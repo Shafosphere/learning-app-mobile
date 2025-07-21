@@ -23,3 +23,15 @@ CREATE TABLE language_pairs (
   target_language_id INTEGER NOT NULL REFERENCES languages(id),
   PRIMARY KEY (source_language_id, target_language_id)
 );
+
+-- Indeksy dla szybkich zapytań
+CREATE INDEX idx_words_lang_cefr 
+  ON words(language_id, cefr_level);
+CREATE INDEX idx_trans_src_tgtlang 
+  ON translations(source_word_id, target_language_id);
+
+-- Ustawienia SQLite (wykonaj raz przy otwarciu DB)
+PRAGMA journal_mode = WAL;
+PRAGMA synchronous = NORMAL;
+PRAGMA cache_size = 10000;
+PRAGMA page_size = 4096;
