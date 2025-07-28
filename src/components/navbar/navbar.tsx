@@ -32,7 +32,7 @@ export default function Navbar() {
           styles.iconCon,
           pressed && styles.iconConPressed,
         ]}
-        onPress={() => router.push("/settings")}
+        onPress={() => router.push("/")}
       >
         <Entypo style={styles.icon} name="home" size={16} color="black" />
       </Pressable>
