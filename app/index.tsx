@@ -1,6 +1,7 @@
+// index.tsx
 import { useRouter } from "expo-router";
 import { ActivityIndicator, Button, StyleSheet, Text, View } from "react-native";
-import { getRandomEnglishWord } from "@/src/components/db/db";
+import { getRandomEnglishWord, logTableContents } from "@/src/components/db/db"; // Dodaj import
 import { useEffect, useState } from "react";
 
 export default function Index() {
@@ -8,7 +9,6 @@ export default function Index() {
   const [word, setWord] = useState<string | null>(null);
 
   useEffect(() => {
-    // pobieramy słowo raz przy montowaniu komponentu
     getRandomEnglishWord()
       .then((w) => setWord(w))
       .catch((err) => {
@@ -17,7 +17,14 @@ export default function Index() {
       });
   }, []);
 
-  // pokazujemy loader do czasu, aż word będzie !== null
+  const handleLogTables = async () => {
+    try {
+      await logTableContents();
+    } catch (error) {
+      console.error("Błąd logowania tabel:", error);
+    }
+  };
+
   if (word === null) {
     return (
       <View style={styles.container}>
@@ -29,6 +36,7 @@ export default function Index() {
   return (
     <View style={styles.container}>
       <Text style={styles.text}>{word}</Text>
+      <Button title="Sprawdź tabele" onPress={handleLogTables} />
     </View>
   );
 }

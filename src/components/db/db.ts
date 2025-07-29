@@ -1,4 +1,3 @@
-// src/db.ts
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
@@ -8,7 +7,7 @@ export async function initDB() {
   // 1) Otwórz połączenie
   const db = await SQLite.openDatabaseAsync("mygame.db");
 
-  // 2) Utwórz tabele
+  // 2) Utwórz tabele zgodnie z projektem
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS languages (
       id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -17,18 +16,38 @@ export async function initDB() {
     );
     CREATE TABLE IF NOT EXISTS words (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      language_id INTEGER NOT NULL,
+      language_id INTEGER NOT NULL REFERENCES languages(id),
       text        TEXT    NOT NULL,
-      cefr_level  TEXT    NOT NULL
+      cefr_level  TEXT    NOT NULL CHECK(cefr_level IN ('A1','A2','B1','B2','C1','C2')),
+      UNIQUE(language_id, text)
     );
     CREATE TABLE IF NOT EXISTS translations (
-      source_word_id INTEGER NOT NULL,
-      target_word_id INTEGER NOT NULL,
-      PRIMARY KEY(source_word_id, target_word_id)
+      id                  INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_word_id      INTEGER NOT NULL REFERENCES words(id),
+      target_language_id  INTEGER NOT NULL REFERENCES languages(id),
+      translation_text    TEXT    NOT NULL,
+      target_word_id      INTEGER REFERENCES words(id),
+      UNIQUE(source_word_id, target_language_id, translation_text)
     );
+    CREATE TABLE IF NOT EXISTS language_pairs (
+      source_language_id INTEGER NOT NULL REFERENCES languages(id),
+      target_language_id INTEGER NOT NULL REFERENCES languages(id),
+      PRIMARY KEY (source_language_id, target_language_id)
+    );
+    -- Indeksy dla szybkich zapytań
+    CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
+    CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
   `);
 
-  // 3) Sprawdź, czy trzeba importować
+  // 3) Ustawienia PRAGMA dla wydajności
+  await db.execAsync(`
+    PRAGMA journal_mode = WAL;
+    PRAGMA synchronous = NORMAL;
+    PRAGMA cache_size = 10000;
+    PRAGMA page_size = 4096;
+  `);
+
+  // 4) Sprawdź, czy trzeba importować
   const countRow = await db.getFirstAsync<{ cnt: number }>(`
     SELECT COUNT(*) AS cnt
       FROM words
@@ -36,15 +55,16 @@ export async function initDB() {
        SELECT id FROM languages WHERE code = 'en'
      );
   `);
-  // jeśli brak wiersza albo cnt===0 → import, w przeciwnym razie pomiń
   const cnt = countRow?.cnt ?? 0;
   if (cnt > 0) {
     console.log("DB już załadowana → pomijam import");
     return;
   }
 
-  // 4) Parsuj CSV
-  const asset = Asset.fromModule(require("../../../assets/data/wordsENGtoPL.csv"));
+  // 5) Parsuj CSV
+  const asset = Asset.fromModule(
+    require("../../../assets/data/wordsENGtoPL.csv")
+  );
   await asset.downloadAsync();
   const csv = await FileSystem.readAsStringAsync(asset.localUri!);
   const { data } = Papa.parse<{
@@ -56,7 +76,7 @@ export async function initDB() {
     skipEmptyLines: true,
   });
 
-  // 5) Wstaw języki i pobierz ich ID
+  // 6) Wstaw języki i pobierz ich ID
   await db.runAsync(
     `INSERT OR IGNORE INTO languages (code,name) VALUES ('en','English'),('pl','Polski');`
   );
@@ -70,50 +90,55 @@ export async function initDB() {
     langMap[l.code] = l.id;
   });
 
-  // 6) Import danych wewnątrz transakcji
+  // 7) Import danych wewnątrz transakcji
   await db.execAsync("BEGIN TRANSACTION;");
   try {
     for (const row of data) {
       if (!row.word || !row.wordpl) continue;
 
-      // 6a) Wstaw / pobierz słowo angielskie
+      // 7a) Wstaw / pobierz słowo angielskie
       await db.runAsync(
-        `INSERT OR IGNORE INTO words (language_id,text,cefr_level) VALUES (?,?,?);`,
+        `INSERT OR IGNORE INTO words (language_id, text, cefr_level) VALUES (?, ?, ?);`,
         langMap.en,
         row.word,
         row.cefr_level
       );
       const enRow = await db.getFirstAsync<{ id: number }>(
-        `SELECT id FROM words WHERE language_id=? AND text=?;`,
+        `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
         langMap.en,
         row.word
       );
       if (!enRow) throw new Error(`Brak wpisu EN: ${row.word}`);
       const srcId = enRow.id;
 
-      // 6b) Tłumaczenia: wstaw / pobierz polskie słowo i powiąż
+      // 7b) Tłumaczenia: wstaw do translations z translation_text
       for (const plw of row.wordpl.split(/\s*,\s*/)) {
-        await db.runAsync(
-          `INSERT OR IGNORE INTO words (language_id,text,cefr_level) VALUES (?,?,?);`,
-          langMap.pl,
-          plw,
-          row.cefr_level
-        );
+        // Sprawdź, czy tłumaczenie istnieje w words (opcjonalne)
         const plRow = await db.getFirstAsync<{ id: number }>(
-          `SELECT id FROM words WHERE language_id=? AND text=?;`,
+          `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
           langMap.pl,
           plw
         );
-        if (!plRow) throw new Error(`Brak wpisu PL: ${plw}`);
-        const targetId = plRow.id;
+        const targetId = plRow ? plRow.id : null;
 
+        // Wstaw do translations
         await db.runAsync(
-          `INSERT OR IGNORE INTO translations (source_word_id,target_word_id) VALUES (?,?);`,
+          `INSERT OR IGNORE INTO translations (source_word_id, target_language_id, translation_text, target_word_id) 
+           VALUES (?, ?, ?, ?);`,
           srcId,
+          langMap.pl,
+          plw,
           targetId
         );
       }
     }
+
+    // 7c) Wstaw do language_pairs (en -> pl)
+    await db.runAsync(
+      `INSERT OR IGNORE INTO language_pairs (source_language_id, target_language_id) VALUES (?, ?);`,
+      langMap.en,
+      langMap.pl
+    );
 
     await db.execAsync("COMMIT;");
     console.log("Import CSV zakończony ✔️");
@@ -123,22 +148,51 @@ export async function initDB() {
   }
 }
 
-// helper otwierający DB
+// Helper otwierający DB
 async function openDB() {
-  return await SQLite.openDatabaseAsync('mygame.db');
+  return await SQLite.openDatabaseAsync("mygame.db");
 }
 
-// zwraca losowe słowo angielskie
-export async function getRandomEnglishWord(): Promise<string|null> {
+// Zwraca losowe słowo angielskie
+export async function getRandomEnglishWord(): Promise<string | null> {
   const db = await openDB();
   const row = await db.getFirstAsync<{ text: string }>(
     `SELECT text 
        FROM words 
       WHERE language_id = (
-        SELECT id FROM languages WHERE code='en'
+        SELECT id FROM languages WHERE code = 'en'
       )
    ORDER BY RANDOM()
       LIMIT 1;`
   );
   return row?.text ?? null;
+}
+
+// Wyświetla zawartość tabel
+export async function logTableContents() {
+  const db = await openDB();
+
+  // Languages
+  const languages = await db.getAllAsync("SELECT * FROM languages");
+  console.log("Languages:");
+  console.table(languages);
+
+  // Random 10 words
+  const words = await db.getAllAsync(
+    "SELECT * FROM words ORDER BY RANDOM() LIMIT 10"
+  );
+  console.log("Random 10 words:");
+  console.table(words);
+
+  // Random 10 translations
+  const translations = await db.getAllAsync(
+    "SELECT * FROM translations ORDER BY RANDOM() LIMIT 10"
+  );
+  console.log("Random 10 translations:");
+  console.table(translations);
+
+  // Language pairs
+  const languagePairs = await db.getAllAsync("SELECT * FROM language_pairs");
+  console.log("Language pairs:");
+  console.table(languagePairs);
 }
