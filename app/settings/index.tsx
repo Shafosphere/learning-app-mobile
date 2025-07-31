@@ -4,6 +4,8 @@ import { useSettings } from "../../src/contexts/SettingsContext";
 import { useStyles } from "../../src/screens/settings/styles_settings";
 import { regeneratePatches } from "@/src/components/db/dbGenerator";
 import { logGeneratedTableContents } from "@/src/components/db/dbGenerator";
+import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
+
 export default function Settings() {
   const { theme, toggleTheme } = useSettings();
   const styles = useStyles();
@@ -20,11 +22,26 @@ export default function Settings() {
     }
   }
 
-  async function handleCheckTable(){
+  async function loadAndDisplayPatch() {
+    try {
+      const patchData = await getWordsFromPatch({
+        sourceLangId: 1,
+        targetLangId: 2,
+        cefrLevel: "A1",
+        batchIndex: 1,
+      });
+
+      console.log(JSON.stringify(patchData, null, 2));
+    } catch (error) {
+      console.error("Wystąpił błąd podczas pobierania paczki:", error);
+    }
+  }
+
+  async function handleCheckTable() {
     try {
       await logGeneratedTableContents();
     } catch (error) {
-      console.log(error)
+      console.log(error);
     }
   }
 
@@ -38,7 +55,9 @@ export default function Settings() {
 
       <Button title={"Generuj patche"} onPress={handleGeneratePatches} />
 
-      <Button title="Sprawdź tablice" onPress={handleCheckTable}/>
+      <Button title="Sprawdź tablice" onPress={handleCheckTable} />
+
+      <Button title="Pobierz patch" onPress={loadAndDisplayPatch} />
     </View>
   );
 }

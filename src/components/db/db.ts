@@ -1,14 +1,25 @@
+// src/components/db/db.ts
+
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
 import Papa from "papaparse";
 
+const db = SQLite.openDatabaseAsync("mygame.db");
+
+// Zwraca globalną instancję bazy danych
+export async function getDB() {
+  return db;
+}
+
 export async function initDB() {
-  // 1) Otwórz połączenie
-  const db = await SQLite.openDatabaseAsync("mygame.db");
+  const database = await getDB();
+
+  // 1) Otwórz połączenie - NIEPOTRZEBNE, JUŻ MAMY
+  // const db = await SQLite.openDatabaseAsync("mygame.db");
 
   // 2) Utwórz tabele zgodnie z projektem
-  await db.execAsync(`
+  await database.execAsync(`
     CREATE TABLE IF NOT EXISTS languages (
       id   INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT    NOT NULL UNIQUE,
@@ -40,7 +51,7 @@ export async function initDB() {
   `);
 
   // 3) Ustawienia PRAGMA dla wydajności
-  await db.execAsync(`
+  await database.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = NORMAL;
     PRAGMA cache_size = 10000;
@@ -48,7 +59,7 @@ export async function initDB() {
   `);
 
   // 4) Sprawdź, czy trzeba importować
-  const countRow = await db.getFirstAsync<{ cnt: number }>(`
+  const countRow = await database.getFirstAsync<{ cnt: number }>(`
     SELECT COUNT(*) AS cnt
       FROM words
      WHERE language_id = (
@@ -77,10 +88,10 @@ export async function initDB() {
   });
 
   // 6) Wstaw języki i pobierz ich ID
-  await db.runAsync(
+  await database.runAsync(
     `INSERT OR IGNORE INTO languages (code,name) VALUES ('en','English'),('pl','Polski');`
   );
-  const langs = await db.getAllAsync<{ id: number; code: string }>(
+  const langs = await database.getAllAsync<{ id: number; code: string }>(
     `SELECT id, code FROM languages WHERE code IN (?,?);`,
     "en",
     "pl"
@@ -91,19 +102,19 @@ export async function initDB() {
   });
 
   // 7) Import danych wewnątrz transakcji
-  await db.execAsync("BEGIN TRANSACTION;");
+  await database.execAsync("BEGIN TRANSACTION;");
   try {
     for (const row of data) {
       if (!row.word || !row.wordpl) continue;
 
       // 7a) Wstaw / pobierz słowo angielskie
-      await db.runAsync(
+      await database.runAsync(
         `INSERT OR IGNORE INTO words (language_id, text, cefr_level) VALUES (?, ?, ?);`,
         langMap.en,
         row.word,
         row.cefr_level
       );
-      const enRow = await db.getFirstAsync<{ id: number }>(
+      const enRow = await database.getFirstAsync<{ id: number }>(
         `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
         langMap.en,
         row.word
@@ -114,7 +125,7 @@ export async function initDB() {
       // 7b) Tłumaczenia: wstaw do translations z translation_text
       for (const plw of row.wordpl.split(/\s*,\s*/)) {
         // Sprawdź, czy tłumaczenie istnieje w words (opcjonalne)
-        const plRow = await db.getFirstAsync<{ id: number }>(
+        const plRow = await database.getFirstAsync<{ id: number }>(
           `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
           langMap.pl,
           plw
@@ -122,7 +133,7 @@ export async function initDB() {
         const targetId = plRow ? plRow.id : null;
 
         // Wstaw do translations
-        await db.runAsync(
+        await database.runAsync(
           `INSERT OR IGNORE INTO translations (source_word_id, target_language_id, translation_text, target_word_id) 
            VALUES (?, ?, ?, ?);`,
           srcId,
@@ -134,28 +145,25 @@ export async function initDB() {
     }
 
     // 7c) Wstaw do language_pairs (en -> pl)
-    await db.runAsync(
+    await database.runAsync(
       `INSERT OR IGNORE INTO language_pairs (source_language_id, target_language_id) VALUES (?, ?);`,
       langMap.en,
       langMap.pl
     );
 
-    await db.execAsync("COMMIT;");
+    await database.execAsync("COMMIT;");
     console.log("Import CSV zakończony ✔️");
   } catch (e) {
-    await db.execAsync("ROLLBACK;");
+    await database.execAsync("ROLLBACK;");
     console.error("Błąd podczas importu, wycofuję zmiany:", e);
   }
 }
 
-// Helper otwierający DB
-async function openDB() {
-  return await SQLite.openDatabaseAsync("mygame.db");
-}
+// Pozostałe funkcje również powinny używać globalnej instancji
 
 // Zwraca losowe słowo angielskie
 export async function getRandomEnglishWord(): Promise<string | null> {
-  const db = await openDB();
+  const db = await getDB();
   const row = await db.getFirstAsync<{ text: string }>(
     `SELECT text 
        FROM words 
@@ -170,7 +178,7 @@ export async function getRandomEnglishWord(): Promise<string | null> {
 
 // Wyświetla zawartość tabel
 export async function logTableContents() {
-  const db = await openDB();
+  const db = await getDB();
 
   // Languages
   const languages = await db.getAllAsync("SELECT * FROM languages");
