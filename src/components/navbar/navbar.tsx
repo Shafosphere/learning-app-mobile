@@ -61,6 +61,16 @@ export default function Navbar() {
           color="black"
         />
       </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconCon,
+          pressed && styles.iconConPressed,
+        ]}
+        onPress={() => router.push("/profile")}
+      >
+        <Entypo style={styles.icon} name="globe" size={16} color="black" />
+      </Pressable>
     </View>
   );
 }

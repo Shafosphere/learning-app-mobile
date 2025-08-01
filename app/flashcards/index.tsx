@@ -1,9 +1,10 @@
 import { Button, Text, View } from "react-native";
-import { styles } from "../../src/screens/flashcards/styles_flashcards";
 import { useState } from "react";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
+import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
 
 export default function Flashcards() {
+  const styles = useStyles();
 
   interface WordWithTranslations {
     id: number;

@@ -1,6 +1,6 @@
-import { StyleSheet } from "react-native";
+import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-export const styles = StyleSheet.create({
+export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     justifyContent: "center",
@@ -10,4 +10,4 @@ export const styles = StyleSheet.create({
     fontSize: 24,
     fontWeight: "bold",
   },
-});
+}));
