@@ -204,3 +204,19 @@ export async function logTableContents() {
   console.log("Language pairs:");
   console.table(languagePairs);
 }
+
+export async function getLanguagePairs() {
+  const db = await getDB();
+  return db.getAllAsync<{
+    id: number;
+    source_code: string;
+    target_code: string;
+  }>(
+    `SELECT lp.rowid AS id,
+            s.code  AS source_code,
+            t.code  AS target_code
+       FROM language_pairs lp
+       JOIN languages s ON lp.source_language_id = s.id
+       JOIN languages t ON lp.target_language_id = t.id;`
+  );
+}
