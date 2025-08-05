@@ -33,4 +33,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.my_green,
     borderRadius: 10,
   },
+  buttoncontainer: {
+    // flex: 1,
+    width: "75%",
+    height: "30%",
+    marginTop: 20,
+    padding: 20,
+    display: 'flex',
+    flexDirection: 'row-reverse'
+  }
 }));
