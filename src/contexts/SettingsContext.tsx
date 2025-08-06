@@ -1,32 +1,38 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+// src/contexts/SettingsContext.tsx
+import { createContext, ReactNode, useContext } from "react";
 import { Theme, themeMap } from "../theme/theme";
+import { usePersistedState } from "../hooks/usePersistedState";
 
 interface SettingsContextValue {
   theme: Theme;
   colors: (typeof themeMap)[Theme];
-  toggleTheme: () => void;
+  toggleTheme: () => Promise<void>;
 }
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
   colors: themeMap.light,
-  toggleTheme: () => {},
+  toggleTheme: async () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
 
-export function SettingsProvider({children}: {children: ReactNode} ) {
-    const [theme, setTheme] = useState<Theme>('light');
-    const toggleTheme = () => setTheme(prev => prev === 'light' ? 'dark' : 'light');
-    const colors = themeMap[theme];
+export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
 
-    return(
-        <SettingsContext.Provider value={{theme, colors, toggleTheme}}>
-            {children}
-        </SettingsContext.Provider>
-    );
-}
+  const toggleTheme = async () => {
+    const newTheme: Theme = theme === "light" ? "dark" : "light";
+    await setTheme(newTheme);
+  };
+  const colors = themeMap[theme];
 
-export function useSettings() {
-  return useContext(SettingsContext)
-}
+  return (
+    <SettingsContext.Provider value={{ theme, colors, toggleTheme }}>
+      {children}
+    </SettingsContext.Provider>
+  );
+};
+
+export const useSettings = () => useContext(SettingsContext);

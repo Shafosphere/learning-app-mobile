@@ -54,47 +54,9 @@ export default function Profile() {
 
   return (
     <View style={styles.container}>
-      {/* Sekcja „Znam” */}
-      <View style={styles.minicontainer}>
-        <Text style={styles.title}>Znam:</Text>
-        <View style={styles.grid}>
-          {Object.keys(flagMap).map((code) => {
-            const isAvailable = sourceLangs.includes(code);
-            const src = isAvailable ? flagMap[code] : flagGrayMap[code];
-
-            return (
-              <Pressable
-                key={code}
-                onPress={() => {
-                  if (isAvailable) {
-                    setSource(code);
-                  }
-                }}
-              >
-                <View
-                  style={[
-                    styles.flag,
-                    activeSource === code && styles.flagActive,
-                  ]}
-                >
-                  <Image
-                    source={src}
-                    style={{
-                      width: styles.flag.width,
-                      height: styles.flag.height,
-                      resizeMode: "contain",
-                    }}
-                  />
-                </View>
-              </Pressable>
-            );
-          })}
-        </View>
-      </View>
-
       {/* Sekcja „Chcę się nauczyć” */}
       <View style={styles.minicontainer}>
-        <Text style={styles.title}>Chce się nauczyć:</Text>
+        <Text style={styles.title}>Znam:</Text>
         <View style={styles.grid}>
           {Object.keys(flagMap).map((code) => {
             const isAvailable = targetLangs.includes(code);
@@ -109,21 +71,43 @@ export default function Profile() {
                   }
                 }}
               >
-                <View
+                <Image
+                  source={src}
                   style={[
                     styles.flag,
                     activeTarget === code && styles.flagActive,
                   ]}
-                >
-                  <Image
-                    source={src}
-                    style={{
-                      width: styles.flag.width,
-                      height: styles.flag.height,
-                      resizeMode: "contain",
-                    }}
-                  />
-                </View>
+                />
+              </Pressable>
+            );
+          })}
+        </View>
+      </View>
+
+      {/* Sekcja „Znam” */}
+      <View style={styles.minicontainer}>
+        <Text style={styles.title}>Chce sie nauczyć:</Text>
+        <View style={styles.grid}>
+          {Object.keys(flagMap).map((code) => {
+            const isAvailable = sourceLangs.includes(code);
+            const src = isAvailable ? flagMap[code] : flagGrayMap[code];
+
+            return (
+              <Pressable
+                key={code}
+                onPress={() => {
+                  if (isAvailable) {
+                    setSource(code);
+                  }
+                }}
+              >
+                <Image
+                  source={src}
+                  style={[
+                    styles.flag,
+                    activeSource === code && styles.flagActive,
+                  ]}
+                />
               </Pressable>
             );
           })}
@@ -132,7 +116,7 @@ export default function Profile() {
 
       <View style={styles.buttoncontainer}>
         <MyButton
-          text="Confirm"
+          text="Zatwierdź"
           color="my_green"
           onPress={() => {
             console.log("Confirm button pressed");

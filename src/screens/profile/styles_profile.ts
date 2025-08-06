@@ -5,9 +5,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     backgroundColor: colors.background,
     alignItems: "center",
+    justifyContent: "center",
   },
   minicontainer: {
     width: "75%",
+    // height: "50%",
   },
   title: {
     fontSize: 25,
@@ -27,19 +29,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: 90,
     height: 60,
     borderRadius: 4,
+    overflow: "hidden",
   },
   flagActive: {
-    borderWidth: 2,
     borderColor: colors.my_green,
+    borderWidth: 4,
     borderRadius: 10,
   },
   buttoncontainer: {
     // flex: 1,
     width: "75%",
-    height: "30%",
-    marginTop: 20,
-    padding: 20,
-    display: 'flex',
-    flexDirection: 'row-reverse'
-  }
+    height: "20%",
+    marginTop: 40,
+    // padding: 20,
+    display: "flex",
+    flexDirection: "row-reverse",
+  },
 }));

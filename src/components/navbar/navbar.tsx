@@ -9,15 +9,18 @@ import {
 } from "react-native";
 import { useStyles } from "./styles_navbar";
 import { Image } from "expo-image";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
 const logo = require("./../../../assets/box/logo.png");
 
 export default function Navbar() {
   const router = useRouter();
+  const { theme, toggleTheme } = useSettings();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
 
@@ -70,6 +73,21 @@ export default function Navbar() {
         onPress={() => router.push("/profile")}
       >
         <Entypo style={styles.icon} name="globe" size={16} color="black" />
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconCon,
+          pressed && styles.iconConPressed,
+        ]}
+        onPress={toggleTheme}
+      >
+        <MaterialIcons
+          style={styles.icon}
+          name="dark-mode"
+          size={16}
+          color="black"
+        />
       </Pressable>
     </View>
   );

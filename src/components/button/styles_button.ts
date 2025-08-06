@@ -4,7 +4,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   button: {
     // paddingVertical: 12,
     // paddingHorizontal: 20,
-    borderRadius: 6,
+    borderRadius: 11,
     alignItems: "center",
     justifyContent: 'center',
     backgroundColor: colors.my_green,
