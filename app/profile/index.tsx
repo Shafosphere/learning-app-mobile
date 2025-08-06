@@ -3,6 +3,7 @@ import { useStyles } from "@/src/screens/profile/styles_profile";
 import { useEffect, useState } from "react";
 import { getLanguagePairs } from "@/src/components/db/db";
 import MyButton from "@/src/components/button/button";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
 import PL_FLAG_GRAY from "../../assets/flag/PLgray.png";
 import ES_FLAG_GRAY from "../../assets/flag/ESgray.png";
@@ -16,6 +17,7 @@ import US_FLAG from "../../assets/flag/US.png";
 
 export default function Profile() {
   const styles = useStyles();
+  const { addProfile } = useSettings();
 
   const flagMap: Record<string, number> = {
     pl: PL_FLAG,
@@ -118,8 +120,15 @@ export default function Profile() {
         <MyButton
           text="Zatwierdź"
           color="my_green"
-          onPress={() => {
-            console.log("Confirm button pressed");
+          onPress={async () => {
+            if (activeSource && activeTarget) {
+              await addProfile({
+                sourceLang: activeSource,
+                targetLang: activeTarget,
+              });
+              setSource(null);
+              setTarget(null);
+            }
           }}
           disabled={false}
         />

@@ -1,9 +1,5 @@
 // src/components/db/dbGenerator.ts
-
-import { getDB } from "./db"; // WAŻNE: Importuj getDB
-import * as SQLite from "expo-sqlite";
-
-// ... interfejsy zostają bez zmian ...
+import { getDB } from "./db"; 
 
 export interface PatchGenParams {
   srcCode: string;
@@ -97,9 +93,6 @@ export async function regeneratePatches({
       );
     }
   }
-
-  // NIE ZAMYKAJ POŁĄCZENIA!
-  // await db.closeAsync();
 }
 
 export async function logGeneratedTableContents() {
@@ -107,8 +100,6 @@ export async function logGeneratedTableContents() {
   const patches = await db.getAllAsync("SELECT * FROM patches_json");
   console.log("Patches:");
   console.log(patches);
-  // NIE ZAMYKAJ POŁĄCZENIA!
-  // await db.closeAsync();
 }
 
 export async function getWordsFromPatch({
@@ -167,8 +158,5 @@ export async function getWordsFromPatch({
     text: wordMap.get(id) ?? "Słowo nieznalezione",
     translations: translationsMap.get(id) || [],
   }));
-
-  // NIE ZAMYKAJ POŁĄCZENIA!
-  // await db.closeAsync();
   return result;
 }

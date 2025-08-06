@@ -5,21 +5,12 @@ import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
 import Papa from "papaparse";
 
-const db = SQLite.openDatabaseAsync("mygame.db");
+let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-// Zwraca globalną instancję bazy danych
-export async function getDB() {
-  return db;
-}
+async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
+  const db = await SQLite.openDatabaseAsync("mygame.db");
 
-export async function initDB() {
-  const database = await getDB();
-
-  // 1) Otwórz połączenie - NIEPOTRZEBNE, JUŻ MAMY
-  // const db = await SQLite.openDatabaseAsync("mygame.db");
-
-  // 2) Utwórz tabele zgodnie z projektem
-  await database.execAsync(`
+  await db.execAsync(`
     CREATE TABLE IF NOT EXISTS languages (
       id   INTEGER PRIMARY KEY AUTOINCREMENT,
       code TEXT    NOT NULL UNIQUE,
@@ -45,34 +36,28 @@ export async function initDB() {
       target_language_id INTEGER NOT NULL REFERENCES languages(id),
       PRIMARY KEY (source_language_id, target_language_id)
     );
-    -- Indeksy dla szybkich zapytań
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
   `);
 
-  // 3) Ustawienia PRAGMA dla wydajności
-  await database.execAsync(`
+  await db.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = NORMAL;
     PRAGMA cache_size = 10000;
     PRAGMA page_size = 4096;
   `);
 
-  // 4) Sprawdź, czy trzeba importować
-  const countRow = await database.getFirstAsync<{ cnt: number }>(`
-    SELECT COUNT(*) AS cnt
-      FROM words
-     WHERE language_id = (
-       SELECT id FROM languages WHERE code = 'en'
-     );
+  const countRow = await db.getFirstAsync<{ cnt: number }>(`
+    SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');
   `);
-  const cnt = countRow?.cnt ?? 0;
-  if (cnt > 0) {
+
+  if ((countRow?.cnt ?? 0) > 0) {
     console.log("DB już załadowana → pomijam import");
-    return;
+    return db;
   }
 
-  // 5) Parsuj CSV
+  console.log("Baza danych jest pusta. Rozpoczynam import z CSV...");
+
   const asset = Asset.fromModule(
     require("../../../assets/data/wordsENGtoPL.csv")
   );
@@ -87,11 +72,10 @@ export async function initDB() {
     skipEmptyLines: true,
   });
 
-  // 6) Wstaw języki i pobierz ich ID
-  await database.runAsync(
+  await db.runAsync(
     `INSERT OR IGNORE INTO languages (code,name) VALUES ('en','English'),('pl','Polski');`
   );
-  const langs = await database.getAllAsync<{ id: number; code: string }>(
+  const langs = await db.getAllAsync<{ id: number; code: string }>(
     `SELECT id, code FROM languages WHERE code IN (?,?);`,
     "en",
     "pl"
@@ -101,41 +85,37 @@ export async function initDB() {
     langMap[l.code] = l.id;
   });
 
-  // 7) Import danych wewnątrz transakcji
-  await database.execAsync("BEGIN TRANSACTION;");
+  await db.execAsync("BEGIN TRANSACTION;");
   try {
     for (const row of data) {
       if (!row.word || !row.wordpl) continue;
 
-      // 7a) Wstaw / pobierz słowo angielskie
-      await database.runAsync(
+      const enResult = await db.runAsync(
         `INSERT OR IGNORE INTO words (language_id, text, cefr_level) VALUES (?, ?, ?);`,
         langMap.en,
         row.word,
         row.cefr_level
       );
-      const enRow = await database.getFirstAsync<{ id: number }>(
+
+      const enRow = await db.getFirstAsync<{ id: number }>(
         `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
         langMap.en,
         row.word
       );
+
       if (!enRow) throw new Error(`Brak wpisu EN: ${row.word}`);
       const srcId = enRow.id;
 
-      // 7b) Tłumaczenia: wstaw do translations z translation_text
       for (const plw of row.wordpl.split(/\s*,\s*/)) {
-        // Sprawdź, czy tłumaczenie istnieje w words (opcjonalne)
-        const plRow = await database.getFirstAsync<{ id: number }>(
+        const plRow = await db.getFirstAsync<{ id: number }>(
           `SELECT id FROM words WHERE language_id = ? AND text = ?;`,
           langMap.pl,
           plw
         );
         const targetId = plRow ? plRow.id : null;
 
-        // Wstaw do translations
-        await database.runAsync(
-          `INSERT OR IGNORE INTO translations (source_word_id, target_language_id, translation_text, target_word_id) 
-           VALUES (?, ?, ?, ?);`,
+        await db.runAsync(
+          `INSERT OR IGNORE INTO translations (source_word_id, target_language_id, translation_text, target_word_id) VALUES (?, ?, ?, ?);`,
           srcId,
           langMap.pl,
           plw,
@@ -144,62 +124,53 @@ export async function initDB() {
       }
     }
 
-    // 7c) Wstaw do language_pairs (en -> pl)
-    await database.runAsync(
+    await db.runAsync(
       `INSERT OR IGNORE INTO language_pairs (source_language_id, target_language_id) VALUES (?, ?);`,
       langMap.en,
       langMap.pl
     );
 
-    await database.execAsync("COMMIT;");
+    await db.execAsync("COMMIT;");
     console.log("Import CSV zakończony ✔️");
   } catch (e) {
-    await database.execAsync("ROLLBACK;");
+    await db.execAsync("ROLLBACK;");
     console.error("Błąd podczas importu, wycofuję zmiany:", e);
+    throw e;
   }
+
+  return db;
 }
 
-// Pozostałe funkcje również powinny używać globalnej instancji
+export function getDB(): Promise<SQLite.SQLiteDatabase> {
+  if (!dbInitializationPromise) {
+    dbInitializationPromise = initializeDatabase();
+  }
+  return dbInitializationPromise;
+}
 
-// Zwraca losowe słowo angielskie
 export async function getRandomEnglishWord(): Promise<string | null> {
   const db = await getDB();
   const row = await db.getFirstAsync<{ text: string }>(
-    `SELECT text 
-       FROM words 
-      WHERE language_id = (
-        SELECT id FROM languages WHERE code = 'en'
-      )
-   ORDER BY RANDOM()
-      LIMIT 1;`
+    `SELECT text FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en') ORDER BY RANDOM() LIMIT 1;`
   );
   return row?.text ?? null;
 }
 
-// Wyświetla zawartość tabel
 export async function logTableContents() {
   const db = await getDB();
-
-  // Languages
   const languages = await db.getAllAsync("SELECT * FROM languages");
   console.log("Languages:");
   console.table(languages);
-
-  // Random 10 words
   const words = await db.getAllAsync(
     "SELECT * FROM words ORDER BY RANDOM() LIMIT 10"
   );
   console.log("Random 10 words:");
   console.table(words);
-
-  // Random 10 translations
   const translations = await db.getAllAsync(
     "SELECT * FROM translations ORDER BY RANDOM() LIMIT 10"
   );
   console.log("Random 10 translations:");
   console.table(translations);
-
-  // Language pairs
   const languagePairs = await db.getAllAsync("SELECT * FROM language_pairs");
   console.log("Language pairs:");
   console.table(languagePairs);
@@ -212,11 +183,9 @@ export async function getLanguagePairs() {
     source_code: string;
     target_code: string;
   }>(
-    `SELECT lp.rowid AS id,
-            s.code  AS source_code,
-            t.code  AS target_code
-       FROM language_pairs lp
-       JOIN languages s ON lp.source_language_id = s.id
-       JOIN languages t ON lp.target_language_id = t.id;`
+    `SELECT lp.rowid AS id, s.code AS source_code, t.code AS target_code
+     FROM language_pairs lp
+     JOIN languages s ON lp.source_language_id = s.id
+     JOIN languages t ON lp.target_language_id = t.id;`
   );
 }

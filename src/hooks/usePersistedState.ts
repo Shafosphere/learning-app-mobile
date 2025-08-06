@@ -16,7 +16,7 @@ export function usePersistedState<T>(
           setState(JSON.parse(raw) as T);
         }
       } catch (e) {
-        console.log(`❌ Błąd odczytu ${key}:`, e);
+        console.log(`Błąd odczytu ${key}:`, e);
       }
     }
     load();
@@ -28,7 +28,7 @@ export function usePersistedState<T>(
         setState(value); 
         await AsyncStorage.setItem(key, JSON.stringify(value)); 
       } catch (e) {
-        console.log(`❌ Błąd zapisu ${key}:`, e);
+        console.log(`Błąd zapisu ${key}:`, e);
       }
     },
     [key]

@@ -1,8 +1,9 @@
+// _layout.tsx
 import { Stack } from "expo-router";
 import Navbar from "@/src/components/navbar/navbar";
 import React, { useEffect, useState, useCallback } from "react";
 import { SettingsProvider } from "@/src/contexts/SettingsContext";
-import { initDB } from "@/src/components/db/db";
+import { getDB } from "@/src/components/db/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
 
@@ -14,8 +15,8 @@ export default function RootLayout() {
   useEffect(() => {
     async function prepareApp() {
       try {
-        await initDB();
-        console.log("Inicjalizacja bazy danych zakończona pomyślnie.");
+        await getDB();
+        console.log("Baza danych gotowa do użycia.");
       } catch (e) {
         console.error("Błąd podczas inicjalizacji bazy danych:", e);
       } finally {
@@ -31,6 +32,7 @@ export default function RootLayout() {
       await SplashScreen.hideAsync();
     }
   }, [isDbReady]);
+  
   if (!isDbReady) {
     return null;
   }
