@@ -27,7 +27,7 @@ export const lightColors: ThemeColors = {
   my_red: '#ff5470',
   my_yellow: '#fde24f',
   border: '#e9e9e9',
-  font: '#00214d',
+  font: '#00214d',  
   darkbg: '#001534',
   lightbg: '#fffffe',
 };

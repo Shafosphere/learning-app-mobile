@@ -1,5 +1,5 @@
 // src/contexts/SettingsContext.tsx
-import { createContext, ReactNode, useContext } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import { Theme, themeMap } from "../theme/theme";
 import { usePersistedState } from "../hooks/usePersistedState";
 
@@ -9,6 +9,8 @@ interface SettingsContextValue {
   toggleTheme: () => Promise<void>;
   profiles: LanguageProfile[];
   addProfile: (profile: LanguageProfile) => Promise<void>;
+  selectedLevel: string;
+  setLevel: (lvl: string) => void;
 }
 
 export interface LanguageProfile {
@@ -22,6 +24,8 @@ const defaultValue: SettingsContextValue = {
   toggleTheme: async () => {},
   profiles: [],
   addProfile: async () => {},
+  selectedLevel: "A1",
+  setLevel: () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
@@ -29,6 +33,7 @@ const SettingsContext = createContext<SettingsContextValue>(defaultValue);
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const [selectedLevel, setLevel] = useState<string>("A1");
   const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
   const [profiles, setProfiles] = usePersistedState<LanguageProfile[]>(
     "profiles",
@@ -50,11 +55,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     if (!exists) {
       await setProfiles([...profiles, profile]);
     }
+    console.log(profiles);
   };
 
   return (
     <SettingsContext.Provider
-      value={{ theme, colors, toggleTheme, profiles, addProfile }}
+      value={{
+        theme,
+        colors,
+        toggleTheme,
+        profiles,
+        addProfile,
+        selectedLevel,
+        setLevel,
+      }}
     >
       {children}
     </SettingsContext.Provider>

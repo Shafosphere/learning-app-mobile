@@ -45,7 +45,7 @@ export default function Navbar() {
           styles.iconCon,
           pressed && styles.iconConPressed,
         ]}
-        onPress={() => router.push("/flashcards")}
+        onPress={() => router.push("/level")}
       >
         <FontAwesome5 name="box-open" size={16} style={styles.icon} />
       </Pressable>

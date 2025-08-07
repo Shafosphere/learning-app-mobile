@@ -7,9 +7,11 @@ import Papa from "papaparse";
 
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
-async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
-  const db = await SQLite.openDatabaseAsync("mygame.db");
+async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
+  return SQLite.openDatabaseAsync("mygame.db");
+}
 
+async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     CREATE TABLE IF NOT EXISTS languages (
       id   INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -39,23 +41,36 @@ async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
   `);
+}
 
+async function configurePragmas(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(`
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = NORMAL;
     PRAGMA cache_size = 10000;
     PRAGMA page_size = 4096;
   `);
+}
 
-  const countRow = await db.getFirstAsync<{ cnt: number }>(`
-    SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');
-  `);
+async function seedLanguages(
+  db: SQLite.SQLiteDatabase
+): Promise<Record<string, number>> {
+  await db.runAsync(
+    `INSERT OR IGNORE INTO languages (code,name) VALUES ('en','English'),('pl','Polski');`
+  );
+  const langs = await db.getAllAsync<{ id: number; code: string }>(
+    `SELECT id, code FROM languages WHERE code IN (?,?);`,
+    "en",
+    "pl"
+  );
+  const langMap: Record<string, number> = {};
+  langs.forEach((l) => {
+    langMap[l.code] = l.id;
+  });
+  return langMap;
+}
 
-  if ((countRow?.cnt ?? 0) > 0) {
-    console.log("DB już załadowana → pomijam import");
-    return db;
-  }
-
+async function importInitialCsv(db: SQLite.SQLiteDatabase): Promise<void> {
   console.log("Baza danych jest pusta. Rozpoczynam import z CSV...");
 
   const asset = Asset.fromModule(
@@ -72,25 +87,14 @@ async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     skipEmptyLines: true,
   });
 
-  await db.runAsync(
-    `INSERT OR IGNORE INTO languages (code,name) VALUES ('en','English'),('pl','Polski');`
-  );
-  const langs = await db.getAllAsync<{ id: number; code: string }>(
-    `SELECT id, code FROM languages WHERE code IN (?,?);`,
-    "en",
-    "pl"
-  );
-  const langMap: Record<string, number> = {};
-  langs.forEach((l) => {
-    langMap[l.code] = l.id;
-  });
+  const langMap = await seedLanguages(db);
 
   await db.execAsync("BEGIN TRANSACTION;");
   try {
     for (const row of data) {
       if (!row.word || !row.wordpl) continue;
 
-      const enResult = await db.runAsync(
+      await db.runAsync(
         `INSERT OR IGNORE INTO words (language_id, text, cefr_level) VALUES (?, ?, ?);`,
         langMap.en,
         row.word,
@@ -137,7 +141,23 @@ async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     console.error("Błąd podczas importu, wycofuję zmiany:", e);
     throw e;
   }
+}
 
+async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
+  const db = await openDatabase();
+  await applySchema(db);
+  await configurePragmas(db);
+
+  const countRow = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');`
+  );
+
+  if ((countRow?.cnt ?? 0) > 0) {
+    console.log("DB już załadowana → pomijam import");
+    return db;
+  }
+
+  await importInitialCsv(db);
   return db;
 }
 

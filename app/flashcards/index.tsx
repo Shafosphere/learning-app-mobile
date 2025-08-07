@@ -2,9 +2,11 @@ import { Button, Text, View } from "react-native";
 import { useState } from "react";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
 export default function Flashcards() {
   const styles = useStyles();
+  const { selectedLevel, profiles } = useSettings();
 
   interface WordWithTranslations {
     id: number;
@@ -65,6 +67,16 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
+      <Text>{selectedLevel}</Text>
+      {profiles && (
+        <>
+          {profiles.map((profile, idx) => (
+            <Text key={idx}>
+              {profile.sourceLang} → {profile.targetLang}
+            </Text>
+          ))}
+        </>
+      )}
       <Button title="sprawdź patch" onPress={loadAndDisplayPatch} />
       <Button title="add" onPress={downloadData} />
 
