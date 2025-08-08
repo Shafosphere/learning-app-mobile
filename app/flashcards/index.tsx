@@ -1,26 +1,17 @@
 import { Button, Text, View } from "react-native";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import Boxes from "@/src/components/boxes/boxes";
+import Card from "@/src/components/card/card";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 export default function Flashcards() {
   const styles = useStyles();
   const { selectedLevel, profiles } = useSettings();
-
-  interface WordWithTranslations {
-    id: number;
-    text: string;
-    translations: string[];
-  }
-
-  interface BoxesState {
-    boxOne: WordWithTranslations[];
-    boxTwo: WordWithTranslations[];
-    boxThree: WordWithTranslations[];
-    boxFour: WordWithTranslations[];
-    boxFive: WordWithTranslations[];
-  }
+  const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
+  const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
 
   const [boxes, setBoxes] = useState<BoxesState>({
     boxOne: [],
@@ -30,24 +21,13 @@ export default function Flashcards() {
     boxFive: [],
   });
 
-  async function loadAndDisplayPatch() {
-    try {
-      const patchData = await getWordsFromPatch({
-        sourceLangId: 1,
-        targetLangId: 2,
-        cefrLevel: "A1",
-        batchIndex: 1,
-      });
-
-      console.log(JSON.stringify(patchData, null, 2));
-    } catch (error) {
-      console.error("Wystąpił błąd podczas pobierania paczki:", error);
-    }
+  function clickOnBox(boxName: keyof BoxesState) {
+    setActiveBox(boxName);
   }
 
   async function downloadData() {
     try {
-      const patchData = await getWordsFromPatch({
+      const patchData: WordWithTranslations[] = await getWordsFromPatch({
         sourceLangId: 1,
         targetLangId: 2,
         cefrLevel: "A1",
@@ -65,9 +45,21 @@ export default function Flashcards() {
     }
   }
 
+  useEffect(() => {
+    if (activeBox && boxes[activeBox].length > 0) {
+      const currentBox = boxes[activeBox];
+      const randomIndex = Math.floor(Math.random() * currentBox.length);
+      const randomWord = currentBox[randomIndex];
+
+      setItem(randomWord);
+      console.log("Wylosowane:", randomWord);
+    }
+  }, [activeBox]);
+
   return (
     <View style={styles.container}>
-      <Text>{selectedLevel}</Text>
+      {/* <Text>{selectedLevel}</Text>
+      <Text>{activeBox}</Text>
       {profiles && (
         <>
           {profiles.map((profile, idx) => (
@@ -76,13 +68,15 @@ export default function Flashcards() {
             </Text>
           ))}
         </>
-      )}
-      <Button title="sprawdź patch" onPress={loadAndDisplayPatch} />
-      <Button title="add" onPress={downloadData} />
+      )} */}
+      <Card selectedItem={selectedItem}/>
 
-      <View>
-        <Text>{boxes.boxOne.length}</Text>
-      </View>
+      <Boxes
+        boxes={boxes}
+        activeBox={activeBox}
+        onSelectBox={setActiveBox}
+        onDownload={downloadData}
+      />
     </View>
   );
 }

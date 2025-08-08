@@ -5,6 +5,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: colors.background,
   },
   text: {
     fontSize: 24,

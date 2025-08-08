@@ -14,7 +14,7 @@ interface MyButtonProps {
 export default function MyButton({
   text,
   onPress,
-  color = 'my_green',
+  color = "my_green",
   disabled = false,
   width = 130,
 }: MyButtonProps) {
@@ -35,3 +35,5 @@ export default function MyButton({
     </Pressable>
   );
 }
+
+{/* <MyButton text="Confirm" color="my_green" onPress={} disabled={false} />; */}

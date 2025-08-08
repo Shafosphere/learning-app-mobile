@@ -18,5 +18,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 16,
     fontWeight: "900",
     textTransform: "uppercase",
+    textAlign: "center"
   },
 }));
