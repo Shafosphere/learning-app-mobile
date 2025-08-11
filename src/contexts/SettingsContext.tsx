@@ -11,6 +11,8 @@ interface SettingsContextValue {
   addProfile: (profile: LanguageProfile) => Promise<void>;
   selectedLevel: string;
   setLevel: (lvl: string) => void;
+  spellChecking: boolean;
+  toggleSpellChecking: () => Promise<void>;
 }
 
 export interface LanguageProfile {
@@ -26,9 +28,19 @@ const defaultValue: SettingsContextValue = {
   addProfile: async () => {},
   selectedLevel: "A1",
   setLevel: () => {},
+  spellChecking: true,
+  toggleSpellChecking: async () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
+const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
+  "spellChecking",
+  true
+);
+
+const toggleSpellChecking = async () => {
+  await setSpellChecking(!spellChecking);
+};
 
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
@@ -68,6 +80,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         addProfile,
         selectedLevel,
         setLevel,
+        spellChecking,
+        toggleSpellChecking,
       }}
     >
       {children}

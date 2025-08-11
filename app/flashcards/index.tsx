@@ -6,12 +6,26 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/boxes/boxes";
 import Card from "@/src/components/card/card";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import useSpellchecking from "@/src/hooks/useSpellchecking";
 
 export default function Flashcards() {
   const styles = useStyles();
   const { selectedLevel, profiles } = useSettings();
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
+
+  const checkSpelling = useSpellchecking();
+  const [answer, setAnswer] = useState("");
+  const [result, setResult] = useState<boolean | null>(null);
+
+  const boxOrder: ReadonlyArray<keyof BoxesState> = [
+    "boxOne",
+    "boxTwo",
+    "boxThree",
+    "boxFour",
+    "boxFive",
+  ];
+  const [learned, setLearned] = useState<WordWithTranslations[]>([]);
 
   const [boxes, setBoxes] = useState<BoxesState>({
     boxOne: [],
@@ -20,10 +34,6 @@ export default function Flashcards() {
     boxFour: [],
     boxFive: [],
   });
-
-  function clickOnBox(boxName: keyof BoxesState) {
-    setActiveBox(boxName);
-  }
 
   async function downloadData() {
     try {
@@ -43,6 +53,67 @@ export default function Flashcards() {
     } catch (error) {
       console.error("Błąd podczas pobierania:", error);
     }
+  }
+
+  function checkAnswer(): boolean {
+    if (!selectedItem) return false;
+    const isOk = selectedItem.translations.some((t) =>
+      checkSpelling(answer, t)
+    );
+    return isOk;
+  }
+
+  function confirm() {
+    const ok = checkAnswer();
+    if (ok) {
+      console.log("logika jezeli bedzie dobrze");
+      setResult(true);
+
+      setTimeout(() => {
+        setResult(null);
+        console.log("timeout w confirm");
+      }, 1500);
+    } else {
+      console.log("logika jezeli bedzie źle");
+    }
+  }
+
+  function moveElement(id: number, promote = false) {
+    if (!activeBox) return;
+
+    setBoxes((prev) => {
+      const from = activeBox;
+      const source = prev[from];
+      const element = source.find((x) => x.id === id);
+      if (!element) return prev;
+
+      const fromIdx = boxOrder.indexOf(from);
+
+      let target: keyof BoxesState | null;
+      if (promote) {
+        const isLast = fromIdx >= boxOrder.length - 1;
+        if (isLast) {
+          target = null;
+        } else {
+          target = boxOrder[fromIdx + 1];
+        }
+      } else {
+        target = "boxOne";
+      }
+
+      const nextState: BoxesState = {
+        ...prev,
+        [from]: source.filter((x) => x.id !== id),
+      };
+
+      if (target) {
+        nextState[target] = [element, ...prev[target]];
+      } else {
+        setLearned((list) => [element, ...list]);
+      }
+
+      return nextState;
+    });
   }
 
   useEffect(() => {
@@ -69,7 +140,14 @@ export default function Flashcards() {
           ))}
         </>
       )} */}
-      <Card selectedItem={selectedItem}/>
+      <Card
+        selectedItem={selectedItem}
+        checkAnswer={checkAnswer}
+        setAnswer={setAnswer}
+        answer={answer}
+        result={result}
+        confirm={confirm}
+      />
 
       <Boxes
         boxes={boxes}

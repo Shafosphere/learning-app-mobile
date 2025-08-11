@@ -1,0 +1,47 @@
++48 - 0;
+import { useContext } from "react";
+import { useSettings } from "../contexts/SettingsContext";
+export default function useSpellchecking() {
+  const { spellChecking } = useSettings();
+
+  function levenshtein(a: string, b: string): number {
+    const matrix: number[][] = [];
+    if (a.length === 0) return b.length;
+    if (b.length === 0) return a.length;
+
+    for (let i = 0; i <= b.length; i++) matrix[i] = [i];
+    for (let j = 0; j <= a.length; j++) matrix[0][j] = j;
+
+    for (let i = 1; i <= b.length; i++) {
+      for (let j = 1; j <= a.length; j++) {
+        if (b.charAt(i - 1) === a.charAt(j - 1)) {
+          matrix[i][j] = matrix[i - 1][j - 1];
+        } else {
+          matrix[i][j] = Math.min(
+            matrix[i - 1][j] + 1,
+            matrix[i][j - 1] + 1,
+            matrix[i - 1][j - 1] + 1
+          );
+        }
+      }
+    }
+
+    return matrix[b.length][a.length];
+  }
+
+  function checkSpelling(userForm: string, correctForm: string): boolean {
+    if (!userForm || !correctForm) return false;
+
+    const userWord = userForm.trim().toLowerCase();
+    const correctWord = correctForm.trim().toLowerCase();
+
+    if (spellChecking) {
+      if (userWord === correctWord) return true;
+      return levenshtein(userWord, correctWord) <= 1;
+    }
+
+    return userWord === correctWord;
+  }
+
+  return checkSpelling;
+}

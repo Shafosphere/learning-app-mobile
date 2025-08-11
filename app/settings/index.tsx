@@ -7,7 +7,8 @@ import { logGeneratedTableContents } from "@/src/components/db/dbGenerator";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
 
 export default function Settings() {
-  const { theme, toggleTheme } = useSettings();
+  const { theme, toggleTheme, spellChecking, toggleSpellChecking } =
+    useSettings();
   const styles = useStyles();
 
   async function handleGeneratePatches() {
@@ -51,6 +52,14 @@ export default function Settings() {
       <Button
         title={theme === "light" ? "Przełącz na ciemny" : "Przełącz na jasny"}
         onPress={toggleTheme}
+      />
+
+      <Text style={styles.text}>
+        Spellchecking: {spellChecking ? "włączone" : "wyłączone"}
+      </Text>
+      <Button
+        title={spellChecking ? "Wyłącz sprawdzanie" : "Włącz sprawdzanie"}
+        onPress={toggleSpellChecking}
       />
 
       <Button title={"Generuj patche"} onPress={handleGeneratePatches} />
