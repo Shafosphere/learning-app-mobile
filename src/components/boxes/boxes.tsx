@@ -10,14 +10,14 @@ import BoxBottom from "../../../assets/box/bottomBox.png";
 interface BoxesProps {
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;
-  onSelectBox: (name: keyof BoxesState) => void;
+  handleSelectBox: (name: keyof BoxesState) => void;
   onDownload: () => Promise<void>;
 }
 
 export default function Boxes({
   boxes,
   activeBox,
-  onSelectBox,
+  handleSelectBox,
   onDownload,
 }: BoxesProps) {
   const styles = useStyles();
@@ -30,7 +30,7 @@ export default function Boxes({
     <View style={styles.container}>
       <View style={styles.containerTop}>
         {entries.map(([boxName, words]) => (
-          <Pressable key={boxName} onPress={() => onSelectBox(boxName)}>
+          <Pressable key={boxName} onPress={() => handleSelectBox(boxName)}>
             <View style={styles.containerBox}>
               <View
                 style={[
@@ -53,13 +53,20 @@ export default function Boxes({
             </View>
           </Pressable>
         ))}
+        {/* <MyButton
+          text="+"
+          color="my_yellow"
+          onPress={onDownload}
+          disabled={false}
+          width={100}
+        /> */}
       </View>
-      <MyButton
+      {/* <MyButton
         text="dodaj"
         color="my_yellow"
         onPress={onDownload}
         disabled={false}
-      />
+      /> */}
     </View>
   );
 }

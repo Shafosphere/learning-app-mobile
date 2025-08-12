@@ -10,8 +10,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 15,
   },
   card: {
-    height: 150,
+    height: 120,
     width: 325,
+    paddingLeft: 10,
+    paddingRight: 10,
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
     alignItems: "center",
@@ -19,9 +21,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   cardGood: {
     backgroundColor: colors.my_green,
+    alignItems: "center",
   },
   cardBad: {
     backgroundColor: colors.my_red,
+    alignItems: "flex-start",
+    // justifyContent: "flex-start",
   },
   cardInput: {
     borderBottomColor: colors.border,
@@ -31,9 +36,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     padding: 0,
   },
   cardFont: {
-    fontSize: 20,
-    fontWeight: 600,
+    fontSize: 24,
+    fontWeight: 800,
     color: colors.headline,
+    textAlign: "center",
   },
   containerButton: {
     display: "flex",
@@ -42,5 +48,25 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     gap: 15,
     // width: "100%",
+  },
+  containerInput: {
+    position: "relative",
+    // backgroundColor: colors.my_yellow,
+    width: "100%",
+  },
+  myplaceholder: {
+    position: "absolute",
+    top: 8,
+    left: 8,
+    opacity: 0.5,
+    fontSize: 24,
+    fontWeight: 800,
+  },
+  myinput: {
+    // borderWidth: 1,
+    width: "100%",
+    padding: 8,
+    fontSize: 24,
+    fontWeight: 800,
   },
 }));

@@ -13,11 +13,11 @@ export default function Flashcards() {
   const { selectedLevel, profiles } = useSettings();
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
-
+  const [queueNext, setQueueNext] = useState(false);
   const checkSpelling = useSpellchecking();
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<boolean | null>(null);
-
+  const reversed = activeBox === "boxTwo" || activeBox === "boxFour";
   const boxOrder: ReadonlyArray<keyof BoxesState> = [
     "boxOne",
     "boxTwo",
@@ -25,6 +25,14 @@ export default function Flashcards() {
     "boxFour",
     "boxFive",
   ];
+
+  const [correction, setCorrection] = useState<{
+    awers: string;
+    rewers: string;
+    input1: string;
+    input2: string;
+  } | null>(null);
+
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
 
   const [boxes, setBoxes] = useState<BoxesState>({
@@ -34,6 +42,24 @@ export default function Flashcards() {
     boxFour: [],
     boxFive: [],
   });
+
+  function selectRandomWord(box: keyof BoxesState) {
+    const list = boxes[box];
+    if (!list || list.length === 0) {
+      setItem(null);
+      return;
+    }
+    if (list.length === 1) {
+      setItem(list[0]);
+      return;
+    }
+    let idx = Math.floor(Math.random() * list.length);
+    if (selectedItem && list[idx].id === selectedItem.id) {
+      idx = (idx + 1) % list.length;
+    }
+    setItem(list[idx]);
+    console.log(selectedItem);
+  }
 
   async function downloadData() {
     try {
@@ -55,31 +81,52 @@ export default function Flashcards() {
     }
   }
 
+  function handleSelectBox(box: keyof BoxesState) {
+    setActiveBox(box);
+    selectRandomWord(box);
+  }
+
   function checkAnswer(): boolean {
     if (!selectedItem) return false;
-    const isOk = selectedItem.translations.some((t) =>
-      checkSpelling(answer, t)
-    );
+    let isOk: boolean;
+    if (reversed) {
+      isOk = checkSpelling(answer, selectedItem.text);
+    } else {
+      isOk = selectedItem.translations.some((t) => checkSpelling(answer, t));
+    }
+
     return isOk;
   }
 
   function confirm() {
+    if (!selectedItem) return;
+
     const ok = checkAnswer();
     if (ok) {
-      console.log("logika jezeli bedzie dobrze");
       setResult(true);
-
       setTimeout(() => {
+        setAnswer("");
+        moveElement(selectedItem.id, true);
         setResult(null);
-        console.log("timeout w confirm");
+        setQueueNext(true);
       }, 1500);
     } else {
-      console.log("logika jezeli bedzie źle");
+      setResult(false);
+      setCorrection({
+        awers: selectedItem.text,
+        rewers: selectedItem.translations[0] ?? "",
+        input1: "",
+        input2: "",
+      });
     }
   }
 
   function moveElement(id: number, promote = false) {
     if (!activeBox) return;
+    if (activeBox === "boxOne" && promote === false) {
+      selectRandomWord(activeBox);
+      return;
+    }
 
     setBoxes((prev) => {
       const from = activeBox;
@@ -116,16 +163,38 @@ export default function Flashcards() {
     });
   }
 
-  useEffect(() => {
-    if (activeBox && boxes[activeBox].length > 0) {
-      const currentBox = boxes[activeBox];
-      const randomIndex = Math.floor(Math.random() * currentBox.length);
-      const randomWord = currentBox[randomIndex];
+  function wrongInputChange(which: 1 | 2, value: string) {
+    setCorrection((c) =>
+      c ? { ...c, [which === 1 ? "input1" : "input2"]: value } : c
+    );
+  }
 
-      setItem(randomWord);
-      console.log("Wylosowane:", randomWord);
+  useEffect(() => {
+    if (
+      correction &&
+      correction.input1.trim() === correction.awers &&
+      correction.input2.trim() === correction.rewers
+    ) {
+      if (selectedItem) {
+        moveElement(selectedItem.id, false);
+      }
+      setResult(null);
+      setCorrection(null);
+      setQueueNext(true);
     }
-  }, [activeBox]);
+  }, [correction]);
+
+  useEffect(() => {
+    console.log(selectedItem);
+  }, [selectedItem]);
+
+  useEffect(() => {
+    if (queueNext && activeBox) {
+      selectRandomWord(activeBox);
+      setResult(null);
+      setQueueNext(false);
+    }
+  }, [boxes]);
 
   return (
     <View style={styles.container}>
@@ -142,17 +211,21 @@ export default function Flashcards() {
       )} */}
       <Card
         selectedItem={selectedItem}
-        checkAnswer={checkAnswer}
         setAnswer={setAnswer}
         answer={answer}
         result={result}
         confirm={confirm}
+        reversed={reversed}
+        setResult={setResult}
+        correction={correction}
+        wrongInputChange={wrongInputChange}
+        onDownload={downloadData}
       />
 
       <Boxes
         boxes={boxes}
         activeBox={activeBox}
-        onSelectBox={setActiveBox}
+        handleSelectBox={handleSelectBox}
         onDownload={downloadData}
       />
     </View>
