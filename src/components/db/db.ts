@@ -5,6 +5,14 @@ import * as FileSystem from "expo-file-system";
 import { Asset } from "expo-asset";
 import Papa from "papaparse";
 
+export type LanguagePair = {
+  id: number;
+  source_code: string;
+  target_code: string;
+  source_id: number;   // NEW
+  target_id: number;   // NEW
+};
+
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -196,16 +204,28 @@ export async function logTableContents() {
   console.table(languagePairs);
 }
 
-export async function getLanguagePairs() {
+
+export async function getLanguagePairs(): Promise<LanguagePair[]> {
   const db = await getDB();
-  return db.getAllAsync<{
-    id: number;
-    source_code: string;
-    target_code: string;
-  }>(
-    `SELECT lp.rowid AS id, s.code AS source_code, t.code AS target_code
-     FROM language_pairs lp
-     JOIN languages s ON lp.source_language_id = s.id
-     JOIN languages t ON lp.target_language_id = t.id;`
+  return db.getAllAsync<LanguagePair>(`
+    SELECT 
+      lp.rowid AS id,
+      s.code   AS source_code,
+      t.code   AS target_code,
+      s.id     AS source_id,   -- NEW
+      t.id     AS target_id    -- NEW
+    FROM language_pairs lp
+    JOIN languages s ON lp.source_language_id = s.id
+    JOIN languages t ON lp.target_language_id = t.id;
+  `);
+}
+
+
+export async function getLanguageIdByCode(code: string) {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ id: number }>(
+    "SELECT id FROM languages WHERE code = ? LIMIT 1",
+    code
   );
+  return row?.id ?? null;
 }

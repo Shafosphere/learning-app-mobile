@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getLanguagePairs } from "@/src/components/db/db";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import type { LanguagePair } from "@/src/components/db/db";
 
 import PL_FLAG_GRAY from "../../assets/flag/PLgray.png";
 import ES_FLAG_GRAY from "../../assets/flag/ESgray.png";
@@ -33,9 +34,7 @@ export default function Profile() {
     en: US_FLAG_GRAY,
   };
 
-  const [availablePairs, setAvailablePairs] = useState<
-    { id: number; source_code: string; target_code: string }[]
-  >([]);
+  const [availablePairs, setAvailablePairs] = useState<LanguagePair[]>([]);
   const [activeSource, setSource] = useState<string | null>(null);
   const [activeTarget, setTarget] = useState<string | null>(null);
 
@@ -43,6 +42,7 @@ export default function Profile() {
     getLanguagePairs()
       .then((pairs) => {
         setAvailablePairs(pairs);
+        console.log(pairs);
       })
       .catch((err) => console.error("Błąd pobierania par: ", err));
   }, []);
@@ -121,10 +121,16 @@ export default function Profile() {
           text="Zatwierdź"
           color="my_green"
           onPress={async () => {
-            if (activeSource && activeTarget) {
+            const pair = availablePairs.find(
+              (p) =>
+                p.source_code === activeSource && p.target_code === activeTarget
+            );
+            if (pair) {
               await addProfile({
-                sourceLang: activeSource,
-                targetLang: activeTarget,
+                sourceLang: pair.source_code,
+                targetLang: pair.target_code,
+                sourceLangId: pair.source_id, // NEW
+                targetLangId: pair.target_id, // NEW
               });
               setSource(null);
               setTarget(null);

@@ -10,7 +10,7 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 
 export default function Flashcards() {
   const styles = useStyles();
-  const { selectedLevel, profiles } = useSettings();
+  const { selectedLevel, profiles, activeProfile } = useSettings();
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
   const [queueNext, setQueueNext] = useState(false);
@@ -62,23 +62,20 @@ export default function Flashcards() {
   }
 
   async function downloadData() {
-    try {
-      const patchData: WordWithTranslations[] = await getWordsFromPatch({
-        sourceLangId: 1,
-        targetLangId: 2,
-        cefrLevel: "A1",
-        batchIndex: 1,
-      });
-
-      setBoxes((prev) => ({
-        ...prev,
-        boxOne: [...prev.boxOne, ...patchData],
-      }));
-
-      console.log("boxOne teraz ma:", boxes.boxOne);
-    } catch (error) {
-      console.error("Błąd podczas pobierania:", error);
+    const prof = activeProfile;
+    if (!prof || prof.sourceLangId == null || prof.targetLangId == null) {
+      console.warn("Brak aktywnego profilu lub ID języków");
+      return;
     }
+
+    const patchData = await getWordsFromPatch({
+      sourceLangId: prof.sourceLangId,
+      targetLangId: prof.targetLangId,
+      cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
+      batchIndex: 1,
+    });
+
+    setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...patchData] }));
   }
 
   function handleSelectBox(box: keyof BoxesState) {
@@ -198,7 +195,7 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
-      {/* <Text>{selectedLevel}</Text>
+      <Text>{selectedLevel}</Text>
       <Text>{activeBox}</Text>
       {profiles && (
         <>
@@ -208,7 +205,7 @@ export default function Flashcards() {
             </Text>
           ))}
         </>
-      )} */}
+      )}
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}

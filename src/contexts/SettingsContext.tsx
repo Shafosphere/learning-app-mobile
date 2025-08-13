@@ -13,12 +13,19 @@ interface SettingsContextValue {
   setLevel: (lvl: string) => void;
   spellChecking: boolean;
   toggleSpellChecking: () => Promise<void>;
+  activeProfileIdx: number | null; // NEW
+  setActiveProfileIdx: (i: number | null) => Promise<void>; // NEW
+  activeProfile: LanguageProfile | null;
 }
 
 export interface LanguageProfile {
-  sourceLang: string;
-  targetLang: string;
+  sourceLang: string; // 'en'
+  targetLang: string; // 'pl'
+  sourceLangId?: number; // np. 1
+  targetLangId?: number; // np. 2
 }
+
+export type CEFR = 'A1'|'A2'|'B1'|'B2'|'C1'|'C2';
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
@@ -30,18 +37,12 @@ const defaultValue: SettingsContextValue = {
   setLevel: () => {},
   spellChecking: true,
   toggleSpellChecking: async () => {},
+  activeProfileIdx: null,
+  setActiveProfileIdx: async () => {},
+  activeProfile: null,
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
-const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
-  "spellChecking",
-  true
-);
-
-const toggleSpellChecking = async () => {
-  await setSpellChecking(!spellChecking);
-};
-
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
@@ -52,23 +53,48 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
+  const [activeProfileIdx, setActiveProfileIdx] = usePersistedState<
+    number | null
+  >("activeProfileIdx", null);
+
+  console.log(profiles);
+  const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
+    "spellChecking",
+    true
+  );
+  const toggleSpellChecking = async () => {
+    await setSpellChecking(!spellChecking);
+  };
   const toggleTheme = async () => {
     const newTheme: Theme = theme === "light" ? "dark" : "light";
     await setTheme(newTheme);
   };
   const colors = themeMap[theme];
 
-  const addProfile = async (profile: LanguageProfile) => {
-    const exists = profiles.some(
-      (p) =>
-        p.sourceLang === profile.sourceLang &&
-        p.targetLang === profile.targetLang
+  const addProfile = async (p: LanguageProfile) => {
+    const existsIdx = profiles.findIndex(
+      (x) =>
+        (p.sourceLangId &&
+          p.targetLangId &&
+          x.sourceLangId === p.sourceLangId &&
+          x.targetLangId === p.targetLangId) ||
+        (!p.sourceLangId &&
+          !p.targetLangId &&
+          x.sourceLang === p.sourceLang &&
+          x.targetLang === p.targetLang)
     );
-    if (!exists) {
-      await setProfiles([...profiles, profile]);
+    if (existsIdx === -1) {
+      const newList = [...profiles, p];
+      await setProfiles(newList);
+      if (activeProfileIdx == null)
+        await setActiveProfileIdx(newList.length - 1);
+    } else {
+      if (activeProfileIdx == null) await setActiveProfileIdx(existsIdx);
     }
-    console.log(profiles);
   };
+
+  const activeProfile =
+    activeProfileIdx != null ? profiles[activeProfileIdx] : null;
 
   return (
     <SettingsContext.Provider
@@ -78,6 +104,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         toggleTheme,
         profiles,
         addProfile,
+        activeProfileIdx,
+        setActiveProfileIdx,
+        activeProfile,
         selectedLevel,
         setLevel,
         spellChecking,
