@@ -6,6 +6,7 @@ import { SettingsProvider } from "@/src/contexts/SettingsContext";
 import { getDB } from "@/src/components/db/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
 import { View } from "react-native";
+import { PopupProvider } from "@/src/contexts/PopupContext";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -25,14 +26,14 @@ export default function RootLayout() {
     }
 
     prepareApp();
-  }, []); 
+  }, []);
 
   const onLayoutRootView = useCallback(async () => {
     if (isDbReady) {
       await SplashScreen.hideAsync();
     }
   }, [isDbReady]);
-  
+
   if (!isDbReady) {
     return null;
   }
@@ -40,8 +41,10 @@ export default function RootLayout() {
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <SettingsProvider>
-        <Navbar />
-        <Stack screenOptions={{ headerShown: false }} />
+        <PopupProvider>
+          <Navbar />
+          <Stack screenOptions={{ headerShown: false }} />
+        </PopupProvider>
       </SettingsProvider>
     </View>
   );

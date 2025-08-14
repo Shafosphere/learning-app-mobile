@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
+import { usePopup } from "@/src/contexts/PopupContext";
 
 export default function ProfilPanel() {
   const {
@@ -21,6 +22,7 @@ export default function ProfilPanel() {
 
   const [clickedProfile, setClickedProfile] = useState<number | null>(null); // ⬅️ start od null
   const router = useRouter();
+  const setPopup = usePopup();
 
   const flagMap: Record<string, number> = {
     pl: PL_FLAG,
@@ -41,6 +43,14 @@ export default function ProfilPanel() {
   }, [profiles, activeProfileIdx]);
 
   const styles = useStyles();
+
+  const handleClick = () => {
+    setPopup({
+      message: "Zapisano pomyślnie!",
+      color: "my_green",
+      duration: 3000,
+    });
+  };
 
   const confirmSelection = async () => {
     if (clickedProfile == null) return;
@@ -80,7 +90,10 @@ export default function ProfilPanel() {
           <MyButton
             text="zatwierdź"
             color="my_green"
-            onPress={confirmSelection}
+            onPress={() => {
+              confirmSelection();
+              handleClick();
+            }}
             disabled={clickedProfile == null}
           />
         </View>
