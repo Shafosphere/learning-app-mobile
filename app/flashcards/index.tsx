@@ -1,4 +1,4 @@
-import { Button, Text, View } from "react-native";
+import { Button, Text, View, Image, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
@@ -7,8 +7,14 @@ import Boxes from "@/src/components/boxes/boxes";
 import Card from "@/src/components/card/card";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import PL_FLAG from "../../assets/flag/PL.png";
+import ES_FLAG from "../../assets/flag/ES.png";
+import PM_FLAG from "../../assets/flag/PM.png";
+import US_FLAG from "../../assets/flag/US.png";
+import { useRouter } from "expo-router";
 
 export default function Flashcards() {
+  const router = useRouter();
   const styles = useStyles();
   const { selectedLevel, profiles, activeProfile } = useSettings();
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
@@ -32,6 +38,13 @@ export default function Flashcards() {
     input1: string;
     input2: string;
   } | null>(null);
+
+  const flagMap: Record<string, number> = {
+    pl: PL_FLAG,
+    es: ES_FLAG,
+    pm: PM_FLAG,
+    en: US_FLAG,
+  };
 
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
 
@@ -131,6 +144,7 @@ export default function Flashcards() {
       const element = source.find((x) => x.id === id);
       if (!element) return prev;
 
+          console.log("Przenoszę element:", element, "z boxa:", from);
       const fromIdx = boxOrder.indexOf(from);
 
       let target: keyof BoxesState | null;
@@ -195,17 +209,19 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
-      <Text>{selectedLevel}</Text>
-      <Text>{activeBox}</Text>
-      {profiles && (
-        <>
-          {profiles.map((profile, idx) => (
-            <Text key={idx}>
-              {profile.sourceLang} → {profile.targetLang}
-            </Text>
-          ))}
-        </>
-      )}
+      <TouchableOpacity
+        onPress={() => router.push("/profilpanel")}
+        style={styles.containeroflevel}
+      >
+        {activeProfile && (
+          <Image
+            source={flagMap[activeProfile.sourceLang]}
+            style={styles.flag}
+          />
+        )}
+        <Text style={styles.levelText}>{selectedLevel}</Text>
+      </TouchableOpacity>
+
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}

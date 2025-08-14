@@ -15,6 +15,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 
 const logo = require("./../../../assets/box/logo.png");
 
@@ -70,9 +71,9 @@ export default function Navbar() {
           styles.iconCon,
           pressed && styles.iconConPressed,
         ]}
-        onPress={() => router.push("/profile")}
+        onPress={() => router.push("/profilpanel")}
       >
-        <Entypo style={styles.icon} name="globe" size={16} color="black" />
+        <FontAwesome style={styles.icon} name="flag" size={16} color="black" />
       </Pressable>
 
       <Pressable
