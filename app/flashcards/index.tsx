@@ -19,27 +19,24 @@ export default function Flashcards() {
   const styles = useStyles();
   const { selectedLevel, profiles, activeProfile } = useSettings();
 
-  if (
-    !activeProfile ||
-    activeProfile.sourceLangId == null ||
-    activeProfile.targetLangId == null ||
-    !selectedLevel
-  ) {
-    return (
-      <View style={styles.container}>
-        <Text>Wybierz profil i poziom.</Text>
-      </View>
-    );
-  }
-
-  const { boxes, setBoxes, isReady, resetSave, saveNow } =
-    useBoxesPersistenceSnapshot({
-      sourceLangId: activeProfile.sourceLangId,
-      targetLangId: activeProfile.targetLangId,
-      level: selectedLevel,
-      autosave: true,
-      saveDelayMs: 0,
-    });
+  const {
+    boxes,
+    setBoxes,
+    batchIndex,
+    setBatchIndex,
+    isReady,
+    resetSave,
+    saveNow,
+  } = useBoxesPersistenceSnapshot({
+    sourceLangId: activeProfile?.sourceLangId ?? 0,
+    targetLangId: activeProfile?.targetLangId ?? 0,
+    level: selectedLevel ?? "A1",
+    autosave:
+      activeProfile?.sourceLangId != null &&
+      activeProfile?.targetLangId != null &&
+      !!selectedLevel,
+    saveDelayMs: 0,
+  });
 
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
@@ -101,10 +98,16 @@ export default function Flashcards() {
       sourceLangId: prof.sourceLangId,
       targetLangId: prof.targetLangId,
       cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
-      batchIndex: 1,
+      batchIndex: batchIndex,
     });
 
     setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...patchData] }));
+    setBatchIndex((prev) => {
+      const next = prev + 1;
+      console.log(next);
+      return next;
+    });
+    await saveNow();
   }
 
   function handleSelectBox(box: keyof BoxesState) {
@@ -222,6 +225,19 @@ export default function Flashcards() {
       setQueueNext(false);
     }
   }, [boxes]);
+
+  if (
+    !activeProfile ||
+    activeProfile.sourceLangId == null ||
+    activeProfile.targetLangId == null ||
+    !selectedLevel
+  ) {
+    return (
+      <View style={styles.container}>
+        <Text>Wybierz profil i poziom.</Text>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -37,6 +37,7 @@ export type SavedBoxesV2 = {
   sourceLangId: number;
   targetLangId: number;
   level: string; // "A1" | ... | "C2"
+  batchIndex: number;
   flashcards: BoxesState; // full snapshot of boxes state
 };
 
@@ -50,7 +51,12 @@ export function makeScopeId(
 
 async function saveToStorageSnapshot(
   key: string,
-  meta: { sourceLangId: number; targetLangId: number; level: string },
+  meta: {
+    sourceLangId: number;
+    targetLangId: number;
+    level: string;
+    batchIndex: number;
+  },
   boxes: BoxesState
 ) {
   const payload: SavedBoxesV2 = {
@@ -60,6 +66,7 @@ async function saveToStorageSnapshot(
     sourceLangId: meta.sourceLangId,
     targetLangId: meta.targetLangId,
     level: meta.level,
+    batchIndex: meta.batchIndex,
     flashcards: boxes,
   };
   await AsyncStorage.setItem(key, JSON.stringify(payload));
@@ -107,6 +114,7 @@ export function useBoxesPersistenceSnapshot(params: {
     boxFour: [],
     boxFive: [],
   });
+  const [batchIndex, setBatchIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const savingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoringRef = useRef(true);
@@ -125,7 +133,10 @@ export function useBoxesPersistenceSnapshot(params: {
       try {
         const saved = await loadFromStorageSnapshot(storageKey);
         if (saved) {
-          if (mounted) setBoxes(saved.flashcards);
+          if (mounted) {
+            setBoxes(saved.flashcards);
+            setBatchIndex(saved.batchIndex ?? 0);
+          }
         } else if (initialWords && mounted) {
           setBoxes({
             boxOne: initialWords,
@@ -154,7 +165,7 @@ export function useBoxesPersistenceSnapshot(params: {
     savingTimer.current = setTimeout(() => {
       saveToStorageSnapshot(
         storageKey,
-        { sourceLangId, targetLangId, level },
+        { sourceLangId, targetLangId, level, batchIndex },
         boxes
       ).catch(() => {});
     }, saveDelayMs);
@@ -167,6 +178,7 @@ export function useBoxesPersistenceSnapshot(params: {
     sourceLangId,
     targetLangId,
     level,
+    batchIndex,
   ]);
 
   const resetSave = useCallback(async () => {
@@ -176,10 +188,19 @@ export function useBoxesPersistenceSnapshot(params: {
   const saveNow = useCallback(async () => {
     await saveToStorageSnapshot(
       storageKey,
-      { sourceLangId, targetLangId, level },
+      { sourceLangId, targetLangId, level, batchIndex },
       boxes
     );
-  }, [storageKey, boxes, sourceLangId, targetLangId, level]);
+  }, [storageKey, boxes, sourceLangId, targetLangId, level, batchIndex]);
 
-  return { boxes, setBoxes, isReady, resetSave, saveNow, storageKey } as const;
+  return {
+    boxes,
+    setBoxes,
+    batchIndex,
+    setBatchIndex,
+    isReady,
+    resetSave,
+    saveNow,
+    storageKey,
+  } as const;
 }
