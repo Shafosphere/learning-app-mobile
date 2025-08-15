@@ -3,9 +3,11 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
-    justifyContent: "center",
+    // justifyContent: "center",
     // alignItems: "center",
     backgroundColor: colors.background,
+    // marginTop: 20,
+    paddingTop: 50,
     position: "relative",
     display: "flex",
     gap: 30,
@@ -24,9 +26,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   flag: {
     width: 99/3,
     height: 66/3,
-    // borderRadius: 4,
-    // borderWidth: 2,
-    // borderColor: colors.my_green,
   },
   levelText: {
     width: "100%",

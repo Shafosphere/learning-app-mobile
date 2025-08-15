@@ -12,11 +12,35 @@ import ES_FLAG from "../../assets/flag/ES.png";
 import PM_FLAG from "../../assets/flag/PM.png";
 import US_FLAG from "../../assets/flag/US.png";
 import { useRouter } from "expo-router";
+import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
   const { selectedLevel, profiles, activeProfile } = useSettings();
+
+  if (
+    !activeProfile ||
+    activeProfile.sourceLangId == null ||
+    activeProfile.targetLangId == null ||
+    !selectedLevel
+  ) {
+    return (
+      <View style={styles.container}>
+        <Text>Wybierz profil i poziom.</Text>
+      </View>
+    );
+  }
+
+  const { boxes, setBoxes, isReady, resetSave, saveNow } =
+    useBoxesPersistenceSnapshot({
+      sourceLangId: activeProfile.sourceLangId,
+      targetLangId: activeProfile.targetLangId,
+      level: selectedLevel,
+      autosave: true,
+      saveDelayMs: 0,
+    });
+
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
   const [queueNext, setQueueNext] = useState(false);
@@ -47,14 +71,6 @@ export default function Flashcards() {
   };
 
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
-
-  const [boxes, setBoxes] = useState<BoxesState>({
-    boxOne: [],
-    boxTwo: [],
-    boxThree: [],
-    boxFour: [],
-    boxFive: [],
-  });
 
   function selectRandomWord(box: keyof BoxesState) {
     const list = boxes[box];
@@ -144,7 +160,7 @@ export default function Flashcards() {
       const element = source.find((x) => x.id === id);
       if (!element) return prev;
 
-          console.log("Przenoszę element:", element, "z boxa:", from);
+      console.log("Przenoszę element:", element, "z boxa:", from);
       const fromIdx = boxOrder.indexOf(from);
 
       let target: keyof BoxesState | null;
