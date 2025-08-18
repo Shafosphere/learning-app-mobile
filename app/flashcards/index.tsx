@@ -13,7 +13,8 @@ import PM_FLAG from "../../assets/flag/PM.png";
 import US_FLAG from "../../assets/flag/US.png";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
-
+import BoxesCarousel from "@/src/components/boxes/boxcarousel";
+// import MediumBoxes from "@/src/components/boxes/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
@@ -267,12 +268,26 @@ export default function Flashcards() {
         onDownload={downloadData}
       />
 
-      <Boxes
+      {/* <Boxes
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        onDownload={downloadData}
+      /> */}
+
+      <BoxesCarousel
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
         onDownload={downloadData}
       />
+
+      {/* <MediumBoxes
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        onDownload={downloadData}
+      /> */}
     </View>
   );
 }

@@ -5,6 +5,7 @@ import { useStyles } from "../../src/screens/settings/styles_settings";
 import { regeneratePatches } from "@/src/components/db/dbGenerator";
 import { logGeneratedTableContents } from "@/src/components/db/dbGenerator";
 import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
+import { clearAllFlashcards } from "@/src/utils/flashcardsStorage";
 
 export default function Settings() {
   const { theme, toggleTheme, spellChecking, toggleSpellChecking } =
@@ -46,6 +47,8 @@ export default function Settings() {
     }
   }
 
+
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Aktualny motyw: {theme}</Text>
@@ -67,6 +70,8 @@ export default function Settings() {
       <Button title="Sprawdź tablice" onPress={handleCheckTable} />
 
       <Button title="Pobierz patch" onPress={loadAndDisplayPatch} />
+
+      <Button title="wyczysc pamiec" onPress={clearAllFlashcards} />
     </View>
   );
 }
