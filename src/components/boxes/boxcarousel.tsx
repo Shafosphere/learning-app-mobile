@@ -1,14 +1,12 @@
 // BoxesCarousel.tsx
-import React, { useMemo, useRef, useCallback } from "react";
+import React, { useCallback, useMemo } from "react";
 import {
+  FlatList,
+  Text,
   View,
   Image,
-  Pressable,
-  Animated,
-  FlatList,
   Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
+  Pressable,
 } from "react-native";
 import { useStyles } from "./styles_carousel";
 import { BoxesState } from "@/src/types/boxes";
@@ -20,117 +18,69 @@ interface BoxesProps {
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;
   handleSelectBox: (name: keyof BoxesState) => void;
-  onDownload: () => Promise<void>;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const ITEM_WIDTH = Math.round(SCREEN_WIDTH * 0.3);
-
-export default function BoxesCarousel({
+export default function Boxes({
   boxes,
   activeBox,
   handleSelectBox,
 }: BoxesProps) {
+  const { width: SCREEN_WIDTH } = Dimensions.get("window");
+  const ITEM_WIDTH = Math.round(SCREEN_WIDTH * 0.3);
+
   const styles = useStyles();
-  const data = useMemo(
-    () => Object.keys(boxes || {}).map((k) => ({ key: k as keyof BoxesState })),
-    [boxes]
-  );
+  const transformBoxesForList = (boxesObject: BoxesState | null) => {
+    const validBoxes = boxesObject || {};
+    const boxKeys = Object.keys(validBoxes) as Array<keyof BoxesState>;
+    return boxKeys.map((keyName) => ({
+      boxName: keyName,
+    }));
+  };
 
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const listRef = useRef<FlatList>(null);
-
-  const initialIndex = useMemo(() => {
-    if (!activeBox) return 0;
-    const idx = data.findIndex((d) => d.key === activeBox);
-    return idx >= 0 ? idx : 0;
-  }, [activeBox, data]);
-
-  const onMomentumEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      const idx = Math.round(x / ITEM_WIDTH);
-      const item = data[idx];
-      if (item && item.key !== activeBox) {
-        handleSelectBox(item.key);
-      }
-    },
-    [activeBox, data, handleSelectBox]
-  );
-
-  const scrollToIndex = useCallback((index: number) => {
-    listRef.current?.scrollToIndex({ index, animated: true });
-  }, []);
+  const data = useMemo(() => transformBoxesForList(boxes), [boxes]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: { key: keyof BoxesState }; index: number }) => {
-      const inputRange = [
-        (index - 1) * ITEM_WIDTH,
-        index * ITEM_WIDTH,
-        (index + 1) * ITEM_WIDTH,
-      ];
-
-      const scale = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.9, 1.0, 0.9],
-        extrapolate: "clamp",
-      });
-
-      const opacity = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.6, 1.0, 0.6],
-        extrapolate: "clamp",
-      });
-
-      const isActive = item.key === activeBox;
-
+    ({
+      item,
+      index,
+    }: {
+      item: { boxName: keyof BoxesState };
+      index: number;
+    }) => {
+      const boxContent = boxes[item.boxName];
       return (
-        <View style={{ width: ITEM_WIDTH }}>
-          <Animated.View
+        <Pressable onPress={() => handleSelectBox(item.boxName)}>
+          <View
             style={[
-              isActive && styles.activeBox,
-              { transform: [{ scale }], opacity },
+              styles.containerSkin,
+              activeBox === item.boxName && styles.activeBox,
             ]}
           >
-            <Pressable
-              onPress={() => scrollToIndex(index)}
-              style={styles.containerSkin}
-            >
-              <Image source={BoxTop} style={styles.skin} />
-
-              <Image source={BoxBottom} style={styles.skin} />
-            </Pressable>
-          </Animated.View>
-        </View>
+            <Image style={styles.skin} source={BoxTop} resizeMode="stretch" />
+            <Image
+              style={styles.skin}
+              source={BoxBottom}
+              resizeMode="stretch"
+            />
+          </View>
+          <Text>{boxContent.length}</Text>
+        </Pressable>
       );
     },
-    [activeBox, scrollX, styles.activeBox, styles.boxWords, scrollToIndex]
+    [boxes, activeBox]
   );
-
   return (
     <View>
-      <Animated.FlatList
-        ref={listRef}
-        data={data}
-        keyExtractor={(i) => String(i.key)}
-        renderItem={renderItem}
+      <FlatList
         horizontal
+        showsVerticalScrollIndicator={false}
         showsHorizontalScrollIndicator={false}
+        bounces={true}
+        data={data}
+        renderItem={renderItem}
         contentContainerStyle={{
           paddingHorizontal: (SCREEN_WIDTH - ITEM_WIDTH) / 2,
         }}
-        decelerationRate="fast"
-        onMomentumScrollEnd={onMomentumEnd}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          { useNativeDriver: true }
-        )}
-        initialScrollIndex={initialIndex}
-        getItemLayout={(_d, index) => ({
-          length: ITEM_WIDTH,
-          offset: ITEM_WIDTH * index,
-          index,
-        })}
       />
     </View>
   );

@@ -272,22 +272,14 @@ export default function Flashcards() {
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
-        onDownload={downloadData}
       /> */}
 
       <BoxesCarousel
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
-        onDownload={downloadData}
       />
 
-      {/* <MediumBoxes
-        boxes={boxes}
-        activeBox={activeBox}
-        handleSelectBox={handleSelectBox}
-        onDownload={downloadData}
-      /> */}
     </View>
   );
 }

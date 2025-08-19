@@ -11,14 +11,12 @@ interface BoxesProps {
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;
   handleSelectBox: (name: keyof BoxesState) => void;
-  onDownload: () => Promise<void>;
 }
 
 export default function Boxes({
   boxes,
   activeBox,
   handleSelectBox,
-  onDownload,
 }: BoxesProps) {
   const styles = useStyles();
 
@@ -53,20 +51,7 @@ export default function Boxes({
             </View>
           </Pressable>
         ))}
-        {/* <MyButton
-          text="+"
-          color="my_yellow"
-          onPress={onDownload}
-          disabled={false}
-          width={100}
-        /> */}
       </View>
-      {/* <MyButton
-        text="dodaj"
-        color="my_yellow"
-        onPress={onDownload}
-        disabled={false}
-      /> */}
     </View>
   );
 }

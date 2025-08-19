@@ -1,8 +1,7 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
-  container: {
-  },
+  container: {},
   containerSkin: {
     position: "relative",
     width: 115,
@@ -24,6 +23,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     margin: 4,
   },
   activeBox: {
+    width: 205,
+    height: 212,
     borderBottomWidth: 5,
     borderBottomColor: colors.my_green,
   },
