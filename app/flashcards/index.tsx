@@ -279,7 +279,6 @@ export default function Flashcards() {
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
       />
-
     </View>
   );
 }

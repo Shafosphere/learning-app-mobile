@@ -2,7 +2,8 @@ import { Text, TextInput, View } from "react-native";
 import { useStyles } from "./styles_card";
 import MyButton from "../button/button";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import AntDesign from "@expo/vector-icons/AntDesign";
 
 type CardProps = {
   selectedItem: WordWithTranslations | null;
@@ -37,9 +38,29 @@ export default function Card({
   const statusStyle =
     result === null ? undefined : result ? styles.cardGood : styles.cardBad;
 
+  const [translations, setTranslations] = useState<number>(0);
+
   const awers = selectedItem?.text ?? "";
-  const rewers = selectedItem?.translations?.[0] ?? "";
+  const rewers = selectedItem?.translations?.[translations] ?? "";
   const promptText = reversed ? rewers : awers;
+
+  const len = selectedItem?.translations?.length ?? 0;
+  const prev = () => len && setTranslations((i) => (i - 1 + len) % len);
+  const next = () => len && setTranslations((i) => (i + 1) % len);
+
+  function handleConfirm() {
+    if (selectedItem?.translations && selectedItem.translations.length > 1) {
+      const currentIndex = translations; 
+      if (currentIndex !== 0) {
+        const arr = [...selectedItem.translations]; 
+        const [chosen] = arr.splice(currentIndex, 1);
+        arr.unshift(chosen); 
+        selectedItem.translations = arr; 
+      }
+      setTranslations(0); 
+    }
+    confirm(); 
+  }
 
   function showCardContent() {
     if (result === false && correction) {
@@ -68,7 +89,26 @@ export default function Card({
     if (selectedItem && selectedItem.text) {
       return (
         <>
-          <Text style={styles.cardFont}>{promptText}</Text>
+          <View style={styles.topContainer}>
+            {promptText === rewers && selectedItem.translations.length > 1 ? (
+              <AntDesign
+                style={styles.miniArrow}
+                onPress={prev}
+                name="caretleft"
+                size={16}
+              />
+            ) : null}
+            <Text style={styles.cardFont}>{promptText}</Text>
+            {promptText === rewers && selectedItem.translations.length > 1 ? (
+              <AntDesign
+                style={styles.miniArrow}
+                onPress={next}
+                name="caretright"
+                size={16}
+              />
+            ) : null}
+          </View>
+
           <TextInput
             style={[styles.cardInput, styles.cardFont]}
             value={answer}
@@ -90,7 +130,7 @@ export default function Card({
           text="zatwiedź"
           color="my_green"
           disabled={false}
-          onPress={confirm}
+          onPress={handleConfirm}
         />
         <MyButton
           text="dodaj    słówka"

@@ -26,7 +26,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   cardBad: {
     backgroundColor: colors.my_red,
     alignItems: "flex-start",
-    // justifyContent: "flex-start",
   },
   cardInput: {
     borderBottomColor: colors.border,
@@ -47,11 +46,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     gap: 15,
-    // width: "100%",
   },
   containerInput: {
     position: "relative",
-    // backgroundColor: colors.my_yellow,
     width: "100%",
   },
   myplaceholder: {
@@ -63,10 +60,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 800,
   },
   myinput: {
-    // borderWidth: 1,
     width: "100%",
     padding: 8,
     fontSize: 24,
     fontWeight: 800,
   },
+  topContainer: {
+    display: "flex",
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  miniArrow: {
+    color: colors.headline,
+    padding: 5,
+  }
 }));

@@ -115,19 +115,17 @@ export default function BoxesCarousel({
             zIndex: layer,
             overflow: "visible",
             alignItems: "center",
-                    // backgroundColor: '#FF0000'
+            justifyContent: "center",
+            // backgroundColor: '#ff00d4ff'
           }}
         >
           <Animated.View
             onLayout={(e) => setBoxH(e.nativeEvent.layout.height)} // <-- pomiar H
-            style={[
-              isActive && styles.activeBox,
-              { transform: [{ scale }, { translateY }], opacity },
-            ]}
+            style={[{ transform: [{ scale }, { translateY }], opacity }]}
           >
             <Pressable
               onPress={() => scrollToIndex(index)}
-              style={styles.containerSkin}
+              style={[styles.containerSkin, isActive && styles.activeBox]}
             >
               <Image source={BoxTop} style={styles.skin} />
               <Image source={BoxBottom} style={styles.skin} />
@@ -164,10 +162,8 @@ export default function BoxesCarousel({
             0,
             (SCREEN_WIDTH - ITEM_WIDTH) / 2 - SPACING / 2
           ),
-          justifyContent: "center",
           // alignItems: "center",
-          paddingTop: 70,
-          // backgroundColor: '#FF0000' ,
+          // paddingTop: 70,
           // gap: 20,
         }}
         decelerationRate="fast"

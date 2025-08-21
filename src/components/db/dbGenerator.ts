@@ -1,35 +1,33 @@
 // src/components/db/dbGenerator.ts
-import { getDB } from "./db"; 
+import { getDB } from "./db";
+import { WordWithTranslations } from "@/src/types/boxes";
+import type { CEFRLevel } from "@/src/types/language";
 
 export interface PatchGenParams {
   srcCode: string;
   tgtCode: string;
   dbName?: string;
   batchSize?: number;
-  levels?: readonly ["A1" | "A2" | "B1" | "B2" | "C1" | "C2", ...string[]];
+  levels?: readonly CEFRLevel[];
 }
 
 export interface GetWordsFromPatchParams {
   sourceLangId: number;
   targetLangId: number;
-  cefrLevel: "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+  cefrLevel: CEFRLevel;
   batchIndex: number;
   dbName?: string;
 }
 
-export interface WordWithTranslations {
-  id: number;
-  text: string;
-  translations: string[];
-}
-
 type SQLParams = (string | number | null)[];
+
+const defaultLevels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 export async function regeneratePatches({
   srcCode,
   tgtCode,
   batchSize = 30,
-  levels = ["A1", "A2", "B1", "B2", "C1", "C2"],
+  levels = defaultLevels,
 }: PatchGenParams): Promise<void> {
   const db = await getDB();
 

@@ -3,17 +3,16 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
-    paddingBottom: 100,
-    // backgroundColor: '#FF0000'
+    // paddingBottom: 100,
+    // backgroundColor: '#FF0000',
   },
   containerSkin: {
     position: "relative",
     width: 115,
-    height: 115,
-    // paddingBottom: 2,
-    // borderBottomWidth: 5,
-    // borderBottomColor: "transparent",
-        // backgroundColor: '#FF0000'
+    height: 122,
+    paddingBottom: 2,
+    borderBottomWidth: 5,
+    borderBottomColor: "transparent",
   },
   skin: {
     position: "absolute",
@@ -28,8 +27,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     margin: 4,
   },
   activeBox: {
-    // borderBottomWidth: 5,
-    // borderBottomColor: colors.my_green,
+    borderBottomWidth: 5,
+    borderBottomColor: colors.my_green,
   },
   number: {
     fontSize: 40,

@@ -5,6 +5,7 @@ import { getLanguagePairs } from "@/src/components/db/db";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { LanguagePair } from "@/src/components/db/db";
+import type { LanguageProfile } from "@/src/types/profile";
 
 import PL_FLAG_GRAY from "../../assets/flag/PLgray.png";
 import ES_FLAG_GRAY from "../../assets/flag/ESgray.png";
@@ -125,13 +126,13 @@ export default function Profile() {
               (p) =>
                 p.source_code === activeSource && p.target_code === activeTarget
             );
-            if (pair) {
+           if (pair) {
               await addProfile({
                 sourceLang: pair.source_code,
                 targetLang: pair.target_code,
                 sourceLangId: pair.source_id, // NEW
                 targetLangId: pair.target_id, // NEW
-              });
+              } as LanguageProfile);
               setSource(null);
               setTarget(null);
             }

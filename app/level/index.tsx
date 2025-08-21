@@ -2,12 +2,13 @@ import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { useStyles } from "@/src/screens/level/styles_level";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import type { CEFRLevel } from "@/src/types/language";
 
 export default function Level() {
   const { setLevel } = useSettings();
   const styles = useStyles();
   const router = useRouter();
-  const levels = ["A1", "A2", "B1", "B2", "C1", "C2"];
+  const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
   return (
     <View style={styles.container}>
       <View style={styles.minicontainer}>

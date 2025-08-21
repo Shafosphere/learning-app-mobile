@@ -2,6 +2,8 @@
 import { createContext, ReactNode, useContext, useState } from "react";
 import { Theme, themeMap } from "../theme/theme";
 import { usePersistedState } from "../hooks/usePersistedState";
+import type { CEFRLevel } from "../types/language";
+import { LanguageProfile } from "../types/profile";
 
 interface SettingsContextValue {
   theme: Theme;
@@ -9,8 +11,8 @@ interface SettingsContextValue {
   toggleTheme: () => Promise<void>;
   profiles: LanguageProfile[];
   addProfile: (profile: LanguageProfile) => Promise<void>;
-  selectedLevel: string;
-  setLevel: (lvl: string) => void;
+  selectedLevel: CEFRLevel;
+  setLevel: (lvl: CEFRLevel) => void;
   spellChecking: boolean;
   toggleSpellChecking: () => Promise<void>;
   activeProfileIdx: number | null; // NEW
@@ -18,14 +20,7 @@ interface SettingsContextValue {
   activeProfile: LanguageProfile | null;
 }
 
-export interface LanguageProfile {
-  sourceLang: string; // 'en'
-  targetLang: string; // 'pl'
-  sourceLangId?: number; // np. 1
-  targetLangId?: number; // np. 2
-}
-
-export type CEFR = 'A1'|'A2'|'B1'|'B2'|'C1'|'C2';
+export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
@@ -34,7 +29,7 @@ const defaultValue: SettingsContextValue = {
   profiles: [],
   addProfile: async () => {},
   selectedLevel: "A1",
-  setLevel: () => {},
+  setLevel: (_lvl: CEFRLevel) => {},
   spellChecking: true,
   toggleSpellChecking: async () => {},
   activeProfileIdx: null,
@@ -46,7 +41,7 @@ const SettingsContext = createContext<SettingsContextValue>(defaultValue);
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedLevel, setLevel] = useState<string>("A1");
+  const [selectedLevel, setLevel] = useState<CEFRLevel>("A1");
   const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
   const [profiles, setProfiles] = usePersistedState<LanguageProfile[]>(
     "profiles",
