@@ -36,5 +36,53 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 40,
     fontWeight: 800,
     color: colors.headline,
+  },
+  mouth: {
+    position: "absolute",
+    bottom: 15,
+    right: 30,
+    zIndex: 1000,
+  },
+  lefteye: {
+    position: "absolute",
+    bottom: 30,
+    right: 50,
+    zIndex: 999,
+  },
+  leftpupil: {
+    position: "absolute",
+    bottom: 36,
+    right: 53,
+    zIndex: 1000,
+  },
+  righteye: {
+    position: "absolute",
+    bottom: 32,
+    right: 20,
+    zIndex: 999,
+  },
+  rightpupil: {
+    position: "absolute",
+    bottom: 38,
+    right: 23,
+    zIndex: 1000,
+  },
+  card1: {
+    position: "absolute",
+    height: 120,
+    width: 100,
+    right: 10,
+  },
+    card2: {
+    position: "absolute",
+    height: 120,
+    width: 110,
+    right: 10,
+  },
+    card3: {
+    position: "absolute",
+    height: 120,
+    width: 100,
+    right: 10,
   }
 }));

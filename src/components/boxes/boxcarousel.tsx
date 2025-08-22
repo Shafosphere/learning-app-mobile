@@ -8,20 +8,20 @@ import React, {
 } from "react";
 import {
   View,
-  Image,
-  Pressable,
+  // Image,
+  // Pressable,
   Animated,
   FlatList,
   Dimensions,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Text,
+  // Text,
 } from "react-native";
 import { useStyles } from "./styles_carousel";
 import { BoxesState } from "@/src/types/boxes";
-
-import BoxTop from "../../../assets/box/topBox.png";
-import BoxBottom from "../../../assets/box/bottomBox.png";
+import BoxCarouselItem from "./boxCarouselItem";
+// import BoxTop from "../../../assets/box/topBox.png";
+// import BoxBottom from "../../../assets/box/bottomBox.png";
 
 interface BoxesProps {
   boxes: BoxesState;
@@ -109,42 +109,21 @@ export default function BoxesCarousel({
       const isActive = index === activeIdx;
 
       return (
-        <View
-          style={{
-            width: CELL_WIDTH,
-            zIndex: layer,
-            overflow: "visible",
-            alignItems: "center",
-            justifyContent: "center",
-            // backgroundColor: '#ff00d4ff'
-          }}
-        >
-          <Animated.View
-            onLayout={(e) => setBoxH(e.nativeEvent.layout.height)} // <-- pomiar H
-            style={[{ transform: [{ scale }, { translateY }], opacity }]}
-          >
-            <Pressable
-              onPress={() => scrollToIndex(index)}
-              style={[styles.containerSkin, isActive && styles.activeBox]}
-            >
-              <Image source={BoxTop} style={styles.skin} />
-              <Image source={BoxBottom} style={styles.skin} />
-            </Pressable>
-          </Animated.View>
-          <Animated.Text style={[styles.number, { opacity }]}>
-            {boxContent.length}
-          </Animated.Text>
-        </View>
+        <BoxCarouselItem
+          boxContent={boxContent}
+          layer={layer}
+          scale={scale}
+          opacity={opacity}
+          translateY={translateY}
+          isActive={isActive}
+          onPress={() => scrollToIndex(index)}
+          setBoxH={setBoxH}
+          cellWidth={CELL_WIDTH}
+          styles={styles}
+        />
       );
     },
-    [
-      activeIdx,
-      scrollX,
-      styles.activeBox,
-      styles.containerSkin,
-      styles.skin,
-      boxes,
-    ]
+    [activeIdx, boxes, scrollX, styles]
   );
 
   return (
