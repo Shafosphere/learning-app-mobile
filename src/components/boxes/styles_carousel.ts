@@ -26,10 +26,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 20,
     margin: 4,
   },
-  activeBox: {
-    borderBottomWidth: 5,
-    borderBottomColor: colors.my_green,
-  },
+  // activeBox: {
+  //   borderBottomWidth: 5,
+  //   borderBottomColor: colors.my_green,
+  // },
   number: {
     fontSize: 40,
     textAlign: "center",

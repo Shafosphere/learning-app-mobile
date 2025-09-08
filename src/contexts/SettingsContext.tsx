@@ -9,6 +9,8 @@ interface SettingsContextValue {
   theme: Theme;
   colors: (typeof themeMap)[Theme];
   toggleTheme: () => Promise<void>;
+  boxesLayout: "classic" | "carousel";
+  setBoxesLayout: (layout: "classic" | "carousel") => Promise<void>;
   profiles: LanguageProfile[];
   addProfile: (profile: LanguageProfile) => Promise<void>;
   selectedLevel: CEFRLevel;
@@ -26,6 +28,8 @@ const defaultValue: SettingsContextValue = {
   theme: "light",
   colors: themeMap.light,
   toggleTheme: async () => {},
+  boxesLayout: "carousel",
+  setBoxesLayout: async () => {},
   profiles: [],
   addProfile: async () => {},
   selectedLevel: "A1",
@@ -43,6 +47,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
 }) => {
   const [selectedLevel, setLevel] = useState<CEFRLevel>("A1");
   const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
+  const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
+    "classic" | "carousel"
+  >("boxesLayout", "carousel");
   const [profiles, setProfiles] = usePersistedState<LanguageProfile[]>(
     "profiles",
     []
@@ -65,6 +72,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setTheme(newTheme);
   };
   const colors = themeMap[theme];
+
+  const boxesLayout = boxesLayoutState;
+  const setBoxesLayout = async (layout: "classic" | "carousel") => {
+    await _setBoxesLayout(layout);
+  };
 
   const addProfile = async (p: LanguageProfile) => {
     const existsIdx = profiles.findIndex(
@@ -97,6 +109,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         theme,
         colors,
         toggleTheme,
+        boxesLayout,
+        setBoxesLayout,
         profiles,
         addProfile,
         activeProfileIdx,

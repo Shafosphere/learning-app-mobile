@@ -16,21 +16,28 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 24,
     fontWeight: "bold",
   },
-  containeroflevel: {
+  containerofprofile: {
     position: "absolute",
     top: 0,
     right: 0,
     paddingRight: 32,
     marginTop: 10,
   },
+  containeroflevel: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    paddingLeft: 32,
+    marginTop: 10,
+  },
   flag: {
-    width: 99/3,
-    height: 66/3,
+    width: 99 / 2.5,
+    height: 66 / 2.5,
   },
   levelText: {
     width: "100%",
     textAlign: "right",
-    fontSize: 15,
+    fontSize: 20,
     fontWeight: 900,
     color: colors.headline,
   },

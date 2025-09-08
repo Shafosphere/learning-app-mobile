@@ -18,7 +18,7 @@ import BoxesCarousel from "@/src/components/boxes/boxcarousel";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, profiles, activeProfile } = useSettings();
+  const { selectedLevel, profiles, activeProfile, boxesLayout } = useSettings();
 
   const {
     boxes,
@@ -244,7 +244,7 @@ export default function Flashcards() {
     <View style={styles.container}>
       <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
-        style={styles.containeroflevel}
+        style={styles.containerofprofile}
       >
         {activeProfile && (
           <Image
@@ -252,6 +252,19 @@ export default function Flashcards() {
             style={styles.flag}
           />
         )}
+        {/* <Text style={styles.levelText}>{selectedLevel}</Text> */}
+      </TouchableOpacity>
+
+      <TouchableOpacity
+        onPress={() => router.push("/level")}
+        style={styles.containeroflevel}
+      >
+        {/* {activeProfile && (
+          <Image
+            source={flagMap[activeProfile.sourceLang]}
+            style={styles.flag}
+          />
+        )} */}
         <Text style={styles.levelText}>{selectedLevel}</Text>
       </TouchableOpacity>
 
@@ -268,17 +281,19 @@ export default function Flashcards() {
         onDownload={downloadData}
       />
 
-      {/* <Boxes
-        boxes={boxes}
-        activeBox={activeBox}
-        handleSelectBox={handleSelectBox}
-      /> */}
-
-      <BoxesCarousel
-        boxes={boxes}
-        activeBox={activeBox}
-        handleSelectBox={handleSelectBox}
-      />
+      {boxesLayout === "classic" ? (
+        <Boxes
+          boxes={boxes}
+          activeBox={activeBox}
+          handleSelectBox={handleSelectBox}
+        />
+      ) : (
+        <BoxesCarousel
+          boxes={boxes}
+          activeBox={activeBox}
+          handleSelectBox={handleSelectBox}
+        />
+      )}
     </View>
   );
 }

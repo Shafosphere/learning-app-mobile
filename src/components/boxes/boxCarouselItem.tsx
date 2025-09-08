@@ -65,20 +65,20 @@ const BoxCarouselItem: React.FC<Props> = ({
     }
   };
 
-const CARDS = [Card1, Card2, Card3];
+  const CARDS = [Card1, Card2, Card3];
 
-const renderCards = (len: number) => {
-  const count = len > 30 ? 3 : len > 20 ? 2 : len > 10 ? 1 : 0;
-  if (!count) return null;
+  const renderCards = (len: number) => {
+    const count = len > 30 ? 3 : len > 20 ? 2 : len > 10 ? 1 : 0;
+    if (!count) return null;
 
-  return (
-    <View style={styles.cardsRow}>
-      {CARDS.slice(0, count).map((src, i) => (
-        <Image key={i} source={src} style={styles[`card${i + 1}`]} />
-      ))}
-    </View>
-  );
-};
+    return (
+      <View style={styles.cardsRow}>
+        {CARDS.slice(0, count).map((src, i) => (
+          <Image key={i} source={src} style={styles[`card${i + 1}`]} />
+        ))}
+      </View>
+    );
+  };
 
   return (
     <View
@@ -92,7 +92,7 @@ const renderCards = (len: number) => {
     >
       <Animated.View
         onLayout={(e) => setBoxH(e.nativeEvent.layout.height)}
-        style={[{ transform: [{ scale }, { translateY }], opacity }]}
+        style={[{ transform: [{ translateY }, { scale }], opacity }]}
       >
         <Pressable
           onPress={onPress}

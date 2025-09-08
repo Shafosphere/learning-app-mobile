@@ -1,5 +1,12 @@
 import React from "react";
-import { View, Text, Button } from "react-native";
+import {
+  View,
+  Text,
+  Switch,
+  Button,
+  Image,
+  TouchableOpacity,
+} from "react-native";
 import { useSettings } from "../../src/contexts/SettingsContext";
 import { useStyles } from "../../src/screens/settings/styles_settings";
 import { regeneratePatches } from "@/src/components/db/dbGenerator";
@@ -8,8 +15,14 @@ import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
 import { clearAllFlashcards } from "@/src/utils/flashcardsStorage";
 
 export default function Settings() {
-  const { theme, toggleTheme, spellChecking, toggleSpellChecking } =
-    useSettings();
+  const {
+    theme,
+    toggleTheme,
+    spellChecking,
+    toggleSpellChecking,
+    boxesLayout,
+    setBoxesLayout,
+  } = useSettings();
   const styles = useStyles();
 
   async function handleGeneratePatches() {
@@ -17,7 +30,7 @@ export default function Settings() {
       await regeneratePatches({
         srcCode: "en",
         tgtCode: "pl",
-        batchSize: 30,
+        batchSize: 10,
       });
     } catch (error) {
       console.log(error);
@@ -47,31 +60,78 @@ export default function Settings() {
     }
   }
 
-
-
   return (
     <View style={styles.container}>
-      <Text style={styles.text}>Aktualny motyw: {theme}</Text>
-      <Button
-        title={theme === "light" ? "Przełącz na ciemny" : "Przełącz na jasny"}
-        onPress={toggleTheme}
-      />
+      <View style={styles.section}>
+        <Text style={styles.text}>Aktualny motyw: {theme}</Text>
+        <Switch
+          style={{ transform: [{ scaleX: 1.12 }, { scaleY: 1.12 }] }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          value={theme === "dark"}
+          onValueChange={(val) => {
+            // true => dark mode enabled
+            if ((val && theme !== "dark") || (!val && theme !== "light")) {
+              toggleTheme();
+            }
+          }}
+        />
+      </View>
 
-      <Text style={styles.text}>
-        Spellchecking: {spellChecking ? "włączone" : "wyłączone"}
-      </Text>
-      <Button
-        title={spellChecking ? "Wyłącz sprawdzanie" : "Włącz sprawdzanie"}
-        onPress={toggleSpellChecking}
-      />
+      <View style={styles.section}>
+        <Text style={styles.text}>
+          Spellchecking: {spellChecking ? "włączone" : "wyłączone"}
+        </Text>
+        <Switch
+          style={{ transform: [{ scaleX: 1.12 }, { scaleY: 1.12 }] }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          value={spellChecking}
+          onValueChange={(val) => {
+            if (val !== spellChecking) toggleSpellChecking();
+          }}
+        />
+      </View>
 
-      <Button title={"Generuj patche"} onPress={handleGeneratePatches} />
+      <View style={styles.bigsection}>
+        <Text style={styles.bigsectiontext}>Wybierz schemat pudełek:</Text>
+        <View style={styles.options}>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setBoxesLayout("classic")}
+            style={[
+              styles.boxcontainer,
+              boxesLayout === "classic" && styles.boxcontainerSelected,
+            ]}
+          >
+            <Image
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+              source={require("../../assets/boxstyle1.png")}
+            />
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.7}
+            onPress={() => setBoxesLayout("carousel")}
+            style={[
+              styles.boxcontainer,
+              boxesLayout === "carousel" && styles.boxcontainerSelected,
+            ]}
+          >
+            <Image
+              style={{ width: "100%", height: "100%" }}
+              resizeMode="cover"
+              source={require("../../assets/boxstyle2.png")}
+            />
+          </TouchableOpacity>
+        </View>
+      </View>
+
+      {/* <Button title={"Generuj patche"} onPress={handleGeneratePatches} />
 
       <Button title="Sprawdź tablice" onPress={handleCheckTable} />
 
       <Button title="Pobierz patch" onPress={loadAndDisplayPatch} />
 
-      <Button title="wyczysc pamiec" onPress={clearAllFlashcards} />
+      <Button title="wyczysc pamiec" onPress={clearAllFlashcards} /> */}
     </View>
   );
 }
