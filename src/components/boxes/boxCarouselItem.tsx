@@ -1,19 +1,8 @@
 import React, { useEffect, useRef, useState } from "react";
 import { View, Pressable, Image, Animated } from "react-native";
 import { BoxesState } from "@/src/types/boxes";
-import BoxTop from "../../../assets/box/topBox.png";
-import BoxBottom from "../../../assets/box/bottomBox.png";
-import LeftEyeImg from "../../../assets/box/leftEyeImg.svg";
-import LeftPupilImg from "../../../assets/box/leftPupilImg.svg";
-import RightEyeImg from "../../../assets/box/rightEyeImg.svg";
-import RightPupilImg from "../../../assets/box/rightPupilImg.svg";
-import Smile from "../../../assets/box/smile.svg";
-import Surprised from "../../../assets/box/surprised.svg";
-import Happy from "../../../assets/box/happy.svg";
-
-import Card1 from "../../../assets/box/miniflashcard1.png";
-import Card2 from "../../../assets/box/miniflashcard2.png";
-import Card3 from "../../../assets/box/miniflashcard3.png";
+import BoxSkin from "./BoxSkin";
+import { useStyles } from "./styles_boxes";
 
 interface Props {
   boxContent: BoxesState[keyof BoxesState];
@@ -25,7 +14,6 @@ interface Props {
   onPress: () => void;
   setBoxH: (height: number) => void;
   cellWidth: number;
-  styles: any;
 }
 
 const BoxCarouselItem: React.FC<Props> = ({
@@ -38,8 +26,8 @@ const BoxCarouselItem: React.FC<Props> = ({
   onPress,
   setBoxH,
   cellWidth,
-  styles,
 }) => {
+  const styles = useStyles();
   const [face, setFace] = useState(isActive ? "happy" : "smile");
   const firstRender = useRef(true);
 
@@ -54,31 +42,7 @@ const BoxCarouselItem: React.FC<Props> = ({
     return () => clearTimeout(timer);
   }, [isActive]);
 
-  const renderMouth = () => {
-    switch (face) {
-      case "happy":
-        return <Happy style={styles.mouth} width={18} height={18} />;
-      case "surprised":
-        return <Surprised style={styles.mouth} width={18} height={18} />;
-      default:
-        return <Smile style={styles.mouth} width={18} height={18} />;
-    }
-  };
-
-  const CARDS = [Card1, Card2, Card3];
-
-  const renderCards = (len: number) => {
-    const count = len > 30 ? 3 : len > 20 ? 2 : len > 10 ? 1 : 0;
-    if (!count) return null;
-
-    return (
-      <View style={styles.cardsRow}>
-        {CARDS.slice(0, count).map((src, i) => (
-          <Image key={i} source={src} style={styles[`card${i + 1}`]} />
-        ))}
-      </View>
-    );
-  };
+  // Mouth and mini-cards are now handled inside BoxSkin
 
   return (
     <View
@@ -94,21 +58,16 @@ const BoxCarouselItem: React.FC<Props> = ({
         onLayout={(e) => setBoxH(e.nativeEvent.layout.height)}
         style={[{ transform: [{ translateY }, { scale }], opacity }]}
       >
-        <Pressable
-          onPress={onPress}
-          style={[styles.containerSkin, isActive && styles.activeBox]}
-        >
-          <Image source={BoxTop} style={styles.skin} />
-          {renderCards(boxContent.length)}
-          {renderMouth()}
-          <LeftPupilImg style={styles.leftpupil} width={4} height={4} />
-          <LeftEyeImg style={styles.lefteye} width={12} height={12} />
-          <RightPupilImg style={styles.rightpupil} width={4} height={4} />
-          <RightEyeImg style={styles.righteye} width={12} height={12} />
-          <Image source={BoxBottom} style={styles.skin} />
+        <Pressable onPress={onPress}>
+          <BoxSkin
+            wordCount={boxContent.length}
+            face={face as "smile" | "happy" | "surprised"}
+            isActive={isActive}
+            isCaro={true}
+          />
         </Pressable>
       </Animated.View>
-      <Animated.Text style={[styles.number, { opacity }]}>
+      <Animated.Text style={[styles.number, styles.numberUpdate, { opacity }]}>
         {boxContent.length}
       </Animated.Text>
     </View>

@@ -17,7 +17,7 @@ import {
   NativeSyntheticEvent,
   // Text,
 } from "react-native";
-import { useStyles } from "./styles_carousel";
+import { useStyles } from "./styles_boxes";
 import { BoxesState } from "@/src/types/boxes";
 import BoxCarouselItem from "./boxCarouselItem";
 // import BoxTop from "../../../assets/box/topBox.png";
@@ -119,7 +119,6 @@ export default function BoxesCarousel({
           onPress={() => scrollToIndex(index)}
           setBoxH={setBoxH}
           cellWidth={CELL_WIDTH}
-          styles={styles}
         />
       );
     },
