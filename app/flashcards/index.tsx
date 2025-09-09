@@ -1,6 +1,7 @@
 import { Button, Text, View, Image, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
-import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
+import { getRandomWordsBatch } from "@/src/components/db/dbGenerator";
+import { FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/boxes/boxes";
@@ -28,6 +29,8 @@ export default function Flashcards() {
     isReady,
     resetSave,
     saveNow,
+    addUsedWordIds,
+    progress,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeProfile?.sourceLangId ?? 0,
     targetLangId: activeProfile?.targetLangId ?? 0,
@@ -95,14 +98,26 @@ export default function Flashcards() {
       return;
     }
 
-    const patchData = await getWordsFromPatch({
+    const excludeIds = [
+      ...boxes.boxOne.map((x) => x.id),
+      ...boxes.boxTwo.map((x) => x.id),
+      ...boxes.boxThree.map((x) => x.id),
+      ...boxes.boxFour.map((x) => x.id),
+      ...boxes.boxFive.map((x) => x.id),
+      ...learned.map((x) => x.id),
+    ];
+
+    const batchData = await getRandomWordsBatch({
       sourceLangId: prof.sourceLangId,
       targetLangId: prof.targetLangId,
       cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
-      batchIndex: batchIndex,
+      batchSize: FLASHCARDS_BATCH_SIZE,
+      excludeIds,
     });
 
-    setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...patchData] }));
+    setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...batchData] }));
+    // Track used words when they are added to any box
+    addUsedWordIds(batchData.map((w) => w.id));
     setBatchIndex((prev) => {
       const next = prev + 1;
       console.log(next);
@@ -190,6 +205,9 @@ export default function Flashcards() {
         setLearned((list) => [element, ...list]);
       }
 
+      // Update usedWordIds when moving to a box or learned
+      addUsedWordIds(element.id);
+
       return nextState;
     });
   }
@@ -265,7 +283,9 @@ export default function Flashcards() {
             style={styles.flag}
           />
         )} */}
-        <Text style={styles.levelText}>{selectedLevel}</Text>
+        <Text style={styles.levelText}>
+          {selectedLevel} — {Math.round((progress ?? 0) * 100)}%
+        </Text>
       </TouchableOpacity>
 
       <Card

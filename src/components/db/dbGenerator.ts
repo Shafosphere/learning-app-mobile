@@ -3,127 +3,36 @@ import { getDB } from "./db";
 import { WordWithTranslations } from "@/src/types/boxes";
 import type { CEFRLevel } from "@/src/types/language";
 
-export interface PatchGenParams {
-  srcCode: string;
-  tgtCode: string;
-  dbName?: string;
-  batchSize?: number;
-  levels?: readonly CEFRLevel[];
-}
-
-export interface GetWordsFromPatchParams {
+export interface GetRandomWordsBatchParams {
   sourceLangId: number;
   targetLangId: number;
   cefrLevel: CEFRLevel;
-  batchIndex: number;
-  dbName?: string;
+  batchSize: number;
+  excludeIds?: number[];
 }
 
-type SQLParams = (string | number | null)[];
-
-const defaultLevels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
-
-export async function regeneratePatches({
-  srcCode,
-  tgtCode,
-  batchSize = 30,
-  levels = defaultLevels,
-}: PatchGenParams): Promise<void> {
-  const db = await getDB();
-
-  const selectAll = async <T>(
-    sql: string,
-    params: SQLParams = []
-  ): Promise<T[]> => {
-    return db.getAllAsync<T>(sql, params);
-  };
-
-  const run = async (sql: string, params: SQLParams = []): Promise<number> => {
-    const { lastInsertRowId } = await db.runAsync(sql, params);
-    return lastInsertRowId ?? 0;
-  };
-
-  const [{ id: srcId }] = await selectAll<{ id: number }>(
-    "SELECT id FROM languages WHERE code = ? LIMIT 1",
-    [srcCode]
-  );
-  const [{ id: tgtId }] = await selectAll<{ id: number }>(
-    "SELECT id FROM languages WHERE code = ? LIMIT 1",
-    [tgtCode]
-  );
-
-  await db.execAsync(`
-    CREATE TABLE IF NOT EXISTS patches_json (
-      id                 INTEGER PRIMARY KEY AUTOINCREMENT,
-      source_language_id INTEGER NOT NULL,
-      target_language_id INTEGER NOT NULL,
-      cefr_level         TEXT    NOT NULL,
-      batch_index        INTEGER NOT NULL,
-      word_ids           TEXT    NOT NULL,
-      UNIQUE (source_language_id, target_language_id, cefr_level, batch_index)
-    );
-  `);
-
-  await run(
-    "DELETE FROM patches_json WHERE source_language_id = ? AND target_language_id = ?",
-    [srcId, tgtId]
-  );
-
-  for (const level of levels) {
-    const rows = await selectAll<{ id: number }>(
-      `SELECT id FROM words
-       WHERE language_id = ? AND cefr_level = ?
-       ORDER BY RANDOM()`,
-      [srcId, level]
-    );
-
-    if (rows.length === 0) continue;
-
-    const ids = rows.map((r) => r.id);
-
-    for (let i = 0; i < ids.length; i += batchSize) {
-      const chunk = ids.slice(i, i + batchSize);
-      await run(
-        `INSERT INTO patches_json
-           (source_language_id, target_language_id, cefr_level, batch_index, word_ids)
-         VALUES (?, ?, ?, ?, ?)`,
-        [srcId, tgtId, level, Math.floor(i / batchSize), JSON.stringify(chunk)]
-      );
-    }
-  }
-}
-
-export async function logGeneratedTableContents() {
-  const db = await getDB();
-  const patches = await db.getAllAsync("SELECT * FROM patches_json");
-  console.log("Patches:");
-  console.log(patches);
-}
-
-export async function getWordsFromPatch({
+export async function getRandomWordsBatch({
   sourceLangId,
   targetLangId,
   cefrLevel,
-  batchIndex,
-}: GetWordsFromPatchParams): Promise<WordWithTranslations[]> {
+  batchSize,
+  excludeIds = [],
+}: GetRandomWordsBatchParams): Promise<WordWithTranslations[]> {
   const db = await getDB();
 
-  const patchRow = await db.getFirstAsync<{ word_ids: string }>(
-    `SELECT word_ids FROM patches_json
-     WHERE source_language_id = ? AND target_language_id = ?
-       AND cefr_level = ? AND batch_index = ?`,
-    [sourceLangId, targetLangId, cefrLevel, batchIndex]
-  );
-
-  if (!patchRow) {
-    console.warn("Nie znaleziono paczki dla podanych parametrów.");
-    return [];
+  const params: (number | string)[] = [sourceLangId, cefrLevel];
+  let sql = `SELECT id FROM words WHERE language_id = ? AND cefr_level = ?`;
+  if (excludeIds.length > 0) {
+    const placeholders = excludeIds.map(() => "?").join(",");
+    sql += ` AND id NOT IN (${placeholders})`;
+    params.push(...excludeIds);
   }
+  sql += ` ORDER BY RANDOM() LIMIT ?`;
+  params.push(batchSize);
 
-  const wordIds: number[] = JSON.parse(patchRow.word_ids);
-  if (wordIds.length === 0) {
-    return [];
-  }
+  const rows = await db.getAllAsync<{ id: number }>(sql, params);
+  if (!rows || rows.length === 0) return [];
+  const wordIds = rows.map((r) => r.id);
 
   const placeholders = wordIds.map(() => "?").join(",");
 
@@ -143,7 +52,6 @@ export async function getWordsFromPatch({
 
   const wordMap = new Map(wordsData.map((w) => [w.id, w.text]));
   const translationsMap = new Map<number, string[]>();
-
   for (const t of translationsData) {
     if (!translationsMap.has(t.source_word_id)) {
       translationsMap.set(t.source_word_id, []);
@@ -152,7 +60,7 @@ export async function getWordsFromPatch({
   }
 
   const result: WordWithTranslations[] = wordIds.map((id) => ({
-    id: id,
+    id,
     text: wordMap.get(id) ?? "Słowo nieznalezione",
     translations: translationsMap.get(id) || [],
   }));

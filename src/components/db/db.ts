@@ -229,3 +229,16 @@ export async function getLanguageIdByCode(code: string) {
   );
   return row?.id ?? null;
 }
+
+export async function getTotalWordsForLevel(
+  languageId: number,
+  level: string
+): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    "SELECT COUNT(*) AS cnt FROM words WHERE language_id = ? AND cefr_level = ?",
+    languageId,
+    level
+  );
+  return row?.cnt ?? 0;
+}

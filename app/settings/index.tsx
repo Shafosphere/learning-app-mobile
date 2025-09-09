@@ -1,18 +1,7 @@
 import React from "react";
-import {
-  View,
-  Text,
-  Switch,
-  Button,
-  Image,
-  TouchableOpacity,
-} from "react-native";
+import { View, Text, Switch, Image, TouchableOpacity } from "react-native";
 import { useSettings } from "../../src/contexts/SettingsContext";
 import { useStyles } from "../../src/screens/settings/styles_settings";
-import { regeneratePatches } from "@/src/components/db/dbGenerator";
-import { logGeneratedTableContents } from "@/src/components/db/dbGenerator";
-import { getWordsFromPatch } from "@/src/components/db/dbGenerator";
-import { clearAllFlashcards } from "@/src/utils/flashcardsStorage";
 
 export default function Settings() {
   const {
@@ -25,40 +14,7 @@ export default function Settings() {
   } = useSettings();
   const styles = useStyles();
 
-  async function handleGeneratePatches() {
-    try {
-      await regeneratePatches({
-        srcCode: "en",
-        tgtCode: "pl",
-        batchSize: 10,
-      });
-    } catch (error) {
-      console.log(error);
-    }
-  }
-
-  async function loadAndDisplayPatch() {
-    try {
-      const patchData = await getWordsFromPatch({
-        sourceLangId: 1,
-        targetLangId: 2,
-        cefrLevel: "A1",
-        batchIndex: 1,
-      });
-
-      console.log(JSON.stringify(patchData, null, 2));
-    } catch (error) {
-      console.error("Wystąpił błąd podczas pobierania paczki:", error);
-    }
-  }
-
-  async function handleCheckTable() {
-    try {
-      await logGeneratedTableContents();
-    } catch (error) {
-      console.log(error);
-    }
-  }
+  // debug handlers related to patches have been removed
 
   return (
     <View style={styles.container}>
@@ -125,13 +81,7 @@ export default function Settings() {
         </View>
       </View>
 
-      {/* <Button title={"Generuj patche"} onPress={handleGeneratePatches} />
-
-      <Button title="Sprawdź tablice" onPress={handleCheckTable} />
-
-      <Button title="Pobierz patch" onPress={loadAndDisplayPatch} />
-
-      <Button title="wyczysc pamiec" onPress={clearAllFlashcards} /> */}
+      {/* Optional debug buttons removed (patches no longer used) */}
     </View>
   );
 }

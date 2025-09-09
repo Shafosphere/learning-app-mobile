@@ -2,6 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // Adjust import path to your project
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { getTotalWordsForLevel } from "@/src/components/db/db";
 
 // ---- Public helpers --------------------------------------------------------
 export type BoxName = keyof BoxesState; // "boxOne" | ... | "boxFive"
@@ -39,6 +40,7 @@ export type SavedBoxesV2 = {
   level: string; // "A1" | ... | "C2"
   batchIndex: number;
   flashcards: BoxesState; // full snapshot of boxes state
+  usedWordIds?: number[]; // ids already used in session/history
 };
 
 export function makeScopeId(
@@ -57,7 +59,8 @@ async function saveToStorageSnapshot(
     level: string;
     batchIndex: number;
   },
-  boxes: BoxesState
+  boxes: BoxesState,
+  usedWordIds: number[]
 ) {
   const payload: SavedBoxesV2 = {
     v: 2,
@@ -68,6 +71,7 @@ async function saveToStorageSnapshot(
     level: meta.level,
     batchIndex: meta.batchIndex,
     flashcards: boxes,
+    usedWordIds,
   };
   await AsyncStorage.setItem(key, JSON.stringify(payload));
 }
@@ -116,6 +120,9 @@ export function useBoxesPersistenceSnapshot(params: {
   });
   const [batchIndex, setBatchIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
+  const [usedWordIds, setUsedWordIds] = useState<number[]>([]);
+  const [progress, setProgress] = useState(0);
+  const [totalWordsForLevel, setTotalWordsForLevel] = useState<number>(0);
   const savingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoringRef = useRef(true);
 
@@ -136,6 +143,7 @@ export function useBoxesPersistenceSnapshot(params: {
           if (mounted) {
             setBoxes(saved.flashcards);
             setBatchIndex(saved.batchIndex ?? 0);
+            setUsedWordIds(saved.usedWordIds ?? []);
           }
         } else if (initialWords && mounted) {
           setBoxes({
@@ -145,6 +153,7 @@ export function useBoxesPersistenceSnapshot(params: {
             boxFour: [],
             boxFive: [],
           });
+          setUsedWordIds(initialWords.map((w) => w.id));
         }
       } finally {
         isRestoringRef.current = false;
@@ -156,6 +165,35 @@ export function useBoxesPersistenceSnapshot(params: {
     };
   }, [storageKey]);
 
+  // Fetch total words for current level/language to compute progress
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        if (!sourceLangId || !level) {
+          if (mounted) setTotalWordsForLevel(0);
+          return;
+        }
+        const total = await getTotalWordsForLevel(sourceLangId, level);
+        if (mounted) setTotalWordsForLevel(total || 0);
+      } catch (_) {
+        if (mounted) setTotalWordsForLevel(0);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, [sourceLangId, level]);
+
+  // Recompute progress whenever usedWordIds or total changes
+  useEffect(() => {
+    if (totalWordsForLevel > 0) {
+      setProgress(Math.min(1, usedWordIds.length / totalWordsForLevel));
+    } else {
+      setProgress(0);
+    }
+  }, [usedWordIds, totalWordsForLevel]);
+
   // Autosave when boxes change
   useEffect(() => {
     if (!autosave || !isReady) return;
@@ -166,11 +204,13 @@ export function useBoxesPersistenceSnapshot(params: {
       saveToStorageSnapshot(
         storageKey,
         { sourceLangId, targetLangId, level, batchIndex },
-        boxes
+        boxes,
+        usedWordIds
       ).catch(() => {});
     }, saveDelayMs);
   }, [
     boxes,
+    usedWordIds,
     autosave,
     isReady,
     saveDelayMs,
@@ -189,9 +229,28 @@ export function useBoxesPersistenceSnapshot(params: {
     await saveToStorageSnapshot(
       storageKey,
       { sourceLangId, targetLangId, level, batchIndex },
-      boxes
+      boxes,
+      usedWordIds
     );
-  }, [storageKey, boxes, sourceLangId, targetLangId, level, batchIndex]);
+  }, [
+    storageKey,
+    boxes,
+    usedWordIds,
+    sourceLangId,
+    targetLangId,
+    level,
+    batchIndex,
+  ]);
+
+  const addUsedWordIds = useCallback((ids: number[] | number) => {
+    const list = Array.isArray(ids) ? ids : [ids];
+    setUsedWordIds((prev) => {
+      if (list.length === 0) return prev;
+      const set = new Set(prev);
+      for (const id of list) set.add(id);
+      return Array.from(set);
+    });
+  }, []);
 
   return {
     boxes,
@@ -202,5 +261,8 @@ export function useBoxesPersistenceSnapshot(params: {
     resetSave,
     saveNow,
     storageKey,
+    usedWordIds,
+    addUsedWordIds,
+    progress,
   } as const;
 }
