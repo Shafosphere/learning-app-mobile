@@ -264,5 +264,6 @@ export function useBoxesPersistenceSnapshot(params: {
     usedWordIds,
     addUsedWordIds,
     progress,
+    totalWordsForLevel,
   } as const;
 }

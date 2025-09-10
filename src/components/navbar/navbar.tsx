@@ -81,6 +81,16 @@ export default function Navbar() {
           styles.iconCon,
           pressed && styles.iconConPressed,
         ]}
+        onPress={() => router.push("/review")}
+      >
+        <Ionicons style={styles.icon} name="repeat" size={16} color="black" />
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconCon,
+          pressed && styles.iconConPressed,
+        ]}
         onPress={toggleTheme}
       >
         <MaterialIcons

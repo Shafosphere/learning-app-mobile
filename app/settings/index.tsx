@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Switch, Image, TouchableOpacity } from "react-native";
+import { View, Text, Switch, Image, TouchableOpacity, TextInput } from "react-native";
 import { useSettings } from "../../src/contexts/SettingsContext";
 import { useStyles } from "../../src/screens/settings/styles_settings";
 
@@ -11,6 +11,8 @@ export default function Settings() {
     toggleSpellChecking,
     boxesLayout,
     setBoxesLayout,
+    flashcardsBatchSize,
+    setFlashcardsBatchSize,
   } = useSettings();
   const styles = useStyles();
 
@@ -79,6 +81,31 @@ export default function Settings() {
             />
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.text}>Liczba fiszek w partii:</Text>
+        <TextInput
+          style={{
+            borderWidth: 1,
+            borderColor: "#ccc",
+            borderRadius: 8,
+            paddingHorizontal: 12,
+            paddingVertical: 6,
+            minWidth: 80,
+            textAlign: "center",
+            color: styles.text.color,
+          }}
+          keyboardType="number-pad"
+          value={String(flashcardsBatchSize ?? "")}
+          onChangeText={(txt) => {
+            const n = parseInt(txt.replace(/[^0-9]/g, ""), 10);
+            if (!Number.isNaN(n) && n > 0 && n <= 200) {
+              setFlashcardsBatchSize(n);
+            }
+          }}
+          placeholder="np. 10"
+        />
       </View>
 
       {/* Optional debug buttons removed (patches no longer used) */}

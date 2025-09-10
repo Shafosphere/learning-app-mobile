@@ -48,6 +48,20 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     );
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
+    -- Reviews table for spaced repetition scheduling
+    CREATE TABLE IF NOT EXISTS reviews (
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      word_id          INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
+      source_lang_id   INTEGER NOT NULL REFERENCES languages(id),
+      target_lang_id   INTEGER NOT NULL REFERENCES languages(id),
+      level            TEXT    NOT NULL,
+      learned_at       INTEGER NOT NULL,
+      next_review      INTEGER NOT NULL,
+      stage            INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(word_id, source_lang_id, target_lang_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_reviews_due ON reviews(next_review);
+    CREATE INDEX IF NOT EXISTS idx_reviews_pair ON reviews(source_lang_id, target_lang_id);
   `);
 }
 
@@ -241,4 +255,94 @@ export async function getTotalWordsForLevel(
     level
   );
   return row?.cnt ?? 0;
+}
+
+// Review helpers
+import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
+
+function computeNextReviewFromStage(stage: number, nowMs: number): number {
+  const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
+  return nowMs + REVIEW_INTERVALS_MS[idx];
+}
+
+export async function scheduleReview(
+  wordId: number,
+  sourceLangId: number,
+  targetLangId: number,
+  level: string,
+  stage: number
+) {
+  const db = await getDB();
+  const now = Date.now();
+  const nextReview = computeNextReviewFromStage(stage, now);
+  await db.runAsync(
+    `INSERT INTO reviews (word_id, source_lang_id, target_lang_id, level, learned_at, next_review, stage)
+     VALUES (?, ?, ?, ?, ?, ?, ?)
+     ON CONFLICT(word_id, source_lang_id, target_lang_id) DO UPDATE SET
+       level = excluded.level,
+       next_review = excluded.next_review,
+       stage = excluded.stage,
+       learned_at = CASE WHEN reviews.learned_at IS NULL THEN excluded.learned_at ELSE reviews.learned_at END;
+    `,
+    wordId,
+    sourceLangId,
+    targetLangId,
+    level,
+    now,
+    nextReview,
+    stage
+  );
+  return { nextReview, stage };
+}
+
+export async function getDueReviews(
+  sourceLangId: number,
+  targetLangId: number,
+  nowMs: number
+) {
+  const db = await getDB();
+  return db.getAllAsync<{
+    word_id: number;
+    text: string;
+    stage: number;
+    level: string;
+    next_review: number;
+  }>(
+    `SELECT r.word_id, w.text, r.stage, r.level, r.next_review
+     FROM reviews r
+     JOIN words w ON w.id = r.word_id
+     WHERE r.source_lang_id = ?
+       AND r.target_lang_id = ?
+       AND r.next_review <= ?
+     ORDER BY r.next_review ASC;`,
+    sourceLangId,
+    targetLangId,
+    nowMs
+  );
+}
+
+export async function advanceReview(
+  wordId: number,
+  sourceLangId: number,
+  targetLangId: number
+) {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ stage: number }>(
+    `SELECT stage FROM reviews WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ? LIMIT 1;`,
+    wordId,
+    sourceLangId,
+    targetLangId
+  );
+  const newStage = ((row?.stage ?? 0) + 1) | 0;
+  const now = Date.now();
+  const nextReview = computeNextReviewFromStage(newStage, now);
+  await db.runAsync(
+    `UPDATE reviews SET stage = ?, next_review = ? WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ?;`,
+    newStage,
+    nextReview,
+    wordId,
+    sourceLangId,
+    targetLangId
+  );
+  return { nextReview, stage: newStage };
 }

@@ -4,6 +4,7 @@ import { Theme, themeMap } from "../theme/theme";
 import { usePersistedState } from "../hooks/usePersistedState";
 import type { CEFRLevel } from "../types/language";
 import { LanguageProfile } from "../types/profile";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
 
 interface SettingsContextValue {
   theme: Theme;
@@ -20,6 +21,8 @@ interface SettingsContextValue {
   activeProfileIdx: number | null; // NEW
   setActiveProfileIdx: (i: number | null) => Promise<void>; // NEW
   activeProfile: LanguageProfile | null;
+  flashcardsBatchSize: number;
+  setFlashcardsBatchSize: (n: number) => Promise<void>;
 }
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
@@ -39,6 +42,8 @@ const defaultValue: SettingsContextValue = {
   activeProfileIdx: null,
   setActiveProfileIdx: async () => {},
   activeProfile: null,
+  flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
+  setFlashcardsBatchSize: async () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
@@ -64,6 +69,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "spellChecking",
     true
   );
+  const [flashcardsBatchSize, setFlashcardsBatchSize] =
+    usePersistedState<number>(
+      "flashcardsBatchSize",
+      DEFAULT_FLASHCARDS_BATCH_SIZE
+    );
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -112,18 +122,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         boxesLayout,
         setBoxesLayout,
         profiles,
-        addProfile,
-        activeProfileIdx,
-        setActiveProfileIdx,
-        activeProfile,
-        selectedLevel,
-        setLevel,
-        spellChecking,
-        toggleSpellChecking,
-      }}
-    >
-      {children}
-    </SettingsContext.Provider>
+      addProfile,
+      activeProfileIdx,
+      setActiveProfileIdx,
+      activeProfile,
+      selectedLevel,
+      setLevel,
+      spellChecking,
+      toggleSpellChecking,
+      flashcardsBatchSize,
+      setFlashcardsBatchSize,
+    }}
+  >
+    {children}
+  </SettingsContext.Provider>
   );
 };
 

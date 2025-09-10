@@ -1,7 +1,8 @@
 import { Button, Text, View, Image, TouchableOpacity } from "react-native";
 import { useEffect, useState } from "react";
 import { getRandomWordsBatch } from "@/src/components/db/dbGenerator";
-import { FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { scheduleReview } from "@/src/components/db/db";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/boxes/boxes";
@@ -19,7 +20,7 @@ import BoxesCarousel from "@/src/components/boxes/boxcarousel";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, profiles, activeProfile, boxesLayout } = useSettings();
+  const { selectedLevel, profiles, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
 
   const {
     boxes,
@@ -31,6 +32,7 @@ export default function Flashcards() {
     saveNow,
     addUsedWordIds,
     progress,
+    totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeProfile?.sourceLangId ?? 0,
     targetLangId: activeProfile?.targetLangId ?? 0,
@@ -72,6 +74,8 @@ export default function Flashcards() {
   };
 
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
+  const learnedPercent =
+    totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
 
   function selectRandomWord(box: keyof BoxesState) {
     const list = boxes[box];
@@ -111,7 +115,7 @@ export default function Flashcards() {
       sourceLangId: prof.sourceLangId,
       targetLangId: prof.targetLangId,
       cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
-      batchSize: FLASHCARDS_BATCH_SIZE,
+      batchSize: (flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE),
       excludeIds,
     });
 
@@ -166,7 +170,7 @@ export default function Flashcards() {
     }
   }
 
-  function moveElement(id: number, promote = false) {
+  async function moveElement(id: number, promote = false) {
     if (!activeBox) return;
     if (activeBox === "boxOne" && promote === false) {
       selectRandomWord(activeBox);
@@ -203,6 +207,21 @@ export default function Flashcards() {
         nextState[target] = [element, ...prev[target]];
       } else {
         setLearned((list) => [element, ...list]);
+        // Schedule spaced-repetition review when a word is learned
+        if (
+          activeProfile?.sourceLangId != null &&
+          activeProfile?.targetLangId != null &&
+          selectedLevel
+        ) {
+          // Initial stage 0 on first learn; helper computes next_review
+          void scheduleReview(
+            element.id,
+            activeProfile.sourceLangId,
+            activeProfile.targetLangId,
+            selectedLevel,
+            0
+          );
+        }
       }
 
       // Update usedWordIds when moving to a box or learned
@@ -284,7 +303,7 @@ export default function Flashcards() {
           />
         )} */}
         <Text style={styles.levelText}>
-          {selectedLevel} — {Math.round((progress ?? 0) * 100)}%
+          {selectedLevel} — {Math.round(learnedPercent * 100)}%
         </Text>
       </TouchableOpacity>
 

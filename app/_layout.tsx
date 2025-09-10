@@ -5,7 +5,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { SettingsProvider } from "@/src/contexts/SettingsContext";
 import { getDB } from "@/src/components/db/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
-import { View } from "react-native";
+import { View, ActivityIndicator, Text } from "react-native";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 
 SplashScreen.preventAutoHideAsync();
@@ -35,7 +35,22 @@ export default function RootLayout() {
   }, [isDbReady]);
 
   if (!isDbReady) {
-    return null;
+    return (
+      <View
+        style={{
+          flex: 1,
+          alignItems: "center",
+          justifyContent: "center",
+          padding: 24,
+          gap: 12,
+        }}
+      >
+        <ActivityIndicator size="large" />
+        <Text style={{ fontSize: 16, color: "#333", textAlign: "center" }}>
+          Importuję dane z CSV…
+        </Text>
+      </View>
+    );
   }
 
   return (
