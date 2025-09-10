@@ -10,6 +10,7 @@ import {
 import { useStyles } from "./styles_navbar";
 import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useStreak } from "@/src/contexts/StreakContext";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -22,6 +23,7 @@ const logo = require("./../../../assets/box/logo.png");
 export default function Navbar() {
   const router = useRouter();
   const { theme, toggleTheme } = useSettings();
+  const { streakCount } = useStreak();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
 
@@ -86,6 +88,9 @@ export default function Navbar() {
         <Ionicons style={styles.icon} name="repeat" size={16} color="black" />
       </Pressable>
 
+      {/* Spacer to push theme + streak to the right */}
+      <View style={{ flex: 1 }} />
+
       <Pressable
         style={({ pressed }) => [
           styles.iconCon,
@@ -100,6 +105,8 @@ export default function Navbar() {
           color="black"
         />
       </Pressable>
+
+      <Text style={styles.streakText}>{streakCount}</Text>
     </View>
   );
 }

@@ -16,11 +16,13 @@ import US_FLAG from "../../assets/flag/US.png";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/boxes/boxcarousel";
+import { useStreak } from "@/src/contexts/StreakContext";
 // import MediumBoxes from "@/src/components/boxes/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
   const { selectedLevel, profiles, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
+  const { registerLearningEvent } = useStreak();
 
   const {
     boxes,
@@ -153,6 +155,10 @@ export default function Flashcards() {
     const ok = checkAnswer();
     if (ok) {
       setResult(true);
+      // If the user answered correctly in the last box, register streak event
+      if (activeBox === "boxFive") {
+        registerLearningEvent();
+      }
       setTimeout(() => {
         setAnswer("");
         moveElement(selectedItem.id, true);

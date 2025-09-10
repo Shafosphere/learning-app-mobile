@@ -18,6 +18,8 @@ interface SettingsContextValue {
   setLevel: (lvl: CEFRLevel) => void;
   spellChecking: boolean;
   toggleSpellChecking: () => Promise<void>;
+  showBoxFaces: boolean;
+  toggleShowBoxFaces: () => Promise<void>;
   activeProfileIdx: number | null; // NEW
   setActiveProfileIdx: (i: number | null) => Promise<void>; // NEW
   activeProfile: LanguageProfile | null;
@@ -39,6 +41,8 @@ const defaultValue: SettingsContextValue = {
   setLevel: (_lvl: CEFRLevel) => {},
   spellChecking: true,
   toggleSpellChecking: async () => {},
+  showBoxFaces: true,
+  toggleShowBoxFaces: async () => {},
   activeProfileIdx: null,
   setActiveProfileIdx: async () => {},
   activeProfile: null,
@@ -69,6 +73,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "spellChecking",
     true
   );
+  const [showBoxFaces, setShowBoxFaces] = usePersistedState<boolean>(
+    "showBoxFaces",
+    true
+  );
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
       "flashcardsBatchSize",
@@ -76,6 +84,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     );
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
+  };
+  const toggleShowBoxFaces = async () => {
+    await setShowBoxFaces(!showBoxFaces);
   };
   const toggleTheme = async () => {
     const newTheme: Theme = theme === "light" ? "dark" : "light";
@@ -130,6 +141,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setLevel,
       spellChecking,
       toggleSpellChecking,
+      showBoxFaces,
+      toggleShowBoxFaces,
       flashcardsBatchSize,
       setFlashcardsBatchSize,
     }}

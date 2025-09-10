@@ -13,6 +13,7 @@ import Card1 from "../../../assets/box/miniflashcard1.png";
 import Card2 from "../../../assets/box/miniflashcard2.png";
 import Card3 from "../../../assets/box/miniflashcard3.png";
 import { useStyles } from "./styles_boxes";
+import { useSettings } from "../../contexts/SettingsContext";
 
 type Face = "smile" | "happy" | "surprised";
 
@@ -27,6 +28,7 @@ const CARDS = [Card1, Card2, Card3];
 
 const BoxSkin: React.FC<BoxSkinProps> = ({ wordCount, face, isActive, isCaro }) => {
   const styles = useStyles();
+  const { showBoxFaces } = useSettings();
 
   const renderMouth = () => {
     switch (face) {
@@ -57,11 +59,15 @@ const BoxSkin: React.FC<BoxSkinProps> = ({ wordCount, face, isActive, isCaro }) 
     <View style={[styles.containerSkin, isActive && styles.activeBox, isCaro && styles.caroPosition]}>
       <Image source={BoxTop} style={styles.skin} />
       {renderCards()}
-      {renderMouth()}
-      <LeftPupilImg style={styles.leftpupil} width={4} height={4} />
-      <LeftEyeImg style={styles.lefteye} width={12} height={12} />
-      <RightPupilImg style={styles.rightpupil} width={4} height={4} />
-      <RightEyeImg style={styles.righteye} width={12} height={12} />
+      {showBoxFaces && (
+        <>
+          {renderMouth()}
+          <LeftPupilImg style={styles.leftpupil} width={4} height={4} />
+          <LeftEyeImg style={styles.lefteye} width={12} height={12} />
+          <RightPupilImg style={styles.rightpupil} width={4} height={4} />
+          <RightEyeImg style={styles.righteye} width={12} height={12} />
+        </>
+      )}
       <Image source={BoxBottom} style={styles.skin} />
     </View>
   );

@@ -3,6 +3,7 @@ import { Stack } from "expo-router";
 import Navbar from "@/src/components/navbar/navbar";
 import React, { useEffect, useState, useCallback } from "react";
 import { SettingsProvider } from "@/src/contexts/SettingsContext";
+import { StreakProvider } from "@/src/contexts/StreakContext";
 import { getDB } from "@/src/components/db/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, Text } from "react-native";
@@ -56,10 +57,12 @@ export default function RootLayout() {
   return (
     <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
       <SettingsProvider>
-        <PopupProvider>
-          <Navbar />
-          <Stack screenOptions={{ headerShown: false }} />
-        </PopupProvider>
+        <StreakProvider>
+          <PopupProvider>
+            <Navbar />
+            <Stack screenOptions={{ headerShown: false }} />
+          </PopupProvider>
+        </StreakProvider>
       </SettingsProvider>
     </View>
   );

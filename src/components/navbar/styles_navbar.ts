@@ -28,4 +28,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   iconConPressed: {
     backgroundColor: colors.my_green,
   },
+  streakText: {
+    marginLeft: 8,
+    color: colors.headline,
+    fontWeight: "700",
+    fontSize: 16,
+    textAlign: "right",
+  },
 }));

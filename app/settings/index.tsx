@@ -9,6 +9,8 @@ export default function Settings() {
     toggleTheme,
     spellChecking,
     toggleSpellChecking,
+    showBoxFaces,
+    toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
     flashcardsBatchSize,
@@ -81,6 +83,20 @@ export default function Settings() {
             />
           </TouchableOpacity>
         </View>
+      </View>
+
+      <View style={styles.section}>
+        <Text style={styles.text}>
+          Miny pudełek: {showBoxFaces ? "włączone" : "wyłączone"}
+        </Text>
+        <Switch
+          style={{ transform: [{ scaleX: 1.12 }, { scaleY: 1.12 }] }}
+          hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+          value={showBoxFaces}
+          onValueChange={(val) => {
+            if (val !== showBoxFaces) toggleShowBoxFaces();
+          }}
+        />
       </View>
 
       <View style={styles.section}>
