@@ -93,7 +93,3 @@ Dodatkowo istnieje util `clearAllFlashcards()` do czyszczenia snapshotów pudeł
 - Ekran `/review` to placeholder – należy dodać UI obsługujące pobieranie „due” z `reviews` i ocenę odpowiedzi (np. przyciski łatwo/ciężko → `advanceReview`).
 - Interfejs związany z innymi parami językowymi oprócz EN→PL gotowy po stronie DB (pairy), ale CSV importuje EN→PL – inne pary wymagają danych.
 - Występuje tolerancja literówek (Levenshtein≤1) przy włączonym „Spellchecking”.
-
----
-
-Opracował: Codex – automatyczna dokumentacja stanu projektu na podstawie kodu.
