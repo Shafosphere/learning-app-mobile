@@ -302,15 +302,17 @@ export default function Flashcards() {
         onPress={() => router.push("/level")}
         style={styles.containeroflevel}
       >
-        {/* {activeProfile && (
-          <Image
-            source={flagMap[activeProfile.sourceLang]}
-            style={styles.flag}
-          />
-        )} */}
-        <Text style={styles.levelText}>
-          {selectedLevel} — {Math.round(learnedPercent * 100)}%
-        </Text>
+        <View style={styles.levelContainer}>
+          <Text style={styles.levelLabel}>{selectedLevel}</Text>
+          {/* <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                { width: `${learnedPercent * 100}%` },
+              ]}
+            />
+          </View> */}
+        </View>
       </TouchableOpacity>
 
       <Card

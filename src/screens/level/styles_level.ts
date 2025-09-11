@@ -9,7 +9,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   minicontainer: {
     width: "75%",
-    height: "75%",
+    height: "90%",
     display: "flex",
     flexDirection: "row",
     flexWrap: "wrap",
@@ -27,6 +27,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     fontWeight: 900,
   },
+  progressTrack: {
+    backgroundColor: colors.my_red,
+    height: 12,
+    width: '80%',
+    // borderRadius: 4,
+    marginTop: 8,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    backgroundColor: colors.my_green,
+    height: '100%',
+    // borderRadius: 4,
+  },
   choose: {
     marginTop: 10,
     width: "100%",
@@ -34,5 +47,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     textAlign: "center",
     fontWeight: 800,
+    textTransform: "uppercase",
   },
 }));

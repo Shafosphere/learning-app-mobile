@@ -41,4 +41,25 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 900,
     color: colors.headline,
   },
+  // New level indicator with progress bar
+  levelContainer: {
+    gap: 6,
+    alignItems: "flex-start",
+  },
+  levelLabel: {
+    fontSize: 20,
+    fontWeight: 900,
+    color: colors.headline,
+  },
+  progressTrack: {
+    backgroundColor: colors.my_red,
+    height: 8,
+    width: 120,
+    borderRadius: 999,
+    overflow: "hidden",
+  },
+  progressFill: {
+    backgroundColor: colors.my_green,
+    height: "100%",
+  },
 }));

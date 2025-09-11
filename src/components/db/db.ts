@@ -259,6 +259,7 @@ export async function getTotalWordsForLevel(
 
 // Review helpers
 import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
+import type { CEFRLevel } from "@/src/types/language";
 
 function computeNextReviewFromStage(stage: number, nowMs: number): number {
   const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
@@ -345,4 +346,34 @@ export async function advanceReview(
     targetLangId
   );
   return { nextReview, stage: newStage };
+}
+
+export async function countDueReviewsByLevel(
+  sourceLangId: number,
+  targetLangId: number,
+  nowMs: number
+): Promise<Record<CEFRLevel, number>> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ level: CEFRLevel; cnt: number }>(
+    `SELECT level, COUNT(*) AS cnt
+     FROM reviews
+     WHERE source_lang_id = ? AND target_lang_id = ? AND next_review <= ?
+     GROUP BY level;`,
+    sourceLangId,
+    targetLangId,
+    nowMs
+  );
+  const base: Record<CEFRLevel, number> = {
+    A1: 0,
+    A2: 0,
+    B1: 0,
+    B2: 0,
+    C1: 0,
+    C2: 0,
+  };
+  for (const r of rows) {
+    // Ensure only valid CEFR keys are assigned
+    if (r.level in base) base[r.level as CEFRLevel] = r.cnt | 0;
+  }
+  return base;
 }
