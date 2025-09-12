@@ -51,6 +51,34 @@ export function makeScopeId(
   return `${sourceLangId}-${targetLangId}-${level}`;
 }
 
+// Helper: remove a single wordId from usedWordIds inside saved snapshot
+export async function removeWordIdFromUsedWordIds(params: {
+  sourceLangId: number;
+  targetLangId: number;
+  level: string; // CEFR
+  wordId: number;
+  storageNamespace?: string; // defaults to 'boxes'
+}): Promise<void> {
+  const { sourceLangId, targetLangId, level, wordId, storageNamespace = "boxes" } = params;
+  const storageKey = `${storageNamespace}:${makeScopeId(sourceLangId, targetLangId, level)}`;
+  const raw = await AsyncStorage.getItem(storageKey);
+  if (!raw) return;
+  try {
+    const parsed = JSON.parse(raw) as SavedBoxesV2;
+    if (!parsed || parsed.v !== 2) return;
+    const current = Array.isArray(parsed.usedWordIds) ? parsed.usedWordIds : [];
+    const next = current.filter((id) => id !== wordId);
+    const updated: SavedBoxesV2 = {
+      ...parsed,
+      updatedAt: Date.now(),
+      usedWordIds: next,
+    };
+    await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
+  } catch (_) {
+    // ignore parse errors
+  }
+}
+
 async function saveToStorageSnapshot(
   key: string,
   meta: {

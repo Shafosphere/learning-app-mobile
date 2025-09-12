@@ -1,4 +1,3 @@
-+48 - 0;
 import { useContext } from "react";
 import { useSettings } from "../contexts/SettingsContext";
 export default function useSpellchecking() {

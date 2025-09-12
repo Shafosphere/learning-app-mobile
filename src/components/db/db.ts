@@ -260,6 +260,7 @@ export async function getTotalWordsForLevel(
 // Review helpers
 import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
 import type { CEFRLevel } from "@/src/types/language";
+import type { WordWithTranslations } from "@/src/types/boxes";
 
 function computeNextReviewFromStage(stage: number, nowMs: number): number {
   const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
@@ -348,6 +349,21 @@ export async function advanceReview(
   return { nextReview, stage: newStage };
 }
 
+// Removes a review entry for a given word and language pair
+export async function removeReview(
+  wordId: number,
+  sourceLangId: number,
+  targetLangId: number
+): Promise<void> {
+  const db = await getDB();
+  await db.runAsync(
+    `DELETE FROM reviews WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ?;`,
+    wordId,
+    sourceLangId,
+    targetLangId
+  );
+}
+
 export async function countDueReviewsByLevel(
   sourceLangId: number,
   targetLangId: number,
@@ -376,4 +392,53 @@ export async function countDueReviewsByLevel(
     if (r.level in base) base[r.level as CEFRLevel] = r.cnt | 0;
   }
   return base;
+}
+
+// Returns a random due review word (for given pair and CEFR level)
+// with its target-language translations.
+export async function getRandomDueReviewWord(
+  sourceLangId: number,
+  targetLangId: number,
+  level: CEFRLevel,
+  nowMs: number = Date.now()
+): Promise<WordWithTranslations | null> {
+  const db = await getDB();
+
+  // Pick one due review at random for the selected level
+  const due = await db.getFirstAsync<{ id: number }>(
+    `SELECT r.word_id AS id
+     FROM reviews r
+     WHERE r.source_lang_id = ?
+       AND r.target_lang_id = ?
+       AND r.level = ?
+       AND r.next_review <= ?
+     ORDER BY RANDOM()
+     LIMIT 1;`,
+    sourceLangId,
+    targetLangId,
+    level,
+    nowMs
+  );
+
+  if (!due) return null;
+
+  const wordRow = await db.getFirstAsync<{ text: string }>(
+    `SELECT text FROM words WHERE id = ? LIMIT 1;`,
+    due.id
+  );
+
+  const translations = await db.getAllAsync<{ translation_text: string }>(
+    `SELECT translation_text
+     FROM translations
+     WHERE source_word_id = ? AND target_language_id = ?
+     ORDER BY translation_text ASC;`,
+    due.id,
+    targetLangId
+  );
+
+  return {
+    id: due.id,
+    text: wordRow?.text ?? "",
+    translations: translations.map((t) => t.translation_text),
+  };
 }
