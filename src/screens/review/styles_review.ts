@@ -9,6 +9,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     padding: 24,
     // gap: 16,
   },
+  // Carousel middle card state variants
+  carouselMiddleNeutral: {
+    backgroundColor: colors.lightbg,
+    borderColor: colors.my_green,
+  },
+  carouselMiddleCorrect: {
+    backgroundColor: colors.my_green,
+    borderColor: colors.my_green,
+  },
+  carouselMiddleWrong: {
+    backgroundColor: colors.my_red,
+    borderColor: colors.my_red,
+  },
   promptBar: {
     backgroundColor: colors.lightbg,
     borderColor: colors.my_green,

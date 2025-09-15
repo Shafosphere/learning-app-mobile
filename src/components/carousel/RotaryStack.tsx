@@ -17,6 +17,8 @@ export type RotaryStackHandle = {
 interface RotaryStackProps {
   items?: string[];
   height?: number; // height of the carousel window
+  // Optional style override applied to the middle card (slot=2)
+  middleStyle?: any;
 }
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -104,7 +106,7 @@ function useInterpolatedStyle(
 type Card = { key: string; text: string | null; slot: number };
 
 const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
-  ({ items = DEFAULT_ITEMS, height = 160 }, ref) => {
+  ({ items = DEFAULT_ITEMS, height = 160, middleStyle }, ref) => {
     const styles = useStyles();
 
     // Normalize items – avoid empty array
@@ -191,7 +193,12 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
             return (
               <Animated.View
                 key={card.key}
-                style={[styles.cardBase, interpStyle]}
+                style={[
+                  styles.cardBase,
+                  interpStyle,
+                  card.slot === 2 && styles.cardMiddle,
+                  card.slot === 2 && middleStyle,
+                ]}
                 pointerEvents="none"
               >
                 {!!card.text && (

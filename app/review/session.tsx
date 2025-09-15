@@ -22,6 +22,7 @@ export default function ReviewSession() {
   const checkSpelling = useSpellchecking();
   const carouselRef = useRef<RotaryStackHandle>(null);
 
+  const [queue, setQueue] = useState<WordWithTranslations[]>([]);
   const [current, setCurrent] = useState<WordWithTranslations | null>(null);
   const [answer, setAnswer] = useState("");
   const [promptState, setPromptState] = useState<"neutral" | "correct" | "wrong">("neutral");
@@ -33,13 +34,29 @@ export default function ReviewSession() {
 
   async function loadNext() {
     if (!srcId || !tgtId) {
+      setQueue([]);
       setCurrent(null);
       return;
     }
     setLoading(true);
     try {
-      const next = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
-      setCurrent(next);
+      // If queue has less than 2 items, bootstrap it with up to 2 words
+      if (queue.length < 2) {
+        const first = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
+        const second = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
+        const initial = [first, second].filter(
+          (w): w is WordWithTranslations => !!w
+        );
+        setQueue(initial);
+        setCurrent(initial[0] ?? null);
+      } else {
+        // Consume the first and fetch a new one to append
+        const [, ...rest] = queue;
+        const nextOne = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
+        const updated = [...rest, ...(nextOne ? [nextOne] : [])];
+        setQueue(updated);
+        setCurrent(updated[0] ?? null);
+      }
     } finally {
       setAnswer("");
       setPromptState("neutral");
@@ -64,6 +81,11 @@ export default function ReviewSession() {
           setLoading(false);
         });
       setTimeout(() => {
+        // spin after correct answer (if not already animating), then reset color and refresh queue
+        if (!carouselRef.current?.isAnimating()) {
+          carouselRef.current?.spin();
+        }
+        setPromptState("neutral");
         void loadNext();
       }, 2000);
     } else {
@@ -79,7 +101,11 @@ export default function ReviewSession() {
       .catch(() => {})
       .finally(() => {
         setLoading(false);
-        void loadNext();
+        void loadNext().then(() => {
+          if (!carouselRef.current?.isAnimating()) {
+            carouselRef.current?.spin();
+          }
+        });
       });
   }
 
@@ -96,7 +122,11 @@ export default function ReviewSession() {
       });
     } finally {
       setLoading(false);
-      void loadNext();
+      void loadNext().then(() => {
+        if (!carouselRef.current?.isAnimating()) {
+          carouselRef.current?.spin();
+        }
+      });
     }
   }
 
@@ -121,50 +151,25 @@ export default function ReviewSession() {
       ) : (
         <View style={styles.content}>
           <View style={styles.emptyspace}></View>
-          {/* Temporary carousel demo */}
           <View style={{ width: "100%", alignItems: "center", marginBottom: 10 }}>
             <RotaryStack
               ref={carouselRef}
-              items={[
-                current?.text ?? "—",
-                "kolejny 1",
-                "kolejny 2",
-                "kolejny 3",
-                "kolejny 4",
-              ]}
+              items={queue.map((w) => w.text)}
               height={160}
+              middleStyle={
+                promptState === "correct"
+                  ? styles.carouselMiddleCorrect
+                  : promptState === "wrong"
+                  ? styles.carouselMiddleWrong
+                  : styles.carouselMiddleNeutral
+              }
             />
-            <View style={{ marginTop: 8 }}>
-              <MyButton
-                text="KRĘĆ"
-                color="my_green"
-                onPress={() => carouselRef.current?.spin()}
-                width={120}
-              />
-            </View>
           </View>
-          <View
-            style={[
-              styles.promptBar,
-              promptState === "correct" && styles.promptBarCorrect,
-              promptState === "wrong" && styles.promptBarWrong,
-            ]}
-          >
-            <Text
-              style={[
-                styles.promptText,
-                promptState === "correct" && styles.promptTextCorrect,
-                promptState === "wrong" && styles.promptTextWrong,
-              ]}
-            >
-              {current.text}
+          {/* {promptState === "wrong" && (
+            <Text style={[styles.promptText, styles.promptTextWrong]}>
+              Poprawna odpowiedź: {correctAnswer ?? ""}
             </Text>
-            {promptState === "wrong" && (
-              <Text style={[styles.promptText, styles.promptTextWrong]}>
-                Poprawna odpowiedź: {correctAnswer ?? ""}
-              </Text>
-            )}
-          </View>
+          )} */}
           <TextInput
             style={styles.answerInput}
             placeholder="Przetłumacz"
