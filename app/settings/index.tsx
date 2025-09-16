@@ -1,7 +1,9 @@
-import React from "react";
-import { View, Text, Switch, Image, TouchableOpacity, TextInput } from "react-native";
+import React, { useState } from "react";
+import { View, Text, Switch, Image, TouchableOpacity, TextInput, Alert } from "react-native";
 import { useSettings } from "../../src/contexts/SettingsContext";
 import { useStyles } from "../../src/screens/settings/styles_settings";
+import MyButton from "@/src/components/button/button";
+import { addRandomReviewsForPair } from "@/src/components/db/db";
 
 export default function Settings() {
   const {
@@ -15,8 +17,11 @@ export default function Settings() {
     setBoxesLayout,
     flashcardsBatchSize,
     setFlashcardsBatchSize,
+    activeProfile,
+    selectedLevel,
   } = useSettings();
   const styles = useStyles();
+  const [busy, setBusy] = useState(false);
 
   // debug handlers related to patches have been removed
 
@@ -124,7 +129,43 @@ export default function Settings() {
         />
       </View>
 
-      {/* Optional debug buttons removed (patches no longer used) */}
+      {/* Debug: Add random review items */}
+      <View style={[styles.section, { alignItems: "center" }]}>
+        <MyButton
+          text={busy ? "Dodawanie..." : "Dodaj 10 losowych do review"}
+          color="my_green"
+          disabled={busy || !activeProfile}
+          onPress={async () => {
+            if (!activeProfile?.sourceLangId || !activeProfile?.targetLangId) {
+              Alert.alert("Brak profilu", "Wybierz profil w ustawieniach.");
+              return;
+            }
+            setBusy(true);
+            try {
+              const inserted = await addRandomReviewsForPair(
+                activeProfile.sourceLangId,
+                activeProfile.targetLangId,
+                selectedLevel,
+                10
+              );
+              Alert.alert(
+                "Dodano",
+                inserted > 0
+                  ? `Dodano ${inserted} słówek do powtórki (${selectedLevel}).`
+                  : "Brak nowych słówek do dodania."
+              );
+            } catch (e) {
+              Alert.alert("Błąd", "Nie udało się dodać słówek.");
+            } finally {
+              setBusy(false);
+            }
+          }}
+          width={260}
+        />
+        {!activeProfile && (
+          <Text style={[styles.text, { marginTop: 6 }]}>Najpierw wybierz profil.</Text>
+        )}
+      </View>
     </View>
   );
 }

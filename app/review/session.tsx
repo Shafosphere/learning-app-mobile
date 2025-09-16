@@ -13,7 +13,9 @@ import type { WordWithTranslations } from "@/src/types/boxes";
 import { useStyles } from "@/src/screens/review/styles_review";
 import { removeWordIdFromUsedWordIds } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import MyButton from "@/src/components/button/button";
-import RotaryStack, { RotaryStackHandle } from "@/src/components/carousel/RotaryStack";
+import RotaryStack, {
+  RotaryStackHandle,
+} from "@/src/components/carousel/RotaryStack";
 
 export default function ReviewSession() {
   const styles = useStyles();
@@ -22,10 +24,11 @@ export default function ReviewSession() {
   const checkSpelling = useSpellchecking();
   const carouselRef = useRef<RotaryStackHandle>(null);
 
-  const [queue, setQueue] = useState<WordWithTranslations[]>([]);
   const [current, setCurrent] = useState<WordWithTranslations | null>(null);
   const [answer, setAnswer] = useState("");
-  const [promptState, setPromptState] = useState<"neutral" | "correct" | "wrong">("neutral");
+  const [promptState, setPromptState] = useState<
+    "neutral" | "correct" | "wrong"
+  >("neutral");
   const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
@@ -34,29 +37,13 @@ export default function ReviewSession() {
 
   async function loadNext() {
     if (!srcId || !tgtId) {
-      setQueue([]);
       setCurrent(null);
       return;
     }
     setLoading(true);
     try {
-      // If queue has less than 2 items, bootstrap it with up to 2 words
-      if (queue.length < 2) {
-        const first = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
-        const second = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
-        const initial = [first, second].filter(
-          (w): w is WordWithTranslations => !!w
-        );
-        setQueue(initial);
-        setCurrent(initial[0] ?? null);
-      } else {
-        // Consume the first and fetch a new one to append
-        const [, ...rest] = queue;
-        const nextOne = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
-        const updated = [...rest, ...(nextOne ? [nextOne] : [])];
-        setQueue(updated);
-        setCurrent(updated[0] ?? null);
-      }
+      const next = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
+      setCurrent(next);
     } finally {
       setAnswer("");
       setPromptState("neutral");
@@ -81,11 +68,6 @@ export default function ReviewSession() {
           setLoading(false);
         });
       setTimeout(() => {
-        // spin after correct answer (if not already animating), then reset color and refresh queue
-        if (!carouselRef.current?.isAnimating()) {
-          carouselRef.current?.spin();
-        }
-        setPromptState("neutral");
         void loadNext();
       }, 2000);
     } else {
@@ -101,11 +83,7 @@ export default function ReviewSession() {
       .catch(() => {})
       .finally(() => {
         setLoading(false);
-        void loadNext().then(() => {
-          if (!carouselRef.current?.isAnimating()) {
-            carouselRef.current?.spin();
-          }
-        });
+        void loadNext();
       });
   }
 
@@ -122,11 +100,7 @@ export default function ReviewSession() {
       });
     } finally {
       setLoading(false);
-      void loadNext().then(() => {
-        if (!carouselRef.current?.isAnimating()) {
-          carouselRef.current?.spin();
-        }
-      });
+      void loadNext();
     }
   }
 
@@ -151,25 +125,42 @@ export default function ReviewSession() {
       ) : (
         <View style={styles.content}>
           <View style={styles.emptyspace}></View>
-          <View style={{ width: "100%", alignItems: "center", marginBottom: 10 }}>
+          {/* Temporary carousel demo */}
+          <View>
             <RotaryStack
               ref={carouselRef}
-              items={queue.map((w) => w.text)}
-              height={160}
-              middleStyle={
-                promptState === "correct"
-                  ? styles.carouselMiddleCorrect
-                  : promptState === "wrong"
-                  ? styles.carouselMiddleWrong
-                  : styles.carouselMiddleNeutral
-              }
+              items={[
+                current?.text ?? "—",
+                "kolejny 1",
+                "kolejny 2",
+                "kolejny 3",
+                "kolejny 4",
+              ]}
+              height={70}
             />
           </View>
-          {/* {promptState === "wrong" && (
-            <Text style={[styles.promptText, styles.promptTextWrong]}>
-              Poprawna odpowiedź: {correctAnswer ?? ""}
+          {/* <View
+            style={[
+              styles.promptBar,
+              promptState === "correct" && styles.promptBarCorrect,
+              promptState === "wrong" && styles.promptBarWrong,
+            ]}
+          >
+            <Text
+              style={[
+                styles.promptText,
+                promptState === "correct" && styles.promptTextCorrect,
+                promptState === "wrong" && styles.promptTextWrong,
+              ]}
+            >
+              {current.text}
             </Text>
-          )} */}
+            {promptState === "wrong" && (
+              <Text style={[styles.promptText, styles.promptTextWrong]}>
+                Poprawna odpowiedź: {correctAnswer ?? ""}
+              </Text>
+            )}
+          </View> */}
           <TextInput
             style={styles.answerInput}
             placeholder="Przetłumacz"
@@ -186,6 +177,7 @@ export default function ReviewSession() {
               onPress={onReset}
               width={140}
             />
+
             <View style={{ gap: 10 }}>
               <MyButton
                 text="SUBMIT"
@@ -197,6 +189,12 @@ export default function ReviewSession() {
                 text="ZACHOWAJ"
                 color="my_yellow"
                 onPress={onKeep}
+                width={140}
+              />
+              <MyButton
+                text="KRĘĆ"
+                color="my_green"
+                onPress={() => carouselRef.current?.spin()}
                 width={140}
               />
             </View>

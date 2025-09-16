@@ -442,3 +442,43 @@ export async function getRandomDueReviewWord(
     translations: translations.map((t) => t.translation_text),
   };
 }
+
+// Debug helper: adds random words as due reviews for a given pair/level
+export async function addRandomReviewsForPair(
+  sourceLangId: number,
+  targetLangId: number,
+  level: CEFRLevel,
+  count: number = 10
+): Promise<number> {
+  const db = await getDB();
+  // Pick random words matching level with at least one translation to target language
+  const rows = await db.getAllAsync<{ id: number }>(
+    `SELECT w.id
+     FROM words w
+     WHERE w.language_id = ?
+       AND w.cefr_level = ?
+       AND EXISTS (
+         SELECT 1 FROM translations t
+         WHERE t.source_word_id = w.id AND t.target_language_id = ?
+       )
+       AND NOT EXISTS (
+         SELECT 1 FROM reviews r
+         WHERE r.word_id = w.id AND r.source_lang_id = ? AND r.target_lang_id = ?
+       )
+     ORDER BY RANDOM()
+     LIMIT ?;`,
+    sourceLangId,
+    level,
+    targetLangId,
+    sourceLangId,
+    targetLangId,
+    count
+  );
+
+  let inserted = 0;
+  for (const row of rows) {
+    await scheduleReview(row.id, sourceLangId, targetLangId, level, 0);
+    inserted += 1;
+  }
+  return inserted;
+}
