@@ -9,8 +9,13 @@ import React, {
 import { Animated, Text, View, Easing } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+type SpinParams = {
+  injectText?: string | null;
+  targetSlot?: 0 | 4;
+};
+
 export type RotaryStackHandle = {
-  spin: () => void;
+  spin: (params?: SpinParams) => void;
   isAnimating: () => boolean;
 };
 
@@ -84,7 +89,7 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
   cardHidden: {
     // opacity: 0,
-  }
+  },
 }));
 
 // Slot configuration roughly mirroring the web CSS
@@ -133,25 +138,21 @@ type Card = { key: string; text: string | null; slot: number };
 
 const buildInitialCards = (data: string[]): Card[] => {
   const total = data.length;
-  const getText = (offset: number) => {
-    if (total === 0) {
-      return null;
-    }
-    // Ta funkcja pomocnicza pozostaje bez zmian
-    const index = ((offset % total) + total) % total;
-    return data[index] ?? null;
+  const getFromStart = (index: number) =>
+    index >= 0 && index < total ? data[index] ?? null : null;
+  const getFromEnd = (indexFromEnd: number) => {
+    const index = total - 1 - indexFromEnd;
+    return index >= 0 && index < total ? data[index] ?? null : null;
   };
 
-  // Zmieniamy logikę układania kart, aby pasowała do animacji "w dół"
   return [
-    { key: "c0", text: getText(2), slot: 0 },   // Następny po następnym
-    { key: "c1", text: getText(1), slot: 1 },   // Następny element czeka na górze
-    { key: "c2", text: getText(0), slot: 2 },   // Pierwszy, widoczny element
-    { key: "c3", text: getText(-1), slot: 3 },  // Ostatni element z listy jest na dole
-    { key: "c4", text: getText(-2), slot: 4 },  // Przedostatni element
+    { key: "c0", text: getFromStart(2), slot: 0 }, // słowo ukryte nad górnym slotem
+    { key: "c1", text: getFromStart(1), slot: 1 }, // slot górny
+    { key: "c2", text: getFromStart(0), slot: 2 }, // slot środkowy
+    { key: "c3", text: total >= 4 ? getFromEnd(0) : null, slot: 3 }, // slot dolny
+    { key: "c4", text: total >= 5 ? getFromEnd(1) : null, slot: 4 }, // ukryty pod spodem
   ];
 };
-
 
 const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
   ({ items = DEFAULT_ITEMS, height = 160, middleStyle }, ref) => {
@@ -169,8 +170,8 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
     // snapshot of previous slots to animate from
     const prevSlotsRef = useRef<Record<string, number> | null>(null);
 
-    // pointer for what to inject next into bottom-bot after a spin
-    const [nextIndex, setNextIndex] = useState(3); // 0->middle,1->bottom,2->bottom-bot seeded
+    // pointer for what to inject next into top-bot after a spin
+    const [nextIndex, setNextIndex] = useState(3); // 0->middle,1->top,2->top-bot already seeded
 
     // Cards with their current slots
     const [cards, setCards] = useState<Card[]>(() => buildInitialCards(data));
@@ -183,7 +184,12 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
       setAnimating(false);
     }, [data, anim]);
 
-    const spin = () => {
+    const spin = (params?: SpinParams) => {
+      const { injectText, targetSlot = 0 } = params ?? {};
+      if (targetSlot !== 0 && targetSlot !== 4) {
+        // keep API defensive – ignore unsupported slots
+        return;
+      }
       if (animating) return;
       setAnimating(true);
       // snapshot current slots
@@ -201,17 +207,21 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
         easing: Easing.out(Easing.cubic),
         useNativeDriver: true,
       }).start(() => {
-        // after animation completes, only inject new data into bottom-bot
+        // after animation completes, only inject new data into top-bot
         setCards((prev) => {
           const updated = [...prev];
-          const idx = updated.findIndex((c) => c.slot === 4);
+          const idx = updated.findIndex((c) => c.slot === targetSlot);
           if (idx !== -1) {
-            const text = data[nextIndex % data.length] ?? null;
-            updated[idx] = { ...updated[idx], text };
+            const fallbackText =
+              data.length > 0 ? data[nextIndex % data.length] ?? null : null;
+            const textToUse = injectText !== undefined ? injectText : fallbackText;
+            updated[idx] = { ...updated[idx], text: textToUse };
           }
           return updated;
         });
-        setNextIndex((i) => (i + 1) % data.length);
+        if (injectText === undefined && data.length > 0) {
+          setNextIndex((i) => (i + 1) % data.length);
+        }
         prevSlotsRef.current = null;
         setAnimating(false);
       });
@@ -222,7 +232,7 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
       isAnimating: () => animating,
     }));
 
-  return (
+    return (
       <View style={styles.container}>
         <View style={[styles.window, { height }]}>
           {cards.map((card) => {
@@ -247,14 +257,17 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
                   card.slot === 2 && styles.cardMiddle,
                   card.slot === 2 && middleStyle,
                   card.slot === 3 && styles.cardBottom,
-                   card.slot === 4 && styles.cardHidden,
+                  card.slot === 4 && styles.cardHidden,
                 ]}
                 pointerEvents="none"
               >
                 {(prevSlot === 2 || card.slot === 2) && (
                   <Animated.View
                     pointerEvents="none"
-                    style={[styles.cardMiddleBorder, { opacity: middleBorderOpacity }]}
+                    style={[
+                      styles.cardMiddleBorder,
+                      { opacity: middleBorderOpacity },
+                    ]}
                   />
                 )}
                 {!!card.text && (

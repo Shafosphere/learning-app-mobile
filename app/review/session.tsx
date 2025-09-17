@@ -5,9 +5,8 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import {
   advanceReview,
-  getRandomDueReviewWord,
+  getDueReviewWordsBatch,
   removeReview,
-  scheduleReview,
 } from "@/src/components/db/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { useStyles } from "@/src/screens/review/styles_review";
@@ -31,24 +30,58 @@ export default function ReviewSession() {
   >("neutral");
   const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+  const [carouselItems, setCarouselItems] = useState<string[]>([]);
+  const [spinBusy, setSpinBusy] = useState(false);
 
   const srcId = activeProfile?.sourceLangId ?? null;
   const tgtId = activeProfile?.targetLangId ?? null;
+  const carouselWordsRef = useRef<WordWithTranslations[]>([]);
+  const [lockedAfterWrong, setLockedAfterWrong] = useState(false);
+  const [sessionEnded, setSessionEnded] = useState(false);
+
+  const formatWordText = (value?: string | null) =>
+    value && value.trim().length > 0 ? value : "—";
+
+  const dedupeWords = (list: WordWithTranslations[]) => {
+    const seen = new Set<number>();
+    return list.filter((item) => {
+      if (seen.has(item.id)) {
+        return false;
+      }
+      seen.add(item.id);
+      return true;
+    });
+  };
 
   async function loadNext() {
     if (!srcId || !tgtId) {
       setCurrent(null);
+      setCarouselItems([]);
+      carouselWordsRef.current = [];
+      setSessionEnded(false);
       return;
     }
     setLoading(true);
     try {
-      const next = await getRandomDueReviewWord(srcId, tgtId, selectedLevel);
+      const hadWordsBefore = carouselWordsRef.current.length > 0;
+      const batch = await getDueReviewWordsBatch(
+        srcId,
+        tgtId,
+        selectedLevel,
+        5
+      );
+      const uniqueBatch = dedupeWords(batch);
+      carouselWordsRef.current = uniqueBatch;
+      setCarouselItems(uniqueBatch.map((item) => formatWordText(item.text)));
+      const next = uniqueBatch[0] ?? null;
       setCurrent(next);
+      setSessionEnded(uniqueBatch.length === 0 && hadWordsBefore);
     } finally {
       setAnswer("");
       setPromptState("neutral");
       setCorrectAnswer(null);
       setLoading(false);
+      setLockedAfterWrong(false);
     }
   }
 
@@ -76,20 +109,33 @@ export default function ReviewSession() {
     }
   }
 
-  function onKeep() {
+  async function onKeep() {
     if (!current || !srcId || !tgtId) return;
-    setLoading(true);
-    advanceReview(current.id, srcId, tgtId)
-      .catch(() => {})
-      .finally(() => {
-        setLoading(false);
-        void loadNext();
-      });
+    if (spinBusy) return;
+    setSpinBusy(true);
+    setLockedAfterWrong(false);
+    setPromptState("neutral");
+    setCorrectAnswer(null);
+
+    advanceReview(current.id, srcId, tgtId).catch(() => {});
+
+    try {
+      const nextWord = await fetchNextCarouselWord();
+      const rotated = nextWord
+        ? spinCarousel({ injectionWord: nextWord })
+        : spinCarousel();
+      if (rotated) {
+        setAnswer("");
+      }
+    } finally {
+      setSpinBusy(false);
+    }
   }
 
   async function onReset() {
     if (!current || !srcId || !tgtId) return;
-    setLoading(true);
+    if (spinBusy) return;
+    setSpinBusy(true);
     try {
       await removeReview(current.id, srcId, tgtId);
       await removeWordIdFromUsedWordIds({
@@ -98,9 +144,130 @@ export default function ReviewSession() {
         level: selectedLevel,
         wordId: current.id,
       });
+      const nextWord = await fetchNextCarouselWord();
+      const rotated = spinCarousel({
+        injectionWord: nextWord ?? undefined,
+        dropCurrent: true,
+      });
+      if (rotated) {
+        setSessionEnded(false);
+      }
+      setAnswer("");
+      setPromptState("neutral");
+      setCorrectAnswer(null);
+      setLockedAfterWrong(false);
     } finally {
-      setLoading(false);
-      void loadNext();
+      setSpinBusy(false);
+    }
+  }
+
+  async function fetchNextCarouselWord(): Promise<WordWithTranslations | null> {
+    if (!srcId || !tgtId) return null;
+    const batch = await getDueReviewWordsBatch(srcId, tgtId, selectedLevel, 5);
+    if (batch.length === 0) {
+      return null;
+    }
+    const uniqueBatch = dedupeWords(batch);
+    const exclude = new Set(carouselWordsRef.current.map((item) => item.id));
+    const fresh = uniqueBatch.find((item) => !exclude.has(item.id));
+    return fresh ?? null;
+  }
+
+  function spinCarousel(options?: {
+    injectionWord?: WordWithTranslations | null;
+    dropCurrent?: boolean;
+  }): boolean {
+    const carousel = carouselRef.current;
+    if (!carousel) return false;
+
+    const { injectionWord = null, dropCurrent = false } = options ?? {};
+    const queue = carouselWordsRef.current;
+    if (queue.length === 0) {
+      setSessionEnded(true);
+      setCurrent(null);
+      setCarouselItems([]);
+      setPromptState("neutral");
+      setCorrectAnswer(null);
+      setLockedAfterWrong(false);
+      return false;
+    }
+
+    let nextQueue = dropCurrent ? queue.slice(1) : [...queue];
+
+    if (!dropCurrent && nextQueue.length > 1) {
+      nextQueue = [...nextQueue.slice(1), nextQueue[0]];
+    }
+
+    if (injectionWord) {
+      console.log("[ReviewSession] Injecting carousel word", injectionWord);
+      nextQueue = nextQueue.filter((item) => item.id !== injectionWord.id);
+      if (nextQueue.length >= 3) {
+        nextQueue[2] = injectionWord;
+      } else {
+        nextQueue.push(injectionWord);
+      }
+    }
+
+    if (nextQueue.length === 0) {
+      carouselWordsRef.current = [];
+      setCurrent(null);
+      setCarouselItems([]);
+      setSessionEnded(true);
+      setPromptState("neutral");
+      setCorrectAnswer(null);
+      setLockedAfterWrong(false);
+      return false;
+    }
+
+    carouselWordsRef.current = nextQueue;
+    const nextCurrent = nextQueue[0] ?? null;
+    setCurrent(nextCurrent);
+    setSessionEnded(false);
+
+    const hiddenTopWord =
+      nextQueue.length >= 3
+        ? nextQueue[2]
+        : nextQueue[nextQueue.length - 1] ?? null;
+
+    const injectText = formatWordText(hiddenTopWord?.text);
+    carousel.spin({ injectText });
+    return true;
+  }
+
+  async function handleSpin() {
+    const carousel = carouselRef.current;
+    if (!carousel || carousel.isAnimating() || spinBusy) return;
+    if (!srcId || !tgtId || !current) return;
+    if (lockedAfterWrong) return;
+
+    setSpinBusy(true);
+    const ok = current.translations.some((t) => checkSpelling(answer, t));
+    if (!ok) {
+      setPromptState("wrong");
+      setCorrectAnswer(current.translations[0] ?? "");
+      setLockedAfterWrong(true);
+      setSpinBusy(false);
+      return;
+    }
+
+    console.log("[ReviewSession] poprawna odpowiedź", current);
+    setPromptState("correct");
+    setCorrectAnswer(null);
+    setLockedAfterWrong(false);
+
+    advanceReview(current.id, srcId, tgtId).catch(() => {});
+
+    try {
+      const nextWord = await fetchNextCarouselWord();
+      const rotated = nextWord
+        ? spinCarousel({ injectionWord: nextWord })
+        : spinCarousel();
+      if (rotated) {
+        setAnswer("");
+        setPromptState("neutral");
+      }
+    } finally {
+      setSpinBusy(false);
     }
   }
 
@@ -112,6 +279,16 @@ export default function ReviewSession() {
         <Text style={styles.emptyText}>Wybierz profil w ustawieniach.</Text>
       ) : loading ? (
         <ActivityIndicator />
+      ) : sessionEnded ? (
+        <View style={{ alignItems: "center", gap: 12 }}>
+          <Text style={styles.emptyText}>Powtórka zakończona.</Text>
+          <MyButton
+            text="WRÓĆ"
+            color="my_yellow"
+            onPress={() => router.back()}
+            width={100}
+          />
+        </View>
       ) : !current ? (
         <View style={{ alignItems: "center", gap: 12 }}>
           <Text style={styles.emptyText}>Brak słówek do powtórki.</Text>
@@ -129,13 +306,11 @@ export default function ReviewSession() {
           <View>
             <RotaryStack
               ref={carouselRef}
-              items={[
-                current?.text ?? "—",
-                "kolejny 1",
-                "kolejny 2",
-                "kolejny 3",
-                "kolejny 4",
-              ]}
+              items={
+                carouselItems.length > 0
+                  ? carouselItems
+                  : [current?.text ?? "—"]
+              }
               height={70}
             />
           </View>
@@ -174,27 +349,30 @@ export default function ReviewSession() {
             <MyButton
               text="ZRESETUJ"
               color="my_red"
-              onPress={onReset}
+              onPress={() => {
+                void onReset();
+              }}
+              disabled={spinBusy || sessionEnded}
               width={140}
             />
 
             <View style={{ gap: 10 }}>
               <MyButton
-                text="SUBMIT"
+                text="KRĘĆ"
                 color="my_green"
-                onPress={onSubmit}
+                onPress={() => {
+                  void handleSpin();
+                }}
+                disabled={spinBusy || lockedAfterWrong || sessionEnded}
                 width={140}
               />
               <MyButton
                 text="ZACHOWAJ"
                 color="my_yellow"
-                onPress={onKeep}
-                width={140}
-              />
-              <MyButton
-                text="KRĘĆ"
-                color="my_green"
-                onPress={() => carouselRef.current?.spin()}
+                onPress={() => {
+                  void onKeep();
+                }}
+                disabled={spinBusy || sessionEnded}
                 width={140}
               />
             </View>

@@ -443,6 +443,70 @@ export async function getRandomDueReviewWord(
   };
 }
 
+export async function getDueReviewWordsBatch(
+  sourceLangId: number,
+  targetLangId: number,
+  level: CEFRLevel,
+  limit: number,
+  nowMs: number = Date.now()
+): Promise<WordWithTranslations[]> {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const db = await getDB();
+
+  const rows = await db.getAllAsync<{ id: number; text: string }>(
+    `SELECT w.id, w.text
+     FROM reviews r
+     JOIN words w ON w.id = r.word_id
+     WHERE r.source_lang_id = ?
+       AND r.target_lang_id = ?
+       AND r.level = ?
+       AND r.next_review <= ?
+     ORDER BY RANDOM()
+     LIMIT ?;`,
+    sourceLangId,
+    targetLangId,
+    level,
+    nowMs,
+    limit
+  );
+
+  if (rows.length === 0) {
+    return [];
+  }
+
+  const wordIds = rows.map((row) => row.id);
+  const placeholders = wordIds.map(() => "?").join(",");
+
+  const translations = await db.getAllAsync<{
+    source_word_id: number;
+    translation_text: string;
+  }>(
+    `SELECT source_word_id, translation_text
+     FROM translations
+     WHERE source_word_id IN (${placeholders})
+       AND target_language_id = ?
+     ORDER BY translation_text ASC;`,
+    [...wordIds, targetLangId]
+  );
+
+  const translationsMap = new Map<number, string[]>();
+  for (const item of translations) {
+    if (!translationsMap.has(item.source_word_id)) {
+      translationsMap.set(item.source_word_id, []);
+    }
+    translationsMap.get(item.source_word_id)!.push(item.translation_text);
+  }
+
+  return rows.map((row) => ({
+    id: row.id,
+    text: row.text,
+    translations: translationsMap.get(row.id) ?? [],
+  }));
+}
+
 // Debug helper: adds random words as due reviews for a given pair/level
 export async function addRandomReviewsForPair(
   sourceLangId: number,
