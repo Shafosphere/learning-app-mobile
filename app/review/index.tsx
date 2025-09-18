@@ -1,6 +1,7 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 import { Pressable, Text, View } from "react-native";
 import { useRouter } from "expo-router";
+import { useFocusEffect } from "@react-navigation/native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
 import { useStyles } from "@/src/screens/level/styles_level";
@@ -21,26 +22,33 @@ export default function Review() {
     C2: 0,
   });
 
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const srcId = activeProfile?.sourceLangId;
-        const tgtId = activeProfile?.targetLangId;
-        if (!srcId || !tgtId) {
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+
+      const fetchCounts = async () => {
+        try {
+          const srcId = activeProfile?.sourceLangId;
+          const tgtId = activeProfile?.targetLangId;
+          if (!srcId || !tgtId) {
+            if (mounted)
+              setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
+            return;
+          }
+          const map = await countDueReviewsByLevel(srcId, tgtId, Date.now());
+          if (mounted) setCounts(map);
+        } catch (_) {
           if (mounted) setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
-          return;
         }
-        const map = await countDueReviewsByLevel(srcId, tgtId, Date.now());
-        if (mounted) setCounts(map);
-      } catch (_) {
-        if (mounted) setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [activeProfile?.sourceLangId, activeProfile?.targetLangId]);
+      };
+
+      void fetchCounts();
+
+      return () => {
+        mounted = false;
+      };
+    }, [activeProfile?.sourceLangId, activeProfile?.targetLangId])
+  );
 
   return (
     <View style={styles.container}>

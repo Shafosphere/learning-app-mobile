@@ -36,11 +36,12 @@ export default function ReviewSession() {
   const srcId = activeProfile?.sourceLangId ?? null;
   const tgtId = activeProfile?.targetLangId ?? null;
   const carouselWordsRef = useRef<WordWithTranslations[]>([]);
+  const sessionTimeRef = useRef<number>(Date.now());
   const [lockedAfterWrong, setLockedAfterWrong] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
 
   const formatWordText = (value?: string | null) =>
-    value && value.trim().length > 0 ? value : "—";
+    value && value.trim().length > 0 ? value : "";
 
   const dedupeWords = (list: WordWithTranslations[]) => {
     const seen = new Set<number>();
@@ -63,12 +64,14 @@ export default function ReviewSession() {
     }
     setLoading(true);
     try {
+      const nowCursor = sessionTimeRef.current;
       const hadWordsBefore = carouselWordsRef.current.length > 0;
       const batch = await getDueReviewWordsBatch(
         srcId,
         tgtId,
         selectedLevel,
-        5
+        5,
+        nowCursor
       );
       const uniqueBatch = dedupeWords(batch);
       carouselWordsRef.current = uniqueBatch;
@@ -86,6 +89,7 @@ export default function ReviewSession() {
   }
 
   useEffect(() => {
+    sessionTimeRef.current = Date.now();
     void loadNext();
   }, [srcId, tgtId, selectedLevel]);
 
@@ -163,7 +167,13 @@ export default function ReviewSession() {
 
   async function fetchNextCarouselWord(): Promise<WordWithTranslations | null> {
     if (!srcId || !tgtId) return null;
-    const batch = await getDueReviewWordsBatch(srcId, tgtId, selectedLevel, 5);
+    const batch = await getDueReviewWordsBatch(
+      srcId,
+      tgtId,
+      selectedLevel,
+      5,
+      sessionTimeRef.current
+    );
     if (batch.length === 0) {
       return null;
     }
@@ -199,7 +209,6 @@ export default function ReviewSession() {
     }
 
     if (injectionWord) {
-      console.log("[ReviewSession] Injecting carousel word", injectionWord);
       nextQueue = nextQueue.filter((item) => item.id !== injectionWord.id);
       if (nextQueue.length >= 3) {
         nextQueue[2] = injectionWord;
@@ -224,10 +233,7 @@ export default function ReviewSession() {
     setCurrent(nextCurrent);
     setSessionEnded(false);
 
-    const hiddenTopWord =
-      nextQueue.length >= 3
-        ? nextQueue[2]
-        : nextQueue[nextQueue.length - 1] ?? null;
+    const hiddenTopWord = nextQueue.length >= 3 ? nextQueue[2] : null;
 
     const injectText = formatWordText(hiddenTopWord?.text);
     carousel.spin({ injectText });
@@ -250,7 +256,6 @@ export default function ReviewSession() {
       return;
     }
 
-    console.log("[ReviewSession] poprawna odpowiedź", current);
     setPromptState("correct");
     setCorrectAnswer(null);
     setLockedAfterWrong(false);
@@ -259,9 +264,10 @@ export default function ReviewSession() {
 
     try {
       const nextWord = await fetchNextCarouselWord();
-      const rotated = nextWord
-        ? spinCarousel({ injectionWord: nextWord })
-        : spinCarousel();
+      const rotated = spinCarousel({
+        injectionWord: nextWord ?? undefined,
+        dropCurrent: true,
+      });
       if (rotated) {
         setAnswer("");
         setPromptState("neutral");
@@ -307,35 +313,11 @@ export default function ReviewSession() {
             <RotaryStack
               ref={carouselRef}
               items={
-                carouselItems.length > 0
-                  ? carouselItems
-                  : [current?.text ?? "—"]
+                carouselItems.length > 0 ? carouselItems : [current?.text ?? ""]
               }
               height={70}
             />
           </View>
-          {/* <View
-            style={[
-              styles.promptBar,
-              promptState === "correct" && styles.promptBarCorrect,
-              promptState === "wrong" && styles.promptBarWrong,
-            ]}
-          >
-            <Text
-              style={[
-                styles.promptText,
-                promptState === "correct" && styles.promptTextCorrect,
-                promptState === "wrong" && styles.promptTextWrong,
-              ]}
-            >
-              {current.text}
-            </Text>
-            {promptState === "wrong" && (
-              <Text style={[styles.promptText, styles.promptTextWrong]}>
-                Poprawna odpowiedź: {correctAnswer ?? ""}
-              </Text>
-            )}
-          </View> */}
           <TextInput
             style={styles.answerInput}
             placeholder="Przetłumacz"
@@ -346,15 +328,17 @@ export default function ReviewSession() {
             onSubmitEditing={onSubmit}
           />
           <View style={styles.buttonRow}>
-            <MyButton
-              text="ZRESETUJ"
-              color="my_red"
-              onPress={() => {
-                void onReset();
-              }}
-              disabled={spinBusy || sessionEnded}
-              width={140}
-            />
+            {promptState === "wrong" && (
+              <MyButton
+                text="ZRESETUJ"
+                color="my_red"
+                onPress={() => {
+                  void onReset();
+                }}
+                disabled={spinBusy || sessionEnded}
+                width={140}
+              />
+            )}
 
             <View style={{ gap: 10 }}>
               <MyButton
@@ -366,15 +350,17 @@ export default function ReviewSession() {
                 disabled={spinBusy || lockedAfterWrong || sessionEnded}
                 width={140}
               />
-              <MyButton
-                text="ZACHOWAJ"
-                color="my_yellow"
-                onPress={() => {
-                  void onKeep();
-                }}
-                disabled={spinBusy || sessionEnded}
-                width={140}
-              />
+              {promptState === "wrong" && (
+                <MyButton
+                  text="ZACHOWAJ"
+                  color="my_yellow"
+                  onPress={() => {
+                    void onKeep();
+                  }}
+                  disabled={spinBusy || sessionEnded}
+                  width={140}
+                />
+              )}
             </View>
           </View>
         </View>
