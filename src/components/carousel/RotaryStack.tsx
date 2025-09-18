@@ -36,12 +36,6 @@ const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    // overflow: "hidden",
-    // border styling for visibility
-    // backgroundColor: colors.lightbg,
-    // borderColor: colors.my_green,
-    // borderWidth: 3,
-    // borderRadius: 8,
   },
   cardBase: {
     position: "absolute",
@@ -51,7 +45,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     paddingLeft: 12,
     height: 56,
     borderRadius: 8,
-    backgroundColor: colors.lightbg,
+    backgroundColor: colors.secondBackground,
     justifyContent: "center",
     //  opacity: 0.1,
   },
@@ -62,11 +56,11 @@ const useStyles = createThemeStylesHook((colors) => ({
     textTransform: "uppercase",
   },
   cardMiddle: {
-    backgroundColor: colors.lightbg,
+    backgroundColor: colors.secondBackground,
     width: "100%",
     zIndex: 100,
     // paddingVertical: 14,
-    // paddingHorizontal: 18,
+    paddingHorizontal: 18,
     alignContent: "center",
     justifyContent: "center",
     borderRadius: 8,
@@ -214,7 +208,8 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
           if (idx !== -1) {
             const fallbackText =
               data.length > 0 ? data[nextIndex % data.length] ?? null : null;
-            const textToUse = injectText !== undefined ? injectText : fallbackText;
+            const textToUse =
+              injectText !== undefined ? injectText : fallbackText;
             updated[idx] = { ...updated[idx], text: textToUse };
           }
           return updated;

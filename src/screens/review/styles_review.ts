@@ -57,22 +57,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: '100%',
   },
   promptTextCorrect: {
-    color: colors.lightbg,
+    color: colors.secondBackground,
   },
   promptTextWrong: {
-    color: colors.lightbg,
+    color: colors.secondBackground,
   },
   answerInput: {
     height: 60,
     width: "100%",
-    backgroundColor: colors.lightbg,
+    backgroundColor: colors.secondBackground,
     borderColor: colors.my_yellow,
     borderWidth: 3,
     borderRadius: 8,
-    // paddingVertical: 14,
     paddingHorizontal: 18,
     fontSize: 25,
-    color: colors.font,
+    color: colors.headline,
   },
   buttonRow: {
     flexDirection: "row",

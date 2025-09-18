@@ -342,7 +342,7 @@ export default function ReviewSession() {
 
             <View style={{ gap: 10 }}>
               <MyButton
-                text="KRĘĆ"
+                text="submit"
                 color="my_green"
                 onPress={() => {
                   void handleSpin();

@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { getLanguagePairs } from "@/src/components/db/db";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { usePopup } from "@/src/contexts/PopupContext";
 import type { LanguagePair } from "@/src/components/db/db";
 import type { LanguageProfile } from "@/src/types/profile";
 
@@ -20,6 +21,7 @@ import US_FLAG from "../../assets/flag/US.png";
 export default function Profile() {
   const styles = useStyles();
   const { addProfile } = useSettings();
+  const setPopup = usePopup();
 
   const flagMap: Record<string, number> = {
     pl: PL_FLAG,
@@ -126,13 +128,18 @@ export default function Profile() {
               (p) =>
                 p.source_code === activeSource && p.target_code === activeTarget
             );
-           if (pair) {
+            if (pair) {
               await addProfile({
                 sourceLang: pair.source_code,
                 targetLang: pair.target_code,
                 sourceLangId: pair.source_id, // NEW
                 targetLangId: pair.target_id, // NEW
               } as LanguageProfile);
+              setPopup({
+                message: "Utworzono profil!",
+                color: "my_green",
+                duration: 3000,
+              });
               setSource(null);
               setTarget(null);
             }

@@ -1,8 +1,8 @@
 import { Text, TextInput, View } from "react-native";
 import { useStyles } from "./styles_card";
 import MyButton from "../button/button";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { useEffect, useState } from "react";
+import { WordWithTranslations } from "@/src/types/boxes";
+import { useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 
 type CardProps = {
@@ -21,6 +21,7 @@ type CardProps = {
   } | null;
   wrongInputChange: (which: 1 | 2, value: string) => void;
   onDownload: () => Promise<void>;
+  downloadDisabled?: boolean;
 };
 
 export default function Card({
@@ -33,6 +34,7 @@ export default function Card({
   correction,
   wrongInputChange,
   onDownload,
+  downloadDisabled = false,
 }: CardProps) {
   const styles = useStyles();
   const statusStyle =
@@ -136,7 +138,7 @@ export default function Card({
           text="dodaj    słówka"
           color="my_yellow"
           onPress={onDownload}
-          disabled={false}
+          disabled={downloadDisabled}
         />
       </View>
     </View>

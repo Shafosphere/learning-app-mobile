@@ -78,6 +78,7 @@ export default function Flashcards() {
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const learnedPercent =
     totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
+  const boxOneFull = boxes.boxOne.length >= 30;
 
   function selectRandomWord(box: keyof BoxesState) {
     const list = boxes[box];
@@ -98,6 +99,9 @@ export default function Flashcards() {
   }
 
   async function downloadData() {
+    if (boxOneFull) {
+      return;
+    }
     const prof = activeProfile;
     if (!prof || prof.sourceLangId == null || prof.targetLangId == null) {
       console.warn("Brak aktywnego profilu lub ID języków");
@@ -326,6 +330,7 @@ export default function Flashcards() {
         correction={correction}
         wrongInputChange={wrongInputChange}
         onDownload={downloadData}
+        downloadDisabled={boxOneFull}
       />
 
       {boxesLayout === "classic" ? (

@@ -267,6 +267,17 @@ function computeNextReviewFromStage(stage: number, nowMs: number): number {
   return nowMs + REVIEW_INTERVALS_MS[idx];
 }
 
+function createEmptyLevelCounts(): Record<CEFRLevel, number> {
+  return {
+    A1: 0,
+    A2: 0,
+    B1: 0,
+    B2: 0,
+    C1: 0,
+    C2: 0,
+  };
+}
+
 export async function scheduleReview(
   wordId: number,
   sourceLangId: number,
@@ -379,19 +390,33 @@ export async function countDueReviewsByLevel(
     targetLangId,
     nowMs
   );
-  const base: Record<CEFRLevel, number> = {
-    A1: 0,
-    A2: 0,
-    B1: 0,
-    B2: 0,
-    C1: 0,
-    C2: 0,
-  };
+  const counts = createEmptyLevelCounts();
   for (const r of rows) {
     // Ensure only valid CEFR keys are assigned
-    if (r.level in base) base[r.level as CEFRLevel] = r.cnt | 0;
+    if (r.level in counts) counts[r.level as CEFRLevel] = r.cnt | 0;
   }
-  return base;
+  return counts;
+}
+
+export async function countLearnedWordsByLevel(
+  sourceLangId: number,
+  targetLangId: number
+): Promise<Record<CEFRLevel, number>> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ level: CEFRLevel; cnt: number }>(
+    `SELECT level, COUNT(*) AS cnt
+     FROM reviews
+     WHERE source_lang_id = ? AND target_lang_id = ?
+     GROUP BY level;`,
+    sourceLangId,
+    targetLangId
+  );
+
+  const counts = createEmptyLevelCounts();
+  for (const row of rows) {
+    if (row.level in counts) counts[row.level as CEFRLevel] = row.cnt | 0;
+  }
+  return counts;
 }
 
 // Returns a random due review word (for given pair and CEFR level)

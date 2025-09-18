@@ -44,9 +44,14 @@ export default function Boxes({
     <View style={styles.container}>
       <View style={styles.containerTop}>
         {entries.map(([boxName, words]) => {
+          const storedFace = faces[boxName];
+          const isActive = activeBox === boxName;
           const currentFace: Face =
-            (faces[boxName] as Face | undefined) ??
-            (activeBox === boxName ? "happy" : "smile");
+            storedFace === "surprised"
+              ? "surprised"
+              : isActive
+              ? "happy"
+              : "smile";
 
           const onPress = () => {
             setFaces((prev) => ({ ...prev, [boxName]: "surprised" }));
@@ -57,11 +62,11 @@ export default function Boxes({
               clearTimeout(timersRef.current[boxName]!);
             }
             timersRef.current[boxName] = setTimeout(() => {
-              const isActive = activeBoxRef.current === boxName;
-              setFaces((prev) => ({
-                ...prev,
-                [boxName]: isActive ? "happy" : "smile",
-              }));
+              setFaces((prev) => {
+                const next = { ...prev };
+                delete next[boxName];
+                return next;
+              });
             }, 500);
           };
 

@@ -4,9 +4,7 @@ import { useStyles } from "@/src/screens/level/styles_level";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { getTotalWordsForLevel } from "@/src/components/db/db";
-import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { countLearnedWordsByLevel, getTotalWordsForLevel } from "@/src/components/db/db";
 
 export default function Level() {
   const { setLevel, activeProfile } = useSettings();
@@ -29,35 +27,20 @@ export default function Level() {
         const srcId = activeProfile.sourceLangId;
         const tgtId = activeProfile.targetLangId;
 
-        const entries = await Promise.all(
-          levels.map(async (lvl) => {
-            try {
-              const storageKey = `boxes:${makeScopeId(srcId, tgtId, lvl)}`;
-              const raw = await AsyncStorage.getItem(storageKey);
-              let usedWordIdsLen = 0;
-              if (raw) {
-                const parsed = JSON.parse(raw);
-                if (
-                  parsed &&
-                  parsed.v === 2 &&
-                  Array.isArray(parsed.usedWordIds)
-                ) {
-                  usedWordIdsLen = parsed.usedWordIds.length;
-                }
-              }
-              const total = await getTotalWordsForLevel(srcId, lvl);
-              const progress =
-                total > 0 ? Math.min(1, usedWordIdsLen / total) : 0;
-              return [lvl, progress] as const;
-            } catch (_) {
-              return [lvl, 0] as const;
-            }
-          })
-        );
+        const [learnedCounts, totals] = await Promise.all([
+          countLearnedWordsByLevel(srcId, tgtId),
+          Promise.all(
+            levels.map(async (lvl) => [
+              lvl,
+              await getTotalWordsForLevel(srcId, lvl),
+            ] as const)
+          ),
+        ]);
 
         if (!mounted) return;
-        const map = entries.reduce((acc, [lvl, prog]) => {
-          acc[lvl] = prog;
+        const map = totals.reduce((acc, [lvl, total]) => {
+          const learned = learnedCounts[lvl] ?? 0;
+          acc[lvl] = total > 0 ? Math.min(1, learned / total) : 0;
           return acc;
         }, {} as Record<CEFRLevel, number>);
         setProgressMap(map);
