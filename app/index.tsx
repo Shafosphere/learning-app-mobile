@@ -10,11 +10,18 @@ export default function Index() {
     router.push("/profilpanel");
   };
 
+  const goToStats = () => {
+    router.push("/stats");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Hejka!</Text>
       <Text style={styles.text}>Stwórz swój pierwszy profil!</Text>
-      <MyButton text="Przejdź do profilu" onPress={goToProfilPanel} />
+      <View style={styles.buttons}>
+        <MyButton text="Profil" onPress={goToProfilPanel} width={140} />
+        <MyButton text="Statystyki" onPress={goToStats} width={140} />
+      </View>
     </View>
   );
 }
@@ -31,5 +38,11 @@ const styles = StyleSheet.create({
     width: "100%",
     fontSize: 24,
     fontWeight: "bold",
+  },
+  buttons: {
+    marginTop: 24,
+    width: "100%",
+    flexDirection: "row",
+    gap: 16,
   },
 });

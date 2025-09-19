@@ -22,7 +22,7 @@ const logo = require("./../../../assets/box/logo.png");
 
 export default function Navbar() {
   const router = useRouter();
-  const { theme, toggleTheme } = useSettings();
+  const { toggleTheme } = useSettings();
   const { streakCount } = useStreak();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
@@ -86,6 +86,21 @@ export default function Navbar() {
         onPress={() => router.push("/review")}
       >
         <Ionicons style={styles.icon} name="repeat" size={16} color="black" />
+      </Pressable>
+
+      <Pressable
+        style={({ pressed }) => [
+          styles.iconCon,
+          pressed && styles.iconConPressed,
+        ]}
+        onPress={() => router.push("/stats")}
+      >
+        <Ionicons
+          style={styles.icon}
+          name="stats-chart"
+          size={16}
+          color="black"
+        />
       </Pressable>
 
       {/* Spacer to push theme + streak to the right */}

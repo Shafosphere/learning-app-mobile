@@ -25,6 +25,8 @@ interface SettingsContextValue {
   activeProfile: LanguageProfile | null;
   flashcardsBatchSize: number;
   setFlashcardsBatchSize: (n: number) => Promise<void>;
+  dailyGoal: number;
+  setDailyGoal: (n: number) => Promise<void>;
 }
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
@@ -48,6 +50,8 @@ const defaultValue: SettingsContextValue = {
   activeProfile: null,
   flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
   setFlashcardsBatchSize: async () => {},
+  dailyGoal: 20,
+  setDailyGoal: async () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
@@ -82,6 +86,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcardsBatchSize",
       DEFAULT_FLASHCARDS_BATCH_SIZE
     );
+  const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -133,22 +138,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         boxesLayout,
         setBoxesLayout,
         profiles,
-      addProfile,
-      activeProfileIdx,
-      setActiveProfileIdx,
-      activeProfile,
-      selectedLevel,
-      setLevel,
-      spellChecking,
-      toggleSpellChecking,
-      showBoxFaces,
-      toggleShowBoxFaces,
-      flashcardsBatchSize,
-      setFlashcardsBatchSize,
-    }}
-  >
-    {children}
-  </SettingsContext.Provider>
+        addProfile,
+        activeProfileIdx,
+        setActiveProfileIdx,
+        activeProfile,
+        selectedLevel,
+        setLevel,
+        spellChecking,
+        toggleSpellChecking,
+        showBoxFaces,
+        toggleShowBoxFaces,
+        flashcardsBatchSize,
+        setFlashcardsBatchSize,
+        dailyGoal,
+        setDailyGoal,
+      }}
+    >
+      {children}
+    </SettingsContext.Provider>
   );
 };
 
