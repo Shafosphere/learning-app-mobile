@@ -27,6 +27,12 @@ interface SettingsContextValue {
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
+  feedbackEnabled: boolean;
+  setFeedbackEnabled: (value: boolean) => Promise<void>;
+  toggleFeedbackEnabled: () => Promise<void>;
+  learningRemindersEnabled: boolean;
+  setLearningRemindersEnabled: (value: boolean) => Promise<void>;
+  toggleLearningRemindersEnabled: () => Promise<void>;
 }
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
@@ -52,6 +58,12 @@ const defaultValue: SettingsContextValue = {
   setFlashcardsBatchSize: async () => {},
   dailyGoal: 20,
   setDailyGoal: async () => {},
+  feedbackEnabled: true,
+  setFeedbackEnabled: async () => {},
+  toggleFeedbackEnabled: async () => {},
+  learningRemindersEnabled: false,
+  setLearningRemindersEnabled: async () => {},
+  toggleLearningRemindersEnabled: async () => {},
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
@@ -87,6 +99,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       DEFAULT_FLASHCARDS_BATCH_SIZE
     );
   const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
+  const [feedbackEnabledState, _setFeedbackEnabled] =
+    usePersistedState<boolean>("feedbackEnabled", true);
+  const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
+    usePersistedState<boolean>("learningRemindersEnabled", false);
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -129,6 +145,22 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const activeProfile =
     activeProfileIdx != null ? profiles[activeProfileIdx] : null;
 
+  const setFeedbackEnabled = async (value: boolean) => {
+    await _setFeedbackEnabled(value);
+  };
+
+  const toggleFeedbackEnabled = async () => {
+    await setFeedbackEnabled(!feedbackEnabledState);
+  };
+
+  const setLearningRemindersEnabled = async (value: boolean) => {
+    await _setLearningRemindersEnabled(value);
+  };
+
+  const toggleLearningRemindersEnabled = async () => {
+    await setLearningRemindersEnabled(!learningRemindersEnabledState);
+  };
+
   return (
     <SettingsContext.Provider
       value={{
@@ -152,6 +184,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setFlashcardsBatchSize,
         dailyGoal,
         setDailyGoal,
+        feedbackEnabled: feedbackEnabledState,
+        setFeedbackEnabled,
+        toggleFeedbackEnabled,
+        learningRemindersEnabled: learningRemindersEnabledState,
+        setLearningRemindersEnabled,
+        toggleLearningRemindersEnabled,
       }}
     >
       {children}
