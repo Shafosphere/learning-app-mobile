@@ -274,6 +274,12 @@ export default function Flashcards() {
     }
   }, [boxes]);
 
+  const profileAccessibilityLabel = activeProfile
+    ? `Profil ${activeProfile.sourceLang?.toUpperCase()} do ${activeProfile.targetLang?.toUpperCase()}. Otwórz panel profilu.`
+    : "Wybierz profil językowy";
+
+  const levelAccessibilityLabel = `Poziom ${selectedLevel}. Zmień poziom nauki.`;
+
   if (
     !activeProfile ||
     activeProfile.sourceLangId == null ||
@@ -282,7 +288,7 @@ export default function Flashcards() {
   ) {
     return (
       <View style={styles.container}>
-        <Text>Wybierz profil i poziom.</Text>
+        <Text allowFontScaling>Wybierz profil i poziom.</Text>
       </View>
     );
   }
@@ -292,6 +298,8 @@ export default function Flashcards() {
       <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
         style={styles.containerofprofile}
+        accessibilityRole="button"
+        accessibilityLabel={profileAccessibilityLabel}
       >
         {activeProfile && (
           <Image
@@ -305,9 +313,13 @@ export default function Flashcards() {
       <TouchableOpacity
         onPress={() => router.push("/level")}
         style={styles.containeroflevel}
+        accessibilityRole="button"
+        accessibilityLabel={levelAccessibilityLabel}
       >
         <View style={styles.levelContainer}>
-          <Text style={styles.levelLabel}>{selectedLevel}</Text>
+          <Text style={styles.levelLabel} allowFontScaling>
+            {selectedLevel}
+          </Text>
           {/* <View style={styles.progressTrack}>
             <View
               style={[

@@ -55,8 +55,18 @@ const BoxSkin: React.FC<BoxSkinProps> = ({ wordCount, face, isActive, isCaro }) 
     );
   };
 
+  const accessibilityLabel = `Pudełko z ${wordCount} słowami${
+    showBoxFaces ? `, nastrój: ${face}` : ""
+  }`;
+
   return (
-    <View style={[styles.containerSkin, isActive && styles.activeBox, isCaro && styles.caroPosition]}>
+    <View
+      style={[styles.containerSkin, isActive && styles.activeBox, isCaro && styles.caroPosition]}
+      accessible
+      accessibilityRole="image"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ selected: !!isActive }}
+    >
       <Image source={BoxTop} style={styles.skin} />
       {renderCards()}
       {showBoxFaces && (

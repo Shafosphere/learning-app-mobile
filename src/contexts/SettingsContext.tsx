@@ -1,6 +1,11 @@
 // src/contexts/SettingsContext.tsx
-import { createContext, ReactNode, useContext, useState } from "react";
-import { Theme, themeMap } from "../theme/theme";
+import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import {
+  resolveThemeColors,
+  Theme,
+  ThemeColors,
+  ColorBlindMode,
+} from "../theme/theme";
 import { usePersistedState } from "../hooks/usePersistedState";
 import type { CEFRLevel } from "../types/language";
 import { LanguageProfile } from "../types/profile";
@@ -8,7 +13,7 @@ import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
 
 interface SettingsContextValue {
   theme: Theme;
-  colors: (typeof themeMap)[Theme];
+  colors: ThemeColors;
   toggleTheme: () => Promise<void>;
   boxesLayout: "classic" | "carousel";
   setBoxesLayout: (layout: "classic" | "carousel") => Promise<void>;
@@ -33,13 +38,25 @@ interface SettingsContextValue {
   learningRemindersEnabled: boolean;
   setLearningRemindersEnabled: (value: boolean) => Promise<void>;
   toggleLearningRemindersEnabled: () => Promise<void>;
+  highContrastEnabled: boolean;
+  toggleHighContrast: () => Promise<void>;
+  colorBlindMode: ColorBlindMode;
+  toggleColorBlindMode: () => Promise<void>;
+  largeFontEnabled: boolean;
+  toggleLargeFont: () => Promise<void>;
+  fontScaleMultiplier: number;
+  accessibilityPreferences: {
+    highContrastEnabled: boolean;
+    colorBlindMode: ColorBlindMode;
+    largeFontEnabled: boolean;
+  };
 }
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
-  colors: themeMap.light,
+  colors: resolveThemeColors("light"),
   toggleTheme: async () => {},
   boxesLayout: "carousel",
   setBoxesLayout: async () => {},
@@ -64,6 +81,18 @@ const defaultValue: SettingsContextValue = {
   learningRemindersEnabled: false,
   setLearningRemindersEnabled: async () => {},
   toggleLearningRemindersEnabled: async () => {},
+  highContrastEnabled: false,
+  toggleHighContrast: async () => {},
+  colorBlindMode: "none",
+  toggleColorBlindMode: async () => {},
+  largeFontEnabled: false,
+  toggleLargeFont: async () => {},
+  fontScaleMultiplier: 1,
+  accessibilityPreferences: {
+    highContrastEnabled: false,
+    colorBlindMode: "none",
+    largeFontEnabled: false,
+  },
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
@@ -103,6 +132,16 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<boolean>("feedbackEnabled", true);
   const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
     usePersistedState<boolean>("learningRemindersEnabled", false);
+  const [highContrastEnabled, setHighContrastEnabled] =
+    usePersistedState<boolean>("accessibility.highContrast", false);
+  const [colorBlindMode, setColorBlindMode] = usePersistedState<ColorBlindMode>(
+    "accessibility.colorBlindMode",
+    "none"
+  );
+  const [largeFontEnabled, setLargeFontEnabled] = usePersistedState<boolean>(
+    "accessibility.largeFont",
+    false
+  );
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -113,7 +152,16 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     const newTheme: Theme = theme === "light" ? "dark" : "light";
     await setTheme(newTheme);
   };
-  const colors = themeMap[theme];
+  const colors = useMemo(
+    () =>
+      resolveThemeColors(theme, {
+        highContrast: highContrastEnabled,
+        colorBlindMode,
+      }),
+    [theme, highContrastEnabled, colorBlindMode]
+  );
+
+  const fontScaleMultiplier = largeFontEnabled ? 1.15 : 1;
 
   const boxesLayout = boxesLayoutState;
   const setBoxesLayout = async (layout: "classic" | "carousel") => {
@@ -161,6 +209,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
   };
 
+  const toggleHighContrast = async () => {
+    await setHighContrastEnabled(!highContrastEnabled);
+  };
+
+  const toggleColorBlindMode = async () => {
+    await setColorBlindMode(
+      colorBlindMode === "none" ? "deuteranopia" : "none"
+    );
+  };
+
+  const toggleLargeFont = async () => {
+    await setLargeFontEnabled(!largeFontEnabled);
+  };
+
   return (
     <SettingsContext.Provider
       value={{
@@ -190,6 +252,18 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         learningRemindersEnabled: learningRemindersEnabledState,
         setLearningRemindersEnabled,
         toggleLearningRemindersEnabled,
+        highContrastEnabled,
+        toggleHighContrast,
+        colorBlindMode,
+        toggleColorBlindMode,
+        largeFontEnabled,
+        toggleLargeFont,
+        fontScaleMultiplier,
+        accessibilityPreferences: {
+          highContrastEnabled,
+          colorBlindMode,
+          largeFontEnabled,
+        },
       }}
     >
       {children}

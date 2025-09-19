@@ -4,10 +4,12 @@ import { useStyles } from "../../src/screens/settings/styles_settings";
 import AppearanceSection from "@/src/components/settings/AppearanceSection";
 import LearningSection from "@/src/components/settings/LearningSection";
 import DataSection from "@/src/components/settings/DataSection";
+import AccessibilitySection from "@/src/components/settings/AccessibilitySection";
 
 const TAB_CONFIG = [
   { key: "appearance", label: "Wygląd" },
   { key: "learning", label: "Nauka" },
+  { key: "accessibility", label: "Dostępność" },
   { key: "data", label: "Dane" },
 ] as const;
 
@@ -49,6 +51,7 @@ export default function Settings() {
       >
         {activeTab === "appearance" && <AppearanceSection />}
         {activeTab === "learning" && <LearningSection />}
+        {activeTab === "accessibility" && <AccessibilitySection />}
         {activeTab === "data" && <DataSection />}
       </ScrollView>
     </View>
