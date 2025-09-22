@@ -79,23 +79,35 @@ export default function ProfilPanel() {
         ))}
 
         <View style={styles.buttonscontainer}>
-          <MyButton
-            text="nowy"
-            color="my_yellow"
-            onPress={() => router.push("/createprofile")}
-            disabled={false}
-            width={70}
-          />
+          <View style={styles.buttonsRow}>
+            <MyButton
+              text="nowy"
+              color="my_yellow"
+              onPress={() => router.push("/createprofile")}
+              disabled={false}
+              width={70}
+            />
 
-          <MyButton
-            text="zatwierdź"
-            color="my_green"
-            onPress={() => {
-              confirmSelection();
-              handleClick();
-            }}
-            disabled={clickedProfile == null}
-          />
+            <MyButton
+              text="zatwierdź"
+              color="my_green"
+              onPress={() => {
+                confirmSelection();
+                handleClick();
+              }}
+              disabled={clickedProfile == null}
+            />
+          </View>
+
+          <View style={styles.buttonsRow}>
+            <MyButton
+              text="własny"
+              color="my_yellow"
+              onPress={() => router.push("/custom_profile")}
+              disabled={false}
+              width={130}
+            />
+          </View>
         </View>
       </View>
     </View>

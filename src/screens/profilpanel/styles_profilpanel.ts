@@ -26,14 +26,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
     maxHeight: "75%",
   },
   buttonscontainer: {
-    display: "flex",
-    justifyContent: "flex-end",
     width: "100%",
-    flexDirection: "row",
-    gap: 15,
+    flexDirection: "column",
+    gap: 12,
     borderColor: colors.border,
     borderTopWidth: 3,
     paddingTop: 15,
+  },
+  buttonsRow: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 15,
   },
   flag: {
     width: 99/1.3,
