@@ -11,7 +11,9 @@ import type { ThemeColors } from "./theme";
 
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
-type AccessibilityPreferences = ReturnType<typeof useSettings>["accessibilityPreferences"];
+type AccessibilityPreferences = ReturnType<
+  typeof useSettings
+>["accessibilityPreferences"];
 
 type StylesMap<T> = (
   colors: ThemeColors,
@@ -26,7 +28,7 @@ function scaleFontStyles<T>(styles: T, multiplier: number): T {
   for (const key in styles) {
     const value = styles[key];
     if (value && typeof value === "object" && !Array.isArray(value)) {
-      const styleValue: Record<string, unknown> = { ...value };
+      const styleValue = { ...value } as Partial<TextStyle>;
 
       if (typeof styleValue.fontSize === "number") {
         styleValue.fontSize = (styleValue.fontSize as number) * multiplier;

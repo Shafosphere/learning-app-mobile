@@ -1,10 +1,12 @@
-import { useMemo, useState } from "react";
+import { useState, type ComponentType } from "react";
 import {
+  InputAccessoryView,
   Platform,
   Pressable,
   ScrollView,
   Text,
   TextInput,
+  TextInputComponent,
   View,
 } from "react-native";
 import { Asset } from "expo-asset";
@@ -14,6 +16,42 @@ import { usePopup } from "@/src/contexts/PopupContext";
 import { useStyles } from "@/src/screens/custom_profile/styles_custom_profile";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
+import Entypo from "@expo/vector-icons/Entypo";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+const PROFILE_COLORS = [
+  { id: "red", label: "Czerwony", value: "#FF0000" },
+  { id: "orange", label: "Pomarańczowy", value: "#FFA500" },
+  { id: "yellow", label: "Żółty", value: "#FFFF00" },
+  { id: "green", label: "Zielony", value: "#008000" },
+  { id: "turquoise", label: "Turkusowy", value: "#40E0D0" },
+  { id: "blue", label: "Niebieski", value: "#0000FF" },
+  { id: "purple", label: "Fioletowy", value: "#800080" },
+  { id: "pink", label: "Różowy", value: "#FFC0CB" },
+  { id: "brown", label: "Brązowy", value: "#A52A2A" },
+  { id: "gray", label: "Szary", value: "#808080" },
+];
+
+type IconComponent = ComponentType<{
+  name: string;
+  size?: number;
+  color?: string;
+}>;
+
+const PROFILE_ICONS: { id: string; Component: IconComponent; name: string }[] =
+  [
+    { id: "heart", Component: AntDesign, name: "heart" },
+    { id: "coffee", Component: MaterialCommunityIcons, name: "coffee" },
+    { id: "suitcase", Component: Entypo, name: "suitcase" },
+    { id: "star", Component: AntDesign, name: "star" },
+    { id: "house", Component: FontAwesome6, name: "house-chimney" },
+    { id: "cloud", Component: AntDesign, name: "cloud" },
+    { id: "eye", Component: AntDesign, name: "eye" },
+    { id: "leaf", Component: Ionicons, name: "leaf" },
+  ];
 interface ManualCard {
   id: string;
   front: string;
@@ -22,20 +60,11 @@ interface ManualCard {
 
 type AddMode = "csv" | "manual";
 
-type IconOption = {
-  id: string;
-  label: string;
-  color: string;
-  borderColor: string;
-};
-
 export default function CustomProfileScreen() {
   const styles = useStyles();
   const { colors } = useSettings();
   const setPopup = usePopup();
 
-  const [deckName, setDeckName] = useState("");
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(null);
   const [addMode, setAddMode] = useState<AddMode>("csv");
   const [manualCards, setManualCards] = useState<ManualCard[]>([
     { id: "card-0", front: "", back: "" },
@@ -43,42 +72,6 @@ export default function CustomProfileScreen() {
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
 
   const sampleFileName = "custom_profile_przyklad.csv";
-
-  const iconOptions: IconOption[] = useMemo(
-    () => [
-      {
-        id: "mint",
-        label: "Miętowy",
-        color: colors.my_green,
-        borderColor: colors.my_green,
-      },
-      {
-        id: "sunny",
-        label: "Słoneczny",
-        color: colors.my_yellow,
-        borderColor: colors.my_yellow,
-      },
-      {
-        id: "coral",
-        label: "Koralowy",
-        color: colors.my_red,
-        borderColor: colors.my_red,
-      },
-      {
-        id: "ocean",
-        label: "Oceaniczny",
-        color: colors.darkbg,
-        borderColor: colors.darkbg,
-      },
-      {
-        id: "cloud",
-        label: "Chmura",
-        color: colors.lightbg,
-        borderColor: colors.border,
-      },
-    ],
-    [colors]
-  );
 
   const segmentOptions: { key: AddMode; label: string }[] = [
     { key: "csv", label: "Import z CSV" },
@@ -140,11 +133,12 @@ export default function CustomProfileScreen() {
           await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
 
         if (permissions.granted && permissions.directoryUri) {
-          const targetFileUri = await FileSystem.StorageAccessFramework.createFileAsync(
-            permissions.directoryUri,
-            sampleFileName,
-            "text/csv"
-          );
+          const targetFileUri =
+            await FileSystem.StorageAccessFramework.createFileAsync(
+              permissions.directoryUri,
+              sampleFileName,
+              "text/csv"
+            );
 
           await FileSystem.writeAsStringAsync(targetFileUri, sampleContent, {
             encoding: FileSystem.EncodingType.UTF8,
@@ -186,48 +180,43 @@ export default function CustomProfileScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Nazwa talii</Text>
-          <TextInput
-            style={styles.input}
-            placeholder="Wpisz nazwę"
-            placeholderTextColor={colors.paragraph}
-            value={deckName}
-            onChangeText={setDeckName}
-            accessibilityLabel="Nazwa talii"
-          />
+          <Text style={styles.sectionHeader}>Profil</Text>
 
-          <Text style={styles.sectionHeader}>Ikona</Text>
-          <View style={styles.iconGrid}>
-            {iconOptions.map((option) => (
-              <Pressable
-                key={option.id}
-                accessibilityRole="button"
-                accessibilityState={{ selected: selectedIcon === option.id }}
-                accessibilityLabel={`Ikona ${option.label}`}
-                onPress={() => setSelectedIcon(option.id)}
-                style={({ pressed }) => [
-                  styles.iconTile,
-                  selectedIcon === option.id && styles.iconTileSelected,
-                  pressed && { opacity: 0.85 },
-                ]}
-              >
-                <View
+          <View>
+            <Text style={styles.miniSectionHeader}>nazwa</Text>
+            <TextInput style={styles.profileInput}></TextInput>
+          </View>
+
+          <View style={styles.iconContainer}>
+            <Text style={styles.miniSectionHeader}>ikona</Text>
+            <View style={styles.imageContainer}>
+              {PROFILE_ICONS.map(({ id, Component, name }) => (
+                <Component
+                  key={id}
+                  name={name as never}
+                  size={30}
+                  color={colors.headline}
+                />
+              ))}
+            </View>
+
+            <View style={styles.colorsContainer}>
+              {PROFILE_COLORS.map((color) => (
+                <Pressable
+                  key={color.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Kolor ${color.label}`}
                   style={[
-                    styles.iconSquare,
-                    {
-                      backgroundColor: option.color,
-                      borderColor: option.borderColor,
-                    },
+                    styles.profileColor,
+                    { backgroundColor: color.value },
                   ]}
                 />
-                <Text style={styles.iconLabel}>{option.label}</Text>
-              </Pressable>
-            ))}
+              ))}
+            </View>
           </View>
         </View>
-
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Tryb dodawania kart</Text>
+          <Text style={styles.sectionHeader}>ZAWARTOSC</Text>
           <View style={styles.segmentedControl}>
             {segmentOptions.map((option) => (
               <Pressable
@@ -256,95 +245,11 @@ export default function CustomProfileScreen() {
 
         {addMode === "csv" ? (
           <View style={styles.section}>
-            <Text style={styles.sectionHeader}>Import z pliku CSV</Text>
-            <Text style={styles.csvInstruction}>
-              Przygotuj plik CSV z kolumnami "front" i "back" oraz nagłówkiem.
-              Upewnij się, że kodowanie to UTF-8, a separator to przecinek lub
-              średnik.
-            </Text>
-            {csvFileName && (
-              <Text style={styles.csvFileName}>
-                Wybrany plik: {csvFileName}
-              </Text>
-            )}
-            <View style={styles.csvButtons}>
-              <MyButton
-                text="Wybierz plik"
-                color="my_yellow"
-                onPress={handleSelectCsv}
-                accessibilityLabel="Wybierz plik CSV"
-              />
-              <MyButton
-                text="Pobierz przykład"
-                color="my_green"
-                onPress={handleDownloadSample}
-                accessibilityLabel="Pobierz przykładowy plik CSV"
-              />
-            </View>
+            <Text style={styles.sectionHeader}>import z pliku CSV</Text>
           </View>
         ) : (
           <View style={styles.section}>
             <Text style={styles.sectionHeader}>Dodaj ręcznie</Text>
-            <View style={styles.table}>
-              <View style={styles.tableHeader}>
-                <Text style={styles.headerCell}>Awers</Text>
-                <Text style={styles.headerCell}>Rewers</Text>
-                <Text style={styles.headerCellSmall}>Usuń</Text>
-              </View>
-              <View style={styles.tableBody}>
-                {manualCards.map((item, index) => (
-                  <View key={item.id} style={styles.tableRow}>
-                    <View style={styles.tableCell}>
-                      <TextInput
-                        style={styles.cellInput}
-                        placeholder="Awers"
-                        placeholderTextColor={colors.paragraph}
-                        value={item.front}
-                        onChangeText={(value) =>
-                          handleManualCardChange(item.id, "front", value)
-                        }
-                        multiline
-                        accessibilityLabel={`Awers karty ${index + 1}`}
-                      />
-                    </View>
-                    <View style={styles.tableCell}>
-                      <TextInput
-                        style={styles.cellInput}
-                        placeholder="Rewers"
-                        placeholderTextColor={colors.paragraph}
-                        value={item.back}
-                        onChangeText={(value) =>
-                          handleManualCardChange(item.id, "back", value)
-                        }
-                        multiline
-                        accessibilityLabel={`Rewers karty ${index + 1}`}
-                      />
-                    </View>
-                    <Pressable
-                      onPress={() => handleRemoveCard(item.id)}
-                      accessibilityRole="button"
-                      accessibilityLabel="Usuń kartę"
-                      disabled={manualCards.length === 1}
-                      style={({ pressed }) => [
-                        styles.removeButton,
-                        manualCards.length === 1 && styles.removeButtonDisabled,
-                        pressed && { opacity: 0.7 },
-                      ]}
-                    >
-                      <Text style={styles.removeButtonText}>✕</Text>
-                    </Pressable>
-                  </View>
-                ))}
-              </View>
-              <View style={styles.addCardButton}>
-                <MyButton
-                  text="Dodaj kartę"
-                  color="my_yellow"
-                  onPress={handleAddCard}
-                  accessibilityLabel="Dodaj nową kartę"
-                />
-              </View>
-            </View>
           </View>
         )}
       </ScrollView>
