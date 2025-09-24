@@ -8,6 +8,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   scrollContent: {
     padding: 24,
     gap: 24,
+    minHeight: "100%",
   },
   section: {
     backgroundColor: colors.secondBackground,
@@ -17,10 +18,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
     // gap: 16,
     // paddingTop: 36,
-    position: "relative",
   },
   sectionHeader: {
-    fontSize: 24,
+    fontSize: 30,
     textTransform: "uppercase",
     // position: "absolute",
     width: "100%",
@@ -32,7 +32,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // backgroundColor: colors.my_green,
   },
   miniSectionHeader: {
-    fontSize: 16,
+    fontSize: 20,
     textTransform: "uppercase",
     fontWeight: "900",
     // backgroundColor: colors.my_green,
@@ -42,8 +42,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginBottom: 12,
     display: "flex",
     flexDirection: "row",
+    flexWrap: "wrap",
     width: "100%",
-    justifyContent: "space-between",
+    justifyContent: "flex-start",
+  },
+  iconWrapper: {
+    // backgroundColor: colors.my_green,
+    flexBasis: "20%",
+    // width: "16.6667%",
+    alignItems: "center",
+    justifyContent: "center",
+    marginBottom: 6,
+    padding: 8,
+    borderRadius: 16,
+    borderWidth: 2,
+    borderColor: "transparent",
+  },
+  iconWrapperSelected: {
+    borderColor: colors.my_green,
   },
   iconContainer: {
     // gap: 8,
@@ -51,11 +67,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
   colorsContainer: {
     display: "flex",
     flexDirection: "row",
+    flexWrap: "wrap",
     width: "100%",
+    height: "100%",
+    justifyContent: "center",
+
+    // Usuń wysokość, aby kontener sam dopasował się do zawartości
   },
   profileColor: {
-    width: "10%",
+    width: "16%",
+    aspectRatio: 1,
     height: 20,
+  },
+  profileColorSelected: {
+    borderWidth: 3,
+    borderColor: colors.my_green,
   },
   profileInput: {
     borderColor: colors.my_yellow,
@@ -89,99 +115,124 @@ export const useStyles = createThemeStylesHook((colors) => ({
   segmentOptionLabelActive: {
     color: colors.darkbg,
   },
-  csvInstruction: {
+  modeContainer: {
+    marginTop: 24,
+  },
+  modeTitle: {
+    fontSize: 24,
+    fontWeight: "900",
+    color: colors.headline,
+  },
+  modeDescription: {
     fontSize: 14,
     lineHeight: 20,
     color: colors.paragraph,
+    marginBottom: 16,
   },
-  csvFileName: {
-    fontSize: 14,
+  modeActions: {
+    gap: 12,
+    alignSelf: "flex-end",
+  },
+  csvSelectedFile: {
+    fontSize: 13,
     fontStyle: "italic",
-    color: colors.headline,
-  },
-  csvButtons: {
-    flexDirection: "row",
-    gap: 12,
-    flexWrap: "wrap",
-  },
-  table: {
-    gap: 12,
-  },
-  tableHeader: {
-    flexDirection: "row",
-    gap: 12,
-    paddingHorizontal: 8,
-  },
-  headerCell: {
-    flex: 1,
-    fontSize: 14,
-    fontWeight: "700",
     color: colors.paragraph,
-    paddingLeft: 10,
   },
-  headerCellSmall: {
-    width: 52,
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.paragraph,
-    textAlign: "center",
-  },
-  tableBody: {
-    gap: 12,
-  },
-  tableRow: {
+  manualHeader: {
     flexDirection: "row",
-    gap: 12,
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 12,
-    padding: 8,
     alignItems: "center",
-    backgroundColor: colors.lightbg,
+    // backgroundColor: colors.my_green,
   },
-  tableCell: {
+  manualHeaderCell: {
     flex: 1,
-    borderRadius: 8,
+    fontSize: 15,
+    fontWeight: "700",
+    textAlign: "center",
+    color: colors.paragraph,
+    textTransform: "uppercase",
+  },
+  manualHeaderSpacer: {
+    width: 44,
+  },
+  manualTable: {
+    marginTop: 4,
+    // borderRadius: 18,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.secondBackground,
     overflow: "hidden",
+    borderRightWidth: 0,
+    borderLeftWidth: 0,
   },
-  cellInput: {
-    paddingHorizontal: 10,
-    paddingVertical: 8,
+  manualRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 16,
+    paddingVertical: 14,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+  },
+  manualRowLast: {
+    borderBottomWidth: 0,
+  },
+  manualCell: {
+    flex: 1,
+  },
+  manualDivider: {
+    width: 1,
+    alignSelf: "stretch",
+    backgroundColor: colors.border,
+    marginHorizontal: 12,
+  },
+  manualInput: {
+    paddingHorizontal: 4,
+    paddingVertical: 0,
     fontSize: 14,
     lineHeight: 20,
     color: colors.headline,
-    minHeight: 40,
     textAlignVertical: "top",
+    minHeight: 24,
   },
-  removeButton: {
-    width: 32,
-    height: 32,
-    borderRadius: 16,
-    backgroundColor: colors.my_red,
+  manualRemoveButton: {
+    width: 44,
     alignItems: "center",
     justifyContent: "center",
   },
-  removeButtonText: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.lightbg,
-    lineHeight: 18,
+  manualRemoveButtonDisabled: {
+    opacity: 0.3,
   },
-  removeButtonDisabled: {
-    opacity: 0.4,
+  manualRemoveIcon: {
+    color: colors.my_red,
+    fontSize: 24,
+    fontWeight: "900",
+    lineHeight: 24,
   },
-  addCardButton: {
-    alignSelf: "flex-start",
+  manualAddButton: {
+    alignSelf: "flex-end",
+    backgroundColor: colors.my_yellow,
+    width: 56,
+    height: 56,
+    borderRadius: 18,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 16,
+  },
+  manualAddIcon: {
+    color: colors.headline,
+    fontSize: 30,
+    fontWeight: "900",
+    lineHeight: 30,
   },
   footer: {
     paddingHorizontal: 24,
     paddingBottom: 32,
     paddingTop: 8,
-    gap: 12,
-    alignItems: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+  },
+  footerActionRight: {
+    marginLeft: "auto",
   },
   divider: {
     height: 1,
