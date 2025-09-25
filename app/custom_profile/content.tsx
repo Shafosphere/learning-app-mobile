@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -10,9 +10,14 @@ import {
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import MyButton from "@/src/components/button/button";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStyles } from "@/src/screens/custom_profile/styles_custom_profile";
 import { usePopup } from "@/src/contexts/PopupContext";
+import {
+  createCustomProfile,
+  replaceCustomFlashcards,
+} from "@/src/components/db/db";
+import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
 
 type AddMode = "csv" | "manual";
 
@@ -33,12 +38,37 @@ export default function CustomProfileContentScreen() {
   const styles = useStyles();
   const setPopup = usePopup();
   const router = useRouter();
+  const params = useLocalSearchParams();
 
-  const [addMode, setAddMode] = useState<AddMode>("csv");
+  const profileName = useMemo(() => {
+    const raw = params.name;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    return (value ?? "").toString().trim();
+  }, [params.name]);
+  const iconId = useMemo(() => {
+    const raw = params.iconId;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    return (value ?? "").toString().trim();
+  }, [params.iconId]);
+  const iconColor = useMemo(() => {
+    const raw = params.iconColor;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    return (value ?? "").toString().trim();
+  }, [params.iconColor]);
+  const colorId = useMemo(() => {
+    const raw = params.colorId;
+    if (raw == null) return null;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    const trimmed = (value ?? "").toString().trim();
+    return trimmed.length > 0 ? trimmed : null;
+  }, [params.colorId]);
+
+  const [addMode, setAddMode] = useState<AddMode>("manual");
   const [manualCards, setManualCards] = useState<ManualCard[]>([
     { id: "card-0", front: "", back: "" },
   ]);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleManualCardChange = (
     cardId: string,
@@ -136,12 +166,87 @@ export default function CustomProfileContentScreen() {
     setAddMode("manual");
   };
 
-  const handleSaveDraft = () => {
-    setPopup({
-      message: "Szkic zapisany (placeholder)",
-      color: "my_green",
-      duration: 3000,
+  const handleSaveProfile = async () => {
+    if (addMode === "csv") {
+      setPopup({
+        message: "Import z CSV pojawi się w kolejnej wersji",
+        color: "my_yellow",
+        duration: 4000,
+      });
+      return;
+    }
+
+    const cleanName = profileName.trim();
+    if (!cleanName) {
+      setPopup({
+        message: "Najpierw nadaj nazwę profilowi",
+        color: "my_red",
+        duration: 3000,
+      });
+      router.back();
+      return;
+    }
+    if (!iconId) {
+      setPopup({
+        message: "Wybierz ikonę profilu",
+        color: "my_red",
+        duration: 3000,
+      });
+      router.back();
+      return;
+    }
+
+    const trimmedCards: { frontText: string; backText: string; position: number }[]
+      = [];
+    manualCards.forEach((card) => {
+      const front = card.front.trim();
+      const back = card.back.trim();
+      if (!front && !back) {
+        return;
+      }
+      trimmedCards.push({
+        frontText: front,
+        backText: back,
+        position: trimmedCards.length,
+      });
     });
+
+    if (trimmedCards.length === 0) {
+      setPopup({
+        message: "Dodaj przynajmniej jedną fiszkę",
+        color: "my_red",
+        duration: 3000,
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      const profileId = await createCustomProfile({
+        name: cleanName,
+        iconId,
+        iconColor: iconColor || DEFAULT_PROFILE_COLOR,
+        colorId: colorId ?? undefined,
+      });
+
+      await replaceCustomFlashcards(profileId, trimmedCards);
+
+      setPopup({
+        message: "Zestaw fiszek zapisany!",
+        color: "my_green",
+        duration: 3500,
+      });
+      router.replace("/profilpanel");
+    } catch (error) {
+      console.error("Failed to save custom profile", error);
+      setPopup({
+        message: "Nie udało się zapisać zestawu",
+        color: "my_red",
+        duration: 4000,
+      });
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const handleGoBack = () => {
@@ -290,7 +395,8 @@ export default function CustomProfileContentScreen() {
         <MyButton
           text="Stwórz"
           color="my_green"
-          onPress={handleSaveDraft}
+          onPress={handleSaveProfile}
+          disabled={isSaving}
           accessibilityLabel="Stwórz talię"
         />
       </View>

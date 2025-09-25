@@ -22,7 +22,7 @@ const logo = require("./../../../assets/box/logo.png");
 
 export default function Navbar() {
   const router = useRouter();
-  const { toggleTheme } = useSettings();
+  const { toggleTheme, activeCustomProfileId } = useSettings();
   const { streakCount } = useStreak();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
@@ -48,7 +48,11 @@ export default function Navbar() {
           styles.iconCon,
           pressed && styles.iconConPressed,
         ]}
-        onPress={() => router.push("/level")}
+        onPress={() =>
+          activeCustomProfileId != null
+            ? router.push("/flashcards_custom")
+            : router.push("/level")
+        }
       >
         <FontAwesome5 name="box-open" size={16} style={styles.icon} />
       </Pressable>

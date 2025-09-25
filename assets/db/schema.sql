@@ -24,13 +24,52 @@ CREATE TABLE language_pairs (
   PRIMARY KEY (source_language_id, target_language_id)
 );
 
+CREATE TABLE custom_profiles (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  name        TEXT    NOT NULL,
+  icon_id     TEXT    NOT NULL,
+  icon_color  TEXT    NOT NULL,
+  color_id    TEXT,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);
+
+CREATE TABLE custom_flashcards (
+  id          INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_id  INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+  front_text  TEXT    NOT NULL,
+  back_text   TEXT    NOT NULL,
+  position    INTEGER,
+  created_at  INTEGER NOT NULL,
+  updated_at  INTEGER NOT NULL
+);
+
+CREATE TABLE reviews (
+  id               INTEGER PRIMARY KEY AUTOINCREMENT,
+  word_id          INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
+  source_lang_id   INTEGER NOT NULL REFERENCES languages(id),
+  target_lang_id   INTEGER NOT NULL REFERENCES languages(id),
+  level            TEXT    NOT NULL,
+  learned_at       INTEGER NOT NULL,
+  next_review      INTEGER NOT NULL,
+  stage            INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(word_id, source_lang_id, target_lang_id)
+);
+
 -- Indeksy dla szybkich zapytań
 CREATE INDEX idx_words_lang_cefr 
   ON words(language_id, cefr_level);
 CREATE INDEX idx_trans_src_tgtlang 
   ON translations(source_word_id, target_language_id);
+CREATE INDEX idx_custom_flashcards_profile
+  ON custom_flashcards(profile_id, position);
+CREATE INDEX idx_reviews_due
+  ON reviews(next_review);
+CREATE INDEX idx_reviews_pair
+  ON reviews(source_lang_id, target_lang_id);
 
 -- Ustawienia SQLite (wykonaj raz przy otwarciu DB)
+PRAGMA foreign_keys = ON;
 PRAGMA journal_mode = WAL;
 PRAGMA synchronous = NORMAL;
 PRAGMA cache_size = 10000;

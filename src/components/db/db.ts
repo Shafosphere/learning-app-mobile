@@ -13,6 +13,43 @@ export type LanguagePair = {
   target_id: number;   // NEW
 };
 
+export interface CustomProfileRecord {
+  id: number;
+  name: string;
+  iconId: string;
+  iconColor: string;
+  colorId: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface CustomProfileInput {
+  name: string;
+  iconId: string;
+  iconColor: string;
+  colorId?: string | null;
+}
+
+export interface CustomProfileSummary extends CustomProfileRecord {
+  cardsCount: number;
+}
+
+export interface CustomFlashcardRecord {
+  id: number;
+  profileId: number;
+  frontText: string;
+  backText: string;
+  position: number | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
+export interface CustomFlashcardInput {
+  frontText: string;
+  backText: string;
+  position?: number | null;
+}
+
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
@@ -46,6 +83,25 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       target_language_id INTEGER NOT NULL REFERENCES languages(id),
       PRIMARY KEY (source_language_id, target_language_id)
     );
+    CREATE TABLE IF NOT EXISTS custom_profiles (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      name        TEXT    NOT NULL,
+      icon_id     TEXT    NOT NULL,
+      icon_color  TEXT    NOT NULL,
+      color_id    TEXT,
+      created_at  INTEGER NOT NULL,
+      updated_at  INTEGER NOT NULL
+    );
+    CREATE TABLE IF NOT EXISTS custom_flashcards (
+      id          INTEGER PRIMARY KEY AUTOINCREMENT,
+      profile_id  INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+      front_text  TEXT    NOT NULL,
+      back_text   TEXT    NOT NULL,
+      position    INTEGER,
+      created_at  INTEGER NOT NULL,
+      updated_at  INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_flashcards_profile ON custom_flashcards(profile_id, position);
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
     -- Reviews table for spaced repetition scheduling
@@ -67,11 +123,183 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
 
 async function configurePragmas(db: SQLite.SQLiteDatabase): Promise<void> {
   await db.execAsync(`
+    PRAGMA foreign_keys = ON;
     PRAGMA journal_mode = WAL;
     PRAGMA synchronous = NORMAL;
     PRAGMA cache_size = 10000;
     PRAGMA page_size = 4096;
   `);
+}
+
+export async function getCustomProfiles(): Promise<CustomProfileRecord[]> {
+  const db = await getDB();
+  return db.getAllAsync<CustomProfileRecord>(
+    `SELECT
+       id,
+       name,
+       icon_id     AS iconId,
+       icon_color  AS iconColor,
+       color_id    AS colorId,
+       created_at  AS createdAt,
+       updated_at  AS updatedAt
+     FROM custom_profiles
+     ORDER BY created_at DESC, id DESC;`
+  );
+}
+
+export async function getCustomProfilesWithCardCounts(): Promise<CustomProfileSummary[]> {
+  const db = await getDB();
+  return db.getAllAsync<CustomProfileSummary>(
+    `SELECT
+       cp.id,
+       cp.name,
+       cp.icon_id     AS iconId,
+       cp.icon_color  AS iconColor,
+       cp.color_id    AS colorId,
+       cp.created_at  AS createdAt,
+       cp.updated_at  AS updatedAt,
+       (
+         SELECT COUNT(*)
+         FROM custom_flashcards cf
+         WHERE cf.profile_id = cp.id
+       ) AS cardsCount
+     FROM custom_profiles cp
+     ORDER BY cp.created_at DESC, cp.id DESC;`
+  );
+}
+
+export async function getCustomProfileById(
+  id: number
+): Promise<CustomProfileRecord | null> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<CustomProfileRecord>(
+    `SELECT
+       id,
+       name,
+       icon_id     AS iconId,
+       icon_color  AS iconColor,
+       color_id    AS colorId,
+       created_at  AS createdAt,
+       updated_at  AS updatedAt
+     FROM custom_profiles
+     WHERE id = ?
+     LIMIT 1;`,
+    id
+  );
+  return row ?? null;
+}
+
+export async function createCustomProfile(
+  profile: CustomProfileInput
+): Promise<number> {
+  const db = await getDB();
+  const now = Date.now();
+  const name = profile.name.trim();
+  if (!name) {
+    throw new Error("Custom profile name cannot be empty");
+  }
+  const result = await db.runAsync(
+    `INSERT INTO custom_profiles (name, icon_id, icon_color, color_id, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?);`,
+    name,
+    profile.iconId,
+    profile.iconColor,
+    profile.colorId ?? null,
+    now,
+    now
+  );
+  return Number(result.lastInsertRowId ?? 0);
+}
+
+export async function updateCustomProfile(
+  id: number,
+  profile: CustomProfileInput
+): Promise<void> {
+  const db = await getDB();
+  const now = Date.now();
+  const name = profile.name.trim();
+  if (!name) {
+    throw new Error("Custom profile name cannot be empty");
+  }
+  await db.runAsync(
+    `UPDATE custom_profiles
+     SET name = ?, icon_id = ?, icon_color = ?, color_id = ?, updated_at = ?
+     WHERE id = ?;`,
+    name,
+    profile.iconId,
+    profile.iconColor,
+    profile.colorId ?? null,
+    now,
+    id
+  );
+}
+
+export async function deleteCustomProfile(id: number): Promise<void> {
+  const db = await getDB();
+  await db.runAsync(`DELETE FROM custom_profiles WHERE id = ?;`, id);
+}
+
+export async function getCustomFlashcards(
+  profileId: number
+): Promise<CustomFlashcardRecord[]> {
+  const db = await getDB();
+  return db.getAllAsync<CustomFlashcardRecord>(
+    `SELECT
+       id,
+       profile_id AS profileId,
+       front_text AS frontText,
+       back_text  AS backText,
+       position,
+       created_at AS createdAt,
+       updated_at AS updatedAt
+     FROM custom_flashcards
+     WHERE profile_id = ?
+     ORDER BY position IS NULL, position ASC, id ASC;`,
+    profileId
+  );
+}
+
+export async function replaceCustomFlashcards(
+  profileId: number,
+  cards: CustomFlashcardInput[]
+): Promise<void> {
+  const db = await getDB();
+  await db.execAsync("BEGIN TRANSACTION;");
+  const now = Date.now();
+  try {
+    await db.runAsync(
+      `DELETE FROM custom_flashcards WHERE profile_id = ?;`,
+      profileId
+    );
+
+    let fallbackPosition = 0;
+    for (const card of cards) {
+      const front = card.frontText.trim();
+      const back = card.backText.trim();
+      if (!front && !back) {
+        continue; // ignore completely empty cards
+      }
+      const position =
+        card.position != null ? Number(card.position) : fallbackPosition;
+      await db.runAsync(
+        `INSERT INTO custom_flashcards
+           (profile_id, front_text, back_text, position, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?);`,
+        profileId,
+        front,
+        back,
+        position,
+        now,
+        now
+      );
+      fallbackPosition += 1;
+    }
+
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await db.execAsync("ROLLBACK;");
+    throw error;
+  }
 }
 
 async function seedLanguages(
@@ -216,6 +444,16 @@ export async function logTableContents() {
   const languagePairs = await db.getAllAsync("SELECT * FROM language_pairs");
   console.log("Language pairs:");
   console.table(languagePairs);
+  const customProfiles = await db.getAllAsync(
+    "SELECT * FROM custom_profiles ORDER BY id DESC LIMIT 5"
+  );
+  console.log("Custom profiles (latest 5):");
+  console.table(customProfiles);
+  const customFlashcards = await db.getAllAsync(
+    "SELECT * FROM custom_flashcards ORDER BY id DESC LIMIT 5"
+  );
+  console.log("Custom flashcards (latest 5):");
+  console.table(customFlashcards);
 }
 
 

@@ -1,5 +1,13 @@
 // src/contexts/SettingsContext.tsx
-import { createContext, ReactNode, useContext, useMemo, useState } from "react";
+import {
+  createContext,
+  ReactNode,
+  useCallback,
+  useContext,
+  useMemo,
+  useState,
+  useEffect,
+} from "react";
 import {
   resolveThemeColors,
   Theme,
@@ -28,6 +36,8 @@ interface SettingsContextValue {
   activeProfileIdx: number | null; // NEW
   setActiveProfileIdx: (i: number | null) => Promise<void>; // NEW
   activeProfile: LanguageProfile | null;
+  activeCustomProfileId: number | null;
+  setActiveCustomProfileId: (id: number | null) => Promise<void>;
   flashcardsBatchSize: number;
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   dailyGoal: number;
@@ -71,6 +81,8 @@ const defaultValue: SettingsContextValue = {
   activeProfileIdx: null,
   setActiveProfileIdx: async () => {},
   activeProfile: null,
+  activeCustomProfileId: null,
+  setActiveCustomProfileId: async () => {},
   flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
   setFlashcardsBatchSize: async () => {},
   dailyGoal: 20,
@@ -109,9 +121,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     []
   );
 
-  const [activeProfileIdx, setActiveProfileIdx] = usePersistedState<
+  const [activeProfileIdx, setActiveProfileIdxState] = usePersistedState<
     number | null
   >("activeProfileIdx", null);
+
+  const [activeCustomProfileId, setActiveCustomProfileIdState] =
+    usePersistedState<number | null>("activeCustomProfileId", null);
 
   console.log(profiles);
   const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
@@ -168,6 +183,32 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await _setBoxesLayout(layout);
   };
 
+  const setActiveProfileIdx = useCallback(
+    async (idx: number | null) => {
+      if (idx != null) {
+        await setActiveCustomProfileIdState(null);
+      }
+      await setActiveProfileIdxState(idx);
+    },
+    [setActiveCustomProfileIdState, setActiveProfileIdxState]
+  );
+
+  const setActiveCustomProfileId = useCallback(
+    async (profileId: number | null) => {
+      if (profileId != null) {
+        await setActiveProfileIdxState(null);
+      }
+      await setActiveCustomProfileIdState(profileId);
+    },
+    [setActiveCustomProfileIdState, setActiveProfileIdxState]
+  );
+
+  useEffect(() => {
+    if (activeProfileIdx != null && activeCustomProfileId != null) {
+      void setActiveCustomProfileId(null);
+    }
+  }, [activeProfileIdx, activeCustomProfileId, setActiveCustomProfileId]);
+
   const addProfile = async (p: LanguageProfile) => {
     const existsIdx = profiles.findIndex(
       (x) =>
@@ -183,10 +224,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     if (existsIdx === -1) {
       const newList = [...profiles, p];
       await setProfiles(newList);
-      if (activeProfileIdx == null)
+      if (activeProfileIdx == null && activeCustomProfileId == null)
         await setActiveProfileIdx(newList.length - 1);
     } else {
-      if (activeProfileIdx == null) await setActiveProfileIdx(existsIdx);
+      if (activeProfileIdx == null && activeCustomProfileId == null)
+        await setActiveProfileIdx(existsIdx);
     }
   };
 
@@ -236,6 +278,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         activeProfileIdx,
         setActiveProfileIdx,
         activeProfile,
+        activeCustomProfileId,
+        setActiveCustomProfileId,
         selectedLevel,
         setLevel,
         spellChecking,
