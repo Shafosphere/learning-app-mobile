@@ -1,50 +1,68 @@
-import { Button, Text, View, Image, TouchableOpacity } from "react-native";
-import { useEffect, useState } from "react";
-import { getRandomWordsBatch } from "@/src/components/db/dbGenerator";
-import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { scheduleReview } from "@/src/components/db/db";
+import { Text, View, TouchableOpacity } from "react-native";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import {
+  getCustomFlashcards,
+  getCustomProfileById,
+  scheduleReview,
+} from "@/src/components/db/db";
 import { useStyles } from "@/src/screens/flashcards/styles_flashcards";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/boxes/boxes";
 import Card from "@/src/components/card/card";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import PL_FLAG from "../../assets/flag/PL.png";
-import ES_FLAG from "../../assets/flag/ES.png";
-import PM_FLAG from "../../assets/flag/PM.png";
-import US_FLAG from "../../assets/flag/US.png";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/boxes/boxcarousel";
 import { useStreak } from "@/src/contexts/StreakContext";
+import { useIsFocused } from "@react-navigation/native";
+import { getProfileIconById } from "@/src/constants/customProfile";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import type {
+  CustomFlashcardRecord,
+  CustomProfileRecord,
+} from "@/src/components/db/db";
+
+function mapCustomCardToWord(
+  card: CustomFlashcardRecord
+): WordWithTranslations {
+  const front = card.frontText?.trim() ?? "";
+  const rawBack = card.backText ?? "";
+  const variants = rawBack
+    .split(/[;,\n]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  const translations = variants.length > 0 ? variants : [rawBack.trim()];
+
+  return {
+    id: card.id,
+    text: front,
+    translations,
+  };
+}
 // import MediumBoxes from "@/src/components/boxes/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, profiles, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
-  const { registerLearningEvent } = useStreak();
-
   const {
-    boxes,
-    setBoxes,
-    batchIndex,
-    setBatchIndex,
-    isReady,
-    resetSave,
-    saveNow,
-    addUsedWordIds,
-    progress,
-    totalWordsForLevel,
-  } = useBoxesPersistenceSnapshot({
-    sourceLangId: activeProfile?.sourceLangId ?? 0,
-    targetLangId: activeProfile?.targetLangId ?? 0,
-    level: selectedLevel ?? "A1",
-    autosave:
-      activeProfile?.sourceLangId != null &&
-      activeProfile?.targetLangId != null &&
-      !!selectedLevel,
-    saveDelayMs: 0,
-  });
+    activeProfile,
+    selectedLevel,
+    activeCustomProfileId,
+    boxesLayout,
+    flashcardsBatchSize,
+  } = useSettings();
+  const { registerLearningEvent } = useStreak();
+  const isFocused = useIsFocused();
+
+  const { boxes, setBoxes, isReady, addUsedWordIds } =
+    useBoxesPersistenceSnapshot({
+      sourceLangId: activeCustomProfileId ?? 0,
+      targetLangId: activeCustomProfileId ?? 0,
+      level: `custom-${activeCustomProfileId ?? 0}`,
+      storageNamespace: "customBoxes",
+      autosave: activeCustomProfileId != null,
+      saveDelayMs: 0,
+    });
 
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
@@ -67,18 +85,32 @@ export default function Flashcards() {
     input1: string;
     input2: string;
   } | null>(null);
-
-  const flagMap: Record<string, number> = {
-    pl: PL_FLAG,
-    es: ES_FLAG,
-    pm: PM_FLAG,
-    en: US_FLAG,
-  };
-
+  const [customProfile, setCustomProfile] =
+    useState<CustomProfileRecord | null>(null);
+  const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
-  const learnedPercent =
-    totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
-  const boxOneFull = boxes.boxOne.length >= 30;
+  const totalCards = customCards.length;
+  const learnedPercent = totalCards > 0 ? learned.length / totalCards : 0;
+  const trackedIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const list of Object.values(boxes)) {
+      for (const item of list) ids.add(item.id);
+    }
+    for (const item of learned) ids.add(item.id);
+    return ids;
+  }, [boxes, learned]);
+  const allCardsDistributed = totalCards > 0 && trackedIds.size >= totalCards;
+  const totalCardsInBoxes = useMemo(() => {
+    return (
+      boxes.boxOne.length +
+      boxes.boxTwo.length +
+      boxes.boxThree.length +
+      boxes.boxFour.length +
+      boxes.boxFive.length
+    );
+  }, [boxes]);
 
   function selectRandomWord(box: keyof BoxesState) {
     const list = boxes[box];
@@ -95,45 +127,28 @@ export default function Flashcards() {
       idx = (idx + 1) % list.length;
     }
     setItem(list[idx]);
-    console.log(selectedItem);
   }
 
-  async function downloadData() {
-    if (boxOneFull) {
-      return;
+  async function downloadData(): Promise<void> {
+    if (!customCards.length) return;
+
+    const existingIds = new Set<number>();
+    for (const list of Object.values(boxes)) {
+      for (const item of list) existingIds.add(item.id);
     }
-    const prof = activeProfile;
-    if (!prof || prof.sourceLangId == null || prof.targetLangId == null) {
-      console.warn("Brak aktywnego profilu lub ID języków");
-      return;
-    }
+    for (const item of learned) existingIds.add(item.id);
 
-    const excludeIds = [
-      ...boxes.boxOne.map((x) => x.id),
-      ...boxes.boxTwo.map((x) => x.id),
-      ...boxes.boxThree.map((x) => x.id),
-      ...boxes.boxFour.map((x) => x.id),
-      ...boxes.boxFive.map((x) => x.id),
-      ...learned.map((x) => x.id),
-    ];
+    const remaining = customCards.filter((card) => !existingIds.has(card.id));
+    if (remaining.length === 0) return;
 
-    const batchData = await getRandomWordsBatch({
-      sourceLangId: prof.sourceLangId,
-      targetLangId: prof.targetLangId,
-      cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
-      batchSize: (flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE),
-      excludeIds,
-    });
+    const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
+    const nextBatch = remaining.slice(0, Math.max(1, batchSize));
 
-    setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...batchData] }));
-    // Track used words when they are added to any box
-    addUsedWordIds(batchData.map((w) => w.id));
-    setBatchIndex((prev) => {
-      const next = prev + 1;
-      console.log(next);
-      return next;
-    });
-    await saveNow();
+    setBoxes((prev) => ({
+      ...prev,
+      boxOne: [...prev.boxOne, ...nextBatch],
+    }));
+    addUsedWordIds(nextBatch.map((card) => card.id));
   }
 
   function handleSelectBox(box: keyof BoxesState) {
@@ -241,11 +256,107 @@ export default function Flashcards() {
     });
   }
 
+  useEffect(() => {
+    if (!isFocused) return;
+
+    let isMounted = true;
+
+    if (activeCustomProfileId == null) {
+      setCustomProfile(null);
+      setCustomCards([]);
+      setLoadError(null);
+      setIsLoadingData(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    setIsLoadingData(true);
+    setLoadError(null);
+
+    void Promise.all([
+      getCustomProfileById(activeCustomProfileId),
+      getCustomFlashcards(activeCustomProfileId),
+    ])
+      .then(([profileRow, flashcardRows]) => {
+        if (!isMounted) return;
+        if (!profileRow) {
+          setCustomProfile(null);
+          setCustomCards([]);
+          setLoadError("Wybrany profil nie istnieje.");
+          return;
+        }
+        setCustomProfile(profileRow);
+        const mapped = flashcardRows.map(mapCustomCardToWord);
+        setCustomCards(mapped);
+      })
+      .catch((error) => {
+        console.error("Failed to load custom flashcards", error);
+        if (!isMounted) return;
+        setCustomProfile(null);
+        setCustomCards([]);
+        setLoadError("Nie udało się wczytać fiszek.");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingData(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCustomProfileId, isFocused]);
+
   function wrongInputChange(which: 1 | 2, value: string) {
     setCorrection((c) =>
       c ? { ...c, [which === 1 ? "input1" : "input2"]: value } : c
     );
   }
+
+  useEffect(() => {
+    if (!isReady) return;
+    const allowedIds = new Set(customCards.map((card) => card.id));
+
+    setBoxes((prev) => {
+      let mutated = false;
+      const sanitize = (list: WordWithTranslations[]) => {
+        const filtered = list.filter((item) => allowedIds.has(item.id));
+        if (filtered.length !== list.length) mutated = true;
+        return filtered;
+      };
+
+      const next: BoxesState = {
+        boxOne: sanitize(prev.boxOne),
+        boxTwo: sanitize(prev.boxTwo),
+        boxThree: sanitize(prev.boxThree),
+        boxFour: sanitize(prev.boxFour),
+        boxFive: sanitize(prev.boxFive),
+      };
+      return mutated ? next : prev;
+    });
+
+    setLearned((current) => {
+      const filtered = current.filter((card) => allowedIds.has(card.id));
+      return filtered.length === current.length ? current : filtered;
+    });
+  }, [customCards, learned, isReady, setBoxes]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (isLoadingData) return;
+    if (activeCustomProfileId == null) return;
+    if (totalCardsInBoxes > 0) return;
+    if (allCardsDistributed) return;
+    if (!customCards.length) return;
+
+    void downloadData();
+  }, [
+    isReady,
+    isLoadingData,
+    activeCustomProfileId,
+    totalCardsInBoxes,
+    allCardsDistributed,
+    customCards,
+  ]);
 
   useEffect(() => {
     if (
@@ -263,33 +374,108 @@ export default function Flashcards() {
   }, [correction]);
 
   useEffect(() => {
-    console.log(selectedItem);
-  }, [selectedItem]);
-
-  useEffect(() => {
     if (queueNext && activeBox) {
       selectRandomWord(activeBox);
       setResult(null);
       setQueueNext(false);
     }
-  }, [boxes]);
+  }, [activeBox, boxes, queueNext]);
 
-  const profileAccessibilityLabel = activeProfile
-    ? `Profil ${activeProfile.sourceLang?.toUpperCase()} do ${activeProfile.targetLang?.toUpperCase()}. Otwórz panel profilu.`
-    : "Wybierz profil językowy";
+  useEffect(() => {
+    if (selectedItem && !customCards.some((card) => card.id === selectedItem.id)) {
+      setItem(null);
+    }
+  }, [customCards, selectedItem]);
 
-  const levelAccessibilityLabel = `Poziom ${selectedLevel}. Zmień poziom nauki.`;
+  const profileAccessibilityLabel = customProfile
+    ? `Profil ${customProfile.name}. Otwórz panel profili.`
+    : "Wybierz profil fiszek.";
 
-  if (
-    !activeProfile ||
-    activeProfile.sourceLangId == null ||
-    activeProfile.targetLangId == null ||
-    !selectedLevel
-  ) {
-    return (
-      <View style={styles.container}>
-        <Text allowFontScaling>Wybierz profil i poziom.</Text>
+  const editAccessibilityLabel = customProfile
+    ? `Edytuj fiszki profilu ${customProfile.name}.`
+    : "Dodaj fiszki do profilu.";
+
+  const profileIconMeta = useMemo(() => {
+    if (!customProfile) return null;
+    return getProfileIconById(customProfile.iconId);
+  }, [customProfile]);
+  const ProfileIconComponent = profileIconMeta?.Component;
+  const profileIconName = profileIconMeta?.name ?? "";
+  const profileIconColor = customProfile?.iconColor ?? "#00214D";
+  const profileName = customProfile?.name ?? "Wybierz profil";
+  const totalCardsLabel = customCards.length > 0
+    ? `Fiszki: ${customCards.length}`
+    : "Brak fiszek";
+  const downloadDisabled =
+    customCards.length === 0 || allCardsDistributed || isLoadingData || !isReady;
+  const shouldShowBoxes =
+    activeCustomProfileId != null &&
+    isReady &&
+    !isLoadingData &&
+    !loadError &&
+    customCards.length > 0;
+
+  useEffect(() => {
+    setActiveBox(null);
+    setItem(null);
+    setAnswer("");
+    setResult(null);
+    setCorrection(null);
+    setQueueNext(false);
+  }, [activeCustomProfileId]);
+
+  const handleEditPress = () => {
+    if (!customProfile || activeCustomProfileId == null) return;
+    const encodedName = encodeURIComponent(customProfile.name);
+    router.push(
+      `/custom_profile/edit?id=${activeCustomProfileId.toString()}&name=${encodedName}`
+    );
+  };
+
+  let cardSection: ReactNode;
+  if (activeCustomProfileId == null) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>
+          Wybierz własny profil w panelu profili, aby rozpocząć naukę.
+        </Text>
       </View>
+    );
+  } else if (isLoadingData) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>Ładowanie fiszek...</Text>
+      </View>
+    );
+  } else if (loadError) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>{loadError}</Text>
+      </View>
+    );
+  } else if (!customCards.length) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>
+          Dodaj fiszki do tego profilu, aby móc z nich korzystać.
+        </Text>
+      </View>
+    );
+  } else {
+    cardSection = (
+      <Card
+        selectedItem={selectedItem}
+        setAnswer={setAnswer}
+        answer={answer}
+        result={result}
+        confirm={confirm}
+        reversed={reversed}
+        setResult={setResult}
+        correction={correction}
+        wrongInputChange={wrongInputChange}
+        onDownload={downloadData}
+        downloadDisabled={downloadDisabled}
+      />
     );
   }
 
@@ -301,24 +487,39 @@ export default function Flashcards() {
         accessibilityRole="button"
         accessibilityLabel={profileAccessibilityLabel}
       >
-        {activeProfile && (
-          <Image
-            source={flagMap[activeProfile.sourceLang]}
-            style={styles.flag}
-          />
-        )}
-        {/* <Text style={styles.levelText}>{selectedLevel}</Text> */}
+        <View style={{ flexDirection: "row", alignItems: "center" }}>
+          {ProfileIconComponent ? (
+            <ProfileIconComponent
+              name={profileIconName as never}
+              size={32}
+              color={profileIconColor}
+            />
+          ) : null}
+          <Text
+            style={[
+              styles.levelLabel,
+              { marginLeft: ProfileIconComponent ? 8 : 0 },
+            ]}
+            allowFontScaling
+          >
+            {profileName}
+          </Text>
+        </View>
       </TouchableOpacity>
 
       <TouchableOpacity
-        onPress={() => router.push("/level")}
-        style={styles.containeroflevel}
+        onPress={handleEditPress}
+        style={[
+          styles.containeroflevel,
+          !customProfile && { opacity: 0.4 },
+        ]}
         accessibilityRole="button"
-        accessibilityLabel={levelAccessibilityLabel}
+        accessibilityLabel={editAccessibilityLabel}
+        disabled={!customProfile}
       >
         <View style={styles.levelContainer}>
           <Text style={styles.levelLabel} allowFontScaling>
-            {selectedLevel}
+            {totalCardsLabel}
           </Text>
           {/* <View style={styles.progressTrack}>
             <View
@@ -331,33 +532,23 @@ export default function Flashcards() {
         </View>
       </TouchableOpacity>
 
-      <Card
-        selectedItem={selectedItem}
-        setAnswer={setAnswer}
-        answer={answer}
-        result={result}
-        confirm={confirm}
-        reversed={reversed}
-        setResult={setResult}
-        correction={correction}
-        wrongInputChange={wrongInputChange}
-        onDownload={downloadData}
-        downloadDisabled={boxOneFull}
-      />
+      {cardSection}
 
-      {boxesLayout === "classic" ? (
-        <Boxes
-          boxes={boxes}
-          activeBox={activeBox}
-          handleSelectBox={handleSelectBox}
-        />
-      ) : (
-        <BoxesCarousel
-          boxes={boxes}
-          activeBox={activeBox}
-          handleSelectBox={handleSelectBox}
-        />
-      )}
+      {shouldShowBoxes ? (
+        boxesLayout === "classic" ? (
+          <Boxes
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+          />
+        ) : (
+          <BoxesCarousel
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+          />
+        )
+      ) : null}
     </View>
   );
 }
