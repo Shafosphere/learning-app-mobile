@@ -9,6 +9,7 @@ import {
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "@/src/screens/custom_profile/styles_custom_profile";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -24,6 +25,35 @@ type ManualCard = {
   id: string;
   front: string;
   back: string;
+};
+
+const MANUAL_HISTORY_LIMIT = 50;
+
+const createEmptyManualCard = (id?: string): ManualCard => ({
+  id: id ?? `card-${Date.now()}`,
+  front: "",
+  back: "",
+});
+
+const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
+  cards.map((card) => ({ ...card }));
+
+const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
+  if (a.length !== b.length) {
+    return false;
+  }
+  for (let index = 0; index < a.length; index += 1) {
+    const cardA = a[index];
+    const cardB = b[index];
+    if (
+      cardA.id !== cardB.id ||
+      cardA.front !== cardB.front ||
+      cardA.back !== cardB.back
+    ) {
+      return false;
+    }
+  }
+  return true;
 };
 
 export default function EditCustomProfileScreen() {
@@ -54,16 +84,46 @@ export default function EditCustomProfileScreen() {
   const [iconId, setIconId] = useState<string | null>(null);
   const [iconColor, setIconColor] = useState<string>(DEFAULT_PROFILE_COLOR);
   const [colorId, setColorId] = useState<string | null>(null);
-  const [manualCards, setManualCards] = useState<ManualCard[]>([
-    { id: "card-0", front: "", back: "" },
+  const [manualCards, setManualCards] = useState<ManualCard[]>(() => [
+    createEmptyManualCard("card-0"),
   ]);
+  const [manualHistory, setManualHistory] = useState<ManualCard[][]>([]);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const ensureAtLeastOneCard = useCallback((cards: ManualCard[]) => {
-    return cards.length > 0 ? cards : [{ id: "card-0", front: "", back: "" }];
+    return cards.length > 0 ? cards : [createEmptyManualCard()];
   }, []);
+
+  const applyManualCardsChange = useCallback(
+    (updater: (cards: ManualCard[]) => ManualCard[]) => {
+      setManualCards((current) => {
+        const workingCopy = cloneManualCards(current);
+        const next = cloneManualCards(
+          ensureAtLeastOneCard(updater(workingCopy))
+        );
+
+        if (areManualCardsEqual(current, next)) {
+          return current;
+        }
+
+        setManualHistory((history) => {
+          const nextHistory = [
+            ...history,
+            cloneManualCards(current),
+          ];
+          if (nextHistory.length > MANUAL_HISTORY_LIMIT) {
+            nextHistory.shift();
+          }
+          return nextHistory;
+        });
+
+        return next;
+      });
+    },
+    [ensureAtLeastOneCard]
+  );
 
   const hydrateFromDb = useCallback(async () => {
     if (!profileId) {
@@ -81,7 +141,9 @@ export default function EditCustomProfileScreen() {
 
       if (!profileRow) {
         setLoadError("Profil nie istnieje.");
-        setManualCards([{ id: "card-0", front: "", back: "" }]);
+        const fallbackCards = [createEmptyManualCard("card-0")];
+        setManualCards(cloneManualCards(fallbackCards));
+        setManualHistory([]);
         setLoading(false);
         return;
       }
@@ -96,7 +158,10 @@ export default function EditCustomProfileScreen() {
         front: card.frontText,
         back: card.backText,
       }));
-      setManualCards(ensureAtLeastOneCard(incomingCards));
+      const normalizedCards = ensureAtLeastOneCard(incomingCards);
+      const initialCards = cloneManualCards(normalizedCards);
+      setManualCards(initialCards);
+      setManualHistory([]);
     } catch (error) {
       console.error("Failed to load custom profile for edit", error);
       setLoadError("Nie udało się wczytać danych profilu.");
@@ -116,7 +181,7 @@ export default function EditCustomProfileScreen() {
     field: keyof Omit<ManualCard, "id">,
     value: string
   ) => {
-    setManualCards((cards) =>
+    applyManualCardsChange((cards) =>
       cards.map((card) =>
         card.id === cardId ? { ...card, [field]: value } : card
       )
@@ -124,16 +189,30 @@ export default function EditCustomProfileScreen() {
   };
 
   const handleAddCard = () => {
-    setManualCards((cards) => [
-      ...cards,
-      { id: `card-${Date.now()}`, front: "", back: "" },
-    ]);
+    applyManualCardsChange((cards) => [...cards, createEmptyManualCard()]);
   };
 
   const handleRemoveCard = (cardId: string) => {
-    setManualCards((cards) => {
+    applyManualCardsChange((cards) => {
       if (cards.length <= 1) return cards;
-      return ensureAtLeastOneCard(cards.filter((card) => card.id !== cardId));
+      return cards.filter((card) => card.id !== cardId);
+    });
+  };
+
+  const hasManualChanges = manualHistory.length > 0;
+
+  const handleUndoManualChanges = () => {
+    if (manualHistory.length === 0) {
+      return;
+    }
+
+    const previousSnapshot = manualHistory[manualHistory.length - 1];
+    setManualHistory((history) => history.slice(0, -1));
+    setManualCards(cloneManualCards(previousSnapshot));
+    setPopup({
+      message: "Cofnięto ostatnią zmianę",
+      color: "my_yellow",
+      duration: 2500,
     });
   };
 
@@ -247,7 +326,10 @@ export default function EditCustomProfileScreen() {
                     return (
                       <View
                         key={card.id}
-                        style={[styles.manualRow, isLast && styles.manualRowLast]}
+                        style={[
+                          styles.manualRow,
+                          isLast && styles.manualRowLast,
+                        ]}
                       >
                         <View style={styles.manualCell}>
                           <TextInput
@@ -287,14 +369,31 @@ export default function EditCustomProfileScreen() {
                     );
                   })}
                 </View>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Dodaj nową fiszkę"
-                  style={styles.manualAddButton}
-                  onPress={handleAddCard}
-                >
-                  <Text style={styles.manualAddIcon}>+</Text>
-                </Pressable>
+                <View>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Cofnij zmiany fiszek"
+                    style={styles.manualAddButton}
+                    accessibilityState={{ disabled: !hasManualChanges }}
+                    disabled={!hasManualChanges}
+                    onPress={handleUndoManualChanges}
+                  >
+                    <FontAwesome
+                      name="undo"
+                      size={24}
+                      color={styles.manualAddIcon.color ?? "black"}
+                      style={styles.manualAddIcon}
+                    />
+                  </Pressable>
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel="Dodaj nową fiszkę"
+                    style={styles.manualAddButton}
+                    onPress={handleAddCard}
+                  >
+                    <Text style={styles.manualAddIcon}>+</Text>
+                  </Pressable>
+                </View>
               </View>
             </>
           )}
