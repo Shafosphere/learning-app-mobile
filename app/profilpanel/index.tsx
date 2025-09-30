@@ -1,9 +1,6 @@
-// ProfilPanel.tsx
 import { useStyles } from "@/src/screens/profilpanel/styles_profilpanel";
 import { Image, Text, View, Pressable } from "react-native";
-import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import AntDesign from "@expo/vector-icons/AntDesign";
 import PL_FLAG from "../../assets/flag/PL.png";
 import ES_FLAG from "../../assets/flag/ES.png";
 import PM_FLAG from "../../assets/flag/PM.png";
@@ -14,6 +11,7 @@ import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useFocusEffect } from "@react-navigation/native";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import {
   getCustomProfilesWithCardCounts,
   type CustomProfileSummary,
@@ -27,17 +25,20 @@ type SelectedProfile =
 export default function ProfilPanel() {
   const {
     profiles,
-    activeProfileIdx, // ⬅️ bierzemy z contextu
-    setActiveProfileIdx, // ⬅️ setter z contextu
-    activeProfile, // (opcjonalnie do logów)
+    activeProfileIdx,
+    setActiveProfileIdx,
+    activeProfile,
     activeCustomProfileId,
     setActiveCustomProfileId,
     colors,
   } = useSettings();
 
-  const [selectedProfile, setSelectedProfile] = useState<SelectedProfile | null>(
-    null
-  );
+  const lang: Record<string, Record<string, string>> = {
+    pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
+  };
+
+  const [selectedProfile, setSelectedProfile] =
+    useState<SelectedProfile | null>(null);
   const [committedProfile, setCommittedProfile] =
     useState<SelectedProfile | null>(null);
   const [customProfiles, setCustomProfiles] = useState<CustomProfileSummary[]>(
@@ -133,26 +134,34 @@ export default function ProfilPanel() {
           const isHighlighted =
             highlightProfile?.type === "builtin" &&
             highlightProfile.index === index;
+          const targetFlag = flagMap[item.targetLang];
           return (
             <Pressable
               key={index}
-              onPress={() =>
-                setSelectedProfile({ type: "builtin", index })
-              }
-              style={[
-                styles.profilecontainer,
-                isHighlighted && styles.clicked,
-              ]}
+              onPress={() => setSelectedProfile({ type: "builtin", index })}
+              style={[styles.profileCard, isHighlighted && styles.clicked]}
             >
-              <Image style={styles.flag} source={flagMap[item.targetLang]} />
-              <Entypo style={styles.arrow} name="arrow-long-right" size={90} />
+              {targetFlag ? (
+                <View style={styles.profileCardBadge}>
+                  <Image
+                    style={styles.profileCardBadgeFlag}
+                    source={targetFlag}
+                  />
+                  <Text style={styles.profileCardBadgeText}>
+                    {item.targetLang?.toUpperCase()}
+                  </Text>
+                </View>
+              ) : null}
               <Image style={styles.flag} source={flagMap[item.sourceLang]} />
+              <Text style={styles.profileCardText}>
+                {lang[item.targetLang]?.[item.sourceLang] ?? item.sourceLang}
+              </Text>
             </Pressable>
           );
         })}
 
         <View style={styles.customSection}>
-          <Text style={styles.customSectionTitle}>Własne profile</Text>
+          <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
           {customProfiles.length === 0 ? (
             <Text style={styles.customEmptyText}>
               Nie masz jeszcze własnych fiszek.
@@ -173,10 +182,7 @@ export default function ProfilPanel() {
                     onPress={() =>
                       setSelectedProfile({ type: "custom", id: profile.id })
                     }
-                    style={[
-                      styles.customCard,
-                      isHighlighted && styles.customCardSelected,
-                    ]}
+                    style={[styles.customCard, isHighlighted && styles.clicked]}
                   >
                     <View style={styles.customCardContent}>
                       <View
@@ -187,7 +193,7 @@ export default function ProfilPanel() {
                       >
                         <IconComponent
                           name={iconName}
-                          size={28}
+                          size={60}
                           color={profile.iconColor}
                         />
                       </View>
@@ -196,7 +202,7 @@ export default function ProfilPanel() {
                           {profile.name}
                         </Text>
                         <Text style={styles.customCardMeta}>
-                          Fiszki: {profile.cardsCount}
+                          fiszki: {profile.cardsCount}
                         </Text>
                       </View>
                     </View>
@@ -209,9 +215,9 @@ export default function ProfilPanel() {
                         handleEditCustomProfile(profile);
                       }}
                     >
-                      <AntDesign
+                      <FontAwesome6
                         name="edit"
-                        size={20}
+                        size={24}
                         color={colors.headline}
                       />
                     </Pressable>
@@ -233,7 +239,7 @@ export default function ProfilPanel() {
             />
 
             <MyButton
-              text="zatwierdź"
+              text="aktywuj"
               color="my_green"
               onPress={() => {
                 confirmSelection();
@@ -248,16 +254,6 @@ export default function ProfilPanel() {
                   committedProfile?.type === "custom" &&
                   committedProfile.id === selectedProfile.id)
               }
-            />
-          </View>
-
-          <View style={styles.buttonsRow}>
-            <MyButton
-              text="własny"
-              color="my_yellow"
-              onPress={() => router.push("/custom_profile")}
-              disabled={false}
-              width={130}
             />
           </View>
         </View>

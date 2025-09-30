@@ -11,7 +11,8 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MyButton from "@/src/components/button/button";
-import { useStyles } from "@/src/screens/custom_profile/styles_custom_profile";
+import Feather from "@expo/vector-icons/Feather";
+import { useEditStyles } from "@/src/screens/custom_profile/styles_edit_custom_profile";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
   getCustomFlashcards,
@@ -57,7 +58,7 @@ const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
 };
 
 export default function EditCustomProfileScreen() {
-  const styles = useStyles();
+  const styles = useEditStyles();
   const params = useLocalSearchParams();
   const router = useRouter();
   const setPopup = usePopup();
@@ -109,10 +110,7 @@ export default function EditCustomProfileScreen() {
         }
 
         setManualHistory((history) => {
-          const nextHistory = [
-            ...history,
-            cloneManualCards(current),
-          ];
+          const nextHistory = [...history, cloneManualCards(current)];
           if (nextHistory.length > MANUAL_HISTORY_LIMIT) {
             nextHistory.shift();
           }
@@ -310,66 +308,40 @@ export default function EditCustomProfileScreen() {
                   placeholder="np. Fiszki podróżnicze"
                   accessibilityLabel="Nazwa profilu"
                 />
-              </View>
 
-              <View style={styles.modeContainer}>
-                <Text style={styles.modeTitle}>Edytuj fiszki</Text>
-                <View style={styles.manualHeader}>
-                  <Text style={styles.manualHeaderCell}>przód</Text>
-                  <Text style={styles.manualHeaderCell}>tył</Text>
-                  <View style={styles.manualHeaderSpacer} />
-                </View>
-                <View style={styles.manualTable}>
-                  {manualCards.map((card, index) => {
-                    const isSingleCard = manualCards.length === 1;
-                    const isLast = index === manualCards.length - 1;
-                    return (
-                      <View
-                        key={card.id}
-                        style={[
-                          styles.manualRow,
-                          isLast && styles.manualRowLast,
-                        ]}
-                      >
-                        <View style={styles.manualCell}>
-                          <TextInput
-                            style={styles.manualInput}
-                            multiline
-                            value={card.front}
-                            onChangeText={(value) =>
-                              handleManualCardChange(card.id, "front", value)
-                            }
-                          />
-                        </View>
-                        <View style={styles.manualDivider} />
-                        <View style={styles.manualCell}>
-                          <TextInput
-                            style={styles.manualInput}
-                            multiline
-                            value={card.back}
-                            onChangeText={(value) =>
-                              handleManualCardChange(card.id, "back", value)
-                            }
-                          />
-                        </View>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel="Usuń fiszkę"
-                          accessibilityState={{ disabled: isSingleCard }}
-                          style={[
-                            styles.manualRemoveButton,
-                            isSingleCard && styles.manualRemoveButtonDisabled,
-                          ]}
-                          disabled={isSingleCard}
-                          onPress={() => handleRemoveCard(card.id)}
-                        >
-                          <Text style={styles.manualRemoveIcon}>✕</Text>
-                        </Pressable>
+                <Text style={styles.miniSectionHeader}>fiszki</Text>
+                {manualCards.map((card, index) => {
+                  const isFirst = index === 0;
+
+                  return (
+                    <View
+                      key={card.id}
+                      style={[styles.card, isFirst && styles.cardFirst]}
+                    >
+                      <Text style={styles.number}>{index + 1}</Text>
+                      <View style={styles.inputContainer}>
+                        <TextInput
+                          value={card.front}
+                          style={styles.cardinput}
+                          onChangeText={(value) =>
+                            handleManualCardChange(card.id, "front", value)
+                          }
+                        />
+                        <View style={styles.cardDivider} />
+                        <TextInput
+                          value={card.back}
+                          style={styles.cardinput}
+                          onChangeText={(value) =>
+                            handleManualCardChange(card.id, "back", value)
+                          }
+                        />
                       </View>
-                    );
-                  })}
-                </View>
-                <View>
+                      <Feather name="trash-2" size={24} color="black" />
+                    </View>
+                  );
+                })}
+
+                <View style={styles.buttonContainer}>
                   <Pressable
                     accessibilityRole="button"
                     accessibilityLabel="Cofnij zmiany fiszek"
@@ -404,14 +376,15 @@ export default function EditCustomProfileScreen() {
 
       <View style={styles.footer}>
         <MyButton
-          text="Powrót"
+          text="<-"
           color="my_yellow"
           onPress={() => router.back()}
           accessibilityLabel="Wróć do panelu profili"
         />
         <MyButton
-          text="Zapisz"
+          text="zapisz zmainy"
           color="my_green"
+          width={190}
           onPress={handleSave}
           disabled={isSaving || loading || !!loadError}
           accessibilityLabel="Zapisz zmiany profilu"

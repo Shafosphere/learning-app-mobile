@@ -4,35 +4,30 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-  },
-  scrollContent: {
-    padding: 24,
-    gap: 24,
-    minHeight: "100%",
+        padding: 18,
+    paddingTop: 32,
   },
   section: {
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
-    padding: 20,
-    borderWidth: 1,
-    borderColor: colors.border,
+    padding: 16,
+    paddingTop: 32,
     // gap: 16,
     // paddingTop: 36,
+    maxHeight: "100%",
   },
   sectionHeader: {
-    fontSize: 30,
+    fontSize: 24,
     textTransform: "uppercase",
-    // position: "absolute",
-    width: "100%",
-    textAlign: "right",
+    position: "absolute",
     fontWeight: "900",
+    right: 24,
+    top: 10,
     color: colors.headline,
-    margin: 0,
-    padding: 0,
     // backgroundColor: colors.my_green,
   },
   miniSectionHeader: {
-    fontSize: 20,
+    fontSize: 16,
     textTransform: "uppercase",
     fontWeight: "900",
     // backgroundColor: colors.my_green,
@@ -69,9 +64,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     flexWrap: "wrap",
     width: "100%",
-    height: "100%",
+    // height: "100%",
     justifyContent: "center",
-
+    // backgroundColor: "red",
     // Usuń wysokość, aby kontener sam dopasował się do zawartości
   },
   profileColor: {
@@ -88,6 +83,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderWidth: 3,
     borderRadius: 8,
     marginBottom: 8,
+    paddingLeft: 8,
+    fontSize: 16,
   },
   segmentedControl: {
     marginTop: 8,
@@ -239,4 +236,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.border,
     marginHorizontal: 24,
   },
+  buttonscontainer: {
+    width: "100%",
+    alignItems: "flex-end",
+    padding: 10,
+  }
 }));

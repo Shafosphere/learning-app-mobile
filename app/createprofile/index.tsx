@@ -5,6 +5,7 @@ import { getLanguagePairs } from "@/src/components/db/db";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { usePopup } from "@/src/contexts/PopupContext";
+import { useRouter } from "expo-router";
 import type { LanguagePair } from "@/src/components/db/db";
 import type { LanguageProfile } from "@/src/types/profile";
 
@@ -22,6 +23,7 @@ export default function Profile() {
   const styles = useStyles();
   const { addProfile } = useSettings();
   const setPopup = usePopup();
+  const router = useRouter();
 
   const flagMap: Record<string, number> = {
     pl: PL_FLAG,
@@ -120,9 +122,19 @@ export default function Profile() {
       </View>
 
       <View style={styles.buttoncontainer}>
+        <View style={styles.buttonWrapper}>
+          <MyButton
+            text="Własny"
+            color="my_yellow"
+            onPress={() => router.push("/custom_profile")}
+            disabled={false}
+            width={100}
+          />
+        </View>
         <MyButton
-          text="Zatwierdź"
+          text="stwórz"
           color="my_green"
+          width={100}
           onPress={async () => {
             const pair = availablePairs.find(
               (p) =>

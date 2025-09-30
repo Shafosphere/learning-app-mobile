@@ -5,7 +5,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     backgroundColor: colors.background,
     alignItems: "center",
-    justifyContent: "center",
+    // justifyContent: "center",
+    paddingTop: "20%",
   },
   minicontainer: {
     width: "75%",
@@ -40,9 +41,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // flex: 1,
     width: "75%",
     height: "20%",
-    marginTop: 40,
+    // marginTop: 40,
     // padding: 20,
     display: "flex",
-    flexDirection: "row-reverse",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    alignItems: "center",
+  },
+  buttonWrapper: {
+    marginRight: 16,
   },
 }));

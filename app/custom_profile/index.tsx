@@ -48,73 +48,64 @@ export default function CustomProfileScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>Profil</Text>
+      <View style={styles.section}>
+        <Text style={styles.sectionHeader}>Profiil</Text>
 
-          <View>
-            <Text style={styles.miniSectionHeader}>nazwa</Text>
-            <TextInput
-              style={styles.profileInput}
-              value={profileName}
-              onChangeText={setProfileName}
-              placeholder="np. Fiszki podróżnicze"
-              accessibilityLabel="Nazwa profilu"
-            />
+        <View>
+          <Text style={styles.miniSectionHeader}>nazwa</Text>
+          <TextInput
+            style={styles.profileInput}
+            value={profileName}
+            onChangeText={setProfileName}
+            placeholder="np. Fiszki podróżnicze"
+            accessibilityLabel="Nazwa profilu"
+          />
+        </View>
+
+        <View style={styles.iconContainer}>
+          <Text style={styles.miniSectionHeader}>ikona</Text>
+          <View style={styles.imageContainer}>
+            {PROFILE_ICONS.map(({ id, Component, name }) => (
+              <Pressable
+                key={id}
+                accessibilityRole="button"
+                accessibilityLabel={`Ikona ${name}`}
+                onPress={() => setSelectedIcon(id)}
+                style={[
+                  styles.iconWrapper,
+                  selectedIcon === id && styles.iconWrapperSelected,
+                ]}
+              >
+                <Component
+                  name={name as never}
+                  size={40}
+                  color={selectedColor}
+                />
+              </Pressable>
+            ))}
           </View>
 
-          <View style={styles.iconContainer}>
-            <Text style={styles.miniSectionHeader}>ikona</Text>
-            <View style={styles.imageContainer}>
-              {PROFILE_ICONS.map(({ id, Component, name }) => (
-                <Pressable
-                  key={id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Ikona ${name}`}
-                  onPress={() => setSelectedIcon(id)}
-                  style={[
-                    styles.iconWrapper,
-                    selectedIcon === id && styles.iconWrapperSelected,
-                  ]}
-                >
-                  <Component
-                    name={name as never}
-                    size={40}
-                    color={selectedColor}
-                  />
-                </Pressable>
-              ))}
-            </View>
-
-            <View style={styles.colorsContainer}>
-              {PROFILE_COLORS.map((color) => (
-                <Pressable
-                  key={color.id}
-                  accessibilityRole="button"
-                  accessibilityLabel={`Kolor ${color.label}`}
-                  onPress={() => {
-                    setSelectedColor(color.hex);
-                    setSelectedColorId(color.id);
-                  }}
-                  style={[
-                    styles.profileColor,
-                    { backgroundColor: color.hex },
-                    selectedColor === color.hex && styles.profileColorSelected,
-                  ]}
-                />
-              ))}
-            </View>
+          <View style={styles.colorsContainer}>
+            {PROFILE_COLORS.map((color) => (
+              <Pressable
+                key={color.id}
+                accessibilityRole="button"
+                accessibilityLabel={`Kolor ${color.label}`}
+                onPress={() => {
+                  setSelectedColor(color.hex);
+                  setSelectedColorId(color.id);
+                }}
+                style={[
+                  styles.profileColor,
+                  { backgroundColor: color.hex },
+                  selectedColor === color.hex && styles.profileColorSelected,
+                ]}
+              />
+            ))}
           </View>
         </View>
-      </ScrollView>
 
-      <View style={styles.divider} />
-
-      <View style={styles.footer}>
-        <View style={styles.footerActionRight}>
+        <View style={styles.buttonscontainer}>
           <MyButton
             text="->"
             color="my_green"
@@ -124,6 +115,20 @@ export default function CustomProfileScreen() {
           />
         </View>
       </View>
+
+      {/* <View style={styles.divider} /> */}
+
+      {/* <View style={styles.footer}>
+        <View style={styles.footerActionRight}>
+          <MyButton
+            text="->"
+            color="my_green"
+            onPress={handleNavigateToContent}
+            accessibilityLabel="Przejdź do ustawień zawartości profilu"
+            disabled={nextDisabled}
+          />
+        </View>
+      </View> */}
     </View>
   );
 }
