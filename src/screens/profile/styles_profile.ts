@@ -49,6 +49,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
   },
   buttonWrapper: {
-    marginRight: 16,
+    marginRight: 12,
   },
 }));

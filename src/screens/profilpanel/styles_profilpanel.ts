@@ -3,6 +3,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollArea: {
+    flex: 1,
+    alignSelf: "stretch",
+  },
+  scrollContent: {
+    paddingBottom: 120,
     alignItems: "center",
   },
   title: {
@@ -90,8 +97,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     alignItems: "center",
   },
-  customIconBadge: {
-  },
+  customIconBadge: {},
   customCardInfo: {
     marginLeft: 12,
   },
@@ -105,21 +111,23 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 900,
     color: colors.headline,
   },
-  customEditButton: {
-  },
+  customEditButton: {},
   buttonscontainer: {
-    marginTop: 24,
     width: "100%",
-    flexDirection: "column",
+    paddingBottom: 24,
     gap: 12,
+    backgroundColor: colors.background,
+    alignItems: "center",
+  },
+  buttonsRow: {
     borderColor: colors.border,
     borderTopWidth: 3,
     paddingTop: 15,
-  },
-  buttonsRow: {
+    width: "75%",
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 10,
+    // backgroundColor: colors.my_green,
   },
   flag: {
     width: 99 / 1.1,

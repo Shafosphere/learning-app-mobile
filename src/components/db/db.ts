@@ -39,6 +39,7 @@ export interface CustomFlashcardRecord {
   profileId: number;
   frontText: string;
   backText: string;
+  answers: string[];
   position: number | null;
   createdAt: number;
   updatedAt: number;
@@ -46,8 +47,64 @@ export interface CustomFlashcardRecord {
 
 export interface CustomFlashcardInput {
   frontText: string;
-  backText: string;
+  backText?: string;
+  answers?: string[];
   position?: number | null;
+}
+
+const ANSWER_SPLIT_REGEX = /[;,\n]/;
+
+function dedupeOrdered(values: string[]): string[] {
+  const seen = new Set<string>();
+  const result: string[] = [];
+  for (const value of values) {
+    if (!seen.has(value)) {
+      seen.add(value);
+      result.push(value);
+    }
+  }
+  return result;
+}
+
+function splitBackTextIntoAnswers(raw: string | null | undefined): string[] {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const tentative = trimmed
+    .split(ANSWER_SPLIT_REGEX)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  const candidates = tentative.length > 0 ? tentative : [trimmed];
+  return dedupeOrdered(candidates);
+}
+
+function normalizeAnswersInput(
+  rawAnswers: Array<string | null | undefined> | undefined
+): string[] {
+  if (!rawAnswers || rawAnswers.length === 0) {
+    return [];
+  }
+  const cleaned = rawAnswers
+    .map((value) => (typeof value === "string" ? value.trim() : ""))
+    .filter((value) => value.length > 0);
+
+  return dedupeOrdered(cleaned);
+}
+
+function addAnswerIfPresent(target: string[], answer: string | null | undefined) {
+  if (!answer) {
+    return;
+  }
+  const trimmed = answer.trim();
+  if (!trimmed) {
+    return;
+  }
+  if (!target.includes(trimmed)) {
+    target.push(trimmed);
+  }
 }
 
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
@@ -101,6 +158,14 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
+    CREATE TABLE IF NOT EXISTS custom_flashcard_answers (
+      id            INTEGER PRIMARY KEY AUTOINCREMENT,
+      flashcard_id  INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
+      answer_text   TEXT    NOT NULL,
+      created_at    INTEGER NOT NULL,
+      UNIQUE(flashcard_id, answer_text)
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_flashcard_answers_card ON custom_flashcard_answers(flashcard_id);
     CREATE INDEX IF NOT EXISTS idx_custom_flashcards_profile ON custom_flashcards(profile_id, position);
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
@@ -119,6 +184,51 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_reviews_due ON reviews(next_review);
     CREATE INDEX IF NOT EXISTS idx_reviews_pair ON reviews(source_lang_id, target_lang_id);
   `);
+
+  await backfillCustomFlashcardAnswers(db);
+}
+
+async function backfillCustomFlashcardAnswers(
+  db: SQLite.SQLiteDatabase
+): Promise<void> {
+  const cardsNeedingAnswers = await db.getAllAsync<{
+    id: number;
+    backText: string;
+  }>(
+    `SELECT cf.id AS id, cf.back_text AS backText
+     FROM custom_flashcards cf
+     LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
+     WHERE cfa.id IS NULL;`
+  );
+
+  if (cardsNeedingAnswers.length === 0) {
+    return;
+  }
+
+  const now = Date.now();
+  await db.execAsync("BEGIN TRANSACTION;");
+  try {
+    for (const card of cardsNeedingAnswers) {
+      const answers = splitBackTextIntoAnswers(card.backText);
+      if (answers.length === 0) {
+        continue;
+      }
+      for (const answer of answers) {
+        await db.runAsync(
+          `INSERT OR IGNORE INTO custom_flashcard_answers
+             (flashcard_id, answer_text, created_at)
+           VALUES (?, ?, ?);`,
+          card.id,
+          answer,
+          now
+        );
+      }
+    }
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await db.execAsync("ROLLBACK;");
+    throw error;
+  }
 }
 
 async function configurePragmas(db: SQLite.SQLiteDatabase): Promise<void> {
@@ -243,20 +353,67 @@ export async function getCustomFlashcards(
   profileId: number
 ): Promise<CustomFlashcardRecord[]> {
   const db = await getDB();
-  return db.getAllAsync<CustomFlashcardRecord>(
+  const rows = await db.getAllAsync<{
+    id: number;
+    profileId: number;
+    frontText: string;
+    backText: string;
+    position: number | null;
+    createdAt: number;
+    updatedAt: number;
+    answerText: string | null;
+  }>(
     `SELECT
-       id,
-       profile_id AS profileId,
-       front_text AS frontText,
-       back_text  AS backText,
-       position,
-       created_at AS createdAt,
-       updated_at AS updatedAt
-     FROM custom_flashcards
-     WHERE profile_id = ?
-     ORDER BY position IS NULL, position ASC, id ASC;`,
+       cf.id             AS id,
+       cf.profile_id     AS profileId,
+       cf.front_text     AS frontText,
+       cf.back_text      AS backText,
+       cf.position       AS position,
+       cf.created_at     AS createdAt,
+       cf.updated_at     AS updatedAt,
+       cfa.answer_text   AS answerText
+     FROM custom_flashcards cf
+     LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
+     WHERE cf.profile_id = ?
+     ORDER BY cf.position IS NULL,
+              cf.position ASC,
+              cf.id ASC,
+              cfa.id ASC;`,
     profileId
   );
+
+  const byId = new Map<number, CustomFlashcardRecord>();
+  const ordered: CustomFlashcardRecord[] = [];
+
+  for (const row of rows) {
+    let record = byId.get(row.id);
+    if (!record) {
+      record = {
+        id: row.id,
+        profileId: row.profileId,
+        frontText: row.frontText,
+        backText: row.backText,
+        answers: [],
+        position: row.position,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+      };
+      byId.set(row.id, record);
+      ordered.push(record);
+    }
+
+    addAnswerIfPresent(record.answers, row.answerText);
+  }
+
+  for (const record of ordered) {
+    if (record.answers.length === 0) {
+      record.answers = splitBackTextIntoAnswers(record.backText);
+    } else {
+      record.answers = dedupeOrdered(record.answers);
+    }
+  }
+
+  return ordered;
 }
 
 export async function replaceCustomFlashcards(
@@ -274,24 +431,52 @@ export async function replaceCustomFlashcards(
 
     let fallbackPosition = 0;
     for (const card of cards) {
-      const front = card.frontText.trim();
-      const back = card.backText.trim();
-      if (!front && !back) {
+      const front = (card.frontText ?? "").trim();
+      const normalizedAnswers = normalizeAnswersInput(card.answers);
+      const backSource = (card.backText ?? "").trim();
+      const derivedAnswers =
+        normalizedAnswers.length > 0
+          ? normalizedAnswers
+          : splitBackTextIntoAnswers(backSource);
+
+      if (!front && derivedAnswers.length === 0) {
         continue; // ignore completely empty cards
       }
+
       const position =
         card.position != null ? Number(card.position) : fallbackPosition;
-      await db.runAsync(
+      const serializedBackText =
+        derivedAnswers.length > 0 ? derivedAnswers.join("; ") : backSource;
+
+      const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
            (profile_id, front_text, back_text, position, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?);`,
         profileId,
         front,
-        back,
+        serializedBackText,
         position,
         now,
         now
       );
+      const flashcardId = Number(insertResult.lastInsertRowId ?? 0);
+
+      const answersToPersist =
+        derivedAnswers.length > 0
+          ? derivedAnswers
+          : splitBackTextIntoAnswers(serializedBackText);
+
+      for (const answer of answersToPersist) {
+        await db.runAsync(
+          `INSERT OR IGNORE INTO custom_flashcard_answers
+             (flashcard_id, answer_text, created_at)
+           VALUES (?, ?, ?);`,
+          flashcardId,
+          answer,
+          now
+        );
+      }
+
       fallbackPosition += 1;
     }
 

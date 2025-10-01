@@ -27,12 +27,29 @@ function mapCustomCardToWord(
   card: CustomFlashcardRecord
 ): WordWithTranslations {
   const front = card.frontText?.trim() ?? "";
+  const normalizedAnswers = (card.answers ?? [])
+    .map((answer) => answer.trim())
+    .filter((answer) => answer.length > 0);
+
+  const uniqueAnswers: string[] = [];
+  for (const answer of normalizedAnswers) {
+    if (!uniqueAnswers.includes(answer)) {
+      uniqueAnswers.push(answer);
+    }
+  }
+
   const rawBack = card.backText ?? "";
-  const variants = rawBack
+  const fallback = rawBack
     .split(/[;,\n]/)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
-  const translations = variants.length > 0 ? variants : [rawBack.trim()];
+  const defaultTranslation = rawBack.trim();
+  const translations =
+    uniqueAnswers.length > 0
+      ? uniqueAnswers
+      : fallback.length > 0
+      ? fallback
+      : [defaultTranslation];
 
   return {
     id: card.id,

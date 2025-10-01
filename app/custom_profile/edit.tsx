@@ -20,12 +20,16 @@ import {
   replaceCustomFlashcards,
   updateCustomProfile,
 } from "@/src/components/db/db";
-import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
+import {
+  DEFAULT_PROFILE_COLOR,
+  PROFILE_COLORS,
+  PROFILE_ICONS,
+} from "@/src/constants/customProfile";
 
 type ManualCard = {
   id: string;
   front: string;
-  back: string;
+  answers: string[];
 };
 
 const MANUAL_HISTORY_LIMIT = 50;
@@ -33,11 +37,23 @@ const MANUAL_HISTORY_LIMIT = 50;
 const createEmptyManualCard = (id?: string): ManualCard => ({
   id: id ?? `card-${Date.now()}`,
   front: "",
-  back: "",
+  answers: [""],
 });
 
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
-  cards.map((card) => ({ ...card }));
+  cards.map((card) => ({ ...card, answers: [...card.answers] }));
+
+const ensureCardHasAnswer = (card: ManualCard): ManualCard => {
+  if (card.answers.length === 0) {
+    return { ...card, answers: [""] };
+  }
+  return card;
+};
+
+const ensureCardsNormalized = (cards: ManualCard[]): ManualCard[] =>
+  (cards.length > 0 ? cards : [createEmptyManualCard()]).map(
+    ensureCardHasAnswer
+  );
 
 const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
   if (a.length !== b.length) {
@@ -46,15 +62,37 @@ const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
   for (let index = 0; index < a.length; index += 1) {
     const cardA = a[index];
     const cardB = b[index];
-    if (
-      cardA.id !== cardB.id ||
-      cardA.front !== cardB.front ||
-      cardA.back !== cardB.back
-    ) {
+    if (cardA.id !== cardB.id || cardA.front !== cardB.front) {
       return false;
+    }
+    if (cardA.answers.length !== cardB.answers.length) {
+      return false;
+    }
+    for (
+      let answerIndex = 0;
+      answerIndex < cardA.answers.length;
+      answerIndex += 1
+    ) {
+      if (cardA.answers[answerIndex] !== cardB.answers[answerIndex]) {
+        return false;
+      }
     }
   }
   return true;
+};
+
+const normalizeAnswers = (answers: string[]): string[] => {
+  const deduped: string[] = [];
+  for (const answer of answers) {
+    const trimmed = answer.trim();
+    if (!trimmed) {
+      continue;
+    }
+    if (!deduped.includes(trimmed)) {
+      deduped.push(trimmed);
+    }
+  }
+  return deduped;
 };
 
 export default function EditCustomProfileScreen() {
@@ -94,16 +132,15 @@ export default function EditCustomProfileScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const ensureAtLeastOneCard = useCallback((cards: ManualCard[]) => {
-    return cards.length > 0 ? cards : [createEmptyManualCard()];
+    return ensureCardsNormalized(cards);
   }, []);
 
   const applyManualCardsChange = useCallback(
     (updater: (cards: ManualCard[]) => ManualCard[]) => {
       setManualCards((current) => {
         const workingCopy = cloneManualCards(current);
-        const next = cloneManualCards(
-          ensureAtLeastOneCard(updater(workingCopy))
-        );
+        const updated = updater(workingCopy);
+        const next = cloneManualCards(ensureAtLeastOneCard(updated));
 
         if (areManualCardsEqual(current, next)) {
           return current;
@@ -151,11 +188,20 @@ export default function EditCustomProfileScreen() {
       setIconColor(profileRow.iconColor ?? DEFAULT_PROFILE_COLOR);
       setColorId(profileRow.colorId);
 
-      const incomingCards = cardRows.map((card, index) => ({
-        id: `card-${card.id ?? index}`,
-        front: card.frontText,
-        back: card.backText,
-      }));
+      const incomingCards = cardRows.map((card, index) => {
+        const answersSource =
+          card.answers && card.answers.length > 0
+            ? card.answers
+            : [card.backText ?? ""];
+        const normalizedAnswersList = normalizeAnswers(answersSource);
+        const answers =
+          normalizedAnswersList.length > 0 ? normalizedAnswersList : [""];
+        return ensureCardHasAnswer({
+          id: `card-${card.id ?? index}`,
+          front: card.frontText,
+          answers,
+        });
+      });
       const normalizedCards = ensureAtLeastOneCard(incomingCards);
       const initialCards = cloneManualCards(normalizedCards);
       setManualCards(initialCards);
@@ -174,15 +220,53 @@ export default function EditCustomProfileScreen() {
     }, [hydrateFromDb])
   );
 
-  const handleManualCardChange = (
+  const handleManualCardFrontChange = (cardId: string, value: string) => {
+    applyManualCardsChange((cards) =>
+      cards.map((card) =>
+        card.id === cardId ? { ...card, front: value } : card
+      )
+    );
+  };
+
+  const handleManualCardAnswerChange = (
     cardId: string,
-    field: keyof Omit<ManualCard, "id">,
+    answerIndex: number,
     value: string
   ) => {
     applyManualCardsChange((cards) =>
+      cards.map((card) => {
+        if (card.id !== cardId) {
+          return card;
+        }
+        const nextAnswers = [...card.answers];
+        nextAnswers[answerIndex] = value;
+        return { ...card, answers: nextAnswers };
+      })
+    );
+  };
+
+  const handleAddAnswer = (cardId: string) => {
+    applyManualCardsChange((cards) =>
       cards.map((card) =>
-        card.id === cardId ? { ...card, [field]: value } : card
+        card.id === cardId ? { ...card, answers: [...card.answers, ""] } : card
       )
+    );
+  };
+
+  const handleRemoveAnswer = (cardId: string, answerIndex: number) => {
+    applyManualCardsChange((cards) =>
+      cards.map((card) => {
+        if (card.id !== cardId) {
+          return card;
+        }
+        if (card.answers.length <= 1) {
+          return card;
+        }
+        const nextAnswers = card.answers.filter(
+          (_, index) => index !== answerIndex
+        );
+        return ensureCardHasAnswer({ ...card, answers: nextAnswers });
+      })
     );
   };
 
@@ -234,16 +318,28 @@ export default function EditCustomProfileScreen() {
       return;
     }
 
-    const trimmedCards = manualCards
-      .map((card) => ({
-        frontText: card.front.trim(),
-        backText: card.back.trim(),
-      }))
-      .filter((card) => card.frontText || card.backText)
-      .map((card, index) => ({
-        ...card,
-        position: index,
-      }));
+    const trimmedCards = manualCards.reduce<
+      Array<{
+        frontText: string;
+        backText: string;
+        answers: string[];
+        position: number;
+      }>
+    >((acc, card) => {
+      const frontText = card.front.trim();
+      const answers = normalizeAnswers(card.answers);
+      if (!frontText && answers.length === 0) {
+        return acc;
+      }
+      const backText = answers[0] ?? "";
+      acc.push({
+        frontText,
+        backText,
+        answers,
+        position: acc.length,
+      });
+      return acc;
+    }, []);
 
     if (trimmedCards.length === 0) {
       setPopup({
@@ -309,6 +405,56 @@ export default function EditCustomProfileScreen() {
                   accessibilityLabel="Nazwa profilu"
                 />
 
+                <View style={styles.iconContainer}>
+                  <Text style={styles.miniSectionHeader}>ikona</Text>
+
+                  <View style={styles.imageContainer}>
+                    {PROFILE_ICONS.map(({ id, Component, name }) => {
+                      const isSelected = iconId === id;
+                      return (
+                        <Pressable
+                          key={id}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Ikona ${name}`}
+                          onPress={() => setIconId(id)}
+                          style={[
+                            styles.iconWrapper,
+                            isSelected && styles.iconWrapperSelected,
+                          ]}
+                        >
+                          <Component
+                            name={name as never}
+                            size={40}
+                            color={iconColor}
+                          />
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+
+                  <View style={styles.colorsContainer}>
+                    {PROFILE_COLORS.map((color) => {
+                      const isSelected = iconColor === color.hex;
+                      return (
+                        <Pressable
+                          key={color.id}
+                          accessibilityRole="button"
+                          accessibilityLabel={`Kolor ${color.label}`}
+                          onPress={() => {
+                            setIconColor(color.hex);
+                            setColorId(color.id);
+                          }}
+                          style={[
+                            styles.profileColor,
+                            { backgroundColor: color.hex },
+                            isSelected && styles.profileColorSelected,
+                          ]}
+                        />
+                      );
+                    })}
+                  </View>
+                </View>
+
                 <Text style={styles.miniSectionHeader}>fiszki</Text>
                 {manualCards.map((card, index) => {
                   const isFirst = index === 0;
@@ -323,20 +469,103 @@ export default function EditCustomProfileScreen() {
                         <TextInput
                           value={card.front}
                           style={styles.cardinput}
+                          placeholder="przód"
+                          placeholderTextColor={styles.cardPlaceholder.color}
                           onChangeText={(value) =>
-                            handleManualCardChange(card.id, "front", value)
+                            handleManualCardFrontChange(card.id, value)
                           }
                         />
                         <View style={styles.cardDivider} />
-                        <TextInput
-                          value={card.back}
-                          style={styles.cardinput}
-                          onChangeText={(value) =>
-                            handleManualCardChange(card.id, "back", value)
-                          }
-                        />
+                        <View style={styles.answersContainer}>
+                          {card.answers.map((answer, answerIndex) => {
+                            const placeholder =
+                              answerIndex === 0
+                                ? "tył"
+                                : `tył ${answerIndex + 1}`;
+                            return (
+                              <View
+                                key={`${card.id}-answer-${answerIndex}`}
+                                style={styles.answerRow}
+                              >
+                                <Text style={styles.answerIndex}>
+                                  {answerIndex + 1}.
+                                </Text>
+                                <TextInput
+                                  value={answer}
+                                  style={styles.answerInput}
+                                  placeholder={placeholder}
+                                  placeholderTextColor={
+                                    styles.cardPlaceholder.color
+                                  }
+                                  onChangeText={(value) =>
+                                    handleManualCardAnswerChange(
+                                      card.id,
+                                      answerIndex,
+                                      value
+                                    )
+                                  }
+                                />
+                                {card.answers.length > 1 && (
+                                  <Pressable
+                                    accessibilityRole="button"
+                                    accessibilityLabel={`Usuń odpowiedź ${
+                                      answerIndex + 1
+                                    } dla fiszki ${index + 1}`}
+                                    style={styles.answerRemoveButton}
+                                    hitSlop={8}
+                                    onPress={() =>
+                                      handleRemoveAnswer(card.id, answerIndex)
+                                    }
+                                  >
+                                    <Feather
+                                      name="minus-circle"
+                                      size={20}
+                                      color={
+                                        styles.cardActionIcon.color ?? "black"
+                                      }
+                                    />
+                                  </Pressable>
+                                )}
+                              </View>
+                            );
+                          })}
+                        </View>
                       </View>
-                      <Feather name="trash-2" size={24} color="black" />
+                      <View style={styles.cardActions}>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Usuń fiszkę ${index + 1}`}
+                          style={[
+                            styles.cardActionButton,
+                            manualCards.length <= 1 &&
+                              styles.removeButtonDisabled,
+                          ]}
+                          hitSlop={8}
+                          disabled={manualCards.length <= 1}
+                          onPress={() => handleRemoveCard(card.id)}
+                        >
+                          <Feather
+                            name="trash-2"
+                            size={24}
+                            color={styles.cardActionIcon.color ?? "black"}
+                          />
+                        </Pressable>
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
+                            index + 1
+                          }`}
+                          style={styles.cardActionButton}
+                          hitSlop={8}
+                          onPress={() => handleAddAnswer(card.id)}
+                        >
+                          <Feather
+                            name="plus"
+                            size={24}
+                            color={styles.cardActionIcon.color ?? "black"}
+                          />
+                        </Pressable>
+                      </View>
                     </View>
                   );
                 })}
@@ -371,8 +600,6 @@ export default function EditCustomProfileScreen() {
           )}
         </View>
       </ScrollView>
-
-      <View style={styles.divider} />
 
       <View style={styles.footer}>
         <MyButton

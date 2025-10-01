@@ -44,6 +44,14 @@ CREATE TABLE custom_flashcards (
   updated_at  INTEGER NOT NULL
 );
 
+CREATE TABLE custom_flashcard_answers (
+  id            INTEGER PRIMARY KEY AUTOINCREMENT,
+  flashcard_id  INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
+  answer_text   TEXT    NOT NULL,
+  created_at    INTEGER NOT NULL,
+  UNIQUE(flashcard_id, answer_text)
+);
+
 CREATE TABLE reviews (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   word_id          INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
@@ -63,6 +71,8 @@ CREATE INDEX idx_trans_src_tgtlang
   ON translations(source_word_id, target_language_id);
 CREATE INDEX idx_custom_flashcards_profile
   ON custom_flashcards(profile_id, position);
+CREATE INDEX idx_custom_flashcard_answers_card
+  ON custom_flashcard_answers(flashcard_id);
 CREATE INDEX idx_reviews_due
   ON reviews(next_review);
 CREATE INDEX idx_reviews_pair

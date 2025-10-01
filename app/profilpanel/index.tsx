@@ -1,5 +1,5 @@
 import { useStyles } from "@/src/screens/profilpanel/styles_profilpanel";
-import { Image, Text, View, Pressable } from "react-native";
+import { Image, Text, View, Pressable, ScrollView } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import PL_FLAG from "../../assets/flag/PL.png";
 import ES_FLAG from "../../assets/flag/ES.png";
@@ -126,136 +126,142 @@ export default function ProfilPanel() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.minicontainer}>
-        <Text style={styles.title}>Twoje profile</Text>
+      <ScrollView
+        style={styles.scrollArea}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+      >
+        <View style={styles.minicontainer}>
+          <Text style={styles.title}>Twoje profile</Text>
 
-        {profiles.map((item, index) => {
-          const highlightProfile = selectedProfile ?? committedProfile;
-          const isHighlighted =
-            highlightProfile?.type === "builtin" &&
-            highlightProfile.index === index;
-          const targetFlag = flagMap[item.targetLang];
-          return (
-            <Pressable
-              key={index}
-              onPress={() => setSelectedProfile({ type: "builtin", index })}
-              style={[styles.profileCard, isHighlighted && styles.clicked]}
-            >
-              {targetFlag ? (
-                <View style={styles.profileCardBadge}>
-                  <Image
-                    style={styles.profileCardBadgeFlag}
-                    source={targetFlag}
-                  />
-                  <Text style={styles.profileCardBadgeText}>
-                    {item.targetLang?.toUpperCase()}
-                  </Text>
-                </View>
-              ) : null}
-              <Image style={styles.flag} source={flagMap[item.sourceLang]} />
-              <Text style={styles.profileCardText}>
-                {lang[item.targetLang]?.[item.sourceLang] ?? item.sourceLang}
+          {profiles.map((item, index) => {
+            const highlightProfile = selectedProfile ?? committedProfile;
+            const isHighlighted =
+              highlightProfile?.type === "builtin" &&
+              highlightProfile.index === index;
+            const targetFlag = flagMap[item.targetLang];
+            return (
+              <Pressable
+                key={index}
+                onPress={() => setSelectedProfile({ type: "builtin", index })}
+                style={[styles.profileCard, isHighlighted && styles.clicked]}
+              >
+                {targetFlag ? (
+                  <View style={styles.profileCardBadge}>
+                    <Image
+                      style={styles.profileCardBadgeFlag}
+                      source={targetFlag}
+                    />
+                    <Text style={styles.profileCardBadgeText}>
+                      {item.targetLang?.toUpperCase()}
+                    </Text>
+                  </View>
+                ) : null}
+                <Image style={styles.flag} source={flagMap[item.sourceLang]} />
+                <Text style={styles.profileCardText}>
+                  {lang[item.targetLang]?.[item.sourceLang] ?? item.sourceLang}
+                </Text>
+              </Pressable>
+            );
+          })}
+
+          <View style={styles.customSection}>
+            <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
+            {customProfiles.length === 0 ? (
+              <Text style={styles.customEmptyText}>
+                Nie masz jeszcze własnych fiszek.
               </Text>
-            </Pressable>
-          );
-        })}
-
-        <View style={styles.customSection}>
-          <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
-          {customProfiles.length === 0 ? (
-            <Text style={styles.customEmptyText}>
-              Nie masz jeszcze własnych fiszek.
-            </Text>
-          ) : (
-            <View style={styles.customList}>
-              {customProfiles.map((profile) => {
-                const iconMeta = getProfileIconById(profile.iconId);
-                const IconComponent = iconMeta?.Component ?? Ionicons;
-                const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                const highlightProfile = selectedProfile ?? committedProfile;
-                const isHighlighted =
-                  highlightProfile?.type === "custom" &&
-                  highlightProfile.id === profile.id;
-                return (
-                  <Pressable
-                    key={profile.id}
-                    onPress={() =>
-                      setSelectedProfile({ type: "custom", id: profile.id })
-                    }
-                    style={[styles.customCard, isHighlighted && styles.clicked]}
-                  >
-                    <View style={styles.customCardContent}>
-                      <View
-                        style={[
-                          styles.customIconBadge,
-                          { borderColor: profile.iconColor },
-                        ]}
-                      >
-                        <IconComponent
-                          name={iconName}
-                          size={60}
-                          color={profile.iconColor}
-                        />
-                      </View>
-                      <View style={styles.customCardInfo}>
-                        <Text style={styles.customCardTitle}>
-                          {profile.name}
-                        </Text>
-                        <Text style={styles.customCardMeta}>
-                          fiszki: {profile.cardsCount}
-                        </Text>
-                      </View>
-                    </View>
+            ) : (
+              <View style={styles.customList}>
+                {customProfiles.map((profile) => {
+                  const iconMeta = getProfileIconById(profile.iconId);
+                  const IconComponent = iconMeta?.Component ?? Ionicons;
+                  const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                  const highlightProfile = selectedProfile ?? committedProfile;
+                  const isHighlighted =
+                    highlightProfile?.type === "custom" &&
+                    highlightProfile.id === profile.id;
+                  return (
                     <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`Edytuj profil ${profile.name}`}
-                      style={styles.customEditButton}
-                      onPress={(event) => {
-                        event.stopPropagation();
-                        handleEditCustomProfile(profile);
-                      }}
+                      key={profile.id}
+                      onPress={() =>
+                        setSelectedProfile({ type: "custom", id: profile.id })
+                      }
+                      style={[styles.customCard, isHighlighted && styles.clicked]}
                     >
-                      <FontAwesome6
-                        name="edit"
-                        size={24}
-                        color={colors.headline}
-                      />
+                      <View style={styles.customCardContent}>
+                        <View
+                          style={[
+                            styles.customIconBadge,
+                            { borderColor: profile.iconColor },
+                          ]}
+                        >
+                          <IconComponent
+                            name={iconName}
+                            size={60}
+                            color={profile.iconColor}
+                          />
+                        </View>
+                        <View style={styles.customCardInfo}>
+                          <Text style={styles.customCardTitle}>
+                            {profile.name}
+                          </Text>
+                          <Text style={styles.customCardMeta}>
+                            fiszki: {profile.cardsCount}
+                          </Text>
+                        </View>
+                      </View>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Edytuj profil ${profile.name}`}
+                        style={styles.customEditButton}
+                        onPress={(event) => {
+                          event.stopPropagation();
+                          handleEditCustomProfile(profile);
+                        }}
+                      >
+                        <FontAwesome6
+                          name="edit"
+                          size={24}
+                          color={colors.headline}
+                        />
+                      </Pressable>
                     </Pressable>
-                  </Pressable>
-                );
-              })}
-            </View>
-          )}
-        </View>
-
-        <View style={styles.buttonscontainer}>
-          <View style={styles.buttonsRow}>
-            <MyButton
-              text="nowy"
-              color="my_yellow"
-              onPress={() => router.push("/createprofile")}
-              disabled={false}
-              width={70}
-            />
-
-            <MyButton
-              text="aktywuj"
-              color="my_green"
-              onPress={() => {
-                confirmSelection();
-                handleClick();
-              }}
-              disabled={
-                !selectedProfile ||
-                (selectedProfile.type === "builtin" &&
-                  committedProfile?.type === "builtin" &&
-                  committedProfile.index === selectedProfile.index) ||
-                (selectedProfile.type === "custom" &&
-                  committedProfile?.type === "custom" &&
-                  committedProfile.id === selectedProfile.id)
-              }
-            />
+                  );
+                })}
+              </View>
+            )}
           </View>
+        </View>
+      </ScrollView>
+
+      <View style={styles.buttonscontainer}>
+        <View style={styles.buttonsRow}>
+          <MyButton
+            text="nowy"
+            color="my_yellow"
+            onPress={() => router.push("/createprofile")}
+            disabled={false}
+            width={70}
+          />
+
+          <MyButton
+            text="aktywuj"
+            color="my_green"
+            onPress={() => {
+              confirmSelection();
+              handleClick();
+            }}
+            disabled={
+              !selectedProfile ||
+              (selectedProfile.type === "builtin" &&
+                committedProfile?.type === "builtin" &&
+                committedProfile.index === selectedProfile.index) ||
+              (selectedProfile.type === "custom" &&
+                committedProfile?.type === "custom" &&
+                committedProfile.id === selectedProfile.id)
+            }
+          />
         </View>
       </View>
     </View>

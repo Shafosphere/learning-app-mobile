@@ -4,7 +4,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
-        padding: 18,
+    padding: 18,
     paddingTop: 32,
   },
   section: {
@@ -14,7 +14,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 32,
     // gap: 16,
     // paddingTop: 36,
-    maxHeight: "100%",
+    // maxHeight: "100%",
   },
   sectionHeader: {
     fontSize: 24,
@@ -86,6 +86,94 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingLeft: 8,
     fontSize: 16,
   },
+  card: {
+    flexDirection: "row",
+    width: "100%",
+    borderBottomWidth: 2,
+    borderColor: colors.border,
+    alignItems: "flex-start",
+    paddingVertical: 12,
+  },
+  cardFirst: {
+    borderTopWidth: 2,
+  },
+  number: {
+    fontSize: 16,
+    fontWeight: 900,
+    width: "10%",
+    height: "100%",
+    maxHeight: "100%",
+    minWidth: 36,
+    textAlign: "center",
+    textAlignVertical: "center",
+    paddingTop: 6,
+  },
+  inputContainer: {
+    flex: 1,
+    gap: 12,
+  },
+  cardinput: {
+    width: "100%",
+    fontSize: 16,
+    fontWeight: 800,
+    paddingVertical: 6,
+  },
+  cardPlaceholder: {
+    color: colors.border,
+  },
+  cardDivider: {
+    borderStyle: "dashed",
+    borderTopWidth: 2,
+    borderColor: colors.border,
+    alignSelf: "stretch",
+  },
+  answersContainer: {
+    gap: 12,
+  },
+  answerRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 8,
+  },
+  answerIndex: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.headline,
+    width: 24,
+    textAlign: "right",
+  },
+  answerInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: 700,
+    paddingVertical: 6,
+  },
+  answerRemoveButton: {
+    padding: 4,
+  },
+  cardActions: {
+    width: 48,
+    alignItems: "center",
+    justifyContent: "space-between",
+    paddingVertical: 12,
+    gap: 12,
+  },
+  cardActionButton: {
+    alignItems: "center",
+    justifyContent: "center",
+    padding: 4,
+  },
+  cardActionIcon: {
+    color: colors.headline,
+  },
+  removeButtonDisabled: {
+    opacity: 0.4,
+  },
+  buttonContainer: {
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 10,
+  },
   segmentedControl: {
     marginTop: 8,
     flexDirection: "row",
@@ -135,75 +223,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontStyle: "italic",
     color: colors.paragraph,
   },
-  manualHeader: {
-    flexDirection: "row",
-    alignItems: "center",
-    // backgroundColor: colors.my_green,
-  },
-  manualHeaderCell: {
-    flex: 1,
-    fontSize: 15,
-    fontWeight: "700",
-    textAlign: "center",
-    color: colors.paragraph,
-    textTransform: "uppercase",
-  },
-  manualHeaderSpacer: {
-    width: 44,
-  },
-  manualTable: {
-    marginTop: 4,
-    // borderRadius: 18,
-    borderWidth: 1,
-    borderColor: colors.border,
-    backgroundColor: colors.secondBackground,
-    overflow: "hidden",
-    borderRightWidth: 0,
-    borderLeftWidth: 0,
-  },
-  manualRow: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 16,
-    paddingVertical: 14,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-  },
-  manualRowLast: {
-    borderBottomWidth: 0,
-  },
-  manualCell: {
-    flex: 1,
-  },
-  manualDivider: {
-    width: 1,
-    alignSelf: "stretch",
-    backgroundColor: colors.border,
-    marginHorizontal: 12,
-  },
-  manualInput: {
-    paddingHorizontal: 4,
-    paddingVertical: 0,
-    fontSize: 14,
-    lineHeight: 20,
-    color: colors.headline,
-    textAlignVertical: "top",
-    minHeight: 24,
-  },
-  manualRemoveButton: {
-    width: 44,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  manualRemoveButtonDisabled: {
-    opacity: 0.3,
-  },
-  manualRemoveIcon: {
-    color: colors.my_red,
-    fontSize: 24,
-    fontWeight: "900",
-    lineHeight: 24,
-  },
   manualAddButton: {
     alignSelf: "flex-end",
     backgroundColor: colors.my_yellow,
@@ -240,5 +259,5 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     alignItems: "flex-end",
     padding: 10,
-  }
+  },
 }));

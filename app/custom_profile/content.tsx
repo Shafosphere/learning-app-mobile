@@ -7,6 +7,7 @@ import {
   TextInput,
   View,
 } from "react-native";
+import Feather from "@expo/vector-icons/Feather";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import MyButton from "@/src/components/button/button";
@@ -24,8 +25,34 @@ type AddMode = "csv" | "manual";
 interface ManualCard {
   id: string;
   front: string;
-  back: string;
+  answers: string[];
 }
+
+const createEmptyManualCard = (id?: string): ManualCard => ({
+  id: id ?? `card-${Date.now()}`,
+  front: "",
+  answers: [""],
+});
+
+const ensureCardHasAnswer = (card: ManualCard): ManualCard =>
+  card.answers.length === 0 ? { ...card, answers: [""] } : card;
+
+const ensureCardsNormalized = (cards: ManualCard[]): ManualCard[] =>
+  (cards.length > 0 ? cards : [createEmptyManualCard()]).map(ensureCardHasAnswer);
+
+const normalizeAnswers = (answers: string[]): string[] => {
+  const deduped: string[] = [];
+  for (const answer of answers) {
+    const trimmed = answer.trim();
+    if (!trimmed) {
+      continue;
+    }
+    if (!deduped.includes(trimmed)) {
+      deduped.push(trimmed);
+    }
+  }
+  return deduped;
+};
 
 const sampleFileName = "custom_profile_przyklad.csv";
 
@@ -64,35 +91,84 @@ export default function CustomProfileContentScreen() {
   }, [params.colorId]);
 
   const [addMode, setAddMode] = useState<AddMode>("manual");
-  const [manualCards, setManualCards] = useState<ManualCard[]>([
-    { id: "card-0", front: "", back: "" },
-  ]);
+  const [manualCards, setManualCards] = useState<ManualCard[]>(() =>
+    ensureCardsNormalized([createEmptyManualCard("card-0")])
+  );
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleManualCardChange = (
+  const handleManualCardFrontChange = (cardId: string, value: string) => {
+    setManualCards((cards) =>
+      ensureCardsNormalized(
+        cards.map((card) =>
+          card.id === cardId ? { ...card, front: value } : card
+        )
+      )
+    );
+  };
+
+  const handleManualCardAnswerChange = (
     cardId: string,
-    field: keyof Omit<ManualCard, "id">,
+    answerIndex: number,
     value: string
   ) => {
     setManualCards((cards) =>
-      cards.map((card) =>
-        card.id === cardId ? { ...card, [field]: value } : card
+      ensureCardsNormalized(
+        cards.map((card) => {
+          if (card.id !== cardId) {
+            return card;
+          }
+          const answers = [...card.answers];
+          answers[answerIndex] = value;
+          return { ...card, answers };
+        })
+      )
+    );
+  };
+
+  const handleAddAnswer = (cardId: string) => {
+    setManualCards((cards) =>
+      ensureCardsNormalized(
+        cards.map((card) =>
+          card.id === cardId
+            ? { ...card, answers: [...card.answers, ""] }
+            : card
+        )
+      )
+    );
+  };
+
+  const handleRemoveAnswer = (cardId: string, answerIndex: number) => {
+    setManualCards((cards) =>
+      ensureCardsNormalized(
+        cards.map((card) => {
+          if (card.id !== cardId) {
+            return card;
+          }
+          if (card.answers.length <= 1) {
+            return card;
+          }
+          const nextAnswers = card.answers.filter((_, index) => index !== answerIndex);
+          return ensureCardHasAnswer({ ...card, answers: nextAnswers });
+        })
       )
     );
   };
 
   const handleAddCard = () => {
-    setManualCards((cards) => [
-      ...cards,
-      { id: `card-${Date.now()}`, front: "", back: "" },
-    ]);
+    setManualCards((cards) =>
+      ensureCardsNormalized([...cards, createEmptyManualCard()])
+    );
   };
 
   const handleRemoveCard = (cardId: string) => {
-    setManualCards((cards) =>
-      cards.length > 1 ? cards.filter((card) => card.id !== cardId) : cards
-    );
+    setManualCards((cards) => {
+      if (cards.length <= 1) {
+        return cards;
+      }
+      const filtered = cards.filter((card) => card.id !== cardId);
+      return ensureCardsNormalized(filtered);
+    });
   };
 
   const handleSelectCsv = () => {
@@ -162,10 +238,6 @@ export default function CustomProfileContentScreen() {
     }
   };
 
-  const handleCreateManually = () => {
-    setAddMode("manual");
-  };
-
   const handleSaveProfile = async () => {
     if (addMode === "csv") {
       setPopup({
@@ -196,20 +268,28 @@ export default function CustomProfileContentScreen() {
       return;
     }
 
-    const trimmedCards: { frontText: string; backText: string; position: number }[]
-      = [];
-    manualCards.forEach((card) => {
-      const front = card.front.trim();
-      const back = card.back.trim();
-      if (!front && !back) {
-        return;
+    const trimmedCards = manualCards.reduce<
+      Array<{
+        frontText: string;
+        backText: string;
+        answers: string[];
+        position: number;
+      }>
+    >((acc, card) => {
+      const frontText = card.front.trim();
+      const answers = normalizeAnswers(card.answers);
+      if (!frontText && answers.length === 0) {
+        return acc;
       }
-      trimmedCards.push({
-        frontText: front,
-        backText: back,
-        position: trimmedCards.length,
+      const backText = answers[0] ?? "";
+      acc.push({
+        frontText,
+        backText,
+        answers,
+        position: acc.length,
       });
-    });
+      return acc;
+    }, []);
 
     if (trimmedCards.length === 0) {
       setPopup({
@@ -317,67 +397,132 @@ export default function CustomProfileContentScreen() {
             </View>
           ) : (
             <View style={styles.modeContainer}>
-              <Text style={styles.modeTitle}>Stwórz tutaj</Text>
-              <View style={styles.manualHeader}>
-                <Text style={styles.manualHeaderCell}>przód</Text>
-                <Text style={styles.manualHeaderCell}>tył</Text>
-                <View style={styles.manualHeaderSpacer} />
-              </View>
-              <View style={styles.manualTable}>
-                {manualCards.map((card, index) => {
-                  const isSingleCard = manualCards.length === 1;
-                  const isLast = index === manualCards.length - 1;
-                  return (
-                    <View
-                      key={card.id}
-                      style={[styles.manualRow, isLast && styles.manualRowLast]}
-                    >
-                      <View style={styles.manualCell}>
-                        <TextInput
-                          style={styles.manualInput}
-                          multiline
-                          value={card.front}
-                          onChangeText={(value) =>
-                            handleManualCardChange(card.id, "front", value)
-                          }
-                        />
+              {/* <Text style={styles.modeTitle}>Stwórz tutaj</Text> */}
+              <Text style={styles.miniSectionHeader}>fiszki</Text>
+              {manualCards.map((card, index) => {
+                const isFirst = index === 0;
+
+                return (
+                  <View
+                    key={card.id}
+                    style={[styles.card, isFirst && styles.cardFirst]}
+                  >
+                    <Text style={styles.number}>{index + 1}</Text>
+                    <View style={styles.inputContainer}>
+                      <TextInput
+                        value={card.front}
+                        style={styles.cardinput}
+                        placeholder="przód"
+                        placeholderTextColor={styles.cardPlaceholder.color}
+                        onChangeText={(value) =>
+                          handleManualCardFrontChange(card.id, value)
+                        }
+                      />
+                      <View style={styles.cardDivider} />
+                      <View style={styles.answersContainer}>
+                        {card.answers.map((answer, answerIndex) => {
+                          const placeholder =
+                            answerIndex === 0
+                              ? "tył"
+                              : `tył ${answerIndex + 1}`;
+                          return (
+                            <View
+                              key={`${card.id}-answer-${answerIndex}`}
+                              style={styles.answerRow}
+                            >
+                              <Text style={styles.answerIndex}>
+                                {answerIndex + 1}.
+                              </Text>
+                              <TextInput
+                                value={answer}
+                                style={styles.answerInput}
+                                placeholder={placeholder}
+                                placeholderTextColor={
+                                  styles.cardPlaceholder.color
+                                }
+                                onChangeText={(value) =>
+                                  handleManualCardAnswerChange(
+                                    card.id,
+                                    answerIndex,
+                                    value
+                                  )
+                                }
+                              />
+                              {card.answers.length > 1 && (
+                                <Pressable
+                                  accessibilityRole="button"
+                                  accessibilityLabel={`Usuń odpowiedź ${
+                                    answerIndex + 1
+                                  } dla fiszki ${index + 1}`}
+                                  style={styles.answerRemoveButton}
+                                  hitSlop={8}
+                                  onPress={() =>
+                                    handleRemoveAnswer(card.id, answerIndex)
+                                  }
+                                >
+                                  <Feather
+                                    name="minus-circle"
+                                    size={20}
+                                    color={
+                                      styles.cardActionIcon.color ?? "black"
+                                    }
+                                  />
+                                </Pressable>
+                              )}
+                            </View>
+                          );
+                        })}
                       </View>
-                      <View style={styles.manualDivider} />
-                      <View style={styles.manualCell}>
-                        <TextInput
-                          style={styles.manualInput}
-                          multiline
-                          value={card.back}
-                          onChangeText={(value) =>
-                            handleManualCardChange(card.id, "back", value)
-                          }
-                        />
-                      </View>
+                    </View>
+                    <View style={styles.cardActions}>
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel="Usuń fiszkę"
-                        accessibilityState={{ disabled: isSingleCard }}
+                        accessibilityLabel={`Usuń fiszkę ${index + 1}`}
                         style={[
-                          styles.manualRemoveButton,
-                          isSingleCard && styles.manualRemoveButtonDisabled,
+                          styles.cardActionButton,
+                          manualCards.length <= 1 &&
+                            styles.removeButtonDisabled,
                         ]}
-                        disabled={isSingleCard}
+                        hitSlop={8}
+                        disabled={manualCards.length <= 1}
                         onPress={() => handleRemoveCard(card.id)}
                       >
-                        <Text style={styles.manualRemoveIcon}>✕</Text>
+                        <Feather
+                          name="trash-2"
+                          size={24}
+                          color={styles.cardActionIcon.color ?? "black"}
+                        />
+                      </Pressable>
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
+                          index + 1
+                        }`}
+                        style={styles.cardActionButton}
+                        hitSlop={8}
+                        onPress={() => handleAddAnswer(card.id)}
+                      >
+                        <Feather
+                          name="plus"
+                          size={24}
+                          color={styles.cardActionIcon.color ?? "black"}
+                        />
                       </Pressable>
                     </View>
-                  );
-                })}
+                  </View>
+                );
+              })}
+
+              <View style={styles.buttonContainer}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Dodaj nową fiszkę"
+                  style={styles.manualAddButton}
+                  onPress={handleAddCard}
+                >
+                  <Text style={styles.manualAddIcon}>+</Text>
+                </Pressable>
               </View>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel="Dodaj nową fiszkę"
-                style={styles.manualAddButton}
-                onPress={handleAddCard}
-              >
-                <Text style={styles.manualAddIcon}>+</Text>
-              </Pressable>
             </View>
           )}
         </View>
