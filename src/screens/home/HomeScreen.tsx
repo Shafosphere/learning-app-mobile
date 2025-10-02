@@ -1,7 +1,7 @@
 // index.tsx
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
-import { styles } from "./styles";
+import { styles } from "./HomeScreen-styles";
 import MyButton from "@/src/components/button/button";
 
 export default function HomeScreen() {

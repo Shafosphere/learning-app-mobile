@@ -1,10 +1,10 @@
 import { Pressable, Text, TouchableOpacity, View } from "react-native";
 import { useEffect, useState } from "react";
-import { useStyles } from "./styles";
+import { useStyles } from "./LevelScreen-styles";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
-import { countLearnedWordsByLevel, getTotalWordsForLevel } from "@/src/components/db/db";
+import { countLearnedWordsByLevel, getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
 export default function LevelScreen() {
   const { setLevel, activeProfile } = useSettings();

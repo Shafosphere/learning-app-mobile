@@ -2,7 +2,7 @@ import React from "react";
 import { View, Text, Switch } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();

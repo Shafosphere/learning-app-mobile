@@ -62,8 +62,8 @@ Kluczowe pozycje:
 Dodatkowo istnieje util `clearAllFlashcards()` do czyszczenia snapshotów pudełek (usuwa klucze `boxes:*`).
 
 ## Baza danych (SQLite)
-- Inicjalizacja: `src/components/db/db.ts` – tworzenie schematu + import CSV `assets/data/wordsENGtoPL.csv` przy pierwszym uruchomieniu (EN→PL, z poziomami CEFR).
-- Tabele (pełny schemat: `assets/db/schema.sql`, runtime: `db.ts`):
+- Inicjalizacja: `src/db/sqlite/db.ts` – tworzenie schematu + import CSV `assets/data/wordsENGtoPL.csv` przy pierwszym uruchomieniu (EN→PL, z poziomami CEFR).
+- Tabele (pełny schemat: `src/db/schema/schema.sql`, runtime: `db.ts`):
   - `languages(id, code, name)` – kody języków (np. `en`, `pl`).
   - `words(id, language_id, text, cefr_level)` – słowa z poziomem CEFR.
   - `translations(id, source_word_id, target_language_id, translation_text, target_word_id?)` – tłumaczenia słowa źródłowego na język docelowy.
@@ -75,11 +75,11 @@ Dodatkowo istnieje util `clearAllFlashcards()` do czyszczenia snapshotów pudeł
 ## Ważne moduły i pliki
 - Nawigacja i opakowanie kontekstów: `app/_layout.tsx`.
 - Start/redirect do powtórek: `app/index.tsx`.
-- Nauka: `app/flashcards/index.tsx`, komponenty: karty (`src/components/card/card.tsx`), pudełka siatka (`src/components/boxes/boxes.tsx`), karuzela (`src/components/boxes/boxcarousel.tsx`, `boxCarouselItem.tsx`), skórka pudełka (`BoxSkin.tsx`).
+- Nauka: `app/flashcards/index.tsx`, komponenty: karty (`src/components/card/card.tsx`), pudełka siatka (`src/components/box/boxes.tsx`), karuzela (`src/components/box/boxcarousel.tsx`, `boxCarouselItem.tsx`), skórka pudełka (`BoxSkin.tsx`).
 - Profile: tworzenie `app/createprofile/index.tsx`, wybór `app/profilpanel/index.tsx`.
 - Poziomy: `app/level/index.tsx`.
 - Ustawienia: `app/settings/index.tsx` + `src/contexts/SettingsContext.tsx`.
-- Powtórki (DB, logika): `src/components/db/db.ts` (+ `scheduleReview`, `getDueReviews`, `advanceReview`).
+- Powtórki (DB, logika): `src/db/sqlite/db.ts` (+ `scheduleReview`, `getDueReviews`, `advanceReview`).
 - Snapshot pudełek: `src/hooks/useBoxesPersistenceSnapshot.ts`.
 - Spellchecking: `src/hooks/useSpellchecking.ts`.
 - Tematy/styl: `src/theme/*`, `src/screens/*/styles_*.ts`.

@@ -1,6 +1,6 @@
 + 21- 0
 import { View, Text } from "react-native";
-import { useStyles } from "./styles_popup";
+import { useStyles } from "./popup-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
 export type PopupColor = "my_green" | "my_red" | "my_yellow";

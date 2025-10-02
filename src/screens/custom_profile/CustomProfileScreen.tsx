@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
 import MyButton from "@/src/components/button/button";
-import { useStyles } from "./styles";
+import { useStyles } from "./CustomProfileScreen-styles";
 import { useRouter } from "expo-router";
 import {
   DEFAULT_PROFILE_COLOR,

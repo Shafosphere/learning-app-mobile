@@ -10,12 +10,12 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import MyButton from "@/src/components/button/button";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useStyles } from "./styles";
+import { useStyles } from "./CustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
   createCustomProfile,
   replaceCustomFlashcards,
-} from "@/src/components/db/db";
+} from "@/src/db/sqlite/db";
 import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
 import {
   ManualCardsEditor,

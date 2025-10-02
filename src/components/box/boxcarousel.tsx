@@ -17,11 +17,11 @@ import {
   NativeSyntheticEvent,
   // Text,
 } from "react-native";
-import { useStyles } from "./styles_boxes";
+import { useStyles } from "./boxes-styles";
 import { BoxesState } from "@/src/types/boxes";
 import BoxCarouselItem from "./boxCarouselItem";
-// import BoxTop from "../../../assets/box/topBox.png";
-// import BoxBottom from "../../../assets/box/bottomBox.png";
+// import BoxTop from "@/assets/illustrations/box/topBox.png";
+// import BoxBottom from "@/assets/illustrations/box/bottomBox.png";
 
 interface BoxesProps {
   boxes: BoxesState;

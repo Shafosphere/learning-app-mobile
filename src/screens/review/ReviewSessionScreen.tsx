@@ -7,9 +7,9 @@ import {
   advanceReview,
   getDueReviewWordsBatch,
   removeReview,
-} from "@/src/components/db/db";
+} from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
-import { useSessionStyles } from "./sessionStyles";
+import { useSessionStyles } from "./ReviewSessionScreen-styles";
 import { removeWordIdFromUsedWordIds } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import MyButton from "@/src/components/button/button";
 import RotaryStack, {

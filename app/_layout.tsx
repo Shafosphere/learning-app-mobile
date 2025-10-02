@@ -4,7 +4,7 @@ import Navbar from "@/src/components/navbar/navbar";
 import React, { useEffect, useState, useCallback } from "react";
 import { SettingsProvider } from "@/src/contexts/SettingsContext";
 import { StreakProvider } from "@/src/contexts/StreakContext";
-import { getDB } from "@/src/components/db/db"; // ZMIANA: Importujemy tylko getDB
+import { getDB } from "@/src/db/sqlite/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, Text } from "react-native";
 import { PopupProvider } from "@/src/contexts/PopupContext";

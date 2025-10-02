@@ -7,7 +7,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useStyles } from "./styles_navbar";
+import { useStyles } from "./navbar-styles";
 import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStreak } from "@/src/contexts/StreakContext";
@@ -18,7 +18,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-const logo = require("./../../../assets/box/logo.png");
+const logo = require("@/assets/illustrations/box/logo.png");
 
 export default function Navbar() {
   const router = useRouter();

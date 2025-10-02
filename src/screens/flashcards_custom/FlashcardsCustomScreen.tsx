@@ -4,16 +4,16 @@ import {
   getCustomFlashcards,
   getCustomProfileById,
   scheduleReview,
-} from "@/src/components/db/db";
-import { useStyles } from "./styles";
+} from "@/src/db/sqlite/db";
+import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import Boxes from "@/src/components/boxes/boxes";
+import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
-import BoxesCarousel from "@/src/components/boxes/boxcarousel";
+import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useStreak } from "@/src/contexts/StreakContext";
 import { useIsFocused } from "@react-navigation/native";
 import { getProfileIconById } from "@/src/constants/customProfile";
@@ -21,7 +21,7 @@ import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import type {
   CustomFlashcardRecord,
   CustomProfileRecord,
-} from "@/src/components/db/db";
+} from "@/src/db/sqlite/db";
 
 function mapCustomCardToWord(
   card: CustomFlashcardRecord
@@ -57,7 +57,7 @@ function mapCustomCardToWord(
     translations,
   };
 }
-// import MediumBoxes from "@/src/components/boxes/mediumboxes";
+// import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();

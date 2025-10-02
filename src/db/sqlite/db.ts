@@ -1,4 +1,4 @@
-// src/components/db/db.ts
+// sqlite helpers and persistence primitives
 
 import * as SQLite from "expo-sqlite";
 import * as FileSystem from "expo-file-system";
@@ -509,7 +509,7 @@ async function importInitialCsv(db: SQLite.SQLiteDatabase): Promise<void> {
   console.log("Baza danych jest pusta. Rozpoczynam import z CSV...");
 
   const asset = Asset.fromModule(
-    require("../../../assets/data/wordsENGtoPL.csv")
+    require("@/assets/data/wordsENGtoPL.csv")
   );
   await asset.downloadAsync();
   const csv = await FileSystem.readAsStringAsync(asset.localUri!);

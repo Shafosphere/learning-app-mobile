@@ -1,10 +1,10 @@
-import { useStyles } from "./styles";
+import { useStyles } from "./ProfilPanelScreen-styles";
 import { Image, Text, View, Pressable, ScrollView } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import PL_FLAG from "@/assets/flag/PL.png";
-import ES_FLAG from "@/assets/flag/ES.png";
-import PM_FLAG from "@/assets/flag/PM.png";
-import US_FLAG from "@/assets/flag/US.png";
+import PL_FLAG from "@/assets/flags/PL.png";
+import ES_FLAG from "@/assets/flags/ES.png";
+import PM_FLAG from "@/assets/flags/PM.png";
+import US_FLAG from "@/assets/flags/US.png";
 import { useCallback, useEffect, useState } from "react";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import MyButton from "@/src/components/button/button";
@@ -15,7 +15,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import {
   getCustomProfilesWithCardCounts,
   type CustomProfileSummary,
-} from "@/src/components/db/db";
+} from "@/src/db/sqlite/db";
 import { getProfileIconById } from "@/src/constants/customProfile";
 
 type SelectedProfile =

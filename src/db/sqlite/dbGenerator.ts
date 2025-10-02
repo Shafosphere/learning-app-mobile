@@ -1,4 +1,4 @@
-// src/components/db/dbGenerator.ts
+// helpers for generating flashcard batches from SQLite store
 import { getDB } from "./db";
 import { WordWithTranslations } from "@/src/types/boxes";
 import type { CEFRLevel } from "@/src/types/language";

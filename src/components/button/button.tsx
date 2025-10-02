@@ -1,5 +1,5 @@
 import { Pressable, Text } from "react-native";
-import { useStyles } from "./styles_button";
+import { useStyles } from "./button-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { ThemeColorKey } from "@/src/theme/theme";
 

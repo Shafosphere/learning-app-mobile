@@ -1,23 +1,23 @@
 import { View, Text, Image, Pressable } from "react-native";
-import { useStyles } from "./styles";
+import { useStyles } from "./CreateProfileScreen-styles";
 import { useEffect, useState } from "react";
-import { getLanguagePairs } from "@/src/components/db/db";
+import { getLanguagePairs } from "@/src/db/sqlite/db";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useRouter } from "expo-router";
-import type { LanguagePair } from "@/src/components/db/db";
+import type { LanguagePair } from "@/src/db/sqlite/db";
 import type { LanguageProfile } from "@/src/types/profile";
 
-import PL_FLAG_GRAY from "@/assets/flag/PLgray.png";
-import ES_FLAG_GRAY from "@/assets/flag/ESgray.png";
-import PM_FLAG_GRAY from "@/assets/flag/PMgray.png";
-import US_FLAG_GRAY from "@/assets/flag/USgray.png";
+import PL_FLAG_GRAY from "@/assets/flags/PLgray.png";
+import ES_FLAG_GRAY from "@/assets/flags/ESgray.png";
+import PM_FLAG_GRAY from "@/assets/flags/PMgray.png";
+import US_FLAG_GRAY from "@/assets/flags/USgray.png";
 
-import PL_FLAG from "@/assets/flag/PL.png";
-import ES_FLAG from "@/assets/flag/ES.png";
-import PM_FLAG from "@/assets/flag/PM.png";
-import US_FLAG from "@/assets/flag/US.png";
+import PL_FLAG from "@/assets/flags/PL.png";
+import ES_FLAG from "@/assets/flags/ES.png";
+import PM_FLAG from "@/assets/flags/PM.png";
+import US_FLAG from "@/assets/flags/US.png";
 
 export default function CreateProfileScreen() {
   const styles = useStyles();

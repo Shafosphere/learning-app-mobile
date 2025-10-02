@@ -12,14 +12,14 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MyButton from "@/src/components/button/button";
-import { useEditStyles } from "./editStyles";
+import { useEditStyles } from "./EditCustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
   getCustomFlashcards,
   getCustomProfileById,
   replaceCustomFlashcards,
   updateCustomProfile,
-} from "@/src/components/db/db";
+} from "@/src/db/sqlite/db";
 import {
   DEFAULT_PROFILE_COLOR,
   PROFILE_COLORS,

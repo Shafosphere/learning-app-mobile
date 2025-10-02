@@ -1,6 +1,6 @@
 import { Button, Pressable, Text, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
-import { useStyles } from "./styles_boxes";
+import { useStyles } from "./boxes-styles";
 import { BoxesState } from "@/src/types/boxes";
 import BoxSkin from "./BoxSkin";
 

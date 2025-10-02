@@ -2,9 +2,9 @@ import React, { useState } from "react";
 import { View, Text, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import MyButton from "@/src/components/button/button";
-import { addRandomReviewsForPair } from "@/src/components/db/db";
+import { addRandomReviewsForPair } from "@/src/db/sqlite/db";
 
 const DataSection: React.FC = () => {
   const styles = useStyles();

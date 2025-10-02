@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { View, TouchableOpacity, Text, ScrollView } from "react-native";
-import { useStyles } from "./styles";
+import { useStyles } from "./SettingsScreen-styles";
 import AppearanceSection from "@/src/components/settings/AppearanceSection";
 import LearningSection from "@/src/components/settings/LearningSection";
 import DataSection from "@/src/components/settings/DataSection";

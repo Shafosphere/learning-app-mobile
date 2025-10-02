@@ -2,7 +2,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // Adjust import path to your project
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { getTotalWordsForLevel } from "@/src/components/db/db";
+import { getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
 // ---- Public helpers --------------------------------------------------------
 export type BoxName = keyof BoxesState; // "boxOne" | ... | "boxFive"

@@ -1,5 +1,5 @@
 import { Text, TextInput, View } from "react-native";
-import { useStyles } from "./styles_card";
+import { useStyles } from "./card-styles";
 import MyButton from "../button/button";
 import { WordWithTranslations } from "@/src/types/boxes";
 import { useState } from "react";

@@ -9,9 +9,9 @@ import AchievementsList from "@/src/components/stats/AchievementsList";
 import { ACHIEVEMENTS } from "@/src/constants/achievements";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStreak } from "@/src/contexts/StreakContext";
-import { countDueReviewsByLevel } from "@/src/components/db/db";
+import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
-import { useStyles } from "./styles";
+import { useStyles } from "./StatsScreen-styles";
 
 const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -111,4 +111,3 @@ export default function StatsScreen() {
     </ScrollView>
   );
 };
-

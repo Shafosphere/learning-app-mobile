@@ -9,10 +9,10 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 
-const classicPreview = require("../../../assets/boxstyle1.png");
-const carouselPreview = require("../../../assets/boxstyle2.png");
+const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
+const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";

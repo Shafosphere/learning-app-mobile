@@ -4,8 +4,8 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
-import { useStyles } from "./styles";
-import { countDueReviewsByLevel } from "@/src/components/db/db";
+import { useStyles } from "../level/LevelScreen-styles";
+import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 
 export default function ReviewScreen() {
   const { setLevel, activeProfile, colors } = useSettings();
