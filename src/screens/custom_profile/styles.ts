@@ -1,6 +1,6 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-import { buildManualCardsStyles } from "./styles_shared_manual_cards";
+import { buildManualCardsStyles } from "./sharedManualCardsStyles";
 
 export const useStyles = createThemeStylesHook((colors) => {
   const manualCardsStyles = buildManualCardsStyles(colors);

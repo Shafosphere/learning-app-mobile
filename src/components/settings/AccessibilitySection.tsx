@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { View, Text, Switch } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles_settings";
+import { useStyles } from "@/src/screens/settings/styles";
 
 const AccessibilitySection: React.FC = () => {
   const styles = useStyles();

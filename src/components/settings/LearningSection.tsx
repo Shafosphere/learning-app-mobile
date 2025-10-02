@@ -9,7 +9,7 @@ import {
 } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles_settings";
+import { useStyles } from "@/src/screens/settings/styles";
 
 const classicPreview = require("../../../assets/boxstyle1.png");
 const carouselPreview = require("../../../assets/boxstyle2.png");

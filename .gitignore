@@ -42,3 +42,5 @@ app-example
 images/
 assets/images/*
 !assets/images/.gitkeep
+*.png
+*.svg

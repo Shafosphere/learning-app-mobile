@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { View, Text, Alert } from "react-native";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/styles_settings";
+import { useStyles } from "@/src/screens/settings/styles";
 import MyButton from "@/src/components/button/button";
 import { addRandomReviewsForPair } from "@/src/components/db/db";
 
