@@ -5,13 +5,13 @@ import {
   ScrollView,
   Text,
   TextInput,
+  TextStyle,
   View,
 } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MyButton from "@/src/components/button/button";
-import Feather from "@expo/vector-icons/Feather";
 import { useEditStyles } from "@/src/screens/custom_profile/styles_edit_custom_profile";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -25,75 +25,18 @@ import {
   PROFILE_COLORS,
   PROFILE_ICONS,
 } from "@/src/constants/customProfile";
-
-type ManualCard = {
-  id: string;
-  front: string;
-  answers: string[];
-};
+import {
+  ManualCardsEditor,
+  ManualCardsEditorStyles,
+} from "@/src/features/customProfile/manualCards/ManualCardsEditor";
+import {
+  createEmptyManualCard,
+  ensureCardsNormalized,
+  normalizeAnswers,
+  useManualCardsForm,
+} from "@/src/features/customProfile/manualCards/useManualCardsForm";
 
 const MANUAL_HISTORY_LIMIT = 50;
-
-const createEmptyManualCard = (id?: string): ManualCard => ({
-  id: id ?? `card-${Date.now()}`,
-  front: "",
-  answers: [""],
-});
-
-const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
-  cards.map((card) => ({ ...card, answers: [...card.answers] }));
-
-const ensureCardHasAnswer = (card: ManualCard): ManualCard => {
-  if (card.answers.length === 0) {
-    return { ...card, answers: [""] };
-  }
-  return card;
-};
-
-const ensureCardsNormalized = (cards: ManualCard[]): ManualCard[] =>
-  (cards.length > 0 ? cards : [createEmptyManualCard()]).map(
-    ensureCardHasAnswer
-  );
-
-const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
-  if (a.length !== b.length) {
-    return false;
-  }
-  for (let index = 0; index < a.length; index += 1) {
-    const cardA = a[index];
-    const cardB = b[index];
-    if (cardA.id !== cardB.id || cardA.front !== cardB.front) {
-      return false;
-    }
-    if (cardA.answers.length !== cardB.answers.length) {
-      return false;
-    }
-    for (
-      let answerIndex = 0;
-      answerIndex < cardA.answers.length;
-      answerIndex += 1
-    ) {
-      if (cardA.answers[answerIndex] !== cardB.answers[answerIndex]) {
-        return false;
-      }
-    }
-  }
-  return true;
-};
-
-const normalizeAnswers = (answers: string[]): string[] => {
-  const deduped: string[] = [];
-  for (const answer of answers) {
-    const trimmed = answer.trim();
-    if (!trimmed) {
-      continue;
-    }
-    if (!deduped.includes(trimmed)) {
-      deduped.push(trimmed);
-    }
-  }
-  return deduped;
-};
 
 export default function EditCustomProfileScreen() {
   const styles = useEditStyles();
@@ -114,7 +57,7 @@ export default function EditCustomProfileScreen() {
     const str = (value ?? "").toString();
     try {
       return decodeURIComponent(str);
-    } catch (error) {
+    } catch {
       return str;
     }
   }, [params.name]);
@@ -123,42 +66,25 @@ export default function EditCustomProfileScreen() {
   const [iconId, setIconId] = useState<string | null>(null);
   const [iconColor, setIconColor] = useState<string>(DEFAULT_PROFILE_COLOR);
   const [colorId, setColorId] = useState<string | null>(null);
-  const [manualCards, setManualCards] = useState<ManualCard[]>(() => [
-    createEmptyManualCard("card-0"),
-  ]);
-  const [manualHistory, setManualHistory] = useState<ManualCard[][]>([]);
+  const {
+    manualCards,
+    replaceManualCards,
+    handleManualCardFrontChange,
+    handleManualCardAnswerChange,
+    handleAddAnswer,
+    handleRemoveAnswer,
+    handleAddCard,
+    handleRemoveCard,
+    canUndo,
+    undo,
+  } = useManualCardsForm({
+    initialCards: [createEmptyManualCard("card-0")],
+    enableHistory: true,
+    historyLimit: MANUAL_HISTORY_LIMIT,
+  });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-
-  const ensureAtLeastOneCard = useCallback((cards: ManualCard[]) => {
-    return ensureCardsNormalized(cards);
-  }, []);
-
-  const applyManualCardsChange = useCallback(
-    (updater: (cards: ManualCard[]) => ManualCard[]) => {
-      setManualCards((current) => {
-        const workingCopy = cloneManualCards(current);
-        const updated = updater(workingCopy);
-        const next = cloneManualCards(ensureAtLeastOneCard(updated));
-
-        if (areManualCardsEqual(current, next)) {
-          return current;
-        }
-
-        setManualHistory((history) => {
-          const nextHistory = [...history, cloneManualCards(current)];
-          if (nextHistory.length > MANUAL_HISTORY_LIMIT) {
-            nextHistory.shift();
-          }
-          return nextHistory;
-        });
-
-        return next;
-      });
-    },
-    [ensureAtLeastOneCard]
-  );
 
   const hydrateFromDb = useCallback(async () => {
     if (!profileId) {
@@ -176,9 +102,7 @@ export default function EditCustomProfileScreen() {
 
       if (!profileRow) {
         setLoadError("Profil nie istnieje.");
-        const fallbackCards = [createEmptyManualCard("card-0")];
-        setManualCards(cloneManualCards(fallbackCards));
-        setManualHistory([]);
+        replaceManualCards([createEmptyManualCard("card-0")]);
         setLoading(false);
         return;
       }
@@ -196,23 +120,21 @@ export default function EditCustomProfileScreen() {
         const normalizedAnswersList = normalizeAnswers(answersSource);
         const answers =
           normalizedAnswersList.length > 0 ? normalizedAnswersList : [""];
-        return ensureCardHasAnswer({
+        return {
           id: `card-${card.id ?? index}`,
           front: card.frontText,
           answers,
-        });
+        };
       });
-      const normalizedCards = ensureAtLeastOneCard(incomingCards);
-      const initialCards = cloneManualCards(normalizedCards);
-      setManualCards(initialCards);
-      setManualHistory([]);
+      const normalizedCards = ensureCardsNormalized(incomingCards);
+      replaceManualCards(normalizedCards);
     } catch (error) {
       console.error("Failed to load custom profile for edit", error);
       setLoadError("Nie udało się wczytać danych profilu.");
     } finally {
       setLoading(false);
     }
-  }, [profileId, ensureAtLeastOneCard]);
+  }, [profileId, replaceManualCards]);
 
   useFocusEffect(
     useCallback(() => {
@@ -220,77 +142,19 @@ export default function EditCustomProfileScreen() {
     }, [hydrateFromDb])
   );
 
-  const handleManualCardFrontChange = (cardId: string, value: string) => {
-    applyManualCardsChange((cards) =>
-      cards.map((card) =>
-        card.id === cardId ? { ...card, front: value } : card
-      )
-    );
-  };
+  const undoButtonColor =
+    ((styles.manualAddIcon as TextStyle)?.color ??
+      (styles.cardActionIcon as TextStyle)?.color ??
+      undefined) ?? "black";
 
-  const handleManualCardAnswerChange = (
-    cardId: string,
-    answerIndex: number,
-    value: string
-  ) => {
-    applyManualCardsChange((cards) =>
-      cards.map((card) => {
-        if (card.id !== cardId) {
-          return card;
-        }
-        const nextAnswers = [...card.answers];
-        nextAnswers[answerIndex] = value;
-        return { ...card, answers: nextAnswers };
-      })
-    );
-  };
-
-  const handleAddAnswer = (cardId: string) => {
-    applyManualCardsChange((cards) =>
-      cards.map((card) =>
-        card.id === cardId ? { ...card, answers: [...card.answers, ""] } : card
-      )
-    );
-  };
-
-  const handleRemoveAnswer = (cardId: string, answerIndex: number) => {
-    applyManualCardsChange((cards) =>
-      cards.map((card) => {
-        if (card.id !== cardId) {
-          return card;
-        }
-        if (card.answers.length <= 1) {
-          return card;
-        }
-        const nextAnswers = card.answers.filter(
-          (_, index) => index !== answerIndex
-        );
-        return ensureCardHasAnswer({ ...card, answers: nextAnswers });
-      })
-    );
-  };
-
-  const handleAddCard = () => {
-    applyManualCardsChange((cards) => [...cards, createEmptyManualCard()]);
-  };
-
-  const handleRemoveCard = (cardId: string) => {
-    applyManualCardsChange((cards) => {
-      if (cards.length <= 1) return cards;
-      return cards.filter((card) => card.id !== cardId);
-    });
-  };
-
-  const hasManualChanges = manualHistory.length > 0;
+  const hasManualChanges = canUndo;
 
   const handleUndoManualChanges = () => {
-    if (manualHistory.length === 0) {
+    if (!canUndo) {
       return;
     }
 
-    const previousSnapshot = manualHistory[manualHistory.length - 1];
-    setManualHistory((history) => history.slice(0, -1));
-    setManualCards(cloneManualCards(previousSnapshot));
+    undo();
     setPopup({
       message: "Cofnięto ostatnią zmianę",
       color: "my_yellow",
@@ -319,12 +183,12 @@ export default function EditCustomProfileScreen() {
     }
 
     const trimmedCards = manualCards.reduce<
-      Array<{
+      {
         frontText: string;
         backText: string;
         answers: string[];
         position: number;
-      }>
+      }[]
     >((acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
@@ -456,145 +320,32 @@ export default function EditCustomProfileScreen() {
                 </View>
 
                 <Text style={styles.miniSectionHeader}>fiszki</Text>
-                {manualCards.map((card, index) => {
-                  const isFirst = index === 0;
-
-                  return (
-                    <View
-                      key={card.id}
-                      style={[styles.card, isFirst && styles.cardFirst]}
-                    >
-                      <Text style={styles.number}>{index + 1}</Text>
-                      <View style={styles.inputContainer}>
-                        <TextInput
-                          value={card.front}
-                          style={styles.cardinput}
-                          placeholder="przód"
-                          placeholderTextColor={styles.cardPlaceholder.color}
-                          onChangeText={(value) =>
-                            handleManualCardFrontChange(card.id, value)
-                          }
+                <ManualCardsEditor
+                  manualCards={manualCards}
+                  styles={styles as unknown as ManualCardsEditorStyles}
+                  onCardFrontChange={handleManualCardFrontChange}
+                  onCardAnswerChange={handleManualCardAnswerChange}
+                  onAddAnswer={handleAddAnswer}
+                  onRemoveAnswer={handleRemoveAnswer}
+                  onAddCard={handleAddCard}
+                  onRemoveCard={handleRemoveCard}
+                  actionButtons={[
+                    {
+                      key: "undo",
+                      onPress: handleUndoManualChanges,
+                      accessibilityLabel: "Cofnij zmiany fiszek",
+                      content: (
+                        <FontAwesome
+                          name="undo"
+                          size={24}
+                          color={undoButtonColor}
+                          style={styles.manualAddIcon}
                         />
-                        <View style={styles.cardDivider} />
-                        <View style={styles.answersContainer}>
-                          {card.answers.map((answer, answerIndex) => {
-                            const placeholder =
-                              answerIndex === 0
-                                ? "tył"
-                                : `tył ${answerIndex + 1}`;
-                            return (
-                              <View
-                                key={`${card.id}-answer-${answerIndex}`}
-                                style={styles.answerRow}
-                              >
-                                <Text style={styles.answerIndex}>
-                                  {answerIndex + 1}.
-                                </Text>
-                                <TextInput
-                                  value={answer}
-                                  style={styles.answerInput}
-                                  placeholder={placeholder}
-                                  placeholderTextColor={
-                                    styles.cardPlaceholder.color
-                                  }
-                                  onChangeText={(value) =>
-                                    handleManualCardAnswerChange(
-                                      card.id,
-                                      answerIndex,
-                                      value
-                                    )
-                                  }
-                                />
-                                {card.answers.length > 1 && (
-                                  <Pressable
-                                    accessibilityRole="button"
-                                    accessibilityLabel={`Usuń odpowiedź ${
-                                      answerIndex + 1
-                                    } dla fiszki ${index + 1}`}
-                                    style={styles.answerRemoveButton}
-                                    hitSlop={8}
-                                    onPress={() =>
-                                      handleRemoveAnswer(card.id, answerIndex)
-                                    }
-                                  >
-                                    <Feather
-                                      name="minus-circle"
-                                      size={20}
-                                      color={
-                                        styles.cardActionIcon.color ?? "black"
-                                      }
-                                    />
-                                  </Pressable>
-                                )}
-                              </View>
-                            );
-                          })}
-                        </View>
-                      </View>
-                      <View style={styles.cardActions}>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Usuń fiszkę ${index + 1}`}
-                          style={[
-                            styles.cardActionButton,
-                            manualCards.length <= 1 &&
-                              styles.removeButtonDisabled,
-                          ]}
-                          hitSlop={8}
-                          disabled={manualCards.length <= 1}
-                          onPress={() => handleRemoveCard(card.id)}
-                        >
-                          <Feather
-                            name="trash-2"
-                            size={24}
-                            color={styles.cardActionIcon.color ?? "black"}
-                          />
-                        </Pressable>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
-                            index + 1
-                          }`}
-                          style={styles.cardActionButton}
-                          hitSlop={8}
-                          onPress={() => handleAddAnswer(card.id)}
-                        >
-                          <Feather
-                            name="plus"
-                            size={24}
-                            color={styles.cardActionIcon.color ?? "black"}
-                          />
-                        </Pressable>
-                      </View>
-                    </View>
-                  );
-                })}
-
-                <View style={styles.buttonContainer}>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Cofnij zmiany fiszek"
-                    style={styles.manualAddButton}
-                    accessibilityState={{ disabled: !hasManualChanges }}
-                    disabled={!hasManualChanges}
-                    onPress={handleUndoManualChanges}
-                  >
-                    <FontAwesome
-                      name="undo"
-                      size={24}
-                      color={styles.manualAddIcon.color ?? "black"}
-                      style={styles.manualAddIcon}
-                    />
-                  </Pressable>
-                  <Pressable
-                    accessibilityRole="button"
-                    accessibilityLabel="Dodaj nową fiszkę"
-                    style={styles.manualAddButton}
-                    onPress={handleAddCard}
-                  >
-                    <Text style={styles.manualAddIcon}>+</Text>
-                  </Pressable>
-                </View>
+                      ),
+                      disabled: !hasManualChanges,
+                    },
+                  ]}
+                />
               </View>
             </>
           )}
