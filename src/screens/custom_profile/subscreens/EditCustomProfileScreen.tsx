@@ -1,7 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
-  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -12,6 +11,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import MyButton from "@/src/components/button/button";
+import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useEditStyles } from "./EditCustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -22,8 +22,6 @@ import {
 } from "@/src/db/sqlite/db";
 import {
   DEFAULT_PROFILE_COLOR,
-  PROFILE_COLORS,
-  PROFILE_ICONS,
 } from "@/src/constants/customProfile";
 import {
   ManualCardsEditor,
@@ -272,51 +270,24 @@ export default function EditCustomProfileScreen() {
                 <View style={styles.iconContainer}>
                   <Text style={styles.miniSectionHeader}>ikona</Text>
 
-                  <View style={styles.imageContainer}>
-                    {PROFILE_ICONS.map(({ id, Component, name }) => {
-                      const isSelected = iconId === id;
-                      return (
-                        <Pressable
-                          key={id}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Ikona ${name}`}
-                          onPress={() => setIconId(id)}
-                          style={[
-                            styles.iconWrapper,
-                            isSelected && styles.iconWrapperSelected,
-                          ]}
-                        >
-                          <Component
-                            name={name as never}
-                            size={40}
-                            color={iconColor}
-                          />
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-
-                  <View style={styles.colorsContainer}>
-                    {PROFILE_COLORS.map((color) => {
-                      const isSelected = iconColor === color.hex;
-                      return (
-                        <Pressable
-                          key={color.id}
-                          accessibilityRole="button"
-                          accessibilityLabel={`Kolor ${color.label}`}
-                          onPress={() => {
-                            setIconColor(color.hex);
-                            setColorId(color.id);
-                          }}
-                          style={[
-                            styles.profileColor,
-                            { backgroundColor: color.hex },
-                            isSelected && styles.profileColorSelected,
-                          ]}
-                        />
-                      );
-                    })}
-                  </View>
+                  <ProfileIconColorSelector
+                    selectedIcon={iconId}
+                    selectedColor={iconColor}
+                    selectedColorId={colorId}
+                    onIconChange={setIconId}
+                    onColorChange={(color) => {
+                      setIconColor(color.hex);
+                      setColorId(color.id);
+                    }}
+                    styles={{
+                      iconsContainer: styles.imageContainer,
+                      iconWrapper: styles.iconWrapper,
+                      iconWrapperSelected: styles.iconWrapperSelected,
+                      colorsContainer: styles.colorsContainer,
+                      colorSwatch: styles.profileColor,
+                      colorSwatchSelected: styles.profileColorSelected,
+                    }}
+                  />
                 </View>
 
                 <Text style={styles.miniSectionHeader}>fiszki</Text>

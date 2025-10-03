@@ -1,6 +1,7 @@
 import { useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { Text, TextInput, View } from "react-native";
 import MyButton from "@/src/components/button/button";
+import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useStyles } from "./CustomProfileScreen-styles";
 import { useRouter } from "expo-router";
 import {
@@ -64,45 +65,24 @@ export default function CustomProfileScreen() {
 
         <View style={styles.iconContainer}>
           <Text style={styles.miniSectionHeader}>ikona</Text>
-          <View style={styles.imageContainer}>
-            {PROFILE_ICONS.map(({ id, Component, name }) => (
-              <Pressable
-                key={id}
-                accessibilityRole="button"
-                accessibilityLabel={`Ikona ${name}`}
-                onPress={() => setSelectedIcon(id)}
-                style={[
-                  styles.iconWrapper,
-                  selectedIcon === id && styles.iconWrapperSelected,
-                ]}
-              >
-                <Component
-                  name={name as never}
-                  size={40}
-                  color={selectedColor}
-                />
-              </Pressable>
-            ))}
-          </View>
-
-          <View style={styles.colorsContainer}>
-            {PROFILE_COLORS.map((color) => (
-              <Pressable
-                key={color.id}
-                accessibilityRole="button"
-                accessibilityLabel={`Kolor ${color.label}`}
-                onPress={() => {
-                  setSelectedColor(color.hex);
-                  setSelectedColorId(color.id);
-                }}
-                style={[
-                  styles.profileColor,
-                  { backgroundColor: color.hex },
-                  selectedColor === color.hex && styles.profileColorSelected,
-                ]}
-              />
-            ))}
-          </View>
+          <ProfileIconColorSelector
+            selectedIcon={selectedIcon}
+            selectedColor={selectedColor}
+            selectedColorId={selectedColorId}
+            onIconChange={setSelectedIcon}
+            onColorChange={(color) => {
+              setSelectedColor(color.hex);
+              setSelectedColorId(color.id);
+            }}
+            styles={{
+              iconsContainer: styles.imageContainer,
+              iconWrapper: styles.iconWrapper,
+              iconWrapperSelected: styles.iconWrapperSelected,
+              colorsContainer: styles.colorsContainer,
+              colorSwatch: styles.profileColor,
+              colorSwatchSelected: styles.profileColorSelected,
+            }}
+          />
         </View>
 
         <View style={styles.buttonscontainer}>

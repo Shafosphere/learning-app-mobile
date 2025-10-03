@@ -53,7 +53,7 @@ export default function ReviewScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.reviewMinicontainer}>
-        <Text style={styles.choose}>wybierz poziom powtórek</Text>
+        <Text style={styles.choose}>POWÓTRKI Z SEKCJI:</Text>
 
         {levels.map((item, index) => (
           <Pressable

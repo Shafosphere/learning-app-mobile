@@ -821,6 +821,19 @@ export async function countDueReviewsByLevel(
   return counts;
 }
 
+export async function countTotalDueReviews(
+  sourceLangId: number,
+  targetLangId: number,
+  nowMs: number
+): Promise<number> {
+  const counts = await countDueReviewsByLevel(sourceLangId, targetLangId, nowMs);
+  let total = 0;
+  for (const value of Object.values(counts)) {
+    total += value | 0;
+  }
+  return total;
+}
+
 export async function countLearnedWordsByLevel(
   sourceLangId: number,
   targetLangId: number

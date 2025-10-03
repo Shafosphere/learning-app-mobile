@@ -9,14 +9,11 @@ import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import PL_FLAG from "@/assets/flags/PL.png";
-import ES_FLAG from "@/assets/flags/ES.png";
-import PM_FLAG from "@/assets/flags/PM.png";
-import US_FLAG from "@/assets/flags/US.png";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useStreak } from "@/src/contexts/StreakContext";
+import { getFlagSource } from "@/src/constants/languageFlags";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   const router = useRouter();
@@ -67,13 +64,6 @@ export default function FlashcardsScreen() {
     input1: string;
     input2: string;
   } | null>(null);
-
-  const flagMap: Record<string, number> = {
-    pl: PL_FLAG,
-    es: ES_FLAG,
-    pm: PM_FLAG,
-    en: US_FLAG,
-  };
 
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const learnedPercent =
@@ -293,6 +283,8 @@ export default function FlashcardsScreen() {
     );
   }
 
+  const profileFlagSource = getFlagSource(activeProfile.sourceLang);
+
   return (
     <View style={styles.container}>
       <TouchableOpacity
@@ -301,12 +293,9 @@ export default function FlashcardsScreen() {
         accessibilityRole="button"
         accessibilityLabel={profileAccessibilityLabel}
       >
-        {activeProfile && (
-          <Image
-            source={flagMap[activeProfile.sourceLang]}
-            style={styles.flag}
-          />
-        )}
+        {profileFlagSource ? (
+          <Image source={profileFlagSource} style={styles.flag} />
+        ) : null}
         {/* <Text style={styles.levelText}>{selectedLevel}</Text> */}
       </TouchableOpacity>
 

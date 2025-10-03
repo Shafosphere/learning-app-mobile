@@ -8,36 +8,16 @@ import { usePopup } from "@/src/contexts/PopupContext";
 import { useRouter } from "expo-router";
 import type { LanguagePair } from "@/src/db/sqlite/db";
 import type { LanguageProfile } from "@/src/types/profile";
-
-import PL_FLAG_GRAY from "@/assets/flags/PLgray.png";
-import ES_FLAG_GRAY from "@/assets/flags/ESgray.png";
-import PM_FLAG_GRAY from "@/assets/flags/PMgray.png";
-import US_FLAG_GRAY from "@/assets/flags/USgray.png";
-
-import PL_FLAG from "@/assets/flags/PL.png";
-import ES_FLAG from "@/assets/flags/ES.png";
-import PM_FLAG from "@/assets/flags/PM.png";
-import US_FLAG from "@/assets/flags/US.png";
+import {
+  getFlagSource,
+  supportedLanguageCodes,
+} from "@/src/constants/languageFlags";
 
 export default function CreateProfileScreen() {
   const styles = useStyles();
   const { addProfile } = useSettings();
   const setPopup = usePopup();
   const router = useRouter();
-
-  const flagMap: Record<string, number> = {
-    pl: PL_FLAG,
-    es: ES_FLAG,
-    pm: PM_FLAG,
-    en: US_FLAG,
-  };
-
-  const flagGrayMap: Record<string, number> = {
-    pl: PL_FLAG_GRAY,
-    es: ES_FLAG_GRAY,
-    pm: PM_FLAG_GRAY,
-    en: US_FLAG_GRAY,
-  };
 
   const [availablePairs, setAvailablePairs] = useState<LanguagePair[]>([]);
   const [activeSource, setSource] = useState<string | null>(null);
@@ -65,9 +45,13 @@ export default function CreateProfileScreen() {
       <View style={styles.minicontainer}>
         <Text style={styles.title}>Znam:</Text>
         <View style={styles.grid}>
-          {Object.keys(flagMap).map((code) => {
+          {supportedLanguageCodes.map((code) => {
             const isAvailable = targetLangs.includes(code);
-            const src = isAvailable ? flagMap[code] : flagGrayMap[code];
+            const src = getFlagSource(code, isAvailable ? "active" : "inactive");
+
+            if (!src) {
+              return null;
+            }
 
             return (
               <Pressable
@@ -95,9 +79,13 @@ export default function CreateProfileScreen() {
       <View style={styles.minicontainer}>
         <Text style={styles.title}>Chce sie nauczyć:</Text>
         <View style={styles.grid}>
-          {Object.keys(flagMap).map((code) => {
+          {supportedLanguageCodes.map((code) => {
             const isAvailable = sourceLangs.includes(code);
-            const src = isAvailable ? flagMap[code] : flagGrayMap[code];
+            const src = getFlagSource(code, isAvailable ? "active" : "inactive");
+
+            if (!src) {
+              return null;
+            }
 
             return (
               <Pressable

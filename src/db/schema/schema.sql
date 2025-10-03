@@ -77,10 +77,3 @@ CREATE INDEX idx_reviews_due
   ON reviews(next_review);
 CREATE INDEX idx_reviews_pair
   ON reviews(source_lang_id, target_lang_id);
-
--- Ustawienia SQLite (wykonaj raz przy otwarciu DB)
-PRAGMA foreign_keys = ON;
-PRAGMA journal_mode = WAL;
-PRAGMA synchronous = NORMAL;
-PRAGMA cache_size = 10000;
-PRAGMA page_size = 4096;

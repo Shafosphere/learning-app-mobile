@@ -10,7 +10,7 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system";
 import MyButton from "@/src/components/button/button";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useStyles } from "./CustomProfileScreen-styles";
+import { useStyles } from "../CustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
   createCustomProfile,

@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/review/ReviewSessionScreen";
+export { default } from "@/src/screens/review/subscreens/ReviewSessionScreen";

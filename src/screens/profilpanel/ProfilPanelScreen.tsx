@@ -1,10 +1,6 @@
 import { useStyles } from "./ProfilPanelScreen-styles";
 import { Image, Text, View, Pressable, ScrollView } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import PL_FLAG from "@/assets/flags/PL.png";
-import ES_FLAG from "@/assets/flags/ES.png";
-import PM_FLAG from "@/assets/flags/PM.png";
-import US_FLAG from "@/assets/flags/US.png";
 import { useCallback, useEffect, useState } from "react";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import MyButton from "@/src/components/button/button";
@@ -17,6 +13,7 @@ import {
   type CustomProfileSummary,
 } from "@/src/db/sqlite/db";
 import { getProfileIconById } from "@/src/constants/customProfile";
+import { getFlagSource } from "@/src/constants/languageFlags";
 
 type SelectedProfile =
   | { type: "builtin"; index: number }
@@ -46,13 +43,6 @@ export default function ProfilPanelScreen() {
   );
   const router = useRouter();
   const setPopup = usePopup();
-
-  const flagMap: Record<string, number> = {
-    pl: PL_FLAG,
-    es: ES_FLAG,
-    pm: PM_FLAG,
-    en: US_FLAG,
-  };
 
   useEffect(() => {
     console.log("profiles length:", profiles.length);
@@ -139,7 +129,8 @@ export default function ProfilPanelScreen() {
             const isHighlighted =
               highlightProfile?.type === "builtin" &&
               highlightProfile.index === index;
-            const targetFlag = flagMap[item.targetLang];
+            const targetFlag = getFlagSource(item.targetLang);
+            const sourceFlag = getFlagSource(item.sourceLang);
             return (
               <Pressable
                 key={index}
@@ -157,7 +148,9 @@ export default function ProfilPanelScreen() {
                     </Text>
                   </View>
                 ) : null}
-                <Image style={styles.flag} source={flagMap[item.sourceLang]} />
+                {sourceFlag ? (
+                  <Image style={styles.flag} source={sourceFlag} />
+                ) : null}
                 <Text style={styles.profileCardText}>
                   {lang[item.targetLang]?.[item.sourceLang] ?? item.sourceLang}
                 </Text>

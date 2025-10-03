@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/custom_profile/EditCustomProfileScreen";
+export { default } from "@/src/screens/custom_profile/subscreens/EditCustomProfileScreen";
