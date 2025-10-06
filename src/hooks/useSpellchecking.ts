@@ -36,6 +36,9 @@ export default function useSpellchecking() {
 
     if (spellChecking) {
       if (userWord === correctWord) return true;
+      if (Math.min(userWord.length, correctWord.length) <= 1) {
+        return false;
+      }
       return levenshtein(userWord, correctWord) <= 1;
     }
 

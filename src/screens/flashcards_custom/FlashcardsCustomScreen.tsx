@@ -3,7 +3,7 @@ import { type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   getCustomFlashcards,
   getCustomProfileById,
-  scheduleReview,
+  scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -61,13 +61,8 @@ function mapCustomCardToWord(
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const {
-    activeProfile,
-    selectedLevel,
-    activeCustomProfileId,
-    boxesLayout,
-    flashcardsBatchSize,
-  } = useSettings();
+  const { activeCustomProfileId, boxesLayout, flashcardsBatchSize } =
+    useSettings();
   const { registerLearningEvent } = useStreak();
   const isFocused = useIsFocused();
 
@@ -250,19 +245,9 @@ export default function Flashcards() {
       } else {
         setLearned((list) => [element, ...list]);
         // Schedule spaced-repetition review when a word is learned
-        if (
-          activeProfile?.sourceLangId != null &&
-          activeProfile?.targetLangId != null &&
-          selectedLevel
-        ) {
-          // Initial stage 0 on first learn; helper computes next_review
-          void scheduleReview(
-            element.id,
-            activeProfile.sourceLangId,
-            activeProfile.targetLangId,
-            selectedLevel,
-            0
-          );
+        if (activeCustomProfileId != null) {
+          // Initial stage 0 mirrors built-in flow for newly learned cards
+          void scheduleCustomReview(element.id, activeCustomProfileId, 0);
         }
       }
 
@@ -535,9 +520,9 @@ export default function Flashcards() {
         disabled={!customProfile}
       >
         <View style={styles.levelContainer}>
-          <Text style={styles.levelLabel} allowFontScaling>
+          {/* <Text style={styles.levelLabel} allowFontScaling>
             {totalCardsLabel}
-          </Text>
+          </Text> */}
           {/* <View style={styles.progressTrack}>
             <View
               style={[

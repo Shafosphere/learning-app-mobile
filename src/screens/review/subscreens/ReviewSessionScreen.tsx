@@ -4,10 +4,14 @@ import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import {
+  advanceCustomReview,
   advanceReview,
+  getDueCustomReviewFlashcards,
   getDueReviewWordsBatch,
+  removeCustomReview,
   removeReview,
 } from "@/src/db/sqlite/db";
+import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { useSessionStyles } from "./ReviewSessionScreen-styles";
 import { removeWordIdFromUsedWordIds } from "@/src/hooks/useBoxesPersistenceSnapshot";
@@ -16,10 +20,31 @@ import RotaryStack, {
   RotaryStackHandle,
 } from "@/src/components/carousel/RotaryStack";
 
+function mapCustomReviewToWord(
+  card: CustomReviewFlashcard
+): WordWithTranslations {
+  const answers = (card.answers ?? [])
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  const fallback = card.backText?.trim() ?? "";
+  const translations =
+    answers.length > 0
+      ? answers
+      : fallback.length > 0
+      ? [fallback]
+      : [card.frontText];
+
+  return {
+    id: card.id,
+    text: card.frontText,
+    translations,
+  };
+}
+
 export default function ReviewSessionScreen() {
   const styles = useSessionStyles();
   const router = useRouter();
-  const { activeProfile, selectedLevel } = useSettings();
+  const { activeProfile, selectedLevel, activeCustomProfileId } = useSettings();
   const checkSpelling = useSpellchecking();
   const carouselRef = useRef<RotaryStackHandle>(null);
 
@@ -33,8 +58,12 @@ export default function ReviewSessionScreen() {
   const [carouselItems, setCarouselItems] = useState<string[]>([]);
   const [spinBusy, setSpinBusy] = useState(false);
 
+  const isCustomMode = activeCustomProfileId != null;
   const srcId = activeProfile?.sourceLangId ?? null;
   const tgtId = activeProfile?.targetLangId ?? null;
+  const hasBuiltInProfile =
+    srcId != null && tgtId != null && selectedLevel != null;
+  const canRunReview = isCustomMode || hasBuiltInProfile;
   const carouselWordsRef = useRef<WordWithTranslations[]>([]);
   const sessionTimeRef = useRef<number>(Date.now());
   const [lockedAfterWrong, setLockedAfterWrong] = useState(false);
@@ -54,25 +83,44 @@ export default function ReviewSessionScreen() {
     });
   };
 
+  async function fetchDueWords(
+    limit: number,
+    nowMs: number
+  ): Promise<WordWithTranslations[]> {
+    if (isCustomMode && activeCustomProfileId != null) {
+      const rows = await getDueCustomReviewFlashcards(
+        activeCustomProfileId,
+        limit,
+        nowMs
+      );
+      return rows.map(mapCustomReviewToWord);
+    }
+
+    if (!isCustomMode && srcId && tgtId && selectedLevel) {
+      return getDueReviewWordsBatch(srcId, tgtId, selectedLevel, limit, nowMs);
+    }
+
+    return [];
+  }
+
   async function loadNext() {
-    if (!srcId || !tgtId) {
+    if (!canRunReview) {
       setCurrent(null);
       setCarouselItems([]);
       carouselWordsRef.current = [];
       setSessionEnded(false);
+      setAnswer("");
+      setPromptState("neutral");
+      setCorrectAnswer(null);
+      setLockedAfterWrong(false);
+      setLoading(false);
       return;
     }
     setLoading(true);
     try {
       const nowCursor = sessionTimeRef.current;
       const hadWordsBefore = carouselWordsRef.current.length > 0;
-      const batch = await getDueReviewWordsBatch(
-        srcId,
-        tgtId,
-        selectedLevel,
-        5,
-        nowCursor
-      );
+      const batch = await fetchDueWords(5, nowCursor);
       const uniqueBatch = dedupeWords(batch);
       carouselWordsRef.current = uniqueBatch;
       setCarouselItems(uniqueBatch.map((item) => formatWordText(item.text)));
@@ -91,15 +139,21 @@ export default function ReviewSessionScreen() {
   useEffect(() => {
     sessionTimeRef.current = Date.now();
     void loadNext();
-  }, [srcId, tgtId, selectedLevel]);
+  }, [srcId, tgtId, selectedLevel, activeCustomProfileId, isCustomMode]);
 
   function onSubmit() {
-    if (!current || !srcId || !tgtId) return;
+    if (!current || !canRunReview) return;
     const ok = current.translations.some((t) => checkSpelling(answer, t));
     if (ok) {
       setPromptState("correct");
       setLoading(true);
-      advanceReview(current.id, srcId, tgtId)
+      const advancePromise =
+        isCustomMode && activeCustomProfileId != null
+          ? advanceCustomReview(current.id, activeCustomProfileId)
+          : srcId && tgtId
+          ? advanceReview(current.id, srcId, tgtId)
+          : Promise.resolve();
+      advancePromise
         .catch(() => {})
         .finally(() => {
           setLoading(false);
@@ -114,14 +168,20 @@ export default function ReviewSessionScreen() {
   }
 
   async function onKeep() {
-    if (!current || !srcId || !tgtId) return;
+    if (!current || !canRunReview) return;
     if (spinBusy) return;
     setSpinBusy(true);
     setLockedAfterWrong(false);
     setPromptState("neutral");
     setCorrectAnswer(null);
 
-    advanceReview(current.id, srcId, tgtId).catch(() => {});
+    const advancePromise =
+      isCustomMode && activeCustomProfileId != null
+        ? advanceCustomReview(current.id, activeCustomProfileId)
+        : srcId && tgtId
+        ? advanceReview(current.id, srcId, tgtId)
+        : Promise.resolve();
+    advancePromise.catch(() => {});
 
     try {
       const nextWord = await fetchNextCarouselWord();
@@ -137,17 +197,21 @@ export default function ReviewSessionScreen() {
   }
 
   async function onReset() {
-    if (!current || !srcId || !tgtId) return;
+    if (!current || !canRunReview) return;
     if (spinBusy) return;
     setSpinBusy(true);
     try {
-      await removeReview(current.id, srcId, tgtId);
-      await removeWordIdFromUsedWordIds({
-        sourceLangId: srcId,
-        targetLangId: tgtId,
-        level: selectedLevel,
-        wordId: current.id,
-      });
+      if (isCustomMode && activeCustomProfileId != null) {
+        await removeCustomReview(current.id, activeCustomProfileId);
+      } else if (srcId && tgtId && selectedLevel) {
+        await removeReview(current.id, srcId, tgtId);
+        await removeWordIdFromUsedWordIds({
+          sourceLangId: srcId,
+          targetLangId: tgtId,
+          level: selectedLevel,
+          wordId: current.id,
+        });
+      }
       const nextWord = await fetchNextCarouselWord();
       const rotated = spinCarousel({
         injectionWord: nextWord ?? undefined,
@@ -166,14 +230,8 @@ export default function ReviewSessionScreen() {
   }
 
   async function fetchNextCarouselWord(): Promise<WordWithTranslations | null> {
-    if (!srcId || !tgtId) return null;
-    const batch = await getDueReviewWordsBatch(
-      srcId,
-      tgtId,
-      selectedLevel,
-      5,
-      sessionTimeRef.current
-    );
+    if (!canRunReview) return null;
+    const batch = await fetchDueWords(5, sessionTimeRef.current);
     if (batch.length === 0) {
       return null;
     }
@@ -243,7 +301,7 @@ export default function ReviewSessionScreen() {
   async function handleSpin() {
     const carousel = carouselRef.current;
     if (!carousel || carousel.isAnimating() || spinBusy) return;
-    if (!srcId || !tgtId || !current) return;
+    if (!current || !canRunReview) return;
     if (lockedAfterWrong) return;
 
     setSpinBusy(true);
@@ -260,7 +318,13 @@ export default function ReviewSessionScreen() {
     setCorrectAnswer(null);
     setLockedAfterWrong(false);
 
-    advanceReview(current.id, srcId, tgtId).catch(() => {});
+    const advancePromise =
+      isCustomMode && activeCustomProfileId != null
+        ? advanceCustomReview(current.id, activeCustomProfileId)
+        : srcId && tgtId
+        ? advanceReview(current.id, srcId, tgtId)
+        : Promise.resolve();
+    advancePromise.catch(() => {});
 
     try {
       const nextWord = await fetchNextCarouselWord();
@@ -277,12 +341,14 @@ export default function ReviewSessionScreen() {
     }
   }
 
-  const hasProfile = !!srcId && !!tgtId;
+  const reviewContextMessage = isCustomMode
+    ? "Wybierz profil własnych fiszek."
+    : "Wybierz profil i poziom w ustawieniach.";
 
   return (
     <View style={styles.container}>
-      {!hasProfile ? (
-        <Text style={styles.emptyText}>Wybierz profil w ustawieniach.</Text>
+      {!canRunReview ? (
+        <Text style={styles.emptyText}>{reviewContextMessage}</Text>
       ) : loading ? (
         <ActivityIndicator />
       ) : sessionEnded ? (

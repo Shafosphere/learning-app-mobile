@@ -4,13 +4,17 @@ import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import MyButton from "@/src/components/button/button";
-import { addRandomReviewsForPair } from "@/src/db/sqlite/db";
+import {
+  addRandomCustomReviews,
+  addRandomReviewsForPair,
+} from "@/src/db/sqlite/db";
 
 const DataSection: React.FC = () => {
   const styles = useStyles();
   const router = useRouter();
-  const { activeProfile, selectedLevel } = useSettings();
-  const [busy, setBusy] = useState(false);
+  const { activeProfile, selectedLevel, activeCustomProfileId } = useSettings();
+  const [builtInBusy, setBuiltInBusy] = useState(false);
+  const [customBusy, setCustomBusy] = useState(false);
 
   const handleAddRandom = async () => {
     if (!activeProfile?.sourceLangId || !activeProfile?.targetLangId) {
@@ -18,7 +22,7 @@ const DataSection: React.FC = () => {
       return;
     }
 
-    setBusy(true);
+    setBuiltInBusy(true);
     try {
       const inserted = await addRandomReviewsForPair(
         activeProfile.sourceLangId,
@@ -35,7 +39,32 @@ const DataSection: React.FC = () => {
     } catch {
       Alert.alert("Błąd", "Nie udało się dodać słówek.");
     } finally {
-      setBusy(false);
+      setBuiltInBusy(false);
+    }
+  };
+
+  const handleAddRandomCustom = async () => {
+    if (activeCustomProfileId == null) {
+      Alert.alert(
+        "Brak profilu",
+        "Wybierz własny profil fiszek w ustawieniach."
+      );
+      return;
+    }
+
+    setCustomBusy(true);
+    try {
+      const inserted = await addRandomCustomReviews(activeCustomProfileId, 10);
+      Alert.alert(
+        "Dodano",
+        inserted > 0
+          ? `Dodano ${inserted} fiszek do powtórek profilu.`
+          : "Brak nowych fiszek do dodania."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się dodać fiszek.");
+    } finally {
+      setCustomBusy(false);
     }
   };
 
@@ -51,9 +80,9 @@ const DataSection: React.FC = () => {
           </Text>
         </View>
         <MyButton
-          text={busy ? "Dodawanie..." : "Dodaj 10"}
+          text={builtInBusy ? "Dodawanie..." : "Dodaj 10"}
           color="my_green"
-          disabled={busy || !activeProfile}
+          disabled={builtInBusy || !activeProfile}
           onPress={handleAddRandom}
           width={140}
         />
@@ -61,6 +90,28 @@ const DataSection: React.FC = () => {
 
       {!activeProfile && (
         <Text style={styles.infoText}>Najpierw wybierz profil.</Text>
+      )}
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Dodaj customowe powtórki</Text>
+          <Text style={styles.rowSubtitle}>
+            Wstaw losowe fiszki z aktywnego profilu własnego.
+          </Text>
+        </View>
+        <MyButton
+          text={customBusy ? "Dodawanie..." : "Dodaj 10"}
+          color="my_green"
+          disabled={customBusy || activeCustomProfileId == null}
+          onPress={handleAddRandomCustom}
+          width={140}
+        />
+      </View>
+
+      {activeCustomProfileId == null && (
+        <Text style={styles.infoText}>
+          Najpierw wybierz własny profil w panelu profili.
+        </Text>
       )}
 
       <View style={styles.buttonsContainer}>

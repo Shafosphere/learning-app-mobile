@@ -1,6 +1,5 @@
 import { useCallback, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -8,52 +7,17 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useStyles } from "./ReviewProfilesScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
+  countDueCustomReviews,
   countTotalDueReviews,
   getCustomProfilesWithCardCounts,
   type CustomProfileSummary,
 } from "@/src/db/sqlite/db";
 import { getProfileIconById } from "@/src/constants/customProfile";
 import { getFlagSource } from "@/src/constants/languageFlags";
-import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 
 const languageLabels: Record<string, Record<string, string>> = {
   pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
 };
-
-async function readCustomDueCount(
-  profileId: number,
-  fallback: number
-): Promise<number> {
-  const storageKey = `customBoxes:${profileId}-${profileId}-custom-${profileId}`;
-  try {
-    const raw = await AsyncStorage.getItem(storageKey);
-    if (!raw) {
-      return fallback;
-    }
-
-    const parsed = JSON.parse(raw) as SavedBoxesV2 | null;
-    if (!parsed || parsed.v !== 2 || !parsed.flashcards) {
-      return fallback;
-    }
-
-    const {
-      flashcards: { boxOne, boxTwo, boxThree, boxFour, boxFive },
-    } = parsed;
-
-    const lengths = [boxOne, boxTwo, boxThree, boxFour, boxFive].map((list) =>
-      Array.isArray(list) ? list.length : 0
-    );
-
-    const total = lengths.reduce((sum, count) => sum + count, 0);
-    return total;
-  } catch (error) {
-    console.warn(
-      `Failed to read custom review snapshot for profile ${profileId}`,
-      error
-    );
-    return fallback;
-  }
-}
 
 export default function ReviewProfilesScreen() {
   const styles = useStyles();
@@ -105,11 +69,16 @@ export default function ReviewProfilesScreen() {
       setCustomProfiles(rows);
       const customEntries = await Promise.all(
         rows.map(async (profile) => {
-          const count = await readCustomDueCount(
-            profile.id,
-            profile.cardsCount
-          );
-          return [profile.id, count] as const;
+          try {
+            const count = await countDueCustomReviews(profile.id, now);
+            return [profile.id, count] as const;
+          } catch (error) {
+            console.warn(
+              `Failed to count custom reviews for profile ${profile.id}`,
+              error
+            );
+            return [profile.id, 0] as const;
+          }
         })
       );
       const nextCustom: Record<number, number> = {};
@@ -158,7 +127,7 @@ export default function ReviewProfilesScreen() {
     (profileId: number) => {
       void (async () => {
         await setActiveCustomProfileId(profileId);
-        router.push("/flashcards_custom");
+        router.push("/review/session");
       })();
     },
     [router, setActiveCustomProfileId]
@@ -188,81 +157,65 @@ export default function ReviewProfilesScreen() {
           {/* <Text style={styles.title}>Powtórki</Text> */}
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Powtórki z głównych profili</Text>
-            {profiles.map((profile, index) => {
-              const builtInCount = builtInCounts[index] ?? 0;
-              const targetFlag = getFlagSource(profile.targetLang);
-              const sourceFlag = getFlagSource(profile.sourceLang);
-              const friendlyLabel =
-                languageLabels[profile.targetLang]?.[profile.sourceLang] ??
-                profile.sourceLang;
+            <Text style={styles.sectionTitle}>Powtórki</Text>
+            <View style={styles.profileGrid}>
+              {profiles.map((profile, index) => {
+                const builtInCount = builtInCounts[index] ?? 0;
+                const sourceFlag = getFlagSource(profile.sourceLang);
+                const friendlyLabel =
+                  languageLabels[profile.targetLang]?.[profile.sourceLang] ??
+                  profile.sourceLang;
 
-              return (
-                <Pressable
-                  key={`${profile.sourceLang}-${profile.targetLang}-${index}`}
-                  style={styles.profileCard}
-                  onPress={() => handleSelectProfile(index)}
-                >
-                  {targetFlag ? (
-                    <View style={styles.profileCardBadge}>
-                      <Image
-                        style={styles.profileCardBadgeFlag}
-                        source={targetFlag}
-                      />
-                      <Text style={styles.profileCardBadgeText}>
-                        {profile.targetLang?.toUpperCase()}
-                      </Text>
-                    </View>
-                  ) : null}
-                  <View style={styles.profileCardContent}>
+                return (
+                  <Pressable
+                    key={`${profile.sourceLang}-${profile.targetLang}-${index}`}
+                    style={styles.profileCard}
+                    onPress={() => handleSelectProfile(index)}
+                  >
+                    {/* <View style={styles.profileCardContent}> */}
                     {sourceFlag ? (
                       <Image style={styles.flag} source={sourceFlag} />
                     ) : null}
                     <Text style={styles.profileCardText}>{friendlyLabel}</Text>
-                  </View>
-                  {renderCount(builtInCount)}
-                </Pressable>
-              );
-            })}
+                    {/* </View> */}
+                    <View style={styles.profileCount}>
+                      {renderCount(builtInCount)}
+                    </View>
+                  </Pressable>
+                );
+              })}
+            </View>
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Powtórki z twoich profili</Text>
+            <Text style={styles.sectionTitle}>Twoje</Text>
             {customProfiles.length === 0 ? (
               <Text style={styles.emptyText}>
                 Nie masz jeszcze własnych fiszek.
               </Text>
             ) : (
-              <View style={styles.customList}>
-                {customProfiles.map((profile) => {
+              <View style={styles.profileGrid}>
+                {customProfiles.map((profile, index) => {
                   const iconMeta = getProfileIconById(profile.iconId);
                   const IconComponent = iconMeta?.Component ?? Ionicons;
                   const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                  const dueCount =
-                    customCounts[profile.id] ?? profile.cardsCount;
+                  const dueCount = customCounts[profile.id] ?? 0;
 
                   return (
                     <Pressable
-                      key={profile.id}
-                      style={styles.customCard}
+                      key={`${profile.id}-${index}`}
+                      style={styles.profileCard}
                       onPress={() => handleSelectCustomProfile(profile.id)}
                     >
-                      <View style={styles.customCardContent}>
-                        <IconComponent
-                          name={iconName}
-                          size={60}
-                          color={profile.iconColor}
-                        />
-                        <View style={styles.customCardInfo}>
-                          <Text style={styles.customCardTitle}>
-                            {profile.name}
-                          </Text>
-                          <Text style={styles.customCardMeta}>
-                            fiszki: {profile.cardsCount}
-                          </Text>
-                        </View>
+                      <IconComponent
+                        name={iconName}
+                        size={48}
+                        color={profile.iconColor}
+                      />
+                      <Text style={styles.profileCardText}>{profile.name}</Text>
+                      <View style={styles.profileCount}>
+                        {renderCount(dueCount)}
                       </View>
-                      {renderCount(dueCount)}
                     </Pressable>
                   );
                 })}

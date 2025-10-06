@@ -52,6 +52,16 @@ CREATE TABLE custom_flashcard_answers (
   UNIQUE(flashcard_id, answer_text)
 );
 
+CREATE TABLE custom_reviews (
+  id             INTEGER PRIMARY KEY AUTOINCREMENT,
+  profile_id     INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+  flashcard_id   INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
+  learned_at     INTEGER NOT NULL,
+  next_review    INTEGER NOT NULL,
+  stage          INTEGER NOT NULL DEFAULT 0,
+  UNIQUE(flashcard_id)
+);
+
 CREATE TABLE reviews (
   id               INTEGER PRIMARY KEY AUTOINCREMENT,
   word_id          INTEGER NOT NULL REFERENCES words(id) ON DELETE CASCADE,
@@ -73,6 +83,10 @@ CREATE INDEX idx_custom_flashcards_profile
   ON custom_flashcards(profile_id, position);
 CREATE INDEX idx_custom_flashcard_answers_card
   ON custom_flashcard_answers(flashcard_id);
+CREATE INDEX idx_custom_reviews_profile
+  ON custom_reviews(profile_id);
+CREATE INDEX idx_custom_reviews_due
+  ON custom_reviews(next_review);
 CREATE INDEX idx_reviews_due
   ON reviews(next_review);
 CREATE INDEX idx_reviews_pair

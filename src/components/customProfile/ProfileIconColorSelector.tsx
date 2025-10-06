@@ -1,14 +1,12 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 import {
   Pressable,
   StyleProp,
   View,
   ViewStyle,
+  useWindowDimensions,
 } from "react-native";
-import {
-  PROFILE_COLORS,
-  PROFILE_ICONS,
-} from "@/src/constants/customProfile";
+import { PROFILE_COLORS, PROFILE_ICONS } from "@/src/constants/customProfile";
 
 export interface ProfileIconColorSelectorStyles {
   container?: StyleProp<ViewStyle>;
@@ -41,6 +39,59 @@ function ProfileIconColorSelectorComponent({
   styles,
   iconSize = 40,
 }: ProfileIconColorSelectorProps) {
+  const { width } = useWindowDimensions();
+
+  const layout = useMemo(() => {
+    const baseSize = iconSize ?? 40;
+
+    if (!Number.isFinite(width) || width <= 0) {
+      return { columns: 3, spacing: 8, size: baseSize };
+    }
+
+    if (width >= 1200) {
+      return { columns: 6, spacing: 16, size: Math.min(baseSize * 1.5, 72) };
+    }
+
+    if (width >= 900) {
+      return { columns: 5, spacing: 14, size: Math.min(baseSize * 1.35, 68) };
+    }
+
+    if (width >= 600) {
+      return { columns: 4, spacing: 12, size: Math.min(baseSize * 1.2, 64) };
+    }
+
+    if (width >= 400) {
+      return { columns: 4, spacing: 10, size: Math.max(baseSize * 0.95, 32) };
+    }
+
+    return { columns: 3, spacing: 8, size: Math.max(baseSize * 0.9, 28) };
+  }, [iconSize, width]);
+
+  const baseIconsContainerStyle = useMemo<ViewStyle>(
+    () => ({
+      flexDirection: "row",
+      flexWrap: "wrap",
+      justifyContent: "flex-start",
+    }),
+    []
+  );
+
+  const iconWrapperStyle = useMemo<ViewStyle>(() => {
+    const percentage = 100 / layout.columns;
+    const horizontalPadding = Math.round(layout.spacing / 2);
+
+    return {
+      flexBasis: `${percentage}%`,
+      maxWidth: `${percentage}%`,
+      paddingHorizontal: horizontalPadding,
+      paddingVertical: layout.spacing,
+      alignItems: "center",
+      justifyContent: "center",
+    };
+  }, [layout.columns, layout.spacing]);
+
+  const computedIconSize = Math.round(layout.size);
+
   const isColorSelected = (hex: string, id: string) => {
     if (selectedColorId) {
       return selectedColorId === id;
@@ -50,7 +101,7 @@ function ProfileIconColorSelectorComponent({
 
   return (
     <View style={styles?.container}>
-      <View style={styles?.iconsContainer}>
+      <View style={[baseIconsContainerStyle, styles?.iconsContainer]}>
         {PROFILE_ICONS.map(({ id, Component, name }) => {
           const isSelected = selectedIcon === id;
           return (
@@ -62,12 +113,13 @@ function ProfileIconColorSelectorComponent({
               disabled={disabled}
               style={[
                 styles?.iconWrapper,
+                iconWrapperStyle,
                 isSelected && styles?.iconWrapperSelected,
               ]}
             >
               <Component
                 name={name as never}
-                size={iconSize}
+                size={computedIconSize}
                 color={selectedColor}
               />
             </Pressable>

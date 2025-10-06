@@ -45,6 +45,11 @@ export interface CustomFlashcardRecord {
   updatedAt: number;
 }
 
+export interface CustomReviewFlashcard extends CustomFlashcardRecord {
+  stage: number;
+  nextReview: number;
+}
+
 export interface CustomFlashcardInput {
   frontText: string;
   backText?: string;
@@ -167,6 +172,17 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     );
     CREATE INDEX IF NOT EXISTS idx_custom_flashcard_answers_card ON custom_flashcard_answers(flashcard_id);
     CREATE INDEX IF NOT EXISTS idx_custom_flashcards_profile ON custom_flashcards(profile_id, position);
+    CREATE TABLE IF NOT EXISTS custom_reviews (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      profile_id     INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+      flashcard_id   INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
+      learned_at     INTEGER NOT NULL,
+      next_review    INTEGER NOT NULL,
+      stage          INTEGER NOT NULL DEFAULT 0,
+      UNIQUE(flashcard_id)
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_reviews_profile ON custom_reviews(profile_id);
+    CREATE INDEX IF NOT EXISTS idx_custom_reviews_due ON custom_reviews(next_review);
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
     -- Reviews table for spaced repetition scheduling
@@ -731,6 +747,185 @@ export async function scheduleReview(
   return { nextReview, stage };
 }
 
+export async function scheduleCustomReview(
+  flashcardId: number,
+  profileId: number,
+  stage: number
+) {
+  const db = await getDB();
+  const now = Date.now();
+  const nextReview = computeNextReviewFromStage(stage, now);
+  await db.runAsync(
+    `INSERT INTO custom_reviews (flashcard_id, profile_id, learned_at, next_review, stage)
+     VALUES (?, ?, ?, ?, ?)
+     ON CONFLICT(flashcard_id) DO UPDATE SET
+       profile_id = excluded.profile_id,
+       next_review = excluded.next_review,
+       stage = excluded.stage,
+       learned_at = CASE WHEN custom_reviews.learned_at IS NULL THEN excluded.learned_at ELSE custom_reviews.learned_at END;`,
+    flashcardId,
+    profileId,
+    now,
+    nextReview,
+    stage
+  );
+  return { nextReview, stage };
+}
+
+export async function advanceCustomReview(
+  flashcardId: number,
+  profileId: number
+) {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ stage: number }>(
+    `SELECT stage FROM custom_reviews WHERE flashcard_id = ? AND profile_id = ? LIMIT 1;`,
+    flashcardId,
+    profileId
+  );
+  if (!row) {
+    return scheduleCustomReview(flashcardId, profileId, 0);
+  }
+  const newStage = ((row.stage ?? 0) + 1) | 0;
+  const now = Date.now();
+  const nextReview = computeNextReviewFromStage(newStage, now);
+  await db.runAsync(
+    `UPDATE custom_reviews SET stage = ?, next_review = ? WHERE flashcard_id = ? AND profile_id = ?;`,
+    newStage,
+    nextReview,
+    flashcardId,
+    profileId
+  );
+  return { nextReview, stage: newStage };
+}
+
+export async function removeCustomReview(
+  flashcardId: number,
+  profileId: number
+): Promise<void> {
+  const db = await getDB();
+  await db.runAsync(
+    `DELETE FROM custom_reviews WHERE flashcard_id = ? AND profile_id = ?;`,
+    flashcardId,
+    profileId
+  );
+}
+
+export async function countDueCustomReviews(
+  profileId: number,
+  nowMs: number = Date.now()
+): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM custom_reviews WHERE profile_id = ? AND next_review <= ?;`,
+    profileId,
+    nowMs
+  );
+  return row?.cnt ?? 0;
+}
+
+export async function getDueCustomReviewFlashcards(
+  profileId: number,
+  limit: number,
+  nowMs: number = Date.now()
+): Promise<CustomReviewFlashcard[]> {
+  if (!profileId || limit <= 0) {
+    return [];
+  }
+  const db = await getDB();
+  const seedRows = await db.getAllAsync<{
+    id: number;
+    stage: number;
+    nextReview: number;
+  }>(
+    `SELECT
+       cr.flashcard_id AS id,
+       cr.stage        AS stage,
+       cr.next_review  AS nextReview
+     FROM custom_reviews cr
+     WHERE cr.profile_id = ?
+       AND cr.next_review <= ?
+     ORDER BY RANDOM()
+     LIMIT ?;`,
+    profileId,
+    nowMs,
+    limit
+  );
+  if (seedRows.length === 0) {
+    return [];
+  }
+  const ids = seedRows.map((row) => row.id);
+  const placeholders = ids.map(() => "?").join(",");
+  const flashcardRows = await db.getAllAsync<{
+    id: number;
+    profileId: number;
+    frontText: string;
+    backText: string;
+    position: number | null;
+    createdAt: number;
+    updatedAt: number;
+    answerText: string | null;
+  }>(
+    `SELECT
+       cf.id            AS id,
+       cf.profile_id    AS profileId,
+       cf.front_text    AS frontText,
+       cf.back_text     AS backText,
+       cf.position      AS position,
+       cf.created_at    AS createdAt,
+       cf.updated_at    AS updatedAt,
+       cfa.answer_text  AS answerText
+     FROM custom_flashcards cf
+     LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
+     WHERE cf.id IN (${placeholders})
+     ORDER BY cf.id ASC, cfa.id ASC;`,
+    ...ids
+  );
+  const stageMap = new Map<number, { stage: number; nextReview: number }>();
+  for (const item of seedRows) {
+    stageMap.set(item.id, { stage: item.stage, nextReview: item.nextReview });
+  }
+  const map = new Map<number, CustomReviewFlashcard>();
+  for (const row of flashcardRows) {
+    let record = map.get(row.id);
+    if (!record) {
+      const stageInfo = stageMap.get(row.id);
+      if (!stageInfo) {
+        continue;
+      }
+      record = {
+        id: row.id,
+        profileId: row.profileId,
+        frontText: row.frontText,
+        backText: row.backText,
+        answers: [],
+        position: row.position,
+        createdAt: row.createdAt,
+        updatedAt: row.updatedAt,
+        stage: stageInfo.stage,
+        nextReview: stageInfo.nextReview,
+      };
+      map.set(row.id, record);
+    }
+    addAnswerIfPresent(record.answers, row.answerText);
+  }
+  const ordered: CustomReviewFlashcard[] = [];
+  const seen = new Set<number>();
+  for (const seed of seedRows) {
+    const record = map.get(seed.id);
+    if (!record || seen.has(seed.id)) {
+      continue;
+    }
+    if (record.answers.length === 0) {
+      record.answers = splitBackTextIntoAnswers(record.backText);
+    } else {
+      record.answers = dedupeOrdered(record.answers);
+    }
+    ordered.push(record);
+    seen.add(seed.id);
+  }
+  return ordered;
+}
+
 export async function getDueReviews(
   sourceLangId: number,
   targetLangId: number,
@@ -1006,4 +1201,29 @@ export async function addRandomReviewsForPair(
     inserted += 1;
   }
   return inserted;
+}
+
+export async function addRandomCustomReviews(
+  profileId: number,
+  count: number = 10
+): Promise<number> {
+  if (!profileId || count <= 0) {
+    return 0;
+  }
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ id: number }>(
+    `SELECT cf.id
+     FROM custom_flashcards cf
+     LEFT JOIN custom_reviews cr ON cr.flashcard_id = cf.id
+     WHERE cf.profile_id = ?
+       AND cr.id IS NULL
+     ORDER BY RANDOM()
+     LIMIT ?;`,
+    profileId,
+    count
+  );
+  for (const row of rows) {
+    await scheduleCustomReview(row.id, profileId, 0);
+  }
+  return rows.length;
 }

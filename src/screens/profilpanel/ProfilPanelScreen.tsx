@@ -122,7 +122,7 @@ export default function ProfilPanelScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.minicontainer}>
-          <Text style={styles.title}>Twoje profile</Text>
+          <Text style={styles.title}>Stworzone przez nas</Text>
 
           {profiles.map((item, index) => {
             const highlightProfile = selectedProfile ?? committedProfile;
