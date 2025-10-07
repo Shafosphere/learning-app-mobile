@@ -1,5 +1,4 @@
-import { Button, Text, View, Image, TouchableOpacity } from "react-native";
-import { useEffect, useState } from "react";
+import { Text, View, Image, TouchableOpacity } from "react-native";
 import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { scheduleReview } from "@/src/db/sqlite/db";
@@ -7,18 +6,18 @@ import { useStyles } from "./FlashcardsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useStreak } from "@/src/contexts/StreakContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
+import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, profiles, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
+  const { selectedLevel, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
   const { registerLearningEvent } = useStreak();
 
   const {
@@ -43,50 +42,45 @@ export default function FlashcardsScreen() {
     saveDelayMs: 0,
   });
 
-  const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
-  const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
-  const [queueNext, setQueueNext] = useState(false);
   const checkSpelling = useSpellchecking();
-  const [answer, setAnswer] = useState("");
-  const [result, setResult] = useState<boolean | null>(null);
-  const reversed = activeBox === "boxTwo" || activeBox === "boxFour";
-  const boxOrder: ReadonlyArray<keyof BoxesState> = [
-    "boxOne",
-    "boxTwo",
-    "boxThree",
-    "boxFour",
-    "boxFive",
-  ];
-
-  const [correction, setCorrection] = useState<{
-    awers: string;
-    rewers: string;
-    input1: string;
-    input2: string;
-  } | null>(null);
-
-  const [learned, setLearned] = useState<WordWithTranslations[]>([]);
+  const {
+    activeBox,
+    handleSelectBox,
+    selectedItem,
+    answer,
+    setAnswer,
+    result,
+    setResult,
+    confirm,
+    reversed,
+    correction,
+    wrongInputChange,
+    learned,
+  } = useFlashcardsInteraction({
+    boxes,
+    setBoxes,
+    checkSpelling,
+    addUsedWordIds,
+    registerLearningEvent,
+    onWordPromotedOut: (word) => {
+      if (
+        activeProfile?.sourceLangId != null &&
+        activeProfile?.targetLangId != null &&
+        selectedLevel
+      ) {
+        void scheduleReview(
+          word.id,
+          activeProfile.sourceLangId,
+          activeProfile.targetLangId,
+          selectedLevel,
+          0
+        );
+      }
+    },
+  });
   const learnedPercent =
     totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
   const boxOneFull = boxes.boxOne.length >= 30;
-
-  function selectRandomWord(box: keyof BoxesState) {
-    const list = boxes[box];
-    if (!list || list.length === 0) {
-      setItem(null);
-      return;
-    }
-    if (list.length === 1) {
-      setItem(list[0]);
-      return;
-    }
-    let idx = Math.floor(Math.random() * list.length);
-    if (selectedItem && list[idx].id === selectedItem.id) {
-      idx = (idx + 1) % list.length;
-    }
-    setItem(list[idx]);
-    console.log(selectedItem);
-  }
 
   async function downloadData() {
     if (boxOneFull) {
@@ -119,150 +113,10 @@ export default function FlashcardsScreen() {
     // Track used words when they are added to any box
     addUsedWordIds(batchData.map((w) => w.id));
     setBatchIndex((prev) => {
-      const next = prev + 1;
-      console.log(next);
-      return next;
+      return prev + 1;
     });
     await saveNow();
   }
-
-  function handleSelectBox(box: keyof BoxesState) {
-    setActiveBox(box);
-    selectRandomWord(box);
-  }
-
-  function checkAnswer(): boolean {
-    if (!selectedItem) return false;
-    let isOk: boolean;
-    if (reversed) {
-      isOk = checkSpelling(answer, selectedItem.text);
-    } else {
-      isOk = selectedItem.translations.some((t) => checkSpelling(answer, t));
-    }
-
-    return isOk;
-  }
-
-  function confirm() {
-    if (!selectedItem) return;
-
-    const ok = checkAnswer();
-    if (ok) {
-      setResult(true);
-      // If the user answered correctly in the last box, register streak event
-      if (activeBox === "boxFive") {
-        registerLearningEvent();
-      }
-      setTimeout(() => {
-        setAnswer("");
-        moveElement(selectedItem.id, true);
-        setResult(null);
-        setQueueNext(true);
-      }, 1500);
-    } else {
-      setResult(false);
-      setCorrection({
-        awers: selectedItem.text,
-        rewers: selectedItem.translations[0] ?? "",
-        input1: "",
-        input2: "",
-      });
-    }
-  }
-
-  async function moveElement(id: number, promote = false) {
-    if (!activeBox) return;
-    if (activeBox === "boxOne" && promote === false) {
-      selectRandomWord(activeBox);
-      return;
-    }
-
-    setBoxes((prev) => {
-      const from = activeBox;
-      const source = prev[from];
-      const element = source.find((x) => x.id === id);
-      if (!element) return prev;
-
-      console.log("Przenoszę element:", element, "z boxa:", from);
-      const fromIdx = boxOrder.indexOf(from);
-
-      let target: keyof BoxesState | null;
-      if (promote) {
-        const isLast = fromIdx >= boxOrder.length - 1;
-        if (isLast) {
-          target = null;
-        } else {
-          target = boxOrder[fromIdx + 1];
-        }
-      } else {
-        target = "boxOne";
-      }
-
-      const nextState: BoxesState = {
-        ...prev,
-        [from]: source.filter((x) => x.id !== id),
-      };
-
-      if (target) {
-        nextState[target] = [element, ...prev[target]];
-      } else {
-        setLearned((list) => [element, ...list]);
-        // Schedule spaced-repetition review when a word is learned
-        if (
-          activeProfile?.sourceLangId != null &&
-          activeProfile?.targetLangId != null &&
-          selectedLevel
-        ) {
-          // Initial stage 0 on first learn; helper computes next_review
-          void scheduleReview(
-            element.id,
-            activeProfile.sourceLangId,
-            activeProfile.targetLangId,
-            selectedLevel,
-            0
-          );
-        }
-      }
-
-      // Update usedWordIds when moving to a box or learned
-      addUsedWordIds(element.id);
-
-      return nextState;
-    });
-  }
-
-  function wrongInputChange(which: 1 | 2, value: string) {
-    setCorrection((c) =>
-      c ? { ...c, [which === 1 ? "input1" : "input2"]: value } : c
-    );
-  }
-
-  useEffect(() => {
-    if (
-      correction &&
-      correction.input1.trim() === correction.awers &&
-      correction.input2.trim() === correction.rewers
-    ) {
-      if (selectedItem) {
-        moveElement(selectedItem.id, false);
-      }
-      setResult(null);
-      setCorrection(null);
-      setQueueNext(true);
-    }
-  }, [correction]);
-
-  useEffect(() => {
-    console.log(selectedItem);
-  }, [selectedItem]);
-
-  useEffect(() => {
-    if (queueNext && activeBox) {
-      selectRandomWord(activeBox);
-      setResult(null);
-      setQueueNext(false);
-    }
-  }, [boxes]);
 
   const profileAccessibilityLabel = activeProfile
     ? `Profil ${activeProfile.sourceLang?.toUpperCase()} do ${activeProfile.targetLang?.toUpperCase()}. Otwórz panel profilu.`

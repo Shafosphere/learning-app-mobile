@@ -19,6 +19,7 @@ export interface CustomProfileRecord {
   iconId: string;
   iconColor: string;
   colorId: string | null;
+  reviewsEnabled: boolean;
   createdAt: number;
   updatedAt: number;
 }
@@ -28,6 +29,7 @@ export interface CustomProfileInput {
   iconId: string;
   iconColor: string;
   colorId?: string | null;
+  reviewsEnabled?: boolean;
 }
 
 export interface CustomProfileSummary extends CustomProfileRecord {
@@ -55,6 +57,60 @@ export interface CustomFlashcardInput {
   backText?: string;
   answers?: string[];
   position?: number | null;
+}
+
+type CustomProfileSqlRow = {
+  id: number;
+  name: string;
+  iconId: string;
+  iconColor: string;
+  colorId: string | null;
+  reviewsEnabled: number;
+  createdAt: number;
+  updatedAt: number;
+};
+
+type CustomProfileSummarySqlRow = CustomProfileSqlRow & {
+  cardsCount: number;
+};
+
+type TableColumnInfo = {
+  name: string;
+};
+
+function mapCustomProfileRow(row: CustomProfileSqlRow): CustomProfileRecord {
+  return {
+    ...row,
+    reviewsEnabled: row.reviewsEnabled === 1,
+  };
+}
+
+function mapCustomProfileSummaryRow(
+  row: CustomProfileSummarySqlRow
+): CustomProfileSummary {
+  const { cardsCount, ...rest } = row;
+  const base = mapCustomProfileRow(rest as CustomProfileSqlRow);
+  return {
+    ...base,
+    cardsCount,
+  };
+}
+
+async function ensureColumn(
+  db: SQLite.SQLiteDatabase,
+  tableName: string,
+  columnName: string,
+  definition: string
+): Promise<void> {
+  const rows = await db.getAllAsync<TableColumnInfo>(
+    `PRAGMA table_info(${tableName});`
+  );
+  if (rows.some((column) => column.name === columnName)) {
+    return;
+  }
+  await db.execAsync(
+    `ALTER TABLE ${tableName} ADD COLUMN ${columnName} ${definition};`
+  );
 }
 
 const ANSWER_SPLIT_REGEX = /[;,\n]/;
@@ -151,6 +207,7 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       icon_id     TEXT    NOT NULL,
       icon_color  TEXT    NOT NULL,
       color_id    TEXT,
+      reviews_enabled INTEGER NOT NULL DEFAULT 0,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -200,6 +257,13 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_reviews_due ON reviews(next_review);
     CREATE INDEX IF NOT EXISTS idx_reviews_pair ON reviews(source_lang_id, target_lang_id);
   `);
+
+  await ensureColumn(
+    db,
+    "custom_profiles",
+    "reviews_enabled",
+    "INTEGER NOT NULL DEFAULT 0"
+  );
 
   await backfillCustomFlashcardAnswers(db);
 }
@@ -259,29 +323,32 @@ async function configurePragmas(db: SQLite.SQLiteDatabase): Promise<void> {
 
 export async function getCustomProfiles(): Promise<CustomProfileRecord[]> {
   const db = await getDB();
-  return db.getAllAsync<CustomProfileRecord>(
+  const rows = await db.getAllAsync<CustomProfileSqlRow>(
     `SELECT
        id,
        name,
        icon_id     AS iconId,
        icon_color  AS iconColor,
        color_id    AS colorId,
+       COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
        updated_at  AS updatedAt
      FROM custom_profiles
      ORDER BY created_at DESC, id DESC;`
   );
+  return rows.map(mapCustomProfileRow);
 }
 
 export async function getCustomProfilesWithCardCounts(): Promise<CustomProfileSummary[]> {
   const db = await getDB();
-  return db.getAllAsync<CustomProfileSummary>(
+  const rows = await db.getAllAsync<CustomProfileSummarySqlRow>(
     `SELECT
        cp.id,
        cp.name,
        cp.icon_id     AS iconId,
        cp.icon_color  AS iconColor,
        cp.color_id    AS colorId,
+       COALESCE(cp.reviews_enabled, 0) AS reviewsEnabled,
        cp.created_at  AS createdAt,
        cp.updated_at  AS updatedAt,
        (
@@ -292,19 +359,21 @@ export async function getCustomProfilesWithCardCounts(): Promise<CustomProfileSu
      FROM custom_profiles cp
      ORDER BY cp.created_at DESC, cp.id DESC;`
   );
+  return rows.map(mapCustomProfileSummaryRow);
 }
 
 export async function getCustomProfileById(
   id: number
 ): Promise<CustomProfileRecord | null> {
   const db = await getDB();
-  const row = await db.getFirstAsync<CustomProfileRecord>(
+  const row = await db.getFirstAsync<CustomProfileSqlRow>(
     `SELECT
        id,
        name,
        icon_id     AS iconId,
        icon_color  AS iconColor,
        color_id    AS colorId,
+       COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
        updated_at  AS updatedAt
      FROM custom_profiles
@@ -312,7 +381,7 @@ export async function getCustomProfileById(
      LIMIT 1;`,
     id
   );
-  return row ?? null;
+  return row ? mapCustomProfileRow(row) : null;
 }
 
 export async function createCustomProfile(
@@ -324,13 +393,15 @@ export async function createCustomProfile(
   if (!name) {
     throw new Error("Custom profile name cannot be empty");
   }
+  const reviewsEnabled = profile.reviewsEnabled === true ? 1 : 0;
   const result = await db.runAsync(
-    `INSERT INTO custom_profiles (name, icon_id, icon_color, color_id, created_at, updated_at)
-     VALUES (?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO custom_profiles (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?);`,
     name,
     profile.iconId,
     profile.iconColor,
     profile.colorId ?? null,
+    reviewsEnabled,
     now,
     now
   );
@@ -347,14 +418,16 @@ export async function updateCustomProfile(
   if (!name) {
     throw new Error("Custom profile name cannot be empty");
   }
+  const reviewsEnabled = profile.reviewsEnabled === true ? 1 : 0;
   await db.runAsync(
     `UPDATE custom_profiles
-     SET name = ?, icon_id = ?, icon_color = ?, color_id = ?, updated_at = ?
+     SET name = ?, icon_id = ?, icon_color = ?, color_id = ?, reviews_enabled = ?, updated_at = ?
      WHERE id = ?;`,
     name,
     profile.iconId,
     profile.iconColor,
     profile.colorId ?? null,
+    reviewsEnabled,
     now,
     id
   );
@@ -806,6 +879,16 @@ export async function removeCustomReview(
   await db.runAsync(
     `DELETE FROM custom_reviews WHERE flashcard_id = ? AND profile_id = ?;`,
     flashcardId,
+    profileId
+  );
+}
+
+export async function clearCustomReviewsForProfile(
+  profileId: number
+): Promise<void> {
+  const db = await getDB();
+  await db.runAsync(
+    `DELETE FROM custom_reviews WHERE profile_id = ?;`,
     profileId
   );
 }

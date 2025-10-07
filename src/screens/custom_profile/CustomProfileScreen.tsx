@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Text, TextInput, View } from "react-native";
+import { Pressable, Text, TextInput, TextStyle, View } from "react-native";
 import MyButton from "@/src/components/button/button";
 import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useStyles } from "./CustomProfileScreen-styles";
@@ -9,6 +9,7 @@ import {
   PROFILE_COLORS,
   PROFILE_ICONS,
 } from "@/src/constants/customProfile";
+import Ionicons from "@expo/vector-icons/Ionicons";
 export default function CustomProfileScreen() {
   const styles = useStyles();
   const router = useRouter();
@@ -28,6 +29,9 @@ export default function CustomProfileScreen() {
   const [selectedIcon, setSelectedIcon] = useState<string | null>(
     PROFILE_ICONS[0]?.id ?? null
   );
+  const [reviewsEnabled, setReviewsEnabled] = useState(false);
+  const checkboxIconColor =
+    (styles.checkboxIcon as TextStyle)?.color ?? "#ffffff";
 
   const handleNavigateToContent = () => {
     const name = profileName.trim();
@@ -38,6 +42,7 @@ export default function CustomProfileScreen() {
       name,
       iconId: selectedIcon,
       iconColor: selectedColor,
+      reviewsEnabled: reviewsEnabled ? "1" : "0",
     };
     if (selectedColorId) {
       params.colorId = selectedColorId;
@@ -61,6 +66,34 @@ export default function CustomProfileScreen() {
             placeholder="np. Fiszki podróżnicze"
             accessibilityLabel="Nazwa profilu"
           />
+          <View style={styles.checkboxRow}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.checkboxPressable,
+                pressed && styles.checkboxPressablePressed,
+              ]}
+              onPress={() => setReviewsEnabled((prev) => !prev)}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: reviewsEnabled }}
+              accessibilityLabel="Włącz udział profilu w powtórkach"
+            >
+              <View
+                style={[
+                  styles.checkboxBase,
+                  reviewsEnabled && styles.checkboxBaseChecked,
+                ]}
+              >
+                {reviewsEnabled ? (
+                  <Ionicons
+                    name="checkmark"
+                    size={18}
+                    color={checkboxIconColor}
+                  />
+                ) : null}
+              </View>
+              <Text style={styles.checkboxLabel}>włącz powtórki</Text>
+            </Pressable>
+          </View>
         </View>
 
         <View style={styles.iconContainer}>

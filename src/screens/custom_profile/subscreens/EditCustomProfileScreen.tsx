@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Pressable,
   ScrollView,
   Text,
   TextInput,
@@ -10,19 +11,19 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import MyButton from "@/src/components/button/button";
 import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useEditStyles } from "./EditCustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
+  clearCustomReviewsForProfile,
   getCustomFlashcards,
   getCustomProfileById,
   replaceCustomFlashcards,
   updateCustomProfile,
 } from "@/src/db/sqlite/db";
-import {
-  DEFAULT_PROFILE_COLOR,
-} from "@/src/constants/customProfile";
+import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
@@ -64,6 +65,7 @@ export default function EditCustomProfileScreen() {
   const [iconId, setIconId] = useState<string | null>(null);
   const [iconColor, setIconColor] = useState<string>(DEFAULT_PROFILE_COLOR);
   const [colorId, setColorId] = useState<string | null>(null);
+  const [reviewsEnabled, setReviewsEnabled] = useState(false);
   const {
     manualCards,
     replaceManualCards,
@@ -109,6 +111,7 @@ export default function EditCustomProfileScreen() {
       setIconId(profileRow.iconId);
       setIconColor(profileRow.iconColor ?? DEFAULT_PROFILE_COLOR);
       setColorId(profileRow.colorId);
+      setReviewsEnabled(profileRow.reviewsEnabled);
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -141,9 +144,11 @@ export default function EditCustomProfileScreen() {
   );
 
   const undoButtonColor =
-    ((styles.manualAddIcon as TextStyle)?.color ??
-      (styles.cardActionIcon as TextStyle)?.color ??
-      undefined) ?? "black";
+    (styles.manualAddIcon as TextStyle)?.color ??
+    (styles.cardActionIcon as TextStyle)?.color ??
+    "black";
+  const checkboxIconColor =
+    (styles.checkboxIcon as TextStyle)?.color ?? "#ffffff";
 
   const hasManualChanges = canUndo;
 
@@ -219,7 +224,12 @@ export default function EditCustomProfileScreen() {
         iconId: iconId ?? "heart",
         iconColor,
         colorId: colorId ?? undefined,
+        reviewsEnabled,
       });
+
+      if (!reviewsEnabled) {
+        await clearCustomReviewsForProfile(profileId);
+      }
 
       await replaceCustomFlashcards(profileId, trimmedCards);
 
@@ -259,6 +269,7 @@ export default function EditCustomProfileScreen() {
             <>
               <View>
                 <Text style={styles.miniSectionHeader}>nazwa</Text>
+
                 <TextInput
                   style={styles.profileInput}
                   value={profileName}
@@ -266,6 +277,35 @@ export default function EditCustomProfileScreen() {
                   placeholder="np. Fiszki podróżnicze"
                   accessibilityLabel="Nazwa profilu"
                 />
+
+                <View style={styles.checkboxRow}>
+                  <Pressable
+                    style={({ pressed }) => [
+                      styles.checkboxPressable,
+                      pressed && styles.checkboxPressablePressed,
+                    ]}
+                    onPress={() => setReviewsEnabled((prev) => !prev)}
+                    accessibilityRole="checkbox"
+                    accessibilityState={{ checked: reviewsEnabled }}
+                    accessibilityLabel="Włącz udział profilu w powtórkach"
+                  >
+                    <View
+                      style={[
+                        styles.checkboxBase,
+                        reviewsEnabled && styles.checkboxBaseChecked,
+                      ]}
+                    >
+                      {reviewsEnabled ? (
+                        <Ionicons
+                          name="checkmark"
+                          size={18}
+                          color={checkboxIconColor}
+                        />
+                      ) : null}
+                    </View>
+                    <Text style={styles.checkboxLabel}>włącz powtórki</Text>
+                  </Pressable>
+                </View>
 
                 <View style={styles.iconContainer}>
                   <Text style={styles.miniSectionHeader}>ikona</Text>

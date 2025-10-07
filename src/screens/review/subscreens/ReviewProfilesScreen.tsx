@@ -69,6 +69,9 @@ export default function ReviewProfilesScreen() {
       setCustomProfiles(rows);
       const customEntries = await Promise.all(
         rows.map(async (profile) => {
+          if (!profile.reviewsEnabled) {
+            return [profile.id, 0] as const;
+          }
           try {
             const count = await countDueCustomReviews(profile.id, now);
             return [profile.id, count] as const;
@@ -146,6 +149,12 @@ export default function ReviewProfilesScreen() {
     // </View>
   );
 
+  const visibleCustomProfiles = customProfiles.filter(
+    (profile) => profile.reviewsEnabled
+  );
+  const hasCustomProfiles = customProfiles.length > 0;
+  const hasVisibleCustomProfiles = visibleCustomProfiles.length > 0;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -189,13 +198,17 @@ export default function ReviewProfilesScreen() {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Twoje</Text>
-            {customProfiles.length === 0 ? (
+            {!hasCustomProfiles ? (
               <Text style={styles.emptyText}>
                 Nie masz jeszcze własnych fiszek.
               </Text>
+            ) : !hasVisibleCustomProfiles ? (
+              <Text style={styles.emptyText}>
+                Wszystkie profile mają wyłączone powtórki.
+              </Text>
             ) : (
               <View style={styles.profileGrid}>
-                {customProfiles.map((profile, index) => {
+                {visibleCustomProfiles.map((profile, index) => {
                   const iconMeta = getProfileIconById(profile.iconId);
                   const IconComponent = iconMeta?.Component ?? Ionicons;
                   const iconName = (iconMeta?.name ?? "grid-outline") as never;

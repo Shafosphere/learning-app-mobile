@@ -9,7 +9,7 @@ import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
@@ -18,6 +18,7 @@ import { useStreak } from "@/src/contexts/StreakContext";
 import { useIsFocused } from "@react-navigation/native";
 import { getProfileIconById } from "@/src/constants/customProfile";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type {
   CustomFlashcardRecord,
   CustomProfileRecord,
@@ -76,33 +77,40 @@ export default function Flashcards() {
       saveDelayMs: 0,
     });
 
-  const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
-  const [selectedItem, setItem] = useState<WordWithTranslations | null>(null);
-  const [queueNext, setQueueNext] = useState(false);
-  const checkSpelling = useSpellchecking();
-  const [answer, setAnswer] = useState("");
-  const [result, setResult] = useState<boolean | null>(null);
-  const reversed = activeBox === "boxTwo" || activeBox === "boxFour";
-  const boxOrder: ReadonlyArray<keyof BoxesState> = [
-    "boxOne",
-    "boxTwo",
-    "boxThree",
-    "boxFour",
-    "boxFive",
-  ];
-
-  const [correction, setCorrection] = useState<{
-    awers: string;
-    rewers: string;
-    input1: string;
-    input2: string;
-  } | null>(null);
   const [customProfile, setCustomProfile] =
     useState<CustomProfileRecord | null>(null);
+  const checkSpelling = useSpellchecking();
+  const {
+    activeBox,
+    handleSelectBox,
+    selectedItem,
+    answer,
+    setAnswer,
+    result,
+    setResult,
+    confirm,
+    reversed,
+    correction,
+    wrongInputChange,
+    learned,
+    setLearned,
+    resetInteractionState,
+    clearSelection,
+  } = useFlashcardsInteraction({
+    boxes,
+    setBoxes,
+    checkSpelling,
+    addUsedWordIds,
+    registerLearningEvent,
+    onWordPromotedOut: (word) => {
+      if (activeCustomProfileId != null && customProfile?.reviewsEnabled) {
+        void scheduleCustomReview(word.id, activeCustomProfileId, 0);
+      }
+    },
+  });
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const totalCards = customCards.length;
   const learnedPercent = totalCards > 0 ? learned.length / totalCards : 0;
   const trackedIds = useMemo(() => {
@@ -124,23 +132,6 @@ export default function Flashcards() {
     );
   }, [boxes]);
 
-  function selectRandomWord(box: keyof BoxesState) {
-    const list = boxes[box];
-    if (!list || list.length === 0) {
-      setItem(null);
-      return;
-    }
-    if (list.length === 1) {
-      setItem(list[0]);
-      return;
-    }
-    let idx = Math.floor(Math.random() * list.length);
-    if (selectedItem && list[idx].id === selectedItem.id) {
-      idx = (idx + 1) % list.length;
-    }
-    setItem(list[idx]);
-  }
-
   async function downloadData(): Promise<void> {
     if (!customCards.length) return;
 
@@ -161,101 +152,6 @@ export default function Flashcards() {
       boxOne: [...prev.boxOne, ...nextBatch],
     }));
     addUsedWordIds(nextBatch.map((card) => card.id));
-  }
-
-  function handleSelectBox(box: keyof BoxesState) {
-    setActiveBox(box);
-    selectRandomWord(box);
-  }
-
-  function checkAnswer(): boolean {
-    if (!selectedItem) return false;
-    let isOk: boolean;
-    if (reversed) {
-      isOk = checkSpelling(answer, selectedItem.text);
-    } else {
-      isOk = selectedItem.translations.some((t) => checkSpelling(answer, t));
-    }
-
-    return isOk;
-  }
-
-  function confirm() {
-    if (!selectedItem) return;
-
-    const ok = checkAnswer();
-    if (ok) {
-      setResult(true);
-      // If the user answered correctly in the last box, register streak event
-      if (activeBox === "boxFive") {
-        registerLearningEvent();
-      }
-      setTimeout(() => {
-        setAnswer("");
-        moveElement(selectedItem.id, true);
-        setResult(null);
-        setQueueNext(true);
-      }, 1500);
-    } else {
-      setResult(false);
-      setCorrection({
-        awers: selectedItem.text,
-        rewers: selectedItem.translations[0] ?? "",
-        input1: "",
-        input2: "",
-      });
-    }
-  }
-
-  async function moveElement(id: number, promote = false) {
-    if (!activeBox) return;
-    if (activeBox === "boxOne" && promote === false) {
-      selectRandomWord(activeBox);
-      return;
-    }
-
-    setBoxes((prev) => {
-      const from = activeBox;
-      const source = prev[from];
-      const element = source.find((x) => x.id === id);
-      if (!element) return prev;
-
-      console.log("Przenoszę element:", element, "z boxa:", from);
-      const fromIdx = boxOrder.indexOf(from);
-
-      let target: keyof BoxesState | null;
-      if (promote) {
-        const isLast = fromIdx >= boxOrder.length - 1;
-        if (isLast) {
-          target = null;
-        } else {
-          target = boxOrder[fromIdx + 1];
-        }
-      } else {
-        target = "boxOne";
-      }
-
-      const nextState: BoxesState = {
-        ...prev,
-        [from]: source.filter((x) => x.id !== id),
-      };
-
-      if (target) {
-        nextState[target] = [element, ...prev[target]];
-      } else {
-        setLearned((list) => [element, ...list]);
-        // Schedule spaced-repetition review when a word is learned
-        if (activeCustomProfileId != null) {
-          // Initial stage 0 mirrors built-in flow for newly learned cards
-          void scheduleCustomReview(element.id, activeCustomProfileId, 0);
-        }
-      }
-
-      // Update usedWordIds when moving to a box or learned
-      addUsedWordIds(element.id);
-
-      return nextState;
-    });
   }
 
   useEffect(() => {
@@ -308,12 +204,6 @@ export default function Flashcards() {
     };
   }, [activeCustomProfileId, isFocused]);
 
-  function wrongInputChange(which: 1 | 2, value: string) {
-    setCorrection((c) =>
-      c ? { ...c, [which === 1 ? "input1" : "input2"]: value } : c
-    );
-  }
-
   useEffect(() => {
     if (!isReady) return;
     const allowedIds = new Set(customCards.map((card) => card.id));
@@ -326,7 +216,7 @@ export default function Flashcards() {
         return filtered;
       };
 
-      const next: BoxesState = {
+      const next = {
         boxOne: sanitize(prev.boxOne),
         boxTwo: sanitize(prev.boxTwo),
         boxThree: sanitize(prev.boxThree),
@@ -340,7 +230,7 @@ export default function Flashcards() {
       const filtered = current.filter((card) => allowedIds.has(card.id));
       return filtered.length === current.length ? current : filtered;
     });
-  }, [customCards, learned, isReady, setBoxes]);
+  }, [customCards, isReady, learned, setBoxes, setLearned]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -361,33 +251,10 @@ export default function Flashcards() {
   ]);
 
   useEffect(() => {
-    if (
-      correction &&
-      correction.input1.trim() === correction.awers &&
-      correction.input2.trim() === correction.rewers
-    ) {
-      if (selectedItem) {
-        moveElement(selectedItem.id, false);
-      }
-      setResult(null);
-      setCorrection(null);
-      setQueueNext(true);
-    }
-  }, [correction]);
-
-  useEffect(() => {
-    if (queueNext && activeBox) {
-      selectRandomWord(activeBox);
-      setResult(null);
-      setQueueNext(false);
-    }
-  }, [activeBox, boxes, queueNext]);
-
-  useEffect(() => {
     if (selectedItem && !customCards.some((card) => card.id === selectedItem.id)) {
-      setItem(null);
+      clearSelection();
     }
-  }, [customCards, selectedItem]);
+  }, [clearSelection, customCards, selectedItem]);
 
   const profileAccessibilityLabel = customProfile
     ? `Profil ${customProfile.name}. Otwórz panel profili.`
@@ -418,13 +285,8 @@ export default function Flashcards() {
     customCards.length > 0;
 
   useEffect(() => {
-    setActiveBox(null);
-    setItem(null);
-    setAnswer("");
-    setResult(null);
-    setCorrection(null);
-    setQueueNext(false);
-  }, [activeCustomProfileId]);
+    resetInteractionState();
+  }, [activeCustomProfileId, resetInteractionState]);
 
   const handleEditPress = () => {
     if (!customProfile || activeCustomProfileId == null) return;
@@ -509,7 +371,7 @@ export default function Flashcards() {
         </View>
       </TouchableOpacity>
 
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={handleEditPress}
         style={[
           styles.containeroflevel,
@@ -520,19 +382,19 @@ export default function Flashcards() {
         disabled={!customProfile}
       >
         <View style={styles.levelContainer}>
-          {/* <Text style={styles.levelLabel} allowFontScaling>
+          <Text style={styles.levelLabel} allowFontScaling>
             {totalCardsLabel}
-          </Text> */}
-          {/* <View style={styles.progressTrack}>
+          </Text>
+          <View style={styles.progressTrack}>
             <View
               style={[
                 styles.progressFill,
                 { width: `${learnedPercent * 100}%` },
               ]}
             />
-          </View> */}
+          </View>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {cardSection}
 

@@ -134,6 +134,41 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontWeight: "900",
       color: colors.headline,
     },
+    checkboxRow: {
+      marginTop: 12,
+      marginBottom: 8,
+    },
+    checkboxPressable: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      gap: 12,
+    },
+    checkboxPressablePressed: {
+      opacity: 0.8,
+    },
+    checkboxBase: {
+      width: 24,
+      height: 24,
+      borderRadius: 6,
+      borderWidth: 2,
+      borderColor: colors.border,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      backgroundColor: colors.background,
+    },
+    checkboxBaseChecked: {
+      borderColor: colors.my_green,
+      backgroundColor: colors.my_green,
+    },
+    checkboxIcon: {
+      color: colors.background,
+    },
+    checkboxLabel: {
+      fontSize: 14,
+      fontWeight: "800",
+      textTransform: "uppercase" as const,
+      color: colors.headline,
+    },
     imageContainer: {
       marginBottom: 12,
       display: "flex",

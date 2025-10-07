@@ -64,6 +64,13 @@ export default function CustomProfileContentScreen() {
     const trimmed = (value ?? "").toString().trim();
     return trimmed.length > 0 ? trimmed : null;
   }, [params.colorId]);
+  const reviewsEnabled = useMemo(() => {
+    const raw = params.reviewsEnabled;
+    if (raw == null) return false;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    const normalized = (value ?? "").toString().trim().toLowerCase();
+    return normalized === "1" || normalized === "true";
+  }, [params.reviewsEnabled]);
 
   const [addMode, setAddMode] = useState<AddMode>("manual");
   const {
@@ -216,6 +223,7 @@ export default function CustomProfileContentScreen() {
         iconId,
         iconColor: iconColor || DEFAULT_PROFILE_COLOR,
         colorId: colorId ?? undefined,
+        reviewsEnabled,
       });
 
       await replaceCustomFlashcards(profileId, trimmedCards);
