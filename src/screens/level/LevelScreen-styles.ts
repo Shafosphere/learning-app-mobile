@@ -36,6 +36,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // marginTop: 8,
     overflow: "hidden",
   },
+  hiddenProgressTrack: {
+    opacity: 0,
+  },
   progressFill: {
     backgroundColor: colors.my_green,
     height: "100%",

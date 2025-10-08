@@ -1,10 +1,10 @@
+import { ReactNode } from "react";
 import { Pressable, Text } from "react-native";
-import { useStyles } from "./button-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { ThemeColorKey } from "@/src/theme/theme";
+import { useStyles } from "./button-styles";
 
-interface MyButtonProps {
-  text: string;
+interface MyButtonBaseProps {
   onPress?: () => void;
   color?: ThemeColorKey;
   disabled?: boolean;
@@ -12,8 +12,13 @@ interface MyButtonProps {
   accessibilityLabel?: string;
 }
 
+type MyButtonProps =
+  | (MyButtonBaseProps & { text: string; children?: ReactNode })
+  | (MyButtonBaseProps & { text?: string; children: ReactNode });
+
 export default function MyButton({
   text,
+  children,
   onPress,
   color = "my_green",
   disabled = false,
@@ -22,7 +27,15 @@ export default function MyButton({
 }: MyButtonProps) {
   const styles = useStyles();
   const { colors } = useSettings();
-  const derivedLabel = accessibilityLabel ?? text;
+  const derivedLabel =
+    accessibilityLabel ?? (typeof text === "string" ? text : undefined);
+  const content =
+    children ??
+    (text !== undefined ? (
+      <Text style={styles.text} allowFontScaling>
+        {text}
+      </Text>
+    ) : null);
 
   return (
     <Pressable
@@ -37,9 +50,7 @@ export default function MyButton({
         pressed && styles.pressed,
       ]}
     >
-      <Text style={styles.text} allowFontScaling>
-        {text}
-      </Text>
+      {content}
     </Pressable>
   );
 }

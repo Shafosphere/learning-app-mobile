@@ -56,23 +56,32 @@ export default function LevelScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.minicontainer}>
-        {levels.map((item, index) => (
-          <Pressable
-            onPress={() => [setLevel(item), router.push("/flashcards")]}
-            style={styles.tile}
-            key={index}
-          >
-            <Text style={styles.level}>{item}</Text>
-            <View style={styles.progressTrack}>
+        {levels.map((item, index) => {
+          const progress = progressMap[item] ?? 0;
+
+          return (
+            <Pressable
+              onPress={() => [setLevel(item), router.push("/flashcards")]}
+              style={styles.tile}
+              key={index}
+            >
+              <Text style={styles.level}>{item}</Text>
               <View
                 style={[
-                  styles.progressFill,
-                  { width: `${(progressMap[item] ?? 0) * 100}%` },
+                  styles.progressTrack,
+                  progress < 0.01 && styles.hiddenProgressTrack,
                 ]}
-              />
-            </View>
-          </Pressable>
-        ))}
+              >
+                <View
+                  style={[
+                    styles.progressFill,
+                    { width: `${progress * 100}%` },
+                  ]}
+                />
+              </View>
+            </Pressable>
+          );
+        })}
         <Text style={styles.choose}>Wybierz poziom</Text>
       </View>
     </View>

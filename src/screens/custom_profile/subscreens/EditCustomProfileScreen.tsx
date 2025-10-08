@@ -11,6 +11,7 @@ import {
 import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
+import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MyButton from "@/src/components/button/button";
 import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
@@ -340,22 +341,6 @@ export default function EditCustomProfileScreen() {
                   onRemoveAnswer={handleRemoveAnswer}
                   onAddCard={handleAddCard}
                   onRemoveCard={handleRemoveCard}
-                  actionButtons={[
-                    {
-                      key: "undo",
-                      onPress: handleUndoManualChanges,
-                      accessibilityLabel: "Cofnij zmiany fiszek",
-                      content: (
-                        <FontAwesome
-                          name="undo"
-                          size={24}
-                          color={undoButtonColor}
-                          style={styles.manualAddIcon}
-                        />
-                      ),
-                      disabled: !hasManualChanges,
-                    },
-                  ]}
                 />
               </View>
             </>
@@ -365,19 +350,41 @@ export default function EditCustomProfileScreen() {
 
       <View style={styles.footer}>
         <MyButton
-          text="<-"
           color="my_yellow"
+          // width={56}
           onPress={() => router.back()}
           accessibilityLabel="Wróć do panelu profili"
-        />
-        <MyButton
-          text="zapisz zmainy"
-          color="my_green"
-          width={190}
-          onPress={handleSave}
-          disabled={isSaving || loading || !!loadError}
-          accessibilityLabel="Zapisz zmiany profilu"
-        />
+        >
+          <Entypo
+            name="arrow-long-left"
+            size={50}
+            color={undoButtonColor}
+          />
+        </MyButton>
+        <View style={styles.rightButtons}>
+          {hasManualChanges ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Cofnij zmiany fiszek"
+              style={styles.undoButton}
+              onPress={handleUndoManualChanges}
+            >
+              <FontAwesome
+                name="undo"
+                size={24}
+                color={undoButtonColor}
+                style={styles.manualAddIcon}
+              />
+            </Pressable>
+          ) : null}
+          <MyButton
+            text="zapisz"
+            color="my_green"
+            onPress={handleSave}
+            disabled={isSaving || loading || !!loadError}
+            accessibilityLabel="Zapisz zmiany profilu"
+          />
+        </View>
       </View>
     </View>
   );

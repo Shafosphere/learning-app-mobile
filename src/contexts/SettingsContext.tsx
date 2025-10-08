@@ -5,7 +5,6 @@ import {
   useCallback,
   useContext,
   useMemo,
-  useState,
   useEffect,
 } from "react";
 import {
@@ -111,7 +110,10 @@ const SettingsContext = createContext<SettingsContextValue>(defaultValue);
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  const [selectedLevel, setLevel] = useState<CEFRLevel>("A1");
+  const [selectedLevel, persistSelectedLevel] = usePersistedState<CEFRLevel>(
+    "selectedLevel",
+    "A1"
+  );
   const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
   const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
     "classic" | "carousel"
@@ -264,6 +266,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const toggleLargeFont = async () => {
     await setLargeFontEnabled(!largeFontEnabled);
   };
+
+  const setLevel = useCallback(
+    (lvl: CEFRLevel) => {
+      void persistSelectedLevel(lvl);
+    },
+    [persistSelectedLevel]
+  );
 
   return (
     <SettingsContext.Provider

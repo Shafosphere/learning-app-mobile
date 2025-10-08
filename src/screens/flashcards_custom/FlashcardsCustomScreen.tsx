@@ -23,6 +23,7 @@ import type {
   CustomFlashcardRecord,
   CustomProfileRecord,
 } from "@/src/db/sqlite/db";
+import Confetti from "@/src/components/confetti/Confetti";
 
 function mapCustomCardToWord(
   card: CustomFlashcardRecord
@@ -66,6 +67,13 @@ export default function Flashcards() {
     useSettings();
   const { registerLearningEvent } = useStreak();
   const isFocused = useIsFocused();
+  const [shouldCelebrate, setShouldCelebrate] = useState(false);
+
+  useEffect(() => {
+    if (!shouldCelebrate) return;
+    const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
+    return () => clearTimeout(timeout);
+  }, [shouldCelebrate]);
 
   const { boxes, setBoxes, isReady, addUsedWordIds } =
     useBoxesPersistenceSnapshot({
@@ -106,6 +114,13 @@ export default function Flashcards() {
       if (activeCustomProfileId != null && customProfile?.reviewsEnabled) {
         void scheduleCustomReview(word.id, activeCustomProfileId, 0);
       }
+    },
+    onCorrectAnswer: (boxKey) => {
+      if (boxKey !== "boxFive") return;
+      setShouldCelebrate(false);
+      requestAnimationFrame(() => {
+        setShouldCelebrate(true);
+      });
     },
   });
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
@@ -345,6 +360,7 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
+      <Confetti generateConfetti={shouldCelebrate} />
       <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
         style={styles.containerofprofile}

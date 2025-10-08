@@ -230,5 +230,18 @@ export const useEditStyles = createThemeStylesHook((colors) => {
       alignItems: "center",
       justifyContent: "space-between",
     },
+    undoButton: {
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      width: 50,
+      height: 50,
+      borderRadius: 12,
+      backgroundColor: colors.my_red,
+    },
+    rightButtons: {
+      display: 'flex',
+      flexDirection: "row",
+      gap: 6,
+    },
   };
 });

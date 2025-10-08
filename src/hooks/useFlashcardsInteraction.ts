@@ -19,6 +19,7 @@ export type UseFlashcardsInteractionParams = {
   registerLearningEvent: () => void;
   reversedBoxes?: ReadonlyArray<keyof BoxesState>;
   onWordPromotedOut?: (word: WordWithTranslations) => void;
+  onCorrectAnswer?: (box: keyof BoxesState) => void;
 };
 
 export function useFlashcardsInteraction({
@@ -29,6 +30,7 @@ export function useFlashcardsInteraction({
   registerLearningEvent,
   reversedBoxes = ["boxTwo", "boxFour"],
   onWordPromotedOut,
+  onCorrectAnswer,
 }: UseFlashcardsInteractionParams) {
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
@@ -128,6 +130,9 @@ export function useFlashcardsInteraction({
     const ok = checkAnswer();
     if (ok) {
       setResult(true);
+      if (activeBox) {
+        onCorrectAnswer?.(activeBox);
+      }
       if (activeBox === "boxFive") {
         registerLearningEvent();
       }
@@ -146,7 +151,14 @@ export function useFlashcardsInteraction({
         input2: "",
       });
     }
-  }, [activeBox, checkAnswer, moveElement, registerLearningEvent, selectedItem]);
+  }, [
+    activeBox,
+    checkAnswer,
+    moveElement,
+    onCorrectAnswer,
+    registerLearningEvent,
+    selectedItem,
+  ]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {
     setCorrection((c) =>

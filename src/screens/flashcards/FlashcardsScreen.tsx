@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { Text, View, Image, TouchableOpacity } from "react-native";
 import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
@@ -13,12 +14,20 @@ import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useStreak } from "@/src/contexts/StreakContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import Confetti from "@/src/components/confetti/Confetti";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   const router = useRouter();
   const styles = useStyles();
   const { selectedLevel, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
   const { registerLearningEvent } = useStreak();
+  const [shouldCelebrate, setShouldCelebrate] = useState(false);
+
+  useEffect(() => {
+    if (!shouldCelebrate) return;
+    const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
+    return () => clearTimeout(timeout);
+  }, [shouldCelebrate]);
 
   const {
     boxes,
@@ -76,6 +85,13 @@ export default function FlashcardsScreen() {
           0
         );
       }
+    },
+    onCorrectAnswer: (boxKey) => {
+      if (boxKey !== "boxFive") return;
+      setShouldCelebrate(false);
+      requestAnimationFrame(() => {
+        setShouldCelebrate(true);
+      });
     },
   });
   const learnedPercent =
@@ -138,9 +154,9 @@ export default function FlashcardsScreen() {
   }
 
   const profileFlagSource = getFlagSource(activeProfile.sourceLang);
-
   return (
     <View style={styles.container}>
+      <Confetti generateConfetti={shouldCelebrate} />
       <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
         style={styles.containerofprofile}
