@@ -1,7 +1,7 @@
 // sqlite helpers and persistence primitives
 
 import * as SQLite from "expo-sqlite";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import { Asset } from "expo-asset";
 import Papa from "papaparse";
 

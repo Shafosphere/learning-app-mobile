@@ -7,7 +7,7 @@ import {
   View,
 } from "react-native";
 import { Asset } from "expo-asset";
-import * as FileSystem from "expo-file-system";
+import * as FileSystem from "expo-file-system/legacy";
 import MyButton from "@/src/components/button/button";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStyles } from "../CustomProfileScreen-styles";
