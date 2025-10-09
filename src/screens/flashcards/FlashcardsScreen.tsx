@@ -11,7 +11,7 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/box/boxcarousel";
-import { useStreak } from "@/src/contexts/StreakContext";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import Confetti from "@/src/components/confetti/Confetti";
@@ -20,7 +20,7 @@ export default function FlashcardsScreen() {
   const router = useRouter();
   const styles = useStyles();
   const { selectedLevel, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
-  const { registerLearningEvent } = useStreak();
+  const { registerKnownWord } = useLearningStats();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
 
   useEffect(() => {
@@ -70,7 +70,7 @@ export default function FlashcardsScreen() {
     setBoxes,
     checkSpelling,
     addUsedWordIds,
-    registerLearningEvent,
+    registerKnownWord,
     onWordPromotedOut: (word) => {
       if (
         activeProfile?.sourceLangId != null &&

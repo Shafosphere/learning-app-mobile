@@ -65,7 +65,7 @@ const AchievementsList: React.FC<{ items: AchievementListItem[] }> = ({
       subtitle={
         items.some((item) => item.unlocked)
           ? "Brawo! Oto Twoje osiągnięcia."
-          : "Odblokuj nowe odznaki utrzymując dobrą passę."
+          : "Odblokuj nowe odznaki, poznając słówka i realizując cele."
       }
     >
       {items.map((item, idx) => {

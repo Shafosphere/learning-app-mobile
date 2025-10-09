@@ -16,7 +16,7 @@ Dokument opisuje aktualne działanie aplikacji, dostępne opcje, ekrany, logikę
 - `/settings`: ustawienia aplikacji (motyw, sprawdzanie pisowni, miny pudełek, układ pudełek, wielkość partii fiszek).
 - `/review`: ekran powtórek – placeholder (UI do rozbudowy), ale logika terminów działa w DB.
 
-Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Boxy/Level, Ustawienia, Profile, Review, przełączanie motywu oraz licznik „streak”.
+Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Boxy/Level, Ustawienia, Profile, Review, przełączanie motywu oraz licznik opanowanych słówek.
 
 ## Nauka – logika pudełek i fiszek
 - 5 pudełek: `boxOne` … `boxFive` (typy: `src/types/boxes.ts`).
@@ -29,7 +29,7 @@ Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Box
   - Przycisk „dodaj słówka” dobiera partię słów przez `getRandomWordsBatch(...)` z DB dla aktywnego profilu i wybranego poziomu, pomijając już użyte ID.
   - Rozmiar partii konfigurowalny w Ustawieniach (domyślnie 10).
 - Postęp poziomu: obliczany jako `nauczone / łączna_liczba_słów_dla_poziomu` (z DB).
-- Zdarzenie nauki a „streak”: odpowiedź poprawna w `boxFive` rejestruje „dzień nauki” (zliczane w `StreakContext`).
+- Trafienie w `boxFive`: poprawna odpowiedź wpisana w ostatnim pudełku zlicza nowe, opanowane słowo (przechowywane w `LearningStatsContext`).
 
 ## Powtórki (spaced repetition)
 - Interwały (ms): `[2d, 7d, 30d, 90d, 180d, 365d]` – `src/config/appConfig.ts`.
@@ -83,4 +83,3 @@ Dodatkowo istnieje util `clearAllFlashcards()` do czyszczenia snapshotów pudeł
 - Snapshot pudełek: `src/hooks/useBoxesPersistenceSnapshot.ts`.
 - Spellchecking: `src/hooks/useSpellchecking.ts`.
 - Tematy/styl: `src/theme/*`, `src/screens/*/styles_*.ts`.
-z

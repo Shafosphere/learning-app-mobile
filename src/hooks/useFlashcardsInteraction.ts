@@ -16,7 +16,7 @@ export type UseFlashcardsInteractionParams = {
   setBoxes: React.Dispatch<React.SetStateAction<BoxesState>>;
   checkSpelling: SpellcheckFn;
   addUsedWordIds: (ids: number[] | number) => void;
-  registerLearningEvent: () => void;
+  registerKnownWord: (wordId: number) => void;
   reversedBoxes?: ReadonlyArray<keyof BoxesState>;
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState) => void;
@@ -27,7 +27,7 @@ export function useFlashcardsInteraction({
   setBoxes,
   checkSpelling,
   addUsedWordIds,
-  registerLearningEvent,
+  registerKnownWord,
   reversedBoxes = ["boxTwo", "boxFour"],
   onWordPromotedOut,
   onCorrectAnswer,
@@ -134,7 +134,7 @@ export function useFlashcardsInteraction({
         onCorrectAnswer?.(activeBox);
       }
       if (activeBox === "boxFive") {
-        registerLearningEvent();
+        registerKnownWord(selectedItem.id);
       }
       setTimeout(() => {
         setAnswer("");
@@ -156,7 +156,7 @@ export function useFlashcardsInteraction({
     checkAnswer,
     moveElement,
     onCorrectAnswer,
-    registerLearningEvent,
+    registerKnownWord,
     selectedItem,
   ]);
 
@@ -188,6 +188,25 @@ export function useFlashcardsInteraction({
       setQueueNext(false);
     }
   }, [activeBox, boxes, queueNext, selectRandomWord]);
+
+  useEffect(() => {
+    if (!activeBox) return;
+    const list = boxes[activeBox];
+    if (!list || list.length === 0) {
+      if (selectedItem != null) {
+        selectRandomWord(activeBox);
+      }
+      return;
+    }
+
+    const currentId = selectedItem?.id ?? null;
+    const itemStillAvailable =
+      currentId != null && list.some((item) => item.id === currentId);
+
+    if (!itemStillAvailable) {
+      selectRandomWord(activeBox);
+    }
+  }, [activeBox, boxes, selectRandomWord, selectedItem]);
 
   const resetInteractionState = useCallback(() => {
     setActiveBox(null);

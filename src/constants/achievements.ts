@@ -1,4 +1,4 @@
-export type AchievementType = "streak" | "dailyGoal";
+export type AchievementType = "knownWords" | "dailyGoal";
 
 export type AchievementDefinition = {
   id: string;
@@ -10,25 +10,25 @@ export type AchievementDefinition = {
 
 export const ACHIEVEMENTS: AchievementDefinition[] = [
   {
-    id: "streak_spark",
-    title: "Pierwsza iskra",
-    description: "Utrzymaj passę przez 3 kolejne dni.",
-    threshold: 3,
-    type: "streak",
+    id: "known_words_first",
+    title: "Pierwsze zwycięstwo",
+    description: "Opanuj pierwsze słówko w boxFive.",
+    threshold: 1,
+    type: "knownWords",
   },
   {
-    id: "streak_blaze",
-    title: "Płomień nauki",
-    description: "Dotrzymaj do 7 dni codziennej nauki.",
-    threshold: 7,
-    type: "streak",
+    id: "known_words_stack",
+    title: "Garść słówek",
+    description: "Opanuj 10 słówek.",
+    threshold: 10,
+    type: "knownWords",
   },
   {
-    id: "streak_unstoppable",
-    title: "Nie do zatrzymania",
-    description: "Zbuduj 30-dniową passę.",
-    threshold: 30,
-    type: "streak",
+    id: "known_words_master",
+    title: "Słowny mistrz",
+    description: "Opanuj 50 słówek.",
+    threshold: 50,
+    type: "knownWords",
   },
   {
     id: "daily_goal_champion",

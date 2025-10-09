@@ -1,14 +1,14 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { ScrollView, View, Text } from "react-native";
 import { useFocusEffect } from "@react-navigation/native";
-import StreakCard from "@/src/components/stats/StreakCard";
+import KnownWordsCard from "@/src/components/stats/KnownWordsCard";
 import DailyGoalCard from "@/src/components/stats/DailyGoalCard";
 import DueReviewsCard from "@/src/components/stats/DueReviewsCard";
 import LevelProgressCard from "@/src/components/stats/LevelProgressCard";
 import AchievementsList from "@/src/components/stats/AchievementsList";
 import { ACHIEVEMENTS } from "@/src/constants/achievements";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStreak } from "@/src/contexts/StreakContext";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
 import { useStyles } from "./StatsScreen-styles";
@@ -18,8 +18,12 @@ const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 export default function StatsScreen() {
   const styles = useStyles();
   const { activeProfile, dailyGoal, setDailyGoal } = useSettings();
-  const { streakCount, lastDate, dailyProgressCount, achievements } =
-    useStreak();
+  const {
+    knownWordsCount,
+    lastKnownWordDate,
+    dailyProgressCount,
+    achievements,
+  } = useLearningStats();
 
   const [dueReviews, setDueReviews] = useState<Record<CEFRLevel, number>>({
     A1: 0,
@@ -85,9 +89,9 @@ export default function StatsScreen() {
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <StreakCard
-        streakCount={streakCount}
-        lastDate={lastDate}
+      <KnownWordsCard
+        knownWordsCount={knownWordsCount}
+        lastKnownWordDate={lastKnownWordDate}
         dailyProgressCount={dailyProgressCount}
       />
 

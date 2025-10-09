@@ -14,7 +14,7 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/box/boxcarousel";
-import { useStreak } from "@/src/contexts/StreakContext";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useIsFocused } from "@react-navigation/native";
 import { getProfileIconById } from "@/src/constants/customProfile";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
@@ -65,7 +65,7 @@ export default function Flashcards() {
   const styles = useStyles();
   const { activeCustomProfileId, boxesLayout, flashcardsBatchSize } =
     useSettings();
-  const { registerLearningEvent } = useStreak();
+  const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
 
@@ -109,7 +109,7 @@ export default function Flashcards() {
     setBoxes,
     checkSpelling,
     addUsedWordIds,
-    registerLearningEvent,
+    registerKnownWord,
     onWordPromotedOut: (word) => {
       if (activeCustomProfileId != null && customProfile?.reviewsEnabled) {
         void scheduleCustomReview(word.id, activeCustomProfileId, 0);

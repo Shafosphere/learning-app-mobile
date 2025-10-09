@@ -4,8 +4,8 @@ import StatsCard from "./StatsCard";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 type Props = {
-  streakCount: number;
-  lastDate: string;
+  knownWordsCount: number;
+  lastKnownWordDate: string;
   dailyProgressCount: number;
 };
 
@@ -47,28 +47,33 @@ function formatDate(dateStr: string) {
   return d.toLocaleDateString?.() ?? dateStr;
 }
 
-const StreakCard: React.FC<Props> = ({
-  streakCount,
-  lastDate,
+const KnownWordsCard: React.FC<Props> = ({
+  knownWordsCount,
+  lastKnownWordDate,
   dailyProgressCount,
 }) => {
   const styles = useStyles();
   return (
-    <StatsCard title="Twoja passa" subtitle="Codziennie choć trochę!">
-      <Text style={styles.value}>{streakCount}</Text>
-      <Text style={styles.label}>dni z rzędu</Text>
+    <StatsCard
+      title="Opanowane słówka"
+      subtitle="Każde trafienie w boxFive to nowy sukces."
+    >
+      <Text style={styles.value}>{knownWordsCount}</Text>
+      <Text style={styles.label}>słów znanych na pewno</Text>
       <View style={styles.row}>
         <View style={styles.metricWrap}>
           <Text style={styles.metricValue}>{dailyProgressCount}</Text>
-          <Text style={styles.metricLabel}>Dzisiejsze poprawne odpowiedzi</Text>
+          <Text style={styles.metricLabel}>Dzisiejsze trafienia w boxFive</Text>
         </View>
         <View style={styles.metricWrap}>
-          <Text style={styles.metricValue}>{formatDate(lastDate)}</Text>
-          <Text style={styles.metricLabel}>Ostatnia aktywność</Text>
+          <Text style={styles.metricValue}>
+            {formatDate(lastKnownWordDate)}
+          </Text>
+          <Text style={styles.metricLabel}>Ostatnie opanowane słowo</Text>
         </View>
       </View>
     </StatsCard>
   );
 };
 
-export default StreakCard;
+export default KnownWordsCard;

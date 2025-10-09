@@ -9,48 +9,44 @@ export type AchievementState = {
 
 export type AchievementsMap = Record<string, AchievementState>;
 
-type StreakContextValue = {
-  streakCount: number;
-  lastDate: string; // ISO date (YYYY-MM-DD)
+type LearningStatsContextValue = {
+  knownWordsCount: number;
+  lastKnownWordDate: string; // ISO date (YYYY-MM-DD)
   dailyProgressCount: number;
   dailyProgressDate: string;
   achievements: AchievementsMap;
-  registerLearningEvent: () => void; // per request, sync signature
+  registerKnownWord: (wordId: number) => void;
 };
 
-const defaultValue: StreakContextValue = {
-  streakCount: 0,
-  lastDate: "",
+const defaultValue: LearningStatsContextValue = {
+  knownWordsCount: 0,
+  lastKnownWordDate: "",
   dailyProgressCount: 0,
   dailyProgressDate: "",
   achievements: {},
-  registerLearningEvent: () => {},
+  registerKnownWord: () => {},
 };
 
-const StreakContext = createContext<StreakContextValue>(defaultValue);
+const LearningStatsContext =
+  createContext<LearningStatsContextValue>(defaultValue);
 
 function isoDateOnly(d: Date): string {
   // Ensures "YYYY-MM-DD"
   return d.toISOString().slice(0, 10);
 }
 
-function getYesterdayIso(): string {
-  const d = new Date();
-  d.setDate(d.getDate() - 1);
-  return isoDateOnly(d);
-}
+type KnownWordsState = {
+  ids: number[];
+  lastLearnedDate: string;
+};
 
-export const StreakProvider: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => {
+export const LearningStatsProvider: React.FC<{
+  children: React.ReactNode;
+}> = ({ children }) => {
   const { dailyGoal } = useSettings();
-  const [streakCount, setStreakCount] = usePersistedState<number>(
-    "streakCount",
-    0
-  );
-  const [lastDate, setLastDate] = usePersistedState<string>(
-    "streakLastDate",
-    ""
+  const [knownWords, setKnownWords] = usePersistedState<KnownWordsState>(
+    "knownWords",
+    { ids: [], lastLearnedDate: "" }
   );
   const [dailyProgress, setDailyProgress] = usePersistedState<{
     date: string;
@@ -62,10 +58,10 @@ export const StreakProvider: React.FC<{ children: React.ReactNode }> = ({
   );
 
   const unlockAchievements = (params: {
-    nextStreak?: number;
+    nextKnownWords?: number;
     nextDailyCount: number;
   }) => {
-    const { nextStreak, nextDailyCount } = params;
+    const { nextKnownWords, nextDailyCount } = params;
     let hasChanges = false;
     let nextAchievements = achievements;
     const nowIso = new Date().toISOString();
@@ -73,8 +69,11 @@ export const StreakProvider: React.FC<{ children: React.ReactNode }> = ({
     for (const achievement of ACHIEVEMENTS) {
       if (nextAchievements[achievement.id]) continue;
 
-      if (achievement.type === "streak") {
-        if (nextStreak == null || nextStreak < achievement.threshold) {
+      if (achievement.type === "knownWords") {
+        if (
+          nextKnownWords == null ||
+          nextKnownWords < achievement.threshold
+        ) {
           continue;
         }
       }
@@ -97,42 +96,55 @@ export const StreakProvider: React.FC<{ children: React.ReactNode }> = ({
     }
   };
 
-  const registerLearningEvent = () => {
+  const registerKnownWord = (wordId: number) => {
     const today = isoDateOnly(new Date());
     const baseDailyCount =
       dailyProgress.date === today ? dailyProgress.count : 0;
     const nextDailyCount = baseDailyCount + 1;
 
     void setDailyProgress({ date: today, count: nextDailyCount });
-    unlockAchievements({ nextDailyCount });
 
-    // If already logged today, do nothing for streak but keep daily progress.
-    if (lastDate === today) return;
+    const alreadyKnown = knownWords.ids.includes(wordId);
+    if (!alreadyKnown) {
+      const nextIds = [wordId, ...knownWords.ids];
+      void setKnownWords({
+        ids: nextIds,
+        lastLearnedDate: today,
+      });
+      unlockAchievements({
+        nextKnownWords: nextIds.length,
+        nextDailyCount,
+      });
+      return;
+    }
 
-    const yesterday = getYesterdayIso();
-    const nextCount = lastDate === yesterday ? streakCount + 1 : 1;
+    if (knownWords.lastLearnedDate !== today) {
+      void setKnownWords({
+        ids: knownWords.ids,
+        lastLearnedDate: today,
+      });
+    }
 
-    // Fire-and-forget persistence to keep sync signature
-    void setStreakCount(nextCount);
-    void setLastDate(today);
-
-    unlockAchievements({ nextStreak: nextCount, nextDailyCount });
+    unlockAchievements({
+      nextKnownWords: knownWords.ids.length,
+      nextDailyCount,
+    });
   };
 
   return (
-    <StreakContext.Provider
+    <LearningStatsContext.Provider
       value={{
-        streakCount,
-        lastDate,
+        knownWordsCount: knownWords.ids.length,
+        lastKnownWordDate: knownWords.lastLearnedDate,
         dailyProgressCount: dailyProgress.count,
         dailyProgressDate: dailyProgress.date,
         achievements,
-        registerLearningEvent,
+        registerKnownWord,
       }}
     >
       {children}
-    </StreakContext.Provider>
+    </LearningStatsContext.Provider>
   );
 };
 
-export const useStreak = () => useContext(StreakContext);
+export const useLearningStats = () => useContext(LearningStatsContext);

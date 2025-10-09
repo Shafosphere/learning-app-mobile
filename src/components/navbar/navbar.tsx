@@ -10,7 +10,7 @@ import {
 import { useStyles } from "./navbar-styles";
 import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStreak } from "@/src/contexts/StreakContext";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -24,7 +24,7 @@ export default function Navbar() {
   const router = useRouter();
   const { toggleTheme, activeCustomProfileId, selectedLevel, activeProfile } =
     useSettings();
-  const { streakCount } = useStreak();
+  const { knownWordsCount } = useLearningStats();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
 
@@ -120,7 +120,7 @@ export default function Navbar() {
         />
       </Pressable>
 
-      {/* Spacer to push theme + streak to the right */}
+      {/* Spacer to push theme + counter to the right */}
       <View style={{ flex: 1 }} />
 
       <Pressable
@@ -138,7 +138,7 @@ export default function Navbar() {
         />
       </Pressable>
 
-      <Text style={styles.streakText}>{streakCount}</Text>
+      <Text style={styles.counterText}>{knownWordsCount}</Text>
     </View>
   );
 }
