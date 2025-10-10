@@ -157,7 +157,7 @@ export default function FlashcardsScreen() {
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
         style={styles.containerofprofile}
         accessibilityRole="button"
@@ -166,8 +166,7 @@ export default function FlashcardsScreen() {
         {profileFlagSource ? (
           <Image source={profileFlagSource} style={styles.flag} />
         ) : null}
-        {/* <Text style={styles.levelText}>{selectedLevel}</Text> */}
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       <TouchableOpacity
         onPress={() => router.push("/level")}
@@ -179,14 +178,6 @@ export default function FlashcardsScreen() {
           <Text style={styles.levelLabel} allowFontScaling>
             {selectedLevel}
           </Text>
-          {/* <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${learnedPercent * 100}%` },
-              ]}
-            />
-          </View> */}
         </View>
       </TouchableOpacity>
 

@@ -130,6 +130,7 @@ export const useEditStyles = createThemeStylesHook((colors) => {
       right: 24,
       top: 10,
       color: colors.headline,
+      marginBottom: 2,
     },
     miniSectionHeader: {
       fontSize: 16,

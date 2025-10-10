@@ -1,3 +1,4 @@
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "expo-router";
 import {
   Platform,
@@ -11,134 +12,240 @@ import { useStyles } from "./navbar-styles";
 import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { getFlagSource } from "@/src/constants/languageFlags";
+import {
+  getCustomProfileById,
+  type CustomProfileRecord,
+} from "@/src/db/sqlite/db";
+import { getProfileIconById } from "@/src/constants/customProfile";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Entypo from "@expo/vector-icons/Entypo";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-const logo = require("@/assets/illustrations/box/logo.png");
+const logo = require("@/assets/illustrations/navbar/logo.png");
+const watchIcon = require("@/assets/illustrations/navbar/watch.png");
+const padIcon = require("@/assets/illustrations/navbar/pad.png");
 
 export default function Navbar() {
   const router = useRouter();
-  const { toggleTheme, activeCustomProfileId, selectedLevel, activeProfile } =
-    useSettings();
+  const {
+    toggleTheme,
+    activeCustomProfileId,
+    selectedLevel,
+    activeProfile,
+    colors,
+  } = useSettings();
   const { knownWordsCount } = useLearningStats();
   const styles = useStyles();
   const topPad = Platform.OS === "android" ? StatusBar.currentHeight : 0;
+  const [customProfile, setCustomProfile] =
+    useState<CustomProfileRecord | null>(null);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    if (activeCustomProfileId == null) {
+      setCustomProfile(null);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    getCustomProfileById(activeCustomProfileId)
+      .then((profile) => {
+        if (isMounted) {
+          setCustomProfile(profile);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load active custom profile", error);
+        if (isMounted) {
+          setCustomProfile(null);
+        }
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCustomProfileId]);
+
+  const profileFlagSource = useMemo(() => {
+    if (!activeProfile || !activeProfile.sourceLang) {
+      return undefined;
+    }
+
+    return getFlagSource(activeProfile.sourceLang);
+  }, [activeProfile]);
+
+  const profileAccessibilityLabel = useMemo(() => {
+    if (customProfile) {
+      return `Profil ${customProfile.name}. Otwórz panel profili.`;
+    }
+
+    if (activeProfile?.sourceLang && activeProfile?.targetLang) {
+      return `Profil ${activeProfile.sourceLang.toUpperCase()} do ${activeProfile.targetLang.toUpperCase()}. Otwórz panel profilu.`;
+    }
+
+    return "Wybierz profil językowy";
+  }, [activeProfile, customProfile]);
+
+  const profileIconMeta = useMemo(() => {
+    if (!customProfile) return null;
+    return getProfileIconById(customProfile.iconId);
+  }, [customProfile]);
+
+  const CustomProfileIcon = profileIconMeta?.Component;
+  const customProfileIconName = profileIconMeta?.name ?? "grid-outline";
+  const customProfileIconColor = customProfile?.iconColor ?? colors.headline;
+
+  const profileGraphic =
+    activeCustomProfileId != null && customProfile ? (
+      <View style={styles.customProfileIconWrapper}>
+        {CustomProfileIcon ? (
+          <CustomProfileIcon
+            name={customProfileIconName as never}
+            size={24}
+            color={customProfileIconColor}
+          />
+        ) : (
+          <Ionicons
+            name="person-circle-outline"
+            size={24}
+            color={colors.headline}
+          />
+        )}
+      </View>
+    ) : profileFlagSource ? (
+      <Image source={profileFlagSource} style={styles.profileFlag} />
+    ) : (
+      <Ionicons
+        name="person-circle-outline"
+        size={24}
+        color={colors.headline}
+      />
+    );
+
+  const handlePadPress = () => {
+    if (activeCustomProfileId != null) {
+      router.push("/flashcards_custom");
+      return;
+    }
+
+    const hasProfile =
+      activeProfile?.sourceLangId != null &&
+      activeProfile?.targetLangId != null;
+
+    if (hasProfile && selectedLevel) {
+      router.push("/flashcards");
+      return;
+    }
+
+    router.push("/level");
+  };
 
   return (
     <View style={[styles.container, { marginTop: topPad }]}>
-      <TouchableOpacity onPress={() => router.push("/")}>
-        <Image source={logo} style={styles.logo} />
-      </TouchableOpacity>
+      <View style={styles.leftGroup}>
+        <TouchableOpacity
+          onPress={() => router.push("/profilpanel")}
+          style={styles.profileButton}
+          accessibilityRole="button"
+          accessibilityLabel={profileAccessibilityLabel}
+        >
+          {profileGraphic}
+          {activeCustomProfileId != null && customProfile ? (
+            <Text
+              style={styles.profileName}
+              numberOfLines={1}
+              ellipsizeMode="tail"
+              allowFontScaling
+            >
+              {customProfile.name}
+            </Text>
+          ) : null}
+        </TouchableOpacity>
+      </View>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => router.push("/")}
-      >
-        <Entypo style={styles.icon} name="home" size={16} color="black" />
-      </Pressable>
+      <View style={styles.centerGroup}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.iconButton,
+            pressed && styles.iconButtonPressed,
+          ]}
+          onPress={() => router.push("/review")}
+          accessibilityRole="button"
+          accessibilityLabel="Przejdź do powtórek"
+        >
+          <Image
+            source={watchIcon}
+            style={styles.centerIcon}
+            contentFit="contain"
+          />
+        </Pressable>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => {
-          if (activeCustomProfileId != null) {
-            router.push("/flashcards_custom");
-            return;
-          }
+        <Pressable
+          style={({ pressed }) => [
+            styles.iconButton,
+            pressed && styles.iconButtonPressed,
+          ]}
+          onPress={handlePadPress}
+          accessibilityRole="button"
+          accessibilityLabel="Przejdź do gry fiszek"
+        >
+          <Image
+            source={padIcon}
+            style={styles.centerIcon}
+            contentFit="contain"
+          />
+        </Pressable>
 
-          const hasProfile =
-            activeProfile?.sourceLangId != null &&
-            activeProfile?.targetLangId != null;
+        <View pointerEvents="box-none" style={styles.logoWrapper}>
+          <TouchableOpacity
+            onPress={() => router.push("/")}
+            style={styles.logoButton}
+            accessibilityRole="button"
+            accessibilityLabel="Przejdź do strony głównej"
+          >
+            <Image source={logo} style={styles.logo} contentFit="contain" />
+          </TouchableOpacity>
+        </View>
+      </View>
 
-          if (hasProfile && selectedLevel) {
-            router.push("/flashcards");
-            return;
-          }
+      <View style={styles.rightGroup}>
+        <Pressable
+          style={({ pressed }) => [
+            styles.iconButton,
+            pressed && styles.iconButtonPressed,
+          ]}
+          onPress={toggleTheme}
+        >
+          <MaterialIcons
+            style={styles.icon}
+            name="dark-mode"
+            size={24}
+            color={colors.headline}
+          />
+        </Pressable>
 
-          router.push("/level");
-        }}
-      >
-        <FontAwesome5 name="box-open" size={16} style={styles.icon} />
-      </Pressable>
+        <Pressable
+          style={({ pressed }) => [
+            styles.iconButton,
+            pressed && styles.iconButtonPressed,
+          ]}
+          onPress={() => router.push("/settings")}
+        >
+          <Ionicons
+            style={styles.icon}
+            name="settings-sharp"
+            size={24}
+            color={colors.headline}
+          />
+        </Pressable>
+      </View>
 
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => router.push("/settings")}
-      >
-        <Ionicons
-          style={styles.icon}
-          name="settings-sharp"
-          size={16}
-          color="black"
-        />
-      </Pressable>
-
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => router.push("/profilpanel")}
-      >
-        <FontAwesome style={styles.icon} name="flag" size={16} color="black" />
-      </Pressable>
-
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => router.push("/review")}
-      >
-        <Ionicons style={styles.icon} name="repeat" size={16} color="black" />
-      </Pressable>
-
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={() => router.push("/stats")}
-      >
-        <Ionicons
-          style={styles.icon}
-          name="stats-chart"
-          size={16}
-          color="black"
-        />
-      </Pressable>
-
-      {/* Spacer to push theme + counter to the right */}
-      <View style={{ flex: 1 }} />
-
-      <Pressable
-        style={({ pressed }) => [
-          styles.iconCon,
-          pressed && styles.iconConPressed,
-        ]}
-        onPress={toggleTheme}
-      >
-        <MaterialIcons
-          style={styles.icon}
-          name="dark-mode"
-          size={16}
-          color="black"
-        />
-      </Pressable>
-
-      <Text style={styles.counterText}>{knownWordsCount}</Text>
+      {/* <View style={styles.rightGroup}>
+        <Text style={styles.counterText}>{knownWordsCount}</Text>
+      </View> */}
     </View>
   );
 }

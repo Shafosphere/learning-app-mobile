@@ -361,7 +361,7 @@ export default function Flashcards() {
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
-      <TouchableOpacity
+      {/* <TouchableOpacity
         onPress={() => router.push("/profilpanel")}
         style={styles.containerofprofile}
         accessibilityRole="button"
@@ -385,7 +385,7 @@ export default function Flashcards() {
             {profileName}
           </Text>
         </View>
-      </TouchableOpacity>
+      </TouchableOpacity> */}
 
       {/* <TouchableOpacity
         onPress={handleEditPress}
