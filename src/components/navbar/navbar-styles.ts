@@ -1,42 +1,40 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 const LOGO_ASPECT_RATIO = 523 / 555;
 export const useStyles = createThemeStylesHook((colors) => ({
-  container: {
-    flexDirection: "row",
-    height: 55,
-    alignItems: "center",
-    justifyContent: "space-between",
+  layout: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  topBarContainer: {
     backgroundColor: colors.secondBackground,
     paddingHorizontal: 14,
+    paddingBottom: 0,
     overflow: "visible",
   },
-  leftGroup: {
-    // flex: 1,
-    flexDirection: "row",
-    alignItems: "center",
-    // backgroundColor: "red",
-    width: "25%",
-  },
-  centerGroup: {
+  topBar: {
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "space-between",
-    paddingHorizontal: 8,
-    // backgroundColor: "blue",
-    width: "50%",
-    overflow: "visible",
+    height: 50,
     position: "relative",
   },
+  leftGroup: {
+    flexDirection: "row",
+    alignItems: "center",
+    flex: 1,
+  },
   rightGroup: {
-    // flex: 1,
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    display: "flex",
-    // backgroundColor: "red",
-    margin: 0,
-    padding: 0,
-    width: "25%",
+    flex: 1,
+  },
+  content: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  contentInner: {
+    flex: 1,
   },
   logo: {
     width: 60,
@@ -54,6 +52,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   logoWrapper: {
     position: "absolute",
     top: 0,
+    bottom: 0,
     left: 0,
     right: 0,
     alignItems: "center",
@@ -72,6 +71,36 @@ export const useStyles = createThemeStylesHook((colors) => ({
   iconButtonPressed: {
     backgroundColor: colors.my_green,
   },
+  bottomBarContainer: {
+    backgroundColor: colors.secondBackground,
+    paddingHorizontal: 16,
+    paddingTop: 8,
+  },
+  bottomBar: {
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomIconButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
+    borderRadius: 12,
+    marginHorizontal: 4,
+  },
+  bottomCenterButton: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    borderRadius: 16,
+    marginHorizontal: 12,
+  },
+  bottomIconButtonPressed: {
+    backgroundColor: colors.my_green,
+  },
   profileButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -86,10 +115,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   customProfileIconWrapper: {
     alignItems: "center",
     justifyContent: "center",
-  },
-  centerIcon: {
-    width: 34,
-    height: 34,
   },
   counterText: {
     marginLeft: 8,

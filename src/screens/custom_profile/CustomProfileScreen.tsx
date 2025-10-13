@@ -1,147 +1,99 @@
-import { useMemo, useState } from "react";
-import { Pressable, Text, TextInput, TextStyle, View } from "react-native";
+import { ScrollView, TextStyle, View } from "react-native";
 import MyButton from "@/src/components/button/button";
-import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useStyles } from "./CustomProfileScreen-styles";
 import { useRouter } from "expo-router";
-import {
-  DEFAULT_PROFILE_COLOR,
-  PROFILE_COLORS,
-  PROFILE_ICONS,
-} from "@/src/constants/customProfile";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { CustomProfileForm } from "@/src/components/customProfile/form/CustomProfileForm";
+import { useCustomProfileDraft } from "@/src/hooks/useCustomProfileDraft";
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+
 export default function CustomProfileScreen() {
   const styles = useStyles();
   const router = useRouter();
-  const defaultColor = useMemo(
-    () =>
-      PROFILE_COLORS.find((color) => color.hex === DEFAULT_PROFILE_COLOR) ??
-      PROFILE_COLORS[0],
-    []
-  );
-  const [profileName, setProfileName] = useState("");
-  const [selectedColor, setSelectedColor] = useState(
-    defaultColor?.hex ?? DEFAULT_PROFILE_COLOR
-  );
-  const [selectedColorId, setSelectedColorId] = useState(
-    defaultColor?.id ?? PROFILE_COLORS[0]?.id ?? ""
-  );
-  const [selectedIcon, setSelectedIcon] = useState<string | null>(
-    PROFILE_ICONS[0]?.id ?? null
-  );
-  const [reviewsEnabled, setReviewsEnabled] = useState(false);
-  const checkboxIconColor =
-    (styles.checkboxIcon as TextStyle)?.color ?? "#ffffff";
+  const {
+    profileName,
+    setProfileName,
+    iconId,
+    setIconId,
+    iconColor,
+    colorId,
+    reviewsEnabled,
+    toggleReviewsEnabled,
+    handleColorChange,
+  } = useCustomProfileDraft();
 
   const handleNavigateToContent = () => {
     const name = profileName.trim();
-    if (!selectedIcon || !name) {
+    if (!iconId || !name) {
       return;
     }
     const params: Record<string, string> = {
       name,
-      iconId: selectedIcon,
-      iconColor: selectedColor,
+      iconId,
+      iconColor,
       reviewsEnabled: reviewsEnabled ? "1" : "0",
     };
-    if (selectedColorId) {
-      params.colorId = selectedColorId;
+    if (colorId) {
+      params.colorId = colorId;
     }
     router.push({ pathname: "/custom_profile/content", params });
   };
 
-  const nextDisabled = !profileName.trim() || !selectedIcon;
+  const nextDisabled = !profileName.trim() || !iconId;
+  const actionIconColor =
+    (styles.manualAddIcon as TextStyle)?.color ??
+    (styles.cardActionIcon as TextStyle)?.color ??
+    "black";
+
+  const handleGoBack = () => {
+    router.back();
+  };
 
   return (
     <View style={styles.container}>
-      <View style={styles.section}>
-        <Text style={styles.sectionHeader}>Profiil</Text>
+      <ScrollView
+        style={styles.scrollView}
+        contentContainerStyle={styles.scrollContent}
+        keyboardShouldPersistTaps="handled"
+        showsVerticalScrollIndicator={false}
+      >
+        <CustomProfileForm
+          title="NOWY PROFIL"
+          profileName={profileName}
+          onProfileNameChange={setProfileName}
+          reviewsEnabled={reviewsEnabled}
+          onToggleReviews={toggleReviewsEnabled}
+          iconId={iconId}
+          iconColor={iconColor}
+          colorId={colorId}
+          onIconChange={(value) => setIconId(value)}
+          onColorChange={handleColorChange}
+        />
+      </ScrollView>
 
-        <View>
-          <Text style={styles.miniSectionHeader}>nazwa</Text>
-          <TextInput
-            style={styles.profileInput}
-            value={profileName}
-            onChangeText={setProfileName}
-            placeholder="np. Fiszki podróżnicze"
-            accessibilityLabel="Nazwa profilu"
-          />
-          <View style={styles.checkboxRow}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.checkboxPressable,
-                pressed && styles.checkboxPressablePressed,
-              ]}
-              onPress={() => setReviewsEnabled((prev) => !prev)}
-              accessibilityRole="checkbox"
-              accessibilityState={{ checked: reviewsEnabled }}
-              accessibilityLabel="Włącz udział profilu w powtórkach"
-            >
-              <View
-                style={[
-                  styles.checkboxBase,
-                  reviewsEnabled && styles.checkboxBaseChecked,
-                ]}
-              >
-                {reviewsEnabled ? (
-                  <Ionicons
-                    name="checkmark"
-                    size={18}
-                    color={checkboxIconColor}
-                  />
-                ) : null}
-              </View>
-              <Text style={styles.checkboxLabel}>włącz powtórki</Text>
-            </Pressable>
-          </View>
-        </View>
-
-        <View style={styles.iconContainer}>
-          <Text style={styles.miniSectionHeader}>ikona</Text>
-          <ProfileIconColorSelector
-            selectedIcon={selectedIcon}
-            selectedColor={selectedColor}
-            selectedColorId={selectedColorId}
-            onIconChange={setSelectedIcon}
-            onColorChange={(color) => {
-              setSelectedColor(color.hex);
-              setSelectedColorId(color.id);
-            }}
-            styles={{
-              iconsContainer: styles.imageContainer,
-              iconWrapper: styles.iconWrapper,
-              iconWrapperSelected: styles.iconWrapperSelected,
-              colorsContainer: styles.colorsContainer,
-              colorSwatch: styles.profileColor,
-              colorSwatchSelected: styles.profileColorSelected,
-            }}
-          />
-        </View>
-
-        <View style={styles.buttonscontainer}>
-          <MyButton
-            text="->"
-            color="my_green"
-            onPress={handleNavigateToContent}
-            accessibilityLabel="Przejdź do ustawień zawartości profilu"
-            disabled={nextDisabled}
-          />
-        </View>
+      <View style={styles.footer}>
+        <MyButton
+          color="my_yellow"
+          onPress={handleGoBack}
+          accessibilityLabel="Wróć do poprzedniego ekranu"
+        >
+          <Entypo name="arrow-long-left" size={50} color={actionIconColor} />
+        </MyButton>
+        <MyButton
+          color="my_green"
+          text="dalej"
+          onPress={handleNavigateToContent}
+          accessibilityLabel="Przejdź do ustawień zawartości profilu"
+          disabled={nextDisabled}
+        >
+          {/* <Entypo
+            name="arrow-long-right"
+            size={50}
+            color={actionIconColor}
+            style={styles.manualAddIcon}
+          /> */}
+        </MyButton>
       </View>
-
-      {/* <View style={styles.divider} /> */}
-
-      {/* <View style={styles.footer}>
-        <View style={styles.footerActionRight}>
-          <MyButton
-            text="->"
-            color="my_green"
-            onPress={handleNavigateToContent}
-            accessibilityLabel="Przejdź do ustawień zawartości profilu"
-            disabled={nextDisabled}
-          />
-        </View>
-      </View> */}
     </View>
   );
 }

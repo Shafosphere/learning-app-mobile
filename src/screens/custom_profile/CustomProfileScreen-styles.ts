@@ -103,7 +103,7 @@ export const useStyles = createThemeStylesHook((colors) => {
     },
     manualAddIcon: {
       color: colors.headline,
-      fontSize: 30,
+      // fontSize: 30,
       fontWeight: "900",
       lineHeight: 30,
     },
@@ -112,6 +112,13 @@ export const useStyles = createThemeStylesHook((colors) => {
       backgroundColor: colors.background,
       padding: 18,
       paddingTop: 32,
+    },
+    scrollView: {
+      flex: 1,
+    },
+    scrollContent: {
+      flexGrow: 1,
+      paddingBottom: 120,
     },
     section: {
       backgroundColor: colors.secondBackground,
@@ -279,11 +286,6 @@ export const useStyles = createThemeStylesHook((colors) => {
       height: 1,
       backgroundColor: colors.border,
       marginHorizontal: 24,
-    },
-    buttonscontainer: {
-      width: "100%",
-      alignItems: "flex-end",
-      padding: 10,
     },
   };
 });

@@ -4,7 +4,6 @@ import {
   Pressable,
   ScrollView,
   Text,
-  TextInput,
   TextStyle,
   View,
 } from "react-native";
@@ -12,9 +11,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Entypo from "@expo/vector-icons/Entypo";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import MyButton from "@/src/components/button/button";
-import ProfileIconColorSelector from "@/src/components/customProfile/ProfileIconColorSelector";
 import { useEditStyles } from "./EditCustomProfileScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -25,6 +22,9 @@ import {
   updateCustomProfile,
 } from "@/src/db/sqlite/db";
 import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
+import { CustomProfileForm } from "@/src/components/customProfile/form/CustomProfileForm";
+import { useCustomProfileFormStyles } from "@/src/components/customProfile/form/CustomProfileForm-styles";
+import { useCustomProfileDraft } from "@/src/hooks/useCustomProfileDraft";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
@@ -40,6 +40,7 @@ const MANUAL_HISTORY_LIMIT = 50;
 
 export default function EditCustomProfileScreen() {
   const styles = useEditStyles();
+  const formStyles = useCustomProfileFormStyles();
   const params = useLocalSearchParams();
   const router = useRouter();
   const setPopup = usePopup();
@@ -62,11 +63,18 @@ export default function EditCustomProfileScreen() {
     }
   }, [params.name]);
 
-  const [profileName, setProfileName] = useState(initialName);
-  const [iconId, setIconId] = useState<string | null>(null);
-  const [iconColor, setIconColor] = useState<string>(DEFAULT_PROFILE_COLOR);
-  const [colorId, setColorId] = useState<string | null>(null);
-  const [reviewsEnabled, setReviewsEnabled] = useState(false);
+  const {
+    profileName,
+    setProfileName,
+    iconId,
+    setIconId,
+    iconColor,
+    colorId,
+    reviewsEnabled,
+    toggleReviewsEnabled,
+    handleColorChange,
+    hydrateDraft,
+  } = useCustomProfileDraft({ initialName });
   const {
     manualCards,
     replaceManualCards,
@@ -108,11 +116,13 @@ export default function EditCustomProfileScreen() {
         return;
       }
 
-      setProfileName(profileRow.name);
-      setIconId(profileRow.iconId);
-      setIconColor(profileRow.iconColor ?? DEFAULT_PROFILE_COLOR);
-      setColorId(profileRow.colorId);
-      setReviewsEnabled(profileRow.reviewsEnabled);
+      hydrateDraft({
+        profileName: profileRow.name,
+        iconId: profileRow.iconId,
+        iconColor: profileRow.iconColor ?? DEFAULT_PROFILE_COLOR,
+        colorId: profileRow.colorId ?? null,
+        reviewsEnabled: profileRow.reviewsEnabled,
+      });
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -136,7 +146,7 @@ export default function EditCustomProfileScreen() {
     } finally {
       setLoading(false);
     }
-  }, [profileId, replaceManualCards]);
+  }, [hydrateDraft, profileId, replaceManualCards]);
 
   useFocusEffect(
     useCallback(() => {
@@ -148,8 +158,6 @@ export default function EditCustomProfileScreen() {
     (styles.manualAddIcon as TextStyle)?.color ??
     (styles.cardActionIcon as TextStyle)?.color ??
     "black";
-  const checkboxIconColor =
-    (styles.checkboxIcon as TextStyle)?.color ?? "#ffffff";
 
   const hasManualChanges = canUndo;
 
@@ -258,94 +266,45 @@ export default function EditCustomProfileScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.section}>
-          <Text style={styles.sectionHeader}>EDYTUJ PROFIL</Text>
-          {loading ? (
+        {loading ? (
+          <View style={formStyles.section}>
+            <Text style={formStyles.sectionHeader}>EDYTUJ PROFIL</Text>
             <View style={{ alignItems: "center", paddingVertical: 32 }}>
               <ActivityIndicator size="large" />
             </View>
-          ) : loadError ? (
+          </View>
+        ) : loadError ? (
+          <View style={formStyles.section}>
+            <Text style={formStyles.sectionHeader}>EDYTUJ PROFIL</Text>
             <Text style={{ color: "#ff5470", fontSize: 16 }}>{loadError}</Text>
-          ) : (
-            <>
-              <View>
-                <Text style={styles.miniSectionHeader}>nazwa</Text>
-
-                <TextInput
-                  style={styles.profileInput}
-                  value={profileName}
-                  onChangeText={setProfileName}
-                  placeholder="np. Fiszki podróżnicze"
-                  accessibilityLabel="Nazwa profilu"
-                />
-
-                <View style={styles.checkboxRow}>
-                  <Pressable
-                    style={({ pressed }) => [
-                      styles.checkboxPressable,
-                      pressed && styles.checkboxPressablePressed,
-                    ]}
-                    onPress={() => setReviewsEnabled((prev) => !prev)}
-                    accessibilityRole="checkbox"
-                    accessibilityState={{ checked: reviewsEnabled }}
-                    accessibilityLabel="Włącz udział profilu w powtórkach"
-                  >
-                    <View
-                      style={[
-                        styles.checkboxBase,
-                        reviewsEnabled && styles.checkboxBaseChecked,
-                      ]}
-                    >
-                      {reviewsEnabled ? (
-                        <Ionicons
-                          name="checkmark"
-                          size={18}
-                          color={checkboxIconColor}
-                        />
-                      ) : null}
-                    </View>
-                    <Text style={styles.checkboxLabel}>włącz powtórki</Text>
-                  </Pressable>
-                </View>
-
-                <View style={styles.iconContainer}>
-                  <Text style={styles.miniSectionHeader}>ikona</Text>
-
-                  <ProfileIconColorSelector
-                    selectedIcon={iconId}
-                    selectedColor={iconColor}
-                    selectedColorId={colorId}
-                    onIconChange={setIconId}
-                    onColorChange={(color) => {
-                      setIconColor(color.hex);
-                      setColorId(color.id);
-                    }}
-                    styles={{
-                      iconsContainer: styles.imageContainer,
-                      iconWrapper: styles.iconWrapper,
-                      iconWrapperSelected: styles.iconWrapperSelected,
-                      colorsContainer: styles.colorsContainer,
-                      colorSwatch: styles.profileColor,
-                      colorSwatchSelected: styles.profileColorSelected,
-                    }}
-                  />
-                </View>
-
-                <Text style={styles.miniSectionHeader}>fiszki</Text>
-                <ManualCardsEditor
-                  manualCards={manualCards}
-                  styles={styles as unknown as ManualCardsEditorStyles}
-                  onCardFrontChange={handleManualCardFrontChange}
-                  onCardAnswerChange={handleManualCardAnswerChange}
-                  onAddAnswer={handleAddAnswer}
-                  onRemoveAnswer={handleRemoveAnswer}
-                  onAddCard={handleAddCard}
-                  onRemoveCard={handleRemoveCard}
-                />
-              </View>
-            </>
-          )}
-        </View>
+          </View>
+        ) : (
+          <CustomProfileForm
+            title="EDYTUJ PROFIL"
+            profileName={profileName}
+            onProfileNameChange={setProfileName}
+            reviewsEnabled={reviewsEnabled}
+            onToggleReviews={toggleReviewsEnabled}
+            iconId={iconId}
+            iconColor={iconColor}
+            colorId={colorId}
+            onIconChange={(value) => setIconId(value)}
+            onColorChange={handleColorChange}
+            disabled={isSaving}
+          >
+            <Text style={styles.miniSectionHeader}>fiszki</Text>
+            <ManualCardsEditor
+              manualCards={manualCards}
+              styles={styles as unknown as ManualCardsEditorStyles}
+              onCardFrontChange={handleManualCardFrontChange}
+              onCardAnswerChange={handleManualCardAnswerChange}
+              onAddAnswer={handleAddAnswer}
+              onRemoveAnswer={handleRemoveAnswer}
+              onAddCard={handleAddCard}
+              onRemoveCard={handleRemoveCard}
+            />
+          </CustomProfileForm>
+        )}
       </ScrollView>
 
       <View style={styles.footer}>

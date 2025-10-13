@@ -8,6 +8,7 @@ import { getDB } from "@/src/db/sqlite/db"; // ZMIANA: Importujemy tylko getDB
 import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, Text } from "react-native";
 import { PopupProvider } from "@/src/contexts/PopupContext";
+import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -55,15 +56,18 @@ export default function RootLayout() {
   }
 
   return (
-    <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-      <SettingsProvider>
-        <LearningStatsProvider>
-          <PopupProvider>
-            <Navbar />
-            <Stack screenOptions={{ headerShown: false }} />
-          </PopupProvider>
-        </LearningStatsProvider>
-      </SettingsProvider>
-    </View>
+    <SafeAreaProvider>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <SettingsProvider>
+          <LearningStatsProvider>
+            <PopupProvider>
+              <Navbar>
+                <Stack screenOptions={{ headerShown: false }} />
+              </Navbar>
+            </PopupProvider>
+          </LearningStatsProvider>
+        </SettingsProvider>
+      </View>
+    </SafeAreaProvider>
   );
 }
