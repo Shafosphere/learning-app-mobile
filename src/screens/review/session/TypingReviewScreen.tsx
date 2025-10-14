@@ -13,7 +13,7 @@ import {
 } from "@/src/db/sqlite/db";
 import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
-import { useSessionStyles } from "./ReviewSessionScreen-styles";
+import { useStyles } from "./TypingReviewScreen-styles";
 import { removeWordIdFromUsedWordIds } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import MyButton from "@/src/components/button/button";
 import RotaryStack, {
@@ -41,8 +41,8 @@ function mapCustomReviewToWord(
   };
 }
 
-export default function ReviewSessionScreen() {
-  const styles = useSessionStyles();
+export default function TypingReviewScreen() {
+  const styles = useStyles();
   const router = useRouter();
   const { activeProfile, selectedLevel, activeCustomProfileId } = useSettings();
   const checkSpelling = useSpellchecking();

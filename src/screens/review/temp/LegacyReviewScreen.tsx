@@ -1,14 +1,13 @@
 import React, { useCallback, useState } from "react";
 import { Pressable, Text, View } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-
+import { useFocusEffect } from "@react-navigation/native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
-import { useStyles } from "../level/LevelScreen-styles";
+import { useStyles } from "../../level/LevelScreen-styles";
 import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 
-export default function ReviewScreen() {
+export default function LegacyReviewScreen() {
   const { setLevel, activeProfile, colors } = useSettings();
   const styles = useStyles();
   const router = useRouter();
@@ -58,10 +57,7 @@ export default function ReviewScreen() {
 
         {levels.map((item, index) => (
           <Pressable
-            onPress={() => {
-              setLevel(item);
-              router.push("/review/memory");
-            }}
+            onPress={() => [setLevel(item), router.push("/review/session")]}
             style={styles.reviewTile}
             key={index}
           >

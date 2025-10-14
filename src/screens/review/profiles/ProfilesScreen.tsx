@@ -4,7 +4,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
-import { useStyles } from "./ReviewProfilesScreen-styles";
+import { useStyles } from "./ProfilesScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
@@ -19,7 +19,7 @@ const languageLabels: Record<string, Record<string, string>> = {
   pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
 };
 
-export default function ReviewProfilesScreen() {
+export default function ProfilesScreen() {
   const styles = useStyles();
   const router = useRouter();
   const { profiles, setActiveProfileIdx, setActiveCustomProfileId, colors } =
@@ -130,7 +130,7 @@ export default function ReviewProfilesScreen() {
     (profileId: number) => {
       void (async () => {
         await setActiveCustomProfileId(profileId);
-        router.push("/review/session");
+        router.push("/review/memory");
       })();
     },
     [router, setActiveCustomProfileId]

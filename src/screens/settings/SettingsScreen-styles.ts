@@ -110,6 +110,39 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "600",
     color: colors.paragraph,
   },
+  memoryOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  memoryOption: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingVertical: 12,
+    paddingHorizontal: 8,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  memoryOptionActive: {
+    borderColor: colors.my_green,
+  },
+  memoryOptionLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.paragraph,
+  },
+  memoryOptionLabelActive: {
+    color: colors.my_green,
+  },
+  memoryOptionMeta: {
+    fontSize: 12,
+    marginTop: 4,
+    color: colors.paragraph,
+    opacity: 0.75,
+  },
   input: {
     borderWidth: 1,
     borderColor: colors.border,

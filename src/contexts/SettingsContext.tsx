@@ -13,6 +13,7 @@ import {
   ThemeColors,
   ColorBlindMode,
 } from "../theme/theme";
+import { MemoryBoardSize } from "../constants/memoryGame";
 import { usePersistedState } from "../hooks/usePersistedState";
 import type { CEFRLevel } from "../types/language";
 import { LanguageProfile } from "../types/profile";
@@ -54,6 +55,8 @@ interface SettingsContextValue {
   largeFontEnabled: boolean;
   toggleLargeFont: () => Promise<void>;
   fontScaleMultiplier: number;
+  memoryBoardSize: MemoryBoardSize;
+  setMemoryBoardSize: (size: MemoryBoardSize) => Promise<void>;
   accessibilityPreferences: {
     highContrastEnabled: boolean;
     colorBlindMode: ColorBlindMode;
@@ -99,6 +102,8 @@ const defaultValue: SettingsContextValue = {
   largeFontEnabled: false,
   toggleLargeFont: async () => {},
   fontScaleMultiplier: 1,
+  memoryBoardSize: "large",
+  setMemoryBoardSize: async () => {},
   accessibilityPreferences: {
     highContrastEnabled: false,
     colorBlindMode: "none",
@@ -159,6 +164,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "accessibility.largeFont",
     false
   );
+  const [memoryBoardSize, setMemoryBoardSizeState] =
+    usePersistedState<MemoryBoardSize>("memory.boardSize", "large");
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -267,6 +274,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setLargeFontEnabled(!largeFontEnabled);
   };
 
+  const setMemoryBoardSize = useCallback(
+    async (size: MemoryBoardSize) => {
+      await setMemoryBoardSizeState(size);
+    },
+    [setMemoryBoardSizeState]
+  );
+
   const setLevel = useCallback(
     (lvl: CEFRLevel) => {
       void persistSelectedLevel(lvl);
@@ -312,6 +326,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         largeFontEnabled,
         toggleLargeFont,
         fontScaleMultiplier,
+        memoryBoardSize,
+        setMemoryBoardSize,
         accessibilityPreferences: {
           highContrastEnabled,
           colorBlindMode,

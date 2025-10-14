@@ -1,6 +1,6 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-export const useSessionStyles = createThemeStylesHook((colors) => ({
+export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
