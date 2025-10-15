@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/createprofile/CreateProfileScreen";
+export { default } from "@/src/screens/createprofile/ProfileSelectionScreen";
