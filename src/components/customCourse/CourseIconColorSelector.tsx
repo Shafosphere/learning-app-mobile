@@ -6,9 +6,14 @@ import {
   ViewStyle,
   useWindowDimensions,
 } from "react-native";
-import { PROFILE_COLORS, PROFILE_ICONS } from "@/src/constants/customProfile";
+import {
+  COURSE_ICONS,
+  CourseColorOption,
+  getCourseColorsForTheme,
+} from "@/src/constants/customCourse";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
-export interface ProfileIconColorSelectorStyles {
+export interface CourseIconColorSelectorStyles {
   container?: StyleProp<ViewStyle>;
   iconsContainer?: StyleProp<ViewStyle>;
   iconWrapper?: StyleProp<ViewStyle>;
@@ -18,18 +23,18 @@ export interface ProfileIconColorSelectorStyles {
   colorSwatchSelected?: StyleProp<ViewStyle>;
 }
 
-export interface ProfileIconColorSelectorProps {
+export interface CourseIconColorSelectorProps {
   selectedIcon: string | null;
   selectedColor: string;
   selectedColorId?: string | null;
   onIconChange: (iconId: string) => void;
-  onColorChange: (color: (typeof PROFILE_COLORS)[number]) => void;
+  onColorChange: (color: CourseColorOption) => void;
   disabled?: boolean;
-  styles?: ProfileIconColorSelectorStyles;
+  styles?: CourseIconColorSelectorStyles;
   iconSize?: number;
 }
 
-function ProfileIconColorSelectorComponent({
+function CourseIconColorSelectorComponent({
   selectedIcon,
   selectedColor,
   selectedColorId,
@@ -38,8 +43,14 @@ function ProfileIconColorSelectorComponent({
   disabled = false,
   styles,
   iconSize = 40,
-}: ProfileIconColorSelectorProps) {
+}: CourseIconColorSelectorProps) {
   const { width } = useWindowDimensions();
+  const { colors } = useSettings();
+
+  const colorOptions = useMemo(
+    () => getCourseColorsForTheme(colors),
+    [colors]
+  );
 
   const layout = useMemo(() => {
     const baseSize = iconSize ?? 40;
@@ -102,7 +113,7 @@ function ProfileIconColorSelectorComponent({
   return (
     <View style={styles?.container}>
       <View style={[baseIconsContainerStyle, styles?.iconsContainer]}>
-        {PROFILE_ICONS.map(({ id, Component, name }) => {
+        {COURSE_ICONS.map(({ id, Component, name }) => {
           const isSelected = selectedIcon === id;
           return (
             <Pressable
@@ -128,7 +139,7 @@ function ProfileIconColorSelectorComponent({
       </View>
 
       <View style={styles?.colorsContainer}>
-        {PROFILE_COLORS.map((color) => {
+        {colorOptions.map((color) => {
           const selected = isColorSelected(color.hex, color.id);
           return (
             <Pressable
@@ -150,6 +161,6 @@ function ProfileIconColorSelectorComponent({
   );
 }
 
-export const ProfileIconColorSelector = memo(ProfileIconColorSelectorComponent);
+export const CourseIconColorSelector = memo(CourseIconColorSelectorComponent);
 
-export default ProfileIconColorSelector;
+export default CourseIconColorSelector;

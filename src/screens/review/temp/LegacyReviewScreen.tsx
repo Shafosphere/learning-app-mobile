@@ -8,7 +8,7 @@ import { useStyles } from "../../level/LevelScreen-styles";
 import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 
 export default function LegacyReviewScreen() {
-  const { setLevel, activeProfile, colors } = useSettings();
+  const { setLevel, activeCourse, colors } = useSettings();
   const styles = useStyles();
   const router = useRouter();
   const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -28,8 +28,8 @@ export default function LegacyReviewScreen() {
 
       const fetchCounts = async () => {
         try {
-          const srcId = activeProfile?.sourceLangId;
-          const tgtId = activeProfile?.targetLangId;
+          const srcId = activeCourse?.sourceLangId;
+          const tgtId = activeCourse?.targetLangId;
           if (!srcId || !tgtId) {
             if (mounted)
               setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
@@ -47,7 +47,7 @@ export default function LegacyReviewScreen() {
       return () => {
         mounted = false;
       };
-    }, [activeProfile?.sourceLangId, activeProfile?.targetLangId])
+    }, [activeCourse?.sourceLangId, activeCourse?.targetLangId])
   );
 
   return (

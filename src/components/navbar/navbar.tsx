@@ -13,10 +13,10 @@ import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import {
-  getCustomProfileById,
-  type CustomProfileRecord,
+  getCustomCourseById,
+  type CustomCourseRecord,
 } from "@/src/db/sqlite/db";
-import { getProfileIconById } from "@/src/constants/customProfile";
+import { getCourseIconById } from "@/src/constants/customCourse";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -33,9 +33,9 @@ export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
   const {
     toggleTheme,
-    activeCustomProfileId,
+    activeCustomCourseId,
     selectedLevel,
-    activeProfile,
+    activeCourse,
     colors,
   } = useSettings();
   const styles = useStyles();
@@ -44,74 +44,74 @@ export default function Navbar({ children }: NavbarProps) {
     Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
-  const [customProfile, setCustomProfile] =
-    useState<CustomProfileRecord | null>(null);
+  const [customCourse, setCustomCourse] =
+    useState<CustomCourseRecord | null>(null);
 
   useEffect(() => {
     let isMounted = true;
 
-    if (activeCustomProfileId == null) {
-      setCustomProfile(null);
+    if (activeCustomCourseId == null) {
+      setCustomCourse(null);
       return () => {
         isMounted = false;
       };
     }
 
-    getCustomProfileById(activeCustomProfileId)
-      .then((profile) => {
+    getCustomCourseById(activeCustomCourseId)
+      .then((course) => {
         if (isMounted) {
-          setCustomProfile(profile);
+          setCustomCourse(course);
         }
       })
       .catch((error) => {
-        console.error("Failed to load active custom profile", error);
+        console.error("Failed to load active custom course", error);
         if (isMounted) {
-          setCustomProfile(null);
+          setCustomCourse(null);
         }
       });
 
     return () => {
       isMounted = false;
     };
-  }, [activeCustomProfileId]);
+  }, [activeCustomCourseId]);
 
-  const profileFlagSource = useMemo(() => {
-    if (!activeProfile || !activeProfile.sourceLang) {
+  const courseFlagSource = useMemo(() => {
+    if (!activeCourse || !activeCourse.sourceLang) {
       return undefined;
     }
 
-    return getFlagSource(activeProfile.sourceLang);
-  }, [activeProfile]);
+    return getFlagSource(activeCourse.sourceLang);
+  }, [activeCourse]);
 
-  const profileAccessibilityLabel = useMemo(() => {
-    if (customProfile) {
-      return `Profil ${customProfile.name}. Otwórz panel profili.`;
+  const courseAccessibilityLabel = useMemo(() => {
+    if (customCourse) {
+      return `Kurs ${customCourse.name}. Otwórz panel kursów.`;
     }
 
-    if (activeProfile?.sourceLang && activeProfile?.targetLang) {
-      return `Profil ${activeProfile.sourceLang.toUpperCase()} do ${activeProfile.targetLang.toUpperCase()}. Otwórz panel profilu.`;
+    if (activeCourse?.sourceLang && activeCourse?.targetLang) {
+      return `Kurs ${activeCourse.sourceLang.toUpperCase()} do ${activeCourse.targetLang.toUpperCase()}. Otwórz panel kursów.`;
     }
 
-    return "Wybierz profil językowy";
-  }, [activeProfile, customProfile]);
+    return "Wybierz kurs językowy";
+  }, [activeCourse, customCourse]);
 
-  const profileIconMeta = useMemo(() => {
-    if (!customProfile) return null;
-    return getProfileIconById(customProfile.iconId);
-  }, [customProfile]);
+  const courseIconMeta = useMemo(() => {
+    if (!customCourse) return null;
+    return getCourseIconById(customCourse.iconId);
+  }, [customCourse]);
 
-  const CustomProfileIcon = profileIconMeta?.Component;
-  const customProfileIconName = profileIconMeta?.name ?? "grid-outline";
-  const customProfileIconColor = customProfile?.iconColor ?? colors.headline;
+  const CustomCourseIcon = courseIconMeta?.Component;
+  const customCourseIconName = courseIconMeta?.name ?? "grid-outline";
+  const customCourseIconColor = customCourse?.iconColor ?? colors.headline;
 
-  const profileGraphic =
-    activeCustomProfileId != null && customProfile ? (
-      <View style={styles.customProfileIconWrapper}>
-        {CustomProfileIcon ? (
-          <CustomProfileIcon
-            name={customProfileIconName as never}
+  const courseGraphic =
+    activeCustomCourseId != null && customCourse ? (
+      <View style={styles.customCourseIconWrapper}>
+        {CustomCourseIcon ? (
+          <CustomCourseIcon
+            name={customCourseIconName as never}
             size={24}
-            color={customProfileIconColor}
+            color={customCourseIconColor}
           />
         ) : (
           <Ionicons
@@ -121,8 +121,8 @@ export default function Navbar({ children }: NavbarProps) {
           />
         )}
       </View>
-    ) : profileFlagSource ? (
-      <Image source={profileFlagSource} style={styles.profileFlag} />
+    ) : courseFlagSource ? (
+      <Image source={courseFlagSource} style={styles.courseFlag} />
     ) : (
       <Ionicons
         name="person-circle-outline"
@@ -132,16 +132,16 @@ export default function Navbar({ children }: NavbarProps) {
     );
 
   const handlePadPress = () => {
-    if (activeCustomProfileId != null) {
+    if (activeCustomCourseId != null) {
       router.push("/flashcards_custom");
       return;
     }
 
-    const hasProfile =
-      activeProfile?.sourceLangId != null &&
-      activeProfile?.targetLangId != null;
+    const hasCourse =
+      activeCourse?.sourceLangId != null &&
+      activeCourse?.targetLangId != null;
 
-    if (hasProfile && selectedLevel) {
+    if (hasCourse && selectedLevel) {
       router.push("/flashcards");
       return;
     }
@@ -163,20 +163,20 @@ export default function Navbar({ children }: NavbarProps) {
         <View style={styles.topBar}>
           <View style={styles.leftGroup}>
             <TouchableOpacity
-              onPress={() => router.push("/profilpanel")}
-              style={styles.profileButton}
+              onPress={() => router.push("/coursepanel")}
+              style={styles.courseButton}
               accessibilityRole="button"
-              accessibilityLabel={profileAccessibilityLabel}
+              accessibilityLabel={courseAccessibilityLabel}
             >
-              {profileGraphic}
-              {activeCustomProfileId != null && customProfile ? (
+              {courseGraphic}
+              {activeCustomCourseId != null && customCourse ? (
                 <Text
-                  style={styles.profileName}
+                  style={styles.courseName}
                   numberOfLines={1}
                   ellipsizeMode="tail"
                   allowFontScaling
                 >
-                  {customProfile.name}
+                  {customCourse.name}
                 </Text>
               ) : null}
             </TouchableOpacity>

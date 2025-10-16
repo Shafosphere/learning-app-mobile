@@ -14,27 +14,27 @@ export const boxOrder: BoxName[] = [
   "boxFive",
 ];
 
-export function makeProfileKey(profile: {
+export function makeCourseKey(course: {
   sourceLangId?: number | null;
   targetLangId?: number | null;
   sourceLang?: string | null; // e.g. "EN"
   targetLang?: string | null; // e.g. "PL"
 }) {
   const byId =
-    profile.sourceLangId != null && profile.targetLangId != null
-      ? `${profile.sourceLangId}-${profile.targetLangId}`
+    course.sourceLangId != null && course.targetLangId != null
+      ? `${course.sourceLangId}-${course.targetLangId}`
       : null;
   const byCode =
-    profile.sourceLang && profile.targetLang
-      ? `${profile.sourceLang}-${profile.targetLang}`
+    course.sourceLang && course.targetLang
+      ? `${course.sourceLang}-${course.targetLang}`
       : null;
-  return byId ?? byCode ?? "unknown-profile";
+  return byId ?? byCode ?? "unknown-course";
 }
 
 export type SavedBoxesV2 = {
   v: 2;
   updatedAt: number; // epoch ms
-  profileId: string; // e.g. "1-2-A1"
+  courseId: string; // e.g. "1-2-A1"
   sourceLangId: number;
   targetLangId: number;
   level: string; // "A1" | ... | "C2"
@@ -93,7 +93,7 @@ async function saveToStorageSnapshot(
   const payload: SavedBoxesV2 = {
     v: 2,
     updatedAt: Date.now(),
-    profileId: makeScopeId(meta.sourceLangId, meta.targetLangId, meta.level),
+    courseId: makeScopeId(meta.sourceLangId, meta.targetLangId, meta.level),
     sourceLangId: meta.sourceLangId,
     targetLangId: meta.targetLangId,
     level: meta.level,

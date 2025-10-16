@@ -10,39 +10,39 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system/legacy";
 import MyButton from "@/src/components/button/button";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useStyles } from "../CustomProfileScreen-styles";
+import { useStyles } from "../CustomCourseScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
-  createCustomProfile,
+  createCustomCourse,
   replaceCustomFlashcards,
 } from "@/src/db/sqlite/db";
-import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
+import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
-} from "@/src/features/customProfile/manualCards/ManualCardsEditor";
+} from "@/src/features/customCourse/manualCards/ManualCardsEditor";
 import {
   createEmptyManualCard,
   normalizeAnswers,
   useManualCardsForm,
-} from "@/src/features/customProfile/manualCards/useManualCardsForm";
+} from "@/src/features/customCourse/manualCards/useManualCardsForm";
 
 type AddMode = "csv" | "manual";
 
-const sampleFileName = "custom_profile_przyklad.csv";
+const sampleFileName = "custom_course_przyklad.csv";
 
 const segmentOptions: { key: AddMode; label: string }[] = [
   { key: "csv", label: "Import z CSV" },
   { key: "manual", label: "Dodaj ręcznie" },
 ];
 
-export default function CustomProfileContentScreen() {
+export default function CustomCourseContentScreen() {
   const styles = useStyles();
   const setPopup = usePopup();
   const router = useRouter();
   const params = useLocalSearchParams();
 
-  const profileName = useMemo(() => {
+  const courseName = useMemo(() => {
     const raw = params.name;
     const value = Array.isArray(raw) ? raw[0] : raw;
     return (value ?? "").toString().trim();
@@ -154,7 +154,7 @@ export default function CustomProfileContentScreen() {
     }
   };
 
-  const handleSaveProfile = async () => {
+  const handleSaveCourse = async () => {
     if (addMode === "csv") {
       setPopup({
         message: "Import z CSV pojawi się w kolejnej wersji",
@@ -164,10 +164,10 @@ export default function CustomProfileContentScreen() {
       return;
     }
 
-    const cleanName = profileName.trim();
+    const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
-        message: "Najpierw nadaj nazwę profilowi",
+        message: "Najpierw nadaj nazwę kursowi",
         color: "my_red",
         duration: 3000,
       });
@@ -176,7 +176,7 @@ export default function CustomProfileContentScreen() {
     }
     if (!iconId) {
       setPopup({
-        message: "Wybierz ikonę profilu",
+        message: "Wybierz ikonę kursu",
         color: "my_red",
         duration: 3000,
       });
@@ -218,24 +218,24 @@ export default function CustomProfileContentScreen() {
 
     setIsSaving(true);
     try {
-      const profileId = await createCustomProfile({
+      const courseId = await createCustomCourse({
         name: cleanName,
         iconId,
-        iconColor: iconColor || DEFAULT_PROFILE_COLOR,
+        iconColor: iconColor || DEFAULT_COURSE_COLOR,
         colorId: colorId ?? undefined,
         reviewsEnabled,
       });
 
-      await replaceCustomFlashcards(profileId, trimmedCards);
+      await replaceCustomFlashcards(courseId, trimmedCards);
 
       setPopup({
         message: "Zestaw fiszek zapisany!",
         color: "my_green",
         duration: 3500,
       });
-      router.replace("/profilpanel");
+      router.replace("/coursepanel");
     } catch (error) {
-      console.error("Failed to save custom profile", error);
+      console.error("Failed to save custom course", error);
       setPopup({
         message: "Nie udało się zapisać zestawu",
         color: "my_red",
@@ -338,12 +338,12 @@ export default function CustomProfileContentScreen() {
           text="←"
           color="my_yellow"
           onPress={handleGoBack}
-          accessibilityLabel="Wróć do tworzenia profilu"
+          accessibilityLabel="Wróć do tworzenia kursu"
         />
         <MyButton
           text="Stwórz"
           color="my_green"
-          onPress={handleSaveProfile}
+          onPress={handleSaveCourse}
           disabled={isSaving}
           accessibilityLabel="Stwórz talię"
         />

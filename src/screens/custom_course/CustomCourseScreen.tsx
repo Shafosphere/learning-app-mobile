@@ -1,18 +1,18 @@
 import { ScrollView, TextStyle, View } from "react-native";
 import MyButton from "@/src/components/button/button";
-import { useStyles } from "./CustomProfileScreen-styles";
+import { useStyles } from "./CustomCourseScreen-styles";
 import { useRouter } from "expo-router";
-import { CustomProfileForm } from "@/src/components/customProfile/form/CustomProfileForm";
-import { useCustomProfileDraft } from "@/src/hooks/useCustomProfileDraft";
+import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
+import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import Entypo from "@expo/vector-icons/Entypo";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 
-export default function CustomProfileScreen() {
+export default function CustomCourseScreen() {
   const styles = useStyles();
   const router = useRouter();
   const {
-    profileName,
-    setProfileName,
+    courseName,
+    setCourseName,
     iconId,
     setIconId,
     iconColor,
@@ -20,10 +20,10 @@ export default function CustomProfileScreen() {
     reviewsEnabled,
     toggleReviewsEnabled,
     handleColorChange,
-  } = useCustomProfileDraft();
+  } = useCustomCourseDraft();
 
   const handleNavigateToContent = () => {
-    const name = profileName.trim();
+    const name = courseName.trim();
     if (!iconId || !name) {
       return;
     }
@@ -36,10 +36,10 @@ export default function CustomProfileScreen() {
     if (colorId) {
       params.colorId = colorId;
     }
-    router.push({ pathname: "/custom_profile/content", params });
+    router.push({ pathname: "/custom_course/content", params });
   };
 
-  const nextDisabled = !profileName.trim() || !iconId;
+  const nextDisabled = !courseName.trim() || !iconId;
   const actionIconColor =
     (styles.manualAddIcon as TextStyle)?.color ??
     (styles.cardActionIcon as TextStyle)?.color ??
@@ -57,10 +57,10 @@ export default function CustomProfileScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CustomProfileForm
+        <CustomCourseForm
           title="NOWY PROFIL"
-          profileName={profileName}
-          onProfileNameChange={setProfileName}
+          courseName={courseName}
+          onCourseNameChange={setCourseName}
           reviewsEnabled={reviewsEnabled}
           onToggleReviews={toggleReviewsEnabled}
           iconId={iconId}
@@ -83,7 +83,7 @@ export default function CustomProfileScreen() {
           color="my_green"
           text="dalej"
           onPress={handleNavigateToContent}
-          accessibilityLabel="Przejdź do ustawień zawartości profilu"
+          accessibilityLabel="Przejdź do ustawień zawartości kursu"
           disabled={nextDisabled}
         >
           {/* <Entypo

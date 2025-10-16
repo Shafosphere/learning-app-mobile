@@ -1,5 +1,5 @@
 import { View, Text, Image, Pressable } from "react-native";
-import { useStyles } from "./CreateProfileScreen-styles";
+import { useStyles } from "./CreateCourseScreen-styles";
 import { useEffect, useState } from "react";
 import { getLanguagePairs } from "@/src/db/sqlite/db";
 import MyButton from "@/src/components/button/button";
@@ -7,15 +7,15 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useRouter } from "expo-router";
 import type { LanguagePair } from "@/src/db/sqlite/db";
-import type { LanguageProfile } from "@/src/types/profile";
+import type { LanguageCourse } from "@/src/types/course";
 import {
   getFlagSource,
   supportedLanguageCodes,
 } from "@/src/constants/languageFlags";
 
-export default function CreateProfileScreen() {
+export default function CreateCourseScreen() {
   const styles = useStyles();
-  const { addProfile } = useSettings();
+  const { addCourse } = useSettings();
   const setPopup = usePopup();
   const router = useRouter();
 
@@ -114,7 +114,7 @@ export default function CreateProfileScreen() {
           <MyButton
             text="Własny"
             color="my_yellow"
-            onPress={() => router.push("/custom_profile")}
+            onPress={() => router.push("/custom_course")}
             disabled={false}
             width={100}
           />
@@ -129,14 +129,14 @@ export default function CreateProfileScreen() {
                 p.source_code === activeSource && p.target_code === activeTarget
             );
             if (pair) {
-              await addProfile({
+              await addCourse({
                 sourceLang: pair.source_code,
                 targetLang: pair.target_code,
                 sourceLangId: pair.source_id, // NEW
                 targetLangId: pair.target_id, // NEW
-              } as LanguageProfile);
+              } as LanguageCourse);
               setPopup({
-                message: "Utworzono profil!",
+                message: "Utworzono kurs!",
                 color: "my_green",
                 duration: 3000,
               });

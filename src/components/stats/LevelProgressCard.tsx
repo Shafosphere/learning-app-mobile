@@ -2,14 +2,14 @@ import React from "react";
 import { Text } from "react-native";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import type { CEFRLevel } from "@/src/types/language";
-import type { LanguageProfile } from "@/src/types/profile";
+import type { LanguageCourse } from "@/src/types/course";
 import ProgressBar from "./ProgressBar";
 import StatsCard from "./StatsCard";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 type Props = {
   level: CEFRLevel;
-  profile: LanguageProfile;
+  course: LanguageCourse;
 };
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -20,12 +20,12 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
 }));
 
-const LevelProgressCard: React.FC<Props> = ({ level, profile }) => {
+const LevelProgressCard: React.FC<Props> = ({ level, course }) => {
   const styles = useStyles();
   const hasLanguageIds =
-    profile.sourceLangId != null && profile.targetLangId != null;
-  const sourceLangId = hasLanguageIds ? profile.sourceLangId! : 0;
-  const targetLangId = hasLanguageIds ? profile.targetLangId! : 0;
+    course.sourceLangId != null && course.targetLangId != null;
+  const sourceLangId = hasLanguageIds ? course.sourceLangId! : 0;
+  const targetLangId = hasLanguageIds ? course.targetLangId! : 0;
 
   const { progress, totalWordsForLevel, usedWordIds, isReady } =
     useBoxesPersistenceSnapshot({
@@ -43,7 +43,7 @@ const LevelProgressCard: React.FC<Props> = ({ level, profile }) => {
     <StatsCard title={`Poziom ${level}`}>
       {!hasLanguageIds ? (
         <Text style={styles.meta}>
-          Brak danych profilu – powiąż języki, aby śledzić postępy.
+          Brak danych kursu – powiąż języki, aby śledzić postępy.
         </Text>
       ) : !isReady ? (
         <Text style={styles.meta}>Ładuję dane…</Text>

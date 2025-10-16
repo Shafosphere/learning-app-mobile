@@ -101,18 +101,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
   bottomIconButtonPressed: {
     backgroundColor: colors.my_green,
   },
-  profileButton: {
+  courseButton: {
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 4,
     paddingHorizontal: 6,
   },
-  profileFlag: {
+  courseFlag: {
     width: 99 / 2.7,
     height: 66 / 2.7,
     borderRadius: 4,
   },
-  customProfileIconWrapper: {
+  customCourseIconWrapper: {
     alignItems: "center",
     justifyContent: "center",
   },
@@ -123,7 +123,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 16,
     textAlign: "right",
   },
-  profileName: {
+  courseName: {
     marginLeft: 8,
     color: colors.headline,
     fontWeight: "600",

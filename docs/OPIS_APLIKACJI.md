@@ -4,19 +4,19 @@ Dokument opisuje aktualne działanie aplikacji, dostępne opcje, ekrany, logikę
 
 ## Cel i skrót działania
 - Aplikacja uczy słownictwa metodą pudełek (5 pudełek) z wpisywaniem odpowiedzi.
-- Dane słów importowane są z CSV (EN→PL) do lokalnej bazy SQLite; obsługa profili językowych i poziomów CEFR.
-- Postęp i stan pudełek zapisywane są w AsyncStorage (snapshoty per profil/poziom); nauczone słowa trafiają do systemu powtórek (spaced repetition) z terminami w tabeli `reviews`.
+- Dane słów importowane są z CSV (EN→PL) do lokalnej bazy SQLite; obsługa kursów językowych i poziomów CEFR.
+- Postęp i stan pudełek zapisywane są w AsyncStorage (snapshoty per kurs/poziom); nauczone słowa trafiają do systemu powtórek (spaced repetition) z terminami w tabeli `reviews`.
 
 ## Ekrany i nawigacja
 - `/` (Start): powitanie + sprawdzenie, czy są zaległe powtórki; jeśli tak, przekierowuje do `/review`.
-- `/createprofile`: tworzenie profilu (wybór pary języków dostępnej w DB).
-- `/profilpanel`: podgląd listy profili, wybór aktywnego profilu.
+- `/createcourse`: tworzenie kursu (wybór pary języków dostępnej w DB).
+- `/coursepanel`: podgląd listy kursów, wybór aktywnego kursu.
 - `/level`: wybór poziomu CEFR: `A1`…`C2` (po wyborze przejście do `/flashcards`).
 - `/flashcards`: główny ekran nauki – karta do wpisywania odpowiedzi + pudełka (układ „classic” lub „carousel”).
 - `/settings`: ustawienia aplikacji (motyw, sprawdzanie pisowni, miny pudełek, układ pudełek, wielkość partii fiszek).
 - `/review`: ekran powtórek – placeholder (UI do rozbudowy), ale logika terminów działa w DB.
 
-Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Boxy/Level, Ustawienia, Profile, Review, przełączanie motywu oraz licznik opanowanych słówek.
+Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Boxy/Level, Ustawienia, Kursy, Review, przełączanie motywu oraz licznik opanowanych słówek.
 
 ## Nauka – logika pudełek i fiszek
 - 5 pudełek: `boxOne` … `boxFive` (typy: `src/types/boxes.ts`).
@@ -26,7 +26,7 @@ Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Box
   - Jeśli poprawna: słowo awansuje do następnego pudełka; jeżeli było w `boxFive`, słowo uznajemy za „nauczone” i planujemy pierwszą powtórkę w tabeli `reviews` (patrz niżej, interwały).
   - Jeśli błędna: pokazuje się tryb korekty – trzeba wpisać poprawnie awers i rewers; po poprawie słowo spada do `boxOne`.
 - Ładowanie nowych słówek:
-  - Przycisk „dodaj słówka” dobiera partię słów przez `getRandomWordsBatch(...)` z DB dla aktywnego profilu i wybranego poziomu, pomijając już użyte ID.
+  - Przycisk „dodaj słówka” dobiera partię słów przez `getRandomWordsBatch(...)` z DB dla aktywnego kursu i wybranego poziomu, pomijając już użyte ID.
   - Rozmiar partii konfigurowalny w Ustawieniach (domyślnie 10).
 - Postęp poziomu: obliczany jako `nauczone / łączna_liczba_słów_dla_poziomu` (z DB).
 - Trafienie w `boxFive`: poprawna odpowiedź wpisana w ostatnim pudełku zlicza nowe, opanowane słowo (przechowywane w `LearningStatsContext`).
@@ -43,17 +43,17 @@ Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Box
 - Układ pudełek: `classic` (siatka) lub `carousel` (karuzela z animacją).
 - „Liczba fiszek w partii”: rozmiar nowo pobieranej paczki słów (1–200, domyślnie 10).
 
-## Profile językowe
-- Każdy profil to para języków (źródłowy → docelowy), np. `en → pl`.
-- Tworzenie profilu oferuje tylko pary dostępne w tabeli `language_pairs` DB.
-- Można mieć wiele profili; aktywny profil jest zapamiętywany (AsyncStorage).
+## Kursy językowe
+- Każdy kurs to para języków (źródłowy → docelowy), np. `en → pl`.
+- Tworzenie kursu oferuje tylko pary dostępne w tabeli `language_pairs` DB.
+- Można mieć wiele kursów; aktywny kurs jest zapamiętywany (AsyncStorage).
 
 ## Przechowywanie stanu (AsyncStorage)
 Kluczowe pozycje:
 - `theme`: aktualny motyw.
 - `boxesLayout`: układ pudełek: `classic`/`carousel`.
-- `profiles`: lista profili (`LanguageProfile`).
-- `activeProfileIdx`: indeks aktywnego profilu.
+- `courses`: lista kursów (`LanguageCourse`).
+- `activeCourseIdx`: indeks aktywnego kursu.
 - `spellChecking`: `true`/`false`.
 - `showBoxFaces`: `true`/`false`.
 - `flashcardsBatchSize`: liczba fiszek w pobieranej partii.
@@ -76,7 +76,7 @@ Dodatkowo istnieje util `clearAllFlashcards()` do czyszczenia snapshotów pudeł
 - Nawigacja i opakowanie kontekstów: `app/_layout.tsx`.
 - Start/redirect do powtórek: `app/index.tsx`.
 - Nauka: `app/flashcards/index.tsx`, komponenty: karty (`src/components/card/card.tsx`), pudełka siatka (`src/components/box/boxes.tsx`), karuzela (`src/components/box/boxcarousel.tsx`, `boxCarouselItem.tsx`), skórka pudełka (`BoxSkin.tsx`).
-- Profile: tworzenie `app/createprofile/index.tsx`, wybór `app/profilpanel/index.tsx`.
+- Kursy: tworzenie `app/createcourse/index.tsx`, wybór `app/coursepanel/index.tsx`.
 - Poziomy: `app/level/index.tsx`.
 - Ustawienia: `app/settings/index.tsx` + `src/contexts/SettingsContext.tsx`.
 - Powtórki (DB, logika): `src/db/sqlite/db.ts` (+ `scheduleReview`, `getDueReviews`, `advanceReview`).

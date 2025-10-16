@@ -17,7 +17,7 @@ const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
 export default function StatsScreen() {
   const styles = useStyles();
-  const { activeProfile, dailyGoal, setDailyGoal } = useSettings();
+  const { activeCourse, dailyGoal, setDailyGoal } = useSettings();
   const {
     knownWordsCount,
     lastKnownWordDate,
@@ -36,17 +36,17 @@ export default function StatsScreen() {
 
   const refreshDueReviews = useCallback(async () => {
     if (
-      !activeProfile ||
-      activeProfile.sourceLangId == null ||
-      activeProfile.targetLangId == null
+      !activeCourse ||
+      activeCourse.sourceLangId == null ||
+      activeCourse.targetLangId == null
     ) {
       setDueReviews({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
       return;
     }
     try {
       const counts = await countDueReviewsByLevel(
-        activeProfile.sourceLangId,
-        activeProfile.targetLangId,
+        activeCourse.sourceLangId,
+        activeCourse.targetLangId,
         Date.now()
       );
       setDueReviews(counts);
@@ -54,7 +54,7 @@ export default function StatsScreen() {
       console.warn("Nie udało się pobrać liczby powtórek", error);
       setDueReviews({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
     }
-  }, [activeProfile]);
+  }, [activeCourse]);
 
   useFocusEffect(
     useCallback(() => {
@@ -73,15 +73,15 @@ export default function StatsScreen() {
   );
 
   if (
-    !activeProfile ||
-    activeProfile.sourceLangId == null ||
-    activeProfile.targetLangId == null
+    !activeCourse ||
+    activeCourse.sourceLangId == null ||
+    activeCourse.targetLangId == null
   ) {
     return (
       <View style={styles.emptyWrap}>
-        <Text style={styles.emptyTitle}>Brak aktywnego profilu</Text>
+        <Text style={styles.emptyTitle}>Brak aktywnego kursu</Text>
         <Text style={styles.emptyText}>
-          Stwórz profil w panelu profilu, aby śledzić statystyki nauki.
+          Stwórz kurs w panelu kursów, aby śledzić statystyki nauki.
         </Text>
       </View>
     );
@@ -106,7 +106,7 @@ export default function StatsScreen() {
       <View style={styles.grid}>
         {LEVELS.map((level) => (
           <View key={level} style={styles.columnCard}>
-            <LevelProgressCard level={level} profile={activeProfile} />
+            <LevelProgressCard level={level} course={activeCourse} />
           </View>
         ))}
       </View>

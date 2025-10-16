@@ -13,7 +13,7 @@ export type LanguagePair = {
   target_id: number;   // NEW
 };
 
-export interface CustomProfileRecord {
+export interface CustomCourseRecord {
   id: number;
   name: string;
   iconId: string;
@@ -24,7 +24,7 @@ export interface CustomProfileRecord {
   updatedAt: number;
 }
 
-export interface CustomProfileInput {
+export interface CustomCourseInput {
   name: string;
   iconId: string;
   iconColor: string;
@@ -32,13 +32,13 @@ export interface CustomProfileInput {
   reviewsEnabled?: boolean;
 }
 
-export interface CustomProfileSummary extends CustomProfileRecord {
+export interface CustomCourseSummary extends CustomCourseRecord {
   cardsCount: number;
 }
 
 export interface CustomFlashcardRecord {
   id: number;
-  profileId: number;
+  courseId: number;
   frontText: string;
   backText: string;
   answers: string[];
@@ -59,7 +59,7 @@ export interface CustomFlashcardInput {
   position?: number | null;
 }
 
-type CustomProfileSqlRow = {
+type CustomCourseSqlRow = {
   id: number;
   name: string;
   iconId: string;
@@ -70,7 +70,7 @@ type CustomProfileSqlRow = {
   updatedAt: number;
 };
 
-type CustomProfileSummarySqlRow = CustomProfileSqlRow & {
+type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
   cardsCount: number;
 };
 
@@ -78,18 +78,18 @@ type TableColumnInfo = {
   name: string;
 };
 
-function mapCustomProfileRow(row: CustomProfileSqlRow): CustomProfileRecord {
+function mapCustomCourseRow(row: CustomCourseSqlRow): CustomCourseRecord {
   return {
     ...row,
     reviewsEnabled: row.reviewsEnabled === 1,
   };
 }
 
-function mapCustomProfileSummaryRow(
-  row: CustomProfileSummarySqlRow
-): CustomProfileSummary {
+function mapCustomCourseSummaryRow(
+  row: CustomCourseSummarySqlRow
+): CustomCourseSummary {
   const { cardsCount, ...rest } = row;
-  const base = mapCustomProfileRow(rest as CustomProfileSqlRow);
+  const base = mapCustomCourseRow(rest as CustomCourseSqlRow);
   return {
     ...base,
     cardsCount,
@@ -201,7 +201,7 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       target_language_id INTEGER NOT NULL REFERENCES languages(id),
       PRIMARY KEY (source_language_id, target_language_id)
     );
-    CREATE TABLE IF NOT EXISTS custom_profiles (
+    CREATE TABLE IF NOT EXISTS custom_courses (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       name        TEXT    NOT NULL,
       icon_id     TEXT    NOT NULL,
@@ -213,7 +213,7 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     );
     CREATE TABLE IF NOT EXISTS custom_flashcards (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
-      profile_id  INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+      course_id  INTEGER NOT NULL REFERENCES custom_courses(id) ON DELETE CASCADE,
       front_text  TEXT    NOT NULL,
       back_text   TEXT    NOT NULL,
       position    INTEGER,
@@ -228,17 +228,17 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       UNIQUE(flashcard_id, answer_text)
     );
     CREATE INDEX IF NOT EXISTS idx_custom_flashcard_answers_card ON custom_flashcard_answers(flashcard_id);
-    CREATE INDEX IF NOT EXISTS idx_custom_flashcards_profile ON custom_flashcards(profile_id, position);
+    CREATE INDEX IF NOT EXISTS idx_custom_flashcards_course ON custom_flashcards(course_id, position);
     CREATE TABLE IF NOT EXISTS custom_reviews (
       id             INTEGER PRIMARY KEY AUTOINCREMENT,
-      profile_id     INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+      course_id     INTEGER NOT NULL REFERENCES custom_courses(id) ON DELETE CASCADE,
       flashcard_id   INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
       learned_at     INTEGER NOT NULL,
       next_review    INTEGER NOT NULL,
       stage          INTEGER NOT NULL DEFAULT 0,
       UNIQUE(flashcard_id)
     );
-    CREATE INDEX IF NOT EXISTS idx_custom_reviews_profile ON custom_reviews(profile_id);
+    CREATE INDEX IF NOT EXISTS idx_custom_reviews_course ON custom_reviews(course_id);
     CREATE INDEX IF NOT EXISTS idx_custom_reviews_due ON custom_reviews(next_review);
     CREATE INDEX IF NOT EXISTS idx_words_lang_cefr ON words(language_id, cefr_level);
     CREATE INDEX IF NOT EXISTS idx_trans_src_tgtlang ON translations(source_word_id, target_language_id);
@@ -260,7 +260,7 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
 
   await ensureColumn(
     db,
-    "custom_profiles",
+    "custom_courses",
     "reviews_enabled",
     "INTEGER NOT NULL DEFAULT 0"
   );
@@ -321,9 +321,9 @@ async function configurePragmas(db: SQLite.SQLiteDatabase): Promise<void> {
   `);
 }
 
-export async function getCustomProfiles(): Promise<CustomProfileRecord[]> {
+export async function getCustomCourses(): Promise<CustomCourseRecord[]> {
   const db = await getDB();
-  const rows = await db.getAllAsync<CustomProfileSqlRow>(
+  const rows = await db.getAllAsync<CustomCourseSqlRow>(
     `SELECT
        id,
        name,
@@ -333,15 +333,15 @@ export async function getCustomProfiles(): Promise<CustomProfileRecord[]> {
        COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
        updated_at  AS updatedAt
-     FROM custom_profiles
+     FROM custom_courses
      ORDER BY created_at DESC, id DESC;`
   );
-  return rows.map(mapCustomProfileRow);
+  return rows.map(mapCustomCourseRow);
 }
 
-export async function getCustomProfilesWithCardCounts(): Promise<CustomProfileSummary[]> {
+export async function getCustomCoursesWithCardCounts(): Promise<CustomCourseSummary[]> {
   const db = await getDB();
-  const rows = await db.getAllAsync<CustomProfileSummarySqlRow>(
+  const rows = await db.getAllAsync<CustomCourseSummarySqlRow>(
     `SELECT
        cp.id,
        cp.name,
@@ -354,19 +354,19 @@ export async function getCustomProfilesWithCardCounts(): Promise<CustomProfileSu
        (
          SELECT COUNT(*)
          FROM custom_flashcards cf
-         WHERE cf.profile_id = cp.id
+         WHERE cf.course_id = cp.id
        ) AS cardsCount
-     FROM custom_profiles cp
+     FROM custom_courses cp
      ORDER BY cp.created_at DESC, cp.id DESC;`
   );
-  return rows.map(mapCustomProfileSummaryRow);
+  return rows.map(mapCustomCourseSummaryRow);
 }
 
-export async function getCustomProfileById(
+export async function getCustomCourseById(
   id: number
-): Promise<CustomProfileRecord | null> {
+): Promise<CustomCourseRecord | null> {
   const db = await getDB();
-  const row = await db.getFirstAsync<CustomProfileSqlRow>(
+  const row = await db.getFirstAsync<CustomCourseSqlRow>(
     `SELECT
        id,
        name,
@@ -376,31 +376,31 @@ export async function getCustomProfileById(
        COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
        updated_at  AS updatedAt
-     FROM custom_profiles
+     FROM custom_courses
      WHERE id = ?
      LIMIT 1;`,
     id
   );
-  return row ? mapCustomProfileRow(row) : null;
+  return row ? mapCustomCourseRow(row) : null;
 }
 
-export async function createCustomProfile(
-  profile: CustomProfileInput
+export async function createCustomCourse(
+  course: CustomCourseInput
 ): Promise<number> {
   const db = await getDB();
   const now = Date.now();
-  const name = profile.name.trim();
+  const name = course.name.trim();
   if (!name) {
-    throw new Error("Custom profile name cannot be empty");
+    throw new Error("Custom course name cannot be empty");
   }
-  const reviewsEnabled = profile.reviewsEnabled === true ? 1 : 0;
+  const reviewsEnabled = course.reviewsEnabled === true ? 1 : 0;
   const result = await db.runAsync(
-    `INSERT INTO custom_profiles (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at)
+    `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at)
      VALUES (?, ?, ?, ?, ?, ?, ?);`,
     name,
-    profile.iconId,
-    profile.iconColor,
-    profile.colorId ?? null,
+    course.iconId,
+    course.iconColor,
+    course.colorId ?? null,
     reviewsEnabled,
     now,
     now
@@ -408,43 +408,43 @@ export async function createCustomProfile(
   return Number(result.lastInsertRowId ?? 0);
 }
 
-export async function updateCustomProfile(
+export async function updateCustomCourse(
   id: number,
-  profile: CustomProfileInput
+  course: CustomCourseInput
 ): Promise<void> {
   const db = await getDB();
   const now = Date.now();
-  const name = profile.name.trim();
+  const name = course.name.trim();
   if (!name) {
-    throw new Error("Custom profile name cannot be empty");
+    throw new Error("Custom course name cannot be empty");
   }
-  const reviewsEnabled = profile.reviewsEnabled === true ? 1 : 0;
+  const reviewsEnabled = course.reviewsEnabled === true ? 1 : 0;
   await db.runAsync(
-    `UPDATE custom_profiles
+    `UPDATE custom_courses
      SET name = ?, icon_id = ?, icon_color = ?, color_id = ?, reviews_enabled = ?, updated_at = ?
      WHERE id = ?;`,
     name,
-    profile.iconId,
-    profile.iconColor,
-    profile.colorId ?? null,
+    course.iconId,
+    course.iconColor,
+    course.colorId ?? null,
     reviewsEnabled,
     now,
     id
   );
 }
 
-export async function deleteCustomProfile(id: number): Promise<void> {
+export async function deleteCustomCourse(id: number): Promise<void> {
   const db = await getDB();
-  await db.runAsync(`DELETE FROM custom_profiles WHERE id = ?;`, id);
+  await db.runAsync(`DELETE FROM custom_courses WHERE id = ?;`, id);
 }
 
 export async function getCustomFlashcards(
-  profileId: number
+  courseId: number
 ): Promise<CustomFlashcardRecord[]> {
   const db = await getDB();
   const rows = await db.getAllAsync<{
     id: number;
-    profileId: number;
+    courseId: number;
     frontText: string;
     backText: string;
     position: number | null;
@@ -454,7 +454,7 @@ export async function getCustomFlashcards(
   }>(
     `SELECT
        cf.id             AS id,
-       cf.profile_id     AS profileId,
+       cf.course_id     AS courseId,
        cf.front_text     AS frontText,
        cf.back_text      AS backText,
        cf.position       AS position,
@@ -463,12 +463,12 @@ export async function getCustomFlashcards(
        cfa.answer_text   AS answerText
      FROM custom_flashcards cf
      LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
-     WHERE cf.profile_id = ?
+     WHERE cf.course_id = ?
      ORDER BY cf.position IS NULL,
               cf.position ASC,
               cf.id ASC,
               cfa.id ASC;`,
-    profileId
+    courseId
   );
 
   const byId = new Map<number, CustomFlashcardRecord>();
@@ -479,7 +479,7 @@ export async function getCustomFlashcards(
     if (!record) {
       record = {
         id: row.id,
-        profileId: row.profileId,
+        courseId: row.courseId,
         frontText: row.frontText,
         backText: row.backText,
         answers: [],
@@ -506,7 +506,7 @@ export async function getCustomFlashcards(
 }
 
 export async function replaceCustomFlashcards(
-  profileId: number,
+  courseId: number,
   cards: CustomFlashcardInput[]
 ): Promise<void> {
   const db = await getDB();
@@ -514,8 +514,8 @@ export async function replaceCustomFlashcards(
   const now = Date.now();
   try {
     await db.runAsync(
-      `DELETE FROM custom_flashcards WHERE profile_id = ?;`,
-      profileId
+      `DELETE FROM custom_flashcards WHERE course_id = ?;`,
+      courseId
     );
 
     let fallbackPosition = 0;
@@ -539,9 +539,9 @@ export async function replaceCustomFlashcards(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (profile_id, front_text, back_text, position, created_at, updated_at)
+           (course_id, front_text, back_text, position, created_at, updated_at)
          VALUES (?, ?, ?, ?, ?, ?);`,
-        profileId,
+        courseId,
         front,
         serializedBackText,
         position,
@@ -718,11 +718,11 @@ export async function logTableContents() {
   const languagePairs = await db.getAllAsync("SELECT * FROM language_pairs");
   console.log("Language pairs:");
   console.table(languagePairs);
-  const customProfiles = await db.getAllAsync(
-    "SELECT * FROM custom_profiles ORDER BY id DESC LIMIT 5"
+  const customCourses = await db.getAllAsync(
+    "SELECT * FROM custom_courses ORDER BY id DESC LIMIT 5"
   );
-  console.log("Custom profiles (latest 5):");
-  console.table(customProfiles);
+  console.log("Custom courses (latest 5):");
+  console.table(customCourses);
   const customFlashcards = await db.getAllAsync(
     "SELECT * FROM custom_flashcards ORDER BY id DESC LIMIT 5"
   );
@@ -822,22 +822,22 @@ export async function scheduleReview(
 
 export async function scheduleCustomReview(
   flashcardId: number,
-  profileId: number,
+  courseId: number,
   stage: number
 ) {
   const db = await getDB();
   const now = Date.now();
   const nextReview = computeNextReviewFromStage(stage, now);
   await db.runAsync(
-    `INSERT INTO custom_reviews (flashcard_id, profile_id, learned_at, next_review, stage)
+    `INSERT INTO custom_reviews (flashcard_id, course_id, learned_at, next_review, stage)
      VALUES (?, ?, ?, ?, ?)
      ON CONFLICT(flashcard_id) DO UPDATE SET
-       profile_id = excluded.profile_id,
+       course_id = excluded.course_id,
        next_review = excluded.next_review,
        stage = excluded.stage,
        learned_at = CASE WHEN custom_reviews.learned_at IS NULL THEN excluded.learned_at ELSE custom_reviews.learned_at END;`,
     flashcardId,
-    profileId,
+    courseId,
     now,
     nextReview,
     stage
@@ -847,71 +847,71 @@ export async function scheduleCustomReview(
 
 export async function advanceCustomReview(
   flashcardId: number,
-  profileId: number
+  courseId: number
 ) {
   const db = await getDB();
   const row = await db.getFirstAsync<{ stage: number }>(
-    `SELECT stage FROM custom_reviews WHERE flashcard_id = ? AND profile_id = ? LIMIT 1;`,
+    `SELECT stage FROM custom_reviews WHERE flashcard_id = ? AND course_id = ? LIMIT 1;`,
     flashcardId,
-    profileId
+    courseId
   );
   if (!row) {
-    return scheduleCustomReview(flashcardId, profileId, 0);
+    return scheduleCustomReview(flashcardId, courseId, 0);
   }
   const newStage = ((row.stage ?? 0) + 1) | 0;
   const now = Date.now();
   const nextReview = computeNextReviewFromStage(newStage, now);
   await db.runAsync(
-    `UPDATE custom_reviews SET stage = ?, next_review = ? WHERE flashcard_id = ? AND profile_id = ?;`,
+    `UPDATE custom_reviews SET stage = ?, next_review = ? WHERE flashcard_id = ? AND course_id = ?;`,
     newStage,
     nextReview,
     flashcardId,
-    profileId
+    courseId
   );
   return { nextReview, stage: newStage };
 }
 
 export async function removeCustomReview(
   flashcardId: number,
-  profileId: number
+  courseId: number
 ): Promise<void> {
   const db = await getDB();
   await db.runAsync(
-    `DELETE FROM custom_reviews WHERE flashcard_id = ? AND profile_id = ?;`,
+    `DELETE FROM custom_reviews WHERE flashcard_id = ? AND course_id = ?;`,
     flashcardId,
-    profileId
+    courseId
   );
 }
 
-export async function clearCustomReviewsForProfile(
-  profileId: number
+export async function clearCustomReviewsForCourse(
+  courseId: number
 ): Promise<void> {
   const db = await getDB();
   await db.runAsync(
-    `DELETE FROM custom_reviews WHERE profile_id = ?;`,
-    profileId
+    `DELETE FROM custom_reviews WHERE course_id = ?;`,
+    courseId
   );
 }
 
 export async function countDueCustomReviews(
-  profileId: number,
+  courseId: number,
   nowMs: number = Date.now()
 ): Promise<number> {
   const db = await getDB();
   const row = await db.getFirstAsync<{ cnt: number }>(
-    `SELECT COUNT(*) AS cnt FROM custom_reviews WHERE profile_id = ? AND next_review <= ?;`,
-    profileId,
+    `SELECT COUNT(*) AS cnt FROM custom_reviews WHERE course_id = ? AND next_review <= ?;`,
+    courseId,
     nowMs
   );
   return row?.cnt ?? 0;
 }
 
 export async function getDueCustomReviewFlashcards(
-  profileId: number,
+  courseId: number,
   limit: number,
   nowMs: number = Date.now()
 ): Promise<CustomReviewFlashcard[]> {
-  if (!profileId || limit <= 0) {
+  if (!courseId || limit <= 0) {
     return [];
   }
   const db = await getDB();
@@ -925,11 +925,11 @@ export async function getDueCustomReviewFlashcards(
        cr.stage        AS stage,
        cr.next_review  AS nextReview
      FROM custom_reviews cr
-     WHERE cr.profile_id = ?
+     WHERE cr.course_id = ?
        AND cr.next_review <= ?
      ORDER BY RANDOM()
      LIMIT ?;`,
-    profileId,
+    courseId,
     nowMs,
     limit
   );
@@ -940,7 +940,7 @@ export async function getDueCustomReviewFlashcards(
   const placeholders = ids.map(() => "?").join(",");
   const flashcardRows = await db.getAllAsync<{
     id: number;
-    profileId: number;
+    courseId: number;
     frontText: string;
     backText: string;
     position: number | null;
@@ -950,7 +950,7 @@ export async function getDueCustomReviewFlashcards(
   }>(
     `SELECT
        cf.id            AS id,
-       cf.profile_id    AS profileId,
+       cf.course_id    AS courseId,
        cf.front_text    AS frontText,
        cf.back_text     AS backText,
        cf.position      AS position,
@@ -977,7 +977,7 @@ export async function getDueCustomReviewFlashcards(
       }
       record = {
         id: row.id,
-        profileId: row.profileId,
+        courseId: row.courseId,
         frontText: row.frontText,
         backText: row.backText,
         answers: [],
@@ -1287,10 +1287,10 @@ export async function addRandomReviewsForPair(
 }
 
 export async function addRandomCustomReviews(
-  profileId: number,
+  courseId: number,
   count: number = 10
 ): Promise<number> {
-  if (!profileId || count <= 0) {
+  if (!courseId || count <= 0) {
     return 0;
   }
   const db = await getDB();
@@ -1298,15 +1298,15 @@ export async function addRandomCustomReviews(
     `SELECT cf.id
      FROM custom_flashcards cf
      LEFT JOIN custom_reviews cr ON cr.flashcard_id = cf.id
-     WHERE cf.profile_id = ?
+     WHERE cf.course_id = ?
        AND cr.id IS NULL
      ORDER BY RANDOM()
      LIMIT ?;`,
-    profileId,
+    courseId,
     count
   );
   for (const row of rows) {
-    await scheduleCustomReview(row.id, profileId, 0);
+    await scheduleCustomReview(row.id, courseId, 0);
   }
   return rows.length;
 }

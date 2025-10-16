@@ -16,7 +16,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 24,
     fontWeight: "bold",
   },
-  containerofprofile: {
+  containerofcourse: {
     position: "absolute",
     top: 0,
     right: 0,

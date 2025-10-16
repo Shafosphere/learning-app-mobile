@@ -44,7 +44,7 @@ function mapCustomReviewToWord(
 export default function TypingReviewScreen() {
   const styles = useStyles();
   const router = useRouter();
-  const { activeProfile, selectedLevel, activeCustomProfileId } = useSettings();
+  const { activeCourse, selectedLevel, activeCustomCourseId } = useSettings();
   const checkSpelling = useSpellchecking();
   const carouselRef = useRef<RotaryStackHandle>(null);
 
@@ -58,12 +58,12 @@ export default function TypingReviewScreen() {
   const [carouselItems, setCarouselItems] = useState<string[]>([]);
   const [spinBusy, setSpinBusy] = useState(false);
 
-  const isCustomMode = activeCustomProfileId != null;
-  const srcId = activeProfile?.sourceLangId ?? null;
-  const tgtId = activeProfile?.targetLangId ?? null;
-  const hasBuiltInProfile =
+  const isCustomMode = activeCustomCourseId != null;
+  const srcId = activeCourse?.sourceLangId ?? null;
+  const tgtId = activeCourse?.targetLangId ?? null;
+  const hasBuiltInCourse =
     srcId != null && tgtId != null && selectedLevel != null;
-  const canRunReview = isCustomMode || hasBuiltInProfile;
+  const canRunReview = isCustomMode || hasBuiltInCourse;
   const carouselWordsRef = useRef<WordWithTranslations[]>([]);
   const sessionTimeRef = useRef<number>(Date.now());
   const [lockedAfterWrong, setLockedAfterWrong] = useState(false);
@@ -87,9 +87,9 @@ export default function TypingReviewScreen() {
     limit: number,
     nowMs: number
   ): Promise<WordWithTranslations[]> {
-    if (isCustomMode && activeCustomProfileId != null) {
+    if (isCustomMode && activeCustomCourseId != null) {
       const rows = await getDueCustomReviewFlashcards(
-        activeCustomProfileId,
+        activeCustomCourseId,
         limit,
         nowMs
       );
@@ -139,7 +139,7 @@ export default function TypingReviewScreen() {
   useEffect(() => {
     sessionTimeRef.current = Date.now();
     void loadNext();
-  }, [srcId, tgtId, selectedLevel, activeCustomProfileId, isCustomMode]);
+  }, [srcId, tgtId, selectedLevel, activeCustomCourseId, isCustomMode]);
 
   function onSubmit() {
     if (!current || !canRunReview) return;
@@ -148,8 +148,8 @@ export default function TypingReviewScreen() {
       setPromptState("correct");
       setLoading(true);
       const advancePromise =
-        isCustomMode && activeCustomProfileId != null
-          ? advanceCustomReview(current.id, activeCustomProfileId)
+        isCustomMode && activeCustomCourseId != null
+          ? advanceCustomReview(current.id, activeCustomCourseId)
           : srcId && tgtId
           ? advanceReview(current.id, srcId, tgtId)
           : Promise.resolve();
@@ -176,8 +176,8 @@ export default function TypingReviewScreen() {
     setCorrectAnswer(null);
 
     const advancePromise =
-      isCustomMode && activeCustomProfileId != null
-        ? advanceCustomReview(current.id, activeCustomProfileId)
+      isCustomMode && activeCustomCourseId != null
+        ? advanceCustomReview(current.id, activeCustomCourseId)
         : srcId && tgtId
         ? advanceReview(current.id, srcId, tgtId)
         : Promise.resolve();
@@ -201,8 +201,8 @@ export default function TypingReviewScreen() {
     if (spinBusy) return;
     setSpinBusy(true);
     try {
-      if (isCustomMode && activeCustomProfileId != null) {
-        await removeCustomReview(current.id, activeCustomProfileId);
+      if (isCustomMode && activeCustomCourseId != null) {
+        await removeCustomReview(current.id, activeCustomCourseId);
       } else if (srcId && tgtId && selectedLevel) {
         await removeReview(current.id, srcId, tgtId);
         await removeWordIdFromUsedWordIds({
@@ -319,8 +319,8 @@ export default function TypingReviewScreen() {
     setLockedAfterWrong(false);
 
     const advancePromise =
-      isCustomMode && activeCustomProfileId != null
-        ? advanceCustomReview(current.id, activeCustomProfileId)
+      isCustomMode && activeCustomCourseId != null
+        ? advanceCustomReview(current.id, activeCustomCourseId)
         : srcId && tgtId
         ? advanceReview(current.id, srcId, tgtId)
         : Promise.resolve();
@@ -342,8 +342,8 @@ export default function TypingReviewScreen() {
   }
 
   const reviewContextMessage = isCustomMode
-    ? "Wybierz profil własnych fiszek."
-    : "Wybierz profil i poziom w ustawieniach.";
+    ? "Wybierz kurs własnych fiszek."
+    : "Wybierz kurs i poziom w ustawieniach.";
 
   return (
     <View style={styles.container}>

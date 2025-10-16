@@ -19,7 +19,7 @@ import Confetti from "@/src/components/confetti/Confetti";
 export default function FlashcardsScreen() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, activeProfile, boxesLayout, flashcardsBatchSize } = useSettings();
+  const { selectedLevel, activeCourse, boxesLayout, flashcardsBatchSize } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
 
@@ -41,12 +41,12 @@ export default function FlashcardsScreen() {
     progress,
     totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
-    sourceLangId: activeProfile?.sourceLangId ?? 0,
-    targetLangId: activeProfile?.targetLangId ?? 0,
+    sourceLangId: activeCourse?.sourceLangId ?? 0,
+    targetLangId: activeCourse?.targetLangId ?? 0,
     level: selectedLevel ?? "A1",
     autosave:
-      activeProfile?.sourceLangId != null &&
-      activeProfile?.targetLangId != null &&
+      activeCourse?.sourceLangId != null &&
+      activeCourse?.targetLangId != null &&
       !!selectedLevel,
     saveDelayMs: 0,
   });
@@ -73,14 +73,14 @@ export default function FlashcardsScreen() {
     registerKnownWord,
     onWordPromotedOut: (word) => {
       if (
-        activeProfile?.sourceLangId != null &&
-        activeProfile?.targetLangId != null &&
+        activeCourse?.sourceLangId != null &&
+        activeCourse?.targetLangId != null &&
         selectedLevel
       ) {
         void scheduleReview(
           word.id,
-          activeProfile.sourceLangId,
-          activeProfile.targetLangId,
+          activeCourse.sourceLangId,
+          activeCourse.targetLangId,
           selectedLevel,
           0
         );
@@ -102,9 +102,9 @@ export default function FlashcardsScreen() {
     if (boxOneFull) {
       return;
     }
-    const prof = activeProfile;
+    const prof = activeCourse;
     if (!prof || prof.sourceLangId == null || prof.targetLangId == null) {
-      console.warn("Brak aktywnego profilu lub ID języków");
+      console.warn("Brak aktywnego kursu lub ID języków");
       return;
     }
 
@@ -134,37 +134,37 @@ export default function FlashcardsScreen() {
     await saveNow();
   }
 
-  const profileAccessibilityLabel = activeProfile
-    ? `Profil ${activeProfile.sourceLang?.toUpperCase()} do ${activeProfile.targetLang?.toUpperCase()}. Otwórz panel profilu.`
-    : "Wybierz profil językowy";
+  const courseAccessibilityLabel = activeCourse
+    ? `Kurs ${activeCourse.sourceLang?.toUpperCase()} do ${activeCourse.targetLang?.toUpperCase()}. Otwórz panel kursów.`
+    : "Wybierz kurs językowy";
 
   const levelAccessibilityLabel = `Poziom ${selectedLevel}. Zmień poziom nauki.`;
 
   if (
-    !activeProfile ||
-    activeProfile.sourceLangId == null ||
-    activeProfile.targetLangId == null ||
+    !activeCourse ||
+    activeCourse.sourceLangId == null ||
+    activeCourse.targetLangId == null ||
     !selectedLevel
   ) {
     return (
       <View style={styles.container}>
-        <Text allowFontScaling>Wybierz profil i poziom.</Text>
+        <Text allowFontScaling>Wybierz kurs i poziom.</Text>
       </View>
     );
   }
 
-  const profileFlagSource = getFlagSource(activeProfile.sourceLang);
+  const courseFlagSource = getFlagSource(activeCourse.sourceLang);
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
       {/* <TouchableOpacity
-        onPress={() => router.push("/profilpanel")}
-        style={styles.containerofprofile}
+        onPress={() => router.push("/coursepanel")}
+        style={styles.containerofcourse}
         accessibilityRole="button"
-        accessibilityLabel={profileAccessibilityLabel}
+        accessibilityLabel={courseAccessibilityLabel}
       >
-        {profileFlagSource ? (
-          <Image source={profileFlagSource} style={styles.flag} />
+        {courseFlagSource ? (
+          <Image source={courseFlagSource} style={styles.flag} />
         ) : null}
       </TouchableOpacity> */}
 

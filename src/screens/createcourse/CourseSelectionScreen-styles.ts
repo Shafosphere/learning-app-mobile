@@ -23,7 +23,36 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 20,
     marginBottom: 20,
   },
-  profileCard: {
+  groupSection: {
+    width: "100%",
+  },
+  groupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginTop: 16,
+    marginBottom: 12,
+  },
+  groupHeaderLine: {
+    flex: 1,
+    borderBottomWidth: 4,
+    borderStyle: "dashed",
+    borderColor: colors.border,
+    marginRight: 12,
+  },
+  groupHeaderBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  groupHeaderLabel: {
+    marginLeft: 6,
+    fontSize: 20,
+    fontWeight: 800,
+    color: colors.headline,
+  },
+  groupHeaderLabelNoFlag: {
+    marginLeft: 0,
+  },
+  courseCard: {
     width: "100%",
     minHeight: 92,
     flexDirection: "row",
@@ -34,15 +63,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingLeft: "10%",
     paddingRight: "6%",
     position: "relative",
+    marginBottom: 16,
   },
-  profileCardText: {
+  courseCardText: {
     flex: 1,
     fontSize: 22,
     fontWeight: 800,
     textAlign: "center",
     color: colors.headline,
   },
-  profileCardBadge: {
+  courseCardBadge: {
     position: "absolute",
     top: -21,
     right: "-2%",
@@ -51,12 +81,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  profileCardBadgeFlag: {
+  courseCardBadgeFlag: {
     width: 99 / 2.5,
     height: 66 / 2.5,
     borderRadius: 5,
   },
-  profileCardBadgeText: {
+  courseCardBadgeText: {
     marginLeft: 6,
     fontSize: 20,
     fontWeight: 800,
@@ -83,10 +113,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   pinCheckboxActive: {
     borderColor: colors.my_green,
-    backgroundColor: colors.my_green,
-  },
-  clicked: {
-    backgroundColor: colors.my_green,
   },
   buttonscontainer: {
     width: "100%",

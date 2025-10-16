@@ -7,7 +7,7 @@ import type { CEFRLevel } from "@/src/types/language";
 import { countLearnedWordsByLevel, getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
 export default function LevelScreen() {
-  const { setLevel, activeProfile } = useSettings();
+  const { setLevel, activeCourse } = useSettings();
   const styles = useStyles();
   const router = useRouter();
   const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -20,12 +20,12 @@ export default function LevelScreen() {
     let mounted = true;
     (async () => {
       try {
-        if (!activeProfile?.sourceLangId || !activeProfile?.targetLangId) {
+        if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
           if (mounted) setProgressMap({} as Record<CEFRLevel, number>);
           return;
         }
-        const srcId = activeProfile.sourceLangId;
-        const tgtId = activeProfile.targetLangId;
+        const srcId = activeCourse.sourceLangId;
+        const tgtId = activeCourse.targetLangId;
 
         const [learnedCounts, totals] = await Promise.all([
           countLearnedWordsByLevel(srcId, tgtId),
@@ -51,7 +51,7 @@ export default function LevelScreen() {
     return () => {
       mounted = false;
     };
-  }, [activeProfile?.sourceLangId, activeProfile?.targetLangId]);
+  }, [activeCourse?.sourceLangId, activeCourse?.targetLangId]);
   
   return (
     <View style={styles.container}>

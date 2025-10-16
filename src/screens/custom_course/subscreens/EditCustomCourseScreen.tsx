@@ -12,40 +12,40 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import Entypo from "@expo/vector-icons/Entypo";
 import MyButton from "@/src/components/button/button";
-import { useEditStyles } from "./EditCustomProfileScreen-styles";
+import { useEditStyles } from "./EditCustomCourseScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
-  clearCustomReviewsForProfile,
+  clearCustomReviewsForCourse,
   getCustomFlashcards,
-  getCustomProfileById,
+  getCustomCourseById,
   replaceCustomFlashcards,
-  updateCustomProfile,
+  updateCustomCourse,
 } from "@/src/db/sqlite/db";
-import { DEFAULT_PROFILE_COLOR } from "@/src/constants/customProfile";
-import { CustomProfileForm } from "@/src/components/customProfile/form/CustomProfileForm";
-import { useCustomProfileFormStyles } from "@/src/components/customProfile/form/CustomProfileForm-styles";
-import { useCustomProfileDraft } from "@/src/hooks/useCustomProfileDraft";
+import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
+import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
+import { useCustomCourseFormStyles } from "@/src/components/customCourse/form/CustomCourseForm-styles";
+import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
-} from "@/src/features/customProfile/manualCards/ManualCardsEditor";
+} from "@/src/features/customCourse/manualCards/ManualCardsEditor";
 import {
   createEmptyManualCard,
   ensureCardsNormalized,
   normalizeAnswers,
   useManualCardsForm,
-} from "@/src/features/customProfile/manualCards/useManualCardsForm";
+} from "@/src/features/customCourse/manualCards/useManualCardsForm";
 
 const MANUAL_HISTORY_LIMIT = 50;
 
-export default function EditCustomProfileScreen() {
+export default function EditCustomCourseScreen() {
   const styles = useEditStyles();
-  const formStyles = useCustomProfileFormStyles();
+  const formStyles = useCustomCourseFormStyles();
   const params = useLocalSearchParams();
   const router = useRouter();
   const setPopup = usePopup();
 
-  const profileId = useMemo(() => {
+  const courseId = useMemo(() => {
     const raw = params.id;
     const value = Array.isArray(raw) ? raw[0] : raw;
     const parsed = Number(value);
@@ -64,8 +64,8 @@ export default function EditCustomProfileScreen() {
   }, [params.name]);
 
   const {
-    profileName,
-    setProfileName,
+    courseName,
+    setCourseName,
     iconId,
     setIconId,
     iconColor,
@@ -74,7 +74,7 @@ export default function EditCustomProfileScreen() {
     toggleReviewsEnabled,
     handleColorChange,
     hydrateDraft,
-  } = useCustomProfileDraft({ initialName });
+  } = useCustomCourseDraft({ initialName });
   const {
     manualCards,
     replaceManualCards,
@@ -96,32 +96,32 @@ export default function EditCustomProfileScreen() {
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const hydrateFromDb = useCallback(async () => {
-    if (!profileId) {
-      setLoadError("Nie znaleziono profilu do edycji.");
+    if (!courseId) {
+      setLoadError("Nie znaleziono kursu do edycji.");
       setLoading(false);
       return;
     }
     setLoading(true);
     setLoadError(null);
     try {
-      const [profileRow, cardRows] = await Promise.all([
-        getCustomProfileById(profileId),
-        getCustomFlashcards(profileId),
+      const [courseRow, cardRows] = await Promise.all([
+        getCustomCourseById(courseId),
+        getCustomFlashcards(courseId),
       ]);
 
-      if (!profileRow) {
-        setLoadError("Profil nie istnieje.");
+      if (!courseRow) {
+        setLoadError("Kurs nie istnieje.");
         replaceManualCards([createEmptyManualCard("card-0")]);
         setLoading(false);
         return;
       }
 
       hydrateDraft({
-        profileName: profileRow.name,
-        iconId: profileRow.iconId,
-        iconColor: profileRow.iconColor ?? DEFAULT_PROFILE_COLOR,
-        colorId: profileRow.colorId ?? null,
-        reviewsEnabled: profileRow.reviewsEnabled,
+        courseName: courseRow.name,
+        iconId: courseRow.iconId,
+        iconColor: courseRow.iconColor ?? DEFAULT_COURSE_COLOR,
+        colorId: courseRow.colorId ?? null,
+        reviewsEnabled: courseRow.reviewsEnabled,
       });
 
       const incomingCards = cardRows.map((card, index) => {
@@ -141,12 +141,12 @@ export default function EditCustomProfileScreen() {
       const normalizedCards = ensureCardsNormalized(incomingCards);
       replaceManualCards(normalizedCards);
     } catch (error) {
-      console.error("Failed to load custom profile for edit", error);
-      setLoadError("Nie udało się wczytać danych profilu.");
+      console.error("Failed to load custom course for edit", error);
+      setLoadError("Nie udało się wczytać danych kursu.");
     } finally {
       setLoading(false);
     }
-  }, [hydrateDraft, profileId, replaceManualCards]);
+  }, [hydrateDraft, courseId, replaceManualCards]);
 
   useFocusEffect(
     useCallback(() => {
@@ -175,19 +175,19 @@ export default function EditCustomProfileScreen() {
   };
 
   const handleSave = async () => {
-    if (!profileId) {
+    if (!courseId) {
       setPopup({
-        message: "Nie można zapisać – brak identyfikatora profilu",
+        message: "Nie można zapisać – brak identyfikatora kursu",
         color: "my_red",
         duration: 4000,
       });
       return;
     }
 
-    const cleanName = profileName.trim();
+    const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
-        message: "Podaj nazwę profilu",
+        message: "Podaj nazwę kursu",
         color: "my_red",
         duration: 3000,
       });
@@ -228,7 +228,7 @@ export default function EditCustomProfileScreen() {
 
     setIsSaving(true);
     try {
-      await updateCustomProfile(profileId, {
+      await updateCustomCourse(courseId, {
         name: cleanName,
         iconId: iconId ?? "heart",
         iconColor,
@@ -237,10 +237,10 @@ export default function EditCustomProfileScreen() {
       });
 
       if (!reviewsEnabled) {
-        await clearCustomReviewsForProfile(profileId);
+        await clearCustomReviewsForCourse(courseId);
       }
 
-      await replaceCustomFlashcards(profileId, trimmedCards);
+      await replaceCustomFlashcards(courseId, trimmedCards);
 
       setPopup({
         message: "Zmiany zapisane!",
@@ -249,7 +249,7 @@ export default function EditCustomProfileScreen() {
       });
       router.back();
     } catch (error) {
-      console.error("Failed to save custom profile", error);
+      console.error("Failed to save custom course", error);
       setPopup({
         message: "Nie udało się zapisać zmian",
         color: "my_red",
@@ -279,10 +279,10 @@ export default function EditCustomProfileScreen() {
             <Text style={{ color: "#ff5470", fontSize: 16 }}>{loadError}</Text>
           </View>
         ) : (
-          <CustomProfileForm
+          <CustomCourseForm
             title="EDYTUJ PROFIL"
-            profileName={profileName}
-            onProfileNameChange={setProfileName}
+            courseName={courseName}
+            onCourseNameChange={setCourseName}
             reviewsEnabled={reviewsEnabled}
             onToggleReviews={toggleReviewsEnabled}
             iconId={iconId}
@@ -303,7 +303,7 @@ export default function EditCustomProfileScreen() {
               onAddCard={handleAddCard}
               onRemoveCard={handleRemoveCard}
             />
-          </CustomProfileForm>
+          </CustomCourseForm>
         )}
       </ScrollView>
 
@@ -312,7 +312,7 @@ export default function EditCustomProfileScreen() {
           color="my_yellow"
           // width={56}
           onPress={() => router.back()}
-          accessibilityLabel="Wróć do panelu profili"
+          accessibilityLabel="Wróć do panelu kursów"
         >
           <Entypo
             name="arrow-long-left"
@@ -341,7 +341,7 @@ export default function EditCustomProfileScreen() {
             color="my_green"
             onPress={handleSave}
             disabled={isSaving || loading || !!loadError}
-            accessibilityLabel="Zapisz zmiany profilu"
+            accessibilityLabel="Zapisz zmiany kursu"
           />
         </View>
       </View>

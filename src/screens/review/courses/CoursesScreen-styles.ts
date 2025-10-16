@@ -27,17 +27,41 @@ export const useStyles = createThemeStylesHook((colors) => ({
   section: {
     gap: 12,
   },
-  profileGrid: {
+  courseGrid: {
     flexDirection: "row",
     flexWrap: "wrap",
     justifyContent: "space-between",
+  },
+  groupContainer: {
+    width: "100%",
+    marginBottom: 16,
+  },
+  groupHeader: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginBottom: 12,
+    gap: 12,
+  },
+  groupDivider: {
+    flex: 1,
+    borderBottomWidth: 4,
+    borderStyle: "dashed",
+    borderColor: colors.border,
+  },
+  groupHeaderLabel: {
+    fontSize: 20,
+    fontWeight: "800",
+    color: colors.headline,
+    backgroundColor: colors.background,
+    paddingHorizontal: 8,
+    borderRadius: 8,
   },
   sectionTitle: {
     fontSize: 25,
     fontWeight: 900,
     color: colors.headline,
   },
-  profileCard: {
+  courseCard: {
     width: 145,
     height: 145,
     display: "flex",
@@ -53,7 +77,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // paddingRight: "6%",
     position: "relative",
   },
-  profileCardContent: {
+  courseCardContent: {
     height: "100%",
     width: "100%",
     flexDirection: "row",
@@ -61,17 +85,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
     gap: 16,
     justifyContent: "center",
   },
-  profileCardText: {
+  courseCardText: {
     fontSize: 24,
     fontWeight: "900",
     color: colors.headline,
   },
-  profileCount: {
+  courseCount: {
     position: "absolute",
     bottom: 12,
     right: 12,
   },
-  profileCardBadge: {
+  courseCardBadge: {
     position: "absolute",
     top: -21,
     right: 0,
@@ -80,12 +104,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 10,
     paddingVertical: 4,
   },
-  profileCardBadgeFlag: {
+  courseCardBadgeFlag: {
     width: 99 / 2.5,
     height: 66 / 2.5,
     borderRadius: 5,
   },
-  profileCardBadgeText: {
+  courseCardBadgeText: {
     marginLeft: 6,
     fontSize: 22,
     fontWeight: "800",

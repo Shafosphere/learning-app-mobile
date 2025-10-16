@@ -105,9 +105,9 @@ const createDeckForWords = (
 
 export default function MemoryGameScreen() {
   const {
-    activeProfile,
+    activeCourse,
     selectedLevel,
-    activeCustomProfileId,
+    activeCustomCourseId,
     colors,
     memoryBoardSize,
   } = useSettings();
@@ -257,9 +257,9 @@ export default function MemoryGameScreen() {
     }
   };
 
-  const isCustomMode = activeCustomProfileId != null;
-  const srcId = activeProfile?.sourceLangId ?? null;
-  const tgtId = activeProfile?.targetLangId ?? null;
+  const isCustomMode = activeCustomCourseId != null;
+  const srcId = activeCourse?.sourceLangId ?? null;
+  const tgtId = activeCourse?.targetLangId ?? null;
 
   useEffect(() => {
     let mounted = true;
@@ -270,7 +270,7 @@ export default function MemoryGameScreen() {
         return;
       }
 
-      if (isCustomMode && activeCustomProfileId == null) {
+      if (isCustomMode && activeCustomCourseId == null) {
         if (mounted) resetGameState([]);
         return;
       }
@@ -280,9 +280,9 @@ export default function MemoryGameScreen() {
         const now = Date.now();
         let words: WordWithTranslations[] = [];
 
-        if (isCustomMode && activeCustomProfileId != null) {
+        if (isCustomMode && activeCustomCourseId != null) {
           const rows = await getDueCustomReviewFlashcards(
-            activeCustomProfileId,
+            activeCustomCourseId,
             requiredPairs,
             now
           );
@@ -314,7 +314,7 @@ export default function MemoryGameScreen() {
       mounted = false;
     };
   }, [
-    activeCustomProfileId,
+    activeCustomCourseId,
     isCustomMode,
     memoryBoardSize,
     requiredPairs,

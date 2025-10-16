@@ -5,11 +5,11 @@ import { useRouter } from "expo-router";
 
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
-import { useStyles } from "../level/LevelScreen-styles";
+import { useStyles } from "@/src/screens/level/LevelScreen-styles";
 import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
 
-export default function ReviewScreen() {
-  const { setLevel, activeProfile, colors } = useSettings();
+export default function ReviewLevelsScreen() {
+  const { setLevel, activeCourse, colors } = useSettings();
   const styles = useStyles();
   const router = useRouter();
   const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -29,8 +29,8 @@ export default function ReviewScreen() {
 
       const fetchCounts = async () => {
         try {
-          const srcId = activeProfile?.sourceLangId;
-          const tgtId = activeProfile?.targetLangId;
+          const srcId = activeCourse?.sourceLangId;
+          const tgtId = activeCourse?.targetLangId;
           if (!srcId || !tgtId) {
             if (mounted)
               setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
@@ -48,7 +48,7 @@ export default function ReviewScreen() {
       return () => {
         mounted = false;
       };
-    }, [activeProfile?.sourceLangId, activeProfile?.targetLangId])
+    }, [activeCourse?.sourceLangId, activeCourse?.targetLangId])
   );
 
   return (

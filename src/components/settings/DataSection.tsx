@@ -12,21 +12,21 @@ import {
 const DataSection: React.FC = () => {
   const styles = useStyles();
   const router = useRouter();
-  const { activeProfile, selectedLevel, activeCustomProfileId } = useSettings();
+  const { activeCourse, selectedLevel, activeCustomCourseId } = useSettings();
   const [builtInBusy, setBuiltInBusy] = useState(false);
   const [customBusy, setCustomBusy] = useState(false);
 
   const handleAddRandom = async () => {
-    if (!activeProfile?.sourceLangId || !activeProfile?.targetLangId) {
-      Alert.alert("Brak profilu", "Wybierz profil w ustawieniach.");
+    if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
+      Alert.alert("Brak kursu", "Wybierz kurs w ustawieniach.");
       return;
     }
 
     setBuiltInBusy(true);
     try {
       const inserted = await addRandomReviewsForPair(
-        activeProfile.sourceLangId,
-        activeProfile.targetLangId,
+        activeCourse.sourceLangId,
+        activeCourse.targetLangId,
         selectedLevel,
         10
       );
@@ -44,21 +44,21 @@ const DataSection: React.FC = () => {
   };
 
   const handleAddRandomCustom = async () => {
-    if (activeCustomProfileId == null) {
+    if (activeCustomCourseId == null) {
       Alert.alert(
-        "Brak profilu",
-        "Wybierz własny profil fiszek w ustawieniach."
+        "Brak kursu",
+        "Wybierz własny kurs fiszek w ustawieniach."
       );
       return;
     }
 
     setCustomBusy(true);
     try {
-      const inserted = await addRandomCustomReviews(activeCustomProfileId, 10);
+      const inserted = await addRandomCustomReviews(activeCustomCourseId, 10);
       Alert.alert(
         "Dodano",
         inserted > 0
-          ? `Dodano ${inserted} fiszek do powtórek profilu.`
+          ? `Dodano ${inserted} fiszek do powtórek kursu.`
           : "Brak nowych fiszek do dodania."
       );
     } catch {
@@ -70,7 +70,7 @@ const DataSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>Profil i dane</Text>
+      <Text style={styles.sectionHeader}>Kurs i dane</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
@@ -82,43 +82,43 @@ const DataSection: React.FC = () => {
         <MyButton
           text={builtInBusy ? "Dodawanie..." : "Dodaj 10"}
           color="my_green"
-          disabled={builtInBusy || !activeProfile}
+          disabled={builtInBusy || !activeCourse}
           onPress={handleAddRandom}
           width={140}
         />
       </View>
 
-      {!activeProfile && (
-        <Text style={styles.infoText}>Najpierw wybierz profil.</Text>
+      {!activeCourse && (
+        <Text style={styles.infoText}>Najpierw wybierz kurs.</Text>
       )}
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Dodaj customowe powtórki</Text>
           <Text style={styles.rowSubtitle}>
-            Wstaw losowe fiszki z aktywnego profilu własnego.
+            Wstaw losowe fiszki z aktywnego kursu własnego.
           </Text>
         </View>
         <MyButton
           text={customBusy ? "Dodawanie..." : "Dodaj 10"}
           color="my_green"
-          disabled={customBusy || activeCustomProfileId == null}
+          disabled={customBusy || activeCustomCourseId == null}
           onPress={handleAddRandomCustom}
           width={140}
         />
       </View>
 
-      {activeCustomProfileId == null && (
+      {activeCustomCourseId == null && (
         <Text style={styles.infoText}>
-          Najpierw wybierz własny profil w panelu profili.
+          Najpierw wybierz własny kurs w panelu kursów.
         </Text>
       )}
 
       <View style={styles.buttonsContainer}>
         <MyButton
-          text="Zarządzaj profilami"
+          text="Zarządzaj kursami"
           color="my_yellow"
-          onPress={() => router.push("/profilpanel")}
+          onPress={() => router.push("/coursepanel")}
           width={220}
         />
       </View>

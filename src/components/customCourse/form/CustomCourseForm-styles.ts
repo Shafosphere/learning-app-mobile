@@ -1,6 +1,6 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-export const useCustomProfileFormStyles = createThemeStylesHook((colors) => {
+export const useCustomCourseFormStyles = createThemeStylesHook((colors) => {
   return {
     section: {
       backgroundColor: colors.secondBackground,
@@ -99,12 +99,12 @@ export const useCustomProfileFormStyles = createThemeStylesHook((colors) => {
       width: "100%",
       justifyContent: "center",
     },
-    profileColor: {
+    courseColor: {
       width: "16%",
       aspectRatio: 1,
       height: 20,
     },
-    profileColorSelected: {
+    courseColorSelected: {
       borderWidth: 3,
       borderColor: colors.my_green,
     },

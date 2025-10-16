@@ -2,7 +2,7 @@ import { Text, View, TouchableOpacity } from "react-native";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import {
   getCustomFlashcards,
-  getCustomProfileById,
+  getCustomCourseById,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
@@ -16,12 +16,12 @@ import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnap
 import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useIsFocused } from "@react-navigation/native";
-import { getProfileIconById } from "@/src/constants/customProfile";
+import { getCourseIconById } from "@/src/constants/customCourse";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type {
   CustomFlashcardRecord,
-  CustomProfileRecord,
+  CustomCourseRecord,
 } from "@/src/db/sqlite/db";
 import Confetti from "@/src/components/confetti/Confetti";
 
@@ -63,7 +63,7 @@ function mapCustomCardToWord(
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const { activeCustomProfileId, boxesLayout, flashcardsBatchSize } =
+  const { activeCustomCourseId, boxesLayout, flashcardsBatchSize } =
     useSettings();
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
@@ -77,16 +77,16 @@ export default function Flashcards() {
 
   const { boxes, setBoxes, isReady, addUsedWordIds } =
     useBoxesPersistenceSnapshot({
-      sourceLangId: activeCustomProfileId ?? 0,
-      targetLangId: activeCustomProfileId ?? 0,
-      level: `custom-${activeCustomProfileId ?? 0}`,
+      sourceLangId: activeCustomCourseId ?? 0,
+      targetLangId: activeCustomCourseId ?? 0,
+      level: `custom-${activeCustomCourseId ?? 0}`,
       storageNamespace: "customBoxes",
-      autosave: activeCustomProfileId != null,
+      autosave: activeCustomCourseId != null,
       saveDelayMs: 0,
     });
 
-  const [customProfile, setCustomProfile] =
-    useState<CustomProfileRecord | null>(null);
+  const [customCourse, setCustomCourse] =
+    useState<CustomCourseRecord | null>(null);
   const checkSpelling = useSpellchecking();
   const {
     activeBox,
@@ -111,8 +111,8 @@ export default function Flashcards() {
     addUsedWordIds,
     registerKnownWord,
     onWordPromotedOut: (word) => {
-      if (activeCustomProfileId != null && customProfile?.reviewsEnabled) {
-        void scheduleCustomReview(word.id, activeCustomProfileId, 0);
+      if (activeCustomCourseId != null && customCourse?.reviewsEnabled) {
+        void scheduleCustomReview(word.id, activeCustomCourseId, 0);
       }
     },
     onCorrectAnswer: (boxKey) => {
@@ -174,8 +174,8 @@ export default function Flashcards() {
 
     let isMounted = true;
 
-    if (activeCustomProfileId == null) {
-      setCustomProfile(null);
+    if (activeCustomCourseId == null) {
+      setCustomCourse(null);
       setCustomCards([]);
       setLoadError(null);
       setIsLoadingData(false);
@@ -188,25 +188,25 @@ export default function Flashcards() {
     setLoadError(null);
 
     void Promise.all([
-      getCustomProfileById(activeCustomProfileId),
-      getCustomFlashcards(activeCustomProfileId),
+      getCustomCourseById(activeCustomCourseId),
+      getCustomFlashcards(activeCustomCourseId),
     ])
-      .then(([profileRow, flashcardRows]) => {
+      .then(([courseRow, flashcardRows]) => {
         if (!isMounted) return;
-        if (!profileRow) {
-          setCustomProfile(null);
+        if (!courseRow) {
+          setCustomCourse(null);
           setCustomCards([]);
-          setLoadError("Wybrany profil nie istnieje.");
+          setLoadError("Wybrany kurs nie istnieje.");
           return;
         }
-        setCustomProfile(profileRow);
+        setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
         setCustomCards(mapped);
       })
       .catch((error) => {
         console.error("Failed to load custom flashcards", error);
         if (!isMounted) return;
-        setCustomProfile(null);
+        setCustomCourse(null);
         setCustomCards([]);
         setLoadError("Nie udało się wczytać fiszek.");
       })
@@ -217,7 +217,7 @@ export default function Flashcards() {
     return () => {
       isMounted = false;
     };
-  }, [activeCustomProfileId, isFocused]);
+  }, [activeCustomCourseId, isFocused]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -250,7 +250,7 @@ export default function Flashcards() {
   useEffect(() => {
     if (!isReady) return;
     if (isLoadingData) return;
-    if (activeCustomProfileId == null) return;
+    if (activeCustomCourseId == null) return;
     if (totalCardsInBoxes > 0) return;
     if (allCardsDistributed) return;
     if (!customCards.length) return;
@@ -259,7 +259,7 @@ export default function Flashcards() {
   }, [
     isReady,
     isLoadingData,
-    activeCustomProfileId,
+    activeCustomCourseId,
     totalCardsInBoxes,
     allCardsDistributed,
     customCards,
@@ -271,29 +271,29 @@ export default function Flashcards() {
     }
   }, [clearSelection, customCards, selectedItem]);
 
-  const profileAccessibilityLabel = customProfile
-    ? `Profil ${customProfile.name}. Otwórz panel profili.`
-    : "Wybierz profil fiszek.";
+  const courseAccessibilityLabel = customCourse
+    ? `Kurs ${customCourse.name}. Otwórz panel kursów.`
+    : "Wybierz kurs fiszek.";
 
-  const editAccessibilityLabel = customProfile
-    ? `Edytuj fiszki profilu ${customProfile.name}.`
-    : "Dodaj fiszki do profilu.";
+  const editAccessibilityLabel = customCourse
+    ? `Edytuj fiszki kursu ${customCourse.name}.`
+    : "Dodaj fiszki do kursu.";
 
-  const profileIconMeta = useMemo(() => {
-    if (!customProfile) return null;
-    return getProfileIconById(customProfile.iconId);
-  }, [customProfile]);
-  const ProfileIconComponent = profileIconMeta?.Component;
-  const profileIconName = profileIconMeta?.name ?? "";
-  const profileIconColor = customProfile?.iconColor ?? "#00214D";
-  const profileName = customProfile?.name ?? "Wybierz profil";
+  const courseIconMeta = useMemo(() => {
+    if (!customCourse) return null;
+    return getCourseIconById(customCourse.iconId);
+  }, [customCourse]);
+  const CourseIconComponent = courseIconMeta?.Component;
+  const courseIconName = courseIconMeta?.name ?? "";
+  const courseIconColor = customCourse?.iconColor ?? "#00214D";
+  const courseName = customCourse?.name ?? "Wybierz kurs";
   const totalCardsLabel = customCards.length > 0
     ? `Fiszki: ${customCards.length}`
     : "Brak fiszek";
   const downloadDisabled =
     customCards.length === 0 || allCardsDistributed || isLoadingData || !isReady;
   const shouldShowBoxes =
-    activeCustomProfileId != null &&
+    activeCustomCourseId != null &&
     isReady &&
     !isLoadingData &&
     !loadError &&
@@ -301,22 +301,22 @@ export default function Flashcards() {
 
   useEffect(() => {
     resetInteractionState();
-  }, [activeCustomProfileId, resetInteractionState]);
+  }, [activeCustomCourseId, resetInteractionState]);
 
   const handleEditPress = () => {
-    if (!customProfile || activeCustomProfileId == null) return;
-    const encodedName = encodeURIComponent(customProfile.name);
+    if (!customCourse || activeCustomCourseId == null) return;
+    const encodedName = encodeURIComponent(customCourse.name);
     router.push(
-      `/custom_profile/edit?id=${activeCustomProfileId.toString()}&name=${encodedName}`
+      `/custom_course/edit?id=${activeCustomCourseId.toString()}&name=${encodedName}`
     );
   };
 
   let cardSection: ReactNode;
-  if (activeCustomProfileId == null) {
+  if (activeCustomCourseId == null) {
     cardSection = (
       <View style={{ paddingHorizontal: 32 }}>
         <Text allowFontScaling>
-          Wybierz własny profil w panelu profili, aby rozpocząć naukę.
+          Wybierz własny kurs w panelu kursów, aby rozpocząć naukę.
         </Text>
       </View>
     );
@@ -336,7 +336,7 @@ export default function Flashcards() {
     cardSection = (
       <View style={{ paddingHorizontal: 32 }}>
         <Text allowFontScaling>
-          Dodaj fiszki do tego profilu, aby móc z nich korzystać.
+          Dodaj fiszki do tego kursu, aby móc z nich korzystać.
         </Text>
       </View>
     );
@@ -362,27 +362,27 @@ export default function Flashcards() {
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
       {/* <TouchableOpacity
-        onPress={() => router.push("/profilpanel")}
-        style={styles.containerofprofile}
+        onPress={() => router.push("/coursepanel")}
+        style={styles.containerofcourse}
         accessibilityRole="button"
-        accessibilityLabel={profileAccessibilityLabel}
+        accessibilityLabel={courseAccessibilityLabel}
       >
         <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {ProfileIconComponent ? (
-            <ProfileIconComponent
-              name={profileIconName as never}
+          {CourseIconComponent ? (
+            <CourseIconComponent
+              name={courseIconName as never}
               size={32}
-              color={profileIconColor}
+              color={courseIconColor}
             />
           ) : null}
           <Text
             style={[
               styles.levelLabel,
-              { marginLeft: ProfileIconComponent ? 8 : 0 },
+              { marginLeft: CourseIconComponent ? 8 : 0 },
             ]}
             allowFontScaling
           >
-            {profileName}
+            {courseName}
           </Text>
         </View>
       </TouchableOpacity> */}
@@ -391,11 +391,11 @@ export default function Flashcards() {
         onPress={handleEditPress}
         style={[
           styles.containeroflevel,
-          !customProfile && { opacity: 0.4 },
+          !customCourse && { opacity: 0.4 },
         ]}
         accessibilityRole="button"
         accessibilityLabel={editAccessibilityLabel}
-        disabled={!customProfile}
+        disabled={!customCourse}
       >
         <View style={styles.levelContainer}>
           <Text style={styles.levelLabel} allowFontScaling>

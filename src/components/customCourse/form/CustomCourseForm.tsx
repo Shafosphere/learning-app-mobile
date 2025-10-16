@@ -7,30 +7,30 @@ import {
   View,
 } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { ProfileIconColorSelector } from "@/src/components/customProfile/ProfileIconColorSelector";
-import { ProfileColorOption } from "@/src/hooks/useCustomProfileDraft";
-import { useCustomProfileFormStyles } from "./CustomProfileForm-styles";
+import { CourseIconColorSelector } from "@/src/components/customCourse/CourseIconColorSelector";
+import { CourseColorOption } from "@/src/constants/customCourse";
+import { useCustomCourseFormStyles } from "./CustomCourseForm-styles";
 
-export interface CustomProfileFormProps {
+export interface CustomCourseFormProps {
   title: string;
-  profileName: string;
-  onProfileNameChange: (value: string) => void;
+  courseName: string;
+  onCourseNameChange: (value: string) => void;
   reviewsEnabled: boolean;
   onToggleReviews: () => void;
   iconId: string | null;
   iconColor: string;
   colorId: string | null;
   onIconChange: (iconId: string) => void;
-  onColorChange: (color: ProfileColorOption) => void;
+  onColorChange: (color: CourseColorOption) => void;
   namePlaceholder?: string;
   disabled?: boolean;
   children?: ReactNode;
 }
 
-export function CustomProfileForm({
+export function CustomCourseForm({
   title,
-  profileName,
-  onProfileNameChange,
+  courseName,
+  onCourseNameChange,
   reviewsEnabled,
   onToggleReviews,
   iconId,
@@ -41,8 +41,8 @@ export function CustomProfileForm({
   namePlaceholder = "np. Fiszki podróżnicze",
   disabled = false,
   children,
-}: CustomProfileFormProps) {
-  const styles = useCustomProfileFormStyles();
+}: CustomCourseFormProps) {
+  const styles = useCustomCourseFormStyles();
   const checkboxIconColor =
     (styles.checkboxIcon as TextStyle)?.color ?? "#ffffff";
 
@@ -54,10 +54,10 @@ export function CustomProfileForm({
           <Text style={styles.label}>nazwa</Text>
           <TextInput
             style={styles.nameInput}
-            value={profileName}
-            onChangeText={onProfileNameChange}
+            value={courseName}
+            onChangeText={onCourseNameChange}
             placeholder={namePlaceholder}
-            accessibilityLabel="Nazwa profilu"
+            accessibilityLabel="Nazwa kursu"
             editable={!disabled}
           />
         </View>
@@ -71,7 +71,7 @@ export function CustomProfileForm({
             onPress={onToggleReviews}
             accessibilityRole="checkbox"
             accessibilityState={{ checked: reviewsEnabled }}
-            accessibilityLabel="Włącz udział profilu w powtórkach"
+            accessibilityLabel="Włącz udział kursu w powtórkach"
             disabled={disabled}
           >
             <View
@@ -94,7 +94,7 @@ export function CustomProfileForm({
 
         <View style={styles.iconSection}>
           <Text style={styles.label}>ikona</Text>
-          <ProfileIconColorSelector
+          <CourseIconColorSelector
             selectedIcon={iconId}
             selectedColor={iconColor}
             selectedColorId={colorId ?? undefined}
@@ -106,8 +106,8 @@ export function CustomProfileForm({
               iconWrapper: styles.iconWrapper,
               iconWrapperSelected: styles.iconWrapperSelected,
               colorsContainer: styles.colorsContainer,
-              colorSwatch: styles.profileColor,
-              colorSwatchSelected: styles.profileColorSelected,
+              colorSwatch: styles.courseColor,
+              colorSwatchSelected: styles.courseColorSelected,
             }}
           />
         </View>
@@ -120,4 +120,4 @@ export function CustomProfileForm({
   );
 }
 
-export default CustomProfileForm;
+export default CustomCourseForm;

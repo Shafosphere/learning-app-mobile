@@ -203,23 +203,23 @@ export const useEditStyles = createThemeStylesHook((colors) => {
       width: "100%",
       justifyContent: "center",
     },
-    profileColor: {
+    courseColor: {
       width: "16%",
       aspectRatio: 1,
       height: 20,
     },
-    profileColorSelected: {
+    courseColorSelected: {
       borderWidth: 3,
       borderColor: colors.my_green,
     },
-    profileInput: {
+    courseInput: {
       borderColor: colors.my_yellow,
       borderWidth: 3,
       borderRadius: 8,
       paddingLeft: 8,
       fontSize: 16,
     },
-    profileInputLocked: {
+    courseInputLocked: {
       backgroundColor: colors.border,
       opacity: 0.75,
     },

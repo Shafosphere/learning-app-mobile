@@ -24,7 +24,7 @@ CREATE TABLE language_pairs (
   PRIMARY KEY (source_language_id, target_language_id)
 );
 
-CREATE TABLE custom_profiles (
+CREATE TABLE custom_courses (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
   name        TEXT    NOT NULL,
   icon_id     TEXT    NOT NULL,
@@ -36,7 +36,7 @@ CREATE TABLE custom_profiles (
 
 CREATE TABLE custom_flashcards (
   id          INTEGER PRIMARY KEY AUTOINCREMENT,
-  profile_id  INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+  course_id  INTEGER NOT NULL REFERENCES custom_courses(id) ON DELETE CASCADE,
   front_text  TEXT    NOT NULL,
   back_text   TEXT    NOT NULL,
   position    INTEGER,
@@ -54,7 +54,7 @@ CREATE TABLE custom_flashcard_answers (
 
 CREATE TABLE custom_reviews (
   id             INTEGER PRIMARY KEY AUTOINCREMENT,
-  profile_id     INTEGER NOT NULL REFERENCES custom_profiles(id) ON DELETE CASCADE,
+  course_id     INTEGER NOT NULL REFERENCES custom_courses(id) ON DELETE CASCADE,
   flashcard_id   INTEGER NOT NULL REFERENCES custom_flashcards(id) ON DELETE CASCADE,
   learned_at     INTEGER NOT NULL,
   next_review    INTEGER NOT NULL,
@@ -79,12 +79,12 @@ CREATE INDEX idx_words_lang_cefr
   ON words(language_id, cefr_level);
 CREATE INDEX idx_trans_src_tgtlang 
   ON translations(source_word_id, target_language_id);
-CREATE INDEX idx_custom_flashcards_profile
-  ON custom_flashcards(profile_id, position);
+CREATE INDEX idx_custom_flashcards_course
+  ON custom_flashcards(course_id, position);
 CREATE INDEX idx_custom_flashcard_answers_card
   ON custom_flashcard_answers(flashcard_id);
-CREATE INDEX idx_custom_reviews_profile
-  ON custom_reviews(profile_id);
+CREATE INDEX idx_custom_reviews_course
+  ON custom_reviews(course_id);
 CREATE INDEX idx_custom_reviews_due
   ON custom_reviews(next_review);
 CREATE INDEX idx_reviews_due

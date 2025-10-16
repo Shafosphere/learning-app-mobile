@@ -16,8 +16,49 @@ import {
 import { MemoryBoardSize } from "../constants/memoryGame";
 import { usePersistedState } from "../hooks/usePersistedState";
 import type { CEFRLevel } from "../types/language";
-import { LanguageProfile } from "../types/profile";
+import { LanguageCourse } from "../types/course";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+function languagesMatch(a: LanguageCourse, b: LanguageCourse): boolean {
+  const hasIdsA = a.sourceLangId != null && a.targetLangId != null;
+  const hasIdsB = b.sourceLangId != null && b.targetLangId != null;
+
+  if (hasIdsA && hasIdsB) {
+    return (
+      a.sourceLangId === b.sourceLangId && a.targetLangId === b.targetLangId
+    );
+  }
+
+  return a.sourceLang === b.sourceLang && a.targetLang === b.targetLang;
+}
+
+function coursesEqual(a: LanguageCourse, b: LanguageCourse): boolean {
+  if (!languagesMatch(a, b)) {
+    return false;
+  }
+  const levelA = a.level ?? null;
+  const levelB = b.level ?? null;
+  return levelA === levelB;
+}
+
+function findCourseIndex(
+  list: LanguageCourse[],
+  course: LanguageCourse
+): number {
+  const exactIdx = list.findIndex((candidate) =>
+    coursesEqual(candidate, course)
+  );
+  if (exactIdx !== -1) {
+    return exactIdx;
+  }
+  if (course.level != null) {
+    return list.findIndex(
+      (candidate) => candidate.level == null && languagesMatch(candidate, course)
+    );
+  }
+  return -1;
+}
 
 interface SettingsContextValue {
   theme: Theme;
@@ -25,19 +66,20 @@ interface SettingsContextValue {
   toggleTheme: () => Promise<void>;
   boxesLayout: "classic" | "carousel";
   setBoxesLayout: (layout: "classic" | "carousel") => Promise<void>;
-  profiles: LanguageProfile[];
-  addProfile: (profile: LanguageProfile) => Promise<void>;
+  courses: LanguageCourse[];
+  addCourse: (course: LanguageCourse) => Promise<void>;
+  removeCourse: (course: LanguageCourse) => Promise<void>;
   selectedLevel: CEFRLevel;
   setLevel: (lvl: CEFRLevel) => void;
   spellChecking: boolean;
   toggleSpellChecking: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
-  activeProfileIdx: number | null; // NEW
-  setActiveProfileIdx: (i: number | null) => Promise<void>; // NEW
-  activeProfile: LanguageProfile | null;
-  activeCustomProfileId: number | null;
-  setActiveCustomProfileId: (id: number | null) => Promise<void>;
+  activeCourseIdx: number | null; // NEW
+  setActiveCourseIdx: (i: number | null) => Promise<void>; // NEW
+  activeCourse: LanguageCourse | null;
+  activeCustomCourseId: number | null;
+  setActiveCustomCourseId: (id: number | null) => Promise<void>;
   flashcardsBatchSize: number;
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   dailyGoal: number;
@@ -72,19 +114,20 @@ const defaultValue: SettingsContextValue = {
   toggleTheme: async () => {},
   boxesLayout: "carousel",
   setBoxesLayout: async () => {},
-  profiles: [],
-  addProfile: async () => {},
+  courses: [],
+  addCourse: async () => {},
+  removeCourse: async () => {},
   selectedLevel: "A1",
   setLevel: (_lvl: CEFRLevel) => {},
   spellChecking: true,
   toggleSpellChecking: async () => {},
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
-  activeProfileIdx: null,
-  setActiveProfileIdx: async () => {},
-  activeProfile: null,
-  activeCustomProfileId: null,
-  setActiveCustomProfileId: async () => {},
+  activeCourseIdx: null,
+  setActiveCourseIdx: async () => {},
+  activeCourse: null,
+  activeCustomCourseId: null,
+  setActiveCustomCourseId: async () => {},
   flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
   setFlashcardsBatchSize: async () => {},
   dailyGoal: 20,
@@ -123,19 +166,19 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
     "classic" | "carousel"
   >("boxesLayout", "carousel");
-  const [profiles, setProfiles] = usePersistedState<LanguageProfile[]>(
-    "profiles",
+  const [courses, setCourses] = usePersistedState<LanguageCourse[]>(
+    "courses",
     []
   );
 
-  const [activeProfileIdx, setActiveProfileIdxState] = usePersistedState<
+  const [activeCourseIdx, setActiveCourseIdxState] = usePersistedState<
     number | null
-  >("activeProfileIdx", null);
+  >("activeCourseIdx", null);
 
-  const [activeCustomProfileId, setActiveCustomProfileIdState] =
-    usePersistedState<number | null>("activeCustomProfileId", null);
+  const [activeCustomCourseId, setActiveCustomCourseIdState] =
+    usePersistedState<number | null>("activeCustomCourseId", null);
 
-  console.log(profiles);
+  console.log(courses);
   const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
     "spellChecking",
     true
@@ -192,57 +235,145 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await _setBoxesLayout(layout);
   };
 
-  const setActiveProfileIdx = useCallback(
+  const setActiveCourseIdx = useCallback(
     async (idx: number | null) => {
       if (idx != null) {
-        await setActiveCustomProfileIdState(null);
+        await setActiveCustomCourseIdState(null);
       }
-      await setActiveProfileIdxState(idx);
+      await setActiveCourseIdxState(idx);
     },
-    [setActiveCustomProfileIdState, setActiveProfileIdxState]
+    [setActiveCustomCourseIdState, setActiveCourseIdxState]
   );
 
-  const setActiveCustomProfileId = useCallback(
-    async (profileId: number | null) => {
-      if (profileId != null) {
-        await setActiveProfileIdxState(null);
+  const setActiveCustomCourseId = useCallback(
+    async (courseId: number | null) => {
+      if (courseId != null) {
+        await setActiveCourseIdxState(null);
       }
-      await setActiveCustomProfileIdState(profileId);
+      await setActiveCustomCourseIdState(courseId);
     },
-    [setActiveCustomProfileIdState, setActiveProfileIdxState]
+    [setActiveCustomCourseIdState, setActiveCourseIdxState]
   );
 
   useEffect(() => {
-    if (activeProfileIdx != null && activeCustomProfileId != null) {
-      void setActiveCustomProfileId(null);
+    if (activeCourseIdx != null && activeCustomCourseId != null) {
+      void setActiveCustomCourseId(null);
     }
-  }, [activeProfileIdx, activeCustomProfileId, setActiveCustomProfileId]);
+  }, [activeCourseIdx, activeCustomCourseId, setActiveCustomCourseId]);
 
-  const addProfile = async (p: LanguageProfile) => {
-    const existsIdx = profiles.findIndex(
-      (x) =>
-        (p.sourceLangId &&
-          p.targetLangId &&
-          x.sourceLangId === p.sourceLangId &&
-          x.targetLangId === p.targetLangId) ||
-        (!p.sourceLangId &&
-          !p.targetLangId &&
-          x.sourceLang === p.sourceLang &&
-          x.targetLang === p.targetLang)
-    );
-    if (existsIdx === -1) {
-      const newList = [...profiles, p];
-      await setProfiles(newList);
-      if (activeProfileIdx == null && activeCustomProfileId == null)
-        await setActiveProfileIdx(newList.length - 1);
-    } else {
-      if (activeProfileIdx == null && activeCustomProfileId == null)
-        await setActiveProfileIdx(existsIdx);
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const [legacyCoursesRaw, legacyActiveIdxRaw, legacyCustomIdRaw] =
+          await Promise.all([
+            AsyncStorage.getItem("profiles"),
+            AsyncStorage.getItem("activeProfileIdx"),
+            AsyncStorage.getItem("activeCustomProfileId"),
+          ]);
+
+        if (!cancelled && legacyCoursesRaw && courses.length === 0) {
+          try {
+            const parsed = JSON.parse(legacyCoursesRaw) as LanguageCourse[];
+            if (Array.isArray(parsed) && parsed.length > 0) {
+              await setCourses(parsed);
+            }
+          } catch (error) {
+            console.warn("[SettingsContext] Failed to migrate legacy profiles", error);
+          } finally {
+            await AsyncStorage.removeItem("profiles");
+          }
+        }
+
+        if (!cancelled && legacyActiveIdxRaw && activeCourseIdx == null) {
+          try {
+            const parsedIdx = JSON.parse(legacyActiveIdxRaw);
+            if (typeof parsedIdx === "number") {
+              await setActiveCourseIdx(parsedIdx);
+            }
+          } catch (error) {
+            console.warn(
+              "[SettingsContext] Failed to migrate legacy activeProfileIdx",
+              error
+            );
+          } finally {
+            await AsyncStorage.removeItem("activeProfileIdx");
+          }
+        }
+
+        if (!cancelled && legacyCustomIdRaw && activeCustomCourseId == null) {
+          try {
+            const parsedId = JSON.parse(legacyCustomIdRaw);
+            if (typeof parsedId === "number") {
+              await setActiveCustomCourseId(parsedId);
+            }
+          } catch (error) {
+            console.warn(
+              "[SettingsContext] Failed to migrate legacy activeCustomProfileId",
+              error
+            );
+          } finally {
+            await AsyncStorage.removeItem("activeCustomProfileId");
+          }
+        }
+      } catch (error) {
+        console.warn("[SettingsContext] Legacy migration failed", error);
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses.length,
+    setActiveCourseIdx,
+    setActiveCustomCourseId,
+    setCourses,
+  ]);
+
+  const addCourse = async (p: LanguageCourse) => {
+    const existsIdx = findCourseIndex(courses, p);
+    if (existsIdx !== -1) {
+      const existing = courses[existsIdx];
+      if (existing.level == null && p.level != null) {
+        const updated = [...courses];
+        updated[existsIdx] = { ...existing, ...p };
+        await setCourses(updated);
+      }
+      return;
+    }
+
+    const newList = [...courses, p];
+    await setCourses(newList);
+  };
+
+  const removeCourse = async (course: LanguageCourse) => {
+    const indexToRemove = findCourseIndex(courses, course);
+    if (indexToRemove === -1) {
+      return;
+    }
+
+    const updatedCourses = courses.filter((_, idx) => idx !== indexToRemove);
+    await setCourses(updatedCourses);
+
+    if (activeCourseIdx == null) {
+      return;
+    }
+
+    if (activeCourseIdx === indexToRemove) {
+      await setActiveCourseIdx(null);
+      return;
+    }
+
+    if (activeCourseIdx > indexToRemove) {
+      await setActiveCourseIdx(activeCourseIdx - 1);
     }
   };
 
-  const activeProfile =
-    activeProfileIdx != null ? profiles[activeProfileIdx] : null;
+  const activeCourse =
+    activeCourseIdx != null ? courses[activeCourseIdx] : null;
 
   const setFeedbackEnabled = async (value: boolean) => {
     await _setFeedbackEnabled(value);
@@ -296,13 +427,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         toggleTheme,
         boxesLayout,
         setBoxesLayout,
-        profiles,
-        addProfile,
-        activeProfileIdx,
-        setActiveProfileIdx,
-        activeProfile,
-        activeCustomProfileId,
-        setActiveCustomProfileId,
+        courses,
+        addCourse,
+        removeCourse,
+        activeCourseIdx,
+        setActiveCourseIdx,
+        activeCourse,
+        activeCustomCourseId,
+        setActiveCustomCourseId,
         selectedLevel,
         setLevel,
         spellChecking,

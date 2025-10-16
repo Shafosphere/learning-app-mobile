@@ -7,7 +7,7 @@
 
 ## VoiceOver / TalkBack
 - Uruchom czytnik ekranu (VoiceOver na iOS lub TalkBack na Androidzie).
-- Nawiguj po głównych ekranach, upewniając się, że przyciski (np. rozpoczynanie nauki, wybór profilu, przełączniki ustawień) mają czytelne etykiety.
+- Nawiguj po głównych ekranach, upewniając się, że przyciski (np. rozpoczynanie nauki, wybór kursu, przełączniki ustawień) mają czytelne etykiety.
 - Potwierdź, że elementy interaktywne zgłaszają prawidłowe role i stany (np. zaznaczone pudełko w widoku fiszek).
 
 ## Orientacja pozioma
