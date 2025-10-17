@@ -10,6 +10,8 @@ import {
   getDueReviewWordsBatch,
   removeCustomReview,
   removeReview,
+  logLearningEvent,
+  logCustomLearningEvent,
 } from "@/src/db/sqlite/db";
 import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
@@ -57,6 +59,7 @@ export default function TypingReviewScreen() {
   const [loading, setLoading] = useState(false);
   const [carouselItems, setCarouselItems] = useState<string[]>([]);
   const [spinBusy, setSpinBusy] = useState(false);
+  const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
 
   const isCustomMode = activeCustomCourseId != null;
   const srcId = activeCourse?.sourceLangId ?? null;
@@ -126,6 +129,7 @@ export default function TypingReviewScreen() {
       setCarouselItems(uniqueBatch.map((item) => formatWordText(item.text)));
       const next = uniqueBatch[0] ?? null;
       setCurrent(next);
+      setQuestionShownAt(next ? Date.now() : null);
       setSessionEnded(uniqueBatch.length === 0 && hadWordsBefore);
     } finally {
       setAnswer("");
@@ -144,6 +148,27 @@ export default function TypingReviewScreen() {
   function onSubmit() {
     if (!current || !canRunReview) return;
     const ok = current.translations.some((t) => checkSpelling(answer, t));
+    const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
+    // Log event (reviews session)
+    if (isCustomMode && activeCustomCourseId != null) {
+      void logCustomLearningEvent({
+        flashcardId: current.id,
+        courseId: activeCustomCourseId,
+        box: null,
+        result: ok ? 'ok' : 'wrong',
+        durationMs: duration ?? undefined,
+      });
+    } else if (!isCustomMode && srcId && tgtId && selectedLevel) {
+      void logLearningEvent({
+        wordId: current.id,
+        sourceLangId: srcId,
+        targetLangId: tgtId,
+        level: selectedLevel,
+        box: null,
+        result: ok ? 'ok' : 'wrong',
+        durationMs: duration ?? undefined,
+      });
+    }
     if (ok) {
       setPromptState("correct");
       setLoading(true);

@@ -18,12 +18,25 @@ import {
 } from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const logo = require("@/assets/illustrations/navbar/logo.png");
+
+const MAX_NAV_COURSE_NAME_LENGTH = 13;
+
+const truncateCourseName = (name: string): string => {
+  if (!name) {
+    return "";
+  }
+  if (name.length <= MAX_NAV_COURSE_NAME_LENGTH) {
+    return name;
+  }
+  return `${name.slice(0, MAX_NAV_COURSE_NAME_LENGTH - 1)}…`;
+};
 
 type NavbarProps = {
   children?: ReactNode;
@@ -46,6 +59,7 @@ export default function Navbar({ children }: NavbarProps) {
   const bottomPad = Math.max(insets.bottom, 12);
   const [customCourse, setCustomCourse] =
     useState<CustomCourseRecord | null>(null);
+  const { knownWordsCount } = useLearningStats();
 
   useEffect(() => {
     let isMounted = true;
@@ -103,6 +117,9 @@ export default function Navbar({ children }: NavbarProps) {
   const CustomCourseIcon = courseIconMeta?.Component;
   const customCourseIconName = courseIconMeta?.name ?? "grid-outline";
   const customCourseIconColor = customCourse?.iconColor ?? colors.headline;
+  const customCourseDisplayName = customCourse
+    ? truncateCourseName(customCourse.name)
+    : "";
 
   const courseGraphic =
     activeCustomCourseId != null && customCourse ? (
@@ -176,7 +193,7 @@ export default function Navbar({ children }: NavbarProps) {
                   ellipsizeMode="tail"
                   allowFontScaling
                 >
-                  {customCourse.name}
+                  {customCourseDisplayName}
                 </Text>
               ) : null}
             </TouchableOpacity>
@@ -194,6 +211,19 @@ export default function Navbar({ children }: NavbarProps) {
           </View>
 
           <View style={styles.rightGroup}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.iconButton,
+                pressed && styles.iconButtonPressed,
+              ]}
+              onPress={() => router.push("/stats")}
+              accessibilityRole="button"
+              accessibilityLabel={`Opanowane słówka: ${knownWordsCount}. Przejdź do statystyk`}
+            >
+              <Text style={styles.counterText} allowFontScaling>
+                {knownWordsCount}
+              </Text>
+            </Pressable>
             <Pressable
               style={({ pressed }) => [
                 styles.iconButton,

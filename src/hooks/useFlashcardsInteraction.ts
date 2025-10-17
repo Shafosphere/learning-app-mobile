@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { logCustomLearningEvent, logLearningEvent } from "@/src/db/sqlite/db";
 
 type SpellcheckFn = (input: string, expected: string) => boolean;
 
@@ -39,6 +41,8 @@ export function useFlashcardsInteraction({
   const [result, setResult] = useState<boolean | null>(null);
   const [correction, setCorrection] = useState<CorrectionState | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
+  const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
+  const { activeCourse, selectedLevel, activeCustomCourseId } = useSettings();
 
   const reversed = useMemo(() => {
     if (!activeBox) return false;
@@ -61,6 +65,7 @@ export function useFlashcardsInteraction({
         idx = (idx + 1) % list.length;
       }
       setSelectedItem(list[idx]);
+      setQuestionShownAt(Date.now());
     },
     [boxes, selectedItem]
   );
@@ -128,6 +133,31 @@ export function useFlashcardsInteraction({
     if (!selectedItem) return;
 
     const ok = checkAnswer();
+    const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
+    // Log learning event for analytics (flashcards)
+    if (activeCustomCourseId != null) {
+      void logCustomLearningEvent({
+        flashcardId: selectedItem.id,
+        courseId: activeCustomCourseId,
+        box: activeBox ?? null,
+        result: ok ? 'ok' : 'wrong',
+        durationMs: duration ?? undefined,
+      });
+    } else if (
+      activeCourse?.sourceLangId != null &&
+      activeCourse?.targetLangId != null &&
+      selectedLevel
+    ) {
+      void logLearningEvent({
+        wordId: selectedItem.id,
+        sourceLangId: activeCourse.sourceLangId,
+        targetLangId: activeCourse.targetLangId,
+        level: selectedLevel,
+        box: activeBox ?? null,
+        result: ok ? 'ok' : 'wrong',
+        durationMs: duration ?? undefined,
+      });
+    }
     if (ok) {
       setResult(true);
       if (activeBox) {
@@ -157,6 +187,10 @@ export function useFlashcardsInteraction({
     moveElement,
     onCorrectAnswer,
     registerKnownWord,
+    activeCourse?.sourceLangId,
+    activeCourse?.targetLangId,
+    activeCustomCourseId,
+    selectedLevel,
     selectedItem,
   ]);
 

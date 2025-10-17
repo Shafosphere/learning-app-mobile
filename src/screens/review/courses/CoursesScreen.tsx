@@ -11,6 +11,7 @@ import {
   countDueReviewsByLevel,
   countTotalDueReviews,
   getCustomCoursesWithCardCounts,
+  getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
@@ -31,6 +32,18 @@ const LEVEL_ORDER: Record<CEFRLevel, number> = {
 };
 const MAX_LEVEL_ORDER = Math.max(...Object.values(LEVEL_ORDER)) + 1;
 
+const MAX_COURSE_NAME_LENGTH = 13;
+
+const truncateName = (name: string): string => {
+  if (!name) {
+    return "";
+  }
+  if (name.length <= MAX_COURSE_NAME_LENGTH) {
+    return name;
+  }
+  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
+};
+
 export default function CoursesScreen() {
   const styles = useStyles();
   const router = useRouter();
@@ -40,6 +53,7 @@ export default function CoursesScreen() {
     setActiveCustomCourseId,
     setLevel,
     colors,
+    pinnedOfficialCourseIds,
   } = useSettings();
 
   const [builtInCounts, setBuiltInCounts] = useState<Record<number, number>>(
@@ -49,6 +63,10 @@ export default function CoursesScreen() {
     []
   );
   const [customCounts, setCustomCounts] = useState<Record<number, number>>({});
+  const [officialCourses, setOfficialCourses] = useState<CustomCourseSummary[]>(
+    []
+  );
+  const [officialCounts, setOfficialCounts] = useState<Record<number, number>>({});
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
@@ -86,10 +104,15 @@ export default function CoursesScreen() {
     setBuiltInCounts(nextBuiltIn);
 
     try {
-      const rows = await getCustomCoursesWithCardCounts();
-      setCustomCourses(rows);
+      const [allCustomRows, officialRows] = await Promise.all([
+        getCustomCoursesWithCardCounts(),
+        getOfficialCustomCoursesWithCardCounts(),
+      ]);
+
+      const userRows = allCustomRows.filter((row) => !row.isOfficial);
+      setCustomCourses(userRows);
       const customEntries = await Promise.all(
-        rows.map(async (course) => {
+        userRows.map(async (course) => {
           if (!course.reviewsEnabled) {
             return [course.id, 0] as const;
           }
@@ -110,10 +133,36 @@ export default function CoursesScreen() {
         nextCustom[id] = count;
       }
       setCustomCounts(nextCustom);
+
+      setOfficialCourses(officialRows);
+      const officialEntries = await Promise.all(
+        officialRows.map(async (course) => {
+          if (!course.reviewsEnabled) {
+            return [course.id, 0] as const;
+          }
+          try {
+            const count = await countDueCustomReviews(course.id, now);
+            return [course.id, count] as const;
+          } catch (error) {
+            console.warn(
+              `Failed to count official reviews for course ${course.id}`,
+              error
+            );
+            return [course.id, 0] as const;
+          }
+        })
+      );
+      const nextOfficial: Record<number, number> = {};
+      for (const [id, count] of officialEntries) {
+        nextOfficial[id] = count;
+      }
+      setOfficialCounts(nextOfficial);
     } catch (error) {
-      console.error("Failed to load custom course counts", error);
+      console.error("Failed to load custom/official course counts", error);
       setCustomCourses([]);
       setCustomCounts({});
+      setOfficialCourses([]);
+      setOfficialCounts({});
     }
   }, [courses]);
 
@@ -185,6 +234,11 @@ export default function CoursesScreen() {
   );
   const hasCustomCourses = customCourses.length > 0;
   const hasVisibleCustomCourses = visibleCustomCourses.length > 0;
+  const visibleOfficialCourses = officialCourses.filter(
+    (course) =>
+      pinnedOfficialCourseIds.includes(course.id) && course.reviewsEnabled
+  );
+  const hasPinnedOfficial = visibleOfficialCourses.length > 0;
   const builtInGroups = useMemo(() => {
     const groups = new Map<
       string,
@@ -278,6 +332,44 @@ export default function CoursesScreen() {
           </View>
 
           <View style={styles.section}>
+            <Text style={styles.sectionTitle}>Zestawy tematyczne</Text>
+            {!hasPinnedOfficial ? (
+              <Text style={styles.emptyText}>
+                Nie masz jeszcze przypiętych zestawów tematycznych.
+              </Text>
+            ) : (
+              <View style={styles.courseGrid}>
+                {visibleOfficialCourses.map((course) => {
+                  const iconMeta = getCourseIconById(course.iconId);
+                  const IconComponent = iconMeta?.Component ?? Ionicons;
+                  const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                  const dueCount = officialCounts[course.id] ?? 0;
+
+                  return (
+                    <Pressable
+                      key={`official-${course.id}`}
+                      style={styles.courseCard}
+                      onPress={() => handleSelectCustomCourse(course.id)}
+                    >
+                      <IconComponent
+                        name={iconName}
+                        size={48}
+                        color={course.iconColor}
+                      />
+                      <Text style={styles.courseCardText}>
+                        {truncateName(course.name)}
+                      </Text>
+                      <View style={styles.courseCount}>
+                        {renderCount(dueCount)}
+                      </View>
+                    </Pressable>
+                  );
+                })}
+              </View>
+            )}
+          </View>
+
+          <View style={styles.section}>
             <Text style={styles.sectionTitle}>Twoje</Text>
             {!hasCustomCourses ? (
               <Text style={styles.emptyText}>
@@ -285,7 +377,7 @@ export default function CoursesScreen() {
               </Text>
             ) : !hasVisibleCustomCourses ? (
               <Text style={styles.emptyText}>
-                Wszystkie course mają wyłączone powtórki.
+                Wszystkie kursy mają wyłączone powtórki.
               </Text>
             ) : (
               <View style={styles.courseGrid}>
@@ -306,7 +398,9 @@ export default function CoursesScreen() {
                         size={48}
                         color={course.iconColor}
                       />
-                      <Text style={styles.courseCardText}>{course.name}</Text>
+                      <Text style={styles.courseCardText}>
+                        {truncateName(course.name)}
+                      </Text>
                       <View style={styles.courseCount}>
                         {renderCount(dueCount)}
                       </View>

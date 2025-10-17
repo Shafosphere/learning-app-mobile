@@ -31,6 +31,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 12,
     marginBottom: 12,
   },
   groupHeaderLine: {
@@ -153,6 +154,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   customEditButton: {},
+  emptyContainer: {
+    width: "100%",
+    minHeight: 240,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  emptyState: {
+    fontSize: 26,
+    fontWeight: 800,
+    textAlign: "center",
+    color: colors.paragraph,
+  },
   buttonscontainer: {
     width: "100%",
     paddingBottom: 24,

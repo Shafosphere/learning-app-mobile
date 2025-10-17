@@ -118,6 +118,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   counterText: {
     marginLeft: 8,
+    marginRight: 8,
     color: colors.headline,
     fontWeight: "700",
     fontSize: 16,
@@ -129,6 +130,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "600",
     fontSize: 16,
     flexShrink: 1,
+    maxWidth: 130,
   },
   right: {
     display: "flex",

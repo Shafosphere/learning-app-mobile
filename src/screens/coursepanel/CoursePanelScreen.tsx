@@ -1,20 +1,21 @@
-import { useStyles } from "./CoursePanelScreen-styles";
-import { Image, Text, View, Pressable, ScrollView } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import MyButton from "@/src/components/button/button";
-import { useRouter } from "expo-router";
-import { usePopup } from "@/src/contexts/PopupContext";
-import { useFocusEffect } from "@react-navigation/native";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import {
-  getCustomCoursesWithCardCounts,
-  type CustomCourseSummary,
-} from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
+import { usePopup } from "@/src/contexts/PopupContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+  getCustomCoursesWithCardCounts,
+  getOfficialCustomCoursesWithCardCounts,
+  type CustomCourseSummary,
+} from "@/src/db/sqlite/db";
 import type { LanguageCourse } from "@/src/types/course";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useFocusEffect } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { useStyles } from "./CoursePanelScreen-styles";
 
 type BuiltinCourseGroup = {
   key: string;
@@ -27,6 +28,18 @@ type SelectedCourse =
   | { type: "builtin"; index: number }
   | { type: "custom"; id: number };
 
+const MAX_COURSE_NAME_LENGTH = 13;
+
+const truncateName = (name: string): string => {
+  if (!name) {
+    return "";
+  }
+  if (name.length <= MAX_COURSE_NAME_LENGTH) {
+    return name;
+  }
+  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
+};
+
 export default function CoursePanelScreen() {
   const {
     courses,
@@ -37,6 +50,7 @@ export default function CoursePanelScreen() {
     setActiveCustomCourseId,
     colors,
     setLevel,
+    pinnedOfficialCourseIds,
   } = useSettings();
 
   const lang: Record<string, Record<string, string>> = {
@@ -48,6 +62,9 @@ export default function CoursePanelScreen() {
   const [committedCourse, setCommittedCourse] =
     useState<SelectedCourse | null>(null);
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>(
+    []
+  );
+  const [officialCourses, setOfficialCourses] = useState<CustomCourseSummary[]>(
     []
   );
   const router = useRouter();
@@ -78,6 +95,31 @@ export default function CoursePanelScreen() {
 
     return groups;
   }, [courses]);
+
+  const userCustomCourses = useMemo(
+    () => customCourses.filter((course) => !course.isOfficial),
+    [customCourses]
+  );
+
+  const pinnedOfficialCourses = useMemo(
+    () =>
+      officialCourses.filter((course) =>
+        pinnedOfficialCourseIds.includes(course.id)
+      ),
+    [officialCourses, pinnedOfficialCourseIds]
+  );
+
+  const hasBuiltInCourses = useMemo(
+    () => builtinCourseGroups.some((group) => group.items.length > 0),
+    [builtinCourseGroups]
+  );
+
+  const hasPinnedOfficialCourses = pinnedOfficialCourses.length > 0;
+  const hasUserCustomCourses = userCustomCourses.length > 0;
+  const isEmptyState =
+    !hasBuiltInCourses &&
+    !hasPinnedOfficialCourses &&
+    !hasUserCustomCourses;
 
   useEffect(() => {
     console.log("courses length:", courses.length);
@@ -113,6 +155,13 @@ export default function CoursePanelScreen() {
         })
         .catch((error) => {
           console.error("Failed to load custom courses", error);
+        });
+      getOfficialCustomCoursesWithCardCounts()
+        .then((rows) => {
+          if (isMounted) setOfficialCourses(rows);
+        })
+        .catch((error) => {
+          console.error("Failed to load official courses", error);
         });
       return () => {
         isMounted = false;
@@ -161,20 +210,29 @@ export default function CoursePanelScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.minicontainer}>
-          <Text style={styles.title}>Stworzone przez nas</Text>
+          {isEmptyState ? (
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyState}>
+                nic tu nie ma :(, czas wybrać kurs!
+              </Text>
+            </View>
+          ) : (
+            <>
+              {hasBuiltInCourses ? (
+                <>
+                  <Text style={styles.title}>Stworzone przez nas</Text>
+                  <View style={styles.builtinSection}>
+                    {builtinCourseGroups.map((group) => {
+                      const headerCode = group.targetLang
+                        ? group.targetLang.toUpperCase()
+                        : group.key.toUpperCase();
+                      const showHeader = group.items.length > 1;
 
-          <View style={styles.builtinSection}>
-            {builtinCourseGroups.map((group) => {
-              const headerCode = group.targetLang
-                ? group.targetLang.toUpperCase()
-                : group.key.toUpperCase();
-              const showHeader = group.items.length > 1;
-
-              return (
-                <View key={`builtin-group-${group.key}`} style={styles.groupSection}>
-                  {showHeader ? (
-                    <View style={styles.groupHeader}>
-                      <View style={styles.groupHeaderLine} />
+                return (
+                  <View key={`builtin-group-${group.key}`} style={styles.groupSection}>
+                    {showHeader ? (
+                      <View style={styles.groupHeader}>
+                        <View style={styles.groupHeaderLine} />
                       <View style={styles.groupHeaderBadge}>
                         {group.targetFlag ? (
                           <Image
@@ -235,25 +293,75 @@ export default function CoursePanelScreen() {
                       );
                     })}
                   </View>
-                </View>
-              );
-            })}
-          </View>
+                  </View>
+                );
+                    })}
+                  </View>
+                </>
+              ) : null}
 
-          <View style={styles.customSection}>
-            <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
-            {customCourses.length === 0 ? (
-              <Text style={styles.customEmptyText}>
-                Nie masz jeszcze własnych fiszek.
-              </Text>
-            ) : (
-              <View style={styles.customList}>
-                {customCourses.map((course) => {
-                  const iconMeta = getCourseIconById(course.iconId);
-                  const IconComponent = iconMeta?.Component ?? Ionicons;
-                  const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                  const highlightCourse = selectedCourse ?? committedCourse;
-                  const isHighlighted =
+              {hasPinnedOfficialCourses ? (
+                <View style={styles.builtinSection}>
+                  <View style={styles.groupHeader}>
+                    <View style={styles.groupHeaderLine} />
+                    <Text style={styles.groupHeaderLabel}>Zestawy tematyczne</Text>
+                  </View>
+                  <View style={styles.groupCourses}>
+                    {pinnedOfficialCourses.map((course) => {
+                      const highlightCourse = selectedCourse ?? committedCourse;
+                      const isHighlighted =
+                        highlightCourse?.type === "custom" &&
+                        highlightCourse.id === course.id;
+                    const iconMeta = getCourseIconById(course.iconId);
+                    const IconComponent = iconMeta?.Component ?? Ionicons;
+                    const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                    return (
+                      <Pressable
+                        key={`official-${course.id}`}
+                        onPress={() =>
+                          setSelectedCourse({ type: "custom", id: course.id })
+                        }
+                        style={[styles.customCard, isHighlighted && styles.clicked]}
+                      >
+                        <View style={styles.customCardContent}>
+                          <View
+                            style={[
+                              styles.customIconBadge,
+                              { borderColor: course.iconColor },
+                            ]}
+                          >
+                            <IconComponent
+                              name={iconName}
+                              size={60}
+                              color={course.iconColor}
+                            />
+                          </View>
+                          <View style={styles.customCardInfo}>
+                            <Text style={styles.customCardTitle}>
+                              {truncateName(course.name)}
+                            </Text>
+                            <Text style={styles.customCardMeta}>
+                              fiszki: {course.cardsCount}
+                            </Text>
+                          </View>
+                        </View>
+                      </Pressable>
+                    );
+                    })}
+                  </View>
+                </View>
+              ) : null}
+
+              {hasUserCustomCourses ? (
+                <View style={styles.customSection}>
+                  <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
+                  <View style={styles.customList}>
+                    {userCustomCourses.map((course) => {
+                      const iconMeta = getCourseIconById(course.iconId);
+                      const IconComponent = iconMeta?.Component ?? Ionicons;
+                      const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                      const highlightCourse = selectedCourse ?? committedCourse;
+                      const isHighlighted =
                     highlightCourse?.type === "custom" &&
                     highlightCourse.id === course.id;
                   return (
@@ -279,34 +387,38 @@ export default function CoursePanelScreen() {
                         </View>
                         <View style={styles.customCardInfo}>
                           <Text style={styles.customCardTitle}>
-                            {course.name}
+                            {truncateName(course.name)}
                           </Text>
                           <Text style={styles.customCardMeta}>
                             fiszki: {course.cardsCount}
                           </Text>
                         </View>
                       </View>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Edytuj kurs ${course.name}`}
-                        style={styles.customEditButton}
-                        onPress={(event) => {
-                          event.stopPropagation();
-                          handleEditCustomCourse(course);
-                        }}
-                      >
-                        <FontAwesome6
-                          name="edit"
-                          size={24}
-                          color={colors.headline}
-                        />
-                      </Pressable>
+                      {!course.isOfficial && (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Edytuj kurs ${course.name}`}
+                          style={styles.customEditButton}
+                          onPress={(event) => {
+                            event.stopPropagation();
+                            handleEditCustomCourse(course);
+                          }}
+                        >
+                          <FontAwesome6
+                            name="edit"
+                            size={24}
+                            color={colors.headline}
+                          />
+                        </Pressable>
+                      )}
                     </Pressable>
                   );
-                })}
-              </View>
-            )}
-          </View>
+                    })}
+                  </View>
+                </View>
+              ) : null}
+            </>
+          )}
         </View>
       </ScrollView>
 

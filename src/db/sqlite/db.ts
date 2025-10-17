@@ -22,6 +22,9 @@ export interface CustomCourseRecord {
   reviewsEnabled: boolean;
   createdAt: number;
   updatedAt: number;
+  // optional metadata
+  isOfficial?: boolean;
+  slug?: string | null;
 }
 
 export interface CustomCourseInput {
@@ -68,6 +71,8 @@ type CustomCourseSqlRow = {
   reviewsEnabled: number;
   createdAt: number;
   updatedAt: number;
+  isOfficial?: number;
+  slug?: string | null;
 };
 
 type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
@@ -82,6 +87,8 @@ function mapCustomCourseRow(row: CustomCourseSqlRow): CustomCourseRecord {
   return {
     ...row,
     reviewsEnabled: row.reviewsEnabled === 1,
+    isOfficial: row.isOfficial === 1,
+    slug: row.slug ?? null,
   };
 }
 
@@ -170,6 +177,45 @@ function addAnswerIfPresent(target: string[], answer: string | null | undefined)
 
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 
+export type DbInitializationEvent =
+  | { type: "start" }
+  | { type: "import-start" }
+  | { type: "import-finish" }
+  | { type: "ready"; initialImport: boolean }
+  | { type: "error"; error: unknown };
+
+export type DbInitializationListener = (event: DbInitializationEvent) => void;
+
+const dbInitializationListeners = new Set<DbInitializationListener>();
+let lastDbInitializationEvent: DbInitializationEvent | null = null;
+
+export function addDbInitializationListener(
+  listener: DbInitializationListener
+): () => void {
+  dbInitializationListeners.add(listener);
+  if (lastDbInitializationEvent) {
+    try {
+      listener(lastDbInitializationEvent);
+    } catch (error) {
+      console.warn("[DB] DbInitializationListener threw on subscribe", error);
+    }
+  }
+  return () => {
+    dbInitializationListeners.delete(listener);
+  };
+}
+
+function notifyDbInitializationListeners(event: DbInitializationEvent): void {
+  lastDbInitializationEvent = event;
+  dbInitializationListeners.forEach((listener) => {
+    try {
+      listener(event);
+    } catch (error) {
+      console.warn("[DB] DbInitializationListener threw", error);
+    }
+  });
+}
+
 async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
   return SQLite.openDatabaseAsync("mygame.db");
 }
@@ -256,6 +302,33 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     );
     CREATE INDEX IF NOT EXISTS idx_reviews_due ON reviews(next_review);
     CREATE INDEX IF NOT EXISTS idx_reviews_pair ON reviews(source_lang_id, target_lang_id);
+
+    -- Optional learning events for analytics (flashcards + reviews)
+    CREATE TABLE IF NOT EXISTS learning_events (
+      id               INTEGER PRIMARY KEY AUTOINCREMENT,
+      word_id          INTEGER NOT NULL,
+      source_lang_id   INTEGER,
+      target_lang_id   INTEGER,
+      level            TEXT,
+      box              TEXT, -- boxOne..boxFive or NULL for reviews
+      result           TEXT NOT NULL, -- 'ok' | 'wrong'
+      duration_ms      INTEGER,
+      created_at       INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_learning_events_word ON learning_events(word_id);
+    CREATE INDEX IF NOT EXISTS idx_learning_events_time ON learning_events(created_at);
+
+    CREATE TABLE IF NOT EXISTS custom_learning_events (
+      id             INTEGER PRIMARY KEY AUTOINCREMENT,
+      flashcard_id   INTEGER NOT NULL,
+      course_id      INTEGER,
+      box            TEXT,
+      result         TEXT NOT NULL,
+      duration_ms    INTEGER,
+      created_at     INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_custom_learning_events_card ON custom_learning_events(flashcard_id);
+    CREATE INDEX IF NOT EXISTS idx_custom_learning_events_time ON custom_learning_events(created_at);
   `);
 
   await ensureColumn(
@@ -263,6 +336,15 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     "custom_courses",
     "reviews_enabled",
     "INTEGER NOT NULL DEFAULT 0"
+  );
+
+  // Official pack metadata (idempotent, safe for existing DBs)
+  await ensureColumn(db, "custom_courses", "is_official", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn(db, "custom_courses", "slug", "TEXT");
+  await db.execAsync(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_courses_slug
+       ON custom_courses(slug)
+       WHERE slug IS NOT NULL;`
   );
 
   await backfillCustomFlashcardAnswers(db);
@@ -332,7 +414,9 @@ export async function getCustomCourses(): Promise<CustomCourseRecord[]> {
        color_id    AS colorId,
        COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
-       updated_at  AS updatedAt
+       updated_at  AS updatedAt,
+       COALESCE(is_official, 0) AS isOfficial,
+       slug AS slug
      FROM custom_courses
      ORDER BY created_at DESC, id DESC;`
   );
@@ -351,6 +435,8 @@ export async function getCustomCoursesWithCardCounts(): Promise<CustomCourseSumm
        COALESCE(cp.reviews_enabled, 0) AS reviewsEnabled,
        cp.created_at  AS createdAt,
        cp.updated_at  AS updatedAt,
+       COALESCE(cp.is_official, 0) AS isOfficial,
+       cp.slug AS slug,
        (
          SELECT COUNT(*)
          FROM custom_flashcards cf
@@ -505,11 +591,12 @@ export async function getCustomFlashcards(
   return ordered;
 }
 
-export async function replaceCustomFlashcards(
+export async function replaceCustomFlashcardsWithDb(
+  db: SQLite.SQLiteDatabase,
   courseId: number,
   cards: CustomFlashcardInput[]
 ): Promise<void> {
-  const db = await getDB();
+  console.log("[DB] replaceCustomFlashcardsWithDb: start", { courseId, count: cards.length });
   await db.execAsync("BEGIN TRANSACTION;");
   const now = Date.now();
   try {
@@ -570,10 +657,21 @@ export async function replaceCustomFlashcards(
     }
 
     await db.execAsync("COMMIT;");
+    console.log("[DB] replaceCustomFlashcardsWithDb: committed");
   } catch (error) {
     await db.execAsync("ROLLBACK;");
+    console.warn("[DB] replaceCustomFlashcardsWithDb: rollback due to error", error);
     throw error;
   }
+}
+
+export async function replaceCustomFlashcards(
+  courseId: number,
+  cards: CustomFlashcardInput[]
+): Promise<void> {
+  const db = await getDB();
+  console.log("[DB] replaceCustomFlashcards: delegating to WithDb");
+  return replaceCustomFlashcardsWithDb(db, courseId, cards);
 }
 
 async function seedLanguages(
@@ -668,20 +766,46 @@ async function importInitialCsv(db: SQLite.SQLiteDatabase): Promise<void> {
 }
 
 async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
+  notifyDbInitializationListeners({ type: "start" });
   const db = await openDatabase();
+  console.log("[DB] initializeDatabase: openDatabase done");
   await applySchema(db);
+  console.log("[DB] initializeDatabase: applySchema done");
   await configurePragmas(db);
+  console.log("[DB] initializeDatabase: configurePragmas done");
 
   const countRow = await db.getFirstAsync<{ cnt: number }>(
     `SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');`
   );
 
-  if ((countRow?.cnt ?? 0) > 0) {
+  const requiresInitialImport = (countRow?.cnt ?? 0) === 0;
+
+  if (!requiresInitialImport) {
     console.log("DB już załadowana → pomijam import");
-    return db;
+  } else {
+    notifyDbInitializationListeners({ type: "import-start" });
+    try {
+      await importInitialCsv(db);
+      notifyDbInitializationListeners({ type: "import-finish" });
+    } catch (error) {
+      notifyDbInitializationListeners({ type: "error", error });
+      throw error;
+    }
   }
 
-  await importInitialCsv(db);
+  try {
+    await seedOfficialPacksWithDb(db);
+  } catch (e) {
+    console.warn(
+      "[DB] Seeding official packs failed" +
+        (requiresInitialImport ? " after initial import" : ""),
+      e
+    );
+  }
+  notifyDbInitializationListeners({
+    type: "ready",
+    initialImport: requiresInitialImport,
+  });
   return db;
 }
 
@@ -728,6 +852,167 @@ export async function logTableContents() {
   );
   console.log("Custom flashcards (latest 5):");
   console.table(customFlashcards);
+}
+
+
+// ===== Official packs (built-in custom courses) =====
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+
+async function readCsvAsset(assetModule: any): Promise<
+  { frontText: string; backText: string; answers: string[]; position: number }[]
+> {
+  console.log("[DB] readCsvAsset: create asset from module");
+  const asset = Asset.fromModule(assetModule);
+  console.log("[DB] readCsvAsset: start download", asset);
+  await asset.downloadAsync();
+  console.log("[DB] readCsvAsset: downloaded");
+  const uri = asset.localUri ?? asset.uri;
+  console.log("[DB] readCsvAsset: uri=", uri);
+  const csv = await FileSystem.readAsStringAsync(uri);
+  console.log("[DB] readCsvAsset: file read, length=", csv?.length ?? 0);
+  console.log("[DB] readCsvAsset: start parse");
+  const { data } = Papa.parse<{ front?: string; back?: string }>(csv, {
+    header: true,
+    skipEmptyLines: true,
+  });
+  console.log("[DB] readCsvAsset: parsed rows=", data?.length ?? 0);
+  const cards = data
+    .map((row, idx) => {
+      const front = (row.front ?? "").trim();
+      const backRaw = (row.back ?? "").trim();
+      const answers = splitBackTextIntoAnswers(backRaw);
+      return {
+        frontText: front,
+        backText: backRaw,
+        answers,
+        position: idx,
+      };
+    })
+    .filter((c) => c.frontText.length > 0 || c.answers.length > 0);
+  return cards;
+}
+
+async function ensureOfficialCourse(
+  db: SQLite.SQLiteDatabase,
+  slug: string,
+  name: string,
+  iconId: string,
+  iconColor: string,
+  reviewsEnabled: boolean
+): Promise<number> {
+  console.log("[DB] ensureOfficialCourse: start", slug);
+  const existing = await db.getFirstAsync<{ id: number }>(
+    `SELECT id FROM custom_courses WHERE slug = ? LIMIT 1;`,
+    slug
+  );
+  const now = Date.now();
+  if (existing?.id) {
+    console.log("[DB] ensureOfficialCourse: update existing", existing.id);
+    await db.runAsync(
+      `UPDATE custom_courses
+       SET name = ?, icon_id = ?, icon_color = ?, reviews_enabled = ?, is_official = 1, updated_at = ?
+       WHERE id = ?;`,
+      name,
+      iconId,
+      iconColor,
+      reviewsEnabled ? 1 : 0,
+      now,
+      existing.id
+    );
+    return existing.id;
+  }
+  console.log("[DB] ensureOfficialCourse: insert new", slug);
+  const result = await db.runAsync(
+    `INSERT INTO custom_courses
+       (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug)
+     VALUES (?, ?, ?, NULL, ?, ?, ?, 1, ?);`,
+    name,
+    iconId,
+    iconColor,
+    reviewsEnabled ? 1 : 0,
+    now,
+    now,
+    slug
+  );
+  console.log("[DB] ensureOfficialCourse: inserted id=", Number(result.lastInsertRowId ?? 0));
+  return Number(result.lastInsertRowId ?? 0);
+}
+
+async function importOfficialPackIfEmpty(
+  db: SQLite.SQLiteDatabase,
+  courseId: number,
+  assetModule: any
+) {
+  console.log("[DB] importOfficialPackIfEmpty: check courseId=", courseId);
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM custom_flashcards WHERE course_id = ?;`,
+    courseId
+  );
+  const count = row?.cnt ?? 0;
+  console.log("[DB] importOfficialPackIfEmpty: existing count=", count);
+  if (count > 0) {
+    console.log("[DB] importOfficialPackIfEmpty: skipping import (already has cards)");
+    return;
+  }
+  console.log("[DB] importOfficialPackIfEmpty: reading asset");
+  const cards = await readCsvAsset(assetModule);
+  console.log("[DB] importOfficialPackIfEmpty: cards prepared=", cards.length);
+  if (cards.length === 0) return;
+  console.log("[DB] importOfficialPackIfEmpty: replacing flashcards");
+  await replaceCustomFlashcardsWithDb(db, courseId, cards);
+  console.log("[DB] importOfficialPackIfEmpty: replaced flashcards");
+}
+
+export async function seedOfficialPacksWithDb(
+  db: SQLite.SQLiteDatabase
+): Promise<void> {
+  console.log("[DB] Seeding official packs: start");
+  for (const def of OFFICIAL_PACKS) {
+    try {
+      console.log(`[DB] Seeding pack: ${def.slug}`);
+      const id = await ensureOfficialCourse(
+        db,
+        def.slug,
+        def.name,
+        def.iconId,
+        def.iconColor,
+        def.reviewsEnabled ?? true
+      );
+      await importOfficialPackIfEmpty(db, id, def.csvAsset);
+    } catch (e) {
+      console.warn(`[DB] Failed to seed official pack ${def.slug}`, e);
+    }
+  }
+  console.log("[DB] Seeding official packs: done");
+}
+
+export async function seedOfficialPacks(): Promise<void> {
+  const db = await getDB();
+  return seedOfficialPacksWithDb(db);
+}
+
+export async function getOfficialCustomCoursesWithCardCounts(): Promise<CustomCourseSummary[]> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<CustomCourseSummarySqlRow>(
+    `SELECT
+       cp.id,
+       cp.name,
+       cp.icon_id     AS iconId,
+       cp.icon_color  AS iconColor,
+       cp.color_id    AS colorId,
+       COALESCE(cp.reviews_enabled, 0) AS reviewsEnabled,
+       cp.created_at  AS createdAt,
+       cp.updated_at  AS updatedAt,
+       COALESCE(cp.is_official, 0) AS isOfficial,
+       cp.slug AS slug,
+       (
+         SELECT COUNT(*) FROM custom_flashcards cf WHERE cf.course_id = cp.id
+       ) AS cardsCount
+     FROM custom_courses cp
+     WHERE COALESCE(cp.is_official, 0) = 1
+     ORDER BY cp.created_at DESC, cp.id DESC;`
+  );
+  return rows.map(mapCustomCourseSummaryRow);
 }
 
 
@@ -818,6 +1103,187 @@ export async function scheduleReview(
     stage
   );
   return { nextReview, stage };
+}
+
+// --- Analytics helpers ------------------------------------------------------
+
+export async function logLearningEvent(params: {
+  wordId: number;
+  sourceLangId?: number | null;
+  targetLangId?: number | null;
+  level?: string | null;
+  box?: string | null; // boxOne..boxFive
+  result: 'ok' | 'wrong';
+  durationMs?: number | null;
+}): Promise<void> {
+  const db = await getDB();
+  const now = Date.now();
+  await db.runAsync(
+    `INSERT INTO learning_events (word_id, source_lang_id, target_lang_id, level, box, result, duration_ms, created_at)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?);`,
+    params.wordId,
+    params.sourceLangId ?? null,
+    params.targetLangId ?? null,
+    params.level ?? null,
+    params.box ?? null,
+    params.result,
+    params.durationMs ?? null,
+    now
+  );
+}
+
+export async function logCustomLearningEvent(params: {
+  flashcardId: number;
+  courseId?: number | null;
+  box?: string | null;
+  result: 'ok' | 'wrong';
+  durationMs?: number | null;
+}): Promise<void> {
+  const db = await getDB();
+  const now = Date.now();
+  await db.runAsync(
+    `INSERT INTO custom_learning_events (flashcard_id, course_id, box, result, duration_ms, created_at)
+     VALUES (?, ?, ?, ?, ?, ?);`,
+    params.flashcardId,
+    params.courseId ?? null,
+    params.box ?? null,
+    params.result,
+    params.durationMs ?? null,
+    now
+  );
+}
+
+export async function countTotalLearnedWordsGlobal(): Promise<number> {
+  const db = await getDB();
+  const r1 = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM reviews;`
+  );
+  const r2 = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM custom_reviews;`
+  );
+  return (r1?.cnt ?? 0) + (r2?.cnt ?? 0);
+}
+
+export async function countCustomFlashcardsForCourse(courseId: number): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM custom_flashcards WHERE course_id = ?;`,
+    courseId
+  );
+  return row?.cnt ?? 0;
+}
+
+export async function countCustomLearnedForCourse(courseId: number): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt FROM custom_reviews WHERE course_id = ?;`,
+    courseId
+  );
+  return row?.cnt ?? 0;
+}
+
+export type DailyCount = { date: string; count: number };
+
+export async function getDailyLearnedCountsBuiltin(
+  fromMs: number,
+  toMs: number
+): Promise<DailyCount[]> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ d: string; cnt: number }>(
+    `SELECT strftime('%Y-%m-%d', learned_at/1000, 'unixepoch') AS d, COUNT(*) AS cnt
+     FROM reviews
+     WHERE learned_at BETWEEN ? AND ?
+     GROUP BY d
+     ORDER BY d ASC;`,
+    fromMs,
+    toMs
+  );
+  return rows.map((r) => ({ date: r.d, count: r.cnt | 0 }));
+}
+
+export async function getDailyLearnedCountsCustom(
+  fromMs: number,
+  toMs: number
+): Promise<DailyCount[]> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ d: string; cnt: number }>(
+    `SELECT strftime('%Y-%m-%d', learned_at/1000, 'unixepoch') AS d, COUNT(*) AS cnt
+     FROM custom_reviews
+     WHERE learned_at BETWEEN ? AND ?
+     GROUP BY d
+     ORDER BY d ASC;`,
+    fromMs,
+    toMs
+  );
+  return rows.map((r) => ({ date: r.d, count: r.cnt | 0 }));
+}
+
+export async function getHourlyActivityCounts(
+  fromMs: number,
+  toMs: number
+): Promise<number[]> {
+  const db = await getDB();
+  const hours = new Array<number>(24).fill(0);
+  const rows1 = await db.getAllAsync<{ h: string; cnt: number }>(
+    `SELECT strftime('%H', created_at/1000, 'unixepoch') AS h, COUNT(*) AS cnt
+     FROM learning_events WHERE created_at BETWEEN ? AND ?
+     GROUP BY h;`,
+    fromMs,
+    toMs
+  );
+  for (const r of rows1) {
+    const idx = parseInt(r.h, 10) | 0;
+    if (idx >= 0 && idx < 24) hours[idx] += r.cnt | 0;
+  }
+  const rows2 = await db.getAllAsync<{ h: string; cnt: number }>(
+    `SELECT strftime('%H', created_at/1000, 'unixepoch') AS h, COUNT(*) AS cnt
+     FROM custom_learning_events WHERE created_at BETWEEN ? AND ?
+     GROUP BY h;`,
+    fromMs,
+    toMs
+  );
+  for (const r of rows2) {
+    const idx = parseInt(r.h, 10) | 0;
+    if (idx >= 0 && idx < 24) hours[idx] += r.cnt | 0;
+  }
+  return hours;
+}
+
+export type HardWord = { id: number; text: string; wrongCount: number };
+
+export async function getHardWords(
+  sourceLangId: number,
+  targetLangId: number,
+  limit: number = 10
+): Promise<HardWord[]> {
+  const db = await getDB();
+  // Count wrong answers for a word before it was learned (first occurrence in reviews)
+  const rows = await db.getAllAsync<{
+    id: number;
+    text: string;
+    wrongCount: number;
+  }>(
+    `WITH learned AS (
+       SELECT word_id, MIN(learned_at) AS first_learned_at
+       FROM reviews
+       WHERE source_lang_id = ? AND target_lang_id = ?
+       GROUP BY word_id
+     )
+     SELECT w.id AS id, w.text AS text,
+            COALESCE(SUM(CASE WHEN e.result = 'wrong' THEN 1 ELSE 0 END), 0) AS wrongCount
+     FROM learned l
+     JOIN words w ON w.id = l.word_id
+     LEFT JOIN learning_events e
+       ON e.word_id = l.word_id AND e.created_at <= l.first_learned_at
+     GROUP BY w.id, w.text
+     HAVING wrongCount > 0
+     ORDER BY wrongCount DESC, w.text ASC
+     LIMIT ?;`,
+    sourceLangId,
+    targetLangId,
+    limit
+  );
+  return rows.map((r) => ({ id: r.id, text: r.text, wrongCount: r.wrongCount | 0 }));
 }
 
 export async function scheduleCustomReview(

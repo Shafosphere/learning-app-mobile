@@ -1,6 +1,7 @@
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  Alert,
   Pressable,
   ScrollView,
   Text,
@@ -14,10 +15,12 @@ import Entypo from "@expo/vector-icons/Entypo";
 import MyButton from "@/src/components/button/button";
 import { useEditStyles } from "./EditCustomCourseScreen-styles";
 import { usePopup } from "@/src/contexts/PopupContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   clearCustomReviewsForCourse,
   getCustomFlashcards,
   getCustomCourseById,
+  deleteCustomCourse,
   replaceCustomFlashcards,
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
@@ -44,6 +47,7 @@ export default function EditCustomCourseScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const setPopup = usePopup();
+  const { colors } = useSettings();
 
   const courseId = useMemo(() => {
     const raw = params.id;
@@ -93,6 +97,7 @@ export default function EditCustomCourseScreen() {
   });
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
 
   const hydrateFromDb = useCallback(async () => {
@@ -172,6 +177,56 @@ export default function EditCustomCourseScreen() {
       color: "my_yellow",
       duration: 2500,
     });
+  };
+
+  const handleDeleteCourse = () => {
+    if (!courseId) {
+      setPopup({
+        message: "Nie można usunąć – brak identyfikatora kursu",
+        color: "my_red",
+        duration: 4000,
+      });
+      return;
+    }
+
+    Alert.alert(
+      "Usuń kurs",
+      "Czy na pewno chcesz usunąć ten kurs? Tego działania nie można cofnąć.",
+      [
+        { text: "Anuluj", style: "cancel" },
+        {
+          text: "Usuń",
+          style: "destructive",
+          onPress: () => {
+            if (isDeleting) {
+              return;
+            }
+
+            void (async () => {
+              setIsDeleting(true);
+              try {
+                await deleteCustomCourse(courseId);
+                setPopup({
+                  message: "Kurs został usunięty",
+                  color: "my_green",
+                  duration: 3500,
+                });
+                router.back();
+              } catch (error) {
+                console.error("Failed to delete custom course", error);
+                setPopup({
+                  message: "Nie udało się usunąć kursu",
+                  color: "my_red",
+                  duration: 4000,
+                });
+              } finally {
+                setIsDeleting(false);
+              }
+            })();
+          },
+        },
+      ]
+    );
   };
 
   const handleSave = async () => {
@@ -268,19 +323,19 @@ export default function EditCustomCourseScreen() {
       >
         {loading ? (
           <View style={formStyles.section}>
-            <Text style={formStyles.sectionHeader}>EDYTUJ PROFIL</Text>
+            <Text style={formStyles.sectionHeader}>EDYTUJ KURS</Text>
             <View style={{ alignItems: "center", paddingVertical: 32 }}>
               <ActivityIndicator size="large" />
             </View>
           </View>
         ) : loadError ? (
           <View style={formStyles.section}>
-            <Text style={formStyles.sectionHeader}>EDYTUJ PROFIL</Text>
+            <Text style={formStyles.sectionHeader}>EDYTUJ KURS</Text>
             <Text style={{ color: "#ff5470", fontSize: 16 }}>{loadError}</Text>
           </View>
         ) : (
           <CustomCourseForm
-            title="EDYTUJ PROFIL"
+            title="EDYTUJ KURS"
             courseName={courseName}
             onCourseNameChange={setCourseName}
             reviewsEnabled={reviewsEnabled}
@@ -310,7 +365,7 @@ export default function EditCustomCourseScreen() {
       <View style={styles.footer}>
         <MyButton
           color="my_yellow"
-          // width={56}
+          width={60}
           onPress={() => router.back()}
           accessibilityLabel="Wróć do panelu kursów"
         >
@@ -331,15 +386,28 @@ export default function EditCustomCourseScreen() {
               <FontAwesome
                 name="undo"
                 size={24}
-                color={undoButtonColor}
+                color={colors.my_yellow}
                 style={styles.manualAddIcon}
               />
             </Pressable>
+          ) : null}
+          {courseId ? (
+            <MyButton
+              text="usuń"
+              color="my_red"
+              onPress={handleDeleteCourse}
+              width={100}
+              disabled={
+                isSaving || loading || isDeleting || !!loadError
+              }
+              accessibilityLabel="Usuń kurs"
+            />
           ) : null}
           <MyButton
             text="zapisz"
             color="my_green"
             onPress={handleSave}
+            width={100}
             disabled={isSaving || loading || !!loadError}
             accessibilityLabel="Zapisz zmiany kursu"
           />

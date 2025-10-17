@@ -237,11 +237,14 @@ export const useEditStyles = createThemeStylesHook((colors) => {
       width: 50,
       height: 50,
       borderRadius: 12,
-      backgroundColor: colors.my_red,
+      backgroundColor: colors.my_yellow,
     },
     rightButtons: {
-      display: 'flex',
+      display: "flex",
       flexDirection: "row",
+      flexWrap: "wrap" as const,
+      justifyContent: "flex-end" as const,
+      flexShrink: 1,
       gap: 6,
     },
   };

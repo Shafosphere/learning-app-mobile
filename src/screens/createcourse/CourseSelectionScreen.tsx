@@ -15,7 +15,21 @@ import type { LanguageCourse } from "@/src/types/course";
 import type { CEFRLevel } from "@/src/types/language";
 import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
-import { getLanguagePairs } from "@/src/db/sqlite/db";
+import { getLanguagePairs, getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+import { getCourseIconById } from "@/src/constants/customCourse";
+import Ionicons from "@expo/vector-icons/Ionicons";
+
+const MAX_COURSE_NAME_LENGTH = 13;
+
+const truncateName = (name: string): string => {
+  if (!name) {
+    return "";
+  }
+  if (name.length <= MAX_COURSE_NAME_LENGTH) {
+    return name;
+  }
+  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
+};
 
 const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -51,10 +65,18 @@ export default function CourseSelectionScreen() {
   const styles = useStyles();
   const router = useRouter();
   const { courses, colors, addCourse, removeCourse, setLevel } = useSettings();
+  const {
+    pinnedOfficialCourseIds,
+    pinOfficialCourse,
+    unpinOfficialCourse,
+  } = useSettings();
 
   const [availableCourses, setAvailableCourses] = useState<LanguageCourse[]>(
     []
   );
+  const [officialCourses, setOfficialCourses] = useState<
+    { id: number; name: string; iconId: string; iconColor: string }[]
+  >([]);
   const [placeholderPinnedKeys, setPlaceholderPinnedKeys] = useState<
     Set<string>
   >(() => new Set());
@@ -83,6 +105,28 @@ export default function CourseSelectionScreen() {
         );
       });
 
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+    getOfficialCustomCoursesWithCardCounts()
+      .then((rows) => {
+        if (!isMounted) return;
+        const mapped = rows.map((r) => ({
+          id: r.id,
+          name: r.name,
+          iconId: r.iconId,
+          iconColor: r.iconColor,
+        }));
+        setOfficialCourses(mapped);
+      })
+      .catch((error) => {
+        console.error("[CourseSelection] Failed to load official packs", error);
+        setOfficialCourses([]);
+      });
     return () => {
       isMounted = false;
     };
@@ -197,6 +241,22 @@ export default function CourseSelectionScreen() {
       void handlePinToggle(course);
     },
     [handlePinToggle]
+  );
+
+  const handleOfficialPinToggle = useCallback(
+    async (id: number) => {
+      const isPinned = pinnedOfficialCourseIds.includes(id);
+      try {
+        if (isPinned) {
+          await unpinOfficialCourse(id);
+        } else {
+          await pinOfficialCourse(id);
+        }
+      } catch (error) {
+        console.error(`[CourseSelection] Failed to toggle official pack ${id}`, error);
+      }
+    },
+    [pinOfficialCourse, pinnedOfficialCourseIds, unpinOfficialCourse]
   );
 
   const isCoursePinned = useCallback(
@@ -314,6 +374,62 @@ export default function CourseSelectionScreen() {
               </View>
             );
           })}
+
+          {officialCourses.length > 0 ? (
+            <>
+              <Text style={styles.subTitle}>Zestawy tematyczne</Text>
+              {officialCourses.map((pack) => {
+                const iconMeta = getCourseIconById(pack.iconId);
+                const IconComponent = iconMeta?.Component ?? Ionicons;
+                const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                const isPinned = pinnedOfficialCourseIds.includes(pack.id);
+                return (
+                  <Pressable
+                    key={`official-${pack.id}`}
+                    onPress={() => void handleOfficialPinToggle(pack.id)}
+                    style={styles.courseCard}
+                  >
+                    <IconComponent
+                      name={iconName}
+                      size={40}
+                      color={pack.iconColor}
+                    />
+                    <Text style={styles.courseCardText}>
+                      {truncateName(pack.name)}
+                    </Text>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={
+                        isPinned
+                          ? `Odepnij zestaw ${pack.name}`
+                          : `Przypnij zestaw ${pack.name}`
+                      }
+                      style={styles.pinButton}
+                      onPress={(event) => {
+                        event.stopPropagation();
+                        void handleOfficialPinToggle(pack.id);
+                      }}
+                    >
+                      <View
+                        style={[
+                          styles.pinCheckbox,
+                          isPinned && styles.pinCheckboxActive,
+                        ]}
+                      >
+                        {isPinned ? (
+                          <Octicons
+                            name="pin"
+                            size={20}
+                            color={colors.headline}
+                          />
+                        ) : null}
+                      </View>
+                    </Pressable>
+                  </Pressable>
+                );
+              })}
+            </>
+          ) : null}
 
           <Text style={styles.footerNote}>kiedys bedzie tu ich wiecej :)</Text>
         </View>

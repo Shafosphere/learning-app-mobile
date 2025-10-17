@@ -23,6 +23,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 20,
     marginBottom: 20,
   },
+  subTitle: {
+    fontSize: 18,
+    fontWeight: 700,
+    color: colors.headline,
+    marginTop: 16,
+    marginBottom: 12,
+  },
   groupSection: {
     width: "100%",
   },

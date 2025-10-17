@@ -58,7 +58,7 @@ export default function CustomCourseScreen() {
         showsVerticalScrollIndicator={false}
       >
         <CustomCourseForm
-          title="NOWY PROFIL"
+          title="NOWY KURS"
           courseName={courseName}
           onCourseNameChange={setCourseName}
           reviewsEnabled={reviewsEnabled}

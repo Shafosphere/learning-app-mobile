@@ -80,6 +80,10 @@ interface SettingsContextValue {
   activeCourse: LanguageCourse | null;
   activeCustomCourseId: number | null;
   setActiveCustomCourseId: (id: number | null) => Promise<void>;
+  // Pinned official packs (custom courses marked as official)
+  pinnedOfficialCourseIds: number[];
+  pinOfficialCourse: (id: number) => Promise<void>;
+  unpinOfficialCourse: (id: number) => Promise<void>;
   flashcardsBatchSize: number;
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   dailyGoal: number;
@@ -128,6 +132,9 @@ const defaultValue: SettingsContextValue = {
   activeCourse: null,
   activeCustomCourseId: null,
   setActiveCustomCourseId: async () => {},
+  pinnedOfficialCourseIds: [],
+  pinOfficialCourse: async () => {},
+  unpinOfficialCourse: async () => {},
   flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
   setFlashcardsBatchSize: async () => {},
   dailyGoal: 20,
@@ -177,6 +184,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
 
   const [activeCustomCourseId, setActiveCustomCourseIdState] =
     usePersistedState<number | null>("activeCustomCourseId", null);
+
+  // Pinned official packs
+  const [pinnedOfficialCourseIds, setPinnedOfficialCourseIds] =
+    usePersistedState<number[]>("officialPinnedCourseIds", []);
 
   console.log(courses);
   const [spellChecking, setSpellChecking] = usePersistedState<boolean>(
@@ -255,6 +266,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [setActiveCustomCourseIdState, setActiveCourseIdxState]
   );
 
+  const pinOfficialCourse = useCallback(
+    async (id: number) => {
+      if (pinnedOfficialCourseIds.includes(id)) return;
+      await setPinnedOfficialCourseIds([...pinnedOfficialCourseIds, id]);
+    },
+    [pinnedOfficialCourseIds, setPinnedOfficialCourseIds]
+  );
+
+  const unpinOfficialCourse = useCallback(
+    async (id: number) => {
+      if (!pinnedOfficialCourseIds.includes(id)) return;
+      await setPinnedOfficialCourseIds(
+        pinnedOfficialCourseIds.filter((x) => x !== id)
+      );
+    },
+    [pinnedOfficialCourseIds, setPinnedOfficialCourseIds]
+  );
+
   useEffect(() => {
     if (activeCourseIdx != null && activeCustomCourseId != null) {
       void setActiveCustomCourseId(null);
@@ -329,7 +358,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     activeCustomCourseId,
     courses.length,
     setActiveCourseIdx,
-    setActiveCustomCourseId,
+      setActiveCustomCourseId,
+      pinnedOfficialCourseIds,
+      pinOfficialCourse,
+      unpinOfficialCourse,
     setCourses,
   ]);
 
@@ -433,10 +465,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         activeCourseIdx,
         setActiveCourseIdx,
         activeCourse,
-        activeCustomCourseId,
-        setActiveCustomCourseId,
-        selectedLevel,
-        setLevel,
+      activeCustomCourseId,
+      setActiveCustomCourseId,
+      pinnedOfficialCourseIds,
+      pinOfficialCourse,
+      unpinOfficialCourse,
+      selectedLevel,
+      setLevel,
         spellChecking,
         toggleSpellChecking,
         showBoxFaces,

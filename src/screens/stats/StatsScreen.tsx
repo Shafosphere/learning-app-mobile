@@ -1,117 +1,78 @@
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { ScrollView, View, Text } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import KnownWordsCard from "@/src/components/stats/KnownWordsCard";
-import DailyGoalCard from "@/src/components/stats/DailyGoalCard";
-import DueReviewsCard from "@/src/components/stats/DueReviewsCard";
-import LevelProgressCard from "@/src/components/stats/LevelProgressCard";
-import AchievementsList from "@/src/components/stats/AchievementsList";
-import { ACHIEVEMENTS } from "@/src/constants/achievements";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { countDueReviewsByLevel } from "@/src/db/sqlite/db";
-import type { CEFRLevel } from "@/src/types/language";
 import { useStyles } from "./StatsScreen-styles";
-
-const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+import { useSettings } from "@/src/contexts/SettingsContext";
+import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
+import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
+import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
+import HardWordsList from "@/src/components/stats/HardWordsList";
+import HourlyActivityChart from "@/src/components/stats/HourlyActivityChart";
+import { getDailyLearnedCountsBuiltin, getDailyLearnedCountsCustom, getHourlyActivityCounts } from "@/src/db/sqlite/db";
 
 export default function StatsScreen() {
   const styles = useStyles();
-  const { activeCourse, dailyGoal, setDailyGoal } = useSettings();
-  const {
-    knownWordsCount,
-    lastKnownWordDate,
-    dailyProgressCount,
-    achievements,
-  } = useLearningStats();
+  const { activeCourse } = useSettings();
+  const [heatmapData, setHeatmapData] = useState<HeatmapDay[]>([]);
+  const [hourly, setHourly] = useState<number[]>(new Array(24).fill(0));
+  const [selectedDay, setSelectedDay] = useState<HeatmapDay | null>(null);
 
-  const [dueReviews, setDueReviews] = useState<Record<CEFRLevel, number>>({
-    A1: 0,
-    A2: 0,
-    B1: 0,
-    B2: 0,
-    C1: 0,
-    C2: 0,
-  });
-
-  const refreshDueReviews = useCallback(async () => {
-    if (
-      !activeCourse ||
-      activeCourse.sourceLangId == null ||
-      activeCourse.targetLangId == null
-    ) {
-      setDueReviews({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
-      return;
-    }
-    try {
-      const counts = await countDueReviewsByLevel(
-        activeCourse.sourceLangId,
-        activeCourse.targetLangId,
-        Date.now()
-      );
-      setDueReviews(counts);
-    } catch (error) {
-      console.warn("Nie udało się pobrać liczby powtórek", error);
-      setDueReviews({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
-    }
-  }, [activeCourse]);
-
-  useFocusEffect(
-    useCallback(() => {
-      void refreshDueReviews();
-    }, [refreshDueReviews])
-  );
-
-  const achievementItems = useMemo(
-    () =>
-      ACHIEVEMENTS.map((item) => ({
-        ...item,
-        unlocked: Boolean(achievements[item.id]),
-        unlockedAt: achievements[item.id]?.unlockedAt,
-      })),
-    [achievements]
-  );
-
-  if (
-    !activeCourse ||
-    activeCourse.sourceLangId == null ||
-    activeCourse.targetLangId == null
-  ) {
-    return (
-      <View style={styles.emptyWrap}>
-        <Text style={styles.emptyTitle}>Brak aktywnego kursu</Text>
-        <Text style={styles.emptyText}>
-          Stwórz kurs w panelu kursów, aby śledzić statystyki nauki.
-        </Text>
-      </View>
-    );
-  }
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      const now = new Date();
+      const end = new Date(now);
+      end.setHours(23, 59, 59, 999);
+      const start = new Date(end);
+      start.setDate(start.getDate() - 89);
+      start.setHours(0, 0, 0, 0);
+      try {
+        const [builtin, custom, hours] = await Promise.all([
+          getDailyLearnedCountsBuiltin(start.getTime(), end.getTime()),
+          getDailyLearnedCountsCustom(start.getTime(), end.getTime()),
+          getHourlyActivityCounts(start.getTime(), end.getTime()),
+        ]);
+        if (!mounted) return;
+        // Merge builtin + custom by date
+        const map = new Map<string, number>();
+        for (const it of builtin) map.set(it.date, (map.get(it.date) ?? 0) + it.count);
+        for (const it of custom) map.set(it.date, (map.get(it.date) ?? 0) + it.count);
+        const arr: HeatmapDay[] = Array.from(map.entries())
+          .map(([date, count]) => ({ date, count }))
+          .sort((a, b) => a.date.localeCompare(b.date));
+        setHeatmapData(arr);
+        setHourly(hours);
+      } catch (e) {
+        if (mounted) {
+          setHeatmapData([]);
+          setHourly(new Array(24).fill(0));
+        }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   return (
     <ScrollView contentContainerStyle={styles.container}>
-      <KnownWordsCard
-        knownWordsCount={knownWordsCount}
-        lastKnownWordDate={lastKnownWordDate}
-        dailyProgressCount={dailyProgressCount}
+      <BigKnownWordsCard />
+
+      <PinnedCoursesProgress />
+
+      <ActivityHeatmap
+        data={heatmapData}
+        days={90}
+        onSelect={(d) => setSelectedDay(d)}
       />
+      {selectedDay ? (
+        <Text style={{ textAlign: "center" }}>
+          {selectedDay.date}: {selectedDay.count} opanowanych
+        </Text>
+      ) : null}
 
-      <DailyGoalCard
-        dailyGoal={dailyGoal}
-        currentCount={dailyProgressCount}
-        onSave={setDailyGoal}
-      />
+      <HardWordsList />
 
-      <DueReviewsCard dueReviews={dueReviews} />
-
-      <View style={styles.grid}>
-        {LEVELS.map((level) => (
-          <View key={level} style={styles.columnCard}>
-            <LevelProgressCard level={level} course={activeCourse} />
-          </View>
-        ))}
-      </View>
-
-      <AchievementsList items={achievementItems} />
+      <HourlyActivityChart hours={hourly} />
     </ScrollView>
   );
 };
