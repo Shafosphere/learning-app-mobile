@@ -37,6 +37,8 @@ const LearningSection: React.FC = () => {
     colors,
     spellChecking,
     toggleSpellChecking,
+    ignoreDiacriticsInSpellcheck,
+    toggleIgnoreDiacriticsInSpellcheck,
     showBoxFaces,
     toggleShowBoxFaces,
     boxesLayout,
@@ -103,6 +105,13 @@ const LearningSection: React.FC = () => {
     }
   };
 
+  const handleDiacriticsToggle = async (value: boolean) => {
+    if (value !== ignoreDiacriticsInSpellcheck) {
+      await toggleIgnoreDiacriticsInSpellcheck();
+      await triggerHaptics();
+    }
+  };
+
   const handleRemindersToggle = async (value: boolean) => {
     if (value !== learningRemindersEnabled) {
       await toggleLearningRemindersEnabled();
@@ -132,6 +141,21 @@ const LearningSection: React.FC = () => {
           style={styles.switch}
           value={spellChecking}
           onValueChange={handleSpellCheckToggle}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Ignoruj znaki diakrytyczne</Text>
+          <Text style={styles.rowSubtitle}>
+            {"Porównuj słowa bez ogonków, np. ą -> a."}
+          </Text>
+        </View>
+        <Switch
+          style={styles.switch}
+          value={ignoreDiacriticsInSpellcheck}
+          onValueChange={handleDiacriticsToggle}
+          disabled={!spellChecking}
         />
       </View>
 

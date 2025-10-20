@@ -73,6 +73,8 @@ interface SettingsContextValue {
   setLevel: (lvl: CEFRLevel) => void;
   spellChecking: boolean;
   toggleSpellChecking: () => Promise<void>;
+  ignoreDiacriticsInSpellcheck: boolean;
+  toggleIgnoreDiacriticsInSpellcheck: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
   activeCourseIdx: number | null; // NEW
@@ -125,6 +127,8 @@ const defaultValue: SettingsContextValue = {
   setLevel: (_lvl: CEFRLevel) => {},
   spellChecking: true,
   toggleSpellChecking: async () => {},
+  ignoreDiacriticsInSpellcheck: false,
+  toggleIgnoreDiacriticsInSpellcheck: async () => {},
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
   activeCourseIdx: null,
@@ -194,6 +198,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "spellChecking",
     true
   );
+  const [ignoreDiacriticsInSpellcheck, setIgnoreDiacriticsInSpellcheck] =
+    usePersistedState<boolean>("spellCheckingIgnoreDiacritics", false);
   const [showBoxFaces, setShowBoxFaces] = usePersistedState<boolean>(
     "showBoxFaces",
     true
@@ -222,6 +228,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<MemoryBoardSize>("memory.boardSize", "large");
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
+  };
+  const toggleIgnoreDiacriticsInSpellcheck = async () => {
+    await setIgnoreDiacriticsInSpellcheck(!ignoreDiacriticsInSpellcheck);
   };
   const toggleShowBoxFaces = async () => {
     await setShowBoxFaces(!showBoxFaces);
@@ -465,15 +474,17 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         activeCourseIdx,
         setActiveCourseIdx,
         activeCourse,
-      activeCustomCourseId,
-      setActiveCustomCourseId,
-      pinnedOfficialCourseIds,
-      pinOfficialCourse,
-      unpinOfficialCourse,
-      selectedLevel,
-      setLevel,
+        activeCustomCourseId,
+        setActiveCustomCourseId,
+        pinnedOfficialCourseIds,
+        pinOfficialCourse,
+        unpinOfficialCourse,
+        selectedLevel,
+        setLevel,
         spellChecking,
         toggleSpellChecking,
+        ignoreDiacriticsInSpellcheck,
+        toggleIgnoreDiacriticsInSpellcheck,
         showBoxFaces,
         toggleShowBoxFaces,
         flashcardsBatchSize,

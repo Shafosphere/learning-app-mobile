@@ -3,6 +3,7 @@ import { boxOrder } from "./useBoxesPersistenceSnapshot";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent, logLearningEvent } from "@/src/db/sqlite/db";
+import { stripDiacritics } from "@/src/utils/diacritics";
 
 type SpellcheckFn = (input: string, expected: string) => boolean;
 
@@ -42,7 +43,8 @@ export function useFlashcardsInteraction({
   const [correction, setCorrection] = useState<CorrectionState | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
-  const { activeCourse, selectedLevel, activeCustomCourseId } = useSettings();
+  const { activeCourse, selectedLevel, activeCustomCourseId, ignoreDiacriticsInSpellcheck } =
+    useSettings();
 
   const reversed = useMemo(() => {
     if (!activeBox) return false;
@@ -200,11 +202,38 @@ export function useFlashcardsInteraction({
     );
   }, []);
 
+  const normalizeUserInput = useCallback(
+    (value: string) => {
+      const trimmed = value.trim();
+      if (!ignoreDiacriticsInSpellcheck) {
+        return trimmed;
+      }
+      return stripDiacritics(trimmed);
+    },
+    [ignoreDiacriticsInSpellcheck]
+  );
+
+  const normalizeExpected = useCallback(
+    (value: string) => {
+      if (!ignoreDiacriticsInSpellcheck) {
+        return value;
+      }
+      return stripDiacritics(value);
+    },
+    [ignoreDiacriticsInSpellcheck]
+  );
+
+  const matchesCorrectionField = useCallback(
+    (input: string, expected: string) =>
+      normalizeUserInput(input) === normalizeExpected(expected),
+    [normalizeExpected, normalizeUserInput]
+  );
+
   useEffect(() => {
     if (
       correction &&
-      correction.input1.trim() === correction.awers &&
-      correction.input2.trim() === correction.rewers
+      matchesCorrectionField(correction.input1, correction.awers) &&
+      matchesCorrectionField(correction.input2, correction.rewers)
     ) {
       if (selectedItem) {
         moveElement(selectedItem.id, false);
@@ -213,7 +242,7 @@ export function useFlashcardsInteraction({
       setCorrection(null);
       setQueueNext(true);
     }
-  }, [correction, moveElement, selectedItem]);
+  }, [correction, matchesCorrectionField, moveElement, selectedItem]);
 
   useEffect(() => {
     if (queueNext && activeBox) {

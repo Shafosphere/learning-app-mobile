@@ -17,6 +17,7 @@ import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
 import { getLanguagePairs, getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 const MAX_COURSE_NAME_LENGTH = 13;
@@ -48,6 +49,26 @@ const languageLabels: Record<string, string> = {
   de: "niemiecki",
 };
 
+type OfficialCourseListItem = {
+  id: number;
+  name: string;
+  iconId: string;
+  iconColor: string;
+  slug: string | null;
+  sourceLang: string | null;
+  targetLang: string | null;
+};
+
+type CourseGroup = {
+  key: string;
+  sourceLang: string | null;
+  targetLang: string | null;
+  sourceFlag: ReturnType<typeof getFlagSource>;
+  targetFlag: ReturnType<typeof getFlagSource>;
+  courses: LanguageCourse[];
+  officialPacks: OfficialCourseListItem[];
+};
+
 const createCourseKey = (course: LanguageCourse) => {
   const sourceKey =
     course.sourceLangId != null
@@ -75,7 +96,7 @@ export default function CourseSelectionScreen() {
     []
   );
   const [officialCourses, setOfficialCourses] = useState<
-    { id: number; name: string; iconId: string; iconColor: string }[]
+    OfficialCourseListItem[]
   >([]);
   const [placeholderPinnedKeys, setPlaceholderPinnedKeys] = useState<
     Set<string>
@@ -115,12 +136,18 @@ export default function CourseSelectionScreen() {
     getOfficialCustomCoursesWithCardCounts()
       .then((rows) => {
         if (!isMounted) return;
-        const mapped = rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          iconId: r.iconId,
-          iconColor: r.iconColor,
-        }));
+        const mapped = rows.map<OfficialCourseListItem>((r) => {
+          const manifest = OFFICIAL_PACKS.find((pack) => pack.slug === r.slug);
+          return {
+            id: r.id,
+            name: r.name,
+            iconId: r.iconId,
+            iconColor: r.iconColor,
+            slug: r.slug ?? null,
+            sourceLang: manifest?.sourceLang ?? null,
+            targetLang: manifest?.targetLang ?? null,
+          };
+        });
         setOfficialCourses(mapped);
       })
       .catch((error) => {
@@ -148,38 +175,40 @@ export default function CourseSelectionScreen() {
     [displayedCourses]
   );
 
-  const groupedCourses = useMemo(
-    () => {
-      const groups: Array<{
-        key: string;
-        targetLang: string | null | undefined;
-        targetFlag: ReturnType<typeof getFlagSource>;
-        courses: LanguageCourse[];
-      }> = [];
-      const groupIndex = new Map<string, number>();
+  const groupedCourses = useMemo(() => {
+    const map = new Map<string, CourseGroup>();
 
-      displayedCourseLevels.forEach((course) => {
-        const groupKey = course.targetLang ?? "unknown";
-        let index = groupIndex.get(groupKey);
+    const ensureGroup = (
+      sourceLang: string | null | undefined,
+      targetLang: string | null | undefined
+    ): CourseGroup => {
+      const key = `${sourceLang ?? "unknown"}-${targetLang ?? "unknown"}`;
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          key,
+          sourceLang: sourceLang ?? null,
+          targetLang: targetLang ?? null,
+          sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
+          targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
+          courses: [],
+          officialPacks: [],
+        };
+        map.set(key, group);
+      }
+      return group;
+    };
 
-        if (index == null) {
-          index = groups.length;
-          groupIndex.set(groupKey, index);
-          groups.push({
-            key: groupKey,
-            targetLang: course.targetLang,
-            targetFlag: getFlagSource(course.targetLang),
-            courses: [],
-          });
-        }
+    displayedCourseLevels.forEach((course) => {
+      ensureGroup(course.sourceLang, course.targetLang).courses.push(course);
+    });
 
-        groups[index].courses.push(course);
-      });
+    officialCourses.forEach((pack) => {
+      ensureGroup(pack.sourceLang, pack.targetLang).officialPacks.push(pack);
+    });
 
-      return groups;
-    },
-    [displayedCourseLevels]
-  );
+    return Array.from(map.values());
+  }, [displayedCourseLevels, officialCourses]);
 
   useEffect(() => {
     if (!usingPlaceholder) {
@@ -291,145 +320,166 @@ export default function CourseSelectionScreen() {
           <Text style={styles.title}>Czego sie uczymy?</Text>
 
           {groupedCourses.map((group) => {
-            const headerCode = group.targetLang
+            const hasCourses = group.courses.length > 0;
+            const hasOfficial = group.officialPacks.length > 0;
+            if (!hasCourses && !hasOfficial) {
+              return null;
+            }
+
+            const nativeCode = group.targetLang
               ? group.targetLang.toUpperCase()
-              : group.key.toUpperCase();
+              : "?";
+            const learningCode = group.sourceLang
+              ? group.sourceLang.toUpperCase()
+              : "?";
 
             return (
               <View key={`group-${group.key}`} style={styles.groupSection}>
                 <View style={styles.groupHeader}>
                   <View style={styles.groupHeaderLine} />
                   <View style={styles.groupHeaderBadge}>
-                    {group.targetFlag ? (
-                      <Image
-                        style={styles.courseCardBadgeFlag}
-                        source={group.targetFlag}
-                      />
-                    ) : null}
-                    <Text
-                      style={[
-                        styles.groupHeaderLabel,
-                        !group.targetFlag && styles.groupHeaderLabelNoFlag,
-                      ]}
-                    >
-                      {headerCode}
-                    </Text>
-                  </View>
-                </View>
-
-                {group.courses.map((course) => {
-                  const key = createCourseKey(course);
-                  const sourceFlag = getFlagSource(course.sourceLang);
-                  const isPinned = isCoursePinned(course);
-                  const sourceLabel =
-                    languageLabels[course.sourceLang] ??
-                    course.sourceLang.toUpperCase();
-                  const targetLabel = course.targetLang
-                    ? languageLabels[course.targetLang] ??
-                      course.targetLang.toUpperCase()
-                    : headerCode;
-
-                  return (
-                    <Pressable
-                      key={key}
-                      onPress={() => handleCardPress(course)}
-                      style={styles.courseCard}
-                    >
-                      {sourceFlag ? (
-                        <Image style={styles.flag} source={sourceFlag} />
+                    <View style={styles.groupHeaderLanguage}>
+                      <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
+                      {group.targetFlag ? (
+                        <Image
+                          style={styles.groupHeaderFlag}
+                          source={group.targetFlag}
+                        />
                       ) : null}
-                      <Text style={styles.courseCardText}>
-                        {`${sourceLabel} → ${targetLabel} ${
-                          course.level ?? ""
-                        }`.trim()}
-                      </Text>
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={
-                          isPinned
-                            ? `Odepnij kurs ${targetLabel}`
-                            : `Przypnij kurs ${targetLabel}`
-                        }
-                        style={styles.pinButton}
-                        onPress={(event) => handlePinPress(event, course)}
-                      >
-                        <View
-                          style={[
-                            styles.pinCheckbox,
-                            isPinned && styles.pinCheckboxActive,
-                          ]}
-                        >
-                          {isPinned ? (
-                            <Octicons
-                              name="pin"
-                              size={20}
-                              color={colors.headline}
+                    </View>
+                    {group.sourceLang ? (
+                      <>
+                        <Text style={styles.groupHeaderSeparator}>/</Text>
+                        <View style={styles.groupHeaderLanguage}>
+                          <Text style={styles.groupHeaderCode}>
+                            {learningCode}
+                          </Text>
+                          {group.sourceFlag ? (
+                            <Image
+                              style={styles.groupHeaderFlag}
+                              source={group.sourceFlag}
                             />
                           ) : null}
                         </View>
-                      </Pressable>
-                    </Pressable>
-                  );
-                })}
+                      </>
+                    ) : null}
+                  </View>
+                </View>
+
+                {hasCourses
+                  ? group.courses.map((course) => {
+                      const key = createCourseKey(course);
+                      const sourceFlag = getFlagSource(course.sourceLang);
+                      const isPinned = isCoursePinned(course);
+                      const sourceLabel =
+                        languageLabels[course.sourceLang] ??
+                        course.sourceLang.toUpperCase();
+                      const targetLabel =
+                        languageLabels[course.targetLang] ??
+                        course.targetLang.toUpperCase();
+
+                      return (
+                        <Pressable
+                          key={key}
+                          onPress={() => handleCardPress(course)}
+                          style={styles.courseCard}
+                        >
+                          {sourceFlag ? (
+                            <Image style={styles.flag} source={sourceFlag} />
+                          ) : null}
+                          <Text style={styles.courseCardText}>
+                            {`${sourceLabel} → ${targetLabel} ${
+                              course.level ?? ""
+                            }`.trim()}
+                          </Text>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                              isPinned
+                                ? `Odepnij kurs ${targetLabel}`
+                                : `Przypnij kurs ${targetLabel}`
+                            }
+                            style={styles.pinButton}
+                            onPress={(event) => handlePinPress(event, course)}
+                          >
+                            <View
+                              style={[
+                                styles.pinCheckbox,
+                                isPinned && styles.pinCheckboxActive,
+                              ]}
+                            >
+                              {isPinned ? (
+                                <Octicons
+                                  name="pin"
+                                  size={20}
+                                  color={colors.headline}
+                                />
+                              ) : null}
+                            </View>
+                          </Pressable>
+                        </Pressable>
+                      );
+                    })
+                  : null}
+
+                {hasOfficial ? (
+                  <>
+                    <Text style={styles.subTitle}>Zestawy tematyczne</Text>
+                    {group.officialPacks.map((pack) => {
+                      const iconMeta = getCourseIconById(pack.iconId);
+                      const IconComponent = iconMeta?.Component ?? Ionicons;
+                      const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                      const isPinned = pinnedOfficialCourseIds.includes(pack.id);
+                      return (
+                        <Pressable
+                          key={`official-${pack.id}`}
+                          onPress={() => void handleOfficialPinToggle(pack.id)}
+                          style={styles.courseCard}
+                        >
+                          <IconComponent
+                            name={iconName}
+                            size={40}
+                            color={pack.iconColor}
+                          />
+                          <Text style={styles.courseCardText}>
+                            {truncateName(pack.name)}
+                          </Text>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={
+                              isPinned
+                                ? `Odepnij zestaw ${pack.name}`
+                                : `Przypnij zestaw ${pack.name}`
+                            }
+                            style={styles.pinButton}
+                            onPress={(event) => {
+                              event.stopPropagation();
+                              void handleOfficialPinToggle(pack.id);
+                            }}
+                          >
+                            <View
+                              style={[
+                                styles.pinCheckbox,
+                                isPinned && styles.pinCheckboxActive,
+                              ]}
+                            >
+                              {isPinned ? (
+                                <Octicons
+                                  name="pin"
+                                  size={20}
+                                  color={colors.headline}
+                                />
+                              ) : null}
+                            </View>
+                          </Pressable>
+                        </Pressable>
+                      );
+                    })}
+                  </>
+                ) : null}
               </View>
             );
           })}
-
-          {officialCourses.length > 0 ? (
-            <>
-              <Text style={styles.subTitle}>Zestawy tematyczne</Text>
-              {officialCourses.map((pack) => {
-                const iconMeta = getCourseIconById(pack.iconId);
-                const IconComponent = iconMeta?.Component ?? Ionicons;
-                const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                const isPinned = pinnedOfficialCourseIds.includes(pack.id);
-                return (
-                  <Pressable
-                    key={`official-${pack.id}`}
-                    onPress={() => void handleOfficialPinToggle(pack.id)}
-                    style={styles.courseCard}
-                  >
-                    <IconComponent
-                      name={iconName}
-                      size={40}
-                      color={pack.iconColor}
-                    />
-                    <Text style={styles.courseCardText}>
-                      {truncateName(pack.name)}
-                    </Text>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={
-                        isPinned
-                          ? `Odepnij zestaw ${pack.name}`
-                          : `Przypnij zestaw ${pack.name}`
-                      }
-                      style={styles.pinButton}
-                      onPress={(event) => {
-                        event.stopPropagation();
-                        void handleOfficialPinToggle(pack.id);
-                      }}
-                    >
-                      <View
-                        style={[
-                          styles.pinCheckbox,
-                          isPinned && styles.pinCheckboxActive,
-                        ]}
-                      >
-                        {isPinned ? (
-                          <Octicons
-                            name="pin"
-                            size={20}
-                            color={colors.headline}
-                          />
-                        ) : null}
-                      </View>
-                    </Pressable>
-                  </Pressable>
-                );
-              })}
-            </>
-          ) : null}
 
           <Text style={styles.footerNote}>kiedys bedzie tu ich wiecej :)</Text>
         </View>

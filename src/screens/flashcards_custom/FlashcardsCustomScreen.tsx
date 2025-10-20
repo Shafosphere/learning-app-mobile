@@ -361,57 +361,6 @@ export default function Flashcards() {
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
-      {/* <TouchableOpacity
-        onPress={() => router.push("/coursepanel")}
-        style={styles.containerofcourse}
-        accessibilityRole="button"
-        accessibilityLabel={courseAccessibilityLabel}
-      >
-        <View style={{ flexDirection: "row", alignItems: "center" }}>
-          {CourseIconComponent ? (
-            <CourseIconComponent
-              name={courseIconName as never}
-              size={32}
-              color={courseIconColor}
-            />
-          ) : null}
-          <Text
-            style={[
-              styles.levelLabel,
-              { marginLeft: CourseIconComponent ? 8 : 0 },
-            ]}
-            allowFontScaling
-          >
-            {courseName}
-          </Text>
-        </View>
-      </TouchableOpacity> */}
-
-      {/* <TouchableOpacity
-        onPress={handleEditPress}
-        style={[
-          styles.containeroflevel,
-          !customCourse && { opacity: 0.4 },
-        ]}
-        accessibilityRole="button"
-        accessibilityLabel={editAccessibilityLabel}
-        disabled={!customCourse}
-      >
-        <View style={styles.levelContainer}>
-          <Text style={styles.levelLabel} allowFontScaling>
-            {totalCardsLabel}
-          </Text>
-          <View style={styles.progressTrack}>
-            <View
-              style={[
-                styles.progressFill,
-                { width: `${learnedPercent * 100}%` },
-              ]}
-            />
-          </View>
-        </View>
-      </TouchableOpacity> */}
-
       {cardSection}
 
       {shouldShowBoxes ? (

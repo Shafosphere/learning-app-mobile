@@ -47,14 +47,26 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
     backgroundColor: colors.background,
   },
-  groupHeaderLabel: {
-    marginLeft: 6,
+  groupHeaderLanguage: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  groupHeaderCode: {
+    fontSize: 20,
+    fontWeight: 800,
+    color: colors.headline,
+    marginRight: 6,
+  },
+  groupHeaderSeparator: {
+    marginHorizontal: 8,
     fontSize: 20,
     fontWeight: 800,
     color: colors.headline,
   },
-  groupHeaderLabelNoFlag: {
-    marginLeft: 0,
+  groupHeaderFlag: {
+    width: 99 / 3,
+    height: 66 / 3,
+    borderRadius: 5,
   },
   groupCourses: {
     display: "flex",
@@ -84,26 +96,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     textAlign: "center",
   },
-  courseCardBadge: {
-    position: "absolute",
-    top: -21,
-    right: 0,
-    flexDirection: "row",
-    alignItems: "center",
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-  },
-  courseCardBadgeFlag: {
-    width: 99 / 2.5,
-    height: 66 / 2.5,
-    borderRadius: 5,
-  },
-  courseCardBadgeText: {
-    marginLeft: 6,
-    fontSize: 25,
-    fontWeight: 800,
-    color: colors.headline,
-  },
   customSection: {
     width: "100%",
     marginTop: 24,
@@ -112,6 +104,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   customSectionTitle: {
     fontSize: 25,
     fontWeight: 900,
+    color: colors.headline,
+  },
+  groupSubtitle: {
+    fontSize: 18,
+    fontWeight: 700,
     color: colors.headline,
   },
   customList: {

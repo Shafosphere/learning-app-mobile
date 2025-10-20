@@ -1,6 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
@@ -13,15 +14,25 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CoursePanelScreen-styles";
 
-type BuiltinCourseGroup = {
+type BuiltinCourseItem = { course: LanguageCourse; index: number };
+
+type OfficialCourseListItem = CustomCourseSummary & {
+  sourceLang: string | null;
+  targetLang: string | null;
+};
+
+type CourseGroup = {
   key: string;
-  targetLang: LanguageCourse["targetLang"];
-  targetFlag: ReturnType<typeof getFlagSource>;
-  items: Array<{ course: LanguageCourse; index: number }>;
+  sourceLang: string | null;
+  targetLang: string | null;
+  sourceFlag?: ReturnType<typeof getFlagSource>;
+  targetFlag?: ReturnType<typeof getFlagSource>;
+  builtin: BuiltinCourseItem[];
+  official: OfficialCourseListItem[];
 };
 
 type SelectedCourse =
@@ -57,44 +68,16 @@ export default function CoursePanelScreen() {
     pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
   };
 
-  const [selectedCourse, setSelectedCourse] =
-    useState<SelectedCourse | null>(null);
   const [committedCourse, setCommittedCourse] =
     useState<SelectedCourse | null>(null);
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>(
     []
   );
-  const [officialCourses, setOfficialCourses] = useState<CustomCourseSummary[]>(
+  const [officialCourses, setOfficialCourses] = useState<OfficialCourseListItem[]>(
     []
   );
   const router = useRouter();
   const setPopup = usePopup();
-
-  const builtinCourseGroups = useMemo(() => {
-    const groups: BuiltinCourseGroup[] = [];
-    const groupIndex = new Map<string, number>();
-
-    courses.forEach((course, index) => {
-      const targetLang = course.targetLang;
-      const groupKey = targetLang ?? "unknown";
-      let position = groupIndex.get(groupKey);
-
-      if (position == null) {
-        position = groups.length;
-        groupIndex.set(groupKey, position);
-        groups.push({
-          key: groupKey,
-          targetLang,
-          targetFlag: getFlagSource(targetLang),
-          items: [],
-        });
-      }
-
-      groups[position].items.push({ course, index });
-    });
-
-    return groups;
-  }, [courses]);
 
   const userCustomCourses = useMemo(
     () => customCourses.filter((course) => !course.isOfficial),
@@ -109,9 +92,46 @@ export default function CoursePanelScreen() {
     [officialCourses, pinnedOfficialCourseIds]
   );
 
+  const courseGroups = useMemo(() => {
+    const map = new Map<string, CourseGroup>();
+
+    const ensureGroup = (
+      sourceLang?: string | null,
+      targetLang?: string | null
+    ): CourseGroup => {
+      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          key,
+          sourceLang: sourceLang ?? null,
+          targetLang: targetLang ?? null,
+          sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
+          targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
+          builtin: [],
+          official: [],
+        };
+        map.set(key, group);
+      }
+      return group;
+    };
+
+    courses.forEach((course, index) => {
+      const targetLang = course.targetLang ?? null;
+      const sourceLang = course.sourceLang ?? null;
+      ensureGroup(sourceLang, targetLang).builtin.push({ course, index });
+    });
+
+    pinnedOfficialCourses.forEach((course) => {
+      ensureGroup(course.sourceLang, course.targetLang).official.push(course);
+    });
+
+    return Array.from(map.values());
+  }, [courses, pinnedOfficialCourses]);
+
   const hasBuiltInCourses = useMemo(
-    () => builtinCourseGroups.some((group) => group.items.length > 0),
-    [builtinCourseGroups]
+    () => courseGroups.some((group) => group.builtin.length > 0),
+    [courseGroups]
   );
 
   const hasPinnedOfficialCourses = pinnedOfficialCourses.length > 0;
@@ -158,7 +178,17 @@ export default function CoursePanelScreen() {
         });
       getOfficialCustomCoursesWithCardCounts()
         .then((rows) => {
-          if (isMounted) setOfficialCourses(rows);
+          if (isMounted) {
+            const mapped = rows.map<OfficialCourseListItem>((row) => {
+              const manifest = OFFICIAL_PACKS.find((pack) => pack.slug === row.slug);
+              return {
+                ...row,
+                sourceLang: manifest?.sourceLang ?? null,
+                targetLang: manifest?.targetLang ?? null,
+              };
+            });
+            setOfficialCourses(mapped);
+          }
         })
         .catch((error) => {
           console.error("Failed to load official courses", error);
@@ -171,29 +201,56 @@ export default function CoursePanelScreen() {
 
   const styles = useStyles();
 
-  const handleClick = () => {
+  const activationCooldownRef = useRef<number>(0);
+  const ACTIVATION_COOLDOWN_MS = 500;
+
+  const canActivate = useCallback(() => {
+    const now = Date.now();
+    if (now - activationCooldownRef.current < ACTIVATION_COOLDOWN_MS) {
+      return false;
+    }
+    activationCooldownRef.current = now;
+    return true;
+  }, []);
+
+  const notifyActivated = useCallback(() => {
     setPopup({
       message: "Zapisano pomyślnie!",
       color: "my_green",
       duration: 3000,
     });
-  };
+  }, [setPopup]);
 
-  const confirmSelection = async () => {
-    if (!selectedCourse) return;
-
-    if (selectedCourse.type === "builtin") {
-      const selected = courses[selectedCourse.index];
-      if (selected?.level) {
+  const handleBuiltinCoursePress = useCallback(
+    async (index: number) => {
+      const current = committedCourse;
+      if (current?.type === "builtin" && current.index === index) {
+        return;
+      }
+      if (!canActivate()) return;
+      const selected = courses[index];
+      if (!selected) return;
+      if (selected.level) {
         setLevel(selected.level);
       }
-      await setActiveCourseIdx(selectedCourse.index);
-    } else {
-      await setActiveCustomCourseId(selectedCourse.id);
-    }
+      await setActiveCourseIdx(index);
+      notifyActivated();
+    },
+    [canActivate, committedCourse, courses, notifyActivated, setActiveCourseIdx, setLevel]
+  );
 
-    setSelectedCourse(null);
-  };
+  const handleCustomCoursePress = useCallback(
+    async (id: number) => {
+      const current = committedCourse;
+      if (current?.type === "custom" && current.id === id) {
+        return;
+      }
+      if (!canActivate()) return;
+      await setActiveCustomCourseId(id);
+      notifyActivated();
+    },
+    [canActivate, committedCourse, notifyActivated, setActiveCustomCourseId]
+  );
 
   const handleEditCustomCourse = (course: CustomCourseSummary) => {
     const encodedName = encodeURIComponent(course.name);
@@ -218,138 +275,154 @@ export default function CoursePanelScreen() {
             </View>
           ) : (
             <>
-              {hasBuiltInCourses ? (
+              {hasBuiltInCourses || hasPinnedOfficialCourses ? (
                 <>
                   <Text style={styles.title}>Stworzone przez nas</Text>
                   <View style={styles.builtinSection}>
-                    {builtinCourseGroups.map((group) => {
-                      const headerCode = group.targetLang
+                    {courseGroups.map((group) => {
+                      const hasBuiltin = group.builtin.length > 0;
+                      const hasOfficial = group.official.length > 0;
+                      if (!hasBuiltin && !hasOfficial) {
+                        return null;
+                      }
+
+                      const targetCode = group.targetLang
                         ? group.targetLang.toUpperCase()
-                        : group.key.toUpperCase();
-                      const showHeader = group.items.length > 1;
-
-                return (
-                  <View key={`builtin-group-${group.key}`} style={styles.groupSection}>
-                    {showHeader ? (
-                      <View style={styles.groupHeader}>
-                        <View style={styles.groupHeaderLine} />
-                      <View style={styles.groupHeaderBadge}>
-                        {group.targetFlag ? (
-                          <Image
-                            style={styles.courseCardBadgeFlag}
-                            source={group.targetFlag}
-                          />
-                        ) : null}
-                        <Text
-                          style={[
-                            styles.groupHeaderLabel,
-                            !group.targetFlag && styles.groupHeaderLabelNoFlag,
-                          ]}
-                        >
-                          {headerCode}
-                        </Text>
-                      </View>
-                    </View>
-                  ) : null}
-
-                  <View style={styles.groupCourses}>
-                    {group.items.map(({ course: item, index }) => {
-                      const highlightCourse = selectedCourse ?? committedCourse;
-                      const isHighlighted =
-                        highlightCourse?.type === "builtin" &&
-                        highlightCourse.index === index;
-                      const targetFlag = showHeader ? null : group.targetFlag;
-                      const sourceFlag = getFlagSource(item.sourceLang);
+                        : "?";
+                      const sourceCode = group.sourceLang
+                        ? group.sourceLang.toUpperCase()
+                        : "?";
 
                       return (
-                        <Pressable
-                          key={index}
-                          onPress={() =>
-                            setSelectedCourse({ type: "builtin", index })
-                          }
-                          style={[styles.courseCard, isHighlighted && styles.clicked]}
+                        <View
+                          key={`builtin-group-${group.key}`}
+                          style={styles.groupSection}
                         >
-                          {targetFlag ? (
-                            <View style={styles.courseCardBadge}>
-                              <Image
-                                style={styles.courseCardBadgeFlag}
-                                source={targetFlag}
-                              />
-                              <Text style={styles.courseCardBadgeText}>
-                                {item.targetLang?.toUpperCase()}
-                              </Text>
+                          <View style={styles.groupHeader}>
+                            <View style={styles.groupHeaderLine} />
+                            <View style={styles.groupHeaderBadge}>
+                              <View style={styles.groupHeaderLanguage}>
+                                <Text style={styles.groupHeaderCode}>
+                                  {targetCode}
+                                </Text>
+                                {group.targetFlag ? (
+                                  <Image
+                                    style={styles.groupHeaderFlag}
+                                    source={group.targetFlag}
+                                  />
+                                ) : null}
+                              </View>
+                              {group.sourceLang ? (
+                                <>
+                                  <Text style={styles.groupHeaderSeparator}>
+                                    /
+                                  </Text>
+                                  <View style={styles.groupHeaderLanguage}>
+                                    <Text style={styles.groupHeaderCode}>
+                                      {sourceCode}
+                                    </Text>
+                                    {group.sourceFlag ? (
+                                      <Image
+                                        style={styles.groupHeaderFlag}
+                                        source={group.sourceFlag}
+                                      />
+                                    ) : null}
+                                  </View>
+                                </>
+                              ) : null}
+                            </View>
+                          </View>
+
+                          {hasBuiltin ? (
+                            <View style={styles.groupCourses}>
+                              {group.builtin.map(({ course: item, index }) => {
+                                const isHighlighted =
+                                  committedCourse?.type === "builtin" &&
+                                  committedCourse.index === index;
+                                const sourceFlag = getFlagSource(item.sourceLang);
+
+                                return (
+                                  <Pressable
+                                    key={index}
+                                    onPress={() => handleBuiltinCoursePress(index)}
+                                    style={[
+                                      styles.courseCard,
+                                      isHighlighted && styles.clicked,
+                                    ]}
+                                  >
+                                    {sourceFlag ? (
+                                      <Image
+                                        style={styles.flag}
+                                        source={sourceFlag}
+                                      />
+                                    ) : null}
+                                    <Text style={styles.courseCardText}>
+                                      {`${
+                                        lang[item.targetLang]?.[item.sourceLang] ??
+                                        item.sourceLang
+                                      }${item.level ? ` ${item.level}` : ""}`}
+                                    </Text>
+                                  </Pressable>
+                                );
+                              })}
                             </View>
                           ) : null}
-                          {sourceFlag ? (
-                            <Image style={styles.flag} source={sourceFlag} />
+
+                          {hasOfficial ? (
+                            <View style={styles.groupCourses}>
+                              <Text style={styles.groupSubtitle}>
+                                Zestawy tematyczne
+                              </Text>
+                              {group.official.map((course) => {
+                                const isHighlighted =
+                                  committedCourse?.type === "custom" &&
+                                  committedCourse.id === course.id;
+                                const iconMeta = getCourseIconById(course.iconId);
+                                const IconComponent =
+                                  iconMeta?.Component ?? Ionicons;
+                                const iconName = (iconMeta?.name ?? "grid-outline") as never;
+
+                                return (
+                                  <Pressable
+                                    key={`official-${course.id}`}
+                                    onPress={() => handleCustomCoursePress(course.id)}
+                                    style={[
+                                      styles.customCard,
+                                      isHighlighted && styles.clicked,
+                                    ]}
+                                  >
+                                    <View style={styles.customCardContent}>
+                                      <View
+                                        style={[
+                                          styles.customIconBadge,
+                                          { borderColor: course.iconColor },
+                                        ]}
+                                      >
+                                        <IconComponent
+                                          name={iconName}
+                                          size={60}
+                                          color={course.iconColor}
+                                        />
+                                      </View>
+                                      <View style={styles.customCardInfo}>
+                                        <Text style={styles.customCardTitle}>
+                                          {truncateName(course.name)}
+                                        </Text>
+                                        <Text style={styles.customCardMeta}>
+                                          fiszki: {course.cardsCount}
+                                        </Text>
+                                      </View>
+                                    </View>
+                                  </Pressable>
+                                );
+                              })}
+                            </View>
                           ) : null}
-                          <Text style={styles.courseCardText}>
-                            {`${
-                              lang[item.targetLang]?.[item.sourceLang] ??
-                              item.sourceLang
-                            }${item.level ? ` ${item.level}` : ""}`}
-                          </Text>
-                        </Pressable>
+                        </View>
                       );
                     })}
                   </View>
-                  </View>
-                );
-                    })}
-                  </View>
                 </>
-              ) : null}
-
-              {hasPinnedOfficialCourses ? (
-                <View style={styles.builtinSection}>
-                  <View style={styles.groupHeader}>
-                    <View style={styles.groupHeaderLine} />
-                    <Text style={styles.groupHeaderLabel}>Zestawy tematyczne</Text>
-                  </View>
-                  <View style={styles.groupCourses}>
-                    {pinnedOfficialCourses.map((course) => {
-                      const highlightCourse = selectedCourse ?? committedCourse;
-                      const isHighlighted =
-                        highlightCourse?.type === "custom" &&
-                        highlightCourse.id === course.id;
-                    const iconMeta = getCourseIconById(course.iconId);
-                    const IconComponent = iconMeta?.Component ?? Ionicons;
-                    const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                    return (
-                      <Pressable
-                        key={`official-${course.id}`}
-                        onPress={() =>
-                          setSelectedCourse({ type: "custom", id: course.id })
-                        }
-                        style={[styles.customCard, isHighlighted && styles.clicked]}
-                      >
-                        <View style={styles.customCardContent}>
-                          <View
-                            style={[
-                              styles.customIconBadge,
-                              { borderColor: course.iconColor },
-                            ]}
-                          >
-                            <IconComponent
-                              name={iconName}
-                              size={60}
-                              color={course.iconColor}
-                            />
-                          </View>
-                          <View style={styles.customCardInfo}>
-                            <Text style={styles.customCardTitle}>
-                              {truncateName(course.name)}
-                            </Text>
-                            <Text style={styles.customCardMeta}>
-                              fiszki: {course.cardsCount}
-                            </Text>
-                          </View>
-                        </View>
-                      </Pressable>
-                    );
-                    })}
-                  </View>
-                </View>
               ) : null}
 
               {hasUserCustomCourses ? (
@@ -360,16 +433,13 @@ export default function CoursePanelScreen() {
                       const iconMeta = getCourseIconById(course.iconId);
                       const IconComponent = iconMeta?.Component ?? Ionicons;
                       const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                      const highlightCourse = selectedCourse ?? committedCourse;
                       const isHighlighted =
-                    highlightCourse?.type === "custom" &&
-                    highlightCourse.id === course.id;
+                        committedCourse?.type === "custom" &&
+                        committedCourse.id === course.id;
                   return (
                     <Pressable
                       key={course.id}
-                      onPress={() =>
-                        setSelectedCourse({ type: "custom", id: course.id })
-                      }
+                      onPress={() => handleCustomCoursePress(course.id)}
                       style={[styles.customCard, isHighlighted && styles.clicked]}
                     >
                       <View style={styles.customCardContent}>
@@ -430,24 +500,6 @@ export default function CoursePanelScreen() {
             onPress={() => router.push("/createcourse")}
             disabled={false}
             width={70}
-          />
-
-          <MyButton
-            text="aktywuj"
-            color="my_green"
-            onPress={() => {
-              confirmSelection();
-              handleClick();
-            }}
-            disabled={
-              !selectedCourse ||
-              (selectedCourse.type === "builtin" &&
-                committedCourse?.type === "builtin" &&
-                committedCourse.index === selectedCourse.index) ||
-              (selectedCourse.type === "custom" &&
-                committedCourse?.type === "custom" &&
-                committedCourse.id === selectedCourse.id)
-            }
           />
         </View>
       </View>

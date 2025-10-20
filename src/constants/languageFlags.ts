@@ -4,8 +4,8 @@ import PL_FLAG from "@/assets/flags/PL.png";
 import PL_FLAG_GRAY from "@/assets/flags/PLgray.png";
 import ES_FLAG from "@/assets/flags/ES.png";
 import ES_FLAG_GRAY from "@/assets/flags/ESgray.png";
-import PM_FLAG from "@/assets/flags/PM.png";
-import PM_FLAG_GRAY from "@/assets/flags/PMgray.png";
+import FR_FLAG from "@/assets/flags/PM.png";
+import FR_FLAG_GRAY from "@/assets/flags/PMgray.png";
 import US_FLAG from "@/assets/flags/US.png";
 import US_FLAG_GRAY from "@/assets/flags/USgray.png";
 
@@ -25,9 +25,13 @@ export const languageFlags = {
     active: ES_FLAG,
     inactive: ES_FLAG_GRAY,
   },
+  fr: {
+    active: FR_FLAG,
+    inactive: FR_FLAG_GRAY,
+  },
   pm: {
-    active: PM_FLAG,
-    inactive: PM_FLAG_GRAY,
+    active: FR_FLAG,
+    inactive: FR_FLAG_GRAY,
   },
   en: {
     active: US_FLAG,

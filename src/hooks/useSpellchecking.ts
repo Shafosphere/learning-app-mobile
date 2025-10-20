@@ -1,7 +1,15 @@
-import { useContext } from "react";
 import { useSettings } from "../contexts/SettingsContext";
+import { stripDiacritics } from "../utils/diacritics";
 export default function useSpellchecking() {
-  const { spellChecking } = useSettings();
+  const { spellChecking, ignoreDiacriticsInSpellcheck } = useSettings();
+
+  function prepareWord(rawValue: string): string {
+    const cleaned = rawValue.trim().toLowerCase();
+    if (!ignoreDiacriticsInSpellcheck) {
+      return cleaned;
+    }
+    return stripDiacritics(cleaned);
+  }
 
   function levenshtein(a: string, b: string): number {
     const matrix: number[][] = [];
@@ -31,8 +39,8 @@ export default function useSpellchecking() {
   function checkSpelling(userForm: string, correctForm: string): boolean {
     if (!userForm || !correctForm) return false;
 
-    const userWord = userForm.trim().toLowerCase();
-    const correctWord = correctForm.trim().toLowerCase();
+    const userWord = prepareWord(userForm);
+    const correctWord = prepareWord(correctForm);
 
     if (spellChecking) {
       if (userWord === correctWord) return true;

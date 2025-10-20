@@ -50,14 +50,26 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     alignItems: "center",
   },
-  groupHeaderLabel: {
-    marginLeft: 6,
+  groupHeaderLanguage: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  groupHeaderCode: {
+    fontSize: 20,
+    fontWeight: 800,
+    color: colors.headline,
+    marginRight: 6,
+  },
+  groupHeaderSeparator: {
+    marginHorizontal: 8,
     fontSize: 20,
     fontWeight: 800,
     color: colors.headline,
   },
-  groupHeaderLabelNoFlag: {
-    marginLeft: 0,
+  groupHeaderFlag: {
+    width: 99 / 3,
+    height: 66 / 3,
+    borderRadius: 5,
   },
   courseCard: {
     width: "100%",
