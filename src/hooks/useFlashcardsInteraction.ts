@@ -7,11 +7,14 @@ import { stripDiacritics } from "@/src/utils/diacritics";
 
 type SpellcheckFn = (input: string, expected: string) => boolean;
 
+type CorrectionMode = "demote" | "intro";
+
 type CorrectionState = {
   awers: string;
   rewers: string;
   input1: string;
   input2: string;
+  mode: CorrectionMode;
 };
 
 export type UseFlashcardsInteractionParams = {
@@ -23,6 +26,7 @@ export type UseFlashcardsInteractionParams = {
   reversedBoxes?: ReadonlyArray<keyof BoxesState>;
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState) => void;
+  boxZeroEnabled?: boolean;
 };
 
 export function useFlashcardsInteraction({
@@ -34,6 +38,7 @@ export function useFlashcardsInteraction({
   reversedBoxes = ["boxTwo", "boxFour"],
   onWordPromotedOut,
   onCorrectAnswer,
+  boxZeroEnabled = true,
 }: UseFlashcardsInteractionParams) {
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
@@ -53,6 +58,10 @@ export function useFlashcardsInteraction({
 
   const selectRandomWord = useCallback(
     (box: keyof BoxesState) => {
+      if (box === "boxZero" && !boxZeroEnabled) {
+        setSelectedItem(null);
+        return;
+      }
       const list = boxes[box];
       if (!list || list.length === 0) {
         setSelectedItem(null);
@@ -69,21 +78,30 @@ export function useFlashcardsInteraction({
       setSelectedItem(list[idx]);
       setQuestionShownAt(Date.now());
     },
-    [boxes, selectedItem]
+    [boxes, boxZeroEnabled, selectedItem]
   );
 
   const handleSelectBox = useCallback(
     (box: keyof BoxesState) => {
+      if (box === "boxZero" && !boxZeroEnabled) {
+        setActiveBox(null);
+        setSelectedItem(null);
+        return;
+      }
       setActiveBox(box);
       selectRandomWord(box);
     },
-    [selectRandomWord]
+    [boxZeroEnabled, selectRandomWord]
   );
 
   const moveElement = useCallback(
     (id: number, promote = false) => {
       if (!activeBox) return;
-      if (activeBox === "boxOne" && promote === false) {
+      if (activeBox === "boxZero" && !promote) {
+        selectRandomWord(activeBox);
+        return;
+      }
+      if (activeBox === "boxOne" && promote === false && !boxZeroEnabled) {
         selectRandomWord(activeBox);
         return;
       }
@@ -101,7 +119,7 @@ export function useFlashcardsInteraction({
           const isLast = fromIdx >= order.length - 1;
           target = isLast ? null : order[fromIdx + 1];
         } else {
-          target = "boxOne";
+          target = boxZeroEnabled ? "boxZero" : "boxOne";
         }
 
         const nextState: BoxesState = {
@@ -120,18 +138,22 @@ export function useFlashcardsInteraction({
         return nextState;
       });
     },
-    [activeBox, addUsedWordIds, onWordPromotedOut, selectRandomWord, setBoxes]
+    [activeBox, addUsedWordIds, boxZeroEnabled, onWordPromotedOut, selectRandomWord, setBoxes]
   );
 
   const checkAnswer = useCallback(() => {
     if (!selectedItem) return false;
+    if (activeBox === "boxZero") return false;
     if (reversed) {
       return checkSpelling(answer, selectedItem.text);
     }
     return selectedItem.translations.some((t) => checkSpelling(answer, t));
-  }, [answer, checkSpelling, reversed, selectedItem]);
+  }, [activeBox, answer, checkSpelling, reversed, selectedItem]);
 
   const confirm = useCallback(() => {
+    if (activeBox === "boxZero") {
+      return;
+    }
     if (!selectedItem) return;
 
     const ok = checkAnswer();
@@ -181,6 +203,7 @@ export function useFlashcardsInteraction({
         rewers: selectedItem.translations[0] ?? "",
         input1: "",
         input2: "",
+        mode: "demote",
       });
     }
   }, [
@@ -236,7 +259,8 @@ export function useFlashcardsInteraction({
       matchesCorrectionField(correction.input2, correction.rewers)
     ) {
       if (selectedItem) {
-        moveElement(selectedItem.id, false);
+        const promote = correction.mode === "intro";
+        moveElement(selectedItem.id, promote);
       }
       setResult(null);
       setCorrection(null);
@@ -283,6 +307,77 @@ export function useFlashcardsInteraction({
   const clearSelection = useCallback(() => {
     setSelectedItem(null);
   }, []);
+
+  useEffect(() => {
+    if (!boxZeroEnabled && activeBox === "boxZero") {
+      setActiveBox(null);
+      setSelectedItem(null);
+      setAnswer("");
+      setResult(null);
+      setCorrection(null);
+    }
+  }, [activeBox, boxZeroEnabled]);
+
+  useEffect(() => {
+    if (!boxZeroEnabled) {
+      if (correction?.mode === "intro") {
+        setCorrection(null);
+      }
+      return;
+    }
+
+    if (activeBox !== "boxZero") {
+      if (correction?.mode === "intro") {
+        setCorrection(null);
+      }
+      return;
+    }
+
+    if (!selectedItem) {
+      if (correction?.mode === "intro") {
+        setCorrection(null);
+      }
+      return;
+    }
+
+    if (answer !== "") {
+      setAnswer("");
+    }
+
+    if (result !== null) {
+      setResult(null);
+    }
+
+    const expectedAwers = selectedItem.text;
+    const expectedRewers = selectedItem.translations[0] ?? "";
+
+    setCorrection((prev) => {
+      if (
+        prev &&
+        prev.mode === "intro" &&
+        prev.awers === expectedAwers &&
+        prev.rewers === expectedRewers
+      ) {
+        return prev;
+      }
+      return {
+        awers: expectedAwers,
+        rewers: expectedRewers,
+        input1: "",
+        input2: "",
+        mode: "intro",
+      };
+    });
+  }, [
+    activeBox,
+    answer,
+    boxZeroEnabled,
+    correction,
+    result,
+    selectedItem,
+    setAnswer,
+    setResult,
+  ]);
 
   return {
     activeBox,

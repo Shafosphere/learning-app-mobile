@@ -27,6 +27,7 @@ interface BoxesProps {
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;
   handleSelectBox: (name: keyof BoxesState) => void;
+  hideBoxZero?: boolean;
 }
 
 const { width: SCREEN_WIDTH } = Dimensions.get("window");
@@ -38,12 +39,17 @@ export default function BoxesCarousel({
   boxes,
   activeBox,
   handleSelectBox,
+  hideBoxZero = false,
 }: BoxesProps) {
   const styles = useStyles();
 
   const data = useMemo(
-    () => Object.keys(boxes || {}).map((k) => ({ key: k as keyof BoxesState })),
-    [boxes]
+    () => {
+      const keys = Object.keys(boxes || {}) as Array<keyof BoxesState>;
+      const filtered = hideBoxZero ? keys.filter((k) => k !== "boxZero") : keys;
+      return filtered.map((k) => ({ key: k }));
+    },
+    [boxes, hideBoxZero]
   );
 
   const initialIndex = useMemo(() => {

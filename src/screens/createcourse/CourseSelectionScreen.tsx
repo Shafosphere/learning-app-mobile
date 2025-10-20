@@ -1,11 +1,15 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   GestureResponderEvent,
+  Animated,
+  Easing,
   Image,
+  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
   View,
+  StyleSheet,
 } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useStyles } from "./CourseSelectionScreen-styles";
@@ -15,22 +19,18 @@ import type { LanguageCourse } from "@/src/types/course";
 import type { CEFRLevel } from "@/src/types/language";
 import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
-import { getLanguagePairs, getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+import {
+  getLanguagePairs,
+  getOfficialCustomCoursesWithCardCounts,
+} from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import type { StyleProp, TextStyle, ViewStyle } from "react-native";
 
-const MAX_COURSE_NAME_LENGTH = 13;
-
-const truncateName = (name: string): string => {
-  if (!name) {
-    return "";
-  }
-  if (name.length <= MAX_COURSE_NAME_LENGTH) {
-    return name;
-  }
-  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
-};
+const MARQUEE_DELAY_MS = 800;
+const MARQUEE_SPEED_PER_PIXEL_MS = 20;
+const MARQUEE_GAP_PX = 0;
 
 const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -57,6 +57,7 @@ type OfficialCourseListItem = {
   slug: string | null;
   sourceLang: string | null;
   targetLang: string | null;
+  cardsCount: number;
 };
 
 type CourseGroup = {
@@ -68,6 +69,128 @@ type CourseGroup = {
   courses: LanguageCourse[];
   officialPacks: OfficialCourseListItem[];
 };
+
+type MarqueeTextProps = {
+  text: string;
+  containerStyle?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+};
+
+function CourseTitleMarquee({
+  text,
+  containerStyle,
+  textStyle,
+}: MarqueeTextProps) {
+  const translateX = useRef(new Animated.Value(0)).current;
+  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
+  const [containerWidth, setContainerWidth] = useState(0);
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const flattenedTextStyle = useMemo(
+    () => StyleSheet.flatten(textStyle) || {},
+    [textStyle]
+  );
+  const fontSize =
+    typeof flattenedTextStyle.fontSize === "number"
+      ? flattenedTextStyle.fontSize
+      : 16;
+  const avgCharWidthFactor = 0.65; // heuristic for typical sans-serif, tuned
+  const estimatedTextWidth = useMemo(
+    () => Math.ceil(text.length * fontSize * avgCharWidthFactor),
+    [text.length, fontSize]
+  );
+
+  useEffect(() => {
+    return () => {
+      animationRef.current?.stop();
+      animationRef.current = null;
+    };
+  }, []);
+
+  useEffect(() => {
+    if (containerWidth > 0 && estimatedTextWidth > containerWidth - 8) {
+      const distance = estimatedTextWidth - containerWidth + MARQUEE_GAP_PX; //nie umiem tego nrpawic, dalem 1.4
+      animationRef.current?.stop();
+      translateX.setValue(0);
+
+      const duration = Math.max(4000, distance * MARQUEE_SPEED_PER_PIXEL_MS);
+      const animation = Animated.loop(
+        Animated.sequence([
+          Animated.delay(MARQUEE_DELAY_MS),
+          Animated.timing(translateX, {
+            toValue: -distance,
+            duration,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+          Animated.delay(MARQUEE_DELAY_MS),
+          Animated.timing(translateX, {
+            toValue: 0,
+            duration,
+            easing: Easing.linear,
+            useNativeDriver: true,
+          }),
+        ])
+      );
+
+      animationRef.current = animation;
+      setShouldAnimate(true);
+      animation.start();
+
+      return () => {
+        animation.stop();
+      };
+    }
+
+    animationRef.current?.stop();
+    animationRef.current = null;
+    translateX.setValue(0);
+    setShouldAnimate(false);
+
+    return undefined;
+  }, [containerWidth, estimatedTextWidth, translateX]);
+
+  const handleContainerLayout = useCallback(
+    (event: LayoutChangeEvent) => {
+      const width = event.nativeEvent.layout.width;
+      if (Math.abs(width - containerWidth) > 0.5) {
+        setContainerWidth(width);
+      }
+    },
+    [containerWidth]
+  );
+
+  return (
+    <View
+      style={containerStyle}
+      onLayout={handleContainerLayout}
+      pointerEvents="none"
+    >
+      <Animated.View
+        style={
+          shouldAnimate
+            ? {
+                flexDirection: "row",
+                transform: [{ translateX }],
+              }
+            : undefined
+        }
+      >
+        <Text
+          style={[
+            textStyle,
+            shouldAnimate
+              ? { width: estimatedTextWidth, flexShrink: 0 }
+              : { flexShrink: 0 },
+          ]}
+          allowFontScaling
+        >
+          {text}
+        </Text>
+        {shouldAnimate ? <View style={{ width: MARQUEE_GAP_PX }} /> : null}
+      </Animated.View>
+    </View>
+  );
+}
 
 const createCourseKey = (course: LanguageCourse) => {
   const sourceKey =
@@ -86,11 +209,8 @@ export default function CourseSelectionScreen() {
   const styles = useStyles();
   const router = useRouter();
   const { courses, colors, addCourse, removeCourse, setLevel } = useSettings();
-  const {
-    pinnedOfficialCourseIds,
-    pinOfficialCourse,
-    unpinOfficialCourse,
-  } = useSettings();
+  const { pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
+    useSettings();
 
   const [availableCourses, setAvailableCourses] = useState<LanguageCourse[]>(
     []
@@ -120,10 +240,7 @@ export default function CourseSelectionScreen() {
         setAvailableCourses(mapped);
       })
       .catch((error) => {
-        console.error(
-          "[CourseSelection] Failed to load language pairs",
-          error
-        );
+        console.error("[CourseSelection] Failed to load language pairs", error);
       });
 
     return () => {
@@ -146,6 +263,7 @@ export default function CourseSelectionScreen() {
             slug: r.slug ?? null,
             sourceLang: manifest?.sourceLang ?? null,
             targetLang: manifest?.targetLang ?? null,
+            cardsCount: r.cardsCount,
           };
         });
         setOfficialCourses(mapped);
@@ -282,7 +400,10 @@ export default function CourseSelectionScreen() {
           await pinOfficialCourse(id);
         }
       } catch (error) {
-        console.error(`[CourseSelection] Failed to toggle official pack ${id}`, error);
+        console.error(
+          `[CourseSelection] Failed to toggle official pack ${id}`,
+          error
+        );
       }
     },
     [pinOfficialCourse, pinnedOfficialCourseIds, unpinOfficialCourse]
@@ -424,26 +545,44 @@ export default function CourseSelectionScreen() {
 
                 {hasOfficial ? (
                   <>
-                    <Text style={styles.subTitle}>Zestawy tematyczne</Text>
+                    <Text style={styles.subTitle}>Mini kursy</Text>
                     {group.officialPacks.map((pack) => {
                       const iconMeta = getCourseIconById(pack.iconId);
                       const IconComponent = iconMeta?.Component ?? Ionicons;
-                      const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                      const isPinned = pinnedOfficialCourseIds.includes(pack.id);
+                      const iconName = (iconMeta?.name ??
+                        "grid-outline") as never;
+                      const isPinned = pinnedOfficialCourseIds.includes(
+                        pack.id
+                      );
                       return (
                         <Pressable
                           key={`official-${pack.id}`}
                           onPress={() => void handleOfficialPinToggle(pack.id)}
                           style={styles.courseCard}
                         >
-                          <IconComponent
-                            name={iconName}
-                            size={40}
-                            color={pack.iconColor}
-                          />
-                          <Text style={styles.courseCardText}>
-                            {truncateName(pack.name)}
-                          </Text>
+                          <View style={styles.officialIconWrapper}>
+                            <IconComponent
+                              name={iconName}
+                              size={60}
+                              color={pack.iconColor}
+                            />
+                            {pack.sourceLang ? (
+                              <Image
+                                style={styles.officialFlagBadge}
+                                source={getFlagSource(pack.sourceLang)}
+                              />
+                            ) : null}
+                          </View>
+                          <View style={styles.courseCardInfo}>
+                            <CourseTitleMarquee
+                              text={pack.name}
+                              containerStyle={styles.courseCardTitleContainer}
+                              textStyle={styles.customCardTitle}
+                            />
+                            <Text style={styles.customCardMeta}>
+                              fiszki: {pack.cardsCount}
+                            </Text>
+                          </View>
                           <Pressable
                             accessibilityRole="button"
                             accessibilityLabel={
@@ -488,8 +627,17 @@ export default function CourseSelectionScreen() {
       <View style={styles.buttonscontainer}>
         <View style={styles.buttonsRow}>
           <MyButton
-            text="własny"
             color="my_yellow"
+            onPress={() => router.push("/coursepanel")}
+            disabled={false}
+            width={60}
+            accessibilityLabel="Wróć do panelu kursów"
+          >
+            <Ionicons name="arrow-back" size={28} color={colors.headline} />
+          </MyButton>
+          <MyButton
+            text="własny"
+            color="my_green"
             onPress={() => router.push("/custom_course")}
             disabled={false}
             width={90}

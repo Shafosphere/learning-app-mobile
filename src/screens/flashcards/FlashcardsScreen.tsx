@@ -19,7 +19,13 @@ import Confetti from "@/src/components/confetti/Confetti";
 export default function FlashcardsScreen() {
   const router = useRouter();
   const styles = useStyles();
-  const { selectedLevel, activeCourse, boxesLayout, flashcardsBatchSize } = useSettings();
+  const {
+    selectedLevel,
+    activeCourse,
+    boxesLayout,
+    flashcardsBatchSize,
+    boxZeroEnabled,
+  } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
 
@@ -38,6 +44,7 @@ export default function FlashcardsScreen() {
     resetSave,
     saveNow,
     addUsedWordIds,
+    removeUsedWordIds,
     progress,
     totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
@@ -93,13 +100,16 @@ export default function FlashcardsScreen() {
         setShouldCelebrate(true);
       });
     },
+    boxZeroEnabled,
   });
   const learnedPercent =
     totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
-  const boxOneFull = boxes.boxOne.length >= 30;
+  const introBoxLimitReached = boxZeroEnabled
+    ? boxes.boxZero.length >= 30
+    : boxes.boxOne.length >= 30;
 
   async function downloadData() {
-    if (boxOneFull) {
+    if (introBoxLimitReached) {
       return;
     }
     const prof = activeCourse;
@@ -109,6 +119,7 @@ export default function FlashcardsScreen() {
     }
 
     const excludeIds = [
+      ...boxes.boxZero.map((x) => x.id),
       ...boxes.boxOne.map((x) => x.id),
       ...boxes.boxTwo.map((x) => x.id),
       ...boxes.boxThree.map((x) => x.id),
@@ -125,7 +136,17 @@ export default function FlashcardsScreen() {
       excludeIds,
     });
 
-    setBoxes((prev) => ({ ...prev, boxOne: [...prev.boxOne, ...batchData] }));
+    setBoxes((prev) =>
+      boxZeroEnabled
+        ? {
+            ...prev,
+            boxZero: [...prev.boxZero, ...batchData],
+          }
+        : {
+            ...prev,
+            boxOne: [...prev.boxOne, ...batchData],
+          }
+    );
     // Track used words when they are added to any box
     addUsedWordIds(batchData.map((w) => w.id));
     setBatchIndex((prev) => {
@@ -139,6 +160,18 @@ export default function FlashcardsScreen() {
     : "Wybierz kurs językowy";
 
   const levelAccessibilityLabel = `Poziom ${selectedLevel}. Zmień poziom nauki.`;
+
+  useEffect(() => {
+    if (boxZeroEnabled) return;
+    if (!boxes.boxZero.length) return;
+
+    const wordsToReset = boxes.boxZero;
+    setBoxes((prev) => ({
+      ...prev,
+      boxZero: [],
+    }));
+    removeUsedWordIds(wordsToReset.map((word) => word.id));
+  }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
 
   if (
     !activeCourse ||
@@ -154,6 +187,7 @@ export default function FlashcardsScreen() {
   }
 
   const courseFlagSource = getFlagSource(activeCourse.sourceLang);
+  const introModeActive = boxZeroEnabled && activeBox === "boxZero";
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
@@ -192,7 +226,8 @@ export default function FlashcardsScreen() {
         correction={correction}
         wrongInputChange={wrongInputChange}
         onDownload={downloadData}
-        downloadDisabled={boxOneFull}
+        downloadDisabled={introBoxLimitReached}
+        introMode={introModeActive}
       />
 
       {boxesLayout === "classic" ? (
@@ -200,12 +235,14 @@ export default function FlashcardsScreen() {
           boxes={boxes}
           activeBox={activeBox}
           handleSelectBox={handleSelectBox}
+          hideBoxZero={!boxZeroEnabled}
         />
       ) : (
         <BoxesCarousel
           boxes={boxes}
           activeBox={activeBox}
           handleSelectBox={handleSelectBox}
+          hideBoxZero={!boxZeroEnabled}
         />
       )}
     </View>

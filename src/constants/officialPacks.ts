@@ -14,7 +14,7 @@ export type OfficialPackDef = {
 export const OFFICIAL_PACKS: OfficialPackDef[] = [
   {
     slug: "proste_zwroty",
-    name: "Proste zwroty",
+    name: "Raz",
     iconId: "book",
     iconColor: "#4361EE",
     reviewsEnabled: true,
@@ -24,7 +24,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "podstawowe_slowa",
-    name: "Podstawy",
+    name: "dwie linie",
     iconId: "heart",
     iconColor: "#FF6B6B",
     reviewsEnabled: true,

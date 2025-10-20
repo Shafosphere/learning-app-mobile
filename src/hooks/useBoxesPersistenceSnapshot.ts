@@ -5,8 +5,9 @@ import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
 // ---- Public helpers --------------------------------------------------------
-export type BoxName = keyof BoxesState; // "boxOne" | ... | "boxFive"
+export type BoxName = keyof BoxesState;
 export const boxOrder: BoxName[] = [
+  "boxZero",
   "boxOne",
   "boxTwo",
   "boxThree",
@@ -114,6 +115,31 @@ async function loadFromStorageSnapshot(
   return parsed as SavedBoxesV2;
 }
 
+const createEmptyBoxes = (): BoxesState => ({
+  boxZero: [],
+  boxOne: [],
+  boxTwo: [],
+  boxThree: [],
+  boxFour: [],
+  boxFive: [],
+});
+
+const normalizeBoxes = (source?: BoxesState | null): BoxesState => {
+  const empty = createEmptyBoxes();
+  if (!source) {
+    return empty;
+  }
+
+  return {
+    boxZero: source.boxZero ?? [],
+    boxOne: source.boxOne ?? [],
+    boxTwo: source.boxTwo ?? [],
+    boxThree: source.boxThree ?? [],
+    boxFour: source.boxFour ?? [],
+    boxFive: source.boxFive ?? [],
+  };
+};
+
 export function useBoxesPersistenceSnapshot(params: {
   sourceLangId: number;
   targetLangId: number;
@@ -139,13 +165,7 @@ export function useBoxesPersistenceSnapshot(params: {
     level
   )}`;
 
-  const [boxes, setBoxes] = useState<BoxesState>({
-    boxOne: [],
-    boxTwo: [],
-    boxThree: [],
-    boxFour: [],
-    boxFive: [],
-  });
+  const [boxes, setBoxes] = useState<BoxesState>(() => createEmptyBoxes());
   const [batchIndex, setBatchIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [usedWordIds, setUsedWordIds] = useState<number[]>([]);
@@ -169,17 +189,14 @@ export function useBoxesPersistenceSnapshot(params: {
         const saved = await loadFromStorageSnapshot(storageKey);
         if (saved) {
           if (mounted) {
-            setBoxes(saved.flashcards);
+            setBoxes(normalizeBoxes(saved.flashcards));
             setBatchIndex(saved.batchIndex ?? 0);
             setUsedWordIds(saved.usedWordIds ?? []);
           }
         } else if (initialWords && mounted) {
           setBoxes({
+            ...createEmptyBoxes(),
             boxOne: initialWords,
-            boxTwo: [],
-            boxThree: [],
-            boxFour: [],
-            boxFive: [],
           });
           setUsedWordIds(initialWords.map((w) => w.id));
         }
@@ -280,6 +297,12 @@ export function useBoxesPersistenceSnapshot(params: {
     });
   }, []);
 
+  const removeUsedWordIds = useCallback((ids: number[] | number) => {
+    const list = Array.isArray(ids) ? ids : [ids];
+    if (list.length === 0) return;
+    setUsedWordIds((prev) => prev.filter((id) => !list.includes(id)));
+  }, []);
+
   return {
     boxes,
     setBoxes,
@@ -291,6 +314,7 @@ export function useBoxesPersistenceSnapshot(params: {
     storageKey,
     usedWordIds,
     addUsedWordIds,
+    removeUsedWordIds,
     progress,
     totalWordsForLevel,
   } as const;

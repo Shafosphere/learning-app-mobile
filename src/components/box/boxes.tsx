@@ -8,12 +8,14 @@ interface BoxesProps {
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;
   handleSelectBox: (name: keyof BoxesState) => void;
+  hideBoxZero?: boolean;
 }
 
 export default function Boxes({
   boxes,
   activeBox,
   handleSelectBox,
+  hideBoxZero = false,
 }: BoxesProps) {
   const styles = useStyles();
   type Face = "smile" | "happy" | "surprised";
@@ -39,11 +41,14 @@ export default function Boxes({
   const entries = Object.entries(boxes) as Array<
     [keyof BoxesState, BoxesState[keyof BoxesState]]
   >;
+  const displayedEntries = hideBoxZero
+    ? entries.filter(([boxName]) => boxName !== "boxZero")
+    : entries;
 
   return (
     <View style={styles.container}>
       <View style={styles.containerTop}>
-        {entries.map(([boxName, words]) => {
+        {displayedEntries.map(([boxName, words]) => {
           const storedFace = faces[boxName];
           const isActive = activeBox === boxName;
           const currentFace: Face =

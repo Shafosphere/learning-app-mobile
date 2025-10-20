@@ -5,6 +5,7 @@ export interface WordWithTranslations {
 }
 
 export interface BoxesState {
+  boxZero: WordWithTranslations[];
   boxOne: WordWithTranslations[];
   boxTwo: WordWithTranslations[];
   boxThree: WordWithTranslations[];

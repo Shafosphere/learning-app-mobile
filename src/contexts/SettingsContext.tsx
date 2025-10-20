@@ -6,6 +6,7 @@ import {
   useContext,
   useMemo,
   useEffect,
+  useRef,
 } from "react";
 import {
   resolveThemeColors,
@@ -19,6 +20,7 @@ import type { CEFRLevel } from "../types/language";
 import { LanguageCourse } from "../types/course";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Text } from "react-native";
 
 function languagesMatch(a: LanguageCourse, b: LanguageCourse): boolean {
   const hasIdsA = a.sourceLangId != null && a.targetLangId != null;
@@ -77,6 +79,8 @@ interface SettingsContextValue {
   toggleIgnoreDiacriticsInSpellcheck: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
+  boxZeroEnabled: boolean;
+  toggleBoxZeroEnabled: () => Promise<void>;
   activeCourseIdx: number | null; // NEW
   setActiveCourseIdx: (i: number | null) => Promise<void>; // NEW
   activeCourse: LanguageCourse | null;
@@ -131,6 +135,8 @@ const defaultValue: SettingsContextValue = {
   toggleIgnoreDiacriticsInSpellcheck: async () => {},
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
+  boxZeroEnabled: true,
+  toggleBoxZeroEnabled: async () => {},
   activeCourseIdx: null,
   setActiveCourseIdx: async () => {},
   activeCourse: null,
@@ -204,6 +210,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "showBoxFaces",
     true
   );
+  const [boxZeroEnabled, setBoxZeroEnabled] = usePersistedState<boolean>(
+    "flashcards.boxZeroEnabled",
+    true
+  );
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
       "flashcardsBatchSize",
@@ -235,6 +245,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const toggleShowBoxFaces = async () => {
     await setShowBoxFaces(!showBoxFaces);
   };
+  const toggleBoxZeroEnabled = async () => {
+    await setBoxZeroEnabled(!boxZeroEnabled);
+  };
   const toggleTheme = async () => {
     const newTheme: Theme = theme === "light" ? "dark" : "light";
     await setTheme(newTheme);
@@ -247,6 +260,37 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       }),
     [theme, highContrastEnabled, colorBlindMode]
   );
+
+  const originalTextDefaultStyleRef = useRef(Text.defaultProps?.style);
+
+  useEffect(() => {
+    const baseStyle = originalTextDefaultStyleRef.current;
+    const baseArray = Array.isArray(baseStyle)
+      ? baseStyle.filter(Boolean)
+      : baseStyle
+      ? [baseStyle]
+      : [];
+
+    Text.defaultProps = {
+      ...(Text.defaultProps ?? {}),
+      style: [...baseArray, { color: colors.headline }],
+    };
+
+    return () => {
+      const currentDefaults = Text.defaultProps ?? {};
+      const { style: _ignoredStyle, ...restDefaults } = currentDefaults;
+
+      if (originalTextDefaultStyleRef.current === undefined) {
+        Text.defaultProps = restDefaults;
+        return;
+      }
+
+      Text.defaultProps = {
+        ...restDefaults,
+        style: originalTextDefaultStyleRef.current,
+      };
+    };
+  }, [colors.headline]);
 
   const fontScaleMultiplier = largeFontEnabled ? 1.15 : 1;
 
@@ -487,6 +531,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         toggleIgnoreDiacriticsInSpellcheck,
         showBoxFaces,
         toggleShowBoxFaces,
+        boxZeroEnabled,
+        toggleBoxZeroEnabled,
         flashcardsBatchSize,
         setFlashcardsBatchSize,
         dailyGoal,

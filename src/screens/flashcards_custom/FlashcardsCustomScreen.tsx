@@ -9,7 +9,7 @@ import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
-import { WordWithTranslations } from "@/src/types/boxes";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
@@ -63,8 +63,12 @@ function mapCustomCardToWord(
 export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
-  const { activeCustomCourseId, boxesLayout, flashcardsBatchSize } =
-    useSettings();
+  const {
+    activeCustomCourseId,
+    boxesLayout,
+    flashcardsBatchSize,
+    boxZeroEnabled,
+  } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
@@ -75,7 +79,7 @@ export default function Flashcards() {
     return () => clearTimeout(timeout);
   }, [shouldCelebrate]);
 
-  const { boxes, setBoxes, isReady, addUsedWordIds } =
+  const { boxes, setBoxes, isReady, addUsedWordIds, removeUsedWordIds } =
     useBoxesPersistenceSnapshot({
       sourceLangId: activeCustomCourseId ?? 0,
       targetLangId: activeCustomCourseId ?? 0,
@@ -122,6 +126,7 @@ export default function Flashcards() {
         setShouldCelebrate(true);
       });
     },
+    boxZeroEnabled,
   });
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -139,6 +144,7 @@ export default function Flashcards() {
   const allCardsDistributed = totalCards > 0 && trackedIds.size >= totalCards;
   const totalCardsInBoxes = useMemo(() => {
     return (
+      boxes.boxZero.length +
       boxes.boxOne.length +
       boxes.boxTwo.length +
       boxes.boxThree.length +
@@ -162,12 +168,31 @@ export default function Flashcards() {
     const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
     const nextBatch = remaining.slice(0, Math.max(1, batchSize));
 
-    setBoxes((prev) => ({
-      ...prev,
-      boxOne: [...prev.boxOne, ...nextBatch],
-    }));
+    setBoxes((prev) =>
+      boxZeroEnabled
+        ? {
+            ...prev,
+            boxZero: [...prev.boxZero, ...nextBatch],
+          }
+        : {
+            ...prev,
+            boxOne: [...prev.boxOne, ...nextBatch],
+          }
+    );
     addUsedWordIds(nextBatch.map((card) => card.id));
   }
+
+  useEffect(() => {
+    if (boxZeroEnabled) return;
+    if (!boxes.boxZero.length) return;
+
+    const wordsToReset = boxes.boxZero;
+    setBoxes((prev) => ({
+      ...prev,
+      boxZero: [],
+    }));
+    removeUsedWordIds(wordsToReset.map((word) => word.id));
+  }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
 
   useEffect(() => {
     if (!isFocused) return;
@@ -231,7 +256,8 @@ export default function Flashcards() {
         return filtered;
       };
 
-      const next = {
+      const next: BoxesState = {
+        boxZero: sanitize(prev.boxZero),
         boxOne: sanitize(prev.boxOne),
         boxTwo: sanitize(prev.boxTwo),
         boxThree: sanitize(prev.boxThree),
@@ -298,6 +324,7 @@ export default function Flashcards() {
     !isLoadingData &&
     !loadError &&
     customCards.length > 0;
+  const introModeActive = boxZeroEnabled && activeBox === "boxZero";
 
   useEffect(() => {
     resetInteractionState();
@@ -354,6 +381,7 @@ export default function Flashcards() {
         wrongInputChange={wrongInputChange}
         onDownload={downloadData}
         downloadDisabled={downloadDisabled}
+        introMode={introModeActive}
       />
     );
   }
@@ -369,12 +397,14 @@ export default function Flashcards() {
             boxes={boxes}
             activeBox={activeBox}
             handleSelectBox={handleSelectBox}
+            hideBoxZero={!boxZeroEnabled}
           />
         ) : (
           <BoxesCarousel
             boxes={boxes}
             activeBox={activeBox}
             handleSelectBox={handleSelectBox}
+            hideBoxZero={!boxZeroEnabled}
           />
         )
       ) : null}

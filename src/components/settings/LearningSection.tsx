@@ -41,6 +41,8 @@ const LearningSection: React.FC = () => {
     toggleIgnoreDiacriticsInSpellcheck,
     showBoxFaces,
     toggleShowBoxFaces,
+    boxZeroEnabled,
+    toggleBoxZeroEnabled,
     boxesLayout,
     setBoxesLayout,
     flashcardsBatchSize,
@@ -105,6 +107,13 @@ const LearningSection: React.FC = () => {
     }
   };
 
+  const handleBoxZeroToggle = async (value: boolean) => {
+    if (value !== boxZeroEnabled) {
+      await toggleBoxZeroEnabled();
+      await triggerHaptics();
+    }
+  };
+
   const handleDiacriticsToggle = async (value: boolean) => {
     if (value !== ignoreDiacriticsInSpellcheck) {
       await toggleIgnoreDiacriticsInSpellcheck();
@@ -160,18 +169,32 @@ const LearningSection: React.FC = () => {
       </View>
 
       <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Miny pudełek</Text>
-          <Text style={styles.rowSubtitle}>
-            Uśmiechnięte / smutne pudełka w zależności od statusu.
-          </Text>
-        </View>
-        <Switch
-          style={styles.switch}
-          value={showBoxFaces}
-          onValueChange={handleFacesToggle}
-        />
+      <View style={styles.rowTextWrapper}>
+        <Text style={styles.rowTitle}>Miny pudełek</Text>
+        <Text style={styles.rowSubtitle}>
+          Uśmiechnięte / smutne pudełka w zależności od statusu.
+        </Text>
       </View>
+      <Switch
+        style={styles.switch}
+        value={showBoxFaces}
+        onValueChange={handleFacesToggle}
+      />
+    </View>
+
+    <View style={styles.row}>
+      <View style={styles.rowTextWrapper}>
+        <Text style={styles.rowTitle}>Faza zapoznania (Box 0)</Text>
+        <Text style={styles.rowSubtitle}>
+          Najpierw przepisz słówko i tłumaczenie w dwóch polach.
+        </Text>
+      </View>
+      <Switch
+        style={styles.switch}
+        value={boxZeroEnabled}
+        onValueChange={handleBoxZeroToggle}
+      />
+    </View>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

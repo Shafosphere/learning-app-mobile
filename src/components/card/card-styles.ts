@@ -27,6 +27,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.my_red,
     alignItems: "flex-start",
   },
+  cardIntro: {
+    alignItems: "flex-start",
+  },
   cardInput: {
     borderBottomColor: colors.border,
     borderBottomWidth: 3,
@@ -58,12 +61,29 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.5,
     fontSize: 24,
     fontWeight: 800,
+    color: colors.headline
   },
   myinput: {
     width: "100%",
     padding: 8,
     fontSize: 24,
     fontWeight: 800,
+    color: colors.headline,
+  },
+  inputOverlay: {
+    position: "absolute",
+    top: 8,
+   left: 8,
+   width: "100%",
+   fontSize: 24,
+   fontWeight: 800,
+    pointerEvents: "none",
+  },
+  overlayCharError: {
+    color: colors.my_red,
+  },
+  overlayCharNeutral: {
+    color: colors.headline,
   },
   topContainer: {
     display: "flex",

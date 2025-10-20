@@ -202,7 +202,7 @@ export default function CoursePanelScreen() {
   const styles = useStyles();
 
   const activationCooldownRef = useRef<number>(0);
-  const ACTIVATION_COOLDOWN_MS = 500;
+  const ACTIVATION_COOLDOWN_MS = 100;
 
   const canActivate = useCallback(() => {
     const now = Date.now();
@@ -371,7 +371,7 @@ export default function CoursePanelScreen() {
                           {hasOfficial ? (
                             <View style={styles.groupCourses}>
                               <Text style={styles.groupSubtitle}>
-                                Zestawy tematyczne
+                                Mini kursy
                               </Text>
                               {group.official.map((course) => {
                                 const isHighlighted =
@@ -381,6 +381,9 @@ export default function CoursePanelScreen() {
                                 const IconComponent =
                                   iconMeta?.Component ?? Ionicons;
                                 const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                                const sourceFlag = course.sourceLang
+                                  ? getFlagSource(course.sourceLang)
+                                  : undefined;
 
                                 return (
                                   <Pressable
@@ -403,6 +406,12 @@ export default function CoursePanelScreen() {
                                           size={60}
                                           color={course.iconColor}
                                         />
+                                        {sourceFlag ? (
+                                          <Image
+                                            style={styles.customIconFlag}
+                                            source={sourceFlag}
+                                          />
+                                        ) : null}
                                       </View>
                                       <View style={styles.customCardInfo}>
                                         <Text style={styles.customCardTitle}>

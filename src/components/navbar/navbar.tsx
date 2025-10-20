@@ -17,6 +17,8 @@ import {
   type CustomCourseRecord,
 } from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import type { LanguageCourse } from "@/src/types/course";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 
@@ -59,6 +61,23 @@ export default function Navbar({ children }: NavbarProps) {
   const bottomPad = Math.max(insets.bottom, 12);
   const [customCourse, setCustomCourse] =
     useState<CustomCourseRecord | null>(null);
+  type DisplayCourse =
+    | { kind: "custom"; course: CustomCourseRecord }
+    | { kind: "builtin"; course: LanguageCourse };
+  const derivedDisplayCourse = useMemo<DisplayCourse | null>(() => {
+    if (activeCustomCourseId != null && customCourse) {
+      return { kind: "custom", course: customCourse };
+    }
+
+    if (activeCustomCourseId == null && activeCourse) {
+      return { kind: "builtin", course: activeCourse as LanguageCourse };
+    }
+
+    return null;
+  }, [activeCourse, activeCustomCourseId, customCourse]);
+  const [displayCourse, setDisplayCourse] = useState<DisplayCourse | null>(
+    derivedDisplayCourse
+  );
   const { knownWordsCount } = useLearningStats();
 
   useEffect(() => {
@@ -75,6 +94,9 @@ export default function Navbar({ children }: NavbarProps) {
       .then((course) => {
         if (isMounted) {
           setCustomCourse(course);
+          if (course) {
+            setDisplayCourse({ kind: "custom", course });
+          }
         }
       })
       .catch((error) => {
@@ -89,40 +111,70 @@ export default function Navbar({ children }: NavbarProps) {
     };
   }, [activeCustomCourseId]);
 
+  useEffect(() => {
+    if (derivedDisplayCourse) {
+      setDisplayCourse(derivedDisplayCourse);
+    }
+  }, [derivedDisplayCourse]);
+
+  const displayedCustomCourse =
+    displayCourse?.kind === "custom" ? displayCourse.course : null;
+  const displayedBuiltinCourse =
+    displayCourse?.kind === "builtin" ? displayCourse.course : null;
+
   const courseFlagSource = useMemo(() => {
-    if (!activeCourse || !activeCourse.sourceLang) {
+    if (!displayedBuiltinCourse?.sourceLang) {
       return undefined;
     }
 
-    return getFlagSource(activeCourse.sourceLang);
-  }, [activeCourse]);
+    return getFlagSource(displayedBuiltinCourse.sourceLang);
+  }, [displayedBuiltinCourse]);
 
-  const courseAccessibilityLabel = useMemo(() => {
-    if (customCourse) {
-      return `Kurs ${customCourse.name}. Otwórz panel kursów.`;
+  const customCourseFlagSource = useMemo(() => {
+    if (!displayedCustomCourse?.slug) {
+      return undefined;
     }
 
-    if (activeCourse?.sourceLang && activeCourse?.targetLang) {
-      return `Kurs ${activeCourse.sourceLang.toUpperCase()} do ${activeCourse.targetLang.toUpperCase()}. Otwórz panel kursów.`;
+    const manifest = OFFICIAL_PACKS.find(
+      (pack) => pack.slug === displayedCustomCourse.slug
+    );
+    const sourceLang = manifest?.sourceLang;
+    if (!sourceLang) {
+      return undefined;
+    }
+
+    return getFlagSource(sourceLang);
+  }, [displayedCustomCourse]);
+
+  const courseAccessibilityLabel = useMemo(() => {
+    if (displayedCustomCourse) {
+      return `Kurs ${displayedCustomCourse.name}. Otwórz panel kursów.`;
+    }
+
+    if (
+      displayedBuiltinCourse?.sourceLang &&
+      displayedBuiltinCourse?.targetLang
+    ) {
+      return `Kurs ${displayedBuiltinCourse.sourceLang.toUpperCase()} do ${displayedBuiltinCourse.targetLang.toUpperCase()}. Otwórz panel kursów.`;
     }
 
     return "Wybierz kurs językowy";
-  }, [activeCourse, customCourse]);
+  }, [displayedBuiltinCourse, displayedCustomCourse]);
 
   const courseIconMeta = useMemo(() => {
-    if (!customCourse) return null;
-    return getCourseIconById(customCourse.iconId);
-  }, [customCourse]);
+    if (!displayedCustomCourse) return null;
+    return getCourseIconById(displayedCustomCourse.iconId);
+  }, [displayedCustomCourse]);
 
   const CustomCourseIcon = courseIconMeta?.Component;
   const customCourseIconName = courseIconMeta?.name ?? "grid-outline";
-  const customCourseIconColor = customCourse?.iconColor ?? colors.headline;
-  const customCourseDisplayName = customCourse
-    ? truncateCourseName(customCourse.name)
+  const customCourseIconColor =
+    displayedCustomCourse?.iconColor ?? colors.headline;
+  const customCourseDisplayName = displayedCustomCourse
+    ? truncateCourseName(displayedCustomCourse.name)
     : "";
 
-  const courseGraphic =
-    activeCustomCourseId != null && customCourse ? (
+  const courseGraphic = displayedCustomCourse ? (
       <View style={styles.customCourseIconWrapper}>
         {CustomCourseIcon ? (
           <CustomCourseIcon
@@ -137,6 +189,9 @@ export default function Navbar({ children }: NavbarProps) {
             color={colors.headline}
           />
         )}
+        {customCourseFlagSource ? (
+          <Image source={customCourseFlagSource} style={styles.customCourseFlag} />
+        ) : null}
       </View>
     ) : courseFlagSource ? (
       <Image source={courseFlagSource} style={styles.courseFlag} />
@@ -186,7 +241,7 @@ export default function Navbar({ children }: NavbarProps) {
               accessibilityLabel={courseAccessibilityLabel}
             >
               {courseGraphic}
-              {activeCustomCourseId != null && customCourse ? (
+              {displayedCustomCourse ? (
                 <Text
                   style={styles.courseName}
                   numberOfLines={1}

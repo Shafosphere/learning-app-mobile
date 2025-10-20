@@ -115,6 +115,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
   customCourseIconWrapper: {
     alignItems: "center",
     justifyContent: "center",
+    position: "relative",
+    width: 32,
+    height: 32,
+  },
+  customCourseFlag: {
+    position: "absolute",
+    bottom: 0,
+    right: 0,
+    width: 99 / 5.5,
+    height: 66 / 5.5,
+    borderRadius: 4,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
   },
   counterText: {
     marginLeft: 8,

@@ -4,6 +4,8 @@ import MyButton from "../button/button";
 import { WordWithTranslations } from "@/src/types/boxes";
 import { useCallback, useEffect, useRef, useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { stripDiacritics } from "@/src/utils/diacritics";
 
 type CardProps = {
   selectedItem: WordWithTranslations | null;
@@ -18,10 +20,12 @@ type CardProps = {
     rewers: string;
     input1: string;
     input2: string;
+    mode?: "demote" | "intro";
   } | null;
   wrongInputChange: (which: 1 | 2, value: string) => void;
   onDownload: () => Promise<void>;
   downloadDisabled?: boolean;
+  introMode?: boolean;
 };
 
 export default function Card({
@@ -35,16 +39,24 @@ export default function Card({
   wrongInputChange,
   onDownload,
   downloadDisabled = false,
+  introMode = false,
 }: CardProps) {
   const styles = useStyles();
+  const { ignoreDiacriticsInSpellcheck } = useSettings();
+  const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
-    result === null ? undefined : result ? styles.cardGood : styles.cardBad;
+    !isIntroMode && result !== null
+      ? result
+        ? styles.cardGood
+        : styles.cardBad
+      : undefined;
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
   const correctionInput1Ref = useRef<TextInput | null>(null);
   const correctionInput2Ref = useRef<TextInput | null>(null);
   const previousResult = useRef<boolean | null>(null);
+  const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
   const timeouts = useRef<Array<ReturnType<typeof setTimeout>>>([]);
@@ -74,7 +86,8 @@ export default function Card({
   }, []);
 
   useEffect(() => {
-    const movedToCorrection = result === false && previousResult.current !== false;
+    const movedToCorrection =
+      result === false && previousResult.current !== false;
     const backToMain = result !== false && previousResult.current === false;
 
     if (movedToCorrection) {
@@ -85,7 +98,7 @@ export default function Card({
       }
     }
 
-    if (backToMain) {
+    if (backToMain && !isIntroMode) {
       needsCorrectionFocus.current = false;
       setAnswer("");
       if (selectedItem) {
@@ -93,25 +106,53 @@ export default function Card({
       }
     }
 
-    previousResult.current = result;
-  }, [correction, result, selectedItem, setAnswer, focusWithDelay]);
-
-  useEffect(() => {
-    if (result === false && correction && needsCorrectionFocus.current) {
+    if (isIntroMode && !previousIntroMode.current && correction) {
       focusWithDelay(correctionInput1Ref);
       needsCorrectionFocus.current = false;
     }
-  }, [correction, result, focusWithDelay]);
+
+    if (!isIntroMode && previousIntroMode.current && result !== false) {
+      if (selectedItem) {
+        focusWithDelay(mainInputRef);
+      }
+    }
+
+    previousResult.current = result;
+    previousIntroMode.current = isIntroMode;
+  }, [
+    correction,
+    focusWithDelay,
+    isIntroMode,
+    result,
+    selectedItem,
+    setAnswer,
+  ]);
+
+  useEffect(() => {
+    if (
+      correction &&
+      needsCorrectionFocus.current &&
+      (result === false || isIntroMode)
+    ) {
+      focusWithDelay(correctionInput1Ref);
+      needsCorrectionFocus.current = false;
+    }
+  }, [correction, isIntroMode, result, focusWithDelay]);
 
   useEffect(() => {
     const currentId = selectedItem?.id ?? null;
     if (currentId !== previousSelectedId.current) {
-      if (currentId != null && result !== false) {
-        focusWithDelay(mainInputRef);
+      if (currentId != null) {
+        if (isIntroMode) {
+          focusWithDelay(correctionInput1Ref);
+          needsCorrectionFocus.current = false;
+        } else if (result !== false) {
+          focusWithDelay(mainInputRef);
+        }
       }
       previousSelectedId.current = currentId;
     }
-  }, [selectedItem, result, focusWithDelay]);
+  }, [isIntroMode, selectedItem, result, focusWithDelay]);
 
   useEffect(() => {
     previousCorrectionInput2.current = correction?.input2 ?? "";
@@ -131,22 +172,78 @@ export default function Card({
     confirm();
   }
 
+  function normalizeChar(char: string | undefined): string {
+    if (!char) return "";
+    let normalized = char.toLowerCase();
+    if (ignoreDiacriticsInSpellcheck) {
+      normalized = stripDiacritics(normalized);
+    }
+    return normalized;
+  }
+
+  function isCharMismatchAt(value: string, expected: string, index: number): boolean {
+    const inputChar = value[index];
+    if (!inputChar) return false;
+    const expectedChar = expected?.[index];
+    if (!expectedChar) return true;
+    return normalizeChar(inputChar) !== normalizeChar(expectedChar);
+  }
+
+  function renderOverlayText(value: string, expected: string) {
+    if (!value) return null;
+    return value.split("").map((char, idx) => {
+      const mismatch = isCharMismatchAt(value, expected, idx);
+      const displayChar = char === " " ? "\u00A0" : char;
+      const charStyle = mismatch ? styles.overlayCharError : styles.overlayCharNeutral;
+      return (
+        <Text
+          key={`overlay-${idx}`}
+          style={charStyle}
+        >
+          {displayChar}
+        </Text>
+      );
+    });
+  }
+
   function showCardContent() {
-    if (result === false && correction) {
+    if (correction && (result === false || isIntroMode)) {
       return (
         <>
           <View style={styles.containerInput}>
             <Text style={styles.myplaceholder}>{correction.awers}</Text>
-            <TextInput
-              value={correction.input1}
-              onChangeText={(t) => wrongInputChange(1, t)}
-              style={styles.myinput}
-              ref={correctionInput1Ref}
-              returnKeyType="next"
-              blurOnSubmit={false}
-              onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
-              autoCapitalize="none"
-            />
+              <TextInput
+                value={correction.input1}
+                onChangeText={(t) => {
+                  wrongInputChange(1, t);
+                  if (isIntroMode && correction.awers) {
+                    const normalizeString = (value: string) => {
+                      let base = value.toLowerCase();
+                      if (ignoreDiacriticsInSpellcheck) {
+                        base = stripDiacritics(base);
+                      }
+                      return base;
+                    };
+                    if (
+                      normalizeString(t) === normalizeString(correction.awers) &&
+                      t.length === correction.awers.length
+                    ) {
+                      focusWithDelay(correctionInput2Ref);
+                    }
+                  }
+                }}
+                style={styles.myinput}
+                ref={correctionInput1Ref}
+                returnKeyType="next"
+                blurOnSubmit={false}
+                onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
+                autoCapitalize="none"
+              />
+            {isIntroMode ? (
+              <Text style={styles.inputOverlay}>
+                {renderOverlayText(correction.input1, correction.awers)}
+              </Text>
+            ) : null}
           </View>
           <View style={styles.containerInput}>
             <Text style={styles.myplaceholder}>{correction.rewers}</Text>
@@ -172,6 +269,11 @@ export default function Card({
                 }
               }}
             />
+            {isIntroMode ? (
+              <Text style={styles.inputOverlay}>
+                {renderOverlayText(correction.input2, correction.rewers)}
+              </Text>
+            ) : null}
           </View>
         </>
       );
@@ -215,9 +317,11 @@ export default function Card({
     return <Text style={styles.cardFont}>Wybierz pudełko z słowkami</Text>;
   }
 
+  const cardContainerStyle = [styles.card, isIntroMode ? styles.cardIntro : statusStyle];
+
   return (
     <View style={styles.container}>
-      <View style={[styles.card, statusStyle]}>{showCardContent()}</View>
+      <View style={cardContainerStyle}>{showCardContent()}</View>
 
       <View style={styles.containerButton}>
         <MyButton

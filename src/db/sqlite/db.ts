@@ -461,7 +461,9 @@ export async function getCustomCourseById(
        color_id    AS colorId,
        COALESCE(reviews_enabled, 0) AS reviewsEnabled,
        created_at  AS createdAt,
-       updated_at  AS updatedAt
+       updated_at  AS updatedAt,
+       COALESCE(is_official, 0) AS isOfficial,
+       slug
      FROM custom_courses
      WHERE id = ?
      LIMIT 1;`,
