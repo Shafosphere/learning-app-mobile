@@ -69,6 +69,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderRadius: 5,
   },
   groupCourses: {
+    marginTop: 12,
     display: "flex",
     flexDirection: "column",
     gap: 12,
@@ -155,7 +156,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   customCardInfo: {
+    flex: 1,
     marginLeft: 12,
+    minWidth: 0,
+    alignItems: "flex-start",
+  },
+  customCardTitleContainer: {
+    width: "100%",
+    overflow: "hidden",
   },
   customCardTitle: {
     fontSize: 25,

@@ -17,9 +17,26 @@ import {
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import type { CEFRLevel } from "@/src/types/language";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 
-const languageLabels: Record<string, Record<string, string>> = {
-  pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
+const LANGUAGE_LABELS_BY_TARGET: Record<string, Record<string, string>> = {
+  pl: {
+    en: "angielski",
+    fr: "francuski",
+    es: "hiszpański",
+    de: "niemiecki",
+    pm: "francuski",
+  },
+};
+
+const FALLBACK_LANGUAGE_LABELS: Record<string, string> = {
+  pl: "polski",
+  en: "angielski",
+  fr: "francuski",
+  es: "hiszpański",
+  de: "niemiecki",
+  pm: "francuski",
 };
 
 const LEVEL_ORDER: Record<CEFRLevel, number> = {
@@ -32,16 +49,57 @@ const LEVEL_ORDER: Record<CEFRLevel, number> = {
 };
 const MAX_LEVEL_ORDER = Math.max(...Object.values(LEVEL_ORDER)) + 1;
 
-const MAX_COURSE_NAME_LENGTH = 13;
+const resolveLanguageLabel = (
+  targetLang: string | null | undefined,
+  sourceLang: string | null | undefined
+): string => {
+  if (sourceLang) {
+    const targetLabels = targetLang
+      ? LANGUAGE_LABELS_BY_TARGET[targetLang]
+      : undefined;
+    if (targetLabels?.[sourceLang]) {
+      return targetLabels[sourceLang];
+    }
+    const fallbackLabel = FALLBACK_LANGUAGE_LABELS[sourceLang];
+    if (fallbackLabel) {
+      return fallbackLabel;
+    }
+    return sourceLang.toUpperCase();
+  }
+  return "unknown";
+};
 
-const truncateName = (name: string): string => {
-  if (!name) {
-    return "";
-  }
-  if (name.length <= MAX_COURSE_NAME_LENGTH) {
-    return name;
-  }
-  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
+type OfficialCourseReviewItem = CustomCourseSummary & {
+  sourceLang: string | null;
+  targetLang: string | null;
+};
+
+type BuiltInGroup = {
+  key: string;
+  targetLang: string | null;
+  sourceLang: string | null;
+  targetFlag?: ReturnType<typeof getFlagSource>;
+  sourceFlag?: ReturnType<typeof getFlagSource>;
+  items: Array<{ courseIndex: number; courseLevel: string | null }>;
+};
+
+type OfficialGroup = {
+  key: string;
+  targetLang: string | null;
+  sourceLang: string | null;
+  targetFlag?: ReturnType<typeof getFlagSource>;
+  sourceFlag?: ReturnType<typeof getFlagSource>;
+  courses: OfficialCourseReviewItem[];
+};
+
+type CombinedGroup = {
+  key: string;
+  targetLang: string | null;
+  sourceLang: string | null;
+  targetFlag?: ReturnType<typeof getFlagSource>;
+  sourceFlag?: ReturnType<typeof getFlagSource>;
+  builtin: BuiltInGroup["items"];
+  official: OfficialGroup["courses"];
 };
 
 export default function CoursesScreen() {
@@ -63,7 +121,7 @@ export default function CoursesScreen() {
     []
   );
   const [customCounts, setCustomCounts] = useState<Record<number, number>>({});
-  const [officialCourses, setOfficialCourses] = useState<CustomCourseSummary[]>(
+  const [officialCourses, setOfficialCourses] = useState<OfficialCourseReviewItem[]>(
     []
   );
   const [officialCounts, setOfficialCounts] = useState<Record<number, number>>({});
@@ -134,9 +192,21 @@ export default function CoursesScreen() {
       }
       setCustomCounts(nextCustom);
 
-      setOfficialCourses(officialRows);
+      const mappedOfficialCourses = officialRows.map<OfficialCourseReviewItem>(
+        (course) => {
+          const manifest = OFFICIAL_PACKS.find(
+            (pack) => pack.slug === course.slug
+          );
+          return {
+            ...course,
+            sourceLang: manifest?.sourceLang ?? null,
+            targetLang: manifest?.targetLang ?? null,
+          };
+        }
+      );
+      setOfficialCourses(mappedOfficialCourses);
       const officialEntries = await Promise.all(
-        officialRows.map(async (course) => {
+        mappedOfficialCourses.map(async (course) => {
           if (!course.reviewsEnabled) {
             return [course.id, 0] as const;
           }
@@ -238,25 +308,32 @@ export default function CoursesScreen() {
     (course) =>
       pinnedOfficialCourseIds.includes(course.id) && course.reviewsEnabled
   );
-  const hasPinnedOfficial = visibleOfficialCourses.length > 0;
-  const builtInGroups = useMemo(() => {
-    const groups = new Map<
-      string,
-      {
-        label: string;
-        items: Array<{ courseIndex: number; courseLevel: string | null }>;
+  const builtInGroups = useMemo<BuiltInGroup[]>(() => {
+    const groups = new Map<string, BuiltInGroup>();
+
+    const ensureGroup = (
+      targetLang: string | null | undefined,
+      sourceLang: string | null | undefined
+    ): BuiltInGroup => {
+      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = {
+          key,
+          targetLang: targetLang ?? null,
+          sourceLang: sourceLang ?? null,
+          targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
+          sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
+          items: [],
+        };
+        groups.set(key, group);
       }
-    >();
+      return group;
+    };
 
     courses.forEach((course, index) => {
-      const friendlyLabel =
-        languageLabels[course.targetLang]?.[course.sourceLang] ??
-        course.sourceLang?.toUpperCase() ??
-        "unknown";
-      if (!groups.has(friendlyLabel)) {
-        groups.set(friendlyLabel, { label: friendlyLabel, items: [] });
-      }
-      groups.get(friendlyLabel)!.items.push({
+      const group = ensureGroup(course.targetLang, course.sourceLang);
+      group.items.push({
         courseIndex: index,
         courseLevel: course.level ?? null,
       });
@@ -282,6 +359,103 @@ export default function CoursesScreen() {
     });
   }, [courses]);
 
+  const officialGroups = useMemo<OfficialGroup[]>(() => {
+    const groups = new Map<string, OfficialGroup>();
+
+    const ensureGroup = (
+      targetLang: string | null,
+      sourceLang: string | null
+    ): OfficialGroup => {
+      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      let group = groups.get(key);
+      if (!group) {
+        group = {
+          key,
+          targetLang,
+          sourceLang,
+          targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
+          sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
+          courses: [],
+        };
+        groups.set(key, group);
+      }
+      return group;
+    };
+
+    visibleOfficialCourses.forEach((course) => {
+      const group = ensureGroup(course.targetLang, course.sourceLang);
+      group.courses.push(course);
+    });
+
+    return Array.from(groups.values());
+  }, [visibleOfficialCourses]);
+
+  const combinedGroups = useMemo<CombinedGroup[]>(() => {
+    const map = new Map<string, CombinedGroup>();
+    const order: string[] = [];
+
+    const ensureGroup = (
+      targetLang: string | null,
+      sourceLang: string | null,
+      targetFlag?: ReturnType<typeof getFlagSource>,
+      sourceFlag?: ReturnType<typeof getFlagSource>
+    ): CombinedGroup => {
+      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      let group = map.get(key);
+      if (!group) {
+        group = {
+          key,
+          targetLang,
+          sourceLang,
+          targetFlag: targetFlag ?? (targetLang ? getFlagSource(targetLang) : undefined),
+          sourceFlag: sourceFlag ?? (sourceLang ? getFlagSource(sourceLang) : undefined),
+          builtin: [],
+          official: [],
+        };
+        map.set(key, group);
+        order.push(key);
+      } else {
+        if (!group.targetFlag && targetFlag) {
+          group.targetFlag = targetFlag;
+        }
+        if (!group.sourceFlag && sourceFlag) {
+          group.sourceFlag = sourceFlag;
+        }
+        if (targetLang && !group.targetLang) {
+          group.targetLang = targetLang;
+        }
+        if (sourceLang && !group.sourceLang) {
+          group.sourceLang = sourceLang;
+        }
+      }
+      return group;
+    };
+
+    builtInGroups.forEach((group) => {
+      const combined = ensureGroup(
+        group.targetLang,
+        group.sourceLang,
+        group.targetFlag,
+        group.sourceFlag
+      );
+      combined.builtin = [...group.items];
+    });
+
+    officialGroups.forEach((group) => {
+      const combined = ensureGroup(
+        group.targetLang,
+        group.sourceLang,
+        group.targetFlag,
+        group.sourceFlag
+      );
+      combined.official = [...combined.official, ...group.courses];
+    });
+
+    return order
+      .map((key) => map.get(key)!)
+      .filter((group) => group.builtin.length > 0 || group.official.length > 0);
+  }, [builtInGroups, officialGroups]);
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -294,79 +468,126 @@ export default function CoursesScreen() {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Powtórki</Text>
-            {builtInGroups.map((group) => (
-              <View key={group.label} style={styles.groupContainer}>
-                <View style={styles.groupHeader}>
-                  <View style={styles.groupDivider} />
-                  <Text style={styles.groupHeaderLabel}>{group.label}</Text>
-                </View>
-                <View style={styles.courseGrid}>
-                  {group.items.map(({ courseIndex, courseLevel }) => {
-                    const course = courses[courseIndex];
-                    const builtInCount = builtInCounts[courseIndex] ?? 0;
-                    const sourceFlag = getFlagSource(course.sourceLang);
-                    const levelLabel =
-                      courseLevel ??
-                      (languageLabels[course.targetLang]?.[course.sourceLang] ??
-                        course.sourceLang);
+            {combinedGroups.map((group) => {
+              const targetCode = group.targetLang
+                ? group.targetLang.toUpperCase()
+                : "?";
+              const sourceCode = group.sourceLang
+                ? group.sourceLang.toUpperCase()
+                : "?";
 
-                    return (
-                      <Pressable
-                        key={`${course.sourceLang}-${course.targetLang}-${courseLevel ?? "default"}-${courseIndex}`}
-                        style={styles.courseCard}
-                        onPress={() => handleSelectCourse(courseIndex)}
-                      >
-                        {sourceFlag ? (
-                          <Image style={styles.flag} source={sourceFlag} />
+              return (
+                <View key={group.key} style={styles.groupContainer}>
+                  <View style={styles.groupHeader}>
+                    <View style={styles.groupHeaderLine} />
+                    <View style={styles.groupHeaderBadge}>
+                      <View style={styles.groupHeaderLanguage}>
+                        <Text style={styles.groupHeaderCode}>{targetCode}</Text>
+                        {group.targetFlag ? (
+                          <Image
+                            style={styles.groupHeaderFlag}
+                            source={group.targetFlag}
+                          />
                         ) : null}
-                        <Text style={styles.courseCardText}>{levelLabel}</Text>
-                        <View style={styles.courseCount}>
-                          {renderCount(builtInCount)}
-                        </View>
-                      </Pressable>
-                    );
-                  })}
-                </View>
-              </View>
-            ))}
-          </View>
-
-          <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Zestawy tematyczne</Text>
-            {!hasPinnedOfficial ? (
-              <Text style={styles.emptyText}>
-                Nie masz jeszcze przypiętych zestawów tematycznych.
-              </Text>
-            ) : (
-              <View style={styles.courseGrid}>
-                {visibleOfficialCourses.map((course) => {
-                  const iconMeta = getCourseIconById(course.iconId);
-                  const IconComponent = iconMeta?.Component ?? Ionicons;
-                  const iconName = (iconMeta?.name ?? "grid-outline") as never;
-                  const dueCount = officialCounts[course.id] ?? 0;
-
-                  return (
-                    <Pressable
-                      key={`official-${course.id}`}
-                      style={styles.courseCard}
-                      onPress={() => handleSelectCustomCourse(course.id)}
-                    >
-                      <IconComponent
-                        name={iconName}
-                        size={48}
-                        color={course.iconColor}
-                      />
-                      <Text style={styles.courseCardText}>
-                        {truncateName(course.name)}
-                      </Text>
-                      <View style={styles.courseCount}>
-                        {renderCount(dueCount)}
                       </View>
-                    </Pressable>
-                  );
-                })}
-              </View>
-            )}
+                      {group.sourceLang ? (
+                        <>
+                          <Text style={styles.groupHeaderSeparator}>/</Text>
+                          <View style={styles.groupHeaderLanguage}>
+                            <Text style={styles.groupHeaderCode}>
+                              {sourceCode}
+                            </Text>
+                            {group.sourceFlag ? (
+                              <Image
+                                style={styles.groupHeaderFlag}
+                                source={group.sourceFlag}
+                              />
+                            ) : null}
+                          </View>
+                        </>
+                      ) : null}
+                    </View>
+                  </View>
+
+                  {group.builtin.length > 0 ? (
+                    <View style={styles.courseGrid}>
+                      {group.builtin.map(({ courseIndex, courseLevel }) => {
+                        const course = courses[courseIndex];
+                        const builtInCount = builtInCounts[courseIndex] ?? 0;
+                        const sourceFlag = getFlagSource(course.sourceLang);
+                        const levelLabel =
+                          courseLevel ??
+                          resolveLanguageLabel(
+                            course.targetLang,
+                            course.sourceLang
+                          );
+
+                        return (
+                          <Pressable
+                            key={`${course.sourceLang}-${course.targetLang}-${
+                              courseLevel ?? "default"
+                            }-${courseIndex}`}
+                            style={styles.courseCard}
+                            onPress={() => handleSelectCourse(courseIndex)}
+                          >
+                            {sourceFlag ? (
+                              <Image style={styles.flag} source={sourceFlag} />
+                            ) : null}
+                            <Text style={styles.courseCardText}>
+                              {levelLabel}
+                            </Text>
+                            <View style={styles.courseCount}>
+                              {renderCount(builtInCount)}
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  ) : null}
+
+                  {group.official.length > 0 ? (
+                    <>
+                      <Text style={styles.miniSectionTitle}>Mini kursy</Text>
+                      <View style={styles.courseGrid}>
+                        {group.official.map((course) => {
+                          const iconMeta = getCourseIconById(course.iconId);
+                          const IconComponent = iconMeta?.Component ?? Ionicons;
+                          const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                          const dueCount = officialCounts[course.id] ?? 0;
+
+                          return (
+                            <Pressable
+                              key={`official-${course.id}`}
+                              style={styles.courseCard}
+                              onPress={() => handleSelectCustomCourse(course.id)}
+                            >
+                              <IconComponent
+                                name={iconName}
+                                size={48}
+                                color={course.iconColor}
+                              />
+                              <CourseTitleMarquee
+                                text={course.name}
+                                containerStyle={styles.courseCardTitleContainer}
+                                textStyle={styles.courseCardText}
+                              />
+                              <View style={styles.courseCount}>
+                                {renderCount(dueCount)}
+                              </View>
+                            </Pressable>
+                          );
+                        })}
+                      </View>
+                    </>
+                  ) : null}
+                </View>
+              );
+            })}
+            {combinedGroups.length === 0 ? (
+              <Text style={styles.emptyText}>
+                Nie masz jeszcze przypiętych kursów do powtórek.
+              </Text>
+            ) : null}
           </View>
 
           <View style={styles.section}>
@@ -398,9 +619,11 @@ export default function CoursesScreen() {
                         size={48}
                         color={course.iconColor}
                       />
-                      <Text style={styles.courseCardText}>
-                        {truncateName(course.name)}
-                      </Text>
+                      <CourseTitleMarquee
+                        text={course.name}
+                        containerStyle={styles.courseCardTitleContainer}
+                        textStyle={styles.courseCardText}
+                      />
                       <View style={styles.courseCount}>
                         {renderCount(dueCount)}
                       </View>

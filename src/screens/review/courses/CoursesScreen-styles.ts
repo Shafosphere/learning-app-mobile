@@ -39,26 +39,51 @@ export const useStyles = createThemeStylesHook((colors) => ({
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",
+    marginTop: 12,
     marginBottom: 12,
-    gap: 12,
   },
-  groupDivider: {
+  groupHeaderLine: {
     flex: 1,
     borderBottomWidth: 4,
     borderStyle: "dashed",
     borderColor: colors.border,
+    marginRight: 12,
   },
-  groupHeaderLabel: {
+  groupHeaderBadge: {
+    flexDirection: "row",
+    alignItems: "center",
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+  },
+  groupHeaderLanguage: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  groupHeaderCode: {
     fontSize: 20,
     fontWeight: "800",
     color: colors.headline,
-    backgroundColor: colors.background,
-    paddingHorizontal: 8,
-    borderRadius: 8,
+    marginRight: 6,
+  },
+  groupHeaderSeparator: {
+    marginHorizontal: 8,
+    fontSize: 20,
+    fontWeight: "800",
+    color: colors.headline,
+  },
+  groupHeaderFlag: {
+    width: 99 / 3,
+    height: 66 / 3,
+    borderRadius: 5,
   },
   sectionTitle: {
     fontSize: 25,
     fontWeight: 900,
+    color: colors.headline,
+  },
+  miniSectionTitle: {
+    fontSize: 20,
+    fontWeight: 800,
     color: colors.headline,
   },
   courseCard: {
@@ -84,6 +109,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     gap: 16,
     justifyContent: "center",
+  },
+  courseCardTitleContainer: {
+    width: "80%",
+    overflow: "hidden",
+    alignItems: "center",
   },
   courseCardText: {
     fontSize: 24,

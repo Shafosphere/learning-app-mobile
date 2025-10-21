@@ -246,6 +246,8 @@ export default function Flashcards() {
 
   useEffect(() => {
     if (!isReady) return;
+    if (isLoadingData || customCards.length === 0) return;
+
     const allowedIds = new Set(customCards.map((card) => card.id));
 
     setBoxes((prev) => {
@@ -271,7 +273,7 @@ export default function Flashcards() {
       const filtered = current.filter((card) => allowedIds.has(card.id));
       return filtered.length === current.length ? current : filtered;
     });
-  }, [customCards, isReady, learned, setBoxes, setLearned]);
+  }, [customCards, isReady, isLoadingData, learned, setBoxes, setLearned]);
 
   useEffect(() => {
     if (!isReady) return;

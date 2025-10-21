@@ -17,6 +17,7 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CoursePanelScreen-styles";
+import { CourseCard } from "@/src/components/course/CourseCard";
 
 type BuiltinCourseItem = { course: LanguageCourse; index: number };
 
@@ -38,18 +39,6 @@ type CourseGroup = {
 type SelectedCourse =
   | { type: "builtin"; index: number }
   | { type: "custom"; id: number };
-
-const MAX_COURSE_NAME_LENGTH = 13;
-
-const truncateName = (name: string): string => {
-  if (!name) {
-    return "";
-  }
-  if (name.length <= MAX_COURSE_NAME_LENGTH) {
-    return name;
-  }
-  return `${name.slice(0, MAX_COURSE_NAME_LENGTH - 1)}…`;
-};
 
 export default function CoursePanelScreen() {
   const {
@@ -386,43 +375,32 @@ export default function CoursePanelScreen() {
                                   : undefined;
 
                                 return (
-                                  <Pressable
+                                  <CourseCard
                                     key={`official-${course.id}`}
                                     onPress={() => handleCustomCoursePress(course.id)}
-                                    style={[
-                                      styles.customCard,
-                                      isHighlighted && styles.clicked,
+                                    containerStyle={styles.customCard}
+                                    contentStyle={styles.customCardContent}
+                                    icon={{
+                                      Component: IconComponent,
+                                      name: iconName,
+                                      color: course.iconColor,
+                                      size: 60,
+                                    }}
+                                    iconWrapperStyle={[
+                                      styles.customIconBadge,
+                                      { borderColor: course.iconColor },
                                     ]}
-                                  >
-                                    <View style={styles.customCardContent}>
-                                      <View
-                                        style={[
-                                          styles.customIconBadge,
-                                          { borderColor: course.iconColor },
-                                        ]}
-                                      >
-                                        <IconComponent
-                                          name={iconName}
-                                          size={60}
-                                          color={course.iconColor}
-                                        />
-                                        {sourceFlag ? (
-                                          <Image
-                                            style={styles.customIconFlag}
-                                            source={sourceFlag}
-                                          />
-                                        ) : null}
-                                      </View>
-                                      <View style={styles.customCardInfo}>
-                                        <Text style={styles.customCardTitle}>
-                                          {truncateName(course.name)}
-                                        </Text>
-                                        <Text style={styles.customCardMeta}>
-                                          fiszki: {course.cardsCount}
-                                        </Text>
-                                      </View>
-                                    </View>
-                                  </Pressable>
+                                    flagSource={sourceFlag}
+                                    flagStyle={styles.customIconFlag}
+                                    infoStyle={styles.customCardInfo}
+                                    title={course.name}
+                                    titleContainerStyle={styles.customCardTitleContainer}
+                                    titleTextStyle={styles.customCardTitle}
+                                    meta={`fiszki: ${course.cardsCount}`}
+                                    metaTextStyle={styles.customCardMeta}
+                                    isHighlighted={isHighlighted}
+                                    highlightedStyle={styles.clicked}
+                                  />
                                 );
                               })}
                             </View>
@@ -445,53 +423,51 @@ export default function CoursePanelScreen() {
                       const isHighlighted =
                         committedCourse?.type === "custom" &&
                         committedCourse.id === course.id;
-                  return (
-                    <Pressable
-                      key={course.id}
-                      onPress={() => handleCustomCoursePress(course.id)}
-                      style={[styles.customCard, isHighlighted && styles.clicked]}
-                    >
-                      <View style={styles.customCardContent}>
-                        <View
-                          style={[
+                      return (
+                        <CourseCard
+                          key={course.id}
+                          onPress={() => handleCustomCoursePress(course.id)}
+                          containerStyle={styles.customCard}
+                          contentStyle={styles.customCardContent}
+                          icon={{
+                            Component: IconComponent,
+                            name: iconName,
+                            color: course.iconColor,
+                            size: 60,
+                          }}
+                          iconWrapperStyle={[
                             styles.customIconBadge,
                             { borderColor: course.iconColor },
                           ]}
-                        >
-                          <IconComponent
-                            name={iconName}
-                            size={60}
-                            color={course.iconColor}
-                          />
-                        </View>
-                        <View style={styles.customCardInfo}>
-                          <Text style={styles.customCardTitle}>
-                            {truncateName(course.name)}
-                          </Text>
-                          <Text style={styles.customCardMeta}>
-                            fiszki: {course.cardsCount}
-                          </Text>
-                        </View>
-                      </View>
-                      {!course.isOfficial && (
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Edytuj kurs ${course.name}`}
-                          style={styles.customEditButton}
-                          onPress={(event) => {
-                            event.stopPropagation();
-                            handleEditCustomCourse(course);
-                          }}
-                        >
-                          <FontAwesome6
-                            name="edit"
-                            size={24}
-                            color={colors.headline}
-                          />
-                        </Pressable>
-                      )}
-                    </Pressable>
-                  );
+                          infoStyle={styles.customCardInfo}
+                          title={course.name}
+                          titleContainerStyle={styles.customCardTitleContainer}
+                          titleTextStyle={styles.customCardTitle}
+                          meta={`fiszki: ${course.cardsCount}`}
+                          metaTextStyle={styles.customCardMeta}
+                          isHighlighted={isHighlighted}
+                          highlightedStyle={styles.clicked}
+                          rightAccessory={
+                            !course.isOfficial ? (
+                              <Pressable
+                                accessibilityRole="button"
+                                accessibilityLabel={`Edytuj kurs ${course.name}`}
+                                style={styles.customEditButton}
+                                onPress={(event) => {
+                                  event.stopPropagation();
+                                  handleEditCustomCourse(course);
+                                }}
+                              >
+                                <FontAwesome6
+                                  name="edit"
+                                  size={24}
+                                  color={colors.headline}
+                                />
+                              </Pressable>
+                            ) : null
+                          }
+                        />
+                      );
                     })}
                   </View>
                 </View>

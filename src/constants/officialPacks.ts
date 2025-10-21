@@ -24,7 +24,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "podstawowe_slowa",
-    name: "dwie linie",
+    name: "dwie linieas",
     iconId: "heart",
     iconColor: "#FF6B6B",
     reviewsEnabled: true,
@@ -34,7 +34,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "francuskie_podstawy",
-    name: "Podstawy",
+    name: "ToJEstNaprawdedluganzwwa",
     iconId: "book",
     iconColor: "#4CC9F0",
     reviewsEnabled: true,

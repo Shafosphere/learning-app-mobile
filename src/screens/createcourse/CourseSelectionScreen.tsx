@@ -1,15 +1,11 @@
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GestureResponderEvent,
-  Animated,
-  Easing,
   Image,
-  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
   View,
-  StyleSheet,
 } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useStyles } from "./CourseSelectionScreen-styles";
@@ -18,6 +14,7 @@ import { getFlagSource } from "@/src/constants/languageFlags";
 import type { LanguageCourse } from "@/src/types/course";
 import type { CEFRLevel } from "@/src/types/language";
 import MyButton from "@/src/components/button/button";
+import { CourseCard } from "@/src/components/course/CourseCard";
 import { useRouter } from "expo-router";
 import {
   getLanguagePairs,
@@ -26,11 +23,6 @@ import {
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import type { StyleProp, TextStyle, ViewStyle } from "react-native";
-
-const MARQUEE_DELAY_MS = 800;
-const MARQUEE_SPEED_PER_PIXEL_MS = 20;
-const MARQUEE_GAP_PX = 0;
 
 const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -69,128 +61,6 @@ type CourseGroup = {
   courses: LanguageCourse[];
   officialPacks: OfficialCourseListItem[];
 };
-
-type MarqueeTextProps = {
-  text: string;
-  containerStyle?: StyleProp<ViewStyle>;
-  textStyle?: StyleProp<TextStyle>;
-};
-
-function CourseTitleMarquee({
-  text,
-  containerStyle,
-  textStyle,
-}: MarqueeTextProps) {
-  const translateX = useRef(new Animated.Value(0)).current;
-  const animationRef = useRef<Animated.CompositeAnimation | null>(null);
-  const [containerWidth, setContainerWidth] = useState(0);
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-  const flattenedTextStyle = useMemo(
-    () => StyleSheet.flatten(textStyle) || {},
-    [textStyle]
-  );
-  const fontSize =
-    typeof flattenedTextStyle.fontSize === "number"
-      ? flattenedTextStyle.fontSize
-      : 16;
-  const avgCharWidthFactor = 0.65; // heuristic for typical sans-serif, tuned
-  const estimatedTextWidth = useMemo(
-    () => Math.ceil(text.length * fontSize * avgCharWidthFactor),
-    [text.length, fontSize]
-  );
-
-  useEffect(() => {
-    return () => {
-      animationRef.current?.stop();
-      animationRef.current = null;
-    };
-  }, []);
-
-  useEffect(() => {
-    if (containerWidth > 0 && estimatedTextWidth > containerWidth - 8) {
-      const distance = estimatedTextWidth - containerWidth + MARQUEE_GAP_PX; //nie umiem tego nrpawic, dalem 1.4
-      animationRef.current?.stop();
-      translateX.setValue(0);
-
-      const duration = Math.max(4000, distance * MARQUEE_SPEED_PER_PIXEL_MS);
-      const animation = Animated.loop(
-        Animated.sequence([
-          Animated.delay(MARQUEE_DELAY_MS),
-          Animated.timing(translateX, {
-            toValue: -distance,
-            duration,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-          Animated.delay(MARQUEE_DELAY_MS),
-          Animated.timing(translateX, {
-            toValue: 0,
-            duration,
-            easing: Easing.linear,
-            useNativeDriver: true,
-          }),
-        ])
-      );
-
-      animationRef.current = animation;
-      setShouldAnimate(true);
-      animation.start();
-
-      return () => {
-        animation.stop();
-      };
-    }
-
-    animationRef.current?.stop();
-    animationRef.current = null;
-    translateX.setValue(0);
-    setShouldAnimate(false);
-
-    return undefined;
-  }, [containerWidth, estimatedTextWidth, translateX]);
-
-  const handleContainerLayout = useCallback(
-    (event: LayoutChangeEvent) => {
-      const width = event.nativeEvent.layout.width;
-      if (Math.abs(width - containerWidth) > 0.5) {
-        setContainerWidth(width);
-      }
-    },
-    [containerWidth]
-  );
-
-  return (
-    <View
-      style={containerStyle}
-      onLayout={handleContainerLayout}
-      pointerEvents="none"
-    >
-      <Animated.View
-        style={
-          shouldAnimate
-            ? {
-                flexDirection: "row",
-                transform: [{ translateX }],
-              }
-            : undefined
-        }
-      >
-        <Text
-          style={[
-            textStyle,
-            shouldAnimate
-              ? { width: estimatedTextWidth, flexShrink: 0 }
-              : { flexShrink: 0 },
-          ]}
-          allowFontScaling
-        >
-          {text}
-        </Text>
-        {shouldAnimate ? <View style={{ width: MARQUEE_GAP_PX }} /> : null}
-      </Animated.View>
-    </View>
-  );
-}
 
 const createCourseKey = (course: LanguageCourse) => {
   const sourceKey =
@@ -555,63 +425,59 @@ export default function CourseSelectionScreen() {
                         pack.id
                       );
                       return (
-                        <Pressable
+                        <CourseCard
                           key={`official-${pack.id}`}
                           onPress={() => void handleOfficialPinToggle(pack.id)}
-                          style={styles.courseCard}
-                        >
-                          <View style={styles.officialIconWrapper}>
-                            <IconComponent
-                              name={iconName}
-                              size={60}
-                              color={pack.iconColor}
-                            />
-                            {pack.sourceLang ? (
-                              <Image
-                                style={styles.officialFlagBadge}
-                                source={getFlagSource(pack.sourceLang)}
-                              />
-                            ) : null}
-                          </View>
-                          <View style={styles.courseCardInfo}>
-                            <CourseTitleMarquee
-                              text={pack.name}
-                              containerStyle={styles.courseCardTitleContainer}
-                              textStyle={styles.customCardTitle}
-                            />
-                            <Text style={styles.customCardMeta}>
-                              fiszki: {pack.cardsCount}
-                            </Text>
-                          </View>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={
-                              isPinned
-                                ? `Odepnij zestaw ${pack.name}`
-                                : `Przypnij zestaw ${pack.name}`
-                            }
-                            style={styles.pinButton}
-                            onPress={(event) => {
-                              event.stopPropagation();
-                              void handleOfficialPinToggle(pack.id);
-                            }}
-                          >
-                            <View
-                              style={[
-                                styles.pinCheckbox,
-                                isPinned && styles.pinCheckboxActive,
-                              ]}
+                          containerStyle={styles.courseCard}
+                          icon={{
+                            Component: IconComponent,
+                            name: iconName,
+                            color: pack.iconColor,
+                            size: 60,
+                          }}
+                          flagSource={
+                            pack.sourceLang
+                              ? getFlagSource(pack.sourceLang)
+                              : undefined
+                          }
+                          flagStyle={styles.officialFlagBadge}
+                          infoStyle={styles.courseCardInfo}
+                          title={pack.name}
+                          titleContainerStyle={styles.courseCardTitleContainer}
+                          titleTextStyle={styles.customCardTitle}
+                          meta={`fiszki: ${pack.cardsCount}`}
+                          metaTextStyle={styles.customCardMeta}
+                          rightAccessory={
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={
+                                isPinned
+                                  ? `Odepnij zestaw ${pack.name}`
+                                  : `Przypnij zestaw ${pack.name}`
+                              }
+                              style={styles.pinButton}
+                              onPress={(event) => {
+                                event.stopPropagation();
+                                void handleOfficialPinToggle(pack.id);
+                              }}
                             >
-                              {isPinned ? (
-                                <Octicons
-                                  name="pin"
-                                  size={20}
-                                  color={colors.headline}
-                                />
-                              ) : null}
-                            </View>
-                          </Pressable>
-                        </Pressable>
+                              <View
+                                style={[
+                                  styles.pinCheckbox,
+                                  isPinned && styles.pinCheckboxActive,
+                                ]}
+                              >
+                                {isPinned ? (
+                                  <Octicons
+                                    name="pin"
+                                    size={20}
+                                    color={colors.headline}
+                                  />
+                                ) : null}
+                              </View>
+                            </Pressable>
+                          }
+                        />
                       );
                     })}
                   </>
