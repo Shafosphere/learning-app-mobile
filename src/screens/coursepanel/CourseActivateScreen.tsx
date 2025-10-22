@@ -16,7 +16,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
-import { useStyles } from "./CoursePanelScreen-styles";
+import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseCard } from "@/src/components/course/CourseCard";
 
 type BuiltinCourseItem = { course: LanguageCourse; index: number };
@@ -40,7 +40,7 @@ type SelectedCourse =
   | { type: "builtin"; index: number }
   | { type: "custom"; id: number };
 
-export default function CoursePanelScreen() {
+export default function CourseActivateScreen() {
   const {
     courses,
     activeCourseIdx,
@@ -191,7 +191,7 @@ export default function CoursePanelScreen() {
   const styles = useStyles();
 
   const activationCooldownRef = useRef<number>(0);
-  const ACTIVATION_COOLDOWN_MS = 100;
+  const ACTIVATION_COOLDOWN_MS = 30;
 
   const canActivate = useCallback(() => {
     const now = Date.now();
@@ -204,7 +204,7 @@ export default function CoursePanelScreen() {
 
   const notifyActivated = useCallback(() => {
     setPopup({
-      message: "Zapisano pomyślnie!",
+      message: "Aktywowałem kurs :3",
       color: "my_green",
       duration: 3000,
     });
@@ -243,10 +243,34 @@ export default function CoursePanelScreen() {
 
   const handleEditCustomCourse = (course: CustomCourseSummary) => {
     const encodedName = encodeURIComponent(course.name);
-    router.push(
-      `/custom_course/edit?id=${course.id.toString()}&name=${encodedName}`
-    );
+    const params = [`id=${course.id.toString()}`, `name=${encodedName}`];
+    if (course.isOfficial) {
+      params.push("lockAppearance=1");
+    }
+    router.push(`/custom_course/edit?${params.join("&")}`);
   };
+
+  const handleEditBuiltinCourse = useCallback(
+    (course: LanguageCourse) => {
+      const baseLabel =
+        lang[course.targetLang]?.[course.sourceLang] ?? course.sourceLang;
+      const displayName = `${baseLabel}${
+        course.level ? ` ${course.level}` : ""
+      }`;
+      const params = [
+        `name=${encodeURIComponent(displayName)}`,
+        `targetLang=${encodeURIComponent(course.targetLang)}`,
+      ];
+      if (course.sourceLang) {
+        params.push(`sourceLang=${encodeURIComponent(course.sourceLang)}`);
+      }
+      if (course.level) {
+        params.push(`level=${encodeURIComponent(course.level)}`);
+      }
+      router.push(`/coursepanel/settings?${params.join("&")}`);
+    },
+    [lang, router]
+  );
 
   return (
     <View style={styles.container}>
@@ -329,6 +353,10 @@ export default function CoursePanelScreen() {
                                   committedCourse?.type === "builtin" &&
                                   committedCourse.index === index;
                                 const sourceFlag = getFlagSource(item.sourceLang);
+                                const displayTitle = `${
+                                  lang[item.targetLang]?.[item.sourceLang] ??
+                                  item.sourceLang
+                                }${item.level ? ` ${item.level}` : ""}`;
 
                                 return (
                                   <Pressable
@@ -346,11 +374,24 @@ export default function CoursePanelScreen() {
                                       />
                                     ) : null}
                                     <Text style={styles.courseCardText}>
-                                      {`${
-                                        lang[item.targetLang]?.[item.sourceLang] ??
-                                        item.sourceLang
-                                      }${item.level ? ` ${item.level}` : ""}`}
+                                      {displayTitle}
                                     </Text>
+                                    <Pressable
+                                      accessibilityRole="button"
+                                      accessibilityLabel={`Edytuj kurs ${displayTitle}`}
+                                      style={styles.courseEditButton}
+                                      onPress={(event) => {
+                                        event.stopPropagation();
+                                        handleEditBuiltinCourse(item);
+                                      }}
+                                      hitSlop={8}
+                                    >
+                                      <FontAwesome6
+                                        name="edit"
+                                        size={24}
+                                        color={colors.headline}
+                                      />
+                                    </Pressable>
                                   </Pressable>
                                 );
                               })}
@@ -400,6 +441,24 @@ export default function CoursePanelScreen() {
                                     metaTextStyle={styles.customCardMeta}
                                     isHighlighted={isHighlighted}
                                     highlightedStyle={styles.clicked}
+                                    rightAccessory={
+                                      <Pressable
+                                        accessibilityRole="button"
+                                        accessibilityLabel={`Edytuj kurs ${course.name}`}
+                                        style={styles.customEditButton}
+                                        onPress={(event) => {
+                                          event.stopPropagation();
+                                          handleEditCustomCourse(course);
+                                        }}
+                                        hitSlop={8}
+                                      >
+                                        <FontAwesome6
+                                          name="edit"
+                                          size={24}
+                                          color={colors.headline}
+                                        />
+                                      </Pressable>
+                                    }
                                   />
                                 );
                               })}
@@ -448,23 +507,22 @@ export default function CoursePanelScreen() {
                           isHighlighted={isHighlighted}
                           highlightedStyle={styles.clicked}
                           rightAccessory={
-                            !course.isOfficial ? (
-                              <Pressable
-                                accessibilityRole="button"
-                                accessibilityLabel={`Edytuj kurs ${course.name}`}
-                                style={styles.customEditButton}
-                                onPress={(event) => {
-                                  event.stopPropagation();
-                                  handleEditCustomCourse(course);
-                                }}
-                              >
-                                <FontAwesome6
-                                  name="edit"
-                                  size={24}
-                                  color={colors.headline}
-                                />
-                              </Pressable>
-                            ) : null
+                            <Pressable
+                              accessibilityRole="button"
+                              accessibilityLabel={`Edytuj kurs ${course.name}`}
+                              style={styles.customEditButton}
+                              onPress={(event) => {
+                                event.stopPropagation();
+                                handleEditCustomCourse(course);
+                              }}
+                              hitSlop={8}
+                            >
+                              <FontAwesome6
+                                name="edit"
+                                size={24}
+                                color={colors.headline}
+                              />
+                            </Pressable>
                           }
                         />
                       );

@@ -52,6 +52,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
+    // backgroundColor: colors.my_green,
   },
   iconFlag: {
     position: "absolute",
@@ -69,6 +70,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     marginLeft: 12,
     minWidth: 0,
     alignItems: "flex-start",
+        // backgroundColor: colors.my_green,
   },
   titleContainer: {
     width: "100%",

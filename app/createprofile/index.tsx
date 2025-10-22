@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/createcourse/CourseSelectionScreen";
+export { default } from "@/src/screens/createcourse/CoursePinScreen";

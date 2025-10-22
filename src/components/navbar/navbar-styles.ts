@@ -146,6 +146,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexShrink: 1,
     maxWidth: 130,
   },
+  courseLevel: {
+    marginLeft: 8,
+    color: colors.headline,
+    fontWeight: "600",
+    fontSize: 16,
+  },
   right: {
     display: "flex",
     flexDirection: "row",

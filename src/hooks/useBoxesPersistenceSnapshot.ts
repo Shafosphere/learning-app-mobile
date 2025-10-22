@@ -198,7 +198,12 @@ export function useBoxesPersistenceSnapshot(params: {
             ...createEmptyBoxes(),
             boxOne: initialWords,
           });
+          setBatchIndex(0);
           setUsedWordIds(initialWords.map((w) => w.id));
+        } else if (mounted) {
+          setBoxes(createEmptyBoxes());
+          setBatchIndex(0);
+          setUsedWordIds([]);
         }
       } finally {
         isRestoringRef.current = false;

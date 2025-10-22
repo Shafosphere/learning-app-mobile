@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { Text, View, Image, TouchableOpacity } from "react-native";
+import { useCallback, useEffect, useState } from "react";
+import { Text, View } from "react-native";
 import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { scheduleReview } from "@/src/db/sqlite/db";
@@ -12,8 +12,8 @@ import { useRouter } from "expo-router";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import BoxesCarousel from "@/src/components/box/boxcarousel";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { getFlagSource } from "@/src/constants/languageFlags";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import Confetti from "@/src/components/confetti/Confetti";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
@@ -25,6 +25,7 @@ export default function FlashcardsScreen() {
     boxesLayout,
     flashcardsBatchSize,
     boxZeroEnabled,
+    autoflowEnabled,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
@@ -108,7 +109,7 @@ export default function FlashcardsScreen() {
     ? boxes.boxZero.length >= 30
     : boxes.boxOne.length >= 30;
 
-  async function downloadData() {
+  const downloadData = useCallback(async () => {
     if (introBoxLimitReached) {
       return;
     }
@@ -153,13 +154,19 @@ export default function FlashcardsScreen() {
       return prev + 1;
     });
     await saveNow();
-  }
-
-  const courseAccessibilityLabel = activeCourse
-    ? `Kurs ${activeCourse.sourceLang?.toUpperCase()} do ${activeCourse.targetLang?.toUpperCase()}. Otwórz panel kursów.`
-    : "Wybierz kurs językowy";
-
-  const levelAccessibilityLabel = `Poziom ${selectedLevel}. Zmień poziom nauki.`;
+  }, [
+    activeCourse,
+    addUsedWordIds,
+    boxZeroEnabled,
+    boxes,
+    flashcardsBatchSize,
+    introBoxLimitReached,
+    learned,
+    saveNow,
+    selectedLevel,
+    setBatchIndex,
+    setBoxes,
+  ]);
 
   useEffect(() => {
     if (boxZeroEnabled) return;
@@ -186,34 +193,25 @@ export default function FlashcardsScreen() {
     );
   }
 
-  const courseFlagSource = getFlagSource(activeCourse.sourceLang);
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
+  const correctionLocked = correction?.mode === "demote";
+  const isAnswering =
+    selectedItem != null && result === null && correction?.mode !== "intro";
+  const canAutoflowSwitch = !correctionLocked && !isAnswering;
+
+  useFlashcardsAutoflow({
+    enabled: autoflowEnabled,
+    boxes,
+    activeBox,
+    handleSelectBox,
+    canSwitch: canAutoflowSwitch,
+    boxZeroEnabled,
+    downloadMore: downloadData,
+    introBoxLimitReached,
+  });
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
-      {/* <TouchableOpacity
-        onPress={() => router.push("/coursepanel")}
-        style={styles.containerofcourse}
-        accessibilityRole="button"
-        accessibilityLabel={courseAccessibilityLabel}
-      >
-        {courseFlagSource ? (
-          <Image source={courseFlagSource} style={styles.flag} />
-        ) : null}
-      </TouchableOpacity> */}
-
-      <TouchableOpacity
-        onPress={() => router.push("/level")}
-        style={styles.containeroflevel}
-        accessibilityRole="button"
-        accessibilityLabel={levelAccessibilityLabel}
-      >
-        <View style={styles.levelContainer}>
-          <Text style={styles.levelLabel} allowFontScaling>
-            {selectedLevel}
-          </Text>
-        </View>
-      </TouchableOpacity>
 
       <Card
         selectedItem={selectedItem}

@@ -3,6 +3,8 @@ import { View, Text, Switch } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { usePopup } from "@/src/contexts/PopupContext";
+import MyButton from "@/src/components/button/button";
 
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
@@ -12,6 +14,7 @@ const AppearanceSection: React.FC = () => {
     feedbackEnabled,
     toggleFeedbackEnabled,
   } = useSettings();
+  const setPopup = usePopup();
 
   const handleThemeToggle = async (value: boolean) => {
     if ((value && theme !== "dark") || (!value && theme !== "light")) {
@@ -37,6 +40,14 @@ const AppearanceSection: React.FC = () => {
       }
       await toggleFeedbackEnabled();
     }
+  };
+
+  const handleTestPopup = () => {
+    setPopup({
+      message: "Hej! To ja, Boxik. Dymek działa!",
+      color: "my_yellow",
+      duration: 3600,
+    });
   };
 
   return (
@@ -68,6 +79,21 @@ const AppearanceSection: React.FC = () => {
           style={styles.switch}
           value={feedbackEnabled}
           onValueChange={handleFeedbackToggle}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Przetestuj dymek Boxika</Text>
+          <Text style={styles.rowSubtitle}>
+            Dotknij, aby zobaczyć nowy popup i animację w akcji.
+          </Text>
+        </View>
+        <MyButton
+          text="Pokaż popup"
+          color="my_yellow"
+          onPress={handleTestPopup}
+          width={140}
         />
       </View>
     </View>

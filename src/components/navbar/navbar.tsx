@@ -251,6 +251,11 @@ export default function Navbar({ children }: NavbarProps) {
                   {customCourseDisplayName}
                 </Text>
               ) : null}
+              {displayedBuiltinCourse && selectedLevel ? (
+                <Text style={styles.courseLevel} allowFontScaling>
+                  {selectedLevel}
+                </Text>
+              ) : null}
             </TouchableOpacity>
           </View>
 

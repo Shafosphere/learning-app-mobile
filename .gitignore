@@ -40,6 +40,9 @@ app-example
 
 # Ignore images folders
 images/
+.github/
+android/
+.idea/
 assets/images/*
 !assets/images/.gitkeep
 *.png

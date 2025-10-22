@@ -4,6 +4,7 @@ import {
   Alert,
   Pressable,
   ScrollView,
+  Switch,
   Text,
   TextStyle,
   View,
@@ -47,7 +48,21 @@ export default function EditCustomCourseScreen() {
   const params = useLocalSearchParams();
   const router = useRouter();
   const setPopup = usePopup();
-  const { colors } = useSettings();
+  const {
+    colors,
+    getCustomCourseBoxZeroEnabled,
+    setCustomCourseBoxZeroEnabled,
+  } = useSettings();
+
+  const lockAppearance = useMemo(() => {
+    const raw = params.lockAppearance;
+    const value = Array.isArray(raw) ? raw[0] : raw;
+    if (!value) {
+      return false;
+    }
+    const normalized = value.toString().toLowerCase();
+    return normalized === "1" || normalized === "true" || normalized === "yes";
+  }, [params.lockAppearance]);
 
   const courseId = useMemo(() => {
     const raw = params.id;
@@ -95,14 +110,25 @@ export default function EditCustomCourseScreen() {
     enableHistory: true,
     historyLimit: MANUAL_HISTORY_LIMIT,
   });
+  const initialBoxZeroEnabled = useMemo(() => {
+    if (courseId != null) {
+      return getCustomCourseBoxZeroEnabled(courseId);
+    }
+    return true;
+  }, [courseId, getCustomCourseBoxZeroEnabled]);
+  const [courseBoxZeroEnabled, setCourseBoxZeroEnabled] = useState<boolean>(
+    initialBoxZeroEnabled
+  );
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isOfficialCourse, setIsOfficialCourse] = useState(lockAppearance);
 
   const hydrateFromDb = useCallback(async () => {
     if (!courseId) {
       setLoadError("Nie znaleziono kursu do edycji.");
+      setCourseBoxZeroEnabled(initialBoxZeroEnabled);
       setLoading(false);
       return;
     }
@@ -117,6 +143,8 @@ export default function EditCustomCourseScreen() {
       if (!courseRow) {
         setLoadError("Kurs nie istnieje.");
         replaceManualCards([createEmptyManualCard("card-0")]);
+        setIsOfficialCourse(lockAppearance);
+        setCourseBoxZeroEnabled(initialBoxZeroEnabled);
         setLoading(false);
         return;
       }
@@ -128,6 +156,10 @@ export default function EditCustomCourseScreen() {
         colorId: courseRow.colorId ?? null,
         reviewsEnabled: courseRow.reviewsEnabled,
       });
+      setIsOfficialCourse(courseRow.isOfficial === true);
+      setCourseBoxZeroEnabled(
+        getCustomCourseBoxZeroEnabled(courseRow.id)
+      );
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -148,10 +180,19 @@ export default function EditCustomCourseScreen() {
     } catch (error) {
       console.error("Failed to load custom course for edit", error);
       setLoadError("Nie udało się wczytać danych kursu.");
+      setIsOfficialCourse(lockAppearance);
+      setCourseBoxZeroEnabled(initialBoxZeroEnabled);
     } finally {
       setLoading(false);
     }
-  }, [hydrateDraft, courseId, replaceManualCards]);
+  }, [
+    courseId,
+    getCustomCourseBoxZeroEnabled,
+    hydrateDraft,
+    initialBoxZeroEnabled,
+    lockAppearance,
+    replaceManualCards,
+  ]);
 
   useFocusEffect(
     useCallback(() => {
@@ -179,7 +220,22 @@ export default function EditCustomCourseScreen() {
     });
   };
 
+  const handleCourseBoxZeroToggle = async (value: boolean) => {
+    setCourseBoxZeroEnabled(value);
+    if (courseId != null) {
+      await setCustomCourseBoxZeroEnabled(courseId, value);
+    }
+  };
+
   const handleDeleteCourse = () => {
+    if (isOfficialCourse) {
+      setPopup({
+        message: "Nie można usunąć oficjalnego kursu",
+        color: "my_red",
+        duration: 4000,
+      });
+      return;
+    }
     if (!courseId) {
       setPopup({
         message: "Nie można usunąć – brak identyfikatora kursu",
@@ -346,18 +402,45 @@ export default function EditCustomCourseScreen() {
             onIconChange={(value) => setIconId(value)}
             onColorChange={handleColorChange}
             disabled={isSaving}
+            nameEditable={!isOfficialCourse}
+            hideIconSection={isOfficialCourse}
           >
-            <Text style={styles.miniSectionHeader}>fiszki</Text>
-            <ManualCardsEditor
-              manualCards={manualCards}
-              styles={styles as unknown as ManualCardsEditorStyles}
-              onCardFrontChange={handleManualCardFrontChange}
-              onCardAnswerChange={handleManualCardAnswerChange}
-              onAddAnswer={handleAddAnswer}
-              onRemoveAnswer={handleRemoveAnswer}
-              onAddCard={handleAddCard}
-              onRemoveCard={handleRemoveCard}
-            />
+            <View style={styles.toggleRow}>
+              <View style={styles.toggleTextWrapper}>
+                <Text style={styles.toggleTitle}>Faza zapoznania (Box 0)</Text>
+                <Text style={styles.toggleSubtitle}>
+                  Steruj tylko dla tego kursu.
+                </Text>
+              </View>
+              <Switch
+                value={courseBoxZeroEnabled}
+                onValueChange={handleCourseBoxZeroToggle}
+                trackColor={{
+                  false: colors.border,
+                  true: colors.my_green,
+                }}
+                thumbColor={colors.background}
+              />
+            </View>
+            {isOfficialCourse ? (
+              <Text style={styles.miniSectionHeader}>
+                Więcej ustawień kursu pojawi się już wkrótce.
+              </Text>
+            ) : (
+              <>
+                <Text style={styles.miniSectionHeader}>fiszki</Text>
+                <ManualCardsEditor
+                  manualCards={manualCards}
+                  styles={styles as unknown as ManualCardsEditorStyles}
+                  onCardFrontChange={handleManualCardFrontChange}
+                  onCardAnswerChange={handleManualCardAnswerChange}
+                  onAddAnswer={handleAddAnswer}
+                  onRemoveAnswer={handleRemoveAnswer}
+                  onAddCard={handleAddCard}
+                  onRemoveCard={handleRemoveCard}
+                />
+              </>
+            )}
           </CustomCourseForm>
         )}
       </ScrollView>
@@ -398,7 +481,11 @@ export default function EditCustomCourseScreen() {
               onPress={handleDeleteCourse}
               width={100}
               disabled={
-                isSaving || loading || isDeleting || !!loadError
+                isSaving ||
+                loading ||
+                isDeleting ||
+                !!loadError ||
+                isOfficialCourse
               }
               accessibilityLabel="Usuń kurs"
             />

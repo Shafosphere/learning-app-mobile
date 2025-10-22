@@ -87,7 +87,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
     paddingLeft: "10%",
-    paddingRight: "3%",
+    paddingRight: "10%",
     position: "relative",
   },
   courseCardText: {
@@ -95,7 +95,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 900,
     color: colors.headline,
     flex: 1,
-    textAlign: "center",
+    textAlign: "left",
+    marginLeft: 12,
   },
   customSection: {
     width: "100%",
@@ -175,7 +176,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 900,
     color: colors.headline,
   },
-  customEditButton: {},
+  customEditButton: {
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  courseEditButton: {
+    padding: 12,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   emptyContainer: {
     width: "100%",
     minHeight: 240,
@@ -206,8 +216,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // backgroundColor: colors.my_green,
   },
   flag: {
-    width: 99 / 1.1,
-    height: 66 / 1.1,
+    width: 99 / 1.25,
+    height: 66 / 1.25,
+        // backgroundColor: colors.my_green,
   },
   clicked: {
     backgroundColor: colors.my_green,

@@ -1,26 +1,33 @@
 // src/contexts/SettingsContext.tsx
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   createContext,
   ReactNode,
   useCallback,
   useContext,
-  useMemo,
   useEffect,
+  useMemo,
   useRef,
 } from "react";
+import { StyleProp, Text, TextProps, TextStyle } from "react-native";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
+import { MemoryBoardSize } from "../constants/memoryGame";
+import { usePersistedState } from "../hooks/usePersistedState";
 import {
+  ColorBlindMode,
   resolveThemeColors,
   Theme,
   ThemeColors,
-  ColorBlindMode,
 } from "../theme/theme";
-import { MemoryBoardSize } from "../constants/memoryGame";
-import { usePersistedState } from "../hooks/usePersistedState";
-import type { CEFRLevel } from "../types/language";
 import { LanguageCourse } from "../types/course";
-import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { Text } from "react-native";
+import type { CEFRLevel } from "../types/language";
+
+// Rozszerzamy typ Text, aby uwzględnić defaultProps
+type TextWithDefaultProps = typeof Text & {
+  defaultProps?: TextProps & {
+    style?: StyleProp<TextStyle>;
+  };
+};
 
 function languagesMatch(a: LanguageCourse, b: LanguageCourse): boolean {
   const hasIdsA = a.sourceLangId != null && a.targetLangId != null;
@@ -62,6 +69,42 @@ function findCourseIndex(
   return -1;
 }
 
+export type CourseBoxZeroKeyParams = {
+  sourceLang?: string | null;
+  targetLang?: string | null;
+  level?: CEFRLevel | null;
+};
+
+type CourseBoxZeroOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
+type CourseAutoflowOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
+const DEFAULT_COURSE_BOX_ZERO_OVERRIDES: CourseBoxZeroOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_AUTOFLOW_OVERRIDES: CourseAutoflowOverrides = {
+  builtin: {},
+  custom: {},
+};
+function makeBuiltinCourseKey({
+  sourceLang,
+  targetLang,
+  level,
+}: CourseBoxZeroKeyParams): string {
+  const src = (sourceLang ?? "unknown").toLowerCase();
+  const tgt = (targetLang ?? "unknown").toLowerCase();
+  const lvl = (level ?? "none").toString().toUpperCase();
+  return `${src}|${tgt}|${lvl}`;
+}
+
 interface SettingsContextValue {
   theme: Theme;
   colors: ThemeColors;
@@ -80,7 +123,31 @@ interface SettingsContextValue {
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
   boxZeroEnabled: boolean;
-  toggleBoxZeroEnabled: () => Promise<void>;
+  getBuiltinCourseBoxZeroEnabled: (
+    params: CourseBoxZeroKeyParams
+  ) => boolean;
+  setBuiltinCourseBoxZeroEnabled: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseBoxZeroEnabled: (courseId: number) => boolean;
+  setCustomCourseBoxZeroEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
+  autoflowEnabled: boolean;
+  getBuiltinCourseAutoflowEnabled: (
+    params: CourseBoxZeroKeyParams
+  ) => boolean;
+  setBuiltinCourseAutoflowEnabled: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseAutoflowEnabled: (courseId: number) => boolean;
+  setCustomCourseAutoflowEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
   activeCourseIdx: number | null; // NEW
   setActiveCourseIdx: (i: number | null) => Promise<void>; // NEW
   activeCourse: LanguageCourse | null;
@@ -136,7 +203,15 @@ const defaultValue: SettingsContextValue = {
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
   boxZeroEnabled: true,
-  toggleBoxZeroEnabled: async () => {},
+  getBuiltinCourseBoxZeroEnabled: () => true,
+  setBuiltinCourseBoxZeroEnabled: async () => {},
+  getCustomCourseBoxZeroEnabled: () => true,
+  setCustomCourseBoxZeroEnabled: async () => {},
+  autoflowEnabled: false,
+  getBuiltinCourseAutoflowEnabled: () => false,
+  setBuiltinCourseAutoflowEnabled: async () => {},
+  getCustomCourseAutoflowEnabled: () => false,
+  setCustomCourseAutoflowEnabled: async () => {},
   activeCourseIdx: null,
   setActiveCourseIdx: async () => {},
   activeCourse: null,
@@ -210,10 +285,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "showBoxFaces",
     true
   );
-  const [boxZeroEnabled, setBoxZeroEnabled] = usePersistedState<boolean>(
+  const [boxZeroDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.boxZeroEnabled",
     true
   );
+  const [boxZeroOverrides, setBoxZeroOverrides] =
+    usePersistedState<CourseBoxZeroOverrides>(
+      "flashcards.courseBoxZeroOverrides",
+      DEFAULT_COURSE_BOX_ZERO_OVERRIDES
+    );
+  const [autoflowDefaultEnabled] = usePersistedState<boolean>(
+    "flashcards.autoflowEnabled",
+    false
+  );
+  const [autoflowOverrides, setAutoflowOverrides] =
+    usePersistedState<CourseAutoflowOverrides>(
+      "flashcards.courseAutoflowOverrides",
+      DEFAULT_COURSE_AUTOFLOW_OVERRIDES
+    );
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
       "flashcardsBatchSize",
@@ -245,9 +334,6 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const toggleShowBoxFaces = async () => {
     await setShowBoxFaces(!showBoxFaces);
   };
-  const toggleBoxZeroEnabled = async () => {
-    await setBoxZeroEnabled(!boxZeroEnabled);
-  };
   const toggleTheme = async () => {
     const newTheme: Theme = theme === "light" ? "dark" : "light";
     await setTheme(newTheme);
@@ -261,7 +347,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [theme, highContrastEnabled, colorBlindMode]
   );
 
-  const originalTextDefaultStyleRef = useRef(Text.defaultProps?.style);
+  const originalTextDefaultStyleRef = useRef<StyleProp<TextStyle>>(
+    (Text as TextWithDefaultProps).defaultProps?.style
+  );
 
   useEffect(() => {
     const baseStyle = originalTextDefaultStyleRef.current;
@@ -271,21 +359,21 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       ? [baseStyle]
       : [];
 
-    Text.defaultProps = {
-      ...(Text.defaultProps ?? {}),
+    (Text as TextWithDefaultProps).defaultProps = {
+      ...((Text as TextWithDefaultProps).defaultProps ?? {}),
       style: [...baseArray, { color: colors.headline }],
     };
 
     return () => {
-      const currentDefaults = Text.defaultProps ?? {};
+      const currentDefaults = (Text as TextWithDefaultProps).defaultProps ?? {};
       const { style: _ignoredStyle, ...restDefaults } = currentDefaults;
 
       if (originalTextDefaultStyleRef.current === undefined) {
-        Text.defaultProps = restDefaults;
+        (Text as TextWithDefaultProps).defaultProps = restDefaults;
         return;
       }
 
-      Text.defaultProps = {
+      (Text as TextWithDefaultProps).defaultProps = {
         ...restDefaults,
         style: originalTextDefaultStyleRef.current,
       };
@@ -317,6 +405,148 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       await setActiveCustomCourseIdState(courseId);
     },
     [setActiveCustomCourseIdState, setActiveCourseIdxState]
+  );
+
+  const getBuiltinCourseBoxZeroEnabled = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = boxZeroOverrides.builtin[key];
+      return override ?? boxZeroDefaultEnabled;
+    },
+    [boxZeroDefaultEnabled, boxZeroOverrides.builtin]
+  );
+
+  const setBuiltinCourseBoxZeroEnabled = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = boxZeroOverrides.builtin[key];
+      const shouldRemove = enabled === boxZeroDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...boxZeroOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setBoxZeroOverrides({
+        builtin: nextBuiltin,
+        custom: { ...boxZeroOverrides.custom },
+      });
+    },
+    [boxZeroDefaultEnabled, boxZeroOverrides, setBoxZeroOverrides]
+  );
+
+  const getCustomCourseBoxZeroEnabled = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = boxZeroOverrides.custom[key];
+      return override ?? boxZeroDefaultEnabled;
+    },
+    [boxZeroDefaultEnabled, boxZeroOverrides.custom]
+  );
+
+  const setCustomCourseBoxZeroEnabled = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = boxZeroOverrides.custom[key];
+      const shouldRemove = enabled === boxZeroDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...boxZeroOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setBoxZeroOverrides({
+        builtin: { ...boxZeroOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [boxZeroDefaultEnabled, boxZeroOverrides, setBoxZeroOverrides]
+  );
+
+  const getBuiltinCourseAutoflowEnabled = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = autoflowOverrides.builtin[key];
+      return override ?? autoflowDefaultEnabled;
+    },
+    [autoflowDefaultEnabled, autoflowOverrides.builtin]
+  );
+
+  const setBuiltinCourseAutoflowEnabled = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = autoflowOverrides.builtin[key];
+      const shouldRemove = enabled === autoflowDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...autoflowOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setAutoflowOverrides({
+        builtin: nextBuiltin,
+        custom: { ...autoflowOverrides.custom },
+      });
+    },
+    [autoflowDefaultEnabled, autoflowOverrides, setAutoflowOverrides]
+  );
+
+  const getCustomCourseAutoflowEnabled = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = autoflowOverrides.custom[key];
+      return override ?? autoflowDefaultEnabled;
+    },
+    [autoflowDefaultEnabled, autoflowOverrides.custom]
+  );
+
+  const setCustomCourseAutoflowEnabled = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = autoflowOverrides.custom[key];
+      const shouldRemove = enabled === autoflowDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...autoflowOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setAutoflowOverrides({
+        builtin: { ...autoflowOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [autoflowDefaultEnabled, autoflowOverrides, setAutoflowOverrides]
   );
 
   const pinOfficialCourse = useCallback(
@@ -460,6 +690,54 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const activeCourse =
     activeCourseIdx != null ? courses[activeCourseIdx] : null;
 
+  const boxZeroEnabled = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseBoxZeroEnabled(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseBoxZeroEnabled({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return boxZeroDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    boxZeroDefaultEnabled,
+    courses,
+    getBuiltinCourseBoxZeroEnabled,
+    getCustomCourseBoxZeroEnabled,
+  ]);
+
+  const autoflowEnabled = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseAutoflowEnabled(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseAutoflowEnabled({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return autoflowDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    autoflowDefaultEnabled,
+    courses,
+    getBuiltinCourseAutoflowEnabled,
+    getCustomCourseAutoflowEnabled,
+  ]);
+
   const setFeedbackEnabled = async (value: boolean) => {
     await _setFeedbackEnabled(value);
   };
@@ -532,7 +810,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         showBoxFaces,
         toggleShowBoxFaces,
         boxZeroEnabled,
-        toggleBoxZeroEnabled,
+        getBuiltinCourseBoxZeroEnabled,
+        setBuiltinCourseBoxZeroEnabled,
+        getCustomCourseBoxZeroEnabled,
+        setCustomCourseBoxZeroEnabled,
+        autoflowEnabled,
+        getBuiltinCourseAutoflowEnabled,
+        setBuiltinCourseAutoflowEnabled,
+        getCustomCourseAutoflowEnabled,
+        setCustomCourseAutoflowEnabled,
         flashcardsBatchSize,
         setFlashcardsBatchSize,
         dailyGoal,

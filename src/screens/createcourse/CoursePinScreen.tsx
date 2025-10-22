@@ -75,7 +75,7 @@ const createCourseKey = (course: LanguageCourse) => {
   return `${sourceKey}->${targetKey}->${levelKey}`;
 };
 
-export default function CourseSelectionScreen() {
+export default function CoursePinScreen() {
   const styles = useStyles();
   const router = useRouter();
   const { courses, colors, addCourse, removeCourse, setLevel } = useSettings();
@@ -110,7 +110,7 @@ export default function CourseSelectionScreen() {
         setAvailableCourses(mapped);
       })
       .catch((error) => {
-        console.error("[CourseSelection] Failed to load language pairs", error);
+        console.error("[CoursePin] Failed to load language pairs", error);
       });
 
     return () => {
@@ -139,7 +139,7 @@ export default function CourseSelectionScreen() {
         setOfficialCourses(mapped);
       })
       .catch((error) => {
-        console.error("[CourseSelection] Failed to load official packs", error);
+        console.error("[CoursePin] Failed to load official packs", error);
         setOfficialCourses([]);
       });
     return () => {
@@ -225,7 +225,7 @@ export default function CourseSelectionScreen() {
             next.add(key);
           }
           console.log(
-            `[CourseSelection] Placeholder pin toggle for ${key}, pinned=${next.has(
+            `[CoursePin] Placeholder pin toggle for ${key}, pinned=${next.has(
               key
             )}`
           );
@@ -244,7 +244,7 @@ export default function CourseSelectionScreen() {
         }
       } catch (error) {
         console.error(
-          `[CourseSelection] Failed to toggle course ${key}`,
+          `[CoursePin] Failed to toggle course ${key}`,
           error
         );
       }
@@ -271,7 +271,7 @@ export default function CourseSelectionScreen() {
         }
       } catch (error) {
         console.error(
-          `[CourseSelection] Failed to toggle official pack ${id}`,
+          `[CoursePin] Failed to toggle official pack ${id}`,
           error
         );
       }

@@ -41,8 +41,6 @@ const LearningSection: React.FC = () => {
     toggleIgnoreDiacriticsInSpellcheck,
     showBoxFaces,
     toggleShowBoxFaces,
-    boxZeroEnabled,
-    toggleBoxZeroEnabled,
     boxesLayout,
     setBoxesLayout,
     flashcardsBatchSize,
@@ -103,13 +101,6 @@ const LearningSection: React.FC = () => {
   const handleFacesToggle = async (value: boolean) => {
     if (value !== showBoxFaces) {
       await toggleShowBoxFaces();
-      await triggerHaptics();
-    }
-  };
-
-  const handleBoxZeroToggle = async (value: boolean) => {
-    if (value !== boxZeroEnabled) {
-      await toggleBoxZeroEnabled();
       await triggerHaptics();
     }
   };
@@ -179,20 +170,6 @@ const LearningSection: React.FC = () => {
         style={styles.switch}
         value={showBoxFaces}
         onValueChange={handleFacesToggle}
-      />
-    </View>
-
-    <View style={styles.row}>
-      <View style={styles.rowTextWrapper}>
-        <Text style={styles.rowTitle}>Faza zapoznania (Box 0)</Text>
-        <Text style={styles.rowSubtitle}>
-          Najpierw przepisz słówko i tłumaczenie w dwóch polach.
-        </Text>
-      </View>
-      <Switch
-        style={styles.switch}
-        value={boxZeroEnabled}
-        onValueChange={handleBoxZeroToggle}
       />
     </View>
 

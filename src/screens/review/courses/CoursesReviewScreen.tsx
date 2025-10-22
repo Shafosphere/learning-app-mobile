@@ -102,7 +102,7 @@ type CombinedGroup = {
   official: OfficialGroup["courses"];
 };
 
-export default function CoursesScreen() {
+export default function CoursesReviewScreen() {
   const styles = useStyles();
   const router = useRouter();
   const {

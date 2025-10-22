@@ -24,6 +24,9 @@ export interface CustomCourseFormProps {
   onColorChange: (color: CourseColorOption) => void;
   namePlaceholder?: string;
   disabled?: boolean;
+  nameEditable?: boolean;
+  hideIconSection?: boolean;
+  hideReviewsToggle?: boolean;
   children?: ReactNode;
 }
 
@@ -40,6 +43,9 @@ export function CustomCourseForm({
   onColorChange,
   namePlaceholder = "np. Fiszki podróżnicze",
   disabled = false,
+  nameEditable = true,
+  hideIconSection = false,
+  hideReviewsToggle = false,
   children,
 }: CustomCourseFormProps) {
   const styles = useCustomCourseFormStyles();
@@ -58,59 +64,63 @@ export function CustomCourseForm({
             onChangeText={onCourseNameChange}
             placeholder={namePlaceholder}
             accessibilityLabel="Nazwa kursu"
-            editable={!disabled}
+            editable={nameEditable && !disabled}
           />
         </View>
 
-        <View style={styles.checkboxRow}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.checkboxPressable,
-              pressed && styles.checkboxPressablePressed,
-            ]}
-            onPress={onToggleReviews}
-            accessibilityRole="checkbox"
-            accessibilityState={{ checked: reviewsEnabled }}
-            accessibilityLabel="Włącz udział kursu w powtórkach"
-            disabled={disabled}
-          >
-            <View
-              style={[
-                styles.checkboxBase,
-                reviewsEnabled && styles.checkboxBaseChecked,
+        {hideReviewsToggle ? null : (
+          <View style={styles.checkboxRow}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.checkboxPressable,
+                pressed && styles.checkboxPressablePressed,
               ]}
+              onPress={onToggleReviews}
+              accessibilityRole="checkbox"
+              accessibilityState={{ checked: reviewsEnabled }}
+              accessibilityLabel="Włącz udział kursu w powtórkach"
+              disabled={disabled}
             >
-              {reviewsEnabled ? (
-                <Ionicons
-                  name="checkmark"
-                  size={18}
-                  color={checkboxIconColor}
-                />
-              ) : null}
-            </View>
-            <Text style={styles.checkboxLabel}>włącz powtórki</Text>
-          </Pressable>
-        </View>
+              <View
+                style={[
+                  styles.checkboxBase,
+                  reviewsEnabled && styles.checkboxBaseChecked,
+                ]}
+              >
+                {reviewsEnabled ? (
+                  <Ionicons
+                    name="checkmark"
+                    size={18}
+                    color={checkboxIconColor}
+                  />
+                ) : null}
+              </View>
+              <Text style={styles.checkboxLabel}>włącz powtórki</Text>
+            </Pressable>
+          </View>
+        )}
 
-        <View style={styles.iconSection}>
-          <Text style={styles.label}>ikona</Text>
-          <CourseIconColorSelector
-            selectedIcon={iconId}
-            selectedColor={iconColor}
-            selectedColorId={colorId ?? undefined}
-            onIconChange={onIconChange}
-            onColorChange={onColorChange}
-            disabled={disabled}
-            styles={{
-              iconsContainer: styles.iconsContainer,
-              iconWrapper: styles.iconWrapper,
-              iconWrapperSelected: styles.iconWrapperSelected,
-              colorsContainer: styles.colorsContainer,
-              colorSwatch: styles.courseColor,
-              colorSwatchSelected: styles.courseColorSelected,
-            }}
-          />
-        </View>
+        {hideIconSection ? null : (
+          <View style={styles.iconSection}>
+            <Text style={styles.label}>ikona</Text>
+            <CourseIconColorSelector
+              selectedIcon={iconId}
+              selectedColor={iconColor}
+              selectedColorId={colorId ?? undefined}
+              onIconChange={onIconChange}
+              onColorChange={onColorChange}
+              disabled={disabled}
+              styles={{
+                iconsContainer: styles.iconsContainer,
+                iconWrapper: styles.iconWrapper,
+                iconWrapperSelected: styles.iconWrapperSelected,
+                colorsContainer: styles.colorsContainer,
+                colorSwatch: styles.courseColor,
+                colorSwatchSelected: styles.courseColorSelected,
+              }}
+            />
+          </View>
+        )}
 
         {children ? (
           <View style={styles.childrenContainer}>{children}</View>

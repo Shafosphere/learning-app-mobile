@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/coursepanel/CoursePanelScreen";
+export { default } from "@/src/screens/coursepanel/CourseActivateScreen";

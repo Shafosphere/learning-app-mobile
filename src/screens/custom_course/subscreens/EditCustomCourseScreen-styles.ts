@@ -139,6 +139,26 @@ export const useEditStyles = createThemeStylesHook((colors) => {
       color: colors.headline,
       marginTop: 8,
     },
+    toggleRow: {
+      flexDirection: "row" as const,
+      alignItems: "center" as const,
+      justifyContent: "space-between" as const,
+      gap: 12,
+      marginTop: 12,
+    },
+    toggleTextWrapper: {
+      flex: 1,
+    },
+    toggleTitle: {
+      fontSize: 16,
+      fontWeight: "800",
+      color: colors.headline,
+    },
+    toggleSubtitle: {
+      fontSize: 14,
+      color: colors.paragraph,
+      marginTop: 2,
+    },
     checkboxRow: {
       marginTop: 12,
       marginBottom: 8,
