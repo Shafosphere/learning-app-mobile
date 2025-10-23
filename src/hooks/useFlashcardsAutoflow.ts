@@ -9,6 +9,7 @@ type AutoflowParams = {
   handleSelectBox: (box: keyof BoxesState) => void;
   canSwitch: boolean;
   boxZeroEnabled: boolean;
+  isReady: boolean;
   downloadMore: () => Promise<void>;
   introBoxLimitReached: boolean;
 };
@@ -39,6 +40,7 @@ export function useFlashcardsAutoflow({
   handleSelectBox,
   canSwitch,
   boxZeroEnabled,
+  isReady,
   downloadMore,
   introBoxLimitReached,
 }: AutoflowParams) {
@@ -63,6 +65,12 @@ export function useFlashcardsAutoflow({
     console.log("=== Checking if need to download more ===");
     console.log("enabled:", enabled);
     if (!enabled) return;
+    // Wait until boxes snapshot has finished loading to avoid triggering
+    // unnecessary downloads when initial boxes are empty.
+    if (!isReady) {
+      console.log("Autoflow: boxes not ready yet, skipping download check");
+      return;
+    }
     console.log("introBoxLimitReached:", introBoxLimitReached);
     if (introBoxLimitReached) return;
     console.log("fetchInFlight:", fetchInFlight.current);
@@ -90,5 +98,5 @@ export function useFlashcardsAutoflow({
       console.log("Download completed");
       fetchInFlight.current = false;
     });
-  }, [boxes, boxZeroEnabled, downloadMore, enabled, introBoxLimitReached]);
+  }, [boxes, boxZeroEnabled, downloadMore, enabled, introBoxLimitReached, isReady]);
 }

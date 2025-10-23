@@ -1,22 +1,10 @@
-import { useMemo, useState } from "react";
-import {
-  Platform,
-  Pressable,
-  ScrollView,
-  Text,
-  View,
-} from "react-native";
-import { Asset } from "expo-asset";
-import * as FileSystem from "expo-file-system/legacy";
 import MyButton from "@/src/components/button/button";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import { useStyles } from "../CustomCourseScreen-styles";
+import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
   createCustomCourse,
   replaceCustomFlashcards,
 } from "@/src/db/sqlite/db";
-import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
@@ -26,6 +14,15 @@ import {
   normalizeAnswers,
   useManualCardsForm,
 } from "@/src/features/customCourse/manualCards/useManualCardsForm";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { Asset } from "expo-asset";
+import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import Papa from "papaparse";
+import { useMemo, useState } from "react";
+import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { useStyles } from "../CustomCourseScreen-styles";
 
 type AddMode = "csv" | "manual";
 
@@ -75,6 +72,7 @@ export default function CustomCourseContentScreen() {
   const [addMode, setAddMode] = useState<AddMode>("manual");
   const {
     manualCards,
+    replaceManualCards,
     handleManualCardFrontChange,
     handleManualCardAnswerChange,
     handleAddAnswer,
@@ -87,13 +85,60 @@ export default function CustomCourseContentScreen() {
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const handleSelectCsv = () => {
-    setCsvFileName("twoj_plik.csv");
-    setPopup({
-      message: "Wybieranie pliku dostępne w przyszłej wersji",
-      color: "my_yellow",
-      duration: 3000,
-    });
+  const handleSelectCsv = async () => {
+    try {
+      const picked = await DocumentPicker.getDocumentAsync({
+        type: ["text/csv", "text/plain", "*/*"], // Allow CSV, plain text, or any file
+        copyToCacheDirectory: true,
+      });
+      if (picked.canceled || !picked.assets?.[0]) {
+        return;
+      }
+      const fileUri = picked.assets[0].uri;
+      const fileName = picked.assets[0].name;
+      setCsvFileName(fileName);
+      const csvContent = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+      const parsed = Papa.parse(csvContent, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      if (parsed.errors.length > 0) {
+        setPopup({
+          message: "Błąd parsowania CSV",
+          color: "my_red",
+          duration: 4000,
+        });
+        return;
+      }
+      const cards = (parsed.data as any[]).map((row, idx) => ({
+        id: `csv-${idx}`,
+        front: (row.front || "").toString(),
+        answers: [(row.back || "").toString()],
+      }));
+      if (!cards.length) {
+        setPopup({
+          message: "Brak danych w pliku CSV",
+          color: "my_red",
+          duration: 3000,
+        });
+        return;
+      }
+      replaceManualCards(cards);
+      setPopup({
+        message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
+        color: "my_green",
+        duration: 3500,
+      });
+    } catch (e) {
+      setPopup({
+        message: "Błąd importu CSV",
+        color: "my_red",
+        duration: 4000,
+      });
+      console.error("CSV import error", e);
+    }
   };
 
   const readSampleCsv = async () => {
@@ -287,9 +332,9 @@ export default function CustomCourseContentScreen() {
             <View style={styles.modeContainer}>
               <Text style={styles.modeTitle}>Import z pliku CSV</Text>
               <Text style={styles.modeDescription}>
-                Przygotuj plik CSV z kolumnami przód i tył oraz wypełnionymi danymi.
-                Możesz również pobrać gotowy plik do wypełnienia (zalecam zrobić to
-                na laptopie lub komputerze).
+                Przygotuj plik CSV z kolumnami przód i tył oraz wypełnionymi
+                danymi. Możesz również pobrać gotowy plik do wypełnienia
+                (zalecam zrobić to na laptopie lub komputerze).
               </Text>
               <View style={styles.modeActions}>
                 <MyButton
@@ -334,19 +379,31 @@ export default function CustomCourseContentScreen() {
       <View style={styles.divider} />
 
       <View style={styles.footer}>
-        <MyButton
-          text="←"
-          color="my_yellow"
-          onPress={handleGoBack}
-          accessibilityLabel="Wróć do tworzenia kursu"
-        />
-        <MyButton
-          text="Stwórz"
-          color="my_green"
-          onPress={handleSaveCourse}
-          disabled={isSaving}
-          accessibilityLabel="Stwórz talię"
-        />
+        <View style={styles.buttonsRow}>
+          {/* <MyButton
+            text="←"
+            color="my_yellow"
+            onPress={handleGoBack}
+            accessibilityLabel="Wróć do tworzenia kursu"
+          /> */}
+          <MyButton
+            color="my_yellow"
+            onPress={handleGoBack}
+            disabled={false}
+            width={60}
+            accessibilityLabel="Wróć do tworzenia kursu"
+          >
+            <Ionicons name="arrow-back" size={28} style={styles.returnbtn} />
+          </MyButton>
+
+          <MyButton
+            text="Stwórz"
+            color="my_green"
+            onPress={handleSaveCourse}
+            disabled={isSaving}
+            accessibilityLabel="Stwórz kurs"
+          />
+        </View>
       </View>
     </View>
   );

@@ -1,12 +1,11 @@
-import { ScrollView, TextStyle, View } from "react-native";
 import MyButton from "@/src/components/button/button";
-import { useStyles } from "./CustomCourseScreen-styles";
-import { useRouter } from "expo-router";
 import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
+import { usePopup } from "@/src/contexts/PopupContext";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useRouter } from "expo-router";
+import { ScrollView, TextStyle, View } from "react-native";
+import { useStyles } from "./CustomCourseScreen-styles";
 export default function CustomCourseScreen() {
   const styles = useStyles();
   const router = useRouter();
@@ -22,9 +21,32 @@ export default function CustomCourseScreen() {
     handleColorChange,
   } = useCustomCourseDraft();
 
+  const setPopup = usePopup();
+
   const handleNavigateToContent = () => {
     const name = courseName.trim();
-    if (!iconId || !name) {
+    if (!name && !iconId) {
+      setPopup({
+        message: "Musisz podać nazwę kursu i wybrać ikonę",
+        color: "my_red",
+        duration: 3000,
+      });
+      return;
+    }
+    if (!name) {
+      setPopup({
+        message: "Musisz podać nazwę kursu",
+        color: "my_red",
+        duration: 3000,
+      });
+      return;
+    }
+    if (!iconId) {
+      setPopup({
+        message: "Musisz wybrać ikonę",
+        color: "my_red",
+        duration: 3000,
+      });
       return;
     }
     const params: Record<string, string> = {
@@ -39,7 +61,7 @@ export default function CustomCourseScreen() {
     router.push({ pathname: "/custom_course/content", params });
   };
 
-  const nextDisabled = !courseName.trim() || !iconId;
+  // const nextDisabled = !courseName.trim() || !iconId;
   const actionIconColor =
     (styles.manualAddIcon as TextStyle)?.color ??
     (styles.cardActionIcon as TextStyle)?.color ??
@@ -72,27 +94,41 @@ export default function CustomCourseScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <MyButton
+        {/* <MyButton
           color="my_yellow"
           onPress={handleGoBack}
           accessibilityLabel="Wróć do poprzedniego ekranu"
         >
           <Entypo name="arrow-long-left" size={50} color={actionIconColor} />
-        </MyButton>
-        <MyButton
-          color="my_green"
-          text="dalej"
-          onPress={handleNavigateToContent}
-          accessibilityLabel="Przejdź do ustawień zawartości kursu"
-          disabled={nextDisabled}
-        >
-          {/* <Entypo
+        </MyButton> */}
+
+        <View style={styles.buttonsRow}>
+          <MyButton
+            color="my_yellow"
+            onPress={handleGoBack}
+            disabled={false}
+            width={60}
+            accessibilityLabel="Wróć do panelu kursów"
+          >
+            <Ionicons name="arrow-back" size={28} color={actionIconColor} />
+          </MyButton>
+
+          <MyButton
+            color="my_green"
+            text="dalej"
+            onPress={handleNavigateToContent}
+            accessibilityLabel="Przejdź do ustawień zawartości kursu"
+            // disabled={nextDisabled}
+          ></MyButton>
+        </View>
+
+        {/* <Entypo
             name="arrow-long-right"
             size={50}
             color={actionIconColor}
             style={styles.manualAddIcon}
           /> */}
-        </MyButton>
+        {/* </MyButton> */}
       </View>
     </View>
   );

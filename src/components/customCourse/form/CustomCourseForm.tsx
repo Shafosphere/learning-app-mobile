@@ -1,3 +1,6 @@
+import { CourseIconColorSelector } from "@/src/components/customCourse/CourseIconColorSelector";
+import { CourseColorOption } from "@/src/constants/customCourse";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { ReactNode } from "react";
 import {
   Pressable,
@@ -6,9 +9,6 @@ import {
   TextStyle,
   View,
 } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { CourseIconColorSelector } from "@/src/components/customCourse/CourseIconColorSelector";
-import { CourseColorOption } from "@/src/constants/customCourse";
 import { useCustomCourseFormStyles } from "./CustomCourseForm-styles";
 
 export interface CustomCourseFormProps {
@@ -63,6 +63,7 @@ export function CustomCourseForm({
             value={courseName}
             onChangeText={onCourseNameChange}
             placeholder={namePlaceholder}
+            placeholderTextColor={styles.nameInput.color}
             accessibilityLabel="Nazwa kursu"
             editable={nameEditable && !disabled}
           />

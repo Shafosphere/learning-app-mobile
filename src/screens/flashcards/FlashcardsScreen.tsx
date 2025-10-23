@@ -1,20 +1,20 @@
-import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
-import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
-import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { scheduleReview } from "@/src/db/sqlite/db";
-import { useStyles } from "./FlashcardsScreen-styles";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import BoxesCarousel from "@/src/components/box/boxcarousel";
 import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
+import Confetti from "@/src/components/confetti/Confetti";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { scheduleReview } from "@/src/db/sqlite/db";
+import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
+import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
+import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useRouter } from "expo-router";
-import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
-import BoxesCarousel from "@/src/components/box/boxcarousel";
-import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
-import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
-import Confetti from "@/src/components/confetti/Confetti";
+import { useCallback, useEffect, useState } from "react";
+import { Text, View } from "react-native";
+import { useStyles } from "./FlashcardsScreen-styles";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   const router = useRouter();
@@ -180,19 +180,6 @@ export default function FlashcardsScreen() {
     removeUsedWordIds(wordsToReset.map((word) => word.id));
   }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
 
-  if (
-    !activeCourse ||
-    activeCourse.sourceLangId == null ||
-    activeCourse.targetLangId == null ||
-    !selectedLevel
-  ) {
-    return (
-      <View style={styles.container}>
-        <Text allowFontScaling>Wybierz kurs i poziom.</Text>
-      </View>
-    );
-  }
-
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
   const correctionLocked = correction?.mode === "demote";
   const isAnswering =
@@ -206,9 +193,23 @@ export default function FlashcardsScreen() {
     handleSelectBox,
     canSwitch: canAutoflowSwitch,
     boxZeroEnabled,
+    isReady: isReady,
     downloadMore: downloadData,
     introBoxLimitReached,
   });
+
+  if (
+    !activeCourse ||
+    activeCourse.sourceLangId == null ||
+    activeCourse.targetLangId == null ||
+    !selectedLevel
+  ) {
+    return (
+      <View style={styles.container}>
+        <Text allowFontScaling>Wybierz kurs i poziom.</Text>
+      </View>
+    );
+  }
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />

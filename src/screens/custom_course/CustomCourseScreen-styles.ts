@@ -1,11 +1,11 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-
 export const useStyles = createThemeStylesHook((colors) => {
   return {
     card: {
       flexDirection: "row" as const,
-      width: "100%",
+      // width: "100%",
+      flex: 1,
       borderBottomWidth: 2,
       borderColor: colors.border,
       alignItems: "flex-start" as const,
@@ -15,7 +15,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       borderTopWidth: 2,
     },
     number: {
-      fontSize: 16,
+      fontSize: 21,
       fontWeight: 900,
       width: "10%",
       height: "100%",
@@ -24,6 +24,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       textAlign: "center" as const,
       textAlignVertical: "center" as const,
       paddingTop: 6,
+      color: colors.headline
     },
     inputContainer: {
       flex: 1,
@@ -36,7 +37,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       paddingVertical: 6,
     },
     cardPlaceholder: {
-      color: colors.border,
+      color: colors.paragraph,
     },
     cardDivider: {
       borderStyle: "dashed" as const,
@@ -55,7 +56,7 @@ export const useStyles = createThemeStylesHook((colors) => {
     answerIndex: {
       fontSize: 14,
       fontWeight: "700",
-      color: colors.headline,
+      color: colors.paragraph,
       width: 24,
       textAlign: "right" as const,
     },
@@ -100,10 +101,11 @@ export const useStyles = createThemeStylesHook((colors) => {
       alignItems: "center" as const,
       justifyContent: "center" as const,
       marginTop: 16,
+      fontSize: 30,
     },
     manualAddIcon: {
       color: colors.headline,
-      // fontSize: 30,
+      fontSize: 30,
       fontWeight: "900",
       lineHeight: 30,
     },
@@ -112,6 +114,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       backgroundColor: colors.background,
       padding: 18,
       paddingTop: 32,
+      paddingBottom: 0,
     },
     scrollView: {
       flex: 1,
@@ -132,7 +135,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       position: "absolute",
       fontWeight: "900",
       right: 24,
-      top: 10,
+      top: 24,
       color: colors.headline,
     },
     miniSectionHeader: {
@@ -223,10 +226,10 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontSize: 16,
     },
     segmentedControl: {
-      marginTop: 8,
+      marginTop: 24,
       flexDirection: "row",
       backgroundColor: colors.lightbg,
-      borderRadius: 12,
+      borderRadius: 8,
       borderWidth: 1,
       borderColor: colors.border,
       overflow: "hidden",
@@ -272,12 +275,19 @@ export const useStyles = createThemeStylesHook((colors) => {
       color: colors.paragraph,
     },
     footer: {
-      paddingHorizontal: 24,
-      paddingBottom: 32,
-      paddingTop: 8,
-      flexDirection: "row",
+      width: "100%",
+      paddingBottom: 24,
+      backgroundColor: colors.background,
       alignItems: "center",
-      justifyContent: "space-between",
+    },
+    buttonsRow: {
+      borderColor: colors.border,
+      borderTopWidth: 3,
+      paddingTop: 15,
+      width: "100%",
+      flexDirection: "row",
+      justifyContent: "flex-end",
+      gap: 10,
     },
     footerActionRight: {
       marginLeft: "auto",
@@ -287,5 +297,8 @@ export const useStyles = createThemeStylesHook((colors) => {
       backgroundColor: colors.border,
       marginHorizontal: 24,
     },
+    returnbtn:{
+      color: colors.headline,
+    }
   };
 });

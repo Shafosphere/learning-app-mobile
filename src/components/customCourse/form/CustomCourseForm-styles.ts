@@ -7,6 +7,7 @@ export const useCustomCourseFormStyles = createThemeStylesHook((colors) => {
       borderRadius: 16,
       padding: 16,
       paddingTop: 32,
+      paddingBottom: 32,
       marginBottom: 24,
     },
     sectionHeader: {
@@ -34,6 +35,7 @@ export const useCustomCourseFormStyles = createThemeStylesHook((colors) => {
       marginTop: 8,
       paddingLeft: 8,
       fontSize: 16,
+      color: colors.headline,
     },
     checkboxRow: {
       marginTop: 12,
