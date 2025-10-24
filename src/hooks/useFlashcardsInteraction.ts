@@ -1,9 +1,9 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
-import { boxOrder } from "./useBoxesPersistenceSnapshot";
-import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent, logLearningEvent } from "@/src/db/sqlite/db";
+import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
 type SpellcheckFn = (input: string, expected: string) => boolean;
 
@@ -52,9 +52,11 @@ export function useFlashcardsInteraction({
     useSettings();
 
   const reversed = useMemo(() => {
-    if (!activeBox) return false;
-    return reversedBoxes.includes(activeBox);
-  }, [activeBox, reversedBoxes]);
+    if (!activeBox || !selectedItem) return false;
+    // Jeśli fiszka ma flagę flipped=true, odwracamy ją tylko dla wybranych boxów.
+    // Jeśli flipped=false -> nigdy nie odwracamy.
+    return selectedItem.flipped ? reversedBoxes.includes(activeBox) : false;
+  }, [activeBox, reversedBoxes, selectedItem]);
 
   const selectRandomWord = useCallback(
     (box: keyof BoxesState) => {

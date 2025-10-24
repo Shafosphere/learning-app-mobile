@@ -1,3 +1,32 @@
+import MyButton from "@/src/components/button/button";
+import {
+  ManualCardsEditor,
+  ManualCardsEditorStyles,
+} from "@/src/components/customCourse/cardEdit/ManualCardsEditor";
+import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
+import { useCustomCourseFormStyles } from "@/src/components/customCourse/form/CustomCourseForm-styles";
+import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
+import { usePopup } from "@/src/contexts/PopupContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+  clearCustomReviewsForCourse,
+  deleteCustomCourse,
+  getCustomCourseById,
+  getCustomFlashcards,
+  replaceCustomFlashcards,
+  updateCustomCourse,
+} from "@/src/db/sqlite/db";
+import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
+import {
+  createEmptyManualCard,
+  ensureCardsNormalized,
+  normalizeAnswers,
+  useManualCardsForm,
+} from "@/src/hooks/useManualCardsForm";
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import { useFocusEffect } from "@react-navigation/native";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useCallback, useMemo, useState } from "react";
 import {
   ActivityIndicator,
@@ -9,36 +38,7 @@ import {
   TextStyle,
   View,
 } from "react-native";
-import { useFocusEffect } from "@react-navigation/native";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import FontAwesome from "@expo/vector-icons/FontAwesome";
-import Entypo from "@expo/vector-icons/Entypo";
-import MyButton from "@/src/components/button/button";
 import { useEditStyles } from "./EditCustomCourseScreen-styles";
-import { usePopup } from "@/src/contexts/PopupContext";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import {
-  clearCustomReviewsForCourse,
-  getCustomFlashcards,
-  getCustomCourseById,
-  deleteCustomCourse,
-  replaceCustomFlashcards,
-  updateCustomCourse,
-} from "@/src/db/sqlite/db";
-import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
-import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
-import { useCustomCourseFormStyles } from "@/src/components/customCourse/form/CustomCourseForm-styles";
-import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
-import {
-  ManualCardsEditor,
-  ManualCardsEditorStyles,
-} from "@/src/features/customCourse/manualCards/ManualCardsEditor";
-import {
-  createEmptyManualCard,
-  ensureCardsNormalized,
-  normalizeAnswers,
-  useManualCardsForm,
-} from "@/src/features/customCourse/manualCards/useManualCardsForm";
 
 const MANUAL_HISTORY_LIMIT = 50;
 
@@ -103,6 +103,7 @@ export default function EditCustomCourseScreen() {
     handleRemoveAnswer,
     handleAddCard,
     handleRemoveCard,
+    handleToggleFlipped,
     canUndo,
     undo,
   } = useManualCardsForm({
@@ -161,6 +162,7 @@ export default function EditCustomCourseScreen() {
         getCustomCourseBoxZeroEnabled(courseRow.id)
       );
 
+      console.log('Loading cards from DB:', cardRows);
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
           card.answers && card.answers.length > 0
@@ -173,9 +175,11 @@ export default function EditCustomCourseScreen() {
           id: `card-${card.id ?? index}`,
           front: card.frontText,
           answers,
+          flipped: card.flipped,
         };
       });
       const normalizedCards = ensureCardsNormalized(incomingCards);
+      console.log('Normalized cards:', normalizedCards);
       replaceManualCards(normalizedCards);
     } catch (error) {
       console.error("Failed to load custom course for edit", error);
@@ -311,6 +315,7 @@ export default function EditCustomCourseScreen() {
         backText: string;
         answers: string[];
         position: number;
+        flipped: boolean;
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -324,6 +329,7 @@ export default function EditCustomCourseScreen() {
         backText,
         answers,
         position: acc.length,
+        flipped: card.flipped,
       });
       return acc;
     }, []);
@@ -337,6 +343,7 @@ export default function EditCustomCourseScreen() {
       return;
     }
 
+        await clearCustomReviewsForCourse(courseId);
     setIsSaving(true);
     try {
       await updateCustomCourse(courseId, {
@@ -348,9 +355,9 @@ export default function EditCustomCourseScreen() {
       });
 
       if (!reviewsEnabled) {
-        await clearCustomReviewsForCourse(courseId);
       }
 
+      console.log('Saving cards to DB:', trimmedCards);
       await replaceCustomFlashcards(courseId, trimmedCards);
 
       setPopup({
@@ -438,6 +445,7 @@ export default function EditCustomCourseScreen() {
                   onRemoveAnswer={handleRemoveAnswer}
                   onAddCard={handleAddCard}
                   onRemoveCard={handleRemoveCard}
+                  onToggleFlipped={handleToggleFlipped}
                 />
               </>
             )}

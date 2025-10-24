@@ -4,6 +4,7 @@ export type ManualCard = {
   id: string;
   front: string;
   answers: string[];
+  flipped: boolean;
 };
 
 export interface UseManualCardsFormOptions {
@@ -22,6 +23,7 @@ export const createEmptyManualCard = (id?: string): ManualCard => ({
   id: id ?? `card-${Date.now()}`,
   front: "",
   answers: [""],
+  flipped: true, // domyślnie włączone
 });
 
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
@@ -191,6 +193,17 @@ export const useManualCardsForm = (
     [applyManualCardsChange]
   );
 
+  const handleToggleFlipped = useCallback(
+    (cardId: string) => {
+      applyManualCardsChange((cards) =>
+        cards.map((card) =>
+          card.id === cardId ? { ...card, flipped: !card.flipped } : card
+        )
+      );
+    },
+    [applyManualCardsChange]
+  );
+
   const undo = useCallback(() => {
     if (!enableHistory) {
       return;
@@ -223,6 +236,7 @@ export const useManualCardsForm = (
     handleRemoveAnswer,
     handleAddCard,
     handleRemoveCard,
+    handleToggleFlipped,
     canUndo,
     undo,
     clearHistory,

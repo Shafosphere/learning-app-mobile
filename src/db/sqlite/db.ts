@@ -1,8 +1,8 @@
 // sqlite helpers and persistence primitives
 
-import * as SQLite from "expo-sqlite";
-import * as FileSystem from "expo-file-system/legacy";
 import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system/legacy";
+import * as SQLite from "expo-sqlite";
 import Papa from "papaparse";
 
 export type LanguagePair = {
@@ -39,15 +39,20 @@ export interface CustomCourseSummary extends CustomCourseRecord {
   cardsCount: number;
 }
 
-export interface CustomFlashcardRecord {
+export interface CustomFlashcardRow {
   id: number;
   courseId: number;
   frontText: string;
   backText: string;
   answers: string[];
   position: number | null;
+  flipped: number;
   createdAt: number;
   updatedAt: number;
+}
+
+export interface CustomFlashcardRecord extends Omit<CustomFlashcardRow, 'flipped'> {
+  flipped: boolean;
 }
 
 export interface CustomReviewFlashcard extends CustomFlashcardRecord {
@@ -60,6 +65,7 @@ export interface CustomFlashcardInput {
   backText?: string;
   answers?: string[];
   position?: number | null;
+  flipped?: boolean;
 }
 
 type CustomCourseSqlRow = {
@@ -263,6 +269,7 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       front_text  TEXT    NOT NULL,
       back_text   TEXT    NOT NULL,
       position    INTEGER,
+      flipped     INTEGER NOT NULL DEFAULT 1,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -536,6 +543,7 @@ export async function getCustomFlashcards(
     frontText: string;
     backText: string;
     position: number | null;
+    flipped: number;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -546,6 +554,7 @@ export async function getCustomFlashcards(
        cf.front_text     AS frontText,
        cf.back_text      AS backText,
        cf.position       AS position,
+       cf.flipped        AS flipped,
        cf.created_at     AS createdAt,
        cf.updated_at     AS updatedAt,
        cfa.answer_text   AS answerText
@@ -565,15 +574,20 @@ export async function getCustomFlashcards(
   for (const row of rows) {
     let record = byId.get(row.id);
     if (!record) {
-      record = {
+      const rowData: CustomFlashcardRow = {
         id: row.id,
         courseId: row.courseId,
         frontText: row.frontText,
         backText: row.backText,
         answers: [],
         position: row.position,
+        flipped: row.flipped,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
+      };
+      record = {
+        ...rowData,
+        flipped: rowData.flipped === 1
       };
       byId.set(row.id, record);
       ordered.push(record);
@@ -628,12 +642,13 @@ export async function replaceCustomFlashcardsWithDb(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, position, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, position, flipped, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
         position,
+        card.flipped ?? 1, // domyślnie 1 (można odwracać)
         now,
         now
       );
@@ -1058,8 +1073,8 @@ export async function getTotalWordsForLevel(
 
 // Review helpers
 import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
-import type { CEFRLevel } from "@/src/types/language";
 import type { WordWithTranslations } from "@/src/types/boxes";
+import type { CEFRLevel } from "@/src/types/language";
 
 function computeNextReviewFromStage(stage: number, nowMs: number): number {
   const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
@@ -1412,6 +1427,7 @@ export async function getDueCustomReviewFlashcards(
     frontText: string;
     backText: string;
     position: number | null;
+    flipped: number;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -1424,6 +1440,7 @@ export async function getDueCustomReviewFlashcards(
        cf.position      AS position,
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
+       cf.flipped       AS flipped,
        cfa.answer_text  AS answerText
      FROM custom_flashcards cf
      LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
@@ -1450,6 +1467,7 @@ export async function getDueCustomReviewFlashcards(
         backText: row.backText,
         answers: [],
         position: row.position,
+        flipped: row.flipped === 1,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         stage: stageInfo.stage,
@@ -1647,6 +1665,7 @@ export async function getRandomDueReviewWord(
     id: due.id,
     text: wordRow?.text ?? "",
     translations: translations.map((t) => t.translation_text),
+    flipped: false,
   };
 }
 
@@ -1711,6 +1730,7 @@ export async function getDueReviewWordsBatch(
     id: row.id,
     text: row.text,
     translations: translationsMap.get(row.id) ?? [],
+    flipped: false,
   }));
 }
 

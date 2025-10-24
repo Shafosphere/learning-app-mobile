@@ -2,6 +2,7 @@ export interface WordWithTranslations {
   id: number;
   text: string;
   translations: string[];
+  flipped: boolean;
 }
 
 export interface BoxesState {

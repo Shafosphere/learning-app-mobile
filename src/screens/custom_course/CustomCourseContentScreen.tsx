@@ -1,4 +1,8 @@
 import MyButton from "@/src/components/button/button";
+import {
+  ManualCardsEditor,
+  ManualCardsEditorStyles,
+} from "@/src/components/customCourse/cardEdit/ManualCardsEditor";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -6,14 +10,10 @@ import {
   replaceCustomFlashcards,
 } from "@/src/db/sqlite/db";
 import {
-  ManualCardsEditor,
-  ManualCardsEditorStyles,
-} from "@/src/features/customCourse/manualCards/ManualCardsEditor";
-import {
   createEmptyManualCard,
   normalizeAnswers,
   useManualCardsForm,
-} from "@/src/features/customCourse/manualCards/useManualCardsForm";
+} from "@/src/hooks/useManualCardsForm";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from "expo-asset";
 import * as DocumentPicker from "expo-document-picker";
@@ -22,7 +22,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-import { useStyles } from "../CustomCourseScreen-styles";
+import { useStyles } from "./CustomCourseScreen-styles";
 
 type AddMode = "csv" | "manual";
 
@@ -79,6 +79,7 @@ export default function CustomCourseContentScreen() {
     handleRemoveAnswer,
     handleAddCard,
     handleRemoveCard,
+    handleToggleFlipped,
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
@@ -116,6 +117,7 @@ export default function CustomCourseContentScreen() {
         id: `csv-${idx}`,
         front: (row.front || "").toString(),
         answers: [(row.back || "").toString()],
+        flipped: true,
       }));
       if (!cards.length) {
         setPopup({
@@ -235,6 +237,7 @@ export default function CustomCourseContentScreen() {
         backText: string;
         answers: string[];
         position: number;
+        flipped: boolean;
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -248,6 +251,7 @@ export default function CustomCourseContentScreen() {
         backText,
         answers,
         position: acc.length,
+        flipped: card.flipped,
       });
       return acc;
     }, []);
@@ -271,6 +275,7 @@ export default function CustomCourseContentScreen() {
         reviewsEnabled,
       });
 
+      console.log('Saving cards to database:', trimmedCards);
       await replaceCustomFlashcards(courseId, trimmedCards);
 
       setPopup({
@@ -370,6 +375,7 @@ export default function CustomCourseContentScreen() {
                 onRemoveAnswer={handleRemoveAnswer}
                 onAddCard={handleAddCard}
                 onRemoveCard={handleRemoveCard}
+                onToggleFlipped={handleToggleFlipped}
               />
             </View>
           )}

@@ -1,33 +1,33 @@
-import { Text, View, TouchableOpacity } from "react-native";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
-import {
-  getCustomFlashcards,
-  getCustomCourseById,
-  scheduleCustomReview,
-} from "@/src/db/sqlite/db";
-import { useStyles } from "../flashcards/FlashcardsScreen-styles";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import BoxesCarousel from "@/src/components/box/boxcarousel";
 import Boxes from "@/src/components/box/boxes";
 import Card from "@/src/components/card/card";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import useSpellchecking from "@/src/hooks/useSpellchecking";
-import { useRouter } from "expo-router";
-import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
-import BoxesCarousel from "@/src/components/box/boxcarousel";
-import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { useIsFocused } from "@react-navigation/native";
-import { getCourseIconById } from "@/src/constants/customCourse";
-import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
-import type {
-  CustomFlashcardRecord,
-  CustomCourseRecord,
-} from "@/src/db/sqlite/db";
 import Confetti from "@/src/components/confetti/Confetti";
+import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import type {
+  CustomCourseRecord,
+  CustomFlashcardRecord,
+} from "@/src/db/sqlite/db";
+import {
+  getCustomCourseById,
+  getCustomFlashcards,
+  scheduleCustomReview,
+} from "@/src/db/sqlite/db";
+import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { useIsFocused } from "@react-navigation/native";
+import { useRouter } from "expo-router";
+import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { Text, View } from "react-native";
+import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 
 function mapCustomCardToWord(
   card: CustomFlashcardRecord
 ): WordWithTranslations {
+  console.log('Converting card:', { id: card.id, frontText: card.frontText, flipped: card.flipped });
   const front = card.frontText?.trim() ?? "";
   const normalizedAnswers = (card.answers ?? [])
     .map((answer) => answer.trim())
@@ -53,11 +53,14 @@ function mapCustomCardToWord(
       ? fallback
       : [defaultTranslation];
 
-  return {
+  const result = {
     id: card.id,
     text: front,
     translations,
+    flipped: card.flipped,
   };
+  console.log('Converted to WordWithTranslations:', result);
+  return result;
 }
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
@@ -85,7 +88,7 @@ export default function Flashcards() {
       targetLangId: activeCustomCourseId ?? 0,
       level: `custom-${activeCustomCourseId ?? 0}`,
       storageNamespace: "customBoxes",
-      autosave: activeCustomCourseId != null,
+      autosave: activeCustomCourseId !== null,
       saveDelayMs: 0,
     });
 
@@ -132,7 +135,6 @@ export default function Flashcards() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const totalCards = customCards.length;
-  const learnedPercent = totalCards > 0 ? learned.length / totalCards : 0;
   const trackedIds = useMemo(() => {
     const ids = new Set<number>();
     for (const list of Object.values(boxes)) {
@@ -224,8 +226,10 @@ export default function Flashcards() {
           setLoadError("Wybrany kurs nie istnieje.");
           return;
         }
+        console.log('Loading flashcards from DB:', flashcardRows);
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
+        console.log('After mapping flashcards:', mapped);
         setCustomCards(mapped);
       })
       .catch((error) => {
@@ -299,25 +303,7 @@ export default function Flashcards() {
     }
   }, [clearSelection, customCards, selectedItem]);
 
-  const courseAccessibilityLabel = customCourse
-    ? `Kurs ${customCourse.name}. Otwórz panel kursów.`
-    : "Wybierz kurs fiszek.";
 
-  const editAccessibilityLabel = customCourse
-    ? `Edytuj fiszki kursu ${customCourse.name}.`
-    : "Dodaj fiszki do kursu.";
-
-  const courseIconMeta = useMemo(() => {
-    if (!customCourse) return null;
-    return getCourseIconById(customCourse.iconId);
-  }, [customCourse]);
-  const CourseIconComponent = courseIconMeta?.Component;
-  const courseIconName = courseIconMeta?.name ?? "";
-  const courseIconColor = customCourse?.iconColor ?? "#00214D";
-  const courseName = customCourse?.name ?? "Wybierz kurs";
-  const totalCardsLabel = customCards.length > 0
-    ? `Fiszki: ${customCards.length}`
-    : "Brak fiszek";
   const downloadDisabled =
     customCards.length === 0 || allCardsDistributed || isLoadingData || !isReady;
   const shouldShowBoxes =
@@ -331,14 +317,6 @@ export default function Flashcards() {
   useEffect(() => {
     resetInteractionState();
   }, [activeCustomCourseId, resetInteractionState]);
-
-  const handleEditPress = () => {
-    if (!customCourse || activeCustomCourseId == null) return;
-    const encodedName = encodeURIComponent(customCourse.name);
-    router.push(
-      `/custom_course/edit?id=${activeCustomCourseId.toString()}&name=${encodedName}`
-    );
-  };
 
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {

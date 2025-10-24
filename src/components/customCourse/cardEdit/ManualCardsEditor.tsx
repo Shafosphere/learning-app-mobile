@@ -1,3 +1,6 @@
+import { ManualCard } from "@/src/hooks/useManualCardsForm";
+import Feather from "@expo/vector-icons/Feather";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import { ReactNode } from "react";
 import {
   Pressable,
@@ -7,10 +10,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import Feather from "@expo/vector-icons/Feather";
-
-import { ManualCard } from "./useManualCardsForm";
-
+import { useStyles } from "./ManualCardsEditor-styles";
 export interface ManualCardsEditorButtonConfig {
   key: string;
   onPress: () => void;
@@ -54,37 +54,64 @@ export interface ManualCardsEditorProps {
   onRemoveAnswer: (cardId: string, answerIndex: number) => void;
   onAddCard: () => void;
   onRemoveCard: (cardId: string) => void;
+  onToggleFlipped: (cardId: string) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
 }
 
 export const ManualCardsEditor = ({
   manualCards,
-  styles,
+  // styles,
   onCardFrontChange,
   onCardAnswerChange,
   onAddAnswer,
   onRemoveAnswer,
   onAddCard,
   onRemoveCard,
+  onToggleFlipped,
   actionButtons,
 }: ManualCardsEditorProps) => {
+  const styles = useStyles();
   return (
     <>
       {manualCards.map((card, index) => {
+        console.log(`Card ${index + 1} (${card.id}):`, { flipped: card.flipped });
         const isFirst = index === 0;
         const isSingleCard = manualCards.length <= 1;
 
         return (
-          <View key={card.id} style={[styles.card, isFirst && styles.cardFirst]}>
+          <View
+            key={card.id}
+            style={[styles.card, isFirst && styles.cardFirst]}
+          >
             <Text style={styles.number}>{index + 1}</Text>
             <View style={styles.inputContainer}>
-              <TextInput
-                value={card.front}
-                style={styles.cardinput}
-                placeholder="przód"
-                placeholderTextColor={styles.cardPlaceholder?.color}
-                onChangeText={(value) => onCardFrontChange(card.id, value)}
-              />
+              <View style={styles.flipRow}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`${card.flipped ? 'Wyłącz' : 'Włącz'} odwracanie dla fiszki ${index + 1}`}
+                  onPress={() => {
+                    console.log('Toggling flip for card:', { id: card.id, oldFlipped: card.flipped });
+                    onToggleFlipped(card.id);
+                  }}
+                  hitSlop={8}
+                >
+                  <MaterialIcons
+                    style={[
+                      styles.icon,
+                      card.flipped ? styles.iconFlipActivate : styles.iconFlipDeactive
+                    ]}
+                    name="screen-rotation-alt"
+                    size={24}
+                  />
+                </Pressable>
+                <TextInput
+                  value={card.front}
+                  style={styles.cardinput}
+                  placeholder="przód"
+                  placeholderTextColor={styles.cardPlaceholder?.color}
+                  onChangeText={(value) => onCardFrontChange(card.id, value)}
+                />
+              </View>
               <View style={styles.cardDivider} />
               <View style={styles.answersContainer}>
                 {card.answers.map((answer, answerIndex) => {
@@ -131,7 +158,10 @@ export const ManualCardsEditor = ({
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={`Usuń fiszkę ${index + 1}`}
-                style={[styles.cardActionButton, isSingleCard && styles.removeButtonDisabled]}
+                style={[
+                  styles.cardActionButton,
+                  isSingleCard && styles.removeButtonDisabled,
+                ]}
                 hitSlop={8}
                 disabled={isSingleCard}
                 onPress={() => onRemoveCard(card.id)}

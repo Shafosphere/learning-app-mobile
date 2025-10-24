@@ -90,6 +90,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 800,
     textAlign: "center",
     color: colors.headline,
+    marginLeft: 8,
   },
   courseCardInfo: {
     flex: 1,
