@@ -43,6 +43,7 @@ images/
 .github/
 android/
 .idea/
+.legacy/
 assets/images/*
 !assets/images/.gitkeep
 *.png

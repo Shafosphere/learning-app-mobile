@@ -8,7 +8,7 @@ import {
   View,
 } from "react-native";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useStyles } from "./CourseSelectionScreen-styles";
+import { useStyles } from "./CoursePinScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import type { LanguageCourse } from "@/src/types/course";
@@ -243,10 +243,7 @@ export default function CoursePinScreen() {
           await addCourse(course);
         }
       } catch (error) {
-        console.error(
-          `[CoursePin] Failed to toggle course ${key}`,
-          error
-        );
+        console.error(`[CoursePin] Failed to toggle course ${key}`, error);
       }
     },
     [addCourse, pinnedKeys, removeCourse, usingPlaceholder]

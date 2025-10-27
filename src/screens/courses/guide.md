@@ -1,0 +1,9 @@
+- `activatecourse/CourseActivateScreen.tsx` – ekran wyboru aktywnego kursu. Grupuje kursy wbudowane i oficjalne według par językowych, pozwala przełączać kurs aktywny oraz zapamiętuje ostatni wybór użytkownika.
+- `editcourse/CourseEditScreen.tsx` – główny edytor kursu. Obsługuje zarówno kursy wbudowane (przełączniki ustawień) jak i własne kursy (zmiana nazwy, ikony, fiszek oraz zapisywanie danych w bazie).
+- `editcourse/components/SettingsCourse.tsx` – sekcja przełączników ustawień kursu (Box 0, Autoflow, powtórki) wykorzystywana przez edytor.
+- `editcourse/components/editFlashcards/editFlashcards.tsx` – komponent formularza do ręcznej edycji fiszek: dodawanie/usuwanie fiszek i odpowiedzi, zaznaczanie odwracania kart.
+- `editcourse/components/iconEdit/iconEdit.tsx` – selektor ikony i koloru kursu reagujący na rozmiar ekranu, wykorzystywany przy tworzeniu i edycji kursów.
+- `editcourse/components/nameEdit/nameEdit.tsx` – pole tekstowe do zmiany nazwy kursu z obsługą dostępności.
+- `makenewcourse/CourseAppearanceScreen.tsx` – pierwszy krok kreatora nowego kursu, gdzie użytkownik ustawia nazwę, ikonę i kolor przed przejściem do treści.
+- `makenewcourse/importFlashcards.tsx` – drugi krok kreatora; umożliwia import fiszek z pliku CSV lub ręczne dodawanie, zapisuje kurs w bazie i obsługuje komunikaty o błędach.
+- `pincourse/CoursePinScreen.tsx` – ekran przypinania kursów. Pobiera dostępne pary językowe i oficjalne paczki, grupuje je i pozwala dodać/usuwać kursy z listy użytkownika.

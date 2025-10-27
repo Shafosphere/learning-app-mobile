@@ -57,14 +57,13 @@ export default function CourseActivateScreen() {
     pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
   };
 
-  const [committedCourse, setCommittedCourse] =
-    useState<SelectedCourse | null>(null);
-  const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>(
-    []
+  const [committedCourse, setCommittedCourse] = useState<SelectedCourse | null>(
+    null
   );
-  const [officialCourses, setOfficialCourses] = useState<OfficialCourseListItem[]>(
-    []
-  );
+  const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
+  const [officialCourses, setOfficialCourses] = useState<
+    OfficialCourseListItem[]
+  >([]);
   const router = useRouter();
   const setPopup = usePopup();
 
@@ -126,9 +125,7 @@ export default function CourseActivateScreen() {
   const hasPinnedOfficialCourses = pinnedOfficialCourses.length > 0;
   const hasUserCustomCourses = userCustomCourses.length > 0;
   const isEmptyState =
-    !hasBuiltInCourses &&
-    !hasPinnedOfficialCourses &&
-    !hasUserCustomCourses;
+    !hasBuiltInCourses && !hasPinnedOfficialCourses && !hasUserCustomCourses;
 
   useEffect(() => {
     console.log("courses length:", courses.length);
@@ -169,7 +166,9 @@ export default function CourseActivateScreen() {
         .then((rows) => {
           if (isMounted) {
             const mapped = rows.map<OfficialCourseListItem>((row) => {
-              const manifest = OFFICIAL_PACKS.find((pack) => pack.slug === row.slug);
+              const manifest = OFFICIAL_PACKS.find(
+                (pack) => pack.slug === row.slug
+              );
               return {
                 ...row,
                 sourceLang: manifest?.sourceLang ?? null,
@@ -225,7 +224,14 @@ export default function CourseActivateScreen() {
       await setActiveCourseIdx(index);
       notifyActivated();
     },
-    [canActivate, committedCourse, courses, notifyActivated, setActiveCourseIdx, setLevel]
+    [
+      canActivate,
+      committedCourse,
+      courses,
+      notifyActivated,
+      setActiveCourseIdx,
+      setLevel,
+    ]
   );
 
   const handleCustomCoursePress = useCallback(
@@ -247,7 +253,7 @@ export default function CourseActivateScreen() {
     if (course.isOfficial) {
       params.push("lockAppearance=1");
     }
-    router.push(`/custom_course/edit?${params.join("&")}`);
+    router.push(`/editcourse?${params.join("&")}`);
   };
 
   const handleEditBuiltinCourse = useCallback(
@@ -267,7 +273,7 @@ export default function CourseActivateScreen() {
       if (course.level) {
         params.push(`level=${encodeURIComponent(course.level)}`);
       }
-      router.push(`/coursepanel/settings?${params.join("&")}`);
+      router.push(`/editcourse?${params.join("&")}`);
     },
     [lang, router]
   );
@@ -352,7 +358,9 @@ export default function CourseActivateScreen() {
                                 const isHighlighted =
                                   committedCourse?.type === "builtin" &&
                                   committedCourse.index === index;
-                                const sourceFlag = getFlagSource(item.sourceLang);
+                                const sourceFlag = getFlagSource(
+                                  item.sourceLang
+                                );
                                 const displayTitle = `${
                                   lang[item.targetLang]?.[item.sourceLang] ??
                                   item.sourceLang
@@ -361,7 +369,9 @@ export default function CourseActivateScreen() {
                                 return (
                                   <Pressable
                                     key={index}
-                                    onPress={() => handleBuiltinCoursePress(index)}
+                                    onPress={() =>
+                                      handleBuiltinCoursePress(index)
+                                    }
                                     style={[
                                       styles.courseCard,
                                       isHighlighted && styles.clicked,
@@ -407,10 +417,13 @@ export default function CourseActivateScreen() {
                                 const isHighlighted =
                                   committedCourse?.type === "custom" &&
                                   committedCourse.id === course.id;
-                                const iconMeta = getCourseIconById(course.iconId);
+                                const iconMeta = getCourseIconById(
+                                  course.iconId
+                                );
                                 const IconComponent =
                                   iconMeta?.Component ?? Ionicons;
-                                const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                                const iconName = (iconMeta?.name ??
+                                  "grid-outline") as never;
                                 const sourceFlag = course.sourceLang
                                   ? getFlagSource(course.sourceLang)
                                   : undefined;
@@ -418,7 +431,9 @@ export default function CourseActivateScreen() {
                                 return (
                                   <CourseCard
                                     key={`official-${course.id}`}
-                                    onPress={() => handleCustomCoursePress(course.id)}
+                                    onPress={() =>
+                                      handleCustomCoursePress(course.id)
+                                    }
                                     containerStyle={styles.customCard}
                                     contentStyle={styles.customCardContent}
                                     icon={{
@@ -435,7 +450,9 @@ export default function CourseActivateScreen() {
                                     flagStyle={styles.customIconFlag}
                                     infoStyle={styles.customCardInfo}
                                     title={course.name}
-                                    titleContainerStyle={styles.customCardTitleContainer}
+                                    titleContainerStyle={
+                                      styles.customCardTitleContainer
+                                    }
                                     titleTextStyle={styles.customCardTitle}
                                     meta={`fiszki: ${course.cardsCount}`}
                                     metaTextStyle={styles.customCardMeta}
@@ -473,12 +490,15 @@ export default function CourseActivateScreen() {
 
               {hasUserCustomCourses ? (
                 <View style={styles.customSection}>
-                  <Text style={styles.customSectionTitle}>Stworzone przez Ciebie</Text>
+                  <Text style={styles.customSectionTitle}>
+                    Stworzone przez Ciebie
+                  </Text>
                   <View style={styles.customList}>
                     {userCustomCourses.map((course) => {
                       const iconMeta = getCourseIconById(course.iconId);
                       const IconComponent = iconMeta?.Component ?? Ionicons;
-                      const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                      const iconName = (iconMeta?.name ??
+                        "grid-outline") as never;
                       const isHighlighted =
                         committedCourse?.type === "custom" &&
                         committedCourse.id === course.id;

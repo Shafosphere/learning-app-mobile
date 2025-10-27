@@ -12,6 +12,7 @@ import {
   getCourseColorsForTheme,
 } from "@/src/constants/customCourse";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useStyles } from "./iconEdit-styles";
 
 export interface CourseIconColorSelectorStyles {
   container?: StyleProp<ViewStyle>;
@@ -41,12 +42,12 @@ function CourseIconColorSelectorComponent({
   onIconChange,
   onColorChange,
   disabled = false,
-  styles,
+  // styles,
   iconSize = 40,
 }: CourseIconColorSelectorProps) {
   const { width } = useWindowDimensions();
   const { colors } = useSettings();
-
+  const styles = useStyles();
   const colorOptions = useMemo(
     () => getCourseColorsForTheme(colors),
     [colors]

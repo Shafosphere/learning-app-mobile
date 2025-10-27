@@ -1,13 +1,16 @@
 import MyButton from "@/src/components/button/button";
-import { CustomCourseForm } from "@/src/components/customCourse/form/CustomCourseForm";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { ScrollView, TextStyle, View } from "react-native";
-import { useStyles } from "./CustomCourseScreen-styles";
+import { ScrollView, Text, TextStyle, View } from "react-native";
+import { useCustomCourseFormStyles } from "../editcourse/components/courseContent/CustomCourseForm-styles";
+import CourseIconColorSelector from "../editcourse/components/iconEdit/iconEdit";
+import CourseNameField from "../editcourse/components/nameEdit/nameEdit";
+import { useStyles } from "./CourseAppearanceScreen-styles";
 export default function CustomCourseScreen() {
   const styles = useStyles();
+  const formStyles = useCustomCourseFormStyles();
   const router = useRouter();
   const {
     courseName,
@@ -17,7 +20,6 @@ export default function CustomCourseScreen() {
     iconColor,
     colorId,
     reviewsEnabled,
-    toggleReviewsEnabled,
     handleColorChange,
   } = useCustomCourseDraft();
 
@@ -79,29 +81,40 @@ export default function CustomCourseScreen() {
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
       >
-        <CustomCourseForm
-          title="NOWY KURS"
-          courseName={courseName}
-          onCourseNameChange={setCourseName}
-          reviewsEnabled={reviewsEnabled}
-          onToggleReviews={toggleReviewsEnabled}
-          iconId={iconId}
-          iconColor={iconColor}
-          colorId={colorId}
-          onIconChange={(value) => setIconId(value)}
-          onColorChange={handleColorChange}
-        />
+        <View style={styles.section}>
+          <Text style={styles.sectionHeader}>NOWY KURS</Text>
+
+          <View style={formStyles.content}>
+            <View>
+              <CourseNameField
+                value={courseName}
+                onChange={setCourseName}
+              />
+            </View>
+
+            <View style={formStyles.iconSection}>
+              <Text style={formStyles.label}>ikona</Text>
+              <CourseIconColorSelector
+                selectedIcon={iconId}
+                selectedColor={iconColor}
+                selectedColorId={colorId ?? undefined}
+                onIconChange={(value) => setIconId(value)}
+                onColorChange={handleColorChange}
+                styles={{
+                  iconsContainer: formStyles.iconsContainer,
+                  iconWrapper: formStyles.iconWrapper,
+                  iconWrapperSelected: formStyles.iconWrapperSelected,
+                  colorsContainer: formStyles.colorsContainer,
+                  colorSwatch: formStyles.courseColor,
+                  colorSwatchSelected: formStyles.courseColorSelected,
+                }}
+              />
+            </View>
+          </View>
+        </View>
       </ScrollView>
 
       <View style={styles.footer}>
-        {/* <MyButton
-          color="my_yellow"
-          onPress={handleGoBack}
-          accessibilityLabel="Wróć do poprzedniego ekranu"
-        >
-          <Entypo name="arrow-long-left" size={50} color={actionIconColor} />
-        </MyButton> */}
-
         <View style={styles.buttonsRow}>
           <MyButton
             color="my_yellow"
@@ -118,17 +131,8 @@ export default function CustomCourseScreen() {
             text="dalej"
             onPress={handleNavigateToContent}
             accessibilityLabel="Przejdź do ustawień zawartości kursu"
-            // disabled={nextDisabled}
           ></MyButton>
         </View>
-
-        {/* <Entypo
-            name="arrow-long-right"
-            size={50}
-            color={actionIconColor}
-            style={styles.manualAddIcon}
-          /> */}
-        {/* </MyButton> */}
       </View>
     </View>
   );

@@ -1,8 +1,4 @@
 import MyButton from "@/src/components/button/button";
-import {
-  ManualCardsEditor,
-  ManualCardsEditorStyles,
-} from "@/src/components/customCourse/cardEdit/ManualCardsEditor";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -14,6 +10,10 @@ import {
   normalizeAnswers,
   useManualCardsForm,
 } from "@/src/hooks/useManualCardsForm";
+import {
+  ManualCardsEditor,
+  ManualCardsEditorStyles,
+} from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from "expo-asset";
 import * as DocumentPicker from "expo-document-picker";
@@ -22,7 +22,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-import { useStyles } from "./CustomCourseScreen-styles";
+import { useStyles } from "./importFlashcards-styles";
 
 type AddMode = "csv" | "manual";
 
@@ -386,12 +386,6 @@ export default function CustomCourseContentScreen() {
 
       <View style={styles.footer}>
         <View style={styles.buttonsRow}>
-          {/* <MyButton
-            text="←"
-            color="my_yellow"
-            onPress={handleGoBack}
-            accessibilityLabel="Wróć do tworzenia kursu"
-          /> */}
           <MyButton
             color="my_yellow"
             onPress={handleGoBack}

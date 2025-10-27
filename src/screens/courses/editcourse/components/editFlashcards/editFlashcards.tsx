@@ -10,7 +10,7 @@ import {
   View,
   ViewStyle,
 } from "react-native";
-import { useStyles } from "./ManualCardsEditor-styles";
+import { useStyles } from "./editFlashcards-styles";
 export interface ManualCardsEditorButtonConfig {
   key: string;
   onPress: () => void;
