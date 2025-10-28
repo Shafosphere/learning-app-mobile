@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView, View, Text } from "react-native";
+import { ScrollView, Text } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
-import { useSettings } from "@/src/contexts/SettingsContext";
+// import { useSettings } from "@/src/contexts/SettingsContext";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
@@ -11,7 +11,7 @@ import { getDailyLearnedCountsBuiltin, getDailyLearnedCountsCustom, getHourlyAct
 
 export default function StatsScreen() {
   const styles = useStyles();
-  const { activeCourse } = useSettings();
+  // const { activeCourse } = useSettings();
   const [heatmapData, setHeatmapData] = useState<HeatmapDay[]>([]);
   const [hourly, setHourly] = useState<number[]>(new Array(24).fill(0));
   const [selectedDay, setSelectedDay] = useState<HeatmapDay | null>(null);

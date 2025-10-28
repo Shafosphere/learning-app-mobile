@@ -75,8 +75,8 @@ export async function removeWordIdFromUsedWordIds(params: {
       usedWordIds: next,
     };
     await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
-  } catch (_) {
-    // ignore parse errors
+  } catch (err) {
+      console.warn("[removeWordIdFromUsedWordIds] Parse or write error", { err, storageKey });
   }
 }
 

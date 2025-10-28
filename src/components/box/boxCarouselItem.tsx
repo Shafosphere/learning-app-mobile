@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { View, Pressable, Image, Animated } from "react-native";
+import { View, Pressable, Animated } from "react-native";
 import { BoxesState } from "@/src/types/boxes";
 import BoxSkin from "./BoxSkin";
 import { useStyles } from "./boxes-styles";

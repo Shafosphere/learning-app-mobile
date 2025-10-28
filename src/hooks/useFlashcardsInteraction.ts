@@ -23,7 +23,7 @@ export type UseFlashcardsInteractionParams = {
   checkSpelling: SpellcheckFn;
   addUsedWordIds: (ids: number[] | number) => void;
   registerKnownWord: (wordId: number) => void;
-  reversedBoxes?: ReadonlyArray<keyof BoxesState>;
+  reversedBoxes?: readonly (keyof BoxesState)[];
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState) => void;
   boxZeroEnabled?: boolean;
@@ -219,6 +219,7 @@ export function useFlashcardsInteraction({
     activeCustomCourseId,
     selectedLevel,
     selectedItem,
+    questionShownAt,
   ]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {

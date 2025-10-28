@@ -1,6 +1,7 @@
 import { ManualCard } from "@/src/hooks/useManualCardsForm";
 import Feather from "@expo/vector-icons/Feather";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
+import FontAwesome from "@expo/vector-icons/FontAwesome";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { ReactNode } from "react";
 import {
   Pressable,
@@ -74,7 +75,9 @@ export const ManualCardsEditor = ({
   return (
     <>
       {manualCards.map((card, index) => {
-        console.log(`Card ${index + 1} (${card.id}):`, { flipped: card.flipped });
+        console.log(`Card ${index + 1} (${card.id}):`, {
+          flipped: card.flipped,
+        });
         const isFirst = index === 0;
         const isSingleCard = manualCards.length <= 1;
 
@@ -88,21 +91,33 @@ export const ManualCardsEditor = ({
               <View style={styles.flipRow}>
                 <Pressable
                   accessibilityRole="button"
-                  accessibilityLabel={`${card.flipped ? 'Wyłącz' : 'Włącz'} odwracanie dla fiszki ${index + 1}`}
+                  accessibilityLabel={`${
+                    card.flipped ? "Wyłącz" : "Włącz"
+                  } odwracanie dla fiszki ${index + 1}`}
                   onPress={() => {
-                    console.log('Toggling flip for card:', { id: card.id, oldFlipped: card.flipped });
+                    console.log("Toggling flip for card:", {
+                      id: card.id,
+                      oldFlipped: card.flipped,
+                    });
                     onToggleFlipped(card.id);
                   }}
                   hitSlop={8}
                 >
-                  <MaterialIcons
-                    style={[
-                      styles.icon,
-                      card.flipped ? styles.iconFlipActivate : styles.iconFlipDeactive
-                    ]}
-                    name="screen-rotation-alt"
-                    size={24}
-                  />
+                  <View style={styles.lockcontainer}>
+                    {card.flipped ? (
+                      <FontAwesome5
+                        style={[styles.icon, styles.iconFlipActivate]}
+                        name="lock-open"
+                        size={16}
+                      />
+                    ) : (
+                      <FontAwesome
+                        style={[styles.icon, styles.iconFlipDeactive]}
+                        name="lock"
+                        size={21}
+                      />
+                    )}
+                  </View>
                 </Pressable>
                 <TextInput
                   value={card.front}

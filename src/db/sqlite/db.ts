@@ -4,6 +4,11 @@ import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system/legacy";
 import * as SQLite from "expo-sqlite";
 import Papa from "papaparse";
+import wordsENGtoPLCsv from "@/assets/data/wordsENGtoPL.csv";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
+import type { WordWithTranslations } from "@/src/types/boxes";
+import type { CEFRLevel } from "@/src/types/language";
 
 export type LanguagePair = {
   id: number;
@@ -156,7 +161,7 @@ function splitBackTextIntoAnswers(raw: string | null | undefined): string[] {
 }
 
 function normalizeAnswersInput(
-  rawAnswers: Array<string | null | undefined> | undefined
+  rawAnswers: (string | null | undefined)[] | undefined
 ): string[] {
   if (!rawAnswers || rawAnswers.length === 0) {
     return [];
@@ -712,9 +717,7 @@ async function seedLanguages(
 async function importInitialCsv(db: SQLite.SQLiteDatabase): Promise<void> {
   console.log("Baza danych jest pusta. Rozpoczynam import z CSV...");
 
-  const asset = Asset.fromModule(
-    require("@/assets/data/wordsENGtoPL.csv")
-  );
+  const asset = Asset.fromModule(wordsENGtoPLCsv);
   await asset.downloadAsync();
   const csv = await FileSystem.readAsStringAsync(asset.localUri!);
   const { data } = Papa.parse<{
@@ -871,9 +874,6 @@ export async function logTableContents() {
   console.table(customFlashcards);
 }
 
-
-// ===== Official packs (built-in custom courses) =====
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 
 async function readCsvAsset(assetModule: any): Promise<
   { frontText: string; backText: string; answers: string[]; position: number }[]
@@ -1072,9 +1072,6 @@ export async function getTotalWordsForLevel(
 }
 
 // Review helpers
-import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
-import type { WordWithTranslations } from "@/src/types/boxes";
-import type { CEFRLevel } from "@/src/types/language";
 
 function computeNextReviewFromStage(stage: number, nowMs: number): number {
   const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
@@ -1240,7 +1237,7 @@ export async function getHourlyActivityCounts(
   toMs: number
 ): Promise<number[]> {
   const db = await getDB();
-  const hours = new Array<number>(24).fill(0);
+  const hours = Array.from({ length: 24 }, () => 0);
   const rows1 = await db.getAllAsync<{ h: string; cnt: number }>(
     `SELECT strftime('%H', created_at/1000, 'unixepoch') AS h, COUNT(*) AS cnt
      FROM learning_events WHERE created_at BETWEEN ? AND ?

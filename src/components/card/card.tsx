@@ -59,7 +59,7 @@ export default function Card({
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
-  const timeouts = useRef<Array<ReturnType<typeof setTimeout>>>([]);
+  const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const previousCorrectionInput2 = useRef<string>("");
 
   const awers = selectedItem?.text ?? "";
@@ -76,7 +76,7 @@ export default function Card({
       timeouts.current = timeouts.current.filter((id) => id !== timeoutId);
     }, 50);
     timeouts.current.push(timeoutId);
-  }, [timeouts]);
+  }, []);
 
   useEffect(() => {
     return () => {

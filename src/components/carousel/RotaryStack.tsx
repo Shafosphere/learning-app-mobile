@@ -99,7 +99,7 @@ const SLOT_CONFIG = [
 
 const DEFAULT_ITEMS = ["ALPHA", "BRAVO", "CHARLIE", "DELTA", "ECHO", "FOXTROT"];
 
-function useInterpolatedStyle(
+function getInterpolatedStyle(
   anim: Animated.Value,
   fromSlot: number,
   toSlot: number
@@ -232,7 +232,7 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
         <View style={[styles.window, { height }]}>
           {cards.map((card) => {
             const prevSlot = prevSlotsRef.current?.[card.key] ?? card.slot;
-            const interpStyle = useInterpolatedStyle(anim, prevSlot, card.slot);
+            const interpStyle = getInterpolatedStyle(anim, prevSlot, card.slot);
             // Border overlay opacity for smooth fade in/out on middle slot
             const middleBorderOpacity =
               prevSlot === 2 && card.slot !== 2
@@ -276,5 +276,7 @@ const RotaryStack = forwardRef<RotaryStackHandle, RotaryStackProps>(
     );
   }
 );
+
+RotaryStack.displayName = "RotaryStack";
 
 export default RotaryStack;

@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/review/memorygame/MemoryGameScreen";
+export { default } from "@/src/screens/review/minigames/memorygame/MemoryGameScreen";

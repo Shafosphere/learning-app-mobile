@@ -96,7 +96,7 @@ export default function PinnedCoursesProgress() {
           }
         }
         if (mounted) setItems(results);
-      } catch (_) {
+      } catch {
         if (mounted) setItems([]);
       }
     })();
@@ -124,4 +124,3 @@ export default function PinnedCoursesProgress() {
     </StatsCard>
   );
 }
-

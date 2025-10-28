@@ -3,7 +3,6 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     position: "absolute",
-    top: 120,
     left: 0,
     right: 0,
     paddingHorizontal: 16,

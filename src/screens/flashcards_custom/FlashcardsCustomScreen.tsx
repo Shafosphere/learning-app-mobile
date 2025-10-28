@@ -19,7 +19,7 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useIsFocused } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router";
 import { type ReactNode, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
@@ -64,7 +64,7 @@ function mapCustomCardToWord(
 }
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
-  const router = useRouter();
+  // const router = useRouter();
   const styles = useStyles();
   const {
     activeCustomCourseId,
@@ -229,7 +229,7 @@ export default function Flashcards() {
         console.log('Loading flashcards from DB:', flashcardRows);
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
-        console.log('After mapping flashcards:', mapped);
+        // console.log('After mapping flashcards:', mapped);
         setCustomCards(mapped);
       })
       .catch((error) => {

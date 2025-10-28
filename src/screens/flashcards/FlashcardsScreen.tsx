@@ -11,13 +11,13 @@ import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnap
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import { useRouter } from "expo-router";
+// import { useRouter } from "expo-router";
 import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
-  const router = useRouter();
+  // const router = useRouter();
   const styles = useStyles();
   const {
     selectedLevel,
@@ -39,14 +39,14 @@ export default function FlashcardsScreen() {
   const {
     boxes,
     setBoxes,
-    batchIndex,
+    // batchIndex,
     setBatchIndex,
     isReady,
-    resetSave,
+    // resetSave,
     saveNow,
     addUsedWordIds,
     removeUsedWordIds,
-    progress,
+    // progress,
     totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeCourse?.sourceLangId ?? 0,
@@ -103,8 +103,8 @@ export default function FlashcardsScreen() {
     },
     boxZeroEnabled,
   });
-  const learnedPercent =
-    totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
+  // const learnedPercent =
+  //   totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
   const introBoxLimitReached = boxZeroEnabled
     ? boxes.boxZero.length >= 30
     : boxes.boxOne.length >= 30;

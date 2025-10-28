@@ -51,14 +51,14 @@ export default function HardWordsList() {
           5
         );
         if (mounted) setItems(rows);
-      } catch (_) {
+      } catch {
         if (mounted) setItems([]);
       }
     })();
     return () => {
       mounted = false;
     };
-  }, [activeCourse?.sourceLangId, activeCourse?.targetLangId]);
+  }, [activeCourse]);
 
   return (
     <StatsCard title="Trudne słówka" subtitle="Najwięcej błędów przed nauczeniem">
@@ -77,4 +77,3 @@ export default function HardWordsList() {
     </StatsCard>
   );
 }
-

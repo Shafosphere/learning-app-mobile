@@ -35,6 +35,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontSize: 16,
       fontWeight: 800,
       paddingVertical: 6,
+      color: colors.headline,
     },
     cardPlaceholder: {
       color: colors.paragraph,
@@ -65,6 +66,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontSize: 16,
       fontWeight: 700,
       paddingVertical: 6,
+      color: colors.headline,
     },
     answerRemoveButton: {
       padding: 4,
@@ -120,10 +122,17 @@ export const useStyles = createThemeStylesHook((colors) => {
       marginRight: 3,
     },
     iconFlipActivate: {
-      color: colors.my_green,
+      color: colors.headline,
     },
     iconFlipDeactive: {
       color: colors.my_red,
+    },
+    lockcontainer: {
+      height: 25,
+      width: 25,
+      justifyContent: "center",
+      alignItems: "center",
+      // backgroundColor: colors.headline,
     },
   };
 });

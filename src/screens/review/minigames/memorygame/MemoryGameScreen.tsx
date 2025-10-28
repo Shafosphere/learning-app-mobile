@@ -60,6 +60,7 @@ function mapCustomReviewToWord(
     id: card.id,
     text: card.frontText,
     translations,
+    flipped: card.flipped,
   };
 }
 

@@ -1,10 +1,15 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { Text } from "react-native";
 import StatsCard from "./StatsCard";
 import ProgressBar from "./ProgressBar";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { countLearnedWordsByLevel, getTotalWordsForLevel, countCustomFlashcardsForCourse, countCustomLearnedForCourse } from "@/src/db/sqlite/db";
+import {
+  countLearnedWordsByLevel,
+  getTotalWordsForLevel,
+  countCustomFlashcardsForCourse,
+  countCustomLearnedForCourse,
+} from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
 
 const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
@@ -87,7 +92,7 @@ export default function CourseProgressCard() {
           setProgress(0);
           setSummary({ learned: 0, total: 0 });
         }
-      } catch (_) {
+      } catch {
         if (mounted) {
           setTitle("Postęp przypiętego kursu");
           setProgress(0);
@@ -98,7 +103,7 @@ export default function CourseProgressCard() {
     return () => {
       mounted = false;
     };
-  }, [activeCourse?.sourceLangId, activeCourse?.targetLangId, activeCourse?.level, activeCustomCourseId]);
+  }, [activeCourse, activeCustomCourseId]);
 
   // Hide when absolutely no course is pinned
   if (!activeCourse && activeCustomCourseId == null) return null;

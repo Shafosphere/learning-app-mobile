@@ -1,6 +1,6 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-export const useCourseEditStyles = createThemeStylesHook((colors) => ({
+export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
@@ -172,7 +172,17 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
     paddingTop: 15,
     width: "90%",
     flexDirection: "row",
-    justifyContent: "flex-end",
+    alignItems: "center",
+    // klucz: rozciągamy środek, więc nie potrzebujemy już flex-end
+    justifyContent: "flex-start",
+    gap: 10,
+  },
+  spacer: {
+    flex: 1, // zajmuje całe wolne miejsce
+  },
+  rightGroup: {
+    flexDirection: "row",
+    alignItems: "center",
     gap: 10,
   },
 }));

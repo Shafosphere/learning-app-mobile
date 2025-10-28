@@ -129,17 +129,20 @@ export default function Confetti({
 
   useEffect(() => {
     isMountedRef.current = true;
+    const pendingRemovals = pendingRemovalsRef.current;
     return () => {
       isMountedRef.current = false;
-      if (intervalRef.current) {
-        clearInterval(intervalRef.current);
+      const interval = intervalRef.current;
+      if (interval) {
+        clearInterval(interval);
         intervalRef.current = null;
       }
-      if (removalFrameRef.current != null) {
-        cancelAnimationFrame(removalFrameRef.current);
+      const removalFrame = removalFrameRef.current;
+      if (removalFrame != null) {
+        cancelAnimationFrame(removalFrame);
         removalFrameRef.current = null;
       }
-      pendingRemovalsRef.current.clear();
+      pendingRemovals.clear();
     };
   }, []);
 

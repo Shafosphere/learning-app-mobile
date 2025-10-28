@@ -80,7 +80,7 @@ type BuiltInGroup = {
   sourceLang: string | null;
   targetFlag?: ReturnType<typeof getFlagSource>;
   sourceFlag?: ReturnType<typeof getFlagSource>;
-  items: Array<{ courseIndex: number; courseLevel: string | null }>;
+  items: { courseIndex: number; courseLevel: string | null }[];
 };
 
 type OfficialGroup = {
@@ -270,7 +270,7 @@ export default function CoursesReviewScreen() {
           setActiveCourseIdx(index),
           setActiveCustomCourseId(null),
         ]);
-        router.push("/review/memory");
+        router.push("/review/brain");
       })();
     },
     [courses, router, setActiveCourseIdx, setActiveCustomCourseId, setLevel]
@@ -280,7 +280,7 @@ export default function CoursesReviewScreen() {
     (courseId: number) => {
       void (async () => {
         await setActiveCustomCourseId(courseId);
-        router.push("/review/memory");
+        router.push("/review/brain");
       })();
     },
     [router, setActiveCustomCourseId]

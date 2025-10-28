@@ -352,7 +352,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   );
 
   useEffect(() => {
-    const baseStyle = originalTextDefaultStyleRef.current;
+    const originalStyle = originalTextDefaultStyleRef.current;
+    const baseStyle = originalStyle;
     const baseArray = Array.isArray(baseStyle)
       ? baseStyle.filter(Boolean)
       : baseStyle
@@ -368,14 +369,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       const currentDefaults = (Text as TextWithDefaultProps).defaultProps ?? {};
       const { style: _ignoredStyle, ...restDefaults } = currentDefaults;
 
-      if (originalTextDefaultStyleRef.current === undefined) {
+      if (originalStyle === undefined) {
         (Text as TextWithDefaultProps).defaultProps = restDefaults;
         return;
       }
 
       (Text as TextWithDefaultProps).defaultProps = {
         ...restDefaults,
-        style: originalTextDefaultStyleRef.current,
+        style: originalStyle,
       };
     };
   }, [colors.headline]);

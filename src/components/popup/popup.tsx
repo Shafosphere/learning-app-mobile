@@ -1,7 +1,8 @@
-import { useEffect, useRef } from "react";
-import { Animated, Easing, Text, View } from "react-native";
+import { useEffect, useMemo, useRef } from "react";
+import { Animated, Easing, Platform, StatusBar, Text, View } from "react-native";
 import { useStyles } from "./popup-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 export type PopupColor = "my_green" | "my_red" | "my_yellow";
 
@@ -13,6 +14,8 @@ interface PopupProps {
 }
 
 const EXIT_ANIMATION_MS = 220;
+const NAVBAR_HEIGHT = 50;
+const POPUP_GAP = 24;
 
 export default function Popup({
   message,
@@ -22,9 +25,16 @@ export default function Popup({
 }: PopupProps) {
   const styles = useStyles();
   const { colors } = useSettings();
+  const insets = useSafeAreaInsets();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-18)).current;
   const scale = useRef(new Animated.Value(0.94)).current;
+  const topOffset = useMemo(() => {
+    const statusBarHeight =
+      Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
+    const topPadding = Math.max(statusBarHeight, insets.top);
+    return topPadding + NAVBAR_HEIGHT + POPUP_GAP;
+  }, [insets.top]);
 
   useEffect(() => {
     const entryAnimation = Animated.parallel([
@@ -92,6 +102,7 @@ export default function Popup({
       style={[
         styles.container,
         {
+          top: topOffset,
           opacity,
           transform: [{ translateY }, { scale }],
         },

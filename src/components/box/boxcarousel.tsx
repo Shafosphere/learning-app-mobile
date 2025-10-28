@@ -43,14 +43,11 @@ export default function BoxesCarousel({
 }: BoxesProps) {
   const styles = useStyles();
 
-  const data = useMemo(
-    () => {
-      const keys = Object.keys(boxes || {}) as Array<keyof BoxesState>;
-      const filtered = hideBoxZero ? keys.filter((k) => k !== "boxZero") : keys;
-      return filtered.map((k) => ({ key: k }));
-    },
-    [boxes, hideBoxZero]
-  );
+  const data = useMemo(() => {
+    const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
+    const filtered = hideBoxZero ? keys.filter((k) => k !== "boxZero") : keys;
+    return filtered.map((k) => ({ key: k }));
+  }, [boxes, hideBoxZero]);
 
   const initialIndex = useMemo(() => {
     if (!activeBox) return 0;
@@ -128,7 +125,7 @@ export default function BoxesCarousel({
         />
       );
     },
-    [activeIdx, boxes, scrollX, styles]
+    [activeIdx, boxH, boxes, scrollToIndex, scrollX]
   );
 
   return (

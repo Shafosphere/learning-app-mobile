@@ -1,3 +1,7 @@
+import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
+import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
+import francuskiePodstawyCsv from "@/assets/data/francuskie_podstawy.csv";
+
 export type OfficialPackDef = {
   slug: string;
   name: string;
@@ -20,7 +24,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     reviewsEnabled: true,
     sourceLang: "en",
     targetLang: "pl",
-    csvAsset: require("@/assets/data/proste_zwroty.csv"),
+    csvAsset: prosteZwrotyCsv,
   },
   {
     slug: "podstawowe_slowa",
@@ -30,7 +34,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     reviewsEnabled: true,
     sourceLang: "en",
     targetLang: "pl",
-    csvAsset: require("@/assets/data/podstawowe_slowa.csv"),
+    csvAsset: podstawoweSlowaCsv,
   },
   {
     slug: "francuskie_podstawy",
@@ -40,6 +44,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     reviewsEnabled: true,
     sourceLang: "fr",
     targetLang: "pl",
-    csvAsset: require("@/assets/data/francuskie_podstawy.csv"),
+    csvAsset: francuskiePodstawyCsv,
   },
 ];

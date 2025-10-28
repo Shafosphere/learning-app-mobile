@@ -1,4 +1,4 @@
-import { Button, Pressable, Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import React, { useEffect, useRef, useState } from "react";
 import { useStyles } from "./boxes-styles";
 import { BoxesState } from "@/src/types/boxes";
@@ -33,14 +33,18 @@ export default function Boxes({
   }, [activeBox]);
 
   useEffect(() => {
+    const timers = timersRef.current;
     return () => {
-      Object.values(timersRef.current).forEach((t) => t && clearTimeout(t));
+      Object.values(timers).forEach((t) => {
+        if (t) clearTimeout(t);
+      });
     };
   }, []);
 
-  const entries = Object.entries(boxes) as Array<
-    [keyof BoxesState, BoxesState[keyof BoxesState]]
-  >;
+  const entries = Object.entries(boxes) as [
+    keyof BoxesState,
+    BoxesState[keyof BoxesState]
+  ][];
   const displayedEntries = hideBoxZero
     ? entries.filter(([boxName]) => boxName !== "boxZero")
     : entries;
