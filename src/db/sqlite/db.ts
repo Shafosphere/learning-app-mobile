@@ -1731,6 +1731,51 @@ export async function getDueReviewWordsBatch(
   }));
 }
 
+export async function getRandomTranslationsForLevel(
+  sourceLangId: number,
+  targetLangId: number,
+  level: CEFRLevel,
+  limit: number,
+  excludeWordIds: number[] = []
+): Promise<string[]> {
+  if (limit <= 0) {
+    return [];
+  }
+
+  const db = await getDB();
+  const excludeClause =
+    excludeWordIds.length > 0
+      ? `AND w.id NOT IN (${excludeWordIds.map(() => "?").join(",")})`
+      : "";
+
+  const query = `SELECT t.translation_text
+     FROM words w
+     JOIN translations t ON t.source_word_id = w.id
+     WHERE w.language_id = ?
+       AND w.cefr_level = ?
+       AND t.target_language_id = ?
+       ${excludeClause}
+     ORDER BY RANDOM()
+     LIMIT ?;`;
+
+  const params: Array<number | string> = [
+    sourceLangId,
+    level,
+    targetLangId,
+    ...excludeWordIds,
+    limit,
+  ];
+
+  const rows = await db.getAllAsync<{ translation_text: string }>(
+    query,
+    ...params
+  );
+
+  return rows
+    .map((row) => row.translation_text?.trim() ?? "")
+    .filter((value) => value.length > 0);
+}
+
 // Debug helper: adds random words as due reviews for a given pair/level
 export async function addRandomReviewsForPair(
   sourceLangId: number,

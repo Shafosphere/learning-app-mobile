@@ -8,11 +8,14 @@ import {
   addRandomCustomReviews,
   addRandomReviewsForPair,
 } from "@/src/db/sqlite/db";
+import type { CEFRLevel } from "@/src/types/language";
+
+const DEBUG_LEVEL: CEFRLevel = "A1";
 
 const DataSection: React.FC = () => {
   const styles = useStyles();
   const router = useRouter();
-  const { activeCourse, selectedLevel, activeCustomCourseId } = useSettings();
+  const { activeCourse, activeCustomCourseId } = useSettings();
   const [builtInBusy, setBuiltInBusy] = useState(false);
   const [customBusy, setCustomBusy] = useState(false);
 
@@ -27,13 +30,13 @@ const DataSection: React.FC = () => {
       const inserted = await addRandomReviewsForPair(
         activeCourse.sourceLangId,
         activeCourse.targetLangId,
-        selectedLevel,
+        DEBUG_LEVEL,
         10
       );
       Alert.alert(
         "Dodano",
         inserted > 0
-          ? `Dodano ${inserted} słówek do powtórki (${selectedLevel}).`
+          ? `Dodano ${inserted} słówek do powtórki (${DEBUG_LEVEL}).`
           : "Brak nowych słówek do dodania."
       );
     } catch {
