@@ -213,7 +213,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 10,
-    // backgroundColor: colors.my_green,
   },
   flag: {
     width: 99 / 1.25,

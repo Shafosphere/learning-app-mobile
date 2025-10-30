@@ -8,10 +8,19 @@ import { Alert, Pressable, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "./inputaletter-styles";
+import { MinigameLayout } from "../components/MinigameLayout";
+import { MinigameHeading } from "../components/MinigameHeading";
+import {
+  completeSessionStep,
+  getSessionStep,
+} from "@/src/screens/review/minigames/sessionStore";
+import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
 
 type InputALetterParams = {
   words?: string | string[];
   letters?: string | string[];
+  sessionId?: string | string[];
+  stepId?: string | string[];
 };
 
 type WireWord = {
@@ -170,7 +179,37 @@ export default function InputALetter() {
   const params = useLocalSearchParams<InputALetterParams>();
   const router = useRouter();
 
+  const sessionIdParam = extractSingleParam(params.sessionId);
+  const stepIdParam = extractSingleParam(params.stepId);
+
+  const sessionId =
+    typeof sessionIdParam === "string" && sessionIdParam.length > 0
+      ? sessionIdParam
+      : null;
+  const stepId =
+    typeof stepIdParam === "string" && stepIdParam.length > 0
+      ? stepIdParam
+      : null;
+
+  const sessionStep = useMemo(() => {
+    if (!sessionId || !stepId) {
+      return null;
+    }
+
+    const step = getSessionStep(sessionId, stepId);
+    return step && step.type === "inputaletter" ? step : null;
+  }, [sessionId, stepId]);
+
+  const isSessionMode = sessionStep != null;
+
   const { words, letters } = useMemo(() => {
+    if (sessionStep) {
+      return {
+        words: sessionStep.round.words,
+        letters: sessionStep.round.letters,
+      };
+    }
+
     const wordsParam = extractSingleParam(params.words);
     const lettersParam = extractSingleParam(params.letters);
 
@@ -182,7 +221,7 @@ export default function InputALetter() {
         typeof lettersParam === "string" ? lettersParam : undefined
       ),
     };
-  }, [params.letters, params.words]);
+  }, [params.letters, params.words, sessionStep]);
 
   const [slots, setSlots] = useState<SlotState[][]>(() =>
     buildInitialSlots(words)
@@ -195,6 +234,10 @@ export default function InputALetter() {
   );
   const [checked, setChecked] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);
+  const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
+  const [lastEvaluation, setLastEvaluation] = useState<
+    { wordId: number; isCorrect: boolean }[] | null
+  >(null);
 
   const resetState = useCallback(() => {
     const initialSlots = buildInitialSlots(words);
@@ -203,6 +246,8 @@ export default function InputALetter() {
     setActiveSlot(findFirstEmptySlot(initialSlots));
     setChecked(false);
     setIsSuccess(false);
+    setHasSubmittedResult(false);
+    setLastEvaluation(null);
   }, [letters, words]);
 
   useEffect(() => {
@@ -225,6 +270,22 @@ export default function InputALetter() {
     [slots]
   );
 
+  const evaluateWords = useCallback(() => {
+    return words.map((word, wordIndex) => {
+      const characters = Array.from(word.term);
+      const isCorrect = word.missingIndices.every((missingIndex, slotIndex) => {
+        const expected = characters[missingIndex] ?? "";
+        const provided = slots[wordIndex]?.[slotIndex]?.letter ?? "";
+        return expected === provided;
+      });
+
+      return {
+        wordId: word.id,
+        isCorrect,
+      };
+    });
+  }, [slots, words]);
+
   const hasValidData =
     words.length === 3 && totalSlots > 0 && letters.length >= totalSlots;
 
@@ -243,25 +304,27 @@ export default function InputALetter() {
           )
         );
 
-        setSlots((prev) =>
-          prev.map((wordSlots, wIdx) =>
-            wIdx === wordIndex
-              ? wordSlots.map((slot, sIdx) =>
-                  sIdx === slotIndex
-                    ? { letter: null, letterPoolIndex: null }
-                    : slot
-                )
-              : wordSlots
-          )
-        );
-      }
+      setSlots((prev) =>
+        prev.map((wordSlots, wIdx) =>
+          wIdx === wordIndex
+            ? wordSlots.map((slot, sIdx) =>
+                sIdx === slotIndex
+                  ? { letter: null, letterPoolIndex: null }
+                  : slot
+              )
+            : wordSlots
+        )
+      );
+    }
 
-      setActiveSlot({ wordIndex, slotIndex });
-      setChecked(false);
-      setIsSuccess(false);
-    },
-    [slots]
-  );
+    setActiveSlot({ wordIndex, slotIndex });
+    setChecked(false);
+    setIsSuccess(false);
+    setHasSubmittedResult(false);
+    setLastEvaluation(null);
+  },
+  [slots]
+);
 
   const findNextEmptySlot = useCallback(
     (matrix: SlotState[][]): ActiveSlot | null => findFirstEmptySlot(matrix),
@@ -324,6 +387,8 @@ export default function InputALetter() {
       setSlots(updatedSlots);
       setChecked(false);
       setIsSuccess(false);
+      setHasSubmittedResult(false);
+      setLastEvaluation(null);
 
       const nextSlot = findNextEmptySlot(updatedSlots);
       setActiveSlot(nextSlot);
@@ -344,32 +409,59 @@ export default function InputALetter() {
       return;
     }
 
-    let success = true;
+    const evaluation = evaluateWords();
+    const success = evaluation.every((entry) => entry.isCorrect);
 
-    words.forEach((word, wordIndex) => {
-      const characters = Array.from(word.term);
-
-      word.missingIndices.forEach((missingIndex, slotIndex) => {
-        const expected = characters[missingIndex] ?? "";
-        const provided = slots[wordIndex]?.[slotIndex]?.letter ?? "";
-
-        if (!expected || expected !== provided) {
-          success = false;
-        }
-      });
-    });
-
+    setLastEvaluation(evaluation);
     setIsSuccess(success);
     setChecked(true);
-  }, [allSlotsFilled, hasValidData, slots, words]);
+  }, [allSlotsFilled, evaluateWords, hasValidData]);
 
-  const handleReset = useCallback(() => {
-    resetState();
-  }, [resetState]);
+  const handleContinue = useCallback(() => {
+    if (!isSessionMode || !sessionStep || !sessionId) {
+      router.replace("/review/brain");
+      return;
+    }
+
+    if (!checked || hasSubmittedResult) {
+      return;
+    }
+
+    const evaluation = lastEvaluation ?? evaluateWords();
+
+    setHasSubmittedResult(true);
+
+    const updates = evaluation.map((entry) => ({
+      wordId: entry.wordId,
+      status: entry.isCorrect ? ("correct" as const) : ("incorrect" as const),
+    }));
+
+    const nextStep = completeSessionStep(sessionId, sessionStep.id, updates);
+
+    if (nextStep) {
+      const route = getRouteForStep(nextStep);
+      const nextHref = `${route}?sessionId=${encodeURIComponent(
+        sessionId
+      )}&stepId=${encodeURIComponent(nextStep.id)}`;
+      router.replace(nextHref as never);
+    } else {
+      router.replace("/review/brain");
+    }
+  }, [
+    checked,
+    evaluateWords,
+    hasSubmittedResult,
+    isSessionMode,
+    lastEvaluation,
+    router,
+    sessionId,
+    sessionStep,
+  ]);
 
   if (!hasValidData) {
     return (
-      <View style={styles.container}>
+      <MinigameLayout contentStyle={styles.container}>
+        <MinigameHeading title="Uzupełnij brakujące litery" />
         <View style={styles.fallbackContainer}>
           <Text style={styles.promptText}>
             Nie udało się wczytać danych dla tej minigry.
@@ -384,15 +476,36 @@ export default function InputALetter() {
           width={200}
           accessibilityLabel="Wróć do poprzedniego ekranu"
         />
-      </View>
+      </MinigameLayout>
     );
   }
 
   return (
-    <View style={styles.container}>
-      <View style={styles.promptContainer}>
-        <Text style={styles.caption}>Uzupełnij brakujące litery</Text>
-      </View>
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerContent={
+        <View style={styles.actionsContainer}>
+          <MyButton
+            text="Sprawdź"
+            onPress={handleCheck}
+            width={120}
+            accessibilityLabel="Sprawdź poprawność wpisanych liter"
+            color="my_green"
+          />
+          {isSessionMode ? (
+            <MyButton
+              text="Dalej"
+              onPress={handleContinue}
+              width={120}
+              accessibilityLabel="Przejdź do kolejnej minigry"
+              color="my_green"
+              disabled={!checked || hasSubmittedResult}
+            />
+          ) : null}
+        </View>
+      }
+    >
+      <MinigameHeading title="Uzupełnij brakujące litery" />
       <View style={styles.wordsContainer}>
         {words.map((word, wordIndex) => {
           const characters = Array.from(word.term);
@@ -498,52 +611,6 @@ export default function InputALetter() {
           </Pressable>
         ))}
       </View>
-      <View style={styles.actionsContainer}>
-        <MyButton
-          text="Sprawdź"
-          onPress={handleCheck}
-          width={200}
-          accessibilityLabel="Sprawdź poprawność wpisanych liter"
-        />
-        <MyButton
-          text="Resetuj"
-          onPress={handleReset}
-          width={200}
-          accessibilityLabel="Wyczyść wszystkie litery i zacznij od nowa"
-        />
-      </View>
-      {checked ? (
-        <View style={styles.resultContainer}>
-          <Text
-            style={[
-              styles.resultText,
-              isSuccess
-                ? styles.resultTextSuccess
-                : styles.resultTextError,
-            ]}
-          >
-            {isSuccess
-              ? "Świetnie! Wszystkie słówka są poprawne."
-              : "Jeszcze nie. Popraw litery oznaczone na czerwono."}
-          </Text>
-          <View style={styles.resultSummary}>
-            {words.map((word) => (
-              <Text
-                key={`word-${word.id}`}
-                style={styles.resultSummaryText}
-              >
-                {word.term}
-              </Text>
-            ))}
-          </View>
-          <MyButton
-            text="Wróć do Brain"
-            onPress={() => router.replace("/review/brain")}
-            width={220}
-            accessibilityLabel="Wróć do ekranu Brain"
-          />
-        </View>
-      ) : null}
-    </View>
+    </MinigameLayout>
   );
 }

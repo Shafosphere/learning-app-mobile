@@ -10,12 +10,6 @@ import {
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import {
-  MEMORY_BOARD_LAYOUTS,
-  MEMORY_BOARD_SIZE_LABELS,
-  MEMORY_BOARD_SIZE_ORDER,
-  MemoryBoardSize,
-} from "@/src/constants/memoryGame";
 
 const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
 const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
@@ -48,8 +42,6 @@ const LearningSection: React.FC = () => {
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
     feedbackEnabled,
-    memoryBoardSize,
-    setMemoryBoardSize,
   } = useSettings();
 
   const [batchSizeInput, setBatchSizeInput] = useState(
@@ -115,13 +107,6 @@ const LearningSection: React.FC = () => {
   const handleRemindersToggle = async (value: boolean) => {
     if (value !== learningRemindersEnabled) {
       await toggleLearningRemindersEnabled();
-      await triggerHaptics();
-    }
-  };
-
-  const handleMemoryBoardSelect = async (size: MemoryBoardSize) => {
-    if (size !== memoryBoardSize) {
-      await setMemoryBoardSize(size);
       await triggerHaptics();
     }
   };
@@ -216,46 +201,6 @@ const LearningSection: React.FC = () => {
           </TouchableOpacity>
         ))}
       </View>
-
-      <View style={[styles.row, { alignItems: "flex-start" }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Plansza Memory</Text>
-          <Text style={styles.rowSubtitle}>
-            Wybierz rozmiar planszy gry pamięciowej.
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.memoryOptions}>
-        {MEMORY_BOARD_SIZE_ORDER.map((size) => {
-          const isActive = memoryBoardSize === size;
-          const layout = MEMORY_BOARD_LAYOUTS[size];
-          return (
-            <TouchableOpacity
-              key={size}
-              activeOpacity={0.7}
-              onPress={() => handleMemoryBoardSelect(size)}
-              style={[
-                styles.memoryOption,
-                isActive && styles.memoryOptionActive,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.memoryOptionLabel,
-                  isActive && styles.memoryOptionLabelActive,
-                ]}
-              >
-                {MEMORY_BOARD_SIZE_LABELS[size]}
-              </Text>
-              <Text style={styles.memoryOptionMeta}>
-                {layout.columns} × {layout.rows}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Liczba fiszek w partii</Text>

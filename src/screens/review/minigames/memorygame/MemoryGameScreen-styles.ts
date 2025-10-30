@@ -8,14 +8,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 24,
     backgroundColor: colors.background,
   },
-  title: {
-    fontSize: 32,
-    fontWeight: "700",
-    textAlign: "center" as const,
-    textTransform: "uppercase" as const,
-    letterSpacing: 2,
-    color: colors.headline,
-  },
   subtitle: {
     fontSize: 18,
     fontWeight: "600",
@@ -37,6 +29,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     aspectRatio: 1.4,
     marginHorizontal: 6,
+  },
+  placeholderCard: {
+    flex: 1,
+    aspectRatio: 1.4,
+    marginHorizontal: 6,
+    opacity: 0,
   },
   cardInner: {
     flex: 1,
@@ -76,5 +74,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 18,
     color: colors.headline,
     textAlign: "center" as const,
+  },
+  actionsContainer: {
+    flexDirection: "row" as const,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    gap: 16,
   },
 }));

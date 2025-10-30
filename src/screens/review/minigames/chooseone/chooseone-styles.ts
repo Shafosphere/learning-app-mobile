@@ -5,8 +5,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: 24,
-    paddingVertical: 32,
-    justifyContent: "center",
+    paddingTop: 48,
+    paddingBottom: 32,
+    justifyContent: "flex-start",
     alignItems: "center",
     gap: 32,
   },
@@ -14,12 +15,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 12,
-  },
-  caption: {
-    fontSize: 14,
-    color: colors.paragraph,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   promptText: {
     fontSize: 28,
@@ -54,6 +49,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   optionButtonIncorrect: {
     borderColor: colors.my_red,
   },
+  optionButtonSelected: {
+    borderColor: colors.my_yellow,
+  },
   optionText: {
     fontSize: 18,
     color: colors.headline,
@@ -72,5 +70,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   resultTextError: {
     color: colors.my_red,
+  },
+  actionsContainer: {
+    flexDirection: "row",
+    justifyContent: "center",
+    alignItems: "center",
+    gap: 16,
   },
 }));

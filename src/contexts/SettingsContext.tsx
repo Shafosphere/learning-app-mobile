@@ -11,7 +11,10 @@ import {
 } from "react";
 import { StyleProp, Text, TextProps, TextStyle } from "react-native";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
-import { MemoryBoardSize } from "../constants/memoryGame";
+import {
+  MemoryBoardSize,
+  sanitizeMemoryBoardSize,
+} from "../constants/memoryGame";
 import { usePersistedState } from "../hooks/usePersistedState";
 import {
   ColorBlindMode,
@@ -237,7 +240,7 @@ const defaultValue: SettingsContextValue = {
   largeFontEnabled: false,
   toggleLargeFont: async () => {},
   fontScaleMultiplier: 1,
-  memoryBoardSize: "large",
+  memoryBoardSize: "twoByThree",
   setMemoryBoardSize: async () => {},
   accessibilityPreferences: {
     highContrastEnabled: false,
@@ -323,8 +326,19 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "accessibility.largeFont",
     false
   );
-  const [memoryBoardSize, setMemoryBoardSizeState] =
-    usePersistedState<MemoryBoardSize>("memory.boardSize", "large");
+  const [rawMemoryBoardSize, setRawMemoryBoardSize] =
+    usePersistedState<string>("memory.boardSize", "twoByThree");
+  const memoryBoardSize = useMemo<MemoryBoardSize>(
+    () => sanitizeMemoryBoardSize(rawMemoryBoardSize),
+    [rawMemoryBoardSize]
+  );
+
+  useEffect(() => {
+    const normalized = sanitizeMemoryBoardSize(rawMemoryBoardSize);
+    if (normalized !== rawMemoryBoardSize) {
+      void setRawMemoryBoardSize(normalized);
+    }
+  }, [rawMemoryBoardSize, setRawMemoryBoardSize]);
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -771,9 +785,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
 
   const setMemoryBoardSize = useCallback(
     async (size: MemoryBoardSize) => {
-      await setMemoryBoardSizeState(size);
+      await setRawMemoryBoardSize(size);
     },
-    [setMemoryBoardSizeState]
+    [setRawMemoryBoardSize]
   );
 
   const setLevel = useCallback(

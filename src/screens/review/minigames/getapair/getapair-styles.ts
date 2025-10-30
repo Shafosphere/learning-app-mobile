@@ -5,7 +5,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     backgroundColor: colors.background,
     paddingHorizontal: 24,
-    paddingVertical: 32,
+    paddingTop: 48,
+    paddingBottom: 32,
     justifyContent: "flex-start",
     alignItems: "center",
     gap: 24,
@@ -14,12 +15,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     gap: 8,
     paddingHorizontal: 12,
-  },
-  caption: {
-    fontSize: 14,
-    color: colors.paragraph,
-    textTransform: "uppercase",
-    letterSpacing: 0.5,
   },
   promptText: {
     fontSize: 28,
@@ -82,8 +77,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   actionsContainer: {
     width: "100%",
-    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "flex-end",
     gap: 12,
+    alignItems: "center",
   },
   resultContainer: {
     gap: 12,

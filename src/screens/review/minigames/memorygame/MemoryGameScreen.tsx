@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -8,6 +8,7 @@ import {
   View,
 } from "react-native";
 
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   getDueCustomReviewFlashcards,
@@ -18,6 +19,15 @@ import type { WordWithTranslations } from "@/src/types/boxes";
 
 import { useStyles } from "./MemoryGameScreen-styles";
 import { getMemoryBoardLayout } from "@/src/constants/memoryGame";
+import { MinigameLayout } from "../components/MinigameLayout";
+import { MinigameHeading } from "../components/MinigameHeading";
+import MyButton from "@/src/components/button/button";
+import {
+  completeSessionStep,
+  getSessionStep,
+} from "@/src/screens/review/minigames/sessionStore";
+import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
+import type { SanitizedWord } from "@/src/screens/review/brain/minigame-generators";
 
 const HIGHLIGHT_TIMEOUT_MS = 1500;
 const RESULT_DELAY_MS = 500;
@@ -41,6 +51,21 @@ type MemoryCard = {
   animation: Animated.Value;
   status: MemoryCardStatus;
 };
+
+type MemoryPlaceholder = {
+  id: string;
+  placeholder: true;
+};
+
+type MemoryListItem = MemoryCard | MemoryPlaceholder;
+
+type MemoryGameParams = {
+  sessionId?: string | string[];
+  stepId?: string | string[];
+};
+
+const extractSingleParam = (value: string | string[] | undefined) =>
+  Array.isArray(value) ? value[0] : value;
 
 function mapCustomReviewToWord(
   card: CustomReviewFlashcard
@@ -112,11 +137,13 @@ export default function MemoryGameScreen() {
     colors,
     memoryBoardSize,
   } = useSettings();
+  const params = useLocalSearchParams<MemoryGameParams>();
+  const router = useRouter();
   const styles = useStyles();
 
   const boardLayout = getMemoryBoardLayout(memoryBoardSize);
-  const totalCards = boardLayout.columns * boardLayout.rows;
-  const requiredPairs = totalCards / 2;
+  const totalSlots = boardLayout.columns * boardLayout.rows;
+  const requiredPairs = Math.floor(totalSlots / 2);
   const defaultFrontColor = colors.my_green;
   const defaultBackColor = colors.secondBackground;
 
@@ -130,6 +157,31 @@ export default function MemoryGameScreen() {
   );
   const deckRef = useRef<MemoryCard[]>([]);
   const selectedIdsRef = useRef<string[]>([]);
+  const isMountedRef = useRef(true);
+  const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
+
+  const sessionIdParam = extractSingleParam(params.sessionId);
+  const stepIdParam = extractSingleParam(params.stepId);
+
+  const sessionId =
+    typeof sessionIdParam === "string" && sessionIdParam.length > 0
+      ? sessionIdParam
+      : null;
+  const stepId =
+    typeof stepIdParam === "string" && stepIdParam.length > 0
+      ? stepIdParam
+      : null;
+
+  const sessionStep = useMemo(() => {
+    if (!sessionId || !stepId) {
+      return null;
+    }
+
+    const step = getSessionStep(sessionId, stepId);
+    return step && step.type === "memory" ? step : null;
+  }, [sessionId, stepId]);
+
+  const isSessionMode = sessionStep != null;
 
   const clearResolveTimeout = () => {
     if (resolveTimeoutRef.current) {
@@ -145,18 +197,39 @@ export default function MemoryGameScreen() {
     }
   };
 
-  const resetGameState = (nextDeck: MemoryCard[] = []) => {
+  const resetGameState = useCallback((nextDeck: MemoryCard[] = []) => {
     setDeck(nextDeck);
     setSelectedIds([]);
     selectedIdsRef.current = [];
     setIsResolving(false);
+    setHasSubmittedResult(false);
     clearResolveTimeout();
     clearResultDelayTimeout();
-  };
+  }, []);
+
+  const buildSessionDeck = useCallback(
+    (words: SanitizedWord[]): MemoryCard[] => {
+      const mapped: WordWithTranslations[] = words.map((word) => ({
+        id: word.id,
+        text: word.term,
+        translations: word.translations,
+        flipped: false,
+      }));
+
+      const pairs = Math.min(requiredPairs, mapped.length);
+      return createDeckForWords(mapped, pairs);
+    },
+    [requiredPairs]
+  );
 
   useEffect(() => {
     deckRef.current = deck;
   }, [deck]);
+
+  const allMatched = useMemo(
+    () => deck.length > 0 && deck.every((card) => card.status === "matched"),
+    [deck]
+  );
 
   useEffect(() => {
     return () => {
@@ -262,66 +335,149 @@ export default function MemoryGameScreen() {
   const srcId = activeCourse?.sourceLangId ?? null;
   const tgtId = activeCourse?.targetLangId ?? null;
 
-  useEffect(() => {
-    let mounted = true;
+  const loadWords = useCallback(async () => {
+    if (!isMountedRef.current) {
+      return;
+    }
 
-    const loadWords = async () => {
-      if (!isCustomMode && (!srcId || !tgtId || !selectedLevel)) {
-        if (mounted) resetGameState([]);
+    if (!isCustomMode && (!srcId || !tgtId || !selectedLevel)) {
+      if (isMountedRef.current) {
+        resetGameState([]);
+      }
+      return;
+    }
+
+    if (isCustomMode && activeCustomCourseId == null) {
+      if (isMountedRef.current) {
+        resetGameState([]);
+      }
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const now = Date.now();
+      let words: WordWithTranslations[] = [];
+
+      if (isCustomMode && activeCustomCourseId != null) {
+        const rows = await getDueCustomReviewFlashcards(
+          activeCustomCourseId,
+          requiredPairs,
+          now
+        );
+        words = rows.map(mapCustomReviewToWord);
+      } else if (srcId && tgtId && selectedLevel) {
+        words = await getDueReviewWordsBatch(
+          srcId,
+          tgtId,
+          selectedLevel,
+          requiredPairs,
+          now
+        );
+      }
+
+      if (!isMountedRef.current) {
         return;
       }
 
-      if (isCustomMode && activeCustomCourseId == null) {
-        if (mounted) resetGameState([]);
-        return;
+      const nextDeck = createDeckForWords(words, requiredPairs);
+      resetGameState(nextDeck);
+    } catch {
+      if (isMountedRef.current) {
+        resetGameState([]);
       }
-
-      setLoading(true);
-      try {
-        const now = Date.now();
-        let words: WordWithTranslations[] = [];
-
-        if (isCustomMode && activeCustomCourseId != null) {
-          const rows = await getDueCustomReviewFlashcards(
-            activeCustomCourseId,
-            requiredPairs,
-            now
-          );
-          words = rows.map(mapCustomReviewToWord);
-        } else if (srcId && tgtId && selectedLevel) {
-          words = await getDueReviewWordsBatch(
-            srcId,
-            tgtId,
-            selectedLevel,
-            requiredPairs,
-            now
-          );
-        }
-
-        if (mounted) {
-          const nextDeck = createDeckForWords(words, requiredPairs);
-          resetGameState(nextDeck);
-        }
-      } catch {
-        if (mounted) resetGameState([]);
-      } finally {
-        if (mounted) setLoading(false);
+    } finally {
+      if (isMountedRef.current) {
+        setLoading(false);
       }
-    };
-
-    void loadWords();
-
-    return () => {
-      mounted = false;
-    };
+    }
   }, [
     activeCustomCourseId,
     isCustomMode,
-    memoryBoardSize,
     requiredPairs,
     selectedLevel,
     srcId,
     tgtId,
+    resetGameState,
+  ]);
+
+  useEffect(() => {
+    isMountedRef.current = true;
+
+    if (isSessionMode && sessionStep) {
+      const nextDeck = buildSessionDeck(sessionStep.words);
+      resetGameState(nextDeck);
+      setLoading(false);
+    } else if (!isSessionMode) {
+      void loadWords();
+    } else {
+      resetGameState([]);
+      setLoading(false);
+    }
+
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, [
+    buildSessionDeck,
+    isSessionMode,
+    loadWords,
+    resetGameState,
+    sessionStep,
+  ]);
+
+  const handleRestart = useCallback(() => {
+    if (isSessionMode && sessionStep) {
+      const nextDeck = buildSessionDeck(sessionStep.words);
+      resetGameState(nextDeck);
+      setLoading(false);
+      return;
+    }
+
+    void loadWords();
+  }, [
+    buildSessionDeck,
+    isSessionMode,
+    loadWords,
+    resetGameState,
+    sessionStep,
+  ]);
+
+  const handleContinue = useCallback(() => {
+    if (!isSessionMode || !sessionStep || !sessionId) {
+      router.replace("/review/brain");
+      return;
+    }
+
+    if (!allMatched || hasSubmittedResult) {
+      return;
+    }
+
+    setHasSubmittedResult(true);
+
+    const updates = sessionStep.wordIds.map((wordId) => ({
+      wordId,
+      status: "correct" as const,
+    }));
+
+    const nextStep = completeSessionStep(sessionId, sessionStep.id, updates);
+
+    if (nextStep) {
+      const route = getRouteForStep(nextStep);
+      const nextHref = `${route}?sessionId=${encodeURIComponent(
+        sessionId
+      )}&stepId=${encodeURIComponent(nextStep.id)}`;
+      router.replace(nextHref as never);
+    } else {
+      router.replace("/review/brain");
+    }
+  }, [
+    allMatched,
+    hasSubmittedResult,
+    isSessionMode,
+    router,
+    sessionId,
+    sessionStep,
   ]);
 
   const handleCardPress = (id: string) => {
@@ -378,12 +534,46 @@ export default function MemoryGameScreen() {
     });
   };
 
+  const placeholdersNeeded =
+    deck.length > 0 ? Math.max(0, totalSlots - deck.length) : 0;
+  const listData: MemoryListItem[] =
+    placeholdersNeeded > 0
+      ? [
+          ...deck,
+          ...Array.from({ length: placeholdersNeeded }, (_, index) => ({
+            id: `placeholder-${index}`,
+            placeholder: true as const,
+          })),
+        ]
+      : deck;
+
   return (
-    <View style={styles.container}>
-      <Text style={styles.title}>Memory Game</Text>
-      {!isCustomMode && selectedLevel ? (
-        <Text style={styles.subtitle}>Poziom: {selectedLevel}</Text>
-      ) : null}
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerContent={
+        <View style={styles.actionsContainer}>
+          <MyButton
+            text="Odśwież planszę"
+            color="my_green"
+            onPress={handleRestart}
+            disabled={loading}
+            width={140}
+            accessibilityLabel="Losuj nowe pary słówek"
+          />
+          {isSessionMode ? (
+            <MyButton
+              text="Dalej"
+              color="my_green"
+              onPress={handleContinue}
+              disabled={!allMatched || hasSubmittedResult}
+              width={120}
+              accessibilityLabel="Przejdź do kolejnej minigry"
+            />
+          ) : null}
+        </View>
+      }
+    >
+      <MinigameHeading title="Memory Game" />
 
       {loading ? (
         <View style={styles.loader}>
@@ -395,13 +585,23 @@ export default function MemoryGameScreen() {
         </View>
       ) : (
         <FlatList
-          data={deck}
+          data={listData}
           keyExtractor={(item) => item.id}
           numColumns={boardLayout.columns}
           contentContainerStyle={styles.grid}
           columnWrapperStyle={styles.row}
           scrollEnabled={false}
           renderItem={({ item }) => {
+            if ("placeholder" in item) {
+              return (
+                <View
+                  style={[styles.card, styles.placeholderCard]}
+                  pointerEvents="none"
+                  accessible={false}
+                />
+              );
+            }
+
             const frontAnimatedStyle = {
               transform: [
                 { perspective: 1000 },
@@ -484,14 +684,13 @@ export default function MemoryGameScreen() {
                       { backgroundColor: backBackgroundColor },
                       backAnimatedStyle,
                     ]}
-                  >
-                  </Animated.View>
+                  ></Animated.View>
                 </View>
               </Pressable>
             );
           }}
         />
       )}
-    </View>
+    </MinigameLayout>
   );
 }

@@ -39,6 +39,7 @@ yarn-error.*
 app-example
 
 # Ignore images folders
+sounds/
 images/
 .github/
 android/

@@ -63,6 +63,7 @@ export async function getRandomWordsBatch({
     id,
     text: wordMap.get(id) ?? "Słowo nieznalezione",
     translations: translationsMap.get(id) || [],
+    flipped: false,
   }));
   return result;
 }

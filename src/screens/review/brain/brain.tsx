@@ -1,5 +1,12 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Image, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Image,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
@@ -11,44 +18,32 @@ import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "./brain-styles";
-
-// --- Types -----------------------------------------------------------------
-
-type SanitizedWord = {
-  id: number;
-  term: string;
-  translations: string[];
-};
-
-type ChooseOneRound = {
-  prompt: string;
-  options: string[];
-  correctIndex: number;
-};
-
-type GetAPairPair = {
-  id: number;
-  term: string;
-  translation: string;
-  isCorrect: boolean;
-};
-
-type GetAPairRound = {
-  pairs: GetAPairPair[];
-};
-
-type InputALetterWord = {
-  id: number;
-  term: string;
-  missingIndices: number[];
-};
-
-type InputALetterRound = {
-  words: InputALetterWord[];
-  letters: string[];
-};
-
-// --- General helpers -------------------------------------------------------
+import {
+  MEMORY_BOARD_LAYOUTS,
+  MEMORY_BOARD_SIZE_LABELS,
+  MEMORY_BOARD_SIZE_ORDER,
+  MemoryBoardSize,
+} from "@/src/constants/memoryGame";
+import {
+  buildSessionTemplate,
+  MIN_SESSION_WORDS,
+} from "./session-builder";
+import {
+  destroySession,
+  registerSession,
+} from "@/src/screens/review/minigames/sessionStore";
+import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
+import {
+  ChooseOneRound,
+  createChooseOneRound as generateChooseOneRound,
+  createGetAPairRound as generateGetAPairRound,
+  createInputALetterRound as generateInputALetterRound,
+  getLetterIndices,
+  GetAPairRound,
+  InputALetterRound,
+  sanitizeWord,
+  SanitizedWord,
+} from "./minigame-generators";
 
 const mapCustomReviewToWord = (
   card: CustomReviewFlashcard
@@ -72,51 +67,6 @@ const mapCustomReviewToWord = (
   };
 };
 
-const sanitizeWord = (word: WordWithTranslations): SanitizedWord | null => {
-  const term = word.text?.trim() ?? "";
-  const translations = word.translations
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-
-  if (!term || translations.length === 0) {
-    return null;
-  }
-
-  return {
-    id: word.id,
-    term,
-    translations,
-  };
-};
-
-const shuffleArray = <T,>(items: T[]): T[] => {
-  const copy = [...items];
-  for (let i = copy.length - 1; i > 0; i -= 1) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [copy[i], copy[j]] = [copy[j], copy[i]];
-  }
-  return copy;
-};
-
-const isAlphabeticCharacter = (value: string): boolean => {
-  if (value.length === 0) {
-    return false;
-  }
-
-  const lower = value.toLocaleLowerCase();
-  const upper = value.toLocaleUpperCase();
-
-  return lower !== upper;
-};
-
-const getLetterIndices = (term: string): number[] => {
-  const characters = Array.from(term);
-
-  return characters
-    .map((char, index) => (isAlphabeticCharacter(char) ? index : -1))
-    .filter((index) => index !== -1);
-};
-
 export default function BrainScreen() {
   const styles = useStyles();
   const {
@@ -124,6 +74,8 @@ export default function BrainScreen() {
     activeCustomCourseId,
     selectedLevel,
     colors,
+    memoryBoardSize,
+    setMemoryBoardSize,
   } = useSettings();
   const router = useRouter();
   const [words, setWords] = useState<WordWithTranslations[]>([]);
@@ -139,6 +91,47 @@ export default function BrainScreen() {
         .filter((value): value is SanitizedWord => value !== null),
     [words]
   );
+
+  const handleStartSession = useCallback(() => {
+    if (sanitizedWords.length < MIN_SESSION_WORDS) {
+      Alert.alert(
+        "Za mało fiszek",
+        `Potrzebujemy co najmniej ${MIN_SESSION_WORDS} słówek, aby rozpocząć sesję gier.`
+      );
+      return;
+    }
+
+    const buildResult = buildSessionTemplate({
+      sanitizedWords,
+      levelTranslations,
+    });
+
+    if (!buildResult.ok) {
+      Alert.alert("Brak danych", buildResult.message);
+      return;
+    }
+
+    const { sessionId, firstStep } = registerSession(buildResult.template);
+
+    if (!firstStep) {
+      destroySession(sessionId);
+      Alert.alert(
+        "Nie udało się rozpocząć",
+        "Wystąpił błąd podczas przygotowywania sesji gier. Spróbuj ponownie."
+      );
+      return;
+    }
+
+    const route = getRouteForStep(firstStep);
+    const nextHref = `${route}?sessionId=${encodeURIComponent(
+      sessionId
+    )}&stepId=${encodeURIComponent(firstStep.id)}`;
+    router.push(nextHref as never);
+  }, [
+    levelTranslations,
+    router,
+    sanitizedWords,
+  ]);
 
   // --- Choose One minigame setup -------------------------------------------
   const canStartChooseOne = useMemo(() => {
@@ -273,10 +266,7 @@ export default function BrainScreen() {
           setLevelTranslations(unique);
         }
       } catch (err) {
-        console.warn(
-          "Failed to load level translations for get a pair",
-          err
-        );
+        console.warn("Failed to load level translations for get a pair", err);
         if (isMounted) {
           setLevelTranslations([]);
         }
@@ -301,43 +291,7 @@ export default function BrainScreen() {
       return null;
     }
 
-    const pickRandomIndex = (max: number) => Math.floor(Math.random() * max);
-    const targetIndex = pickRandomIndex(sanitizedWords.length);
-    const target = sanitizedWords[targetIndex];
-
-    if (!target) {
-      return null;
-    }
-
-    const correctTranslation =
-      target.translations[pickRandomIndex(target.translations.length)];
-
-    const otherTranslations = sanitizedWords
-      .filter((entry) => entry.id !== target.id)
-      .flatMap((entry) => entry.translations)
-      .filter((value) => value !== correctTranslation);
-
-    const uniqueDistractors = shuffleArray(
-      Array.from(new Set(otherTranslations))
-    );
-
-    if (uniqueDistractors.length < 2) {
-      return null;
-    }
-
-    const distractors = uniqueDistractors.slice(0, 2);
-    const options = shuffleArray([...distractors, correctTranslation]);
-    const correctIndex = options.indexOf(correctTranslation);
-
-    if (correctIndex === -1) {
-      return null;
-    }
-
-    return {
-      prompt: target.term,
-      options,
-      correctIndex,
-    };
+    return generateChooseOneRound(sanitizedWords);
   }, [canStartChooseOne, sanitizedWords]);
 
   // Get a Pair round generator
@@ -346,202 +300,8 @@ export default function BrainScreen() {
       return null;
     }
 
-    const selectedWords = shuffleArray(sanitizedWords).slice(0, 3);
-
-    if (selectedWords.length < 3) {
-      return null;
-    }
-
-    const normalize = (value: string) => value.trim();
-
-    const getUniqueTranslations = (values: string[]): string[] =>
-      Array.from(
-        new Set(
-          values
-            .map(normalize)
-            .filter((entry) => entry.length > 0)
-        )
-      );
-
-    const getWrongCandidates = (word: SanitizedWord): string[] => {
-      const ownTranslations = new Set(
-        getUniqueTranslations(word.translations)
-      );
-
-      const otherTranslations = sanitizedWords
-        .filter((entry) => entry.id !== word.id)
-        .flatMap((entry) => entry.translations);
-
-      const combined = [
-        ...otherTranslations,
-        ...levelTranslations,
-      ];
-
-      return getUniqueTranslations(combined).filter(
-        (translation) => !ownTranslations.has(translation)
-      );
-    };
-
-    const assignUniqueCorrectTranslations = (): Map<number, string> | null => {
-      const attempts = 10;
-
-      for (let attempt = 0; attempt < attempts; attempt += 1) {
-        const order = shuffleArray([...selectedWords]);
-        const used = new Set<string>();
-        const assignments = new Map<number, string>();
-
-        const backtrack = (index: number): boolean => {
-          if (index >= order.length) {
-            return true;
-          }
-
-          const word = order[index];
-          const options = shuffleArray(getUniqueTranslations(word.translations));
-
-          for (const option of options) {
-            if (used.has(option)) {
-              continue;
-            }
-
-            used.add(option);
-            assignments.set(word.id, option);
-
-            if (backtrack(index + 1)) {
-              return true;
-            }
-
-            used.delete(option);
-            assignments.delete(word.id);
-          }
-
-          return false;
-        };
-
-        if (backtrack(0)) {
-          return assignments;
-        }
-      }
-
-      return null;
-    };
-
-    const buildSubsets = <T,>(items: T[], size: number): T[][] => {
-      if (size === 0) {
-        return [[]];
-      }
-      if (size > items.length) {
-        return [];
-      }
-
-      const result: T[][] = [];
-
-      const helper = (start: number, path: T[]) => {
-        if (path.length === size) {
-          result.push([...path]);
-          return;
-        }
-
-        for (let i = start; i < items.length; i += 1) {
-          path.push(items[i]);
-          helper(i + 1, path);
-          path.pop();
-        }
-      };
-
-      helper(0, []);
-      return result;
-    };
-
-    const assignments = assignUniqueCorrectTranslations();
-
-    if (!assignments || assignments.size !== selectedWords.length) {
-      return null;
-    }
-
-    const candidatesForIncorrect = selectedWords.filter(
-      (word) => getWrongCandidates(word).length > 0
-    );
-
-    const possibleCounts =
-      candidatesForIncorrect.length === 0
-        ? [0]
-        : Array.from(
-            { length: candidatesForIncorrect.length + 1 },
-            (_, index) => index
-          );
-
-    const countsToTry = shuffleArray(possibleCounts);
-
-    for (const count of countsToTry) {
-      const subsets = buildSubsets(candidatesForIncorrect, count);
-      const subsetsToTry = shuffleArray(subsets);
-
-      for (const subset of subsetsToTry) {
-        const incorrectIds = new Set(subset.map((word) => word.id));
-        const pairs: GetAPairPair[] = [];
-        const usedTranslations = new Set<string>();
-        let failed = false;
-
-        // Assign correct pairs first to reserve their translations
-        for (const word of selectedWords) {
-          if (incorrectIds.has(word.id)) {
-            continue;
-          }
-
-          const translation = assignments.get(word.id);
-          if (!translation || usedTranslations.has(translation)) {
-            failed = true;
-            break;
-          }
-
-          usedTranslations.add(translation);
-          pairs.push({
-            id: word.id,
-            term: word.term,
-            translation,
-            isCorrect: true,
-          });
-        }
-
-        if (failed) {
-          continue;
-        }
-
-        for (const word of subset) {
-          const wrongCandidates = shuffleArray(
-            getWrongCandidates(word).filter(
-              (translation) => !usedTranslations.has(translation)
-            )
-          );
-
-          const chosenWrong = wrongCandidates[0];
-
-          if (!chosenWrong) {
-            failed = true;
-            break;
-          }
-
-          usedTranslations.add(chosenWrong);
-          pairs.push({
-            id: word.id,
-            term: word.term,
-            translation: chosenWrong,
-            isCorrect: false,
-          });
-        }
-
-        if (failed) {
-          continue;
-        }
-
-        if (pairs.length === selectedWords.length) {
-          return { pairs: shuffleArray(pairs) };
-        }
-      }
-    }
-
-    return null;
-  }, [canStartGetAPair, sanitizedWords, levelTranslations]);
+    return generateGetAPairRound(sanitizedWords, levelTranslations);
+  }, [canStartGetAPair, levelTranslations, sanitizedWords]);
 
   // Input a Letter round generator
   const createInputALetterRound = useCallback((): InputALetterRound | null => {
@@ -549,60 +309,21 @@ export default function BrainScreen() {
       return null;
     }
 
-    const eligibleWords = sanitizedWords.filter(
-      (word) => getLetterIndices(word.term).length > 0
-    );
-
-    if (eligibleWords.length < 3) {
-      return null;
-    }
-
-    const selected = shuffleArray(eligibleWords).slice(0, 3);
-    const words: InputALetterWord[] = [];
-    const letters: string[] = [];
-
-    for (const word of selected) {
-      const characters = Array.from(word.term);
-      const indices = getLetterIndices(word.term);
-
-      if (indices.length === 0) {
-        continue;
-      }
-
-      const missingCount =
-        indices.length >= 6 ? 3 : indices.length >= 4 ? 2 : 1;
-
-      const chosen = shuffleArray(indices)
-        .slice(0, missingCount)
-        .sort((a, b) => a - b);
-
-      if (chosen.length === 0) {
-        continue;
-      }
-
-      chosen.forEach((index) => {
-        const letter = characters[index];
-        if (letter) {
-          letters.push(letter);
-        }
-      });
-
-      words.push({
-        id: word.id,
-        term: word.term,
-        missingIndices: chosen,
-      });
-    }
-
-    if (words.length < 3 || letters.length === 0) {
-      return null;
-    }
-
-    return {
-      words,
-      letters: shuffleArray(letters),
-    };
+    return generateInputALetterRound(sanitizedWords);
   }, [canStartInputALetter, sanitizedWords]);
+
+  const handleMemoryBoardSelect = useCallback(
+    (size: MemoryBoardSize) => {
+      if (size !== memoryBoardSize) {
+        void setMemoryBoardSize(size);
+      }
+    },
+    [memoryBoardSize, setMemoryBoardSize]
+  );
+
+  const handleStartMemoryGame = useCallback(() => {
+    router.push("/review/minigames/memorygame");
+  }, [router]);
 
   // Choose One navigation handler
   const handleStartChooseOne = useCallback(() => {
@@ -667,6 +388,25 @@ export default function BrainScreen() {
     });
   }, [createInputALetterRound, router]);
 
+  const handleOpenTable = useCallback(() => {
+    if (sanitizedWords.length === 0) {
+      return;
+    }
+
+    const payload = sanitizedWords.map((word) => ({
+      id: word.id,
+      term: word.term,
+      translations: word.translations,
+    }));
+
+    router.push({
+      pathname: "/review/table",
+      params: {
+        words: encodeURIComponent(JSON.stringify(payload)),
+      },
+    });
+  }, [router, sanitizedWords]);
+
   return (
     <View style={styles.container}>
       <Image
@@ -683,26 +423,83 @@ export default function BrainScreen() {
           </Text>
           <MyButton
             text="Start"
-            onPress={() => {}}
-            disabled={words.length === 0 || !!error}
+            onPress={handleStartSession}
+            disabled={
+              !!error ||
+              loading ||
+              sanitizedWords.length < MIN_SESSION_WORDS
+            }
+          />
+          <View style={styles.memorySection}>
+            <Text style={styles.memoryTitle}>Memory game</Text>
+            <Text style={styles.memorySubtitle}>
+              Wybierz układ planszy i rozpocznij grę.
+            </Text>
+            <View style={styles.memoryOptions}>
+              {MEMORY_BOARD_SIZE_ORDER.map((size) => {
+                const isActive = memoryBoardSize === size;
+                const layout = MEMORY_BOARD_LAYOUTS[size];
+                const cardsCount = layout.columns * layout.rows;
+                return (
+                  <TouchableOpacity
+                    key={size}
+                    style={[
+                      styles.memoryOption,
+                      isActive && styles.memoryOptionActive,
+                    ]}
+                    activeOpacity={0.8}
+                    onPress={() => handleMemoryBoardSelect(size)}
+                  >
+                    <Text
+                      style={[
+                        styles.memoryOptionLabel,
+                        isActive && styles.memoryOptionLabelActive,
+                      ]}
+                    >
+                      {MEMORY_BOARD_SIZE_LABELS[size]}
+                    </Text>
+                    <Text
+                      style={[
+                        styles.memoryOptionMeta,
+                        isActive && styles.memoryOptionMetaActive,
+                      ]}
+                    >
+                      {cardsCount} kart
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+            <MyButton
+              text="Memory game"
+              onPress={handleStartMemoryGame}
+              disabled={!!error || loading}
+              width={120}
+            />
+          </View>
+          <MyButton
+            text="Tablica"
+            onPress={handleOpenTable}
+            disabled={!!error || loading || sanitizedWords.length === 0}
+            width={120}
           />
           <MyButton
             text="Choose one"
             onPress={handleStartChooseOne}
             disabled={!!error || loading || !canStartChooseOne}
-            width={180}
+            width={120}
           />
           <MyButton
             text="Input a letter"
             onPress={handleStartInputALetter}
             disabled={!!error || loading || !canStartInputALetter}
-            width={180}
+            width={120}
           />
           <MyButton
             text="Get a pair"
             onPress={handleStartGetAPair}
             disabled={!!error || loading || !canStartGetAPair}
-            width={180}
+            width={120}
           />
         </>
       )}
