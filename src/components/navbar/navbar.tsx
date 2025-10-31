@@ -1,5 +1,11 @@
-import { type ReactNode, useEffect, useMemo, useState } from "react";
-import { useRouter } from "expo-router";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useMemo,
+  useState,
+} from "react";
+import { usePathname, useRouter } from "expo-router";
 import {
   Platform,
   Pressable,
@@ -13,7 +19,10 @@ import { Image } from "expo-image";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import {
+  countDueCustomReviews,
+  countDueReviewsByLevel,
   getCustomCourseById,
+  getCustomCoursesWithCardCounts,
   type CustomCourseRecord,
 } from "@/src/db/sqlite/db";
 import { getCourseIconById } from "@/src/constants/customCourse";
@@ -21,6 +30,7 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import type { LanguageCourse } from "@/src/types/course";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
@@ -28,30 +38,21 @@ import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const logo = require("@/assets/illustrations/navbar/logo.png");
 
-const MAX_NAV_COURSE_NAME_LENGTH = 13;
-
-const truncateCourseName = (name: string): string => {
-  if (!name) {
-    return "";
-  }
-  if (name.length <= MAX_NAV_COURSE_NAME_LENGTH) {
-    return name;
-  }
-  return `${name.slice(0, MAX_NAV_COURSE_NAME_LENGTH - 1)}…`;
-};
-
 type NavbarProps = {
   children?: ReactNode;
 };
 
 export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     toggleTheme,
     activeCustomCourseId,
     selectedLevel,
     activeCourse,
     colors,
+    courses,
+    pinnedOfficialCourseIds,
   } = useSettings();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
@@ -61,6 +62,7 @@ export default function Navbar({ children }: NavbarProps) {
   const bottomPad = Math.max(insets.bottom, 12);
   const [customCourse, setCustomCourse] =
     useState<CustomCourseRecord | null>(null);
+  const [dueReviewCount, setDueReviewCount] = useState<number>(0);
   type DisplayCourse =
     | { kind: "custom"; course: CustomCourseRecord }
     | { kind: "builtin"; course: LanguageCourse };
@@ -170,9 +172,75 @@ export default function Navbar({ children }: NavbarProps) {
   const customCourseIconName = courseIconMeta?.name ?? "grid-outline";
   const customCourseIconColor =
     displayedCustomCourse?.iconColor ?? colors.headline;
-  const customCourseDisplayName = displayedCustomCourse
-    ? truncateCourseName(displayedCustomCourse.name)
-    : "";
+  const refreshDueReviewCount = useCallback(async () => {
+    const now = Date.now();
+    try {
+      let total = 0;
+
+      const builtinCounts = await Promise.all(
+        courses.map(async (course) => {
+          const srcId = course.sourceLangId;
+          const tgtId = course.targetLangId;
+          if (srcId == null || tgtId == null) {
+            return 0;
+          }
+          try {
+            const counts = await countDueReviewsByLevel(srcId, tgtId, now);
+            if (course.level) {
+              return counts[course.level] ?? 0;
+            }
+            let sum = 0;
+            for (const value of Object.values(counts)) {
+              sum += value | 0;
+            }
+            return sum;
+          } catch (error) {
+            console.warn(
+              `[Navbar] Failed to count reviews for ${srcId}-${tgtId}`,
+              error
+            );
+            return 0;
+          }
+        })
+      );
+      for (const count of builtinCounts) {
+        total += count;
+      }
+
+      const customRows = await getCustomCoursesWithCardCounts();
+      const officialIds = new Set(pinnedOfficialCourseIds);
+      const customCoursesToCount = customRows.filter((course) => {
+        if (!course.reviewsEnabled) {
+          return false;
+        }
+        if (course.isOfficial) {
+          return officialIds.has(course.id);
+        }
+        return true;
+      });
+      const customCounts = await Promise.all(
+        customCoursesToCount.map(async (course) => {
+          try {
+            return await countDueCustomReviews(course.id, now);
+          } catch (error) {
+            console.warn(
+              `[Navbar] Failed to count custom reviews for course ${course.id}`,
+              error
+            );
+            return 0;
+          }
+        })
+      );
+      for (const count of customCounts) {
+        total += count;
+      }
+
+      setDueReviewCount(total);
+    } catch (error) {
+      console.warn("[Navbar] Failed to refresh review count", error);
+      setDueReviewCount(0);
+    }
+  }, [courses, pinnedOfficialCourseIds]);
 
   const courseGraphic = displayedCustomCourse ? (
       <View style={styles.customCourseIconWrapper}>
@@ -220,6 +288,16 @@ export default function Navbar({ children }: NavbarProps) {
 
     router.push("/level");
   };
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      if (cancelled) return;
+      await refreshDueReviewCount();
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [refreshDueReviewCount, pathname]);
 
   const handleReviewPress = () => {
     router.push("/review");
@@ -228,6 +306,12 @@ export default function Navbar({ children }: NavbarProps) {
   const handleSettingsPress = () => {
     router.push("/settings");
   };
+  const reviewBadgeBackground =
+    dueReviewCount > 0 ? colors.my_red : colors.my_green;
+  const reviewBadgeTextColor =
+    dueReviewCount > 0 ? colors.lightbg : colors.darkbg;
+  const formattedReviewCount =
+    dueReviewCount > 999 ? "999+" : String(dueReviewCount);
 
   return (
     <View style={styles.layout}>
@@ -242,14 +326,11 @@ export default function Navbar({ children }: NavbarProps) {
             >
               {courseGraphic}
               {displayedCustomCourse ? (
-                <Text
-                  style={styles.courseName}
-                  numberOfLines={1}
-                  ellipsizeMode="tail"
-                  allowFontScaling
-                >
-                  {customCourseDisplayName}
-                </Text>
+                <CourseTitleMarquee
+                  text={displayedCustomCourse.name}
+                  containerStyle={styles.courseName}
+                  textStyle={styles.courseNameText}
+                />
               ) : null}
               {displayedBuiltinCourse && selectedLevel ? (
                 <Text style={styles.courseLevel} allowFontScaling>
@@ -317,11 +398,29 @@ export default function Navbar({ children }: NavbarProps) {
             accessibilityRole="button"
             accessibilityLabel="Przejdź do powtórek"
           >
-            <FontAwesome5
-              name="hourglass-end"
-              size={24}
-              color={colors.headline}
-            />
+            <View style={styles.reviewIconWrapper}>
+              <FontAwesome5
+                name="hourglass-end"
+                size={24}
+                color={colors.headline}
+              />
+              <View
+                style={[
+                  styles.reviewBadge,
+                  { backgroundColor: reviewBadgeBackground },
+                ]}
+              >
+                <Text
+                  style={[
+                    styles.reviewBadgeText,
+                    { color: reviewBadgeTextColor },
+                  ]}
+                  allowFontScaling
+                >
+                  {formattedReviewCount}
+                </Text>
+              </View>
+            </View>
           </Pressable>
 
           <Pressable

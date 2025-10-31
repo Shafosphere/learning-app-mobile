@@ -197,7 +197,6 @@ export default function GetaPair() {
     const evaluation = buildEvaluation(selectedSet);
 
     const success =
-      selectedSet.size > 0 &&
       selectedSet.size === incorrectIds.size &&
       evaluation.every((entry) => entry.isCorrect);
 
@@ -210,13 +209,6 @@ export default function GetaPair() {
       message,
     });
     setLastEvaluation(evaluation);
-  };
-
-  const handleRetry = () => {
-    setResult(null);
-    setSelectedIds([]);
-    setHasSubmittedResult(false);
-    setLastEvaluation(null);
   };
 
   const handleContinue = useCallback(() => {
@@ -285,24 +277,28 @@ export default function GetaPair() {
   }
 
   const showEvaluation = result !== null;
+  const shouldShowCheckButton = !isSessionMode || !showEvaluation;
+  const shouldShowContinueButton = isSessionMode && showEvaluation;
 
   return (
     <MinigameLayout
       contentStyle={styles.container}
       footerContent={
         <View style={styles.actionsContainer}>
-          <MyButton
-            text="Sprawdź"
-            onPress={evaluateSelection}
-            disabled={showEvaluation || selectedIds.length === 0}
-            width={120}
-            color="my_green"
-          />
-          {isSessionMode ? (
+          {shouldShowCheckButton ? (
+            <MyButton
+              text="Sprawdź"
+              onPress={evaluateSelection}
+              disabled={showEvaluation}
+              width={120}
+              color="my_green"
+            />
+          ) : null}
+          {shouldShowContinueButton ? (
             <MyButton
               text="Dalej"
               onPress={handleContinue}
-              disabled={!showEvaluation || hasSubmittedResult}
+              disabled={hasSubmittedResult}
               width={120}
               color="my_green"
               accessibilityLabel="Przejdź do kolejnej minigry"

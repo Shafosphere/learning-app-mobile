@@ -16,21 +16,55 @@ type AutoflowParams = {
 
 const SWITCH_STICKY_MS = 1500;
 
-const priorityOrder = [...boxOrder].reverse();
+const nonIntroOrder = boxOrder.filter((box) => box !== "boxZero");
+
+const SMALL_STACK_THRESHOLD = 5;
+
+function pickFromOrder(
+  boxes: BoxesState,
+  order: Array<keyof BoxesState>
+): keyof BoxesState {
+  const counts = order.map((box) => boxes[box]?.length ?? 0);
+  const maxCount = Math.max(...counts);
+
+  if (maxCount <= 0) {
+    return order[0];
+  }
+
+  for (const box of order) {
+    if ((boxes[box]?.length ?? 0) === maxCount) {
+      return box;
+    }
+  }
+
+  return order[0];
+}
 
 function pickPriorityBox(
   boxes: BoxesState,
   boxZeroEnabled: boolean
 ): keyof BoxesState | null {
-  for (const candidate of priorityOrder) {
-    if (!boxZeroEnabled && candidate === "boxZero") {
-      continue;
+  if (boxZeroEnabled) {
+    const allCounts = boxOrder.map((box) => boxes[box]?.length ?? 0);
+    const allSmall = allCounts.every(
+      (count) => count <= SMALL_STACK_THRESHOLD
+    );
+    if (allSmall) {
+      return "boxZero";
     }
-    if ((boxes[candidate] ?? []).length >= 10) {
-      return candidate;
+
+    const maxOther = Math.max(
+      ...nonIntroOrder.map((box) => boxes[box]?.length ?? 0)
+    );
+    const boxZeroCount = boxes.boxZero?.length ?? 0;
+    if (boxZeroCount >= maxOther) {
+      return "boxZero";
     }
+
+    return pickFromOrder(boxes, nonIntroOrder);
   }
-  return null;
+
+  return pickFromOrder(boxes, nonIntroOrder);
 }
 
 export function useFlashcardsAutoflow({

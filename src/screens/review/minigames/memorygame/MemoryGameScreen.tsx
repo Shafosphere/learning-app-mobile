@@ -149,7 +149,7 @@ export default function MemoryGameScreen() {
 
   const [deck, setDeck] = useState<MemoryCard[]>([]);
   const [loading, setLoading] = useState(false);
-  const [_selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [, setSelectedIds] = useState<string[]>([]);
   const [isResolving, setIsResolving] = useState(false);
   const resolveTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const resultDelayTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -426,23 +426,6 @@ export default function MemoryGameScreen() {
     sessionStep,
   ]);
 
-  const handleRestart = useCallback(() => {
-    if (isSessionMode && sessionStep) {
-      const nextDeck = buildSessionDeck(sessionStep.words);
-      resetGameState(nextDeck);
-      setLoading(false);
-      return;
-    }
-
-    void loadWords();
-  }, [
-    buildSessionDeck,
-    isSessionMode,
-    loadWords,
-    resetGameState,
-    sessionStep,
-  ]);
-
   const handleContinue = useCallback(() => {
     if (!isSessionMode || !sessionStep || !sessionId) {
       router.replace("/review/brain");
@@ -552,14 +535,6 @@ export default function MemoryGameScreen() {
       contentStyle={styles.container}
       footerContent={
         <View style={styles.actionsContainer}>
-          <MyButton
-            text="Odśwież planszę"
-            color="my_green"
-            onPress={handleRestart}
-            disabled={loading}
-            width={140}
-            accessibilityLabel="Losuj nowe pary słówek"
-          />
           {isSessionMode ? (
             <MyButton
               text="Dalej"

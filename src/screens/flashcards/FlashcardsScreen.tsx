@@ -47,7 +47,6 @@ export default function FlashcardsScreen() {
     addUsedWordIds,
     removeUsedWordIds,
     // progress,
-    totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeCourse?.sourceLangId ?? 0,
     targetLangId: activeCourse?.targetLangId ?? 0,

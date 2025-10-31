@@ -1,7 +1,8 @@
-import React, { createContext, useContext } from "react";
+import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { ACHIEVEMENTS } from "../constants/achievements";
 import { useSettings } from "./SettingsContext";
+import { countTotalLearnedWordsGlobal } from "../db/sqlite/db";
 
 export type AchievementState = {
   unlockedAt: string;
@@ -44,6 +45,9 @@ export const LearningStatsProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const { dailyGoal } = useSettings();
+  const [dbKnownWordsCount, setDbKnownWordsCount] = useState<number | null>(
+    null
+  );
   const [knownWords, setKnownWords] = usePersistedState<KnownWordsState>(
     "knownWords",
     { ids: [], lastLearnedDate: "" }
@@ -105,36 +109,72 @@ export const LearningStatsProvider: React.FC<{
     void setDailyProgress({ date: today, count: nextDailyCount });
 
     const alreadyKnown = knownWords.ids.includes(wordId);
+    let nextKnownWordsTotal = knownWords.ids.length;
+
     if (!alreadyKnown) {
       const nextIds = [wordId, ...knownWords.ids];
+      nextKnownWordsTotal = nextIds.length;
       void setKnownWords({
         ids: nextIds,
         lastLearnedDate: today,
       });
-      unlockAchievements({
-        nextKnownWords: nextIds.length,
-        nextDailyCount,
-      });
-      return;
-    }
-
-    if (knownWords.lastLearnedDate !== today) {
-      void setKnownWords({
-        ids: knownWords.ids,
-        lastLearnedDate: today,
-      });
+      setDbKnownWordsCount((prev) =>
+        Math.max(prev ?? 0, nextKnownWordsTotal)
+      );
+    } else {
+      if (knownWords.lastLearnedDate !== today) {
+        void setKnownWords({
+          ids: knownWords.ids,
+          lastLearnedDate: today,
+        });
+      }
     }
 
     unlockAchievements({
-      nextKnownWords: knownWords.ids.length,
+      nextKnownWords: nextKnownWordsTotal,
       nextDailyCount,
     });
+
+    void countTotalLearnedWordsGlobal()
+      .then((total) => {
+        setDbKnownWordsCount(total);
+      })
+      .catch((error) => {
+        console.log("Nie udało się odczytać liczby opanowanych słówek:", error);
+      });
   };
+
+  useEffect(() => {
+    let mounted = true;
+    void countTotalLearnedWordsGlobal()
+      .then((total) => {
+        if (mounted) {
+          setDbKnownWordsCount(total);
+        }
+      })
+      .catch((error) => {
+        if (mounted) {
+          console.log(
+            "Nie udało się wczytać początkowej liczby opanowanych słówek:",
+            error
+          );
+          setDbKnownWordsCount(null);
+        }
+      });
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  const knownWordsCount = Math.max(
+    dbKnownWordsCount ?? 0,
+    knownWords.ids.length
+  );
 
   return (
     <LearningStatsContext.Provider
       value={{
-        knownWordsCount: knownWords.ids.length,
+        knownWordsCount,
         lastKnownWordDate: knownWords.lastLearnedDate,
         dailyProgressCount: dailyProgress.count,
         dailyProgressDate: dailyProgress.date,

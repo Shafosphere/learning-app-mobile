@@ -1,4 +1,4 @@
-import { Pressable, Text, TouchableOpacity, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { useEffect, useState } from "react";
 import { useStyles } from "./LevelScreen-styles";
 import { useRouter } from "expo-router";
@@ -6,11 +6,12 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CEFRLevel } from "@/src/types/language";
 import { countLearnedWordsByLevel, getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
+const LEVELS: readonly CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+
 export default function LevelScreen() {
   const { setLevel, activeCourse } = useSettings();
   const styles = useStyles();
   const router = useRouter();
-  const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
   const [progressMap, setProgressMap] = useState<Record<CEFRLevel, number>>(
     {} as Record<CEFRLevel, number>
@@ -30,7 +31,7 @@ export default function LevelScreen() {
         const [learnedCounts, totals] = await Promise.all([
           countLearnedWordsByLevel(srcId, tgtId),
           Promise.all(
-            levels.map(async (lvl) => [
+            LEVELS.map(async (lvl) => [
               lvl,
               await getTotalWordsForLevel(srcId, lvl),
             ] as const)
@@ -44,7 +45,7 @@ export default function LevelScreen() {
           return acc;
         }, {} as Record<CEFRLevel, number>);
         setProgressMap(map);
-      } catch (_) {
+      } catch {
         if (mounted) setProgressMap({} as Record<CEFRLevel, number>);
       }
     })();
@@ -56,7 +57,7 @@ export default function LevelScreen() {
   return (
     <View style={styles.container}>
       <View style={styles.minicontainer}>
-        {levels.map((item, index) => {
+        {LEVELS.map((item, index) => {
           const progress = progressMap[item] ?? 0;
 
           return (

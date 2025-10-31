@@ -20,7 +20,7 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
-import { type ReactNode, useEffect, useMemo, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 
@@ -155,16 +155,10 @@ export default function Flashcards() {
     );
   }, [boxes]);
 
-  async function downloadData(): Promise<void> {
+  const downloadData = useCallback(async (): Promise<void> => {
     if (!customCards.length) return;
 
-    const existingIds = new Set<number>();
-    for (const list of Object.values(boxes)) {
-      for (const item of list) existingIds.add(item.id);
-    }
-    for (const item of learned) existingIds.add(item.id);
-
-    const remaining = customCards.filter((card) => !existingIds.has(card.id));
+    const remaining = customCards.filter((card) => !trackedIds.has(card.id));
     if (remaining.length === 0) return;
 
     const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
@@ -182,7 +176,14 @@ export default function Flashcards() {
           }
     );
     addUsedWordIds(nextBatch.map((card) => card.id));
-  }
+  }, [
+    addUsedWordIds,
+    boxZeroEnabled,
+    customCards,
+    flashcardsBatchSize,
+    setBoxes,
+    trackedIds,
+  ]);
 
   useEffect(() => {
     if (boxZeroEnabled) return;
@@ -295,6 +296,7 @@ export default function Flashcards() {
     totalCardsInBoxes,
     allCardsDistributed,
     customCards,
+    downloadData,
   ]);
 
   useEffect(() => {

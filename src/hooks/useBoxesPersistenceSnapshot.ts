@@ -213,7 +213,7 @@ export function useBoxesPersistenceSnapshot(params: {
     return () => {
       mounted = false;
     };
-  }, [storageKey]);
+  }, [storageKey, initialWords]);
 
   // Fetch total words for current level/language to compute progress
   useEffect(() => {
@@ -226,7 +226,7 @@ export function useBoxesPersistenceSnapshot(params: {
         }
         const total = await getTotalWordsForLevel(sourceLangId, level);
         if (mounted) setTotalWordsForLevel(total || 0);
-      } catch (_) {
+      } catch {
         if (mounted) setTotalWordsForLevel(0);
       }
     })();

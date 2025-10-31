@@ -197,6 +197,18 @@ export default function InputALetter() {
     }
 
     const step = getSessionStep(sessionId, stepId);
+    if (!step) {
+      console.warn("[InputALetter] Session step not found", {
+        sessionId,
+        stepId,
+      });
+    } else if (step.type !== "inputaletter") {
+      console.warn("[InputALetter] Session step has unexpected type", {
+        sessionId,
+        stepId,
+        type: step.type,
+      });
+    }
     return step && step.type === "inputaletter" ? step : null;
   }, [sessionId, stepId]);
 
@@ -204,6 +216,16 @@ export default function InputALetter() {
 
   const { words, letters } = useMemo(() => {
     if (sessionStep) {
+      console.log("[InputALetter] Loaded session round data", {
+        sessionId,
+        stepId,
+        words: sessionStep.round.words.map((word) => ({
+          id: word.id,
+          term: word.term,
+          missingIndices: word.missingIndices,
+        })),
+        letters: sessionStep.round.letters,
+      });
       return {
         words: sessionStep.round.words,
         letters: sessionStep.round.letters,
@@ -221,7 +243,7 @@ export default function InputALetter() {
         typeof lettersParam === "string" ? lettersParam : undefined
       ),
     };
-  }, [params.letters, params.words, sessionStep]);
+  }, [params.letters, params.words, sessionId, sessionStep, stepId]);
 
   const [slots, setSlots] = useState<SlotState[][]>(() =>
     buildInitialSlots(words)
@@ -229,11 +251,8 @@ export default function InputALetter() {
   const [letterStates, setLetterStates] = useState<LetterState[]>(() =>
     buildLetterStates(letters)
   );
-  const [activeSlot, setActiveSlot] = useState<ActiveSlot | null>(() =>
-    findFirstEmptySlot(buildInitialSlots(words))
-  );
+  const [activeSlot, setActiveSlot] = useState<ActiveSlot | null>(() => null);
   const [checked, setChecked] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
   const [lastEvaluation, setLastEvaluation] = useState<
     { wordId: number; isCorrect: boolean }[] | null
@@ -243,9 +262,8 @@ export default function InputALetter() {
     const initialSlots = buildInitialSlots(words);
     setSlots(initialSlots);
     setLetterStates(buildLetterStates(letters));
-    setActiveSlot(findFirstEmptySlot(initialSlots));
+    setActiveSlot(null);
     setChecked(false);
-    setIsSuccess(false);
     setHasSubmittedResult(false);
     setLastEvaluation(null);
   }, [letters, words]);
@@ -289,6 +307,36 @@ export default function InputALetter() {
   const hasValidData =
     words.length === 3 && totalSlots > 0 && letters.length >= totalSlots;
 
+  useEffect(() => {
+    console.log("[InputALetter] Round state snapshot", {
+      sessionId,
+      stepId,
+      wordsCount: words.length,
+      totalSlots,
+      lettersCount: letters.length,
+      isSessionMode,
+    });
+    if (!hasValidData) {
+      console.warn("[InputALetter] Invalid round data detected", {
+        sessionId,
+        stepId,
+        words,
+        letters,
+        totalSlots,
+      });
+    }
+  }, [
+    hasValidData,
+    isSessionMode,
+    letters,
+    letters.length,
+    sessionId,
+    stepId,
+    totalSlots,
+    words,
+    words.length,
+  ]);
+
   const allSlotsFilled = totalSlots > 0 && filledSlots >= totalSlots;
 
   const handleSelectSlot = useCallback(
@@ -304,27 +352,26 @@ export default function InputALetter() {
           )
         );
 
-      setSlots((prev) =>
-        prev.map((wordSlots, wIdx) =>
-          wIdx === wordIndex
-            ? wordSlots.map((slot, sIdx) =>
-                sIdx === slotIndex
-                  ? { letter: null, letterPoolIndex: null }
-                  : slot
-              )
-            : wordSlots
-        )
-      );
-    }
+        setSlots((prev) =>
+          prev.map((wordSlots, wIdx) =>
+            wIdx === wordIndex
+              ? wordSlots.map((slot, sIdx) =>
+                  sIdx === slotIndex
+                    ? { letter: null, letterPoolIndex: null }
+                    : slot
+                )
+              : wordSlots
+          )
+        );
+      }
 
-    setActiveSlot({ wordIndex, slotIndex });
-    setChecked(false);
-    setIsSuccess(false);
-    setHasSubmittedResult(false);
-    setLastEvaluation(null);
-  },
-  [slots]
-);
+      setActiveSlot({ wordIndex, slotIndex });
+      setChecked(false);
+      setHasSubmittedResult(false);
+      setLastEvaluation(null);
+    },
+    [slots]
+  );
 
   const findNextEmptySlot = useCallback(
     (matrix: SlotState[][]): ActiveSlot | null => findFirstEmptySlot(matrix),
@@ -386,7 +433,6 @@ export default function InputALetter() {
       setLetterStates(updatedLetterStates);
       setSlots(updatedSlots);
       setChecked(false);
-      setIsSuccess(false);
       setHasSubmittedResult(false);
       setLastEvaluation(null);
 
@@ -410,10 +456,7 @@ export default function InputALetter() {
     }
 
     const evaluation = evaluateWords();
-    const success = evaluation.every((entry) => entry.isCorrect);
-
     setLastEvaluation(evaluation);
-    setIsSuccess(success);
     setChecked(true);
   }, [allSlotsFilled, evaluateWords, hasValidData]);
 
@@ -480,26 +523,31 @@ export default function InputALetter() {
     );
   }
 
+  const shouldShowCheckButton = !isSessionMode || !checked;
+  const shouldShowContinueButton = isSessionMode && checked;
+
   return (
     <MinigameLayout
       contentStyle={styles.container}
       footerContent={
         <View style={styles.actionsContainer}>
-          <MyButton
-            text="Sprawdź"
-            onPress={handleCheck}
-            width={120}
-            accessibilityLabel="Sprawdź poprawność wpisanych liter"
-            color="my_green"
-          />
-          {isSessionMode ? (
+          {shouldShowCheckButton ? (
+            <MyButton
+              text="Sprawdź"
+              onPress={handleCheck}
+              width={120}
+              accessibilityLabel="Sprawdź poprawność wpisanych liter"
+              color="my_green"
+            />
+          ) : null}
+          {shouldShowContinueButton ? (
             <MyButton
               text="Dalej"
               onPress={handleContinue}
               width={120}
               accessibilityLabel="Przejdź do kolejnej minigry"
               color="my_green"
-              disabled={!checked || hasSubmittedResult}
+              disabled={hasSubmittedResult}
             />
           ) : null}
         </View>

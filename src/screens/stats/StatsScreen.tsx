@@ -41,7 +41,7 @@ export default function StatsScreen() {
           .sort((a, b) => a.date.localeCompare(b.date));
         setHeatmapData(arr);
         setHourly(hours);
-      } catch (e) {
+      } catch {
         if (mounted) {
           setHeatmapData([]);
           setHourly(new Array(24).fill(0));

@@ -40,6 +40,10 @@ type SelectedCourse =
   | { type: "builtin"; index: number }
   | { type: "custom"; id: number };
 
+const LANGUAGE_LABELS: Record<string, Record<string, string>> = {
+  pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
+};
+
 export default function CourseActivateScreen() {
   const {
     courses,
@@ -52,10 +56,6 @@ export default function CourseActivateScreen() {
     setLevel,
     pinnedOfficialCourseIds,
   } = useSettings();
-
-  const lang: Record<string, Record<string, string>> = {
-    pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
-  };
 
   const [committedCourse, setCommittedCourse] = useState<SelectedCourse | null>(
     null
@@ -259,7 +259,8 @@ export default function CourseActivateScreen() {
   const handleEditBuiltinCourse = useCallback(
     (course: LanguageCourse) => {
       const baseLabel =
-        lang[course.targetLang]?.[course.sourceLang] ?? course.sourceLang;
+        LANGUAGE_LABELS[course.targetLang]?.[course.sourceLang] ??
+        course.sourceLang;
       const displayName = `${baseLabel}${
         course.level ? ` ${course.level}` : ""
       }`;
@@ -275,7 +276,7 @@ export default function CourseActivateScreen() {
       }
       router.push(`/editcourse?${params.join("&")}`);
     },
-    [lang, router]
+    [router]
   );
 
   return (
@@ -361,9 +362,14 @@ export default function CourseActivateScreen() {
                                 const sourceFlag = getFlagSource(
                                   item.sourceLang
                                 );
+                                const languageLabel =
+                                  item.targetLang && item.sourceLang
+                                    ? LANGUAGE_LABELS[item.targetLang]?.[
+                                        item.sourceLang
+                                      ]
+                                    : undefined;
                                 const displayTitle = `${
-                                  lang[item.targetLang]?.[item.sourceLang] ??
-                                  item.sourceLang
+                                  languageLabel ?? item.sourceLang ?? ""
                                 }${item.level ? ` ${item.level}` : ""}`;
 
                                 return (

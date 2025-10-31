@@ -378,11 +378,15 @@ export const buildInputALetterRound = (
   rng: () => number = Math.random
 ): InputALetterRound | null => {
   if (selectedWords.length < 3) {
+    console.warn("[Brain] Input a letter: insufficient selected words", {
+      selectedCount: selectedWords.length,
+    });
     return null;
   }
 
   const words: InputALetterWord[] = [];
-  const lettersSet = new Set<string>();
+  const lettersBag: string[] = [];
+  let totalSlots = 0;
 
   selectedWords.forEach((word, index) => {
     const indices = getLetterIndices(word.term);
@@ -398,6 +402,8 @@ export const buildInputALetterRound = (
       return;
     }
 
+    totalSlots += missingIndices.length;
+
     words.push({
       id: word.id,
       term: word.term,
@@ -407,15 +413,34 @@ export const buildInputALetterRound = (
     missingIndices.forEach((position) => {
       const char = Array.from(word.term)[position] ?? "";
       if (char) {
-        lettersSet.add(char);
+        lettersBag.push(char);
       }
     });
   });
 
-  const letters = shuffleArray(Array.from(lettersSet), rng);
+  const letters = shuffleArray([...lettersBag], rng);
 
   if (words.length < 3 || letters.length === 0) {
+    console.warn("[Brain] Input a letter round generation failed", {
+      wordsCount: words.length,
+      lettersCount: letters.length,
+      selectedWordIds: selectedWords.map((word) => word.id),
+    });
     return null;
+  }
+
+  if (letters.length < totalSlots) {
+    console.warn("[Brain] Input a letter round has fewer letters than slots", {
+      totalSlots,
+      lettersCount: letters.length,
+      letters,
+      words: words.map((word) => ({
+        id: word.id,
+        term: word.term,
+        missingIndices: word.missingIndices,
+      })),
+      selectedWordIds: selectedWords.map((word) => word.id),
+    });
   }
 
   return {

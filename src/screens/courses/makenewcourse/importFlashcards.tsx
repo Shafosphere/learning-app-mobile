@@ -23,6 +23,7 @@ import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./importFlashcards-styles";
+import sampleCsvAsset from "@/assets/data/import.csv";
 
 type AddMode = "csv" | "manual";
 
@@ -144,7 +145,7 @@ export default function CustomCourseContentScreen() {
   };
 
   const readSampleCsv = async () => {
-    const asset = Asset.fromModule(require("@/assets/data/import.csv"));
+    const asset = Asset.fromModule(sampleCsvAsset);
     await asset.downloadAsync();
     const uri = asset.localUri ?? asset.uri;
     return FileSystem.readAsStringAsync(uri, {

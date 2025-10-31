@@ -99,8 +99,16 @@ export const buildSessionTemplate = ({
   levelTranslations,
 }: BuildSessionParams): SessionBuildResult => {
   const sanitized = uniqueById(sanitizedWords);
+  console.log("[Brain] Starting session build", {
+    received: sanitizedWords.length,
+    unique: sanitized.length,
+  });
 
   if (sanitized.length < MIN_SESSION_WORDS) {
+    console.warn("[Brain] Session build aborted: insufficient words", {
+      required: MIN_SESSION_WORDS,
+      available: sanitized.length,
+    });
     return {
       ok: false,
       message: "Potrzebujemy co najmniej 10 słówek, aby rozpocząć sesję gier.",
@@ -112,6 +120,10 @@ export const buildSessionTemplate = ({
   );
 
   if (inputEligible.length < 3) {
+    console.warn("[Brain] Session build aborted: not enough input-eligible words", {
+      inputEligibleCount: inputEligible.length,
+      total: sanitized.length,
+    });
     return {
       ok: false,
       message:
@@ -176,6 +188,10 @@ export const buildSessionTemplate = ({
         const inputRound = buildInputALetterRound(inputCombo);
 
         if (!inputRound) {
+          console.warn("[Brain] Failed to build Input a letter round", {
+            inputWordIds: inputCombo.map((word) => word.id),
+            inputTerms: inputCombo.map((word) => word.term),
+          });
           continue;
         }
 
@@ -218,6 +234,14 @@ export const buildSessionTemplate = ({
           words: wordSeeds,
         };
 
+        console.log("[Brain] Session template built", {
+          memoryWordIds: memoryWords.map((word) => word.id),
+          chooseWordId: chooseCandidate.id,
+          inputWordIds: inputCombo.map((word) => word.id),
+          getAPairWordIds: pairCombo.map((word) => word.id),
+          levelTranslationsCount: levelTranslations.length,
+        });
+
         return true;
       }
 
@@ -228,6 +252,10 @@ export const buildSessionTemplate = ({
   });
 
   if (!template) {
+    console.warn("[Brain] Session build failed after all combinations tried", {
+      sanitizedCount: sanitized.length,
+      inputEligibleCount: inputEligible.length,
+    });
     return {
       ok: false,
       message:

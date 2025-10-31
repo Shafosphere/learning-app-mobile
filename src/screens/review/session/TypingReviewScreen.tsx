@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, TextInput, View } from "react-native";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -44,6 +44,20 @@ function mapCustomReviewToWord(
   };
 }
 
+const formatWordText = (value?: string | null) =>
+  value && value.trim().length > 0 ? value : "";
+
+const dedupeWords = (list: WordWithTranslations[]) => {
+  const seen = new Set<number>();
+  return list.filter((item) => {
+    if (seen.has(item.id)) {
+      return false;
+    }
+    seen.add(item.id);
+    return true;
+  });
+};
+
 export default function TypingReviewScreen() {
   const styles = useStyles();
   const router = useRouter();
@@ -56,7 +70,6 @@ export default function TypingReviewScreen() {
   const [promptState, setPromptState] = useState<
     "neutral" | "correct" | "wrong"
   >("neutral");
-  const [correctAnswer, setCorrectAnswer] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
   const [carouselItems, setCarouselItems] = useState<string[]>([]);
   const [spinBusy, setSpinBusy] = useState(false);
@@ -73,41 +86,27 @@ export default function TypingReviewScreen() {
   const [lockedAfterWrong, setLockedAfterWrong] = useState(false);
   const [sessionEnded, setSessionEnded] = useState(false);
 
-  const formatWordText = (value?: string | null) =>
-    value && value.trim().length > 0 ? value : "";
-
-  const dedupeWords = (list: WordWithTranslations[]) => {
-    const seen = new Set<number>();
-    return list.filter((item) => {
-      if (seen.has(item.id)) {
-        return false;
+  const fetchDueWords = useCallback(
+    async (limit: number, nowMs: number): Promise<WordWithTranslations[]> => {
+      if (isCustomMode && activeCustomCourseId != null) {
+        const rows = await getDueCustomReviewFlashcards(
+          activeCustomCourseId,
+          limit,
+          nowMs
+        );
+        return rows.map(mapCustomReviewToWord);
       }
-      seen.add(item.id);
-      return true;
-    });
-  };
 
-  async function fetchDueWords(
-    limit: number,
-    nowMs: number
-  ): Promise<WordWithTranslations[]> {
-    if (isCustomMode && activeCustomCourseId != null) {
-      const rows = await getDueCustomReviewFlashcards(
-        activeCustomCourseId,
-        limit,
-        nowMs
-      );
-      return rows.map(mapCustomReviewToWord);
-    }
+      if (!isCustomMode && srcId && tgtId && selectedLevel) {
+        return getDueReviewWordsBatch(srcId, tgtId, selectedLevel, limit, nowMs);
+      }
 
-    if (!isCustomMode && srcId && tgtId && selectedLevel) {
-      return getDueReviewWordsBatch(srcId, tgtId, selectedLevel, limit, nowMs);
-    }
+      return [];
+    },
+    [activeCustomCourseId, isCustomMode, selectedLevel, srcId, tgtId]
+  );
 
-    return [];
-  }
-
-  async function loadNext() {
+  const loadNext = useCallback(async () => {
     if (!canRunReview) {
       setCurrent(null);
       setCarouselItems([]);
@@ -115,7 +114,6 @@ export default function TypingReviewScreen() {
       setSessionEnded(false);
       setAnswer("");
       setPromptState("neutral");
-      setCorrectAnswer(null);
       setLockedAfterWrong(false);
       setLoading(false);
       return;
@@ -135,16 +133,15 @@ export default function TypingReviewScreen() {
     } finally {
       setAnswer("");
       setPromptState("neutral");
-      setCorrectAnswer(null);
       setLoading(false);
       setLockedAfterWrong(false);
     }
-  }
+  }, [canRunReview, fetchDueWords]);
 
   useEffect(() => {
     sessionTimeRef.current = Date.now();
     void loadNext();
-  }, [srcId, tgtId, selectedLevel, activeCustomCourseId, isCustomMode]);
+  }, [loadNext]);
 
   function onSubmit() {
     if (!current || !canRunReview) return;
@@ -189,7 +186,6 @@ export default function TypingReviewScreen() {
       }, 2000);
     } else {
       setPromptState("wrong");
-      setCorrectAnswer(current.translations[0] ?? "");
     }
   }
 
@@ -199,7 +195,6 @@ export default function TypingReviewScreen() {
     setSpinBusy(true);
     setLockedAfterWrong(false);
     setPromptState("neutral");
-    setCorrectAnswer(null);
 
     const advancePromise =
       isCustomMode && activeCustomCourseId != null
@@ -248,14 +243,15 @@ export default function TypingReviewScreen() {
       }
       setAnswer("");
       setPromptState("neutral");
-      setCorrectAnswer(null);
       setLockedAfterWrong(false);
     } finally {
       setSpinBusy(false);
     }
   }
 
-  async function fetchNextCarouselWord(): Promise<WordWithTranslations | null> {
+  const fetchNextCarouselWord = useCallback(async (): Promise<
+    WordWithTranslations | null
+  > => {
     if (!canRunReview) return null;
     const batch = await fetchDueWords(5, sessionTimeRef.current);
     if (batch.length === 0) {
@@ -265,7 +261,7 @@ export default function TypingReviewScreen() {
     const exclude = new Set(carouselWordsRef.current.map((item) => item.id));
     const fresh = uniqueBatch.find((item) => !exclude.has(item.id));
     return fresh ?? null;
-  }
+  }, [canRunReview, fetchDueWords]);
 
   function spinCarousel(options?: {
     injectionWord?: WordWithTranslations | null;
@@ -281,7 +277,6 @@ export default function TypingReviewScreen() {
       setCurrent(null);
       setCarouselItems([]);
       setPromptState("neutral");
-      setCorrectAnswer(null);
       setLockedAfterWrong(false);
       return false;
     }
@@ -307,7 +302,6 @@ export default function TypingReviewScreen() {
       setCarouselItems([]);
       setSessionEnded(true);
       setPromptState("neutral");
-      setCorrectAnswer(null);
       setLockedAfterWrong(false);
       return false;
     }
@@ -334,14 +328,12 @@ export default function TypingReviewScreen() {
     const ok = current.translations.some((t) => checkSpelling(answer, t));
     if (!ok) {
       setPromptState("wrong");
-      setCorrectAnswer(current.translations[0] ?? "");
       setLockedAfterWrong(true);
       setSpinBusy(false);
       return;
     }
 
     setPromptState("correct");
-    setCorrectAnswer(null);
     setLockedAfterWrong(false);
 
     const advancePromise =

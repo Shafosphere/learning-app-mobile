@@ -194,30 +194,31 @@ export default function ChooseOne() {
     );
   }
 
-  const isSelectionCorrect =
-    hasChecked && selectedIndex !== null && selectedIndex === correctIndex;
-  const correctAnswerLabel = options[correctIndex];
   const showResult = hasChecked && selectedIndex !== null;
+  const shouldShowCheckButton = !isSessionMode || !hasChecked;
+  const shouldShowContinueButton = isSessionMode && hasChecked;
 
   return (
     <MinigameLayout
       contentStyle={styles.container}
       footerContent={
         <View style={styles.actionsContainer}>
-          <MyButton
-            text="Sprawdź"
-            color="my_green"
-            onPress={handleCheck}
-            disabled={selectedIndex === null || hasChecked}
-            width={120}
-            accessibilityLabel="Sprawdź zaznaczoną odpowiedź"
-          />
-          {isSessionMode ? (
+          {shouldShowCheckButton ? (
+            <MyButton
+              text="Sprawdź"
+              color="my_green"
+              onPress={handleCheck}
+              disabled={selectedIndex === null || hasChecked}
+              width={120}
+              accessibilityLabel="Sprawdź zaznaczoną odpowiedź"
+            />
+          ) : null}
+          {shouldShowContinueButton ? (
             <MyButton
               text="Dalej"
               color="my_green"
               onPress={handleContinue}
-              disabled={!hasChecked || hasSubmittedResult}
+              disabled={hasSubmittedResult}
               width={120}
               accessibilityLabel="Przejdź do kolejnej minigry"
             />

@@ -5,8 +5,8 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { ScrollView, Text, TextStyle, View } from "react-native";
 import { useCustomCourseFormStyles } from "../editcourse/components/courseContent/CustomCourseForm-styles";
-import CourseIconColorSelector from "../editcourse/components/iconEdit/iconEdit";
-import CourseNameField from "../editcourse/components/nameEdit/nameEdit";
+import { CourseIconColorSelector } from "../editcourse/components/iconEdit/iconEdit";
+import { CourseNameField } from "../editcourse/components/nameEdit/nameEdit";
 import { useStyles } from "./CourseAppearanceScreen-styles";
 export default function CustomCourseScreen() {
   const styles = useStyles();

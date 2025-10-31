@@ -37,7 +37,7 @@ export default function LegacyReviewScreen() {
           }
           const map = await countDueReviewsByLevel(srcId, tgtId, Date.now());
           if (mounted) setCounts(map);
-        } catch (_) {
+        } catch {
           if (mounted) setCounts({ A1: 0, A2: 0, B1: 0, B2: 0, C1: 0, C2: 0 });
         }
       };

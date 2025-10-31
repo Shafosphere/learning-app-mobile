@@ -23,17 +23,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
   row: {
     flex: 1,
     justifyContent: "space-between" as const,
-    marginBottom: 16,
+    marginBottom: 20,
   },
   card: {
     flex: 1,
-    aspectRatio: 1.4,
-    marginHorizontal: 6,
+    aspectRatio: 1.8,
+    marginHorizontal: 8,
   },
   placeholderCard: {
     flex: 1,
-    aspectRatio: 1.4,
-    marginHorizontal: 6,
+    // aspectRatio: 0.85,
+    marginHorizontal: 8,
     opacity: 0,
   },
   cardInner: {
@@ -55,7 +55,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingVertical: 16,
   },
   cardFrontLabel: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "700",
     color: colors.headline,
     textAlign: "center" as const,

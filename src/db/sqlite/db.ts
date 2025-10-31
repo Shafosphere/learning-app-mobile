@@ -1758,7 +1758,7 @@ export async function getRandomTranslationsForLevel(
      ORDER BY RANDOM()
      LIMIT ?;`;
 
-  const params: Array<number | string> = [
+  const params: (number | string)[] = [
     sourceLangId,
     level,
     targetLangId,

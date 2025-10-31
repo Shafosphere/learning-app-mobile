@@ -4,7 +4,7 @@ export const MEMORY_BOARD_LAYOUTS: Record<
   MemoryBoardSize,
   { columns: number; rows: number }
 > = {
-  twoByThree: { columns: 3, rows: 2 },
+  twoByThree: { columns: 2, rows: 3 },
   threeByThree: { columns: 3, rows: 3 },
 };
 

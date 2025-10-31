@@ -101,6 +101,26 @@ export const useStyles = createThemeStylesHook((colors) => ({
   bottomIconButtonPressed: {
     backgroundColor: colors.my_green,
   },
+  reviewIconWrapper: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reviewBadge: {
+    position: "absolute",
+    top: 10,
+    right: -10,
+    minWidth: 20,
+    paddingHorizontal: 6,
+    paddingVertical: 2,
+    borderRadius: 999,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  reviewBadgeText: {
+    fontWeight: "700",
+    fontSize: 12,
+  },
   courseButton: {
     flexDirection: "row",
     alignItems: "center",
@@ -140,11 +160,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   courseName: {
     marginLeft: 8,
+    flexShrink: 1,
+    maxWidth: 130,
+    overflow: "hidden",
+  },
+  courseNameText: {
     color: colors.headline,
     fontWeight: "600",
     fontSize: 16,
-    flexShrink: 1,
-    maxWidth: 130,
   },
   courseLevel: {
     marginLeft: 8,
