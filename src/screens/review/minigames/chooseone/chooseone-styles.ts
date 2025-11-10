@@ -71,10 +71,4 @@ export const useStyles = createThemeStylesHook((colors) => ({
   resultTextError: {
     color: colors.my_red,
   },
-  actionsContainer: {
-    flexDirection: "row",
-    justifyContent: "center",
-    alignItems: "center",
-    gap: 16,
-  },
 }));

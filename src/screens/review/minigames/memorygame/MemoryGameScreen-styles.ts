@@ -75,10 +75,4 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     textAlign: "center" as const,
   },
-  actionsContainer: {
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    alignItems: "center" as const,
-    gap: 16,
-  },
 }));

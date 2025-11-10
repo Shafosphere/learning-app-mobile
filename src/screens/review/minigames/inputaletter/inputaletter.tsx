@@ -15,6 +15,7 @@ import {
   getSessionStep,
 } from "@/src/screens/review/minigames/sessionStore";
 import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
 type InputALetterParams = {
   words?: string | string[];
@@ -456,6 +457,8 @@ export default function InputALetter() {
     }
 
     const evaluation = evaluateWords();
+    const allCorrect = evaluation.every((entry) => entry.isCorrect);
+    playFeedbackSound(allCorrect);
     setLastEvaluation(evaluation);
     setChecked(true);
   }, [allSlotsFilled, evaluateWords, hasValidData]);
@@ -525,34 +528,49 @@ export default function InputALetter() {
 
   const shouldShowCheckButton = !isSessionMode || !checked;
   const shouldShowContinueButton = isSessionMode && checked;
+  const evaluationResult = lastEvaluation;
+  const isAwaitingInput = !allSlotsFilled;
+  const isCheckButtonDisabled = isAwaitingInput || checked;
+  const allCorrectResult =
+    evaluationResult?.every((entry) => entry.isCorrect) ?? false;
+  const checkButtonColor = isAwaitingInput
+    ? "border"
+    : evaluationResult
+    ? allCorrectResult
+      ? "my_green"
+      : "my_red"
+    : "my_green";
+
+  const footerActions: NonNullable<
+    React.ComponentProps<typeof MinigameLayout>["footerActions"]
+  > = [];
+
+  if (shouldShowCheckButton) {
+    footerActions.push({
+      key: "check",
+      text: "Sprawdź",
+      onPress: handleCheck,
+      width: 120,
+      accessibilityLabel: "Sprawdź poprawność wpisanych liter",
+      color: checkButtonColor,
+      disabled: isCheckButtonDisabled,
+    });
+  }
+
+  if (shouldShowContinueButton) {
+    footerActions.push({
+      key: "continue",
+      text: "Dalej",
+      onPress: handleContinue,
+      width: 120,
+      accessibilityLabel: "Przejdź do kolejnej minigry",
+      color: allCorrectResult ? "my_green" : "my_red",
+      disabled: hasSubmittedResult,
+    });
+  }
 
   return (
-    <MinigameLayout
-      contentStyle={styles.container}
-      footerContent={
-        <View style={styles.actionsContainer}>
-          {shouldShowCheckButton ? (
-            <MyButton
-              text="Sprawdź"
-              onPress={handleCheck}
-              width={120}
-              accessibilityLabel="Sprawdź poprawność wpisanych liter"
-              color="my_green"
-            />
-          ) : null}
-          {shouldShowContinueButton ? (
-            <MyButton
-              text="Dalej"
-              onPress={handleContinue}
-              width={120}
-              accessibilityLabel="Przejdź do kolejnej minigry"
-              color="my_green"
-              disabled={hasSubmittedResult}
-            />
-          ) : null}
-        </View>
-      }
-    >
+    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
       <MinigameHeading title="Uzupełnij brakujące litery" />
       <View style={styles.wordsContainer}>
         {words.map((word, wordIndex) => {

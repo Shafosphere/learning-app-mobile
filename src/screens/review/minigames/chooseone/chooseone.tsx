@@ -10,6 +10,7 @@ import {
   getSessionStep,
 } from "@/src/screens/review/minigames/sessionStore";
 import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
 type ChooseOneParams = {
   prompt?: string | string[];
@@ -127,8 +128,9 @@ export default function ChooseOne() {
     if (selectedIndex === null || hasChecked) {
       return;
     }
+    playFeedbackSound(selectedIndex === correctIndex);
     setHasChecked(true);
-  }, [hasChecked, selectedIndex]);
+  }, [correctIndex, hasChecked, selectedIndex]);
 
   const handleContinue = useCallback(() => {
     if (!isSessionMode || !sessionStep || !sessionId) {
@@ -197,35 +199,49 @@ export default function ChooseOne() {
   const showResult = hasChecked && selectedIndex !== null;
   const shouldShowCheckButton = !isSessionMode || !hasChecked;
   const shouldShowContinueButton = isSessionMode && hasChecked;
+  const isCheckButtonDisabled = selectedIndex === null || hasChecked;
+  const hasResult = hasChecked && selectedIndex !== null;
+  const isCorrectSelection =
+    hasResult && selectedIndex === correctIndex;
+  const checkButtonColor =
+    selectedIndex === null
+      ? "border"
+      : hasResult
+      ? isCorrectSelection
+        ? "my_green"
+        : "my_red"
+      : "my_green";
+
+  const footerActions: NonNullable<
+    React.ComponentProps<typeof MinigameLayout>["footerActions"]
+  > = [];
+
+  if (shouldShowCheckButton) {
+    footerActions.push({
+      key: "check",
+      text: "Sprawdź",
+      color: checkButtonColor,
+      onPress: handleCheck,
+      disabled: isCheckButtonDisabled,
+      width: 120,
+      accessibilityLabel: "Sprawdź zaznaczoną odpowiedź",
+    });
+  }
+
+  if (shouldShowContinueButton) {
+    footerActions.push({
+      key: "continue",
+      text: "Dalej",
+      color: isCorrectSelection ? "my_green" : "my_red",
+      onPress: handleContinue,
+      disabled: hasSubmittedResult,
+      width: 120,
+      accessibilityLabel: "Przejdź do kolejnej minigry",
+    });
+  }
 
   return (
-    <MinigameLayout
-      contentStyle={styles.container}
-      footerContent={
-        <View style={styles.actionsContainer}>
-          {shouldShowCheckButton ? (
-            <MyButton
-              text="Sprawdź"
-              color="my_green"
-              onPress={handleCheck}
-              disabled={selectedIndex === null || hasChecked}
-              width={120}
-              accessibilityLabel="Sprawdź zaznaczoną odpowiedź"
-            />
-          ) : null}
-          {shouldShowContinueButton ? (
-            <MyButton
-              text="Dalej"
-              color="my_green"
-              onPress={handleContinue}
-              disabled={hasSubmittedResult}
-              width={120}
-              accessibilityLabel="Przejdź do kolejnej minigry"
-            />
-          ) : null}
-        </View>
-      }
-    >
+    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
       <MinigameHeading title="Wybierz poprawne tłumaczenie" />
       <View style={styles.promptContainer}>
         <Text style={styles.promptText}>{prompt}</Text>

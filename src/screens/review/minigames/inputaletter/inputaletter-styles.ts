@@ -132,13 +132,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   letterButtonTextUsed: {
     color: colors.paragraph,
   },
-  actionsContainer: {
-    width: "100%",
-    flexDirection: "row",
-    justifyContent: "flex-end",
-    gap: 12,
-    alignItems: "center",
-  },
   resultContainer: {
     gap: 12,
     alignItems: "center",

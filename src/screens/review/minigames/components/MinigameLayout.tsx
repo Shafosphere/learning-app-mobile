@@ -1,13 +1,25 @@
-import React from "react";
+import React, { ComponentProps } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 import { View } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 import { FOOTER_BASE_PADDING, useStyles } from "./MinigameLayout-styles";
+import MyButton from "@/src/components/button/button";
+
+type FooterActionConfig = {
+  key?: string;
+  text: string;
+  onPress: () => void;
+  disabled?: boolean;
+  color?: ComponentProps<typeof MyButton>["color"];
+  width?: number;
+  accessibilityLabel?: string;
+};
 
 type MinigameLayoutProps = {
   children: React.ReactNode;
   footerContent?: React.ReactNode;
+  footerActions?: FooterActionConfig[];
   style?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
   footerContainerStyle?: StyleProp<ViewStyle>;
@@ -18,6 +30,7 @@ type MinigameLayoutProps = {
 export function MinigameLayout({
   children,
   footerContent,
+  footerActions,
   style,
   contentStyle,
   footerContainerStyle,
@@ -27,10 +40,26 @@ export function MinigameLayout({
   const styles = useStyles();
   const insets = useSafeAreaInsets();
 
+  const resolvedFooterContent =
+    footerContent ??
+    (footerActions && footerActions.length > 0
+      ? footerActions.map((action, index) => (
+          <MyButton
+            key={action.key ?? `${action.text}-${index}`}
+            text={action.text}
+            onPress={action.onPress}
+            disabled={action.disabled}
+            color={action.color}
+            width={action.width}
+            accessibilityLabel={action.accessibilityLabel}
+          />
+        ))
+      : null);
+
   return (
     <View style={[styles.root, style]} testID={testID}>
       <View style={[styles.content, contentStyle]}>{children}</View>
-      {footerContent ? (
+      {resolvedFooterContent ? (
         <View
           style={[
             styles.footerContainer,
@@ -39,7 +68,7 @@ export function MinigameLayout({
           ]}
         >
           <View style={[styles.footerRow, footerRowStyle]}>
-            {footerContent}
+            {resolvedFooterContent}
           </View>
         </View>
       ) : null}

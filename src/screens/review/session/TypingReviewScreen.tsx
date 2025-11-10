@@ -21,6 +21,7 @@ import MyButton from "@/src/components/button/button";
 import RotaryStack, {
   RotaryStackHandle,
 } from "@/src/components/carousel/RotaryStack";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
 function mapCustomReviewToWord(
   card: CustomReviewFlashcard
@@ -146,6 +147,7 @@ export default function TypingReviewScreen() {
   function onSubmit() {
     if (!current || !canRunReview) return;
     const ok = current.translations.some((t) => checkSpelling(answer, t));
+    playFeedbackSound(ok);
     const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
     // Log event (reviews session)
     if (isCustomMode && activeCustomCourseId != null) {
@@ -326,6 +328,7 @@ export default function TypingReviewScreen() {
 
     setSpinBusy(true);
     const ok = current.translations.some((t) => checkSpelling(answer, t));
+    playFeedbackSound(ok);
     if (!ok) {
       setPromptState("wrong");
       setLockedAfterWrong(true);

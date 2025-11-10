@@ -10,6 +10,7 @@ import {
   getSessionStep,
 } from "@/src/screens/review/minigames/sessionStore";
 import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
 type GetAPairParams = {
   pairs?: string | string[];
@@ -204,6 +205,8 @@ export default function GetaPair() {
       ? "Brawo! Twoja ocena jest poprawna."
       : `To nie to. ${summaryLabel}`;
 
+    playFeedbackSound(success);
+
     setResult({
       success,
       message,
@@ -279,34 +282,46 @@ export default function GetaPair() {
   const showEvaluation = result !== null;
   const shouldShowCheckButton = !isSessionMode || !showEvaluation;
   const shouldShowContinueButton = isSessionMode && showEvaluation;
+  const requiresSelection = incorrectCount > 0;
+  const awaitingSelection = requiresSelection && selectedIds.length === 0;
+  const isCheckButtonDisabled = awaitingSelection || showEvaluation;
+  const checkButtonColor = awaitingSelection
+    ? "border"
+    : result
+    ? result.success
+      ? "my_green"
+      : "my_red"
+    : "my_green";
+
+  const footerActions: NonNullable<
+    React.ComponentProps<typeof MinigameLayout>["footerActions"]
+  > = [];
+
+  if (shouldShowCheckButton) {
+    footerActions.push({
+      key: "check",
+      text: "Sprawdź",
+      onPress: evaluateSelection,
+      disabled: isCheckButtonDisabled,
+      width: 120,
+      color: checkButtonColor,
+    });
+  }
+
+  if (shouldShowContinueButton && result) {
+    footerActions.push({
+      key: "continue",
+      text: "Dalej",
+      onPress: handleContinue,
+      disabled: hasSubmittedResult,
+      width: 120,
+      color: result.success ? "my_green" : "my_red",
+      accessibilityLabel: "Przejdź do kolejnej minigry",
+    });
+  }
 
   return (
-    <MinigameLayout
-      contentStyle={styles.container}
-      footerContent={
-        <View style={styles.actionsContainer}>
-          {shouldShowCheckButton ? (
-            <MyButton
-              text="Sprawdź"
-              onPress={evaluateSelection}
-              disabled={showEvaluation}
-              width={120}
-              color="my_green"
-            />
-          ) : null}
-          {shouldShowContinueButton ? (
-            <MyButton
-              text="Dalej"
-              onPress={handleContinue}
-              disabled={hasSubmittedResult}
-              width={120}
-              color="my_green"
-              accessibilityLabel="Przejdź do kolejnej minigry"
-            />
-          ) : null}
-        </View>
-      }
-    >
+    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
       <MinigameHeading title="Znajdź błędne pary" />
       <View style={styles.pairsContainer}>
         {pairs.map((pair) => {

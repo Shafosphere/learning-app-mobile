@@ -21,13 +21,13 @@ import { useStyles } from "./MemoryGameScreen-styles";
 import { getMemoryBoardLayout } from "@/src/constants/memoryGame";
 import { MinigameLayout } from "../components/MinigameLayout";
 import { MinigameHeading } from "../components/MinigameHeading";
-import MyButton from "@/src/components/button/button";
 import {
   completeSessionStep,
   getSessionStep,
 } from "@/src/screens/review/minigames/sessionStore";
 import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
 import type { SanitizedWord } from "@/src/screens/review/brain/minigame-generators";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
 const HIGHLIGHT_TIMEOUT_MS = 1500;
 const RESULT_DELAY_MS = 500;
@@ -159,6 +159,8 @@ export default function MemoryGameScreen() {
   const selectedIdsRef = useRef<string[]>([]);
   const isMountedRef = useRef(true);
   const [hasSubmittedResult, setHasSubmittedResult] = useState(false);
+  const [hasPlayedCompletionSound, setHasPlayedCompletionSound] =
+    useState(false);
 
   const sessionIdParam = extractSingleParam(params.sessionId);
   const stepIdParam = extractSingleParam(params.stepId);
@@ -203,6 +205,7 @@ export default function MemoryGameScreen() {
     selectedIdsRef.current = [];
     setIsResolving(false);
     setHasSubmittedResult(false);
+    setHasPlayedCompletionSound(false);
     clearResolveTimeout();
     clearResultDelayTimeout();
   }, []);
@@ -237,6 +240,17 @@ export default function MemoryGameScreen() {
       clearResultDelayTimeout();
     };
   }, []);
+
+  useEffect(() => {
+    if (deck.length === 0) {
+      return;
+    }
+
+    if (allMatched && !hasPlayedCompletionSound) {
+      playFeedbackSound(true);
+      setHasPlayedCompletionSound(true);
+    }
+  }, [allMatched, deck.length, hasPlayedCompletionSound]);
 
   const evaluateSelection = (firstId: string, secondId: string) => {
     const firstCard = deckRef.current.find((card) => card.id === firstId);
@@ -530,24 +544,25 @@ export default function MemoryGameScreen() {
         ]
       : deck;
 
+  const footerActions =
+    [] as NonNullable<
+      React.ComponentProps<typeof MinigameLayout>["footerActions"]
+    >;
+
+  if (isSessionMode) {
+    footerActions.push({
+      key: "continue",
+      text: "Dalej",
+      color: allMatched ? "my_green" : "border",
+      onPress: handleContinue,
+      disabled: !allMatched || hasSubmittedResult,
+      width: 120,
+      accessibilityLabel: "Przejdź do kolejnej minigry",
+    });
+  }
+
   return (
-    <MinigameLayout
-      contentStyle={styles.container}
-      footerContent={
-        <View style={styles.actionsContainer}>
-          {isSessionMode ? (
-            <MyButton
-              text="Dalej"
-              color="my_green"
-              onPress={handleContinue}
-              disabled={!allMatched || hasSubmittedResult}
-              width={120}
-              accessibilityLabel="Przejdź do kolejnej minigry"
-            />
-          ) : null}
-        </View>
-      }
-    >
+    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
       <MinigameHeading title="Memory Game" />
 
       {loading ? (
