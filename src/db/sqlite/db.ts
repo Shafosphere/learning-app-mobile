@@ -1662,7 +1662,7 @@ export async function getRandomDueReviewWord(
     id: due.id,
     text: wordRow?.text ?? "",
     translations: translations.map((t) => t.translation_text),
-    flipped: false,
+    flipped: true,
   };
 }
 
@@ -1727,7 +1727,7 @@ export async function getDueReviewWordsBatch(
     id: row.id,
     text: row.text,
     translations: translationsMap.get(row.id) ?? [],
-    flipped: false,
+    flipped: true,
   }));
 }
 

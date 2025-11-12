@@ -53,10 +53,11 @@ export function useFlashcardsInteraction({
 
   const reversed = useMemo(() => {
     if (!activeBox || !selectedItem) return false;
-    // Jeśli fiszka ma flagę flipped=true, odwracamy ją tylko dla wybranych boxów.
-    // Jeśli flipped=false -> nigdy nie odwracamy.
-    return selectedItem.flipped ? reversedBoxes.includes(activeBox) : false;
-  }, [activeBox, reversedBoxes, selectedItem]);
+    const shouldFlip =
+      activeCustomCourseId == null ? true : selectedItem.flipped;
+    // Oficjalne kursy (brak activeCustomCourseId) zawsze się odwracają.
+    return shouldFlip ? reversedBoxes.includes(activeBox) : false;
+  }, [activeBox, activeCustomCourseId, reversedBoxes, selectedItem]);
 
   const selectRandomWord = useCallback(
     (box: keyof BoxesState) => {

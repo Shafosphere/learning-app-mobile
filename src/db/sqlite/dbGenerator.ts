@@ -63,7 +63,7 @@ export async function getRandomWordsBatch({
     id,
     text: wordMap.get(id) ?? "Słowo nieznalezione",
     translations: translationsMap.get(id) || [],
-    flipped: false,
+    flipped: true, // oficjalne słowa zawsze mogą być odwracane w boxach 2 i 4
   }));
   return result;
 }
