@@ -36,6 +36,17 @@ export type InputALetterRound = {
   letters: string[];
 };
 
+export type WrongLetterTile = {
+  char: string;
+  isWrong: boolean;
+};
+
+export type WrongLetterRound = {
+  originalWord: string;
+  letters: WrongLetterTile[];
+  wrongIndex: number;
+};
+
 // --- Helpers ----------------------------------------------------------------
 
 export const sanitizeWord = (
@@ -87,6 +98,51 @@ export const getLetterIndices = (term: string): number[] => {
     .map((char, index) => (isAlphabeticCharacter(char) ? index : -1))
     .filter((index) => index !== -1);
 };
+
+const WRONG_LETTER_POOL = Array.from("abcdefghijklmnopqrstuvwxyz");
+
+const pickWrongLetter = (term: string, rng: () => number): string => {
+  const lowerSet = new Set(Array.from(term.toLocaleLowerCase()));
+  const available = WRONG_LETTER_POOL.filter((letter) => !lowerSet.has(letter));
+  const pool = available.length > 0 ? available : WRONG_LETTER_POOL;
+  const randomIndex = Math.floor(rng() * pool.length);
+  return pool[randomIndex] ?? "x";
+};
+
+export const buildWrongLetterRoundFromTerm = (
+  term: string,
+  rng: () => number = Math.random
+): WrongLetterRound | null => {
+  const normalized = term.trim();
+
+  if (normalized.length < 2) {
+    return null;
+  }
+
+  const characters = Array.from(normalized);
+  const insertIndex = Math.floor(rng() * (characters.length - 1)) + 1;
+  const wrongLetter = pickWrongLetter(normalized, rng);
+
+  const letters = [
+    ...characters.slice(0, insertIndex),
+    wrongLetter,
+    ...characters.slice(insertIndex),
+  ];
+
+  return {
+    originalWord: normalized,
+    wrongIndex: insertIndex,
+    letters: letters.map((char, index) => ({
+      char,
+      isWrong: index === insertIndex,
+    })),
+  };
+};
+
+export const buildWrongLetterRound = (
+  word: SanitizedWord,
+  rng: () => number = Math.random
+): WrongLetterRound | null => buildWrongLetterRoundFromTerm(word.term, rng);
 
 // --- Choose One -------------------------------------------------------------
 
@@ -396,7 +452,9 @@ export const buildInputALetterRound = (
     }
 
     const shuffled = shuffleArray(indices, rng);
-    const missingIndices = shuffled.slice(0, Math.min(2, shuffled.length));
+    const missingIndices = shuffled
+      .slice(0, Math.min(2, shuffled.length))
+      .sort((a, b) => a - b);
 
     if (missingIndices.length === 0) {
       return;

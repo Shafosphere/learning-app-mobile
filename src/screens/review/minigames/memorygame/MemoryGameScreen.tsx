@@ -141,7 +141,8 @@ export default function MemoryGameScreen() {
   const router = useRouter();
   const styles = useStyles();
 
-  const boardLayout = getMemoryBoardLayout(memoryBoardSize);
+  // Force 2 columns × 3 rows layout as requested
+  const boardLayout = getMemoryBoardLayout("twoByThree");
   const totalSlots = boardLayout.columns * boardLayout.rows;
   const requiredPairs = Math.floor(totalSlots / 2);
   const defaultFrontColor = colors.my_green;

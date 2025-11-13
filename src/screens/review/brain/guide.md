@@ -2,7 +2,7 @@
 
 ## Cel ekranu
 Ekran Brain odpowiada za przygotowanie materiału do treningu oraz uruchamianie minigier powiązanych z powtórką słówek. Po wejściu pobiera fiszki do sesji dziennej (kurs standardowy lub customowy) i na ich podstawie umożliwia:
-- rozpoczęcie pełnej sesji gier (Memory → Choose one → Input a letter → Get a pair → Table),
+- rozpoczęcie pełnej sesji gier (Memory → Choose one → Input a letter → Get a pair → Wrong letter → Table),
 - uruchomienie pojedynczych minigier z bieżącej puli słówek,
 - podgląd fiszek w widoku tabeli,
 - konfigurację planszy dla gry Memory.
@@ -31,16 +31,18 @@ Jeżeli brakuje danych spełniających wymagania, użytkownik dostaje komunikat 
 
 ## Tworzenie pełnej sesji gier
 Przycisk `Start` buduje szablon sesji (`buildSessionTemplate`) i rejestruje go w `sessionStore`. Proces składa się z kilku kroków:
-1. **Walidacja danych wejściowych**: wymagane jest min. `MIN_SESSION_WORDS = 10` słówek, z czego co najmniej 3 muszą pozwalać na ukrycie litery (Input a letter).
+1. **Walidacja danych wejściowych**: wymagane jest min. `MIN_SESSION_WORDS = 11` słówek, z czego co najmniej 3 muszą pozwalać na ukrycie litery (Input a letter), a przynajmniej jedno ma mieć długość ≥ 2 znaki, aby przygotować Wrong letter.
 2. **Losowanie kandydatów**:
    - losujemy 3 słowa do Input a letter,
    - spośród pozostałych wybieramy 3 słowa dla Get a pair (wraz z fałszywymi tłumaczeniami),
    - szukamy pojedynczego słowa do Choose one, dla którego da się wygenerować 2 unikatowe dystraktory,
+   - wybieramy słowo z minimum dwiema literami dla Wrong letter,
    - dobieramy 3 kolejne słowa na rundę Memory.
 3. **Generowanie rund**:
    - `buildInputALetterRound` przygotowuje maskowane litery i pulę znaków,
    - `buildGetAPairRound` łączy terminy z tłumaczeniami, mieszając poprawne i błędne pary,
    - `buildChooseOneRoundForTarget` tworzy pytanie wyboru,
+   - `buildWrongLetterRound` dokłada dodatkową literę (nigdy na początku/końcu) do wybranego słowa,
    - runda Memory wykorzystuje wybrane słowa jako bodźce do zapamiętania,
    - na końcu zawsze dodawany jest krok `table` do podsumowania.
 4. **Rejestracja sesji**:

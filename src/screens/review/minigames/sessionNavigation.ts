@@ -8,6 +8,7 @@ type SessionRoute =
   | "/review/minigames/chooseone"
   | "/review/minigames/inputaletter"
   | "/review/minigames/getapair"
+  | "/review/minigames/wrongletter"
   | "/review/table"
   | "/review/brain";
 
@@ -21,6 +22,8 @@ export const getRouteForStepType = (type: SessionStepType): SessionRoute => {
       return "/review/minigames/inputaletter";
     case "getapair":
       return "/review/minigames/getapair";
+    case "wrongletter":
+      return "/review/minigames/wrongletter";
     case "table":
       return "/review/table";
     default:

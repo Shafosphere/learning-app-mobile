@@ -379,6 +379,37 @@ export default function InputALetter() {
     []
   );
 
+  // Prefer next empty slot in the same word, then subsequent words.
+  const findNextSlotAfter = useCallback(
+    (matrix: SlotState[][], current: ActiveSlot | null): ActiveSlot | null => {
+      if (current) {
+        const { wordIndex, slotIndex } = current;
+        const wordSlots = matrix[wordIndex] ?? [];
+
+        // Next empty in the same word
+        for (let s = slotIndex + 1; s < wordSlots.length; s += 1) {
+          if (wordSlots[s]?.letter == null) {
+            return { wordIndex, slotIndex: s };
+          }
+        }
+
+        // First empty in the following words
+        for (let w = wordIndex + 1; w < matrix.length; w += 1) {
+          const nextWordSlots = matrix[w] ?? [];
+          for (let s = 0; s < nextWordSlots.length; s += 1) {
+            if (nextWordSlots[s]?.letter == null) {
+              return { wordIndex: w, slotIndex: s };
+            }
+          }
+        }
+      }
+
+      // Fallback: first empty globally (or null if none)
+      return findFirstEmptySlot(matrix);
+    },
+    []
+  );
+
   const handleSelectLetter = useCallback(
     (letterIndex: number) => {
       const letterEntry = letterStates[letterIndex];
@@ -437,10 +468,10 @@ export default function InputALetter() {
       setHasSubmittedResult(false);
       setLastEvaluation(null);
 
-      const nextSlot = findNextEmptySlot(updatedSlots);
+      const nextSlot = findNextSlotAfter(updatedSlots, targetSlot);
       setActiveSlot(nextSlot);
     },
-    [activeSlot, findNextEmptySlot, letterStates, slots]
+    [activeSlot, findNextSlotAfter, letterStates, slots]
   );
 
   const handleCheck = useCallback(() => {

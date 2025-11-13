@@ -1,4 +1,8 @@
-import { Audio } from "expo-av";
+import {
+  Audio,
+  InterruptionModeAndroid,
+  InterruptionModeIOS,
+} from "expo-av";
 
 import { SOUNDS, SoundId } from "@/src/constants/sounds";
 
@@ -17,8 +21,9 @@ const configureAudioMode = async () => {
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
       allowsRecordingIOS: false,
-      interruptionModeIOS: Audio.INTERRUPTION_MODE_IOS_DO_NOT_MIX,
-      shouldDuckAndroid: false,
+      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
+      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
+      shouldDuckAndroid: true,
       playThroughEarpieceAndroid: false,
     });
     audioModeConfigured = true;
@@ -66,4 +71,3 @@ export const playSound = async (soundId: SoundId) => {
 export const playFeedbackSound = (isCorrect: boolean) => {
   void playSound(isCorrect ? "ding" : "dong");
 };
-

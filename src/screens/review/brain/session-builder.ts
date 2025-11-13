@@ -2,6 +2,7 @@ import {
   buildChooseOneRoundForTarget,
   buildGetAPairRound,
   buildInputALetterRound,
+  buildWrongLetterRound,
   getLetterIndices,
   shuffleArray,
   type SanitizedWord,
@@ -12,7 +13,7 @@ import type {
   SessionStepTemplate,
 } from "@/src/screens/review/minigames/sessionStore";
 
-export const MIN_SESSION_WORDS = 10;
+export const MIN_SESSION_WORDS = 11;
 
 export type SessionBuildResult =
   | { ok: true; template: SessionTemplate }
@@ -111,12 +112,16 @@ export const buildSessionTemplate = ({
     });
     return {
       ok: false,
-      message: "Potrzebujemy co najmniej 10 słówek, aby rozpocząć sesję gier.",
+      message: `Potrzebujemy co najmniej ${MIN_SESSION_WORDS} słówek, aby rozpocząć sesję gier.`,
     };
   }
 
   const inputEligible = sanitized.filter(
     (word) => getLetterIndices(word.term).length > 0
+  );
+
+  const wrongLetterEligible = sanitized.filter(
+    (word) => word.term.trim().length >= 2
   );
 
   if (inputEligible.length < 3) {
@@ -128,6 +133,15 @@ export const buildSessionTemplate = ({
       ok: false,
       message:
         "Brakuje słówek, w których możemy ukryć litery. Odśwież fiszki i spróbuj ponownie.",
+    };
+  }
+
+  if (wrongLetterEligible.length === 0) {
+    console.warn("[Brain] Session build aborted: no wrong-letter eligible words");
+    return {
+      ok: false,
+      message:
+        "Brakuje słówek nadających się do gry w dodatkową literę. Odśwież fiszki i spróbuj ponownie.",
     };
   }
 
@@ -155,7 +169,7 @@ export const buildSessionTemplate = ({
       const pairIds = new Set(pairCombo.map((word) => word.id));
       const remainingAfterPairs = differenceById(remainingAfterInput, pairIds);
 
-      if (remainingAfterPairs.length < 4) {
+      if (remainingAfterPairs.length < 5) {
         return false;
       }
 
@@ -175,11 +189,34 @@ export const buildSessionTemplate = ({
           (word) => word.id !== chooseCandidate.id
         );
 
-        if (remainingAfterChoose.length < 3) {
+        if (remainingAfterChoose.length < 4) {
           continue;
         }
 
-        const memoryWords = shuffleArray(remainingAfterChoose).slice(0, 3);
+        const shuffledAfterChoose = shuffleArray(remainingAfterChoose);
+        const wrongLetterCandidate = shuffledAfterChoose.find(
+          (word) => word.term.trim().length >= 2
+        );
+
+        if (!wrongLetterCandidate) {
+          continue;
+        }
+
+        const wrongLetterRound = buildWrongLetterRound(wrongLetterCandidate);
+
+        if (!wrongLetterRound) {
+          continue;
+        }
+
+        const remainingAfterWrongLetter = shuffledAfterChoose.filter(
+          (word) => word.id !== wrongLetterCandidate.id
+        );
+
+        if (remainingAfterWrongLetter.length < 3) {
+          continue;
+        }
+
+        const memoryWords = remainingAfterWrongLetter.slice(0, 3);
 
         if (memoryWords.length < 3) {
           continue;
@@ -218,6 +255,11 @@ export const buildSessionTemplate = ({
             round: pairRound,
           },
           {
+            type: "wrongletter",
+            wordId: wrongLetterCandidate.id,
+            round: wrongLetterRound,
+          },
+          {
             type: "table",
           },
         ];
@@ -227,6 +269,7 @@ export const buildSessionTemplate = ({
           ...toSeeds([chooseCandidate], "chooseone"),
           ...toSeeds(inputCombo, "inputaletter"),
           ...toSeeds(pairCombo, "getapair"),
+          ...toSeeds([wrongLetterCandidate], "wrongletter"),
         ];
 
         template = {
@@ -239,6 +282,7 @@ export const buildSessionTemplate = ({
           chooseWordId: chooseCandidate.id,
           inputWordIds: inputCombo.map((word) => word.id),
           getAPairWordIds: pairCombo.map((word) => word.id),
+           wrongLetterWordId: wrongLetterCandidate.id,
           levelTranslationsCount: levelTranslations.length,
         });
 
@@ -255,6 +299,7 @@ export const buildSessionTemplate = ({
     console.warn("[Brain] Session build failed after all combinations tried", {
       sanitizedCount: sanitized.length,
       inputEligibleCount: inputEligible.length,
+      wrongLetterEligibleCount: wrongLetterEligible.length,
     });
     return {
       ok: false,

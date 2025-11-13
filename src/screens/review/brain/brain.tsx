@@ -160,6 +160,11 @@ export default function BrainScreen() {
     return eligible.length >= 3;
   }, [sanitizedWords]);
 
+  const canStartWrongLetter = useMemo(
+    () => sanitizedWords.some((word) => word.term.trim().length >= 2),
+    [sanitizedWords]
+  );
+
   // --- Data fetching -------------------------------------------------------
   useEffect(() => {
     let isMounted = true;
@@ -407,6 +412,38 @@ export default function BrainScreen() {
     });
   }, [router, sanitizedWords]);
 
+  const handleStartWrongLetter = useCallback(() => {
+    if (!canStartWrongLetter) {
+      Alert.alert(
+        "Brak danych",
+        "Potrzebujemy co najmniej jednego słowa z dwiema literami, aby uruchomić tę grę."
+      );
+      return;
+    }
+
+    const eligible = sanitizedWords.filter(
+      (word) => word.term.trim().length >= 2
+    );
+    const pool = eligible.length > 0 ? eligible : sanitizedWords;
+    const randomIndex = Math.floor(Math.random() * pool.length);
+    const selected = pool[randomIndex];
+
+    if (!selected) {
+      Alert.alert(
+        "Brak danych",
+        "Nie udało się pobrać słowa do gry. Odśwież fiszki i spróbuj ponownie."
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/review/minigames/wrongletter",
+      params: {
+        word: selected.term,
+      },
+    });
+  }, [canStartWrongLetter, router, sanitizedWords]);
+
   return (
     <View style={styles.container}>
       <Image
@@ -499,6 +536,12 @@ export default function BrainScreen() {
             text="Get a pair"
             onPress={handleStartGetAPair}
             disabled={!!error || loading || !canStartGetAPair}
+            width={120}
+          />
+          <MyButton
+            text="Wrong letter"
+            onPress={handleStartWrongLetter}
+            disabled={!!error || loading || !canStartWrongLetter}
             width={120}
           />
         </>

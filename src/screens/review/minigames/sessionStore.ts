@@ -3,6 +3,7 @@ import type {
   GetAPairRound,
   InputALetterRound,
   SanitizedWord,
+  WrongLetterRound,
 } from "@/src/screens/review/brain/minigame-generators";
 
 export type SessionStepType =
@@ -10,6 +11,7 @@ export type SessionStepType =
   | "chooseone"
   | "inputaletter"
   | "getapair"
+  | "wrongletter"
   | "table";
 
 export type SessionWordStatus = "pending" | "correct" | "incorrect";
@@ -49,6 +51,12 @@ type GetAPairStep = {
   round: GetAPairRound;
 };
 
+type WrongLetterStep = {
+  type: "wrongletter";
+  wordId: number;
+  round: WrongLetterRound;
+};
+
 type TableStep = {
   type: "table";
 };
@@ -58,6 +66,7 @@ export type SessionStepTemplate =
   | ChooseOneStep
   | InputALetterStep
   | GetAPairStep
+  | WrongLetterStep
   | TableStep;
 
 export type SessionStep = SessionStepTemplate & { id: string };
@@ -200,4 +209,3 @@ export const getSessionResults = (
 export const destroySession = (sessionId: string) => {
   sessions.delete(sessionId);
 };
-
