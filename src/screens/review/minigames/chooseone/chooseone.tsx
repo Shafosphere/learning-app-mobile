@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStyles } from "./chooseone-styles";
 import MyButton from "@/src/components/button/button";
 import { MinigameLayout } from "../components/MinigameLayout";
-import { MinigameHeading } from "../components/MinigameHeading";
 import {
   completeSessionStep,
   getSessionStep,
@@ -22,6 +21,8 @@ type ChooseOneParams = {
 
 const extractSingleParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
+
+const HEADING_TITLE = "Wybierz poprawne tłumaczenie";
 
 export default function ChooseOne() {
   const styles = useStyles();
@@ -176,8 +177,10 @@ export default function ChooseOne() {
 
   if (!hasValidData) {
     return (
-      <MinigameLayout contentStyle={styles.container}>
-        <MinigameHeading title="Wybierz poprawne tłumaczenie" />
+      <MinigameLayout
+        contentStyle={styles.container}
+        headingTitle={HEADING_TITLE}
+      >
         <View style={styles.promptContainer}>
           <Text style={styles.promptText}>
             Nie udało się wczytać danych dla tej minigry.
@@ -203,6 +206,12 @@ export default function ChooseOne() {
   const hasResult = hasChecked && selectedIndex !== null;
   const isCorrectSelection =
     hasResult && selectedIndex === correctIndex;
+  const footerResultStatus =
+    isSessionMode && hasResult
+      ? isCorrectSelection
+        ? ("correct" as const)
+        : ("incorrect" as const)
+      : null;
   const checkButtonColor =
     selectedIndex === null
       ? "border"
@@ -241,8 +250,12 @@ export default function ChooseOne() {
   }
 
   return (
-    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
-      <MinigameHeading title="Wybierz poprawne tłumaczenie" />
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerActions={footerActions}
+      headingTitle={HEADING_TITLE}
+      footerResultStatus={footerResultStatus}
+    >
       <View style={styles.promptContainer}>
         <Text style={styles.promptText}>{prompt}</Text>
       </View>

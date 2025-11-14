@@ -9,7 +9,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "./inputaletter-styles";
 import { MinigameLayout } from "../components/MinigameLayout";
-import { MinigameHeading } from "../components/MinigameHeading";
 import {
   completeSessionStep,
   getSessionStep,
@@ -53,6 +52,8 @@ type ActiveSlot = {
 
 const extractSingleParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
+
+const HEADING_TITLE = "Uzupełnij brakujące litery";
 
 const parseWordsParam = (raw: string | undefined): RoundWord[] => {
   if (!raw) {
@@ -537,8 +538,10 @@ export default function InputALetter() {
 
   if (!hasValidData) {
     return (
-      <MinigameLayout contentStyle={styles.container}>
-        <MinigameHeading title="Uzupełnij brakujące litery" />
+      <MinigameLayout
+        contentStyle={styles.container}
+        headingTitle={HEADING_TITLE}
+      >
         <View style={styles.fallbackContainer}>
           <Text style={styles.promptText}>
             Nie udało się wczytać danych dla tej minigry.
@@ -571,6 +574,12 @@ export default function InputALetter() {
       ? "my_green"
       : "my_red"
     : "my_green";
+  const footerResultStatus =
+    isSessionMode && checked
+      ? allCorrectResult
+        ? ("correct" as const)
+        : ("incorrect" as const)
+      : null;
 
   const footerActions: NonNullable<
     React.ComponentProps<typeof MinigameLayout>["footerActions"]
@@ -601,8 +610,12 @@ export default function InputALetter() {
   }
 
   return (
-    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
-      <MinigameHeading title="Uzupełnij brakujące litery" />
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerActions={footerActions}
+      headingTitle={HEADING_TITLE}
+      footerResultStatus={footerResultStatus}
+    >
       <View style={styles.wordsContainer}>
         {words.map((word, wordIndex) => {
           const characters = Array.from(word.term);

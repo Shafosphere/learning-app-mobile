@@ -183,7 +183,9 @@ export default function FlashcardsScreen() {
   const correctionLocked = correction?.mode === "demote";
   const isAnswering =
     selectedItem != null && result === null && correction?.mode !== "intro";
-  const canAutoflowSwitch = !correctionLocked && !isAnswering;
+  const resultPending = result !== null;
+  const canAutoflowSwitch =
+    !correctionLocked && !isAnswering && !resultPending;
 
   useFlashcardsAutoflow({
     enabled: autoflowEnabled,

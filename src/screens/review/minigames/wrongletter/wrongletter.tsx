@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 
 import { useStyles } from "./wrongletter-styles";
 import { MinigameLayout } from "../components/MinigameLayout";
-import { MinigameHeading } from "../components/MinigameHeading";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import {
   buildWrongLetterRoundFromTerm,
@@ -24,6 +23,8 @@ type WrongLetterParams = {
 
 const extractSingleParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
+
+const HEADING_TITLE = "Znajdź błędną literę";
 
 export default function WrongLetter() {
   const styles = useStyles();
@@ -175,6 +176,12 @@ export default function WrongLetter() {
       ? "my_green"
       : "my_red"
     : "my_green";
+  const footerResultStatus =
+    isSessionMode && hasChecked && selectedIndex !== null
+      ? isCorrectSelection
+        ? ("correct" as const)
+        : ("incorrect" as const)
+      : null;
 
   const footerActions = useMemo(() => {
     const actions: NonNullable<
@@ -233,8 +240,12 @@ export default function WrongLetter() {
   }, [round]);
 
   return (
-    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
-      <MinigameHeading title="Znajdź błędną literę" />
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerActions={footerActions}
+      headingTitle={HEADING_TITLE}
+      footerResultStatus={footerResultStatus}
+    >
       {round ? (
         <>
           <Text style={styles.instructions}>{renderedWord}</Text>

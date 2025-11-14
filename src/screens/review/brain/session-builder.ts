@@ -212,13 +212,13 @@ export const buildSessionTemplate = ({
           (word) => word.id !== wrongLetterCandidate.id
         );
 
-        if (remainingAfterWrongLetter.length < 3) {
+        if (remainingAfterWrongLetter.length < 4) {
           continue;
         }
 
-        const memoryWords = remainingAfterWrongLetter.slice(0, 3);
+        const memoryWords = remainingAfterWrongLetter.slice(0, 4);
 
-        if (memoryWords.length < 3) {
+        if (memoryWords.length < 4) {
           continue;
         }
 

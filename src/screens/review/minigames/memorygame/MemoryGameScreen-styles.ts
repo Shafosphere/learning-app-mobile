@@ -8,13 +8,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 24,
     backgroundColor: colors.background,
   },
-  subtitle: {
-    fontSize: 18,
-    fontWeight: "600",
+  readyState: {
+    flex: 1,
+    justifyContent: "center" as const,
+    alignItems: "center" as const,
+    paddingHorizontal: 16,
+  },
+  readyTitle: {
+    fontSize: 26,
+    fontWeight: "700",
+    marginBottom: 12,
     textAlign: "center" as const,
-    marginTop: 8,
-    marginBottom: 24,
     color: colors.headline,
+  },
+  readyDescription: {
+    fontSize: 16,
+    lineHeight: 22,
+    textAlign: "center" as const,
+    color: colors.paragraph,
   },
   grid: {
     flexGrow: 1,

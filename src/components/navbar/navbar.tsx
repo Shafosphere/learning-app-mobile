@@ -42,6 +42,9 @@ type NavbarProps = {
   children?: ReactNode;
 };
 
+const REVIEW_MINIGAME_PREFIX = "/review/minigames";
+const REVIEW_SESSION_PATHS = new Set(["/review/brain", "/review/table"]);
+
 export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
@@ -312,6 +315,15 @@ export default function Navbar({ children }: NavbarProps) {
     dueReviewCount > 0 ? colors.lightbg : colors.darkbg;
   const formattedReviewCount =
     dueReviewCount > 999 ? "999+" : String(dueReviewCount);
+  const shouldHideBottomBar = useMemo(() => {
+    if (!pathname) {
+      return false;
+    }
+    if (pathname.startsWith(REVIEW_MINIGAME_PREFIX)) {
+      return true;
+    }
+    return REVIEW_SESSION_PATHS.has(pathname);
+  }, [pathname]);
 
   return (
     <View style={styles.layout}>
@@ -387,72 +399,74 @@ export default function Navbar({ children }: NavbarProps) {
         <View style={styles.contentInner}>{children}</View>
       </View>
 
-      <View style={[styles.bottomBarContainer, { paddingBottom: bottomPad }]}>
-        <View style={styles.bottomBar}>
-          <Pressable
-            style={({ pressed }) => [
-              styles.bottomIconButton,
-              pressed && styles.bottomIconButtonPressed,
-            ]}
-            onPress={handleReviewPress}
-            accessibilityRole="button"
-            accessibilityLabel="Przejdź do powtórek"
-          >
-            <View style={styles.reviewIconWrapper}>
-              <FontAwesome5
-                name="hourglass-end"
+      {shouldHideBottomBar ? null : (
+        <View style={[styles.bottomBarContainer, { paddingBottom: bottomPad }]}>
+          <View style={styles.bottomBar}>
+            <Pressable
+              style={({ pressed }) => [
+                styles.bottomIconButton,
+                pressed && styles.bottomIconButtonPressed,
+              ]}
+              onPress={handleReviewPress}
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź do powtórek"
+            >
+              <View style={styles.reviewIconWrapper}>
+                <FontAwesome5
+                  name="hourglass-end"
+                  size={24}
+                  color={colors.headline}
+                />
+                <View
+                  style={[
+                    styles.reviewBadge,
+                    { backgroundColor: reviewBadgeBackground },
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.reviewBadgeText,
+                      { color: reviewBadgeTextColor },
+                    ]}
+                    allowFontScaling
+                  >
+                    {formattedReviewCount}
+                  </Text>
+                </View>
+              </View>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.bottomCenterButton,
+                pressed && styles.bottomIconButtonPressed,
+              ]}
+              onPress={handlePadPress}
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź do gry fiszek"
+            >
+              <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.bottomIconButton,
+                pressed && styles.bottomIconButtonPressed,
+              ]}
+              onPress={handleSettingsPress}
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź do ustawień"
+            >
+              <Ionicons
+                style={styles.icon}
+                name="settings-sharp"
                 size={24}
                 color={colors.headline}
               />
-              <View
-                style={[
-                  styles.reviewBadge,
-                  { backgroundColor: reviewBadgeBackground },
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.reviewBadgeText,
-                    { color: reviewBadgeTextColor },
-                  ]}
-                  allowFontScaling
-                >
-                  {formattedReviewCount}
-                </Text>
-              </View>
-            </View>
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.bottomCenterButton,
-              pressed && styles.bottomIconButtonPressed,
-            ]}
-            onPress={handlePadPress}
-            accessibilityRole="button"
-            accessibilityLabel="Przejdź do gry fiszek"
-          >
-            <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
-          </Pressable>
-
-          <Pressable
-            style={({ pressed }) => [
-              styles.bottomIconButton,
-              pressed && styles.bottomIconButtonPressed,
-            ]}
-            onPress={handleSettingsPress}
-            accessibilityRole="button"
-            accessibilityLabel="Przejdź do ustawień"
-          >
-            <Ionicons
-              style={styles.icon}
-              name="settings-sharp"
-              size={24}
-              color={colors.headline}
-            />
-          </Pressable>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      )}
     </View>
   );
 }

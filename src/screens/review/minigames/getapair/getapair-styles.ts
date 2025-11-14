@@ -33,24 +33,30 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   pairButton: {
     backgroundColor: colors.secondBackground,
-    borderRadius: 16,
+    borderRadius: 4,
     paddingVertical: 16,
     paddingHorizontal: 20,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.secondBackground,
     width: "100%",
   },
   pairButtonPressed: {
     opacity: 0.85,
   },
   pairButtonSelected: {
+    backgroundColor: colors.my_yellow,
+    borderColor: colors.my_yellow,
+  },
+  pairButtonEvaluationCorrect: {
     backgroundColor: colors.my_green,
     borderColor: colors.my_green,
   },
-  pairButtonCorrect: {
-    borderColor: colors.my_green,
+  pairButtonEvaluationIncorrectNeutral: {
+    backgroundColor: colors.border,
+    borderColor: colors.border,
   },
-  pairButtonIncorrect: {
+  pairButtonEvaluationIncorrectSelected: {
+    backgroundColor: colors.my_red,
     borderColor: colors.my_red,
   },
   pairContent: {
@@ -74,6 +80,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   pairTextSelected: {
     color: colors.darkbg,
+  },
+  pairTextOnColored: {
+    color: colors.lightbg,
   },
   resultContainer: {
     gap: 12,

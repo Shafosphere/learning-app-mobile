@@ -4,7 +4,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "./getapair-styles";
 import { MinigameLayout } from "../components/MinigameLayout";
-import { MinigameHeading } from "../components/MinigameHeading";
 import {
   completeSessionStep,
   getSessionStep,
@@ -28,24 +27,26 @@ type PairEntry = {
 const extractSingleParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
-const getSummaryLabel = (incorrectCount: number, total: number) => {
-  if (incorrectCount === 0) {
-    return "W tym zestawie wszystkie pary są poprawne.";
-  }
+const HEADING_TITLE = "Znajdź poprawne pary";
 
-  if (incorrectCount === total) {
+const getSummaryLabel = (correctCount: number, total: number) => {
+  if (correctCount === 0) {
     return "W tym zestawie wszystkie pary są błędne.";
   }
 
-  if (incorrectCount === 1) {
-    return "Dokładnie jedna para jest błędna.";
+  if (correctCount === total) {
+    return "W tym zestawie wszystkie pary są poprawne.";
   }
 
-  if (incorrectCount === 2) {
-    return "Dokładnie dwie pary są błędne.";
+  if (correctCount === 1) {
+    return "Dokładnie jedna para jest poprawna.";
   }
 
-  return `Błędnych par jest ${incorrectCount}.`;
+  if (correctCount === 2) {
+    return "Dokładnie dwie pary są poprawne.";
+  }
+
+  return `Poprawnych par jest ${correctCount}.`;
 };
 
 export default function GetaPair() {
@@ -144,16 +145,16 @@ export default function GetaPair() {
 
   const hasValidData = pairs.length === 3;
 
-  const incorrectIds = useMemo(
-    () => new Set(pairs.filter((pair) => !pair.isCorrect).map((pair) => pair.id)),
+  const correctIds = useMemo(
+    () => new Set(pairs.filter((pair) => pair.isCorrect).map((pair) => pair.id)),
     [pairs]
   );
 
-  const incorrectCount = incorrectIds.size;
+  const correctCount = correctIds.size;
   const totalPairs = pairs.length;
   const summaryLabel = useMemo(
-    () => getSummaryLabel(incorrectCount, totalPairs),
-    [incorrectCount, totalPairs]
+    () => getSummaryLabel(correctCount, totalPairs),
+    [correctCount, totalPairs]
   );
 
   useEffect(() => {
@@ -178,7 +179,7 @@ export default function GetaPair() {
   const buildEvaluation = useCallback(
     (selectedSet: Set<number>) =>
       pairs.map((pair) => {
-        const shouldSelect = !pair.isCorrect;
+        const shouldSelect = pair.isCorrect;
         const isSelected = selectedSet.has(pair.id);
 
         return {
@@ -198,7 +199,7 @@ export default function GetaPair() {
     const evaluation = buildEvaluation(selectedSet);
 
     const success =
-      selectedSet.size === incorrectIds.size &&
+      selectedSet.size === correctIds.size &&
       evaluation.every((entry) => entry.isCorrect);
 
     const message = success
@@ -259,8 +260,10 @@ export default function GetaPair() {
 
   if (!hasValidData) {
     return (
-      <MinigameLayout contentStyle={styles.container}>
-        <MinigameHeading title="Znajdź błędne pary" />
+      <MinigameLayout
+        contentStyle={styles.container}
+        headingTitle={HEADING_TITLE}
+      >
         <View style={styles.promptContainer}>
           <Text style={styles.promptText}>
             Nie udało się wczytać danych dla tej minigry.
@@ -282,7 +285,7 @@ export default function GetaPair() {
   const showEvaluation = result !== null;
   const shouldShowCheckButton = !isSessionMode || !showEvaluation;
   const shouldShowContinueButton = isSessionMode && showEvaluation;
-  const requiresSelection = incorrectCount > 0;
+  const requiresSelection = correctCount > 0;
   const awaitingSelection = requiresSelection && selectedIds.length === 0;
   const isCheckButtonDisabled = awaitingSelection || showEvaluation;
   const checkButtonColor = awaitingSelection
@@ -292,6 +295,12 @@ export default function GetaPair() {
       ? "my_green"
       : "my_red"
     : "my_green";
+  const footerResultStatus =
+    isSessionMode && result
+      ? result.success
+        ? ("correct" as const)
+        : ("incorrect" as const)
+      : null;
 
   const footerActions: NonNullable<
     React.ComponentProps<typeof MinigameLayout>["footerActions"]
@@ -321,12 +330,32 @@ export default function GetaPair() {
   }
 
   return (
-    <MinigameLayout contentStyle={styles.container} footerActions={footerActions}>
-      <MinigameHeading title="Znajdź błędne pary" />
+    <MinigameLayout
+      contentStyle={styles.container}
+      footerActions={footerActions}
+      headingTitle={HEADING_TITLE}
+      footerResultStatus={footerResultStatus}
+    >
       <View style={styles.pairsContainer}>
         {pairs.map((pair) => {
           const isSelected = selectedIds.includes(pair.id);
-          const isIncorrect = incorrectIds.has(pair.id);
+          const isCorrectPair = correctIds.has(pair.id);
+          const isIncorrectSelected = isSelected && !isCorrectPair;
+          const evaluationStyle = showEvaluation
+            ? isCorrectPair
+              ? styles.pairButtonEvaluationCorrect
+              : isIncorrectSelected
+              ? styles.pairButtonEvaluationIncorrectSelected
+              : styles.pairButtonEvaluationIncorrectNeutral
+            : null;
+          const shouldHighlightSelection = !showEvaluation && isSelected;
+          const textColorStyle = showEvaluation
+            ? isCorrectPair || isIncorrectSelected
+              ? styles.pairTextOnColored
+              : null
+            : shouldHighlightSelection
+            ? styles.pairTextSelected
+            : null;
 
           return (
             <Pressable
@@ -342,18 +371,15 @@ export default function GetaPair() {
               style={({ pressed }) => [
                 styles.pairButton,
                 pressed && styles.pairButtonPressed,
-                isSelected && styles.pairButtonSelected,
-                showEvaluation &&
-                  (isIncorrect
-                    ? styles.pairButtonIncorrect
-                    : styles.pairButtonCorrect),
+                shouldHighlightSelection && styles.pairButtonSelected,
+                evaluationStyle,
               ]}
             >
               <View style={styles.pairContent}>
                 <Text
                   style={[
                     styles.termText,
-                    isSelected && styles.pairTextSelected,
+                    textColorStyle,
                   ]}
                 >
                   {pair.term}
@@ -361,7 +387,7 @@ export default function GetaPair() {
                 <Text
                   style={[
                     styles.translationText,
-                    isSelected && styles.pairTextSelected,
+                    textColorStyle,
                   ]}
                 >
                   {pair.translation}

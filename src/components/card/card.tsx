@@ -2,7 +2,7 @@ import { Platform, Text, TextInput, View } from "react-native";
 import { useStyles } from "./card-styles";
 import MyButton from "../button/button";
 import { WordWithTranslations } from "@/src/types/boxes";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -58,6 +58,7 @@ export default function Card({
   const previousResult = useRef<boolean | null>(null);
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
+  const lastTranslationItemId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const previousCorrectionInput2 = useRef<string>("");
@@ -69,6 +70,16 @@ export default function Card({
   const len = selectedItem?.translations?.length ?? 0;
   const prev = () => len && setTranslations((i) => (i - 1 + len) % len);
   const next = () => len && setTranslations((i) => (i + 1) % len);
+
+  useLayoutEffect(() => {
+    const currentId = selectedItem?.id ?? null;
+    if (currentId === lastTranslationItemId.current) {
+      return;
+    }
+
+    lastTranslationItemId.current = currentId;
+    setTranslations(0);
+  }, [selectedItem?.id]);
 
   const focusWithDelay = useCallback((ref: React.RefObject<TextInput | null>) => {
     const timeoutId = setTimeout(() => {

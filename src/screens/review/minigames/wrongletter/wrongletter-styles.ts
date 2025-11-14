@@ -29,9 +29,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   tile: {
     minWidth: 52,
     minHeight: 64,
-    borderRadius: 16,
+    borderRadius: 4,
     borderWidth: 2,
-    borderColor: colors.border,
+    borderColor: colors.secondBackground,
     backgroundColor: colors.secondBackground,
     justifyContent: "center",
     alignItems: "center",
