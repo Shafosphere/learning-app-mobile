@@ -75,13 +75,32 @@ export const useStyles = createThemeStylesHook((colors) => {
       width: 48,
       alignItems: "center" as const,
       justifyContent: "space-between" as const,
-      paddingVertical: 12,
-      gap: 12,
+      // paddingVertical: 12,
+      gap: 18,
+      // backgroundColor: colors.my_green,
+    },
+    displayCardCorrect: {
+      borderLeftWidth: 4,
+      borderLeftColor: colors.my_green,
+      backgroundColor: colors.my_green + "12",
+    },
+    displayCardIncorrect: {
+      borderLeftWidth: 4,
+      borderLeftColor: colors.my_red,
+      backgroundColor: colors.my_red + "12",
+    },
+    displayTextCorrect: {
+      color: colors.my_green,
+    },
+    displayTextIncorrect: {
+      color: colors.my_red,
     },
     cardActionButton: {
       alignItems: "center" as const,
       justifyContent: "center" as const,
+      // backgroundColor: colors.my_red,
       padding: 4,
+      paddingTop: 8,
     },
     cardActionIcon: {
       color: colors.headline,

@@ -1,12 +1,9 @@
-import {
-  Audio,
-  InterruptionModeAndroid,
-  InterruptionModeIOS,
-} from "expo-av";
+import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 
 import { SOUNDS, SoundId } from "@/src/constants/sounds";
 
-type LoadedSounds = Partial<Record<SoundId, Audio.Sound>>;
+type SoundInstance = ReturnType<typeof createAudioPlayer>;
+type LoadedSounds = Partial<Record<SoundId, SoundInstance>>;
 
 const loadedSounds: LoadedSounds = {};
 let audioModeConfigured = false;
@@ -17,14 +14,13 @@ const configureAudioMode = async () => {
   }
 
   try {
-    await Audio.setAudioModeAsync({
-      playsInSilentModeIOS: true,
-      staysActiveInBackground: false,
-      allowsRecordingIOS: false,
-      interruptionModeIOS: InterruptionModeIOS.DuckOthers,
-      interruptionModeAndroid: InterruptionModeAndroid.DuckOthers,
-      shouldDuckAndroid: true,
-      playThroughEarpieceAndroid: false,
+    await setAudioModeAsync({
+      playsInSilentMode: true,
+      shouldPlayInBackground: false,
+      allowsRecording: false,
+      interruptionMode: "duckOthers",
+      interruptionModeAndroid: "duckOthers",
+      shouldRouteThroughEarpiece: false,
     });
     audioModeConfigured = true;
   } catch (error) {
@@ -32,16 +28,16 @@ const configureAudioMode = async () => {
   }
 };
 
-const loadSound = async (soundId: SoundId): Promise<Audio.Sound | null> => {
+const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> => {
   const cached = loadedSounds[soundId];
   if (cached) {
     return cached;
   }
 
   try {
-    const { sound } = await Audio.Sound.createAsync(SOUNDS[soundId]);
-    loadedSounds[soundId] = sound;
-    return sound;
+    const player = createAudioPlayer(SOUNDS[soundId]);
+    loadedSounds[soundId] = player;
+    return player;
   } catch (error) {
     console.warn("[soundPlayer] Failed to load sound", {
       soundId,
@@ -59,7 +55,8 @@ export const playSound = async (soundId: SoundId) => {
   }
 
   try {
-    await sound.replayAsync();
+    await sound.seekTo(0);
+    sound.play();
   } catch (error) {
     console.warn("[soundPlayer] Failed to play sound", {
       soundId,

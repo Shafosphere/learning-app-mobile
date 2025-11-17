@@ -1,15 +1,24 @@
-import React, { useEffect, useMemo, useRef } from "react";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useStyles } from "./table-styles";
 import MyButton from "@/src/components/button/button";
+import { ManualCard } from "@/src/hooks/useManualCardsForm";
+import {
+  ManualCardsEditor,
+  type ManualCardsDisplayAction,
+  type ManualCardsEditorStyles,
+} from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import Entypo from "@expo/vector-icons/Entypo";
 import {
   completeSessionStep,
   destroySession,
   getSessionResults,
   getSessionStep,
+  type SessionWordResult,
   type SessionWordStatus,
 } from "@/src/screens/review/minigames/sessionStore";
+import { advanceCustomReview, advanceReview } from "@/src/db/sqlite/db";
 
 type TableParams = {
   words?: string | string[];
@@ -24,13 +33,6 @@ type TableWord = {
   status?: SessionWordStatus;
 };
 
-type TableRow = {
-  key: string;
-  term: string;
-  translation: string;
-  status?: SessionWordStatus;
-};
-
 const extractParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
 
@@ -39,6 +41,7 @@ export default function Table() {
   const router = useRouter();
   const params = useLocalSearchParams<TableParams>();
   const completionRef = useRef(false);
+  const persistenceRef = useRef(false);
 
   const sessionIdParam = extractParam(params.sessionId);
   const stepIdParam = extractParam(params.stepId);
@@ -70,6 +73,54 @@ export default function Table() {
     return getSessionResults(sessionId);
   }, [sessionId]);
 
+  const persistSessionOutcomes = useCallback(
+    async (results: SessionWordResult[] | null) => {
+      if (!results) {
+        return;
+      }
+      const tasks: Promise<unknown>[] = [];
+      for (const entry of results) {
+        if (entry.status !== "correct" || !entry.context) {
+          continue;
+        }
+        if (entry.context.kind === "official") {
+          tasks.push(
+            advanceReview(
+              entry.wordId,
+              entry.context.sourceLangId,
+              entry.context.targetLangId
+            ).catch((error) => {
+              console.warn(
+                "[Table] Failed to advance review word",
+                entry.wordId,
+                error
+              );
+            })
+          );
+        } else if (entry.context.kind === "custom") {
+          tasks.push(
+            advanceCustomReview(entry.wordId, entry.context.courseId).catch(
+              (error) => {
+                console.warn(
+                  "[Table] Failed to advance custom review word",
+                  entry.wordId,
+                  error
+                );
+              }
+            )
+          );
+        }
+      }
+
+      if (tasks.length === 0) {
+        return;
+      }
+
+      await Promise.allSettled(tasks);
+    },
+    []
+  );
+
   useEffect(() => {
     if (!isSessionMode || !sessionId || !sessionStep) {
       return;
@@ -82,6 +133,26 @@ export default function Table() {
     completionRef.current = true;
     completeSessionStep(sessionId, sessionStep.id);
   }, [isSessionMode, sessionId, sessionStep]);
+
+  useEffect(() => {
+    persistenceRef.current = false;
+  }, [sessionId]);
+
+  useEffect(() => {
+    if (!isSessionMode || !sessionId || !sessionResults) {
+      return;
+    }
+    if (persistenceRef.current) {
+      return;
+    }
+    persistenceRef.current = true;
+    void persistSessionOutcomes(sessionResults);
+  }, [
+    isSessionMode,
+    persistSessionOutcomes,
+    sessionId,
+    sessionResults,
+  ]);
 
   const words = useMemo(() => {
     if (isSessionMode) {
@@ -149,34 +220,56 @@ export default function Table() {
     }
   }, [isSessionMode, params.words, sessionResults]);
 
-  const rows = useMemo(() => {
-    const result: TableRow[] = [];
-
-    words.forEach((word) => {
-      if (word.translations.length === 0) {
-        result.push({
-          key: `${word.id}-0`,
-          term: word.term,
-          translation: "—",
+  const manualCardEntries = useMemo(
+    () =>
+      words.map((word, index) => {
+        const id =
+          typeof word.id === "number" && Number.isFinite(word.id)
+            ? `word-${word.id}`
+            : `word-display-${index}`;
+        return {
+          card: {
+            id,
+            front: word.term,
+            answers: word.translations.length > 0 ? word.translations : ["—"],
+            flipped: true,
+          } satisfies ManualCard,
           status: word.status,
-        });
-        return;
-      }
+        };
+      }),
+    [words]
+  );
 
-      word.translations.forEach((translation, index) => {
-        result.push({
-          key: `${word.id}-${index}`,
-          term: index === 0 ? word.term : "",
-          translation,
-          status: word.status,
-        });
-      });
+  const manualCards = useMemo(
+    () => manualCardEntries.map((entry) => entry.card),
+    [manualCardEntries]
+  );
+
+  const manualCardStatuses = useMemo(() => {
+    const map: Record<string, SessionWordStatus | undefined> = {};
+    manualCardEntries.forEach((entry) => {
+      map[entry.card.id] = entry.status;
     });
+    return map;
+  }, [manualCardEntries]);
 
-    return result;
-  }, [words]);
+  const handleLoopAction = useCallback((card: ManualCard) => {
+    console.log("[Table] Loop action triggered for card", card.id);
+  }, []);
 
-  const hasData = rows.length > 0;
+  const loopAction = useMemo<ManualCardsDisplayAction>(
+    () => ({
+      icon: (
+        <Entypo name="loop" size={24} color={styles.loopIcon.color ?? "black"} />
+      ),
+      onPress: handleLoopAction,
+      accessibilityLabel: (card: ManualCard, index: number) =>
+        `Przełącz fiszkę ${index + 1}`,
+    }),
+    [handleLoopAction, styles.loopIcon.color]
+  );
+
+  const hasData = manualCards.length > 0;
   const backLabel = isSessionMode ? "Zakończ" : "Wróć";
 
   const handleBack = () => {
@@ -191,50 +284,21 @@ export default function Table() {
 
   return (
     <View style={styles.container}>
-      <Text style={styles.title}>Tablica słówek</Text>
+      <Text style={styles.title}>Podsumowanie</Text>
       <View style={styles.table}>
-        <View style={styles.tableHeader}>
-          <Text style={[styles.headerCell, styles.termColumn]}>Słówko</Text>
-          <Text style={[styles.headerCell, styles.translationColumn]}>
-            Tłumaczenie
-          </Text>
-        </View>
         {hasData ? (
           <ScrollView
             style={styles.scrollArea}
             contentContainerStyle={styles.tableBody}
+            showsVerticalScrollIndicator={false}
           >
-            {rows.map((row) => (
-              <View
-                key={row.key}
-                style={[
-                  styles.tableRow,
-                  row.status === "correct" && styles.rowCorrect,
-                  row.status === "incorrect" && styles.rowIncorrect,
-                ]}
-              >
-                <Text
-                  style={[
-                    styles.cell,
-                    styles.termColumn,
-                    row.status === "correct" && styles.cellCorrect,
-                    row.status === "incorrect" && styles.cellIncorrect,
-                  ]}
-                >
-                  {row.term}
-                </Text>
-                <Text
-                  style={[
-                    styles.cell,
-                    styles.translationColumn,
-                    row.status === "correct" && styles.cellCorrect,
-                    row.status === "incorrect" && styles.cellIncorrect,
-                  ]}
-                >
-                  {row.translation}
-                </Text>
-              </View>
-            ))}
+            <ManualCardsEditor
+              manualCards={manualCards}
+              styles={{} as ManualCardsEditorStyles}
+              mode="display"
+              displayAction={loopAction}
+              displayStatuses={manualCardStatuses}
+            />
           </ScrollView>
         ) : (
           <View style={styles.emptyState}>
@@ -245,7 +309,9 @@ export default function Table() {
           </View>
         )}
       </View>
-      <MyButton text={backLabel} onPress={handleBack} width={120} />
+      <View style={styles.footer}>
+        <MyButton text={backLabel} onPress={handleBack} width={120} />
+      </View>
     </View>
   );
 }

@@ -37,6 +37,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
   },
   tableBody: {
+    paddingHorizontal: 16,
     paddingBottom: 16,
   },
   tableRow: {
@@ -83,5 +84,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 16,
     color: colors.paragraph,
     textAlign: "center",
+  },
+  footer: {
+    alignItems: "flex-end",
+  },
+  loopIcon: {
+    color: colors.headline,
   },
 }));

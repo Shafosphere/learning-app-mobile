@@ -5,6 +5,7 @@ import type {
   SanitizedWord,
   WrongLetterRound,
 } from "@/src/screens/review/brain/minigame-generators";
+import type { CEFRLevel } from "@/src/types/language";
 
 export type SessionStepType =
   | "memory"
@@ -21,11 +22,24 @@ export type SessionWordSeed = {
   term: string;
   translations: string[];
   source: Exclude<SessionStepType, "table">;
+  context?: SessionWordContext | null;
 };
 
 export type SessionWordResult = SessionWordSeed & {
   status: SessionWordStatus;
 };
+
+export type SessionWordContext =
+  | {
+      kind: "official";
+      sourceLangId: number;
+      targetLangId: number;
+      level: CEFRLevel;
+    }
+  | {
+      kind: "custom";
+      courseId: number;
+    };
 
 type MemoryStep = {
   type: "memory";

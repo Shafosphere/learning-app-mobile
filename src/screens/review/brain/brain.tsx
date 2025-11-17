@@ -31,6 +31,7 @@ import {
 import {
   destroySession,
   registerSession,
+  type SessionWordContext,
 } from "@/src/screens/review/minigames/sessionStore";
 import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
 import {
@@ -44,6 +45,10 @@ import {
   sanitizeWord,
   SanitizedWord,
 } from "./minigame-generators";
+import { getMinigameRequirement } from "./minigame-config";
+
+const INPUT_A_LETTER_REQUIREMENT = getMinigameRequirement("inputaletter");
+const WRONG_LETTER_REQUIREMENT = getMinigameRequirement("wrongletter");
 
 const mapCustomReviewToWord = (
   card: CustomReviewFlashcard
@@ -79,6 +84,10 @@ export default function BrainScreen() {
   } = useSettings();
   const router = useRouter();
   const [words, setWords] = useState<WordWithTranslations[]>([]);
+  const [wordContexts, setWordContexts] = useState<Record<
+    number,
+    SessionWordContext
+  >>({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelTranslations, setLevelTranslations] = useState<string[]>([]);
@@ -104,6 +113,7 @@ export default function BrainScreen() {
     const buildResult = buildSessionTemplate({
       sanitizedWords,
       levelTranslations,
+      wordContexts,
     });
 
     if (!buildResult.ok) {
@@ -127,11 +137,7 @@ export default function BrainScreen() {
       sessionId
     )}&stepId=${encodeURIComponent(firstStep.id)}`;
     router.push(nextHref as never);
-  }, [
-    levelTranslations,
-    router,
-    sanitizedWords,
-  ]);
+  }, [levelTranslations, router, sanitizedWords, wordContexts]);
 
   // --- Choose One minigame setup -------------------------------------------
   const canStartChooseOne = useMemo(() => {
@@ -153,17 +159,20 @@ export default function BrainScreen() {
   );
 
   const canStartInputALetter = useMemo(() => {
-    const eligible = sanitizedWords.filter(
-      (word) => getLetterIndices(word.term).length > 0
-    );
-
-    return eligible.length >= 3;
+    const eligible = INPUT_A_LETTER_REQUIREMENT
+      ? INPUT_A_LETTER_REQUIREMENT.eligibleWords(sanitizedWords)
+      : sanitizedWords.filter((word) => getLetterIndices(word.term).length > 0);
+    const minimum = INPUT_A_LETTER_REQUIREMENT?.minDistinctWords ?? 3;
+    return eligible.length >= minimum;
   }, [sanitizedWords]);
 
-  const canStartWrongLetter = useMemo(
-    () => sanitizedWords.some((word) => word.term.trim().length >= 2),
-    [sanitizedWords]
-  );
+  const canStartWrongLetter = useMemo(() => {
+    const eligible = WRONG_LETTER_REQUIREMENT
+      ? WRONG_LETTER_REQUIREMENT.eligibleWords(sanitizedWords)
+      : sanitizedWords.filter((word) => word.term.trim().length >= 2);
+    const minimum = WRONG_LETTER_REQUIREMENT?.minDistinctWords ?? 1;
+    return eligible.length >= minimum;
+  }, [sanitizedWords]);
 
   // --- Data fetching -------------------------------------------------------
   useEffect(() => {
@@ -173,6 +182,7 @@ export default function BrainScreen() {
       if (!activeCustomCourseId && !activeCourse?.sourceLangId) {
         if (isMounted) {
           setWords([]);
+          setWordContexts({});
           setLoading(false);
         }
         return;
@@ -184,6 +194,7 @@ export default function BrainScreen() {
       try {
         const now = Date.now();
         let result: WordWithTranslations[] = [];
+        const contexts: Record<number, SessionWordContext> = {};
 
         if (activeCustomCourseId != null) {
           const rows = await getDueCustomReviewFlashcards(
@@ -191,7 +202,13 @@ export default function BrainScreen() {
             50,
             now
           );
-          result = rows.map(mapCustomReviewToWord);
+          result = rows.map((row) => {
+            contexts[row.id] = {
+              kind: "custom",
+              courseId: row.courseId,
+            };
+            return mapCustomReviewToWord(row);
+          });
         } else {
           const srcId = activeCourse?.sourceLangId ?? null;
           const tgtId = activeCourse?.targetLangId ?? null;
@@ -203,16 +220,26 @@ export default function BrainScreen() {
               50,
               now
             );
+            result.forEach((word) => {
+              contexts[word.id] = {
+                kind: "official",
+                sourceLangId: srcId,
+                targetLangId: tgtId,
+                level: selectedLevel,
+              };
+            });
           }
         }
 
         if (isMounted) {
           setWords(result);
+          setWordContexts(contexts);
         }
       } catch (err) {
         console.error("Failed to load review words for brain screen", err);
         if (isMounted) {
           setWords([]);
+          setWordContexts({});
           setError("Nie udało się pobrać fiszek.");
         }
       } finally {

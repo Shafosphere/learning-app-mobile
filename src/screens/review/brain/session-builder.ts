@@ -3,36 +3,57 @@ import {
   buildGetAPairRound,
   buildInputALetterRound,
   buildWrongLetterRound,
-  getLetterIndices,
   shuffleArray,
   type SanitizedWord,
 } from "./minigame-generators";
+import {
+  MINIGAME_REQUIREMENTS,
+  type MinigameRequirement,
+} from "./minigame-config";
 import type {
   SessionTemplate,
   SessionWordSeed,
   SessionStepTemplate,
+  SessionWordContext,
 } from "@/src/screens/review/minigames/sessionStore";
 
-export const MIN_SESSION_WORDS = 11;
+export const MIN_SESSION_WORDS = 9;
+const MAX_SESSION_WORDS = 20;
+const MIN_MINIGAMES_PER_SESSION = 3;
+const MAX_SELECTION_ATTEMPTS = 5;
 
 export type SessionBuildResult =
   | { ok: true; template: SessionTemplate }
   | { ok: false; message: string };
 
-const differenceById = (
-  source: SanitizedWord[],
-  ids: Set<number>
-): SanitizedWord[] => source.filter((word) => !ids.has(word.id));
+type MinigameStepType = SessionWordSeed["source"];
+type PlayableRequirement = MinigameRequirement & { isSummary?: false };
+
+type WordContextMap = Record<number, SessionWordContext | undefined>;
+
+type StepBuildContext = {
+  sessionWords: SanitizedWord[];
+  levelTranslations: string[];
+  wordContexts: WordContextMap;
+};
+
+type StepBuildOutcome = {
+  step: SessionStepTemplate;
+  usedWords: SanitizedWord[];
+  wordSeeds: SessionWordSeed[];
+};
 
 const toSeeds = (
   words: SanitizedWord[],
-  source: SessionWordSeed["source"]
+  source: SessionWordSeed["source"],
+  contextMap: WordContextMap
 ): SessionWordSeed[] =>
   words.map((word) => ({
     wordId: word.id,
     term: word.term,
     translations: word.translations,
     source,
+    context: contextMap[word.id] ?? null,
   }));
 
 const uniqueById = (words: SanitizedWord[]): SanitizedWord[] => {
@@ -46,58 +67,16 @@ const uniqueById = (words: SanitizedWord[]): SanitizedWord[] => {
   });
 };
 
-const combinationIterator = (
-  items: SanitizedWord[],
-  size: number,
-  visitor: (combo: SanitizedWord[]) => boolean
-): boolean => {
-  const n = items.length;
-  if (size === 0 || size > n) {
-    return false;
-  }
-
-  const indices = Array.from({ length: size }, (_, index) => index);
-
-  const visit = () => {
-    const combo = indices.map((index) => items[index]);
-    return visitor(combo);
-  };
-
-  if (visit()) {
-    return true;
-  }
-
-  while (true) {
-    let i = size - 1;
-    while (i >= 0 && indices[i] === i + n - size) {
-      i -= 1;
-    }
-
-    if (i < 0) {
-      break;
-    }
-
-    indices[i] += 1;
-    for (let j = i + 1; j < size; j += 1) {
-      indices[j] = indices[j - 1] + 1;
-    }
-
-    if (visit()) {
-      return true;
-    }
-  }
-
-  return false;
-};
-
 type BuildSessionParams = {
   sanitizedWords: SanitizedWord[];
   levelTranslations: string[];
+  wordContexts: WordContextMap;
 };
 
 export const buildSessionTemplate = ({
   sanitizedWords,
   levelTranslations,
+  wordContexts,
 }: BuildSessionParams): SessionBuildResult => {
   const sanitized = uniqueById(sanitizedWords);
   console.log("[Brain] Starting session build", {
@@ -116,190 +95,21 @@ export const buildSessionTemplate = ({
     };
   }
 
-  const inputEligible = sanitized.filter(
-    (word) => getLetterIndices(word.term).length > 0
+  const sessionWords = shuffleArray(sanitized).slice(
+    0,
+    Math.min(sanitized.length, MAX_SESSION_WORDS)
   );
 
-  const wrongLetterEligible = sanitized.filter(
-    (word) => word.term.trim().length >= 2
-  );
-
-  if (inputEligible.length < 3) {
-    console.warn("[Brain] Session build aborted: not enough input-eligible words", {
-      inputEligibleCount: inputEligible.length,
-      total: sanitized.length,
-    });
-    return {
-      ok: false,
-      message:
-        "Brakuje słówek, w których możemy ukryć litery. Odśwież fiszki i spróbuj ponownie.",
-    };
-  }
-
-  if (wrongLetterEligible.length === 0) {
-    console.warn("[Brain] Session build aborted: no wrong-letter eligible words");
-    return {
-      ok: false,
-      message:
-        "Brakuje słówek nadających się do gry w dodatkową literę. Odśwież fiszki i spróbuj ponownie.",
-    };
-  }
-
-  const shuffledInputCandidates = shuffleArray(inputEligible);
-  const allWordsShuffled = shuffleArray(sanitized);
-
-  let template: SessionTemplate | null = null;
-
-  combinationIterator(shuffledInputCandidates, 3, (inputCombo) => {
-    const inputIds = new Set(inputCombo.map((word) => word.id));
-    const remainingAfterInput = differenceById(allWordsShuffled, inputIds);
-
-    if (remainingAfterInput.length < 7) {
-      return false;
-    }
-
-    const shuffledPairsPool = shuffleArray(remainingAfterInput);
-
-    const foundPair = combinationIterator(shuffledPairsPool, 3, (pairCombo) => {
-      const pairRound = buildGetAPairRound(pairCombo, sanitized, levelTranslations);
-      if (!pairRound) {
-        return false;
-      }
-
-      const pairIds = new Set(pairCombo.map((word) => word.id));
-      const remainingAfterPairs = differenceById(remainingAfterInput, pairIds);
-
-      if (remainingAfterPairs.length < 5) {
-        return false;
-      }
-
-      const shuffledChooseCandidates = shuffleArray(remainingAfterPairs);
-
-      for (const chooseCandidate of shuffledChooseCandidates) {
-        const chooseRound = buildChooseOneRoundForTarget(
-          chooseCandidate,
-          sanitized
-        );
-
-        if (!chooseRound) {
-          continue;
-        }
-
-        const remainingAfterChoose = remainingAfterPairs.filter(
-          (word) => word.id !== chooseCandidate.id
-        );
-
-        if (remainingAfterChoose.length < 4) {
-          continue;
-        }
-
-        const shuffledAfterChoose = shuffleArray(remainingAfterChoose);
-        const wrongLetterCandidate = shuffledAfterChoose.find(
-          (word) => word.term.trim().length >= 2
-        );
-
-        if (!wrongLetterCandidate) {
-          continue;
-        }
-
-        const wrongLetterRound = buildWrongLetterRound(wrongLetterCandidate);
-
-        if (!wrongLetterRound) {
-          continue;
-        }
-
-        const remainingAfterWrongLetter = shuffledAfterChoose.filter(
-          (word) => word.id !== wrongLetterCandidate.id
-        );
-
-        if (remainingAfterWrongLetter.length < 4) {
-          continue;
-        }
-
-        const memoryWords = remainingAfterWrongLetter.slice(0, 4);
-
-        if (memoryWords.length < 4) {
-          continue;
-        }
-
-        const inputRound = buildInputALetterRound(inputCombo);
-
-        if (!inputRound) {
-          console.warn("[Brain] Failed to build Input a letter round", {
-            inputWordIds: inputCombo.map((word) => word.id),
-            inputTerms: inputCombo.map((word) => word.term),
-          });
-          continue;
-        }
-
-        // Prepare session data
-        const steps: SessionStepTemplate[] = [
-          {
-            type: "memory",
-            wordIds: memoryWords.map((word) => word.id),
-            words: memoryWords,
-          },
-          {
-            type: "chooseone",
-            wordId: chooseCandidate.id,
-            round: chooseRound,
-          },
-          {
-            type: "inputaletter",
-            wordIds: inputCombo.map((word) => word.id),
-            round: inputRound,
-          },
-          {
-            type: "getapair",
-            wordIds: pairCombo.map((word) => word.id),
-            round: pairRound,
-          },
-          {
-            type: "wrongletter",
-            wordId: wrongLetterCandidate.id,
-            round: wrongLetterRound,
-          },
-          {
-            type: "table",
-          },
-        ];
-
-        const wordSeeds: SessionWordSeed[] = [
-          ...toSeeds(memoryWords, "memory"),
-          ...toSeeds([chooseCandidate], "chooseone"),
-          ...toSeeds(inputCombo, "inputaletter"),
-          ...toSeeds(pairCombo, "getapair"),
-          ...toSeeds([wrongLetterCandidate], "wrongletter"),
-        ];
-
-        template = {
-          steps,
-          words: wordSeeds,
-        };
-
-        console.log("[Brain] Session template built", {
-          memoryWordIds: memoryWords.map((word) => word.id),
-          chooseWordId: chooseCandidate.id,
-          inputWordIds: inputCombo.map((word) => word.id),
-          getAPairWordIds: pairCombo.map((word) => word.id),
-           wrongLetterWordId: wrongLetterCandidate.id,
-          levelTranslationsCount: levelTranslations.length,
-        });
-
-        return true;
-      }
-
-      return false;
-    });
-
-    return foundPair;
+  const dynamicTemplate = buildDynamicSessionTemplate({
+    sessionWords,
+    levelTranslations,
+    wordContexts,
   });
 
-  if (!template) {
-    console.warn("[Brain] Session build failed after all combinations tried", {
+  if (!dynamicTemplate) {
+    console.warn("[Brain] Session build failed: unable to construct sequence", {
       sanitizedCount: sanitized.length,
-      inputEligibleCount: inputEligible.length,
-      wrongLetterEligibleCount: wrongLetterEligible.length,
+      sessionWordCount: sessionWords.length,
     });
     return {
       ok: false,
@@ -310,6 +120,227 @@ export const buildSessionTemplate = ({
 
   return {
     ok: true,
-    template,
+    template: dynamicTemplate,
   };
+};
+
+const isPlayableRequirement = (
+  requirement: MinigameRequirement
+): requirement is PlayableRequirement => requirement.isSummary !== true;
+
+const PLAYABLE_REQUIREMENTS = MINIGAME_REQUIREMENTS.filter(isPlayableRequirement);
+
+const getRequiredWordCount = (requirement: MinigameRequirement): number =>
+  requirement.selectCount ?? requirement.minDistinctWords;
+
+const violatesSequenceRules = (
+  previousTypes: MinigameStepType[],
+  nextType: MinigameStepType
+): boolean => {
+  const lastType = previousTypes[previousTypes.length - 1];
+  if (lastType && lastType === nextType) {
+    return true;
+  }
+
+  if (previousTypes.length < 3) {
+    return false;
+  }
+
+  const prevType = previousTypes[previousTypes.length - 2];
+  const thirdLast = previousTypes[previousTypes.length - 3];
+
+  return Boolean(thirdLast && thirdLast === lastType && prevType === nextType);
+};
+
+const buildDynamicSessionTemplate = ({
+  sessionWords,
+  levelTranslations,
+  wordContexts,
+}: {
+  sessionWords: SanitizedWord[];
+  levelTranslations: string[];
+  wordContexts: WordContextMap;
+}): SessionTemplate | null => {
+  let remainingWords = [...sessionWords];
+  const context: StepBuildContext = {
+    sessionWords,
+    levelTranslations,
+    wordContexts,
+  };
+
+  const steps: SessionStepTemplate[] = [];
+  const wordSeeds: SessionWordSeed[] = [];
+  const chosenTypes: MinigameStepType[] = [];
+
+  while (remainingWords.length > 0) {
+    const shuffledRequirements = shuffleArray(PLAYABLE_REQUIREMENTS);
+    let outcome: StepBuildOutcome | null = null;
+
+    for (const requirement of shuffledRequirements) {
+      const stepType = requirement.type as MinigameStepType;
+      if (violatesSequenceRules(chosenTypes, stepType)) {
+        continue;
+      }
+
+      const requiredCount = getRequiredWordCount(requirement);
+      const eligible = requirement.eligibleWords(remainingWords);
+
+      if (eligible.length < requiredCount || requiredCount <= 0) {
+        continue;
+      }
+
+      for (let attempt = 0; attempt < MAX_SELECTION_ATTEMPTS; attempt += 1) {
+        const selected = shuffleArray(eligible).slice(0, requiredCount);
+
+        if (selected.length < requiredCount) {
+          continue;
+        }
+
+        const built = buildStepForRequirement(
+          requirement,
+          selected,
+          context
+        );
+
+        if (built) {
+          outcome = built;
+          break;
+        }
+      }
+
+      if (outcome) {
+        break;
+      }
+    }
+
+    if (!outcome) {
+      console.warn("[Brain] Unable to select next minigame", {
+        remainingWords: remainingWords.length,
+        chosenTypes,
+      });
+      return null;
+    }
+
+    steps.push(outcome.step);
+    wordSeeds.push(...outcome.wordSeeds);
+    chosenTypes.push(outcome.step.type as MinigameStepType);
+
+    const usedIds = new Set(outcome.usedWords.map((word) => word.id));
+    remainingWords = remainingWords.filter((word) => !usedIds.has(word.id));
+  }
+
+  if (steps.length < MIN_MINIGAMES_PER_SESSION) {
+    console.warn("[Brain] Too few minigames generated", {
+      steps: steps.map((step) => step.type),
+    });
+    return null;
+  }
+
+  steps.push({ type: "table" });
+
+  return {
+    steps,
+    words: wordSeeds,
+  };
+};
+
+const buildStepForRequirement = (
+  requirement: PlayableRequirement,
+  selectedWords: SanitizedWord[],
+  context: StepBuildContext
+): StepBuildOutcome | null => {
+  const source = requirement.type as MinigameStepType;
+  switch (requirement.type) {
+    case "memory": {
+      return {
+        step: {
+          type: "memory",
+          wordIds: selectedWords.map((word) => word.id),
+          words: selectedWords,
+        },
+        usedWords: selectedWords,
+        wordSeeds: toSeeds(selectedWords, source, context.wordContexts),
+      };
+    }
+    case "chooseone": {
+      const target = selectedWords[0];
+      if (!target) {
+        return null;
+      }
+
+      const round = buildChooseOneRoundForTarget(target, context.sessionWords);
+      if (!round) {
+        return null;
+      }
+
+      return {
+        step: {
+          type: "chooseone",
+          wordId: target.id,
+          round,
+        },
+        usedWords: selectedWords,
+        wordSeeds: toSeeds(selectedWords, source, context.wordContexts),
+      };
+    }
+    case "inputaletter": {
+      const round = buildInputALetterRound(selectedWords);
+      if (!round) {
+        return null;
+      }
+
+      return {
+        step: {
+          type: "inputaletter",
+          wordIds: selectedWords.map((word) => word.id),
+          round,
+        },
+        usedWords: selectedWords,
+        wordSeeds: toSeeds(selectedWords, source, context.wordContexts),
+      };
+    }
+    case "getapair": {
+      const round = buildGetAPairRound(
+        selectedWords,
+        context.sessionWords,
+        context.levelTranslations
+      );
+      if (!round) {
+        return null;
+      }
+
+      return {
+        step: {
+          type: "getapair",
+          wordIds: selectedWords.map((word) => word.id),
+          round,
+        },
+        usedWords: selectedWords,
+        wordSeeds: toSeeds(selectedWords, source, context.wordContexts),
+      };
+    }
+    case "wrongletter": {
+      const target = selectedWords[0];
+      if (!target) {
+        return null;
+      }
+
+      const round = buildWrongLetterRound(target);
+      if (!round) {
+        return null;
+      }
+
+      return {
+        step: {
+          type: "wrongletter",
+          wordId: target.id,
+          round,
+        },
+        usedWords: selectedWords,
+        wordSeeds: toSeeds(selectedWords, source, context.wordContexts),
+      };
+    }
+    default:
+      return null;
+  }
 };

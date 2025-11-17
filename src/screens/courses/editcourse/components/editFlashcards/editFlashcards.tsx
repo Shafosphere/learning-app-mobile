@@ -40,28 +40,46 @@ export interface ManualCardsEditorStyles {
   buttonContainer: ViewStyle;
   manualAddButton: ViewStyle;
   manualAddIcon: TextStyle;
+  displayCardCorrect?: ViewStyle;
+  displayCardIncorrect?: ViewStyle;
+  displayTextCorrect?: TextStyle;
+  displayTextIncorrect?: TextStyle;
 }
 
 export interface ManualCardsEditorProps {
   manualCards: ManualCard[];
   styles: ManualCardsEditorStyles;
-  onCardFrontChange: (cardId: string, value: string) => void;
-  onCardAnswerChange: (
+  mode?: "edit" | "display";
+  displayAction?: ManualCardsDisplayAction;
+  displayStatuses?: Record<string, ManualCardDisplayStatus | undefined>;
+  onCardFrontChange?: (cardId: string, value: string) => void;
+  onCardAnswerChange?: (
     cardId: string,
     answerIndex: number,
     value: string
   ) => void;
-  onAddAnswer: (cardId: string) => void;
-  onRemoveAnswer: (cardId: string, answerIndex: number) => void;
-  onAddCard: () => void;
-  onRemoveCard: (cardId: string) => void;
-  onToggleFlipped: (cardId: string) => void;
+  onAddAnswer?: (cardId: string) => void;
+  onRemoveAnswer?: (cardId: string, answerIndex: number) => void;
+  onAddCard?: () => void;
+  onRemoveCard?: (cardId: string) => void;
+  onToggleFlipped?: (cardId: string) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
 }
 
+export interface ManualCardsDisplayAction {
+  icon: ReactNode | ((card: ManualCard, index: number) => ReactNode);
+  onPress?: (card: ManualCard, index: number) => void;
+  accessibilityLabel?: string | ((card: ManualCard, index: number) => string);
+}
+
+export type ManualCardDisplayStatus = "pending" | "correct" | "incorrect";
+
 export const ManualCardsEditor = ({
   manualCards,
-  // styles,
+  styles: _deprecatedExternalStyles,
+  mode = "edit",
+  displayAction,
+  displayStatuses,
   onCardFrontChange,
   onCardAnswerChange,
   onAddAnswer,
@@ -72,6 +90,43 @@ export const ManualCardsEditor = ({
   actionButtons,
 }: ManualCardsEditorProps) => {
   const styles = useStyles();
+  const isDisplayMode = mode === "display";
+  const handleFrontChange =
+    onCardFrontChange ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleAnswerChange =
+    onCardAnswerChange ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleAddAnswerPress =
+    onAddAnswer ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleRemoveAnswerPress =
+    onRemoveAnswer ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleAddCardPress =
+    onAddCard ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleRemoveCardPress =
+    onRemoveCard ??
+    (() => {
+      // no-op in display mode
+    });
+  const handleToggleFlippedPress =
+    onToggleFlipped ??
+    (() => {
+      // no-op in display mode
+    });
+
   return (
     <>
       {manualCards.map((card, index) => {
@@ -80,52 +135,97 @@ export const ManualCardsEditor = ({
         });
         const isFirst = index === 0;
         const isSingleCard = manualCards.length <= 1;
+        const displayStatus = displayStatuses?.[card.id];
+        const resolvedDisplayIcon =
+          typeof displayAction?.icon === "function"
+            ? displayAction.icon(card, index)
+            : displayAction?.icon;
+        const resolvedAccessibilityLabel =
+          typeof displayAction?.accessibilityLabel === "function"
+            ? displayAction.accessibilityLabel(card, index)
+            : displayAction?.accessibilityLabel;
 
         return (
           <View
             key={card.id}
-            style={[styles.card, isFirst && styles.cardFirst]}
+            style={[
+              styles.card,
+              isFirst && styles.cardFirst,
+              isDisplayMode &&
+                displayStatus === "correct" &&
+                styles.displayCardCorrect,
+              isDisplayMode &&
+                displayStatus === "incorrect" &&
+                styles.displayCardIncorrect,
+            ]}
           >
-            <Text style={styles.number}>{index + 1}</Text>
+            <Text
+              style={[
+                styles.number,
+                isDisplayMode &&
+                  displayStatus === "correct" &&
+                  styles.displayTextCorrect,
+                isDisplayMode &&
+                  displayStatus === "incorrect" &&
+                  styles.displayTextIncorrect,
+              ]}
+            >
+              {index + 1}
+            </Text>
             <View style={styles.inputContainer}>
               <View style={styles.flipRow}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`${
-                    card.flipped ? "Wyłącz" : "Włącz"
-                  } odwracanie dla fiszki ${index + 1}`}
-                  onPress={() => {
-                    console.log("Toggling flip for card:", {
-                      id: card.id,
-                      oldFlipped: card.flipped,
-                    });
-                    onToggleFlipped(card.id);
-                  }}
-                  hitSlop={8}
-                >
-                  <View style={styles.lockcontainer}>
-                    {card.flipped ? (
-                      <FontAwesome5
-                        style={[styles.icon, styles.iconFlipActivate]}
-                        name="lock-open"
-                        size={16}
-                      />
-                    ) : (
-                      <FontAwesome
-                        style={[styles.icon, styles.iconFlipDeactive]}
-                        name="lock"
-                        size={21}
-                      />
-                    )}
-                  </View>
-                </Pressable>
-                <TextInput
-                  value={card.front}
-                  style={styles.cardinput}
-                  placeholder="przód"
-                  placeholderTextColor={styles.cardPlaceholder?.color}
-                  onChangeText={(value) => onCardFrontChange(card.id, value)}
-                />
+                {!isDisplayMode && (
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`${
+                      card.flipped ? "Wyłącz" : "Włącz"
+                    } odwracanie dla fiszki ${index + 1}`}
+                    onPress={() => {
+                      console.log("Toggling flip for card:", {
+                        id: card.id,
+                        oldFlipped: card.flipped,
+                      });
+                      handleToggleFlippedPress(card.id);
+                    }}
+                    hitSlop={8}
+                  >
+                    <View style={styles.lockcontainer}>
+                      {card.flipped ? (
+                        <FontAwesome5
+                          style={[styles.icon, styles.iconFlipActivate]}
+                          name="lock-open"
+                          size={16}
+                        />
+                      ) : (
+                        <FontAwesome
+                          style={[styles.icon, styles.iconFlipDeactive]}
+                          name="lock"
+                          size={21}
+                        />
+                      )}
+                    </View>
+                  </Pressable>
+                )}
+                {isDisplayMode ? (
+                  <Text
+                    style={[
+                      styles.cardinput,
+                      displayStatus === "correct" && styles.displayTextCorrect,
+                      displayStatus === "incorrect" &&
+                        styles.displayTextIncorrect,
+                    ]}
+                  >
+                    {card.front?.trim().length ? card.front : "—"}
+                  </Text>
+                ) : (
+                  <TextInput
+                    value={card.front}
+                    style={styles.cardinput}
+                    placeholder="przód"
+                    placeholderTextColor={styles.cardPlaceholder?.color}
+                    onChangeText={(value) => handleFrontChange(card.id, value)}
+                  />
+                )}
               </View>
               <View style={styles.cardDivider} />
               <View style={styles.answersContainer}>
@@ -138,16 +238,30 @@ export const ManualCardsEditor = ({
                       style={styles.answerRow}
                     >
                       <Text style={styles.answerIndex}>{answerIndex + 1}.</Text>
-                      <TextInput
-                        value={answer}
-                        style={styles.answerInput}
-                        placeholder={placeholder}
-                        placeholderTextColor={styles.cardPlaceholder?.color}
-                        onChangeText={(value) =>
-                          onCardAnswerChange(card.id, answerIndex, value)
-                        }
-                      />
-                      {card.answers.length > 1 && (
+                      {isDisplayMode ? (
+                        <Text
+                          style={[
+                            styles.answerInput,
+                            displayStatus === "correct" &&
+                              styles.displayTextCorrect,
+                            displayStatus === "incorrect" &&
+                              styles.displayTextIncorrect,
+                          ]}
+                        >
+                          {answer?.trim().length ? answer : "—"}
+                        </Text>
+                      ) : (
+                        <TextInput
+                          value={answer}
+                          style={styles.answerInput}
+                          placeholder={placeholder}
+                          placeholderTextColor={styles.cardPlaceholder?.color}
+                          onChangeText={(value) =>
+                            handleAnswerChange(card.id, answerIndex, value)
+                          }
+                        />
+                      )}
+                      {!isDisplayMode && card.answers.length > 1 && (
                         <Pressable
                           accessibilityRole="button"
                           accessibilityLabel={`Usuń odpowiedź ${
@@ -155,7 +269,9 @@ export const ManualCardsEditor = ({
                           } dla fiszki ${index + 1}`}
                           style={styles.answerRemoveButton}
                           hitSlop={8}
-                          onPress={() => onRemoveAnswer(card.id, answerIndex)}
+                          onPress={() =>
+                            handleRemoveAnswerPress(card.id, answerIndex)
+                          }
                         >
                           <Feather
                             name="minus-circle"
@@ -169,65 +285,94 @@ export const ManualCardsEditor = ({
                 })}
               </View>
             </View>
-            <View style={styles.cardActions}>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Usuń fiszkę ${index + 1}`}
-                style={[
-                  styles.cardActionButton,
-                  isSingleCard && styles.removeButtonDisabled,
-                ]}
-                hitSlop={8}
-                disabled={isSingleCard}
-                onPress={() => onRemoveCard(card.id)}
-              >
-                <Feather
-                  name="trash-2"
-                  size={24}
-                  color={styles.cardActionIcon?.color ?? "black"}
-                />
-              </Pressable>
-              <Pressable
-                accessibilityRole="button"
-                accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${index + 1}`}
-                style={styles.cardActionButton}
-                hitSlop={8}
-                onPress={() => onAddAnswer(card.id)}
-              >
-                <Feather
-                  name="plus"
-                  size={24}
-                  color={styles.cardActionIcon?.color ?? "black"}
-                />
-              </Pressable>
-            </View>
+            {(!isDisplayMode || (isDisplayMode && resolvedDisplayIcon)) && (
+              <View style={styles.cardActions}>
+                {isDisplayMode ? (
+                  <>
+                    {resolvedDisplayIcon ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={
+                          resolvedAccessibilityLabel ??
+                          `Akcja dla fiszki ${index + 1}`
+                        }
+                        style={styles.cardActionButton}
+                        hitSlop={8}
+                        onPress={() =>
+                          displayAction?.onPress?.(card, index)
+                        }
+                      >
+                        {resolvedDisplayIcon}
+                      </Pressable>
+                    ) : null}
+                  </>
+                ) : (
+                  <>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Usuń fiszkę ${index + 1}`}
+                      style={[
+                        styles.cardActionButton,
+                        isSingleCard && styles.removeButtonDisabled,
+                      ]}
+                      hitSlop={8}
+                      disabled={isSingleCard}
+                      onPress={() => handleRemoveCardPress(card.id)}
+                    >
+                      <Feather
+                        name="trash-2"
+                        size={24}
+                        color={styles.cardActionIcon?.color ?? "black"}
+                      />
+                    </Pressable>
+                    <Pressable
+                      accessibilityRole="button"
+                      accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
+                        index + 1
+                      }`}
+                      style={styles.cardActionButton}
+                      hitSlop={8}
+                      onPress={() => handleAddAnswerPress(card.id)}
+                    >
+                      <Feather
+                        name="plus"
+                        size={24}
+                        color={styles.cardActionIcon?.color ?? "black"}
+                      />
+                    </Pressable>
+                  </>
+                )}
+              </View>
+            )}
           </View>
         );
       })}
 
-      <View style={styles.buttonContainer}>
-        {actionButtons?.map((action) => (
+      {!isDisplayMode && (
+        <View style={styles.buttonContainer}>
+          {actionButtons?.map((action) => (
+            <Pressable
+              key={action.key}
+              accessibilityRole="button"
+              accessibilityLabel={action.accessibilityLabel}
+              style={styles.manualAddButton}
+              accessibilityState={{ disabled: !!action.disabled }}
+              disabled={action.disabled}
+              onPress={action.disabled ? undefined : action.onPress}
+            >
+              {action.content}
+            </Pressable>
+          ))}
           <Pressable
-            key={action.key}
             accessibilityRole="button"
-            accessibilityLabel={action.accessibilityLabel}
+            accessibilityLabel="Dodaj nową fiszkę"
             style={styles.manualAddButton}
-            accessibilityState={{ disabled: !!action.disabled }}
-            disabled={action.disabled}
-            onPress={action.disabled ? undefined : action.onPress}
+            onPress={handleAddCardPress}
           >
-            {action.content}
+            <Text style={styles.manualAddIcon}>+</Text>
           </Pressable>
-        ))}
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel="Dodaj nową fiszkę"
-          style={styles.manualAddButton}
-          onPress={onAddCard}
-        >
-          <Text style={styles.manualAddIcon}>+</Text>
-        </Pressable>
-      </View>
+        </View>
+      )}
     </>
   );
 };
