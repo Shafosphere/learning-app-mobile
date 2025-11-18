@@ -471,6 +471,33 @@ export default function BrainScreen() {
     });
   }, [canStartWrongLetter, router, sanitizedWords]);
 
+  const handleStartTraditional = useCallback(() => {
+    router.push("/review/session");
+  }, [router]);
+
+  const handleOpenAnimationDemo = useCallback(() => {
+    const payload = sanitizedWords.slice(0, 15).map((word) => ({
+      id: word.id,
+      term: word.term,
+      translations: word.translations,
+    }));
+
+    if (payload.length === 0) {
+      Alert.alert(
+        "Brak danych",
+        "Najpierw pobierz fiszki, aby zobaczyć karuzelę animacji."
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/review/animation",
+      params: {
+        words: encodeURIComponent(JSON.stringify(payload)),
+      },
+    });
+  }, [router, sanitizedWords]);
+
   return (
     <View style={styles.container}>
       <Image
@@ -495,11 +522,11 @@ export default function BrainScreen() {
             }
           />
           <View style={styles.memorySection}>
-            <Text style={styles.memoryTitle}>Memory game</Text>
+            {/* <Text style={styles.memoryTitle}>Memory game</Text>
             <Text style={styles.memorySubtitle}>
               Wybierz układ planszy i rozpocznij grę.
-            </Text>
-            <View style={styles.memoryOptions}>
+            </Text> */}
+            {/* <View style={styles.memoryOptions}>
               {MEMORY_BOARD_SIZE_ORDER.map((size) => {
                 const isActive = memoryBoardSize === size;
                 const layout = MEMORY_BOARD_LAYOUTS[size];
@@ -533,19 +560,25 @@ export default function BrainScreen() {
                   </TouchableOpacity>
                 );
               })}
-            </View>
-            <MyButton
+            </View> */}
+            {/* <MyButton
               text="Memory game"
               onPress={handleStartMemoryGame}
               disabled={!!error || loading}
               width={120}
-            />
+            /> */}
           </View>
-          <MyButton
+          {/* <MyButton
             text="Tablica"
             onPress={handleOpenTable}
             disabled={!!error || loading || sanitizedWords.length === 0}
             width={120}
+          />
+          <MyButton
+            text="Tradycyjne"
+            onPress={handleStartTraditional}
+            disabled={!!error || loading}
+            width={140}
           />
           <MyButton
             text="Choose one"
@@ -570,6 +603,11 @@ export default function BrainScreen() {
             onPress={handleStartWrongLetter}
             disabled={!!error || loading || !canStartWrongLetter}
             width={120}
+          /> */}
+          <MyButton
+            text="tradycyjne"
+            onPress={handleOpenAnimationDemo}
+            // width={120}
           />
         </>
       )}

@@ -43,9 +43,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.my_red,
     borderWidth: 3,
   },
-  content:{
-    height: '100%',
-    width: '100%',
+  content: {
+    height: "100%",
+    width: "100%",
     gap: 10,
   },
   promptText: {
@@ -54,7 +54,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "800",
     textAlign: "left",
     textTransform: "uppercase",
-    width: '100%',
+    width: "100%",
   },
   promptTextCorrect: {
     color: colors.secondBackground,
@@ -76,9 +76,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   buttonRow: {
     flexDirection: "row",
     // alignItems: "center",
-    justifyContent: "space-between",
+    justifyContent: "flex-end",
     width: "100%",
     // marginTop: 12,
+    // backgroundColor: colors.my_green,
   },
   emptyText: {
     color: colors.headline,
@@ -86,6 +87,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textAlign: "center",
   },
   emptyspace: {
-    height: '13%'
+    height: "13%",
   },
 }));

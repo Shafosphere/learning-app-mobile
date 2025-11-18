@@ -147,12 +147,7 @@ export default function Table() {
     }
     persistenceRef.current = true;
     void persistSessionOutcomes(sessionResults);
-  }, [
-    isSessionMode,
-    persistSessionOutcomes,
-    sessionId,
-    sessionResults,
-  ]);
+  }, [isSessionMode, persistSessionOutcomes, sessionId, sessionResults]);
 
   const words = useMemo(() => {
     if (isSessionMode) {
@@ -204,12 +199,26 @@ export default function Table() {
           return;
         }
 
+        const statusValue =
+          typeof (entry as { status?: unknown }).status === "string"
+            ? (entry as { status: string }).status
+            : undefined;
+
+        const normalizedStatus: SessionWordStatus | undefined =
+          statusValue === "correct" ||
+          statusValue === "incorrect" ||
+          statusValue === "pending"
+            ? (statusValue as SessionWordStatus)
+            : undefined;
+
         sanitized.push({
-          id: typeof (entry as { id?: unknown }).id === "number"
-            ? (entry as { id: number }).id
-            : Number.NaN,
+          id:
+            typeof (entry as { id?: unknown }).id === "number"
+              ? (entry as { id: number }).id
+              : Number.NaN,
           term,
           translations,
+          status: normalizedStatus,
         });
       });
 
@@ -260,7 +269,11 @@ export default function Table() {
   const loopAction = useMemo<ManualCardsDisplayAction>(
     () => ({
       icon: (
-        <Entypo name="loop" size={24} color={styles.loopIcon.color ?? "black"} />
+        <Entypo
+          name="loop"
+          size={24}
+          color={styles.loopIcon.color ?? "black"}
+        />
       ),
       onPress: handleLoopAction,
       accessibilityLabel: (card: ManualCard, index: number) =>
@@ -279,7 +292,7 @@ export default function Table() {
       return;
     }
 
-    router.back();
+    router.replace("/review/brain");
   };
 
   return (
