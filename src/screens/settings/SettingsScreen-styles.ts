@@ -164,4 +164,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.75,
     textAlign: "center",
   },
+  keyboardSection: {
+    marginBottom: 24,
+  },
+  keyboardInput: {
+    width: "100%",
+    marginTop: 12,
+    textAlign: "left",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  keyboardActions: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+    marginTop: 12,
+  },
+  keyboardButtonWrapper: {
+    marginRight: 12,
+    marginTop: 8,
+  },
 }));

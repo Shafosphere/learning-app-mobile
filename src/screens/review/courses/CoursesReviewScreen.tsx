@@ -27,6 +27,7 @@ const LANGUAGE_LABELS_BY_TARGET: Record<string, Record<string, string>> = {
     es: "hiszpański",
     de: "niemiecki",
     pm: "francuski",
+    kr: "koreański",
   },
 };
 
@@ -37,6 +38,7 @@ const FALLBACK_LANGUAGE_LABELS: Record<string, string> = {
   es: "hiszpański",
   de: "niemiecki",
   pm: "francuski",
+  kr: "koreański",
 };
 
 const LEVEL_ORDER: Record<CEFRLevel, number> = {

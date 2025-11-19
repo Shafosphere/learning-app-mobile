@@ -1,6 +1,7 @@
 import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
 import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
 import francuskiePodstawyCsv from "@/assets/data/francuskie_podstawy.csv";
+import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 
 export type OfficialPackDef = {
   slug: string;
@@ -28,7 +29,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "podstawowe_slowa",
-    name: "dwie linieas",
+    name: "Podstawowe słówka",
     iconId: "heart",
     iconColor: "#FF6B6B",
     reviewsEnabled: true,
@@ -38,12 +39,22 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "francuskie_podstawy",
-    name: "ToJEstNaprawdedluganzwwa",
+    name: "Francuskie podstawy",
     iconId: "book",
     iconColor: "#4CC9F0",
     reviewsEnabled: true,
     sourceLang: "fr",
     targetLang: "pl",
     csvAsset: francuskiePodstawyCsv,
+  },
+  {
+    slug: "hangul_polish_reading",
+    name: "Hangul – czytanie",
+    iconId: "book",
+    iconColor: "#F97316",
+    reviewsEnabled: true,
+    sourceLang: "kr",
+    targetLang: "pl",
+    csvAsset: hangulPolishReadingCsv,
   },
 ];

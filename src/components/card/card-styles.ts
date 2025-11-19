@@ -36,12 +36,25 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderStyle: "solid",
     width: "50%",
     padding: 0,
+    // backgroundColor: colors.my_green,
+    paddingLeft: 8,
+    paddingRight: 8,
+    marginTop: 4,
   },
   cardFont: {
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
+    textAlign: "left",
+    width: "100%",
+  },
+
+    empty: {
+    fontSize: 24,
+    fontWeight: 800,
+    color: colors.headline,
     textAlign: "center",
+    width: "100%",
   },
   containerButton: {
     display: "flex",
@@ -61,7 +74,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.5,
     fontSize: 24,
     fontWeight: 800,
-    color: colors.headline
+    color: colors.headline,
   },
   myinput: {
     width: "100%",
@@ -73,10 +86,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   inputOverlay: {
     position: "absolute",
     top: 8,
-   left: 8,
-   width: "100%",
-   fontSize: 24,
-   fontWeight: 800,
+    left: 8,
+    width: "100%",
+    fontSize: 24,
+    fontWeight: 800,
     pointerEvents: "none",
   },
   overlayCharError: {
@@ -86,12 +99,28 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   topContainer: {
-    display: "flex",
     flexDirection: "row",
     alignItems: "center",
+    width: "100%",
+    gap: 8,
+    paddingLeft: 8,
+    paddingRight: 8,
+    marginBottom: 4,
+    // backgroundColor: colors.my_green,
   },
-  miniArrow: {
+  promptText: {
+    flex: 1,
+    textAlign: "left",
+  },
+  cardIconWrapper: {
+    width: 32,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  cardIconPlaceholder: {
+    width: 32,
+  },
+  cardIconColor: {
     color: colors.headline,
-    padding: 5,
-  }
+  },
 }));

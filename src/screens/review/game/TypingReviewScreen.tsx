@@ -14,6 +14,7 @@ import MyButton from "@/src/components/button/button";
 
 import RotaryStack, {
   RotaryStackHandle,
+  RotaryStackItem,
 } from "@/src/components/carousel/RotaryStack";
 
 import useSpellchecking from "@/src/hooks/useSpellchecking";
@@ -39,6 +40,17 @@ type AnimationResult = {
   answer: string;
 };
 
+type Direction = "termToTranslation" | "translationToTerm";
+
+type QueueEntry = {
+  word: AnimationWord;
+  promptItem: RotaryStackItem;
+  expectedAnswers: string[];
+  direction: Direction;
+  availablePrompts?: string[];
+  currentPromptIndex?: number;
+};
+
 const DEMO_WORDS: AnimationWord[] = [
   { id: 1, term: "ALFA", translations: ["ALFA"] },
   { id: 2, term: "BRAVO", translations: ["BRAVO"] },
@@ -50,6 +62,41 @@ const DEMO_WORDS: AnimationWord[] = [
 
 const extractParam = (value: string | string[] | undefined) =>
   Array.isArray(value) ? value[0] : value;
+
+const createQueueEntry = (word: AnimationWord): QueueEntry => {
+  const flipDirection = Math.random() < 0.5;
+  if (!flipDirection) {
+    return {
+      word,
+      promptItem: {
+        text: word.term,
+        showMultiAnswerHint: false,
+      },
+      expectedAnswers: word.translations,
+      direction: "termToTranslation",
+    };
+  }
+
+  const translationPrompt =
+    word.translations[Math.floor(Math.random() * word.translations.length)] ??
+    word.translations[0];
+  const initialIndex = word.translations.findIndex(
+    (value) => value === translationPrompt
+  );
+  const safeIndex = initialIndex >= 0 ? initialIndex : 0;
+
+  return {
+    word,
+    promptItem: {
+      text: translationPrompt,
+      showMultiAnswerHint: word.translations.length > 1,
+    },
+    expectedAnswers: [word.term],
+    direction: "translationToTerm",
+    availablePrompts: word.translations,
+    currentPromptIndex: safeIndex,
+  };
+};
 
 export default function AnimationScreen() {
   const styles = useStyles();
@@ -63,12 +110,15 @@ export default function AnimationScreen() {
   const [busy, setBusy] = useState(false);
   const [persistingResults, setPersistingResults] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const queueRef = useRef<AnimationWord[]>([]);
+  const queueRef = useRef<QueueEntry[]>([]);
   const [finished, setFinished] = useState(false);
-  const [carouselItems, setCarouselItems] = useState<string[]>(
-    DEMO_WORDS.map((word) => word.term)
+  const [carouselItems, setCarouselItems] = useState<RotaryStackItem[]>(
+    DEMO_WORDS.map((word) => ({ text: word.term }))
   );
   const [results, setResults] = useState<AnimationResult[]>([]);
+  const [currentDirection, setCurrentDirection] = useState<Direction | null>(
+    null
+  );
   const officialSourceLangId = activeCourse?.sourceLangId ?? null;
   const officialTargetLangId = activeCourse?.targetLangId ?? null;
 
@@ -215,12 +265,15 @@ export default function AnimationScreen() {
   }, [providedWords]);
 
   useEffect(() => {
-    const queue = providedWords.length > 0 ? providedWords : DEMO_WORDS;
-    queueRef.current = queue;
-    setFinished(queue.length === 0);
+    const queueSource = providedWords.length > 0 ? providedWords : DEMO_WORDS;
+    const randomizedQueue = queueSource.map(createQueueEntry);
+
+    queueRef.current = randomizedQueue;
+    setFinished(randomizedQueue.length === 0);
     setResults([]);
     setAnswer("");
-    setCarouselItems(queue.map((word) => word.term));
+    setCarouselItems(randomizedQueue.map((entry) => entry.promptItem));
+    setCurrentDirection(randomizedQueue[0]?.direction ?? null);
   }, [providedWords]);
 
   useEffect(() => {
@@ -277,33 +330,36 @@ export default function AnimationScreen() {
 
     const [currentWord, ...rest] = queue;
     const normalizedAnswer = answer.trim();
-    const isCorrect = currentWord.translations.some((value) =>
+    const isCorrect = currentWord.expectedAnswers.some((value) =>
       checkSpelling(normalizedAnswer, value)
     );
 
     setResults((prev) => [
       ...prev,
       {
-        word: currentWord,
+        word: currentWord.word,
         status: isCorrect ? "correct" : "incorrect",
         answer: normalizedAnswer,
       },
     ]);
 
-    console.log("[AnimationScreen] Środkowe słowo:", currentWord.term);
+    console.log("[AnimationScreen] Środkowe słowo:", currentWord.promptItem.text);
 
     setAnswer("");
     inputRef.current?.focus();
     queueRef.current = rest;
     if (rest.length === 0) {
       setFinished(true);
+      setCurrentDirection(null);
+    } else {
+      setCurrentDirection(rest[0]?.direction ?? null);
     }
 
-    const hiddenWord = rest.length >= 3 ? rest[2]?.term ?? null : null;
+    const hiddenItem = rest.length >= 3 ? rest[2]?.promptItem ?? null : null;
 
     setBusy(true);
     carousel.spin({
-      injectText: hiddenWord ?? null,
+      injectItem: hiddenItem ?? null,
     });
 
     inputRef.current?.focus();
@@ -318,6 +374,41 @@ export default function AnimationScreen() {
     }, 800);
   }, [answer, busy, checkSpelling, finished]);
 
+  const handleCyclePrompt = useCallback(() => {
+    const queue = queueRef.current;
+    if (queue.length === 0) {
+      return null;
+    }
+
+    const [currentEntry, ...rest] = queue;
+
+    if (
+      currentEntry.direction !== "translationToTerm" ||
+      !currentEntry.availablePrompts ||
+      currentEntry.availablePrompts.length <= 1
+    ) {
+      return null;
+    }
+
+    const prompts = currentEntry.availablePrompts;
+    const currentIndex = currentEntry.currentPromptIndex ?? 0;
+    const nextIndex = (currentIndex + 1) % prompts.length;
+    const nextText = prompts[nextIndex];
+
+    const updatedEntry: QueueEntry = {
+      ...currentEntry,
+      promptItem: {
+        text: nextText,
+        showMultiAnswerHint: true,
+      },
+      currentPromptIndex: nextIndex,
+    };
+
+    queueRef.current = [updatedEntry, ...rest];
+
+    return updatedEntry.promptItem;
+  }, []);
+
   return (
     <View style={styles.container}>
       <View style={styles.content}>
@@ -329,11 +420,20 @@ export default function AnimationScreen() {
             : "Tryb demo (brak słówek z Brain)"}
         </Text> */}
 
-        <RotaryStack ref={carouselRef} items={carouselItems} height={70} />
+        <RotaryStack
+          ref={carouselRef}
+          items={carouselItems}
+          height={70}
+          onMiddleIconPress={handleCyclePrompt}
+        />
 
         <TextInput
           style={styles.answerInput}
-          placeholder="Wpisz tłumaczenie"
+          placeholder={
+            currentDirection === "translationToTerm"
+              ? "Wpisz słówko po angielsku"
+              : "Wpisz tłumaczenie"
+          }
           value={answer}
           onChangeText={setAnswer}
           autoCapitalize="none"

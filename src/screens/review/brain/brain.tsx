@@ -24,10 +24,7 @@ import {
   MEMORY_BOARD_SIZE_ORDER,
   MemoryBoardSize,
 } from "@/src/constants/memoryGame";
-import {
-  buildSessionTemplate,
-  MIN_SESSION_WORDS,
-} from "./session-builder";
+import { buildSessionTemplate, MIN_SESSION_WORDS } from "./session-builder";
 import {
   destroySession,
   registerSession,
@@ -84,10 +81,9 @@ export default function BrainScreen() {
   } = useSettings();
   const router = useRouter();
   const [words, setWords] = useState<WordWithTranslations[]>([]);
-  const [wordContexts, setWordContexts] = useState<Record<
-    number,
-    SessionWordContext
-  >>({});
+  const [wordContexts, setWordContexts] = useState<
+    Record<number, SessionWordContext>
+  >({});
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelTranslations, setLevelTranslations] = useState<string[]>([]);
@@ -516,9 +512,7 @@ export default function BrainScreen() {
             text="Start"
             onPress={handleStartSession}
             disabled={
-              !!error ||
-              loading ||
-              sanitizedWords.length < MIN_SESSION_WORDS
+              !!error || loading || sanitizedWords.length < MIN_SESSION_WORDS
             }
           />
           <View style={styles.memorySection}>
@@ -568,7 +562,7 @@ export default function BrainScreen() {
               width={120}
             /> */}
           </View>
-          {/* <MyButton
+          <MyButton
             text="Tablica"
             onPress={handleOpenTable}
             disabled={!!error || loading || sanitizedWords.length === 0}
@@ -603,7 +597,7 @@ export default function BrainScreen() {
             onPress={handleStartWrongLetter}
             disabled={!!error || loading || !canStartWrongLetter}
             width={120}
-          /> */}
+          />
           <MyButton
             text="tradycyjne"
             onPress={handleOpenAnimationDemo}

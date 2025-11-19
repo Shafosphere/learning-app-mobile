@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { View, Text, Alert } from "react-native";
+import { View, Text, Alert, TextInput } from "react-native";
 import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
@@ -9,15 +9,18 @@ import {
   addRandomReviewsForPair,
 } from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
+import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 
 const DEBUG_LEVEL: CEFRLevel = "A1";
 
 const DataSection: React.FC = () => {
   const styles = useStyles();
   const router = useRouter();
-  const { activeCourse, activeCustomCourseId } = useSettings();
+  const { activeCourse, activeCustomCourseId, colors } = useSettings();
   const [builtInBusy, setBuiltInBusy] = useState(false);
   const [customBusy, setCustomBusy] = useState(false);
+  const [hangulValue, setHangulValue] = useState("");
+  const [showHangulKeyboard, setShowHangulKeyboard] = useState(false);
 
   const handleAddRandom = async () => {
     if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
@@ -73,6 +76,55 @@ const DataSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
+      <View style={styles.keyboardSection}>
+        <Text style={styles.rowTitle}>Testuj klawiaturę Hangul</Text>
+        <Text style={styles.rowSubtitle}>
+          Wpisz koreańskie znaki bez systemowej klawiatury.
+        </Text>
+        <TextInput
+          style={[styles.input, styles.keyboardInput]}
+          value={hangulValue}
+          editable={false}
+          placeholder="Kliknij Pokaż, a potem dodawaj znaki"
+          placeholderTextColor={colors.paragraph}
+        />
+        <View style={styles.keyboardActions}>
+          <View style={styles.keyboardButtonWrapper}>
+            <MyButton
+              text={
+                showHangulKeyboard ? "Ukryj klawiaturę" : "Pokaż klawiaturę"
+              }
+              color="my_green"
+              onPress={() => setShowHangulKeyboard((prev) => !prev)}
+              width={220}
+            />
+          </View>
+          <View style={styles.keyboardButtonWrapper}>
+            <MyButton
+              text="Wyczyść"
+              color="my_red"
+              onPress={() => setHangulValue("")}
+              disabled={hangulValue.length === 0}
+              width={120}
+            />
+          </View>
+        </View>
+        <HangulKeyboardOverlay
+          visible={showHangulKeyboard}
+          value={hangulValue}
+          onChangeText={setHangulValue}
+          onSubmit={() =>
+            Alert.alert(
+              "Hangul",
+              hangulValue.length > 0
+                ? `Wpisałeś: ${hangulValue}`
+                : "Brak znaków do zatwierdzenia."
+            )
+          }
+          onRequestClose={() => setShowHangulKeyboard(false)}
+        />
+      </View>
+
       <Text style={styles.sectionHeader}>Kurs i dane</Text>
 
       <View style={styles.row}>

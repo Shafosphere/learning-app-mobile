@@ -8,6 +8,7 @@ import FR_FLAG from "@/assets/flags/PM.png";
 import FR_FLAG_GRAY from "@/assets/flags/PMgray.png";
 import US_FLAG from "@/assets/flags/US.png";
 import US_FLAG_GRAY from "@/assets/flags/USgray.png";
+import KR_FLAG from "@/assets/flags/KR.png";
 
 export type FlagVariant = "active" | "inactive";
 
@@ -36,6 +37,9 @@ export const languageFlags = {
   en: {
     active: US_FLAG,
     inactive: US_FLAG_GRAY,
+  },
+  kr: {
+    active: KR_FLAG,
   },
 } as const satisfies Record<string, LanguageFlagSources>;
 
