@@ -77,6 +77,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   myinput: {
+      height: 44,         // stała wysokość inputa
+  lineHeight: 28,     // stała wysokość 
     width: "100%",
     padding: 8,
     fontSize: 24,
@@ -87,6 +89,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "absolute",
     top: 8,
     left: 8,
+          height: 44,         // stała wysokość inputa
+  lineHeight: 28,     // stała wysokość 
     width: "100%",
     fontSize: 24,
     fontWeight: 800,

@@ -311,6 +311,9 @@ export function useFlashcardsInteraction({
   const clearSelection = useCallback(() => {
     setSelectedItem(null);
   }, []);
+  useEffect(() => {
+    console.log("[Flashcards] Active box:", activeBox);
+  }, [activeBox]);
 
   useEffect(() => {
     if (!boxZeroEnabled && activeBox === "boxZero") {

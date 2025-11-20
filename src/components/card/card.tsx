@@ -6,12 +6,16 @@ import {
   useCallback,
   useEffect,
   useLayoutEffect,
+  useMemo,
   useRef,
   useState,
 } from "react";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
+
+const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 
 type CardProps = {
   selectedItem: WordWithTranslations | null;
@@ -56,6 +60,13 @@ export default function Card({
         ? styles.cardGood
         : styles.cardBad
       : undefined;
+  const [isMainInputFocused, setIsMainInputFocused] = useState(false);
+  const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
+    useState(false);
+  const [hangulTarget, setHangulTarget] = useState<
+    "main" | "correction1" | null
+  >(null);
+  const noopTextChange = useCallback((_: string) => {}, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -72,6 +83,43 @@ export default function Card({
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[translations] ?? "";
   const promptText = reversed ? rewers : awers;
+  const expectsHangulAnswer = useMemo(() => {
+    if (!reversed) return false;
+    const expected = selectedItem?.text ?? "";
+    return HANGUL_CHAR_REGEX.test(expected);
+  }, [reversed, selectedItem?.text]);
+  const expectsHangulCorrectionAwers = useMemo(() => {
+    const value = correction?.awers ?? "";
+    if (!value) return false;
+    return HANGUL_CHAR_REGEX.test(value);
+  }, [correction?.awers]);
+  const shouldUseHangulKeyboardMain = expectsHangulAnswer;
+  const shouldUseHangulKeyboardCorrection1 = expectsHangulCorrectionAwers;
+  const showMainHangulKeyboard =
+    hangulTarget === "main" &&
+    shouldUseHangulKeyboardMain &&
+    isMainInputFocused;
+  const showCorrectionHangulKeyboard =
+    hangulTarget === "correction1" &&
+    shouldUseHangulKeyboardCorrection1 &&
+    isCorrectionInput1Focused;
+  const showHangulKeyboard =
+    showMainHangulKeyboard || showCorrectionHangulKeyboard;
+
+  useEffect(() => {
+    console.log("[Card] reversed:", reversed, {
+      expectsHangulAnswer,
+      expectsHangulCorrectionAwers,
+      hangulTarget,
+      overlayVisible: showHangulKeyboard,
+    });
+  }, [
+    reversed,
+    expectsHangulAnswer,
+    expectsHangulCorrectionAwers,
+    hangulTarget,
+    showHangulKeyboard,
+  ]);
 
   const len = selectedItem?.translations?.length ?? 0;
   const canToggleTranslations = promptText === rewers && len > 1;
@@ -88,15 +136,85 @@ export default function Card({
   }, [selectedItem?.id]);
 
   const focusWithDelay = useCallback(
-    (ref: React.RefObject<TextInput | null>) => {
+    (ref: React.RefObject<TextInput | null>, delay = 50) => {
       const timeoutId = setTimeout(() => {
         ref.current?.focus();
         timeouts.current = timeouts.current.filter((id) => id !== timeoutId);
-      }, 50);
+      }, delay);
       timeouts.current.push(timeoutId);
     },
     []
   );
+
+  const handleCorrectionInput1Change = useCallback(
+    (t: string) => {
+      wrongInputChange(1, t);
+      if (correction?.awers) {
+        const normalizeString = (value: string) => {
+          let base = value.toLowerCase();
+          if (ignoreDiacriticsInSpellcheck) {
+            base = stripDiacritics(base);
+          }
+          return base;
+        };
+        const matches =
+          normalizeString(t) === normalizeString(correction.awers) &&
+          t.length === correction.awers.length;
+        if (matches) {
+          setHangulTarget(null);
+          setIsCorrectionInput1Focused(false);
+          correctionInput1Ref.current?.blur();
+          const delay = shouldUseHangulKeyboardCorrection1 ? 200 : 50;
+          focusWithDelay(correctionInput2Ref, delay);
+        }
+      }
+    },
+    [
+      correction?.awers,
+      focusWithDelay,
+      ignoreDiacriticsInSpellcheck,
+      wrongInputChange,
+      setHangulTarget,
+      setIsCorrectionInput1Focused,
+      shouldUseHangulKeyboardCorrection1,
+    ]
+  );
+
+  const hangulOverlayConfig = useMemo(() => {
+    if (showMainHangulKeyboard) {
+      return {
+        value: answer,
+        onChangeText: setAnswer,
+        onSubmit: handleConfirm,
+      };
+    }
+    if (showCorrectionHangulKeyboard && correction) {
+      return {
+        value: correction.input1,
+        onChangeText: handleCorrectionInput1Change,
+        onSubmit: () => {
+          setHangulTarget(null);
+          setIsCorrectionInput1Focused(false);
+          correctionInput1Ref.current?.blur();
+          const delay = shouldUseHangulKeyboardCorrection1 ? 200 : 50;
+          focusWithDelay(correctionInput2Ref, delay);
+        },
+      };
+    }
+    return null;
+  }, [
+    showMainHangulKeyboard,
+    answer,
+    setAnswer,
+    handleConfirm,
+    showCorrectionHangulKeyboard,
+    correction,
+    handleCorrectionInput1Change,
+    focusWithDelay,
+    setHangulTarget,
+    setIsCorrectionInput1Focused,
+    shouldUseHangulKeyboardCorrection1,
+  ]);
 
   useEffect(() => {
     return () => {
@@ -237,30 +355,24 @@ export default function Card({
             <Text style={styles.myplaceholder}>{correction.awers}</Text>
             <TextInput
               value={correction.input1}
-              onChangeText={(t) => {
-                wrongInputChange(1, t);
-                if (isIntroMode && correction.awers) {
-                  const normalizeString = (value: string) => {
-                    let base = value.toLowerCase();
-                    if (ignoreDiacriticsInSpellcheck) {
-                      base = stripDiacritics(base);
-                    }
-                    return base;
-                  };
-                  if (
-                    normalizeString(t) === normalizeString(correction.awers) &&
-                    t.length === correction.awers.length
-                  ) {
-                    focusWithDelay(correctionInput2Ref);
-                  }
-                }
-              }}
+              onChangeText={handleCorrectionInput1Change}
               style={styles.myinput}
               ref={correctionInput1Ref}
               returnKeyType="next"
               blurOnSubmit={false}
               onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
               autoCapitalize="none"
+              showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
+              onFocus={() => {
+                setIsCorrectionInput1Focused(true);
+                setHangulTarget("correction1");
+              }}
+              onBlur={() => {
+                setIsCorrectionInput1Focused(false);
+                if (hangulTarget === "correction1") {
+                  setHangulTarget(null);
+                }
+              }}
             />
             {isIntroMode ? (
               <Text style={styles.inputOverlay}>
@@ -340,6 +452,17 @@ export default function Card({
             returnKeyType="done"
             blurOnSubmit={false}
             onSubmitEditing={handleConfirm}
+            showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
+            onFocus={() => {
+              setIsMainInputFocused(true);
+              setHangulTarget("main");
+            }}
+            onBlur={() => {
+              setIsMainInputFocused(false);
+              if (hangulTarget === "main") {
+                setHangulTarget(null);
+              }
+            }}
           />
         </>
       );
@@ -352,9 +475,28 @@ export default function Card({
     isIntroMode ? styles.cardIntro : statusStyle,
   ];
 
+  const handleCloseHangulKeyboard = () => {
+    const target = hangulTarget;
+    setHangulTarget(null);
+    if (target === "main") {
+      setIsMainInputFocused(false);
+      mainInputRef.current?.blur();
+    } else if (target === "correction1") {
+      setIsCorrectionInput1Focused(false);
+      correctionInput1Ref.current?.blur();
+    }
+  };
+
   return (
     <View style={styles.container}>
       <View style={cardContainerStyle}>{showCardContent()}</View>
+      <HangulKeyboardOverlay
+        visible={showHangulKeyboard}
+        value={hangulOverlayConfig?.value ?? ""}
+        onChangeText={hangulOverlayConfig?.onChangeText ?? noopTextChange}
+        onSubmit={hangulOverlayConfig?.onSubmit ?? handleConfirm}
+        onRequestClose={handleCloseHangulKeyboard}
+      />
 
       <View style={styles.containerButton}>
         <MyButton
