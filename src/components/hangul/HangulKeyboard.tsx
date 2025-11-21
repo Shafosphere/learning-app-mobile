@@ -25,7 +25,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     width: "100%",
     marginBottom: 6,
-    paddingHorizontal: 3,
+    paddingHorizontal: 6,
   },
   keyButton: {
     flex: 1,
@@ -59,9 +59,10 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
   bottomRow: {
     flexDirection: "row",
-    paddingHorizontal: 6,
+    paddingHorizontal: 12,
     marginTop: 2,
     alignItems: "center",
+    marginBottom: 40,
   },
   spaceBar: {
     flex: 1,
@@ -88,6 +89,7 @@ export type HangulKeyboardProps = {
   onChangeText: (text: string) => void;
   onSubmit?: () => void;
   onBackspace?: () => void;
+  bottomPadding?: number;
 };
 
 export default function HangulKeyboard({
@@ -95,6 +97,7 @@ export default function HangulKeyboard({
   onChangeText,
   onSubmit,
   onBackspace,
+  bottomPadding = 0,
 }: HangulKeyboardProps) {
   const styles = useStyles();
   const [isShifted, setIsShifted] = useState(false);
@@ -116,7 +119,7 @@ export default function HangulKeyboard({
   };
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, { paddingBottom: bottomPadding }]}>
       {currentRows.slice(0, 2).map((row, rowIndex) => (
         <View key={`row-${rowIndex}`} style={styles.row}>
           {row.map((symbol) => (
@@ -180,7 +183,7 @@ export default function HangulKeyboard({
           ]}
           onPress={() => handleAppend(" ")}
         >
-          <Text style={{ fontSize: 14, color: "#555" }}>Spacja</Text>
+          <Text style={{ fontSize: 14, color: "#555" }}></Text>
         </Pressable>
 
         <Pressable

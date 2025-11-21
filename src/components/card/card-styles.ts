@@ -49,7 +49,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
   },
 
-    empty: {
+  empty: {
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
@@ -71,14 +71,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "absolute",
     top: 8,
     left: 8,
+    height: 44, // stała wysokość inputa
+    lineHeight: 28, // stała wysokość
     opacity: 0.5,
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
   },
   myinput: {
-      height: 44,         // stała wysokość inputa
-  lineHeight: 28,     // stała wysokość 
+    height: 44, // stała wysokość inputa
+    lineHeight: 28, // stała wysokość
     width: "100%",
     padding: 8,
     fontSize: 24,
@@ -89,8 +91,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "absolute",
     top: 8,
     left: 8,
-          height: 44,         // stała wysokość inputa
-  lineHeight: 28,     // stała wysokość 
+    height: 44, // stała wysokość inputa
+    lineHeight: 28, // stała wysokość
     width: "100%",
     fontSize: 24,
     fontWeight: 800,

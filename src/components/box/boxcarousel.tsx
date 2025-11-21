@@ -10,7 +10,6 @@ import {
   View,
   // Image,
   // Pressable,
-  Animated,
   FlatList,
   Dimensions,
   NativeScrollEvent,
@@ -42,6 +41,7 @@ export default function BoxesCarousel({
   hideBoxZero = false,
 }: BoxesProps) {
   const styles = useStyles();
+  const listRef = useRef<FlatList>(null);
 
   const data = useMemo(() => {
     const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
@@ -59,9 +59,11 @@ export default function BoxesCarousel({
 
   useEffect(() => setActiveIdx(initialIndex), [initialIndex]);
 
-  const scrollX = useRef(new Animated.Value(0)).current;
-  const listRef = useRef<FlatList>(null);
-  const [boxH, setBoxH] = useState(0);
+  useEffect(() => {
+    scrollToIndex(initialIndex);
+  }, [initialIndex, scrollToIndex]);
+
+  const sidePadding = Math.max(0, (SCREEN_WIDTH - CELL_WIDTH) / 2);
 
   const onMomentumEnd = useCallback(
     (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -69,8 +71,9 @@ export default function BoxesCarousel({
       const idx = Math.round(x / CELL_WIDTH);
       const item = data[idx];
       if (item && item.key !== activeBox) handleSelectBox(item.key);
+      if (idx !== activeIdx) setActiveIdx(idx);
     },
-    [activeBox, data, handleSelectBox]
+    [activeBox, activeIdx, data, handleSelectBox]
   );
 
   const scrollToIndex = useCallback((index: number) => {
@@ -80,34 +83,6 @@ export default function BoxesCarousel({
   const renderItem = useCallback(
     ({ item, index }: { item: { key: keyof BoxesState }; index: number }) => {
       const boxContent = boxes[item.key];
-      const inputRange = [
-        (index - 1) * CELL_WIDTH,
-        index * CELL_WIDTH,
-        (index + 1) * CELL_WIDTH,
-      ];
-
-      const scale = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.9, 2.0, 0.9],
-        extrapolate: "clamp",
-      });
-
-      const opacity = scrollX.interpolate({
-        inputRange,
-        outputRange: [0.6, 1.0, 0.6],
-        extrapolate: "clamp",
-      });
-
-      const translateY = scrollX.interpolate({
-        inputRange,
-        outputRange: [
-          ((1 - 0.9) * boxH) / 1,
-          ((1 - 2.0) * boxH) / 6,
-          ((1 - 0.9) * boxH) / 1,
-        ],
-        extrapolate: "clamp",
-      });
-
       const layer = Math.max(0, 3 - Math.abs(activeIdx - index));
       const isActive = index === activeIdx;
 
@@ -115,22 +90,18 @@ export default function BoxesCarousel({
         <BoxCarouselItem
           boxContent={boxContent}
           layer={layer}
-          scale={scale}
-          opacity={opacity}
-          translateY={translateY}
           isActive={isActive}
           onPress={() => scrollToIndex(index)}
-          setBoxH={setBoxH}
           cellWidth={CELL_WIDTH}
         />
       );
     },
-    [activeIdx, boxH, boxes, scrollToIndex, scrollX]
+    [activeIdx, boxes, scrollToIndex]
   );
 
   return (
     <View style={styles.container}>
-      <Animated.FlatList
+      <FlatList
         ref={listRef}
         bounces={true}
         data={data}
@@ -139,27 +110,13 @@ export default function BoxesCarousel({
         horizontal
         showsHorizontalScrollIndicator={false}
         contentContainerStyle={{
-          paddingHorizontal: Math.max(
-            0,
-            (SCREEN_WIDTH - ITEM_WIDTH) / 2 - SPACING / 2
-          ),
-          // alignItems: "center",
-          // paddingTop: 70,
-          // gap: 20,
+          paddingHorizontal: sidePadding,
         }}
         decelerationRate="fast"
+        snapToInterval={CELL_WIDTH}
+        snapToAlignment="center"
+        disableIntervalMomentum
         onMomentumScrollEnd={onMomentumEnd}
-        onScroll={Animated.event(
-          [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-          {
-            useNativeDriver: true,
-            listener: (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-              const x = e.nativeEvent.contentOffset.x;
-              const idx = Math.round(x / CELL_WIDTH);
-              if (idx !== activeIdx) setActiveIdx(idx);
-            },
-          }
-        )}
         initialScrollIndex={initialIndex}
         getItemLayout={(_d, index) => ({
           length: CELL_WIDTH,

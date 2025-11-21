@@ -17,15 +17,15 @@ const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
   },
   sheet: {
-    backgroundColor: "#D1D5DB",
-    borderTopLeftRadius: 0,
-    borderTopRightRadius: 0,
-    paddingBottom: 10,
-    shadowColor: "#000",
-    shadowOpacity: 0.1,
-    shadowRadius: 4,
-    shadowOffset: { width: 0, height: -2 },
-    elevation: 5,
+    // backgroundColor: "#D1D5DB",
+    // borderTopLeftRadius: 0,
+    // borderTopRightRadius: 0,
+    // paddingBottom: 10,
+    // shadowColor: "#000",
+    // shadowOpacity: 0.1,
+    // shadowRadius: 4,
+    // shadowOffset: { width: 0, height: -2 },
+    // elevation: 5,
   },
 }));
 
@@ -42,7 +42,7 @@ export function HangulKeyboardOverlay({
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const NAVBAR_HEIGHT = 72;
-  const bottomOffset = NAVBAR_HEIGHT + insets.bottom - 40;
+  const bottomOffset = NAVBAR_HEIGHT + insets.bottom - 1000;
 
   return (
     <Modal
@@ -57,7 +57,7 @@ export function HangulKeyboardOverlay({
       >
         <Pressable style={styles.dismissArea} onPress={onRequestClose} />
 
-        <View style={[styles.sheet, { marginBottom: 8 }]}>
+        <View>
           <HangulKeyboard {...keyboardProps} />
         </View>
       </View>

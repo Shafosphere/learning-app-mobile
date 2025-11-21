@@ -7,29 +7,22 @@ import { useStyles } from "./boxes-styles";
 interface Props {
   boxContent: BoxesState[keyof BoxesState];
   layer: number;
-  scale: Animated.AnimatedInterpolation<number>;
-  opacity: Animated.AnimatedInterpolation<number>;
-  translateY: Animated.AnimatedInterpolation<number>;
   isActive: boolean;
   onPress: () => void;
-  setBoxH: (height: number) => void;
   cellWidth: number;
 }
 
 const BoxCarouselItem: React.FC<Props> = ({
   boxContent,
   layer,
-  scale,
-  opacity,
-  translateY,
   isActive,
   onPress,
-  setBoxH,
   cellWidth,
 }) => {
   const styles = useStyles();
   const [face, setFace] = useState(isActive ? "happy" : "smile");
   const firstRender = useRef(true);
+  const anim = useRef(new Animated.Value(isActive ? 1 : 0)).current;
 
   useEffect(() => {
     if (firstRender.current) {
@@ -41,6 +34,30 @@ const BoxCarouselItem: React.FC<Props> = ({
     const timer = setTimeout(() => setFace(isActive ? "happy" : "smile"), 500);
     return () => clearTimeout(timer);
   }, [isActive]);
+
+  useEffect(() => {
+    Animated.spring(anim, {
+      toValue: isActive ? 1 : 0,
+      useNativeDriver: true,
+      tension: 200,
+      friction: 20,
+    }).start();
+  }, [anim, isActive]);
+
+  const scale = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.9, 1.1],
+  });
+
+  const translateY = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [12, 0],
+  });
+
+  const opacity = anim.interpolate({
+    inputRange: [0, 1],
+    outputRange: [0.6, 1],
+  });
 
   // Mouth and mini-cards are now handled inside BoxSkin
 
@@ -55,7 +72,6 @@ const BoxCarouselItem: React.FC<Props> = ({
       }}
     >
       <Animated.View
-        onLayout={(e) => setBoxH(e.nativeEvent.layout.height)}
         style={[{ transform: [{ translateY }, { scale }], opacity }]}
       >
         <Pressable onPress={onPress}>
