@@ -2,7 +2,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent, logLearningEvent } from "@/src/db/sqlite/db";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
 type SpellcheckFn = (input: string, expected: string) => boolean;
@@ -48,6 +48,7 @@ export function useFlashcardsInteraction({
   const [correction, setCorrection] = useState<CorrectionState | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
+  const lastServedIdRef = useRef<number | null>(null);
   const { activeCourse, selectedLevel, activeCustomCourseId, ignoreDiacriticsInSpellcheck } =
     useSettings();
 
@@ -63,25 +64,31 @@ export function useFlashcardsInteraction({
     (box: keyof BoxesState) => {
       if (box === "boxZero" && !boxZeroEnabled) {
         setSelectedItem(null);
+        setQuestionShownAt(null);
+        lastServedIdRef.current = null;
         return;
       }
       const list = boxes[box];
       if (!list || list.length === 0) {
         setSelectedItem(null);
+        setQuestionShownAt(null);
+        lastServedIdRef.current = null;
         return;
       }
-      if (list.length === 1) {
-        setSelectedItem(list[0]);
-        return;
-      }
-      let idx = Math.floor(Math.random() * list.length);
-      if (selectedItem && list[idx].id === selectedItem.id) {
-        idx = (idx + 1) % list.length;
-      }
-      setSelectedItem(list[idx]);
+      const avoidId = lastServedIdRef.current;
+      const filtered =
+        avoidId != null && list.length > 1
+          ? list.filter((item) => item.id !== avoidId)
+          : list;
+      const pool = filtered.length > 0 ? filtered : list;
+      const idx = Math.floor(Math.random() * pool.length);
+      const next = pool[idx] ?? list[0];
+
+      lastServedIdRef.current = next.id;
+      setSelectedItem(next);
       setQuestionShownAt(Date.now());
     },
-    [boxes, boxZeroEnabled, selectedItem]
+    [boxes, boxZeroEnabled]
   );
 
   const handleSelectBox = useCallback(
@@ -186,6 +193,33 @@ export function useFlashcardsInteraction({
       });
     }
     if (ok) {
+      if (!reversed && activeBox && selectedItem.translations.length > 1) {
+        const matched = selectedItem.translations.find((t) =>
+          checkSpelling(answer, t)
+        );
+        if (matched) {
+          const reorderedTranslations = [
+            matched,
+            ...selectedItem.translations.filter((t) => t !== matched),
+          ];
+          const updatedWord: WordWithTranslations = {
+            ...selectedItem,
+            translations: reorderedTranslations,
+          };
+          setSelectedItem(updatedWord);
+          setBoxes((prev) => {
+            const list = prev[activeBox];
+            if (!list) return prev;
+            const nextList = list.map((item) =>
+              item.id === updatedWord.id ? updatedWord : item
+            );
+            return {
+              ...prev,
+              [activeBox]: nextList,
+            };
+          });
+        }
+      }
       setResult(true);
       if (activeBox) {
         onCorrectAnswer?.(activeBox);
@@ -214,6 +248,7 @@ export function useFlashcardsInteraction({
     checkAnswer,
     moveElement,
     onCorrectAnswer,
+    checkSpelling,
     registerKnownWord,
     activeCourse?.sourceLangId,
     activeCourse?.targetLangId,
@@ -221,11 +256,19 @@ export function useFlashcardsInteraction({
     selectedLevel,
     selectedItem,
     questionShownAt,
+    reversed,
+    setBoxes,
   ]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {
     setCorrection((c) =>
       c ? { ...c, [which === 1 ? "input1" : "input2"]: value } : c
+    );
+  }, []);
+
+  const setCorrectionRewers = useCallback((value: string) => {
+    setCorrection((current) =>
+      current ? { ...current, rewers: value } : current
     );
   }, []);
 
@@ -306,10 +349,14 @@ export function useFlashcardsInteraction({
     setResult(null);
     setCorrection(null);
     setQueueNext(false);
+    setQuestionShownAt(null);
+    lastServedIdRef.current = null;
   }, []);
 
   const clearSelection = useCallback(() => {
     setSelectedItem(null);
+    setQuestionShownAt(null);
+    lastServedIdRef.current = null;
   }, []);
   useEffect(() => {
     console.log("[Flashcards] Active box:", activeBox);
@@ -398,10 +445,12 @@ export function useFlashcardsInteraction({
     reversed,
     correction,
     wrongInputChange,
+    setCorrectionRewers,
     learned,
     setLearned,
     moveElement,
     resetInteractionState,
     clearSelection,
+    isBetweenCards: queueNext,
   };
 }

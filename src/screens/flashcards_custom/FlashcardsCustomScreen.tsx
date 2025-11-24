@@ -15,6 +15,7 @@ import {
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -50,8 +51,8 @@ function mapCustomCardToWord(
     uniqueAnswers.length > 0
       ? uniqueAnswers
       : fallback.length > 0
-      ? fallback
-      : [defaultTranslation];
+        ? fallback
+        : [defaultTranslation];
 
   const result = {
     id: card.id,
@@ -71,6 +72,7 @@ export default function Flashcards() {
     boxesLayout,
     flashcardsBatchSize,
     boxZeroEnabled,
+    autoflowEnabled,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
@@ -107,6 +109,7 @@ export default function Flashcards() {
     reversed,
     correction,
     wrongInputChange,
+    setCorrectionRewers,
     learned,
     setLearned,
     resetInteractionState,
@@ -131,6 +134,8 @@ export default function Flashcards() {
     },
     boxZeroEnabled,
   });
+
+
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -167,13 +172,13 @@ export default function Flashcards() {
     setBoxes((prev) =>
       boxZeroEnabled
         ? {
-            ...prev,
-            boxZero: [...prev.boxZero, ...nextBatch],
-          }
+          ...prev,
+          boxZero: [...prev.boxZero, ...nextBatch],
+        }
         : {
-            ...prev,
-            boxOne: [...prev.boxOne, ...nextBatch],
-          }
+          ...prev,
+          boxOne: [...prev.boxOne, ...nextBatch],
+        }
     );
     addUsedWordIds(nextBatch.map((card) => card.id));
   }, [
@@ -181,9 +186,32 @@ export default function Flashcards() {
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,
-    setBoxes,
     trackedIds,
   ]);
+
+  const introBoxLimitReached = boxZeroEnabled
+    ? boxes.boxZero.length >= 30
+    : boxes.boxOne.length >= 30;
+
+  const correctionLocked = correction?.mode === "demote";
+  const isAnswering =
+    selectedItem != null && result === null && correction?.mode !== "intro";
+  const resultPending = result !== null;
+  const canAutoflowSwitch =
+    !correctionLocked && !isAnswering && !resultPending;
+
+  useFlashcardsAutoflow({
+    enabled: autoflowEnabled,
+    boxes,
+    activeBox,
+    handleSelectBox,
+    canSwitch: canAutoflowSwitch,
+    boxZeroEnabled,
+    isReady: isReady,
+    downloadMore: downloadData,
+    introBoxLimitReached,
+    totalFlashcardsInCourse: totalCards,
+  });
 
   useEffect(() => {
     if (boxZeroEnabled) return;
@@ -361,6 +389,7 @@ export default function Flashcards() {
         setResult={setResult}
         correction={correction}
         wrongInputChange={wrongInputChange}
+        setCorrectionRewers={setCorrectionRewers}
         onDownload={downloadData}
         downloadDisabled={downloadDisabled}
         introMode={introModeActive}

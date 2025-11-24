@@ -36,6 +36,7 @@ type CardProps = {
   onDownload: () => Promise<void>;
   downloadDisabled?: boolean;
   introMode?: boolean;
+  setCorrectionRewers?: (value: string) => void;
 };
 
 export default function Card({
@@ -50,6 +51,7 @@ export default function Card({
   onDownload,
   downloadDisabled = false,
   introMode = false,
+  setCorrectionRewers,
 }: CardProps) {
   const styles = useStyles();
   const { ignoreDiacriticsInSpellcheck } = useSettings();
@@ -83,6 +85,8 @@ export default function Card({
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[translations] ?? "";
   const promptText = reversed ? rewers : awers;
+  const correctionAwers = correction?.awers ?? awers;
+  const correctionRewers = isIntroMode ? rewers : correction?.rewers ?? "";
   const expectsHangulAnswer = useMemo(() => {
     if (!reversed) return false;
     const expected = selectedItem?.text ?? "";
@@ -106,24 +110,28 @@ export default function Card({
   const showHangulKeyboard =
     showMainHangulKeyboard || showCorrectionHangulKeyboard;
 
-  useEffect(() => {
-    console.log("[Card] reversed:", reversed, {
-      expectsHangulAnswer,
-      expectsHangulCorrectionAwers,
-      hangulTarget,
-      overlayVisible: showHangulKeyboard,
-    });
-  }, [
-    reversed,
-    expectsHangulAnswer,
-    expectsHangulCorrectionAwers,
-    hangulTarget,
-    showHangulKeyboard,
-  ]);
+  // useEffect(() => {
+  //   console.log("[Card] reversed:", reversed, {
+  //     expectsHangulAnswer,
+  //     expectsHangulCorrectionAwers,
+  //     hangulTarget,
+  //     overlayVisible: showHangulKeyboard,
+  //   });
+  // }, [
+  //   reversed,
+  //   expectsHangulAnswer,
+  //   expectsHangulCorrectionAwers,
+  //   hangulTarget,
+  //   showHangulKeyboard,
+  // ]);
 
   const len = selectedItem?.translations?.length ?? 0;
-  const canToggleTranslations = promptText === rewers && len > 1;
-  const next = () => len && setTranslations((i) => (i + 1) % len);
+  const isShowingTranslation = isIntroMode || promptText === rewers;
+  const canToggleTranslations = isShowingTranslation && len > 1;
+  const next = () => {
+    if (!len) return;
+    setTranslations((i) => (i + 1) % len);
+  };
 
   useLayoutEffect(() => {
     const currentId = selectedItem?.id ?? null;
@@ -134,6 +142,12 @@ export default function Card({
     lastTranslationItemId.current = currentId;
     setTranslations(0);
   }, [selectedItem?.id]);
+
+  useEffect(() => {
+    if (!isIntroMode || !setCorrectionRewers) return;
+    const nextTranslation = selectedItem?.translations?.[translations] ?? "";
+    setCorrectionRewers(nextTranslation);
+  }, [isIntroMode, selectedItem?.translations, setCorrectionRewers, translations]);
 
   const focusWithDelay = useCallback(
     (ref: React.RefObject<TextInput | null>, delay = 50) => {
@@ -352,7 +366,7 @@ export default function Card({
       return (
         <>
           <View style={styles.containerInput}>
-            <Text style={styles.myplaceholder}>{correction.awers}</Text>
+            <Text style={styles.myplaceholder}>{correctionAwers}</Text>
             <TextInput
               value={correction.input1}
               onChangeText={handleCorrectionInput1Change}
@@ -376,12 +390,12 @@ export default function Card({
             />
             {isIntroMode ? (
               <Text style={styles.inputOverlay}>
-                {renderOverlayText(correction.input1, correction.awers)}
+                {renderOverlayText(correction.input1, correctionAwers)}
               </Text>
             ) : null}
           </View>
           <View style={styles.containerInput}>
-            <Text style={styles.myplaceholder}>{correction.rewers}</Text>
+            <Text style={styles.myplaceholder}>{correctionRewers}</Text>
             <TextInput
               value={correction.input2}
               onChangeText={(t) => {
@@ -411,8 +425,21 @@ export default function Card({
             />
             {isIntroMode ? (
               <Text style={styles.inputOverlay}>
-                {renderOverlayText(correction.input2, correction.rewers)}
+                {renderOverlayText(correction.input2, correctionRewers)}
               </Text>
+            ) : null}
+            {isIntroMode && canToggleTranslations ? (
+              <Pressable
+                style={[styles.cardIconWrapper, styles.introToggle]}
+                onPress={next}
+                hitSlop={8}
+              >
+                <Octicons
+                  name="discussion-duplicate"
+                  size={24}
+                  color={styles.cardFont.color}
+                />
+              </Pressable>
             ) : null}
           </View>
         </>

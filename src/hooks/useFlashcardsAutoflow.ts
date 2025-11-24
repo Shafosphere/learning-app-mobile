@@ -1,6 +1,5 @@
 import type { BoxesState } from "@/src/types/boxes";
 import { useEffect, useRef } from "react";
-import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
 type AutoflowParams = {
   enabled: boolean;
@@ -12,59 +11,80 @@ type AutoflowParams = {
   isReady: boolean;
   downloadMore: () => Promise<void>;
   introBoxLimitReached: boolean;
+  totalFlashcardsInCourse?: number | null;
 };
 
 const SWITCH_STICKY_MS = 1500;
+const BASE_STACK_TARGET = 5;
+const FLUSH_THRESHOLD_DEFAULT = 15;
+const FLUSH_THRESHOLD_MIN = 3;
+const FLUSH_THRESHOLD_MAX = 15;
+const FLUSH_THRESHOLD_RATIO = 0.1;
+const CLEANUP_BOXES: Array<keyof BoxesState> = [
+  "boxTwo",
+  "boxThree",
+  "boxFour",
+  "boxFive",
+];
 
-const nonIntroOrder = boxOrder.filter((box) => box !== "boxZero");
+type AutoflowDecision = {
+  targetBox: keyof BoxesState | null;
+  shouldDownloadNew: boolean;
+};
 
-const SMALL_STACK_THRESHOLD = 5;
+function pickAutoflowDecision(params: {
+  boxes: BoxesState;
+  activeBox: keyof BoxesState | null;
+  boxZeroEnabled: boolean;
+  canDownloadMore: boolean;
+  flushThreshold: number;
+}): AutoflowDecision {
+  const { boxes, activeBox, boxZeroEnabled, canDownloadMore, flushThreshold } =
+    params;
+  const count = (box: keyof BoxesState) => boxes[box]?.length ?? 0;
+  const baseBox: keyof BoxesState = "boxOne";
+  const introBox: keyof BoxesState = "boxZero";
+  const downloadTarget: keyof BoxesState = boxZeroEnabled ? introBox : baseBox;
 
-function pickFromOrder(
-  boxes: BoxesState,
-  order: Array<keyof BoxesState>
-): keyof BoxesState {
-  const counts = order.map((box) => boxes[box]?.length ?? 0);
-  const maxCount = Math.max(...counts);
+  const boxZeroCount = count(introBox);
 
-  if (maxCount <= 0) {
-    return order[0];
-  }
-
-  for (const box of order) {
-    if ((boxes[box]?.length ?? 0) === maxCount) {
-      return box;
-    }
-  }
-
-  return order[0];
-}
-
-function pickPriorityBox(
-  boxes: BoxesState,
-  boxZeroEnabled: boolean
-): keyof BoxesState | null {
+  // Intro box has absolute priority when enabled and non-empty.
   if (boxZeroEnabled) {
-    const allCounts = boxOrder.map((box) => boxes[box]?.length ?? 0);
-    const allSmall = allCounts.every(
-      (count) => count <= SMALL_STACK_THRESHOLD
-    );
-    if (allSmall) {
-      return "boxZero";
+    if (activeBox === introBox && boxZeroCount > 0) {
+      return { targetBox: introBox, shouldDownloadNew: false };
     }
-
-    const maxOther = Math.max(
-      ...nonIntroOrder.map((box) => boxes[box]?.length ?? 0)
-    );
-    const boxZeroCount = boxes.boxZero?.length ?? 0;
-    if (boxZeroCount >= maxOther) {
-      return "boxZero";
+    if (boxZeroCount > 0) {
+      return { targetBox: introBox, shouldDownloadNew: false };
     }
-
-    return pickFromOrder(boxes, nonIntroOrder);
   }
 
-  return pickFromOrder(boxes, nonIntroOrder);
+  // When inside a cleanup session (boxes 2-5), stay there until empty.
+  if (activeBox && CLEANUP_BOXES.includes(activeBox)) {
+    if (count(activeBox) > 0) {
+      return { targetBox: activeBox, shouldDownloadNew: false };
+    }
+    return { targetBox: baseBox, shouldDownloadNew: false };
+  }
+
+  // Box 1 acts as the engine: keep trimming it to BASE_STACK_TARGET.
+  const baseCount = count(baseBox);
+  if (baseCount > BASE_STACK_TARGET) {
+    return { targetBox: baseBox, shouldDownloadNew: false };
+  }
+
+  // If Box 1 is light, check whether any higher box is "ripe" for a cleanup session.
+  const flushCandidate = CLEANUP_BOXES.find(
+    (box) => count(box) >= flushThreshold
+  );
+  if (flushCandidate) {
+    return { targetBox: flushCandidate, shouldDownloadNew: false };
+  }
+
+  // Nothing urgent above, Box 1 is light -> consider pulling a new batch.
+  const downloadCount = count(downloadTarget);
+  const shouldDownloadNew = canDownloadMore && downloadCount <= BASE_STACK_TARGET;
+
+  return { targetBox: baseBox, shouldDownloadNew };
 }
 
 export function useFlashcardsAutoflow({
@@ -77,60 +97,60 @@ export function useFlashcardsAutoflow({
   isReady,
   downloadMore,
   introBoxLimitReached,
+  totalFlashcardsInCourse,
 }: AutoflowParams) {
   const switchLockedUntil = useRef(0);
   const fetchInFlight = useRef(false);
 
+  const flushThreshold = Math.min(
+    FLUSH_THRESHOLD_MAX,
+    Math.max(
+      FLUSH_THRESHOLD_MIN,
+      totalFlashcardsInCourse && totalFlashcardsInCourse > 0
+        ? Math.ceil(totalFlashcardsInCourse * FLUSH_THRESHOLD_RATIO)
+        : FLUSH_THRESHOLD_DEFAULT
+    )
+  );
+
   useEffect(() => {
     if (!enabled) return;
-    if (!canSwitch) return;
     const now = Date.now();
-    if (now < switchLockedUntil.current) return;
+    const canDownloadMore =
+      isReady && !introBoxLimitReached && !fetchInFlight.current;
 
-    const candidate = pickPriorityBox(boxes, boxZeroEnabled);
-    if (!candidate) return;
-    if (candidate === activeBox) return;
-
-    handleSelectBox(candidate);
-    switchLockedUntil.current = now + SWITCH_STICKY_MS;
-  }, [enabled, canSwitch, boxes, boxZeroEnabled, activeBox, handleSelectBox]);
-
-  useEffect(() => {
-    console.log("=== Checking if need to download more ===");
-    console.log("enabled:", enabled);
-    if (!enabled) return;
-    // Wait until boxes snapshot has finished loading to avoid triggering
-    // unnecessary downloads when initial boxes are empty.
-    if (!isReady) {
-      console.log("Autoflow: boxes not ready yet, skipping download check");
-      return;
-    }
-    console.log("introBoxLimitReached:", introBoxLimitReached);
-    if (introBoxLimitReached) return;
-    console.log("fetchInFlight:", fetchInFlight.current);
-    if (fetchInFlight.current) return;
-
-    // Pobierz aktualny stan pudełek bezpośrednio przed sprawdzeniem
-    const boxZeroCount = boxes.boxZero.length;
-    const boxOneCount = boxes.boxOne.length;
-    console.log("Current counts - boxZero:", boxZeroCount, "boxOne:", boxOneCount);
-    
-    // Sprawdź, czy pudełko ma mniej niż 6 kart
-    const targetBox = boxZeroEnabled ? boxes.boxZero : boxes.boxOne;
-    const targetBoxCount = targetBox.length;
-    
-    console.log("Target box count:", targetBoxCount);
-    
-    if (targetBoxCount > 5) {
-      console.log("No need to download more cards - target box has enough cards");
-      return;
-    }
-
-    console.log("=== Downloading more cards ===");
-    fetchInFlight.current = true;
-    void downloadMore().finally(() => {
-      console.log("Download completed");
-      fetchInFlight.current = false;
+    const decision = pickAutoflowDecision({
+      boxes,
+      activeBox,
+      boxZeroEnabled,
+      canDownloadMore,
+      flushThreshold,
     });
-  }, [boxes, boxZeroEnabled, downloadMore, enabled, introBoxLimitReached, isReady]);
+
+    if (decision.shouldDownloadNew && canDownloadMore) {
+      fetchInFlight.current = true;
+      void downloadMore().finally(() => {
+        fetchInFlight.current = false;
+      });
+    }
+
+    if (!canSwitch) return;
+    if (now < switchLockedUntil.current) return;
+    if (!decision.targetBox) return;
+    if (decision.targetBox === activeBox) return;
+
+    handleSelectBox(decision.targetBox);
+    switchLockedUntil.current = now + SWITCH_STICKY_MS;
+  }, [
+    activeBox,
+    boxes,
+    boxZeroEnabled,
+    canSwitch,
+    downloadMore,
+    enabled,
+    handleSelectBox,
+    introBoxLimitReached,
+    isReady,
+    flushThreshold,
+    totalFlashcardsInCourse,
+  ]);
 }

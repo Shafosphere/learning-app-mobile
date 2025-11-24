@@ -66,6 +66,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   containerInput: {
     position: "relative",
     width: "100%",
+    // backgroundColor: colors.my_green,
   },
   myplaceholder: {
     position: "absolute",
@@ -125,6 +126,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   cardIconPlaceholder: {
     width: 32,
+  },
+  introToggle: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    height: 44,
+    justifyContent: "center",
+    alignItems: "center",
   },
   cardIconColor: {
     color: colors.headline,

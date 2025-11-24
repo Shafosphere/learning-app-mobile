@@ -47,6 +47,7 @@ export default function FlashcardsScreen() {
     addUsedWordIds,
     removeUsedWordIds,
     // progress,
+    totalWordsForLevel,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeCourse?.sourceLangId ?? 0,
     targetLangId: activeCourse?.targetLangId ?? 0,
@@ -71,7 +72,9 @@ export default function FlashcardsScreen() {
     reversed,
     correction,
     wrongInputChange,
+    setCorrectionRewers,
     learned,
+    isBetweenCards,
   } = useFlashcardsInteraction({
     boxes,
     setBoxes,
@@ -182,7 +185,10 @@ export default function FlashcardsScreen() {
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
   const correctionLocked = correction?.mode === "demote";
   const isAnswering =
-    selectedItem != null && result === null && correction?.mode !== "intro";
+    selectedItem != null &&
+    result === null &&
+    correction?.mode !== "intro" &&
+    !isBetweenCards;
   const resultPending = result !== null;
   const canAutoflowSwitch =
     !correctionLocked && !isAnswering && !resultPending;
@@ -197,6 +203,7 @@ export default function FlashcardsScreen() {
     isReady: isReady,
     downloadMore: downloadData,
     introBoxLimitReached,
+    totalFlashcardsInCourse: totalWordsForLevel,
   });
 
   if (
@@ -225,6 +232,7 @@ export default function FlashcardsScreen() {
         setResult={setResult}
         correction={correction}
         wrongInputChange={wrongInputChange}
+        setCorrectionRewers={setCorrectionRewers}
         onDownload={downloadData}
         downloadDisabled={introBoxLimitReached}
         introMode={introModeActive}
