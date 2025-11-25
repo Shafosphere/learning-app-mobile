@@ -13,6 +13,7 @@ import * as SplashScreen from "expo-splash-screen";
 import { View, ActivityIndicator, Text } from "react-native";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -110,6 +111,7 @@ export default function RootLayout() {
           <LearningStatsProvider>
             <PopupProvider>
               <Navbar>
+                <OnboardingGate />
                 <Stack screenOptions={{ headerShown: false }} />
               </Navbar>
             </PopupProvider>

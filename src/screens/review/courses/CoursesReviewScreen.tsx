@@ -19,6 +19,7 @@ import { getFlagSource } from "@/src/constants/languageFlags";
 import type { CEFRLevel } from "@/src/types/language";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 
 const LANGUAGE_LABELS_BY_TARGET: Record<string, Record<string, string>> = {
   pl: {
@@ -119,14 +120,39 @@ export default function CoursesReviewScreen() {
   const [builtInCounts, setBuiltInCounts] = useState<Record<number, number>>(
     {}
   );
-  const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>(
-    []
-  );
+  const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
   const [customCounts, setCustomCounts] = useState<Record<number, number>>({});
-  const [officialCourses, setOfficialCourses] = useState<OfficialCourseReviewItem[]>(
-    []
+  const [officialCourses, setOfficialCourses] = useState<
+    OfficialCourseReviewItem[]
+  >([]);
+  const [officialCounts, setOfficialCounts] = useState<Record<number, number>>(
+    {}
   );
-  const [officialCounts, setOfficialCounts] = useState<Record<number, number>>({});
+  const { IntroOverlay } = useFlashcardsIntro({
+    storageKey: "@review_courses_intro_seen_v1",
+    messages: [
+      {
+        title: "Wybierz kurs do powtórek",
+        description:
+          "Dotknij kafelka, by przejść do gry i powtórzyć fiszki z tego kursu.",
+      },
+      {
+        title: "Jak często się pojawiają?",
+        description:
+          "Może za 2 dni, może za tydzień, a może za rok? Pamiętaj, że żeby zapamiętać, trzeba zapomnieć ;)",
+      },
+      {
+        title: "Co oznaczają liczby",
+        description:
+          "Czerwona liczba to zaległe powtórki. Zielona oznacza, że na razie nic nie czeka.",
+      },
+      {
+        title: "Wyłączanie powtórek",
+        description:
+          "W ustawieniach kursu możesz wyłączyć powtórki — wtedy nie pojawi się na tej liście.",
+      },
+    ],
+  });
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
@@ -409,8 +435,10 @@ export default function CoursesReviewScreen() {
           key,
           targetLang,
           sourceLang,
-          targetFlag: targetFlag ?? (targetLang ? getFlagSource(targetLang) : undefined),
-          sourceFlag: sourceFlag ?? (sourceLang ? getFlagSource(sourceLang) : undefined),
+          targetFlag:
+            targetFlag ?? (targetLang ? getFlagSource(targetLang) : undefined),
+          sourceFlag:
+            sourceFlag ?? (sourceLang ? getFlagSource(sourceLang) : undefined),
           builtin: [],
           official: [],
         };
@@ -460,6 +488,7 @@ export default function CoursesReviewScreen() {
 
   return (
     <View style={styles.container}>
+      <IntroOverlay />
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
@@ -554,14 +583,17 @@ export default function CoursesReviewScreen() {
                         {group.official.map((course) => {
                           const iconMeta = getCourseIconById(course.iconId);
                           const IconComponent = iconMeta?.Component ?? Ionicons;
-                          const iconName = (iconMeta?.name ?? "grid-outline") as never;
+                          const iconName = (iconMeta?.name ??
+                            "grid-outline") as never;
                           const dueCount = officialCounts[course.id] ?? 0;
 
                           return (
                             <Pressable
                               key={`official-${course.id}`}
                               style={styles.courseCard}
-                              onPress={() => handleSelectCustomCourse(course.id)}
+                              onPress={() =>
+                                handleSelectCustomCourse(course.id)
+                              }
                             >
                               <IconComponent
                                 name={iconName}

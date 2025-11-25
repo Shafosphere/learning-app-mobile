@@ -5,6 +5,11 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
+  getOnboardingCheckpoint,
+  OnboardingCheckpoint,
+  setOnboardingCheckpoint,
+} from "@/src/services/onboardingCheckpoint";
+import {
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
@@ -18,6 +23,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseCard } from "@/src/components/course/CourseCard";
+import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 
 type BuiltinCourseItem = { course: LanguageCourse; index: number };
 
@@ -66,6 +72,11 @@ export default function CourseActivateScreen() {
   >([]);
   const router = useRouter();
   const setPopup = usePopup();
+  const [showIntro, setShowIntro] = useState(false);
+  const [introStep, setIntroStep] = useState(0);
+  const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
+    null
+  );
 
   const userCustomCourses = useMemo(
     () => customCourses.filter((course) => !course.isOfficial),
@@ -152,6 +163,24 @@ export default function CourseActivateScreen() {
     setCommittedCourse(null);
   }, [activeCourseIdx, activeCustomCourseId]);
 
+  useEffect(() => {
+    let mounted = true;
+    getOnboardingCheckpoint()
+      .then((cp) => {
+        if (!mounted) return;
+        const resolved = cp ?? "activate_required";
+        setCheckpoint(resolved);
+        if (resolved !== "done") {
+          setShowIntro(true);
+          setIntroStep(0);
+        }
+      })
+      .catch(() => {});
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
@@ -202,6 +231,8 @@ export default function CourseActivateScreen() {
   }, []);
 
   const notifyActivated = useCallback(() => {
+    void setOnboardingCheckpoint("done");
+    setCheckpoint("done");
     setPopup({
       message: "Aktywowałem kurs :3",
       color: "my_green",
@@ -279,8 +310,51 @@ export default function CourseActivateScreen() {
     [router]
   );
 
+  const introMessages = useMemo(
+    () => [
+      {
+        title: "Aktywuj kurs",
+        description:
+          "Tutaj aktywujesz kurs, gry będą używać fiszek z aktywnego kursu.",
+      },
+      {
+        title: "Ustawienia kursu",
+        description:
+          "Każdy kurs ma swoje ustawienia, które możesz zmieniać w kazdej chwili.",
+      },
+    ],
+    []
+  );
+
+  const handleIntroClose = useCallback(() => {
+    setIntroStep((prev) => {
+      const next = prev + 1;
+      if (next >= introMessages.length) {
+        setShowIntro(false);
+        return prev;
+      }
+      return next;
+    });
+  }, [introMessages.length]);
+
+  const hasActiveCourse =
+    activeCourseIdx != null || activeCustomCourseId != null;
+  const introActive = checkpoint !== "done";
+
   return (
     <View style={styles.container}>
+      {showIntro ? (
+        <View style={styles.introOverlay} pointerEvents="box-none">
+          <LogoMessage
+            floating
+            offset={{ top: 8, left: 8, right: 8 }}
+            title={introMessages[introStep]?.title}
+            description={introMessages[introStep]?.description}
+            onClose={handleIntroClose}
+            closeLabel="Następny komunikat"
+          />
+        </View>
+      ) : null}
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
@@ -561,17 +635,47 @@ export default function CourseActivateScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
-          <MyButton
-            text="nowy"
-            color="my_yellow"
-            onPress={() => router.push("/createcourse")}
-            disabled={false}
-            width={70}
-          />
+      {introActive ? (
+        <View style={styles.buttonscontainer}>
+          <View style={styles.buttonsRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź dalej"
+              disabled={!hasActiveCourse}
+              onPress={() => {
+                setCheckpoint("done");
+                void setOnboardingCheckpoint("done");
+                router.replace("/flashcards");
+              }}
+              style={[
+                styles.nextButton,
+                !hasActiveCourse && styles.nextButtonDisabled,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.nextButtonLabel,
+                  !hasActiveCourse && styles.nextButtonLabelDisabled,
+                ]}
+              >
+                Dalej
+              </Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      ) : (
+        <View style={styles.buttonscontainer}>
+          <View style={styles.buttonsRow}>
+            <MyButton
+              text="nowy"
+              color="my_yellow"
+              onPress={() => router.push("/createcourse")}
+              disabled={false}
+              width={70}
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 }

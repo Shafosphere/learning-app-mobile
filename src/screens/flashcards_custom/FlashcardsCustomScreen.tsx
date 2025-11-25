@@ -24,6 +24,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 
 function mapCustomCardToWord(
   card: CustomFlashcardRecord
@@ -77,6 +78,24 @@ export default function Flashcards() {
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  const { IntroOverlay } = useFlashcardsIntro({
+    messages: [
+      {
+        title: "To jest główna gra",
+        description: "Tutaj uczysz się swoich własnych fiszek.",
+      },
+      {
+        title: "Jak działa powtarzanie",
+        description:
+          "Słówka trafiają do pierwszego pudełka. Poprawna odpowiedź przenosi kartę do kolejnego pudełka aż do ostatniego.",
+      },
+      {
+        title: "Gdy popełnisz błąd",
+        description:
+          "Zła odpowiedź cofa słówko do pudełka nr 1, żeby wzmocnić pamięć. Spróbuj ponownie!",
+      },
+    ],
+  });
 
   useEffect(() => {
     if (!shouldCelebrate) return;
@@ -399,6 +418,7 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
+      <IntroOverlay />
       <Confetti generateConfetti={shouldCelebrate} />
       {cardSection}
 

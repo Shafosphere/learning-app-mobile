@@ -3,6 +3,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+    position: "relative",
   },
   scrollArea: {
     flex: 1,
@@ -24,6 +25,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     display: "flex",
     flexDirection: "column",
     gap: 12,
+  },
+  introOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    zIndex: 30,
+    elevation: 6,
+    paddingHorizontal: 4,
+    paddingTop: 8,
   },
   groupSection: {
     width: "100%",
@@ -213,6 +224,27 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 10,
+  },
+  nextButton: {
+    width: 90,
+    height: 50,
+    borderRadius: 12,
+    backgroundColor: colors.my_green,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  nextButtonDisabled: {
+    backgroundColor: colors.border,
+  },
+  nextButtonLabel: {
+    fontSize: 16,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    color: colors.headline,
+  },
+  nextButtonLabelDisabled: {
+    color: colors.paragraph,
+    opacity: 0.6,
   },
   flag: {
     width: 99 / 1.25,

@@ -12,9 +12,10 @@ import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 // import { useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   // const router = useRouter();
@@ -29,12 +30,14 @@ export default function FlashcardsScreen() {
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  const { IntroOverlay } = useFlashcardsIntro();
 
   useEffect(() => {
     if (!shouldCelebrate) return;
     const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
     return () => clearTimeout(timeout);
   }, [shouldCelebrate]);
+
 
   const {
     boxes,
@@ -220,6 +223,7 @@ export default function FlashcardsScreen() {
   }
   return (
     <View style={styles.container}>
+      <IntroOverlay />
       <Confetti generateConfetti={shouldCelebrate} />
 
       <Card

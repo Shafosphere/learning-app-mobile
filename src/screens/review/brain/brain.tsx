@@ -18,6 +18,7 @@ import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import MyButton from "@/src/components/button/button";
 import { useStyles } from "./brain-styles";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import {
   MEMORY_BOARD_LAYOUTS,
   MEMORY_BOARD_SIZE_LABELS,
@@ -87,6 +88,26 @@ export default function BrainScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelTranslations, setLevelTranslations] = useState<string[]>([]);
+  const { IntroOverlay } = useFlashcardsIntro({
+    storageKey: "@review_brain_intro_seen_v1",
+    messages: [
+      {
+        title: "Co to?",
+        description:
+          "Tutaj wybierasz metode powtórki.",
+      },
+      {
+        title: "Wybierz tryb powtórek",
+        description:
+          "Przycisk 'start' to szybka sesja mini gier. Przycisk 'Tradycyjne' to klasyczne wpisywanie tłumaczeń.",
+      },
+      {
+        title: "Po sesji",
+        description:
+          "Na końcu obu trybów zobaczysz tabelę z podsumowaniem wyników.",
+      },
+    ],
+  });
 
   // --- Derived data shared by minigames ------------------------------------
   const sanitizedWords = useMemo(
@@ -496,6 +517,7 @@ export default function BrainScreen() {
 
   return (
     <View style={styles.container}>
+      <IntroOverlay />
       <Image
         source={require("@/assets/illustrations/box/logo.png")}
         style={styles.logo}

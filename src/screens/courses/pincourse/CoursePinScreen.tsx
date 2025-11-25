@@ -23,6 +23,12 @@ import {
 import { getCourseIconById } from "@/src/constants/customCourse";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import {
+  getOnboardingCheckpoint,
+  OnboardingCheckpoint,
+  setOnboardingCheckpoint,
+} from "@/src/services/onboardingCheckpoint";
+import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 
 const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
 
@@ -91,6 +97,11 @@ export default function CoursePinScreen() {
   const [placeholderPinnedKeys, setPlaceholderPinnedKeys] = useState<
     Set<string>
   >(() => new Set());
+  const [showIntro, setShowIntro] = useState(false);
+  const [introStep, setIntroStep] = useState(0);
+  const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
+    null
+  );
 
   useEffect(() => {
     let isMounted = true;
@@ -144,6 +155,27 @@ export default function CoursePinScreen() {
       });
     return () => {
       isMounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    getOnboardingCheckpoint()
+      .then((cp) => {
+        if (!mounted) return;
+        const resolved = cp ?? "pin_required";
+        setCheckpoint(resolved);
+        if (resolved !== "done") {
+          setShowIntro(true);
+          setIntroStep(0);
+        }
+      })
+      .catch(() => {})
+      .finally(() => {
+        // no-op
+      });
+    return () => {
+      mounted = false;
     };
   }, []);
 
@@ -239,14 +271,28 @@ export default function CoursePinScreen() {
       try {
         if (isPinned) {
           await removeCourse(course);
+          const remaining = courses.length - 1;
+          if (remaining <= 0) {
+            setCheckpoint("pin_required");
+            void setOnboardingCheckpoint("pin_required");
+          }
         } else {
           await addCourse(course);
+          setCheckpoint("activate_required");
+          void setOnboardingCheckpoint("activate_required");
         }
       } catch (error) {
         console.error(`[CoursePin] Failed to toggle course ${key}`, error);
       }
     },
-    [addCourse, pinnedKeys, removeCourse, usingPlaceholder]
+    [
+      addCourse,
+      courses.length,
+      pinnedKeys,
+      removeCourse,
+      setCheckpoint,
+      usingPlaceholder,
+    ]
   );
 
   const handlePinPress = useCallback(
@@ -263,8 +309,15 @@ export default function CoursePinScreen() {
       try {
         if (isPinned) {
           await unpinOfficialCourse(id);
+          const remaining = pinnedOfficialCourseIds.length - 1;
+          if (remaining <= 0 && courses.length === 0) {
+            setCheckpoint("pin_required");
+            void setOnboardingCheckpoint("pin_required");
+          }
         } else {
           await pinOfficialCourse(id);
+          setCheckpoint("activate_required");
+          void setOnboardingCheckpoint("activate_required");
         }
       } catch (error) {
         console.error(
@@ -273,7 +326,13 @@ export default function CoursePinScreen() {
         );
       }
     },
-    [pinOfficialCourse, pinnedOfficialCourseIds, unpinOfficialCourse]
+    [
+      courses.length,
+      pinOfficialCourse,
+      pinnedOfficialCourseIds,
+      unpinOfficialCourse,
+      setCheckpoint,
+    ]
   );
 
   const isCoursePinned = useCallback(
@@ -287,6 +346,18 @@ export default function CoursePinScreen() {
     [pinnedKeys, placeholderPinnedKeys, usingPlaceholder]
   );
 
+  const hasAnyPinned = useMemo(() => {
+    if (usingPlaceholder) {
+      return placeholderPinnedKeys.size > 0;
+    }
+    return pinnedKeys.size > 0 || pinnedOfficialCourseIds.length > 0;
+  }, [
+    pinnedKeys,
+    pinnedOfficialCourseIds,
+    placeholderPinnedKeys,
+    usingPlaceholder,
+  ]);
+
   const handleCardPress = useCallback(
     (course: LanguageCourse) => {
       if (course.level) {
@@ -297,8 +368,58 @@ export default function CoursePinScreen() {
     [handlePinToggle, setLevel]
   );
 
+  const introMessages = useMemo(
+    () => [
+      {
+        title: "Cześć, jestem X",
+        description: "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów",
+      },
+      {
+        title: "Przypnij kilka kursów",
+        description:
+          "Możesz przypiąć więcej niż jeden kurs naraz. Po prostu zaznacz te, które cie interesują.",
+      },
+      {
+        title: "Po przypięciu kliknij Dalej",
+        description:
+          "Przycisk u dołu włączy się, gdy przypniesz co najmniej jeden kurs.",
+      },
+      {
+        title: "Własne kursy!",
+        description:
+          "Pożniej bedziesz mógł zrobić własne kursy z swoimi fiszkami! :3",
+      },
+    ],
+    []
+  );
+
+  const handleCloseIntro = useCallback(() => {
+    setIntroStep((prev) => {
+      const next = prev + 1;
+      if (next >= introMessages.length) {
+        setShowIntro(false);
+        return prev;
+      }
+      return next;
+    });
+  }, [introMessages.length]);
+
+  const introActive = checkpoint !== "done";
+
   return (
     <View style={styles.container}>
+      {showIntro && introMessages[introStep] ? (
+        <View style={styles.introOverlay} pointerEvents="box-none">
+          <LogoMessage
+            floating
+            offset={{ top: 12, left: 12, right: 12 }}
+            title={introMessages[introStep].title}
+            description={introMessages[introStep].description}
+            onClose={handleCloseIntro}
+            closeLabel="Następny komunikat"
+          />
+        </View>
+      ) : null}
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
@@ -487,26 +608,56 @@ export default function CoursePinScreen() {
         </View>
       </ScrollView>
 
-      <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
-          <MyButton
-            color="my_yellow"
-            onPress={() => router.push("/coursepanel")}
-            disabled={false}
-            width={60}
-            accessibilityLabel="Wróć do panelu kursów"
-          >
-            <Ionicons name="arrow-back" size={28} color={colors.headline} />
-          </MyButton>
-          <MyButton
-            text="własny"
-            color="my_green"
-            onPress={() => router.push("/custom_course")}
-            disabled={false}
-            width={90}
-          />
+      {introActive ? (
+        <View style={styles.buttonscontainer}>
+          <View style={styles.buttonsRow}>
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź dalej do aktywacji"
+              disabled={!hasAnyPinned}
+              onPress={() => {
+                setCheckpoint("activate_required");
+                void setOnboardingCheckpoint("activate_required");
+                router.replace("/coursepanel");
+              }}
+              style={[
+                styles.nextButton,
+                !hasAnyPinned && styles.nextButtonDisabled,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.nextButtonLabel,
+                  !hasAnyPinned && styles.nextButtonLabelDisabled,
+                ]}
+              >
+                Dalej
+              </Text>
+            </Pressable>
+          </View>
         </View>
-      </View>
+      ) : (
+        <View style={styles.buttonscontainer}>
+          <View style={styles.buttonsRow}>
+            <MyButton
+              color="my_yellow"
+              onPress={() => router.push("/coursepanel")}
+              disabled={false}
+              width={60}
+              accessibilityLabel="Wróć do panelu kursów"
+            >
+              <Ionicons name="arrow-back" size={28} color={colors.headline} />
+            </MyButton>
+            <MyButton
+              text="własny"
+              color="my_green"
+              onPress={() => router.push("/custom_course")}
+              disabled={false}
+              width={90}
+            />
+          </View>
+        </View>
+      )}
     </View>
   );
 }

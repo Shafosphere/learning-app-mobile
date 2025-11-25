@@ -51,6 +51,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     shadowRadius: 6,
     shadowOffset: { width: 0, height: 3 },
     elevation: 2,
+    position: "relative",
   },
   sectionHeader: {
     fontSize: 18,
@@ -183,5 +184,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
   keyboardButtonWrapper: {
     marginRight: 12,
     marginTop: 8,
+  },
+  messagePreview: {
+    marginTop: 8,
+    marginBottom: 14,
+    position: "relative",
+  },
+  messagePreviewFloating: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    marginTop: 0,
+    marginBottom: 0,
+    zIndex: 40,
+    elevation: 8,
   },
 }));
