@@ -1,26 +1,18 @@
-// BoxesCarousel.tsx
-import React, {
-  useMemo,
-  useRef,
-  useCallback,
-  useState,
-  useEffect,
-} from "react";
-import {
-  View,
-  // Image,
-  // Pressable,
-  FlatList,
-  Dimensions,
-  NativeScrollEvent,
-  NativeSyntheticEvent,
-  // Text,
-} from "react-native";
-import { useStyles } from "./boxes-styles";
 import { BoxesState } from "@/src/types/boxes";
-import BoxCarouselItem from "./boxCarouselItem";
-// import BoxTop from "@/assets/illustrations/box/topBox.png";
-// import BoxBottom from "@/assets/illustrations/box/bottomBox.png";
+import React, { useCallback, useEffect, useMemo, useRef } from "react";
+import { Dimensions, FlatList, View } from "react-native";
+import Animated, {
+  useAnimatedScrollHandler,
+  useSharedValue,
+} from "react-native-reanimated";
+import BoxCarouselItem from "./boxCarouselItem copy";
+import { useStyles } from "./boxes-styles";
+
+const { width: SCREEN_WIDTH } = Dimensions.get("window");
+const ITEM_WIDTH = SCREEN_WIDTH * 0.35;
+const SPACING = 20;
+const ITEM_SIZE = ITEM_WIDTH + SPACING;
+const SIDE_SPACER = (SCREEN_WIDTH - ITEM_SIZE) / 2;
 
 interface BoxesProps {
   boxes: BoxesState;
@@ -29,10 +21,8 @@ interface BoxesProps {
   hideBoxZero?: boolean;
 }
 
-const { width: SCREEN_WIDTH } = Dimensions.get("window");
-const ITEM_WIDTH = Math.round(SCREEN_WIDTH * 0.3);
-const SPACING = 40;
-const CELL_WIDTH = ITEM_WIDTH + SPACING;
+// Create an animated FlatList
+const AnimatedFlatList = Animated.createAnimatedComponent(FlatList);
 
 export default function BoxesCarousel({
   boxes,
@@ -41,88 +31,102 @@ export default function BoxesCarousel({
   hideBoxZero = false,
 }: BoxesProps) {
   const styles = useStyles();
-  const listRef = useRef<FlatList>(null);
+  const scrollX = useSharedValue(0);
+  const flatListRef = useRef<FlatList>(null);
 
+  // Prepare data
   const data = useMemo(() => {
     const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
     const filtered = hideBoxZero ? keys.filter((k) => k !== "boxZero") : keys;
-    return filtered.map((k) => ({ key: k }));
+    return filtered.map((k) => ({ key: k, content: boxes[k] }));
   }, [boxes, hideBoxZero]);
 
+  // Calculate initial index
   const initialIndex = useMemo(() => {
     if (!activeBox) return 0;
     const idx = data.findIndex((d) => d.key === activeBox);
     return idx >= 0 ? idx : 0;
   }, [activeBox, data]);
 
-  const [activeIdx, setActiveIdx] = useState<number>(initialIndex);
+  // Handle scroll events for animations
+  const onScroll = useAnimatedScrollHandler((event) => {
+    scrollX.value = event.contentOffset.x;
+  });
 
-  useEffect(() => setActiveIdx(initialIndex), [initialIndex]);
-
-  useEffect(() => {
-    scrollToIndex(initialIndex);
-  }, [initialIndex, scrollToIndex]);
-
-  const sidePadding = Math.max(0, (SCREEN_WIDTH - CELL_WIDTH) / 2);
-
-  const onMomentumEnd = useCallback(
-    (e: NativeSyntheticEvent<NativeScrollEvent>) => {
-      const x = e.nativeEvent.contentOffset.x;
-      const idx = Math.round(x / CELL_WIDTH);
-      const item = data[idx];
-      if (item && item.key !== activeBox) handleSelectBox(item.key);
-      if (idx !== activeIdx) setActiveIdx(idx);
+  // Handle selection when scrolling stops
+  const onMomentumScrollEnd = useCallback(
+    (e: any) => {
+      const offsetX = e.nativeEvent.contentOffset.x;
+      const index = Math.round(offsetX / ITEM_SIZE);
+      const item = data[index];
+      if (item && item.key !== activeBox) {
+        handleSelectBox(item.key);
+      }
     },
-    [activeBox, activeIdx, data, handleSelectBox]
+    [activeBox, data, handleSelectBox]
   );
 
-  const scrollToIndex = useCallback((index: number) => {
-    listRef.current?.scrollToIndex({ index, animated: true });
-  }, []);
+  // Sync activeBox prop with scroll position (programmatic changes)
+  useEffect(() => {
+    if (flatListRef.current && data.length > 0) {
+      const index = data.findIndex((d) => d.key === activeBox);
+      if (index >= 0) {
+        // Check if we are already near this index to avoid unnecessary scrolls
+        // But for simplicity, we just scroll. 
+        // We can check scrollX.value but that's on UI thread.
+        flatListRef.current.scrollToIndex({ index, animated: true });
+      }
+    }
+  }, [activeBox, data]);
 
   const renderItem = useCallback(
-    ({ item, index }: { item: { key: keyof BoxesState }; index: number }) => {
-      const boxContent = boxes[item.key];
-      const layer = Math.max(0, 3 - Math.abs(activeIdx - index));
-      const isActive = index === activeIdx;
-
+    ({ item, index }: { item: any; index: number }) => {
+      const isActive = item.key === activeBox;
       return (
         <BoxCarouselItem
-          boxContent={boxContent}
-          layer={layer}
+          boxContent={item.content}
+          index={index}
+          scrollX={scrollX}
+          itemWidth={ITEM_WIDTH}
+          spacing={SPACING}
           isActive={isActive}
-          onPress={() => scrollToIndex(index)}
-          cellWidth={CELL_WIDTH}
+          onPress={() => {
+            flatListRef.current?.scrollToIndex({ index, animated: true });
+            if (item.key !== activeBox) handleSelectBox(item.key);
+          }}
         />
       );
     },
-    [activeIdx, boxes, scrollToIndex]
+    [activeBox, handleSelectBox, scrollX]
   );
 
   return (
     <View style={styles.container}>
-      <FlatList
-        ref={listRef}
-        bounces={true}
+      <AnimatedFlatList
+        ref={flatListRef}
         data={data}
-        keyExtractor={(i) => String(i.key)}
+        keyExtractor={(item: any) => String(item.key)}
         renderItem={renderItem}
         horizontal
         showsHorizontalScrollIndicator={false}
-        contentContainerStyle={{
-          paddingHorizontal: sidePadding,
-        }}
+        snapToInterval={ITEM_SIZE}
         decelerationRate="fast"
-        snapToInterval={CELL_WIDTH}
-        snapToAlignment="center"
-        disableIntervalMomentum
-        onMomentumScrollEnd={onMomentumEnd}
+        bounces={false}
+        contentContainerStyle={{
+          paddingHorizontal: SIDE_SPACER,
+        }}
+        onScroll={onScroll}
+        scrollEventThrottle={16}
+        onMomentumScrollEnd={onMomentumScrollEnd}
         initialScrollIndex={initialIndex}
-        getItemLayout={(_d, index) => ({
-          length: CELL_WIDTH,
-          offset: CELL_WIDTH * index,
+        getItemLayout={(_: any, index: number) => ({
+          length: ITEM_SIZE,
+          offset: ITEM_SIZE * index,
           index,
         })}
+        // Optimization props
+        removeClippedSubviews={false}
+        windowSize={5}
       />
     </View>
   );

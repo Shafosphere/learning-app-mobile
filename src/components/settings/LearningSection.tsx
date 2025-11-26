@@ -1,29 +1,8 @@
 import React, { useCallback, useEffect, useState } from "react";
-import {
-  View,
-  Text,
-  Switch,
-  TouchableOpacity,
-  Image,
-  TextInput,
-} from "react-native";
+import { View, Text, Switch, TextInput } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-
-const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
-const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
-
-type LayoutOption = {
-  key: "classic" | "carousel";
-  label: string;
-  preview: number;
-};
-
-const layoutOptions: LayoutOption[] = [
-  { key: "classic", label: "Klasyczny", preview: classicPreview },
-  { key: "carousel", label: "Karuzela", preview: carouselPreview },
-];
 
 const LearningSection: React.FC = () => {
   const styles = useStyles();
@@ -33,10 +12,6 @@ const LearningSection: React.FC = () => {
     toggleSpellChecking,
     ignoreDiacriticsInSpellcheck,
     toggleIgnoreDiacriticsInSpellcheck,
-    showBoxFaces,
-    toggleShowBoxFaces,
-    boxesLayout,
-    setBoxesLayout,
     flashcardsBatchSize,
     setFlashcardsBatchSize,
     learningRemindersEnabled,
@@ -61,13 +36,6 @@ const LearningSection: React.FC = () => {
     }
   }, [feedbackEnabled]);
 
-  const handleLayoutSelect = async (key: "classic" | "carousel") => {
-    if (key !== boxesLayout) {
-      await setBoxesLayout(key);
-      await triggerHaptics();
-    }
-  };
-
   const handleBatchChange = (value: string) => {
     const sanitized = value.replace(/[^0-9]/g, "");
     setBatchSizeInput(sanitized);
@@ -86,13 +54,6 @@ const LearningSection: React.FC = () => {
   const handleSpellCheckToggle = async (value: boolean) => {
     if (value !== spellChecking) {
       await toggleSpellChecking();
-      await triggerHaptics();
-    }
-  };
-
-  const handleFacesToggle = async (value: boolean) => {
-    if (value !== showBoxFaces) {
-      await toggleShowBoxFaces();
       await triggerHaptics();
     }
   };
@@ -145,20 +106,6 @@ const LearningSection: React.FC = () => {
       </View>
 
       <View style={styles.row}>
-      <View style={styles.rowTextWrapper}>
-        <Text style={styles.rowTitle}>Miny pudełek</Text>
-        <Text style={styles.rowSubtitle}>
-          Uśmiechnięte / smutne pudełka w zależności od statusu.
-        </Text>
-      </View>
-      <Switch
-        style={styles.switch}
-        value={showBoxFaces}
-        onValueChange={handleFacesToggle}
-      />
-    </View>
-
-      <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Przypomnienia o nauce</Text>
           <Text style={styles.rowSubtitle}>
@@ -172,35 +119,6 @@ const LearningSection: React.FC = () => {
         />
       </View>
 
-      <View style={[styles.row, { alignItems: "flex-start" }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wybierz schemat pudełek</Text>
-          <Text style={styles.rowSubtitle}>
-            Preferowany widok listy fiszek podczas nauki.
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.layoutOptions}>
-        {layoutOptions.map((option) => (
-          <TouchableOpacity
-            key={option.key}
-            activeOpacity={0.7}
-            onPress={() => handleLayoutSelect(option.key)}
-            style={[
-              styles.layoutOption,
-              boxesLayout === option.key && styles.layoutOptionActive,
-            ]}
-          >
-            <Image
-              source={option.preview}
-              style={styles.layoutImage}
-              resizeMode="cover"
-            />
-            <Text style={styles.layoutLabel}>{option.label}</Text>
-          </TouchableOpacity>
-        ))}
-      </View>
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Liczba fiszek w partii</Text>

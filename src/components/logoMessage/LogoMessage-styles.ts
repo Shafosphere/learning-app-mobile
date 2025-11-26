@@ -45,6 +45,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
     borderWidth: 1,
     borderColor: colors.border,
+    zIndex: 10,
   },
   closeLabel: {
     fontSize: 18,

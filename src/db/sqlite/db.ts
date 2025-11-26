@@ -1840,3 +1840,28 @@ export async function addRandomCustomReviews(
   }
   return rows.length;
 }
+
+export async function resetReviewsForPair(
+  sourceLangId: number,
+  targetLangId: number
+): Promise<number> {
+  const db = await getDB();
+  const result = await db.runAsync(
+    `DELETE FROM reviews WHERE source_lang_id = ? AND target_lang_id = ?;`,
+    sourceLangId,
+    targetLangId
+  );
+  return Number(result?.changes ?? 0);
+}
+
+export async function resetCustomReviewsForCourse(
+  courseId: number
+): Promise<number> {
+  if (!courseId) return 0;
+  const db = await getDB();
+  const result = await db.runAsync(
+    `DELETE FROM custom_reviews WHERE course_id = ?;`,
+    courseId
+  );
+  return Number(result?.changes ?? 0);
+}

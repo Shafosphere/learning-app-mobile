@@ -8,7 +8,10 @@ import type { CEFRLevel } from "@/src/types/language";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Alert, ScrollView, Text, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { resetReviewsForPair } from "@/src/db/sqlite/db";
+import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 
 type CourseEditParams = {
   id?: string | string[];
@@ -109,6 +112,7 @@ function BuiltinCourseEditor({
   const router = useRouter();
   const {
     colors,
+    courses,
     getBuiltinCourseBoxZeroEnabled,
     setBuiltinCourseBoxZeroEnabled,
     getBuiltinCourseAutoflowEnabled,
@@ -134,6 +138,22 @@ function BuiltinCourseEditor({
     })
   );
   const [reviewsEnabled, setReviewsEnabled] = useState(true);
+  const [resettingBoxes, setResettingBoxes] = useState(false);
+  const [resettingReviews, setResettingReviews] = useState(false);
+  const [resettingAll, setResettingAll] = useState(false);
+
+  const getMatchingCourse = () =>
+    courses.find((course) => {
+      const sameSource = normalizedSource
+        ? course.sourceLang?.toLowerCase() === normalizedSource
+        : true;
+      const sameTarget = normalizedTarget
+        ? course.targetLang?.toLowerCase() === normalizedTarget
+        : true;
+      const sameLevel =
+        normalizedLevel != null ? course.level === normalizedLevel : true;
+      return sameSource && sameTarget && sameLevel;
+    });
 
   const handleBoxZeroToggle = async (value: boolean) => {
     setBoxZeroEnabled(value);
@@ -156,6 +176,137 @@ function BuiltinCourseEditor({
         level: normalizedLevel,
       },
       value
+    );
+  };
+
+  const performResetBoxes = async () => {
+    setResettingBoxes(true);
+    const matchingCourse = getMatchingCourse();
+
+    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
+      setResettingBoxes(false);
+      Alert.alert(
+        "Brak danych kursu",
+        "Nie znaleziono identyfikatorów języków dla tego kursu."
+      );
+      return;
+    }
+
+    try {
+      const scopeId = makeScopeId(
+        matchingCourse.sourceLangId,
+        matchingCourse.targetLangId,
+        normalizedLevel ?? "A1"
+      );
+      const storageKey = `boxes:${scopeId}`;
+      await AsyncStorage.removeItem(storageKey);
+      Alert.alert(
+        "Zresetowano pudełka",
+        "Stan pudełek i użyte słówka tego kursu został wyczyszczony."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się zresetować pudełek.");
+    } finally {
+      setResettingBoxes(false);
+    }
+  };
+
+  const handleResetBoxes = () => {
+    Alert.alert(
+      "Reset pudełek",
+      "Czyści stan pudełek dla tego kursu i przenosi fiszki do puli nieznanych. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetBoxes },
+      ]
+    );
+  };
+
+  const performResetReviews = async () => {
+    setResettingReviews(true);
+    const matchingCourse = getMatchingCourse();
+
+    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
+      setResettingReviews(false);
+      Alert.alert(
+        "Brak danych kursu",
+        "Nie znaleziono identyfikatorów języków dla tego kursu."
+      );
+      return;
+    }
+
+    try {
+      const deleted = await resetReviewsForPair(
+        matchingCourse.sourceLangId,
+        matchingCourse.targetLangId
+      );
+      Alert.alert(
+        "Zresetowano powtórki",
+        deleted > 0
+          ? `Usunięto ${deleted} wpisów powtórek dla tego kursu.`
+          : "Nie było zapisanych powtórek do usunięcia."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się zresetować powtórek.");
+    } finally {
+      setResettingReviews(false);
+    }
+  };
+
+  const handleResetReviews = () => {
+    Alert.alert(
+      "Reset powtórek",
+      "Usuniesz zapisane powtórki dla tego kursu. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetReviews },
+      ]
+    );
+  };
+
+  const performResetAll = async () => {
+    setResettingAll(true);
+    const matchingCourse = getMatchingCourse();
+
+    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
+      setResettingAll(false);
+      Alert.alert(
+        "Brak danych kursu",
+        "Nie znaleziono identyfikatorów języków dla tego kursu."
+      );
+      return;
+    }
+
+    try {
+      const scopeId = makeScopeId(
+        matchingCourse.sourceLangId,
+        matchingCourse.targetLangId,
+        normalizedLevel ?? "A1"
+      );
+      await AsyncStorage.removeItem(`boxes:${scopeId}`);
+      await resetReviewsForPair(
+        matchingCourse.sourceLangId,
+        matchingCourse.targetLangId
+      );
+      Alert.alert(
+        "Reset całkowity",
+        "Wyczyszczono pudełka, powtórki i przywrócono fiszki jako nieznane."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się wykonać pełnego resetu.");
+    } finally {
+      setResettingAll(false);
+    }
+  };
+
+  const handleResetAll = () => {
+    Alert.alert(
+      "Reset całkowity",
+      "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane dla tego kursu. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetAll },
+      ]
     );
   };
 
@@ -198,6 +349,51 @@ function BuiltinCourseEditor({
             reviewsEnabled={reviewsEnabled}
             onToggleReviews={setReviewsEnabled}
           />
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset pudełek</Text>
+              <Text style={styles.toggleSubtitle}>
+                Czyści stan pudełek i przywraca fiszki do puli nieznanych.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingBoxes ? "Resetuję..." : "Reset pudełek"}
+              color="my_red"
+              onPress={handleResetBoxes}
+              disabled={resettingBoxes}
+              width={150}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset powtórek</Text>
+              <Text style={styles.toggleSubtitle}>
+                Usuwa zapisane powtórki dla tego kursu.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingReviews ? "Resetuję..." : "Reset powtórek"}
+              color="my_red"
+              onPress={handleResetReviews}
+              disabled={resettingReviews}
+              width={150}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset całkowity</Text>
+              <Text style={styles.toggleSubtitle}>
+                Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingAll ? "Resetuję..." : "Reset całkowity"}
+              color="my_red"
+              onPress={handleResetAll}
+              disabled={resettingAll}
+              width={150}
+            />
+          </View>
         </View>
       </ScrollView>
 

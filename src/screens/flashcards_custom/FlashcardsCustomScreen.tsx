@@ -78,24 +78,7 @@ export default function Flashcards() {
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
-  const { IntroOverlay } = useFlashcardsIntro({
-    messages: [
-      {
-        title: "To jest główna gra",
-        description: "Tutaj uczysz się swoich własnych fiszek.",
-      },
-      {
-        title: "Jak działa powtarzanie",
-        description:
-          "Słówka trafiają do pierwszego pudełka. Poprawna odpowiedź przenosi kartę do kolejnego pudełka aż do ostatniego.",
-      },
-      {
-        title: "Gdy popełnisz błąd",
-        description:
-          "Zła odpowiedź cofa słówko do pudełka nr 1, żeby wzmocnić pamięć. Spróbuj ponownie!",
-      },
-    ],
-  });
+  const { IntroOverlay } = useFlashcardsIntro();
 
   useEffect(() => {
     if (!shouldCelebrate) return;

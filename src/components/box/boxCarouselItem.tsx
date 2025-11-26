@@ -46,7 +46,7 @@ const BoxCarouselItem: React.FC<Props> = ({
 
   const scale = anim.interpolate({
     inputRange: [0, 1],
-    outputRange: [0.9, 1.1],
+    outputRange: [0.9, 1.8],
   });
 
   const translateY = anim.interpolate({

@@ -1,19 +1,36 @@
-import React, { useState } from "react";
-import { View, TouchableOpacity, Text, ScrollView } from "react-native";
-import { useStyles } from "./SettingsScreen-styles";
-import AppearanceSection from "@/src/components/settings/AppearanceSection";
-import LearningSection from "@/src/components/settings/LearningSection";
-import DataSection from "@/src/components/settings/DataSection";
 import AccessibilitySection from "@/src/components/settings/AccessibilitySection";
+import AppearanceSection from "@/src/components/settings/AppearanceSection";
+import CoursesDataSection from "@/src/components/settings/CoursesDataSection";
+import DebuggingSection from "@/src/components/settings/DebuggingSection";
+import LearningSection from "@/src/components/settings/LearningSection";
+import React, { useState } from "react";
+import { ScrollView, TouchableOpacity, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useStyles } from "./SettingsScreen-styles";
 
-const TAB_CONFIG = [
-  { key: "appearance", label: "Wygląd" },
-  { key: "learning", label: "Nauka" },
-  { key: "accessibility", label: "Dostępność" },
-  { key: "data", label: "Dane" },
+const BASE_TAB_CONFIG = [
+  { key: "ui", label: "UI", icon: "color-palette-outline" as const },
+  {
+    key: "accessibility",
+    label: "Dostępność",
+    icon: "accessibility-outline" as const,
+  },
+  { key: "learning", label: "Nauka", icon: "school-outline" as const },
+  { key: "coursesData", label: "Kursy i dane", icon: "albums-outline" as const },
 ] as const;
 
-type TabKey = (typeof TAB_CONFIG)[number]["key"];
+const DEBUG_TAB_CONFIG = [
+  { key: "debug", label: "Debug", icon: "bug-outline" as const },
+] as const;
+
+type BaseTabKey = (typeof BASE_TAB_CONFIG)[number]["key"];
+type TabKey = BaseTabKey | "debug";
+
+const TAB_CONFIG: ReadonlyArray<{
+  key: TabKey;
+  label: string;
+  icon: keyof typeof Ionicons.glyphMap;
+}> = __DEV__ ? [...BASE_TAB_CONFIG, ...DEBUG_TAB_CONFIG] : BASE_TAB_CONFIG;
 
 export default function SettingsScreen() {
   const styles = useStyles();
@@ -21,6 +38,20 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={styles.contentWrapper}>
+        <ScrollView
+          style={styles.content}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {activeTab === "ui" && <AppearanceSection />}
+          {activeTab === "learning" && <LearningSection />}
+          {activeTab === "accessibility" && <AccessibilitySection />}
+          {activeTab === "coursesData" && <CoursesDataSection />}
+          {activeTab === "debug" && __DEV__ && <DebuggingSection />}
+        </ScrollView>
+      </View>
+
       <View style={styles.tabBar}>
         {TAB_CONFIG.map((tab) => (
           <TouchableOpacity
@@ -32,28 +63,18 @@ export default function SettingsScreen() {
               activeTab === tab.key && styles.tabButtonActive,
             ]}
           >
-            <Text
+            <Ionicons
+              name={tab.icon}
+              size={24}
               style={[
-                styles.tabLabel,
-                activeTab === tab.key && styles.tabLabelActive,
+                styles.tabIcon,
+                activeTab === tab.key && styles.tabIconActive,
               ]}
-            >
-              {tab.label}
-            </Text>
-          </TouchableOpacity>
-        ))}
-      </View>
-
-      <ScrollView
-        style={styles.content}
-        contentContainerStyle={styles.scrollContent}
-        showsVerticalScrollIndicator={false}
-      >
-        {activeTab === "appearance" && <AppearanceSection />}
-        {activeTab === "learning" && <LearningSection />}
-        {activeTab === "accessibility" && <AccessibilitySection />}
-        {activeTab === "data" && <DataSection />}
-      </ScrollView>
+              accessibilityLabel={tab.label}
+            />
+         </TouchableOpacity>
+       ))}
+     </View>
     </View>
   );
 }

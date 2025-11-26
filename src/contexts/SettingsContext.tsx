@@ -24,6 +24,10 @@ import {
 } from "../theme/theme";
 import { LanguageCourse } from "../types/course";
 import type { CEFRLevel } from "../types/language";
+import {
+  resetCustomReviewsForCourse,
+  resetReviewsForPair,
+} from "../db/sqlite/db";
 
 // Rozszerzamy typ Text, aby uwzględnić defaultProps
 type TextWithDefaultProps = typeof Text & {
@@ -151,6 +155,9 @@ interface SettingsContextValue {
     courseId: number,
     enabled: boolean
   ) => Promise<void>;
+  resetLearningSettings: () => Promise<void>;
+  resetActiveCourseReviews: () => Promise<number>;
+  resetActiveCustomCourseReviews: () => Promise<number>;
   activeCourseIdx: number | null; // NEW
   setActiveCourseIdx: (i: number | null) => Promise<void>; // NEW
   activeCourse: LanguageCourse | null;
@@ -215,6 +222,9 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseAutoflowEnabled: async () => {},
   getCustomCourseAutoflowEnabled: () => false,
   setCustomCourseAutoflowEnabled: async () => {},
+  resetLearningSettings: async () => {},
+  resetActiveCourseReviews: async () => 0,
+  resetActiveCustomCourseReviews: async () => 0,
   activeCourseIdx: null,
   setActiveCourseIdx: async () => {},
   activeCourse: null,
@@ -797,6 +807,41 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [persistSelectedLevel]
   );
 
+  const resetLearningSettings = useCallback(async () => {
+    await Promise.all([
+      setSpellChecking(true),
+      setIgnoreDiacriticsInSpellcheck(false),
+      setShowBoxFaces(true),
+      _setBoxesLayout("carousel"),
+      setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
+      _setLearningRemindersEnabled(false),
+    ]);
+  }, [
+    _setBoxesLayout,
+    _setLearningRemindersEnabled,
+    setFlashcardsBatchSize,
+    setIgnoreDiacriticsInSpellcheck,
+    setShowBoxFaces,
+    setSpellChecking,
+  ]);
+
+  const resetActiveCourseReviews = useCallback(async () => {
+    if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
+      return 0;
+    }
+    return resetReviewsForPair(
+      activeCourse.sourceLangId,
+      activeCourse.targetLangId
+    );
+  }, [activeCourse]);
+
+  const resetActiveCustomCourseReviews = useCallback(async () => {
+    if (activeCustomCourseId == null) {
+      return 0;
+    }
+    return resetCustomReviewsForCourse(activeCustomCourseId);
+  }, [activeCustomCourseId]);
+
   return (
     <SettingsContext.Provider
       value={{
@@ -834,6 +879,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseAutoflowEnabled,
         getCustomCourseAutoflowEnabled,
         setCustomCourseAutoflowEnabled,
+        resetLearningSettings,
+        resetActiveCourseReviews,
+        resetActiveCustomCourseReviews,
         flashcardsBatchSize,
         setFlashcardsBatchSize,
         dailyGoal,

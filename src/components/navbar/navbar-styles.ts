@@ -161,7 +161,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   courseName: {
     marginLeft: 8,
     flexShrink: 1,
-    maxWidth: 130,
+    maxWidth: 100,
     overflow: "hidden",
   },
   courseNameText: {

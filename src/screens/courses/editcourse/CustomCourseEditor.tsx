@@ -1,5 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
@@ -15,8 +16,10 @@ import {
   getCustomCourseById,
   getCustomFlashcards,
   replaceCustomFlashcards,
+  resetCustomReviewsForCourse,
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
+import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   createEmptyManualCard,
@@ -105,6 +108,18 @@ export default function CustomCourseEditor({
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isOfficialCourse, setIsOfficialCourse] = useState(lockAppearance);
+  const [resettingBoxes, setResettingBoxes] = useState(false);
+  const [resettingReviews, setResettingReviews] = useState(false);
+  const [resettingAll, setResettingAll] = useState(false);
+  const customBoxesStorageKey = useMemo(
+    () =>
+      `customBoxes:${makeScopeId(
+        courseId,
+        courseId,
+        `custom-${courseId}`
+      )}`,
+    [courseId]
+  );
 
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
@@ -202,6 +217,87 @@ export default function CustomCourseEditor({
 
   const handleCourseReviewsToggle = (value: boolean) => {
     setReviewsEnabled(value);
+  };
+
+  const performResetBoxes = async () => {
+    setResettingBoxes(true);
+    try {
+      await AsyncStorage.removeItem(customBoxesStorageKey);
+      Alert.alert(
+        "Zresetowano pudełka",
+        "Stan pudełek i użyte słówka tego kursu został wyczyszczony."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się zresetować pudełek.");
+    } finally {
+      setResettingBoxes(false);
+    }
+  };
+
+  const handleResetBoxes = () => {
+    Alert.alert(
+      "Reset pudełek",
+      "Czyści stan pudełek dla tego kursu i przenosi fiszki z powrotem do puli nieznanych. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetBoxes },
+      ]
+    );
+  };
+
+  const performResetReviews = async () => {
+    setResettingReviews(true);
+    try {
+      const deleted = await resetCustomReviewsForCourse(courseId);
+      Alert.alert(
+        "Zresetowano powtórki",
+        deleted > 0
+          ? `Usunięto ${deleted} wpisów powtórek tego kursu.`
+          : "Nie było zapisanych powtórek do usunięcia."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się zresetować powtórek.");
+    } finally {
+      setResettingReviews(false);
+    }
+  };
+
+  const handleResetReviews = () => {
+    Alert.alert(
+      "Reset powtórek",
+      "Usuniesz zapisane powtórki dla tego kursu. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetReviews },
+      ]
+    );
+  };
+
+  const performResetAll = async () => {
+    setResettingAll(true);
+    try {
+      await AsyncStorage.removeItem(customBoxesStorageKey);
+      await resetCustomReviewsForCourse(courseId);
+      Alert.alert(
+        "Reset całkowity",
+        "Wyczyszczono pudełka, powtórki i przywrócono fiszki jako nieznane."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się wykonać pełnego resetu.");
+    } finally {
+      setResettingAll(false);
+    }
+  };
+
+  const handleResetAll = () => {
+    Alert.alert(
+      "Reset całkowity",
+      "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane dla tego kursu. Kontynuować?",
+      [
+        { text: "Anuluj", style: "cancel" },
+        { text: "Resetuj", style: "destructive", onPress: performResetAll },
+      ]
+    );
   };
 
   const handleDeleteCourse = () => {
@@ -357,6 +453,51 @@ export default function CustomCourseEditor({
             reviewsEnabled={reviewsEnabled}
             onToggleReviews={handleCourseReviewsToggle}
           />
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset pudełek</Text>
+              <Text style={styles.toggleSubtitle}>
+                Czyści stan pudełek i przywraca fiszki do puli nieznanych.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingBoxes ? "Resetuję..." : "Reset pudełek"}
+              color="my_red"
+              onPress={handleResetBoxes}
+              disabled={resettingBoxes}
+              width={150}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset powtórek</Text>
+              <Text style={styles.toggleSubtitle}>
+                Usuwa zapisane powtórki dla tego kursu.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingReviews ? "Resetuję..." : "Reset powtórek"}
+              color="my_red"
+              onPress={handleResetReviews}
+              disabled={resettingReviews}
+              width={150}
+            />
+          </View>
+          <View style={styles.toggleRow}>
+            <View style={styles.toggleTextWrapper}>
+              <Text style={styles.toggleTitle}>Reset całkowity</Text>
+              <Text style={styles.toggleSubtitle}>
+                Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.
+              </Text>
+            </View>
+            <MyButton
+              text={resettingAll ? "Resetuję..." : "Reset całkowity"}
+              color="my_red"
+              onPress={handleResetAll}
+              disabled={resettingAll}
+              width={150}
+            />
+          </View>
         </View>
 
         {!isOfficialCourse ? (

@@ -93,6 +93,14 @@ export default function LogoMessage({
       accessibilityRole="text"
     >
       <Image source={LOGO_SOURCE} style={styles.logo} />
+      <View style={styles.textWrapper}>
+        {resolvedTitle ? (
+          <Text style={styles.title}>{resolvedTitle}</Text>
+        ) : null}
+        {resolvedDescription ? (
+          <Text style={styles.description}>{resolvedDescription}</Text>
+        ) : null}
+      </View>
       {onClose ? (
         <Pressable
           accessibilityRole="button"
@@ -104,14 +112,6 @@ export default function LogoMessage({
           <Text style={styles.closeLabel}>×</Text>
         </Pressable>
       ) : null}
-      <View style={styles.textWrapper}>
-        {resolvedTitle ? (
-          <Text style={styles.title}>{resolvedTitle}</Text>
-        ) : null}
-        {resolvedDescription ? (
-          <Text style={styles.description}>{resolvedDescription}</Text>
-        ) : null}
-      </View>
     </View>
   );
 }

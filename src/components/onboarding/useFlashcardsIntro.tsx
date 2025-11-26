@@ -35,17 +35,46 @@ export function useFlashcardsIntro(options?: UseFlashcardsIntroOptions) {
       options?.messages ?? [
         {
           title: "To jest główna gra",
-          description: "Tutaj codziennie uczysz się słówek w swoim tempie.",
+          description:
+            "Inspirowana systemem Leitnera. Tutaj uczymy się słówek.",
         },
         {
-          title: "Jak działa powtarzanie",
-          description:
-            "Słówka trafiają do pierwszego pudełka. Poprawna odpowiedź przenosi kartę do kolejnego pudełka aż do ostatniego.",
+          title: "Cel gry",
+          description: "Celem gry jest przeniesienie słówka przez wszystkie pudełka.",
         },
         {
-          title: "Gdy popełnisz błąd",
+          title: "Dodaj słówka",
           description:
-            "Zła odpowiedź cofa słówko do pudełka nr 1, żeby wzmocnić pamięć. Spróbuj ponownie!",
+            "Klikając przycisk 'Dodaj słówka', dodajesz z aktualnego kursu 10 kolejnych fiszek do pudełka nr 1.",
+        },
+        {
+          title: "Aktywuj pudełko",
+          description:
+            "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę. Kliknij pudełko, w którym jest liczba 10.",
+        },
+        {
+          title: "Podaj odpowiedź",
+          description: "W karcie pojawia się wylosowana fiszka i miejsce na odpowiedź. Podaj ją.",
+        },
+        {
+          title: "I co teraz?",
+          description:
+            "Jeżeli odpowiedziałeś dobrze, słówko przeskoczy do kolejnego pudełka. Jeżeli źle, słówko zawsze wróci do pudełka nr 1.",
+        },
+        {
+          title: "Rób to sam",
+          description:
+            "Sam kontrolujesz, które pudełko jest aktywne, a także ile słówek jest w pudełkach.",
+        },
+        {
+          title: "Równowaga",
+          description:
+            "Ważne jest, żeby dodawać nie za dużo, ale też nie za mało słówek. Jeżeli nie chcesz robić tego sam, uruchom tryb auto w ustawieniach danego kursu.",
+        },
+        {
+          title: "Za trudne?",
+          description:
+            "Możesz zawsze włączyć pudełko nr 0 w ustawieniach kursu. To specjalne pudełko, które pozwala zapoznać się z fiszkami.",
         },
       ],
     [options?.messages]

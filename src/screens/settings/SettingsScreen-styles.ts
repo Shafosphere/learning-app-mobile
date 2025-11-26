@@ -4,6 +4,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  contentWrapper: {
+    flex: 1,
     paddingHorizontal: 16,
     paddingTop: 16,
   },
@@ -11,28 +14,37 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     width: "100%",
     backgroundColor: colors.secondBackground,
-    borderRadius: 12,
+    borderRadius: 0,
     padding: 4,
-    marginBottom: 16,
+    // marginTop: 12,
+    marginBottom: 0,
+    paddingHorizontal: 0,
   },
   tabButton: {
     flex: 1,
-    borderRadius: 8,
+    borderRadius: 2,
     paddingVertical: 10,
     alignItems: "center",
   },
   tabButtonActive: {
     backgroundColor: colors.my_green,
   },
-  tabLabel: {
-    fontSize: 13,
-    fontWeight: "700",
-    textTransform: "uppercase",
-    color: colors.paragraph,
-  },
-  tabLabelActive: {
-    color: colors.background,
-  },
+    tabLabel: {
+      fontSize: 13,
+      fontWeight: "700",
+      textTransform: "uppercase",
+      color: colors.paragraph,
+    },
+    tabLabelActive: {
+      color: colors.background,
+    },
+    tabIcon: {
+      color: colors.paragraph,
+      textAlign: "center",
+    },
+    tabIconActive: {
+      color: colors.background,
+    },
   content: {
     flex: 1,
     width: "100%",

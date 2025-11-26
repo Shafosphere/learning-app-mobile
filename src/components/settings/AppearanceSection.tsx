@@ -1,10 +1,22 @@
-import React from "react";
-import { View, Text, Switch } from "react-native";
+import React, { useCallback } from "react";
+import { View, Text, Switch, TouchableOpacity, Image } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import { usePopup } from "@/src/contexts/PopupContext";
-import MyButton from "@/src/components/button/button";
+
+const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
+const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
+
+type LayoutOption = {
+  key: "classic" | "carousel";
+  label: string;
+  preview: number;
+};
+
+const layoutOptions: LayoutOption[] = [
+  { key: "classic", label: "Klasyczny", preview: classicPreview },
+  { key: "carousel", label: "Karuzela", preview: carouselPreview },
+];
 
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
@@ -13,41 +25,49 @@ const AppearanceSection: React.FC = () => {
     toggleTheme,
     feedbackEnabled,
     toggleFeedbackEnabled,
+    showBoxFaces,
+    toggleShowBoxFaces,
+    boxesLayout,
+    setBoxesLayout,
   } = useSettings();
-  const setPopup = usePopup();
+
+  const triggerHaptics = useCallback(async () => {
+    if (!feedbackEnabled) return;
+    try {
+      await Haptics.selectionAsync();
+    } catch {
+      // Ignored
+    }
+  }, [feedbackEnabled]);
 
   const handleThemeToggle = async (value: boolean) => {
     if ((value && theme !== "dark") || (!value && theme !== "light")) {
       await toggleTheme();
-      if (feedbackEnabled) {
-        try {
-          await Haptics.selectionAsync();
-        } catch {
-          // Ignored: haptyka może być niedostępna na danym urządzeniu
-        }
-      }
+      await triggerHaptics();
     }
   };
 
   const handleFeedbackToggle = async (value: boolean) => {
     if (value !== feedbackEnabled) {
       if (value) {
-        try {
-          await Haptics.selectionAsync();
-        } catch {
-          // Ignored
-        }
+        await triggerHaptics();
       }
       await toggleFeedbackEnabled();
     }
   };
 
-  const handleTestPopup = () => {
-    setPopup({
-      message: "Hej! To ja, Boxik. Dymek działa!",
-      color: "my_yellow",
-      duration: 3600,
-    });
+  const handleFacesToggle = async (value: boolean) => {
+    if (value !== showBoxFaces) {
+      await toggleShowBoxFaces();
+      await triggerHaptics();
+    }
+  };
+
+  const handleLayoutSelect = async (key: "classic" | "carousel") => {
+    if (key !== boxesLayout) {
+      await setBoxesLayout(key);
+      await triggerHaptics();
+    }
   };
 
   return (
@@ -84,17 +104,46 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Przetestuj dymek Boxika</Text>
+          <Text style={styles.rowTitle}>Miny pudełek</Text>
           <Text style={styles.rowSubtitle}>
-            Dotknij, aby zobaczyć nowy popup i animację w akcji.
+            Uśmiechnięte / smutne pudełka w zależności od statusu.
           </Text>
         </View>
-        <MyButton
-          text="Pokaż popup"
-          color="my_yellow"
-          onPress={handleTestPopup}
-          width={140}
+        <Switch
+          style={styles.switch}
+          value={showBoxFaces}
+          onValueChange={handleFacesToggle}
         />
+      </View>
+
+      <View style={[styles.row, { alignItems: "flex-start" }]}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Wybierz schemat pudełek</Text>
+          <Text style={styles.rowSubtitle}>
+            Preferowany widok listy fiszek podczas nauki.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.layoutOptions}>
+        {layoutOptions.map((option) => (
+          <TouchableOpacity
+            key={option.key}
+            activeOpacity={0.7}
+            onPress={() => handleLayoutSelect(option.key)}
+            style={[
+              styles.layoutOption,
+              boxesLayout === option.key && styles.layoutOptionActive,
+            ]}
+          >
+            <Image
+              source={option.preview}
+              style={styles.layoutImage}
+              resizeMode="cover"
+            />
+            <Text style={styles.layoutLabel}>{option.label}</Text>
+          </TouchableOpacity>
+        ))}
       </View>
     </View>
   );
