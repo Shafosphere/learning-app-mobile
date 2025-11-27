@@ -223,9 +223,7 @@ const DebuggingSection: React.FC = () => {
         <View style={styles.keyboardActions}>
           <View style={styles.keyboardButtonWrapper}>
             <MyButton
-              text={
-                showHangulKeyboard ? "Ukryj klawiaturę" : "Pokaż klawiaturę"
-              }
+              text={showHangulKeyboard ? "Ukryj klawiaturę" : "Pokaż klawiaturę"}
               color="my_green"
               onPress={() => setShowHangulKeyboard((prev) => !prev)}
               width={220}

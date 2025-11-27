@@ -1,5 +1,5 @@
-import BoxesCarousel from "@/src/components/box/boxcarousel";
-import Boxes from "@/src/components/box/boxes";
+import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
+import Boxes from "@/src/components/Box/List/BoxList";
 import Card from "@/src/components/card/card";
 import Confetti from "@/src/components/confetti/Confetti";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
@@ -21,10 +21,10 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
-import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 
 function mapCustomCardToWord(
   card: CustomFlashcardRecord

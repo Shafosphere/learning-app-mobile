@@ -17,10 +17,13 @@ export const useStyles = createThemeStylesHook((colors) => {
       borderColor: colors.my_green,
     },
     colorsContainer: {
-      flexDirection: "row" as const,
-      flexWrap: "wrap" as const,
       width: "100%",
-      justifyContent: "center",
+      gap: 0,
+      padding: 12,
+    },
+    colorsRow: {
+      flexDirection: "row" as const,
+      width: "100%",
     },
     iconsContainer: {
       marginBottom: 12,
@@ -34,13 +37,19 @@ export const useStyles = createThemeStylesHook((colors) => {
       borderColor: colors.my_green,
     },
     colorSwatch: {
-      width: 48,
-      height: 48,
-      borderRadius: 12,
+      flex: 1, // 5 items per row -> each takes equal width
+      aspectRatio: 1,
+      borderRadius: 2,
     },
-    colorSwatchSelected: {
+    selectionOverlay: {
+      position: "absolute",
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
       borderWidth: 3,
       borderColor: colors.my_green,
+      borderRadius: 2,
     },
   };
 });

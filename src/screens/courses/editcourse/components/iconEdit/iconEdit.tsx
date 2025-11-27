@@ -1,3 +1,9 @@
+import {
+  COURSE_ICONS,
+  CourseColorOption,
+  getCourseColorsForTheme,
+} from "@/src/constants/customCourse";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { memo, useMemo } from "react";
 import {
   Pressable,
@@ -6,12 +12,6 @@ import {
   ViewStyle,
   useWindowDimensions,
 } from "react-native";
-import {
-  COURSE_ICONS,
-  CourseColorOption,
-  getCourseColorsForTheme,
-} from "@/src/constants/customCourse";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./iconEdit-styles";
 
 export interface CourseIconColorSelectorStyles {
@@ -22,6 +22,7 @@ export interface CourseIconColorSelectorStyles {
   colorsContainer?: StyleProp<ViewStyle>;
   colorSwatch?: StyleProp<ViewStyle>;
   colorSwatchSelected?: StyleProp<ViewStyle>;
+  selectionOverlay?: StyleProp<ViewStyle>;
 }
 
 export interface CourseIconColorSelectorProps {
@@ -53,30 +54,41 @@ function CourseIconColorSelectorComponent({
     [colors]
   );
 
+  const colorRows = useMemo(() => {
+    const rows: CourseColorOption[][] = [];
+    for (let i = 0; i < colorOptions.length; i += 4) {
+      rows.push(colorOptions.slice(i, i + 4));
+    }
+    return rows;
+  }, [colorOptions]);
+
   const layout = useMemo(() => {
     const baseSize = iconSize ?? 40;
+    const baseSpacing = !Number.isFinite(width) || width <= 0 ? 8 : 10;
+    const spacing =
+      width >= 1200
+        ? 14
+        : width >= 900
+          ? 12
+          : width >= 600
+            ? 10
+            : baseSpacing;
+    const scale =
+      width >= 1200
+        ? 1.35
+        : width >= 900
+          ? 1.25
+          : width >= 600
+            ? 1.1
+            : width >= 400
+              ? 1
+              : 0.9;
 
-    if (!Number.isFinite(width) || width <= 0) {
-      return { columns: 3, spacing: 8, size: baseSize };
-    }
-
-    if (width >= 1200) {
-      return { columns: 6, spacing: 16, size: Math.min(baseSize * 1.5, 72) };
-    }
-
-    if (width >= 900) {
-      return { columns: 5, spacing: 14, size: Math.min(baseSize * 1.35, 68) };
-    }
-
-    if (width >= 600) {
-      return { columns: 4, spacing: 12, size: Math.min(baseSize * 1.2, 64) };
-    }
-
-    if (width >= 400) {
-      return { columns: 4, spacing: 10, size: Math.max(baseSize * 0.95, 32) };
-    }
-
-    return { columns: 3, spacing: 8, size: Math.max(baseSize * 0.9, 28) };
+    return {
+      columns: 3, // 3 columns -> 5 rows for 15 icons
+      spacing,
+      size: Math.min(Math.max(baseSize * scale, 28), 72),
+    };
   }, [iconSize, width]);
 
   const baseIconsContainerStyle = useMemo<ViewStyle>(
@@ -140,23 +152,28 @@ function CourseIconColorSelectorComponent({
       </View>
 
       <View style={styles?.colorsContainer}>
-        {colorOptions.map((color) => {
-          const selected = isColorSelected(color.hex, color.id);
-          return (
-            <Pressable
-              key={color.id}
-              accessibilityRole="button"
-              accessibilityLabel={`Kolor ${color.label}`}
-              onPress={() => onColorChange(color)}
-              disabled={disabled}
-              style={[
-                styles?.colorSwatch,
-                { backgroundColor: color.hex },
-                selected && styles?.colorSwatchSelected,
-              ]}
-            />
-          );
-        })}
+        {colorRows.map((row, rowIndex) => (
+          <View key={`row-${rowIndex}`} style={styles?.colorsRow}>
+            {row.map((color) => {
+              const selected = isColorSelected(color.hex, color.id);
+              return (
+                <Pressable
+                  key={color.id}
+                  accessibilityRole="button"
+                  accessibilityLabel={`Kolor ${color.label}`}
+                  onPress={() => onColorChange(color)}
+                  disabled={disabled}
+                  style={[
+                    styles?.colorSwatch,
+                    { backgroundColor: color.hex },
+                  ]}
+                >
+                  {selected && <View style={styles?.selectionOverlay} />}
+                </Pressable>
+              );
+            })}
+          </View>
+        ))}
       </View>
     </View>
   );

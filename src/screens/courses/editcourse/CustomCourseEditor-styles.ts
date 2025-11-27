@@ -82,15 +82,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.my_green,
   },
   colorsContainer: {
-    flexDirection: "row" as const,
-    flexWrap: "wrap" as const,
     width: "100%",
-    justifyContent: "center" as const,
-    gap: 8,
+    justifyContent: "flex-start" as const,
   },
   courseColor: {
-    width: 48,
-    height: 48,
+    flex: 1,
+    aspectRatio: 1,
     borderRadius: 12,
   },
   courseColorSelected: {

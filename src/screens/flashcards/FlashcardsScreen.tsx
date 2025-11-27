@@ -1,5 +1,5 @@
-import BoxesCarousel from "@/src/components/box/boxcarousel";
-import Boxes from "@/src/components/box/boxes";
+import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
+import Boxes from "@/src/components/Box/List/BoxList";
 import Card from "@/src/components/card/card";
 import Confetti from "@/src/components/confetti/Confetti";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
@@ -12,10 +12,10 @@ import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 // import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
+import { useCallback, useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
-import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function FlashcardsScreen() {
   // const router = useRouter();
@@ -145,13 +145,13 @@ export default function FlashcardsScreen() {
     setBoxes((prev) =>
       boxZeroEnabled
         ? {
-            ...prev,
-            boxZero: [...prev.boxZero, ...batchData],
-          }
+          ...prev,
+          boxZero: [...prev.boxZero, ...batchData],
+        }
         : {
-            ...prev,
-            boxOne: [...prev.boxOne, ...batchData],
-          }
+          ...prev,
+          boxOne: [...prev.boxOne, ...batchData],
+        }
     );
     // Track used words when they are added to any box
     addUsedWordIds(batchData.map((w) => w.id));
