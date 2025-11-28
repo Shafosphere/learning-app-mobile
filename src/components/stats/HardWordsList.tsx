@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Text, View } from "react-native";
 import StatsCard from "./StatsCard";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import { getHardWords, type HardWord } from "@/src/db/sqlite/db";
+import { getStubbornWords, type StubbornWord } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -30,8 +30,8 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 export default function HardWordsList() {
   const styles = useStyles();
-  const { activeCourse } = useSettings();
-  const [items, setItems] = useState<HardWord[]>([]);
+  const { activeCourse, selectedLevel } = useSettings();
+  const [items, setItems] = useState<StubbornWord[]>([]);
 
   useEffect(() => {
     let mounted = true;
@@ -40,14 +40,16 @@ export default function HardWordsList() {
         if (
           !activeCourse ||
           activeCourse.sourceLangId == null ||
-          activeCourse.targetLangId == null
+          activeCourse.targetLangId == null ||
+          !selectedLevel
         ) {
           if (mounted) setItems([]);
           return;
         }
-        const rows = await getHardWords(
+        const rows = await getStubbornWords(
           activeCourse.sourceLangId,
           activeCourse.targetLangId,
+          selectedLevel,
           5
         );
         if (mounted) setItems(rows);
@@ -58,10 +60,10 @@ export default function HardWordsList() {
     return () => {
       mounted = false;
     };
-  }, [activeCourse]);
+  }, [activeCourse, selectedLevel]);
 
   return (
-    <StatsCard title="Trudne słówka" subtitle="Najwięcej błędów przed nauczeniem">
+    <StatsCard title="Trudne słówka" subtitle="Najczęściej przerzucane między boxami">
       {items.length === 0 ? (
         <Text style={styles.empty}>Brak danych – spróbuj pograć dłużej.</Text>
       ) : (
@@ -69,7 +71,7 @@ export default function HardWordsList() {
           {items.map((it) => (
             <View key={it.id} style={styles.item}>
               <Text style={styles.word}>{it.text}</Text>
-              <Text style={styles.meta}>błędy: {it.wrongCount}</Text>
+              <Text style={styles.meta}>przejścia: {it.moveCount}</Text>
             </View>
           ))}
         </View>

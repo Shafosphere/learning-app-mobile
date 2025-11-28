@@ -1,5 +1,6 @@
-import React from "react";
+import React, { useMemo, useState } from "react";
 import { View, Text } from "react-native";
+import Svg, { Polygon } from "react-native-svg";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
@@ -19,7 +20,7 @@ const clamp01 = (v: number) => {
 
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
-    gap: 6,
+    gap: 8,
   },
   labelRow: {
     flexDirection: "row",
@@ -37,15 +38,9 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     opacity: 0.8,
   },
-  track: {
-    height: 10,
-    borderRadius: 100,
-    backgroundColor: colors.border,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 100,
+  trackWrapper: {
+    height: 15,
+    marginHorizontal: 4,
   },
 }));
 
@@ -58,6 +53,22 @@ const ProgressBar: React.FC<Props> = ({
   const styles = useStyles();
   const { colors } = useSettings();
   const pct = clamp01(value) * 100;
+  const [barWidth, setBarWidth] = useState<number | null>(null);
+
+  const pointsForWidth = useMemo(() => {
+    if (!barWidth) return null;
+    const height = styles.trackWrapper.height as number;
+    const slant = Math.min(10, barWidth / 5);
+    const buildPoints = (width: number) => {
+      const safeWidth = Math.max(width, slant * 2);
+      return `${slant},0 ${safeWidth},0 ${safeWidth - slant},${height} 0,${height}`;
+    };
+    const trackPoints = buildPoints(barWidth);
+    const fillWidth = Math.min(barWidth, Math.max(0, (barWidth * pct) / 100));
+    const fillPoints = fillWidth > 0 ? buildPoints(fillWidth) : null;
+    return { trackPoints, fillPoints };
+  }, [barWidth, pct, styles.trackWrapper.height]);
+
   return (
     <View style={styles.container}>
       {label ? (
@@ -68,13 +79,25 @@ const ProgressBar: React.FC<Props> = ({
           ) : null}
         </View>
       ) : null}
-      <View style={styles.track}>
-        <View
-          style={[
-            styles.fill,
-            { width: `${pct}%`, backgroundColor: color ?? colors.my_green },
-          ]}
-        />
+      <View
+        style={styles.trackWrapper}
+        onLayout={(e) => setBarWidth(e.nativeEvent.layout.width)}
+      >
+        {pointsForWidth ? (
+          <Svg
+            width={barWidth ?? 0}
+            height={styles.trackWrapper.height as number}
+            viewBox={`0 0 ${barWidth ?? 0} ${styles.trackWrapper.height as number}`}
+          >
+            <Polygon points={pointsForWidth.trackPoints} fill={colors.my_red} />
+            {pointsForWidth.fillPoints ? (
+              <Polygon
+                points={pointsForWidth.fillPoints}
+                fill={color ?? colors.my_green}
+              />
+            ) : null}
+          </Svg>
+        ) : null}
       </View>
     </View>
   );

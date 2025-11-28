@@ -20,19 +20,13 @@
 16. src/components/settings/AppearanceSection.tsx: Sekcja wyglądu z przełącznikiem motywu, haptyką i przyciskiem testującym popup. Używany: tak (src/screens/settings/SettingsScreen.tsx).
 17. src/components/settings/DataSection.tsx: Sekcja zarządzania danymi testowymi i skrótów do panelu kursów. Używany: tak (src/screens/settings/SettingsScreen.tsx).
 18. src/components/settings/LearningSection.tsx: Sekcja preferencji nauki (spellcheck, layout pudełek, przypomnienia, plansza memory). Używany: tak (src/screens/settings/SettingsScreen.tsx).
-19. src/components/stats/AchievementsList.tsx: Karta listy odznak z ikonami i datami odblokowania. Używany: nie (brak aktualnych importów; planowany na rozbudowę statystyk).
-20. src/components/stats/ActivityHeatmap.tsx: Mapa aktywności z ostatnich dni z interaktywną skalą kolorów. Używany: tak (src/screens/stats/StatsScreen.tsx).
-21. src/components/stats/BigKnownWordsCard.tsx: Karta z globalną liczbą opanowanych słówek. Używany: tak (src/screens/stats/StatsScreen.tsx).
-22. src/components/stats/CourseProgressCard.tsx: Karta monitorująca postęp przypiętego kursu lub kursu customowego. Używany: nie (brak bieżącej integracji).
-23. src/components/stats/DailyGoalCard.tsx: Konfigurowalna karta dziennego celu z zapisem i walidacją wejścia. Używany: nie (czeka na podpięcie w ekranie statystyk).
-24. src/components/stats/DueReviewsCard.tsx: Zestawienie liczby powtórek według poziomu CEFR. Używany: nie (brak aktualnych importów).
-25. src/components/stats/HardWordsList.tsx: Lista najtrudniejszych słówek na podstawie błędów. Używany: tak (src/screens/stats/StatsScreen.tsx).
-26. src/components/stats/HourlyActivityChart.tsx: Wykres słupkowy aktywności w ujęciu godzinowym. Używany: tak (src/screens/stats/StatsScreen.tsx).
-27. src/components/stats/KnownWordsCard.tsx: Karta pokazująca liczbę znanych słów oraz ostatnie postępy. Używany: nie (obecnie brak importów).
-28. src/components/stats/LevelProgressCard.tsx: Karta postępu konkretnego poziomu CEFR z danymi z hooka fiszek. Używany: nie (nie jest aktualnie renderowany).
-29. src/components/stats/PinnedCoursesProgress.tsx: Zbiorcza lista postępów dla przypiętych kursów. Używany: tak (src/screens/stats/StatsScreen.tsx).
-30. src/components/stats/ProgressBar.tsx: Wspólny pasek postępu dla kart statystyk z obsługą procentów. Używany: tak (wykorzystują go m.in. src/components/stats/PinnedCoursesProgress.tsx).
-31. src/components/stats/StatsCard.tsx: Bazowy kontener kart statystyk zapewniający jednolity layout. Używany: tak (wszystkie komponenty statystyczne).
+19. src/components/stats/ActivityHeatmap.tsx: Mapa aktywności z ostatnich dni z interaktywną skalą kolorów. Używany: tak (src/screens/stats/StatsScreen.tsx).
+20. src/components/stats/BigKnownWordsCard.tsx: Karta z globalną liczbą opanowanych słówek. Używany: tak (src/screens/stats/StatsScreen.tsx).
+21. src/components/stats/HardWordsList.tsx: Lista najtrudniejszych słówek na podstawie błędów. Używany: tak (src/screens/stats/StatsScreen.tsx).
+22. src/components/stats/HourlyActivityChart.tsx: Wykres słupkowy aktywności w ujęciu godzinowym. Używany: tak (src/screens/stats/StatsScreen.tsx).
+23. src/components/stats/PinnedCoursesProgress.tsx: Zbiorcza lista postępów dla przypiętych kursów. Używany: tak (src/screens/stats/StatsScreen.tsx).
+24. src/components/stats/ProgressBar.tsx: Wspólny pasek postępu dla kart statystyk z obsługą procentów. Używany: tak (wykorzystują go m.in. src/components/stats/PinnedCoursesProgress.tsx).
+25. src/components/stats/StatsCard.tsx: Bazowy kontener kart statystyk zapewniający jednolity layout. Używany: tak (wszystkie komponenty statystyczne).
 
 # Screeny
 1. src/screens/coursepanel/CourseActivateScreen.tsx: Panel wyboru i aktywacji kursów (wbudowane, oficjalne, customowe) z pinowaniem i podglądem szczegółów. Używany: tak (app/coursepanel/index.tsx).
@@ -54,7 +48,7 @@
 17. src/screens/stats/StatsScreen.tsx: Dashboard statystyk z heatmapą aktywności, progresami kursów i listami słówek. Używany: tak (app/stats/index.tsx).
 
 # Hooki
-1. src/hooks/useBoxesPersistenceSnapshot.ts: Utrzymuje stan pudełek SRS w AsyncStorage, raportuje postęp i zarządza kolejką słówek. Używany: tak (src/screens/flashcards/FlashcardsScreen.tsx, src/screens/flashcards_custom/FlashcardsCustomScreen.tsx, src/components/stats/LevelProgressCard.tsx).
+1. src/hooks/useBoxesPersistenceSnapshot.ts: Utrzymuje stan pudełek SRS w AsyncStorage, raportuje postęp i zarządza kolejką słówek. Używany: tak (src/screens/flashcards/FlashcardsScreen.tsx, src/screens/flashcards_custom/FlashcardsCustomScreen.tsx).
 2. src/hooks/useCustomCourseDraft.ts: Przechowuje roboczą konfigurację kursu customowego (nazwa, ikona, kolory, powtórki) z resetem i hydracją. Używany: tak (src/screens/custom_course/CustomCourseScreen.tsx, src/screens/custom_course/subscreens/EditCustomCourseScreen.tsx).
 3. src/hooks/useFlashcardsInteraction.ts: Zarządza logiką nauki (wybór pudełka, sprawdzanie odpowiedzi, logowanie postępów, promocja kart). Używany: tak (src/screens/flashcards/FlashcardsScreen.tsx, src/screens/flashcards_custom/FlashcardsCustomScreen.tsx).
 4. src/hooks/usePersistedState.ts: Generyczny hook stanu z zapisem w AsyncStorage, używany do preferencji i statystyk. Używany: tak (np. src/contexts/SettingsContext.tsx, src/contexts/LearningStatsContext.tsx).

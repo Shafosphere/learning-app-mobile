@@ -42,7 +42,9 @@
       ],
       "expo-sqlite",
       "expo-asset",
-      "expo-audio"
+      "expo-audio",
+      "expo-font",
+      "expo-web-browser"
     ],
     "experiments": {
       "typedRoutes": true

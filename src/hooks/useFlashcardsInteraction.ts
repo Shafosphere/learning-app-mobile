@@ -1,5 +1,5 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { logCustomLearningEvent, logLearningEvent } from "@/src/db/sqlite/db";
+import { logCustomLearningEvent, logLearningEvent, logWordBoxMove } from "@/src/db/sqlite/db";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -116,21 +116,21 @@ export function useFlashcardsInteraction({
         return;
       }
 
+      const from = activeBox;
+      const fromIdx = boxOrder.indexOf(from);
+      const target: keyof BoxesState | null = promote
+        ? fromIdx >= boxOrder.length - 1
+          ? null
+          : boxOrder[fromIdx + 1]
+        : boxZeroEnabled
+          ? "boxZero"
+          : "boxOne";
+      let movedWord: WordWithTranslations | null = null;
+
       setBoxes((prev) => {
-        const from = activeBox;
         const source = prev[from];
         const element = source.find((x) => x.id === id);
         if (!element) return prev;
-
-        const order = boxOrder;
-        const fromIdx = order.indexOf(from);
-        let target: keyof BoxesState | null;
-        if (promote) {
-          const isLast = fromIdx >= order.length - 1;
-          target = isLast ? null : order[fromIdx + 1];
-        } else {
-          target = boxZeroEnabled ? "boxZero" : "boxOne";
-        }
 
         const nextState: BoxesState = {
           ...prev,
@@ -145,10 +145,37 @@ export function useFlashcardsInteraction({
         }
 
         addUsedWordIds(element.id);
+        movedWord = element;
         return nextState;
       });
+
+      if (
+        movedWord &&
+        activeCourse?.sourceLangId != null &&
+        activeCourse?.targetLangId != null &&
+        selectedLevel
+      ) {
+        void logWordBoxMove({
+          wordId: movedWord.id,
+          sourceLangId: activeCourse.sourceLangId,
+          targetLangId: activeCourse.targetLangId,
+          level: selectedLevel,
+          fromBox: from,
+          toBox: target,
+        });
+      }
     },
-    [activeBox, addUsedWordIds, boxZeroEnabled, onWordPromotedOut, selectRandomWord, setBoxes]
+    [
+      activeBox,
+      activeCourse?.sourceLangId,
+      activeCourse?.targetLangId,
+      addUsedWordIds,
+      boxZeroEnabled,
+      onWordPromotedOut,
+      selectRandomWord,
+      selectedLevel,
+      setBoxes,
+    ]
   );
 
   const checkAnswer = useCallback(() => {

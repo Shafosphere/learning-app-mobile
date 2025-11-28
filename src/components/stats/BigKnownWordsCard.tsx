@@ -1,20 +1,43 @@
-import React, { useEffect, useState } from "react";
-import { Text } from "react-native";
-import StatsCard from "./StatsCard";
-import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { countTotalLearnedWordsGlobal } from "@/src/db/sqlite/db";
+import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import React, { useEffect, useState } from "react";
+import { StyleSheet, Text, View } from "react-native";
+import { OrganicFireEffect } from "./OrganicFireEffect";
 
 const useStyles = createThemeStylesHook((colors) => ({
+  container: {
+    backgroundColor: colors.secondBackground,
+    borderRadius: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    height: 180,
+    overflow: "hidden",
+    position: "relative",
+    justifyContent: "center",
+    alignItems: "center",
+  },
   bigNumber: {
-    fontSize: 48,
+    fontSize: 64,
     fontWeight: "800",
     color: colors.headline,
+    zIndex: 10,
+    marginTop: -20, // Adjust for visual balance with flames
   },
   label: {
-    marginTop: 4,
-    fontSize: 14,
+    fontSize: 16,
+    fontWeight: "600",
     color: colors.paragraph,
-    opacity: 0.9,
+    opacity: 0.8,
+    zIndex: 10,
+    marginTop: 4,
+  },
+  flamesWrapper: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1,
+    opacity: 0.8, // Slight transparency to blend with background
   },
 }));
 
@@ -37,10 +60,13 @@ const BigKnownWordsCard: React.FC = () => {
   }, []);
 
   return (
-    <StatsCard title="Opanowane słówka">
+    <View style={styles.container}>
+      <View style={styles.flamesWrapper}>
+        <OrganicFireEffect />
+      </View>
       <Text style={styles.bigNumber}>{total}</Text>
-      <Text style={styles.label}>łączna liczba opanowanych słówek</Text>
-    </StatsCard>
+      <Text style={styles.label}>Opanowane słówka</Text>
+    </View>
   );
 };
 

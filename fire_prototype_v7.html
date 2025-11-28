@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fire Effect Prototype V7 - Organic Chaos</title>
+    <style>
+        body {
+            background-color: #0f172a;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            font-family: sans-serif;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        .card {
+            width: 400px;
+            height: 220px;
+            background-color: #1e293b;
+            border-radius: 16px;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .content {
+            z-index: 10;
+            text-align: center;
+            color: white;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+        }
+
+        .number {
+            font-size: 72px;
+            font-weight: 800;
+            margin: 0;
+            line-height: 1;
+        }
+
+        .label {
+            font-size: 18px;
+            opacity: 0.9;
+            margin-top: 5px;
+            font-weight: 500;
+        }
+
+        .fire-container {
+            position: absolute;
+            bottom: -20px;
+            left: -20px;
+            width: 110%;
+            height: 100%;
+            z-index: 1;
+            /* Add a global blur for the 'glow' effect */
+            filter: url(#fire-blur);
+        }
+
+        .particles-container {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .controls {
+            color: #94a3b8;
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 8px;
+            max-width: 400px;
+            text-align: center;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <div class="fire-container" id="fire-container">
+            <svg width="0" height="0">
+                <defs>
+                    <filter id="fire-blur">
+                        <feGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
+                        <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
+                            result="goo" />
+                        <feBlend in="SourceGraphic" in2="goo" />
+                    </filter>
+                </defs>
+            </svg>
+            <!-- SVG injected here -->
+        </div>
+        <div class="particles-container" id="particles-container"></div>
+        <div class="content">
+            <h1 class="number">124</h1>
+            <p class="label">Opanowane słówka</p>
+        </div>
+    </div>
+
+    <div class="controls">
+        <p><strong>Prototyp V7: Organic Chaos</strong></p>
+        <p>Features: Overlapping layers, core intensity, shape morphing (squash/stretch), color flickering, and rising
+            sparks.</p>
+    </div>
+
+    <script>
+        const container = document.getElementById('fire-container');
+        const particlesContainer = document.getElementById('particles-container');
+        const width = 440;
+        const height = 220;
+
+        const svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("width", "100%");
+        svg.setAttribute("height", "100%");
+        svg.setAttribute("viewBox", `0 0 ${width} ${height}`);
+        svg.setAttribute("preserveAspectRatio", "none");
+        container.appendChild(svg);
+
+        // Noise function
+        function noise(t, offset) {
+            return Math.sin(t + offset) +
+                Math.sin(t * 2.3 + offset * 2) * 0.5 +
+                Math.sin(t * 4.7 + offset * 3) * 0.2;
+        }
+
+        class OrganicFlame {
+            constructor(x, heightBase, widthBase, layer) {
+                this.x = x;
+                this.baseY = height + 20; // Start slightly below
+                this.heightBase = heightBase;
+                this.widthBase = widthBase;
+                this.layer = layer;
+
+                this.seed = Math.random() * 1000;
+                this.speed = 0.5 + Math.random() * 0.5;
+
+                this.path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+
+                // Colors based on layer
+                if (layer === 'back') {
+                    this.color = '#991b1b'; // Deep Red
+                    this.opacity = 0.7;
+                } else if (layer === 'mid') {
+                    this.color = '#ea580c'; // Orange
+                    this.opacity = 0.8;
+                } else if (layer === 'core') {
+                    this.color = '#facc15'; // Yellow/White
+                    this.opacity = 0.9;
+                }
+
+                this.path.setAttribute("fill", this.color);
+                this.path.setAttribute("opacity", this.opacity);
+                // Add blend mode for better mixing
+                this.path.style.mixBlendMode = 'screen';
+                svg.appendChild(this.path);
+            }
+
+            update(time) {
+                const t = time * this.speed + this.seed;
+
+                // Dynamic Height & Width (Squash & Stretch)
+                const hVar = noise(t, 0) * 20;
+                const wVar = noise(t, 10) * 10;
+
+                const currentH = this.heightBase + hVar;
+                const currentW = this.widthBase + wVar;
+
+                // Tip Movement (Chaotic Sway)
+                const tipX = this.x + noise(t, 20) * 30;
+                const tipY = this.baseY - currentH;
+
+                // Control Points
+                // We use 4 control points (2 per side) to create complex curves
+
+                // Lower CPs (Base structure)
+                const cp1Y = this.baseY - currentH * 0.25;
+                const cp1LeftX = this.x - currentW * 0.6 + noise(t, 30) * 10;
+                const cp1RightX = this.x + currentW * 0.6 + noise(t, 40) * 10;
+
+                // Upper CPs (Licking motion)
+                const cp2Y = this.baseY - currentH * 0.75;
+                const cp2LeftX = tipX - currentW * 0.3 + noise(t, 50) * 15;
+                const cp2RightX = tipX + currentW * 0.3 + noise(t, 60) * 15;
+
+                // Base points (Anchors)
+                // Move them slightly too for "root" chaos
+                const baseLeftX = this.x - currentW * 0.5 + noise(t, 70) * 5;
+                const baseRightX = this.x + currentW * 0.5 + noise(t, 80) * 5;
+
+                const d = `
+                    M ${baseLeftX} ${this.baseY}
+                    C ${cp1LeftX} ${cp1Y}, ${cp2LeftX} ${cp2Y}, ${tipX} ${tipY}
+                    C ${cp2RightX} ${cp2Y}, ${cp1RightX} ${cp1Y}, ${baseRightX} ${this.baseY}
+                    Z
+                `;
+
+                this.path.setAttribute("d", d);
+
+                // Flicker (Opacity)
+                const flicker = 0.1 * noise(t * 5, 90); // Fast noise
+                this.path.setAttribute("opacity", this.opacity + flicker);
+            }
+        }
+
+        // Particles (Sparks)
+        const particlesCanvas = document.createElement('canvas');
+        particlesCanvas.width = width;
+        particlesCanvas.height = height;
+        particlesCanvas.style.width = '100%';
+        particlesCanvas.style.height = '100%';
+        particlesContainer.appendChild(particlesCanvas);
+        const ctx = particlesCanvas.getContext('2d');
+
+        class Spark {
+            constructor() {
+                this.reset();
+            }
+
+            reset() {
+                this.x = Math.random() * width;
+                this.y = height;
+                this.size = Math.random() * 2 + 1;
+                this.speedY = Math.random() * 2 + 1;
+                this.life = 1.0;
+                this.decay = Math.random() * 0.02 + 0.01;
+            }
+
+            update() {
+                this.y -= this.speedY;
+                this.life -= this.decay;
+                this.x += Math.sin(this.y * 0.1) * 0.5; // Slight sway
+
+                if (this.life <= 0) this.reset();
+            }
+
+            draw() {
+                ctx.globalAlpha = this.life;
+                ctx.fillStyle = '#fbbf24';
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const flames = [];
+        // Back Layer (Red, Wide)
+        for (let i = 0; i < 15; i++) {
+            flames.push(new OrganicFlame(Math.random() * width, 150, 80, 'back'));
+        }
+        // Mid Layer (Orange)
+        for (let i = 0; i < 12; i++) {
+            flames.push(new OrganicFlame(Math.random() * width, 120, 60, 'mid'));
+        }
+        // Core Layer (Yellow)
+        for (let i = 0; i < 8; i++) {
+            flames.push(new OrganicFlame(Math.random() * width, 90, 40, 'core'));
+        }
+
+        const sparks = [];
+        for (let i = 0; i < 30; i++) sparks.push(new Spark());
+
+        let time = 0;
+        function animate() {
+            time += 0.02;
+
+            flames.forEach(f => f.update(time));
+
+            ctx.clearRect(0, 0, width, height);
+            sparks.forEach(s => {
+                s.update();
+                s.draw();
+            });
+
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+    </script>
+</body>
+
+</html>

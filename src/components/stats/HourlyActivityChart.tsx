@@ -4,40 +4,69 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import StatsCard from "./StatsCard";
 
 type Props = {
-  hours: number[]; // length 24
+  timeMs: {
+    week: number;
+    month: number;
+    year: number;
+  };
 };
 
 const useStyles = createThemeStylesHook((colors) => ({
+  list: {
+    gap: 10,
+    marginTop: 4,
+  },
   row: {
     flexDirection: "row",
-    alignItems: "flex-end",
-    height: 80,
-    gap: 2,
+    justifyContent: "space-between",
+    alignItems: "center",
   },
-  bar: {
-    width: 6,
-    backgroundColor: colors.my_green,
-    borderRadius: 2,
-  },
-  scale: {
-    marginTop: 8,
-    fontSize: 12,
+  label: {
     color: colors.paragraph,
+    fontSize: 14,
+  },
+  value: {
+    color: colors.headline,
+    fontSize: 16,
+    fontWeight: "700",
+  },
+  hint: {
+    marginTop: 10,
+    color: colors.paragraph,
+    fontSize: 12,
   },
 }));
 
-export default function HourlyActivityChart({ hours }: Props) {
+function formatDuration(ms: number): string {
+  if (!ms || ms <= 0) return "0 min";
+  const hours = ms / 3_600_000;
+  if (hours >= 10) return `${Math.round(hours)} h`;
+  if (hours >= 1) return `${hours.toFixed(1)} h`;
+  const minutes = Math.max(1, Math.round(ms / 60_000));
+  return `${minutes} min`;
+}
+
+export default function LearningTimeCard({ timeMs }: Props) {
   const styles = useStyles();
-  const max = Math.max(1, ...hours);
+  const rows = [
+    { label: "Ten tydzień", value: formatDuration(timeMs.week) },
+    { label: "Ten miesiąc", value: formatDuration(timeMs.month) },
+    { label: "Ten rok", value: formatDuration(timeMs.year) },
+  ];
+
   return (
-    <StatsCard title="Godziny aktywności">
-      <View style={styles.row}>
-        {hours.map((v, i) => (
-          <View key={i} style={[styles.bar, { height: Math.max(2, (v / max) * 80) }]} />
+    <StatsCard title="Czas w nauce" subtitle="Suma czasu spędzonego na kartach">
+      <View style={styles.list}>
+        {rows.map((row) => (
+          <View key={row.label} style={styles.row}>
+            <Text style={styles.label}>{row.label}</Text>
+            <Text style={styles.value}>{row.value}</Text>
+          </View>
         ))}
       </View>
-      <Text style={styles.scale}>0–23 h (ostatnie 90 dni)</Text>
+      <Text style={styles.hint}>
+        Liczymy czas od pokazania karty do potwierdzenia odpowiedzi (bez przerw między kartami).
+      </Text>
     </StatsCard>
   );
 }
-

@@ -330,6 +330,20 @@ async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     CREATE INDEX IF NOT EXISTS idx_learning_events_word ON learning_events(word_id);
     CREATE INDEX IF NOT EXISTS idx_learning_events_time ON learning_events(created_at);
 
+    -- Aggregated counter of how many times a word was moved between Leitner boxes
+    CREATE TABLE IF NOT EXISTS word_box_moves (
+      word_id        INTEGER NOT NULL,
+      source_lang_id INTEGER NOT NULL,
+      target_lang_id INTEGER NOT NULL,
+      level          TEXT    NOT NULL,
+      move_count     INTEGER NOT NULL DEFAULT 1,
+      last_from_box  TEXT,
+      last_to_box    TEXT,
+      last_moved_at  INTEGER NOT NULL,
+      PRIMARY KEY (word_id, source_lang_id, target_lang_id, level)
+    );
+    CREATE INDEX IF NOT EXISTS idx_word_box_moves_last ON word_box_moves(last_moved_at);
+
     CREATE TABLE IF NOT EXISTS custom_learning_events (
       id             INTEGER PRIMARY KEY AUTOINCREMENT,
       flashcard_id   INTEGER NOT NULL,
@@ -1167,6 +1181,34 @@ export async function logCustomLearningEvent(params: {
   );
 }
 
+export async function logWordBoxMove(params: {
+  wordId: number;
+  sourceLangId: number;
+  targetLangId: number;
+  level: CEFRLevel;
+  fromBox?: string | null;
+  toBox?: string | null;
+}): Promise<void> {
+  const db = await getDB();
+  const now = Date.now();
+  await db.runAsync(
+    `INSERT INTO word_box_moves (word_id, source_lang_id, target_lang_id, level, move_count, last_from_box, last_to_box, last_moved_at)
+     VALUES (?, ?, ?, ?, 1, ?, ?, ?)
+     ON CONFLICT(word_id, source_lang_id, target_lang_id, level) DO UPDATE SET
+       move_count = move_count + 1,
+       last_from_box = excluded.last_from_box,
+       last_to_box = excluded.last_to_box,
+       last_moved_at = excluded.last_moved_at;`,
+    params.wordId,
+    params.sourceLangId,
+    params.targetLangId,
+    params.level,
+    params.fromBox ?? null,
+    params.toBox ?? null,
+    now
+  );
+}
+
 export async function countTotalLearnedWordsGlobal(): Promise<number> {
   const db = await getDB();
   const r1 = await db.getFirstAsync<{ cnt: number }>(
@@ -1261,6 +1303,78 @@ export async function getHourlyActivityCounts(
     if (idx >= 0 && idx < 24) hours[idx] += r.cnt | 0;
   }
   return hours;
+}
+
+export async function getTotalLearningTimeMs(
+  fromMs: number,
+  toMs: number
+): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ ms: number }>(
+    `SELECT SUM(ms) AS ms FROM (
+       SELECT COALESCE(duration_ms, 0) AS ms
+       FROM learning_events
+       WHERE created_at BETWEEN ? AND ?
+       UNION ALL
+       SELECT COALESCE(duration_ms, 0) AS ms
+       FROM custom_learning_events
+       WHERE created_at BETWEEN ? AND ?
+     );`,
+    fromMs,
+    toMs,
+    fromMs,
+    toMs
+  );
+  return row?.ms ?? 0;
+}
+
+export type StubbornWord = {
+  id: number;
+  text: string;
+  moveCount: number;
+  lastFromBox: string | null;
+  lastToBox: string | null;
+  lastMovedAt: number | null;
+};
+
+export async function getStubbornWords(
+  sourceLangId: number,
+  targetLangId: number,
+  level: CEFRLevel,
+  limit: number = 10
+): Promise<StubbornWord[]> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{
+    id: number;
+    text: string;
+    moveCount: number;
+    lastFromBox: string | null;
+    lastToBox: string | null;
+    lastMovedAt: number | null;
+  }>(
+    `SELECT w.id AS id, w.text AS text,
+            m.move_count AS moveCount,
+            m.last_from_box AS lastFromBox,
+            m.last_to_box AS lastToBox,
+            m.last_moved_at AS lastMovedAt
+     FROM word_box_moves m
+     JOIN words w ON w.id = m.word_id
+     WHERE m.source_lang_id = ? AND m.target_lang_id = ? AND m.level = ?
+     ORDER BY m.move_count DESC, m.last_moved_at DESC
+     LIMIT ?;`,
+    sourceLangId,
+    targetLangId,
+    level,
+    limit
+  );
+  return rows.map((r) => ({
+    id: r.id,
+    text: r.text,
+    moveCount: r.moveCount | 0,
+    lastFromBox: r.lastFromBox,
+    lastToBox: r.lastToBox,
+    lastMovedAt: r.lastMovedAt,
+  }));
 }
 
 export type HardWord = { id: number; text: string; wrongCount: number };

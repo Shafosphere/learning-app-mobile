@@ -9,6 +9,25 @@ import type { CEFRLevel } from "@/src/types/language";
 import type { LanguageCourse } from "@/src/types/course";
 
 const LEVELS: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
+const LANGUAGE_LABELS: Record<string, string> = {
+  pl: "polski",
+  en: "angielski",
+  fr: "francuski",
+  es: "hiszpański",
+  de: "niemiecki",
+  pm: "francuski",
+  kr: "koreański",
+};
+const LANGUAGE_LABELS_BY_TARGET: Record<string, Record<string, string>> = {
+  pl: {
+    en: "angielski",
+    fr: "francuski",
+    es: "hiszpański",
+    de: "niemiecki",
+    pm: "francuski",
+    kr: "koreański",
+  },
+};
 
 type Item = {
   key: string;
@@ -35,10 +54,17 @@ const useStyles = createThemeStylesHook((colors) => ({
 }));
 
 function labelForCourse(c: LanguageCourse): string {
-  const src = (c.sourceLang ?? "").toUpperCase();
-  const tgt = (c.targetLang ?? "").toUpperCase();
+  const targetLabels = c.targetLang ? LANGUAGE_LABELS_BY_TARGET[c.targetLang] : undefined;
+  const langCode =
+    (targetLabels && c.sourceLang && targetLabels[c.sourceLang]
+      ? c.sourceLang
+      : c.targetLang) ?? c.sourceLang;
+
+  const langLabel =
+    (targetLabels && c.sourceLang ? targetLabels[c.sourceLang] : undefined) ??
+    (langCode ? LANGUAGE_LABELS[langCode] ?? langCode.toUpperCase() : "kurs");
   const lvl = c.level ? ` ${c.level}` : "";
-  return `${src}→${tgt}${lvl}`;
+  return `${langLabel}${lvl}`;
 }
 
 function keyForCourse(c: LanguageCourse): string {
