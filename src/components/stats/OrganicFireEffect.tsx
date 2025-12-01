@@ -1,19 +1,23 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { LayoutChangeEvent, StyleSheet, View } from "react-native";
+import Animated, {
+  SharedValue,
+  useAnimatedProps,
+  useFrameCallback,
+  useSharedValue
+} from "react-native-reanimated";
 import Svg, {
   Circle,
-  Defs,
-  FeBlend,
-  FeColorMatrix,
-  FeGaussianBlur,
-  Filter,
   G,
-  Path,
+  Path
 } from "react-native-svg";
+
+const AnimatedPath = Animated.createAnimatedComponent(Path);
+const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 type FlameLayer = "back" | "mid" | "core";
 
-type Flame = {
+type FlameConfig = {
   x: number;
   baseY: number;
   heightBase: number;
@@ -23,140 +27,136 @@ type Flame = {
   speed: number;
   color: string;
   opacity: number;
-  path: string;
-  flicker: number;
 };
 
-type Spark = {
-  x: number;
-  y: number;
+type SparkConfig = {
+  initialX: number;
+  initialY: number;
   size: number;
   speedY: number;
-  life: number;
   decay: number;
+  offset: number;
 };
 
 const layerStyles: Record<FlameLayer, { color: string; opacity: number }> = {
-  back: { color: "#991b1b", opacity: 0.7 },
-  mid: { color: "#ea580c", opacity: 0.8 },
-  core: { color: "#facc15", opacity: 0.9 },
+  back: { color: "#ef4444", opacity: 0.4 }, // Brighter red, lower opacity
+  mid: { color: "#f97316", opacity: 0.5 }, // Brighter orange
+  core: { color: "#fef08a", opacity: 0.7 }, // Brighter yellow
 };
 
 const DEFAULT_WIDTH = 440;
 const DEFAULT_HEIGHT = 220;
 
-// Simple layered noise used by the HTML prototype.
-const noise = (t: number, offset: number) =>
-  Math.sin(t + offset) +
-  Math.sin(t * 2.3 + offset * 2) * 0.5 +
-  Math.sin(t * 4.7 + offset * 3) * 0.2;
-
-const createFlames = (width: number, height: number): Flame[] => {
-  const baseY = height + 20;
-  const next: Flame[] = [];
-
-  const addFlames = (count: number, layer: FlameLayer, heightBase: number, widthBase: number) => {
-    for (let i = 0; i < count; i++) {
-      const seed = Math.random() * 1000;
-      const speed = 0.5 + Math.random() * 0.5;
-      const { color, opacity } = layerStyles[layer];
-
-      next.push({
-        x: Math.random() * width,
-        baseY,
-        heightBase,
-        widthBase,
-        layer,
-        seed,
-        speed,
-        color,
-        opacity,
-        path: "",
-        flicker: opacity,
-      });
-    }
-  };
-
-  addFlames(15, "back", 150, 80);
-  addFlames(12, "mid", 120, 60);
-  addFlames(8, "core", 90, 40);
-
-  return next;
+// Worklet-safe noise function
+const noise = (t: number, offset: number) => {
+  "worklet";
+  return (
+    Math.sin(t + offset) +
+    Math.sin(t * 2.3 + offset * 2) * 0.5 +
+    Math.sin(t * 4.7 + offset * 3) * 0.2
+  );
 };
 
-const createSparks = (width: number, height: number): Spark[] => {
-  const sparks: Spark[] = [];
-  for (let i = 0; i < 30; i++) {
-    sparks.push({
-      x: Math.random() * width,
-      y: height,
-      size: Math.random() * 2 + 1,
-      speedY: Math.random() * 2 + 1,
-      life: 1,
-      decay: Math.random() * 0.02 + 0.01,
-    });
-  }
-  return sparks;
-};
+const FlameComponent = ({
+  config,
+  time,
+}: {
+  config: FlameConfig;
+  time: SharedValue<number>;
+}) => {
+  const animatedProps = useAnimatedProps(() => {
+    const t = time.value * config.speed + config.seed;
 
-const advanceFlame = (flame: Flame, time: number) => {
-  const t = time * flame.speed + flame.seed;
+    const hVar = noise(t, 0) * 20;
+    const wVar = noise(t, 10) * 10;
 
-  const hVar = noise(t, 0) * 20;
-  const wVar = noise(t, 10) * 10;
+    const currentH = config.heightBase + hVar;
+    const currentW = config.widthBase + wVar;
 
-  const currentH = flame.heightBase + hVar;
-  const currentW = flame.widthBase + wVar;
+    const tipX = config.x + noise(t, 20) * 30;
+    const tipY = config.baseY - currentH;
 
-  const tipX = flame.x + noise(t, 20) * 30;
-  const tipY = flame.baseY - currentH;
+    const cp1Y = config.baseY - currentH * 0.25;
+    const cp1LeftX = config.x - currentW * 0.6 + noise(t, 30) * 10;
+    const cp1RightX = config.x + currentW * 0.6 + noise(t, 40) * 10;
 
-  const cp1Y = flame.baseY - currentH * 0.25;
-  const cp1LeftX = flame.x - currentW * 0.6 + noise(t, 30) * 10;
-  const cp1RightX = flame.x + currentW * 0.6 + noise(t, 40) * 10;
+    const cp2Y = config.baseY - currentH * 0.75;
+    const cp2LeftX = tipX - currentW * 0.3 + noise(t, 50) * 15;
+    const cp2RightX = tipX + currentW * 0.3 + noise(t, 60) * 15;
 
-  const cp2Y = flame.baseY - currentH * 0.75;
-  const cp2LeftX = tipX - currentW * 0.3 + noise(t, 50) * 15;
-  const cp2RightX = tipX + currentW * 0.3 + noise(t, 60) * 15;
+    const baseLeftX = config.x - currentW * 0.5 + noise(t, 70) * 5;
+    const baseRightX = config.x + currentW * 0.5 + noise(t, 80) * 5;
 
-  const baseLeftX = flame.x - currentW * 0.5 + noise(t, 70) * 5;
-  const baseRightX = flame.x + currentW * 0.5 + noise(t, 80) * 5;
-
-  flame.path = `
-      M ${baseLeftX} ${flame.baseY}
+    const d = `
+      M ${baseLeftX} ${config.baseY}
       C ${cp1LeftX} ${cp1Y}, ${cp2LeftX} ${cp2Y}, ${tipX} ${tipY}
-      C ${cp2RightX} ${cp2Y}, ${cp1RightX} ${cp1Y}, ${baseRightX} ${flame.baseY}
+      C ${cp2RightX} ${cp2Y}, ${cp1RightX} ${cp1Y}, ${baseRightX} ${config.baseY}
       Z
     `;
 
-  const flicker = 0.1 * noise(t * 5, 90);
-  flame.flicker = Math.max(0, flame.opacity + flicker);
+    const flicker = 0.1 * noise(t * 5, 90);
+    const fillOpacity = Math.max(0, config.opacity + flicker);
+
+    return {
+      d,
+      fillOpacity,
+    };
+  });
+
+  return <AnimatedPath animatedProps={animatedProps} fill={config.color} />;
 };
 
-const advanceSpark = (spark: Spark, width: number, height: number) => {
-  spark.y -= spark.speedY;
-  spark.life -= spark.decay;
-  spark.x += Math.sin(spark.y * 0.1) * 0.5;
+const SparkComponent = ({
+  config,
+  time,
+  width,
+  height,
+}: {
+  config: SparkConfig;
+  time: SharedValue<number>;
+  width: number;
+  height: number;
+}) => {
+  const animatedProps = useAnimatedProps(() => {
+    // Simulate continuous movement based on time
+    // We use modulo to loop the spark's life
+    const lifeCycle = 200; // Arbitrary cycle length
+    const t = (time.value * 10 + config.offset) % lifeCycle;
 
-  if (spark.life <= 0) {
-    spark.x = Math.random() * width;
-    spark.y = height;
-    spark.size = Math.random() * 2 + 1;
-    spark.speedY = Math.random() * 2 + 1;
-    spark.life = 1;
-    spark.decay = Math.random() * 0.02 + 0.01;
-  }
+    // Normalized life from 1 to 0
+    const progress = t / lifeCycle;
+
+    // Reset position logic simulated by modulo
+    // y goes from height to height - distance
+    const distance = config.speedY * 100; // Scale speed to distance
+    const currentY = height - (progress * distance);
+
+    // X sway
+    const currentX = config.initialX + Math.sin(currentY * 0.1) * 5;
+
+    // Opacity fades out as it goes up
+    const opacity = 1 - progress;
+
+    return {
+      cx: currentX,
+      cy: currentY,
+      opacity: Math.max(0, opacity),
+    };
+  });
+
+  return (
+    <AnimatedCircle
+      r={config.size}
+      fill="#fbbf24"
+      animatedProps={animatedProps}
+    />
+  );
 };
 
 export const OrganicFireEffect: React.FC = () => {
   const [size, setSize] = useState({ width: DEFAULT_WIDTH, height: DEFAULT_HEIGHT });
   const [ready, setReady] = useState(false);
-  const [, forceRender] = useState(0);
-
-  const flamesRef = useRef<Flame[]>([]);
-  const sparksRef = useRef<Spark[]>([]);
-  const rafRef = useRef<number | null>(null);
-  const timeRef = useRef(0);
+  const time = useSharedValue(0);
 
   const handleLayout = (event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
@@ -166,67 +166,102 @@ export const OrganicFireEffect: React.FC = () => {
     }
   };
 
-  useEffect(() => {
-    if (!ready) return undefined;
+  useFrameCallback((frameInfo) => {
+    if (!ready) return;
+    // Increment time based on frame duration to keep consistent speed
+    // frameInfo.timeSincePreviousFrame is in ms
+    const dt = (frameInfo.timeSincePreviousFrame ?? 16) / 1000;
+    time.value += dt;
+  });
 
-    flamesRef.current = createFlames(size.width, size.height);
-    sparksRef.current = createSparks(size.width, size.height);
-    timeRef.current = 0;
+  const flames = useMemo(() => {
+    const baseY = size.height + 20;
+    const list: FlameConfig[] = [];
 
-    const animate = () => {
-      timeRef.current += 0.02;
+    const addFlames = (count: number, layer: FlameLayer, heightBase: number, widthBase: number) => {
+      let spread = 1.0;
+      if (layer === "core") spread = 0.6; // Increased spread for core
+      if (layer === "mid") spread = 0.85;  // Increased spread for mid
+      if (layer === "back") spread = 1.0; // Full width
 
-      flamesRef.current.forEach((flame) => advanceFlame(flame, timeRef.current));
-      sparksRef.current.forEach((spark) => advanceSpark(spark, size.width, size.height));
+      // Calculate the total width covered by this layer
+      const layerWidth = size.width * spread;
+      const startX = (size.width - layerWidth) / 2;
 
-      forceRender((value) => value + 1); // Forces a re-render with updated paths
-      rafRef.current = requestAnimationFrame(animate);
-    };
+      // Calculate step size to distribute flames evenly
+      // If count is 1, place in center. If > 1, distribute across layerWidth.
+      const step = count > 1 ? layerWidth / (count - 1) : 0;
 
-    rafRef.current = requestAnimationFrame(animate);
+      for (let i = 0; i < count; i++) {
+        const { color, opacity } = layerStyles[layer];
 
-    return () => {
-      if (rafRef.current !== null) {
-        cancelAnimationFrame(rafRef.current);
+        // Base position: evenly distributed
+        let baseX = size.width / 2; // Default center
+        if (count > 1) {
+          baseX = startX + i * step;
+        }
+
+        // Add small random jitter so they aren't perfectly grid-aligned
+        // Jitter is +/- 10% of the step size
+        const jitter = (Math.random() - 0.5) * (step * 0.4);
+
+        list.push({
+          x: baseX + jitter,
+          baseY,
+          heightBase,
+          widthBase,
+          layer,
+          seed: Math.random() * 1000,
+          speed: 0.5 + Math.random() * 0.5,
+          color,
+          opacity,
+        });
       }
     };
-  }, [ready, size.height, size.width]);
+
+    addFlames(8, "back", 150, 80);
+    addFlames(6, "mid", 120, 60);
+    addFlames(7, "core", 90, 40);
+
+    return list;
+  }, [size.width, size.height]);
+
+  const sparks = useMemo(() => {
+    const list: SparkConfig[] = [];
+    for (let i = 0; i < 10; i++) {
+      list.push({
+        initialX: Math.random() * size.width,
+        initialY: size.height,
+        size: Math.random() * 2 + 1,
+        speedY: Math.random() * 2 + 1,
+        decay: Math.random() * 0.02 + 0.01,
+        offset: Math.random() * 1000,
+      });
+    }
+    return list;
+  }, [size.width, size.height]);
 
   return (
     <View style={styles.container} pointerEvents="none" onLayout={handleLayout}>
-      {ready ? (
+      {ready && (
         <Svg width="100%" height="100%" viewBox={`0 0 ${size.width} ${size.height}`} preserveAspectRatio="none">
-          <Defs>
-            <Filter id="fireBlur">
-              <FeGaussianBlur in="SourceGraphic" stdDeviation="2" result="blur" />
-              <FeColorMatrix
-                in="blur"
-                type="matrix"
-                values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 18 -7"
-                result="goo"
-              />
-              <FeBlend in="SourceGraphic" in2="goo" />
-            </Filter>
-          </Defs>
-
-          <G filter="url(#fireBlur)">
-            {flamesRef.current.map((flame, index) => (
-              <Path key={`flame-${index}`} d={flame.path} fill={flame.color} fillOpacity={flame.flicker} />
+          <G>
+            {flames.map((config, index) => (
+              <FlameComponent key={`flame-${index}`} config={config} time={time} />
             ))}
           </G>
 
-          {sparksRef.current.map((spark, index) => (
-            <Circle
+          {sparks.map((config, index) => (
+            <SparkComponent
               key={`spark-${index}`}
-              cx={spark.x}
-              cy={spark.y}
-              r={spark.size}
-              fill="#fbbf24"
-              opacity={spark.life}
+              config={config}
+              time={time}
+              width={size.width}
+              height={size.height}
             />
           ))}
         </Svg>
-      ) : null}
+      )}
     </View>
   );
 };

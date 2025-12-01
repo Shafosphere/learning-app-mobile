@@ -54,7 +54,8 @@ export default function Card({
   setCorrectionRewers,
 }: CardProps) {
   const styles = useStyles();
-  const { ignoreDiacriticsInSpellcheck } = useSettings();
+  const { ignoreDiacriticsInSpellcheck, flashcardsSuggestionsEnabled } =
+    useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
     !isIntroMode && result !== null
@@ -62,6 +63,7 @@ export default function Card({
         ? styles.cardGood
         : styles.cardBad
       : undefined;
+  const autoCompleteValue = flashcardsSuggestionsEnabled ? "on" : "off";
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
     useState(false);
@@ -376,6 +378,8 @@ export default function Card({
               blurOnSubmit={false}
               onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
               autoCapitalize="none"
+              autoCorrect={flashcardsSuggestionsEnabled}
+              autoComplete={autoCompleteValue}
               showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
               onFocus={() => {
                 setIsCorrectionInput1Focused(true);
@@ -414,6 +418,8 @@ export default function Card({
               ref={correctionInput2Ref}
               returnKeyType="done"
               autoCapitalize="none"
+              autoCorrect={flashcardsSuggestionsEnabled}
+              autoComplete={autoCompleteValue}
               onKeyPress={({ nativeEvent }) => {
                 if (
                   nativeEvent.key === "Backspace" &&
@@ -475,6 +481,8 @@ export default function Card({
             value={answer}
             onChangeText={setAnswer}
             autoCapitalize="none"
+            autoCorrect={flashcardsSuggestionsEnabled}
+            autoComplete={autoCompleteValue}
             ref={mainInputRef}
             returnKeyType="done"
             blurOnSubmit={false}

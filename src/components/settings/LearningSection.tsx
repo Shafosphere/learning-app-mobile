@@ -14,6 +14,8 @@ const LearningSection: React.FC = () => {
     toggleIgnoreDiacriticsInSpellcheck,
     flashcardsBatchSize,
     setFlashcardsBatchSize,
+    flashcardsSuggestionsEnabled,
+    toggleFlashcardsSuggestions,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
     feedbackEnabled,
@@ -72,6 +74,13 @@ const LearningSection: React.FC = () => {
     }
   };
 
+  const handleSuggestionsToggle = async (value: boolean) => {
+    if (value !== flashcardsSuggestionsEnabled) {
+      await toggleFlashcardsSuggestions();
+      await triggerHaptics();
+    }
+  };
+
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>Nauka</Text>
@@ -87,6 +96,20 @@ const LearningSection: React.FC = () => {
           style={styles.switch}
           value={spellChecking}
           onValueChange={handleSpellCheckToggle}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Sugestie klawiatury</Text>
+          <Text style={styles.rowSubtitle}>
+            Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach.
+          </Text>
+        </View>
+        <Switch
+          style={styles.switch}
+          value={flashcardsSuggestionsEnabled}
+          onValueChange={handleSuggestionsToggle}
         />
       </View>
 

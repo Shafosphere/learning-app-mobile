@@ -1,8 +1,15 @@
-import React, { useCallback } from "react";
-import { View, Text, Switch, TouchableOpacity, Image } from "react-native";
-import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import Slider from "@react-native-community/slider";
+import * as Haptics from "expo-haptics";
+import React, { useCallback } from "react";
+import {
+  Image,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
 const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
 const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
@@ -25,11 +32,15 @@ const AppearanceSection: React.FC = () => {
     toggleTheme,
     feedbackEnabled,
     toggleFeedbackEnabled,
+    feedbackVolume,
+    setFeedbackVolume,
     showBoxFaces,
     toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
   } = useSettings();
+
+  const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
 
   const triggerHaptics = useCallback(async () => {
     if (!feedbackEnabled) return;
@@ -70,6 +81,19 @@ const AppearanceSection: React.FC = () => {
     }
   };
 
+  const handleVolumeChange = useCallback(
+    (value: number) => {
+      if (!feedbackEnabled) return;
+      setVolumePreview(value);
+      void setFeedbackVolume(value);
+    },
+    [feedbackEnabled, setFeedbackVolume]
+  );
+
+  React.useEffect(() => {
+    setVolumePreview(feedbackVolume);
+  }, [feedbackVolume]);
+
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>Wygląd</Text>
@@ -100,6 +124,47 @@ const AppearanceSection: React.FC = () => {
           value={feedbackEnabled}
           onValueChange={handleFeedbackToggle}
         />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Głośność efektów</Text>
+          <Text style={styles.rowSubtitle}>
+            Regulacja głośności dźwięków w aplikacji.
+          </Text>
+        </View>
+        <View style={styles.sliderRow}>
+          <View
+            style={[
+              styles.sliderWrapper,
+              !feedbackEnabled && styles.sliderDisabled,
+            ]}
+          >
+            <Slider
+              style={styles.sliderWrapper}
+              value={volumePreview}
+              onValueChange={handleVolumeChange}
+              minimumValue={0}
+              maximumValue={1}
+              step={0.01}
+              disabled={!feedbackEnabled}
+              minimumTrackTintColor={
+                (styles.sliderFill as { backgroundColor: string })
+                  .backgroundColor
+              }
+              maximumTrackTintColor={
+                (styles.sliderTrack as { backgroundColor: string })
+                  .backgroundColor
+              }
+              thumbTintColor={
+                (styles.sliderThumb as { borderColor: string }).borderColor
+              }
+            />
+          </View>
+          <Text style={styles.sliderValue}>
+            {Math.round(volumePreview * 100)}%
+          </Text>
+        </View>
       </View>
 
       <View style={styles.row}>

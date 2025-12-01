@@ -1,6 +1,6 @@
 export const SOUNDS = {
-  ding: require("@/assets/sounds/ding.wav"),
-  dong: require("@/assets/sounds/dong.wav"),
+  pop: require("@/assets/sounds/pop.wav"),
+  pup: require("@/assets/sounds/pup.wav"),
   error: require("@/assets/sounds/error.wav"),
 } as const;
 

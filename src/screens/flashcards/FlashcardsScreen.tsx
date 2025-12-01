@@ -11,6 +11,7 @@ import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnap
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 // import { useRouter } from "expo-router";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { useCallback, useEffect, useState } from "react";
@@ -37,7 +38,6 @@ export default function FlashcardsScreen() {
     const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
     return () => clearTimeout(timeout);
   }, [shouldCelebrate]);
-
 
   const {
     boxes,
@@ -108,6 +108,11 @@ export default function FlashcardsScreen() {
     },
     boxZeroEnabled,
   });
+
+  useEffect(() => {
+    if (result === null) return;
+    playFeedbackSound(result);
+  }, [result]);
   // const learnedPercent =
   //   totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
   const introBoxLimitReached = boxZeroEnabled

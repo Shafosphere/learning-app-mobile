@@ -72,12 +72,47 @@ function pickAutoflowDecision(params: {
     return { targetBox: baseBox, shouldDownloadNew: false };
   }
 
-  // If Box 1 is light, check whether any higher box is "ripe" for a cleanup session.
-  const flushCandidate = CLEANUP_BOXES.find(
-    (box) => count(box) >= flushThreshold
-  );
-  if (flushCandidate) {
-    return { targetBox: flushCandidate, shouldDownloadNew: false };
+  // Backpressure Logic:
+  // 1. If Box 2 is NOT full, we must fill it. Priority is Box 1 (and downloading).
+  //    We do NOT jump to Box 3, 4, or 5 even if they are full.
+  const boxTwo = CLEANUP_BOXES[0];
+  if (count(boxTwo) < flushThreshold) {
+    // Box 2 isn't full yet -> keep feeding it from Box 1.
+    // Fall through to download logic below.
+  } else {
+    // 2. Box 2 IS full. We need to unclog the system.
+    //    Find the highest "blocked" box in the chain [2, 3, 4, 5].
+    //    A box is a candidate if it is full.
+    //    But if the *next* box is ALSO full, we skip the current one (it's blocked).
+    //    We want the highest full box that has room above it (or is the last box).
+    for (let i = 0; i < CLEANUP_BOXES.length; i++) {
+      const currentBox = CLEANUP_BOXES[i];
+      const nextBox = CLEANUP_BOXES[i + 1]; // undefined if i is last
+
+      const currentIsFull = count(currentBox) >= flushThreshold;
+      const nextIsFull = nextBox ? count(nextBox) >= flushThreshold : false;
+
+      if (currentIsFull) {
+        if (nextIsFull) {
+          // Current is full, but Next is also full.
+          // We can't move cards from Current to Next effectively (Next is clogged).
+          // Skip this one and look higher to unclog Next first.
+          continue;
+        } else {
+          // Current is full, and Next is NOT full (or doesn't exist).
+          // This is the bottleneck we should clear.
+          return { targetBox: currentBox, shouldDownloadNew: false };
+        }
+      } else {
+        // If we hit a non-full box in the chain while searching up,
+        // it means the chain is broken.
+        // Actually, since we only enter this 'else' block if Box 2 is full,
+        // and we iterate up...
+        // If Box 2 is full, Box 3 is empty...
+        // i=0: Box 2 full, Box 3 not full -> Return Box 2. Correct.
+        break;
+      }
+    }
   }
 
   // Nothing urgent above, Box 1 is light -> consider pulling a new batch.

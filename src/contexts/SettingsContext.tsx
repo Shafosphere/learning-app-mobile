@@ -28,6 +28,7 @@ import {
   resetCustomReviewsForCourse,
   resetReviewsForPair,
 } from "../db/sqlite/db";
+import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
 
 // Rozszerzamy typ Text, aby uwzględnić defaultProps
 type TextWithDefaultProps = typeof Text & {
@@ -75,6 +76,8 @@ function findCourseIndex(
   }
   return -1;
 }
+
+const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 
 export type CourseBoxZeroKeyParams = {
   sourceLang?: string | null;
@@ -169,11 +172,15 @@ interface SettingsContextValue {
   unpinOfficialCourse: (id: number) => Promise<void>;
   flashcardsBatchSize: number;
   setFlashcardsBatchSize: (n: number) => Promise<void>;
+  flashcardsSuggestionsEnabled: boolean;
+  toggleFlashcardsSuggestions: () => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
   feedbackEnabled: boolean;
   setFeedbackEnabled: (value: boolean) => Promise<void>;
   toggleFeedbackEnabled: () => Promise<void>;
+  feedbackVolume: number;
+  setFeedbackVolume: (value: number) => Promise<void>;
   learningRemindersEnabled: boolean;
   setLearningRemindersEnabled: (value: boolean) => Promise<void>;
   toggleLearningRemindersEnabled: () => Promise<void>;
@@ -235,11 +242,15 @@ const defaultValue: SettingsContextValue = {
   unpinOfficialCourse: async () => {},
   flashcardsBatchSize: DEFAULT_FLASHCARDS_BATCH_SIZE,
   setFlashcardsBatchSize: async () => {},
+  flashcardsSuggestionsEnabled: true,
+  toggleFlashcardsSuggestions: async () => {},
   dailyGoal: 20,
   setDailyGoal: async () => {},
   feedbackEnabled: true,
   setFeedbackEnabled: async () => {},
   toggleFeedbackEnabled: async () => {},
+  feedbackVolume: 1,
+  setFeedbackVolume: async () => {},
   learningRemindersEnabled: false,
   setLearningRemindersEnabled: async () => {},
   toggleLearningRemindersEnabled: async () => {},
@@ -321,9 +332,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcardsBatchSize",
       DEFAULT_FLASHCARDS_BATCH_SIZE
     );
+  const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
+    usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", false);
   const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
   const [feedbackEnabledState, _setFeedbackEnabled] =
     usePersistedState<boolean>("feedbackEnabled", true);
+  const [feedbackVolumeState, _setFeedbackVolume] =
+    usePersistedState<number>("feedbackVolume", 1);
   const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
     usePersistedState<boolean>("learningRemindersEnabled", false);
   const [highContrastEnabled, setHighContrastEnabled] =
@@ -771,12 +786,29 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setFeedbackEnabled(!feedbackEnabledState);
   };
 
+  const setFeedbackVolume = useCallback(
+    async (value: number) => {
+      const clamped = clampVolume(value);
+      await _setFeedbackVolume(clamped);
+      setSoundPlayerVolume(clamped);
+    },
+    [_setFeedbackVolume]
+  );
+
+  useEffect(() => {
+    setSoundPlayerVolume(clampVolume(feedbackVolumeState));
+  }, [feedbackVolumeState]);
+
   const setLearningRemindersEnabled = async (value: boolean) => {
     await _setLearningRemindersEnabled(value);
   };
 
   const toggleLearningRemindersEnabled = async () => {
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
+  };
+
+  const toggleFlashcardsSuggestions = async () => {
+    await setFlashcardsSuggestionsEnabled(!flashcardsSuggestionsEnabled);
   };
 
   const toggleHighContrast = async () => {
@@ -814,13 +846,17 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setShowBoxFaces(true),
       _setBoxesLayout("carousel"),
       setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
+      setFlashcardsSuggestionsEnabled(false),
       _setLearningRemindersEnabled(false),
+      _setFeedbackVolume(1),
     ]);
   }, [
     _setBoxesLayout,
     _setLearningRemindersEnabled,
+    _setFeedbackVolume,
     setFlashcardsBatchSize,
     setIgnoreDiacriticsInSpellcheck,
+    setFlashcardsSuggestionsEnabled,
     setShowBoxFaces,
     setSpellChecking,
   ]);
@@ -884,11 +920,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         resetActiveCustomCourseReviews,
         flashcardsBatchSize,
         setFlashcardsBatchSize,
+        flashcardsSuggestionsEnabled,
+        toggleFlashcardsSuggestions,
         dailyGoal,
         setDailyGoal,
         feedbackEnabled: feedbackEnabledState,
         setFeedbackEnabled,
         toggleFeedbackEnabled,
+        feedbackVolume: feedbackVolumeState,
+        setFeedbackVolume,
         learningRemindersEnabled: learningRemindersEnabledState,
         setLearningRemindersEnabled,
         toggleLearningRemindersEnabled,

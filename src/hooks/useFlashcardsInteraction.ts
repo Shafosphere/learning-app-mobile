@@ -49,6 +49,14 @@ export function useFlashcardsInteraction({
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
   const lastServedIdRef = useRef<number | null>(null);
+  const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
+    boxZero: [],
+    boxOne: [],
+    boxTwo: [],
+    boxThree: [],
+    boxFour: [],
+    boxFive: [],
+  });
   const { activeCourse, selectedLevel, activeCustomCourseId, ignoreDiacriticsInSpellcheck } =
     useSettings();
 
@@ -60,7 +68,48 @@ export function useFlashcardsInteraction({
     return shouldFlip ? reversedBoxes.includes(activeBox) : false;
   }, [activeBox, activeCustomCourseId, reversedBoxes, selectedItem]);
 
-  const selectRandomWord = useCallback(
+  const shuffleList = useCallback((items: WordWithTranslations[]) => {
+    const arr = [...items];
+    for (let i = arr.length - 1; i > 0; i--) {
+      const j = Math.floor(Math.random() * (i + 1));
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+    }
+    return arr;
+  }, []);
+
+  const syncQueueWithBox = useCallback(
+    (box: keyof BoxesState) => {
+      const boxItems = boxes[box] ?? [];
+      if (boxItems.length === 0) {
+        queuesRef.current[box] = [];
+        return;
+      }
+      const allowedIds = new Set(boxItems.map((item) => item.id));
+      const existing = queuesRef.current[box] ?? [];
+      const trimmed = existing.filter((item) => allowedIds.has(item.id));
+      const queuedIds = new Set(trimmed.map((item) => item.id));
+      const newItems = boxItems.filter((item) => !queuedIds.has(item.id));
+      queuesRef.current[box] = [...trimmed, ...newItems];
+    },
+    [boxes]
+  );
+
+  const ensureQueueHasItems = useCallback(
+    (box: keyof BoxesState) => {
+      const list = boxes[box];
+      const queue = queuesRef.current[box] ?? [];
+      if (!list || list.length === 0) {
+        queuesRef.current[box] = [];
+        return;
+      }
+      if (queue.length === 0) {
+        queuesRef.current[box] = shuffleList(list);
+      }
+    },
+    [boxes, shuffleList]
+  );
+
+  const selectNextWord = useCallback(
     (box: keyof BoxesState) => {
       if (box === "boxZero" && !boxZeroEnabled) {
         setSelectedItem(null);
@@ -75,20 +124,23 @@ export function useFlashcardsInteraction({
         lastServedIdRef.current = null;
         return;
       }
-      const avoidId = lastServedIdRef.current;
-      const filtered =
-        avoidId != null && list.length > 1
-          ? list.filter((item) => item.id !== avoidId)
-          : list;
-      const pool = filtered.length > 0 ? filtered : list;
-      const idx = Math.floor(Math.random() * pool.length);
-      const next = pool[idx] ?? list[0];
 
+      syncQueueWithBox(box);
+      ensureQueueHasItems(box);
+      const queue = queuesRef.current[box] ?? [];
+      const [next, ...rest] = queue;
+      if (!next) {
+        setSelectedItem(null);
+        setQuestionShownAt(null);
+        lastServedIdRef.current = null;
+        return;
+      }
+      queuesRef.current[box] = rest;
       lastServedIdRef.current = next.id;
       setSelectedItem(next);
       setQuestionShownAt(Date.now());
     },
-    [boxes, boxZeroEnabled]
+    [boxes, boxZeroEnabled, ensureQueueHasItems, syncQueueWithBox]
   );
 
   const handleSelectBox = useCallback(
@@ -99,20 +151,20 @@ export function useFlashcardsInteraction({
         return;
       }
       setActiveBox(box);
-      selectRandomWord(box);
+      selectNextWord(box);
     },
-    [boxZeroEnabled, selectRandomWord]
+    [boxZeroEnabled, selectNextWord]
   );
 
   const moveElement = useCallback(
     (id: number, promote = false) => {
       if (!activeBox) return;
       if (activeBox === "boxZero" && !promote) {
-        selectRandomWord(activeBox);
+        selectNextWord(activeBox);
         return;
       }
       if (activeBox === "boxOne" && promote === false && !boxZeroEnabled) {
-        selectRandomWord(activeBox);
+        selectNextWord(activeBox);
         return;
       }
 
@@ -146,6 +198,20 @@ export function useFlashcardsInteraction({
 
         addUsedWordIds(element.id);
         movedWord = element;
+
+        // Keep queues in sync with the move: remove from source queue, append to target queue.
+        const removeFromQueue = (queueBox: keyof BoxesState) => {
+          queuesRef.current[queueBox] = (queuesRef.current[queueBox] ?? []).filter(
+            (item) => item.id !== id
+          );
+        };
+        removeFromQueue(from);
+        if (target) {
+          const targetQueue = queuesRef.current[target] ?? [];
+          const exists = targetQueue.some((item) => item.id === element.id);
+          queuesRef.current[target] = exists ? targetQueue : [...targetQueue, element];
+        }
+
         return nextState;
       });
 
@@ -172,7 +238,7 @@ export function useFlashcardsInteraction({
       addUsedWordIds,
       boxZeroEnabled,
       onWordPromotedOut,
-      selectRandomWord,
+      selectNextWord,
       selectedLevel,
       setBoxes,
     ]
@@ -344,18 +410,18 @@ export function useFlashcardsInteraction({
 
   useEffect(() => {
     if (queueNext && activeBox) {
-      selectRandomWord(activeBox);
+      selectNextWord(activeBox);
       setResult(null);
       setQueueNext(false);
     }
-  }, [activeBox, boxes, queueNext, selectRandomWord]);
+  }, [activeBox, boxes, queueNext, selectNextWord]);
 
   useEffect(() => {
     if (!activeBox) return;
     const list = boxes[activeBox];
     if (!list || list.length === 0) {
       if (selectedItem != null) {
-        selectRandomWord(activeBox);
+        selectNextWord(activeBox);
       }
       return;
     }
@@ -365,9 +431,9 @@ export function useFlashcardsInteraction({
       currentId != null && list.some((item) => item.id === currentId);
 
     if (!itemStillAvailable) {
-      selectRandomWord(activeBox);
+      selectNextWord(activeBox);
     }
-  }, [activeBox, boxes, selectRandomWord, selectedItem]);
+  }, [activeBox, boxes, selectNextWord, selectedItem]);
 
   const resetInteractionState = useCallback(() => {
     setActiveBox(null);

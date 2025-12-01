@@ -7,6 +7,9 @@ type LoadedSounds = Partial<Record<SoundId, SoundInstance>>;
 
 const loadedSounds: LoadedSounds = {};
 let audioModeConfigured = false;
+let feedbackVolume = 1;
+
+const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 
 const configureAudioMode = async () => {
   if (audioModeConfigured) {
@@ -31,11 +34,13 @@ const configureAudioMode = async () => {
 const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> => {
   const cached = loadedSounds[soundId];
   if (cached) {
+    cached.volume = feedbackVolume;
     return cached;
   }
 
   try {
     const player = createAudioPlayer(SOUNDS[soundId]);
+    player.volume = feedbackVolume;
     loadedSounds[soundId] = player;
     return player;
   } catch (error) {
@@ -53,6 +58,7 @@ export const playSound = async (soundId: SoundId) => {
   if (!sound) {
     return;
   }
+  sound.volume = feedbackVolume;
 
   try {
     await sound.seekTo(0);
@@ -66,5 +72,13 @@ export const playSound = async (soundId: SoundId) => {
 };
 
 export const playFeedbackSound = (isCorrect: boolean) => {
-  void playSound(isCorrect ? "ding" : "dong");
+  void playSound(isCorrect ? "pop" : "pup");
+};
+
+export const setFeedbackVolume = (value: number) => {
+  feedbackVolume = clampVolume(value);
+  Object.values(loadedSounds).forEach((sound) => {
+    if (!sound) return;
+    sound.volume = feedbackVolume;
+  });
 };
