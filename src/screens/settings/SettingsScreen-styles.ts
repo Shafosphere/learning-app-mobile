@@ -29,22 +29,22 @@ export const useStyles = createThemeStylesHook((colors) => ({
   tabButtonActive: {
     backgroundColor: colors.my_green,
   },
-    tabLabel: {
-      fontSize: 13,
-      fontWeight: "700",
-      textTransform: "uppercase",
-      color: colors.paragraph,
-    },
-    tabLabelActive: {
-      color: colors.background,
-    },
-    tabIcon: {
-      color: colors.paragraph,
-      textAlign: "center",
-    },
-    tabIconActive: {
-      color: colors.background,
-    },
+  tabLabel: {
+    fontSize: 13,
+    fontWeight: "700",
+    textTransform: "uppercase",
+    color: colors.paragraph,
+  },
+  tabLabelActive: {
+    color: colors.background,
+  },
+  tabIcon: {
+    color: colors.headline,
+    textAlign: "center",
+  },
+  tabIconActive: {
+    color: colors.background,
+  },
   content: {
     flex: 1,
     width: "100%",
@@ -98,6 +98,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     columnGap: 8,
     flexDirection: "row",
     minWidth: 160,
+  },
+  slider: {
+    height: 40,
+    // width: "100%",
+    // transform: [{ scaleY: 4 }], // spróbuj 1.3–2
   },
   sliderWrapper: {
     height: 28,

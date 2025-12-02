@@ -29,7 +29,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "podstawowe_slowa",
-    name: "Podstawowe słówka",
+    name: "Podstawowe zwroty",
     iconId: "heart",
     iconColor: "#FF6B6B",
     reviewsEnabled: true,

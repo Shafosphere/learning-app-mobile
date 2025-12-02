@@ -3,13 +3,7 @@ import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import Slider from "@react-native-community/slider";
 import * as Haptics from "expo-haptics";
 import React, { useCallback } from "react";
-import {
-  Image,
-  Switch,
-  Text,
-  TouchableOpacity,
-  View,
-} from "react-native";
+import { Image, Switch, Text, TouchableOpacity, View } from "react-native";
 
 const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
 const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
@@ -83,11 +77,10 @@ const AppearanceSection: React.FC = () => {
 
   const handleVolumeChange = useCallback(
     (value: number) => {
-      if (!feedbackEnabled) return;
       setVolumePreview(value);
       void setFeedbackVolume(value);
     },
-    [feedbackEnabled, setFeedbackVolume]
+    [setFeedbackVolume]
   );
 
   React.useEffect(() => {
@@ -114,7 +107,7 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Dźwięki i haptyka</Text>
+          <Text style={styles.rowTitle}>Wibracje</Text>
           <Text style={styles.rowSubtitle}>
             Krótkie wibracje w kluczowych interakcjach aplikacji.
           </Text>
@@ -134,20 +127,14 @@ const AppearanceSection: React.FC = () => {
           </Text>
         </View>
         <View style={styles.sliderRow}>
-          <View
-            style={[
-              styles.sliderWrapper,
-              !feedbackEnabled && styles.sliderDisabled,
-            ]}
-          >
+          <View style={styles.sliderWrapper}>
             <Slider
-              style={styles.sliderWrapper}
+              style={styles.slider}
               value={volumePreview}
               onValueChange={handleVolumeChange}
               minimumValue={0}
               maximumValue={1}
               step={0.01}
-              disabled={!feedbackEnabled}
               minimumTrackTintColor={
                 (styles.sliderFill as { backgroundColor: string })
                   .backgroundColor
@@ -161,6 +148,7 @@ const AppearanceSection: React.FC = () => {
               }
             />
           </View>
+
           <Text style={styles.sliderValue}>
             {Math.round(volumePreview * 100)}%
           </Text>

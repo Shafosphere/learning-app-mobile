@@ -102,6 +102,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // paddingRight: "6%",
     position: "relative",
   },
+  courseCardDisabled: {
+    opacity: 0.8,
+  },
   courseCardContent: {
     height: "100%",
     width: "100%",

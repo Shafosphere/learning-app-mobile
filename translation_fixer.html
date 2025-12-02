@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Translation Fixer Tool</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+            color: #333;
+        }
+
+        h1 {
+            color: #2c3e50;
+        }
+
+        .controls {
+            margin-bottom: 20px;
+            padding: 15px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.2s;
+        }
+
+        button:hover {
+            background-color: #2980b9;
+        }
+
+        button.secondary {
+            background-color: #e74c3c;
+        }
+
+        button.secondary:hover {
+            background-color: #c0392b;
+        }
+
+        button.success {
+            background-color: #27ae60;
+        }
+
+        button.success:hover {
+            background-color: #219150;
+        }
+
+        #fileInput {
+            padding: 5px;
+        }
+
+        .stats {
+            margin-left: auto;
+            font-weight: bold;
+            color: #7f8c8d;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        th,
+        td {
+            padding: 12px 15px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        th {
+            background-color: #34495e;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+
+        tr:hover {
+            background-color: #f1f1f1;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 8px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+
+        input[type="text"]:focus {
+            border-color: #3498db;
+            outline: none;
+        }
+
+        .suspicious {
+            background-color: #fff3cd;
+        }
+
+        .suspicious input {
+            background-color: #fff;
+            border-color: #e67e22;
+        }
+
+        .actions a {
+            text-decoration: none;
+            color: #3498db;
+            font-weight: bold;
+        }
+
+        .actions a:hover {
+            text-decoration: underline;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 20px;
+            font-size: 18px;
+            color: #7f8c8d;
+        }
+    </style>
+</head>
+
+<body>
+
+    <h1>Translation Fixer Tool</h1>
+
+    <div class="controls">
+        <input type="file" id="fileInput" accept=".csv">
+        <button onclick="loadCSV()">Load CSV</button>
+        <button class="secondary" onclick="filterSuspicious()">Find Suspicious</button>
+        <button onclick="showAll()">Show All</button>
+        <button class="success" onclick="exportCSV()">Export CSV</button>
+        <div class="stats" id="stats"></div>
+    </div>
+
+    <div id="tableContainer">
+        <div class="loading hidden" id="loading">Loading...</div>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th width="50">ID</th>
+                    <th width="80">Level</th>
+                    <th width="200">English</th>
+                    <th>Polish Translation</th>
+                    <th width="100">Actions</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <!-- Rows will be populated here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        let csvData = [];
+        let headers = [];
+
+        function parseCSV(text) {
+            const lines = text.split('\n');
+            const result = [];
+
+            // Simple CSV parser that handles quotes
+            // Note: This is a basic implementation. For production with very complex CSVs, a library like PapaParse is recommended.
+            // But for this specific file format, a custom regex splitter works well.
+
+            for (let i = 0; i < lines.length; i++) {
+                let line = lines[i].trim();
+                if (!line) continue;
+
+                const row = [];
+                let currentVal = '';
+                let insideQuote = false;
+
+                for (let j = 0; j < line.length; j++) {
+                    const char = line[j];
+
+                    if (char === '"') {
+                        insideQuote = !insideQuote;
+                    } else if (char === ',' && !insideQuote) {
+                        row.push(currentVal);
+                        currentVal = '';
+                    } else {
+                        currentVal += char;
+                    }
+                }
+                row.push(currentVal);
+
+                // Clean up quotes from values
+                const cleanedRow = row.map(val => {
+                    val = val.trim();
+                    if (val.startsWith('"') && val.endsWith('"')) {
+                        return val.substring(1, val.length - 1).replace(/""/g, '"');
+                    }
+                    return val;
+                });
+
+                if (i === 0) {
+                    headers = cleanedRow;
+                } else {
+                    // Map to object based on known structure: id, cefr_level, word, wordpl
+                    // Or just keep as array if headers vary. Let's assume standard structure based on file view.
+                    if (cleanedRow.length >= 4) {
+                        result.push({
+                            id: cleanedRow[0],
+                            level: cleanedRow[1],
+                            word: cleanedRow[2],
+                            translation: cleanedRow[3],
+                            originalRow: cleanedRow // Keep other columns if any
+                        });
+                    }
+                }
+            }
+            return result;
+        }
+
+        function loadCSV() {
+            const fileInput = document.getElementById('fileInput');
+            const file = fileInput.files[0];
+
+            if (!file) {
+                alert('Please select a file first!');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = function (e) {
+                const text = e.target.result;
+                csvData = parseCSV(text);
+                renderTable(csvData);
+                updateStats(csvData.length, csvData.length);
+            };
+            reader.readAsText(file);
+        }
+
+        function renderTable(data) {
+            const tbody = document.getElementById('tableBody');
+            tbody.innerHTML = '';
+
+            // Limit rendering for performance if list is huge, but 6000 rows is manageable in modern browsers.
+            // We can implement virtual scrolling if needed, but let's try direct render first.
+            // To be safe, let's render first 500 and add "Show More" if needed, or just render all.
+            // 6000 DOM nodes might be slightly heavy but usable.
+
+            // Optimization: Use document fragment
+            const fragment = document.createDocumentFragment();
+
+            data.forEach((row, index) => {
+                const tr = document.createElement('tr');
+                tr.dataset.id = row.id;
+
+                // Check if suspicious for styling
+                if (isSuspicious(row)) {
+                    tr.classList.add('suspicious');
+                }
+
+                tr.innerHTML = `
+                    <td>${row.id}</td>
+                    <td>${row.level}</td>
+                    <td>${row.word}</td>
+                    <td><input type="text" value="${row.translation.replace(/"/g, '&quot;')}" onchange="updateTranslation('${row.id}', this.value)"></td>
+                    <td class="actions">
+                        <a href="https://translate.google.com/?sl=en&tl=pl&text=${encodeURIComponent(row.word)}&op=translate" target="_blank">G.Translate</a>
+                    </td>
+                `;
+                fragment.appendChild(tr);
+            });
+
+            tbody.appendChild(fragment);
+        }
+
+        function updateTranslation(id, newValue) {
+            const row = csvData.find(r => r.id === id);
+            if (row) {
+                row.translation = newValue;
+            }
+        }
+
+        function isSuspicious(row) {
+            const pl = row.translation.toLowerCase().trim();
+
+            // User requested to ONLY filter by special characters for now.
+            // Special characters: brackets, slashes, exclamation marks, question marks, etc.
+            // Exclude commas as they are common separators.
+            const specialChars = /[\[\](){}\/\\!@#$%^&*_+=|<>?]/;
+
+            if (specialChars.test(pl)) return true;
+
+            return false;
+        }
+
+        function filterSuspicious() {
+            const suspiciousData = csvData.filter(isSuspicious);
+            renderTable(suspiciousData);
+            updateStats(suspiciousData.length, csvData.length);
+        }
+
+        function showAll() {
+            renderTable(csvData);
+            updateStats(csvData.length, csvData.length);
+        }
+
+        function updateStats(showing, total) {
+            document.getElementById('stats').textContent = `Showing: ${showing} / ${total}`;
+        }
+
+        function exportCSV() {
+            if (csvData.length === 0) {
+                alert('No data to export!');
+                return;
+            }
+
+            // Reconstruct CSV
+            let csvContent = headers.join(',') + '\n';
+
+            csvData.forEach(row => {
+                // Escape quotes in translation if needed
+                let translation = row.translation;
+                if (translation.includes(',') || translation.includes('"')) {
+                    translation = `"${translation.replace(/"/g, '""')}"`;
+                }
+
+                // Reconstruct line
+                // Assuming original structure: id,cefr_level,word,wordpl
+                // We use the updated translation
+                const line = [
+                    row.id,
+                    row.level,
+                    row.word,
+                    translation
+                ].join(',');
+
+                csvContent += line + '\n';
+            });
+
+            // Create download link
+            const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'wordsENGtoPL_fixed.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    </script>
+</body>
+
+</html>

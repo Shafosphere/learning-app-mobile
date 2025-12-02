@@ -14,7 +14,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   introOverlay: {
     position: "absolute",
-    top: 0,
+    bottom: "30%",
     left: 0,
     right: 0,
     zIndex: 30,

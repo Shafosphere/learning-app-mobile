@@ -8,71 +8,32 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 24,
     gap: 24,
     backgroundColor: colors.background,
-    display: "flex", 
-    flexDirection: "row",
+    display: "flex",
+    flexDirection: "column",
     flexWrap: "wrap",
+    alignContent: "center",
   },
-  logo: {
-    width: 200,
-    height: 200,
-    resizeMode: "contain",
-  },
-  counter: {
-    color: colors.headline,
-    fontSize: 16,
-    fontWeight: "700",
-    textAlign: "center",
-  },
-  memorySection: {
-    width: "100%",
-    alignItems: "center",
-    gap: 12,
-  },
-  memoryTitle: {
-    color: colors.headline,
-    fontSize: 18,
-    fontWeight: "700",
-    textAlign: "center" as const,
-  },
-  memorySubtitle: {
-    color: colors.paragraph,
-    fontSize: 14,
-    textAlign: "center" as const,
-  },
-  memoryOptions: {
-    flexDirection: "row" as const,
-    justifyContent: "center" as const,
-    gap: 12,
-  },
-  memoryOption: {
-    minWidth: 110,
-    paddingVertical: 12,
-    paddingHorizontal: 16,
-    borderRadius: 16,
-    borderWidth: 2,
+  button: {
+    width: 256,
+    height: 256,
+    borderWidth: 30,
     borderColor: colors.border,
-    backgroundColor: colors.secondBackground,
-    alignItems: "center" as const,
-    gap: 4,
+    alignItems: "center",
+    // justifyContent: "top",
   },
-  memoryOptionActive: {
-    borderColor: colors.my_green,
-    backgroundColor: colors.my_green,
+  topbutton: {
+    borderTopWidth: 0,
+    justifyContent: "flex-end"
   },
-  memoryOptionLabel: {
-    fontSize: 16,
-    fontWeight: "700",
+  botbutton: {
+    borderBottomWidth: 0,
+    justifyContent: "flex-start"
+  },
+  header:{
+    fontSize: 32,
+    fontWeight: 900,
     color: colors.headline,
-  },
-  memoryOptionLabelActive: {
-    color: colors.secondBackground,
-  },
-  memoryOptionMeta: {
-    fontSize: 12,
-    fontWeight: "500",
-    color: colors.paragraph,
-  },
-  memoryOptionMetaActive: {
-    color: colors.secondBackground,
-  },
+    marginTop: 16,
+    marginBottom: 16,
+  }
 }));

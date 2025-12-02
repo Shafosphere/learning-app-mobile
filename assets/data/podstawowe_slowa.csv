@@ -1,51 +1,225 @@
 front,back
-hello,cześć
-good morning,dzień dobry
-good evening,dobry wieczór
-good night,dobranoc
-please,proszę
-thank you,dziękuję
-you're welcome,proszę bardzo; nie ma za co
-yes,tak
-no,nie
-excuse me,przepraszam
-sorry,przykro mi; przepraszam
-bathroom,łazienka
+red,czerwony
+orange,pomarańczowy
+yellow,żółty
+green,zielony
+blue,niebieski
+purple,fioletowy
+pink,różowy
+brown,brązowy
+black,czarny
+white,biały
+gray,szary
+gold,złoty
+silver,srebrny
+light,jasny
+dark,ciemny
+zero,zero
+one,jeden
+two,dwa
+three,trzy
+four,cztery
+five,pięć
+six,sześć
+seven,siedem
+eight,osiem
+nine,dziewięć
+ten,dziesięć
+many,dużo
+few,mało
+a few,kilka
+a couple,para
+to be,być
+to have,mieć
+to do,robić
+to go,iść
+to come,przychodzić
+to leave,wychodzić
+to eat,jeść
+to drink,pić
+to sleep,spać
+to wake up,budzić się
+to work,pracować
+to study,uczyć się
+to rest,odpoczywać
+to speak,mówić
+to listen,słuchać
+to write,pisać
+to read,czytać
+to look,patrzeć
+to watch,oglądać
+to ask,pytać
+to answer,odpowiadać
+to think,myśleć
+to know,wiedzieć
+to understand,rozumieć
+to remember,pamiętać
+to forget,zapominać
+to want,chcieć
+to like,lubić
+to love,kochać
+to hate,nienawidzić; nie lubić
+to be able to,móc
+to have to,musieć
+bread,chleb
+butter,masło
+cheese,ser
+meat,mięso
+fish,ryba
+rice,ryż
+pasta,makaron
+soup,zupa
+salad,sałatka
+egg,jajko
+vegetables,warzywa
+fruit,owoce
+apple,jabłko
+banana,banan
+orange (fruit),pomarańcza
+tomato,pomidor
+cucumber,ogórek
+potato,ziemniak
+carrot,marchewka
+onion,cebula
 water,woda
-food,jedzenie
-friend,przyjaciel; przyjaciółka
-family,rodzina
+juice,sok
+tea,herbata
+coffee,kawa
+milk,mleko
+soft drink,napój gazowany
 mother,mama; matka
 father,tata; ojciec
+parents,rodzice
+son,syn
+daughter,córka
+grandmother,babcia
+grandfather,dziadek
+aunt,ciocia
+uncle,wujek
 brother,brat
 sister,siostra
 child,dziecko
-house,dom
-city,miasto
-street,ulica
-school,szkoła
-work,praca
-money,pieniądze
-time,czas
+boy,chłopak
+girl,dziewczyna
+man,mężczyzna
+woman,kobieta
+friend,przyjaciel; przyjaciółka
+neighbor,sąsiad; sąsiadka
+teacher,nauczyciel; nauczycielka
+classmate,kolega; koleżanka
+table,stół
+chair,krzesło
+sofa,sofa; kanapa
+armchair,fotel
+desk,biurko
+bed,łóżko
+wardrobe,szafa
+shelf,półka
+carpet,dywan
+lamp,lampa
+plate,talerz
+fork,widelec
+knife,nóż
+spoon,łyżka
+cup,kubek
+glass,szklanka
+pot,garnek
+frying pan,patelnia
+fridge,lodówka
+oven,piekarnik
+door,drzwi
+window,okno
+key,klucz
+phone,telefon
+computer,komputer
+head,głowa
+face,twarz
+hair,włosy
+eye,oko
+ear,ucho
+nose,nos
+mouth,usta
+tooth,ząb
+neck,szyja
+shoulder,ramię
+arm,ręka
+hand,dłoń
+finger,palec
+chest,klatka piersiowa
+belly,brzuch
+back,plecy
+leg,noga
+knee,kolano
+foot,stopa
+good,dobry
+bad,zły
+nice,fajny
+boring,nudny
+interesting,ciekawy
+important,ważny
+small,mały
+big,duży
+tall,wysoki
+short,niski
+long,długi
+short (length),krótki
+tired,zmęczony
+hungry,głodny
+thirsty,spragniony
+sick,chory
+healthy,zdrowy
+happy,szczęśliwy
+sad,smutny
+calm,spokojny
+fast,szybki
+slow,wolny
+cheap,tani
+expensive,drogi
+new,nowy
+old,stary
+Monday,poniedziałek
+Tuesday,wtorek
+Wednesday,środa
+Thursday,czwartek
+Friday,piątek
+Saturday,sobota
+Sunday,niedziela
+second,sekunda
+minute,minuta
+hour,godzina
 day,dzień
-night,noc
+week,tydzień
+month,miesiąc
+year,rok
 today,dziś; dzisiaj
 tomorrow,jutro
 yesterday,wczoraj
-learn,uczyć się
-read,czytać
-write,pisać
-speak,mówić
-think,myśleć
-go,iść
-come,przyjść
-eat,jeść
-drink,pić
-sleep,spać
-see,widzieć; zobaczyć
-know,wiedzieć; znać
-want,chcieć
-need,potrzebować
-like,lubić
-love,kochać
-help,pomóc; pomagać
+morning,rano
+noon,południe
+afternoon,popołudnie
+evening,wieczór
+night,noc
+now,teraz
+later,później
+earlier,wcześniej
+house,dom
+apartment,mieszkanie
+school,szkoła
+work,praca
+shop,sklep
+supermarket,supermarket
+restaurant,restauracja
+cafe,kawiarnia
+street,ulica
+park,park
+bus stop,przystanek
+station,dworzec
+hospital,szpital
+pharmacy,apteka
+bank,bank
+post office,poczta
+cinema,kino
+gym,siłownia
+library,biblioteka
+city,miasto
+village,wieś

@@ -21,7 +21,7 @@ export function useFlashcardsIntro(options?: UseFlashcardsIntroOptions) {
   const storageKey = options?.storageKey ?? "@flashcards_intro_seen_v1";
   const defaultOverlay: ViewStyle = {
     position: "absolute",
-    top: 0,
+    bottom: "30%",
     left: 0,
     right: 0,
     zIndex: 30,

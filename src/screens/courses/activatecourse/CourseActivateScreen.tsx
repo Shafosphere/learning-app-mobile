@@ -77,6 +77,7 @@ export default function CourseActivateScreen() {
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
+  const [startedInOnboarding, setStartedInOnboarding] = useState(false);
 
   const userCustomCourses = useMemo(
     () => customCourses.filter((course) => !course.isOfficial),
@@ -171,6 +172,7 @@ export default function CourseActivateScreen() {
         const resolved = cp ?? "activate_required";
         setCheckpoint(resolved);
         if (resolved !== "done") {
+          setStartedInOnboarding(true);
           setShowIntro(true);
           setIntroStep(0);
         }
@@ -339,7 +341,7 @@ export default function CourseActivateScreen() {
 
   const hasActiveCourse =
     activeCourseIdx != null || activeCustomCourseId != null;
-  const introActive = checkpoint !== "done";
+  const showOnboardingNext = startedInOnboarding;
 
   return (
     <View style={styles.container}>
@@ -635,7 +637,7 @@ export default function CourseActivateScreen() {
         </View>
       </ScrollView>
 
-      {introActive ? (
+      {showOnboardingNext ? (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
             <Pressable

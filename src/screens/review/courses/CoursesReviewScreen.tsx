@@ -553,17 +553,22 @@ export default function CoursesReviewScreen() {
                             course.sourceLang
                           );
 
-                        return (
-                          <Pressable
-                            key={`${course.sourceLang}-${course.targetLang}-${
-                              courseLevel ?? "default"
-                            }-${courseIndex}`}
-                            style={styles.courseCard}
-                            onPress={() => handleSelectCourse(courseIndex)}
-                          >
-                            {sourceFlag ? (
-                              <Image style={styles.flag} source={sourceFlag} />
-                            ) : null}
+                      return (
+                        <Pressable
+                          key={`${course.sourceLang}-${course.targetLang}-${
+                            courseLevel ?? "default"
+                          }-${courseIndex}`}
+                          style={[
+                            styles.courseCard,
+                            builtInCount === 0 && styles.courseCardDisabled,
+                          ]}
+                          disabled={builtInCount === 0}
+                          accessibilityState={{ disabled: builtInCount === 0 }}
+                          onPress={() => handleSelectCourse(courseIndex)}
+                        >
+                          {sourceFlag ? (
+                            <Image style={styles.flag} source={sourceFlag} />
+                          ) : null}
                             <Text style={styles.courseCardText}>
                               {levelLabel}
                             </Text>
@@ -590,7 +595,12 @@ export default function CoursesReviewScreen() {
                           return (
                             <Pressable
                               key={`official-${course.id}`}
-                              style={styles.courseCard}
+                              style={[
+                                styles.courseCard,
+                                dueCount === 0 && styles.courseCardDisabled,
+                              ]}
+                              disabled={dueCount === 0}
+                              accessibilityState={{ disabled: dueCount === 0 }}
                               onPress={() =>
                                 handleSelectCustomCourse(course.id)
                               }
@@ -645,7 +655,12 @@ export default function CoursesReviewScreen() {
                   return (
                     <Pressable
                       key={`${course.id}-${index}`}
-                      style={styles.courseCard}
+                      style={[
+                        styles.courseCard,
+                        dueCount === 0 && styles.courseCardDisabled,
+                      ]}
+                      disabled={dueCount === 0}
+                      accessibilityState={{ disabled: dueCount === 0 }}
                       onPress={() => handleSelectCustomCourse(course.id)}
                     >
                       <IconComponent

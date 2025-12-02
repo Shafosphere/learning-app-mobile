@@ -29,6 +29,16 @@ type AddMode = "csv" | "manual";
 
 const sampleFileName = "custom_course_przyklad.csv";
 
+const LOCK_TRUE_VALUES = new Set([
+  "true",
+  "1",
+  "yes",
+  "y",
+  "tak",
+  "t",
+  "locked",
+]);
+
 const segmentOptions: { key: AddMode; label: string }[] = [
   { key: "csv", label: "Import z CSV" },
   { key: "manual", label: "Dodaj ręcznie" },
@@ -87,6 +97,33 @@ export default function CustomCourseContentScreen() {
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
+  const parseLockValue = (value: unknown): boolean => {
+    if (value == null) return false;
+    const normalized = value.toString().trim().toLowerCase();
+    return LOCK_TRUE_VALUES.has(normalized);
+  };
+
+  const parseAnswers = (raw: unknown): string[] => {
+    const normalized = (raw ?? "").toString().trim();
+    if (!normalized) return [];
+    const parts = normalized
+      .split(/[;,|\n]/)
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
+
+    if (parts.length === 0) return [normalized];
+
+    const deduped: string[] = [];
+    const seen = new Set<string>();
+    for (const value of parts) {
+      if (!seen.has(value)) {
+        deduped.push(value);
+        seen.add(value);
+      }
+    }
+    return deduped;
+  };
+
   const handleSelectCsv = async () => {
     try {
       const picked = await DocumentPicker.getDocumentAsync({
@@ -114,12 +151,18 @@ export default function CustomCourseContentScreen() {
         });
         return;
       }
-      const cards = (parsed.data as any[]).map((row, idx) => ({
-        id: `csv-${idx}`,
-        front: (row.front || "").toString(),
-        answers: [(row.back || "").toString()],
-        flipped: true,
-      }));
+      const cards = (parsed.data as any[])
+        .map((row, idx) => {
+          const answers = parseAnswers(row.back);
+          const locked = parseLockValue(row.lock);
+          return {
+            id: `csv-${idx}`,
+            front: (row.front || "").toString(),
+            answers: answers.length > 0 ? answers : [(row.back || "").toString()],
+            flipped: !locked,
+          };
+        })
+        .filter((card) => card.front.trim().length > 0 || card.answers.some((a) => a.trim().length > 0));
       if (!cards.length) {
         setPopup({
           message: "Brak danych w pliku CSV",
@@ -203,15 +246,6 @@ export default function CustomCourseContentScreen() {
   };
 
   const handleSaveCourse = async () => {
-    if (addMode === "csv") {
-      setPopup({
-        message: "Import z CSV pojawi się w kolejnej wersji",
-        color: "my_yellow",
-        duration: 4000,
-      });
-      return;
-    }
-
     const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
@@ -338,9 +372,11 @@ export default function CustomCourseContentScreen() {
             <View style={styles.modeContainer}>
               <Text style={styles.modeTitle}>Import z pliku CSV</Text>
               <Text style={styles.modeDescription}>
-                Przygotuj plik CSV z kolumnami przód i tył oraz wypełnionymi
-                danymi. Możesz również pobrać gotowy plik do wypełnienia
-                (zalecam zrobić to na laptopie lub komputerze).
+                Przygotuj plik CSV z kolumnami front, back oraz opcjonalnym
+                polem lock (true/1/tak = zablokowany). W polu back możesz wpisać
+                wiele tłumaczeń oddzielonych średnikiem lub pionową kreską.
+                Możesz też pobrać gotowy plik do wypełnienia (zalecam zrobić to
+                na laptopie lub komputerze).
               </Text>
               <View style={styles.modeActions}>
                 <MyButton
