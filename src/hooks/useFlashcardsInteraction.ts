@@ -244,114 +244,151 @@ export function useFlashcardsInteraction({
     ]
   );
 
-  const checkAnswer = useCallback(() => {
-    if (!selectedItem) return false;
-    if (activeBox === "boxZero") return false;
-    if (reversed) {
-      return checkSpelling(answer, selectedItem.text);
-    }
-    return selectedItem.translations.some((t) => checkSpelling(answer, t));
-  }, [activeBox, answer, checkSpelling, reversed, selectedItem]);
+  const moveTranslationToFront = useCallback(
+    (list: string[], preferred?: string) => {
+      if (!preferred) return list;
+      const index = list.findIndex((value) => value === preferred);
+      if (index <= 0) return list;
+      const reordered = [preferred, ...list.filter((_, idx) => idx !== index)];
+      return reordered;
+    },
+    []
+  );
 
-  const confirm = useCallback(() => {
-    if (activeBox === "boxZero") {
-      return;
-    }
-    if (!selectedItem) return;
+  const confirm = useCallback(
+    (selectedTranslation?: string) => {
+      if (activeBox === "boxZero") {
+        return;
+      }
+      if (!selectedItem) return;
 
-    const ok = checkAnswer();
-    const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
-    // Log learning event for analytics (flashcards)
-    if (activeCustomCourseId != null) {
-      void logCustomLearningEvent({
-        flashcardId: selectedItem.id,
-        courseId: activeCustomCourseId,
-        box: activeBox ?? null,
-        result: ok ? 'ok' : 'wrong',
-        durationMs: duration ?? undefined,
-      });
-    } else if (
-      activeCourse?.sourceLangId != null &&
-      activeCourse?.targetLangId != null &&
-      selectedLevel
-    ) {
-      void logLearningEvent({
-        wordId: selectedItem.id,
-        sourceLangId: activeCourse.sourceLangId,
-        targetLangId: activeCourse.targetLangId,
-        level: selectedLevel,
-        box: activeBox ?? null,
-        result: ok ? 'ok' : 'wrong',
-        durationMs: duration ?? undefined,
-      });
-    }
-    if (ok) {
-      if (!reversed && activeBox && selectedItem.translations.length > 1) {
-        const matched = selectedItem.translations.find((t) =>
-          checkSpelling(answer, t)
-        );
-        if (matched) {
-          const reorderedTranslations = [
-            matched,
-            ...selectedItem.translations.filter((t) => t !== matched),
-          ];
-          const updatedWord: WordWithTranslations = {
-            ...selectedItem,
-            translations: reorderedTranslations,
+      const reorderedTranslations = moveTranslationToFront(
+        selectedItem.translations,
+        selectedTranslation
+      );
+      const wordForCheck =
+        reorderedTranslations === selectedItem.translations
+          ? selectedItem
+          : { ...selectedItem, translations: reorderedTranslations };
+
+      if (wordForCheck !== selectedItem && activeBox) {
+        setSelectedItem(wordForCheck);
+        setBoxes((prev) => {
+          const list = prev[activeBox];
+          if (!list) return prev;
+          const nextList = list.map((item) =>
+            item.id === wordForCheck.id ? wordForCheck : item
+          );
+          return {
+            ...prev,
+            [activeBox]: nextList,
           };
-          setSelectedItem(updatedWord);
-          setBoxes((prev) => {
-            const list = prev[activeBox];
-            if (!list) return prev;
-            const nextList = list.map((item) =>
-              item.id === updatedWord.id ? updatedWord : item
+        });
+      }
+
+      const ok = reversed
+        ? checkSpelling(answer, wordForCheck.text)
+        : wordForCheck.translations.some((t) => checkSpelling(answer, t));
+      const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
+      // Log learning event for analytics (flashcards)
+      if (activeCustomCourseId != null) {
+        void logCustomLearningEvent({
+          flashcardId: wordForCheck.id,
+          courseId: activeCustomCourseId,
+          box: activeBox ?? null,
+          result: ok ? 'ok' : 'wrong',
+          durationMs: duration ?? undefined,
+        });
+      } else if (
+        activeCourse?.sourceLangId != null &&
+        activeCourse?.targetLangId != null &&
+        selectedLevel
+      ) {
+        void logLearningEvent({
+          wordId: wordForCheck.id,
+          sourceLangId: activeCourse.sourceLangId,
+          targetLangId: activeCourse.targetLangId,
+          level: selectedLevel,
+          box: activeBox ?? null,
+          result: ok ? 'ok' : 'wrong',
+          durationMs: duration ?? undefined,
+        });
+      }
+      if (ok) {
+        if (!reversed && activeBox && wordForCheck.translations.length > 1) {
+          const matched = wordForCheck.translations.find((t) =>
+            checkSpelling(answer, t)
+          );
+          if (matched) {
+            const matchedIndex = wordForCheck.translations.findIndex(
+              (t) => t === matched
             );
-            return {
-              ...prev,
-              [activeBox]: nextList,
-            };
-          });
+            if (matchedIndex > 0) {
+              const reorderedTranslations = [
+                matched,
+                ...wordForCheck.translations.filter((_, idx) => idx !== matchedIndex),
+              ];
+              const updatedWord: WordWithTranslations = {
+                ...wordForCheck,
+                translations: reorderedTranslations,
+              };
+              setSelectedItem(updatedWord);
+              setBoxes((prev) => {
+                const list = prev[activeBox];
+                if (!list) return prev;
+                const nextList = list.map((item) =>
+                  item.id === updatedWord.id ? updatedWord : item
+                );
+                return {
+                  ...prev,
+                  [activeBox]: nextList,
+                };
+              });
+            }
+          }
         }
+        setResult(true);
+        if (activeBox) {
+          onCorrectAnswer?.(activeBox);
+        }
+        if (activeBox === "boxFive") {
+          registerKnownWord(wordForCheck.id);
+        }
+        setTimeout(() => {
+          setAnswer("");
+          moveElement(wordForCheck.id, true);
+          setResult(null);
+          setQueueNext(true);
+        }, 1500);
+      } else {
+        setResult(false);
+        setCorrection({
+          awers: wordForCheck.text,
+          rewers: wordForCheck.translations[0] ?? "",
+          input1: "",
+          input2: "",
+          mode: "demote",
+        });
       }
-      setResult(true);
-      if (activeBox) {
-        onCorrectAnswer?.(activeBox);
-      }
-      if (activeBox === "boxFive") {
-        registerKnownWord(selectedItem.id);
-      }
-      setTimeout(() => {
-        setAnswer("");
-        moveElement(selectedItem.id, true);
-        setResult(null);
-        setQueueNext(true);
-      }, 1500);
-    } else {
-      setResult(false);
-      setCorrection({
-        awers: selectedItem.text,
-        rewers: selectedItem.translations[0] ?? "",
-        input1: "",
-        input2: "",
-        mode: "demote",
-      });
-    }
-  }, [
-    activeBox,
-    checkAnswer,
-    moveElement,
-    onCorrectAnswer,
-    checkSpelling,
-    registerKnownWord,
-    activeCourse?.sourceLangId,
-    activeCourse?.targetLangId,
-    activeCustomCourseId,
-    selectedLevel,
-    selectedItem,
-    questionShownAt,
-    reversed,
-    setBoxes,
-  ]);
+    },
+    [
+      activeBox,
+      activeCourse?.sourceLangId,
+      activeCourse?.targetLangId,
+      activeCustomCourseId,
+      answer,
+      checkSpelling,
+      moveElement,
+      onCorrectAnswer,
+      questionShownAt,
+      registerKnownWord,
+      reversed,
+      selectedItem,
+      selectedLevel,
+      setBoxes,
+      moveTranslationToFront,
+    ]
+  );
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {
     setCorrection((c) =>

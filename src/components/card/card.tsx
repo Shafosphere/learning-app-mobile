@@ -37,6 +37,7 @@ type CardProps = {
   downloadDisabled?: boolean;
   introMode?: boolean;
   setCorrectionRewers?: (value: string) => void;
+  confirm: (selectedTranslation?: string) => void;
 };
 
 export default function Card({
@@ -63,7 +64,19 @@ export default function Card({
         ? styles.cardGood
         : styles.cardBad
       : undefined;
-  const autoCompleteValue = flashcardsSuggestionsEnabled ? "on" : "off";
+  const suggestionProps = useMemo(
+    () => {
+      const disabled = !flashcardsSuggestionsEnabled;
+      return {
+        autoCorrect: flashcardsSuggestionsEnabled,
+        spellCheck: flashcardsSuggestionsEnabled,
+        autoComplete: disabled ? ("off" as const) : undefined,
+        textContentType: disabled ? ("none" as const) : undefined,
+        importantForAutofill: disabled ? ("no" as const) : undefined,
+      };
+    },
+    [flashcardsSuggestionsEnabled]
+  );
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
     useState(false);
@@ -314,16 +327,9 @@ export default function Card({
 
   function handleConfirm() {
     if (selectedItem?.translations && selectedItem.translations.length > 1) {
-      const currentIndex = translations;
-      if (currentIndex !== 0) {
-        const arr = [...selectedItem.translations];
-        const [chosen] = arr.splice(currentIndex, 1);
-        arr.unshift(chosen);
-        selectedItem.translations = arr;
-      }
       setTranslations(0);
     }
-    confirm();
+    confirm(rewers);
   }
 
   function normalizeChar(char: string | undefined): string {
@@ -378,8 +384,7 @@ export default function Card({
               blurOnSubmit={false}
               onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
               autoCapitalize="none"
-              autoCorrect={flashcardsSuggestionsEnabled}
-              autoComplete={autoCompleteValue}
+              {...suggestionProps}
               showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
               onFocus={() => {
                 setIsCorrectionInput1Focused(true);
@@ -418,8 +423,7 @@ export default function Card({
               ref={correctionInput2Ref}
               returnKeyType="done"
               autoCapitalize="none"
-              autoCorrect={flashcardsSuggestionsEnabled}
-              autoComplete={autoCompleteValue}
+              {...suggestionProps}
               onKeyPress={({ nativeEvent }) => {
                 if (
                   nativeEvent.key === "Backspace" &&
@@ -481,8 +485,7 @@ export default function Card({
             value={answer}
             onChangeText={setAnswer}
             autoCapitalize="none"
-            autoCorrect={flashcardsSuggestionsEnabled}
-            autoComplete={autoCompleteValue}
+            {...suggestionProps}
             ref={mainInputRef}
             returnKeyType="done"
             blurOnSubmit={false}

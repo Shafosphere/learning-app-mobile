@@ -3,7 +3,7 @@ import { ScrollView } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
 // import { useSettings } from "@/src/contexts/SettingsContext";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
-import MedalsShowcase from "@/src/components/stats/MedalsShowcase";
+import MedalsShowcase from "@/src/components/stats/bookshelf";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import HardWordsList from "@/src/components/stats/HardWordsList";

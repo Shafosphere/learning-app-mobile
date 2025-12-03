@@ -47,6 +47,8 @@ function pickAutoflowDecision(params: {
   const downloadTarget: keyof BoxesState = boxZeroEnabled ? introBox : baseBox;
 
   const boxZeroCount = count(introBox);
+  const baseCount = count(baseBox);
+  const boxTwo = CLEANUP_BOXES[0];
 
   // Intro box has absolute priority when enabled and non-empty.
   if (boxZeroEnabled) {
@@ -66,20 +68,11 @@ function pickAutoflowDecision(params: {
     return { targetBox: baseBox, shouldDownloadNew: false };
   }
 
-  // Box 1 acts as the engine: keep trimming it to BASE_STACK_TARGET.
-  const baseCount = count(baseBox);
-  if (baseCount > BASE_STACK_TARGET) {
-    return { targetBox: baseBox, shouldDownloadNew: false };
-  }
-
   // Backpressure Logic:
   // 1. If Box 2 is NOT full, we must fill it. Priority is Box 1 (and downloading).
   //    We do NOT jump to Box 3, 4, or 5 even if they are full.
-  const boxTwo = CLEANUP_BOXES[0];
-  if (count(boxTwo) < flushThreshold) {
-    // Box 2 isn't full yet -> keep feeding it from Box 1.
-    // Fall through to download logic below.
-  } else {
+  const boxTwoIsFull = count(boxTwo) >= flushThreshold;
+  if (boxTwoIsFull) {
     // 2. Box 2 IS full. We need to unclog the system.
     //    Find the highest "blocked" box in the chain [2, 3, 4, 5].
     //    A box is a candidate if it is full.
@@ -113,6 +106,15 @@ function pickAutoflowDecision(params: {
         break;
       }
     }
+  } else {
+    // Box 2 isn't full yet -> keep feeding it from Box 1.
+    // Fall through to engine/download logic below.
+  }
+
+  // Box 1 acts as the engine: keep trimming it to BASE_STACK_TARGET,
+  // but only after handling full Box2+ to avoid overfilling cleanup boxes.
+  if (baseCount > BASE_STACK_TARGET) {
+    return { targetBox: baseBox, shouldDownloadNew: false };
   }
 
   // Nothing urgent above, Box 1 is light -> consider pulling a new batch.

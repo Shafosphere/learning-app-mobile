@@ -1,1 +1,2 @@
-// export { default } from "@/legacy/review/ReviewLevelsScreen";
+// Legacy alias kept for backward compatibility; reuse main review screen.
+export { default } from "@/src/screens/review/courses/CoursesReviewScreen";

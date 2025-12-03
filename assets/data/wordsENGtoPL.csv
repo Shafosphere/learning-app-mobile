@@ -1805,7 +1805,7 @@ id,cefr_level,word,wordpl
 1804,A1,ideal,"idealny, doskonały, ideał"
 1805,B1,obviously,"oczywiście, widocznie, wyraźnie, najwyraźniej"
 1806,B2,mill,"młyn, młynek, fabryka, frez, mielić"
-1807,B1,tend,"mieć skłonność do, skłaniać się ku, opiekować się, doglądać"
+1807,B1,tend,"mieć skłonność do, skłaniać się ku, opiekować się, doglądać, zmierzać"
 1808,B1,flat,"mieszkanie, lokal, płaski, równina, bemol"
 1809,B2,illustrated,"ilustrowany, zilustrować"
 1810,A2,pursuant,zgodnie z
@@ -1973,7 +1973,6 @@ id,cefr_level,word,wordpl
 1972,B2,obligations,"zobowiązania, obowiązki"
 1973,B2,faculty,"wydział, zdolność, umiejętność"
 1974,B1,partial,"częściowy, fragmentaryczny, niekompletny, stronniczy"
-1975,A2,ft,"stopa (jednostka długości), ft."
 1976,B2,prescribed,"przepisany, zalecany, przepisać, zalecać"
 1977,B1,academy,"akademia, szkoła wyższa"
 1978,B2,enterprise,"przedsiębiorstwo, przedsięwzięcie, inicjatywa, przedsiębiorczość"
@@ -2020,7 +2019,7 @@ id,cefr_level,word,wordpl
 2019,A2,jersey,"dżersej, koszulka sportowa"
 2020,A2,quick,"szybki, bystry, nagły, szybko"
 2021,B1,physics,fizyka
-2022,B2,essentially,"w istocie, w gruncie rzeczy"
+2022,B2,essentially,"esencjonalnie ,w istocie, w gruncie rzeczy"
 2023,B1,accompanied,"towarzyszyć, towarzyszący, w towarzystwie"
 2024,A2,diagnosis,"diagnoza, rozpoznanie"
 2025,B1,atlantic,"Atlantyk, atlantycki"
@@ -2038,7 +2037,7 @@ id,cefr_level,word,wordpl
 2037,A2,collective,"grupowy, zbiorowy, spółdzielnia, kolektyw"
 2038,B1,tendency,"skłonność, tendencja"
 2039,B1,whenever,"kiedy, tylko, kiedykolwiek"
-2040,B2,spread,"rozprzestrzenianie, ekspansja, zasięg, obszar, rozkładówka, smarowidło, substancja do smarowania, różnica między ceną kupna a sprzedaży, rozprzestrzeniać, szerzyć, rozkładać, smarować, rozprzestrzeniać się"
+2040,B2,spread,"rozprzestrzenianie, rozpiętość, ekspansja, zasięg, obszar, rozkładówka, smarowidło, substancja do smarowania, różnica między ceną kupna a sprzedaży, rozprzestrzeniać, szerzyć, rozkładać, smarować, rozprzestrzeniać się"
 2041,B2,founded,"założyć, założony, ustanowić, ustanowiony"
 2042,A1,song,"piosenka, pieśń"
 2043,A1,gift,"prezent, dar, talent"
@@ -2064,7 +2063,7 @@ id,cefr_level,word,wordpl
 2063,A1,bell,"dzwon, dzwonek"
 2064,B1,intention,"zamiar, intencja"
 2065,B2,distinguished,"wyróżniony, wyróżniać się, wybitny, dystyngowany, uhonorowany"
-2066,B1,league,"liga, około trzy mile angielskie"
+2066,B1,league,liga
 2067,B2,exhibit,"wystawiać, eksponować, pokazywać, eksponat, wystawa, dowód rzeczowy, pokaz"
 2068,B2,functional,"funkcjonalny, czynnościowy, sprawny"
 2069,A1,spot,"miejsce, plama, plamka, punkt, pryszcz, spot reklamowy, zauważyć, dostrzec, rozpoznać"
@@ -2092,7 +2091,6 @@ id,cefr_level,word,wordpl
 2091,B2,dynamic,"dynamiczny, dynamika, siła napędowa, napędowy"
 2092,B1,muscle,mięsień
 2093,B2,residence,"miejsce zamieszkania, rezydencja, pobyt, siedziba"
-2094,B2,ph,potencjał wodoru (pH)
 2095,B2,superintendent,"nadzorca, kierownik, inspektor, komisarz"
 2096,A1,sunday,"niedziela, niedzielny"
 2097,A2,filing,"archiwizacja, katalogowanie, wniosek, złożenie dokumentów"
@@ -2135,7 +2133,6 @@ id,cefr_level,word,wordpl
 2134,A1,snow,"śnieg, śnieżny, śnieżyca, śnieżnobiały, śnieżyć"
 2135,A2,automatic,automatyczny
 2136,A2,prepare,"przygotowywać, przygotować, sporządzać"
-2137,A2,ltd,spółka z ograniczoną odpowiedzialnością (Ltd.)
 2138,A1,fishing,"łowienie ryb, połów ryb, wędkarstwo, rybołówstwo, rybacki, wędkarski"
 2139,A2,opposed,"sprzeciwiać się, być przeciwnym, przeciwny, sprzeczny, przeciwstawny"
 2140,A2,grace,"gracja, wdzięk, łaska, względy, przyzwoitość, modlitwa przed lub po posiłku"
@@ -2177,7 +2174,6 @@ id,cefr_level,word,wordpl
 2176,A1,payable,"płatny, do zapłaty"
 2177,B2,dose,"dawka, porcja"
 2178,A2,tone,"ton, dźwięk, odcień, tonacja, barwa, nadawać ton"
-2179,A2,ave,"aleja (skrót: Ave.), ave."
 2180,B1,parallel,"równoległy, paralela, równolegle, odpowiednik, podobny"
 2181,B2,devoted,"oddany, poświęcony, dedykowany"
 2182,A1,rain,"deszcz, opad, padać"
@@ -2337,13 +2333,13 @@ id,cefr_level,word,wordpl
 2336,A2,wet,"mokry, wilgotny, zwilżać"
 2337,B1,residents,"mieszkaniec, mieszkańcy"
 2338,A2,russian,"rosyjski, Rosjanin, Rosjanka"
-2339,B2,unlike,"w przeciwieństwie do, wbrew, niepodobny"
+2339,B2,unlike,"inaczej ,w przeciwieństwie do, wbrew, niepodobny"
 2340,B1,decline,"zanik, zanikanie, spadek, upadek, spadać, maleć, odmawiać, odrzucać"
 2341,A1,smile,"uśmiech, uśmiechać się, uśmiechnąć się"
 2342,B2,solar,słoneczny
 2343,A1,bus,"autobus, sprzątać naczynia, zbierać talerze, jechać autobusem"
 2344,A2,occupation,"zajęcie, zawód, okupacja"
-2345,B2,spite,"złośliwość, robić komuś na złość"
+2345,B2,spite,"uraza ,złośliwość, robić komuś na złość, złość"
 2346,B2,disposal,"usuwanie, likwidacja, pozbywanie się, wywóz"
 2347,B1,incident,"wydarzenie, incydent, zajście, wypadek"
 2348,A1,sick,"chory, mający mdłości, zwymiotować, wywoływać wstręt, niesmaczny"
@@ -2387,7 +2383,6 @@ id,cefr_level,word,wordpl
 2386,B1,notion,"pojęcie, wyobrażenie"
 2387,B1,gene,gen
 2388,B2,contractor,"zleceniobiorca, wykonawca, kontrahent, podwykonawca"
-2389,A2,cf,por. (porównaj)
 2390,B1,pub,"pub, gospoda"
 2391,A2,unfortunately,"niestety, nieszczęśliwie"
 2392,A2,successfully,"skutecznie, udanie, pomyślnie"
@@ -2423,12 +2418,10 @@ id,cefr_level,word,wordpl
 2422,A2,shell,"muszla, skorupa, skorupka, pancerz, łupina, szkielet, zrąb, pocisk, granat, łuska, łuskać, ostrzeliwać"
 2423,B2,virtue,"cnota, zaleta, dobro, zaletność"
 2424,B1,rarely,"rzadko, sporadycznie"
-2425,A2,pro,"profesjonalista, prostytutka, za (czymś), sprzyjający (czemuś), pro- (przedrostek)"
 2426,B1,tension,"napięcie, naprężenie, stan napięcia, napiętość"
 2427,A2,lateral,"boczny, poprzeczny, lateralny"
 2428,A2,passenger,"pasażer, pasażerka"
 2429,A1,video,"wideo, film wideo, nagranie wideo, nagrywać na wideo"
-2430,A2,ms,"Ms. – pani, ms – milisekunda"
 2431,B1,remarkable,"znakomity, wybitny, nadzwyczajny, niezwykły"
 2432,B2,thereafter,"następnie, potem, odtąd"
 2433,A2,perfectly,"perfekcyjnie, idealnie, doskonale, znakomicie, całkowicie"
@@ -2493,7 +2486,6 @@ id,cefr_level,word,wordpl
 2492,B1,blind,"ślepy, niewidomy, żaluzja, ślepiec"
 2493,B1,ward,"oddział, szpitalny, wychowanek, podopieczny"
 2494,B2,radical,"radykał, pierwiastek, rodnik, radykalny, pierwiastkowy, rodnikowy"
-2495,A1,med,"med. – medycyna, lek"
 2496,B1,constantly,"stale, nieustannie, ciągle, wciąż"
 2497,B2,reasonably,"wystarczająco, dość, rozsądnie, rozważnie, sensownie"
 2498,A2,conviction,"przeświadczenie, przekonanie, wyrok"
@@ -2502,7 +2494,6 @@ id,cefr_level,word,wordpl
 2501,B2,veterans,"weterani, byli żołnierze"
 2502,B2,candidates,"kandydaci, kandydatki"
 2503,A2,shock,"szok, wstrząs, porażenie, kępa, pęk, stóg, szokować, wstrząsać"
-2504,A2,stat,"natychmiast, statystyki (skrót)"
 2505,A2,deeply,"głęboko, gruntownie, wnikliwie"
 2506,A1,fat,"tłuszcz, gruby, tłusty"
 2507,A2,ing,"gerundium, końcówka -ing"
@@ -2528,7 +2519,6 @@ id,cefr_level,word,wordpl
 2527,A2,automobile,samochód
 2528,B1,miscellaneous,"rozmaity, różnorodny"
 2529,A1,sheep,"owca, owce"
-2530,A2,supra,"wyżej, powyżej (s)"
 2531,B2,regime,"reżim, ustrój, system"
 2532,A2,alive,żywy
 2533,B1,score,"wynik, rezultat, partytura, dwudziestka, rachunek, naciąć, zdobyć, uzyskać"
@@ -2546,7 +2536,6 @@ id,cefr_level,word,wordpl
 2545,A1,orange,"pomarańcza, pomarańczowy"
 2546,B2,thoroughly,"dokładnie, gruntownie, całkowicie"
 2547,B1,absent,"nieobecny, brakujący"
-2548,A2,sci,"nauka, skrót od science"
 2549,B1,imperial,"cesarski, imperialny"
 2550,A2,irrigation,"irygacja, nawadnianie"
 2551,B1,annually,"corocznie, rocznie, dorocznie"
@@ -2565,10 +2554,9 @@ id,cefr_level,word,wordpl
 2564,A2,greek,"grecki, Grek, Greczynka"
 2565,B1,count,"liczyć, liczyć się, hrabia"
 2566,B1,asian,"azjatycki, Azjata, Azjatka"
-2567,A2,op,"op. (skrót) – opus, op. – operacja"
 2568,A2,helpful,"pomocny, użyteczny, życzliwy"
 2569,B1,retained,"zachowany, utrzymany, zatrzymany, zatrzymywać"
-2570,B1,curriculum,"program, program nauczania, plan nauczania "
+2570,B1,curriculum,"program, program nauczania, plan nauczania"
 2571,A2,detection,"wykrywanie, detekcja"
 2572,A2,wisdom,"mądrość, roztropność"
 2573,A2,murder,"morderstwo, zabójstwo, mordować, zamordować"
@@ -2632,7 +2620,6 @@ id,cefr_level,word,wordpl
 2631,B2,disorders,"zaburzenia, schorzenia, nieprawidłowości"
 2632,B1,preference,"preferencja, upodobanie, pierwszeństwo"
 2633,B2,virtually,"praktycznie, w praktyce, niemal, wirtualnie"
-2634,B1,cal,"kaloria (cal), kal"
 2635,B1,recover,"odzyskać, wyzdrowieć, dojść do siebie"
 2636,B1,arc,"łuk, łuk elektryczny, tworzyć łuk, opadać łukiem"
 2637,B1,fraction,"ułamek, część, odłamek, frakcja"
@@ -2766,7 +2753,6 @@ id,cefr_level,word,wordpl
 2765,B1,provincial,"prowincjonalny, regionalny, prowincja"
 2766,A2,retired,"emerytowany, na emeryturze"
 2767,A1,warrant,"nakaz, poręczenie, rękojmia, gwarancja, zapewnienie, upoważnienie, pełnomocnictwo, ręczyć, gwarantować"
-2768,B1,int,"skrót od integer (liczba całkowita), int. – międzynarodowy"
 2769,A2,landscape,"krajobraz, pejzaż, układ, krajobrazowy, pejzażowy"
 2770,A1,congressional,"kongresowy, sejmowy"
 2771,B2,laser,"laser, laserowy"
@@ -2988,7 +2974,6 @@ id,cefr_level,word,wordpl
 2987,A2,desert,"pustynia, opuszczać, porzucić, dezertować"
 2988,A2,string,"sznur, sznurek, ciąg, nawlekać, naciągać"
 2989,B1,intense,"intensywny, natężony, gwałtowny, silny"
-2990,B1,don,"don, pan, don (mafii), przywdziać, wdziać"
 2991,B1,definitely,"zdecydowanie, bez wątpienia, na pewno, niewątpliwie"
 2992,B1,indirect,pośredni
 2993,B2,servant,"służący, sługa"
@@ -3011,7 +2996,7 @@ id,cefr_level,word,wordpl
 3010,A2,visitors,"odwiedzający, goście"
 3011,A2,pleasant,"przyjemny, miły"
 3012,A1,drama,dramat
-3013,A2,sake,"dla dobra, ze względu na, w celu, saké"
+3013,A2,sake,"powód, cel ,dla dobra, ze względu na, w celu"
 3014,B1,encountered,"napotkać, napotkany, spotkać"
 3015,B2,dear,"drogi, kochany, kosztowny, szanowny, ukochany, kochanie"
 3016,B1,inter,"pochować, grzebać"
@@ -3041,7 +3026,6 @@ id,cefr_level,word,wordpl
 3040,B2,transmitted,"przesyłać, przekazywać, nadawać, transmitować, przenosić, przekazany"
 3041,B1,th,-ty
 3042,A1,friday,piątek
-3043,B1,un,"ONZ, Organizacja Narodów Zjednoczonych"
 3044,B2,implies,"oznaczać, zakładać, sugerować, pociągać za sobą"
 3045,B1,tends,"opiekować się, pielęgnować, mieć tendencję"
 3046,B2,altered,"zmieniony, zmodyfikowany, przerobiony"
@@ -3356,7 +3340,6 @@ id,cefr_level,word,wordpl
 3355,B1,mar,"psuć, niszczyć, szpecić"
 3356,B1,cir,około
 3357,A2,creates,tworzyć
-3358,B1,ha,"ha!, hektar"
 3359,B1,verdict,"werdykt, orzeczenie, wyrok, opinia, zdanie"
 3360,B1,fe,żelazo
 3361,B1,negro,"czarny, Murzyn"
@@ -3467,7 +3450,6 @@ id,cefr_level,word,wordpl
 3466,A1,eighteen,"osiemnaście, 18"
 3467,B1,infinite,"nieskończony, nieprzebrany, bezkresny, bezgraniczny"
 3468,B2,geographic,geograficzny
-3469,B1,nasa,NASA (Narodowa Agencja Aeronautyki i Przestrzeni Kosmicznej)
 3470,B2,barrier,"bariera, przeszkoda"
 3471,A2,entertainment,"rozrywka, zabawa"
 3472,B1,accumulation,"akumulacja, nagromadzenie"
@@ -3503,7 +3485,6 @@ id,cefr_level,word,wordpl
 3502,B1,explicit,"wyraźny, bezpośredni, jawny"
 3503,A2,lamp,lampa
 3504,A2,mood,"nastrój, humor, samopoczucie, tryb"
-3505,B1,par,"norma, standard, średnia, par (golf), wyrównać"
 3506,A1,tenant,"najemca, lokator"
 3507,B1,methodology,"metodologia, metodyka"
 3508,B1,mercury,rtęć
@@ -3867,7 +3848,6 @@ id,cefr_level,word,wordpl
 3866,B1,node,"węzeł, wierzchołek"
 3867,B1,wherein,w którym
 3868,B1,mud,błoto
-3869,B1,ab,mięsień prosty brzucha
 3870,B1,aggressive,agresywny
 3871,B1,auxiliary,pomocniczy
 3872,B1,hazard,"niebezpieczeństwo, ryzyko, ryzykować"
@@ -4271,7 +4251,7 @@ id,cefr_level,word,wordpl
 4270,B1,governance,"zarządzanie, kierowanie, kierownictwo, styl kierowania"
 4271,B2,suppressed,"tłumiony, stłumiony, powstrzymany, uciszony"
 4272,B2,hybrid,"hybryda, mieszaniec, hybrydowy, krzyżówka"
-4273,A1,literacy,umiejętność czytania i pisania
+4273,A1,literacy,"piśmienność ,umiejętność czytania i pisania"
 4274,B1,covenant,"ugoda, umowa, przymierze, zawrzeć umowę"
 4275,A1,beans,"fasola, fasolka"
 4276,A1,swimming,pływanie
@@ -4360,7 +4340,7 @@ id,cefr_level,word,wordpl
 4359,A1,princess,księżniczka
 4360,B1,outdoor,zewnętrzny
 4361,B1,variability,"zmienność, niestałość"
-4362,B2,altitude,wysokość nad poziomem morza
+4362,B2,altitude,"wysokość ,nad poziomem morza, wzniesienie"
 4363,A1,socialism,socjalizm
 4364,A2,alarm,"alarm, budzik, alarmować"
 4365,B2,radar,radar
@@ -4719,9 +4699,7 @@ id,cefr_level,word,wordpl
 4718,B1,magnificent,"wspaniały, świetny, okazały"
 4719,A2,kissed,"całować, pocałować"
 4720,A2,formulated,"formułować, sformułować, sformułowany"
-4721,B2,rna,kwas rybonukleinowy (RNA)
 4722,B2,biblical,biblijny
-4723,B2,ment,–ment (przyrostek rzeczotwórczy)
 4724,A2,pity,"litość, współczuć, żałować"
 4725,B2,privately,prywatnie
 4726,B2,pearl,perła
@@ -4809,7 +4787,6 @@ id,cefr_level,word,wordpl
 4808,B2,feasibility,"możliwość, wykonalność, prawdopodobieństwo"
 4809,B2,heirs,"spadkobiercy, dziedzice"
 4810,B2,slender,"szczupły, smukły, zgrabny, strzelisty, drobny, wąski, niewielki"
-4811,B2,affidavit,"pisemne oświadczenie pod przysięgą, zeznanie pod przysięgą"
 4812,A2,earthquake,trzęsienie ziemi
 4813,A2,stolen,"skradziony, ukradziony"
 4814,A1,sixteenth,szesnasty
@@ -4897,26 +4874,23 @@ id,cefr_level,word,wordpl
 4896,A2,advertisement,"reklama, ogłoszenie, anons"
 4897,B2,exposition,"ekspozycja, wystawa"
 4898,B1,respectfully,z poważaniem
-4899,B2,registrar,"urzędnik stanu cywilnego, sekretarz uczelni, rejestrator, archiwariusz, inwentaryzator"
+4899,B2,registrar,"rejestrator ,urzędnik stanu cywilnego, sekretarz uczelni, archiwariusz, inwentaryzator"
 4900,A1,singer,"piosenkarz, piosenkarka, śpiewak, śpiewaczka"
 4901,B2,repetition,"powtórzenie, powtórka"
 4902,B1,controversial,"kontrowersyjny, sporny"
 4903,B2,conspicuous,"oczywisty, rzucający się w oczy, widoczny, wyraźny"
 4904,B1,lighter,"zapalniczka, lichtuga"
-4905,B2,oecd,"OECD, Organizacja Współpracy Gospodarczej i Rozwoju"
 4906,B2,assn,"stowarzyszenie, zrzeszenie"
 4907,B2,madame,"pani, szanowna pani"
 4908,B2,stack,"stos, sterta, stóg, komin, wieża, układać w stos, układać, ustawiać jeden na drugim"
 4909,B2,thailand,Tajlandia
 4910,B2,ram,"baran, taran, bijak, suwak, walić, taranować"
-4911,B2,issn,"ISSN, Międzynarodowy Znormalizowany Numer Wydawnictwa Ciągłego"
 4912,A2,mysterious,tajemniczy
 4913,A1,insulation,"odizolowanie, oddzielenie, izolacja"
 4914,B1,basement,"piwnica, suterena"
 4915,B2,gauge,"wskaźnik, miernik, kaliber, rozstaw toru, -mierz, mierzyć, oceniać, ustalać, kalibrować"
 4916,B2,cavalry,"kawaleria, konnica, kawaleryjski"
 4917,B2,quest,"poszukiwanie, wyprawa, zadanie, poszukiwać"
-4918,B2,fcc,"FCC, Federalna Komisja ds. Komunikacji"
 4919,A2,costa,żebro
 4920,B2,docket,"kwit, paragon, wykaz, manifest, wykaz spraw, wokanda, lista przewozowa"
 4921,B1,forbidden,"niedozwolony, zabroniony"
@@ -4958,7 +4932,6 @@ id,cefr_level,word,wordpl
 4957,B2,sensible,"rozsądny, sensowny, praktyczny"
 4958,B2,causal,"przyczynowy, sprawczy"
 4959,B2,utterly,"całkowicie, kompletnie, zupełnie"
-4960,B2,mac,"Mac (komputer), komputer Mac, peleryna przeciwdeszczowa, płaszcz przeciwdeszczowy"
 4961,B2,patch,"łata, naszywka, plaster, łatka, poprawka, skrawek ziemi, łatać, naprawiać"
 4962,A2,harmful,szkodliwy
 4963,A2,bonus,"bonus, premia, korzyść"
@@ -5234,7 +5207,7 @@ id,cefr_level,word,wordpl
 5233,A2,importantly,"istotnie, ważnie, znacząco"
 5234,B2,booth,"budka, kiosk, stragan, kabina"
 5235,B1,dot,"kropka, plamka, cętka, kropkować, plamić"
-5236,A2,realised,"zdać sobie sprawę, uświadomić sobie"
+5236,A2,realised,"realizowany ,zdać sobie sprawę, uświadomić sobie"
 5237,B2,imagery,"obrazy, wyobrażenia, symbolika"
 5238,B2,barn,stodoła
 5239,A2,kit,"zestaw, komplet, ekwipunek, strój, ubiór"
@@ -5289,7 +5262,6 @@ id,cefr_level,word,wordpl
 5288,B1,rage,"wściekłość, furia, szaleć, wściekać się"
 5289,A2,creativity,kreatywność
 5290,B2,gage,"wskaźnik, miernik, -mierz, mierzyć, oceniać, szacować"
-5291,B2,eec,"EEC, Europejska Wspólnota Gospodarcza"
 5292,B2,cannon,"armata, działo"
 5293,B2,reinforcement,"wzmocnienie, zasilenie, wsparcie, umocnienie"
 5294,A1,lonely,"samotny, osamotniony, odludny"
@@ -5299,7 +5271,6 @@ id,cefr_level,word,wordpl
 5298,B1,sworn,"zaprzysięgły, przysięgać"
 5299,B2,voluntarily,dobrowolnie
 5300,B1,temper,"nastrój, temperament, hartować, temperować, łagodzić"
-5301,A2,weber,weber (jednostka strumienia magnetycznego)
 5302,B1,phoenix,feniks
 5303,B2,jay,sójka
 5304,A2,cheaper,tańszy
@@ -5337,7 +5308,6 @@ id,cefr_level,word,wordpl
 5336,B1,conveyance,"transport, przewóz, przeniesienie własności, nośnik, narzędzie"
 5337,B2,coherent,"spójny, logiczny, zrozumiały, czytelny"
 5338,B1,nova,nowa
-5339,B2,ho,"ho!, hej, ho (wołanie)"
 5340,B2,laborers,"robotnik, pracownik fizyczny, robotnicy, pracownicy fizyczni"
 5341,B2,outbreak,"wybuch, ognisko"
 5342,B2,distortion,"zniekształcenie, dystorsja, odkształcenie"
@@ -5348,7 +5318,6 @@ id,cefr_level,word,wordpl
 5347,B1,sexuality,seksualność
 5348,B1,undergo,"poddać się, przechodzić, doświadczać"
 5349,A1,cinema,"kino, kinematografia, film, przemysł filmowy"
-5350,B2,oh,"och!, o!"
 5351,B2,malignant,złośliwy
 5352,B2,dip,"zanurzenie, zanurzać, spadek, obniżenie, kąpiel"
 5353,B1,ambitious,ambitny
@@ -5402,7 +5371,6 @@ id,cefr_level,word,wordpl
 5401,B2,seventeenth,siedemnasty
 5402,B2,overlooked,"przeoczony, pominięty, ignorowany"
 5403,B2,appropriately,"odpowiednio, właściwie, stosownie"
-5404,A1,pop,"pop (muzyka), pop-art, napój gazowany, huk, trzask, strzał, tata (pot.), porcja, popowy, strzelać, pękać, wpaść, odwiedzać"
 5405,B2,uptake,"wchłanianie, pobieranie, przyswajanie, zrozumienie"
 5406,B1,kindness,"życzliwość, uprzejmość, dobroć"
 5407,B2,transcript,"stenogram, transkrypcja, zapis, transkrypt"
@@ -5499,7 +5467,6 @@ id,cefr_level,word,wordpl
 5498,A1,arterial,tętniczy
 5499,B1,spiral,"spirala, spiralny, poruszać się spiralnie, gwałtownie wzrastać"
 5500,B2,prevalent,"powszechny, rozpowszechniony, dominujący"
-5501,B2,io,wejście/wyjście (I/O)
 5502,A2,countryside,"wieś, okolica, teren wiejski"
 5503,B1,fond,"czuły, kochający, lubić"
 5504,B2,bachelor,"kawaler, licencjat, bakałarz, nieżonaty mężczyzna, kawalerka, kawalerski"
@@ -5508,12 +5475,10 @@ id,cefr_level,word,wordpl
 5507,B2,packet,"paczka, pakiet"
 5508,A2,composer,"kompozytor, kompozytorka"
 5509,B2,uncommon,"rzadki, niepospolity, nietypowy"
-5510,B2,charleston,charleston (taniec)
 5511,B2,breed,"hodować, rozmnażać się, rasa, typ, rodzaj, gatunek"
 5512,B2,fertile,"żyzny, płodny, zapłodniony"
 5513,A2,robin,rudzik
 5514,B2,tensile,"rozciągliwy, rozciągalny, ciągliwy"
-5515,B2,db,"baza danych, decybel (dB)"
 5516,B2,herald,"herold, zapowiadać, zwiastować"
 5517,B1,absorb,"wchłaniać, pochłaniać, absorbować, przyswajać"
 5518,B1,moss,mech
@@ -5536,7 +5501,7 @@ id,cefr_level,word,wordpl
 5535,B2,cherry,"wiśnia, czereśnia, kolor wiśniowy,"
 5536,B2,straightforward,"bezpośredni, szczery, prostolinijny, łatwy, nieskomplikowany"
 5537,B1,assignor,"zbywca, cedent"
-5538,B1,ladder,"drabina, drabinka, drabinka w pończochach"
+5538,B1,ladder,"drabina, drabinka"
 5539,B2,segregation,"segregacja, oddzielenie, rozdział"
 5540,B2,intestinal,jelitowy
 5541,A2,avoidance,"unikanie, uchylanie się, omijanie"
@@ -5552,10 +5517,8 @@ id,cefr_level,word,wordpl
 5551,B2,obscure,"niejasny, mało znany, zaciemniać, przysłaniać, przyćmiewać"
 5552,B2,ammonium,"jon amonowy, kation amonowy, amon"
 5553,A2,allowable,"dopuszczalny, dozwolony"
-5554,B2,ntis,Narodowa Służba Informacji Technicznej (NTIS)
 5555,B2,subsistence,"utrzymanie, środki do życia, podtrzymywanie życia, egzystencja"
 5556,A1,outset,"początek, start"
-5557,B2,pg,strona (skrót)
 5558,B2,berry,"jagoda, owoc jagodowy"
 5559,B2,disciplinary,dyscyplinarny
 5560,A2,secretariat,sekretariat
@@ -5570,8 +5533,6 @@ id,cefr_level,word,wordpl
 5569,A2,localized,"zlokalizowany, miejscowy"
 5570,B2,complementary,"komplementarny, uzupełniający"
 5571,B2,intercourse,"kontakt, stosunki, rozmowa, konwersacja, stosunek płciowy, stosunek"
-5572,B2,tag,"metka, etykietka, etykieta, tag (grafitti), tag (informatyka), berek (gra), puenta, oznaczać, etykietować, tagować, nadawać etykietę"
-5573,B2,ip,"protokołu internetowego (IP), adres IP"
 5574,B2,prototype,"prototyp, pierwowzór, wzorzec, model"
 5575,A2,statistically,statystycznie
 5576,B2,correspondent,"korespondent, sprawozdawca"
@@ -5613,7 +5574,7 @@ id,cefr_level,word,wordpl
 5612,A2,heroic,"heroiczny, bohaterski"
 5613,A2,lemon,"cytryna, cytrynowy, kolor cytrynowy, bubel, gruchot, tandeta"
 5614,A1,ok,"ok, w porządku, dobry, dobrze, zgoda"
-5615,B2,groundwater,"woda gruntowa, poziom wód gruntowych"
+5615,B2,groundwater,"woda gruntowa, poziom wód gruntowych, wody gruntowe"
 5616,B2,duct,"kanał, przewód"
 5617,A2,marker,"flamaster, marker, pisak, znacznik, punkt orientacyjny"
 5618,A2,stats,statystyki
@@ -5623,7 +5584,7 @@ id,cefr_level,word,wordpl
 5622,A1,okay,"ok, w porządku, dobry, dobrze, zgoda"
 5623,B1,penny,"pens, grosz"
 5624,A1,ns,nanosekunda
-5625,B2,atlas,"atlas (księga map), atlant (mitol.), dźwigacz, kręg szczytowy"
+5625,B2,atlas,"atlas, zbiór map, książkę z mapami"
 5626,B2,comprehension,"rozumienie, zrozumienie, pojmowanie"
 5627,A2,reactive,"reaktywny, reagujący"
 5628,B2,worldwide,"światowy, ogólnoświatowy, na całym świecie"
@@ -5651,9 +5612,8 @@ id,cefr_level,word,wordpl
 5650,B2,reconciliation,"pojednanie, pogodzenie, uzgodnienie"
 5651,B2,yeast,"drożdże, ferment, zakwas"
 5652,B2,cholesterol,cholesterol
-5653,B2,hereinafter,"poniżej, niżej, w dalszej części dokumentu, dalej w dokumencie"
+5653,B2,hereinafter,"dalej zwany ,poniżej, niżej, w dalszej części dokumentu, dalej w dokumencie"
 5654,B2,lest,"aby nie, ażeby nie, żeby nie, na wypadek gdyby"
-5655,B2,ti,"tytan (symbol chemiczny Ti), ti (nuta), kordylina (roślina)"
 5656,A1,breadth,"szerokość, zakres, rozpiętość, rozmach"
 5657,B2,sludge,"szlam, muł, osad"
 5658,B2,nutritional,"odżywczy, żywieniowy, pokarmowy"
@@ -5685,7 +5645,6 @@ id,cefr_level,word,wordpl
 5684,B2,fierce,"wściekły, srogi, gwałtowny"
 5685,B2,commercially,komercyjnie
 5686,B2,aeronautics,aeronautyka
-5687,B2,ppm,"część na milion, części na milion (ppm)"
 5688,B1,abandonment,"porzucenie, opuszczenie, rezygnacja, zrzeczenie się, wyrzeczenie się"
 5689,A2,fog,"mgła, zamglenie"
 5690,B1,resembles,"przypominać, być podobnym"
@@ -5701,14 +5660,11 @@ id,cefr_level,word,wordpl
 5700,B2,norwegian,"norweski, Norweg, Norweżka, po norwesku"
 5701,B2,contaminated,"zanieczyszczony, skażony"
 5702,B2,maize,kukurydza
-5703,B2,jimmy,"łom, wytrych, wyważać, wyważyć (drzwi)"
 5704,B2,condemnation,"potępienie, skazanie"
 5705,B2,coordinator,"koordynator, koordynatorka"
 5706,B2,inmates,"więzień, osadzony, więźniowie, osadzeni"
-5707,B2,rep,"przedstawiciel handlowy, przedstawiciel, reputacja (skrót rep.)"
 5708,B2,crest,"grzywa, szczyt, grań, grzbiet, kita, pióropusz, czub, klejnot herbowy, fala"
 5709,B2,thence,"stamtąd, następnie"
-5710,B2,manila,"papier manilowy, tektura manilowa, brązowo-szary (kolor)"
 5711,A1,sunshine,"światło słoneczne, promienie słoneczne, słońce, słoneczko, nasłoneczniony, wesołość, pogoda ducha"
 5712,B2,amplifier,wzmacniacz
 5713,B2,tan,"opalenizna, kolor jasnobrązowy, opalać się, garbować"
@@ -5727,7 +5683,6 @@ id,cefr_level,word,wordpl
 5726,A1,wheeler,kołodziej
 5727,A1,blowing,"dmuchanie, wianie, wybuch, eksplozja"
 5728,B2,excise,"akcyza, wycinać, usuwać"
-5729,B2,maxwell,"Makswel, makswel (jednostka)"
 5730,B1,vivid,"żywy, obrazowy"
 5731,B2,nationwide,"ogólnonarodowy, ogólnokrajowy, ogólnonarodowo, ogólnokrajowo"
 5732,B2,gel,żel
@@ -5738,7 +5693,6 @@ id,cefr_level,word,wordpl
 5737,B2,sterile,"bezpłodny, niepłodny, jałowy, sterylny"
 5738,B1,deleted,"usunięty, skasowany, wykreślony, zlikwidowany"
 5739,A2,criticized,"krytykowany, skrytykowany, skrytykować"
-5740,B2,geog,"geografia, geogr. (skrót geog.)"
 5741,B2,multiplied,"mnożony, pomnożony, mnożyć"
 5742,B2,arena,arena
 5743,A1,denotes,"oznaczać, symbolizować, wskazywać"
@@ -5750,12 +5704,12 @@ id,cefr_level,word,wordpl
 5749,B1,pork,wieprzowina
 5750,B2,hen,kura
 5751,B2,domination,"dominacja, dominowanie"
-5752,B2,appellee,"apelowany, strona pozwanej w apelacji"
+5752,B2,appellee,"apelowany, strona pozwanej w apelacji, pozwany, pozwana, oskarżony"
 5753,B2,pest,"szkodnik, utrapienie, plaga"
 5754,B2,plaza,"plac, rynek, pasaż, centrum handlowe"
 5755,B2,prosecutor,"oskarżyciel, prokurator"
 5756,B2,unsuccessful,"nieudany, niepomyślny"
-5757,B1,resemble,"przypominać, być podobnym do"
+5757,B1,resemble,"przypominać, być podobnym do, być podobnym"
 5758,B2,porch,"ganek, weranda"
 5759,B2,saddle,"siodło, siodełko, antyklina, osiodłać"
 5760,B2,cancellation,"anulowanie, odwołanie, unieważnienie"
@@ -5810,7 +5764,6 @@ id,cefr_level,word,wordpl
 5809,B2,lengthy,"długi, rozwlekły, przydługi, tasiemcowy"
 5810,B2,detached,"odłączony, oderwany, obojętny, bezstronny"
 5811,A1,collectively,zbiorowo
-5812,B2,pb,ołów (symbol Pb)
 5813,B2,chronicle,"kronika, kronikować"
 5814,B2,dissemination,"rozpowszechnianie, rozsiewanie"
 5815,B2,archbishop,arcybiskup
@@ -5896,10 +5849,7 @@ id,cefr_level,word,wordpl
 5895,B1,importation,"importowanie, import, przywóz"
 5896,A2,trick,"sztuczka, podstęp, fortel, figiel, oszukać, zwieść"
 5897,A2,systematically,systematycznie
-5898,B2,doi,"identyfikator obiektu cyfrowego, DOI"
-5899,B2,yr,"rok, rok (skrót)"
 5900,B2,potent,"potężny, mocny, sugestywny, przekonywujący, skuteczny, sprawny"
-5901,B2,au,jednostka astronomiczna (AU)
 5902,B2,frankly,"szczerze, otwarcie"
 5903,B2,asphalt,"asfalt, asfaltować, asfaltowy, wyasfaltowany"
 5904,A1,honorary,honorowy
@@ -5911,7 +5861,7 @@ id,cefr_level,word,wordpl
 5910,A1,eleventh,jedenasty
 5911,B2,unwilling,"niechętny, oporny"
 5912,B1,elbow,"łokieć, rozpychać się łokciami"
-5913,B2,hose,"wąż, wąż ogrodowy, wąż do gaszenia, pończocha, trykot, polewać wodą"
+5913,B2,hose,"wąż, wąż ogrodowy, wąż do gaszenia, pończocha, trykot, polewać wodą, wąż gumowy, szlauch"
 5914,B2,echo,"echo, odbijać się, powtarzać"
 5915,B2,chopped,"posiekany, pokrojony, siekać, ciąć"
 5916,B2,pastoral,"sielankowy, pasterski, duszpasterski, pastoralny"
@@ -5929,7 +5879,7 @@ id,cefr_level,word,wordpl
 5928,A1,posture,"postawa, postura, poza, stanowisko, podejście, pozować, przybierać"
 5929,A1,coatings,"powłoka, pokrycie, warstwa ochronna"
 5930,A2,learners,"uczniowie, uczący się"
-5931,B1,irrespective,"bez względu na, niezależnie"
+5931,B1,irrespective,"niezależny ,bez względu na, niezależnie"
 5932,B1,underneath,"pod, pod spodem, poniżej"
 5933,B2,recession,recesja
 5934,B1,transitional,"przejściowy, pośredni"
@@ -5954,7 +5904,6 @@ id,cefr_level,word,wordpl
 5953,B2,conclusive,"rozstrzygający, niezbity, decydujący, ostateczny"
 5954,A1,problematic,problematyczny
 5955,B2,ribs,"żebro, żebra"
-5956,B2,certiorari,"certiorari, skarga kasacyjna (USA)"
 5957,B2,specificity,"specyfika, swoistość, specyficzność"
 5958,B2,swedish,"szwedzki, Szwed, Szwedka"
 5959,A2,terrorist,"terrorysta, terrorystyczny"
@@ -6055,7 +6004,6 @@ id,cefr_level,word,wordpl
 6054,B2,chromatography,chromatografia
 6055,B2,admissible,"dopuszczalny, do przyjęcia"
 6056,B2,contingency,"ewentualność, przypadek, kontyngencja, nieprzewidziane zdarzenie"
-6057,B2,rand,rand (waluta RPA)
 6058,B1,pie,"ciasto, placek, pasztecik, pizza"
 6059,B2,compassion,"współczucie, litość"
 6060,B1,indifference,obojętność
@@ -6204,7 +6152,6 @@ id,cefr_level,word,wordpl
 6203,B2,govt,"rząd, władze"
 6204,B2,ambiguity,"dwuznaczność, wieloznaczność, niejednoznaczność"
 6205,A2,gloves,rękawiczki
-6206,B2,usda,Departament Rolnictwa USA
 6207,A2,barber,"fryzjer, golibroda"
 6208,B2,urinary,moczowy
 6209,B2,intervene,"interweniować, ingerować, wtrącać się, zakłócać"
@@ -6227,7 +6174,6 @@ id,cefr_level,word,wordpl
 6226,A2,admired,"podziwiany, uwielbiany, podziwiony"
 6227,B2,residing,"mieszkający, rezydujący, zamieszkały"
 6228,B2,seminary,"seminarium duchowne, kolegium duchowne"
-6229,B2,cor,"o rany!, ojej!, jejku!"
 6230,B2,diplomacy,dyplomacja
 6231,B2,literal,"dosłowny, literalny, dosłownie"
 6232,B2,analytic,analityczny
@@ -6251,7 +6197,6 @@ id,cefr_level,word,wordpl
 6250,B2,postmaster,naczelnik poczty
 6251,B2,incubation,"inkubacja, wysiadywanie, inkubowanie"
 6252,B2,crust,"skorupa, skórka, spód, warstwa powierzchniowa"
-6253,B2,monte,gra w trzy karty
 6254,B2,inferred,"wnioskowany, wywnioskowany, wnioskować, wywnioskować"
 6255,A1,kick,"kop, kopnięcie, kopniak, kopać"
 6256,B1,monks,"mnich, mnisi"
