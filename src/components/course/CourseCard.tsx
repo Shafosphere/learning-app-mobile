@@ -25,6 +25,7 @@ type CourseCardProps = {
   meta?: string;
   icon: IconConfig;
   flagSource?: ImageSourcePropType;
+  mainImageSource?: ImageSourcePropType;
   onPress?: (event: GestureResponderEvent) => void;
   containerStyle?: StyleProp<ViewStyle>;
   contentStyle?: StyleProp<ViewStyle>;
@@ -70,7 +71,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     marginLeft: 12,
     minWidth: 0,
     alignItems: "flex-start",
-        // backgroundColor: colors.my_green,
+    // backgroundColor: colors.my_green,
   },
   titleContainer: {
     width: "100%",
@@ -98,6 +99,7 @@ export function CourseCard({
   meta,
   icon,
   flagSource,
+  mainImageSource,
   onPress,
   containerStyle,
   contentStyle,
@@ -110,8 +112,8 @@ export function CourseCard({
   rightAccessory,
   isHighlighted,
   highlightedStyle,
-  pressableProps,
-}: CourseCardProps) {
+  ...pressableProps
+}: CourseCardProps & PressableProps) {
   const styles = useStyles();
   const IconComponent = icon.Component;
   const iconSize = icon.size ?? 60;
@@ -127,7 +129,14 @@ export function CourseCard({
     >
       <View style={[styles.content, contentStyle]}>
         <View style={[styles.iconWrapper, iconWrapperStyle]}>
-          <IconComponent name={icon.name} size={iconSize} color={icon.color} />
+          {mainImageSource ? (
+            <Image
+              source={mainImageSource}
+              style={{ width: iconSize, height: iconSize, resizeMode: "contain" }}
+            />
+          ) : (
+            <IconComponent name={icon.name} size={iconSize} color={icon.color} />
+          )}
           {flagSource ? (
             <Image source={flagSource} style={[styles.iconFlag, flagStyle]} />
           ) : null}

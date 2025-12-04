@@ -1,15 +1,16 @@
-import { type ComponentType } from "react";
-import AntDesign from "@expo/vector-icons/AntDesign";
-import Entypo from "@expo/vector-icons/Entypo";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import {
   Theme,
   ThemeColors,
   ThemePalette,
   themeMap,
 } from "@/src/theme/theme";
+import AntDesign from "@expo/vector-icons/AntDesign";
+import Entypo from "@expo/vector-icons/Entypo";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import { type ComponentType } from "react";
+import { getFlagSource } from "./languageFlags";
 
 export interface CourseColorOption {
   id: string;
@@ -113,4 +114,39 @@ export const COURSE_ICONS: CourseIconDefinition[] = [
 
 export function getCourseIconById(id: string | null | undefined) {
   return COURSE_ICONS.find((icon) => icon.id === id) ?? null;
+}
+
+export function resolveCourseIconProps(
+  iconId: string | undefined | null,
+  iconColor: string
+) {
+  if (iconId?.startsWith("flag:")) {
+    const langCode = iconId.split(":")[1];
+    const flagSource = getFlagSource(langCode);
+    if (flagSource) {
+      return {
+        mainImageSource: flagSource,
+        icon: {
+          Component: Ionicons, // Dummy component
+          name: "grid-outline", // Dummy name
+          color: iconColor,
+          size: 60,
+        },
+      };
+    }
+  }
+
+  const iconMeta = getCourseIconById(iconId);
+  const IconComponent = iconMeta?.Component ?? Ionicons;
+  const iconName = iconMeta?.name ?? "grid-outline";
+
+  return {
+    mainImageSource: undefined,
+    icon: {
+      Component: IconComponent,
+      name: iconName,
+      color: iconColor,
+      size: 60,
+    },
+  };
 }

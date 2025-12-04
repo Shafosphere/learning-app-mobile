@@ -5,6 +5,7 @@ import Confetti from "@/src/components/confetti/Confetti";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import type {
   CustomCourseRecord,
   CustomFlashcardRecord,
@@ -23,7 +24,7 @@ import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { Text, View } from "react-native";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useStyles } from "../flashcards/FlashcardsScreen-styles";
 
 function mapCustomCardToWord(
@@ -74,6 +75,7 @@ export default function Flashcards() {
     flashcardsBatchSize,
     boxZeroEnabled,
     autoflowEnabled,
+    colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
@@ -86,7 +88,15 @@ export default function Flashcards() {
     return () => clearTimeout(timeout);
   }, [shouldCelebrate]);
 
-  const { boxes, setBoxes, isReady, addUsedWordIds, removeUsedWordIds } =
+  const {
+    boxes,
+    setBoxes,
+    isReady,
+    addUsedWordIds,
+    removeUsedWordIds,
+    setBatchIndex,
+    saveNow,
+  } =
     useBoxesPersistenceSnapshot({
       sourceLangId: activeCustomCourseId ?? 0,
       targetLangId: activeCustomCourseId ?? 0,
@@ -137,9 +147,14 @@ export default function Flashcards() {
     boxZeroEnabled,
   });
 
+  useEffect(() => {
+    if (result === null) return;
+    playFeedbackSound(result);
+  }, [result]);
 
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const totalCards = customCards.length;
   const trackedIds = useMemo(() => {
@@ -183,11 +198,15 @@ export default function Flashcards() {
         }
     );
     addUsedWordIds(nextBatch.map((card) => card.id));
+    setBatchIndex((prev) => prev + 1);
+    await saveNow();
   }, [
     addUsedWordIds,
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,
+    saveNow,
+    setBatchIndex,
     trackedIds,
   ]);
 
@@ -236,13 +255,16 @@ export default function Flashcards() {
       setCustomCourse(null);
       setCustomCards([]);
       setLoadError(null);
+      setLoadedCourseId(null);
       setIsLoadingData(false);
       return () => {
         isMounted = false;
       };
     }
 
-    setIsLoadingData(true);
+    const shouldShowLoader =
+      loadedCourseId !== activeCustomCourseId || customCards.length === 0;
+    setIsLoadingData(shouldShowLoader);
     setLoadError(null);
 
     void Promise.all([
@@ -262,6 +284,7 @@ export default function Flashcards() {
         const mapped = flashcardRows.map(mapCustomCardToWord);
         // console.log('After mapping flashcards:', mapped);
         setCustomCards(mapped);
+        setLoadedCourseId(activeCustomCourseId);
       })
       .catch((error) => {
         console.error("Failed to load custom flashcards", error);
@@ -277,7 +300,7 @@ export default function Flashcards() {
     return () => {
       isMounted = false;
     };
-  }, [activeCustomCourseId, isFocused]);
+  }, [activeCustomCourseId, isFocused, customCards.length, loadedCourseId]);
 
   useEffect(() => {
     if (!isReady) return;
@@ -361,8 +384,8 @@ export default function Flashcards() {
     );
   } else if (isLoadingData) {
     cardSection = (
-      <View style={{ paddingHorizontal: 32 }}>
-        <Text allowFontScaling>Ładowanie fiszek...</Text>
+      <View style={{ paddingHorizontal: 32, alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.paragraph} />
       </View>
     );
   } else if (loadError) {

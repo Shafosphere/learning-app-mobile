@@ -1,11 +1,27 @@
+
+import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import { resolveCourseIconProps } from "@/src/constants/customCourse";
+import { getFlagSource } from "@/src/constants/languageFlags";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import {
-  type ReactNode,
+  countDueCustomReviews,
+  countDueReviewsByLevel,
+  getCustomCourseById,
+  getCustomCoursesWithCardCounts,
+  type CustomCourseRecord,
+} from "@/src/db/sqlite/db";
+import type { LanguageCourse } from "@/src/types/course";
+import { Image } from "expo-image";
+import { usePathname, useRouter } from "expo-router";
+import {
   useCallback,
   useEffect,
   useMemo,
   useState,
+  type ReactNode,
 } from "react";
-import { usePathname, useRouter } from "expo-router";
 import {
   Platform,
   Pressable,
@@ -14,27 +30,12 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { useStyles } from "./navbar-styles";
-import { Image } from "expo-image";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { getFlagSource } from "@/src/constants/languageFlags";
-import {
-  countDueCustomReviews,
-  countDueReviewsByLevel,
-  getCustomCourseById,
-  getCustomCoursesWithCardCounts,
-  type CustomCourseRecord,
-} from "@/src/db/sqlite/db";
-import { getCourseIconById } from "@/src/constants/customCourse";
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
-import type { LanguageCourse } from "@/src/types/course";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
-import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import { useStyles } from "./navbar-styles";
 
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 
 const logo = require("@/assets/illustrations/navbar/logo.png");
 
@@ -56,6 +57,7 @@ export default function Navbar({ children }: NavbarProps) {
     colors,
     courses,
     pinnedOfficialCourseIds,
+    setActiveCustomCourseId,
   } = useSettings();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
@@ -143,12 +145,12 @@ export default function Navbar({ children }: NavbarProps) {
     const manifest = OFFICIAL_PACKS.find(
       (pack) => pack.slug === displayedCustomCourse.slug
     );
-    const sourceLang = manifest?.sourceLang;
-    if (!sourceLang) {
+    const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
+    if (!flagLang) {
       return undefined;
     }
 
-    return getFlagSource(sourceLang);
+    return getFlagSource(flagLang);
   }, [displayedCustomCourse]);
 
   const courseAccessibilityLabel = useMemo(() => {
@@ -160,21 +162,20 @@ export default function Navbar({ children }: NavbarProps) {
       displayedBuiltinCourse?.sourceLang &&
       displayedBuiltinCourse?.targetLang
     ) {
-      return `Kurs ${displayedBuiltinCourse.sourceLang.toUpperCase()} do ${displayedBuiltinCourse.targetLang.toUpperCase()}. Otwórz panel kursów.`;
+      return `Kurs ${displayedBuiltinCourse.sourceLang.toUpperCase()} do ${displayedBuiltinCourse.targetLang.toUpperCase()}.Otwórz panel kursów.`;
     }
 
     return "Wybierz kurs językowy";
   }, [displayedBuiltinCourse, displayedCustomCourse]);
 
-  const courseIconMeta = useMemo(() => {
+  const courseIconProps = useMemo(() => {
     if (!displayedCustomCourse) return null;
-    return getCourseIconById(displayedCustomCourse.iconId);
-  }, [displayedCustomCourse]);
+    return resolveCourseIconProps(
+      displayedCustomCourse.iconId,
+      displayedCustomCourse.iconColor ?? colors.headline
+    );
+  }, [displayedCustomCourse, colors.headline]);
 
-  const CustomCourseIcon = courseIconMeta?.Component;
-  const customCourseIconName = courseIconMeta?.name ?? "grid-outline";
-  const customCourseIconColor =
-    displayedCustomCourse?.iconColor ?? colors.headline;
   const refreshDueReviewCount = useCallback(async () => {
     const now = Date.now();
     try {
@@ -199,7 +200,7 @@ export default function Navbar({ children }: NavbarProps) {
             return sum;
           } catch (error) {
             console.warn(
-              `[Navbar] Failed to count reviews for ${srcId}-${tgtId}`,
+              `[Navbar] Failed to count reviews for ${srcId} - ${tgtId}`,
               error
             );
             return 0;
@@ -246,36 +247,52 @@ export default function Navbar({ children }: NavbarProps) {
   }, [courses, pinnedOfficialCourseIds]);
 
   const courseGraphic = displayedCustomCourse ? (
-      <View style={styles.customCourseIconWrapper}>
-        {CustomCourseIcon ? (
-          <CustomCourseIcon
-            name={customCourseIconName as never}
-            size={24}
-            color={customCourseIconColor}
-          />
-        ) : (
-          <Ionicons
-            name="person-circle-outline"
-            size={24}
-            color={colors.headline}
-          />
-        )}
-        {customCourseFlagSource ? (
-          <Image source={customCourseFlagSource} style={styles.customCourseFlag} />
-        ) : null}
-      </View>
-    ) : courseFlagSource ? (
-      <Image source={courseFlagSource} style={styles.courseFlag} />
-    ) : (
-      <Ionicons
-        name="person-circle-outline"
-        size={24}
-        color={colors.headline}
-      />
-    );
+    <View style={styles.customCourseIconWrapper}>
+      {courseIconProps?.mainImageSource ? (
+        <Image
+          source={courseIconProps.mainImageSource}
+          style={{ width: 24, height: 24 }}
+          contentFit="contain"
+        />
+      ) : courseIconProps?.icon ? (
+        <courseIconProps.icon.Component
+          name={courseIconProps.icon.name as never}
+          size={24}
+          color={courseIconProps.icon.color}
+        />
+      ) : (
+        <Ionicons
+          name="person-circle-outline"
+          size={24}
+          color={colors.headline}
+        />
+      )}
+      {customCourseFlagSource ? (
+        <Image
+          source={customCourseFlagSource}
+          style={styles.customCourseFlag}
+        />
+      ) : null}
+    </View>
+  ) : courseFlagSource ? (
+    <Image source={courseFlagSource} style={styles.courseFlag} />
+  ) : (
+    <Ionicons
+      name="person-circle-outline"
+      size={24}
+      color={colors.headline}
+    />
+  );
 
-  const handlePadPress = () => {
+  const handlePadPress = async () => {
     if (activeCustomCourseId != null) {
+      router.push("/flashcards_custom");
+      return;
+    }
+
+    if (pinnedOfficialCourseIds.length > 0) {
+      const firstPinned = pinnedOfficialCourseIds[0];
+      await setActiveCustomCourseId(firstPinned);
       router.push("/flashcards_custom");
       return;
     }

@@ -123,6 +123,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "900",
     color: colors.headline,
   },
+  courseCardIconFlag: {
+    width: 64,
+    height: 48,
+    borderRadius: 8,
+  },
   courseCount: {
     position: "absolute",
     bottom: 12,

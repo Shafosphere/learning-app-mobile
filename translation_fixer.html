@@ -161,6 +161,7 @@
         <input type="file" id="fileInput" accept=".csv">
         <button onclick="loadCSV()">Load CSV</button>
         <button class="secondary" onclick="filterSuspicious()">Find Suspicious</button>
+        <button class="secondary" onclick="filterShortWords()">sus 2</button>
         <button onclick="showAll()">Show All</button>
         <button class="success" onclick="exportCSV()">Export CSV</button>
         <div class="stats" id="stats"></div>
@@ -364,6 +365,12 @@
             const suspiciousData = csvData.filter(isSuspicious);
             renderTable(suspiciousData);
             updateStats(suspiciousData.length, csvData.length);
+        }
+
+        function filterShortWords() {
+            const shortWords = csvData.filter(row => row.word.length <= 3);
+            renderTable(shortWords);
+            updateStats(shortWords.length, csvData.length);
         }
 
         function showAll() {

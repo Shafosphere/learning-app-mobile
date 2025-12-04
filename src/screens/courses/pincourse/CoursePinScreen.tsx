@@ -1,3 +1,24 @@
+
+import MyButton from "@/src/components/button/button";
+import { CourseCard } from "@/src/components/course/CourseCard";
+import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import {
+  resolveCourseIconProps
+} from "@/src/constants/customCourse";
+import { getFlagSource } from "@/src/constants/languageFlags";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+import {
+  getOnboardingCheckpoint,
+  OnboardingCheckpoint,
+  setOnboardingCheckpoint,
+} from "@/src/services/onboardingCheckpoint";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import type { LanguageCourse } from "@/src/types/course";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import Octicons from "@expo/vector-icons/Octicons";
+import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   GestureResponderEvent,
@@ -7,37 +28,7 @@ import {
   Text,
   View,
 } from "react-native";
-import Octicons from "@expo/vector-icons/Octicons";
 import { useStyles } from "./CoursePinScreen-styles";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { getFlagSource } from "@/src/constants/languageFlags";
-import type { LanguageCourse } from "@/src/types/course";
-import type { CEFRLevel } from "@/src/types/language";
-import MyButton from "@/src/components/button/button";
-import { CourseCard } from "@/src/components/course/CourseCard";
-import { useRouter } from "expo-router";
-import {
-  getLanguagePairs,
-  getOfficialCustomCoursesWithCardCounts,
-} from "@/src/db/sqlite/db";
-import { getCourseIconById } from "@/src/constants/customCourse";
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import {
-  getOnboardingCheckpoint,
-  OnboardingCheckpoint,
-  setOnboardingCheckpoint,
-} from "@/src/services/onboardingCheckpoint";
-import LogoMessage from "@/src/components/logoMessage/LogoMessage";
-
-const levels: CEFRLevel[] = ["A1", "A2", "B1", "B2", "C1", "C2"];
-
-const placeholderCourses: LanguageCourse[] = [
-  { sourceLang: "pl", targetLang: "en" },
-  { sourceLang: "pl", targetLang: "fr" },
-  { sourceLang: "pl", targetLang: "es" },
-  { sourceLang: "pl", targetLang: "de" },
-];
 
 const languageLabels: Record<string, string> = {
   pl: "polski",
@@ -56,6 +47,8 @@ type OfficialCourseListItem = {
   sourceLang: string | null;
   targetLang: string | null;
   cardsCount: number;
+  smallFlag: string | null;
+  isMini: boolean;
 };
 
 type CourseGroup = {
@@ -68,17 +61,20 @@ type CourseGroup = {
   officialPacks: OfficialCourseListItem[];
 };
 
+const LEVEL_REGEX = /(a1|a2|b1|b2|c1|c2)$/i;
+const INTRO_STORAGE_KEY = "@course_pin_intro_seen_v1";
+
 const createCourseKey = (course: LanguageCourse) => {
   const sourceKey =
     course.sourceLangId != null
-      ? `id:${course.sourceLangId}`
-      : `code:${course.sourceLang}`;
+      ? `id:${course.sourceLangId} `
+      : `code:${course.sourceLang} `;
   const targetKey =
     course.targetLangId != null
-      ? `id:${course.targetLangId}`
-      : `code:${course.targetLang}`;
-  const levelKey = course.level ? `level:${course.level}` : "level:default";
-  return `${sourceKey}->${targetKey}->${levelKey}`;
+      ? `id:${course.targetLangId} `
+      : `code:${course.targetLang} `;
+  const levelKey = course.level ? `level:${course.level} ` : "level:default";
+  return `${sourceKey} -> ${targetKey} -> ${levelKey} `;
 };
 
 export default function CoursePinScreen() {
@@ -94,39 +90,15 @@ export default function CoursePinScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
-  const [placeholderPinnedKeys, setPlaceholderPinnedKeys] = useState<
-    Set<string>
-  >(() => new Set());
   const [showIntro, setShowIntro] = useState(false);
   const [introStep, setIntroStep] = useState(0);
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
 
+  // Legacy course derivation removed to prevent ghost courses
   useEffect(() => {
-    let isMounted = true;
-
-    getLanguagePairs()
-      .then((pairs) => {
-        if (!isMounted) {
-          return;
-        }
-
-        const mapped: LanguageCourse[] = pairs.map((pair) => ({
-          sourceLang: pair.source_code,
-          targetLang: pair.target_code,
-          sourceLangId: pair.source_id,
-          targetLangId: pair.target_id,
-        }));
-        setAvailableCourses(mapped);
-      })
-      .catch((error) => {
-        console.error("[CoursePin] Failed to load language pairs", error);
-      });
-
-    return () => {
-      isMounted = false;
-    };
+    setAvailableCourses([]);
   }, []);
 
   useEffect(() => {
@@ -145,6 +117,8 @@ export default function CoursePinScreen() {
             sourceLang: manifest?.sourceLang ?? null,
             targetLang: manifest?.targetLang ?? null,
             cardsCount: r.cardsCount,
+            smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
+            isMini: manifest?.isMini ?? true,
           };
         });
         setOfficialCourses(mapped);
@@ -160,40 +134,34 @@ export default function CoursePinScreen() {
 
   useEffect(() => {
     let mounted = true;
-    getOnboardingCheckpoint()
-      .then((cp) => {
+
+    async function hydrateIntro() {
+      try {
+        const [cp, seen] = await Promise.all([
+          getOnboardingCheckpoint(),
+          AsyncStorage.getItem(INTRO_STORAGE_KEY),
+        ]);
         if (!mounted) return;
+
         const resolved = cp ?? "pin_required";
         setCheckpoint(resolved);
-        if (resolved !== "done") {
+
+        if (resolved !== "done" && seen !== "1") {
           setShowIntro(true);
           setIntroStep(0);
         }
-      })
-      .catch(() => {})
-      .finally(() => {
-        // no-op
-      });
+      } catch {
+        // ignore
+      }
+    }
+
+    void hydrateIntro();
     return () => {
       mounted = false;
     };
   }, []);
 
-  const usingPlaceholder = availableCourses.length === 0;
-  const displayedCourses = useMemo(
-    () => (usingPlaceholder ? placeholderCourses : availableCourses),
-    [availableCourses, usingPlaceholder]
-  );
-  const displayedCourseLevels = useMemo(
-    () =>
-      displayedCourses.flatMap((course) =>
-        levels.map<LanguageCourse>((level) => ({
-          ...course,
-          level,
-        }))
-      ),
-    [displayedCourses]
-  );
+  const displayedCourses = availableCourses;
 
   const groupedCourses = useMemo(() => {
     const map = new Map<string, CourseGroup>();
@@ -202,7 +170,7 @@ export default function CoursePinScreen() {
       sourceLang: string | null | undefined,
       targetLang: string | null | undefined
     ): CourseGroup => {
-      const key = `${sourceLang ?? "unknown"}-${targetLang ?? "unknown"}`;
+      const key = `${sourceLang ?? "unknown"} -${targetLang ?? "unknown"} `;
       let group = map.get(key);
       if (!group) {
         group = {
@@ -219,7 +187,7 @@ export default function CoursePinScreen() {
       return group;
     };
 
-    displayedCourseLevels.forEach((course) => {
+    displayedCourses.forEach((course) => {
       ensureGroup(course.sourceLang, course.targetLang).courses.push(course);
     });
 
@@ -227,14 +195,21 @@ export default function CoursePinScreen() {
       ensureGroup(pack.sourceLang, pack.targetLang).officialPacks.push(pack);
     });
 
-    return Array.from(map.values());
-  }, [displayedCourseLevels, officialCourses]);
+    const compareLangs = (
+      a: string | null | undefined,
+      b: string | null | undefined
+    ) => {
+      const first = a ?? "";
+      const second = b ?? "";
+      return first.localeCompare(second);
+    };
 
-  useEffect(() => {
-    if (!usingPlaceholder) {
-      setPlaceholderPinnedKeys(new Set());
-    }
-  }, [usingPlaceholder]);
+    return Array.from(map.values()).sort((a, b) => {
+      const targetDiff = compareLangs(a.targetLang, b.targetLang);
+      if (targetDiff !== 0) return targetDiff;
+      return compareLangs(a.sourceLang, b.sourceLang);
+    });
+  }, [displayedCourses, officialCourses]);
 
   const pinnedKeys = useMemo(() => {
     const set = new Set<string>();
@@ -247,24 +222,6 @@ export default function CoursePinScreen() {
   const handlePinToggle = useCallback(
     async (course: LanguageCourse) => {
       const key = createCourseKey(course);
-
-      if (usingPlaceholder) {
-        setPlaceholderPinnedKeys((current) => {
-          const next = new Set(current);
-          if (next.has(key)) {
-            next.delete(key);
-          } else {
-            next.add(key);
-          }
-          console.log(
-            `[CoursePin] Placeholder pin toggle for ${key}, pinned=${next.has(
-              key
-            )}`
-          );
-          return next;
-        });
-        return;
-      }
 
       const isPinned = pinnedKeys.has(key);
 
@@ -282,17 +239,10 @@ export default function CoursePinScreen() {
           void setOnboardingCheckpoint("activate_required");
         }
       } catch (error) {
-        console.error(`[CoursePin] Failed to toggle course ${key}`, error);
+        console.error(`[CoursePin] Failed to toggle course ${key} `, error);
       }
     },
-    [
-      addCourse,
-      courses.length,
-      pinnedKeys,
-      removeCourse,
-      setCheckpoint,
-      usingPlaceholder,
-    ]
+    [addCourse, courses.length, pinnedKeys, removeCourse, setCheckpoint]
   );
 
   const handlePinPress = useCallback(
@@ -321,7 +271,7 @@ export default function CoursePinScreen() {
         }
       } catch (error) {
         console.error(
-          `[CoursePin] Failed to toggle official pack ${id}`,
+          `[CoursePin] Failed to toggle official pack ${id} `,
           error
         );
       }
@@ -338,24 +288,16 @@ export default function CoursePinScreen() {
   const isCoursePinned = useCallback(
     (course: LanguageCourse) => {
       const key = createCourseKey(course);
-      if (usingPlaceholder) {
-        return placeholderPinnedKeys.has(key);
-      }
       return pinnedKeys.has(key);
     },
-    [pinnedKeys, placeholderPinnedKeys, usingPlaceholder]
+    [pinnedKeys]
   );
 
   const hasAnyPinned = useMemo(() => {
-    if (usingPlaceholder) {
-      return placeholderPinnedKeys.size > 0;
-    }
     return pinnedKeys.size > 0 || pinnedOfficialCourseIds.length > 0;
   }, [
     pinnedKeys,
     pinnedOfficialCourseIds,
-    placeholderPinnedKeys,
-    usingPlaceholder,
   ]);
 
   const handleCardPress = useCallback(
@@ -398,6 +340,7 @@ export default function CoursePinScreen() {
       const next = prev + 1;
       if (next >= introMessages.length) {
         setShowIntro(false);
+        void AsyncStorage.setItem(INTRO_STORAGE_KEY, "1");
         return prev;
       }
       return next;
@@ -405,6 +348,57 @@ export default function CoursePinScreen() {
   }, [introMessages.length]);
 
   const introActive = checkpoint !== "done";
+  const renderOfficialPackCard = useCallback(
+    (pack: OfficialCourseListItem) => {
+      const iconProps = resolveCourseIconProps(pack.iconId, pack.iconColor);
+      const isPinned = pinnedOfficialCourseIds.includes(pack.id);
+      const flagLang = pack.smallFlag ?? pack.sourceLang;
+      const flagSource = flagLang ? getFlagSource(flagLang) : undefined;
+      return (
+        <CourseCard
+          key={`official-${pack.id}`}
+          onPress={() => void handleOfficialPinToggle(pack.id)}
+          containerStyle={styles.courseCard}
+          {...iconProps}
+          flagSource={flagSource}
+          flagStyle={styles.officialFlagBadge}
+          infoStyle={styles.courseCardInfo}
+          title={pack.name}
+          titleContainerStyle={styles.courseCardTitleContainer}
+          titleTextStyle={styles.customCardTitle}
+          meta={`fiszki: ${pack.cardsCount} `}
+          metaTextStyle={styles.customCardMeta}
+          rightAccessory={
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={
+                isPinned
+                  ? `Odepnij zestaw ${pack.name} `
+                  : `Przypnij zestaw ${pack.name} `
+              }
+              style={styles.pinButton}
+              onPress={(event) => {
+                event.stopPropagation();
+                void handleOfficialPinToggle(pack.id);
+              }}
+            >
+              <View
+                style={[
+                  styles.pinCheckbox,
+                  isPinned && styles.pinCheckboxActive,
+                ]}
+              >
+                {isPinned ? (
+                  <Octicons name="pin" size={20} color={colors.headline} />
+                ) : null}
+              </View>
+            </Pressable>
+          }
+        />
+      );
+    },
+    [colors.headline, handleOfficialPinToggle, pinnedOfficialCourseIds, styles]
+  );
 
   return (
     <View style={styles.container}>
@@ -430,7 +424,14 @@ export default function CoursePinScreen() {
 
           {groupedCourses.map((group) => {
             const hasCourses = group.courses.length > 0;
-            const hasOfficial = group.officialPacks.length > 0;
+            const regularOfficialPacks = group.officialPacks.filter(
+              (pack) => pack.isMini === false
+            );
+            const miniOfficialPacks = group.officialPacks.filter(
+              (pack) => pack.isMini !== false
+            );
+            const hasOfficial =
+              regularOfficialPacks.length > 0 || miniOfficialPacks.length > 0;
             if (!hasCourses && !hasOfficial) {
               return null;
             }
@@ -443,7 +444,7 @@ export default function CoursePinScreen() {
               : "?";
 
             return (
-              <View key={`group-${group.key}`} style={styles.groupSection}>
+              <View key={`group - ${group.key} `} style={styles.groupSection}>
                 <View style={styles.groupHeader}>
                   <View style={styles.groupHeaderLine} />
                   <View style={styles.groupHeaderBadge}>
@@ -477,127 +478,74 @@ export default function CoursePinScreen() {
 
                 {hasCourses
                   ? group.courses.map((course) => {
-                      const key = createCourseKey(course);
-                      const sourceFlag = getFlagSource(course.sourceLang);
-                      const isPinned = isCoursePinned(course);
-                      const sourceLabel =
-                        languageLabels[course.sourceLang] ??
-                        course.sourceLang.toUpperCase();
-                      const targetLabel =
-                        languageLabels[course.targetLang] ??
-                        course.targetLang.toUpperCase();
+                    const key = createCourseKey(course);
+                    const sourceFlag = getFlagSource(course.sourceLang);
+                    const isPinned = isCoursePinned(course);
+                    const sourceLabel =
+                      languageLabels[course.sourceLang] ??
+                      course.sourceLang.toUpperCase();
+                    const targetLabel =
+                      languageLabels[course.targetLang] ??
+                      course.targetLang.toUpperCase();
 
-                      return (
+                    return (
+                      <Pressable
+                        key={key}
+                        onPress={() => handleCardPress(course)}
+                        style={styles.courseCard}
+                      >
+                        {sourceFlag ? (
+                          <Image style={styles.flag} source={sourceFlag} />
+                        ) : null}
+                        <Text style={styles.courseCardText}>
+                          {`${sourceLabel} → ${targetLabel} ${course.level ?? ""
+                            } `.trim()}
+                        </Text>
                         <Pressable
-                          key={key}
-                          onPress={() => handleCardPress(course)}
-                          style={styles.courseCard}
+                          accessibilityRole="button"
+                          accessibilityLabel={
+                            isPinned
+                              ? `Odepnij kurs ${targetLabel} `
+                              : `Przypnij kurs ${targetLabel} `
+                          }
+                          style={styles.pinButton}
+                          onPress={(event) => handlePinPress(event, course)}
                         >
-                          {sourceFlag ? (
-                            <Image style={styles.flag} source={sourceFlag} />
-                          ) : null}
-                          <Text style={styles.courseCardText}>
-                            {`${sourceLabel} → ${targetLabel} ${
-                              course.level ?? ""
-                            }`.trim()}
-                          </Text>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={
-                              isPinned
-                                ? `Odepnij kurs ${targetLabel}`
-                                : `Przypnij kurs ${targetLabel}`
-                            }
-                            style={styles.pinButton}
-                            onPress={(event) => handlePinPress(event, course)}
+                          <View
+                            style={[
+                              styles.pinCheckbox,
+                              isPinned && styles.pinCheckboxActive,
+                            ]}
                           >
-                            <View
-                              style={[
-                                styles.pinCheckbox,
-                                isPinned && styles.pinCheckboxActive,
-                              ]}
-                            >
-                              {isPinned ? (
-                                <Octicons
-                                  name="pin"
-                                  size={20}
-                                  color={colors.headline}
-                                />
-                              ) : null}
-                            </View>
-                          </Pressable>
+                            {isPinned ? (
+                              <Octicons
+                                name="pin"
+                                size={20}
+                                color={colors.headline}
+                              />
+                            ) : null}
+                          </View>
                         </Pressable>
-                      );
-                    })
+                      </Pressable>
+                    );
+                  })
                   : null}
 
                 {hasOfficial ? (
                   <>
-                    <Text style={styles.subTitle}>Mini kursy</Text>
-                    {group.officialPacks.map((pack) => {
-                      const iconMeta = getCourseIconById(pack.iconId);
-                      const IconComponent = iconMeta?.Component ?? Ionicons;
-                      const iconName = (iconMeta?.name ??
-                        "grid-outline") as never;
-                      const isPinned = pinnedOfficialCourseIds.includes(
-                        pack.id
-                      );
-                      return (
-                        <CourseCard
-                          key={`official-${pack.id}`}
-                          onPress={() => void handleOfficialPinToggle(pack.id)}
-                          containerStyle={styles.courseCard}
-                          icon={{
-                            Component: IconComponent,
-                            name: iconName,
-                            color: pack.iconColor,
-                            size: 60,
-                          }}
-                          flagSource={
-                            pack.sourceLang
-                              ? getFlagSource(pack.sourceLang)
-                              : undefined
-                          }
-                          flagStyle={styles.officialFlagBadge}
-                          infoStyle={styles.courseCardInfo}
-                          title={pack.name}
-                          titleContainerStyle={styles.courseCardTitleContainer}
-                          titleTextStyle={styles.customCardTitle}
-                          meta={`fiszki: ${pack.cardsCount}`}
-                          metaTextStyle={styles.customCardMeta}
-                          rightAccessory={
-                            <Pressable
-                              accessibilityRole="button"
-                              accessibilityLabel={
-                                isPinned
-                                  ? `Odepnij zestaw ${pack.name}`
-                                  : `Przypnij zestaw ${pack.name}`
-                              }
-                              style={styles.pinButton}
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                void handleOfficialPinToggle(pack.id);
-                              }}
-                            >
-                              <View
-                                style={[
-                                  styles.pinCheckbox,
-                                  isPinned && styles.pinCheckboxActive,
-                                ]}
-                              >
-                                {isPinned ? (
-                                  <Octicons
-                                    name="pin"
-                                    size={20}
-                                    color={colors.headline}
-                                  />
-                                ) : null}
-                              </View>
-                            </Pressable>
-                          }
-                        />
-                      );
-                    })}
+                    {regularOfficialPacks.length ? (
+                      <>
+                        <Text style={styles.subTitle}>Kursy</Text>
+                        {regularOfficialPacks.map(renderOfficialPackCard)}
+                      </>
+                    ) : null}
+
+                    {miniOfficialPacks.length ? (
+                      <>
+                        <Text style={styles.subTitle}>Mini kursy</Text>
+                        {miniOfficialPacks.map(renderOfficialPackCard)}
+                      </>
+                    ) : null}
                   </>
                 ) : null}
               </View>

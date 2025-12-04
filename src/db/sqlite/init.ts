@@ -8,7 +8,12 @@ import { getDB, notifyDbInitializationListeners, openDatabase } from "./core";
 import { ensureOfficialCourse } from "./repositories/courses";
 import { seedLanguages } from "./repositories/dictionary";
 import { replaceCustomFlashcardsWithDb } from "./repositories/flashcards";
-import { applySchema, configurePragmas } from "./schema";
+import {
+    applySchema,
+    configurePragmas,
+    DICTIONARY_SCHEMA_ENABLED,
+    DICTIONARY_IMPORT_ENABLED,
+} from "./schema";
 import { splitBackTextIntoAnswers } from "./utils";
 
 async function readCsvAsset(assetModule: any): Promise<
@@ -169,6 +174,79 @@ async function importInitialCsv(db: SQLite.SQLiteDatabase): Promise<void> {
     }
 }
 
+function resolveLanguageName(code: string): string {
+    switch (code) {
+        case "en":
+            return "English";
+        case "pl":
+            return "Polski";
+        case "fr":
+            return "Français";
+        case "kr":
+            return "Korean";
+        default:
+            return code.toUpperCase();
+    }
+}
+
+async function seedLanguagePairsFromOfficialPacks(
+    db: SQLite.SQLiteDatabase
+): Promise<void> {
+    if (!DICTIONARY_SCHEMA_ENABLED) return;
+
+    const pairs = OFFICIAL_PACKS
+        .map((pack) => ({
+            source: pack.sourceLang,
+            target: pack.targetLang,
+        }))
+        .filter(
+            (p): p is { source: string; target: string } =>
+                Boolean(p.source) && Boolean(p.target)
+        );
+
+    if (pairs.length === 0) {
+        console.log("[DB] No language pairs from official packs to seed");
+        return;
+    }
+
+    const langCodes = Array.from(
+        new Set(pairs.flatMap((p) => [p.source, p.target]))
+    );
+
+    await db.execAsync("BEGIN TRANSACTION;");
+    try {
+        for (const code of langCodes) {
+            await db.runAsync(
+                `INSERT OR IGNORE INTO languages (code, name) VALUES (?, ?);`,
+                code,
+                resolveLanguageName(code)
+            );
+        }
+
+        // Reset to avoid legacy pairs that are no longer relevant
+        await db.runAsync(`DELETE FROM language_pairs;`);
+
+        for (const { source, target } of pairs) {
+            await db.runAsync(
+                `INSERT OR IGNORE INTO language_pairs (source_language_id, target_language_id)
+                 SELECT s.id, t.id FROM languages s, languages t
+                 WHERE s.code = ? AND t.code = ?;`,
+                source,
+                target
+            );
+        }
+
+        await db.execAsync("COMMIT;");
+        console.log(
+            "[DB] Seeded language pairs from official packs:",
+            pairs.length
+        );
+    } catch (error) {
+        await db.execAsync("ROLLBACK;");
+        console.warn("[DB] Failed to seed language pairs from official packs", error);
+    }
+}
+
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     notifyDbInitializationListeners({ type: "start" });
     const db = await openDatabase();
@@ -177,23 +255,32 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     console.log("[DB] initializeDatabase: applySchema done");
     await configurePragmas(db);
     console.log("[DB] initializeDatabase: configurePragmas done");
+    await seedLanguagePairsFromOfficialPacks(db);
 
-    const countRow = await db.getFirstAsync<{ cnt: number }>(
-        `SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');`
-    );
+    let requiresInitialImport = false;
 
-    const requiresInitialImport = (countRow?.cnt ?? 0) === 0;
+    if (DICTIONARY_SCHEMA_ENABLED && DICTIONARY_IMPORT_ENABLED) {
+        const countRow = await db.getFirstAsync<{ cnt: number }>(
+            `SELECT COUNT(*) AS cnt FROM words WHERE language_id = (SELECT id FROM languages WHERE code = 'en');`
+        );
 
-    if (!requiresInitialImport) {
-        console.log("DB już załadowana → pomijam import");
+        requiresInitialImport = (countRow?.cnt ?? 0) === 0;
     } else {
-        notifyDbInitializationListeners({ type: "import-start" });
-        try {
-            await importInitialCsv(db);
-            notifyDbInitializationListeners({ type: "import-finish" });
-        } catch (error) {
-            notifyDbInitializationListeners({ type: "error", error });
-            throw error;
+        console.log("[DB] Dictionary import disabled -> skipping wordsENGtoPL.csv");
+    }
+
+    if (DICTIONARY_SCHEMA_ENABLED && DICTIONARY_IMPORT_ENABLED) {
+        if (!requiresInitialImport) {
+            console.log("DB już załadowana → pomijam import");
+        } else {
+            notifyDbInitializationListeners({ type: "import-start" });
+            try {
+                await importInitialCsv(db);
+                notifyDbInitializationListeners({ type: "import-finish" });
+            } catch (error) {
+                notifyDbInitializationListeners({ type: "error", error });
+                throw error;
+            }
         }
     }
 

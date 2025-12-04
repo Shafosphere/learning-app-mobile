@@ -1,35 +1,39 @@
 import MyButton from "@/src/components/button/button";
-import { getCourseIconById } from "@/src/constants/customCourse";
+import { CourseCard } from "@/src/components/course/CourseCard";
+import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import {
+  resolveCourseIconProps
+} from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
-  getOnboardingCheckpoint,
-  OnboardingCheckpoint,
-  setOnboardingCheckpoint,
-} from "@/src/services/onboardingCheckpoint";
-import {
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
+import {
+  getOnboardingCheckpoint,
+  OnboardingCheckpoint,
+  setOnboardingCheckpoint,
+} from "@/src/services/onboardingCheckpoint";
 import type { LanguageCourse } from "@/src/types/course";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
-import { CourseCard } from "@/src/components/course/CourseCard";
-import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 
 type BuiltinCourseItem = { course: LanguageCourse; index: number };
 
 type OfficialCourseListItem = CustomCourseSummary & {
   sourceLang: string | null;
   targetLang: string | null;
+  smallFlag: string | null;
+  isMini: boolean;
 };
 
 type CourseGroup = {
@@ -46,8 +50,24 @@ type SelectedCourse =
   | { type: "builtin"; index: number }
   | { type: "custom"; id: number };
 
+const LEVEL_REGEX = /(a1|a2|b1|b2|c1|c2)$/i;
+const INTRO_STORAGE_KEY = "@course_activate_intro_seen_v1";
+
 const LANGUAGE_LABELS: Record<string, Record<string, string>> = {
   pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
+};
+
+const createCourseKey = (course: LanguageCourse) => {
+  const sourceKey =
+    course.sourceLangId != null
+      ? `id:${course.sourceLangId}`
+      : `code:${course.sourceLang}`;
+  const targetKey =
+    course.targetLangId != null
+      ? `id:${course.targetLangId}`
+      : `code:${course.targetLang}`;
+  const levelKey = course.level ? `level:${course.level}` : "level:default";
+  return `${sourceKey}->${targetKey}->${levelKey}`;
 };
 
 export default function CourseActivateScreen() {
@@ -92,6 +112,28 @@ export default function CourseActivateScreen() {
     [officialCourses, pinnedOfficialCourseIds]
   );
 
+  const allowedBuiltinCourseKeys = useMemo(() => {
+    const set = new Set<string>();
+    OFFICIAL_PACKS.forEach((pack) => {
+      if (!pack.sourceLang || !pack.targetLang) return;
+      const match = pack.slug.match(LEVEL_REGEX);
+      const base: LanguageCourse = {
+        sourceLang: pack.sourceLang,
+        targetLang: pack.targetLang,
+      };
+      if (match) {
+        set.add(
+          createCourseKey({
+            ...base,
+            level: match[1].toUpperCase(),
+          })
+        );
+      }
+      set.add(createCourseKey(base));
+    });
+    return set;
+  }, []);
+
   const courseGroups = useMemo(() => {
     const map = new Map<string, CourseGroup>();
 
@@ -117,6 +159,15 @@ export default function CourseActivateScreen() {
     };
 
     courses.forEach((course, index) => {
+      const keyWithLevel = createCourseKey(course);
+      const keyWithoutLevel = createCourseKey({ ...course, level: undefined });
+      if (
+        allowedBuiltinCourseKeys.size > 0 &&
+        !allowedBuiltinCourseKeys.has(keyWithLevel) &&
+        !allowedBuiltinCourseKeys.has(keyWithoutLevel)
+      ) {
+        return;
+      }
       const targetLang = course.targetLang ?? null;
       const sourceLang = course.sourceLang ?? null;
       ensureGroup(sourceLang, targetLang).builtin.push({ course, index });
@@ -126,8 +177,21 @@ export default function CourseActivateScreen() {
       ensureGroup(course.sourceLang, course.targetLang).official.push(course);
     });
 
-    return Array.from(map.values());
-  }, [courses, pinnedOfficialCourses]);
+    const compareLangs = (
+      a: string | null | undefined,
+      b: string | null | undefined
+    ) => {
+      const first = a ?? "";
+      const second = b ?? "";
+      return first.localeCompare(second);
+    };
+
+    return Array.from(map.values()).sort((a, b) => {
+      const targetDiff = compareLangs(a.targetLang, b.targetLang);
+      if (targetDiff !== 0) return targetDiff;
+      return compareLangs(a.sourceLang, b.sourceLang);
+    });
+  }, [allowedBuiltinCourseKeys, courses, pinnedOfficialCourses]);
 
   const hasBuiltInCourses = useMemo(
     () => courseGroups.some((group) => group.builtin.length > 0),
@@ -166,18 +230,30 @@ export default function CourseActivateScreen() {
 
   useEffect(() => {
     let mounted = true;
-    getOnboardingCheckpoint()
-      .then((cp) => {
+    async function hydrateIntro() {
+      try {
+        const [cp, seen] = await Promise.all([
+          getOnboardingCheckpoint(),
+          AsyncStorage.getItem(INTRO_STORAGE_KEY),
+        ]);
         if (!mounted) return;
+
         const resolved = cp ?? "activate_required";
         setCheckpoint(resolved);
+
         if (resolved !== "done") {
           setStartedInOnboarding(true);
-          setShowIntro(true);
-          setIntroStep(0);
+          if (seen !== "1") {
+            setShowIntro(true);
+            setIntroStep(0);
+          }
         }
-      })
-      .catch(() => {});
+      } catch {
+        // ignore
+      }
+    }
+
+    void hydrateIntro();
     return () => {
       mounted = false;
     };
@@ -204,6 +280,8 @@ export default function CourseActivateScreen() {
                 ...row,
                 sourceLang: manifest?.sourceLang ?? null,
                 targetLang: manifest?.targetLang ?? null,
+                smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
+                isMini: manifest?.isMini ?? true,
               };
             });
             setOfficialCourses(mapped);
@@ -294,9 +372,8 @@ export default function CourseActivateScreen() {
       const baseLabel =
         LANGUAGE_LABELS[course.targetLang]?.[course.sourceLang] ??
         course.sourceLang;
-      const displayName = `${baseLabel}${
-        course.level ? ` ${course.level}` : ""
-      }`;
+      const displayName = `${baseLabel}${course.level ? ` ${course.level}` : ""
+        }`;
       const params = [
         `name=${encodeURIComponent(displayName)}`,
         `targetLang=${encodeURIComponent(course.targetLang)}`,
@@ -311,6 +388,72 @@ export default function CourseActivateScreen() {
     },
     [router]
   );
+
+  const renderOfficialCourseSection = (
+    title: string,
+    list: OfficialCourseListItem[]
+  ) => {
+    if (!list.length) return null;
+
+    return (
+      <View style={styles.groupCourses}>
+        <Text style={styles.groupSubtitle}>{title}</Text>
+        {list.map((course) => {
+          const isHighlighted =
+            committedCourse?.type === "custom" &&
+            committedCourse.id === course.id;
+          const iconProps = resolveCourseIconProps(
+            course.iconId,
+            course.iconColor
+          );
+          const flagLang = course.smallFlag ?? course.sourceLang;
+          const sourceFlag = flagLang ? getFlagSource(flagLang) : undefined;
+
+          return (
+            <CourseCard
+              key={`official-${course.id}`}
+              onPress={() => handleCustomCoursePress(course.id)}
+              containerStyle={styles.customCard}
+              contentStyle={styles.customCardContent}
+              {...iconProps}
+              iconWrapperStyle={[
+                styles.customIconBadge,
+                { borderColor: course.iconColor },
+              ]}
+              flagSource={sourceFlag}
+              flagStyle={styles.customIconFlag}
+              infoStyle={styles.customCardInfo}
+              title={course.name}
+              titleContainerStyle={styles.customCardTitleContainer}
+              titleTextStyle={styles.customCardTitle}
+              meta={`fiszki: ${course.cardsCount}`}
+              metaTextStyle={styles.customCardMeta}
+              isHighlighted={isHighlighted}
+              highlightedStyle={styles.clicked}
+              rightAccessory={
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel={`Edytuj kurs ${course.name}`}
+                  style={styles.customEditButton}
+                  onPress={(event) => {
+                    event.stopPropagation();
+                    handleEditCustomCourse(course);
+                  }}
+                  hitSlop={8}
+                >
+                  <FontAwesome6
+                    name="edit"
+                    size={24}
+                    color={colors.headline}
+                  />
+                </Pressable>
+              }
+            />
+          );
+        })}
+      </View>
+    );
+  };
 
   const introMessages = useMemo(
     () => [
@@ -333,6 +476,7 @@ export default function CourseActivateScreen() {
       const next = prev + 1;
       if (next >= introMessages.length) {
         setShowIntro(false);
+        void AsyncStorage.setItem(INTRO_STORAGE_KEY, "1");
         return prev;
       }
       return next;
@@ -377,7 +521,14 @@ export default function CourseActivateScreen() {
                   <View style={styles.builtinSection}>
                     {courseGroups.map((group) => {
                       const hasBuiltin = group.builtin.length > 0;
-                      const hasOfficial = group.official.length > 0;
+                      const regularOfficial = group.official.filter(
+                        (course) => course.isMini === false
+                      );
+                      const miniOfficial = group.official.filter(
+                        (course) => course.isMini !== false
+                      );
+                      const hasOfficial =
+                        regularOfficial.length > 0 || miniOfficial.length > 0;
                       if (!hasBuiltin && !hasOfficial) {
                         return null;
                       }
@@ -441,12 +592,11 @@ export default function CourseActivateScreen() {
                                 const languageLabel =
                                   item.targetLang && item.sourceLang
                                     ? LANGUAGE_LABELS[item.targetLang]?.[
-                                        item.sourceLang
-                                      ]
+                                    item.sourceLang
+                                    ]
                                     : undefined;
-                                const displayTitle = `${
-                                  languageLabel ?? item.sourceLang ?? ""
-                                }${item.level ? ` ${item.level}` : ""}`;
+                                const displayTitle = `${languageLabel ?? item.sourceLang ?? ""
+                                  }${item.level ? ` ${item.level}` : ""}`;
 
                                 return (
                                   <Pressable
@@ -491,77 +641,16 @@ export default function CourseActivateScreen() {
                           ) : null}
 
                           {hasOfficial ? (
-                            <View style={styles.groupCourses}>
-                              <Text style={styles.groupSubtitle}>
-                                Mini kursy
-                              </Text>
-                              {group.official.map((course) => {
-                                const isHighlighted =
-                                  committedCourse?.type === "custom" &&
-                                  committedCourse.id === course.id;
-                                const iconMeta = getCourseIconById(
-                                  course.iconId
-                                );
-                                const IconComponent =
-                                  iconMeta?.Component ?? Ionicons;
-                                const iconName = (iconMeta?.name ??
-                                  "grid-outline") as never;
-                                const sourceFlag = course.sourceLang
-                                  ? getFlagSource(course.sourceLang)
-                                  : undefined;
-
-                                return (
-                                  <CourseCard
-                                    key={`official-${course.id}`}
-                                    onPress={() =>
-                                      handleCustomCoursePress(course.id)
-                                    }
-                                    containerStyle={styles.customCard}
-                                    contentStyle={styles.customCardContent}
-                                    icon={{
-                                      Component: IconComponent,
-                                      name: iconName,
-                                      color: course.iconColor,
-                                      size: 60,
-                                    }}
-                                    iconWrapperStyle={[
-                                      styles.customIconBadge,
-                                      { borderColor: course.iconColor },
-                                    ]}
-                                    flagSource={sourceFlag}
-                                    flagStyle={styles.customIconFlag}
-                                    infoStyle={styles.customCardInfo}
-                                    title={course.name}
-                                    titleContainerStyle={
-                                      styles.customCardTitleContainer
-                                    }
-                                    titleTextStyle={styles.customCardTitle}
-                                    meta={`fiszki: ${course.cardsCount}`}
-                                    metaTextStyle={styles.customCardMeta}
-                                    isHighlighted={isHighlighted}
-                                    highlightedStyle={styles.clicked}
-                                    rightAccessory={
-                                      <Pressable
-                                        accessibilityRole="button"
-                                        accessibilityLabel={`Edytuj kurs ${course.name}`}
-                                        style={styles.customEditButton}
-                                        onPress={(event) => {
-                                          event.stopPropagation();
-                                          handleEditCustomCourse(course);
-                                        }}
-                                        hitSlop={8}
-                                      >
-                                        <FontAwesome6
-                                          name="edit"
-                                          size={24}
-                                          color={colors.headline}
-                                        />
-                                      </Pressable>
-                                    }
-                                  />
-                                );
-                              })}
-                            </View>
+                            <>
+                              {renderOfficialCourseSection(
+                                "Kursy",
+                                regularOfficial
+                              )}
+                              {renderOfficialCourseSection(
+                                "Mini kursy",
+                                miniOfficial
+                              )}
+                            </>
                           ) : null}
                         </View>
                       );
@@ -577,10 +666,10 @@ export default function CourseActivateScreen() {
                   </Text>
                   <View style={styles.customList}>
                     {userCustomCourses.map((course) => {
-                      const iconMeta = getCourseIconById(course.iconId);
-                      const IconComponent = iconMeta?.Component ?? Ionicons;
-                      const iconName = (iconMeta?.name ??
-                        "grid-outline") as never;
+                      const iconProps = resolveCourseIconProps(
+                        course.iconId,
+                        course.iconColor
+                      );
                       const isHighlighted =
                         committedCourse?.type === "custom" &&
                         committedCourse.id === course.id;
@@ -590,12 +679,7 @@ export default function CourseActivateScreen() {
                           onPress={() => handleCustomCoursePress(course.id)}
                           containerStyle={styles.customCard}
                           contentStyle={styles.customCardContent}
-                          icon={{
-                            Component: IconComponent,
-                            name: iconName,
-                            color: course.iconColor,
-                            size: 60,
-                          }}
+                          {...iconProps}
                           iconWrapperStyle={[
                             styles.customIconBadge,
                             { borderColor: course.iconColor },
@@ -647,7 +731,11 @@ export default function CourseActivateScreen() {
               onPress={() => {
                 setCheckpoint("done");
                 void setOnboardingCheckpoint("done");
-                router.replace("/flashcards");
+                if (activeCustomCourseId != null) {
+                  router.replace("/flashcards_custom");
+                } else {
+                  router.replace("/flashcards");
+                }
               }}
               style={[
                 styles.nextButton,

@@ -14,7 +14,10 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
-import { getCourseIconById } from "@/src/constants/customCourse";
+import {
+  getCourseIconById,
+  resolveCourseIconProps,
+} from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import type { CEFRLevel } from "@/src/types/language";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
@@ -75,6 +78,7 @@ const resolveLanguageLabel = (
 type OfficialCourseReviewItem = CustomCourseSummary & {
   sourceLang: string | null;
   targetLang: string | null;
+  isMini: boolean;
 };
 
 type BuiltInGroup = {
@@ -229,6 +233,8 @@ export default function CoursesReviewScreen() {
             ...course,
             sourceLang: manifest?.sourceLang ?? null,
             targetLang: manifest?.targetLang ?? null,
+            isMini: manifest?.isMini ?? true,
+            smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
           };
         }
       );
@@ -420,7 +426,6 @@ export default function CoursesReviewScreen() {
 
   const combinedGroups = useMemo<CombinedGroup[]>(() => {
     const map = new Map<string, CombinedGroup>();
-    const order: string[] = [];
 
     const ensureGroup = (
       targetLang: string | null,
@@ -443,7 +448,6 @@ export default function CoursesReviewScreen() {
           official: [],
         };
         map.set(key, group);
-        order.push(key);
       } else {
         if (!group.targetFlag && targetFlag) {
           group.targetFlag = targetFlag;
@@ -481,9 +485,22 @@ export default function CoursesReviewScreen() {
       combined.official = [...combined.official, ...group.courses];
     });
 
-    return order
-      .map((key) => map.get(key)!)
-      .filter((group) => group.builtin.length > 0 || group.official.length > 0);
+    const compareLangs = (
+      a: string | null | undefined,
+      b: string | null | undefined
+    ) => {
+      const first = a ?? "";
+      const second = b ?? "";
+      return first.localeCompare(second);
+    };
+
+    return Array.from(map.values())
+      .filter((group) => group.builtin.length > 0 || group.official.length > 0)
+      .sort((a, b) => {
+        const targetDiff = compareLangs(a.targetLang, b.targetLang);
+        if (targetDiff !== 0) return targetDiff;
+        return compareLangs(a.sourceLang, b.sourceLang);
+      });
   }, [builtInGroups, officialGroups]);
 
   return (
@@ -506,6 +523,76 @@ export default function CoursesReviewScreen() {
               const sourceCode = group.sourceLang
                 ? group.sourceLang.toUpperCase()
                 : "?";
+              const regularOfficial = group.official.filter(
+                (course) => course.isMini === false
+              );
+              const miniOfficial = group.official.filter(
+                (course) => course.isMini !== false
+              );
+              const renderOfficialSection = (
+                title: string,
+                list: OfficialCourseReviewItem[]
+              ) => {
+                if (!list.length) return null;
+
+                return (
+                  <>
+                    <Text style={styles.miniSectionTitle}>{title}</Text>
+                    <View style={styles.courseGrid}>
+                      {list.map((course) => {
+                        const iconProps = resolveCourseIconProps(
+                          course.iconId,
+                          course.iconColor
+                        );
+                        const iconMeta = getCourseIconById(course.iconId);
+                        const IconComponent =
+                          iconProps.icon?.Component ??
+                          iconMeta?.Component ??
+                          Ionicons;
+                        const iconName = (iconProps.icon?.name ??
+                          iconMeta?.name ??
+                          "grid-outline") as never;
+                        const dueCount = officialCounts[course.id] ?? 0;
+                        const mainFlag = iconProps.mainImageSource;
+
+                        return (
+                          <Pressable
+                            key={`official-${course.id}`}
+                            style={[
+                              styles.courseCard,
+                              dueCount === 0 && styles.courseCardDisabled,
+                            ]}
+                            disabled={dueCount === 0}
+                            accessibilityState={{ disabled: dueCount === 0 }}
+                            onPress={() => handleSelectCustomCourse(course.id)}
+                          >
+                            {mainFlag ? (
+                              <Image
+                                style={styles.courseCardIconFlag}
+                                source={mainFlag}
+                              />
+                            ) : (
+                              <IconComponent
+                                name={iconName}
+                                size={48}
+                                color={course.iconColor}
+                              />
+                            )}
+                            <CourseTitleMarquee
+                              text={course.name}
+                              containerStyle={styles.courseCardTitleContainer}
+                              textStyle={styles.courseCardText}
+                            />
+                            <View style={styles.courseCount}>
+                              {renderCount(dueCount)}
+                            </View>
+                          </Pressable>
+                        );
+                      })}
+                    </View>
+                  </>
+                );
+              };
 
               return (
                 <View key={group.key} style={styles.groupContainer}>
@@ -581,49 +668,8 @@ export default function CoursesReviewScreen() {
                     </View>
                   ) : null}
 
-                  {group.official.length > 0 ? (
-                    <>
-                      <Text style={styles.miniSectionTitle}>Mini kursy</Text>
-                      <View style={styles.courseGrid}>
-                        {group.official.map((course) => {
-                          const iconMeta = getCourseIconById(course.iconId);
-                          const IconComponent = iconMeta?.Component ?? Ionicons;
-                          const iconName = (iconMeta?.name ??
-                            "grid-outline") as never;
-                          const dueCount = officialCounts[course.id] ?? 0;
-
-                          return (
-                            <Pressable
-                              key={`official-${course.id}`}
-                              style={[
-                                styles.courseCard,
-                                dueCount === 0 && styles.courseCardDisabled,
-                              ]}
-                              disabled={dueCount === 0}
-                              accessibilityState={{ disabled: dueCount === 0 }}
-                              onPress={() =>
-                                handleSelectCustomCourse(course.id)
-                              }
-                            >
-                              <IconComponent
-                                name={iconName}
-                                size={48}
-                                color={course.iconColor}
-                              />
-                              <CourseTitleMarquee
-                                text={course.name}
-                                containerStyle={styles.courseCardTitleContainer}
-                                textStyle={styles.courseCardText}
-                              />
-                              <View style={styles.courseCount}>
-                                {renderCount(dueCount)}
-                              </View>
-                            </Pressable>
-                          );
-                        })}
-                      </View>
-                    </>
-                  ) : null}
+                  {renderOfficialSection("Kursy", regularOfficial)}
+                  {renderOfficialSection("Mini kursy", miniOfficial)}
                 </View>
               );
             })}
