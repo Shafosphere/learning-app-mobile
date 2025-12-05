@@ -10,7 +10,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { resetReviewsForPair } from "@/src/db/sqlite/db";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 
 type CourseEditParams = {
@@ -224,33 +223,11 @@ function BuiltinCourseEditor({
 
   const performResetReviews = async () => {
     setResettingReviews(true);
-    const matchingCourse = getMatchingCourse();
-
-    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
-      setResettingReviews(false);
-      Alert.alert(
-        "Brak danych kursu",
-        "Nie znaleziono identyfikatorów języków dla tego kursu."
-      );
-      return;
-    }
-
-    try {
-      const deleted = await resetReviewsForPair(
-        matchingCourse.sourceLangId,
-        matchingCourse.targetLangId
-      );
-      Alert.alert(
-        "Zresetowano powtórki",
-        deleted > 0
-          ? `Usunięto ${deleted} wpisów powtórek dla tego kursu.`
-          : "Nie było zapisanych powtórek do usunięcia."
-      );
-    } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować powtórek.");
-    } finally {
-      setResettingReviews(false);
-    }
+    Alert.alert(
+      "Reset powtórek",
+      "Powtórki dla kursów wbudowanych są wyłączone w nowym formacie."
+    );
+    setResettingReviews(false);
   };
 
   const handleResetReviews = () => {
@@ -284,13 +261,9 @@ function BuiltinCourseEditor({
         normalizedLevel ?? "A1"
       );
       await AsyncStorage.removeItem(`boxes:${scopeId}`);
-      await resetReviewsForPair(
-        matchingCourse.sourceLangId,
-        matchingCourse.targetLangId
-      );
       Alert.alert(
         "Reset całkowity",
-        "Wyczyszczono pudełka, powtórki i przywrócono fiszki jako nieznane."
+        "Wyczyszczono pudełka i przywrócono fiszki jako nieznane."
       );
     } catch {
       Alert.alert("Błąd", "Nie udało się wykonać pełnego resetu.");

@@ -11,6 +11,17 @@ import * as FileSystem from "expo-file-system/legacy";
 import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 
+async function tableExists(
+  db: Awaited<ReturnType<typeof getDB>>,
+  tableName: string
+): Promise<boolean> {
+  const row = await db.getFirstAsync<{ name: string }>(
+    `SELECT name FROM sqlite_master WHERE type='table' AND name = ? LIMIT 1;`,
+    tableName
+  );
+  return Boolean(row?.name);
+}
+
 export type BuiltinReviewExportRow = {
   wordId: number;
   sourceLangId: number;
@@ -42,6 +53,7 @@ export type UserDataExport = {
   boxesSnapshots: Record<string, SavedBoxesV2>;
   customBoxesSnapshots: Record<string, SavedBoxesV2>;
   customCourses: CustomCourseExport[];
+  officialCourses?: CustomCourseExport[];
 };
 
 async function collectBoxesSnapshots(prefixes: string[]): Promise<
@@ -75,47 +87,59 @@ async function collectBoxesSnapshots(prefixes: string[]): Promise<
 
 export async function buildUserDataExport(): Promise<UserDataExport> {
   const db = await getDB();
-
-  const builtinReviews = await db.getAllAsync<BuiltinReviewExportRow>(
-    `SELECT
-       word_id        AS wordId,
-       source_lang_id AS sourceLangId,
-       target_lang_id AS targetLangId,
-       level          AS level,
-       stage          AS stage,
-       learned_at     AS learnedAt,
-       next_review    AS nextReview
-     FROM reviews
-     ORDER BY source_lang_id, target_lang_id, level, word_id;`
-  );
-
-  const customCourses = (await getCustomCourses()).filter(
-    (course) => !course.isOfficial
-  );
-  const customCoursesExport: CustomCourseExport[] = [];
-
-  for (const course of customCourses) {
-    const [flashcards, reviews] = await Promise.all([
-      getCustomFlashcards(course.id),
-      db.getAllAsync<CustomReviewExportRow>(
+  const allCourses = await getCustomCourses();
+  const hasBuiltinReviewsTable = await tableExists(db, "reviews");
+  const builtinReviews = hasBuiltinReviewsTable
+    ? await db.getAllAsync<BuiltinReviewExportRow>(
         `SELECT
-           flashcard_id AS flashcardId,
-           course_id    AS courseId,
-           stage        AS stage,
-           learned_at   AS learnedAt,
-           next_review  AS nextReview
-         FROM custom_reviews
-         WHERE course_id = ?
-         ORDER BY flashcard_id ASC;`,
-        course.id
-      ),
-    ]);
-    customCoursesExport.push({
-      course,
-      flashcards,
-      reviews,
-    });
-  }
+           word_id        AS wordId,
+           source_lang_id AS sourceLangId,
+           target_lang_id AS targetLangId,
+           level          AS level,
+           stage          AS stage,
+           learned_at     AS learnedAt,
+           next_review    AS nextReview
+         FROM reviews
+         ORDER BY source_lang_id, target_lang_id, level, word_id;`
+      )
+    : [];
+
+  const customCourses = allCourses.filter((course) => !course.isOfficial);
+  const officialCourses = allCourses.filter((course) => course.isOfficial);
+
+  const buildCoursesExport = async (
+    courses: CustomCourseRecord[]
+  ): Promise<CustomCourseExport[]> => {
+    const exports: CustomCourseExport[] = [];
+    for (const course of courses) {
+      const [flashcards, reviews] = await Promise.all([
+        getCustomFlashcards(course.id),
+        db.getAllAsync<CustomReviewExportRow>(
+          `SELECT
+             flashcard_id AS flashcardId,
+             course_id    AS courseId,
+             stage        AS stage,
+             learned_at   AS learnedAt,
+             next_review  AS nextReview
+           FROM custom_reviews
+           WHERE course_id = ?
+           ORDER BY flashcard_id ASC;`,
+          course.id
+        ),
+      ]);
+      exports.push({
+        course,
+        flashcards,
+        reviews,
+      });
+    }
+    return exports;
+  };
+
+  const [customCoursesExport, officialCoursesExport] = await Promise.all([
+    buildCoursesExport(customCourses),
+    buildCoursesExport(officialCourses),
+  ]);
 
   const [boxesSnapshots, customBoxesSnapshots] = await Promise.all([
     collectBoxesSnapshots(["boxes:"]),
@@ -129,6 +153,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     boxesSnapshots,
     customBoxesSnapshots,
     customCourses: customCoursesExport,
+    officialCourses: officialCoursesExport,
   };
 }
 

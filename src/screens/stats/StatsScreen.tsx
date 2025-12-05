@@ -8,7 +8,7 @@ import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/Activit
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
-import { getDailyLearnedCountsBuiltin, getDailyLearnedCountsCustom, getTotalLearningTimeMs } from "@/src/db/sqlite/db";
+import { getDailyLearnedCountsCustom, getTotalLearningTimeMs } from "@/src/db/sqlite/db";
 
 export default function StatsScreen() {
   const styles = useStyles();
@@ -30,17 +30,10 @@ export default function StatsScreen() {
       start.setDate(start.getDate() - 89);
       start.setHours(0, 0, 0, 0);
       try {
-        const [builtin, custom] = await Promise.all([
-          getDailyLearnedCountsBuiltin(start.getTime(), end.getTime()),
-          getDailyLearnedCountsCustom(start.getTime(), end.getTime()),
-        ]);
+        const custom = await getDailyLearnedCountsCustom(start.getTime(), end.getTime());
         if (!mounted) return;
-        // Merge builtin + custom by date
-        const map = new Map<string, number>();
-        for (const it of builtin) map.set(it.date, (map.get(it.date) ?? 0) + it.count);
-        for (const it of custom) map.set(it.date, (map.get(it.date) ?? 0) + it.count);
-        const arr: HeatmapDay[] = Array.from(map.entries())
-          .map(([date, count]) => ({ date, count }))
+        const arr: HeatmapDay[] = custom
+          .map(({ date, count }) => ({ date, count }))
           .sort((a, b) => a.date.localeCompare(b.date));
         setHeatmapData(arr);
       } catch {

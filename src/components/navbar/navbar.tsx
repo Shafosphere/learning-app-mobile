@@ -7,7 +7,6 @@ import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
-  countDueReviewsByLevel,
   getCustomCourseById,
   getCustomCoursesWithCardCounts,
   type CustomCourseRecord,
@@ -55,7 +54,6 @@ export default function Navbar({ children }: NavbarProps) {
     selectedLevel,
     activeCourse,
     colors,
-    courses,
     pinnedOfficialCourseIds,
     setActiveCustomCourseId,
   } = useSettings();
@@ -181,36 +179,6 @@ export default function Navbar({ children }: NavbarProps) {
     try {
       let total = 0;
 
-      const builtinCounts = await Promise.all(
-        courses.map(async (course) => {
-          const srcId = course.sourceLangId;
-          const tgtId = course.targetLangId;
-          if (srcId == null || tgtId == null) {
-            return 0;
-          }
-          try {
-            const counts = await countDueReviewsByLevel(srcId, tgtId, now);
-            if (course.level) {
-              return counts[course.level] ?? 0;
-            }
-            let sum = 0;
-            for (const value of Object.values(counts)) {
-              sum += value | 0;
-            }
-            return sum;
-          } catch (error) {
-            console.warn(
-              `[Navbar] Failed to count reviews for ${srcId} - ${tgtId}`,
-              error
-            );
-            return 0;
-          }
-        })
-      );
-      for (const count of builtinCounts) {
-        total += count;
-      }
-
       const customRows = await getCustomCoursesWithCardCounts();
       const officialIds = new Set(pinnedOfficialCourseIds);
       const customCoursesToCount = customRows.filter((course) => {
@@ -244,7 +212,7 @@ export default function Navbar({ children }: NavbarProps) {
       console.warn("[Navbar] Failed to refresh review count", error);
       setDueReviewCount(0);
     }
-  }, [courses, pinnedOfficialCourseIds]);
+  }, [pinnedOfficialCourseIds]);
 
   const courseGraphic = displayedCustomCourse ? (
     <View style={styles.customCourseIconWrapper}>
@@ -306,7 +274,7 @@ export default function Navbar({ children }: NavbarProps) {
       return;
     }
 
-    router.push("/level");
+    router.push("/coursepanel");
   };
   useEffect(() => {
     let cancelled = false;

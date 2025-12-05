@@ -7,7 +7,36 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     // backgroundColor: colors.my_yellow,
     gap: 15,
-    marginTop: 15,
+    // marginTop: 5,
+  },
+  hintContainer: {
+    width: 325,
+    // backgroundColor: colors.my_yellow,
+    height: 40,
+  },
+  hintMarquee: {
+    width: "100%",
+  },
+  dots: {
+    color: colors.paragraph,
+    fontSize: 36,
+    width: 325,
+    textAlign: "center",
+    // backgroundColor: colors.my_yellow,
+  },
+  hint: {
+    color: colors.paragraph,
+    fontSize: 24,
+    width: 325,
+    // backgroundColor: colors.my_yellow,
+  },
+  hintInput: {
+    width: 325,
+    borderBottomColor: colors.border,
+    borderBottomWidth: 2,
+    paddingVertical: 6,
+    fontSize: 18,
+    color: colors.paragraph,
   },
   card: {
     height: 120,

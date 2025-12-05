@@ -135,14 +135,6 @@ export default function ActivityHeatmap({ data, days = 90, onSelect }: Props) {
     return scale[idx];
   };
 
-  const monthLabel = useMemo(() => {
-    const lastDate = daysArr[daysArr.length - 1]?.date;
-    if (!lastDate) return "";
-    const d = new Date(lastDate);
-    if (Number.isNaN(d.getTime())) return lastDate.slice(0, 7);
-    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-  }, [daysArr]);
-
   const weeksCount = weeks.length || 1;
   const baseGap = 6;
   const gapFactor = 0.25;

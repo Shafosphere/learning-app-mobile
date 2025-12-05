@@ -4,12 +4,9 @@ import { useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   getDueCustomReviewFlashcards,
-  getDueReviewWordsBatch,
-  getRandomTranslationsForLevel,
 } from "@/src/db/sqlite/db";
 import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
-import MyButton from "@/src/components/button/button";
 import { useStyles } from "./brain-styles";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { buildSessionTemplate, MIN_SESSION_WORDS } from "./session-builder";
@@ -47,8 +44,7 @@ const mapCustomReviewToWord = (
 
 export default function BrainScreen() {
   const styles = useStyles();
-  const { activeCourse, activeCustomCourseId, selectedLevel, colors } =
-    useSettings();
+  const { activeCustomCourseId, colors } = useSettings();
   const router = useRouter();
   const [words, setWords] = useState<WordWithTranslations[]>([]);
   const [wordContexts, setWordContexts] = useState<
@@ -129,10 +125,11 @@ export default function BrainScreen() {
     let isMounted = true;
 
     const fetchWords = async () => {
-      if (!activeCustomCourseId && !activeCourse?.sourceLangId) {
+      if (activeCustomCourseId == null) {
         if (isMounted) {
           setWords([]);
           setWordContexts({});
+          setError("Wybierz kurs do powtórek.");
           setLoading(false);
         }
         return;
@@ -143,43 +140,19 @@ export default function BrainScreen() {
 
       try {
         const now = Date.now();
-        let result: WordWithTranslations[] = [];
         const contexts: Record<number, SessionWordContext> = {};
-
-        if (activeCustomCourseId != null) {
-          const rows = await getDueCustomReviewFlashcards(
-            activeCustomCourseId,
-            50,
-            now
-          );
-          result = rows.map((row) => {
-            contexts[row.id] = {
-              kind: "custom",
-              courseId: row.courseId,
-            };
-            return mapCustomReviewToWord(row);
-          });
-        } else {
-          const srcId = activeCourse?.sourceLangId ?? null;
-          const tgtId = activeCourse?.targetLangId ?? null;
-          if (srcId && tgtId && selectedLevel) {
-            result = await getDueReviewWordsBatch(
-              srcId,
-              tgtId,
-              selectedLevel,
-              50,
-              now
-            );
-            result.forEach((word) => {
-              contexts[word.id] = {
-                kind: "official",
-                sourceLangId: srcId,
-                targetLangId: tgtId,
-                level: selectedLevel,
-              };
-            });
-          }
-        }
+        const rows = await getDueCustomReviewFlashcards(
+          activeCustomCourseId,
+          50,
+          now
+        );
+        const result = rows.map((row) => {
+          contexts[row.id] = {
+            kind: "custom",
+            courseId: row.courseId,
+          };
+          return mapCustomReviewToWord(row);
+        });
 
         if (isMounted) {
           setWords(result);
@@ -205,67 +178,18 @@ export default function BrainScreen() {
       isMounted = false;
     };
   }, [
-    activeCourse?.sourceLangId,
-    activeCourse?.targetLangId,
     activeCustomCourseId,
-    selectedLevel,
   ]);
 
   // Supplementary translations pulled per CEFR level for Get a Pair
   useEffect(() => {
-    let isMounted = true;
-
-    const loadLevelTranslations = async () => {
-      if (
-        !activeCourse?.sourceLangId ||
-        !activeCourse?.targetLangId ||
-        !selectedLevel ||
-        sanitizedWords.length === 0
-      ) {
-        if (isMounted) {
-          setLevelTranslations([]);
-        }
-        return;
-      }
-
-      try {
-        const translations = await getRandomTranslationsForLevel(
-          activeCourse.sourceLangId,
-          activeCourse.targetLangId,
-          selectedLevel,
-          150,
-          sanitizedWords.map((word) => word.id)
-        );
-
-        if (isMounted) {
-          const unique = Array.from(
-            new Set(
-              translations
-                .map((value) => value.trim())
-                .filter((value) => value.length > 0)
-            )
-          );
-          setLevelTranslations(unique);
-        }
-      } catch (err) {
-        console.warn("Failed to load level translations for get a pair", err);
-        if (isMounted) {
-          setLevelTranslations([]);
-        }
-      }
-    };
-
-    loadLevelTranslations();
-
-    return () => {
-      isMounted = false;
-    };
-  }, [
-    activeCourse?.sourceLangId,
-    activeCourse?.targetLangId,
-    selectedLevel,
-    sanitizedWords,
-  ]);
+    const translations = sanitizedWords
+      .flatMap((word) => word.translations)
+      .map((value) => value.trim())
+      .filter((value) => value.length > 0);
+    const unique = Array.from(new Set(translations));
+    setLevelTranslations(unique);
+  }, [sanitizedWords]);
 
   const handleOpenAnimationDemo = useCallback(() => {
     const payload = sanitizedWords.slice(0, 15).map((word) => ({

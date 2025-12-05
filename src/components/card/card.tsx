@@ -1,4 +1,4 @@
-import { Platform, Pressable, Text, TextInput, View } from "react-native";
+import { Alert, Platform, Pressable, Text, TextInput, View } from "react-native";
 import { useStyles } from "./card-styles";
 import MyButton from "../button/button";
 import { WordWithTranslations } from "@/src/types/boxes";
@@ -14,6 +14,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
+import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 
@@ -24,7 +25,6 @@ type CardProps = {
   setAnswer: React.Dispatch<React.SetStateAction<string>>;
   setResult: React.Dispatch<React.SetStateAction<boolean | null>>;
   result: boolean | null;
-  confirm: () => void;
   correction: {
     awers: string;
     rewers: string;
@@ -38,6 +38,11 @@ type CardProps = {
   introMode?: boolean;
   setCorrectionRewers?: (value: string) => void;
   confirm: (selectedTranslation?: string) => void;
+  onHintUpdate?: (
+    cardId: number,
+    hintFront: string | null,
+    hintBack: string | null
+  ) => void;
 };
 
 export default function Card({
@@ -53,6 +58,7 @@ export default function Card({
   downloadDisabled = false,
   introMode = false,
   setCorrectionRewers,
+  onHintUpdate,
 }: CardProps) {
   const styles = useStyles();
   const { ignoreDiacriticsInSpellcheck, flashcardsSuggestionsEnabled } =
@@ -124,6 +130,22 @@ export default function Card({
     isCorrectionInput1Focused;
   const showHangulKeyboard =
     showMainHangulKeyboard || showCorrectionHangulKeyboard;
+  const [isEditingHint, setIsEditingHint] = useState(false);
+  const [hintDraft, setHintDraft] = useState("");
+  const hintDialogVisible = useRef(false);
+  const currentHint = useMemo(() => {
+    if (!selectedItem) return null;
+    return reversed
+      ? selectedItem.hintBack ?? null
+      : selectedItem.hintFront ?? null;
+  }, [
+    reversed,
+    selectedItem,
+  ]);
+  const shouldMarqueeHint = useMemo(() => {
+    const len = currentHint?.length ?? 0;
+    return len > 28;
+  }, [currentHint]);
 
   // useEffect(() => {
   //   console.log("[Card] reversed:", reversed, {
@@ -208,6 +230,13 @@ export default function Card({
       shouldUseHangulKeyboardCorrection1,
     ]
   );
+
+  const handleConfirm = useCallback(() => {
+    if (selectedItem?.translations && selectedItem.translations.length > 1) {
+      setTranslations(0);
+    }
+    confirm(rewers);
+  }, [confirm, rewers, selectedItem?.translations, setTranslations]);
 
   const hangulOverlayConfig = useMemo(() => {
     if (showMainHangulKeyboard) {
@@ -325,12 +354,11 @@ export default function Card({
     previousCorrectionInput2.current = correction?.input2 ?? "";
   }, [correction?.input2]);
 
-  function handleConfirm() {
-    if (selectedItem?.translations && selectedItem.translations.length > 1) {
-      setTranslations(0);
-    }
-    confirm(rewers);
-  }
+  useEffect(() => {
+    setIsEditingHint(false);
+    setHintDraft(currentHint ?? "");
+    hintDialogVisible.current = false;
+  }, [currentHint, reversed, selectedItem?.id]);
 
   function normalizeChar(char: string | undefined): string {
     if (!char) return "";
@@ -368,6 +396,77 @@ export default function Card({
       );
     });
   }
+
+  const startHintEditing = useCallback(() => {
+    if (!selectedItem || !onHintUpdate) return;
+    setHintDraft(currentHint ?? "");
+    setIsEditingHint(true);
+  }, [currentHint, onHintUpdate, selectedItem]);
+
+  const applyHintToSides = useCallback(
+    (applyToBoth: boolean) => {
+      if (!selectedItem) {
+        setIsEditingHint(false);
+        return;
+      }
+      const normalized = hintDraft.trim();
+      const value = normalized.length > 0 ? normalized : null;
+      if (!onHintUpdate) {
+        setIsEditingHint(false);
+        return;
+      }
+      const nextFront = applyToBoth
+        ? value
+        : reversed
+          ? selectedItem.hintFront ?? null
+          : value;
+      const nextBack = applyToBoth
+        ? value
+        : reversed
+          ? value
+          : selectedItem.hintBack ?? null;
+      onHintUpdate(selectedItem.id, nextFront, nextBack);
+      setIsEditingHint(false);
+      setHintDraft(value ?? "");
+    },
+    [hintDraft, onHintUpdate, reversed, selectedItem]
+  );
+
+  const finishHintEditing = useCallback(() => {
+    if (!selectedItem) return;
+    const normalized = hintDraft.trim();
+    if (!normalized) {
+      setIsEditingHint(false);
+      setHintDraft("");
+      return;
+    }
+    if (hintDialogVisible.current) return;
+    hintDialogVisible.current = true;
+    Alert.alert("Gdzie wyświetlić podpowiedź?", undefined, [
+      {
+        text: "Anuluj",
+        style: "cancel",
+        onPress: () => {
+          hintDialogVisible.current = false;
+          setIsEditingHint(false);
+        },
+      },
+      {
+        text: "Tylko tu",
+        onPress: () => {
+          hintDialogVisible.current = false;
+          applyHintToSides(false);
+        },
+      },
+      {
+        text: "Obie strony",
+        onPress: () => {
+          hintDialogVisible.current = false;
+          applyHintToSides(true);
+        },
+      },
+    ]);
+  }, [applyHintToSides, hintDraft, selectedItem]);
 
   function showCardContent() {
     if (correction && (result === false || isIntroMode)) {
@@ -527,6 +626,40 @@ export default function Card({
 
   return (
     <View style={styles.container}>
+      <View style={styles.hintContainer}>
+        {!isEditingHint ? (
+          <Pressable
+            onPress={startHintEditing}
+            hitSlop={8}
+            disabled={!selectedItem || !onHintUpdate}
+          >
+            {currentHint ? (
+              shouldMarqueeHint ? (
+                <CourseTitleMarquee
+                  text={currentHint}
+                  textStyle={styles.hint}
+                  containerStyle={styles.hintMarquee}
+                />
+              ) : (
+                <Text style={styles.hint}>{currentHint}</Text>
+              )
+            ) : (
+              <Text style={styles.dots}>...</Text>
+            )}
+          </Pressable>
+        ) : (
+          <TextInput
+            value={hintDraft}
+            onChangeText={setHintDraft}
+            onBlur={finishHintEditing}
+            onSubmitEditing={finishHintEditing}
+            placeholder="Wpisz podpowiedź..."
+            style={styles.hintInput}
+            autoFocus
+            returnKeyType="done"
+          />
+        )}
+      </View>
       <View style={cardContainerStyle}>{showCardContent()}</View>
       <HangulKeyboardOverlay
         visible={showHangulKeyboard}

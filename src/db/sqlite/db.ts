@@ -11,7 +11,6 @@ export * from "./core";
 export * from "./init";
 export * from "./repositories/analytics";
 export * from "./repositories/courses";
-export * from "./repositories/dictionary";
 export * from "./repositories/flashcards";
 export * from "./repositories/reviews";
 export * from "./utils";

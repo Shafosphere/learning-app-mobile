@@ -8,8 +8,6 @@ import { useStyles } from "./CoursesScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
-  countDueReviewsByLevel,
-  countTotalDueReviews,
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
@@ -19,75 +17,14 @@ import {
   resolveCourseIconProps,
 } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
-import type { CEFRLevel } from "@/src/types/language";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
-
-const LANGUAGE_LABELS_BY_TARGET: Record<string, Record<string, string>> = {
-  pl: {
-    en: "angielski",
-    fr: "francuski",
-    es: "hiszpański",
-    de: "niemiecki",
-    pm: "francuski",
-    kr: "koreański",
-  },
-};
-
-const FALLBACK_LANGUAGE_LABELS: Record<string, string> = {
-  pl: "polski",
-  en: "angielski",
-  fr: "francuski",
-  es: "hiszpański",
-  de: "niemiecki",
-  pm: "francuski",
-  kr: "koreański",
-};
-
-const LEVEL_ORDER: Record<CEFRLevel, number> = {
-  A1: 0,
-  A2: 1,
-  B1: 2,
-  B2: 3,
-  C1: 4,
-  C2: 5,
-};
-const MAX_LEVEL_ORDER = Math.max(...Object.values(LEVEL_ORDER)) + 1;
-
-const resolveLanguageLabel = (
-  targetLang: string | null | undefined,
-  sourceLang: string | null | undefined
-): string => {
-  if (sourceLang) {
-    const targetLabels = targetLang
-      ? LANGUAGE_LABELS_BY_TARGET[targetLang]
-      : undefined;
-    if (targetLabels?.[sourceLang]) {
-      return targetLabels[sourceLang];
-    }
-    const fallbackLabel = FALLBACK_LANGUAGE_LABELS[sourceLang];
-    if (fallbackLabel) {
-      return fallbackLabel;
-    }
-    return sourceLang.toUpperCase();
-  }
-  return "unknown";
-};
 
 type OfficialCourseReviewItem = CustomCourseSummary & {
   sourceLang: string | null;
   targetLang: string | null;
   isMini: boolean;
-};
-
-type BuiltInGroup = {
-  key: string;
-  targetLang: string | null;
-  sourceLang: string | null;
-  targetFlag?: ReturnType<typeof getFlagSource>;
-  sourceFlag?: ReturnType<typeof getFlagSource>;
-  items: { courseIndex: number; courseLevel: string | null }[];
 };
 
 type OfficialGroup = {
@@ -99,31 +36,14 @@ type OfficialGroup = {
   courses: OfficialCourseReviewItem[];
 };
 
-type CombinedGroup = {
-  key: string;
-  targetLang: string | null;
-  sourceLang: string | null;
-  targetFlag?: ReturnType<typeof getFlagSource>;
-  sourceFlag?: ReturnType<typeof getFlagSource>;
-  builtin: BuiltInGroup["items"];
-  official: OfficialGroup["courses"];
-};
-
 export default function CoursesReviewScreen() {
   const styles = useStyles();
   const router = useRouter();
   const {
-    courses,
-    setActiveCourseIdx,
     setActiveCustomCourseId,
-    setLevel,
     colors,
     pinnedOfficialCourseIds,
   } = useSettings();
-
-  const [builtInCounts, setBuiltInCounts] = useState<Record<number, number>>(
-    {}
-  );
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
   const [customCounts, setCustomCounts] = useState<Record<number, number>>({});
   const [officialCourses, setOfficialCourses] = useState<
@@ -160,38 +80,6 @@ export default function CoursesReviewScreen() {
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
-
-    const builtInEntries = await Promise.all(
-      courses.map(async (course, index) => {
-        const srcId = course.sourceLangId;
-        const tgtId = course.targetLangId;
-        if (srcId == null || tgtId == null) {
-          return [index, 0] as const;
-        }
-        try {
-          if (course.level) {
-            const counts = await countDueReviewsByLevel(srcId, tgtId, now);
-            const levelKey = course.level as CEFRLevel;
-            const count = counts[levelKey] ?? 0;
-            return [index, count] as const;
-          }
-          const count = await countTotalDueReviews(srcId, tgtId, now);
-          return [index, count] as const;
-        } catch (error) {
-          console.warn(
-            `Failed to count reviews for course ${srcId}-${tgtId}`,
-            error
-          );
-          return [index, 0] as const;
-        }
-      })
-    );
-
-    const nextBuiltIn: Record<number, number> = {};
-    for (const [idx, count] of builtInEntries) {
-      nextBuiltIn[idx] = count;
-    }
-    setBuiltInCounts(nextBuiltIn);
 
     try {
       const [allCustomRows, officialRows] = await Promise.all([
@@ -268,7 +156,7 @@ export default function CoursesReviewScreen() {
       setOfficialCourses([]);
       setOfficialCounts({});
     }
-  }, [courses]);
+  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -288,26 +176,6 @@ export default function CoursesReviewScreen() {
         isMounted = false;
       };
     }, [refreshData])
-  );
-
-  const handleSelectCourse = useCallback(
-    (index: number) => {
-      const course = courses[index];
-      if (!course) {
-        return;
-      }
-      void (async () => {
-        if (course.level) {
-          setLevel(course.level);
-        }
-        await Promise.all([
-          setActiveCourseIdx(index),
-          setActiveCustomCourseId(null),
-        ]);
-        router.push("/review/brain");
-      })();
-    },
-    [courses, router, setActiveCourseIdx, setActiveCustomCourseId, setLevel]
   );
 
   const handleSelectCustomCourse = useCallback(
@@ -342,57 +210,6 @@ export default function CoursesReviewScreen() {
     (course) =>
       pinnedOfficialCourseIds.includes(course.id) && course.reviewsEnabled
   );
-  const builtInGroups = useMemo<BuiltInGroup[]>(() => {
-    const groups = new Map<string, BuiltInGroup>();
-
-    const ensureGroup = (
-      targetLang: string | null | undefined,
-      sourceLang: string | null | undefined
-    ): BuiltInGroup => {
-      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
-      let group = groups.get(key);
-      if (!group) {
-        group = {
-          key,
-          targetLang: targetLang ?? null,
-          sourceLang: sourceLang ?? null,
-          targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
-          sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
-          items: [],
-        };
-        groups.set(key, group);
-      }
-      return group;
-    };
-
-    courses.forEach((course, index) => {
-      const group = ensureGroup(course.targetLang, course.sourceLang);
-      group.items.push({
-        courseIndex: index,
-        courseLevel: course.level ?? null,
-      });
-    });
-
-    return Array.from(groups.values()).map((group) => {
-      const items = [...group.items].sort((a, b) => {
-        const rankA =
-          (a.courseLevel && LEVEL_ORDER[a.courseLevel as CEFRLevel]) ??
-          MAX_LEVEL_ORDER;
-        const rankB =
-          (b.courseLevel && LEVEL_ORDER[b.courseLevel as CEFRLevel]) ??
-          MAX_LEVEL_ORDER;
-        if (rankA !== rankB) {
-          return Number(rankA) - Number(rankB);
-        }
-        const labelA = a.courseLevel ?? "";
-        const labelB = b.courseLevel ?? "";
-        return labelA.localeCompare(labelB);
-      });
-
-      return { ...group, items };
-    });
-  }, [courses]);
-
   const officialGroups = useMemo<OfficialGroup[]>(() => {
     const groups = new Map<string, OfficialGroup>();
 
@@ -421,70 +238,6 @@ export default function CoursesReviewScreen() {
       group.courses.push(course);
     });
 
-    return Array.from(groups.values());
-  }, [visibleOfficialCourses]);
-
-  const combinedGroups = useMemo<CombinedGroup[]>(() => {
-    const map = new Map<string, CombinedGroup>();
-
-    const ensureGroup = (
-      targetLang: string | null,
-      sourceLang: string | null,
-      targetFlag?: ReturnType<typeof getFlagSource>,
-      sourceFlag?: ReturnType<typeof getFlagSource>
-    ): CombinedGroup => {
-      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
-      let group = map.get(key);
-      if (!group) {
-        group = {
-          key,
-          targetLang,
-          sourceLang,
-          targetFlag:
-            targetFlag ?? (targetLang ? getFlagSource(targetLang) : undefined),
-          sourceFlag:
-            sourceFlag ?? (sourceLang ? getFlagSource(sourceLang) : undefined),
-          builtin: [],
-          official: [],
-        };
-        map.set(key, group);
-      } else {
-        if (!group.targetFlag && targetFlag) {
-          group.targetFlag = targetFlag;
-        }
-        if (!group.sourceFlag && sourceFlag) {
-          group.sourceFlag = sourceFlag;
-        }
-        if (targetLang && !group.targetLang) {
-          group.targetLang = targetLang;
-        }
-        if (sourceLang && !group.sourceLang) {
-          group.sourceLang = sourceLang;
-        }
-      }
-      return group;
-    };
-
-    builtInGroups.forEach((group) => {
-      const combined = ensureGroup(
-        group.targetLang,
-        group.sourceLang,
-        group.targetFlag,
-        group.sourceFlag
-      );
-      combined.builtin = [...group.items];
-    });
-
-    officialGroups.forEach((group) => {
-      const combined = ensureGroup(
-        group.targetLang,
-        group.sourceLang,
-        group.targetFlag,
-        group.sourceFlag
-      );
-      combined.official = [...combined.official, ...group.courses];
-    });
-
     const compareLangs = (
       a: string | null | undefined,
       b: string | null | undefined
@@ -494,14 +247,13 @@ export default function CoursesReviewScreen() {
       return first.localeCompare(second);
     };
 
-    return Array.from(map.values())
-      .filter((group) => group.builtin.length > 0 || group.official.length > 0)
-      .sort((a, b) => {
-        const targetDiff = compareLangs(a.targetLang, b.targetLang);
-        if (targetDiff !== 0) return targetDiff;
-        return compareLangs(a.sourceLang, b.sourceLang);
-      });
-  }, [builtInGroups, officialGroups]);
+    return Array.from(groups.values()).sort((a, b) => {
+      const targetDiff = compareLangs(a.targetLang, b.targetLang);
+      if (targetDiff !== 0) return targetDiff;
+      return compareLangs(a.sourceLang, b.sourceLang);
+    });
+  }, [visibleOfficialCourses]);
+  const hasOfficialGroups = officialGroups.length > 0;
 
   return (
     <View style={styles.container}>
@@ -516,17 +268,17 @@ export default function CoursesReviewScreen() {
 
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>Powtórki</Text>
-            {combinedGroups.map((group) => {
+            {officialGroups.map((group) => {
               const targetCode = group.targetLang
                 ? group.targetLang.toUpperCase()
                 : "?";
               const sourceCode = group.sourceLang
                 ? group.sourceLang.toUpperCase()
                 : "?";
-              const regularOfficial = group.official.filter(
+              const regularOfficial = (group.courses ?? []).filter(
                 (course) => course.isMini === false
               );
-              const miniOfficial = group.official.filter(
+              const miniOfficial = (group.courses ?? []).filter(
                 (course) => course.isMini !== false
               );
               const renderOfficialSection = (
@@ -627,53 +379,12 @@ export default function CoursesReviewScreen() {
                     </View>
                   </View>
 
-                  {group.builtin.length > 0 ? (
-                    <View style={styles.courseGrid}>
-                      {group.builtin.map(({ courseIndex, courseLevel }) => {
-                        const course = courses[courseIndex];
-                        const builtInCount = builtInCounts[courseIndex] ?? 0;
-                        const sourceFlag = getFlagSource(course.sourceLang);
-                        const levelLabel =
-                          courseLevel ??
-                          resolveLanguageLabel(
-                            course.targetLang,
-                            course.sourceLang
-                          );
-
-                      return (
-                        <Pressable
-                          key={`${course.sourceLang}-${course.targetLang}-${
-                            courseLevel ?? "default"
-                          }-${courseIndex}`}
-                          style={[
-                            styles.courseCard,
-                            builtInCount === 0 && styles.courseCardDisabled,
-                          ]}
-                          disabled={builtInCount === 0}
-                          accessibilityState={{ disabled: builtInCount === 0 }}
-                          onPress={() => handleSelectCourse(courseIndex)}
-                        >
-                          {sourceFlag ? (
-                            <Image style={styles.flag} source={sourceFlag} />
-                          ) : null}
-                            <Text style={styles.courseCardText}>
-                              {levelLabel}
-                            </Text>
-                            <View style={styles.courseCount}>
-                              {renderCount(builtInCount)}
-                            </View>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  ) : null}
-
                   {renderOfficialSection("Kursy", regularOfficial)}
                   {renderOfficialSection("Mini kursy", miniOfficial)}
                 </View>
               );
             })}
-            {combinedGroups.length === 0 ? (
+            {!hasOfficialGroups ? (
               <Text style={styles.emptyText}>
                 Nie masz jeszcze przypiętych kursów do powtórek.
               </Text>

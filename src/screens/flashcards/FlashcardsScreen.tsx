@@ -5,31 +5,99 @@ import Confetti from "@/src/components/confetti/Confetti";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { scheduleReview } from "@/src/db/sqlite/db";
-import { getRandomWordsBatch } from "@/src/db/sqlite/dbGenerator";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
+import type {
+  CustomCourseRecord,
+  CustomFlashcardRecord,
+} from "@/src/db/sqlite/db";
+import {
+  getCustomCourseById,
+  getCustomFlashcards,
+  scheduleCustomReview,
+  updateCustomFlashcardHints,
+} from "@/src/db/sqlite/db";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import { playFeedbackSound } from "@/src/utils/soundPlayer";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
-import { useCallback, useEffect, useState } from "react";
-import { Text, View } from "react-native";
+import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
+
+function pickRandomBatch<T>(items: T[], size: number): T[] {
+  const normalizedSize = Math.max(1, size);
+  const pool = [...items];
+
+  for (let i = pool.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [pool[i], pool[j]] = [pool[j], pool[i]];
+  }
+
+  return pool.slice(0, normalizedSize);
+}
+
+function mapCustomCardToWord(
+  card: CustomFlashcardRecord
+): WordWithTranslations {
+  console.log("Converting card:", {
+    id: card.id,
+    frontText: card.frontText,
+    flipped: card.flipped,
+  });
+  const front = card.frontText?.trim() ?? "";
+  const normalizedAnswers = (card.answers ?? [])
+    .map((answer) => answer.trim())
+    .filter((answer) => answer.length > 0);
+
+  const uniqueAnswers: string[] = [];
+  for (const answer of normalizedAnswers) {
+    if (!uniqueAnswers.includes(answer)) {
+      uniqueAnswers.push(answer);
+    }
+  }
+
+  const rawBack = card.backText ?? "";
+  const fallback = rawBack
+    .split(/[;,\n]/)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+  const defaultTranslation = rawBack.trim();
+  const translations =
+    uniqueAnswers.length > 0
+      ? uniqueAnswers
+      : fallback.length > 0
+        ? fallback
+        : [defaultTranslation];
+
+  const result = {
+    id: card.id,
+    text: front,
+    translations,
+    flipped: card.flipped,
+    hintFront: card.hintFront,
+    hintBack: card.hintBack,
+  };
+  console.log("Converted to WordWithTranslations:", result);
+  return result;
+}
 // import MediumBoxes from "@/src/components/box/mediumboxes";
-export default function FlashcardsScreen() {
+export default function Flashcards() {
   // const router = useRouter();
   const styles = useStyles();
   const {
-    selectedLevel,
-    activeCourse,
+    activeCustomCourseId,
     boxesLayout,
     flashcardsBatchSize,
     boxZeroEnabled,
     autoflowEnabled,
+    colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
+  const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const { IntroOverlay } = useFlashcardsIntro();
 
@@ -42,26 +110,23 @@ export default function FlashcardsScreen() {
   const {
     boxes,
     setBoxes,
-    // batchIndex,
-    setBatchIndex,
     isReady,
-    // resetSave,
-    saveNow,
     addUsedWordIds,
     removeUsedWordIds,
-    // progress,
-    totalWordsForLevel,
-  } = useBoxesPersistenceSnapshot({
-    sourceLangId: activeCourse?.sourceLangId ?? 0,
-    targetLangId: activeCourse?.targetLangId ?? 0,
-    level: selectedLevel ?? "A1",
-    autosave:
-      activeCourse?.sourceLangId != null &&
-      activeCourse?.targetLangId != null &&
-      !!selectedLevel,
-    saveDelayMs: 0,
-  });
+    setBatchIndex,
+    saveNow,
+  } =
+    useBoxesPersistenceSnapshot({
+      sourceLangId: activeCustomCourseId ?? 0,
+      targetLangId: activeCustomCourseId ?? 0,
+      level: `custom-${activeCustomCourseId ?? 0}`,
+      storageNamespace: "customBoxes",
+      autosave: activeCustomCourseId !== null,
+      saveDelayMs: 0,
+    });
 
+  const [customCourse, setCustomCourse] =
+    useState<CustomCourseRecord | null>(null);
   const checkSpelling = useSpellchecking();
   const {
     activeBox,
@@ -77,7 +142,10 @@ export default function FlashcardsScreen() {
     wrongInputChange,
     setCorrectionRewers,
     learned,
-    isBetweenCards,
+    setLearned,
+    resetInteractionState,
+    clearSelection,
+    updateSelectedItem,
   } = useFlashcardsInteraction({
     boxes,
     setBoxes,
@@ -85,18 +153,8 @@ export default function FlashcardsScreen() {
     addUsedWordIds,
     registerKnownWord,
     onWordPromotedOut: (word) => {
-      if (
-        activeCourse?.sourceLangId != null &&
-        activeCourse?.targetLangId != null &&
-        selectedLevel
-      ) {
-        void scheduleReview(
-          word.id,
-          activeCourse.sourceLangId,
-          activeCourse.targetLangId,
-          selectedLevel,
-          0
-        );
+      if (activeCustomCourseId != null && customCourse?.reviewsEnabled) {
+        void scheduleCustomReview(word.id, activeCustomCourseId, 0);
       }
     },
     onCorrectAnswer: (boxKey) => {
@@ -113,90 +171,73 @@ export default function FlashcardsScreen() {
     if (result === null) return;
     playFeedbackSound(result);
   }, [result]);
-  // const learnedPercent =
-  //   totalWordsForLevel > 0 ? learned.length / totalWordsForLevel : 0;
-  const introBoxLimitReached = boxZeroEnabled
-    ? boxes.boxZero.length >= 30
-    : boxes.boxOne.length >= 30;
 
-  const downloadData = useCallback(async () => {
-    if (introBoxLimitReached) {
-      return;
+  const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const totalCards = customCards.length;
+  const trackedIds = useMemo(() => {
+    const ids = new Set<number>();
+    for (const list of Object.values(boxes)) {
+      for (const item of list) ids.add(item.id);
     }
-    const prof = activeCourse;
-    if (!prof || prof.sourceLangId == null || prof.targetLangId == null) {
-      console.warn("Brak aktywnego kursu lub ID języków");
-      return;
-    }
+    for (const item of learned) ids.add(item.id);
+    return ids;
+  }, [boxes, learned]);
+  const allCardsDistributed = totalCards > 0 && trackedIds.size >= totalCards;
+  const totalCardsInBoxes = useMemo(() => {
+    return (
+      boxes.boxZero.length +
+      boxes.boxOne.length +
+      boxes.boxTwo.length +
+      boxes.boxThree.length +
+      boxes.boxFour.length +
+      boxes.boxFive.length
+    );
+  }, [boxes]);
 
-    const excludeIds = [
-      ...boxes.boxZero.map((x) => x.id),
-      ...boxes.boxOne.map((x) => x.id),
-      ...boxes.boxTwo.map((x) => x.id),
-      ...boxes.boxThree.map((x) => x.id),
-      ...boxes.boxFour.map((x) => x.id),
-      ...boxes.boxFive.map((x) => x.id),
-      ...learned.map((x) => x.id),
-    ];
+  const downloadData = useCallback(async (): Promise<void> => {
+    if (!customCards.length) return;
 
-    const batchData = await getRandomWordsBatch({
-      sourceLangId: prof.sourceLangId,
-      targetLangId: prof.targetLangId,
-      cefrLevel: selectedLevel as "A1" | "A2" | "B1" | "B2" | "C1" | "C2",
-      batchSize: (flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE),
-      excludeIds,
-    });
+    const remaining = customCards.filter((card) => !trackedIds.has(card.id));
+    if (remaining.length === 0) return;
+
+    const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
+    const nextBatch = pickRandomBatch(remaining, batchSize);
 
     setBoxes((prev) =>
       boxZeroEnabled
         ? {
           ...prev,
-          boxZero: [...prev.boxZero, ...batchData],
+          boxZero: [...prev.boxZero, ...nextBatch],
         }
         : {
           ...prev,
-          boxOne: [...prev.boxOne, ...batchData],
+          boxOne: [...prev.boxOne, ...nextBatch],
         }
     );
-    // Track used words when they are added to any box
-    addUsedWordIds(batchData.map((w) => w.id));
-    setBatchIndex((prev) => {
-      return prev + 1;
-    });
+    addUsedWordIds(nextBatch.map((card) => card.id));
+    setBatchIndex((prev) => prev + 1);
     await saveNow();
   }, [
-    activeCourse,
     addUsedWordIds,
     boxZeroEnabled,
-    boxes,
+    customCards,
     flashcardsBatchSize,
-    introBoxLimitReached,
-    learned,
     saveNow,
-    selectedLevel,
     setBatchIndex,
+    trackedIds,
     setBoxes,
   ]);
 
-  useEffect(() => {
-    if (boxZeroEnabled) return;
-    if (!boxes.boxZero.length) return;
+  const introBoxLimitReached = boxZeroEnabled
+    ? boxes.boxZero.length >= 30
+    : boxes.boxOne.length >= 30;
 
-    const wordsToReset = boxes.boxZero;
-    setBoxes((prev) => ({
-      ...prev,
-      boxZero: [],
-    }));
-    removeUsedWordIds(wordsToReset.map((word) => word.id));
-  }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
-
-  const introModeActive = boxZeroEnabled && activeBox === "boxZero";
   const correctionLocked = correction?.mode === "demote";
   const isAnswering =
-    selectedItem != null &&
-    result === null &&
-    correction?.mode !== "intro" &&
-    !isBetweenCards;
+    selectedItem != null && result === null && correction?.mode !== "intro";
   const resultPending = result !== null;
   const canAutoflowSwitch =
     !correctionLocked && !isAnswering && !resultPending;
@@ -211,26 +252,211 @@ export default function FlashcardsScreen() {
     isReady: isReady,
     downloadMore: downloadData,
     introBoxLimitReached,
-    totalFlashcardsInCourse: totalWordsForLevel,
+    totalFlashcardsInCourse: totalCards,
   });
 
-  if (
-    !activeCourse ||
-    activeCourse.sourceLangId == null ||
-    activeCourse.targetLangId == null ||
-    !selectedLevel
-  ) {
-    return (
-      <View style={styles.container}>
-        <Text allowFontScaling>Wybierz kurs i poziom.</Text>
+  useEffect(() => {
+    if (boxZeroEnabled) return;
+    if (!boxes.boxZero.length) return;
+
+    const wordsToReset = boxes.boxZero;
+    setBoxes((prev) => ({
+      ...prev,
+      boxZero: [],
+    }));
+    removeUsedWordIds(wordsToReset.map((word) => word.id));
+  }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
+
+  useEffect(() => {
+    if (!isFocused) return;
+
+    let isMounted = true;
+
+    if (activeCustomCourseId == null) {
+      setCustomCourse(null);
+      setCustomCards([]);
+      setLoadError(null);
+      setLoadedCourseId(null);
+      setIsLoadingData(false);
+      return () => {
+        isMounted = false;
+      };
+    }
+
+    const shouldShowLoader =
+      loadedCourseId !== activeCustomCourseId || customCards.length === 0;
+    setIsLoadingData(shouldShowLoader);
+    setLoadError(null);
+
+    void Promise.all([
+      getCustomCourseById(activeCustomCourseId),
+      getCustomFlashcards(activeCustomCourseId),
+    ])
+      .then(([courseRow, flashcardRows]) => {
+        if (!isMounted) return;
+        if (!courseRow) {
+          setCustomCourse(null);
+          setCustomCards([]);
+          setLoadError("Wybrany kurs nie istnieje.");
+          return;
+        }
+        console.log("Loading flashcards from DB:", flashcardRows);
+        setCustomCourse(courseRow);
+        const mapped = flashcardRows.map(mapCustomCardToWord);
+        // console.log('After mapping flashcards:', mapped);
+        setCustomCards(mapped);
+        setLoadedCourseId(activeCustomCourseId);
+      })
+      .catch((error) => {
+        console.error("Failed to load custom flashcards", error);
+        if (!isMounted) return;
+        setCustomCourse(null);
+        setCustomCards([]);
+        setLoadError("Nie udało się wczytać fiszek.");
+      })
+      .finally(() => {
+        if (isMounted) setIsLoadingData(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [activeCustomCourseId, isFocused, customCards.length, loadedCourseId]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (isLoadingData || customCards.length === 0) return;
+
+    const allowedIds = new Set(customCards.map((card) => card.id));
+
+    setBoxes((prev) => {
+      let mutated = false;
+      const sanitize = (list: WordWithTranslations[]) => {
+        const filtered = list.filter((item) => allowedIds.has(item.id));
+        if (filtered.length !== list.length) mutated = true;
+        return filtered;
+      };
+
+      const next: BoxesState = {
+        boxZero: sanitize(prev.boxZero),
+        boxOne: sanitize(prev.boxOne),
+        boxTwo: sanitize(prev.boxTwo),
+        boxThree: sanitize(prev.boxThree),
+        boxFour: sanitize(prev.boxFour),
+        boxFive: sanitize(prev.boxFive),
+      };
+      return mutated ? next : prev;
+    });
+
+    setLearned((current) => {
+      const filtered = current.filter((card) => allowedIds.has(card.id));
+      return filtered.length === current.length ? current : filtered;
+    });
+  }, [customCards, isReady, isLoadingData, learned, setBoxes, setLearned]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (isLoadingData) return;
+    if (activeCustomCourseId == null) return;
+    if (totalCardsInBoxes > 0) return;
+    if (allCardsDistributed) return;
+    if (!customCards.length) return;
+
+    void downloadData();
+  }, [
+    isReady,
+    isLoadingData,
+    activeCustomCourseId,
+    totalCardsInBoxes,
+    allCardsDistributed,
+    customCards,
+    downloadData,
+  ]);
+
+  useEffect(() => {
+    if (selectedItem && !customCards.some((card) => card.id === selectedItem.id)) {
+      clearSelection();
+    }
+  }, [clearSelection, customCards, selectedItem]);
+
+  const patchCardHints = useCallback(
+    (cardId: number, hintFront: string | null, hintBack: string | null) => {
+      const patcher = (item: WordWithTranslations) =>
+        item.id === cardId ? { ...item, hintFront, hintBack } : item;
+
+      setCustomCards((prev) => prev.map(patcher));
+      setBoxes((prev) => ({
+        boxZero: prev.boxZero.map(patcher),
+        boxOne: prev.boxOne.map(patcher),
+        boxTwo: prev.boxTwo.map(patcher),
+        boxThree: prev.boxThree.map(patcher),
+        boxFour: prev.boxFour.map(patcher),
+        boxFive: prev.boxFive.map(patcher),
+      }));
+      setLearned((prev) => prev.map(patcher));
+      updateSelectedItem((current) => patcher(current));
+    },
+    [setBoxes, setCustomCards, setLearned, updateSelectedItem]
+  );
+
+  const handleHintUpdate = useCallback(
+    async (cardId: number, hintFront: string | null, hintBack: string | null) => {
+      if (activeCustomCourseId == null) return;
+      patchCardHints(cardId, hintFront, hintBack);
+      try {
+        await updateCustomFlashcardHints(cardId, { hintFront, hintBack });
+      } catch (error) {
+        console.error("Failed to update flashcard hint", { cardId, error });
+      }
+    },
+    [activeCustomCourseId, patchCardHints]
+  );
+
+  const downloadDisabled =
+    customCards.length === 0 || allCardsDistributed || isLoadingData || !isReady;
+  const shouldShowBoxes =
+    activeCustomCourseId != null &&
+    isReady &&
+    !isLoadingData &&
+    !loadError &&
+    customCards.length > 0;
+  const introModeActive = boxZeroEnabled && activeBox === "boxZero";
+
+  useEffect(() => {
+    resetInteractionState();
+  }, [activeCustomCourseId, resetInteractionState]);
+
+  let cardSection: ReactNode;
+  if (activeCustomCourseId == null) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>
+          Wybierz własny kurs w panelu kursów, aby rozpocząć naukę.
+        </Text>
       </View>
     );
-  }
-  return (
-    <View style={styles.container}>
-      <IntroOverlay />
-      <Confetti generateConfetti={shouldCelebrate} />
-
+  } else if (isLoadingData) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32, alignItems: "center" }}>
+        <ActivityIndicator size="large" color={colors.paragraph} />
+      </View>
+    );
+  } else if (loadError) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>{loadError}</Text>
+      </View>
+    );
+  } else if (!customCards.length) {
+    cardSection = (
+      <View style={{ paddingHorizontal: 32 }}>
+        <Text allowFontScaling>
+          Dodaj fiszki do tego kursu, aby móc z nich korzystać.
+        </Text>
+      </View>
+    );
+  } else {
+    cardSection = (
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}
@@ -243,25 +469,36 @@ export default function FlashcardsScreen() {
         wrongInputChange={wrongInputChange}
         setCorrectionRewers={setCorrectionRewers}
         onDownload={downloadData}
-        downloadDisabled={introBoxLimitReached}
+        downloadDisabled={downloadDisabled}
         introMode={introModeActive}
+        onHintUpdate={handleHintUpdate}
       />
+    );
+  }
 
-      {boxesLayout === "classic" ? (
-        <Boxes
-          boxes={boxes}
-          activeBox={activeBox}
-          handleSelectBox={handleSelectBox}
-          hideBoxZero={!boxZeroEnabled}
-        />
-      ) : (
-        <BoxesCarousel
-          boxes={boxes}
-          activeBox={activeBox}
-          handleSelectBox={handleSelectBox}
-          hideBoxZero={!boxZeroEnabled}
-        />
-      )}
+  return (
+    <View style={styles.container}>
+      <IntroOverlay />
+      <Confetti generateConfetti={shouldCelebrate} />
+      {cardSection}
+
+      {shouldShowBoxes ? (
+        boxesLayout === "classic" ? (
+          <Boxes
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+            hideBoxZero={!boxZeroEnabled}
+          />
+        ) : (
+          <BoxesCarousel
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+            hideBoxZero={!boxZeroEnabled}
+          />
+        )
+      ) : null}
     </View>
   );
 }

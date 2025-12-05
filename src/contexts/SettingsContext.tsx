@@ -26,7 +26,6 @@ import { LanguageCourse } from "../types/course";
 import type { CEFRLevel } from "../types/language";
 import {
   resetCustomReviewsForCourse,
-  resetReviewsForPair,
 } from "../db/sqlite/db";
 import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
 
@@ -862,14 +861,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   ]);
 
   const resetActiveCourseReviews = useCallback(async () => {
-    if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
-      return 0;
-    }
-    return resetReviewsForPair(
-      activeCourse.sourceLangId,
-      activeCourse.targetLangId
-    );
-  }, [activeCourse]);
+    return 0;
+  }, []);
 
   const resetActiveCustomCourseReviews = useCallback(async () => {
     if (activeCustomCourseId == null) {

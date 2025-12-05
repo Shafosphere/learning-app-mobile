@@ -18,7 +18,6 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   getDueCustomReviewFlashcards,
-  getDueReviewWordsBatch,
 } from "@/src/db/sqlite/db";
 import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
 import type { WordWithTranslations } from "@/src/types/boxes";
@@ -146,8 +145,7 @@ const createDeckForWords = (
 };
 
 export default function MemoryGameScreen() {
-  const { activeCourse, selectedLevel, activeCustomCourseId, colors } =
-    useSettings();
+  const { activeCustomCourseId, colors } = useSettings();
   const params = useLocalSearchParams<MemoryGameParams>();
   const router = useRouter();
   const styles = useStyles();
@@ -523,23 +521,12 @@ export default function MemoryGameScreen() {
     }, RESULT_DELAY_MS);
   };
 
-  const isCustomMode = activeCustomCourseId != null;
-  const srcId = activeCourse?.sourceLangId ?? null;
-  const tgtId = activeCourse?.targetLangId ?? null;
-
   const loadWords = useCallback(async () => {
     if (!isMountedRef.current) {
       return;
     }
 
-    if (!isCustomMode && (!srcId || !tgtId || !selectedLevel)) {
-      if (isMountedRef.current) {
-        resetGameState([]);
-      }
-      return;
-    }
-
-    if (isCustomMode && activeCustomCourseId == null) {
+    if (activeCustomCourseId == null) {
       if (isMountedRef.current) {
         resetGameState([]);
       }
@@ -551,22 +538,12 @@ export default function MemoryGameScreen() {
       const now = Date.now();
       let words: WordWithTranslations[] = [];
 
-      if (isCustomMode && activeCustomCourseId != null) {
-        const rows = await getDueCustomReviewFlashcards(
-          activeCustomCourseId,
-          requiredPairs,
-          now
-        );
-        words = rows.map(mapCustomReviewToWord);
-      } else if (srcId && tgtId && selectedLevel) {
-        words = await getDueReviewWordsBatch(
-          srcId,
-          tgtId,
-          selectedLevel,
-          requiredPairs,
-          now
-        );
-      }
+      const rows = await getDueCustomReviewFlashcards(
+        activeCustomCourseId,
+        requiredPairs,
+        now
+      );
+      words = rows.map(mapCustomReviewToWord);
 
       if (!isMountedRef.current) {
         return;
@@ -585,11 +562,7 @@ export default function MemoryGameScreen() {
     }
   }, [
     activeCustomCourseId,
-    isCustomMode,
     requiredPairs,
-    selectedLevel,
-    srcId,
-    tgtId,
     resetGameState,
   ]);
 

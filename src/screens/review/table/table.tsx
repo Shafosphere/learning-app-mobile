@@ -18,7 +18,7 @@ import {
   type SessionWordResult,
   type SessionWordStatus,
 } from "@/src/screens/review/minigames/sessionStore";
-import { advanceCustomReview, advanceReview } from "@/src/db/sqlite/db";
+import { advanceCustomReview } from "@/src/db/sqlite/db";
 
 type TableParams = {
   words?: string | string[];
@@ -83,21 +83,7 @@ export default function Table() {
         if (entry.status !== "correct" || !entry.context) {
           continue;
         }
-        if (entry.context.kind === "official") {
-          tasks.push(
-            advanceReview(
-              entry.wordId,
-              entry.context.sourceLangId,
-              entry.context.targetLangId
-            ).catch((error) => {
-              console.warn(
-                "[Table] Failed to advance review word",
-                entry.wordId,
-                error
-              );
-            })
-          );
-        } else if (entry.context.kind === "custom") {
+        if (entry.context.kind === "custom") {
           tasks.push(
             advanceCustomReview(entry.wordId, entry.context.courseId).catch(
               (error) => {

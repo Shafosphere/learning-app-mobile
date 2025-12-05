@@ -1,48 +1,15 @@
-import type { WordWithTranslations } from "@/src/types/boxes";
-import type { CEFRLevel } from "@/src/types/language";
 import { getDB } from "../core";
 import {
   addAnswerIfPresent,
   computeNextReviewFromStage,
-  createEmptyLevelCounts,
   dedupeOrdered,
   splitBackTextIntoAnswers,
 } from "../utils";
-import { CustomFlashcardRecord } from "./flashcards";
+import { type CustomFlashcardRecord } from "./flashcards";
 
 export interface CustomReviewFlashcard extends CustomFlashcardRecord {
   stage: number;
   nextReview: number;
-}
-
-export async function scheduleReview(
-  wordId: number,
-  sourceLangId: number,
-  targetLangId: number,
-  level: string,
-  stage: number
-) {
-  const db = await getDB();
-  const now = Date.now();
-  const nextReview = computeNextReviewFromStage(stage, now);
-  await db.runAsync(
-    `INSERT INTO reviews (word_id, source_lang_id, target_lang_id, level, learned_at, next_review, stage)
-     VALUES (?, ?, ?, ?, ?, ?, ?)
-     ON CONFLICT(word_id, source_lang_id, target_lang_id) DO UPDATE SET
-       level = excluded.level,
-       next_review = excluded.next_review,
-       stage = excluded.stage,
-       learned_at = CASE WHEN reviews.learned_at IS NULL THEN excluded.learned_at ELSE reviews.learned_at END;
-    `,
-    wordId,
-    sourceLangId,
-    targetLangId,
-    level,
-    now,
-    nextReview,
-    stage
-  );
-  return { nextReview, stage };
 }
 
 export async function scheduleCustomReview(
@@ -168,6 +135,8 @@ export async function getDueCustomReviewFlashcards(
     courseId: number;
     frontText: string;
     backText: string;
+    hintFront: string | null;
+    hintBack: string | null;
     position: number | null;
     flipped: number;
     createdAt: number;
@@ -179,6 +148,8 @@ export async function getDueCustomReviewFlashcards(
        cf.course_id    AS courseId,
        cf.front_text    AS frontText,
        cf.back_text     AS backText,
+       cf.hint_front    AS hintFront,
+       cf.hint_back     AS hintBack,
        cf.position      AS position,
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
@@ -207,6 +178,8 @@ export async function getDueCustomReviewFlashcards(
         courseId: row.courseId,
         frontText: row.frontText,
         backText: row.backText,
+        hintFront: row.hintFront,
+        hintBack: row.hintBack,
         answers: [],
         position: row.position,
         flipped: row.flipped === 1,
@@ -237,282 +210,6 @@ export async function getDueCustomReviewFlashcards(
   return ordered;
 }
 
-export async function getDueReviews(
-  sourceLangId: number,
-  targetLangId: number,
-  nowMs: number
-) {
-  const db = await getDB();
-  return db.getAllAsync<{
-    word_id: number;
-    text: string;
-    stage: number;
-    level: string;
-    next_review: number;
-  }>(
-    `SELECT r.word_id, w.text, r.stage, r.level, r.next_review
-     FROM reviews r
-     JOIN words w ON w.id = r.word_id
-     WHERE r.source_lang_id = ?
-       AND r.target_lang_id = ?
-       AND r.next_review <= ?
-     ORDER BY r.next_review ASC;`,
-    sourceLangId,
-    targetLangId,
-    nowMs
-  );
-}
-
-export async function advanceReview(
-  wordId: number,
-  sourceLangId: number,
-  targetLangId: number
-) {
-  const db = await getDB();
-  const row = await db.getFirstAsync<{ stage: number }>(
-    `SELECT stage FROM reviews WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ? LIMIT 1;`,
-    wordId,
-    sourceLangId,
-    targetLangId
-  );
-  const newStage = ((row?.stage ?? 0) + 1) | 0;
-  const now = Date.now();
-  const nextReview = computeNextReviewFromStage(newStage, now);
-  await db.runAsync(
-    `UPDATE reviews SET stage = ?, next_review = ? WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ?;`,
-    newStage,
-    nextReview,
-    wordId,
-    sourceLangId,
-    targetLangId
-  );
-  return { nextReview, stage: newStage };
-}
-
-export async function removeReview(
-  wordId: number,
-  sourceLangId: number,
-  targetLangId: number
-): Promise<void> {
-  const db = await getDB();
-  await db.runAsync(
-    `DELETE FROM reviews WHERE word_id = ? AND source_lang_id = ? AND target_lang_id = ?;`,
-    wordId,
-    sourceLangId,
-    targetLangId
-  );
-}
-
-export async function countDueReviewsByLevel(
-  sourceLangId: number,
-  targetLangId: number,
-  nowMs: number
-): Promise<Record<CEFRLevel, number>> {
-  const db = await getDB();
-  const rows = await db.getAllAsync<{ level: CEFRLevel; cnt: number }>(
-    `SELECT level, COUNT(*) AS cnt
-     FROM reviews
-     WHERE source_lang_id = ? AND target_lang_id = ? AND next_review <= ?
-     GROUP BY level;`,
-    sourceLangId,
-    targetLangId,
-    nowMs
-  );
-  const counts = createEmptyLevelCounts();
-  for (const r of rows) {
-    if (r.level in counts) counts[r.level as CEFRLevel] = r.cnt | 0;
-  }
-  return counts;
-}
-
-export async function countTotalDueReviews(
-  sourceLangId: number,
-  targetLangId: number,
-  nowMs: number
-): Promise<number> {
-  const counts = await countDueReviewsByLevel(
-    sourceLangId,
-    targetLangId,
-    nowMs
-  );
-  let total = 0;
-  for (const value of Object.values(counts)) {
-    total += value | 0;
-  }
-  return total;
-}
-
-export async function countLearnedWordsByLevel(
-  sourceLangId: number,
-  targetLangId: number
-): Promise<Record<CEFRLevel, number>> {
-  const db = await getDB();
-  const rows = await db.getAllAsync<{ level: CEFRLevel; cnt: number }>(
-    `SELECT level, COUNT(*) AS cnt
-     FROM reviews
-     WHERE source_lang_id = ? AND target_lang_id = ?
-     GROUP BY level;`,
-    sourceLangId,
-    targetLangId
-  );
-
-  const counts = createEmptyLevelCounts();
-  for (const row of rows) {
-    if (row.level in counts) counts[row.level as CEFRLevel] = row.cnt | 0;
-  }
-  return counts;
-}
-
-export async function getRandomDueReviewWord(
-  sourceLangId: number,
-  targetLangId: number,
-  level: CEFRLevel,
-  nowMs: number = Date.now()
-): Promise<WordWithTranslations | null> {
-  const db = await getDB();
-
-  const due = await db.getFirstAsync<{ id: number }>(
-    `SELECT r.word_id AS id
-     FROM reviews r
-     WHERE r.source_lang_id = ?
-       AND r.target_lang_id = ?
-       AND r.level = ?
-       AND r.next_review <= ?
-     ORDER BY RANDOM()
-     LIMIT 1;`,
-    sourceLangId,
-    targetLangId,
-    level,
-    nowMs
-  );
-
-  if (!due) return null;
-
-  const wordRow = await db.getFirstAsync<{ text: string }>(
-    `SELECT text FROM words WHERE id = ? LIMIT 1;`,
-    due.id
-  );
-
-  const translations = await db.getAllAsync<{ translation_text: string }>(
-    `SELECT translation_text
-     FROM translations
-     WHERE source_word_id = ? AND target_language_id = ?
-     ORDER BY translation_text ASC;`,
-    due.id,
-    targetLangId
-  );
-
-  return {
-    id: due.id,
-    text: wordRow?.text ?? "",
-    translations: translations.map((t) => t.translation_text),
-    flipped: true,
-  };
-}
-
-export async function getDueReviewWordsBatch(
-  sourceLangId: number,
-  targetLangId: number,
-  level: CEFRLevel,
-  limit: number,
-  nowMs: number = Date.now()
-): Promise<WordWithTranslations[]> {
-  if (limit <= 0) {
-    return [];
-  }
-
-  const db = await getDB();
-
-  const rows = await db.getAllAsync<{ id: number; text: string }>(
-    `SELECT w.id, w.text
-     FROM reviews r
-     JOIN words w ON w.id = r.word_id
-     WHERE r.source_lang_id = ?
-       AND r.target_lang_id = ?
-       AND r.level = ?
-       AND r.next_review <= ?
-     ORDER BY RANDOM()
-     LIMIT ?;`,
-    sourceLangId,
-    targetLangId,
-    level,
-    nowMs,
-    limit
-  );
-
-  if (rows.length === 0) {
-    return [];
-  }
-
-  const wordIds = rows.map((row) => row.id);
-  const placeholders = wordIds.map(() => "?").join(",");
-
-  const translations = await db.getAllAsync<{
-    source_word_id: number;
-    translation_text: string;
-  }>(
-    `SELECT source_word_id, translation_text
-     FROM translations
-     WHERE source_word_id IN (${placeholders})
-       AND target_language_id = ?
-     ORDER BY translation_text ASC;`,
-    [...wordIds, targetLangId]
-  );
-
-  const translationsMap = new Map<number, string[]>();
-  for (const item of translations) {
-    if (!translationsMap.has(item.source_word_id)) {
-      translationsMap.set(item.source_word_id, []);
-    }
-    translationsMap.get(item.source_word_id)!.push(item.translation_text);
-  }
-
-  return rows.map((row) => ({
-    id: row.id,
-    text: row.text,
-    translations: translationsMap.get(row.id) ?? [],
-    flipped: true,
-  }));
-}
-
-export async function addRandomReviewsForPair(
-  sourceLangId: number,
-  targetLangId: number,
-  level: CEFRLevel,
-  count: number = 10
-): Promise<number> {
-  const db = await getDB();
-  const rows = await db.getAllAsync<{ id: number }>(
-    `SELECT w.id
-     FROM words w
-     WHERE w.language_id = ?
-       AND w.cefr_level = ?
-       AND EXISTS (
-         SELECT 1 FROM translations t
-         WHERE t.source_word_id = w.id AND t.target_language_id = ?
-       )
-       AND NOT EXISTS (
-         SELECT 1 FROM reviews r
-         WHERE r.word_id = w.id AND r.source_lang_id = ? AND r.target_lang_id = ?
-       )
-     ORDER BY RANDOM()
-     LIMIT ?;`,
-    sourceLangId,
-    level,
-    targetLangId,
-    sourceLangId,
-    targetLangId,
-    count
-  );
-
-  let inserted = 0;
-  for (const row of rows) {
-    await scheduleReview(row.id, sourceLangId, targetLangId, level, 0);
-    inserted += 1;
-  }
-  return inserted;
-}
-
 export async function addRandomCustomReviews(
   courseId: number,
   count: number = 10
@@ -538,19 +235,6 @@ export async function addRandomCustomReviews(
   return rows.length;
 }
 
-export async function resetReviewsForPair(
-  sourceLangId: number,
-  targetLangId: number
-): Promise<number> {
-  const db = await getDB();
-  const result = await db.runAsync(
-    `DELETE FROM reviews WHERE source_lang_id = ? AND target_lang_id = ?;`,
-    sourceLangId,
-    targetLangId
-  );
-  return Number(result?.changes ?? 0);
-}
-
 export async function resetCustomReviewsForCourse(
   courseId: number
 ): Promise<number> {
@@ -565,13 +249,10 @@ export async function resetCustomReviewsForCourse(
 
 export async function countTotalLearnedWordsGlobal(): Promise<number> {
   const db = await getDB();
-  const r1 = await db.getFirstAsync<{ cnt: number }>(
-    `SELECT COUNT(*) AS cnt FROM reviews;`
-  );
-  const r2 = await db.getFirstAsync<{ cnt: number }>(
+  const row = await db.getFirstAsync<{ cnt: number }>(
     `SELECT COUNT(*) AS cnt FROM custom_reviews;`
   );
-  return (r1?.cnt ?? 0) + (r2?.cnt ?? 0);
+  return row?.cnt ?? 0;
 }
 
 export async function countCustomLearnedForCourse(

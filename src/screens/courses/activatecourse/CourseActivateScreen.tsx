@@ -15,7 +15,6 @@ import {
 } from "@/src/db/sqlite/db";
 import {
   getOnboardingCheckpoint,
-  OnboardingCheckpoint,
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import type { LanguageCourse } from "@/src/types/course";
@@ -94,9 +93,6 @@ export default function CourseActivateScreen() {
   const setPopup = usePopup();
   const [showIntro, setShowIntro] = useState(false);
   const [introStep, setIntroStep] = useState(0);
-  const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
-    null
-  );
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
 
   const userCustomCourses = useMemo(
@@ -239,7 +235,6 @@ export default function CourseActivateScreen() {
         if (!mounted) return;
 
         const resolved = cp ?? "activate_required";
-        setCheckpoint(resolved);
 
         if (resolved !== "done") {
           setStartedInOnboarding(true);
@@ -312,7 +307,6 @@ export default function CourseActivateScreen() {
 
   const notifyActivated = useCallback(() => {
     void setOnboardingCheckpoint("done");
-    setCheckpoint("done");
     setPopup({
       message: "Aktywowałem kurs :3",
       color: "my_green",
@@ -729,7 +723,6 @@ export default function CourseActivateScreen() {
               accessibilityLabel="Przejdź dalej"
               disabled={!hasActiveCourse}
               onPress={() => {
-                setCheckpoint("done");
                 void setOnboardingCheckpoint("done");
                 if (activeCustomCourseId != null) {
                   router.replace("/flashcards_custom");

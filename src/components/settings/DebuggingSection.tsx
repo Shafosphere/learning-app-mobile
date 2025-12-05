@@ -4,9 +4,7 @@ import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import MyButton from "@/src/components/button/button";
 import {
   addRandomCustomReviews,
-  addRandomReviewsForPair,
 } from "@/src/db/sqlite/db";
-import type { CEFRLevel } from "@/src/types/language";
 import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -15,21 +13,16 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 
-const DEBUG_LEVEL: CEFRLevel = "A1";
-
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
   const {
-    activeCourse,
     activeCustomCourseId,
     colors,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
-    resetActiveCourseReviews,
     resetActiveCustomCourseReviews,
   } = useSettings();
   const setPopup = usePopup();
-  const [builtInBusy, setBuiltInBusy] = useState(false);
   const [customBusy, setCustomBusy] = useState(false);
   const [hangulValue, setHangulValue] = useState("");
   const [showHangulKeyboard, setShowHangulKeyboard] = useState(false);
@@ -37,33 +30,6 @@ const DebuggingSection: React.FC = () => {
   const [logoFloating, setLogoFloating] = useState(true);
   const [clearingStorage, setClearingStorage] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
-
-  const handleAddRandom = async () => {
-    if (!activeCourse?.sourceLangId || !activeCourse?.targetLangId) {
-      Alert.alert("Brak kursu", "Wybierz kurs w ustawieniach.");
-      return;
-    }
-
-    setBuiltInBusy(true);
-    try {
-      const inserted = await addRandomReviewsForPair(
-        activeCourse.sourceLangId,
-        activeCourse.targetLangId,
-        DEBUG_LEVEL,
-        10
-      );
-      Alert.alert(
-        "Dodano",
-        inserted > 0
-          ? `Dodano ${inserted} słówek do powtórki (${DEBUG_LEVEL}).`
-          : "Brak nowych słówek do dodania."
-      );
-    } catch {
-      Alert.alert("Błąd", "Nie udało się dodać słówek.");
-    } finally {
-      setBuiltInBusy(false);
-    }
-  };
 
   const handleAddRandomCustom = async () => {
     if (activeCustomCourseId == null) {
@@ -93,23 +59,6 @@ const DebuggingSection: React.FC = () => {
       color: "my_yellow",
       duration: 3600,
     });
-  };
-
-  const handleResetReviews = async () => {
-    setBuiltInBusy(true);
-    try {
-      const deleted = await resetActiveCourseReviews();
-      Alert.alert(
-        "Zresetowano pudełka",
-        deleted > 0
-          ? `Usunięto ${deleted} wpisów powtórek dla aktywnego kursu.`
-          : "Brak wpisów do usunięcia."
-      );
-    } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować pudełek.");
-    } finally {
-      setBuiltInBusy(false);
-    }
   };
 
   const handleResetCustomReviews = async () => {
@@ -317,26 +266,6 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Dodaj fiszki testowe</Text>
-          <Text style={styles.rowSubtitle}>
-            Przyspiesz testowanie aplikacji, dodając losowe powtórki.
-          </Text>
-        </View>
-        <MyButton
-          text={builtInBusy ? "Dodawanie..." : "Dodaj 10"}
-          color="my_green"
-          disabled={builtInBusy || !activeCourse}
-          onPress={handleAddRandom}
-          width={140}
-        />
-      </View>
-
-      {!activeCourse && (
-        <Text style={styles.infoText}>Najpierw wybierz kurs.</Text>
-      )}
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Dodaj customowe powtórki</Text>
           <Text style={styles.rowSubtitle}>
             Wstaw losowe fiszki z aktywnego kursu własnego.
@@ -356,22 +285,6 @@ const DebuggingSection: React.FC = () => {
           Najpierw wybierz własny kurs w panelu kursów.
         </Text>
       )}
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Reset pudełek (dev)</Text>
-          <Text style={styles.rowSubtitle}>
-            Usuń wszystkie wpisy powtórek dla aktywnego kursu.
-          </Text>
-        </View>
-        <MyButton
-          text={builtInBusy ? "Resetuję..." : "Reset pudełek"}
-          color="my_red"
-          disabled={builtInBusy || !activeCourse}
-          onPress={handleResetReviews}
-          width={160}
-        />
-      </View>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

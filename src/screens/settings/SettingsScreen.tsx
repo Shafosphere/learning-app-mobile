@@ -32,12 +32,12 @@ const DEBUG_TAB_CONFIG = [
 type BaseTabKey = (typeof BASE_TAB_CONFIG)[number]["key"];
 type TabKey = BaseTabKey | "debug";
 
-const TAB_CONFIG: ReadonlyArray<{
+const TAB_CONFIG: readonly {
   key: TabKey;
   label: string;
   icon: keyof typeof Ionicons.glyphMap;
   faIcon?: React.ComponentProps<typeof FontAwesome5>["name"];
-}> = __DEV__ ? [...BASE_TAB_CONFIG, ...DEBUG_TAB_CONFIG] : BASE_TAB_CONFIG;
+}[] = __DEV__ ? [...BASE_TAB_CONFIG, ...DEBUG_TAB_CONFIG] : BASE_TAB_CONFIG;
 
 export default function SettingsScreen() {
   const styles = useStyles();

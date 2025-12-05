@@ -12,6 +12,8 @@ export interface CustomFlashcardRow {
   courseId: number;
   frontText: string;
   backText: string;
+  hintFront: string | null;
+  hintBack: string | null;
   answers: string[];
   position: number | null;
   flipped: number;
@@ -28,6 +30,8 @@ export interface CustomFlashcardInput {
   frontText: string;
   backText?: string;
   answers?: string[];
+  hintFront?: string | null;
+  hintBack?: string | null;
   position?: number | null;
   flipped?: boolean;
 }
@@ -41,6 +45,8 @@ export async function getCustomFlashcards(
     courseId: number;
     frontText: string;
     backText: string;
+    hintFront: string | null;
+    hintBack: string | null;
     position: number | null;
     flipped: number;
     createdAt: number;
@@ -52,6 +58,8 @@ export async function getCustomFlashcards(
        cf.course_id     AS courseId,
        cf.front_text     AS frontText,
        cf.back_text      AS backText,
+       cf.hint_front     AS hintFront,
+       cf.hint_back      AS hintBack,
        cf.position       AS position,
        cf.flipped        AS flipped,
        cf.created_at     AS createdAt,
@@ -78,6 +86,8 @@ export async function getCustomFlashcards(
         courseId: row.courseId,
         frontText: row.frontText,
         backText: row.backText,
+        hintFront: row.hintFront,
+        hintBack: row.hintBack,
         answers: [],
         position: row.position,
         flipped: row.flipped,
@@ -144,11 +154,13 @@ export async function replaceCustomFlashcardsWithDb(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, position, flipped, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, position, flipped, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
+        card.hintFront ?? null,
+        card.hintBack ?? null,
         position,
         card.flipped ?? 1, // domyślnie 1 (można odwracać)
         now,
@@ -205,4 +217,21 @@ export async function countCustomFlashcardsForCourse(
     courseId
   );
   return row?.cnt ?? 0;
+}
+
+export async function updateCustomFlashcardHints(
+  flashcardId: number,
+  hints: { hintFront: string | null; hintBack: string | null }
+): Promise<void> {
+  const db = await getDB();
+  const now = Date.now();
+  await db.runAsync(
+    `UPDATE custom_flashcards
+       SET hint_front = ?, hint_back = ?, updated_at = ?
+     WHERE id = ?;`,
+    hints.hintFront,
+    hints.hintBack,
+    now,
+    flashcardId
+  );
 }

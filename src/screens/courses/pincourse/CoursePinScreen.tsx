@@ -61,7 +61,6 @@ type CourseGroup = {
   officialPacks: OfficialCourseListItem[];
 };
 
-const LEVEL_REGEX = /(a1|a2|b1|b2|c1|c2)$/i;
 const INTRO_STORAGE_KEY = "@course_pin_intro_seen_v1";
 
 const createCourseKey = (course: LanguageCourse) => {
@@ -94,6 +93,24 @@ export default function CoursePinScreen() {
   const [introStep, setIntroStep] = useState(0);
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
+  );
+
+  const persistCheckpointIfNeeded = useCallback(
+    (next: OnboardingCheckpoint) => {
+      setCheckpoint((prev) => {
+        const current = prev ?? "pin_required";
+        if (current === "done") {
+          return current;
+        }
+        if (current === next) {
+          void setOnboardingCheckpoint(next);
+          return current;
+        }
+        void setOnboardingCheckpoint(next);
+        return next;
+      });
+    },
+    []
   );
 
   // Legacy course derivation removed to prevent ghost courses
@@ -230,19 +247,17 @@ export default function CoursePinScreen() {
           await removeCourse(course);
           const remaining = courses.length - 1;
           if (remaining <= 0) {
-            setCheckpoint("pin_required");
-            void setOnboardingCheckpoint("pin_required");
+            persistCheckpointIfNeeded("pin_required");
           }
         } else {
           await addCourse(course);
-          setCheckpoint("activate_required");
-          void setOnboardingCheckpoint("activate_required");
+          persistCheckpointIfNeeded("activate_required");
         }
       } catch (error) {
         console.error(`[CoursePin] Failed to toggle course ${key} `, error);
       }
     },
-    [addCourse, courses.length, pinnedKeys, removeCourse, setCheckpoint]
+    [addCourse, courses.length, persistCheckpointIfNeeded, pinnedKeys, removeCourse]
   );
 
   const handlePinPress = useCallback(
@@ -261,13 +276,11 @@ export default function CoursePinScreen() {
           await unpinOfficialCourse(id);
           const remaining = pinnedOfficialCourseIds.length - 1;
           if (remaining <= 0 && courses.length === 0) {
-            setCheckpoint("pin_required");
-            void setOnboardingCheckpoint("pin_required");
+            persistCheckpointIfNeeded("pin_required");
           }
         } else {
           await pinOfficialCourse(id);
-          setCheckpoint("activate_required");
-          void setOnboardingCheckpoint("activate_required");
+          persistCheckpointIfNeeded("activate_required");
         }
       } catch (error) {
         console.error(
@@ -280,8 +293,8 @@ export default function CoursePinScreen() {
       courses.length,
       pinOfficialCourse,
       pinnedOfficialCourseIds,
+      persistCheckpointIfNeeded,
       unpinOfficialCourse,
-      setCheckpoint,
     ]
   );
 

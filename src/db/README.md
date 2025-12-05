@@ -17,9 +17,8 @@ src/db/
     └── repositories/           # Logika biznesowa podzielona tematycznie
         ├── courses.ts          # Operacje na kursach
         ├── flashcards.ts       # Operacje na fiszkach
-        ├── reviews.ts          # System powtórek (SRS)
-        ├── analytics.ts        # Statystyki i analizy
-        └── dictionary.ts       # Słownik, języki, tłumaczenia
+        ├── reviews.ts          # System powtórek (SRS) dla customów
+        └── analytics.ts        # Statystyki i analizy (custom)
 ```
 
 ---
@@ -34,9 +33,8 @@ src/db/
 - Obiekt `db` z zagnieżdżonymi modułami:
   - `db.courses` - operacje na kursach
   - `db.flashcards` - operacje na fiszkach
-  - `db.reviews` - system powtórek
-  - `db.analytics` - statystyki
-  - `db.dictionary` - słownik i języki
+  - `db.reviews` - system powtórek dla fiszek
+  - `db.analytics` - statystyki dla fiszek
   - `db.system` - funkcje systemowe (inicjalizacja)
 - Re-eksport typów TypeScript dla wygody
 
@@ -47,11 +45,11 @@ import { db } from '@/src/db';
 // Pobierz wszystkie kursy
 const courses = await db.courses.getCustomCourses();
 
-// Zaplanuj powtórkę
-await db.reviews.scheduleReview(wordId, sourceLangId, targetLangId, level, stage);
+// Zaplanuj powtórkę (custom)
+await db.reviews.scheduleCustomReview(flashcardId, courseId, 0);
 
 // Pobierz statystyki
-const stats = await db.analytics.getDailyLearnedCountsBuiltin(fromMs, toMs);
+const stats = await db.analytics.getDailyLearnedCountsCustom(fromMs, toMs);
 ```
 
 ---
@@ -200,13 +198,11 @@ import { getCustomCourses, scheduleReview } from '@/src/db/sqlite/db';
 - `clearCustomReviewsForCourse(courseId)`
 
 **Debug/testing:**
-- `addRandomReviewsForPair(sourceLangId, targetLangId, level, count)` - dodaje losowe słowa do powtórek
 - `addRandomCustomReviews(courseId, count)` - dodaje losowe fiszki do powtórek
-- `resetReviewsForPair(...)` - resetuje wszystkie powtórki dla pary językowej
 - `resetCustomReviewsForCourse(courseId)` - resetuje powtórki dla kursu
 
 **Globalne:**
-- `countTotalLearnedWordsGlobal()` - łączna liczba opanowanych słów (reviews + custom_reviews)
+- `countTotalLearnedWordsGlobal()` - łączna liczba opanowanych fiszek (custom_reviews)
 - `countCustomLearnedForCourse(courseId)` - liczba opanowanych fiszek w kursie
 
 **Typy:**
@@ -221,48 +217,19 @@ import { getCustomCourses, scheduleReview } from '@/src/db/sqlite/db';
 **Główne funkcje:**
 
 **Logowanie zdarzeń:**
-- `logLearningEvent(params)` - loguje pojedyncze zdarzenie nauki (ok/wrong)
 - `logCustomLearningEvent(params)` - loguje zdarzenie dla custom fiszki
-- `logWordBoxMove(params)` - loguje przesunięcie słowa między boxami Leitnera
 
 **Statystyki czasowe:**
-- `getDailyLearnedCountsBuiltin(fromMs, toMs)` - liczba nauczonych słów per dzień (builtin)
 - `getDailyLearnedCountsCustom(fromMs, toMs)` - liczba nauczonych fiszek per dzień (custom)
 - `getHourlyActivityCounts(fromMs, toMs)` - aktywność per godzina dnia (0-23)
 - `getTotalLearningTimeMs(fromMs, toMs)` - łączny czas nauki w ms
 
 **Analiza trudności:**
-- `getStubbornWords(sourceLangId, targetLangId, level, limit)` - "uparte" słowa (najwięcej przesunięć)
-- `getHardWords(sourceLangId, targetLangId, limit)` - "trudne" słowa (najwięcej błędów przed nauczeniem)
+- `getHardFlashcards(courseId, limit)` - fiszki z największą liczbą błędów
 
 **Typy:**
 - `DailyCount` - `{ date: string, count: number }`
-- `StubbornWord` - słowo z liczbą przesunięć
-- `HardWord` - słowo z liczbą błędów
-
----
-
-### `repositories/dictionary.ts` - Słownik i języki
-
-**Odpowiedzialność:** Operacje na słowach, językach, tłumaczeniach, parach językowych.
-
-**Główne funkcje:**
-
-**Języki:**
-- `seedLanguages(db)` - seeduje języki (en, pl)
-- `getLanguagePairs()` - pobiera wszystkie pary językowe
-- `getLanguageIdByCode(code)` - zwraca ID języka po kodzie (np. 'en' → 1)
-
-**Słownik:**
-- `getTotalWordsForLevel(languageId, level)` - liczba słów dla poziomu CEFR
-- `getRandomEnglishWord()` - losowe angielskie słowo
-- `getRandomTranslationsForLevel(...)` - losowe tłumaczenia dla poziomu CEFR
-
-**Debug:**
-- `logTableContents()` - loguje zawartość tabel do konsoli (debug)
-
-**Typy:**
-- `LanguagePair` - para językowa z kodami i ID
+- `HardFlashcard` - fiszka z liczbą błędnych odpowiedzi
 
 ---
 

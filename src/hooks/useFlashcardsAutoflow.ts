@@ -20,7 +20,7 @@ const FLUSH_THRESHOLD_DEFAULT = 15;
 const FLUSH_THRESHOLD_MIN = 3;
 const FLUSH_THRESHOLD_MAX = 15;
 const FLUSH_THRESHOLD_RATIO = 0.1;
-const CLEANUP_BOXES: Array<keyof BoxesState> = [
+const CLEANUP_BOXES: readonly (keyof BoxesState)[] = [
   "boxTwo",
   "boxThree",
   "boxFour",

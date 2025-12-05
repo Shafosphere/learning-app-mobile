@@ -472,7 +472,7 @@ export default function InputALetter() {
       const nextSlot = findNextSlotAfter(updatedSlots, targetSlot);
       setActiveSlot(nextSlot);
     },
-    [activeSlot, findNextSlotAfter, letterStates, slots]
+    [activeSlot, findNextEmptySlot, findNextSlotAfter, letterStates, slots]
   );
 
   const handleCheck = useCallback(() => {

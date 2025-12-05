@@ -20,7 +20,7 @@ import RotaryStack, {
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { advanceCustomReview, advanceReview } from "@/src/db/sqlite/db";
+import { advanceCustomReview } from "@/src/db/sqlite/db";
 
 import { useStyles } from "./TypingReviewScreen-styles";
 
@@ -103,7 +103,7 @@ export default function AnimationScreen() {
   const params = useLocalSearchParams<AnimationParams>();
   const router = useRouter();
   const checkSpelling = useSpellchecking();
-  const { activeCourse, activeCustomCourseId } = useSettings();
+  const { activeCustomCourseId } = useSettings();
   const carouselRef = useRef<RotaryStackHandle>(null);
   const inputRef = useRef<TextInput>(null);
   const [answer, setAnswer] = useState("");
@@ -119,9 +119,6 @@ export default function AnimationScreen() {
   const [currentDirection, setCurrentDirection] = useState<Direction | null>(
     null
   );
-  const officialSourceLangId = activeCourse?.sourceLangId ?? null;
-  const officialTargetLangId = activeCourse?.targetLangId ?? null;
-
   const providedWords = useMemo(() => {
     const raw = extractParam(params.words);
 
@@ -222,25 +219,6 @@ export default function AnimationScreen() {
         return;
       }
 
-      if (officialSourceLangId != null && officialTargetLangId != null) {
-        await Promise.allSettled(
-          correctEntries.map((entry) =>
-            advanceReview(
-              entry.word.id,
-              officialSourceLangId,
-              officialTargetLangId
-            ).catch((error) => {
-              console.warn(
-                "[TypingReviewScreen] Failed to advance review word",
-                entry.word.id,
-                error
-              );
-            })
-          )
-        );
-        return;
-      }
-
       console.warn(
         "[TypingReviewScreen] Missing review context, skipping persistence."
       );
@@ -248,8 +226,6 @@ export default function AnimationScreen() {
     [
       activeCustomCourseId,
       isDemoMode,
-      officialSourceLangId,
-      officialTargetLangId,
     ]
   );
 

@@ -48,9 +48,12 @@ const CoursesDataSection: React.FC = () => {
           "Import zakończony",
           `Pomyślnie zaimportowano dane.\n\n` +
           `Kursy (własne): ${stats?.coursesCreated}\n` +
-          `Fiszki (własne): ${stats?.flashcardsCreated}\n` +
-          `Postęp (własne): ${stats?.reviewsRestored}\n` +
-          `Postęp (oficjalne): ${stats?.builtinReviewsRestored}\n` +
+          `Fiszki przywrócone: ${stats?.flashcardsCreated}\n` +
+          `Powtórki (własne): ${stats?.reviewsRestored}\n` +
+          `Kursy oficjalne: ${stats?.officialCoursesProcessed}\n` +
+          `Powtórki (oficjalne kursy): ${stats?.officialReviewsRestored}\n` +
+          `Powtórki (builtin DB): ${stats?.builtinReviewsRestored}\n` +
+          `Hinty (oficjalne kursy): ${stats?.officialHintsUpdated}\n` +
           `Stany pudełek: ${stats?.boxesSnapshotsRestored}`
         );
       } else {

@@ -1,5 +1,5 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { logCustomLearningEvent, logLearningEvent, logWordBoxMove } from "@/src/db/sqlite/db";
+import { logCustomLearningEvent } from "@/src/db/sqlite/db";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -57,8 +57,7 @@ export function useFlashcardsInteraction({
     boxFour: [],
     boxFive: [],
   });
-  const { activeCourse, selectedLevel, activeCustomCourseId, ignoreDiacriticsInSpellcheck } =
-    useSettings();
+  const { activeCustomCourseId, ignoreDiacriticsInSpellcheck } = useSettings();
 
   const reversed = useMemo(() => {
     if (!activeBox || !selectedItem) return false;
@@ -177,7 +176,6 @@ export function useFlashcardsInteraction({
         : boxZeroEnabled
           ? "boxZero"
           : "boxOne";
-      let movedWord: WordWithTranslations | null = null;
 
       setBoxes((prev) => {
         const source = prev[from];
@@ -197,7 +195,6 @@ export function useFlashcardsInteraction({
         }
 
         addUsedWordIds(element.id);
-        movedWord = element;
 
         // Keep queues in sync with the move: remove from source queue, append to target queue.
         const removeFromQueue = (queueBox: keyof BoxesState) => {
@@ -215,31 +212,13 @@ export function useFlashcardsInteraction({
         return nextState;
       });
 
-      if (
-        movedWord &&
-        activeCourse?.sourceLangId != null &&
-        activeCourse?.targetLangId != null &&
-        selectedLevel
-      ) {
-        void logWordBoxMove({
-          wordId: movedWord.id,
-          sourceLangId: activeCourse.sourceLangId,
-          targetLangId: activeCourse.targetLangId,
-          level: selectedLevel,
-          fromBox: from,
-          toBox: target,
-        });
-      }
     },
     [
       activeBox,
-      activeCourse?.sourceLangId,
-      activeCourse?.targetLangId,
       addUsedWordIds,
       boxZeroEnabled,
       onWordPromotedOut,
       selectNextWord,
-      selectedLevel,
       setBoxes,
     ]
   );
@@ -295,20 +274,6 @@ export function useFlashcardsInteraction({
         void logCustomLearningEvent({
           flashcardId: wordForCheck.id,
           courseId: activeCustomCourseId,
-          box: activeBox ?? null,
-          result: ok ? 'ok' : 'wrong',
-          durationMs: duration ?? undefined,
-        });
-      } else if (
-        activeCourse?.sourceLangId != null &&
-        activeCourse?.targetLangId != null &&
-        selectedLevel
-      ) {
-        void logLearningEvent({
-          wordId: wordForCheck.id,
-          sourceLangId: activeCourse.sourceLangId,
-          targetLangId: activeCourse.targetLangId,
-          level: selectedLevel,
           box: activeBox ?? null,
           result: ok ? 'ok' : 'wrong',
           durationMs: duration ?? undefined,
@@ -373,8 +338,6 @@ export function useFlashcardsInteraction({
     },
     [
       activeBox,
-      activeCourse?.sourceLangId,
-      activeCourse?.targetLangId,
       activeCustomCourseId,
       answer,
       checkSpelling,
@@ -384,7 +347,6 @@ export function useFlashcardsInteraction({
       registerKnownWord,
       reversed,
       selectedItem,
-      selectedLevel,
       setBoxes,
       moveTranslationToFront,
     ]
@@ -488,6 +450,16 @@ export function useFlashcardsInteraction({
     setQuestionShownAt(null);
     lastServedIdRef.current = null;
   }, []);
+
+  const updateSelectedItem = useCallback(
+    (updater: (item: WordWithTranslations) => WordWithTranslations) => {
+      setSelectedItem((prev) => {
+        if (!prev) return prev;
+        return updater(prev);
+      });
+    },
+    []
+  );
   useEffect(() => {
     console.log("[Flashcards] Active box:", activeBox);
   }, [activeBox]);
@@ -581,6 +553,7 @@ export function useFlashcardsInteraction({
     moveElement,
     resetInteractionState,
     clearSelection,
+    updateSelectedItem,
     isBetweenCards: queueNext,
   };
 }

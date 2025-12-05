@@ -3,6 +3,8 @@ export interface WordWithTranslations {
   text: string;
   translations: string[];
   flipped: boolean;
+  hintFront?: string | null;
+  hintBack?: string | null;
 }
 
 export interface BoxesState {

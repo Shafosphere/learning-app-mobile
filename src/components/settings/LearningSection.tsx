@@ -103,7 +103,8 @@ const LearningSection: React.FC = () => {
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Sugestie klawiatury</Text>
           <Text style={styles.rowSubtitle}>
-            Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach.
+            Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach. Uwaga: część klawiatur (np. Samsung, Gboard) może nadal pokazywać pasek podpowiedzi.
+
           </Text>
         </View>
         <Switch

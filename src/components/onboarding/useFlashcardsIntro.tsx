@@ -2,7 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { getOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
-import { View, StyleProp, ViewStyle } from "react-native";
+import { Modal, StyleProp, StyleSheet, View, ViewStyle } from "react-native";
 
 type IntroMessage = {
   title: string;
@@ -19,16 +19,19 @@ export function useFlashcardsIntro(options?: UseFlashcardsIntroOptions) {
   const [showIntro, setShowIntro] = useState(false);
   const [introStep, setIntroStep] = useState(0);
   const storageKey = options?.storageKey ?? "@flashcards_intro_seen_v1";
-  const defaultOverlay: ViewStyle = {
-    position: "absolute",
-    bottom: "30%",
-    left: 0,
-    right: 0,
-    zIndex: 30,
-    elevation: 6,
-    paddingHorizontal: 4,
-    paddingTop: 8,
-  };
+  const defaultOverlay = useMemo<ViewStyle>(
+    () => ({
+      position: "absolute",
+      bottom: "30%",
+      left: 0,
+      right: 0,
+      zIndex: 30,
+      elevation: 6,
+      paddingHorizontal: 4,
+      paddingTop: 8,
+    }),
+    []
+  );
 
   const introMessages = useMemo<IntroMessage[]>(
     () =>
@@ -120,19 +123,30 @@ export function useFlashcardsIntro(options?: UseFlashcardsIntroOptions) {
   const IntroOverlay = useCallback(() => {
     if (!showIntro || !introMessages[introStep]) return null;
     return (
-      <View
-        style={[defaultOverlay, options?.containerStyle]}
-        pointerEvents="box-none"
+      <Modal
+        visible
+        transparent
+        animationType="fade"
+        statusBarTranslucent
+        onRequestClose={handleIntroClose}
       >
-        <LogoMessage
-          floating
-          offset={{ top: 8, left: 8, right: 8 }}
-          title={introMessages[introStep].title}
-          description={introMessages[introStep].description}
-          onClose={handleIntroClose}
-          closeLabel="Następny komunikat"
-        />
-      </View>
+        <View style={StyleSheet.absoluteFillObject}>
+          <View
+            style={StyleSheet.absoluteFillObject}
+            pointerEvents="auto"
+          />
+          <View style={[defaultOverlay, options?.containerStyle]}>
+            <LogoMessage
+              floating
+              offset={{ top: 8, left: 8, right: 8 }}
+              title={introMessages[introStep].title}
+              description={introMessages[introStep].description}
+              onClose={handleIntroClose}
+              closeLabel="Następny komunikat"
+            />
+          </View>
+        </View>
+      </Modal>
     );
   }, [defaultOverlay, handleIntroClose, introMessages, introStep, options?.containerStyle, showIntro]);
 

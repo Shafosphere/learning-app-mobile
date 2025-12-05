@@ -157,7 +157,7 @@ const useStyles = createThemeStylesHook((colors) => {
 
 export default function MedalsShowcase() {
   const styles = useStyles();
-  const words = ["NARAZIE", "NIC  TU", "NIE", "MA"];
+  const words = useMemo(() => ["NARAZIE", "NIC  TU", "NIE", "MA"], []);
   const rows = useMemo(() => {
     const palette: BookColor[] = ["brown", "violet", "blue"];
     const sizes: BookSize[] = ["short", "medium", "tall"];
