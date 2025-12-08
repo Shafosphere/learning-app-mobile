@@ -10,6 +10,7 @@ type SpellcheckFn = (input: string, expected: string) => boolean;
 type CorrectionMode = "demote" | "intro";
 
 type CorrectionState = {
+  cardId: number;
   awers: string;
   rewers: string;
   input1: string;
@@ -328,6 +329,7 @@ export function useFlashcardsInteraction({
       } else {
         setResult(false);
         setCorrection({
+          cardId: wordForCheck.id,
           awers: wordForCheck.text,
           rewers: wordForCheck.translations[0] ?? "",
           input1: "",
@@ -504,23 +506,22 @@ export function useFlashcardsInteraction({
       setResult(null);
     }
 
-    const expectedAwers = selectedItem.text;
-    const expectedRewers = selectedItem.translations[0] ?? "";
+    const firstTranslation = selectedItem.translations[0] ?? "";
 
     setCorrection((prev) => {
-      if (
-        prev &&
-        prev.mode === "intro" &&
-        prev.awers === expectedAwers &&
-        prev.rewers === expectedRewers
-      ) {
-        return prev;
-      }
+      const isSameIntroCard =
+        prev?.mode === "intro" && prev.cardId === selectedItem.id;
+      const preferredRewers = isSameIntroCard ? prev.rewers : firstTranslation;
+      const nextRewers = selectedItem.translations.includes(preferredRewers)
+        ? preferredRewers
+        : firstTranslation;
+
       return {
-        awers: expectedAwers,
-        rewers: expectedRewers,
-        input1: "",
-        input2: "",
+        cardId: selectedItem.id,
+        awers: selectedItem.text,
+        rewers: nextRewers,
+        input1: isSameIntroCard ? prev.input1 : "",
+        input2: isSameIntroCard ? prev.input2 : "",
         mode: "intro",
       };
     });
@@ -528,7 +529,7 @@ export function useFlashcardsInteraction({
     activeBox,
     answer,
     boxZeroEnabled,
-    correction,
+    correction?.mode,
     result,
     selectedItem,
     setAnswer,

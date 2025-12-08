@@ -239,8 +239,9 @@ export default function Flashcards() {
   const isAnswering =
     selectedItem != null && result === null && correction?.mode !== "intro";
   const resultPending = result !== null;
-  const canAutoflowSwitch =
-    !correctionLocked && !isAnswering && !resultPending;
+  // Allow autoflow to switch boxes even when a card is shown (isAnswering),
+  // otherwise it never jumps to a clogged box until the current box is emptied.
+  const canAutoflowSwitch = !correctionLocked && !resultPending;
 
   useFlashcardsAutoflow({
     enabled: autoflowEnabled,

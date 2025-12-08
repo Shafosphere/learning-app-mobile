@@ -1,7 +1,7 @@
-import { Alert, Platform, Pressable, Text, TextInput, View } from "react-native";
-import { useStyles } from "./card-styles";
-import MyButton from "../button/button";
+import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { WordWithTranslations } from "@/src/types/boxes";
+import { stripDiacritics } from "@/src/utils/diacritics";
 import {
   useCallback,
   useEffect,
@@ -10,13 +10,24 @@ import {
   useRef,
   useState,
 } from "react";
-import Octicons from "@expo/vector-icons/Octicons";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { stripDiacritics } from "@/src/utils/diacritics";
-import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
-import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import {
+  Alert,
+  Animated,
+  ScrollView,
+  Text,
+  TextInput,
+  View
+} from "react-native";
+import { useStyles } from "./card-styles";
+import { CardActions } from "./subcomponents/CardActions";
+import { CardCorrection } from "./subcomponents/CardCorrection";
+import { CardHint } from "./subcomponents/CardHint";
+import { CardInput } from "./subcomponents/CardInput";
+import { CardMeasure } from "./subcomponents/CardMeasure";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
+const INPUT_HORIZONTAL_PADDING = 8;
+const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
 
 type CardProps = {
   selectedItem: WordWithTranslations | null;
@@ -61,7 +72,7 @@ export default function Card({
   onHintUpdate,
 }: CardProps) {
   const styles = useStyles();
-  const { ignoreDiacriticsInSpellcheck, flashcardsSuggestionsEnabled } =
+  const { ignoreDiacriticsInSpellcheck, flashcardsSuggestionsEnabled, colors } =
     useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -70,26 +81,23 @@ export default function Card({
         ? styles.cardGood
         : styles.cardBad
       : undefined;
-  const suggestionProps = useMemo(
-    () => {
-      const disabled = !flashcardsSuggestionsEnabled;
-      return {
-        autoCorrect: flashcardsSuggestionsEnabled,
-        spellCheck: flashcardsSuggestionsEnabled,
-        autoComplete: disabled ? ("off" as const) : undefined,
-        textContentType: disabled ? ("none" as const) : undefined,
-        importantForAutofill: disabled ? ("no" as const) : undefined,
-      };
-    },
-    [flashcardsSuggestionsEnabled]
-  );
+  const suggestionProps = useMemo(() => {
+    const disabled = !flashcardsSuggestionsEnabled;
+    return {
+      autoCorrect: flashcardsSuggestionsEnabled,
+      spellCheck: flashcardsSuggestionsEnabled,
+      autoComplete: disabled ? ("off" as const) : undefined,
+      textContentType: disabled ? ("none" as const) : undefined,
+      importantForAutofill: disabled ? ("no" as const) : undefined,
+    };
+  }, [flashcardsSuggestionsEnabled]);
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
     useState(false);
   const [hangulTarget, setHangulTarget] = useState<
     "main" | "correction1" | null
   >(null);
-  const noopTextChange = useCallback((_: string) => {}, []);
+  const noopTextChange = useCallback((_: string) => { }, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -102,6 +110,14 @@ export default function Card({
   const needsCorrectionFocus = useRef<boolean>(false);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const previousCorrectionInput2 = useRef<string>("");
+  const [input1LayoutWidth, setInput1LayoutWidth] = useState(0);
+  const [input2LayoutWidth, setInput2LayoutWidth] = useState(0);
+  const [input1TextWidth, setInput1TextWidth] = useState(0);
+  const [input2TextWidth, setInput2TextWidth] = useState(0);
+  const [input1ExpectedWidth, setInput1ExpectedWidth] = useState(0);
+  const [input2ExpectedWidth, setInput2ExpectedWidth] = useState(0);
+  const input1ScrollRef = useRef<ScrollView | null>(null);
+  const input2ScrollRef = useRef<ScrollView | null>(null);
 
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[translations] ?? "";
@@ -133,34 +149,30 @@ export default function Card({
   const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");
   const hintDialogVisible = useRef(false);
+  const hintActionsAnim = useRef(new Animated.Value(0)).current;
   const currentHint = useMemo(() => {
     if (!selectedItem) return null;
     return reversed
       ? selectedItem.hintBack ?? null
       : selectedItem.hintFront ?? null;
-  }, [
-    reversed,
-    selectedItem,
-  ]);
+  }, [reversed, selectedItem]);
   const shouldMarqueeHint = useMemo(() => {
     const len = currentHint?.length ?? 0;
     return len > 28;
   }, [currentHint]);
-
-  // useEffect(() => {
-  //   console.log("[Card] reversed:", reversed, {
-  //     expectsHangulAnswer,
-  //     expectsHangulCorrectionAwers,
-  //     hangulTarget,
-  //     overlayVisible: showHangulKeyboard,
-  //   });
-  // }, [
-  //   reversed,
-  //   expectsHangulAnswer,
-  //   expectsHangulCorrectionAwers,
-  //   hangulTarget,
-  //   showHangulKeyboard,
-  // ]);
+  const showCorrectionInputs = Boolean(
+    correction && (result === false || isIntroMode)
+  );
+  const input1ContentWidth = useMemo(() => {
+    const measured = Math.max(input1TextWidth, input1ExpectedWidth);
+    const padded = measured + INPUT_HORIZONTAL_PADDING * 2;
+    return Math.max(padded, input1LayoutWidth || 0);
+  }, [input1ExpectedWidth, input1LayoutWidth, input1TextWidth]);
+  const input2ContentWidth = useMemo(() => {
+    const measured = Math.max(input2TextWidth, input2ExpectedWidth);
+    const padded = measured + INPUT_HORIZONTAL_PADDING * 2;
+    return Math.max(padded, input2LayoutWidth || 0);
+  }, [input2ExpectedWidth, input2LayoutWidth, input2TextWidth]);
 
   const len = selectedItem?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
@@ -184,7 +196,12 @@ export default function Card({
     if (!isIntroMode || !setCorrectionRewers) return;
     const nextTranslation = selectedItem?.translations?.[translations] ?? "";
     setCorrectionRewers(nextTranslation);
-  }, [isIntroMode, selectedItem?.translations, setCorrectionRewers, translations]);
+  }, [
+    isIntroMode,
+    selectedItem?.translations,
+    setCorrectionRewers,
+    translations,
+  ]);
 
   const focusWithDelay = useCallback(
     (ref: React.RefObject<TextInput | null>, delay = 50) => {
@@ -229,6 +246,25 @@ export default function Card({
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
     ]
+  );
+
+  const syncInputScroll = useCallback(
+    (
+      ref: React.RefObject<ScrollView | null>,
+      caretX: number,
+      visibleWidth: number,
+      contentWidth: number
+    ) => {
+      if (!visibleWidth) return;
+      const maxOffset = Math.max(0, contentWidth - visibleWidth);
+      const desiredOffset = Math.max(
+        0,
+        caretX - (visibleWidth - INPUT_SCROLL_AHEAD)
+      );
+      const nextOffset = Math.min(desiredOffset, maxOffset);
+      ref.current?.scrollTo({ x: nextOffset, animated: false });
+    },
+    []
   );
 
   const handleConfirm = useCallback(() => {
@@ -355,6 +391,38 @@ export default function Card({
   }, [correction?.input2]);
 
   useEffect(() => {
+    if (!showCorrectionInputs) return;
+    syncInputScroll(
+      input1ScrollRef,
+      input1TextWidth + INPUT_HORIZONTAL_PADDING,
+      input1LayoutWidth,
+      input1ContentWidth
+    );
+  }, [
+    input1ContentWidth,
+    input1LayoutWidth,
+    input1TextWidth,
+    showCorrectionInputs,
+    syncInputScroll,
+  ]);
+
+  useEffect(() => {
+    if (!showCorrectionInputs) return;
+    syncInputScroll(
+      input2ScrollRef,
+      input2TextWidth + INPUT_HORIZONTAL_PADDING,
+      input2LayoutWidth,
+      input2ContentWidth
+    );
+  }, [
+    input2ContentWidth,
+    input2LayoutWidth,
+    input2TextWidth,
+    showCorrectionInputs,
+    syncInputScroll,
+  ]);
+
+  useEffect(() => {
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
     hintDialogVisible.current = false;
@@ -402,6 +470,12 @@ export default function Card({
     setHintDraft(currentHint ?? "");
     setIsEditingHint(true);
   }, [currentHint, onHintUpdate, selectedItem]);
+
+  const cancelHintEditing = useCallback(() => {
+    setIsEditingHint(false);
+    setHintDraft(currentHint ?? "");
+    hintDialogVisible.current = false;
+  }, [currentHint]);
 
   const applyHintToSides = useCallback(
     (applyToBoth: boolean) => {
@@ -468,140 +542,77 @@ export default function Card({
     ]);
   }, [applyHintToSides, hintDraft, selectedItem]);
 
+  const hintActionsStyle = useMemo(
+    () => ({
+      opacity: hintActionsAnim,
+      transform: [
+        {
+          translateX: hintActionsAnim.interpolate({
+            inputRange: [0, 1],
+            outputRange: [24, 0],
+          }),
+        },
+      ],
+    }),
+    [hintActionsAnim]
+  );
+
+  useEffect(() => {
+    Animated.timing(hintActionsAnim, {
+      toValue: isEditingHint ? 1 : 0,
+      duration: 180,
+      useNativeDriver: true,
+    }).start();
+  }, [hintActionsAnim, isEditingHint]);
+
   function showCardContent() {
     if (correction && (result === false || isIntroMode)) {
       return (
-        <>
-          <View style={styles.containerInput}>
-            <Text style={styles.myplaceholder}>{correctionAwers}</Text>
-            <TextInput
-              value={correction.input1}
-              onChangeText={handleCorrectionInput1Change}
-              style={styles.myinput}
-              ref={correctionInput1Ref}
-              returnKeyType="next"
-              blurOnSubmit={false}
-              onSubmitEditing={() => focusWithDelay(correctionInput2Ref)}
-              autoCapitalize="none"
-              {...suggestionProps}
-              showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
-              onFocus={() => {
-                setIsCorrectionInput1Focused(true);
-                setHangulTarget("correction1");
-              }}
-              onBlur={() => {
-                setIsCorrectionInput1Focused(false);
-                if (hangulTarget === "correction1") {
-                  setHangulTarget(null);
-                }
-              }}
-            />
-            {isIntroMode ? (
-              <Text style={styles.inputOverlay}>
-                {renderOverlayText(correction.input1, correctionAwers)}
-              </Text>
-            ) : null}
-          </View>
-          <View style={styles.containerInput}>
-            <Text style={styles.myplaceholder}>{correctionRewers}</Text>
-            <TextInput
-              value={correction.input2}
-              onChangeText={(t) => {
-                const previousValue = previousCorrectionInput2.current;
-                const shouldFocusPrevious =
-                  Platform.OS === "android" &&
-                  previousValue.length === 1 &&
-                  t === "";
-                previousCorrectionInput2.current = t;
-                wrongInputChange(2, t);
-                if (shouldFocusPrevious) {
-                  focusWithDelay(correctionInput1Ref);
-                }
-              }}
-              style={styles.myinput}
-              ref={correctionInput2Ref}
-              returnKeyType="done"
-              autoCapitalize="none"
-              {...suggestionProps}
-              onKeyPress={({ nativeEvent }) => {
-                if (
-                  nativeEvent.key === "Backspace" &&
-                  correction.input2.length <= 1
-                ) {
-                  focusWithDelay(correctionInput1Ref);
-                }
-              }}
-            />
-            {isIntroMode ? (
-              <Text style={styles.inputOverlay}>
-                {renderOverlayText(correction.input2, correctionRewers)}
-              </Text>
-            ) : null}
-            {isIntroMode && canToggleTranslations ? (
-              <Pressable
-                style={[styles.cardIconWrapper, styles.introToggle]}
-                onPress={next}
-                hitSlop={8}
-              >
-                <Octicons
-                  name="discussion-duplicate"
-                  size={24}
-                  color={styles.cardFont.color}
-                />
-              </Pressable>
-            ) : null}
-          </View>
-        </>
+        <CardCorrection
+          correction={correction}
+          correctionAwers={correctionAwers}
+          correctionRewers={correctionRewers}
+          input1Ref={correctionInput1Ref}
+          input2Ref={correctionInput2Ref}
+          input1ScrollRef={input1ScrollRef}
+          input2ScrollRef={input2ScrollRef}
+          handleCorrectionInput1Change={handleCorrectionInput1Change}
+          wrongInputChange={wrongInputChange}
+          suggestionProps={suggestionProps}
+          isIntroMode={isIntroMode}
+          renderOverlayText={renderOverlayText}
+          input1ContentWidth={input1ContentWidth}
+          input2ContentWidth={input2ContentWidth}
+          setInput1LayoutWidth={setInput1LayoutWidth}
+          setInput2LayoutWidth={setInput2LayoutWidth}
+          focusWithDelay={focusWithDelay}
+          setIsCorrectionInput1Focused={setIsCorrectionInput1Focused}
+          setHangulTarget={setHangulTarget}
+          shouldUseHangulKeyboardCorrection1={shouldUseHangulKeyboardCorrection1}
+          previousCorrectionInput2={previousCorrectionInput2}
+          canToggleTranslations={canToggleTranslations}
+          next={next}
+          input1LayoutWidth={input1LayoutWidth}
+          input2LayoutWidth={input2LayoutWidth}
+        />
       );
     }
     if (selectedItem && selectedItem.text) {
       return (
-        <>
-          <View style={styles.topContainer}>
-            {/* <View style={styles.cardIconPlaceholder} /> */}
-            <Text style={[styles.cardFont, styles.promptText]}>
-              {promptText}
-            </Text>
-            {canToggleTranslations ? (
-              <Pressable
-                style={styles.cardIconWrapper}
-                onPress={next}
-                hitSlop={8}
-              >
-                <Octicons
-                  name="discussion-duplicate"
-                  size={24}
-                  color={styles.cardFont.color}
-                />
-              </Pressable>
-            ) : (
-              <View style={styles.cardIconPlaceholder} />
-            )}
-          </View>
-
-          <TextInput
-            style={[styles.cardInput, styles.cardFont]}
-            value={answer}
-            onChangeText={setAnswer}
-            autoCapitalize="none"
-            {...suggestionProps}
-            ref={mainInputRef}
-            returnKeyType="done"
-            blurOnSubmit={false}
-            onSubmitEditing={handleConfirm}
-            showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
-            onFocus={() => {
-              setIsMainInputFocused(true);
-              setHangulTarget("main");
-            }}
-            onBlur={() => {
-              setIsMainInputFocused(false);
-              if (hangulTarget === "main") {
-                setHangulTarget(null);
-              }
-            }}
-          />
-        </>
+        <CardInput
+          promptText={promptText}
+          answer={answer}
+          setAnswer={setAnswer}
+          mainInputRef={mainInputRef}
+          suggestionProps={suggestionProps}
+          handleConfirm={handleConfirm}
+          shouldUseHangulKeyboardMain={shouldUseHangulKeyboardMain}
+          setIsMainInputFocused={setIsMainInputFocused}
+          setHangulTarget={setHangulTarget}
+          canToggleTranslations={canToggleTranslations}
+          next={next}
+          hangulTarget={hangulTarget}
+        />
       );
     }
     return <Text style={styles.empty}>Wybierz pudełko z słowkami</Text>;
@@ -626,40 +637,19 @@ export default function Card({
 
   return (
     <View style={styles.container}>
-      <View style={styles.hintContainer}>
-        {!isEditingHint ? (
-          <Pressable
-            onPress={startHintEditing}
-            hitSlop={8}
-            disabled={!selectedItem || !onHintUpdate}
-          >
-            {currentHint ? (
-              shouldMarqueeHint ? (
-                <CourseTitleMarquee
-                  text={currentHint}
-                  textStyle={styles.hint}
-                  containerStyle={styles.hintMarquee}
-                />
-              ) : (
-                <Text style={styles.hint}>{currentHint}</Text>
-              )
-            ) : (
-              <Text style={styles.dots}>...</Text>
-            )}
-          </Pressable>
-        ) : (
-          <TextInput
-            value={hintDraft}
-            onChangeText={setHintDraft}
-            onBlur={finishHintEditing}
-            onSubmitEditing={finishHintEditing}
-            placeholder="Wpisz podpowiedź..."
-            style={styles.hintInput}
-            autoFocus
-            returnKeyType="done"
-          />
-        )}
-      </View>
+      <CardHint
+        currentHint={currentHint}
+        isEditingHint={isEditingHint}
+        hintDraft={hintDraft}
+        setHintDraft={setHintDraft}
+        startHintEditing={startHintEditing}
+        cancelHintEditing={cancelHintEditing}
+        finishHintEditing={finishHintEditing}
+        hintActionsStyle={hintActionsStyle}
+        shouldMarqueeHint={shouldMarqueeHint}
+        selectedItem={selectedItem}
+        onHintUpdate={onHintUpdate}
+      />
       <View style={cardContainerStyle}>{showCardContent()}</View>
       <HangulKeyboardOverlay
         visible={showHangulKeyboard}
@@ -669,20 +659,28 @@ export default function Card({
         onRequestClose={handleCloseHangulKeyboard}
       />
 
-      <View style={styles.containerButton}>
-        <MyButton
-          text="zatwiedź"
-          color="my_green"
-          disabled={false}
-          onPress={handleConfirm}
+      {showCorrectionInputs && correction ? (
+        <CardMeasure
+          correctionAwers={correctionAwers}
+          correctionRewers={correctionRewers}
+          correctionInput1={correction.input1}
+          correctionInput2={correction.input2}
+          setInput1ExpectedWidth={setInput1ExpectedWidth}
+          setInput2ExpectedWidth={setInput2ExpectedWidth}
+          setInput1TextWidth={setInput1TextWidth}
+          setInput2TextWidth={setInput2TextWidth}
+          input1ExpectedWidth={input1ExpectedWidth}
+          input2ExpectedWidth={input2ExpectedWidth}
+          input1TextWidth={input1TextWidth}
+          input2TextWidth={input2TextWidth}
         />
-        <MyButton
-          text="dodaj    słówka"
-          color="my_yellow"
-          onPress={onDownload}
-          disabled={downloadDisabled}
-        />
-      </View>
+      ) : null}
+
+      <CardActions
+        handleConfirm={handleConfirm}
+        onDownload={onDownload}
+        downloadDisabled={downloadDisabled}
+      />
     </View>
   );
 }
