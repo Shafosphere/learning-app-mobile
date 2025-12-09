@@ -22,6 +22,7 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useIsFocused } from "@react-navigation/native";
+import FlashcardsPeekOverlay from "./FlashcardsPeekOverlay";
 // import { useRouter } from "expo-router";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -171,6 +172,32 @@ export default function Flashcards() {
     if (result === null) return;
     playFeedbackSound(result);
   }, [result]);
+
+  const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
+  const peekCards = useMemo(
+    () => (peekBox ? boxes[peekBox] ?? [] : []),
+    [boxes, peekBox]
+  );
+
+  const handleBoxLongPress = useCallback(
+    (boxName: keyof BoxesState) => {
+      if (boxName === "boxZero") return;
+      const list = boxes[boxName] ?? [];
+      if (!list.length) return;
+      setPeekBox(boxName);
+    },
+    [boxes]
+  );
+
+  const closePeek = useCallback(() => setPeekBox(null), []);
+
+  useEffect(() => {
+    if (!peekBox) return;
+    const hasCards = (boxes[peekBox] ?? []).length > 0;
+    if (!hasCards) {
+      setPeekBox(null);
+    }
+  }, [boxes, peekBox]);
 
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -490,6 +517,7 @@ export default function Flashcards() {
             activeBox={activeBox}
             handleSelectBox={handleSelectBox}
             hideBoxZero={!boxZeroEnabled}
+            onBoxLongPress={handleBoxLongPress}
           />
         ) : (
           <BoxesCarousel
@@ -497,9 +525,17 @@ export default function Flashcards() {
             activeBox={activeBox}
             handleSelectBox={handleSelectBox}
             hideBoxZero={!boxZeroEnabled}
+            onBoxLongPress={handleBoxLongPress}
           />
         )
       ) : null}
+
+      <FlashcardsPeekOverlay
+        visible={peekBox !== null}
+        boxKey={peekBox}
+        cards={peekCards}
+        onClose={closePeek}
+      />
     </View>
   );
 }

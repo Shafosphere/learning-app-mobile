@@ -2,7 +2,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 // Adjust import path to your project
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { getTotalWordsForLevel } from "@/src/db/sqlite/db";
 
 // ---- Public helpers --------------------------------------------------------
 export type BoxName = keyof BoxesState;
@@ -170,7 +169,7 @@ export function useBoxesPersistenceSnapshot(params: {
   const [isReady, setIsReady] = useState(false);
   const [usedWordIds, setUsedWordIds] = useState<number[]>([]);
   const [progress, setProgress] = useState(0);
-  const [totalWordsForLevel, setTotalWordsForLevel] = useState<number>(0);
+  const [totalWordsForLevel] = useState<number>(0);
   const savingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoringRef = useRef(true);
 
@@ -214,26 +213,6 @@ export function useBoxesPersistenceSnapshot(params: {
       mounted = false;
     };
   }, [storageKey, initialWords]);
-
-  // Fetch total words for current level/language to compute progress
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        if (!sourceLangId || !level) {
-          if (mounted) setTotalWordsForLevel(0);
-          return;
-        }
-        const total = await getTotalWordsForLevel(sourceLangId, level);
-        if (mounted) setTotalWordsForLevel(total || 0);
-      } catch {
-        if (mounted) setTotalWordsForLevel(0);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [sourceLangId, level]);
 
   // Recompute progress whenever usedWordIds or total changes
   useEffect(() => {

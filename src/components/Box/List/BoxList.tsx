@@ -9,6 +9,7 @@ interface BoxesProps {
     activeBox: keyof BoxesState | null;
     handleSelectBox: (name: keyof BoxesState) => void;
     hideBoxZero?: boolean;
+    onBoxLongPress?: (name: keyof BoxesState) => void;
 }
 
 export default function BoxList({
@@ -16,6 +17,7 @@ export default function BoxList({
     activeBox,
     handleSelectBox,
     hideBoxZero = false,
+    onBoxLongPress,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     type Face = "smile" | "happy" | "surprised";
@@ -27,6 +29,7 @@ export default function BoxList({
         Partial<Record<keyof BoxesState, ReturnType<typeof setTimeout>>>
     >({});
     const activeBoxRef = useRef<typeof activeBox>(activeBox);
+    const longPressTriggeredRef = useRef(false);
 
     useEffect(() => {
         activeBoxRef.current = activeBox;
@@ -63,6 +66,10 @@ export default function BoxList({
                                 : "smile";
 
                     const onPress = () => {
+                        if (longPressTriggeredRef.current) {
+                            longPressTriggeredRef.current = false;
+                            return;
+                        }
                         setFaces((prev) => ({ ...prev, [boxName]: "surprised" }));
 
                         handleSelectBox(boxName);
@@ -80,7 +87,18 @@ export default function BoxList({
                     };
 
                     return (
-                        <Pressable key={boxName} onPress={onPress}>
+                        <Pressable
+                            key={boxName}
+                            onPressIn={() => {
+                                longPressTriggeredRef.current = false;
+                            }}
+                            onLongPress={() => {
+                                longPressTriggeredRef.current = true;
+                                onBoxLongPress?.(boxName);
+                            }}
+                            delayLongPress={400}
+                            onPress={onPress}
+                        >
                             <BoxSkin
                                 wordCount={words.length}
                                 face={currentFace}

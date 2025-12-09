@@ -5,6 +5,8 @@ export type ManualCard = {
   front: string;
   answers: string[];
   flipped: boolean;
+  hintFront?: string | null;
+  hintBack?: string | null;
 };
 
 export interface UseManualCardsFormOptions {
@@ -24,6 +26,8 @@ export const createEmptyManualCard = (id?: string): ManualCard => ({
   front: "",
   answers: [""],
   flipped: true, // domyślnie włączone
+  hintFront: "",
+  hintBack: "",
 });
 
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>

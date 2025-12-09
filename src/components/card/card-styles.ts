@@ -93,8 +93,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingRight: 10,
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
-    alignItems: "center",
-    justifyContent: "center",
+    // alignItems: "center",
+    // justifyContent: "center",
   },
   cardGood: {
     backgroundColor: colors.my_green,
@@ -116,7 +116,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // backgroundColor: colors.my_green,
     paddingLeft: 8,
     paddingRight: 8,
-    marginTop: 4,
+    // marginTop: 4,
   },
   cardFont: {
     fontSize: 24,
@@ -149,7 +149,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   containerInput: {
     position: "relative",
     width: "100%",
+    height: "50%",
     // backgroundColor: colors.my_green,
+  },
+  containerInputFirst: {
+    paddingTop: 8,
   },
   inputScroll: {
     width: "100%",
@@ -181,6 +185,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
+
   },
   inputOverlay: {
     position: "absolute",
@@ -192,6 +197,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 24,
     fontWeight: 800,
     pointerEvents: "none",
+    // color: "tra"
   },
   overlayCharError: {
     color: colors.my_red,
@@ -203,10 +209,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    gap: 8,
+    height: "50%",
+    // gap: 8,
     paddingLeft: 8,
     paddingRight: 8,
-    marginBottom: 4,
+    // marginBottom: 4,
     // backgroundColor: colors.my_green,
   },
   promptText: {
@@ -223,6 +230,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   promptScroll: {
     flex: 1,
     minWidth: 0,
+    // backgroundColor: colors.my_green,
   },
   promptScrollContent: {
     paddingRight: 4,

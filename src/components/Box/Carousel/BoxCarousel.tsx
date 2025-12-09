@@ -21,6 +21,7 @@ interface BoxesProps {
     activeBox: keyof BoxesState | null;
     handleSelectBox: (name: keyof BoxesState) => void;
     hideBoxZero?: boolean;
+    onBoxLongPress?: (name: keyof BoxesState) => void;
 }
 
 export default function BoxCarousel({
@@ -28,6 +29,7 @@ export default function BoxCarousel({
     activeBox,
     handleSelectBox,
     hideBoxZero = false,
+    onBoxLongPress,
 }: BoxesProps) {
     const styles = useBoxCarouselStyles();
     const { width } = useWindowDimensions();
@@ -59,6 +61,7 @@ export default function BoxCarousel({
     const [faces, setFaces] = useState<FaceState>({});
     const prevActiveIndexRef = useRef<number | null>(null);
     const faceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const longPressTriggeredRef = useRef(false);
 
     useEffect(() => {
         const widthChanged = prevItemWidthRef.current !== itemWidth;
@@ -246,7 +249,21 @@ export default function BoxCarousel({
                             >
                                 <TouchableOpacity
                                     activeOpacity={1}
-                                    onPress={() => scrollToIndex(index)}
+                                    onPressIn={() => {
+                                        longPressTriggeredRef.current = false;
+                                    }}
+                                    onLongPress={() => {
+                                        longPressTriggeredRef.current = true;
+                                        onBoxLongPress?.(item.key);
+                                    }}
+                                    delayLongPress={400}
+                                    onPress={() => {
+                                        if (longPressTriggeredRef.current) {
+                                            longPressTriggeredRef.current = false;
+                                            return;
+                                        }
+                                        scrollToIndex(index);
+                                    }}
                                 >
                                     <BoxSkin
                                         wordCount={item.count}

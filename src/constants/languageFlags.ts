@@ -53,7 +53,8 @@ export function getFlagSource(
   code: string,
   variant: FlagVariant = "active"
 ): ImageSourcePropType | undefined {
-  const entry = languageFlags[code as keyof typeof languageFlags];
+  const entry: LanguageFlagSources | undefined =
+    languageFlags[code as keyof typeof languageFlags];
   if (!entry) {
     return undefined;
   }

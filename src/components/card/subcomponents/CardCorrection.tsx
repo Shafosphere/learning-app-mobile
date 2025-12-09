@@ -77,7 +77,7 @@ export function CardCorrection({
   return (
     <>
       <View
-        style={styles.containerInput}
+        style={[styles.containerInput, styles.containerInputFirst]}
         onLayout={({ nativeEvent }) => {
           const nextWidth = nativeEvent.layout.width;
           if (Math.abs(nextWidth - input1LayoutWidth) > 0.5) {

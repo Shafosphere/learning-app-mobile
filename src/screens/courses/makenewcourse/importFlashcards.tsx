@@ -160,6 +160,8 @@ export default function CustomCourseContentScreen() {
             front: (row.front || "").toString(),
             answers: answers.length > 0 ? answers : [(row.back || "").toString()],
             flipped: !locked,
+            hintFront: (row.hint1 ?? row.hint_front ?? "").toString(),
+            hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
           };
         })
         .filter((card) => card.front.trim().length > 0 || card.answers.some((a) => a.trim().length > 0));
@@ -267,13 +269,15 @@ export default function CustomCourseContentScreen() {
     }
 
     const trimmedCards = manualCards.reduce<
-      {
-        frontText: string;
-        backText: string;
-        answers: string[];
-        position: number;
-        flipped: boolean;
-      }[]
+        {
+          frontText: string;
+          backText: string;
+          answers: string[];
+          position: number;
+          flipped: boolean;
+          hintFront?: string | null;
+          hintBack?: string | null;
+        }[]
     >((acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
@@ -287,6 +291,8 @@ export default function CustomCourseContentScreen() {
         answers,
         position: acc.length,
         flipped: card.flipped,
+        hintFront: card.hintFront ?? "",
+        hintBack: card.hintBack ?? "",
       });
       return acc;
     }, []);
@@ -372,11 +378,13 @@ export default function CustomCourseContentScreen() {
             <View style={styles.modeContainer}>
               <Text style={styles.modeTitle}>Import z pliku CSV</Text>
               <Text style={styles.modeDescription}>
-                Przygotuj plik CSV z kolumnami front, back oraz opcjonalnym
-                polem lock (true/1/tak = zablokowany). W polu back możesz wpisać
-                wiele tłumaczeń oddzielonych średnikiem lub pionową kreską.
-                Możesz też pobrać gotowy plik do wypełnienia (zalecam zrobić to
-                na laptopie lub komputerze).
+                Plik CSV powinien mieć kolumny: front (treść fiszki), back
+                (odpowiedź), hint1 (podpowiedź do front), hint2 (podpowiedź do
+                back) oraz lock. Podpowiedzi mogą zostać puste. W lock wpisz
+                true/1/tak, jeśli fiszka ma być zablokowana. W polu back możesz
+                podać kilka odpowiedzi, oddzielając je średnikiem lub kreską |
+                (np. cat; kitty). Możesz też pobrać gotowy szablon CSV do
+                uzupełnienia na komputerze.
               </Text>
               <View style={styles.modeActions}>
                 <MyButton

@@ -1,6 +1,14 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { Pressable, ScrollView, Text, TextInput, View } from "react-native";
+import { useMemo } from "react";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
+
+const MARQUEE_DELAY_MS = 800;
+const MARQUEE_SPEED_PER_PIXEL_MS = 20;
+const MIN_DURATION_MS = 4000;
+const REPEAT_SPACER_PX = 14;
+const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
 type CardInputProps = {
   promptText: string;
@@ -33,24 +41,51 @@ export function CardInput({
 }: CardInputProps) {
   const styles = useStyles();
   const shouldMarqueePrompt = promptText.length > 18;
+  const promptTextStyle = useMemo(
+    () => [styles.cardFont, styles.promptMarqueeText],
+    [styles]
+  );
+  const flattenedPromptTextStyle = useMemo(
+    () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
+    [promptTextStyle]
+  );
+  const promptFontSize =
+    typeof flattenedPromptTextStyle.fontSize === "number"
+      ? flattenedPromptTextStyle.fontSize
+      : 16;
+  const estimatedPromptWidth = useMemo(
+    () =>
+      Math.max(
+        1,
+        Math.ceil(promptText.length * promptFontSize * AVG_CHAR_WIDTH_FACTOR)
+      ),
+    [promptText.length, promptFontSize]
+  );
+  const marqueeDuration = useMemo(
+    () =>
+      Math.max(MIN_DURATION_MS, estimatedPromptWidth * MARQUEE_SPEED_PER_PIXEL_MS),
+    [estimatedPromptWidth]
+  );
 
   return (
     <>
       <View style={styles.topContainer}>
         {shouldMarqueePrompt ? (
-          <ScrollView
-            style={styles.promptScroll}
-            contentContainerStyle={styles.promptScrollContent}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-          >
-            <Text
-              style={[styles.cardFont, styles.promptText, styles.promptScrollText]}
+          <View style={styles.promptScroll}>
+            <TextTicker
+              key={promptText}
+              style={promptTextStyle}
+              animationType="auto"
+              duration={marqueeDuration + REPEAT_SPACER_PX}
+              repeatSpacer={REPEAT_SPACER_PX}
+              marqueeDelay={MARQUEE_DELAY_MS}
+              loop
+              useNativeDriver={false}
               numberOfLines={1}
             >
               {promptText}
-            </Text>
-          </ScrollView>
+            </TextTicker>
+          </View>
         ) : (
           <Text
             style={[styles.cardFont, styles.promptText]}
@@ -69,7 +104,7 @@ export function CardInput({
             />
           </Pressable>
         ) : (
-          <View style={styles.cardIconPlaceholder} />
+          null
         )}
       </View>
 
