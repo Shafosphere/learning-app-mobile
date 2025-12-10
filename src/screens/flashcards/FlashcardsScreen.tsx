@@ -147,6 +147,7 @@ export default function Flashcards() {
     resetInteractionState,
     clearSelection,
     updateSelectedItem,
+    getQueueForBox,
   } = useFlashcardsInteraction({
     boxes,
     setBoxes,
@@ -175,8 +176,8 @@ export default function Flashcards() {
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
-    () => (peekBox ? boxes[peekBox] ?? [] : []),
-    [boxes, peekBox]
+    () => (peekBox ? getQueueForBox(peekBox) : []),
+    [getQueueForBox, peekBox]
   );
 
   const handleBoxLongPress = useCallback(

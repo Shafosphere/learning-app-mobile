@@ -109,6 +109,15 @@ export function useFlashcardsInteraction({
     [boxes, shuffleList]
   );
 
+  const getQueueForBox = useCallback(
+    (box: keyof BoxesState) => {
+      syncQueueWithBox(box);
+      ensureQueueHasItems(box);
+      return queuesRef.current[box] ?? [];
+    },
+    [ensureQueueHasItems, syncQueueWithBox]
+  );
+
   const selectNextWord = useCallback(
     (box: keyof BoxesState) => {
       if (box === "boxZero" && !boxZeroEnabled) {
@@ -556,5 +565,6 @@ export function useFlashcardsInteraction({
     clearSelection,
     updateSelectedItem,
     isBetweenCards: queueNext,
+    getQueueForBox,
   };
 }
