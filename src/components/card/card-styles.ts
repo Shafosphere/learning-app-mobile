@@ -137,7 +137,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 800,
     color: colors.headline,
     textAlign: "center",
+    textAlignVertical: "center",
+    // backgroundColor: colors.my_green,
     width: "100%",
+    height: "100%",
   },
   containerButton: {
     display: "flex",
@@ -185,7 +188,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
-
   },
   inputOverlay: {
     position: "absolute",

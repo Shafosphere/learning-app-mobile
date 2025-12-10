@@ -22,7 +22,7 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { useIsFocused } from "@react-navigation/native";
-import FlashcardsPeekOverlay from "./FlashcardsPeekOverlay";
+import FlashcardsPeekOverlay from "../../components/Box/Peek/FlashcardsPeek";
 // import { useRouter } from "expo-router";
 import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -181,7 +181,6 @@ export default function Flashcards() {
 
   const handleBoxLongPress = useCallback(
     (boxName: keyof BoxesState) => {
-      if (boxName === "boxZero") return;
       const list = boxes[boxName] ?? [];
       if (!list.length) return;
       setPeekBox(boxName);
@@ -534,6 +533,8 @@ export default function Flashcards() {
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}
+        activeCustomCourseId={activeCustomCourseId}
+        activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
       />
     </View>
