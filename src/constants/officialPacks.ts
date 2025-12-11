@@ -6,6 +6,7 @@ import francuskiePodstawyCsv from "@/assets/data/francuskie_podstawy.csv";
 import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
 import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
+import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 
 export type OfficialPackDef = {
   slug: string;
@@ -119,5 +120,17 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     smallFlag: "kr",
     isMini: true,
     csvAsset: hangulPolishReadingCsv,
+  },
+  {
+    slug: "stolice_unii_europejskiej",
+    name: "Stolice UE",
+    iconId: "planet",
+    iconColor: "#14B8A6",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    csvAsset: stoliceUniiEuropejskiejCsv,
   },
 ];

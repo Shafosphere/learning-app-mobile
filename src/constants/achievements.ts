@@ -1,40 +1,37 @@
-export type AchievementType = "knownWords" | "dailyGoal";
+export type AchievementType = "streak" | "course_completion" | "total_words" | "speed";
 
-export type AchievementDefinition = {
+export interface AchievementDef {
   id: string;
   title: string;
   description: string;
-  threshold: number;
   type: AchievementType;
-};
+  targetValue: number; // e.g., 20 for streak
+  icon: string; // resource name or identifier
+}
 
-export const ACHIEVEMENTS: AchievementDefinition[] = [
+export const ACHIEVEMENTS: AchievementDef[] = [
   {
-    id: "known_words_first",
-    title: "Pierwsze zwycięstwo",
-    description: "Opanuj pierwsze słówko w boxFive.",
-    threshold: 1,
-    type: "knownWords",
+    id: "streak_5",
+    title: "Rozgrzewka",
+    description: "Odpowiedz poprawnie 5 razy z rzędu",
+    type: "streak",
+    targetValue: 5,
+    icon: "reward1",
   },
   {
-    id: "known_words_stack",
-    title: "Garść słówek",
-    description: "Opanuj 10 słówek.",
-    threshold: 10,
-    type: "knownWords",
+    id: "streak_20",
+    title: "Na fali",
+    description: "Odpowiedz poprawnie 20 razy z rzędu",
+    type: "streak",
+    targetValue: 20,
+    icon: "reward1",
   },
   {
-    id: "known_words_master",
-    title: "Słowny mistrz",
-    description: "Opanuj 50 słówek.",
-    threshold: 50,
-    type: "knownWords",
-  },
-  {
-    id: "daily_goal_champion",
-    title: "Mistrz celu",
-    description: "Zrealizuj swój dzienny cel nauki.",
-    threshold: 1,
-    type: "dailyGoal",
+    id: "streak_50",
+    title: "Mistrz koncentracji",
+    description: "Odpowiedz poprawnie 50 razy z rzędu",
+    type: "streak",
+    targetValue: 50,
+    icon: "reward1",
   },
 ];

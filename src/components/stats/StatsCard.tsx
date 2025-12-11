@@ -5,6 +5,7 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 type Props = ViewProps & {
   title: string;
   subtitle?: string;
+  action?: React.ReactNode;
   children: React.ReactNode;
 };
 
@@ -18,6 +19,11 @@ const useStyles = createThemeStylesHook((colors) => ({
     shadowOpacity: 0.05,
     shadowRadius: 8,
     elevation: 2,
+  },
+  header: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
   title: {
     fontSize: 16,
@@ -38,6 +44,7 @@ const useStyles = createThemeStylesHook((colors) => ({
 const StatsCard: React.FC<Props> = ({
   title,
   subtitle,
+  action,
   children,
   style,
   ...rest
@@ -46,7 +53,10 @@ const StatsCard: React.FC<Props> = ({
 
   return (
     <View style={[styles.container, style]} {...rest}>
-      <Text style={styles.title}>{title}</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>{title}</Text>
+        {action}
+      </View>
       {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
       <View style={styles.content}>{children}</View>
     </View>

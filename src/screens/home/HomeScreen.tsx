@@ -1,8 +1,8 @@
 // index.tsx
+import MyButton from "@/src/components/button/button";
 import { useRouter } from "expo-router";
 import { Text, View } from "react-native";
 import { styles } from "./HomeScreen-styles";
-import MyButton from "@/src/components/button/button";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -19,6 +19,10 @@ export default function HomeScreen() {
     router.push("/custom_course");
   };
 
+  const goToWiki = () => {
+    router.push("/wiki");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Hejka!</Text>
@@ -33,6 +37,7 @@ export default function HomeScreen() {
           onPress={goToCustomCourse}
           width={140}
         />
+        <MyButton text="Pomoc" onPress={goToWiki} width={140} color="my_yellow" />
       </View>
     </View>
   );

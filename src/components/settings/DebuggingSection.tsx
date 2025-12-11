@@ -1,17 +1,18 @@
-import React, { useState } from "react";
-import { View, Text, Alert, TextInput, Switch } from "react-native";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import MyButton from "@/src/components/button/button";
+import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
+import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import { usePopup } from "@/src/contexts/PopupContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
 } from "@/src/db/sqlite/db";
-import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
-import LogoMessage from "@/src/components/logoMessage/LogoMessage";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { usePopup } from "@/src/contexts/PopupContext";
+import { unlockAchievement } from "@/src/db/sqlite/repositories/achievements";
+import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
-import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
+import React, { useState } from "react";
+import { Alert, Switch, Text, TextInput, View } from "react-native";
 
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
@@ -252,10 +253,10 @@ const DebuggingSection: React.FC = () => {
             offset={
               logoFloating
                 ? {
-                    top: 8,
-                    left: 8,
-                    right: 8,
-                  }
+                  top: 8,
+                  left: 8,
+                  right: 8,
+                }
                 : undefined
             }
           />
@@ -299,6 +300,26 @@ const DebuggingSection: React.FC = () => {
           disabled={customBusy || activeCustomCourseId == null}
           onPress={handleResetCustomReviews}
           width={160}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Dodaj testowe puchary</Text>
+          <Text style={styles.rowSubtitle}>
+            Odblokuj losowe 3 osiągnięcia (test bookshelf).
+          </Text>
+        </View>
+        <MyButton
+          text="Daj puchary"
+          color="my_green"
+          onPress={async () => {
+            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
+            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
+            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
+            Alert.alert("Gotowe", "Dodano 3 testowe osiągnięcia.");
+          }}
+          width={140}
         />
       </View>
 

@@ -1,5 +1,6 @@
 import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useAchievements } from "@/src/hooks/useAchievements";
 import { WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import {
@@ -359,6 +360,16 @@ export default function Card({
     selectedItem,
     setAnswer,
   ]);
+
+  // Achievements integration
+  const { reportResult } = useAchievements();
+  useEffect(() => {
+    if (result === true) {
+      reportResult(true);
+    } else if (result === false) {
+      reportResult(false);
+    }
+  }, [result, reportResult]);
 
   useEffect(() => {
     if (
