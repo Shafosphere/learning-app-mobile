@@ -19,6 +19,7 @@ export type OfficialPackDef = {
   smallFlag?: string;
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
+  categoryId?: string;
   csvAsset: any;
 };
 
@@ -131,6 +132,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: true,
+    categoryId: "geography",
     csvAsset: stoliceUniiEuropejskiejCsv,
   },
 ];

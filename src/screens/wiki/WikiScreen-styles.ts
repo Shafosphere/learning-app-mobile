@@ -19,35 +19,12 @@ export const createStyles = (colors: ThemeColors) =>
         scrollContent: {
             paddingBottom: 20,
         },
-        section: {
-            marginBottom: 24,
-            backgroundColor: colors.secondBackground,
-            padding: 16,
-            borderRadius: 12,
-            borderWidth: 1,
-            borderColor: colors.border,
-        },
-        sectionTitle: {
-            fontSize: 20,
-            fontWeight: "bold",
-            color: colors.headline,
-            marginBottom: 12,
-        },
+
         text: {
             fontSize: 16,
             color: colors.paragraph,
             lineHeight: 24,
             marginBottom: 8,
-        },
-        legendItem: {
-            flexDirection: "row",
-            alignItems: "center",
-            marginBottom: 12,
-        },
-        legendIconContainer: {
-            width: 40,
-            alignItems: "center",
-            marginRight: 12,
         },
         legendText: {
             fontSize: 16,
@@ -74,5 +51,5 @@ export const createStyles = (colors: ThemeColors) =>
         activeTabButton: {
             backgroundColor: colors.my_green,
             borderColor: colors.my_green,
-        }
+        },
     });

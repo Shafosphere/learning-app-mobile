@@ -74,6 +74,27 @@ export function CardCorrection({
 }: CardCorrectionProps) {
   const styles = useStyles();
 
+  function applyPlaceholderCasing(value: string, expected: string): string {
+    if (!expected) return value;
+    const chars = value.split("");
+    const expectedChars = expected.split("");
+    const len = Math.min(chars.length, expectedChars.length);
+    for (let i = 0; i < len; i++) {
+      const current = chars[i];
+      const target = expectedChars[i];
+      if (!current) continue;
+      if (current.toLowerCase() !== target.toLowerCase()) continue;
+      const shouldUpper = target === target.toUpperCase();
+      const shouldLower = target === target.toLowerCase();
+      if (shouldUpper && current !== current.toUpperCase()) {
+        chars[i] = current.toUpperCase();
+      } else if (shouldLower && current !== current.toLowerCase()) {
+        chars[i] = current.toLowerCase();
+      }
+    }
+    return chars.join("");
+  }
+
   return (
     <>
       <View
@@ -106,7 +127,11 @@ export function CardCorrection({
             </Text>
             <TextInput
               value={correction.input1}
-              onChangeText={handleCorrectionInput1Change}
+              onChangeText={(text) =>
+                handleCorrectionInput1Change(
+                  applyPlaceholderCasing(text, correctionAwers)
+                )
+              }
               style={styles.myinput}
               ref={input1Ref}
               returnKeyType="next"
@@ -167,13 +192,14 @@ export function CardCorrection({
             <TextInput
               value={correction.input2}
               onChangeText={(t) => {
+                const adjusted = applyPlaceholderCasing(t, correctionRewers);
                 const previousValue = previousCorrectionInput2.current;
                 const shouldFocusPrevious =
                   Platform.OS === "android" &&
                   previousValue.length === 1 &&
-                  t === "";
-                previousCorrectionInput2.current = t;
-                wrongInputChange(2, t);
+                  adjusted === "";
+                previousCorrectionInput2.current = adjusted;
+                wrongInputChange(2, adjusted);
                 if (shouldFocusPrevious) {
                   focusWithDelay(input1Ref);
                 }

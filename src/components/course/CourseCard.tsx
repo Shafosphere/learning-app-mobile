@@ -46,6 +46,8 @@ const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     flexDirection: "row",
     alignItems: "center",
+        // backgroundColor: colors.my_green,
+
   },
   iconWrapper: {
     width: 64,

@@ -377,21 +377,22 @@ export function useFlashcardsInteraction({
 
   const normalizeUserInput = useCallback(
     (value: string) => {
-      const trimmed = value.trim();
+      const normalized = value.trim().toLowerCase();
       if (!ignoreDiacriticsInSpellcheck) {
-        return trimmed;
+        return normalized;
       }
-      return stripDiacritics(trimmed);
+      return stripDiacritics(normalized);
     },
     [ignoreDiacriticsInSpellcheck]
   );
 
   const normalizeExpected = useCallback(
     (value: string) => {
+      const normalized = value.toLowerCase();
       if (!ignoreDiacriticsInSpellcheck) {
-        return value;
+        return normalized;
       }
-      return stripDiacritics(value);
+      return stripDiacritics(normalized);
     },
     [ignoreDiacriticsInSpellcheck]
   );

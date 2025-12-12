@@ -3,7 +3,11 @@ import MyButton from "@/src/components/button/button";
 import { CourseCard } from "@/src/components/course/CourseCard";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import {
-  resolveCourseIconProps
+  COURSE_CATEGORIES,
+  CourseCategory,
+} from "@/src/constants/courseCategories";
+import {
+  resolveCourseIconProps,
 } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
@@ -14,14 +18,13 @@ import {
   OnboardingCheckpoint,
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import type { LanguageCourse } from "@/src/types/course";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  GestureResponderEvent,
   Image,
   Pressable,
   ScrollView,
@@ -29,14 +32,6 @@ import {
   View,
 } from "react-native";
 import { useStyles } from "./CoursePinScreen-styles";
-
-const languageLabels: Record<string, string> = {
-  pl: "polski",
-  en: "angielski",
-  fr: "francuski",
-  es: "hiszpański",
-  de: "niemiecki",
-};
 
 type OfficialCourseListItem = {
   id: number;
@@ -49,43 +44,26 @@ type OfficialCourseListItem = {
   cardsCount: number;
   smallFlag: string | null;
   isMini: boolean;
+  categoryId?: string;
 };
 
 type CourseGroup = {
   key: string;
+  category?: CourseCategory;
   sourceLang: string | null;
   targetLang: string | null;
   sourceFlag: ReturnType<typeof getFlagSource>;
   targetFlag: ReturnType<typeof getFlagSource>;
-  courses: LanguageCourse[];
   officialPacks: OfficialCourseListItem[];
 };
 
 const INTRO_STORAGE_KEY = "@course_pin_intro_seen_v1";
 
-const createCourseKey = (course: LanguageCourse) => {
-  const sourceKey =
-    course.sourceLangId != null
-      ? `id:${course.sourceLangId} `
-      : `code:${course.sourceLang} `;
-  const targetKey =
-    course.targetLangId != null
-      ? `id:${course.targetLangId} `
-      : `code:${course.targetLang} `;
-  const levelKey = course.level ? `level:${course.level} ` : "level:default";
-  return `${sourceKey} -> ${targetKey} -> ${levelKey} `;
-};
-
 export default function CoursePinScreen() {
   const styles = useStyles();
   const router = useRouter();
-  const { courses, colors, addCourse, removeCourse, setLevel } = useSettings();
-  const { pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
+  const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
     useSettings();
-
-  const [availableCourses, setAvailableCourses] = useState<LanguageCourse[]>(
-    []
-  );
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
@@ -113,11 +91,6 @@ export default function CoursePinScreen() {
     []
   );
 
-  // Legacy course derivation removed to prevent ghost courses
-  useEffect(() => {
-    setAvailableCourses([]);
-  }, []);
-
   useEffect(() => {
     let isMounted = true;
     getOfficialCustomCoursesWithCardCounts()
@@ -136,6 +109,7 @@ export default function CoursePinScreen() {
             cardsCount: r.cardsCount,
             smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
             isMini: manifest?.isMini ?? true,
+            categoryId: manifest?.categoryId,
           };
         });
         setOfficialCourses(mapped);
@@ -178,25 +152,33 @@ export default function CoursePinScreen() {
     };
   }, []);
 
-  const displayedCourses = availableCourses;
-
   const groupedCourses = useMemo(() => {
     const map = new Map<string, CourseGroup>();
 
     const ensureGroup = (
-      sourceLang: string | null | undefined,
-      targetLang: string | null | undefined
+      sourceLang: string | null,
+      targetLang: string | null,
+      categoryId?: string
     ): CourseGroup => {
-      const key = `${sourceLang ?? "unknown"} -${targetLang ?? "unknown"} `;
+      let key: string;
+      let category: CourseCategory | undefined;
+
+      if (categoryId && COURSE_CATEGORIES[categoryId]) {
+        category = COURSE_CATEGORIES[categoryId];
+        key = `cat:${categoryId}`;
+      } else {
+        key = `${sourceLang ?? "unknown"} -${targetLang ?? "unknown"} `;
+      }
+
       let group = map.get(key);
       if (!group) {
         group = {
           key,
+          category,
           sourceLang: sourceLang ?? null,
           targetLang: targetLang ?? null,
           sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
           targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
-          courses: [],
           officialPacks: [],
         };
         map.set(key, group);
@@ -204,12 +186,12 @@ export default function CoursePinScreen() {
       return group;
     };
 
-    displayedCourses.forEach((course) => {
-      ensureGroup(course.sourceLang, course.targetLang).courses.push(course);
-    });
-
     officialCourses.forEach((pack) => {
-      ensureGroup(pack.sourceLang, pack.targetLang).officialPacks.push(pack);
+      ensureGroup(
+        pack.sourceLang,
+        pack.targetLang,
+        pack.categoryId
+      ).officialPacks.push(pack);
     });
 
     const compareLangs = (
@@ -226,47 +208,7 @@ export default function CoursePinScreen() {
       if (targetDiff !== 0) return targetDiff;
       return compareLangs(a.sourceLang, b.sourceLang);
     });
-  }, [displayedCourses, officialCourses]);
-
-  const pinnedKeys = useMemo(() => {
-    const set = new Set<string>();
-    courses.forEach((course) => {
-      set.add(createCourseKey(course));
-    });
-    return set;
-  }, [courses]);
-
-  const handlePinToggle = useCallback(
-    async (course: LanguageCourse) => {
-      const key = createCourseKey(course);
-
-      const isPinned = pinnedKeys.has(key);
-
-      try {
-        if (isPinned) {
-          await removeCourse(course);
-          const remaining = courses.length - 1;
-          if (remaining <= 0) {
-            persistCheckpointIfNeeded("pin_required");
-          }
-        } else {
-          await addCourse(course);
-          persistCheckpointIfNeeded("activate_required");
-        }
-      } catch (error) {
-        console.error(`[CoursePin] Failed to toggle course ${key} `, error);
-      }
-    },
-    [addCourse, courses.length, persistCheckpointIfNeeded, pinnedKeys, removeCourse]
-  );
-
-  const handlePinPress = useCallback(
-    (event: GestureResponderEvent, course: LanguageCourse) => {
-      event.stopPropagation();
-      void handlePinToggle(course);
-    },
-    [handlePinToggle]
-  );
+  }, [officialCourses]);
 
   const handleOfficialPinToggle = useCallback(
     async (id: number) => {
@@ -275,7 +217,7 @@ export default function CoursePinScreen() {
         if (isPinned) {
           await unpinOfficialCourse(id);
           const remaining = pinnedOfficialCourseIds.length - 1;
-          if (remaining <= 0 && courses.length === 0) {
+          if (remaining <= 0) {
             persistCheckpointIfNeeded("pin_required");
           }
         } else {
@@ -289,39 +231,12 @@ export default function CoursePinScreen() {
         );
       }
     },
-    [
-      courses.length,
-      pinOfficialCourse,
-      pinnedOfficialCourseIds,
-      persistCheckpointIfNeeded,
-      unpinOfficialCourse,
-    ]
-  );
-
-  const isCoursePinned = useCallback(
-    (course: LanguageCourse) => {
-      const key = createCourseKey(course);
-      return pinnedKeys.has(key);
-    },
-    [pinnedKeys]
+    [pinOfficialCourse, pinnedOfficialCourseIds, persistCheckpointIfNeeded, unpinOfficialCourse]
   );
 
   const hasAnyPinned = useMemo(() => {
-    return pinnedKeys.size > 0 || pinnedOfficialCourseIds.length > 0;
-  }, [
-    pinnedKeys,
-    pinnedOfficialCourseIds,
-  ]);
-
-  const handleCardPress = useCallback(
-    (course: LanguageCourse) => {
-      if (course.level) {
-        setLevel(course.level);
-      }
-      void handlePinToggle(course);
-    },
-    [handlePinToggle, setLevel]
-  );
+    return pinnedOfficialCourseIds.length > 0;
+  }, [pinnedOfficialCourseIds]);
 
   const introMessages = useMemo(
     () => [
@@ -436,7 +351,6 @@ export default function CoursePinScreen() {
           <Text style={styles.title}>Czego sie uczymy?</Text>
 
           {groupedCourses.map((group) => {
-            const hasCourses = group.courses.length > 0;
             const regularOfficialPacks = group.officialPacks.filter(
               (pack) => pack.isMini === false
             );
@@ -445,7 +359,7 @@ export default function CoursePinScreen() {
             );
             const hasOfficial =
               regularOfficialPacks.length > 0 || miniOfficialPacks.length > 0;
-            if (!hasCourses && !hasOfficial) {
+            if (!hasOfficial) {
               return null;
             }
 
@@ -461,88 +375,51 @@ export default function CoursePinScreen() {
                 <View style={styles.groupHeader}>
                   <View style={styles.groupHeaderLine} />
                   <View style={styles.groupHeaderBadge}>
-                    <View style={styles.groupHeaderLanguage}>
-                      <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
-                      {group.targetFlag ? (
-                        <Image
-                          style={styles.groupHeaderFlag}
-                          source={group.targetFlag}
-                        />
-                      ) : null}
-                    </View>
-                    {group.sourceLang ? (
+                    {group.category ? (
+                      <View style={styles.groupHeaderLanguage}>
+                        {group.category.icon ? (
+                          <FontAwesome6
+                            name={group.category.icon}
+                            size={16}
+                            color={colors.headline}
+                            style={{ marginRight: 6 }}
+                          />
+                        ) : null}
+                        <Text style={[styles.groupHeaderCode, { fontSize: 24 }]}>
+                          {group.category.label.toUpperCase()}
+                        </Text>
+                      </View>
+                    ) : (
                       <>
-                        <Text style={styles.groupHeaderSeparator}>/</Text>
                         <View style={styles.groupHeaderLanguage}>
-                          <Text style={styles.groupHeaderCode}>
-                            {learningCode}
-                          </Text>
-                          {group.sourceFlag ? (
+                          <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
+                          {group.targetFlag ? (
                             <Image
                               style={styles.groupHeaderFlag}
-                              source={group.sourceFlag}
+                              source={group.targetFlag}
                             />
                           ) : null}
                         </View>
+                        {group.sourceLang ? (
+                          <>
+                            <Text style={styles.groupHeaderSeparator}>/</Text>
+                            <View style={styles.groupHeaderLanguage}>
+                              <Text style={styles.groupHeaderCode}>
+                                {learningCode}
+                              </Text>
+                              {group.sourceFlag ? (
+                                <Image
+                                  style={styles.groupHeaderFlag}
+                                  source={group.sourceFlag}
+                                />
+                              ) : null}
+                            </View>
+                          </>
+                        ) : null}
                       </>
-                    ) : null}
+                    )}
                   </View>
                 </View>
-
-                {hasCourses
-                  ? group.courses.map((course) => {
-                    const key = createCourseKey(course);
-                    const sourceFlag = getFlagSource(course.sourceLang);
-                    const isPinned = isCoursePinned(course);
-                    const sourceLabel =
-                      languageLabels[course.sourceLang] ??
-                      course.sourceLang.toUpperCase();
-                    const targetLabel =
-                      languageLabels[course.targetLang] ??
-                      course.targetLang.toUpperCase();
-
-                    return (
-                      <Pressable
-                        key={key}
-                        onPress={() => handleCardPress(course)}
-                        style={styles.courseCard}
-                      >
-                        {sourceFlag ? (
-                          <Image style={styles.flag} source={sourceFlag} />
-                        ) : null}
-                        <Text style={styles.courseCardText}>
-                          {`${sourceLabel} → ${targetLabel} ${course.level ?? ""
-                            } `.trim()}
-                        </Text>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={
-                            isPinned
-                              ? `Odepnij kurs ${targetLabel} `
-                              : `Przypnij kurs ${targetLabel} `
-                          }
-                          style={styles.pinButton}
-                          onPress={(event) => handlePinPress(event, course)}
-                        >
-                          <View
-                            style={[
-                              styles.pinCheckbox,
-                              isPinned && styles.pinCheckboxActive,
-                            ]}
-                          >
-                            {isPinned ? (
-                              <Octicons
-                                name="pin"
-                                size={20}
-                                color={colors.headline}
-                              />
-                            ) : null}
-                          </View>
-                        </Pressable>
-                      </Pressable>
-                    );
-                  })
-                  : null}
 
                 {hasOfficial ? (
                   <>

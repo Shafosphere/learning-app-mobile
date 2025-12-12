@@ -1,10 +1,14 @@
+import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { Ionicons } from "@expo/vector-icons";
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { createStyles } from "./WikiScreen-styles";
+import TutorialCarousel from "./components/TutorialCarousel";
+import TutorialSlide from "./components/TutorialSlide";
 
 type Tab = "general" | "flashcards";
 
@@ -19,136 +23,104 @@ export default function WikiScreen() {
     };
 
     const renderGeneral = () => (
-        <>
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>O aplikacji</Text>
-                <Text style={styles.text}>
-                    Witaj w aplikacji do nauki języków! Tutaj możesz tworzyć własne kursy,
-                    dodawać fiszki i śledzić swoje postępy. Aplikacja została stworzona,
-                    aby pomóc Ci w systematycznej nauce.
-                </Text>
-            </View>
+        <TutorialCarousel>
+            <TutorialSlide
+                title="Witaj w aplikacji!"
+                description="To Twoje centrum nauki języków. Twórz własne kursy, dodawaj fiszki i śledź swoje postępy w jednym miejscu."
+            >
+                <Ionicons name="school" size={100} color={colors.my_green} />
+            </TutorialSlide>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Legenda</Text>
-
-                <View style={styles.legendItem}>
-                    <View style={styles.legendIconContainer}>
-                        <Ionicons name="book" size={24} color={colors.headline} />
+            <TutorialSlide
+                title="Gdzie co jest?"
+                description="Nawigacja w pigułce:"
+            >
+                <View style={{ flexDirection: "row", gap: 20, justifyContent: "center", width: "100%", flexWrap: "wrap" }}>
+                    <View style={{ alignItems: "center", gap: 8, width: 80 }}>
+                        <Ionicons name="person-circle-outline" size={32} color={colors.headline} />
+                        <Text style={[styles.legendText, { flex: 0, textAlign: "center", fontSize: 11 }]}>Góra-Lewo: Kursy</Text>
                     </View>
-                    <Text style={styles.legendText}>Kursy - tutaj znajdziesz dostępne lekcje.</Text>
-                </View>
-
-                <View style={styles.legendItem}>
-                    <View style={styles.legendIconContainer}>
-                        <Ionicons name="stats-chart" size={24} color={colors.headline} />
+                    <View style={{ alignItems: "center", gap: 8, width: 80 }}>
+                        <Text style={{ fontSize: 28, fontWeight: "bold", color: colors.headline }}>123</Text>
+                        <Text style={[styles.legendText, { flex: 0, textAlign: "center", fontSize: 11 }]}>Góra-Prawo: Statystyki</Text>
                     </View>
-                    <Text style={styles.legendText}>Statystyki - sprawdź swoje postępy i osiągnięcia.</Text>
-                </View>
-
-                <View style={styles.legendItem}>
-                    <View style={styles.legendIconContainer}>
-                        <Ionicons name="create" size={24} color={colors.headline} />
+                    <View style={{ alignItems: "center", gap: 8, width: 80 }}>
+                        <FontAwesome5 name="gamepad" size={28} color={colors.headline} />
+                        <Text style={[styles.legendText, { flex: 0, textAlign: "center", fontSize: 11 }]}>Dół-Środek: Nauka</Text>
                     </View>
-                    <Text style={styles.legendText}>Własne fiszki - twórz i edytuj swoje zestawy słówek.</Text>
                 </View>
-            </View>
+            </TutorialSlide>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Jak zacząć?</Text>
-                <Text style={styles.text}>
-                    1. Przejdź do sekcji "Kursy", aby wybrać gotowy zestaw.
-                </Text>
-                <Text style={styles.text}>
-                    2. Użyj "Własne fiszki", aby dodać słówka, których chcesz się nauczyć.
-                </Text>
-                <Text style={styles.text}>
-                    3. Regularnie zaglądaj do "Statystyk", aby utrzymać motywację!
-                </Text>
-            </View>
-        </>
+            <TutorialSlide
+                title="Jak zacząć?"
+                description="Proste kroki do sukcesu:"
+            >
+                <View style={{ width: "100%", paddingHorizontal: 20, gap: 16 }}>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                        <View style={{ backgroundColor: colors.my_green, width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" }}>
+                            <Text style={{ fontWeight: "bold", color: "white" }}>1</Text>
+                        </View>
+                        <Text style={[styles.text, { marginBottom: 0, flex: 1 }]}>Wybierz gotowy kurs lub stwórz swój.</Text>
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                        <View style={{ backgroundColor: colors.my_green, width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" }}>
+                            <Text style={{ fontWeight: "bold", color: "white" }}>2</Text>
+                        </View>
+                        <Text style={[styles.text, { marginBottom: 0, flex: 1 }]}>Dodaj nowe słówka do nauki.</Text>
+                    </View>
+                    <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                        <View style={{ backgroundColor: colors.my_green, width: 30, height: 30, borderRadius: 15, alignItems: "center", justifyContent: "center" }}>
+                            <Text style={{ fontWeight: "bold", color: "white" }}>3</Text>
+                        </View>
+                        <Text style={[styles.text, { marginBottom: 0, flex: 1 }]}>Powtarzaj codziennie i sprawdzaj staty!</Text>
+                    </View>
+                </View>
+            </TutorialSlide>
+        </TutorialCarousel>
     );
 
     const renderFlashcards = () => (
-        <>
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Opis gry Flashcards</Text>
-                <Text style={styles.text}>
-                    Fiszki działają jak system Leitnera – poprawne odpowiedzi przesuwają kartę do
-                    kolejnego pudełka, a błędne cofają do startu. Algorytm pilnuje, by częściej
-                    wracać do trudnych słówek i losowo wybiera kolejną paczkę z aktywnego kursu.
-                </Text>
-                <Text style={styles.text}>
-                    Domyślnie nowa paczka to 10 słów. Trafiają do Box 0 (jeśli włączony) lub Box 1
-                    i czekają na pierwsze podejście.
-                </Text>
-            </View>
+        <TutorialCarousel>
+            <TutorialSlide
+                title="System 5 pudełek"
+                description="Każde nowe słowo zaczyna w Box 1. System Leitnera optymalizuje powtórki."
+            >
+                <View style={{ flexDirection: "row", gap: 8, alignItems: "flex-end", height: 80 }}>
+                    <BoxSkin wordCount={5} face="smile" isActive />
+                    <BoxSkin wordCount={0} face="smile" />
+                    <BoxSkin wordCount={0} face="smile" />
+                </View>
+            </TutorialSlide>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Sterowanie kartą</Text>
-                <Text style={styles.text}>- Wpisz tłumaczenie pod pytaniem i kliknij "zatwiedź".</Text>
-                <Text style={styles.text}>
-                    - "dodaj słówka" dobiera nową paczkę z kursu, gdy obecne pudełka są puste lub
-                    chcesz dorzucić więcej kart.
-                </Text>
-                <Text style={styles.text}>
-                    - Ikona dwóch dymków zmienia wersję tłumaczenia, gdy fiszka ma kilka poprawnych
-                    odpowiedzi.
-                </Text>
-                <Text style={styles.text}>
-                    - Dotknij pola z trzema kropkami pod kartą, aby dodać lub edytować podpowiedź
-                    zapisywaną w kursie.
-                </Text>
-                <Text style={styles.text}>
-                    - Przy błędnej odpowiedzi pojawiają się dwa pola korekty; wpisz poprawne
-                    słówko i tłumaczenie, by wrócić do nauki.
-                </Text>
-            </View>
+            <TutorialSlide
+                title="Progres (Sukces)"
+                description="Każda dobra odpowiedź przesuwa kartę do wyższego pudełka (np. z Box 1 do Box 2)."
+            >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <BoxSkin wordCount={1} face="smile" />
+                    <Ionicons name="arrow-forward" size={32} color={colors.my_green} />
+                    <BoxSkin wordCount={2} face="happy" isActive />
+                </View>
+            </TutorialSlide>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Pudełka</Text>
-                <Text style={styles.text}>
-                    - Box 0: opcjonalna faza zapoznania. Nowe karty trafiają tutaj, a przejście
-                    dalej wymaga szybkiej korekty.
-                </Text>
-                <Text style={styles.text}>
-                    - Box 1: startowy poziom, gdy Box 0 jest wyłączony lub fiszka wyszła z fazy
-                    wstępnej.
-                </Text>
-                <Text style={styles.text}>
-                    - Box 2 i Box 4: pytanie bywa odwrócone (tłumaczenie → oryginał), żeby ćwiczyć
-                    kierunek w drugą stronę.
-                </Text>
-                <Text style={styles.text}>
-                    - Box 5: ostatni poziom. Poprawna odpowiedź oznacza fiszkę jako opanowaną
-                    (konfetti!) i może zaplanować ją do późniejszych powtórek.
-                </Text>
-                <Text style={styles.text}>
-                    - Zła odpowiedź cofa kartę do Box 0 lub Box 1, dobra przesuwa o jedno pudełko
-                    do przodu.
-                </Text>
-            </View>
+            <TutorialSlide
+                title="Mistrzostwo (Box 5)"
+                description="Dotarcie do Box 5 oznacza pełne opanowanie słowa. Fiszka znika z cyklu powtórek."
+            >
+                <BoxSkin wordCount={0} face="happy" isActive />
+            </TutorialSlide>
 
-            <View style={styles.section}>
-                <Text style={styles.sectionTitle}>Aktywacja i podgląd</Text>
-                <Text style={styles.text}>
-                    - Stuknij pudełko, aby z niego losować karty; liczba pod spodem to liczba fiszek.
-                </Text>
-                <Text style={styles.text}>
-                    - Przytrzymaj pudełko, by otworzyć podgląd listy fiszek w środku (bez zmiany
-                    kolejki).
-                </Text>
-                <Text style={styles.text}>
-                    - W edycji kursu możesz włączyć/wyłączyć Box 0, przełącznik "Autoflow" oraz
-                    powtórki – przydatne, gdy chcesz, żeby pudełka same się przełączały i dociągały
-                    nowe słowa.
-                </Text>
-                <Text style={styles.text}>
-                    - W ustawieniach wyglądu wybierzesz układ pudełek (lista lub karuzela) oraz
-                    miny pudełek.
-                </Text>
-            </View>
-        </>
+            <TutorialSlide
+                title="Regres (Błąd)"
+                description="Każdy błąd jest bolesny! Cofa kartę z powrotem do Box 1, niezależnie od obecnego poziomu."
+            >
+                <View style={{ flexDirection: "row", alignItems: "center", gap: 12 }}>
+                    <BoxSkin wordCount={4} face="surprised" />
+                    <Ionicons name="arrow-forward" size={32} color={colors.my_red} />
+                    <BoxSkin wordCount={1} face="smile" isActive />
+                </View>
+            </TutorialSlide>
+        </TutorialCarousel>
     );
 
     return (

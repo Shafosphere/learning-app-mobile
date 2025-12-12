@@ -138,16 +138,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "space-between",
     borderRadius: 15,
-    paddingLeft: "10%",
-    paddingRight: "10%",
+    paddingLeft: "7%",
+    paddingRight: "7%",
     backgroundColor: colors.secondBackground,
     height: 92,
+    
   },
   customCardContent: {
     flex: 1,
     display: "flex",
     flexDirection: "row",
     alignItems: "center",
+        // gap: 2,
   },
   customIconBadge: {
     width: 64,
@@ -188,7 +190,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   customEditButton: {
-    padding: 12,
+    padding: 4,
+    marginLeft: 8,
+    // backgroundColor: colors.my_yellow,
     alignItems: "center",
     justifyContent: "center",
   },
@@ -249,7 +253,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   flag: {
     width: 99 / 1.25,
     height: 66 / 1.25,
-        // backgroundColor: colors.my_green,
+    // backgroundColor: colors.my_green,
   },
   clicked: {
     backgroundColor: colors.my_green,

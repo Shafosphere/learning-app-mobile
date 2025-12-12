@@ -1,9 +1,8 @@
 import MyButton from "@/src/components/button/button";
 import { CourseCard } from "@/src/components/course/CourseCard";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
-import {
-  resolveCourseIconProps
-} from "@/src/constants/customCourse";
+import { COURSE_CATEGORIES, CourseCategory } from "@/src/constants/courseCategories";
+import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -17,68 +16,40 @@ import {
   getOnboardingCheckpoint,
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
-import type { LanguageCourse } from "@/src/types/course";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
 
-type BuiltinCourseItem = { course: LanguageCourse; index: number };
-
 type OfficialCourseListItem = CustomCourseSummary & {
   sourceLang: string | null;
   targetLang: string | null;
   smallFlag: string | null;
   isMini: boolean;
+  categoryId?: string;
 };
 
 type CourseGroup = {
   key: string;
+  category?: CourseCategory;
   sourceLang: string | null;
   targetLang: string | null;
   sourceFlag?: ReturnType<typeof getFlagSource>;
   targetFlag?: ReturnType<typeof getFlagSource>;
-  builtin: BuiltinCourseItem[];
   official: OfficialCourseListItem[];
 };
 
-type SelectedCourse =
-  | { type: "builtin"; index: number }
-  | { type: "custom"; id: number };
-
-const LEVEL_REGEX = /(a1|a2|b1|b2|c1|c2)$/i;
+type SelectedCourse = { type: "custom"; id: number };
 const INTRO_STORAGE_KEY = "@course_activate_intro_seen_v1";
-
-const LANGUAGE_LABELS: Record<string, Record<string, string>> = {
-  pl: { en: "angielski", fr: "francuski", es: "hiszpański" },
-};
-
-const createCourseKey = (course: LanguageCourse) => {
-  const sourceKey =
-    course.sourceLangId != null
-      ? `id:${course.sourceLangId}`
-      : `code:${course.sourceLang}`;
-  const targetKey =
-    course.targetLangId != null
-      ? `id:${course.targetLangId}`
-      : `code:${course.targetLang}`;
-  const levelKey = course.level ? `level:${course.level}` : "level:default";
-  return `${sourceKey}->${targetKey}->${levelKey}`;
-};
 
 export default function CourseActivateScreen() {
   const {
-    courses,
-    activeCourseIdx,
-    setActiveCourseIdx,
-    activeCourse,
     activeCustomCourseId,
     setActiveCustomCourseId,
     colors,
-    setLevel,
     pinnedOfficialCourseIds,
   } = useSettings();
 
@@ -108,45 +79,33 @@ export default function CourseActivateScreen() {
     [officialCourses, pinnedOfficialCourseIds]
   );
 
-  const allowedBuiltinCourseKeys = useMemo(() => {
-    const set = new Set<string>();
-    OFFICIAL_PACKS.forEach((pack) => {
-      if (!pack.sourceLang || !pack.targetLang) return;
-      const match = pack.slug.match(LEVEL_REGEX);
-      const base: LanguageCourse = {
-        sourceLang: pack.sourceLang,
-        targetLang: pack.targetLang,
-      };
-      if (match) {
-        set.add(
-          createCourseKey({
-            ...base,
-            level: match[1].toUpperCase(),
-          })
-        );
-      }
-      set.add(createCourseKey(base));
-    });
-    return set;
-  }, []);
-
   const courseGroups = useMemo(() => {
     const map = new Map<string, CourseGroup>();
 
     const ensureGroup = (
-      sourceLang?: string | null,
-      targetLang?: string | null
+      sourceLang: string | null,
+      targetLang: string | null,
+      categoryId?: string
     ): CourseGroup => {
-      const key = `${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      let key: string;
+      let category: CourseCategory | undefined;
+
+      if (categoryId && COURSE_CATEGORIES[categoryId]) {
+        category = COURSE_CATEGORIES[categoryId];
+        key = `cat:${categoryId}`;
+      } else {
+        key = `lang:${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
+      }
+
       let group = map.get(key);
       if (!group) {
         group = {
           key,
+          category,
           sourceLang: sourceLang ?? null,
           targetLang: targetLang ?? null,
           sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
           targetFlag: targetLang ? getFlagSource(targetLang) : undefined,
-          builtin: [],
           official: [],
         };
         map.set(key, group);
@@ -154,23 +113,12 @@ export default function CourseActivateScreen() {
       return group;
     };
 
-    courses.forEach((course, index) => {
-      const keyWithLevel = createCourseKey(course);
-      const keyWithoutLevel = createCourseKey({ ...course, level: undefined });
-      if (
-        allowedBuiltinCourseKeys.size > 0 &&
-        !allowedBuiltinCourseKeys.has(keyWithLevel) &&
-        !allowedBuiltinCourseKeys.has(keyWithoutLevel)
-      ) {
-        return;
-      }
-      const targetLang = course.targetLang ?? null;
-      const sourceLang = course.sourceLang ?? null;
-      ensureGroup(sourceLang, targetLang).builtin.push({ course, index });
-    });
-
     pinnedOfficialCourses.forEach((course) => {
-      ensureGroup(course.sourceLang, course.targetLang).official.push(course);
+      ensureGroup(
+        course.sourceLang,
+        course.targetLang,
+        course.categoryId
+      ).official.push(course);
     });
 
     const compareLangs = (
@@ -187,42 +135,20 @@ export default function CourseActivateScreen() {
       if (targetDiff !== 0) return targetDiff;
       return compareLangs(a.sourceLang, b.sourceLang);
     });
-  }, [allowedBuiltinCourseKeys, courses, pinnedOfficialCourses]);
-
-  const hasBuiltInCourses = useMemo(
-    () => courseGroups.some((group) => group.builtin.length > 0),
-    [courseGroups]
-  );
+  }, [pinnedOfficialCourses]);
 
   const hasPinnedOfficialCourses = pinnedOfficialCourses.length > 0;
   const hasUserCustomCourses = userCustomCourses.length > 0;
   const isEmptyState =
-    !hasBuiltInCourses && !hasPinnedOfficialCourses && !hasUserCustomCourses;
+    !hasPinnedOfficialCourses && !hasUserCustomCourses;
 
   useEffect(() => {
-    console.log("courses length:", courses.length);
-    console.log("courses:", JSON.stringify(courses, null, 2));
-    console.log(
-      "activeCourseIdx:",
-      activeCourseIdx,
-      "activeCourse:",
-      activeCourse,
-      "activeCustomCourseId:",
-      activeCustomCourseId
-    );
-  }, [courses, activeCourseIdx, activeCourse, activeCustomCourseId]);
-
-  useEffect(() => {
-    if (activeCourseIdx != null) {
-      setCommittedCourse({ type: "builtin", index: activeCourseIdx });
-      return;
-    }
     if (activeCustomCourseId != null) {
       setCommittedCourse({ type: "custom", id: activeCustomCourseId });
       return;
     }
     setCommittedCourse(null);
-  }, [activeCourseIdx, activeCustomCourseId]);
+  }, [activeCustomCourseId]);
 
   useEffect(() => {
     let mounted = true;
@@ -277,6 +203,7 @@ export default function CourseActivateScreen() {
                 targetLang: manifest?.targetLang ?? null,
                 smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
                 isMini: manifest?.isMini ?? true,
+                categoryId: manifest?.categoryId,
               };
             });
             setOfficialCourses(mapped);
@@ -314,31 +241,6 @@ export default function CourseActivateScreen() {
     });
   }, [setPopup]);
 
-  const handleBuiltinCoursePress = useCallback(
-    async (index: number) => {
-      const current = committedCourse;
-      if (current?.type === "builtin" && current.index === index) {
-        return;
-      }
-      if (!canActivate()) return;
-      const selected = courses[index];
-      if (!selected) return;
-      if (selected.level) {
-        setLevel(selected.level);
-      }
-      await setActiveCourseIdx(index);
-      notifyActivated();
-    },
-    [
-      canActivate,
-      committedCourse,
-      courses,
-      notifyActivated,
-      setActiveCourseIdx,
-      setLevel,
-    ]
-  );
-
   const handleCustomCoursePress = useCallback(
     async (id: number) => {
       const current = committedCourse;
@@ -360,28 +262,6 @@ export default function CourseActivateScreen() {
     }
     router.push(`/editcourse?${params.join("&")}`);
   };
-
-  const handleEditBuiltinCourse = useCallback(
-    (course: LanguageCourse) => {
-      const baseLabel =
-        LANGUAGE_LABELS[course.targetLang]?.[course.sourceLang] ??
-        course.sourceLang;
-      const displayName = `${baseLabel}${course.level ? ` ${course.level}` : ""
-        }`;
-      const params = [
-        `name=${encodeURIComponent(displayName)}`,
-        `targetLang=${encodeURIComponent(course.targetLang)}`,
-      ];
-      if (course.sourceLang) {
-        params.push(`sourceLang=${encodeURIComponent(course.sourceLang)}`);
-      }
-      if (course.level) {
-        params.push(`level=${encodeURIComponent(course.level)}`);
-      }
-      router.push(`/editcourse?${params.join("&")}`);
-    },
-    [router]
-  );
 
   const renderOfficialCourseSection = (
     title: string,
@@ -477,8 +357,7 @@ export default function CourseActivateScreen() {
     });
   }, [introMessages.length]);
 
-  const hasActiveCourse =
-    activeCourseIdx != null || activeCustomCourseId != null;
+  const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
 
   return (
@@ -509,12 +388,11 @@ export default function CourseActivateScreen() {
             </View>
           ) : (
             <>
-              {hasBuiltInCourses || hasPinnedOfficialCourses ? (
+              {hasPinnedOfficialCourses ? (
                 <>
                   <Text style={styles.title}>Stworzone przez nas</Text>
                   <View style={styles.builtinSection}>
                     {courseGroups.map((group) => {
-                      const hasBuiltin = group.builtin.length > 0;
                       const regularOfficial = group.official.filter(
                         (course) => course.isMini === false
                       );
@@ -523,7 +401,7 @@ export default function CourseActivateScreen() {
                       );
                       const hasOfficial =
                         regularOfficial.length > 0 || miniOfficial.length > 0;
-                      if (!hasBuiltin && !hasOfficial) {
+                      if (!hasOfficial) {
                         return null;
                       }
 
@@ -542,97 +420,55 @@ export default function CourseActivateScreen() {
                           <View style={styles.groupHeader}>
                             <View style={styles.groupHeaderLine} />
                             <View style={styles.groupHeaderBadge}>
-                              <View style={styles.groupHeaderLanguage}>
-                                <Text style={styles.groupHeaderCode}>
-                                  {targetCode}
-                                </Text>
-                                {group.targetFlag ? (
-                                  <Image
-                                    style={styles.groupHeaderFlag}
-                                    source={group.targetFlag}
-                                  />
-                                ) : null}
-                              </View>
-                              {group.sourceLang ? (
-                                <>
-                                  <Text style={styles.groupHeaderSeparator}>
-                                    /
+                              {group.category ? (
+                                <View style={styles.groupHeaderLanguage}>
+                                  {group.category?.icon ? (
+                                    <FontAwesome6
+                                      name={group.category.icon}
+                                      size={16}
+                                      color={colors.headline}
+                                      style={{ marginRight: 6 }}
+                                    />
+                                  ) : null}
+                                  <Text style={[styles.groupHeaderCode, { fontSize: 24 }]}>
+                                    {group.category.label.toUpperCase()}
                                   </Text>
+                                </View>
+                              ) : (
+                                <>
                                   <View style={styles.groupHeaderLanguage}>
                                     <Text style={styles.groupHeaderCode}>
-                                      {sourceCode}
+                                      {targetCode}
                                     </Text>
-                                    {group.sourceFlag ? (
+                                    {group.targetFlag ? (
                                       <Image
                                         style={styles.groupHeaderFlag}
-                                        source={group.sourceFlag}
+                                        source={group.targetFlag}
                                       />
                                     ) : null}
                                   </View>
+                                  {group.sourceLang ? (
+                                    <>
+                                      <Text style={styles.groupHeaderSeparator}>
+                                        /
+                                      </Text>
+                                      <View style={styles.groupHeaderLanguage}>
+                                        <Text style={styles.groupHeaderCode}>
+                                          {sourceCode}
+                                        </Text>
+                                        {group.sourceFlag ? (
+                                          <Image
+                                            style={styles.groupHeaderFlag}
+                                            source={group.sourceFlag}
+                                          />
+                                        ) : null}
+                                      </View>
+                                    </>
+                                  ) : null}
                                 </>
-                              ) : null}
+                              )}
                             </View>
                           </View>
-
-                          {hasBuiltin ? (
-                            <View style={styles.groupCourses}>
-                              {group.builtin.map(({ course: item, index }) => {
-                                const isHighlighted =
-                                  committedCourse?.type === "builtin" &&
-                                  committedCourse.index === index;
-                                const sourceFlag = getFlagSource(
-                                  item.sourceLang
-                                );
-                                const languageLabel =
-                                  item.targetLang && item.sourceLang
-                                    ? LANGUAGE_LABELS[item.targetLang]?.[
-                                    item.sourceLang
-                                    ]
-                                    : undefined;
-                                const displayTitle = `${languageLabel ?? item.sourceLang ?? ""
-                                  }${item.level ? ` ${item.level}` : ""}`;
-
-                                return (
-                                  <Pressable
-                                    key={index}
-                                    onPress={() =>
-                                      handleBuiltinCoursePress(index)
-                                    }
-                                    style={[
-                                      styles.courseCard,
-                                      isHighlighted && styles.clicked,
-                                    ]}
-                                  >
-                                    {sourceFlag ? (
-                                      <Image
-                                        style={styles.flag}
-                                        source={sourceFlag}
-                                      />
-                                    ) : null}
-                                    <Text style={styles.courseCardText}>
-                                      {displayTitle}
-                                    </Text>
-                                    <Pressable
-                                      accessibilityRole="button"
-                                      accessibilityLabel={`Edytuj kurs ${displayTitle}`}
-                                      style={styles.courseEditButton}
-                                      onPress={(event) => {
-                                        event.stopPropagation();
-                                        handleEditBuiltinCourse(item);
-                                      }}
-                                      hitSlop={8}
-                                    >
-                                      <FontAwesome6
-                                        name="edit"
-                                        size={24}
-                                        color={colors.headline}
-                                      />
-                                    </Pressable>
-                                  </Pressable>
-                                );
-                              })}
-                            </View>
-                          ) : null}
 
                           {hasOfficial ? (
                             <>
