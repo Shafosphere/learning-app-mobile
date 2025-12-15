@@ -1,8 +1,7 @@
 import MyButton from "@/src/components/button/button";
-import { CourseCard } from "@/src/components/course/CourseCard";
+import { CourseListCard } from "@/src/components/course/CourseListCard";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { COURSE_CATEGORIES, CourseCategory } from "@/src/constants/courseCategories";
-import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -121,6 +120,11 @@ export default function CourseActivateScreen() {
       ).official.push(course);
     });
 
+    const compareByName = (
+      a: OfficialCourseListItem,
+      b: OfficialCourseListItem
+    ) => a.name.localeCompare(b.name);
+
     const compareLangs = (
       a: string | null | undefined,
       b: string | null | undefined
@@ -130,11 +134,17 @@ export default function CourseActivateScreen() {
       return first.localeCompare(second);
     };
 
-    return Array.from(map.values()).sort((a, b) => {
+    const sortedGroups = Array.from(map.values()).sort((a, b) => {
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
       if (targetDiff !== 0) return targetDiff;
       return compareLangs(a.sourceLang, b.sourceLang);
     });
+
+    sortedGroups.forEach((group) => {
+      group.official.sort(compareByName);
+    });
+
+    return sortedGroups;
   }, [pinnedOfficialCourses]);
 
   const hasPinnedOfficialCourses = pinnedOfficialCourses.length > 0;
@@ -276,34 +286,18 @@ export default function CourseActivateScreen() {
           const isHighlighted =
             committedCourse?.type === "custom" &&
             committedCourse.id === course.id;
-          const iconProps = resolveCourseIconProps(
-            course.iconId,
-            course.iconColor
-          );
           const flagLang = course.smallFlag ?? course.sourceLang;
-          const sourceFlag = flagLang ? getFlagSource(flagLang) : undefined;
 
           return (
-            <CourseCard
+            <CourseListCard
               key={`official-${course.id}`}
-              onPress={() => handleCustomCoursePress(course.id)}
-              containerStyle={styles.customCard}
-              contentStyle={styles.customCardContent}
-              {...iconProps}
-              iconWrapperStyle={[
-                styles.customIconBadge,
-                { borderColor: course.iconColor },
-              ]}
-              flagSource={sourceFlag}
-              flagStyle={styles.customIconFlag}
-              infoStyle={styles.customCardInfo}
               title={course.name}
-              titleContainerStyle={styles.customCardTitleContainer}
-              titleTextStyle={styles.customCardTitle}
-              meta={`fiszki: ${course.cardsCount}`}
-              metaTextStyle={styles.customCardMeta}
+              subtitle={`fiszki: ${course.cardsCount}`}
+              iconId={course.iconId}
+              iconColor={course.iconColor}
+              flagCode={flagLang}
               isHighlighted={isHighlighted}
-              highlightedStyle={styles.clicked}
+              onPress={() => handleCustomCoursePress(course.id)}
               rightAccessory={
                 <Pressable
                   accessibilityRole="button"
@@ -496,32 +490,19 @@ export default function CourseActivateScreen() {
                   </Text>
                   <View style={styles.customList}>
                     {userCustomCourses.map((course) => {
-                      const iconProps = resolveCourseIconProps(
-                        course.iconId,
-                        course.iconColor
-                      );
                       const isHighlighted =
                         committedCourse?.type === "custom" &&
                         committedCourse.id === course.id;
                       return (
-                        <CourseCard
+                        <CourseListCard
                           key={course.id}
-                          onPress={() => handleCustomCoursePress(course.id)}
-                          containerStyle={styles.customCard}
-                          contentStyle={styles.customCardContent}
-                          {...iconProps}
-                          iconWrapperStyle={[
-                            styles.customIconBadge,
-                            { borderColor: course.iconColor },
-                          ]}
-                          infoStyle={styles.customCardInfo}
                           title={course.name}
-                          titleContainerStyle={styles.customCardTitleContainer}
-                          titleTextStyle={styles.customCardTitle}
-                          meta={`fiszki: ${course.cardsCount}`}
-                          metaTextStyle={styles.customCardMeta}
+                          subtitle={`fiszki: ${course.cardsCount}`}
+                          iconId={course.iconId}
+                          iconColor={course.iconColor}
+                          flagCode={null} // Custom courses typically don't have a flag logic derived here yet or use the icon itself
                           isHighlighted={isHighlighted}
-                          highlightedStyle={styles.clicked}
+                          onPress={() => handleCustomCoursePress(course.id)}
                           rightAccessory={
                             <Pressable
                               accessibilityRole="button"

@@ -1,14 +1,10 @@
-
 import MyButton from "@/src/components/button/button";
-import { CourseCard } from "@/src/components/course/CourseCard";
+import { CourseListCard } from "@/src/components/course/CourseListCard";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import {
   COURSE_CATEGORIES,
   CourseCategory,
 } from "@/src/constants/courseCategories";
-import {
-  resolveCourseIconProps,
-} from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -194,6 +190,11 @@ export default function CoursePinScreen() {
       ).officialPacks.push(pack);
     });
 
+    const compareByName = (
+      a: OfficialCourseListItem,
+      b: OfficialCourseListItem
+    ) => a.name.localeCompare(b.name);
+
     const compareLangs = (
       a: string | null | undefined,
       b: string | null | undefined
@@ -203,11 +204,17 @@ export default function CoursePinScreen() {
       return first.localeCompare(second);
     };
 
-    return Array.from(map.values()).sort((a, b) => {
+    const sortedGroups = Array.from(map.values()).sort((a, b) => {
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
       if (targetDiff !== 0) return targetDiff;
       return compareLangs(a.sourceLang, b.sourceLang);
     });
+
+    sortedGroups.forEach((group) => {
+      group.officialPacks.sort(compareByName);
+    });
+
+    return sortedGroups;
   }, [officialCourses]);
 
   const handleOfficialPinToggle = useCallback(
@@ -278,24 +285,18 @@ export default function CoursePinScreen() {
   const introActive = checkpoint !== "done";
   const renderOfficialPackCard = useCallback(
     (pack: OfficialCourseListItem) => {
-      const iconProps = resolveCourseIconProps(pack.iconId, pack.iconColor);
       const isPinned = pinnedOfficialCourseIds.includes(pack.id);
       const flagLang = pack.smallFlag ?? pack.sourceLang;
-      const flagSource = flagLang ? getFlagSource(flagLang) : undefined;
+
       return (
-        <CourseCard
+        <CourseListCard
           key={`official-${pack.id}`}
-          onPress={() => void handleOfficialPinToggle(pack.id)}
-          containerStyle={styles.courseCard}
-          {...iconProps}
-          flagSource={flagSource}
-          flagStyle={styles.officialFlagBadge}
-          infoStyle={styles.courseCardInfo}
           title={pack.name}
-          titleContainerStyle={styles.courseCardTitleContainer}
-          titleTextStyle={styles.customCardTitle}
-          meta={`fiszki: ${pack.cardsCount} `}
-          metaTextStyle={styles.customCardMeta}
+          subtitle={`fiszki: ${pack.cardsCount}`}
+          iconId={pack.iconId}
+          iconColor={pack.iconColor}
+          flagCode={flagLang}
+          onPress={() => void handleOfficialPinToggle(pack.id)}
           rightAccessory={
             <Pressable
               accessibilityRole="button"
@@ -426,14 +427,18 @@ export default function CoursePinScreen() {
                     {regularOfficialPacks.length ? (
                       <>
                         <Text style={styles.subTitle}>Kursy</Text>
-                        {regularOfficialPacks.map(renderOfficialPackCard)}
+                        <View style={styles.cardsList}>
+                          {regularOfficialPacks.map(renderOfficialPackCard)}
+                        </View>
                       </>
                     ) : null}
 
                     {miniOfficialPacks.length ? (
                       <>
                         <Text style={styles.subTitle}>Mini kursy</Text>
-                        {miniOfficialPacks.map(renderOfficialPackCard)}
+                        <View style={styles.cardsList}>
+                          {miniOfficialPacks.map(renderOfficialPackCard)}
+                        </View>
                       </>
                     ) : null}
                   </>

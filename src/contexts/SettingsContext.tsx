@@ -183,6 +183,12 @@ interface SettingsContextValue {
   learningRemindersEnabled: boolean;
   setLearningRemindersEnabled: (value: boolean) => Promise<void>;
   toggleLearningRemindersEnabled: () => Promise<void>;
+  statsFireEffectEnabled: boolean;
+  setStatsFireEffectEnabled: (value: boolean) => Promise<void>;
+  toggleStatsFireEffectEnabled: () => Promise<void>;
+  statsBookshelfEnabled: boolean;
+  setStatsBookshelfEnabled: (value: boolean) => Promise<void>;
+  toggleStatsBookshelfEnabled: () => Promise<void>;
   highContrastEnabled: boolean;
   toggleHighContrast: () => Promise<void>;
   colorBlindMode: ColorBlindMode;
@@ -205,7 +211,7 @@ const defaultValue: SettingsContextValue = {
   theme: "light",
   colors: resolveThemeColors("light"),
   toggleTheme: async () => {},
-  boxesLayout: "carousel",
+  boxesLayout: "classic",
   setBoxesLayout: async () => {},
   courses: [],
   addCourse: async () => {},
@@ -218,10 +224,10 @@ const defaultValue: SettingsContextValue = {
   toggleIgnoreDiacriticsInSpellcheck: async () => {},
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
-  boxZeroEnabled: true,
-  getBuiltinCourseBoxZeroEnabled: () => true,
+  boxZeroEnabled: false,
+  getBuiltinCourseBoxZeroEnabled: () => false,
   setBuiltinCourseBoxZeroEnabled: async () => {},
-  getCustomCourseBoxZeroEnabled: () => true,
+  getCustomCourseBoxZeroEnabled: () => false,
   setCustomCourseBoxZeroEnabled: async () => {},
   autoflowEnabled: false,
   getBuiltinCourseAutoflowEnabled: () => false,
@@ -253,6 +259,12 @@ const defaultValue: SettingsContextValue = {
   learningRemindersEnabled: false,
   setLearningRemindersEnabled: async () => {},
   toggleLearningRemindersEnabled: async () => {},
+  statsFireEffectEnabled: false,
+  setStatsFireEffectEnabled: async () => {},
+  toggleStatsFireEffectEnabled: async () => {},
+  statsBookshelfEnabled: false,
+  setStatsBookshelfEnabled: async () => {},
+  toggleStatsBookshelfEnabled: async () => {},
   highContrastEnabled: false,
   toggleHighContrast: async () => {},
   colorBlindMode: "none",
@@ -280,7 +292,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
   const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
     "classic" | "carousel"
-  >("boxesLayout", "carousel");
+  >("boxesLayout", "classic");
   const [courses, setCourses] = usePersistedState<LanguageCourse[]>(
     "courses",
     []
@@ -310,7 +322,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   );
   const [boxZeroDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.boxZeroEnabled",
-    true
+    false
   );
   const [boxZeroOverrides, setBoxZeroOverrides] =
     usePersistedState<CourseBoxZeroOverrides>(
@@ -340,6 +352,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<number>("feedbackVolume", 1);
   const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
     usePersistedState<boolean>("learningRemindersEnabled", false);
+  const [statsFireEffectEnabledState, _setStatsFireEffectEnabled] =
+    usePersistedState<boolean>("stats.fireEffectEnabled", false);
+  const [statsBookshelfEnabledState, _setStatsBookshelfEnabled] =
+    usePersistedState<boolean>("stats.bookshelfEnabled", false);
   const [highContrastEnabled, setHighContrastEnabled] =
     usePersistedState<boolean>("accessibility.highContrast", false);
   const [colorBlindMode, setColorBlindMode] = usePersistedState<ColorBlindMode>(
@@ -806,6 +822,22 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
   };
 
+  const setStatsFireEffectEnabled = async (value: boolean) => {
+    await _setStatsFireEffectEnabled(value);
+  };
+
+  const toggleStatsFireEffectEnabled = async () => {
+    await setStatsFireEffectEnabled(!statsFireEffectEnabledState);
+  };
+
+  const setStatsBookshelfEnabled = async (value: boolean) => {
+    await _setStatsBookshelfEnabled(value);
+  };
+
+  const toggleStatsBookshelfEnabled = async () => {
+    await setStatsBookshelfEnabled(!statsBookshelfEnabledState);
+  };
+
   const toggleFlashcardsSuggestions = async () => {
     await setFlashcardsSuggestionsEnabled(!flashcardsSuggestionsEnabled);
   };
@@ -843,7 +875,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setSpellChecking(true),
       setIgnoreDiacriticsInSpellcheck(false),
       setShowBoxFaces(true),
-      _setBoxesLayout("carousel"),
+      _setBoxesLayout("classic"),
       setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
       setFlashcardsSuggestionsEnabled(false),
       _setLearningRemindersEnabled(false),
@@ -925,6 +957,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         learningRemindersEnabled: learningRemindersEnabledState,
         setLearningRemindersEnabled,
         toggleLearningRemindersEnabled,
+        statsFireEffectEnabled: statsFireEffectEnabledState,
+        setStatsFireEffectEnabled,
+        toggleStatsFireEffectEnabled,
+        statsBookshelfEnabled: statsBookshelfEnabledState,
+        setStatsBookshelfEnabled,
+        toggleStatsBookshelfEnabled,
         highContrastEnabled,
         toggleHighContrast,
         colorBlindMode,

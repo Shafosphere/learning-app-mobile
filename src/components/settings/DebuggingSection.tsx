@@ -21,6 +21,10 @@ const DebuggingSection: React.FC = () => {
     colors,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
+    statsBookshelfEnabled,
+    toggleStatsBookshelfEnabled,
+    statsFireEffectEnabled,
+    toggleStatsFireEffectEnabled,
     resetActiveCustomCourseReviews,
   } = useSettings();
   const setPopup = usePopup();
@@ -399,6 +403,34 @@ const DebuggingSection: React.FC = () => {
           style={styles.switch}
           value={learningRemindersEnabled}
           onValueChange={toggleLearningRemindersEnabled}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Statystyki: animacja ognia (dev)</Text>
+          <Text style={styles.rowSubtitle}>
+            Pokazuje animowane płomienie w tle “Opanowane słówka”.
+          </Text>
+        </View>
+        <Switch
+          style={styles.switch}
+          value={statsFireEffectEnabled}
+          onValueChange={toggleStatsFireEffectEnabled}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Statystyki: komoda z półkami (dev)</Text>
+          <Text style={styles.rowSubtitle}>
+            Pokazuje moduł bookshelf / puchary na ekranie statystyk.
+          </Text>
+        </View>
+        <Switch
+          style={styles.switch}
+          value={statsBookshelfEnabled}
+          onValueChange={toggleStatsBookshelfEnabled}
         />
       </View>
     </View>

@@ -1,4 +1,5 @@
 import { countTotalLearnedWordsGlobal } from "@/src/db/sqlite/db";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import React, { useEffect, useState } from "react";
 import { StyleSheet, Text, View } from "react-native";
@@ -24,6 +25,9 @@ const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "800",
     color: colors.headline,
     zIndex: 10,
+    marginTop: 0,
+  },
+  bigNumberWithFlames: {
     marginTop: -20, // Adjust for visual balance with flames
   },
   label: {
@@ -43,6 +47,7 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 const BigKnownWordsCard: React.FC = () => {
   const styles = useStyles();
+  const { statsFireEffectEnabled } = useSettings();
   const [total, setTotal] = useState<number>(0);
 
   useEffect(() => {
@@ -61,14 +66,22 @@ const BigKnownWordsCard: React.FC = () => {
 
   return (
     <View style={styles.container}>
-      <View style={styles.flamesWrapper}>
-        <OrganicFireEffect />
-      </View>
-      <Text style={styles.bigNumber}>{total}</Text>
+      {statsFireEffectEnabled && (
+        <View style={styles.flamesWrapper}>
+          <OrganicFireEffect />
+        </View>
+      )}
+      <Text
+        style={[
+          styles.bigNumber,
+          statsFireEffectEnabled && styles.bigNumberWithFlames,
+        ]}
+      >
+        {total}
+      </Text>
       <Text style={styles.label}>Opanowane słówka</Text>
     </View>
   );
 };
 
 export default BigKnownWordsCard;
-

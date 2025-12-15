@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { ScrollView } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
-// import { useSettings } from "@/src/contexts/SettingsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
 import MedalsShowcase from "@/src/components/stats/bookshelf";
@@ -12,7 +12,7 @@ import { getDailyLearnedCountsCustom, getTotalLearningTimeMs } from "@/src/db/sq
 
 export default function StatsScreen() {
   const styles = useStyles();
-  // const { activeCourse } = useSettings();
+  const { statsBookshelfEnabled } = useSettings();
   const [heatmapData, setHeatmapData] = useState<HeatmapDay[]>([]);
   const [learningTime, setLearningTime] = useState({
     week: 0,
@@ -20,6 +20,10 @@ export default function StatsScreen() {
     year: 0,
   });
   const [isBookshelfEditing, setIsBookshelfEditing] = useState(false);
+
+  useEffect(() => {
+    if (!statsBookshelfEnabled) setIsBookshelfEditing(false);
+  }, [statsBookshelfEnabled]);
 
   useEffect(() => {
     let mounted = true;
@@ -103,7 +107,9 @@ export default function StatsScreen() {
     >
       <BigKnownWordsCard />
 
-      <MedalsShowcase onEditModeChange={setIsBookshelfEditing} />
+      {statsBookshelfEnabled && (
+        <MedalsShowcase onEditModeChange={setIsBookshelfEditing} />
+      )}
 
       <PinnedCoursesProgress />
 

@@ -34,6 +34,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   groupSection: {
     width: "100%",
   },
+  cardsList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+  },
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",
@@ -74,16 +79,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   courseCard: {
     width: "100%",
-    minHeight: 92,
+    height: 92,
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "flex-start",
+    justifyContent: "space-between",
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
-    paddingLeft: "10%",
-    paddingRight: "6%",
+    paddingLeft: "7%",
+    paddingRight: "7%",
     position: "relative",
-    marginBottom: 16,
+    marginBottom: 12,
   },
   courseCardText: {
     flex: 1,
@@ -95,8 +100,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   courseCardInfo: {
     flex: 1,
-    marginLeft: 16,
-    marginRight: 12,
+    marginLeft: 12,
     minWidth: 0,
     alignItems: "flex-start",
   },
@@ -110,13 +114,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 900,
     color: colors.headline,
     textAlign: "left",
-    flexShrink: 0,
   },
   customCardMeta: {
     fontSize: 12,
-    fontWeight: 700,
-    color: colors.paragraph,
-    marginTop: 4,
+    fontWeight: 900,
+    color: colors.headline,
     textAlign: "left",
   },
   courseCardBadge: {
@@ -144,14 +146,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
     height: 66 / 1.1,
   },
   pinButton: {
-    marginLeft: 12,
-    justifyContent: "center",
+    padding: 4,
+    marginLeft: 8,
     alignItems: "center",
+    justifyContent: "center",
     flexShrink: 0,
   },
   pinCheckbox: {
-    width: 36,
-    height: 36,
+    width: 32,
+    height: 32,
     borderWidth: 2,
     borderRadius: 8,
     borderColor: colors.border,
@@ -168,7 +171,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     position: "relative",
-    marginRight: 16,
   },
   officialFlagBadge: {
     position: "absolute",
