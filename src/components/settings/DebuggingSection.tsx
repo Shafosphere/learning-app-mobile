@@ -34,6 +34,7 @@ const DebuggingSection: React.FC = () => {
   const [showLogoMessage, setShowLogoMessage] = useState(false);
   const [logoFloating, setLogoFloating] = useState(true);
   const [clearingStorage, setClearingStorage] = useState(false);
+  const [resettingIntro, setResettingIntro] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
 
   const handleAddRandomCustom = async () => {
@@ -140,6 +141,25 @@ const DebuggingSection: React.FC = () => {
       Alert.alert("Ustawiono", `Checkpoint: ${checkpoint}`);
     } catch {
       Alert.alert("Błąd", "Nie udało się ustawić checkpointu.");
+    }
+  };
+
+  const handleResetIntro = async () => {
+    setResettingIntro(true);
+    try {
+      await AsyncStorage.multiRemove([
+        "@course_pin_intro_seen_v1",
+        "@course_activate_intro_seen_v1",
+        "@flashcards_intro_seen_v1",
+        "@review_brain_intro_seen_v1",
+        "@review_courses_intro_seen_v1",
+      ]);
+      await setOnboardingCheckpoint("pin_required");
+      Alert.alert("Gotowe", "Intro zresetowane. Onboarding startuje od przypinania kursu.");
+    } catch {
+      Alert.alert("Błąd", "Nie udało się zresetować dymków.");
+    } finally {
+      setResettingIntro(false);
     }
   };
 
@@ -388,6 +408,22 @@ const DebuggingSection: React.FC = () => {
             width={120}
           />
         </View>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Zresetuj dymki intro</Text>
+          <Text style={styles.rowSubtitle}>
+            Usuwa flagi "seen" dla wszystkich ekranów.
+          </Text>
+        </View>
+        <MyButton
+          text={resettingIntro ? "Resetuję..." : "Reset Intro"}
+          color="my_red"
+          onPress={handleResetIntro}
+          disabled={resettingIntro}
+          width={160}
+        />
       </View>
 
       <Text style={styles.sectionHeader}>Feature flags / eksperymenty</Text>

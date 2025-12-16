@@ -19,7 +19,7 @@ import {
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
-import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 
 type OfficialCourseReviewItem = CustomCourseSummary & {
   sourceLang: string | null;
@@ -52,8 +52,9 @@ export default function CoursesReviewScreen() {
   const [officialCounts, setOfficialCounts] = useState<Record<number, number>>(
     {}
   );
-  const { IntroOverlay } = useFlashcardsIntro({
+  const { IntroOverlay } = useScreenIntro({
     storageKey: "@review_courses_intro_seen_v1",
+    triggerStrategy: "post_onboarding",
     messages: [
       {
         title: "Wybierz kurs do powtórek",

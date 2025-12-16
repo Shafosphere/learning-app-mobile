@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
-import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { COURSE_CATEGORIES, CourseCategory } from "@/src/constants/courseCategories";
+import { COURSE_ACTIVATE_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -11,12 +11,11 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import {
-  getOnboardingCheckpoint,
-  setOnboardingCheckpoint,
+  setOnboardingCheckpoint
 } from "@/src/services/onboardingCheckpoint";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -42,7 +41,6 @@ type CourseGroup = {
 };
 
 type SelectedCourse = { type: "custom"; id: number };
-const INTRO_STORAGE_KEY = "@course_activate_intro_seen_v1";
 
 export default function CourseActivateScreen() {
   const {
@@ -61,9 +59,19 @@ export default function CourseActivateScreen() {
   >([]);
   const router = useRouter();
   const setPopup = usePopup();
-  const [showIntro, setShowIntro] = useState(false);
-  const [introStep, setIntroStep] = useState(0);
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
+
+  const { IntroOverlay } = useScreenIntro({
+    messages: COURSE_ACTIVATE_INTRO_MESSAGES,
+    storageKey: "@course_activate_intro_seen_v1",
+    triggerStrategy: "on_onboarding",
+    onCheckpointLoaded: (cp) => {
+      if (cp !== "done") {
+        setStartedInOnboarding(true);
+      }
+    },
+    floatingOffset: { top: 8, left: 8, right: 8 },
+  });
 
   const userCustomCourses = useMemo(
     () => customCourses.filter((course) => !course.isOfficial),
@@ -160,35 +168,6 @@ export default function CourseActivateScreen() {
     setCommittedCourse(null);
   }, [activeCustomCourseId]);
 
-  useEffect(() => {
-    let mounted = true;
-    async function hydrateIntro() {
-      try {
-        const [cp, seen] = await Promise.all([
-          getOnboardingCheckpoint(),
-          AsyncStorage.getItem(INTRO_STORAGE_KEY),
-        ]);
-        if (!mounted) return;
-
-        const resolved = cp ?? "activate_required";
-
-        if (resolved !== "done") {
-          setStartedInOnboarding(true);
-          if (seen !== "1") {
-            setShowIntro(true);
-            setIntroStep(0);
-          }
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    void hydrateIntro();
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   useFocusEffect(
     useCallback(() => {
@@ -323,51 +302,14 @@ export default function CourseActivateScreen() {
     );
   };
 
-  const introMessages = useMemo(
-    () => [
-      {
-        title: "Aktywuj kurs",
-        description:
-          "Tutaj aktywujesz kurs, gry będą używać fiszek z aktywnego kursu.",
-      },
-      {
-        title: "Ustawienia kursu",
-        description:
-          "Każdy kurs ma swoje ustawienia, które możesz zmieniać w kazdej chwili.",
-      },
-    ],
-    []
-  );
 
-  const handleIntroClose = useCallback(() => {
-    setIntroStep((prev) => {
-      const next = prev + 1;
-      if (next >= introMessages.length) {
-        setShowIntro(false);
-        void AsyncStorage.setItem(INTRO_STORAGE_KEY, "1");
-        return prev;
-      }
-      return next;
-    });
-  }, [introMessages.length]);
 
   const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
 
   return (
     <View style={styles.container}>
-      {showIntro ? (
-        <View style={styles.introOverlay} pointerEvents="box-none">
-          <LogoMessage
-            floating
-            offset={{ top: 8, left: 8, right: 8 }}
-            title={introMessages[introStep]?.title}
-            description={introMessages[introStep]?.description}
-            onClose={handleIntroClose}
-            closeLabel="Następny komunikat"
-          />
-        </View>
-      ) : null}
+      <IntroOverlay />
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}

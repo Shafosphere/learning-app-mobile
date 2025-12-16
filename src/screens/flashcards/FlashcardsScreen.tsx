@@ -5,7 +5,6 @@ import Confetti from "@/src/components/confetti/Confetti";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import type {
   CustomCourseRecord,
   CustomFlashcardRecord,
@@ -21,11 +20,13 @@ import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { useIsFocused } from "@react-navigation/native";
 import FlashcardsPeekOverlay from "../../components/Box/Peek/FlashcardsPeek";
 // import { useRouter } from "expo-router";
-import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
-import { type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
+import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
 
@@ -100,7 +101,11 @@ export default function Flashcards() {
   const { registerKnownWord } = useLearningStats();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
-  const { IntroOverlay } = useFlashcardsIntro();
+  const { IntroOverlay, unlockGate } = useScreenIntro({
+    messages: FLASHCARDS_INTRO_MESSAGES,
+    storageKey: "@flashcards_intro_seen_v1",
+    triggerStrategy: "post_onboarding",
+  });
 
   useEffect(() => {
     if (!shouldCelebrate) return;
@@ -261,6 +266,12 @@ export default function Flashcards() {
   const introBoxLimitReached = boxZeroEnabled
     ? boxes.boxZero.length >= 30
     : boxes.boxOne.length >= 30;
+
+  useEffect(() => {
+    if (activeBox) {
+      unlockGate("box_selected");
+    }
+  }, [activeBox, unlockGate]);
 
   const correctionLocked = correction?.mode === "demote";
   const isAnswering =
@@ -453,6 +464,20 @@ export default function Flashcards() {
   useEffect(() => {
     resetInteractionState();
   }, [activeCustomCourseId, resetInteractionState]);
+
+  const unlockedWrongRef = useRef(false);
+  const unlockedRightRef = useRef(false);
+
+  useEffect(() => {
+    if (result === false && !unlockedWrongRef.current) {
+      unlockedWrongRef.current = true;
+      unlockGate("first_wrong_answer");
+    }
+    if (result === true && !unlockedRightRef.current) {
+      unlockedRightRef.current = true;
+      unlockGate("first_right_answer");
+    }
+  }, [result, unlockGate]);
 
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {

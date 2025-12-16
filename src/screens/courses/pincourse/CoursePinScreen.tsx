@@ -1,6 +1,5 @@
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
-import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import {
   COURSE_CATEGORIES,
   CourseCategory,
@@ -10,14 +9,12 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
 import {
-  getOnboardingCheckpoint,
   OnboardingCheckpoint,
-  setOnboardingCheckpoint,
+  setOnboardingCheckpoint
 } from "@/src/services/onboardingCheckpoint";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
-import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -53,7 +50,8 @@ type CourseGroup = {
   officialPacks: OfficialCourseListItem[];
 };
 
-const INTRO_STORAGE_KEY = "@course_pin_intro_seen_v1";
+import { COURSE_PIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 
 export default function CoursePinScreen() {
   const styles = useStyles();
@@ -63,11 +61,20 @@ export default function CoursePinScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
-  const [showIntro, setShowIntro] = useState(false);
-  const [introStep, setIntroStep] = useState(0);
+  // Local checkpoint state used for immediate UI updates (buttons)
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
+
+  const { IntroOverlay, unlockGate } = useScreenIntro({
+    messages: COURSE_PIN_INTRO_MESSAGES,
+    storageKey: "@course_pin_intro_seen_v1",
+    triggerStrategy: "on_onboarding",
+    onCheckpointLoaded: (cp) => {
+      setCheckpoint(cp ?? "pin_required");
+    },
+    floatingOffset: { top: 12, left: 12, right: 12 },
+  });
 
   const persistCheckpointIfNeeded = useCallback(
     (next: OnboardingCheckpoint) => {
@@ -116,35 +123,6 @@ export default function CoursePinScreen() {
       });
     return () => {
       isMounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-
-    async function hydrateIntro() {
-      try {
-        const [cp, seen] = await Promise.all([
-          getOnboardingCheckpoint(),
-          AsyncStorage.getItem(INTRO_STORAGE_KEY),
-        ]);
-        if (!mounted) return;
-
-        const resolved = cp ?? "pin_required";
-        setCheckpoint(resolved);
-
-        if (resolved !== "done" && seen !== "1") {
-          setShowIntro(true);
-          setIntroStep(0);
-        }
-      } catch {
-        // ignore
-      }
-    }
-
-    void hydrateIntro();
-    return () => {
-      mounted = false;
     };
   }, []);
 
@@ -229,6 +207,7 @@ export default function CoursePinScreen() {
           }
         } else {
           await pinOfficialCourse(id);
+          unlockGate("course_pinned");
           persistCheckpointIfNeeded("activate_required");
         }
       } catch (error) {
@@ -238,49 +217,18 @@ export default function CoursePinScreen() {
         );
       }
     },
-    [pinOfficialCourse, pinnedOfficialCourseIds, persistCheckpointIfNeeded, unpinOfficialCourse]
+    [pinOfficialCourse, pinnedOfficialCourseIds, persistCheckpointIfNeeded, unpinOfficialCourse, unlockGate]
   );
 
   const hasAnyPinned = useMemo(() => {
     return pinnedOfficialCourseIds.length > 0;
   }, [pinnedOfficialCourseIds]);
 
-  const introMessages = useMemo(
-    () => [
-      {
-        title: "Cześć, jestem X",
-        description: "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów",
-      },
-      {
-        title: "Przypnij kilka kursów",
-        description:
-          "Możesz przypiąć więcej niż jeden kurs naraz. Po prostu zaznacz te, które cie interesują.",
-      },
-      {
-        title: "Po przypięciu kliknij Dalej",
-        description:
-          "Przycisk u dołu włączy się, gdy przypniesz co najmniej jeden kurs.",
-      },
-      {
-        title: "Własne kursy!",
-        description:
-          "Pożniej bedziesz mógł zrobić własne kursy z swoimi fiszkami! :3",
-      },
-    ],
-    []
-  );
-
-  const handleCloseIntro = useCallback(() => {
-    setIntroStep((prev) => {
-      const next = prev + 1;
-      if (next >= introMessages.length) {
-        setShowIntro(false);
-        void AsyncStorage.setItem(INTRO_STORAGE_KEY, "1");
-        return prev;
-      }
-      return next;
-    });
-  }, [introMessages.length]);
+  useEffect(() => {
+    if (hasAnyPinned) {
+      unlockGate("course_pinned");
+    }
+  }, [hasAnyPinned, unlockGate]);
 
   const introActive = checkpoint !== "done";
   const renderOfficialPackCard = useCallback(
@@ -331,18 +279,7 @@ export default function CoursePinScreen() {
 
   return (
     <View style={styles.container}>
-      {showIntro && introMessages[introStep] ? (
-        <View style={styles.introOverlay} pointerEvents="box-none">
-          <LogoMessage
-            floating
-            offset={{ top: 12, left: 12, right: 12 }}
-            title={introMessages[introStep].title}
-            description={introMessages[introStep].description}
-            onClose={handleCloseIntro}
-            closeLabel="Następny komunikat"
-          />
-        </View>
-      ) : null}
+      <IntroOverlay />
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}

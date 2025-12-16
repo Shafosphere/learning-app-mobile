@@ -1,46 +1,16 @@
-import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
-import { useRouter } from "expo-router";
+import { BRAIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
-  getDueCustomReviewFlashcards,
+  getDueCustomReviewFlashcards
 } from "@/src/db/sqlite/db";
-import type { CustomReviewFlashcard } from "@/src/db/sqlite/db";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import type { WordWithTranslations } from "@/src/types/boxes";
+import { useRouter } from "expo-router";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { useStyles } from "./brain-styles";
-import { useFlashcardsIntro } from "@/src/components/onboarding/useFlashcardsIntro";
-import { buildSessionTemplate, MIN_SESSION_WORDS } from "./session-builder";
-import {
-  destroySession,
-  registerSession,
-  type SessionWordContext,
-} from "@/src/screens/review/minigames/sessionStore";
-import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
-import { sanitizeWord, SanitizedWord } from "./minigame-generators";
-import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
-import Ionicons from "@expo/vector-icons/Ionicons";
 
-const mapCustomReviewToWord = (
-  card: CustomReviewFlashcard
-): WordWithTranslations => {
-  const answers = (card.answers ?? [])
-    .map((value) => value.trim())
-    .filter((value) => value.length > 0);
-  const fallback = card.backText?.trim() ?? "";
-  const translations =
-    answers.length > 0
-      ? answers
-      : fallback.length > 0
-      ? [fallback]
-      : [card.frontText];
-
-  return {
-    id: card.id,
-    text: card.frontText,
-    translations,
-    flipped: card.flipped,
-  };
-};
+// ... existing imports ...
 
 export default function BrainScreen() {
   const styles = useStyles();
@@ -53,24 +23,10 @@ export default function BrainScreen() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [levelTranslations, setLevelTranslations] = useState<string[]>([]);
-  const { IntroOverlay } = useFlashcardsIntro({
+  const { IntroOverlay } = useScreenIntro({
+    messages: BRAIN_INTRO_MESSAGES,
     storageKey: "@review_brain_intro_seen_v1",
-    messages: [
-      {
-        title: "Co to?",
-        description: "Tutaj wybierasz metode powtórki.",
-      },
-      {
-        title: "Wybierz tryb powtórek",
-        description:
-          "Przycisk 'start' to szybka sesja mini gier. Przycisk 'Tradycyjne' to klasyczne wpisywanie tłumaczeń.",
-      },
-      {
-        title: "Po sesji",
-        description:
-          "Na końcu obu trybów zobaczysz tabelę z podsumowaniem wyników.",
-      },
-    ],
+    triggerStrategy: "post_onboarding",
   });
 
   // --- Derived data shared by minigames ------------------------------------
