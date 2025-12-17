@@ -92,13 +92,22 @@ export default function Card({
       importantForAutofill: disabled ? ("no" as const) : undefined,
     };
   }, [flashcardsSuggestionsEnabled]);
+  const trimTrailingSpaces = useCallback((value: string) => {
+    return value.replace(/ +$/, "");
+  }, []);
+  const handleAnswerChange = useCallback(
+    (value: string) => {
+      setAnswer(trimTrailingSpaces(value));
+    },
+    [setAnswer, trimTrailingSpaces]
+  );
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
     useState(false);
   const [hangulTarget, setHangulTarget] = useState<
     "main" | "correction1" | null
   >(null);
-  const noopTextChange = useCallback((_: string) => { }, []);
+  const noopTextChange = useCallback((_: string) => {}, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -217,7 +226,8 @@ export default function Card({
 
   const handleCorrectionInput1Change = useCallback(
     (t: string) => {
-      wrongInputChange(1, t);
+      const trimmed = trimTrailingSpaces(t);
+      wrongInputChange(1, trimmed);
       if (correction?.awers) {
         const normalizeString = (value: string) => {
           let base = value.toLowerCase();
@@ -227,8 +237,8 @@ export default function Card({
           return base;
         };
         const matches =
-          normalizeString(t) === normalizeString(correction.awers) &&
-          t.length === correction.awers.length;
+          normalizeString(trimmed) === normalizeString(correction.awers) &&
+          trimmed.length === correction.awers.length;
         if (matches) {
           setHangulTarget(null);
           setIsCorrectionInput1Focused(false);
@@ -246,6 +256,7 @@ export default function Card({
       setHangulTarget,
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
+      trimTrailingSpaces,
     ]
   );
 
@@ -279,7 +290,7 @@ export default function Card({
     if (showMainHangulKeyboard) {
       return {
         value: answer,
-        onChangeText: setAnswer,
+        onChangeText: handleAnswerChange,
         onSubmit: handleConfirm,
       };
     }
@@ -300,7 +311,7 @@ export default function Card({
   }, [
     showMainHangulKeyboard,
     answer,
-    setAnswer,
+    handleAnswerChange,
     handleConfirm,
     showCorrectionHangulKeyboard,
     correction,
@@ -398,8 +409,10 @@ export default function Card({
   }, [isIntroMode, selectedItem, result, focusWithDelay]);
 
   useEffect(() => {
-    previousCorrectionInput2.current = correction?.input2 ?? "";
-  }, [correction?.input2]);
+    previousCorrectionInput2.current = trimTrailingSpaces(
+      correction?.input2 ?? ""
+    );
+  }, [correction?.input2, trimTrailingSpaces]);
 
   useEffect(() => {
     if (!showCorrectionInputs) return;
@@ -613,7 +626,6 @@ export default function Card({
         <CardInput
           promptText={promptText}
           answer={answer}
-          setAnswer={setAnswer}
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}
           handleConfirm={handleConfirm}
@@ -623,6 +635,7 @@ export default function Card({
           canToggleTranslations={canToggleTranslations}
           next={next}
           hangulTarget={hangulTarget}
+          setAnswer={handleAnswerChange}
         />
       );
     }

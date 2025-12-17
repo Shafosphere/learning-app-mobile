@@ -1,16 +1,51 @@
+import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { Ionicons } from "@expo/vector-icons";
 import { BRAIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import {
-  getDueCustomReviewFlashcards
-} from "@/src/db/sqlite/db";
+import { getDueCustomReviewFlashcards } from "@/src/db/sqlite/db";
+import type { CustomReviewFlashcard } from "@/src/db/sqlite/repositories/reviews";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
+import {
+  sanitizeWord,
+  type SanitizedWord,
+} from "@/src/screens/review/brain/minigame-generators";
+import {
+  buildSessionTemplate,
+  MIN_SESSION_WORDS,
+} from "@/src/screens/review/brain/session-builder";
+import {
+  destroySession,
+  registerSession,
+  type SessionWordContext,
+} from "@/src/screens/review/minigames/sessionStore";
+import { getRouteForStep } from "@/src/screens/review/minigames/sessionNavigation";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, Pressable, Text, View } from "react-native";
 import { useStyles } from "./brain-styles";
 
-// ... existing imports ...
+const mapCustomReviewToWord = (
+  card: CustomReviewFlashcard
+): WordWithTranslations => {
+  const answers = (card.answers ?? [])
+    .map((value) => value.trim())
+    .filter((value) => value.length > 0);
+  const fallback = card.backText?.trim() ?? "";
+  const translations =
+    answers.length > 0
+      ? answers
+      : fallback.length > 0
+      ? [fallback]
+      : [card.frontText];
+
+  return {
+    id: card.id,
+    text: card.frontText,
+    translations,
+    flipped: card.flipped,
+  };
+};
 
 export default function BrainScreen() {
   const styles = useStyles();

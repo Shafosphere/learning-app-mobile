@@ -25,6 +25,7 @@ import { useIsFocused } from "@react-navigation/native";
 import FlashcardsPeekOverlay from "../../components/Box/Peek/FlashcardsPeek";
 // import { useRouter } from "expo-router";
 import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
+import { useQuote } from "@/src/contexts/QuoteContext";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
@@ -99,6 +100,7 @@ export default function Flashcards() {
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
+  const { showQuote } = useQuote();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const { IntroOverlay, unlockGate } = useScreenIntro({
@@ -169,6 +171,10 @@ export default function Flashcards() {
       setShouldCelebrate(false);
       requestAnimationFrame(() => {
         setShouldCelebrate(true);
+        // 30% chance to show a motivational quote on "Win"
+        if (Math.random() < 0.3) {
+          showQuote("win");
+        }
       });
     },
     boxZeroEnabled,
@@ -177,7 +183,13 @@ export default function Flashcards() {
   useEffect(() => {
     if (result === null) return;
     playFeedbackSound(result);
-  }, [result]);
+    // If wrong answer, 10% chance to show 'loss' quote
+    if (result === false) {
+      if (Math.random() < 0.1) {
+        showQuote("loss");
+      }
+    }
+  }, [result, showQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(

@@ -1,19 +1,22 @@
 // _layout.tsx
-import { Stack } from "expo-router";
 import Navbar from "@/src/components/navbar/navbar";
-import React, { useEffect, useState, useCallback, useRef } from "react";
-import { SettingsProvider } from "@/src/contexts/SettingsContext";
+import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
+import QuoteBubble from "@/src/components/QuoteBubble";
+import QuoteSystemInitializer from "@/src/components/QuoteSystemInitializer";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
+import { PopupProvider } from "@/src/contexts/PopupContext";
+import { QuoteProvider } from "@/src/contexts/QuoteContext";
+import { SettingsProvider } from "@/src/contexts/SettingsContext";
 import {
-  getDB,
   addDbInitializationListener,
+  getDB,
   type DbInitializationEvent,
 } from "@/src/db/sqlite/db";
+import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
-import { View, ActivityIndicator, Text } from "react-native";
-import { PopupProvider } from "@/src/contexts/PopupContext";
+import React, { useCallback, useEffect, useRef, useState } from "react";
+import { ActivityIndicator, Text, View } from "react-native";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
 
 SplashScreen.preventAutoHideAsync();
 
@@ -108,14 +111,18 @@ export default function RootLayout() {
     <SafeAreaProvider>
       <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
         <SettingsProvider>
-          <LearningStatsProvider>
-            <PopupProvider>
-              <Navbar>
-                <OnboardingGate />
-                <Stack screenOptions={{ headerShown: false }} />
-              </Navbar>
-            </PopupProvider>
-          </LearningStatsProvider>
+          <QuoteProvider>
+            <QuoteSystemInitializer />
+            <LearningStatsProvider>
+              <PopupProvider>
+                <Navbar>
+                  <OnboardingGate />
+                  <Stack screenOptions={{ headerShown: false }} />
+                </Navbar>
+                <QuoteBubble />
+              </PopupProvider>
+            </LearningStatsProvider>
+          </QuoteProvider>
         </SettingsProvider>
       </View>
     </SafeAreaProvider>

@@ -49,3 +49,6 @@ assets/images/*
 !assets/images/.gitkeep
 *.png
 *.svg
+
+# User documentation
+docs/opis_aplikacji.md

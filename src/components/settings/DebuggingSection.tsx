@@ -2,6 +2,7 @@ import MyButton from "@/src/components/button/button";
 import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { usePopup } from "@/src/contexts/PopupContext";
+import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
@@ -28,6 +29,7 @@ const DebuggingSection: React.FC = () => {
     resetActiveCustomCourseReviews,
   } = useSettings();
   const setPopup = usePopup();
+  const { showQuote } = useQuote();
   const [customBusy, setCustomBusy] = useState(false);
   const [hangulValue, setHangulValue] = useState("");
   const [showHangulKeyboard, setShowHangulKeyboard] = useState(false);
@@ -180,6 +182,41 @@ const DebuggingSection: React.FC = () => {
           onPress={handleTestPopup}
           width={140}
         />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Testuj cytaty (QuoteBubble)</Text>
+          <Text style={styles.rowSubtitle}>
+            Wywołaj losowy cytat w zależności od kategorii.
+          </Text>
+        </View>
+      </View>
+      <View style={styles.keyboardActions}>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="Win"
+            color="my_green"
+            onPress={() => showQuote("win")}
+            width={100}
+          />
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="Loss"
+            color="my_red"
+            onPress={() => showQuote("loss")}
+            width={100}
+          />
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="Startup"
+            color="my_yellow"
+            onPress={() => showQuote("startup")}
+            width={100}
+          />
+        </View>
       </View>
 
       <View style={styles.keyboardSection}>

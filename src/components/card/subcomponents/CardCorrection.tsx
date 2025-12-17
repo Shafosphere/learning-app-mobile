@@ -73,6 +73,7 @@ export function CardCorrection({
   input2LayoutWidth,
 }: CardCorrectionProps) {
   const styles = useStyles();
+  const trimTrailingSpaces = (value: string) => value.replace(/ +$/, "");
 
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
@@ -193,13 +194,14 @@ export function CardCorrection({
               value={correction.input2}
               onChangeText={(t) => {
                 const adjusted = applyPlaceholderCasing(t, correctionRewers);
+                const trimmed = trimTrailingSpaces(adjusted);
                 const previousValue = previousCorrectionInput2.current;
                 const shouldFocusPrevious =
                   Platform.OS === "android" &&
                   previousValue.length === 1 &&
-                  adjusted === "";
-                previousCorrectionInput2.current = adjusted;
-                wrongInputChange(2, adjusted);
+                  trimmed === "";
+                previousCorrectionInput2.current = trimmed;
+                wrongInputChange(2, trimmed);
                 if (shouldFocusPrevious) {
                   focusWithDelay(input1Ref);
                 }

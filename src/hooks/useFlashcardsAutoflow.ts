@@ -170,12 +170,36 @@ export function useFlashcardsAutoflow({
       });
     }
 
+    const count = (box: keyof BoxesState) => boxes[box]?.length ?? 0;
+    const resolveTargetBox = (): keyof BoxesState | null => {
+      // Keep the preferred target if it actually has cards.
+      if (decision.targetBox && count(decision.targetBox) > 0) {
+        return decision.targetBox;
+      }
+
+      // If we're already on a box with cards, don't jump to an empty one.
+      if (activeBox && count(activeBox) > 0) {
+        return activeBox;
+      }
+
+      // Otherwise pick the first non-empty box in priority order.
+      const fallbackOrder: (keyof BoxesState)[] = [
+        ...(boxZeroEnabled ? (["boxZero"] as const) : []),
+        "boxOne",
+        ...CLEANUP_BOXES,
+      ];
+
+      return fallbackOrder.find((box) => count(box) > 0) ?? null;
+    };
+
+    const targetBox = resolveTargetBox();
+
     if (!canSwitch) return;
     if (now < switchLockedUntil.current) return;
-    if (!decision.targetBox) return;
-    if (decision.targetBox === activeBox) return;
+    if (!targetBox) return;
+    if (targetBox === activeBox) return;
 
-    handleSelectBox(decision.targetBox);
+    handleSelectBox(targetBox);
     switchLockedUntil.current = now + SWITCH_STICKY_MS;
   }, [
     activeBox,
