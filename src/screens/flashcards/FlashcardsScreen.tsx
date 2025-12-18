@@ -31,6 +31,18 @@ import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } fro
 import { ActivityIndicator, Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
 
+const STREAK_TARGET = 5;
+const STREAK_COOLDOWN_MS = 15 * 60 * 1000;
+const COMEBACK_COOLDOWN_MS = 20 * 60 * 1000;
+const LONG_THINK_MS = 12 * 1000;
+const LONG_THINK_COOLDOWN_MS = 30 * 60 * 1000;
+const LOSS_QUOTE_COOLDOWN_MS = 5 * 60 * 1000;
+const BOX_SPAM_WINDOW_MS = 2000;
+const BOX_SPAM_THRESHOLD = 6;
+const BOX_SPAM_COOLDOWN_MS = 15 * 60 * 1000;
+const HINT_FAIL_THRESHOLD = 3;
+const HINT_COOLDOWN_MS = 10 * 60 * 1000;
+
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
   const pool = [...items];
@@ -100,9 +112,18 @@ export default function Flashcards() {
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
-  const { showQuote } = useQuote();
+  const { triggerQuote } = useQuote();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  const correctStreakRef = useRef(0);
+  const wrongStreakRef = useRef(0);
+  const questionStartRef = useRef<number | null>(null);
+  const perCardFailRef = useRef<Record<number, number>>({});
+  const boxSpamRef = useRef<{
+    box: keyof BoxesState | null;
+    ts: number;
+    count: number;
+  }>({ box: null, ts: 0, count: 0 });
   const { IntroOverlay, unlockGate } = useScreenIntro({
     messages: FLASHCARDS_INTRO_MESSAGES,
     storageKey: "@flashcards_intro_seen_v1",
@@ -138,7 +159,7 @@ export default function Flashcards() {
   const checkSpelling = useSpellchecking();
   const {
     activeBox,
-    handleSelectBox,
+    handleSelectBox: baseHandleSelectBox,
     selectedItem,
     answer,
     setAnswer,
@@ -171,25 +192,112 @@ export default function Flashcards() {
       setShouldCelebrate(false);
       requestAnimationFrame(() => {
         setShouldCelebrate(true);
-        // 30% chance to show a motivational quote on "Win"
-        if (Math.random() < 0.3) {
-          showQuote("win");
-        }
+        triggerQuote({
+          trigger: "quote_box_five_win",
+          category: "win",
+          probability: 0.3,
+          cooldownMs: 10 * 60 * 1000,
+        });
       });
     },
     boxZeroEnabled,
   });
 
+  const handleSelectBox = useCallback(
+    (boxName: keyof BoxesState) => {
+      const now = Date.now();
+      const isSameBox =
+        boxSpamRef.current.box === boxName &&
+        now - boxSpamRef.current.ts < BOX_SPAM_WINDOW_MS;
+
+      if (isSameBox) {
+        boxSpamRef.current.count += 1;
+      } else {
+        boxSpamRef.current = { box: boxName, ts: now, count: 1 };
+      }
+      boxSpamRef.current.ts = now;
+
+      if (boxSpamRef.current.count >= BOX_SPAM_THRESHOLD) {
+        triggerQuote({
+          trigger: `quote_box_spam_${boxName}`,
+          category: "box_spam",
+          cooldownMs: BOX_SPAM_COOLDOWN_MS,
+        });
+        boxSpamRef.current.count = 0;
+      }
+
+      baseHandleSelectBox(boxName);
+    },
+    [baseHandleSelectBox, triggerQuote]
+  );
+
   useEffect(() => {
     if (result === null) return;
     playFeedbackSound(result);
-    // If wrong answer, 10% chance to show 'loss' quote
-    if (result === false) {
-      if (Math.random() < 0.1) {
-        showQuote("loss");
+    const now = Date.now();
+    const elapsed = questionStartRef.current
+      ? now - questionStartRef.current
+      : null;
+
+    if (result === true) {
+      const hadComeback = wrongStreakRef.current >= 3;
+      wrongStreakRef.current = 0;
+      correctStreakRef.current += 1;
+
+      if (selectedItem?.id != null) {
+        perCardFailRef.current[selectedItem.id] = 0;
       }
+
+      if (correctStreakRef.current >= STREAK_TARGET) {
+        triggerQuote({
+          trigger: "quote_streak",
+          category: "streak",
+          cooldownMs: STREAK_COOLDOWN_MS,
+        });
+      }
+
+      if (hadComeback) {
+        triggerQuote({
+          trigger: "quote_comeback",
+          category: "comeback",
+          cooldownMs: COMEBACK_COOLDOWN_MS,
+        });
+      }
+
+      if (elapsed !== null && elapsed > LONG_THINK_MS) {
+        triggerQuote({
+          trigger: "quote_long_think",
+          category: "long_think",
+          cooldownMs: LONG_THINK_COOLDOWN_MS,
+          probability: 0.5,
+        });
+      }
+    } else {
+      correctStreakRef.current = 0;
+      wrongStreakRef.current += 1;
+
+      const cardId = selectedItem?.id;
+      if (cardId != null) {
+        const nextFailCount = (perCardFailRef.current[cardId] ?? 0) + 1;
+        perCardFailRef.current[cardId] = nextFailCount;
+        if (nextFailCount >= HINT_FAIL_THRESHOLD) {
+          triggerQuote({
+            trigger: `quote_hint_${cardId}`,
+            category: "hint",
+            cooldownMs: HINT_COOLDOWN_MS,
+          });
+          perCardFailRef.current[cardId] = 0;
+        }
+      }
+
+      triggerQuote({
+        trigger: "quote_loss_random",
+        category: "loss",
+        probability: 0.1,
+        cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
+      });
     }
-  }, [result, showQuote]);
+  }, [result, selectedItem, triggerQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
@@ -293,11 +401,17 @@ export default function Flashcards() {
   // otherwise it never jumps to a clogged box until the current box is emptied.
   const canAutoflowSwitch = !correctionLocked && !resultPending;
 
+  useEffect(() => {
+    if (selectedItem && result === null) {
+      questionStartRef.current = Date.now();
+    }
+  }, [result, selectedItem]);
+
   useFlashcardsAutoflow({
     enabled: autoflowEnabled,
     boxes,
     activeBox,
-    handleSelectBox,
+    handleSelectBox: baseHandleSelectBox,
     canSwitch: canAutoflowSwitch,
     boxZeroEnabled,
     isReady: isReady,

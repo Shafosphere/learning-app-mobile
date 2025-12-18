@@ -4,6 +4,7 @@ import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
@@ -18,6 +19,7 @@ import {
   useCallback,
   useEffect,
   useMemo,
+  useRef,
   useState,
   type ReactNode,
 } from "react";
@@ -48,6 +50,7 @@ const REVIEW_SESSION_PATHS = new Set(["/review/brain", "/review/table"]);
 export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
+  const { triggerQuote } = useQuote();
   const {
     toggleTheme,
     activeCustomCourseId,
@@ -84,6 +87,7 @@ export default function Navbar({ children }: NavbarProps) {
     derivedDisplayCourse
   );
   const { knownWordsCount } = useLearningStats();
+  const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
 
   useEffect(() => {
     let isMounted = true;
@@ -214,6 +218,27 @@ export default function Navbar({ children }: NavbarProps) {
     }
   }, [pinnedOfficialCourseIds]);
 
+  const handleLogoPress = useCallback(() => {
+    const now = Date.now();
+    const withinWindow = now - logoTapRef.current.ts < 2000;
+    logoTapRef.current.ts = now;
+    logoTapRef.current.count = withinWindow
+      ? logoTapRef.current.count + 1
+      : 1;
+
+    if (logoTapRef.current.count >= 7) {
+      triggerQuote({
+        trigger: "quote_logo_rage",
+        category: "easter",
+        cooldownMs: 10 * 1000,
+        respectGlobalCooldown: true,
+      });
+      logoTapRef.current.count = 0;
+    }
+
+    router.push("/");
+  }, [router, triggerQuote]);
+
   const courseGraphic = displayedCustomCourse ? (
     <View style={styles.customCourseIconWrapper}>
       {courseIconProps?.mainImageSource ? (
@@ -339,7 +364,7 @@ export default function Navbar({ children }: NavbarProps) {
 
           <View pointerEvents="box-none" style={styles.logoWrapper}>
             <TouchableOpacity
-              onPress={() => router.push("/")}
+              onPress={handleLogoPress}
               style={styles.logoButton}
               accessibilityRole="button"
               accessibilityLabel="Przejdź do strony głównej"

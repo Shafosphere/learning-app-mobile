@@ -28,7 +28,7 @@ export type OfficialPackDef = {
 export const OFFICIAL_PACKS: OfficialPackDef[] = [
   {
     slug: "eng_to_pl_a1",
-    name: "Angielski A1",
+    name: "Ang A1",
     iconId: "flag:en",
     iconColor: "#10B981",
     reviewsEnabled: true,
@@ -40,7 +40,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "eng_to_pl_a2",
-    name: "Angielski A2",
+    name: "Ang A2",
     iconId: "flag:en",
     iconColor: "#FBBF24",
     reviewsEnabled: true,
@@ -52,7 +52,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "eng_to_pl_b1",
-    name: "Angielski B1",
+    name: "Ang B1",
     iconId: "flag:en",
     iconColor: "#6366F1",
     reviewsEnabled: true,
@@ -64,7 +64,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "eng_to_pl_b2",
-    name: "Angielski B2",
+    name: "Ang B2",
     iconId: "flag:en",
     iconColor: "#EC4899",
     reviewsEnabled: true,

@@ -1,8 +1,8 @@
 // _layout.tsx
 import Navbar from "@/src/components/navbar/navbar";
 import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
-import QuoteBubble from "@/src/components/QuoteBubble";
-import QuoteSystemInitializer from "@/src/components/QuoteSystemInitializer";
+import QuoteBubble from "@/src/components/quote/QuoteBubble";
+import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 import { QuoteProvider } from "@/src/contexts/QuoteContext";
