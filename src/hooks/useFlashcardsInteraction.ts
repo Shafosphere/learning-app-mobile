@@ -329,12 +329,33 @@ export function useFlashcardsInteraction({
         if (activeBox === "boxFive") {
           registerKnownWord(wordForCheck.id);
         }
+        const normalize = (s: string) => {
+          let v = s.trim().toLowerCase();
+          if (ignoreDiacriticsInSpellcheck) {
+            v = stripDiacritics(v);
+          }
+          return v;
+        };
+
+        const userAnswer = normalize(answer);
+        let isPerfect = false;
+
+        if (reversed) {
+          isPerfect = userAnswer === normalize(wordForCheck.text);
+        } else {
+          isPerfect = wordForCheck.translations.some(
+            (t) => userAnswer === normalize(t)
+          );
+        }
+
+        const delay = isPerfect ? 1500 : 3000;
+
         setTimeout(() => {
           setAnswer("");
           moveElement(wordForCheck.id, true);
           setResult(null);
           setQueueNext(true);
-        }, 1500);
+        }, delay);
       } else {
         setResult(false);
         setCorrection({

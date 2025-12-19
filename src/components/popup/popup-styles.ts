@@ -24,8 +24,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
   text: {
     color: colors.headline,
     fontWeight: "600",
-    fontSize: 15,
+    fontSize: 18,
     textAlign: "center",
+  },
+  angry: {
+    backgroundColor: colors.my_red,
+  },
+  calm: {
+    backgroundColor: colors.my_green,
+  },
+  disoriented: {
+    backgroundColor: colors.my_yellow,
   },
   tail: {
     width: 18,
@@ -38,5 +47,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // shadowOpacity: 0.14,
     // shadowRadius: 6,
     // elevation: 6,
+    // borderWidth: 3,
+    // zIndex: 100,
   },
 }));

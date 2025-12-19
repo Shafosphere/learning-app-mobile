@@ -7,6 +7,7 @@ import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
 import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
+import javascriptCsv from "@/assets/data/Javascript.csv";
 
 export type OfficialPackDef = {
   slug: string;
@@ -134,5 +135,18 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     isMini: true,
     categoryId: "geography",
     csvAsset: stoliceUniiEuropejskiejCsv,
+  },
+  {
+    slug: "javascript",
+    name: "JavaScript",
+    iconId: "code",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "programming",
+    csvAsset: javascriptCsv,
   },
 ];

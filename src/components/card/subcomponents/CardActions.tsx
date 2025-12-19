@@ -24,7 +24,7 @@ export function CardActions({
                 onPress={handleConfirm}
             />
             <MyButton
-                text="dodaj    słówka"
+                text="dodaj         fiszki"
                 color="my_yellow"
                 onPress={onDownload}
                 disabled={downloadDisabled}

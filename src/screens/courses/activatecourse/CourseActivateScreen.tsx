@@ -225,7 +225,7 @@ export default function CourseActivateScreen() {
     void setOnboardingCheckpoint("done");
     setPopup({
       message: "Aktywowałem kurs :3",
-      color: "my_green",
+      color: "calm",
       duration: 3000,
     });
   }, [setPopup]);

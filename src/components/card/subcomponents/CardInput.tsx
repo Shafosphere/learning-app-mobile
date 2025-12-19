@@ -23,6 +23,12 @@ type CardInputProps = {
   canToggleTranslations: boolean;
   next: () => void;
   hangulTarget: "main" | "correction1" | null;
+  typoDiff?: {
+    type: "substitution" | "insertion" | "deletion";
+    index: number;
+    expectedChar: string;
+    inputChar: string;
+  } | null;
 };
 
 export function CardInput({
@@ -38,6 +44,7 @@ export function CardInput({
   canToggleTranslations,
   next,
   hangulTarget,
+  typoDiff,
 }: CardInputProps) {
   const styles = useStyles();
   const shouldMarqueePrompt = promptText.length > 18;
@@ -66,6 +73,91 @@ export function CardInput({
       Math.max(MIN_DURATION_MS, estimatedPromptWidth * MARQUEE_SPEED_PER_PIXEL_MS),
     [estimatedPromptWidth]
   );
+
+  const renderedInput = useMemo(() => {
+    if (!typoDiff) {
+      return (
+        <TextInput
+          style={[styles.cardInput, styles.cardFont]}
+          value={answer}
+          onChangeText={setAnswer}
+          autoCapitalize="none"
+          {...suggestionProps}
+          ref={mainInputRef}
+          returnKeyType="done"
+          blurOnSubmit={false}
+          onSubmitEditing={handleConfirm}
+          showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
+          onFocus={() => {
+            setIsMainInputFocused(true);
+            setHangulTarget("main");
+          }}
+          onBlur={() => {
+            setIsMainInputFocused(false);
+            if (hangulTarget === "main") {
+              setHangulTarget(null);
+            }
+          }}
+        />
+      );
+    }
+
+    // Rich text rendering for typo
+    const { index, type, inputChar, expectedChar } = typoDiff;
+    const beforeCursor = answer.slice(0, index);
+
+    // Default: substitution behavior
+    let errorPart: React.ReactNode = null;
+    let correctionPart: React.ReactNode = null;
+    let afterCursor = answer.slice(index + 1);
+
+    if (type === "substitution") {
+      errorPart = <Text style={styles.typoError}>{inputChar}</Text>;
+      correctionPart = (
+        <Text style={styles.typoCorrection}>{expectedChar}</Text>
+      );
+    } else if (type === "insertion") {
+      // Input has extra char at index
+      // Show extra char as error. Capture full mismatch
+      errorPart = <Text style={styles.typoError}>{inputChar}</Text>;
+      correctionPart = null; // No "correction" to add, just remove
+      // The rest of the string starts after this inserted char
+    } else if (type === "deletion") {
+      // Input missed a char at index.
+      // Nothing to strike through (it's missing).
+      // Show missing char in yellow.
+      // Input slice is actually valid up to index.
+      afterCursor = answer.slice(index); // Since 'index' in input is the start of the rest
+      errorPart = null;
+      correctionPart = (
+        <Text style={styles.typoCorrection}>{expectedChar}</Text>
+      );
+    }
+
+    return (
+      <View style={[styles.cardInput, { width: "100%", flexDirection: "row", alignItems: "center" }]}>
+        <Text style={styles.cardFont}>
+          {beforeCursor}
+          {errorPart}
+          {correctionPart}
+          {afterCursor}
+        </Text>
+      </View>
+    );
+  }, [
+    answer,
+    suggestionProps,
+    handleConfirm,
+    hangulTarget,
+    handleConfirm,
+    mainInputRef,
+    setAnswer,
+    setIsMainInputFocused,
+    setHangulTarget,
+    shouldUseHangulKeyboardMain,
+    styles,
+    typoDiff
+  ]);
 
   return (
     <>
@@ -108,28 +200,7 @@ export function CardInput({
         )}
       </View>
 
-      <TextInput
-        style={[styles.cardInput, styles.cardFont]}
-        value={answer}
-        onChangeText={setAnswer}
-        autoCapitalize="none"
-        {...suggestionProps}
-        ref={mainInputRef}
-        returnKeyType="done"
-        blurOnSubmit={false}
-        onSubmitEditing={handleConfirm}
-        showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
-        onFocus={() => {
-          setIsMainInputFocused(true);
-          setHangulTarget("main");
-        }}
-        onBlur={() => {
-          setIsMainInputFocused(false);
-          if (hangulTarget === "main") {
-            setHangulTarget(null);
-          }
-        }}
-      />
+      {renderedInput}
     </>
   );
 }

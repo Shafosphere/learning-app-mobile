@@ -15,11 +15,17 @@ type AutoflowParams = {
 };
 
 const SWITCH_STICKY_MS = 1500;
+// Minimum time (ms) to stay on a box before allowing another auto-switch.
 const BASE_STACK_TARGET = 5;
+// Desired number of cards to keep in the main engine stack (boxOne).
 const FLUSH_THRESHOLD_DEFAULT = 15;
-const FLUSH_THRESHOLD_MIN = 3;
+// Default cap for how many cards per box before cleanup kicks in.
+const FLUSH_THRESHOLD_MIN = 7;
+// Lower bound for flush threshold when computed dynamically.
 const FLUSH_THRESHOLD_MAX = 15;
+// Upper bound for flush threshold when computed dynamically.
 const FLUSH_THRESHOLD_RATIO = 0.1;
+// Fraction of total course cards to use when deriving flush threshold.
 const CLEANUP_BOXES: readonly (keyof BoxesState)[] = [
   "boxTwo",
   "boxThree",

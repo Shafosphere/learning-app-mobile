@@ -30,7 +30,7 @@ export default function CustomCourseScreen() {
     if (!name && !iconId) {
       setPopup({
         message: "Musisz podać nazwę kursu i wybrać ikonę",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;
@@ -38,7 +38,7 @@ export default function CustomCourseScreen() {
     if (!name) {
       setPopup({
         message: "Musisz podać nazwę kursu",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;
@@ -46,7 +46,7 @@ export default function CustomCourseScreen() {
     if (!iconId) {
       setPopup({
         message: "Musisz wybrać ikonę",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;

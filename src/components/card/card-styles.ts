@@ -270,4 +270,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 800,
     lineHeight: 28,
   },
+  typoError: {
+    color: colors.my_red,
+    textDecorationLine: "line-through",
+  },
+  typoCorrection: {
+    color: colors.my_yellow,
+  },
 }));

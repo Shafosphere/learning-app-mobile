@@ -79,7 +79,7 @@ export const QUOTES: Quote[] = [
     category: "return",
   },
   {
-    text: "wyłacz słońce przyciskiem drzemka >:c",
+    text: "hej hej, witam ponownie",
     category: "return",
   },
   // Win (ogólne sukcesy)
@@ -198,7 +198,7 @@ export const QUOTES: Quote[] = [
   },
   // Box spam (szybkie wielokrotne klikanie tego samego boxa)
   {
-    text: "co tak go klikasz non stop?",
+    text: "co tak go klikasz?",
     category: "box_spam",
   },
   {
@@ -206,7 +206,7 @@ export const QUOTES: Quote[] = [
     category: "box_spam",
   },
   {
-    text: "co on ci zrobił?",
+    text: "przestań go klikać!",
     category: "box_spam",
   },
   {

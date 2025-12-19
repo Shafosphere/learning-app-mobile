@@ -9,8 +9,47 @@ import { replaceCustomFlashcardsWithDb } from "./repositories/flashcards";
 import { applySchema, configurePragmas } from "./schema";
 import { splitBackTextIntoAnswers } from "./utils";
 
+type CsvRow = {
+    front?: string;
+    back?: string;
+    hint1?: string;
+    hint2?: string;
+    hint_front?: string;
+    hint_back?: string;
+    lock?: string | number | boolean;
+};
+
+const LOCK_TRUE_VALUES = new Set([
+    "true",
+    "1",
+    "yes",
+    "y",
+    "tak",
+    "t",
+    "locked",
+]);
+
+const parseLockValue = (value: unknown): boolean => {
+    if (value == null) return false;
+    const normalized = value.toString().trim().toLowerCase();
+    return LOCK_TRUE_VALUES.has(normalized);
+};
+
+const extractHint = (primary?: string, secondary?: string): string | null => {
+    const value = (primary ?? secondary ?? "").trim();
+    return value.length > 0 ? value : null;
+};
+
 async function readCsvAsset(assetModule: any): Promise<
-    { frontText: string; backText: string; answers: string[]; position: number }[]
+    {
+        frontText: string;
+        backText: string;
+        answers: string[];
+        position: number;
+        flipped: boolean;
+        hintFront: string | null;
+        hintBack: string | null;
+    }[]
 > {
     console.log("[DB] readCsvAsset: create asset from module");
     const asset = Asset.fromModule(assetModule);
@@ -22,7 +61,7 @@ async function readCsvAsset(assetModule: any): Promise<
     const csv = await FileSystem.readAsStringAsync(uri);
     console.log("[DB] readCsvAsset: file read, length=", csv?.length ?? 0);
     console.log("[DB] readCsvAsset: start parse");
-    const { data } = Papa.parse<{ front?: string; back?: string }>(csv, {
+    const { data } = Papa.parse<CsvRow>(csv, {
         header: true,
         skipEmptyLines: true,
     });
@@ -32,11 +71,17 @@ async function readCsvAsset(assetModule: any): Promise<
             const front = (row.front ?? "").trim();
             const backRaw = (row.back ?? "").trim();
             const answers = splitBackTextIntoAnswers(backRaw);
+            const hintFront = extractHint(row.hint1, row.hint_front);
+            const hintBack = extractHint(row.hint2, row.hint_back);
+            const locked = parseLockValue(row.lock);
             return {
                 frontText: front,
                 backText: backRaw,
                 answers,
                 position: idx,
+                flipped: !locked,
+                hintFront,
+                hintBack,
             };
         })
         .filter((c) => c.frontText.length > 0 || c.answers.length > 0);

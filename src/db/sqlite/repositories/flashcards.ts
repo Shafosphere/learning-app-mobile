@@ -152,6 +152,9 @@ export async function replaceCustomFlashcardsWithDb(
       const serializedBackText =
         derivedAnswers.length > 0 ? derivedAnswers.join("; ") : backSource;
 
+      const flippedValue =
+        card.flipped == null ? 1 : card.flipped ? 1 : 0;
+
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
            (course_id, front_text, back_text, hint_front, hint_back, position, flipped, created_at, updated_at)
@@ -162,7 +165,7 @@ export async function replaceCustomFlashcardsWithDb(
         card.hintFront ?? null,
         card.hintBack ?? null,
         position,
-        card.flipped ?? 1, // domyślnie 1 (można odwracać)
+        flippedValue, // domyślnie 1 (można odwracać)
         now,
         now
       );

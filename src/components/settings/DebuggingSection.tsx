@@ -64,7 +64,7 @@ const DebuggingSection: React.FC = () => {
   const handleTestPopup = () => {
     setPopup({
       message: "Hej! To ja, Boxik. Dymek działa!",
-      color: "my_yellow",
+      color: "disoriented",
       duration: 3600,
     });
   };

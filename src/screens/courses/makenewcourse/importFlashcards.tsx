@@ -146,7 +146,7 @@ export default function CustomCourseContentScreen() {
       if (parsed.errors.length > 0) {
         setPopup({
           message: "Błąd parsowania CSV",
-          color: "my_red",
+          color: "angry",
           duration: 4000,
         });
         return;
@@ -168,7 +168,7 @@ export default function CustomCourseContentScreen() {
       if (!cards.length) {
         setPopup({
           message: "Brak danych w pliku CSV",
-          color: "my_red",
+          color: "angry",
           duration: 3000,
         });
         return;
@@ -176,13 +176,13 @@ export default function CustomCourseContentScreen() {
       replaceManualCards(cards);
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
-        color: "my_green",
+        color: "calm",
         duration: 3500,
       });
     } catch (e) {
       setPopup({
         message: "Błąd importu CSV",
-        color: "my_red",
+        color: "angry",
         duration: 4000,
       });
       console.error("CSV import error", e);
@@ -220,7 +220,7 @@ export default function CustomCourseContentScreen() {
 
           setPopup({
             message: "Plik zapisany w wybranym katalogu",
-            color: "my_green",
+            color: "calm",
             duration: 3000,
           });
           return;
@@ -234,14 +234,14 @@ export default function CustomCourseContentScreen() {
 
       setPopup({
         message: "Plik zapisany w pamięci aplikacji",
-        color: "my_green",
+        color: "calm",
         duration: 4000,
       });
     } catch (error) {
       console.error("Failed to export sample CSV", error);
       setPopup({
         message: "Nie udało się zapisać pliku",
-        color: "my_red",
+        color: "angry",
         duration: 4000,
       });
     }
@@ -252,7 +252,7 @@ export default function CustomCourseContentScreen() {
     if (!cleanName) {
       setPopup({
         message: "Najpierw nadaj nazwę kursowi",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       router.back();
@@ -261,7 +261,7 @@ export default function CustomCourseContentScreen() {
     if (!iconId) {
       setPopup({
         message: "Wybierz ikonę kursu",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       router.back();
@@ -300,7 +300,7 @@ export default function CustomCourseContentScreen() {
     if (trimmedCards.length === 0) {
       setPopup({
         message: "Dodaj przynajmniej jedną fiszkę",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;
@@ -321,7 +321,7 @@ export default function CustomCourseContentScreen() {
 
       setPopup({
         message: "Zestaw fiszek zapisany!",
-        color: "my_green",
+        color: "calm",
         duration: 3500,
       });
       router.replace("/coursepanel");
@@ -329,7 +329,7 @@ export default function CustomCourseContentScreen() {
       console.error("Failed to save custom course", error);
       setPopup({
         message: "Nie udało się zapisać zestawu",
-        color: "my_red",
+        color: "angry",
         duration: 4000,
       });
     } finally {

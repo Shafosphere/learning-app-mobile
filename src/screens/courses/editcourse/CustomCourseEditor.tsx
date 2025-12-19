@@ -200,7 +200,7 @@ export default function CustomCourseEditor({
     undo();
     setPopup({
       message: "Cofnięto ostatnią zmianę",
-      color: "my_yellow",
+      color: "disoriented",
       duration: 2500,
     });
   };
@@ -304,7 +304,7 @@ export default function CustomCourseEditor({
     if (isOfficialCourse) {
       setPopup({
         message: "Nie można usunąć oficjalnego kursu",
-        color: "my_red",
+        color: "angry",
         duration: 4000,
       });
       return;
@@ -326,7 +326,7 @@ export default function CustomCourseEditor({
                 await deleteCustomCourse(courseId);
                 setPopup({
                   message: "Kurs został usunięty",
-                  color: "my_green",
+                  color: "calm",
                   duration: 3500,
                 });
                 router.back();
@@ -334,7 +334,7 @@ export default function CustomCourseEditor({
                 console.error("Failed to delete custom course", error);
                 setPopup({
                   message: "Nie udało się usunąć kursu",
-                  color: "my_red",
+                  color: "angry",
                   duration: 4000,
                 });
               } finally {
@@ -352,7 +352,7 @@ export default function CustomCourseEditor({
     if (!cleanName) {
       setPopup({
         message: "Podaj nazwę kursu",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;
@@ -386,7 +386,7 @@ export default function CustomCourseEditor({
     if (trimmedCards.length === 0) {
       setPopup({
         message: "Dodaj co najmniej jedną fiszkę",
-        color: "my_red",
+        color: "angry",
         duration: 3000,
       });
       return;
@@ -407,7 +407,7 @@ export default function CustomCourseEditor({
 
       setPopup({
         message: "Zmiany zapisane!",
-        color: "my_green",
+        color: "calm",
         duration: 3500,
       });
       router.back();
@@ -415,7 +415,7 @@ export default function CustomCourseEditor({
       console.error("Failed to save custom course", error);
       setPopup({
         message: "Nie udało się zapisać zmian",
-        color: "my_red",
+        color: "angry",
         duration: 4000,
       });
     } finally {

@@ -236,8 +236,12 @@ export default function Navbar({ children }: NavbarProps) {
       logoTapRef.current.count = 0;
     }
 
+    if (pathname === "/") {
+      return;
+    }
+
     router.push("/");
-  }, [router, triggerQuote]);
+  }, [pathname, router, triggerQuote]);
 
   const courseGraphic = displayedCustomCourse ? (
     <View style={styles.customCourseIconWrapper}>

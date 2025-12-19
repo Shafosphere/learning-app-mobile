@@ -3,6 +3,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAchievements } from "@/src/hooks/useAchievements";
 import { WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import {
   useCallback,
   useEffect,
@@ -107,7 +108,7 @@ export default function Card({
   const [hangulTarget, setHangulTarget] = useState<
     "main" | "correction1" | null
   >(null);
-  const noopTextChange = useCallback((_: string) => {}, []);
+  const noopTextChange = useCallback((_: string) => { }, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -589,6 +590,65 @@ export default function Card({
     }).start();
   }, [hintActionsAnim, isEditingHint]);
 
+  const typoDiff = useMemo(() => {
+    if (result !== true || !selectedItem) return null;
+
+    // Check if it's a "perfect" match or a typo match
+    // We need to compare answer vs target (handling multiple translations)
+    // Find the translation that matched (closest) to generate the diff against it.
+
+    // Helper to normalize for comparison
+    const norm = (s: string) => {
+      let v = s.toLowerCase().trim();
+      if (ignoreDiacriticsInSpellcheck) v = stripDiacritics(v);
+      return v;
+    };
+
+    const userAnswer = norm(answer);
+
+    // Find best match among translations (or front text if reversed)
+    let bestMatch: string | null = null;
+
+    if (reversed) {
+      // Answer should match 'awers' (text)
+      const target = selectedItem.text;
+      if (norm(target) === userAnswer) return null; // Perfect match
+      bestMatch = target;
+    } else {
+      // Answer should match one of translations
+      // If perfectly matches any, returns null
+      const perfect = selectedItem.translations.some(t => norm(t) === userAnswer);
+      if (perfect) return null;
+
+      // Otherwise find the one with diff
+      bestMatch = selectedItem.translations.find(t => {
+        // We assume validation logic already passed, so one of them MUST be close enough.
+        // But validation logic inside hook is complex. 
+        // Simplest is to find the one with minimal edit distance or just calculateDiff returns non-null
+        return calculateTypoDiff(userAnswer, norm(t)) !== null;
+      }) ?? selectedItem.translations[0]; // Fallback
+    }
+
+    if (!bestMatch) return null;
+
+    // Calculate diff against the raw target string (but normalized for comparison? 
+    // Wait, visual diff should probably respect user's casing vs target casing?
+    // User requested: "Greaja" vs "Grecja" -> "Gre <a> c ja"
+    // So we should probably use the target string as the source of truth for the 'correction' char.
+
+    // Issue: If we normalize everything, we lose case information for display?
+    // User input "Greaja", Target "Grecja".
+    // transform input to display.
+
+    // Let's rely on the utility. But the utility compares character by character.
+    // If we pass raw strings, "Grecja" vs "grecja" might be 1 diff (case).
+    // If ignoreCase is on, we should probably lowercase both before diffing OR handle case diffs as 'valid'?
+    // The requirement says "literowka". Usually implies actual char error.
+
+    // Let's use normalization for finding the diff.
+    return calculateTypoDiff(userAnswer, norm(bestMatch));
+  }, [result, selectedItem, answer, reversed, ignoreDiacriticsInSpellcheck]);
+
   function showCardContent() {
     if (correction && (result === false || isIntroMode)) {
       return (
@@ -636,6 +696,7 @@ export default function Card({
           next={next}
           hangulTarget={hangulTarget}
           setAnswer={handleAnswerChange}
+          typoDiff={typoDiff}
         />
       );
     }

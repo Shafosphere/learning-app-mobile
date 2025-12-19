@@ -1,10 +1,16 @@
 import { useEffect, useMemo, useRef } from "react";
-import { Animated, Easing, Platform, StatusBar, Text, View } from "react-native";
+import {
+  Animated,
+  Easing,
+  Platform,
+  StatusBar,
+  Text,
+  View,
+} from "react-native";
 import { useStyles } from "./popup-styles";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-export type PopupColor = "my_green" | "my_red" | "my_yellow";
+export type PopupColor = "calm" | "angry" | "disoriented";
 
 interface PopupProps {
   message: string;
@@ -15,7 +21,7 @@ interface PopupProps {
 
 const EXIT_ANIMATION_MS = 220;
 const NAVBAR_HEIGHT = 50;
-const POPUP_GAP = 24;
+const POPUP_GAP = 12;
 
 export default function Popup({
   message,
@@ -24,7 +30,7 @@ export default function Popup({
   onHide,
 }: PopupProps) {
   const styles = useStyles();
-  const { colors } = useSettings();
+  const variantStyle = styles[color];
   const insets = useSafeAreaInsets();
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(-18)).current;
@@ -108,8 +114,8 @@ export default function Popup({
         },
       ]}
     >
-      <View style={[styles.tail, { backgroundColor: colors[color] }]} />
-      <View style={[styles.bubble, { backgroundColor: colors[color] }]}>
+      <View style={[styles.tail, variantStyle]} />
+      <View style={[styles.bubble, variantStyle]}>
         <Text style={styles.text}>{message}</Text>
       </View>
     </Animated.View>

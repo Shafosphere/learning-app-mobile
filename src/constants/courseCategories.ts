@@ -11,4 +11,9 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         label: "Geografia",
         icon: "earth-europe",
     },
+    programming: {
+        id: "programming",
+        label: "Programowanie",
+        icon: "code",
+    },
 };

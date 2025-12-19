@@ -8,18 +8,18 @@ const QUOTE_DURATION_MS = 3500;
 const MIN_VISIBLE_MS_BEFORE_DISMISS = 600;
 
 const CATEGORY_COLORS: Record<QuoteCategory, PopupColor> = {
-    win: "my_green",
-    streak: "my_green",
-    comeback: "my_green",
-    loss: "my_red",
-    startup: "my_yellow",
-    first_time: "my_yellow",
-    return: "my_yellow",
-    long_think: "my_yellow",
-    box_spam: "my_yellow",
-    easter: "my_yellow",
-    hint: "my_yellow",
-    general: "my_yellow",
+    win: "calm",
+    streak: "calm",
+    comeback: "calm",
+    loss: "angry",
+    startup: "disoriented",
+    first_time: "disoriented",
+    return: "disoriented",
+    long_think: "disoriented",
+    box_spam: "disoriented",
+    easter: "disoriented",
+    hint: "disoriented",
+    general: "disoriented",
 };
 
 export default function QuoteBubble() {
@@ -39,7 +39,7 @@ export default function QuoteBubble() {
 
     if (!isVisible || !quote) return null;
 
-    const popupColor = CATEGORY_COLORS[quote.category] ?? "my_yellow";
+    const popupColor = CATEGORY_COLORS[quote.category] ?? "disoriented";
 
     const handleDismiss = () => {
         const now = Date.now();
