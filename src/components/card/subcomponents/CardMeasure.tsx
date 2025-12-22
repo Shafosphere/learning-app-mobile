@@ -6,6 +6,7 @@ type CardMeasureProps = {
     correctionRewers: string;
     correctionInput1: string;
     correctionInput2: string;
+    answerOnly: boolean;
     setInput1ExpectedWidth: (width: number) => void;
     setInput2ExpectedWidth: (width: number) => void;
     setInput1TextWidth: (width: number) => void;
@@ -21,6 +22,7 @@ export function CardMeasure({
     correctionRewers,
     correctionInput1,
     correctionInput2,
+    answerOnly,
     setInput1ExpectedWidth,
     setInput2ExpectedWidth,
     setInput1TextWidth,
@@ -38,18 +40,20 @@ export function CardMeasure({
             pointerEvents="none"
             accessible={false}
         >
-            <Text
-                style={styles.measureText}
-                numberOfLines={1}
-                onTextLayout={({ nativeEvent }) => {
-                    const width = nativeEvent.lines?.[0]?.width ?? 0;
-                    if (Math.abs(width - input1ExpectedWidth) > 0.5) {
-                        setInput1ExpectedWidth(width);
-                    }
-                }}
-            >
-                {correctionAwers || " "}
-            </Text>
+            {!answerOnly ? (
+                <Text
+                    style={styles.measureText}
+                    numberOfLines={1}
+                    onTextLayout={({ nativeEvent }) => {
+                        const width = nativeEvent.lines?.[0]?.width ?? 0;
+                        if (Math.abs(width - input1ExpectedWidth) > 0.5) {
+                            setInput1ExpectedWidth(width);
+                        }
+                    }}
+                >
+                    {correctionAwers || " "}
+                </Text>
+            ) : null}
             <Text
                 style={styles.measureText}
                 numberOfLines={1}
@@ -62,18 +66,20 @@ export function CardMeasure({
             >
                 {correctionRewers || " "}
             </Text>
-            <Text
-                style={styles.measureText}
-                numberOfLines={1}
-                onTextLayout={({ nativeEvent }) => {
-                    const width = nativeEvent.lines?.[0]?.width ?? 0;
-                    if (Math.abs(width - input1TextWidth) > 0.5) {
-                        setInput1TextWidth(width);
-                    }
-                }}
-            >
-                {correctionInput1 || " "}
-            </Text>
+            {!answerOnly ? (
+                <Text
+                    style={styles.measureText}
+                    numberOfLines={1}
+                    onTextLayout={({ nativeEvent }) => {
+                        const width = nativeEvent.lines?.[0]?.width ?? 0;
+                        if (Math.abs(width - input1TextWidth) > 0.5) {
+                            setInput1TextWidth(width);
+                        }
+                    }}
+                >
+                    {correctionInput1 || " "}
+                </Text>
+            ) : null}
             <Text
                 style={styles.measureText}
                 numberOfLines={1}

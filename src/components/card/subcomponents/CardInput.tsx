@@ -12,6 +12,9 @@ const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
 type CardInputProps = {
   promptText: string;
+  allowMultilinePrompt: boolean;
+  onPromptLayout?: (height: number) => void;
+  onInputLayout?: (height: number) => void;
   answer: string;
   setAnswer: (text: string) => void;
   mainInputRef: React.RefObject<TextInput | null>;
@@ -33,6 +36,9 @@ type CardInputProps = {
 
 export function CardInput({
   promptText,
+  allowMultilinePrompt,
+  onPromptLayout,
+  onInputLayout,
   answer,
   setAnswer,
   mainInputRef,
@@ -47,7 +53,7 @@ export function CardInput({
   typoDiff,
 }: CardInputProps) {
   const styles = useStyles();
-  const shouldMarqueePrompt = promptText.length > 18;
+  const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
     () => [styles.cardFont, styles.promptMarqueeText],
     [styles]
@@ -159,9 +165,14 @@ export function CardInput({
     typoDiff
   ]);
 
-  return (
+  const content = (
     <>
-      <View style={styles.topContainer}>
+      <View
+        style={[
+          styles.topContainer,
+          allowMultilinePrompt && styles.topContainerLarge,
+        ]}
+      >
         {shouldMarqueePrompt ? (
           <View style={styles.promptScroll}>
             <TextTicker
@@ -180,9 +191,18 @@ export function CardInput({
           </View>
         ) : (
           <Text
-            style={[styles.cardFont, styles.promptText]}
-            numberOfLines={1}
-            ellipsizeMode="tail"
+            style={[
+              styles.cardFont,
+              styles.promptText,
+              allowMultilinePrompt && styles.promptTextMultiline,
+            ]}
+            numberOfLines={allowMultilinePrompt ? undefined : 1}
+            ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
+            onLayout={({ nativeEvent }) => {
+              if (allowMultilinePrompt && onPromptLayout) {
+                onPromptLayout(nativeEvent.layout.height);
+              }
+            }}
           >
             {promptText}
           </Text>
@@ -195,12 +215,29 @@ export function CardInput({
               color={styles.cardFont.color}
             />
           </Pressable>
-        ) : (
-          null
-        )}
+        ) : null}
       </View>
 
-      {renderedInput}
+      {allowMultilinePrompt ? (
+        <View
+          style={styles.inputContainerLarge}
+          onLayout={({ nativeEvent }) => {
+            if (onInputLayout) {
+              onInputLayout(nativeEvent.layout.height);
+            }
+          }}
+        >
+          {renderedInput}
+        </View>
+      ) : (
+        renderedInput
+      )}
     </>
   );
+
+  if (allowMultilinePrompt) {
+    return <View style={styles.cardContentLarge}>{content}</View>;
+  }
+
+  return content;
 }

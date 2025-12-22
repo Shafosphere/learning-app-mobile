@@ -15,6 +15,7 @@ type CorrectionState = {
   rewers: string;
   input1: string;
   input2: string;
+  answerOnly?: boolean;
   mode: CorrectionMode;
 };
 
@@ -364,6 +365,7 @@ export function useFlashcardsInteraction({
           rewers: wordForCheck.translations[0] ?? "",
           input1: "",
           input2: "",
+          answerOnly: wordForCheck.answerOnly ?? false,
           mode: "demote",
         });
       }
@@ -425,9 +427,12 @@ export function useFlashcardsInteraction({
   );
 
   useEffect(() => {
+    if (!correction) {
+      return;
+    }
+    const isAnswerOnly = Boolean(correction.answerOnly);
     if (
-      correction &&
-      matchesCorrectionField(correction.input1, correction.awers) &&
+      (isAnswerOnly || matchesCorrectionField(correction.input1, correction.awers)) &&
       matchesCorrectionField(correction.input2, correction.rewers)
     ) {
       if (selectedItem) {
@@ -553,6 +558,7 @@ export function useFlashcardsInteraction({
         rewers: nextRewers,
         input1: isSameIntroCard ? prev.input1 : "",
         input2: isSameIntroCard ? prev.input2 : "",
+        answerOnly: selectedItem.answerOnly ?? false,
         mode: "intro",
       };
     });

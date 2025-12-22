@@ -17,13 +17,15 @@ export interface CustomFlashcardRow {
   answers: string[];
   position: number | null;
   flipped: number;
+  answerOnly: number;
   createdAt: number;
   updatedAt: number;
 }
 
 export interface CustomFlashcardRecord
-  extends Omit<CustomFlashcardRow, "flipped"> {
+  extends Omit<CustomFlashcardRow, "flipped" | "answerOnly"> {
   flipped: boolean;
+  answerOnly: boolean;
 }
 
 export interface CustomFlashcardInput {
@@ -34,6 +36,7 @@ export interface CustomFlashcardInput {
   hintBack?: string | null;
   position?: number | null;
   flipped?: boolean;
+  answerOnly?: boolean;
 }
 
 export async function getCustomFlashcards(
@@ -49,6 +52,7 @@ export async function getCustomFlashcards(
     hintBack: string | null;
     position: number | null;
     flipped: number;
+    answerOnly: number;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -62,6 +66,7 @@ export async function getCustomFlashcards(
        cf.hint_back      AS hintBack,
        cf.position       AS position,
        cf.flipped        AS flipped,
+       cf.answer_only    AS answerOnly,
        cf.created_at     AS createdAt,
        cf.updated_at     AS updatedAt,
        cfa.answer_text   AS answerText
@@ -91,12 +96,14 @@ export async function getCustomFlashcards(
         answers: [],
         position: row.position,
         flipped: row.flipped,
+        answerOnly: row.answerOnly,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       };
       record = {
         ...rowData,
         flipped: rowData.flipped === 1,
+        answerOnly: rowData.answerOnly === 1,
       };
       byId.set(row.id, record);
       ordered.push(record);
@@ -154,11 +161,13 @@ export async function replaceCustomFlashcardsWithDb(
 
       const flippedValue =
         card.flipped == null ? 1 : card.flipped ? 1 : 0;
+      const answerOnlyValue =
+        card.answerOnly == null ? 0 : card.answerOnly ? 1 : 0;
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, hint_front, hint_back, position, flipped, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, position, flipped, answer_only, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
@@ -166,6 +175,7 @@ export async function replaceCustomFlashcardsWithDb(
         card.hintBack ?? null,
         position,
         flippedValue, // domyślnie 1 (można odwracać)
+        answerOnlyValue,
         now,
         now
       );

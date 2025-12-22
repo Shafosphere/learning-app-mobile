@@ -29,7 +29,7 @@ type AddMode = "csv" | "manual";
 
 const sampleFileName = "custom_course_przyklad.csv";
 
-const LOCK_TRUE_VALUES = new Set([
+const TRUE_VALUES = new Set([
   "true",
   "1",
   "yes",
@@ -97,10 +97,10 @@ export default function CustomCourseContentScreen() {
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
 
-  const parseLockValue = (value: unknown): boolean => {
+  const parseBooleanValue = (value: unknown): boolean => {
     if (value == null) return false;
     const normalized = value.toString().trim().toLowerCase();
-    return LOCK_TRUE_VALUES.has(normalized);
+    return TRUE_VALUES.has(normalized);
   };
 
   const parseAnswers = (raw: unknown): string[] => {
@@ -154,12 +154,16 @@ export default function CustomCourseContentScreen() {
       const cards = (parsed.data as any[])
         .map((row, idx) => {
           const answers = parseAnswers(row.back);
-          const locked = parseLockValue(row.lock);
+          const locked = parseBooleanValue(row.lock);
+          const answerOnly = parseBooleanValue(
+            row.answer_only ?? row.question ?? row.pytanie
+          );
           return {
             id: `csv-${idx}`,
             front: (row.front || "").toString(),
             answers: answers.length > 0 ? answers : [(row.back || "").toString()],
             flipped: !locked,
+            answerOnly,
             hintFront: (row.hint1 ?? row.hint_front ?? "").toString(),
             hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
           };
@@ -277,6 +281,7 @@ export default function CustomCourseContentScreen() {
           flipped: boolean;
           hintFront?: string | null;
           hintBack?: string | null;
+          answerOnly?: boolean;
         }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -293,6 +298,7 @@ export default function CustomCourseContentScreen() {
         flipped: card.flipped,
         hintFront: card.hintFront ?? "",
         hintBack: card.hintBack ?? "",
+        answerOnly: card.answerOnly ?? false,
       });
       return acc;
     }, []);
@@ -380,11 +386,14 @@ export default function CustomCourseContentScreen() {
               <Text style={styles.modeDescription}>
                 Plik CSV powinien mieć kolumny: front (treść fiszki), back
                 (odpowiedź), hint1 (podpowiedź do front), hint2 (podpowiedź do
-                back) oraz lock. Podpowiedzi mogą zostać puste. W lock wpisz
-                true/1/tak, jeśli fiszka ma być zablokowana. W polu back możesz
-                podać kilka odpowiedzi, oddzielając je średnikiem lub kreską |
-                (np. cat; kitty). Możesz też pobrać gotowy szablon CSV do
-                uzupełnienia na komputerze.
+                back), lock oraz answer_only (aliasy: question, pytanie).
+                Podpowiedzi mogą zostać puste. W lock wpisz true/1/tak, jeśli
+                fiszka ma być zablokowana. W answer_only wpisz true/1/tak, jeśli
+                po błędzie użytkownik ma poprawiać tylko odpowiedź (bez
+                przepisywania pytania). W polu
+                back możesz podać kilka odpowiedzi, oddzielając je średnikiem lub
+                kreską | (np. cat; kitty). Możesz też pobrać gotowy szablon CSV
+                do uzupełnienia na komputerze.
               </Text>
               <View style={styles.modeActions}>
                 <MyButton

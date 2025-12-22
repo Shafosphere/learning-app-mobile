@@ -5,6 +5,7 @@ export type ManualCard = {
   front: string;
   answers: string[];
   flipped: boolean;
+  answerOnly?: boolean;
   hintFront?: string | null;
   hintBack?: string | null;
 };
@@ -26,6 +27,7 @@ export const createEmptyManualCard = (id?: string): ManualCard => ({
   front: "",
   answers: [""],
   flipped: true, // domyślnie włączone
+  answerOnly: false,
   hintFront: "",
   hintBack: "",
 });

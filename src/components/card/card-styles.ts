@@ -87,14 +87,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // backgroundColor: colors.my_green,
   },
   card: {
-    height: 120,
-    width: 325,
     paddingLeft: 10,
     paddingRight: 10,
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
     // alignItems: "center",
     // justifyContent: "center",
+  },
+  cardSmall: {
+    height: 120,
+    width: 325,
+  },
+  cardLarge: {
+    width: 325,
   },
   cardGood: {
     backgroundColor: colors.my_green,
@@ -216,10 +221,46 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingLeft: 8,
     paddingRight: 8,
     // marginBottom: 4,
+    // backgroundColor: colors.my_red,
+  },
+  cardContentLarge: {
+    flex: 1,
+    width: "100%",
+    alignSelf: "stretch",
+  },
+  topContainerLarge: {
+    flex: 1,
+    alignItems: "center",
+    justifyContent: "center",
     // backgroundColor: colors.my_green,
+  },
+  topContainerLargePrompt: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    width: "100%",
+    flex: 1,
+    paddingLeft: 8,
+    paddingRight: 8,
+  },
+  inputContainerLarge: {
+    justifyContent: "flex-end",
+    width: "100%",
+    paddingBottom: 14,
+  },
+  containerInputLarge: {
+    position: "relative",
+    width: "100%",
+    height: undefined,
+    alignSelf: "stretch",
   },
   promptText: {
     flex: 1,
+    textAlign: "left",
+  },
+  promptTextMultiline: {
+    flexWrap: "wrap",
+    // alignSelf: "flex-start",
     textAlign: "left",
   },
   promptMarquee: {

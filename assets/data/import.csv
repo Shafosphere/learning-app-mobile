@@ -1,6 +1,6 @@
-front,back,hint1,hint2,lock
-"Awers przykładowy 1","Rewers przykładowy 1","Podpowiedź awersu 1","Podpowiedź rewersu 1",false
-"Awers przykładowy 2","Rewers przykładowy 2","","",true
-"Słowo: kot","cat; kitty","Przykład zdania: The cat sleeps.","Podpowiedź tylnej strony",true
-"Pytanie: Ile to 2+2?","4","Łatwe dodawanie","",false
-"Słowo: worm","robak; glista; czołgać się; wić się","","",false
+front,back,hint1,hint2,lock,answer_only
+"Awers przykładowy 1","Rewers przykładowy 1","Podpowiedź awersu 1","Podpowiedź rewersu 1",false,false
+"Awers przykładowy 2","Rewers przykładowy 2","","",true,false
+"Słowo: kot","cat; kitty","Przykład zdania: The cat sleeps.","Podpowiedź tylnej strony",true,false
+"Pytanie: Ile to 2+2?","4","Łatwe dodawanie","",false,true
+"Słowo: worm","robak; glista; czołgać się; wić się","","",false,false

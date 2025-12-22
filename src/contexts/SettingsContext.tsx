@@ -173,6 +173,8 @@ interface SettingsContextValue {
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   flashcardsSuggestionsEnabled: boolean;
   toggleFlashcardsSuggestions: () => Promise<void>;
+  flashcardsCardSize: FlashcardsCardSize;
+  setFlashcardsCardSize: (size: FlashcardsCardSize) => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
   feedbackEnabled: boolean;
@@ -206,6 +208,7 @@ interface SettingsContextValue {
 }
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
+export type FlashcardsCardSize = "large" | "small";
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
@@ -249,6 +252,8 @@ const defaultValue: SettingsContextValue = {
   setFlashcardsBatchSize: async () => {},
   flashcardsSuggestionsEnabled: true,
   toggleFlashcardsSuggestions: async () => {},
+  flashcardsCardSize: "large",
+  setFlashcardsCardSize: async () => {},
   dailyGoal: 20,
   setDailyGoal: async () => {},
   feedbackEnabled: true,
@@ -345,6 +350,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     );
   const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
     usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", false);
+  const [flashcardsCardSize, setFlashcardsCardSize] =
+    usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
   const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
   const [feedbackEnabledState, _setFeedbackEnabled] =
     usePersistedState<boolean>("feedbackEnabled", true);
@@ -947,6 +954,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setFlashcardsBatchSize,
         flashcardsSuggestionsEnabled,
         toggleFlashcardsSuggestions,
+        flashcardsCardSize,
+        setFlashcardsCardSize,
         dailyGoal,
         setDailyGoal,
         feedbackEnabled: feedbackEnabledState,

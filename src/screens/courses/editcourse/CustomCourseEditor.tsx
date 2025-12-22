@@ -164,6 +164,7 @@ export default function CustomCourseEditor({
           front: card.frontText,
           answers,
           flipped: card.flipped,
+          answerOnly: card.answerOnly ?? false,
         };
       });
       replaceManualCards(ensureCardsNormalized(incomingCards));
@@ -365,6 +366,7 @@ export default function CustomCourseEditor({
         answers: string[];
         position: number;
         flipped: boolean;
+        answerOnly?: boolean;
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -379,6 +381,7 @@ export default function CustomCourseEditor({
         answers,
         position: acc.length,
         flipped: card.flipped,
+        answerOnly: card.answerOnly ?? false,
       });
       return acc;
     }, []);

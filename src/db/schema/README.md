@@ -8,7 +8,7 @@ Aktualny schemat SQLite (zgodny z `applySchema` w `src/db/sqlite/schema.ts`) obe
 
 - **`custom_courses`** — definicja kursu (`name`, `icon_id`, `icon_color`, `color_id`, `reviews_enabled`, `is_official`, `slug`, `created_at`, `updated_at`).
   - Indeks: `idx_custom_courses_slug` (`UNIQUE`, tylko gdy `slug` nie jest NULL).
-- **`custom_flashcards`** — fiszki w kursie (`course_id`, `front_text`, `back_text`, `hint_front`, `hint_back`, `position`, `flipped`, `created_at`, `updated_at`).
+- **`custom_flashcards`** — fiszki w kursie (`course_id`, `front_text`, `back_text`, `hint_front`, `hint_back`, `position`, `flipped`, `answer_only`, `created_at`, `updated_at`).
 - **`custom_flashcard_answers`** — znormalizowane odpowiedzi z pola `back_text` (`flashcard_id`, `answer_text`, `created_at`), `UNIQUE(flashcard_id, answer_text)`.
 - **`custom_reviews`** — SRS dla fiszek (`course_id`, `flashcard_id`, `learned_at`, `next_review`, `stage`), `UNIQUE(flashcard_id)`.
 - **`custom_learning_events`** — logowanie prób nauki fiszek (`flashcard_id`, `course_id`, `box`, `result`, `duration_ms`, `created_at`).
@@ -19,6 +19,6 @@ Indeksy: `idx_custom_flashcards_course`, `idx_custom_flashcard_answers_card`, `i
 
 ## Uwagi implementacyjne
 
-- `reviews_enabled`, `flipped`, `is_official` są `INTEGER NOT NULL DEFAULT 0/1` (bo SQLite).
-- Kolumny `slug` (kursy), `flipped`, `hint_front` i `hint_back` (fiszki) zostały dodane w późniejszych migracjach — w kodzie są wymuszane przez `ensureColumn`.
+- `reviews_enabled`, `flipped`, `is_official`, `answer_only` są `INTEGER NOT NULL DEFAULT 0/1` (bo SQLite).
+- Kolumny `slug` (kursy), `flipped`, `hint_front`, `hint_back` i `answer_only` (fiszki) zostały dodane w późniejszych migracjach — w kodzie są wymuszane przez `ensureColumn`.
 - Wszystkie tabele używają kluczy obcych i indeksów zdefiniowanych w `schema.sql`; PRAGMA są ustawiane w kodzie (`configurePragmas`).

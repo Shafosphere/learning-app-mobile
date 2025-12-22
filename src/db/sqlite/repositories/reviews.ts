@@ -139,6 +139,7 @@ export async function getDueCustomReviewFlashcards(
     hintBack: string | null;
     position: number | null;
     flipped: number;
+    answerOnly: number;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -154,6 +155,7 @@ export async function getDueCustomReviewFlashcards(
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
        cf.flipped       AS flipped,
+       cf.answer_only  AS answerOnly,
        cfa.answer_text  AS answerText
      FROM custom_flashcards cf
      LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
@@ -183,6 +185,7 @@ export async function getDueCustomReviewFlashcards(
         answers: [],
         position: row.position,
         flipped: row.flipped === 1,
+        answerOnly: row.answerOnly === 1,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         stage: stageInfo.stage,

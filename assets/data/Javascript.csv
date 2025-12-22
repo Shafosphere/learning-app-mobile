@@ -1,101 +1,101 @@
-front,back,hint1,hint2,lock
-Jak nazywa się standard języka JavaScript?,ECMAScript,Podstawy,To oficjalna specyfikacja języka,yes
-Jak nazywa się środowisko uruchomieniowe JS poza przeglądarką?,Node.js,Podstawy,Uruchamia JS na serwerze,yes
-Jak wypisać wartość do konsoli?,console.log,Podstawy,Przykład: console.log(x),yes
-Jak wygląda komentarz jednowierszowy?,//,Składnia,Przykład: // opis,yes
-Jak wygląda komentarz blokowy?,/* */,Składnia,Przykład: /* opis */,yes
-Jak włączyć tryb ścisły?,'use strict',Składnia,Umieść na początku pliku lub funkcji,yes
-Jak zadeklarować zmienną o zasięgu blokowym?,let,Zmienne,let x = 1,yes
-Jak zadeklarować stałą o zasięgu blokowym?,const,Zmienne,const PI = 3.14,yes
-Które słowo kluczowe deklaruje zmienną o zasięgu funkcji?,var,Zmienne,var jest starsze od let i const,yes
-Jaka wartość oznacza brak przypisania?,undefined,Typy,Domyślna wartość nieustawionej zmiennej,yes
-Jaka wartość oznacza celowy brak obiektu?,null,Typy,Często ustawiane ręcznie,yes
-Jaki typ przechowuje true i false?,boolean,Typy,Tylko true albo false,yes
-Jaki typ przechowuje tekst?,string,Typy,Napisy w cudzysłowie lub apostrofach,yes
-Jaki typ przechowuje liczby?,number,Typy,W JS number jest zmiennoprzecinkowy,yes
-Jak sprawdzić typ wartości w runtime?,typeof,Typy,Przykład: typeof x,yes
-Co oznacza wartość NaN?,NaN,Typy,To wynik nieprawidłowych obliczeń liczbowych,yes
-Jak poprawnie sprawdzić czy wartość jest NaN?,Number.isNaN,Typy,Przykład: Number.isNaN(x),yes
-Jaki operator porównania jest ścisły bez konwersji typów?,===,Operatory,1 === '1' daje false,yes
-Jaki operator porównania może konwertować typy?,==,Operatory,1 == '1' daje true,yes
-Jaki operator oznacza nierówność ścisłą?,!==,Operatory,1 !== 2 daje true,yes
-Jaki operator logiczny oznacza AND?,&&,Operatory,true && false daje false,yes
-Jaki operator logiczny oznacza OR?,||,Operatory,false || true daje true,yes
-Jaki operator logiczny neguje wartość?,!,Operatory,!true daje false,yes
-Jaki operator zwraca prawą wartość gdy lewa jest null lub undefined?,??,Operatory,null ?? 'x' zwraca 'x',yes
-Jaki operator bezpiecznie odczytuje pole gdy coś może być null?,?.,Operatory,user?.name nie rzuci błędu,yes
-Jaki operator wybiera jedną z dwóch wartości na podstawie warunku?,?:,Operatory,warunek ? a : b,yes
-Jaki operator łączy napisy?,+,Operatory,'a' + 'b' daje 'ab',yes
-Jak nazywają się napisy w backtickach?,template literal,Napisy,Przykład: `Hej ${name}`,yes
-Jaki zapis wstawia wyrażenie do template literal?,${},Napisy,Przykład: `Suma ${a + b}`,yes
-Jaka właściwość podaje długość napisu?,length,Napisy,'abc'.length daje 3,yes
-Jaka metoda sprawdza czy napis zawiera fragment?,includes,Napisy,'abc'.includes('b') daje true,yes
-Jaka metoda usuwa białe znaki z początku i końca?,trim,Napisy,' a '.trim() daje 'a',yes
-Jaka metoda wycina fragment napisu bez mutacji?,slice,Napisy,'abcd'.slice(1) daje 'bcd',yes
-Jak sparsować liczbę całkowitą z tekstu?,parseInt,Liczby,Przykład: parseInt('42'),yes
-Jak przekonwertować wartość na liczbę?,Number(),Liczby,Przykład: Number('42'),yes
-Jak przekonwertować wartość na napis?,String(),Napisy,Przykład: String(42),yes
-Jak przekonwertować wartość na boolean?,Boolean(),Typy,Przykład: Boolean(0) daje false,yes
-Jak zaokrąglić liczbę w dół?,Math.floor,Liczby,Przykład: Math.floor(3.9) daje 3,yes
-Jaka instrukcja warunkowa zaczyna się od if?,if,Sterowanie,if (x) { },yes
-Jak dodać gałąź dla warunku false?,else,Sterowanie,if (x) { } else { },yes
-Jaka instrukcja wybiera przypadek na podstawie wartości?,switch,Sterowanie,switch (x) { case 1: },yes
-Jaka pętla z licznikiem jest najczęściej używana?,for,Pętle,for (let i = 0; i < n; i++) { },yes
-Jaka pętla działa dopóki warunek jest true?,while,Pętle,while (x) { },yes
-Jaka pętla iteruje po wartościach tablicy lub stringa?,for...of,Pętle,for (const x of arr) { },yes
-Jak przerwać pętlę lub switch?,break,Sterowanie,break kończy najbliższą pętlę,yes
-Jak pominąć bieżącą iterację pętli?,continue,Sterowanie,continue przechodzi do następnej iteracji,yes
-Jakie słowo kluczowe deklaruje funkcję?,function,Funkcje,function hello() { },yes
-Jak zwrócić wartość z funkcji?,return,Funkcje,return kończy funkcję,yes
-Jaki operator występuje w funkcji strzałkowej?,=>,Funkcje,Przykład: () => 1,yes
-Jak nazywa się przenoszenie deklaracji na początek zakresu?,hoisting,Funkcje,Działa m.in. dla function declaration,yes
-Jak nazywa się zasięg zmiennych w kodzie?,scope,Funkcje,Zasięg zależy od bloku lub funkcji,yes
-Jak nazywa się funkcja która pamięta zmienne z zewnętrznego zakresu?,closure,Funkcje,Po polsku domknięcie,yes
-Jak odczytać wszystkie argumenty w funkcji klasycznej?,arguments,Funkcje,arguments działa w funkcjach function,yes
-Jak nazywa się parametr z wartością domyślną?,default parameter,Funkcje,Przykład: function f(x = 0) { },yes
-Jak nazywa się parametr zbierający wiele argumentów?,rest parameter,Funkcje,Przykład: function f(...args) { },yes
-Jak nazywa się operator rozwijający tablicę lub obiekt?,spread operator,Funkcje,Przykład: const b = [...a],yes
-Jak nazywa się rozpakowanie obiektu lub tablicy do zmiennych?,destructuring,Funkcje,Przykład: const {a} = obj,yes
-Jakie słowo kluczowe wskazuje kontekst wywołania?,this,Obiekty,Wartość this zależy od wywołania,yes
-Jak utworzyć nową funkcję z na stałe ustawionym this?,bind,Obiekty,f.bind(obj) zwraca nową funkcję,yes
-Jak wywołać funkcję z ustawionym this?,call,Obiekty,f.call(obj) ustawia this na obj,yes
-Jak utworzyć tablicę literałem?,[],Tablice,Przykład: const a = [],yes
-Jak dodać element na koniec tablicy?,push,Tablice,a.push(1),yes
-Jak usunąć ostatni element tablicy?,pop,Tablice,a.pop(),yes
-Jaka metoda tworzy nową tablicę mapując elementy?,map,Tablice,a.map(x => x * 2),yes
-Jaka metoda filtruje elementy tablicy?,filter,Tablice,a.filter(x => x > 0),yes
-Jaka metoda redukuje tablicę do jednej wartości?,reduce,Tablice,Używana np. do sumowania,yes
-Jaka metoda znajduje pierwszy element spełniający warunek?,find,Tablice,a.find(x => x === 1),yes
-Jak utworzyć obiekt literałem?,{},Obiekty,Przykład: const o = {},yes
-Jak nazywa się dostęp do pola obiektu zapisem z kropką?,dot notation,Obiekty,Przykład: o.name,yes
-Jak nazywa się dostęp do pola obiektu zapisem z nawiasami?,bracket notation,Obiekty,Przykład: o[key],yes
-Jaka metoda zwraca tablicę kluczy obiektu?,Object.keys,Obiekty,Object.keys(o),yes
-Jaka metoda zwraca tablicę par klucz wartość obiektu?,Object.entries,Obiekty,Object.entries(o),yes
-Jak zamienić obiekt na tekst JSON?,JSON.stringify,JSON,JSON.stringify(o),yes
-Jak zamienić tekst JSON na obiekt?,JSON.parse,JSON,JSON.parse(text),yes
-Jak zadeklarować klasę w JS?,class,OOP,class User { },yes
-Jak nazywa się metoda uruchamiana przy tworzeniu instancji?,constructor,OOP,constructor() { },yes
-Jak utworzyć instancję obiektu z konstruktora?,new,OOP,new User(),yes
-Jak dziedziczyć po klasie w JS?,extends,OOP,class A extends B { },yes
-Jak wywołać konstruktor lub metodę klasy bazowej?,super,OOP,super() w konstruktorze,yes
-Jak obsłużyć wyjątki w JS?,try...catch,Błędy,try { } catch (e) { },yes
-Jak rzucić błąd ręcznie?,throw,Błędy,throw new Error('msg'),yes
-Jak nazywa się obiekt reprezentujący operację asynchroniczną?,Promise,Async,Promise ma stany pending fulfilled rejected,yes
-Jaka metoda Promise obsługuje sukces po zakończeniu?,then,Async,p.then(v => v),yes
-Jaka metoda Promise obsługuje błąd?,catch,Async,p.catch(e => e),yes
-Jaka metoda Promise wykona się zawsze na końcu?,finally,Async,p.finally(() => {}),yes
-Jakie słowo kluczowe oznacza funkcję asynchroniczną?,async,Async,async function f() { },yes
-Jakie słowo kluczowe czeka na wynik Promise w async?,await,Async,const v = await p,yes
-Jaka funkcja robi żądania HTTP w przeglądarce i w Node?,fetch,Web API,fetch zwraca Promise,yes
-Jak opóźnić wykonanie kodu jednorazowo?,setTimeout,Web API,Przyjmuje funkcję i opóźnienie w ms,yes
-Jak anulować wcześniej ustawiony timeout?,clearTimeout,Web API,clearTimeout usuwa timeout po id,yes
-Jak uruchomić kod cyklicznie co określony czas?,setInterval,Web API,Przyjmuje funkcję i czas w ms,yes
-Jak nazywa się mechanizm kolejki zdarzeń w JS?,event loop,Async,To on planuje wykonanie callbacków,yes
-Jak zaimportować wartość z modułu ES?,import,Moduły,Przykład: import x from './x',yes
-Jak wyeksportować wartość z modułu ES?,export,Moduły,Przykład: export const x = 1,yes
-Jak znaleźć pierwszy element w DOM selektorem CSS?,document.querySelector,DOM,Przykład: document.querySelector('.btn'),yes
-Jak znaleźć wszystkie elementy w DOM selektorem CSS?,document.querySelectorAll,DOM,Przykład: document.querySelectorAll('li'),yes
-Jak dodać nasłuchiwanie zdarzenia w DOM?,addEventListener,DOM,Przykład: element.addEventListener na click,yes
-Jak zablokować domyślne zachowanie zdarzenia?,preventDefault,DOM,event.preventDefault(),yes
-Jak zapisać wartość w localStorage?,localStorage.setItem,Storage,localStorage przechowuje dane jako string,yes
-Jak odczytać wartość z localStorage?,localStorage.getItem,Storage,Zwraca string albo null,yes
+front,back,lock,answer_only
+Jak nazywa się standard języka JavaScript?,ECMAScript,yes,yes
+Jak nazywa się środowisko uruchomieniowe JS poza przeglądarką?,Node.js,yes,yes
+Jak wypisać wartość do konsoli?,console.log,yes,yes
+Jak wygląda komentarz jednowierszowy?,//,yes,yes
+Jak wygląda komentarz blokowy?,/* */,yes,yes
+Jak włączyć tryb ścisły?,'use strict',yes,yes
+Jak zadeklarować zmienną o zasięgu blokowym?,let,yes,yes
+Jak zadeklarować stałą o zasięgu blokowym?,const,yes,yes
+Które słowo kluczowe deklaruje zmienną o zasięgu funkcji?,var,yes,yes
+Jaka wartość oznacza brak przypisania?,undefined,yes,yes
+Jaka wartość oznacza celowy brak obiektu?,null,yes,yes
+Jaki typ przechowuje true i false?,boolean,yes,yes
+Jaki typ przechowuje tekst?,string,yes,yes
+Jaki typ przechowuje liczby?,number,yes,yes
+Jak sprawdzić typ wartości w runtime?,typeof,yes,yes
+Co oznacza wartość NaN?,NaN,yes,yes
+Jak poprawnie sprawdzić czy wartość jest NaN?,Number.isNaN,yes,yes
+Jaki operator porównania jest ścisły bez konwersji typów?,===,yes,yes
+Jaki operator porównania może konwertować typy?,==,yes,yes
+Jaki operator oznacza nierówność ścisłą?,!==,yes,yes
+Jaki operator logiczny oznacza AND?,&&,yes,yes
+Jaki operator logiczny oznacza OR?,||,yes,yes
+Jaki operator logiczny neguje wartość?,!,yes,yes
+Jaki operator zwraca prawą wartość gdy lewa jest null lub undefined?,??,yes,yes
+Jaki operator bezpiecznie odczytuje pole gdy coś może być null?,?.,yes,yes
+Jaki operator wybiera jedną z dwóch wartości na podstawie warunku?,?:,yes,yes
+Jaki operator łączy napisy?,+,yes,yes
+Jak nazywają się napisy w backtickach?,template literal,yes,yes
+Jaki zapis wstawia wyrażenie do template literal?,${},yes,yes
+Jaka właściwość podaje długość napisu?,length,yes,yes
+Jaka metoda sprawdza czy napis zawiera fragment?,includes,yes,yes
+Jaka metoda usuwa białe znaki z początku i końca?,trim,yes,yes
+Jaka metoda wycina fragment napisu bez mutacji?,slice,yes,yes
+Jak sparsować liczbę całkowitą z tekstu?,parseInt,yes,yes
+Jak przekonwertować wartość na liczbę?,Number(),yes,yes
+Jak przekonwertować wartość na napis?,String(),yes,yes
+Jak przekonwertować wartość na boolean?,Boolean(),yes,yes
+Jak zaokrąglić liczbę w dół?,Math.floor,yes,yes
+Jaka instrukcja warunkowa zaczyna się od if?,if,yes,yes
+Jak dodać gałąź dla warunku false?,else,yes,yes
+Jaka instrukcja wybiera przypadek na podstawie wartości?,switch,yes,yes
+Jaka pętla z licznikiem jest najczęściej używana?,for,yes,yes
+Jaka pętla działa dopóki warunek jest true?,while,yes,yes
+Jaka pętla iteruje po wartościach tablicy lub stringa?,for...of,yes,yes
+Jak przerwać pętlę lub switch?,break,yes,yes
+Jak pominąć bieżącą iterację pętli?,continue,yes,yes
+Jakie słowo kluczowe deklaruje funkcję?,function,yes,yes
+Jak zwrócić wartość z funkcji?,return,yes,yes
+Jaki operator występuje w funkcji strzałkowej?,=>,yes,yes
+Jak nazywa się przenoszenie deklaracji na początek zakresu?,hoisting,yes,yes
+Jak nazywa się zasięg zmiennych w kodzie?,scope,yes,yes
+Jak nazywa się funkcja która pamięta zmienne z zewnętrznego zakresu?,closure,yes,yes
+Jak odczytać wszystkie argumenty w funkcji klasycznej?,arguments,yes,yes
+Jak nazywa się parametr z wartością domyślną?,default parameter,yes,yes
+Jak nazywa się parametr zbierający wiele argumentów?,rest parameter,yes,yes
+Jak nazywa się operator rozwijający tablicę lub obiekt?,spread operator,yes,yes
+Jak nazywa się rozpakowanie obiektu lub tablicy do zmiennych?,destructuring,yes,yes
+Jakie słowo kluczowe wskazuje kontekst wywołania?,this,yes,yes
+Jak utworzyć nową funkcję z na stałe ustawionym this?,bind,yes,yes
+Jak wywołać funkcję z ustawionym this?,call,yes,yes
+Jak utworzyć tablicę literałem?,[],yes,yes
+Jak dodać element na koniec tablicy?,push,yes,yes
+Jak usunąć ostatni element tablicy?,pop,yes,yes
+Jaka metoda tworzy nową tablicę mapując elementy?,map,yes,yes
+Jaka metoda filtruje elementy tablicy?,filter,yes,yes
+Jaka metoda redukuje tablicę do jednej wartości?,reduce,yes,yes
+Jaka metoda znajduje pierwszy element spełniający warunek?,find,yes,yes
+Jak utworzyć obiekt literałem?,{},yes,yes
+Jak nazywa się dostęp do pola obiektu zapisem z kropką?,dot notation,yes,yes
+Jak nazywa się dostęp do pola obiektu zapisem z nawiasami?,bracket notation,yes,yes
+Jaka metoda zwraca tablicę kluczy obiektu?,Object.keys,yes,yes
+Jaka metoda zwraca tablicę par klucz wartość obiektu?,Object.entries,yes,yes
+Jak zamienić obiekt na tekst JSON?,JSON.stringify,yes,yes
+Jak zamienić tekst JSON na obiekt?,JSON.parse,yes,yes
+Jak zadeklarować klasę w JS?,class,yes,yes
+Jak nazywa się metoda uruchamiana przy tworzeniu instancji?,constructor,yes,yes
+Jak utworzyć instancję obiektu z konstruktora?,new,yes,yes
+Jak dziedziczyć po klasie w JS?,extends,yes,yes
+Jak wywołać konstruktor lub metodę klasy bazowej?,super,yes,yes
+Jak obsłużyć wyjątki w JS?,try...catch,yes,yes
+Jak rzucić błąd ręcznie?,throw,yes,yes
+Jak nazywa się obiekt reprezentujący operację asynchroniczną?,Promise,yes,yes
+Jaka metoda Promise obsługuje sukces po zakończeniu?,then,yes,yes
+Jaka metoda Promise obsługuje błąd?,catch,yes,yes
+Jaka metoda Promise wykona się zawsze na końcu?,finally,yes,yes
+Jakie słowo kluczowe oznacza funkcję asynchroniczną?,async,yes,yes
+Jakie słowo kluczowe czeka na wynik Promise w async?,await,yes,yes
+Jaka funkcja robi żądania HTTP w przeglądarce i w Node?,fetch,yes,yes
+Jak opóźnić wykonanie kodu jednorazowo?,setTimeout,yes,yes
+Jak anulować wcześniej ustawiony timeout?,clearTimeout,yes,yes
+Jak uruchomić kod cyklicznie co określony czas?,setInterval,yes,yes
+Jak nazywa się mechanizm kolejki zdarzeń w JS?,event loop,yes,yes
+Jak zaimportować wartość z modułu ES?,import,yes,yes
+Jak wyeksportować wartość z modułu ES?,export,yes,yes
+Jak znaleźć pierwszy element w DOM selektorem CSS?,document.querySelector,yes,yes
+Jak znaleźć wszystkie elementy w DOM selektorem CSS?,document.querySelectorAll,yes,yes
+Jak dodać nasłuchiwanie zdarzenia w DOM?,addEventListener,yes,yes
+Jak zablokować domyślne zachowanie zdarzenia?,preventDefault,yes,yes
+Jak zapisać wartość w localStorage?,localStorage.setItem,yes,yes
+Jak odczytać wartość z localStorage?,localStorage.getItem,yes,yes

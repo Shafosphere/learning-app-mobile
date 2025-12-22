@@ -86,6 +86,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       hint_back   TEXT,
       position    INTEGER,
       flipped     INTEGER NOT NULL DEFAULT 1,
+      answer_only INTEGER NOT NULL DEFAULT 0,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -132,6 +133,12 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
   );
   await ensureColumn(db, "custom_flashcards", "hint_front", "TEXT");
   await ensureColumn(db, "custom_flashcards", "hint_back", "TEXT");
+  await ensureColumn(
+    db,
+    "custom_flashcards",
+    "answer_only",
+    "INTEGER NOT NULL DEFAULT 0"
+  );
 
   // Official pack metadata (idempotent, safe for existing DBs)
   await ensureColumn(

@@ -14,9 +14,20 @@ type LayoutOption = {
   preview: number;
 };
 
+type FlashcardSizeOption = {
+  key: "large" | "small";
+  label: string;
+  meta: string;
+};
+
 const layoutOptions: LayoutOption[] = [
   { key: "classic", label: "Klasyczny", preview: classicPreview },
   { key: "carousel", label: "Karuzela", preview: carouselPreview },
+];
+
+const flashcardSizeOptions: FlashcardSizeOption[] = [
+  { key: "large", label: "Duża", meta: "Więcej miejsca na treść pytania." },
+  { key: "small", label: "Mała", meta: "Kompaktowy widok z mniejszą kartą." },
 ];
 
 const AppearanceSection: React.FC = () => {
@@ -32,6 +43,8 @@ const AppearanceSection: React.FC = () => {
     toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
+    flashcardsCardSize,
+    setFlashcardsCardSize,
   } = useSettings();
 
   const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
@@ -71,6 +84,13 @@ const AppearanceSection: React.FC = () => {
   const handleLayoutSelect = async (key: "classic" | "carousel") => {
     if (key !== boxesLayout) {
       await setBoxesLayout(key);
+      await triggerHaptics();
+    }
+  };
+
+  const handleFlashcardSizeSelect = async (key: "large" | "small") => {
+    if (key !== flashcardsCardSize) {
+      await setFlashcardsCardSize(key);
       await triggerHaptics();
     }
   };
@@ -197,6 +217,42 @@ const AppearanceSection: React.FC = () => {
             <Text style={styles.layoutLabel}>{option.label}</Text>
           </TouchableOpacity>
         ))}
+      </View>
+
+      <View style={[styles.row, { alignItems: "flex-start", marginTop: 16 }]}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Rozmiar fiszki</Text>
+          <Text style={styles.rowSubtitle}>
+            Zmień wielkość karty, aby lepiej mieścić dłuższe pytania.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.flashcardSizeOptions}>
+        {flashcardSizeOptions.map((option) => {
+          const isActive = flashcardsCardSize === option.key;
+          return (
+            <TouchableOpacity
+              key={option.key}
+              activeOpacity={0.7}
+              onPress={() => handleFlashcardSizeSelect(option.key)}
+              style={[
+                styles.flashcardSizeOption,
+                isActive && styles.flashcardSizeOptionActive,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.flashcardSizeLabel,
+                  isActive && styles.flashcardSizeLabelActive,
+                ]}
+              >
+                {option.label}
+              </Text>
+              <Text style={styles.flashcardSizeMeta}>{option.meta}</Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
     </View>
   );

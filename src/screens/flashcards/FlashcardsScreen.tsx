@@ -93,6 +93,7 @@ function mapCustomCardToWord(
     text: front,
     translations,
     flipped: card.flipped,
+    answerOnly: card.answerOnly ?? false,
     hintFront: card.hintFront,
     hintBack: card.hintBack,
   };

@@ -3,6 +3,7 @@ export interface WordWithTranslations {
   text: string;
   translations: string[];
   flipped: boolean;
+  answerOnly?: boolean;
   hintFront?: string | null;
   hintBack?: string | null;
 }

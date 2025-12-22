@@ -17,9 +17,12 @@ type CsvRow = {
     hint_front?: string;
     hint_back?: string;
     lock?: string | number | boolean;
+    answer_only?: string | number | boolean;
+    question?: string | number | boolean;
+    pytanie?: string | number | boolean;
 };
 
-const LOCK_TRUE_VALUES = new Set([
+const TRUE_VALUES = new Set([
     "true",
     "1",
     "yes",
@@ -29,10 +32,10 @@ const LOCK_TRUE_VALUES = new Set([
     "locked",
 ]);
 
-const parseLockValue = (value: unknown): boolean => {
+const parseBooleanValue = (value: unknown): boolean => {
     if (value == null) return false;
     const normalized = value.toString().trim().toLowerCase();
-    return LOCK_TRUE_VALUES.has(normalized);
+    return TRUE_VALUES.has(normalized);
 };
 
 const extractHint = (primary?: string, secondary?: string): string | null => {
@@ -73,13 +76,17 @@ async function readCsvAsset(assetModule: any): Promise<
             const answers = splitBackTextIntoAnswers(backRaw);
             const hintFront = extractHint(row.hint1, row.hint_front);
             const hintBack = extractHint(row.hint2, row.hint_back);
-            const locked = parseLockValue(row.lock);
+            const locked = parseBooleanValue(row.lock);
+            const answerOnly = parseBooleanValue(
+                row.answer_only ?? row.question ?? row.pytanie
+            );
             return {
                 frontText: front,
                 backText: backRaw,
                 answers,
                 position: idx,
                 flipped: !locked,
+                answerOnly,
                 hintFront,
                 hintBack,
             };

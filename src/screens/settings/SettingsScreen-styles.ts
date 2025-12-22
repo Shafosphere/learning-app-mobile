@@ -181,6 +181,40 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "600",
     color: colors.paragraph,
   },
+  flashcardSizeOptions: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    marginTop: 12,
+  },
+  flashcardSizeOption: {
+    flex: 1,
+    borderRadius: 12,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingVertical: 12,
+    paddingHorizontal: 10,
+    alignItems: "center",
+    marginHorizontal: 4,
+  },
+  flashcardSizeOptionActive: {
+    borderColor: colors.my_green,
+  },
+  flashcardSizeLabel: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.paragraph,
+  },
+  flashcardSizeLabelActive: {
+    color: colors.my_green,
+  },
+  flashcardSizeMeta: {
+    fontSize: 12,
+    marginTop: 4,
+    color: colors.paragraph,
+    opacity: 0.75,
+    textAlign: "center",
+  },
   memoryOptions: {
     flexDirection: "row",
     justifyContent: "space-between",

@@ -24,6 +24,7 @@ CREATE TABLE custom_flashcards (
   hint_back   TEXT,
   position    INTEGER,
   flipped     INTEGER NOT NULL DEFAULT 1,
+  answer_only INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL,
   updated_at  INTEGER NOT NULL
 );

@@ -1,0 +1,105 @@
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Animated, Easing } from "react-native";
+import { useStyles } from "../card-styles";
+
+const SMALL_CARD_HEIGHT = 120;
+const LARGE_CARD_MAX_HEIGHT = 325;
+const LARGE_CARD_GAP = 8;
+
+type LayoutHandlers = {
+  onPromptLayout: (height: number) => void;
+  onInputLayout: (height: number) => void;
+};
+
+type LargeCardContainerProps = {
+  cardStateStyle?: object;
+  hasContent: boolean;
+  showCorrectionInputs: boolean;
+  children: (handlers: LayoutHandlers) => React.ReactNode;
+};
+
+export default function LargeCardContainer({
+  cardStateStyle,
+  hasContent,
+  showCorrectionInputs,
+  children,
+}: LargeCardContainerProps) {
+  const styles = useStyles();
+  const [promptHeight, setPromptHeight] = useState<number | null>(null);
+  const [inputHeight, setInputHeight] = useState<number | null>(null);
+  const lastStableHeight = useRef<number | null>(null);
+  const animatedCardHeight = useRef(
+    new Animated.Value(
+      hasContent ? LARGE_CARD_MAX_HEIGHT : SMALL_CARD_HEIGHT
+    )
+  ).current;
+
+  const baseCardHeight = useMemo(() => {
+    if (!hasContent) {
+      return SMALL_CARD_HEIGHT;
+    }
+    const fallbackHeight = lastStableHeight.current ?? SMALL_CARD_HEIGHT;
+    if (promptHeight == null || inputHeight == null) {
+      return fallbackHeight;
+    }
+    const desired =
+      promptHeight + inputHeight * 2 + LARGE_CARD_GAP * 2;
+    return Math.min(
+      LARGE_CARD_MAX_HEIGHT,
+      Math.max(SMALL_CARD_HEIGHT, Math.ceil(desired))
+    );
+  }, [hasContent, promptHeight, inputHeight]);
+
+  const targetCardHeight = useMemo(() => {
+    if (!hasContent) {
+      return SMALL_CARD_HEIGHT;
+    }
+    if (showCorrectionInputs) {
+      return lastStableHeight.current ?? baseCardHeight;
+    }
+    return baseCardHeight;
+  }, [hasContent, showCorrectionInputs, baseCardHeight]);
+
+  const handlePromptLayout = useCallback((height: number) => {
+    const nextHeight = Math.ceil(height);
+    setPromptHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+  }, []);
+
+  const handleInputLayout = useCallback((height: number) => {
+    const nextHeight = Math.ceil(height);
+    setInputHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+  }, []);
+
+  useEffect(() => {
+    if (!hasContent || showCorrectionInputs) {
+      return;
+    }
+    lastStableHeight.current = baseCardHeight;
+  }, [baseCardHeight, hasContent, showCorrectionInputs]);
+
+  useEffect(() => {
+    animatedCardHeight.stopAnimation();
+    Animated.timing(animatedCardHeight, {
+      toValue: targetCardHeight,
+      duration: 220,
+      easing: Easing.out(Easing.cubic),
+      useNativeDriver: false,
+    }).start();
+  }, [animatedCardHeight, targetCardHeight]);
+
+  return (
+    <Animated.View
+      style={[
+        styles.card,
+        styles.cardLarge,
+        { height: animatedCardHeight },
+        cardStateStyle,
+      ]}
+    >
+      {children({
+        onPromptLayout: handlePromptLayout,
+        onInputLayout: handleInputLayout,
+      })}
+    </Animated.View>
+  );
+}
