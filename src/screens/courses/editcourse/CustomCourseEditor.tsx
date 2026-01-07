@@ -80,6 +80,7 @@ export default function CustomCourseEditor({
     handleAddCard,
     handleRemoveCard,
     handleToggleFlipped,
+    handleManualCardImageChange,
     canUndo,
     undo,
   } = useManualCardsForm({
@@ -165,6 +166,8 @@ export default function CustomCourseEditor({
           answers,
           flipped: card.flipped,
           answerOnly: card.answerOnly ?? false,
+          imageFront: card.imageFront ?? null,
+          imageBack: card.imageBack ?? null,
         };
       });
       replaceManualCards(ensureCardsNormalized(incomingCards));
@@ -382,6 +385,8 @@ export default function CustomCourseEditor({
         position: acc.length,
         flipped: card.flipped,
         answerOnly: card.answerOnly ?? false,
+        imageFront: card.imageFront ?? null,
+        imageBack: card.imageBack ?? null,
       });
       return acc;
     }, []);
@@ -555,6 +560,7 @@ export default function CustomCourseEditor({
                     onAddCard={handleAddCard}
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
+                    onCardImageChange={handleManualCardImageChange}
                   />
                 </>
               )}

@@ -4,7 +4,7 @@ import { useStyles } from "../card-styles";
 
 const SMALL_CARD_HEIGHT = 120;
 const LARGE_CARD_MAX_HEIGHT = 325;
-const LARGE_CARD_GAP = 8;
+const LARGE_CARD_GAP = 6;
 
 type LayoutHandlers = {
   onPromptLayout: (height: number) => void;
@@ -43,7 +43,7 @@ export default function LargeCardContainer({
       return fallbackHeight;
     }
     const desired =
-      promptHeight + inputHeight * 2 + LARGE_CARD_GAP * 2;
+      promptHeight + inputHeight + LARGE_CARD_GAP * 2;
     return Math.min(
       LARGE_CARD_MAX_HEIGHT,
       Math.max(SMALL_CARD_HEIGHT, Math.ceil(desired))

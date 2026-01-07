@@ -96,6 +96,8 @@ function mapCustomCardToWord(
     answerOnly: card.answerOnly ?? false,
     hintFront: card.hintFront,
     hintBack: card.hintBack,
+    imageFront: card.imageFront ?? null,
+    imageBack: card.imageBack ?? null,
   };
   console.log("Converted to WordWithTranslations:", result);
   return result;
@@ -203,9 +205,13 @@ export default function Flashcards() {
     },
     boxZeroEnabled,
   });
+  const correctionLocked = correction?.mode === "demote";
 
   const handleSelectBox = useCallback(
     (boxName: keyof BoxesState) => {
+      if (correctionLocked) {
+        return;
+      }
       const now = Date.now();
       const isSameBox =
         boxSpamRef.current.box === boxName &&
@@ -229,7 +235,7 @@ export default function Flashcards() {
 
       baseHandleSelectBox(boxName);
     },
-    [baseHandleSelectBox, triggerQuote]
+    [baseHandleSelectBox, correctionLocked, triggerQuote]
   );
 
   useEffect(() => {
@@ -394,7 +400,6 @@ export default function Flashcards() {
     }
   }, [activeBox, unlockGate]);
 
-  const correctionLocked = correction?.mode === "demote";
   const isAnswering =
     selectedItem != null && result === null && correction?.mode !== "intro";
   const resultPending = result !== null;
@@ -591,20 +596,6 @@ export default function Flashcards() {
   useEffect(() => {
     resetInteractionState();
   }, [activeCustomCourseId, resetInteractionState]);
-
-  const unlockedWrongRef = useRef(false);
-  const unlockedRightRef = useRef(false);
-
-  useEffect(() => {
-    if (result === false && !unlockedWrongRef.current) {
-      unlockedWrongRef.current = true;
-      unlockGate("first_wrong_answer");
-    }
-    if (result === true && !unlockedRightRef.current) {
-      unlockedRightRef.current = true;
-      unlockGate("first_right_answer");
-    }
-  }, [result, unlockGate]);
 
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {

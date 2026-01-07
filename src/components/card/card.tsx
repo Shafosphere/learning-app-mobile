@@ -137,6 +137,11 @@ export default function Card({
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[translations] ?? "";
   const promptText = reversed ? rewers : awers;
+  const promptImageUri = selectedItem
+    ? reversed
+      ? selectedItem.imageBack ?? null
+      : selectedItem.imageFront ?? null
+    : null;
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : correction?.rewers ?? "";
   const answerOnly = correction?.answerOnly ?? selectedItem?.answerOnly ?? false;
@@ -670,6 +675,7 @@ export default function Card({
         <CardCorrection
           correction={correction}
           promptText={promptText}
+          promptImageUri={promptImageUri}
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           answerOnly={answerOnly}
@@ -706,6 +712,7 @@ export default function Card({
           allowMultilinePrompt={flashcardsCardSize === "large"}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
+          promptImageUri={promptImageUri}
           answer={answer}
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}

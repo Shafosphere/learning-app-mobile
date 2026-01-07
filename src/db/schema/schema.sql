@@ -22,6 +22,8 @@ CREATE TABLE custom_flashcards (
   back_text   TEXT    NOT NULL,
   hint_front  TEXT,
   hint_back   TEXT,
+  image_front TEXT,
+  image_back  TEXT,
   position    INTEGER,
   flipped     INTEGER NOT NULL DEFAULT 1,
   answer_only INTEGER NOT NULL DEFAULT 0,

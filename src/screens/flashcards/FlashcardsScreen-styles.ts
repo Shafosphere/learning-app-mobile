@@ -7,7 +7,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // alignItems: "center",
     backgroundColor: colors.background,
     // marginTop: 20,
-    paddingTop: 25,
+    paddingTop: 15,
     position: "relative",
     display: "flex",
     gap: 30,

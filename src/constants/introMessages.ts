@@ -66,12 +66,10 @@ export const FLASHCARDS_INTRO_MESSAGES: IntroMessage[] = [
     title: "Wpisaleś źle",
     description:
       "Nie martw sie, teraz musis poprawić swoją odpwiedź nadpisując ten tekst :3",
-    gateId: "first_wrong_answer",
   },
   {
     title: "Wpisaleś dobrze",
     description: "Brawo, fiszka teraz leci do kolejnego pudełka :3",
-    gateId: "first_right_answer",
   },
 ];
 

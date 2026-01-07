@@ -3,6 +3,7 @@ import type { CustomFlashcardRecord } from "@/src/db/sqlite/db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import { deleteImage, saveImage } from "@/src/services/imageService";
 import type { CustomCourseExport, UserDataExport } from "./exportUserData";
 
 export type ImportResult = {
@@ -18,6 +19,18 @@ export type ImportResult = {
         officialReviewsRestored: number;
         officialHintsUpdated: number;
     };
+};
+
+const persistImageIfAvailable = async (
+    uri?: string | null
+): Promise<string | null> => {
+    if (!uri) return null;
+    try {
+        return await saveImage(uri);
+    } catch (error) {
+        console.warn("[importUserData] Failed to persist image", { uri, error });
+        return null;
+    }
 };
 
 async function restoreCustomCourse(
@@ -52,13 +65,15 @@ async function restoreCustomCourse(
     for (const card of flashcards) {
         const insertCardResult = await db.runAsync(
             `INSERT INTO custom_flashcards
-         (course_id, front_text, back_text, hint_front, hint_back, position, flipped, answer_only, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             newCourseId,
             card.frontText,
             card.backText,
             card.hintFront ?? null,
             card.hintBack ?? null,
+            await persistImageIfAvailable(card.imageFront),
+            await persistImageIfAvailable(card.imageBack),
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,
@@ -157,6 +172,8 @@ async function restoreOfficialCourse(
         backText: string;
         hintFront: string | null;
         hintBack: string | null;
+        imageFront: string | null;
+        imageBack: string | null;
         position: number | null;
         flipped: number;
         answerOnly: number;
@@ -170,6 +187,8 @@ async function restoreOfficialCourse(
            cf.back_text     AS backText,
            cf.hint_front    AS hintFront,
            cf.hint_back     AS hintBack,
+           cf.image_front   AS imageFront,
+           cf.image_back    AS imageBack,
            cf.position      AS position,
            cf.flipped       AS flipped,
            cf.answer_only  AS answerOnly,
@@ -200,6 +219,8 @@ async function restoreOfficialCourse(
                 backText: row.backText,
                 hintFront: row.hintFront,
                 hintBack: row.hintBack,
+                imageFront: row.imageFront,
+                imageBack: row.imageBack,
                 answers: [],
                 position: row.position,
                 flipped: row.flipped === 1,
@@ -244,22 +265,37 @@ async function restoreOfficialCourse(
             const nextHintFront = card.hintFront ?? null;
             const nextHintBack = card.hintBack ?? null;
             const nextAnswerOnly = card.answerOnly ?? false;
+            const nextImageFront = await persistImageIfAvailable(card.imageFront);
+            const nextImageBack = await persistImageIfAvailable(card.imageBack);
             const shouldUpdateHints =
                 nextHintFront !== (existing.hintFront ?? null) ||
                 nextHintBack !== (existing.hintBack ?? null);
             const shouldUpdateAnswerOnly =
                 nextAnswerOnly !== (existing.answerOnly ?? false);
-            if (shouldUpdateHints || shouldUpdateAnswerOnly) {
+            const shouldUpdateImages =
+                nextImageFront !== (existing.imageFront ?? null) ||
+                nextImageBack !== (existing.imageBack ?? null);
+            if (shouldUpdateHints || shouldUpdateAnswerOnly || shouldUpdateImages) {
                 await db.runAsync(
                     `UPDATE custom_flashcards
-                       SET hint_front = ?, hint_back = ?, answer_only = ?, updated_at = ?
+                       SET hint_front = ?, hint_back = ?, image_front = ?, image_back = ?, answer_only = ?, updated_at = ?
                      WHERE id = ?;`,
                     nextHintFront,
                     nextHintBack,
+                    nextImageFront,
+                    nextImageBack,
                     nextAnswerOnly ? 1 : 0,
                     now,
                     existing.id
                 );
+                if (shouldUpdateImages) {
+                    if (existing.imageFront && existing.imageFront !== nextImageFront) {
+                        await deleteImage(existing.imageFront);
+                    }
+                    if (existing.imageBack && existing.imageBack !== nextImageBack) {
+                        await deleteImage(existing.imageBack);
+                    }
+                }
                 if (shouldUpdateHints) {
                     hintsUpdated++;
                 }
@@ -269,13 +305,15 @@ async function restoreOfficialCourse(
 
         const insertCardResult = await db.runAsync(
             `INSERT INTO custom_flashcards
-               (course_id, front_text, back_text, hint_front, hint_back, position, flipped, answer_only, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+               (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             targetCourseId,
             card.frontText,
             card.backText,
             card.hintFront ?? null,
             card.hintBack ?? null,
+            await persistImageIfAvailable(card.imageFront),
+            await persistImageIfAvailable(card.imageBack),
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,

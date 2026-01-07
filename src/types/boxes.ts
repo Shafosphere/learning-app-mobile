@@ -6,6 +6,8 @@ export interface WordWithTranslations {
   answerOnly?: boolean;
   hintFront?: string | null;
   hintBack?: string | null;
+  imageFront?: string | null;
+  imageBack?: string | null;
 }
 
 export interface BoxesState {

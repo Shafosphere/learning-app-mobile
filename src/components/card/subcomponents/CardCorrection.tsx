@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
+import { Image } from "expo-image";
 import {
   Platform,
   Pressable,
@@ -26,6 +27,7 @@ type CardCorrectionProps = {
     input2: string;
   };
   promptText: string;
+  promptImageUri?: string | null;
   correctionAwers: string;
   correctionRewers: string;
   answerOnly: boolean;
@@ -60,6 +62,7 @@ type CardCorrectionProps = {
 export function CardCorrection({
   correction,
   promptText,
+  promptImageUri,
   correctionAwers,
   correctionRewers,
   answerOnly,
@@ -167,27 +170,36 @@ export function CardCorrection({
     </Text>
   );
 
+  const promptImage = promptImageUri ? (
+    <View style={styles.promptImageWrapper}>
+      <Image
+        source={{ uri: promptImageUri }}
+        style={styles.promptImage}
+        contentFit="contain"
+      />
+    </View>
+  ) : null;
+
   const promptBlock = (
     <View
-      style={
-        answerOnly && allowMultilinePrompt
-          ? styles.topContainerLargePrompt
-          : [
-              styles.topContainer,
-              allowMultilinePrompt && styles.topContainerLarge,
-            ]
-      }
+      style={[
+        styles.topContainer,
+        allowMultilinePrompt && styles.topContainerLarge,
+      ]}
     >
-      {promptContent}
-      {canToggleTranslations ? (
-        <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
-          <Octicons
-            name="discussion-duplicate"
-            size={24}
-            color={styles.cardFont.color}
-          />
-        </Pressable>
-      ) : null}
+      <View style={styles.promptRow}>
+        {promptContent}
+        {canToggleTranslations ? (
+          <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+            <Octicons
+              name="discussion-duplicate"
+              size={24}
+              color={styles.cardFont.color}
+            />
+          </Pressable>
+        ) : null}
+      </View>
+      {promptImage}
     </View>
   );
 
@@ -257,7 +269,7 @@ export function CardCorrection({
     <View
       style={[
         allowMultilinePrompt ? styles.containerInputLarge : styles.containerInput,
-        answerOnly && styles.containerInputFirst,
+        answerOnly && !allowMultilinePrompt && styles.containerInputFirst,
       ]}
       onLayout={({ nativeEvent }) => {
         const nextWidth = nativeEvent.layout.width;
@@ -340,15 +352,22 @@ export function CardCorrection({
     return (
       <View style={styles.cardContentLarge}>
         {promptBlock}
-        <View style={styles.inputContainerLarge}>{input2Block}</View>
+        <View
+          style={[
+            styles.inputContainerLarge,
+            styles.inputContainerLargeCorrection,
+          ]}
+        >
+          {input2Block}
+        </View>
       </View>
     );
   }
 
   return (
     <>
-      {answerOnly ? promptBlock : input1Block}
-      {answerOnly ? input2Block : null}
+      {promptBlock}
+      {answerOnly ? input2Block : input1Block}
       {!answerOnly ? input2Block : null}
     </>
   );

@@ -8,6 +8,8 @@ export type ManualCard = {
   answerOnly?: boolean;
   hintFront?: string | null;
   hintBack?: string | null;
+  imageFront?: string | null;
+  imageBack?: string | null;
 };
 
 export interface UseManualCardsFormOptions {
@@ -30,6 +32,8 @@ export const createEmptyManualCard = (id?: string): ManualCard => ({
   answerOnly: false,
   hintFront: "",
   hintBack: "",
+  imageFront: null,
+  imageBack: null,
 });
 
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
@@ -62,7 +66,16 @@ const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
   for (let index = 0; index < a.length; index += 1) {
     const cardA = a[index];
     const cardB = b[index];
-    if (cardA.id !== cardB.id || cardA.front !== cardB.front) {
+    if (
+      cardA.id !== cardB.id ||
+      cardA.front !== cardB.front ||
+      cardA.flipped !== cardB.flipped ||
+      cardA.answerOnly !== cardB.answerOnly ||
+      (cardA.hintFront ?? "") !== (cardB.hintFront ?? "") ||
+      (cardA.hintBack ?? "") !== (cardB.hintBack ?? "") ||
+      (cardA.imageFront ?? "") !== (cardB.imageFront ?? "") ||
+      (cardA.imageBack ?? "") !== (cardB.imageBack ?? "")
+    ) {
       return false;
     }
     if (cardA.answers.length !== cardB.answers.length) {
@@ -210,6 +223,22 @@ export const useManualCardsForm = (
     [applyManualCardsChange]
   );
 
+  const handleManualCardImageChange = useCallback(
+    (cardId: string, side: "front" | "back", uri: string | null) => {
+      applyManualCardsChange((cards) =>
+        cards.map((card) => {
+          if (card.id !== cardId) return card;
+          return {
+            ...card,
+            imageFront: side === "front" ? uri : card.imageFront ?? null,
+            imageBack: side === "back" ? uri : card.imageBack ?? null,
+          };
+        })
+      );
+    },
+    [applyManualCardsChange]
+  );
+
   const undo = useCallback(() => {
     if (!enableHistory) {
       return;
@@ -243,6 +272,7 @@ export const useManualCardsForm = (
     handleAddCard,
     handleRemoveCard,
     handleToggleFlipped,
+    handleManualCardImageChange,
     canUndo,
     undo,
     clearHistory,

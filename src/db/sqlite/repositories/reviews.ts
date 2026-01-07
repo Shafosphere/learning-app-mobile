@@ -137,6 +137,8 @@ export async function getDueCustomReviewFlashcards(
     backText: string;
     hintFront: string | null;
     hintBack: string | null;
+    imageFront: string | null;
+    imageBack: string | null;
     position: number | null;
     flipped: number;
     answerOnly: number;
@@ -151,6 +153,8 @@ export async function getDueCustomReviewFlashcards(
        cf.back_text     AS backText,
        cf.hint_front    AS hintFront,
        cf.hint_back     AS hintBack,
+       cf.image_front   AS imageFront,
+       cf.image_back    AS imageBack,
        cf.position      AS position,
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
@@ -182,6 +186,8 @@ export async function getDueCustomReviewFlashcards(
         backText: row.backText,
         hintFront: row.hintFront,
         hintBack: row.hintBack,
+        imageFront: row.imageFront,
+        imageBack: row.imageBack,
         answers: [],
         position: row.position,
         flipped: row.flipped === 1,

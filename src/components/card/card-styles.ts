@@ -95,7 +95,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // justifyContent: "center",
   },
   cardSmall: {
-    height: 120,
+    minHeight: 120,
     width: 325,
   },
   cardLarge: {
@@ -213,15 +213,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   topContainer: {
+    flexDirection: "column",
+    width: "100%",
+    paddingLeft: 8,
+    paddingRight: 8,
+    gap: 8,
+  },
+  promptRow: {
     flexDirection: "row",
     alignItems: "center",
     width: "100%",
-    height: "50%",
-    // gap: 8,
-    paddingLeft: 8,
-    paddingRight: 8,
-    // marginBottom: 4,
-    // backgroundColor: colors.my_red,
   },
   cardContentLarge: {
     flex: 1,
@@ -247,6 +248,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "flex-end",
     width: "100%",
     paddingBottom: 14,
+  },
+  inputContainerLargeCorrection: {
+    paddingBottom: 6,
   },
   containerInputLarge: {
     position: "relative",
@@ -289,6 +293,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   cardIconPlaceholder: {
     width: 32,
+  },
+  promptImageWrapper: {
+    width: "100%",
+    maxHeight: 180,
+    aspectRatio: 16 / 9,
+    borderRadius: 12,
+    overflow: "hidden",
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+  },
+  promptImage: {
+    width: "100%",
+    height: "100%",
   },
   introToggle: {
     position: "absolute",

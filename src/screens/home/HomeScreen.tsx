@@ -23,6 +23,10 @@ export default function HomeScreen() {
     router.push("/wiki");
   };
 
+  const goToSupport = () => {
+    router.push("/support");
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.text}>Hejka!</Text>
@@ -38,6 +42,12 @@ export default function HomeScreen() {
           width={140}
         />
         <MyButton text="Pomoc" onPress={goToWiki} width={140} color="my_yellow" />
+        <MyButton
+          text="Zgłoś problem"
+          onPress={goToSupport}
+          width={140}
+          color="my_green"
+        />
       </View>
     </View>
   );

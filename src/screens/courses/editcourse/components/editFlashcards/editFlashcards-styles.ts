@@ -71,6 +71,54 @@ export const useStyles = createThemeStylesHook((colors) => {
     answerRemoveButton: {
       padding: 4,
     },
+    imagesRow: {
+      flexDirection: "row" as const,
+      gap: 12,
+      alignItems: "flex-start" as const,
+    },
+    imageSlot: {
+      flex: 1,
+      gap: 6,
+    },
+    imageLabel: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.paragraph,
+      textTransform: "uppercase" as const,
+      letterSpacing: 0.4,
+    },
+    imagePreview: {
+      height: 90,
+      borderWidth: 1,
+      borderColor: colors.border,
+      borderRadius: 12,
+      backgroundColor: colors.secondBackground,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+      overflow: "hidden" as const,
+    },
+    imagePlaceholder: {
+      color: colors.paragraph,
+      fontSize: 12,
+      fontWeight: "600",
+    },
+    imageThumb: {
+      width: "100%",
+      height: "100%",
+    },
+    imageButtonsRow: {
+      flexDirection: "row" as const,
+      gap: 8,
+    },
+    imageButton: {
+      paddingVertical: 4,
+      paddingHorizontal: 8,
+      borderRadius: 8,
+      backgroundColor: colors.secondBackground,
+      borderWidth: 1,
+      borderColor: colors.border,
+      alignSelf: "flex-start" as const,
+    },
     cardActions: {
       width: 48,
       alignItems: "center" as const,

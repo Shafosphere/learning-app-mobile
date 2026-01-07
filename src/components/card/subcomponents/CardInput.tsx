@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
+import { Image } from "expo-image";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
@@ -15,6 +16,7 @@ type CardInputProps = {
   allowMultilinePrompt: boolean;
   onPromptLayout?: (height: number) => void;
   onInputLayout?: (height: number) => void;
+  promptImageUri?: string | null;
   answer: string;
   setAnswer: (text: string) => void;
   mainInputRef: React.RefObject<TextInput | null>;
@@ -39,6 +41,7 @@ export function CardInput({
   allowMultilinePrompt,
   onPromptLayout,
   onInputLayout,
+  promptImageUri,
   answer,
   setAnswer,
   mainInputRef,
@@ -165,6 +168,16 @@ export function CardInput({
     typoDiff
   ]);
 
+  const imageBlock = promptImageUri ? (
+    <View style={styles.promptImageWrapper}>
+      <Image
+        source={{ uri: promptImageUri }}
+        style={styles.promptImage}
+        contentFit="contain"
+      />
+    </View>
+  ) : null;
+
   const content = (
     <>
       <View
@@ -173,50 +186,54 @@ export function CardInput({
           allowMultilinePrompt && styles.topContainerLarge,
         ]}
       >
-        {shouldMarqueePrompt ? (
-          <View style={styles.promptScroll}>
-            <TextTicker
-              key={promptText}
-              style={promptTextStyle}
-              animationType="auto"
-              duration={marqueeDuration + REPEAT_SPACER_PX}
-              repeatSpacer={REPEAT_SPACER_PX}
-              marqueeDelay={MARQUEE_DELAY_MS}
-              loop
-              useNativeDriver={false}
-              numberOfLines={1}
+        <View style={styles.promptRow}>
+          {shouldMarqueePrompt ? (
+            <View style={styles.promptScroll}>
+              <TextTicker
+                key={promptText}
+                style={promptTextStyle}
+                animationType="auto"
+                duration={marqueeDuration + REPEAT_SPACER_PX}
+                repeatSpacer={REPEAT_SPACER_PX}
+                marqueeDelay={MARQUEE_DELAY_MS}
+                loop
+                useNativeDriver={false}
+                numberOfLines={1}
+              >
+                {promptText}
+              </TextTicker>
+            </View>
+          ) : (
+            <Text
+              style={[
+                styles.cardFont,
+                styles.promptText,
+                allowMultilinePrompt && styles.promptTextMultiline,
+              ]}
+              numberOfLines={allowMultilinePrompt ? undefined : 1}
+              ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
+              onLayout={({ nativeEvent }) => {
+                if (allowMultilinePrompt && onPromptLayout) {
+                  onPromptLayout(nativeEvent.layout.height);
+                }
+              }}
             >
               {promptText}
-            </TextTicker>
-          </View>
-        ) : (
-          <Text
-            style={[
-              styles.cardFont,
-              styles.promptText,
-              allowMultilinePrompt && styles.promptTextMultiline,
-            ]}
-            numberOfLines={allowMultilinePrompt ? undefined : 1}
-            ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
-            onLayout={({ nativeEvent }) => {
-              if (allowMultilinePrompt && onPromptLayout) {
-                onPromptLayout(nativeEvent.layout.height);
-              }
-            }}
-          >
-            {promptText}
-          </Text>
-        )}
-        {canToggleTranslations ? (
-          <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
-            <Octicons
-              name="discussion-duplicate"
-              size={24}
-              color={styles.cardFont.color}
-            />
-          </Pressable>
-        ) : null}
+            </Text>
+          )}
+          {canToggleTranslations ? (
+            <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+              <Octicons
+                name="discussion-duplicate"
+                size={24}
+                color={styles.cardFont.color}
+              />
+            </Pressable>
+          ) : null}
+        </View>
       </View>
+
+      {imageBlock}
 
       {allowMultilinePrompt ? (
         <View

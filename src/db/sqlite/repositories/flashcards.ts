@@ -1,4 +1,5 @@
 import * as SQLite from "expo-sqlite";
+import { deleteImage } from "@/src/services/imageService";
 import { getDB } from "../core";
 import {
   addAnswerIfPresent,
@@ -14,6 +15,8 @@ export interface CustomFlashcardRow {
   backText: string;
   hintFront: string | null;
   hintBack: string | null;
+  imageFront: string | null;
+  imageBack: string | null;
   answers: string[];
   position: number | null;
   flipped: number;
@@ -34,6 +37,8 @@ export interface CustomFlashcardInput {
   answers?: string[];
   hintFront?: string | null;
   hintBack?: string | null;
+  imageFront?: string | null;
+  imageBack?: string | null;
   position?: number | null;
   flipped?: boolean;
   answerOnly?: boolean;
@@ -50,6 +55,8 @@ export async function getCustomFlashcards(
     backText: string;
     hintFront: string | null;
     hintBack: string | null;
+    imageFront: string | null;
+    imageBack: string | null;
     position: number | null;
     flipped: number;
     answerOnly: number;
@@ -64,6 +71,8 @@ export async function getCustomFlashcards(
        cf.back_text      AS backText,
        cf.hint_front     AS hintFront,
        cf.hint_back      AS hintBack,
+       cf.image_front    AS imageFront,
+       cf.image_back     AS imageBack,
        cf.position       AS position,
        cf.flipped        AS flipped,
        cf.answer_only    AS answerOnly,
@@ -93,6 +102,8 @@ export async function getCustomFlashcards(
         backText: row.backText,
         hintFront: row.hintFront,
         hintBack: row.hintBack,
+        imageFront: row.imageFront,
+        imageBack: row.imageBack,
         answers: [],
         position: row.position,
         flipped: row.flipped,
@@ -132,6 +143,17 @@ export async function replaceCustomFlashcardsWithDb(
     courseId,
     count: cards.length,
   });
+  const existingImages = new Set<string>();
+  const newImages = new Set<string>();
+  const imageRows = await db.getAllAsync<{ imageFront: string | null; imageBack: string | null }>(
+    `SELECT image_front AS imageFront, image_back AS imageBack FROM custom_flashcards WHERE course_id = ?;`,
+    courseId
+  );
+  for (const row of imageRows) {
+    if (row.imageFront) existingImages.add(row.imageFront);
+    if (row.imageBack) existingImages.add(row.imageBack);
+  }
+
   await db.execAsync("BEGIN TRANSACTION;");
   const now = Date.now();
   try {
@@ -164,15 +186,22 @@ export async function replaceCustomFlashcardsWithDb(
       const answerOnlyValue =
         card.answerOnly == null ? 0 : card.answerOnly ? 1 : 0;
 
+      const imageFront = card.imageFront ?? null;
+      const imageBack = card.imageBack ?? null;
+      if (imageFront) newImages.add(imageFront);
+      if (imageBack) newImages.add(imageBack);
+
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, hint_front, hint_back, position, flipped, answer_only, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
         card.hintFront ?? null,
         card.hintBack ?? null,
+        imageFront,
+        imageBack,
         position,
         flippedValue, // domyślnie 1 (można odwracać)
         answerOnlyValue,
@@ -202,6 +231,10 @@ export async function replaceCustomFlashcardsWithDb(
 
     await db.execAsync("COMMIT;");
     console.log("[DB] replaceCustomFlashcardsWithDb: committed");
+    const toDelete = [...existingImages].filter((uri) => !newImages.has(uri));
+    for (const uri of toDelete) {
+      await deleteImage(uri);
+    }
   } catch (error) {
     await db.execAsync("ROLLBACK;");
     console.warn(

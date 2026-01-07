@@ -9,6 +9,7 @@ import {
   createEmptyManualCard,
   normalizeAnswers,
   useManualCardsForm,
+  type ManualCard,
 } from "@/src/hooks/useManualCardsForm";
 import {
   ManualCardsEditor,
@@ -19,9 +20,11 @@ import { Asset } from "expo-asset";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import { useStyles } from "./importFlashcards-styles";
 import sampleCsvAsset from "@/assets/data/import.csv";
 
@@ -91,6 +94,7 @@ export default function CustomCourseContentScreen() {
     handleAddCard,
     handleRemoveCard,
     handleToggleFlipped,
+    handleManualCardImageChange,
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
@@ -124,10 +128,156 @@ export default function CustomCourseContentScreen() {
     return deduped;
   };
 
+  const normalizeImageField = (raw: unknown): string | null => {
+    const value = (raw ?? "").toString().trim();
+    return value.length > 0 ? value : null;
+  };
+
+  const buildManualCardsFromRows = async (
+    rows: any[],
+    resolveImage?: (name: string | null) => Promise<string | null>
+  ): Promise<ManualCard[]> => {
+    const cards: ManualCard[] = [];
+    for (let idx = 0; idx < rows.length; idx += 1) {
+      const row = rows[idx];
+      const answers = parseAnswers(row.back);
+      const locked = parseBooleanValue(row.lock);
+      const answerOnly = parseBooleanValue(
+        row.answer_only ?? row.question ?? row.pytanie
+      );
+      const imageFrontName = normalizeImageField(row.image_front ?? row.imageFront);
+      const imageBackName = normalizeImageField(row.image_back ?? row.imageBack);
+      const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
+      const imageBack = resolveImage ? await resolveImage(imageBackName) : null;
+
+      const card: ManualCard = {
+        id: `csv-${idx}`,
+        front: (row.front || "").toString(),
+        answers: answers.length > 0 ? answers : [(row.back || "").toString()],
+        flipped: !locked,
+        answerOnly,
+        hintFront: (row.hint1 ?? row.hint_front ?? "").toString(),
+        hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
+        imageFront,
+        imageBack,
+      };
+
+      if (
+        card.front.trim().length > 0 ||
+        card.answers.some((a) => a.trim().length > 0)
+      ) {
+        cards.push(card);
+      }
+    }
+    return cards;
+  };
+
+  const handleZipImport = async (fileUri: string, fileName?: string | null) => {
+    try {
+      const zipBase64 = await FileSystem.readAsStringAsync(fileUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      const zip = await JSZip.loadAsync(zipBase64, { base64: true });
+      const csvEntry =
+        zip.file("data.csv")?.[0] ??
+        zip.file(/\.csv$/i)?.[0];
+      if (!csvEntry) {
+        setPopup({
+          message: "Brak pliku CSV w archiwum ZIP",
+          color: "angry",
+          duration: 4000,
+        });
+        return;
+      }
+
+      const csvContent = await csvEntry.async("string");
+      const parsed = Papa.parse(csvContent, {
+        header: true,
+        skipEmptyLines: true,
+      });
+      if (parsed.errors.length > 0) {
+        setPopup({
+          message: "Błąd parsowania CSV z ZIP",
+          color: "angry",
+          duration: 4000,
+        });
+        return;
+      }
+
+      const imageCache = new Map<string, string | null>();
+      const resolveZipImage = async (
+        name: string | null
+      ): Promise<string | null> => {
+        if (!name) return null;
+        if (imageCache.has(name)) {
+          return imageCache.get(name) ?? null;
+        }
+        const normalized = name.replace(/^images[\\/]/i, "");
+        const candidates = [
+          `images/${normalized}`,
+          `images\\${normalized}`,
+          normalized,
+        ];
+        let entry: JSZipObject | null = null;
+        for (const candidate of candidates) {
+          const match = zip.file(candidate);
+          if (match && match.length > 0) {
+            entry = match[0];
+            break;
+          }
+        }
+        if (!entry) {
+          imageCache.set(name, null);
+          return null;
+        }
+        try {
+          const base64 = await entry.async("base64");
+          const saved = await importImageFromZip(base64, normalized);
+          imageCache.set(name, saved);
+          return saved;
+        } catch (error) {
+          console.warn("[Import ZIP] Failed to persist image", {
+            name,
+            error,
+          });
+          imageCache.set(name, null);
+          return null;
+        }
+      };
+
+      const cards = await buildManualCardsFromRows(
+        parsed.data as any[],
+        resolveZipImage
+      );
+      if (cards.length === 0) {
+        setPopup({
+          message: "Brak danych w pliku ZIP",
+          color: "angry",
+          duration: 3000,
+        });
+        return;
+      }
+
+      replaceManualCards(cards);
+      setPopup({
+        message: `Zaimportowano ${cards.length} fiszek z ZIP`,
+        color: "calm",
+        duration: 3500,
+      });
+    } catch (error) {
+      console.error("ZIP import error", error);
+      setPopup({
+        message: "Błąd importu ZIP",
+        color: "angry",
+        duration: 4000,
+      });
+    }
+  };
+
   const handleSelectCsv = async () => {
     try {
       const picked = await DocumentPicker.getDocumentAsync({
-        type: ["text/csv", "text/plain", "*/*"], // Allow CSV, plain text, or any file
+        type: ["text/csv", "text/plain", "application/zip", "application/x-zip-compressed", "*/*"], // Allow CSV, ZIP, or any file
         copyToCacheDirectory: true,
       });
       if (picked.canceled || !picked.assets?.[0]) {
@@ -136,6 +286,11 @@ export default function CustomCourseContentScreen() {
       const fileUri = picked.assets[0].uri;
       const fileName = picked.assets[0].name;
       setCsvFileName(fileName);
+      if (fileName?.toLowerCase().endsWith(".zip")) {
+        await handleZipImport(fileUri, fileName);
+        return;
+      }
+
       const csvContent = await FileSystem.readAsStringAsync(fileUri, {
         encoding: FileSystem.EncodingType.UTF8,
       });
@@ -151,24 +306,38 @@ export default function CustomCourseContentScreen() {
         });
         return;
       }
-      const cards = (parsed.data as any[])
-        .map((row, idx) => {
-          const answers = parseAnswers(row.back);
-          const locked = parseBooleanValue(row.lock);
-          const answerOnly = parseBooleanValue(
-            row.answer_only ?? row.question ?? row.pytanie
-          );
-          return {
-            id: `csv-${idx}`,
-            front: (row.front || "").toString(),
-            answers: answers.length > 0 ? answers : [(row.back || "").toString()],
-            flipped: !locked,
-            answerOnly,
-            hintFront: (row.hint1 ?? row.hint_front ?? "").toString(),
-            hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
-          };
-        })
-        .filter((card) => card.front.trim().length > 0 || card.answers.some((a) => a.trim().length > 0));
+
+      const externalResolver = (() => {
+        const cache = new Map<string, string | null>();
+        return async (name: string | null): Promise<string | null> => {
+          if (!name) return null;
+          if (cache.has(name)) {
+            return cache.get(name) ?? null;
+          }
+          if (
+            name.startsWith("file://") ||
+            name.startsWith("content://")
+          ) {
+            try {
+              const saved = await saveImage(name);
+              cache.set(name, saved);
+              return saved;
+            } catch (error) {
+              console.warn("[Import CSV] Failed to persist image", {
+                name,
+                error,
+              });
+            }
+          }
+          cache.set(name, null);
+          return null;
+        };
+      })();
+
+      const cards = await buildManualCardsFromRows(
+        parsed.data as any[],
+        externalResolver
+      );
       if (!cards.length) {
         setPopup({
           message: "Brak danych w pliku CSV",
@@ -299,6 +468,8 @@ export default function CustomCourseContentScreen() {
         hintFront: card.hintFront ?? "",
         hintBack: card.hintBack ?? "",
         answerOnly: card.answerOnly ?? false,
+        imageFront: card.imageFront ?? null,
+        imageBack: card.imageBack ?? null,
       });
       return acc;
     }, []);
@@ -390,10 +561,12 @@ export default function CustomCourseContentScreen() {
                 Podpowiedzi mogą zostać puste. W lock wpisz true/1/tak, jeśli
                 fiszka ma być zablokowana. W answer_only wpisz true/1/tak, jeśli
                 po błędzie użytkownik ma poprawiać tylko odpowiedź (bez
-                przepisywania pytania). W polu
-                back możesz podać kilka odpowiedzi, oddzielając je średnikiem lub
-                kreską | (np. cat; kitty). Możesz też pobrać gotowy szablon CSV
-                do uzupełnienia na komputerze.
+                przepisywania pytania). W polu back możesz podać kilka
+                odpowiedzi, oddzielając je średnikiem lub kreską | (np. cat;
+                kitty). Dodatkowe kolumny image_front / image_back możesz
+                wykorzystać przy imporcie ZIP (pliki w folderze images/ obok
+                data.csv). Możesz też pobrać gotowy szablon CSV do
+                uzupełnienia na komputerze.
               </Text>
               <View style={styles.modeActions}>
                 <MyButton
@@ -430,6 +603,7 @@ export default function CustomCourseContentScreen() {
                 onAddCard={handleAddCard}
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
+                onCardImageChange={handleManualCardImageChange}
               />
             </View>
           )}

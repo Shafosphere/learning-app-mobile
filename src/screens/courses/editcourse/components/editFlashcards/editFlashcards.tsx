@@ -1,9 +1,12 @@
 import { ManualCard } from "@/src/hooks/useManualCardsForm";
+import { saveImage } from "@/src/services/imageService";
+import * as ImagePicker from "expo-image-picker";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { ReactNode } from "react";
 import {
+  Image,
   Pressable,
   Text,
   TextInput,
@@ -37,6 +40,14 @@ export interface ManualCardsEditorStyles {
   cardActionButton: ViewStyle;
   cardActionIcon: TextStyle;
   removeButtonDisabled: ViewStyle;
+  imagesRow: ViewStyle;
+  imageSlot: ViewStyle;
+  imageLabel: TextStyle;
+  imagePreview: ViewStyle;
+  imagePlaceholder: TextStyle;
+  imageThumb: ViewStyle;
+  imageButtonsRow: ViewStyle;
+  imageButton: ViewStyle;
   buttonContainer: ViewStyle;
   manualAddButton: ViewStyle;
   manualAddIcon: TextStyle;
@@ -63,6 +74,11 @@ export interface ManualCardsEditorProps {
   onAddCard?: () => void;
   onRemoveCard?: (cardId: string) => void;
   onToggleFlipped?: (cardId: string) => void;
+  onCardImageChange?: (
+    cardId: string,
+    side: "front" | "back",
+    uri: string | null
+  ) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
 }
 
@@ -87,6 +103,7 @@ export const ManualCardsEditor = ({
   onAddCard,
   onRemoveCard,
   onToggleFlipped,
+  onCardImageChange,
   actionButtons,
 }: ManualCardsEditorProps) => {
   const styles = useStyles();
@@ -126,6 +143,35 @@ export const ManualCardsEditor = ({
     (() => {
       // no-op in display mode
     });
+  const handleCardImageChange =
+    onCardImageChange ??
+    (() => {
+      // no-op in display mode
+    });
+
+  const pickImage = async (cardId: string, side: "front" | "back") => {
+    if (isDisplayMode) return;
+    const result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      quality: 0.8,
+      allowsEditing: false,
+      allowsMultipleSelection: false,
+    });
+    if (result.canceled || !result.assets?.[0]?.uri) {
+      return;
+    }
+    try {
+      const saved = await saveImage(result.assets[0].uri);
+      handleCardImageChange(cardId, side, saved);
+    } catch (error) {
+      console.warn("[ManualCardsEditor] Failed to save picked image", error);
+    }
+  };
+
+  const clearImage = (cardId: string, side: "front" | "back") => {
+    if (isDisplayMode) return;
+    handleCardImageChange(cardId, side, null);
+  };
 
   return (
     <>
@@ -144,6 +190,9 @@ export const ManualCardsEditor = ({
           typeof displayAction?.accessibilityLabel === "function"
             ? displayAction.accessibilityLabel(card, index)
             : displayAction?.accessibilityLabel;
+        const canEditImages = !isDisplayMode && Boolean(onCardImageChange);
+        const shouldShowImagesRow =
+          canEditImages || card.imageFront || card.imageBack;
 
         return (
           <View
@@ -284,6 +333,95 @@ export const ManualCardsEditor = ({
                   );
                 })}
               </View>
+              {shouldShowImagesRow ? (
+                <>
+                  <View style={styles.cardDivider} />
+                  <View style={styles.imagesRow}>
+                    <View style={styles.imageSlot}>
+                      <Text style={styles.imageLabel}>Awers</Text>
+                      <Pressable
+                        onPress={() => pickImage(card.id, "front")}
+                        disabled={!canEditImages}
+                        hitSlop={6}
+                        style={({ pressed }) => [
+                          styles.imagePreview,
+                          pressed && canEditImages ? { opacity: 0.85 } : null,
+                        ]}
+                      >
+                        {card.imageFront ? (
+                          <Image
+                            source={{ uri: card.imageFront }}
+                            style={styles.imageThumb}
+                            contentFit="cover"
+                          />
+                        ) : (
+                          <Text style={styles.imagePlaceholder}>
+                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                          </Text>
+                        )}
+                      </Pressable>
+                      {card.imageFront && canEditImages ? (
+                        <View style={styles.imageButtonsRow}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Usuń obraz awersu dla fiszki ${index + 1}`}
+                            hitSlop={8}
+                            onPress={() => clearImage(card.id, "front")}
+                            style={styles.imageButton}
+                          >
+                            <Feather
+                              name="trash-2"
+                              size={16}
+                              color={styles.cardActionIcon?.color ?? "black"}
+                            />
+                          </Pressable>
+                        </View>
+                      ) : null}
+                    </View>
+                    <View style={styles.imageSlot}>
+                      <Text style={styles.imageLabel}>Rewers</Text>
+                      <Pressable
+                        onPress={() => pickImage(card.id, "back")}
+                        disabled={!canEditImages}
+                        hitSlop={6}
+                        style={({ pressed }) => [
+                          styles.imagePreview,
+                          pressed && canEditImages ? { opacity: 0.85 } : null,
+                        ]}
+                      >
+                        {card.imageBack ? (
+                          <Image
+                            source={{ uri: card.imageBack }}
+                            style={styles.imageThumb}
+                            contentFit="cover"
+                          />
+                        ) : (
+                          <Text style={styles.imagePlaceholder}>
+                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                          </Text>
+                        )}
+                      </Pressable>
+                      {card.imageBack && canEditImages ? (
+                        <View style={styles.imageButtonsRow}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Usuń obraz rewersu dla fiszki ${index + 1}`}
+                            hitSlop={8}
+                            onPress={() => clearImage(card.id, "back")}
+                            style={styles.imageButton}
+                          >
+                            <Feather
+                              name="trash-2"
+                              size={16}
+                              color={styles.cardActionIcon?.color ?? "black"}
+                            />
+                          </Pressable>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                </>
+              ) : null}
             </View>
             {(!isDisplayMode || (isDisplayMode && resolvedDisplayIcon)) && (
               <View style={styles.cardActions}>
