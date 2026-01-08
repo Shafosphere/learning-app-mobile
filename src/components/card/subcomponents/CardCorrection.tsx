@@ -1,6 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useMemo } from "react";
 import { Image } from "expo-image";
+import { useMemo } from "react";
 import {
   Platform,
   Pressable,
@@ -32,6 +32,8 @@ type CardCorrectionProps = {
   correctionRewers: string;
   answerOnly: boolean;
   allowMultilinePrompt: boolean;
+  onPromptLayout?: (height: number) => void;
+  onInputLayout?: (height: number) => void;
   input1Ref: React.RefObject<TextInput | null>;
   input2Ref: React.RefObject<TextInput | null>;
   input1ScrollRef: React.RefObject<ScrollView | null>;
@@ -67,6 +69,8 @@ export function CardCorrection({
   correctionRewers,
   answerOnly,
   allowMultilinePrompt,
+  onPromptLayout,
+  onInputLayout,
   input1Ref,
   input2Ref,
   input1ScrollRef,
@@ -91,7 +95,6 @@ export function CardCorrection({
   input2LayoutWidth,
 }: CardCorrectionProps) {
   const styles = useStyles();
-  const trimTrailingSpaces = (value: string) => value.replace(/ +$/, "");
   const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
     () => [styles.cardFont, styles.promptMarqueeText],
@@ -171,7 +174,14 @@ export function CardCorrection({
   );
 
   const promptImage = promptImageUri ? (
-    <View style={styles.promptImageWrapper}>
+    <View
+      style={styles.promptImageWrapper}
+      onLayout={({ nativeEvent }) => {
+        if (allowMultilinePrompt && onPromptLayout) {
+          onPromptLayout(nativeEvent.layout.height);
+        }
+      }}
+    >
       <Image
         source={{ uri: promptImageUri }}
         style={styles.promptImage}
@@ -185,21 +195,26 @@ export function CardCorrection({
       style={[
         styles.topContainer,
         allowMultilinePrompt && styles.topContainerLarge,
+        // Center image if present
+        promptImageUri && allowMultilinePrompt && { justifyContent: 'center' }
       ]}
     >
-      <View style={styles.promptRow}>
-        {promptContent}
-        {canToggleTranslations ? (
-          <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
-            <Octicons
-              name="discussion-duplicate"
-              size={24}
-              color={styles.cardFont.color}
-            />
-          </Pressable>
-        ) : null}
-      </View>
-      {promptImage}
+      {promptImageUri ? (
+        promptImage
+      ) : (
+        <View style={styles.promptRow}>
+          {promptContent}
+          {canToggleTranslations ? (
+            <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+              <Octicons
+                name="discussion-duplicate"
+                size={24}
+                color={styles.cardFont.color}
+              />
+            </Pressable>
+          ) : null}
+        </View>
+      )}
     </View>
   );
 
@@ -297,15 +312,14 @@ export function CardCorrection({
             value={correction.input2}
             onChangeText={(t) => {
               const adjusted = applyPlaceholderCasing(t, correctionRewers);
-              const trimmed = trimTrailingSpaces(adjusted);
               const previousValue = previousCorrectionInput2.current;
               const shouldFocusPrevious =
                 !answerOnly &&
                 Platform.OS === "android" &&
                 previousValue.length === 1 &&
-                trimmed === "";
-              previousCorrectionInput2.current = trimmed;
-              wrongInputChange(2, trimmed);
+                adjusted.length === 0;
+              previousCorrectionInput2.current = adjusted;
+              wrongInputChange(2, adjusted);
               if (shouldFocusPrevious) {
                 focusWithDelay(input1Ref);
               }
@@ -348,7 +362,7 @@ export function CardCorrection({
     </View>
   );
 
-  if (answerOnly && allowMultilinePrompt) {
+  if (allowMultilinePrompt) {
     return (
       <View style={styles.cardContentLarge}>
         {promptBlock}
@@ -357,8 +371,14 @@ export function CardCorrection({
             styles.inputContainerLarge,
             styles.inputContainerLargeCorrection,
           ]}
+          onLayout={({ nativeEvent }) => {
+            if (onInputLayout) {
+              onInputLayout(nativeEvent.layout.height);
+            }
+          }}
         >
-          {input2Block}
+          {answerOnly ? input2Block : input1Block}
+          {!answerOnly ? input2Block : null}
         </View>
       </View>
     );

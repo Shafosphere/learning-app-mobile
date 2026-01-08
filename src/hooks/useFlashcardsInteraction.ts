@@ -61,13 +61,22 @@ export function useFlashcardsInteraction({
   });
   const { activeCustomCourseId, ignoreDiacriticsInSpellcheck } = useSettings();
 
+  const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
+    if (!card) return false;
+    if (card.answerOnly) return true;
+    const hasTextPrompt = Boolean(card.text?.trim());
+    const hasImagePrompt = Boolean(card.imageFront || card.imageBack);
+    return !hasTextPrompt && hasImagePrompt;
+  }, []);
+
   const reversed = useMemo(() => {
     if (!activeBox || !selectedItem) return false;
+    if (isAnswerOnlyCard(selectedItem)) return false;
     const shouldFlip =
       activeCustomCourseId == null ? true : selectedItem.flipped;
     // Oficjalne kursy (brak activeCustomCourseId) zawsze się odwracają.
     return shouldFlip ? reversedBoxes.includes(activeBox) : false;
-  }, [activeBox, activeCustomCourseId, reversedBoxes, selectedItem]);
+  }, [activeBox, activeCustomCourseId, reversedBoxes, selectedItem, isAnswerOnlyCard]);
 
   const shuffleList = useCallback((items: WordWithTranslations[]) => {
     const arr = [...items];
@@ -359,13 +368,14 @@ export function useFlashcardsInteraction({
         }, delay);
       } else {
         setResult(false);
+        const answerOnly = isAnswerOnlyCard(wordForCheck);
         setCorrection({
           cardId: wordForCheck.id,
           awers: wordForCheck.text,
           rewers: wordForCheck.translations[0] ?? "",
           input1: "",
           input2: "",
-          answerOnly: wordForCheck.answerOnly ?? false,
+          answerOnly,
           mode: "demote",
         });
       }
@@ -383,6 +393,7 @@ export function useFlashcardsInteraction({
       selectedItem,
       setBoxes,
       moveTranslationToFront,
+      isAnswerOnlyCard,
     ]
   );
 
@@ -543,6 +554,7 @@ export function useFlashcardsInteraction({
     }
 
     const firstTranslation = selectedItem.translations[0] ?? "";
+    const answerOnly = isAnswerOnlyCard(selectedItem);
 
     setCorrection((prev) => {
       const isSameIntroCard =
@@ -558,7 +570,7 @@ export function useFlashcardsInteraction({
         rewers: nextRewers,
         input1: isSameIntroCard ? prev.input1 : "",
         input2: isSameIntroCard ? prev.input2 : "",
-        answerOnly: selectedItem.answerOnly ?? false,
+        answerOnly,
         mode: "intro",
       };
     });
@@ -571,6 +583,7 @@ export function useFlashcardsInteraction({
     selectedItem,
     setAnswer,
     setResult,
+    isAnswerOnlyCard,
   ]);
 
   return {

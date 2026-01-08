@@ -3,6 +3,7 @@ import type { CustomFlashcardRecord } from "@/src/db/sqlite/db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import type { SQLiteDatabase } from "expo-sqlite";
 import { deleteImage, saveImage } from "@/src/services/imageService";
 import type { CustomCourseExport, UserDataExport } from "./exportUserData";
 
@@ -34,7 +35,7 @@ const persistImageIfAvailable = async (
 };
 
 async function restoreCustomCourse(
-    db: any,
+    db: SQLiteDatabase,
     courseExport: CustomCourseExport
 ): Promise<{ flashcardsCreated: number; reviewsRestored: number }> {
     const { course, flashcards, reviews } = courseExport;
@@ -125,7 +126,7 @@ async function restoreCustomCourse(
 }
 
 async function restoreOfficialCourse(
-    db: any,
+    db: SQLiteDatabase,
     courseExport: CustomCourseExport
 ): Promise<{
     flashcardsCreated: number;

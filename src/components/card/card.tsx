@@ -136,20 +136,31 @@ export default function Card({
 
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[translations] ?? "";
-  const promptText = reversed ? rewers : awers;
+  const promptImageFront = selectedItem?.imageFront ?? null;
+  const promptImageBack = selectedItem?.imageBack ?? null;
+  const hasTextPrompt = Boolean(awers.trim());
+  const hasImagePrompt = Boolean(promptImageFront || promptImageBack);
+  const answerOnly =
+    (selectedItem?.answerOnly ?? false) || (!hasTextPrompt && hasImagePrompt);
+
+  // Force answerOnly logic: if true, card can only be shown Front -> Back
+  const effectiveReversed = answerOnly ? false : reversed;
+
   const promptImageUri = selectedItem
-    ? reversed
-      ? selectedItem.imageBack ?? null
-      : selectedItem.imageFront ?? null
+    ? effectiveReversed
+      ? promptImageBack
+      : promptImageFront
     : null;
+  const promptText = effectiveReversed ? rewers : awers;
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : correction?.rewers ?? "";
-  const answerOnly = correction?.answerOnly ?? selectedItem?.answerOnly ?? false;
+
   const expectsHangulAnswer = useMemo(() => {
-    if (!reversed) return false;
+    if (!effectiveReversed) return false;
     const expected = selectedItem?.text ?? "";
     return HANGUL_CHAR_REGEX.test(expected);
-  }, [reversed, selectedItem?.text]);
+  }, [effectiveReversed, selectedItem?.text]);
+
   const expectsHangulCorrectionAwers = useMemo(() => {
     const value = correction?.awers ?? "";
     if (!value) return false;
@@ -174,10 +185,10 @@ export default function Card({
   const hintActionsAnim = useRef(new Animated.Value(0)).current;
   const currentHint = useMemo(() => {
     if (!selectedItem) return null;
-    return reversed
+    return effectiveReversed
       ? selectedItem.hintBack ?? null
       : selectedItem.hintFront ?? null;
-  }, [reversed, selectedItem]);
+  }, [effectiveReversed, selectedItem]);
   const shouldMarqueeHint = useMemo(() => {
     const len = currentHint?.length ?? 0;
     return len > 28;
@@ -185,6 +196,10 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode)
   );
+
+  // Decide if we should use large layout: either global setting OR image is present
+  const useLargeLayout = flashcardsCardSize === "large" || hasImagePrompt;
+
   const input1ContentWidth = useMemo(() => {
     const measured = Math.max(input1TextWidth, input1ExpectedWidth);
     const padded = measured + INPUT_HORIZONTAL_PADDING * 2;
@@ -242,8 +257,7 @@ export default function Card({
 
   const handleCorrectionInput1Change = useCallback(
     (t: string) => {
-      const trimmed = trimTrailingSpaces(t);
-      wrongInputChange(1, trimmed);
+      wrongInputChange(1, t);
       if (correction?.awers) {
         const normalizeString = (value: string) => {
           let base = value.toLowerCase();
@@ -253,8 +267,9 @@ export default function Card({
           return base;
         };
         const matches =
-          normalizeString(trimmed) === normalizeString(correction.awers) &&
-          trimmed.length === correction.awers.length;
+          normalizeString(trimTrailingSpaces(t)) ===
+            normalizeString(correction.awers) &&
+          trimTrailingSpaces(t).length === correction.awers.length;
         if (matches) {
           setHangulTarget(null);
           setIsCorrectionInput1Focused(false);
@@ -272,7 +287,6 @@ export default function Card({
       setHangulTarget,
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
-      trimTrailingSpaces,
     ]
   );
 
@@ -468,7 +482,7 @@ export default function Card({
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
     hintDialogVisible.current = false;
-  }, [currentHint, reversed, selectedItem?.id]);
+  }, [currentHint, effectiveReversed, selectedItem?.id]);
 
   function normalizeChar(char: string | undefined): string {
     if (!char) return "";
@@ -533,19 +547,19 @@ export default function Card({
       }
       const nextFront = applyToBoth
         ? value
-        : reversed
+        : effectiveReversed
           ? selectedItem.hintFront ?? null
           : value;
       const nextBack = applyToBoth
         ? value
-        : reversed
+        : effectiveReversed
           ? value
           : selectedItem.hintBack ?? null;
       onHintUpdate(selectedItem.id, nextFront, nextBack);
       setIsEditingHint(false);
       setHintDraft(value ?? "");
     },
-    [hintDraft, onHintUpdate, reversed, selectedItem]
+    [hintDraft, onHintUpdate, effectiveReversed, selectedItem]
   );
 
   const finishHintEditing = useCallback(() => {
@@ -626,7 +640,7 @@ export default function Card({
     // Find best match among translations (or front text if reversed)
     let bestMatch: string | null = null;
 
-    if (reversed) {
+    if (effectiveReversed) {
       // Answer should match 'awers' (text)
       const target = selectedItem.text;
       if (norm(target) === userAnswer) return null; // Perfect match
@@ -664,7 +678,7 @@ export default function Card({
 
     // Let's use normalization for finding the diff.
     return calculateTypoDiff(userAnswer, norm(bestMatch));
-  }, [result, selectedItem, answer, reversed, ignoreDiacriticsInSpellcheck]);
+  }, [result, selectedItem, answer, effectiveReversed, ignoreDiacriticsInSpellcheck]);
 
   function showCardContent(layoutHandlers?: {
     onPromptLayout?: (height: number) => void;
@@ -679,7 +693,9 @@ export default function Card({
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           answerOnly={answerOnly}
-          allowMultilinePrompt={flashcardsCardSize === "large"}
+          allowMultilinePrompt={useLargeLayout}
+          onPromptLayout={layoutHandlers?.onPromptLayout}
+          onInputLayout={layoutHandlers?.onInputLayout}
           input1Ref={correctionInput1Ref}
           input2Ref={correctionInput2Ref}
           input1ScrollRef={input1ScrollRef}
@@ -705,11 +721,11 @@ export default function Card({
         />
       );
     }
-    if (selectedItem && selectedItem.text) {
+    if (selectedItem && (hasTextPrompt || hasImagePrompt)) {
       return (
         <CardInput
           promptText={promptText}
-          allowMultilinePrompt={flashcardsCardSize === "large"}
+          allowMultilinePrompt={useLargeLayout}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
           promptImageUri={promptImageUri}
@@ -760,7 +776,7 @@ export default function Card({
         selectedItem={selectedItem}
         onHintUpdate={onHintUpdate}
       />
-      {flashcardsCardSize === "large" ? (
+      {useLargeLayout ? (
         <LargeCardContainer
           cardStateStyle={cardStateStyle}
           hasContent={Boolean(selectedItem)}

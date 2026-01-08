@@ -8,6 +8,7 @@ import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
 import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 import javascriptCsv from "@/assets/data/Javascript.csv";
+import flagiDemoCsv from "@/assets/data/flagi_demo.csv";
 
 export type OfficialPackDef = {
   slug: string;
@@ -18,6 +19,7 @@ export type OfficialPackDef = {
   sourceLang?: string;
   targetLang?: string;
   smallFlag?: string;
+  imageMap?: Record<string, any>;
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
   categoryId?: string;
@@ -148,5 +150,24 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     isMini: true,
     categoryId: "programming",
     csvAsset: javascriptCsv,
+  },
+  {
+    slug: "flagi_demo",
+    name: "Flagi demo",
+    iconId: "globe",
+    iconColor: "#EAB308",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "geography",
+    csvAsset: flagiDemoCsv,
+    imageMap: {
+      "PL.png": require("@/assets/flags/PL.png"),
+      "KR.png": require("@/assets/flags/KR.png"),
+      "ES.png": require("@/assets/flags/ES.png"),
+      "PM.png": require("@/assets/flags/PM.png"),
+    },
   },
 ];

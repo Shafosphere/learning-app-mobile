@@ -1,4 +1,5 @@
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { saveImage } from "@/src/services/imageService";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system/legacy";
 import * as SQLite from "expo-sqlite";
@@ -43,7 +44,24 @@ const extractHint = (primary?: string, secondary?: string): string | null => {
     return value.length > 0 ? value : null;
 };
 
-async function readCsvAsset(assetModule: any): Promise<
+const resolveImageFromMap = async (
+    imageName: string | null,
+    imageMap?: Record<string, any>
+): Promise<string | null> => {
+    if (!imageName || !imageMap) return null;
+    const mod = imageMap[imageName];
+    if (!mod) return null;
+    const asset = Asset.fromModule(mod);
+    await asset.downloadAsync();
+    const uri = asset.localUri ?? asset.uri;
+    if (!uri) return null;
+    return saveImage(uri);
+};
+
+async function readCsvAsset(
+    assetModule: any,
+    imageMap?: Record<string, any>
+): Promise<
     {
         frontText: string;
         backText: string;
@@ -52,6 +70,8 @@ async function readCsvAsset(assetModule: any): Promise<
         flipped: boolean;
         hintFront: string | null;
         hintBack: string | null;
+        imageFront: string | null;
+        imageBack: string | null;
     }[]
 > {
     console.log("[DB] readCsvAsset: create asset from module");
@@ -69,11 +89,13 @@ async function readCsvAsset(assetModule: any): Promise<
         skipEmptyLines: true,
     });
     console.log("[DB] readCsvAsset: parsed rows=", data?.length ?? 0);
-    const cards = data
-        .map((row, idx) => {
+    const cards = await Promise.all(
+        data.map(async (row, idx) => {
             const front = (row.front ?? "").trim();
             const backRaw = (row.back ?? "").trim();
             const answers = splitBackTextIntoAnswers(backRaw);
+            const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
+            const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
             const hintFront = extractHint(row.hint1, row.hint_front);
             const hintBack = extractHint(row.hint2, row.hint_back);
             const locked = parseBooleanValue(row.lock);
@@ -89,16 +111,34 @@ async function readCsvAsset(assetModule: any): Promise<
                 answerOnly,
                 hintFront,
                 hintBack,
+                imageFront: imageFrontName
+                    ? await resolveImageFromMap(
+                        imageFrontName.toString().trim(),
+                        imageMap
+                    )
+                    : null,
+                imageBack: imageBackName
+                    ? await resolveImageFromMap(
+                        imageBackName.toString().trim(),
+                        imageMap
+                    )
+                    : null,
             };
         })
-        .filter((c) => c.frontText.length > 0 || c.answers.length > 0);
-    return cards;
+    );
+    return cards.filter(
+        (c) =>
+            c.frontText.length > 0 ||
+            c.answers.length > 0 ||
+            c.imageFront != null ||
+            c.imageBack != null
+    );
 }
 
 async function importOfficialPackIfEmpty(
     db: SQLite.SQLiteDatabase,
     courseId: number,
-    assetModule: any
+    pack: { csvAsset: any; imageMap?: Record<string, any>; slug: string }
 ) {
     console.log("[DB] importOfficialPackIfEmpty: check courseId=", courseId);
     const row = await db.getFirstAsync<{ cnt: number }>(
@@ -111,8 +151,8 @@ async function importOfficialPackIfEmpty(
         console.log("[DB] importOfficialPackIfEmpty: skipping import (already has cards)");
         return;
     }
-    console.log("[DB] importOfficialPackIfEmpty: reading asset");
-    const cards = await readCsvAsset(assetModule);
+    console.log("[DB] importOfficialPackIfEmpty: reading asset", pack.slug);
+    const cards = await readCsvAsset(pack.csvAsset, pack.imageMap);
     console.log("[DB] importOfficialPackIfEmpty: cards prepared=", cards.length);
     if (cards.length === 0) return;
     console.log("[DB] importOfficialPackIfEmpty: replacing flashcards");
@@ -135,7 +175,7 @@ export async function seedOfficialPacksWithDb(
                 def.iconColor,
                 def.reviewsEnabled ?? true
             );
-            await importOfficialPackIfEmpty(db, id, def.csvAsset);
+            await importOfficialPackIfEmpty(db, id, def);
         } catch (e) {
             console.warn(`[DB] Failed to seed official pack ${def.slug}`, e);
         }
