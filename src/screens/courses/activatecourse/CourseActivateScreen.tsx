@@ -254,13 +254,14 @@ export default function CourseActivateScreen() {
 
   const renderOfficialCourseSection = (
     title: string,
-    list: OfficialCourseListItem[]
+    list: OfficialCourseListItem[],
+    showTitle: boolean = true
   ) => {
     if (!list.length) return null;
 
     return (
       <View style={styles.groupCourses}>
-        <Text style={styles.groupSubtitle}>{title}</Text>
+        {showTitle ? <Text style={styles.groupSubtitle}>{title}</Text> : null}
         {list.map((course) => {
           const isHighlighted =
             committedCourse?.type === "custom" &&
@@ -335,8 +336,10 @@ export default function CourseActivateScreen() {
                       const miniOfficial = group.official.filter(
                         (course) => course.isMini !== false
                       );
+                      const showRegular = regularOfficial.length > 0;
+                      const showMini = miniOfficial.length > 0;
                       const hasOfficial =
-                        regularOfficial.length > 0 || miniOfficial.length > 0;
+                        showRegular || showMini;
                       if (!hasOfficial) {
                         return null;
                       }
@@ -410,11 +413,13 @@ export default function CourseActivateScreen() {
                             <>
                               {renderOfficialCourseSection(
                                 "Kursy",
-                                regularOfficial
+                                regularOfficial,
+                                showRegular
                               )}
                               {renderOfficialCourseSection(
                                 "Mini kursy",
-                                miniOfficial
+                                miniOfficial,
+                                showRegular && showMini
                               )}
                             </>
                           ) : null}

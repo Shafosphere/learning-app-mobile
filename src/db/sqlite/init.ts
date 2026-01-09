@@ -55,7 +55,7 @@ const resolveImageFromMap = async (
     await asset.downloadAsync();
     const uri = asset.localUri ?? asset.uri;
     if (!uri) return null;
-    return saveImage(uri);
+    return saveImage(uri, asset.type);
 };
 
 async function readCsvAsset(

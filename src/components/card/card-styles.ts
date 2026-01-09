@@ -116,7 +116,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderBottomColor: colors.border,
     borderBottomWidth: 3,
     borderStyle: "solid",
-    width: "50%",
+    width: "100%",
+    height: 52,
     padding: 0,
     // backgroundColor: colors.my_green,
     paddingLeft: 8,
@@ -250,7 +251,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 14,
   },
   inputContainerLargeCorrection: {
-    paddingBottom: 6,
+    paddingBottom: 14,
   },
   containerInputLarge: {
     position: "relative",

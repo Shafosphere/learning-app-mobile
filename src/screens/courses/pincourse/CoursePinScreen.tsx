@@ -295,8 +295,10 @@ export default function CoursePinScreen() {
             const miniOfficialPacks = group.officialPacks.filter(
               (pack) => pack.isMini !== false
             );
+            const showRegular = regularOfficialPacks.length > 0;
+            const showMini = miniOfficialPacks.length > 0;
             const hasOfficial =
-              regularOfficialPacks.length > 0 || miniOfficialPacks.length > 0;
+              showRegular || showMini;
             if (!hasOfficial) {
               return null;
             }
@@ -361,7 +363,7 @@ export default function CoursePinScreen() {
 
                 {hasOfficial ? (
                   <>
-                    {regularOfficialPacks.length ? (
+                    {showRegular ? (
                       <>
                         <Text style={styles.subTitle}>Kursy</Text>
                         <View style={styles.cardsList}>
@@ -370,9 +372,11 @@ export default function CoursePinScreen() {
                       </>
                     ) : null}
 
-                    {miniOfficialPacks.length ? (
+                    {showMini ? (
                       <>
-                        <Text style={styles.subTitle}>Mini kursy</Text>
+                        {showRegular ? (
+                          <Text style={styles.subTitle}>Mini kursy</Text>
+                        ) : null}
                         <View style={styles.cardsList}>
                           {miniOfficialPacks.map(renderOfficialPackCard)}
                         </View>

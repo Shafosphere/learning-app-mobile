@@ -23,7 +23,16 @@ const ensureImagesDir = async (): Promise<string> => {
 
 const extractExtension = (source?: string | null): string => {
   if (!source) return "jpg";
-  const match = /\.(\w{2,5})($|\?)/i.exec(source);
+  const normalized = source.trim();
+  if (!normalized) return "jpg";
+
+  const plain = /^([a-z0-9]{2,5})$/i.exec(normalized)?.[1];
+  if (plain) {
+    const lower = plain.toLowerCase();
+    return lower === "jpeg" ? "jpg" : lower;
+  }
+
+  const match = /\.(\w{2,5})($|\?)/i.exec(normalized);
   const ext = match?.[1]?.toLowerCase();
   if (!ext) return "jpg";
   if (ext === "jpeg") return "jpg";
@@ -47,7 +56,10 @@ export const isManagedImageUri = (uri?: string | null): boolean => {
   return uri.startsWith(getImagesDir());
 };
 
-export async function saveImage(uri: string): Promise<string> {
+export async function saveImage(
+  uri: string,
+  preferredExtension?: string | null
+): Promise<string> {
   if (!uri) {
     throw new Error("Nieprawidłowy URI obrazka.");
   }
@@ -61,7 +73,7 @@ export async function saveImage(uri: string): Promise<string> {
     assertBelowSizeLimit(info.size, "Obraz");
   }
 
-  const filename = buildFileName(uri);
+  const filename = buildFileName(preferredExtension ?? uri);
   const target = `${dir}${filename}`;
   await FileSystem.copyAsync({ from: uri, to: target });
   return target;

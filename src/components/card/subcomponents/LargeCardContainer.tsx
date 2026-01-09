@@ -54,11 +54,11 @@ export default function LargeCardContainer({
     if (!hasContent) {
       return SMALL_CARD_HEIGHT;
     }
-    if (showCorrectionInputs) {
-      return lastStableHeight.current ?? baseCardHeight;
-    }
-    return baseCardHeight;
-  }, [hasContent, showCorrectionInputs, baseCardHeight]);
+    // Keep card height driven by current measurements so the "correction" state
+    // matches the neutral one. Use the last stable value only as a fallback
+    // while measurements are being gathered.
+    return baseCardHeight ?? lastStableHeight.current ?? SMALL_CARD_HEIGHT;
+  }, [hasContent, baseCardHeight]);
 
   const handlePromptLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
@@ -71,11 +71,11 @@ export default function LargeCardContainer({
   }, []);
 
   useEffect(() => {
-    if (!hasContent || showCorrectionInputs) {
+    if (!hasContent) {
       return;
     }
     lastStableHeight.current = baseCardHeight;
-  }, [baseCardHeight, hasContent, showCorrectionInputs]);
+  }, [baseCardHeight, hasContent]);
 
   useEffect(() => {
     animatedCardHeight.stopAnimation();

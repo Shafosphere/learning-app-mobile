@@ -466,6 +466,9 @@ export function useFlashcardsInteraction({
 
   useEffect(() => {
     if (!activeBox) return;
+    // Avoid double-selecting a new card when a transition is already queued
+    if (queueNext) return;
+
     const list = boxes[activeBox];
     if (!list || list.length === 0) {
       if (selectedItem != null) {
@@ -481,7 +484,7 @@ export function useFlashcardsInteraction({
     if (!itemStillAvailable) {
       selectNextWord(activeBox);
     }
-  }, [activeBox, boxes, selectNextWord, selectedItem]);
+  }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
 
   const resetInteractionState = useCallback(() => {
     setActiveBox(null);
