@@ -197,9 +197,9 @@ export default function Flashcards() {
         setShouldCelebrate(true);
         triggerQuote({
           trigger: "quote_box_five_win",
-          category: "win",
-          probability: 0.3,
-          cooldownMs: 10 * 60 * 1000,
+          category: "win_mastery",
+          probability: 1, // Mastery moment should always feel rewarding?
+          cooldownMs: 5 * 60 * 1000,
         });
       });
     },
@@ -271,6 +271,25 @@ export default function Flashcards() {
         });
       }
 
+      const isFast = elapsed !== null && elapsed < 3000;
+
+      if (isFast) {
+        triggerQuote({
+          trigger: "quote_win_fast",
+          category: "win_fast",
+          cooldownMs: 2 * 60 * 1000,
+          probability: 0.6
+        });
+      } else {
+        // Standard win
+        triggerQuote({
+          trigger: "quote_win_standard",
+          category: "win_standard",
+          cooldownMs: 3 * 60 * 1000,
+          probability: 0.3
+        });
+      }
+
       if (elapsed !== null && elapsed > LONG_THINK_MS) {
         triggerQuote({
           trigger: "quote_long_think",
@@ -300,7 +319,7 @@ export default function Flashcards() {
       triggerQuote({
         trigger: "quote_loss_random",
         category: "loss",
-        probability: 0.1,
+        probability: 0.2, // Increased slightly per plan considerations, user said low prio but consistency helps
         cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
       });
     }

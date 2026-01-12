@@ -1,8 +1,12 @@
 export type QuoteCategory =
-  | "win"
+  | "win_standard"
+  | "win_fast"
+  | "win_mastery"
   | "loss"
-  | "startup"
-  | "general"
+  | "startup_morning"
+  | "startup_day"
+  | "startup_evening"
+  | "startup_night"
   | "streak"
   | "comeback"
   | "long_think"
@@ -10,144 +14,205 @@ export type QuoteCategory =
   | "easter"
   | "return"
   | "hint"
-  | "first_time";
+  | "first_time"
+  | "general";
 
 export interface Quote {
   text: string;
   author?: string;
   category: QuoteCategory;
+  /**
+   * If set, this quote is part of a strict sequence.
+   * The context will try to show sequenceIndex: 0, then 1, then 2...
+   * Resets if cooldown expires or sequence finishes (looping depends on logic).
+   */
+  sequenceIndex?: number;
 }
 
 export const QUOTES: Quote[] = [
-  // Startup (domyślny cytat startowy)
+  // --- Startup Time-Based ---
+  // Morning (05:00 - 12:00)
   {
-    text: "hejo, co tam? :3",
-    category: "startup",
+    text: "Dzień dobry! Kawa już była?",
+    category: "startup_morning",
   },
   {
-    text: "Możemy zaczynać?",
-    category: "startup",
+    text: "Wstawaj szkoda dnia! :D",
+    category: "startup_morning",
   },
   {
-    text: "Cześć :)",
-    category: "startup",
+    text: "Słoneczko świeci (chyba), czas na naukę.",
+    category: "startup_morning",
   },
   {
-    text: "Hejooo",
-    category: "startup",
+    text: "Pora obudzić ten mózg.",
+    category: "startup_morning",
+  },
+
+  // Day (12:00 - 18:00)
+  {
+    text: "Hejooo, co tam?",
+    category: "startup_day",
   },
   {
-    text: "Dzień dobry, cześc i czołem!",
-    category: "startup",
+    text: "Gotowy na powtóreczki?",
+    category: "startup_day",
   },
   {
-    text: "I kto za to płaci?",
-    category: "startup",
+    text: "Działamy, działamy!",
+    category: "startup_day",
   },
   {
-    text: "OwO",
-    category: "startup",
+    text: "Szybka sesyjka?",
+    category: "startup_day",
   },
-  // First time (pierwsze uruchomienie)
+
+  // Evening (18:00 - 22:00)
+  {
+    text: "Wieczorne zakuwanie? Szanuję.",
+    category: "startup_evening",
+  },
+  {
+    text: "Dobry wieczór :)",
+    category: "startup_evening",
+  },
+  {
+    text: "Relaks przy fiszkach?",
+    category: "startup_evening",
+  },
+
+  // Night (22:00 - 05:00)
+  {
+    text: "Jeszcze nie śpisz? :o",
+    category: "startup_night",
+  },
+  {
+    text: "Nocna zmiana widzę.",
+    category: "startup_night",
+  },
+  {
+    text: "Sowy górą!",
+    category: "startup_night",
+  },
+  {
+    text: "Tylko nie siedź do rana...",
+    category: "startup_night",
+  },
+
+  // --- First Time ---
   {
     text: "Uczyć się to nic innego jak przypominać sobie",
-    category: "first_time",
-  },
-  {
-    text: "Nie uczysz się po to, żeby wiedzieć. Uczysz się, żeby móc.",
-    category: "first_time",
-  },
-  {
-    text: "Trudne dziś oznacza łatwiejsze jutro.",
     category: "first_time",
   },
   {
     text: "Każdy ekspert był kiedyś początkujący.",
     category: "first_time",
   },
+
+  // --- Return (long break) ---
   {
-    text: "Jedna strona dziennie to 365 stron rocznie.",
-    category: "first_time",
-  },
-  {
-    text: "Zmęczenie to sygnał, że pracujesz. Nie że masz przestać.”",
-    category: "first_time",
-  },
-  // Return after break (>6h przerwy)
-  {
-    text: "cooo?! nie ja nie śpię!",
+    text: "O, wróciłeś! Tęskniłem.",
     category: "return",
   },
   {
-    text: "hej hej, witam ponownie",
+    text: "Dawno cię nie było!",
     category: "return",
   },
-  // Win (ogólne sukcesy)
+
+  // --- Wins ---
+  // Win Fast (<3s)
   {
-    text: "yeeeeeeeey",
-    category: "win",
+    text: "Speedrun?!",
+    category: "win_fast",
   },
   {
-    text: "Sigma",
-    category: "win",
+    text: "Ale szybko!",
+    category: "win_fast",
+  },
+  {
+    text: "Błyskawica!",
+    category: "win_fast",
+  },
+  {
+    text: "EZ",
+    category: "win_fast",
+  },
+
+  // Win Mastery (Box 5)
+  {
+    text: "Sigma.",
+    category: "win_mastery",
+  },
+  {
+    text: "Mistrzostwo świata!",
+    category: "win_mastery",
+  },
+  {
+    text: "Król/Królowa fiszek!",
+    category: "win_mastery",
+  },
+
+  // Win Standard
+  {
+    text: "Tak jest!",
+    category: "win_standard",
+  },
+  {
+    text: "Dobra robota.",
+    category: "win_standard",
+  },
+  {
+    text: "Piąteczka! :D",
+    category: "win_standard",
   },
   {
     text: ":D",
-    category: "win",
+    category: "win_standard",
   },
   {
-    text: "piąteczka! :D",
-    category: "win",
+    text: "Lecisz z tym!",
+    category: "win_standard",
   },
+
+  // --- Streak ---
   {
-    text: "bly bly bly",
-    category: "win",
-  },
-  // Streak (>=5 poprawnych z rzędu)
-  {
-    text: "ale lecisz :o",
+    text: "Ale seria! :o",
     category: "streak",
   },
   {
-    text: "ale urwał",
+    text: "Nie do zatrzymania!",
     category: "streak",
   },
   {
-    text: "Hue hue hue hue",
+    text: "On fire! 🔥",
     category: "streak",
   },
-  // Comeback (trafienie po serii błędów)
+
+  // --- Comeback ---
   {
-    text: "no w konću",
+    text: "No w końcu!",
     category: "comeback",
   },
   {
-    text: "Da się? Da się!",
+    text: "Wracamy do gry!",
     category: "comeback",
   },
   {
-    text: "Wraaaacamy!! :3",
+    text: "Odbicie od dna!",
     category: "comeback",
   },
+
+  // --- Loss ---
   {
-    text: "a żeś mi teraz zaimponował",
-    category: "comeback",
-  },
-  // Loss / Failure (nieudana próba)
-  {
-    text: "zaraza",
+    text: "Oj...",
     category: "loss",
   },
   {
-    text: "oj :c",
+    text: "Zdarza się najlepszym.",
     category: "loss",
   },
   {
-    text: "z dwojga złego lepiej w tę stronę",
-    category: "loss",
-  },
-  {
-    text: "nieeee!",
+    text: "Następnym razem pójdzie lepiej.",
     category: "loss",
   },
   {
@@ -155,89 +220,92 @@ export const QUOTES: Quote[] = [
     category: "loss",
   },
   {
-    text: "ale szpont poleciał",
+    text: "Głowa do góry.",
     category: "loss",
   },
-  // Long think (poprawna odpowiedź po dłuższym zastanowieniu)
+
+  // --- Long Think ---
   {
-    text: "hmmmmm",
+    text: "Hmmmmm...",
     category: "long_think",
   },
   {
-    text: "tik tak tik tak...",
+    text: "Ważne że poprawnie.",
     category: "long_think",
   },
   {
-    text: "ziew",
+    text: "Uff, udało się.",
     category: "long_think",
   },
-  // Hint / repeated fails (kilka błędów na tej samej fiszce)
+
+  // --- Hints ---
   {
-    text: "Może wpisz sobie podpowiedź w '...' miejscu? ",
+    text: "Może wpisz sobie podpowiedź?",
     category: "hint",
   },
   {
-    text: "Historia zatacza koło...",
+    text: "Znowu to samo? :(",
     category: "hint",
   },
   {
-    text: "Znowuuuu???",
+    text: "To już nie błąd, to znajomy.",
     category: "hint",
   },
-  {
-    text: "Może zrób przerwe? Pozmywaj naczynia czy coś.",
-    category: "hint",
-  },
-  {
-    text: "To już nie błąd, to znajomy",
-    category: "hint",
-  },
-  {
-    text: "Przerabialiśmy to. I co? I nic.",
-    category: "hint",
-  },
-  // Box spam (szybkie wielokrotne klikanie tego samego boxa)
+
+  // --- Box Spam (Sequential) ---
   {
     text: "co tak go klikasz?",
     category: "box_spam",
+    sequenceIndex: 0,
   },
   {
     text: "zostaw mojego braciaka! :c",
     category: "box_spam",
+    sequenceIndex: 1,
   },
   {
     text: "przestań go klikać!",
     category: "box_spam",
+    sequenceIndex: 2,
   },
   {
     text: "ZOSTAW GO!",
     category: "box_spam",
+    sequenceIndex: 3,
+  },
+  {
+    text: "...",
+    category: "box_spam",
+    sequenceIndex: 4,
+  },
+  {
+    text: "serio, przestań.",
+    category: "box_spam",
+    sequenceIndex: 5,
   },
 
-  // Easter (wielokrotne tapnięcia w logo w navbarze)
+  // --- Easter ---
   {
-    text: "oślepłem! oślepłem! czy jeszcze kiedys zagram na skrzypcach?!",
+    text: "OwO",
     category: "easter",
   },
   {
-    text: "przestań! >:c",
+    text: "ała!",
     category: "easter",
   },
   {
-    text: "dośc! >:c",
+    text: "przestań tykać logo >:<",
     category: "easter",
   },
   {
-    text: ">:c",
+    text: "I kto za to płaci?",
     category: "easter",
   },
+
+  // --- General Fallback ---
   {
-    text: "nudzi ci sie? >:c",
-    category: "easter",
-  },
-  // General / Fallback
-  {
-    text: "",
+    text: "Powodzenia!",
     category: "general",
   },
 ];
+

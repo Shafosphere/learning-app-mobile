@@ -2,17 +2,22 @@ import Popup, { PopupColor } from "@/src/components/popup/popup";
 import { QuoteCategory } from "@/src/constants/quotes";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import React, { useEffect, useMemo, useRef } from "react";
-import { StyleSheet, TouchableWithoutFeedback, View } from "react-native";
+import { StyleSheet, View } from "react-native";
 
 const QUOTE_DURATION_MS = 3500;
 const MIN_VISIBLE_MS_BEFORE_DISMISS = 600;
 
 const CATEGORY_COLORS: Record<QuoteCategory, PopupColor> = {
-    win: "calm",
+    win_standard: "calm",
+    win_fast: "calm",
+    win_mastery: "calm",
     streak: "calm",
     comeback: "calm",
     loss: "angry",
-    startup: "disoriented",
+    startup_morning: "disoriented",
+    startup_day: "disoriented",
+    startup_evening: "disoriented",
+    startup_night: "disoriented",
     first_time: "disoriented",
     return: "disoriented",
     long_think: "disoriented",
@@ -41,25 +46,15 @@ export default function QuoteBubble() {
 
     const popupColor = CATEGORY_COLORS[quote.category] ?? "disoriented";
 
-    const handleDismiss = () => {
-        const now = Date.now();
-        if (now - lastShowTsRef.current < MIN_VISIBLE_MS_BEFORE_DISMISS) {
-            return;
-        }
-        hideQuote();
-    };
-
     return (
-        <TouchableWithoutFeedback onPress={handleDismiss}>
-            <View style={[StyleSheet.absoluteFill, { zIndex: 1000 }]}>
-                <Popup
-                    key={popupMessage}
-                    message={popupMessage}
-                    color={popupColor}
-                    duration={QUOTE_DURATION_MS}
-                    onHide={hideQuote}
-                />
-            </View>
-        </TouchableWithoutFeedback>
+        <View pointerEvents="box-none" style={[StyleSheet.absoluteFill, { zIndex: 1000 }]}>
+            <Popup
+                key={popupMessage}
+                message={popupMessage}
+                color={popupColor}
+                duration={QUOTE_DURATION_MS}
+                onHide={hideQuote}
+            />
+        </View>
     );
 }

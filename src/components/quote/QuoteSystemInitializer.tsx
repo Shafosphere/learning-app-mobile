@@ -1,7 +1,7 @@
 import { useQuote } from "@/src/contexts/QuoteContext";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { AppState } from "react-native";
 import { useEffect, useRef } from "react";
+import { AppState } from "react-native";
 
 const LAST_ACTIVE_TS_KEY = "@quote_last_active_ts_v1";
 const FIRST_TIME_KEY = "@quote_first_time_shown_v1";
@@ -55,9 +55,22 @@ export default function QuoteSystemInitializer() {
                     });
                 } else {
                     startupTimeout = setTimeout(() => {
+                        const hour = new Date().getHours();
+                        let category: "startup_morning" | "startup_day" | "startup_evening" | "startup_night" = "startup_day";
+
+                        if (hour >= 5 && hour < 12) {
+                            category = "startup_morning";
+                        } else if (hour >= 12 && hour < 18) {
+                            category = "startup_day";
+                        } else if (hour >= 18 && hour < 22) {
+                            category = "startup_evening";
+                        } else {
+                            category = "startup_night";
+                        }
+
                         triggerQuote({
                             trigger: "quote_startup",
-                            category: "startup",
+                            category: category,
                             respectGlobalCooldown: false,
                             cooldownMs: 60 * 60 * 1000, // max raz na godzinę
                         });
