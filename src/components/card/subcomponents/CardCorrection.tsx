@@ -1,6 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { Image } from "expo-image";
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import {
   Platform,
   Pressable,
@@ -122,6 +122,8 @@ export function CardCorrection({
     [estimatedPromptWidth]
   );
 
+  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
+
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
     const chars = value.split("");
@@ -184,8 +186,16 @@ export function CardCorrection({
     >
       <Image
         source={{ uri: promptImageUri }}
-        style={styles.promptImage}
+        style={[
+          styles.promptImage,
+          { aspectRatio: imageAspectRatio ?? 1.5 },
+        ]}
         contentFit="contain"
+        onLoad={({ source }) => {
+          if (source?.width && source?.height) {
+            setImageAspectRatio(source.width / source.height);
+          }
+        }}
       />
     </View>
   ) : null;
