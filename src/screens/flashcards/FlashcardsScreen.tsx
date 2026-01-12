@@ -30,6 +30,7 @@ import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { useStyles } from "./FlashcardsScreen-styles";
+import { TrueFalseActionsAnimated } from "./TrueFalseActions";
 
 const STREAK_TARGET = 5;
 const STREAK_COOLDOWN_MS = 15 * 60 * 1000;
@@ -98,6 +99,7 @@ function mapCustomCardToWord(
     hintBack: card.hintBack,
     imageFront: card.imageFront ?? null,
     imageBack: card.imageBack ?? null,
+    type: (card.type as "text" | "true_false") || "text",
   };
   console.log("Converted to WordWithTranslations:", result);
   return result;
@@ -611,6 +613,16 @@ export default function Flashcards() {
     !loadError &&
     customCards.length > 0;
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
+  const handleTrueFalseAnswer = useCallback(
+    (value: boolean) => {
+      const choice = value ? "true" : "false";
+      setAnswer(choice);
+      confirm(choice, choice);
+    },
+    [confirm, setAnswer]
+  );
+  const shouldShowTrueFalseActions =
+    selectedItem?.type === "true_false" && shouldShowBoxes && !correction;
 
   useEffect(() => {
     resetInteractionState();
@@ -691,6 +703,11 @@ export default function Flashcards() {
           />
         )
       ) : null}
+
+      <TrueFalseActionsAnimated
+        visible={shouldShowTrueFalseActions}
+        onAnswer={handleTrueFalseAnswer}
+      />
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

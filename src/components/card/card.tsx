@@ -23,9 +23,10 @@ import {
 import { useStyles } from "./card-styles";
 import { CardActions } from "./subcomponents/CardActions";
 import { CardCorrection } from "./subcomponents/CardCorrection";
-import { CardHint } from "./subcomponents/CardHint";
 import { CardInput } from "./subcomponents/CardInput";
+import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
+import { CardTrueFalse } from "./subcomponents/CardTrueFalse";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
@@ -51,7 +52,7 @@ type CardProps = {
   downloadDisabled?: boolean;
   introMode?: boolean;
   setCorrectionRewers?: (value: string) => void;
-  confirm: (selectedTranslation?: string) => void;
+  confirm: (selectedTranslation?: string, answerOverride?: string) => void;
   onHintUpdate?: (
     cardId: number,
     hintFront: string | null,
@@ -113,6 +114,7 @@ export default function Card({
     "main" | "correction1" | null
   >(null);
   const noopTextChange = useCallback((_: string) => { }, []);
+  const noopTrueFalseAnswer = useCallback((_: boolean) => { }, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -140,8 +142,9 @@ export default function Card({
   const promptImageBack = selectedItem?.imageBack ?? null;
   const hasTextPrompt = Boolean(awers.trim());
   const hasImagePrompt = Boolean(promptImageFront || promptImageBack);
+  const type = selectedItem?.type ?? "text";
   const answerOnly =
-    (selectedItem?.answerOnly ?? false) || (!hasTextPrompt && hasImagePrompt);
+    (selectedItem?.answerOnly ?? false) || (!hasTextPrompt && hasImagePrompt) || type === "true_false";
 
   // Force answerOnly logic: if true, card can only be shown Front -> Back
   const effectiveReversed = answerOnly ? false : reversed;
@@ -268,7 +271,7 @@ export default function Card({
         };
         const matches =
           normalizeString(trimTrailingSpaces(t)) ===
-            normalizeString(correction.awers) &&
+          normalizeString(correction.awers) &&
           trimTrailingSpaces(t).length === correction.awers.length;
         if (matches) {
           setHangulTarget(null);
@@ -401,6 +404,8 @@ export default function Card({
     selectedItem,
     setAnswer,
     answerOnly,
+    type,
+    showCorrectionInputs,
   ]);
 
   // Achievements integration
@@ -721,7 +726,18 @@ export default function Card({
         />
       );
     }
-    if (selectedItem && (hasTextPrompt || hasImagePrompt)) {
+    if (selectedItem?.type === "true_false") {
+      return (
+        <CardTrueFalse
+          promptText={promptText}
+          promptImageUri={promptImageUri}
+          allowMultilinePrompt={useLargeLayout}
+          onAnswer={noopTrueFalseAnswer}
+          showButtons={false}
+        />
+      );
+    }
+    if (selectedItem) {
       return (
         <CardInput
           promptText={promptText}
@@ -730,6 +746,7 @@ export default function Card({
           onInputLayout={layoutHandlers?.onInputLayout}
           promptImageUri={promptImageUri}
           answer={answer}
+          setAnswer={handleAnswerChange}
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}
           handleConfirm={handleConfirm}
@@ -739,7 +756,6 @@ export default function Card({
           canToggleTranslations={canToggleTranslations}
           next={next}
           hangulTarget={hangulTarget}
-          setAnswer={handleAnswerChange}
           typoDiff={typoDiff}
         />
       );

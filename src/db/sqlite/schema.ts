@@ -89,6 +89,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       position    INTEGER,
       flipped     INTEGER NOT NULL DEFAULT 1,
       answer_only INTEGER NOT NULL DEFAULT 0,
+      type        TEXT NOT NULL DEFAULT 'text',
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -142,6 +143,12 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     "custom_flashcards",
     "answer_only",
     "INTEGER NOT NULL DEFAULT 0"
+  );
+  await ensureColumn(
+    db,
+    "custom_flashcards",
+    "type",
+    "TEXT NOT NULL DEFAULT 'text'"
   );
 
   // Official pack metadata (idempotent, safe for existing DBs)

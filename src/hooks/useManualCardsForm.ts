@@ -6,6 +6,7 @@ export type ManualCard = {
   answers: string[];
   flipped: boolean;
   answerOnly?: boolean;
+  type?: "text" | "true_false";
   hintFront?: string | null;
   hintBack?: string | null;
   imageFront?: string | null;
@@ -30,6 +31,7 @@ export const createEmptyManualCard = (id?: string): ManualCard => ({
   answers: [""],
   flipped: true, // domyślnie włączone
   answerOnly: false,
+  type: "text",
   hintFront: "",
   hintBack: "",
   imageFront: null,
@@ -71,6 +73,7 @@ const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
       cardA.front !== cardB.front ||
       cardA.flipped !== cardB.flipped ||
       cardA.answerOnly !== cardB.answerOnly ||
+      cardA.type !== cardB.type ||
       (cardA.hintFront ?? "") !== (cardB.hintFront ?? "") ||
       (cardA.hintBack ?? "") !== (cardB.hintBack ?? "") ||
       (cardA.imageFront ?? "") !== (cardB.imageFront ?? "") ||

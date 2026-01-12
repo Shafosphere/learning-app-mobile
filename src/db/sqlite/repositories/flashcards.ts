@@ -1,5 +1,5 @@
-import * as SQLite from "expo-sqlite";
 import { deleteImage } from "@/src/services/imageService";
+import * as SQLite from "expo-sqlite";
 import { getDB } from "../core";
 import {
   addAnswerIfPresent,
@@ -21,6 +21,7 @@ export interface CustomFlashcardRow {
   position: number | null;
   flipped: number;
   answerOnly: number;
+  type: string;
   createdAt: number;
   updatedAt: number;
 }
@@ -29,6 +30,7 @@ export interface CustomFlashcardRecord
   extends Omit<CustomFlashcardRow, "flipped" | "answerOnly"> {
   flipped: boolean;
   answerOnly: boolean;
+  type: string;
 }
 
 export interface CustomFlashcardInput {
@@ -42,6 +44,7 @@ export interface CustomFlashcardInput {
   position?: number | null;
   flipped?: boolean;
   answerOnly?: boolean;
+  type?: "text" | "true_false";
 }
 
 export async function getCustomFlashcards(
@@ -60,6 +63,7 @@ export async function getCustomFlashcards(
     position: number | null;
     flipped: number;
     answerOnly: number;
+    type: string;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -76,6 +80,7 @@ export async function getCustomFlashcards(
        cf.position       AS position,
        cf.flipped        AS flipped,
        cf.answer_only    AS answerOnly,
+       cf.type           AS type,
        cf.created_at     AS createdAt,
        cf.updated_at     AS updatedAt,
        cfa.answer_text   AS answerText
@@ -108,6 +113,7 @@ export async function getCustomFlashcards(
         position: row.position,
         flipped: row.flipped,
         answerOnly: row.answerOnly,
+        type: row.type,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       };
@@ -185,6 +191,7 @@ export async function replaceCustomFlashcardsWithDb(
         card.flipped == null ? 1 : card.flipped ? 1 : 0;
       const answerOnlyValue =
         card.answerOnly == null ? 0 : card.answerOnly ? 1 : 0;
+      const typeValue = card.type || "text";
 
       const imageFront = card.imageFront ?? null;
       const imageBack = card.imageBack ?? null;
@@ -193,8 +200,8 @@ export async function replaceCustomFlashcardsWithDb(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, type, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
@@ -205,6 +212,7 @@ export async function replaceCustomFlashcardsWithDb(
         position,
         flippedValue, // domyślnie 1 (można odwracać)
         answerOnlyValue,
+        typeValue,
         now,
         now
       );

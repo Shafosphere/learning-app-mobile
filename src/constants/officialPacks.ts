@@ -10,6 +10,7 @@ import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.
 import javascriptCsv from "@/assets/data/Javascript.csv";
 import flagiDemoCsv from "@/assets/data/flagi_demo.csv";
 import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
+import trueFalseTestCsv from "@/assets/data/true_false_test.csv";
 
 export type OfficialPackDef = {
   slug: string;
@@ -151,6 +152,15 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     isMini: true,
     categoryId: "programming",
     csvAsset: javascriptCsv,
+  },
+  {
+    slug: "true_false_demo",
+    name: "Prawda / Fałsz",
+    iconId: "help-circle",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    isMini: true,
+    csvAsset: trueFalseTestCsv,
   },
   {
     slug: "flagi_europy",

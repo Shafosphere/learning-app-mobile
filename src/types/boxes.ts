@@ -8,6 +8,7 @@ export interface WordWithTranslations {
   hintBack?: string | null;
   imageFront?: string | null;
   imageBack?: string | null;
+  type?: "text" | "true_false";
 }
 
 export interface BoxesState {

@@ -255,11 +255,12 @@ export function useFlashcardsInteraction({
   );
 
   const confirm = useCallback(
-    (selectedTranslation?: string) => {
+    (selectedTranslation?: string, answerOverride?: string) => {
       if (activeBox === "boxZero") {
         return;
       }
       if (!selectedItem) return;
+      const answerToUse = answerOverride ?? answer;
 
       const reorderedTranslations = moveTranslationToFront(
         selectedItem.translations,
@@ -286,8 +287,8 @@ export function useFlashcardsInteraction({
       }
 
       const ok = reversed
-        ? checkSpelling(answer, wordForCheck.text)
-        : wordForCheck.translations.some((t) => checkSpelling(answer, t));
+        ? checkSpelling(answerToUse, wordForCheck.text)
+        : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
       const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
       // Log learning event for analytics (flashcards)
       if (activeCustomCourseId != null) {
@@ -302,7 +303,7 @@ export function useFlashcardsInteraction({
       if (ok) {
         if (!reversed && activeBox && wordForCheck.translations.length > 1) {
           const matched = wordForCheck.translations.find((t) =>
-            checkSpelling(answer, t)
+            checkSpelling(answerToUse, t)
           );
           if (matched) {
             const matchedIndex = wordForCheck.translations.findIndex(
@@ -347,7 +348,7 @@ export function useFlashcardsInteraction({
           return v;
         };
 
-        const userAnswer = normalize(answer);
+        const userAnswer = normalize(answerToUse);
         let isPerfect = false;
 
         if (reversed) {

@@ -1,3 +1,4 @@
+import sampleCsvAsset from "@/assets/data/import.csv";
 import MyButton from "@/src/components/button/button";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -15,6 +16,7 @@ import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Asset } from "expo-asset";
 import * as DocumentPicker from "expo-document-picker";
@@ -24,9 +26,7 @@ import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
 import { useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
-import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import { useStyles } from "./importFlashcards-styles";
-import sampleCsvAsset from "@/assets/data/import.csv";
 
 type AddMode = "csv" | "manual";
 
@@ -106,6 +106,18 @@ export default function CustomCourseContentScreen() {
     const normalized = value.toString().trim().toLowerCase();
     return TRUE_VALUES.has(normalized);
   };
+  const isBooleanText = (value: string): boolean => {
+    const normalized = value.toLowerCase();
+    return (
+      TRUE_VALUES.has(normalized) ||
+      normalized === "false" ||
+      normalized === "no" ||
+      normalized === "nie" ||
+      normalized === "n" ||
+      normalized === "unlocked" ||
+      value === "0"
+    );
+  };
 
   const parseAnswers = (raw: unknown): string[] => {
     const normalized = (raw ?? "").toString().trim();
@@ -140,7 +152,19 @@ export default function CustomCourseContentScreen() {
     const cards: ManualCard[] = [];
     for (let idx = 0; idx < rows.length; idx += 1) {
       const row = rows[idx];
-      const answers = parseAnswers(row.back);
+      const trueFalseRaw =
+        row.is_true ?? row.isTrue ?? row.czy_prawda ?? row.czyPrawda;
+      const hasTrueFalseFlag =
+        trueFalseRaw != null &&
+        trueFalseRaw.toString().trim().length > 0;
+      const answers = hasTrueFalseFlag
+        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+        : parseAnswers(row.back);
+      const isBoolean = hasTrueFalseFlag
+        ? true
+        : answers.length > 0 && answers.every((a) => isBooleanText(a));
+
+      const type = isBoolean ? "true_false" : "text";
       const locked = parseBooleanValue(row.lock);
       const answerOnly = parseBooleanValue(
         row.answer_only ?? row.question ?? row.pytanie
@@ -160,6 +184,7 @@ export default function CustomCourseContentScreen() {
         hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
         imageFront,
         imageBack,
+        type,
       };
 
       if (
@@ -178,9 +203,8 @@ export default function CustomCourseContentScreen() {
         encoding: FileSystem.EncodingType.Base64,
       });
       const zip = await JSZip.loadAsync(zipBase64, { base64: true });
-      const csvEntry =
-        zip.file("data.csv")?.[0] ??
-        zip.file(/\.csv$/i)?.[0];
+      const csvFile = zip.file("data.csv");
+      const csvEntry = csvFile || zip.file(/\.csv$/i)?.[0];
       if (!csvEntry) {
         setPopup({
           message: "Brak pliku CSV w archiwum ZIP",
@@ -221,8 +245,8 @@ export default function CustomCourseContentScreen() {
         let entry: JSZipObject | null = null;
         for (const candidate of candidates) {
           const match = zip.file(candidate);
-          if (match && match.length > 0) {
-            entry = match[0];
+          if (match) {
+            entry = match;
             break;
           }
         }
@@ -442,16 +466,19 @@ export default function CustomCourseContentScreen() {
     }
 
     const trimmedCards = manualCards.reduce<
-        {
-          frontText: string;
-          backText: string;
-          answers: string[];
-          position: number;
-          flipped: boolean;
-          hintFront?: string | null;
-          hintBack?: string | null;
-          answerOnly?: boolean;
-        }[]
+      {
+        frontText: string;
+        backText: string;
+        answers: string[];
+        position: number;
+        flipped: boolean;
+        hintFront?: string | null;
+        hintBack?: string | null;
+        answerOnly?: boolean;
+        imageFront?: string | null;
+        imageBack?: string | null;
+        type?: "text" | "true_false";
+      }[]
     >((acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
@@ -470,6 +497,7 @@ export default function CustomCourseContentScreen() {
         answerOnly: card.answerOnly ?? false,
         imageFront: card.imageFront ?? null,
         imageBack: card.imageBack ?? null,
+        type: card.type,
       });
       return acc;
     }, []);
@@ -565,8 +593,10 @@ export default function CustomCourseContentScreen() {
                 odpowiedzi, oddzielając je średnikiem lub kreską | (np. cat;
                 kitty). Dodatkowe kolumny image_front / image_back możesz
                 wykorzystać przy imporcie ZIP (pliki w folderze images/ obok
-                data.csv). Możesz też pobrać gotowy szablon CSV do
-                uzupełnienia na komputerze.
+                data.csv). Dla fiszek PRAWDA/FAŁSZ dodaj kolumnę is_true (alias:
+                czy_prawda) z wartością true/false — obecność tej kolumny
+                ustawia typ karty na true/false. Możesz też pobrać gotowy
+                szablon CSV do uzupełnienia na komputerze.
               </Text>
               <View style={styles.modeActions}>
                 <MyButton

@@ -21,6 +21,10 @@ type CsvRow = {
     answer_only?: string | number | boolean;
     question?: string | number | boolean;
     pytanie?: string | number | boolean;
+    is_true?: string | number | boolean;
+    isTrue?: string | number | boolean;
+    czy_prawda?: string | number | boolean;
+    czyPrawda?: string | number | boolean;
 };
 
 const TRUE_VALUES = new Set([
@@ -37,6 +41,18 @@ const parseBooleanValue = (value: unknown): boolean => {
     if (value == null) return false;
     const normalized = value.toString().trim().toLowerCase();
     return TRUE_VALUES.has(normalized);
+};
+const isBooleanText = (value: string): boolean => {
+    const normalized = value.toLowerCase();
+    return (
+        TRUE_VALUES.has(normalized) ||
+        normalized === "false" ||
+        normalized === "no" ||
+        normalized === "nie" ||
+        normalized === "n" ||
+        normalized === "unlocked" ||
+        value === "0"
+    );
 };
 
 const extractHint = (primary?: string, secondary?: string): string | null => {
@@ -72,6 +88,7 @@ async function readCsvAsset(
         hintBack: string | null;
         imageFront: string | null;
         imageBack: string | null;
+        type?: "text" | "true_false";
     }[]
 > {
     console.log("[DB] readCsvAsset: create asset from module");
@@ -93,7 +110,20 @@ async function readCsvAsset(
         data.map(async (row, idx) => {
             const front = (row.front ?? "").trim();
             const backRaw = (row.back ?? "").trim();
-            const answers = splitBackTextIntoAnswers(backRaw);
+            const trueFalseRaw =
+                (row as any).is_true ??
+                (row as any).isTrue ??
+                (row as any).czy_prawda ??
+                (row as any).czyPrawda;
+            const hasTrueFalseFlag =
+                trueFalseRaw != null &&
+                trueFalseRaw.toString().trim().length > 0;
+            const answers = hasTrueFalseFlag
+                ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+                : splitBackTextIntoAnswers(backRaw);
+            const isBoolean = hasTrueFalseFlag
+                ? true
+                : answers.length > 0 && answers.every((a) => isBooleanText(a));
             const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
             const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
             const hintFront = extractHint(row.hint1, row.hint_front);
@@ -111,6 +141,7 @@ async function readCsvAsset(
                 answerOnly,
                 hintFront,
                 hintBack,
+                type: isBoolean ? "true_false" : "text",
                 imageFront: imageFrontName
                     ? await resolveImageFromMap(
                         imageFrontName.toString().trim(),
