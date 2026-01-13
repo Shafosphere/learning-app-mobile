@@ -63,6 +63,7 @@ export function useFlashcardsInteraction({
 
   const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
     if (!card) return false;
+    if (card.type === "true_false") return true;
     if (card.answerOnly) return true;
     const hasTextPrompt = Boolean(card.text?.trim());
     const hasImagePrompt = Boolean(card.imageFront || card.imageBack);

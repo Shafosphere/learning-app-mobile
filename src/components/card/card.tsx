@@ -58,6 +58,7 @@ type CardProps = {
     hintFront: string | null,
     hintBack: string | null
   ) => void;
+  hideActions?: boolean;
 };
 
 export default function Card({
@@ -74,6 +75,7 @@ export default function Card({
   introMode = false,
   setCorrectionRewers,
   onHintUpdate,
+  hideActions = false,
 }: CardProps) {
   const styles = useStyles();
   const {
@@ -764,6 +766,7 @@ export default function Card({
   }
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
+  const showCardActions = !(hideActions || selectedItem?.type === "true_false");
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -835,6 +838,7 @@ export default function Card({
         handleConfirm={handleConfirm}
         onDownload={onDownload}
         downloadDisabled={downloadDisabled}
+        hidden={!showCardActions}
       />
     </View>
   );

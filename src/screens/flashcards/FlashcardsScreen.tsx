@@ -28,7 +28,8 @@ import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useStyles } from "./FlashcardsScreen-styles";
 import { TrueFalseActionsAnimated } from "./TrueFalseActions";
 
@@ -357,6 +358,12 @@ export default function Flashcards() {
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const totalCards = customCards.length;
+  const courseHasOnlyTrueFalse = useMemo(
+    () =>
+      customCards.length > 0 &&
+      customCards.every((card) => card.type === "true_false"),
+    [customCards]
+  );
   const trackedIds = useMemo(() => {
     const ids = new Set<number>();
     for (const list of Object.values(boxes)) {
@@ -622,7 +629,12 @@ export default function Flashcards() {
     [confirm, setAnswer]
   );
   const shouldShowTrueFalseActions =
-    selectedItem?.type === "true_false" && shouldShowBoxes && !correction;
+    (courseHasOnlyTrueFalse || selectedItem?.type === "true_false") &&
+    shouldShowBoxes &&
+    !correction;
+  const addButtonDisabled = downloadDisabled;
+  const shouldShowFloatingAdd =
+    shouldShowBoxes && (courseHasOnlyTrueFalse || selectedItem?.type === "true_false");
 
   useEffect(() => {
     resetInteractionState();
@@ -674,6 +686,7 @@ export default function Flashcards() {
         downloadDisabled={downloadDisabled}
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
+        hideActions={courseHasOnlyTrueFalse}
       />
     );
   }
@@ -685,23 +698,35 @@ export default function Flashcards() {
       {cardSection}
 
       {shouldShowBoxes ? (
-        boxesLayout === "classic" ? (
-          <Boxes
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            hideBoxZero={!boxZeroEnabled}
-            onBoxLongPress={handleBoxLongPress}
-          />
-        ) : (
-          <BoxesCarousel
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            hideBoxZero={!boxZeroEnabled}
-            onBoxLongPress={handleBoxLongPress}
-          />
-        )
+        <View style={styles.boxesWrapper}>
+          {shouldShowFloatingAdd ? (
+            <Pressable
+              style={styles.addButton}
+              onPress={downloadData}
+              disabled={addButtonDisabled}
+              accessibilityLabel="Dodaj nowe fiszki do pudełek"
+            >
+              <Ionicons name="add" size={26} color="#0F172A" />
+            </Pressable>
+          ) : null}
+          {boxesLayout === "classic" ? (
+            <Boxes
+              boxes={boxes}
+              activeBox={activeBox}
+              handleSelectBox={handleSelectBox}
+              hideBoxZero={!boxZeroEnabled}
+              onBoxLongPress={handleBoxLongPress}
+            />
+          ) : (
+            <BoxesCarousel
+              boxes={boxes}
+              activeBox={activeBox}
+              handleSelectBox={handleSelectBox}
+              hideBoxZero={!boxZeroEnabled}
+              onBoxLongPress={handleBoxLongPress}
+            />
+          )}
+        </View>
       ) : null}
 
       <TrueFalseActionsAnimated
