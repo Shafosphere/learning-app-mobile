@@ -1,4 +1,5 @@
-import { Switch, Text, View } from "react-native";
+import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
 
 type SwitchColors = {
   thumb: string;
@@ -15,6 +16,11 @@ type Props = {
   onToggleAutoflow: (value: boolean) => void;
   reviewsEnabled: boolean;
   onToggleReviews: (value: boolean) => void;
+  skipCorrectionEnabled: boolean;
+  onToggleSkipCorrection: (value: boolean) => void;
+  skipCorrectionLocked?: boolean;
+  cardSize: FlashcardsCardSize;
+  onSelectCardSize: (value: FlashcardsCardSize) => void;
 };
 
 export function CourseSettingsSection({
@@ -26,7 +32,13 @@ export function CourseSettingsSection({
   onToggleAutoflow,
   reviewsEnabled,
   onToggleReviews,
+  skipCorrectionEnabled,
+  onToggleSkipCorrection,
+  skipCorrectionLocked = false,
+  cardSize,
+  onSelectCardSize,
 }: Props) {
+  const cardSizeStyles = localStyles(switchColors);
   const {
     sectionGroup,
     sectionLabel,
@@ -89,6 +101,114 @@ export function CourseSettingsSection({
           thumbColor={switchColors.thumb}
         />
       </View>
+
+      <View style={toggleRow}>
+        <View style={toggleTextWrapper}>
+          <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
+          <Text style={toggleSubtitle}>
+            Po złej odpowiedzi od razu pokaż następną fiszkę.
+          </Text>
+        </View>
+        <Switch
+          value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+          onValueChange={skipCorrectionLocked ? undefined : onToggleSkipCorrection}
+          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
+          thumbColor={switchColors.thumb}
+          disabled={skipCorrectionLocked}
+        />
+      </View>
+
+      <View style={toggleRow}>
+        <View style={toggleTextWrapper}>
+          <Text style={toggleTitle}>Rozmiar fiszki</Text>
+          <Text style={toggleSubtitle}>
+            Zmień wielkość karty tylko dla tego kursu.
+          </Text>
+        </View>
+      </View>
+      <View style={cardSizeStyles.cardSizeRow}>
+        {[
+          {
+            key: "large" as FlashcardsCardSize,
+            title: "Duża",
+            subtitle: "Więcej miejsca na treść pytania.",
+          },
+          {
+            key: "small" as FlashcardsCardSize,
+            title: "Mała",
+            subtitle: "Kompaktowy widok z mniejszą kartą.",
+          },
+        ].map((option, idx) => {
+          const isActive = cardSize === option.key;
+          return (
+            <Pressable
+              key={option.key}
+              style={[
+                cardSizeStyles.cardSizeOption,
+                idx === 0 && cardSizeStyles.cardSizeOptionFirst,
+                idx === 1 && cardSizeStyles.cardSizeOptionLast,
+                isActive
+                  ? cardSizeStyles.cardSizeOptionActive
+                  : cardSizeStyles.cardSizeOptionInactive,
+              ]}
+              onPress={() => onSelectCardSize(option.key)}
+            >
+              <Text
+                style={[
+                  toggleTitle,
+                  cardSizeStyles.cardSizeTitle,
+                  isActive && cardSizeStyles.cardSizeTitleActive,
+                ]}
+              >
+                {option.title}
+              </Text>
+              <Text style={[toggleSubtitle, cardSizeStyles.cardSizeSubtitle]}>
+                {option.subtitle}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
     </View>
   );
 }
+
+const localStyles = (switchColors: SwitchColors) =>
+  StyleSheet.create({
+    cardSizeRow: {
+      flexDirection: "row",
+      paddingHorizontal: 4,
+    },
+    cardSizeOption: {
+      flex: 1,
+      borderRadius: 12,
+      borderWidth: 1,
+      paddingHorizontal: 14,
+      paddingVertical: 10,
+    },
+    cardSizeOptionFirst: {
+      marginRight: 6,
+    },
+    cardSizeOptionLast: {
+      marginLeft: 6,
+    },
+    cardSizeOptionActive: {
+      backgroundColor: switchColors.trackTrue,
+      borderColor: switchColors.trackTrue,
+    },
+    cardSizeOptionInactive: {
+      backgroundColor: "transparent",
+      borderColor: switchColors.trackFalse,
+    },
+    cardSizeTitle: {
+      color: "#0F172A",
+      fontWeight: "600",
+    },
+    cardSizeTitleActive: {
+      color: "#0F172A",
+    },
+    cardSizeSubtitle: {
+      color: "#475569",
+      marginTop: 4,
+    },
+  });

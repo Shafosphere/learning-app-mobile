@@ -5,6 +5,7 @@ import { CourseSettingsSection } from "@/src/screens/courses/editcourse/componen
 import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEditScreen-styles";
 import type { CEFRLevel } from "@/src/types/language";
+import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -116,6 +117,10 @@ function BuiltinCourseEditor({
     setBuiltinCourseBoxZeroEnabled,
     getBuiltinCourseAutoflowEnabled,
     setBuiltinCourseAutoflowEnabled,
+    getBuiltinCourseSkipCorrectionEnabled,
+    setBuiltinCourseSkipCorrectionEnabled,
+    getBuiltinCourseCardSize,
+    setBuiltinCourseCardSize,
   } = useSettings();
 
   const normalizedSource = sourceLang ? sourceLang.toLowerCase() : null;
@@ -131,6 +136,20 @@ function BuiltinCourseEditor({
   );
   const [autoflowEnabled, setAutoflowEnabled] = useState(() =>
     getBuiltinCourseAutoflowEnabled({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [skipCorrectionEnabled, setSkipCorrectionEnabled] = useState(() =>
+    getBuiltinCourseSkipCorrectionEnabled({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [cardSize, setCardSize] = useState<FlashcardsCardSize>(() =>
+    getBuiltinCourseCardSize({
       sourceLang: normalizedSource,
       targetLang: normalizedTarget,
       level: normalizedLevel,
@@ -169,6 +188,30 @@ function BuiltinCourseEditor({
   const handleAutoflowToggle = async (value: boolean) => {
     setAutoflowEnabled(value);
     await setBuiltinCourseAutoflowEnabled(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleSkipCorrectionToggle = async (value: boolean) => {
+    setSkipCorrectionEnabled(value);
+    await setBuiltinCourseSkipCorrectionEnabled(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleCardSizeChange = async (value: FlashcardsCardSize) => {
+    setCardSize(value);
+    await setBuiltinCourseCardSize(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
@@ -321,6 +364,10 @@ function BuiltinCourseEditor({
             onToggleAutoflow={handleAutoflowToggle}
             reviewsEnabled={reviewsEnabled}
             onToggleReviews={setReviewsEnabled}
+            skipCorrectionEnabled={skipCorrectionEnabled}
+            onToggleSkipCorrection={handleSkipCorrectionToggle}
+            cardSize={cardSize}
+            onSelectCardSize={handleCardSizeChange}
           />
           <View style={styles.toggleRow}>
             <View style={styles.toggleTextWrapper}>

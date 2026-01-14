@@ -94,12 +94,22 @@ type CourseAutoflowOverrides = {
   custom: Record<string, boolean>;
 };
 
+type CourseSkipCorrectionOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
 const DEFAULT_COURSE_BOX_ZERO_OVERRIDES: CourseBoxZeroOverrides = {
   builtin: {},
   custom: {},
 };
 
 const DEFAULT_COURSE_AUTOFLOW_OVERRIDES: CourseAutoflowOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES: CourseSkipCorrectionOverrides = {
   builtin: {},
   custom: {},
 };
@@ -157,6 +167,19 @@ interface SettingsContextValue {
     courseId: number,
     enabled: boolean
   ) => Promise<void>;
+  skipCorrectionEnabled: boolean;
+  getBuiltinCourseSkipCorrectionEnabled: (
+    params: CourseBoxZeroKeyParams
+  ) => boolean;
+  setBuiltinCourseSkipCorrectionEnabled: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseSkipCorrectionEnabled: (courseId: number) => boolean;
+  setCustomCourseSkipCorrectionEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
   resetLearningSettings: () => Promise<void>;
   resetActiveCourseReviews: () => Promise<number>;
   resetActiveCustomCourseReviews: () => Promise<number>;
@@ -174,7 +197,18 @@ interface SettingsContextValue {
   flashcardsSuggestionsEnabled: boolean;
   toggleFlashcardsSuggestions: () => Promise<void>;
   flashcardsCardSize: FlashcardsCardSize;
-  setFlashcardsCardSize: (size: FlashcardsCardSize) => Promise<void>;
+  flashcardsCardSizeDefault: FlashcardsCardSize;
+  setFlashcardsCardSizeDefault: (size: FlashcardsCardSize) => Promise<void>;
+  getBuiltinCourseCardSize: (params: CourseBoxZeroKeyParams) => FlashcardsCardSize;
+  setBuiltinCourseCardSize: (
+    params: CourseBoxZeroKeyParams,
+    size: FlashcardsCardSize
+  ) => Promise<void>;
+  getCustomCourseCardSize: (courseId: number) => FlashcardsCardSize;
+  setCustomCourseCardSize: (
+    courseId: number,
+    size: FlashcardsCardSize
+  ) => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
   feedbackEnabled: boolean;
@@ -209,6 +243,10 @@ interface SettingsContextValue {
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type FlashcardsCardSize = "large" | "small";
+type CourseCardSizeOverrides = {
+  builtin: Record<string, FlashcardsCardSize>;
+  custom: Record<string, FlashcardsCardSize>;
+};
 
 const defaultValue: SettingsContextValue = {
   theme: "light",
@@ -237,6 +275,11 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseAutoflowEnabled: async () => {},
   getCustomCourseAutoflowEnabled: () => false,
   setCustomCourseAutoflowEnabled: async () => {},
+  skipCorrectionEnabled: false,
+  getBuiltinCourseSkipCorrectionEnabled: () => false,
+  setBuiltinCourseSkipCorrectionEnabled: async () => {},
+  getCustomCourseSkipCorrectionEnabled: () => false,
+  setCustomCourseSkipCorrectionEnabled: async () => {},
   resetLearningSettings: async () => {},
   resetActiveCourseReviews: async () => 0,
   resetActiveCustomCourseReviews: async () => 0,
@@ -253,7 +296,6 @@ const defaultValue: SettingsContextValue = {
   flashcardsSuggestionsEnabled: true,
   toggleFlashcardsSuggestions: async () => {},
   flashcardsCardSize: "large",
-  setFlashcardsCardSize: async () => {},
   dailyGoal: 20,
   setDailyGoal: async () => {},
   feedbackEnabled: true,
@@ -270,6 +312,12 @@ const defaultValue: SettingsContextValue = {
   statsBookshelfEnabled: false,
   setStatsBookshelfEnabled: async () => {},
   toggleStatsBookshelfEnabled: async () => {},
+  flashcardsCardSizeDefault: "large",
+  setFlashcardsCardSizeDefault: async () => {},
+  getBuiltinCourseCardSize: () => "large",
+  setBuiltinCourseCardSize: async () => {},
+  getCustomCourseCardSize: () => "large",
+  setCustomCourseCardSize: async () => {},
   highContrastEnabled: false,
   toggleHighContrast: async () => {},
   colorBlindMode: "none",
@@ -343,6 +391,22 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcards.courseAutoflowOverrides",
       DEFAULT_COURSE_AUTOFLOW_OVERRIDES
     );
+  const [cardSizeOverrides, setCardSizeOverrides] =
+    usePersistedState<CourseCardSizeOverrides>(
+      "flashcards.courseCardSizeOverrides",
+      { builtin: {}, custom: {} }
+    );
+  const [flashcardsCardSizeDefault, setFlashcardsCardSizeDefault] =
+    usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
+  const [skipCorrectionDefaultEnabled] = usePersistedState<boolean>(
+    "flashcards.skipCorrectionEnabled",
+    false
+  );
+  const [skipCorrectionOverrides, setSkipCorrectionOverrides] =
+    usePersistedState<CourseSkipCorrectionOverrides>(
+      "flashcards.courseSkipCorrectionOverrides",
+      DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES
+    );
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
       "flashcardsBatchSize",
@@ -350,8 +414,6 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     );
   const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
     usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", false);
-  const [flashcardsCardSize, setFlashcardsCardSize] =
-    usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
   const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
   const [feedbackEnabledState, _setFeedbackEnabled] =
     usePersistedState<boolean>("feedbackEnabled", true);
@@ -611,6 +673,148 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [autoflowDefaultEnabled, autoflowOverrides, setAutoflowOverrides]
   );
 
+  const getBuiltinCourseCardSize = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = cardSizeOverrides.builtin[key];
+      return override ?? flashcardsCardSizeDefault;
+    },
+    [cardSizeOverrides.builtin, flashcardsCardSizeDefault]
+  );
+
+  const setBuiltinCourseCardSize = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      size: FlashcardsCardSize
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = cardSizeOverrides.builtin[key];
+      const shouldRemove = size === flashcardsCardSizeDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === size) {
+        return;
+      }
+      const nextBuiltin = { ...cardSizeOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = size;
+      }
+      await setCardSizeOverrides({
+        builtin: nextBuiltin,
+        custom: { ...cardSizeOverrides.custom },
+      });
+    },
+    [cardSizeOverrides, flashcardsCardSizeDefault, setCardSizeOverrides]
+  );
+
+  const getCustomCourseCardSize = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = cardSizeOverrides.custom[key];
+      return override ?? flashcardsCardSizeDefault;
+    },
+    [cardSizeOverrides.custom, flashcardsCardSizeDefault]
+  );
+
+  const setCustomCourseCardSize = useCallback(
+    async (courseId: number, size: FlashcardsCardSize): Promise<void> => {
+      const key = courseId.toString();
+      const current = cardSizeOverrides.custom[key];
+      const shouldRemove = size === flashcardsCardSizeDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === size) {
+        return;
+      }
+      const nextCustom = { ...cardSizeOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = size;
+      }
+      await setCardSizeOverrides({
+        builtin: { ...cardSizeOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [cardSizeOverrides, flashcardsCardSizeDefault, setCardSizeOverrides]
+  );
+
+  const getBuiltinCourseSkipCorrectionEnabled = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = skipCorrectionOverrides.builtin[key];
+      return override ?? skipCorrectionDefaultEnabled;
+    },
+    [skipCorrectionDefaultEnabled, skipCorrectionOverrides.builtin]
+  );
+
+  const setBuiltinCourseSkipCorrectionEnabled = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = skipCorrectionOverrides.builtin[key];
+      const shouldRemove = enabled === skipCorrectionDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...skipCorrectionOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setSkipCorrectionOverrides({
+        builtin: nextBuiltin,
+        custom: { ...skipCorrectionOverrides.custom },
+      });
+    },
+    [skipCorrectionDefaultEnabled, skipCorrectionOverrides, setSkipCorrectionOverrides]
+  );
+
+  const getCustomCourseSkipCorrectionEnabled = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = skipCorrectionOverrides.custom[key];
+      return override ?? skipCorrectionDefaultEnabled;
+    },
+    [skipCorrectionDefaultEnabled, skipCorrectionOverrides.custom]
+  );
+
+  const setCustomCourseSkipCorrectionEnabled = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = skipCorrectionOverrides.custom[key];
+      const shouldRemove = enabled === skipCorrectionDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...skipCorrectionOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setSkipCorrectionOverrides({
+        builtin: { ...skipCorrectionOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [skipCorrectionDefaultEnabled, skipCorrectionOverrides, setSkipCorrectionOverrides]
+  );
+
   const pinOfficialCourse = useCallback(
     async (id: number) => {
       if (pinnedOfficialCourseIds.includes(id)) return;
@@ -800,6 +1004,54 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     getCustomCourseAutoflowEnabled,
   ]);
 
+  const flashcardsCardSize = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseCardSize(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseCardSize({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return flashcardsCardSizeDefault;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    flashcardsCardSizeDefault,
+    getBuiltinCourseCardSize,
+    getCustomCourseCardSize,
+  ]);
+
+  const skipCorrectionEnabled = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseSkipCorrectionEnabled(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseSkipCorrectionEnabled({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return skipCorrectionDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    getBuiltinCourseSkipCorrectionEnabled,
+    getCustomCourseSkipCorrectionEnabled,
+    skipCorrectionDefaultEnabled,
+  ]);
+
   const setFeedbackEnabled = async (value: boolean) => {
     await _setFeedbackEnabled(value);
   };
@@ -885,6 +1137,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       _setBoxesLayout("classic"),
       setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
       setFlashcardsSuggestionsEnabled(false),
+      setFlashcardsCardSizeDefault("large"),
       _setLearningRemindersEnabled(false),
       _setFeedbackVolume(1),
     ]);
@@ -893,6 +1146,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     _setLearningRemindersEnabled,
     _setFeedbackVolume,
     setFlashcardsBatchSize,
+    setFlashcardsCardSizeDefault,
     setIgnoreDiacriticsInSpellcheck,
     setFlashcardsSuggestionsEnabled,
     setShowBoxFaces,
@@ -947,6 +1201,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseAutoflowEnabled,
         getCustomCourseAutoflowEnabled,
         setCustomCourseAutoflowEnabled,
+        skipCorrectionEnabled,
+        getBuiltinCourseSkipCorrectionEnabled,
+        setBuiltinCourseSkipCorrectionEnabled,
+        getCustomCourseSkipCorrectionEnabled,
+        setCustomCourseSkipCorrectionEnabled,
         resetLearningSettings,
         resetActiveCourseReviews,
         resetActiveCustomCourseReviews,
@@ -955,7 +1214,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         flashcardsSuggestionsEnabled,
         toggleFlashcardsSuggestions,
         flashcardsCardSize,
-        setFlashcardsCardSize,
+        flashcardsCardSizeDefault,
+        setFlashcardsCardSizeDefault,
+        getBuiltinCourseCardSize,
+        setBuiltinCourseCardSize,
+        getCustomCourseCardSize,
+        setCustomCourseCardSize,
         dailyGoal,
         setDailyGoal,
         feedbackEnabled: feedbackEnabledState,

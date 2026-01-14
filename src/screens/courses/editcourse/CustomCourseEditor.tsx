@@ -1,4 +1,4 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -19,6 +19,8 @@ import {
   resetCustomReviewsForCourse,
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
+import type { CustomFlashcardInput } from "@/src/db/sqlite/repositories/flashcards";
+import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
@@ -55,6 +57,10 @@ export default function CustomCourseEditor({
     setCustomCourseBoxZeroEnabled,
     getCustomCourseAutoflowEnabled,
     setCustomCourseAutoflowEnabled,
+    getCustomCourseSkipCorrectionEnabled,
+    setCustomCourseSkipCorrectionEnabled,
+    getCustomCourseCardSize,
+    setCustomCourseCardSize,
   } = useSettings();
 
   const {
@@ -97,12 +103,26 @@ export default function CustomCourseEditor({
     () => getCustomCourseAutoflowEnabled(courseId),
     [courseId, getCustomCourseAutoflowEnabled]
   );
+  const initialSkipCorrectionEnabled = useMemo(
+    () => getCustomCourseSkipCorrectionEnabled(courseId),
+    [courseId, getCustomCourseSkipCorrectionEnabled]
+  );
+  const initialCardSize = useMemo(
+    () => getCustomCourseCardSize(courseId),
+    [courseId, getCustomCourseCardSize]
+  );
 
   const [courseBoxZeroEnabled, setCourseBoxZeroEnabled] = useState(
     initialBoxZeroEnabled
   );
   const [courseAutoflowEnabled, setCourseAutoflowEnabled] = useState(
     initialAutoflowEnabled
+  );
+  const [courseSkipCorrectionEnabled, setCourseSkipCorrectionEnabled] = useState(
+    initialSkipCorrectionEnabled
+  );
+  const [courseCardSize, setCourseCardSize] = useState<FlashcardsCardSize>(
+    initialCardSize
   );
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -122,6 +142,13 @@ export default function CustomCourseEditor({
     [courseId]
   );
 
+  const courseIsTrueFalseOnly = useMemo(
+    () =>
+      manualCards.length > 0 &&
+      manualCards.every((card) => (card.type ?? "text") === "true_false"),
+    [manualCards]
+  );
+
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
@@ -137,6 +164,8 @@ export default function CustomCourseEditor({
         setIsOfficialCourse(lockAppearance);
         setCourseBoxZeroEnabled(initialBoxZeroEnabled);
         setCourseAutoflowEnabled(initialAutoflowEnabled);
+        setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
+        setCourseCardSize(initialCardSize);
         setLoading(false);
         return;
       }
@@ -151,6 +180,10 @@ export default function CustomCourseEditor({
       setIsOfficialCourse(courseRow.isOfficial === true);
       setCourseBoxZeroEnabled(getCustomCourseBoxZeroEnabled(courseRow.id));
       setCourseAutoflowEnabled(getCustomCourseAutoflowEnabled(courseRow.id));
+      setCourseSkipCorrectionEnabled(
+        getCustomCourseSkipCorrectionEnabled(courseRow.id)
+      );
+      setCourseCardSize(getCustomCourseCardSize(courseRow.id));
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -166,6 +199,9 @@ export default function CustomCourseEditor({
           answers,
           flipped: card.flipped,
           answerOnly: card.answerOnly ?? false,
+          type: (card.type as "text" | "true_false") ?? "text",
+          hintFront: card.hintFront,
+          hintBack: card.hintBack,
           imageFront: card.imageFront ?? null,
           imageBack: card.imageBack ?? null,
         };
@@ -177,6 +213,8 @@ export default function CustomCourseEditor({
       setIsOfficialCourse(lockAppearance);
       setCourseBoxZeroEnabled(initialBoxZeroEnabled);
       setCourseAutoflowEnabled(initialAutoflowEnabled);
+      setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
+      setCourseCardSize(initialCardSize);
     } finally {
       setLoading(false);
     }
@@ -184,10 +222,15 @@ export default function CustomCourseEditor({
     courseId,
     getCustomCourseAutoflowEnabled,
     getCustomCourseBoxZeroEnabled,
+    getCustomCourseCardSize,
+    getCustomCourseSkipCorrectionEnabled,
     hydrateDraft,
     initialAutoflowEnabled,
     initialBoxZeroEnabled,
+    initialCardSize,
+    initialSkipCorrectionEnabled,
     lockAppearance,
+    normalizeAnswers,
     replaceManualCards,
   ]);
 
@@ -218,6 +261,28 @@ export default function CustomCourseEditor({
     setCourseAutoflowEnabled(value);
     await setCustomCourseAutoflowEnabled(courseId, value);
   };
+
+  const handleCourseSkipCorrectionToggle = async (value: boolean) => {
+    setCourseSkipCorrectionEnabled(value);
+    await setCustomCourseSkipCorrectionEnabled(courseId, value);
+  };
+
+  const handleCourseCardSizeChange = async (value: FlashcardsCardSize) => {
+    setCourseCardSize(value);
+    await setCustomCourseCardSize(courseId, value);
+  };
+
+  useEffect(() => {
+    if (courseIsTrueFalseOnly && !courseSkipCorrectionEnabled) {
+      setCourseSkipCorrectionEnabled(true);
+      void setCustomCourseSkipCorrectionEnabled(courseId, true);
+    }
+  }, [
+    courseId,
+    courseIsTrueFalseOnly,
+    courseSkipCorrectionEnabled,
+    setCustomCourseSkipCorrectionEnabled,
+  ]);
 
   const handleCourseReviewsToggle = (value: boolean) => {
     setReviewsEnabled(value);
@@ -362,16 +427,8 @@ export default function CustomCourseEditor({
       return;
     }
 
-    const trimmedCards = manualCards.reduce<
-      {
-        frontText: string;
-        backText: string;
-        answers: string[];
-        position: number;
-        flipped: boolean;
-        answerOnly?: boolean;
-      }[]
-    >((acc, card) => {
+    const trimmedCards = manualCards.reduce<CustomFlashcardInput[]>(
+      (acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
       if (!frontText && answers.length === 0) {
@@ -385,11 +442,16 @@ export default function CustomCourseEditor({
         position: acc.length,
         flipped: card.flipped,
         answerOnly: card.answerOnly ?? false,
+        type: card.type ?? "text",
+        hintFront: card.hintFront ?? null,
+        hintBack: card.hintBack ?? null,
         imageFront: card.imageFront ?? null,
         imageBack: card.imageBack ?? null,
       });
       return acc;
-    }, []);
+      },
+      []
+    );
 
     if (trimmedCards.length === 0) {
       setPopup({
@@ -460,6 +522,11 @@ export default function CustomCourseEditor({
             onToggleAutoflow={handleCourseAutoflowToggle}
             reviewsEnabled={reviewsEnabled}
             onToggleReviews={handleCourseReviewsToggle}
+            skipCorrectionEnabled={courseSkipCorrectionEnabled}
+            onToggleSkipCorrection={handleCourseSkipCorrectionToggle}
+            skipCorrectionLocked={courseIsTrueFalseOnly}
+            cardSize={courseCardSize}
+            onSelectCardSize={handleCourseCardSizeChange}
           />
           <View style={styles.toggleRow}>
             <View style={styles.toggleTextWrapper}>

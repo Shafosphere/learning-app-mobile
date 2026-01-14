@@ -31,6 +31,8 @@ type CardCorrectionProps = {
   correctionAwers: string;
   correctionRewers: string;
   answerOnly: boolean;
+  showAwersInput: boolean;
+  showRewersInput: boolean;
   allowMultilinePrompt: boolean;
   onPromptLayout?: (height: number) => void;
   onInputLayout?: (height: number) => void;
@@ -68,6 +70,8 @@ export function CardCorrection({
   correctionAwers,
   correctionRewers,
   answerOnly,
+  showAwersInput,
+  showRewersInput,
   allowMultilinePrompt,
   onPromptLayout,
   onInputLayout,
@@ -294,7 +298,7 @@ export function CardCorrection({
     <View
       style={[
         allowMultilinePrompt ? styles.containerInputLarge : styles.containerInput,
-        answerOnly && !allowMultilinePrompt && styles.containerInputFirst,
+        (!allowMultilinePrompt && (answerOnly || !showAwersInput)) && styles.containerInputFirst,
       ]}
       onLayout={({ nativeEvent }) => {
         const nextWidth = nativeEvent.layout.width;
@@ -387,8 +391,8 @@ export function CardCorrection({
             }
           }}
         >
-          {answerOnly ? input2Block : input1Block}
-          {!answerOnly ? input2Block : null}
+          {showAwersInput ? input1Block : null}
+          {showRewersInput ? input2Block : null}
         </View>
       </View>
     );
@@ -397,8 +401,8 @@ export function CardCorrection({
   return (
     <>
       {promptBlock}
-      {answerOnly ? input2Block : input1Block}
-      {!answerOnly ? input2Block : null}
+      {showAwersInput ? input1Block : null}
+      {showRewersInput ? input2Block : null}
     </>
   );
 }

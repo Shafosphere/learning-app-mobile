@@ -159,6 +159,8 @@ export default function Card({
   const promptText = effectiveReversed ? rewers : awers;
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : correction?.rewers ?? "";
+  const shouldCorrectAwers = effectiveReversed;
+  const shouldCorrectRewers = !effectiveReversed || answerOnly;
 
   const expectsHangulAnswer = useMemo(() => {
     if (!effectiveReversed) return false;
@@ -700,6 +702,8 @@ export default function Card({
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           answerOnly={answerOnly}
+          showAwersInput={shouldCorrectAwers}
+          showRewersInput={shouldCorrectRewers}
           allowMultilinePrompt={useLargeLayout}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}

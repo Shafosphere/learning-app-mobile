@@ -115,6 +115,7 @@ export default function Flashcards() {
     flashcardsBatchSize,
     boxZeroEnabled,
     autoflowEnabled,
+    skipCorrectionEnabled,
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
@@ -173,6 +174,7 @@ export default function Flashcards() {
       customCards.every((card) => card.type === "true_false"),
     [customCards]
   );
+  const skipCorrection = courseHasOnlyTrueFalse || skipCorrectionEnabled;
   const checkSpelling = useSpellchecking();
   const {
     activeBox,
@@ -219,7 +221,7 @@ export default function Flashcards() {
       });
     },
     boxZeroEnabled,
-    disableDemotionCorrectionForTrueFalseCourse: courseHasOnlyTrueFalse,
+    skipDemotionCorrection: skipCorrection,
   });
   const correctionLocked = correction?.mode === "demote";
 
