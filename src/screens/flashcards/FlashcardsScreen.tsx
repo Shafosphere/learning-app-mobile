@@ -100,7 +100,7 @@ function mapCustomCardToWord(
     hintBack: card.hintBack,
     imageFront: card.imageFront ?? null,
     imageBack: card.imageBack ?? null,
-    type: (card.type as "text" | "true_false") || "text",
+    type: (card.type as "text" | "image" | "true_false") || "text",
   };
   console.log("Converted to WordWithTranslations:", result);
   return result;

@@ -1,12 +1,14 @@
 import { useCallback, useMemo, useState } from "react";
 
+export type ManualCardType = "text" | "image" | "true_false";
+
 export type ManualCard = {
   id: string;
   front: string;
   answers: string[];
   flipped: boolean;
   answerOnly?: boolean;
-  type?: "text" | "true_false";
+  type?: ManualCardType;
   hintFront?: string | null;
   hintBack?: string | null;
   imageFront?: string | null;
@@ -25,13 +27,16 @@ export interface ReplaceManualCardsOptions {
 
 const DEFAULT_HISTORY_LIMIT = 50;
 
-export const createEmptyManualCard = (id?: string): ManualCard => ({
+export const createEmptyManualCard = (
+  id?: string,
+  type: ManualCardType = "text"
+): ManualCard => ({
   id: id ?? `card-${Date.now()}`,
   front: "",
   answers: [""],
   flipped: true, // domyślnie włączone
   answerOnly: false,
-  type: "text",
+  type,
   hintFront: "",
   hintBack: "",
   imageFront: null,
@@ -199,9 +204,12 @@ export const useManualCardsForm = (
     [applyManualCardsChange]
   );
 
-  const handleAddCard = useCallback(() => {
-    applyManualCardsChange((cards) => [...cards, createEmptyManualCard()]);
-  }, [applyManualCardsChange]);
+  const handleAddCard = useCallback(
+    (type: ManualCardType = "text") => {
+      applyManualCardsChange((cards) => [...cards, createEmptyManualCard(undefined, type)]);
+    },
+    [applyManualCardsChange]
+  );
 
   const handleRemoveCard = useCallback(
     (cardId: string) => {

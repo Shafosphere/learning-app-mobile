@@ -201,5 +201,44 @@ export const useStyles = createThemeStylesHook((colors) => {
       alignItems: "center",
       // backgroundColor: colors.headline,
     },
+    trueFalseContainer: {
+      gap: 8,
+    },
+    trueFalseLabel: {
+      fontSize: 12,
+      fontWeight: "700",
+      color: colors.paragraph,
+      textTransform: "uppercase" as const,
+      letterSpacing: 0.4,
+    },
+    trueFalseOptions: {
+      flexDirection: "row" as const,
+      gap: 10,
+    },
+    trueFalseOption: {
+      flex: 1,
+      paddingVertical: 10,
+      paddingHorizontal: 12,
+      borderRadius: 12,
+      borderWidth: 1,
+      borderColor: colors.border,
+      backgroundColor: colors.secondBackground,
+      alignItems: "center" as const,
+    },
+    trueFalseOptionTrue: {
+      backgroundColor: colors.my_green,
+      borderColor: colors.my_green,
+    },
+    trueFalseOptionFalse: {
+      backgroundColor: colors.my_red,
+      borderColor: colors.my_red,
+    },
+    trueFalseOptionText: {
+      fontWeight: "800",
+      color: colors.headline,
+    },
+    trueFalseOptionTextActive: {
+      color: colors.darkbg,
+    },
   };
 });

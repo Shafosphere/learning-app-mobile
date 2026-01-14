@@ -88,7 +88,7 @@ async function readCsvAsset(
         hintBack: string | null;
         imageFront: string | null;
         imageBack: string | null;
-        type?: "text" | "true_false";
+        type?: "text" | "image" | "true_false";
     }[]
 > {
     console.log("[DB] readCsvAsset: create asset from module");

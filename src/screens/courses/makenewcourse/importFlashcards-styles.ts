@@ -24,7 +24,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   segmentedControl: {
-    marginTop: 24,
+    marginTop: 28,
     flexDirection: "row" as const,
     backgroundColor: colors.lightbg,
     borderRadius: 8,
@@ -50,7 +50,71 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.darkbg,
   },
   modeContainer: {
-    marginTop: 24,
+    marginTop: 12,
+  },
+  cardTypeSection: {
+    marginTop: 2,
+    marginBottom: 18,
+    gap: 12,
+  },
+  cardTypeSelector: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    gap: 8,
+  },
+  cardTypeSelectorOpen: {
+    borderBottomLeftRadius: 10,
+    borderBottomRightRadius: 10,
+  },
+  cardTypeSelectorText: {
+    flex: 1,
+    gap: 4,
+  },
+  cardTypeDropdown: {
+    marginTop: 6,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    overflow: "hidden" as const,
+  },
+  cardTypeDropdownItem: {
+    paddingVertical: 12,
+    paddingHorizontal: 12,
+    borderBottomWidth: 1,
+    borderBottomColor: colors.border,
+    gap: 0,
+  },
+  cardTypeDropdownItemFirst: {
+    borderTopLeftRadius: 12,
+    borderTopRightRadius: 12,
+  },
+  cardTypeDropdownItemLast: {
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    borderBottomWidth: 0,
+  },
+  cardTypeDropdownItemActive: {
+    backgroundColor: colors.my_green,
+    borderColor: colors.my_green,
+  },
+  cardTypeChevron: {
+    color: colors.headline,
+  },
+  cardTypeOptionLabel: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: colors.headline,
+  },
+  cardTypeOptionLabelActive: {
+    color: colors.darkbg,
   },
   modeTitle: {
     fontSize: 24,

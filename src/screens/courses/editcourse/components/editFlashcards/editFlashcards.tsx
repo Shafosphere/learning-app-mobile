@@ -1,4 +1,4 @@
-import { ManualCard } from "@/src/hooks/useManualCardsForm";
+import { ManualCard, ManualCardType } from "@/src/hooks/useManualCardsForm";
 import { saveImage } from "@/src/services/imageService";
 import * as ImagePicker from "expo-image-picker";
 import Feather from "@expo/vector-icons/Feather";
@@ -55,6 +55,14 @@ export interface ManualCardsEditorStyles {
   displayCardIncorrect?: ViewStyle;
   displayTextCorrect?: TextStyle;
   displayTextIncorrect?: TextStyle;
+  trueFalseContainer?: ViewStyle;
+  trueFalseLabel?: TextStyle;
+  trueFalseOptions?: ViewStyle;
+  trueFalseOption?: ViewStyle;
+  trueFalseOptionTrue?: ViewStyle;
+  trueFalseOptionFalse?: ViewStyle;
+  trueFalseOptionText?: TextStyle;
+  trueFalseOptionTextActive?: TextStyle;
 }
 
 export interface ManualCardsEditorProps {
@@ -63,6 +71,7 @@ export interface ManualCardsEditorProps {
   mode?: "edit" | "display";
   displayAction?: ManualCardsDisplayAction;
   displayStatuses?: Record<string, ManualCardDisplayStatus | undefined>;
+  cardType?: ManualCardType;
   onCardFrontChange?: (cardId: string, value: string) => void;
   onCardAnswerChange?: (
     cardId: string,
@@ -96,6 +105,7 @@ export const ManualCardsEditor = ({
   mode = "edit",
   displayAction,
   displayStatuses,
+  cardType,
   onCardFrontChange,
   onCardAnswerChange,
   onAddAnswer,
@@ -190,9 +200,20 @@ export const ManualCardsEditor = ({
           typeof displayAction?.accessibilityLabel === "function"
             ? displayAction.accessibilityLabel(card, index)
             : displayAction?.accessibilityLabel;
+        const effectiveCardType: ManualCardType = cardType ?? card.type ?? "text";
+        const isTrueFalse = effectiveCardType === "true_false";
+        const isImageType = effectiveCardType === "image";
+        const cardTypeProvided = cardType !== undefined;
         const canEditImages = !isDisplayMode && Boolean(onCardImageChange);
-        const shouldShowImagesRow =
-          canEditImages || card.imageFront || card.imageBack;
+        const hasImages = Boolean(card.imageFront || card.imageBack);
+        const allowImageEditing =
+          canEditImages && (isImageType || !cardTypeProvided || hasImages);
+        const shouldShowImagesRow = cardTypeProvided
+          ? (isImageType && (allowImageEditing || hasImages)) ||
+            (!isImageType && hasImages)
+          : allowImageEditing || hasImages;
+        const trueFalseValue =
+          card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
 
         return (
           <View
@@ -278,60 +299,104 @@ export const ManualCardsEditor = ({
               </View>
               <View style={styles.cardDivider} />
               <View style={styles.answersContainer}>
-                {card.answers.map((answer, answerIndex) => {
-                  const placeholder =
-                    answerIndex === 0 ? "tył" : `tył ${answerIndex + 1}`;
-                  return (
-                    <View
-                      key={`${card.id}-answer-${answerIndex}`}
-                      style={styles.answerRow}
-                    >
-                      <Text style={styles.answerIndex}>{answerIndex + 1}.</Text>
-                      {isDisplayMode ? (
-                        <Text
-                          style={[
-                            styles.answerInput,
-                            displayStatus === "correct" &&
-                              styles.displayTextCorrect,
-                            displayStatus === "incorrect" &&
-                              styles.displayTextIncorrect,
-                          ]}
-                        >
-                          {answer?.trim().length ? answer : "—"}
-                        </Text>
-                      ) : (
-                        <TextInput
-                          value={answer}
-                          style={styles.answerInput}
-                          placeholder={placeholder}
-                          placeholderTextColor={styles.cardPlaceholder?.color}
-                          onChangeText={(value) =>
-                            handleAnswerChange(card.id, answerIndex, value)
-                          }
-                        />
-                      )}
-                      {!isDisplayMode && card.answers.length > 1 && (
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Usuń odpowiedź ${
-                            answerIndex + 1
-                          } dla fiszki ${index + 1}`}
-                          style={styles.answerRemoveButton}
-                          hitSlop={8}
-                          onPress={() =>
-                            handleRemoveAnswerPress(card.id, answerIndex)
-                          }
-                        >
-                          <Feather
-                            name="minus-circle"
-                            size={20}
-                            color={styles.cardActionIcon?.color ?? "black"}
-                          />
-                        </Pressable>
-                      )}
+                {isTrueFalse ? (
+                  <View style={styles.trueFalseContainer}>
+                    <Text style={styles.trueFalseLabel}>Odpowiedź</Text>
+                    <View style={styles.trueFalseOptions}>
+                      {[
+                        { key: "true", label: "Prawda" },
+                        { key: "false", label: "Fałsz" },
+                      ].map((option) => {
+                        const isActive = trueFalseValue === option.key;
+                        const isFalse = option.key === "false";
+                        return (
+                          <Pressable
+                            key={option.key}
+                            accessibilityRole="button"
+                            accessibilityState={{ selected: isActive }}
+                            accessibilityLabel={`${option.label} dla fiszki ${index + 1}`}
+                            style={[
+                              styles.trueFalseOption,
+                              isActive &&
+                                (isFalse
+                                  ? styles.trueFalseOptionFalse
+                                  : styles.trueFalseOptionTrue),
+                            ]}
+                            hitSlop={6}
+                            disabled={isDisplayMode}
+                            onPress={() =>
+                              handleAnswerChange(card.id, 0, option.key)
+                            }
+                          >
+                            <Text
+                              style={[
+                                styles.trueFalseOptionText,
+                                isActive && styles.trueFalseOptionTextActive,
+                              ]}
+                            >
+                              {option.label}
+                            </Text>
+                          </Pressable>
+                        );
+                      })}
                     </View>
-                  );
-                })}
+                  </View>
+                ) : (
+                  card.answers.map((answer, answerIndex) => {
+                    const placeholder =
+                      answerIndex === 0 ? "tył" : `tył ${answerIndex + 1}`;
+                    return (
+                      <View
+                        key={`${card.id}-answer-${answerIndex}`}
+                        style={styles.answerRow}
+                      >
+                        <Text style={styles.answerIndex}>{answerIndex + 1}.</Text>
+                        {isDisplayMode ? (
+                          <Text
+                            style={[
+                              styles.answerInput,
+                              displayStatus === "correct" &&
+                                styles.displayTextCorrect,
+                              displayStatus === "incorrect" &&
+                                styles.displayTextIncorrect,
+                            ]}
+                          >
+                            {answer?.trim().length ? answer : "—"}
+                          </Text>
+                        ) : (
+                          <TextInput
+                            value={answer}
+                            style={styles.answerInput}
+                            placeholder={placeholder}
+                            placeholderTextColor={styles.cardPlaceholder?.color}
+                            onChangeText={(value) =>
+                              handleAnswerChange(card.id, answerIndex, value)
+                            }
+                          />
+                        )}
+                        {!isDisplayMode && card.answers.length > 1 && (
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Usuń odpowiedź ${
+                              answerIndex + 1
+                            } dla fiszki ${index + 1}`}
+                            style={styles.answerRemoveButton}
+                            hitSlop={8}
+                            onPress={() =>
+                              handleRemoveAnswerPress(card.id, answerIndex)
+                            }
+                          >
+                            <Feather
+                              name="minus-circle"
+                              size={20}
+                              color={styles.cardActionIcon?.color ?? "black"}
+                            />
+                          </Pressable>
+                        )}
+                      </View>
+                    );
+                  })
+                )}
               </View>
               {shouldShowImagesRow ? (
                 <>
@@ -341,11 +406,11 @@ export const ManualCardsEditor = ({
                       <Text style={styles.imageLabel}>Awers</Text>
                       <Pressable
                         onPress={() => pickImage(card.id, "front")}
-                        disabled={!canEditImages}
+                        disabled={!allowImageEditing}
                         hitSlop={6}
                         style={({ pressed }) => [
                           styles.imagePreview,
-                          pressed && canEditImages ? { opacity: 0.85 } : null,
+                          pressed && allowImageEditing ? { opacity: 0.85 } : null,
                         ]}
                       >
                         {card.imageFront ? (
@@ -356,11 +421,11 @@ export const ManualCardsEditor = ({
                           />
                         ) : (
                           <Text style={styles.imagePlaceholder}>
-                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                            {allowImageEditing ? "Dodaj obraz" : "Brak"}
                           </Text>
                         )}
                       </Pressable>
-                      {card.imageFront && canEditImages ? (
+                      {card.imageFront && allowImageEditing ? (
                         <View style={styles.imageButtonsRow}>
                           <Pressable
                             accessibilityRole="button"
@@ -382,11 +447,11 @@ export const ManualCardsEditor = ({
                       <Text style={styles.imageLabel}>Rewers</Text>
                       <Pressable
                         onPress={() => pickImage(card.id, "back")}
-                        disabled={!canEditImages}
+                        disabled={!allowImageEditing}
                         hitSlop={6}
                         style={({ pressed }) => [
                           styles.imagePreview,
-                          pressed && canEditImages ? { opacity: 0.85 } : null,
+                          pressed && allowImageEditing ? { opacity: 0.85 } : null,
                         ]}
                       >
                         {card.imageBack ? (
@@ -397,11 +462,11 @@ export const ManualCardsEditor = ({
                           />
                         ) : (
                           <Text style={styles.imagePlaceholder}>
-                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                            {allowImageEditing ? "Dodaj obraz" : "Brak"}
                           </Text>
                         )}
                       </Pressable>
-                      {card.imageBack && canEditImages ? (
+                      {card.imageBack && allowImageEditing ? (
                         <View style={styles.imageButtonsRow}>
                           <Pressable
                             accessibilityRole="button"
@@ -463,21 +528,23 @@ export const ManualCardsEditor = ({
                         color={styles.cardActionIcon?.color ?? "black"}
                       />
                     </Pressable>
-                    <Pressable
-                      accessibilityRole="button"
-                      accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
-                        index + 1
-                      }`}
-                      style={styles.cardActionButton}
-                      hitSlop={8}
-                      onPress={() => handleAddAnswerPress(card.id)}
-                    >
-                      <Feather
-                        name="plus"
-                        size={24}
-                        color={styles.cardActionIcon?.color ?? "black"}
-                      />
-                    </Pressable>
+                    {!isTrueFalse && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
+                          index + 1
+                        }`}
+                        style={styles.cardActionButton}
+                        hitSlop={8}
+                        onPress={() => handleAddAnswerPress(card.id)}
+                      >
+                        <Feather
+                          name="plus"
+                          size={24}
+                          color={styles.cardActionIcon?.color ?? "black"}
+                        />
+                      </Pressable>
+                    )}
                   </>
                 )}
               </View>

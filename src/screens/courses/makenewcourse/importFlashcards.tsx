@@ -11,6 +11,7 @@ import {
   normalizeAnswers,
   useManualCardsForm,
   type ManualCard,
+  type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
 import {
   ManualCardsEditor,
@@ -24,7 +25,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./importFlashcards-styles";
 
@@ -45,6 +46,21 @@ const TRUE_VALUES = new Set([
 const segmentOptions: { key: AddMode; label: string }[] = [
   { key: "csv", label: "Import z CSV" },
   { key: "manual", label: "Dodaj ręcznie" },
+];
+
+const cardTypeOptions: { key: ManualCardType; label: string }[] = [
+  {
+    key: "text",
+    label: "Tradycyjne",
+  },
+  {
+    key: "image",
+    label: "Z obrazkiem",
+  },
+  {
+    key: "true_false",
+    label: "Prawda / Fałsz",
+  },
 ];
 
 export default function CustomCourseContentScreen() {
@@ -98,8 +114,63 @@ export default function CustomCourseContentScreen() {
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
+  const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
+  const [cardTypeMenuOpen, setCardTypeMenuOpen] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [isSaving, setIsSaving] = useState(false);
+
+  const inferCardTypeFromCards = useCallback((cards: ManualCard[]): ManualCardType => {
+    if (cards.length > 0 && cards.every((card) => (card.type ?? "text") === "true_false")) {
+      return "true_false";
+    }
+    if (
+      cards.some(
+        (card) =>
+          (card.type ?? "text") === "image" ||
+          Boolean(card.imageFront) ||
+          Boolean(card.imageBack)
+      )
+    ) {
+      return "image";
+    }
+    return "text";
+  }, []);
+
+  const mapCardsToType = useCallback(
+    (cards: ManualCard[], nextType: ManualCardType): ManualCard[] =>
+      cards.map((card) => {
+        if (nextType === "true_false") {
+          const normalizedAnswer =
+            card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
+          return {
+            ...card,
+            type: nextType,
+            answers: [normalizedAnswer],
+            imageFront: null,
+            imageBack: null,
+          };
+        }
+        const ensuredAnswers = card.answers.length > 0 ? card.answers : [""];
+        return {
+          ...card,
+          type: nextType,
+          answers: ensuredAnswers,
+          imageFront: nextType === "image" ? card.imageFront ?? null : null,
+          imageBack: nextType === "image" ? card.imageBack ?? null : null,
+        };
+      }),
+    []
+  );
+
+  const handleManualCardTypeChange = useCallback(
+    (nextType: ManualCardType) => {
+      if (nextType === manualCardType) return;
+      setManualCardType(nextType);
+      setCardTypeMenuOpen(false);
+      replaceManualCards(mapCardsToType(manualCards, nextType));
+    },
+    [manualCardType, manualCards, mapCardsToType, replaceManualCards]
+  );
 
   const parseBooleanValue = (value: unknown): boolean => {
     if (value == null) return false;
@@ -164,7 +235,6 @@ export default function CustomCourseContentScreen() {
         ? true
         : answers.length > 0 && answers.every((a) => isBooleanText(a));
 
-      const type = isBoolean ? "true_false" : "text";
       const locked = parseBooleanValue(row.lock);
       const answerOnly = parseBooleanValue(
         row.answer_only ?? row.question ?? row.pytanie
@@ -173,6 +243,12 @@ export default function CustomCourseContentScreen() {
       const imageBackName = normalizeImageField(row.image_back ?? row.imageBack);
       const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
       const imageBack = resolveImage ? await resolveImage(imageBackName) : null;
+      const hasImages = Boolean(imageFront || imageBack);
+      const type: ManualCardType = isBoolean
+        ? "true_false"
+        : hasImages
+          ? "image"
+          : "text";
 
       const card: ManualCard = {
         id: `csv-${idx}`,
@@ -282,7 +358,9 @@ export default function CustomCourseContentScreen() {
         return;
       }
 
-      replaceManualCards(cards);
+      const inferredType = inferCardTypeFromCards(cards);
+      setManualCardType(inferredType);
+      replaceManualCards(mapCardsToType(cards, inferredType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z ZIP`,
         color: "calm",
@@ -370,7 +448,9 @@ export default function CustomCourseContentScreen() {
         });
         return;
       }
-      replaceManualCards(cards);
+      const inferredType = inferCardTypeFromCards(cards);
+      setManualCardType(inferredType);
+      replaceManualCards(mapCardsToType(cards, inferredType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
         color: "calm",
@@ -477,7 +557,7 @@ export default function CustomCourseContentScreen() {
         answerOnly?: boolean;
         imageFront?: string | null;
         imageBack?: string | null;
-        type?: "text" | "true_false";
+        type?: "text" | "image" | "true_false";
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -486,6 +566,7 @@ export default function CustomCourseContentScreen() {
         return acc;
       }
       const backText = answers[0] ?? "";
+      const cardTypeToSave = (card.type ?? manualCardType) as ManualCardType;
       acc.push({
         frontText,
         backText,
@@ -497,7 +578,7 @@ export default function CustomCourseContentScreen() {
         answerOnly: card.answerOnly ?? false,
         imageFront: card.imageFront ?? null,
         imageBack: card.imageBack ?? null,
-        type: card.type,
+        type: cardTypeToSave,
       });
       return acc;
     }, []);
@@ -622,18 +703,80 @@ export default function CustomCourseContentScreen() {
           ) : (
             <View style={styles.modeContainer}>
               {/* <Text style={styles.modeTitle}>Stwórz tutaj</Text> */}
+              <View style={styles.cardTypeSection}>
+                <Pressable
+                  accessibilityRole="button"
+                  accessibilityLabel="Wybierz typ fiszek"
+                  accessibilityState={{ expanded: cardTypeMenuOpen }}
+                  onPress={() => setCardTypeMenuOpen((prev) => !prev)}
+                  style={({ pressed }) => [
+                    styles.cardTypeSelector,
+                    cardTypeMenuOpen && styles.cardTypeSelectorOpen,
+                    pressed ? { opacity: 0.9 } : null,
+                  ]}
+                >
+                  <View style={styles.cardTypeSelectorText}>
+                    <Text style={[styles.cardTypeOptionLabel, styles.cardTypeOptionLabelActive]}>
+                      {cardTypeOptions.find((o) => o.key === manualCardType)?.label ??
+                        "—"}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={cardTypeMenuOpen ? "chevron-up" : "chevron-down"}
+                    size={20}
+                    color={styles.cardTypeChevron?.color ?? "#0F172A"}
+                  />
+                </Pressable>
+                {cardTypeMenuOpen && (
+                  <View style={styles.cardTypeDropdown}>
+                    {cardTypeOptions.map((option, idx) => {
+                      const isActive = manualCardType === option.key;
+                      return (
+                        <Pressable
+                          key={option.key}
+                          accessibilityRole="button"
+                          accessibilityState={{ selected: isActive }}
+                          style={({ pressed }) => [
+                            styles.cardTypeDropdownItem,
+                            idx === 0 && styles.cardTypeDropdownItemFirst,
+                            idx === cardTypeOptions.length - 1 &&
+                              styles.cardTypeDropdownItemLast,
+                            isActive && styles.cardTypeDropdownItemActive,
+                            pressed ? { opacity: 0.9 } : null,
+                          ]}
+                          onPress={() => handleManualCardTypeChange(option.key)}
+                        >
+                          <Text
+                            style={[
+                              styles.cardTypeOptionLabel,
+                              isActive && styles.cardTypeOptionLabelActive,
+                            ]}
+                          >
+                            {option.label}
+                          </Text>
+                        </Pressable>
+                      );
+                    })}
+                  </View>
+                )}
+              </View>
               <Text style={styles.miniSectionHeader}>fiszki</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
+                cardType={manualCardType}
                 styles={styles as unknown as ManualCardsEditorStyles}
                 onCardFrontChange={handleManualCardFrontChange}
                 onCardAnswerChange={handleManualCardAnswerChange}
                 onAddAnswer={handleAddAnswer}
                 onRemoveAnswer={handleRemoveAnswer}
-                onAddCard={handleAddCard}
+                onAddCard={() => handleAddCard(manualCardType)}
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
-                onCardImageChange={handleManualCardImageChange}
+                onCardImageChange={
+                  manualCardType === "image"
+                    ? handleManualCardImageChange
+                    : undefined
+                }
               />
             </View>
           )}

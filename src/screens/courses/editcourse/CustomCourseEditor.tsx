@@ -199,7 +199,7 @@ export default function CustomCourseEditor({
           answers,
           flipped: card.flipped,
           answerOnly: card.answerOnly ?? false,
-          type: (card.type as "text" | "true_false") ?? "text",
+          type: (card.type as "text" | "image" | "true_false") ?? "text",
           hintFront: card.hintFront,
           hintBack: card.hintBack,
           imageFront: card.imageFront ?? null,
