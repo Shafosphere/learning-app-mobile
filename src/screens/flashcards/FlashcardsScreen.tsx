@@ -162,6 +162,17 @@ export default function Flashcards() {
 
   const [customCourse, setCustomCourse] =
     useState<CustomCourseRecord | null>(null);
+  const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(false);
+  const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const totalCards = customCards.length;
+  const courseHasOnlyTrueFalse = useMemo(
+    () =>
+      customCards.length > 0 &&
+      customCards.every((card) => card.type === "true_false"),
+    [customCards]
+  );
   const checkSpelling = useSpellchecking();
   const {
     activeBox,
@@ -181,6 +192,7 @@ export default function Flashcards() {
     resetInteractionState,
     clearSelection,
     updateSelectedItem,
+    isBetweenCards,
     getQueueForBox,
   } = useFlashcardsInteraction({
     boxes,
@@ -207,6 +219,7 @@ export default function Flashcards() {
       });
     },
     boxZeroEnabled,
+    disableDemotionCorrectionForTrueFalseCourse: courseHasOnlyTrueFalse,
   });
   const correctionLocked = correction?.mode === "demote";
 
@@ -353,17 +366,6 @@ export default function Flashcards() {
     }
   }, [boxes, peekBox]);
 
-  const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
-  const [isLoadingData, setIsLoadingData] = useState(false);
-  const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
-  const [loadError, setLoadError] = useState<string | null>(null);
-  const totalCards = customCards.length;
-  const courseHasOnlyTrueFalse = useMemo(
-    () =>
-      customCards.length > 0 &&
-      customCards.every((card) => card.type === "true_false"),
-    [customCards]
-  );
   const trackedIds = useMemo(() => {
     const ids = new Set<number>();
     for (const list of Object.values(boxes)) {
@@ -632,6 +634,7 @@ export default function Flashcards() {
     (courseHasOnlyTrueFalse || selectedItem?.type === "true_false") &&
     shouldShowBoxes &&
     !correction;
+  const trueFalseActionsDisabled = result !== null || isBetweenCards;
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
     shouldShowBoxes && (courseHasOnlyTrueFalse || selectedItem?.type === "true_false");
@@ -731,6 +734,7 @@ export default function Flashcards() {
 
       <TrueFalseActionsAnimated
         visible={shouldShowTrueFalseActions}
+        disabled={trueFalseActionsDisabled}
         onAnswer={handleTrueFalseAnswer}
       />
 

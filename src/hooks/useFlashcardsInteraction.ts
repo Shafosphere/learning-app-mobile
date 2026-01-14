@@ -29,6 +29,7 @@ export type UseFlashcardsInteractionParams = {
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState) => void;
   boxZeroEnabled?: boolean;
+  disableDemotionCorrectionForTrueFalseCourse?: boolean;
 };
 
 export function useFlashcardsInteraction({
@@ -41,6 +42,7 @@ export function useFlashcardsInteraction({
   onWordPromotedOut,
   onCorrectAnswer,
   boxZeroEnabled = true,
+  disableDemotionCorrectionForTrueFalseCourse = false,
 }: UseFlashcardsInteractionParams) {
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
@@ -370,6 +372,18 @@ export function useFlashcardsInteraction({
         }, delay);
       } else {
         setResult(false);
+        if (
+          disableDemotionCorrectionForTrueFalseCourse &&
+          wordForCheck.type === "true_false"
+        ) {
+          setTimeout(() => {
+            setAnswer("");
+            moveElement(wordForCheck.id, false);
+            setResult(null);
+            setQueueNext(true);
+          }, 1500);
+          return;
+        }
         const answerOnly = isAnswerOnlyCard(wordForCheck);
         setCorrection({
           cardId: wordForCheck.id,
@@ -387,6 +401,8 @@ export function useFlashcardsInteraction({
       activeCustomCourseId,
       answer,
       checkSpelling,
+      disableDemotionCorrectionForTrueFalseCourse,
+      ignoreDiacriticsInSpellcheck,
       moveElement,
       onCorrectAnswer,
       questionShownAt,

@@ -5,19 +5,21 @@ import { Animated, StyleSheet, View } from "react-native";
 
 type TrueFalseActionsProps = {
   onAnswer: (value: boolean) => void;
+  disabled?: boolean;
 };
 
-export function TrueFalseActions({ onAnswer }: TrueFalseActionsProps) {
+export function TrueFalseActions({ onAnswer, disabled = false }: TrueFalseActionsProps) {
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors), [colors]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, disabled && styles.disabled]}>
       <MyButton
         text="FAŁSZ"
         color="my_red"
         onPress={() => onAnswer(false)}
         width={140}
+        disabled={disabled}
         accessibilityLabel="Oznacz jako Fałsz"
       />
       <View style={styles.spacer} />
@@ -26,6 +28,7 @@ export function TrueFalseActions({ onAnswer }: TrueFalseActionsProps) {
         color="my_green"
         onPress={() => onAnswer(true)}
         width={140}
+        disabled={disabled}
         accessibilityLabel="Oznacz jako Prawda"
       />
     </View>
@@ -35,11 +38,13 @@ export function TrueFalseActions({ onAnswer }: TrueFalseActionsProps) {
 type TrueFalseActionsAnimatedProps = {
   visible: boolean;
   onAnswer: (value: boolean) => void;
+  disabled?: boolean;
 };
 
 export function TrueFalseActionsAnimated({
   visible,
   onAnswer,
+  disabled = false,
 }: TrueFalseActionsAnimatedProps) {
   const [rendered, setRendered] = useState(visible);
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
@@ -86,9 +91,9 @@ export function TrueFalseActionsAnimated({
   return (
     <Animated.View
       style={{ opacity, transform: [{ translateY }], width: "100%" }}
-      pointerEvents={visible ? "auto" : "none"}
+      pointerEvents={visible && !disabled ? "auto" : "none"}
     >
-      <TrueFalseActions onAnswer={onAnswer} />
+      <TrueFalseActions onAnswer={onAnswer} disabled={disabled} />
     </Animated.View>
   );
 }
@@ -103,6 +108,9 @@ const makeStyles = (colors: any) =>
       paddingTop: 12,
       paddingBottom: 4,
       backgroundColor: colors?.bg ?? "transparent",
+    },
+    disabled: {
+      opacity: 0.55,
     },
     spacer: {
       width: 20,
