@@ -59,6 +59,7 @@ type CardProps = {
     hintBack: string | null
   ) => void;
   hideActions?: boolean;
+  isFocused?: boolean;
 };
 
 export default function Card({
@@ -76,6 +77,7 @@ export default function Card({
   setCorrectionRewers,
   onHintUpdate,
   hideActions = false,
+  isFocused = true,
 }: CardProps) {
   const styles = useStyles();
   const {
@@ -232,13 +234,16 @@ export default function Card({
 
   useLayoutEffect(() => {
     const currentId = selectedItem?.id ?? null;
+    if (!isFocused) {
+      return;
+    }
     if (currentId === lastTranslationItemId.current) {
       return;
     }
 
     lastTranslationItemId.current = currentId;
-    setTranslations(0);
-  }, [selectedItem?.id]);
+    setTranslations((prev) => (prev === 0 ? prev : 0));
+  }, [isFocused, selectedItem?.id]);
 
   useEffect(() => {
     if (!isIntroMode || !setCorrectionRewers) return;
@@ -809,7 +814,7 @@ export default function Card({
         </LargeCardContainer>
       ) : (
         <View style={[styles.card, styles.cardSmall, cardStateStyle]}>
-          {showCardContent()}
+          <View style={styles.cardSmallContent}>{showCardContent()}</View>
         </View>
       )}
       <HangulKeyboardOverlay

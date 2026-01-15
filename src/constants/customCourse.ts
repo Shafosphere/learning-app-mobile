@@ -110,6 +110,15 @@ export const COURSE_ICONS: CourseIconDefinition[] = [
   { id: "lightbulb", Component: AntDesign, name: "bulb" },
   { id: "planet", Component: Ionicons, name: "planet" },
   { id: "puzzle", Component: MaterialCommunityIcons, name: "puzzle-outline" },
+  { id: "globe", Component: MaterialCommunityIcons, name: "earth" },
+  { id: "mountain", Component: MaterialCommunityIcons, name: "terrain" },
+  { id: "compass", Component: MaterialCommunityIcons, name: "compass-outline" },
+  { id: "dna", Component: MaterialCommunityIcons, name: "dna" },
+  { id: "microscope", Component: MaterialCommunityIcons, name: "flask" },
+  { id: "tree", Component: MaterialCommunityIcons, name: "pine-tree" },
+  { id: "code", Component: MaterialCommunityIcons, name: "laptop" },
+  { id: "chip", Component: MaterialCommunityIcons, name: "memory" },
+  { id: "robot", Component: MaterialCommunityIcons, name: "robot-outline" },
 ];
 
 export function getCourseIconById(id: string | null | undefined) {

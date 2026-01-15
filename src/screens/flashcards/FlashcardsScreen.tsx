@@ -60,11 +60,6 @@ function pickRandomBatch<T>(items: T[], size: number): T[] {
 function mapCustomCardToWord(
   card: CustomFlashcardRecord
 ): WordWithTranslations {
-  console.log("Converting card:", {
-    id: card.id,
-    frontText: card.frontText,
-    flipped: card.flipped,
-  });
   const front = card.frontText?.trim() ?? "";
   const normalizedAnswers = (card.answers ?? [])
     .map((answer) => answer.trim())
@@ -102,7 +97,6 @@ function mapCustomCardToWord(
     imageBack: card.imageBack ?? null,
     type: (card.type as "text" | "image" | "true_false") || "text",
   };
-  console.log("Converted to WordWithTranslations:", result);
   return result;
 }
 // import MediumBoxes from "@/src/components/box/mediumboxes";
@@ -446,7 +440,7 @@ export default function Flashcards() {
   }, [result, selectedItem]);
 
   useFlashcardsAutoflow({
-    enabled: autoflowEnabled,
+    enabled: autoflowEnabled && isFocused,
     boxes,
     activeBox,
     handleSelectBox: baseHandleSelectBox,
@@ -503,7 +497,6 @@ export default function Flashcards() {
           setLoadError("Wybrany kurs nie istnieje.");
           return;
         }
-        console.log("Loading flashcards from DB:", flashcardRows);
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
         // console.log('After mapping flashcards:', mapped);
@@ -692,6 +685,7 @@ export default function Flashcards() {
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
         hideActions={courseHasOnlyTrueFalse}
+        isFocused={isFocused}
       />
     );
   }

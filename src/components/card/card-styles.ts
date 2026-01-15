@@ -98,6 +98,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     minHeight: 120,
     width: 325,
   },
+  cardSmallContent: {
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+    paddingVertical: 10,
+    gap: 10,
+  },
   cardLarge: {
     width: 325,
   },
@@ -146,7 +153,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textAlignVertical: "center",
     // backgroundColor: colors.my_green,
     width: "100%",
-    height: "100%",
   },
   containerButton: {
     display: "flex",

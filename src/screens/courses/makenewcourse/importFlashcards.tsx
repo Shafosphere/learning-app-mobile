@@ -1,4 +1,3 @@
-import sampleCsvAsset from "@/assets/data/import.csv";
 import MyButton from "@/src/components/button/button";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -18,16 +17,16 @@ import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import { CsvImportGuide } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
 import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { Asset } from "expo-asset";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
 import { useCallback, useMemo, useRef, useState } from "react";
-import { Platform, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./importFlashcards-styles";
 
 type AddMode = "csv" | "manual";
@@ -494,63 +493,6 @@ export default function CustomCourseContentScreen() {
     }
   };
 
-  const readSampleCsv = async () => {
-    const asset = Asset.fromModule(sampleCsvAsset);
-    await asset.downloadAsync();
-    const uri = asset.localUri ?? asset.uri;
-    return FileSystem.readAsStringAsync(uri, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
-  };
-
-  const handleDownloadSample = async () => {
-    try {
-      const sampleContent = await readSampleCsv();
-
-      if (Platform.OS === "android") {
-        const permissions =
-          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
-
-        if (permissions.granted && permissions.directoryUri) {
-          const targetFileUri =
-            await FileSystem.StorageAccessFramework.createFileAsync(
-              permissions.directoryUri,
-              sampleFileName,
-              "text/csv"
-            );
-
-          await FileSystem.writeAsStringAsync(targetFileUri, sampleContent, {
-            encoding: FileSystem.EncodingType.UTF8,
-          });
-
-          setPopup({
-            message: "Plik zapisany w wybranym katalogu",
-            color: "calm",
-            duration: 3000,
-          });
-          return;
-        }
-      }
-
-      const destination = `${FileSystem.documentDirectory}${sampleFileName}`;
-      await FileSystem.writeAsStringAsync(destination, sampleContent, {
-        encoding: FileSystem.EncodingType.UTF8,
-      });
-
-      setPopup({
-        message: "Plik zapisany w pamięci aplikacji",
-        color: "calm",
-        duration: 4000,
-      });
-    } catch (error) {
-      console.error("Failed to export sample CSV", error);
-      setPopup({
-        message: "Nie udało się zapisać pliku",
-        color: "angry",
-        duration: 4000,
-      });
-    }
-  };
 
   const handleSaveCourse = async () => {
     const cleanName = courseName.trim();
@@ -692,42 +634,11 @@ export default function CustomCourseContentScreen() {
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>
               <Text style={styles.modeTitle}>Import z pliku CSV</Text>
-              <Text style={styles.modeDescription}>
-                Plik CSV powinien mieć kolumny: front (treść fiszki), back
-                (odpowiedź), hint1 (podpowiedź do front), hint2 (podpowiedź do
-                back), lock oraz answer_only (aliasy: question, pytanie).
-                Podpowiedzi mogą zostać puste. W lock wpisz true/1/tak, jeśli
-                fiszka ma być zablokowana. W answer_only wpisz true/1/tak, jeśli
-                po błędzie użytkownik ma poprawiać tylko odpowiedź (bez
-                przepisywania pytania). W polu back możesz podać kilka
-                odpowiedzi, oddzielając je średnikiem lub kreską | (np. cat;
-                kitty). Dodatkowe kolumny image_front / image_back możesz
-                wykorzystać przy imporcie ZIP (pliki w folderze images/ obok
-                data.csv). Dla fiszek PRAWDA/FAŁSZ dodaj kolumnę is_true (alias:
-                czy_prawda) z wartością true/false — obecność tej kolumny
-                ustawia typ karty na true/false. Możesz też pobrać gotowy
-                szablon CSV do uzupełnienia na komputerze.
-              </Text>
-              <View style={styles.modeActions}>
-                <MyButton
-                  text="Importuj"
-                  onPress={handleSelectCsv}
-                  accessibilityLabel="Wybierz plik CSV z dysku"
-                  width={125}
-                />
-                <MyButton
-                  text="Pobierz"
-                  color="my_yellow"
-                  onPress={handleDownloadSample}
-                  accessibilityLabel="Pobierz przykładowy plik CSV"
-                  width={125}
-                />
-              </View>
-              {csvFileName && (
-                <Text style={styles.csvSelectedFile}>
-                  Wybrany plik: {csvFileName}
-                </Text>
-              )}
+              <CsvImportGuide
+                onPickFile={handleSelectCsv}
+                selectedFileName={csvFileName}
+                setPopup={setPopup}
+              />
             </View>
           ) : (
             <View style={styles.modeContainer}>
@@ -769,7 +680,7 @@ export default function CustomCourseContentScreen() {
                             styles.cardTypeDropdownItem,
                             idx === 0 && styles.cardTypeDropdownItemFirst,
                             idx === cardTypeOptions.length - 1 &&
-                              styles.cardTypeDropdownItemLast,
+                            styles.cardTypeDropdownItemLast,
                             isActive && styles.cardTypeDropdownItemActive,
                             pressed ? { opacity: 0.9 } : null,
                           ]}
