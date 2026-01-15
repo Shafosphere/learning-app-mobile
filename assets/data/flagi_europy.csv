@@ -1,55 +1,55 @@
-back,image_front
-Andora,ad.svg
-Albania,al.svg
-Austria,at.svg
-Wyspy Alandzkie,ax.svg
-Bośnia i Hercegowina,ba.svg
-Belgia,be.svg
-Bułgaria,bg.svg
-Białoruś,by.svg
-Szwajcaria,ch.svg
-Cypr,cy.svg
-Czechy,cz.svg
-Niemcy,de.svg
-Dania,dk.svg
-Estonia,ee.svg
-Hiszpania,es.svg
-Unia Europejska,eu.svg
-Finlandia,fi.svg
-Wyspy Owcze,fo.svg
-Francja,fr.svg
-Anglia,gb-eng.svg
-Irlandia Północna,gb-nir.svg
-Szkocja,gb-sct.svg
-Wielka Brytania,gb.svg
-Walia,gb-wls.svg
-Grecja,gr.svg
-Chorwacja,hr.svg
-Węgry,hu.svg
-Irlandia,ie.svg
-Islandia,is.svg
-Włochy,it.svg
-Liechtenstein,li.svg
-Litwa,lt.svg
-Luksemburg,lu.svg
-Łotwa,lv.svg
-Monako,mc.svg
-Mołdawia,md.svg
-Czarnogóra,me.svg
-Macedonia Północna,mk.svg
-Malta,mt.svg
-Niderlandy,nl.svg
-Norwegia,no.svg
-Polska,pl.svg
-Portugalia,pt.svg
-Rumunia,ro.svg
-Serbia,rs.svg
-Rosja,ru.svg
-Szwecja,se.svg
-Słowenia,si.svg
-Svalbard i Jan Mayen,sj.svg
-Słowacja,sk.svg
-San Marino,sm.svg
-Ukraina,ua.svg
-Watykan,va.svg
-Kosowo,xk.svg
+image_front,back
+ad.svg,Andora
+al.svg,Albania
+at.svg,Austria
+ax.svg,Wyspy Alandzkie
+ba.svg,Bośnia i Hercegowina
+be.svg,Belgia
+bg.svg,Bułgaria
+by.svg,Białoruś
+ch.svg,Szwajcaria
+cy.svg,Cypr
+cz.svg,Czechy
+de.svg,Niemcy
+dk.svg,Dania
+ee.svg,Estonia
+es.svg,Hiszpania
+eu.svg,Unia Europejska
+fi.svg,Finlandia
+fo.svg,Wyspy Owcze
+fr.svg,Francja
+gb-eng.svg,Anglia
+gb-nir.svg,Irlandia Północna
+gb-sct.svg,Szkocja
+gb.svg,Wielka Brytania
+gb-wls.svg,Walia
+gr.svg,Grecja
+hr.svg,Chorwacja
+hu.svg,Węgry
+ie.svg,Irlandia
+is.svg,Islandia
+it.svg,Włochy
+li.svg,Liechtenstein
+lt.svg,Litwa
+lu.svg,Luksemburg
+lv.svg,Łotwa
+mc.svg,Monako
+md.svg,Mołdawia
+me.svg,Czarnogóra
+mk.svg,Macedonia Północna
+mt.svg,Malta
+nl.svg,Niderlandy
+no.svg,Norwegia
+pl.svg,Polska
+pt.svg,Portugalia
+ro.svg,Rumunia
+rs.svg,Serbia
+ru.svg,Rosja
+se.svg,Szwecja
+si.svg,Słowenia
+sj.svg,Svalbard i Jan Mayen
+sk.svg,Słowacja
+sm.svg,San Marino
+ua.svg,Ukraina
+va.svg,Watykan
+xk.svg,Kosowo

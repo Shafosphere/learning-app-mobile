@@ -76,9 +76,18 @@ export const useStyles = createThemeStylesHook((colors) => {
       gap: 12,
       alignItems: "flex-start" as const,
     },
+    imagesRowSingle: {
+      justifyContent: "flex-start" as const,
+    },
+    imageHero: {
+      marginBottom: 6,
+    },
     imageSlot: {
       flex: 1,
       gap: 6,
+    },
+    imageSlotFull: {
+      flex: 1,
     },
     imageLabel: {
       fontSize: 12,
@@ -123,9 +132,11 @@ export const useStyles = createThemeStylesHook((colors) => {
       width: 48,
       alignItems: "center" as const,
       justifyContent: "space-between" as const,
-      // paddingVertical: 12,
       gap: 18,
-      // backgroundColor: colors.my_green,
+    },
+    cardActionsImage: {},
+    cardActionButtonAddImage: {
+      marginTop: 84,
     },
     displayCardCorrect: {
       borderLeftWidth: 4,
@@ -154,7 +165,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       color: colors.headline,
     },
     removeButtonDisabled: {
-      opacity: 0.4,
+      opacity: 1,
     },
     buttonContainer: {
       flexDirection: "row" as const,

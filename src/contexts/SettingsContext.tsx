@@ -270,10 +270,10 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseBoxZeroEnabled: async () => {},
   getCustomCourseBoxZeroEnabled: () => false,
   setCustomCourseBoxZeroEnabled: async () => {},
-  autoflowEnabled: false,
-  getBuiltinCourseAutoflowEnabled: () => false,
+  autoflowEnabled: true,
+  getBuiltinCourseAutoflowEnabled: () => true,
   setBuiltinCourseAutoflowEnabled: async () => {},
-  getCustomCourseAutoflowEnabled: () => false,
+  getCustomCourseAutoflowEnabled: () => true,
   setCustomCourseAutoflowEnabled: async () => {},
   skipCorrectionEnabled: false,
   getBuiltinCourseSkipCorrectionEnabled: () => false,
@@ -384,7 +384,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     );
   const [autoflowDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.autoflowEnabled",
-    false
+    true
   );
   const [autoflowOverrides, setAutoflowOverrides] =
     usePersistedState<CourseAutoflowOverrides>(

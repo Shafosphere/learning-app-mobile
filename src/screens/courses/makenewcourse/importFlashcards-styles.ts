@@ -26,7 +26,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   segmentedControl: {
     marginTop: 28,
     flexDirection: "row" as const,
-    backgroundColor: colors.lightbg,
+    backgroundColor: colors.secondBackground,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: colors.border,
@@ -56,6 +56,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 2,
     marginBottom: 18,
     gap: 12,
+    position: "relative" as const,
   },
   cardTypeSelector: {
     flexDirection: "row" as const,
@@ -78,12 +79,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     gap: 4,
   },
   cardTypeDropdown: {
+    position: "absolute" as const,
+    top: "100%",
+    left: 0,
+    right: 0,
     marginTop: 6,
     borderRadius: 12,
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.secondBackground,
     overflow: "hidden" as const,
+    zIndex: 10,
+    elevation: 5,
   },
   cardTypeDropdownItem: {
     paddingVertical: 12,
@@ -114,7 +121,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   cardTypeOptionLabelActive: {
-    color: colors.darkbg,
+    color: colors.headline,
   },
   modeTitle: {
     fontSize: 24,

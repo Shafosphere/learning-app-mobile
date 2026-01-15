@@ -61,8 +61,10 @@ export function CourseSettingsSection({
 
       <View style={toggleRow}>
         <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Faza zapoznania (Box 0)</Text>
-          <Text style={toggleSubtitle}>Steruj tylko dla tego kursu.</Text>
+          <Text style={toggleTitle}>Faza zapoznania (Pudełko 0)</Text>
+          <Text style={toggleSubtitle}>
+            To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami.
+          </Text>
         </View>
         <Switch
           value={boxZeroEnabled}
@@ -131,12 +133,12 @@ export function CourseSettingsSection({
           {
             key: "large" as FlashcardsCardSize,
             title: "Duża",
-            subtitle: "Więcej miejsca na treść pytania.",
+            subtitle: "Karta rozszerza się pionowo i widzisz cały tekst.",
           },
           {
             key: "small" as FlashcardsCardSize,
             title: "Mała",
-            subtitle: "Kompaktowy widok z mniejszą kartą.",
+            subtitle: "Tekst jest w jednej linii i przesuwa się.",
           },
         ].map((option, idx) => {
           const isActive = cardSize === option.key;

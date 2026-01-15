@@ -8,6 +8,7 @@ import {
 } from "@/src/db/sqlite/db";
 import {
   createEmptyManualCard,
+  ensureCardsNormalized,
   normalizeAnswers,
   useManualCardsForm,
   type ManualCard,
@@ -25,7 +26,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Platform, Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./importFlashcards-styles";
 
@@ -114,6 +115,11 @@ export default function CustomCourseContentScreen() {
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
+  const manualCardsByTypeRef = useRef<Record<ManualCardType, ManualCard[]>>({
+    text: manualCards,
+    image: [createEmptyManualCard("card-image-0", "image")],
+    true_false: [createEmptyManualCard("card-truefalse-0", "true_false")],
+  });
   const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
   const [cardTypeMenuOpen, setCardTypeMenuOpen] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
@@ -148,6 +154,7 @@ export default function CustomCourseContentScreen() {
             answers: [normalizedAnswer],
             imageFront: null,
             imageBack: null,
+            front: card.front ?? "",
           };
         }
         const ensuredAnswers = card.answers.length > 0 ? card.answers : [""];
@@ -155,21 +162,44 @@ export default function CustomCourseContentScreen() {
           ...card,
           type: nextType,
           answers: ensuredAnswers,
+          front: nextType === "image" ? "" : card.front ?? "",
           imageFront: nextType === "image" ? card.imageFront ?? null : null,
-          imageBack: nextType === "image" ? card.imageBack ?? null : null,
+          imageBack: nextType === "image" ? null : card.imageBack ?? null,
         };
       }),
     []
   );
 
+  const persistCurrentManualCards = useCallback(() => {
+    manualCardsByTypeRef.current[manualCardType] = ensureCardsNormalized(
+      manualCards.map((card) => ({ ...card, type: manualCardType }))
+    );
+  }, [manualCardType, manualCards]);
+
+  const loadCardsForType = useCallback(
+    (nextType: ManualCardType, providedCards?: ManualCard[]) => {
+      persistCurrentManualCards();
+      const nextCards =
+        providedCards ??
+        manualCardsByTypeRef.current[nextType] ??
+        [createEmptyManualCard(undefined, nextType)];
+      const normalized = ensureCardsNormalized(
+        nextCards.map((card) => ({ ...card, type: nextType }))
+      );
+      manualCardsByTypeRef.current[nextType] = normalized;
+      setManualCardType(nextType);
+      setCardTypeMenuOpen(false);
+      replaceManualCards(normalized);
+    },
+    [persistCurrentManualCards, replaceManualCards]
+  );
+
   const handleManualCardTypeChange = useCallback(
     (nextType: ManualCardType) => {
       if (nextType === manualCardType) return;
-      setManualCardType(nextType);
-      setCardTypeMenuOpen(false);
-      replaceManualCards(mapCardsToType(manualCards, nextType));
+      loadCardsForType(nextType);
     },
-    [manualCardType, manualCards, mapCardsToType, replaceManualCards]
+    [loadCardsForType, manualCardType]
   );
 
   const parseBooleanValue = (value: unknown): boolean => {
@@ -359,8 +389,7 @@ export default function CustomCourseContentScreen() {
       }
 
       const inferredType = inferCardTypeFromCards(cards);
-      setManualCardType(inferredType);
-      replaceManualCards(mapCardsToType(cards, inferredType));
+      loadCardsForType(inferredType, mapCardsToType(cards, inferredType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z ZIP`,
         color: "calm",
@@ -449,8 +478,7 @@ export default function CustomCourseContentScreen() {
         return;
       }
       const inferredType = inferCardTypeFromCards(cards);
-      setManualCardType(inferredType);
-      replaceManualCards(mapCardsToType(cards, inferredType));
+      loadCardsForType(inferredType, mapCardsToType(cards, inferredType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
         color: "calm",
@@ -562,7 +590,8 @@ export default function CustomCourseContentScreen() {
     >((acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
-      if (!frontText && answers.length === 0) {
+      const hasFrontImage = (card.imageFront ?? "").toString().length > 0;
+      if (!frontText && answers.length === 0 && !hasFrontImage) {
         return acc;
       }
       const backText = answers[0] ?? "";
