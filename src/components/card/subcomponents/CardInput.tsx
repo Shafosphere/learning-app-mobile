@@ -1,9 +1,9 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { Image } from "expo-image";
-import { useMemo, useState } from "react";
+import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
+import { PromptImage } from "./PromptImage";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -168,31 +168,17 @@ export function CardInput({
     typoDiff
   ]);
 
-  const [imageAspectRatio, setImageAspectRatio] = useState<number | null>(null);
-
   const imageBlock = promptImageUri ? (
-    <View
-      style={styles.promptImageWrapper}
-      onLayout={({ nativeEvent }) => {
+    <PromptImage
+      key={promptImageUri}
+      uri={promptImageUri}
+      imageStyle={styles.promptImage}
+      onHeightChange={(height) => {
         if (allowMultilinePrompt && onPromptLayout) {
-          onPromptLayout(nativeEvent.layout.height);
+          onPromptLayout(height);
         }
       }}
-    >
-      <Image
-        source={{ uri: promptImageUri }}
-        style={[
-          styles.promptImage,
-          { aspectRatio: imageAspectRatio ?? 1.5 },
-        ]}
-        contentFit="contain"
-        onLoad={({ source }) => {
-          if (source?.width && source?.height) {
-            setImageAspectRatio(source.width / source.height);
-          }
-        }}
-      />
-    </View>
+    />
   ) : null;
 
   const content = (

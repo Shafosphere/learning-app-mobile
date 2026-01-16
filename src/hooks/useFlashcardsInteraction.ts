@@ -263,7 +263,7 @@ export function useFlashcardsInteraction({
         return;
       }
       if (!selectedItem) return;
-      const answerToUse = answerOverride ?? answer;
+      const answerToUse = (answerOverride ?? answer).replace(/ +$/, "");
 
       const reorderedTranslations = moveTranslationToFront(
         selectedItem.translations,
@@ -456,11 +456,16 @@ export function useFlashcardsInteraction({
     if (!correction) {
       return;
     }
-    const isAnswerOnly = Boolean(correction.answerOnly);
-    if (
-      (isAnswerOnly || matchesCorrectionField(correction.input1, correction.awers)) &&
-      matchesCorrectionField(correction.input2, correction.rewers)
-    ) {
+    const expectsAwersInput = !correction.answerOnly && reversed;
+    const expectsRewersInput = correction.answerOnly || !reversed;
+    const awersOk =
+      !expectsAwersInput ||
+      matchesCorrectionField(correction.input1, correction.awers);
+    const rewersOk =
+      !expectsRewersInput ||
+      matchesCorrectionField(correction.input2, correction.rewers);
+
+    if (awersOk && rewersOk) {
       if (selectedItem) {
         const promote = correction.mode === "intro";
         moveElement(selectedItem.id, promote);
@@ -469,7 +474,7 @@ export function useFlashcardsInteraction({
       setCorrection(null);
       setQueueNext(true);
     }
-  }, [correction, matchesCorrectionField, moveElement, selectedItem]);
+  }, [correction, matchesCorrectionField, moveElement, reversed, selectedItem]);
 
   useEffect(() => {
     if (queueNext && activeBox) {

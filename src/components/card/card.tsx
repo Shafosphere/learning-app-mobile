@@ -107,9 +107,9 @@ export default function Card({
   }, []);
   const handleAnswerChange = useCallback(
     (value: string) => {
-      setAnswer(trimTrailingSpaces(value));
+      setAnswer(value);
     },
-    [setAnswer, trimTrailingSpaces]
+    [setAnswer]
   );
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
@@ -128,6 +128,7 @@ export default function Card({
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
   const lastTranslationItemId = useRef<number | null>(null);
+  const lastCorrectionFocusedId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
   const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const previousCorrectionInput2 = useRef<string>("");
@@ -220,9 +221,10 @@ export default function Card({
     return Math.max(padded, input2LayoutWidth || 0);
   }, [input2ExpectedWidth, input2LayoutWidth, input2TextWidth]);
 
-  const correctionPrimaryRef = answerOnly
-    ? correctionInput2Ref
-    : correctionInput1Ref;
+  const correctionPrimaryRef =
+    shouldCorrectAwers && correctionInput1Ref
+      ? correctionInput1Ref
+      : correctionInput2Ref;
 
   const len = selectedItem?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
@@ -415,6 +417,7 @@ export default function Card({
     answerOnly,
     type,
     showCorrectionInputs,
+    correctionPrimaryRef,
   ]);
 
   // Achievements integration
@@ -430,13 +433,17 @@ export default function Card({
   useEffect(() => {
     if (
       correction &&
-      needsCorrectionFocus.current &&
       (result === false || isIntroMode)
     ) {
-      focusWithDelay(correctionPrimaryRef);
-      needsCorrectionFocus.current = false;
+      const hasFocusedThisCorrection =
+        lastCorrectionFocusedId.current === correction.cardId;
+      if (needsCorrectionFocus.current || !hasFocusedThisCorrection) {
+        focusWithDelay(correctionPrimaryRef);
+        needsCorrectionFocus.current = false;
+        lastCorrectionFocusedId.current = correction.cardId;
+      }
     }
-  }, [correction, isIntroMode, result, focusWithDelay, answerOnly]);
+  }, [correction, isIntroMode, result, focusWithDelay, answerOnly, correctionPrimaryRef]);
 
   useEffect(() => {
     const currentId = selectedItem?.id ?? null;
@@ -451,7 +458,7 @@ export default function Card({
       }
       previousSelectedId.current = currentId;
     }
-  }, [isIntroMode, selectedItem, result, focusWithDelay, answerOnly]);
+  }, [isIntroMode, selectedItem, result, focusWithDelay, answerOnly, correctionPrimaryRef]);
 
   useEffect(() => {
     previousCorrectionInput2.current = trimTrailingSpaces(
