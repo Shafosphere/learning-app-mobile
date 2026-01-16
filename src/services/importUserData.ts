@@ -66,8 +66,8 @@ async function restoreCustomCourse(
     for (const card of flashcards) {
         const insertCardResult = await db.runAsync(
             `INSERT INTO custom_flashcards
-         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, type, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             newCourseId,
             card.frontText,
             card.backText,
@@ -78,6 +78,7 @@ async function restoreCustomCourse(
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,
+            card.type ?? "text",
             card.createdAt,
             now
         );
@@ -178,6 +179,7 @@ async function restoreOfficialCourse(
         position: number | null;
         flipped: number;
         answerOnly: number;
+        type: string | null;
         createdAt: number;
         updatedAt: number;
         answerText: string | null;
@@ -193,6 +195,7 @@ async function restoreOfficialCourse(
            cf.position      AS position,
            cf.flipped       AS flipped,
            cf.answer_only  AS answerOnly,
+           cf.type          AS type,
            cf.created_at    AS createdAt,
            cf.updated_at    AS updatedAt,
            cfa.answer_text  AS answerText
@@ -226,6 +229,7 @@ async function restoreOfficialCourse(
                 position: row.position,
                 flipped: row.flipped === 1,
                 answerOnly: row.answerOnly === 1,
+                type: row.type ?? "text",
                 createdAt: row.createdAt,
                 updatedAt: row.updatedAt,
             };
@@ -268,6 +272,7 @@ async function restoreOfficialCourse(
             const nextAnswerOnly = card.answerOnly ?? false;
             const nextImageFront = await persistImageIfAvailable(card.imageFront);
             const nextImageBack = await persistImageIfAvailable(card.imageBack);
+            const nextType = card.type ?? "text";
             const shouldUpdateHints =
                 nextHintFront !== (existing.hintFront ?? null) ||
                 nextHintBack !== (existing.hintBack ?? null);
@@ -276,16 +281,23 @@ async function restoreOfficialCourse(
             const shouldUpdateImages =
                 nextImageFront !== (existing.imageFront ?? null) ||
                 nextImageBack !== (existing.imageBack ?? null);
-            if (shouldUpdateHints || shouldUpdateAnswerOnly || shouldUpdateImages) {
+            const shouldUpdateType = nextType !== (existing.type ?? "text");
+            if (
+                shouldUpdateHints ||
+                shouldUpdateAnswerOnly ||
+                shouldUpdateImages ||
+                shouldUpdateType
+            ) {
                 await db.runAsync(
                     `UPDATE custom_flashcards
-                       SET hint_front = ?, hint_back = ?, image_front = ?, image_back = ?, answer_only = ?, updated_at = ?
+                       SET hint_front = ?, hint_back = ?, image_front = ?, image_back = ?, answer_only = ?, type = ?, updated_at = ?
                      WHERE id = ?;`,
                     nextHintFront,
                     nextHintBack,
                     nextImageFront,
                     nextImageBack,
                     nextAnswerOnly ? 1 : 0,
+                    nextType,
                     now,
                     existing.id
                 );
@@ -306,8 +318,8 @@ async function restoreOfficialCourse(
 
         const insertCardResult = await db.runAsync(
             `INSERT INTO custom_flashcards
-               (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, created_at, updated_at)
-             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+               (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, type, created_at, updated_at)
+             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
             targetCourseId,
             card.frontText,
             card.backText,
@@ -318,6 +330,7 @@ async function restoreOfficialCourse(
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,
+            card.type ?? "text",
             card.createdAt ?? now,
             now
         );

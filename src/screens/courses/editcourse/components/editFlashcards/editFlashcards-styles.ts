@@ -131,8 +131,9 @@ export const useStyles = createThemeStylesHook((colors) => {
     cardActions: {
       width: 48,
       alignItems: "center" as const,
-      justifyContent: "space-between" as const,
-      gap: 18,
+      justifyContent: "flex-start" as const,
+      gap: 14,
+      paddingVertical: 2,
     },
     cardActionsImage: {},
     cardActionButtonAddImage: {
@@ -163,6 +164,12 @@ export const useStyles = createThemeStylesHook((colors) => {
     },
     cardActionIcon: {
       color: colors.headline,
+    },
+    imageClearButton: {
+      marginTop: -2,
+    },
+    imageClearIcon: {
+      color: colors.my_red,
     },
     removeButtonDisabled: {
       opacity: 1,

@@ -65,6 +65,8 @@ export interface ManualCardsEditorStyles {
   trueFalseOptionTextActive?: TextStyle;
   cardActionsImage?: ViewStyle;
   cardActionButtonAddImage?: ViewStyle;
+  imageClearButton?: ViewStyle;
+  imageClearIcon?: TextStyle;
 }
 
 export interface ManualCardsEditorProps {
@@ -163,8 +165,12 @@ export const ManualCardsEditor = ({
 
   const pickImage = async (cardId: string, side: "front" | "back") => {
     if (isDisplayMode) return;
+    const imageMediaType =
+      (ImagePicker as any).MediaType?.Images ??
+      (ImagePicker as any).MediaTypeOptions?.Images ??
+      ImagePicker.MediaTypeOptions.Images;
     const result = await ImagePicker.launchImageLibraryAsync({
-      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      mediaTypes: imageMediaType,
       quality: 0.8,
       allowsEditing: false,
       allowsMultipleSelection: false,
@@ -219,6 +225,8 @@ export const ManualCardsEditor = ({
         const trueFalseValue =
           card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
         const showFrontInput = !isImageType;
+        const showImageHeroClearAction =
+          isImageType && Boolean(card.imageFront) && allowImageEditing;
 
         return (
           <View
@@ -328,40 +336,21 @@ export const ManualCardsEditor = ({
                         pressed && allowImageEditing ? { opacity: 0.85 } : null,
                       ]}
                     >
-                      {card.imageFront ? (
-                        <Image
-                          source={{ uri: card.imageFront }}
-                          style={styles.imageThumb}
-                          resizeMode="cover"
-                        />
-                      ) : (
-                        <Text style={styles.imagePlaceholder}>
-                          {allowImageEditing ? "Dodaj obraz" : "Brak"}
-                        </Text>
-                      )}
-                    </Pressable>
-                    {card.imageFront && allowImageEditing ? (
-                      <View style={styles.imageButtonsRow}>
-                        <Pressable
-                          accessibilityRole="button"
-                          accessibilityLabel={`Usuń obraz awersu dla fiszki ${
-                            index + 1
-                          }`}
-                          hitSlop={8}
-                          onPress={() => clearImage(card.id, "front")}
-                          style={styles.imageButton}
-                        >
-                          <Feather
-                            name="trash-2"
-                            size={16}
-                            color={styles.cardActionIcon?.color ?? "black"}
-                          />
-                        </Pressable>
-                      </View>
-                    ) : null}
-                  </View>
+                    {card.imageFront ? (
+                      <Image
+                        source={{ uri: card.imageFront }}
+                        style={styles.imageThumb}
+                        resizeMode="cover"
+                      />
+                    ) : (
+                      <Text style={styles.imagePlaceholder}>
+                        {allowImageEditing ? "Dodaj obraz" : "Brak"}
+                      </Text>
+                    )}
+                  </Pressable>
                 </View>
-              )}
+              </View>
+            )}
               <View style={styles.cardDivider} />
               <View style={styles.answersContainer}>
                 {isTrueFalse ? (
@@ -615,6 +604,26 @@ export const ManualCardsEditor = ({
                         color={styles.cardActionIcon?.color ?? "black"}
                       />
                     </Pressable>
+                    {showImageHeroClearAction ? (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Usuń obraz dla fiszki ${
+                          index + 1
+                        }`}
+                        style={[
+                          styles.cardActionButton,
+                          styles.imageClearButton,
+                        ]}
+                        hitSlop={8}
+                        onPress={() => clearImage(card.id, "front")}
+                      >
+                        <Feather
+                          name="x"
+                          size={22}
+                          color={styles.imageClearIcon?.color ?? "#D72638"}
+                        />
+                      </Pressable>
+                    ) : null}
                     {!isTrueFalse && (
                       <Pressable
                         accessibilityRole="button"

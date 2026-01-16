@@ -28,6 +28,8 @@ import {
   ensureCardsNormalized,
   normalizeAnswers,
   useManualCardsForm,
+  type ManualCard,
+  type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
 import {
   ManualCardsEditor,
@@ -96,6 +98,7 @@ export default function CustomCourseEditor({
     enableHistory: true,
     historyLimit: 50,
   });
+  const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
 
   const initialBoxZeroEnabled = useMemo(
     () => getCustomCourseBoxZeroEnabled(courseId),
@@ -150,6 +153,34 @@ export default function CustomCourseEditor({
       )}`,
     [courseId]
   );
+
+  const inferCardTypeFromCards = useCallback(
+    (cards: ManualCard[]): ManualCardType => {
+      if (
+        cards.length > 0 &&
+        cards.every((card) => (card.type ?? "text") === "true_false")
+      ) {
+        return "true_false";
+      }
+      if (
+        cards.some(
+          (card) =>
+            (card.type ?? "text") === "image" ||
+            Boolean(card.imageFront) ||
+            Boolean(card.imageBack)
+        )
+      ) {
+        return "image";
+      }
+      return "text";
+    },
+    []
+  );
+
+  useEffect(() => {
+    const inferred = inferCardTypeFromCards(manualCards);
+    setManualCardType((prev) => (prev === inferred ? prev : inferred));
+  }, [inferCardTypeFromCards, manualCards]);
 
   const courseIsTrueFalseOnly = useMemo(
     () =>
@@ -650,15 +681,20 @@ export default function CustomCourseEditor({
                   </View>
                   <ManualCardsEditor
                     manualCards={manualCards}
+                    cardType={manualCardType}
                     styles={{} as ManualCardsEditorStyles}
                     onCardFrontChange={handleManualCardFrontChange}
                     onCardAnswerChange={handleManualCardAnswerChange}
                     onAddAnswer={handleAddAnswer}
                     onRemoveAnswer={handleRemoveAnswer}
-                    onAddCard={handleAddCard}
+                    onAddCard={() => handleAddCard(manualCardType)}
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
-                    onCardImageChange={handleManualCardImageChange}
+                    onCardImageChange={
+                      manualCardType === "image"
+                        ? handleManualCardImageChange
+                        : undefined
+                    }
                   />
                 </>
               )}
