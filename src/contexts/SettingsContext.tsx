@@ -99,6 +99,11 @@ type CourseSkipCorrectionOverrides = {
   custom: Record<string, boolean>;
 };
 
+type CourseImageSizeOverrides = {
+  builtin: Record<string, FlashcardsImageSize>;
+  custom: Record<string, FlashcardsImageSize>;
+};
+
 const DEFAULT_COURSE_BOX_ZERO_OVERRIDES: CourseBoxZeroOverrides = {
   builtin: {},
   custom: {},
@@ -110,6 +115,11 @@ const DEFAULT_COURSE_AUTOFLOW_OVERRIDES: CourseAutoflowOverrides = {
 };
 
 const DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES: CourseSkipCorrectionOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES: CourseImageSizeOverrides = {
   builtin: {},
   custom: {},
 };
@@ -209,6 +219,19 @@ interface SettingsContextValue {
     courseId: number,
     size: FlashcardsCardSize
   ) => Promise<void>;
+  flashcardsImageSize: FlashcardsImageSize;
+  flashcardsImageSizeDefault: FlashcardsImageSize;
+  setFlashcardsImageSizeDefault: (size: FlashcardsImageSize) => Promise<void>;
+  getBuiltinCourseImageSize: (params: CourseBoxZeroKeyParams) => FlashcardsImageSize;
+  setBuiltinCourseImageSize: (
+    params: CourseBoxZeroKeyParams,
+    size: FlashcardsImageSize
+  ) => Promise<void>;
+  getCustomCourseImageSize: (courseId: number) => FlashcardsImageSize;
+  setCustomCourseImageSize: (
+    courseId: number,
+    size: FlashcardsImageSize
+  ) => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
   feedbackEnabled: boolean;
@@ -243,6 +266,7 @@ interface SettingsContextValue {
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type FlashcardsCardSize = "large" | "small";
+export type FlashcardsImageSize = "dynamic" | "small" | "medium" | "large";
 type CourseCardSizeOverrides = {
   builtin: Record<string, FlashcardsCardSize>;
   custom: Record<string, FlashcardsCardSize>;
@@ -296,6 +320,7 @@ const defaultValue: SettingsContextValue = {
   flashcardsSuggestionsEnabled: true,
   toggleFlashcardsSuggestions: async () => {},
   flashcardsCardSize: "large",
+  flashcardsImageSize: "dynamic",
   dailyGoal: 20,
   setDailyGoal: async () => {},
   feedbackEnabled: true,
@@ -318,6 +343,12 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseCardSize: async () => {},
   getCustomCourseCardSize: () => "large",
   setCustomCourseCardSize: async () => {},
+  flashcardsImageSizeDefault: "dynamic",
+  setFlashcardsImageSizeDefault: async () => {},
+  getBuiltinCourseImageSize: () => "dynamic",
+  setBuiltinCourseImageSize: async () => {},
+  getCustomCourseImageSize: () => "dynamic",
+  setCustomCourseImageSize: async () => {},
   highContrastEnabled: false,
   toggleHighContrast: async () => {},
   colorBlindMode: "none",
@@ -396,8 +427,15 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcards.courseCardSizeOverrides",
       { builtin: {}, custom: {} }
     );
+  const [imageSizeOverrides, setImageSizeOverrides] =
+    usePersistedState<CourseImageSizeOverrides>(
+      "flashcards.courseImageSizeOverrides",
+      DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES
+    );
   const [flashcardsCardSizeDefault, setFlashcardsCardSizeDefault] =
     usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
+  const [flashcardsImageSizeDefault, setFlashcardsImageSizeDefault] =
+    usePersistedState<FlashcardsImageSize>("flashcards.imageSize", "dynamic");
   const [skipCorrectionDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.skipCorrectionEnabled",
     false
@@ -744,6 +782,77 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [cardSizeOverrides, flashcardsCardSizeDefault, setCardSizeOverrides]
   );
 
+  const getBuiltinCourseImageSize = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = imageSizeOverrides.builtin[key];
+      return override ?? flashcardsImageSizeDefault;
+    },
+    [flashcardsImageSizeDefault, imageSizeOverrides.builtin]
+  );
+
+  const setBuiltinCourseImageSize = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      size: FlashcardsImageSize
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = imageSizeOverrides.builtin[key];
+      const shouldRemove = size === flashcardsImageSizeDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === size) {
+        return;
+      }
+      const nextBuiltin = { ...imageSizeOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = size;
+      }
+      await setImageSizeOverrides({
+        builtin: nextBuiltin,
+        custom: { ...imageSizeOverrides.custom },
+      });
+    },
+    [flashcardsImageSizeDefault, imageSizeOverrides, setImageSizeOverrides]
+  );
+
+  const getCustomCourseImageSize = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = imageSizeOverrides.custom[key];
+      return override ?? flashcardsImageSizeDefault;
+    },
+    [flashcardsImageSizeDefault, imageSizeOverrides.custom]
+  );
+
+  const setCustomCourseImageSize = useCallback(
+    async (courseId: number, size: FlashcardsImageSize): Promise<void> => {
+      const key = courseId.toString();
+      const current = imageSizeOverrides.custom[key];
+      const shouldRemove = size === flashcardsImageSizeDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === size) {
+        return;
+      }
+      const nextCustom = { ...imageSizeOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = size;
+      }
+      await setImageSizeOverrides({
+        builtin: { ...imageSizeOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [flashcardsImageSizeDefault, imageSizeOverrides, setImageSizeOverrides]
+  );
+
   const getBuiltinCourseSkipCorrectionEnabled = useCallback(
     ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
       const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
@@ -1028,6 +1137,30 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     getCustomCourseCardSize,
   ]);
 
+  const flashcardsImageSize = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseImageSize(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseImageSize({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return flashcardsImageSizeDefault;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    flashcardsImageSizeDefault,
+    getBuiltinCourseImageSize,
+    getCustomCourseImageSize,
+  ]);
+
   const skipCorrectionEnabled = useMemo(() => {
     if (activeCustomCourseId != null) {
       return getCustomCourseSkipCorrectionEnabled(activeCustomCourseId);
@@ -1138,6 +1271,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
       setFlashcardsSuggestionsEnabled(false),
       setFlashcardsCardSizeDefault("large"),
+      setFlashcardsImageSizeDefault("dynamic"),
       _setLearningRemindersEnabled(false),
       _setFeedbackVolume(1),
     ]);
@@ -1147,6 +1281,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     _setFeedbackVolume,
     setFlashcardsBatchSize,
     setFlashcardsCardSizeDefault,
+    setFlashcardsImageSizeDefault,
     setIgnoreDiacriticsInSpellcheck,
     setFlashcardsSuggestionsEnabled,
     setShowBoxFaces,
@@ -1220,6 +1355,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseCardSize,
         getCustomCourseCardSize,
         setCustomCourseCardSize,
+        flashcardsImageSize,
+        flashcardsImageSizeDefault,
+        setFlashcardsImageSizeDefault,
+        getBuiltinCourseImageSize,
+        setBuiltinCourseImageSize,
+        getCustomCourseImageSize,
+        setCustomCourseImageSize,
         dailyGoal,
         setDailyGoal,
         feedbackEnabled: feedbackEnabledState,

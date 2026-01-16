@@ -1,5 +1,5 @@
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
-import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
+import type { FlashcardsCardSize, FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
 type SwitchColors = {
   thumb: string;
@@ -21,6 +21,10 @@ type Props = {
   skipCorrectionLocked?: boolean;
   cardSize: FlashcardsCardSize;
   onSelectCardSize: (value: FlashcardsCardSize) => void;
+  showImageSizeOptions?: boolean;
+  imageSize?: FlashcardsImageSize;
+  onSelectImageSize?: (value: FlashcardsImageSize) => void;
+  imageSizeEnabled?: boolean;
 };
 
 export function CourseSettingsSection({
@@ -37,6 +41,10 @@ export function CourseSettingsSection({
   skipCorrectionLocked = false,
   cardSize,
   onSelectCardSize,
+  showImageSizeOptions = false,
+  imageSize,
+  onSelectImageSize,
+  imageSizeEnabled = false,
 }: Props) {
   const cardSizeStyles = localStyles(switchColors);
   const {
@@ -171,6 +179,88 @@ export function CourseSettingsSection({
           );
         })}
       </View>
+
+      {showImageSizeOptions ? (
+        <>
+          <View style={toggleRow}>
+            <View style={toggleTextWrapper}>
+              <Text style={toggleTitle}>Rozmiar obrazu</Text>
+              <Text style={toggleSubtitle}>
+                Dopasuj wysokość obrazków w dużych fiszkach.
+              </Text>
+              {!imageSizeEnabled ? (
+                <Text style={[toggleSubtitle, cardSizeStyles.imageSizeHint]}>
+                  Dostępne tylko dla dużych kart z obrazkami.
+                </Text>
+              ) : null}
+            </View>
+          </View>
+          <View style={cardSizeStyles.imageSizeRow}>
+            {[
+              {
+                key: "dynamic" as FlashcardsImageSize,
+                title: "Dynamiczny",
+                subtitle: "Użyj naturalnych proporcji",
+              },
+              {
+                key: "small" as FlashcardsImageSize,
+                title: "Mały",
+                subtitle: "40% maksymalnej wysokości",
+              },
+              {
+                key: "medium" as FlashcardsImageSize,
+                title: "Średni",
+                subtitle: "60% maksymalnej wysokości",
+              },
+              {
+                key: "large" as FlashcardsImageSize,
+                title: "Duży",
+                subtitle: "100% maksymalnej wysokości",
+              },
+            ].map((option) => {
+              const isActive = imageSize === option.key;
+              const isDisabled = !imageSizeEnabled || !onSelectImageSize;
+              return (
+                <Pressable
+                  key={option.key}
+                  style={[
+                    cardSizeStyles.cardSizeOption,
+                    cardSizeStyles.imageSizeOption,
+                    isActive
+                      ? cardSizeStyles.cardSizeOptionActive
+                      : cardSizeStyles.cardSizeOptionInactive,
+                    isDisabled && cardSizeStyles.cardSizeOptionDisabled,
+                  ]}
+                  onPress={
+                    isDisabled ? undefined : () => onSelectImageSize(option.key)
+                  }
+                  disabled={isDisabled}
+                >
+                  <Text
+                    style={[
+                      toggleTitle,
+                      cardSizeStyles.cardSizeTitle,
+                      isActive && cardSizeStyles.cardSizeTitleActive,
+                      isDisabled && cardSizeStyles.cardSizeTitleDisabled,
+                    ]}
+                  >
+                    {option.title}
+                  </Text>
+                  <Text
+                    style={[
+                      toggleSubtitle,
+                      cardSizeStyles.cardSizeSubtitle,
+                      isDisabled && cardSizeStyles.cardSizeSubtitleDisabled,
+                    ]}
+                  >
+                    {option.subtitle}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      ) : null}
     </View>
   );
 }
@@ -212,5 +302,29 @@ const localStyles = (switchColors: SwitchColors) =>
     cardSizeSubtitle: {
       color: "#475569",
       marginTop: 4,
+    },
+    imageSizeRow: {
+      flexDirection: "row",
+      flexWrap: "wrap",
+      paddingHorizontal: 4,
+      marginTop: 6,
+    },
+    imageSizeOption: {
+      minWidth: "48%",
+      marginBottom: 8,
+      marginRight: 6,
+    },
+    cardSizeOptionDisabled: {
+      opacity: 0.5,
+    },
+    cardSizeTitleDisabled: {
+      color: "#94a3b8",
+    },
+    cardSizeSubtitleDisabled: {
+      color: "#94a3b8",
+    },
+    imageSizeHint: {
+      marginTop: 4,
+      color: "#94a3b8",
     },
   });

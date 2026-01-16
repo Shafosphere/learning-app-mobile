@@ -5,13 +5,17 @@ import { CourseSettingsSection } from "@/src/screens/courses/editcourse/componen
 import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEditScreen-styles";
 import type { CEFRLevel } from "@/src/types/language";
-import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
+import type {
+  FlashcardsCardSize,
+  FlashcardsImageSize,
+} from "@/src/contexts/SettingsContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 
 type CourseEditParams = {
   id?: string | string[];
@@ -121,6 +125,8 @@ function BuiltinCourseEditor({
     setBuiltinCourseSkipCorrectionEnabled,
     getBuiltinCourseCardSize,
     setBuiltinCourseCardSize,
+    getBuiltinCourseImageSize,
+    setBuiltinCourseImageSize,
   } = useSettings();
 
   const normalizedSource = sourceLang ? sourceLang.toLowerCase() : null;
@@ -150,6 +156,13 @@ function BuiltinCourseEditor({
   );
   const [cardSize, setCardSize] = useState<FlashcardsCardSize>(() =>
     getBuiltinCourseCardSize({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [imageSize, setImageSize] = useState<FlashcardsImageSize>(() =>
+    getBuiltinCourseImageSize({
       sourceLang: normalizedSource,
       targetLang: normalizedTarget,
       level: normalizedLevel,
@@ -212,6 +225,18 @@ function BuiltinCourseEditor({
   const handleCardSizeChange = async (value: FlashcardsCardSize) => {
     setCardSize(value);
     await setBuiltinCourseCardSize(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleImageSizeChange = async (value: FlashcardsImageSize) => {
+    setImageSize(value);
+    await setBuiltinCourseImageSize(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
@@ -326,6 +351,15 @@ function BuiltinCourseEditor({
     );
   };
 
+  const matchingCourse = getMatchingCourse();
+  const courseSlug = (matchingCourse as { slug?: string } | undefined)?.slug ?? null;
+  const matchingManifest = OFFICIAL_PACKS.find(
+    (pack) =>
+      (courseSlug && pack.slug === courseSlug) || pack.name === courseName
+  );
+  const courseHasImages = Boolean(matchingManifest?.imageMap);
+  const imageSizeEnabled = cardSize === "large" && courseHasImages;
+
   return (
     <View style={styles.container}>
       <ScrollView
@@ -368,6 +402,10 @@ function BuiltinCourseEditor({
             onToggleSkipCorrection={handleSkipCorrectionToggle}
             cardSize={cardSize}
             onSelectCardSize={handleCardSizeChange}
+            showImageSizeOptions={courseHasImages}
+            imageSize={imageSize}
+            onSelectImageSize={handleImageSizeChange}
+            imageSizeEnabled={imageSizeEnabled}
           />
           <View style={styles.toggleRow}>
             <View style={styles.toggleTextWrapper}>

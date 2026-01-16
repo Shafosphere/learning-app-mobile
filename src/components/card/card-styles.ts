@@ -1,5 +1,7 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+export const PROMPT_IMAGE_MAX_HEIGHT = 140;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     // flex: 1,
@@ -304,8 +306,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   promptImage: {
     width: "90%",
     maxWidth: "90%",
-    height: 140,
-    maxHeight: 140,
+    height: undefined,
+    maxHeight: PROMPT_IMAGE_MAX_HEIGHT,
     borderRadius: 0,
     backgroundColor: "transparent",
     contentFit: "contain",

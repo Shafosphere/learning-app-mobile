@@ -84,6 +84,7 @@ export default function Card({
     ignoreDiacriticsInSpellcheck,
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
+    flashcardsImageSize,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -209,6 +210,10 @@ export default function Card({
 
   // Decide if we should use large layout: either global setting OR image is present
   const useLargeLayout = flashcardsCardSize === "large" || hasImagePrompt;
+  const promptImageSizeMode =
+    flashcardsCardSize === "large" && hasImagePrompt
+      ? flashcardsImageSize
+      : "dynamic";
 
   const input1ContentWidth = useMemo(() => {
     const measured = Math.max(input1TextWidth, input1ExpectedWidth);
@@ -711,6 +716,7 @@ export default function Card({
           correction={correction}
           promptText={promptText}
           promptImageUri={promptImageUri}
+          imageSizeMode={promptImageSizeMode}
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           answerOnly={answerOnly}
@@ -763,6 +769,7 @@ export default function Card({
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
           promptImageUri={promptImageUri}
+          imageSizeMode={promptImageSizeMode}
           answer={answer}
           setAnswer={handleAnswerChange}
           mainInputRef={mainInputRef}

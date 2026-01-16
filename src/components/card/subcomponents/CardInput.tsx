@@ -1,15 +1,29 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
-import { useStyles } from "../card-styles";
+import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
 import { PromptImage } from "./PromptImage";
+import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
 const MIN_DURATION_MS = 4000;
 const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
+
+const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
+  dynamic: 1,
+  small: 0.4,
+  medium: 0.6,
+  large: 1,
+};
+
+const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
+  const fraction = IMAGE_SIZE_MULTIPLIER[mode] ?? 1;
+  const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
+  return { height: target, maxHeight: target };
+};
 
 type CardInputProps = {
   promptText: string;
@@ -34,6 +48,7 @@ type CardInputProps = {
     expectedChar: string;
     inputChar: string;
   } | null;
+  imageSizeMode: FlashcardsImageSize;
 };
 
 export function CardInput({
@@ -54,6 +69,7 @@ export function CardInput({
   next,
   hangulTarget,
   typoDiff,
+  imageSizeMode,
 }: CardInputProps) {
   const styles = useStyles();
   const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
@@ -81,6 +97,10 @@ export function CardInput({
     () =>
       Math.max(MIN_DURATION_MS, estimatedPromptWidth * MARQUEE_SPEED_PER_PIXEL_MS),
     [estimatedPromptWidth]
+  );
+  const promptImageStyle = useMemo(
+    () => buildPromptImageStyle(imageSizeMode),
+    [imageSizeMode]
   );
 
   const renderedInput = useMemo(() => {
@@ -172,7 +192,7 @@ export function CardInput({
     <PromptImage
       key={promptImageUri}
       uri={promptImageUri}
-      imageStyle={styles.promptImage}
+      imageStyle={[styles.promptImage, promptImageStyle]}
       onHeightChange={(height) => {
         if (allowMultilinePrompt && onPromptLayout) {
           onPromptLayout(height);

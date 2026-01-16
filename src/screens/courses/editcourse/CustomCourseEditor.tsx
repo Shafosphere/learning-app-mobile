@@ -20,7 +20,7 @@ import {
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
 import type { CustomFlashcardInput } from "@/src/db/sqlite/repositories/flashcards";
-import type { FlashcardsCardSize } from "@/src/contexts/SettingsContext";
+import type { FlashcardsCardSize, FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
@@ -61,6 +61,8 @@ export default function CustomCourseEditor({
     setCustomCourseSkipCorrectionEnabled,
     getCustomCourseCardSize,
     setCustomCourseCardSize,
+    getCustomCourseImageSize,
+    setCustomCourseImageSize,
   } = useSettings();
 
   const {
@@ -111,6 +113,10 @@ export default function CustomCourseEditor({
     () => getCustomCourseCardSize(courseId),
     [courseId, getCustomCourseCardSize]
   );
+  const initialImageSize = useMemo(
+    () => getCustomCourseImageSize(courseId),
+    [courseId, getCustomCourseImageSize]
+  );
 
   const [courseBoxZeroEnabled, setCourseBoxZeroEnabled] = useState(
     initialBoxZeroEnabled
@@ -123,6 +129,9 @@ export default function CustomCourseEditor({
   );
   const [courseCardSize, setCourseCardSize] = useState<FlashcardsCardSize>(
     initialCardSize
+  );
+  const [courseImageSize, setCourseImageSize] = useState<FlashcardsImageSize>(
+    initialImageSize
   );
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
@@ -148,6 +157,18 @@ export default function CustomCourseEditor({
       manualCards.every((card) => (card.type ?? "text") === "true_false"),
     [manualCards]
   );
+  const courseHasImageCards = useMemo(
+    () =>
+      manualCards.some(
+        (card) =>
+          (card.type ?? "text") === "image" ||
+          Boolean(card.imageFront) ||
+          Boolean(card.imageBack)
+      ),
+    [manualCards]
+  );
+  const imageSizeOptionsEnabled =
+    courseCardSize === "large" && courseHasImageCards;
 
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
@@ -184,6 +205,7 @@ export default function CustomCourseEditor({
         getCustomCourseSkipCorrectionEnabled(courseRow.id)
       );
       setCourseCardSize(getCustomCourseCardSize(courseRow.id));
+      setCourseImageSize(getCustomCourseImageSize(courseRow.id));
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -270,6 +292,11 @@ export default function CustomCourseEditor({
   const handleCourseCardSizeChange = async (value: FlashcardsCardSize) => {
     setCourseCardSize(value);
     await setCustomCourseCardSize(courseId, value);
+  };
+
+  const handleCourseImageSizeChange = async (value: FlashcardsImageSize) => {
+    setCourseImageSize(value);
+    await setCustomCourseImageSize(courseId, value);
   };
 
   useEffect(() => {
@@ -527,6 +554,10 @@ export default function CustomCourseEditor({
             skipCorrectionLocked={courseIsTrueFalseOnly}
             cardSize={courseCardSize}
             onSelectCardSize={handleCourseCardSizeChange}
+            showImageSizeOptions={courseHasImageCards}
+            imageSize={courseImageSize}
+            onSelectImageSize={handleCourseImageSizeChange}
+            imageSizeEnabled={imageSizeOptionsEnabled}
           />
           <View style={styles.toggleRow}>
             <View style={styles.toggleTextWrapper}>
