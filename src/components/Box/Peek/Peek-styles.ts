@@ -182,10 +182,9 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     // alignItems: "baseline",
     gap: 6,
-    height: 24,
+    minHeight: 24,
     display: "flex",
-    alignItems: "center",
-    // backgroundColor: colors.my_yellow,
+    alignItems: "flex-start",
   },
   cardSimpleIndex: {
     fontSize: 12,
@@ -255,5 +254,59 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     textAlign: "center",
     maxWidth: 260,
     lineHeight: 22,
+  },
+  cardImage: {
+    width: 96,
+    height: 96,
+    borderRadius: 12,
+    backgroundColor: "transparent",
+  },
+  cardImageSmall: {
+    width: 64,
+    height: 64,
+    borderRadius: 10,
+    backgroundColor: "transparent",
+  },
+  cardImageLarge: {
+    width: 140,
+    height: 100,
+    borderRadius: 16,
+    backgroundColor: "transparent",
+  },
+  cardValue: {
+    flex: 1,
+    gap: 6,
+  },
+  typePill: {
+    paddingVertical: 4,
+    paddingHorizontal: 10,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+  },
+  typePillText: {
+    fontSize: 12,
+    color: colors.headline,
+    fontWeight: "600",
+  },
+  cardMetaRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
+    marginBottom: 6,
+    gap: 8,
+  },
+  cardTrueFalse: {
+    color: colors.my_green ?? colors.headline,
+    fontWeight: "700",
+  },
+  cardEmptyValue: {
+    color: colors.paragraph,
+    opacity: 0.8,
+  },
+  imageOnlyWrapper: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 8,
   },
 }));

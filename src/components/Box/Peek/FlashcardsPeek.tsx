@@ -5,13 +5,13 @@ import React, { useEffect, useRef } from "react";
 import {
   Animated,
   FlatList,
-  Image,
   Modal,
   Pressable,
   Text,
   View,
   useWindowDimensions,
 } from "react-native";
+import { Image } from "expo-image";
 
 type FlashcardsPeekOverlayProps = {
   visible: boolean;
@@ -90,11 +90,38 @@ export default function FlashcardsPeekOverlay({
       activeCustomCourseId == null ? true : Boolean(item.flipped);
     const prompt =
       boxIsReversed && shouldFlip ? item.translations?.[0] ?? "" : item.text;
-    const displayPrompt = prompt?.trim() || "Brak treści";
+    const type = item.type ?? "text";
+    const promptImage = boxIsReversed && shouldFlip ? item.imageBack : item.imageFront;
+    const answerImage = boxIsReversed && shouldFlip ? item.imageFront : item.imageBack;
+    const hasPromptImage = Boolean(promptImage);
+    const hasAnswerImage = Boolean(answerImage);
+    const displayPrompt = prompt?.trim() || (hasPromptImage ? "" : "Brak treści");
     const translations =
       item.translations?.map((t) => t?.trim()).filter(Boolean) ?? [];
     const mainTranslation = translations[0] ?? "Brak tłumaczenia";
-    const extraTranslations = translations.slice(1);
+    const extraTranslations = type === "true_false" ? [] : translations.slice(1);
+    const normalizedTrueFalse = translations[0]?.toLowerCase() ?? "";
+    const trueFalseAnswer =
+      normalizedTrueFalse === "true"
+        ? "Prawda"
+        : normalizedTrueFalse === "false"
+          ? "Fałsz"
+          : translations[0]?.trim() || "Brak odpowiedzi";
+    const inferredType =
+      type === "true_false"
+        ? "true_false"
+        : hasPromptImage || hasAnswerImage
+          ? "image"
+          : "text";
+    const typeLabel =
+      inferredType === "true_false"
+        ? "Prawda / Fałsz"
+        : inferredType === "image"
+          ? "Obrazek"
+          : "Tekst";
+    const showPromptImageOnly =
+      inferredType === "image" && hasPromptImage && !displayPrompt;
+    const showTrueFalseAnswer = inferredType === "true_false" && isBoxZero;
 
     return (
       <View style={styles.cardWrapper}>
@@ -106,25 +133,70 @@ export default function FlashcardsPeekOverlay({
             </View>
 
             <View style={styles.cardMain}>
-              <View style={styles.cardLine}>
-                <Text style={styles.cardTag}>Awers</Text>
-                <Text
-                  style={styles.cardPrimary}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {displayPrompt}
-                </Text>
+              <View style={styles.cardMetaRow}>
+                <View style={styles.typePill}>
+                  <Text style={styles.typePillText}>{typeLabel}</Text>
+                </View>
               </View>
+              {showPromptImageOnly ? (
+                <View style={styles.imageOnlyWrapper}>
+                  <Image
+                    source={{ uri: promptImage as string }}
+                    style={styles.cardImageLarge}
+                    contentFit="contain"
+                  />
+                </View>
+              ) : (
+                <View style={styles.cardLine}>
+                  <Text style={styles.cardTag}>Awers</Text>
+                  <View style={styles.cardValue}>
+                    {hasPromptImage ? (
+                      <Image
+                        source={{ uri: promptImage as string }}
+                        style={styles.cardImage}
+                        contentFit="contain"
+                      />
+                    ) : null}
+                    {displayPrompt ? (
+                      <Text
+                        style={styles.cardPrimary}
+                        numberOfLines={hasPromptImage ? 3 : 2}
+                        ellipsizeMode="tail"
+                      >
+                        {displayPrompt}
+                      </Text>
+                    ) : null}
+                    {!hasPromptImage && !displayPrompt ? (
+                      <Text style={styles.cardEmptyValue}>Brak treści</Text>
+                    ) : null}
+                  </View>
+                </View>
+              )}
               <View style={styles.cardLine}>
                 <Text style={[styles.cardTag]}>Rewers</Text>
-                <Text
-                  style={[styles.cardSecondary, styles.rewers]}
-                  numberOfLines={2}
-                  ellipsizeMode="tail"
-                >
-                  {mainTranslation}
-                </Text>
+                <View style={styles.cardValue}>
+                  {hasAnswerImage ? (
+                    <Image
+                      source={{ uri: answerImage as string }}
+                      style={styles.cardImage}
+                      contentFit="contain"
+                    />
+                    ) : null}
+                    <Text
+                      style={[
+                        styles.cardSecondary,
+                        styles.rewers,
+                        inferredType === "true_false" ? styles.cardTrueFalse : undefined,
+                      ]}
+                      numberOfLines={hasAnswerImage ? 3 : 2}
+                      ellipsizeMode="tail"
+                    >
+                      {inferredType === "true_false" ? trueFalseAnswer : mainTranslation}
+                    </Text>
+                    {!hasAnswerImage && !mainTranslation ? (
+                      <Text style={styles.cardEmptyValue}>Brak tłumaczenia</Text>
+                    ) : null}
+                  </View>
               </View>
               {extraTranslations.length ? (
                 <Text style={styles.cardAlternatives}>
@@ -138,17 +210,56 @@ export default function FlashcardsPeekOverlay({
           </View>
         ) : (
           <View style={[styles.cardContentSimple]}>
-            <Text style={styles.cardSimpleIndex}>FISZKA #{index + 1}</Text>
-            <View style={styles.cardLine}>
-              <Text style={styles.cardTag}>Awers:</Text>
-              <Text
-                style={styles.cardPrimary}
-                numberOfLines={2}
-                ellipsizeMode="tail"
-              >
-                {displayPrompt}
-              </Text>
+            <View style={styles.cardMetaRow}>
+              <Text style={styles.cardSimpleIndex}>FISZKA #{index + 1}</Text>
+              <View style={styles.typePill}>
+                <Text style={styles.typePillText}>{typeLabel}</Text>
+              </View>
             </View>
+            <View style={styles.cardLine}>
+              {showPromptImageOnly ? (
+                <View style={styles.imageOnlyWrapper}>
+                  <Image
+                    source={{ uri: promptImage as string }}
+                    style={styles.cardImageLarge}
+                    contentFit="contain"
+                  />
+                </View>
+              ) : (
+                <>
+                  <Text style={styles.cardTag}>Pytanie:</Text>
+                  <View style={styles.cardValue}>
+                    {hasPromptImage ? (
+                      <Image
+                        source={{ uri: promptImage as string }}
+                        style={styles.cardImageSmall}
+                        contentFit="contain"
+                      />
+                    ) : null}
+                    {displayPrompt ? (
+                      <Text
+                        style={styles.cardPrimary}
+                        numberOfLines={hasPromptImage ? 3 : 2}
+                        ellipsizeMode="tail"
+                      >
+                        {displayPrompt}
+                      </Text>
+                    ) : null}
+                    {!hasPromptImage && !displayPrompt ? (
+                      <Text style={styles.cardEmptyValue}>Brak treści</Text>
+                    ) : null}
+                  </View>
+                </>
+              )}
+            </View>
+            {showTrueFalseAnswer ? (
+              <View style={styles.cardLine}>
+                <Text style={styles.cardTag}>Odpowiedź:</Text>
+                <Text style={[styles.cardSecondary, styles.cardTrueFalse]}>
+                  {trueFalseAnswer}
+                </Text>
+              </View>
+            ) : null}
           </View>
         )}
       </View>
@@ -239,7 +350,9 @@ export default function FlashcardsPeekOverlay({
                 <FlatList
                   ref={listRef}
                   data={cards}
-                  keyExtractor={(item) => String(item.id)}
+                  keyExtractor={(item, idx) =>
+                    `${item.id}-${item.type ?? "text"}-${idx}`
+                  }
                   showsVerticalScrollIndicator={false}
                   style={styles.cardsList}
                   ListFooterComponent={<View style={styles.cardsListFooter} />}
