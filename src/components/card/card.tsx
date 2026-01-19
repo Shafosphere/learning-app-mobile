@@ -1,7 +1,6 @@
 import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAchievements } from "@/src/hooks/useAchievements";
-import { WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import {
@@ -18,49 +17,19 @@ import {
   ScrollView,
   Text,
   TextInput,
-  View
+  View,
 } from "react-native";
 import { useStyles } from "./card-styles";
+import type { CardProps } from "./card-types";
 import { CardActions } from "./subcomponents/CardActions";
-import { CardCorrection } from "./subcomponents/CardCorrection";
-import { CardInput } from "./subcomponents/CardInput";
+import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
-import { CardTrueFalse } from "./subcomponents/CardTrueFalse";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const INPUT_HORIZONTAL_PADDING = 8;
 const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
-
-type CardProps = {
-  selectedItem: WordWithTranslations | null;
-  reversed?: boolean;
-  answer: string;
-  setAnswer: React.Dispatch<React.SetStateAction<string>>;
-  setResult: React.Dispatch<React.SetStateAction<boolean | null>>;
-  result: boolean | null;
-  correction: {
-    awers: string;
-    rewers: string;
-    input1: string;
-    input2: string;
-    mode?: "demote" | "intro";
-  } | null;
-  wrongInputChange: (which: 1 | 2, value: string) => void;
-  onDownload: () => Promise<void>;
-  downloadDisabled?: boolean;
-  introMode?: boolean;
-  setCorrectionRewers?: (value: string) => void;
-  confirm: (selectedTranslation?: string, answerOverride?: string) => void;
-  onHintUpdate?: (
-    cardId: number,
-    hintFront: string | null,
-    hintBack: string | null
-  ) => void;
-  hideActions?: boolean;
-  isFocused?: boolean;
-};
 
 export default function Card({
   selectedItem,
@@ -110,7 +79,7 @@ export default function Card({
     (value: string) => {
       setAnswer(value);
     },
-    [setAnswer]
+    [setAnswer],
   );
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
@@ -118,8 +87,8 @@ export default function Card({
   const [hangulTarget, setHangulTarget] = useState<
     "main" | "correction1" | null
   >(null);
-  const noopTextChange = useCallback((_: string) => { }, []);
-  const noopTrueFalseAnswer = useCallback((_: boolean) => { }, []);
+  const noopTextChange = useCallback((_: string) => {}, []);
+  const noopTrueFalseAnswer = useCallback((_: boolean) => {}, []);
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -150,7 +119,9 @@ export default function Card({
   const hasImagePrompt = Boolean(promptImageFront || promptImageBack);
   const type = selectedItem?.type ?? "text";
   const answerOnly =
-    (selectedItem?.answerOnly ?? false) || (!hasTextPrompt && hasImagePrompt) || type === "true_false";
+    (selectedItem?.answerOnly ?? false) ||
+    (!hasTextPrompt && hasImagePrompt) ||
+    type === "true_false";
 
   // Force answerOnly logic: if true, card can only be shown Front -> Back
   const effectiveReversed = answerOnly ? false : reversed;
@@ -162,7 +133,7 @@ export default function Card({
     : null;
   const promptText = effectiveReversed ? rewers : awers;
   const correctionAwers = correction?.awers ?? awers;
-  const correctionRewers = isIntroMode ? rewers : correction?.rewers ?? "";
+  const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
   const shouldCorrectAwers = effectiveReversed;
   const shouldCorrectRewers = !effectiveReversed || answerOnly;
 
@@ -197,15 +168,15 @@ export default function Card({
   const currentHint = useMemo(() => {
     if (!selectedItem) return null;
     return effectiveReversed
-      ? selectedItem.hintBack ?? null
-      : selectedItem.hintFront ?? null;
+      ? (selectedItem.hintBack ?? null)
+      : (selectedItem.hintFront ?? null);
   }, [effectiveReversed, selectedItem]);
   const shouldMarqueeHint = useMemo(() => {
     const len = currentHint?.length ?? 0;
     return len > 28;
   }, [currentHint]);
   const showCorrectionInputs = Boolean(
-    correction && (result === false || isIntroMode)
+    correction && (result === false || isIntroMode),
   );
 
   // Decide if we should use large layout: either global setting OR image is present
@@ -271,7 +242,7 @@ export default function Card({
       }, delay);
       timeouts.current.push(timeoutId);
     },
-    []
+    [],
   );
 
   const handleCorrectionInput1Change = useCallback(
@@ -287,7 +258,7 @@ export default function Card({
         };
         const matches =
           normalizeString(trimTrailingSpaces(t)) ===
-          normalizeString(correction.awers) &&
+            normalizeString(correction.awers) &&
           trimTrailingSpaces(t).length === correction.awers.length;
         if (matches) {
           setHangulTarget(null);
@@ -306,7 +277,7 @@ export default function Card({
       setHangulTarget,
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
-    ]
+    ],
   );
 
   const syncInputScroll = useCallback(
@@ -314,18 +285,18 @@ export default function Card({
       ref: React.RefObject<ScrollView | null>,
       caretX: number,
       visibleWidth: number,
-      contentWidth: number
+      contentWidth: number,
     ) => {
       if (!visibleWidth) return;
       const maxOffset = Math.max(0, contentWidth - visibleWidth);
       const desiredOffset = Math.max(
         0,
-        caretX - (visibleWidth - INPUT_SCROLL_AHEAD)
+        caretX - (visibleWidth - INPUT_SCROLL_AHEAD),
       );
       const nextOffset = Math.min(desiredOffset, maxOffset);
       ref.current?.scrollTo({ x: nextOffset, animated: false });
     },
-    []
+    [],
   );
 
   const handleConfirm = useCallback(() => {
@@ -436,19 +407,23 @@ export default function Card({
   }, [result, reportResult]);
 
   useEffect(() => {
-    if (
-      correction &&
-      (result === false || isIntroMode)
-    ) {
+    if (correction && (result === false || isIntroMode)) {
       const hasFocusedThisCorrection =
         lastCorrectionFocusedId.current === correction.cardId;
       if (needsCorrectionFocus.current || !hasFocusedThisCorrection) {
         focusWithDelay(correctionPrimaryRef);
         needsCorrectionFocus.current = false;
-        lastCorrectionFocusedId.current = correction.cardId;
+        lastCorrectionFocusedId.current = correction.cardId ?? null;
       }
     }
-  }, [correction, isIntroMode, result, focusWithDelay, answerOnly, correctionPrimaryRef]);
+  }, [
+    correction,
+    isIntroMode,
+    result,
+    focusWithDelay,
+    answerOnly,
+    correctionPrimaryRef,
+  ]);
 
   useEffect(() => {
     const currentId = selectedItem?.id ?? null;
@@ -463,11 +438,18 @@ export default function Card({
       }
       previousSelectedId.current = currentId;
     }
-  }, [isIntroMode, selectedItem, result, focusWithDelay, answerOnly, correctionPrimaryRef]);
+  }, [
+    isIntroMode,
+    selectedItem,
+    result,
+    focusWithDelay,
+    answerOnly,
+    correctionPrimaryRef,
+  ]);
 
   useEffect(() => {
     previousCorrectionInput2.current = trimTrailingSpaces(
-      correction?.input2 ?? ""
+      correction?.input2 ?? "",
     );
   }, [correction?.input2, trimTrailingSpaces]);
 
@@ -477,7 +459,7 @@ export default function Card({
       input1ScrollRef,
       input1TextWidth + INPUT_HORIZONTAL_PADDING,
       input1LayoutWidth,
-      input1ContentWidth
+      input1ContentWidth,
     );
   }, [
     input1ContentWidth,
@@ -494,7 +476,7 @@ export default function Card({
       input2ScrollRef,
       input2TextWidth + INPUT_HORIZONTAL_PADDING,
       input2LayoutWidth,
-      input2ContentWidth
+      input2ContentWidth,
     );
   }, [
     input2ContentWidth,
@@ -522,7 +504,7 @@ export default function Card({
   function isCharMismatchAt(
     value: string,
     expected: string,
-    index: number
+    index: number,
   ): boolean {
     const inputChar = value[index];
     if (!inputChar) return false;
@@ -574,18 +556,18 @@ export default function Card({
       const nextFront = applyToBoth
         ? value
         : effectiveReversed
-          ? selectedItem.hintFront ?? null
+          ? (selectedItem.hintFront ?? null)
           : value;
       const nextBack = applyToBoth
         ? value
         : effectiveReversed
           ? value
-          : selectedItem.hintBack ?? null;
+          : (selectedItem.hintBack ?? null);
       onHintUpdate(selectedItem.id, nextFront, nextBack);
       setIsEditingHint(false);
       setHintDraft(value ?? "");
     },
-    [hintDraft, onHintUpdate, effectiveReversed, selectedItem]
+    [hintDraft, onHintUpdate, effectiveReversed, selectedItem],
   );
 
   const finishHintEditing = useCallback(() => {
@@ -636,7 +618,7 @@ export default function Card({
         },
       ],
     }),
-    [hintActionsAnim]
+    [hintActionsAnim],
   );
 
   useEffect(() => {
@@ -674,21 +656,24 @@ export default function Card({
     } else {
       // Answer should match one of translations
       // If perfectly matches any, returns null
-      const perfect = selectedItem.translations.some(t => norm(t) === userAnswer);
+      const perfect = selectedItem.translations.some(
+        (t) => norm(t) === userAnswer,
+      );
       if (perfect) return null;
 
       // Otherwise find the one with diff
-      bestMatch = selectedItem.translations.find(t => {
-        // We assume validation logic already passed, so one of them MUST be close enough.
-        // But validation logic inside hook is complex. 
-        // Simplest is to find the one with minimal edit distance or just calculateDiff returns non-null
-        return calculateTypoDiff(userAnswer, norm(t)) !== null;
-      }) ?? selectedItem.translations[0]; // Fallback
+      bestMatch =
+        selectedItem.translations.find((t) => {
+          // We assume validation logic already passed, so one of them MUST be close enough.
+          // But validation logic inside hook is complex.
+          // Simplest is to find the one with minimal edit distance or just calculateDiff returns non-null
+          return calculateTypoDiff(userAnswer, norm(t)) !== null;
+        }) ?? selectedItem.translations[0]; // Fallback
     }
 
     if (!bestMatch) return null;
 
-    // Calculate diff against the raw target string (but normalized for comparison? 
+    // Calculate diff against the raw target string (but normalized for comparison?
     // Wait, visual diff should probably respect user's casing vs target casing?
     // User requested: "Greaja" vs "Grecja" -> "Gre <a> c ja"
     // So we should probably use the target string as the source of truth for the 'correction' char.
@@ -704,89 +689,59 @@ export default function Card({
 
     // Let's use normalization for finding the diff.
     return calculateTypoDiff(userAnswer, norm(bestMatch));
-  }, [result, selectedItem, answer, effectiveReversed, ignoreDiacriticsInSpellcheck]);
+  }, [
+    result,
+    selectedItem,
+    answer,
+    effectiveReversed,
+    ignoreDiacriticsInSpellcheck,
+  ]);
 
-  function showCardContent(layoutHandlers?: {
-    onPromptLayout?: (height: number) => void;
-    onInputLayout?: (height: number) => void;
-  }) {
-    if (correction && (result === false || isIntroMode)) {
-      return (
-        <CardCorrection
-          correction={correction}
-          promptText={promptText}
-          promptImageUri={promptImageUri}
-          imageSizeMode={promptImageSizeMode}
-          correctionAwers={correctionAwers}
-          correctionRewers={correctionRewers}
-          answerOnly={answerOnly}
-          showAwersInput={shouldCorrectAwers}
-          showRewersInput={shouldCorrectRewers}
-          allowMultilinePrompt={useLargeLayout}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
-          input1Ref={correctionInput1Ref}
-          input2Ref={correctionInput2Ref}
-          input1ScrollRef={input1ScrollRef}
-          input2ScrollRef={input2ScrollRef}
-          handleCorrectionInput1Change={handleCorrectionInput1Change}
-          wrongInputChange={wrongInputChange}
-          suggestionProps={suggestionProps}
-          isIntroMode={isIntroMode}
-          renderOverlayText={renderOverlayText}
-          input1ContentWidth={input1ContentWidth}
-          input2ContentWidth={input2ContentWidth}
-          setInput1LayoutWidth={setInput1LayoutWidth}
-          setInput2LayoutWidth={setInput2LayoutWidth}
-          focusWithDelay={focusWithDelay}
-          setIsCorrectionInput1Focused={setIsCorrectionInput1Focused}
-          setHangulTarget={setHangulTarget}
-          shouldUseHangulKeyboardCorrection1={shouldUseHangulKeyboardCorrection1}
-          previousCorrectionInput2={previousCorrectionInput2}
-          canToggleTranslations={canToggleTranslations}
-          next={next}
-          input1LayoutWidth={input1LayoutWidth}
-          input2LayoutWidth={input2LayoutWidth}
-        />
-      );
-    }
-    if (selectedItem?.type === "true_false") {
-      return (
-        <CardTrueFalse
-          promptText={promptText}
-          promptImageUri={promptImageUri}
-          allowMultilinePrompt={useLargeLayout}
-          onAnswer={noopTrueFalseAnswer}
-          showButtons={false}
-        />
-      );
-    }
-    if (selectedItem) {
-      return (
-        <CardInput
-          promptText={promptText}
-          allowMultilinePrompt={useLargeLayout}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
-          promptImageUri={promptImageUri}
-          imageSizeMode={promptImageSizeMode}
-          answer={answer}
-          setAnswer={handleAnswerChange}
-          mainInputRef={mainInputRef}
-          suggestionProps={suggestionProps}
-          handleConfirm={handleConfirm}
-          shouldUseHangulKeyboardMain={shouldUseHangulKeyboardMain}
-          setIsMainInputFocused={setIsMainInputFocused}
-          setHangulTarget={setHangulTarget}
-          canToggleTranslations={canToggleTranslations}
-          next={next}
-          hangulTarget={hangulTarget}
-          typoDiff={typoDiff}
-        />
-      );
-    }
-    return <Text style={styles.empty}>Wybierz pudełko z słowkami</Text>;
-  }
+  const resolverProps = {
+    correction,
+    result,
+    isIntroMode,
+    selectedItem,
+    promptText,
+    promptImageUri,
+    promptImageSizeMode,
+    correctionAwers,
+    correctionRewers,
+    answerOnly,
+    shouldCorrectAwers,
+    shouldCorrectRewers,
+    useLargeLayout,
+    correctionInput1Ref,
+    correctionInput2Ref,
+    input1ScrollRef,
+    input2ScrollRef,
+    handleCorrectionInput1Change,
+    wrongInputChange,
+    suggestionProps,
+    renderOverlayText,
+    input1ContentWidth,
+    input2ContentWidth,
+    setInput1LayoutWidth,
+    setInput2LayoutWidth,
+    focusWithDelay,
+    setIsCorrectionInput1Focused,
+    setHangulTarget,
+    shouldUseHangulKeyboardCorrection1,
+    previousCorrectionInput2,
+    canToggleTranslations,
+    next,
+    input1LayoutWidth,
+    input2LayoutWidth,
+    noopTrueFalseAnswer,
+    answer,
+    handleAnswerChange,
+    mainInputRef,
+    handleConfirm,
+    shouldUseHangulKeyboardMain,
+    setIsMainInputFocused,
+    hangulTarget,
+    typoDiff,
+  };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
   const showCardActions = !(hideActions || selectedItem?.type === "true_false");
@@ -824,11 +779,15 @@ export default function Card({
           hasContent={Boolean(selectedItem)}
           showCorrectionInputs={showCorrectionInputs}
         >
-          {(handlers) => showCardContent(handlers)}
+          {(handlers) => (
+            <CardContentResolver {...resolverProps} layoutHandlers={handlers} />
+          )}
         </LargeCardContainer>
       ) : (
         <View style={[styles.card, styles.cardSmall, cardStateStyle]}>
-          <View style={styles.cardSmallContent}>{showCardContent()}</View>
+          <View style={styles.cardSmallContent}>
+            <CardContentResolver {...resolverProps} />
+          </View>
         </View>
       )}
       <HangulKeyboardOverlay
@@ -844,7 +803,7 @@ export default function Card({
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           correctionInput1={correction.input1}
-          correctionInput2={correction.input2}
+          correctionInput2={correction.input2 ?? ""}
           answerOnly={answerOnly}
           setInput1ExpectedWidth={setInput1ExpectedWidth}
           setInput2ExpectedWidth={setInput2ExpectedWidth}

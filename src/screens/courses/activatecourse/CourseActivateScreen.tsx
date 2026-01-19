@@ -19,28 +19,12 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
+import { CourseGroupList } from "./components/CourseGroupList";
+import { CourseGroup, OfficialCourseListItem, SelectedCourse } from "./types";
 
-type OfficialCourseListItem = CustomCourseSummary & {
-  sourceLang: string | null;
-  targetLang: string | null;
-  smallFlag: string | null;
-  isMini: boolean;
-  categoryId?: string;
-};
 
-type CourseGroup = {
-  key: string;
-  category?: CourseCategory;
-  sourceLang: string | null;
-  targetLang: string | null;
-  sourceFlag?: ReturnType<typeof getFlagSource>;
-  targetFlag?: ReturnType<typeof getFlagSource>;
-  official: OfficialCourseListItem[];
-};
-
-type SelectedCourse = { type: "custom"; id: number };
 
 export default function CourseActivateScreen() {
   const {
@@ -252,56 +236,7 @@ export default function CourseActivateScreen() {
     router.push(`/editcourse?${params.join("&")}`);
   };
 
-  const renderOfficialCourseSection = (
-    title: string,
-    list: OfficialCourseListItem[],
-    showTitle: boolean = true
-  ) => {
-    if (!list.length) return null;
 
-    return (
-      <View style={styles.groupCourses}>
-        {showTitle ? <Text style={styles.groupSubtitle}>{title}</Text> : null}
-        {list.map((course) => {
-          const isHighlighted =
-            committedCourse?.type === "custom" &&
-            committedCourse.id === course.id;
-          const flagLang = course.smallFlag ?? course.sourceLang;
-
-          return (
-            <CourseListCard
-              key={`official-${course.id}`}
-              title={course.name}
-              subtitle={`fiszki: ${course.cardsCount}`}
-              iconId={course.iconId}
-              iconColor={course.iconColor}
-              flagCode={flagLang}
-              isHighlighted={isHighlighted}
-              onPress={() => handleCustomCoursePress(course.id)}
-              rightAccessory={
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel={`Edytuj kurs ${course.name}`}
-                  style={styles.customEditButton}
-                  onPress={(event) => {
-                    event.stopPropagation();
-                    handleEditCustomCourse(course);
-                  }}
-                  hitSlop={8}
-                >
-                  <FontAwesome6
-                    name="edit"
-                    size={24}
-                    color={colors.headline}
-                  />
-                </Pressable>
-              }
-            />
-          );
-        })}
-      </View>
-    );
-  };
 
 
 
@@ -328,105 +263,13 @@ export default function CourseActivateScreen() {
               {hasPinnedOfficialCourses ? (
                 <>
                   <Text style={styles.title}>Stworzone przez nas</Text>
-                  <View style={styles.builtinSection}>
-                    {courseGroups.map((group) => {
-                      const regularOfficial = group.official.filter(
-                        (course) => course.isMini === false
-                      );
-                      const miniOfficial = group.official.filter(
-                        (course) => course.isMini !== false
-                      );
-                      const showRegular = regularOfficial.length > 0;
-                      const showMini = miniOfficial.length > 0;
-                      const hasOfficial =
-                        showRegular || showMini;
-                      if (!hasOfficial) {
-                        return null;
-                      }
-
-                      const targetCode = group.targetLang
-                        ? group.targetLang.toUpperCase()
-                        : "?";
-                      const sourceCode = group.sourceLang
-                        ? group.sourceLang.toUpperCase()
-                        : "?";
-
-                      return (
-                        <View
-                          key={`builtin-group-${group.key}`}
-                          style={styles.groupSection}
-                        >
-                          <View style={styles.groupHeader}>
-                            <View style={styles.groupHeaderLine} />
-                            <View style={styles.groupHeaderBadge}>
-                              {group.category ? (
-                                <View style={styles.groupHeaderLanguage}>
-                                  {group.category?.icon ? (
-                                    <FontAwesome6
-                                      name={group.category.icon}
-                                      size={16}
-                                      color={colors.headline}
-                                      style={{ marginRight: 6 }}
-                                    />
-                                  ) : null}
-                                  <Text style={[styles.groupHeaderCode, { fontSize: 24 }]}>
-                                    {group.category.label.toUpperCase()}
-                                  </Text>
-                                </View>
-                              ) : (
-                                <>
-                                  <View style={styles.groupHeaderLanguage}>
-                                    <Text style={styles.groupHeaderCode}>
-                                      {targetCode}
-                                    </Text>
-                                    {group.targetFlag ? (
-                                      <Image
-                                        style={styles.groupHeaderFlag}
-                                        source={group.targetFlag}
-                                      />
-                                    ) : null}
-                                  </View>
-                                  {group.sourceLang ? (
-                                    <>
-                                      <Text style={styles.groupHeaderSeparator}>
-                                        /
-                                      </Text>
-                                      <View style={styles.groupHeaderLanguage}>
-                                        <Text style={styles.groupHeaderCode}>
-                                          {sourceCode}
-                                        </Text>
-                                        {group.sourceFlag ? (
-                                          <Image
-                                            style={styles.groupHeaderFlag}
-                                            source={group.sourceFlag}
-                                          />
-                                        ) : null}
-                                      </View>
-                                    </>
-                                  ) : null}
-                                </>
-                              )}
-                            </View>
-                          </View>
-
-                          {hasOfficial ? (
-                            <>
-                              {renderOfficialCourseSection(
-                                "Kursy",
-                                regularOfficial,
-                                showRegular
-                              )}
-                              {renderOfficialCourseSection(
-                                "Mini kursy",
-                                miniOfficial,
-                                showRegular && showMini
-                              )}
-                            </>
-                          ) : null}
-                        </View>
-                      );
-                    })}
-                  </View>
+                  <CourseGroupList
+                    groups={courseGroups}
+                    committedCourse={committedCourse}
+                    colors={colors}
+                    onPress={handleCustomCoursePress}
+                    onEdit={handleEditCustomCourse}
+                  />
                 </>
               ) : null}
 

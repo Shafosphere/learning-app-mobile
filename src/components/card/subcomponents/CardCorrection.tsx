@@ -1,6 +1,8 @@
+import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import {
+  ImageStyle,
   Platform,
   Pressable,
   ScrollView,
@@ -8,12 +10,10 @@ import {
   Text,
   TextInput,
   View,
-  ImageStyle,
 } from "react-native";
 import TextTicker from "react-native-text-ticker";
-import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import { PROMPT_IMAGE_MAX_HEIGHT, useStyles } from "../card-styles";
 import { PromptImage } from "./PromptImage";
-import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -34,13 +34,10 @@ const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
   return { height: target, maxHeight: target };
 };
 
+import { CardCorrectionType } from "../card-types";
+
 type CardCorrectionProps = {
-  correction: {
-    awers: string;
-    rewers: string;
-    input1: string;
-    input2: string;
-  };
+  correction: CardCorrectionType;
   promptText: string;
   promptImageUri?: string | null;
   correctionAwers: string;
@@ -66,7 +63,7 @@ type CardCorrectionProps = {
   setInput2LayoutWidth: (width: number) => void;
   focusWithDelay: (
     ref: React.RefObject<TextInput | null>,
-    delay?: number
+    delay?: number,
   ) => void;
   setIsCorrectionInput1Focused: (focused: boolean) => void;
   setHangulTarget: (target: "main" | "correction1" | null) => void;
@@ -119,11 +116,11 @@ export function CardCorrection({
   const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
     () => [styles.cardFont, styles.promptMarqueeText],
-    [styles]
+    [styles],
   );
   const flattenedPromptTextStyle = useMemo(
     () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
-    [promptTextStyle]
+    [promptTextStyle],
   );
   const promptFontSize =
     typeof flattenedPromptTextStyle.fontSize === "number"
@@ -133,18 +130,21 @@ export function CardCorrection({
     () =>
       Math.max(
         1,
-        Math.ceil(promptText.length * promptFontSize * AVG_CHAR_WIDTH_FACTOR)
+        Math.ceil(promptText.length * promptFontSize * AVG_CHAR_WIDTH_FACTOR),
       ),
-    [promptText.length, promptFontSize]
+    [promptText.length, promptFontSize],
   );
   const marqueeDuration = useMemo(
     () =>
-      Math.max(MIN_DURATION_MS, estimatedPromptWidth * MARQUEE_SPEED_PER_PIXEL_MS),
-    [estimatedPromptWidth]
+      Math.max(
+        MIN_DURATION_MS,
+        estimatedPromptWidth * MARQUEE_SPEED_PER_PIXEL_MS,
+      ),
+    [estimatedPromptWidth],
   );
   const promptImageStyle = useMemo(
     () => buildPromptImageStyle(imageSizeMode),
-    [imageSizeMode]
+    [imageSizeMode],
   );
 
   function applyPlaceholderCasing(value: string, expected: string): string {
@@ -217,7 +217,7 @@ export function CardCorrection({
         styles.topContainer,
         allowMultilinePrompt && styles.topContainerLarge,
         // Center image if present
-        promptImageUri && allowMultilinePrompt && { justifyContent: 'center' }
+        promptImageUri && allowMultilinePrompt && { justifyContent: "center" },
       ]}
     >
       {promptImageUri ? (
@@ -226,7 +226,11 @@ export function CardCorrection({
         <View style={styles.promptRow}>
           {promptContent}
           {canToggleTranslations ? (
-            <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+            <Pressable
+              style={styles.cardIconWrapper}
+              onPress={next}
+              hitSlop={8}
+            >
               <Octicons
                 name="discussion-duplicate"
                 size={24}
@@ -242,7 +246,9 @@ export function CardCorrection({
   const input1Block = (
     <View
       style={[
-        allowMultilinePrompt ? styles.containerInputLarge : styles.containerInput,
+        allowMultilinePrompt
+          ? styles.containerInputLarge
+          : styles.containerInput,
         styles.containerInputFirst,
       ]}
       onLayout={({ nativeEvent }) => {
@@ -264,14 +270,18 @@ export function CardCorrection({
         ]}
       >
         <View style={[styles.inputRow, { width: input1ContentWidth }]}>
-          <Text style={styles.myplaceholder} numberOfLines={1} ellipsizeMode="clip">
+          <Text
+            style={styles.myplaceholder}
+            numberOfLines={1}
+            ellipsizeMode="clip"
+          >
             {correctionAwers}
           </Text>
           <TextInput
             value={correction.input1}
             onChangeText={(text) =>
               handleCorrectionInput1Change(
-                applyPlaceholderCasing(text, correctionAwers)
+                applyPlaceholderCasing(text, correctionAwers),
               )
             }
             style={styles.myinput}
@@ -292,7 +302,11 @@ export function CardCorrection({
             }}
           />
           {isIntroMode ? (
-            <Text style={styles.inputOverlay} numberOfLines={1} ellipsizeMode="clip">
+            <Text
+              style={styles.inputOverlay}
+              numberOfLines={1}
+              ellipsizeMode="clip"
+            >
               {renderOverlayText(correction.input1, correctionAwers)}
             </Text>
           ) : null}
@@ -304,8 +318,12 @@ export function CardCorrection({
   const input2Block = (
     <View
       style={[
-        allowMultilinePrompt ? styles.containerInputLarge : styles.containerInput,
-        (!allowMultilinePrompt && (answerOnly || !showAwersInput)) && styles.containerInputFirst,
+        allowMultilinePrompt
+          ? styles.containerInputLarge
+          : styles.containerInput,
+        !allowMultilinePrompt &&
+          (answerOnly || !showAwersInput) &&
+          styles.containerInputFirst,
       ]}
       onLayout={({ nativeEvent }) => {
         const nextWidth = nativeEvent.layout.width;
@@ -326,11 +344,15 @@ export function CardCorrection({
         ]}
       >
         <View style={[styles.inputRow, { width: input2ContentWidth }]}>
-          <Text style={styles.myplaceholder} numberOfLines={1} ellipsizeMode="clip">
+          <Text
+            style={styles.myplaceholder}
+            numberOfLines={1}
+            ellipsizeMode="clip"
+          >
             {correctionRewers}
           </Text>
           <TextInput
-            value={correction.input2}
+            value={correction.input2 ?? ""}
             onChangeText={(t) => {
               const adjusted = applyPlaceholderCasing(t, correctionRewers);
               const previousValue = previousCorrectionInput2.current;
@@ -354,15 +376,19 @@ export function CardCorrection({
               if (
                 !answerOnly &&
                 nativeEvent.key === "Backspace" &&
-                correction.input2.length <= 1
+                (correction.input2 ?? "").length <= 1
               ) {
                 focusWithDelay(input1Ref);
               }
             }}
           />
           {isIntroMode ? (
-            <Text style={styles.inputOverlay} numberOfLines={1} ellipsizeMode="clip">
-              {renderOverlayText(correction.input2, correctionRewers)}
+            <Text
+              style={styles.inputOverlay}
+              numberOfLines={1}
+              ellipsizeMode="clip"
+            >
+              {renderOverlayText(correction.input2 ?? "", correctionRewers)}
             </Text>
           ) : null}
         </View>

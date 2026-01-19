@@ -1,10 +1,15 @@
-import { useCallback, useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import Ionicons from "@expo/vector-icons/Ionicons";
+import { useCallback, useMemo, useState } from "react";
+import { Image, Pressable, ScrollView, Text, View } from "react-native";
 
-import { useStyles } from "./CoursesScreen-styles";
+import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import {
+  getCourseIconById
+} from "@/src/constants/customCourse";
+import { getFlagSource } from "@/src/constants/languageFlags";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
@@ -12,29 +17,11 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
-import {
-  getCourseIconById,
-  resolveCourseIconProps,
-} from "@/src/constants/customCourse";
-import { getFlagSource } from "@/src/constants/languageFlags";
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
-import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
-
-type OfficialCourseReviewItem = CustomCourseSummary & {
-  sourceLang: string | null;
-  targetLang: string | null;
-  isMini: boolean;
-};
-
-type OfficialGroup = {
-  key: string;
-  targetLang: string | null;
-  sourceLang: string | null;
-  targetFlag?: ReturnType<typeof getFlagSource>;
-  sourceFlag?: ReturnType<typeof getFlagSource>;
-  courses: OfficialCourseReviewItem[];
-};
+import { DueCountBadge } from "./components/DueCountBadge";
+import { ReviewCourseSection } from "./components/ReviewCourseSection";
+import { useStyles } from "./CoursesScreen-styles";
+import { OfficialCourseReviewItem, OfficialGroup } from "./types";
 
 export default function CoursesReviewScreen() {
   const styles = useStyles();
@@ -189,18 +176,7 @@ export default function CoursesReviewScreen() {
     [router, setActiveCustomCourseId]
   );
 
-  const renderCount = (count: number) => (
-    // <View style={styles.countBadge}>
-    <Text
-      style={[
-        styles.countNumber,
-        { color: count > 0 ? colors.my_red : colors.my_green },
-      ]}
-    >
-      {count}
-    </Text>
-    // </View>
-  );
+
 
   const visibleCustomCourses = customCourses.filter(
     (course) => course.reviewsEnabled
@@ -282,70 +258,8 @@ export default function CoursesReviewScreen() {
               const miniOfficial = (group.courses ?? []).filter(
                 (course) => course.isMini !== false
               );
-              const renderOfficialSection = (
-                title: string,
-                list: OfficialCourseReviewItem[]
-              ) => {
-                if (!list.length) return null;
-
-                return (
-                  <>
-                    <Text style={styles.miniSectionTitle}>{title}</Text>
-                    <View style={styles.courseGrid}>
-                      {list.map((course) => {
-                        const iconProps = resolveCourseIconProps(
-                          course.iconId,
-                          course.iconColor
-                        );
-                        const iconMeta = getCourseIconById(course.iconId);
-                        const IconComponent =
-                          iconProps.icon?.Component ??
-                          iconMeta?.Component ??
-                          Ionicons;
-                        const iconName = (iconProps.icon?.name ??
-                          iconMeta?.name ??
-                          "grid-outline") as never;
-                        const dueCount = officialCounts[course.id] ?? 0;
-                        const mainFlag = iconProps.mainImageSource;
-
-                        return (
-                          <Pressable
-                            key={`official-${course.id}`}
-                            style={[
-                              styles.courseCard,
-                              dueCount === 0 && styles.courseCardDisabled,
-                            ]}
-                            disabled={dueCount === 0}
-                            accessibilityState={{ disabled: dueCount === 0 }}
-                            onPress={() => handleSelectCustomCourse(course.id)}
-                          >
-                            {mainFlag ? (
-                              <Image
-                                style={styles.courseCardIconFlag}
-                                source={mainFlag}
-                              />
-                            ) : (
-                              <IconComponent
-                                name={iconName}
-                                size={48}
-                                color={course.iconColor}
-                              />
-                            )}
-                            <CourseTitleMarquee
-                              text={course.name}
-                              containerStyle={styles.courseCardTitleContainer}
-                              textStyle={styles.courseCardText}
-                            />
-                            <View style={styles.courseCount}>
-                              {renderCount(dueCount)}
-                            </View>
-                          </Pressable>
-                        );
-                      })}
-                    </View>
-                  </>
-                );
-              };
+              const showRegular = regularOfficial.length > 0;
+              const showMini = miniOfficial.length > 0;
 
               return (
                 <View key={group.key} style={styles.groupContainer}>
@@ -380,8 +294,22 @@ export default function CoursesReviewScreen() {
                     </View>
                   </View>
 
-                  {renderOfficialSection("Kursy", regularOfficial)}
-                  {renderOfficialSection("Mini kursy", miniOfficial)}
+                  {showRegular && (
+                    <ReviewCourseSection
+                      title="Kursy"
+                      list={regularOfficial}
+                      counts={officialCounts}
+                      onSelect={handleSelectCustomCourse}
+                    />
+                  )}
+                  {showMini && (
+                    <ReviewCourseSection
+                      title="Mini kursy"
+                      list={miniOfficial}
+                      counts={officialCounts}
+                      onSelect={handleSelectCustomCourse}
+                    />
+                  )}
                 </View>
               );
             })}
@@ -432,7 +360,7 @@ export default function CoursesReviewScreen() {
                         textStyle={styles.courseCardText}
                       />
                       <View style={styles.courseCount}>
-                        {renderCount(dueCount)}
+                        <DueCountBadge count={dueCount} />
                       </View>
                     </Pressable>
                   );
