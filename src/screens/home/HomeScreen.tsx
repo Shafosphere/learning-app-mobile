@@ -41,7 +41,7 @@ export default function HomeScreen() {
           onPress={goToCustomCourse}
           width={140}
         />
-        <MyButton text="Pomoc" onPress={goToWiki} width={140} color="my_yellow" />
+        <MyButton text="CO I JAK" onPress={goToWiki} width={140} color="my_yellow" />
         <MyButton
           text="Zgłoś problem"
           onPress={goToSupport}
