@@ -17,7 +17,8 @@ import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
-import { CsvImportGuide } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
+import { CardTypeSelector, CardTypeOption } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
+import { CsvImportGuide, CsvImportType } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
 import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
@@ -120,9 +121,14 @@ export default function CustomCourseContentScreen() {
     true_false: [createEmptyManualCard("card-truefalse-0", "true_false")],
   });
   const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
-  const [cardTypeMenuOpen, setCardTypeMenuOpen] = useState(false);
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
+  const [csvCardType, setCsvCardType] = useState<CsvImportType>("text");
   const [isSaving, setIsSaving] = useState(false);
+  const csvTypeOptions: CardTypeOption<CsvImportType>[] = [
+    { key: "text", label: "Tradycyjne" },
+    { key: "true_false", label: "Prawda / Fałsz" },
+    { key: "image", label: "Z obrazkami (ZIP)" },
+  ];
 
   const inferCardTypeFromCards = useCallback((cards: ManualCard[]): ManualCardType => {
     if (cards.length > 0 && cards.every((card) => (card.type ?? "text") === "true_false")) {
@@ -187,7 +193,6 @@ export default function CustomCourseContentScreen() {
       );
       manualCardsByTypeRef.current[nextType] = normalized;
       setManualCardType(nextType);
-      setCardTypeMenuOpen(false);
       replaceManualCards(normalized);
     },
     [persistCurrentManualCards, replaceManualCards]
@@ -249,27 +254,61 @@ export default function CustomCourseContentScreen() {
     rows: any[],
     resolveImage?: (name: string | null) => Promise<string | null>
   ): Promise<ManualCard[]> => {
+    const readStringField = (row: any, keys: string[]): string => {
+      for (const key of keys) {
+        const raw = row[key];
+        if (raw != null && `${raw}`.toString().trim().length > 0) {
+          return `${raw}`.toString();
+        }
+      }
+      return "";
+    };
+
+    const readBooleanishField = (row: any, keys: string[]): any => {
+      for (const key of keys) {
+        const raw = row[key];
+        if (raw != null && `${raw}`.toString().trim().length > 0) {
+          return raw;
+        }
+      }
+      return null;
+    };
+
     const cards: ManualCard[] = [];
     for (let idx = 0; idx < rows.length; idx += 1) {
       const row = rows[idx];
-      const trueFalseRaw =
-        row.is_true ?? row.isTrue ?? row.czy_prawda ?? row.czyPrawda;
+      const trueFalseRaw = readBooleanishField(row, [
+        "is_true",
+        "isTrue",
+        "czy_prawda",
+        "czyPrawda",
+        "prawda",
+        "prawda_falsz",
+        "prawdaFalsz",
+      ]);
       const hasTrueFalseFlag =
         trueFalseRaw != null &&
         trueFalseRaw.toString().trim().length > 0;
+      const backRaw = readStringField(row, ["back", "tyl"]);
       const answers = hasTrueFalseFlag
         ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-        : parseAnswers(row.back);
+        : parseAnswers(backRaw);
       const isBoolean = hasTrueFalseFlag
         ? true
         : answers.length > 0 && answers.every((a) => isBooleanText(a));
 
-      const locked = parseBooleanValue(row.lock);
-      const answerOnly = parseBooleanValue(
-        row.answer_only ?? row.question ?? row.pytanie
+      const locked = parseBooleanValue(
+        readBooleanishField(row, ["lock", "blokada"])
       );
-      const imageFrontName = normalizeImageField(row.image_front ?? row.imageFront);
-      const imageBackName = normalizeImageField(row.image_back ?? row.imageBack);
+      const answerOnly = parseBooleanValue(
+        readBooleanishField(row, ["answer_only", "question", "pytanie", "tylko_odpowiedz"])
+      );
+      const imageFrontName = normalizeImageField(
+        readStringField(row, ["image_front", "imageFront", "obraz_przod"])
+      );
+      const imageBackName = normalizeImageField(
+        readStringField(row, ["image_back", "imageBack", "obraz_tyl"])
+      );
       const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
       const imageBack = resolveImage ? await resolveImage(imageBackName) : null;
       const hasImages = Boolean(imageFront || imageBack);
@@ -281,12 +320,12 @@ export default function CustomCourseContentScreen() {
 
       const card: ManualCard = {
         id: `csv-${idx}`,
-        front: (row.front || "").toString(),
-        answers: answers.length > 0 ? answers : [(row.back || "").toString()],
+        front: readStringField(row, ["front", "przod"]),
+        answers: answers.length > 0 ? answers : [backRaw],
         flipped: !locked,
         answerOnly,
-        hintFront: (row.hint1 ?? row.hint_front ?? "").toString(),
-        hintBack: (row.hint2 ?? row.hint_back ?? "").toString(),
+        hintFront: readStringField(row, ["hint1", "hint_front", "podpowiedz1"]),
+        hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),
         imageFront,
         imageBack,
         type,
@@ -633,73 +672,28 @@ export default function CustomCourseContentScreen() {
 
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>
-              <Text style={styles.modeTitle}>Import z pliku CSV</Text>
+              <CardTypeSelector
+                options={csvTypeOptions}
+                value={csvCardType}
+                onChange={setCsvCardType}
+                label="Typ fiszek"
+              />
               <CsvImportGuide
                 onPickFile={handleSelectCsv}
                 selectedFileName={csvFileName}
                 setPopup={setPopup}
+                activeType={csvCardType}
+                onChangeType={setCsvCardType}
               />
             </View>
           ) : (
             <View style={styles.modeContainer}>
-              {/* <Text style={styles.modeTitle}>Stwórz tutaj</Text> */}
-              <View style={styles.cardTypeSection}>
-                <Pressable
-                  accessibilityRole="button"
-                  accessibilityLabel="Wybierz typ fiszek"
-                  accessibilityState={{ expanded: cardTypeMenuOpen }}
-                  onPress={() => setCardTypeMenuOpen((prev) => !prev)}
-                  style={({ pressed }) => [
-                    styles.cardTypeSelector,
-                    cardTypeMenuOpen && styles.cardTypeSelectorOpen,
-                    pressed ? { opacity: 0.9 } : null,
-                  ]}
-                >
-                  <View style={styles.cardTypeSelectorText}>
-                    <Text style={[styles.cardTypeOptionLabel, styles.cardTypeOptionLabelActive]}>
-                      {cardTypeOptions.find((o) => o.key === manualCardType)?.label ??
-                        "—"}
-                    </Text>
-                  </View>
-                  <Ionicons
-                    name={cardTypeMenuOpen ? "chevron-up" : "chevron-down"}
-                    size={20}
-                    color={styles.cardTypeChevron?.color ?? "#0F172A"}
-                  />
-                </Pressable>
-                {cardTypeMenuOpen && (
-                  <View style={styles.cardTypeDropdown}>
-                    {cardTypeOptions.map((option, idx) => {
-                      const isActive = manualCardType === option.key;
-                      return (
-                        <Pressable
-                          key={option.key}
-                          accessibilityRole="button"
-                          accessibilityState={{ selected: isActive }}
-                          style={({ pressed }) => [
-                            styles.cardTypeDropdownItem,
-                            idx === 0 && styles.cardTypeDropdownItemFirst,
-                            idx === cardTypeOptions.length - 1 &&
-                            styles.cardTypeDropdownItemLast,
-                            isActive && styles.cardTypeDropdownItemActive,
-                            pressed ? { opacity: 0.9 } : null,
-                          ]}
-                          onPress={() => handleManualCardTypeChange(option.key)}
-                        >
-                          <Text
-                            style={[
-                              styles.cardTypeOptionLabel,
-                              isActive && styles.cardTypeOptionLabelActive,
-                            ]}
-                          >
-                            {option.label}
-                          </Text>
-                        </Pressable>
-                      );
-                    })}
-                  </View>
-                )}
-              </View>
+              <CardTypeSelector
+                options={cardTypeOptions}
+                value={manualCardType}
+                onChange={handleManualCardTypeChange}
+                label="Typ fiszek"
+              />
               <Text style={styles.miniSectionHeader}>fiszki</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
