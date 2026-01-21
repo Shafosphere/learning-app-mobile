@@ -28,10 +28,22 @@ export default function LargeCardContainer({
   const [promptHeight, setPromptHeight] = useState<number | null>(null);
   const [inputHeight, setInputHeight] = useState<number | null>(null);
   const lastStableHeight = useRef<number | null>(null);
+  const initialCardHeight =
+    hasContent && lastStableHeight.current != null
+      ? lastStableHeight.current
+      : SMALL_CARD_HEIGHT;
+  const emptyAlignmentStyle = useMemo(
+    () =>
+      hasContent
+        ? null
+        : {
+            alignItems: "center",
+            justifyContent: "center",
+          },
+    [hasContent],
+  );
   const animatedCardHeight = useRef(
-    new Animated.Value(
-      hasContent ? LARGE_CARD_MAX_HEIGHT : SMALL_CARD_HEIGHT
-    )
+    new Animated.Value(initialCardHeight)
   ).current;
 
   const baseCardHeight = useMemo(() => {
@@ -93,6 +105,7 @@ export default function LargeCardContainer({
         styles.card,
         styles.cardLarge,
         { height: animatedCardHeight },
+        emptyAlignmentStyle,
         cardStateStyle,
       ]}
     >

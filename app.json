@@ -1,11 +1,11 @@
 {
   "expo": {
-    "name": "learning-app-mobile",
-    "slug": "learning-app-mobile",
+    "name": "Memicard",
+    "slug": "memicard",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/icons/icon.png",
-    "scheme": "learningappmobile",
+    "scheme": "memicard",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
@@ -17,7 +17,7 @@
         "backgroundColor": "#ffffff"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.learningappmobile"
+      "package": "com.anonymous.memicard"
     },
     "splash": {
       "image": "./assets/icons/splash-icon.png",
