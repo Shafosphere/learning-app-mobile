@@ -9,10 +9,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   header: {
     gap: 8,
-    marginBottom: 18,
     width: "100%",
     height: 110,
-    justifyContent: "center"
+    justifyContent: "center",
   },
   quote: {
     fontSize: 18,
@@ -42,20 +41,25 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
     padding: 14,
+    position: "relative",
     alignItems: "center",
     justifyContent: "center",
-    gap: 12,
   },
   tilePressed: {
     transform: [{ scale: 0.98 }],
   },
   iconBox: {
-    width: 72,
-    height: 72,
+    width: 90,
+    height: 90,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.secondBackground,
+    marginBottom: 40,
+    transform: [{ rotate: "5deg" }],
+  },
+  iconFlipped: {
+    transform: [{ scaleX: -1 }],
   },
   iconImage: {
     width: "100%",
@@ -63,11 +67,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     resizeMode: "contain",
   },
   tileText: {
+    position: "absolute",
+    left: 14,
+    right: 14,
+    bottom: 14,
     alignItems: "center",
-    gap: 4,
   },
   tileTitle: {
-    fontSize: 16,
+    fontSize: 24,
     fontWeight: "800",
     color: colors.headline,
   },
@@ -75,8 +82,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 12,
     color: colors.headline,
     textAlign: "center",
-    lineHeight: 18,
-    minHeight: 18 * 2,
+    // lineHeight: 18,
+    // minHeight: 18 * 2,
   },
   tileSubtitleHidden: {
     opacity: 0,
@@ -85,3 +92,5 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0,
   },
 }));
+
+export type HomeScreenStyles = ReturnType<typeof useStyles>;

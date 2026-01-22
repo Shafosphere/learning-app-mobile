@@ -1,38 +1,19 @@
 // index.tsx
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { useRouter } from "expo-router";
 import type React from "react";
-import {
-  FlatList,
-  Image,
-  Pressable,
-  Text,
-  View,
-  type ImageSourcePropType,
-} from "react-native";
+import { FlatList, View, Text } from "react-native";
+import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useStyles } from "./HomeScreen-styles";
 import { quotes } from "./quotes";
-import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import Feather from "@expo/vector-icons/Feather";
-import Entypo from "@expo/vector-icons/Entypo";
-
-const ICON_SIZE = 70;
-
-type HomeTile = {
-  key: string;
-  title: string;
-  subtitle: string;
-  image?: ImageSourcePropType;
-  icon?: React.ReactNode;
-  action?: () => void;
-  isPlaceholder?: boolean;
-};
 
 export default function HomeScreen() {
   const router = useRouter();
   const styles = useStyles();
-  const { colors } = useSettings();
   const logo = require("../../../assets/illustrations/box/logo.png");
+  const statsImage = require("../../../assets/images/staty.png");
+  const customImage = require("../../../assets/images/edit.png");
+  const tutorialImage = require("../../../assets/images/tutorial.png");
+  const supportImage = require("../../../assets/images/wsparcie.png");
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
@@ -56,7 +37,7 @@ export default function HomeScreen() {
     router.push("/support");
   };
 
-  const tiles: HomeTile[] = [
+  const buildHomeTiles = (): HomeTile[] => [
     {
       key: "courses",
       title: "Kursy",
@@ -65,44 +46,36 @@ export default function HomeScreen() {
       action: goToCoursePanel,
     },
     {
+      key: "custom",
+      title: "Stwórz",
+      subtitle: "Kreator własnych kursów",
+      image: customImage,
+      action: goToCustomCourse,
+    },
+    {
       key: "stats",
       title: "Statystyki",
       subtitle: "Zobacz wyniki",
-      icon: (
-        <Feather name="bar-chart-2" size={ICON_SIZE} color={colors.headline} />
-      ),
+      image: statsImage,
       action: goToStats,
-    },
-    {
-      key: "custom",
-      title: "Własne fiszki",
-      subtitle: "Kreator własnych kursów",
-      icon: <Entypo name="pencil" size={ICON_SIZE} color={colors.headline} />,
-      action: goToCustomCourse,
     },
     {
       key: "wiki",
       title: "Przewodnik",
       subtitle: "Instrukcje i wskazówki",
-      icon: (
-        <Feather name="book-open" size={ICON_SIZE} color={colors.headline} />
-      ),
+      image: tutorialImage,
       action: goToWiki,
     },
     {
       key: "support",
-      title: "Wsparcie",
-      subtitle: "Pomoc i sugestie",
-      icon: (
-        <MaterialIcons
-          name="support-agent"
-          size={ICON_SIZE}
-          color={colors.headline}
-        />
-      ),
+      title: "Kontakt",
+      subtitle: "Błedy i sugestie",
+      image: supportImage,
       action: goToSupport,
     },
   ];
+
+  const tiles = buildHomeTiles();
 
   const listData =
     tiles.length % 2 === 0
@@ -117,39 +90,7 @@ export default function HomeScreen() {
           },
         ];
 
-  const renderTile = ({ item }: { item: HomeTile }) => {
-    if (item.isPlaceholder) {
-      return <View style={[styles.tile, styles.placeholderTile]} />;
-    }
-
-    return (
-      <Pressable
-        onPress={item.action}
-        accessibilityRole="button"
-        accessibilityLabel={item.title}
-        style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
-      >
-        <View style={styles.iconBox}>
-          {item.icon ? (
-            item.icon
-          ) : item.image ? (
-            <Image source={item.image} style={styles.iconImage} />
-          ) : null}
-        </View>
-        <View style={styles.tileText}>
-          <Text style={styles.tileTitle}>{item.title}</Text>
-          <Text
-            style={[
-              styles.tileSubtitle,
-              !item.subtitle && styles.tileSubtitleHidden,
-            ]}
-          >
-            {item.subtitle || "placeholder"}
-          </Text>
-        </View>
-      </Pressable>
-    );
-  };
+  const renderTile = renderHomeTile(styles);
 
   return (
     <View style={styles.container}>
