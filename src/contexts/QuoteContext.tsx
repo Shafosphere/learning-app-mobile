@@ -4,9 +4,11 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useEffect,
   useRef,
   useState,
 } from "react";
+import { useSettings } from "./SettingsContext";
 
 export interface QuoteTriggerRequest {
   trigger: string;
@@ -35,6 +37,7 @@ const QuoteContext = createContext<QuoteContextType>({
 });
 
 export const QuoteProvider = ({ children }: { children: ReactNode }) => {
+  const { quotesEnabled } = useSettings();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const lastQuoteTimestampRef = useRef<number>(0);
@@ -116,6 +119,10 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
 
   const triggerQuote = useCallback(
     (request: QuoteTriggerRequest) => {
+      if (!quotesEnabled) {
+        return;
+      }
+
       const {
         trigger,
         category,
@@ -149,12 +156,18 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
 
       showQuote(category);
     },
-    [showQuote]
+    [quotesEnabled, showQuote]
   );
 
   const hideQuote = useCallback(() => {
     setIsVisible(false);
   }, []);
+
+  useEffect(() => {
+    if (!quotesEnabled) {
+      setIsVisible(false);
+    }
+  }, [quotesEnabled]);
 
   return (
     <QuoteContext.Provider

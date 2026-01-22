@@ -85,7 +85,7 @@ function CourseIconColorSelectorComponent({
               : 0.9;
 
     return {
-      columns: 3, // 3 columns -> 5 rows for 15 icons
+      columns: 4, // 4 columns -> 4 rows for 15 icons
       spacing,
       size: Math.min(Math.max(baseSize * scale, 28), 72),
     };

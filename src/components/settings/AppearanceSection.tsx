@@ -1,12 +1,24 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import Slider from "@react-native-community/slider";
 import * as Haptics from "expo-haptics";
-import React, { useCallback } from "react";
-import { Image, Switch, Text, TouchableOpacity, View } from "react-native";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import {
+  PanResponder,
+  Image,
+  Switch,
+  Text,
+  TouchableOpacity,
+  View,
+} from "react-native";
 
-const classicPreview = require("@/assets/illustrations/box/boxstyle1.png");
-const carouselPreview = require("@/assets/illustrations/box/boxstyle2.png");
+const classicPreview = require("@/assets/images/sett_classic.png");
+const carouselPreview = require("@/assets/images/sett_caro.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";
@@ -19,6 +31,130 @@ const layoutOptions: LayoutOption[] = [
   { key: "carousel", label: "Karuzela", preview: carouselPreview },
 ];
 
+type ThickSliderProps = {
+  value: number;
+  minimumValue?: number;
+  maximumValue?: number;
+  step?: number;
+  disabled?: boolean;
+  onValueChange: (value: number) => void;
+  onSlidingComplete?: (value: number) => void;
+};
+
+const ThickSlider: React.FC<ThickSliderProps> = ({
+  value,
+  minimumValue = 0,
+  maximumValue = 1,
+  step = 0.01,
+  disabled = false,
+  onValueChange,
+  onSlidingComplete,
+}) => {
+  const styles = useStyles();
+  const trackRef = useRef<View | null>(null);
+  const [trackLayout, setTrackLayout] = useState<{
+    pageX: number;
+    width: number;
+  } | null>(null);
+
+  const clampToStep = useCallback(
+    (input: number) => {
+      const clamped = Math.min(Math.max(input, minimumValue), maximumValue);
+      if (!step) return clamped;
+      const stepped = Math.round(clamped / step) * step;
+      return Math.min(Math.max(stepped, minimumValue), maximumValue);
+    },
+    [minimumValue, maximumValue, step]
+  );
+
+  const updateFromPageX = useCallback(
+    (pageX: number, finalize = false) => {
+      if (!trackLayout) return;
+      const relative = pageX - trackLayout.pageX;
+      const boundedPx = Math.min(
+        Math.max(relative, 0),
+        Math.max(trackLayout.width, 1)
+      );
+      const ratio =
+        trackLayout.width === 0 ? 0 : boundedPx / trackLayout.width;
+      const raw = minimumValue + ratio * (maximumValue - minimumValue);
+      const nextValue = clampToStep(raw);
+      onValueChange(nextValue);
+      if (finalize && onSlidingComplete) {
+        onSlidingComplete(nextValue);
+      }
+    },
+    [
+      trackLayout,
+      minimumValue,
+      maximumValue,
+      clampToStep,
+      onValueChange,
+      onSlidingComplete,
+    ]
+  );
+
+  const panResponder = useMemo(
+    () =>
+      PanResponder.create({
+        onStartShouldSetPanResponder: () => !disabled,
+        onMoveShouldSetPanResponder: () => !disabled,
+        onPanResponderGrant: (evt) => {
+          if (disabled) return;
+          updateFromPageX(evt.nativeEvent.pageX);
+        },
+        onPanResponderMove: (evt) => {
+          if (disabled) return;
+          updateFromPageX(evt.nativeEvent.pageX);
+        },
+        onPanResponderRelease: (evt) => {
+          if (disabled) return;
+          updateFromPageX(evt.nativeEvent.pageX, true);
+        },
+        onPanResponderTerminate: (evt) => {
+          if (disabled) return;
+          updateFromPageX(evt.nativeEvent.pageX, true);
+        },
+        onPanResponderTerminationRequest: () => true,
+      }),
+    [disabled, updateFromPageX]
+  );
+
+  const handleLayout = useCallback(() => {
+    trackRef.current?.measure((_, __, width, ___, pageX) => {
+      if (width) {
+        setTrackLayout({ pageX, width });
+      }
+    });
+  }, []);
+
+  const clampedValue = Math.min(Math.max(value, minimumValue), maximumValue);
+  const percent =
+    maximumValue === minimumValue
+      ? 0
+      : (clampedValue - minimumValue) / (maximumValue - minimumValue);
+  const thumbOffset = (trackLayout?.width ?? 0) * percent;
+
+  return (
+    <View
+      ref={trackRef}
+      onLayout={handleLayout}
+      style={[styles.sliderWrapper, disabled && styles.sliderDisabled]}
+      {...panResponder.panHandlers}
+    >
+      <View style={styles.sliderTrack} />
+      <View style={[styles.sliderFill, { width: `${percent * 100}%` }]} />
+      <View
+        style={[
+          styles.sliderThumb,
+          { transform: [{ translateX: thumbOffset - 14 }] },
+        ]}
+        pointerEvents="none"
+      />
+    </View>
+  );
+};
+
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
   const {
@@ -28,6 +164,8 @@ const AppearanceSection: React.FC = () => {
     toggleFeedbackEnabled,
     feedbackVolume,
     setFeedbackVolume,
+    quotesEnabled,
+    toggleQuotesEnabled,
     showBoxFaces,
     toggleShowBoxFaces,
     boxesLayout,
@@ -35,6 +173,7 @@ const AppearanceSection: React.FC = () => {
   } = useSettings();
 
   const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
+  const volumeDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerHaptics = useCallback(async () => {
     if (!feedbackEnabled) return;
@@ -61,6 +200,14 @@ const AppearanceSection: React.FC = () => {
     }
   };
 
+  const handleQuotesToggle = async (value: boolean) => {
+    // Switch is inverted: ON means mute quotes
+    if (value === quotesEnabled) {
+      await toggleQuotesEnabled();
+      await triggerHaptics();
+    }
+  };
+
   const handleFacesToggle = async (value: boolean) => {
     if (value !== showBoxFaces) {
       await toggleShowBoxFaces();
@@ -75,9 +222,22 @@ const AppearanceSection: React.FC = () => {
     }
   };
 
-  const handleVolumeChange = useCallback(
+  const handleVolumePreviewChange = useCallback((value: number) => {
+    setVolumePreview(value);
+    if (volumeDebounce.current) {
+      clearTimeout(volumeDebounce.current);
+    }
+    volumeDebounce.current = setTimeout(() => {
+      void setFeedbackVolume(value);
+    }, 180);
+  }, [setFeedbackVolume]);
+
+  const handleVolumeCommit = useCallback(
     (value: number) => {
       setVolumePreview(value);
+      if (volumeDebounce.current) {
+        clearTimeout(volumeDebounce.current);
+      }
       void setFeedbackVolume(value);
     },
     [setFeedbackVolume]
@@ -86,6 +246,15 @@ const AppearanceSection: React.FC = () => {
   React.useEffect(() => {
     setVolumePreview(feedbackVolume);
   }, [feedbackVolume]);
+
+  useEffect(() => {
+    return () => {
+      if (volumeDebounce.current) {
+        clearTimeout(volumeDebounce.current);
+        volumeDebounce.current = null;
+      }
+    };
+  }, []);
 
   return (
     <View style={styles.sectionCard}>
@@ -121,33 +290,34 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Wyłącz reakcje</Text>
+          <Text style={styles.rowSubtitle}>
+            Wycisza bąbelki z cytatami/reakcjami w aplikacji. Nie dotyczy powiadomień kursu.
+          </Text>
+        </View>
+        <Switch
+          style={styles.switch}
+          value={!quotesEnabled}
+          onValueChange={handleQuotesToggle}
+        />
+      </View>
+
+      <View style={styles.sliderSection}>
+        <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Głośność efektów</Text>
           <Text style={styles.rowSubtitle}>
             Regulacja głośności dźwięków w aplikacji.
           </Text>
         </View>
         <View style={styles.sliderRow}>
-          <View style={styles.sliderWrapper}>
-            <Slider
-              style={styles.slider}
-              value={volumePreview}
-              onValueChange={handleVolumeChange}
-              minimumValue={0}
-              maximumValue={1}
-              step={0.01}
-              minimumTrackTintColor={
-                (styles.sliderFill as { backgroundColor: string })
-                  .backgroundColor
-              }
-              maximumTrackTintColor={
-                (styles.sliderTrack as { backgroundColor: string })
-                  .backgroundColor
-              }
-              thumbTintColor={
-                (styles.sliderThumb as { borderColor: string }).borderColor
-              }
-            />
-          </View>
+          <ThickSlider
+            value={volumePreview}
+            onValueChange={handleVolumePreviewChange}
+            onSlidingComplete={handleVolumeCommit}
+            minimumValue={0}
+            maximumValue={1}
+            step={0.01}
+          />
 
           <Text style={styles.sliderValue}>
             {Math.round(volumePreview * 100)}%
@@ -178,25 +348,37 @@ const AppearanceSection: React.FC = () => {
         </View>
       </View>
 
-      <View style={styles.layoutOptions}>
-        {layoutOptions.map((option) => (
-          <TouchableOpacity
-            key={option.key}
-            activeOpacity={0.7}
-            onPress={() => handleLayoutSelect(option.key)}
-            style={[
-              styles.layoutOption,
-              boxesLayout === option.key && styles.layoutOptionActive,
-            ]}
-          >
-            <Image
-              source={option.preview}
-              style={styles.layoutImage}
-              resizeMode="cover"
-            />
-            <Text style={styles.layoutLabel}>{option.label}</Text>
-          </TouchableOpacity>
-        ))}
+      <View style={styles.layoutOptionsRow}>
+        {layoutOptions.map((option) => {
+          const isActive = boxesLayout === option.key;
+          return (
+            <TouchableOpacity
+              key={option.key}
+              activeOpacity={0.7}
+              onPress={() => handleLayoutSelect(option.key)}
+              style={[
+                styles.layoutOption,
+                isActive && styles.layoutOptionActive,
+              ]}
+            >
+              <View style={styles.layoutPreviewWrapper}>
+                <Image
+                  source={option.preview}
+                  style={styles.layoutPreview}
+                  resizeMode="contain"
+                />
+              </View>
+              <Text
+                style={[
+                  styles.layoutLabel,
+                  isActive && styles.layoutLabelActive,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
       </View>
 
     </View>

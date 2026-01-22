@@ -206,6 +206,8 @@ interface SettingsContextValue {
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   flashcardsSuggestionsEnabled: boolean;
   toggleFlashcardsSuggestions: () => Promise<void>;
+  quotesEnabled: boolean;
+  toggleQuotesEnabled: () => Promise<void>;
   flashcardsCardSize: FlashcardsCardSize;
   flashcardsCardSizeDefault: FlashcardsCardSize;
   setFlashcardsCardSizeDefault: (size: FlashcardsCardSize) => Promise<void>;
@@ -319,6 +321,8 @@ const defaultValue: SettingsContextValue = {
   setFlashcardsBatchSize: async () => {},
   flashcardsSuggestionsEnabled: true,
   toggleFlashcardsSuggestions: async () => {},
+  quotesEnabled: true,
+  toggleQuotesEnabled: async () => {},
   flashcardsCardSize: "large",
   flashcardsImageSize: "dynamic",
   dailyGoal: 20,
@@ -452,6 +456,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     );
   const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
     usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", false);
+  const [quotesEnabled, setQuotesEnabled] = usePersistedState<boolean>(
+    "quotes.enabled",
+    true
+  );
   const [dailyGoal, setDailyGoal] = usePersistedState<number>("dailyGoal", 20);
   const [feedbackEnabledState, _setFeedbackEnabled] =
     usePersistedState<boolean>("feedbackEnabled", true);
@@ -1234,6 +1242,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setFlashcardsSuggestionsEnabled(!flashcardsSuggestionsEnabled);
   };
 
+  const toggleQuotesEnabled = async () => {
+    await setQuotesEnabled(!quotesEnabled);
+  };
+
   const toggleHighContrast = async () => {
     await setHighContrastEnabled(!highContrastEnabled);
   };
@@ -1348,6 +1360,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setFlashcardsBatchSize,
         flashcardsSuggestionsEnabled,
         toggleFlashcardsSuggestions,
+        quotesEnabled,
+        toggleQuotesEnabled,
         flashcardsCardSize,
         flashcardsCardSizeDefault,
         setFlashcardsCardSizeDefault,

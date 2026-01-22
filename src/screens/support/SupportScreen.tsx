@@ -8,6 +8,10 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Linking, Platform, ScrollView, Text, View } from "react-native";
 
 const SUPPORT_EMAIL = "support@example.com";
+const BUG_REPORT_SUBJECT = "Zgłoszenie błędu - Learning App";
+const SUGGESTION_SUBJECT = "Sugestia / pomysł - Learning App";
+const SUGGESTION_BODY =
+  "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne.";
 
 type DiagnosticEntry = {
   key: "app" | "platform" | "device";
@@ -67,20 +71,23 @@ export default function SupportScreen() {
     [selectedDiagnostics],
   );
 
-  const openMailto = useCallback(async () => {
-    const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
-      "Zgłoszenie błędu - Learning App",
-    )}&body=${encodeURIComponent(emailBody)}`;
-    try {
-      await Linking.openURL(url);
-      setStatus("Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.");
-    } catch (error) {
-      console.warn("[Support] mailto failed", error);
-      setStatus(
-        "Nie udało się otworzyć klienta poczty. Skopiuj dane ręcznie i wyślij własnoręcznie.",
-      );
-    }
-  }, [emailBody]);
+  const openMailto = useCallback(
+    async (subject: string, body: string, successMessage: string) => {
+      const url = `mailto:${SUPPORT_EMAIL}?subject=${encodeURIComponent(
+        subject,
+      )}&body=${encodeURIComponent(body)}`;
+      try {
+        await Linking.openURL(url);
+        setStatus(successMessage);
+      } catch (error) {
+        console.warn("[Support] mailto failed", error);
+        setStatus(
+          "Nie udało się otworzyć klienta poczty. Skopiuj dane ręcznie i wyślij własnoręcznie.",
+        );
+      }
+    },
+    [],
+  );
 
   const handleSendEmail = useCallback(async () => {
     setBusy(true);
@@ -91,7 +98,7 @@ export default function SupportScreen() {
       if (available) {
         const result = await MailComposer.composeAsync({
           recipients: [SUPPORT_EMAIL],
-          subject: "Zgłoszenie błędu - Learning App",
+          subject: BUG_REPORT_SUBJECT,
           body: emailBody,
         });
 
@@ -106,17 +113,69 @@ export default function SupportScreen() {
         }
       }
 
-      await openMailto();
+      await openMailto(
+        BUG_REPORT_SUBJECT,
+        emailBody,
+        "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
+      );
     } catch (error) {
       console.warn("[Support] send email failed", error);
       setStatus(
         "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto.",
       );
-      await openMailto();
+      await openMailto(
+        BUG_REPORT_SUBJECT,
+        emailBody,
+        "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
+      );
     } finally {
       setBusy(false);
     }
   }, [emailBody, openMailto]);
+
+  const handleSendSuggestion = useCallback(async () => {
+    setBusy(true);
+    setStatus(null);
+
+    try {
+      const available = await MailComposer.isAvailableAsync();
+      if (available) {
+        const result = await MailComposer.composeAsync({
+          recipients: [SUPPORT_EMAIL],
+          subject: SUGGESTION_SUBJECT,
+          body: SUGGESTION_BODY,
+        });
+
+        if (result.status === MailComposer.MailComposerStatus.SENT) {
+          setStatus("Sugestia wysłana. Dziękujemy za pomysł!");
+          return;
+        }
+
+        if (result.status === MailComposer.MailComposerStatus.CANCELLED) {
+          setStatus("Wysyłka anulowana. Możesz spróbować ponownie.");
+          return;
+        }
+      }
+
+      await openMailto(
+        SUGGESTION_SUBJECT,
+        SUGGESTION_BODY,
+        "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
+      );
+    } catch (error) {
+      console.warn("[Support] send suggestion failed", error);
+      setStatus(
+        "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto.",
+      );
+      await openMailto(
+        SUGGESTION_SUBJECT,
+        SUGGESTION_BODY,
+        "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
+      );
+    } finally {
+      setBusy(false);
+    }
+  }, [openMailto]);
 
   return (
     <View style={styles.container}>
@@ -124,6 +183,22 @@ export default function SupportScreen() {
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >
+        <View style={styles.section}>
+          <Text style={styles.header}>Wyślij sugestię</Text>
+          <Text style={styles.subtitle}>
+            Masz pomysł na nową funkcję lub poprawkę? Podziel się nim, a my
+            sprawdzimy jak możemy go wdrożyć.
+          </Text>
+          <View style={styles.buttonWrapper}>
+            <MyButton
+              text="Podziel się pomysłem"
+              onPress={handleSendSuggestion}
+              width={160}
+              disabled={busy}
+            />
+          </View>
+        </View>
+
         <View style={styles.section}>
           <Text style={styles.header}>Zgłoś problem</Text>
           <Text style={styles.subtitle}>
