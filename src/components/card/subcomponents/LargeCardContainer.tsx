@@ -15,6 +15,7 @@ type LargeCardContainerProps = {
   cardStateStyle?: object;
   hasContent: boolean;
   showCorrectionInputs: boolean;
+  backgroundColorOverride?: string;
   children: (handlers: LayoutHandlers) => React.ReactNode;
 };
 
@@ -22,6 +23,7 @@ export default function LargeCardContainer({
   cardStateStyle,
   hasContent,
   showCorrectionInputs,
+  backgroundColorOverride,
   children,
 }: LargeCardContainerProps) {
   const styles = useStyles();
@@ -107,6 +109,9 @@ export default function LargeCardContainer({
         { height: animatedCardHeight },
         emptyAlignmentStyle,
         cardStateStyle,
+        backgroundColorOverride
+          ? { backgroundColor: backgroundColorOverride }
+          : null,
       ]}
     >
       {children({

@@ -455,7 +455,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       DEFAULT_FLASHCARDS_BATCH_SIZE
     );
   const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
-    usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", false);
+    usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", true);
   const [quotesEnabled, setQuotesEnabled] = usePersistedState<boolean>(
     "quotes.enabled",
     true

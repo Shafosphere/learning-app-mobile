@@ -18,6 +18,7 @@ import {
   Text,
   TextInput,
   View,
+  Platform,
 } from "react-native";
 import { useStyles } from "./card-styles";
 import type { CardProps } from "./card-types";
@@ -47,6 +48,8 @@ export default function Card({
   onHintUpdate,
   hideActions = false,
   isFocused = true,
+  backgroundColorOverride,
+  textColorOverride,
 }: CardProps) {
   const styles = useStyles();
   const {
@@ -70,6 +73,11 @@ export default function Card({
       autoComplete: disabled ? ("off" as const) : undefined,
       textContentType: disabled ? ("none" as const) : undefined,
       importantForAutofill: disabled ? ("no" as const) : undefined,
+      // On Android some keyboards still show suggestions; visible-password suppresses that bar.
+      keyboardType:
+        disabled && Platform.OS === "android"
+          ? ("visible-password" as const)
+          : undefined,
     };
   }, [flashcardsSuggestionsEnabled]);
   const trimTrailingSpaces = useCallback((value: string) => {
@@ -778,15 +786,32 @@ export default function Card({
           cardStateStyle={cardStateStyle}
           hasContent={Boolean(selectedItem)}
           showCorrectionInputs={showCorrectionInputs}
+          backgroundColorOverride={backgroundColorOverride}
         >
           {(handlers) => (
-            <CardContentResolver {...resolverProps} layoutHandlers={handlers} />
+            <CardContentResolver
+              {...resolverProps}
+              layoutHandlers={handlers}
+              textColorOverride={textColorOverride}
+            />
           )}
         </LargeCardContainer>
       ) : (
-        <View style={[styles.card, styles.cardSmall, cardStateStyle]}>
+        <View
+          style={[
+            styles.card,
+            styles.cardSmall,
+            cardStateStyle,
+            backgroundColorOverride
+              ? { backgroundColor: backgroundColorOverride }
+              : null,
+          ]}
+        >
           <View style={styles.cardSmallContent}>
-            <CardContentResolver {...resolverProps} />
+            <CardContentResolver
+              {...resolverProps}
+              textColorOverride={textColorOverride}
+            />
           </View>
         </View>
       )}

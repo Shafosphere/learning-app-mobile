@@ -609,7 +609,13 @@ export default function Flashcards() {
   );
 
   const downloadDisabled =
-    customCards.length === 0 || allCardsDistributed || isLoadingData || !isReady;
+    customCards.length === 0 ||
+    allCardsDistributed ||
+    isLoadingData ||
+    !isReady ||
+    (boxZeroEnabled
+      ? boxes.boxZero.length >= 40
+      : boxes.boxOne.length >= 40);
   const shouldShowBoxes =
     activeCustomCourseId != null &&
     isReady &&

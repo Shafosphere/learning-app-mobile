@@ -56,6 +56,7 @@ interface CardContentResolverProps {
   setIsMainInputFocused: any;
   hangulTarget: any;
   typoDiff: any;
+  textColorOverride?: string;
 }
 
 export const CardContentResolver = (props: CardContentResolverProps) => {
@@ -105,6 +106,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     setIsMainInputFocused,
     hangulTarget,
     typoDiff,
+    textColorOverride,
   } = props;
 
   const showCorrection = correction && (result === false || isIntroMode);
@@ -155,6 +157,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           next={next}
           input1LayoutWidth={input1LayoutWidth}
           input2LayoutWidth={input2LayoutWidth}
+          textColorOverride={textColorOverride}
         />
       )}
       {showTrueFalse && (
@@ -186,6 +189,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           next={next}
           hangulTarget={hangulTarget}
           typoDiff={typoDiff}
+          textColorOverride={textColorOverride}
         />
       )}
       {showEmpty && (

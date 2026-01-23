@@ -23,6 +23,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
     borderRadius: 13,
     zIndex: 2,
+    alignItems: "center",
+    justifyContent: "center",
   },
   boxLeft: {
     alignSelf: "flex-start",
@@ -112,5 +114,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 15,
     lineHeight: 22,
     color: colors.headline,
+  },
+  peekExample: {
+    borderWidth: 0,
+    borderRadius: 14,
+    paddingVertical: 14,
+    paddingHorizontal: 12,
+    backgroundColor: colors.secondBackground,
+    gap: 10,
+  },
+  peekExampleLabel: {
+    fontSize: 14,
+    fontWeight: "800",
+    letterSpacing: 0.3,
+    color: colors.headline,
+    textTransform: "uppercase",
   },
 }));

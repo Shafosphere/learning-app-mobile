@@ -29,13 +29,25 @@ export default function MyButton({
   const { colors } = useSettings();
   const derivedLabel =
     accessibilityLabel ?? (typeof text === "string" ? text : undefined);
-  const content =
-    children ??
-    (text !== undefined ? (
-      <Text style={styles.text} allowFontScaling>
+  const backgroundColor = disabled ? colors.border : colors[color];
+
+  const renderContent = (pressed: boolean) => {
+    if (children) return children;
+    if (text === undefined) return null;
+
+    const textColor =
+      color === "my_yellow" && !disabled
+        ? pressed
+          ? colors.headline
+          : colors.font
+        : colors.headline;
+
+    return (
+      <Text style={[styles.text, { color: textColor }]} allowFontScaling>
         {text}
       </Text>
-    ) : null);
+    );
+  };
 
   return (
     <Pressable
@@ -46,11 +58,11 @@ export default function MyButton({
       accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.button,
-        { width, backgroundColor: colors[color] },
-        pressed && styles.pressed,
+        { width, backgroundColor },
+        !disabled && pressed && styles.pressed,
       ]}
     >
-      {content}
+      {({ pressed }) => renderContent(pressed)}
     </Pressable>
   );
 }

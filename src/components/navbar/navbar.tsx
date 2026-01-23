@@ -1,4 +1,3 @@
-
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -63,11 +62,12 @@ export default function Navbar({ children }: NavbarProps) {
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const statusBarHeight =
-    Platform.OS === "android" ? StatusBar.currentHeight ?? 0 : 0;
+    Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0;
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
-  const [customCourse, setCustomCourse] =
-    useState<CustomCourseRecord | null>(null);
+  const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
+    null,
+  );
   const [dueReviewCount, setDueReviewCount] = useState<number>(0);
   type DisplayCourse =
     | { kind: "custom"; course: CustomCourseRecord }
@@ -84,7 +84,7 @@ export default function Navbar({ children }: NavbarProps) {
     return null;
   }, [activeCourse, activeCustomCourseId, customCourse]);
   const [displayCourse, setDisplayCourse] = useState<DisplayCourse | null>(
-    derivedDisplayCourse
+    derivedDisplayCourse,
   );
   const { knownWordsCount } = useLearningStats();
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
@@ -145,7 +145,7 @@ export default function Navbar({ children }: NavbarProps) {
     }
 
     const manifest = OFFICIAL_PACKS.find(
-      (pack) => pack.slug === displayedCustomCourse.slug
+      (pack) => pack.slug === displayedCustomCourse.slug,
     );
     const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
     if (!flagLang) {
@@ -174,7 +174,7 @@ export default function Navbar({ children }: NavbarProps) {
     if (!displayedCustomCourse) return null;
     return resolveCourseIconProps(
       displayedCustomCourse.iconId,
-      displayedCustomCourse.iconColor ?? colors.headline
+      displayedCustomCourse.iconColor ?? colors.headline,
     );
   }, [displayedCustomCourse, colors.headline]);
 
@@ -201,11 +201,11 @@ export default function Navbar({ children }: NavbarProps) {
           } catch (error) {
             console.warn(
               `[Navbar] Failed to count custom reviews for course ${course.id}`,
-              error
+              error,
             );
             return 0;
           }
-        })
+        }),
       );
       for (const count of customCounts) {
         total += count;
@@ -222,9 +222,7 @@ export default function Navbar({ children }: NavbarProps) {
     const now = Date.now();
     const withinWindow = now - logoTapRef.current.ts < 2000;
     logoTapRef.current.ts = now;
-    logoTapRef.current.count = withinWindow
-      ? logoTapRef.current.count + 1
-      : 1;
+    logoTapRef.current.count = withinWindow ? logoTapRef.current.count + 1 : 1;
 
     if (logoTapRef.current.count >= 7) {
       triggerQuote({
@@ -274,11 +272,7 @@ export default function Navbar({ children }: NavbarProps) {
   ) : courseFlagSource ? (
     <Image source={courseFlagSource} style={styles.courseFlag} />
   ) : (
-    <Ionicons
-      name="person-circle-outline"
-      size={24}
-      color={colors.headline}
-    />
+    <Ionicons name="person-circle-outline" size={24} color={colors.headline} />
   );
 
   const handlePadPress = async () => {
@@ -295,8 +289,7 @@ export default function Navbar({ children }: NavbarProps) {
     }
 
     const hasCourse =
-      activeCourse?.sourceLangId != null &&
-      activeCourse?.targetLangId != null;
+      activeCourse?.sourceLangId != null && activeCourse?.targetLangId != null;
 
     if (hasCourse && selectedLevel) {
       router.push("/flashcards");

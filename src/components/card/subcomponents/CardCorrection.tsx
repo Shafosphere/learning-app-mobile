@@ -74,6 +74,7 @@ type CardCorrectionProps = {
   input1LayoutWidth: number;
   input2LayoutWidth: number;
   imageSizeMode: FlashcardsImageSize;
+  textColorOverride?: string;
 };
 
 export function CardCorrection({
@@ -111,12 +112,17 @@ export function CardCorrection({
   input1LayoutWidth,
   input2LayoutWidth,
   imageSizeMode,
+  textColorOverride,
 }: CardCorrectionProps) {
   const styles = useStyles();
   const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
-    () => [styles.cardFont, styles.promptMarqueeText],
-    [styles],
+    () => [
+      styles.cardFont,
+      styles.promptMarqueeText,
+      textColorOverride ? { color: textColorOverride } : null,
+    ],
+    [styles, textColorOverride],
   );
   const flattenedPromptTextStyle = useMemo(
     () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
@@ -190,6 +196,7 @@ export function CardCorrection({
         styles.cardFont,
         styles.promptText,
         allowMultilinePrompt && styles.promptTextMultiline,
+        textColorOverride ? { color: textColorOverride } : null,
       ]}
       numberOfLines={allowMultilinePrompt ? undefined : 1}
       ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
@@ -234,7 +241,7 @@ export function CardCorrection({
               <Octicons
                 name="discussion-duplicate"
                 size={24}
-                color={styles.cardFont.color}
+                color={textColorOverride ?? (styles.cardFont as any).color}
               />
             </Pressable>
           ) : null}
@@ -271,7 +278,10 @@ export function CardCorrection({
       >
         <View style={[styles.inputRow, { width: input1ContentWidth }]}>
           <Text
-            style={styles.myplaceholder}
+            style={[
+              styles.myplaceholder,
+              textColorOverride ? { color: textColorOverride } : null,
+            ]}
             numberOfLines={1}
             ellipsizeMode="clip"
           >
@@ -284,7 +294,10 @@ export function CardCorrection({
                 applyPlaceholderCasing(text, correctionAwers),
               )
             }
-            style={styles.myinput}
+            style={[
+              styles.myinput,
+              textColorOverride ? { color: textColorOverride } : null,
+            ]}
             ref={input1Ref}
             returnKeyType="next"
             blurOnSubmit={false}
@@ -345,7 +358,10 @@ export function CardCorrection({
       >
         <View style={[styles.inputRow, { width: input2ContentWidth }]}>
           <Text
-            style={styles.myplaceholder}
+            style={[
+              styles.myplaceholder,
+              textColorOverride ? { color: textColorOverride } : null,
+            ]}
             numberOfLines={1}
             ellipsizeMode="clip"
           >
@@ -367,7 +383,10 @@ export function CardCorrection({
                 focusWithDelay(input1Ref);
               }
             }}
-            style={styles.myinput}
+            style={[
+              styles.myinput,
+              textColorOverride ? { color: textColorOverride } : null,
+            ]}
             ref={input2Ref}
             returnKeyType="done"
             autoCapitalize="none"
@@ -402,7 +421,7 @@ export function CardCorrection({
           <Octicons
             name="discussion-duplicate"
             size={24}
-            color={styles.cardFont.color}
+            color={textColorOverride ?? (styles.cardFont as any).color}
           />
         </Pressable>
       ) : null}

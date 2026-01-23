@@ -49,6 +49,7 @@ type CardInputProps = {
     inputChar: string;
   } | null;
   imageSizeMode: FlashcardsImageSize;
+  textColorOverride?: string;
 };
 
 export function CardInput({
@@ -70,12 +71,17 @@ export function CardInput({
   hangulTarget,
   typoDiff,
   imageSizeMode,
+  textColorOverride,
 }: CardInputProps) {
   const styles = useStyles();
   const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
-    () => [styles.cardFont, styles.promptMarqueeText],
-    [styles]
+    () => [
+      styles.cardFont,
+      styles.promptMarqueeText,
+      textColorOverride ? { color: textColorOverride } : null,
+    ],
+    [styles, textColorOverride]
   );
   const flattenedPromptTextStyle = useMemo(
     () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
@@ -107,7 +113,11 @@ export function CardInput({
     if (!typoDiff) {
       return (
         <TextInput
-          style={[styles.cardInput, styles.cardFont]}
+          style={[
+            styles.cardInput,
+            styles.cardFont,
+            textColorOverride ? { color: textColorOverride } : null,
+          ]}
           value={answer}
           onChangeText={setAnswer}
           autoCapitalize="none"
@@ -165,7 +175,12 @@ export function CardInput({
 
     return (
       <View style={[styles.cardInput, { width: "100%", flexDirection: "row", alignItems: "center" }]}>
-        <Text style={styles.cardFont}>
+        <Text
+          style={[
+            styles.cardFont,
+            textColorOverride ? { color: textColorOverride } : null,
+          ]}
+        >
           {beforeCursor}
           {errorPart}
           {correctionPart}
@@ -237,6 +252,7 @@ export function CardInput({
                   styles.cardFont,
                   styles.promptText,
                   allowMultilinePrompt && styles.promptTextMultiline,
+                  textColorOverride ? { color: textColorOverride } : null,
                 ]}
                 numberOfLines={allowMultilinePrompt ? undefined : 1}
                 ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
@@ -254,7 +270,9 @@ export function CardInput({
                 <Octicons
                   name="discussion-duplicate"
                   size={24}
-                  color={styles.cardFont.color}
+                  color={
+                    textColorOverride ?? (styles.cardFont as any).color
+                  }
                 />
               </Pressable>
             ) : null}
