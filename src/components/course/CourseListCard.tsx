@@ -1,5 +1,6 @@
 
 import type { ReactNode } from "react";
+import type { StyleProp, ViewStyle } from "react-native";
 
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -15,6 +16,7 @@ type CourseListCardProps = {
     onPress?: () => void;
     rightAccessory?: ReactNode;
     isHighlighted?: boolean;
+    containerStyle?: StyleProp<ViewStyle>;
 };
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -86,6 +88,7 @@ export function CourseListCard({
     onPress,
     rightAccessory,
     isHighlighted,
+    containerStyle,
 }: CourseListCardProps) {
     const styles = useStyles();
 
@@ -95,7 +98,7 @@ export function CourseListCard({
     return (
         <CourseCard
             onPress={onPress}
-            containerStyle={styles.card}
+            containerStyle={[styles.card, containerStyle]}
             contentStyle={styles.cardContent}
             {...iconProps}
             iconWrapperStyle={[styles.iconBadge, { borderColor: iconColor }]}

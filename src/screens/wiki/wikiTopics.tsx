@@ -4,8 +4,11 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import MyButton from "@/src/components/button/button";
 import Card from "@/src/components/card/card";
+import { CourseListCard } from "@/src/components/course/CourseListCard";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { ThemeColors } from "@/src/theme/theme";
+import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import Octicons from "@expo/vector-icons/Octicons";
 
 const SAMPLE_WORD: WordWithTranslations = {
   id: 1,
@@ -15,6 +18,46 @@ const SAMPLE_WORD: WordWithTranslations = {
   // hintFront: "czerwone i rośnie na drzewie",
   // hintBack: "czerwone i rośnie na drzewie",
 };
+
+const SAMPLE_COURSES = [
+  {
+    id: 1,
+    name: "Hiszpański start",
+    cardsCount: 120,
+    iconId: "book",
+    iconColor: "#F4B942",
+    flagCode: "es",
+  },
+  {
+    id: 2,
+    name: "ANG B1",
+    cardsCount: 95,
+    iconId: "globe",
+    iconColor: "#2AA845",
+    flagCode: "en",
+  },
+  {
+    name: "Francuski podstawy",
+    cardsCount: 60,
+    iconId: "heart",
+    iconColor: "#FF7AA2",
+    flagCode: "fr",
+  },
+];
+
+const SAMPLE_ACTIVATE_COURSES = SAMPLE_COURSES.map((course, index) => ({
+  ...course,
+  isHighlighted: index === 1,
+}));
+
+const SAMPLE_PIN_COURSES = SAMPLE_COURSES.map((course, index) => ({
+  ...course,
+  isPinned: index === 1,
+}));
+
+const handlePlaceholderCoursePress = () => {};
+const handlePlaceholderEditCourse = () => {};
+const handlePlaceholderPinToggle = () => {};
 
 function CardPreview({
   mode,
@@ -157,7 +200,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     blocks: [
       {
         type: "paragraph",
-        text: "Ekran przypinania to Twój osobisty selektor – coś jak Spotify, tylko dla nauki.",
+        text: "Ekran przypinania to Twój osobisty selektor",
       },
       {
         type: "heading",
@@ -170,9 +213,69 @@ export const WIKI_TOPICS: WikiTopic[] = [
         items: [
           "Przeglądasz wszystkie kursy i wybierasz te, które Cię teraz interesują",
           "Masz kilka tematów na raz? Przypnij je i miej pod ręką",
-          "Przypięte kursy lądują na kolejnym ekranie – tym do aktywacji",
+          "Przypięte kursy lądują na kolejnym ekranie, tym do aktywacji",
         ],
         tone: "pink",
+      },
+      {
+        type: "example",
+        tone: "green",
+        render: (colors) => (
+          <View style={{ gap: 12 }}>
+            {SAMPLE_PIN_COURSES.map((course) => (
+              <CourseListCard
+                key={course.id}
+                title={course.name}
+                subtitle={`fiszki: ${course.cardsCount}`}
+                iconId={course.iconId}
+                iconColor={course.iconColor}
+                flagCode={course.flagCode}
+                containerStyle={{ backgroundColor: colors.background }}
+                onPress={() => handlePlaceholderPinToggle()}
+                rightAccessory={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                      course.isPinned
+                        ? `Odepnij zestaw ${course.name} `
+                        : `Przypnij zestaw ${course.name} `
+                    }
+                    style={{ padding: 6 }}
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      handlePlaceholderPinToggle();
+                    }}
+                  >
+                    <View
+                      style={[
+                        {
+                          width: 32,
+                          height: 32,
+                          borderRadius: 10,
+                          borderWidth: 2,
+                          borderColor: course.isPinned
+                            ? colors.my_green
+                            : colors.border,
+                          backgroundColor: colors.background,
+                          alignItems: "center",
+                          justifyContent: "center",
+                        },
+                      ]}
+                    >
+                      {course.isPinned ? (
+                        <Octicons
+                          name="pin"
+                          size={20}
+                          color={colors.headline}
+                        />
+                      ) : null}
+                    </View>
+                  </Pressable>
+                }
+              />
+            ))}
+          </View>
+        ),
       },
       {
         type: "callout",
@@ -199,14 +302,48 @@ export const WIKI_TOPICS: WikiTopic[] = [
         ],
         tone: "green",
       },
-      { type: "heading", icon: "⚙️", text: "Co jeszcze?", tone: "pink" },
       {
-        type: "paragraph",
-        text: "Tapping w ikonkę obok kursu otwiera ustawienia – tam wyłączysz odwracanie fiszek, zmienisz tolerancję literówek i inne szczegóły.",
+        type: "example",
+        tone: "green",
+        render: (colors) => (
+          <View style={{ gap: 12 }}>
+            {SAMPLE_ACTIVATE_COURSES.map((course) => (
+              <CourseListCard
+                key={course.id}
+                title={course.name}
+                subtitle={`fiszki: ${course.cardsCount}`}
+                iconId={course.iconId}
+                iconColor={course.iconColor}
+                flagCode={course.flagCode}
+                isHighlighted={course.isHighlighted}
+                containerStyle={{ backgroundColor: colors.background }}
+                onPress={() => handlePlaceholderCoursePress()}
+                rightAccessory={
+                  <Pressable
+                    accessibilityRole="button"
+                    accessibilityLabel={`Edytuj kurs ${course.name}`}
+                    style={{ padding: 6 }}
+                    onPress={(event) => {
+                      event.stopPropagation();
+                      handlePlaceholderEditCourse();
+                    }}
+                    hitSlop={8}
+                  >
+                    <FontAwesome6
+                      name="edit"
+                      size={24}
+                      color={colors.headline}
+                    />
+                  </Pressable>
+                }
+              />
+            ))}
+          </View>
+        ),
       },
       {
         type: "callout",
-        text: "Szybki start: aktywuj kurs → wejdź w grę → zacznij naukę. Proste jak drut! 💪",
+        text: "Kliknęcie w ikonkę obok kursu otwiera ustawienia. Znajdują sie tam ustawienia które będą miały wpływ tylko na ten kurs.",
         tone: "green",
       },
     ],
@@ -219,32 +356,70 @@ export const WIKI_TOPICS: WikiTopic[] = [
         type: "paragraph",
         text: "Apka daje Ci dwa rodzaje ustawień – dla kursów i dla całej aplikacji.",
       },
+      {
+        type: "heading",
+        icon: "🎛️",
+        text: "Ustawienia aplikacji",
+        tone: "pink",
+      },
+            { type: "paragraph", text: "Wygląd" },
+      {
+        type: "list",
+        items: [
+          "Ciemny motyw: przełącza interfejs między jasnym i ciemnym.",
+          "Wibracje: możesz je wyłączyć, jeśli przeszkadzają.",
+          "Reakcje: jeżeli nie lubisz reakcji Memini, wyłącz jego wiadomośći",
+          "Głośność efektów: ustaw głośność dźwięków w aplikacji.",
+          "Miny pudełek: buzie które są na pudełkach w grze w fiszkach",
+          "Schemat pudełek: zmienia schemat wyświetlanych pudełek",
+        ],
+        tone: "pink",
+      },
+      { type: "paragraph", text: "Dostępność" },
+      {
+        type: "list",
+        items: [
+          "Wysoki kontrast: podbija widoczność elementów interfejsu.",
+          "Tryb daltonistyczny: ułatwia korzystanie osobom z zaburzeniami widzenia barw.",
+          "Większa czcionka: powiększa tekst w aplikacji.",
+        ],
+      },
+      { type: "paragraph", text: "Nauka" },
+      {
+        type: "list",
+        items: [
+          "Spellchecking: włącz lub wyłącz sprawdzanie pisowni w odpowiedziach.",
+          "Sugestie klawiatury: zdecyduj, czy chcesz podpowiedzi z klawiatury systemowej.",
+          "Ignoruj znaki diakrytyczne: odpowiedzi bez polskich znaków mogą być uznawane za poprawne.",
+          "Przypomnienia o nauce: skonfiguruj powiadomienia, żeby nie wypaść z rytmu.",
+          "Liczba fiszek w partii: ustaw, ile kart dodajemy jednorazowo do pudełek.",
+        ],
+      },
+      { type: "paragraph", text: "Inne" },
+      {
+        type: "list",
+        items: [
+          "Eksportuj/importuj dane: zrób kopię zapasową lub przenieś progres między urządzeniami.",
+          "Przywróć ustawienia nauki: reset preferencji uczenia do domyślnych.",
+          "Włącz intro od nowa: ponownie odtwórz ekran powitalny.",
+        ],
+      },
       { type: "heading", icon: "⚙️", text: "Ustawienia kursu", tone: "green" },
       {
         type: "list",
         items: [
-          "Odwracanie fiszek – możesz wyłączyć, jeśli np. uczysz się flag",
-          "Tolerancja literówek – jak bardzo apka ma wybaczać błędy",
-          "Czułość na wielkość liter – wielka czy mała? Twój wybór",
-          "Inne detale, które sprawiają, że nauka działa tak, jak chcesz",
+          "Faza zapominania: określa, kiedy fiszka spada do poprzedniego pudełka.",
+          "Automat fiszek (zamiast Autoflow): automatycznie dodaje nowe karty do gry.",
+          "Włącz powtórki: pozwala wrócić do kart z bieżącej partii.",
+          "Pomiń poprawkę po błędzie: decyduje, czy po złej odpowiedzi musisz wpisać poprawną.",
+          "Rozmiar fiszki: wybierz mniejszy lub większy układ kart.",
+          "Resety danych: jednym kliknięciem czyścisz postęp w kursie.",
         ],
         tone: "green",
       },
       {
-        type: "heading",
-        icon: "🎨",
-        text: "Ustawienia aplikacji",
-        tone: "pink",
-      },
-      {
-        type: "list",
-        items: [
-          "Motyw (ciemny/jasny)",
-          "Język interfejsu",
-          "Dźwięki i wibracje",
-          "Opcje globalne dla całej apki",
-        ],
-        tone: "pink",
+        type: "paragraph",
+        text: "Jeśli kurs jest stworzony przez Ciebie, pojawi się dodatkowa sekcja do edycji słówek i fiszek.",
       },
       {
         type: "callout",
@@ -305,7 +480,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
         type: "list",
         tone: "pink",
         items: [
-          "Pudełka: przechowują fiszki na różnych etapach nauki.",
+          "Pudełka: przechowują fiszki, ich liczba jest wyświetlana pod danym pudełkiem.",
           "Aktywne pudełko: ma pod spodem zieloną kreskę i to z niego losuje się fiszka.",
           "Karta: u góry masz pytanie, na dole wpisujesz odpowiedź.",
           "Przyciski pod kartą: „Dodaj fiszki” dorzuca nowe karty, „Zatwierdź” sprawdza odpowiedź.",
@@ -364,23 +539,22 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Mały żółty przycisk w trybie Prawda/Fałsz: dodaje 10 kart do
-              pudełka 1.
+              Mniejszy przycisk "Dodaj fiszki" który wystepuje trybie prawda / fałsz
             </Text>
           </View>
         ),
       },
 
       // 3) Zasady systemu (krótko, bez rozwlekania)
-      { type: "heading", icon: "📦", text: "Zasady (w tle)", tone: "pink" },
+      { type: "heading", icon: "📦", text: "Zasady", tone: "pink" },
       {
         type: "list",
         tone: "pink",
         items: [
-          "Nowa fiszka startuje w pudełku 1.",
-          "Poprawna odpowiedź przesuwa fiszkę do kolejnego pudełka (aż do 5).",
-          "Błędna odpowiedź cofa fiszkę do pudełka 1.",
-          "Po trafieniu do pudełka 5 fiszka wypada z aktywnej nauki.",
+          "Nowa fiszka startuje w pudełku numer jeden.",
+          "Poprawna odpowiedź przesuwa fiszkę do kolejnego pudełka.",
+          "Błędna odpowiedź cofa fiszkę do pudełka numer jeden.",
+          "Nauka kończy się kiedy porpawnie wpiszesz odpowiedź w pudełku numer pięć.",
         ],
       },
 
@@ -414,8 +588,8 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Aktywne pudełko losuje fiszki do karty. Przytrzymaj palec, aby
-              podejrzeć zawartość.
+              Aktywne pudełko losuje fiszki do karty. Przytrzymaj palec na pudełku, aby
+              podejrzeć jego zawartość.
             </Text>
           </View>
         ),
@@ -431,7 +605,13 @@ export const WIKI_TOPICS: WikiTopic[] = [
         render: (colors) => (
           <CardPreview
             mode="default"
-            backgroundColorOverride={colors.lightbg}
+            backgroundColorOverride={
+              ["#001534", "#000000"].includes(
+                colors.background.toLowerCase?.() ?? colors.background,
+              )
+                ? colors.lightbg
+                : "#f2f4f6"
+            }
             textColorOverride={colors.font}
           />
         ),
