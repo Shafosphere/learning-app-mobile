@@ -170,7 +170,7 @@ export default function CoursesReviewScreen() {
     (courseId: number) => {
       void (async () => {
         await setActiveCustomCourseId(courseId);
-        router.push("/review/brain");
+        router.push("/review/placeholder");
       })();
     },
     [router, setActiveCustomCourseId]
