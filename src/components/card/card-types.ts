@@ -32,4 +32,5 @@ export type CardProps = {
   isFocused?: boolean;
   backgroundColorOverride?: string;
   textColorOverride?: string;
+  hideHints?: boolean;
 };

@@ -50,6 +50,7 @@ export default function Card({
   isFocused = true,
   backgroundColorOverride,
   textColorOverride,
+  hideHints = false,
 }: CardProps) {
   const styles = useStyles();
   const {
@@ -768,19 +769,23 @@ export default function Card({
 
   return (
     <View style={styles.container}>
-      <CardHint
-        currentHint={currentHint}
-        isEditingHint={isEditingHint}
-        hintDraft={hintDraft}
-        setHintDraft={setHintDraft}
-        startHintEditing={startHintEditing}
-        cancelHintEditing={cancelHintEditing}
-        finishHintEditing={finishHintEditing}
-        hintActionsStyle={hintActionsStyle}
-        shouldMarqueeHint={shouldMarqueeHint}
-        selectedItem={selectedItem}
-        onHintUpdate={onHintUpdate}
-      />
+      {hideHints ? (
+        <View style={styles.hintContainer} />
+      ) : (
+        <CardHint
+          currentHint={currentHint}
+          isEditingHint={isEditingHint}
+          hintDraft={hintDraft}
+          setHintDraft={setHintDraft}
+          startHintEditing={startHintEditing}
+          cancelHintEditing={cancelHintEditing}
+          finishHintEditing={finishHintEditing}
+          hintActionsStyle={hintActionsStyle}
+          shouldMarqueeHint={shouldMarqueeHint}
+          selectedItem={selectedItem}
+          onHintUpdate={onHintUpdate}
+        />
+      )}
       {useLargeLayout ? (
         <LargeCardContainer
           cardStateStyle={cardStateStyle}

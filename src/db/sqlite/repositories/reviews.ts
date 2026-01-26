@@ -145,6 +145,7 @@ export async function getDueCustomReviewFlashcards(
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
+    type: string | null;
   }>(
     `SELECT
        cf.id            AS id,
@@ -160,6 +161,7 @@ export async function getDueCustomReviewFlashcards(
        cf.updated_at    AS updatedAt,
        cf.flipped       AS flipped,
        cf.answer_only  AS answerOnly,
+       cf.type          AS type,
        cfa.answer_text  AS answerText
      FROM custom_flashcards cf
      LEFT JOIN custom_flashcard_answers cfa ON cfa.flashcard_id = cf.id
@@ -192,6 +194,7 @@ export async function getDueCustomReviewFlashcards(
         position: row.position,
         flipped: row.flipped === 1,
         answerOnly: row.answerOnly === 1,
+        type: (row.type as "text" | "image" | "true_false") || "text",
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         stage: stageInfo.stage,
