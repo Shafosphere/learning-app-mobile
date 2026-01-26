@@ -170,7 +170,7 @@ export default function CoursesReviewScreen() {
     (courseId: number) => {
       void (async () => {
         await setActiveCustomCourseId(courseId);
-        router.push("/review/placeholder");
+        router.push({ pathname: "/review/reviewflashcards", params: { courseId } });
       })();
     },
     [router, setActiveCustomCourseId]

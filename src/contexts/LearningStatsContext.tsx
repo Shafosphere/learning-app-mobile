@@ -1,21 +1,12 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { usePersistedState } from "../hooks/usePersistedState";
-import { ACHIEVEMENTS } from "../constants/achievements";
-import { useSettings } from "./SettingsContext";
 import { countTotalLearnedWordsGlobal } from "../db/sqlite/db";
-
-export type AchievementState = {
-  unlockedAt: string;
-};
-
-export type AchievementsMap = Record<string, AchievementState>;
 
 type LearningStatsContextValue = {
   knownWordsCount: number;
   lastKnownWordDate: string; // ISO date (YYYY-MM-DD)
   dailyProgressCount: number;
   dailyProgressDate: string;
-  achievements: AchievementsMap;
   registerKnownWord: (wordId: number) => void;
 };
 
@@ -24,7 +15,6 @@ const defaultValue: LearningStatsContextValue = {
   lastKnownWordDate: "",
   dailyProgressCount: 0,
   dailyProgressDate: "",
-  achievements: {},
   registerKnownWord: () => {},
 };
 
@@ -44,7 +34,6 @@ type KnownWordsState = {
 export const LearningStatsProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
-  const { dailyGoal } = useSettings();
   const [dbKnownWordsCount, setDbKnownWordsCount] = useState<number | null>(
     null
   );
@@ -56,50 +45,6 @@ export const LearningStatsProvider: React.FC<{
     date: string;
     count: number;
   }>("dailyProgress", { date: "", count: 0 });
-  const [achievements, setAchievements] = usePersistedState<AchievementsMap>(
-    "achievements",
-    {}
-  );
-
-  const unlockAchievements = (params: {
-    nextKnownWords?: number;
-    nextDailyCount: number;
-  }) => {
-    const { nextKnownWords, nextDailyCount } = params;
-    let hasChanges = false;
-    let nextAchievements = achievements;
-    const nowIso = new Date().toISOString();
-
-    for (const achievement of ACHIEVEMENTS) {
-      if (nextAchievements[achievement.id]) continue;
-
-      if (achievement.type === "knownWords") {
-        if (
-          nextKnownWords == null ||
-          nextKnownWords < achievement.threshold
-        ) {
-          continue;
-        }
-      }
-
-      if (achievement.type === "dailyGoal") {
-        if (!dailyGoal || nextDailyCount < dailyGoal) {
-          continue;
-        }
-      }
-
-      if (!hasChanges) {
-        hasChanges = true;
-        nextAchievements = { ...achievements };
-      }
-      nextAchievements[achievement.id] = { unlockedAt: nowIso };
-    }
-
-    if (hasChanges) {
-      void setAchievements(nextAchievements);
-    }
-  };
-
   const registerKnownWord = (wordId: number) => {
     const today = isoDateOnly(new Date());
     const baseDailyCount =
@@ -129,11 +74,6 @@ export const LearningStatsProvider: React.FC<{
         });
       }
     }
-
-    unlockAchievements({
-      nextKnownWords: nextKnownWordsTotal,
-      nextDailyCount,
-    });
 
     void countTotalLearnedWordsGlobal()
       .then((total) => {
@@ -178,7 +118,6 @@ export const LearningStatsProvider: React.FC<{
         lastKnownWordDate: knownWords.lastLearnedDate,
         dailyProgressCount: dailyProgress.count,
         dailyProgressDate: dailyProgress.date,
-        achievements,
         registerKnownWord,
       }}
     >

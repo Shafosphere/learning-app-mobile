@@ -165,10 +165,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   countNumber: {
     fontSize: 22,
     fontWeight: "900",
-    height: 25,
-    width: 25,
-    display: "flex",
-    justifyContent: "center",
+    minWidth: 34,
+    paddingHorizontal: 4,
     textAlign: "center",
     textAlignVertical: "center",
     // backgroundColor: colors.border,

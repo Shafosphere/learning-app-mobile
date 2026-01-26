@@ -4,6 +4,8 @@ export interface WordWithTranslations {
   translations: string[];
   flipped: boolean;
   answerOnly?: boolean;
+  stage?: number;
+  nextReview?: number;
   hintFront?: string | null;
   hintBack?: string | null;
   imageFront?: string | null;
