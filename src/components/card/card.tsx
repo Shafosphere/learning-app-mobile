@@ -544,6 +544,19 @@ export default function Card({
     setIsEditingHint(true);
   }, [currentHint, onHintUpdate, selectedItem]);
 
+  const deleteHint = useCallback(() => {
+    if (!selectedItem || !onHintUpdate) return;
+    const nextFront = effectiveReversed
+      ? (selectedItem.hintFront ?? null)
+      : null;
+    const nextBack = effectiveReversed
+      ? null
+      : (selectedItem.hintBack ?? null);
+    onHintUpdate(selectedItem.id, nextFront, nextBack);
+    setIsEditingHint(false);
+    setHintDraft("");
+  }, [effectiveReversed, onHintUpdate, selectedItem]);
+
   const cancelHintEditing = useCallback(() => {
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
@@ -780,10 +793,12 @@ export default function Card({
           startHintEditing={startHintEditing}
           cancelHintEditing={cancelHintEditing}
           finishHintEditing={finishHintEditing}
+          deleteHint={deleteHint}
           hintActionsStyle={hintActionsStyle}
           shouldMarqueeHint={shouldMarqueeHint}
           selectedItem={selectedItem}
           onHintUpdate={onHintUpdate}
+          onHintInputBlur={cancelHintEditing}
         />
       )}
       {useLargeLayout ? (

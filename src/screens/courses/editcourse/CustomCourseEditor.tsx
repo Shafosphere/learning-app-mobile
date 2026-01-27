@@ -574,6 +574,7 @@ export default function CustomCourseEditor({
               trackFalse: colors.border,
               trackTrue: colors.my_green,
             }}
+            colors={colors}
             boxZeroEnabled={courseBoxZeroEnabled}
             onToggleBoxZero={handleCourseBoxZeroToggle}
             autoflowEnabled={courseAutoflowEnabled}

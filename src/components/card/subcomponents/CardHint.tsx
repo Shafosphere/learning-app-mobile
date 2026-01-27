@@ -11,10 +11,12 @@ type CardHintProps = {
     startHintEditing: () => void;
     cancelHintEditing: () => void;
     finishHintEditing: () => void;
+    deleteHint: () => void;
     hintActionsStyle: any;
     shouldMarqueeHint: boolean;
     selectedItem: any;
     onHintUpdate: any;
+    onHintInputBlur: () => void;
 };
 
 export function CardHint({
@@ -25,13 +27,16 @@ export function CardHint({
     startHintEditing,
     cancelHintEditing,
     finishHintEditing,
+    deleteHint,
     hintActionsStyle,
     shouldMarqueeHint,
     selectedItem,
     onHintUpdate,
+    onHintInputBlur,
 }: CardHintProps) {
     const styles = useStyles();
     const { colors } = useSettings();
+    const canDelete = Boolean(currentHint);
 
     return (
         <View style={styles.hintContainer}>
@@ -61,6 +66,7 @@ export function CardHint({
                         value={hintDraft}
                         onChangeText={setHintDraft}
                         onSubmitEditing={finishHintEditing}
+                        onBlur={onHintInputBlur}
                         placeholder="Wpisz podpowiedź..."
                         placeholderTextColor={colors.paragraph}
                         style={styles.hintInput}
@@ -69,14 +75,16 @@ export function CardHint({
                     />
                     <Animated.View style={[styles.hintActions, hintActionsStyle]}>
                         <Pressable
-                            onPress={cancelHintEditing}
+                            onPress={canDelete ? deleteHint : cancelHintEditing}
                             style={({ pressed }) => [
                                 styles.hintActionButton,
                                 styles.hintActionGhost,
                                 pressed && styles.hintActionPressed,
                             ]}
                         >
-                            <Text style={styles.hintActionText}>Anuluj</Text>
+                            <Text style={styles.hintActionText}>
+                                {canDelete ? "Usuń" : "Anuluj"}
+                            </Text>
                         </Pressable>
                         <Pressable
                             onPress={finishHintEditing}

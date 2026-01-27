@@ -392,6 +392,7 @@ function BuiltinCourseEditor({
               trackFalse: colors.border,
               trackTrue: colors.my_green,
             }}
+            colors={colors}
             boxZeroEnabled={boxZeroEnabled}
             onToggleBoxZero={handleBoxZeroToggle}
             autoflowEnabled={autoflowEnabled}

@@ -12,6 +12,20 @@ import flagiDemoCsv from "@/assets/data/flagi_demo.csv";
 import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
 import trueFalseTestCsv from "@/assets/data/true_false_test.csv";
 
+export type OfficialPackCourseSettings = {
+  // Domyślne ustawienia kursu nadpisywane podczas pierwszego załadowania pakietu
+  autoflowEnabled?: boolean;
+  // aliasy dla wygody
+  Autoflow?: boolean;
+  autoflow?: boolean;
+  boxZeroEnabled?: boolean;
+  boxZero?: boolean;
+  skipCorrectionEnabled?: boolean;
+  skipCorrection?: boolean;
+  cardSize?: "large" | "small";
+  imageSize?: "dynamic" | "small" | "medium" | "large";
+};
+
 export type OfficialPackDef = {
   slug: string;
   name: string;
@@ -25,6 +39,8 @@ export type OfficialPackDef = {
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
   categoryId?: string;
+  // Opcjonalne ustawienia domyślne aplikowane przy seedowaniu oficjalnego kursu
+  settings?: OfficialPackCourseSettings;
   csvAsset: any;
 };
 

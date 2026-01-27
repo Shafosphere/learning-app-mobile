@@ -37,6 +37,7 @@ const SAMPLE_COURSES = [
     flagCode: "en",
   },
   {
+    id: 3,
     name: "Francuski podstawy",
     cardsCount: 60,
     iconId: "heart",

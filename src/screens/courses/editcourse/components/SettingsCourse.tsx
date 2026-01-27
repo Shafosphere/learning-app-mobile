@@ -1,5 +1,6 @@
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
 import type { FlashcardsCardSize, FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import type { ThemeColors } from "@/src/theme/theme";
 
 type SwitchColors = {
   thumb: string;
@@ -10,6 +11,7 @@ type SwitchColors = {
 type Props = {
   styles: Record<string, unknown>;
   switchColors: SwitchColors;
+  colors: ThemeColors;
   boxZeroEnabled: boolean;
   onToggleBoxZero: (value: boolean) => void;
   autoflowEnabled: boolean;
@@ -30,6 +32,7 @@ type Props = {
 export function CourseSettingsSection({
   styles,
   switchColors,
+  colors,
   boxZeroEnabled,
   onToggleBoxZero,
   autoflowEnabled,
@@ -46,7 +49,7 @@ export function CourseSettingsSection({
   onSelectImageSize,
   imageSizeEnabled = false,
 }: Props) {
-  const cardSizeStyles = localStyles(switchColors);
+  const cardSizeStyles = localStyles(switchColors, colors);
   const {
     sectionGroup,
     sectionLabel,
@@ -84,7 +87,7 @@ export function CourseSettingsSection({
 
       <View style={toggleRow}>
         <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Autoflow fiszek</Text>
+          <Text style={toggleTitle}>Automat fiszek</Text>
           <Text style={toggleSubtitle}>
             Automatycznie przełączaj pudełka i pobieraj nowe słowa.
           </Text>
@@ -265,7 +268,7 @@ export function CourseSettingsSection({
   );
 }
 
-const localStyles = (switchColors: SwitchColors) =>
+const localStyles = (switchColors: SwitchColors, colors: ThemeColors) =>
   StyleSheet.create({
     cardSizeRow: {
       flexDirection: "row",
@@ -293,14 +296,14 @@ const localStyles = (switchColors: SwitchColors) =>
       borderColor: switchColors.trackFalse,
     },
     cardSizeTitle: {
-      color: "#0F172A",
       fontWeight: "600",
+      color: colors.headline,
     },
     cardSizeTitleActive: {
-      color: "#0F172A",
+      color: colors.font,
     },
     cardSizeSubtitle: {
-      color: "#475569",
+      color: colors.paragraph,
       marginTop: 4,
     },
     imageSizeRow: {
@@ -318,13 +321,13 @@ const localStyles = (switchColors: SwitchColors) =>
       opacity: 0.5,
     },
     cardSizeTitleDisabled: {
-      color: "#94a3b8",
+      color: colors.paragraph,
     },
     cardSizeSubtitleDisabled: {
-      color: "#94a3b8",
+      color: colors.paragraph,
     },
     imageSizeHint: {
       marginTop: 4,
-      color: "#94a3b8",
+      color: colors.paragraph,
     },
   });

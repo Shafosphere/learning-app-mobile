@@ -1,4 +1,5 @@
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { saveImage } from "@/src/services/imageService";
 import { Asset } from "expo-asset";
 import * as FileSystem from "expo-file-system/legacy";
@@ -6,7 +7,10 @@ import * as SQLite from "expo-sqlite";
 import Papa from "papaparse";
 import { getDB, notifyDbInitializationListeners, openDatabase } from "./core";
 import { ensureOfficialCourse } from "./repositories/courses";
-import { replaceCustomFlashcardsWithDb } from "./repositories/flashcards";
+import {
+    replaceCustomFlashcardsWithDb,
+    type CustomFlashcardInput,
+} from "./repositories/flashcards";
 import { applySchema, configurePragmas } from "./schema";
 import { splitBackTextIntoAnswers } from "./utils";
 
@@ -77,20 +81,7 @@ const resolveImageFromMap = async (
 async function readCsvAsset(
     assetModule: any,
     imageMap?: Record<string, any>
-): Promise<
-    {
-        frontText: string;
-        backText: string;
-        answers: string[];
-        position: number;
-        flipped: boolean;
-        hintFront: string | null;
-        hintBack: string | null;
-        imageFront: string | null;
-        imageBack: string | null;
-        type?: "text" | "image" | "true_false";
-    }[]
-> {
+): Promise<CustomFlashcardInput[]> {
     console.log("[DB] readCsvAsset: create asset from module");
     const asset = Asset.fromModule(assetModule);
     console.log("[DB] readCsvAsset: start download", asset);
@@ -132,7 +123,7 @@ async function readCsvAsset(
             const answerOnly = parseBooleanValue(
                 row.answer_only ?? row.question ?? row.pytanie
             );
-            return {
+            const card: CustomFlashcardInput = {
                 frontText: front,
                 backText: backRaw,
                 answers,
@@ -155,12 +146,13 @@ async function readCsvAsset(
                     )
                     : null,
             };
+            return card;
         })
     );
     return cards.filter(
         (c) =>
             c.frontText.length > 0 ||
-            c.answers.length > 0 ||
+            (c.answers?.length ?? 0) > 0 ||
             c.imageFront != null ||
             c.imageBack != null
     );
@@ -191,6 +183,95 @@ async function importOfficialPackIfEmpty(
     console.log("[DB] importOfficialPackIfEmpty: replaced flashcards");
 }
 
+type OverrideMap<T> = {
+    builtin: Record<string, T>;
+    custom: Record<string, T>;
+};
+
+async function upsertCourseOverride<T>(
+    storageKey: string,
+    courseId: number,
+    value: T
+): Promise<void> {
+    const raw = await AsyncStorage.getItem(storageKey);
+    let parsed: OverrideMap<T>;
+    try {
+        parsed = raw ? (JSON.parse(raw) as OverrideMap<T>) : { builtin: {}, custom: {} };
+    } catch {
+        parsed = { builtin: {}, custom: {} };
+    }
+    if (parsed.custom[courseId] !== undefined) {
+        return; // user already has override, don't clobber
+    }
+    parsed.custom = { ...parsed.custom, [courseId]: value };
+    await AsyncStorage.setItem(storageKey, JSON.stringify(parsed));
+}
+
+async function applyOfficialCourseSettings(
+    _db: SQLite.SQLiteDatabase,
+    courseId: number,
+    settings: OfficialPackCourseSettings
+): Promise<void> {
+    const autoflow =
+        settings.autoflowEnabled ??
+        (settings as any).autoflow ??
+        (settings as any).Autoflow;
+    const boxZero =
+        settings.boxZeroEnabled ??
+        (settings as any).boxZero;
+    const skipCorrection =
+        settings.skipCorrectionEnabled ??
+        (settings as any).skipCorrection;
+
+    const tasks: Promise<void>[] = [];
+    if (autoflow !== undefined) {
+        tasks.push(
+            upsertCourseOverride<boolean>(
+                "flashcards.courseAutoflowOverrides",
+                courseId,
+                autoflow
+            )
+        );
+    }
+    if (boxZero !== undefined) {
+        tasks.push(
+            upsertCourseOverride<boolean>(
+                "flashcards.courseBoxZeroOverrides",
+                courseId,
+                boxZero
+            )
+        );
+    }
+    if (skipCorrection !== undefined) {
+        tasks.push(
+            upsertCourseOverride<boolean>(
+                "flashcards.courseSkipCorrectionOverrides",
+                courseId,
+                skipCorrection
+            )
+        );
+    }
+    if (settings.cardSize !== undefined) {
+        tasks.push(
+            upsertCourseOverride<string>(
+                "flashcards.courseCardSizeOverrides",
+                courseId,
+                settings.cardSize
+            )
+        );
+    }
+    if (settings.imageSize !== undefined) {
+        tasks.push(
+            upsertCourseOverride<string>(
+                "flashcards.courseImageSizeOverrides",
+                courseId,
+                settings.imageSize
+            )
+        );
+    }
+    await Promise.all(tasks);
+}
+
 export async function seedOfficialPacksWithDb(
     db: SQLite.SQLiteDatabase
 ): Promise<void> {
@@ -206,6 +287,9 @@ export async function seedOfficialPacksWithDb(
                 def.iconColor,
                 def.reviewsEnabled ?? true
             );
+            if (def.settings) {
+                await applyOfficialCourseSettings(db, id, def.settings);
+            }
             await importOfficialPackIfEmpty(db, id, def);
         } catch (e) {
             console.warn(`[DB] Failed to seed official pack ${def.slug}`, e);
