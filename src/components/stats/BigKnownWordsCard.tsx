@@ -79,7 +79,7 @@ const BigKnownWordsCard: React.FC = () => {
       >
         {total}
       </Text>
-      <Text style={styles.label}>Opanowane słówka</Text>
+      <Text style={styles.label}>Opanowane fiszki</Text>
     </View>
   );
 };

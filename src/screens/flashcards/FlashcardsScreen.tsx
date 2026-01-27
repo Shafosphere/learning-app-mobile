@@ -1,14 +1,9 @@
-import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
-import Boxes from "@/src/components/Box/List/BoxList";
 import Card from "@/src/components/card/card";
-import Confetti from "@/src/components/confetti/Confetti";
+import { FlashcardsGameView } from "@/src/components/flashcards/FlashcardsGameView";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import type {
-  CustomCourseRecord,
-  CustomFlashcardRecord,
-} from "@/src/db/sqlite/db";
+import type { CustomCourseRecord } from "@/src/db/sqlite/db";
 import {
   getCustomCourseById,
   getCustomFlashcards,
@@ -16,22 +11,21 @@ import {
   updateCustomFlashcardHints,
 } from "@/src/db/sqlite/db";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
+import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useIsFocused } from "@react-navigation/native";
-import FlashcardsPeekOverlay from "../../components/Box/Peek/FlashcardsPeek";
 // import { useRouter } from "expo-router";
 import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
-import { useStyles } from "./FlashcardsScreen-styles";
-import { TrueFalseActionsAnimated } from "./TrueFalseActions";
+import { ActivityIndicator, Text, View } from "react-native";
 
 const STREAK_TARGET = 5;
 const STREAK_COOLDOWN_MS = 15 * 60 * 1000;
@@ -57,52 +51,9 @@ function pickRandomBatch<T>(items: T[], size: number): T[] {
   return pool.slice(0, normalizedSize);
 }
 
-function mapCustomCardToWord(
-  card: CustomFlashcardRecord
-): WordWithTranslations {
-  const front = card.frontText?.trim() ?? "";
-  const normalizedAnswers = (card.answers ?? [])
-    .map((answer) => answer.trim())
-    .filter((answer) => answer.length > 0);
-
-  const uniqueAnswers: string[] = [];
-  for (const answer of normalizedAnswers) {
-    if (!uniqueAnswers.includes(answer)) {
-      uniqueAnswers.push(answer);
-    }
-  }
-
-  const rawBack = card.backText ?? "";
-  const fallback = rawBack
-    .split(/[;,\n]/)
-    .map((entry) => entry.trim())
-    .filter((entry) => entry.length > 0);
-  const defaultTranslation = rawBack.trim();
-  const translations =
-    uniqueAnswers.length > 0
-      ? uniqueAnswers
-      : fallback.length > 0
-        ? fallback
-        : [defaultTranslation];
-
-  const result = {
-    id: card.id,
-    text: front,
-    translations,
-    flipped: card.flipped,
-    answerOnly: card.answerOnly ?? false,
-    hintFront: card.hintFront,
-    hintBack: card.hintBack,
-    imageFront: card.imageFront ?? null,
-    imageBack: card.imageBack ?? null,
-    type: (card.type as "text" | "image" | "true_false") || "text",
-  };
-  return result;
-}
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   // const router = useRouter();
-  const styles = useStyles();
   const {
     activeCustomCourseId,
     boxesLayout,
@@ -116,6 +67,8 @@ export default function Flashcards() {
   const { triggerQuote } = useQuote();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
+  useAutoResetFlag(shouldCelebrate, resetCelebrate);
   const correctStreakRef = useRef(0);
   const wrongStreakRef = useRef(0);
   const questionStartRef = useRef<number | null>(null);
@@ -130,12 +83,6 @@ export default function Flashcards() {
     storageKey: "@flashcards_intro_seen_v1",
     triggerStrategy: "post_onboarding",
   });
-
-  useEffect(() => {
-    if (!shouldCelebrate) return;
-    const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
-    return () => clearTimeout(timeout);
-  }, [shouldCelebrate]);
 
   const {
     boxes,
@@ -623,12 +570,13 @@ export default function Flashcards() {
     !loadError &&
     customCards.length > 0;
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
-  const handleTrueFalseAnswer = useCallback(
-    (value: boolean) => {
-      const choice = value ? "true" : "false";
-      setAnswer(choice);
-      confirm(choice, choice);
-    },
+  const handleTrueFalseAnswer = useMemo(
+    () =>
+      makeTrueFalseHandler({
+        setAnswer,
+        confirm,
+        passChoiceAsSelectedTranslation: true,
+      }),
     [confirm, setAnswer]
   );
   const shouldShowTrueFalseActions =
@@ -697,57 +645,29 @@ export default function Flashcards() {
   }
 
   return (
-    <View style={styles.container}>
-      <IntroOverlay />
-      <Confetti generateConfetti={shouldCelebrate} />
+    <FlashcardsGameView
+      introOverlay={<IntroOverlay />}
+      shouldCelebrate={shouldCelebrate}
+      boxes={boxes}
+      activeBox={activeBox}
+      onSelectBox={handleSelectBox}
+      onBoxLongPress={handleBoxLongPress}
+      boxesLayout={boxesLayout}
+      hideBoxZero={!boxZeroEnabled}
+      showBoxes={shouldShowBoxes}
+      showFloatingAdd={shouldShowFloatingAdd}
+      addButtonDisabled={addButtonDisabled}
+      onAddButtonPress={downloadData}
+      showTrueFalseActions={shouldShowTrueFalseActions}
+      trueFalseActionsDisabled={trueFalseActionsDisabled}
+      onTrueFalseAnswer={handleTrueFalseAnswer}
+      peekBox={peekBox}
+      peekCards={peekCards}
+      activeCustomCourseId={activeCustomCourseId}
+      activeCourseName={customCourse?.name ?? null}
+      onClosePeek={closePeek}
+    >
       {cardSection}
-
-      {shouldShowBoxes ? (
-        <View style={styles.boxesWrapper}>
-          {shouldShowFloatingAdd ? (
-            <Pressable
-              style={styles.addButton}
-              onPress={downloadData}
-              disabled={addButtonDisabled}
-              accessibilityLabel="Dodaj nowe fiszki do pudełek"
-            >
-              <Ionicons name="add" size={26} color="#0F172A" />
-            </Pressable>
-          ) : null}
-          {boxesLayout === "classic" ? (
-            <Boxes
-              boxes={boxes}
-              activeBox={activeBox}
-              handleSelectBox={handleSelectBox}
-              hideBoxZero={!boxZeroEnabled}
-              onBoxLongPress={handleBoxLongPress}
-            />
-          ) : (
-            <BoxesCarousel
-              boxes={boxes}
-              activeBox={activeBox}
-              handleSelectBox={handleSelectBox}
-              hideBoxZero={!boxZeroEnabled}
-              onBoxLongPress={handleBoxLongPress}
-            />
-          )}
-        </View>
-      ) : null}
-
-      <TrueFalseActionsAnimated
-        visible={shouldShowTrueFalseActions}
-        disabled={trueFalseActionsDisabled}
-        onAnswer={handleTrueFalseAnswer}
-      />
-
-      <FlashcardsPeekOverlay
-        visible={peekBox !== null}
-        boxKey={peekBox}
-        cards={peekCards}
-        activeCustomCourseId={activeCustomCourseId}
-        activeCourseName={customCourse?.name ?? null}
-        onClose={closePeek}
-      />
-    </View>
+    </FlashcardsGameView>
   );
 }

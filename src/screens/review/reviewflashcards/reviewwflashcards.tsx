@@ -1,27 +1,23 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { View } from "react-native";
 
-import { useLocalSearchParams } from "expo-router";
-import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
-import Boxes from "@/src/components/Box/List/BoxList";
 import Card from "@/src/components/card/card";
+import type { CardCorrectionType } from "@/src/components/card/card-types";
+import { FlashcardsGameView } from "@/src/components/flashcards/FlashcardsGameView";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import useSpellchecking from "@/src/hooks/useSpellchecking";
-import Confetti from "@/src/components/confetti/Confetti";
-import { TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
-import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
   scheduleCustomReview,
-  type CustomReviewFlashcard,
 } from "@/src/db/sqlite/db";
+import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
+import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import type { CardCorrectionType } from "@/src/components/card/card-types";
 import { stripDiacritics } from "@/src/utils/diacritics";
-import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
+import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
+import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
+import { useLocalSearchParams } from "expo-router";
 
 const BOX_SPAM_WINDOW_MS = 2000;
 const BOX_SPAM_THRESHOLD = 20;
@@ -94,11 +90,12 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
-  const styles = useStyles();
   const params = useLocalSearchParams<{ courseId?: string }>();
   const { ignoreDiacriticsInSpellcheck } = useSettings();
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
+  const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
+  useAutoResetFlag(shouldCelebrate, resetCelebrate);
   const courseId = useMemo(() => {
     const id = params?.courseId;
     const num =
@@ -361,12 +358,6 @@ export default function ReviewFlashcardsPlaceholder() {
   };
 
   useEffect(() => {
-    if (!shouldCelebrate) return;
-    const timeout = setTimeout(() => setShouldCelebrate(false), 1750);
-    return () => clearTimeout(timeout);
-  }, [shouldCelebrate]);
-
-  useEffect(() => {
     if (!correction || !activeBox || !courseId) return;
     if (transitionTimerRef.current) return;
 
@@ -481,9 +472,9 @@ export default function ReviewFlashcardsPlaceholder() {
     setCorrection((current) =>
       current
         ? {
-            ...current,
-            [which === 1 ? "input1" : "input2"]: value,
-          }
+          ...current,
+          [which === 1 ? "input1" : "input2"]: value,
+        }
         : current,
     );
   };
@@ -509,8 +500,8 @@ export default function ReviewFlashcardsPlaceholder() {
       (effectiveReversed
         ? checkSpelling(userAnswer, selectedItem.text)
         : (selectedItem.translations ?? []).some((t) =>
-            checkSpelling(userAnswer, t),
-          ));
+          checkSpelling(userAnswer, t),
+        ));
 
     setResult(ok);
     playFeedbackSound(ok);
@@ -603,13 +594,13 @@ export default function ReviewFlashcardsPlaceholder() {
     }, delayMs);
   };
 
-  const handleTrueFalseAnswer = useCallback(
-    (value: boolean) => {
-      const choice = value ? "true" : "false";
-      setAnswer(choice);
-      handleConfirm(undefined, choice);
-    },
-    [handleConfirm],
+  const handleTrueFalseAnswer = useMemo(
+    () =>
+      makeTrueFalseHandler({
+        setAnswer,
+        confirm: handleConfirm,
+      }),
+    [handleConfirm, setAnswer],
   );
 
   const shouldShowTrueFalseActions =
@@ -617,8 +608,24 @@ export default function ReviewFlashcardsPlaceholder() {
   const trueFalseActionsDisabled = result !== null || isLoading;
 
   return (
-    <View style={styles.container}>
-      <Confetti generateConfetti={shouldCelebrate} />
+    <FlashcardsGameView
+      shouldCelebrate={shouldCelebrate}
+      boxes={boxes}
+      activeBox={activeBox}
+      onSelectBox={handleSelectBox}
+      onBoxLongPress={handleBoxLongPress}
+      boxesLayout={layout}
+      hideBoxZero={true}
+      showFloatingAdd={false}
+      showTrueFalseActions={shouldShowTrueFalseActions}
+      trueFalseActionsDisabled={trueFalseActionsDisabled}
+      onTrueFalseAnswer={handleTrueFalseAnswer}
+      peekBox={peekBox}
+      peekCards={peekCards}
+      activeCustomCourseId={courseId}
+      activeCourseName={null}
+      onClosePeek={closePeek}
+    >
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}
@@ -630,7 +637,7 @@ export default function ReviewFlashcardsPlaceholder() {
         correction={correction}
         wrongInputChange={wrongInputChange}
         setCorrectionRewers={setCorrectionRewers}
-        onDownload={async () => {}}
+        onDownload={async () => { }}
         downloadDisabled
         introMode={false}
         onHintUpdate={() => undefined}
@@ -638,73 +645,6 @@ export default function ReviewFlashcardsPlaceholder() {
         hideHints
         isFocused={!isLoading}
       />
-
-      <View style={styles.boxesWrapper}>
-        {layout === "classic" ? (
-          <Boxes
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            onBoxLongPress={handleBoxLongPress}
-            hideBoxZero
-          />
-        ) : (
-          <BoxesCarousel
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            onBoxLongPress={handleBoxLongPress}
-            hideBoxZero
-          />
-        )}
-      </View>
-
-      <TrueFalseActionsAnimated
-        visible={shouldShowTrueFalseActions}
-        disabled={trueFalseActionsDisabled}
-        onAnswer={handleTrueFalseAnswer}
-      />
-
-      <FlashcardsPeekOverlay
-        visible={peekBox !== null}
-        boxKey={peekBox}
-        cards={peekCards}
-        activeCustomCourseId={courseId ?? null}
-        activeCourseName={null}
-        onClose={closePeek}
-      />
-    </View>
+    </FlashcardsGameView>
   );
-}
-
-function mapReviewCardToWord(
-  card: CustomReviewFlashcard,
-): WordWithTranslations {
-  const front = card.frontText?.trim() ?? "";
-  const answers = (card.answers ?? []).map((ans) => ans.trim()).filter(Boolean);
-  const backPieces = (card.backText ?? "")
-    .split(/[;,\n]/)
-    .map((entry) => entry.trim())
-    .filter(Boolean);
-  const translations =
-    answers.length > 0
-      ? answers
-      : backPieces.length > 0
-        ? backPieces
-        : [card.backText ?? ""];
-
-  return {
-    id: card.id,
-    text: front,
-    translations,
-    flipped: card.flipped ?? false,
-    stage: card.stage,
-    nextReview: card.nextReview,
-    answerOnly: card.answerOnly ?? false,
-    hintFront: card.hintFront,
-    hintBack: card.hintBack,
-    imageFront: card.imageFront ?? null,
-    imageBack: card.imageBack ?? null,
-    type: (card.type as "text" | "image" | "true_false") || "text",
-  };
 }
