@@ -140,6 +140,8 @@ interface SettingsContextValue {
   toggleTheme: () => Promise<void>;
   boxesLayout: "classic" | "carousel";
   setBoxesLayout: (layout: "classic" | "carousel") => Promise<void>;
+  actionButtonsPosition: "top" | "bottom";
+  setActionButtonsPosition: (position: "top" | "bottom") => Promise<void>;
   courses: LanguageCourse[];
   addCourse: (course: LanguageCourse) => Promise<void>;
   removeCourse: (course: LanguageCourse) => Promise<void>;
@@ -280,6 +282,8 @@ const defaultValue: SettingsContextValue = {
   toggleTheme: async () => {},
   boxesLayout: "classic",
   setBoxesLayout: async () => {},
+  actionButtonsPosition: "bottom",
+  setActionButtonsPosition: async () => {},
   courses: [],
   addCourse: async () => {},
   removeCourse: async () => {},
@@ -381,6 +385,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
     "classic" | "carousel"
   >("boxesLayout", "classic");
+  const [actionButtonsPositionState, _setActionButtonsPosition] =
+    usePersistedState<"top" | "bottom">(
+      "flashcards.actionsPosition",
+      "bottom"
+    );
   const [courses, setCourses] = usePersistedState<LanguageCourse[]>(
     "courses",
     []
@@ -555,6 +564,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const boxesLayout = boxesLayoutState;
   const setBoxesLayout = async (layout: "classic" | "carousel") => {
     await _setBoxesLayout(layout);
+  };
+  const actionButtonsPosition = actionButtonsPositionState;
+  const setActionButtonsPosition = async (position: "top" | "bottom") => {
+    await _setActionButtonsPosition(position);
   };
 
   const setActiveCourseIdx = useCallback(
@@ -1319,6 +1332,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         toggleTheme,
         boxesLayout,
         setBoxesLayout,
+        actionButtonsPosition,
+        setActionButtonsPosition,
         courses,
         addCourse,
         removeCourse,

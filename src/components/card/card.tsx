@@ -27,6 +27,7 @@ import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
+import { TrueFalseActions } from "@/src/screens/flashcards/TrueFalseActions";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const INPUT_HORIZONTAL_PADDING = 8;
@@ -46,6 +47,9 @@ export default function Card({
   introMode = false,
   setCorrectionRewers,
   onHintUpdate,
+  showTrueFalseActions = false,
+  trueFalseActionsDisabled = false,
+  onTrueFalseAnswer,
   hideActions = false,
   isFocused = true,
   backgroundColorOverride,
@@ -58,6 +62,7 @@ export default function Card({
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
     flashcardsImageSize,
+    actionButtonsPosition,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -98,6 +103,10 @@ export default function Card({
   >(null);
   const noopTextChange = useCallback((_: string) => {}, []);
   const noopTrueFalseAnswer = useCallback((_: boolean) => {}, []);
+  const trueFalseAnswerHandler = useMemo(
+    () => onTrueFalseAnswer ?? noopTrueFalseAnswer,
+    [onTrueFalseAnswer, noopTrueFalseAnswer],
+  );
 
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
@@ -767,6 +776,10 @@ export default function Card({
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
   const showCardActions = !(hideActions || selectedItem?.type === "true_false");
+  const shouldRenderTopTrueFalse =
+    actionButtonsPosition === "top" &&
+    selectedItem?.type === "true_false" &&
+    showTrueFalseActions;
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -861,12 +874,20 @@ export default function Card({
         />
       ) : null}
 
-      <CardActions
-        handleConfirm={handleConfirm}
-        onDownload={onDownload}
-        downloadDisabled={downloadDisabled}
-        hidden={!showCardActions}
-      />
+      {shouldRenderTopTrueFalse ? (
+        <TrueFalseActions
+          onAnswer={trueFalseAnswerHandler}
+          disabled={trueFalseActionsDisabled}
+          dense
+        />
+      ) : (
+        <CardActions
+          handleConfirm={handleConfirm}
+          onDownload={onDownload}
+          downloadDisabled={downloadDisabled}
+          hidden={!showCardActions}
+        />
+      )}
     </View>
   );
 }

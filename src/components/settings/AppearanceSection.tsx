@@ -19,6 +19,8 @@ import {
 
 const classicPreview = require("@/assets/images/sett_classic.png");
 const carouselPreview = require("@/assets/images/sett_caro.png");
+const topButtonsPreview = require("@/assets/images/twoHand.png");
+const bottomButtonsPreview = require("@/assets/images/onehand.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";
@@ -29,6 +31,17 @@ type LayoutOption = {
 const layoutOptions: LayoutOption[] = [
   { key: "classic", label: "Klasyczny", preview: classicPreview },
   { key: "carousel", label: "Karuzela", preview: carouselPreview },
+];
+
+type ActionButtonsOption = {
+  key: "top" | "bottom";
+  label: string;
+  preview: number;
+};
+
+const actionButtonsOptions: ActionButtonsOption[] = [
+  { key: "top", label: "U góry", preview: topButtonsPreview },
+  { key: "bottom", label: "Na dole", preview: bottomButtonsPreview },
 ];
 
 type ThickSliderProps = {
@@ -170,6 +183,8 @@ const AppearanceSection: React.FC = () => {
     toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
+    actionButtonsPosition,
+    setActionButtonsPosition,
   } = useSettings();
 
   const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
@@ -218,6 +233,13 @@ const AppearanceSection: React.FC = () => {
   const handleLayoutSelect = async (key: "classic" | "carousel") => {
     if (key !== boxesLayout) {
       await setBoxesLayout(key);
+      await triggerHaptics();
+    }
+  };
+
+  const handleActionButtonsPosition = async (position: "top" | "bottom") => {
+    if (position !== actionButtonsPosition) {
+      await setActionButtonsPosition(position);
       await triggerHaptics();
     }
   };
@@ -371,6 +393,50 @@ const AppearanceSection: React.FC = () => {
               <Text
                 style={[
                   styles.layoutLabel,
+                  isActive && styles.layoutLabelActive,
+                ]}
+              >
+                {option.label}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
+
+      <View style={[styles.row, { alignItems: "flex-start", marginTop: 6 }]}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>Wybierz układ</Text>
+          <Text style={styles.rowSubtitle}>
+            Wybierz rozmieszczenie przycisków w trybie prawda/fałsz.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.actionOptionsRow}>
+        {actionButtonsOptions.map((option) => {
+          const isActive = actionButtonsPosition === option.key;
+          return (
+            <TouchableOpacity
+              key={option.key}
+              activeOpacity={0.8}
+              onPress={() => handleActionButtonsPosition(option.key)}
+              style={[
+                styles.layoutOption,
+                styles.actionOption,
+                isActive && styles.layoutOptionActive,
+              ]}
+            >
+              <View style={[styles.layoutPreviewWrapper, styles.actionPreview]}>
+                <Image
+                  source={option.preview}
+                  style={[styles.layoutPreview, styles.actionPreviewImage]}
+                  resizeMode="cover"
+                />
+              </View>
+              <Text
+                style={[
+                  styles.layoutLabel,
+                  styles.actionLabel,
                   isActive && styles.layoutLabelActive,
                 ]}
               >

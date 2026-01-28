@@ -75,13 +75,13 @@ const makeStyles = (colors: any) =>
         promptText: {
             fontSize: 24,
             fontWeight: "bold",
-            color: colors.my_blue || "#000",
+            color: colors.headline,
             textAlign: "center",
         },
         promptTextMulti: {
             fontSize: 22,
             fontWeight: "bold",
-            color: colors.my_blue || "#000",
+            color: colors.headline,
             textAlign: "center",
         },
         buttonsRow: {

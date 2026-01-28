@@ -639,6 +639,9 @@ export default function Flashcards() {
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
         hideActions={courseHasOnlyTrueFalse}
+        showTrueFalseActions={shouldShowTrueFalseActions}
+        trueFalseActionsDisabled={trueFalseActionsDisabled}
+        onTrueFalseAnswer={handleTrueFalseAnswer}
         isFocused={isFocused}
       />
     );

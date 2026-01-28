@@ -642,6 +642,9 @@ export default function ReviewFlashcardsPlaceholder() {
         introMode={false}
         onHintUpdate={() => undefined}
         hideActions={selectedItem?.type === "true_false"}
+        showTrueFalseActions={shouldShowTrueFalseActions}
+        trueFalseActionsDisabled={trueFalseActionsDisabled}
+        onTrueFalseAnswer={handleTrueFalseAnswer}
         hideHints
         isFocused={!isLoading}
       />

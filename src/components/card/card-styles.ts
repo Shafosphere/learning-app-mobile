@@ -161,7 +161,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
-    gap: 15,
+    gap: 20,
   },
   containerInput: {
     position: "relative",

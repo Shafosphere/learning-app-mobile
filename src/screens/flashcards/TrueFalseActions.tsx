@@ -6,11 +6,16 @@ import { Animated, StyleSheet, View } from "react-native";
 type TrueFalseActionsProps = {
   onAnswer: (value: boolean) => void;
   disabled?: boolean;
+  dense?: boolean;
 };
 
-export function TrueFalseActions({ onAnswer, disabled = false }: TrueFalseActionsProps) {
+export function TrueFalseActions({
+  onAnswer,
+  disabled = false,
+  dense = false,
+}: TrueFalseActionsProps) {
   const { colors } = useSettings();
-  const styles = useMemo(() => makeStyles(colors), [colors]);
+  const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
 
   return (
     <View style={[styles.container, disabled && styles.disabled]}>
@@ -39,12 +44,14 @@ type TrueFalseActionsAnimatedProps = {
   visible: boolean;
   onAnswer: (value: boolean) => void;
   disabled?: boolean;
+  dense?: boolean;
 };
 
 export function TrueFalseActionsAnimated({
   visible,
   onAnswer,
   disabled = false,
+  dense = false,
 }: TrueFalseActionsAnimatedProps) {
   const [rendered, setRendered] = useState(visible);
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
@@ -93,21 +100,21 @@ export function TrueFalseActionsAnimated({
       style={{ opacity, transform: [{ translateY }], width: "100%" }}
       pointerEvents={visible && !disabled ? "auto" : "none"}
     >
-      <TrueFalseActions onAnswer={onAnswer} disabled={disabled} />
+      <TrueFalseActions onAnswer={onAnswer} disabled={disabled} dense={dense} />
     </Animated.View>
   );
 }
 
-const makeStyles = (colors: any) =>
+const makeStyles = (colors: any, dense: boolean) =>
   StyleSheet.create({
     container: {
       flexDirection: "row",
       justifyContent: "center",
       alignItems: "center",
-      paddingHorizontal: 16,
-      paddingTop: 12,
-      paddingBottom: 4,
-      backgroundColor: colors?.bg ?? "transparent",
+      paddingHorizontal: dense ? 0 : 16,
+      paddingTop: dense ? 0 : 12,
+      paddingBottom: dense ? 0 : 4,
+      backgroundColor: dense ? "transparent" : colors?.bg ?? "transparent",
     },
     disabled: {
       opacity: 0.55,

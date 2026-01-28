@@ -8,6 +8,7 @@ import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 import { TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 export interface FlashcardsGameViewProps {
@@ -73,6 +74,17 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
   introOverlay,
 }) => {
   const styles = useStyles();
+  const { actionButtonsPosition } = useSettings();
+
+  const trueFalseActionsBottom =
+    actionButtonsPosition === "bottom" ? (
+      <TrueFalseActionsAnimated
+        visible={showTrueFalseActions}
+        disabled={trueFalseActionsDisabled}
+        onAnswer={onTrueFalseAnswer}
+        dense
+      />
+    ) : null;
 
   return (
     <View style={styles.container}>
@@ -115,11 +127,7 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
         </View>
       )}
 
-      <TrueFalseActionsAnimated
-        visible={showTrueFalseActions}
-        disabled={trueFalseActionsDisabled}
-        onAnswer={onTrueFalseAnswer}
-      />
+      {trueFalseActionsBottom}
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

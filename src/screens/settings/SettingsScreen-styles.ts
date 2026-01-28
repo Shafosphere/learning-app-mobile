@@ -216,39 +216,36 @@ export const useStyles = createThemeStylesHook((colors) => ({
   layoutLabelActive: {
     color: "#00caac",
   },
-  flashcardSizeOptions: {
+  actionOptionsRow: {
     flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "stretch",
+    width: "100%",
     justifyContent: "space-between",
-    marginTop: 12,
+    columnGap: 12,
+    marginTop: 8,
   },
-  flashcardSizeOption: {
-    flex: 1,
-    borderRadius: 12,
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.background,
-    paddingVertical: 12,
-    paddingHorizontal: 10,
+  actionOption: {
+    flexGrow: 0,
+    flexBasis: "48%",
+    maxWidth: "48%",
+    minWidth: 0,
+  },
+  actionPreview: {
+    aspectRatio: 1.6,
+    maxHeight: 120,
     alignItems: "center",
-    marginHorizontal: 4,
+    justifyContent: "center",
+    overflow: "hidden",
+    borderRadius: 10,
   },
-  flashcardSizeOptionActive: {
-    borderColor: colors.my_green,
+  actionPreviewImage: {
+    width: "115%",
+    height: "115%",
+    transform: [{ scale: 1.1 }, { translateY: 15 }],
   },
-  flashcardSizeLabel: {
-    fontSize: 14,
-    fontWeight: "700",
-    color: colors.paragraph,
-  },
-  flashcardSizeLabelActive: {
-    color: colors.my_green,
-  },
-  flashcardSizeMeta: {
-    fontSize: 12,
-    marginTop: 4,
-    color: colors.paragraph,
-    opacity: 0.75,
-    textAlign: "center",
+  actionLabel: {
+    fontSize: 13,
   },
   memoryOptions: {
     flexDirection: "row",

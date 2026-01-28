@@ -3,38 +3,38 @@ import { View } from "react-native";
 import { useStyles } from "../card-styles";
 
 type CardActionsProps = {
-    handleConfirm: () => void;
-    onDownload: () => Promise<void>;
-    downloadDisabled: boolean;
-    hidden?: boolean;
+  handleConfirm: () => void;
+  onDownload: () => Promise<void>;
+  downloadDisabled: boolean;
+  hidden?: boolean;
 };
 
 export function CardActions({
-    handleConfirm,
-    onDownload,
-    downloadDisabled,
-    hidden = false,
+  handleConfirm,
+  onDownload,
+  downloadDisabled,
+  hidden = false,
 }: CardActionsProps) {
-    if (hidden) {
-        return null;
-    }
+  if (hidden) {
+    return null;
+  }
 
-    const styles = useStyles();
+  const styles = useStyles();
 
-    return (
-        <View style={styles.containerButton}>
-            <MyButton
-                text="dodaj         fiszki"
-                color="my_yellow"
-                onPress={onDownload}
-                disabled={downloadDisabled}
-            />
-            <MyButton
-                text="zatwiedź"
-                color="my_green"
-                disabled={false}
-                onPress={handleConfirm}
-            />
-        </View>
-    );
+  return (
+    <View style={styles.containerButton}>
+      <MyButton
+        text="dodaj         fiszki"
+        color="my_yellow"
+        onPress={onDownload}
+        disabled={downloadDisabled}
+      />
+      <MyButton
+        text="zatwiedź"
+        color="my_green"
+        disabled={false}
+        onPress={handleConfirm}
+      />
+    </View>
+  );
 }

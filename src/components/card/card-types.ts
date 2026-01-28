@@ -28,6 +28,9 @@ export type CardProps = {
     hintFront: string | null,
     hintBack: string | null,
   ) => void;
+  showTrueFalseActions?: boolean;
+  trueFalseActionsDisabled?: boolean;
+  onTrueFalseAnswer?: (value: boolean) => void;
   hideActions?: boolean;
   isFocused?: boolean;
   backgroundColorOverride?: string;
