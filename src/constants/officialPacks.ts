@@ -7,10 +7,11 @@ import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
 import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
+import astronomiaCsv from "@/assets/data/astronomia.csv";
 import javascriptCsv from "@/assets/data/Javascript.csv";
+import javascript2Csv from "@/assets/data/Javascript2.csv";
 import flagiDemoCsv from "@/assets/data/flagi_demo.csv";
 import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
-import trueFalseTestCsv from "@/assets/data/true_false_test.csv";
 
 export type OfficialPackCourseSettings = {
   // Domyślne ustawienia kursu nadpisywane podczas pierwszego załadowania pakietu
@@ -157,6 +158,19 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     csvAsset: stoliceUniiEuropejskiejCsv,
   },
   {
+    slug: "astronomia",
+    name: "Astronomia",
+    iconId: "planet",
+    iconColor: "#8B5CF6",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "science",
+    csvAsset: astronomiaCsv,
+  },
+  {
     slug: "javascript",
     name: "JavaScript",
     iconId: "code",
@@ -170,13 +184,17 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     csvAsset: javascriptCsv,
   },
   {
-    slug: "true_false_demo",
-    name: "Prawda / Fałsz",
-    iconId: "help-circle",
-    iconColor: "#0EA5E9",
+    slug: "javascript2",
+    name: "JavaScript 2 (P/F)",
+    iconId: "code",
+    iconColor: "#22C55E",
     reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
     isMini: true,
-    csvAsset: trueFalseTestCsv,
+    categoryId: "programming",
+    csvAsset: javascript2Csv,
   },
   {
     slug: "flagi_europy",

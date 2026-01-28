@@ -16,4 +16,9 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         label: "Programowanie",
         icon: "code",
     },
+    science: {
+        id: "science",
+        label: "Nauka",
+        icon: "atom",
+    },
 };
