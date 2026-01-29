@@ -18,7 +18,13 @@ export interface QuoteTriggerRequest {
   respectGlobalCooldown?: boolean;
 }
 
-const GLOBAL_QUOTE_COOLDOWN_MS = 1 * 1000; // avoid spamming quotes across triggers
+const GLOBAL_QUOTE_COOLDOWN_MS = 60 * 1000; // max 1 visible quote per minute
+const GLOBAL_COOLDOWN_EXEMPT_CATEGORIES: QuoteCategory[] = ["box_spam"];
+
+const isDev = typeof __DEV__ !== "undefined" ? __DEV__ : true;
+const logQuote = (...args: unknown[]) => {
+  if (isDev) console.log("[Quote]", ...args);
+};
 
 interface QuoteContextType {
   quote: Quote | null;
@@ -113,6 +119,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
     }
 
     lastCategoryQuoteRef.current[category] = candidate;
+    logQuote("show", { category, text: candidate.text });
     setQuote(candidate);
     setIsVisible(true);
   }, []);
@@ -120,6 +127,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const triggerQuote = useCallback(
     (request: QuoteTriggerRequest) => {
       if (!quotesEnabled) {
+        logQuote("skip: quotes disabled", { trigger: request.trigger, category: request.category });
         return;
       }
 
@@ -131,7 +139,12 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
         respectGlobalCooldown = true,
       } = request;
 
-      if (probability < 1 && Math.random() > probability) {
+      const isGlobalCooldownExempt =
+        GLOBAL_COOLDOWN_EXEMPT_CATEGORIES.includes(category);
+
+      const roll = Math.random();
+      if (probability < 1 && roll > probability) {
+        logQuote("skip: probability roll", { trigger, category, probability, roll: Number(roll.toFixed(3)) });
         return;
       }
 
@@ -139,27 +152,42 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
 
       if (
         respectGlobalCooldown &&
+        !isGlobalCooldownExempt &&
         now - lastQuoteTimestampRef.current < GLOBAL_QUOTE_COOLDOWN_MS
       ) {
+        logQuote("skip: global cooldown", {
+          trigger,
+          category,
+          elapsedMs: now - lastQuoteTimestampRef.current,
+          remainingMs: GLOBAL_QUOTE_COOLDOWN_MS - (now - lastQuoteTimestampRef.current),
+        });
         return;
       }
 
       const lastTriggerTs = triggerTimestampsRef.current[trigger] ?? 0;
       if (cooldownMs > 0 && now - lastTriggerTs < cooldownMs) {
+        logQuote("skip: trigger cooldown", {
+          trigger,
+          category,
+          elapsedMs: now - lastTriggerTs,
+          remainingMs: cooldownMs - (now - lastTriggerTs),
+        });
         return;
       }
 
       triggerTimestampsRef.current[trigger] = now;
-      if (respectGlobalCooldown) {
+      if (respectGlobalCooldown && !isGlobalCooldownExempt) {
         lastQuoteTimestampRef.current = now;
       }
 
+      logQuote("fire", { trigger, category, cooldownMs, respectGlobalCooldown });
       showQuote(category);
     },
     [quotesEnabled, showQuote]
   );
 
   const hideQuote = useCallback(() => {
+    logQuote("hide");
     setIsVisible(false);
   }, []);
 

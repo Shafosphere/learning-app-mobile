@@ -33,8 +33,8 @@ const COMEBACK_COOLDOWN_MS = 20 * 60 * 1000;
 const LONG_THINK_MS = 12 * 1000;
 const LONG_THINK_COOLDOWN_MS = 30 * 60 * 1000;
 const LOSS_QUOTE_COOLDOWN_MS = 5 * 60 * 1000;
-const BOX_SPAM_WINDOW_MS = 2000;
-const BOX_SPAM_THRESHOLD = 20;
+const BOX_SPAM_WINDOW_MS = 2500;
+const BOX_SPAM_THRESHOLD = 40;
 const BOX_SPAM_COOLDOWN_MS = 0;
 const HINT_FAIL_THRESHOLD = 3;
 const HINT_COOLDOWN_MS = 10 * 60 * 1000;
@@ -188,6 +188,7 @@ export default function Flashcards() {
           trigger: `quote_box_spam_${boxName}`,
           category: "box_spam",
           cooldownMs: BOX_SPAM_COOLDOWN_MS,
+          respectGlobalCooldown: false, // zawsze pokaż, nawet gdy inny cytat był niedawno
         });
         boxSpamRef.current.count = 0;
       }
@@ -227,6 +228,7 @@ export default function Flashcards() {
           trigger: "quote_comeback",
           category: "comeback",
           cooldownMs: COMEBACK_COOLDOWN_MS,
+          probability: 0.5, // ~50% rzadziej
         });
       }
 
@@ -245,7 +247,7 @@ export default function Flashcards() {
           trigger: "quote_win_standard",
           category: "win_standard",
           cooldownMs: 3 * 60 * 1000,
-          probability: 0.3
+          probability: 0.15 // zmniejsz szansę o ~50%
         });
       }
 
@@ -278,7 +280,7 @@ export default function Flashcards() {
       triggerQuote({
         trigger: "quote_loss_random",
         category: "loss",
-        probability: 0.2, // Increased slightly per plan considerations, user said low prio but consistency helps
+        probability: 0.1, // ~50% rzadziej
         cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
       });
     }

@@ -112,6 +112,7 @@ export default function HomeScreen() {
         keyExtractor={(item) => item.key}
         renderItem={renderTile}
         numColumns={2}
+        scrollEnabled={false}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={styles.gridRow}
         contentContainerStyle={styles.gridContent}

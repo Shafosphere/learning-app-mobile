@@ -295,11 +295,15 @@ export default function CustomCourseContentScreen() {
         ? true
         : answers.length > 0 && answers.every((a) => isBooleanText(a));
 
-      const locked = parseBooleanValue(
-        readBooleanishField(row, ["lock", "blokada"])
-      );
       const answerOnly = parseBooleanValue(
-        readBooleanishField(row, ["answer_only", "question", "pytanie", "tylko_odpowiedz"])
+        readBooleanishField(row, [
+          "blokada",
+          "block",
+          "answer_only",
+          "question",
+          "pytanie",
+          "lock",
+        ])
       );
       const imageFrontName = normalizeImageField(
         readStringField(row, ["image_front", "imageFront", "obraz_przod"])
@@ -320,7 +324,7 @@ export default function CustomCourseContentScreen() {
         id: `csv-${idx}`,
         front: readStringField(row, ["front", "przod"]),
         answers: answers.length > 0 ? answers : [backRaw],
-        flipped: !locked,
+        flipped: !answerOnly,
         answerOnly,
         hintFront: readStringField(row, ["hint1", "hint_front", "podpowiedz1"]),
         hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),

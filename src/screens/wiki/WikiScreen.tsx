@@ -230,7 +230,7 @@ export default function WikiScreen() {
                 </View>
               </Pressable>
               {!isLast && (
-                <View style={styles.connectorArea}>
+                <View pointerEvents="none" style={styles.connectorArea}>
                   <ChevronStripe
                     count={5}
                     style={[

@@ -2,13 +2,9 @@ import engToPLA1Csv from "@/assets/data/ENGtoPL_A1.csv";
 import engToPLA2Csv from "@/assets/data/ENGtoPL_A2.csv";
 import engToPLB1Csv from "@/assets/data/ENGtoPL_B1.csv";
 import engToPLB2Csv from "@/assets/data/ENGtoPL_B2.csv";
-import francuskiePodstawyCsv from "@/assets/data/francuskie_podstawy.csv";
 import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
-import podstawoweSlowaCsv from "@/assets/data/podstawowe_slowa.csv";
-import prosteZwrotyCsv from "@/assets/data/proste_zwroty.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 import astronomiaCsv from "@/assets/data/astronomia.csv";
-import javascriptCsv from "@/assets/data/Javascript.csv";
 import javascript2Csv from "@/assets/data/Javascript2.csv";
 import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
 
@@ -96,42 +92,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     csvAsset: engToPLB2Csv,
   },
   {
-    slug: "proste_zwroty",
-    name: "Raz",
-    iconId: "book",
-    iconColor: "#4361EE",
-    reviewsEnabled: true,
-    sourceLang: "en",
-    targetLang: "pl",
-    smallFlag: "pl",
-    isMini: true,
-    csvAsset: prosteZwrotyCsv,
-  },
-  {
-    slug: "podstawowe_slowa",
-    name: "Podstawowe zwroty",
-    iconId: "heart",
-    iconColor: "#FF6B6B",
-    reviewsEnabled: true,
-    sourceLang: "en",
-    targetLang: "pl",
-    smallFlag: "pl",
-    isMini: true,
-    csvAsset: podstawoweSlowaCsv,
-  },
-  {
-    slug: "francuskie_podstawy",
-    name: "Francuskie podstawy",
-    iconId: "book",
-    iconColor: "#4CC9F0",
-    reviewsEnabled: true,
-    sourceLang: "fr",
-    targetLang: "pl",
-    smallFlag: "fr",
-    isMini: true,
-    csvAsset: francuskiePodstawyCsv,
-  },
-  {
     slug: "hangul_polish_reading",
     name: "Hangul – czytanie",
     iconId: "book",
@@ -170,19 +130,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     csvAsset: astronomiaCsv,
   },
   {
-    slug: "javascript",
-    name: "JavaScript",
-    iconId: "code",
-    iconColor: "#0EA5E9",
-    reviewsEnabled: true,
-    sourceLang: "pl",
-    targetLang: "pl",
-    smallFlag: "pl",
-    isMini: true,
-    categoryId: "programming",
-    csvAsset: javascriptCsv,
-  },
-  {
     slug: "javascript2",
     name: "JavaScript 2 (P/F)",
     iconId: "code",
@@ -203,7 +150,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     reviewsEnabled: true,
     sourceLang: "pl",
     targetLang: "pl",
-    smallFlag: "eu",
+    smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
     csvAsset: flagiEuropyCsv,

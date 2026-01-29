@@ -6,7 +6,7 @@ import { AppState } from "react-native";
 const LAST_ACTIVE_TS_KEY = "@quote_last_active_ts_v1";
 const FIRST_TIME_KEY = "@quote_first_time_shown_v1";
 const RETURN_AFTER_BREAK_MS = 6 * 60 * 60 * 1000; // 6h przerwy
-const STARTUP_DELAY_MS = 1500;
+const STARTUP_DELAY_MS = 10_000; // opóźnij startowe cytaty o 10s po starcie aplikacji
 
 export default function QuoteSystemInitializer() {
     const { triggerQuote } = useQuote();
@@ -39,12 +39,7 @@ export default function QuoteSystemInitializer() {
                 const isFirstTime = firstTimeRaw !== "1";
 
                 if (isFirstTime) {
-                    triggerQuote({
-                        trigger: "quote_first_time",
-                        category: "first_time",
-                        respectGlobalCooldown: false,
-                        cooldownMs: 0,
-                    });
+                    // Podczas pierwszego uruchomienia (intro) nie pokazuj cytatów
                     await AsyncStorage.setItem(FIRST_TIME_KEY, "1");
                 } else if (lastActive && now - lastActive > RETURN_AFTER_BREAK_MS) {
                     triggerQuote({

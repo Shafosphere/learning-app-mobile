@@ -99,7 +99,7 @@ export const QUOTES: Quote[] = [
     category: "startup_night",
   },
 
-  // --- First Time ---
+  // --- First Time (narazie wyłączyłem) --- 
   {
     text: "Uczyć się to nic innego jak przypominać sobie",
     category: "first_time",
@@ -229,14 +229,6 @@ export const QUOTES: Quote[] = [
     text: "Hmmmmm...",
     category: "long_think",
   },
-  {
-    text: "Ważne że poprawnie.",
-    category: "long_think",
-  },
-  {
-    text: "Uff, udało się.",
-    category: "long_think",
-  },
 
   // --- Hints ---
   {
@@ -245,10 +237,6 @@ export const QUOTES: Quote[] = [
   },
   {
     text: "Znowu to samo? :(",
-    category: "hint",
-  },
-  {
-    text: "To już nie błąd, to znajomy.",
     category: "hint",
   },
 

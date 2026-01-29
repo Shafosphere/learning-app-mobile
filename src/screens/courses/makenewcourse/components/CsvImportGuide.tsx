@@ -150,16 +150,10 @@ type TemplateData = {
 
 const OPTIONAL_FIELDS_TEXT = [
   {
-    id: "blokada",
+    id: "blokada / block",
     label: "blokada",
     description:
-      'Wartość "tak" wyłączy flip w pudełkach (pytanie zostaje pytaniem), ale nadal wpisujesz oba pola w poprawce.',
-  },
-  {
-    id: "tylko_odpowiedz",
-    label: "tylko_odpowiedz",
-    description:
-      'Wartość "tak" robi prawie to samo co blokada: z tą różnicą że w trybie porpawki wpisujesz tylko tekst z kolumny "tył"',
+      'Wartość "tak" nie odwraca fiszki w pudełkach i w trybie poprawki wpisujesz tylko tekst z kolumny "tył".',
   },
   {
     id: "podpowiedz1 / podpowiedz2",
