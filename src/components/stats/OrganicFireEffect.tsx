@@ -109,12 +109,10 @@ const FlameComponent = ({
 const SparkComponent = ({
   config,
   time,
-  width,
   height,
 }: {
   config: SparkConfig;
   time: SharedValue<number>;
-  width: number;
   height: number;
 }) => {
   const animatedProps = useAnimatedProps(() => {
@@ -256,7 +254,6 @@ export const OrganicFireEffect: React.FC = () => {
               key={`spark-${index}`}
               config={config}
               time={time}
-              width={size.width}
               height={size.height}
             />
           ))}

@@ -7,7 +7,7 @@ import HangulKeyboard, {
 } from "@/src/components/hangul/HangulKeyboard";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
-const useStyles = createThemeStylesHook((colors) => ({
+const useStyles = createThemeStylesHook((_colors) => ({
   overlay: {
     flex: 1,
     justifyContent: "flex-end",

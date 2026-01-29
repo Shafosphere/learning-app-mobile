@@ -4,7 +4,6 @@ import Card from "@/src/components/card/card";
 import type { CardCorrectionType } from "@/src/components/card/card-types";
 import { FlashcardsGameView } from "@/src/components/flashcards/FlashcardsGameView";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
@@ -91,7 +90,6 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{ courseId?: string }>();
-  const { ignoreDiacriticsInSpellcheck } = useSettings();
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -350,12 +348,6 @@ export default function ReviewFlashcardsPlaceholder() {
       (selectedItem?.imageFront || selectedItem?.imageBack)) ||
     selectedItem?.type === "true_false";
   const effectiveReversed = answerOnly ? false : reversed;
-
-  const normalize = (value: string | undefined | null) => {
-    const raw = (value ?? "").trim().toLowerCase();
-    if (!ignoreDiacriticsInSpellcheck) return raw;
-    return stripDiacritics(raw);
-  };
 
   useEffect(() => {
     if (!correction || !activeBox || !courseId) return;

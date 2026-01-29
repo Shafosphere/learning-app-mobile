@@ -5,7 +5,6 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
 const QUOTE_DURATION_MS = 3500;
-const MIN_VISIBLE_MS_BEFORE_DISMISS = 600;
 
 const CATEGORY_COLORS: Record<QuoteCategory, PopupColor> = {
     win_standard: "calm",

@@ -10,10 +10,10 @@ export default function HomeScreen() {
   const router = useRouter();
   const styles = useStyles();
   const logo = require("../../../assets/illustrations/box/logo.png");
-  const statsImage = require("../../../assets/images/staty.png");
-  const customImage = require("../../../assets/images/edit.png");
-  const tutorialImage = require("../../../assets/images/tutorial.png");
-  const supportImage = require("../../../assets/images/wsparcie.png");
+  const statsImage = require("../../../assets/images/home/staty.png");
+  const customImage = require("../../../assets/images/home/edit.png");
+  const tutorialImage = require("../../../assets/images/home/tutorial.png");
+  const supportImage = require("../../../assets/images/home/wsparcie.png");
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 

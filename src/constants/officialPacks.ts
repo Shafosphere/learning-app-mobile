@@ -10,7 +10,6 @@ import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.
 import astronomiaCsv from "@/assets/data/astronomia.csv";
 import javascriptCsv from "@/assets/data/Javascript.csv";
 import javascript2Csv from "@/assets/data/Javascript2.csv";
-import flagiDemoCsv from "@/assets/data/flagi_demo.csv";
 import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
 
 export type OfficialPackCourseSettings = {

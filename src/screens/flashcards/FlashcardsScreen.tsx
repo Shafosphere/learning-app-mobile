@@ -373,10 +373,8 @@ export default function Flashcards() {
     }
   }, [activeBox, unlockGate]);
 
-  const isAnswering =
-    selectedItem != null && result === null && correction?.mode !== "intro";
   const resultPending = result !== null;
-  // Allow autoflow to switch boxes even when a card is shown (isAnswering),
+  // Allow autoflow to switch boxes even when a card is shown,
   // otherwise it never jumps to a clogged box until the current box is emptied.
   const canAutoflowSwitch = !correctionLocked && !resultPending;
 

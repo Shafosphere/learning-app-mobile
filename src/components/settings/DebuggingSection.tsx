@@ -197,7 +197,7 @@ const DebuggingSection: React.FC = () => {
           <MyButton
             text="Win"
             color="my_green"
-            onPress={() => showQuote("win")}
+            onPress={() => showQuote("win_standard")}
             width={100}
           />
         </View>
@@ -213,7 +213,7 @@ const DebuggingSection: React.FC = () => {
           <MyButton
             text="Startup"
             color="my_yellow"
-            onPress={() => showQuote("startup")}
+            onPress={() => showQuote("startup_day")}
             width={100}
           />
         </View>
@@ -451,7 +451,7 @@ const DebuggingSection: React.FC = () => {
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Zresetuj dymki intro</Text>
           <Text style={styles.rowSubtitle}>
-            Usuwa flagi "seen" dla wszystkich ekranów.
+            Usuwa flagi seen dla wszystkich ekranów.
           </Text>
         </View>
         <MyButton

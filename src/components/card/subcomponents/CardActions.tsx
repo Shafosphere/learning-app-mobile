@@ -15,11 +15,11 @@ export function CardActions({
   downloadDisabled,
   hidden = false,
 }: CardActionsProps) {
+  const styles = useStyles();
+
   if (hidden) {
     return null;
   }
-
-  const styles = useStyles();
 
   return (
     <View style={styles.containerButton}>

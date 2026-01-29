@@ -22,7 +22,7 @@ type LargeCardContainerProps = {
 export default function LargeCardContainer({
   cardStateStyle,
   hasContent,
-  showCorrectionInputs,
+  showCorrectionInputs: _showCorrectionInputs,
   backgroundColorOverride,
   children,
 }: LargeCardContainerProps) {

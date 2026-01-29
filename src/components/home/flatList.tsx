@@ -19,41 +19,42 @@ export type HomeTile = {
 };
 
 export const renderHomeTile =
-  (styles: HomeScreenStyles): ListRenderItem<HomeTile> =>
-  ({ item, index }) => {
-    const isRightColumn = index % 2 === 1;
+  (styles: HomeScreenStyles): ListRenderItem<HomeTile> => {
+    const HomeTileItem: ListRenderItem<HomeTile> & { displayName?: string } = ({
+      item,
+    }) => {
+      if (item.isPlaceholder) {
+        return <View style={[styles.tile, styles.placeholderTile]} />;
+      }
 
-    if (item.isPlaceholder) {
-      return <View style={[styles.tile, styles.placeholderTile]} />;
-    }
-
-    return (
-      <Pressable
-        onPress={item.action}
-        accessibilityRole="button"
-        accessibilityLabel={item.title}
-        style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
-      >
-        <View style={[styles.iconBox, 
-          // isRightColumn && styles.iconFlipped
-          ]}>
-          {item.icon ? (
-            item.icon
-          ) : item.image ? (
-            <Image source={item.image} style={styles.iconImage} />
-          ) : null}
-        </View>
-        <View style={styles.tileText}>
-          <Text style={styles.tileTitle}>{item.title}</Text>
-          <Text
-            style={[
-              styles.tileSubtitle,
-              !item.subtitle && styles.tileSubtitleHidden,
-            ]}
-          >
-            {item.subtitle || "placeholder"}
-          </Text>
-        </View>
-      </Pressable>
-    );
+      return (
+        <Pressable
+          onPress={item.action}
+          accessibilityRole="button"
+          accessibilityLabel={item.title}
+          style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
+        >
+          <View style={styles.iconBox}>
+            {item.icon ? (
+              item.icon
+            ) : item.image ? (
+              <Image source={item.image} style={styles.iconImage} />
+            ) : null}
+          </View>
+          <View style={styles.tileText}>
+            <Text style={styles.tileTitle}>{item.title}</Text>
+            <Text
+              style={[
+                styles.tileSubtitle,
+                !item.subtitle && styles.tileSubtitleHidden,
+              ]}
+            >
+              {item.subtitle || "placeholder"}
+            </Text>
+          </View>
+        </Pressable>
+      );
+    };
+    HomeTileItem.displayName = "HomeTileItem";
+    return HomeTileItem;
   };

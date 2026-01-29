@@ -13,7 +13,7 @@ type CardTrueFalseProps = {
 
 export function CardTrueFalse({
     promptText,
-    promptImageUri,
+    promptImageUri: _promptImageUri,
     onAnswer,
     allowMultilinePrompt,
     showButtons = true,

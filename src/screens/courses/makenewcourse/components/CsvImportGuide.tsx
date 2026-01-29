@@ -1,8 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
-import * as FileSystem from "expo-file-system/legacy";
-import * as Sharing from "expo-sharing";
 import { Platform, Text, View } from "react-native";
 
 export type CsvImportType = "text" | "image" | "true_false";
@@ -10,13 +8,7 @@ export type CsvImportType = "text" | "image" | "true_false";
 interface CsvImportGuideProps {
   onPickFile: () => void;
   selectedFileName: string | null;
-  setPopup: (popup: {
-    message: string;
-    color: "calm" | "angry";
-    duration: number;
-  }) => void;
   activeType: CsvImportType;
-  onChangeType: (type: CsvImportType) => void;
 }
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -224,9 +216,7 @@ const TEMPLATES: Record<CsvImportType, TemplateData> = {
 export function CsvImportGuide({
   onPickFile,
   selectedFileName,
-  setPopup,
   activeType,
-  onChangeType,
 }: CsvImportGuideProps) {
   const styles = useStyles();
   const template = TEMPLATES[activeType];

@@ -4,7 +4,7 @@ import { useStyles } from "./StatsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
-import MedalsShowcase from "@/src/components/stats/bookshelf";
+// import MedalsShowcase from "@/src/components/stats/bookshelf";
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
@@ -107,9 +107,9 @@ export default function StatsScreen() {
     >
       <BigKnownWordsCard />
 
-      {statsBookshelfEnabled && (
+      {/* {statsBookshelfEnabled && (
         <MedalsShowcase onEditModeChange={setIsBookshelfEditing} />
-      )}
+      )} */}
 
       <PinnedCoursesProgress />
 

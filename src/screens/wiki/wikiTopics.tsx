@@ -540,7 +540,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Mniejszy przycisk "Dodaj fiszki" który wystepuje trybie prawda / fałsz
+              Mniejszy przycisk Dodaj fiszki który wystepuje w trybie prawda / fałsz
             </Text>
           </View>
         ),

@@ -32,8 +32,6 @@ import { useStyles } from "./importFlashcards-styles";
 
 type AddMode = "csv" | "manual";
 
-const sampleFileName = "custom_course_przyklad.csv";
-
 const TRUE_VALUES = new Set([
   "true",
   "1",
@@ -341,7 +339,7 @@ export default function CustomCourseContentScreen() {
     return cards;
   };
 
-  const handleZipImport = async (fileUri: string, fileName?: string | null) => {
+  const handleZipImport = async (fileUri: string) => {
     try {
       const zipBase64 = await FileSystem.readAsStringAsync(fileUri, {
         encoding: FileSystem.EncodingType.Base64,
@@ -456,7 +454,7 @@ export default function CustomCourseContentScreen() {
       const fileName = picked.assets[0].name;
       setCsvFileName(fileName);
       if (fileName?.toLowerCase().endsWith(".zip")) {
-        await handleZipImport(fileUri, fileName);
+        await handleZipImport(fileUri);
         return;
       }
 
@@ -681,9 +679,7 @@ export default function CustomCourseContentScreen() {
               <CsvImportGuide
                 onPickFile={handleSelectCsv}
                 selectedFileName={csvFileName}
-                setPopup={setPopup}
                 activeType={csvCardType}
-                onChangeType={setCsvCardType}
               />
             </View>
           ) : (

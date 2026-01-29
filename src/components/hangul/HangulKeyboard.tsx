@@ -14,7 +14,7 @@ const ROWS_SHIFTED = [
   ["ㅋ", "ㅌ", "ㅊ", "ㅍ", "ㅠ", "ㅜ", "ㅡ"],
 ] as const;
 
-const useStyles = createThemeStylesHook((colors) => ({
+const useStyles = createThemeStylesHook((_colors) => ({
   container: {
     width: "100%",
     paddingTop: 6,

@@ -28,7 +28,6 @@ export default function CoursesReviewScreen() {
   const router = useRouter();
   const {
     setActiveCustomCourseId,
-    colors,
     pinnedOfficialCourseIds,
   } = useSettings();
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);

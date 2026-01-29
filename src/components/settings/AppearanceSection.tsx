@@ -17,10 +17,10 @@ import {
   View,
 } from "react-native";
 
-const classicPreview = require("@/assets/images/sett_classic.png");
-const carouselPreview = require("@/assets/images/sett_caro.png");
-const topButtonsPreview = require("@/assets/images/twoHand.png");
-const bottomButtonsPreview = require("@/assets/images/onehand.png");
+const classicPreview = require("@/assets/images/settings/sett_classic.png");
+const carouselPreview = require("@/assets/images/settings/sett_caro.png");
+const topButtonsPreview = require("@/assets/images/settings/twoHand.png");
+const bottomButtonsPreview = require("@/assets/images/settings/onehand.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";
