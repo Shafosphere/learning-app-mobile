@@ -11,6 +11,10 @@ export default function useSpellchecking() {
     return stripDiacritics(cleaned);
   }
 
+  function containsDigit(value: string): boolean {
+    return /\d/.test(value);
+  }
+
   function levenshtein(a: string, b: string): number {
     const matrix: number[][] = [];
     if (a.length === 0) return b.length;
@@ -41,6 +45,11 @@ export default function useSpellchecking() {
 
     const userWord = prepareWord(userForm);
     const correctWord = prepareWord(correctForm);
+    // Avoid forgiving typos when numbers are involved (years, quantities, etc.).
+    // Numeric answers should match exactly so "1994" !== "1995".
+    if (containsDigit(userWord) || containsDigit(correctWord)) {
+      return userWord === correctWord;
+    }
 
     if (spellChecking) {
       if (userWord === correctWord) return true;

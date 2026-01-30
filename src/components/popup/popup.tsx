@@ -20,7 +20,7 @@ interface PopupProps {
 }
 
 const EXIT_ANIMATION_MS = 220;
-const NAVBAR_HEIGHT = 35;
+const NAVBAR_HEIGHT = 45;
 const POPUP_GAP = 12;
 
 export default function Popup({

@@ -21,6 +21,8 @@ type CsvRow = {
     hint2?: string;
     hint_front?: string;
     hint_back?: string;
+    block?: string | number | boolean;
+    blokada?: string | number | boolean;
     lock?: string | number | boolean;
     answer_only?: string | number | boolean;
     question?: string | number | boolean;
@@ -47,15 +49,21 @@ const parseBooleanValue = (value: unknown): boolean => {
     return TRUE_VALUES.has(normalized);
 };
 const isBooleanText = (value: string): boolean => {
+    // Exclude numeric forms ("1", "0") so plain number answers (0, 1, 2, 16)
+    // are not treated as true/false when the CSV lacks an explicit is_true flag.
     const normalized = value.toLowerCase();
     return (
-        TRUE_VALUES.has(normalized) ||
+        normalized === "true" ||
+        normalized === "yes" ||
+        normalized === "y" ||
+        normalized === "tak" ||
+        normalized === "t" ||
+        normalized === "locked" ||
         normalized === "false" ||
         normalized === "no" ||
         normalized === "nie" ||
         normalized === "n" ||
-        normalized === "unlocked" ||
-        value === "0"
+        normalized === "unlocked"
     );
 };
 
@@ -119,10 +127,15 @@ async function readCsvAsset(
             const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
             const hintFront = extractHint(row.hint1, row.hint_front);
             const hintBack = extractHint(row.hint2, row.hint_back);
-            const locked = parseBooleanValue(row.lock);
-            const answerOnly = parseBooleanValue(
-                row.answer_only ?? row.question ?? row.pytanie
-            );
+            const blockRaw =
+                (row as any).blokada ??
+                (row as any).block ??
+                row.answer_only ??
+                row.question ??
+                row.pytanie ??
+                row.lock;
+            const answerOnly = parseBooleanValue(blockRaw);
+            const locked = answerOnly;
             const card: CustomFlashcardInput = {
                 frontText: front,
                 backText: backRaw,
@@ -156,6 +169,65 @@ async function readCsvAsset(
             c.imageFront != null ||
             c.imageBack != null
     );
+}
+
+// Collects indexes (position) of rows that contain the unified block/answerOnly flag.
+async function getBlockedPositionsFromCsvAsset(assetModule: any): Promise<Set<number>> {
+    const asset = Asset.fromModule(assetModule);
+    await asset.downloadAsync();
+    const uri = asset.localUri ?? asset.uri;
+    if (!uri) return new Set();
+    const csv = await FileSystem.readAsStringAsync(uri);
+    const { data } = Papa.parse<any>(csv, {
+        header: true,
+        skipEmptyLines: true,
+    });
+    const blocked = new Set<number>();
+    data.forEach((row: any, idx: number) => {
+        const flag =
+            row?.blokada ??
+            row?.block ??
+            row?.answer_only ??
+            row?.question ??
+            row?.pytanie ??
+            row?.lock;
+        if (parseBooleanValue(flag)) {
+            blocked.add(idx);
+        }
+    });
+    return blocked;
+}
+
+async function applyBlockFlagFixForOfficialPacks(
+    db: SQLite.SQLiteDatabase
+): Promise<void> {
+    const slugToId = new Map<string, number>();
+    const rows = await db.getAllAsync<{ id: number; slug: string | null }>(
+        `SELECT id, slug FROM custom_courses WHERE is_official = 1 AND slug IS NOT NULL;`
+    );
+    rows.forEach((row) => {
+        if (row.slug) slugToId.set(row.slug, row.id);
+    });
+
+    for (const def of OFFICIAL_PACKS) {
+        const courseId = slugToId.get(def.slug);
+        if (!courseId) continue;
+        try {
+            const blocked = await getBlockedPositionsFromCsvAsset(def.csvAsset);
+            if (blocked.size === 0) continue;
+            const positions = Array.from(blocked.values());
+            const placeholders = positions.map(() => "?").join(", ");
+            await db.runAsync(
+                `UPDATE custom_flashcards
+                 SET answer_only = 1, flipped = 0
+                 WHERE course_id = ?
+                   AND position IN (${placeholders});`,
+                [courseId, ...positions]
+            );
+        } catch (e) {
+            console.warn("[DB] applyBlockFlagFixForOfficialPacks failed", def.slug, e);
+        }
+    }
 }
 
 async function importOfficialPackIfEmpty(
@@ -323,6 +395,15 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
             e
         );
     }
+
+    // Hotfix: older installs imported official packs before the unified "block/answer_only"
+    // field existed. Update existing rows in-place so block=true cards stop flipping.
+    try {
+        await applyBlockFlagFixForOfficialPacks(db);
+    } catch (e) {
+        console.warn("[DB] applyBlockFlagFixForOfficialPacks failed", e);
+    }
+
     notifyDbInitializationListeners({
         type: "ready",
         initialImport: requiresInitialImport,

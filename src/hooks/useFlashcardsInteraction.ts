@@ -470,6 +470,10 @@ export function useFlashcardsInteraction({
         const promote = correction.mode === "intro";
         moveElement(selectedItem.id, promote);
       }
+      // Wyczyść poprzednią odpowiedź zanim pokażemy kolejną fiszkę.
+      // Inaczej przez jedną klatkę nowa karta może odziedziczyć stary tekst
+      // (widoczny "B" na screenach), co wygląda jak mignięcie błędnej karty.
+      setAnswer("");
       setResult(null);
       setCorrection(null);
       setQueueNext(true);
@@ -478,6 +482,8 @@ export function useFlashcardsInteraction({
 
   useEffect(() => {
     if (queueNext && activeBox) {
+      // Upewnij się, że pole odpowiedzi jest puste zanim załadujemy nową kartę.
+      setAnswer("");
       selectNextWord(activeBox);
       setResult(null);
       setQueueNext(false);
