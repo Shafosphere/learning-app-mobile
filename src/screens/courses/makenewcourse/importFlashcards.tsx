@@ -210,15 +210,17 @@ export default function CustomCourseContentScreen() {
     return TRUE_VALUES.has(normalized);
   };
   const isBooleanText = (value: string): boolean => {
-    const normalized = value.toLowerCase();
+    // Accept only unambiguous boolean words; ignore 1-letter tokens like "t" so regular answers stay text cards.
+    const normalized = value.trim().toLowerCase();
     return (
-      TRUE_VALUES.has(normalized) ||
+      normalized === "true" ||
       normalized === "false" ||
+      normalized === "yes" ||
       normalized === "no" ||
+      normalized === "tak" ||
       normalized === "nie" ||
-      normalized === "n" ||
-      normalized === "unlocked" ||
-      value === "0"
+      normalized === "locked" ||
+      normalized === "unlocked"
     );
   };
 

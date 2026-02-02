@@ -49,20 +49,17 @@ const parseBooleanValue = (value: unknown): boolean => {
     return TRUE_VALUES.has(normalized);
 };
 const isBooleanText = (value: string): boolean => {
-    // Exclude numeric forms ("1", "0") so plain number answers (0, 1, 2, 16)
-    // are not treated as true/false when the CSV lacks an explicit is_true flag.
-    const normalized = value.toLowerCase();
+    // Treat only clear boolean words as true/false answers; avoid 1-letter tokens like "t"/"y"
+    // so entries such as Hangul consonant readings ("t", "p") are not converted to true_false cards.
+    const normalized = value.trim().toLowerCase();
     return (
         normalized === "true" ||
-        normalized === "yes" ||
-        normalized === "y" ||
-        normalized === "tak" ||
-        normalized === "t" ||
-        normalized === "locked" ||
         normalized === "false" ||
+        normalized === "yes" ||
         normalized === "no" ||
+        normalized === "tak" ||
         normalized === "nie" ||
-        normalized === "n" ||
+        normalized === "locked" ||
         normalized === "unlocked"
     );
 };
