@@ -167,6 +167,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           allowMultilinePrompt={useLargeLayout}
           onAnswer={noopTrueFalseAnswer}
           showButtons={false}
+          onPromptLayout={layoutHandlers?.onPromptLayout}
+          onInputLayout={layoutHandlers?.onInputLayout}
         />
       )}
       {showInput && (

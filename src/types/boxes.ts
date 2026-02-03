@@ -10,6 +10,7 @@ export interface WordWithTranslations {
   hintBack?: string | null;
   imageFront?: string | null;
   imageBack?: string | null;
+  explanation?: string | null;
   type?: "text" | "image" | "true_false";
 }
 

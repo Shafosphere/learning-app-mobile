@@ -8,7 +8,11 @@ import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
-import { getDailyLearnedCountsCustom, getTotalLearningTimeMs } from "@/src/db/sqlite/db";
+import {
+  getDailyLearnedCountsCustom,
+  getDailyLearningTimeMsCustom,
+  getTotalLearningTimeMs,
+} from "@/src/db/sqlite/db";
 
 export default function StatsScreen() {
   const styles = useStyles();
@@ -35,11 +39,30 @@ export default function StatsScreen() {
       start.setDate(start.getDate() - 89);
       start.setHours(0, 0, 0, 0);
       try {
-        const custom = await getDailyLearnedCountsCustom(start.getTime(), end.getTime());
+        const [customCounts, customTimes] = await Promise.all([
+          getDailyLearnedCountsCustom(start.getTime(), end.getTime()),
+          getDailyLearningTimeMsCustom(start.getTime(), end.getTime()),
+        ]);
         if (!mounted) return;
-        const arr: HeatmapDay[] = custom
-          .map(({ date, count }) => ({ date, count }))
-          .sort((a, b) => a.date.localeCompare(b.date));
+        const merged = new Map<string, HeatmapDay>();
+        for (const item of customCounts) {
+          merged.set(item.date, {
+            date: item.date,
+            count: item.count,
+            timeMs: 0,
+          });
+        }
+        for (const item of customTimes) {
+          const prev = merged.get(item.date);
+          merged.set(item.date, {
+            date: item.date,
+            count: prev?.count ?? 0,
+            timeMs: item.ms,
+          });
+        }
+        const arr: HeatmapDay[] = Array.from(merged.values()).sort((a, b) =>
+          a.date.localeCompare(b.date)
+        );
         setHeatmapData(arr);
       } catch {
         if (mounted) {

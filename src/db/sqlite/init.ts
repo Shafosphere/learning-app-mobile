@@ -17,6 +17,10 @@ import { splitBackTextIntoAnswers } from "./utils";
 type CsvRow = {
     front?: string;
     back?: string;
+    przod?: string;
+    tyl?: string;
+    front_text?: string;
+    back_text?: string;
     hint1?: string;
     hint2?: string;
     hint_front?: string;
@@ -104,8 +108,22 @@ async function readCsvAsset(
     console.log("[DB] readCsvAsset: parsed rows=", data?.length ?? 0);
     const cards = await Promise.all(
         data.map(async (row, idx) => {
-            const front = (row.front ?? "").trim();
-            const backRaw = (row.back ?? "").trim();
+            const front = (
+                row.front ??
+                row.przod ??
+                row.front_text ??
+                (row as any).frontText ??
+                (row as any).question_text ??
+                (row as any).questionText ??
+                ""
+            ).trim();
+            const backRaw = (
+                row.back ??
+                row.tyl ??
+                row.back_text ??
+                (row as any).backText ??
+                ""
+            ).trim();
             const trueFalseRaw =
                 (row as any).is_true ??
                 (row as any).isTrue ??
@@ -124,6 +142,16 @@ async function readCsvAsset(
             const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
             const hintFront = extractHint(row.hint1, row.hint_front);
             const hintBack = extractHint(row.hint2, row.hint_back);
+            const explanationRaw =
+                (row as any).explanation ??
+                (row as any).wyjasnienie ??
+                (row as any).wyjaśnienie ??
+                (row as any).explain ??
+                null;
+            const explanation =
+                typeof explanationRaw === "string"
+                    ? explanationRaw.trim() || null
+                    : null;
             const blockRaw =
                 (row as any).blokada ??
                 (row as any).block ??
@@ -155,6 +183,7 @@ async function readCsvAsset(
                         imageMap
                     )
                     : null,
+                explanation,
             };
             return card;
         })

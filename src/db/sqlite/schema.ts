@@ -86,6 +86,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       hint_back   TEXT,
       image_front TEXT,
       image_back  TEXT,
+      explanation TEXT,
       position    INTEGER,
       flipped     INTEGER NOT NULL DEFAULT 1,
       answer_only INTEGER NOT NULL DEFAULT 0,
@@ -138,6 +139,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
   await ensureColumn(db, "custom_flashcards", "hint_back", "TEXT");
   await ensureColumn(db, "custom_flashcards", "image_front", "TEXT");
   await ensureColumn(db, "custom_flashcards", "image_back", "TEXT");
+  await ensureColumn(db, "custom_flashcards", "explanation", "TEXT");
   await ensureColumn(
     db,
     "custom_flashcards",

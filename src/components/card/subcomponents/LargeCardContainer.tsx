@@ -77,11 +77,17 @@ export default function LargeCardContainer({
   const handlePromptLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
     setPromptHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    if (__DEV__) {
+      console.log("[LargeCardContainer] promptHeight", nextHeight);
+    }
   }, []);
 
   const handleInputLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
     setInputHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    if (__DEV__) {
+      console.log("[LargeCardContainer] inputHeight", nextHeight);
+    }
   }, []);
 
   useEffect(() => {
@@ -99,6 +105,9 @@ export default function LargeCardContainer({
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
+    if (__DEV__) {
+      console.log("[LargeCardContainer] targetHeight", targetCardHeight);
+    }
   }, [animatedCardHeight, targetCardHeight]);
 
   return (

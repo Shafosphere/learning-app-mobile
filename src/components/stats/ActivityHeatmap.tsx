@@ -3,7 +3,7 @@ import { Pressable, Text, View } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
-export type HeatmapDay = { date: string; count: number };
+export type HeatmapDay = { date: string; count: number; timeMs: number };
 
 type Props = {
   data: HeatmapDay[];
@@ -97,41 +97,51 @@ export default function ActivityHeatmap({ data, days = 90, onSelect }: Props) {
   const [selectedDay, setSelectedDay] = useState<HeatmapDay | null>(null);
 
   const map = useMemo(() => {
-    const m = new Map<string, number>();
-    for (const item of data) m.set(item.date, item.count | 0);
+    const m = new Map<string, { count: number; timeMs: number }>();
+    for (const item of data) {
+      m.set(item.date, {
+        count: item.count | 0,
+        timeMs: item.timeMs | 0,
+      });
+    }
     return m;
   }, [data]);
 
   const daysArr = useMemo(() => {
-    const list: { date: string; count: number }[] = [];
+    const list: { date: string; count: number; timeMs: number }[] = [];
     const end = new Date();
     end.setHours(0, 0, 0, 0);
     for (let i = days - 1; i >= 0; i--) {
       const d = new Date(end);
       d.setDate(end.getDate() - i);
       const dateStr = d.toISOString().slice(0, 10);
-      list.push({ date: dateStr, count: map.get(dateStr) ?? 0 });
+      const entry = map.get(dateStr);
+      list.push({
+        date: dateStr,
+        count: entry?.count ?? 0,
+        timeMs: entry?.timeMs ?? 0,
+      });
     }
     return list;
   }, [days, map]);
 
   const max = useMemo(() => {
     let m = 0;
-    for (const item of daysArr) m = Math.max(m, item.count);
+    for (const item of daysArr) m = Math.max(m, item.timeMs);
     return m || 1;
   }, [daysArr]);
 
   const weeks = useMemo(() => {
-    const result: { date: string; count: number }[][] = [];
+    const result: { date: string; count: number; timeMs: number }[][] = [];
     for (let i = 0; i < daysArr.length; i += 7) {
       result.push(daysArr.slice(i, i + 7));
     }
     return result;
   }, [daysArr]);
 
-  const pickColor = (count: number) => {
-    if (count <= 0) return scale[0];
-    const idx = Math.min(4, Math.ceil((count / max) * 4));
+  const pickColor = (timeMs: number) => {
+    if (timeMs <= 0) return scale[0];
+    const idx = Math.min(4, Math.ceil((timeMs / max) * 4));
     return scale[idx];
   };
 
@@ -199,7 +209,7 @@ export default function ActivityHeatmap({ data, days = 90, onSelect }: Props) {
                 styles.selectionLabel,
                 {
                   color:
-                    selectedDay.count === 0 ? colors.my_red : colors.my_green,
+                    selectedDay.timeMs === 0 ? colors.my_red : colors.my_green,
                 },
               ]}
             >
@@ -231,7 +241,7 @@ export default function ActivityHeatmap({ data, days = 90, onSelect }: Props) {
                     height: cellSize,
                     borderRadius: cellRadius,
                     marginBottom: cellGap,
-                    backgroundColor: pickColor(day.count),
+                    backgroundColor: pickColor(day.timeMs),
                     borderWidth: 1,
                     borderColor: colors.paragraph,
                   },

@@ -13,6 +13,7 @@ export type ManualCard = {
   hintBack?: string | null;
   imageFront?: string | null;
   imageBack?: string | null;
+  explanation?: string | null;
 };
 
 export interface UseManualCardsFormOptions {

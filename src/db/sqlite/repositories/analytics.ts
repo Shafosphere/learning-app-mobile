@@ -1,7 +1,16 @@
 import { getDB } from "../core";
 
 export type DailyCount = { date: string; count: number };
-export type HardFlashcard = { id: number; frontText: string; wrongCount: number };
+export type DailyTime = { date: string; ms: number };
+export type HardFlashcard = {
+  id: number;
+  frontText: string;
+  backText: string;
+  imageFront: string | null;
+  imageBack: string | null;
+  type: string;
+  wrongCount: number;
+};
 
 export async function logCustomLearningEvent(params: {
   flashcardId: number;
@@ -39,6 +48,24 @@ export async function getDailyLearnedCountsCustom(
     toMs
   );
   return rows.map((r) => ({ date: r.d, count: r.cnt | 0 }));
+}
+
+export async function getDailyLearningTimeMsCustom(
+  fromMs: number,
+  toMs: number
+): Promise<DailyTime[]> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ d: string; ms: number }>(
+    `SELECT strftime('%Y-%m-%d', created_at/1000, 'unixepoch') AS d,
+            SUM(COALESCE(duration_ms, 0)) AS ms
+     FROM custom_learning_events
+     WHERE created_at BETWEEN ? AND ?
+     GROUP BY d
+     ORDER BY d ASC;`,
+    fromMs,
+    toMs
+  );
+  return rows.map((r) => ({ date: r.d, ms: r.ms | 0 }));
 }
 
 export async function getHourlyActivityCounts(
@@ -85,16 +112,24 @@ export async function getHardFlashcards(
   const rows = await db.getAllAsync<{
     id: number;
     frontText: string;
+    backText: string;
+    imageFront: string | null;
+    imageBack: string | null;
+    type: string;
     wrongCount: number;
   }>(
     `SELECT
        cf.id AS id,
        cf.front_text AS frontText,
+       cf.back_text AS backText,
+       cf.image_front AS imageFront,
+       cf.image_back AS imageBack,
+       cf.type AS type,
        COALESCE(SUM(CASE WHEN e.result = 'wrong' THEN 1 ELSE 0 END), 0) AS wrongCount
      FROM custom_flashcards cf
      LEFT JOIN custom_learning_events e ON e.flashcard_id = cf.id
      WHERE cf.course_id = ?
-     GROUP BY cf.id, cf.front_text
+     GROUP BY cf.id, cf.front_text, cf.back_text, cf.image_front, cf.image_back, cf.type
      HAVING wrongCount > 0
      ORDER BY wrongCount DESC, cf.id ASC
      LIMIT ?;`,
@@ -104,6 +139,10 @@ export async function getHardFlashcards(
   return rows.map((r) => ({
     id: r.id,
     frontText: r.frontText,
+    backText: r.backText,
+    imageFront: r.imageFront ?? null,
+    imageBack: r.imageBack ?? null,
+    type: r.type,
     wrongCount: r.wrongCount | 0,
   }));
 }

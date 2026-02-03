@@ -211,7 +211,7 @@ export function useFlashcardsInteraction({
         };
 
         if (target) {
-          nextState[target] = [element, ...prev[target]];
+          nextState[target] = [...prev[target], element];
         } else {
           setLearned((list) => [element, ...list]);
           onWordPromotedOut?.(element);
@@ -373,12 +373,16 @@ export function useFlashcardsInteraction({
       } else {
         setResult(false);
         if (skipDemotionCorrection) {
+          const hasExplanation =
+            typeof wordForCheck.explanation === "string" &&
+            wordForCheck.explanation.trim().length > 0;
+          const delay = hasExplanation ? 4000 : 1500;
           setTimeout(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
             setResult(null);
             setQueueNext(true);
-          }, 1500);
+          }, delay);
           return;
         }
         const answerOnly = isAnswerOnlyCard(wordForCheck);

@@ -198,7 +198,22 @@ export default function Card({
   );
 
   // Decide if we should use large layout: either global setting OR image is present
-  const useLargeLayout = flashcardsCardSize === "large" || hasImagePrompt;
+  // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,
+  // żeby tekst nie był ucinany nawet bez obrazka.
+  const useLargeLayout =
+    flashcardsCardSize === "large" ||
+    hasImagePrompt ||
+    selectedItem?.type === "true_false";
+  if (__DEV__ && selectedItem) {
+    console.log("[Card] layout", {
+      id: selectedItem.id,
+      type: selectedItem.type,
+      flashcardsCardSize,
+      hasImagePrompt,
+      useLargeLayout,
+      textLen: (promptText ?? "").length,
+    });
+  }
   const promptImageSizeMode =
     flashcardsCardSize === "large" && hasImagePrompt
       ? flashcardsImageSize
@@ -240,6 +255,18 @@ export default function Card({
     lastTranslationItemId.current = currentId;
     setTranslations((prev) => (prev === 0 ? prev : 0));
   }, [isFocused, selectedItem?.id]);
+
+  useEffect(() => {
+    if (!__DEV__ || !selectedItem) {
+      return;
+    }
+    console.log("[Card] selectedItem", {
+      id: selectedItem.id,
+      type: selectedItem.type,
+      text: selectedItem.text,
+      translationsCount: selectedItem.translations?.length ?? 0,
+    });
+  }, [selectedItem?.id]);
 
   useEffect(() => {
     if (!isIntroMode || !setCorrectionRewers) return;
@@ -777,9 +804,7 @@ export default function Card({
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
   const showCardActions = !(hideActions || selectedItem?.type === "true_false");
   const shouldRenderTopTrueFalse =
-    actionButtonsPosition === "top" &&
-    selectedItem?.type === "true_false" &&
-    showTrueFalseActions;
+    actionButtonsPosition === "top" && showTrueFalseActions;
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;

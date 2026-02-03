@@ -17,6 +17,7 @@ export interface CustomFlashcardRow {
   hintBack: string | null;
   imageFront: string | null;
   imageBack: string | null;
+  explanation: string | null;
   answers: string[];
   position: number | null;
   flipped: number;
@@ -41,6 +42,7 @@ export interface CustomFlashcardInput {
   hintBack?: string | null;
   imageFront?: string | null;
   imageBack?: string | null;
+  explanation?: string | null;
   position?: number | null;
   flipped?: boolean;
   answerOnly?: boolean;
@@ -60,6 +62,7 @@ export async function getCustomFlashcards(
     hintBack: string | null;
     imageFront: string | null;
     imageBack: string | null;
+    explanation: string | null;
     position: number | null;
     flipped: number;
     answerOnly: number;
@@ -77,6 +80,7 @@ export async function getCustomFlashcards(
        cf.hint_back      AS hintBack,
        cf.image_front    AS imageFront,
        cf.image_back     AS imageBack,
+       cf.explanation    AS explanation,
        cf.position       AS position,
        cf.flipped        AS flipped,
        cf.answer_only    AS answerOnly,
@@ -109,6 +113,7 @@ export async function getCustomFlashcards(
         hintBack: row.hintBack,
         imageFront: row.imageFront,
         imageBack: row.imageBack,
+        explanation: row.explanation,
         answers: [],
         position: row.position,
         flipped: row.flipped,
@@ -200,8 +205,8 @@ export async function replaceCustomFlashcardsWithDb(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, position, flipped, answer_only, type, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
@@ -209,6 +214,7 @@ export async function replaceCustomFlashcardsWithDb(
         card.hintBack ?? null,
         imageFront,
         imageBack,
+        card.explanation ?? null,
         position,
         flippedValue, // domyślnie 1 (można odwracać)
         answerOnlyValue,

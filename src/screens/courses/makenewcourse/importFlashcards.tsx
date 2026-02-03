@@ -17,7 +17,7 @@ import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
-import { CardTypeSelector, CardTypeOption } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
+import { CardTypeOption, CardTypeSelector } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
 import { CsvImportGuide, CsvImportType } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
 import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -332,6 +332,12 @@ export default function CustomCourseContentScreen() {
         hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),
         imageFront,
         imageBack,
+        explanation: readStringField(row, [
+          "explanation",
+          "wyjasnienie",
+          "wyjaśnienie",
+          "opis",
+        ]),
         type,
       };
 
@@ -570,6 +576,7 @@ export default function CustomCourseContentScreen() {
         answerOnly?: boolean;
         imageFront?: string | null;
         imageBack?: string | null;
+        explanation?: string | null;
         type?: "text" | "image" | "true_false";
       }[]
     >((acc, card) => {
@@ -592,6 +599,7 @@ export default function CustomCourseContentScreen() {
         answerOnly: card.answerOnly ?? false,
         imageFront: card.imageFront ?? null,
         imageBack: card.imageBack ?? null,
+        explanation: card.explanation ?? null,
         type: cardTypeToSave,
       });
       return acc;

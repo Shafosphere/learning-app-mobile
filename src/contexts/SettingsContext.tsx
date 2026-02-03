@@ -1086,6 +1086,26 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const activeCourse =
     activeCourseIdx != null ? courses[activeCourseIdx] : null;
 
+  useEffect(() => {
+    if (!__DEV__) {
+      return;
+    }
+    if (activeCustomCourseId != null) {
+      console.log("[ActiveCourse] custom", { id: activeCustomCourseId });
+      return;
+    }
+    if (activeCourse) {
+      console.log("[ActiveCourse] builtin", {
+        name: activeCourse.name,
+        sourceLang: activeCourse.sourceLang,
+        targetLang: activeCourse.targetLang,
+        level: activeCourse.level ?? null,
+      });
+      return;
+    }
+    console.log("[ActiveCourse] none");
+  }, [activeCourse, activeCustomCourseId]);
+
   const boxZeroEnabled = useMemo(() => {
     if (activeCustomCourseId != null) {
       return getCustomCourseBoxZeroEnabled(activeCustomCourseId);
