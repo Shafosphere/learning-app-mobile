@@ -39,7 +39,6 @@ type CsvRow = {
 
 const TRUE_VALUES = new Set([
     "true",
-    "1",
     "yes",
     "y",
     "tak",

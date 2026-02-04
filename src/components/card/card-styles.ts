@@ -295,6 +295,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: undefined,
     flexShrink: 1,
   },
+  explanationContainer: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
+  },
   cardIconWrapper: {
     width: 32,
     alignItems: "flex-end",

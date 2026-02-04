@@ -21,4 +21,9 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         label: "Nauka",
         icon: "atom",
     },
+    math: {
+        id: "math",
+        label: "Matematyka",
+        icon: "calculator",
+    },
 };

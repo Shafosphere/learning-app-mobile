@@ -38,6 +38,8 @@ export interface FlashcardsGameViewProps {
   showTrueFalseActions: boolean;
   trueFalseActionsDisabled: boolean;
   onTrueFalseAnswer: (val: boolean) => void;
+  trueFalseActionsMode?: "answer" | "ok";
+  onTrueFalseOk?: () => void;
 
   // Peek Ref
   peekBox: keyof BoxesState | null;
@@ -66,6 +68,8 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
   showTrueFalseActions,
   trueFalseActionsDisabled,
   onTrueFalseAnswer,
+  trueFalseActionsMode = "answer",
+  onTrueFalseOk,
   peekBox,
   peekCards,
   activeCustomCourseId,
@@ -82,6 +86,8 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
         visible={showTrueFalseActions}
         disabled={trueFalseActionsDisabled}
         onAnswer={onTrueFalseAnswer}
+        onOk={onTrueFalseOk}
+        mode={trueFalseActionsMode}
         dense
       />
     ) : null;

@@ -50,6 +50,8 @@ export default function Card({
   showTrueFalseActions = false,
   trueFalseActionsDisabled = false,
   onTrueFalseAnswer,
+  trueFalseActionsMode = "answer",
+  onTrueFalseOk,
   hideActions = false,
   isFocused = true,
   backgroundColorOverride,
@@ -204,16 +206,6 @@ export default function Card({
     flashcardsCardSize === "large" ||
     hasImagePrompt ||
     selectedItem?.type === "true_false";
-  if (__DEV__ && selectedItem) {
-    console.log("[Card] layout", {
-      id: selectedItem.id,
-      type: selectedItem.type,
-      flashcardsCardSize,
-      hasImagePrompt,
-      useLargeLayout,
-      textLen: (promptText ?? "").length,
-    });
-  }
   const promptImageSizeMode =
     flashcardsCardSize === "large" && hasImagePrompt
       ? flashcardsImageSize
@@ -255,18 +247,6 @@ export default function Card({
     lastTranslationItemId.current = currentId;
     setTranslations((prev) => (prev === 0 ? prev : 0));
   }, [isFocused, selectedItem?.id]);
-
-  useEffect(() => {
-    if (!__DEV__ || !selectedItem) {
-      return;
-    }
-    console.log("[Card] selectedItem", {
-      id: selectedItem.id,
-      type: selectedItem.type,
-      text: selectedItem.text,
-      translationsCount: selectedItem.translations?.length ?? 0,
-    });
-  }, [selectedItem?.id]);
 
   useEffect(() => {
     if (!isIntroMode || !setCorrectionRewers) return;
@@ -902,6 +882,8 @@ export default function Card({
       {shouldRenderTopTrueFalse ? (
         <TrueFalseActions
           onAnswer={trueFalseAnswerHandler}
+          onOk={onTrueFalseOk}
+          mode={trueFalseActionsMode}
           disabled={trueFalseActionsDisabled}
           dense
         />

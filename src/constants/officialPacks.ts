@@ -8,6 +8,7 @@ import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import javascript2Csv from "@/assets/data/Javascript2.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 import debuggingCsv from "@/assets/data/debbuing.csv";
+import mathCsv from "@/assets/data/math.csv";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
@@ -130,6 +131,19 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     isMini: true,
     categoryId: "science",
     csvAsset: astronomiaCsv,
+  },
+  {
+    slug: "math",
+    name: "Matematyka",
+    iconId: "calculator",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "math",
+    csvAsset: mathCsv,
   },
   {
     slug: "javascript2",

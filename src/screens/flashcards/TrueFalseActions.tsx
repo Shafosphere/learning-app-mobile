@@ -5,17 +5,47 @@ import { Animated, StyleSheet, View } from "react-native";
 
 type TrueFalseActionsProps = {
   onAnswer: (value: boolean) => void;
+  onOk?: () => void;
+  mode?: "answer" | "ok";
+  okLabel?: string;
   disabled?: boolean;
   dense?: boolean;
 };
 
 export function TrueFalseActions({
   onAnswer,
+  onOk,
+  mode = "answer",
+  okLabel = "OK",
   disabled = false,
   dense = false,
 }: TrueFalseActionsProps) {
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
+
+  if (mode === "ok") {
+    return (
+      <View style={[styles.container, disabled && styles.disabled]}>
+        <MyButton
+          text="FAŁSZ"
+          color="my_red"
+          onPress={() => {}}
+          width={140}
+          disabled
+          accessibilityLabel="Fałsz (nieaktywne)"
+        />
+        <View style={styles.spacer} />
+        <MyButton
+          text={okLabel}
+          color="my_yellow"
+          onPress={onOk}
+          width={140}
+          disabled={disabled}
+          accessibilityLabel="Potwierdź i przejdź dalej"
+        />
+      </View>
+    );
+  }
 
   return (
     <View style={[styles.container, disabled && styles.disabled]}>
@@ -43,6 +73,9 @@ export function TrueFalseActions({
 type TrueFalseActionsAnimatedProps = {
   visible: boolean;
   onAnswer: (value: boolean) => void;
+  onOk?: () => void;
+  mode?: "answer" | "ok";
+  okLabel?: string;
   disabled?: boolean;
   dense?: boolean;
 };
@@ -50,6 +83,9 @@ type TrueFalseActionsAnimatedProps = {
 export function TrueFalseActionsAnimated({
   visible,
   onAnswer,
+  onOk,
+  mode = "answer",
+  okLabel = "OK",
   disabled = false,
   dense = false,
 }: TrueFalseActionsAnimatedProps) {
@@ -100,7 +136,14 @@ export function TrueFalseActionsAnimated({
       style={{ opacity, transform: [{ translateY }], width: "100%" }}
       pointerEvents={visible && !disabled ? "auto" : "none"}
     >
-      <TrueFalseActions onAnswer={onAnswer} disabled={disabled} dense={dense} />
+      <TrueFalseActions
+        onAnswer={onAnswer}
+        onOk={onOk}
+        mode={mode}
+        okLabel={okLabel}
+        disabled={disabled}
+        dense={dense}
+      />
     </Animated.View>
   );
 }

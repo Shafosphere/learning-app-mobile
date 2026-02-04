@@ -172,10 +172,18 @@ export function useFlashcardsInteraction({
         setSelectedItem(null);
         return;
       }
+      if (__DEV__) {
+        const queued = getQueueForBox(box);
+        const next = queued[0] ?? null;
+        const cardLabel = next
+          ? `card:${next.id} "${next.text ?? ""}"`
+          : "card:none";
+        console.log(`[Flashcards] activate:${box} ${cardLabel}`);
+      }
       setActiveBox(box);
       selectNextWord(box);
     },
-    [boxZeroEnabled, selectNextWord]
+    [boxZeroEnabled, getQueueForBox, selectNextWord]
   );
 
   const moveElement = useCallback(
@@ -372,10 +380,23 @@ export function useFlashcardsInteraction({
         }, delay);
       } else {
         setResult(false);
+        const hasExplanation =
+          typeof wordForCheck.explanation === "string" &&
+          wordForCheck.explanation.trim().length > 0;
+        if (wordForCheck.type === "true_false") {
+          if (hasExplanation) {
+            return;
+          }
+          const delay = 1500;
+          setTimeout(() => {
+            setAnswer("");
+            moveElement(wordForCheck.id, false);
+            setResult(null);
+            setQueueNext(true);
+          }, delay);
+          return;
+        }
         if (skipDemotionCorrection) {
-          const hasExplanation =
-            typeof wordForCheck.explanation === "string" &&
-            wordForCheck.explanation.trim().length > 0;
           const delay = hasExplanation ? 4000 : 1500;
           setTimeout(() => {
             setAnswer("");
@@ -415,6 +436,16 @@ export function useFlashcardsInteraction({
       isAnswerOnlyCard,
     ]
   );
+
+  const acknowledgeExplanation = useCallback(() => {
+    if (!selectedItem) return;
+    if (result !== false) return;
+    if (selectedItem.type !== "true_false") return;
+    setAnswer("");
+    moveElement(selectedItem.id, false);
+    setResult(null);
+    setQueueNext(true);
+  }, [moveElement, result, selectedItem]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {
     setCorrection((c) =>
@@ -631,6 +662,7 @@ export function useFlashcardsInteraction({
     learned,
     setLearned,
     moveElement,
+    acknowledgeExplanation,
     resetInteractionState,
     clearSelection,
     updateSelectedItem,

@@ -31,6 +31,8 @@ export type CardProps = {
   showTrueFalseActions?: boolean;
   trueFalseActionsDisabled?: boolean;
   onTrueFalseAnswer?: (value: boolean) => void;
+  trueFalseActionsMode?: "answer" | "ok";
+  onTrueFalseOk?: () => void;
   hideActions?: boolean;
   isFocused?: boolean;
   backgroundColorOverride?: string;

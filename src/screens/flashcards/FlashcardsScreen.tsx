@@ -51,6 +51,18 @@ function pickRandomBatch<T>(items: T[], size: number): T[] {
   return pool.slice(0, normalizedSize);
 }
 
+function dedupeById<T extends { id: number }>(list: T[]): T[] {
+  if (list.length <= 1) return list;
+  const seen = new Set<number>();
+  const next: T[] = [];
+  for (const item of list) {
+    if (seen.has(item.id)) continue;
+    seen.add(item.id);
+    next.push(item);
+  }
+  return next;
+}
+
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   // const router = useRouter();
@@ -132,6 +144,7 @@ export default function Flashcards() {
     setCorrectionRewers,
     learned,
     setLearned,
+    acknowledgeExplanation,
     resetInteractionState,
     clearSelection,
     updateSelectedItem,
@@ -339,19 +352,22 @@ export default function Flashcards() {
 
     const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
     const nextBatch = pickRandomBatch(remaining, batchSize);
+    let actuallyAdded: WordWithTranslations[] = [];
 
-    setBoxes((prev) =>
-      boxZeroEnabled
-        ? {
-          ...prev,
-          boxZero: [...prev.boxZero, ...nextBatch],
-        }
-        : {
-          ...prev,
-          boxOne: [...prev.boxOne, ...nextBatch],
-        }
-    );
-    addUsedWordIds(nextBatch.map((card) => card.id));
+    setBoxes((prev) => {
+      const targetKey = boxZeroEnabled ? "boxZero" : "boxOne";
+      const existingIds = new Set(prev[targetKey].map((card) => card.id));
+      actuallyAdded = nextBatch.filter((card) => !existingIds.has(card.id));
+      if (actuallyAdded.length === 0) {
+        return prev;
+      }
+      return {
+        ...prev,
+        [targetKey]: [...prev[targetKey], ...actuallyAdded],
+      };
+    });
+    if (actuallyAdded.length === 0) return;
+    addUsedWordIds(actuallyAdded.map((card) => card.id));
     setBatchIndex((prev) => prev + 1);
     await saveNow();
   }, [
@@ -476,8 +492,9 @@ export default function Flashcards() {
       let mutated = false;
       const sanitize = (list: WordWithTranslations[]) => {
         const filtered = list.filter((item) => allowedIds.has(item.id));
-        if (filtered.length !== list.length) mutated = true;
-        return filtered;
+        const deduped = dedupeById(filtered);
+        if (deduped.length !== list.length) mutated = true;
+        return deduped;
       };
 
       const next: BoxesState = {
@@ -493,7 +510,8 @@ export default function Flashcards() {
 
     setLearned((current) => {
       const filtered = current.filter((card) => allowedIds.has(card.id));
-      return filtered.length === current.length ? current : filtered;
+      const deduped = dedupeById(filtered);
+      return deduped.length === current.length ? current : deduped;
     });
   }, [customCards, isReady, isLoadingData, learned, setBoxes, setLearned]);
 
@@ -579,11 +597,23 @@ export default function Flashcards() {
       }),
     [confirm, setAnswer]
   );
+  const explanationText =
+    typeof selectedItem?.explanation === "string"
+      ? selectedItem.explanation.trim()
+      : "";
+  const shouldShowExplanation =
+    selectedItem?.type === "true_false" &&
+    result === false &&
+    explanationText.length > 0;
   const shouldShowTrueFalseActions =
-    (courseHasOnlyTrueFalse || selectedItem?.type === "true_false") &&
+    ((courseHasOnlyTrueFalse || selectedItem?.type === "true_false") ||
+      shouldShowExplanation) &&
     shouldShowBoxes &&
     !correction;
-  const trueFalseActionsDisabled = result !== null || isBetweenCards;
+  const trueFalseActionsMode = shouldShowExplanation ? "ok" : "answer";
+  const trueFalseActionsDisabled = shouldShowExplanation
+    ? isBetweenCards
+    : result !== null || isBetweenCards;
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
     shouldShowBoxes && (courseHasOnlyTrueFalse || selectedItem?.type === "true_false");
@@ -642,6 +672,8 @@ export default function Flashcards() {
         showTrueFalseActions={shouldShowTrueFalseActions}
         trueFalseActionsDisabled={trueFalseActionsDisabled}
         onTrueFalseAnswer={handleTrueFalseAnswer}
+        trueFalseActionsMode={trueFalseActionsMode}
+        onTrueFalseOk={acknowledgeExplanation}
         isFocused={isFocused}
       />
     );
@@ -664,6 +696,8 @@ export default function Flashcards() {
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
+      trueFalseActionsMode={trueFalseActionsMode}
+      onTrueFalseOk={acknowledgeExplanation}
       peekBox={peekBox}
       peekCards={peekCards}
       activeCustomCourseId={activeCustomCourseId}

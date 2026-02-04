@@ -4,6 +4,7 @@ import { Text } from "react-native";
 import { useStyles } from "../card-styles";
 import type { CardProps } from "../card-types";
 import { CardCorrection } from "./CardCorrection";
+import { CardExplanation } from "./CardExplanation";
 import { CardInput } from "./CardInput";
 import { CardTrueFalse } from "./CardTrueFalse";
 
@@ -109,10 +110,23 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     textColorOverride,
   } = props;
 
+  const explanation =
+    typeof selectedItem?.explanation === "string"
+      ? selectedItem.explanation.trim()
+      : "";
+  const hasExplanation = explanation.length > 0;
   const showCorrection = correction && (result === false || isIntroMode);
-  const showTrueFalse = !showCorrection && selectedItem?.type === "true_false";
-  const showInput = !showCorrection && !showTrueFalse && selectedItem;
-  const showEmpty = !showCorrection && !showTrueFalse && !showInput;
+  const showExplanation =
+    !showCorrection &&
+    selectedItem?.type === "true_false" &&
+    result === false &&
+    hasExplanation;
+  const showTrueFalse =
+    !showCorrection && !showExplanation && selectedItem?.type === "true_false";
+  const showInput =
+    !showCorrection && !showTrueFalse && !showExplanation && selectedItem;
+  const showEmpty =
+    !showCorrection && !showTrueFalse && !showExplanation && !showInput;
 
   return (
     <>
@@ -169,6 +183,14 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           showButtons={false}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
+        />
+      )}
+      {showExplanation && (
+        <CardExplanation
+          explanation={explanation}
+          onPromptLayout={layoutHandlers?.onPromptLayout}
+          onInputLayout={layoutHandlers?.onInputLayout}
+          textColorOverride={textColorOverride}
         />
       )}
       {showInput && (
