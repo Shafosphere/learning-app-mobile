@@ -9,6 +9,7 @@ import javascript2Csv from "@/assets/data/Javascript2.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 import debuggingCsv from "@/assets/data/debbuing.csv";
 import mathCsv from "@/assets/data/math.csv";
+import math2Csv from "@/assets/data/math2.csv";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
@@ -133,17 +134,17 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     csvAsset: astronomiaCsv,
   },
   {
-    slug: "math",
-    name: "Matematyka",
+    slug: "math2",
+    name: "Matematyka (Umiem/Nie umiem)",
     iconId: "calculator",
-    iconColor: "#0EA5E9",
+    iconColor: "#38BDF8",
     reviewsEnabled: true,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
     isMini: true,
     categoryId: "math",
-    csvAsset: mathCsv,
+    csvAsset: math2Csv,
   },
   {
     slug: "javascript2",

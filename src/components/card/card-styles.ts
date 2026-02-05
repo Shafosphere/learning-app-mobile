@@ -302,6 +302,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingVertical: 10,
     paddingHorizontal: 16,
   },
+  explanationOuterMathOnly: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+  },
+  explanationContainerMathOnly: {
+    justifyContent: "center",
+    alignItems: "center",
+    alignSelf: "center",
+  },
   cardIconWrapper: {
     width: 32,
     alignItems: "flex-end",

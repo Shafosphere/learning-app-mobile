@@ -20,7 +20,11 @@ import {
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
 import type { CustomFlashcardInput } from "@/src/db/sqlite/repositories/flashcards";
-import type { FlashcardsCardSize, FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import type {
+  FlashcardsCardSize,
+  FlashcardsImageSize,
+  TrueFalseButtonsVariant,
+} from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
@@ -65,6 +69,8 @@ export default function CustomCourseEditor({
     setCustomCourseCardSize,
     getCustomCourseImageSize,
     setCustomCourseImageSize,
+    getCustomCourseTrueFalseButtonsVariant,
+    setCustomCourseTrueFalseButtonsVariant,
   } = useSettings();
 
   const {
@@ -136,6 +142,10 @@ export default function CustomCourseEditor({
   const [courseImageSize, setCourseImageSize] = useState<FlashcardsImageSize>(
     initialImageSize
   );
+  const [courseTrueFalseButtonsVariant, setCourseTrueFalseButtonsVariant] =
+    useState<TrueFalseButtonsVariant>(() =>
+      getCustomCourseTrueFalseButtonsVariant(courseId)
+    );
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -237,6 +247,9 @@ export default function CustomCourseEditor({
       );
       setCourseCardSize(getCustomCourseCardSize(courseRow.id));
       setCourseImageSize(getCustomCourseImageSize(courseRow.id));
+      setCourseTrueFalseButtonsVariant(
+        getCustomCourseTrueFalseButtonsVariant(courseRow.id)
+      );
 
       const incomingCards = cardRows.map((card, index) => {
         const answersSource =
@@ -268,6 +281,9 @@ export default function CustomCourseEditor({
       setCourseAutoflowEnabled(initialAutoflowEnabled);
       setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
       setCourseCardSize(initialCardSize);
+      setCourseTrueFalseButtonsVariant(
+        getCustomCourseTrueFalseButtonsVariant(courseId)
+      );
     } finally {
       setLoading(false);
     }
@@ -277,6 +293,7 @@ export default function CustomCourseEditor({
     getCustomCourseBoxZeroEnabled,
     getCustomCourseCardSize,
     getCustomCourseSkipCorrectionEnabled,
+    getCustomCourseTrueFalseButtonsVariant,
     hydrateDraft,
     initialAutoflowEnabled,
     initialBoxZeroEnabled,
@@ -328,6 +345,13 @@ export default function CustomCourseEditor({
   const handleCourseImageSizeChange = async (value: FlashcardsImageSize) => {
     setCourseImageSize(value);
     await setCustomCourseImageSize(courseId, value);
+  };
+
+  const handleCourseTrueFalseButtonsVariantChange = async (
+    value: TrueFalseButtonsVariant
+  ) => {
+    setCourseTrueFalseButtonsVariant(value);
+    await setCustomCourseTrueFalseButtonsVariant(courseId, value);
   };
 
   useEffect(() => {
@@ -584,6 +608,10 @@ export default function CustomCourseEditor({
             skipCorrectionEnabled={courseSkipCorrectionEnabled}
             onToggleSkipCorrection={handleCourseSkipCorrectionToggle}
             skipCorrectionLocked={courseIsTrueFalseOnly}
+            hideSkipCorrectionOption={courseIsTrueFalseOnly}
+            showTrueFalseButtonsVariant={courseIsTrueFalseOnly}
+            trueFalseButtonsVariant={courseTrueFalseButtonsVariant}
+            onSelectTrueFalseButtonsVariant={handleCourseTrueFalseButtonsVariantChange}
             cardSize={courseCardSize}
             onSelectCardSize={handleCourseCardSizeChange}
             showImageSizeOptions={courseHasImageCards}

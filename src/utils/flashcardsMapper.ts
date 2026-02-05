@@ -58,7 +58,7 @@ const mapBaseCard = (
     imageFront: card.imageFront ?? null,
     imageBack: card.imageBack ?? null,
     explanation: card.explanation ?? null,
-    type: (card.type as "text" | "image" | "true_false") || "text",
+    type: (card.type as "text" | "image" | "true_false" | "know_dont_know") || "text",
   };
 };
 

@@ -8,6 +8,7 @@ import type { CEFRLevel } from "@/src/types/language";
 import type {
   FlashcardsCardSize,
   FlashcardsImageSize,
+  TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -127,6 +128,8 @@ function BuiltinCourseEditor({
     setBuiltinCourseCardSize,
     getBuiltinCourseImageSize,
     setBuiltinCourseImageSize,
+    getBuiltinCourseTrueFalseButtonsVariant,
+    setBuiltinCourseTrueFalseButtonsVariant,
   } = useSettings();
 
   const normalizedSource = sourceLang ? sourceLang.toLowerCase() : null;
@@ -168,6 +171,14 @@ function BuiltinCourseEditor({
       level: normalizedLevel,
     })
   );
+  const [trueFalseButtonsVariant, setTrueFalseButtonsVariant] =
+    useState<TrueFalseButtonsVariant>(() =>
+      getBuiltinCourseTrueFalseButtonsVariant({
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      })
+    );
   const [reviewsEnabled, setReviewsEnabled] = useState(true);
   const [resettingBoxes, setResettingBoxes] = useState(false);
   const [resettingReviews, setResettingReviews] = useState(false);
@@ -237,6 +248,20 @@ function BuiltinCourseEditor({
   const handleImageSizeChange = async (value: FlashcardsImageSize) => {
     setImageSize(value);
     await setBuiltinCourseImageSize(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleTrueFalseButtonsVariantChange = async (
+    value: TrueFalseButtonsVariant
+  ) => {
+    setTrueFalseButtonsVariant(value);
+    await setBuiltinCourseTrueFalseButtonsVariant(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
@@ -401,6 +426,10 @@ function BuiltinCourseEditor({
             onToggleReviews={setReviewsEnabled}
             skipCorrectionEnabled={skipCorrectionEnabled}
             onToggleSkipCorrection={handleSkipCorrectionToggle}
+            hideSkipCorrectionOption={false}
+            showTrueFalseButtonsVariant={false}
+            trueFalseButtonsVariant={trueFalseButtonsVariant}
+            onSelectTrueFalseButtonsVariant={handleTrueFalseButtonsVariantChange}
             cardSize={cardSize}
             onSelectCardSize={handleCardSizeChange}
             showImageSizeOptions={courseHasImages}

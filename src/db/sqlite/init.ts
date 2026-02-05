@@ -37,6 +37,41 @@ type CsvRow = {
     czyPrawda?: string | number | boolean;
 };
 
+const KNOWN_CSV_HEADERS = new Set([
+    "front",
+    "back",
+    "przod",
+    "tyl",
+    "front_text",
+    "back_text",
+    "fronttext",
+    "backtext",
+    "question_text",
+    "questiontext",
+    "hint1",
+    "hint2",
+    "hint_front",
+    "hint_back",
+    "block",
+    "blokada",
+    "lock",
+    "answer_only",
+    "question",
+    "pytanie",
+    "is_true",
+    "istrue",
+    "czy_prawda",
+    "czyprawda",
+    "explanation",
+    "wyjasnienie",
+    "wyjaśnienie",
+    "explain",
+    "image_front",
+    "imagefront",
+    "image_back",
+    "imageback",
+]);
+
 const TRUE_VALUES = new Set([
     "true",
     "yes",
@@ -100,93 +135,132 @@ async function readCsvAsset(
     const csv = await FileSystem.readAsStringAsync(uri);
     console.log("[DB] readCsvAsset: file read, length=", csv?.length ?? 0);
     console.log("[DB] readCsvAsset: start parse");
-    const { data } = Papa.parse<CsvRow>(csv, {
+    const parsedWithHeader = Papa.parse<CsvRow>(csv, {
         header: true,
         skipEmptyLines: true,
     });
-    console.log("[DB] readCsvAsset: parsed rows=", data?.length ?? 0);
-    const cards = await Promise.all(
-        data.map(async (row, idx) => {
-            const front = (
-                row.front ??
-                row.przod ??
-                row.front_text ??
-                (row as any).frontText ??
-                (row as any).question_text ??
-                (row as any).questionText ??
-                ""
-            ).trim();
-            const backRaw = (
-                row.back ??
-                row.tyl ??
-                row.back_text ??
-                (row as any).backText ??
-                ""
-            ).trim();
-            const trueFalseRaw =
-                (row as any).is_true ??
-                (row as any).isTrue ??
-                (row as any).czy_prawda ??
-                (row as any).czyPrawda;
-            const hasTrueFalseFlag =
-                trueFalseRaw != null &&
-                trueFalseRaw.toString().trim().length > 0;
-            const answers = hasTrueFalseFlag
-                ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-                : splitBackTextIntoAnswers(backRaw);
-            const isBoolean = hasTrueFalseFlag
-                ? true
-                : answers.length > 0 && answers.every((a) => isBooleanText(a));
-            const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
-            const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
-            const hintFront = extractHint(row.hint1, row.hint_front);
-            const hintBack = extractHint(row.hint2, row.hint_back);
-            const explanationRaw =
-                (row as any).explanation ??
-                (row as any).wyjasnienie ??
-                (row as any).wyjaśnienie ??
-                (row as any).explain ??
-                null;
-            const explanation =
-                typeof explanationRaw === "string"
-                    ? explanationRaw.trim() || null
-                    : null;
-            const blockRaw =
-                (row as any).blokada ??
-                (row as any).block ??
-                row.answer_only ??
-                row.question ??
-                row.pytanie ??
-                row.lock;
-            const answerOnly = parseBooleanValue(blockRaw);
-            const locked = answerOnly;
+    const headerFields = (parsedWithHeader.meta?.fields ?? []).map((field) =>
+        field.trim().toLowerCase()
+    );
+    const hasKnownHeader = headerFields.some((field) =>
+        KNOWN_CSV_HEADERS.has(field)
+    );
+    const headerlessRows = hasKnownHeader
+        ? null
+        : Papa.parse<string[]>(csv, {
+            header: false,
+            skipEmptyLines: true,
+        }).data;
+    const data = headerlessRows ? [] : parsedWithHeader.data;
+    console.log(
+        "[DB] readCsvAsset: parsed rows=",
+        data?.length ?? 0,
+        "headerless=",
+        Boolean(headerlessRows)
+    );
+    const cards = headerlessRows
+        ? headerlessRows.map((row, idx) => {
+            const front = (row?.[0] ?? "").toString().trim();
+            const explanationRaw = (row?.[1] ?? "").toString().trim();
+            const explanation = explanationRaw.length > 0 ? explanationRaw : null;
             const card: CustomFlashcardInput = {
                 frontText: front,
-                backText: backRaw,
-                answers,
+                backText: "",
+                answers: [],
                 position: idx,
-                flipped: !locked,
-                answerOnly,
-                hintFront,
-                hintBack,
-                type: isBoolean ? "true_false" : "text",
-                imageFront: imageFrontName
-                    ? await resolveImageFromMap(
-                        imageFrontName.toString().trim(),
-                        imageMap
-                    )
-                    : null,
-                imageBack: imageBackName
-                    ? await resolveImageFromMap(
-                        imageBackName.toString().trim(),
-                        imageMap
-                    )
-                    : null,
+                flipped: false,
+                answerOnly: true,
+                hintFront: null,
+                hintBack: null,
+                type: "know_dont_know",
+                imageFront: null,
+                imageBack: null,
                 explanation,
             };
             return card;
         })
-    );
+        : await Promise.all(
+            data.map(async (row, idx) => {
+                const front = (
+                    row.front ??
+                    row.przod ??
+                    row.front_text ??
+                    (row as any).frontText ??
+                    (row as any).question_text ??
+                    (row as any).questionText ??
+                    ""
+                ).trim();
+                const backRaw = (
+                    row.back ??
+                    row.tyl ??
+                    row.back_text ??
+                    (row as any).backText ??
+                    ""
+                ).trim();
+                const trueFalseRaw =
+                    (row as any).is_true ??
+                    (row as any).isTrue ??
+                    (row as any).czy_prawda ??
+                    (row as any).czyPrawda;
+                const hasTrueFalseFlag =
+                    trueFalseRaw != null &&
+                    trueFalseRaw.toString().trim().length > 0;
+                const answers = hasTrueFalseFlag
+                    ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+                    : splitBackTextIntoAnswers(backRaw);
+                const isBoolean = hasTrueFalseFlag
+                    ? true
+                    : answers.length > 0 && answers.every((a) => isBooleanText(a));
+                const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
+                const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
+                const hintFront = extractHint(row.hint1, row.hint_front);
+                const hintBack = extractHint(row.hint2, row.hint_back);
+                const explanationRaw =
+                    (row as any).explanation ??
+                    (row as any).wyjasnienie ??
+                    (row as any).wyjaśnienie ??
+                    (row as any).explain ??
+                    null;
+                const explanation =
+                    typeof explanationRaw === "string"
+                        ? explanationRaw.trim() || null
+                        : null;
+                const blockRaw =
+                    (row as any).blokada ??
+                    (row as any).block ??
+                    row.answer_only ??
+                    row.question ??
+                    row.pytanie ??
+                    row.lock;
+                const answerOnly = parseBooleanValue(blockRaw);
+                const locked = answerOnly;
+                const card: CustomFlashcardInput = {
+                    frontText: front,
+                    backText: backRaw,
+                    answers,
+                    position: idx,
+                    flipped: !locked,
+                    answerOnly,
+                    hintFront,
+                    hintBack,
+                    type: isBoolean ? "true_false" : "text",
+                    imageFront: imageFrontName
+                        ? await resolveImageFromMap(
+                            imageFrontName.toString().trim(),
+                            imageMap
+                        )
+                        : null,
+                    imageBack: imageBackName
+                        ? await resolveImageFromMap(
+                            imageBackName.toString().trim(),
+                            imageMap
+                        )
+                        : null,
+                    explanation,
+                };
+                return card;
+            })
+        );
     return cards.filter(
         (c) =>
             c.frontText.length > 0 ||

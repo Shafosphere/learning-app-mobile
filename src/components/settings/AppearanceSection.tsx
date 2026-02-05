@@ -407,7 +407,7 @@ const AppearanceSection: React.FC = () => {
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>Wybierz układ</Text>
           <Text style={styles.rowSubtitle}>
-            Wybierz rozmieszczenie przycisków w trybie prawda/fałsz.
+            Wybierz rozmieszczenie przycisków w trybach:    prawda/fałsz oraz umiem/nie umiem.
           </Text>
         </View>
       </View>

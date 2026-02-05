@@ -65,7 +65,7 @@ export function useFlashcardsInteraction({
 
   const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
     if (!card) return false;
-    if (card.type === "true_false") return true;
+    if (card.type === "true_false" || card.type === "know_dont_know") return true;
     if (card.answerOnly) return true;
     const hasTextPrompt = Boolean(card.text?.trim());
     const hasImagePrompt = Boolean(card.imageFront || card.imageBack);
@@ -272,11 +272,11 @@ export function useFlashcardsInteraction({
       }
       if (!selectedItem) return;
       const answerToUse = (answerOverride ?? answer).replace(/ +$/, "");
+      const isKnowDontKnow = selectedItem.type === "know_dont_know";
 
-      const reorderedTranslations = moveTranslationToFront(
-        selectedItem.translations,
-        selectedTranslation
-      );
+      const reorderedTranslations = isKnowDontKnow
+        ? selectedItem.translations
+        : moveTranslationToFront(selectedItem.translations, selectedTranslation);
       const wordForCheck =
         reorderedTranslations === selectedItem.translations
           ? selectedItem
@@ -297,9 +297,11 @@ export function useFlashcardsInteraction({
         });
       }
 
-      const ok = reversed
-        ? checkSpelling(answerToUse, wordForCheck.text)
-        : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
+      const ok = isKnowDontKnow
+        ? answerToUse.trim().toLowerCase() === "true"
+        : reversed
+          ? checkSpelling(answerToUse, wordForCheck.text)
+          : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
       const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
       // Log learning event for analytics (flashcards)
       if (activeCustomCourseId != null) {
@@ -370,8 +372,14 @@ export function useFlashcardsInteraction({
           );
         }
 
-        const delay = isPerfect ? 1500 : 3000;
+        const delay = isKnowDontKnow ? 1500 : isPerfect ? 1500 : 3000;
 
+        const hasExplanation =
+          typeof wordForCheck.explanation === "string" &&
+          wordForCheck.explanation.trim().length > 0;
+        if (isKnowDontKnow && hasExplanation) {
+          return;
+        }
         setTimeout(() => {
           setAnswer("");
           moveElement(wordForCheck.id, true);
@@ -383,6 +391,19 @@ export function useFlashcardsInteraction({
         const hasExplanation =
           typeof wordForCheck.explanation === "string" &&
           wordForCheck.explanation.trim().length > 0;
+        if (isKnowDontKnow) {
+          if (hasExplanation) {
+            return;
+          }
+          const delay = 1500;
+          setTimeout(() => {
+            setAnswer("");
+            moveElement(wordForCheck.id, false);
+            setResult(null);
+            setQueueNext(true);
+          }, delay);
+          return;
+        }
         if (wordForCheck.type === "true_false") {
           if (hasExplanation) {
             return;
@@ -439,12 +460,21 @@ export function useFlashcardsInteraction({
 
   const acknowledgeExplanation = useCallback(() => {
     if (!selectedItem) return;
-    if (result !== false) return;
-    if (selectedItem.type !== "true_false") return;
-    setAnswer("");
-    moveElement(selectedItem.id, false);
-    setResult(null);
-    setQueueNext(true);
+    if (selectedItem.type === "true_false") {
+      if (result !== false) return;
+      setAnswer("");
+      moveElement(selectedItem.id, false);
+      setResult(null);
+      setQueueNext(true);
+      return;
+    }
+    if (selectedItem.type === "know_dont_know") {
+      if (result == null) return;
+      setAnswer("");
+      moveElement(selectedItem.id, result);
+      setResult(null);
+      setQueueNext(true);
+    }
   }, [moveElement, result, selectedItem]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {

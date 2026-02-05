@@ -194,7 +194,7 @@ export async function getDueCustomReviewFlashcards(
         position: row.position,
         flipped: row.flipped === 1,
         answerOnly: row.answerOnly === 1,
-        type: (row.type as "text" | "image" | "true_false") || "text",
+        type: (row.type as "text" | "image" | "true_false" | "know_dont_know") || "text",
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
         stage: stageInfo.stage,

@@ -3,6 +3,7 @@ import { useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
@@ -74,7 +75,9 @@ export function CardInput({
   textColorOverride,
 }: CardInputProps) {
   const styles = useStyles();
-  const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
+  const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
+  const shouldMarqueePrompt =
+    !hasMath && !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
     () => [
       styles.cardFont,
@@ -216,6 +219,57 @@ export function CardInput({
     />
   ) : null;
 
+  const promptTextBlock = hasMath ? (
+    <CardMathText
+      text={promptText}
+      textStyle={[
+        styles.cardFont,
+        styles.promptText,
+        allowMultilinePrompt && styles.promptTextMultiline,
+        textColorOverride ? { color: textColorOverride } : null,
+      ]}
+      onLayout={({ nativeEvent }: any) => {
+        if (allowMultilinePrompt && onPromptLayout) {
+          onPromptLayout(nativeEvent.layout.height);
+        }
+      }}
+    />
+  ) : shouldMarqueePrompt ? (
+    <View style={styles.promptScroll}>
+      <TextTicker
+        key={promptText}
+        style={promptTextStyle}
+        animationType="auto"
+        duration={marqueeDuration + REPEAT_SPACER_PX}
+        repeatSpacer={REPEAT_SPACER_PX}
+        marqueeDelay={MARQUEE_DELAY_MS}
+        loop
+        useNativeDriver={false}
+        numberOfLines={1}
+      >
+        {promptText}
+      </TextTicker>
+    </View>
+  ) : (
+    <Text
+      style={[
+        styles.cardFont,
+        styles.promptText,
+        allowMultilinePrompt && styles.promptTextMultiline,
+        textColorOverride ? { color: textColorOverride } : null,
+      ]}
+      numberOfLines={allowMultilinePrompt ? undefined : 1}
+      ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
+      onLayout={({ nativeEvent }) => {
+        if (allowMultilinePrompt && onPromptLayout) {
+          onPromptLayout(nativeEvent.layout.height);
+        }
+      }}
+    >
+      {promptText}
+    </Text>
+  );
+
   const content = (
     <>
       <View
@@ -230,41 +284,7 @@ export function CardInput({
           imageBlock
         ) : (
           <View style={styles.promptRow}>
-            {shouldMarqueePrompt ? (
-              <View style={styles.promptScroll}>
-                <TextTicker
-                  key={promptText}
-                  style={promptTextStyle}
-                  animationType="auto"
-                  duration={marqueeDuration + REPEAT_SPACER_PX}
-                  repeatSpacer={REPEAT_SPACER_PX}
-                  marqueeDelay={MARQUEE_DELAY_MS}
-                  loop
-                  useNativeDriver={false}
-                  numberOfLines={1}
-                >
-                  {promptText}
-                </TextTicker>
-              </View>
-            ) : (
-              <Text
-                style={[
-                  styles.cardFont,
-                  styles.promptText,
-                  allowMultilinePrompt && styles.promptTextMultiline,
-                  textColorOverride ? { color: textColorOverride } : null,
-                ]}
-                numberOfLines={allowMultilinePrompt ? undefined : 1}
-                ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
-                onLayout={({ nativeEvent }) => {
-                  if (allowMultilinePrompt && onPromptLayout) {
-                    onPromptLayout(nativeEvent.layout.height);
-                  }
-                }}
-              >
-                {promptText}
-              </Text>
-            )}
+            {promptTextBlock}
             {canToggleTranslations ? (
               <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
                 <Octicons

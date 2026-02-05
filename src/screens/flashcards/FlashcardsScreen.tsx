@@ -38,6 +38,7 @@ const BOX_SPAM_THRESHOLD = 40;
 const BOX_SPAM_COOLDOWN_MS = 0;
 const HINT_FAIL_THRESHOLD = 3;
 const HINT_COOLDOWN_MS = 10 * 60 * 1000;
+const TRUE_FALSE_POST_OK_COOLDOWN_MS = 1000;
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -73,6 +74,7 @@ export default function Flashcards() {
     boxZeroEnabled,
     autoflowEnabled,
     skipCorrectionEnabled,
+    trueFalseButtonsVariant,
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
@@ -120,11 +122,22 @@ export default function Flashcards() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [isPostOkCooldownActive, setIsPostOkCooldownActive] = useState(false);
+  const postOkCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
     () =>
       customCards.length > 0 &&
-      customCards.every((card) => card.type === "true_false"),
+      customCards.every(
+        (card) =>
+          card.type === "true_false" || card.type === "know_dont_know"
+      ),
+    [customCards]
+  );
+  const courseHasOnlyKnowDontKnow = useMemo(
+    () =>
+      customCards.length > 0 &&
+      customCards.every((card) => card.type === "know_dont_know"),
     [customCards]
   );
   const skipCorrection = courseHasOnlyTrueFalse || skipCorrectionEnabled;
@@ -177,11 +190,25 @@ export default function Flashcards() {
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
   });
-  const correctionLocked = correction?.mode === "demote";
+  const correctionLocked = correction != null;
+
+  const resultPending = result !== null;
+  const explanationText =
+    typeof selectedItem?.explanation === "string"
+      ? selectedItem.explanation.trim()
+      : "";
+  const isKnowDontKnow = selectedItem?.type === "know_dont_know";
+  const waitingForOk =
+    !correction &&
+    !isBetweenCards &&
+    explanationText.length > 0 &&
+    ((selectedItem?.type === "true_false" && result === false) ||
+      (isKnowDontKnow && result !== null));
+  const boxSelectionLocked = correctionLocked || waitingForOk;
 
   const handleSelectBox = useCallback(
     (boxName: keyof BoxesState) => {
-      if (correctionLocked) {
+      if (boxSelectionLocked) {
         return;
       }
       const now = Date.now();
@@ -208,7 +235,7 @@ export default function Flashcards() {
 
       baseHandleSelectBox(boxName);
     },
-    [baseHandleSelectBox, correctionLocked, triggerQuote]
+    [baseHandleSelectBox, boxSelectionLocked, triggerQuote]
   );
 
   useEffect(() => {
@@ -391,10 +418,9 @@ export default function Flashcards() {
     }
   }, [activeBox, unlockGate]);
 
-  const resultPending = result !== null;
   // Allow autoflow to switch boxes even when a card is shown,
   // otherwise it never jumps to a clogged box until the current box is emptied.
-  const canAutoflowSwitch = !correctionLocked && !resultPending;
+  const canAutoflowSwitch = !boxSelectionLocked && !resultPending;
 
   useEffect(() => {
     if (selectedItem && result === null) {
@@ -597,30 +623,56 @@ export default function Flashcards() {
       }),
     [confirm, setAnswer]
   );
-  const explanationText =
-    typeof selectedItem?.explanation === "string"
-      ? selectedItem.explanation.trim()
-      : "";
+  const handleTrueFalseOk = useCallback(() => {
+    if (isPostOkCooldownActive) return;
+    acknowledgeExplanation();
+    setIsPostOkCooldownActive(true);
+    if (postOkCooldownTimerRef.current) {
+      clearTimeout(postOkCooldownTimerRef.current);
+    }
+    postOkCooldownTimerRef.current = setTimeout(() => {
+      setIsPostOkCooldownActive(false);
+      postOkCooldownTimerRef.current = null;
+    }, TRUE_FALSE_POST_OK_COOLDOWN_MS);
+  }, [acknowledgeExplanation, isPostOkCooldownActive]);
   const shouldShowExplanation =
-    selectedItem?.type === "true_false" &&
-    result === false &&
-    explanationText.length > 0;
+    explanationText.length > 0 &&
+    ((selectedItem?.type === "true_false" && result === false) ||
+      (isKnowDontKnow && result !== null));
   const shouldShowTrueFalseActions =
-    ((courseHasOnlyTrueFalse || selectedItem?.type === "true_false") ||
+    ((courseHasOnlyTrueFalse ||
+      selectedItem?.type === "true_false" ||
+      isKnowDontKnow) ||
       shouldShowExplanation) &&
     shouldShowBoxes &&
     !correction;
   const trueFalseActionsMode = shouldShowExplanation ? "ok" : "answer";
   const trueFalseActionsDisabled = shouldShowExplanation
-    ? isBetweenCards
-    : result !== null || isBetweenCards;
+    ? isBetweenCards || isPostOkCooldownActive
+    : result !== null || isBetweenCards || isPostOkCooldownActive;
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
-    shouldShowBoxes && (courseHasOnlyTrueFalse || selectedItem?.type === "true_false");
+    shouldShowBoxes &&
+    (courseHasOnlyTrueFalse ||
+      selectedItem?.type === "true_false" ||
+      isKnowDontKnow);
+  const effectiveTrueFalseButtonsVariant = isKnowDontKnow
+    ? "know_dont_know"
+    : courseHasOnlyKnowDontKnow
+      ? "know_dont_know"
+      : trueFalseButtonsVariant;
 
   useEffect(() => {
     resetInteractionState();
   }, [activeCustomCourseId, resetInteractionState]);
+
+  useEffect(() => {
+    return () => {
+      if (postOkCooldownTimerRef.current) {
+        clearTimeout(postOkCooldownTimerRef.current);
+      }
+    };
+  }, []);
 
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {
@@ -673,7 +725,7 @@ export default function Flashcards() {
         trueFalseActionsDisabled={trueFalseActionsDisabled}
         onTrueFalseAnswer={handleTrueFalseAnswer}
         trueFalseActionsMode={trueFalseActionsMode}
-        onTrueFalseOk={acknowledgeExplanation}
+        onTrueFalseOk={handleTrueFalseOk}
         isFocused={isFocused}
       />
     );
@@ -697,7 +749,8 @@ export default function Flashcards() {
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
       trueFalseActionsMode={trueFalseActionsMode}
-      onTrueFalseOk={acknowledgeExplanation}
+      onTrueFalseOk={handleTrueFalseOk}
+      trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
       peekBox={peekBox}
       peekCards={peekCards}
       activeCustomCourseId={activeCustomCourseId}

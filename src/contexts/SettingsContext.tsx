@@ -94,10 +94,6 @@ type CourseAutoflowOverrides = {
   custom: Record<string, boolean>;
 };
 
-type CourseSkipCorrectionOverrides = {
-  builtin: Record<string, boolean>;
-  custom: Record<string, boolean>;
-};
 
 type CourseImageSizeOverrides = {
   builtin: Record<string, FlashcardsImageSize>;
@@ -120,6 +116,11 @@ const DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES: CourseSkipCorrectionOverrides = 
 };
 
 const DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES: CourseImageSizeOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES: CourseTrueFalseButtonsOverrides = {
   builtin: {},
   custom: {},
 };
@@ -191,6 +192,21 @@ interface SettingsContextValue {
   setCustomCourseSkipCorrectionEnabled: (
     courseId: number,
     enabled: boolean
+  ) => Promise<void>;
+  trueFalseButtonsVariant: TrueFalseButtonsVariant;
+  getBuiltinCourseTrueFalseButtonsVariant: (
+    params: CourseBoxZeroKeyParams
+  ) => TrueFalseButtonsVariant;
+  setBuiltinCourseTrueFalseButtonsVariant: (
+    params: CourseBoxZeroKeyParams,
+    variant: TrueFalseButtonsVariant
+  ) => Promise<void>;
+  getCustomCourseTrueFalseButtonsVariant: (
+    courseId: number
+  ) => TrueFalseButtonsVariant;
+  setCustomCourseTrueFalseButtonsVariant: (
+    courseId: number,
+    variant: TrueFalseButtonsVariant
   ) => Promise<void>;
   resetLearningSettings: () => Promise<void>;
   resetActiveCourseReviews: () => Promise<number>;
@@ -271,9 +287,19 @@ interface SettingsContextValue {
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type FlashcardsCardSize = "large" | "small";
 export type FlashcardsImageSize = "dynamic" | "small" | "medium" | "large";
+export type TrueFalseButtonsVariant = "true_false" | "know_dont_know";
 type CourseCardSizeOverrides = {
   builtin: Record<string, FlashcardsCardSize>;
   custom: Record<string, FlashcardsCardSize>;
+};
+
+type CourseTrueFalseButtonsOverrides = {
+  builtin: Record<string, TrueFalseButtonsVariant>;
+  custom: Record<string, TrueFalseButtonsVariant>;
+};
+type CourseSkipCorrectionOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
 };
 
 const defaultValue: SettingsContextValue = {
@@ -310,6 +336,11 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseSkipCorrectionEnabled: async () => {},
   getCustomCourseSkipCorrectionEnabled: () => false,
   setCustomCourseSkipCorrectionEnabled: async () => {},
+  trueFalseButtonsVariant: "true_false",
+  getBuiltinCourseTrueFalseButtonsVariant: () => "true_false",
+  setBuiltinCourseTrueFalseButtonsVariant: async () => {},
+  getCustomCourseTrueFalseButtonsVariant: () => "true_false",
+  setCustomCourseTrueFalseButtonsVariant: async () => {},
   resetLearningSettings: async () => {},
   resetActiveCourseReviews: async () => 0,
   resetActiveCustomCourseReviews: async () => 0,
@@ -457,6 +488,16 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<CourseSkipCorrectionOverrides>(
       "flashcards.courseSkipCorrectionOverrides",
       DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES
+    );
+  const [trueFalseButtonsVariantDefault] =
+    usePersistedState<TrueFalseButtonsVariant>(
+      "flashcards.trueFalseButtonsVariant",
+      "true_false"
+    );
+  const [trueFalseButtonsOverrides, setTrueFalseButtonsOverrides] =
+    usePersistedState<CourseTrueFalseButtonsOverrides>(
+      "flashcards.courseTrueFalseButtonsOverrides",
+      DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES
     );
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
@@ -945,6 +986,88 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [skipCorrectionDefaultEnabled, skipCorrectionOverrides, setSkipCorrectionOverrides]
   );
 
+  const getBuiltinCourseTrueFalseButtonsVariant = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = trueFalseButtonsOverrides.builtin[key];
+      return override ?? trueFalseButtonsVariantDefault;
+    },
+    [trueFalseButtonsOverrides.builtin, trueFalseButtonsVariantDefault]
+  );
+
+  const setBuiltinCourseTrueFalseButtonsVariant = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      variant: TrueFalseButtonsVariant
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = trueFalseButtonsOverrides.builtin[key];
+      const shouldRemove = variant === trueFalseButtonsVariantDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === variant) {
+        return;
+      }
+      const nextBuiltin = { ...trueFalseButtonsOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = variant;
+      }
+      await setTrueFalseButtonsOverrides({
+        builtin: nextBuiltin,
+        custom: { ...trueFalseButtonsOverrides.custom },
+      });
+    },
+    [
+      setTrueFalseButtonsOverrides,
+      trueFalseButtonsOverrides,
+      trueFalseButtonsVariantDefault,
+    ]
+  );
+
+  const getCustomCourseTrueFalseButtonsVariant = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = trueFalseButtonsOverrides.custom[key];
+      return override ?? trueFalseButtonsVariantDefault;
+    },
+    [trueFalseButtonsOverrides.custom, trueFalseButtonsVariantDefault]
+  );
+
+  const setCustomCourseTrueFalseButtonsVariant = useCallback(
+    async (
+      courseId: number,
+      variant: TrueFalseButtonsVariant
+    ): Promise<void> => {
+      const key = courseId.toString();
+      const current = trueFalseButtonsOverrides.custom[key];
+      const shouldRemove = variant === trueFalseButtonsVariantDefault;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === variant) {
+        return;
+      }
+      const nextCustom = { ...trueFalseButtonsOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = variant;
+      }
+      await setTrueFalseButtonsOverrides({
+        builtin: { ...trueFalseButtonsOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [
+      setTrueFalseButtonsOverrides,
+      trueFalseButtonsOverrides,
+      trueFalseButtonsVariantDefault,
+    ]
+  );
+
   const pinOfficialCourse = useCallback(
     async (id: number) => {
       if (pinnedOfficialCourseIds.includes(id)) return;
@@ -1226,6 +1349,30 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     skipCorrectionDefaultEnabled,
   ]);
 
+  const trueFalseButtonsVariant = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseTrueFalseButtonsVariant(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseTrueFalseButtonsVariant({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return trueFalseButtonsVariantDefault;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    getBuiltinCourseTrueFalseButtonsVariant,
+    getCustomCourseTrueFalseButtonsVariant,
+    trueFalseButtonsVariantDefault,
+  ]);
+
   const setFeedbackEnabled = async (value: boolean) => {
     await _setFeedbackEnabled(value);
   };
@@ -1388,6 +1535,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseSkipCorrectionEnabled,
         getCustomCourseSkipCorrectionEnabled,
         setCustomCourseSkipCorrectionEnabled,
+        trueFalseButtonsVariant,
+        getBuiltinCourseTrueFalseButtonsVariant,
+        setBuiltinCourseTrueFalseButtonsVariant,
+        getCustomCourseTrueFalseButtonsVariant,
+        setCustomCourseTrueFalseButtonsVariant,
         resetLearningSettings,
         resetActiveCourseReviews,
         resetActiveCustomCourseReviews,

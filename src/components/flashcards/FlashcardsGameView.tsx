@@ -10,6 +10,7 @@ import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 import { TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 
 export interface FlashcardsGameViewProps {
   /**
@@ -40,6 +41,7 @@ export interface FlashcardsGameViewProps {
   onTrueFalseAnswer: (val: boolean) => void;
   trueFalseActionsMode?: "answer" | "ok";
   onTrueFalseOk?: () => void;
+  trueFalseButtonsVariant?: TrueFalseButtonsVariant;
 
   // Peek Ref
   peekBox: keyof BoxesState | null;
@@ -70,6 +72,7 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
   onTrueFalseAnswer,
   trueFalseActionsMode = "answer",
   onTrueFalseOk,
+  trueFalseButtonsVariant = "true_false",
   peekBox,
   peekCards,
   activeCustomCourseId,
@@ -89,6 +92,7 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
         onOk={onTrueFalseOk}
         mode={trueFalseActionsMode}
         dense
+        variant={trueFalseButtonsVariant}
       />
     ) : null;
 

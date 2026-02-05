@@ -1,5 +1,5 @@
 import MyButton from "@/src/components/button/button";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useSettings, type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
@@ -10,6 +10,7 @@ type TrueFalseActionsProps = {
   okLabel?: string;
   disabled?: boolean;
   dense?: boolean;
+  variant?: TrueFalseButtonsVariant;
 };
 
 export function TrueFalseActions({
@@ -19,20 +20,25 @@ export function TrueFalseActions({
   okLabel = "OK",
   disabled = false,
   dense = false,
+  variant = "true_false",
 }: TrueFalseActionsProps) {
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
+  const labels =
+    variant === "know_dont_know"
+      ? { falseLabel: "NIE UMIEM", trueLabel: "UMIEM" }
+      : { falseLabel: "FAŁSZ", trueLabel: "PRAWDA" };
 
   if (mode === "ok") {
     return (
       <View style={[styles.container, disabled && styles.disabled]}>
         <MyButton
-          text="FAŁSZ"
+          text={labels.falseLabel}
           color="my_red"
           onPress={() => {}}
           width={140}
           disabled
-          accessibilityLabel="Fałsz (nieaktywne)"
+          accessibilityLabel={`${labels.falseLabel} (nieaktywne)`}
         />
         <View style={styles.spacer} />
         <MyButton
@@ -50,21 +56,21 @@ export function TrueFalseActions({
   return (
     <View style={[styles.container, disabled && styles.disabled]}>
       <MyButton
-        text="FAŁSZ"
+        text={labels.falseLabel}
         color="my_red"
         onPress={() => onAnswer(false)}
         width={140}
         disabled={disabled}
-        accessibilityLabel="Oznacz jako Fałsz"
+        accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
       />
       <View style={styles.spacer} />
       <MyButton
-        text="PRAWDA"
+        text={labels.trueLabel}
         color="my_green"
         onPress={() => onAnswer(true)}
         width={140}
         disabled={disabled}
-        accessibilityLabel="Oznacz jako Prawda"
+        accessibilityLabel={`Oznacz jako ${labels.trueLabel}`}
       />
     </View>
   );
@@ -78,6 +84,7 @@ type TrueFalseActionsAnimatedProps = {
   okLabel?: string;
   disabled?: boolean;
   dense?: boolean;
+  variant?: TrueFalseButtonsVariant;
 };
 
 export function TrueFalseActionsAnimated({
@@ -88,6 +95,7 @@ export function TrueFalseActionsAnimated({
   okLabel = "OK",
   disabled = false,
   dense = false,
+  variant = "true_false",
 }: TrueFalseActionsAnimatedProps) {
   const [rendered, setRendered] = useState(visible);
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
@@ -143,6 +151,7 @@ export function TrueFalseActionsAnimated({
         okLabel={okLabel}
         disabled={disabled}
         dense={dense}
+        variant={variant}
       />
     </Animated.View>
   );

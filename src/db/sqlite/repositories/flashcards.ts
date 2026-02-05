@@ -46,7 +46,7 @@ export interface CustomFlashcardInput {
   position?: number | null;
   flipped?: boolean;
   answerOnly?: boolean;
-  type?: "text" | "image" | "true_false";
+  type?: "text" | "image" | "true_false" | "know_dont_know";
 }
 
 export async function getCustomFlashcards(

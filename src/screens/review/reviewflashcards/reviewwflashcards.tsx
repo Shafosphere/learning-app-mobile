@@ -9,6 +9,7 @@ import {
   getDueCustomReviewFlashcards,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -90,6 +91,7 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{ courseId?: string }>();
+  const { trueFalseButtonsVariant } = useSettings();
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -346,7 +348,8 @@ export default function ReviewFlashcardsPlaceholder() {
     (selectedItem?.answerOnly ?? false) ||
     (!selectedItem?.text?.trim() &&
       (selectedItem?.imageFront || selectedItem?.imageBack)) ||
-    selectedItem?.type === "true_false";
+    selectedItem?.type === "true_false" ||
+    selectedItem?.type === "know_dont_know";
   const effectiveReversed = answerOnly ? false : reversed;
 
   useEffect(() => {
@@ -487,13 +490,15 @@ export default function ReviewFlashcardsPlaceholder() {
       transitionTimerRef.current = null;
     }
     const userAnswer = (answerOverride ?? answer).trim();
-    const ok =
-      userAnswer.length > 0 &&
-      (effectiveReversed
-        ? checkSpelling(userAnswer, selectedItem.text)
-        : (selectedItem.translations ?? []).some((t) =>
-          checkSpelling(userAnswer, t),
-        ));
+    const isKnowDontKnow = selectedItem.type === "know_dont_know";
+    const ok = isKnowDontKnow
+      ? userAnswer.toLowerCase() === "true"
+      : userAnswer.length > 0 &&
+        (effectiveReversed
+          ? checkSpelling(userAnswer, selectedItem.text)
+          : (selectedItem.translations ?? []).some((t) =>
+            checkSpelling(userAnswer, t),
+          ));
 
     setResult(ok);
     playFeedbackSound(ok);
@@ -505,6 +510,65 @@ export default function ReviewFlashcardsPlaceholder() {
     const currentStage = selectedItem.stage ?? boxToStage(activeBox);
 
     if (!ok) {
+      if (isKnowDontKnow) {
+        const hasExplanation =
+          typeof selectedItem.explanation === "string" &&
+          selectedItem.explanation.trim().length > 0;
+        const delayMs = hasExplanation ? 3500 : 1500;
+        void (async () => {
+          try {
+            const { stage: demotedStage, nextReview } = await scheduleCustomReview(
+              selectedItem.id,
+              courseId,
+              1,
+            );
+            const baseCard: WordWithTranslations = {
+              ...selectedItem,
+              stage: currentStage,
+            };
+            scheduleReturnToBox(baseCard, demotedStage, nextReview);
+          } catch (error) {
+            console.error("Failed to demote after know/dont know", error);
+            setBoxes((prev) => {
+              const current = prev[activeBox] ?? [];
+              if (current.some((item) => item.id === selectedItem.id)) {
+                return prev;
+              }
+              return {
+                ...prev,
+                [activeBox]: [selectedItem, ...current],
+              };
+            });
+            setActiveBox((current) => current ?? activeBox);
+          }
+        })();
+
+        transitionTimerRef.current = setTimeout(() => {
+          setBoxes((prev) => {
+            const current = prev[activeBox] ?? [];
+            const remaining = current.filter((item) => item.id !== selectedItem.id);
+            const nextState: BoxesState = {
+              ...prev,
+              [activeBox]: remaining,
+            };
+
+            if (remaining.length === 0) {
+              const nextActive = findFirstActiveBox(nextState);
+              if (nextActive !== activeBox) {
+                setActiveBox(nextActive);
+              }
+            }
+
+            return nextState;
+          });
+          reset();
+          transitionTimerRef.current = null;
+          setQueueNext(true);
+          setIsBetweenCards(true);
+          setTimeout(() => setIsBetweenCards(false), 300);
+        }, delayMs);
+        return;
+      }
       setCorrection({
         cardId: selectedItem.id,
         awers: selectedItem.text,
@@ -527,7 +591,12 @@ export default function ReviewFlashcardsPlaceholder() {
         (t) => normalizedUser === normalizeStrict(t),
       );
     })();
-    const delayMs = isPerfect ? 1500 : 3000;
+    const hasExplanation =
+      typeof selectedItem.explanation === "string" &&
+      selectedItem.explanation.trim().length > 0;
+    const delayMs = isKnowDontKnow
+      ? hasExplanation ? 3500 : 1500
+      : isPerfect ? 1500 : 3000;
     if (activeBox === "boxFive") {
       setShouldCelebrate(false);
       requestAnimationFrame(() => setShouldCelebrate(true));
@@ -596,8 +665,12 @@ export default function ReviewFlashcardsPlaceholder() {
   );
 
   const shouldShowTrueFalseActions =
-    selectedItem?.type === "true_false" && !correction;
+    (selectedItem?.type === "true_false" ||
+      selectedItem?.type === "know_dont_know") &&
+    !correction;
   const trueFalseActionsDisabled = result !== null || isLoading;
+  const effectiveTrueFalseButtonsVariant =
+    selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
 
   return (
     <FlashcardsGameView
@@ -612,6 +685,7 @@ export default function ReviewFlashcardsPlaceholder() {
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
+      trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
       peekBox={peekBox}
       peekCards={peekCards}
       activeCustomCourseId={courseId}
@@ -633,7 +707,10 @@ export default function ReviewFlashcardsPlaceholder() {
         downloadDisabled
         introMode={false}
         onHintUpdate={() => undefined}
-        hideActions={selectedItem?.type === "true_false"}
+        hideActions={
+          selectedItem?.type === "true_false" ||
+          selectedItem?.type === "know_dont_know"
+        }
         showTrueFalseActions={shouldShowTrueFalseActions}
         trueFalseActionsDisabled={trueFalseActionsDisabled}
         onTrueFalseAnswer={handleTrueFalseAnswer}

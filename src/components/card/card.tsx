@@ -65,6 +65,7 @@ export default function Card({
     flashcardsCardSize,
     flashcardsImageSize,
     actionButtonsPosition,
+    trueFalseButtonsVariant,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -141,7 +142,8 @@ export default function Card({
   const answerOnly =
     (selectedItem?.answerOnly ?? false) ||
     (!hasTextPrompt && hasImagePrompt) ||
-    type === "true_false";
+    type === "true_false" ||
+    type === "know_dont_know";
 
   // Force answerOnly logic: if true, card can only be shown Front -> Back
   const effectiveReversed = answerOnly ? false : reversed;
@@ -205,7 +207,8 @@ export default function Card({
   const useLargeLayout =
     flashcardsCardSize === "large" ||
     hasImagePrompt ||
-    selectedItem?.type === "true_false";
+    selectedItem?.type === "true_false" ||
+    selectedItem?.type === "know_dont_know";
   const promptImageSizeMode =
     flashcardsCardSize === "large" && hasImagePrompt
       ? flashcardsImageSize
@@ -782,7 +785,15 @@ export default function Card({
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
-  const showCardActions = !(hideActions || selectedItem?.type === "true_false");
+  const showCardActions = !(
+    hideActions ||
+    selectedItem?.type === "true_false" ||
+    selectedItem?.type === "know_dont_know"
+  );
+  const effectiveTrueFalseButtonsVariant =
+    selectedItem?.type === "know_dont_know"
+      ? "know_dont_know"
+      : trueFalseButtonsVariant;
   const shouldRenderTopTrueFalse =
     actionButtonsPosition === "top" && showTrueFalseActions;
 
@@ -886,6 +897,7 @@ export default function Card({
           mode={trueFalseActionsMode}
           disabled={trueFalseActionsDisabled}
           dense
+          variant={effectiveTrueFalseButtonsVariant}
         />
       ) : (
         <CardActions

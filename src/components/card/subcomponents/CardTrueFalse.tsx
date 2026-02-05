@@ -2,6 +2,7 @@ import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo } from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { CardMathText, hasMathSegments } from "./CardMathText";
 
 type CardTrueFalseProps = {
     promptText: string;
@@ -27,6 +28,8 @@ export function CardTrueFalse({
     const { colors } = useSettings();
     const styles = useMemo(() => makeStyles(colors), [colors]);
 
+    const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
+
     useEffect(() => {
         if (!showButtons) {
             // Reserve a small vertical buffer so long prompts don't get clipped.
@@ -38,16 +41,38 @@ export function CardTrueFalse({
         <View style={styles.container}>
             <View style={styles.promptContainer}>
                 {allowMultilinePrompt ? (
-                    <Text
-                        style={styles.promptTextMulti}
+                    hasMath ? (
+                        <CardMathText
+                            text={promptText}
+                            textStyle={styles.promptTextMulti}
+                            onLayout={(event) => {
+                                if (allowMultilinePrompt) {
+                                    onPromptLayout?.(event.nativeEvent.layout.height);
+                                }
+                            }}
+                        />
+                    ) : (
+                        <Text
+                            style={styles.promptTextMulti}
+                            onLayout={(event) => {
+                                if (allowMultilinePrompt) {
+                                    onPromptLayout?.(event.nativeEvent.layout.height);
+                                }
+                            }}
+                        >
+                            {promptText}
+                        </Text>
+                    )
+                ) : hasMath ? (
+                    <CardMathText
+                        text={promptText}
+                        textStyle={styles.promptText}
                         onLayout={(event) => {
                             if (allowMultilinePrompt) {
                                 onPromptLayout?.(event.nativeEvent.layout.height);
                             }
                         }}
-                    >
-                        {promptText}
-                    </Text>
+                    />
                 ) : (
                     <Text
                         style={styles.promptText}

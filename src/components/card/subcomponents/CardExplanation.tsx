@@ -1,6 +1,7 @@
 import { useEffect, useMemo } from "react";
-import { Text, View } from "react-native";
+import { View } from "react-native";
 import { useStyles } from "../card-styles";
+import { CardMathText, isMathOnlyText } from "./CardMathText";
 
 type CardExplanationProps = {
   explanation: string;
@@ -16,6 +17,7 @@ export function CardExplanation({
   textColorOverride,
 }: CardExplanationProps) {
   const styles = useStyles();
+  const mathOnly = useMemo(() => isMathOnlyText(explanation), [explanation]);
   const textStyle = useMemo(
     () => [
       styles.empty,
@@ -30,13 +32,18 @@ export function CardExplanation({
   }, [onInputLayout]);
 
   return (
-    <View
-      style={styles.explanationContainer}
-      onLayout={(event) => {
-        onPromptLayout?.(event.nativeEvent.layout.height);
-      }}
-    >
-      <Text style={textStyle}>{explanation}</Text>
+    <View style={mathOnly ? styles.explanationOuterMathOnly : null}>
+      <View
+        style={[
+          styles.explanationContainer,
+          mathOnly && styles.explanationContainerMathOnly,
+        ]}
+        onLayout={(event) => {
+          onPromptLayout?.(event.nativeEvent.layout.height);
+        }}
+      >
+        <CardMathText text={explanation} textStyle={textStyle} />
+      </View>
     </View>
   );
 }

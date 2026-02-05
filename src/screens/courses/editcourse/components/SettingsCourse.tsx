@@ -1,5 +1,9 @@
 import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
-import type { FlashcardsCardSize, FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import type {
+  FlashcardsCardSize,
+  FlashcardsImageSize,
+  TrueFalseButtonsVariant,
+} from "@/src/contexts/SettingsContext";
 import type { ThemeColors } from "@/src/theme/theme";
 
 type SwitchColors = {
@@ -21,6 +25,10 @@ type Props = {
   skipCorrectionEnabled: boolean;
   onToggleSkipCorrection: (value: boolean) => void;
   skipCorrectionLocked?: boolean;
+  hideSkipCorrectionOption?: boolean;
+  trueFalseButtonsVariant: TrueFalseButtonsVariant;
+  onSelectTrueFalseButtonsVariant: (value: TrueFalseButtonsVariant) => void;
+  showTrueFalseButtonsVariant?: boolean;
   cardSize: FlashcardsCardSize;
   onSelectCardSize: (value: FlashcardsCardSize) => void;
   showImageSizeOptions?: boolean;
@@ -42,6 +50,10 @@ export function CourseSettingsSection({
   skipCorrectionEnabled,
   onToggleSkipCorrection,
   skipCorrectionLocked = false,
+  hideSkipCorrectionOption = false,
+  trueFalseButtonsVariant,
+  onSelectTrueFalseButtonsVariant,
+  showTrueFalseButtonsVariant = false,
   cardSize,
   onSelectCardSize,
   showImageSizeOptions = false,
@@ -115,21 +127,79 @@ export function CourseSettingsSection({
         />
       </View>
 
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
-          <Text style={toggleSubtitle}>
-            Po złej odpowiedzi od razu pokaż następną fiszkę.
-          </Text>
+      {hideSkipCorrectionOption ? null : (
+        <View style={toggleRow}>
+          <View style={toggleTextWrapper}>
+            <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
+            <Text style={toggleSubtitle}>
+              Po złej odpowiedzi od razu pokaż następną fiszkę.
+            </Text>
+          </View>
+          <Switch
+            value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+            onValueChange={skipCorrectionLocked ? undefined : onToggleSkipCorrection}
+            trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
+            thumbColor={switchColors.thumb}
+            disabled={skipCorrectionLocked}
+          />
         </View>
-        <Switch
-          value={skipCorrectionLocked ? true : skipCorrectionEnabled}
-          onValueChange={skipCorrectionLocked ? undefined : onToggleSkipCorrection}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-          disabled={skipCorrectionLocked}
-        />
-      </View>
+      )}
+
+      {showTrueFalseButtonsVariant ? (
+        <>
+          <View style={toggleRow}>
+            <View style={toggleTextWrapper}>
+              <Text style={toggleTitle}>Rodzaj przycisków w Prawda / Fałsz</Text>
+              <Text style={toggleSubtitle}>
+                Wybierz, jakie napisy mają mieć przyciski.
+              </Text>
+            </View>
+          </View>
+          <View style={cardSizeStyles.cardSizeRow}>
+            {[
+              {
+                key: "true_false" as TrueFalseButtonsVariant,
+                title: "Stwierdzenie",
+                subtitle: "Prawda / Fałsz",
+              },
+              {
+                key: "know_dont_know" as TrueFalseButtonsVariant,
+                title: "Opanowanie",
+                subtitle: "Umiem / Nie umiem",
+              },
+            ].map((option, idx) => {
+              const isActive = trueFalseButtonsVariant === option.key;
+              return (
+                <Pressable
+                  key={option.key}
+                  style={[
+                    cardSizeStyles.cardSizeOption,
+                    idx === 0 && cardSizeStyles.cardSizeOptionFirst,
+                    idx === 1 && cardSizeStyles.cardSizeOptionLast,
+                    isActive
+                      ? cardSizeStyles.cardSizeOptionActive
+                      : cardSizeStyles.cardSizeOptionInactive,
+                  ]}
+                  onPress={() => onSelectTrueFalseButtonsVariant(option.key)}
+                >
+                  <Text
+                    style={[
+                      toggleTitle,
+                      cardSizeStyles.cardSizeTitle,
+                      isActive && cardSizeStyles.cardSizeTitleActive,
+                    ]}
+                  >
+                    {option.title}
+                  </Text>
+                  <Text style={[toggleSubtitle, cardSizeStyles.cardSizeSubtitle]}>
+                    {option.subtitle}
+                  </Text>
+                </Pressable>
+              );
+            })}
+          </View>
+        </>
+      ) : null}
 
       <View style={toggleRow}>
         <View style={toggleTextWrapper}>

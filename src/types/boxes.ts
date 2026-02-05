@@ -11,7 +11,7 @@ export interface WordWithTranslations {
   imageFront?: string | null;
   imageBack?: string | null;
   explanation?: string | null;
-  type?: "text" | "image" | "true_false";
+  type?: "text" | "image" | "true_false" | "know_dont_know";
 }
 
 export interface BoxesState {

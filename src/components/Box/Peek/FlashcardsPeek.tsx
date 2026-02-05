@@ -99,23 +99,29 @@ export default function FlashcardsPeekOverlay({
     const translations =
       item.translations?.map((t) => t?.trim()).filter(Boolean) ?? [];
     const mainTranslation = translations[0] ?? "Brak tłumaczenia";
-    const extraTranslations = type === "true_false" ? [] : translations.slice(1);
+    const isBooleanType = type === "true_false" || type === "know_dont_know";
+    const isKnowDontKnow = type === "know_dont_know";
+    const extraTranslations = isBooleanType ? [] : translations.slice(1);
     const normalizedTrueFalse = translations[0]?.toLowerCase() ?? "";
     const trueFalseAnswer =
-      normalizedTrueFalse === "true"
-        ? "Prawda"
-        : normalizedTrueFalse === "false"
-          ? "Fałsz"
-          : translations[0]?.trim() || "Brak odpowiedzi";
+      isKnowDontKnow
+        ? "Umiem / Nie umiem"
+        : normalizedTrueFalse === "true"
+          ? "Prawda"
+          : normalizedTrueFalse === "false"
+            ? "Fałsz"
+            : translations[0]?.trim() || "Brak odpowiedzi";
     const inferredType =
-      type === "true_false"
+      isBooleanType
         ? "true_false"
         : hasPromptImage || hasAnswerImage
           ? "image"
           : "text";
     const typeLabel =
       inferredType === "true_false"
-        ? "Prawda / Fałsz"
+        ? isKnowDontKnow
+          ? "Umiem / Nie umiem"
+          : "Prawda / Fałsz"
         : inferredType === "image"
           ? "Obrazek"
           : "Tekst";

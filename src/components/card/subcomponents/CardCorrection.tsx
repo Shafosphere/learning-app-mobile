@@ -13,6 +13,7 @@ import {
 } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { PROMPT_IMAGE_MAX_HEIGHT, useStyles } from "../card-styles";
+import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 
 const MARQUEE_DELAY_MS = 800;
@@ -115,7 +116,9 @@ export function CardCorrection({
   textColorOverride,
 }: CardCorrectionProps) {
   const styles = useStyles();
-  const shouldMarqueePrompt = !allowMultilinePrompt && promptText.length > 18;
+  const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
+  const shouldMarqueePrompt =
+    !hasMath && !allowMultilinePrompt && promptText.length > 18;
   const promptTextStyle = useMemo(
     () => [
       styles.cardFont,
@@ -174,7 +177,17 @@ export function CardCorrection({
     return chars.join("");
   }
 
-  const promptContent = shouldMarqueePrompt ? (
+  const promptContent = hasMath ? (
+    <CardMathText
+      text={promptText}
+      textStyle={[
+        styles.cardFont,
+        styles.promptText,
+        allowMultilinePrompt && styles.promptTextMultiline,
+        textColorOverride ? { color: textColorOverride } : null,
+      ]}
+    />
+  ) : shouldMarqueePrompt ? (
     <View style={styles.promptScroll}>
       <TextTicker
         key={promptText}

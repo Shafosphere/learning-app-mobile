@@ -1,0 +1,65 @@
+Podaj definicję wartości bezwzględnej $|x|$ dla liczby rzeczywistej $x < 0$.,$|x| = -x$
+Jak brzmi nierówność trójkąta dla wartości bezwzględnej sumy dwóch liczb $x$ i $y$?,$|x + y| \le |x| + |y|$
+Rozwiąż równoważnie nierówność $|x - a| \le r$ dla $r \ge 0$.,$a - r \le x \le a + r$
+Ile wynosi $\sqrt{a^2}$ dla dowolnej liczby rzeczywistej $a$?,$|a|$
+"Zdefiniuj potęgę $a^{\frac{m}{n}}$ dla $a \ge 0$ oraz dodatnich liczb całkowitych $m, n$.",$a^{\frac{m}{n}} = \sqrt{a^m}^n$
+"Dla $a > 0$ i $a \ne 1$, podaj definicję logarytmu $\log_a b = c$ w postaci potęgowej.",$a^c = b$
+Wzór na logarytm iloczynu: $\log_a (x \cdot y) = $ _____.,$\log_a x + \log_a y$
+Wzór na logarytm ilorazu: $\log_a \left(\frac{x}{y}\right) = $ _____.,$\log_a x - \log_a y$
+Podaj wzór na zamianę podstawy logarytmu $\log_b c$ na logarytm o podstawie $a$.,$\log_b c = \frac{\log_a c}{\log_a b}$
+Ile wynosi silnia zera ($0!$)?,$1$
+Podaj wzór na współczynnik dwumianowy $\binom{n}{k}$ (symbol Newtona).,$\binom{n}{k} = \frac{n!}{k!(n-k)!}$
+Uzupełnij tożsamość dla symbolu Newtona: $\binom{n}{k} = $ $\binom{n}{\dots}$.,$\binom{n}{n-k}$
+Podaj wzór skróconego mnożenia na sześcian sumy $(a + b)^3$.,$(a + b)^3 = a^3 + 3a^2b + 3ab^2 + b^3$
+Podaj wzór na różnicę sześcianów $a^3 - b^3$.,$a^3 - b^3 = (a - b)(a^2 + ab + b^2)$
+Jak zdefiniowany jest wyróżnik $\Delta$ funkcji kwadratowej $f(x) = ax^2 + bx + c$?,$\Delta = b^2 - 4ac$
+"Ile miejsc zerowych ma funkcja kwadratowa, gdy $\Delta < 0$?",Zero (brak rzeczywistych miejsc zerowych).
+"Podaj współrzędną $p$ wierzchołka paraboli $W = (p, q)$ funkcji kwadratowej.",$p = -\frac{b}{2a}$
+"Podaj współrzędną $q$ wierzchołka paraboli $W = (p, q)$ za pomocą $\Delta$.",$q = -\frac{\Delta}{4a}$
+Podaj postać kanoniczną funkcji kwadratowej.,$f(x) = a(x - p)^2 + q$
+"Podaj postać iloczynową funkcji kwadratowej, gdy $\Delta > 0$.",$f(x) = a(x - x_1)(x - x_2)$
+Wzory Viète’a: Ile wynosi suma pierwiastków $x_1 + x_2$ równania kwadratowego?,$x_1 + x_2 = -\frac{b}{a}$
+Wzory Viète’a: Ile wynosi iloczyn pierwiastków $x_1 \cdot x_2$ równania kwadratowego?,$x_1 \cdot x_2 = \frac{c}{a}$
+Podaj wzór na $n$-ty wyraz ciągu arytmetycznego $a_n$.,$a_n = a_1 + (n - 1)r$
+Podaj wzór na sumę $S_n$ pierwszych $n$ wyrazów ciągu arytmetycznego.,$S_n = \frac{a_1 + a_n}{2} \cdot n$
+"Jaka zależność zachodzi między sąsiednimi wyrazami ciągu arytmetycznego $a_{n-1}, a_n, a_{n+1}$?",$a_n = \frac{a_{n-1} + a_{n+1}}{2}$
+Podaj wzór na $n$-ty wyraz ciągu geometrycznego $a_n$.,$a_n = a_1 \cdot q^{n-1}$
+"Podaj wzór na sumę $S_n$ ciągu geometrycznego, gdy $q \ne 1$.",$S_n = a_1 \cdot \frac{1 - q^n}{1 - q}$
+"Jaka zależność zachodzi między sąsiednimi wyrazami ciągu geometrycznego $a_{n-1}, a_n, a_{n+1}$?",$a_n^2 = a_{n-1} \cdot a_{n+1}$
+"Podaj wzór na sumę $S$ wszystkich wyrazów nieskończonego ciągu geometrycznego, gdy $|q| < 1$.",$S = \frac{a_1}{1 - q}$
+Podaj wzór na procent składany (kapitał końcowy $K_n$).,$K_n = K_0 \cdot (1 + \frac{p}{100})^n$
+Ile wynosi granica $\lim_{n \to \infty} \sqrt[n]{n}$?,$1$
+"Definicja $\sin \alpha$ w trójkącie prostokątnym ($a$ - przyprostokątna naprzeciw $\alpha$, $c$ - przeciwprostokątna).",$\sin \alpha = \frac{a}{c}$
+"Definicja $\text{tg } \alpha$ w trójkącie prostokątnym ($a, b$ - przyprostokątne, $a$ naprzeciw $\alpha$).",$\text{tg } \alpha = \frac{a}{b}$
+Podaj tożsamość trygonometryczną zwaną 'jedynką trygonometryczną'.,$\sin^2 \alpha + \cos^2 \alpha = 1$
+Ile wynosi wartość $\sin 45^{\circ}$?,$\frac{\sqrt{2}}{2}$
+Ile wynosi wartość $\text{tg } 60^{\circ}$?,$\sqrt{3}$
+Podaj wzór na sinus podwojonego kąta $\sin 2\alpha$.,$\sin 2\alpha = 2 \sin \alpha \cos \alpha$
+Podaj wzór na cosinus podwojonego kąta $\cos 2\alpha$ (używając tylko $\cos$).,$\cos 2\alpha = 2 \cos^2 \alpha - 1$
+Wzór redukcyjny: Ile wynosi $\sin(180^{\circ} - \alpha)$?,$\sin \alpha$
+Wzór redukcyjny: Ile wynosi $\cos(180^{\circ} - \alpha)$?,$-\cos \alpha$
+Podaj treść twierdzenia sinusów dla trójkąta o boku $a$ i kącie $\alpha$.,$\frac{a}{\sin \alpha} = 2R$
+Podaj wzór twierdzenia cosinusów dla boku $a$ trójkąta.,$a^2 = b^2 + c^2 - 2bc \cdot \cos \alpha$
+Podaj wzór na pole trójkąta $P$ z użyciem dwóch boków i kąta między nimi.,$P = \frac{1}{2} ab \sin \gamma$
+Podaj wzór Herona na pole trójkąta ($p$ - połowa obwodu).,$P = \sqrt{p(p - a)(p - b)(p - c)}$
+Ile wynosi promień $R$ okręgu opisanego na trójkącie prostokątnym o przeciwprostokątnej $c$?,$R = \frac{1}{2}c$
+Podaj wzór na wysokość $h$ trójkąta równobocznego o boku $a$.,$h = \frac{a\sqrt{3}}{2}$
+Podaj wzór na pole trójkąta równobocznego o boku $a$.,$P = \frac{a^2\sqrt{3}}{4}$
+Podaj twierdzenie o dwusiecznej kąta wewnętrznego w trójkącie $ABC$ (punkt $D$ na $AB$).,$\frac{|AD|}{|BD|} = \frac{|AC|}{|BC|}$
+Ile wynosi miara kąta wpisanego opartego na półokręgu?,$90^{\circ}$ (kąt prosty).
+Podaj relację między kątem wpisanym a kątem środkowym opartym na tym samym łuku.,Kąt wpisany jest dwa razy mniejszy od kąta środkowego.
+"Jaki jest warunek konieczny i dostateczny, aby na czworokącie opisać okrąg?",Sumy miar przeciwległych kątów wewnętrznych są równe $180^{\circ}$.
+"Jaki jest warunek konieczny i dostateczny, aby w czworokąt wpisać okrąg?",Sumy długości przeciwległych boków są równe ($a + c = b + d$).
+Jaki jest stosunek pól figur podobnych w skali $k$?,Stosunek ten jest równy $k^2$.
+"Podaj wzór na odległość między punktami $A = (x_A, y_A)$ i $B = (x_B, y_B)$.",$|AB| = \sqrt{(x_B - x_A)^2 + (y_B - y_A)^2}$
+"Podaj współrzędne środka $S$ odcinka $AB$ o końcach $(x_A, y_A)$ i $(x_B, y_B)$.","$S = \left(\frac{x_A + x_B}{2}, \frac{y_A + y_B}{2}\right)$"
+Jak wyznaczyć współczynnik kierunkowy $a$ prostej przechodzącej przez punkty $A$ i $B$ ($x_A \ne x_B$)?,$a = \frac{y_B - y_A}{x_B - x_A}$
+Podaj warunek równoległości dwóch prostych o współczynnikach kierunkowych $a_1$ i $a_2$.,$a_1 = a_2$
+Podaj warunek prostopadłości dwóch prostych o współczynnikach kierunkowych $a_1$ i $a_2$.,$a_1 \cdot a_2 = -1$
+"Podaj równanie kanoniczne okręgu o środku $S = (a, b)$ i promieniu $r$.",$(x - a)^2 + (y - b)^2 = r^2$
+Podaj wzór na współrzędne wektora $\vec{AB}$ o początku $A$ i końcu $B$.,"$\vec{AB} = [x_B - x_A, y_B - y_A]$"
+"Współrzędne punktu $P = (x, y)$ po symetrii osiowej względem osi $Ox$ to _____.","$P' = (x, -y)$"
+"Współrzędne punktu $P = (x, y)$ po symetrii środkowej względem początku układu współrzędnych to _____.","$P' = (-x, -y)$"
+"Podaj wzór na pole powierzchni całkowitej $P_c$ prostopadłościanu o krawędziach $a, b, c$.",$P_c = 2(ab + bc + ca)$
+"Podaj wzór na objętość $V$ prostopadłościanu o krawędziach $a, b, c$.",$V = abc$
+"Podaj wzór na odległość $d$ punktu $P(x_0, y_0)$ od prostej $Ax + By + C = 0$.",$d = \frac{|A \cdot x_0 + B \cdot y_0 + C|}{\sqrt{A^2 + B^2}}$

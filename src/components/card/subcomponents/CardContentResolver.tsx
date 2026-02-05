@@ -116,13 +116,16 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
       : "";
   const hasExplanation = explanation.length > 0;
   const showCorrection = correction && (result === false || isIntroMode);
+  const isKnowDontKnow = selectedItem?.type === "know_dont_know";
   const showExplanation =
     !showCorrection &&
-    selectedItem?.type === "true_false" &&
-    result === false &&
-    hasExplanation;
+    hasExplanation &&
+    ((selectedItem?.type === "true_false" && result === false) ||
+      (isKnowDontKnow && result !== null));
   const showTrueFalse =
-    !showCorrection && !showExplanation && selectedItem?.type === "true_false";
+    !showCorrection &&
+    !showExplanation &&
+    (selectedItem?.type === "true_false" || isKnowDontKnow);
   const showInput =
     !showCorrection && !showTrueFalse && !showExplanation && selectedItem;
   const showEmpty =
