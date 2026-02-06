@@ -121,7 +121,7 @@ export function CardMathText({
       : DEFAULT_FONT_SIZE;
   const color = colorOverride ?? flattenedStyle.color ?? "#000";
   const adjustedTextStyle = useMemo(
-    () => [textStyle, styles.leftAlignedText],
+    () => [textStyle, styles.leftAlignedText, styles.inlineText],
     [textStyle],
   );
 
@@ -180,6 +180,12 @@ const styles = StyleSheet.create({
   },
   leftAlignedText: {
     textAlign: "left",
+  },
+  inlineText: {
+    // Avoid full-width text segments breaking each word onto its own line.
+    width: undefined,
+    alignSelf: "auto",
+    flexShrink: 1,
   },
   wrapText: {
     alignSelf: "stretch",

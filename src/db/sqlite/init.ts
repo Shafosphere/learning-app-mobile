@@ -21,6 +21,7 @@ type CsvRow = {
     tyl?: string;
     front_text?: string;
     back_text?: string;
+    type?: string;
     hint1?: string;
     hint2?: string;
     hint_front?: string;
@@ -66,10 +67,12 @@ const KNOWN_CSV_HEADERS = new Set([
     "wyjasnienie",
     "wyjaśnienie",
     "explain",
+    "opis",
     "image_front",
     "imagefront",
     "image_back",
     "imageback",
+    "type",
 ]);
 
 const TRUE_VALUES = new Set([
@@ -105,6 +108,22 @@ const isBooleanText = (value: string): boolean => {
 const extractHint = (primary?: string, secondary?: string): string | null => {
     const value = (primary ?? secondary ?? "").trim();
     return value.length > 0 ? value : null;
+};
+
+const parseCardType = (
+    value: unknown
+): "text" | "image" | "true_false" | "know_dont_know" | null => {
+    if (value == null) return null;
+    const normalized = value.toString().trim().toLowerCase();
+    if (
+        normalized === "text" ||
+        normalized === "image" ||
+        normalized === "true_false" ||
+        normalized === "know_dont_know"
+    ) {
+        return normalized as "text" | "image" | "true_false" | "know_dont_know";
+    }
+    return null;
 };
 
 const resolveImageFromMap = async (
@@ -181,6 +200,7 @@ async function readCsvAsset(
         })
         : await Promise.all(
             data.map(async (row, idx) => {
+                const explicitType = parseCardType((row as any).type);
                 const front = (
                     row.front ??
                     row.przod ??
@@ -205,14 +225,21 @@ async function readCsvAsset(
                 const hasTrueFalseFlag =
                     trueFalseRaw != null &&
                     trueFalseRaw.toString().trim().length > 0;
-                const answers = hasTrueFalseFlag
-                    ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-                    : splitBackTextIntoAnswers(backRaw);
-                const isBoolean = hasTrueFalseFlag
-                    ? true
-                    : answers.length > 0 && answers.every((a) => isBooleanText(a));
                 const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
                 const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
+                const imageFront = imageFrontName
+                    ? await resolveImageFromMap(
+                        imageFrontName.toString().trim(),
+                        imageMap
+                    )
+                    : null;
+                const imageBack = imageBackName
+                    ? await resolveImageFromMap(
+                        imageBackName.toString().trim(),
+                        imageMap
+                    )
+                    : null;
+                const hasImages = Boolean(imageFront || imageBack);
                 const hintFront = extractHint(row.hint1, row.hint_front);
                 const hintBack = extractHint(row.hint2, row.hint_back);
                 const explanationRaw =
@@ -220,6 +247,7 @@ async function readCsvAsset(
                     (row as any).wyjasnienie ??
                     (row as any).wyjaśnienie ??
                     (row as any).explain ??
+                    (row as any).opis ??
                     null;
                 const explanation =
                     typeof explanationRaw === "string"
@@ -234,30 +262,42 @@ async function readCsvAsset(
                     row.lock;
                 const answerOnly = parseBooleanValue(blockRaw);
                 const locked = answerOnly;
+                const inferredAnswers = hasTrueFalseFlag
+                    ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+                    : splitBackTextIntoAnswers(backRaw);
+                const isBoolean = hasTrueFalseFlag
+                    ? true
+                    : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
+                const inferredType = isBoolean ? "true_false" : hasImages ? "image" : "text";
+                const type = explicitType ?? inferredType;
                 const card: CustomFlashcardInput = {
                     frontText: front,
                     backText: backRaw,
-                    answers,
+                    answers: inferredAnswers,
                     position: idx,
                     flipped: !locked,
                     answerOnly,
                     hintFront,
                     hintBack,
-                    type: isBoolean ? "true_false" : "text",
-                    imageFront: imageFrontName
-                        ? await resolveImageFromMap(
-                            imageFrontName.toString().trim(),
-                            imageMap
-                        )
-                        : null,
-                    imageBack: imageBackName
-                        ? await resolveImageFromMap(
-                            imageBackName.toString().trim(),
-                            imageMap
-                        )
-                        : null,
+                    type,
+                    imageFront,
+                    imageBack,
                     explanation,
                 };
+                if (type === "know_dont_know") {
+                    card.answers = [];
+                    card.answerOnly = true;
+                    card.flipped = false;
+                    card.explanation = explanation || backRaw || null;
+                } else if (type === "true_false") {
+                    card.answers = hasTrueFalseFlag
+                        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+                        : inferredAnswers.length > 0
+                            ? inferredAnswers.map((value) =>
+                                parseBooleanValue(value) ? "true" : "false"
+                            )
+                            : [];
+                }
                 return card;
             })
         );

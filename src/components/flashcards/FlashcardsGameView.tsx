@@ -5,10 +5,9 @@ import { Pressable, View } from "react-native";
 import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
+import { FlashcardsActions } from "@/src/components/flashcards/FlashcardsActions";
 import Confetti from "@/src/components/confetti/Confetti";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
-import { TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 
@@ -81,20 +80,6 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
   introOverlay,
 }) => {
   const styles = useStyles();
-  const { actionButtonsPosition } = useSettings();
-
-  const trueFalseActionsBottom =
-    actionButtonsPosition === "bottom" ? (
-      <TrueFalseActionsAnimated
-        visible={showTrueFalseActions}
-        disabled={trueFalseActionsDisabled}
-        onAnswer={onTrueFalseAnswer}
-        onOk={onTrueFalseOk}
-        mode={trueFalseActionsMode}
-        dense
-        variant={trueFalseButtonsVariant}
-      />
-    ) : null;
 
   return (
     <View style={styles.container}>
@@ -137,7 +122,16 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
         </View>
       )}
 
-      {trueFalseActionsBottom}
+      <FlashcardsActions
+        placement="bottom"
+        showTrueFalseActions={showTrueFalseActions}
+        trueFalseActionsDisabled={trueFalseActionsDisabled}
+        onTrueFalseAnswer={onTrueFalseAnswer}
+        trueFalseActionsMode={trueFalseActionsMode}
+        onTrueFalseOk={onTrueFalseOk}
+        trueFalseButtonsVariant={trueFalseButtonsVariant}
+        showCardActions={false}
+      />
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

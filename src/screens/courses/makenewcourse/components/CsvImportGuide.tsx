@@ -230,6 +230,10 @@ export function CsvImportGuide({
       {/* Content */}
       <View style={styles.contentContainer}>
         <Text style={styles.description}>{template.description}</Text>
+        <Text style={styles.description}>
+          Opcjonalna kolumna <Text style={{ fontWeight: "700" }}>type</Text> pozwala mieszać typy fiszek w jednym pliku
+          (text, image, true_false, know_dont_know).
+        </Text>
 
         {/* Visual Table Preview */}
         <View style={styles.columnTable}>

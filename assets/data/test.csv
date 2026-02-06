@@ -1,0 +1,9 @@
+type,przod,tyl,image_front,is_true,explanation
+text,Bonjour,Hello,,,
+text,"Witaj, świecie","Hello, World",,,
+true_false,Ziemia jest płaska,,,false,
+true_false,Słońce jest gwiazdą,,,true,
+image,,Polska,ad.svg,,
+image,,Austria,at.svg,,
+know_dont_know,Wzór na pole koła,"Pi razy r do kwadratu",,,
+know_dont_know,II zasada dynamiki Newtona,"F=ma",,,

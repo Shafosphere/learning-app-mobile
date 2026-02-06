@@ -22,12 +22,11 @@ import {
 } from "react-native";
 import { useStyles } from "./card-styles";
 import type { CardProps } from "./card-types";
-import { CardActions } from "./subcomponents/CardActions";
+import { FlashcardsActions } from "@/src/components/flashcards/FlashcardsActions";
 import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
-import { TrueFalseActions } from "@/src/screens/flashcards/TrueFalseActions";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const INPUT_HORIZONTAL_PADDING = 8;
@@ -47,6 +46,7 @@ export default function Card({
   introMode = false,
   setCorrectionRewers,
   onHintUpdate,
+  actionCooldownActive = false,
   showTrueFalseActions = false,
   trueFalseActionsDisabled = false,
   onTrueFalseAnswer,
@@ -64,7 +64,6 @@ export default function Card({
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
     flashcardsImageSize,
-    actionButtonsPosition,
     trueFalseButtonsVariant,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
@@ -118,6 +117,10 @@ export default function Card({
   const previousResult = useRef<boolean | null>(null);
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
+  const lastRenderLogRef = useRef<{ id: number | null; ts: number }>({
+    id: null,
+    ts: 0,
+  });
   const lastTranslationItemId = useRef<number | null>(null);
   const lastCorrectionFocusedId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
@@ -242,6 +245,22 @@ export default function Card({
     shouldCorrectAwers && correctionInput1Ref
       ? correctionInput1Ref
       : correctionInput2Ref;
+
+  useEffect(() => {
+    if (!selectedItem) return;
+    const now = Date.now();
+    const last = lastRenderLogRef.current;
+    if (last.id === selectedItem.id && now - last.ts < 250) {
+      return;
+    }
+    lastRenderLogRef.current = { id: selectedItem.id, ts: now };
+    const tsIso = new Date(now).toISOString();
+    console.log(
+      `[Card] ${tsIso} (${now}) render id=${selectedItem.id} type=${selectedItem.type ?? "text"} ` +
+        `text="${(selectedItem.text ?? "").toString().slice(0, 60)}" ` +
+        `imageFront=${Boolean(selectedItem.imageFront)} imageBack=${Boolean(selectedItem.imageBack)}`
+    );
+  }, [selectedItem]);
 
   const len = selectedItem?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
@@ -808,11 +827,12 @@ export default function Card({
     selectedItem?.type === "know_dont_know"
       ? "know_dont_know"
       : trueFalseButtonsVariant;
-  const shouldRenderTopTrueFalse =
-    actionButtonsPosition === "top" && showTrueFalseActions;
   const handleCardActionsConfirm =
     isExplanationVisible && onTrueFalseOk ? onTrueFalseOk : handleConfirm;
-  const cardActionsDownloadDisabled = downloadDisabled || isExplanationVisible;
+  const cardActionsDownloadDisabled =
+    downloadDisabled || isExplanationVisible || actionCooldownActive;
+  const cardActionsConfirmDisabled = actionCooldownActive;
+  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -907,23 +927,21 @@ export default function Card({
         />
       ) : null}
 
-      {shouldRenderTopTrueFalse ? (
-        <TrueFalseActions
-          onAnswer={trueFalseAnswerHandler}
-          onOk={onTrueFalseOk}
-          mode={trueFalseActionsMode}
-          disabled={trueFalseActionsDisabled}
-          dense
-          variant={effectiveTrueFalseButtonsVariant}
-        />
-      ) : (
-        <CardActions
-          handleConfirm={handleCardActionsConfirm}
-          onDownload={onDownload}
-          downloadDisabled={cardActionsDownloadDisabled}
-          hidden={!showCardActions}
-        />
-      )}
+      <FlashcardsActions
+        placement="inline"
+        showTrueFalseActions={showTrueFalseActions}
+        trueFalseActionsDisabled={trueFalseActionsDisabled}
+        onTrueFalseAnswer={trueFalseAnswerHandler}
+        trueFalseActionsMode={trueFalseActionsMode}
+        onTrueFalseOk={onTrueFalseOk}
+        trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
+        showCardActions={showCardActions}
+        onCardActionsConfirm={handleCardActionsConfirm}
+        onDownload={onDownload}
+        downloadDisabled={cardActionsDownloadDisabled}
+        confirmDisabled={cardActionsConfirmDisabled}
+        confirmLabel={cardActionsConfirmLabel}
+      />
     </View>
   );
 }

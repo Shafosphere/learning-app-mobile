@@ -24,7 +24,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
-import { type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 
 const STREAK_TARGET = 5;
@@ -122,8 +122,8 @@ export default function Flashcards() {
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
-  const [isPostOkCooldownActive, setIsPostOkCooldownActive] = useState(false);
-  const postOkCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
+  const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
     () =>
@@ -602,12 +602,8 @@ export default function Flashcards() {
 
   const downloadDisabled =
     customCards.length === 0 ||
-    allCardsDistributed ||
     isLoadingData ||
-    !isReady ||
-    (boxZeroEnabled
-      ? boxes.boxZero.length >= 40
-      : boxes.boxOne.length >= 40);
+    !isReady;
   const shouldShowBoxes =
     activeCustomCourseId != null &&
     isReady &&
@@ -625,17 +621,9 @@ export default function Flashcards() {
     [confirm, setAnswer]
   );
   const handleTrueFalseOk = useCallback(() => {
-    if (isPostOkCooldownActive) return;
+    if (isActionCooldownActive) return;
     acknowledgeExplanation();
-    setIsPostOkCooldownActive(true);
-    if (postOkCooldownTimerRef.current) {
-      clearTimeout(postOkCooldownTimerRef.current);
-    }
-    postOkCooldownTimerRef.current = setTimeout(() => {
-      setIsPostOkCooldownActive(false);
-      postOkCooldownTimerRef.current = null;
-    }, TRUE_FALSE_POST_OK_COOLDOWN_MS);
-  }, [acknowledgeExplanation, isPostOkCooldownActive]);
+  }, [acknowledgeExplanation, isActionCooldownActive]);
   const shouldShowExplanation =
     explanationText.length > 0 &&
     ((selectedItem?.type === "true_false" && result === false) ||
@@ -652,8 +640,8 @@ export default function Flashcards() {
   const trueFalseActionsMode =
     shouldShowExplanation && shouldUseTrueFalseActionBar ? "ok" : "answer";
   const trueFalseActionsDisabled = shouldShowExplanation
-    ? isBetweenCards || isPostOkCooldownActive
-    : result !== null || isBetweenCards || isPostOkCooldownActive;
+    ? isBetweenCards || isActionCooldownActive
+    : result !== null || isBetweenCards || isActionCooldownActive;
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
     shouldShowBoxes &&
@@ -668,14 +656,26 @@ export default function Flashcards() {
       ? "know_dont_know"
       : trueFalseButtonsVariant;
 
+  useLayoutEffect(() => {
+    if (!selectedItem) return;
+    setIsActionCooldownActive(true);
+    if (actionCooldownTimerRef.current) {
+      clearTimeout(actionCooldownTimerRef.current);
+    }
+    actionCooldownTimerRef.current = setTimeout(() => {
+      setIsActionCooldownActive(false);
+      actionCooldownTimerRef.current = null;
+    }, TRUE_FALSE_POST_OK_COOLDOWN_MS);
+  }, [selectedItem?.id]);
+
   useEffect(() => {
     resetInteractionState();
   }, [activeCustomCourseId, resetInteractionState]);
 
   useEffect(() => {
     return () => {
-      if (postOkCooldownTimerRef.current) {
-        clearTimeout(postOkCooldownTimerRef.current);
+      if (actionCooldownTimerRef.current) {
+        clearTimeout(actionCooldownTimerRef.current);
       }
     };
   }, []);
@@ -732,6 +732,7 @@ export default function Flashcards() {
         onTrueFalseAnswer={handleTrueFalseAnswer}
         trueFalseActionsMode={trueFalseActionsMode}
         onTrueFalseOk={handleTrueFalseOk}
+        actionCooldownActive={isActionCooldownActive}
         isFocused={isFocused}
       />
     );

@@ -286,9 +286,25 @@ export default function CustomCourseContentScreen() {
       return null;
     };
 
+    const readCardType = (row: any): ManualCardType | null => {
+      const raw = row?.type;
+      if (raw == null) return null;
+      const normalized = raw.toString().trim().toLowerCase();
+      if (
+        normalized === "text" ||
+        normalized === "image" ||
+        normalized === "true_false" ||
+        normalized === "know_dont_know"
+      ) {
+        return normalized as ManualCardType;
+      }
+      return null;
+    };
+
     const cards: ManualCard[] = [];
     for (let idx = 0; idx < rows.length; idx += 1) {
       const row = rows[idx];
+      const explicitType = readCardType(row);
       const trueFalseRaw = readBooleanishField(row, [
         "is_true",
         "isTrue",
@@ -302,23 +318,6 @@ export default function CustomCourseContentScreen() {
         trueFalseRaw != null &&
         trueFalseRaw.toString().trim().length > 0;
       const backRaw = readStringField(row, ["back", "tyl"]);
-      const answers = hasTrueFalseFlag
-        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-        : parseAnswers(backRaw);
-      const isBoolean = hasTrueFalseFlag
-        ? true
-        : answers.length > 0 && answers.every((a) => isBooleanText(a));
-
-      const answerOnly = parseBooleanValue(
-        readBooleanishField(row, [
-          "blokada",
-          "block",
-          "answer_only",
-          "question",
-          "pytanie",
-          "lock",
-        ])
-      );
       const imageFrontName = normalizeImageField(
         readStringField(row, ["image_front", "imageFront", "obraz_przod"])
       );
@@ -328,30 +327,70 @@ export default function CustomCourseContentScreen() {
       const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
       const imageBack = resolveImage ? await resolveImage(imageBackName) : null;
       const hasImages = Boolean(imageFront || imageBack);
-      const type: ManualCardType = isBoolean
+
+      const inferredAnswers = hasTrueFalseFlag
+        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+        : parseAnswers(backRaw);
+      const isBoolean = hasTrueFalseFlag
+        ? true
+        : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
+      const inferredType: ManualCardType = isBoolean
         ? "true_false"
         : hasImages
           ? "image"
           : "text";
+      const type: ManualCardType = explicitType ?? inferredType;
+
+      const answerOnlyFlag = parseBooleanValue(
+        readBooleanishField(row, [
+          "blokada",
+          "block",
+          "answer_only",
+          "question",
+          "pytanie",
+          "lock",
+        ])
+      );
+      const explanation = readStringField(row, [
+        "explanation",
+        "wyjasnienie",
+        "wyjaśnienie",
+        "opis",
+      ]);
 
       const card: ManualCard = {
         id: `csv-${idx}`,
         front: readStringField(row, ["front", "przod"]),
-        answers: answers.length > 0 ? answers : [backRaw],
-        flipped: !answerOnly,
-        answerOnly,
+        answers: [],
+        flipped: !answerOnlyFlag,
+        answerOnly: answerOnlyFlag,
         hintFront: readStringField(row, ["hint1", "hint_front", "podpowiedz1"]),
         hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),
         imageFront,
         imageBack,
-        explanation: readStringField(row, [
-          "explanation",
-          "wyjasnienie",
-          "wyjaśnienie",
-          "opis",
-        ]),
+        explanation: explanation || null,
         type,
       };
+
+      if (type === "know_dont_know") {
+        const fallbackExplanation = backRaw || explanation;
+        card.explanation = fallbackExplanation || null;
+        card.answers = [];
+        card.answerOnly = true;
+        card.flipped = false;
+      } else if (type === "true_false") {
+        const answers = hasTrueFalseFlag
+          ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
+          : inferredAnswers.length > 0
+            ? inferredAnswers.map((value) =>
+                parseBooleanValue(value) ? "true" : "false"
+              )
+            : [];
+        card.answers = answers.length > 0 ? answers : [backRaw];
+      } else {
+        const answers = inferredAnswers.length > 0 ? inferredAnswers : [backRaw];
+        card.answers = answers;
+      }
 
       if (
         card.front.trim().length > 0 ||

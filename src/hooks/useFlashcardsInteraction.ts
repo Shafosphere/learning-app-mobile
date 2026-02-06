@@ -135,8 +135,18 @@ export function useFlashcardsInteraction({
     [ensureQueueHasItems, syncQueueWithBox]
   );
 
+  const lastSelectionRef = useRef<{ ts: number; box: keyof BoxesState | null }>({
+    ts: 0,
+    box: null,
+  });
   const selectNextWord = useCallback(
     (box: keyof BoxesState) => {
+      const now = Date.now();
+      const last = lastSelectionRef.current;
+      if (now - last.ts < 80 && last.box === box && selectedItem != null) {
+        return;
+      }
+      lastSelectionRef.current = { ts: now, box };
       if (box === "boxZero" && !boxZeroEnabled) {
         setSelectedItem(null);
         setQuestionShownAt(null);
@@ -166,7 +176,7 @@ export function useFlashcardsInteraction({
       setSelectedItem(next);
       setQuestionShownAt(Date.now());
     },
-    [boxes, boxZeroEnabled, ensureQueueHasItems, syncQueueWithBox]
+    [boxes, boxZeroEnabled, ensureQueueHasItems, selectedItem, syncQueueWithBox]
   );
 
   const handleSelectBox = useCallback(

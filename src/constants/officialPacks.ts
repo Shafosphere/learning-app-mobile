@@ -8,6 +8,7 @@ import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import javascript2Csv from "@/assets/data/Javascript2.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
 import math2Csv from "@/assets/data/math2.csv";
+import testCsv from "@/assets/data/test.csv";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
@@ -172,6 +173,23 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
       imageSize: "medium",
     },
     csvAsset: flagiEuropyCsv,
+    imageMap: imageMaps.europeFlags,
+  },
+  {
+    slug: "test_mixed_types",
+    name: "Test (Mixed Types)",
+    iconId: "lab",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "test",
+    settings: {
+      imageSize: "medium",
+    },
+    csvAsset: testCsv,
     imageMap: imageMaps.europeFlags,
   },
 ];
