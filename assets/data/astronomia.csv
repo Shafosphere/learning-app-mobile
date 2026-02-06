@@ -1,61 +1,58 @@
-front,back,block
-"Ile planet jest w Układzie Słonecznym?",8,true
-"Najbliższa Słońcu planeta?",Merkury,true
-"Druga planeta od Słońca?",Wenus,true
-"Trzecia planeta od Słońca?",Ziemia,true
-"Czwarta planeta od Słońca?",Mars,true
-"Piąta planeta od Słońca?",Jowisz,true
-"Szósta planeta od Słońca?",Saturn,true
-"Siódma planeta od Słońca?",Uran,true
-"Ósma planeta od Słońca?",Neptun,true
-"Największa planeta Układu Słonecznego?",Jowisz,true
-"Najmniejsza planeta Układu Słonecznego?",Merkury,true
-"Najgorętsza planeta Układu Słonecznego?",Wenus,true
-"Planeta nazywana 'Czerwoną'?",Mars,true
-"Planeta z najsłynniejszymi pierścieniami?",Saturn,true
-"Ile księżyców ma Ziemia?",1,true
-"Ile księżyców ma Mars?",2,true
-"Jak nazywa się bliższy księżyc Marsa?",Fobos,true
-"Jak nazywa się dalszy księżyc Marsa?",Deimos,true
-"Ile księżyców ma Merkury?",0,true
-"Ile księżyców ma Wenus?",0,true
-"Największy księżyc Układu Słonecznego?",Ganimedes,true
-"Księżyc Jowisza kojarzony z oceanem pod lodem?",Europa,true
-"Największy księżyc Saturna?",Tytan,true
-"Księżyc Saturna z gejzerami lodu?",Enceladus,true
-"Największy księżyc Neptuna?",Tryton,true
-"Skrót jednostki astronomicznej?",AU,true
-"Jak nazywa się ścieżka pozorna Słońca na niebie?",ekliptyka,true
-"Jak nazywa się ugięcie światła przez grawitację?",soczewkowanie,true
-"Jak nazywa się metoda odległości oparta o przesunięcie pozorne?",paralaksa,true
-"Najbliższa gwiazda (poza Słońcem)?","Proxima Centauri",true
-"W jakiej galaktyce jest Ziemia?","Droga Mleczna",true
-"Najbliższa duża galaktyka względem Drogi Mlecznej?",Andromeda,true
-"Najjaśniejsza gwiazda nocnego nieba?",Syriusz,true
-"Jak nazywa się Gwiazda Polarna?",Polaris,true
-"Jak nazywa się teleskop kosmiczny uruchomiony w 1990?",Hubble,true
-"Jaka sonda minęła Plutona w 2015?","New Horizons",true
-"Planeta karłowata w pasie planetoid?",Ceres,true
-"Region za Neptunem z Plutonem?","Pas Kuipera",true
-"Jak nazywa się obłok obiegający Słońce",Oorta,true
-"Jak nazywa się granica wpływu wiatru słonecznego?",heliopauza,true
-"Jak nazywa się jednostka 1 pc?",parsek,true
-"Jak nazywa się 'spadająca gwiazda'?",meteor,true
-"Jak nazywa się obiekt, który spadł na Ziemię?",meteoryt,true
-"Jak nazywa się obiekt w kosmosie przed wejściem w atmosferę?",meteoroid,true
-"W jakim gwiazdozbiorze jest Wielki Wóz?","Wielka Niedźwiedzica",true
-"Prędkość światła w próżni (km/s, zaokrąglona)?",300000,true
-"Jak nazywa się obszar planetoid między Marsem a Jowiszem?","Pas Główny",true
-"Jak nazywa się gwiazda w centrum Układu Słonecznego?",Słońce,true
-"Co jest większe: Księżyc czy Merkury?",Merkury,true
-"Co jest większe: Wenus czy Ziemia?",Ziemia,true
-"Co jest większe: Uran czy Neptun?",Uran,true
-"Co jest większe: Pluton czy Księżyc?",Księżyc,true
-"Średnia odległość Ziemi od Księżyca (km)?",384400,true
-"Ile dni trwa obieg Merkurego wokół Słońca?",88,true
-"Ile dni trwa obieg Wenus wokół Słońca?",225,true
-"Ile lat trwa obieg Jowisza wokół Słońca?",11.9,true
-"Ile lat trwa obieg Saturna wokół Słońca?",29.5,true
-"Ile lat trwa obieg Neptuna wokół Słońca?",164.8,true
-"Ile godzin trwa jeden dzień na Wenus?",5832,true
-"Ile godzin trwa jeden dzień na Jowiszu?",9.9,true
+front,back,block,explanation
+Ile planet jest w Układzie Słonecznym?,8,True,"Planety: Merkury, Wenus, Ziemia, Mars, Jowisz, Saturn, Uran, Neptun."
+Najbliższa Słońcu planeta?,Merkury,True,"Średnia odległość Merkurego od Słońca to ok. 57,9 mln km (0,39 AU)."
+Druga planeta od Słońca?,Wenus,True,
+Trzecia planeta od Słońca?,Ziemia,True,
+Czwarta planeta od Słońca?,Mars,True,
+Piąta planeta od Słońca?,Jowisz,True,
+Szósta planeta od Słońca?,Saturn,True,
+Siódma planeta od Słońca?,Uran,True,
+Ósma planeta od Słońca?,Neptun,True,
+Największa planeta Układu Słonecznego?,Jowisz,True,Jowisz ma średnicę ok. 142 984 km (równikową) i masę ~318 mas Ziemi.
+Najmniejsza planeta Układu Słonecznego?,Merkury,True,Merkury ma średnicę ok. 4 879 km.
+Najgorętsza planeta Układu Słonecznego?,Wenus,True,To Wenus — gęsta atmosfera CO₂ powoduje silny efekt cieplarniany (~465°C na powierzchni).
+Planeta nazywana 'Czerwoną'?,Mars,True,
+Planeta z najsłynniejszymi pierścieniami?,Saturn,True,Pierścienie Saturna składają się głównie z lodu i drobin skalnych.
+Ile księżyców ma Ziemia?,1,True,Naturalny satelita Ziemi to Księżyc (1).
+Ile księżyców ma Mars?,2,True,Mars ma 2 księżyce: Fobosa i Deimosa.
+Jak nazywa się bliższy księżyc Marsa?,Fobos,True,
+Jak nazywa się dalszy księżyc Marsa?,Deimos,True,
+Ile księżyców ma Merkury?,0,True,
+Ile księżyców ma Wenus?,0,True,
+Największy księżyc Układu Słonecznego?,Ganimedes,True,Ganimedes (księżyc Jowisza) ma średnicę ok. 5 268 km.
+Księżyc Jowisza kojarzony z oceanem pod lodem?,Europa,True,Europa prawdopodobnie skrywa globalny ocean pod lodową skorupą.
+Największy księżyc Saturna?,Tytan,True,Tytan ma gęstą atmosferę azotową i średnicę ok. 5 150 km.
+Księżyc Saturna z gejzerami lodu?,Enceladus,True,
+Największy księżyc Neptuna?,Tryton,True,
+Skrót jednostki astronomicznej?,AU,True,1 AU to 149 597 871 – jest to średnia odległość Ziemi od słońca
+Najbliższa gwiazda (poza Słońcem)?,Proxima Centauri,True,"Proxima Centauri znajduje się w odległości około 4,24–4,26 lat świetlnych od Ziemi"
+W jakiej galaktyce jest Ziemia?,Droga Mleczna,True,
+Najbliższa duża galaktyka względem Drogi Mlecznej?,Andromeda,True,
+Najjaśniejsza gwiazda nocnego nieba?,Syriusz,True,
+Jak nazywa się Gwiazda Polarna?,Polaris,True,
+Jak nazywa się teleskop kosmiczny uruchomiony w 1990?,Hubble,True,
+Jaka sonda minęła Plutona w 2015?,New Horizons,True,
+Planeta karłowata w pasie planetoid?,Ceres,True,
+Region za Neptunem z Plutonem?,Pas Kuipera,True,
+Jak nazywa się obłok obiegający Słońce,Oorta,True,"hipotetyczny, sferyczny obłok, składający się z pyłu, drobnych okruchów i planetoid obiegających Słońce w odległości od 300 do 100 000 j.a. "
+Jak nazywa się granica wpływu wiatru słonecznego?,heliopauza,True,
+Jak nazywa się jednostka 1 pc?,parsek,True,"jeden parsek to około 3,2616 lat świetlnych "
+Jak nazywa się 'spadająca gwiazda'?,meteor,True,
+"Jak nazywa się obiekt, który spadł na Ziemię?",meteoryt,True,
+Jak nazywa się obiekt w kosmosie przed wejściem w atmosferę?,meteoroid,True,
+W jakim gwiazdozbiorze jest Wielki Wóz?,Wielka Niedźwiedzica,True,
+"Prędkość światła w próżni (km/s, zaokrąglona)?",300000,True,"Dokładnie: 299 792 km/s, zwykle zaokrągla się do 300 000 km/s."
+Jak nazywa się obszar planetoid między Marsem a Jowiszem?,Pas Główny,True,
+Jak nazywa się gwiazda w centrum Układu Słonecznego?,Słońce,True,
+Co jest większe: Księżyc czy Merkury?,Merkury,True,Średnice: Merkury: 4879km. Księżyc 3474km. 
+Co jest większe: Wenus czy Ziemia?,Ziemia,True,Średnice: Wenus:12104km. Ziemia: 12756km
+Co jest większe: Uran czy Neptun?,Uran,True,Średnice: Uran: 51118km. Neptun: 49526km
+Co jest większe: Pluton czy Księżyc?,Księżyc,True,Średnice: Księżyc: 3474km. Pluton: 2370 km
+Średnia odległość Ziemi od Księżyca (km)?,384400,True,"Średnio ok. 384 400 km (orbita eliptyczna, więc odległość się zmienia)."
+Ile dni trwa obieg Merkurego wokół Słońca?,88,True,
+Ile dni trwa obieg Wenus wokół Słońca?,225,True,
+Ile lat trwa obieg Jowisza wokół Słońca?,11.9,True,
+Ile lat trwa obieg Saturna wokół Słońca?,29.5,True,
+Ile lat trwa obieg Neptuna wokół Słońca?,164.8,True,
+Ile godzin trwa jeden dzień na Wenus?,5832,True,
+Ile godzin trwa jeden dzień na Jowiszu?,9.9,True,

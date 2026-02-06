@@ -1,6 +1,6 @@
 import { useCallback, useMemo, useState } from "react";
 
-export type ManualCardType = "text" | "image" | "true_false";
+export type ManualCardType = "text" | "image" | "true_false" | "know_dont_know";
 
 export type ManualCard = {
   id: string;

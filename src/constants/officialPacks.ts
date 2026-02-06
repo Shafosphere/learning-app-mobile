@@ -7,8 +7,6 @@ import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
 import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
 import javascript2Csv from "@/assets/data/Javascript2.csv";
 import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
-import debuggingCsv from "@/assets/data/debbuing.csv";
-import mathCsv from "@/assets/data/math.csv";
 import math2Csv from "@/assets/data/math2.csv";
 import { imageMaps } from "./imageMaps";
 
@@ -175,15 +173,5 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     },
     csvAsset: flagiEuropyCsv,
     imageMap: imageMaps.europeFlags,
-  },
-  {
-    slug: "debugging",
-    name: "Debugging",
-    iconId: "bug",
-    iconColor: "#FF5733",
-    sourceLang: "pl",
-    targetLang: "pl",
-    categoryId: "other",
-    csvAsset: debuggingCsv,
   },
 ];

@@ -210,7 +210,9 @@ export const ManualCardsEditor = ({
             : displayAction?.accessibilityLabel;
         const effectiveCardType: ManualCardType =
           cardType ?? card.type ?? "text";
-        const isTrueFalse = effectiveCardType === "true_false";
+        const isBooleanCardType =
+          effectiveCardType === "true_false" ||
+          effectiveCardType === "know_dont_know";
         const isImageType = effectiveCardType === "image";
         const cardTypeProvided = cardType !== undefined;
         const canEditImages = !isDisplayMode && Boolean(onCardImageChange);
@@ -258,7 +260,7 @@ export const ManualCardsEditor = ({
             <View style={styles.inputContainer}>
               {!isImageType && (
                 <View style={styles.flipRow}>
-                  {!isDisplayMode && !isTrueFalse && (
+                  {!isDisplayMode && !isBooleanCardType && (
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`${
@@ -353,13 +355,25 @@ export const ManualCardsEditor = ({
             )}
               <View style={styles.cardDivider} />
               <View style={styles.answersContainer}>
-                {isTrueFalse ? (
+                {isBooleanCardType ? (
                   <View style={styles.trueFalseContainer}>
                     <Text style={styles.trueFalseLabel}>Odpowiedź</Text>
                     <View style={styles.trueFalseOptions}>
                       {[
-                        { key: "true", label: "Prawda" },
-                        { key: "false", label: "Fałsz" },
+                        {
+                          key: "true",
+                          label:
+                            effectiveCardType === "know_dont_know"
+                              ? "Umiem"
+                              : "Prawda",
+                        },
+                        {
+                          key: "false",
+                          label:
+                            effectiveCardType === "know_dont_know"
+                              ? "Nie umiem"
+                              : "Fałsz",
+                        },
                       ].map((option) => {
                         const isActive = trueFalseValue === option.key;
                         const isFalse = option.key === "false";
@@ -624,7 +638,7 @@ export const ManualCardsEditor = ({
                         />
                       </Pressable>
                     ) : null}
-                    {!isTrueFalse && (
+                    {!isBooleanCardType && (
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${

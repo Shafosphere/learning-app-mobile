@@ -33,15 +33,6 @@ export function TrueFalseActions({
     return (
       <View style={[styles.container, disabled && styles.disabled]}>
         <MyButton
-          text={labels.falseLabel}
-          color="my_red"
-          onPress={() => {}}
-          width={140}
-          disabled
-          accessibilityLabel={`${labels.falseLabel} (nieaktywne)`}
-        />
-        <View style={styles.spacer} />
-        <MyButton
           text={okLabel}
           color="my_yellow"
           onPress={onOk}

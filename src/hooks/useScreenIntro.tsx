@@ -5,8 +5,24 @@ import {
     OnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { StyleProp, StyleSheet, View, ViewStyle } from "react-native";
+import React, {
+    useCallback,
+    useEffect,
+    useRef,
+    useState
+} from "react";
+import {
+    Animated,
+    Easing,
+    Keyboard,
+    KeyboardEvent,
+    Platform,
+    StyleProp,
+    StyleSheet,
+    useWindowDimensions,
+    View,
+    ViewStyle
+} from "react-native";
 
 type TriggerStrategy = "on_onboarding" | "post_onboarding";
 
@@ -40,6 +56,11 @@ export function useScreenIntro({
     const [openGates, setOpenGates] = useState<Record<string, boolean>>({});
     const [awaitingGateStep, setAwaitingGateStep] = useState<number | null>(null);
 
+    // Animation value for keyboard offset
+    const keyboardHeightAnim = useRef(new Animated.Value(0)).current;
+
+    const { height: windowHeight } = useWindowDimensions();
+
     // Use a ref to store the latest callback to avoid re-triggering the effect
     // when the consumer passes a new inline function instance on every render.
     const onCheckpointLoadedRef = useRef(onCheckpointLoaded);
@@ -48,19 +69,52 @@ export function useScreenIntro({
         onCheckpointLoadedRef.current = onCheckpointLoaded;
     }, [onCheckpointLoaded]);
 
-    const defaultOverlay = useMemo<ViewStyle>(
-        () => ({
-            position: "absolute",
-            bottom: "30%",
-            left: 0,
-            right: 0,
-            zIndex: 30,
-            elevation: 6,
-            paddingHorizontal: 4,
-            paddingTop: 8,
-        }),
-        []
-    );
+    // Base position (when no keyboard)
+    const baseBottom = windowHeight * 0.15;
+
+    useEffect(() => {
+        const handleShow = (event: KeyboardEvent) => {
+            const endHeight = event.endCoordinates.height;
+            // Calculate how much we need to lift the bubble to be above the keyboard
+            // We want final bottom = endHeight + 16.
+            // Current bottom is baseBottom.
+            // So lift = (endHeight + 16) - baseBottom.
+            // If baseBottom is already higher than keyboard + 16, lift is 0.
+            const lift = Math.max(0, endHeight + 16 - baseBottom);
+
+            Animated.timing(keyboardHeightAnim, {
+                toValue: lift,
+                duration: Platform.OS === "ios" ? event.duration : 250,
+                easing: Platform.OS === "ios" ? Easing.out(Easing.ease) : undefined,
+                useNativeDriver: false, // Layout properties cannot use native driver
+            }).start();
+        };
+
+        const handleHide = (event: KeyboardEvent) => {
+            Animated.timing(keyboardHeightAnim, {
+                toValue: 0,
+                duration: Platform.OS === "ios" ? event.duration : 250,
+                easing: Platform.OS === "ios" ? Easing.out(Easing.ease) : undefined,
+                useNativeDriver: false,
+            }).start();
+        };
+
+        const showEvent = Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow";
+        const hideEvent = Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide";
+
+        const showSub = Keyboard.addListener(showEvent, handleShow);
+        const hideSub = Keyboard.addListener(hideEvent, handleHide);
+
+        return () => {
+            showSub.remove();
+            hideSub.remove();
+        };
+    }, [keyboardHeightAnim, baseBottom]);
+
+    // Final animated bottom position: baseBottom + lift
+    const animatedBottom = Animated.add(keyboardHeightAnim, baseBottom);
+
+    const maxBodyHeight = windowHeight * 0.4; // Simplified constant max height to avoid complex re-renders during animation
 
     useEffect(() => {
         let mounted = true;
@@ -90,7 +144,7 @@ export function useScreenIntro({
                         shouldShow = true;
                     }
                 } else if (triggerStrategy === "post_onboarding") {
-                    // Flashcards: defaults to showing if checkpint IS done (meaning we are past onboarding) 
+                    // Flashcards: defaults to showing if checkpint IS done (meaning we are past onboarding)
                     // and we haven't seen this specific specific intro yet.
                     if (isDone && !hasSeenIntro) {
                         shouldShow = true;
@@ -106,7 +160,6 @@ export function useScreenIntro({
                         setIsIntroActive(true);
                     }
                 }
-
             } catch (error) {
                 console.warn("Failed to hydrate intro:", error);
             }
@@ -191,39 +244,52 @@ export function useScreenIntro({
     const IntroOverlay = useCallback(() => {
         if (!showIntro || !messages[introStep]) return null;
 
-        // LogoMessage props are 'variant' based or direct title/description.
-        // We use direct title/description from our messages array.
-
-        // For screens like Pin/Activate, they used `floating` prop on LogoMessage.
-        // For Flashcards, it used a Modal.
-        // To unify, we can check if we want a Modal or just a floating View.
-        // The original generic hook `useFlashcardsIntro` used a Modal. 
-        // `CourseActivateScreen` and `CoursePinScreen` rendered `LogoMessage` directly in the view stack (absolute positioned View).
-
-        // A Modal is generally safer for "overlays" to ensure z-index, but might conflict if the design expects it to be part of the flow.
-        // However, the `useFlashcardsIntro` was successfully using Modal.
-        // Let's stick to Modal for the "Overlay" concept if it works for all 3. 
-        // BUT: In Activate/Pin screens, the overlay was inside the specific screen struct, maybe under some other specific UI?
-        // Actually, in ActivateScreen/PinScreen it was: 
-        // <View style={styles.introOverlay} pointerEvents="box-none"><LogoMessage ... /></View>
-        // This `introOverlay` style usually is absolute fill of the screen container.
-        // Using a Modal is cleaner as it breaks out of the flex layout issues.
-
         return (
-            <View style={[StyleSheet.absoluteFill, { zIndex: 999 }]} pointerEvents="box-none">
-                <View style={[defaultOverlay, containerStyle]} pointerEvents="box-none">
+            <View
+                style={[StyleSheet.absoluteFill, { zIndex: 999 }]}
+                pointerEvents="box-none"
+            >
+                <Animated.View
+                    style={[
+                        {
+                            position: "absolute",
+                            left: 0,
+                            right: 0,
+                            zIndex: 30,
+                            elevation: 6,
+                            paddingHorizontal: 4,
+                            paddingTop: 8,
+                            bottom: animatedBottom,
+                        },
+                        containerStyle,
+                    ]}
+                    pointerEvents="box-none"
+                >
                     <LogoMessage
-                        floating
-                        offset={floatingOffset}
+                        style={{
+                            marginTop: floatingOffset?.top ?? 8,
+                            marginLeft: floatingOffset?.left ?? 8,
+                            marginRight: floatingOffset?.right ?? 8,
+                        }}
+                        maxBodyHeight={maxBodyHeight}
                         title={messages[introStep].title}
                         description={messages[introStep].description}
                         onClose={handleClose}
                         closeLabel="Następny komunikat"
                     />
-                </View>
+                </Animated.View>
             </View>
         );
-    }, [showIntro, messages, introStep, defaultOverlay, containerStyle, floatingOffset, handleClose]);
+    }, [
+        showIntro,
+        messages,
+        introStep,
+        containerStyle,
+        floatingOffset,
+        handleClose,
+        animatedBottom,
+        maxBodyHeight,
+    ]);
 
     return {
         IntroOverlay,

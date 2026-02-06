@@ -153,7 +153,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     textAlign: "center",
     textAlignVertical: "center",
-    // backgroundColor: colors.my_green,
+    flexShrink: 1,
+    maxWidth: "100%",
     width: "100%",
   },
   containerButton: {
@@ -297,7 +298,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   explanationContainer: {
     width: "100%",
-    alignItems: "center",
+    minWidth: 0,
+    overflow: "hidden",
+    alignItems: "stretch",
     justifyContent: "center",
     paddingVertical: 10,
     paddingHorizontal: 16,

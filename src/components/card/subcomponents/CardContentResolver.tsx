@@ -121,7 +121,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     !showCorrection &&
     hasExplanation &&
     ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null));
+      (isKnowDontKnow && result !== null) ||
+      (selectedItem?.answerOnly && result !== null));
   const showTrueFalse =
     !showCorrection &&
     !showExplanation &&

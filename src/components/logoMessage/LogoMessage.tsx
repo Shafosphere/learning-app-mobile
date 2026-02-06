@@ -1,7 +1,9 @@
 import React from "react";
 import {
   Image,
+  type LayoutChangeEvent,
   Pressable,
+  ScrollView,
   StyleProp,
   Text,
   View,
@@ -61,6 +63,8 @@ export type LogoMessageProps = {
     left: number;
     right: number;
   }>;
+  maxBodyHeight?: number;
+  onLayout?: (event: LayoutChangeEvent) => void;
   onClose?: () => void;
   closeLabel?: string;
 };
@@ -72,6 +76,8 @@ export default function LogoMessage({
   style,
   floating = false,
   offset,
+  maxBodyHeight,
+  onLayout,
   onClose,
   closeLabel = "Zamknij",
 }: LogoMessageProps) {
@@ -89,18 +95,34 @@ export default function LogoMessage({
         style,
       ]}
       pointerEvents={floating ? "auto" : undefined}
+      onLayout={onLayout}
       accessible
       accessibilityRole="text"
     >
       <Image source={LOGO_SOURCE} style={styles.logo} />
-      <View style={styles.textWrapper}>
-        {resolvedTitle ? (
-          <Text style={styles.title}>{resolvedTitle}</Text>
-        ) : null}
-        {resolvedDescription ? (
-          <Text style={styles.description}>{resolvedDescription}</Text>
-        ) : null}
-      </View>
+      {typeof maxBodyHeight === "number" ? (
+        <ScrollView
+          style={[styles.textWrapper, { maxHeight: maxBodyHeight }]}
+          contentContainerStyle={styles.textContent}
+          showsVerticalScrollIndicator={false}
+        >
+          {resolvedTitle ? (
+            <Text style={styles.title}>{resolvedTitle}</Text>
+          ) : null}
+          {resolvedDescription ? (
+            <Text style={styles.description}>{resolvedDescription}</Text>
+          ) : null}
+        </ScrollView>
+      ) : (
+        <View style={styles.textWrapper}>
+          {resolvedTitle ? (
+            <Text style={styles.title}>{resolvedTitle}</Text>
+          ) : null}
+          {resolvedDescription ? (
+            <Text style={styles.description}>{resolvedDescription}</Text>
+          ) : null}
+        </View>
+      )}
       {onClose ? (
         <Pressable
           accessibilityRole="button"

@@ -127,7 +127,7 @@ export function CardMathText({
 
   if (!hasMath) {
     return (
-      <Text style={textStyle} onLayout={onLayout}>
+      <Text style={[textStyle, styles.wrapText]} onLayout={onLayout}>
         {text}
       </Text>
     );
@@ -180,6 +180,11 @@ const styles = StyleSheet.create({
   },
   leftAlignedText: {
     textAlign: "left",
+  },
+  wrapText: {
+    alignSelf: "stretch",
+    flexShrink: 1,
+    maxWidth: "100%",
   },
   inlineMath: {
     alignSelf: "center",

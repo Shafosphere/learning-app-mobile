@@ -3,7 +3,7 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, Text, View } from "react-native";
 
-export type CsvImportType = "text" | "image" | "true_false";
+export type CsvImportType = "text" | "image" | "true_false" | "know_dont_know";
 
 interface CsvImportGuideProps {
   onPickFile: () => void;
@@ -191,6 +191,16 @@ const TEMPLATES: Record<CsvImportType, TemplateData> = {
       { id: "czy_prawda", label: "czy_prawda" },
     ],
     sampleRow: ["Ziemia jest płaska", "false"],
+    optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
+  },
+  know_dont_know: {
+    label: "Umiem / Nie umiem",
+    description: "Fiszki, gdzie odpowiedzią jest Umiem lub Nie umiem.",
+    requiredColumns: [
+      { id: "przod", label: "przód" },
+      { id: "czy_prawda", label: "czy_prawda" },
+    ],
+    sampleRow: ["Funkcje strzałkowe JS", "true"],
     optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
   },
   image: {

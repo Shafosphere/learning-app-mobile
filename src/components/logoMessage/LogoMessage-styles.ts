@@ -33,6 +33,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   textWrapper: {
     flex: 1,
   },
+  textContent: {
+    paddingBottom: 2,
+  },
   closeButton: {
     position: "absolute",
     top: 6,

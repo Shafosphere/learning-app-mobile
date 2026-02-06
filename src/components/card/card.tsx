@@ -200,6 +200,18 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
+  const explanationText =
+    typeof selectedItem?.explanation === "string"
+      ? selectedItem.explanation.trim()
+      : "";
+  const isKnowDontKnowType = selectedItem?.type === "know_dont_know";
+  const isExplanationVisible = Boolean(
+    !showCorrectionInputs &&
+      explanationText.length > 0 &&
+      ((selectedItem?.type === "true_false" && result === false) ||
+        (isKnowDontKnowType && result !== null) ||
+        ((selectedItem?.answerOnly ?? false) && result !== null)),
+  );
 
   // Decide if we should use large layout: either global setting OR image is present
   // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,
@@ -207,6 +219,7 @@ export default function Card({
   const useLargeLayout =
     flashcardsCardSize === "large" ||
     hasImagePrompt ||
+    selectedItem?.answerOnly ||
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know";
   const promptImageSizeMode =
@@ -787,6 +800,7 @@ export default function Card({
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
   const showCardActions = !(
     hideActions ||
+    showTrueFalseActions ||
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know"
   );
@@ -796,6 +810,9 @@ export default function Card({
       : trueFalseButtonsVariant;
   const shouldRenderTopTrueFalse =
     actionButtonsPosition === "top" && showTrueFalseActions;
+  const handleCardActionsConfirm =
+    isExplanationVisible && onTrueFalseOk ? onTrueFalseOk : handleConfirm;
+  const cardActionsDownloadDisabled = downloadDisabled || isExplanationVisible;
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -901,9 +918,9 @@ export default function Card({
         />
       ) : (
         <CardActions
-          handleConfirm={handleConfirm}
+          handleConfirm={handleCardActionsConfirm}
           onDownload={onDownload}
-          downloadDisabled={downloadDisabled}
+          downloadDisabled={cardActionsDownloadDisabled}
           hidden={!showCardActions}
         />
       )}

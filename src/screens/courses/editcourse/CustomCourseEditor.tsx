@@ -168,6 +168,12 @@ export default function CustomCourseEditor({
     (cards: ManualCard[]): ManualCardType => {
       if (
         cards.length > 0 &&
+        cards.every((card) => (card.type ?? "text") === "know_dont_know")
+      ) {
+        return "know_dont_know";
+      }
+      if (
+        cards.length > 0 &&
         cards.every((card) => (card.type ?? "text") === "true_false")
       ) {
         return "true_false";
@@ -195,7 +201,10 @@ export default function CustomCourseEditor({
   const courseIsTrueFalseOnly = useMemo(
     () =>
       manualCards.length > 0 &&
-      manualCards.every((card) => (card.type ?? "text") === "true_false"),
+      manualCards.every((card) => {
+        const type = card.type ?? "text";
+        return type === "true_false" || type === "know_dont_know";
+      }),
     [manualCards]
   );
   const courseHasImageCards = useMemo(
@@ -265,7 +274,9 @@ export default function CustomCourseEditor({
           answers,
           flipped: card.flipped,
           answerOnly: card.answerOnly ?? false,
-          type: (card.type as "text" | "image" | "true_false") ?? "text",
+          type:
+            (card.type as "text" | "image" | "true_false" | "know_dont_know") ??
+            "text",
           hintFront: card.hintFront,
           hintBack: card.hintBack,
           imageFront: card.imageFront ?? null,

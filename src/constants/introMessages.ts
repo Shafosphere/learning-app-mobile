@@ -54,22 +54,19 @@ export const FLASHCARDS_INTRO_MESSAGES: IntroMessage[] = [
   {
     title: "Aktywuj pudełko",
     description:
-      "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę. Kliknji te gdzie sa słówka",
+      "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę.",
   },
   {
     title: "Podaj odpowiedź",
     description:
-      "W karcie pojawia się wylosowana fiszka i miejsce na odpowiedź",
+      "W karcie pojawia się wylosowana fiszka, w zależności od jej typu masz podać odpowiedź lub kliknąć przycisk",
     gateId: "box_selected",
   },
   {
-    title: "Wpisaleś źle",
+    title: "Za skomplikowane?",
     description:
-      "Nie martw sie, teraz musis poprawić swoją odpwiedź nadpisując ten tekst :3",
-  },
-  {
-    title: "Wpisaleś dobrze",
-    description: "Brawo, fiszka teraz leci do kolejnego pudełka :3",
+      "Jeśli czegoś nie rozumiesz, zajrzyj do przewodnika na stronie głównej. Możesz tam przejść, klikając moją miniaturkę na górnym pasku.",
+    gateId: "box_selected",
   },
 ];
 

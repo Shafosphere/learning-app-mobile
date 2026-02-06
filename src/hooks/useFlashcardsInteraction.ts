@@ -52,6 +52,10 @@ export function useFlashcardsInteraction({
   const [correction, setCorrection] = useState<CorrectionState | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
+  const [pendingExplanationMove, setPendingExplanationMove] = useState<{
+    cardId: number;
+    promote: boolean;
+  } | null>(null);
   const lastServedIdRef = useRef<number | null>(null);
   const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
     boxZero: [],
@@ -378,6 +382,17 @@ export function useFlashcardsInteraction({
           typeof wordForCheck.explanation === "string" &&
           wordForCheck.explanation.trim().length > 0;
         if (isKnowDontKnow && hasExplanation) {
+          setPendingExplanationMove({
+            cardId: wordForCheck.id,
+            promote: true,
+          });
+          return;
+        }
+        if (isAnswerOnlyCard(wordForCheck) && hasExplanation) {
+          setPendingExplanationMove({
+            cardId: wordForCheck.id,
+            promote: true,
+          });
           return;
         }
         setTimeout(() => {
@@ -393,6 +408,10 @@ export function useFlashcardsInteraction({
           wordForCheck.explanation.trim().length > 0;
         if (isKnowDontKnow) {
           if (hasExplanation) {
+            setPendingExplanationMove({
+              cardId: wordForCheck.id,
+              promote: false,
+            });
             return;
           }
           const delay = 1500;
@@ -406,6 +425,10 @@ export function useFlashcardsInteraction({
         }
         if (wordForCheck.type === "true_false") {
           if (hasExplanation) {
+            setPendingExplanationMove({
+              cardId: wordForCheck.id,
+              promote: false,
+            });
             return;
           }
           const delay = 1500;
@@ -418,6 +441,13 @@ export function useFlashcardsInteraction({
           return;
         }
         if (skipDemotionCorrection) {
+          if (isAnswerOnlyCard(wordForCheck) && hasExplanation) {
+            setPendingExplanationMove({
+              cardId: wordForCheck.id,
+              promote: false,
+            });
+            return;
+          }
           const delay = hasExplanation ? 4000 : 1500;
           setTimeout(() => {
             setAnswer("");
@@ -455,15 +485,29 @@ export function useFlashcardsInteraction({
       setBoxes,
       moveTranslationToFront,
       isAnswerOnlyCard,
+      setPendingExplanationMove,
     ]
   );
 
   const acknowledgeExplanation = useCallback(() => {
     if (!selectedItem) return;
+    if (
+      pendingExplanationMove &&
+      pendingExplanationMove.cardId === selectedItem.id &&
+      result !== null
+    ) {
+      setAnswer("");
+      moveElement(selectedItem.id, pendingExplanationMove.promote);
+      setPendingExplanationMove(null);
+      setResult(null);
+      setQueueNext(true);
+      return;
+    }
     if (selectedItem.type === "true_false") {
       if (result !== false) return;
       setAnswer("");
       moveElement(selectedItem.id, false);
+      setPendingExplanationMove(null);
       setResult(null);
       setQueueNext(true);
       return;
@@ -472,10 +516,11 @@ export function useFlashcardsInteraction({
       if (result == null) return;
       setAnswer("");
       moveElement(selectedItem.id, result);
+      setPendingExplanationMove(null);
       setResult(null);
       setQueueNext(true);
     }
-  }, [moveElement, result, selectedItem]);
+  }, [moveElement, pendingExplanationMove, result, selectedItem]);
 
   const wrongInputChange = useCallback((which: 1 | 2, value: string) => {
     setCorrection((c) =>
@@ -532,6 +577,19 @@ export function useFlashcardsInteraction({
 
     if (awersOk && rewersOk) {
       if (selectedItem) {
+        const hasExplanation =
+          typeof selectedItem.explanation === "string" &&
+          selectedItem.explanation.trim().length > 0;
+        const answerOnly = isAnswerOnlyCard(selectedItem);
+        if (correction.mode === "demote" && hasExplanation && answerOnly) {
+          setPendingExplanationMove({
+            cardId: selectedItem.id,
+            promote: false,
+          });
+          setAnswer("");
+          setCorrection(null);
+          return;
+        }
         const promote = correction.mode === "intro";
         moveElement(selectedItem.id, promote);
       }
@@ -543,7 +601,14 @@ export function useFlashcardsInteraction({
       setCorrection(null);
       setQueueNext(true);
     }
-  }, [correction, matchesCorrectionField, moveElement, reversed, selectedItem]);
+  }, [
+    correction,
+    isAnswerOnlyCard,
+    matchesCorrectionField,
+    moveElement,
+    reversed,
+    selectedItem,
+  ]);
 
   useEffect(() => {
     if (queueNext && activeBox) {
@@ -583,6 +648,7 @@ export function useFlashcardsInteraction({
     setAnswer("");
     setResult(null);
     setCorrection(null);
+    setPendingExplanationMove(null);
     setQueueNext(false);
     setQuestionShownAt(null);
     lastServedIdRef.current = null;
@@ -610,6 +676,7 @@ export function useFlashcardsInteraction({
       setAnswer("");
       setResult(null);
       setCorrection(null);
+      setPendingExplanationMove(null);
     }
   }, [activeBox, boxZeroEnabled]);
 

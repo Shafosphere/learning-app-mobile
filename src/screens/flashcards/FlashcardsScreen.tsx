@@ -203,7 +203,8 @@ export default function Flashcards() {
     !isBetweenCards &&
     explanationText.length > 0 &&
     ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null));
+      (isKnowDontKnow && result !== null) ||
+      (selectedItem?.answerOnly && result !== null));
   const boxSelectionLocked = correctionLocked || waitingForOk;
 
   const handleSelectBox = useCallback(
@@ -638,15 +639,18 @@ export default function Flashcards() {
   const shouldShowExplanation =
     explanationText.length > 0 &&
     ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null));
+      (isKnowDontKnow && result !== null) ||
+      (selectedItem?.answerOnly && result !== null));
+  const shouldUseTrueFalseActionBar =
+    courseHasOnlyTrueFalse ||
+    selectedItem?.type === "true_false" ||
+    isKnowDontKnow;
   const shouldShowTrueFalseActions =
-    ((courseHasOnlyTrueFalse ||
-      selectedItem?.type === "true_false" ||
-      isKnowDontKnow) ||
-      shouldShowExplanation) &&
+    shouldUseTrueFalseActionBar &&
     shouldShowBoxes &&
     !correction;
-  const trueFalseActionsMode = shouldShowExplanation ? "ok" : "answer";
+  const trueFalseActionsMode =
+    shouldShowExplanation && shouldUseTrueFalseActionBar ? "ok" : "answer";
   const trueFalseActionsDisabled = shouldShowExplanation
     ? isBetweenCards || isPostOkCooldownActive
     : result !== null || isBetweenCards || isPostOkCooldownActive;
@@ -658,6 +662,8 @@ export default function Flashcards() {
       isKnowDontKnow);
   const effectiveTrueFalseButtonsVariant = isKnowDontKnow
     ? "know_dont_know"
+    : selectedItem?.answerOnly
+      ? "know_dont_know"
     : courseHasOnlyKnowDontKnow
       ? "know_dont_know"
       : trueFalseButtonsVariant;

@@ -24,13 +24,13 @@ export function CardActions({
   return (
     <View style={styles.containerButton}>
       <MyButton
-        text="dodaj         fiszki"
+        text="DODAJ FISZKI"
         color="my_yellow"
         onPress={onDownload}
         disabled={downloadDisabled}
       />
       <MyButton
-        text="zatwiedź"
+        text="OK"
         color="my_green"
         disabled={false}
         onPress={handleConfirm}

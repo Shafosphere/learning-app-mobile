@@ -60,6 +60,10 @@ const cardTypeOptions: { key: ManualCardType; label: string }[] = [
     key: "true_false",
     label: "Prawda / Fałsz",
   },
+  {
+    key: "know_dont_know",
+    label: "Umiem / Nie umiem",
+  },
 ];
 
 export default function CustomCourseContentScreen() {
@@ -117,6 +121,7 @@ export default function CustomCourseContentScreen() {
     text: manualCards,
     image: [createEmptyManualCard("card-image-0", "image")],
     true_false: [createEmptyManualCard("card-truefalse-0", "true_false")],
+    know_dont_know: [createEmptyManualCard("card-knowdontknow-0", "know_dont_know")],
   });
   const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
@@ -125,10 +130,17 @@ export default function CustomCourseContentScreen() {
   const csvTypeOptions: CardTypeOption<CsvImportType>[] = [
     { key: "text", label: "Tradycyjne" },
     { key: "true_false", label: "Prawda / Fałsz" },
+    { key: "know_dont_know", label: "Umiem / Nie umiem" },
     { key: "image", label: "Z obrazkami (ZIP)" },
   ];
 
   const inferCardTypeFromCards = useCallback((cards: ManualCard[]): ManualCardType => {
+    if (
+      cards.length > 0 &&
+      cards.every((card) => (card.type ?? "text") === "know_dont_know")
+    ) {
+      return "know_dont_know";
+    }
     if (cards.length > 0 && cards.every((card) => (card.type ?? "text") === "true_false")) {
       return "true_false";
     }
@@ -148,7 +160,7 @@ export default function CustomCourseContentScreen() {
   const mapCardsToType = useCallback(
     (cards: ManualCard[], nextType: ManualCardType): ManualCard[] =>
       cards.map((card) => {
-        if (nextType === "true_false") {
+        if (nextType === "true_false" || nextType === "know_dont_know") {
           const normalizedAnswer =
             card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
           return {
@@ -437,7 +449,12 @@ export default function CustomCourseContentScreen() {
       }
 
       const inferredType = inferCardTypeFromCards(cards);
-      loadCardsForType(inferredType, mapCardsToType(cards, inferredType));
+      const forcedType =
+        inferredType === "true_false" &&
+        (csvCardType === "true_false" || csvCardType === "know_dont_know")
+          ? csvCardType
+          : inferredType;
+      loadCardsForType(forcedType, mapCardsToType(cards, forcedType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z ZIP`,
         color: "calm",
@@ -526,7 +543,12 @@ export default function CustomCourseContentScreen() {
         return;
       }
       const inferredType = inferCardTypeFromCards(cards);
-      loadCardsForType(inferredType, mapCardsToType(cards, inferredType));
+      const forcedType =
+        inferredType === "true_false" &&
+        (csvCardType === "true_false" || csvCardType === "know_dont_know")
+          ? csvCardType
+          : inferredType;
+      loadCardsForType(forcedType, mapCardsToType(cards, forcedType));
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
         color: "calm",
@@ -577,7 +599,7 @@ export default function CustomCourseContentScreen() {
         imageFront?: string | null;
         imageBack?: string | null;
         explanation?: string | null;
-        type?: "text" | "image" | "true_false";
+        type?: "text" | "image" | "true_false" | "know_dont_know";
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();

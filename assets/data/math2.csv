@@ -2,7 +2,7 @@ Podaj definicję wartości bezwzględnej $|x|$ dla liczby rzeczywistej $x < 0$.,
 Jak brzmi nierówność trójkąta dla wartości bezwzględnej sumy dwóch liczb $x$ i $y$?,$|x + y| \le |x| + |y|$
 Rozwiąż równoważnie nierówność $|x - a| \le r$ dla $r \ge 0$.,$a - r \le x \le a + r$
 Ile wynosi $\sqrt{a^2}$ dla dowolnej liczby rzeczywistej $a$?,$|a|$
-"Zdefiniuj potęgę $a^{\frac{m}{n}}$ dla $a \ge 0$ oraz dodatnich liczb całkowitych $m, n$.",$a^{\frac{m}{n}} = \sqrt{a^m}^n$
+"Zdefiniuj potęgę $a^{\frac{m}{n}}$ dla $a \ge 0$ oraz dodatnich liczb całkowitych $m, n$.",$a^{\frac{m}{n}} = \sqrt[n]{a^m}$
 "Dla $a > 0$ i $a \ne 1$, podaj definicję logarytmu $\log_a b = c$ w postaci potęgowej.",$a^c = b$
 Wzór na logarytm iloczynu: $\log_a (x \cdot y) = $ _____.,$\log_a x + \log_a y$
 Wzór na logarytm ilorazu: $\log_a \left(\frac{x}{y}\right) = $ _____.,$\log_a x - \log_a y$
