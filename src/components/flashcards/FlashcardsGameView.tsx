@@ -5,11 +5,13 @@ import { Pressable, View } from "react-native";
 import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
-import { FlashcardsActions } from "@/src/components/flashcards/FlashcardsActions";
 import Confetti from "@/src/components/confetti/Confetti";
-import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { FlashcardsActions } from "@/src/components/flashcards/FlashcardsActions";
 import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
+import { TrueFalseActions } from "@/src/screens/flashcards/TrueFalseActions";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 export interface FlashcardsGameViewProps {
   /**
@@ -80,14 +82,33 @@ export const FlashcardsGameView: React.FC<FlashcardsGameViewProps> = ({
   introOverlay,
 }) => {
   const styles = useStyles();
+  const { actionButtonsPosition } = useSettings();
+  const shouldShowTopTrueFalse =
+    actionButtonsPosition === "top" && showTrueFalseActions;
 
   return (
     <View style={styles.container}>
       {introOverlay}
       <Confetti generateConfetti={shouldCelebrate} />
 
-      {/* Main Card Area */}
+
       {children}
+
+      {shouldShowTopTrueFalse ? (
+        <View style={styles.topActionsWrapper}>
+          <TrueFalseActions
+            disabled={trueFalseActionsDisabled}
+            onAnswer={onTrueFalseAnswer}
+            onOk={onTrueFalseOk}
+            mode={trueFalseActionsMode}
+            dense
+            variant={trueFalseButtonsVariant}
+          />
+        </View>
+      ) : null}
+
+      {/* Main Card Area */}
+      {/* {children} */}
 
       {showBoxes && (
         <View style={styles.boxesWrapper}>

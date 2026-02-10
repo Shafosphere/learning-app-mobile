@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import { useEffect, useMemo, useState } from "react";
 import { StyleSheet, View, ImageStyle, StyleProp, ViewStyle } from "react-native";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { SvgUri, SvgXml } from "react-native-svg";
 
 type PromptImageProps = {
   uri: string;
@@ -41,6 +42,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
   const { colors } = useSettings();
   const [svgViewBox, setSvgViewBox] = useState<SvgViewBox | null>(null);
   const [isSvg, setIsSvg] = useState(false);
+  const [svgXml, setSvgXml] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -57,6 +59,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           if (!cancelled) {
             setSvgViewBox(parseSvgViewBox(decoded));
             setIsSvg(true);
+            setSvgXml(decoded);
           }
           return;
         }
@@ -66,6 +69,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           if (!cancelled) {
             setSvgViewBox(null); // bez parsowania viewBox
             setIsSvg(true);
+            setSvgXml(null);
           }
           return;
         }
@@ -76,6 +80,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           if (!cancelled) {
             setSvgViewBox(null);
             setIsSvg(false);
+            setSvgXml(null);
           }
           return;
         }
@@ -88,15 +93,18 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           if (looksLikeSvg) {
             setSvgViewBox(parseSvgViewBox(xml));
             setIsSvg(true);
+            setSvgXml(xml);
           } else {
             setSvgViewBox(null);
             setIsSvg(false);
+            setSvgXml(null);
           }
         }
       } catch {
         if (!cancelled) {
           setSvgViewBox(null);
           setIsSvg(false);
+          setSvgXml(null);
         }
       }
     };
@@ -156,13 +164,21 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
         style={frameStyle}
         onLayout={({ nativeEvent }) => onHeightChange?.(nativeEvent.layout.height)}
       >
-        <Image
-          source={{ uri }}
-          recyclingKey={uri}
-          style={{ width: "100%", height: "100%" }}
-          contentFit="contain"
-          transition={0}
-        />
+        {isSvg ? (
+          svgXml ? (
+            <SvgXml xml={svgXml} width="100%" height="100%" />
+          ) : (
+            <SvgUri uri={uri} width="100%" height="100%" />
+          )
+        ) : (
+          <Image
+            source={{ uri }}
+            recyclingKey={uri}
+            style={{ width: "100%", height: "100%" }}
+            contentFit="contain"
+            transition={0}
+          />
+        )}
       </View>
     </View>
   );

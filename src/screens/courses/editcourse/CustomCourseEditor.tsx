@@ -178,16 +178,6 @@ export default function CustomCourseEditor({
       ) {
         return "true_false";
       }
-      if (
-        cards.some(
-          (card) =>
-            (card.type ?? "text") === "image" ||
-            Boolean(card.imageFront) ||
-            Boolean(card.imageBack)
-        )
-      ) {
-        return "image";
-      }
       return "text";
     },
     []
@@ -211,7 +201,6 @@ export default function CustomCourseEditor({
     () =>
       manualCards.some(
         (card) =>
-          (card.type ?? "text") === "image" ||
           Boolean(card.imageFront) ||
           Boolean(card.imageBack)
       ),
@@ -275,8 +264,7 @@ export default function CustomCourseEditor({
           flipped: card.flipped,
           answerOnly: card.answerOnly ?? false,
           type:
-            (card.type as "text" | "image" | "true_false" | "know_dont_know") ??
-            "text",
+            (card.type as "text" | "true_false" | "know_dont_know") ?? "text",
           hintFront: card.hintFront,
           hintBack: card.hintBack,
           imageFront: card.imageFront ?? null,
@@ -730,11 +718,7 @@ export default function CustomCourseEditor({
                     onAddCard={() => handleAddCard(manualCardType)}
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
-                    onCardImageChange={
-                      manualCardType === "image"
-                        ? handleManualCardImageChange
-                        : undefined
-                    }
+                    onCardImageChange={handleManualCardImageChange}
                   />
                 </>
               )}

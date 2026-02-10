@@ -187,6 +187,11 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           showButtons={false}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
+          imageSizeMode={
+            promptImageSizeMode === "dynamic"
+              ? "dynamic"
+              : (promptImageSizeMode as any)
+          }
         />
       )}
       {showExplanation && (

@@ -75,6 +75,7 @@ export default function Flashcards() {
     autoflowEnabled,
     skipCorrectionEnabled,
     trueFalseButtonsVariant,
+    actionButtonsPosition,
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
@@ -637,6 +638,8 @@ export default function Flashcards() {
     shouldUseTrueFalseActionBar &&
     shouldShowBoxes &&
     !correction;
+  const shouldShowInlineTrueFalseActions =
+    shouldShowTrueFalseActions && actionButtonsPosition !== "top";
   const trueFalseActionsMode =
     shouldShowExplanation && shouldUseTrueFalseActionBar ? "ok" : "answer";
   const trueFalseActionsDisabled = shouldShowExplanation
@@ -727,7 +730,7 @@ export default function Flashcards() {
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
         hideActions={courseHasOnlyTrueFalse}
-        showTrueFalseActions={shouldShowTrueFalseActions}
+        showTrueFalseActions={shouldShowInlineTrueFalseActions}
         trueFalseActionsDisabled={trueFalseActionsDisabled}
         onTrueFalseAnswer={handleTrueFalseAnswer}
         trueFalseActionsMode={trueFalseActionsMode}

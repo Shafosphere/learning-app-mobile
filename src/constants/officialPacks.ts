@@ -31,6 +31,7 @@ export type OfficialPackDef = {
   iconId: string;
   iconColor: string;
   reviewsEnabled?: boolean;
+  defaultType?: "traditional" | "true_false" | "self_assess";
   sourceLang?: string;
   targetLang?: string;
   smallFlag?: string;
@@ -52,6 +53,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "flag:en",
     iconColor: "#10B981",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -64,6 +66,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "flag:en",
     iconColor: "#FBBF24",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -76,6 +79,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "flag:en",
     iconColor: "#6366F1",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -88,6 +92,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "flag:en",
     iconColor: "#EC4899",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -100,6 +105,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "book",
     iconColor: "#F97316",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "kr",
     targetLang: "pl",
     smallFlag: "kr",
@@ -112,6 +118,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "planet",
     iconColor: "#14B8A6",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -125,6 +132,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "planet",
     iconColor: "#8B5CF6",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -138,6 +146,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "calculator",
     iconColor: "#38BDF8",
     reviewsEnabled: true,
+    defaultType: "self_assess",
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -151,6 +160,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "code",
     iconColor: "#22C55E",
     reviewsEnabled: true,
+    defaultType: "true_false",
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -164,6 +174,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "globe",
     iconColor: "#22C55E",
     reviewsEnabled: true,
+    defaultType: "traditional",
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",

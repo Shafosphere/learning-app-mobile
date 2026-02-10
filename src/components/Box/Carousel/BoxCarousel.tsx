@@ -193,7 +193,7 @@ export default function BoxCarousel({
                 onMomentumScrollEnd={handleMomentumEnd}
                 onScroll={Animated.event(
                     [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                    { useNativeDriver: true }
+                    { useNativeDriver: false }
                 )}
                 scrollEventThrottle={16}
                 getItemLayout={(_, index) => ({

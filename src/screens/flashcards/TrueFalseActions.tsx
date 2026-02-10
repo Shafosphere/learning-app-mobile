@@ -122,13 +122,13 @@ export function TrueFalseActionsAnimated({
         Animated.timing(opacity, {
           toValue: 1,
           duration: 200,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.spring(translateY, {
           toValue: 0,
           speed: 20,
           bounciness: 6,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start();
     } else {
@@ -136,12 +136,12 @@ export function TrueFalseActionsAnimated({
         Animated.timing(opacity, {
           toValue: 0,
           duration: 150,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
         Animated.timing(translateY, {
           toValue: 8,
           duration: 150,
-          useNativeDriver: true,
+          useNativeDriver: false,
         }),
       ]).start(({ finished }) => {
         if (finished) {

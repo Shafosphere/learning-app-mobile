@@ -15,64 +15,25 @@ import { applySchema, configurePragmas } from "./schema";
 import { splitBackTextIntoAnswers } from "./utils";
 
 type CsvRow = {
-    front?: string;
-    back?: string;
-    przod?: string;
-    tyl?: string;
+    type?: string;
     front_text?: string;
     back_text?: string;
-    type?: string;
-    hint1?: string;
-    hint2?: string;
-    hint_front?: string;
-    hint_back?: string;
+    front_image?: string;
+    back_image?: string;
+    tf_answer?: string | number | boolean;
     block?: string | number | boolean;
-    blokada?: string | number | boolean;
-    lock?: string | number | boolean;
-    answer_only?: string | number | boolean;
-    question?: string | number | boolean;
-    pytanie?: string | number | boolean;
-    is_true?: string | number | boolean;
-    isTrue?: string | number | boolean;
-    czy_prawda?: string | number | boolean;
-    czyPrawda?: string | number | boolean;
+    explanation?: string;
 };
 
 const KNOWN_CSV_HEADERS = new Set([
-    "front",
-    "back",
-    "przod",
-    "tyl",
+    "type",
     "front_text",
     "back_text",
-    "fronttext",
-    "backtext",
-    "question_text",
-    "questiontext",
-    "hint1",
-    "hint2",
-    "hint_front",
-    "hint_back",
+    "front_image",
+    "back_image",
+    "tf_answer",
     "block",
-    "blokada",
-    "lock",
-    "answer_only",
-    "question",
-    "pytanie",
-    "is_true",
-    "istrue",
-    "czy_prawda",
-    "czyprawda",
     "explanation",
-    "wyjasnienie",
-    "wyjaśnienie",
-    "explain",
-    "opis",
-    "image_front",
-    "imagefront",
-    "image_back",
-    "imageback",
-    "type",
 ]);
 
 const TRUE_VALUES = new Set([
@@ -89,39 +50,17 @@ const parseBooleanValue = (value: unknown): boolean => {
     const normalized = value.toString().trim().toLowerCase();
     return TRUE_VALUES.has(normalized);
 };
-const isBooleanText = (value: string): boolean => {
-    // Treat only clear boolean words as true/false answers; avoid 1-letter tokens like "t"/"y"
-    // so entries such as Hangul consonant readings ("t", "p") are not converted to true_false cards.
-    const normalized = value.trim().toLowerCase();
-    return (
-        normalized === "true" ||
-        normalized === "false" ||
-        normalized === "yes" ||
-        normalized === "no" ||
-        normalized === "tak" ||
-        normalized === "nie" ||
-        normalized === "locked" ||
-        normalized === "unlocked"
-    );
-};
-
-const extractHint = (primary?: string, secondary?: string): string | null => {
-    const value = (primary ?? secondary ?? "").trim();
-    return value.length > 0 ? value : null;
-};
-
 const parseCardType = (
     value: unknown
-): "text" | "image" | "true_false" | "know_dont_know" | null => {
+): "traditional" | "true_false" | "self_assess" | null => {
     if (value == null) return null;
     const normalized = value.toString().trim().toLowerCase();
     if (
-        normalized === "text" ||
-        normalized === "image" ||
+        normalized === "traditional" ||
         normalized === "true_false" ||
-        normalized === "know_dont_know"
+        normalized === "self_assess"
     ) {
-        return normalized as "text" | "image" | "true_false" | "know_dont_know";
+        return normalized as "traditional" | "true_false" | "self_assess";
     }
     return null;
 };
@@ -142,7 +81,8 @@ const resolveImageFromMap = async (
 
 async function readCsvAsset(
     assetModule: any,
-    imageMap?: Record<string, any>
+    imageMap?: Record<string, any>,
+    defaultType?: "traditional" | "true_false" | "self_assess"
 ): Promise<CustomFlashcardInput[]> {
     console.log("[DB] readCsvAsset: create asset from module");
     const asset = Asset.fromModule(assetModule);
@@ -161,152 +101,97 @@ async function readCsvAsset(
     const headerFields = (parsedWithHeader.meta?.fields ?? []).map((field) =>
         field.trim().toLowerCase()
     );
-    const hasKnownHeader = headerFields.some((field) =>
-        KNOWN_CSV_HEADERS.has(field)
-    );
-    const headerlessRows = hasKnownHeader
-        ? null
-        : Papa.parse<string[]>(csv, {
-            header: false,
-            skipEmptyLines: true,
-        }).data;
-    const data = headerlessRows ? [] : parsedWithHeader.data;
+    const hasKnownHeader = headerFields.some((field) => KNOWN_CSV_HEADERS.has(field));
+    const data = hasKnownHeader ? parsedWithHeader.data : [];
     console.log(
         "[DB] readCsvAsset: parsed rows=",
         data?.length ?? 0,
         "headerless=",
-        Boolean(headerlessRows)
+        false
     );
-    const cards = headerlessRows
-        ? headerlessRows.map((row, idx) => {
-            const front = (row?.[0] ?? "").toString().trim();
-            const explanationRaw = (row?.[1] ?? "").toString().trim();
-            const explanation = explanationRaw.length > 0 ? explanationRaw : null;
+    const cards = await Promise.all(
+        data.map(async (row, idx) => {
+            const explicitType = parseCardType((row as any).type);
+            const resolvedType = explicitType ?? defaultType ?? null;
+            if (!resolvedType) {
+                return null;
+            }
+
+            const front = (row.front_text ?? "").toString().trim();
+            const backRaw = (row.back_text ?? "").toString().trim();
+            const tfAnswerRaw = (row as any).tf_answer;
+            const hasTrueFalseFlag =
+                tfAnswerRaw != null && tfAnswerRaw.toString().trim().length > 0;
+            const imageFrontName = (row as any).front_image ?? null;
+            const imageBackName = (row as any).back_image ?? null;
+            const imageFront = imageFrontName
+                ? await resolveImageFromMap(
+                    imageFrontName.toString().trim(),
+                    imageMap
+                )
+                : null;
+            const imageBack = imageBackName
+                ? await resolveImageFromMap(
+                    imageBackName.toString().trim(),
+                    imageMap
+                )
+                : null;
+            const explanationRaw = (row as any).explanation ?? null;
+            const explanation =
+                typeof explanationRaw === "string"
+                    ? explanationRaw.trim() || null
+                    : null;
+            const blockRaw = (row as any).block;
+            const answerOnly = parseBooleanValue(blockRaw);
+            const locked = answerOnly;
+
+            const mappedType =
+                resolvedType === "traditional"
+                    ? "text"
+                    : resolvedType === "true_false"
+                        ? "true_false"
+                        : "know_dont_know";
+
+            const inferredAnswers =
+                mappedType === "true_false" && hasTrueFalseFlag
+                    ? [parseBooleanValue(tfAnswerRaw) ? "true" : "false"]
+                    : splitBackTextIntoAnswers(backRaw);
+
             const card: CustomFlashcardInput = {
                 frontText: front,
-                backText: "",
-                answers: [],
+                backText: backRaw,
+                answers: inferredAnswers,
                 position: idx,
-                flipped: false,
-                answerOnly: true,
+                flipped: !locked,
+                answerOnly,
                 hintFront: null,
                 hintBack: null,
-                type: "know_dont_know",
-                imageFront: null,
-                imageBack: null,
-                explanation,
+                type: mappedType,
+                imageFront,
+                imageBack,
+                explanation: explanation,
             };
+
+            if (mappedType === "know_dont_know") {
+                card.answers = [];
+                card.answerOnly = true;
+                card.flipped = false;
+                card.explanation = explanation || null;
+            } else if (mappedType === "true_false") {
+                card.answers = hasTrueFalseFlag
+                    ? [parseBooleanValue(tfAnswerRaw) ? "true" : "false"]
+                    : [];
+            }
             return card;
         })
-        : await Promise.all(
-            data.map(async (row, idx) => {
-                const explicitType = parseCardType((row as any).type);
-                const front = (
-                    row.front ??
-                    row.przod ??
-                    row.front_text ??
-                    (row as any).frontText ??
-                    (row as any).question_text ??
-                    (row as any).questionText ??
-                    ""
-                ).trim();
-                const backRaw = (
-                    row.back ??
-                    row.tyl ??
-                    row.back_text ??
-                    (row as any).backText ??
-                    ""
-                ).trim();
-                const trueFalseRaw =
-                    (row as any).is_true ??
-                    (row as any).isTrue ??
-                    (row as any).czy_prawda ??
-                    (row as any).czyPrawda;
-                const hasTrueFalseFlag =
-                    trueFalseRaw != null &&
-                    trueFalseRaw.toString().trim().length > 0;
-                const imageFrontName = (row as any).image_front ?? (row as any).imageFront ?? null;
-                const imageBackName = (row as any).image_back ?? (row as any).imageBack ?? null;
-                const imageFront = imageFrontName
-                    ? await resolveImageFromMap(
-                        imageFrontName.toString().trim(),
-                        imageMap
-                    )
-                    : null;
-                const imageBack = imageBackName
-                    ? await resolveImageFromMap(
-                        imageBackName.toString().trim(),
-                        imageMap
-                    )
-                    : null;
-                const hasImages = Boolean(imageFront || imageBack);
-                const hintFront = extractHint(row.hint1, row.hint_front);
-                const hintBack = extractHint(row.hint2, row.hint_back);
-                const explanationRaw =
-                    (row as any).explanation ??
-                    (row as any).wyjasnienie ??
-                    (row as any).wyjaśnienie ??
-                    (row as any).explain ??
-                    (row as any).opis ??
-                    null;
-                const explanation =
-                    typeof explanationRaw === "string"
-                        ? explanationRaw.trim() || null
-                        : null;
-                const blockRaw =
-                    (row as any).blokada ??
-                    (row as any).block ??
-                    row.answer_only ??
-                    row.question ??
-                    row.pytanie ??
-                    row.lock;
-                const answerOnly = parseBooleanValue(blockRaw);
-                const locked = answerOnly;
-                const inferredAnswers = hasTrueFalseFlag
-                    ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-                    : splitBackTextIntoAnswers(backRaw);
-                const isBoolean = hasTrueFalseFlag
-                    ? true
-                    : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
-                const inferredType = isBoolean ? "true_false" : hasImages ? "image" : "text";
-                const type = explicitType ?? inferredType;
-                const card: CustomFlashcardInput = {
-                    frontText: front,
-                    backText: backRaw,
-                    answers: inferredAnswers,
-                    position: idx,
-                    flipped: !locked,
-                    answerOnly,
-                    hintFront,
-                    hintBack,
-                    type,
-                    imageFront,
-                    imageBack,
-                    explanation,
-                };
-                if (type === "know_dont_know") {
-                    card.answers = [];
-                    card.answerOnly = true;
-                    card.flipped = false;
-                    card.explanation = explanation || backRaw || null;
-                } else if (type === "true_false") {
-                    card.answers = hasTrueFalseFlag
-                        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-                        : inferredAnswers.length > 0
-                            ? inferredAnswers.map((value) =>
-                                parseBooleanValue(value) ? "true" : "false"
-                            )
-                            : [];
-                }
-                return card;
-            })
-        );
+    );
     return cards.filter(
-        (c) =>
-            c.frontText.length > 0 ||
-            (c.answers?.length ?? 0) > 0 ||
-            c.imageFront != null ||
-            c.imageBack != null
+        (c): c is CustomFlashcardInput =>
+            Boolean(c) &&
+            (c.frontText.length > 0 ||
+                (c.answers?.length ?? 0) > 0 ||
+                c.imageFront != null ||
+                c.imageBack != null)
     );
 }
 
@@ -323,13 +208,7 @@ async function getBlockedPositionsFromCsvAsset(assetModule: any): Promise<Set<nu
     });
     const blocked = new Set<number>();
     data.forEach((row: any, idx: number) => {
-        const flag =
-            row?.blokada ??
-            row?.block ??
-            row?.answer_only ??
-            row?.question ??
-            row?.pytanie ??
-            row?.lock;
+        const flag = row?.block;
         if (parseBooleanValue(flag)) {
             blocked.add(idx);
         }
@@ -372,7 +251,12 @@ async function applyBlockFlagFixForOfficialPacks(
 async function importOfficialPackIfEmpty(
     db: SQLite.SQLiteDatabase,
     courseId: number,
-    pack: { csvAsset: any; imageMap?: Record<string, any>; slug: string }
+    pack: {
+        csvAsset: any;
+        imageMap?: Record<string, any>;
+        slug: string;
+        defaultType?: "traditional" | "true_false" | "self_assess";
+    }
 ) {
     console.log("[DB] importOfficialPackIfEmpty: check courseId=", courseId);
     const row = await db.getFirstAsync<{ cnt: number }>(
@@ -386,7 +270,7 @@ async function importOfficialPackIfEmpty(
         return;
     }
     console.log("[DB] importOfficialPackIfEmpty: reading asset", pack.slug);
-    const cards = await readCsvAsset(pack.csvAsset, pack.imageMap);
+    const cards = await readCsvAsset(pack.csvAsset, pack.imageMap, pack.defaultType);
     console.log("[DB] importOfficialPackIfEmpty: cards prepared=", cards.length);
     if (cards.length === 0) return;
     console.log("[DB] importOfficialPackIfEmpty: replacing flashcards");

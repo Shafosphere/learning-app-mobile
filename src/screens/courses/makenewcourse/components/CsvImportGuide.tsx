@@ -3,7 +3,7 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, Text, View } from "react-native";
 
-export type CsvImportType = "text" | "image" | "true_false" | "know_dont_know";
+export type CsvImportType = "text" | "true_false" | "know_dont_know";
 
 interface CsvImportGuideProps {
   onPickFile: () => void;
@@ -150,6 +150,12 @@ type TemplateData = {
 
 const OPTIONAL_FIELDS_TEXT = [
   {
+    id: "image_front",
+    label: "image_front (opcjonalne)",
+    description:
+      "Nazwa pliku w ZIP (folder images/) albo ścieżka file:// / content:// w CSV.",
+  },
+  {
     id: "blokada / block",
     label: "blokada",
     description:
@@ -164,6 +170,12 @@ const OPTIONAL_FIELDS_TEXT = [
 ];
 
 const OPTIONAL_FIELDS_HINT_ONLY = [
+  {
+    id: "image_front",
+    label: "image_front (opcjonalne)",
+    description:
+      "Nazwa pliku w ZIP (folder images/) albo ścieżka file:// / content:// w CSV.",
+  },
   {
     id: "podpowiedz1 / podpowiedz2",
     label: "podpowiedz1 / podpowiedz2",
@@ -203,18 +215,6 @@ const TEMPLATES: Record<CsvImportType, TemplateData> = {
     sampleRow: ["Funkcje strzałkowe JS", "true"],
     optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
   },
-  image: {
-    label: "Z obrazkami (ZIP)",
-    description:
-      "Tylko format ZIP. Musi zawierać plik 'data.csv' oraz folder 'images'.",
-    requiredColumns: [
-      { id: "obraz_przod", label: "obraz_przod (plik pytanie)" },
-      { id: "tyl", label: "tył (tekst odpowiedzi)" },
-    ],
-    sampleRow: ["kot.jpg", "Cat"],
-    tip: "Pliki obrazków umieść w folderze 'images' w archiwum ZIP. W CSV podaj tylko nazwę pliku, np. 'obrazek.jpg'. Pole 'tył' zawiera tekst odpowiedzi.",
-    optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
-  },
 };
 
 export function CsvImportGuide({
@@ -231,8 +231,15 @@ export function CsvImportGuide({
       <View style={styles.contentContainer}>
         <Text style={styles.description}>{template.description}</Text>
         <Text style={styles.description}>
-          Opcjonalna kolumna <Text style={{ fontWeight: "700" }}>type</Text> pozwala mieszać typy fiszek w jednym pliku
-          (text, image, true_false, know_dont_know).
+          Opcjonalna kolumna <Text style={{ fontWeight: "700" }}>type</Text>{" "}
+          pozwala mieszać typy fiszek w jednym pliku (text, true_false,
+          know_dont_know).
+        </Text>
+        <Text style={styles.description}>
+          Obrazki dodajesz przez kolumnę{" "}
+          <Text style={{ fontWeight: "700" }}>image_front</Text>. Jeśli używasz
+          plików, najlepiej spakować CSV do ZIP z folderem{" "}
+          <Text style={{ fontWeight: "700" }}>images/</Text>.
         </Text>
 
         {/* Visual Table Preview */}

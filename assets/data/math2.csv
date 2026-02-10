@@ -1,3 +1,4 @@
+front_text,explanation
 Podaj definicję wartości bezwzględnej $|x|$ dla liczby rzeczywistej $x < 0$.,$|x| = -x$
 Jak brzmi nierówność trójkąta dla wartości bezwzględnej sumy dwóch liczb $x$ i $y$?,$|x + y| \le |x| + |y|$
 Rozwiąż równoważnie nierówność $|x - a| \le r$ dla $r \ge 0$.,$a - r \le x \le a + r$

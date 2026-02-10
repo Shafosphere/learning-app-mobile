@@ -12,6 +12,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     display: "flex",
     gap: 30,
   },
+  topActionsWrapper: {
+    paddingHorizontal: 16,
+    alignItems: "center",
+  },
   boxesWrapper: {
     position: "relative",
     alignItems: "center",

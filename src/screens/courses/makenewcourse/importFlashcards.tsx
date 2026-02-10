@@ -53,10 +53,6 @@ const cardTypeOptions: { key: ManualCardType; label: string }[] = [
     label: "Tradycyjne",
   },
   {
-    key: "image",
-    label: "Z obrazkiem",
-  },
-  {
     key: "true_false",
     label: "Prawda / Fałsz",
   },
@@ -119,7 +115,6 @@ export default function CustomCourseContentScreen() {
   });
   const manualCardsByTypeRef = useRef<Record<ManualCardType, ManualCard[]>>({
     text: manualCards,
-    image: [createEmptyManualCard("card-image-0", "image")],
     true_false: [createEmptyManualCard("card-truefalse-0", "true_false")],
     know_dont_know: [createEmptyManualCard("card-knowdontknow-0", "know_dont_know")],
   });
@@ -131,7 +126,6 @@ export default function CustomCourseContentScreen() {
     { key: "text", label: "Tradycyjne" },
     { key: "true_false", label: "Prawda / Fałsz" },
     { key: "know_dont_know", label: "Umiem / Nie umiem" },
-    { key: "image", label: "Z obrazkami (ZIP)" },
   ];
 
   const inferCardTypeFromCards = useCallback((cards: ManualCard[]): ManualCardType => {
@@ -143,16 +137,6 @@ export default function CustomCourseContentScreen() {
     }
     if (cards.length > 0 && cards.every((card) => (card.type ?? "text") === "true_false")) {
       return "true_false";
-    }
-    if (
-      cards.some(
-        (card) =>
-          (card.type ?? "text") === "image" ||
-          Boolean(card.imageFront) ||
-          Boolean(card.imageBack)
-      )
-    ) {
-      return "image";
     }
     return "text";
   }, []);
@@ -167,8 +151,6 @@ export default function CustomCourseContentScreen() {
             ...card,
             type: nextType,
             answers: [normalizedAnswer],
-            imageFront: null,
-            imageBack: null,
             front: card.front ?? "",
           };
         }
@@ -177,9 +159,7 @@ export default function CustomCourseContentScreen() {
           ...card,
           type: nextType,
           answers: ensuredAnswers,
-          front: nextType === "image" ? "" : card.front ?? "",
-          imageFront: nextType === "image" ? card.imageFront ?? null : null,
-          imageBack: nextType === "image" ? null : card.imageBack ?? null,
+          front: card.front ?? "",
         };
       }),
     []
@@ -286,17 +266,19 @@ export default function CustomCourseContentScreen() {
       return null;
     };
 
-    const readCardType = (row: any): ManualCardType | null => {
+      const readCardType = (row: any): ManualCardType | null => {
       const raw = row?.type;
       if (raw == null) return null;
       const normalized = raw.toString().trim().toLowerCase();
       if (
         normalized === "text" ||
-        normalized === "image" ||
         normalized === "true_false" ||
         normalized === "know_dont_know"
       ) {
         return normalized as ManualCardType;
+      }
+      if (normalized === "image") {
+        return "text";
       }
       return null;
     };
@@ -321,12 +303,8 @@ export default function CustomCourseContentScreen() {
       const imageFrontName = normalizeImageField(
         readStringField(row, ["image_front", "imageFront", "obraz_przod"])
       );
-      const imageBackName = normalizeImageField(
-        readStringField(row, ["image_back", "imageBack", "obraz_tyl"])
-      );
       const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
-      const imageBack = resolveImage ? await resolveImage(imageBackName) : null;
-      const hasImages = Boolean(imageFront || imageBack);
+      const imageBack = null;
 
       const inferredAnswers = hasTrueFalseFlag
         ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
@@ -334,11 +312,7 @@ export default function CustomCourseContentScreen() {
       const isBoolean = hasTrueFalseFlag
         ? true
         : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
-      const inferredType: ManualCardType = isBoolean
-        ? "true_false"
-        : hasImages
-          ? "image"
-          : "text";
+      const inferredType: ManualCardType = isBoolean ? "true_false" : "text";
       const type: ManualCardType = explicitType ?? inferredType;
 
       const answerOnlyFlag = parseBooleanValue(
@@ -638,7 +612,7 @@ export default function CustomCourseContentScreen() {
         imageFront?: string | null;
         imageBack?: string | null;
         explanation?: string | null;
-        type?: "text" | "image" | "true_false" | "know_dont_know";
+        type?: "text" | "true_false" | "know_dont_know";
       }[]
     >((acc, card) => {
       const frontText = card.front.trim();
@@ -777,11 +751,7 @@ export default function CustomCourseContentScreen() {
                 onAddCard={() => handleAddCard(manualCardType)}
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
-                onCardImageChange={
-                  manualCardType === "image"
-                    ? handleManualCardImageChange
-                    : undefined
-                }
+                onCardImageChange={handleManualCardImageChange}
               />
             </View>
           )}

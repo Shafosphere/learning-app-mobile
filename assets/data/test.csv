@@ -1,9 +1,13 @@
-type,przod,tyl,image_front,is_true,explanation
-text,Bonjour,Hello,,,
-text,"Witaj, świecie","Hello, World",,,
-true_false,Ziemia jest płaska,,,false,
-true_false,Słońce jest gwiazdą,,,true,
-image,,Polska,ad.svg,,
-image,,Austria,at.svg,,
-know_dont_know,Wzór na pole koła,"Pi razy r do kwadratu",,,
-know_dont_know,II zasada dynamiki Newtona,"F=ma",,,
+type,front_text,back_text,front_image,back_image,tf_answer,block,explanation
+traditional,Bonjour,Hello,,,,,
+traditional,"Witaj, świecie","Hello, World",,,,,
+true_false,Ziemia jest płaska,,,,false,,
+true_false,Słońce jest gwiazdą,,,,true,,
+true_false,Czy to flaga polski?,,pl.svg,,false,,
+true_false,Czy to flaga Francji?,,fr.svg,,true,,
+traditional,,Polska,ad.svg,,,,
+traditional,,Austria,at.svg,,,,
+self_assess,Wzór na pole koła,,,,,,Pi razy r do kwadratu
+self_assess,II zasada dynamiki Newtona,,,,,,F=ma
+self_assess,Stolica Niemiec,,de.svg,,,,
+self_assess,,,it.svg,,,,włochy

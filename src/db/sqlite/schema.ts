@@ -152,6 +152,11 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     "type",
     "TEXT NOT NULL DEFAULT 'text'"
   );
+  await db.execAsync(
+    `UPDATE custom_flashcards
+     SET type = 'text'
+     WHERE type IS NULL OR type = '' OR type = 'image';`
+  );
 
   // Official pack metadata (idempotent, safe for existing DBs)
   await ensureColumn(

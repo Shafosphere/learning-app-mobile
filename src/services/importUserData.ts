@@ -34,6 +34,18 @@ const persistImageIfAvailable = async (
     }
 };
 
+const normalizeImportedType = (value?: string | null): "text" | "true_false" | "know_dont_know" => {
+    if (!value) return "text";
+    const normalized = value.toString().trim().toLowerCase();
+    if (normalized === "true_false" || normalized === "know_dont_know") {
+        return normalized;
+    }
+    if (normalized === "image") {
+        return "text";
+    }
+    return "text";
+};
+
 async function restoreCustomCourse(
     db: SQLiteDatabase,
     courseExport: CustomCourseExport
@@ -78,7 +90,7 @@ async function restoreCustomCourse(
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,
-            card.type ?? "text",
+            normalizeImportedType(card.type),
             card.createdAt,
             now
         );
@@ -272,7 +284,7 @@ async function restoreOfficialCourse(
             const nextAnswerOnly = card.answerOnly ?? false;
             const nextImageFront = await persistImageIfAvailable(card.imageFront);
             const nextImageBack = await persistImageIfAvailable(card.imageBack);
-            const nextType = card.type ?? "text";
+            const nextType = normalizeImportedType(card.type);
             const shouldUpdateHints =
                 nextHintFront !== (existing.hintFront ?? null) ||
                 nextHintBack !== (existing.hintBack ?? null);
@@ -330,7 +342,7 @@ async function restoreOfficialCourse(
             card.position,
             card.flipped ? 1 : 0,
             card.answerOnly ? 1 : 0,
-            card.type ?? "text",
+            normalizeImportedType(card.type),
             card.createdAt ?? now,
             now
         );

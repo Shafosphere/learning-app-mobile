@@ -111,23 +111,15 @@ export default function FlashcardsPeekOverlay({
           : normalizedTrueFalse === "false"
             ? "Fałsz"
             : translations[0]?.trim() || "Brak odpowiedzi";
-    const inferredType =
-      isBooleanType
-        ? "true_false"
-        : hasPromptImage || hasAnswerImage
-          ? "image"
-          : "text";
     const typeLabel =
-      inferredType === "true_false"
+      isBooleanType
         ? isKnowDontKnow
           ? "Umiem / Nie umiem"
           : "Prawda / Fałsz"
-        : inferredType === "image"
-          ? "Obrazek"
-          : "Tekst";
+        : "Tekst";
     const showPromptImageOnly =
-      inferredType === "image" && hasPromptImage && !displayPrompt;
-    const showTrueFalseAnswer = inferredType === "true_false" && isBoxZero;
+      hasPromptImage && !displayPrompt;
+    const showTrueFalseAnswer = isBooleanType && isBoxZero;
 
     return (
       <View style={styles.cardWrapper}>
@@ -143,6 +135,11 @@ export default function FlashcardsPeekOverlay({
                 <View style={styles.typePill}>
                   <Text style={styles.typePillText}>{typeLabel}</Text>
                 </View>
+                {hasPromptImage ? (
+                  <View style={styles.typePill}>
+                    <Text style={styles.typePillText}>Obrazek</Text>
+                  </View>
+                ) : null}
               </View>
               {showPromptImageOnly ? (
                 <View style={styles.imageOnlyWrapper}>
@@ -221,6 +218,11 @@ export default function FlashcardsPeekOverlay({
               <View style={styles.typePill}>
                 <Text style={styles.typePillText}>{typeLabel}</Text>
               </View>
+              {hasPromptImage ? (
+                <View style={styles.typePill}>
+                  <Text style={styles.typePillText}>Obrazek</Text>
+                </View>
+              ) : null}
             </View>
             <View style={styles.cardLine}>
               {showPromptImageOnly ? (
