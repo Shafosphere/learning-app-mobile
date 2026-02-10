@@ -2,7 +2,11 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Card from "@/src/components/card/card";
 import type { CardCorrectionType } from "@/src/components/card/card-types";
-import { FlashcardsGameView } from "@/src/components/flashcards/FlashcardsGameView";
+import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
+import Boxes from "@/src/components/Box/List/BoxList";
+import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
+import Confetti from "@/src/components/confetti/Confetti";
+import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import {
   advanceCustomReview,
@@ -18,6 +22,8 @@ import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
+import { View } from "react-native";
+import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const BOX_SPAM_WINDOW_MS = 2000;
 const BOX_SPAM_THRESHOLD = 20;
@@ -91,7 +97,8 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{ courseId?: string }>();
-  const { trueFalseButtonsVariant } = useSettings();
+  const styles = useStyles();
+  const { trueFalseButtonsVariant, actionButtonsPosition } = useSettings();
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -669,29 +676,51 @@ export default function ReviewFlashcardsPlaceholder() {
       selectedItem?.type === "know_dont_know") &&
     !correction;
   const trueFalseActionsDisabled = result !== null || isLoading;
+  const explanationText =
+    typeof selectedItem?.explanation === "string"
+      ? selectedItem.explanation.trim()
+      : "";
+  const showCorrectionInputs = Boolean(correction && result === false);
+  const isExplanationVisible = Boolean(
+    !showCorrectionInputs &&
+      explanationText.length > 0 &&
+      ((selectedItem?.type === "true_false" && result === false) ||
+        (selectedItem?.type === "know_dont_know" && result !== null) ||
+        ((selectedItem?.answerOnly ?? false) && result !== null)),
+  );
+  const showCardActions = !(
+    shouldShowTrueFalseActions ||
+    selectedItem?.type === "true_false" ||
+    selectedItem?.type === "know_dont_know"
+  );
+  const handleCardActionsConfirm = () => handleConfirm();
+  const cardActionsDownloadDisabled = true;
+  const cardActionsConfirmDisabled = false;
+  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const effectiveTrueFalseButtonsVariant =
     selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
 
-  return (
-    <FlashcardsGameView
-      shouldCelebrate={shouldCelebrate}
-      boxes={boxes}
-      activeBox={activeBox}
-      onSelectBox={handleSelectBox}
-      onBoxLongPress={handleBoxLongPress}
-      boxesLayout={layout}
-      hideBoxZero={true}
-      showFloatingAdd={false}
+  const renderButtons = (position: "top" | "bottom") => (
+    <FlashcardsButtons
+      position={position}
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-      peekBox={peekBox}
-      peekCards={peekCards}
-      activeCustomCourseId={courseId}
-      activeCourseName={null}
-      onClosePeek={closePeek}
-    >
+      showCardActions={showCardActions}
+      onCardActionsConfirm={handleCardActionsConfirm}
+      onDownload={async () => undefined}
+      downloadDisabled={cardActionsDownloadDisabled}
+      confirmDisabled={cardActionsConfirmDisabled}
+      confirmLabel={cardActionsConfirmLabel}
+    />
+  );
+
+  return (
+    <View style={styles.container}>
+      <Confetti generateConfetti={shouldCelebrate} />
+
+      {actionButtonsPosition === "top" ? renderButtons("top") : null}
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}
@@ -703,20 +732,41 @@ export default function ReviewFlashcardsPlaceholder() {
         correction={correction}
         wrongInputChange={wrongInputChange}
         setCorrectionRewers={setCorrectionRewers}
-        onDownload={async () => { }}
-        downloadDisabled
         introMode={false}
         onHintUpdate={() => undefined}
-        hideActions={
-          selectedItem?.type === "true_false" ||
-          selectedItem?.type === "know_dont_know"
-        }
-        showTrueFalseActions={shouldShowTrueFalseActions}
-        trueFalseActionsDisabled={trueFalseActionsDisabled}
-        onTrueFalseAnswer={handleTrueFalseAnswer}
         hideHints
         isFocused={!isLoading}
       />
-    </FlashcardsGameView>
+      {actionButtonsPosition === "bottom" ? renderButtons("bottom") : null}
+
+      <View style={styles.boxesWrapper}>
+        {layout === "classic" ? (
+          <Boxes
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+            hideBoxZero
+            onBoxLongPress={handleBoxLongPress}
+          />
+        ) : (
+          <BoxesCarousel
+            boxes={boxes}
+            activeBox={activeBox}
+            handleSelectBox={handleSelectBox}
+            hideBoxZero
+            onBoxLongPress={handleBoxLongPress}
+          />
+        )}
+      </View>
+
+      <FlashcardsPeekOverlay
+        visible={peekBox !== null}
+        boxKey={peekBox}
+        cards={peekCards}
+        activeCustomCourseId={courseId}
+        activeCourseName={null}
+        onClose={closePeek}
+      />
+    </View>
   );
 }

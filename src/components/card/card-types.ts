@@ -18,8 +18,6 @@ export type CardProps = {
   result: boolean | null;
   correction: CardCorrectionType | null;
   wrongInputChange: (which: 1 | 2, value: string) => void;
-  onDownload: () => Promise<void>;
-  downloadDisabled?: boolean;
   introMode?: boolean;
   setCorrectionRewers?: (value: string) => void;
   confirm: (selectedTranslation?: string, answerOverride?: string) => void;
@@ -28,13 +26,6 @@ export type CardProps = {
     hintFront: string | null,
     hintBack: string | null,
   ) => void;
-  actionCooldownActive?: boolean;
-  showTrueFalseActions?: boolean;
-  trueFalseActionsDisabled?: boolean;
-  onTrueFalseAnswer?: (value: boolean) => void;
-  trueFalseActionsMode?: "answer" | "ok";
-  onTrueFalseOk?: () => void;
-  hideActions?: boolean;
   isFocused?: boolean;
   backgroundColorOverride?: string;
   textColorOverride?: string;

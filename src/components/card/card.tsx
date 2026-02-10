@@ -22,7 +22,6 @@ import {
 } from "react-native";
 import { useStyles } from "./card-styles";
 import type { CardProps } from "./card-types";
-import { FlashcardsActions } from "@/src/components/flashcards/FlashcardsActions";
 import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
@@ -41,18 +40,9 @@ export default function Card({
   confirm,
   correction,
   wrongInputChange,
-  onDownload,
-  downloadDisabled = false,
   introMode = false,
   setCorrectionRewers,
   onHintUpdate,
-  actionCooldownActive = false,
-  showTrueFalseActions = false,
-  trueFalseActionsDisabled = false,
-  onTrueFalseAnswer,
-  trueFalseActionsMode = "answer",
-  onTrueFalseOk,
-  hideActions = false,
   isFocused = true,
   backgroundColorOverride,
   textColorOverride,
@@ -64,7 +54,6 @@ export default function Card({
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
     flashcardsImageSize,
-    trueFalseButtonsVariant,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -104,12 +93,6 @@ export default function Card({
     "main" | "correction1" | null
   >(null);
   const noopTextChange = useCallback((_: string) => {}, []);
-  const noopTrueFalseAnswer = useCallback((_: boolean) => {}, []);
-  const trueFalseAnswerHandler = useMemo(
-    () => onTrueFalseAnswer ?? noopTrueFalseAnswer,
-    [onTrueFalseAnswer, noopTrueFalseAnswer],
-  );
-
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
   const correctionInput1Ref = useRef<TextInput | null>(null);
@@ -805,7 +788,6 @@ export default function Card({
     next,
     input1LayoutWidth,
     input2LayoutWidth,
-    noopTrueFalseAnswer,
     answer,
     handleAnswerChange,
     mainInputRef,
@@ -817,22 +799,6 @@ export default function Card({
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
-  const showCardActions = !(
-    hideActions ||
-    showTrueFalseActions ||
-    selectedItem?.type === "true_false" ||
-    selectedItem?.type === "know_dont_know"
-  );
-  const effectiveTrueFalseButtonsVariant =
-    selectedItem?.type === "know_dont_know"
-      ? "know_dont_know"
-      : trueFalseButtonsVariant;
-  const handleCardActionsConfirm =
-    isExplanationVisible && onTrueFalseOk ? onTrueFalseOk : handleConfirm;
-  const cardActionsDownloadDisabled =
-    downloadDisabled || isExplanationVisible || actionCooldownActive;
-  const cardActionsConfirmDisabled = actionCooldownActive;
-  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -927,21 +893,10 @@ export default function Card({
         />
       ) : null}
 
-      <FlashcardsActions
-        placement="inline"
-        showTrueFalseActions={showTrueFalseActions}
-        trueFalseActionsDisabled={trueFalseActionsDisabled}
-        onTrueFalseAnswer={trueFalseAnswerHandler}
-        trueFalseActionsMode={trueFalseActionsMode}
-        onTrueFalseOk={onTrueFalseOk}
-        trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-        showCardActions={showCardActions}
-        onCardActionsConfirm={handleCardActionsConfirm}
-        onDownload={onDownload}
-        downloadDisabled={cardActionsDownloadDisabled}
-        confirmDisabled={cardActionsConfirmDisabled}
-        confirmLabel={cardActionsConfirmLabel}
-      />
+      {/*
+        Actions (True/False, Download/OK) are now rendered outside Card
+        from FlashcardsScreen via FlashcardsButtons.
+      */}
     </View>
   );
 }

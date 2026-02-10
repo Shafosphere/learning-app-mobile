@@ -1,5 +1,10 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import Card from "@/src/components/card/card";
-import { FlashcardsGameView } from "@/src/components/flashcards/FlashcardsGameView";
+import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
+import Boxes from "@/src/components/Box/List/BoxList";
+import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
+import Confetti from "@/src/components/confetti/Confetti";
+import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -24,8 +29,17 @@ import { useIsFocused } from "@react-navigation/native";
 import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useScreenIntro } from "@/src/hooks/useScreenIntro";
-import { type ReactNode, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
+import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const STREAK_TARGET = 5;
 const STREAK_COOLDOWN_MS = 15 * 60 * 1000;
@@ -67,6 +81,7 @@ function dedupeById<T extends { id: number }>(list: T[]): T[] {
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   // const router = useRouter();
+  const styles = useStyles();
   const {
     activeCustomCourseId,
     boxesLayout,
@@ -107,39 +122,40 @@ export default function Flashcards() {
     removeUsedWordIds,
     setBatchIndex,
     saveNow,
-  } =
-    useBoxesPersistenceSnapshot({
-      sourceLangId: activeCustomCourseId ?? 0,
-      targetLangId: activeCustomCourseId ?? 0,
-      level: `custom-${activeCustomCourseId ?? 0}`,
-      storageNamespace: "customBoxes",
-      autosave: activeCustomCourseId !== null,
-      saveDelayMs: 0,
-    });
+  } = useBoxesPersistenceSnapshot({
+    sourceLangId: activeCustomCourseId ?? 0,
+    targetLangId: activeCustomCourseId ?? 0,
+    level: `custom-${activeCustomCourseId ?? 0}`,
+    storageNamespace: "customBoxes",
+    autosave: activeCustomCourseId !== null,
+    saveDelayMs: 0,
+  });
 
-  const [customCourse, setCustomCourse] =
-    useState<CustomCourseRecord | null>(null);
+  const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
+    null,
+  );
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
-  const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
     () =>
       customCards.length > 0 &&
       customCards.every(
-        (card) =>
-          card.type === "true_false" || card.type === "know_dont_know"
+        (card) => card.type === "true_false" || card.type === "know_dont_know",
       ),
-    [customCards]
+    [customCards],
   );
   const courseHasOnlyKnowDontKnow = useMemo(
     () =>
       customCards.length > 0 &&
       customCards.every((card) => card.type === "know_dont_know"),
-    [customCards]
+    [customCards],
   );
   const skipCorrection = courseHasOnlyTrueFalse || skipCorrectionEnabled;
   const checkSpelling = useSpellchecking();
@@ -237,7 +253,7 @@ export default function Flashcards() {
 
       baseHandleSelectBox(boxName);
     },
-    [baseHandleSelectBox, boxSelectionLocked, triggerQuote]
+    [baseHandleSelectBox, boxSelectionLocked, triggerQuote],
   );
 
   useEffect(() => {
@@ -281,7 +297,7 @@ export default function Flashcards() {
           trigger: "quote_win_fast",
           category: "win_fast",
           cooldownMs: 2 * 60 * 1000,
-          probability: 0.6
+          probability: 0.6,
         });
       } else {
         // Standard win
@@ -289,7 +305,7 @@ export default function Flashcards() {
           trigger: "quote_win_standard",
           category: "win_standard",
           cooldownMs: 3 * 60 * 1000,
-          probability: 0.15 // zmniejsz szansę o ~50%
+          probability: 0.15, // zmniejsz szansę o ~50%
         });
       }
 
@@ -331,7 +347,7 @@ export default function Flashcards() {
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
     () => (peekBox ? getQueueForBox(peekBox) : []),
-    [getQueueForBox, peekBox]
+    [getQueueForBox, peekBox],
   );
 
   const handleBoxLongPress = useCallback(
@@ -340,7 +356,7 @@ export default function Flashcards() {
       if (!list.length) return;
       setPeekBox(boxName);
     },
-    [boxes]
+    [boxes],
   );
 
   const closePeek = useCallback(() => setPeekBox(null), []);
@@ -563,7 +579,10 @@ export default function Flashcards() {
   ]);
 
   useEffect(() => {
-    if (selectedItem && !customCards.some((card) => card.id === selectedItem.id)) {
+    if (
+      selectedItem &&
+      !customCards.some((card) => card.id === selectedItem.id)
+    ) {
       clearSelection();
     }
   }, [clearSelection, customCards, selectedItem]);
@@ -585,11 +604,15 @@ export default function Flashcards() {
       setLearned((prev) => prev.map(patcher));
       updateSelectedItem((current) => patcher(current));
     },
-    [setBoxes, setCustomCards, setLearned, updateSelectedItem]
+    [setBoxes, setCustomCards, setLearned, updateSelectedItem],
   );
 
   const handleHintUpdate = useCallback(
-    async (cardId: number, hintFront: string | null, hintBack: string | null) => {
+    async (
+      cardId: number,
+      hintFront: string | null,
+      hintBack: string | null,
+    ) => {
       if (activeCustomCourseId == null) return;
       patchCardHints(cardId, hintFront, hintBack);
       try {
@@ -598,13 +621,11 @@ export default function Flashcards() {
         console.error("Failed to update flashcard hint", { cardId, error });
       }
     },
-    [activeCustomCourseId, patchCardHints]
+    [activeCustomCourseId, patchCardHints],
   );
 
   const downloadDisabled =
-    customCards.length === 0 ||
-    isLoadingData ||
-    !isReady;
+    customCards.length === 0 || isLoadingData || !isReady;
   const shouldShowBoxes =
     activeCustomCourseId != null &&
     isReady &&
@@ -619,7 +640,7 @@ export default function Flashcards() {
         confirm,
         passChoiceAsSelectedTranslation: true,
       }),
-    [confirm, setAnswer]
+    [confirm, setAnswer],
   );
   const handleTrueFalseOk = useCallback(() => {
     if (isActionCooldownActive) return;
@@ -630,21 +651,41 @@ export default function Flashcards() {
     ((selectedItem?.type === "true_false" && result === false) ||
       (isKnowDontKnow && result !== null) ||
       (selectedItem?.answerOnly && result !== null));
+  const isIntroMode = Boolean(introModeActive && correction?.mode === "intro");
+  const showCorrectionInputs = Boolean(
+    correction && (result === false || isIntroMode),
+  );
+  const isExplanationVisible = Boolean(
+    !showCorrectionInputs &&
+    explanationText.length > 0 &&
+    ((selectedItem?.type === "true_false" && result === false) ||
+      (isKnowDontKnow && result !== null) ||
+      (selectedItem?.answerOnly && result !== null)),
+  );
   const shouldUseTrueFalseActionBar =
     courseHasOnlyTrueFalse ||
     selectedItem?.type === "true_false" ||
     isKnowDontKnow;
   const shouldShowTrueFalseActions =
-    shouldUseTrueFalseActionBar &&
-    shouldShowBoxes &&
-    !correction;
-  const shouldShowInlineTrueFalseActions =
-    shouldShowTrueFalseActions && actionButtonsPosition !== "top";
+    shouldUseTrueFalseActionBar && shouldShowBoxes && !correction;
   const trueFalseActionsMode =
     shouldShowExplanation && shouldUseTrueFalseActionBar ? "ok" : "answer";
   const trueFalseActionsDisabled = shouldShowExplanation
     ? isBetweenCards || isActionCooldownActive
     : result !== null || isBetweenCards || isActionCooldownActive;
+  const showCardActions = !(
+    courseHasOnlyTrueFalse ||
+    shouldShowTrueFalseActions ||
+    selectedItem?.type === "true_false" ||
+    isKnowDontKnow
+  );
+  const handleCardActionsConfirm = isExplanationVisible
+    ? handleTrueFalseOk
+    : () => confirm();
+  const cardActionsDownloadDisabled =
+    downloadDisabled || isExplanationVisible || isActionCooldownActive;
+  const cardActionsConfirmDisabled = isActionCooldownActive;
+  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
     shouldShowBoxes &&
@@ -655,9 +696,9 @@ export default function Flashcards() {
     ? "know_dont_know"
     : selectedItem?.answerOnly
       ? "know_dont_know"
-    : courseHasOnlyKnowDontKnow
-      ? "know_dont_know"
-      : trueFalseButtonsVariant;
+      : courseHasOnlyKnowDontKnow
+        ? "know_dont_know"
+        : trueFalseButtonsVariant;
 
   useLayoutEffect(() => {
     if (!selectedItem) return;
@@ -725,49 +766,83 @@ export default function Flashcards() {
         correction={correction}
         wrongInputChange={wrongInputChange}
         setCorrectionRewers={setCorrectionRewers}
-        onDownload={downloadData}
-        downloadDisabled={downloadDisabled}
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
-        hideActions={courseHasOnlyTrueFalse}
-        showTrueFalseActions={shouldShowInlineTrueFalseActions}
-        trueFalseActionsDisabled={trueFalseActionsDisabled}
-        onTrueFalseAnswer={handleTrueFalseAnswer}
-        trueFalseActionsMode={trueFalseActionsMode}
-        onTrueFalseOk={handleTrueFalseOk}
-        actionCooldownActive={isActionCooldownActive}
         isFocused={isFocused}
       />
     );
   }
 
-  return (
-    <FlashcardsGameView
-      introOverlay={<IntroOverlay />}
-      shouldCelebrate={shouldCelebrate}
-      boxes={boxes}
-      activeBox={activeBox}
-      onSelectBox={handleSelectBox}
-      onBoxLongPress={handleBoxLongPress}
-      boxesLayout={boxesLayout}
-      hideBoxZero={!boxZeroEnabled}
-      showBoxes={shouldShowBoxes}
-      showFloatingAdd={shouldShowFloatingAdd}
-      addButtonDisabled={addButtonDisabled}
-      onAddButtonPress={downloadData}
+  const renderButtons = (position: "top" | "bottom") => (
+    <FlashcardsButtons
+      position={position}
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
       trueFalseActionsMode={trueFalseActionsMode}
       onTrueFalseOk={handleTrueFalseOk}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-      peekBox={peekBox}
-      peekCards={peekCards}
-      activeCustomCourseId={activeCustomCourseId}
-      activeCourseName={customCourse?.name ?? null}
-      onClosePeek={closePeek}
-    >
+      showCardActions={showCardActions}
+      onCardActionsConfirm={handleCardActionsConfirm}
+      onDownload={downloadData}
+      downloadDisabled={cardActionsDownloadDisabled}
+      confirmDisabled={cardActionsConfirmDisabled}
+      confirmLabel={cardActionsConfirmLabel}
+    />
+  );
+
+  return (
+    <View style={styles.container}>
+      <IntroOverlay />
+      <Confetti generateConfetti={shouldCelebrate} />
+
       {cardSection}
-    </FlashcardsGameView>
+
+      {actionButtonsPosition === "top" ? renderButtons("top") : null}
+
+      {shouldShowBoxes && (
+        <View style={styles.boxesWrapper}>
+          {shouldShowFloatingAdd && (
+            <Pressable
+              style={styles.addButton}
+              onPress={downloadData}
+              disabled={addButtonDisabled}
+              accessibilityLabel="Dodaj nowe fiszki do pudełek"
+            >
+              <Ionicons name="add" size={26} color="#0F172A" />
+            </Pressable>
+          )}
+
+          {boxesLayout === "classic" ? (
+            <Boxes
+              boxes={boxes}
+              activeBox={activeBox}
+              handleSelectBox={handleSelectBox}
+              hideBoxZero={!boxZeroEnabled}
+              onBoxLongPress={handleBoxLongPress}
+            />
+          ) : (
+            <BoxesCarousel
+              boxes={boxes}
+              activeBox={activeBox}
+              handleSelectBox={handleSelectBox}
+              hideBoxZero={!boxZeroEnabled}
+              onBoxLongPress={handleBoxLongPress}
+            />
+          )}
+
+          {actionButtonsPosition === "bottom" ? renderButtons("bottom") : null}
+        </View>
+      )}
+
+      <FlashcardsPeekOverlay
+        visible={peekBox !== null}
+        boxKey={peekBox}
+        cards={peekCards}
+        activeCustomCourseId={activeCustomCourseId}
+        activeCourseName={customCourse?.name ?? null}
+        onClose={closePeek}
+      />
+    </View>
   );
 }
