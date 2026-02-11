@@ -26,7 +26,7 @@ export function CardActions({
   }
 
   return (
-    <View style={styles.containerButton}>
+    <View style={styles.containerButton} collapsable={false}>
       <MyButton
         text="DODAJ FISZKI"
         color="my_yellow"

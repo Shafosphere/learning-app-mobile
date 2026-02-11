@@ -35,7 +35,7 @@ export const createEmptyManualCard = (
   id: id ?? `card-${Date.now()}`,
   front: "",
   answers: [""],
-  flipped: true, // domyślnie włączone
+  flipped: false, // domyślnie wyłączone
   answerOnly: false,
   type,
   hintFront: "",

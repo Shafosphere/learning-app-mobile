@@ -14,6 +14,7 @@ interface CardContentResolverProps {
   result: CardProps["result"];
   isIntroMode: boolean;
   selectedItem: CardProps["selectedItem"];
+  isBetweenCards?: CardProps["isBetweenCards"];
   promptText: string;
   promptImageUri: string | null;
   promptImageSizeMode: FlashcardsImageSize | "dynamic";
@@ -48,7 +49,7 @@ interface CardContentResolverProps {
   next: () => void;
   input1LayoutWidth: number;
   input2LayoutWidth: number;
-  noopTrueFalseAnswer: (val: boolean) => void;
+  noopTrueFalseAnswer?: (val: boolean) => void;
   answer: string;
   handleAnswerChange: (val: string) => void;
   mainInputRef: React.MutableRefObject<any>;
@@ -67,6 +68,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     result,
     isIntroMode,
     selectedItem,
+    isBetweenCards,
     promptText,
     promptImageUri,
     promptImageSizeMode,
@@ -98,7 +100,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     next,
     input1LayoutWidth,
     input2LayoutWidth,
-    noopTrueFalseAnswer,
+    noopTrueFalseAnswer = () => {},
     answer,
     handleAnswerChange,
     mainInputRef,

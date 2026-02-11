@@ -10,7 +10,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 15,
     position: "relative",
     display: "flex",
-    gap: 30,
+  },
+  cardSectionWrapper: {
+    marginBottom: 10,
+  },
+  topButtonsWrapper: {
+    marginBottom: 22,
   },
   topActionsWrapper: {
     paddingHorizontal: 16,
@@ -20,6 +25,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "relative",
     alignItems: "center",
     paddingHorizontal: 16,
+    marginTop: 2,
+  },
+  boxesWrapperWithBottomButtons: {
+    marginTop: 20,
+  },
+  bottomButtonsWrapper: {
+    marginTop: 8,
   },
   addButton: {
     position: "absolute",

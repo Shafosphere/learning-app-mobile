@@ -1,7 +1,14 @@
 import { Image } from "expo-image";
 import * as FileSystem from "expo-file-system/legacy";
 import { useEffect, useMemo, useState } from "react";
-import { StyleSheet, View, ImageStyle, StyleProp, ViewStyle } from "react-native";
+import {
+  StyleSheet,
+  View,
+  Image as RNImage,
+  ImageStyle,
+  StyleProp,
+  ViewStyle,
+} from "react-native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { SvgUri, SvgXml } from "react-native-svg";
 
@@ -43,6 +50,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
   const [svgViewBox, setSvgViewBox] = useState<SvgViewBox | null>(null);
   const [isSvg, setIsSvg] = useState(false);
   const [svgXml, setSvgXml] = useState<string | null>(null);
+  const [rasterAspectRatio, setRasterAspectRatio] = useState<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -81,6 +89,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setSvgViewBox(null);
             setIsSvg(false);
             setSvgXml(null);
+            setRasterAspectRatio(null);
           }
           return;
         }
@@ -94,10 +103,26 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setSvgViewBox(parseSvgViewBox(xml));
             setIsSvg(true);
             setSvgXml(xml);
+            setRasterAspectRatio(null);
           } else {
             setSvgViewBox(null);
             setIsSvg(false);
             setSvgXml(null);
+            RNImage.getSize(
+              uri,
+              (width, height) => {
+                if (cancelled) return;
+                if (width > 0 && height > 0) {
+                  setRasterAspectRatio(width / height);
+                  return;
+                }
+                setRasterAspectRatio(1);
+              },
+              () => {
+                if (cancelled) return;
+                setRasterAspectRatio(1);
+              }
+            );
           }
         }
       } catch {
@@ -105,6 +130,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           setSvgViewBox(null);
           setIsSvg(false);
           setSvgXml(null);
+          setRasterAspectRatio(1);
         }
       }
     };
@@ -139,12 +165,16 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           : 64; // sensowny fallback
 
     const ratio = svgViewBox ? svgViewBox.width / svgViewBox.height : undefined;
+    const resolvedRatio =
+      ratio ??
+      (flat.aspectRatio as number | undefined) ??
+      (isSvg ? undefined : (rasterAspectRatio ?? 1));
 
     return {
       height,
       // jeśli nie mamy viewBox (np. remote), i tak border będzie działał,
       // tylko proporcja będzie zależeć od slotu; najlepiej wtedy podać height+width z zewnątrz
-      aspectRatio: ratio ?? (flat.aspectRatio as number | undefined),
+      aspectRatio: resolvedRatio,
 
       borderWidth: isSvg ? 1 : 0,
       borderColor: colors.border ?? "#00000033",
@@ -156,7 +186,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
       flexShrink: 0,
       alignSelf: "center",
     } as ViewStyle;
-  }, [colors.border, imageStyle, isSvg, svgViewBox]);
+  }, [colors.border, imageStyle, isSvg, rasterAspectRatio, svgViewBox]);
 
   return (
     <View style={slotStyle}>
@@ -177,6 +207,12 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             style={{ width: "100%", height: "100%" }}
             contentFit="contain"
             transition={0}
+            onError={(event) => {
+              console.warn("[PromptImage] failed to render image", {
+                uri,
+                error: event.error,
+              });
+            }}
           />
         )}
       </View>

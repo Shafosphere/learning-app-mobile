@@ -193,7 +193,7 @@ export async function replaceCustomFlashcardsWithDb(
         derivedAnswers.length > 0 ? derivedAnswers.join("; ") : backSource;
 
       const flippedValue =
-        card.flipped == null ? 1 : card.flipped ? 1 : 0;
+        card.flipped == null ? 0 : card.flipped ? 1 : 0;
       const answerOnlyValue =
         card.answerOnly == null ? 0 : card.answerOnly ? 1 : 0;
       const typeValue = card.type || "text";
@@ -216,7 +216,7 @@ export async function replaceCustomFlashcardsWithDb(
         imageBack,
         card.explanation ?? null,
         position,
-        flippedValue, // domyślnie 1 (można odwracać)
+        flippedValue, // domyślnie 0 (bez odwracania)
         answerOnlyValue,
         typeValue,
         now,

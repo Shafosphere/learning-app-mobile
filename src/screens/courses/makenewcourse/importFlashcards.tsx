@@ -39,7 +39,6 @@ const TRUE_VALUES = new Set([
   "y",
   "tak",
   "t",
-  "locked",
 ]);
 
 const segmentOptions: { key: AddMode; label: string }[] = [
@@ -210,9 +209,7 @@ export default function CustomCourseContentScreen() {
       normalized === "yes" ||
       normalized === "no" ||
       normalized === "tak" ||
-      normalized === "nie" ||
-      normalized === "locked" ||
-      normalized === "unlocked"
+      normalized === "nie"
     );
   };
 
@@ -315,15 +312,8 @@ export default function CustomCourseContentScreen() {
       const inferredType: ManualCardType = isBoolean ? "true_false" : "text";
       const type: ManualCardType = explicitType ?? inferredType;
 
-      const answerOnlyFlag = parseBooleanValue(
-        readBooleanishField(row, [
-          "blokada",
-          "block",
-          "answer_only",
-          "question",
-          "pytanie",
-          "lock",
-        ])
+      const flipFlag = parseBooleanValue(
+        readBooleanishField(row, ["flip"])
       );
       const explanation = readStringField(row, [
         "explanation",
@@ -336,8 +326,8 @@ export default function CustomCourseContentScreen() {
         id: `csv-${idx}`,
         front: readStringField(row, ["front", "przod"]),
         answers: [],
-        flipped: !answerOnlyFlag,
-        answerOnly: answerOnlyFlag,
+        flipped: flipFlag,
+        answerOnly: false,
         hintFront: readStringField(row, ["hint1", "hint_front", "podpowiedz1"]),
         hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),
         imageFront,

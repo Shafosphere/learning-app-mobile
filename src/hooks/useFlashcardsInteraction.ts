@@ -172,6 +172,16 @@ export function useFlashcardsInteraction({
         return;
       }
       queuesRef.current[box] = rest;
+      if (__DEV__) {
+        const upcoming = rest[0] ?? null;
+        const currentLabel = `id=${next.id} type=${next.type ?? "text"} text="${(next.text ?? "").slice(0, 60)}"`;
+        const upcomingLabel = upcoming
+          ? `id=${upcoming.id} type=${upcoming.type ?? "text"} text="${(upcoming.text ?? "").slice(0, 60)}"`
+          : "none";
+        console.log(
+          `[Flashcards] queue:${box} current:${currentLabel} upcoming:${upcomingLabel}`
+        );
+      }
       lastServedIdRef.current = next.id;
       setSelectedItem(next);
       setQuestionShownAt(Date.now());

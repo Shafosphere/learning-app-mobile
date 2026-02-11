@@ -1,6 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings, type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
 
 type TrueFalseActionsProps = {
@@ -32,7 +32,10 @@ export function TrueFalseActions({
   if (mode === "ok") {
     if (variant === "know_dont_know") {
       return (
-        <View style={[styles.container, disabled && styles.disabled]}>
+        <View
+          style={[styles.container, disabled && styles.disabled]}
+          collapsable={false}
+        >
           <MyButton
             text={labels.falseLabel}
             color="my_red"
@@ -54,7 +57,10 @@ export function TrueFalseActions({
       );
     }
     return (
-      <View style={[styles.container, disabled && styles.disabled]}>
+      <View
+        style={[styles.container, disabled && styles.disabled]}
+        collapsable={false}
+      >
         <MyButton
           text={okLabel}
           color="my_yellow"
@@ -68,7 +74,10 @@ export function TrueFalseActions({
   }
 
   return (
-    <View style={[styles.container, disabled && styles.disabled]}>
+    <View
+      style={[styles.container, disabled && styles.disabled]}
+      collapsable={false}
+    >
       <MyButton
         text={labels.falseLabel}
         color="my_red"
@@ -111,13 +120,11 @@ export function TrueFalseActionsAnimated({
   dense = false,
   variant = "true_false",
 }: TrueFalseActionsAnimatedProps) {
-  const [rendered, setRendered] = useState(visible);
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
   const translateY = useRef(new Animated.Value(visible ? 0 : 8)).current;
 
   useEffect(() => {
     if (visible) {
-      setRendered(true);
       Animated.parallel([
         Animated.timing(opacity, {
           toValue: 1,
@@ -143,15 +150,9 @@ export function TrueFalseActionsAnimated({
           duration: 150,
           useNativeDriver: false,
         }),
-      ]).start(({ finished }) => {
-        if (finished) {
-          setRendered(false);
-        }
-      });
+      ]).start();
     }
   }, [opacity, translateY, visible]);
-
-  if (!rendered) return null;
 
   return (
     <Animated.View

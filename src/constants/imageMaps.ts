@@ -57,6 +57,8 @@ export const imageMaps = {
     "ua.svg": require("@/assets/flags/europe/ua.svg"),
     "va.svg": require("@/assets/flags/europe/va.svg"),
     "xk.svg": require("@/assets/flags/europe/xk.svg"),
+    // Pozapackowy testowy asset do mieszanych fiszek
+    "bigbear.png": require("@/assets/images/forFlashcards/bigbear.png"),
   },
   // Dodaj kolejne mapy tutaj, np.
   // asiaFlags: { "jp.svg": require("@/assets/flags/asia/jp.svg"), ... }

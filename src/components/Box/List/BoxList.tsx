@@ -10,6 +10,7 @@ interface BoxesProps {
     handleSelectBox: (name: keyof BoxesState) => void;
     hideBoxZero?: boolean;
     onBoxLongPress?: (name: keyof BoxesState) => void;
+    disabled?: boolean;
 }
 
 export default function BoxList({
@@ -18,6 +19,7 @@ export default function BoxList({
     handleSelectBox,
     hideBoxZero = false,
     onBoxLongPress,
+    disabled = false,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     type Face = "smile" | "happy" | "surprised";
@@ -66,6 +68,9 @@ export default function BoxList({
                                 : "smile";
 
                     const onPress = () => {
+                        if (disabled) {
+                            return;
+                        }
                         if (longPressTriggeredRef.current) {
                             longPressTriggeredRef.current = false;
                             return;
@@ -89,10 +94,13 @@ export default function BoxList({
                     return (
                         <Pressable
                             key={boxName}
+                            disabled={disabled}
                             onPressIn={() => {
+                                if (disabled) return;
                                 longPressTriggeredRef.current = false;
                             }}
                             onLongPress={() => {
+                                if (disabled) return;
                                 longPressTriggeredRef.current = true;
                                 onBoxLongPress?.(boxName);
                             }}

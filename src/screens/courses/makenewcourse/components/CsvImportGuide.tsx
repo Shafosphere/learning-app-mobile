@@ -156,10 +156,10 @@ const OPTIONAL_FIELDS_TEXT = [
       "Nazwa pliku w ZIP (folder images/) albo ścieżka file:// / content:// w CSV.",
   },
   {
-    id: "blokada / block",
-    label: "blokada",
+    id: "flip",
+    label: "flip",
     description:
-      'Wartość "tak" nie odwraca fiszki w pudełkach i w trybie poprawki wpisujesz tylko tekst z kolumny "tył".',
+      'Wartość "tak/true/1" odwraca fiszkę w pudełkach 2 i 4; brak kolumny lub pusta wartość oznacza domyślnie brak odwracania.',
   },
   {
     id: "podpowiedz1 / podpowiedz2",

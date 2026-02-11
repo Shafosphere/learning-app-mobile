@@ -1,4 +1,4 @@
-type,front_text,back_text,front_image,back_image,tf_answer,block,explanation
+type,front_text,back_text,front_image,back_image,tf_answer,flip,explanation
 traditional,Bonjour,Hello,,,,,
 traditional,"Witaj, świecie","Hello, World",,,,,
 true_false,Ziemia jest płaska,,,,false,,
@@ -11,3 +11,12 @@ self_assess,Wzór na pole koła,,,,,,Pi razy r do kwadratu
 self_assess,II zasada dynamiki Newtona,,,,,,F=ma
 self_assess,Stolica Niemiec,,de.svg,,,,
 self_assess,,,it.svg,,,,włochy
+traditional,Co to za konstelacja?,Wielki Wóz,bigbear.png,,,,
+self_assess,"Opisz w dwóch zdaniach, co się wydarzy, gdy wrzucisz dwie kostki lodu do garnka wrzątku w wagonie jadącego pociągu i obserwujesz to z drona.",,,,,,"Para, chlupnięcie i bardzo krótka lekcja fizyki."
+traditional,"Front: esejo-matryca o długości 300 znaków opisująca jak kot zdobywa tytuł magistra inżyniera na Politechnice w ciągu jednej sesji egzaminacyjnej.","Back: kot w todze, z dyplomem, śpi dalej do południa.",,,,,absurd
+true_false,"Zdanie o kosmicznej długosci: Ten flashcard ma sprawdzić czy komponent poprawnie zawija tekst, gdy użytkownik próbuje dowiedzieć się, czy dżdżownica może zostać astronautą, jeśli ma kask z folii aluminiowej i certyfikat NASA wydrukowany na drukarce igłowej.",,,,false,absurd,
+self_assess,"Podaj rozwinięcie szeregu Taylora funkcji $e^x$ do wyrazu przy $x^4$ włącznie.",,,,,,"$1 + x + \frac{x^2}{2} + \frac{x^3}{6} + \frac{x^4}{24} + O(x^5)$"
+traditional,"Pusta karta z absurdalnie długim backiem","To jest nieskończenie rozwlekła odpowiedź, w której autor opowiada o tym, jak w 47 krokach przygotować kanapkę z powietrza, zaczynając od wyhodowania kromki na farmie pikseli, a kończąc na degustacji w zerowej grawitacji na Międzynarodowej Stacji Kosmicznej.",,,,,wrap-test
+true_false,"Czy 7+5=12 oraz jednocześnie 7+5=19 w geometrii kubkowej z wymyślonym aksjomatem 'każda liczba ma prawo do drugiej odpowiedzi'?",,,,true,paradoks,
+self_assess,"Zapisz wzór całki z części: $\int u\, dv = u\,v - \int v\,du$ (sprawdź, czy łamiesz renderer).",,,,,,"$\int u\, dv = u\,v - \int v\,du$"
+traditional,"Przód minimalny","Tył mega-maksymalny z dokładnie sto jeden wyrazami liczącymi się do testu zawijania, ale bez liczenia ich ręcznie: lorem ipsum dolor sit amet consectetur adipiscing elit sed do eiusmod tempor incididunt ut labore et dolore magna aliqua ut enim ad minim veniam quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.",,,,,wordcount

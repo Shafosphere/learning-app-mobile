@@ -22,6 +22,7 @@ interface BoxesProps {
     handleSelectBox: (name: keyof BoxesState) => void;
     hideBoxZero?: boolean;
     onBoxLongPress?: (name: keyof BoxesState) => void;
+    disabled?: boolean;
 }
 
 export default function BoxCarousel({
@@ -30,6 +31,7 @@ export default function BoxCarousel({
     handleSelectBox,
     hideBoxZero = false,
     onBoxLongPress,
+    disabled = false,
 }: BoxesProps) {
     const styles = useBoxCarouselStyles();
     const { width } = useWindowDimensions();
@@ -89,6 +91,9 @@ export default function BoxCarousel({
     const handleMomentumEnd = (
         event: NativeSyntheticEvent<NativeScrollEvent>
     ) => {
+        if (disabled) {
+            return;
+        }
         const offsetX = event.nativeEvent.contentOffset.x;
         const rawIndex = Math.round(offsetX / itemWidth);
         const clamped = Math.max(0, Math.min(rawIndex, items.length - 1));
@@ -101,6 +106,9 @@ export default function BoxCarousel({
     };
 
     const scrollToIndex = (index: number, shouldNotify = true) => {
+        if (disabled) {
+            return;
+        }
         const clamped = Math.max(0, Math.min(index, items.length - 1));
         flatListRef.current?.scrollToOffset({
             offset: clamped * itemWidth,
@@ -185,6 +193,7 @@ export default function BoxCarousel({
                 data={items}
                 keyExtractor={(item) => String(item.key)}
                 horizontal
+                scrollEnabled={!disabled}
                 showsHorizontalScrollIndicator={false}
                 bounces={false}
                 snapToInterval={itemWidth}
@@ -249,10 +258,13 @@ export default function BoxCarousel({
                             >
                                 <TouchableOpacity
                                     activeOpacity={1}
+                                    disabled={disabled}
                                     onPressIn={() => {
+                                        if (disabled) return;
                                         longPressTriggeredRef.current = false;
                                     }}
                                     onLongPress={() => {
+                                        if (disabled) return;
                                         longPressTriggeredRef.current = true;
                                         onBoxLongPress?.(item.key);
                                     }}

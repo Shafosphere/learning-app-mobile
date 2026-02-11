@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import { StyleSheet, Text, View } from "react-native";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { MathJaxSvg } from "react-native-mathjax-html-to-svg";
 
 const DEFAULT_FONT_SIZE = 16;
@@ -78,6 +78,42 @@ const splitTextSegment = (value: string): Segment[] =>
     .filter(Boolean)
     .map((chunk) => ({ type: "text" as const, value: chunk, display: false }));
 
+const splitMathForWrap = (value: string): string[] => {
+  const chunks: string[] = [];
+  let buffer = "";
+  let bracesDepth = 0;
+  let parenDepth = 0;
+  let bracketDepth = 0;
+
+  for (let i = 0; i < value.length; i += 1) {
+    const char = value[i];
+    const previous = i > 0 ? value[i - 1] : "";
+
+    buffer += char;
+
+    if (char === "{" && previous !== "\\") bracesDepth += 1;
+    if (char === "}" && previous !== "\\") bracesDepth = Math.max(0, bracesDepth - 1);
+    if (char === "(" && previous !== "\\") parenDepth += 1;
+    if (char === ")" && previous !== "\\") parenDepth = Math.max(0, parenDepth - 1);
+    if (char === "[" && previous !== "\\") bracketDepth += 1;
+    if (char === "]" && previous !== "\\")
+      bracketDepth = Math.max(0, bracketDepth - 1);
+
+    const topLevel = bracesDepth === 0 && parenDepth === 0 && bracketDepth === 0;
+    const breakableOperator = char === "+" || char === "-" || char === "=";
+    if (topLevel && breakableOperator) {
+      chunks.push(buffer.trimEnd());
+      buffer = "";
+    }
+  }
+
+  if (buffer.trim().length > 0) {
+    chunks.push(buffer.trim());
+  }
+
+  return chunks.filter((chunk) => chunk.length > 0);
+};
+
 export const hasMathSegments = (text: string) =>
   parseSegments(text).some((segment) => segment.type === "math");
 
@@ -124,6 +160,27 @@ export function CardMathText({
     () => [textStyle, styles.leftAlignedText, styles.inlineText],
     [textStyle],
   );
+  const shouldUseHorizontalScroll = useMemo(
+    () =>
+      isMathOnly &&
+      segments.some(
+        (segment) => segment.type === "math" && segment.value.trim().length > 30,
+      ),
+    [isMathOnly, segments],
+  );
+  const splitMathMap = useMemo(() => {
+    const map = new Map<number, string[]>();
+    segments.forEach((segment, index) => {
+      if (segment.type !== "math" || segment.display) return;
+      if (!shouldUseHorizontalScroll) return;
+      const split = splitMathForWrap(segment.value);
+      if (split.length > 1) {
+        map.set(index, split);
+      }
+    });
+    return map;
+  }, [segments, shouldUseHorizontalScroll]);
+  const canWrapLongMath = splitMathMap.size > 0;
 
   if (!hasMath) {
     return (
@@ -133,9 +190,14 @@ export function CardMathText({
     );
   }
 
-  return (
+  const content = (
     <View
-      style={[styles.row, hasMath && styles.rowWithMath, isMathOnly && styles.rowMathOnly]}
+      style={[
+        styles.row,
+        hasMath && styles.rowWithMath,
+        isMathOnly && styles.rowMathOnly,
+        shouldUseHorizontalScroll && !canWrapLongMath && styles.rowNoWrap,
+      ]}
       onLayout={onLayout}
     >
       {wrappedSegments.map((segment, index) => {
@@ -149,6 +211,25 @@ export function CardMathText({
 
         const wrapper = segment.display ? "\\[" : "\\(";
         const closer = segment.display ? "\\]" : "\\)";
+        const mathValue = segment.value.replace(/\\\\(?=[A-Za-z])/g, "\\");
+        const splitMath = splitMathMap.get(index);
+
+        if (splitMath) {
+          return (
+            <View key={`mw-${index}`} style={styles.splitMathGroup}>
+              {splitMath.map((part, partIndex) => (
+                <MathJaxSvg
+                  key={`m-${index}-${partIndex}`}
+                  fontSize={fontSize}
+                  color={color}
+                  style={styles.inlineMath}
+                >
+                  {`\\(${part.replace(/\\\\(?=[A-Za-z])/g, "\\")}\\)`}
+                </MathJaxSvg>
+              ))}
+            </View>
+          );
+        }
 
         return (
           <MathJaxSvg
@@ -157,12 +238,26 @@ export function CardMathText({
             color={color}
             style={styles.inlineMath}
           >
-            {`${wrapper}${segment.value}${closer}`}
+            {`${wrapper}${mathValue}${closer}`}
           </MathJaxSvg>
         );
       })}
     </View>
   );
+
+  if (shouldUseHorizontalScroll && !canWrapLongMath) {
+    return (
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        contentContainerStyle={styles.scrollContent}
+      >
+        {content}
+      </ScrollView>
+    );
+  }
+
+  return content;
 }
 
 const styles = StyleSheet.create({
@@ -177,6 +272,9 @@ const styles = StyleSheet.create({
   },
   rowMathOnly: {
     justifyContent: "center",
+  },
+  rowNoWrap: {
+    flexWrap: "nowrap",
   },
   leftAlignedText: {
     textAlign: "left",
@@ -194,5 +292,14 @@ const styles = StyleSheet.create({
   },
   inlineMath: {
     alignSelf: "center",
+  },
+  splitMathGroup: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "center",
+  },
+  scrollContent: {
+    minWidth: "100%",
+    justifyContent: "center",
   },
 });

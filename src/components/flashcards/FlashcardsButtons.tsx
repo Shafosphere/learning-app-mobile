@@ -44,11 +44,16 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   const styles = useStyles();
   const noopAsync = React.useCallback(async () => undefined, []);
   const noop = React.useCallback(() => undefined, []);
+  const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };
 
   return (
     <View collapsable={false}>
       {position === "bottom" ? (
-        showTrueFalseActions ? (
+        <View
+          style={!showTrueFalseActions ? hiddenStyle : undefined}
+          pointerEvents={showTrueFalseActions ? "auto" : "none"}
+          collapsable={false}
+        >
           <TrueFalseActionsAnimated
             visible={showTrueFalseActions}
             disabled={trueFalseActionsDisabled}
@@ -58,12 +63,12 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
             dense
             variant={trueFalseButtonsVariant}
           />
-        ) : null
+        </View>
       ) : (
         <View
           style={[
             styles.topActionsWrapper,
-            !showTrueFalseActions && { opacity: 0, height: 0 },
+            !showTrueFalseActions && hiddenStyle,
           ]}
           pointerEvents={showTrueFalseActions ? "auto" : "none"}
           collapsable={false}
@@ -79,7 +84,11 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
         </View>
       )}
 
-      {showCardActions ? (
+      <View
+        style={!showCardActions ? hiddenStyle : undefined}
+        pointerEvents={showCardActions ? "auto" : "none"}
+        collapsable={false}
+      >
         <CardActions
           handleConfirm={onCardActionsConfirm ?? noop}
           onDownload={onDownload ?? noopAsync}
@@ -87,7 +96,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
           confirmDisabled={confirmDisabled}
           confirmLabel={confirmLabel}
         />
-      ) : null}
+      </View>
     </View>
   );
 };

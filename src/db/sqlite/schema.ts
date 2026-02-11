@@ -88,7 +88,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       image_back  TEXT,
       explanation TEXT,
       position    INTEGER,
-      flipped     INTEGER NOT NULL DEFAULT 1,
+      flipped     INTEGER NOT NULL DEFAULT 0,
       answer_only INTEGER NOT NULL DEFAULT 0,
       type        TEXT NOT NULL DEFAULT 'text',
       created_at  INTEGER NOT NULL,

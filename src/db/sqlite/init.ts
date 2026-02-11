@@ -21,7 +21,7 @@ type CsvRow = {
     front_image?: string;
     back_image?: string;
     tf_answer?: string | number | boolean;
-    block?: string | number | boolean;
+    flip?: string | number | boolean;
     explanation?: string;
 };
 
@@ -32,17 +32,17 @@ const KNOWN_CSV_HEADERS = new Set([
     "front_image",
     "back_image",
     "tf_answer",
-    "block",
+    "flip",
     "explanation",
 ]);
 
 const TRUE_VALUES = new Set([
     "true",
+    "1",
     "yes",
     "y",
     "tak",
     "t",
-    "locked",
 ]);
 
 const parseBooleanValue = (value: unknown): boolean => {
@@ -92,9 +92,11 @@ async function readCsvAsset(
     const uri = asset.localUri ?? asset.uri;
     console.log("[DB] readCsvAsset: uri=", uri);
     const csv = await FileSystem.readAsStringAsync(uri);
+    // Guard against mixed CRLF/LF endings that can break row detection in Papa.
+    const normalizedCsv = csv.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
     console.log("[DB] readCsvAsset: file read, length=", csv?.length ?? 0);
     console.log("[DB] readCsvAsset: start parse");
-    const parsedWithHeader = Papa.parse<CsvRow>(csv, {
+    const parsedWithHeader = Papa.parse<CsvRow>(normalizedCsv, {
         header: true,
         skipEmptyLines: true,
     });
@@ -141,9 +143,8 @@ async function readCsvAsset(
                 typeof explanationRaw === "string"
                     ? explanationRaw.trim() || null
                     : null;
-            const blockRaw = (row as any).block;
-            const answerOnly = parseBooleanValue(blockRaw);
-            const locked = answerOnly;
+            const flipRaw = (row as any).flip;
+            const shouldFlip = parseBooleanValue(flipRaw);
 
             const mappedType =
                 resolvedType === "traditional"
@@ -162,8 +163,8 @@ async function readCsvAsset(
                 backText: backRaw,
                 answers: inferredAnswers,
                 position: idx,
-                flipped: !locked,
-                answerOnly,
+                flipped: shouldFlip,
+                answerOnly: false,
                 hintFront: null,
                 hintBack: null,
                 type: mappedType,
@@ -173,10 +174,11 @@ async function readCsvAsset(
             };
 
             if (mappedType === "know_dont_know") {
+                const explanationFallback = explanation || backRaw || null;
                 card.answers = [];
                 card.answerOnly = true;
                 card.flipped = false;
-                card.explanation = explanation || null;
+                card.explanation = explanationFallback;
             } else if (mappedType === "true_false") {
                 card.answers = hasTrueFalseFlag
                     ? [parseBooleanValue(tfAnswerRaw) ? "true" : "false"]
@@ -193,59 +195,6 @@ async function readCsvAsset(
                 c.imageFront != null ||
                 c.imageBack != null)
     );
-}
-
-// Collects indexes (position) of rows that contain the unified block/answerOnly flag.
-async function getBlockedPositionsFromCsvAsset(assetModule: any): Promise<Set<number>> {
-    const asset = Asset.fromModule(assetModule);
-    await asset.downloadAsync();
-    const uri = asset.localUri ?? asset.uri;
-    if (!uri) return new Set();
-    const csv = await FileSystem.readAsStringAsync(uri);
-    const { data } = Papa.parse<any>(csv, {
-        header: true,
-        skipEmptyLines: true,
-    });
-    const blocked = new Set<number>();
-    data.forEach((row: any, idx: number) => {
-        const flag = row?.block;
-        if (parseBooleanValue(flag)) {
-            blocked.add(idx);
-        }
-    });
-    return blocked;
-}
-
-async function applyBlockFlagFixForOfficialPacks(
-    db: SQLite.SQLiteDatabase
-): Promise<void> {
-    const slugToId = new Map<string, number>();
-    const rows = await db.getAllAsync<{ id: number; slug: string | null }>(
-        `SELECT id, slug FROM custom_courses WHERE is_official = 1 AND slug IS NOT NULL;`
-    );
-    rows.forEach((row) => {
-        if (row.slug) slugToId.set(row.slug, row.id);
-    });
-
-    for (const def of OFFICIAL_PACKS) {
-        const courseId = slugToId.get(def.slug);
-        if (!courseId) continue;
-        try {
-            const blocked = await getBlockedPositionsFromCsvAsset(def.csvAsset);
-            if (blocked.size === 0) continue;
-            const positions = Array.from(blocked.values());
-            const placeholders = positions.map(() => "?").join(", ");
-            await db.runAsync(
-                `UPDATE custom_flashcards
-                 SET answer_only = 1, flipped = 0
-                 WHERE course_id = ?
-                   AND position IN (${placeholders});`,
-                [courseId, ...positions]
-            );
-        } catch (e) {
-            console.warn("[DB] applyBlockFlagFixForOfficialPacks failed", def.slug, e);
-        }
-    }
 }
 
 async function importOfficialPackIfEmpty(
@@ -417,14 +366,6 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
             (requiresInitialImport ? " after initial import" : ""),
             e
         );
-    }
-
-    // Hotfix: older installs imported official packs before the unified "block/answer_only"
-    // field existed. Update existing rows in-place so block=true cards stop flipping.
-    try {
-        await applyBlockFlagFixForOfficialPacks(db);
-    } catch (e) {
-        console.warn("[DB] applyBlockFlagFixForOfficialPacks failed", e);
     }
 
     notifyDbInitializationListeners({

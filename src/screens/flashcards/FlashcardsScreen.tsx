@@ -222,7 +222,8 @@ export default function Flashcards() {
     ((selectedItem?.type === "true_false" && result === false) ||
       (isKnowDontKnow && result !== null) ||
       (selectedItem?.answerOnly && result !== null));
-  const boxSelectionLocked = correctionLocked || waitingForOk;
+  const boxSelectionLocked =
+    correctionLocked || waitingForOk || resultPending || isBetweenCards;
 
   const handleSelectBox = useCallback(
     (boxName: keyof BoxesState) => {
@@ -699,6 +700,7 @@ export default function Flashcards() {
       : courseHasOnlyKnowDontKnow
         ? "know_dont_know"
         : trueFalseButtonsVariant;
+  const areButtonsOnTop = actionButtonsPosition === "top";
 
   useLayoutEffect(() => {
     if (!selectedItem) return;
@@ -769,6 +771,7 @@ export default function Flashcards() {
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
         isFocused={isFocused}
+        isBetweenCards={isBetweenCards}
       />
     );
   }
@@ -796,12 +799,19 @@ export default function Flashcards() {
       <IntroOverlay />
       <Confetti generateConfetti={shouldCelebrate} />
 
-      {cardSection}
+      <View style={styles.cardSectionWrapper}>{cardSection}</View>
 
-      {actionButtonsPosition === "top" ? renderButtons("top") : null}
+      {areButtonsOnTop ? (
+        <View style={styles.topButtonsWrapper}>{renderButtons("top")}</View>
+      ) : null}
 
       {shouldShowBoxes && (
-        <View style={styles.boxesWrapper}>
+        <View
+          style={[
+            styles.boxesWrapper,
+            !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+          ]}
+        >
           {shouldShowFloatingAdd && (
             <Pressable
               style={styles.addButton}
@@ -820,6 +830,7 @@ export default function Flashcards() {
               handleSelectBox={handleSelectBox}
               hideBoxZero={!boxZeroEnabled}
               onBoxLongPress={handleBoxLongPress}
+              disabled={boxSelectionLocked}
             />
           ) : (
             <BoxesCarousel
@@ -828,10 +839,15 @@ export default function Flashcards() {
               handleSelectBox={handleSelectBox}
               hideBoxZero={!boxZeroEnabled}
               onBoxLongPress={handleBoxLongPress}
+              disabled={boxSelectionLocked}
             />
           )}
 
-          {actionButtonsPosition === "bottom" ? renderButtons("bottom") : null}
+          {!areButtonsOnTop ? (
+            <View style={styles.bottomButtonsWrapper}>
+              {renderButtons("bottom")}
+            </View>
+          ) : null}
         </View>
       )}
 

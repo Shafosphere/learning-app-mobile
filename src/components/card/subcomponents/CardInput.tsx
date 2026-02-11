@@ -211,13 +211,9 @@ export function CardInput({
       key={promptImageUri}
       uri={promptImageUri}
       imageStyle={[styles.promptImage, promptImageStyle]}
-      onHeightChange={(height) => {
-        if (allowMultilinePrompt && onPromptLayout) {
-          onPromptLayout(height);
-        }
-      }}
     />
   ) : null;
+  const hasPromptText = promptText.trim().length > 0;
 
   const promptTextBlock = hasMath ? (
     <CardMathText
@@ -228,11 +224,6 @@ export function CardInput({
         allowMultilinePrompt && styles.promptTextMultiline,
         textColorOverride ? { color: textColorOverride } : null,
       ]}
-      onLayout={({ nativeEvent }: any) => {
-        if (allowMultilinePrompt && onPromptLayout) {
-          onPromptLayout(nativeEvent.layout.height);
-        }
-      }}
     />
   ) : shouldMarqueePrompt ? (
     <View style={styles.promptScroll}>
@@ -260,11 +251,6 @@ export function CardInput({
       ]}
       numberOfLines={allowMultilinePrompt ? undefined : 1}
       ellipsizeMode={allowMultilinePrompt ? "clip" : "tail"}
-      onLayout={({ nativeEvent }) => {
-        if (allowMultilinePrompt && onPromptLayout) {
-          onPromptLayout(nativeEvent.layout.height);
-        }
-      }}
     >
       {promptText}
     </Text>
@@ -276,28 +262,34 @@ export function CardInput({
         style={[
           styles.topContainer,
           allowMultilinePrompt && styles.topContainerLarge,
-          // If we show image, we want to center it, similar to how text is centered or styled
-          promptImageUri && allowMultilinePrompt && { justifyContent: 'center' }
+          promptImageUri && allowMultilinePrompt && { justifyContent: "center" },
         ]}
       >
-        {promptImageUri ? (
-          imageBlock
-        ) : (
-          <View style={styles.promptRow}>
-            {promptTextBlock}
-            {canToggleTranslations ? (
-              <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
-                <Octicons
-                  name="discussion-duplicate"
-                  size={24}
-                  color={
-                    textColorOverride ?? (styles.cardFont as any).color
-                  }
-                />
-              </Pressable>
-            ) : null}
-          </View>
-        )}
+        <View
+          style={{ width: "100%", gap: 8 }}
+          onLayout={({ nativeEvent }) => {
+            if (!allowMultilinePrompt || !onPromptLayout) return;
+            onPromptLayout(nativeEvent.layout.height);
+          }}
+        >
+          {promptImageUri ? imageBlock : null}
+          {hasPromptText ? (
+            <View style={styles.promptRow}>
+              {promptTextBlock}
+              {canToggleTranslations ? (
+                <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+                  <Octicons
+                    name="discussion-duplicate"
+                    size={24}
+                    color={
+                      textColorOverride ?? (styles.cardFont as any).color
+                    }
+                  />
+                </Pressable>
+              ) : null}
+            </View>
+          ) : null}
+        </View>
       </View>
 
       {allowMultilinePrompt ? (

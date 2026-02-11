@@ -47,6 +47,7 @@ export default function Card({
   backgroundColorOverride,
   textColorOverride,
   hideHints = false,
+  isBetweenCards = false,
 }: CardProps) {
   const styles = useStyles();
   const {
@@ -758,6 +759,7 @@ export default function Card({
     result,
     isIntroMode,
     selectedItem,
+    isBetweenCards,
     promptText,
     promptImageUri,
     promptImageSizeMode,
@@ -814,7 +816,7 @@ export default function Card({
 
   return (
     <View style={styles.container}>
-      {hideHints ? (
+      {hideHints || isBetweenCards ? (
         <View style={styles.hintContainer} />
       ) : (
         <CardHint
