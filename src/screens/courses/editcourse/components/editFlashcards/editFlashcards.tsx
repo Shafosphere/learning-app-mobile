@@ -212,7 +212,7 @@ export const ManualCardsEditor = ({
             ? displayAction.accessibilityLabel(card, index)
             : displayAction?.accessibilityLabel;
         const effectiveCardType: ManualCardType =
-          cardType ?? card.type ?? "text";
+          card.type ?? cardType ?? "text";
         const isBooleanCardType =
           effectiveCardType === "true_false" ||
           effectiveCardType === "know_dont_know";
@@ -314,6 +314,60 @@ export const ManualCardsEditor = ({
                   ) : null}
               </View>
               <View style={styles.cardDivider} />
+              {shouldShowImagesRow ? (
+                <>
+                  <View style={[styles.imagesRow, styles.imagesRowSingle]}>
+                    <View style={[styles.imageSlot, styles.imageSlotFull]}>
+                      <Text style={styles.imageLabel}>
+                        {hasFrontImage ? "Awers" : hasLegacyBackImage ? "Awers (legacy)" : "Awers"}
+                      </Text>
+                      <Pressable
+                        onPress={() => pickImage(card.id, "front")}
+                        disabled={!canEditImages}
+                        hitSlop={6}
+                        style={({ pressed }) => [
+                          styles.imagePreview,
+                          pressed && canEditImages
+                            ? { opacity: 0.85 }
+                            : null,
+                        ]}
+                      >
+                        {card.imageFront || card.imageBack ? (
+                          <Image
+                            source={{ uri: (card.imageFront ?? card.imageBack) as string }}
+                            style={styles.imageThumb}
+                            resizeMode="cover"
+                          />
+                        ) : (
+                          <Text style={styles.imagePlaceholder}>
+                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                          </Text>
+                        )}
+                      </Pressable>
+                      {card.imageFront && canEditImages ? (
+                        <View style={styles.imageButtonsRow}>
+                          <Pressable
+                            accessibilityRole="button"
+                            accessibilityLabel={`Usuń obraz awersu dla fiszki ${
+                              index + 1
+                            }`}
+                            hitSlop={8}
+                            onPress={() => clearImage(card.id, "front")}
+                            style={styles.imageButton}
+                          >
+                            <Feather
+                              name="trash-2"
+                              size={16}
+                              color={styles.cardActionIcon?.color ?? "black"}
+                            />
+                          </Pressable>
+                        </View>
+                      ) : null}
+                    </View>
+                  </View>
+                  <View style={styles.cardDivider} />
+                </>
+              ) : null}
               <View style={styles.answersContainer}>
                 {isBooleanCardType ? (
                   <View style={styles.trueFalseContainer}>
@@ -430,60 +484,6 @@ export const ManualCardsEditor = ({
                   })
                 )}
               </View>
-              {shouldShowImagesRow ? (
-                <>
-                  <View style={styles.cardDivider} />
-                  <View style={[styles.imagesRow, styles.imagesRowSingle]}>
-                    <View style={[styles.imageSlot, styles.imageSlotFull]}>
-                      <Text style={styles.imageLabel}>
-                        {hasFrontImage ? "Awers" : hasLegacyBackImage ? "Awers (legacy)" : "Awers"}
-                      </Text>
-                      <Pressable
-                        onPress={() => pickImage(card.id, "front")}
-                        disabled={!canEditImages}
-                        hitSlop={6}
-                        style={({ pressed }) => [
-                          styles.imagePreview,
-                          pressed && canEditImages
-                            ? { opacity: 0.85 }
-                            : null,
-                        ]}
-                      >
-                        {card.imageFront || card.imageBack ? (
-                          <Image
-                            source={{ uri: (card.imageFront ?? card.imageBack) as string }}
-                            style={styles.imageThumb}
-                            resizeMode="cover"
-                          />
-                        ) : (
-                          <Text style={styles.imagePlaceholder}>
-                            {canEditImages ? "Dodaj obraz" : "Brak"}
-                          </Text>
-                        )}
-                      </Pressable>
-                      {card.imageFront && canEditImages ? (
-                        <View style={styles.imageButtonsRow}>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`Usuń obraz awersu dla fiszki ${
-                              index + 1
-                            }`}
-                            hitSlop={8}
-                            onPress={() => clearImage(card.id, "front")}
-                            style={styles.imageButton}
-                          >
-                            <Feather
-                              name="trash-2"
-                              size={16}
-                              color={styles.cardActionIcon?.color ?? "black"}
-                            />
-                          </Pressable>
-                        </View>
-                      ) : null}
-                    </View>
-                  </View>
-                </>
-              ) : null}
             </View>
             {(!isDisplayMode || (isDisplayMode && resolvedDisplayIcon)) && (
               <View style={styles.cardActions}>

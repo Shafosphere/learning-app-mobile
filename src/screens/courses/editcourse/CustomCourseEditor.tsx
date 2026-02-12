@@ -32,15 +32,18 @@ import {
   ensureCardsNormalized,
   normalizeAnswers,
   useManualCardsForm,
-  type ManualCard,
   type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
 import {
   ManualCardsEditor,
   type ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import {
+  CardTypeSelector,
+  type CardTypeOption,
+} from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
 import { CourseIconColorSelector } from "@/src/screens/courses/editcourse/components/iconEdit/iconEdit";
-import { CourseSettingsSection } from "@/src/screens/courses/editcourse/components/SettingsCourse";
+import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
 import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useStyles } from "./CustomCourseEditor-styles";
 export type CustomCourseEditorProps = {
@@ -104,7 +107,7 @@ export default function CustomCourseEditor({
     enableHistory: true,
     historyLimit: 50,
   });
-  const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
+  const [newCardType, setNewCardType] = useState<ManualCardType>("text");
 
   const initialBoxZeroEnabled = useMemo(
     () => getCustomCourseBoxZeroEnabled(courseId),
@@ -164,29 +167,11 @@ export default function CustomCourseEditor({
     [courseId]
   );
 
-  const inferCardTypeFromCards = useCallback(
-    (cards: ManualCard[]): ManualCardType => {
-      if (
-        cards.length > 0 &&
-        cards.every((card) => (card.type ?? "text") === "know_dont_know")
-      ) {
-        return "know_dont_know";
-      }
-      if (
-        cards.length > 0 &&
-        cards.every((card) => (card.type ?? "text") === "true_false")
-      ) {
-        return "true_false";
-      }
-      return "text";
-    },
-    []
-  );
-
-  useEffect(() => {
-    const inferred = inferCardTypeFromCards(manualCards);
-    setManualCardType((prev) => (prev === inferred ? prev : inferred));
-  }, [inferCardTypeFromCards, manualCards]);
+  const newCardTypeOptions: CardTypeOption<ManualCardType>[] = [
+    { key: "text", label: "Tradycyjne" },
+    { key: "true_false", label: "Prawda / Fałsz" },
+    { key: "know_dont_know", label: "Umiem / Nie umiem" },
+  ];
 
   const courseIsTrueFalseOnly = useMemo(
     () =>
@@ -590,79 +575,69 @@ export default function CustomCourseEditor({
         </View>
 
         <View style={styles.sectionCard}>
-          <CourseSettingsSection
+          <CourseSettingsPanel
             styles={styles}
-            switchColors={{
-              thumb: colors.background,
-              trackFalse: colors.border,
-              trackTrue: colors.my_green,
+            settingsProps={{
+              styles,
+              switchColors: {
+                thumb: colors.background,
+                trackFalse: colors.border,
+                trackTrue: colors.my_green,
+              },
+              colors,
+              boxZeroEnabled: courseBoxZeroEnabled,
+              onToggleBoxZero: handleCourseBoxZeroToggle,
+              autoflowEnabled: courseAutoflowEnabled,
+              onToggleAutoflow: handleCourseAutoflowToggle,
+              reviewsEnabled,
+              onToggleReviews: handleCourseReviewsToggle,
+              skipCorrectionEnabled: courseSkipCorrectionEnabled,
+              onToggleSkipCorrection: handleCourseSkipCorrectionToggle,
+              skipCorrectionLocked: courseIsTrueFalseOnly,
+              hideSkipCorrectionOption: courseIsTrueFalseOnly,
+              showTrueFalseButtonsVariant: courseIsTrueFalseOnly,
+              trueFalseButtonsVariant: courseTrueFalseButtonsVariant,
+              onSelectTrueFalseButtonsVariant:
+                handleCourseTrueFalseButtonsVariantChange,
+              cardSize: courseCardSize,
+              onSelectCardSize: handleCourseCardSizeChange,
+              showImageSizeOptions: courseHasImageCards,
+              imageSize: courseImageSize,
+              onSelectImageSize: handleCourseImageSizeChange,
+              imageSizeEnabled: imageSizeOptionsEnabled,
             }}
-            colors={colors}
-            boxZeroEnabled={courseBoxZeroEnabled}
-            onToggleBoxZero={handleCourseBoxZeroToggle}
-            autoflowEnabled={courseAutoflowEnabled}
-            onToggleAutoflow={handleCourseAutoflowToggle}
-            reviewsEnabled={reviewsEnabled}
-            onToggleReviews={handleCourseReviewsToggle}
-            skipCorrectionEnabled={courseSkipCorrectionEnabled}
-            onToggleSkipCorrection={handleCourseSkipCorrectionToggle}
-            skipCorrectionLocked={courseIsTrueFalseOnly}
-            hideSkipCorrectionOption={courseIsTrueFalseOnly}
-            showTrueFalseButtonsVariant={courseIsTrueFalseOnly}
-            trueFalseButtonsVariant={courseTrueFalseButtonsVariant}
-            onSelectTrueFalseButtonsVariant={handleCourseTrueFalseButtonsVariantChange}
-            cardSize={courseCardSize}
-            onSelectCardSize={handleCourseCardSizeChange}
-            showImageSizeOptions={courseHasImageCards}
-            imageSize={courseImageSize}
-            onSelectImageSize={handleCourseImageSizeChange}
-            imageSizeEnabled={imageSizeOptionsEnabled}
+            resetActions={[
+              {
+                key: "boxes",
+                title: "Reset pudełek",
+                subtitle:
+                  "Czyści stan pudełek i przywraca fiszki do puli nieznanych.",
+                ctaText: "Reset pudełek",
+                loading: resettingBoxes,
+                onPress: handleResetBoxes,
+                disabled: resettingBoxes,
+              },
+              {
+                key: "reviews",
+                title: "Reset powtórek",
+                subtitle: "Usuwa zapisane powtórki dla tego kursu.",
+                ctaText: "Reset powtórek",
+                loading: resettingReviews,
+                onPress: handleResetReviews,
+                disabled: resettingReviews,
+              },
+              {
+                key: "all",
+                title: "Reset całkowity",
+                subtitle:
+                  "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.",
+                ctaText: "Reset całkowity",
+                loading: resettingAll,
+                onPress: handleResetAll,
+                disabled: resettingAll,
+              },
+            ]}
           />
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset pudełek</Text>
-              <Text style={styles.toggleSubtitle}>
-                Czyści stan pudełek i przywraca fiszki do puli nieznanych.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingBoxes ? "Resetuję..." : "Reset pudełek"}
-              color="my_red"
-              onPress={handleResetBoxes}
-              disabled={resettingBoxes}
-              width={150}
-            />
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset powtórek</Text>
-              <Text style={styles.toggleSubtitle}>
-                Usuwa zapisane powtórki dla tego kursu.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingReviews ? "Resetuję..." : "Reset powtórek"}
-              color="my_red"
-              onPress={handleResetReviews}
-              disabled={resettingReviews}
-              width={150}
-            />
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset całkowity</Text>
-              <Text style={styles.toggleSubtitle}>
-                Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingAll ? "Resetuję..." : "Reset całkowity"}
-              color="my_red"
-              onPress={handleResetAll}
-              disabled={resettingAll}
-              width={150}
-            />
-          </View>
         </View>
 
         {!isOfficialCourse ? (
@@ -707,15 +682,21 @@ export default function CustomCourseEditor({
                       Zmieniaj zawartość kursu
                     </Text>
                   </View>
+                  <CardTypeSelector
+                    options={newCardTypeOptions}
+                    value={newCardType}
+                    onChange={setNewCardType}
+                    label="Typ fiszki"
+                  />
                   <ManualCardsEditor
                     manualCards={manualCards}
-                    cardType={manualCardType}
+                    cardType={newCardType}
                     styles={{} as ManualCardsEditorStyles}
                     onCardFrontChange={handleManualCardFrontChange}
                     onCardAnswerChange={handleManualCardAnswerChange}
                     onAddAnswer={handleAddAnswer}
                     onRemoveAnswer={handleRemoveAnswer}
-                    onAddCard={() => handleAddCard(manualCardType)}
+                    onAddCard={() => handleAddCard(newCardType)}
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
                     onCardImageChange={handleManualCardImageChange}

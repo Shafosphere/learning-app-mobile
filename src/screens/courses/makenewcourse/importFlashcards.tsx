@@ -1,13 +1,8 @@
 import MyButton from "@/src/components/button/button";
-import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
-  createCustomCourse,
-  replaceCustomFlashcards,
-} from "@/src/db/sqlite/db";
-import {
   createEmptyManualCard,
-  ensureCardsNormalized,
   normalizeAnswers,
   useManualCardsForm,
   type ManualCard,
@@ -23,14 +18,22 @@ import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  CONTENT_DRAFT_STORAGE_KEY,
+  type AddMode,
+  type ContentDraftPayload,
+  isAddMode,
+  isCsvImportType,
+  isManualCardType,
+  makeCustomCourseDraftScopeKey,
+  normalizeDraftCards,
+} from "./contentDraft";
 import { useStyles } from "./importFlashcards-styles";
-
-type AddMode = "csv" | "manual";
 
 const TRUE_VALUES = new Set([
   "true",
@@ -65,6 +68,7 @@ export default function CustomCourseContentScreen() {
   const styles = useStyles();
   const setPopup = usePopup();
   const router = useRouter();
+  const pathname = usePathname();
   const params = useLocalSearchParams();
 
   const courseName = useMemo(() => {
@@ -112,88 +116,95 @@ export default function CustomCourseContentScreen() {
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
-  const manualCardsByTypeRef = useRef<Record<ManualCardType, ManualCard[]>>({
-    text: manualCards,
-    true_false: [createEmptyManualCard("card-truefalse-0", "true_false")],
-    know_dont_know: [createEmptyManualCard("card-knowdontknow-0", "know_dont_know")],
-  });
-  const [manualCardType, setManualCardType] = useState<ManualCardType>("text");
+  const [newCardType, setNewCardType] = useState<ManualCardType>("text");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [csvCardType, setCsvCardType] = useState<CsvImportType>("text");
-  const [isSaving, setIsSaving] = useState(false);
+  const [isDraftHydrated, setIsDraftHydrated] = useState(false);
   const csvTypeOptions: CardTypeOption<CsvImportType>[] = [
     { key: "text", label: "Tradycyjne" },
     { key: "true_false", label: "Prawda / Fałsz" },
     { key: "know_dont_know", label: "Umiem / Nie umiem" },
   ];
-
-  const inferCardTypeFromCards = useCallback((cards: ManualCard[]): ManualCardType => {
-    if (
-      cards.length > 0 &&
-      cards.every((card) => (card.type ?? "text") === "know_dont_know")
-    ) {
-      return "know_dont_know";
-    }
-    if (cards.length > 0 && cards.every((card) => (card.type ?? "text") === "true_false")) {
-      return "true_false";
-    }
-    return "text";
-  }, []);
-
-  const mapCardsToType = useCallback(
-    (cards: ManualCard[], nextType: ManualCardType): ManualCard[] =>
-      cards.map((card) => {
-        if (nextType === "true_false" || nextType === "know_dont_know") {
-          const normalizedAnswer =
-            card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
-          return {
-            ...card,
-            type: nextType,
-            answers: [normalizedAnswer],
-            front: card.front ?? "",
-          };
-        }
-        const ensuredAnswers = card.answers.length > 0 ? card.answers : [""];
-        return {
-          ...card,
-          type: nextType,
-          answers: ensuredAnswers,
-          front: card.front ?? "",
-        };
+  const draftScopeKey = useMemo(
+    () =>
+      makeCustomCourseDraftScopeKey({
+        courseName,
+        iconId,
+        iconColor,
+        colorId,
+        reviewsEnabled,
       }),
-    []
+    [courseName, colorId, iconColor, iconId, reviewsEnabled]
   );
 
-  const persistCurrentManualCards = useCallback(() => {
-    manualCardsByTypeRef.current[manualCardType] = ensureCardsNormalized(
-      manualCards.map((card) => ({ ...card, type: manualCardType }))
-    );
-  }, [manualCardType, manualCards]);
+  useEffect(() => {
+    let isMounted = true;
+    const restoreDraft = async () => {
+      try {
+        const raw = await AsyncStorage.getItem(CONTENT_DRAFT_STORAGE_KEY);
+        if (!raw || !isMounted) return;
+        const parsed = JSON.parse(raw) as Partial<ContentDraftPayload>;
+        if (!parsed || parsed.scopeKey !== draftScopeKey) return;
 
-  const loadCardsForType = useCallback(
-    (nextType: ManualCardType, providedCards?: ManualCard[]) => {
-      persistCurrentManualCards();
-      const nextCards =
-        providedCards ??
-        manualCardsByTypeRef.current[nextType] ??
-        [createEmptyManualCard(undefined, nextType)];
-      const normalized = ensureCardsNormalized(
-        nextCards.map((card) => ({ ...card, type: nextType }))
+        if (isAddMode(parsed.addMode)) {
+          setAddMode(parsed.addMode);
+        }
+        if (isManualCardType(parsed.newCardType)) {
+          setNewCardType(parsed.newCardType);
+        }
+        if (isCsvImportType(parsed.csvCardType)) {
+          setCsvCardType(parsed.csvCardType);
+        }
+        if (parsed.csvFileName === null || typeof parsed.csvFileName === "string") {
+          setCsvFileName(parsed.csvFileName);
+        }
+
+        const restoredCards = normalizeDraftCards(parsed.manualCards);
+        if (restoredCards.length > 0) {
+          replaceManualCards(restoredCards);
+        }
+      } catch (error) {
+        console.warn("Failed to restore content draft", error);
+      } finally {
+        if (isMounted) {
+          setIsDraftHydrated(true);
+        }
+      }
+    };
+
+    void restoreDraft();
+    return () => {
+      isMounted = false;
+    };
+  }, [draftScopeKey, replaceManualCards]);
+
+  useEffect(() => {
+    if (!isDraftHydrated) return;
+    const timeoutId = setTimeout(() => {
+      const payload: ContentDraftPayload = {
+        scopeKey: draftScopeKey,
+        addMode,
+        newCardType,
+        csvCardType,
+        csvFileName,
+        manualCards,
+      };
+      void AsyncStorage.setItem(
+        CONTENT_DRAFT_STORAGE_KEY,
+        JSON.stringify(payload)
       );
-      manualCardsByTypeRef.current[nextType] = normalized;
-      setManualCardType(nextType);
-      replaceManualCards(normalized);
-    },
-    [persistCurrentManualCards, replaceManualCards]
-  );
+    }, 250);
 
-  const handleManualCardTypeChange = useCallback(
-    (nextType: ManualCardType) => {
-      if (nextType === manualCardType) return;
-      loadCardsForType(nextType);
-    },
-    [loadCardsForType, manualCardType]
-  );
+    return () => clearTimeout(timeoutId);
+  }, [
+    addMode,
+    newCardType,
+    csvCardType,
+    csvFileName,
+    manualCards,
+    draftScopeKey,
+    isDraftHydrated,
+  ]);
 
   const parseBooleanValue = (value: unknown): boolean => {
     if (value == null) return false;
@@ -241,7 +252,8 @@ export default function CustomCourseContentScreen() {
 
   const buildManualCardsFromRows = async (
     rows: any[],
-    resolveImage?: (name: string | null) => Promise<string | null>
+    resolveImage?: (name: string | null) => Promise<string | null>,
+    fallbackType: ManualCardType = "text"
   ): Promise<ManualCard[]> => {
     const readStringField = (row: any, keys: string[]): string => {
       for (const key of keys) {
@@ -310,7 +322,8 @@ export default function CustomCourseContentScreen() {
         ? true
         : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
       const inferredType: ManualCardType = isBoolean ? "true_false" : "text";
-      const type: ManualCardType = explicitType ?? inferredType;
+      const type: ManualCardType =
+        explicitType ?? (fallbackType !== "text" ? fallbackType : inferredType);
 
       const flipFlag = parseBooleanValue(
         readBooleanishField(row, ["flip"])
@@ -440,7 +453,8 @@ export default function CustomCourseContentScreen() {
 
       const cards = await buildManualCardsFromRows(
         parsed.data as any[],
-        resolveZipImage
+        resolveZipImage,
+        csvCardType
       );
       if (cards.length === 0) {
         setPopup({
@@ -451,13 +465,7 @@ export default function CustomCourseContentScreen() {
         return;
       }
 
-      const inferredType = inferCardTypeFromCards(cards);
-      const forcedType =
-        inferredType === "true_false" &&
-        (csvCardType === "true_false" || csvCardType === "know_dont_know")
-          ? csvCardType
-          : inferredType;
-      loadCardsForType(forcedType, mapCardsToType(cards, forcedType));
+      replaceManualCards(cards);
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z ZIP`,
         color: "calm",
@@ -535,7 +543,8 @@ export default function CustomCourseContentScreen() {
 
       const cards = await buildManualCardsFromRows(
         parsed.data as any[],
-        externalResolver
+        externalResolver,
+        csvCardType
       );
       if (!cards.length) {
         setPopup({
@@ -545,13 +554,7 @@ export default function CustomCourseContentScreen() {
         });
         return;
       }
-      const inferredType = inferCardTypeFromCards(cards);
-      const forcedType =
-        inferredType === "true_false" &&
-        (csvCardType === "true_false" || csvCardType === "know_dont_know")
-          ? csvCardType
-          : inferredType;
-      loadCardsForType(forcedType, mapCardsToType(cards, forcedType));
+      replaceManualCards(cards);
       setPopup({
         message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
         color: "calm",
@@ -568,7 +571,7 @@ export default function CustomCourseContentScreen() {
   };
 
 
-  const handleSaveCourse = async () => {
+  const handleNavigateToSettings = async () => {
     const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
@@ -612,7 +615,7 @@ export default function CustomCourseContentScreen() {
         return acc;
       }
       const backText = answers[0] ?? "";
-      const cardTypeToSave = (card.type ?? manualCardType) as ManualCardType;
+      const cardTypeToSave = (card.type ?? "text") as ManualCardType;
       acc.push({
         frontText,
         backText,
@@ -639,35 +642,49 @@ export default function CustomCourseContentScreen() {
       return;
     }
 
-    setIsSaving(true);
-    try {
-      const courseId = await createCustomCourse({
-        name: cleanName,
-        iconId,
-        iconColor: iconColor || DEFAULT_COURSE_COLOR,
-        colorId: colorId ?? undefined,
-        reviewsEnabled,
-      });
-
-      console.log('Saving cards to database:', trimmedCards);
-      await replaceCustomFlashcards(courseId, trimmedCards);
-
-      setPopup({
-        message: "Zestaw fiszek zapisany!",
-        color: "calm",
-        duration: 3500,
-      });
-      router.replace("/coursepanel");
-    } catch (error) {
-      console.error("Failed to save custom course", error);
-      setPopup({
-        message: "Nie udało się zapisać zestawu",
-        color: "angry",
-        duration: 4000,
-      });
-    } finally {
-      setIsSaving(false);
+    const params: Record<string, string> = {
+      name: cleanName,
+      iconId,
+      iconColor,
+      reviewsEnabled: reviewsEnabled ? "1" : "0",
+    };
+    if (colorId) {
+      params.colorId = colorId;
     }
+
+    // Flush latest draft immediately before navigating to step 3.
+    // Debounced autosave can miss the last keystrokes if user clicks "Dalej" quickly.
+    const latestDraftPayload: ContentDraftPayload = {
+      scopeKey: draftScopeKey,
+      addMode,
+      newCardType,
+      csvCardType,
+      csvFileName,
+      manualCards,
+    };
+    try {
+      if (__DEV__) {
+        console.log("[ContentStep] Flushing draft before navigation", {
+          scopeKey: draftScopeKey,
+          cards: manualCards.length,
+          addMode,
+          newCardType,
+          csvCardType,
+          csvFileName,
+        });
+      }
+      await AsyncStorage.setItem(
+        CONTENT_DRAFT_STORAGE_KEY,
+        JSON.stringify(latestDraftPayload)
+      );
+    } catch (error) {
+      console.warn("Failed to persist content draft before navigation", error);
+    }
+
+    const settingsPath = pathname.startsWith("/custom_profile")
+      ? "/custom_profile/settings"
+      : "/custom_course/settings";
+    router.push({ pathname: settingsPath, params });
   };
 
   const handleGoBack = () => {
@@ -713,7 +730,7 @@ export default function CustomCourseContentScreen() {
                 options={csvTypeOptions}
                 value={csvCardType}
                 onChange={setCsvCardType}
-                label="Typ fiszek"
+                label="Typ fiszki"
               />
               <CsvImportGuide
                 onPickFile={handleSelectCsv}
@@ -725,20 +742,20 @@ export default function CustomCourseContentScreen() {
             <View style={styles.modeContainer}>
               <CardTypeSelector
                 options={cardTypeOptions}
-                value={manualCardType}
-                onChange={handleManualCardTypeChange}
-                label="Typ fiszek"
+                value={newCardType}
+                onChange={setNewCardType}
+                label="Typ fiszki"
               />
               <Text style={styles.miniSectionHeader}>fiszki</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
-                cardType={manualCardType}
+                cardType={newCardType}
                 styles={styles as unknown as ManualCardsEditorStyles}
                 onCardFrontChange={handleManualCardFrontChange}
                 onCardAnswerChange={handleManualCardAnswerChange}
                 onAddAnswer={handleAddAnswer}
                 onRemoveAnswer={handleRemoveAnswer}
-                onAddCard={() => handleAddCard(manualCardType)}
+                onAddCard={() => handleAddCard(newCardType)}
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
                 onCardImageChange={handleManualCardImageChange}
@@ -763,11 +780,10 @@ export default function CustomCourseContentScreen() {
           </MyButton>
 
           <MyButton
-            text="Stwórz"
+            text="Dalej"
             color="my_green"
-            onPress={handleSaveCourse}
-            disabled={isSaving}
-            accessibilityLabel="Stwórz kurs"
+            onPress={handleNavigateToSettings}
+            accessibilityLabel="Przejdź do ustawień kursu"
           />
         </View>
       </View>

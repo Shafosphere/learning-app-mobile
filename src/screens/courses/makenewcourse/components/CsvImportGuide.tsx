@@ -159,7 +159,7 @@ const OPTIONAL_FIELDS_TEXT = [
     id: "flip",
     label: "flip",
     description:
-      'Wartość "tak/true/1" odwraca fiszkę w pudełkach 2 i 4; brak kolumny lub pusta wartość oznacza domyślnie brak odwracania.',
+      'Wartość "tak/true/1" odwraca fiszkę w pudełkach 2 i 4; kolumna jest opcjonalna, a brak wartości używa domyślnego zachowania kursu/importera.',
   },
   {
     id: "podpowiedz1 / podpowiedz2",

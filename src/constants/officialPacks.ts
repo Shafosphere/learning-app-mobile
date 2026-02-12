@@ -32,6 +32,8 @@ export type OfficialPackDef = {
   iconColor: string;
   reviewsEnabled?: boolean;
   defaultType?: "traditional" | "true_false" | "self_assess";
+  // Default flip behavior for rows without explicit CSV `flip` value
+  defaultFlip?: boolean;
   sourceLang?: string;
   targetLang?: string;
   smallFlag?: string;
@@ -54,6 +56,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#10B981",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -67,6 +70,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#FBBF24",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -80,6 +84,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#6366F1",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -93,6 +98,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#EC4899",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "en",
     targetLang: "pl",
     smallFlag: "pl",
@@ -106,6 +112,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "kr",
     targetLang: "pl",
     smallFlag: "kr",
@@ -119,6 +126,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#14B8A6",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -133,6 +141,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#8B5CF6",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: false,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -147,6 +156,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#38BDF8",
     reviewsEnabled: true,
     defaultType: "self_assess",
+    defaultFlip: false,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -161,6 +171,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#22C55E",
     reviewsEnabled: true,
     defaultType: "true_false",
+    defaultFlip: false,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -175,6 +186,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconColor: "#22C55E",
     reviewsEnabled: true,
     defaultType: "traditional",
+    defaultFlip: true,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",
@@ -192,6 +204,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     iconId: "lab",
     iconColor: "#0EA5E9",
     reviewsEnabled: true,
+    defaultFlip: false,
     sourceLang: "pl",
     targetLang: "pl",
     smallFlag: "pl",

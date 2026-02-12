@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import CustomCourseEditor from "@/src/screens/courses/editcourse/CustomCourseEditor";
-import { CourseSettingsSection } from "@/src/screens/courses/editcourse/components/SettingsCourse";
+import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
 import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEditScreen-styles";
 import type { CEFRLevel } from "@/src/types/language";
@@ -410,78 +410,67 @@ function BuiltinCourseEditor({
         </View>
 
         <View style={styles.sectionCard}>
-          <CourseSettingsSection
+          <CourseSettingsPanel
             styles={styles}
-            switchColors={{
-              thumb: colors.background,
-              trackFalse: colors.border,
-              trackTrue: colors.my_green,
+            settingsProps={{
+              styles,
+              switchColors: {
+                thumb: colors.background,
+                trackFalse: colors.border,
+                trackTrue: colors.my_green,
+              },
+              colors,
+              boxZeroEnabled,
+              onToggleBoxZero: handleBoxZeroToggle,
+              autoflowEnabled,
+              onToggleAutoflow: handleAutoflowToggle,
+              reviewsEnabled,
+              onToggleReviews: setReviewsEnabled,
+              skipCorrectionEnabled,
+              onToggleSkipCorrection: handleSkipCorrectionToggle,
+              hideSkipCorrectionOption: false,
+              showTrueFalseButtonsVariant: false,
+              trueFalseButtonsVariant,
+              onSelectTrueFalseButtonsVariant: handleTrueFalseButtonsVariantChange,
+              cardSize,
+              onSelectCardSize: handleCardSizeChange,
+              showImageSizeOptions: courseHasImages,
+              imageSize,
+              onSelectImageSize: handleImageSizeChange,
+              imageSizeEnabled,
             }}
-            colors={colors}
-            boxZeroEnabled={boxZeroEnabled}
-            onToggleBoxZero={handleBoxZeroToggle}
-            autoflowEnabled={autoflowEnabled}
-            onToggleAutoflow={handleAutoflowToggle}
-            reviewsEnabled={reviewsEnabled}
-            onToggleReviews={setReviewsEnabled}
-            skipCorrectionEnabled={skipCorrectionEnabled}
-            onToggleSkipCorrection={handleSkipCorrectionToggle}
-            hideSkipCorrectionOption={false}
-            showTrueFalseButtonsVariant={false}
-            trueFalseButtonsVariant={trueFalseButtonsVariant}
-            onSelectTrueFalseButtonsVariant={handleTrueFalseButtonsVariantChange}
-            cardSize={cardSize}
-            onSelectCardSize={handleCardSizeChange}
-            showImageSizeOptions={courseHasImages}
-            imageSize={imageSize}
-            onSelectImageSize={handleImageSizeChange}
-            imageSizeEnabled={imageSizeEnabled}
+            resetActions={[
+              {
+                key: "boxes",
+                title: "Reset pudełek",
+                subtitle:
+                  "Czyści stan pudełek i przywraca fiszki do puli nieznanych.",
+                ctaText: "Reset pudełek",
+                loading: resettingBoxes,
+                onPress: handleResetBoxes,
+                disabled: resettingBoxes,
+              },
+              {
+                key: "reviews",
+                title: "Reset powtórek",
+                subtitle: "Usuwa zapisane powtórki dla tego kursu.",
+                ctaText: "Reset powtórek",
+                loading: resettingReviews,
+                onPress: handleResetReviews,
+                disabled: resettingReviews,
+              },
+              {
+                key: "all",
+                title: "Reset całkowity",
+                subtitle:
+                  "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.",
+                ctaText: "Reset całkowity",
+                loading: resettingAll,
+                onPress: handleResetAll,
+                disabled: resettingAll,
+              },
+            ]}
           />
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset pudełek</Text>
-              <Text style={styles.toggleSubtitle}>
-                Czyści stan pudełek i przywraca fiszki do puli nieznanych.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingBoxes ? "Resetuję..." : "Reset pudełek"}
-              color="my_red"
-              onPress={handleResetBoxes}
-              disabled={resettingBoxes}
-              width={150}
-            />
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset powtórek</Text>
-              <Text style={styles.toggleSubtitle}>
-                Usuwa zapisane powtórki dla tego kursu.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingReviews ? "Resetuję..." : "Reset powtórek"}
-              color="my_red"
-              onPress={handleResetReviews}
-              disabled={resettingReviews}
-              width={150}
-            />
-          </View>
-          <View style={styles.toggleRow}>
-            <View style={styles.toggleTextWrapper}>
-              <Text style={styles.toggleTitle}>Reset całkowity</Text>
-              <Text style={styles.toggleSubtitle}>
-                Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.
-              </Text>
-            </View>
-            <MyButton
-              text={resettingAll ? "Resetuję..." : "Reset całkowity"}
-              color="my_red"
-              onPress={handleResetAll}
-              disabled={resettingAll}
-              width={150}
-            />
-          </View>
         </View>
       </ScrollView>
 

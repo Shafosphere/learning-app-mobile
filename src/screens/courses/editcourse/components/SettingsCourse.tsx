@@ -12,7 +12,7 @@ type SwitchColors = {
   trackTrue: string;
 };
 
-type Props = {
+export type CourseSettingsSectionProps = {
   styles: Record<string, unknown>;
   switchColors: SwitchColors;
   colors: ThemeColors;
@@ -60,7 +60,7 @@ export function CourseSettingsSection({
   imageSize,
   onSelectImageSize,
   imageSizeEnabled = false,
-}: Props) {
+}: CourseSettingsSectionProps) {
   const cardSizeStyles = localStyles(switchColors, colors);
   const {
     sectionGroup,
@@ -132,7 +132,7 @@ export function CourseSettingsSection({
           <View style={toggleTextWrapper}>
             <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
             <Text style={toggleSubtitle}>
-              Po złej odpowiedzi od razu pokaż następną fiszkę.
+              Po złej odpowiedzi od razu pokaż następną fiszkę (dotyczy fiszek tradycyjnych).
             </Text>
           </View>
           <Switch

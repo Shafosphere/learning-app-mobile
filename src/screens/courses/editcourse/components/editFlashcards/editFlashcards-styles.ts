@@ -48,6 +48,7 @@ export const useStyles = createThemeStylesHook((colors) => {
     },
     answersContainer: {
       gap: 12,
+      paddingTop: 2,
     },
     answerRow: {
       flexDirection: "row" as const,
@@ -75,6 +76,7 @@ export const useStyles = createThemeStylesHook((colors) => {
       flexDirection: "row" as const,
       gap: 12,
       alignItems: "flex-start" as const,
+      paddingTop: 2,
     },
     imagesRowSingle: {
       justifyContent: "flex-start" as const,

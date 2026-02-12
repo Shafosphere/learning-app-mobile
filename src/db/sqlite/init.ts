@@ -82,7 +82,8 @@ const resolveImageFromMap = async (
 async function readCsvAsset(
     assetModule: any,
     imageMap?: Record<string, any>,
-    defaultType?: "traditional" | "true_false" | "self_assess"
+    defaultType?: "traditional" | "true_false" | "self_assess",
+    defaultFlip?: boolean
 ): Promise<CustomFlashcardInput[]> {
     console.log("[DB] readCsvAsset: create asset from module");
     const asset = Asset.fromModule(assetModule);
@@ -144,7 +145,11 @@ async function readCsvAsset(
                     ? explanationRaw.trim() || null
                     : null;
             const flipRaw = (row as any).flip;
-            const shouldFlip = parseBooleanValue(flipRaw);
+            const hasFlipOverride =
+                flipRaw != null && flipRaw.toString().trim().length > 0;
+            const shouldFlip = hasFlipOverride
+                ? parseBooleanValue(flipRaw)
+                : (defaultFlip ?? false);
 
             const mappedType =
                 resolvedType === "traditional"
@@ -205,6 +210,7 @@ async function importOfficialPackIfEmpty(
         imageMap?: Record<string, any>;
         slug: string;
         defaultType?: "traditional" | "true_false" | "self_assess";
+        defaultFlip?: boolean;
     }
 ) {
     console.log("[DB] importOfficialPackIfEmpty: check courseId=", courseId);
@@ -219,7 +225,12 @@ async function importOfficialPackIfEmpty(
         return;
     }
     console.log("[DB] importOfficialPackIfEmpty: reading asset", pack.slug);
-    const cards = await readCsvAsset(pack.csvAsset, pack.imageMap, pack.defaultType);
+    const cards = await readCsvAsset(
+        pack.csvAsset,
+        pack.imageMap,
+        pack.defaultType,
+        pack.defaultFlip
+    );
     console.log("[DB] importOfficialPackIfEmpty: cards prepared=", cards.length);
     if (cards.length === 0) return;
     console.log("[DB] importOfficialPackIfEmpty: replacing flashcards");
