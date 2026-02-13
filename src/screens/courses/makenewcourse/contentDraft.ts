@@ -1,5 +1,4 @@
 import type { ManualCard, ManualCardType } from "@/src/hooks/useManualCardsForm";
-import type { CsvImportType } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
 
 export type AddMode = "csv" | "manual";
 
@@ -10,7 +9,6 @@ export type ContentDraftPayload = {
   scopeKey: string;
   addMode: AddMode;
   newCardType: ManualCardType;
-  csvCardType: CsvImportType;
   csvFileName: string | null;
   manualCards: ManualCard[];
 };
@@ -27,9 +25,6 @@ export type SettingsDraftPayload = {
 };
 
 export const isManualCardType = (value: unknown): value is ManualCardType =>
-  value === "text" || value === "true_false" || value === "know_dont_know";
-
-export const isCsvImportType = (value: unknown): value is CsvImportType =>
   value === "text" || value === "true_false" || value === "know_dont_know";
 
 export const isAddMode = (value: unknown): value is AddMode =>

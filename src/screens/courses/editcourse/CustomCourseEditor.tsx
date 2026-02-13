@@ -1,5 +1,13 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { ActivityIndicator, Alert, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Alert,
+  Animated,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
@@ -26,6 +34,7 @@ import type {
   TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   createEmptyManualCard,
@@ -193,6 +202,14 @@ export default function CustomCourseEditor({
   );
   const imageSizeOptionsEnabled =
     courseCardSize === "large" && courseHasImageCards;
+  const shouldShowManualToolbar =
+    !isOfficialCourse && !loading && !loadError;
+  const { bottomOffset: manualToolbarOffset } = useKeyboardBottomOffset({
+    enabled: shouldShowManualToolbar,
+    gap: 8,
+    baseInset: 0,
+    keyboardTopCorrection: 44,
+  });
 
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
@@ -562,7 +579,10 @@ export default function CustomCourseEditor({
   return (
     <View style={styles.container}>
       <ScrollView
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          shouldShowManualToolbar && styles.scrollContentWithManualToolbar,
+        ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.sectionCard}>
@@ -682,12 +702,6 @@ export default function CustomCourseEditor({
                       Zmieniaj zawartość kursu
                     </Text>
                   </View>
-                  <CardTypeSelector
-                    options={newCardTypeOptions}
-                    value={newCardType}
-                    onChange={setNewCardType}
-                    label="Typ fiszki"
-                  />
                   <ManualCardsEditor
                     manualCards={manualCards}
                     cardType={newCardType}
@@ -700,6 +714,7 @@ export default function CustomCourseEditor({
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
                     onCardImageChange={handleManualCardImageChange}
+                    showDefaultBottomAddButton={false}
                   />
                 </>
               )}
@@ -707,6 +722,34 @@ export default function CustomCourseEditor({
           </>
         ) : null}
       </ScrollView>
+
+      {shouldShowManualToolbar ? (
+        <Animated.View
+          style={[styles.manualToolbarWrap, { marginBottom: manualToolbarOffset }]}
+        >
+          <View style={styles.manualToolbar}>
+            <CardTypeSelector
+              options={newCardTypeOptions}
+              value={newCardType}
+              onChange={setNewCardType}
+              label="Typ fiszki"
+              labelHidden
+              size="compact"
+              dropdownDirection="up"
+              containerStyle={styles.manualTypeSelector}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Dodaj nową fiszkę"
+              style={styles.manualAddButton}
+              hitSlop={8}
+              onPress={() => handleAddCard(newCardType)}
+            >
+              <Text style={styles.manualAddIcon}>+</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      ) : null}
 
       <View style={styles.buttonscontainer}>
         <View style={styles.buttonsRow}>

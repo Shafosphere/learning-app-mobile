@@ -11,6 +11,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 24,
     gap: 24,
   },
+  scrollContentWithManualToolbar: {
+    paddingBottom: 236,
+  },
   sectionCard: {
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
@@ -108,6 +111,38 @@ export const useStyles = createThemeStylesHook((colors) => ({
   manualHint: {
     fontSize: 13,
     color: colors.paragraph,
+  },
+  manualToolbarWrap: {
+    paddingHorizontal: 24,
+    paddingTop: 8,
+    paddingBottom: 10,
+    backgroundColor: colors.background,
+    borderTopWidth: 1,
+    borderTopColor: colors.border,
+  },
+  manualToolbar: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+  },
+  manualTypeSelector: {
+    flex: 1,
+  },
+  manualAddButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+    backgroundColor: colors.my_yellow,
+    borderWidth: 1,
+    borderColor: colors.border,
+  },
+  manualAddIcon: {
+    fontSize: 28,
+    lineHeight: 28,
+    fontWeight: "900" as const,
+    color: colors.headline,
   },
   manualHistoryRow: {
     marginTop: 16,

@@ -691,11 +691,11 @@ export const WIKI_TOPICS: WikiTopic[] = [
       { type: "heading", icon: "📥", text: "Import z CSV", tone: "pink" },
       {
         type: "paragraph",
-        text: "Format pliku zależy od typu fiszek. W kreatorze masz przykładowe szablony do pobrania – weź jeden, wypełnij i importuj.",
+        text: "W jednym pliku CSV mozesz miec rozne rodzaje fiszek. Kreator pokazuje prosty przewodnik i gotowy przyklad.",
       },
       {
         type: "paragraph",
-        text: "Kolumny zazwyczaj to: przód, tył (i opcjonalnie link do obrazka). Możesz też wyeksportować kurs do CSV, żeby zrobić backup albo podzielić się z kimś.",
+        text: "Po wybraniu pliku aplikacja najpierw go sprawdza i pokazuje raport: co da sie zaimportowac, a co trzeba poprawic.",
       },
       {
         type: "callout",

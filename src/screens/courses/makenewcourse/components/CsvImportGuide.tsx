@@ -3,315 +3,320 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
 import { Platform, Text, View } from "react-native";
 
-export type CsvImportType = "text" | "true_false" | "know_dont_know";
-
 interface CsvImportGuideProps {
   onPickFile: () => void;
   selectedFileName: string | null;
-  activeType: CsvImportType;
+  isAnalyzing?: boolean;
 }
 
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
-    gap: 16,
+    gap: 14,
   },
-  contentContainer: {
+  card: {
     backgroundColor: colors.background,
     borderRadius: 12,
-    padding: 16,
+    padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
+    gap: 10,
   },
-  description: {
-    fontSize: 14,
+  cardTitle: {
+    fontSize: 13,
+    fontWeight: "900",
+    textTransform: "uppercase" as const,
+    color: colors.headline,
+  },
+  paragraph: {
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.paragraph,
-    marginBottom: 16,
-    lineHeight: 20,
   },
-  columnTable: {
-    marginTop: 8,
-    marginBottom: 16,
+  listItem: {
+    fontSize: 13,
+    lineHeight: 19,
+    color: colors.paragraph,
+  },
+  columnsGrid: {
     borderWidth: 1,
     borderColor: colors.border,
-    borderRadius: 8,
-    overflow: "hidden",
+    borderRadius: 10,
+    overflow: "hidden" as const,
+    marginTop: 2,
   },
-  columnRow: {
-    flexDirection: "row",
+  columnsRow: {
+    flexDirection: "row" as const,
     borderBottomWidth: 1,
     borderBottomColor: colors.border,
     backgroundColor: colors.secondBackground,
   },
-  columnHeader: {
+  columnsCell: {
     flex: 1,
-    padding: 8,
-    fontSize: 12,
-    fontWeight: "700",
-    color: colors.headline,
+    minWidth: 74,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
     borderRightWidth: 1,
     borderRightColor: colors.border,
-  },
-  columnCell: {
-    flex: 1,
-    padding: 8,
-    fontSize: 12,
+    fontSize: 11,
     color: colors.paragraph,
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-    borderRightWidth: 1,
-    borderRightColor: colors.border,
   },
-  lastCell: {
+  columnsCellHeader: {
+    color: colors.headline,
+    fontWeight: "800",
+    fontSize: 11,
+  },
+  columnsCellLast: {
     borderRightWidth: 0,
   },
-  actionsRow: {
-    flexDirection: "row",
-    gap: 12,
-    marginTop: 8,
-    alignItems: "center",
-    justifyContent: "flex-end",
+  code: {
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
   },
-  fileInfo: {
-    marginTop: 8,
-    padding: 12,
-    backgroundColor: colors.my_green + "20",
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.my_green,
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 8,
-  },
-  fileName: {
-    flex: 1,
-    fontSize: 14,
-    color: colors.headline,
-    fontWeight: "600",
-  },
-  tipBox: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: colors.my_yellow + "20",
-    borderRadius: 8,
-    gap: 4,
-  },
-  tipTitle: {
-    fontSize: 12,
-    fontWeight: "700",
-    color: "#B45309",
-    textTransform: "uppercase",
-  },
-  tipText: {
-    fontSize: 12,
-    color: colors.paragraph,
-    lineHeight: 18,
-  },
-  optionalBox: {
-    marginTop: 12,
-    padding: 12,
-    backgroundColor: colors.secondBackground,
+  legendCard: {
     borderRadius: 10,
     borderWidth: 1,
+    padding: 10,
+    gap: 4,
+  },
+  legendCardBlue: {
+    backgroundColor: colors.my_green + "12",
+    borderColor: colors.my_green,
+  },
+  legendCardYellow: {
+    backgroundColor: colors.my_yellow + "20",
+    borderColor: colors.my_yellow,
+  },
+  legendCardPlain: {
+    backgroundColor: colors.secondBackground,
     borderColor: colors.border,
-    gap: 8,
   },
-  optionalTitle: {
+  legendTitle: {
     fontSize: 12,
-    fontWeight: "800",
-    textTransform: "uppercase",
-    color: colors.headline,
-    letterSpacing: 0.2,
-  },
-  optionalList: {
-    gap: 8,
-  },
-  optionalItem: {
-    gap: 2,
-  },
-  optionalLabel: {
-    fontSize: 13,
-    fontWeight: "800",
+    fontWeight: "900",
     color: colors.headline,
   },
-  optionalDescription: {
+  legendLine: {
     fontSize: 12,
-    color: colors.paragraph,
     lineHeight: 18,
+    color: colors.paragraph,
+  },
+  actionsRow: {
+    flexDirection: "row" as const,
+    justifyContent: "flex-end" as const,
+    alignItems: "center" as const,
+    gap: 10,
+  },
+  fileInfo: {
+    marginTop: 2,
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.my_green,
+    backgroundColor: colors.my_green + "1A",
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 8,
+  },
+  fileText: {
+    flex: 1,
+    fontSize: 13,
+    color: colors.headline,
+    fontWeight: "700",
+  },
+  warningBox: {
+    padding: 10,
+    borderRadius: 10,
+    backgroundColor: colors.my_yellow + "1A",
+    borderWidth: 1,
+    borderColor: colors.my_yellow,
+    gap: 6,
+  },
+  legendLabel: {
+    color: colors.headline,
+    fontWeight: "800",
   },
 }));
 
-type TemplateData = {
-  label: string;
-  description: string;
-  requiredColumns: { id: string; label: string }[];
-  sampleRow: string[];
-  optionalFields?: { id: string; label: string; description: string }[];
-  tip?: string;
-};
-
-const OPTIONAL_FIELDS_TEXT = [
-  {
-    id: "image_front",
-    label: "image_front (opcjonalne)",
-    description:
-      "Nazwa pliku w ZIP (folder images/) albo ścieżka file:// / content:// w CSV.",
-  },
-  {
-    id: "flip",
-    label: "flip",
-    description:
-      'Wartość "tak/true/1" odwraca fiszkę w pudełkach 2 i 4; kolumna jest opcjonalna, a brak wartości używa domyślnego zachowania kursu/importera.',
-  },
-  {
-    id: "podpowiedz1 / podpowiedz2",
-    label: "podpowiedz1 / podpowiedz2",
-    description:
-      "Tekst z tych kolumn pojawi sie nad kratą z fiszką, jeżeli to trudne słówo możesz napisać tam skojrzenie albo pierwszą litere.",
-  },
+const exampleMixedRows = [
+  "type,front_text,back_text,tf_answer,explanation,flip,front_image",
+  "traditional,Austria,Wieden,,,,",
+  "true_false,Ziemia jest plaska,,false,Ziemia nie jest plaska,,",
+  "self_assess,Wzor na pole kola,,,Pi razy r do kwadratu,,",
+  ",,Pies na obrazku,,, ,dog.png",
 ];
 
-const OPTIONAL_FIELDS_HINT_ONLY = [
-  {
-    id: "image_front",
-    label: "image_front (opcjonalne)",
-    description:
-      "Nazwa pliku w ZIP (folder images/) albo ścieżka file:// / content:// w CSV.",
-  },
-  {
-    id: "podpowiedz1 / podpowiedz2",
-    label: "podpowiedz1 / podpowiedz2",
-    description:
-      "Tekst z tych kolumn pojawi sie nad kratą z fiszką, jeżeli to trudne słówo możesz napisać tam skojrzenie albo pierwszą litere.",
-  },
+const traditionalRows = [
+  ["front_text", "Przod fiszki: pytanie / haslo / stwierdzenie", "Tak"],
+  ["back_text", "Tyl fiszki: poprawna odpowiedz tekstowa", "Tak"],
+  ["front_image", "Obrazek na fiszce", "Nie"],
+  ["flip", "Czy odwracac karte", "Nie"],
 ];
 
-const TEMPLATES: Record<CsvImportType, TemplateData> = {
-  text: {
-    label: "Tradycyjne",
-    description: "Standardowe fiszki tekstowe z pytaniem i odpowiedzią. Multi odpowiedzi oddzielaj ; ",
-    requiredColumns: [
-      { id: "przod", label: "przód" },
-      { id: "tyl", label: "tył" },
-    ],
-    sampleRow: ["Pies", "Dog; Puppy"],
-    optionalFields: OPTIONAL_FIELDS_TEXT,
-  },
-  true_false: {
-    label: "Prawda / Fałsz",
-    description: "Fiszki, gdzie odpowiedzią jest Prawda lub Fałsz.",
-    requiredColumns: [
-      { id: "przod", label: "przód" },
-      { id: "czy_prawda", label: "czy_prawda" },
-    ],
-    sampleRow: ["Ziemia jest płaska", "false"],
-    optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
-  },
-  know_dont_know: {
-    label: "Umiem / Nie umiem",
-    description: "Fiszki, gdzie odpowiedzią jest Umiem lub Nie umiem.",
-    requiredColumns: [
-      { id: "przod", label: "przód" },
-      { id: "czy_prawda", label: "czy_prawda" },
-    ],
-    sampleRow: ["Funkcje strzałkowe JS", "true"],
-    optionalFields: OPTIONAL_FIELDS_HINT_ONLY,
-  },
-};
+const trueFalseRows = [
+  ["front_text", "Tresc pytania lub zdania", "Tak (lub obrazek)"],
+  ["tf_answer", "Poprawna odpowiedz: true lub false", "Tak"],
+  ["explanation", "Wyjasnienie po odpowiedzi", "Nie"],
+  ["front_image", "Obrazek na fiszce", "Nie"],
+  ["flip", "Czy odwracac karte", "Nie"],
+];
+
+const selfAssessRows = [
+  ["front_text", "Pytanie / temat do samooceny", "Tak (lub obrazek)"],
+  ["explanation", "Tresc, ktora pokazuje sie po ocenie", "Nie"],
+  ["back_text", "Fallback, gdy explanation jest puste", "Nie"],
+  ["front_image", "Obrazek na fiszce", "Nie"],
+];
+
+const mixedRows = [
+  ["type", "Podajesz typ dla kazdego wiersza osobno", "Tak (gdy mix typow)"],
+  ["front_text", "Tekst z przodu karty", "Tak (lub obrazek)"],
+  ["back_text", "Odpowiedz tekstowa dla traditional", "Zalezy od typu"],
+  ["tf_answer", "Odpowiedz dla true_false", "Tylko dla true_false"],
+  ["explanation", "Opis dla true_false/self_assess", "Nie"],
+];
 
 export function CsvImportGuide({
   onPickFile,
   selectedFileName,
-  activeType,
+  isAnalyzing = false,
 }: CsvImportGuideProps) {
   const styles = useStyles();
-  const template = TEMPLATES[activeType];
+
+  const renderColumnsTable = (rows: string[][]) => (
+    <View style={styles.columnsGrid}>
+      <View style={styles.columnsRow}>
+        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>Kolumna</Text>
+        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>Co to jest</Text>
+        <Text style={[styles.columnsCell, styles.columnsCellHeader, styles.columnsCellLast]}>
+          Czy potrzebne
+        </Text>
+      </View>
+      {rows.map((row, index) => (
+        <View key={`${row[0]}-${index}`} style={styles.columnsRow}>
+          <Text style={[styles.columnsCell, styles.code]}>{row[0]}</Text>
+          <Text style={styles.columnsCell}>{row[1]}</Text>
+          <Text style={[styles.columnsCell, styles.columnsCellLast]}>{row[2]}</Text>
+        </View>
+      ))}
+    </View>
+  );
 
   return (
     <View style={styles.container}>
-      {/* Content */}
-      <View style={styles.contentContainer}>
-        <Text style={styles.description}>{template.description}</Text>
-        <Text style={styles.description}>
-          Opcjonalna kolumna <Text style={{ fontWeight: "700" }}>type</Text>{" "}
-          pozwala mieszać typy fiszek w jednym pliku (text, true_false,
-          know_dont_know).
-        </Text>
-        <Text style={styles.description}>
-          Obrazki dodajesz przez kolumnę{" "}
-          <Text style={{ fontWeight: "700" }}>image_front</Text>. Jeśli używasz
-          plików, najlepiej spakować CSV do ZIP z folderem{" "}
-          <Text style={{ fontWeight: "700" }}>images/</Text>.
-        </Text>
-
-        {/* Visual Table Preview */}
-        <View style={styles.columnTable}>
-          <View style={styles.columnRow}>
-            {template.requiredColumns.map((col, idx, arr) => (
-              <Text
-                key={col.id}
-                style={[
-                  styles.columnHeader,
-                  idx === arr.length - 1 && styles.lastCell,
-                ]}
-              >
-                {col.label}
-              </Text>
-            ))}
-          </View>
-          <View style={styles.columnRow}>
-            {template.sampleRow.map((val, idx, arr) => (
-              <Text
-                key={idx}
-                style={[
-                  styles.columnCell,
-                  idx === arr.length - 1 && styles.lastCell,
-                ]}
-              >
-                {val}
-              </Text>
-            ))}
-          </View>
-        </View>
-
-        {template.tip && (
-          <View style={styles.tipBox}>
-            <Text style={styles.tipTitle}>Wskazówka</Text>
-            <Text style={styles.tipText}>{template.tip}</Text>
-          </View>
-        )}
-
-        {template.optionalFields && template.optionalFields.length > 0 && (
-          <View style={styles.optionalBox}>
-            <Text style={styles.optionalTitle}>Kolumny opcjonalne</Text>
-            <View style={styles.optionalList}>
-              {template.optionalFields.map((field) => (
-                <View key={field.id} style={styles.optionalItem}>
-                  <Text style={styles.optionalLabel}>{field.label}</Text>
-                  <Text style={styles.optionalDescription}>
-                    {field.description}
-                  </Text>
-                </View>
-              ))}
-            </View>
-          </View>
-        )}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Szybki start</Text>
+        <Text style={styles.listItem}>1. Przygotuj CSV (albo ZIP z CSV i folderem images/).</Text>
+        <Text style={styles.listItem}>2. Wybierz plik i zobacz raport.</Text>
+        <Text style={styles.listItem}>3. Kliknij import poprawnych wierszy.</Text>
       </View>
 
-      {/* Actions */}
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>1) Traditional</Text>
+        {renderColumnsTable(traditionalRows)}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>2) True_False</Text>
+        {renderColumnsTable(trueFalseRows)}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>3) Self_Assess</Text>
+        {renderColumnsTable(selfAssessRows)}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>4) Mieszane</Text>
+        {renderColumnsTable(mixedRows)}
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Legenda (prosto)</Text>
+
+        <View style={[styles.legendCard, styles.legendCardBlue]}>
+          <Text style={styles.legendTitle}>type</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Co to jest: </Text>rodzaj karty.
+          </Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Wazne: </Text>
+            `type` jest opcjonalne i najczesciej przydaje sie, gdy w jednym pliku masz wiecej niz jeden rodzaj fiszek.
+          </Text>
+          <Text style={styles.legendLine}>- traditional = zwykla karta: pytanie + odpowiedz</Text>
+          <Text style={styles.legendLine}>- true_false = karta Prawda/Falsz</Text>
+          <Text style={styles.legendLine}>- self_assess = karta umiem / nie umiem</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Jak puste: </Text>aplikacja sama zgadnie typ po danych.
+          </Text>
+        </View>
+
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>front_text i obrazek</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Co to jest: </Text>przod karty (tekst lub obraz).
+          </Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Wazne: </Text>karta przejdzie, gdy ma tekst LUB obrazek.
+          </Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Jak oba puste: </Text>wiersz bedzie pominiety.
+          </Text>
+        </View>
+
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>tf_answer</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Co to jest: </Text>poprawna odpowiedz dla true_false.
+          </Text>
+          <Text style={styles.legendLine}>Wpisz np. true/false lub 1/0.</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Jak puste przy true_false: </Text>wiersz bedzie bledem.
+          </Text>
+        </View>
+
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>flip</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Co to jest: </Text>czy karta ma byc odwracana.
+          </Text>
+          <Text style={styles.legendLine}>Wpisz true, jesli chcesz odwrotny kierunek.</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Jak puste: </Text>domyslnie nie odwraca.
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.card}>
+        <Text style={styles.cardTitle}>Przyklad mixed CSV</Text>
+        {exampleMixedRows.map((line) => (
+          <Text key={line} style={[styles.paragraph, styles.code]}>
+            {line}
+          </Text>
+        ))}
+      </View>
+
+      <View style={styles.warningBox}>
+        <Text style={styles.cardTitle}>Jesli sie pomylisz, aplikacja zrobi...</Text>
+        <Text style={styles.listItem}>- Pokaze blad i numer wiersza.</Text>
+        <Text style={styles.listItem}>- Pominie tylko zle wiersze, dobre zaimportuje.</Text>
+        <Text style={styles.listItem}>- Przy brakujacym obrazku da ostrzezenie.</Text>
+      </View>
+
       <View style={styles.actionsRow}>
-        <MyButton text="Wybierz plik" onPress={onPickFile} width={140} />
+        <MyButton
+          text={isAnalyzing ? "Analizuje..." : "Wybierz plik"}
+          onPress={isAnalyzing ? undefined : onPickFile}
+          disabled={isAnalyzing}
+          width={150}
+        />
       </View>
 
-      {selectedFileName && (
+      {selectedFileName ? (
         <View style={styles.fileInfo}>
-          <Ionicons
-            name="document-text"
-            size={20}
-            color={styles.fileName?.color}
-          />
-          <Text style={styles.fileName}>{selectedFileName}</Text>
-          <Ionicons name="checkmark-circle" size={20} color="green" />
+          <Ionicons name="document-text" size={18} color={styles.fileText.color} />
+          <Text style={styles.fileText}>{selectedFileName}</Text>
+          <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
         </View>
-      )}
+      ) : null}
     </View>
   );
 }

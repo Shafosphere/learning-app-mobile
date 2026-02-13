@@ -93,6 +93,7 @@ export interface ManualCardsEditorProps {
     uri: string | null
   ) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
+  showDefaultBottomAddButton?: boolean;
 }
 
 export interface ManualCardsDisplayAction {
@@ -119,6 +120,7 @@ export const ManualCardsEditor = ({
   onToggleFlipped,
   onCardImageChange,
   actionButtons,
+  showDefaultBottomAddButton = true,
 }: ManualCardsEditorProps) => {
   const styles = useStyles();
   const [openImageSlots, setOpenImageSlots] = useState<Record<string, boolean>>(
@@ -588,7 +590,7 @@ export const ManualCardsEditor = ({
         );
       })}
 
-      {!isDisplayMode && (
+      {!isDisplayMode && showDefaultBottomAddButton && (
         <View style={styles.buttonContainer}>
           {actionButtons?.map((action) => (
             <Pressable

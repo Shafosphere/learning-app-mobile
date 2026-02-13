@@ -5,44 +5,36 @@ import {
   createEmptyManualCard,
   normalizeAnswers,
   useManualCardsForm,
-  type ManualCard,
   type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
+import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
 } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
-import { CardTypeOption, CardTypeSelector } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
-import { CsvImportGuide, CsvImportType } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
-import { importImageFromZip, saveImage } from "@/src/services/imageService";
+import { CardTypeSelector } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
+import { CsvImportGuide } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
+import {
+  analyzeRows,
+} from "@/src/screens/courses/makenewcourse/csvImport/analyzeRows";
+import { mapAnalysisToManualCards } from "@/src/screens/courses/makenewcourse/csvImport/mapToManualCards";
+import { parseImportFile } from "@/src/screens/courses/makenewcourse/csvImport/parseFile";
+import type { CsvAnalysisResult } from "@/src/screens/courses/makenewcourse/csvImport/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
-import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import JSZip, { JSZipObject } from "jszip";
-import Papa from "papaparse";
 import { useEffect, useMemo, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import { Animated, Pressable, ScrollView, Text, View } from "react-native";
 import {
   CONTENT_DRAFT_STORAGE_KEY,
   type AddMode,
   type ContentDraftPayload,
   isAddMode,
-  isCsvImportType,
   isManualCardType,
   makeCustomCourseDraftScopeKey,
   normalizeDraftCards,
 } from "./contentDraft";
 import { useStyles } from "./importFlashcards-styles";
-
-const TRUE_VALUES = new Set([
-  "true",
-  "1",
-  "yes",
-  "y",
-  "tak",
-  "t",
-]);
 
 const segmentOptions: { key: AddMode; label: string }[] = [
   { key: "csv", label: "Import z CSV" },
@@ -63,6 +55,8 @@ const cardTypeOptions: { key: ManualCardType; label: string }[] = [
     label: "Umiem / Nie umiem",
   },
 ];
+
+type CsvStep = "idle" | "analyzing" | "preview" | "importing";
 
 export default function CustomCourseContentScreen() {
   const styles = useStyles();
@@ -118,13 +112,18 @@ export default function CustomCourseContentScreen() {
   });
   const [newCardType, setNewCardType] = useState<ManualCardType>("text");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
-  const [csvCardType, setCsvCardType] = useState<CsvImportType>("text");
+  const [csvStep, setCsvStep] = useState<CsvStep>("idle");
+  const [csvAnalysis, setCsvAnalysis] = useState<CsvAnalysisResult | null>(null);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
-  const csvTypeOptions: CardTypeOption<CsvImportType>[] = [
-    { key: "text", label: "Tradycyjne" },
-    { key: "true_false", label: "Prawda / Fałsz" },
-    { key: "know_dont_know", label: "Umiem / Nie umiem" },
-  ];
+
+  const shouldShowManualToolbar = addMode === "manual";
+  const { bottomOffset: manualToolbarOffset } = useKeyboardBottomOffset({
+    enabled: shouldShowManualToolbar,
+    gap: 8,
+    baseInset: 0,
+    keyboardTopCorrection: 44,
+  });
+
   const draftScopeKey = useMemo(
     () =>
       makeCustomCourseDraftScopeKey({
@@ -151,9 +150,6 @@ export default function CustomCourseContentScreen() {
         }
         if (isManualCardType(parsed.newCardType)) {
           setNewCardType(parsed.newCardType);
-        }
-        if (isCsvImportType(parsed.csvCardType)) {
-          setCsvCardType(parsed.csvCardType);
         }
         if (parsed.csvFileName === null || typeof parsed.csvFileName === "string") {
           setCsvFileName(parsed.csvFileName);
@@ -185,7 +181,6 @@ export default function CustomCourseContentScreen() {
         scopeKey: draftScopeKey,
         addMode,
         newCardType,
-        csvCardType,
         csvFileName,
         manualCards,
       };
@@ -196,380 +191,120 @@ export default function CustomCourseContentScreen() {
     }, 250);
 
     return () => clearTimeout(timeoutId);
-  }, [
-    addMode,
-    newCardType,
-    csvCardType,
-    csvFileName,
-    manualCards,
-    draftScopeKey,
-    isDraftHydrated,
-  ]);
+  }, [addMode, newCardType, csvFileName, manualCards, draftScopeKey, isDraftHydrated]);
 
-  const parseBooleanValue = (value: unknown): boolean => {
-    if (value == null) return false;
-    const normalized = value.toString().trim().toLowerCase();
-    return TRUE_VALUES.has(normalized);
-  };
-  const isBooleanText = (value: string): boolean => {
-    // Accept only unambiguous boolean words; ignore 1-letter tokens like "t" so regular answers stay text cards.
-    const normalized = value.trim().toLowerCase();
-    return (
-      normalized === "true" ||
-      normalized === "false" ||
-      normalized === "yes" ||
-      normalized === "no" ||
-      normalized === "tak" ||
-      normalized === "nie"
-    );
-  };
-
-  const parseAnswers = (raw: unknown): string[] => {
-    const normalized = (raw ?? "").toString().trim();
-    if (!normalized) return [];
-    const parts = normalized
-      .split(/[;,|\n]/)
-      .map((entry) => entry.trim())
-      .filter((entry) => entry.length > 0);
-
-    if (parts.length === 0) return [normalized];
-
-    const deduped: string[] = [];
-    const seen = new Set<string>();
-    for (const value of parts) {
-      if (!seen.has(value)) {
-        deduped.push(value);
-        seen.add(value);
-      }
-    }
-    return deduped;
-  };
-
-  const normalizeImageField = (raw: unknown): string | null => {
-    const value = (raw ?? "").toString().trim();
-    return value.length > 0 ? value : null;
-  };
-
-  const buildManualCardsFromRows = async (
-    rows: any[],
-    resolveImage?: (name: string | null) => Promise<string | null>,
-    fallbackType: ManualCardType = "text"
-  ): Promise<ManualCard[]> => {
-    const readStringField = (row: any, keys: string[]): string => {
-      for (const key of keys) {
-        const raw = row[key];
-        if (raw != null && `${raw}`.toString().trim().length > 0) {
-          return `${raw}`.toString();
-        }
-      }
-      return "";
-    };
-
-    const readBooleanishField = (row: any, keys: string[]): any => {
-      for (const key of keys) {
-        const raw = row[key];
-        if (raw != null && `${raw}`.toString().trim().length > 0) {
-          return raw;
-        }
-      }
-      return null;
-    };
-
-      const readCardType = (row: any): ManualCardType | null => {
-      const raw = row?.type;
-      if (raw == null) return null;
-      const normalized = raw.toString().trim().toLowerCase();
-      if (
-        normalized === "text" ||
-        normalized === "true_false" ||
-        normalized === "know_dont_know"
-      ) {
-        return normalized as ManualCardType;
-      }
-      if (normalized === "image") {
-        return "text";
-      }
-      return null;
-    };
-
-    const cards: ManualCard[] = [];
-    for (let idx = 0; idx < rows.length; idx += 1) {
-      const row = rows[idx];
-      const explicitType = readCardType(row);
-      const trueFalseRaw = readBooleanishField(row, [
-        "is_true",
-        "isTrue",
-        "czy_prawda",
-        "czyPrawda",
-        "prawda",
-        "prawda_falsz",
-        "prawdaFalsz",
-      ]);
-      const hasTrueFalseFlag =
-        trueFalseRaw != null &&
-        trueFalseRaw.toString().trim().length > 0;
-      const backRaw = readStringField(row, ["back", "tyl"]);
-      const imageFrontName = normalizeImageField(
-        readStringField(row, ["image_front", "imageFront", "obraz_przod"])
-      );
-      const imageFront = resolveImage ? await resolveImage(imageFrontName) : null;
-      const imageBack = null;
-
-      const inferredAnswers = hasTrueFalseFlag
-        ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-        : parseAnswers(backRaw);
-      const isBoolean = hasTrueFalseFlag
-        ? true
-        : inferredAnswers.length > 0 && inferredAnswers.every((a) => isBooleanText(a));
-      const inferredType: ManualCardType = isBoolean ? "true_false" : "text";
-      const type: ManualCardType =
-        explicitType ?? (fallbackType !== "text" ? fallbackType : inferredType);
-
-      const flipFlag = parseBooleanValue(
-        readBooleanishField(row, ["flip"])
-      );
-      const explanation = readStringField(row, [
-        "explanation",
-        "wyjasnienie",
-        "wyjaśnienie",
-        "opis",
-      ]);
-
-      const card: ManualCard = {
-        id: `csv-${idx}`,
-        front: readStringField(row, ["front", "przod"]),
-        answers: [],
-        flipped: flipFlag,
-        answerOnly: false,
-        hintFront: readStringField(row, ["hint1", "hint_front", "podpowiedz1"]),
-        hintBack: readStringField(row, ["hint2", "hint_back", "podpowiedz2"]),
-        imageFront,
-        imageBack,
-        explanation: explanation || null,
-        type,
-      };
-
-      if (type === "know_dont_know") {
-        const fallbackExplanation = backRaw || explanation;
-        card.explanation = fallbackExplanation || null;
-        card.answers = [];
-        card.answerOnly = true;
-        card.flipped = false;
-      } else if (type === "true_false") {
-        const answers = hasTrueFalseFlag
-          ? [parseBooleanValue(trueFalseRaw) ? "true" : "false"]
-          : inferredAnswers.length > 0
-            ? inferredAnswers.map((value) =>
-                parseBooleanValue(value) ? "true" : "false"
-              )
-            : [];
-        card.answers = answers.length > 0 ? answers : [backRaw];
-      } else {
-        const answers = inferredAnswers.length > 0 ? inferredAnswers : [backRaw];
-        card.answers = answers;
-      }
-
-      if (
-        card.front.trim().length > 0 ||
-        card.answers.some((a) => a.trim().length > 0)
-      ) {
-        cards.push(card);
-      }
-    }
-    return cards;
-  };
-
-  const handleZipImport = async (fileUri: string) => {
-    try {
-      const zipBase64 = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.Base64,
-      });
-      const zip = await JSZip.loadAsync(zipBase64, { base64: true });
-      const csvFile = zip.file("data.csv");
-      const csvEntry = csvFile || zip.file(/\.csv$/i)?.[0];
-      if (!csvEntry) {
-        setPopup({
-          message: "Brak pliku CSV w archiwum ZIP",
-          color: "angry",
-          duration: 4000,
-        });
-        return;
-      }
-
-      const csvContent = await csvEntry.async("string");
-      const parsed = Papa.parse(csvContent, {
-        header: true,
-        skipEmptyLines: true,
-      });
-      if (parsed.errors.length > 0) {
-        setPopup({
-          message: "Błąd parsowania CSV z ZIP",
-          color: "angry",
-          duration: 4000,
-        });
-        return;
-      }
-
-      const imageCache = new Map<string, string | null>();
-      const resolveZipImage = async (
-        name: string | null
-      ): Promise<string | null> => {
-        if (!name) return null;
-        if (imageCache.has(name)) {
-          return imageCache.get(name) ?? null;
-        }
-        const normalized = name.replace(/^images[\\/]/i, "");
-        const candidates = [
-          `images/${normalized}`,
-          `images\\${normalized}`,
-          normalized,
-        ];
-        let entry: JSZipObject | null = null;
-        for (const candidate of candidates) {
-          const match = zip.file(candidate);
-          if (match) {
-            entry = match;
-            break;
-          }
-        }
-        if (!entry) {
-          imageCache.set(name, null);
-          return null;
-        }
-        try {
-          const base64 = await entry.async("base64");
-          const saved = await importImageFromZip(base64, normalized);
-          imageCache.set(name, saved);
-          return saved;
-        } catch (error) {
-          console.warn("[Import ZIP] Failed to persist image", {
-            name,
-            error,
-          });
-          imageCache.set(name, null);
-          return null;
-        }
-      };
-
-      const cards = await buildManualCardsFromRows(
-        parsed.data as any[],
-        resolveZipImage,
-        csvCardType
-      );
-      if (cards.length === 0) {
-        setPopup({
-          message: "Brak danych w pliku ZIP",
-          color: "angry",
-          duration: 3000,
-        });
-        return;
-      }
-
-      replaceManualCards(cards);
-      setPopup({
-        message: `Zaimportowano ${cards.length} fiszek z ZIP`,
-        color: "calm",
-        duration: 3500,
-      });
-    } catch (error) {
-      console.error("ZIP import error", error);
-      setPopup({
-        message: "Błąd importu ZIP",
-        color: "angry",
-        duration: 4000,
-      });
-    }
-  };
-
-  const handleSelectCsv = async () => {
+  const handlePickCsvFile = async () => {
     try {
       const picked = await DocumentPicker.getDocumentAsync({
-        type: ["text/csv", "text/plain", "application/zip", "application/x-zip-compressed", "*/*"], // Allow CSV, ZIP, or any file
+        type: [
+          "text/csv",
+          "text/plain",
+          "application/zip",
+          "application/x-zip-compressed",
+          "*/*",
+        ],
         copyToCacheDirectory: true,
       });
       if (picked.canceled || !picked.assets?.[0]) {
         return;
       }
-      const fileUri = picked.assets[0].uri;
-      const fileName = picked.assets[0].name;
+
+      const asset = picked.assets[0];
+      const fileName = asset.name ?? "plik";
       setCsvFileName(fileName);
-      if (fileName?.toLowerCase().endsWith(".zip")) {
-        await handleZipImport(fileUri);
-        return;
-      }
+      setCsvStep("analyzing");
 
-      const csvContent = await FileSystem.readAsStringAsync(fileUri, {
-        encoding: FileSystem.EncodingType.UTF8,
+      const parsed = await parseImportFile({
+        uri: asset.uri,
+        name: asset.name,
       });
-      const parsed = Papa.parse(csvContent, {
-        header: true,
-        skipEmptyLines: true,
-      });
-      if (parsed.errors.length > 0) {
+      const analysis = analyzeRows(parsed);
+      setCsvAnalysis(analysis);
+      setCsvStep("preview");
+
+      const errorCount = analysis.issues.filter((issue) => issue.severity === "error").length;
+      const warningCount = analysis.issues.filter((issue) => issue.severity === "warning").length;
+
+      if (analysis.validRows.length === 0) {
         setPopup({
-          message: "Błąd parsowania CSV",
+          message: "Nie ma jeszcze wierszy, ktore da sie zaimportowac.",
           color: "angry",
-          duration: 4000,
+          duration: 3500,
         });
         return;
       }
 
-      const externalResolver = (() => {
-        const cache = new Map<string, string | null>();
-        return async (name: string | null): Promise<string | null> => {
-          if (!name) return null;
-          if (cache.has(name)) {
-            return cache.get(name) ?? null;
-          }
-          if (
-            name.startsWith("file://") ||
-            name.startsWith("content://")
-          ) {
-            try {
-              const saved = await saveImage(name);
-              cache.set(name, saved);
-              return saved;
-            } catch (error) {
-              console.warn("[Import CSV] Failed to persist image", {
-                name,
-                error,
-              });
-            }
-          }
-          cache.set(name, null);
-          return null;
-        };
-      })();
-
-      const cards = await buildManualCardsFromRows(
-        parsed.data as any[],
-        externalResolver,
-        csvCardType
-      );
-      if (!cards.length) {
-        setPopup({
-          message: "Brak danych w pliku CSV",
-          color: "angry",
-          duration: 3000,
-        });
-        return;
-      }
-      replaceManualCards(cards);
       setPopup({
-        message: `Zaimportowano ${cards.length} fiszek z pliku CSV`,
-        color: "calm",
+        message:
+          errorCount > 0
+            ? `Sprawdzono plik: ${analysis.validRows.length} da sie zaimportowac, ${errorCount} trzeba poprawic.`
+            : warningCount > 0
+              ? `Sprawdzono plik: ${analysis.validRows.length} da sie zaimportowac, ${warningCount} ma ostrzezenia.`
+              : `Super! ${analysis.validRows.length} wierszy jest gotowych do importu.`,
+        color: warningCount > 0 || errorCount > 0 ? "disoriented" : "calm",
         duration: 3500,
       });
-    } catch (e) {
+    } catch (error) {
+      console.error("CSV parse/analyze error", error);
+      setCsvStep("idle");
       setPopup({
-        message: "Błąd importu CSV",
+        message: "Błąd analizy pliku CSV/ZIP.",
         color: "angry",
         duration: 4000,
       });
-      console.error("CSV import error", e);
     }
   };
 
+  const handleImportAnalyzedRows = async () => {
+    if (!csvAnalysis) return;
+    try {
+      setCsvStep("importing");
+      const cards = await mapAnalysisToManualCards(csvAnalysis);
+
+      if (!cards.length) {
+        setPopup({
+          message: "Nie ma kart, ktore da sie teraz zaimportowac.",
+          color: "angry",
+          duration: 3500,
+        });
+        setCsvStep("preview");
+        return;
+      }
+
+      replaceManualCards(cards);
+      setAddMode("manual");
+
+      const skipped = csvAnalysis.invalidRowsCount;
+      const warningCount = csvAnalysis.issues.filter(
+        (issue) => issue.severity === "warning"
+      ).length;
+
+      setPopup({
+        message:
+          skipped > 0
+            ? `Zaimportowano ${cards.length} fiszek, pominięto ${skipped} błędnych wierszy.`
+            : warningCount > 0
+              ? `Zaimportowano ${cards.length} fiszek (${warningCount} ostrzeżeń).`
+              : `Zaimportowano ${cards.length} fiszek.`,
+        color: skipped > 0 ? "disoriented" : "calm",
+        duration: 4000,
+      });
+      setCsvStep("preview");
+    } catch (error) {
+      console.error("CSV import error", error);
+      setPopup({
+        message: "Błąd podczas importu fiszek.",
+        color: "angry",
+        duration: 4000,
+      });
+      setCsvStep("preview");
+    }
+  };
+
+  const handleResetCsvPreview = () => {
+    setCsvAnalysis(null);
+    setCsvStep("idle");
+  };
 
   const handleNavigateToSettings = async () => {
     const cleanName = courseName.trim();
@@ -642,23 +377,20 @@ export default function CustomCourseContentScreen() {
       return;
     }
 
-    const params: Record<string, string> = {
+    const paramsToPass: Record<string, string> = {
       name: cleanName,
       iconId,
       iconColor,
       reviewsEnabled: reviewsEnabled ? "1" : "0",
     };
     if (colorId) {
-      params.colorId = colorId;
+      paramsToPass.colorId = colorId;
     }
 
-    // Flush latest draft immediately before navigating to step 3.
-    // Debounced autosave can miss the last keystrokes if user clicks "Dalej" quickly.
     const latestDraftPayload: ContentDraftPayload = {
       scopeKey: draftScopeKey,
       addMode,
       newCardType,
-      csvCardType,
       csvFileName,
       manualCards,
     };
@@ -669,7 +401,6 @@ export default function CustomCourseContentScreen() {
           cards: manualCards.length,
           addMode,
           newCardType,
-          csvCardType,
           csvFileName,
         });
       }
@@ -684,20 +415,29 @@ export default function CustomCourseContentScreen() {
     const settingsPath = pathname.startsWith("/custom_profile")
       ? "/custom_profile/settings"
       : "/custom_course/settings";
-    router.push({ pathname: settingsPath, params });
+    router.push({ pathname: settingsPath, params: paramsToPass });
   };
 
   const handleGoBack = () => {
     router.back();
   };
 
+  const csvErrorCount = csvAnalysis
+    ? csvAnalysis.issues.filter((issue) => issue.severity === "error").length
+    : 0;
+  const csvWarningCount = csvAnalysis
+    ? csvAnalysis.issues.filter((issue) => issue.severity === "warning").length
+    : 0;
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        // contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.section}>
+      <ScrollView keyboardShouldPersistTaps="handled">
+        <View
+          style={[
+            styles.section,
+            shouldShowManualToolbar && styles.sectionWithManualToolbar,
+          ]}
+        >
           <Text style={styles.sectionHeader}>ZAWARTOSC</Text>
           <View style={styles.segmentedControl}>
             {segmentOptions.map((option) => (
@@ -726,26 +466,88 @@ export default function CustomCourseContentScreen() {
 
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>
-              <CardTypeSelector
-                options={csvTypeOptions}
-                value={csvCardType}
-                onChange={setCsvCardType}
-                label="Typ fiszki"
-              />
               <CsvImportGuide
-                onPickFile={handleSelectCsv}
+                onPickFile={handlePickCsvFile}
                 selectedFileName={csvFileName}
-                activeType={csvCardType}
+                isAnalyzing={csvStep === "analyzing"}
               />
+
+              {csvAnalysis ? (
+                <View style={styles.csvPreviewCard}>
+                  <Text style={styles.csvPreviewTitle}>Podgląd importu</Text>
+
+                  <View style={styles.csvStatsGrid}>
+                    <View style={styles.csvStatBox}>
+                      <Text style={styles.csvStatLabel}>Wiersze</Text>
+                      <Text style={styles.csvStatValue}>{csvAnalysis.totalRows}</Text>
+                    </View>
+                    <View style={styles.csvStatBox}>
+                      <Text style={styles.csvStatLabel}>Da sie zaimportowac</Text>
+                      <Text style={styles.csvStatValue}>{csvAnalysis.validRows.length}</Text>
+                    </View>
+                    <View style={styles.csvStatBox}>
+                      <Text style={styles.csvStatLabel}>Bledy do poprawy</Text>
+                      <Text style={styles.csvStatValue}>{csvErrorCount}</Text>
+                    </View>
+                    <View style={styles.csvStatBox}>
+                      <Text style={styles.csvStatLabel}>Ostrzezenia</Text>
+                      <Text style={styles.csvStatValue}>{csvWarningCount}</Text>
+                    </View>
+                  </View>
+
+                  <View style={styles.csvTypeStatsRow}>
+                    <Text style={styles.csvTypePill}>
+                      Traditional: {csvAnalysis.statsByType.traditional}
+                    </Text>
+                    <Text style={styles.csvTypePill}>
+                      True/False: {csvAnalysis.statsByType.true_false}
+                    </Text>
+                    <Text style={styles.csvTypePill}>
+                      Self-assess: {csvAnalysis.statsByType.self_assess}
+                    </Text>
+                  </View>
+
+                  {csvAnalysis.issues.length > 0 ? (
+                    <View style={styles.csvIssuesBox}>
+                      {csvAnalysis.issues.slice(0, 12).map((issue, index) => (
+                        <Text
+                          key={`${issue.code}-${issue.row ?? "x"}-${index}`}
+                          style={styles.csvIssueText}
+                        >
+                          [{issue.severity.toUpperCase()}]
+                          {issue.row ? ` wiersz ${issue.row}` : ""}
+                          {issue.field ? ` (${issue.field})` : ""}: {issue.message}
+                        </Text>
+                      ))}
+                      {csvAnalysis.issues.length > 12 ? (
+                        <Text style={styles.csvIssueTextMuted}>
+                          +{csvAnalysis.issues.length - 12} kolejnych wpisów w raporcie.
+                        </Text>
+                      ) : null}
+                    </View>
+                  ) : null}
+
+                  <View style={styles.csvActionRow}>
+                    <MyButton
+                      text={csvStep === "importing" ? "Importowanie..." : "Importuj poprawne"}
+                      color="my_green"
+                      width={190}
+                      disabled={csvStep === "importing" || csvAnalysis.validRows.length === 0}
+                      onPress={handleImportAnalyzedRows}
+                    />
+                    <MyButton
+                      text="Wyczyść raport"
+                      color="my_yellow"
+                      width={150}
+                      disabled={csvStep === "importing"}
+                      onPress={handleResetCsvPreview}
+                    />
+                  </View>
+                </View>
+              ) : null}
             </View>
           ) : (
             <View style={styles.modeContainer}>
-              <CardTypeSelector
-                options={cardTypeOptions}
-                value={newCardType}
-                onChange={setNewCardType}
-                label="Typ fiszki"
-              />
               <Text style={styles.miniSectionHeader}>fiszki</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
@@ -759,11 +561,40 @@ export default function CustomCourseContentScreen() {
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
                 onCardImageChange={handleManualCardImageChange}
+                showDefaultBottomAddButton={false}
               />
             </View>
           )}
         </View>
       </ScrollView>
+
+      {shouldShowManualToolbar ? (
+        <Animated.View
+          style={[styles.manualToolbarWrap, { marginBottom: manualToolbarOffset }]}
+        >
+          <View style={styles.manualToolbar}>
+            <CardTypeSelector
+              options={cardTypeOptions}
+              value={newCardType}
+              onChange={setNewCardType}
+              label="Typ fiszki"
+              labelHidden
+              size="compact"
+              dropdownDirection="up"
+              containerStyle={styles.manualTypeSelector}
+            />
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel="Dodaj nową fiszkę"
+              style={styles.manualAddButton}
+              hitSlop={8}
+              onPress={() => handleAddCard(newCardType)}
+            >
+              <Text style={styles.manualAddIcon}>+</Text>
+            </Pressable>
+          </View>
+        </Animated.View>
+      ) : null}
 
       <View style={styles.divider} />
 
