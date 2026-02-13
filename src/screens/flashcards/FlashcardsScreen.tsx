@@ -19,6 +19,7 @@ import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnap
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
@@ -38,7 +39,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Pressable, Text, View } from "react-native";
+import { ActivityIndicator, Animated, Pressable, Text, View } from "react-native";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const STREAK_TARGET = 5;
@@ -693,6 +694,21 @@ export default function Flashcards() {
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
+  const bottomButtonsAnchorRef = useRef<View | null>(null);
+  const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
+    useState<number | null>(null);
+  const measureBottomButtons = useCallback(() => {
+    requestAnimationFrame(() => {
+      bottomButtonsAnchorRef.current?.measureInWindow((_x, y, _w, h) => {
+        if (h <= 0) return;
+        const nextBottom = y + h;
+        setBottomButtonsBottomInWindow((prev) => {
+          if (prev !== null && Math.abs(prev - nextBottom) < 1) return prev;
+          return nextBottom;
+        });
+      });
+    });
+  }, []);
   const effectiveTrueFalseButtonsVariant = isKnowDontKnow
     ? "know_dont_know"
     : selectedItem?.answerOnly
@@ -701,6 +717,14 @@ export default function Flashcards() {
         ? "know_dont_know"
         : trueFalseButtonsVariant;
   const areButtonsOnTop = actionButtonsPosition === "top";
+  const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
+    useKeyboardBottomOffset({
+    enabled: !areButtonsOnTop,
+    gap: 8,
+    targetBottomInWindow: bottomButtonsBottomInWindow,
+    keyboardTopCorrection: 44,
+    debug: true,
+  });
 
   useLayoutEffect(() => {
     if (!selectedItem) return;
@@ -725,6 +749,36 @@ export default function Flashcards() {
       }
     };
   }, []);
+
+  useEffect(() => {
+    if (areButtonsOnTop || !shouldShowBoxes) return;
+    measureBottomButtons();
+  }, [
+    areButtonsOnTop,
+    measureBottomButtons,
+    selectedItem?.id,
+    shouldShowBoxes,
+    showCardActions,
+    shouldShowTrueFalseActions,
+  ]);
+
+  useEffect(() => {
+    if (areButtonsOnTop || !shouldShowBoxes || !keyboardVisible) return;
+    const timers = [0, 120, 280, 520].map((delay) =>
+      setTimeout(() => {
+        measureBottomButtons();
+      }, delay),
+    );
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [
+    areButtonsOnTop,
+    keyboardVisible,
+    measureBottomButtons,
+    selectedItem?.id,
+    shouldShowBoxes,
+  ]);
 
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {
@@ -844,8 +898,23 @@ export default function Flashcards() {
           )}
 
           {!areButtonsOnTop ? (
-            <View style={styles.bottomButtonsWrapper}>
-              {renderButtons("bottom")}
+            <View
+              ref={bottomButtonsAnchorRef}
+              onLayout={measureBottomButtons}
+              collapsable={false}
+              style={styles.bottomButtonsWrapper}
+            >
+              <Animated.View
+                style={{
+                  transform: [
+                    {
+                      translateY: Animated.multiply(bottomButtonsOffset, -1),
+                    },
+                  ],
+                }}
+              >
+                {renderButtons("bottom")}
+              </Animated.View>
             </View>
           ) : null}
         </View>

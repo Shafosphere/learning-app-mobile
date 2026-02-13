@@ -20,13 +20,13 @@ export const COURSE_ACTIVATE_INTRO_MESSAGES: IntroMessage[] = [
 
 export const COURSE_PIN_INTRO_MESSAGES: IntroMessage[] = [
   {
-    title: "Cześć, jestem X",
+    title: "Cześć, jestem Memicard",
     description: "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów",
   },
   {
     title: "Przypnij kilka kursów",
     description:
-      "Możesz przypiąć więcej niż jeden kurs naraz. Po prostu zaznacz te, które cie interesują.",
+      "Na starcie wybierzmy kursy które Cie interesują, możesz przypiąć więcej niż jeden kurs. Będziesz miał szybszy dostęp do tych 'przypiętych'. ",
   },
   {
     title: "Po przypięciu kliknij Dalej",

@@ -32,6 +32,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   bottomButtonsWrapper: {
     marginTop: 8,
+    marginBottom: 2,
   },
   addButton: {
     position: "absolute",

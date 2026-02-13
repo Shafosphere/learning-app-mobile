@@ -15,6 +15,7 @@ import {
 } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
+import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -22,7 +23,7 @@ import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
-import { View } from "react-native";
+import { Animated, View } from "react-native";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const BOX_SPAM_WINDOW_MS = 2000;
@@ -693,12 +694,59 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know"
   );
+  const bottomButtonsAnchorRef = useRef<View | null>(null);
+  const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
+    useState<number | null>(null);
+  const measureBottomButtons = useCallback(() => {
+    requestAnimationFrame(() => {
+      bottomButtonsAnchorRef.current?.measureInWindow((_x, y, _w, h) => {
+        if (h <= 0) return;
+        const nextBottom = y + h;
+        setBottomButtonsBottomInWindow((prev) => {
+          if (prev !== null && Math.abs(prev - nextBottom) < 1) return prev;
+          return nextBottom;
+        });
+      });
+    });
+  }, []);
   const handleCardActionsConfirm = () => handleConfirm();
   const cardActionsDownloadDisabled = true;
   const cardActionsConfirmDisabled = false;
   const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const effectiveTrueFalseButtonsVariant =
     selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
+  const areButtonsOnTop = actionButtonsPosition === "top";
+  const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
+    useKeyboardBottomOffset({
+    enabled: !areButtonsOnTop,
+    gap: 8,
+    targetBottomInWindow: bottomButtonsBottomInWindow,
+    keyboardTopCorrection: 44,
+    debug: true,
+  });
+
+  useEffect(() => {
+    if (areButtonsOnTop) return;
+    measureBottomButtons();
+  }, [
+    areButtonsOnTop,
+    measureBottomButtons,
+    selectedItem?.id,
+    shouldShowTrueFalseActions,
+    showCardActions,
+  ]);
+
+  useEffect(() => {
+    if (areButtonsOnTop || !keyboardVisible) return;
+    const timers = [0, 120, 280, 520].map((delay) =>
+      setTimeout(() => {
+        measureBottomButtons();
+      }, delay),
+    );
+    return () => {
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [areButtonsOnTop, keyboardVisible, measureBottomButtons, selectedItem?.id]);
 
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
@@ -720,7 +768,7 @@ export default function ReviewFlashcardsPlaceholder() {
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
 
-      {actionButtonsPosition === "top" ? renderButtons("top") : null}
+      {areButtonsOnTop ? renderButtons("top") : null}
       <Card
         selectedItem={selectedItem}
         setAnswer={setAnswer}
@@ -737,7 +785,26 @@ export default function ReviewFlashcardsPlaceholder() {
         hideHints
         isFocused={!isLoading}
       />
-      {actionButtonsPosition === "bottom" ? renderButtons("bottom") : null}
+      {!areButtonsOnTop ? (
+        <View
+          ref={bottomButtonsAnchorRef}
+          onLayout={measureBottomButtons}
+          collapsable={false}
+          style={styles.bottomButtonsWrapper}
+        >
+          <Animated.View
+            style={{
+              transform: [
+                {
+                  translateY: Animated.multiply(bottomButtonsOffset, -1),
+                },
+              ],
+            }}
+          >
+            {renderButtons("bottom")}
+          </Animated.View>
+        </View>
+      ) : null}
 
       <View style={styles.boxesWrapper}>
         {layout === "classic" ? (
