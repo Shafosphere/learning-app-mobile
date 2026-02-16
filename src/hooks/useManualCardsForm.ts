@@ -42,6 +42,7 @@ export const createEmptyManualCard = (
   hintBack: "",
   imageFront: null,
   imageBack: null,
+  explanation: null,
 });
 
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
@@ -83,7 +84,8 @@ const areManualCardsEqual = (a: ManualCard[], b: ManualCard[]) => {
       (cardA.hintFront ?? "") !== (cardB.hintFront ?? "") ||
       (cardA.hintBack ?? "") !== (cardB.hintBack ?? "") ||
       (cardA.imageFront ?? "") !== (cardB.imageFront ?? "") ||
-      (cardA.imageBack ?? "") !== (cardB.imageBack ?? "")
+      (cardA.imageBack ?? "") !== (cardB.imageBack ?? "") ||
+      (cardA.explanation ?? "") !== (cardB.explanation ?? "")
     ) {
       return false;
     }
@@ -251,6 +253,17 @@ export const useManualCardsForm = (
     [applyManualCardsChange]
   );
 
+  const handleManualCardExplanationChange = useCallback(
+    (cardId: string, value: string) => {
+      applyManualCardsChange((cards) =>
+        cards.map((card) =>
+          card.id === cardId ? { ...card, explanation: value } : card
+        )
+      );
+    },
+    [applyManualCardsChange]
+  );
+
   const undo = useCallback(() => {
     if (!enableHistory) {
       return;
@@ -285,6 +298,7 @@ export const useManualCardsForm = (
     handleRemoveCard,
     handleToggleFlipped,
     handleManualCardImageChange,
+    handleManualCardExplanationChange,
     canUndo,
     undo,
     clearHistory,

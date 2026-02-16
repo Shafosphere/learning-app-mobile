@@ -29,12 +29,14 @@ export interface ManualCardsEditorStyles {
   number: TextStyle;
   inputContainer: ViewStyle;
   cardinput: TextStyle;
+  cardInputPlaceholderState?: TextStyle;
   cardPlaceholder: TextStyle;
   cardDivider: ViewStyle;
   answersContainer: ViewStyle;
   answerRow: ViewStyle;
   answerIndex: TextStyle;
   answerInput: TextStyle;
+  answerInputPlaceholderState?: TextStyle;
   answerRemoveButton: ViewStyle;
   cardActions: ViewStyle;
   cardActionButton: ViewStyle;
@@ -43,11 +45,14 @@ export interface ManualCardsEditorStyles {
   imagesRow: ViewStyle;
   imageSlot: ViewStyle;
   imageLabel: TextStyle;
+  imagePreviewContainer?: ViewStyle;
   imagePreview: ViewStyle;
   imagePlaceholder: TextStyle;
   imageThumb: ViewStyle;
   imageButtonsRow: ViewStyle;
   imageButton: ViewStyle;
+  imageOverlayClearButton?: ViewStyle;
+  imageOverlayClearIcon?: TextStyle;
   buttonContainer: ViewStyle;
   manualAddButton: ViewStyle;
   manualAddIcon: TextStyle;
@@ -63,6 +68,10 @@ export interface ManualCardsEditorStyles {
   trueFalseOptionFalse?: ViewStyle;
   trueFalseOptionText?: TextStyle;
   trueFalseOptionTextActive?: TextStyle;
+  explanationContainer?: ViewStyle;
+  explanationLabel?: TextStyle;
+  explanationInput?: TextStyle;
+  explanationInputPlaceholderState?: TextStyle;
   cardActionsImage?: ViewStyle;
   cardActionButtonAddImage?: ViewStyle;
   imageClearButton?: ViewStyle;
@@ -92,6 +101,7 @@ export interface ManualCardsEditorProps {
     side: "front" | "back",
     uri: string | null
   ) => void;
+  onCardExplanationChange?: (cardId: string, value: string) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
   showDefaultBottomAddButton?: boolean;
 }
@@ -119,6 +129,7 @@ export const ManualCardsEditor = ({
   onRemoveCard,
   onToggleFlipped,
   onCardImageChange,
+  onCardExplanationChange,
   actionButtons,
   showDefaultBottomAddButton = true,
 }: ManualCardsEditorProps) => {
@@ -167,6 +178,11 @@ export const ManualCardsEditor = ({
     (() => {
       // no-op in display mode
     });
+  const handleExplanationChange =
+    onCardExplanationChange ??
+    (() => {
+      // no-op in display mode
+    });
 
   const pickImage = async (cardId: string, side: "front" | "back") => {
     if (isDisplayMode) return;
@@ -196,6 +212,13 @@ export const ManualCardsEditor = ({
     handleCardImageChange(cardId, side, null);
   };
 
+  const closeImageSlot = (cardId: string) => {
+    setOpenImageSlots((prev) => ({
+      ...prev,
+      [cardId]: false,
+    }));
+  };
+
   return (
     <>
       {manualCards.map((card, index) => {
@@ -215,13 +238,15 @@ export const ManualCardsEditor = ({
             : displayAction?.accessibilityLabel;
         const effectiveCardType: ManualCardType =
           card.type ?? cardType ?? "text";
+        const isTrueFalseType = effectiveCardType === "true_false";
+        const isKnowDontKnowType = effectiveCardType === "know_dont_know";
         const isBooleanCardType =
-          effectiveCardType === "true_false" ||
-          effectiveCardType === "know_dont_know";
+          isTrueFalseType || isKnowDontKnowType;
         const canEditImages = !isDisplayMode && Boolean(onCardImageChange);
         const hasFrontImage = Boolean(card.imageFront);
         const hasLegacyBackImage = Boolean(card.imageBack);
         const hasAnyImage = hasFrontImage || hasLegacyBackImage;
+        const imageSideToClear: "front" | "back" = hasFrontImage ? "front" : "back";
         const shouldShowImagesRow =
           hasAnyImage || openImageSlots[card.id];
         const trueFalseValue =
@@ -305,8 +330,12 @@ export const ManualCardsEditor = ({
                     ) : (
                       <TextInput
                         value={card.front}
-                        style={styles.cardinput}
-                        placeholder="przód"
+                        style={[
+                          styles.cardinput,
+                          !card.front?.trim().length &&
+                            styles.cardInputPlaceholderState,
+                        ]}
+                        placeholder="Awers"
                         placeholderTextColor={styles.cardPlaceholder?.color}
                         onChangeText={(value) =>
                           handleFrontChange(card.id, value)
@@ -320,9 +349,6 @@ export const ManualCardsEditor = ({
                 <>
                   <View style={[styles.imagesRow, styles.imagesRowSingle]}>
                     <View style={[styles.imageSlot, styles.imageSlotFull]}>
-                      <Text style={styles.imageLabel}>
-                        {hasFrontImage ? "Awers" : hasLegacyBackImage ? "Awers (legacy)" : "Awers"}
-                      </Text>
                       <Pressable
                         onPress={() => pickImage(card.id, "front")}
                         disabled={!canEditImages}
@@ -346,24 +372,25 @@ export const ManualCardsEditor = ({
                           </Text>
                         )}
                       </Pressable>
-                      {card.imageFront && canEditImages ? (
-                        <View style={styles.imageButtonsRow}>
-                          <Pressable
-                            accessibilityRole="button"
-                            accessibilityLabel={`Usuń obraz awersu dla fiszki ${
-                              index + 1
-                            }`}
-                            hitSlop={8}
-                            onPress={() => clearImage(card.id, "front")}
-                            style={styles.imageButton}
-                          >
-                            <Feather
-                              name="trash-2"
-                              size={16}
-                              color={styles.cardActionIcon?.color ?? "black"}
-                            />
-                          </Pressable>
-                        </View>
+                      {shouldShowImagesRow && canEditImages ? (
+                        <Pressable
+                          accessibilityRole="button"
+                          accessibilityLabel={`Usuń obraz lub zamknij pole obrazu dla fiszki ${
+                            index + 1
+                          }`}
+                          hitSlop={8}
+                          onPress={() => {
+                            clearImage(card.id, imageSideToClear);
+                            closeImageSlot(card.id);
+                          }}
+                          style={styles.imageOverlayClearButton}
+                        >
+                          <Feather
+                            name="x"
+                            size={16}
+                            color={styles.imageOverlayClearIcon?.color ?? "#FFFFFF"}
+                          />
+                        </Pressable>
                       ) : null}
                     </View>
                   </View>
@@ -371,24 +398,18 @@ export const ManualCardsEditor = ({
                 </>
               ) : null}
               <View style={styles.answersContainer}>
-                {isBooleanCardType ? (
+                {isTrueFalseType ? (
                   <View style={styles.trueFalseContainer}>
                     <Text style={styles.trueFalseLabel}>Odpowiedź</Text>
                     <View style={styles.trueFalseOptions}>
                       {[
                         {
                           key: "true",
-                          label:
-                            effectiveCardType === "know_dont_know"
-                              ? "Umiem"
-                              : "Prawda",
+                          label: "Prawda",
                         },
                         {
                           key: "false",
-                          label:
-                            effectiveCardType === "know_dont_know"
-                              ? "Nie umiem"
-                              : "Fałsz",
+                          label: "Fałsz",
                         },
                       ].map((option) => {
                         const isActive = trueFalseValue === option.key;
@@ -427,10 +448,9 @@ export const ManualCardsEditor = ({
                       })}
                     </View>
                   </View>
-                ) : (
+                ) : isKnowDontKnowType ? null : (
                   card.answers.map((answer, answerIndex) => {
-                    const placeholder =
-                      answerIndex === 0 ? "tył" : `tył ${answerIndex + 1}`;
+                    const placeholder = "Rewers";
                     return (
                       <View
                         key={`${card.id}-answer-${answerIndex}`}
@@ -454,7 +474,11 @@ export const ManualCardsEditor = ({
                         ) : (
                           <TextInput
                             value={answer}
-                            style={styles.answerInput}
+                            style={[
+                              styles.answerInput,
+                              !answer?.trim().length &&
+                                styles.answerInputPlaceholderState,
+                            ]}
                             placeholder={placeholder}
                             placeholderTextColor={styles.cardPlaceholder?.color}
                             onChangeText={(value) =>
@@ -485,6 +509,30 @@ export const ManualCardsEditor = ({
                     );
                   })
                 )}
+                {!isKnowDontKnowType ? (
+                  <View style={styles.explanationContainer}>
+                    <Text style={styles.explanationLabel}>Explanation</Text>
+                    {isDisplayMode ? (
+                      <Text style={styles.explanationInput}>
+                        {card.explanation?.trim().length ? card.explanation : "—"}
+                      </Text>
+                    ) : (
+                      <TextInput
+                        value={card.explanation ?? ""}
+                        style={[
+                          styles.explanationInput,
+                          !(card.explanation ?? "").trim().length &&
+                            styles.explanationInputPlaceholderState,
+                        ]}
+                        placeholder="opcjonalnie"
+                        placeholderTextColor={styles.cardPlaceholder?.color}
+                        onChangeText={(value) =>
+                          handleExplanationChange(card.id, value)
+                        }
+                      />
+                    )}
+                  </View>
+                ) : null}
               </View>
             </View>
             {(!isDisplayMode || (isDisplayMode && resolvedDisplayIcon)) && (
@@ -525,11 +573,33 @@ export const ManualCardsEditor = ({
                         color={styles.cardActionIcon?.color ?? "black"}
                       />
                     </Pressable>
+                    {!isBooleanCardType && (
+                      <Pressable
+                        accessibilityRole="button"
+                        accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
+                          index + 1
+                        }`}
+                        style={[
+                          styles.cardActionButton,
+                        ]}
+                        hitSlop={8}
+                        onPress={() => handleAddAnswerPress(card.id)}
+                      >
+                        <Feather
+                          name="plus"
+                          size={24}
+                          color={styles.cardActionIcon?.color ?? "black"}
+                        />
+                      </Pressable>
+                    )}
                     {canEditImages && !hasFrontImage ? (
                       <Pressable
                         accessibilityRole="button"
                         accessibilityLabel={`Dodaj obrazek dla fiszki ${index + 1}`}
-                        style={styles.cardActionButton}
+                        style={[
+                          styles.cardActionButton,
+                          styles.cardActionButtonAddImage,
+                        ]}
                         hitSlop={8}
                         onPress={() =>
                           setOpenImageSlots((prev) => ({
@@ -563,25 +633,6 @@ export const ManualCardsEditor = ({
                         />
                       </Pressable>
                     ) : null}
-                    {!isBooleanCardType && (
-                      <Pressable
-                        accessibilityRole="button"
-                        accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
-                          index + 1
-                        }`}
-                        style={[
-                          styles.cardActionButton,
-                        ]}
-                        hitSlop={8}
-                        onPress={() => handleAddAnswerPress(card.id)}
-                      >
-                        <Feather
-                          name="plus"
-                          size={24}
-                          color={styles.cardActionIcon?.color ?? "black"}
-                        />
-                      </Pressable>
-                    )}
                   </>
                 )}
               </View>

@@ -22,19 +22,19 @@ const useStyles = createThemeStylesHook((colors) => ({
     gap: 10,
   },
   cardTitle: {
-    fontSize: 13,
+    fontSize: 15,
     fontWeight: "900",
     textTransform: "uppercase" as const,
     color: colors.headline,
   },
   paragraph: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.paragraph,
   },
   listItem: {
-    fontSize: 13,
-    lineHeight: 19,
+    fontSize: 14,
+    lineHeight: 20,
     color: colors.paragraph,
   },
   columnsGrid: {
@@ -57,13 +57,13 @@ const useStyles = createThemeStylesHook((colors) => ({
     paddingVertical: 8,
     borderRightWidth: 1,
     borderRightColor: colors.border,
-    fontSize: 11,
+    fontSize: 12,
     color: colors.paragraph,
   },
   columnsCellHeader: {
     color: colors.headline,
     fontWeight: "800",
-    fontSize: 11,
+    fontSize: 12,
   },
   columnsCellLast: {
     borderRightWidth: 0,
@@ -90,13 +90,13 @@ const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
   },
   legendTitle: {
-    fontSize: 12,
+    fontSize: 13,
     fontWeight: "900",
     color: colors.headline,
   },
   legendLine: {
-    fontSize: 12,
-    lineHeight: 18,
+    fontSize: 13,
+    lineHeight: 19,
     color: colors.paragraph,
   },
   actionsRow: {
@@ -118,7 +118,7 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
   fileText: {
     flex: 1,
-    fontSize: 13,
+    fontSize: 14,
     color: colors.headline,
     fontWeight: "700",
   },
@@ -147,31 +147,30 @@ const exampleMixedRows = [
 const traditionalRows = [
   ["front_text", "Przod fiszki: pytanie / haslo / stwierdzenie", "Tak"],
   ["back_text", "Tyl fiszki: poprawna odpowiedz tekstowa", "Tak"],
+  ["explanation", "Dodatkowe wyjasnienie po odpowiedzi", "Nie"],
   ["front_image", "Obrazek na fiszce", "Nie"],
-  ["flip", "Czy odwracac karte", "Nie"],
+  ["flip", "Czy odwracac fiszke", "Nie"],
 ];
 
 const trueFalseRows = [
-  ["front_text", "Tresc pytania lub zdania", "Tak (lub obrazek)"],
+  ["front_text", "Tresc pytania lub zdania", "Tak"],
   ["tf_answer", "Poprawna odpowiedz: true lub false", "Tak"],
   ["explanation", "Wyjasnienie po odpowiedzi", "Nie"],
   ["front_image", "Obrazek na fiszce", "Nie"],
-  ["flip", "Czy odwracac karte", "Nie"],
 ];
 
 const selfAssessRows = [
-  ["front_text", "Pytanie / temat do samooceny", "Tak (lub obrazek)"],
+  ["front_text", "Pytanie / temat do samooceny", "Tak"],
   ["explanation", "Tresc, ktora pokazuje sie po ocenie", "Nie"],
-  ["back_text", "Fallback, gdy explanation jest puste", "Nie"],
   ["front_image", "Obrazek na fiszce", "Nie"],
 ];
 
 const mixedRows = [
-  ["type", "Podajesz typ dla kazdego wiersza osobno", "Tak (gdy mix typow)"],
-  ["front_text", "Tekst z przodu karty", "Tak (lub obrazek)"],
-  ["back_text", "Odpowiedz tekstowa dla traditional", "Zalezy od typu"],
-  ["tf_answer", "Odpowiedz dla true_false", "Tylko dla true_false"],
-  ["explanation", "Opis dla true_false/self_assess", "Nie"],
+  ["type", "Podajesz typ dla kazdego wiersza osobno", "Tak"],
+  // ["front_text", "Tekst z przodu karty", "Tak"],
+  // ["back_text", "Odpowiedz tekstowa dla traditional", "Zalezy od typu"],
+  // ["tf_answer", "Odpowiedz dla true_false", "Tylko dla true_false"],
+  // ["explanation", "Opis dla true_false/self_assess", "Nie"],
 ];
 
 export function CsvImportGuide({
@@ -184,9 +183,19 @@ export function CsvImportGuide({
   const renderColumnsTable = (rows: string[][]) => (
     <View style={styles.columnsGrid}>
       <View style={styles.columnsRow}>
-        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>Kolumna</Text>
-        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>Co to jest</Text>
-        <Text style={[styles.columnsCell, styles.columnsCellHeader, styles.columnsCellLast]}>
+        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>
+          Kolumna
+        </Text>
+        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>
+          Co to jest
+        </Text>
+        <Text
+          style={[
+            styles.columnsCell,
+            styles.columnsCellHeader,
+            styles.columnsCellLast,
+          ]}
+        >
           Czy potrzebne
         </Text>
       </View>
@@ -194,7 +203,9 @@ export function CsvImportGuide({
         <View key={`${row[0]}-${index}`} style={styles.columnsRow}>
           <Text style={[styles.columnsCell, styles.code]}>{row[0]}</Text>
           <Text style={styles.columnsCell}>{row[1]}</Text>
-          <Text style={[styles.columnsCell, styles.columnsCellLast]}>{row[2]}</Text>
+          <Text style={[styles.columnsCell, styles.columnsCellLast]}>
+            {row[2]}
+          </Text>
         </View>
       ))}
     </View>
@@ -204,101 +215,132 @@ export function CsvImportGuide({
     <View style={styles.container}>
       <View style={styles.card}>
         <Text style={styles.cardTitle}>Szybki start</Text>
-        <Text style={styles.listItem}>1. Przygotuj CSV (albo ZIP z CSV i folderem images/).</Text>
-        <Text style={styles.listItem}>2. Wybierz plik i zobacz raport.</Text>
-        <Text style={styles.listItem}>3. Kliknij import poprawnych wierszy.</Text>
+        <Text style={styles.listItem}>
+          1. Przygotuj CSV (albo ZIP z CSV i folderem images/ jeżeli dodajesz
+          obrazki).
+        </Text>
+        <Text style={styles.listItem}>2. Wybierz plik </Text>
+        <Text style={styles.listItem}>
+          3. Kliknij import poprawnych wierszy.
+        </Text>
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>1) Traditional</Text>
+        <Text style={styles.cardTitle}>1) Odpowiedz otwarta</Text>
+        <Text style={styles.paragraph}>
+          Wpisz samodzielnie poprawną odpowiedź na podstawie pytania lub słówka.
+        </Text>
         {renderColumnsTable(traditionalRows)}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>2) True_False</Text>
+        <Text style={styles.cardTitle}>2) Prawda/Falsz</Text>
+        <Text style={styles.paragraph}>
+          Zdecyduj, czy pokazane stwierdzenie jest prawdziwe, czy falszywe.
+        </Text>
         {renderColumnsTable(trueFalseRows)}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>3) Self_Assess</Text>
+        <Text style={styles.cardTitle}>3) Samoocena</Text>
+        <Text style={styles.paragraph}>
+          Ocen, czy znasz odpowiedz, wybierajac "umiem" albo "nie umiem".
+        </Text>
         {renderColumnsTable(selfAssessRows)}
       </View>
 
       <View style={styles.card}>
         <Text style={styles.cardTitle}>4) Mieszane</Text>
+        <Text style={styles.paragraph}>
+          Używane, w momencie kiedy w jednym kursie chcesz wiele rodzajów
+          fiszek. Określ ich typ w pierwszej kolumnie.{" "}
+        </Text>
         {renderColumnsTable(mixedRows)}
       </View>
 
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Legenda (prosto)</Text>
+        <Text style={styles.cardTitle}>Legenda</Text>
 
-        <View style={[styles.legendCard, styles.legendCardBlue]}>
-          <Text style={styles.legendTitle}>type</Text>
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>front_text</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>rodzaj karty.
-          </Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Wazne: </Text>
-            `type` jest opcjonalne i najczesciej przydaje sie, gdy w jednym pliku masz wiecej niz jeden rodzaj fiszek.
-          </Text>
-          <Text style={styles.legendLine}>- traditional = zwykla karta: pytanie + odpowiedz</Text>
-          <Text style={styles.legendLine}>- true_false = karta Prawda/Falsz</Text>
-          <Text style={styles.legendLine}>- self_assess = karta umiem / nie umiem</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Jak puste: </Text>aplikacja sama zgadnie typ po danych.
+            <Text style={styles.legendLabel}>Co to jest: </Text>tekst z przodu
+            karty (pytanie, haslo, stwierdzenie).
           </Text>
         </View>
 
         <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>front_text i obrazek</Text>
+          <Text style={styles.legendTitle}>front_image</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>przod karty (tekst lub obraz).
+            <Text style={styles.legendLabel}>Co to jest: </Text>obraz z przodu
+            karty.
           </Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Wazne: </Text>karta przejdzie, gdy ma tekst LUB obrazek.
+            <Text style={styles.legendLabel}>Wazne: </Text>wpisz nazwe pliku z
+            rozszerzeniem, np. zdjecie.png.
+          </Text>
+        </View>
+
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>back_text</Text>
+          <Text style={styles.legendLine}>
+            <Text style={styles.legendLabel}>Co to jest: </Text>tekst odpowiedzi
           </Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Jak oba puste: </Text>wiersz bedzie pominiety.
+            <Text style={styles.legendLabel}>Wazne: </Text>mozesz wpisac wiele
+            odpowiedzi, oddzielajac je przecinkiem lub srednikiem.
           </Text>
         </View>
 
         <View style={[styles.legendCard, styles.legendCardPlain]}>
           <Text style={styles.legendTitle}>tf_answer</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>poprawna odpowiedz dla true_false.
+            <Text style={styles.legendLabel}>Co to jest: </Text>poprawna
+            odpowiedz dla true_false.
           </Text>
-          <Text style={styles.legendLine}>Wpisz np. true/false lub 1/0.</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Jak puste przy true_false: </Text>wiersz bedzie bledem.
+            Wpisz wartość: true/false lub 1/0.
           </Text>
         </View>
 
         <View style={[styles.legendCard, styles.legendCardPlain]}>
           <Text style={styles.legendTitle}>flip</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>czy karta ma byc odwracana.
+            <Text style={styles.legendLabel}>Co to jest: </Text>Czy fiszka ma
+            być odwracana? Wpisz true, jeśli chcesz odwrotny kierunek. Domyślnie
+            jest false.
           </Text>
-          <Text style={styles.legendLine}>Wpisz true, jesli chcesz odwrotny kierunek.</Text>
           <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Jak puste: </Text>domyslnie nie odwraca.
+            <Text style={styles.legendLabel}>Po co: </Text>Użyteczne, kiedy
+            chcesz się uczyć słówek i czasem odpowiadać w odwrotnie.
           </Text>
         </View>
-      </View>
 
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Przyklad mixed CSV</Text>
-        {exampleMixedRows.map((line) => (
-          <Text key={line} style={[styles.paragraph, styles.code]}>
-            {line}
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>type</Text>
+          <Text style={styles.legendLine}>
+            Jest używane, w momencie, kiedy w jednym pliku masz więcej niż 1
+            rodzajów fiszek. Może przyjmować jedno z trzech wartości podanych
+            niżej:
           </Text>
-        ))}
-      </View>
+          <Text style={styles.legendLine}>
+            - traditional = zwykla karta: pytanie + odpowiedz
+          </Text>
+          <Text style={styles.legendLine}>
+            - true_false = karta Prawda/Falsz
+          </Text>
+          <Text style={styles.legendLine}>
+            - self_assess = karta umiem / nie umiem
+          </Text>
+        </View>
 
-      <View style={styles.warningBox}>
-        <Text style={styles.cardTitle}>Jesli sie pomylisz, aplikacja zrobi...</Text>
-        <Text style={styles.listItem}>- Pokaze blad i numer wiersza.</Text>
-        <Text style={styles.listItem}>- Pominie tylko zle wiersze, dobre zaimportuje.</Text>
-        <Text style={styles.listItem}>- Przy brakujacym obrazku da ostrzezenie.</Text>
+        <View style={[styles.legendCard, styles.legendCardPlain]}>
+          <Text style={styles.legendTitle}>explanation</Text>
+          <Text style={styles.legendLine}>
+            Wyjaśnienie które możesz dodać, które pojawi się po udzieleniu
+            odpowiedzi.{" "}
+          </Text>
+        </View>
       </View>
 
       <View style={styles.actionsRow}>
@@ -312,7 +354,11 @@ export function CsvImportGuide({
 
       {selectedFileName ? (
         <View style={styles.fileInfo}>
-          <Ionicons name="document-text" size={18} color={styles.fileText.color} />
+          <Ionicons
+            name="document-text"
+            size={18}
+            color={styles.fileText.color}
+          />
           <Text style={styles.fileText}>{selectedFileName}</Text>
           <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
         </View>

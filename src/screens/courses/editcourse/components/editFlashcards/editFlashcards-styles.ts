@@ -37,6 +37,10 @@ export const useStyles = createThemeStylesHook((colors) => {
       paddingVertical: 6,
       color: colors.headline,
     },
+    cardInputPlaceholderState: {
+      fontSize: 13,
+      fontWeight: "500",
+    },
     cardPlaceholder: {
       color: colors.paragraph,
     },
@@ -68,6 +72,10 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontWeight: 700,
       paddingVertical: 6,
       color: colors.headline,
+    },
+    answerInputPlaceholderState: {
+      fontSize: 13,
+      fontWeight: "500",
     },
     answerRemoveButton: {
       padding: 4,
@@ -108,6 +116,20 @@ export const useStyles = createThemeStylesHook((colors) => {
       justifyContent: "center" as const,
       overflow: "hidden" as const,
     },
+    imageOverlayClearButton: {
+      position: "absolute" as const,
+      right: 8,
+      bottom: 8,
+      width: 26,
+      height: 26,
+      borderRadius: 13,
+      backgroundColor: colors.my_red,
+      alignItems: "center" as const,
+      justifyContent: "center" as const,
+    },
+    imageOverlayClearIcon: {
+      color: "#FFFFFF",
+    },
     imagePlaceholder: {
       color: colors.paragraph,
       fontSize: 12,
@@ -139,7 +161,7 @@ export const useStyles = createThemeStylesHook((colors) => {
     },
     cardActionsImage: {},
     cardActionButtonAddImage: {
-      marginTop: 84,
+      marginTop: -9,
     },
     displayCardCorrect: {
       borderLeftWidth: 4,
@@ -225,11 +247,11 @@ export const useStyles = createThemeStylesHook((colors) => {
       gap: 8,
     },
     trueFalseLabel: {
-      fontSize: 12,
-      fontWeight: "700",
-      color: colors.paragraph,
+      fontSize: 13,
+      fontWeight: "900",
+      color: colors.headline,
       textTransform: "uppercase" as const,
-      letterSpacing: 0.4,
+      letterSpacing: 0.5,
     },
     trueFalseOptions: {
       flexDirection: "row" as const,
@@ -259,6 +281,26 @@ export const useStyles = createThemeStylesHook((colors) => {
     },
     trueFalseOptionTextActive: {
       color: colors.darkbg,
+    },
+    explanationContainer: {
+      gap: 6,
+    },
+    explanationLabel: {
+      fontSize: 13,
+      fontWeight: "900",
+      color: colors.headline,
+      textTransform: "uppercase" as const,
+      letterSpacing: 0.5,
+    },
+    explanationInput: {
+      fontSize: 16,
+      fontWeight: "700",
+      color: colors.headline,
+      paddingVertical: 6,
+    },
+    explanationInputPlaceholderState: {
+      fontSize: 13,
+      fontWeight: "500",
     },
   };
 });

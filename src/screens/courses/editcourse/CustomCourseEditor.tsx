@@ -34,7 +34,6 @@ import type {
   TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
-import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   createEmptyManualCard,
@@ -109,6 +108,7 @@ export default function CustomCourseEditor({
     handleRemoveCard,
     handleToggleFlipped,
     handleManualCardImageChange,
+    handleManualCardExplanationChange,
     canUndo,
     undo,
   } = useManualCardsForm({
@@ -204,12 +204,6 @@ export default function CustomCourseEditor({
     courseCardSize === "large" && courseHasImageCards;
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError;
-  const { bottomOffset: manualToolbarOffset } = useKeyboardBottomOffset({
-    enabled: shouldShowManualToolbar,
-    gap: 8,
-    baseInset: 0,
-    keyboardTopCorrection: 44,
-  });
 
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
@@ -271,6 +265,7 @@ export default function CustomCourseEditor({
           hintBack: card.hintBack,
           imageFront: card.imageFront ?? null,
           imageBack: card.imageBack ?? null,
+          explanation: card.explanation ?? null,
         };
       });
       replaceManualCards(ensureCardsNormalized(incomingCards));
@@ -530,6 +525,7 @@ export default function CustomCourseEditor({
         hintBack: card.hintBack ?? null,
         imageFront: card.imageFront ?? null,
         imageBack: card.imageBack ?? null,
+        explanation: card.explanation ?? null,
       });
       return acc;
       },
@@ -714,6 +710,7 @@ export default function CustomCourseEditor({
                     onRemoveCard={handleRemoveCard}
                     onToggleFlipped={handleToggleFlipped}
                     onCardImageChange={handleManualCardImageChange}
+                    onCardExplanationChange={handleManualCardExplanationChange}
                     showDefaultBottomAddButton={false}
                   />
                 </>
@@ -725,7 +722,7 @@ export default function CustomCourseEditor({
 
       {shouldShowManualToolbar ? (
         <Animated.View
-          style={[styles.manualToolbarWrap, { marginBottom: manualToolbarOffset }]}
+          style={styles.manualToolbarWrap}
         >
           <View style={styles.manualToolbar}>
             <CardTypeSelector

@@ -7,7 +7,6 @@ import {
   useManualCardsForm,
   type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
-import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import {
   ManualCardsEditor,
   ManualCardsEditorStyles,
@@ -107,6 +106,7 @@ export default function CustomCourseContentScreen() {
     handleRemoveCard,
     handleToggleFlipped,
     handleManualCardImageChange,
+    handleManualCardExplanationChange,
   } = useManualCardsForm({
     initialCards: [createEmptyManualCard("card-0")],
   });
@@ -117,12 +117,6 @@ export default function CustomCourseContentScreen() {
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
 
   const shouldShowManualToolbar = addMode === "manual";
-  const { bottomOffset: manualToolbarOffset } = useKeyboardBottomOffset({
-    enabled: shouldShowManualToolbar,
-    gap: 8,
-    baseInset: 0,
-    keyboardTopCorrection: 44,
-  });
 
   const draftScopeKey = useMemo(
     () =>
@@ -561,6 +555,7 @@ export default function CustomCourseContentScreen() {
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
                 onCardImageChange={handleManualCardImageChange}
+                onCardExplanationChange={handleManualCardExplanationChange}
                 showDefaultBottomAddButton={false}
               />
             </View>
@@ -570,7 +565,7 @@ export default function CustomCourseContentScreen() {
 
       {shouldShowManualToolbar ? (
         <Animated.View
-          style={[styles.manualToolbarWrap, { marginBottom: manualToolbarOffset }]}
+          style={styles.manualToolbarWrap}
         >
           <View style={styles.manualToolbar}>
             <CardTypeSelector
