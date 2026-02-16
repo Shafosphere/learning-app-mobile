@@ -10,6 +10,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 14,
     paddingBottom: 0,
     overflow: "visible",
+    zIndex: 10,
+    elevation: 10,
   },
   topBar: {
     flexDirection: "row",
@@ -17,10 +19,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "space-between",
     height: 50,
     position: "relative",
+    overflow: "visible",
   },
   leftGroup: {
     flexDirection: "row",
     alignItems: "center",
+    gap: 6,
     flex: 1,
   },
   rightGroup: {
@@ -42,22 +46,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   logoButton: {
     paddingVertical: 0,
-    paddingHorizontal: 8,
+    paddingHorizontal: 2,
     borderRadius: 12,
-    marginHorizontal: 8,
     overflow: "visible",
     alignItems: "center",
     justifyContent: "center",
-  },
-  logoWrapper: {
-    position: "absolute",
-    top: 0,
-    bottom: 0,
-    left: 0,
-    right: 0,
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 3,
+    marginBottom: -10,
+    zIndex: 12,
+    elevation: 12,
   },
   icon: {
     color: colors.headline,
@@ -125,7 +121,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     alignItems: "center",
     paddingVertical: 4,
-    paddingHorizontal: 6,
+    paddingHorizontal: 4,
   },
   courseFlag: {
     width: 99 / 2.7,
@@ -161,8 +157,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   courseName: {
     marginLeft: 8,
     flexShrink: 1,
-    maxWidth: 100,
+    maxWidth: 150,
     overflow: "hidden",
+    // backgroundColor: colors.my_red,
   },
   courseNameText: {
     color: colors.headline,

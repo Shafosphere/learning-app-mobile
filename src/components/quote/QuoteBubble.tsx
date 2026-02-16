@@ -1,5 +1,6 @@
 import Popup, { PopupColor } from "@/src/components/popup/popup";
 import { QuoteCategory } from "@/src/constants/quotes";
+import { usePopupAnchorX } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import React, { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
@@ -28,6 +29,7 @@ const CATEGORY_COLORS: Record<QuoteCategory, PopupColor> = {
 
 export default function QuoteBubble() {
     const { quote, isVisible, hideQuote } = useQuote();
+    const popupAnchorX = usePopupAnchorX();
     const lastShowTsRef = useRef<number>(0);
 
     const popupMessage = useMemo(() => {
@@ -52,6 +54,7 @@ export default function QuoteBubble() {
                 message={popupMessage}
                 color={popupColor}
                 duration={QUOTE_DURATION_MS}
+                anchorX={popupAnchorX}
                 onHide={hideQuote}
             />
         </View>

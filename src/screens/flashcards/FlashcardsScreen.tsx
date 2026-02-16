@@ -694,6 +694,8 @@ export default function Flashcards() {
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
+  const shouldHideHintsForActiveBox =
+    activeBox === "boxFour" || activeBox === "boxFive";
   const bottomButtonsAnchorRef = useRef<View | null>(null);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
     useState<number | null>(null);
@@ -826,6 +828,7 @@ export default function Flashcards() {
         onHintUpdate={handleHintUpdate}
         isFocused={isFocused}
         isBetweenCards={isBetweenCards}
+        hideHints={shouldHideHintsForActiveBox}
       />
     );
   }

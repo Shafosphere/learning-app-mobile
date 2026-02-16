@@ -3,6 +3,7 @@ import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
@@ -28,6 +29,7 @@ import {
   StatusBar,
   Text,
   TouchableOpacity,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -50,6 +52,7 @@ export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { triggerQuote } = useQuote();
+  const setPopupAnchorX = usePopupAnchorSetter();
   const {
     toggleTheme,
     activeCustomCourseId,
@@ -65,6 +68,7 @@ export default function Navbar({ children }: NavbarProps) {
     Platform.OS === "android" ? (StatusBar.currentHeight ?? 0) : 0;
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
+  const { width: screenWidth } = useWindowDimensions();
   const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
     null,
   );
@@ -88,6 +92,34 @@ export default function Navbar({ children }: NavbarProps) {
   );
   const { knownWordsCount } = useLearningStats();
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
+  const logoButtonRef = useRef<View | null>(null);
+
+  const updatePopupAnchor = useCallback(() => {
+    const node = logoButtonRef.current as unknown as {
+      measureInWindow?: (
+        cb: (x: number, y: number, width: number, height: number) => void
+      ) => void;
+    } | null;
+    if (!node?.measureInWindow) return;
+
+    node.measureInWindow((x, _y, width) => {
+      if (!Number.isFinite(x) || !Number.isFinite(width) || width <= 0) return;
+      setPopupAnchorX(x + width / 2);
+    });
+  }, [setPopupAnchorX]);
+
+  useEffect(() => {
+    const raf = requestAnimationFrame(() => {
+      updatePopupAnchor();
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [screenWidth, topPad, updatePopupAnchor]);
+
+  useEffect(() => {
+    return () => {
+      setPopupAnchorX(null);
+    };
+  }, [setPopupAnchorX]);
 
   useEffect(() => {
     let isMounted = true;
@@ -335,8 +367,18 @@ export default function Navbar({ children }: NavbarProps) {
   return (
     <View style={styles.layout}>
       <View style={[styles.topBarContainer, { paddingTop: topPad }]}>
-        <View style={styles.topBar}>
+        <View style={styles.topBar} onLayout={updatePopupAnchor}>
           <View style={styles.leftGroup}>
+            <TouchableOpacity
+              ref={logoButtonRef}
+              onPress={handleLogoPress}
+              onLayout={updatePopupAnchor}
+              style={styles.logoButton}
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź do strony głównej"
+            >
+              <Image source={logo} style={styles.logo} contentFit="contain" />
+            </TouchableOpacity>
             <TouchableOpacity
               onPress={() => router.push("/coursepanel")}
               style={styles.courseButton}
@@ -356,17 +398,6 @@ export default function Navbar({ children }: NavbarProps) {
                   {selectedLevel}
                 </Text>
               ) : null}
-            </TouchableOpacity>
-          </View>
-
-          <View pointerEvents="box-none" style={styles.logoWrapper}>
-            <TouchableOpacity
-              onPress={handleLogoPress}
-              style={styles.logoButton}
-              accessibilityRole="button"
-              accessibilityLabel="Przejdź do strony głównej"
-            >
-              <Image source={logo} style={styles.logo} contentFit="contain" />
             </TouchableOpacity>
           </View>
 

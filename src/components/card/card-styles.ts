@@ -36,6 +36,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     fontSize: 24,
     width: 325,
+    textAlign: "center",
     // backgroundColor: colors.my_yellow,
   },
   hintInput: {
