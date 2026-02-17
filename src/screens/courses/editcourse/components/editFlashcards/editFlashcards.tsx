@@ -509,30 +509,28 @@ export const ManualCardsEditor = ({
                     );
                   })
                 )}
-                {!isKnowDontKnowType ? (
-                  <View style={styles.explanationContainer}>
-                    <Text style={styles.explanationLabel}>Explanation</Text>
-                    {isDisplayMode ? (
-                      <Text style={styles.explanationInput}>
-                        {card.explanation?.trim().length ? card.explanation : "—"}
-                      </Text>
-                    ) : (
-                      <TextInput
-                        value={card.explanation ?? ""}
-                        style={[
-                          styles.explanationInput,
-                          !(card.explanation ?? "").trim().length &&
-                            styles.explanationInputPlaceholderState,
-                        ]}
-                        placeholder="opcjonalnie"
-                        placeholderTextColor={styles.cardPlaceholder?.color}
-                        onChangeText={(value) =>
-                          handleExplanationChange(card.id, value)
-                        }
-                      />
-                    )}
-                  </View>
-                ) : null}
+                <View style={styles.explanationContainer}>
+                  <Text style={styles.explanationLabel}>Explanation</Text>
+                  {isDisplayMode ? (
+                    <Text style={styles.explanationInput}>
+                      {card.explanation?.trim().length ? card.explanation : "—"}
+                    </Text>
+                  ) : (
+                    <TextInput
+                      value={card.explanation ?? ""}
+                      style={[
+                        styles.explanationInput,
+                        !(card.explanation ?? "").trim().length &&
+                          styles.explanationInputPlaceholderState,
+                      ]}
+                      placeholder="opcjonalnie"
+                      placeholderTextColor={styles.cardPlaceholder?.color}
+                      onChangeText={(value) =>
+                        handleExplanationChange(card.id, value)
+                      }
+                    />
+                  )}
+                </View>
               </View>
             </View>
             {(!isDisplayMode || (isDisplayMode && resolvedDisplayIcon)) && (

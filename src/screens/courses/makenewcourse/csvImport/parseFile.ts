@@ -23,11 +23,15 @@ const normalizeRecordKeys = (input: Record<string, unknown>): Record<string, unk
   return normalized;
 };
 
-const parseCsvText = (csvText: string): ParsedCsvRaw => {
+const parseCsvText = (
+  csvText: string,
+  options?: { delimitersToGuess?: string[] }
+): ParsedCsvRaw => {
   const normalizedCsv = csvText.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const parsed = Papa.parse<Record<string, unknown>>(normalizedCsv, {
     header: true,
     skipEmptyLines: true,
+    delimitersToGuess: options?.delimitersToGuess,
   });
 
   const headers = (parsed.meta.fields ?? []).map((item) => item.trim().toLowerCase());
@@ -75,14 +79,19 @@ const findCsvInZip = (zip: JSZip): JSZipObject | null => {
 
 export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput> => {
   const fileName = (asset.name ?? "").trim() || "plik";
-  const isZip = fileName.toLowerCase().endsWith(".zip");
+  const lowerName = fileName.toLowerCase();
+  const isZip = lowerName.endsWith(".zip");
+  const isTxt = lowerName.endsWith(".txt");
 
   if (!isZip) {
     const csvText = await FileSystem.readAsStringAsync(asset.uri, {
       encoding: FileSystem.EncodingType.UTF8,
     });
 
-    const parsed = parseCsvText(csvText);
+    const parsed = parseCsvText(
+      csvText,
+      isTxt ? { delimitersToGuess: [",", ";", "\t"] } : undefined
+    );
     const imageCache = new Map<string, string | null>();
 
     const resolveImage = async (name: string | null): Promise<string | null> => {
@@ -105,7 +114,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
     };
 
     return {
-      source: "csv",
+      source: isTxt ? "txt" : "csv",
       fileName,
       rows: parsed.rows,
       headers: parsed.headers,

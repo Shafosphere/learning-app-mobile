@@ -1,31 +1,56 @@
 import MyButton from "@/src/components/button/button";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
-import { Platform, Text, View } from "react-native";
+import { useState } from "react";
+import { Platform, Pressable, Text, View } from "react-native";
 
 interface CsvImportGuideProps {
-  onPickFile: () => void;
+  onPickCsvFile: () => void;
+  onPickTxtFile: () => void;
   selectedFileName: string | null;
   isAnalyzing?: boolean;
 }
 
+type GuideSectionKey = "traditional" | "true_false" | "self_assess" | "mixed";
+
+type GuideField = {
+  key: string;
+  description: string;
+  required: boolean;
+  note?: string;
+};
+
+type GuideSection = {
+  key: GuideSectionKey;
+  title: string;
+  summary: string;
+  fields: GuideField[];
+  tips?: string[];
+};
+
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
-    gap: 14,
+    gap: 12,
   },
   card: {
     backgroundColor: colors.background,
-    borderRadius: 12,
+    borderRadius: 14,
     padding: 14,
     borderWidth: 1,
     borderColor: colors.border,
-    gap: 10,
+    gap: 8,
   },
   cardTitle: {
-    fontSize: 15,
+    fontSize: 18,
     fontWeight: "900",
-    textTransform: "uppercase" as const,
     color: colors.headline,
+  },
+  cardSubtitle: {
+    fontSize: 13,
+    textTransform: "uppercase" as const,
+    fontWeight: "800",
+    color: colors.paragraph,
+    letterSpacing: 0.4,
   },
   paragraph: {
     fontSize: 14,
@@ -37,73 +62,156 @@ const useStyles = createThemeStylesHook((colors) => ({
     lineHeight: 20,
     color: colors.paragraph,
   },
-  columnsGrid: {
-    borderWidth: 1,
-    borderColor: colors.border,
-    borderRadius: 10,
-    overflow: "hidden" as const,
-    marginTop: 2,
-  },
-  columnsRow: {
-    flexDirection: "row" as const,
-    borderBottomWidth: 1,
-    borderBottomColor: colors.border,
-    backgroundColor: colors.secondBackground,
-  },
-  columnsCell: {
-    flex: 1,
-    minWidth: 74,
-    paddingHorizontal: 8,
-    paddingVertical: 8,
-    borderRightWidth: 1,
-    borderRightColor: colors.border,
-    fontSize: 12,
-    color: colors.paragraph,
-  },
-  columnsCellHeader: {
-    color: colors.headline,
-    fontWeight: "800",
-    fontSize: 12,
-  },
-  columnsCellLast: {
-    borderRightWidth: 0,
-  },
-  code: {
-    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
-  },
-  legendCard: {
-    borderRadius: 10,
-    borderWidth: 1,
-    padding: 10,
-    gap: 4,
-  },
-  legendCardBlue: {
-    backgroundColor: colors.my_green + "12",
-    borderColor: colors.my_green,
-  },
-  legendCardYellow: {
-    backgroundColor: colors.my_yellow + "20",
-    borderColor: colors.my_yellow,
-  },
-  legendCardPlain: {
-    backgroundColor: colors.secondBackground,
-    borderColor: colors.border,
-  },
-  legendTitle: {
-    fontSize: 13,
-    fontWeight: "900",
-    color: colors.headline,
-  },
-  legendLine: {
-    fontSize: 13,
-    lineHeight: 19,
-    color: colors.paragraph,
-  },
   actionsRow: {
     flexDirection: "row" as const,
     justifyContent: "flex-end" as const,
     alignItems: "center" as const,
     gap: 10,
+  },
+  sectionTitle: {
+    marginTop: 2,
+    fontSize: 13,
+    textTransform: "uppercase" as const,
+    fontWeight: "900",
+    letterSpacing: 0.4,
+    color: colors.paragraph,
+  },
+  accordionCard: {
+    backgroundColor: colors.secondBackground,
+    borderRadius: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    overflow: "hidden" as const,
+  },
+  accordionHeader: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  accordionHeaderActive: {
+    backgroundColor: colors.my_green + "14",
+  },
+  accordionIndexBadge: {
+    minWidth: 28,
+    height: 28,
+    borderRadius: 999,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    alignItems: "center" as const,
+    justifyContent: "center" as const,
+  },
+  accordionIndexText: {
+    fontSize: 12,
+    fontWeight: "900",
+    color: colors.headline,
+  },
+  accordionHeaderContent: {
+    flex: 1,
+    minWidth: 0,
+    gap: 2,
+  },
+  accordionTitle: {
+    fontSize: 16,
+    fontWeight: "900",
+    color: colors.headline,
+  },
+  accordionSummary: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.paragraph,
+  },
+  chevron: {
+    color: colors.headline,
+  },
+  accordionBody: {
+    paddingHorizontal: 14,
+    paddingBottom: 14,
+    gap: 8,
+  },
+  fieldCard: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    padding: 10,
+    gap: 6,
+  },
+  fieldHeaderRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    gap: 8,
+  },
+  fieldNameBadge: {
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    borderRadius: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+  },
+  fieldNameText: {
+    fontFamily: Platform.OS === "ios" ? "Courier" : "monospace",
+    fontSize: 12,
+    fontWeight: "700",
+    color: colors.headline,
+  },
+  requiredPill: {
+    borderRadius: 999,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderWidth: 1,
+  },
+  requiredPillText: {
+    fontSize: 11,
+    fontWeight: "900",
+    textTransform: "uppercase" as const,
+  },
+  requiredPillRequired: {
+    backgroundColor: colors.my_green + "1A",
+    borderColor: colors.my_green,
+  },
+  requiredPillRequiredText: {
+    color: colors.headline,
+  },
+  requiredPillOptional: {
+    backgroundColor: colors.secondBackground,
+    borderColor: colors.border,
+  },
+  requiredPillOptionalText: {
+    color: colors.paragraph,
+  },
+  fieldDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.paragraph,
+  },
+  fieldNote: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.headline,
+  },
+  tipsBox: {
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: colors.my_yellow,
+    backgroundColor: colors.my_yellow + "1A",
+    padding: 10,
+    gap: 4,
+  },
+  tipsTitle: {
+    fontSize: 12,
+    fontWeight: "900",
+    textTransform: "uppercase" as const,
+    color: colors.headline,
+  },
+  tipsLine: {
+    fontSize: 12,
+    lineHeight: 17,
+    color: colors.paragraph,
   },
   fileInfo: {
     marginTop: 2,
@@ -122,233 +230,219 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     fontWeight: "700",
   },
-  warningBox: {
-    padding: 10,
-    borderRadius: 10,
-    backgroundColor: colors.my_yellow + "1A",
-    borderWidth: 1,
-    borderColor: colors.my_yellow,
-    gap: 6,
-  },
-  legendLabel: {
-    color: colors.headline,
-    fontWeight: "800",
-  },
 }));
 
-const exampleMixedRows = [
-  "type,front_text,back_text,tf_answer,explanation,flip,front_image",
-  "traditional,Austria,Wieden,,,,",
-  "true_false,Ziemia jest plaska,,false,Ziemia nie jest plaska,,",
-  "self_assess,Wzor na pole kola,,,Pi razy r do kwadratu,,",
-  ",,Pies na obrazku,,, ,dog.png",
+const GUIDE_SECTIONS: GuideSection[] = [
+  {
+    key: "traditional",
+    title: "1) Odpowiedz otwarta",
+    summary: "Klasyczna fiszka: pytanie z przodu, odpowiedz z tylu.",
+    fields: [
+      {
+        key: "front_text",
+        description: "Przod fiszki: pytanie, haslo albo stwierdzenie.",
+        required: true,
+      },
+      {
+        key: "back_text",
+        description: "Tyl fiszki: poprawna odpowiedz tekstowa.",
+        required: true,
+        note: "Mozesz wpisac wiele odpowiedzi, oddzielajac je przecinkiem lub srednikiem.",
+      },
+      {
+        key: "explanation",
+        description: "Dodatkowe wyjasnienie pokazywane po odpowiedzi.",
+        required: false,
+      },
+      {
+        key: "flip",
+        description: "Jesli true, karta bedzie odwracana przy nauce.",
+        required: false,
+      },
+    ],
+  },
+  {
+    key: "true_false",
+    title: "2) Prawda/Falsz",
+    summary: "Uzytkownik zaznacza, czy zdanie jest prawdziwe.",
+    fields: [
+      {
+        key: "front_text",
+        description: "Tresc pytania albo zdania do oceny.",
+        required: true,
+      },
+      {
+        key: "tf_answer",
+        description: "Poprawna odpowiedz: true/false albo 1/0.",
+        required: true,
+      },
+      {
+        key: "explanation",
+        description: "Wyjasnienie po odpowiedzi.",
+        required: false,
+      },
+    ],
+  },
+  {
+    key: "self_assess",
+    title: "3) Samoocena",
+    summary: "Uzytkownik ocenia: umiem albo nie umiem.",
+    fields: [
+      {
+        key: "front_text",
+        description: "Pytanie lub temat do samooceny.",
+        required: true,
+      },
+      {
+        key: "explanation",
+        description: "Tresc, ktora pokazuje sie po samoocenie.",
+        required: false,
+      },
+    ],
+  },
+  {
+    key: "mixed",
+    title: "4) Mieszane",
+    summary: "W jednym pliku laczysz rozne typy fiszek.",
+    fields: [
+      {
+        key: "type",
+        description: "Typ fiszki dla kazdego wiersza.",
+        required: true,
+        note: "wartosci: traditional, true_false, self_assess.",
+      },
+    ],
+    tips: [
+      "Uklad kolumn pozostaje taki sam jak w sekcjach powyzej.",
+    ],
+  },
 ];
 
-const traditionalRows = [
-  ["front_text", "Przod fiszki: pytanie / haslo / stwierdzenie", "Tak"],
-  ["back_text", "Tyl fiszki: poprawna odpowiedz tekstowa", "Tak"],
-  ["explanation", "Dodatkowe wyjasnienie po odpowiedzi", "Nie"],
-  ["front_image", "Obrazek na fiszce", "Nie"],
-  ["flip", "Czy odwracac fiszke", "Nie"],
-];
+type GuideAccordionSectionProps = {
+  section: GuideSection;
+  index: number;
+  expanded: boolean;
+  onPress: () => void;
+  styles: ReturnType<typeof useStyles>;
+};
 
-const trueFalseRows = [
-  ["front_text", "Tresc pytania lub zdania", "Tak"],
-  ["tf_answer", "Poprawna odpowiedz: true lub false", "Tak"],
-  ["explanation", "Wyjasnienie po odpowiedzi", "Nie"],
-  ["front_image", "Obrazek na fiszce", "Nie"],
-];
+function GuideAccordionSection({
+  section,
+  index,
+  expanded,
+  onPress,
+  styles,
+}: GuideAccordionSectionProps) {
+  return (
+    <View style={styles.accordionCard}>
+      <Pressable
+        onPress={onPress}
+        accessibilityRole="button"
+        accessibilityState={{ expanded }}
+        style={({ pressed }) => [
+          styles.accordionHeader,
+          expanded && styles.accordionHeaderActive,
+          pressed && { opacity: 0.86 },
+        ]}
+      >
+        <View style={styles.accordionIndexBadge}>
+          <Text style={styles.accordionIndexText}>{index + 1}</Text>
+        </View>
 
-const selfAssessRows = [
-  ["front_text", "Pytanie / temat do samooceny", "Tak"],
-  ["explanation", "Tresc, ktora pokazuje sie po ocenie", "Nie"],
-  ["front_image", "Obrazek na fiszce", "Nie"],
-];
+        <View style={styles.accordionHeaderContent}>
+          <Text style={styles.accordionTitle}>{section.title}</Text>
+          <Text style={styles.accordionSummary}>{section.summary}</Text>
+        </View>
 
-const mixedRows = [
-  ["type", "Podajesz typ dla kazdego wiersza osobno", "Tak"],
-  // ["front_text", "Tekst z przodu karty", "Tak"],
-  // ["back_text", "Odpowiedz tekstowa dla traditional", "Zalezy od typu"],
-  // ["tf_answer", "Odpowiedz dla true_false", "Tylko dla true_false"],
-  // ["explanation", "Opis dla true_false/self_assess", "Nie"],
-];
+        <Ionicons
+          name={expanded ? "chevron-up" : "chevron-down"}
+          size={18}
+          style={styles.chevron}
+        />
+      </Pressable>
+
+      {expanded ? (
+        <View style={styles.accordionBody}>
+          {section.fields.map((field) => (
+            <View key={field.key} style={styles.fieldCard}>
+              <View style={styles.fieldHeaderRow}>
+                <View style={styles.fieldNameBadge}>
+                  <Text style={styles.fieldNameText}>{field.key}</Text>
+                </View>
+
+                <View
+                  style={[
+                    styles.requiredPill,
+                    field.required
+                      ? styles.requiredPillRequired
+                      : styles.requiredPillOptional,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.requiredPillText,
+                      field.required
+                        ? styles.requiredPillRequiredText
+                        : styles.requiredPillOptionalText,
+                    ]}
+                  >
+                    {field.required ? "Wymagane" : "Opcjonalne"}
+                  </Text>
+                </View>
+              </View>
+
+              <Text style={styles.fieldDescription}>{field.description}</Text>
+              {field.note ? <Text style={styles.fieldNote}>{field.note}</Text> : null}
+            </View>
+          ))}
+
+          {section.tips?.length ? (
+            <View style={styles.tipsBox}>
+              <Text style={styles.tipsTitle}>Wazne</Text>
+              {section.tips.map((tip) => (
+                <Text key={tip} style={styles.tipsLine}>
+                  • {tip}
+                </Text>
+              ))}
+            </View>
+          ) : null}
+        </View>
+      ) : null}
+    </View>
+  );
+}
 
 export function CsvImportGuide({
-  onPickFile,
+  onPickCsvFile,
+  onPickTxtFile,
   selectedFileName,
   isAnalyzing = false,
 }: CsvImportGuideProps) {
   const styles = useStyles();
-
-  const renderColumnsTable = (rows: string[][]) => (
-    <View style={styles.columnsGrid}>
-      <View style={styles.columnsRow}>
-        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>
-          Kolumna
-        </Text>
-        <Text style={[styles.columnsCell, styles.columnsCellHeader]}>
-          Co to jest
-        </Text>
-        <Text
-          style={[
-            styles.columnsCell,
-            styles.columnsCellHeader,
-            styles.columnsCellLast,
-          ]}
-        >
-          Czy potrzebne
-        </Text>
-      </View>
-      {rows.map((row, index) => (
-        <View key={`${row[0]}-${index}`} style={styles.columnsRow}>
-          <Text style={[styles.columnsCell, styles.code]}>{row[0]}</Text>
-          <Text style={styles.columnsCell}>{row[1]}</Text>
-          <Text style={[styles.columnsCell, styles.columnsCellLast]}>
-            {row[2]}
-          </Text>
-        </View>
-      ))}
-    </View>
-  );
+  const [expandedKey, setExpandedKey] = useState<GuideSectionKey>("traditional");
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Szybki start</Text>
+        <Text style={styles.cardTitle}>Import</Text>
         <Text style={styles.listItem}>
-          1. Przygotuj CSV (albo ZIP z CSV i folderem images/ jeżeli dodajesz
-          obrazki).
+          1. Przygotuj plik CSV albo TXT z naglowkami kolumn.
         </Text>
-        <Text style={styles.listItem}>2. Wybierz plik </Text>
-        <Text style={styles.listItem}>
-          3. Kliknij import poprawnych wierszy.
-        </Text>
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>1) Odpowiedz otwarta</Text>
-        <Text style={styles.paragraph}>
-          Wpisz samodzielnie poprawną odpowiedź na podstawie pytania lub słówka.
-        </Text>
-        {renderColumnsTable(traditionalRows)}
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>2) Prawda/Falsz</Text>
-        <Text style={styles.paragraph}>
-          Zdecyduj, czy pokazane stwierdzenie jest prawdziwe, czy falszywe.
-        </Text>
-        {renderColumnsTable(trueFalseRows)}
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>3) Samoocena</Text>
-        <Text style={styles.paragraph}>
-          Ocen, czy znasz odpowiedz, wybierajac "umiem" albo "nie umiem".
-        </Text>
-        {renderColumnsTable(selfAssessRows)}
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>4) Mieszane</Text>
-        <Text style={styles.paragraph}>
-          Używane, w momencie kiedy w jednym kursie chcesz wiele rodzajów
-          fiszek. Określ ich typ w pierwszej kolumnie.{" "}
-        </Text>
-        {renderColumnsTable(mixedRows)}
-      </View>
-
-      <View style={styles.card}>
-        <Text style={styles.cardTitle}>Legenda</Text>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>front_text</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>tekst z przodu
-            karty (pytanie, haslo, stwierdzenie).
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>front_image</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>obraz z przodu
-            karty.
-          </Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Wazne: </Text>wpisz nazwe pliku z
-            rozszerzeniem, np. zdjecie.png.
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>back_text</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>tekst odpowiedzi
-          </Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Wazne: </Text>mozesz wpisac wiele
-            odpowiedzi, oddzielajac je przecinkiem lub srednikiem.
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>tf_answer</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>poprawna
-            odpowiedz dla true_false.
-          </Text>
-          <Text style={styles.legendLine}>
-            Wpisz wartość: true/false lub 1/0.
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>flip</Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Co to jest: </Text>Czy fiszka ma
-            być odwracana? Wpisz true, jeśli chcesz odwrotny kierunek. Domyślnie
-            jest false.
-          </Text>
-          <Text style={styles.legendLine}>
-            <Text style={styles.legendLabel}>Po co: </Text>Użyteczne, kiedy
-            chcesz się uczyć słówek i czasem odpowiadać w odwrotnie.
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>type</Text>
-          <Text style={styles.legendLine}>
-            Jest używane, w momencie, kiedy w jednym pliku masz więcej niż 1
-            rodzajów fiszek. Może przyjmować jedno z trzech wartości podanych
-            niżej:
-          </Text>
-          <Text style={styles.legendLine}>
-            - traditional = zwykla karta: pytanie + odpowiedz
-          </Text>
-          <Text style={styles.legendLine}>
-            - true_false = karta Prawda/Falsz
-          </Text>
-          <Text style={styles.legendLine}>
-            - self_assess = karta umiem / nie umiem
-          </Text>
-        </View>
-
-        <View style={[styles.legendCard, styles.legendCardPlain]}>
-          <Text style={styles.legendTitle}>explanation</Text>
-          <Text style={styles.legendLine}>
-            Wyjaśnienie które możesz dodać, które pojawi się po udzieleniu
-            odpowiedzi.{" "}
-          </Text>
-        </View>
+        <Text style={styles.listItem}>2. Wybierz ponizej format pliku i importuj.</Text>
       </View>
 
       <View style={styles.actionsRow}>
         <MyButton
-          text={isAnalyzing ? "Analizuje..." : "Wybierz plik"}
-          onPress={isAnalyzing ? undefined : onPickFile}
+          text="Wybierz CSV"
+          onPress={isAnalyzing ? undefined : onPickCsvFile}
           disabled={isAnalyzing}
-          width={150}
+          width={140}
+        />
+        <MyButton
+          text={isAnalyzing ? "Analizuje..." : "Wybierz TXT"}
+          onPress={isAnalyzing ? undefined : onPickTxtFile}
+          disabled={isAnalyzing}
+          width={140}
         />
       </View>
 
@@ -363,6 +457,28 @@ export function CsvImportGuide({
           <Ionicons name="checkmark-circle" size={18} color="#16A34A" />
         </View>
       ) : null}
+
+      <Text style={styles.sectionTitle}>Typy fiszek</Text>
+      {GUIDE_SECTIONS.map((section, index) => (
+        <GuideAccordionSection
+          key={section.key}
+          section={section}
+          index={index}
+          expanded={expandedKey === section.key}
+          onPress={() => setExpandedKey(section.key)}
+          styles={styles}
+        />
+      ))}
+
+      <View style={styles.card}>
+
+        <Text style={styles.cardTitle}>Jak dodawac obrazy</Text>
+        <Text style={styles.paragraph}>
+          Obok pliku CSV lub TXT z fiszkami utworz folder images. Dodaj do
+          niego obrazy, a w wierszach pliku wpisuj nazwy plikow, np. dog.png.
+          Obslugiwane formaty: .png, .jpg, .jpeg, .svg.
+        </Text>
+      </View>
     </View>
   );
 }

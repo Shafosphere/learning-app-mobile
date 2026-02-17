@@ -152,7 +152,7 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
         }
       }
     }
-    if (input.source === "csv") {
+    if (input.source === "csv" || input.source === "txt") {
       for (const field of [
         { value: frontImageName, key: "front_image" as const },
         { value: backImageName, key: "back_image" as const },
@@ -168,7 +168,7 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
             severity: "warning",
             code: "unsupported_image_reference",
             message:
-              "Dla zwykłego CSV obrazki muszą mieć ścieżkę file:// lub content://. Alternatywnie użyj ZIP z folderem images/.",
+              "Dla zwykłego CSV/TXT obrazki muszą mieć ścieżkę file:// lub content://. Alternatywnie użyj ZIP z folderem images/.",
           });
         }
       }

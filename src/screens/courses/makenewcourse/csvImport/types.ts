@@ -28,7 +28,7 @@ export type CsvParsedRow = {
   raw: Record<string, unknown>;
 };
 
-export type CsvParseSource = "csv" | "zip";
+export type CsvParseSource = "csv" | "txt" | "zip";
 
 export type ParsedCsvInput = {
   source: CsvParseSource;

@@ -36,7 +36,7 @@ import {
 import { useStyles } from "./importFlashcards-styles";
 
 const segmentOptions: { key: AddMode; label: string }[] = [
-  { key: "csv", label: "Import z CSV" },
+  { key: "csv", label: "Import z pliku" },
   { key: "manual", label: "Dodaj ręcznie" },
 ];
 
@@ -187,16 +187,10 @@ export default function CustomCourseContentScreen() {
     return () => clearTimeout(timeoutId);
   }, [addMode, newCardType, csvFileName, manualCards, draftScopeKey, isDraftHydrated]);
 
-  const handlePickCsvFile = async () => {
+  const handlePickImportFile = async (type: string[]) => {
     try {
       const picked = await DocumentPicker.getDocumentAsync({
-        type: [
-          "text/csv",
-          "text/plain",
-          "application/zip",
-          "application/x-zip-compressed",
-          "*/*",
-        ],
+        type,
         copyToCacheDirectory: true,
       });
       if (picked.canceled || !picked.assets?.[0]) {
@@ -239,14 +233,30 @@ export default function CustomCourseContentScreen() {
         duration: 3500,
       });
     } catch (error) {
-      console.error("CSV parse/analyze error", error);
+      console.error("File parse/analyze error", error);
       setCsvStep("idle");
       setPopup({
-        message: "Błąd analizy pliku CSV/ZIP.",
+        message: "Błąd analizy pliku.",
         color: "angry",
         duration: 4000,
       });
     }
+  };
+
+  const handlePickCsvFile = async () => {
+    await handlePickImportFile([
+      "text/csv",
+      "application/zip",
+      "application/x-zip-compressed",
+      "*/*",
+    ]);
+  };
+
+  const handlePickTxtFile = async () => {
+    await handlePickImportFile([
+      "text/plain",
+      "*/*",
+    ]);
   };
 
   const handleImportAnalyzedRows = async () => {
@@ -461,7 +471,8 @@ export default function CustomCourseContentScreen() {
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>
               <CsvImportGuide
-                onPickFile={handlePickCsvFile}
+                onPickCsvFile={handlePickCsvFile}
+                onPickTxtFile={handlePickTxtFile}
                 selectedFileName={csvFileName}
                 isAnalyzing={csvStep === "analyzing"}
               />
