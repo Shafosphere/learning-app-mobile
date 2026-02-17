@@ -11,7 +11,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 0,
     overflow: "visible",
     zIndex: 10,
-    elevation: 10,
   },
   topBar: {
     flexDirection: "row",
@@ -53,7 +52,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     marginBottom: -10,
     zIndex: 12,
-    elevation: 12,
   },
   icon: {
     color: colors.headline,

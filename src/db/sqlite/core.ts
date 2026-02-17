@@ -11,6 +11,7 @@ export type DbInitializationListener = (event: DbInitializationEvent) => void;
 
 const dbInitializationListeners = new Set<DbInitializationListener>();
 let lastDbInitializationEvent: DbInitializationEvent | null = null;
+export const DATABASE_NAME = "mygame.db";
 
 export function addDbInitializationListener(
   listener: DbInitializationListener
@@ -42,7 +43,7 @@ export function notifyDbInitializationListeners(
 }
 
 export async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
-  return SQLite.openDatabaseAsync("mygame.db");
+  return SQLite.openDatabaseAsync(DATABASE_NAME);
 }
 
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;

@@ -4,5 +4,6 @@ module.exports = (() => {
   config.resolver.sourceExts.push('svgx');
   config.transformer.babelTransformerPath = require.resolve('./svgx-transformer');
   config.resolver.assetExts.push('csv');
+  config.resolver.assetExts.push('db');
   return config;
 })();

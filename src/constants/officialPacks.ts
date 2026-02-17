@@ -1,14 +1,3 @@
-import astronomiaCsv from "@/assets/data/astronomia.csv";
-import engToPLA1Csv from "@/assets/data/ENGtoPL_A1.csv";
-import engToPLA2Csv from "@/assets/data/ENGtoPL_A2.csv";
-import engToPLB1Csv from "@/assets/data/ENGtoPL_B1.csv";
-import engToPLB2Csv from "@/assets/data/ENGtoPL_B2.csv";
-import flagiEuropyCsv from "@/assets/data/flagi_europy.csv";
-import hangulPolishReadingCsv from "@/assets/data/hangul_polish_reading.csv";
-import javascript2Csv from "@/assets/data/Javascript2.csv";
-import stoliceUniiEuropejskiejCsv from "@/assets/data/stolice_unii_europejskiej.csv";
-import math2Csv from "@/assets/data/math2.csv";
-import testCsv from "@/assets/data/test.csv";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
@@ -43,7 +32,6 @@ export type OfficialPackDef = {
   categoryId?: string;
   // Opcjonalne ustawienia domyślne aplikowane przy seedowaniu oficjalnego kursu
   settings?: OfficialPackCourseSettings;
-  csvAsset: any;
 };
 
 // Manifest of official (built-in) packs included with the app bundle.
@@ -61,7 +49,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: false,
-    csvAsset: engToPLA1Csv,
   },
   {
     slug: "eng_to_pl_a2",
@@ -75,7 +62,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: false,
-    csvAsset: engToPLA2Csv,
   },
   {
     slug: "eng_to_pl_b1",
@@ -89,7 +75,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: false,
-    csvAsset: engToPLB1Csv,
   },
   {
     slug: "eng_to_pl_b2",
@@ -103,7 +88,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: false,
-    csvAsset: engToPLB2Csv,
   },
   {
     slug: "hangul_polish_reading",
@@ -117,7 +101,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "kr",
     isMini: true,
-    csvAsset: hangulPolishReadingCsv,
   },
   {
     slug: "stolice_unii_europejskiej",
@@ -132,7 +115,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
-    csvAsset: stoliceUniiEuropejskiejCsv,
   },
   {
     slug: "astronomia",
@@ -147,7 +129,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     smallFlag: "pl",
     isMini: true,
     categoryId: "science",
-    csvAsset: astronomiaCsv,
   },
   {
     slug: "math2",
@@ -162,7 +143,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     smallFlag: "pl",
     isMini: true,
     categoryId: "math",
-    csvAsset: math2Csv,
   },
   {
     slug: "javascript2",
@@ -177,7 +157,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     smallFlag: "pl",
     isMini: true,
     categoryId: "programming",
-    csvAsset: javascript2Csv,
   },
   {
     slug: "flagi_europy",
@@ -195,7 +174,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     settings: {
       imageSize: "medium",
     },
-    csvAsset: flagiEuropyCsv,
     imageMap: imageMaps.europeFlags,
   },
   {
@@ -213,7 +191,6 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     settings: {
       imageSize: "medium",
     },
-    csvAsset: testCsv,
     imageMap: imageMaps.europeFlags,
   },
 ];
