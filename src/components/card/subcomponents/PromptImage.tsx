@@ -23,6 +23,116 @@ type SvgViewBox = { minX: number; minY: number; width: number; height: number };
 const isSvgUri = (value: string) =>
   /\.svg(\?|#|$)/i.test(value) || value.startsWith("data:image/svg+xml");
 
+const isConstellationOutlineUri = (value: string): boolean =>
+  /gwiazdozbiory\/.+-outline\.svg(\?|#|$)/i.test(value);
+
+const isLikelyConstellationOutlineSvg = (xml: string, uri: string): boolean => {
+  if (isConstellationOutlineUri(uri)) return true;
+  const hasAnyStrokeColor =
+    /stroke\s*:\s*#[0-9a-f]{3,8}/i.test(xml) ||
+    /stroke\s*=\s*["']#[0-9a-f]{3,8}["']/i.test(xml);
+  const hasClassedShapes = /class\s*=\s*["'](?:cls|st)[-_]?\d+/i.test(xml);
+  const hasConstellationGeometry =
+    /<(path|polyline|polygon|line)[\s>]/i.test(xml) &&
+    /fill\s*:\s*none/i.test(xml);
+  const hasKnownViewBox = /viewBox\s*=\s*["']0\s+0\s+360\s+360["']/i.test(xml);
+  return hasAnyStrokeColor && hasClassedShapes && hasConstellationGeometry && hasKnownViewBox;
+};
+
+const boostConstellationOutlineContrast = (xml: string): string => {
+  const bump = (raw: string): string => {
+    const parsed = Number(raw);
+    if (!Number.isFinite(parsed)) return raw;
+    const boosted = Math.max(parsed * 3.4, 3.2);
+    return Number(boosted.toFixed(2)).toString();
+  };
+
+  let next = xml;
+  next = next.replace(
+    /stroke-width\s*:\s*([0-9]*\.?[0-9]+)(px)?/gi,
+    (_m, value: string, unit: string | undefined) =>
+      `stroke-width:${bump(value)}${unit ?? ""}`
+  );
+  next = next.replace(
+    /stroke-width\s*=\s*["']([0-9]*\.?[0-9]+)["']/gi,
+    (_m, value: string) => `stroke-width="${bump(value)}"`
+  );
+  // High-contrast neutral stroke for readability on any theme.
+  next = next.replace(/stroke\s*:\s*#[0-9a-f]{3,8}/gi, "stroke:#F8FAFC");
+  next = next.replace(/stroke\s*=\s*["']#[0-9a-f]{3,8}["']/gi, 'stroke="#F8FAFC"');
+  return next;
+};
+
+const inlineSvgClassStyles = (xml: string): string => {
+  const classStyles = new Map<string, string>();
+  const styleBlocks = Array.from(xml.matchAll(/<style[^>]*>([\s\S]*?)<\/style>/gi));
+
+  for (const block of styleBlocks) {
+    const css = block[1] ?? "";
+    const rules = Array.from(css.matchAll(/([^{}]+)\{([^}]*)\}/g));
+    for (const rule of rules) {
+      const selectorGroup = (rule[1] ?? "").trim();
+      const declaration = (rule[2] ?? "").trim().replace(/\s+/g, " ");
+      if (!selectorGroup || !declaration) continue;
+
+      const selectors = selectorGroup
+        .split(",")
+        .map((selector) => selector.trim())
+        .filter(Boolean);
+
+      for (const selector of selectors) {
+        const classMatch = selector.match(/^\.([a-z0-9_-]+)$/i);
+        if (!classMatch) continue;
+        const className = classMatch[1];
+        const existing = classStyles.get(className);
+        const merged = existing
+          ? `${existing.replace(/;?\s*$/, "")}; ${declaration}`
+          : declaration;
+        classStyles.set(className, merged);
+      }
+    }
+  }
+
+  if (classStyles.size === 0) {
+    return xml;
+  }
+
+  const withInlineStyles = xml.replace(
+    /<([a-z][a-z0-9:_-]*)([^>]*?)\sclass=(["'])([^"']+)\3([^>]*)>/gi,
+    (match, tagName: string, beforeClass: string, _quote: string, classValue: string, afterClass: string) => {
+      const classes = String(classValue)
+        .split(/\s+/)
+        .map((name) => name.trim())
+        .filter(Boolean);
+      const inlineParts = classes
+        .map((name) => classStyles.get(name))
+        .filter((value): value is string => Boolean(value));
+      if (inlineParts.length === 0) {
+        return match;
+      }
+
+      const rawAttrs = `${beforeClass}${afterClass}`;
+      const selfClosing = /\/\s*$/.test(rawAttrs);
+      const attrsWithoutClosingSlash = rawAttrs.replace(/\/\s*$/, "");
+
+      const existingStyleMatch = attrsWithoutClosingSlash.match(
+        /\sstyle=(["'])([^"']*)\1/i
+      );
+      const existingStyle = existingStyleMatch?.[2]?.trim();
+      const mergedStyle = [existingStyle, ...inlineParts].filter(Boolean).join("; ");
+
+      const attrsWithoutStyle = attrsWithoutClosingSlash.replace(
+        /\sstyle=(["'])([^"']*)\1/gi,
+        ""
+      );
+      const closing = selfClosing ? " />" : ">";
+      return `<${tagName}${attrsWithoutStyle} style="${mergedStyle}"${closing}`;
+    }
+  );
+
+  return withInlineStyles.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+};
+
 const parseSvgViewBox = (xml: string): SvgViewBox | null => {
   const viewBoxMatch = xml.match(/viewBox\s*=\s*["']([^"']+)["']/i);
   if (viewBoxMatch) {
@@ -47,6 +157,7 @@ const parseSvgViewBox = (xml: string): SvgViewBox | null => {
 
 export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProps) {
   const { colors } = useSettings();
+  const [isConstellationOutline, setIsConstellationOutline] = useState(false);
   const [svgViewBox, setSvgViewBox] = useState<SvgViewBox | null>(null);
   const [isSvg, setIsSvg] = useState(false);
   const [svgXml, setSvgXml] = useState<string | null>(null);
@@ -64,10 +175,16 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
         if (uri.startsWith("data:image/svg+xml")) {
           const raw = uri.split(",")[1] ?? "";
           const decoded = decodeURIComponent(raw);
+          const constellationMode = isLikelyConstellationOutlineSvg(decoded, uri);
+          const normalized = inlineSvgClassStyles(decoded);
+          const enhanced = constellationMode
+            ? boostConstellationOutlineContrast(normalized)
+            : normalized;
           if (!cancelled) {
-            setSvgViewBox(parseSvgViewBox(decoded));
+            setSvgViewBox(parseSvgViewBox(enhanced));
             setIsSvg(true);
-            setSvgXml(decoded);
+            setSvgXml(enhanced);
+            setIsConstellationOutline(constellationMode);
           }
           return;
         }
@@ -78,6 +195,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setSvgViewBox(null); // bez parsowania viewBox
             setIsSvg(true);
             setSvgXml(null);
+            setIsConstellationOutline(isConstellationOutlineUri(uri));
           }
           return;
         }
@@ -90,24 +208,32 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setIsSvg(false);
             setSvgXml(null);
             setRasterAspectRatio(null);
+            setIsConstellationOutline(false);
           }
           return;
         }
 
         const xml = await FileSystem.readAsStringAsync(uri);
-        const hasSvgTag = /<svg[\s>]/i.test(xml);
+        const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
+        const normalizedXml = inlineSvgClassStyles(xml);
+        const enhancedXml = constellationMode
+          ? boostConstellationOutlineContrast(normalizedXml)
+          : normalizedXml;
+        const hasSvgTag = /<svg[\s>]/i.test(enhancedXml);
         const looksLikeSvg = uriLooksSvg || hasSvgTag;
 
         if (!cancelled) {
           if (looksLikeSvg) {
-            setSvgViewBox(parseSvgViewBox(xml));
+            setSvgViewBox(parseSvgViewBox(enhancedXml));
             setIsSvg(true);
-            setSvgXml(xml);
+            setSvgXml(enhancedXml);
             setRasterAspectRatio(null);
+            setIsConstellationOutline(constellationMode);
           } else {
             setSvgViewBox(null);
             setIsSvg(false);
             setSvgXml(null);
+            setIsConstellationOutline(false);
             RNImage.getSize(
               uri,
               (width, height) => {
@@ -131,6 +257,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           setIsSvg(false);
           setSvgXml(null);
           setRasterAspectRatio(1);
+          setIsConstellationOutline(false);
         }
       }
     };
@@ -144,25 +271,40 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
   const slotStyle = useMemo(() => {
     // Slot w fiszce: centrowanie + to co przyszło z propsa
     const flat = (StyleSheet.flatten(imageStyle) || {}) as ViewStyle;
+    const baseHeight =
+      typeof flat.height === "number"
+        ? flat.height
+        : typeof flat.maxHeight === "number"
+          ? flat.maxHeight
+          : undefined;
+    const boostedHeight =
+      typeof baseHeight === "number"
+        ? Math.min(Math.max(baseHeight * 1.7, 190), 240)
+        : undefined;
 
     return {
       ...flat,
+      height: isConstellationOutline && boostedHeight ? boostedHeight : flat.height,
+      maxHeight: isConstellationOutline && boostedHeight ? boostedHeight : flat.maxHeight,
       alignItems: "center",
       justifyContent: "center",
       // slot może być duży (np. pełna szerokość), ale ramka będzie tight
     } as ViewStyle;
-  }, [imageStyle]);
+  }, [imageStyle, isConstellationOutline]);
 
   const frameStyle = useMemo(() => {
     // Ramka: zero flex rozciągania + aspectRatio
     const flat = (StyleSheet.flatten(imageStyle) || {}) as ImageStyle;
 
-    const height =
+    const baseHeight =
       typeof flat.height === "number"
         ? flat.height
         : typeof flat.maxHeight === "number"
           ? flat.maxHeight
           : 64; // sensowny fallback
+    const height = isConstellationOutline
+      ? Math.min(Math.max(baseHeight * 1.7, 190), 240)
+      : baseHeight;
 
     const ratio = svgViewBox ? svgViewBox.width / svgViewBox.height : undefined;
     const resolvedRatio =
@@ -178,6 +320,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
 
       borderWidth: isSvg ? 1 : 0,
       borderColor: colors.border ?? "#00000033",
+      backgroundColor: "transparent",
       borderRadius: (flat.borderRadius as number | undefined) ?? 6,
       overflow: "hidden",
 
@@ -186,7 +329,14 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
       flexShrink: 0,
       alignSelf: "center",
     } as ViewStyle;
-  }, [colors.border, imageStyle, isSvg, rasterAspectRatio, svgViewBox]);
+  }, [
+    colors.border,
+    imageStyle,
+    isConstellationOutline,
+    isSvg,
+    rasterAspectRatio,
+    svgViewBox,
+  ]);
 
   return (
     <View style={slotStyle}>

@@ -82,6 +82,16 @@ const OFFICIAL_PACKS = [
     csvFile: "astronomia.csv",
   },
   {
+    slug: "gwiazdozbiory",
+    name: "Gwiazdozbiory",
+    iconId: "planet",
+    iconColor: "#3B82F6",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "gwiazdozbiory.csv",
+  },
+  {
     slug: "math2",
     name: "Matematyka (Umiem/Nie umiem)",
     iconId: "calculator",
