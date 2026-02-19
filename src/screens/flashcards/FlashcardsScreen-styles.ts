@@ -15,23 +15,40 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginBottom: 10,
   },
   topButtonsWrapper: {
-    marginBottom: 22,
+    marginBottom: 10,
   },
   topActionsWrapper: {
     paddingHorizontal: 16,
     alignItems: "center",
   },
   boxesWrapper: {
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
     position: "relative",
     alignItems: "center",
-    paddingHorizontal: 16,
-    marginTop: 2,
+    paddingHorizontal: 12,
+    marginTop: 0,
   },
   boxesWrapperWithBottomButtons: {
-    marginTop: 20,
+    marginTop: 8,
+  },
+  boxesViewport: {
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
+    alignItems: "center",
+  },
+  boxesViewportScrollContent: {
+    width: "100%",
+    alignItems: "center",
+  },
+  boxesScaledContent: {
+    width: "100%",
+    alignItems: "center",
   },
   bottomButtonsWrapper: {
-    marginTop: 8,
+    marginTop: 4,
     marginBottom: 2,
   },
   addButton: {

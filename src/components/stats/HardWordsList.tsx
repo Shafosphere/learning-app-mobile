@@ -50,6 +50,15 @@ export default function HardWordsList() {
     const frontText = (it.frontText ?? "").trim();
     const backText = (it.backText ?? "").trim();
     const imageUri = it.imageFront ?? it.imageBack ?? null;
+    const hasImageOnlyPrompt = Boolean(imageUri) && frontText.length === 0;
+    if (hasImageOnlyPrompt) {
+      const label = backText || "—";
+      return (
+        <Text style={styles.word} numberOfLines={1}>
+          {label}
+        </Text>
+      );
+    }
     if (imageUri) {
       return <PromptImage uri={imageUri} imageStyle={styles.imageSlot} />;
     }

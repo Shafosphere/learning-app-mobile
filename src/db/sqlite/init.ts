@@ -95,6 +95,15 @@ async function applyOfficialCourseSettings(
       )
     );
   }
+  if (settings.imageFrameEnabled !== undefined) {
+    tasks.push(
+      upsertCourseOverride<boolean>(
+        "flashcards.courseImageFrameOverrides",
+        courseId,
+        settings.imageFrameEnabled
+      )
+    );
+  }
   await Promise.all(tasks);
 }
 

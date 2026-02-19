@@ -223,17 +223,17 @@ export default function BoxCarousel({
                     ];
                     const scale = scrollX.interpolate({
                         inputRange,
-                        outputRange: [0.9, 2.5, 0.9],
+                        outputRange: [0.9, 2.15, 0.9],
                         extrapolate: "clamp",
                     });
                     const translateY = scrollX.interpolate({
                         inputRange,
-                        outputRange: [16, -18, 16],
+                        outputRange: [16, -28, 16],
                         extrapolate: "clamp",
                     });
                     const counterTranslateY = scrollX.interpolate({
                         inputRange,
-                        outputRange: [0, 28, 0],
+                        outputRange: [8, 42, 8],
                         extrapolate: "clamp",
                     });
                     const isActive = index === activeIndex;
@@ -246,7 +246,7 @@ export default function BoxCarousel({
                                 width: itemWidth,
                                 alignItems: "center",
                                 justifyContent: "flex-start",
-                                paddingVertical: 22,
+                                paddingVertical: 26,
                             }}
                         >
                             <Animated.View
@@ -288,7 +288,7 @@ export default function BoxCarousel({
                             <Animated.View
                                 style={{
                                     alignItems: "center",
-                                    marginTop: 14,
+                                    marginTop: 20,
                                     minHeight: 32,
                                     transform: [{ translateY: counterTranslateY }],
                                 }}

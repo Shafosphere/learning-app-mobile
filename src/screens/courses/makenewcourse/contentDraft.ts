@@ -22,6 +22,7 @@ export type SettingsDraftPayload = {
   trueFalseButtonsVariant: "true_false" | "know_dont_know";
   cardSize: "large" | "small";
   imageSize: "dynamic" | "small" | "medium" | "large";
+  imageFrameEnabled: boolean;
 };
 
 export const isManualCardType = (value: unknown): value is ManualCardType =>

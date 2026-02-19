@@ -128,6 +128,8 @@ function BuiltinCourseEditor({
     setBuiltinCourseCardSize,
     getBuiltinCourseImageSize,
     setBuiltinCourseImageSize,
+    getBuiltinCourseImageFrameEnabled,
+    setBuiltinCourseImageFrameEnabled,
     getBuiltinCourseTrueFalseButtonsVariant,
     setBuiltinCourseTrueFalseButtonsVariant,
   } = useSettings();
@@ -166,6 +168,13 @@ function BuiltinCourseEditor({
   );
   const [imageSize, setImageSize] = useState<FlashcardsImageSize>(() =>
     getBuiltinCourseImageSize({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [imageFrameEnabled, setImageFrameEnabled] = useState<boolean>(() =>
+    getBuiltinCourseImageFrameEnabled({
       sourceLang: normalizedSource,
       targetLang: normalizedTarget,
       level: normalizedLevel,
@@ -262,6 +271,18 @@ function BuiltinCourseEditor({
   ) => {
     setTrueFalseButtonsVariant(value);
     await setBuiltinCourseTrueFalseButtonsVariant(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleImageFrameToggle = async (value: boolean) => {
+    setImageFrameEnabled(value);
+    await setBuiltinCourseImageFrameEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
@@ -438,6 +459,9 @@ function BuiltinCourseEditor({
               imageSize,
               onSelectImageSize: handleImageSizeChange,
               imageSizeEnabled,
+              showImageFrameOption: courseHasImages,
+              imageFrameEnabled,
+              onToggleImageFrame: handleImageFrameToggle,
             }}
             resetActions={[
               {

@@ -20,6 +20,7 @@ import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
+import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
@@ -39,7 +40,14 @@ import {
   useRef,
   useState,
 } from "react";
-import { ActivityIndicator, Animated, Pressable, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Animated,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const STREAK_TARGET = 5;
@@ -694,6 +702,15 @@ export default function Flashcards() {
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
+  const isCarouselLayout = boxesLayout !== "classic";
+  const {
+    scale: boxesScale,
+    scaledHeight: boxesScaledHeight,
+    scaleOffsetY,
+    onViewportLayout: onBoxesViewportLayout,
+    onContentLayout: onBoxesContentLayout,
+    needsScrollFallback: boxesNeedScrollFallback,
+  } = useAutoScaleToFit({ minScale: isCarouselLayout ? 0.58 : 0.72 });
   const shouldHideHintsForActiveBox =
     activeBox === "boxFour" || activeBox === "boxFive";
   const bottomButtonsAnchorRef = useRef<View | null>(null);
@@ -851,6 +868,31 @@ export default function Flashcards() {
     />
   );
 
+  const boxesContent =
+    boxesLayout === "classic" ? (
+      <Boxes
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        hideBoxZero={!boxZeroEnabled}
+        onBoxLongPress={handleBoxLongPress}
+        disabled={boxSelectionLocked}
+      />
+    ) : (
+      <BoxesCarousel
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        hideBoxZero={!boxZeroEnabled}
+        onBoxLongPress={handleBoxLongPress}
+        disabled={boxSelectionLocked}
+      />
+    );
+  const boxesScaleOffsetY = isCarouselLayout ? 0 : scaleOffsetY;
+  const boxesScaledHeightWithHeadroom = boxesScaledHeight
+    ? boxesScaledHeight + (isCarouselLayout ? 120 : 0)
+    : undefined;
+
   return (
     <View style={styles.container}>
       <IntroOverlay />
@@ -880,24 +922,38 @@ export default function Flashcards() {
             </Pressable>
           )}
 
-          {boxesLayout === "classic" ? (
-            <Boxes
-              boxes={boxes}
-              activeBox={activeBox}
-              handleSelectBox={handleSelectBox}
-              hideBoxZero={!boxZeroEnabled}
-              onBoxLongPress={handleBoxLongPress}
-              disabled={boxSelectionLocked}
-            />
+          {boxesNeedScrollFallback ? (
+            <ScrollView
+              style={styles.boxesViewport}
+              contentContainerStyle={styles.boxesViewportScrollContent}
+              onLayout={onBoxesViewportLayout}
+              showsVerticalScrollIndicator={false}
+            >
+              <View onLayout={onBoxesContentLayout}>{boxesContent}</View>
+            </ScrollView>
           ) : (
-            <BoxesCarousel
-              boxes={boxes}
-              activeBox={activeBox}
-              handleSelectBox={handleSelectBox}
-              hideBoxZero={!boxZeroEnabled}
-              onBoxLongPress={handleBoxLongPress}
-              disabled={boxSelectionLocked}
-            />
+            <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
+              <View
+                style={[
+                  styles.boxesScaledContent,
+                  boxesScaledHeightWithHeadroom
+                    ? { height: boxesScaledHeightWithHeadroom }
+                    : null,
+                ]}
+              >
+                <View
+                  style={{
+                    transform: [
+                      { translateY: -boxesScaleOffsetY },
+                      { scale: boxesScale },
+                    ],
+                  }}
+                  onLayout={onBoxesContentLayout}
+                >
+                  {boxesContent}
+                </View>
+              </View>
+            </View>
           )}
 
           {!areButtonsOnTop ? (

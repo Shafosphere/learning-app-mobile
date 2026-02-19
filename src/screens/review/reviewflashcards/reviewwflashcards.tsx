@@ -14,6 +14,7 @@ import {
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
@@ -23,7 +24,7 @@ import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
-import { Animated, View } from "react-native";
+import { Animated, ScrollView, View } from "react-native";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const BOX_SPAM_WINDOW_MS = 2000;
@@ -715,6 +716,15 @@ export default function ReviewFlashcardsPlaceholder() {
   const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const effectiveTrueFalseButtonsVariant =
     selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
+  const isCarouselLayout = layout !== "classic";
+  const {
+    scale: boxesScale,
+    scaledHeight: boxesScaledHeight,
+    scaleOffsetY,
+    onViewportLayout: onBoxesViewportLayout,
+    onContentLayout: onBoxesContentLayout,
+    needsScrollFallback: boxesNeedScrollFallback,
+  } = useAutoScaleToFit({ minScale: isCarouselLayout ? 0.58 : 0.72 });
   const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
@@ -764,6 +774,29 @@ export default function ReviewFlashcardsPlaceholder() {
     />
   );
 
+  const boxesContent =
+    layout === "classic" ? (
+      <Boxes
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        hideBoxZero
+        onBoxLongPress={handleBoxLongPress}
+      />
+    ) : (
+      <BoxesCarousel
+        boxes={boxes}
+        activeBox={activeBox}
+        handleSelectBox={handleSelectBox}
+        hideBoxZero
+        onBoxLongPress={handleBoxLongPress}
+      />
+    );
+  const boxesScaleOffsetY = isCarouselLayout ? 0 : scaleOffsetY;
+  const boxesScaledHeightWithHeadroom = boxesScaledHeight
+    ? boxesScaledHeight + (isCarouselLayout ? 120 : 0)
+    : undefined;
+
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
@@ -785,45 +818,67 @@ export default function ReviewFlashcardsPlaceholder() {
         hideHints
         isFocused={!isLoading}
       />
-      {!areButtonsOnTop ? (
-        <View
-          ref={bottomButtonsAnchorRef}
-          onLayout={measureBottomButtons}
-          collapsable={false}
-          style={styles.bottomButtonsWrapper}
-        >
-          <Animated.View
-            style={{
-              transform: [
-                {
-                  translateY: Animated.multiply(bottomButtonsOffset, -1),
-                },
-              ],
-            }}
-          >
-            {renderButtons("bottom")}
-          </Animated.View>
-        </View>
-      ) : null}
 
-      <View style={styles.boxesWrapper}>
-        {layout === "classic" ? (
-          <Boxes
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            hideBoxZero
-            onBoxLongPress={handleBoxLongPress}
-          />
+      <View
+        style={[
+          styles.boxesWrapper,
+          !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+        ]}
+      >
+        {boxesNeedScrollFallback ? (
+          <ScrollView
+            style={styles.boxesViewport}
+            contentContainerStyle={styles.boxesViewportScrollContent}
+            onLayout={onBoxesViewportLayout}
+            showsVerticalScrollIndicator={false}
+          >
+            <View onLayout={onBoxesContentLayout}>{boxesContent}</View>
+          </ScrollView>
         ) : (
-          <BoxesCarousel
-            boxes={boxes}
-            activeBox={activeBox}
-            handleSelectBox={handleSelectBox}
-            hideBoxZero
-            onBoxLongPress={handleBoxLongPress}
-          />
+          <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
+            <View
+              style={[
+                styles.boxesScaledContent,
+                boxesScaledHeightWithHeadroom
+                  ? { height: boxesScaledHeightWithHeadroom }
+                  : null,
+              ]}
+            >
+              <View
+                style={{
+                  transform: [
+                    { translateY: -boxesScaleOffsetY },
+                    { scale: boxesScale },
+                  ],
+                }}
+                onLayout={onBoxesContentLayout}
+              >
+                {boxesContent}
+              </View>
+            </View>
+          </View>
         )}
+
+        {!areButtonsOnTop ? (
+          <View
+            ref={bottomButtonsAnchorRef}
+            onLayout={measureBottomButtons}
+            collapsable={false}
+            style={styles.bottomButtonsWrapper}
+          >
+            <Animated.View
+              style={{
+                transform: [
+                  {
+                    translateY: Animated.multiply(bottomButtonsOffset, -1),
+                  },
+                ],
+              }}
+            >
+              {renderButtons("bottom")}
+            </Animated.View>
+          </View>
+        ) : null}
       </View>
 
       <FlashcardsPeekOverlay

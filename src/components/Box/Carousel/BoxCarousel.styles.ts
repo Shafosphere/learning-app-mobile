@@ -2,19 +2,19 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useBoxCarouselStyles = createThemeStylesHook((colors) => ({
     container: {
-        // flex: 1,
         width: "100%",
         alignItems: "center",
-        // backgroundColor: colors.my_red,
+        // Reserve extra room for the animated counter under the active box.
+        paddingBottom: 56,
     },
     number: {
         fontSize: 40,
         textAlign: "center",
-        paddingTop: 40,
+        paddingTop: 10,
         fontWeight: 800,
         color: colors.headline,
     },
     numberUpdate: {
-        marginTop: 40,
+        marginTop: 10,
     },
 }));

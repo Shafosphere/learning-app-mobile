@@ -223,6 +223,7 @@ export function CardCorrection({
       key={promptImageUri}
       uri={promptImageUri}
       imageStyle={[styles.promptImage, promptImageStyle]}
+      renderMode="correction"
       onHeightChange={(height) => {
         if (allowMultilinePrompt && onPromptLayout) {
           onPromptLayout(height);

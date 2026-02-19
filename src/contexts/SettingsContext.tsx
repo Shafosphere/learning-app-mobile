@@ -100,6 +100,11 @@ type CourseImageSizeOverrides = {
   custom: Record<string, FlashcardsImageSize>;
 };
 
+type CourseImageFrameOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
 const DEFAULT_COURSE_BOX_ZERO_OVERRIDES: CourseBoxZeroOverrides = {
   builtin: {},
   custom: {},
@@ -116,6 +121,11 @@ const DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES: CourseSkipCorrectionOverrides = 
 };
 
 const DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES: CourseImageSizeOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_IMAGE_FRAME_OVERRIDES: CourseImageFrameOverrides = {
   builtin: {},
   custom: {},
 };
@@ -252,6 +262,19 @@ interface SettingsContextValue {
     courseId: number,
     size: FlashcardsImageSize
   ) => Promise<void>;
+  flashcardsImageFrameEnabled: boolean;
+  flashcardsImageFrameDefaultEnabled: boolean;
+  setFlashcardsImageFrameDefaultEnabled: (enabled: boolean) => Promise<void>;
+  getBuiltinCourseImageFrameEnabled: (params: CourseBoxZeroKeyParams) => boolean;
+  setBuiltinCourseImageFrameEnabled: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseImageFrameEnabled: (courseId: number) => boolean;
+  setCustomCourseImageFrameEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
   dailyGoal: number;
   setDailyGoal: (n: number) => Promise<void>;
   feedbackEnabled: boolean;
@@ -360,6 +383,7 @@ const defaultValue: SettingsContextValue = {
   toggleQuotesEnabled: async () => {},
   flashcardsCardSize: "large",
   flashcardsImageSize: "dynamic",
+  flashcardsImageFrameEnabled: true,
   dailyGoal: 20,
   setDailyGoal: async () => {},
   feedbackEnabled: true,
@@ -388,6 +412,12 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseImageSize: async () => {},
   getCustomCourseImageSize: () => "dynamic",
   setCustomCourseImageSize: async () => {},
+  flashcardsImageFrameDefaultEnabled: true,
+  setFlashcardsImageFrameDefaultEnabled: async () => {},
+  getBuiltinCourseImageFrameEnabled: () => true,
+  setBuiltinCourseImageFrameEnabled: async () => {},
+  getCustomCourseImageFrameEnabled: () => true,
+  setCustomCourseImageFrameEnabled: async () => {},
   highContrastEnabled: false,
   toggleHighContrast: async () => {},
   colorBlindMode: "none",
@@ -476,10 +506,17 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcards.courseImageSizeOverrides",
       DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES
     );
+  const [imageFrameOverrides, setImageFrameOverrides] =
+    usePersistedState<CourseImageFrameOverrides>(
+      "flashcards.courseImageFrameOverrides",
+      DEFAULT_COURSE_IMAGE_FRAME_OVERRIDES
+    );
   const [flashcardsCardSizeDefault, setFlashcardsCardSizeDefault] =
     usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
   const [flashcardsImageSizeDefault, setFlashcardsImageSizeDefault] =
     usePersistedState<FlashcardsImageSize>("flashcards.imageSize", "dynamic");
+  const [flashcardsImageFrameDefaultEnabled, setFlashcardsImageFrameDefaultEnabled] =
+    usePersistedState<boolean>("flashcards.imageFrameEnabled", true);
   const [skipCorrectionDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.skipCorrectionEnabled",
     false
@@ -915,6 +952,85 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     [flashcardsImageSizeDefault, imageSizeOverrides, setImageSizeOverrides]
   );
 
+  const getBuiltinCourseImageFrameEnabled = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = imageFrameOverrides.builtin[key];
+      return override ?? flashcardsImageFrameDefaultEnabled;
+    },
+    [flashcardsImageFrameDefaultEnabled, imageFrameOverrides.builtin]
+  );
+
+  const setBuiltinCourseImageFrameEnabled = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = imageFrameOverrides.builtin[key];
+      const shouldRemove = enabled === flashcardsImageFrameDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...imageFrameOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setImageFrameOverrides({
+        builtin: nextBuiltin,
+        custom: { ...imageFrameOverrides.custom },
+      });
+    },
+    [
+      flashcardsImageFrameDefaultEnabled,
+      imageFrameOverrides,
+      setImageFrameOverrides,
+    ]
+  );
+
+  const getCustomCourseImageFrameEnabled = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = imageFrameOverrides.custom[key];
+      return override ?? flashcardsImageFrameDefaultEnabled;
+    },
+    [flashcardsImageFrameDefaultEnabled, imageFrameOverrides.custom]
+  );
+
+  const setCustomCourseImageFrameEnabled = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = imageFrameOverrides.custom[key];
+      const shouldRemove = enabled === flashcardsImageFrameDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...imageFrameOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setImageFrameOverrides({
+        builtin: { ...imageFrameOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [
+      flashcardsImageFrameDefaultEnabled,
+      imageFrameOverrides,
+      setImageFrameOverrides,
+    ]
+  );
+
   const getBuiltinCourseSkipCorrectionEnabled = useCallback(
     ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
       const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
@@ -1219,7 +1335,6 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     }
     if (activeCourse) {
       console.log("[ActiveCourse] builtin", {
-        name: activeCourse.name,
         sourceLang: activeCourse.sourceLang,
         targetLang: activeCourse.targetLang,
         level: activeCourse.level ?? null,
@@ -1323,6 +1438,30 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     flashcardsImageSizeDefault,
     getBuiltinCourseImageSize,
     getCustomCourseImageSize,
+  ]);
+
+  const flashcardsImageFrameEnabled = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseImageFrameEnabled(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseImageFrameEnabled({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return flashcardsImageFrameDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    flashcardsImageFrameDefaultEnabled,
+    getBuiltinCourseImageFrameEnabled,
+    getCustomCourseImageFrameEnabled,
   ]);
 
   const skipCorrectionEnabled = useMemo(() => {
@@ -1465,6 +1604,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setFlashcardsSuggestionsEnabled(false),
       setFlashcardsCardSizeDefault("large"),
       setFlashcardsImageSizeDefault("dynamic"),
+      setFlashcardsImageFrameDefaultEnabled(true),
       _setLearningRemindersEnabled(false),
       _setFeedbackVolume(1),
     ]);
@@ -1476,6 +1616,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     setFlashcardsBatchSize,
     setFlashcardsCardSizeDefault,
     setFlashcardsImageSizeDefault,
+    setFlashcardsImageFrameDefaultEnabled,
     setIgnoreDiacriticsInSpellcheck,
     setFlashcardsSuggestionsEnabled,
     setShowBoxFaces,
@@ -1565,6 +1706,13 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseImageSize,
         getCustomCourseImageSize,
         setCustomCourseImageSize,
+        flashcardsImageFrameEnabled,
+        flashcardsImageFrameDefaultEnabled,
+        setFlashcardsImageFrameDefaultEnabled,
+        getBuiltinCourseImageFrameEnabled,
+        setBuiltinCourseImageFrameEnabled,
+        getCustomCourseImageFrameEnabled,
+        setCustomCourseImageFrameEnabled,
         dailyGoal,
         setDailyGoal,
         feedbackEnabled: feedbackEnabledState,

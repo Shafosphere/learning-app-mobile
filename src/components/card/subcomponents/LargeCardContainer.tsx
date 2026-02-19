@@ -5,6 +5,7 @@ import { useStyles } from "../card-styles";
 const SMALL_CARD_HEIGHT = 120;
 const LARGE_CARD_MAX_HEIGHT = 325;
 const LARGE_CARD_GAP = 6;
+const SHRINK_SETTLE_DELAY_MS = 140;
 
 type LayoutHandlers = {
   onPromptLayout: (height: number) => void;
@@ -34,6 +35,8 @@ export default function LargeCardContainer({
     hasContent && lastStableHeight.current != null
       ? lastStableHeight.current
       : SMALL_CARD_HEIGHT;
+  const [stableTargetHeight, setStableTargetHeight] = useState(initialCardHeight);
+  const shrinkTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const emptyAlignmentStyle = useMemo(
     () =>
       hasContent
@@ -64,7 +67,7 @@ export default function LargeCardContainer({
     );
   }, [hasContent, promptHeight, inputHeight]);
 
-  const targetCardHeight = useMemo(() => {
+  const rawTargetCardHeight = useMemo(() => {
     if (!hasContent) {
       return SMALL_CARD_HEIGHT;
     }
@@ -92,14 +95,53 @@ export default function LargeCardContainer({
   }, [baseCardHeight, hasContent]);
 
   useEffect(() => {
+    return () => {
+      if (shrinkTimeoutRef.current) {
+        clearTimeout(shrinkTimeoutRef.current);
+        shrinkTimeoutRef.current = null;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!hasContent) {
+      if (shrinkTimeoutRef.current) {
+        clearTimeout(shrinkTimeoutRef.current);
+        shrinkTimeoutRef.current = null;
+      }
+      setStableTargetHeight(SMALL_CARD_HEIGHT);
+      return;
+    }
+
+    setStableTargetHeight((prev) => {
+      if (rawTargetCardHeight >= prev) {
+        if (shrinkTimeoutRef.current) {
+          clearTimeout(shrinkTimeoutRef.current);
+          shrinkTimeoutRef.current = null;
+        }
+        return rawTargetCardHeight;
+      }
+
+      if (shrinkTimeoutRef.current) {
+        clearTimeout(shrinkTimeoutRef.current);
+      }
+      shrinkTimeoutRef.current = setTimeout(() => {
+        setStableTargetHeight((current) => Math.min(current, rawTargetCardHeight));
+        shrinkTimeoutRef.current = null;
+      }, SHRINK_SETTLE_DELAY_MS);
+      return prev;
+    });
+  }, [hasContent, rawTargetCardHeight]);
+
+  useEffect(() => {
     animatedCardHeight.stopAnimation();
     Animated.timing(animatedCardHeight, {
-      toValue: targetCardHeight,
+      toValue: stableTargetHeight,
       duration: 220,
       easing: Easing.out(Easing.cubic),
       useNativeDriver: false,
     }).start();
-  }, [animatedCardHeight, targetCardHeight]);
+  }, [animatedCardHeight, stableTargetHeight]);
 
   return (
     <Animated.View

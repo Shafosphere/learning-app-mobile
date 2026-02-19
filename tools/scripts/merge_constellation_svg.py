@@ -234,7 +234,7 @@ def build_pattern_overlay(pattern_root: ET.Element, s: float, tx: float, ty: flo
         "transform": f"matrix({s:.10f} 0 0 {s:.10f} {tx:.4f} {ty:.4f})",
     })
 
-    min_stroke_360 = 1.6
+    min_stroke_360 = 2.2
     src_stroke = max(1.5, min_stroke_360 / max(s, 1e-9))
     stroke_str = f"{src_stroke:.3f}".rstrip("0").rstrip(".")
 
@@ -311,7 +311,7 @@ def parse_args() -> argparse.Namespace:
         help="Directory for generated merged SVG files.",
     )
     parser.add_argument("--all", action="store_true", help="Generate merged files for all pairs.")
-    parser.add_argument("--outline-stroke", default="#FFFFFF")
+    parser.add_argument("--outline-stroke", default="#1B2D45")
     parser.add_argument("--pattern-color", default="#FF5470")
     return parser.parse_args()
 

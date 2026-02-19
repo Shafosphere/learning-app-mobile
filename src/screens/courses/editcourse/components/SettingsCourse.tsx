@@ -35,6 +35,9 @@ export type CourseSettingsSectionProps = {
   imageSize?: FlashcardsImageSize;
   onSelectImageSize?: (value: FlashcardsImageSize) => void;
   imageSizeEnabled?: boolean;
+  showImageFrameOption?: boolean;
+  imageFrameEnabled?: boolean;
+  onToggleImageFrame?: (value: boolean) => void;
 };
 
 export function CourseSettingsSection({
@@ -60,6 +63,9 @@ export function CourseSettingsSection({
   imageSize,
   onSelectImageSize,
   imageSizeEnabled = false,
+  showImageFrameOption = false,
+  imageFrameEnabled = true,
+  onToggleImageFrame,
 }: CourseSettingsSectionProps) {
   const cardSizeStyles = localStyles(switchColors, colors);
   const {
@@ -333,6 +339,23 @@ export function CourseSettingsSection({
             })}
           </View>
         </>
+      ) : null}
+
+      {showImageFrameOption ? (
+        <View style={toggleRow}>
+          <View style={toggleTextWrapper}>
+            <Text style={toggleTitle}>Ramka obrazu</Text>
+            <Text style={toggleSubtitle}>
+              Pokazuj obramowanie wokół obrazka na fiszce.
+            </Text>
+          </View>
+          <Switch
+            value={imageFrameEnabled}
+            onValueChange={onToggleImageFrame}
+            trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
+            thumbColor={switchColors.thumb}
+          />
+        </View>
       ) : null}
     </View>
   );

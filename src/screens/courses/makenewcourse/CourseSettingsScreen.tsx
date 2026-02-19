@@ -51,6 +51,8 @@ export default function CourseSettingsScreen() {
     setCustomCourseCardSize,
     getCustomCourseImageSize,
     setCustomCourseImageSize,
+    getCustomCourseImageFrameEnabled,
+    setCustomCourseImageFrameEnabled,
     getCustomCourseTrueFalseButtonsVariant,
     setCustomCourseTrueFalseButtonsVariant,
   } = useSettings();
@@ -125,6 +127,9 @@ export default function CourseSettingsScreen() {
   );
   const [cardSize, setCardSize] = useState(getCustomCourseCardSize(-1));
   const [imageSize, setImageSize] = useState(getCustomCourseImageSize(-1));
+  const [imageFrameEnabled, setImageFrameEnabled] = useState(
+    getCustomCourseImageFrameEnabled(-1)
+  );
 
   useEffect(() => {
     setReviewsEnabled(initialReviewsEnabled);
@@ -253,6 +258,9 @@ export default function CourseSettingsScreen() {
           ) {
             setImageSize(parsedSettingsDraft.imageSize);
           }
+          if (typeof parsedSettingsDraft.imageFrameEnabled === "boolean") {
+            setImageFrameEnabled(parsedSettingsDraft.imageFrameEnabled);
+          }
         }
 
         if (isMounted) {
@@ -304,6 +312,7 @@ export default function CourseSettingsScreen() {
         trueFalseButtonsVariant,
         cardSize,
         imageSize,
+        imageFrameEnabled,
       };
       void AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify(payload));
     }, 250);
@@ -316,6 +325,7 @@ export default function CourseSettingsScreen() {
     draftScopeKey,
     hydrating,
     imageSize,
+    imageFrameEnabled,
     reviewsEnabled,
     skipCorrectionEnabled,
     trueFalseButtonsVariant,
@@ -427,6 +437,7 @@ export default function CourseSettingsScreen() {
       );
       await setCustomCourseCardSize(courseId, cardSize);
       await setCustomCourseImageSize(courseId, imageSize);
+      await setCustomCourseImageFrameEnabled(courseId, imageFrameEnabled);
 
       await Promise.all([
         AsyncStorage.removeItem(CONTENT_DRAFT_STORAGE_KEY),
@@ -495,6 +506,9 @@ export default function CourseSettingsScreen() {
               imageSize,
               onSelectImageSize: setImageSize,
               imageSizeEnabled,
+              showImageFrameOption: courseHasImageCards,
+              imageFrameEnabled,
+              onToggleImageFrame: setImageFrameEnabled,
             }}
           />
         </View>

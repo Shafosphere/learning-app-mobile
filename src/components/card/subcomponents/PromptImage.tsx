@@ -16,6 +16,7 @@ type PromptImageProps = {
   uri: string;
   imageStyle: StyleProp<ImageStyle>; // traktuj to jako "slot" w fiszce
   onHeightChange?: (height: number) => void;
+  renderMode?: "default" | "correction";
 };
 
 type SvgViewBox = { minX: number; minY: number; width: number; height: number };
@@ -25,6 +26,36 @@ const isSvgUri = (value: string) =>
 
 const isConstellationOutlineUri = (value: string): boolean =>
   /gwiazdozbiory\/.+-outline\.svg(\?|#|$)/i.test(value);
+
+const isMergedConstellationSvg = (xml: string, uri: string): boolean =>
+  /id\s*=\s*["']pattern-overlay["']/i.test(xml) ||
+  /gwiazdozbiory\/generated\/.+-merged\.svg(\?|#|$)/i.test(uri);
+
+const enhanceMergedConstellationSvg = (
+  xml: string,
+  outlineColor: string,
+  overlayColor: string
+): string => {
+  let next = xml;
+
+  // Make outline readable in both themes (light: dark stroke, dark: light stroke).
+  next = next.replace(/stroke:\s*#FFFFFF/gi, `stroke:${outlineColor}`);
+  next = next.replace(/fill:\s*#FFFFFF/gi, `fill:${outlineColor}`);
+
+  // Thicken overlay constellation lines for better readability.
+  next = next.replace(
+    /stroke:\s*#FF5470;([^"]*?)stroke-width:\s*([0-9]*\.?[0-9]+)px;/gi,
+    (_m, mid: string, rawWidth: string) => {
+      const width = Number(rawWidth);
+      const boosted = Number.isFinite(width) ? Math.max(width * 1.45, 4.6) : 4.6;
+      return `stroke:#FF5470;${mid}stroke-width:${boosted.toFixed(3)}px;`;
+    }
+  );
+  next = next.replace(/stroke:\s*#FF5470/gi, `stroke:${overlayColor}`);
+  next = next.replace(/fill:\s*#FF5470/gi, `fill:${overlayColor}`);
+
+  return next;
+};
 
 const isLikelyConstellationOutlineSvg = (xml: string, uri: string): boolean => {
   if (isConstellationOutlineUri(uri)) return true;
@@ -155,9 +186,16 @@ const parseSvgViewBox = (xml: string): SvgViewBox | null => {
   return null;
 };
 
-export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProps) {
-  const { colors } = useSettings();
+export function PromptImage({
+  uri,
+  imageStyle,
+  onHeightChange,
+  renderMode = "default",
+}: PromptImageProps) {
+  const { colors, flashcardsImageFrameEnabled } = useSettings();
+  const overlayColor = renderMode === "correction" ? "#FDE047" : "#FF5470";
   const [isConstellationOutline, setIsConstellationOutline] = useState(false);
+  const [isConstellationMerged, setIsConstellationMerged] = useState(false);
   const [svgViewBox, setSvgViewBox] = useState<SvgViewBox | null>(null);
   const [isSvg, setIsSvg] = useState(false);
   const [svgXml, setSvgXml] = useState<string | null>(null);
@@ -176,15 +214,24 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           const raw = uri.split(",")[1] ?? "";
           const decoded = decodeURIComponent(raw);
           const constellationMode = isLikelyConstellationOutlineSvg(decoded, uri);
+          const mergedMode = isMergedConstellationSvg(decoded, uri);
           const normalized = inlineSvgClassStyles(decoded);
-          const enhanced = constellationMode
+          const enhancedOutline = constellationMode
             ? boostConstellationOutlineContrast(normalized)
             : normalized;
+          const enhanced = mergedMode
+            ? enhanceMergedConstellationSvg(
+                enhancedOutline,
+                colors.headline,
+                overlayColor
+              )
+            : enhancedOutline;
           if (!cancelled) {
             setSvgViewBox(parseSvgViewBox(enhanced));
             setIsSvg(true);
             setSvgXml(enhanced);
             setIsConstellationOutline(constellationMode);
+            setIsConstellationMerged(mergedMode);
           }
           return;
         }
@@ -196,6 +243,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setIsSvg(true);
             setSvgXml(null);
             setIsConstellationOutline(isConstellationOutlineUri(uri));
+            setIsConstellationMerged(/\/generated\/.+-merged\.svg(\?|#|$)/i.test(uri));
           }
           return;
         }
@@ -209,16 +257,25 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setSvgXml(null);
             setRasterAspectRatio(null);
             setIsConstellationOutline(false);
+            setIsConstellationMerged(false);
           }
           return;
         }
 
         const xml = await FileSystem.readAsStringAsync(uri);
         const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
+        const mergedMode = isMergedConstellationSvg(xml, uri);
         const normalizedXml = inlineSvgClassStyles(xml);
-        const enhancedXml = constellationMode
+        const enhancedOutline = constellationMode
           ? boostConstellationOutlineContrast(normalizedXml)
           : normalizedXml;
+        const enhancedXml = mergedMode
+          ? enhanceMergedConstellationSvg(
+              enhancedOutline,
+              colors.headline,
+              overlayColor
+            )
+          : enhancedOutline;
         const hasSvgTag = /<svg[\s>]/i.test(enhancedXml);
         const looksLikeSvg = uriLooksSvg || hasSvgTag;
 
@@ -229,11 +286,13 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
             setSvgXml(enhancedXml);
             setRasterAspectRatio(null);
             setIsConstellationOutline(constellationMode);
+            setIsConstellationMerged(mergedMode);
           } else {
             setSvgViewBox(null);
             setIsSvg(false);
             setSvgXml(null);
             setIsConstellationOutline(false);
+            setIsConstellationMerged(false);
             RNImage.getSize(
               uri,
               (width, height) => {
@@ -258,6 +317,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
           setSvgXml(null);
           setRasterAspectRatio(1);
           setIsConstellationOutline(false);
+          setIsConstellationMerged(false);
         }
       }
     };
@@ -266,7 +326,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
     return () => {
       cancelled = true;
     };
-  }, [uri]);
+  }, [colors.headline, overlayColor, uri]);
 
   const slotStyle = useMemo(() => {
     // Slot w fiszce: centrowanie + to co przyszło z propsa
@@ -277,20 +337,27 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
         : typeof flat.maxHeight === "number"
           ? flat.maxHeight
           : undefined;
+    const boostMultiplier = isConstellationMerged ? 2.1 : 1.7;
     const boostedHeight =
       typeof baseHeight === "number"
-        ? Math.min(Math.max(baseHeight * 1.7, 190), 240)
+        ? Math.min(Math.max(baseHeight * boostMultiplier, 200), 280)
         : undefined;
 
     return {
       ...flat,
-      height: isConstellationOutline && boostedHeight ? boostedHeight : flat.height,
-      maxHeight: isConstellationOutline && boostedHeight ? boostedHeight : flat.maxHeight,
+      height:
+        (isConstellationOutline || isConstellationMerged) && boostedHeight
+          ? boostedHeight
+          : flat.height,
+      maxHeight:
+        (isConstellationOutline || isConstellationMerged) && boostedHeight
+          ? boostedHeight
+          : flat.maxHeight,
       alignItems: "center",
       justifyContent: "center",
       // slot może być duży (np. pełna szerokość), ale ramka będzie tight
     } as ViewStyle;
-  }, [imageStyle, isConstellationOutline]);
+  }, [imageStyle, isConstellationMerged, isConstellationOutline]);
 
   const frameStyle = useMemo(() => {
     // Ramka: zero flex rozciągania + aspectRatio
@@ -302,8 +369,9 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
         : typeof flat.maxHeight === "number"
           ? flat.maxHeight
           : 64; // sensowny fallback
-    const height = isConstellationOutline
-      ? Math.min(Math.max(baseHeight * 1.7, 190), 240)
+    const boostMultiplier = isConstellationMerged ? 2.1 : 1.7;
+    const height = isConstellationOutline || isConstellationMerged
+      ? Math.min(Math.max(baseHeight * boostMultiplier, 200), 280)
       : baseHeight;
 
     const ratio = svgViewBox ? svgViewBox.width / svgViewBox.height : undefined;
@@ -318,7 +386,7 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
       // tylko proporcja będzie zależeć od slotu; najlepiej wtedy podać height+width z zewnątrz
       aspectRatio: resolvedRatio,
 
-      borderWidth: isSvg ? 1 : 0,
+      borderWidth: flashcardsImageFrameEnabled && isSvg ? 1 : 0,
       borderColor: colors.border ?? "#00000033",
       backgroundColor: "transparent",
       borderRadius: (flat.borderRadius as number | undefined) ?? 6,
@@ -333,7 +401,9 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
     colors.border,
     imageStyle,
     isConstellationOutline,
+    isConstellationMerged,
     isSvg,
+    flashcardsImageFrameEnabled,
     rasterAspectRatio,
     svgViewBox,
   ]);
@@ -346,9 +416,19 @@ export function PromptImage({ uri, imageStyle, onHeightChange }: PromptImageProp
       >
         {isSvg ? (
           svgXml ? (
-            <SvgXml xml={svgXml} width="100%" height="100%" />
+            <SvgXml
+              xml={svgXml}
+              width="100%"
+              height="100%"
+              preserveAspectRatio={isConstellationMerged ? "xMidYMid slice" : "xMidYMid meet"}
+            />
           ) : (
-            <SvgUri uri={uri} width="100%" height="100%" />
+            <SvgUri
+              uri={uri}
+              width="100%"
+              height="100%"
+              preserveAspectRatio={isConstellationMerged ? "xMidYMid slice" : "xMidYMid meet"}
+            />
           )
         ) : (
           <Image
