@@ -29,6 +29,7 @@ export function useAutoScaleToFit({
   }, []);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
+    // Measure the content container in its natural (unscaled) layout.
     const nextHeight = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
     setContentHeight((prev) => (prev === nextHeight ? prev : nextHeight));
   }, []);

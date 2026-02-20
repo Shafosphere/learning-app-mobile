@@ -35,7 +35,6 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -62,6 +61,7 @@ const BOX_SPAM_COOLDOWN_MS = 0;
 const HINT_FAIL_THRESHOLD = 3;
 const HINT_COOLDOWN_MS = 10 * 60 * 1000;
 const TRUE_FALSE_POST_OK_COOLDOWN_MS = 1000;
+const UI_WARMUP_DELAY_MS = 250;
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -145,12 +145,15 @@ export default function Flashcards() {
   );
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isUiReady, setIsUiReady] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const uiWarmupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
     () =>
@@ -634,6 +637,24 @@ export default function Flashcards() {
     [activeCustomCourseId, patchCardHints],
   );
 
+  useEffect(() => {
+    if (uiWarmupTimerRef.current) {
+      clearTimeout(uiWarmupTimerRef.current);
+      uiWarmupTimerRef.current = null;
+    }
+    if (!isFocused) {
+      setIsUiReady(false);
+      return;
+    }
+    setIsUiReady(false);
+    uiWarmupTimerRef.current = setTimeout(() => {
+      setIsUiReady(true);
+      uiWarmupTimerRef.current = null;
+    }, UI_WARMUP_DELAY_MS);
+  }, [activeCustomCourseId, isFocused]);
+
+  const isUiWarmupActive = isFocused && !isUiReady;
+
   const downloadDisabled =
     customCards.length === 0 || isLoadingData || !isReady;
   const shouldShowBoxes =
@@ -703,6 +724,7 @@ export default function Flashcards() {
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
   const isCarouselLayout = boxesLayout !== "classic";
+  const carouselMinScale = 0.42;
   const {
     scale: boxesScale,
     scaledHeight: boxesScaledHeight,
@@ -710,7 +732,7 @@ export default function Flashcards() {
     onViewportLayout: onBoxesViewportLayout,
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({ minScale: isCarouselLayout ? 0.58 : 0.72 });
+  } = useAutoScaleToFit({ minScale: isCarouselLayout ? carouselMinScale : 0.72 });
   const shouldHideHintsForActiveBox =
     activeBox === "boxFour" || activeBox === "boxFive";
   const bottomButtonsAnchorRef = useRef<View | null>(null);
@@ -744,10 +766,19 @@ export default function Flashcards() {
     keyboardTopCorrection: 44,
     debug: true,
   });
+  const selectedItemId = selectedItem?.id ?? null;
+  const shouldHideMainUiDuringWarmup =
+    isUiWarmupActive &&
+    !isLoadingData &&
+    activeCustomCourseId != null &&
+    !loadError &&
+    customCards.length > 0;
 
-  useLayoutEffect(() => {
-    if (!selectedItem) return;
-    setIsActionCooldownActive(true);
+  useEffect(() => {
+    if (selectedItemId == null) return;
+    if (lastActionCooldownCardIdRef.current === selectedItemId) return;
+    lastActionCooldownCardIdRef.current = selectedItemId;
+    setIsActionCooldownActive((prev) => (prev ? prev : true));
     if (actionCooldownTimerRef.current) {
       clearTimeout(actionCooldownTimerRef.current);
     }
@@ -755,7 +786,7 @@ export default function Flashcards() {
       setIsActionCooldownActive(false);
       actionCooldownTimerRef.current = null;
     }, TRUE_FALSE_POST_OK_COOLDOWN_MS);
-  }, [selectedItem?.id]);
+  }, [selectedItemId]);
 
   useEffect(() => {
     resetInteractionState();
@@ -763,6 +794,9 @@ export default function Flashcards() {
 
   useEffect(() => {
     return () => {
+      if (uiWarmupTimerRef.current) {
+        clearTimeout(uiWarmupTimerRef.current);
+      }
       if (actionCooldownTimerRef.current) {
         clearTimeout(actionCooldownTimerRef.current);
       }
@@ -888,96 +922,133 @@ export default function Flashcards() {
         disabled={boxSelectionLocked}
       />
     );
-  const boxesScaleOffsetY = isCarouselLayout ? 0 : scaleOffsetY;
-  const boxesScaledHeightWithHeadroom = boxesScaledHeight
-    ? boxesScaledHeight + (isCarouselLayout ? 120 : 0)
-    : undefined;
+  const boxesScaleOffsetY = scaleOffsetY;
 
   return (
     <View style={styles.container}>
       <IntroOverlay />
       <Confetti generateConfetti={shouldCelebrate} />
 
-      <View style={styles.cardSectionWrapper}>{cardSection}</View>
+      <View
+        style={{ flex: 1, opacity: shouldHideMainUiDuringWarmup ? 0 : 1 }}
+        pointerEvents={shouldHideMainUiDuringWarmup ? "none" : "auto"}
+      >
+        <View style={styles.cardSectionWrapper}>{cardSection}</View>
 
-      {areButtonsOnTop ? (
-        <View style={styles.topButtonsWrapper}>{renderButtons("top")}</View>
-      ) : null}
+        {areButtonsOnTop ? (
+          <View style={styles.topButtonsWrapper}>{renderButtons("top")}</View>
+        ) : null}
 
-      {shouldShowBoxes && (
-        <View
-          style={[
-            styles.boxesWrapper,
-            !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
-          ]}
-        >
-          {shouldShowFloatingAdd && (
-            <Pressable
-              style={styles.addButton}
-              onPress={downloadData}
-              disabled={addButtonDisabled}
-              accessibilityLabel="Dodaj nowe fiszki do pudełek"
-            >
-              <Ionicons name="add" size={26} color="#0F172A" />
-            </Pressable>
-          )}
+        {shouldShowBoxes && (
+          <View
+            style={[
+              styles.boxesWrapper,
+              !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+            ]}
+          >
+            {shouldShowFloatingAdd && (
+              <Pressable
+                style={styles.addButton}
+                onPress={downloadData}
+                disabled={addButtonDisabled}
+                accessibilityLabel="Dodaj nowe fiszki do pudełek"
+              >
+                <Ionicons name="add" size={26} color="#0F172A" />
+              </Pressable>
+            )}
 
-          {boxesNeedScrollFallback ? (
-            <ScrollView
-              style={styles.boxesViewport}
-              contentContainerStyle={styles.boxesViewportScrollContent}
-              onLayout={onBoxesViewportLayout}
-              showsVerticalScrollIndicator={false}
-            >
-              <View onLayout={onBoxesContentLayout}>{boxesContent}</View>
-            </ScrollView>
-          ) : (
-            <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
-              <View
-                style={[
-                  styles.boxesScaledContent,
-                  boxesScaledHeightWithHeadroom
-                    ? { height: boxesScaledHeightWithHeadroom }
-                    : null,
-                ]}
+            {boxesNeedScrollFallback ? (
+              <ScrollView
+                style={styles.boxesViewport}
+                contentContainerStyle={styles.boxesViewportScrollContent}
+                onLayout={onBoxesViewportLayout}
+                showsVerticalScrollIndicator={false}
               >
                 <View
-                  style={{
-                    transform: [
-                      { translateY: -boxesScaleOffsetY },
-                      { scale: boxesScale },
-                    ],
-                  }}
-                  onLayout={onBoxesContentLayout}
+                  style={[
+                    styles.boxesScaledContent,
+                    boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                  ]}
                 >
-                  {boxesContent}
+                  <View
+                    style={{
+                      transform: [
+                        { translateY: -boxesScaleOffsetY },
+                        { scale: boxesScale },
+                      ],
+                    }}
+                    onLayout={onBoxesContentLayout}
+                  >
+                    {boxesContent}
+                  </View>
+                </View>
+              </ScrollView>
+            ) : (
+              <View
+                style={styles.boxesViewport}
+                onLayout={onBoxesViewportLayout}
+              >
+                <View
+                  style={[
+                    styles.boxesScaledContent,
+                    boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                  ]}
+                >
+                  <View
+                    style={{
+                      transform: [
+                        { translateY: -boxesScaleOffsetY },
+                        { scale: boxesScale },
+                      ],
+                    }}
+                    onLayout={onBoxesContentLayout}
+                  >
+                    {boxesContent}
+                  </View>
                 </View>
               </View>
-            </View>
-          )}
+            )}
 
-          {!areButtonsOnTop ? (
-            <View
-              ref={bottomButtonsAnchorRef}
-              onLayout={measureBottomButtons}
-              collapsable={false}
-              style={styles.bottomButtonsWrapper}
-            >
-              <Animated.View
-                style={{
-                  transform: [
-                    {
-                      translateY: Animated.multiply(bottomButtonsOffset, -1),
-                    },
-                  ],
-                }}
+            {!areButtonsOnTop ? (
+              <View
+                ref={bottomButtonsAnchorRef}
+                onLayout={measureBottomButtons}
+                collapsable={false}
+                style={styles.bottomButtonsWrapper}
               >
-                {renderButtons("bottom")}
-              </Animated.View>
-            </View>
-          ) : null}
+                <Animated.View
+                  style={{
+                    transform: [
+                      {
+                        translateY: Animated.multiply(bottomButtonsOffset, -1),
+                      },
+                    ],
+                  }}
+                >
+                  {renderButtons("bottom")}
+                </Animated.View>
+              </View>
+            ) : null}
+          </View>
+        )}
+      </View>
+
+      {shouldHideMainUiDuringWarmup ? (
+        <View
+          pointerEvents="none"
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <ActivityIndicator size="large" color={colors.paragraph} />
         </View>
-      )}
+      ) : null}
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

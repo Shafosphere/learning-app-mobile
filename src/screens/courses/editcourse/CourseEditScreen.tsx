@@ -403,6 +403,13 @@ function BuiltinCourseEditor({
     (pack) =>
       (courseSlug && pack.slug === courseSlug) || pack.name === courseName
   );
+  const imageSizeOptions: FlashcardsImageSize[] = [
+    "dynamic",
+    "small",
+    "medium",
+    "large",
+    "very_large",
+  ];
   const courseHasImages = Boolean(matchingManifest?.imageMap);
   const imageSizeEnabled = cardSize === "large" && courseHasImages;
 
@@ -457,6 +464,7 @@ function BuiltinCourseEditor({
               onSelectCardSize: handleCardSizeChange,
               showImageSizeOptions: courseHasImages,
               imageSize,
+              imageSizeOptions,
               onSelectImageSize: handleImageSizeChange,
               imageSizeEnabled,
               showImageFrameOption: courseHasImages,

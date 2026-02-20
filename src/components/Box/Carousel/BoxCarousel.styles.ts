@@ -4,17 +4,37 @@ export const useBoxCarouselStyles = createThemeStylesHook((colors) => ({
     container: {
         width: "100%",
         alignItems: "center",
-        // Reserve extra room for the animated counter under the active box.
-        paddingBottom: 56,
+    },
+    listContainer: {
+        width: "100%",
+    },
+    itemContainer: {
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    boxStage: {
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+    counterStage: {
+        width: "100%",
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
+    activeCounterWrap: {
+        minHeight: 56,
+        alignItems: "center",
+        justifyContent: "flex-start",
     },
     number: {
         fontSize: 40,
+        lineHeight: 44,
         textAlign: "center",
-        paddingTop: 10,
         fontWeight: 800,
         color: colors.headline,
     },
     numberUpdate: {
-        marginTop: 10,
+        marginTop: 0,
     },
 }));

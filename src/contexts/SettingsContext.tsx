@@ -309,7 +309,12 @@ interface SettingsContextValue {
 
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type FlashcardsCardSize = "large" | "small";
-export type FlashcardsImageSize = "dynamic" | "small" | "medium" | "large";
+export type FlashcardsImageSize =
+  | "dynamic"
+  | "small"
+  | "medium"
+  | "large"
+  | "very_large";
 export type TrueFalseButtonsVariant = "true_false" | "know_dont_know";
 type CourseCardSizeOverrides = {
   builtin: Record<string, FlashcardsCardSize>;

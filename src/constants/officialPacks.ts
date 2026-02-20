@@ -11,7 +11,7 @@ export type OfficialPackCourseSettings = {
   skipCorrectionEnabled?: boolean;
   skipCorrection?: boolean;
   cardSize?: "large" | "small";
-  imageSize?: "dynamic" | "small" | "medium" | "large";
+  imageSize?: "dynamic" | "small" | "medium" | "large" | "very_large";
   imageFrameEnabled?: boolean;
 };
 
@@ -145,7 +145,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     isMini: true,
     categoryId: "science",
     settings: {
-      imageSize: "large",
+      imageSize: "very_large",
       imageFrameEnabled: false,
     },
     imageMap: imageMaps.constellations,

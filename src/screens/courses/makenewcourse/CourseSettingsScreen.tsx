@@ -2,7 +2,10 @@ import MyButton from "@/src/components/button/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+  useSettings,
+  type FlashcardsImageSize,
+} from "@/src/contexts/SettingsContext";
 import { createCustomCourse, replaceCustomFlashcards } from "@/src/db/sqlite/db";
 import { normalizeAnswers, type ManualCard } from "@/src/hooks/useManualCardsForm";
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
@@ -254,7 +257,8 @@ export default function CourseSettingsScreen() {
             parsedSettingsDraft.imageSize === "dynamic" ||
             parsedSettingsDraft.imageSize === "small" ||
             parsedSettingsDraft.imageSize === "medium" ||
-            parsedSettingsDraft.imageSize === "large"
+            parsedSettingsDraft.imageSize === "large" ||
+            parsedSettingsDraft.imageSize === "very_large"
           ) {
             setImageSize(parsedSettingsDraft.imageSize);
           }
@@ -347,6 +351,13 @@ export default function CourseSettingsScreen() {
   );
 
   const imageSizeEnabled = cardSize === "large" && courseHasImageCards;
+  const imageSizeOptions: FlashcardsImageSize[] = [
+    "dynamic",
+    "small",
+    "medium",
+    "large",
+    "very_large",
+  ];
 
   const handleCreateCourse = async () => {
     if (!courseName || !iconId) {
@@ -504,6 +515,7 @@ export default function CourseSettingsScreen() {
               onSelectCardSize: setCardSize,
               showImageSizeOptions: courseHasImageCards,
               imageSize,
+              imageSizeOptions,
               onSelectImageSize: setImageSize,
               imageSizeEnabled,
               showImageFrameOption: courseHasImageCards,

@@ -52,10 +52,10 @@ export default function LargeCardContainer({
   ).current;
 
   const baseCardHeight = useMemo(() => {
-    if (!hasContent) {
-      return SMALL_CARD_HEIGHT;
-    }
     const fallbackHeight = lastStableHeight.current ?? SMALL_CARD_HEIGHT;
+    if (!hasContent) {
+      return fallbackHeight;
+    }
     if (promptHeight == null || inputHeight == null) {
       return fallbackHeight;
     }
@@ -69,7 +69,7 @@ export default function LargeCardContainer({
 
   const rawTargetCardHeight = useMemo(() => {
     if (!hasContent) {
-      return SMALL_CARD_HEIGHT;
+      return baseCardHeight;
     }
     // Keep card height driven by current measurements so the "correction" state
     // matches the neutral one. Use the last stable value only as a fallback
@@ -109,7 +109,7 @@ export default function LargeCardContainer({
         clearTimeout(shrinkTimeoutRef.current);
         shrinkTimeoutRef.current = null;
       }
-      setStableTargetHeight(SMALL_CARD_HEIGHT);
+      setStableTargetHeight(lastStableHeight.current ?? SMALL_CARD_HEIGHT);
       return;
     }
 

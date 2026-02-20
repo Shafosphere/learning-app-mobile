@@ -11,7 +11,7 @@ export const useBoxSkinStyles = createThemeStylesHook((colors) => ({
         borderBottomColor: "transparent",
     },
     caroPosition: {
-        marginTop: 60,
+        marginTop: 12,
     },
     skin: {
         position: "absolute",

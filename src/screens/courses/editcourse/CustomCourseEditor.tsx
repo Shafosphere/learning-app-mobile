@@ -211,6 +211,13 @@ export default function CustomCourseEditor({
   );
   const imageSizeOptionsEnabled =
     courseCardSize === "large" && courseHasImageCards;
+  const imageSizeOptions: FlashcardsImageSize[] = [
+    "dynamic",
+    "small",
+    "medium",
+    "large",
+    "very_large",
+  ];
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError;
 
@@ -638,6 +645,7 @@ export default function CustomCourseEditor({
               onSelectCardSize: handleCourseCardSizeChange,
               showImageSizeOptions: courseHasImageCards,
               imageSize: courseImageSize,
+              imageSizeOptions,
               onSelectImageSize: handleCourseImageSizeChange,
               imageSizeEnabled: imageSizeOptionsEnabled,
               showImageFrameOption: courseHasImageCards,

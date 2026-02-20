@@ -21,7 +21,7 @@ export type SettingsDraftPayload = {
   skipCorrectionEnabled: boolean;
   trueFalseButtonsVariant: "true_false" | "know_dont_know";
   cardSize: "large" | "small";
-  imageSize: "dynamic" | "small" | "medium" | "large";
+  imageSize: "dynamic" | "small" | "medium" | "large" | "very_large";
   imageFrameEnabled: boolean;
 };
 

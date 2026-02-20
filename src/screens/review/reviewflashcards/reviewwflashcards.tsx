@@ -717,6 +717,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const effectiveTrueFalseButtonsVariant =
     selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
   const isCarouselLayout = layout !== "classic";
+  const carouselMinScale = 0.42;
   const {
     scale: boxesScale,
     scaledHeight: boxesScaledHeight,
@@ -724,7 +725,7 @@ export default function ReviewFlashcardsPlaceholder() {
     onViewportLayout: onBoxesViewportLayout,
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({ minScale: isCarouselLayout ? 0.58 : 0.72 });
+  } = useAutoScaleToFit({ minScale: isCarouselLayout ? carouselMinScale : 0.72 });
   const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
@@ -792,10 +793,7 @@ export default function ReviewFlashcardsPlaceholder() {
         onBoxLongPress={handleBoxLongPress}
       />
     );
-  const boxesScaleOffsetY = isCarouselLayout ? 0 : scaleOffsetY;
-  const boxesScaledHeightWithHeadroom = boxesScaledHeight
-    ? boxesScaledHeight + (isCarouselLayout ? 120 : 0)
-    : undefined;
+  const boxesScaleOffsetY = scaleOffsetY;
 
   return (
     <View style={styles.container}>
@@ -832,16 +830,31 @@ export default function ReviewFlashcardsPlaceholder() {
             onLayout={onBoxesViewportLayout}
             showsVerticalScrollIndicator={false}
           >
-            <View onLayout={onBoxesContentLayout}>{boxesContent}</View>
+            <View
+              style={[
+                styles.boxesScaledContent,
+                boxesScaledHeight ? { height: boxesScaledHeight } : null,
+              ]}
+            >
+              <View
+                style={{
+                  transform: [
+                    { translateY: -boxesScaleOffsetY },
+                    { scale: boxesScale },
+                  ],
+                }}
+                onLayout={onBoxesContentLayout}
+              >
+                {boxesContent}
+              </View>
+            </View>
           </ScrollView>
         ) : (
           <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
             <View
               style={[
                 styles.boxesScaledContent,
-                boxesScaledHeightWithHeadroom
-                  ? { height: boxesScaledHeightWithHeadroom }
-                  : null,
+                boxesScaledHeight ? { height: boxesScaledHeight } : null,
               ]}
             >
               <View

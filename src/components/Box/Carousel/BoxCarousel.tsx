@@ -33,8 +33,9 @@ export default function BoxCarousel({
     onBoxLongPress,
     disabled = false,
 }: BoxesProps) {
-    const styles = useBoxCarouselStyles();
-    const { width } = useWindowDimensions();
+  const styles = useBoxCarouselStyles();
+  const { width } = useWindowDimensions();
+  const BOX_STAGE_HEIGHT = 270;
 
     const items = useMemo(() => {
         const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
@@ -182,131 +183,127 @@ export default function BoxCarousel({
         };
     }, []);
 
+    useEffect(() => {
+        // Ensure transient surprised faces do not linger after major layout/card changes.
+        setFaces((prev) => {
+            const next: FaceState = {};
+            items.forEach((item, idx) => {
+                const isCurrent = idx === activeIndex;
+                const face = prev[item.key];
+                next[item.key] = face === "surprised" ? (isCurrent ? "happy" : "smile") : (face ?? (isCurrent ? "happy" : "smile"));
+            });
+            return next;
+        });
+    }, [activeIndex, items]);
+
     if (!items.length) {
         return <View style={styles.container} />;
     }
+    const activeCount = items[activeIndex]?.count ?? 0;
 
     return (
         <View style={styles.container}>
-            <Animated.FlatList
-                ref={flatListRef}
-                data={items}
-                keyExtractor={(item) => String(item.key)}
-                horizontal
-                scrollEnabled={!disabled}
-                showsHorizontalScrollIndicator={false}
-                bounces={false}
-                snapToInterval={itemWidth}
-                snapToAlignment="start"
-                decelerationRate="fast"
-                onMomentumScrollEnd={handleMomentumEnd}
-                onScroll={Animated.event(
-                    [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                    { useNativeDriver: false }
-                )}
-                scrollEventThrottle={16}
-                getItemLayout={(_, index) => ({
-                    length: itemWidth,
-                    offset: itemWidth * index,
-                    index,
-                })}
-                initialScrollIndex={initialIndex}
-                contentContainerStyle={{
-                    paddingHorizontal: spacerWidth,
-                    alignItems: "center",
-                }}
-                renderItem={({ item, index }) => {
-                    const inputRange = [
-                        (index - 1) * itemWidth,
-                        index * itemWidth,
-                        (index + 1) * itemWidth,
-                    ];
-                    const scale = scrollX.interpolate({
-                        inputRange,
-                        outputRange: [0.9, 2.15, 0.9],
-                        extrapolate: "clamp",
-                    });
-                    const translateY = scrollX.interpolate({
-                        inputRange,
-                        outputRange: [16, -28, 16],
-                        extrapolate: "clamp",
-                    });
-                    const counterTranslateY = scrollX.interpolate({
-                        inputRange,
-                        outputRange: [8, 42, 8],
-                        extrapolate: "clamp",
-                    });
-                    const isActive = index === activeIndex;
-                    const face =
-                        faces[item.key] ?? (isActive ? "happy" : "smile");
+            <View style={styles.listContainer}>
+                <Animated.FlatList
+                    ref={flatListRef}
+                    data={items}
+                    keyExtractor={(item) => String(item.key)}
+                    horizontal
+                    removeClippedSubviews={false}
+                    scrollEnabled={!disabled}
+                    showsHorizontalScrollIndicator={false}
+                    bounces={false}
+                    snapToInterval={itemWidth}
+                    snapToAlignment="start"
+                    decelerationRate="fast"
+                    onMomentumScrollEnd={handleMomentumEnd}
+                    onScroll={Animated.event(
+                        [{ nativeEvent: { contentOffset: { x: scrollX } } }],
+                        { useNativeDriver: false }
+                    )}
+                    scrollEventThrottle={16}
+                    getItemLayout={(_, index) => ({
+                        length: itemWidth,
+                        offset: itemWidth * index,
+                        index,
+                    })}
+                    initialScrollIndex={initialIndex}
+                    contentContainerStyle={{
+                        paddingHorizontal: spacerWidth,
+                        alignItems: "flex-start",
+                    }}
+                    renderItem={({ item, index }) => {
+                        const inputRange = [
+                            (index - 1) * itemWidth,
+                            index * itemWidth,
+                            (index + 1) * itemWidth,
+                        ];
+                        const scale = scrollX.interpolate({
+                            inputRange,
+                            outputRange: [0.9, 2.05, 0.9],
+                            extrapolate: "clamp",
+                        });
+                        const translateY = scrollX.interpolate({
+                            inputRange,
+                            outputRange: [16, -22, 16],
+                            extrapolate: "clamp",
+                        });
+                        const isActive = index === activeIndex;
+                        const face =
+                            faces[item.key] ?? (isActive ? "happy" : "smile");
 
-                    return (
-                        <View
-                            style={{
-                                width: itemWidth,
-                                alignItems: "center",
-                                justifyContent: "flex-start",
-                                paddingVertical: 26,
-                            }}
-                        >
-                            <Animated.View
-                                style={{
-                                    alignItems: "center",
-                                    justifyContent: "center",
-                                    transform: [{ scale }, { translateY }],
-                                }}
+                        return (
+                            <View
+                                style={[styles.itemContainer, { width: itemWidth }]}
                             >
-                                <TouchableOpacity
-                                    activeOpacity={1}
-                                    disabled={disabled}
-                                    onPressIn={() => {
-                                        if (disabled) return;
-                                        longPressTriggeredRef.current = false;
-                                    }}
-                                    onLongPress={() => {
-                                        if (disabled) return;
-                                        longPressTriggeredRef.current = true;
-                                        onBoxLongPress?.(item.key);
-                                    }}
-                                    delayLongPress={400}
-                                    onPress={() => {
-                                        if (longPressTriggeredRef.current) {
-                                            longPressTriggeredRef.current = false;
-                                            return;
-                                        }
-                                        scrollToIndex(index);
-                                    }}
-                                >
-                                    <BoxSkin
-                                        wordCount={item.count}
-                                        face={face}
-                                        isActive={isActive}
-                                        isCaro
-                                    />
-                                </TouchableOpacity>
-                            </Animated.View>
-                            <Animated.View
-                                style={{
-                                    alignItems: "center",
-                                    marginTop: 20,
-                                    minHeight: 32,
-                                    transform: [{ translateY: counterTranslateY }],
-                                }}
-                            >
-                                <Text
+                                <Animated.View
                                     style={[
-                                        styles.number,
-                                        styles.numberUpdate,
-                                        { opacity: isActive ? 1 : 0.7 },
+                                        styles.boxStage,
+                                        {
+                                            height: BOX_STAGE_HEIGHT,
+                                            transform: [{ scale }, { translateY }],
+                                        },
                                     ]}
                                 >
-                                    {item.count}
-                                </Text>
-                            </Animated.View>
-                        </View>
-                    );
-                }}
-            />
+                                    <TouchableOpacity
+                                        activeOpacity={1}
+                                        disabled={disabled}
+                                        onPressIn={() => {
+                                            if (disabled) return;
+                                            longPressTriggeredRef.current = false;
+                                        }}
+                                        onLongPress={() => {
+                                            if (disabled) return;
+                                            longPressTriggeredRef.current = true;
+                                            onBoxLongPress?.(item.key);
+                                        }}
+                                        delayLongPress={400}
+                                        onPress={() => {
+                                            if (longPressTriggeredRef.current) {
+                                                longPressTriggeredRef.current = false;
+                                                return;
+                                            }
+                                            scrollToIndex(index);
+                                        }}
+                                    >
+                                        <BoxSkin
+                                            wordCount={item.count}
+                                            face={face}
+                                            isActive={isActive}
+                                            isCaro={false}
+                                        />
+                                    </TouchableOpacity>
+                                </Animated.View>
+                            </View>
+                        );
+                    }}
+                />
+            </View>
+            <View style={styles.activeCounterWrap}>
+                <Text style={[styles.number, styles.numberUpdate]}>
+                    {activeCount}
+                </Text>
+            </View>
         </View>
     );
 }

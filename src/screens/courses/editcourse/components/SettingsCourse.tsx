@@ -33,6 +33,7 @@ export type CourseSettingsSectionProps = {
   onSelectCardSize: (value: FlashcardsCardSize) => void;
   showImageSizeOptions?: boolean;
   imageSize?: FlashcardsImageSize;
+  imageSizeOptions?: FlashcardsImageSize[];
   onSelectImageSize?: (value: FlashcardsImageSize) => void;
   imageSizeEnabled?: boolean;
   showImageFrameOption?: boolean;
@@ -61,6 +62,7 @@ export function CourseSettingsSection({
   onSelectCardSize,
   showImageSizeOptions = false,
   imageSize,
+  imageSizeOptions,
   onSelectImageSize,
   imageSizeEnabled = false,
   showImageFrameOption = false,
@@ -275,28 +277,41 @@ export function CourseSettingsSection({
             </View>
           </View>
           <View style={cardSizeStyles.imageSizeRow}>
-            {[
-              {
-                key: "dynamic" as FlashcardsImageSize,
-                title: "Dynamiczny",
-                subtitle: "Użyj naturalnych proporcji",
-              },
-              {
-                key: "small" as FlashcardsImageSize,
-                title: "Mały",
-                subtitle: "40% maksymalnej wysokości",
-              },
-              {
-                key: "medium" as FlashcardsImageSize,
-                title: "Średni",
-                subtitle: "60% maksymalnej wysokości",
-              },
-              {
-                key: "large" as FlashcardsImageSize,
-                title: "Duży",
-                subtitle: "100% maksymalnej wysokości",
-              },
-            ].map((option) => {
+            {(imageSizeOptions ?? [
+              "dynamic",
+              "small",
+              "medium",
+              "large",
+            ]).map((key) => {
+              const optionByKey: Record<
+                FlashcardsImageSize,
+                { title: string; subtitle: string }
+              > = {
+                dynamic: {
+                  title: "Dynamiczny",
+                  subtitle: "Użyj naturalnych proporcji",
+                },
+                small: {
+                  title: "Mały",
+                  subtitle: "40% maksymalnej wysokości",
+                },
+                medium: {
+                  title: "Średni",
+                  subtitle: "60% maksymalnej wysokości",
+                },
+                large: {
+                  title: "Duży",
+                  subtitle: "100% maksymalnej wysokości",
+                },
+                very_large: {
+                  title: "Bardzo duży",
+                  subtitle: "170% maksymalnej wysokości",
+                },
+              };
+              const option = {
+                key,
+                ...optionByKey[key],
+              };
               const isActive = imageSize === option.key;
               const isDisabled = !imageSizeEnabled || !onSelectImageSize;
               return (

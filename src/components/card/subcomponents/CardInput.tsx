@@ -18,6 +18,7 @@ const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
   small: 0.4,
   medium: 0.6,
   large: 1,
+  very_large: 1.7,
 };
 
 const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {

@@ -41,6 +41,7 @@ export function CardTrueFalse({
         small: 0.4,
         medium: 0.6,
         large: 1,
+        very_large: 1.7,
     };
     const promptImageStyle: ImageStyle = useMemo(() => {
         const fraction = IMAGE_SIZE_MULTIPLIER[imageSizeMode] ?? 1;
