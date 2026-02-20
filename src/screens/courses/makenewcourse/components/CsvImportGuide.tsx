@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import type { CsvTemplateKey } from "@/src/screens/courses/makenewcourse/csvImport/templates";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
@@ -7,11 +8,13 @@ import { Platform, Pressable, Text, View } from "react-native";
 interface CsvImportGuideProps {
   onPickCsvFile: () => void;
   onPickTxtFile: () => void;
+  onDownloadTemplate: (templateKey: CsvTemplateKey) => void;
+  downloadingTemplateKey?: CsvTemplateKey | null;
   selectedFileName: string | null;
   isAnalyzing?: boolean;
 }
 
-type GuideSectionKey = "traditional" | "true_false" | "self_assess" | "mixed";
+type GuideSectionKey = CsvTemplateKey;
 
 type GuideField = {
   key: string;
@@ -230,6 +233,10 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     fontWeight: "700",
   },
+  templateButtonRow: {
+    marginTop: 2,
+    alignItems: "flex-end" as const,
+  },
 }));
 
 const GUIDE_SECTIONS: GuideSection[] = [
@@ -322,6 +329,8 @@ type GuideAccordionSectionProps = {
   section: GuideSection;
   index: number;
   expanded: boolean;
+  downloadingTemplateKey?: CsvTemplateKey | null;
+  onDownloadTemplate: (templateKey: CsvTemplateKey) => void;
   onPress: () => void;
   styles: ReturnType<typeof useStyles>;
 };
@@ -330,9 +339,13 @@ function GuideAccordionSection({
   section,
   index,
   expanded,
+  onDownloadTemplate,
+  downloadingTemplateKey,
   onPress,
   styles,
 }: GuideAccordionSectionProps) {
+  const isDownloadingTemplate = downloadingTemplateKey === section.key;
+
   return (
     <View style={styles.accordionCard}>
       <Pressable
@@ -406,6 +419,19 @@ function GuideAccordionSection({
               ))}
             </View>
           ) : null}
+
+          <View style={styles.templateButtonRow}>
+            <MyButton
+              text={isDownloadingTemplate ? "Przygotowuje..." : "Pobierz wzor"}
+              onPress={
+                isDownloadingTemplate
+                  ? undefined
+                  : () => onDownloadTemplate(section.key)
+              }
+              disabled={isDownloadingTemplate}
+              width={170}
+            />
+          </View>
         </View>
       ) : null}
     </View>
@@ -415,6 +441,8 @@ function GuideAccordionSection({
 export function CsvImportGuide({
   onPickCsvFile,
   onPickTxtFile,
+  onDownloadTemplate,
+  downloadingTemplateKey = null,
   selectedFileName,
   isAnalyzing = false,
 }: CsvImportGuideProps) {
@@ -465,6 +493,8 @@ export function CsvImportGuide({
           section={section}
           index={index}
           expanded={expandedKey === section.key}
+          onDownloadTemplate={onDownloadTemplate}
+          downloadingTemplateKey={downloadingTemplateKey}
           onPress={() => setExpandedKey(section.key)}
           styles={styles}
         />

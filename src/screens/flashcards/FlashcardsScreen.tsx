@@ -130,14 +130,13 @@ export default function Flashcards() {
     addUsedWordIds,
     removeUsedWordIds,
     setBatchIndex,
-    saveNow,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeCustomCourseId ?? 0,
     targetLangId: activeCustomCourseId ?? 0,
     level: `custom-${activeCustomCourseId ?? 0}`,
     storageNamespace: "customBoxes",
     autosave: activeCustomCourseId !== null,
-    saveDelayMs: 0,
+    saveDelayMs: 1000,
   });
 
   const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
@@ -427,13 +426,11 @@ export default function Flashcards() {
     if (actuallyAdded.length === 0) return;
     addUsedWordIds(actuallyAdded.map((card) => card.id));
     setBatchIndex((prev) => prev + 1);
-    await saveNow();
   }, [
     addUsedWordIds,
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,
-    saveNow,
     setBatchIndex,
     trackedIds,
     setBoxes,

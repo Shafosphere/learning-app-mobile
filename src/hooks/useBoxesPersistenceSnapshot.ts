@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { AppState, type AppStateStatus } from "react-native";
 // Adjust import path to your project
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
@@ -41,6 +42,8 @@ export type SavedBoxesV2 = {
   batchIndex: number;
   flashcards: BoxesState; // full snapshot of boxes state
   usedWordIds?: number[]; // ids already used in session/history
+  lastWriteMs?: number;
+  payloadBytes?: number;
 };
 
 export function makeScopeId(
@@ -79,39 +82,28 @@ export async function removeWordIdFromUsedWordIds(params: {
   }
 }
 
-async function saveToStorageSnapshot(
-  key: string,
-  meta: {
-    sourceLangId: number;
-    targetLangId: number;
-    level: string;
-    batchIndex: number;
-  },
-  boxes: BoxesState,
-  usedWordIds: number[]
-) {
-  const payload: SavedBoxesV2 = {
-    v: 2,
-    updatedAt: Date.now(),
-    courseId: makeScopeId(meta.sourceLangId, meta.targetLangId, meta.level),
-    sourceLangId: meta.sourceLangId,
-    targetLangId: meta.targetLangId,
-    level: meta.level,
-    batchIndex: meta.batchIndex,
-    flashcards: boxes,
-    usedWordIds,
-  };
-  await AsyncStorage.setItem(key, JSON.stringify(payload));
-}
-
 async function loadFromStorageSnapshot(
   key: string
-): Promise<SavedBoxesV2 | null> {
+): Promise<{ parsed: SavedBoxesV2; raw: string } | null> {
   const raw = await AsyncStorage.getItem(key);
   if (!raw) return null;
   const parsed = JSON.parse(raw);
   if (!parsed || parsed.v !== 2) return null;
-  return parsed as SavedBoxesV2;
+  return { parsed: parsed as SavedBoxesV2, raw };
+}
+
+type PersistMeta = { ts: number; bytes: number; durationMs: number };
+type PersistWrite = { key: string; serialized: string };
+
+function estimatePayloadBytes(serialized: string): number {
+  if (typeof TextEncoder !== "undefined") {
+    try {
+      return new TextEncoder().encode(serialized).length;
+    } catch {
+      // Fall back to UTF-16 length approximation below.
+    }
+  }
+  return serialized.length;
 }
 
 const createEmptyBoxes = (): BoxesState => ({
@@ -147,6 +139,8 @@ export function useBoxesPersistenceSnapshot(params: {
   initialWords?: WordWithTranslations[];
   autosave?: boolean;
   saveDelayMs?: number;
+  flushOnAppStateChange?: boolean;
+  skipUnchangedWrites?: boolean;
 }) {
   const {
     sourceLangId,
@@ -155,7 +149,9 @@ export function useBoxesPersistenceSnapshot(params: {
     storageNamespace = "boxes",
     initialWords,
     autosave = true,
-    saveDelayMs = 0,
+    saveDelayMs = 1000,
+    flushOnAppStateChange = true,
+    skipUnchangedWrites = true,
   } = params;
 
   const storageKey = `${storageNamespace}:${makeScopeId(
@@ -172,27 +168,141 @@ export function useBoxesPersistenceSnapshot(params: {
   const [totalWordsForLevel] = useState<number>(0);
   const savingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoringRef = useRef(true);
+  const boxesRef = useRef<BoxesState>(boxes);
+  const usedWordIdsRef = useRef<number[]>(usedWordIds);
+  const batchIndexRef = useRef<number>(batchIndex);
+  const isReadyRef = useRef(false);
+  const writeInFlightRef = useRef(false);
+  const pendingWriteRef = useRef<PersistWrite | null>(null);
+  const idleResolversRef = useRef<(() => void)[]>([]);
+  const lastSerializedRef = useRef<string | null>(null);
+  const lastPersistMetaRef = useRef<PersistMeta | null>(null);
+
+  const clearSavingTimer = useCallback(() => {
+    if (!savingTimer.current) return;
+    clearTimeout(savingTimer.current);
+    savingTimer.current = null;
+  }, []);
+
+  const resolveIdleWaiters = useCallback(() => {
+    if (writeInFlightRef.current || pendingWriteRef.current) return;
+    const resolvers = idleResolversRef.current;
+    idleResolversRef.current = [];
+    resolvers.forEach((resolve) => resolve());
+  }, []);
+
+  const waitForWriteIdle = useCallback(() => {
+    if (!writeInFlightRef.current && !pendingWriteRef.current) {
+      return Promise.resolve();
+    }
+    return new Promise<void>((resolve) => {
+      idleResolversRef.current.push(resolve);
+    });
+  }, []);
+
+  const runPersistQueue = useCallback(async () => {
+    if (writeInFlightRef.current) return;
+    writeInFlightRef.current = true;
+
+    try {
+      // Consume only latest payload (pendingWriteRef is replaced by enqueue).
+      for (;;) {
+        const current = pendingWriteRef.current;
+        if (!current) break;
+        pendingWriteRef.current = null;
+
+        if (
+          skipUnchangedWrites &&
+          current.serialized === lastSerializedRef.current
+        ) {
+          continue;
+        }
+
+        const startedAt = Date.now();
+        await AsyncStorage.setItem(current.key, current.serialized);
+        const durationMs = Date.now() - startedAt;
+        const bytes = estimatePayloadBytes(current.serialized);
+        lastSerializedRef.current = current.serialized;
+        lastPersistMetaRef.current = {
+          ts: Date.now(),
+          bytes,
+          durationMs,
+        };
+      }
+    } finally {
+      writeInFlightRef.current = false;
+      if (pendingWriteRef.current) {
+        void runPersistQueue();
+        return;
+      }
+      resolveIdleWaiters();
+    }
+  }, [resolveIdleWaiters, skipUnchangedWrites]);
+
+  const enqueuePersist = useCallback(
+    async (write: PersistWrite, awaitIdle: boolean) => {
+      pendingWriteRef.current = write;
+      void runPersistQueue();
+      if (awaitIdle) {
+        await waitForWriteIdle();
+      }
+    },
+    [runPersistQueue, waitForWriteIdle]
+  );
+
+  const buildSerializedSnapshot = useCallback((): PersistWrite => {
+    const payload: SavedBoxesV2 = {
+      v: 2,
+      updatedAt: Date.now(),
+      courseId: makeScopeId(sourceLangId, targetLangId, level),
+      sourceLangId,
+      targetLangId,
+      level,
+      batchIndex: batchIndexRef.current,
+      flashcards: boxesRef.current,
+      usedWordIds: usedWordIdsRef.current,
+      lastWriteMs: Date.now(),
+    };
+
+    return {
+      key: storageKey,
+      serialized: JSON.stringify(payload),
+    };
+  }, [level, sourceLangId, storageKey, targetLangId]);
 
   useEffect(() => {
-    return () => {
-      if (savingTimer.current) {
-        clearTimeout(savingTimer.current);
-      }
-    };
-  }, []);
+    boxesRef.current = boxes;
+  }, [boxes]);
+
+  useEffect(() => {
+    usedWordIdsRef.current = usedWordIds;
+  }, [usedWordIds]);
+
+  useEffect(() => {
+    batchIndexRef.current = batchIndex;
+  }, [batchIndex]);
+
+  useEffect(() => {
+    isReadyRef.current = isReady;
+  }, [isReady]);
 
   useEffect(() => {
     let mounted = true;
+    isRestoringRef.current = true;
+    setIsReady(false);
+    clearSavingTimer();
     (async () => {
       try {
         const saved = await loadFromStorageSnapshot(storageKey);
         if (saved) {
           if (mounted) {
-            setBoxes(normalizeBoxes(saved.flashcards));
-            setBatchIndex(saved.batchIndex ?? 0);
-            setUsedWordIds(saved.usedWordIds ?? []);
+            lastSerializedRef.current = saved.raw;
+            setBoxes(normalizeBoxes(saved.parsed.flashcards));
+            setBatchIndex(saved.parsed.batchIndex ?? 0);
+            setUsedWordIds(saved.parsed.usedWordIds ?? []);
           }
         } else if (initialWords && mounted) {
+          lastSerializedRef.current = null;
           setBoxes({
             ...createEmptyBoxes(),
             boxOne: initialWords,
@@ -200,6 +310,7 @@ export function useBoxesPersistenceSnapshot(params: {
           setBatchIndex(0);
           setUsedWordIds(initialWords.map((w) => w.id));
         } else if (mounted) {
+          lastSerializedRef.current = null;
           setBoxes(createEmptyBoxes());
           setBatchIndex(0);
           setUsedWordIds([]);
@@ -212,7 +323,7 @@ export function useBoxesPersistenceSnapshot(params: {
     return () => {
       mounted = false;
     };
-  }, [storageKey, initialWords]);
+  }, [clearSavingTimer, storageKey, initialWords]);
 
   // Recompute progress whenever usedWordIds or total changes
   useEffect(() => {
@@ -228,48 +339,74 @@ export function useBoxesPersistenceSnapshot(params: {
     if (!autosave || !isReady) return;
     if (isRestoringRef.current) return; // avoid saving right after load
 
-    if (savingTimer.current) clearTimeout(savingTimer.current);
+    clearSavingTimer();
     savingTimer.current = setTimeout(() => {
-      saveToStorageSnapshot(
-        storageKey,
-        { sourceLangId, targetLangId, level, batchIndex },
-        boxes,
-        usedWordIds
-      ).catch(() => {});
+      const write = buildSerializedSnapshot();
+      void enqueuePersist(write, false);
     }, saveDelayMs);
   }, [
-    boxes,
-    usedWordIds,
     autosave,
+    batchIndex,
+    boxes,
+    buildSerializedSnapshot,
+    clearSavingTimer,
+    enqueuePersist,
     isReady,
+    level,
     saveDelayMs,
-    storageKey,
     sourceLangId,
     targetLangId,
-    level,
-    batchIndex,
+    usedWordIds,
   ]);
 
   const resetSave = useCallback(async () => {
+    clearSavingTimer();
+    pendingWriteRef.current = null;
+    lastSerializedRef.current = null;
+    lastPersistMetaRef.current = null;
     await AsyncStorage.removeItem(storageKey);
-  }, [storageKey]);
+  }, [clearSavingTimer, storageKey]);
+
+  const flushNow = useCallback(async () => {
+    clearSavingTimer();
+    if (!isReadyRef.current || isRestoringRef.current) return;
+    const write = buildSerializedSnapshot();
+    await enqueuePersist(write, true);
+  }, [buildSerializedSnapshot, clearSavingTimer, enqueuePersist]);
+
+  useEffect(() => {
+    if (!flushOnAppStateChange) return;
+    const onAppStateChange = (state: AppStateStatus) => {
+      if (state === "inactive" || state === "background") {
+        void flushNow();
+      }
+    };
+    const sub = AppState.addEventListener("change", onAppStateChange);
+    return () => {
+      sub.remove();
+    };
+  }, [flushNow, flushOnAppStateChange]);
 
   const saveNow = useCallback(async () => {
-    await saveToStorageSnapshot(
-      storageKey,
-      { sourceLangId, targetLangId, level, batchIndex },
-      boxes,
-      usedWordIds
-    );
-  }, [
-    storageKey,
-    boxes,
-    usedWordIds,
-    sourceLangId,
-    targetLangId,
-    level,
-    batchIndex,
-  ]);
+    await flushNow();
+  }, [flushNow]);
+
+  const getLastPersistMeta = useCallback(() => {
+    return lastPersistMetaRef.current;
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      clearSavingTimer();
+      void flushNow();
+    };
+  }, [clearSavingTimer, flushNow]);
+
+  useEffect(() => {
+    return () => {
+      void flushNow();
+    };
+  }, [storageKey, flushNow]);
 
   const addUsedWordIds = useCallback((ids: number[] | number) => {
     const list = Array.isArray(ids) ? ids : [ids];
@@ -294,6 +431,8 @@ export function useBoxesPersistenceSnapshot(params: {
     setBatchIndex,
     isReady,
     resetSave,
+    flushNow,
+    getLastPersistMeta,
     saveNow,
     storageKey,
     usedWordIds,

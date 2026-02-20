@@ -27,7 +27,7 @@ type ImageRect = {
 };
 
 const DEFAULT_TARGET_HEIGHT = 64;
-const SLOT_MAX_WIDTH_FRACTION = 0.9;
+const SLOT_MAX_WIDTH_FRACTION = 1;
 
 const isSvgUri = (value: string) =>
   /\.svg(\?|#|$)/i.test(value) || value.startsWith("data:image/svg+xml");
@@ -237,6 +237,7 @@ export function PromptImage({
   const [isSvg, setIsSvg] = useState(() => isSvgUri(uri));
   const [svgXml, setSvgXml] = useState<string | null>(null);
   const [contentRatio, setContentRatio] = useState<number>(1);
+  const [hasResolvedDimensions, setHasResolvedDimensions] = useState(false);
   const [slotWidth, setSlotWidth] = useState<number | null>(null);
   const [isConstellationOutline, setIsConstellationOutline] = useState(false);
   const [isConstellationMerged, setIsConstellationMerged] = useState(false);
@@ -250,6 +251,7 @@ export function PromptImage({
         if (!cancelled) {
           setIsSvg(uriLooksSvg);
           setSvgXml(null);
+          setHasResolvedDimensions(false);
           setIsConstellationOutline(false);
           setIsConstellationMerged(false);
         }
@@ -278,6 +280,7 @@ export function PromptImage({
             setIsConstellationOutline(constellationMode);
             setIsConstellationMerged(mergedMode);
             setSvgXml(constellationMode || mergedMode ? enhanced : null);
+            setHasResolvedDimensions(true);
           }
           return;
         }
@@ -291,6 +294,7 @@ export function PromptImage({
             setContentRatio(1);
             setIsConstellationOutline(outlineMode);
             setIsConstellationMerged(mergedMode);
+            setHasResolvedDimensions(true);
           }
           return;
         }
@@ -303,6 +307,7 @@ export function PromptImage({
             setContentRatio(1);
             setIsConstellationOutline(false);
             setIsConstellationMerged(false);
+            setHasResolvedDimensions(true);
           }
           return;
         }
@@ -339,6 +344,7 @@ export function PromptImage({
               } else {
                 setContentRatio(1);
               }
+              setHasResolvedDimensions(true);
             } else {
               setIsSvg(false);
               setSvgXml(null);
@@ -350,12 +356,17 @@ export function PromptImage({
                   if (cancelled) return;
                   if (width > 0 && height > 0) {
                     setContentRatio(width / height);
+                    setHasResolvedDimensions(true);
                     return;
                   }
                   setContentRatio(1);
+                  setHasResolvedDimensions(true);
                 },
                 () => {
-                  if (!cancelled) setContentRatio(1);
+                  if (!cancelled) {
+                    setContentRatio(1);
+                    setHasResolvedDimensions(true);
+                  }
                 }
               );
             }
@@ -373,9 +384,11 @@ export function PromptImage({
             setIsConstellationMerged(false);
             if (width > 0 && height > 0) {
               setContentRatio(width / height);
+              setHasResolvedDimensions(true);
               return;
             }
             setContentRatio(1);
+            setHasResolvedDimensions(true);
           },
           () => {
             if (cancelled) return;
@@ -384,6 +397,7 @@ export function PromptImage({
             setIsConstellationOutline(false);
             setIsConstellationMerged(false);
             setContentRatio(1);
+            setHasResolvedDimensions(true);
           }
         );
       } catch {
@@ -391,6 +405,7 @@ export function PromptImage({
           setIsSvg(false);
           setSvgXml(null);
           setContentRatio(1);
+          setHasResolvedDimensions(true);
           setIsConstellationOutline(false);
           setIsConstellationMerged(false);
         }
@@ -430,6 +445,7 @@ export function PromptImage({
     return {
       width: rect.width,
       height: rect.height,
+      opacity: hasResolvedDimensions ? 1 : 0,
       borderWidth: flashcardsImageFrameEnabled && isSvg ? 1 : 0,
       borderColor: colors.border ?? "#00000033",
       backgroundColor: "transparent",
@@ -447,6 +463,7 @@ export function PromptImage({
     isConstellationMerged,
     isConstellationOutline,
     isSvg,
+    hasResolvedDimensions,
     slotWidth,
   ]);
 

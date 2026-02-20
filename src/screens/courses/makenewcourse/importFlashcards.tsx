@@ -18,12 +18,18 @@ import {
 } from "@/src/screens/courses/makenewcourse/csvImport/analyzeRows";
 import { mapAnalysisToManualCards } from "@/src/screens/courses/makenewcourse/csvImport/mapToManualCards";
 import { parseImportFile } from "@/src/screens/courses/makenewcourse/csvImport/parseFile";
+import {
+  getCsvTemplate,
+  type CsvTemplateKey,
+} from "@/src/screens/courses/makenewcourse/csvImport/templates";
 import type { CsvAnalysisResult } from "@/src/screens/courses/makenewcourse/csvImport/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
+import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
-import { Animated, Pressable, ScrollView, Text, View } from "react-native";
+import * as Sharing from "expo-sharing";
+import { Animated, Platform, Pressable, ScrollView, Text, View } from "react-native";
 import {
   CONTENT_DRAFT_STORAGE_KEY,
   type AddMode,
@@ -114,6 +120,8 @@ export default function CustomCourseContentScreen() {
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [csvStep, setCsvStep] = useState<CsvStep>("idle");
   const [csvAnalysis, setCsvAnalysis] = useState<CsvAnalysisResult | null>(null);
+  const [downloadingTemplateKey, setDownloadingTemplateKey] =
+    useState<CsvTemplateKey | null>(null);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
 
   const shouldShowManualToolbar = addMode === "manual";
@@ -257,6 +265,128 @@ export default function CustomCourseContentScreen() {
       "text/plain",
       "*/*",
     ]);
+  };
+
+  const handleDownloadTemplate = async (templateKey: CsvTemplateKey) => {
+    setDownloadingTemplateKey(templateKey);
+    const template = getCsvTemplate(templateKey);
+
+    try {
+      if (Platform.OS === "web") {
+        const web = globalThis as {
+          document?: {
+            createElement: (tagName: string) => {
+              href: string;
+              download: string;
+              click: () => void;
+              remove: () => void;
+              style?: { display?: string };
+            };
+            body?: { appendChild: (node: unknown) => void };
+          };
+          URL?: {
+            createObjectURL: (obj: Blob) => string;
+            revokeObjectURL: (url: string) => void;
+          };
+          Blob?: typeof Blob;
+        };
+
+        if (!web.document || !web.URL || !web.Blob) {
+          throw new Error("Web download API unavailable");
+        }
+
+        const blob = new web.Blob([template.content], {
+          type: "text/csv;charset=utf-8;",
+        });
+        const url = web.URL.createObjectURL(blob);
+        const anchor = web.document.createElement("a");
+        anchor.href = url;
+        anchor.download = template.fileName;
+        web.document.body?.appendChild(anchor);
+        anchor.click();
+        anchor.remove();
+        web.URL.revokeObjectURL(url);
+
+        setPopup({
+          message: `Pobrano wzor: ${template.fileName}`,
+          color: "calm",
+          duration: 2500,
+        });
+        return;
+      }
+
+      if (Platform.OS === "android") {
+        const permissions =
+          await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
+        if (!permissions.granted) {
+          setPopup({
+            message: "Nie wybrano katalogu do zapisu wzoru CSV.",
+            color: "disoriented",
+            duration: 3200,
+          });
+          return;
+        }
+
+        const targetUri = await FileSystem.StorageAccessFramework.createFileAsync(
+          permissions.directoryUri,
+          template.fileName,
+          "text/csv"
+        );
+
+        await FileSystem.writeAsStringAsync(targetUri, template.content, {
+          encoding: FileSystem.EncodingType.UTF8,
+        });
+
+        setPopup({
+          message: `Zapisano wzor: ${template.fileName}`,
+          color: "calm",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const baseDir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory;
+      if (!baseDir) {
+        throw new Error("Missing local directory for template");
+      }
+      const fileUri = `${baseDir}${template.fileName}`;
+      await FileSystem.writeAsStringAsync(fileUri, template.content, {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+
+      const sharingAvailable = await Sharing.isAvailableAsync().catch(
+        () => false
+      );
+      if (!sharingAvailable) {
+        setPopup({
+          message: `Wzor zapisany lokalnie: ${template.fileName}`,
+          color: "calm",
+          duration: 3000,
+        });
+        return;
+      }
+
+      await Sharing.shareAsync(fileUri, {
+        mimeType: "text/csv",
+        UTI: "public.comma-separated-values-text",
+        dialogTitle: "Pobierz wzor CSV",
+      });
+
+      setPopup({
+        message: `Wzor gotowy: ${template.fileName}`,
+        color: "calm",
+        duration: 2500,
+      });
+    } catch (error) {
+      console.error("CSV template download error", error);
+      setPopup({
+        message: "Nie udalo sie pobrac wzoru CSV.",
+        color: "angry",
+        duration: 3500,
+      });
+    } finally {
+      setDownloadingTemplateKey(null);
+    }
   };
 
   const handleImportAnalyzedRows = async () => {
@@ -473,6 +603,8 @@ export default function CustomCourseContentScreen() {
               <CsvImportGuide
                 onPickCsvFile={handlePickCsvFile}
                 onPickTxtFile={handlePickTxtFile}
+                onDownloadTemplate={handleDownloadTemplate}
+                downloadingTemplateKey={downloadingTemplateKey}
                 selectedFileName={csvFileName}
                 isAnalyzing={csvStep === "analyzing"}
               />
