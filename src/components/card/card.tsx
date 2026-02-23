@@ -28,8 +28,12 @@ import { CardMeasure } from "./subcomponents/CardMeasure";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
+const NUMERIC_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
 const INPUT_HORIZONTAL_PADDING = 8;
 const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
+
+const isNumericAnswerValue = (value: string): boolean =>
+  NUMERIC_ANSWER_REGEX.test(value.trim());
 
 export default function Card({
   selectedItem,
@@ -101,6 +105,7 @@ export default function Card({
   const previousResult = useRef<boolean | null>(null);
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
+  const hasSeenInitialCardRef = useRef(false);
   const lastRenderLogRef = useRef<{ id: number | null; ts: number }>({
     id: null,
     ts: 0,
@@ -145,6 +150,23 @@ export default function Card({
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
   const shouldCorrectAwers = effectiveReversed;
   const shouldCorrectRewers = !effectiveReversed || answerOnly;
+  const isMainAnswerNumeric = useMemo(() => {
+    if (!selectedItem) return false;
+    if (effectiveReversed) {
+      return isNumericAnswerValue(selectedItem.text ?? "");
+    }
+    const translations = selectedItem.translations ?? [];
+    if (translations.length === 0) return false;
+    return translations.every((translation) => isNumericAnswerValue(translation));
+  }, [effectiveReversed, selectedItem]);
+  const isCorrectionInput1Numeric = useMemo(
+    () => isNumericAnswerValue(correctionAwers),
+    [correctionAwers],
+  );
+  const isCorrectionInput2Numeric = useMemo(
+    () => isNumericAnswerValue(correctionRewers),
+    [correctionRewers],
+  );
 
   const expectsHangulAnswer = useMemo(() => {
     if (!effectiveReversed) return false;
@@ -401,7 +423,9 @@ export default function Card({
     if (movedToCorrection) {
       needsCorrectionFocus.current = true;
       if (correction) {
-        focusWithDelay(correctionPrimaryRef);
+        if (isFocused) {
+          focusWithDelay(correctionPrimaryRef);
+        }
         needsCorrectionFocus.current = false;
       }
     }
@@ -409,18 +433,18 @@ export default function Card({
     if (backToMain && !isIntroMode) {
       needsCorrectionFocus.current = false;
       setAnswer("");
-      if (selectedItem) {
+      if (selectedItem && isFocused) {
         focusWithDelay(mainInputRef);
       }
     }
 
-    if (isIntroMode && !previousIntroMode.current && correction) {
+    if (isIntroMode && !previousIntroMode.current && correction && isFocused) {
       focusWithDelay(correctionPrimaryRef);
       needsCorrectionFocus.current = false;
     }
 
     if (!isIntroMode && previousIntroMode.current && result !== false) {
-      if (selectedItem) {
+      if (selectedItem && isFocused) {
         focusWithDelay(mainInputRef);
       }
     }
@@ -433,6 +457,7 @@ export default function Card({
     isIntroMode,
     result,
     selectedItem,
+    isFocused,
     setAnswer,
     answerOnly,
     type,
@@ -455,7 +480,9 @@ export default function Card({
       const hasFocusedThisCorrection =
         lastCorrectionFocusedId.current === correction.cardId;
       if (needsCorrectionFocus.current || !hasFocusedThisCorrection) {
-        focusWithDelay(correctionPrimaryRef);
+        if (isFocused) {
+          focusWithDelay(correctionPrimaryRef);
+        }
         needsCorrectionFocus.current = false;
         lastCorrectionFocusedId.current = correction.cardId ?? null;
       }
@@ -465,6 +492,7 @@ export default function Card({
     isIntroMode,
     result,
     focusWithDelay,
+    isFocused,
     answerOnly,
     correctionPrimaryRef,
   ]);
@@ -473,7 +501,12 @@ export default function Card({
     const currentId = selectedItem?.id ?? null;
     if (currentId !== previousSelectedId.current) {
       if (currentId != null) {
-        if (isIntroMode) {
+        if (!hasSeenInitialCardRef.current) {
+          // Avoid opening keyboard on screen entry; autofocus starts from second card.
+          hasSeenInitialCardRef.current = true;
+        } else if (!isFocused) {
+          // Do not autofocus when screen is not actively focused.
+        } else if (isIntroMode) {
           focusWithDelay(correctionPrimaryRef);
           needsCorrectionFocus.current = false;
         } else if (result !== false) {
@@ -487,6 +520,7 @@ export default function Card({
     selectedItem,
     result,
     focusWithDelay,
+    isFocused,
     answerOnly,
     correctionPrimaryRef,
   ]);
@@ -768,6 +802,9 @@ export default function Card({
     answerOnly,
     shouldCorrectAwers,
     shouldCorrectRewers,
+    isMainAnswerNumeric,
+    isCorrectionInput1Numeric,
+    isCorrectionInput2Numeric,
     useLargeLayout,
     correctionInput1Ref,
     correctionInput2Ref,

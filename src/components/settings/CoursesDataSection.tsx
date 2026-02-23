@@ -1,21 +1,23 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import { exportAndShareUserData } from "@/src/services/exportUserData";
+import {
+  exportAndShareUserData,
+  exportUserDataToGoogleDrive,
+} from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
-import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useState } from "react";
 import { Alert, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
-  const router = useRouter();
-  const { resetLearningSettings } = useSettings();
-  const [resettingOnboarding, setResettingOnboarding] = useState(false);
+  const { t } = useTranslation();
+  const { resetLearningSettings, colors } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
   const [exportingData, setExportingData] = useState(false);
+  const [exportingToDrive, setExportingToDrive] = useState(false);
   const [importingData, setImportingData] = useState(false);
 
   const handleExportUserData = async () => {
@@ -24,17 +26,72 @@ const CoursesDataSection: React.FC = () => {
       const result = await exportAndShareUserData();
       const sizeKb = (result.bytesWritten / 1024).toFixed(1);
       const shareNote = result.sharingSupported
-        ? "Otworzyłem okno udostępniania — wybierz Zapisz/Podziel się lub anuluj."
-        : "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie.";
+        ? t("settings.coursesData.exportFile.shareSupported")
+        : t("settings.coursesData.exportFile.shareUnsupported");
       Alert.alert(
-        "Eksport zapisany",
-        `Zapisano do pliku:\n${result.fileUri}\n\nRozmiar: ${sizeKb} kB\n\n${shareNote}`
+        t("settings.coursesData.exportFile.title"),
+        t("settings.coursesData.exportFile.message", {
+          fileUri: result.fileUri,
+          sizeKb,
+          shareNote,
+        })
       );
     } catch (error) {
       console.error("[CoursesDataSection] export error", error);
-      Alert.alert("Błąd", "Nie udało się wyeksportować danych użytkownika.");
+      Alert.alert(
+        t("settings.coursesData.errors.generic"),
+        t("settings.coursesData.errors.exportUserData")
+      );
     } finally {
       setExportingData(false);
+    }
+  };
+
+  const handleExportUserDataToDrive = async () => {
+    setExportingToDrive(true);
+    try {
+      const result = await exportUserDataToGoogleDrive();
+      const sizeKb = (result.bytesWritten / 1024).toFixed(1);
+
+      if (result.shared) {
+        Alert.alert(
+          t("settings.coursesData.exportDrive.readyTitle"),
+          t("settings.coursesData.exportDrive.readyMessage", {
+            fileUri: result.fileUri,
+            sizeKb,
+          })
+        );
+        return;
+      }
+
+      if (result.cancelled) {
+        Alert.alert(
+          t("settings.coursesData.exportDrive.cancelTitle"),
+          t("settings.coursesData.exportDrive.cancelMessage")
+        );
+        return;
+      }
+
+      if (!result.sharingSupported) {
+        Alert.alert(
+          t("settings.coursesData.exportDrive.unsupportedTitle"),
+          t("settings.coursesData.exportDrive.unsupportedMessage")
+        );
+        return;
+      }
+
+      Alert.alert(
+        t("settings.coursesData.exportDrive.incompleteTitle"),
+        t("settings.coursesData.exportDrive.incompleteMessage")
+      );
+    } catch (error) {
+      console.error("[CoursesDataSection] google drive export error", error);
+      Alert.alert(
+        t("settings.coursesData.errors.generic"),
+        t("settings.coursesData.errors.exportGoogleDrive")
+      );
+    } finally {
+      setExportingToDrive(false);
     }
   };
 
@@ -45,69 +102,56 @@ const CoursesDataSection: React.FC = () => {
       if (result.success) {
         const stats = result.stats;
         Alert.alert(
-          "Import zakończony",
-          `Pomyślnie zaimportowano dane.\n\n` +
-          `Kursy (własne): ${stats?.coursesCreated}\n` +
-          `Fiszki przywrócone: ${stats?.flashcardsCreated}\n` +
-          `Powtórki (własne): ${stats?.reviewsRestored}\n` +
-          `Kursy oficjalne: ${stats?.officialCoursesProcessed}\n` +
-          `Powtórki (oficjalne kursy): ${stats?.officialReviewsRestored}\n` +
-          `Powtórki (builtin DB): ${stats?.builtinReviewsRestored}\n` +
-          `Hinty (oficjalne kursy): ${stats?.officialHintsUpdated}\n` +
-          `Stany pudełek: ${stats?.boxesSnapshotsRestored}`
+          t("settings.coursesData.importDone.title"),
+          t("settings.coursesData.importDone.message", {
+            coursesCreated: stats?.coursesCreated,
+            flashcardsCreated: stats?.flashcardsCreated,
+            reviewsRestored: stats?.reviewsRestored,
+            officialCoursesProcessed: stats?.officialCoursesProcessed,
+            officialReviewsRestored: stats?.officialReviewsRestored,
+            builtinReviewsRestored: stats?.builtinReviewsRestored,
+            officialHintsUpdated: stats?.officialHintsUpdated,
+            boxesSnapshotsRestored: stats?.boxesSnapshotsRestored,
+          })
         );
       } else {
         if (result.message !== "Anulowano wybór pliku.") {
-          Alert.alert("Błąd importu", result.message);
+          Alert.alert(t("settings.coursesData.errors.importTitle"), result.message);
         }
       }
     } catch (error) {
       console.error("[CoursesDataSection] import error", error);
-      Alert.alert("Błąd", "Wystąpił nieoczekiwany błąd podczas importu.");
+      Alert.alert(
+        t("settings.coursesData.errors.generic"),
+        t("settings.coursesData.errors.import")
+      );
     } finally {
       setImportingData(false);
     }
   };
 
-  const handleResetOnboarding = async () => {
-    setResettingOnboarding(true);
-    try {
-      await setOnboardingCheckpoint("pin_required");
-      await AsyncStorage.removeItem("@flashcards_intro_seen_v1");
-      Alert.alert(
-        "Intro włączone",
-        "Przekierowuję do przypięcia kursu.",
-        [
-          {
-            text: "OK",
-            onPress: () => router.replace("/createcourse"),
-          },
-        ],
-        { cancelable: true }
-      );
-    } catch {
-      Alert.alert("Błąd", "Nie udało się ustawić stanu intro.");
-    } finally {
-      setResettingOnboarding(false);
-    }
-  };
-
   const handleResetLearningSettings = () => {
     Alert.alert(
-      "Przywróć ustawienia nauki",
-      "Przywróć domyślne ustawienia (spellcheck, ogonki, miny pudełek, layout, batch, przypomnienia)?",
+      t("settings.coursesData.resetLearningConfirm.title"),
+      t("settings.coursesData.resetLearningConfirm.message"),
       [
-        { text: "Anuluj", style: "cancel" },
+        { text: t("settings.coursesData.resetLearningConfirm.cancel"), style: "cancel" },
         {
-          text: "Przywróć",
+          text: t("settings.coursesData.resetLearningConfirm.confirm"),
           style: "default",
           onPress: async () => {
             setResettingLearning(true);
             try {
               await resetLearningSettings();
-              Alert.alert("Gotowe", "Ustawienia nauki przywrócone.");
+              Alert.alert(
+                t("settings.coursesData.resetLearningDone.title"),
+                t("settings.coursesData.resetLearningDone.message")
+              );
             } catch {
-              Alert.alert("Błąd", "Nie udało się przywrócić ustawień nauki.");
+              Alert.alert(
+                t("settings.coursesData.errors.generic"),
+                t("settings.coursesData.errors.resetLearning")
+              );
             } finally {
               setResettingLearning(false);
             }
@@ -119,17 +163,23 @@ const CoursesDataSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>Inne</Text>
+      <Text style={styles.sectionHeader}>{t("settings.coursesData.section")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Eksportuj dane użytkownika</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.rows.exportUserData.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Postępy w kursach, pudełka i własne kursy zostaną zapisane do pliku JSON w pamięci urządzenia.
+            {t("settings.coursesData.rows.exportUserData.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={exportingData ? "Eksportuję..." : "Eksportuj"}
+          text={
+            exportingData
+              ? t("settings.coursesData.rows.exportUserData.buttonLoading")
+              : t("settings.coursesData.rows.exportUserData.button")
+          }
           color="my_green"
           onPress={handleExportUserData}
           disabled={exportingData}
@@ -139,13 +189,54 @@ const CoursesDataSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Importuj dane użytkownika</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.rows.exportGoogleDrive.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Wczytaj postępy i kursy z pliku JSON.
+            {t("settings.coursesData.rows.exportGoogleDrive.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={importingData ? "Importuję..." : "Importuj"}
+          onPress={handleExportUserDataToDrive}
+          color="my_green"
+          disabled={exportingToDrive}
+          width={160}
+          accessibilityLabel={t("settings.coursesData.rows.exportGoogleDrive.accessibilityLabel")}
+        >
+          {exportingToDrive ? (
+            <Text style={[styles.driveButtonText, { color: colors.headline }]}>
+              {t("settings.coursesData.rows.exportGoogleDrive.buttonLoading")}
+            </Text>
+          ) : (
+            <View style={styles.driveButtonContent}>
+              <MaterialCommunityIcons
+                name="google-drive"
+                size={18}
+                color={colors.headline}
+              />
+              <Text style={[styles.driveButtonText, { color: colors.headline }]}>
+                {t("settings.coursesData.rows.exportGoogleDrive.button")}
+              </Text>
+            </View>
+          )}
+        </MyButton>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.rows.importUserData.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.coursesData.rows.importUserData.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            importingData
+              ? t("settings.coursesData.rows.importUserData.buttonLoading")
+              : t("settings.coursesData.rows.importUserData.button")
+          }
           color="my_green"
           onPress={handleImportUserData}
           disabled={importingData}
@@ -155,32 +246,22 @@ const CoursesDataSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Przywróć ustawienia nauki</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.rows.resetLearning.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Spellcheck, diakrytyki, miny pudełek, layout, batch size, przypomnienia.
+            {t("settings.coursesData.rows.resetLearning.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={resettingLearning ? "Przywracam..." : "Przywróć domyślne"}
+          text={
+            resettingLearning
+              ? t("settings.coursesData.rows.resetLearning.buttonLoading")
+              : t("settings.coursesData.rows.resetLearning.button")
+          }
           color="my_yellow"
           onPress={handleResetLearningSettings}
           disabled={resettingLearning}
-          width={160}
-        />
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Włącz intro od nowa</Text>
-          <Text style={styles.rowSubtitle}>
-            Zresetuj onboarding i przejdź do przypięcia kursu.
-          </Text>
-        </View>
-        <MyButton
-          text={resettingOnboarding ? "Ustawiam..." : "Uruchom intro"}
-          color="my_green"
-          onPress={handleResetOnboarding}
-          disabled={resettingOnboarding}
           width={160}
         />
       </View>

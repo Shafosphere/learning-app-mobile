@@ -3,9 +3,11 @@ import { View, Text, Switch } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useTranslation } from "react-i18next";
 
 const AccessibilitySection: React.FC = () => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const {
     feedbackEnabled,
     highContrastEnabled,
@@ -48,22 +50,25 @@ const AccessibilitySection: React.FC = () => {
   };
 
   return (
-    <View style={styles.sectionCard} accessibilityLabel="Ustawienia dostępności">
+    <View
+      style={styles.sectionCard}
+      accessibilityLabel={t("settings.accessibility.cardLabel")}
+    >
       <Text
         style={styles.sectionHeader}
         allowFontScaling
         accessibilityRole="header"
       >
-        Dostępność
+        {t("settings.accessibility.section")}
       </Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle} allowFontScaling>
-            Wysoki kontrast
+            {t("settings.accessibility.highContrast.title")}
           </Text>
           <Text style={styles.rowSubtitle} allowFontScaling>
-            Podmienia kolory interfejsu na warianty o większym kontraście.
+            {t("settings.accessibility.highContrast.subtitle")}
           </Text>
         </View>
         <Switch
@@ -76,10 +81,10 @@ const AccessibilitySection: React.FC = () => {
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle} allowFontScaling>
-            Tryb daltonistyczny
+            {t("settings.accessibility.colorBlind.title")}
           </Text>
           <Text style={styles.rowSubtitle} allowFontScaling>
-            Stosuje paletę przyjazną osobom z deuteranopią.
+            {t("settings.accessibility.colorBlind.subtitle")}
           </Text>
         </View>
         <Switch
@@ -92,10 +97,10 @@ const AccessibilitySection: React.FC = () => {
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle} allowFontScaling>
-            Większa czcionka
+            {t("settings.accessibility.largeFont.title")}
           </Text>
           <Text style={styles.rowSubtitle} allowFontScaling>
-            Powiększa podstawowy rozmiar czcionki w aplikacji.
+            {t("settings.accessibility.largeFont.subtitle")}
           </Text>
         </View>
         <Switch

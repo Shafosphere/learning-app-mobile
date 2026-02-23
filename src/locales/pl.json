@@ -1,0 +1,401 @@
+{
+  "app": {
+    "loading": {
+      "initializing": "Wczytuję aplikację…",
+      "importingCsv": "Importuję dane z CSV…",
+      "finishingSetup": "Kończę konfigurację…",
+      "launching": "Uruchamiam aplikację…",
+      "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi.",
+      "firstLaunchInfo": "Pierwsze uruchomienie może potrwać kilkanaście sekund."
+    }
+  },
+  "settings": {
+    "tabs": {
+      "ui": "UI",
+      "accessibility": "Dostępność",
+      "learning": "Nauka",
+      "coursesData": "Kursy i dane",
+      "debug": "Debug"
+    },
+    "uiLanguage": {
+      "title": "Język interfejsu",
+      "subtitle": "Wybierz język aplikacji niezależnie od języka kursu.",
+      "polish": "Polski",
+      "english": "English"
+    },
+    "appearance": {
+      "section": "Wygląd",
+      "darkTheme": {
+        "title": "Ciemny motyw",
+        "subtitle": "Przełącz interfejs pomiędzy jasnym a ciemnym trybem."
+      },
+      "vibrations": {
+        "title": "Wibracje",
+        "subtitle": "Krótkie wibracje w kluczowych interakcjach aplikacji."
+      },
+      "disableReactions": {
+        "title": "Wyłącz reakcje",
+        "subtitle": "Wycisza bąbelki z cytatami/reakcjami w aplikacji. Nie dotyczy powiadomień kursu."
+      },
+      "effectsVolume": {
+        "title": "Głośność efektów",
+        "subtitle": "Regulacja głośności dźwięków w aplikacji."
+      },
+      "boxFaces": {
+        "title": "Miny pudełek",
+        "subtitle": "Uśmiechnięte / smutne pudełka w zależności od statusu."
+      },
+      "layoutSelector": {
+        "title": "Wybierz schemat pudełek",
+        "subtitle": "Preferowany widok listy fiszek podczas nauki.",
+        "classic": "Klasyczny",
+        "carousel": "Karuzela"
+      },
+      "actionsSelector": {
+        "title": "Wybierz układ",
+        "subtitle": "Wybierz rozmieszczenie przycisków w trybach: prawda/fałsz oraz umiem/nie umiem.",
+        "top": "U góry",
+        "bottom": "Na dole"
+      }
+    },
+    "accessibility": {
+      "section": "Dostępność",
+      "cardLabel": "Ustawienia dostępności",
+      "highContrast": {
+        "title": "Wysoki kontrast",
+        "subtitle": "Podmienia kolory interfejsu na warianty o większym kontraście."
+      },
+      "colorBlind": {
+        "title": "Tryb daltonistyczny",
+        "subtitle": "Stosuje paletę przyjazną osobom z deuteranopią."
+      },
+      "largeFont": {
+        "title": "Większa czcionka",
+        "subtitle": "Powiększa podstawowy rozmiar czcionki w aplikacji."
+      }
+    },
+    "learning": {
+      "section": "Nauka",
+      "spellcheck": {
+        "title": "Spellchecking",
+        "subtitle": "Tolerancja 1 błędu przy sprawdzaniu."
+      },
+      "keyboardSuggestions": {
+        "title": "Sugestie klawiatury",
+        "subtitle": "Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach. Uwaga: część klawiatur (np. Samsung, Gboard) może nadal pokazywać pasek podpowiedzi."
+      },
+      "ignoreDiacritics": {
+        "title": "Ignoruj znaki diakrytyczne",
+        "subtitle": "Porównuj słowa bez ogonków, np. ą -> a."
+      },
+      "reminders": {
+        "title": "Przypomnienia o nauce",
+        "subtitle": "Placeholder - docelowo planowane powiadomienia push."
+      },
+      "batchSize": {
+        "title": "Liczba fiszek w partii",
+        "subtitle": "Zakres 1-200 fiszek na jedną sesję nauki.",
+        "placeholder": "np. 10"
+      }
+    },
+    "coursesData": {
+      "section": "Inne",
+      "errors": {
+        "generic": "Błąd",
+        "exportUserData": "Nie udało się wyeksportować danych użytkownika.",
+        "exportGoogleDrive": "Nie udało się wyeksportować danych do Google Drive.",
+        "import": "Wystąpił nieoczekiwany błąd podczas importu.",
+        "importTitle": "Błąd importu",
+        "resetLearning": "Nie udało się przywrócić ustawień nauki."
+      },
+      "exportFile": {
+        "title": "Eksport zapisany",
+        "message": "Zapisano do pliku:\n{{fileUri}}\n\nRozmiar: {{sizeKb}} kB\n\n{{shareNote}}",
+        "shareSupported": "Otworzyłem okno udostępniania - wybierz Zapisz/Podziel się lub anuluj.",
+        "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
+      },
+      "exportDrive": {
+        "readyTitle": "Eksport gotowy",
+        "readyMessage": "Przygotowano plik:\n{{fileUri}}\n\nRozmiar: {{sizeKb}} kB\n\nWybierz Google Drive w oknie udostępniania, aby zapisać kopię.",
+        "cancelTitle": "Eksport anulowany",
+        "cancelMessage": "Zamknięto okno udostępniania. Dane nie zostały wysłane do Google Drive.",
+        "unsupportedTitle": "Udostępnianie niedostępne",
+        "unsupportedMessage": "Systemowe udostępnianie nie jest dostępne na tym urządzeniu.",
+        "incompleteTitle": "Nie ukończono eksportu",
+        "incompleteMessage": "Nie udało się zakończyć udostępniania. Spróbuj ponownie i wybierz Google Drive."
+      },
+      "importDone": {
+        "title": "Import zakończony",
+        "message": "Pomyślnie zaimportowano dane.\n\nKursy (własne): {{coursesCreated}}\nFiszki przywrócone: {{flashcardsCreated}}\nPowtórki (własne): {{reviewsRestored}}\nKursy oficjalne: {{officialCoursesProcessed}}\nPowtórki (oficjalne kursy): {{officialReviewsRestored}}\nPowtórki (builtin DB): {{builtinReviewsRestored}}\nHinty (oficjalne kursy): {{officialHintsUpdated}}\nStany pudełek: {{boxesSnapshotsRestored}}"
+      },
+      "resetLearningConfirm": {
+        "title": "Przywróć ustawienia nauki",
+        "message": "Przywróć domyślne ustawienia (spellcheck, ogonki, miny pudełek, layout, batch, przypomnienia)?",
+        "cancel": "Anuluj",
+        "confirm": "Przywróć"
+      },
+      "resetLearningDone": {
+        "title": "Gotowe",
+        "message": "Ustawienia nauki przywrócone."
+      },
+      "rows": {
+        "exportUserData": {
+          "title": "Eksportuj dane użytkownika",
+          "subtitle": "Postępy w kursach, pudełka i własne kursy zostaną zapisane do pliku JSON w pamięci urządzenia.",
+          "button": "Eksportuj",
+          "buttonLoading": "Eksportuję..."
+        },
+        "exportGoogleDrive": {
+          "title": "Eksportuj do Google Drive",
+          "subtitle": "Otwórz okno udostępniania i wybierz Google Drive, aby zapisać kopię JSON.",
+          "button": "Dysk Google",
+          "buttonLoading": "Eksportuję...",
+          "accessibilityLabel": "Eksportuj dane do Google Drive"
+        },
+        "importUserData": {
+          "title": "Importuj dane użytkownika",
+          "subtitle": "Wczytaj postępy i kursy z pliku JSON.",
+          "button": "Importuj",
+          "buttonLoading": "Importuję..."
+        },
+        "resetLearning": {
+          "title": "Przywróć ustawienia nauki",
+          "subtitle": "Spellcheck, diakrytyki, miny pudełek, layout, batch size, przypomnienia.",
+          "button": "Przywróć domyślne",
+          "buttonLoading": "Przywracam..."
+        }
+      }
+    },
+    "debug": {
+      "section": {
+        "tools": "Debug / dev tools",
+        "uiPreview": "UI preview",
+        "seed": "Seed danych",
+        "hardReset": "Twarde resety (dev)",
+        "onboarding": "Onboarding checkpoint",
+        "flags": "Feature flags / eksperymenty"
+      },
+      "alerts": {
+        "missingCourseTitle": "Brak kursu",
+        "missingCourseMessage": "Wybierz własny kurs fiszek w ustawieniach.",
+        "addedTitle": "Dodano",
+        "addedSome": "Dodano {{inserted}} fiszek do powtórek kursu.",
+        "addedNone": "Brak nowych fiszek do dodania.",
+        "errorTitle": "Błąd",
+        "addError": "Nie udało się dodać fiszek.",
+        "resetCustomTitle": "Zresetowano kurs własny",
+        "resetCustomSome": "Usunięto {{deleted}} wpisów powtórek kursu własnego.",
+        "resetCustomNone": "Brak wpisów do usunięcia.",
+        "resetCustomError": "Nie udało się zresetować kursu własnego.",
+        "clearStorageTitle": "Wyczyść AsyncStorage",
+        "clearStorageMessage": "Usunie WSZYSTKIE zapisane ustawienia (również poza settings). Na dev tylko.",
+        "clearStorageConfirm": "Wyczyść",
+        "deleteDbTitle": "Usuń bazę SQLite",
+        "deleteDbMessage": "Skasuje lokalną bazę mygame.db (flashcards/custom). Potrzebny restart aplikacji.",
+        "deleteDbConfirm": "Usuń bazę",
+        "cancel": "Anuluj",
+        "doneTitle": "Gotowe",
+        "storageCleared": "AsyncStorage wyczyszczony.",
+        "storageClearError": "Nie udało się wyczyścić AsyncStorage.",
+        "dbDeleted": "Baza mygame.db została usunięta.",
+        "dbDeleteError": "Nie udało się usunąć bazy.",
+        "checkpointSet": "Ustawiono",
+        "checkpointValue": "Checkpoint: {{checkpoint}}",
+        "checkpointSetError": "Nie udało się ustawić checkpointu.",
+        "introResetDone": "Intro zresetowane. Onboarding startuje od wyboru języka.",
+        "introResetError": "Nie udało się zresetować dymków.",
+        "hangulTitle": "Hangul",
+        "hangulTyped": "Wpisałeś: {{value}}",
+        "hangulEmpty": "Brak znaków do zatwierdzenia.",
+        "trophiesAdded": "Dodano 3 testowe osiągnięcia."
+      },
+      "rows": {
+        "testPopup": {
+          "title": "Przetestuj popup Boxika",
+          "subtitle": "Podgląd komunikatu (tylko środowisko deweloperskie).",
+          "button": "Pokaż popup",
+          "message": "Hej! To ja, Boxik. Dymek działa!"
+        },
+        "testQuotes": {
+          "title": "Testuj cytaty (QuoteBubble)",
+          "subtitle": "Wywołaj losowy cytat w zależności od kategorii.",
+          "win": "Win",
+          "loss": "Loss",
+          "startup": "Startup"
+        },
+        "hangul": {
+          "title": "Testuj klawiaturę Hangul",
+          "subtitle": "Wpisz koreańskie znaki bez systemowej klawiatury.",
+          "placeholder": "Kliknij Pokaż, a potem dodawaj znaki",
+          "show": "Pokaż klawiaturę",
+          "hide": "Ukryj klawiaturę",
+          "clear": "Wyczyść"
+        },
+        "logo": {
+          "title": "Dymek z logo",
+          "subtitle": "Podgląd komunikatu onboardingowego z logo.",
+          "show": "Pokaż",
+          "hide": "Ukryj"
+        },
+        "floating": {
+          "title": "Tryb floating",
+          "subtitle": "Wyświetlaj dymek nad zawartością (absolute).",
+          "on": "Floating: ON",
+          "off": "Floating: OFF"
+        },
+        "logoMessage": {
+          "title": "Dodaj kurs kodem",
+          "description": "To Twoje miejsce do fiszek. Zacznij od przypięcia kursu kodem od prowadzącego."
+        },
+        "addCustomReviews": {
+          "title": "Dodaj customowe powtórki",
+          "subtitle": "Wstaw losowe fiszki z aktywnego kursu własnego.",
+          "button": "Dodaj 10",
+          "buttonLoading": "Dodawanie..."
+        },
+        "selectCourseInfo": "Najpierw wybierz własny kurs w panelu kursów.",
+        "resetCustom": {
+          "title": "Reset kursu własnego (dev)",
+          "subtitle": "Usuń wpisy powtórek aktywnego kursu własnego.",
+          "button": "Reset custom",
+          "buttonLoading": "Resetuję..."
+        },
+        "addTrophies": {
+          "title": "Dodaj testowe puchary",
+          "subtitle": "Odblokuj losowe 3 osiągnięcia (test bookshelf).",
+          "button": "Daj puchary"
+        },
+        "clearStorage": {
+          "title": "Wyczyść AsyncStorage",
+          "subtitle": "Usuwa wszystkie klucze aplikacji (tylko na dev).",
+          "button": "Wyczyść",
+          "buttonLoading": "Czyszczę..."
+        },
+        "deleteDb": {
+          "title": "Usuń bazę mygame.db",
+          "subtitle": "Kasuje lokalną bazę SQLite (wymaga restartu).",
+          "button": "Usuń bazę",
+          "buttonLoading": "Usuwam..."
+        },
+        "resetIntro": {
+          "title": "Zresetuj dymki intro",
+          "subtitle": "Usuwa flagi seen dla wszystkich ekranów.",
+          "button": "Reset Intro",
+          "buttonLoading": "Resetuję..."
+        },
+        "openLanguageIntro": {
+          "title": "Przejdź do wyboru języka",
+          "subtitle": "Otwórz pierwszy ekran onboardingu z flagami PL/EN.",
+          "button": "Ekran języka"
+        },
+        "flags": {
+          "learningReminders": {
+            "title": "Powiadomienia o nauce (dev)",
+            "subtitle": "Szybki toggle na niewydany ficzer przypomnień."
+          },
+          "statsFire": {
+            "title": "Statystyki: animacja ognia (dev)",
+            "subtitle": "Pokazuje animowane płomienie w tle \"Opanowane słówka\"."
+          },
+          "statsBookshelf": {
+            "title": "Statystyki: komoda z półkami (dev)",
+            "subtitle": "Pokazuje moduł bookshelf / puchary na ekranie statystyk."
+          }
+        }
+      }
+    }
+  },
+  "onboarding": {
+    "nextMessage": "Następny komunikat",
+    "languageIntro": {
+      "title": "Zaznacz twój język ojczysty",
+      "confirm": "Dalej",
+      "polish": "Polski",
+      "english": "English",
+      "hintDefault": "Wybierz język, żeby aktywować przycisk.",
+      "hintSelected": "Wybrano: {{language}}"
+    },
+    "courseActivate": {
+      "step1": {
+        "title": "Aktywuj kurs",
+        "description": "Tutaj aktywujesz kurs, gry będą używać fiszek z aktywnego kursu."
+      },
+      "step2": {
+        "title": "Ustawienia kursu",
+        "description": "Każdy kurs ma swoje ustawienia, które możesz zmieniać w każdej chwili."
+      }
+    },
+    "coursePin": {
+      "step1": {
+        "title": "Cześć, jestem Memicard",
+        "description": "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów"
+      },
+      "step2": {
+        "title": "Przypnij kilka kursów",
+        "description": "Na starcie wybierzmy kursy które Cię interesują, możesz przypiąć więcej niż jeden kurs. Będziesz mieć szybszy dostęp do tych przypiętych."
+      },
+      "step3": {
+        "title": "Po przypięciu kliknij Dalej",
+        "description": "Przycisk u dołu włączy się, gdy przypniesz co najmniej jeden kurs."
+      },
+      "step4": {
+        "title": "Własne kursy!",
+        "description": "Później będziesz mógł zrobić własne kursy ze swoimi fiszkami! :3"
+      }
+    },
+    "flashcards": {
+      "step1": {
+        "title": "To jest główna gra",
+        "description": "Inspirowana systemem Leitnera. Tutaj uczymy się słówek."
+      },
+      "step2": {
+        "title": "Cel gry",
+        "description": "Celem gry jest przeniesienie słówka przez wszystkie pudełka."
+      },
+      "step3": {
+        "title": "Aktywuj pudełko",
+        "description": "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę."
+      },
+      "step4": {
+        "title": "Podaj odpowiedź",
+        "description": "W karcie pojawia się wylosowana fiszka, w zależności od jej typu masz podać odpowiedź lub kliknąć przycisk"
+      },
+      "step5": {
+        "title": "Za skomplikowane?",
+        "description": "Jeśli czegoś nie rozumiesz, zajrzyj do przewodnika na stronie głównej. Możesz tam przejść, klikając moją miniaturkę na górnym pasku."
+      }
+    },
+    "brain": {
+      "step1": {
+        "title": "Co to?",
+        "description": "Tutaj wybierasz metodę powtórki."
+      },
+      "step2": {
+        "title": "Wybierz tryb powtórek",
+        "description": "Przycisk start to szybka sesja mini gier. Przycisk Tradycyjne to klasyczne wpisywanie tłumaczeń."
+      },
+      "step3": {
+        "title": "Po sesji",
+        "description": "Na końcu obu trybów zobaczysz tabelę z podsumowaniem wyników."
+      }
+    },
+    "reviewCourses": {
+      "step1": {
+        "title": "Wybierz kurs do powtórek",
+        "description": "Dotknij kafelka, by przejść do gry i powtórzyć fiszki z tego kursu."
+      },
+      "step2": {
+        "title": "Jak często się pojawiają?",
+        "description": "Może za 2 dni, może za tydzień, a może za rok? Pamiętaj, że żeby zapamiętać, trzeba zapomnieć ;)"
+      },
+      "step3": {
+        "title": "Co oznaczają liczby",
+        "description": "Czerwona liczba to zaległe powtórki. Zielona oznacza, że na razie nic nie czeka."
+      },
+      "step4": {
+        "title": "Wyłączanie powtórek",
+        "description": "W ustawieniach kursu możesz wyłączyć powtórki - wtedy nie pojawi się na tej liście."
+      }
+    }
+  }
+}

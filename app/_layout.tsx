@@ -1,4 +1,5 @@
 // _layout.tsx
+import "@/src/i18n";
 import Navbar from "@/src/components/navbar/navbar";
 import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
@@ -16,13 +17,17 @@ import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
 export default function RootLayout() {
+  const { t } = useTranslation();
   const [isDbReady, setDbReady] = useState(false);
-  const [loadingMessage, setLoadingMessage] = useState("Wczytuję aplikację…");
+  const [loadingMessageKey, setLoadingMessageKey] = useState(
+    "app.loading.initializing"
+  );
   const [isInitialImport, setIsInitialImport] = useState(false);
   const splashHiddenRef = useRef(false);
 
@@ -45,21 +50,21 @@ export default function RootLayout() {
       switch (event.type) {
         case "start":
           setIsInitialImport(false);
-          setLoadingMessage("Wczytuję aplikację…");
+          setLoadingMessageKey("app.loading.initializing");
           break;
         case "import-start":
           setIsInitialImport(true);
-          setLoadingMessage("Importuję dane z CSV…");
+          setLoadingMessageKey("app.loading.importingCsv");
           break;
         case "import-finish":
-          setLoadingMessage("Kończę konfigurację…");
+          setLoadingMessageKey("app.loading.finishingSetup");
           break;
         case "ready":
           setIsInitialImport(event.initialImport);
-          setLoadingMessage("Uruchamiam aplikację…");
+          setLoadingMessageKey("app.loading.launching");
           break;
         case "error":
-          setLoadingMessage("Nie udało się przygotować bazy danych. Sprawdź logi.");
+          setLoadingMessageKey("app.loading.dbError");
           break;
       }
     };
@@ -96,11 +101,11 @@ export default function RootLayout() {
       >
         <ActivityIndicator size="large" />
         <Text style={{ fontSize: 16, color: "#333", textAlign: "center" }}>
-          {loadingMessage}
+          {t(loadingMessageKey)}
         </Text>
         {isInitialImport ? (
           <Text style={{ fontSize: 14, color: "#666", textAlign: "center" }}>
-            Pierwsze uruchomienie może potrwać kilkanaście sekund.
+            {t("app.loading.firstLaunchInfo")}
           </Text>
         ) : null}
       </View>

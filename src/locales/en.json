@@ -1,0 +1,401 @@
+{
+  "app": {
+    "loading": {
+      "initializing": "Loading app...",
+      "importingCsv": "Importing CSV data...",
+      "finishingSetup": "Finishing setup...",
+      "launching": "Launching app...",
+      "dbError": "Could not initialize the database. Check logs.",
+      "firstLaunchInfo": "First launch may take several seconds."
+    }
+  },
+  "settings": {
+    "tabs": {
+      "ui": "UI",
+      "accessibility": "Accessibility",
+      "learning": "Learning",
+      "coursesData": "Courses & data",
+      "debug": "Debug"
+    },
+    "uiLanguage": {
+      "title": "Interface language",
+      "subtitle": "Choose app language independently from course language.",
+      "polish": "Polish",
+      "english": "English"
+    },
+    "appearance": {
+      "section": "Appearance",
+      "darkTheme": {
+        "title": "Dark theme",
+        "subtitle": "Switch interface between light and dark mode."
+      },
+      "vibrations": {
+        "title": "Vibration",
+        "subtitle": "Short vibrations during key app interactions."
+      },
+      "disableReactions": {
+        "title": "Disable reactions",
+        "subtitle": "Mutes quote/reaction bubbles in the app. Does not affect course notifications."
+      },
+      "effectsVolume": {
+        "title": "Effects volume",
+        "subtitle": "Adjust in-app sound volume."
+      },
+      "boxFaces": {
+        "title": "Box faces",
+        "subtitle": "Smiling/sad boxes depending on status."
+      },
+      "layoutSelector": {
+        "title": "Choose box layout",
+        "subtitle": "Preferred flashcard list view during study.",
+        "classic": "Classic",
+        "carousel": "Carousel"
+      },
+      "actionsSelector": {
+        "title": "Choose button layout",
+        "subtitle": "Choose button placement in true/false and know/don't know modes.",
+        "top": "Top",
+        "bottom": "Bottom"
+      }
+    },
+    "accessibility": {
+      "section": "Accessibility",
+      "cardLabel": "Accessibility settings",
+      "highContrast": {
+        "title": "High contrast",
+        "subtitle": "Switches interface colors to higher contrast variants."
+      },
+      "colorBlind": {
+        "title": "Color blind mode",
+        "subtitle": "Applies palette friendly for deuteranopia."
+      },
+      "largeFont": {
+        "title": "Larger font",
+        "subtitle": "Increases base font size in the app."
+      }
+    },
+    "learning": {
+      "section": "Learning",
+      "spellcheck": {
+        "title": "Spell checking",
+        "subtitle": "Allows one typo during answer check."
+      },
+      "keyboardSuggestions": {
+        "title": "Keyboard suggestions",
+        "subtitle": "Enable or disable suggestions and autocorrect in flashcards. Note: some keyboards (Samsung, Gboard) may still show suggestions."
+      },
+      "ignoreDiacritics": {
+        "title": "Ignore diacritics",
+        "subtitle": "Compare words without diacritics, e.g. ą -> a."
+      },
+      "reminders": {
+        "title": "Learning reminders",
+        "subtitle": "Placeholder - push notifications planned later."
+      },
+      "batchSize": {
+        "title": "Flashcards per batch",
+        "subtitle": "Range 1-200 cards per study session.",
+        "placeholder": "e.g. 10"
+      }
+    },
+    "coursesData": {
+      "section": "Other",
+      "errors": {
+        "generic": "Error",
+        "exportUserData": "Could not export user data.",
+        "exportGoogleDrive": "Could not export data to Google Drive.",
+        "import": "Unexpected import error occurred.",
+        "importTitle": "Import error",
+        "resetLearning": "Could not restore learning settings."
+      },
+      "exportFile": {
+        "title": "Export saved",
+        "message": "Saved to file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\n{{shareNote}}",
+        "shareSupported": "Share sheet opened - choose Save/Share or cancel.",
+        "shareUnsupported": "System sharing is unavailable on this platform. Copy the file manually."
+      },
+      "exportDrive": {
+        "readyTitle": "Export ready",
+        "readyMessage": "Prepared file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\nChoose Google Drive in share sheet to save a copy.",
+        "cancelTitle": "Export canceled",
+        "cancelMessage": "Share sheet was closed. Data was not sent to Google Drive.",
+        "unsupportedTitle": "Sharing unavailable",
+        "unsupportedMessage": "System sharing is not available on this device.",
+        "incompleteTitle": "Export not completed",
+        "incompleteMessage": "Could not finish sharing. Try again and choose Google Drive."
+      },
+      "importDone": {
+        "title": "Import completed",
+        "message": "Data imported successfully.\n\nCourses (custom): {{coursesCreated}}\nFlashcards restored: {{flashcardsCreated}}\nReviews (custom): {{reviewsRestored}}\nOfficial courses: {{officialCoursesProcessed}}\nReviews (official courses): {{officialReviewsRestored}}\nReviews (builtin DB): {{builtinReviewsRestored}}\nHints (official courses): {{officialHintsUpdated}}\nBox states: {{boxesSnapshotsRestored}}"
+      },
+      "resetLearningConfirm": {
+        "title": "Restore learning settings",
+        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, batch, reminders)?",
+        "cancel": "Cancel",
+        "confirm": "Restore"
+      },
+      "resetLearningDone": {
+        "title": "Done",
+        "message": "Learning settings restored."
+      },
+      "rows": {
+        "exportUserData": {
+          "title": "Export user data",
+          "subtitle": "Progress, box states, and custom courses will be saved as JSON file on device storage.",
+          "button": "Export",
+          "buttonLoading": "Exporting..."
+        },
+        "exportGoogleDrive": {
+          "title": "Export to Google Drive",
+          "subtitle": "Open share sheet and choose Google Drive to save JSON copy.",
+          "button": "Google Drive",
+          "buttonLoading": "Exporting...",
+          "accessibilityLabel": "Export data to Google Drive"
+        },
+        "importUserData": {
+          "title": "Import user data",
+          "subtitle": "Load progress and courses from JSON file.",
+          "button": "Import",
+          "buttonLoading": "Importing..."
+        },
+        "resetLearning": {
+          "title": "Restore learning settings",
+          "subtitle": "Spellcheck, diacritics, box faces, layout, batch size, reminders.",
+          "button": "Restore defaults",
+          "buttonLoading": "Restoring..."
+        }
+      }
+    },
+    "debug": {
+      "section": {
+        "tools": "Debug / dev tools",
+        "uiPreview": "UI preview",
+        "seed": "Data seed",
+        "hardReset": "Hard resets (dev)",
+        "onboarding": "Onboarding checkpoint",
+        "flags": "Feature flags / experiments"
+      },
+      "alerts": {
+        "missingCourseTitle": "No course",
+        "missingCourseMessage": "Select a custom flashcard course in settings.",
+        "addedTitle": "Added",
+        "addedSome": "Added {{inserted}} flashcards to course reviews.",
+        "addedNone": "No new flashcards to add.",
+        "errorTitle": "Error",
+        "addError": "Could not add flashcards.",
+        "resetCustomTitle": "Custom course reset",
+        "resetCustomSome": "Removed {{deleted}} custom course review entries.",
+        "resetCustomNone": "No entries to remove.",
+        "resetCustomError": "Could not reset custom course.",
+        "clearStorageTitle": "Clear AsyncStorage",
+        "clearStorageMessage": "Removes ALL stored settings (also outside settings). Dev only.",
+        "clearStorageConfirm": "Clear",
+        "deleteDbTitle": "Delete SQLite database",
+        "deleteDbMessage": "Deletes local mygame.db (flashcards/custom). App restart required.",
+        "deleteDbConfirm": "Delete database",
+        "cancel": "Cancel",
+        "doneTitle": "Done",
+        "storageCleared": "AsyncStorage cleared.",
+        "storageClearError": "Could not clear AsyncStorage.",
+        "dbDeleted": "mygame.db has been deleted.",
+        "dbDeleteError": "Could not delete database.",
+        "checkpointSet": "Set",
+        "checkpointValue": "Checkpoint: {{checkpoint}}",
+        "checkpointSetError": "Could not set checkpoint.",
+        "introResetDone": "Intro reset. Onboarding starts from language selection.",
+        "introResetError": "Could not reset intro bubbles.",
+        "hangulTitle": "Hangul",
+        "hangulTyped": "You typed: {{value}}",
+        "hangulEmpty": "No characters to submit.",
+        "trophiesAdded": "Added 3 test achievements."
+      },
+      "rows": {
+        "testPopup": {
+          "title": "Test Boxik popup",
+          "subtitle": "Preview message (development only).",
+          "button": "Show popup",
+          "message": "Hey! It's me, Boxik. Popup works!"
+        },
+        "testQuotes": {
+          "title": "Test quotes (QuoteBubble)",
+          "subtitle": "Trigger random quote by category.",
+          "win": "Win",
+          "loss": "Loss",
+          "startup": "Startup"
+        },
+        "hangul": {
+          "title": "Test Hangul keyboard",
+          "subtitle": "Type Korean characters without system keyboard.",
+          "placeholder": "Tap Show, then add characters",
+          "show": "Show keyboard",
+          "hide": "Hide keyboard",
+          "clear": "Clear"
+        },
+        "logo": {
+          "title": "Logo bubble",
+          "subtitle": "Preview onboarding message with logo.",
+          "show": "Show",
+          "hide": "Hide"
+        },
+        "floating": {
+          "title": "Floating mode",
+          "subtitle": "Display bubble above content (absolute).",
+          "on": "Floating: ON",
+          "off": "Floating: OFF"
+        },
+        "logoMessage": {
+          "title": "Add course with code",
+          "description": "This is your flashcard space. Start by pinning a course with teacher's code."
+        },
+        "addCustomReviews": {
+          "title": "Add custom reviews",
+          "subtitle": "Insert random flashcards from active custom course.",
+          "button": "Add 10",
+          "buttonLoading": "Adding..."
+        },
+        "selectCourseInfo": "First select a custom course in courses panel.",
+        "resetCustom": {
+          "title": "Reset custom course (dev)",
+          "subtitle": "Delete review entries for active custom course.",
+          "button": "Reset custom",
+          "buttonLoading": "Resetting..."
+        },
+        "addTrophies": {
+          "title": "Add test trophies",
+          "subtitle": "Unlock 3 random achievements (bookshelf test).",
+          "button": "Give trophies"
+        },
+        "clearStorage": {
+          "title": "Clear AsyncStorage",
+          "subtitle": "Removes all app keys (dev only).",
+          "button": "Clear",
+          "buttonLoading": "Clearing..."
+        },
+        "deleteDb": {
+          "title": "Delete mygame.db",
+          "subtitle": "Deletes local SQLite database (restart required).",
+          "button": "Delete DB",
+          "buttonLoading": "Deleting..."
+        },
+        "resetIntro": {
+          "title": "Reset intro bubbles",
+          "subtitle": "Removes seen flags for all screens.",
+          "button": "Reset intro",
+          "buttonLoading": "Resetting..."
+        },
+        "openLanguageIntro": {
+          "title": "Go to language selection",
+          "subtitle": "Open the first onboarding screen with PL/EN flags.",
+          "button": "Language screen"
+        },
+        "flags": {
+          "learningReminders": {
+            "title": "Learning reminders (dev)",
+            "subtitle": "Quick toggle for unreleased reminders feature."
+          },
+          "statsFire": {
+            "title": "Stats: fire animation (dev)",
+            "subtitle": "Shows animated flames in mastered words background."
+          },
+          "statsBookshelf": {
+            "title": "Stats: bookshelf cabinet (dev)",
+            "subtitle": "Shows bookshelf/trophies module on stats screen."
+          }
+        }
+      }
+    }
+  },
+  "onboarding": {
+    "nextMessage": "Next message",
+    "languageIntro": {
+      "title": "Choose your native language",
+      "confirm": "Next",
+      "polish": "Polish",
+      "english": "English",
+      "hintDefault": "Choose a language to enable the button.",
+      "hintSelected": "Selected: {{language}}"
+    },
+    "courseActivate": {
+      "step1": {
+        "title": "Activate course",
+        "description": "This is where you activate a course. Games will use flashcards from the active course."
+      },
+      "step2": {
+        "title": "Course settings",
+        "description": "Each course has its own settings that you can change anytime."
+      }
+    },
+    "coursePin": {
+      "step1": {
+        "title": "Hi, I'm Memicard",
+        "description": "I'll guide you through the app. Let's start by picking courses."
+      },
+      "step2": {
+        "title": "Pin a few courses",
+        "description": "At start, pick courses you care about. You can pin more than one for faster access."
+      },
+      "step3": {
+        "title": "After pinning, tap Next",
+        "description": "Bottom button will enable after you pin at least one course."
+      },
+      "step4": {
+        "title": "Custom courses!",
+        "description": "Later you'll be able to create your own courses with your own flashcards! :3"
+      }
+    },
+    "flashcards": {
+      "step1": {
+        "title": "This is the main game",
+        "description": "Inspired by the Leitner system. This is where we learn words."
+      },
+      "step2": {
+        "title": "Game goal",
+        "description": "Goal is to move a flashcard through all boxes."
+      },
+      "step3": {
+        "title": "Activate a box",
+        "description": "By tapping a box, you activate it and draw a new flashcard."
+      },
+      "step4": {
+        "title": "Give an answer",
+        "description": "A drawn flashcard appears. Depending on type, answer or tap a button."
+      },
+      "step5": {
+        "title": "Too complicated?",
+        "description": "If something is unclear, check the guide on home screen via my top-bar avatar."
+      }
+    },
+    "brain": {
+      "step1": {
+        "title": "What is this?",
+        "description": "Here you choose review method."
+      },
+      "step2": {
+        "title": "Choose review mode",
+        "description": "Start is a quick mini-game session. Traditional is classic translation typing."
+      },
+      "step3": {
+        "title": "After session",
+        "description": "At the end of both modes you'll see a summary table."
+      }
+    },
+    "reviewCourses": {
+      "step1": {
+        "title": "Choose a course for reviews",
+        "description": "Tap a tile to open the game and review flashcards from this course."
+      },
+      "step2": {
+        "title": "How often do they appear?",
+        "description": "Maybe in 2 days, maybe in a week, maybe in a year. To remember, first you need to forget ;)"
+      },
+      "step3": {
+        "title": "What do the numbers mean?",
+        "description": "Red number means overdue reviews. Green means nothing is waiting now."
+      },
+      "step4": {
+        "title": "Disabling reviews",
+        "description": "You can disable reviews in course settings - then it won't appear on this list."
+      }
+    }
+  }
+}

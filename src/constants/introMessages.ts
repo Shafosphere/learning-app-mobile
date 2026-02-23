@@ -1,88 +1,78 @@
 export type IntroMessage = {
-  title: string;
-  description: string;
+  titleKey: string;
+  descriptionKey: string;
   gateId?: string;
   autoAdvanceOnGate?: boolean;
 };
 
 export const COURSE_ACTIVATE_INTRO_MESSAGES: IntroMessage[] = [
   {
-    title: "Aktywuj kurs",
-    description:
-      "Tutaj aktywujesz kurs, gry będą używać fiszek z aktywnego kursu.",
+    titleKey: "onboarding.courseActivate.step1.title",
+    descriptionKey: "onboarding.courseActivate.step1.description",
   },
   {
-    title: "Ustawienia kursu",
-    description:
-      "Każdy kurs ma swoje ustawienia, które możesz zmieniać w kazdej chwili.",
+    titleKey: "onboarding.courseActivate.step2.title",
+    descriptionKey: "onboarding.courseActivate.step2.description",
   },
 ];
 
 export const COURSE_PIN_INTRO_MESSAGES: IntroMessage[] = [
   {
-    title: "Cześć, jestem Memicard",
-    description: "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów",
+    titleKey: "onboarding.coursePin.step1.title",
+    descriptionKey: "onboarding.coursePin.step1.description",
   },
   {
-    title: "Przypnij kilka kursów",
-    description:
-      "Na starcie wybierzmy kursy które Cie interesują, możesz przypiąć więcej niż jeden kurs. Będziesz miał szybszy dostęp do tych 'przypiętych'. ",
+    titleKey: "onboarding.coursePin.step2.title",
+    descriptionKey: "onboarding.coursePin.step2.description",
   },
   {
-    title: "Po przypięciu kliknij Dalej",
-    description:
-      "Przycisk u dołu włączy się, gdy przypniesz co najmniej jeden kurs.",
+    titleKey: "onboarding.coursePin.step3.title",
+    descriptionKey: "onboarding.coursePin.step3.description",
     gateId: "course_pinned",
     autoAdvanceOnGate: true,
   },
   {
-    title: "Własne kursy!",
-    description:
-      "Pożniej bedziesz mógł zrobić własne kursy z swoimi fiszkami! :3",
+    titleKey: "onboarding.coursePin.step4.title",
+    descriptionKey: "onboarding.coursePin.step4.description",
   },
 ];
 
 export const FLASHCARDS_INTRO_MESSAGES: IntroMessage[] = [
   {
-    title: "To jest główna gra",
-    description: "Inspirowana systemem Leitnera. Tutaj uczymy się słówek.",
+    titleKey: "onboarding.flashcards.step1.title",
+    descriptionKey: "onboarding.flashcards.step1.description",
   },
   {
-    title: "Cel gry",
-    description: "Celem gry jest przeniesienie słówka przez wszystkie pudełka.",
+    titleKey: "onboarding.flashcards.step2.title",
+    descriptionKey: "onboarding.flashcards.step2.description",
   },
   {
-    title: "Aktywuj pudełko",
-    description:
-      "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę.",
+    titleKey: "onboarding.flashcards.step3.title",
+    descriptionKey: "onboarding.flashcards.step3.description",
   },
   {
-    title: "Podaj odpowiedź",
-    description:
-      "W karcie pojawia się wylosowana fiszka, w zależności od jej typu masz podać odpowiedź lub kliknąć przycisk",
+    titleKey: "onboarding.flashcards.step4.title",
+    descriptionKey: "onboarding.flashcards.step4.description",
     gateId: "box_selected",
   },
   {
-    title: "Za skomplikowane?",
-    description:
-      "Jeśli czegoś nie rozumiesz, zajrzyj do przewodnika na stronie głównej. Możesz tam przejść, klikając moją miniaturkę na górnym pasku.",
+    titleKey: "onboarding.flashcards.step5.title",
+    descriptionKey: "onboarding.flashcards.step5.description",
     gateId: "box_selected",
   },
 ];
 
 export const BRAIN_INTRO_MESSAGES: IntroMessage[] = [
   {
-    title: "Co to?",
-    description: "Tutaj wybierasz metode powtórki.",
+    titleKey: "onboarding.brain.step1.title",
+    descriptionKey: "onboarding.brain.step1.description",
   },
   {
-    title: "Wybierz tryb powtórek",
-    description:
-      "Przycisk 'start' to szybka sesja mini gier. Przycisk 'Tradycyjne' to klasyczne wpisywanie tłumaczeń.",
+    titleKey: "onboarding.brain.step2.title",
+    descriptionKey: "onboarding.brain.step2.description",
   },
   {
-    title: "Po sesji",
-    description:
-      "Na końcu obu trybów zobaczysz tabelę z podsumowaniem wyników.",
+    titleKey: "onboarding.brain.step3.title",
+    descriptionKey: "onboarding.brain.step3.description",
   },
 ];

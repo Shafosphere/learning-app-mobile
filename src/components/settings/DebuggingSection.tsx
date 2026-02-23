@@ -11,12 +11,16 @@ import { unlockAchievement } from "@/src/db/sqlite/repositories/achievements";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
 import React, { useState } from "react";
 import { Alert, Switch, Text, TextInput, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
+  const { t } = useTranslation();
+  const router = useRouter();
   const {
     activeCustomCourseId,
     colors,
@@ -41,7 +45,10 @@ const DebuggingSection: React.FC = () => {
 
   const handleAddRandomCustom = async () => {
     if (activeCustomCourseId == null) {
-      Alert.alert("Brak kursu", "Wybierz własny kurs fiszek w ustawieniach.");
+      Alert.alert(
+        t("settings.debug.alerts.missingCourseTitle"),
+        t("settings.debug.alerts.missingCourseMessage")
+      );
       return;
     }
 
@@ -49,13 +56,16 @@ const DebuggingSection: React.FC = () => {
     try {
       const inserted = await addRandomCustomReviews(activeCustomCourseId, 10);
       Alert.alert(
-        "Dodano",
+        t("settings.debug.alerts.addedTitle"),
         inserted > 0
-          ? `Dodano ${inserted} fiszek do powtórek kursu.`
-          : "Brak nowych fiszek do dodania."
+          ? t("settings.debug.alerts.addedSome", { inserted })
+          : t("settings.debug.alerts.addedNone")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się dodać fiszek.");
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.addError")
+      );
     } finally {
       setCustomBusy(false);
     }
@@ -63,7 +73,7 @@ const DebuggingSection: React.FC = () => {
 
   const handleTestPopup = () => {
     setPopup({
-      message: "Hej! To ja, Boxik. Dymek działa!",
+      message: t("settings.debug.rows.testPopup.message"),
       color: "disoriented",
       duration: 3600,
     });
@@ -74,13 +84,16 @@ const DebuggingSection: React.FC = () => {
     try {
       const deleted = await resetActiveCustomCourseReviews();
       Alert.alert(
-        "Zresetowano kurs własny",
+        t("settings.debug.alerts.resetCustomTitle"),
         deleted > 0
-          ? `Usunięto ${deleted} wpisów powtórek kursu własnego.`
-          : "Brak wpisów do usunięcia."
+          ? t("settings.debug.alerts.resetCustomSome", { deleted })
+          : t("settings.debug.alerts.resetCustomNone")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować kursu własnego.");
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.resetCustomError")
+      );
     } finally {
       setCustomBusy(false);
     }
@@ -88,20 +101,26 @@ const DebuggingSection: React.FC = () => {
 
   const handleClearAsyncStorage = () => {
     Alert.alert(
-      "Wyczyść AsyncStorage",
-      "Usunie WSZYSTKIE zapisane ustawienia (również poza settings). Na dev tylko.",
+      t("settings.debug.alerts.clearStorageTitle"),
+      t("settings.debug.alerts.clearStorageMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
+        { text: t("settings.debug.alerts.cancel"), style: "cancel" },
         {
-          text: "Wyczyść",
+          text: t("settings.debug.alerts.clearStorageConfirm"),
           style: "destructive",
           onPress: async () => {
             setClearingStorage(true);
             try {
               await AsyncStorage.clear();
-              Alert.alert("Gotowe", "AsyncStorage wyczyszczony.");
+              Alert.alert(
+                t("settings.debug.alerts.doneTitle"),
+                t("settings.debug.alerts.storageCleared")
+              );
             } catch {
-              Alert.alert("Błąd", "Nie udało się wyczyścić AsyncStorage.");
+              Alert.alert(
+                t("settings.debug.alerts.errorTitle"),
+                t("settings.debug.alerts.storageClearError")
+              );
             } finally {
               setClearingStorage(false);
             }
@@ -113,21 +132,27 @@ const DebuggingSection: React.FC = () => {
 
   const handleDeleteDatabase = () => {
     Alert.alert(
-      "Usuń bazę SQLite",
-      "Skasuje lokalną bazę mygame.db (flashcards/custom). Potrzebny restart aplikacji.",
+      t("settings.debug.alerts.deleteDbTitle"),
+      t("settings.debug.alerts.deleteDbMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
+        { text: t("settings.debug.alerts.cancel"), style: "cancel" },
         {
-          text: "Usuń bazę",
+          text: t("settings.debug.alerts.deleteDbConfirm"),
           style: "destructive",
           onPress: async () => {
             setResettingDb(true);
             try {
               const dbPath = `${FileSystem.documentDirectory}SQLite/mygame.db`;
               await FileSystem.deleteAsync(dbPath, { idempotent: true });
-              Alert.alert("Gotowe", "Baza mygame.db została usunięta.");
+              Alert.alert(
+                t("settings.debug.alerts.doneTitle"),
+                t("settings.debug.alerts.dbDeleted")
+              );
             } catch {
-              Alert.alert("Błąd", "Nie udało się usunąć bazy.");
+              Alert.alert(
+                t("settings.debug.alerts.errorTitle"),
+                t("settings.debug.alerts.dbDeleteError")
+              );
             } finally {
               setResettingDb(false);
             }
@@ -137,12 +162,24 @@ const DebuggingSection: React.FC = () => {
     );
   };
 
-  const handleSetOnboarding = async (checkpoint: "pin_required" | "activate_required" | "done") => {
+  const handleSetOnboarding = async (
+    checkpoint:
+      | "language_required"
+      | "pin_required"
+      | "activate_required"
+      | "done"
+  ) => {
     try {
       await setOnboardingCheckpoint(checkpoint);
-      Alert.alert("Ustawiono", `Checkpoint: ${checkpoint}`);
+      Alert.alert(
+        t("settings.debug.alerts.checkpointSet"),
+        t("settings.debug.alerts.checkpointValue", { checkpoint })
+      );
     } catch {
-      Alert.alert("Błąd", "Nie udało się ustawić checkpointu.");
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.checkpointSetError")
+      );
     }
   };
 
@@ -156,10 +193,16 @@ const DebuggingSection: React.FC = () => {
         "@review_brain_intro_seen_v1",
         "@review_courses_intro_seen_v1",
       ]);
-      await setOnboardingCheckpoint("pin_required");
-      Alert.alert("Gotowe", "Intro zresetowane. Onboarding startuje od przypinania kursu.");
+      await setOnboardingCheckpoint("language_required");
+      Alert.alert(
+        t("settings.debug.alerts.doneTitle"),
+        t("settings.debug.alerts.introResetDone")
+      );
     } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować dymków.");
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.introResetError")
+      );
     } finally {
       setResettingIntro(false);
     }
@@ -167,17 +210,17 @@ const DebuggingSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>Debug / dev tools</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.tools")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Przetestuj popup Boxika</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.testPopup.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Podgląd komunikatu (tylko środowisko deweloperskie).
+            {t("settings.debug.rows.testPopup.subtitle")}
           </Text>
         </View>
         <MyButton
-          text="Pokaż popup"
+          text={t("settings.debug.rows.testPopup.button")}
           color="my_yellow"
           onPress={handleTestPopup}
           width={140}
@@ -186,16 +229,16 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Testuj cytaty (QuoteBubble)</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.testQuotes.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Wywołaj losowy cytat w zależności od kategorii.
+            {t("settings.debug.rows.testQuotes.subtitle")}
           </Text>
         </View>
       </View>
       <View style={styles.keyboardActions}>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="Win"
+            text={t("settings.debug.rows.testQuotes.win")}
             color="my_green"
             onPress={() => showQuote("win_standard")}
             width={100}
@@ -203,7 +246,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="Loss"
+            text={t("settings.debug.rows.testQuotes.loss")}
             color="my_red"
             onPress={() => showQuote("loss")}
             width={100}
@@ -211,7 +254,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="Startup"
+            text={t("settings.debug.rows.testQuotes.startup")}
             color="my_yellow"
             onPress={() => showQuote("startup_day")}
             width={100}
@@ -220,21 +263,25 @@ const DebuggingSection: React.FC = () => {
       </View>
 
       <View style={styles.keyboardSection}>
-        <Text style={styles.rowTitle}>Testuj klawiaturę Hangul</Text>
+        <Text style={styles.rowTitle}>{t("settings.debug.rows.hangul.title")}</Text>
         <Text style={styles.rowSubtitle}>
-          Wpisz koreańskie znaki bez systemowej klawiatury.
+          {t("settings.debug.rows.hangul.subtitle")}
         </Text>
         <TextInput
           style={[styles.input, styles.keyboardInput]}
           value={hangulValue}
           editable={false}
-          placeholder="Kliknij Pokaż, a potem dodawaj znaki"
+          placeholder={t("settings.debug.rows.hangul.placeholder")}
           placeholderTextColor={colors.paragraph}
         />
         <View style={styles.keyboardActions}>
           <View style={styles.keyboardButtonWrapper}>
             <MyButton
-              text={showHangulKeyboard ? "Ukryj klawiaturę" : "Pokaż klawiaturę"}
+              text={
+                showHangulKeyboard
+                  ? t("settings.debug.rows.hangul.hide")
+                  : t("settings.debug.rows.hangul.show")
+              }
               color="my_green"
               onPress={() => setShowHangulKeyboard((prev) => !prev)}
               width={220}
@@ -242,7 +289,7 @@ const DebuggingSection: React.FC = () => {
           </View>
           <View style={styles.keyboardButtonWrapper}>
             <MyButton
-              text="Wyczyść"
+              text={t("settings.debug.rows.hangul.clear")}
               color="my_red"
               onPress={() => setHangulValue("")}
               disabled={hangulValue.length === 0}
@@ -256,27 +303,31 @@ const DebuggingSection: React.FC = () => {
           onChangeText={setHangulValue}
           onSubmit={() =>
             Alert.alert(
-              "Hangul",
+              t("settings.debug.alerts.hangulTitle"),
               hangulValue.length > 0
-                ? `Wpisałeś: ${hangulValue}`
-                : "Brak znaków do zatwierdzenia."
+                ? t("settings.debug.alerts.hangulTyped", { value: hangulValue })
+                : t("settings.debug.alerts.hangulEmpty")
             )
           }
           onRequestClose={() => setShowHangulKeyboard(false)}
         />
       </View>
 
-      <Text style={styles.sectionHeader}>UI preview</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.uiPreview")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Dymek z logo</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.logo.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Podgląd komunikatu onboardingowego z logo.
+            {t("settings.debug.rows.logo.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={showLogoMessage ? "Ukryj" : "Pokaż"}
+          text={
+            showLogoMessage
+              ? t("settings.debug.rows.logo.hide")
+              : t("settings.debug.rows.logo.show")
+          }
           color="my_yellow"
           onPress={() => setShowLogoMessage((prev) => !prev)}
           width={140}
@@ -285,13 +336,17 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Tryb floating</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.floating.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Wyświetlaj dymek nad zawartością (absolute).
+            {t("settings.debug.rows.floating.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={logoFloating ? "Floating: ON" : "Floating: OFF"}
+          text={
+            logoFloating
+              ? t("settings.debug.rows.floating.on")
+              : t("settings.debug.rows.floating.off")
+          }
           color="my_yellow"
           onPress={() => setLogoFloating((prev) => !prev)}
           width={160}
@@ -308,8 +363,8 @@ const DebuggingSection: React.FC = () => {
         >
           <LogoMessage
             variant="pin"
-            title="Dodaj kurs kodem"
-            description="To Twoje miejsce do fiszek. Zacznij od przypięcia kursu kodem od prowadzącego."
+            title={t("settings.debug.rows.logoMessage.title")}
+            description={t("settings.debug.rows.logoMessage.description")}
             floating={logoFloating}
             offset={
               logoFloating
@@ -324,17 +379,21 @@ const DebuggingSection: React.FC = () => {
         </View>
       )}
 
-      <Text style={styles.sectionHeader}>Seed danych</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.seed")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Dodaj customowe powtórki</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.addCustomReviews.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Wstaw losowe fiszki z aktywnego kursu własnego.
+            {t("settings.debug.rows.addCustomReviews.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={customBusy ? "Dodawanie..." : "Dodaj 10"}
+          text={
+            customBusy
+              ? t("settings.debug.rows.addCustomReviews.buttonLoading")
+              : t("settings.debug.rows.addCustomReviews.button")
+          }
           color="my_green"
           disabled={customBusy || activeCustomCourseId == null}
           onPress={handleAddRandomCustom}
@@ -344,19 +403,23 @@ const DebuggingSection: React.FC = () => {
 
       {activeCustomCourseId == null && (
         <Text style={styles.infoText}>
-          Najpierw wybierz własny kurs w panelu kursów.
+          {t("settings.debug.rows.selectCourseInfo")}
         </Text>
       )}
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Reset kursu własnego (dev)</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.resetCustom.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Usuń wpisy powtórek aktywnego kursu własnego.
+            {t("settings.debug.rows.resetCustom.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={customBusy ? "Resetuję..." : "Reset custom"}
+          text={
+            customBusy
+              ? t("settings.debug.rows.resetCustom.buttonLoading")
+              : t("settings.debug.rows.resetCustom.button")
+          }
           color="my_red"
           disabled={customBusy || activeCustomCourseId == null}
           onPress={handleResetCustomReviews}
@@ -366,35 +429,42 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Dodaj testowe puchary</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.addTrophies.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Odblokuj losowe 3 osiągnięcia (test bookshelf).
+            {t("settings.debug.rows.addTrophies.subtitle")}
           </Text>
         </View>
         <MyButton
-          text="Daj puchary"
+          text={t("settings.debug.rows.addTrophies.button")}
           color="my_green"
           onPress={async () => {
             await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
             await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
             await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
-            Alert.alert("Gotowe", "Dodano 3 testowe osiągnięcia.");
+            Alert.alert(
+              t("settings.debug.alerts.doneTitle"),
+              t("settings.debug.alerts.trophiesAdded")
+            );
           }}
           width={140}
         />
       </View>
 
-      <Text style={styles.sectionHeader}>Twarde resety (dev)</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.hardReset")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wyczyść AsyncStorage</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.clearStorage.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Usuwa wszystkie klucze aplikacji (tylko na dev).
+            {t("settings.debug.rows.clearStorage.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={clearingStorage ? "Czyszczę..." : "Wyczyść"}
+          text={
+            clearingStorage
+              ? t("settings.debug.rows.clearStorage.buttonLoading")
+              : t("settings.debug.rows.clearStorage.button")
+          }
           color="my_red"
           onPress={handleClearAsyncStorage}
           disabled={clearingStorage}
@@ -404,13 +474,17 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Usuń bazę mygame.db</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.deleteDb.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Kasuje lokalną bazę SQLite (wymaga restartu).
+            {t("settings.debug.rows.deleteDb.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={resettingDb ? "Usuwam..." : "Usuń bazę"}
+          text={
+            resettingDb
+              ? t("settings.debug.rows.deleteDb.buttonLoading")
+              : t("settings.debug.rows.deleteDb.button")
+          }
           color="my_red"
           onPress={handleDeleteDatabase}
           disabled={resettingDb}
@@ -418,9 +492,34 @@ const DebuggingSection: React.FC = () => {
         />
       </View>
 
-      <Text style={styles.sectionHeader}>Onboarding checkpoint</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.onboarding")}</Text>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.openLanguageIntro.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.openLanguageIntro.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.openLanguageIntro.button")}
+          color="my_green"
+          onPress={() => router.push("/createprofile")}
+          width={170}
+        />
+      </View>
 
       <View style={styles.keyboardActions}>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="language_required"
+            color="my_yellow"
+            onPress={() => handleSetOnboarding("language_required")}
+            width={170}
+          />
+        </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
             text="pin_required"
@@ -449,13 +548,17 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Zresetuj dymki intro</Text>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.resetIntro.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Usuwa flagi seen dla wszystkich ekranów.
+            {t("settings.debug.rows.resetIntro.subtitle")}
           </Text>
         </View>
         <MyButton
-          text={resettingIntro ? "Resetuję..." : "Reset Intro"}
+          text={
+            resettingIntro
+              ? t("settings.debug.rows.resetIntro.buttonLoading")
+              : t("settings.debug.rows.resetIntro.button")
+          }
           color="my_red"
           onPress={handleResetIntro}
           disabled={resettingIntro}
@@ -463,13 +566,15 @@ const DebuggingSection: React.FC = () => {
         />
       </View>
 
-      <Text style={styles.sectionHeader}>Feature flags / eksperymenty</Text>
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.flags")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Powiadomienia o nauce (dev)</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.flags.learningReminders.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Szybki toggle na niewydany ficzer przypomnień.
+            {t("settings.debug.rows.flags.learningReminders.subtitle")}
           </Text>
         </View>
         <Switch
@@ -481,9 +586,11 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Statystyki: animacja ognia (dev)</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.flags.statsFire.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Pokazuje animowane płomienie w tle “Opanowane słówka”.
+            {t("settings.debug.rows.flags.statsFire.subtitle")}
           </Text>
         </View>
         <Switch
@@ -495,9 +602,11 @@ const DebuggingSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Statystyki: komoda z półkami (dev)</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.flags.statsBookshelf.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Pokazuje moduł bookshelf / puchary na ekranie statystyk.
+            {t("settings.debug.rows.flags.statsBookshelf.subtitle")}
           </Text>
         </View>
         <Switch

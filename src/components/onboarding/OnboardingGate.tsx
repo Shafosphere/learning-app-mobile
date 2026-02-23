@@ -9,6 +9,7 @@ import {
 
 const PIN_ROUTE = "/createcourse";
 const ACTIVATE_ROUTE = "/coursepanel";
+const LANGUAGE_ROUTE = "/createprofile";
 
 export function OnboardingGate() {
   const router = useRouter();
@@ -23,7 +24,7 @@ export function OnboardingGate() {
   const pinnedCount = pinnedOfficialCourseIds?.length ?? 0;
   const [hydrated, setHydrated] = useState(false);
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint>(
-    "pin_required"
+    "language_required"
   );
   const lastRedirectRef = useRef<string | null>(null);
 
@@ -69,7 +70,11 @@ export function OnboardingGate() {
     if (resolvedCheckpoint === "done") return;
 
     const target =
-      resolvedCheckpoint === "pin_required" ? PIN_ROUTE : ACTIVATE_ROUTE;
+      resolvedCheckpoint === "language_required"
+        ? LANGUAGE_ROUTE
+        : resolvedCheckpoint === "pin_required"
+          ? PIN_ROUTE
+          : ACTIVATE_ROUTE;
 
     // W trybie aktywacji pozwalamy zostać na ekranie przypinania,
     // żeby użytkownik sam przeszedł dalej.

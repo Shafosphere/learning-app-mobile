@@ -1,5 +1,12 @@
 // src/contexts/SettingsContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import i18n, {
+  normalizeUiLanguage,
+  resolveLanguage,
+  resolveSystemLanguage,
+  type SupportedLanguage,
+  type UiLanguage,
+} from "../i18n";
 import {
   createContext,
   ReactNode,
@@ -146,6 +153,9 @@ function makeBuiltinCourseKey({
 }
 
 interface SettingsContextValue {
+  uiLanguage: UiLanguage;
+  resolvedLanguage: SupportedLanguage;
+  setUiLanguage: (value: UiLanguage) => Promise<void>;
   theme: Theme;
   colors: ThemeColors;
   toggleTheme: () => Promise<void>;
@@ -331,6 +341,9 @@ type CourseSkipCorrectionOverrides = {
 };
 
 const defaultValue: SettingsContextValue = {
+  uiLanguage: "pl",
+  resolvedLanguage: "pl",
+  setUiLanguage: async () => {},
   theme: "light",
   colors: resolveThemeColors("light"),
   toggleTheme: async () => {},
@@ -443,6 +456,14 @@ const SettingsContext = createContext<SettingsContextValue>(defaultValue);
 export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+  const [uiLanguageRaw, setUiLanguageState] = usePersistedState<string>(
+    "uiLanguage",
+    resolveSystemLanguage()
+  );
+  const uiLanguage = useMemo<UiLanguage>(
+    () => normalizeUiLanguage(uiLanguageRaw),
+    [uiLanguageRaw]
+  );
   const [selectedLevel, persistSelectedLevel] = usePersistedState<CEFRLevel>(
     "selectedLevel",
     "A1"
@@ -573,6 +594,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "accessibility.largeFont",
     false
   );
+  const resolvedLanguage = useMemo(
+    () => resolveLanguage(uiLanguage),
+    [uiLanguage]
+  );
   const [rawMemoryBoardSize, setRawMemoryBoardSize] =
     usePersistedState<string>("memory.boardSize", "twoByThree");
   const memoryBoardSize = useMemo<MemoryBoardSize>(
@@ -586,6 +611,17 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       void setRawMemoryBoardSize(normalized);
     }
   }, [rawMemoryBoardSize, setRawMemoryBoardSize]);
+
+  useEffect(() => {
+    void i18n.changeLanguage(resolvedLanguage);
+  }, [resolvedLanguage]);
+
+  useEffect(() => {
+    const normalized = normalizeUiLanguage(uiLanguageRaw);
+    if (uiLanguageRaw !== normalized) {
+      void setUiLanguageState(normalized);
+    }
+  }, [uiLanguageRaw, setUiLanguageState]);
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -599,6 +635,12 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     const newTheme: Theme = theme === "light" ? "dark" : "light";
     await setTheme(newTheme);
   };
+  const setUiLanguage = useCallback(
+    async (value: UiLanguage) => {
+      await setUiLanguageState(value);
+    },
+    [setUiLanguageState]
+  );
   const colors = useMemo(
     () =>
       resolveThemeColors(theme, {
@@ -1642,6 +1684,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   return (
     <SettingsContext.Provider
       value={{
+        uiLanguage,
+        resolvedLanguage,
+        setUiLanguage,
         theme,
         colors,
         toggleTheme,

@@ -23,6 +23,7 @@ import {
     View,
     ViewStyle
 } from "react-native";
+import { useTranslation } from "react-i18next";
 
 type TriggerStrategy = "on_onboarding" | "post_onboarding";
 
@@ -48,6 +49,7 @@ export function useScreenIntro({
     containerStyle,
     floatingOffset = { top: 8, left: 8, right: 8 },
 }: UseScreenIntroOptions) {
+    const { t } = useTranslation();
     const [showIntro, setShowIntro] = useState(false);
     const [introStep, setIntroStep] = useState(0);
     // This state can be used by the screen to determine if it should show certain UI elements
@@ -132,7 +134,7 @@ export function useScreenIntro({
                     onCheckpointLoadedRef.current(checkpoint);
                 }
 
-                const resolvedCheckpoint = checkpoint ?? "pin_required"; // Default assumption if null
+                const resolvedCheckpoint = checkpoint ?? "language_required"; // Default assumption if null
                 const hasSeenIntro = seen === "1";
                 const isDone = resolvedCheckpoint === "done";
 
@@ -272,10 +274,10 @@ export function useScreenIntro({
                             marginRight: floatingOffset?.right ?? 8,
                         }}
                         maxBodyHeight={maxBodyHeight}
-                        title={messages[introStep].title}
-                        description={messages[introStep].description}
+                        title={t(messages[introStep].titleKey)}
+                        description={t(messages[introStep].descriptionKey)}
                         onClose={handleClose}
-                        closeLabel="Następny komunikat"
+                        closeLabel={t("onboarding.nextMessage")}
                     />
                 </Animated.View>
             </View>
@@ -289,6 +291,7 @@ export function useScreenIntro({
         handleClose,
         animatedBottom,
         maxBodyHeight,
+        t,
     ]);
 
     return {

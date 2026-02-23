@@ -3,9 +3,11 @@ import { View, Text, Switch, TextInput } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useTranslation } from "react-i18next";
 
 const LearningSection: React.FC = () => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const {
     colors,
     spellChecking,
@@ -83,13 +85,13 @@ const LearningSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>Nauka</Text>
+      <Text style={styles.sectionHeader}>{t("settings.learning.section")}</Text>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Spellchecking</Text>
+          <Text style={styles.rowTitle}>{t("settings.learning.spellcheck.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Tolerancja 1 błedu przy sprawdzaniu.
+            {t("settings.learning.spellcheck.subtitle")}
           </Text>
         </View>
         <Switch
@@ -101,10 +103,11 @@ const LearningSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Sugestie klawiatury</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.learning.keyboardSuggestions.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach. Uwaga: część klawiatur (np. Samsung, Gboard) może nadal pokazywać pasek podpowiedzi.
-
+            {t("settings.learning.keyboardSuggestions.subtitle")}
           </Text>
         </View>
         <Switch
@@ -116,9 +119,11 @@ const LearningSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Ignoruj znaki diakrytyczne</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.learning.ignoreDiacritics.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            {"Porównuj słowa bez ogonków, np. ą -> a."}
+            {t("settings.learning.ignoreDiacritics.subtitle")}
           </Text>
         </View>
         <Switch
@@ -131,9 +136,11 @@ const LearningSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Przypomnienia o nauce</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.learning.reminders.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Placeholder – docelowo planowane powiadomienia push.
+            {t("settings.learning.reminders.subtitle")}
           </Text>
         </View>
         <Switch
@@ -145,9 +152,9 @@ const LearningSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Liczba fiszek w partii</Text>
+          <Text style={styles.rowTitle}>{t("settings.learning.batchSize.title")}</Text>
           <Text style={styles.rowSubtitle}>
-            Zakres 1-200 fiszek na jedną sesję nauki.
+            {t("settings.learning.batchSize.subtitle")}
           </Text>
         </View>
         <TextInput
@@ -156,7 +163,7 @@ const LearningSection: React.FC = () => {
           value={batchSizeInput}
           onChangeText={handleBatchChange}
           onEndEditing={handleBatchSubmit}
-          placeholder="np. 10"
+          placeholder={t("settings.learning.batchSize.placeholder")}
           placeholderTextColor={`${colors.paragraph}55`}
         />
       </View>

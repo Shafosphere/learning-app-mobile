@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type OnboardingCheckpoint =
+  | "language_required"
   | "pin_required"
   | "activate_required"
   | "done";
@@ -14,6 +15,7 @@ export async function getOnboardingCheckpoint(): Promise<
     const value = await AsyncStorage.getItem(STORAGE_KEY);
     if (!value) return null;
     if (
+      value === "language_required" ||
       value === "pin_required" ||
       value === "activate_required" ||
       value === "done"

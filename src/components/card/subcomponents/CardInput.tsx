@@ -39,6 +39,7 @@ type CardInputProps = {
   suggestionProps: any;
   handleConfirm: () => void;
   shouldUseHangulKeyboardMain: boolean;
+  isMainAnswerNumeric: boolean;
   setIsMainInputFocused: (focused: boolean) => void;
   setHangulTarget: (target: "main" | "correction1" | null) => void;
   canToggleTranslations: boolean;
@@ -66,6 +67,7 @@ export function CardInput({
   suggestionProps,
   handleConfirm,
   shouldUseHangulKeyboardMain,
+  isMainAnswerNumeric,
   setIsMainInputFocused,
   setHangulTarget,
   canToggleTranslations,
@@ -126,6 +128,9 @@ export function CardInput({
           onChangeText={setAnswer}
           autoCapitalize="none"
           {...suggestionProps}
+          keyboardType={
+            isMainAnswerNumeric ? "decimal-pad" : suggestionProps?.keyboardType
+          }
           ref={mainInputRef}
           returnKeyType="done"
           blurOnSubmit={false}
@@ -203,6 +208,7 @@ export function CardInput({
     setIsMainInputFocused,
     setHangulTarget,
     shouldUseHangulKeyboardMain,
+    isMainAnswerNumeric,
     styles,
     typoDiff
   ]);

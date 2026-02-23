@@ -92,6 +92,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.75,
     marginTop: 4,
   },
+  driveButtonContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    columnGap: 8,
+  },
+  driveButtonText: {
+    fontSize: 14,
+    fontWeight: "900",
+    textTransform: "uppercase",
+    textAlign: "center",
+  },
   sliderSection: {
     paddingVertical: 6,
   },
@@ -168,6 +180,48 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "space-between",
     columnGap: 12,
     marginTop: 8,
+  },
+  languageSegment: {
+    flexDirection: "row",
+    alignItems: "stretch",
+    width: "100%",
+    justifyContent: "flex-start",
+    columnGap: 10,
+    marginTop: 8,
+    marginBottom: 6,
+  },
+  languageButton: {
+    // width: 130,
+    // minHeight: 140,
+    borderRadius: 14,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    paddingVertical: 10,
+    rowGap: 8,
+  },
+  languageButtonActive: {
+    backgroundColor: "transparent",
+  },
+  languageButtonFlagImage: {
+    width: 99 / 1.25,
+    height: 66 / 1.25,
+    borderRadius: 4,
+    borderWidth: 4,
+    borderColor: colors.border,
+  },
+  languageButtonFlagImageActive: {
+    borderColor: colors.my_green,
+  },
+  languageButtonLabel: {
+    fontSize: 13,
+    fontWeight: "800",
+    color: colors.paragraph,
+    textAlign: "center",
+  },
+  languageButtonLabelActive: {
+    color: colors.paragraph,
   },
   layoutOption: {
     flexGrow: 0,

@@ -7,26 +7,27 @@ import React, { useState } from "react";
 import { ScrollView, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./SettingsScreen-styles";
 
 const BASE_TAB_CONFIG = [
   {
     key: "ui",
-    label: "UI",
+    labelKey: "settings.tabs.ui",
     icon: "color-palette-outline" as const,
     faIcon: "palette" as const,
   },
   {
     key: "accessibility",
-    label: "Dostępność",
+    labelKey: "settings.tabs.accessibility",
     icon: "accessibility" as const,
   },
-  { key: "learning", label: "Nauka", icon: "school" as const },
-  { key: "coursesData", label: "Kursy i dane", icon: "albums" as const },
+  { key: "learning", labelKey: "settings.tabs.learning", icon: "school" as const },
+  { key: "coursesData", labelKey: "settings.tabs.coursesData", icon: "albums" as const },
 ] as const;
 
 const DEBUG_TAB_CONFIG = [
-  { key: "debug", label: "Debug", icon: "bug-outline" as const },
+  { key: "debug", labelKey: "settings.tabs.debug", icon: "bug-outline" as const },
 ] as const;
 
 type BaseTabKey = (typeof BASE_TAB_CONFIG)[number]["key"];
@@ -34,13 +35,14 @@ type TabKey = BaseTabKey | "debug";
 
 const TAB_CONFIG: readonly {
   key: TabKey;
-  label: string;
+  labelKey: string;
   icon: keyof typeof Ionicons.glyphMap;
   faIcon?: React.ComponentProps<typeof FontAwesome5>["name"];
 }[] = __DEV__ ? [...BASE_TAB_CONFIG, ...DEBUG_TAB_CONFIG] : BASE_TAB_CONFIG;
 
 export default function SettingsScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState<TabKey>(TAB_CONFIG[0].key);
 
   return (
@@ -78,7 +80,7 @@ export default function SettingsScreen() {
                   styles.tabIcon,
                   activeTab === tab.key && styles.tabIconActive,
                 ]}
-                accessibilityLabel={tab.label}
+                accessibilityLabel={t(tab.labelKey)}
               />
             ) : (
               <Ionicons
@@ -88,7 +90,7 @@ export default function SettingsScreen() {
                   styles.tabIcon,
                   activeTab === tab.key && styles.tabIconActive,
                 ]}
-                accessibilityLabel={tab.label}
+                accessibilityLabel={t(tab.labelKey)}
               />
             )}
           </TouchableOpacity>

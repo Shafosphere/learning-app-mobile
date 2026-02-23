@@ -70,6 +70,8 @@ type CardCorrectionProps = {
   setIsCorrectionInput1Focused: (focused: boolean) => void;
   setHangulTarget: (target: "main" | "correction1" | null) => void;
   shouldUseHangulKeyboardCorrection1: boolean;
+  isCorrectionInput1Numeric: boolean;
+  isCorrectionInput2Numeric: boolean;
   previousCorrectionInput2: React.MutableRefObject<string>;
   canToggleTranslations: boolean;
   next: () => void;
@@ -108,6 +110,8 @@ export function CardCorrection({
   setIsCorrectionInput1Focused,
   setHangulTarget,
   shouldUseHangulKeyboardCorrection1,
+  isCorrectionInput1Numeric,
+  isCorrectionInput2Numeric,
   previousCorrectionInput2,
   canToggleTranslations,
   next,
@@ -319,6 +323,11 @@ export function CardCorrection({
             onSubmitEditing={() => focusWithDelay(input2Ref)}
             autoCapitalize="none"
             {...suggestionProps}
+            keyboardType={
+              isCorrectionInput1Numeric
+                ? "decimal-pad"
+                : suggestionProps?.keyboardType
+            }
             showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
             onFocus={() => {
               setIsCorrectionInput1Focused(true);
@@ -406,6 +415,11 @@ export function CardCorrection({
             returnKeyType="done"
             autoCapitalize="none"
             {...suggestionProps}
+            keyboardType={
+              isCorrectionInput2Numeric
+                ? "decimal-pad"
+                : suggestionProps?.keyboardType
+            }
             onKeyPress={({ nativeEvent }) => {
               if (
                 !answerOnly &&

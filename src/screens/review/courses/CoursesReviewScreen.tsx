@@ -43,24 +43,20 @@ export default function CoursesReviewScreen() {
     triggerStrategy: "post_onboarding",
     messages: [
       {
-        title: "Wybierz kurs do powtórek",
-        description:
-          "Dotknij kafelka, by przejść do gry i powtórzyć fiszki z tego kursu.",
+        titleKey: "onboarding.reviewCourses.step1.title",
+        descriptionKey: "onboarding.reviewCourses.step1.description",
       },
       {
-        title: "Jak często się pojawiają?",
-        description:
-          "Może za 2 dni, może za tydzień, a może za rok? Pamiętaj, że żeby zapamiętać, trzeba zapomnieć ;)",
+        titleKey: "onboarding.reviewCourses.step2.title",
+        descriptionKey: "onboarding.reviewCourses.step2.description",
       },
       {
-        title: "Co oznaczają liczby",
-        description:
-          "Czerwona liczba to zaległe powtórki. Zielona oznacza, że na razie nic nie czeka.",
+        titleKey: "onboarding.reviewCourses.step3.title",
+        descriptionKey: "onboarding.reviewCourses.step3.description",
       },
       {
-        title: "Wyłączanie powtórek",
-        description:
-          "W ustawieniach kursu możesz wyłączyć powtórki — wtedy nie pojawi się na tej liście.",
+        titleKey: "onboarding.reviewCourses.step4.title",
+        descriptionKey: "onboarding.reviewCourses.step4.description",
       },
     ],
   });

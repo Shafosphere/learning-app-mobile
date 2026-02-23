@@ -56,6 +56,19 @@ export type UserDataExport = {
   officialCourses?: CustomCourseExport[];
 };
 
+type ExportWriteResult = {
+  fileUri: string;
+  bytesWritten: number;
+  payload: UserDataExport;
+};
+
+type ShareResult = {
+  sharingSupported: boolean;
+  shared: boolean;
+  cancelled: boolean;
+  shareError?: unknown;
+};
+
 async function collectBoxesSnapshots(prefixes: string[]): Promise<
   Record<string, SavedBoxesV2>
 > {
@@ -157,6 +170,95 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
   };
 }
 
+function buildExportFileName(): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return `learning-app-export-${timestamp}.json`;
+}
+
+async function writeExportToLocalFile(): Promise<ExportWriteResult> {
+  const payload = await buildUserDataExport();
+  const json = JSON.stringify(payload, null, 2);
+  const fileName = buildExportFileName();
+  const baseDir = FileSystem.documentDirectory ?? FileSystem.cacheDirectory;
+  if (!baseDir) {
+    throw new Error("Brak dostępu do katalogu dokumentów.");
+  }
+
+  const fileUri = `${baseDir}${fileName}`;
+  await FileSystem.writeAsStringAsync(fileUri, json, {
+    encoding: FileSystem.EncodingType.UTF8,
+  });
+  const info = await FileSystem.getInfoAsync(fileUri);
+
+  return {
+    fileUri,
+    bytesWritten: info.exists ? info.size : json.length,
+    payload,
+  };
+}
+
+function isShareCancelledError(error: unknown): boolean {
+  if (typeof error === "string") {
+    const lower = error.toLowerCase();
+    return lower.includes("cancel") || lower.includes("dismiss");
+  }
+  if (error instanceof Error) {
+    const lower = error.message.toLowerCase();
+    return lower.includes("cancel") || lower.includes("dismiss");
+  }
+  return false;
+}
+
+async function shareJsonFile(
+  fileUri: string,
+  dialogTitle: string
+): Promise<ShareResult> {
+  let sharingSupported = false;
+  try {
+    sharingSupported = await Sharing.isAvailableAsync();
+  } catch (error) {
+    console.warn("[exportUserData] Sharing availability check failed", error);
+  }
+
+  if (!sharingSupported) {
+    return {
+      sharingSupported: false,
+      shared: false,
+      cancelled: false,
+    };
+  }
+
+  try {
+    await Sharing.shareAsync(fileUri, {
+      mimeType: "application/json",
+      UTI: "public.json",
+      dialogTitle,
+    });
+
+    return {
+      sharingSupported: true,
+      shared: true,
+      cancelled: false,
+    };
+  } catch (error) {
+    if (isShareCancelledError(error)) {
+      return {
+        sharingSupported: true,
+        shared: false,
+        cancelled: true,
+      };
+    }
+
+    console.warn("[exportUserData] Sharing failed", error);
+    return {
+      sharingSupported: true,
+      shared: false,
+      cancelled: false,
+      shareError: error,
+    };
+  }
+}
+
 export async function exportUserDataToFile(): Promise<{
   fileUri: string;
   bytesWritten: number;
@@ -164,8 +266,7 @@ export async function exportUserDataToFile(): Promise<{
 }> {
   const payload = await buildUserDataExport();
   const json = JSON.stringify(payload, null, 2);
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  const fileName = `learning-app-export-${timestamp}.json`;
+  const fileName = buildExportFileName();
 
   if (Platform.OS === "android") {
     const permissions =
@@ -191,23 +292,33 @@ export async function exportUserDataToFile(): Promise<{
       payload,
     };
   } else {
-    // iOS and others: Save to cache/document first, then share
-    const baseDir = FileSystem.documentDirectory ?? FileSystem.cacheDirectory;
-    if (!baseDir) {
-      throw new Error("Brak dostępu do katalogu dokumentów.");
-    }
-    const fileUri = `${baseDir}${fileName}`;
+    return writeExportToLocalFile();
+  }
+}
 
-    await FileSystem.writeAsStringAsync(fileUri, json, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
-    const info = await FileSystem.getInfoAsync(fileUri);
+export async function exportUserDataToGoogleDrive(): Promise<{
+  fileUri: string;
+  bytesWritten: number;
+  payload: UserDataExport;
+  sharingSupported: boolean;
+  shared: boolean;
+  cancelled: boolean;
+  shareError?: unknown;
+}> {
+  try {
+    const fileResult = await writeExportToLocalFile();
+    const shareResult = await shareJsonFile(
+      fileResult.fileUri,
+      "Eksportuj do Google Drive"
+    );
 
     return {
-      fileUri,
-      bytesWritten: info.exists ? info.size : json.length,
-      payload,
+      ...fileResult,
+      ...shareResult,
     };
+  } catch (error) {
+    console.error("[exportUserData] Google Drive export failed", error);
+    throw error;
   }
 }
 
@@ -233,35 +344,13 @@ export async function exportAndShareUserData(): Promise<{
       };
     }
 
-    // iOS: Now share/save the file
-    let sharingSupported = false;
-    try {
-      sharingSupported = await Sharing.isAvailableAsync();
-    } catch (error) {
-      console.warn("[exportUserData] Sharing availability check failed", error);
-    }
-
-    let shared = false;
-    let shareError: unknown;
-    if (sharingSupported) {
-      try {
-        await Sharing.shareAsync(result.fileUri, {
-          mimeType: "application/json",
-          UTI: "public.json", // Important for iOS to recognize as JSON
-          dialogTitle: "Zapisz swój postęp",
-        });
-        shared = true;
-      } catch (error) {
-        shareError = error;
-        console.warn("[exportUserData] Sharing failed", error);
-      }
-    }
+    const shareResult = await shareJsonFile(result.fileUri, "Zapisz swój postęp");
 
     return {
       ...result,
-      sharingSupported,
-      shared,
-      shareError,
+      sharingSupported: shareResult.sharingSupported,
+      shared: shareResult.shared,
+      shareError: shareResult.shareError,
     };
   } catch (error) {
     console.error("[exportUserData] Export failed", error);

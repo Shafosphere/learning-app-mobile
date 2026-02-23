@@ -1,5 +1,6 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { getFlagSource } from "@/src/constants/languageFlags";
 import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
@@ -16,6 +17,8 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { useTranslation } from "react-i18next";
+import type { UiLanguage } from "@/src/i18n";
 
 const classicPreview = require("@/assets/images/settings/sett_classic.png");
 const carouselPreview = require("@/assets/images/settings/sett_caro.png");
@@ -24,24 +27,40 @@ const bottomButtonsPreview = require("@/assets/images/settings/onehand.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";
-  label: string;
+  labelKey: string;
   preview: number;
 };
 
 const layoutOptions: LayoutOption[] = [
-  { key: "classic", label: "Klasyczny", preview: classicPreview },
-  { key: "carousel", label: "Karuzela", preview: carouselPreview },
+  {
+    key: "classic",
+    labelKey: "settings.appearance.layoutSelector.classic",
+    preview: classicPreview,
+  },
+  {
+    key: "carousel",
+    labelKey: "settings.appearance.layoutSelector.carousel",
+    preview: carouselPreview,
+  },
 ];
 
 type ActionButtonsOption = {
   key: "top" | "bottom";
-  label: string;
+  labelKey: string;
   preview: number;
 };
 
 const actionButtonsOptions: ActionButtonsOption[] = [
-  { key: "top", label: "U góry", preview: topButtonsPreview },
-  { key: "bottom", label: "Na dole", preview: bottomButtonsPreview },
+  {
+    key: "top",
+    labelKey: "settings.appearance.actionsSelector.top",
+    preview: topButtonsPreview,
+  },
+  {
+    key: "bottom",
+    labelKey: "settings.appearance.actionsSelector.bottom",
+    preview: bottomButtonsPreview,
+  },
 ];
 
 type ThickSliderProps = {
@@ -170,7 +189,10 @@ const ThickSlider: React.FC<ThickSliderProps> = ({
 
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const {
+    uiLanguage,
+    setUiLanguage,
     theme,
     toggleTheme,
     feedbackEnabled,
@@ -243,6 +265,12 @@ const AppearanceSection: React.FC = () => {
       await triggerHaptics();
     }
   };
+  const handleUiLanguageSelect = async (nextLanguage: UiLanguage) => {
+    if (nextLanguage !== uiLanguage) {
+      await setUiLanguage(nextLanguage);
+      await triggerHaptics();
+    }
+  };
 
   const handleVolumePreviewChange = useCallback((value: number) => {
     setVolumePreview(value);
@@ -280,13 +308,65 @@ const AppearanceSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>Wygląd</Text>
+      <Text style={styles.sectionHeader}>{t("settings.appearance.section")}</Text>
+
+      <View style={[styles.row, { alignItems: "flex-start" }]}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>{t("settings.uiLanguage.title")}</Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.uiLanguage.subtitle")}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.languageSegment}>
+        {(
+          [
+            { key: "pl", flagCode: "pl", labelKey: "settings.uiLanguage.polish" },
+            { key: "en", flagCode: "en", labelKey: "settings.uiLanguage.english" },
+          ] as const
+        ).map((option) => {
+          const isActive = uiLanguage === option.key;
+          const flagSource = getFlagSource(option.flagCode, "active");
+          return (
+            <TouchableOpacity
+              key={option.key}
+              activeOpacity={0.7}
+              onPress={() => handleUiLanguageSelect(option.key)}
+              style={[
+                styles.languageButton,
+                isActive && styles.languageButtonActive,
+              ]}
+            >
+              {flagSource ? (
+                <Image
+                  source={flagSource}
+                  style={[
+                    styles.languageButtonFlagImage,
+                    isActive && styles.languageButtonFlagImageActive,
+                  ]}
+                />
+              ) : null}
+              <Text
+                style={[
+                  styles.languageButtonLabel,
+                  isActive && styles.languageButtonLabelActive,
+                ]}
+              >
+                {t(option.labelKey)}
+              </Text>
+            </TouchableOpacity>
+          );
+        })}
+      </View>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Ciemny motyw</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.darkTheme.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Przełącz interfejs pomiędzy jasnym a ciemnym trybem.
+            {t("settings.appearance.darkTheme.subtitle")}
           </Text>
         </View>
         <Switch
@@ -298,9 +378,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wibracje</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.vibrations.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Krótkie wibracje w kluczowych interakcjach aplikacji.
+            {t("settings.appearance.vibrations.subtitle")}
           </Text>
         </View>
         <Switch
@@ -312,9 +394,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wyłącz reakcje</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.disableReactions.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Wycisza bąbelki z cytatami/reakcjami w aplikacji. Nie dotyczy powiadomień kursu.
+            {t("settings.appearance.disableReactions.subtitle")}
           </Text>
         </View>
         <Switch
@@ -326,9 +410,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.sliderSection}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Głośność efektów</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.effectsVolume.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Regulacja głośności dźwięków w aplikacji.
+            {t("settings.appearance.effectsVolume.subtitle")}
           </Text>
         </View>
         <View style={styles.sliderRow}>
@@ -349,9 +435,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Miny pudełek</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.boxFaces.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Uśmiechnięte / smutne pudełka w zależności od statusu.
+            {t("settings.appearance.boxFaces.subtitle")}
           </Text>
         </View>
         <Switch
@@ -363,9 +451,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={[styles.row, { alignItems: "flex-start" }]}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wybierz schemat pudełek</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.layoutSelector.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Preferowany widok listy fiszek podczas nauki.
+            {t("settings.appearance.layoutSelector.subtitle")}
           </Text>
         </View>
       </View>
@@ -396,7 +486,7 @@ const AppearanceSection: React.FC = () => {
                   isActive && styles.layoutLabelActive,
                 ]}
               >
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </TouchableOpacity>
           );
@@ -405,9 +495,11 @@ const AppearanceSection: React.FC = () => {
 
       <View style={[styles.row, { alignItems: "flex-start", marginTop: 6 }]}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>Wybierz układ</Text>
+          <Text style={styles.rowTitle}>
+            {t("settings.appearance.actionsSelector.title")}
+          </Text>
           <Text style={styles.rowSubtitle}>
-            Wybierz rozmieszczenie przycisków w trybach:    prawda/fałsz oraz umiem/nie umiem.
+            {t("settings.appearance.actionsSelector.subtitle")}
           </Text>
         </View>
       </View>
@@ -440,7 +532,7 @@ const AppearanceSection: React.FC = () => {
                   isActive && styles.layoutLabelActive,
                 ]}
               >
-                {option.label}
+                {t(option.labelKey)}
               </Text>
             </TouchableOpacity>
           );
