@@ -208,11 +208,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: 99 / 1.25,
     height: 66 / 1.25,
     borderRadius: 4,
-    borderWidth: 4,
+    borderWidth: 1,
     borderColor: colors.border,
   },
   languageButtonFlagImageActive: {
     borderColor: colors.my_green,
+    borderWidth: 4,
   },
   languageButtonLabel: {
     fontSize: 13,

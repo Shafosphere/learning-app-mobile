@@ -4,6 +4,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import MyButton from "@/src/components/button/button";
 import Card from "@/src/components/card/card";
+import { CardHint } from "@/src/components/card/subcomponents/CardHint";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { ThemeColors } from "@/src/theme/theme";
@@ -104,7 +105,6 @@ function CardPreview({
     });
   }, []);
 
-  const noopAsync = React.useCallback(async () => {}, []);
   const setCorrectionRewers = React.useCallback(() => {}, []);
   const handleHintUpdate = React.useCallback(() => {}, []);
 
@@ -121,13 +121,33 @@ function CardPreview({
         correction={correction}
         wrongInputChange={wrongInputChange}
         setCorrectionRewers={setCorrectionRewers}
-        onDownload={noopAsync}
-        downloadDisabled={false}
         introMode={false}
         onHintUpdate={handleHintUpdate}
         isFocused
         backgroundColorOverride={backgroundColorOverride}
         textColorOverride={textColorOverride}
+      />
+    </View>
+  );
+}
+
+function HintDotsPreview() {
+  return (
+    <View style={{ alignItems: "center" }}>
+      <CardHint
+        currentHint={null}
+        isEditingHint={false}
+        hintDraft=""
+        setHintDraft={() => {}}
+        startHintEditing={() => {}}
+        cancelHintEditing={() => {}}
+        finishHintEditing={() => {}}
+        deleteHint={() => {}}
+        hintActionsStyle={{}}
+        shouldMarqueeHint={false}
+        selectedItem={{ id: SAMPLE_WORD.id }}
+        onHintUpdate={() => {}}
+        onHintInputBlur={() => {}}
       />
     </View>
   );
@@ -154,47 +174,38 @@ export type WikiTopic = {
 };
 
 export const WIKI_TOPICS: WikiTopic[] = [
-  {
-    title: "Intro",
-    subtitle: "O czym jest ta apka",
-    blocks: [
-      {
-        type: "paragraph",
-        text: "Hej! Ta aplikacja to Twój osobisty trener do nauki na fiszkach.",
-      },
-      {
-        type: "paragraph",
-        text: "Zapomnij o starej metodzie „zakryj paluszkiem i powtórz w myślach” – tutaj wszystko działa sprawniej i bardziej aktywnie.",
-      },
-      { type: "heading", icon: "🎯", text: "Jak to działa?", tone: "pink" },
-      {
-        type: "paragraph",
-        text: "Używamy zmodyfikowanego systemu Leitnera (znasz pewnie pudełka na fiszki).",
-      },
-      {
-        type: "list",
-        items: [
-          "Trudne słówka wracają częściej",
-          "Opanowane pojawiają się rzadziej",
-          "Ty uczysz się efektywnie, bez tracenia czasu",
-        ],
-        tone: "pink",
-      },
-      { type: "heading", icon: "💡", text: "Dlaczego warto?", tone: "green" },
-      {
-        type: "paragraph",
-        text: "Ta apka powstała, bo chciałem mieć coś prostego, działającego offline i nie szpiegującego mnie.",
-      },
-      {
-        type: "paragraph",
-        text: "Żadnych kont, żadnego wysyłania danych – wszystko zostaje na Twoim telefonie.",
-      },
-      {
-        type: "paragraph",
-        text: "Tworzona w 100% przeze mnie, dla Ciebie. Offline, prywatna, bez zbędnych fajerwerków. Po prostu działa. I tyle. 🚀",
-      },
-    ],
-  },
+  // {
+  //   title: "Intro",
+  //   subtitle: "O czym jest ta apka",
+  //   blocks: [
+  //     { type: "heading", icon: "🎯", text: "Jak to działa?", tone: "pink" },
+  //     {
+  //       type: "paragraph",
+  //       text: "Używamy zmodyfikowanego systemu Leitnera.",
+  //     },
+  //     {
+  //       type: "list",
+  //       items: [
+  //         "Trudne słówka wracają częściej",
+  //         "Opanowane pojawiają się rzadziej",
+  //       ],
+  //       tone: "pink",
+  //     },
+  //     { type: "heading", icon: "💡", text: "Dlaczego warto?", tone: "green" },
+  //     {
+  //       type: "paragraph",
+  //       text: "Ta apka powstała, bo chciałem mieć coś prostego, działającego offline i nie szpiegującego mnie.",
+  //     },
+  //     {
+  //       type: "paragraph",
+  //       text: "Żadnych kont, żadnego wysyłania danych – wszystko zostaje na Twoim telefonie.",
+  //     },
+  //     {
+  //       type: "paragraph",
+  //       text: "Tworzona w 100% przeze mnie, dla Ciebie. Offline, prywatna, bez zbędnych fajerwerków. Po prostu działa. I tyle. 🚀",
+  //     },
+  //   ],
+  // },
   {
     title: "Przypinanie kursu",
     subtitle: "Jak przypiąć kurs",
@@ -280,7 +291,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
       },
       {
         type: "callout",
-        text: "Nie przesadzaj z liczbą przypiętych kursów – im mniej, tym łatwiej się skupić. Możesz je zmienić w każdej chwili.",
+        text: "Nie przesadzaj z liczbą przypiętych kursów - im mniej, tym łatwiej się skupić. Możesz je zmienić w każdej chwili.",
         tone: "pink",
       },
     ],
@@ -433,10 +444,6 @@ export const WIKI_TOPICS: WikiTopic[] = [
     title: "Fiszki",
     subtitle: "Jak działa gra?",
     blocks: [
-      {
-        type: "paragraph",
-        text: "To serce aplikacji. Tutaj uczysz się na fiszkach w sposób prosty, ale skuteczny.",
-      },
 
       // 1) Szybki start (użytkownik ma od razu ruszyć)
       { type: "heading", icon: "⚡", text: "Szybki start", tone: "green" },
@@ -452,23 +459,23 @@ export const WIKI_TOPICS: WikiTopic[] = [
         ],
       },
 
-      {
-        type: "example",
-        tone: "yellow",
-        render: (colors) => (
-          <Text
-            style={{
-              fontSize: 15,
-              lineHeight: 22,
-              color: colors.paragraph,
-              fontStyle: "italic",
-            }}
-          >
-            Jeśli nie masz jeszcze aktywnego kursu, przypnij go i aktywuj w
-            sekcji kursów.
-          </Text>
-        ),
-      },
+      // {
+      //   type: "example",
+      //   tone: "yellow",
+      //   render: (colors) => (
+      //     <Text
+      //       style={{
+      //         fontSize: 15,
+      //         lineHeight: 22,
+      //         color: colors.paragraph,
+      //         fontStyle: "italic",
+      //       }}
+      //     >
+      //       Jeśli nie masz jeszcze aktywnego kursu, przypnij go i aktywuj w
+      //       sekcji kursów.
+      //     </Text>
+      //   ),
+      // },
 
       // 2) Interfejs: co oznacza co
       {
@@ -569,11 +576,11 @@ export const WIKI_TOPICS: WikiTopic[] = [
 
       {
         type: "paragraph",
-        text: "1) Kliknij „Dodaj fiszki”. Do pudełka 1 wpadnie 10 nowych kart.",
+        text: "1) Kliknij „Dodaj fiszki”. Do pudełka numer jeden wpadnie 10 nowych kart.",
       },
       {
         type: "paragraph",
-        text: "2) Kliknij pudełko 1, aby je aktywować. Aktywne pudełko ma zieloną kreskę pod spodem.",
+        text: "2) Kliknij pierwsze pudełko aby je aktywować. Aktywne pudełko ma zieloną kreskę pod spodem.",
       },
       {
         type: "example",
@@ -643,6 +650,30 @@ export const WIKI_TOPICS: WikiTopic[] = [
         text: "6) Gdy skończą się fiszki, kliknij „Dodaj fiszki” i kontynuuj.",
       },
 
+
+      {
+        type: "paragraph",
+        text: "7) Jeśli jakaś fiszka nie chce wejść do głowy, nad kartą kliknij przycisk: ",
+      },
+      {
+        type: "example",
+        tone: "yellow",
+        render: (colors) => (
+          <View style={{ gap: 8 }}>
+            <HintDotsPreview />
+            <Text
+              style={{
+                fontSize: 14,
+                lineHeight: 20,
+                color: colors.paragraph,
+                textAlign: "center",
+              }}
+            >
+              Możesz dodać krótkie skojarzenie lub wskazówkę widoczną przy tej fiszce w trakcie nauki.
+            </Text>
+          </View>
+        ),
+      },
       // 5) Praktyczne wskazówki
       { type: "heading", icon: "🧠", text: "Wskazówki", tone: "yellow" },
       {
@@ -654,10 +685,6 @@ export const WIKI_TOPICS: WikiTopic[] = [
         ],
       },
 
-      {
-        type: "paragraph",
-        text: "Jeżeli masz problem z zapamietaniem czegoś i fraza nie chce wejśc do głowy, to nad kartą jest przycisk '...'. Możesz tam dopisać skojarzenie, które będzie się wyświetlać podczas nauki tej fiszki.",
-      },
     ],
   },
 

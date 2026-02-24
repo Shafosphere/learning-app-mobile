@@ -78,20 +78,16 @@ export default function CoursePinScreen() {
 
   const persistCheckpointIfNeeded = useCallback(
     (next: OnboardingCheckpoint) => {
-      setCheckpoint((prev) => {
-        const current = prev ?? "pin_required";
-        if (current === "done") {
-          return current;
-        }
-        if (current === next) {
-          void setOnboardingCheckpoint(next);
-          return current;
-        }
-        void setOnboardingCheckpoint(next);
-        return next;
-      });
+      const current = checkpoint ?? "pin_required";
+      if (current === "done") {
+        return;
+      }
+      if (current !== next) {
+        setCheckpoint(next);
+      }
+      void setOnboardingCheckpoint(next);
     },
-    []
+    [checkpoint]
   );
 
   useEffect(() => {
@@ -395,8 +391,8 @@ export default function CoursePinScreen() {
       {introActive ? (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
-            <Pressable
-              accessibilityRole="button"
+            <MyButton
+              text="Dalej"
               accessibilityLabel="Przejdź dalej do aktywacji"
               disabled={!hasAnyPinned}
               onPress={() => {
@@ -404,20 +400,9 @@ export default function CoursePinScreen() {
                 void setOnboardingCheckpoint("activate_required");
                 router.replace("/coursepanel");
               }}
-              style={[
-                styles.nextButton,
-                !hasAnyPinned && styles.nextButtonDisabled,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.nextButtonLabel,
-                  !hasAnyPinned && styles.nextButtonLabelDisabled,
-                ]}
-              >
-                Dalej
-              </Text>
-            </Pressable>
+              color="my_green"
+              width={90}
+            />
           </View>
         </View>
       ) : (

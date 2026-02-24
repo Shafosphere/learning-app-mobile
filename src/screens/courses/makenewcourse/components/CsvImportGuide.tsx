@@ -241,6 +241,23 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 const GUIDE_SECTIONS: GuideSection[] = [
   {
+    key: "self_assess",
+    title: "3) Samoocena",
+    summary: "Uzytkownik ocenia: umiem albo nie umiem.",
+    fields: [
+      {
+        key: "front_text",
+        description: "Pytanie lub temat do samooceny.",
+        required: true,
+      },
+      {
+        key: "explanation",
+        description: "Tresc, ktora pokazuje sie po samoocenie.",
+        required: false,
+      },
+    ],
+  },
+  {
     key: "traditional",
     title: "1) Odpowiedz otwarta",
     summary: "Klasyczna fiszka: pytanie z przodu, odpowiedz z tylu.",
@@ -286,23 +303,6 @@ const GUIDE_SECTIONS: GuideSection[] = [
       {
         key: "explanation",
         description: "Wyjasnienie po odpowiedzi.",
-        required: false,
-      },
-    ],
-  },
-  {
-    key: "self_assess",
-    title: "3) Samoocena",
-    summary: "Uzytkownik ocenia: umiem albo nie umiem.",
-    fields: [
-      {
-        key: "front_text",
-        description: "Pytanie lub temat do samooceny.",
-        required: true,
-      },
-      {
-        key: "explanation",
-        description: "Tresc, ktora pokazuje sie po samoocenie.",
         required: false,
       },
     ],
@@ -447,7 +447,7 @@ export function CsvImportGuide({
   isAnalyzing = false,
 }: CsvImportGuideProps) {
   const styles = useStyles();
-  const [expandedKey, setExpandedKey] = useState<GuideSectionKey>("traditional");
+  const [expandedKey, setExpandedKey] = useState<GuideSectionKey>("self_assess");
 
   return (
     <View style={styles.container}>

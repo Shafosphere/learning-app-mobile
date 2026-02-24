@@ -1,4 +1,5 @@
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { Animated, Pressable, Text, TextInput, View } from "react-native";
 import { useStyles } from "../card-styles";
@@ -74,29 +75,38 @@ export function CardHint({
                         returnKeyType="done"
                     />
                     <Animated.View style={[styles.hintActions, hintActionsStyle]}>
-                        <Pressable
+                        <MyButton
+                            text={canDelete ? "Usuń" : "Anuluj"}
                             onPress={canDelete ? deleteHint : cancelHintEditing}
-                            style={({ pressed }) => [
+                            color="secondBackground"
+                            width="auto"
+                            style={[
                                 styles.hintActionButton,
                                 styles.hintActionGhost,
-                                pressed && styles.hintActionPressed,
                             ]}
-                        >
-                            <Text style={styles.hintActionText}>
-                                {canDelete ? "Usuń" : "Anuluj"}
-                            </Text>
-                        </Pressable>
-                        <Pressable
+                            pressedStyle={styles.hintActionPressed}
+                            textStyle={[
+                                styles.hintActionText,
+                                styles.hintActionTextNoTransform,
+                            ]}
+                        />
+                        <MyButton
+                            text="Zapisz"
                             onPress={finishHintEditing}
                             disabled={!hintDraft.trim()}
-                            style={({ pressed }) => [
+                            color="secondBackground"
+                            width="auto"
+                            style={[
                                 styles.hintActionButton,
-                                (!hintDraft.trim() || pressed) && styles.hintActionPressed,
                                 !hintDraft.trim() && styles.hintActionDisabled,
                             ]}
-                        >
-                            <Text style={styles.hintActionTextPrimaryAcept}>Zapisz</Text>
-                        </Pressable>
+                            pressedStyle={styles.hintActionPressed}
+                            textStyle={[
+                                styles.hintActionTextPrimaryAcept,
+                                styles.hintActionTextNoTransform,
+                                !hintDraft.trim() && styles.hintActionDisabled,
+                            ]}
+                        />
                     </Animated.View>
                 </View>
             )}

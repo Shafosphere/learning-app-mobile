@@ -1,0 +1,198 @@
+front_text,back_text
+Albania,Tirana
+Andora,Andora
+Austria,Wiedeń
+Belgia,Bruksela
+Białoruś,Mińsk
+Bośnia i Hercegowina,Sarajewo
+Bułgaria,Sofia
+Chorwacja,Zagrzeb
+Czarnogóra,Podgorica
+Czechy,Praga
+Dania,Kopenhaga
+Estonia,Tallinn
+Finlandia,Helsinki
+Francja,Paryż
+Grecja,Ateny
+Hiszpania,Madryt
+Holandia,Amsterdam / Haga
+Irlandia,Dublin
+Islandia,Reykjavík
+Kosowo,Prisztina
+Liechtenstein,Vaduz
+Litwa,Wilno
+Luksemburg,Luksemburg
+Macedonia Północna,Skopje
+Malta,Valletta
+Monako,Monako
+Mołdawia,Kiszyniów
+Niemcy,Berlin
+Norwegia,Oslo
+Polska,Warszawa
+Portugalia,Lizbona
+Rumunia,Bukareszt
+San Marino,San Marino
+Serbia,Belgrad
+Szwajcaria,Berno
+Szwecja,Sztokholm
+Słowacja,Bratysława
+Słowenia,Lublana
+Ukraina,Kijów
+Watykan,Watykan
+Wielka Brytania,Londyn
+Węgry,Budapeszt
+Włochy,Rzym
+Łotwa,Ryga
+Rosja,Moskwa
+Afganistan,Kabul
+Arabia Saudyjska,Rijad
+Armenia,Erywań
+Azerbejdżan,Baku
+Bahrajn,Manama
+Bangladesz,Dhaka
+Bhutan,Thimphu
+Brunei,Bandar Seri Begawan
+Chiny,Pekin
+Cypr,Nikozja
+Filipiny,Manila
+Gruzja,Tbilisi
+Indie,Nowe Delhi
+Indonezja,Dżakarta
+Irak,Bagdad
+Iran,Teheran
+Izrael,Jerozolima
+Japonia,Tokio
+Jemen,Sana
+Jordania,Amman
+Kambodża,Phnom Penh
+Katar,Doha
+Kirgistan,Biszkek
+Korea Południowa,Seul
+Korea Północna,Pjongjang
+Kuwejt,Kuwejt
+Laos,Wientian
+Liban,Bejrut
+Malediwy,Male
+Malezja,Kuala Lumpur / Putrajaya
+Mjanma,Naypyidaw
+Mongolia,Ułan Bator
+Nepal,Katmandu
+Oman,Maskat
+Pakistan,Islamabad
+Singapur,Singapur
+Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
+Syria,Damaszek
+Tadżykistan,Duszanbe
+Tajlandia,Bangkok
+Timor Wschodni,Dili
+Turkmenistan,Aszchabad
+Uzbekistan,Taszkent
+Wietnam,Hanoi
+Zjednoczone Emiraty Arabskie,Abu Zabi
+Kazachstan,Astana
+Turcja,Ankara
+Algieria,Algier
+Angola,Luanda
+Benin,Porto-Novo / Kotonu
+Botswana,Gaborone
+Burkina Faso,Wagadugu
+Burundi,Gitega / Bużumbura
+Czad,Ndżamena
+Demokratyczna Republika Konga,Kinszasa
+Dżibuti,Dżibuti
+Erytrea,Asmara
+Eswatini,Mbabane / Lobamba
+Etiopia,Addis Abeba
+Gabon,Libreville
+Gambia,Bandżul
+Ghana,Akra
+Gwinea,Konakry
+Gwinea Bissau,Bissau
+Gwinea Równikowa,Malabo
+Kamerun,Jaunde
+Kenia,Nairobi
+Komory,Moroni
+Kongo,Brazzaville
+Lesotho,Maseru
+Liberia,Monrovia
+Libia,Trypolis
+Madagaskar,Antananarywa
+Malawi,Lilongwe
+Mali,Bamako
+Maroko,Rabat
+Mauretania,Nawakszut
+Mauritius,Port Louis
+Mozambik,Maputo
+Namibia,Windhuk
+Niger,Niamey
+Nigeria,Abudża
+Południowa Afryka,Pretoria
+Republika Zielonego Przylądka,Praia
+Republika Środkowoafrykańska,Bangi
+Rwanda,Kigali
+Senegal,Dakar
+Seszele,Victoria
+Sierra Leone,Freetown
+Somalia,Mogadiszu
+Sudan,Chartum
+Sudan Południowy,Dżuba
+Tanzania,Dodoma / Dar es Salaam
+Togo,Lomé
+Tunezja,Tunis
+Uganda,Kampala
+Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
+Wyspy Świętego Tomasza i Książęca,São Tomé
+Zambia,Lusaka
+Zimbabwe,Harare
+Egipt,Kair
+Antigua i Barbuda,Saint John’s
+Bahamy,Nassau
+Barbados,Bridgetown
+Belize,Belmopan
+Dominika,Roseau
+Dominikana,Santo Domingo
+Grenada,Saint George’s
+Gwatemala,Gwatemala
+Haiti,Port-au-Prince
+Honduras,Tegucigalpa
+Jamajka,Kingston
+Kanada,Ottawa
+Kostaryka,San José
+Kuba,Hawana
+Meksyk,Meksyk
+Nikaragua,Managua
+Panama,Panama
+Saint Kitts i Nevis,Basseterre
+Saint Lucia,Castries
+Saint Vincent i Grenadyny,Kingstown
+Salwador,San Salvador
+Stany Zjednoczone,Waszyngton
+Argentyna,Buenos Aires
+Boliwia,Sucre
+Brazylia,Brasília
+Chile,Santiago
+Ekwador,Quito
+Gujana,Georgetown
+Kolumbia,Bogota
+Paragwaj,Asunción
+Peru,Lima
+Surinam,Paramaribo
+Trynidad i Tobago,Port-of-Spain
+Urugwaj,Montevideo
+Wenezuela,Caracas
+Australia,Canberra
+Fidżi,Suva
+Kiribati,Bairiki
+Mikronezja,Palikir
+Nauru,Yaren
+Niue,Alofi
+Nowa Zelandia,Wellington
+Palau,Ngerulmud
+Papua-Nowa Gwinea,Port Moresby
+Samoa,Apia
+Tonga,Nuku’alofa
+Tuvalu,Vaiaku
+Vanuatu,Port Vila
+Wyspy Cooka,Avarua
+Wyspy Marshalla,Delap
+Wyspy Salomona,Honiara

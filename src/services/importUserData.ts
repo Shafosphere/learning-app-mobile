@@ -188,6 +188,7 @@ async function restoreOfficialCourse(
         hintBack: string | null;
         imageFront: string | null;
         imageBack: string | null;
+        explanation: string | null;
         position: number | null;
         flipped: number;
         answerOnly: number;
@@ -204,6 +205,7 @@ async function restoreOfficialCourse(
            cf.hint_back     AS hintBack,
            cf.image_front   AS imageFront,
            cf.image_back    AS imageBack,
+           cf.explanation   AS explanation,
            cf.position      AS position,
            cf.flipped       AS flipped,
            cf.answer_only  AS answerOnly,
@@ -237,6 +239,7 @@ async function restoreOfficialCourse(
                 hintBack: row.hintBack,
                 imageFront: row.imageFront,
                 imageBack: row.imageBack,
+                explanation: row.explanation,
                 answers: [],
                 position: row.position,
                 flipped: row.flipped === 1,
@@ -253,6 +256,9 @@ async function restoreOfficialCourse(
             const list = frontBackMap.get(key) ?? [];
             list.push(record);
             frontBackMap.set(key, list);
+        }
+        if (!record) {
+            continue;
         }
         if (row.answerText) {
             record.answers.push(row.answerText);

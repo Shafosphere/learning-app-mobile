@@ -33,8 +33,22 @@ import { LanguageCourse } from "../types/course";
 import type { CEFRLevel } from "../types/language";
 import {
   resetCustomReviewsForCourse,
+  getLearningEventsHourlyDistribution,
+  getLearningEventsSummary,
+  getLearningEventsWeekdayDistribution,
 } from "../db/sqlite/db";
 import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
+import {
+  type ReminderPermissionState,
+  cancelLearningReminderNotification,
+  getReminderPermissionState,
+  requestReminderPermissions,
+  scheduleLearningReminderNotification,
+} from "@/src/services/learningReminderNotifications";
+import {
+  computeSmartReminderPlan,
+  type SmartReminderProfile,
+} from "@/src/services/smartReminders";
 
 // Rozszerzamy typ Text, aby uwzględnić defaultProps
 type TextWithDefaultProps = typeof Text & {
@@ -84,6 +98,7 @@ function findCourseIndex(
 }
 
 const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
+const REMINDER_ANALYTICS_WINDOW_MS = 28 * 24 * 60 * 60 * 1000;
 
 export type CourseBoxZeroKeyParams = {
   sourceLang?: string | null;
@@ -295,6 +310,11 @@ interface SettingsContextValue {
   learningRemindersEnabled: boolean;
   setLearningRemindersEnabled: (value: boolean) => Promise<void>;
   toggleLearningRemindersEnabled: () => Promise<void>;
+  learningReminderNextAt: number | null;
+  learningReminderProfile: SmartReminderProfile;
+  learningReminderPreferredWeekdays: number[];
+  learningReminderPermissionState: ReminderPermissionState;
+  refreshLearningReminderSchedule: () => Promise<void>;
   statsFireEffectEnabled: boolean;
   setStatsFireEffectEnabled: (value: boolean) => Promise<void>;
   toggleStatsFireEffectEnabled: () => Promise<void>;
@@ -412,6 +432,11 @@ const defaultValue: SettingsContextValue = {
   learningRemindersEnabled: false,
   setLearningRemindersEnabled: async () => {},
   toggleLearningRemindersEnabled: async () => {},
+  learningReminderNextAt: null,
+  learningReminderProfile: "unknown",
+  learningReminderPreferredWeekdays: [],
+  learningReminderPermissionState: "undetermined",
+  refreshLearningReminderSchedule: async () => {},
   statsFireEffectEnabled: false,
   setStatsFireEffectEnabled: async () => {},
   toggleStatsFireEffectEnabled: async () => {},
@@ -580,6 +605,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<number>("feedbackVolume", 1);
   const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
     usePersistedState<boolean>("learningRemindersEnabled", false);
+  const [learningReminderNextAtState, setLearningReminderNextAtState] =
+    usePersistedState<number | null>("learningReminder.nextAt", null);
+  const [learningReminderProfileState, setLearningReminderProfileState] =
+    usePersistedState<SmartReminderProfile>("learningReminder.profile", "unknown");
+  const [
+    learningReminderPreferredWeekdaysState,
+    setLearningReminderPreferredWeekdaysState,
+  ] = usePersistedState<number[]>("learningReminder.preferredWeekdays", []);
+  const [learningReminderPermissionState, setLearningReminderPermissionState] =
+    usePersistedState<ReminderPermissionState>(
+      "learningReminder.permissionState",
+      "undetermined"
+    );
+  const learningRemindersEnabledRef = useRef(learningRemindersEnabledState);
   const [statsFireEffectEnabledState, _setStatsFireEffectEnabled] =
     usePersistedState<boolean>("stats.fireEffectEnabled", false);
   const [statsBookshelfEnabledState, _setStatsBookshelfEnabled] =
@@ -604,6 +643,10 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     () => sanitizeMemoryBoardSize(rawMemoryBoardSize),
     [rawMemoryBoardSize]
   );
+
+  useEffect(() => {
+    learningRemindersEnabledRef.current = learningRemindersEnabledState;
+  }, [learningRemindersEnabledState]);
 
   useEffect(() => {
     const normalized = sanitizeMemoryBoardSize(rawMemoryBoardSize);
@@ -1580,13 +1623,94 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     setSoundPlayerVolume(clampVolume(feedbackVolumeState));
   }, [feedbackVolumeState]);
 
-  const setLearningRemindersEnabled = async (value: boolean) => {
-    await _setLearningRemindersEnabled(value);
-  };
+  const computeAndScheduleLearningReminder = useCallback(async () => {
+    const permissionState = await getReminderPermissionState();
+    await setLearningReminderPermissionState(permissionState);
+    if (permissionState !== "granted") {
+      await cancelLearningReminderNotification();
+      await setLearningReminderNextAtState(null);
+      return;
+    }
 
-  const toggleLearningRemindersEnabled = async () => {
+    const now = Date.now();
+    const fromMs = now - REMINDER_ANALYTICS_WINDOW_MS;
+    const [hourlyDistribution, weekdayDistribution, summary] = await Promise.all([
+      getLearningEventsHourlyDistribution(fromMs, now),
+      getLearningEventsWeekdayDistribution(fromMs, now),
+      getLearningEventsSummary(fromMs, now),
+    ]);
+
+    const plan = computeSmartReminderPlan({
+      hourlyDistribution,
+      weekdayDistribution,
+      summary,
+    });
+
+    await scheduleLearningReminderNotification(new Date(plan.nextReminderAt), {
+      title: i18n.t("settings.learning.reminders.notification.title"),
+      body: i18n.t("settings.learning.reminders.notification.body"),
+    });
+
+    await Promise.all([
+      setLearningReminderNextAtState(plan.nextReminderAt),
+      setLearningReminderProfileState(plan.profile),
+      setLearningReminderPreferredWeekdaysState(plan.preferredWeekdays),
+    ]);
+  }, [
+    setLearningReminderNextAtState,
+    setLearningReminderPermissionState,
+    setLearningReminderPreferredWeekdaysState,
+    setLearningReminderProfileState,
+  ]);
+
+  const refreshLearningReminderSchedule = useCallback(async () => {
+    if (!learningRemindersEnabledRef.current) {
+      return;
+    }
+    await computeAndScheduleLearningReminder();
+  }, [computeAndScheduleLearningReminder]);
+
+  const setLearningRemindersEnabled = useCallback(
+    async (value: boolean) => {
+      if (!value) {
+        learningRemindersEnabledRef.current = false;
+        await Promise.all([
+          _setLearningRemindersEnabled(false),
+          cancelLearningReminderNotification(),
+          setLearningReminderNextAtState(null),
+          setLearningReminderProfileState("unknown"),
+          setLearningReminderPreferredWeekdaysState([]),
+        ]);
+        return;
+      }
+
+      const permissionState = await requestReminderPermissions();
+      await setLearningReminderPermissionState(permissionState);
+      if (permissionState !== "granted") {
+        learningRemindersEnabledRef.current = false;
+        await _setLearningRemindersEnabled(false);
+        await cancelLearningReminderNotification();
+        await setLearningReminderNextAtState(null);
+        return;
+      }
+
+      learningRemindersEnabledRef.current = true;
+      await _setLearningRemindersEnabled(true);
+      await computeAndScheduleLearningReminder();
+    },
+    [
+      _setLearningRemindersEnabled,
+      computeAndScheduleLearningReminder,
+      setLearningReminderNextAtState,
+      setLearningReminderPermissionState,
+      setLearningReminderPreferredWeekdaysState,
+      setLearningReminderProfileState,
+    ]
+  );
+
+  const toggleLearningRemindersEnabled = useCallback(async () => {
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
-  };
+  }, [learningRemindersEnabledState, setLearningRemindersEnabled]);
 
   const setStatsFireEffectEnabled = async (value: boolean) => {
     await _setStatsFireEffectEnabled(value);
@@ -1652,14 +1776,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       setFlashcardsCardSizeDefault("large"),
       setFlashcardsImageSizeDefault("dynamic"),
       setFlashcardsImageFrameDefaultEnabled(true),
-      _setLearningRemindersEnabled(false),
+      setLearningRemindersEnabled(false),
       _setFeedbackVolume(1),
     ]);
   }, [
     _setBoxesLayout,
     _setActionButtonsPosition,
-    _setLearningRemindersEnabled,
     _setFeedbackVolume,
+    setLearningRemindersEnabled,
     setFlashcardsBatchSize,
     setFlashcardsCardSizeDefault,
     setFlashcardsImageSizeDefault,
@@ -1773,6 +1897,11 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         learningRemindersEnabled: learningRemindersEnabledState,
         setLearningRemindersEnabled,
         toggleLearningRemindersEnabled,
+        learningReminderNextAt: learningReminderNextAtState,
+        learningReminderProfile: learningReminderProfileState,
+        learningReminderPreferredWeekdays: learningReminderPreferredWeekdaysState,
+        learningReminderPermissionState,
+        refreshLearningReminderSchedule,
         statsFireEffectEnabled: statsFireEffectEnabledState,
         setStatsFireEffectEnabled,
         toggleStatsFireEffectEnabled,

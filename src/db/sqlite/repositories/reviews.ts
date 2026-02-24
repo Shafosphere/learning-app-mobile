@@ -139,6 +139,7 @@ export async function getDueCustomReviewFlashcards(
     hintBack: string | null;
     imageFront: string | null;
     imageBack: string | null;
+    explanation: string | null;
     position: number | null;
     flipped: number;
     answerOnly: number;
@@ -156,6 +157,7 @@ export async function getDueCustomReviewFlashcards(
        cf.hint_back     AS hintBack,
        cf.image_front   AS imageFront,
        cf.image_back    AS imageBack,
+       cf.explanation   AS explanation,
        cf.position      AS position,
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
@@ -190,6 +192,7 @@ export async function getDueCustomReviewFlashcards(
         hintBack: row.hintBack,
         imageFront: row.imageFront,
         imageBack: row.imageBack,
+        explanation: row.explanation,
         answers: [],
         position: row.position,
         flipped: row.flipped === 1,
@@ -201,6 +204,9 @@ export async function getDueCustomReviewFlashcards(
         nextReview: stageInfo.nextReview,
       };
       map.set(row.id, record);
+    }
+    if (!record) {
+      continue;
     }
     addAnswerIfPresent(record.answers, row.answerText);
   }

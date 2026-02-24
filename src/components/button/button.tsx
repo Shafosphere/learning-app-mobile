@@ -1,5 +1,12 @@
 import { ReactNode } from "react";
-import { Pressable, Text } from "react-native";
+import {
+  DimensionValue,
+  Pressable,
+  StyleProp,
+  Text,
+  TextStyle,
+  ViewStyle,
+} from "react-native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { ThemeColorKey } from "@/src/theme/theme";
 import { useStyles } from "./button-styles";
@@ -8,8 +15,11 @@ interface MyButtonBaseProps {
   onPress?: () => void;
   color?: ThemeColorKey;
   disabled?: boolean;
-  width?: number;
+  width?: DimensionValue;
   accessibilityLabel?: string;
+  style?: StyleProp<ViewStyle>;
+  textStyle?: StyleProp<TextStyle>;
+  pressedStyle?: StyleProp<ViewStyle>;
 }
 
 type MyButtonProps =
@@ -24,6 +34,9 @@ export default function MyButton({
   disabled = false,
   width = 130,
   accessibilityLabel,
+  style,
+  textStyle,
+  pressedStyle,
 }: MyButtonProps) {
   const styles = useStyles();
   const { colors } = useSettings();
@@ -43,7 +56,7 @@ export default function MyButton({
         : colors.headline;
 
     return (
-      <Text style={[styles.text, { color: textColor }]} allowFontScaling>
+      <Text style={[styles.text, { color: textColor }, textStyle]} allowFontScaling>
         {text}
       </Text>
     );
@@ -59,7 +72,8 @@ export default function MyButton({
       style={({ pressed }) => [
         styles.button,
         { width, backgroundColor },
-        !disabled && pressed && styles.pressed,
+        !disabled && pressed && (pressedStyle ?? styles.pressed),
+        style,
       ]}
     >
       {({ pressed }) => renderContent(pressed)}

@@ -90,7 +90,25 @@
       },
       "reminders": {
         "title": "Learning reminders",
-        "subtitle": "Placeholder - push notifications planned later."
+        "subtitle": "Smart local reminders based on your learning pattern.",
+        "profile": {
+          "morning": "morning",
+          "afternoon": "afternoon",
+          "evening": "evening",
+          "night": "night",
+          "unknown": "unknown"
+        },
+        "notification": {
+          "title": "Time to study",
+          "body": "Have a minute? A short flashcards session keeps the streak alive."
+        },
+        "status": {
+          "next": "Next reminder: {{value}}",
+          "profileAndDays": "Profile: {{profile}}, active days: {{days}}",
+          "collecting": "Collecting data, using a safe default reminder time for now.",
+          "permissionDenied": "Notifications permission is blocked. Enable it in system settings.",
+          "allDays": "every day"
+        }
       },
       "batchSize": {
         "title": "Flashcards per batch",

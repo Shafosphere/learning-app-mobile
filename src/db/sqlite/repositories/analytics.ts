@@ -2,6 +2,11 @@ import { getDB } from "../core";
 
 export type DailyCount = { date: string; count: number };
 export type DailyTime = { date: string; ms: number };
+export type WeekdayActivityDistribution = number[];
+export type LearningEventsSummary = {
+  totalEvents: number;
+  activeDays: number;
+};
 export type HardFlashcard = {
   id: number;
   frontText: string;
@@ -86,6 +91,73 @@ export async function getHourlyActivityCounts(
     if (idx >= 0 && idx < 24) hours[idx] += r.cnt | 0;
   }
   return hours;
+}
+
+export async function getLearningEventsHourlyDistribution(
+  fromMs: number,
+  toMs: number
+): Promise<number[]> {
+  const db = await getDB();
+  const hours = Array.from({ length: 24 }, () => 0);
+  const rows = await db.getAllAsync<{ h: string; cnt: number }>(
+    `SELECT strftime('%H', created_at/1000, 'unixepoch', 'localtime') AS h,
+            COUNT(*) AS cnt
+     FROM custom_learning_events
+     WHERE created_at BETWEEN ? AND ?
+     GROUP BY h;`,
+    fromMs,
+    toMs
+  );
+  for (const r of rows) {
+    const idx = parseInt(r.h, 10) | 0;
+    if (idx >= 0 && idx < 24) {
+      hours[idx] += r.cnt | 0;
+    }
+  }
+  return hours;
+}
+
+export async function getLearningEventsWeekdayDistribution(
+  fromMs: number,
+  toMs: number
+): Promise<WeekdayActivityDistribution> {
+  const db = await getDB();
+  const weekdays = Array.from({ length: 7 }, () => 0);
+  const rows = await db.getAllAsync<{ weekday: string; cnt: number }>(
+    `SELECT strftime('%w', created_at/1000, 'unixepoch', 'localtime') AS weekday,
+            COUNT(*) AS cnt
+     FROM custom_learning_events
+     WHERE created_at BETWEEN ? AND ?
+     GROUP BY weekday;`,
+    fromMs,
+    toMs
+  );
+  for (const r of rows) {
+    const idx = parseInt(r.weekday, 10) | 0;
+    if (idx >= 0 && idx < 7) {
+      weekdays[idx] += r.cnt | 0;
+    }
+  }
+  return weekdays;
+}
+
+export async function getLearningEventsSummary(
+  fromMs: number,
+  toMs: number
+): Promise<LearningEventsSummary> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ totalEvents: number; activeDays: number }>(
+    `SELECT COUNT(*) AS totalEvents,
+            COUNT(DISTINCT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime')) AS activeDays
+     FROM custom_learning_events
+     WHERE created_at BETWEEN ? AND ?;`,
+    fromMs,
+    toMs
+  );
+  return {
+    totalEvents: row?.totalEvents ?? 0,
+    activeDays: row?.activeDays ?? 0,
+  };
 }
 
 export async function getTotalLearningTimeMs(

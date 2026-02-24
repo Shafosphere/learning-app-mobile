@@ -4,6 +4,7 @@ import Navbar from "@/src/components/navbar/navbar";
 import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
+import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 import { QuoteProvider } from "@/src/contexts/QuoteContext";
@@ -118,6 +119,7 @@ export default function RootLayout() {
         <SettingsProvider>
           <QuoteProvider>
             <QuoteSystemInitializer />
+            <LearningRemindersInitializer />
             <LearningStatsProvider>
               <PopupProvider>
                 <Navbar>

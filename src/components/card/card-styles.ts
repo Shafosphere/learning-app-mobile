@@ -89,6 +89,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: "700",
     // backgroundColor: colors.my_green,
   },
+  hintActionTextNoTransform: {
+    textTransform: "none",
+  },
   card: {
     paddingLeft: 10,
     paddingRight: 10,

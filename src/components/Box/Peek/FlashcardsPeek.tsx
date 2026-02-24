@@ -189,12 +189,12 @@ export default function FlashcardsPeekOverlay({
                       style={[
                         styles.cardSecondary,
                         styles.rewers,
-                        inferredType === "true_false" ? styles.cardTrueFalse : undefined,
+                        isBooleanType ? styles.cardTrueFalse : undefined,
                       ]}
                       numberOfLines={hasAnswerImage ? 3 : 2}
                       ellipsizeMode="tail"
                     >
-                      {inferredType === "true_false" ? trueFalseAnswer : mainTranslation}
+                      {isBooleanType ? trueFalseAnswer : mainTranslation}
                     </Text>
                     {!hasAnswerImage && !mainTranslation ? (
                       <Text style={styles.cardEmptyValue}>Brak tłumaczenia</Text>

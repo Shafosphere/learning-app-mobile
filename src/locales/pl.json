@@ -90,7 +90,25 @@
       },
       "reminders": {
         "title": "Przypomnienia o nauce",
-        "subtitle": "Placeholder - docelowo planowane powiadomienia push."
+        "subtitle": "Inteligentne lokalne przypomnienia na bazie Twojej aktywności.",
+        "profile": {
+          "morning": "poranny",
+          "afternoon": "popołudniowy",
+          "evening": "wieczorny",
+          "night": "nocny",
+          "unknown": "nieznany"
+        },
+        "notification": {
+          "title": "Czas na naukę",
+          "body": "Masz chwilę? Krótka sesja fiszek utrzyma rytm."
+        },
+        "status": {
+          "next": "Następne przypomnienie: {{value}}",
+          "profileAndDays": "Profil: {{profile}}, aktywne dni: {{days}}",
+          "collecting": "Zbieramy dane, tymczasowo używamy bezpiecznego domyślnego czasu.",
+          "permissionDenied": "Brak zgody na powiadomienia. Włącz uprawnienia w ustawieniach systemu.",
+          "allDays": "codziennie"
+        }
       },
       "batchSize": {
         "title": "Liczba fiszek w partii",

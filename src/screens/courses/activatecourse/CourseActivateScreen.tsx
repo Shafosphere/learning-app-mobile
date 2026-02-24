@@ -325,8 +325,8 @@ export default function CourseActivateScreen() {
       {showOnboardingNext ? (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
-            <Pressable
-              accessibilityRole="button"
+            <MyButton
+              text="Dalej"
               accessibilityLabel="Przejdź dalej"
               disabled={!hasActiveCourse}
               onPress={() => {
@@ -337,20 +337,9 @@ export default function CourseActivateScreen() {
                   router.replace("/flashcards");
                 }
               }}
-              style={[
-                styles.nextButton,
-                !hasActiveCourse && styles.nextButtonDisabled,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.nextButtonLabel,
-                  !hasActiveCourse && styles.nextButtonLabelDisabled,
-                ]}
-              >
-                Dalej
-              </Text>
-            </Pressable>
+              color="my_green"
+              width={90}
+            />
           </View>
         </View>
       ) : (

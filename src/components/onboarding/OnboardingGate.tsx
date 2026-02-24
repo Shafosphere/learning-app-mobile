@@ -5,6 +5,7 @@ import {
   getOnboardingCheckpoint,
   OnboardingCheckpoint,
   setOnboardingCheckpoint,
+  subscribeOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 
 const PIN_ROUTE = "/createcourse";
@@ -43,6 +44,12 @@ export function OnboardingGate() {
     return () => {
       mounted = false;
     };
+  }, []);
+
+  useEffect(() => {
+    return subscribeOnboardingCheckpoint((next) => {
+      setCheckpoint(next);
+    });
   }, []);
 
   const resolvedCheckpoint = useMemo<OnboardingCheckpoint>(() => {

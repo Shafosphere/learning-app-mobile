@@ -65,7 +65,13 @@ export function useFlashcardsInteraction({
     boxFour: [],
     boxFive: [],
   });
-  const { activeCustomCourseId, ignoreDiacriticsInSpellcheck } = useSettings();
+  const {
+    activeCustomCourseId,
+    ignoreDiacriticsInSpellcheck,
+    learningRemindersEnabled,
+    refreshLearningReminderSchedule,
+  } = useSettings();
+  const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
     if (!card) return false;
@@ -327,15 +333,20 @@ export function useFlashcardsInteraction({
           ? checkSpelling(answerToUse, wordForCheck.text)
           : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
       const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
-      // Log learning event for analytics (flashcards)
-      if (activeCustomCourseId != null) {
-        void logCustomLearningEvent({
-          flashcardId: wordForCheck.id,
-          courseId: activeCustomCourseId,
-          box: activeBox ?? null,
-          result: ok ? 'ok' : 'wrong',
-          durationMs: duration ?? undefined,
-        });
+      void logCustomLearningEvent({
+        flashcardId: wordForCheck.id,
+        courseId: activeCustomCourseId ?? null,
+        box: activeBox ?? null,
+        result: ok ? "ok" : "wrong",
+        durationMs: duration ?? undefined,
+      });
+      if (learningRemindersEnabled) {
+        if (reminderRefreshTimerRef.current != null) {
+          clearTimeout(reminderRefreshTimerRef.current);
+        }
+        reminderRefreshTimerRef.current = setTimeout(() => {
+          void refreshLearningReminderSchedule();
+        }, 90 * 1000);
       }
       if (ok) {
         if (!reversed && activeBox && wordForCheck.translations.length > 1) {
@@ -500,6 +511,8 @@ export function useFlashcardsInteraction({
       onCorrectAnswer,
       questionShownAt,
       registerKnownWord,
+      learningRemindersEnabled,
+      refreshLearningReminderSchedule,
       reversed,
       selectedItem,
       setBoxes,
@@ -508,6 +521,14 @@ export function useFlashcardsInteraction({
       setPendingExplanationMove,
     ]
   );
+
+  useEffect(() => {
+    return () => {
+      if (reminderRefreshTimerRef.current != null) {
+        clearTimeout(reminderRefreshTimerRef.current);
+      }
+    };
+  }, []);
 
   const acknowledgeExplanation = useCallback(() => {
     if (!selectedItem) return;

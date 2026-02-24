@@ -229,27 +229,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "flex-end",
     gap: 10,
   },
-  nextButton: {
-    width: 90,
-    height: 50,
-    borderRadius: 12,
-    backgroundColor: colors.my_green,
-    alignItems: "center",
-    justifyContent: "center",
-  },
-  nextButtonDisabled: {
-    backgroundColor: colors.border,
-  },
-  nextButtonLabel: {
-    fontSize: 16,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    color: colors.headline,
-  },
-  nextButtonLabelDisabled: {
-    color: colors.paragraph,
-    opacity: 0.6,
-  },
   flag: {
     width: 99 / 1.25,
     height: 66 / 1.25,
