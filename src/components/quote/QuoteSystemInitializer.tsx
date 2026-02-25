@@ -1,15 +1,22 @@
 import { useQuote } from "@/src/contexts/QuoteContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+    countDueCustomReviews,
+    getCustomCoursesWithCardCounts,
+} from "@/src/db/sqlite/db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useEffect, useRef } from "react";
 import { AppState } from "react-native";
 
 const LAST_ACTIVE_TS_KEY = "@quote_last_active_ts_v1";
 const FIRST_TIME_KEY = "@quote_first_time_shown_v1";
+const PINNED_OFFICIAL_COURSE_IDS_KEY = "officialPinnedCourseIds";
 const RETURN_AFTER_BREAK_MS = 6 * 60 * 60 * 1000; // 6h przerwy
 const STARTUP_DELAY_MS = 10_000; // opóźnij startowe cytaty o 10s po starcie aplikacji
 
 export default function QuoteSystemInitializer() {
     const { triggerQuote } = useQuote();
+    const { pinnedOfficialCourseIds } = useSettings();
     const hasInitialized = useRef(false);
 
     useEffect(() => {
@@ -50,6 +57,7 @@ export default function QuoteSystemInitializer() {
                     });
                 } else {
                     startupTimeout = setTimeout(() => {
+                        void (async () => {
                         const hour = new Date().getHours();
                         let category: "startup_morning" | "startup_day" | "startup_evening" | "startup_night" = "startup_day";
 
@@ -63,12 +71,52 @@ export default function QuoteSystemInitializer() {
                             category = "startup_night";
                         }
 
+                        const excludeQuoteTexts: string[] = [];
+                        if (category === "startup_day") {
+                            try {
+                                const nowMs = Date.now();
+                                let totalDueCount = 0;
+                                const pinnedOfficialIdsRaw = await AsyncStorage.getItem(
+                                    PINNED_OFFICIAL_COURSE_IDS_KEY
+                                );
+                                const pinnedOfficialIdsFromStorage = pinnedOfficialIdsRaw
+                                    ? (JSON.parse(pinnedOfficialIdsRaw) as number[])
+                                    : null;
+                                const officialIds = new Set(
+                                    pinnedOfficialIdsFromStorage ?? pinnedOfficialCourseIds
+                                );
+                                const allCourses = await getCustomCoursesWithCardCounts();
+                                const coursesToCount = allCourses.filter((course) => {
+                                    if (!course.reviewsEnabled) return false;
+                                    if (course.isOfficial) return officialIds.has(course.id);
+                                    return true;
+                                });
+
+                                const dueCounts = await Promise.all(
+                                    coursesToCount.map((course) =>
+                                        countDueCustomReviews(course.id, nowMs).catch(() => 0)
+                                    )
+                                );
+                                for (const dueCount of dueCounts) {
+                                    totalDueCount += dueCount;
+                                }
+
+                                if (totalDueCount <= 0) {
+                                    excludeQuoteTexts.push("Gotowy na powtóreczki?");
+                                }
+                            } catch (error) {
+                                console.warn("[QuoteSystemInitializer] failed to count due reviews", error);
+                            }
+                        }
+
                         triggerQuote({
                             trigger: "quote_startup",
                             category: category,
                             respectGlobalCooldown: false,
                             cooldownMs: 60 * 60 * 1000, // max raz na godzinę
+                            excludeQuoteTexts,
                         });
+                        })();
                     }, STARTUP_DELAY_MS);
                 }
             } catch (error) {
@@ -91,7 +139,7 @@ export default function QuoteSystemInitializer() {
             appStateListener.remove();
             void persistLastActive();
         };
-    }, [triggerQuote]);
+    }, [pinnedOfficialCourseIds, triggerQuote]);
 
     return null;
 }

@@ -62,16 +62,6 @@ const OFFICIAL_PACKS = [
     csvFile: "hangul_polish_reading.csv",
   },
   {
-    slug: "stolice_unii_europejskiej",
-    name: "Stolice UE",
-    iconId: "planet",
-    iconColor: "#14B8A6",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: true,
-    csvFile: "stolice_unii_europejskiej.csv",
-  },
-  {
     slug: "astronomia",
     name: "Astronomia",
     iconId: "planet",

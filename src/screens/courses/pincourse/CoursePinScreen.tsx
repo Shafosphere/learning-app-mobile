@@ -4,26 +4,33 @@ import {
   COURSE_CATEGORIES,
   CourseCategory,
 } from "@/src/constants/courseCategories";
+import { COURSE_PIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import {
   OnboardingCheckpoint,
   setOnboardingCheckpoint
 } from "@/src/services/onboardingCheckpoint";
-import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
+  Animated,
   Image,
+  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
   View,
 } from "react-native";
+import {
+  AccordionGroupItem,
+  CoursePinAccordion,
+} from "./components/CoursePinAccordion";
 import { useStyles } from "./CoursePinScreen-styles";
 
 type OfficialCourseListItem = {
@@ -45,15 +52,15 @@ type CourseGroup = {
   category?: CourseCategory;
   sourceLang: string | null;
   targetLang: string | null;
-  sourceFlag: ReturnType<typeof getFlagSource>;
-  targetFlag: ReturnType<typeof getFlagSource>;
+  sourceFlag?: ReturnType<typeof getFlagSource>;
+  targetFlag?: ReturnType<typeof getFlagSource>;
   officialPacks: OfficialCourseListItem[];
 };
 
-import { COURSE_PIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
-import { useScreenIntro } from "@/src/hooks/useScreenIntro";
+type CourseViewMode = "languages" | "general";
 
 export default function CoursePinScreen() {
+  const segmentedPad = 4;
   const styles = useStyles();
   const router = useRouter();
   const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
@@ -61,10 +68,19 @@ export default function CoursePinScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
+  const [viewMode, setViewMode] = useState<CourseViewMode>("languages");
+  const [tabsWidth, setTabsWidth] = useState(0);
+  const sliderX = useState(() => new Animated.Value(0))[0];
   // Local checkpoint state used for immediate UI updates (buttons)
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
+  const tabSliderWidth = Math.max(0, (tabsWidth - segmentedPad * 2) / 2);
+
+  const handleTabsLayout = useCallback((event: LayoutChangeEvent) => {
+    const nextWidth = event.nativeEvent.layout.width;
+    setTabsWidth(nextWidth);
+  }, []);
 
   const { IntroOverlay, unlockGate } = useScreenIntro({
     messages: COURSE_PIN_INTRO_MESSAGES,
@@ -137,7 +153,7 @@ export default function CoursePinScreen() {
         category = COURSE_CATEGORIES[categoryId];
         key = `cat:${categoryId}`;
       } else {
-        key = `${sourceLang ?? "unknown"} -${targetLang ?? "unknown"} `;
+        key = `lang:${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
       }
 
       let group = map.get(key);
@@ -179,6 +195,10 @@ export default function CoursePinScreen() {
     };
 
     const sortedGroups = Array.from(map.values()).sort((a, b) => {
+      const categoryA = a.category?.label ?? "";
+      const categoryB = b.category?.label ?? "";
+      const categoryDiff = categoryA.localeCompare(categoryB);
+      if (categoryDiff !== 0) return categoryDiff;
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
       if (targetDiff !== 0) return targetDiff;
       return compareLangs(a.sourceLang, b.sourceLang);
@@ -226,7 +246,67 @@ export default function CoursePinScreen() {
     }
   }, [hasAnyPinned, unlockGate]);
 
+  useEffect(() => {
+    if (tabSliderWidth <= 0) {
+      return;
+    }
+    const targetX = viewMode === "general" ? tabSliderWidth : 0;
+    Animated.timing(sliderX, {
+      toValue: targetX,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [sliderX, tabSliderWidth, viewMode]);
+
   const introActive = checkpoint !== "done";
+  const categorizedCourses = useMemo(
+    () => groupedCourses.filter((group) => Boolean(group.category)),
+    [groupedCourses]
+  );
+  const languageCourses = useMemo(
+    () => groupedCourses.filter((group) => !group.category),
+    [groupedCourses]
+  );
+
+  const accordionGroups = useMemo<AccordionGroupItem[]>(() => {
+    const nextGroups: AccordionGroupItem[] = [];
+
+    categorizedCourses.forEach((group) => {
+      const regularItems = group.officialPacks.filter(
+        (pack) => pack.isMini === false
+      );
+      const miniItems = group.officialPacks.filter(
+        (pack) => pack.isMini !== false
+      );
+      const count = regularItems.length + miniItems.length;
+      if (count === 0) {
+        return;
+      }
+
+      const targetCode = group.targetLang ? group.targetLang.toUpperCase() : "?";
+      const sourceCode = group.sourceLang ? group.sourceLang.toUpperCase() : "?";
+      const title = group.category?.label ?? (group.sourceLang
+        ? `${targetCode} / ${sourceCode}`
+        : targetCode);
+
+      const icon: AccordionGroupItem["icon"] = group.category?.icon
+        ? { kind: "fa6", name: group.category.icon }
+        : undefined;
+
+      nextGroups.push({
+        key: group.key,
+        title,
+        subtitle: group.category?.description ?? "",
+        count,
+        regularItems,
+        miniItems,
+        icon,
+      });
+    });
+
+    return nextGroups;
+  }, [categorizedCourses]);
+
   const renderOfficialPackCard = useCallback(
     (pack: OfficialCourseListItem) => {
       const isPinned = pinnedOfficialCourseIds.includes(pack.id);
@@ -283,50 +363,103 @@ export default function CoursePinScreen() {
       >
         <View style={styles.minicontainer}>
           <Text style={styles.title}>Czego sie uczymy?</Text>
+          <View
+            style={styles.viewModeTabs}
+            accessibilityRole="tablist"
+            accessibilityLabel="Filtr typu kursów"
+            onLayout={handleTabsLayout}
+          >
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.viewModeThumb,
+                {
+                  width: tabSliderWidth,
+                  left: segmentedPad,
+                  transform: [{ translateX: sliderX }],
+                },
+              ]}
+            />
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityState={{ selected: viewMode === "languages" }}
+              style={styles.viewModeTab}
+              onPress={() => setViewMode("languages")}
+            >
+              <View style={styles.viewModeTabContent}>
+                <View
+                  style={[
+                    styles.viewModeDot,
+                    viewMode === "languages" && styles.viewModeDotActive,
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.viewModeTabText,
+                    viewMode === "languages" && styles.viewModeTabTextActive,
+                  ]}
+                >
+                  Języki
+                </Text>
+              </View>
+            </Pressable>
+            <Pressable
+              accessibilityRole="tab"
+              accessibilityState={{ selected: viewMode === "general" }}
+              style={styles.viewModeTab}
+              onPress={() => setViewMode("general")}
+            >
+              <View style={styles.viewModeTabContent}>
+                <View
+                  style={[
+                    styles.viewModeDot,
+                    viewMode === "general" && styles.viewModeDotActive,
+                  ]}
+                />
+                <Text
+                  style={[
+                    styles.viewModeTabText,
+                    viewMode === "general" && styles.viewModeTabTextActive,
+                  ]}
+                >
+                  Wiedza
+                </Text>
+              </View>
+            </Pressable>
+          </View>
 
-          {groupedCourses.map((group) => {
-            const regularOfficialPacks = group.officialPacks.filter(
-              (pack) => pack.isMini === false
-            );
-            const miniOfficialPacks = group.officialPacks.filter(
-              (pack) => pack.isMini !== false
-            );
-            const showRegular = regularOfficialPacks.length > 0;
-            const showMini = miniOfficialPacks.length > 0;
-            const hasOfficial =
-              showRegular || showMini;
-            if (!hasOfficial) {
-              return null;
-            }
+          {viewMode === "languages" ? (
+            <>
+              {languageCourses.length === 0 ? (
+                <Text style={styles.emptyStateText}>Brak kursów językowych</Text>
+              ) : null}
+              {languageCourses.map((group) => {
+                const regularOfficialPacks = group.officialPacks.filter(
+                  (pack) => pack.isMini === false
+                );
+                const miniOfficialPacks = group.officialPacks.filter(
+                  (pack) => pack.isMini !== false
+                );
+                const showRegular = regularOfficialPacks.length > 0;
+                const showMini = miniOfficialPacks.length > 0;
+                const hasOfficial =
+                  showRegular || showMini;
+                if (!hasOfficial) {
+                  return null;
+                }
 
-            const nativeCode = group.targetLang
-              ? group.targetLang.toUpperCase()
-              : "?";
-            const learningCode = group.sourceLang
-              ? group.sourceLang.toUpperCase()
-              : "?";
+                const nativeCode = group.targetLang
+                  ? group.targetLang.toUpperCase()
+                  : "?";
+                const learningCode = group.sourceLang
+                  ? group.sourceLang.toUpperCase()
+                  : "?";
 
-            return (
-              <View key={`group - ${group.key} `} style={styles.groupSection}>
-                <View style={styles.groupHeader}>
-                  <View style={styles.groupHeaderLine} />
-                  <View style={styles.groupHeaderBadge}>
-                    {group.category ? (
-                      <View style={styles.groupHeaderLanguage}>
-                        {group.category.icon ? (
-                          <FontAwesome6
-                            name={group.category.icon}
-                            size={16}
-                            color={colors.headline}
-                            style={{ marginRight: 6 }}
-                          />
-                        ) : null}
-                        <Text style={[styles.groupHeaderCode, { fontSize: 24 }]}>
-                          {group.category.label.toUpperCase()}
-                        </Text>
-                      </View>
-                    ) : (
-                      <>
+                return (
+                  <View key={`group-${group.key}`} style={styles.groupSection}>
+                    <View style={styles.groupHeader}>
+                      <View style={styles.groupHeaderLine} />
+                      <View style={styles.groupHeaderBadge}>
                         <View style={styles.groupHeaderLanguage}>
                           <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
                           {group.targetFlag ? (
@@ -352,13 +485,9 @@ export default function CoursePinScreen() {
                             </View>
                           </>
                         ) : null}
-                      </>
-                    )}
-                  </View>
-                </View>
+                      </View>
+                    </View>
 
-                {hasOfficial ? (
-                  <>
                     {showRegular ? (
                       <>
                         <Text style={styles.subTitle}>Kursy</Text>
@@ -378,11 +507,23 @@ export default function CoursePinScreen() {
                         </View>
                       </>
                     ) : null}
-                  </>
-                ) : null}
-              </View>
-            );
-          })}
+                  </View>
+                );
+              })}
+            </>
+          ) : (
+            <>
+              {accordionGroups.length === 0 ? (
+                <Text style={styles.emptyStateText}>
+                  Brak kursów wiedzy ogólnej
+                </Text>
+              ) : null}
+              <CoursePinAccordion
+                groups={accordionGroups}
+                renderCourseCard={renderOfficialPackCard}
+              />
+            </>
+          )}
 
           <Text style={styles.footerNote}>kiedys bedzie tu ich wiecej :)</Text>
         </View>

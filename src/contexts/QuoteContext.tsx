@@ -16,6 +16,7 @@ export interface QuoteTriggerRequest {
   cooldownMs?: number;
   probability?: number;
   respectGlobalCooldown?: boolean;
+  excludeQuoteTexts?: string[];
 }
 
 const GLOBAL_QUOTE_COOLDOWN_MS = 60 * 1000; // max 1 visible quote per minute
@@ -55,8 +56,11 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const lastCategoryQuoteRef =
     useRef<Partial<Record<QuoteCategory, Quote | null>>>({});
 
-  const showQuote = useCallback((category: QuoteCategory) => {
-    const availableQuotes = QUOTES.filter((q) => q.category === category);
+  const showQuote = useCallback((category: QuoteCategory, excludeQuoteTexts: string[] = []) => {
+    const excludedTexts = new Set(excludeQuoteTexts);
+    const availableQuotes = QUOTES.filter(
+      (q) => q.category === category && !excludedTexts.has(q.text)
+    );
 
     // Fallback to general if no quotes found for category
     const pool =
@@ -137,6 +141,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
         cooldownMs = 5 * 60 * 1000,
         probability = 1,
         respectGlobalCooldown = true,
+        excludeQuoteTexts = [],
       } = request;
 
       const isGlobalCooldownExempt =
@@ -181,7 +186,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
       }
 
       logQuote("fire", { trigger, category, cooldownMs, respectGlobalCooldown });
-      showQuote(category);
+      showQuote(category, excludeQuoteTexts);
     },
     [quotesEnabled, showQuote]
   );
