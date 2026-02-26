@@ -366,77 +366,109 @@ export const WIKI_TOPICS: WikiTopic[] = [
     blocks: [
       {
         type: "paragraph",
-        text: "Apka daje Ci dwa rodzaje ustawień – dla kursów i dla całej aplikacji.",
+        text: "W aplikacji są dwa rodzaje ustawień: globalne (dla całej apki) oraz kursu (osobno dla każdego kursu).",
       },
       {
         type: "heading",
         icon: "🎛️",
-        text: "Ustawienia aplikacji",
+        text: "Ustawienia aplikacji (globalne)",
         tone: "pink",
       },
-            { type: "paragraph", text: "Wygląd" },
       {
-        type: "list",
-        items: [
-          "Ciemny motyw: przełącza interfejs między jasnym i ciemnym.",
-          "Wibracje: możesz je wyłączyć, jeśli przeszkadzają.",
-          "Reakcje: jeżeli nie lubisz reakcji Memini, wyłącz jego wiadomośći",
-          "Głośność efektów: ustaw głośność dźwięków w aplikacji.",
-          "Miny pudełek: buzie które są na pudełkach w grze w fiszkach",
-          "Schemat pudełek: zmienia schemat wyświetlanych pudełek",
-        ],
+        type: "paragraph",
+        text: "Dotyczą całej aplikacji, (prawy dolny róg na pasku).",
+      },
+      {
+        type: "example",
         tone: "pink",
+        render: (colors) => (
+          <View
+            style={{
+              width: "100%",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colors.background,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <Ionicons name="settings-sharp" size={22} color={colors.headline} />
+            </View>
+          </View>
+        ),
       },
-      { type: "paragraph", text: "Dostępność" },
       {
         type: "list",
+        tone: "pink",
         items: [
-          "Wysoki kontrast: podbija widoczność elementów interfejsu.",
-          "Tryb daltonistyczny: ułatwia korzystanie osobom z zaburzeniami widzenia barw.",
-          "Większa czcionka: powiększa tekst w aplikacji.",
-        ],
-      },
-      { type: "paragraph", text: "Nauka" },
-      {
-        type: "list",
-        items: [
-          "Spellchecking: włącz lub wyłącz sprawdzanie pisowni w odpowiedziach.",
-          "Sugestie klawiatury: zdecyduj, czy chcesz podpowiedzi z klawiatury systemowej.",
-          "Ignoruj znaki diakrytyczne: odpowiedzi bez polskich znaków mogą być uznawane za poprawne.",
-          "Przypomnienia o nauce: skonfiguruj powiadomienia, żeby nie wypaść z rytmu.",
-          "Liczba fiszek w partii: ustaw, ile kart dodajemy jednorazowo do pudełek.",
-        ],
-      },
-      { type: "paragraph", text: "Inne" },
-      {
-        type: "list",
-        items: [
-          "Eksportuj/importuj dane: zrób kopię zapasową lub przenieś progres między urządzeniami.",
-          "Przywróć ustawienia nauki: reset preferencji uczenia do domyślnych.",
-          "Włącz intro od nowa: ponownie odtwórz ekran powitalny.",
         ],
       },
       { type: "heading", icon: "⚙️", text: "Ustawienia kursu", tone: "green" },
       {
-        type: "list",
-        items: [
-          "Faza zapominania: określa, kiedy fiszka spada do poprzedniego pudełka.",
-          "Automat fiszek (zamiast Autoflow): automatycznie dodaje nowe karty do gry.",
-          "Włącz powtórki: pozwala wrócić do kart z bieżącej partii.",
-          "Pomiń poprawkę po błędzie: decyduje, czy po złej odpowiedzi musisz wpisać poprawną.",
-          "Rozmiar fiszki: wybierz mniejszy lub większy układ kart.",
-          "Resety danych: jednym kliknięciem czyścisz postęp w kursie.",
-        ],
-        tone: "green",
-      },
-      {
         type: "paragraph",
-        text: "Jeśli kurs jest stworzony przez Ciebie, pojawi się dodatkowa sekcja do edycji słówek i fiszek.",
+        text: "Są to idiwudualne ustawienia dla kazdego kursu.",
       },
       {
-        type: "callout",
-        text: "Pobaw się ustawieniami – każdy ma inny styl nauki. Znajdź swój! 🎯",
+        type: "example",
+        label: "Na ekranie aktywacji kursu: ",
         tone: "green",
+        render: (colors) => (
+          <CourseListCard
+            title="Hangul - czytanie"
+            subtitle="fiszki: 120"
+            iconId="book"
+            iconColor="#F4B942"
+            flagCode="kr"
+            containerStyle={{ backgroundColor: colors.background }}
+            onPress={() => handlePlaceholderCoursePress()}
+            rightAccessory={
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel="Ustawienia kursu Hangul - czytanie"
+                style={{ padding: 6 }}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  handlePlaceholderEditCourse();
+                }}
+                hitSlop={8}
+              >
+                <FontAwesome6 name="edit" size={24} color={colors.headline} />
+              </Pressable>
+            }
+          />
+        ),
+      },
+      {
+        type: "example",
+        label: "Klikasz tą ikone: ",
+        tone: "green",
+        render: (colors) => (
+          <View style={{ alignItems: "center" }}>
+            <View
+              style={{
+                width: 40,
+                height: 40,
+                borderRadius: 20,
+                alignItems: "center",
+                justifyContent: "center",
+                backgroundColor: colors.background,
+                borderWidth: 1,
+                borderColor: colors.border,
+              }}
+            >
+              <FontAwesome6 name="edit" size={24} color={colors.headline} />
+            </View>
+          </View>
+        ),
       },
     ],
   },

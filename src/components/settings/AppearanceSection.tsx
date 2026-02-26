@@ -1,6 +1,5 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import { getFlagSource } from "@/src/constants/languageFlags";
 import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
@@ -10,6 +9,7 @@ import React, {
   useState,
 } from "react";
 import {
+  Modal,
   PanResponder,
   Image,
   Switch,
@@ -61,6 +61,14 @@ const actionButtonsOptions: ActionButtonsOption[] = [
     labelKey: "settings.appearance.actionsSelector.bottom",
     preview: bottomButtonsPreview,
   },
+];
+
+const uiLanguageOptions: {
+  key: UiLanguage;
+  labelKey: "settings.uiLanguage.polish" | "settings.uiLanguage.english";
+}[] = [
+  { key: "pl", labelKey: "settings.uiLanguage.polish" },
+  { key: "en", labelKey: "settings.uiLanguage.english" },
 ];
 
 type ThickSliderProps = {
@@ -210,6 +218,7 @@ const AppearanceSection: React.FC = () => {
   } = useSettings();
 
   const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
   const volumeDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerHaptics = useCallback(async () => {
@@ -270,6 +279,7 @@ const AppearanceSection: React.FC = () => {
       await setUiLanguage(nextLanguage);
       await triggerHaptics();
     }
+    setLanguageMenuOpen(false);
   };
 
   const handleVolumePreviewChange = useCallback((value: number) => {
@@ -313,52 +323,68 @@ const AppearanceSection: React.FC = () => {
       <View style={[styles.row, { alignItems: "flex-start" }]}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>{t("settings.uiLanguage.title")}</Text>
-          <Text style={styles.rowSubtitle}>
+          {/* <Text style={styles.rowSubtitle}>
             {t("settings.uiLanguage.subtitle")}
-          </Text>
+          </Text> */}
         </View>
       </View>
 
       <View style={styles.languageSegment}>
-        {(
-          [
-            { key: "pl", flagCode: "pl", labelKey: "settings.uiLanguage.polish" },
-            { key: "en", flagCode: "en", labelKey: "settings.uiLanguage.english" },
-          ] as const
-        ).map((option) => {
-          const isActive = uiLanguage === option.key;
-          const flagSource = getFlagSource(option.flagCode, "active");
-          return (
-            <TouchableOpacity
-              key={option.key}
-              activeOpacity={0.7}
-              onPress={() => handleUiLanguageSelect(option.key)}
-              style={[
-                styles.languageButton,
-                isActive && styles.languageButtonActive,
-              ]}
-            >
-              {flagSource ? (
-                <Image
-                  source={flagSource}
-                  style={[
-                    styles.languageButtonFlagImage,
-                    isActive && styles.languageButtonFlagImageActive,
-                  ]}
-                />
-              ) : null}
-              <Text
-                style={[
-                  styles.languageButtonLabel,
-                  isActive && styles.languageButtonLabelActive,
-                ]}
-              >
-                {t(option.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
+        <TouchableOpacity
+          activeOpacity={0.8}
+          onPress={() => setLanguageMenuOpen(true)}
+          style={styles.languageSelectTrigger}
+        >
+          <Text style={styles.languageSelectTriggerText}>
+            {
+              t(
+                uiLanguageOptions.find((option) => option.key === uiLanguage)
+                  ?.labelKey ?? "settings.uiLanguage.english"
+              )
+            }
+          </Text>
+          <Text style={styles.languageSelectChevron}>▾</Text>
+        </TouchableOpacity>
       </View>
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={languageMenuOpen}
+        onRequestClose={() => setLanguageMenuOpen(false)}
+      >
+        <TouchableOpacity
+          activeOpacity={1}
+          style={styles.languageModalBackdrop}
+          onPress={() => setLanguageMenuOpen(false)}
+        >
+          <View style={styles.languageModalCard}>
+            {uiLanguageOptions.map((option) => {
+              const isActive = uiLanguage === option.key;
+              return (
+                <TouchableOpacity
+                  key={option.key}
+                  activeOpacity={0.8}
+                  style={[
+                    styles.languageMenuOption,
+                    isActive && styles.languageMenuOptionActive,
+                  ]}
+                  onPress={() => handleUiLanguageSelect(option.key)}
+                >
+                  <Text
+                    style={[
+                      styles.languageMenuOptionText,
+                      isActive && styles.languageMenuOptionTextActive,
+                    ]}
+                  >
+                    {t(option.labelKey)}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </TouchableOpacity>
+      </Modal>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

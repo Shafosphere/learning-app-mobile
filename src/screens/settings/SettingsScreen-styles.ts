@@ -182,47 +182,64 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 8,
   },
   languageSegment: {
-    flexDirection: "row",
+    flexDirection: "column",
     alignItems: "stretch",
     width: "100%",
-    justifyContent: "flex-start",
-    columnGap: 10,
     marginTop: 8,
     marginBottom: 6,
   },
-  languageButton: {
-    // width: 130,
-    // minHeight: 140,
-    borderRadius: 14,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "transparent",
-    borderWidth: 0,
-    paddingVertical: 10,
-    rowGap: 8,
-  },
-  languageButtonActive: {
-    backgroundColor: "transparent",
-  },
-  languageButtonFlagImage: {
-    width: 99 / 1.25,
-    height: 66 / 1.25,
-    borderRadius: 4,
+  languageSelectTrigger: {
+    minHeight: 44,
+    borderRadius: 10,
     borderWidth: 1,
     borderColor: colors.border,
+    backgroundColor: colors.background,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "space-between",
   },
-  languageButtonFlagImageActive: {
-    borderColor: colors.my_green,
-    borderWidth: 4,
+  languageSelectTriggerText: {
+    fontSize: 15,
+    fontWeight: "700",
+    color: colors.paragraph,
   },
-  languageButtonLabel: {
-    fontSize: 13,
+  languageSelectChevron: {
+    fontSize: 24,
     fontWeight: "800",
+    lineHeight: 24,
     color: colors.paragraph,
-    textAlign: "center",
+    opacity: 0.95,
   },
-  languageButtonLabelActive: {
+  languageModalBackdrop: {
+    flex: 1,
+    backgroundColor: "#00000055",
+    justifyContent: "center",
+    paddingHorizontal: 24,
+  },
+  languageModalCard: {
+    borderRadius: 14,
+    backgroundColor: colors.secondBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingVertical: 8,
+    overflow: "hidden",
+  },
+  languageMenuOption: {
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+  },
+  languageMenuOptionActive: {
+    backgroundColor: `${colors.my_green}20`,
+  },
+  languageMenuOptionText: {
+    fontSize: 15,
+    fontWeight: "700",
     color: colors.paragraph,
+  },
+  languageMenuOptionTextActive: {
+    color: colors.my_green,
   },
   layoutOption: {
     flexGrow: 0,

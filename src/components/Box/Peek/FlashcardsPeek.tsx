@@ -215,14 +215,16 @@ export default function FlashcardsPeekOverlay({
           <View style={[styles.cardContentSimple]}>
             <View style={styles.cardMetaRow}>
               <Text style={styles.cardSimpleIndex}>FISZKA #{index + 1}</Text>
-              <View style={styles.typePill}>
-                <Text style={styles.typePillText}>{typeLabel}</Text>
-              </View>
-              {hasPromptImage ? (
+              <View style={styles.cardMetaTags}>
                 <View style={styles.typePill}>
-                  <Text style={styles.typePillText}>Obrazek</Text>
+                  <Text style={styles.typePillText}>{typeLabel}</Text>
                 </View>
-              ) : null}
+                {hasPromptImage ? (
+                  <View style={styles.typePill}>
+                    <Text style={styles.typePillText}>Obrazek</Text>
+                  </View>
+                ) : null}
+              </View>
             </View>
             <View style={styles.cardLine}>
               {showPromptImageOnly ? (

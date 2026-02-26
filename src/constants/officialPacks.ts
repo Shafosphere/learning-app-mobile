@@ -220,7 +220,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   },
   {
     slug: "flagi_ameryki",
-    name: "Flagi Ameryki",
+    name: "Flagi Ameryk",
     iconId: "globe",
     iconColor: "#06B6D4",
     reviewsEnabled: true,

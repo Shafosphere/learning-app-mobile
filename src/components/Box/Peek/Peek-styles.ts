@@ -291,8 +291,13 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
   cardMetaRow: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
     marginBottom: 6,
+    gap: 8,
+  },
+  cardMetaTags: {
+    flexDirection: "row",
+    alignItems: "center",
+    marginLeft: "auto",
     gap: 8,
   },
   cardTrueFalse: {
