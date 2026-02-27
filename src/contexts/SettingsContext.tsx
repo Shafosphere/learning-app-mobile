@@ -324,6 +324,7 @@ interface SettingsContextValue {
   highContrastEnabled: boolean;
   toggleHighContrast: () => Promise<void>;
   colorBlindMode: ColorBlindMode;
+  setColorBlindMode: (mode: ColorBlindMode) => Promise<void>;
   toggleColorBlindMode: () => Promise<void>;
   largeFontEnabled: boolean;
   toggleLargeFont: () => Promise<void>;
@@ -464,6 +465,7 @@ const defaultValue: SettingsContextValue = {
   highContrastEnabled: false,
   toggleHighContrast: async () => {},
   colorBlindMode: "none",
+  setColorBlindMode: async () => {},
   toggleColorBlindMode: async () => {},
   largeFontEnabled: false,
   toggleLargeFont: async () => {},
@@ -625,7 +627,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     usePersistedState<boolean>("stats.bookshelfEnabled", false);
   const [highContrastEnabled, setHighContrastEnabled] =
     usePersistedState<boolean>("accessibility.highContrast", false);
-  const [colorBlindMode, setColorBlindMode] = usePersistedState<ColorBlindMode>(
+  const [colorBlindMode, setColorBlindModeState] = usePersistedState<ColorBlindMode>(
     "accessibility.colorBlindMode",
     "none"
   );
@@ -1740,10 +1742,24 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setHighContrastEnabled(!highContrastEnabled);
   };
 
+  const setColorBlindMode = useCallback(
+    async (mode: ColorBlindMode) => {
+      await setColorBlindModeState(mode);
+    },
+    [setColorBlindModeState]
+  );
+
   const toggleColorBlindMode = async () => {
-    await setColorBlindMode(
-      colorBlindMode === "none" ? "deuteranopia" : "none"
-    );
+    const order: ColorBlindMode[] = [
+      "none",
+      "deuteranopia",
+      "protanopia",
+      "tritanopia",
+    ];
+    const currentIndex = order.indexOf(colorBlindMode);
+    const safeIndex = currentIndex === -1 ? 0 : currentIndex;
+    const nextMode = order[(safeIndex + 1) % order.length];
+    await setColorBlindMode(nextMode);
   };
 
   const toggleLargeFont = async () => {
@@ -1911,6 +1927,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         highContrastEnabled,
         toggleHighContrast,
         colorBlindMode,
+        setColorBlindMode,
         toggleColorBlindMode,
         largeFontEnabled,
         toggleLargeFont,

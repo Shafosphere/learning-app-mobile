@@ -3,7 +3,11 @@
 // Typy motywu
 export type Theme = "light" | "dark";
 
-export type ColorBlindMode = "none" | "deuteranopia";
+export type ColorBlindMode =
+  | "none"
+  | "deuteranopia"
+  | "protanopia"
+  | "tritanopia";
 
 export interface ThemePalette {
   background: string;
@@ -25,6 +29,8 @@ export interface ThemeColors extends ThemePalette {
   variants: {
     highContrast: ThemePaletteOverrides;
     deuteranopia: ThemePaletteOverrides;
+    protanopia: ThemePaletteOverrides;
+    tritanopia: ThemePaletteOverrides;
   };
 }
 
@@ -75,6 +81,16 @@ export const lightColors: ThemeColors = {
       my_red: "#d95f02",
       my_yellow: "#ffd92f",
     },
+    protanopia: {
+      my_green: "#1e88e5",
+      my_red: "#ef6c00",
+      my_yellow: "#ffd54f",
+    },
+    tritanopia: {
+      my_green: "#2e7d32",
+      my_red: "#d81b60",
+      my_yellow: "#8e24aa",
+    },
   },
 };
 
@@ -96,6 +112,16 @@ export const darkColors: ThemeColors = {
       my_green: "#00bcd4",
       my_red: "#ff9100",
       my_yellow: "#ffd166",
+    },
+    protanopia: {
+      my_green: "#4fc3f7",
+      my_red: "#ffb74d",
+      my_yellow: "#ffe082",
+    },
+    tritanopia: {
+      my_green: "#81c784",
+      my_red: "#f06292",
+      my_yellow: "#ba68c8",
     },
   },
 };

@@ -67,7 +67,14 @@
       },
       "colorBlind": {
         "title": "Tryb daltonistyczny",
-        "subtitle": "Stosuje paletę przyjazną osobom z deuteranopią."
+        "subtitle": "Stosuje paletę kolorów dostosowaną do wybranego typu zaburzeń widzenia barw.",
+        "currentLabel": "Aktualny tryb: {{mode}}",
+        "modes": {
+          "none": "Wyłączony",
+          "deuteranopia": "Deuteranopia",
+          "protanopia": "Protanopia",
+          "tritanopia": "Tritanopia"
+        }
       },
       "largeFont": {
         "title": "Większa czcionka",

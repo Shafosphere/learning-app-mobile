@@ -67,7 +67,14 @@
       },
       "colorBlind": {
         "title": "Color blind mode",
-        "subtitle": "Applies palette friendly for deuteranopia."
+        "subtitle": "Applies a palette adjusted for the selected color vision deficiency type.",
+        "currentLabel": "Current mode: {{mode}}",
+        "modes": {
+          "none": "Off",
+          "deuteranopia": "Deuteranopia",
+          "protanopia": "Protanopia",
+          "tritanopia": "Tritanopia"
+        }
       },
       "largeFont": {
         "title": "Larger font",
