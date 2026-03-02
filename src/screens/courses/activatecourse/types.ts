@@ -8,6 +8,7 @@ export type OfficialCourseListItem = CustomCourseSummary & {
     smallFlag: string | null;
     isMini: boolean;
     categoryId?: string;
+    position?: number;
 };
 
 export type CourseGroup = {

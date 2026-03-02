@@ -106,6 +106,7 @@ export default function CoursesReviewScreen() {
             targetLang: manifest?.targetLang ?? null,
             isMini: manifest?.isMini ?? true,
             smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
+            position: manifest?.position,
           };
         }
       );
@@ -218,6 +219,19 @@ export default function CoursesReviewScreen() {
       const second = b ?? "";
       return first.localeCompare(second);
     };
+    const compareByPositionThenName = (
+      a: OfficialCourseReviewItem,
+      b: OfficialCourseReviewItem
+    ) => {
+      const aPos = a.position ?? Number.POSITIVE_INFINITY;
+      const bPos = b.position ?? Number.POSITIVE_INFINITY;
+      if (aPos !== bPos) return aPos - bPos;
+      return a.name.localeCompare(b.name);
+    };
+
+    groups.forEach((group) => {
+      group.courses.sort(compareByPositionThenName);
+    });
 
     return Array.from(groups.values()).sort((a, b) => {
       const targetDiff = compareLangs(a.targetLang, b.targetLang);

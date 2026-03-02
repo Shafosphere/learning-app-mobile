@@ -116,6 +116,15 @@ export default function CourseActivateScreen() {
       a: OfficialCourseListItem,
       b: OfficialCourseListItem
     ) => a.name.localeCompare(b.name);
+    const compareByPositionThenName = (
+      a: OfficialCourseListItem,
+      b: OfficialCourseListItem
+    ) => {
+      const aPos = a.position ?? Number.POSITIVE_INFINITY;
+      const bPos = b.position ?? Number.POSITIVE_INFINITY;
+      if (aPos !== bPos) return aPos - bPos;
+      return compareByName(a, b);
+    };
 
     const compareLangs = (
       a: string | null | undefined,
@@ -133,7 +142,7 @@ export default function CourseActivateScreen() {
     });
 
     sortedGroups.forEach((group) => {
-      group.official.sort(compareByName);
+      group.official.sort(compareByPositionThenName);
     });
 
     return sortedGroups;
@@ -177,6 +186,7 @@ export default function CourseActivateScreen() {
                 smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
                 isMini: manifest?.isMini ?? true,
                 categoryId: manifest?.categoryId,
+                position: manifest?.position,
               };
             });
             setOfficialCourses(mapped);

@@ -9,7 +9,6 @@ const useStyles = createThemeStylesHook((colors) => ({
   container: {
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
-    marginBottom: 16,
     shadowColor: "#000",
     shadowOpacity: 0.05,
     shadowRadius: 8,

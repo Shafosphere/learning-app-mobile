@@ -18,6 +18,9 @@ export type OfficialPackCourseSettings = {
 export type OfficialPackDef = {
   slug: string;
   name: string;
+  // Optional global order (lower value appears first).
+  // When omitted, UI falls back to existing alphabetical ordering.
+  position?: number;
   iconId: string;
   iconColor: string;
   reviewsEnabled?: boolean;
@@ -38,6 +41,20 @@ export type OfficialPackDef = {
 // Manifest of official (built-in) packs included with the app bundle.
 // Add new entries here to ship additional packs.
 export const OFFICIAL_PACKS: OfficialPackDef[] = [
+  {
+    slug: "fiszki_podstawy_en_pl_slowa",
+    name: "Podstawowe słówka",
+    position: 1,
+    iconId: "flag:en",
+    iconColor: "#14B8A6",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    sourceLang: "en",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: false,
+  },
   {
     slug: "eng_to_pl_a1",
     name: "Ang A1",

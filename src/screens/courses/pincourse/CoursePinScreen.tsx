@@ -45,6 +45,7 @@ type OfficialCourseListItem = {
   smallFlag: string | null;
   isMini: boolean;
   categoryId?: string;
+  position?: number;
 };
 
 type CourseGroup = {
@@ -125,6 +126,7 @@ export default function CoursePinScreen() {
             smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
             isMini: manifest?.isMini ?? true,
             categoryId: manifest?.categoryId,
+            position: manifest?.position,
           };
         });
         setOfficialCourses(mapped);
@@ -184,6 +186,15 @@ export default function CoursePinScreen() {
       a: OfficialCourseListItem,
       b: OfficialCourseListItem
     ) => a.name.localeCompare(b.name);
+    const compareByPositionThenName = (
+      a: OfficialCourseListItem,
+      b: OfficialCourseListItem
+    ) => {
+      const aPos = a.position ?? Number.POSITIVE_INFINITY;
+      const bPos = b.position ?? Number.POSITIVE_INFINITY;
+      if (aPos !== bPos) return aPos - bPos;
+      return compareByName(a, b);
+    };
 
     const compareLangs = (
       a: string | null | undefined,
@@ -205,7 +216,7 @@ export default function CoursePinScreen() {
     });
 
     sortedGroups.forEach((group) => {
-      group.officialPacks.sort(compareByName);
+      group.officialPacks.sort(compareByPositionThenName);
     });
 
     return sortedGroups;

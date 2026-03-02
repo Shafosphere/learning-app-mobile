@@ -17,6 +17,13 @@ export type HardFlashcard = {
   wrongCount: number;
 };
 
+function formatLocalDateOnly(date: Date): string {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export async function logCustomLearningEvent(params: {
   flashcardId: number;
   courseId?: number | null;
@@ -173,6 +180,48 @@ export async function getTotalLearningTimeMs(
     toMs
   );
   return row?.ms ?? 0;
+}
+
+export async function getGlobalDailyStreakDays(
+  nowMs: number = Date.now()
+): Promise<number> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ d: string }>(
+    `SELECT DISTINCT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime') AS d
+     FROM custom_learning_events
+     ORDER BY d DESC;`
+  );
+
+  const activeDays = new Set(rows.map((row) => row.d).filter(Boolean));
+  if (activeDays.size === 0) {
+    return 0;
+  }
+
+  const cursor = new Date(nowMs);
+  cursor.setHours(0, 0, 0, 0);
+  let streak = 0;
+
+  while (true) {
+    const dateKey = formatLocalDateOnly(cursor);
+    if (!activeDays.has(dateKey)) {
+      break;
+    }
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+
+  return streak;
+}
+
+export async function countGlobalBoxPromotions(): Promise<number> {
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt
+     FROM custom_learning_events
+     WHERE result = 'ok'
+       AND box IN ('boxOne', 'boxTwo', 'boxThree', 'boxFour');`
+  );
+  return row?.cnt ?? 0;
 }
 
 export async function getHardFlashcards(

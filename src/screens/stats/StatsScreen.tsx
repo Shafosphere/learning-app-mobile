@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { ScrollView } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
@@ -9,6 +9,8 @@ import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import {
+  countGlobalBoxPromotions,
+  getGlobalDailyStreakDays,
   getDailyLearnedCountsCustom,
   getDailyLearningTimeMsCustom,
   getTotalLearningTimeMs,
@@ -23,6 +25,8 @@ export default function StatsScreen() {
     month: 0,
     year: 0,
   });
+  const [streakDays, setStreakDays] = useState(0);
+  const [boxPromotionsCount, setBoxPromotionsCount] = useState(0);
   const [isBookshelfEditing, setIsBookshelfEditing] = useState(false);
 
   useEffect(() => {
@@ -68,6 +72,28 @@ export default function StatsScreen() {
         if (mounted) {
           setHeatmapData([]);
         }
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
+  }, []);
+
+  useEffect(() => {
+    let mounted = true;
+    (async () => {
+      try {
+        const [streak, promotions] = await Promise.all([
+          getGlobalDailyStreakDays(),
+          countGlobalBoxPromotions(),
+        ]);
+        if (!mounted) return;
+        setStreakDays(streak);
+        setBoxPromotionsCount(promotions);
+      } catch {
+        if (!mounted) return;
+        setStreakDays(0);
+        setBoxPromotionsCount(0);
       }
     })();
     return () => {
@@ -129,6 +155,21 @@ export default function StatsScreen() {
       scrollEnabled={!isBookshelfEditing}
     >
       <BigKnownWordsCard />
+
+      <View style={styles.miniStatsRow}>
+        <View style={styles.miniStatItem}>
+          <View style={styles.miniStatCard}>
+            <Text style={styles.miniStatValue}>{streakDays}</Text>
+          </View>
+          <Text style={styles.miniStatLabel}>Daily streak</Text>
+        </View>
+        <View style={styles.miniStatItem}>
+          <View style={styles.miniStatCard}>
+            <Text style={styles.miniStatValue}>{boxPromotionsCount}</Text>
+          </View>
+          <Text style={styles.miniStatLabel}>Przeskoki fiszek</Text>
+        </View>
+      </View>
 
       {/* {statsBookshelfEnabled && (
         <MedalsShowcase onEditModeChange={setIsBookshelfEditing} />

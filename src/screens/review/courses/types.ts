@@ -5,6 +5,7 @@ export type OfficialCourseReviewItem = CustomCourseSummary & {
     sourceLang: string | null;
     targetLang: string | null;
     isMini: boolean;
+    position?: number;
 };
 
 export type OfficialGroup = {

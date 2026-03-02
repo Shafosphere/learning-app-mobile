@@ -52,6 +52,16 @@ const OFFICIAL_PACKS = [
     csvFile: "ENGtoPL_B2.csv",
   },
   {
+    slug: "fiszki_podstawy_en_pl_slowa",
+    name: "Ang Podstawy",
+    iconId: "flag:en",
+    iconColor: "#14B8A6",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvFile: "fiszki_podstawy_EN-PL_slowa.csv",
+  },
+  {
     slug: "hangul_polish_reading",
     name: "Hangul – czytanie",
     iconId: "book",
