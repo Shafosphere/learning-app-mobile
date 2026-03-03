@@ -92,6 +92,16 @@ const OFFICIAL_PACKS = [
     csvFile: "gwiazdozbiory.csv",
   },
   {
+    slug: "polska_historia_300",
+    name: "Historia Polski",
+    iconId: "book",
+    iconColor: "#DC2626",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "polska_historia_300.csv",
+  },
+  {
     slug: "math2",
     name: "Matematyka (Umiem/Nie umiem)",
     iconId: "calculator",

@@ -28,12 +28,84 @@ import { CardMeasure } from "./subcomponents/CardMeasure";
 import LargeCardContainer from "./subcomponents/LargeCardContainer";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
-const NUMERIC_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
+const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
+const YEAR_ANSWER_REGEX = /^\d{3,4}$/;
+const DATE_ANSWER_REGEX = /^\d{3,4}-\d{2}(?:-\d{2})?$/;
 const INPUT_HORIZONTAL_PADDING = 8;
 const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
 
-const isNumericAnswerValue = (value: string): boolean =>
-  NUMERIC_ANSWER_REGEX.test(value.trim());
+type AnswerInputKind = "text" | "number" | "year" | "date";
+type DatePattern = "ym" | "ymd";
+
+const detectInputKind = (value: string): AnswerInputKind => {
+  const trimmed = value.trim();
+  if (!trimmed) return "text";
+  if (DATE_ANSWER_REGEX.test(trimmed)) return "date";
+  if (YEAR_ANSWER_REGEX.test(trimmed)) return "year";
+  if (NUMBER_ANSWER_REGEX.test(trimmed)) return "number";
+  return "text";
+};
+
+const resolveInputKind = (values: string[]): AnswerInputKind => {
+  const normalizedKinds = values
+    .map((entry) => detectInputKind(entry))
+    .filter((kind) => kind !== "text");
+
+  if (normalizedKinds.length === 0) return "text";
+  if (normalizedKinds.every((kind) => kind === "date")) return "date";
+  if (normalizedKinds.every((kind) => kind === "year")) return "year";
+  if (normalizedKinds.every((kind) => kind === "number")) return "number";
+  return "text";
+};
+
+const detectDatePattern = (value: string): DatePattern | null => {
+  const trimmed = value.trim();
+  if (/^\d{3,4}-\d{2}-\d{2}$/.test(trimmed)) return "ymd";
+  if (/^\d{3,4}-\d{2}$/.test(trimmed)) return "ym";
+  return null;
+};
+
+const resolveDatePattern = (values: string[]): DatePattern | null => {
+  let result: DatePattern | null = null;
+  for (const entry of values) {
+    const pattern = detectDatePattern(entry);
+    if (!pattern) continue;
+    if (pattern === "ymd") return "ymd";
+    result = "ym";
+  }
+  return result;
+};
+
+const formatDateLikeInput = (
+  rawValue: string,
+  pattern: DatePattern,
+  previousFormatted?: string,
+): string => {
+  const deletingAutoHyphen =
+    typeof previousFormatted === "string" &&
+    previousFormatted.endsWith("-") &&
+    rawValue === previousFormatted.slice(0, -1);
+  if (deletingAutoHyphen) {
+    return rawValue;
+  }
+
+  const digits = rawValue.replace(/\D/g, "");
+  const maxLength = pattern === "ymd" ? 8 : 6;
+  const clipped = digits.slice(0, maxLength);
+  if (clipped.length <= 4) {
+    if (clipped.length === 4) return `${clipped}-`;
+    return clipped;
+  }
+  if (pattern === "ym") {
+    return `${clipped.slice(0, 4)}-${clipped.slice(4)}`;
+  }
+  if (clipped.length <= 6) {
+    const yearMonth = `${clipped.slice(0, 4)}-${clipped.slice(4)}`;
+    if (clipped.length === 6) return `${yearMonth}-`;
+    return yearMonth;
+  }
+  return `${clipped.slice(0, 4)}-${clipped.slice(4, 6)}-${clipped.slice(6)}`;
+};
 
 export default function Card({
   selectedItem,
@@ -85,12 +157,6 @@ export default function Card({
   const trimTrailingSpaces = useCallback((value: string) => {
     return value.replace(/ +$/, "");
   }, []);
-  const handleAnswerChange = useCallback(
-    (value: string) => {
-      setAnswer(value);
-    },
-    [setAnswer],
-  );
   const [isMainInputFocused, setIsMainInputFocused] = useState(false);
   const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
     useState(false);
@@ -150,22 +216,73 @@ export default function Card({
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
   const shouldCorrectAwers = effectiveReversed;
   const shouldCorrectRewers = !effectiveReversed || answerOnly;
-  const isMainAnswerNumeric = useMemo(() => {
-    if (!selectedItem) return false;
+  const mainExpectedAnswers = useMemo(() => {
+    if (!selectedItem) return [];
     if (effectiveReversed) {
-      return isNumericAnswerValue(selectedItem.text ?? "");
+      const awersValue = (selectedItem.text ?? "").trim();
+      return awersValue ? [awersValue] : [];
     }
-    const translations = selectedItem.translations ?? [];
-    if (translations.length === 0) return false;
-    return translations.every((translation) => isNumericAnswerValue(translation));
+    return (selectedItem.translations ?? [])
+      .map((entry) => entry.trim())
+      .filter((entry) => entry.length > 0);
   }, [effectiveReversed, selectedItem]);
-  const isCorrectionInput1Numeric = useMemo(
-    () => isNumericAnswerValue(correctionAwers),
+  const mainAnswerKind = useMemo(
+    () => resolveInputKind(mainExpectedAnswers),
+    [mainExpectedAnswers],
+  );
+  const mainDatePattern = useMemo(
+    () => resolveDatePattern(mainExpectedAnswers),
+    [mainExpectedAnswers],
+  );
+  const correctionInput1Kind = useMemo(
+    () => resolveInputKind([correctionAwers]),
     [correctionAwers],
   );
-  const isCorrectionInput2Numeric = useMemo(
-    () => isNumericAnswerValue(correctionRewers),
+  const correctionInput2Kind = useMemo(
+    () => resolveInputKind([correctionRewers]),
     [correctionRewers],
+  );
+  const correctionInput1DatePattern = useMemo(
+    () => resolveDatePattern([correctionAwers]),
+    [correctionAwers],
+  );
+  const correctionInput2DatePattern = useMemo(
+    () => resolveDatePattern([correctionRewers]),
+    [correctionRewers],
+  );
+  const isMainAnswerNumeric = useMemo(
+    () => mainAnswerKind === "number" || mainAnswerKind === "year",
+    [mainAnswerKind],
+  );
+  const isMainAnswerDate = useMemo(
+    () => mainAnswerKind === "date",
+    [mainAnswerKind],
+  );
+  const isCorrectionInput1Numeric = useMemo(
+    () => correctionInput1Kind === "number" || correctionInput1Kind === "year",
+    [correctionInput1Kind],
+  );
+  const isCorrectionInput1Date = useMemo(
+    () => correctionInput1Kind === "date",
+    [correctionInput1Kind],
+  );
+  const isCorrectionInput2Numeric = useMemo(
+    () => correctionInput2Kind === "number" || correctionInput2Kind === "year",
+    [correctionInput2Kind],
+  );
+  const isCorrectionInput2Date = useMemo(
+    () => correctionInput2Kind === "date",
+    [correctionInput2Kind],
+  );
+  const handleAnswerChange = useCallback(
+    (value: string) => {
+      if (isMainAnswerDate && mainDatePattern) {
+        setAnswer(formatDateLikeInput(value, mainDatePattern, answer));
+        return;
+      }
+      setAnswer(value);
+    },
+    [answer, isMainAnswerDate, mainDatePattern, setAnswer],
   );
 
   const expectsHangulAnswer = useMemo(() => {
@@ -311,9 +428,46 @@ export default function Card({
     [],
   );
 
+  const handleWrongInputChange = useCallback(
+    (which: 1 | 2, value: string) => {
+      if (which === 1 && isCorrectionInput1Date && correctionInput1DatePattern) {
+        wrongInputChange(
+          1,
+          formatDateLikeInput(
+            value,
+            correctionInput1DatePattern,
+            correction?.input1,
+          ),
+        );
+        return;
+      }
+      if (which === 2 && isCorrectionInput2Date && correctionInput2DatePattern) {
+        wrongInputChange(
+          2,
+          formatDateLikeInput(
+            value,
+            correctionInput2DatePattern,
+            correction?.input2 ?? "",
+          ),
+        );
+        return;
+      }
+      wrongInputChange(which, value);
+    },
+    [
+      correction?.input1,
+      correction?.input2,
+      correctionInput1DatePattern,
+      correctionInput2DatePattern,
+      isCorrectionInput1Date,
+      isCorrectionInput2Date,
+      wrongInputChange,
+    ],
+  );
+
   const handleCorrectionInput1Change = useCallback(
     (t: string) => {
-      wrongInputChange(1, t);
+      handleWrongInputChange(1, t);
       if (correction?.awers) {
         const normalizeString = (value: string) => {
           let base = value.toLowerCase();
@@ -338,8 +492,8 @@ export default function Card({
     [
       correction?.awers,
       focusWithDelay,
+      handleWrongInputChange,
       ignoreDiacriticsInSpellcheck,
-      wrongInputChange,
       setHangulTarget,
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
@@ -803,15 +957,18 @@ export default function Card({
     shouldCorrectAwers,
     shouldCorrectRewers,
     isMainAnswerNumeric,
+    isMainAnswerDate,
     isCorrectionInput1Numeric,
+    isCorrectionInput1Date,
     isCorrectionInput2Numeric,
+    isCorrectionInput2Date,
     useLargeLayout,
     correctionInput1Ref,
     correctionInput2Ref,
     input1ScrollRef,
     input2ScrollRef,
     handleCorrectionInput1Change,
-    wrongInputChange,
+    wrongInputChange: handleWrongInputChange,
     suggestionProps,
     renderOverlayText,
     input1ContentWidth,

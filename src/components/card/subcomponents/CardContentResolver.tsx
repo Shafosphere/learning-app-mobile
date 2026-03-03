@@ -24,8 +24,11 @@ interface CardContentResolverProps {
   shouldCorrectAwers: boolean;
   shouldCorrectRewers: boolean;
   isMainAnswerNumeric: boolean;
+  isMainAnswerDate: boolean;
   isCorrectionInput1Numeric: boolean;
+  isCorrectionInput1Date: boolean;
   isCorrectionInput2Numeric: boolean;
+  isCorrectionInput2Date: boolean;
   useLargeLayout: boolean;
   layoutHandlers?: {
     onPromptLayout?: (height: number) => void;
@@ -81,8 +84,11 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     shouldCorrectAwers,
     shouldCorrectRewers,
     isMainAnswerNumeric,
+    isMainAnswerDate,
     isCorrectionInput1Numeric,
+    isCorrectionInput1Date,
     isCorrectionInput2Numeric,
+    isCorrectionInput2Date,
     useLargeLayout,
     layoutHandlers,
     correctionInput1Ref,
@@ -179,7 +185,9 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
             shouldUseHangulKeyboardCorrection1
           }
           isCorrectionInput1Numeric={isCorrectionInput1Numeric}
+          isCorrectionInput1Date={isCorrectionInput1Date}
           isCorrectionInput2Numeric={isCorrectionInput2Numeric}
+          isCorrectionInput2Date={isCorrectionInput2Date}
           previousCorrectionInput2={previousCorrectionInput2}
           canToggleTranslations={canToggleTranslations}
           next={next}
@@ -227,6 +235,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           handleConfirm={handleConfirm}
           shouldUseHangulKeyboardMain={shouldUseHangulKeyboardMain}
           isMainAnswerNumeric={isMainAnswerNumeric}
+          isMainAnswerDate={isMainAnswerDate}
           setIsMainInputFocused={setIsMainInputFocused}
           setHangulTarget={setHangulTarget}
           canToggleTranslations={canToggleTranslations}

@@ -40,6 +40,7 @@ type CardInputProps = {
   handleConfirm: () => void;
   shouldUseHangulKeyboardMain: boolean;
   isMainAnswerNumeric: boolean;
+  isMainAnswerDate: boolean;
   setIsMainInputFocused: (focused: boolean) => void;
   setHangulTarget: (target: "main" | "correction1" | null) => void;
   canToggleTranslations: boolean;
@@ -68,6 +69,7 @@ export function CardInput({
   handleConfirm,
   shouldUseHangulKeyboardMain,
   isMainAnswerNumeric,
+  isMainAnswerDate,
   setIsMainInputFocused,
   setHangulTarget,
   canToggleTranslations,
@@ -129,7 +131,11 @@ export function CardInput({
           autoCapitalize="none"
           {...suggestionProps}
           keyboardType={
-            isMainAnswerNumeric ? "decimal-pad" : suggestionProps?.keyboardType
+            isMainAnswerDate
+              ? "number-pad"
+              : isMainAnswerNumeric
+                ? "decimal-pad"
+                : suggestionProps?.keyboardType
           }
           ref={mainInputRef}
           returnKeyType="done"
@@ -208,6 +214,7 @@ export function CardInput({
     setIsMainInputFocused,
     setHangulTarget,
     shouldUseHangulKeyboardMain,
+    isMainAnswerDate,
     isMainAnswerNumeric,
     styles,
     typoDiff
