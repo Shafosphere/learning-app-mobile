@@ -61,11 +61,6 @@
       "wordpl": "ten, ta, to, taki, tak"
     },
     {
-      "id": 17,
-      "word": "at",
-      "wordpl": "przy, na, w, u, o, dla, do, z, za, stan, wiek, znak, @"
-    },
-    {
       "id": 18,
       "word": "from",
       "wordpl": "od, z, powód, w, wynik, na, przed"
@@ -2193,7 +2188,7 @@
     {
       "id": 1085,
       "word": "bar",
-      "wordpl": "belka, pręt, drążek, listwa, sztacheta, sztabka, przeszkoda, bariera, szlaban, krata, ruszt, batonik, baton, adwokatura, bar, pub, lada (barowa), takt, bar, kostka mydła, zaryglować, tarasować, blokować, uniemożliwiać, zabronić"
+      "wordpl": "belka, pręt, drążek, listwa, sztacheta, sztabka, przeszkoda, bariera, szlaban, krata, ruszt, batonik, baton, adwokatura, bar, pub, lada, takt, bar, kostka mydła, zaryglować, tarasować, blokować, uniemożliwiać, zabronić"
     },
     {
       "id": 1088,
@@ -2218,7 +2213,7 @@
     {
       "id": 1101,
       "word": "speak",
-      "wordpl": "mówić, rozmawiać, konwersować, przemawiać, wygłaszać, wypowiadać, powiedzieć, wyrażać, świadczyć o, posługiwać się (językiem)"
+      "wordpl": "mówić, rozmawiać, konwersować, przemawiać, wygłaszać, wypowiadać, powiedzieć, wyrażać, świadczyć o, posługiwać się"
     },
     {
       "id": 1103,
@@ -2308,7 +2303,7 @@
     {
       "id": 1169,
       "word": "stone",
-      "wordpl": "kamień, kamyk, kostka (cukru), pestka, ukamienować"
+      "wordpl": "kamień, kamyk, kostka, pestka, ukamienować"
     },
     {
       "id": 1172,
@@ -2328,7 +2323,7 @@
     {
       "id": 1186,
       "word": "radio",
-      "wordpl": "radio, stacja radiowa, medium radiowe, radiowy, nadawać, odbierać, komunikować się (przez radio)"
+      "wordpl": "radio, stacja radiowa, medium radiowe, radiowy, nadawać, odbierać, komunikować się"
     },
     {
       "id": 1191,
@@ -2338,7 +2333,7 @@
     {
       "id": 1197,
       "word": "team",
-      "wordpl": "drużyna, zespół, zaprzęg (zwierząt), połączyć siły, utworzyć zespół"
+      "wordpl": "drużyna, zespół, zaprzęg, połączyć siły, utworzyć zespół"
     },
     {
       "id": 1199,
@@ -2353,7 +2348,7 @@
     {
       "id": 1207,
       "word": "spent",
-      "wordpl": "zużyć, wyczerpać, wydać (pieniądze), spędzić (czas), wyczerpany, wydany"
+      "wordpl": "zużyć, wyczerpać, wydać, spędzić, wyczerpany, wydany"
     },
     {
       "id": 1209,
@@ -2363,12 +2358,12 @@
     {
       "id": 1211,
       "word": "accordance",
-      "wordpl": "zgodność, zgodnie (z), w zgodzie"
+      "wordpl": "zgodność, zgodnie, w zgodzie"
     },
     {
       "id": 1214,
       "word": "fair",
-      "wordpl": "targi, jarmark, sprawiedliwy, słuszny, sprawiedliwie, jasny (pogoda)"
+      "wordpl": "targi, jarmark, sprawiedliwy, słuszny, sprawiedliwie, jasny"
     },
     {
       "id": 1216,
@@ -2383,7 +2378,7 @@
     {
       "id": 1221,
       "word": "bottom",
-      "wordpl": "dno, spód, dół, podnóże, sedno, pupa (pot.)"
+      "wordpl": "dno, spód, dół, podnóże, sedno, pupa"
     },
     {
       "id": 1226,
@@ -2563,7 +2558,7 @@
     {
       "id": 1385,
       "word": "window",
-      "wordpl": "okno, okienko, witryna (sklepowa), wystawa"
+      "wordpl": "okno, okienko, witryna, wystawa"
     },
     {
       "id": 1386,
@@ -2673,7 +2668,7 @@
     {
       "id": 1485,
       "word": "doctor",
-      "wordpl": "lekarz, lekarka, dr (tytuł)"
+      "wordpl": "lekarz, lekarka, dr, doktor"
     },
     {
       "id": 1486,
@@ -2693,7 +2688,7 @@
     {
       "id": 1499,
       "word": "horse",
-      "wordpl": "koń, kozioł (gimnastyka)"
+      "wordpl": "koń, kozioł"
     },
     {
       "id": 1501,
@@ -2773,7 +2768,7 @@
     {
       "id": 1590,
       "word": "chair",
-      "wordpl": "krzesło, fotel, przewodniczący, przewodnicząca, katedra (stanowisko), przewodniczyć"
+      "wordpl": "krzesło, fotel, przewodniczący, przewodnicząca, katedra, przewodniczyć"
     },
     {
       "id": 1601,
@@ -2868,7 +2863,7 @@
     {
       "id": 1687,
       "word": "walk",
-      "wordpl": "spacer, przechadzka, chodnik, ścieżka, chód, iść, spacerować, wyprowadzać (psa)"
+      "wordpl": "spacer, przechadzka, chodnik, ścieżka, chód, iść, spacerować, wyprowadzać"
     },
     {
       "id": 1708,
@@ -3043,7 +3038,7 @@
     {
       "id": 1935,
       "word": "corn",
-      "wordpl": "kukurydza, zboże, odcisk (na stopie), modzel"
+      "wordpl": "kukurydza, zboże, odcisk, modzel"
     },
     {
       "id": 1939,
@@ -3433,7 +3428,7 @@
     {
       "id": 2433,
       "word": "tea",
-      "wordpl": "herbata, herbatka, podwieczorek, slang: marihuana"
+      "wordpl": "herbata, herbatka, podwieczorek,"
     },
     {
       "id": 2439,
@@ -3463,7 +3458,7 @@
     {
       "id": 2482,
       "word": "moon",
-      "wordpl": "księżyc, satelita ziemski, odsłaniać pośladki (slang)"
+      "wordpl": "księżyc, satelita ziemski, odsłaniać"
     },
     {
       "id": 2483,
@@ -3636,11 +3631,6 @@
       "wordpl": "krem, śmietana, śmietanka, kremowy, śmietankowy"
     },
     {
-      "id": 2744,
-      "word": "thee",
-      "wordpl": "ciebie, tobą (archaiczne)"
-    },
-    {
       "id": 2750,
       "word": "tower",
       "wordpl": "wieża, sterczeć, górować"
@@ -3648,7 +3638,7 @@
     {
       "id": 2752,
       "word": "nose",
-      "wordpl": "nos, dziób (samolotu)"
+      "wordpl": "nos, dziób"
     },
     {
       "id": 2756,
@@ -3708,7 +3698,7 @@
     {
       "id": 2844,
       "word": "grey",
-      "wordpl": "szary, siwy, (kolor) szary, szarzeć, poszarzeć, siwieć, osiwieć"
+      "wordpl": "szary, siwy, szary, szarzeć, poszarzeć, siwieć, osiwieć"
     },
     {
       "id": 2846,
@@ -4353,7 +4343,7 @@
     {
       "id": 3922,
       "word": "juice",
-      "wordpl": "sok, likier, siła, moc, chęć do działania, esencja, doping (zwłaszcza sterydowy), prąd, paliwo, fundusz, wyciskać, pić duże ilości alkoholu"
+      "wordpl": "sok, likier, siła, moc, chęć do działania, esencja, doping, prąd, paliwo, fundusz, wyciskać, pić duże ilości alkoholu"
     },
     {
       "id": 3932,
@@ -4788,7 +4778,7 @@
     {
       "id": 4927,
       "word": "email",
-      "wordpl": "e-mail, email, mail, elektroniczny, wysłać (e-mail)"
+      "wordpl": "e-mail, email, mail, elektroniczny,"
     },
     {
       "id": 4932,
@@ -4873,7 +4863,7 @@
     {
       "id": 5171,
       "word": "fore",
-      "wordpl": "przód, przedni, dziobowy, okrzyk ostrzegawczy «fore!», ostrzegać"
+      "wordpl": "przód, przedni, dziobowy, okrzyk ostrzegawczy, ostrzegać"
     },
     {
       "id": 5173,
@@ -5263,7 +5253,7 @@
     {
       "id": 6134,
       "word": "jump",
-      "wordpl": "skok, skakać, wyskakiwać, przeskakiwać, mieć stosunek seksualny (z kimś)"
+      "wordpl": "skok, skakać, wyskakiwać, przeskakiwać, "
     },
     {
       "id": 6143,
@@ -6940,7 +6930,7 @@
     {
       "id": 1126,
       "word": "cash",
-      "wordpl": "gotówka, płatność gotówką, realizować (czek), czek"
+      "wordpl": "gotówka, płatność gotówką, czek"
     },
     {
       "id": 1133,
@@ -7030,7 +7020,7 @@
     {
       "id": 1210,
       "word": "principal",
-      "wordpl": "główny, podstawowy, dyrektor (szkoły), rektor (uniwersytetu), mocodawca, zleceniodawca, kapitał, kwota, dyrektor"
+      "wordpl": "główny, podstawowy, dyrektor, rektor, mocodawca, zleceniodawca, kapitał, kwota, dyrektor"
     },
     {
       "id": 1212,
@@ -7045,7 +7035,7 @@
     {
       "id": 1235,
       "word": "centre",
-      "wordpl": "centrum, środek, centralny, środkowy, centrować, koncentrować (się)"
+      "wordpl": "centrum, środek, centralny, środkowy, centrować, koncentrować"
     },
     {
       "id": 1236,
@@ -7075,7 +7065,7 @@
     {
       "id": 1270,
       "word": "wish",
-      "wordpl": "chcieć, życzyć sobie, pragnąć, życzenie, żałować (że nie)"
+      "wordpl": "chcieć, życzyć sobie, pragnąć, życzenie, żałować"
     },
     {
       "id": 1274,
@@ -7190,7 +7180,7 @@
     {
       "id": 1383,
       "word": "passage",
-      "wordpl": "korytarz, pasaż, przejście, przewód, ustęp (tekstowy), fragment"
+      "wordpl": "korytarz, pasaż, przejście, przewód, ustęp, fragment"
     },
     {
       "id": 1387,
@@ -7355,7 +7345,7 @@
     {
       "id": 1500,
       "word": "machinery",
-      "wordpl": "maszyneria, urządzenia, 506345"
+      "wordpl": "maszyneria, urządzenia,"
     },
     {
       "id": 1503,
@@ -7425,7 +7415,7 @@
     {
       "id": 1547,
       "word": "frank",
-      "wordpl": "szczery, frank (poczta), frankować"
+      "wordpl": "szczery, frank, frankować"
     },
     {
       "id": 1548,
@@ -7505,7 +7495,7 @@
     {
       "id": 1597,
       "word": "scene",
-      "wordpl": "scena, sceneria, obraz, miejsce (zdarzenia), krajobraz"
+      "wordpl": "scena, sceneria, obraz, miejsce, krajobraz"
     },
     {
       "id": 1598,
@@ -7955,7 +7945,7 @@
     {
       "id": 1878,
       "word": "shot",
-      "wordpl": "strzał, próba, zdjęcie, kieliszek (alkoholu), strzelać, oddać strzał"
+      "wordpl": "strzał, próba, zdjęcie, kieliszek, strzelać, oddać strzał"
     },
     {
       "id": 1885,
@@ -8025,7 +8015,7 @@
     {
       "id": 1931,
       "word": "jack",
-      "wordpl": "podnośnik, dźwignik, walet, gniazdo (wtyk), podnośnik samochodowy, dźwigać, podwyższać, podebrać"
+      "wordpl": "podnośnik, dźwignik, walet, gniazdo, podnośnik samochodowy, dźwigać, podwyższać, podebrać"
     },
     {
       "id": 1932,
@@ -8105,7 +8095,7 @@
     {
       "id": 1988,
       "word": "transactions",
-      "wordpl": "transakcje, operacje (finansowe)"
+      "wordpl": "transakcje, operacje"
     },
     {
       "id": 1994,
@@ -8340,7 +8330,7 @@
     {
       "id": 2143,
       "word": "crown",
-      "wordpl": "korona, wieniec, czubek (drzewa), korona drzewa, władza (królewska), koronować, ukoronować, zwieńczać, wieńczyć"
+      "wordpl": "korona, wieniec, czubek, korona drzewa, władza, koronować, ukoronować, zwieńczać, wieńczyć"
     },
     {
       "id": 2144,
@@ -8760,7 +8750,7 @@
     {
       "id": 2421,
       "word": "shell",
-      "wordpl": "muszla, skorupa, skorupka, pancerz, łupina, powłoka, szkielet, zrąb, pocisk, granat, łuska, spółka-wydmuszka, łuskać, ostrzeliwać"
+      "wordpl": "muszla, skorupa, skorupka, pancerz, łupina, powłoka, szkielet, zrąb, pocisk, granat, łuska, łuskać, ostrzeliwać"
     },
     {
       "id": 2426,
@@ -9140,7 +9130,7 @@
     {
       "id": 2741,
       "word": "tape",
-      "wordpl": "taśma, taśma magnetofonowa, nagrywać (na taśmę)"
+      "wordpl": "taśma, taśma magnetofonowa, nagrywać"
     },
     {
       "id": 2742,
@@ -9150,7 +9140,7 @@
     {
       "id": 2746,
       "word": "kids",
-      "wordpl": "dzieci, dzieciak, dziecięcy (potocznie)"
+      "wordpl": "dzieci, dzieciak, dziecięcy"
     },
     {
       "id": 2765,
@@ -10670,7 +10660,7 @@
     {
       "id": 4818,
       "word": "appliances",
-      "wordpl": "urządzenia, sprzęt (AGD)"
+      "wordpl": "urządzenia, sprzęt"
     },
     {
       "id": 4824,
@@ -11045,7 +11035,7 @@
     {
       "id": 5522,
       "word": "shots",
-      "wordpl": "strzały, zastrzyki, ujęcia (filmowe, fotograficzne)"
+      "wordpl": "strzały, zastrzyki, ujęcia"
     },
     {
       "id": 5540,
@@ -11055,12 +11045,12 @@
     {
       "id": 5541,
       "word": "resultant",
-      "wordpl": "wynikowy, wypadkowa (fiz.), wynikający, wynik"
+      "wordpl": "wynikowy, wypadkowa, wynikający, wynik"
     },
     {
       "id": 5549,
       "word": "dependency",
-      "wordpl": "zależność, zależność (prawna, chem.), terytorium zależne (politycznie), moduł zależny (informatyka)"
+      "wordpl": "zależność, zależność, terytorium zależne, moduł zależny"
     },
     {
       "id": 5552,
@@ -11472,7 +11462,7 @@
     {
       "id": 73,
       "word": "more",
-      "wordpl": "więcej, bardzo, -szy, jeszcze"
+      "wordpl": "więcej, bardzo, jeszcze"
     },
     {
       "id": 97,
@@ -11502,7 +11492,7 @@
     {
       "id": 175,
       "word": "department",
-      "wordpl": "departament, wydział, ministerstwo"
+      "wordpl": "departament, wydział, ministerstwo, dział"
     },
     {
       "id": 180,
@@ -11567,7 +11557,7 @@
     {
       "id": 252,
       "word": "required",
-      "wordpl": "nieodzowny, niezbędny"
+      "wordpl": "nieodzowny, niezbędny, wymagane"
     },
     {
       "id": 264,
@@ -11577,7 +11567,7 @@
     {
       "id": 268,
       "word": "provided",
-      "wordpl": "o ile, pod warunkiem, że"
+      "wordpl": "dostarczony, o ile, pod warunkiem, że"
     },
     {
       "id": 269,
@@ -11602,12 +11592,12 @@
     {
       "id": 296,
       "word": "various",
-      "wordpl": "różnorodny, rozmaity"
+      "wordpl": "różnorodny, rozmaity, różne"
     },
     {
       "id": 297,
       "word": "though",
-      "wordpl": "choć, jednak, mimo wszystko"
+      "wordpl": "choć, jednak, mimo wszystko, chociaż"
     },
     {
       "id": 302,
@@ -11697,7 +11687,7 @@
     {
       "id": 390,
       "word": "according",
-      "wordpl": "według"
+      "wordpl": "według, zgodnie z"
     },
     {
       "id": 397,
@@ -11737,7 +11727,7 @@
     {
       "id": 477,
       "word": "obtained",
-      "wordpl": "otrzymany, uzyskany"
+      "wordpl": "otrzymany, uzyskany, uzyskane"
     },
     {
       "id": 478,
@@ -11837,7 +11827,7 @@
     {
       "id": 541,
       "word": "written",
-      "wordpl": "pisemny"
+      "wordpl": "pisemny, napisany"
     },
     {
       "id": 543,
@@ -11852,7 +11842,7 @@
     {
       "id": 551,
       "word": "individual",
-      "wordpl": "indywidualny, poszczególny, osoba"
+      "wordpl": "indywidualny, poszczególny, osoba, osoba fizyczna"
     },
     {
       "id": 552,
@@ -11927,7 +11917,7 @@
     {
       "id": 631,
       "word": "miles",
-      "wordpl": "mile"
+      "wordpl": "mile, mil"
     },
     {
       "id": 634,
@@ -11982,7 +11972,7 @@
     {
       "id": 690,
       "word": "throughout",
-      "wordpl": "przez cały, wszędzie"
+      "wordpl": "przez cały, wszędzie, przez cały czas"
     },
     {
       "id": 692,
@@ -12007,7 +11997,7 @@
     {
       "id": 710,
       "word": "observed",
-      "wordpl": "zaobserwowany, obserwować"
+      "wordpl": "zaobserwowany, obserwować, obserwowany"
     },
     {
       "id": 714,
@@ -12187,7 +12177,7 @@
     {
       "id": 803,
       "word": "upper",
-      "wordpl": "górny, wyższy, wierzchni"
+      "wordpl": "górny, wyższy, wierzchni, górna część"
     },
     {
       "id": 804,
@@ -12312,7 +12302,7 @@
     {
       "id": 888,
       "word": "hearing",
-      "wordpl": "słuch, posłuch, rozprawa, przesłuchanie"
+      "wordpl": "słuch, posłuch, rozprawa, przesłuchanie, słyszenie"
     },
     {
       "id": 894,
@@ -12357,7 +12347,7 @@
     {
       "id": 916,
       "word": "occur",
-      "wordpl": "występować, zdarzać się"
+      "wordpl": "występować, zdarzać się, wystąpić"
     },
     {
       "id": 917,
@@ -12382,7 +12372,7 @@
     {
       "id": 923,
       "word": "none",
-      "wordpl": "żaden, nic, nikt"
+      "wordpl": "żaden, nic, nikt, brak"
     },
     {
       "id": 924,
@@ -12412,7 +12402,7 @@
     {
       "id": 940,
       "word": "characteristics",
-      "wordpl": "charakterystyka, cechy"
+      "wordpl": "charakterystyka, cechy, cechy charakterystyczne"
     },
     {
       "id": 944,
@@ -12532,7 +12522,7 @@
     {
       "id": 1022,
       "word": "appeal",
-      "wordpl": "apelacja, apel, wezwanie, odezwa, zew, urok, apelować, zaapelować, wzywać, zaskarżyć, pociągać"
+      "wordpl": "apelacja, odwołanie, apel, wezwanie, odezwa, zew, urok, apelować, zaapelować, wzywać, zaskarżyć, pociągać"
     },
     {
       "id": 1026,
@@ -12587,7 +12577,7 @@
     {
       "id": 1068,
       "word": "investigation",
-      "wordpl": "śledztwo, badanie, dociekanie"
+      "wordpl": "śledztwo, badanie, dociekanie, dochodzenie"
     },
     {
       "id": 1070,
@@ -12682,7 +12672,7 @@
     {
       "id": 1121,
       "word": "vice",
-      "wordpl": "imadło, zastępca, wada"
+      "wordpl": "imadło, wice, zastępca, wada"
     },
     {
       "id": 1122,
@@ -12722,7 +12712,7 @@
     {
       "id": 1153,
       "word": "relating",
-      "wordpl": "odnoszący się, dotyczący"
+      "wordpl": "odnoszący się, dotyczący, związany z"
     },
     {
       "id": 1155,
@@ -12762,7 +12752,7 @@
     {
       "id": 1174,
       "word": "storage",
-      "wordpl": "przechowywanie, magazynowanie, magazyn, pamięć (komputer)"
+      "wordpl": "przechowywanie, magazynowanie, magazyn, pamięć"
     },
     {
       "id": 1175,
@@ -12792,7 +12782,7 @@
     {
       "id": 1187,
       "word": "slightly",
-      "wordpl": "lekko, nieco, trochę"
+      "wordpl": "lekko, nieco, trochę, nieznacznie"
     },
     {
       "id": 1188,
@@ -12802,7 +12792,7 @@
     {
       "id": 1189,
       "word": "permit",
-      "wordpl": "pozwolenie, przepustka, pozwalać"
+      "wordpl": "pozwolenie, przepustka, pozwalać, zezwolenie"
     },
     {
       "id": 1194,
@@ -12857,7 +12847,7 @@
     {
       "id": 1223,
       "word": "opening",
-      "wordpl": "otwarcie, początek, inauguracja, oferta pracy, debiut (szachy), otwarty, początkowy, przestrzeń, dziura"
+      "wordpl": "otwarcie, początek, inauguracja, oferta pracy, debiut, otwarty, początkowy, przestrzeń, dziura"
     },
     {
       "id": 1225,
@@ -12877,7 +12867,7 @@
     {
       "id": 1229,
       "word": "occurs",
-      "wordpl": "występować, zdarzać się, pojawiać się"
+      "wordpl": "występować, zdarzać się, pojawiać się, występuje"
     },
     {
       "id": 1232,
@@ -12907,17 +12897,17 @@
     {
       "id": 1244,
       "word": "debt",
-      "wordpl": "dług"
+      "wordpl": "dług, zadłużenie"
     },
     {
       "id": 1245,
       "word": "please",
-      "wordpl": "prosić, sprawiać przyjemność, zadowalać, dogadzać"
+      "wordpl": "prosić, sprawiać przyjemność, zadowalać, dogadzać, proszę"
     },
     {
       "id": 1248,
       "word": "lay",
-      "wordpl": "kłaść, położyć, znosić (jaja), laicki, laik"
+      "wordpl": "leżeć, kłaść, położyć, znosić, laicki, laik"
     },
     {
       "id": 1249,
@@ -12967,7 +12957,7 @@
     {
       "id": 1280,
       "word": "gain",
-      "wordpl": "zyskiwać, zyskać, zdobywać, zdobyć, osiągać, osiągnąć, zysk, korzyść, zdobycz, przyrost, wzrost, wzmocnienie"
+      "wordpl": "zyskiwać, zyskać, zdobywać, zdobyć, osiągać, osiągnąć, zysk, korzyść, zdobycz, przyrost, wzrost, wzmocnienie, zyski"
     },
     {
       "id": 1281,
@@ -12992,7 +12982,7 @@
     {
       "id": 1291,
       "word": "engaged",
-      "wordpl": "zaręczony"
+      "wordpl": "zaręczony, zaangażowany"
     },
     {
       "id": 1292,
@@ -13007,7 +12997,7 @@
     {
       "id": 1296,
       "word": "numerous",
-      "wordpl": "liczny"
+      "wordpl": "liczne ,liczny"
     },
     {
       "id": 1297,
@@ -13132,7 +13122,7 @@
     {
       "id": 1359,
       "word": "properly",
-      "wordpl": "właściwie, poprawnie, odpowiednio"
+      "wordpl": "właściwie, poprawnie, odpowiednio, prawidłowo"
     },
     {
       "id": 1363,
@@ -13142,7 +13132,7 @@
     {
       "id": 1366,
       "word": "laid",
-      "wordpl": "położyć, ułożyć"
+      "wordpl": "położyć, ułożyć, układany"
     },
     {
       "id": 1368,
@@ -13182,7 +13172,7 @@
     {
       "id": 1376,
       "word": "proof",
-      "wordpl": "dowód, próba, test, korekta, odbitka próbna, odporny (np. fireproof), stopień zawartości alkoholu, impregnacja"
+      "wordpl": "dowód, próba, test, korekta, odbitka próbna, odporny, stopień zawartości alkoholu, impregnacja"
     },
     {
       "id": 1377,
@@ -13192,12 +13182,12 @@
     {
       "id": 1381,
       "word": "liquid",
-      "wordpl": "ciecz, ciekły, płynny"
+      "wordpl": "płyn ,ciecz, ciekły, płynny"
     },
     {
       "id": 1384,
       "word": "affect",
-      "wordpl": "wpływać, oddziaływać, wywoływać, wzruszać, poruszać, afekt (psychologia)"
+      "wordpl": "wpływać, oddziaływać, wywoływać, wzruszać, poruszać, afekt"
     },
     {
       "id": 1389,
@@ -13237,7 +13227,7 @@
     {
       "id": 1407,
       "word": "recommended",
-      "wordpl": "zalecany, polecany, polecać, zalecać"
+      "wordpl": "zalecany, polecany, polecać, zalecać, zalecane"
     },
     {
       "id": 1408,
@@ -13267,7 +13257,7 @@
     {
       "id": 1422,
       "word": "pounds",
-      "wordpl": "funt, funty"
+      "wordpl": "funt, funty, funtów"
     },
     {
       "id": 1426,
@@ -13292,7 +13282,7 @@
     {
       "id": 1434,
       "word": "proved",
-      "wordpl": "udowodniony, dowiedziony, udowodnić, dowieść"
+      "wordpl": "udowodniony, dowiedziony, udowodnić, dowieść, udowodniono"
     },
     {
       "id": 1436,
@@ -13302,7 +13292,7 @@
     {
       "id": 1441,
       "word": "closely",
-      "wordpl": "dokładnie, z bliska, blisko"
+      "wordpl": "dokładnie, z bliska, blisko, ściśle"
     },
     {
       "id": 1442,
@@ -13327,7 +13317,7 @@
     {
       "id": 1456,
       "word": "monthly",
-      "wordpl": "miesięcznik, miesięczny, comiesięczny, co miesiąc"
+      "wordpl": "miesięcznik, miesięczny, comiesięczny, co miesiąc, miesięcznie"
     },
     {
       "id": 1458,
@@ -13347,7 +13337,7 @@
     {
       "id": 1463,
       "word": "minor",
-      "wordpl": "drobny, pomniejszy, drugorzędny, nieletni, małoletni, molowy"
+      "wordpl": "drobny, pomniejszy, drugorzędny, nieletni, małoletni, molowy, niewielki"
     },
     {
       "id": 1467,
@@ -13367,7 +13357,7 @@
     {
       "id": 1487,
       "word": "observations",
-      "wordpl": "obserwacje / spostrzeżenia"
+      "wordpl": "obserwacje, spostrzeżenia"
     },
     {
       "id": 1488,
@@ -13377,7 +13367,7 @@
     {
       "id": 1489,
       "word": "recovery",
-      "wordpl": "powrót do zdrowia, wyzdrowienie, odzyskanie"
+      "wordpl": "powrót do zdrowia, wyzdrowienie, odzyskanie, odzyskiwanie"
     },
     {
       "id": 1490,
@@ -13392,7 +13382,7 @@
     {
       "id": 1502,
       "word": "severe",
-      "wordpl": "srogi, surowy, dotkliwy, groźny"
+      "wordpl": "srogi, surowy, dotkliwy, groźny, poważny"
     },
     {
       "id": 1506,
@@ -13437,12 +13427,12 @@
     {
       "id": 1525,
       "word": "soul",
-      "wordpl": "dusza, soul (muzyka), życie, wigor"
+      "wordpl": "dusza, soul, życie, wigor"
     },
     {
       "id": 1529,
       "word": "examined",
-      "wordpl": "zbadano / przeanalizowano / sprawdzono"
+      "wordpl": "zbadano, przeanalizowano, sprawdzono, zbadany"
     },
     {
       "id": 1531,
@@ -13452,7 +13442,7 @@
     {
       "id": 1535,
       "word": "measurements",
-      "wordpl": "pomiary / wyniki pomiarów"
+      "wordpl": "pomiary, wyniki pomiarów"
     },
     {
       "id": 1536,
@@ -13472,7 +13462,7 @@
     {
       "id": 1544,
       "word": "crop",
-      "wordpl": "plon, uprawa, przycinać"
+      "wordpl": "plon, uprawa, przycinać, przyciąć"
     },
     {
       "id": 1549,
@@ -13517,7 +13507,7 @@
     {
       "id": 1579,
       "word": "vessels",
-      "wordpl": "naczynie, okręt, statek, naczynie krwionośne"
+      "wordpl": "naczynie, okręt, statek, naczynie krwionośne, statki"
     },
     {
       "id": 1581,
@@ -13567,7 +13557,7 @@
     {
       "id": 1611,
       "word": "deposits",
-      "wordpl": "depozyt, osad, złoże, deponować"
+      "wordpl": "depozyt, osad, złoże, deponować, depozyty"
     },
     {
       "id": 1615,
@@ -13577,12 +13567,12 @@
     {
       "id": 1618,
       "word": "decrease",
-      "wordpl": "zmniejszanie, zmniejszać"
+      "wordpl": "zmniejszanie, zmniejszać, spadek"
     },
     {
       "id": 1620,
       "word": "equally",
-      "wordpl": "równo, jednakowo, podobnie, w równym stopniu, jednocześnie"
+      "wordpl": "równo, jednakowo, podobnie, w równym stopniu, jednocześnie, równie"
     },
     {
       "id": 1633,
@@ -13622,7 +13612,7 @@
     {
       "id": 1648,
       "word": "revised",
-      "wordpl": "zrewidowany, poprawiony, skorygowany"
+      "wordpl": "zrewidowany, poprawiony, skorygowany, zmieniony"
     },
     {
       "id": 1652,
@@ -13652,7 +13642,7 @@
     {
       "id": 1670,
       "word": "delivered",
-      "wordpl": "dostarczać, dostarczyć, wygłaszać (przemówienie), odebrać poród"
+      "wordpl": "dostarczać, dostarczyć, wygłaszać, odebrać poród, dostarczony"
     },
     {
       "id": 1671,
@@ -13672,7 +13662,7 @@
     {
       "id": 1678,
       "word": "unique",
-      "wordpl": "unikat, unikatowy, wyjątkowy, niepowtarzalny"
+      "wordpl": "unikat, unikatowy, wyjątkowy, niepowtarzalny, unikalny"
     },
     {
       "id": 1684,
@@ -13692,7 +13682,7 @@
     {
       "id": 1696,
       "word": "denied",
-      "wordpl": "odmówić, odmawiać, zaprzeczyć, odrzucony"
+      "wordpl": "odmówić, odmawiać, zaprzeczyć, odrzucony, odmówiono"
     },
     {
       "id": 1697,
@@ -13707,7 +13697,7 @@
     {
       "id": 1701,
       "word": "distributed",
-      "wordpl": "dystrybuować, rozdzielać, rozprowadzać, rozdzielony, rozłożony"
+      "wordpl": "dystrybuować, rozdzielać, rozprowadzać, rozdzielony, rozłożony, rozproszony"
     },
     {
       "id": 1703,
@@ -13882,7 +13872,7 @@
     {
       "id": 1801,
       "word": "concluded",
-      "wordpl": "zakończyć, zakończony, wnioskować, wywnioskować"
+      "wordpl": "zakończyć, zakończony, wnioskować, wywnioskować, zakończone"
     },
     {
       "id": 1802,
@@ -13897,7 +13887,7 @@
     {
       "id": 1806,
       "word": "tend",
-      "wordpl": "mieć skłonność do, skłaniać się ku, opiekować się, doglądać"
+      "wordpl": "mieć skłonność do, skłaniać się ku, opiekować się, doglądać, skłaniać się"
     },
     {
       "id": 1807,
@@ -13912,7 +13902,7 @@
     {
       "id": 1816,
       "word": "symptoms",
-      "wordpl": "objaw, symptom"
+      "wordpl": "objaw, symptom, objawy"
     },
     {
       "id": 1824,
@@ -13932,7 +13922,7 @@
     {
       "id": 1833,
       "word": "aside",
-      "wordpl": "na bok, uwaga, wtrącenie"
+      "wordpl": "na bok, uwaga, wtrącenie, na marginesie"
     },
     {
       "id": 1834,
@@ -13947,7 +13937,7 @@
     {
       "id": 1846,
       "word": "demonstrated",
-      "wordpl": "demonstrować, zademonstrować, zademonstrowany"
+      "wordpl": "demonstrować, zademonstrować, zademonstrowany, wykazany"
     },
     {
       "id": 1849,
@@ -13972,7 +13962,7 @@
     {
       "id": 1869,
       "word": "refused",
-      "wordpl": "odmówić, odrzucić"
+      "wordpl": "odmówić, odrzucić, odmówił"
     },
     {
       "id": 1871,
@@ -14072,7 +14062,7 @@
     {
       "id": 1920,
       "word": "infection",
-      "wordpl": "infekcja"
+      "wordpl": "infekcja, zakażenie"
     },
     {
       "id": 1923,
@@ -14087,7 +14077,7 @@
     {
       "id": 1926,
       "word": "incorporated",
-      "wordpl": "zarejestrowany (jako spółka akcyjna), spółka akcyjna, włączony, zintegrowany"
+      "wordpl": "zarejestrowany, spółka akcyjna, włączony, zintegrowany"
     },
     {
       "id": 1927,
@@ -14097,12 +14087,12 @@
     {
       "id": 1929,
       "word": "settled",
-      "wordpl": "ustalony, osiedlić się, załatwić, uregulować"
+      "wordpl": "ustalony, osiedlić się, załatwić, uregulować, rozliczony"
     },
     {
       "id": 1937,
       "word": "compounds",
-      "wordpl": "związki chemiczne, kompleksy"
+      "wordpl": "związki chemiczne, kompleksy, związki"
     },
     {
       "id": 1941,
@@ -14112,7 +14102,7 @@
     {
       "id": 1946,
       "word": "involves",
-      "wordpl": "zawierać, obejmować, wiązać się z, angażować"
+      "wordpl": "zawierać, obejmować, wiązać się z, angażować, obejmuje"
     },
     {
       "id": 1948,
@@ -14202,7 +14192,7 @@
     {
       "id": 1992,
       "word": "copyright",
-      "wordpl": "prawo autorskie, zastrzegać"
+      "wordpl": "prawo autorskie, zastrzegać, prawa autorskie"
     },
     {
       "id": 1997,
@@ -14257,7 +14247,7 @@
     {
       "id": 2038,
       "word": "whenever",
-      "wordpl": "kiedy, tylko, kiedykolwiek"
+      "wordpl": "kiedy, tylko, kiedykolwiek, kiedy tylko"
     },
     {
       "id": 2044,
@@ -14487,7 +14477,7 @@
     {
       "id": 2207,
       "word": "fit",
-      "wordpl": "pasować, zgadzać się, montować, mocować, być w formie, mieścić się, wyposażyć, dopasować, odpowiedni, właściwy, napad (choroby), atak"
+      "wordpl": "pasować, zgadzać się, montować, mocować, być w formie, mieścić się, wyposażyć, dopasować, odpowiedni, właściwy, napad, atak"
     },
     {
       "id": 2208,
@@ -14542,7 +14532,7 @@
     {
       "id": 2235,
       "word": "guidance",
-      "wordpl": "porada, wskazówka, zalecenie, instrukcja, poradnictwo, pokierowanie"
+      "wordpl": "porada, wytyczne, wskazówka, zalecenie, instrukcja, poradnictwo, pokierowanie"
     },
     {
       "id": 2237,
@@ -14572,7 +14562,7 @@
     {
       "id": 2254,
       "word": "contribute",
-      "wordpl": "przyczyniać się, wnosić, dołożyć"
+      "wordpl": "przyczyniać się, wnosić, dołożyć, wnosić wkład"
     },
     {
       "id": 2256,
@@ -14592,7 +14582,7 @@
     {
       "id": 2272,
       "word": "rendered",
-      "wordpl": "oddawać, przedstawiać, renderować, wyrenderować"
+      "wordpl": "oddawać, przedstawiać, renderować, wyrenderować, renderowany"
     },
     {
       "id": 2273,
@@ -14617,7 +14607,7 @@
     {
       "id": 2292,
       "word": "classified",
-      "wordpl": "poufny, tajny, ogłoszenie drobne"
+      "wordpl": "poufny, tajny, klasyfikowane, ogłoszenie drobne"
     },
     {
       "id": 2298,
@@ -14662,7 +14652,7 @@
     {
       "id": 2317,
       "word": "furnished",
-      "wordpl": "umeblowany, wyposażony"
+      "wordpl": "umeblowany, wyposażony, umeblowane"
     },
     {
       "id": 2318,
@@ -14687,17 +14677,17 @@
     {
       "id": 2327,
       "word": "advisory",
-      "wordpl": "doradczy, poradczy, ostrzegawczy, komunikat ostrzegawczy"
+      "wordpl": "doradczy, poradczy, ostrzegawczy, komunikat ostrzegawczy, doradztwo"
     },
     {
       "id": 2333,
       "word": "arise",
-      "wordpl": "wstawać, powstawać, ukazywać się, wyłaniać się, wynikać"
+      "wordpl": "wstawać, powstawać, ukazywać się, wyłaniać się, wynikać, powstać"
     },
     {
       "id": 2334,
       "word": "accomplished",
-      "wordpl": "znakomity, utalentowany, ukończony"
+      "wordpl": "znakomity, utalentowany, ukończony, wykonane"
     },
     {
       "id": 2336,
@@ -14707,17 +14697,17 @@
     {
       "id": 2339,
       "word": "decline",
-      "wordpl": "zanik, zanikanie, spadek, upadek, spadać, maleć, odmawiać, odrzucać"
+      "wordpl": "zanik, zanikanie, spadek, upadek, spadać, maleć, odmawiać, odrzucać, odmowa"
     },
     {
       "id": 2346,
       "word": "incident",
-      "wordpl": "wydarzenie, incydent, zajście, wypadek"
+      "wordpl": "wydarzenie, incydent, zajście, wypadek, zdarzenie"
     },
     {
       "id": 2349,
       "word": "electricity",
-      "wordpl": "elektryczność"
+      "wordpl": "elektryczność, energia elektryczna"
     },
     {
       "id": 2354,
@@ -14737,7 +14727,7 @@
     {
       "id": 2362,
       "word": "producers",
-      "wordpl": "producent, producentka, wytwórca"
+      "wordpl": "producent, producentka, wytwórca, producenci"
     },
     {
       "id": 2364,
@@ -14797,7 +14787,7 @@
     {
       "id": 2392,
       "word": "attended",
-      "wordpl": "uczestniczyć (w), brać udział (w)"
+      "wordpl": "uczestniczyć, brać udział, uczestniczył"
     },
     {
       "id": 2393,
@@ -14877,7 +14867,7 @@
     {
       "id": 2440,
       "word": "adapted",
-      "wordpl": "adaptowany, przystosowany, adaptować"
+      "wordpl": "adaptowany, przystosowany, adaptować, dostosowany"
     },
     {
       "id": 2441,
@@ -14977,7 +14967,7 @@
     {
       "id": 2486,
       "word": "recall",
-      "wordpl": "przypominać sobie, odwoływać, wzywać, pamięć, przywoływać"
+      "wordpl": "przypominać sobie, odwoływać, wzywać, pamięć, przywoływać, przypomnienie"
     },
     {
       "id": 2491,
@@ -14997,7 +14987,7 @@
     {
       "id": 2508,
       "word": "mounted",
-      "wordpl": "zamontowany, osiodłany, jeździć konno, montować, oprawiony (obraz)"
+      "wordpl": "zamontowany, osiodłany, jeździć konno, montować, oprawiony"
     },
     {
       "id": 2509,
@@ -15017,12 +15007,12 @@
     {
       "id": 2513,
       "word": "graduate",
-      "wordpl": "absolwent, absolwentka, ukończyć (studia)"
+      "wordpl": "absolwent, absolwentka, ukończyć"
     },
     {
       "id": 2518,
       "word": "assignment",
-      "wordpl": "zadanie, praca domowa, przydzielenie, przydział, cesja (praw), przeniesienie (praw)"
+      "wordpl": "zadanie, praca domowa, przydzielenie, przydział, cesja, przeniesienie"
     },
     {
       "id": 2521,
@@ -15037,12 +15027,12 @@
     {
       "id": 2527,
       "word": "miscellaneous",
-      "wordpl": "rozmaity, różnorodny"
+      "wordpl": "rozmaity, różnorodny, różne"
     },
     {
       "id": 2532,
       "word": "score",
-      "wordpl": "wynik, rezultat, partytura, dwudziestka, rachunek, naciąć, zdobyć (punkt), uzyskać"
+      "wordpl": "wynik, rezultat, partytura, dwudziestka, rachunek, naciąć, zdobyć, uzyskać"
     },
     {
       "id": 2538,
@@ -15097,7 +15087,7 @@
     {
       "id": 2560,
       "word": "newly",
-      "wordpl": "niedawno, świeżo, dopiero co"
+      "wordpl": "niedawno, świeżo, dopiero co, nowo"
     },
     {
       "id": 2564,
@@ -15117,7 +15107,7 @@
     {
       "id": 2569,
       "word": "curriculum",
-      "wordpl": "program nauczania, plan nauczania, program (studiów)"
+      "wordpl": "program nauczania, plan nauczania, program"
     },
     {
       "id": 2575,
@@ -15132,7 +15122,7 @@
     {
       "id": 2592,
       "word": "afford",
-      "wordpl": "pozwolić sobie (na coś), stać (kogoś na coś), oferować, dostarczać"
+      "wordpl": "pozwolić sobie, stać, oferować, dostarczać, stać się"
     },
     {
       "id": 2593,
@@ -15142,7 +15132,7 @@
     {
       "id": 2596,
       "word": "burning",
-      "wordpl": "piekący, palący, naglący, pilny, namiętny, rozpalony, spalanie, wypalanie"
+      "wordpl": "piekący, palący, naglący, pilny, namiętny, rozpalony, spalanie, wypalanie, palenie"
     },
     {
       "id": 2597,
@@ -15177,7 +15167,7 @@
     {
       "id": 2610,
       "word": "allowance",
-      "wordpl": "kieszonkowe, dieta, zasiłek, ulga podatkowa, przydział, limit, uprawnienie"
+      "wordpl": "kieszonkowe, dieta, zasiłek, ulga podatkowa, przydział, limit, uprawnienie, dodatek"
     },
     {
       "id": 2612,
@@ -15197,7 +15187,7 @@
     {
       "id": 2618,
       "word": "occurrence",
-      "wordpl": "zdarzenie, wydarzenie, występowanie"
+      "wordpl": "zdarzenie, wydarzenie, występowanie, wystąpienie"
     },
     {
       "id": 2620,
@@ -15228,11 +15218,6 @@
       "id": 2631,
       "word": "preference",
       "wordpl": "preferencja, upodobanie, pierwszeństwo"
-    },
-    {
-      "id": 2633,
-      "word": "cal",
-      "wordpl": "kaloria (cal), kal"
     },
     {
       "id": 2634,
@@ -15307,7 +15292,7 @@
     {
       "id": 2655,
       "word": "christmas",
-      "wordpl": "Boże Narodzenie / Święta Bożego Narodzenia / Gwiazdka"
+      "wordpl": "Boże Narodzenie, Święta Bożego Narodzenia, Gwiazdka"
     },
     {
       "id": 2656,
@@ -15322,7 +15307,7 @@
     {
       "id": 2658,
       "word": "scholars",
-      "wordpl": "uczeni, badacze"
+      "wordpl": "uczeni, badacze, naukowcy"
     },
     {
       "id": 2659,
@@ -15387,7 +15372,7 @@
     {
       "id": 2687,
       "word": "breast",
-      "wordpl": "pierś, sutek, biust"
+      "wordpl": "pierś, sutek, biust, piersi"
     },
     {
       "id": 2689,
@@ -15417,12 +15402,12 @@
     {
       "id": 2702,
       "word": "overcome",
-      "wordpl": "pokonywać, przezwyciężać, opanować, pokonany, przezwyciężony"
+      "wordpl": "pokonywać, przezwyciężać, opanować, pokonany, przezwyciężony, pokonać"
     },
     {
       "id": 2703,
       "word": "shaft",
-      "wordpl": "dyszel, snop (światła), drzewce, trzonek, wał, szyb (górniczy), trzon"
+      "wordpl": "dyszel, snop, drzewce, trzonek, wał, szyb, trzon"
     },
     {
       "id": 2704,
@@ -15432,7 +15417,7 @@
     {
       "id": 2706,
       "word": "revision",
-      "wordpl": "korekta, poprawka, rewizja, wersja, powtórka (materiału), zmiana"
+      "wordpl": "korekta, poprawka, rewizja, wersja, powtórka, zmiana"
     },
     {
       "id": 2708,
@@ -15512,7 +15497,7 @@
     {
       "id": 2737,
       "word": "translated",
-      "wordpl": "przetłumaczony, tłumaczony, tłumaczyć"
+      "wordpl": "przetłumaczony, tłumaczony, tłumaczyć, przetłumaczone"
     },
     {
       "id": 2740,
@@ -15522,7 +15507,7 @@
     {
       "id": 2745,
       "word": "stem",
-      "wordpl": "łodyga, pień, trzon, temat słowotwórczy, rdzeń, nóżka (kieliszka), hamować, tamować, powstrzymywać, wynikać"
+      "wordpl": "łodyga, pień, trzon, temat słowotwórczy, rdzeń, nóżka, hamować, tamować, powstrzymywać, wynikać"
     },
     {
       "id": 2747,
@@ -15552,7 +15537,7 @@
     {
       "id": 2759,
       "word": "harbor",
-      "wordpl": "port, przystań, schronienie, azyl, ukrywać, przechować, być siedliskiem, żywić (uczucia)"
+      "wordpl": "port, przystań, schronienie, azyl, ukrywać, przechować, być siedliskiem, żywić"
     },
     {
       "id": 2762,
@@ -15565,11 +15550,6 @@
       "wordpl": "prowincjonalny, regionalny, prowincja"
     },
     {
-      "id": 2767,
-      "word": "int",
-      "wordpl": "skrót od integer (liczba całkowita), int. – międzynarodowy"
-    },
-    {
       "id": 2771,
       "word": "racial",
       "wordpl": "rasowy, rasistowski, odnoszący się do rasy"
@@ -15577,12 +15557,7 @@
     {
       "id": 2775,
       "word": "confusion",
-      "wordpl": "konfuzja, zmieszanie"
-    },
-    {
-      "id": 2778,
-      "word": "km",
-      "wordpl": "kilometr, km"
+      "wordpl": "konfuzja, zmieszanie, zamieszanie"
     },
     {
       "id": 2779,
@@ -15652,7 +15627,7 @@
     {
       "id": 2805,
       "word": "bargaining",
-      "wordpl": "negocjacje"
+      "wordpl": "negocjacje, targowanie się, targowanie"
     },
     {
       "id": 2806,
@@ -15668,11 +15643,6 @@
       "id": 2808,
       "word": "nodded",
       "wordpl": "skinąć głową, skinął, kiwnął"
-    },
-    {
-      "id": 2809,
-      "word": "log",
-      "wordpl": "kłoda, polano, rejestr, dziennik pokładowy, log, raport, dziennik, ścinać drzewo, logować, rejestrować, notować"
     },
     {
       "id": 2811,
@@ -15707,7 +15677,7 @@
     {
       "id": 2822,
       "word": "bulk",
-      "wordpl": "wielkość, masa, większość, hurt, duży, ilość, objętość"
+      "wordpl": "wielkość, masa, większość, hurt, duży, ilość, objętość, masowo"
     },
     {
       "id": 2825,
@@ -15742,7 +15712,7 @@
     {
       "id": 2833,
       "word": "eliminate",
-      "wordpl": "eliminować, wykluczać, likwidować, zlikwidować"
+      "wordpl": "eliminować, wykluczać, likwidować, zlikwidować, wyeliminować"
     },
     {
       "id": 2836,
@@ -15812,27 +15782,12 @@
     {
       "id": 2868,
       "word": "diagram",
-      "wordpl": "diagram, wykres"
-    },
-    {
-      "id": 2869,
-      "word": "herein",
-      "wordpl": "tu"
+      "wordpl": "diagram, wykres, schemat"
     },
     {
       "id": 2872,
       "word": "pale",
       "wordpl": "blady, wyblakły, słaby, kiepski, blednąć, zblednąć"
-    },
-    {
-      "id": 2875,
-      "word": "oklahoma",
-      "wordpl": "Oklahoma"
-    },
-    {
-      "id": 2876,
-      "word": "kentucky",
-      "wordpl": "Kentucky"
     },
     {
       "id": 2877,
@@ -15852,7 +15807,7 @@
     {
       "id": 2887,
       "word": "deed",
-      "wordpl": "czyn, uczynek, akt prawny, dokument, wyczyn, postępek"
+      "wordpl": "czyn, uczynek, akt prawny, dokument, wyczyn, postępek, akt"
     },
     {
       "id": 2888,
@@ -15867,17 +15822,12 @@
     {
       "id": 2893,
       "word": "altogether",
-      "wordpl": "całkowicie, zupełnie, razem, ogółem"
+      "wordpl": "całkowicie, zupełnie, razem, ogółem, łącznie"
     },
     {
       "id": 2899,
       "word": "tract",
-      "wordpl": "traktat, rozprawa, połać, obszar, przewód"
-    },
-    {
-      "id": 2903,
-      "word": "kg",
-      "wordpl": "kilogram"
+      "wordpl": "traktat, rozprawa, połać, obszar, przewód, trakt"
     },
     {
       "id": 2904,
@@ -15892,22 +15842,17 @@
     {
       "id": 2906,
       "word": "wright",
-      "wordpl": "fachowiec, wykonawca, mechanik"
+      "wordpl": "fachowiec, wykonawca, mechanik, rzemieślnik"
     },
     {
       "id": 2911,
       "word": "organ",
-      "wordpl": "narząd, organ, organy, organ wykonawczy, organ władzy"
+      "wordpl": "narząd, organ, organy, organ wykonawczy, organ władzy,"
     },
     {
       "id": 2912,
       "word": "varies",
-      "wordpl": "różnić się, wahać się, zmieniać się"
-    },
-    {
-      "id": 2913,
-      "word": "ye",
-      "wordpl": "wy"
+      "wordpl": "różnić się, wahać się, zmieniać się, różni się"
     },
     {
       "id": 2916,
@@ -15927,12 +15872,7 @@
     {
       "id": 2923,
       "word": "termination",
-      "wordpl": "zakończenie, wygaśnięcie, rozwiązanie umowy, aborcja"
-    },
-    {
-      "id": 2924,
-      "word": "franklin",
-      "wordpl": "wolny kmieć, właściciel ziemski"
+      "wordpl": "zakończenie, wygaśnięcie, rozwiązanie umowy, aborcja, rozwiązanie"
     },
     {
       "id": 2925,
@@ -15942,12 +15882,7 @@
     {
       "id": 2926,
       "word": "con",
-      "wordpl": "oszukiwać, nabierać, naciągać, przekręt, skazaniec"
-    },
-    {
-      "id": 2927,
-      "word": "semi",
-      "wordpl": "bliźniak, dom bliźniaczy, bliźniaczy"
+      "wordpl": "oszukiwać, nabierać, naciągać, przekręt, skazaniec, oszustwo, więzień"
     },
     {
       "id": 2930,
@@ -15962,12 +15897,12 @@
     {
       "id": 2933,
       "word": "lumber",
-      "wordpl": "tarcica, wycinać, wycinka, człapać"
+      "wordpl": "tarcica, wycinać, wycinka, człapać, drewno"
     },
     {
       "id": 2934,
       "word": "preservation",
-      "wordpl": "zachowanie, ochrona, zakonserwowanie"
+      "wordpl": "zachowanie, ochrona, zakonserwowanie, konserwacja"
     },
     {
       "id": 2936,
@@ -15977,7 +15912,7 @@
     {
       "id": 2937,
       "word": "indication",
-      "wordpl": "znak, wskazówka, oznaka, wskazywanie, oznaczanie"
+      "wordpl": "znak, wskazówka, oznaka, wskazywanie, oznaczanie, wskazanie"
     },
     {
       "id": 2940,
@@ -15995,14 +15930,9 @@
       "wordpl": "osobiście"
     },
     {
-      "id": 2950,
-      "word": "tion",
-      "wordpl": "cja"
-    },
-    {
       "id": 2957,
       "word": "incidence",
-      "wordpl": "częstość, częstotliwość, padanie"
+      "wordpl": "częstość, częstotliwość, padanie, częstość występowania"
     },
     {
       "id": 2958,
@@ -16070,11 +16000,6 @@
       "wordpl": "intensywny, natężony, gwałtowny, silny"
     },
     {
-      "id": 2989,
-      "word": "don",
-      "wordpl": "don, pan, don (mafii), przywdziać, wdziać"
-    },
-    {
       "id": 2990,
       "word": "definitely",
       "wordpl": "zdecydowanie, bez wątpienia, na pewno, niewątpliwie"
@@ -16087,7 +16012,7 @@
     {
       "id": 2994,
       "word": "arrest",
-      "wordpl": "areszt, zatrzymanie, aresztować, zatrzymać, powstrzymać"
+      "wordpl": "areszt, zatrzymanie, aresztować, zatrzymać, powstrzymać, aresztowanie"
     },
     {
       "id": 2995,
@@ -16117,12 +16042,7 @@
     {
       "id": 3013,
       "word": "encountered",
-      "wordpl": "napotkać, napotkany, spotkać"
-    },
-    {
-      "id": 3015,
-      "word": "inter",
-      "wordpl": "pochować, grzebać"
+      "wordpl": "napotkać, napotkany, spotkać, napotkane"
     },
     {
       "id": 3017,
@@ -16170,29 +16090,14 @@
       "wordpl": "zwolnienie"
     },
     {
-      "id": 3033,
-      "word": "isbn",
-      "wordpl": "numer ISBN"
-    },
-    {
       "id": 3037,
       "word": "format",
       "wordpl": "format, formatować"
     },
     {
-      "id": 3040,
-      "word": "th",
-      "wordpl": "-ty"
-    },
-    {
-      "id": 3042,
-      "word": "un",
-      "wordpl": "ONZ, Organizacja Narodów Zjednoczonych"
-    },
-    {
       "id": 3044,
       "word": "tends",
-      "wordpl": "opiekować się, pielęgnować, mieć tendencję"
+      "wordpl": "opiekować się, pielęgnować, mieć tendencję, ma tendencję"
     },
     {
       "id": 3048,
@@ -16217,7 +16122,7 @@
     {
       "id": 3056,
       "word": "tiny",
-      "wordpl": "maleńki"
+      "wordpl": "maleńki, malutki"
     },
     {
       "id": 3057,
@@ -16232,7 +16137,7 @@
     {
       "id": 3063,
       "word": "premium",
-      "wordpl": "premia, bonus, dopłata, składka ubezpieczeniowa, premiować, o wysokiej jakości, luksusowy"
+      "wordpl": "premia, bonus, dopłata, składka ubezpieczeniowa, premiować, o wysokiej jakości, luksusowy, premium"
     },
     {
       "id": 3064,
@@ -16252,12 +16157,12 @@
     {
       "id": 3071,
       "word": "defects",
-      "wordpl": "wada, usterka, dezertować"
+      "wordpl": "wada, usterka, dezertować, wady"
     },
     {
       "id": 3072,
       "word": "nutrition",
-      "wordpl": "żywienie"
+      "wordpl": "żywienie, odżywianie"
     },
     {
       "id": 3073,
@@ -16360,19 +16265,14 @@
       "wordpl": "osobliwy, nietypowy, dziwaczny, charakterystyczny, specyficzny, właściwy, szczególny"
     },
     {
-      "id": 3112,
-      "word": "alabama",
-      "wordpl": "Alabama"
-    },
-    {
       "id": 3115,
       "word": "monitor",
-      "wordpl": "monitor, dyżurny, przyrząd, urządzenie, monitorować, nadzorować, obserwować"
+      "wordpl": "monitor, dyżurny, przyrząd, urządzenie, monitorować, nadzorować, obserwować, monitor"
     },
     {
       "id": 3116,
       "word": "attachment",
-      "wordpl": "załącznik, przystawka, nasadka, zajęcie (mienia), przywiązanie"
+      "wordpl": "załącznik, przystawka, nasadka, zajęcie, przywiązanie"
     },
     {
       "id": 3117,
@@ -16412,27 +16312,22 @@
     {
       "id": 3126,
       "word": "notwithstanding",
-      "wordpl": "chociaż, pomimo, mimo, jednakże, niemniej jednak"
+      "wordpl": "chociaż, pomimo, mimo, jednakże, niemniej jednak, niezależnie od"
     },
     {
       "id": 3127,
       "word": "lift",
-      "wordpl": "winda, podnośnik, dźwig, wyciąg, podniesienie, podnosić, podnieść, dźwignąć, znosić (zakaz), ukraść"
+      "wordpl": "winda, podnośnik, dźwig, wyciąg, podniesienie, podnosić, podnieść, dźwignąć, znosić, ukraść"
     },
     {
       "id": 3135,
       "word": "multi",
-      "wordpl": "wielo-, wielokrotnie"
+      "wordpl": "wielo, wielokrotnie, wielokrotny"
     },
     {
       "id": 3136,
       "word": "appreciation",
       "wordpl": "uznanie, docenienie, wdzięczność, zrozumienie"
-    },
-    {
-      "id": 3137,
-      "word": "utah",
-      "wordpl": "Utah"
     },
     {
       "id": 3140,
@@ -16442,7 +16337,7 @@
     {
       "id": 3141,
       "word": "dealers",
-      "wordpl": "handlarz, handlarze, diler, dilerzy, sprzedawca, sprzedawcy"
+      "wordpl": "handlarz, handlarze, diler, dilerzy, sprzedawca, sprzedawcy, dealerzy"
     },
     {
       "id": 3143,
@@ -16452,7 +16347,7 @@
     {
       "id": 3144,
       "word": "livestock",
-      "wordpl": "zwierzęta gospodarskie, żywy inwentarz, bydło"
+      "wordpl": "zwierzęta gospodarskie, żywy inwentarz, bydło, zwierzęta hodowlane"
     },
     {
       "id": 3146,
@@ -16467,7 +16362,7 @@
     {
       "id": 3154,
       "word": "analyzed",
-      "wordpl": "analizować, analizowany"
+      "wordpl": "analizować, analizowany, przeanalizowany"
     },
     {
       "id": 3156,
@@ -16477,7 +16372,7 @@
     {
       "id": 3157,
       "word": "capture",
-      "wordpl": "zdobycie, schwytanie, pojmanie, zbicie (w szachach), kaptaż, zdobywać, chwytać, schwytać, pojmać, zbić, uchwycić, utrwalić (na zdjęciu, na taśmie filmowej, na nagraniu dźwiękowym)"
+      "wordpl": "zdobycie, schwytanie, pojmanie, zbicie, kaptaż, zdobywać, chwytać, schwytać, pojmać, zbić, uchwycić, utrwalić, przechwycić"
     },
     {
       "id": 3161,
@@ -16502,7 +16397,7 @@
     {
       "id": 3170,
       "word": "lung",
-      "wordpl": "płuco"
+      "wordpl": "płuco, płuca"
     },
     {
       "id": 3171,
@@ -16562,7 +16457,7 @@
     {
       "id": 3188,
       "word": "urged",
-      "wordpl": "nakłaniać, ponaglać, zachęcać"
+      "wordpl": "nakłaniać, ponaglać, zachęcać, nalegał"
     },
     {
       "id": 3192,
@@ -16572,7 +16467,7 @@
     {
       "id": 3193,
       "word": "rely",
-      "wordpl": "polegać (na), liczyć (na)"
+      "wordpl": "polegać, liczyć"
     },
     {
       "id": 3194,
@@ -16642,7 +16537,7 @@
     {
       "id": 3228,
       "word": "arises",
-      "wordpl": "pojawiać się, powstawać, wynikać"
+      "wordpl": "pojawiać się, powstawać, wynikać, powstaje"
     },
     {
       "id": 3230,
@@ -16655,14 +16550,9 @@
       "wordpl": "różnorodny, rozmaity"
     },
     {
-      "id": 3233,
-      "word": "memorandum",
-      "wordpl": "memorandum, notatka, memo"
-    },
-    {
       "id": 3234,
       "word": "wholesale",
-      "wordpl": "hurtowy, hurtowo, handel hurtowy"
+      "wordpl": "hurtowy, hurtowo, handel hurtowy, sprzedaż hurtowa"
     },
     {
       "id": 3239,
@@ -16682,7 +16572,7 @@
     {
       "id": 3245,
       "word": "frozen",
-      "wordpl": "zmarznięty, mrożony, zamarły, w bezruchu"
+      "wordpl": "zmarznięty, mrożony, zamarły, w bezruchu, zamrożony"
     },
     {
       "id": 3246,
@@ -16737,7 +16627,7 @@
     {
       "id": 3264,
       "word": "emerged",
-      "wordpl": "pojawić się, wyłonić się"
+      "wordpl": "pojawić się, wyłonić się, pojawił się"
     },
     {
       "id": 3265,
@@ -16757,7 +16647,7 @@
     {
       "id": 3269,
       "word": "unlikely",
-      "wordpl": "nieprawdopodobny, mało prawdopodobny, wątpliwy"
+      "wordpl": "nieprawdopodobny, mało prawdopodobny, wątpliwy, mało prawdopodobne"
     },
     {
       "id": 3272,
@@ -16772,7 +16662,7 @@
     {
       "id": 3278,
       "word": "extends",
-      "wordpl": "rozszerzać, przedłużać, rozciągać, dziedziczyć (po)"
+      "wordpl": "rozszerzać, przedłużać, rozciągać, dziedziczyć, rozszerza"
     },
     {
       "id": 3280,
@@ -16797,7 +16687,7 @@
     {
       "id": 3292,
       "word": "inserted",
-      "wordpl": "wstawić, wkładać, umieszczać"
+      "wordpl": "wstawić, wkładać, umieszczać, wstawiony"
     },
     {
       "id": 3296,
@@ -16812,7 +16702,7 @@
     {
       "id": 3302,
       "word": "monetary",
-      "wordpl": "pieniężny, walutowy"
+      "wordpl": "pieniężny, walutowy, monetarny"
     },
     {
       "id": 3304,
@@ -16822,7 +16712,7 @@
     {
       "id": 3306,
       "word": "strip",
-      "wordpl": "zdejmować, rozbierać, zdzierać, pozbawiać, pas, taśma, pasmo"
+      "wordpl": "zdejmować, rozbierać, zdzierać, pozbawiać, pas, taśma, pasmo, pasek"
     },
     {
       "id": 3307,
@@ -16940,29 +16830,9 @@
       "wordpl": "tropikalny, zwrotnikowy"
     },
     {
-      "id": 3354,
-      "word": "mar",
-      "wordpl": "psuć, niszczyć, szpecić"
-    },
-    {
-      "id": 3355,
-      "word": "cir",
-      "wordpl": "około"
-    },
-    {
-      "id": 3357,
-      "word": "ha",
-      "wordpl": "ha!, hektar"
-    },
-    {
       "id": 3358,
       "word": "verdict",
       "wordpl": "werdykt, orzeczenie, wyrok, opinia, zdanie"
-    },
-    {
-      "id": 3359,
-      "word": "fe",
-      "wordpl": "żelazo"
     },
     {
       "id": 3360,
@@ -16977,17 +16847,12 @@
     {
       "id": 3364,
       "word": "inclusion",
-      "wordpl": "wtrącenie, zawarcie, inkluzja"
+      "wordpl": "wtrącenie, zawarcie, inkluzja, włączenie"
     },
     {
       "id": 3367,
       "word": "theology",
       "wordpl": "teologia"
-    },
-    {
-      "id": 3368,
-      "word": "da",
-      "wordpl": "prokurator, oskarżyciel"
     },
     {
       "id": 3369,
@@ -17005,19 +16870,9 @@
       "wordpl": "pewnie, mocno, stanowczo"
     },
     {
-      "id": 3372,
-      "word": "na",
-      "wordpl": "sód"
-    },
-    {
       "id": 3374,
       "word": "scholarship",
       "wordpl": "stypendium, erudycja"
-    },
-    {
-      "id": 3376,
-      "word": "md",
-      "wordpl": "doktor medycyny, dr med."
     },
     {
       "id": 3379,
@@ -17072,7 +16927,7 @@
     {
       "id": 3397,
       "word": "deposition",
-      "wordpl": "dymisja, utrącenie ze stanowiska, detronizacja, poświadczenie, zeznanie na piśmie, osadzanie się, wytrącanie"
+      "wordpl": "dymisja, utrącenie ze stanowiska, detronizacja, poświadczenie, zeznanie na piśmie, osadzanie się, wytrącanie, osadzanie"
     },
     {
       "id": 3398,
@@ -17122,12 +16977,7 @@
     {
       "id": 3408,
       "word": "dissolved",
-      "wordpl": "rozpuścić, rozpuszczać się, rozwiązać, rozpuszczony"
-    },
-    {
-      "id": 3410,
-      "word": "eu",
-      "wordpl": "Unia Europejska"
+      "wordpl": "rozpuścić, rozpuszczać się, rozwiązać, rozpuszczony, rozwiązany"
     },
     {
       "id": 3415,
@@ -17142,7 +16992,7 @@
     {
       "id": 3419,
       "word": "placement",
-      "wordpl": "umiejscowienie, posada, znalezienie pracy"
+      "wordpl": "umiejscowienie, posada, znalezienie pracy, umieszczenie"
     },
     {
       "id": 3420,
@@ -17152,7 +17002,7 @@
     {
       "id": 3423,
       "word": "comparatively",
-      "wordpl": "relatywnie, względnie, stosunkowo"
+      "wordpl": "relatywnie, względnie, stosunkowo, w porównaniu"
     },
     {
       "id": 3424,
@@ -17182,12 +17032,7 @@
     {
       "id": 3430,
       "word": "exempt",
-      "wordpl": "zwolniony (z czegoś), zwalniać (z obowiązku), wyłączony"
-    },
-    {
-      "id": 3431,
-      "word": "auto",
-      "wordpl": "samochód, auto"
+      "wordpl": "zwolniony, zwalniać, wyłączony"
     },
     {
       "id": 3432,
@@ -17197,17 +17042,12 @@
     {
       "id": 3435,
       "word": "buyer",
-      "wordpl": "nabywca, kupiec"
+      "wordpl": "nabywca, kupiec, kupujący"
     },
     {
       "id": 3438,
       "word": "belgium",
       "wordpl": "Belgia"
-    },
-    {
-      "id": 3439,
-      "word": "rd",
-      "wordpl": "droga"
     },
     {
       "id": 3441,
@@ -17267,7 +17107,7 @@
     {
       "id": 3462,
       "word": "absorbed",
-      "wordpl": "wchłonięty, pochłonięty, wchłaniać"
+      "wordpl": "wchłonięty, pochłonięty, wchłaniać, zaabsorbowany"
     },
     {
       "id": 3463,
@@ -17283,11 +17123,6 @@
       "id": 3466,
       "word": "infinite",
       "wordpl": "nieskończony, nieprzebrany, bezkresny, bezgraniczny"
-    },
-    {
-      "id": 3468,
-      "word": "nasa",
-      "wordpl": "NASA (Narodowa Agencja Aeronautyki i Przestrzeni Kosmicznej)"
     },
     {
       "id": 3471,
@@ -17317,7 +17152,7 @@
     {
       "id": 3482,
       "word": "insisted",
-      "wordpl": "nalegać, upierać się"
+      "wordpl": "nalegać, upierać się, nalegał"
     },
     {
       "id": 3483,
@@ -17337,17 +17172,17 @@
     {
       "id": 3487,
       "word": "ignored",
-      "wordpl": "ignorować, lekceważyć"
+      "wordpl": "ignorować, lekceważyć, zignorowany"
     },
     {
       "id": 3490,
       "word": "estimation",
-      "wordpl": "oszacowanie, ocena, wycena"
+      "wordpl": "oszacowanie, ocena, wycena, szacowanie"
     },
     {
       "id": 3491,
       "word": "elevation",
-      "wordpl": "wzniesienie, uniesienie, wysokość nad poziomem morza, elewacja, wywyższenie"
+      "wordpl": "wzniesienie, uniesienie, wysokość nad poziomem morza, elewacja, wywyższenie, wysokość"
     },
     {
       "id": 3492,
@@ -17370,11 +17205,6 @@
       "wordpl": "wyraźny, bezpośredni, jawny"
     },
     {
-      "id": 3504,
-      "word": "par",
-      "wordpl": "norma, standard, średnia, par (golf), wyrównać"
-    },
-    {
       "id": 3506,
       "word": "methodology",
       "wordpl": "metodologia, metodyka"
@@ -17382,7 +17212,7 @@
     {
       "id": 3507,
       "word": "mercury",
-      "wordpl": "rtęć, Merkury (planet), Merkury (bóg), posłaniec"
+      "wordpl": "rtęć, Merkury, posłaniec"
     },
     {
       "id": 3508,
@@ -17412,7 +17242,7 @@
     {
       "id": 3517,
       "word": "parking",
-      "wordpl": "parking, parkowanie, zaparkowanie, parkingowy"
+      "wordpl": "parking, parkowanie, zaparkowanie, parkingowy, parking"
     },
     {
       "id": 3518,
@@ -17422,7 +17252,7 @@
     {
       "id": 3521,
       "word": "bare",
-      "wordpl": "nagi, goły, obnażony, obnażać, tylko, zaledwie"
+      "wordpl": "nagi, goły, obnażony, obnażać, tylko, zaledwie, nagie"
     },
     {
       "id": 3525,
@@ -17552,7 +17382,7 @@
     {
       "id": 3584,
       "word": "acknowledged",
-      "wordpl": "uznać, przyznać, potwierdzić, uznany"
+      "wordpl": "uznać, przyznać, potwierdzić, uznany, potwierdzone"
     },
     {
       "id": 3585,
@@ -17642,17 +17472,7 @@
     {
       "id": 3624,
       "word": "lodge",
-      "wordpl": "domek, chata, leśniczówka, loża, portiernia, stróżówka, zakwaterować się, zatrzymać się (w hotelu), wnieść (pozew), utknąć"
-    },
-    {
-      "id": 3625,
-      "word": "ser",
-      "wordpl": "ser"
-    },
-    {
-      "id": 3628,
-      "word": "quantum",
-      "wordpl": "kwant, kwantowy"
+      "wordpl": "domek, chata, leśniczówka, loża, portiernia, stróżówka, zakwaterować się, zatrzymać się, wnieść, utknąć, domek letniskowy"
     },
     {
       "id": 3629,
@@ -17660,14 +17480,9 @@
       "wordpl": "bezustannie, ciągle, stale"
     },
     {
-      "id": 3630,
-      "word": "cfr",
-      "wordpl": "porównaj"
-    },
-    {
       "id": 3631,
       "word": "procurement",
-      "wordpl": "zaopatrzenie, nabywanie, zakup, przetarg, zamówienie publiczne"
+      "wordpl": "zaopatrzenie, nabywanie, zakup, przetarg, zamówienie publiczne, zamówienia"
     },
     {
       "id": 3632,
@@ -17677,7 +17492,7 @@
     {
       "id": 3634,
       "word": "cooper",
-      "wordpl": "bednarz"
+      "wordpl": "miedziak, bednarz"
     },
     {
       "id": 3638,
@@ -17740,11 +17555,6 @@
       "wordpl": "gorszy, niższy, podrzędny"
     },
     {
-      "id": 3661,
-      "word": "roger",
-      "wordpl": "przyjąć, zrozumieć, bzykać, dymać, pieprzyć się"
-    },
-    {
       "id": 3663,
       "word": "specialist",
       "wordpl": "specjalista, specjalistka, specjalistyczny"
@@ -17757,17 +17567,12 @@
     {
       "id": 3665,
       "word": "reduces",
-      "wordpl": "zmniejszać, redukować, obniżać"
+      "wordpl": "zmniejszać, redukować, obniżać, zmniejsza"
     },
     {
       "id": 3666,
       "word": "nucleus",
       "wordpl": "jądro, centrum, istota, podstawa"
-    },
-    {
-      "id": 3669,
-      "word": "ref",
-      "wordpl": "sędzia, arbiter"
     },
     {
       "id": 3670,
@@ -17777,7 +17582,7 @@
     {
       "id": 3671,
       "word": "liquor",
-      "wordpl": "napój alkoholowy"
+      "wordpl": "alkohol ,napój alkoholowy"
     },
     {
       "id": 3673,
@@ -17807,12 +17612,12 @@
     {
       "id": 3690,
       "word": "carriage",
-      "wordpl": "karetka, kareta, powóz, wagon, laweta, wózek sklepowy"
+      "wordpl": "karetka, kareta, powóz, wagon, laweta, wózek sklepowy, przewóz"
     },
     {
       "id": 3691,
       "word": "precipitation",
-      "wordpl": "opad atmosferyczny, opad, wytrącanie, wydzielanie"
+      "wordpl": "opady ,opad atmosferyczny, opad, wytrącanie, wydzielanie"
     },
     {
       "id": 3692,
@@ -17822,7 +17627,7 @@
     {
       "id": 3694,
       "word": "resort",
-      "wordpl": "kurort, miejscowość wypoczynkowa, uzdrowisko, uciekać się (do)"
+      "wordpl": "kurort, miejscowość wypoczynkowa, uzdrowisko, uciekać się"
     },
     {
       "id": 3696,
@@ -17907,7 +17712,7 @@
     {
       "id": 3738,
       "word": "healing",
-      "wordpl": "uzdrawianie, gojenie"
+      "wordpl": "uzdrawianie, gojenie, leczenie"
     },
     {
       "id": 3740,
@@ -17922,12 +17727,12 @@
     {
       "id": 3742,
       "word": "textile",
-      "wordpl": "tkanina, materiał, tekstylny, włókienniczy"
+      "wordpl": "tkanina, materiał, tekstylny, włókienniczy, tekstylia"
     },
     {
       "id": 3744,
       "word": "enables",
-      "wordpl": "umożliwiać, pozwalać"
+      "wordpl": "umożliwiać, pozwalać, umożliwia"
     },
     {
       "id": 3745,
@@ -17942,7 +17747,7 @@
     {
       "id": 3751,
       "word": "reproduced",
-      "wordpl": "reproduktować, powielać, reprodukowany"
+      "wordpl": "reproduktować, powielać, reprodukowany, odtworzony"
     },
     {
       "id": 3752,
@@ -17987,7 +17792,7 @@
     {
       "id": 3765,
       "word": "intake",
-      "wordpl": "spożycie, spożywanie, nabór, ssanie"
+      "wordpl": "spożycie, spożywanie, nabór, ssanie, pobór"
     },
     {
       "id": 3766,
@@ -18062,7 +17867,7 @@
     {
       "id": 3790,
       "word": "attracted",
-      "wordpl": "przyciągnięty, zainteresowany"
+      "wordpl": "przyciągnięty, zainteresowany, przyciągnął"
     },
     {
       "id": 3791,
@@ -18117,7 +17922,7 @@
     {
       "id": 3805,
       "word": "cavity",
-      "wordpl": "jama, ubytek, dziura, dół"
+      "wordpl": "jama, ubytek, dziura, dół, wnęka"
     },
     {
       "id": 3807,
@@ -18192,7 +17997,7 @@
     {
       "id": 3831,
       "word": "enactment",
-      "wordpl": "rozporządzenie, zarządzenie, ustawa, wprowadzenie w życie, odegranie roli"
+      "wordpl": "rozporządzenie, zarządzenie, ustawa, wprowadzenie w życie, odegranie roli, uchwalenie"
     },
     {
       "id": 3832,
@@ -18207,7 +18012,7 @@
     {
       "id": 3836,
       "word": "enclosed",
-      "wordpl": "dołączony, załączony, otoczony"
+      "wordpl": "dołączony, załączony, otoczony, zamknięty"
     },
     {
       "id": 3837,
@@ -18217,7 +18022,7 @@
     {
       "id": 3838,
       "word": "shear",
-      "wordpl": "strzyc, ścinać, nożyce do strzyżenia, obcinać wełnę"
+      "wordpl": "strzyc, ścinać, nożyce do strzyżenia, obcinać wełnę, ścinanie"
     },
     {
       "id": 3840,
@@ -18227,7 +18032,7 @@
     {
       "id": 3843,
       "word": "butler",
-      "wordpl": "kamerdyner"
+      "wordpl": "kamerdyner, lokaj"
     },
     {
       "id": 3844,
@@ -18285,11 +18090,6 @@
       "wordpl": "błoto"
     },
     {
-      "id": 3868,
-      "word": "ab",
-      "wordpl": "mięsień prosty brzucha"
-    },
-    {
       "id": 3869,
       "word": "aggressive",
       "wordpl": "agresywny"
@@ -18302,7 +18102,7 @@
     {
       "id": 3871,
       "word": "hazard",
-      "wordpl": "niebezpieczeństwo, ryzyko, ryzykować"
+      "wordpl": "niebezpieczeństwo, ryzyko, ryzykować, zagrożenie"
     },
     {
       "id": 3873,
@@ -18380,11 +18180,6 @@
       "wordpl": "klaster, skupisko, zlepek, gromada, skupiać, przeprowadzać analizę skupień"
     },
     {
-      "id": 3893,
-      "word": "delta",
-      "wordpl": "delta"
-    },
-    {
       "id": 3896,
       "word": "pit",
       "wordpl": "dół, jama, wgłębienie, nora, dziura, kopalnia, szyb, parter, otchłań, pacha, pestka, pułapka, boks, kanał, wyżerać, drylować owoc"
@@ -18415,19 +18210,9 @@
       "wordpl": "diagnostyczny, diagnostyka, diagnoza"
     },
     {
-      "id": 3905,
-      "word": "si",
-      "wordpl": "si"
-    },
-    {
       "id": 3909,
       "word": "continuity",
       "wordpl": "ciągłość"
-    },
-    {
-      "id": 3910,
-      "word": "nat",
-      "wordpl": "narodowość"
     },
     {
       "id": 3916,
@@ -18477,12 +18262,12 @@
     {
       "id": 3931,
       "word": "subsidiary",
-      "wordpl": "zależny, dodatkowy, drugorzędny, filia"
+      "wordpl": "zależny, dodatkowy, drugorzędny, filia, spółka zależna"
     },
     {
       "id": 3935,
       "word": "approximation",
-      "wordpl": "aproksymacja"
+      "wordpl": "przybliżenie, aproksymacja, "
     },
     {
       "id": 3936,
@@ -18507,7 +18292,7 @@
     {
       "id": 3940,
       "word": "mason",
-      "wordpl": "kamieniarz, mason, wolnomularz"
+      "wordpl": "kamieniarz, mason, wolnomularz, murarz"
     },
     {
       "id": 3941,
@@ -18517,7 +18302,7 @@
     {
       "id": 3942,
       "word": "computation",
-      "wordpl": "obliczenie, kalkulacja, liczenie"
+      "wordpl": "obliczenie, kalkulacja, liczenie, obliczenia"
     },
     {
       "id": 3948,
@@ -18533,11 +18318,6 @@
       "id": 3951,
       "word": "differentiation",
       "wordpl": "różnicowanie, odróżnianie, różniczkowanie"
-    },
-    {
-      "id": 3953,
-      "word": "pr",
-      "wordpl": "public relations, relacje publiczne, promocja"
     },
     {
       "id": 3955,
@@ -18572,7 +18352,7 @@
     {
       "id": 3966,
       "word": "tide",
-      "wordpl": "przypływ, odpływ, pływ"
+      "wordpl": "przypływ, odpływ, pływ, fala"
     },
     {
       "id": 3967,
@@ -18597,7 +18377,7 @@
     {
       "id": 3974,
       "word": "capita",
-      "wordpl": "głowa, osoba"
+      "wordpl": "głowa, osoba, na mieszkańca"
     },
     {
       "id": 3975,
@@ -18607,7 +18387,7 @@
     {
       "id": 3976,
       "word": "conceptual",
-      "wordpl": "pojęciowy, konceptualny"
+      "wordpl": "pojęciowy, konceptualny, koncepcyjny"
     },
     {
       "id": 3978,
@@ -18615,14 +18395,9 @@
       "wordpl": "koordynować, współrzędna, koordynata"
     },
     {
-      "id": 3979,
-      "word": "rico",
-      "wordpl": "bogaty, pyszny"
-    },
-    {
       "id": 3980,
       "word": "whispered",
-      "wordpl": "wyszeptany, szeptany"
+      "wordpl": "wyszeptany, szeptany, szepnął"
     },
     {
       "id": 3981,
@@ -18632,7 +18407,7 @@
     {
       "id": 3982,
       "word": "summarized",
-      "wordpl": "streszczony, podsumowany"
+      "wordpl": "streszczony, podsumowany, podsumowane"
     },
     {
       "id": 3983,
@@ -18655,19 +18430,9 @@
       "wordpl": "prawdopodobieństwo"
     },
     {
-      "id": 3990,
-      "word": "hiv",
-      "wordpl": "wirus HIV"
-    },
-    {
-      "id": 3991,
-      "word": "islam",
-      "wordpl": "islam"
-    },
-    {
       "id": 3994,
       "word": "feasible",
-      "wordpl": "możliwy, osiągalny, wykonalny"
+      "wordpl": "wykonalne ,możliwy, osiągalny, wykonalny"
     },
     {
       "id": 3995,
@@ -18678,11 +18443,6 @@
       "id": 3996,
       "word": "tribunal",
       "wordpl": "trybunał, sąd"
-    },
-    {
-      "id": 4000,
-      "word": "ec",
-      "wordpl": "Wspólnota Europejska"
     },
     {
       "id": 4001,
@@ -18697,7 +18457,7 @@
     {
       "id": 4007,
       "word": "rainfall",
-      "wordpl": "opad, opady"
+      "wordpl": "opad, opady, opady deszczu"
     },
     {
       "id": 4009,
@@ -18730,19 +18490,14 @@
       "wordpl": "sekwencja"
     },
     {
-      "id": 4021,
-      "word": "biol",
-      "wordpl": "biologia"
-    },
-    {
       "id": 4022,
       "word": "incorporation",
-      "wordpl": "wcielanie, włączanie, dołączanie, inkorporacja"
+      "wordpl": "wcielanie, włączanie, dołączanie, inkorporacja, włączenie"
     },
     {
       "id": 4023,
       "word": "plea",
-      "wordpl": "błaganie, apel, usprawiedliwienie"
+      "wordpl": "błaganie, apel, usprawiedliwienie, wniosek"
     },
     {
       "id": 4024,
@@ -18772,7 +18527,7 @@
     {
       "id": 4035,
       "word": "maintains",
-      "wordpl": "utrzymywać, zachować, podtrzymywać, konserwować"
+      "wordpl": "utrzymywać, zachować, podtrzymywać, konserwować, utrzymuje"
     },
     {
       "id": 4038,
@@ -18817,7 +18572,7 @@
     {
       "id": 4053,
       "word": "amplitude",
-      "wordpl": "amplituda"
+      "wordpl": "amplituda, amplitudę"
     },
     {
       "id": 4057,
@@ -18867,7 +18622,7 @@
     {
       "id": 4069,
       "word": "assumes",
-      "wordpl": "zakładać, przyjmować, domniemywać"
+      "wordpl": "zakładać, przyjmować, domniemywać, zakłada"
     },
     {
       "id": 4072,
@@ -18882,27 +18637,17 @@
     {
       "id": 4077,
       "word": "substrate",
-      "wordpl": "substrat"
-    },
-    {
-      "id": 4080,
-      "word": "ac",
-      "wordpl": "prąd przemienny, AC"
+      "wordpl": "substrat, podłoże"
     },
     {
       "id": 4083,
       "word": "competing",
-      "wordpl": "konkurujący, rywalizujący"
-    },
-    {
-      "id": 4085,
-      "word": "viz",
-      "wordpl": "to znaczy, mianowicie, czyli"
+      "wordpl": "konkurujący, rywalizujący, konkurencyjny"
     },
     {
       "id": 4086,
       "word": "substitution",
-      "wordpl": "substytucja, zastąpienie, podstawienie"
+      "wordpl": "substytucja, zastąpienie, podstawienie, zastępstwo"
     },
     {
       "id": 4088,
@@ -18918,11 +18663,6 @@
       "id": 4091,
       "word": "telecommunications",
       "wordpl": "telekomunikacja, łączność"
-    },
-    {
-      "id": 4092,
-      "word": "ruth",
-      "wordpl": "litość, współczucie"
     },
     {
       "id": 4093,
@@ -18942,17 +18682,12 @@
     {
       "id": 4099,
       "word": "propagation",
-      "wordpl": "propagacja"
+      "wordpl": "propagacja, rozprzestrzenianie się, rozprzestrzenianie"
     },
     {
       "id": 4107,
       "word": "salvation",
       "wordpl": "zbawienie, ocalenie, ratunek, wybawienie"
-    },
-    {
-      "id": 4113,
-      "word": "lbs",
-      "wordpl": "funt, funty, lb"
     },
     {
       "id": 4115,
@@ -19005,11 +18740,6 @@
       "wordpl": "miejscowy, lokalny, tubylczy, rdzenny"
     },
     {
-      "id": 4129,
-      "word": "jr",
-      "wordpl": "junior, młodszy"
-    },
-    {
       "id": 4130,
       "word": "principally",
       "wordpl": "głównie"
@@ -19047,7 +18777,7 @@
     {
       "id": 4142,
       "word": "leaned",
-      "wordpl": "pochylony, oparty, pochylić się, oprzeć"
+      "wordpl": "pochylony, oparty, pochylić się, oprzeć, oparł się"
     },
     {
       "id": 4143,
@@ -19072,7 +18802,7 @@
     {
       "id": 4149,
       "word": "volunteers",
-      "wordpl": "ochotnicy"
+      "wordpl": "ochotnicy, wolontariusze"
     },
     {
       "id": 4150,
@@ -19092,7 +18822,7 @@
     {
       "id": 4154,
       "word": "eligibility",
-      "wordpl": "kwalifikacje, uprawnienia, zdolność, obieralność, wybieralność"
+      "wordpl": "kwalifikacje, uprawnienia, zdolność, obieralność, wybieralność, kwalifikowalność"
     },
     {
       "id": 4155,
@@ -19127,7 +18857,7 @@
     {
       "id": 4163,
       "word": "shale",
-      "wordpl": "łupek"
+      "wordpl": "łupek, łupki"
     },
     {
       "id": 4165,
@@ -19142,7 +18872,7 @@
     {
       "id": 4171,
       "word": "levy",
-      "wordpl": "danina, opłata, pobierać, nakładać, ściągać"
+      "wordpl": "danina, opłata, pobierać, nakładać, ściągać, podatek"
     },
     {
       "id": 4173,
@@ -19230,11 +18960,6 @@
       "wordpl": "pochodne, instrumenty pochodne"
     },
     {
-      "id": 4201,
-      "word": "anglo",
-      "wordpl": "anglo-, angielski, anglosaski"
-    },
-    {
       "id": 4205,
       "word": "similarity",
       "wordpl": "podobieństwo"
@@ -19307,7 +19032,7 @@
     {
       "id": 4229,
       "word": "convey",
-      "wordpl": "przekazać, przenosić, wyrażać, oddawać, przewozić, transportować, zanieść, doprowadzić, cedować"
+      "wordpl": "przekazać, przenosić, wyrażać, oddawać, przewozić, transportować, zanieść, doprowadzić, cedować, przekazywać"
     },
     {
       "id": 4231,
@@ -19337,7 +19062,7 @@
     {
       "id": 4239,
       "word": "pertinent",
-      "wordpl": "stosowny, trafny, na temat"
+      "wordpl": "stosowny, trafny, na temat, istotny"
     },
     {
       "id": 4240,
@@ -19345,19 +19070,14 @@
       "wordpl": "ratunek, oswobodzenie, ocalenie, pomoc, wyratowanie, ratownictwo, obrona, ratunkowy, ratowniczy, ocalać, ratować, oswabadzać, zbawiać"
     },
     {
-      "id": 4243,
-      "word": "feb",
-      "wordpl": "luty, lut."
-    },
-    {
       "id": 4244,
       "word": "unexpected",
-      "wordpl": "niespodziewany"
+      "wordpl": "niespodziewany, nieoczekiwany"
     },
     {
       "id": 4245,
       "word": "foster",
-      "wordpl": "przybrany, zastępczy, wychowywać, brać na wychowanie, rozwijać, popierać, promować, sprzyjać, żywić, umieszczać w rodzinie, opiekować się"
+      "wordpl": "przybrany, zastępczy, wychowywać, brać na wychowanie, rozwijać, popierać, promować, sprzyjać, żywić, umieszczać w rodzinie, opiekować się, wspierać"
     },
     {
       "id": 4246,
@@ -19377,7 +19097,7 @@
     {
       "id": 4252,
       "word": "stuck",
-      "wordpl": "utknąć, zablokować, unieruchomić, utknięty"
+      "wordpl": "utknąć, zablokować, unieruchomić, utknięty, utknął"
     },
     {
       "id": 4253,
@@ -19402,12 +19122,12 @@
     {
       "id": 4257,
       "word": "exploitation",
-      "wordpl": "eksploatacja, wykorzystanie, wyzysk"
+      "wordpl": "eksploatacja, wykorzystanie, wyzysk, wykorzystywanie"
     },
     {
       "id": 4258,
       "word": "dull",
-      "wordpl": "matowy, tępy, nudny, jednostajny, stłumiony, tępić, stłumić"
+      "wordpl": "matowy, tępy, nudny, jednostajny, stłumiony, tępić, stłumić, tępe"
     },
     {
       "id": 4260,
@@ -19427,7 +19147,7 @@
     {
       "id": 4267,
       "word": "stretch",
-      "wordpl": "napinać, naprężać, rozciągać, przeciągać się, naciągać, naginać, rozciągać się, odcinek, droga, czas, szeroki, przestrzeń, bezkres, akwen, rozciągalność, nadużycie, naciąganie"
+      "wordpl": "napinać, naprężać, rozciągać, przeciągać się, naciągać, naginać, rozciągać się, odcinek, droga, czas, szeroki, przestrzeń, bezkres, akwen, rozciągalność, nadużycie, naciąganie, rozciąganie"
     },
     {
       "id": 4268,
@@ -19467,7 +19187,7 @@
     {
       "id": 4283,
       "word": "cardiac",
-      "wordpl": "sercowy, nasercowy"
+      "wordpl": "sercowy, nasercowy, kardiologiczny"
     },
     {
       "id": 4284,
@@ -19522,7 +19242,7 @@
     {
       "id": 4298,
       "word": "defines",
-      "wordpl": "definiować, określać"
+      "wordpl": "definiować, określać, definiuje"
     },
     {
       "id": 4300,
@@ -19532,7 +19252,7 @@
     {
       "id": 4301,
       "word": "chap",
-      "wordpl": "facet, gość, typ, chłop, człek, chłopak, denerwować, wkurzać"
+      "wordpl": "facet, gość, typ, chłop, człek, chłopak, denerwować, wkurzać, rozdział"
     },
     {
       "id": 4302,
@@ -19552,7 +19272,7 @@
     {
       "id": 4306,
       "word": "reliance",
-      "wordpl": "zaufanie, poleganie"
+      "wordpl": "zaufanie, poleganie, zależność"
     },
     {
       "id": 4308,
@@ -19567,7 +19287,7 @@
     {
       "id": 4313,
       "word": "accommodate",
-      "wordpl": "zakwaterować, ulokować, dać mieszkanie, dać nocleg, dostosować, mieścić, pomieścić"
+      "wordpl": "zakwaterować, ulokować, dać mieszkanie, dać nocleg, dostosować, mieścić, pomieścić, dostosować się"
     },
     {
       "id": 4314,
@@ -19602,7 +19322,7 @@
     {
       "id": 4327,
       "word": "drag",
-      "wordpl": "wlec, ciągnąć, przeciągać się, dłużyć się, zaciągnięcie, opór powietrza, drag (przebranie), strój"
+      "wordpl": "przeciągnij ,wlec, ciągnąć, przeciągać się, dłużyć się, zaciągnięcie, opór powietrza,"
     },
     {
       "id": 4330,
@@ -19632,12 +19352,12 @@
     {
       "id": 4338,
       "word": "bold",
-      "wordpl": "pogrubić, pogrubiony, śmiały"
+      "wordpl": "pogrubić, pogrubiony, śmiały, odważny"
     },
     {
       "id": 4340,
       "word": "crude",
-      "wordpl": "surowy, nieopracowany, przybliżony, prosty, prymitywny, niewybredny, ordynarny, nieoczyszczony, substancja (olej, ropa naftowa)"
+      "wordpl": "surowy, nieopracowany, przybliżony, prosty, prymitywny, niewybredny, ordynarny, nieoczyszczony, substancja "
     },
     {
       "id": 4342,
@@ -19677,7 +19397,7 @@
     {
       "id": 4359,
       "word": "outdoor",
-      "wordpl": "zewnętrzny"
+      "wordpl": "zewnętrzny, na zewnątrz"
     },
     {
       "id": 4360,
@@ -19692,17 +19412,17 @@
     {
       "id": 4367,
       "word": "demonstrates",
-      "wordpl": "demonstrować, wykazywać"
+      "wordpl": "demonstrować, wykazywać, demonstruje"
     },
     {
       "id": 4370,
       "word": "ideological",
-      "wordpl": "ideologiczny"
+      "wordpl": "ideologiczny, demonstruje"
     },
     {
       "id": 4374,
       "word": "elaborate",
-      "wordpl": "starannie, dokładnie, przygotować, szczegółowo, przygotowywać, rozwijać, dopracowywać"
+      "wordpl": "starannie, dokładnie, przygotować, szczegółowo, przygotowywać, rozwijać, dopracowywać, opracować"
     },
     {
       "id": 4376,
@@ -19712,7 +19432,7 @@
     {
       "id": 4378,
       "word": "waiver",
-      "wordpl": "zrzeczenie, się"
+      "wordpl": "zrzeczenie się, zwolnienie"
     },
     {
       "id": 4379,
@@ -19727,7 +19447,7 @@
     {
       "id": 4386,
       "word": "providence",
-      "wordpl": "opatrzność"
+      "wordpl": "opatrzność, opiekun"
     },
     {
       "id": 4388,
@@ -19737,7 +19457,7 @@
     {
       "id": 4389,
       "word": "hull",
-      "wordpl": "kadłub (statku lub samolotu), łupina, strąk, łuska, szypułka, otoczka, łuskać, obierać"
+      "wordpl": "kadłub, łupina, strąk, łuska, szypułka, otoczka, łuskać, obierać"
     },
     {
       "id": 4390,
@@ -19757,7 +19477,7 @@
     {
       "id": 4395,
       "word": "collar",
-      "wordpl": "kołnierz, obroża"
+      "wordpl": "kołnierz, obroża, kołnierzyk"
     },
     {
       "id": 4398,
@@ -19772,7 +19492,7 @@
     {
       "id": 4401,
       "word": "chase",
-      "wordpl": "pogoń, ganiać, ścigać, uganiać się"
+      "wordpl": "pogoń, ganiać, ścigać, uganiać się, pościg"
     },
     {
       "id": 4403,
@@ -19792,7 +19512,7 @@
     {
       "id": 4409,
       "word": "collapse",
-      "wordpl": "upadek, zapaść, rozpad, zawalenie się, załamanie się, runąć, mdleć, zasłabnąć"
+      "wordpl": "załamanie, upadek, zapaść, rozpad, zawalenie się, załamanie się, runąć, mdleć, zasłabnąć"
     },
     {
       "id": 4410,
@@ -19882,7 +19602,7 @@
     {
       "id": 4471,
       "word": "affection",
-      "wordpl": "uczucie, miłość, sympatia"
+      "wordpl": "uczucie, miłość, sympatia, uczucia"
     },
     {
       "id": 4475,
@@ -19912,7 +19632,7 @@
     {
       "id": 4508,
       "word": "bow",
-      "wordpl": "ukłonić się, pokłonić się, kłaniać się, ugiąć się, schylić się, łuk (konstrukcja), dziób (statku), kokarda, smyczek"
+      "wordpl": "łuk, ukłonić się, pokłonić się, kłaniać się, ugiąć się, schylić się, dziób, kokarda, smyczek"
     },
     {
       "id": 4510,
@@ -19947,7 +19667,7 @@
     {
       "id": 4531,
       "word": "destructive",
-      "wordpl": "destrukcyjny"
+      "wordpl": "destrukcyjny, niszczycielski"
     },
     {
       "id": 4533,
@@ -19962,7 +19682,7 @@
     {
       "id": 4549,
       "word": "conductivity",
-      "wordpl": "przewodność właściwa, przewodnictwo, konduktywność"
+      "wordpl": "przewodność właściwa, przewodnictwo, konduktywność, przewodność"
     },
     {
       "id": 4550,
@@ -19992,7 +19712,7 @@
     {
       "id": 4576,
       "word": "bomb",
-      "wordpl": "bomba, piękny (slang), dziewczyna (slang), fortuna (slang), gruchot, zbombardować"
+      "wordpl": "bomba, piękny, dziewczyna, fortuna, gruchot, zbombardować"
     },
     {
       "id": 4584,
@@ -20002,7 +19722,7 @@
     {
       "id": 4587,
       "word": "landlord",
-      "wordpl": "właściciel, wynajmujący, gospodarz"
+      "wordpl": "właściciel, wynajmujący, gospodarz, właściciel nieruchomości"
     },
     {
       "id": 4597,
@@ -20057,7 +19777,7 @@
     {
       "id": 4653,
       "word": "proposes",
-      "wordpl": "proponować, zaproponować"
+      "wordpl": "proponować, zaproponować, proponuje"
     },
     {
       "id": 4657,
@@ -20112,7 +19832,7 @@
     {
       "id": 4679,
       "word": "grabbed",
-      "wordpl": "chwycić, złapać"
+      "wordpl": "chwycić, złapać, chwycił"
     },
     {
       "id": 4683,
@@ -20142,7 +19862,7 @@
     {
       "id": 4708,
       "word": "northwestern",
-      "wordpl": "północno-zachodni"
+      "wordpl": "północno zachodni"
     },
     {
       "id": 4709,
@@ -20157,7 +19877,7 @@
     {
       "id": 4711,
       "word": "fellowship",
-      "wordpl": "towarzystwo, bractwo, wspólnota, stowarzyszenie, stypendium naukowe"
+      "wordpl": "towarzystwo, bractwo, wspólnota, stowarzyszenie, stypendium naukowe, stypendium"
     },
     {
       "id": 4717,
@@ -20167,7 +19887,7 @@
     {
       "id": 4728,
       "word": "cure",
-      "wordpl": "lek, lekarstwo, kuracja, leczyć, peklować"
+      "wordpl": "lek, lekarstwo, kuracja, leczyć, peklować, leczenie"
     },
     {
       "id": 4733,
@@ -20187,7 +19907,7 @@
     {
       "id": 4747,
       "word": "unified",
-      "wordpl": "zjednoczony, zunifikowany"
+      "wordpl": "zjednoczony, zunifikowany, ujednolicony"
     },
     {
       "id": 4748,
@@ -20277,7 +19997,7 @@
     {
       "id": 4823,
       "word": "fitness",
-      "wordpl": "stosowność, zdatność, trafność, dostosowanie, sprawność, kondycja"
+      "wordpl": "stosowność, zdatność, trafność, dostosowanie, sprawność, kondycja, fitness"
     },
     {
       "id": 4828,
@@ -20287,7 +20007,7 @@
     {
       "id": 4829,
       "word": "negotiated",
-      "wordpl": "negocjować, wynegocjować"
+      "wordpl": "negocjować, wynegocjować, wynegocjowany"
     },
     {
       "id": 4831,
@@ -20302,7 +20022,7 @@
     {
       "id": 4839,
       "word": "tightly",
-      "wordpl": "mocno, kurczowo, ciasno, szczelnie"
+      "wordpl": "mocno, kurczowo, ciasno, szczelnie, ściśle"
     },
     {
       "id": 4852,
@@ -20362,7 +20082,7 @@
     {
       "id": 4888,
       "word": "possesses",
-      "wordpl": "posiadać, mieć"
+      "wordpl": "posiadać, mieć, posiada"
     },
     {
       "id": 4890,
@@ -20372,7 +20092,7 @@
     {
       "id": 4897,
       "word": "respectfully",
-      "wordpl": "z poważaniem"
+      "wordpl": "z poważaniem, z szacunkiem"
     },
     {
       "id": 4901,
@@ -20382,7 +20102,7 @@
     {
       "id": 4903,
       "word": "lighter",
-      "wordpl": "zapalniczka, lichtuga"
+      "wordpl": "zapalniczka, lichtuga, lighter"
     },
     {
       "id": 4913,
@@ -20392,7 +20112,7 @@
     {
       "id": 4920,
       "word": "forbidden",
-      "wordpl": "niedozwolony, zabroniony"
+      "wordpl": "niedozwolony, zabroniony, zabronione"
     },
     {
       "id": 4922,
@@ -20412,7 +20132,7 @@
     {
       "id": 4925,
       "word": "attraction",
-      "wordpl": "atrakcja, atrakcyjność, przyciąganie, pociąg (seksualny), pożądanie"
+      "wordpl": "atrakcja, atrakcyjność, przyciąganie, pociąg, pożądanie"
     },
     {
       "id": 4930,
@@ -20427,7 +20147,7 @@
     {
       "id": 4942,
       "word": "casual",
-      "wordpl": "przypadkowy, dorywczy, swobodny, niedbały, luźny, na luzie"
+      "wordpl": "przypadkowy, dorywczy, swobodny, niedbały, luźny, na luzie, nieformalny"
     },
     {
       "id": 4948,
@@ -20457,7 +20177,7 @@
     {
       "id": 4978,
       "word": "recommends",
-      "wordpl": "polecać, rekomendować"
+      "wordpl": "polecać, rekomendować, zaleca"
     },
     {
       "id": 4979,
@@ -20467,7 +20187,7 @@
     {
       "id": 4980,
       "word": "prescription",
-      "wordpl": "recepta, przepis (prawny), zalecenie"
+      "wordpl": "recepta, przepis, zalecenie"
     },
     {
       "id": 4981,
@@ -20482,7 +20202,7 @@
     {
       "id": 4988,
       "word": "gesture",
-      "wordpl": "gest, gestykulacja, gestykulować, czynić gest, skinąć (głową)"
+      "wordpl": "gest, gestykulacja, gestykulować, czynić gest, skinąć"
     },
     {
       "id": 4990,
@@ -20492,7 +20212,7 @@
     {
       "id": 4991,
       "word": "recognizes",
-      "wordpl": "rozpoznawać, rozpoznać, uznawać, uznać, zauważać, zauważyć, doceniać, uznawać za"
+      "wordpl": "rozpoznawać, rozpoznać, uznawać, uznać, zauważać, zauważyć, doceniać, uznawać za, uznaje"
     },
     {
       "id": 4999,
@@ -20557,7 +20277,7 @@
     {
       "id": 5046,
       "word": "advocates",
-      "wordpl": "obrońca, obrońcy, orędownik, orędownicy, rzecznik, rzecznicy, bronić, popierać"
+      "wordpl": "obrońca, obrońcy, orędownik, orędownicy, rzecznik, rzecznicy, bronić, popierać, zwolennicy"
     },
     {
       "id": 5047,
@@ -20567,7 +20287,7 @@
     {
       "id": 5050,
       "word": "injected",
-      "wordpl": "wstrzykiwać, wstrzyknąć"
+      "wordpl": "wstrzykiwać, wstrzyknąć, wstrzyknięty"
     },
     {
       "id": 5059,
@@ -20592,7 +20312,7 @@
     {
       "id": 5071,
       "word": "sighed",
-      "wordpl": "wzdychać, westchnąć"
+      "wordpl": "wzdychać, westchnąć, westchnął"
     },
     {
       "id": 5081,
@@ -20612,7 +20332,7 @@
     {
       "id": 5087,
       "word": "incorrect",
-      "wordpl": "niepoprawny, błędny, niestosowny"
+      "wordpl": "niepoprawny, błędny, niestosowny, nieprawidłowy"
     },
     {
       "id": 5090,
@@ -20677,7 +20397,7 @@
     {
       "id": 5123,
       "word": "departmental",
-      "wordpl": "wydziałowy, departamentalny, resortowy, oddziałowy"
+      "wordpl": "wydziałowy, departamentalny, resortowy, oddziałowy, działowy"
     },
     {
       "id": 5127,
@@ -20697,7 +20417,7 @@
     {
       "id": 5142,
       "word": "deadline",
-      "wordpl": "ostateczny termin, termin ostateczny"
+      "wordpl": "ostateczny termin, termin ostateczny, termin"
     },
     {
       "id": 5144,
@@ -20717,22 +20437,22 @@
     {
       "id": 5158,
       "word": "earnest",
-      "wordpl": "poważny, usilny, gorliwy, szczerość, zaliczka"
+      "wordpl": "poważny, usilny, gorliwy, szczerość, zaliczka, szczery"
     },
     {
       "id": 5162,
       "word": "responsive",
-      "wordpl": "szybko reagujący, czuły"
+      "wordpl": "szybko reagujący, czuły, responsywny"
     },
     {
       "id": 5168,
       "word": "enjoyment",
-      "wordpl": "przyjemność"
+      "wordpl": "przyjemność, radość"
     },
     {
       "id": 5176,
       "word": "proves",
-      "wordpl": "udowodnić, dowodzić, okazać się"
+      "wordpl": "udowodnić, dowodzić, okazać się, dowodzi"
     },
     {
       "id": 5179,
@@ -20772,7 +20492,7 @@
     {
       "id": 5224,
       "word": "forgive",
-      "wordpl": "wybaczać"
+      "wordpl": "wybaczać, wybaczyć"
     },
     {
       "id": 5234,
@@ -20788,11 +20508,6 @@
       "id": 5244,
       "word": "incidental",
       "wordpl": "incydentalny, przypadkowy, nieistotny, towarzyszyć"
-    },
-    {
-      "id": 5245,
-      "word": "telegram",
-      "wordpl": "telegram"
     },
     {
       "id": 5247,
@@ -20812,7 +20527,7 @@
     {
       "id": 5264,
       "word": "contributes",
-      "wordpl": "przyczyniać się, wnosić, przekazywać"
+      "wordpl": "przyczyniać się, wnosić, przekazywać, przyczynia się"
     },
     {
       "id": 5266,
@@ -20842,12 +20557,12 @@
     {
       "id": 5279,
       "word": "afterward",
-      "wordpl": "następnie, potem, później"
+      "wordpl": "następnie, potem, później, po tym"
     },
     {
       "id": 5284,
       "word": "nutrient",
-      "wordpl": "składnik pokarmowy, odżywczy, odżywczy"
+      "wordpl": "składnik pokarmowy, odżywczy, odżywczy, składnik odżywczy"
     },
     {
       "id": 5287,
@@ -20857,7 +20572,7 @@
     {
       "id": 5297,
       "word": "sworn",
-      "wordpl": "zaprzysięgły, przysięgać"
+      "wordpl": "zaprzysięgły, przysięgać, zaprzysiężony"
     },
     {
       "id": 5299,
@@ -20877,7 +20592,7 @@
     {
       "id": 5309,
       "word": "exceedingly",
-      "wordpl": "niezmiernie, nadzwyczaj, wyjątkowo"
+      "wordpl": "niezmiernie, nadzwyczaj, wyjątkowo, niezwykle"
     },
     {
       "id": 5313,
@@ -20918,11 +20633,6 @@
       "id": 5335,
       "word": "conveyance",
       "wordpl": "transport, przewóz, przeniesienie własności, nośnik, narzędzie"
-    },
-    {
-      "id": 5337,
-      "word": "nova",
-      "wordpl": "nowa"
     },
     {
       "id": 5344,
@@ -20997,7 +20707,7 @@
     {
       "id": 5394,
       "word": "sheer",
-      "wordpl": "cienki, przejrzysty, stromy, czysty, absolutny"
+      "wordpl": "cienki, przejrzysty, stromy, czysty, absolutny, przezroczysty"
     },
     {
       "id": 5405,
@@ -21042,7 +20752,7 @@
     {
       "id": 5427,
       "word": "tense",
-      "wordpl": "czas (gramatyczny), spięty, nerwowy, napiąć, naprężyć"
+      "wordpl": "czas gramatyczny, spięty, nerwowy, napiąć, naprężyć, czas"
     },
     {
       "id": 5430,
@@ -21077,7 +20787,7 @@
     {
       "id": 5457,
       "word": "interact",
-      "wordpl": "oddziaływać"
+      "wordpl": "oddziaływać, interakcja"
     },
     {
       "id": 5458,
@@ -21097,7 +20807,7 @@
     {
       "id": 5474,
       "word": "debris",
-      "wordpl": "gruz, szczątki"
+      "wordpl": "gruz, szczątki, gruzy"
     },
     {
       "id": 5475,
@@ -21122,7 +20832,7 @@
     {
       "id": 5488,
       "word": "deserves",
-      "wordpl": "zasługiwać na, być wartym"
+      "wordpl": "zasługiwać na, być wartym, zasługuje"
     },
     {
       "id": 5491,
@@ -21132,7 +20842,7 @@
     {
       "id": 5495,
       "word": "highlights",
-      "wordpl": "najważniejsze punkty, atrakcje, podkreślać, uwydatniać, eksponować"
+      "wordpl": "najważniejsze punkty, atrakcje, podkreślać, uwydatniać, eksponować, najważniejsze wydarzenia, najważniejsze"
     },
     {
       "id": 5498,
@@ -21142,12 +20852,12 @@
     {
       "id": 5502,
       "word": "fond",
-      "wordpl": "czuły, kochający, lubić"
+      "wordpl": "czuły, kochający, lubić, lubiący"
     },
     {
       "id": 5516,
       "word": "absorb",
-      "wordpl": "wchłaniać, pochłaniać, absorbować, przyswajać"
+      "wordpl": "wchłaniać, pochłaniać, absorbować, przyswajać, wchłonąć"
     },
     {
       "id": 5517,
@@ -21167,22 +20877,17 @@
     {
       "id": 5525,
       "word": "examines",
-      "wordpl": "badać, sprawdzać, analizować, egzaminować"
+      "wordpl": "badać, sprawdzać, analizować, egzaminować, bada"
     },
     {
       "id": 5528,
       "word": "beast",
-      "wordpl": "bestia, zwierzę, potwór (fig.), bydlę (obraźliwie)"
+      "wordpl": "bestia, zwierzę, potwór, bydlę "
     },
     {
       "id": 5531,
       "word": "acquaintance",
       "wordpl": "znajomy, znajoma, znajomość"
-    },
-    {
-      "id": 5532,
-      "word": "genera",
-      "wordpl": "rodzaje (biol.)"
     },
     {
       "id": 5536,
@@ -21207,12 +20912,12 @@
     {
       "id": 5564,
       "word": "imaginary",
-      "wordpl": "wyimaginowany, urojony, nierealny"
+      "wordpl": "wyimaginowany, urojony, nierealny, wyobrażony"
     },
     {
       "id": 5567,
       "word": "tablets",
-      "wordpl": "tabletki, pastylki, tablety (elektroniczne)"
+      "wordpl": "tabletki, pastylki, tablety"
     },
     {
       "id": 5576,
@@ -21237,7 +20942,7 @@
     {
       "id": 5590,
       "word": "vacancy",
-      "wordpl": "wakat, wolne stanowisko, wolny etat, wolny pokój"
+      "wordpl": "wakat, wolne stanowisko, wolny etat, wolny pokój, wolne miejsce pracy"
     },
     {
       "id": 5591,
@@ -21252,7 +20957,7 @@
     {
       "id": 5599,
       "word": "proclaimed",
-      "wordpl": "ogłosić, proklamować, ogłaszać, okrzyknąć"
+      "wordpl": "ogłosić, proklamować, ogłaszać, okrzyknąć, ogłoszony"
     },
     {
       "id": 5606,
@@ -21277,7 +20982,7 @@
     {
       "id": 5638,
       "word": "manifested",
-      "wordpl": "manifestować, objawiać, ujawnić, przejawić, objawić się"
+      "wordpl": "manifestować, objawiać, ujawnić, przejawić, objawić się, manifestowany"
     },
     {
       "id": 5639,
@@ -21287,7 +20992,7 @@
     {
       "id": 5648,
       "word": "declares",
-      "wordpl": "deklarować, ogłaszać, oznajmiać, stwierdzać"
+      "wordpl": "deklarować, ogłaszać, oznajmiać, stwierdzać, oświadcza"
     },
     {
       "id": 5658,
@@ -21327,7 +21032,7 @@
     {
       "id": 5689,
       "word": "resembles",
-      "wordpl": "przypominać, być podobnym"
+      "wordpl": "przypominać, być podobnym, przypomina"
     },
     {
       "id": 5695,
@@ -21337,7 +21042,7 @@
     {
       "id": 5698,
       "word": "departed",
-      "wordpl": "zmarły, nieboszczyk, nieboszczka, miniony, niegdysiejszy"
+      "wordpl": "zmarły, nieboszczyk, nieboszczka, miniony, niegdysiejszy, odszedł"
     },
     {
       "id": 5723,
@@ -21357,7 +21062,7 @@
     {
       "id": 5737,
       "word": "deleted",
-      "wordpl": "usunięty, skasowany, wykreślony, zlikwidowany"
+      "wordpl": "usunięty, skasowany, wykreślony, zlikwidowany, usunięte"
     },
     {
       "id": 5746,
@@ -21392,12 +21097,12 @@
     {
       "id": 5770,
       "word": "insane",
-      "wordpl": "obłąkany, niepoczytalny, chory umysłowo"
+      "wordpl": "obłąkany, niepoczytalny, chory umysłowo, szalony"
     },
     {
       "id": 5773,
       "word": "delightful",
-      "wordpl": "zachwycający, wspaniały, rozkoszny"
+      "wordpl": "zachwycający, wspaniały, rozkoszny, uroczy"
     },
     {
       "id": 5775,
@@ -21457,7 +21162,7 @@
     {
       "id": 5823,
       "word": "dial",
-      "wordpl": "wykręcać numer, wybierać numer, tarcza, pokrętło, tarcza telefonu"
+      "wordpl": "wykręcać numer, wybierać numer, tarcza, pokrętło, tarcza telefonu, tarczę"
     },
     {
       "id": 5827,
@@ -21502,7 +21207,7 @@
     {
       "id": 5870,
       "word": "upstream",
-      "wordpl": "pod prąd, w górę (rzeki), dopływowy, wydobywczy"
+      "wordpl": "pod prąd, w górę, dopływowy, wydobywczy, w górę rzeki"
     },
     {
       "id": 5871,
@@ -21537,7 +21242,7 @@
     {
       "id": 5893,
       "word": "purified",
-      "wordpl": "oczyszczony, oczyszczony (substancja), oczyścić, oczyszczać"
+      "wordpl": "oczyszczony, oczyszczony, oczyścić, oczyszczać"
     },
     {
       "id": 5894,
@@ -21602,7 +21307,7 @@
     {
       "id": 5962,
       "word": "northeastern",
-      "wordpl": "północno-wschodni"
+      "wordpl": "północno wschodni,"
     },
     {
       "id": 5963,
@@ -21622,7 +21327,7 @@
     {
       "id": 5973,
       "word": "admiralty",
-      "wordpl": "admiralicja"
+      "wordpl": "admiralicja, admirał"
     },
     {
       "id": 5979,
@@ -21632,7 +21337,7 @@
     {
       "id": 6011,
       "word": "slot",
-      "wordpl": "otwór, gniazdo, szczelina, okienko, miejsce, stanowisko, wkładać, pasować"
+      "wordpl": "otwór, gniazdo, szczelina, okienko, miejsce, stanowisko, wkładać, pasować, slot"
     },
     {
       "id": 6014,
@@ -21648,11 +21353,6 @@
       "id": 6031,
       "word": "miserable",
       "wordpl": "nieszczęśliwy, przygnębiony, ponury, nędzny, opłakany, lichy, żałosny, zrzędliwy, marny"
-    },
-    {
-      "id": 6035,
-      "word": "sept",
-      "wordpl": "klan, odłam, ród"
     },
     {
       "id": 6037,
@@ -21697,7 +21397,7 @@
     {
       "id": 6067,
       "word": "hatch",
-      "wordpl": "właz, luk, okienko, wykluwać się, wylęgać się, knuć, intrygować"
+      "wordpl": "właz, luk, okienko, wykluwać się, wylęgać się, knuć, intrygować, klapa"
     },
     {
       "id": 6074,
@@ -21707,7 +21407,7 @@
     {
       "id": 6080,
       "word": "relies",
-      "wordpl": "polegać na, polegać"
+      "wordpl": "polegać na, polegać, opiera się"
     },
     {
       "id": 6081,
@@ -21722,12 +21422,12 @@
     {
       "id": 6086,
       "word": "inward",
-      "wordpl": "do środka, wewnątrz, wewnętrzny, skryty"
+      "wordpl": "do środka, wewnątrz, wewnętrzny, skryty, do wewnątrz"
     },
     {
       "id": 6088,
       "word": "emerges",
-      "wordpl": "pojawiać się, wyłaniać się, wynurzać się"
+      "wordpl": "pojawiać się, wyłaniać się, wynurzać się, pojawia się"
     },
     {
       "id": 6091,
@@ -21757,7 +21457,7 @@
     {
       "id": 6115,
       "word": "prosperous",
-      "wordpl": "pomyślny, prosperujący, bogaty, kwitnący"
+      "wordpl": "pomyślny, prosperujący, bogaty, kwitnący, dobrobyt"
     },
     {
       "id": 6126,
@@ -21787,7 +21487,7 @@
     {
       "id": 6167,
       "word": "analysed",
-      "wordpl": "analizowany, przebadany, rozpatrzony"
+      "wordpl": "analizowany, przebadany, rozpatrzony, przeanalizowany"
     },
     {
       "id": 6175,
@@ -21832,7 +21532,7 @@
     {
       "id": 6212,
       "word": "misconduct",
-      "wordpl": "niewłaściwe zachowanie, wykroczenie, występek, złe postępowanie"
+      "wordpl": "niewłaściwe zachowanie, wykroczenie, występek, złe postępowanie, niewłaściwe postępowanie"
     },
     {
       "id": 6213,
@@ -21855,11 +21555,6 @@
       "wordpl": "zapytanie, dochodzenie, śledztwo, zasięganie informacji"
     },
     {
-      "id": 6238,
-      "word": "coli",
-      "wordpl": "pałeczka okrężnicy"
-    },
-    {
       "id": 6255,
       "word": "monks",
       "wordpl": "mnich, mnisi"
@@ -21874,7 +21569,7 @@
     {
       "id": 138,
       "word": "found",
-      "wordpl": "zakładać, założyć, fundować, ufundować"
+      "wordpl": "zakładać, założyć, fundować, ufundować, znaleziony"
     },
     {
       "id": 148,
@@ -21884,7 +21579,7 @@
     {
       "id": 203,
       "word": "means",
-      "wordpl": "środek, zasób, możliwość, sposób"
+      "wordpl": "oznacza, środek, zasób, możliwość, sposób"
     },
     {
       "id": 257,
@@ -21899,7 +21594,7 @@
     {
       "id": 267,
       "word": "commission",
-      "wordpl": "komisja, zlecenie, zarządzenie, zlecać"
+      "wordpl": "komisja, zlecenie, zarządzenie, zlecać, prowizja"
     },
     {
       "id": 322,
@@ -21924,7 +21619,7 @@
     {
       "id": 451,
       "word": "related",
-      "wordpl": "powiązany, spokrewniony"
+      "wordpl": "powiązany, spokrewniony, związane"
     },
     {
       "id": 462,
@@ -21944,7 +21639,7 @@
     {
       "id": 523,
       "word": "stock",
-      "wordpl": "zapas, akcja, bulion, zaopatrywać"
+      "wordpl": "zapas, akcja, bulion, zaopatrywać, zapasy"
     },
     {
       "id": 539,
@@ -21954,7 +21649,7 @@
     {
       "id": 548,
       "word": "species",
-      "wordpl": "gatunek"
+      "wordpl": "gatunek, gatunki"
     },
     {
       "id": 553,
@@ -21994,7 +21689,7 @@
     {
       "id": 655,
       "word": "expected",
-      "wordpl": "przewidywany"
+      "wordpl": "przewidywany, oczekiwany"
     },
     {
       "id": 656,
@@ -22024,7 +21719,7 @@
     {
       "id": 695,
       "word": "trial",
-      "wordpl": "proces sądowy, rozprawa, próba"
+      "wordpl": "proces sądowy, rozprawa, próba, proces"
     },
     {
       "id": 718,
@@ -22059,7 +21754,7 @@
     {
       "id": 743,
       "word": "facilities",
-      "wordpl": "pomieszczenie, obiekt, toaleta"
+      "wordpl": "pomieszczenie, obiekt, toaleta, obiekty"
     },
     {
       "id": 747,
@@ -22104,7 +21799,7 @@
     {
       "id": 827,
       "word": "executive",
-      "wordpl": "wykonawczy, kierowniczy, wykonawca, egzekutywa, zarząd"
+      "wordpl": "wykonawczy, kierowniczy, wykonawca, egzekutywa, zarząd, kierownictwo"
     },
     {
       "id": 837,
@@ -22314,7 +22009,7 @@
     {
       "id": 1083,
       "word": "remains",
-      "wordpl": "pozostałość, resztki, szczątki"
+      "wordpl": "pozostałość, resztki, szczątki, pozostałości"
     },
     {
       "id": 1087,
@@ -22369,7 +22064,7 @@
     {
       "id": 1149,
       "word": "whereas",
-      "wordpl": "podczas gdy, natomiast"
+      "wordpl": "podczas gdy, natomiast, mając na uwadze,"
     },
     {
       "id": 1151,
@@ -22394,7 +22089,7 @@
     {
       "id": 1181,
       "word": "latter",
-      "wordpl": "drugi (z dwóch), ten drugi, późniejszy"
+      "wordpl": "późniejszy, drugi , ten drugi,"
     },
     {
       "id": 1195,
@@ -22404,12 +22099,12 @@
     {
       "id": 1198,
       "word": "tons",
-      "wordpl": "tony (jednostka masy), mnóstwo"
+      "wordpl": "tony"
     },
     {
       "id": 1202,
       "word": "components",
-      "wordpl": "komponent, składnik, element, część składowa"
+      "wordpl": "komponent, składnik, element, część składowa, elementy"
     },
     {
       "id": 1206,
@@ -22454,7 +22149,7 @@
     {
       "id": 1272,
       "word": "submitted",
-      "wordpl": "złożony, przedłożony"
+      "wordpl": "złożony, przedłożony, przesłane"
     },
     {
       "id": 1279,
@@ -22584,7 +22279,7 @@
     {
       "id": 1472,
       "word": "discharge",
-      "wordpl": "zwalniać, wypuszczać, wyładować, wydzielać, zwolnienie, wyładunek, wydzielina"
+      "wordpl": "zwalniać, wypuszczać, wyładować, wydzielać, zwolnienie, wyładunek, wydzielina, wyładowanie"
     },
     {
       "id": 1475,
@@ -22594,7 +22289,7 @@
     {
       "id": 1477,
       "word": "wages",
-      "wordpl": "zarobki, płace, pobory"
+      "wordpl": "zarobki, płace, pobory, wynagrodzenia"
     },
     {
       "id": 1478,
@@ -22634,7 +22329,7 @@
     {
       "id": 1509,
       "word": "grain",
-      "wordpl": "ziarno, zboże, drobinka, szum (fotografia)"
+      "wordpl": "ziarno, zboże, drobinka, szum"
     },
     {
       "id": 1520,
@@ -22649,7 +22344,7 @@
     {
       "id": 1528,
       "word": "billion",
-      "wordpl": "miliard, bilion (skala krótka)"
+      "wordpl": "miliard, bilion"
     },
     {
       "id": 1532,
@@ -22764,12 +22459,12 @@
     {
       "id": 1654,
       "word": "mine",
-      "wordpl": "mój, swój, kopalnia, mina, złoże, górniczy, kopać, wydobywać, eksploatować, minować"
+      "wordpl": "moja ,mój, swój, kopalnia, mina, złoże, górniczy, kopać, wydobywać, eksploatować, minować, "
     },
     {
       "id": 1659,
       "word": "variation",
-      "wordpl": "zmiana, odmiana, zmienienie, wariacja"
+      "wordpl": "zmiana, odmiana, zmienienie, wariacja, zmienność"
     },
     {
       "id": 1662,
@@ -22784,7 +22479,7 @@
     {
       "id": 1677,
       "word": "navy",
-      "wordpl": "marynarka wojenna, granatowy (kolor)"
+      "wordpl": "granatowy, marynarka wojenna"
     },
     {
       "id": 1679,
@@ -22829,7 +22524,7 @@
     {
       "id": 1720,
       "word": "prime",
-      "wordpl": "najważniejszy, rozkwit, liczba pierwsza, prym"
+      "wordpl": "najważniejszy, rozkwit, liczba pierwsza, prym, najlepszy"
     },
     {
       "id": 1722,
@@ -22844,7 +22539,7 @@
     {
       "id": 1747,
       "word": "recommendations",
-      "wordpl": "zalecenie, rekomendacja, wskazówki"
+      "wordpl": "zalecenie, rekomendacja, wskazówki, zalecenia"
     },
     {
       "id": 1750,
@@ -22929,7 +22624,7 @@
     {
       "id": 1837,
       "word": "applicant",
-      "wordpl": "kandydat, kandydatka, petent"
+      "wordpl": "kandydat, kandydatka, petent, wnioskodawca"
     },
     {
       "id": 1838,
@@ -22949,7 +22644,7 @@
     {
       "id": 1850,
       "word": "imports",
-      "wordpl": "importy, importować"
+      "wordpl": "importy, importować, import"
     },
     {
       "id": 1852,
@@ -22999,7 +22694,7 @@
     {
       "id": 1894,
       "word": "adjustment",
-      "wordpl": "skorygowanie, wyregulowanie, przystosowanie, adaptacja, uzgodnienie"
+      "wordpl": "skorygowanie, wyregulowanie, przystosowanie, adaptacja, uzgodnienie, dostosowanie"
     },
     {
       "id": 1895,
@@ -23014,7 +22709,7 @@
     {
       "id": 1907,
       "word": "legislature",
-      "wordpl": "legislatura, ciało ustawodawcze, ustawodawstwo"
+      "wordpl": "legislatura, ciało ustawodawcze, ustawodawstwo, organ ustawodawczy"
     },
     {
       "id": 1918,
@@ -23024,7 +22719,7 @@
     {
       "id": 1919,
       "word": "mortgage",
-      "wordpl": "hipoteka"
+      "wordpl": "hipoteka, kredyt hipoteczny"
     },
     {
       "id": 1928,
@@ -23059,7 +22754,7 @@
     {
       "id": 1950,
       "word": "draft",
-      "wordpl": "szkic, projekt, wersja robocza, pobór (militarny), sporządzać, szkicować"
+      "wordpl": "szkic, projekt, wersja robocza, pobór, sporządzać, szkicować"
     },
     {
       "id": 1952,
@@ -23139,7 +22834,7 @@
     {
       "id": 2021,
       "word": "essentially",
-      "wordpl": "w istocie, w gruncie rzeczy"
+      "wordpl": "w istocie, w gruncie rzeczy, zasadniczo"
     },
     {
       "id": 2026,
@@ -23154,7 +22849,7 @@
     {
       "id": 2039,
       "word": "spread",
-      "wordpl": "rozprzestrzenianie, ekspansja, zasięg, obszar, rozkładówka, smarowidło, substancja do smarowania, spread (w finansach), różnica między ceną kupna a sprzedaży, rozprzestrzeniać, szerzyć, rozkładać, smarować, rozprzestrzeniać się"
+      "wordpl": "rozprzestrzenianie, ekspansja, zasięg, obszar, rozkładówka, smarowidło, substancja do smarowania, różnica między ceną kupna a sprzedaży, rozprzestrzeniać, szerzyć, rozkładać, smarować, rozprzestrzeniać się"
     },
     {
       "id": 2040,
@@ -23222,14 +22917,9 @@
       "wordpl": "miejsce zamieszkania, rezydencja, pobyt, siedziba"
     },
     {
-      "id": 2093,
-      "word": "ph",
-      "wordpl": "potencjał wodoru (pH)"
-    },
-    {
       "id": 2094,
       "word": "superintendent",
-      "wordpl": "nadzorca, kierownik, inspektor, komisarz"
+      "wordpl": "nadzorca, kierownik, inspektor, komisarz, kurator"
     },
     {
       "id": 2099,
@@ -23334,17 +23024,12 @@
     {
       "id": 2191,
       "word": "shift",
-      "wordpl": "zmiana, przesunięcie, zmieniać, przesunąć, bieg (w samochodzie), klawisz Shift"
+      "wordpl": "zmiana, przesunięcie, zmieniać, przesunąć, bieg, klawisz Shift"
     },
     {
       "id": 2193,
       "word": "formerly",
-      "wordpl": "dawno, niegdyś, przedtem, poprzednio"
-    },
-    {
-      "id": 2195,
-      "word": "pa",
-      "wordpl": "tata, pa"
+      "wordpl": "dawno, niegdyś, przedtem, poprzednio, dawniej"
     },
     {
       "id": 2203,
@@ -23414,7 +23099,7 @@
     {
       "id": 2257,
       "word": "edited",
-      "wordpl": "edytowany, zredagowany, edytować, zredagować"
+      "wordpl": "edytowany, zredagowany, edytować, zredagować, edytowane"
     },
     {
       "id": 2262,
@@ -23462,11 +23147,6 @@
       "wordpl": "wymiar, wymiary, rozmiar, zakres"
     },
     {
-      "id": 2299,
-      "word": "dna",
-      "wordpl": "DNA, kwas deoksyrybonukleinowy"
-    },
-    {
       "id": 2313,
       "word": "sufficiently",
       "wordpl": "wystarczająco, dostatecznie"
@@ -23489,7 +23169,7 @@
     {
       "id": 2345,
       "word": "disposal",
-      "wordpl": "usuwanie, likwidacja, pozbywanie się, wywóz"
+      "wordpl": "usuwanie, likwidacja, pozbywanie się, wywóz, utylizacja"
     },
     {
       "id": 2357,
@@ -23534,7 +23214,7 @@
     {
       "id": 2411,
       "word": "premises",
-      "wordpl": "nieruchomość, posesja, siedziba, teren, lokal, pomieszczenie, obiekt"
+      "wordpl": "nieruchomość, posesja, siedziba, teren, lokal, pomieszczenie, obiekt, lokale"
     },
     {
       "id": 2415,
@@ -23569,7 +23249,7 @@
     {
       "id": 2458,
       "word": "headquarters",
-      "wordpl": "siedziba, centrala, kwatera główna"
+      "wordpl": "siedziba, centrala, kwatera główna, siedziba główna"
     },
     {
       "id": 2462,
@@ -23689,7 +23369,7 @@
     {
       "id": 2595,
       "word": "plot",
-      "wordpl": "działka, parcela, fabuła, spisek, plan, planować, knuć, wykreślać, nanosić (na wykres)"
+      "wordpl": "działka, parcela, fabuła, spisek, plan, planować, knuć, wykreślać, nanosić"
     },
     {
       "id": 2603,
@@ -23744,7 +23424,7 @@
     {
       "id": 2671,
       "word": "pine",
-      "wordpl": "sosna, tęsknić, usychać (z tęsknoty)"
+      "wordpl": "sosna, tęsknić, usychać"
     },
     {
       "id": 2672,
@@ -23774,7 +23454,7 @@
     {
       "id": 2699,
       "word": "investigated",
-      "wordpl": "badany, zbadany, badać, prowadzić dochodzenie"
+      "wordpl": "badany, zbadany, badać, prowadzić dochodzenie, zbadane"
     },
     {
       "id": 2700,
@@ -23814,7 +23494,7 @@
     {
       "id": 2722,
       "word": "dental",
-      "wordpl": "zębowy, dentystyczny"
+      "wordpl": "zębowy, dentystyczny, stomatologiczny"
     },
     {
       "id": 2723,
@@ -23879,7 +23559,7 @@
     {
       "id": 2772,
       "word": "hell",
-      "wordpl": "piekło, potępienie, piekielny, do diabła! (wykrzyknik)"
+      "wordpl": "piekło, potępienie, piekielny, do diabła"
     },
     {
       "id": 2774,
@@ -23894,7 +23574,7 @@
     {
       "id": 2782,
       "word": "disposition",
-      "wordpl": "predyspozycja, usposobienie, rozporządzanie, rozmieszczenie, skłonność"
+      "wordpl": "dispozycja, predyspozycja, usposobienie, rozporządzanie, rozmieszczenie, skłonność"
     },
     {
       "id": 2783,
@@ -23929,7 +23609,7 @@
     {
       "id": 2823,
       "word": "injection",
-      "wordpl": "zastrzyk, iniekcja, wtrysk"
+      "wordpl": "zastrzyk, iniekcja, wtrysk, wstrzyknięcie"
     },
     {
       "id": 2829,
@@ -23979,7 +23659,7 @@
     {
       "id": 2879,
       "word": "versus",
-      "wordpl": "kontra, przeciw, a, w przeciwieństwie do"
+      "wordpl": "kontra, przeciw, a, w przeciwieństwie do, w porównaniu z"
     },
     {
       "id": 2883,
@@ -24029,7 +23709,7 @@
     {
       "id": 2919,
       "word": "attributed",
-      "wordpl": "przypisywać, przypisany"
+      "wordpl": "przypisywać, przypisany, przypisywany"
     },
     {
       "id": 2921,
@@ -24039,7 +23719,7 @@
     {
       "id": 2938,
       "word": "ease",
-      "wordpl": "łagodzić, uspokajać się, uprościć, słabnąć, złagodnieć, zelżeć, działać z łatwością, beztroska, relaks"
+      "wordpl": "łagodzić, uspokajać się, uprościć, słabnąć, złagodnieć, zelżeć, działać z łatwością, beztroska, relaks, łatwość"
     },
     {
       "id": 2942,
@@ -24054,12 +23734,12 @@
     {
       "id": 2946,
       "word": "implement",
-      "wordpl": "wprowadzić w życie, zastosować, zaimplementować, narzędzie, przyrząd, sprzęt"
+      "wordpl": "wdrożyć wprowadzić w życie, zastosować, zaimplementować, narzędzie, przyrząd, sprzęt"
     },
     {
       "id": 2951,
       "word": "aluminum",
-      "wordpl": "glin"
+      "wordpl": "aluminium, glin"
     },
     {
       "id": 2954,
@@ -24089,7 +23769,7 @@
     {
       "id": 2973,
       "word": "undoubtedly",
-      "wordpl": "niewątpliwie"
+      "wordpl": "niewątpliwie, bez wątpienia"
     },
     {
       "id": 2975,
@@ -24109,7 +23789,7 @@
     {
       "id": 2982,
       "word": "converted",
-      "wordpl": "przekształcony, nawrócony, zmodyfikowany"
+      "wordpl": "przekształcony, nawrócony, zmodyfikowany, przekonwertowany"
     },
     {
       "id": 2984,
@@ -24174,7 +23854,7 @@
     {
       "id": 3043,
       "word": "implies",
-      "wordpl": "oznaczać, zakładać, sugerować, pociągać za sobą"
+      "wordpl": "oznaczać, zakładać, sugerować, pociągać za sobą, oznacza"
     },
     {
       "id": 3045,
@@ -24224,7 +23904,7 @@
     {
       "id": 3083,
       "word": "assured",
-      "wordpl": "zapewnić, zagwarantować, upewnić, zapewniony, pewny siebie"
+      "wordpl": "zapewnić, zagwarantować, upewnić, zapewniony, pewny siebie, pewny"
     },
     {
       "id": 3098,
@@ -24249,7 +23929,7 @@
     {
       "id": 3108,
       "word": "anticipated",
-      "wordpl": "przewidywać, oczekiwać, spodziewać się, oczekiwany, przewidziany"
+      "wordpl": "przewidywać, oczekiwać, spodziewać się, oczekiwany, przewidziany, przewidywany"
     },
     {
       "id": 3118,
@@ -24269,7 +23949,7 @@
     {
       "id": 3133,
       "word": "assurance",
-      "wordpl": "przekonanie, zapewnienie, ubezpieczenie, asekuracja"
+      "wordpl": "przekonanie, zapewnienie, ubezpieczenie, asekuracja, pewność"
     },
     {
       "id": 3150,
@@ -24304,12 +23984,12 @@
     {
       "id": 3168,
       "word": "testified",
-      "wordpl": "zeznawać, zeznać"
+      "wordpl": "zeznawać, zeznać, zeznał"
     },
     {
       "id": 3172,
       "word": "hardware",
-      "wordpl": "sprzęt, osprzęt komputerowy"
+      "wordpl": "sprzęt, osprzęt komputerowy, sprzęt komputerowy"
     },
     {
       "id": 3183,
@@ -24379,7 +24059,7 @@
     {
       "id": 3221,
       "word": "withdrawal",
-      "wordpl": "cofnięcie, wycofanie, odwrót, wypłata (z konta), odejście, cofać, wycofywać, wypłacać"
+      "wordpl": "cofnięcie, wycofanie, odwrót, wypłata, odejście, cofać, wycofywać, wypłacać"
     },
     {
       "id": 3223,
@@ -24399,7 +24079,7 @@
     {
       "id": 3250,
       "word": "holder",
-      "wordpl": "właściciel, okaziciel, uchwyt, obsadka"
+      "wordpl": "właściciel, okaziciel, uchwyt, obsadka, posiadacz"
     },
     {
       "id": 3256,
@@ -24419,12 +24099,12 @@
     {
       "id": 3273,
       "word": "legitimate",
-      "wordpl": "słuszny, uzasadniony, prawowity, legalny, zgodny z prawem"
+      "wordpl": "słuszny, uzasadniony, prawowity, legalny, zgodny z prawem, prawomocny"
     },
     {
       "id": 3276,
       "word": "disposed",
-      "wordpl": "rozporządzać, zbyć, usunąć, pozbyć się, skłonny"
+      "wordpl": "rozporządzać, zbyć, usunąć, pozbyć się, skłonny, usunięty"
     },
     {
       "id": 3279,
@@ -24439,7 +24119,7 @@
     {
       "id": 3286,
       "word": "bankruptcy",
-      "wordpl": "bankructwo"
+      "wordpl": "bankructwo, upadłość"
     },
     {
       "id": 3287,
@@ -24494,7 +24174,7 @@
     {
       "id": 3323,
       "word": "prohibited",
-      "wordpl": "zabroniony, zakazany, niedozwolony"
+      "wordpl": "zabroniony, zakazany, niedozwolony, zabronione"
     },
     {
       "id": 3336,
@@ -24544,12 +24224,12 @@
     {
       "id": 3392,
       "word": "lesions",
-      "wordpl": "zmiany patologiczne, urazy, uszkodzenia"
+      "wordpl": "zmiany patologiczne, urazy, uszkodzenia, zmiany chorobowe"
     },
     {
       "id": 3404,
       "word": "utilized",
-      "wordpl": "wykorzystywać, użytkować"
+      "wordpl": "wykorzystywać, użytkować, wykorzystywany"
     },
     {
       "id": 3409,
@@ -24564,7 +24244,7 @@
     {
       "id": 3413,
       "word": "deck",
-      "wordpl": "pokład, piętro, taras, talia (kart)"
+      "wordpl": "pokład, piętro, taras, talia"
     },
     {
       "id": 3414,
@@ -24609,7 +24289,7 @@
     {
       "id": 3459,
       "word": "delegates",
-      "wordpl": "delegować, delegat"
+      "wordpl": "delegować, delegat, delegaci"
     },
     {
       "id": 3467,
@@ -24639,7 +24319,7 @@
     {
       "id": 3488,
       "word": "verbal",
-      "wordpl": "ustny, mówiony, słowny, czasownikowy, dosłowny"
+      "wordpl": "ustny, mówiony, słowny, czasownikowy, dosłowny, werbalny"
     },
     {
       "id": 3509,
@@ -24704,7 +24384,7 @@
     {
       "id": 3546,
       "word": "lifetime",
-      "wordpl": "okres życia, czas życia, życie, żywot, dożywotni"
+      "wordpl": "okres życia, czas życia, życie, żywot, dożywotni, całe życie"
     },
     {
       "id": 3553,
@@ -24774,7 +24454,7 @@
     {
       "id": 3593,
       "word": "scarcely",
-      "wordpl": "ledwo, ledwie, zaledwie, prawie nie"
+      "wordpl": "ledwo, ledwie, zaledwie, prawie nie, rzadko"
     },
     {
       "id": 3600,
@@ -24789,7 +24469,7 @@
     {
       "id": 3604,
       "word": "decay",
-      "wordpl": "rozkład, gnicie, zgnilizna, próchnica, ruina, degradacja, rozkładać się, gnić, podupadać, rozpadać się, zanikać, rozpad promieniotwórczy"
+      "wordpl": "rozkład, gnicie, zgnilizna, próchnica, ruina, degradacja, rozkładać się, gnić, podupadać, rozpadać się, zanikać, rozpad promieniotwórczy, rozpad"
     },
     {
       "id": 3605,
@@ -24824,7 +24504,7 @@
     {
       "id": 3644,
       "word": "outlook",
-      "wordpl": "perspektywy, spojrzenie, pogląd, prognoza (pogody)"
+      "wordpl": "perspektywy, spojrzenie, pogląd, prognoza, perspektywa"
     },
     {
       "id": 3646,
@@ -24909,7 +24589,7 @@
     {
       "id": 3695,
       "word": "promptly",
-      "wordpl": "natychmiast, bezzwłocznie"
+      "wordpl": "natychmiast, bezzwłocznie, niezwłocznie"
     },
     {
       "id": 3700,
@@ -24929,12 +24609,12 @@
     {
       "id": 3713,
       "word": "alternate",
-      "wordpl": "naprzemiennie, alternatywny, zmienny, co drugi, zamiennik, zastępowy, wymieniać się, zastępować, wahać się"
+      "wordpl": "naprzemiennie, alternatywny, zmienny, co drugi, zamiennik, zastępowy, wymieniać się, zastępować, wahać się, na zmianę"
     },
     {
       "id": 3716,
       "word": "corresponds",
-      "wordpl": "korespondować, odpowiadać, zgadzać się"
+      "wordpl": "korespondować, odpowiadać, zgadzać się, odpowiada"
     },
     {
       "id": 3720,
@@ -24969,7 +24649,7 @@
     {
       "id": 3737,
       "word": "packed",
-      "wordpl": "zapakowany, zatłoczony, tłoczny, upakowany"
+      "wordpl": "zapakowany, zatłoczony, tłoczny, upakowany, spakowany"
     },
     {
       "id": 3739,
@@ -24994,7 +24674,7 @@
     {
       "id": 3763,
       "word": "trunk",
-      "wordpl": "tułów, kadłub, trzon, pień, trąba, kufer, skrzynia, bagażnik samochodowy, magistrala"
+      "wordpl": "tułów, kadłub, trzon, pień, trąba, kufer, skrzynia, bagażnik samochodowy, magistrala, bagażnik"
     },
     {
       "id": 3769,
@@ -25009,7 +24689,7 @@
     {
       "id": 3784,
       "word": "affirmative",
-      "wordpl": "stwierdzenie (odpowiedź twierdząca), twierdzący, pozytywny, potwierdzający, potakujący, afirmatywny, zatwierdzać, potwierdzać"
+      "wordpl": "stwierdzenie, twierdzący, pozytywny, potwierdzający, potakujący, afirmatywny, zatwierdzać, potwierdzać"
     },
     {
       "id": 3786,
@@ -25024,7 +24704,7 @@
     {
       "id": 3795,
       "word": "timing",
-      "wordpl": "wyczucie czasu, dobór momentu, timing"
+      "wordpl": "wyczucie czasu, dobór momentu, timing, czas"
     },
     {
       "id": 3797,
@@ -25069,7 +24749,7 @@
     {
       "id": 3847,
       "word": "accumulated",
-      "wordpl": "nagromadzony, skumulowany, zgromadzony"
+      "wordpl": "nagromadzony, skumulowany, zgromadzony, skumulowane"
     },
     {
       "id": 3848,
@@ -25104,7 +24784,7 @@
     {
       "id": 3892,
       "word": "interfere",
-      "wordpl": "mieszać się, wtrącać się, majstrować przy czymś, przeszkadzać, przeciwdziałać, kolidować, przecinać się, krzyżować się"
+      "wordpl": "mieszać się, wtrącać się, majstrować przy czymś, przeszkadzać, przeciwdziałać, kolidować, przecinać się, krzyżować się, ingerenować"
     },
     {
       "id": 3894,
@@ -25159,7 +24839,7 @@
     {
       "id": 3933,
       "word": "profitable",
-      "wordpl": "zyskowny, pożyteczny, korzystny"
+      "wordpl": "zyskowny, pożyteczny, korzystny, opłacalny"
     },
     {
       "id": 3944,
@@ -25229,7 +24909,7 @@
     {
       "id": 4006,
       "word": "honorable",
-      "wordpl": "zaszczytny, uczciwy, honorowy"
+      "wordpl": "zaszczytny, uczciwy, honorowy, szanowany"
     },
     {
       "id": 4008,
@@ -25329,7 +25009,7 @@
     {
       "id": 4087,
       "word": "boiling",
-      "wordpl": "wrzeć, gotować się, bardzo gorący, ekstremalny"
+      "wordpl": "wrzeć, gotować się, bardzo gorący, ekstremalny, gotowanie"
     },
     {
       "id": 4097,
@@ -25344,12 +25024,12 @@
     {
       "id": 4103,
       "word": "backward",
-      "wordpl": "wstecz, zacofany, niechętny do postępu, od tyłu"
+      "wordpl": "wstecz, zacofany, niechętny do postępu, od tyłu, do tyłu"
     },
     {
       "id": 4105,
       "word": "asserted",
-      "wordpl": "twierdzić, utrzymywać, stwierdzać, stwierdzony"
+      "wordpl": "twierdzić, utrzymywać, stwierdzać, stwierdzony, twierdził"
     },
     {
       "id": 4108,
@@ -25389,7 +25069,7 @@
     {
       "id": 4152,
       "word": "hollow",
-      "wordpl": "pusty, wydrążony, stłumiony, głuchy (np. dźwięk), wgłębienie, dziura, dziurawić, wydrążyć, nieszczery"
+      "wordpl": "pusty, wydrążony, stłumiony, głuchy, wgłębienie, dziura, dziurawić, wydrążyć, nieszczery"
     },
     {
       "id": 4157,
@@ -25399,7 +25079,7 @@
     {
       "id": 4162,
       "word": "rocky",
-      "wordpl": "skalisty, burzliwy, nierówny, chwiejny"
+      "wordpl": "skalisty, burzliwy, nierówny, chwiejny, kamienisty"
     },
     {
       "id": 4166,
@@ -25409,7 +25089,7 @@
     {
       "id": 4167,
       "word": "terminated",
-      "wordpl": "zakończyć, zakończony, przerwany"
+      "wordpl": "zakończyć, zakończony, przerwany, zakończone"
     },
     {
       "id": 4175,
@@ -25444,7 +25124,7 @@
     {
       "id": 4211,
       "word": "relieved",
-      "wordpl": "odczuwać ulgę, odczuwający ulgę, ulgiony, ulżyć"
+      "wordpl": "odczuwać ulgę, odczuwający ulgę, ulgiony, ulżyć, ulżony"
     },
     {
       "id": 4215,
@@ -25459,7 +25139,7 @@
     {
       "id": 4218,
       "word": "shed",
-      "wordpl": "szopa, zrzucać (ze skóry/siebie), pozbywać się, otrząsać się, kapać, ściekać, rozlewać, przelewać"
+      "wordpl": "szopa, zrzucać, pozbywać się, otrząsać się, kapać, ściekać, rozlewać, przelewać"
     },
     {
       "id": 4219,
@@ -25529,7 +25209,7 @@
     {
       "id": 4286,
       "word": "outlet",
-      "wordpl": "gniazdo, wylot, ujście, wypust, rynek zbytu"
+      "wordpl": "gniazdo, wylot, ujście, wypust, rynek zbytu, punkt sprzedaży"
     },
     {
       "id": 4310,
@@ -25549,7 +25229,7 @@
     {
       "id": 4317,
       "word": "spinal",
-      "wordpl": "kręgowy, rdzeniowy"
+      "wordpl": "kręgowy, rdzeniowy, kręgosłupowy"
     },
     {
       "id": 4318,
@@ -25569,7 +25249,7 @@
     {
       "id": 4325,
       "word": "digest",
-      "wordpl": "trawić, obmyślić, streścić, pojąć, porządkować, klasyfikować, streszczenie"
+      "wordpl": "trawić, obmyślić, streścić, pojąć, porządkować, klasyfikować, streszczenie, trawienie"
     },
     {
       "id": 4345,
@@ -25579,7 +25259,7 @@
     {
       "id": 4348,
       "word": "sympathetic",
-      "wordpl": "współczujący, okazujący współczucie"
+      "wordpl": "współczujący, okazujący współczucie, sympatyczny"
     },
     {
       "id": 4349,
@@ -25602,11 +25282,6 @@
       "wordpl": "impuls"
     },
     {
-      "id": 4361,
-      "word": "altitude",
-      "wordpl": "wysokość nad poziomem morza"
-    },
-    {
       "id": 4364,
       "word": "radar",
       "wordpl": "radar"
@@ -25619,7 +25294,7 @@
     {
       "id": 4371,
       "word": "providers",
-      "wordpl": "dostawca, usługodawca"
+      "wordpl": "dostawca, usługodawca, dostawcy"
     },
     {
       "id": 4377,
@@ -25639,7 +25314,7 @@
     {
       "id": 4384,
       "word": "keen",
-      "wordpl": "zapalony, przenikliwy, bystry, chętny"
+      "wordpl": "zapalony, przenikliwy, bystry, chętny, zapalczy"
     },
     {
       "id": 4387,
@@ -25649,7 +25324,7 @@
     {
       "id": 4393,
       "word": "swift",
-      "wordpl": "jerzyk, nagły, prędki"
+      "wordpl": "jerzyk, nagły, prędki, szybki"
     },
     {
       "id": 4396,
@@ -25699,17 +25374,12 @@
     {
       "id": 4424,
       "word": "toll",
-      "wordpl": "dzwonić, uderzać w dzwon, wybijać, dźwięk, strata (ofiary), nieszczęście, opłata (za usługę)"
+      "wordpl": "dzwonić, uderzać w dzwon, wybijać, dźwięk, strata, nieszczęście, opłata"
     },
     {
       "id": 4425,
       "word": "dominion",
       "wordpl": "panowanie, zwierzchnictwo, dominium"
-    },
-    {
-      "id": 4426,
-      "word": "vitro",
-      "wordpl": "w szkle"
     },
     {
       "id": 4427,
@@ -25734,7 +25404,7 @@
     {
       "id": 4434,
       "word": "unanimous",
-      "wordpl": "jednomyślny"
+      "wordpl": "jednomyślny, jednogłośny"
     },
     {
       "id": 4435,
@@ -25759,17 +25429,12 @@
     {
       "id": 4444,
       "word": "bass",
-      "wordpl": "bas, gitara basowa, bass (ryba), basowy"
+      "wordpl": "bas, gitara basowa, basowy"
     },
     {
       "id": 4448,
       "word": "peer",
       "wordpl": "przypatrywać się, przyglądać się, wpatrywać się, rówieśnik, szlachcic, par, członek Izby Lordów, kumpel"
-    },
-    {
-      "id": 4449,
-      "word": "pat",
-      "wordpl": "poklepać, klepnięcie, trafny"
     },
     {
       "id": 4450,
@@ -25819,7 +25484,7 @@
     {
       "id": 4466,
       "word": "grasp",
-      "wordpl": "chwyt, chwytanie, pojmowanie, rozumienie"
+      "wordpl": "chwyt, chwytanie, pojmowanie, rozumienie, uchwyt"
     },
     {
       "id": 4468,
@@ -25854,7 +25519,7 @@
     {
       "id": 4478,
       "word": "sue",
-      "wordpl": "pozywać, skarżyć (do sądu), prosić o rękę"
+      "wordpl": "pozywać, skarżyć, prosić o rękę, pozwanie"
     },
     {
       "id": 4480,
@@ -25904,7 +25569,7 @@
     {
       "id": 4498,
       "word": "split",
-      "wordpl": "dzielić, rozszczepiać, pęknięcie, rozerwać, pęknięty, popękany"
+      "wordpl": "dzielić, rozszczepiać, pęknięcie, rozerwać, pęknięty, popękany, podział"
     },
     {
       "id": 4499,
@@ -25919,7 +25584,7 @@
     {
       "id": 4503,
       "word": "ascertain",
-      "wordpl": "stwierdzać, upewniać się"
+      "wordpl": "stwierdzać, upewniać się, ustalić"
     },
     {
       "id": 4504,
@@ -25939,7 +25604,7 @@
     {
       "id": 4511,
       "word": "severity",
-      "wordpl": "dotkliwość, surowość"
+      "wordpl": "dotkliwość, surowość, nasilenie"
     },
     {
       "id": 4512,
@@ -25954,7 +25619,7 @@
     {
       "id": 4516,
       "word": "clerical",
-      "wordpl": "biurowy, urzędowy, klerykalny"
+      "wordpl": "biurowy, urzędowy, klerykalny, kanclerski"
     },
     {
       "id": 4520,
@@ -26024,7 +25689,7 @@
     {
       "id": 4541,
       "word": "swept",
-      "wordpl": "zamiatać"
+      "wordpl": "zamiatać, zmieciony"
     },
     {
       "id": 4545,
@@ -26094,7 +25759,7 @@
     {
       "id": 4569,
       "word": "sentiment",
-      "wordpl": "uczucie, sentyment, odczucie"
+      "wordpl": "uczucie, sentyment, odczucie, nastroj"
     },
     {
       "id": 4570,
@@ -26105,11 +25770,6 @@
       "id": 4573,
       "word": "decomposition",
       "wordpl": "rozpad, rozkład, dekompozycja"
-    },
-    {
-      "id": 4575,
-      "word": "acreage",
-      "wordpl": "areał"
     },
     {
       "id": 4577,
@@ -26169,7 +25829,7 @@
     {
       "id": 4592,
       "word": "franchise",
-      "wordpl": "franszyza, koncesja, prawo wyborcze, udzielać"
+      "wordpl": "franszyza, franczyza, koncesja, prawo wyborcze, udzielać"
     },
     {
       "id": 4594,
@@ -26204,7 +25864,7 @@
     {
       "id": 4605,
       "word": "alert",
-      "wordpl": "czujny, zapobiegliwy, uważny, ostrzeżenie, alarmować, ostrzegać"
+      "wordpl": "czujny, zapobiegliwy, uważny, ostrzeżenie, alarmować, ostrzegać,alert"
     },
     {
       "id": 4606,
@@ -26214,7 +25874,7 @@
     {
       "id": 4607,
       "word": "transient",
-      "wordpl": "przemijający, nietrwały"
+      "wordpl": "przemijający, nietrwały, przejściowy"
     },
     {
       "id": 4609,
@@ -26264,12 +25924,12 @@
     {
       "id": 4625,
       "word": "descent",
-      "wordpl": "pochodzenie, spadek, schodzenie, opadanie, pochyłość"
+      "wordpl": "pochodzenie, spadek, schodzenie, opadanie, pochyłość, zejście"
     },
     {
       "id": 4627,
       "word": "amino",
-      "wordpl": "aminowy, grupa aminowa"
+      "wordpl": "aminowy, grupa aminowa, aminokwas"
     },
     {
       "id": 4628,
@@ -26279,7 +25939,7 @@
     {
       "id": 4629,
       "word": "doubtless",
-      "wordpl": "niewątpliwie, niewątpliwy"
+      "wordpl": "niewątpliwie, niewątpliwy, bez wątpienia"
     },
     {
       "id": 4630,
@@ -26314,7 +25974,7 @@
     {
       "id": 4638,
       "word": "probation",
-      "wordpl": "staż, okres próbny, kuratela nad przestępcą, probacja"
+      "wordpl": "staż, okres próbny, kuratela nad przestępcą, probacja, okres próby"
     },
     {
       "id": 4639,
@@ -26354,17 +26014,12 @@
     {
       "id": 4648,
       "word": "stern",
-      "wordpl": "surowy, srogi, rufa"
-    },
-    {
-      "id": 4654,
-      "word": "apt",
-      "wordpl": "trafny, stosowny, skłonny, zdolny, uzdolniony"
+      "wordpl": "surowy, srogi, rufa, rygorystyczny"
     },
     {
       "id": 4655,
       "word": "citation",
-      "wordpl": "cytat, cytowanie, wezwanie (sądowe), pochwała"
+      "wordpl": "cytat, cytowanie, wezwanie, pochwała"
     },
     {
       "id": 4656,
@@ -26409,7 +26064,7 @@
     {
       "id": 4675,
       "word": "retreat",
-      "wordpl": "wycofywać się, odwrót, ustronie"
+      "wordpl": "wycofywać się, odwrót, ustronie, odpoczynek"
     },
     {
       "id": 4677,
@@ -26452,19 +26107,9 @@
       "wordpl": "obejmować, zawierać, inkluzywny, ogólny, całościowy, globalny, łączny, włącznie z"
     },
     {
-      "id": 4695,
-      "word": "diesel",
-      "wordpl": "silnik wysokoprężny"
-    },
-    {
       "id": 4696,
       "word": "devised",
-      "wordpl": "opracować, wymyślić"
-    },
-    {
-      "id": 4699,
-      "word": "gamma",
-      "wordpl": "gamma"
+      "wordpl": "opracować, wymyślić, opracowany"
     },
     {
       "id": 4700,
@@ -26475,16 +26120,6 @@
       "id": 4701,
       "word": "dorsal",
       "wordpl": "grzbietowy"
-    },
-    {
-      "id": 4702,
-      "word": "dir",
-      "wordpl": "katalog"
-    },
-    {
-      "id": 4703,
-      "word": "perry",
-      "wordpl": "cydr gruszkowy, gruszecznik"
     },
     {
       "id": 4705,
@@ -26509,22 +26144,12 @@
     {
       "id": 4716,
       "word": "magistrate",
-      "wordpl": "sędzia pokoju, magistrat"
-    },
-    {
-      "id": 4720,
-      "word": "rna",
-      "wordpl": "kwas rybonukleinowy (RNA)"
+      "wordpl": "sędzia ,sędzia pokoju, magistrat"
     },
     {
       "id": 4721,
       "word": "biblical",
       "wordpl": "biblijny"
-    },
-    {
-      "id": 4722,
-      "word": "ment",
-      "wordpl": "–ment (przyrostek rzeczotwórczy)"
     },
     {
       "id": 4724,
@@ -26539,7 +26164,7 @@
     {
       "id": 4729,
       "word": "suppression",
-      "wordpl": "ograniczenie, zakazanie, zduszenie, stłumienie, zatajenie"
+      "wordpl": "ograniczenie, zakazanie, zduszenie, stłumienie, zatajenie, sędzia"
     },
     {
       "id": 4734,
@@ -26584,7 +26209,7 @@
     {
       "id": 4749,
       "word": "unchanged",
-      "wordpl": "niezmieniony"
+      "wordpl": "niezmieniony, bez zmian"
     },
     {
       "id": 4752,
@@ -26594,7 +26219,7 @@
     {
       "id": 4756,
       "word": "resigned",
-      "wordpl": "zrezygnowany"
+      "wordpl": "zrezygnowany, zrezygnował"
     },
     {
       "id": 4757,
@@ -26624,7 +26249,7 @@
     {
       "id": 4763,
       "word": "invalid",
-      "wordpl": "niepoprawny, błędny, niewłaściwy, inwalidzki, inwalida, zwolnić ze służby ze względu na stan zdrowia"
+      "wordpl": "niepoprawny, nieważny, błędny, niewłaściwy, inwalidzki, inwalida, zwolnić ze służby ze względu na stan zdrowia"
     },
     {
       "id": 4764,
@@ -26652,16 +26277,6 @@
       "wordpl": "trójkąt"
     },
     {
-      "id": 4771,
-      "word": "nato",
-      "wordpl": "NATO, Pakt Północnoatlantycki"
-    },
-    {
-      "id": 4773,
-      "word": "ba",
-      "wordpl": "ba, nawet, a nawet"
-    },
-    {
       "id": 4774,
       "word": "aqueous",
       "wordpl": "wodny, wodnisty"
@@ -26669,7 +26284,7 @@
     {
       "id": 4775,
       "word": "brooks",
-      "wordpl": "strumyk, potok"
+      "wordpl": "strumyk, potok, strumyki"
     },
     {
       "id": 4776,
@@ -26714,17 +26329,12 @@
     {
       "id": 4793,
       "word": "hardy",
-      "wordpl": "wytrwały, wytrzymały, odporny (zwłaszcza na zimno), odważny, mężny"
-    },
-    {
-      "id": 4794,
-      "word": "dis",
-      "wordpl": "obrażać, zniewaga"
+      "wordpl": "wytrwały, wytrzymały, odporny, odważny, mężny"
     },
     {
       "id": 4795,
       "word": "hereafter",
-      "wordpl": "odtąd, od tej pory, w przyszłości"
+      "wordpl": "odtąd, od tej pory, w przyszłości, w dalszej części"
     },
     {
       "id": 4796,
@@ -26759,7 +26369,7 @@
     {
       "id": 4805,
       "word": "embrace",
-      "wordpl": "uścisk, obejmować, przyjmować"
+      "wordpl": "uścisk, obejmować, przyjmować, objąć"
     },
     {
       "id": 4807,
@@ -26775,11 +26385,6 @@
       "id": 4809,
       "word": "slender",
       "wordpl": "szczupły, smukły, zgrabny, strzelisty, drobny, wąski, niewielki"
-    },
-    {
-      "id": 4810,
-      "word": "affidavit",
-      "wordpl": "pisemne oświadczenie pod przysięgą, zeznanie pod przysięgą"
     },
     {
       "id": 4814,
@@ -26832,11 +26437,6 @@
       "wordpl": "islamski, muzułmański"
     },
     {
-      "id": 4835,
-      "word": "ego",
-      "wordpl": "ego, jaźń, próżność"
-    },
-    {
       "id": 4836,
       "word": "idle",
       "wordpl": "bezczynny, leniwy, bezużyteczny, nieważny, próżny"
@@ -26859,7 +26459,7 @@
     {
       "id": 4844,
       "word": "confronted",
-      "wordpl": "skonfrontowany, postawiony w obliczu, konfrontować, stawiać w obliczu"
+      "wordpl": "skonfrontowany, postawiony w obliczu, konfrontować, stawiać w obliczu, konfrontowany"
     },
     {
       "id": 4845,
@@ -26894,7 +26494,7 @@
     {
       "id": 4857,
       "word": "marsh",
-      "wordpl": "bagno, moczar"
+      "wordpl": "bagno, moczar, bagnisko"
     },
     {
       "id": 4859,
@@ -26904,7 +26504,7 @@
     {
       "id": 4860,
       "word": "substantive",
-      "wordpl": "konkretny, rzeczywisty, faktyczny, merytoryczny, rzeczownikowy"
+      "wordpl": "konkretny, rzeczowy, rzeczywisty, faktyczny, merytoryczny, rzeczownikowy"
     },
     {
       "id": 4862,
@@ -26959,7 +26559,7 @@
     {
       "id": 4875,
       "word": "hindu",
-      "wordpl": "hinduski, hindus"
+      "wordpl": "hinduski, hindus,hinduista"
     },
     {
       "id": 4876,
@@ -26974,7 +26574,7 @@
     {
       "id": 4878,
       "word": "honourable",
-      "wordpl": "zaszczytny, honorowy, uczciwy, czcigodny"
+      "wordpl": "zaszczytny, honorowy, uczciwy, czcigodny, szanowany"
     },
     {
       "id": 4882,
@@ -26984,7 +26584,7 @@
     {
       "id": 4883,
       "word": "hood",
-      "wordpl": "kaptur, osłona, daszek przeciwsłoneczny, maska (silnika)"
+      "wordpl": "kaptur, osłona, daszek przeciwsłoneczny, maska"
     },
     {
       "id": 4884,
@@ -27007,11 +26607,6 @@
       "wordpl": "azotan"
     },
     {
-      "id": 4894,
-      "word": "gang",
-      "wordpl": "gang, banda, brygada, paczka"
-    },
-    {
       "id": 4896,
       "word": "exposition",
       "wordpl": "ekspozycja, wystawa"
@@ -27032,16 +26627,6 @@
       "wordpl": "oczywisty, rzucający się w oczy, widoczny, wyraźny"
     },
     {
-      "id": 4904,
-      "word": "oecd",
-      "wordpl": "OECD, Organizacja Współpracy Gospodarczej i Rozwoju"
-    },
-    {
-      "id": 4905,
-      "word": "assn",
-      "wordpl": "stowarzyszenie, zrzeszenie"
-    },
-    {
       "id": 4906,
       "word": "madame",
       "wordpl": "pani, szanowna pani"
@@ -27049,7 +26634,7 @@
     {
       "id": 4907,
       "word": "stack",
-      "wordpl": "stos, sterta, stóg, komin (przemysłowy), wieża (stos), układać w stos, układać, ustawiać jeden na drugim"
+      "wordpl": "stos, sterta, stóg, komin, wieża, układać w stos, układać, ustawiać jeden na drugim"
     },
     {
       "id": 4908,
@@ -27062,14 +26647,9 @@
       "wordpl": "baran, taran, bijak, suwak, walić, taranować"
     },
     {
-      "id": 4910,
-      "word": "issn",
-      "wordpl": "ISSN, Międzynarodowy Znormalizowany Numer Wydawnictwa Ciągłego"
-    },
-    {
       "id": 4914,
       "word": "gauge",
-      "wordpl": "wskaźnik, miernik, kaliber, rozstaw toru, -mierz, mierzyć, oceniać, ustalać, kalibrować"
+      "wordpl": "wskaźnik, miernik, kaliber, rozstaw toru, mierz, mierzyć, oceniać, ustalać, kalibrować"
     },
     {
       "id": 4915,
@@ -27082,16 +26662,6 @@
       "wordpl": "poszukiwanie, wyprawa, zadanie, poszukiwać"
     },
     {
-      "id": 4917,
-      "word": "fcc",
-      "wordpl": "FCC, Federalna Komisja ds. Komunikacji"
-    },
-    {
-      "id": 4919,
-      "word": "docket",
-      "wordpl": "kwit, paragon, wykaz, manifest, wykaz spraw (w sądzie), wokanda, lista przewozowa"
-    },
-    {
       "id": 4926,
       "word": "instantly",
       "wordpl": "natychmiast, bezzwłocznie, natychmiastowo, momentalnie"
@@ -27099,17 +26669,12 @@
     {
       "id": 4928,
       "word": "excitation",
-      "wordpl": "ekscytacja, pobudzenie, wzbudzenie"
-    },
-    {
-      "id": 4931,
-      "word": "quasi",
-      "wordpl": "niby, rzekomy, quasi"
+      "wordpl": "ekscytacja, pobudzenie, wzbudzenie, podniecenie"
     },
     {
       "id": 4933,
       "word": "pastor",
-      "wordpl": "pastor, duszpasterz, proboszcz, pasterz (dosł.)"
+      "wordpl": "pastor, duszpasterz, proboszcz, pasterz"
     },
     {
       "id": 4934,
@@ -27157,11 +26722,6 @@
       "wordpl": "stolarz"
     },
     {
-      "id": 4951,
-      "word": "cortex",
-      "wordpl": "kora"
-    },
-    {
       "id": 4952,
       "word": "fulfilled",
       "wordpl": "spełniony, zaspokojony, zrealizowany"
@@ -27169,7 +26729,7 @@
     {
       "id": 4953,
       "word": "prescribe",
-      "wordpl": "przepisywać, ordynować, zarządzać, nakazywać"
+      "wordpl": "przepisywać, ordynować, zarządzać, nakazywać, przepisać"
     },
     {
       "id": 4954,
@@ -27179,7 +26739,7 @@
     {
       "id": 4955,
       "word": "displaced",
-      "wordpl": "wysiedlony, przesunięty, wyparty"
+      "wordpl": "wysiedlony, przesunięty, wyparty, przesiedlony"
     },
     {
       "id": 4956,
@@ -27197,14 +26757,9 @@
       "wordpl": "całkowicie, kompletnie, zupełnie"
     },
     {
-      "id": 4959,
-      "word": "mac",
-      "wordpl": "Mac (komputer), komputer Mac, peleryna przeciwdeszczowa, płaszcz przeciwdeszczowy"
-    },
-    {
       "id": 4960,
       "word": "patch",
-      "wordpl": "łata, naszywka, plaster, łatka (software), poprawka, skrawek ziemi, łatać, naprawiać"
+      "wordpl": "łata, naszywka, plaster, łatka, poprawka, skrawek ziemi, łatać, naprawiać"
     },
     {
       "id": 4963,
@@ -27217,11 +26772,6 @@
       "wordpl": "eter"
     },
     {
-      "id": 4966,
-      "word": "billy",
-      "wordpl": "pałka policyjna, kij policyjny, kozioł, menażka"
-    },
-    {
       "id": 4969,
       "word": "brigade",
       "wordpl": "brygada"
@@ -27229,7 +26779,7 @@
     {
       "id": 4970,
       "word": "damn",
-      "wordpl": "cholera!, do cholery!, cholerny, przeklęty, cholernie, niech szlag trafi, niech diabli wezmą, przeklinać, potępiać, skazywać na piekło"
+      "wordpl": "cholera, cholerny, przeklęty, cholernie, niech szlag trafi, niech diabli wezmą, przeklinać, potępiać, skazywać na piekło"
     },
     {
       "id": 4971,
@@ -27279,7 +26829,7 @@
     {
       "id": 4992,
       "word": "resumed",
-      "wordpl": "wznawiać, wznowić"
+      "wordpl": "wznawiać, wznowić, wznowiony"
     },
     {
       "id": 4995,
@@ -27319,7 +26869,7 @@
     {
       "id": 5004,
       "word": "medication",
-      "wordpl": "kuracja, leczenie, lek"
+      "wordpl": "kuracja, leczenie, lek, leki"
     },
     {
       "id": 5005,
@@ -27334,7 +26884,7 @@
     {
       "id": 5008,
       "word": "originated",
-      "wordpl": "wywodzić się, pochodzić, zapoczątkować"
+      "wordpl": "wywodzić się, pochodzić, zapoczątkować, powstał"
     },
     {
       "id": 5009,
@@ -27354,17 +26904,17 @@
     {
       "id": 5012,
       "word": "traders",
-      "wordpl": "handlarz, handlarze, kupiec, kupcy, trader, traderzy"
+      "wordpl": "handlarz, handlarze, kupiec, kupcy, trader, traderzy, handlowcy"
     },
     {
       "id": 5013,
       "word": "trinity",
-      "wordpl": "troistość, Trójca (Święta), trójka"
+      "wordpl": "troistość, trójca, trójka"
     },
     {
       "id": 5017,
       "word": "dissertation",
-      "wordpl": "dysertacja, praca dyplomowa"
+      "wordpl": "dysertacja, praca dyplomowa, praca doktorska"
     },
     {
       "id": 5019,
@@ -27389,7 +26939,7 @@
     {
       "id": 5025,
       "word": "posed",
-      "wordpl": "pozować, zadawać (pytanie), stawiać, przedstawiać"
+      "wordpl": "pozować, zadawać, stawiać, przedstawiać, pozowany"
     },
     {
       "id": 5026,
@@ -27454,7 +27004,7 @@
     {
       "id": 5049,
       "word": "offenders",
-      "wordpl": "przestępca, sprawca, wykroczeniowiec"
+      "wordpl": "przestępca, sprawca, wykroczeniowiec, przestępcy"
     },
     {
       "id": 5051,
@@ -27499,7 +27049,7 @@
     {
       "id": 5065,
       "word": "undergraduate",
-      "wordpl": "student, studentka"
+      "wordpl": "student, studentka, student studiów licencjackich"
     },
     {
       "id": 5066,
@@ -27514,7 +27064,7 @@
     {
       "id": 5069,
       "word": "polar",
-      "wordpl": "polarny, podbiegunowy, biegunowy"
+      "wordpl": "polarny, podbiegunowy, biegunowy, polar"
     },
     {
       "id": 5072,
@@ -27554,7 +27104,7 @@
     {
       "id": 5082,
       "word": "advisable",
-      "wordpl": "wskazany, słuszny, celowy"
+      "wordpl": "wskazany, słuszny, celowy, wskazane"
     },
     {
       "id": 5083,
@@ -27644,7 +27194,7 @@
     {
       "id": 5122,
       "word": "confidential",
-      "wordpl": "poufny, zaufany"
+      "wordpl": "poufny, zaufany, poufne"
     },
     {
       "id": 5124,
@@ -27654,7 +27204,7 @@
     {
       "id": 5125,
       "word": "ass",
-      "wordpl": "dupa, osioł"
+      "wordpl": "tyłek, dupa, osioł"
     },
     {
       "id": 5126,
@@ -27664,7 +27214,7 @@
     {
       "id": 5128,
       "word": "preventive",
-      "wordpl": "zapobiegawczy, prewencyjny"
+      "wordpl": "zapobiegawczy, prewencyjny, profilaktyczny"
     },
     {
       "id": 5130,
@@ -27702,11 +27252,6 @@
       "wordpl": "morfologia"
     },
     {
-      "id": 5145,
-      "word": "chip",
-      "wordpl": "czips, frytka, układ scalony, odłamek, odprysk"
-    },
-    {
       "id": 5146,
       "word": "ceramic",
       "wordpl": "ceramika, ceramiczny"
@@ -27720,11 +27265,6 @@
       "id": 5151,
       "word": "subordinate",
       "wordpl": "podwładny, podrzędny, podporządkować"
-    },
-    {
-      "id": 5152,
-      "word": "bc",
-      "wordpl": "p.n.e."
     },
     {
       "id": 5153,
@@ -27764,7 +27304,7 @@
     {
       "id": 5161,
       "word": "disciples",
-      "wordpl": "uczeń, naśladowca, apostołowie"
+      "wordpl": "uczeń, naśladowca, apostołowie, uczniowie"
     },
     {
       "id": 5164,
@@ -27819,12 +27359,7 @@
     {
       "id": 5184,
       "word": "fled",
-      "wordpl": "uciec, uciekać"
-    },
-    {
-      "id": 5185,
-      "word": "sierra",
-      "wordpl": "pasmo górskie, górzysty teren"
+      "wordpl": "uciec, uciekać, uciekł"
     },
     {
       "id": 5186,
@@ -27844,12 +27379,12 @@
     {
       "id": 5192,
       "word": "clergy",
-      "wordpl": "kler"
+      "wordpl": "duchowieństwo ,kler"
     },
     {
       "id": 5193,
       "word": "convergence",
-      "wordpl": "zbieżność"
+      "wordpl": "zbieżność, konwergencja"
     },
     {
       "id": 5196,
@@ -27879,7 +27414,7 @@
     {
       "id": 5207,
       "word": "distal",
-      "wordpl": "dystalny"
+      "wordpl": "dalszy, dystalny"
     },
     {
       "id": 5208,
@@ -27889,7 +27424,7 @@
     {
       "id": 5211,
       "word": "radial",
-      "wordpl": "radialny"
+      "wordpl": "radialny, promieniowy"
     },
     {
       "id": 5212,
@@ -27944,7 +27479,7 @@
     {
       "id": 5227,
       "word": "neural",
-      "wordpl": "neuronowy"
+      "wordpl": "neuronowy, neuronalny"
     },
     {
       "id": 5229,
@@ -27982,11 +27517,6 @@
       "wordpl": "prestiż, renoma"
     },
     {
-      "id": 5243,
-      "word": "acad",
-      "wordpl": "akad., akademicki, akademia"
-    },
-    {
       "id": 5248,
       "word": "piston",
       "wordpl": "tłok"
@@ -28017,19 +27547,9 @@
       "wordpl": "posłaniec, wysłannik, kurier, komunikator, serwis"
     },
     {
-      "id": 5258,
-      "word": "lo",
-      "wordpl": "oto, patrzeć"
-    },
-    {
       "id": 5259,
       "word": "speculation",
       "wordpl": "spekulacja, domysł, rozważanie"
-    },
-    {
-      "id": 5260,
-      "word": "proliferation",
-      "wordpl": "proliferacja"
     },
     {
       "id": 5261,
@@ -28099,12 +27619,7 @@
     {
       "id": 5289,
       "word": "gage",
-      "wordpl": "wskaźnik, miernik, -mierz, mierzyć, oceniać, szacować"
-    },
-    {
-      "id": 5290,
-      "word": "eec",
-      "wordpl": "EEC, Europejska Wspólnota Gospodarcza"
+      "wordpl": "wskaźnik, miernik, mierz, mierzyć, oceniać, szacować"
     },
     {
       "id": 5291,
@@ -28154,17 +27669,12 @@
     {
       "id": 5308,
       "word": "identifies",
-      "wordpl": "identyfikować, rozpoznawać"
+      "wordpl": "identyfikować, rozpoznawać, identyfikuje"
     },
     {
       "id": 5314,
       "word": "finely",
-      "wordpl": "drobno, delikatnie, finezyjnie"
-    },
-    {
-      "id": 5316,
-      "word": "nonprofit",
-      "wordpl": "non-profit, niedochodowy, charytatywny"
+      "wordpl": "drobno, delikatnie, finezyjnie, dokładnie"
     },
     {
       "id": 5317,
@@ -28174,7 +27684,7 @@
     {
       "id": 5320,
       "word": "overlap",
-      "wordpl": "pokrywać się, nakładać się, zachodzić na siebie, nakładanie, zachodzenie, część wspólna"
+      "wordpl": "pokrywać się, nakładać się, zachodzić na siebie, nakładanie, zachodzenie, część wspólna, nakładanie się"
     },
     {
       "id": 5321,
@@ -28194,7 +27704,7 @@
     {
       "id": 5326,
       "word": "contended",
-      "wordpl": "rywalizować (o coś), toczyć spór, twierdzić, utrzymywać"
+      "wordpl": "rywalizować, toczyć spór, twierdzić, utrzymywać, spierający się"
     },
     {
       "id": 5328,
@@ -28202,29 +27712,14 @@
       "wordpl": "klarowność, jasność, przejrzystość"
     },
     {
-      "id": 5329,
-      "word": "assay",
-      "wordpl": "próba, analiza, badanie, analizować, testować"
-    },
-    {
       "id": 5332,
       "word": "introductory",
-      "wordpl": "wstępny"
-    },
-    {
-      "id": 5334,
-      "word": "jul",
-      "wordpl": "lipiec, lip."
+      "wordpl": "wstępny, wprowadzający"
     },
     {
       "id": 5336,
       "word": "coherent",
       "wordpl": "spójny, logiczny, zrozumiały, czytelny"
-    },
-    {
-      "id": 5338,
-      "word": "ho",
-      "wordpl": "ho!, hej, ho (wołanie)"
     },
     {
       "id": 5339,
@@ -28234,7 +27729,7 @@
     {
       "id": 5340,
       "word": "outbreak",
-      "wordpl": "wybuch, ognisko (epidemii)"
+      "wordpl": "wybuch, ognisko"
     },
     {
       "id": 5341,
@@ -28250,11 +27745,6 @@
       "id": 5343,
       "word": "aluminium",
       "wordpl": "aluminium, glin"
-    },
-    {
-      "id": 5349,
-      "word": "oh",
-      "wordpl": "och!, o!"
     },
     {
       "id": 5350,
@@ -28294,7 +27784,7 @@
     {
       "id": 5360,
       "word": "microwave",
-      "wordpl": "mikrofalówka, mikrofalować, podgrzewać w mikrofali"
+      "wordpl": "mikrofalówka, mikrofalować, podgrzewać w mikrofali, kuchenka mikrofalowa"
     },
     {
       "id": 5361,
@@ -28334,7 +27824,7 @@
     {
       "id": 5374,
       "word": "welsh",
-      "wordpl": "walijski, Walijczyk, wywinąć się od płacenia (pot.)"
+      "wordpl": "walijski, Walijczyk, wywinąć się od płacenia"
     },
     {
       "id": 5375,
@@ -28359,7 +27849,7 @@
     {
       "id": 5381,
       "word": "exclaimed",
-      "wordpl": "wykrzyknąć, zawołać, wykrzyczeć"
+      "wordpl": "wykrzyknąć, zawołać, wykrzyczeć, wykrzyknął"
     },
     {
       "id": 5382,
@@ -28369,7 +27859,7 @@
     {
       "id": 5384,
       "word": "adolescents",
-      "wordpl": "nastolatek, nastolatka, nastolatkowie"
+      "wordpl": "nastolatek, nastolatka, nastolatkowie, nastolatki"
     },
     {
       "id": 5387,
@@ -28439,12 +27929,7 @@
     {
       "id": 5409,
       "word": "trademark",
-      "wordpl": "znak towarowy, znak handlowy, marka, firmowy, rejestrować (jako znak towarowy)"
-    },
-    {
-      "id": 5412,
-      "word": "ce",
-      "wordpl": "naszej ery, n.e."
+      "wordpl": "znak towarowy, znak handlowy, marka, firmowy, rejestrować"
     },
     {
       "id": 5414,
@@ -28459,7 +27944,7 @@
     {
       "id": 5416,
       "word": "facial",
-      "wordpl": "twarzowy"
+      "wordpl": "twarzowy, kosmetyka twarzy"
     },
     {
       "id": 5418,
@@ -28484,7 +27969,7 @@
     {
       "id": 5425,
       "word": "arbor",
-      "wordpl": "pergola, trzpień, oś"
+      "wordpl": "altana, pergola, trzpień, oś"
     },
     {
       "id": 5426,
@@ -28559,7 +28044,7 @@
     {
       "id": 5451,
       "word": "axes",
-      "wordpl": "oś, osie, topór, topory"
+      "wordpl": "siekiery, osie, topór, topory"
     },
     {
       "id": 5452,
@@ -28584,12 +28069,12 @@
     {
       "id": 5462,
       "word": "applicability",
-      "wordpl": "odpowiedniość, stosowność"
+      "wordpl": "odpowiedniość, stosowność, możliwość zastosowania"
     },
     {
       "id": 5463,
       "word": "robust",
-      "wordpl": "odporny, krzepki"
+      "wordpl": "odporny, krzepki, solidny"
     },
     {
       "id": 5465,
@@ -28669,17 +28154,17 @@
     {
       "id": 5493,
       "word": "pledge",
-      "wordpl": "obiecać, złożyć zastaw, obietnica, zastaw, depozyt, kaucja"
+      "wordpl": "obiecać, złożyć zastaw, obietnica, zastaw, depozyt, kaucja, zobowiązanie"
     },
     {
       "id": 5494,
       "word": "inspected",
-      "wordpl": "skontrolowany, zbadany, sprawdzony, kontrolować, badać, sprawdzać"
+      "wordpl": "skontrolowany, zbadany, sprawdzony, kontrolować, badać, sprawdzać, sprawdzone"
     },
     {
       "id": 5496,
       "word": "shrugged",
-      "wordpl": "wzruszyć ramionami, wzruszać ramionami"
+      "wordpl": "wzruszać ,wzruszyć ramionami, wzruszać ramionami"
     },
     {
       "id": 5499,
@@ -28687,14 +28172,9 @@
       "wordpl": "powszechny, rozpowszechniony, dominujący"
     },
     {
-      "id": 5500,
-      "word": "io",
-      "wordpl": "wejście/wyjście (I/O)"
-    },
-    {
       "id": 5503,
       "word": "bachelor",
-      "wordpl": "kawaler, licencjat, bakałarz (archaicznie), nieżonaty mężczyzna, kawalerka, kawalerski"
+      "wordpl": "kawaler, licencjat, bakałarz, nieżonaty mężczyzna, kawalerka, kawalerski"
     },
     {
       "id": 5504,
@@ -28709,12 +28189,7 @@
     {
       "id": 5508,
       "word": "uncommon",
-      "wordpl": "rzadki, niepospolity, nietypowy"
-    },
-    {
-      "id": 5509,
-      "word": "charleston",
-      "wordpl": "charleston (taniec)"
+      "wordpl": "rzadki, niepospolity, nietypowy, niecodzienny"
     },
     {
       "id": 5510,
@@ -28729,12 +28204,7 @@
     {
       "id": 5513,
       "word": "tensile",
-      "wordpl": "rozciągliwy, rozciągalny, ciągliwy"
-    },
-    {
-      "id": 5514,
-      "word": "db",
-      "wordpl": "baza danych, decybel (dB)"
+      "wordpl": "rozciągliwy, rozciągalny, ciągliwy, rozciągliwość"
     },
     {
       "id": 5515,
@@ -28764,7 +28234,7 @@
     {
       "id": 5527,
       "word": "petty",
-      "wordpl": "małostkowy, drobny, nieistotny"
+      "wordpl": "małostkowy, drobny, nieistotny, drobiazgowy"
     },
     {
       "id": 5529,
@@ -28774,17 +28244,17 @@
     {
       "id": 5533,
       "word": "tangible",
-      "wordpl": "namacalny, dotykalny, konkretny, zrozumiały"
+      "wordpl": "namacalny, dotykalny, konkretny, zrozumiały, materialny"
     },
     {
       "id": 5534,
       "word": "cherry",
-      "wordpl": "wiśnia, czereśnia, kolor wiśniowy, dziewica (slang)"
+      "wordpl": "wiśnia, czereśnia, kolor wiśniowy, dziewica"
     },
     {
       "id": 5535,
       "word": "straightforward",
-      "wordpl": "bezpośredni, szczery, prostolinijny, łatwy, nieskomplikowany"
+      "wordpl": "prosty, bezpośredni, szczery, prostolinijny, łatwy, nieskomplikowany"
     },
     {
       "id": 5538,
@@ -28799,7 +28269,7 @@
     {
       "id": 5542,
       "word": "pleading",
-      "wordpl": "błaganie, apel, uzasadnienie (pismo procesowe), przemowa, oświadczenie (w sądzie)"
+      "wordpl": "błaganie, apel, uzasadnieni, przemowa, oświadczenie"
     },
     {
       "id": 5544,
@@ -28829,22 +28299,12 @@
     {
       "id": 5551,
       "word": "ammonium",
-      "wordpl": "jon amonowy, kation amonowy, amon"
-    },
-    {
-      "id": 5553,
-      "word": "ntis",
-      "wordpl": "Narodowa Służba Informacji Technicznej (NTIS)"
+      "wordpl": "amoniak, jon amonowy, kation amonowy, amon"
     },
     {
       "id": 5554,
       "word": "subsistence",
-      "wordpl": "utrzymanie, środki do życia, podtrzymywanie życia, egzystencja"
-    },
-    {
-      "id": 5556,
-      "word": "pg",
-      "wordpl": "strona (skrót)"
+      "wordpl": "utrzymanie, środki do życia, podtrzymywanie życia, egzystencja, środki utrzymania"
     },
     {
       "id": 5557,
@@ -28869,12 +28329,12 @@
     {
       "id": 5565,
       "word": "diversion",
-      "wordpl": "objazd, urozmaicenie, odwracanie uwagi, rozpraszanie"
+      "wordpl": "objazd, urozmaicenie, odwracanie uwagi, rozpraszanie, dywersja"
     },
     {
       "id": 5566,
       "word": "odds",
-      "wordpl": "szansa, prawdopodobieństwo, kurs (zakładów), przewaga, nierówność, różnica, resztki, sprzeczność (at odds)"
+      "wordpl": "szansa, prawdopodobieństwo, kurs, kursy,  przewaga, nierówność, różnica, resztki, sprzeczność"
     },
     {
       "id": 5569,
@@ -28884,17 +28344,7 @@
     {
       "id": 5570,
       "word": "intercourse",
-      "wordpl": "kontakt, stosunki (dyplomatyczne), rozmowa, konwersacja, stosunek płciowy"
-    },
-    {
-      "id": 5571,
-      "word": "tag",
-      "wordpl": "metka, etykietka, etykieta, tag (grafitti), tag (informatyka), berek (gra), puenta, oznaczać, etykietować, tagować, nadawać etykietę"
-    },
-    {
-      "id": 5572,
-      "word": "ip",
-      "wordpl": "protokołu internetowego (IP), adres IP"
+      "wordpl": "kontakt, stosunki, rozmowa, konwersacja, stosunek płciowy"
     },
     {
       "id": 5573,
@@ -28954,7 +28404,7 @@
     {
       "id": 5594,
       "word": "endeavor",
-      "wordpl": "starać się, dążyć, usiłować, usiłowanie, dążenie, staranie"
+      "wordpl": "starać się, dążyć, usiłować, usiłowanie, dążenie, staranie, wysiłek"
     },
     {
       "id": 5596,
@@ -29017,14 +28467,9 @@
       "wordpl": "wykładowca, wykładowczyni"
     },
     {
-      "id": 5620,
-      "word": "fm",
-      "wordpl": "modulacja częstotliwości, radio FM"
-    },
-    {
       "id": 5624,
       "word": "atlas",
-      "wordpl": "atlas (księga map), atlant (mitol.), dźwigacz, kręg szczytowy"
+      "wordpl": "atlas"
     },
     {
       "id": 5625,
@@ -29039,7 +28484,7 @@
     {
       "id": 5629,
       "word": "bolt",
-      "wordpl": "zasuwa, zapadka, śruba, piorun, grom, ucieczka, skok, przesiewać (mąkę przez sito), zaryglować, jeść łapczywie, rzucić się, odskoczyć"
+      "wordpl": "zasuwa, zapadka, śruba, piorun, grom, ucieczka, skok, przesiewać, zaryglować, jeść łapczywie, rzucić się, odskoczyć"
     },
     {
       "id": 5631,
@@ -29049,7 +28494,7 @@
     {
       "id": 5632,
       "word": "contends",
-      "wordpl": "twierdzić, utrzymywać, walczyć, rywalizować"
+      "wordpl": "twierdzić, utrzymywać, walczyć, rywalizować, twierdzi"
     },
     {
       "id": 5633,
@@ -29117,11 +28562,6 @@
       "wordpl": "aby nie, ażeby nie, żeby nie, na wypadek gdyby"
     },
     {
-      "id": 5654,
-      "word": "ti",
-      "wordpl": "tytan (symbol chemiczny Ti), ti (nuta), kordylina (roślina)"
-    },
-    {
       "id": 5656,
       "word": "sludge",
       "wordpl": "szlam, muł, osad"
@@ -29169,7 +28609,7 @@
     {
       "id": 5672,
       "word": "endowment",
-      "wordpl": "dotacja, darowizna"
+      "wordpl": "dotacja, darowizna, fundusz"
     },
     {
       "id": 5673,
@@ -29194,17 +28634,17 @@
     {
       "id": 5679,
       "word": "punch",
-      "wordpl": "uderzać, bić, dać pięścią, pięść, uderzenie, poncz, dziurkować, dziurkacz, kasować, kasownik, przebijać, przebijak, poganiać"
+      "wordpl": "uderzać, cios, bić, dać pięścią, pięść, uderzenie, poncz, dziurkować, dziurkacz, kasować, kasownik, przebijać, przebijak, poganiać"
     },
     {
       "id": 5682,
       "word": "inasmuch",
-      "wordpl": "ponieważ, jako że, o tyle, o ile"
+      "wordpl": "ponieważ, jako że, o tyle, o ile, w takim stopniu, w jakim"
     },
     {
       "id": 5683,
       "word": "fierce",
-      "wordpl": "wściekły, srogi, gwałtowny"
+      "wordpl": "wściekły, srogi, gwałtowny, zaciekły"
     },
     {
       "id": 5684,
@@ -29215,11 +28655,6 @@
       "id": 5685,
       "word": "aeronautics",
       "wordpl": "aeronautyka"
-    },
-    {
-      "id": 5686,
-      "word": "ppm",
-      "wordpl": "część na milion, części na milion (ppm)"
     },
     {
       "id": 5690,
@@ -29244,7 +28679,7 @@
     {
       "id": 5697,
       "word": "endorsed",
-      "wordpl": "zatwierdzony, poparty, podpisany (czek)"
+      "wordpl": "zatwierdzony, poparty, podpisany"
     },
     {
       "id": 5699,
@@ -29262,11 +28697,6 @@
       "wordpl": "kukurydza"
     },
     {
-      "id": 5702,
-      "word": "jimmy",
-      "wordpl": "łom, wytrych, wyważać, wyważyć (drzwi)"
-    },
-    {
       "id": 5703,
       "word": "condemnation",
       "wordpl": "potępienie, skazanie"
@@ -29282,14 +28712,9 @@
       "wordpl": "więzień, osadzony, więźniowie, osadzeni"
     },
     {
-      "id": 5706,
-      "word": "rep",
-      "wordpl": "przedstawiciel handlowy, przedstawiciel, reputacja (skrót rep.)"
-    },
-    {
       "id": 5707,
       "word": "crest",
-      "wordpl": "grzywa, szczyt, grań, grzbiet, kita, pióropusz, czub, klejnot herbowy, fala"
+      "wordpl": "grzywa, szczyt, grań, grzbiet, kita, pióropusz, czub, klejnot herbowy, fala, grzebień"
     },
     {
       "id": 5708,
@@ -29297,19 +28722,9 @@
       "wordpl": "stamtąd, następnie"
     },
     {
-      "id": 5709,
-      "word": "manila",
-      "wordpl": "papier manilowy, tektura manilowa, brązowo-szary (kolor)"
-    },
-    {
       "id": 5711,
       "word": "amplifier",
       "wordpl": "wzmacniacz"
-    },
-    {
-      "id": 5712,
-      "word": "tan",
-      "wordpl": "opalenizna, kolor jasnobrązowy, opalać się, garbować"
     },
     {
       "id": 5713,
@@ -29332,29 +28747,14 @@
       "wordpl": "niezadowalający, niewystarczający"
     },
     {
-      "id": 5719,
-      "word": "ken",
-      "wordpl": "zakres, zasięg wiedzy, wiedza, pojmowanie"
-    },
-    {
       "id": 5722,
       "word": "fundamentally",
       "wordpl": "zasadniczo, fundamentalnie"
     },
     {
-      "id": 5724,
-      "word": "av",
-      "wordpl": "średnia, audio-wizualny"
-    },
-    {
       "id": 5727,
       "word": "excise",
       "wordpl": "akcyza, wycinać, usuwać"
-    },
-    {
-      "id": 5728,
-      "word": "maxwell",
-      "wordpl": "Makswel, makswel (jednostka)"
     },
     {
       "id": 5730,
@@ -29377,19 +28777,9 @@
       "wordpl": "wierność, dokładność"
     },
     {
-      "id": 5735,
-      "word": "ta",
-      "wordpl": "dzięki"
-    },
-    {
       "id": 5736,
       "word": "sterile",
       "wordpl": "bezpłodny, niepłodny, jałowy, sterylny"
-    },
-    {
-      "id": 5739,
-      "word": "geog",
-      "wordpl": "geografia, geogr. (skrót geog.)"
     },
     {
       "id": 5740,
@@ -29417,11 +28807,6 @@
       "wordpl": "wydobycie, wykop, wykopalisko, prace wykopaliskowe"
     },
     {
-      "id": 5749,
-      "word": "hen",
-      "wordpl": "kura"
-    },
-    {
       "id": 5750,
       "word": "domination",
       "wordpl": "dominacja, dominowanie"
@@ -29429,7 +28814,7 @@
     {
       "id": 5751,
       "word": "appellee",
-      "wordpl": "apelowany, strona pozwanej w apelacji"
+      "wordpl": "apelowany, strona pozwanej w apelacji, apelujący"
     },
     {
       "id": 5752,
@@ -29512,11 +28897,6 @@
       "wordpl": "proton"
     },
     {
-      "id": 5779,
-      "word": "java",
-      "wordpl": "kawa"
-    },
-    {
       "id": 5781,
       "word": "decoration",
       "wordpl": "dekoracja, ozdoba"
@@ -29557,11 +28937,6 @@
       "wordpl": "dżuma, zaraza, plaga, epidemia, nieszczęście, klęska, dręczyć, nękać"
     },
     {
-      "id": 5799,
-      "word": "sup",
-      "wordpl": "spożywać, jeść, kolacja, wieczerza"
-    },
-    {
       "id": 5802,
       "word": "depletion",
       "wordpl": "zanikanie, uszczuplenie, zubożenie, wyczerpanie"
@@ -29574,12 +28949,12 @@
     {
       "id": 5804,
       "word": "communal",
-      "wordpl": "komunalny, gminny, społeczny, wspólny"
+      "wordpl": "komunalny, gminny, społeczny, wspólny, wspólnotowy"
     },
     {
       "id": 5805,
       "word": "torture",
-      "wordpl": "tortura, torturować, dręczyć, męczyć"
+      "wordpl": "tortura, torturować, dręczyć, męczyć, tortury"
     },
     {
       "id": 5806,
@@ -29599,12 +28974,7 @@
     {
       "id": 5809,
       "word": "detached",
-      "wordpl": "odłączony, oderwany, obojętny, bezstronny"
-    },
-    {
-      "id": 5811,
-      "word": "pb",
-      "wordpl": "ołów (symbol Pb)"
+      "wordpl": "odłączony, oderwany, obojętny, bezstronny, wolnostanowiskowy, wolnostojący"
     },
     {
       "id": 5812,
@@ -29639,7 +29009,7 @@
     {
       "id": 5825,
       "word": "aroused",
-      "wordpl": "pobudzony, wzbudzony, wzbudzać"
+      "wordpl": "pobudzony, wzbudzony, wzbudzać, podniecony"
     },
     {
       "id": 5829,
@@ -29665,11 +29035,6 @@
       "id": 5834,
       "word": "compilation",
       "wordpl": "kompilacja"
-    },
-    {
-      "id": 5835,
-      "word": "homer",
-      "wordpl": "zagorzały kibic, fanatyk, home run, przyłożenie"
     },
     {
       "id": 5836,
@@ -29714,17 +29079,12 @@
     {
       "id": 5852,
       "word": "congressman",
-      "wordpl": "kongresmen"
+      "wordpl": "kongresmen, kongresman"
     },
     {
       "id": 5853,
       "word": "modulation",
       "wordpl": "modulacja"
-    },
-    {
-      "id": 5854,
-      "word": "jour",
-      "wordpl": "dziennik, czasopismo"
     },
     {
       "id": 5855,
@@ -29744,7 +29104,7 @@
     {
       "id": 5861,
       "word": "dim",
-      "wordpl": "ciemny, słabo oświetlony, przytłumiony, nieinteligentny (potocznie), przyćmić, przytłumić"
+      "wordpl": "ciemny, słabo oświetlony, przytłumiony, nieinteligentny, przyćmić, przytłumić"
     },
     {
       "id": 5862,
@@ -29754,7 +29114,7 @@
     {
       "id": 5863,
       "word": "fabrication",
-      "wordpl": "fałszerstwo, fabrykacja, sfałszowanie, zmyślenie, wymysł, wytworzenie"
+      "wordpl": "fałszerstwo, fabrykacja, sfałszowanie, zmyślenie, wymysł, wytworzenie, wytwarzanie, produkcja"
     },
     {
       "id": 5864,
@@ -29765,11 +29125,6 @@
       "id": 5866,
       "word": "rocket",
       "wordpl": "rakieta, rukola"
-    },
-    {
-      "id": 5867,
-      "word": "oz",
-      "wordpl": "uncja, uncje"
     },
     {
       "id": 5868,
@@ -29784,7 +29139,7 @@
     {
       "id": 5873,
       "word": "ambiguous",
-      "wordpl": "wieloznaczny, dwuznaczny, niejasny"
+      "wordpl": "wieloznaczny, dwuznaczny, niejasny, niejednoznaczny"
     },
     {
       "id": 5874,
@@ -29794,17 +29149,17 @@
     {
       "id": 5875,
       "word": "retrieved",
-      "wordpl": "odzyskać, pobrać, odzyskany, pobrany"
+      "wordpl": "odzyskać, pobrać, odzyskany, pobrany, odzyskane, odzyskane"
     },
     {
       "id": 5886,
       "word": "bundle",
-      "wordpl": "tobół, tłumok, tobołek, zawiniątko, paczka, pakunek, wiązka, snop, snopek, zapakować, cisnąć"
+      "wordpl": "pakiet ,tobół, tłumok, tobołek, zawiniątko, paczka, pakunek, wiązka, snop, snopek, zapakować, cisnąć"
     },
     {
       "id": 5887,
       "word": "chlorine",
-      "wordpl": "chlor, chlor (pierwiastek)"
+      "wordpl": "chlor"
     },
     {
       "id": 5888,
@@ -29814,7 +29169,7 @@
     {
       "id": 5889,
       "word": "insofar",
-      "wordpl": "o ile, o tyle, o ile"
+      "wordpl": "o ile, o tyle, o ile, w takim zakresie"
     },
     {
       "id": 5891,
@@ -29827,24 +29182,9 @@
       "wordpl": "dwukropek, okrężnica, okrężnicowy"
     },
     {
-      "id": 5897,
-      "word": "doi",
-      "wordpl": "identyfikator obiektu cyfrowego, DOI"
-    },
-    {
-      "id": 5898,
-      "word": "yr",
-      "wordpl": "rok, rok (skrót)"
-    },
-    {
       "id": 5899,
       "word": "potent",
-      "wordpl": "potężny, mocny, sugestywny, przekonywujący, skuteczny, sprawny"
-    },
-    {
-      "id": 5900,
-      "word": "au",
-      "wordpl": "jednostka astronomiczna (AU)"
+      "wordpl": "potężny, mocny, sugestywny, przekonywujący, skuteczny, sprawny, silny"
     },
     {
       "id": 5901,
@@ -29864,7 +29204,7 @@
     {
       "id": 5905,
       "word": "linen",
-      "wordpl": "płótno, pościel, lniany, płócienny"
+      "wordpl": "płótno, pościel, lniany, płócienny, len"
     },
     {
       "id": 5906,
@@ -29952,11 +29292,6 @@
       "wordpl": "pasterz"
     },
     {
-      "id": 5936,
-      "word": "holt",
-      "wordpl": "gaj"
-    },
-    {
       "id": 5938,
       "word": "buddha",
       "wordpl": "Budda"
@@ -30004,7 +29339,7 @@
     {
       "id": 5950,
       "word": "indicative",
-      "wordpl": "wskazujący, tryb oznajmujący"
+      "wordpl": "wskazujący, tryb oznajmujący, orientacyjny"
     },
     {
       "id": 5951,
@@ -30020,11 +29355,6 @@
       "id": 5954,
       "word": "ribs",
       "wordpl": "żebro, żebra"
-    },
-    {
-      "id": 5955,
-      "word": "certiorari",
-      "wordpl": "certiorari, skarga kasacyjna (USA)"
     },
     {
       "id": 5956,
@@ -30050,11 +29380,6 @@
       "id": 5961,
       "word": "indebted",
       "wordpl": "zadłużony, zobowiązany, wdzięczny"
-    },
-    {
-      "id": 5964,
-      "word": "mama",
-      "wordpl": "mama"
     },
     {
       "id": 5965,
@@ -30089,7 +29414,7 @@
     {
       "id": 5975,
       "word": "deficient",
-      "wordpl": "niewystarczający, niepełny, wadliwy"
+      "wordpl": "niewystarczający, niepełny, wadliwy, niedobór"
     },
     {
       "id": 5976,
@@ -30134,7 +29459,7 @@
     {
       "id": 5995,
       "word": "advent",
-      "wordpl": "nadejście, nastanie, przybycie"
+      "wordpl": "adwent, nadejście, nastanie, przybycie,"
     },
     {
       "id": 5996,
@@ -30159,12 +29484,12 @@
     {
       "id": 6000,
       "word": "inquire",
-      "wordpl": "dociekać, wypytywać, rozpytywać, indagować"
+      "wordpl": "dociekać, wypytywać, rozpytywać, indagować, zapytać"
     },
     {
       "id": 6001,
       "word": "confess",
-      "wordpl": "przyznawać się, wyznawać, spowiadać"
+      "wordpl": "przyznawać się, wyznawać, spowiadać, wyznać"
     },
     {
       "id": 6002,
@@ -30182,19 +29507,9 @@
       "wordpl": "elastyczność"
     },
     {
-      "id": 6005,
-      "word": "morocco",
-      "wordpl": "safian, safianowy"
-    },
-    {
       "id": 6006,
       "word": "aperture",
       "wordpl": "otwór, szczelina, przysłona"
-    },
-    {
-      "id": 6008,
-      "word": "sudan",
-      "wordpl": "Sudan"
     },
     {
       "id": 6010,
@@ -30234,7 +29549,7 @@
     {
       "id": 6020,
       "word": "consequent",
-      "wordpl": "wynikowy, następujący"
+      "wordpl": "wynikowy, następujący, konsekwentny"
     },
     {
       "id": 6021,
@@ -30269,12 +29584,12 @@
     {
       "id": 6034,
       "word": "foliage",
-      "wordpl": "listowie"
+      "wordpl": "listowie, liście"
     },
     {
       "id": 6036,
       "word": "lid",
-      "wordpl": "dekiel, pokrywa, wieko, powieka"
+      "wordpl": "dekiel, pokrywa, wieko, powieka, pokrywka"
     },
     {
       "id": 6039,
@@ -30304,7 +29619,7 @@
     {
       "id": 6048,
       "word": "descended",
-      "wordpl": "pochodzić z, zstępować, schodzić, opadać"
+      "wordpl": "pochodzić z, zstępować, schodzić, opadać, zstąpił"
     },
     {
       "id": 6050,
@@ -30329,12 +29644,7 @@
     {
       "id": 6055,
       "word": "contingency",
-      "wordpl": "ewentualność, przypadek, kontyngencja, nieprzewidziane zdarzenie"
-    },
-    {
-      "id": 6056,
-      "word": "rand",
-      "wordpl": "rand (waluta RPA)"
+      "wordpl": "ewentualność, przypadek, kontyngencja, nieprzewidziane zdarzenie, nieprzewidziane okoliczności"
     },
     {
       "id": 6058,
@@ -30364,7 +29674,7 @@
     {
       "id": 6068,
       "word": "aforesaid",
-      "wordpl": "wyżej wymieniony, wspomniany"
+      "wordpl": "wspomniany ,wyżej wymieniony, wspomniany powyżej"
     },
     {
       "id": 6069,
@@ -30384,7 +29694,7 @@
     {
       "id": 6073,
       "word": "temptation",
-      "wordpl": "pokusa, kuszenie"
+      "wordpl": "pokusa, kuszenie, pokus"
     },
     {
       "id": 6076,
@@ -30395,11 +29705,6 @@
       "id": 6077,
       "word": "continuance",
       "wordpl": "trwanie, ciągłość, kontynuacja, ciąg dalszy"
-    },
-    {
-      "id": 6078,
-      "word": "aboriginal",
-      "wordpl": "rdzenny, tubylczy, Aborygen"
     },
     {
       "id": 6082,
@@ -30419,7 +29724,7 @@
     {
       "id": 6089,
       "word": "leakage",
-      "wordpl": "przeciekanie, upływ"
+      "wordpl": "przeciekanie, upływ, wyciek"
     },
     {
       "id": 6092,
@@ -30429,17 +29734,12 @@
     {
       "id": 6093,
       "word": "recurrent",
-      "wordpl": "powtarzać się, periodyczny, okresowy, nawracać, powracać"
+      "wordpl": "powtarzać się, periodyczny, okresowy, nawracać, powracać, powtarzający się"
     },
     {
       "id": 6094,
       "word": "squadron",
       "wordpl": "szwadron, eskadron, eskadra"
-    },
-    {
-      "id": 6095,
-      "word": "cam",
-      "wordpl": "krzywka"
     },
     {
       "id": 6096,
@@ -30479,12 +29779,12 @@
     {
       "id": 6105,
       "word": "cock",
-      "wordpl": "kogut, kurek, fiut (wulg.), przeładować (broń)"
+      "wordpl": "kogut, kurek"
     },
     {
       "id": 6106,
       "word": "aerospace",
-      "wordpl": "lotniczy, kosmiczny, przestrzeń kosmiczna"
+      "wordpl": "lotniczy, kosmiczny, przestrzeń kosmiczna, lotnictwo"
     },
     {
       "id": 6108,
@@ -30494,7 +29794,7 @@
     {
       "id": 6110,
       "word": "exaggerated",
-      "wordpl": "przesadny, wyolbrzymiony"
+      "wordpl": "przesadny, wyolbrzymiony, przesadzony"
     },
     {
       "id": 6111,
@@ -30504,7 +29804,7 @@
     {
       "id": 6112,
       "word": "woven",
-      "wordpl": "pleciony, tkany, utkany"
+      "wordpl": "pleciony, tkany, utkany, tkane"
     },
     {
       "id": 6113,
@@ -30562,11 +29862,6 @@
       "wordpl": "krzemień, krzesiwo, krzemienny"
     },
     {
-      "id": 6131,
-      "word": "asst",
-      "wordpl": "asystent, asystentka"
-    },
-    {
       "id": 6132,
       "word": "resurrection",
       "wordpl": "zmartwychwstanie"
@@ -30619,7 +29914,7 @@
     {
       "id": 6147,
       "word": "legitimacy",
-      "wordpl": "legalność, prawowitość, zasadność"
+      "wordpl": "legalność, prawowitość, zasadność, legitymizacja"
     },
     {
       "id": 6148,
@@ -30669,7 +29964,7 @@
     {
       "id": 6159,
       "word": "exert",
-      "wordpl": "wywierać, używać"
+      "wordpl": "wywierać, używać, wykonywać"
     },
     {
       "id": 6160,
@@ -30704,7 +29999,7 @@
     {
       "id": 6171,
       "word": "affiliation",
-      "wordpl": "afiliacja, przyłączenie się, powiązanie, przystąpienie, stowarzyszenie, związek"
+      "wordpl": "afiliacja, przyłączenie się, powiązanie, przystąpienie, stowarzyszenie, związek, przynależność"
     },
     {
       "id": 6172,
@@ -30715,11 +30010,6 @@
       "id": 6173,
       "word": "preferable",
       "wordpl": "preferowany, wskazany, bardziej pożądany"
-    },
-    {
-      "id": 6176,
-      "word": "neo",
-      "wordpl": "neo-"
     },
     {
       "id": 6177,
@@ -30735,11 +30025,6 @@
       "id": 6183,
       "word": "parade",
       "wordpl": "parada, pochód, defilada, szpaler"
-    },
-    {
-      "id": 6184,
-      "word": "tor",
-      "wordpl": "skalisty pagórek, wzgórze"
     },
     {
       "id": 6187,
@@ -30764,7 +30049,7 @@
     {
       "id": 6192,
       "word": "confinement",
-      "wordpl": "uwięzienie, areszt, ograniczenie, zamknięcie"
+      "wordpl": "uwięzienie, areszt, ograniczenie, zamknięcie, izolacja"
     },
     {
       "id": 6194,
@@ -30795,11 +30080,6 @@
       "id": 6203,
       "word": "ambiguity",
       "wordpl": "dwuznaczność, wieloznaczność, niejednoznaczność"
-    },
-    {
-      "id": 6205,
-      "word": "usda",
-      "wordpl": "Departament Rolnictwa USA"
     },
     {
       "id": 6207,
@@ -30837,11 +30117,6 @@
       "wordpl": "choć, aczkolwiek"
     },
     {
-      "id": 6217,
-      "word": "mhz",
-      "wordpl": "megaherc, MHz"
-    },
-    {
       "id": 6220,
       "word": "transmitter",
       "wordpl": "nadajnik, przekaźnik"
@@ -30854,12 +30129,12 @@
     {
       "id": 6223,
       "word": "exploit",
-      "wordpl": "eksploatować, wykorzystywać, wykorzystać, wyzyskiwać, wyczyn, bohaterski czyn, błąd (w oprogramowaniu)"
+      "wordpl": "eksploatować, wykorzystywać, wykorzystać, wyzyskiwać, wyczyn, bohaterski czyn, błąd"
     },
     {
       "id": 6224,
       "word": "arbitrator",
-      "wordpl": "rozjemca"
+      "wordpl": "rozjemca, arbitraż, arbiter"
     },
     {
       "id": 6226,
@@ -30869,12 +30144,7 @@
     {
       "id": 6227,
       "word": "seminary",
-      "wordpl": "seminarium duchowne, kolegium duchowne"
-    },
-    {
-      "id": 6228,
-      "word": "cor",
-      "wordpl": "o rany!, ojej!, jejku!"
+      "wordpl": "seminarium ,seminarium duchowne, kolegium duchowne"
     },
     {
       "id": 6229,
@@ -30927,11 +30197,6 @@
       "wordpl": "etanol"
     },
     {
-      "id": 6243,
-      "word": "gm",
-      "wordpl": "gram, General Motors"
-    },
-    {
       "id": 6244,
       "word": "innocence",
       "wordpl": "niewinność, cnota, czystość"
@@ -30954,7 +30219,7 @@
     {
       "id": 6249,
       "word": "postmaster",
-      "wordpl": "naczelnik poczty"
+      "wordpl": "naczelnik poczty, administrator poczty"
     },
     {
       "id": 6250,
@@ -30964,12 +30229,7 @@
     {
       "id": 6251,
       "word": "crust",
-      "wordpl": "skorupa, skórka, spód (np. pizzy), warstwa powierzchniowa"
-    },
-    {
-      "id": 6252,
-      "word": "monte",
-      "wordpl": "gra w trzy karty"
+      "wordpl": "skorupa, skórka, spód, warstwa powierzchniowa"
     },
     {
       "id": 6253,
