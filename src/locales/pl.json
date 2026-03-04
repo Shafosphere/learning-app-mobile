@@ -3,10 +3,9 @@
     "loading": {
       "initializing": "Wczytuję aplikację…",
       "importingCsv": "Importuję dane z CSV…",
-      "finishingSetup": "Kończę konfigurację…",
+      "finishingSetup": "Wczytuję",
       "launching": "Uruchamiam aplikację…",
-      "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi.",
-      "firstLaunchInfo": "Pierwsze uruchomienie może potrwać kilkanaście sekund."
+      "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi."
     }
   },
   "settings": {

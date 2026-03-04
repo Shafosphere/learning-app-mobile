@@ -14,6 +14,7 @@ import {
 } from "@/src/db/sqlite/db";
 import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
+import * as NavigationBar from "expo-navigation-bar";
 import { usePathname, useRouter } from "expo-router";
 import {
   useCallback,
@@ -54,6 +55,7 @@ export default function Navbar({ children }: NavbarProps) {
   const { triggerQuote } = useQuote();
   const setPopupAnchorX = usePopupAnchorSetter();
   const {
+    theme,
     toggleTheme,
     activeCustomCourseId,
     selectedLevel,
@@ -93,6 +95,22 @@ export default function Navbar({ children }: NavbarProps) {
   const { knownWordsCount } = useLearningStats();
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    void (async () => {
+      try {
+        await NavigationBar.setButtonStyleAsync(
+          theme === "dark" ? "light" : "dark",
+        );
+      } catch (error) {
+        console.warn("[Navbar] Failed to configure Android navigation bar", error);
+      }
+    })();
+  }, [theme]);
 
   const updatePopupAnchor = useCallback(() => {
     const node = logoButtonRef.current as unknown as {

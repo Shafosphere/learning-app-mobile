@@ -132,7 +132,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: true,
-    categoryId: "science",
+    categoryId: "kosmos",
   },
   {
     slug: "gwiazdozbiory",
@@ -146,7 +146,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: true,
-    categoryId: "science",
+    categoryId: "kosmos",
     settings: {
       imageSize: "very_large",
       imageFrameEnabled: false,
@@ -165,7 +165,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     targetLang: "pl",
     smallFlag: "pl",
     isMini: true,
-    categoryId: "science",
+    categoryId: "historia",
   },
   {
     slug: "math2",

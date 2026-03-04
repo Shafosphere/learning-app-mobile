@@ -29,7 +29,6 @@ export default function RootLayout() {
   const [loadingMessageKey, setLoadingMessageKey] = useState(
     "app.loading.initializing"
   );
-  const [isInitialImport, setIsInitialImport] = useState(false);
   const splashHiddenRef = useRef(false);
 
   const hideSplashOnce = useCallback(async () => {
@@ -50,18 +49,15 @@ export default function RootLayout() {
     const handleDbEvent = (event: DbInitializationEvent) => {
       switch (event.type) {
         case "start":
-          setIsInitialImport(false);
           setLoadingMessageKey("app.loading.initializing");
           break;
         case "import-start":
-          setIsInitialImport(true);
           setLoadingMessageKey("app.loading.importingCsv");
           break;
         case "import-finish":
           setLoadingMessageKey("app.loading.finishingSetup");
           break;
         case "ready":
-          setIsInitialImport(event.initialImport);
           setLoadingMessageKey("app.loading.launching");
           break;
         case "error":
@@ -104,11 +100,6 @@ export default function RootLayout() {
         <Text style={{ fontSize: 16, color: "#333", textAlign: "center" }}>
           {t(loadingMessageKey)}
         </Text>
-        {isInitialImport ? (
-          <Text style={{ fontSize: 14, color: "#666", textAlign: "center" }}>
-            {t("app.loading.firstLaunchInfo")}
-          </Text>
-        ) : null}
       </View>
     );
   }

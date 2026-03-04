@@ -5,8 +5,7 @@
       "importingCsv": "Importing CSV data...",
       "finishingSetup": "Finishing setup...",
       "launching": "Launching app...",
-      "dbError": "Could not initialize the database. Check logs.",
-      "firstLaunchInfo": "First launch may take several seconds."
+      "dbError": "Could not initialize the database. Check logs."
     }
   },
   "settings": {

@@ -13,6 +13,18 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         description: "Stolice i flagi",
         icon: "earth-europe",
     },
+    kosmos: {
+        id: "kosmos",
+        label: "Kosmos",
+        description: "Astronomia, gwiazdozbiory",
+        icon: "rocket",
+    },
+    historia: {
+        id: "historia",
+        label: "historia",
+        description: "Historia Polski",
+        icon: "landmark",
+    },
     programming: {
         id: "programming",
         label: "Programowanie",
