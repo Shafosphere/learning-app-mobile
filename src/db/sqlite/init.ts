@@ -1,5 +1,5 @@
 import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
-import prebuiltDatabaseAsset from "@/assets/db/prebuilt.db";
+import prebuiltDatabaseAsset from "@/assets/data/sqlite/prebuilt.db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { saveImage } from "@/src/services/imageService";
 import { Asset } from "expo-asset";

@@ -9,11 +9,11 @@ import { quotes } from "./quotes";
 export default function HomeScreen() {
   const router = useRouter();
   const styles = useStyles();
-  const logo = require("../../../assets/illustrations/box/logo.png");
-  const statsImage = require("../../../assets/images/home/staty.png");
-  const customImage = require("../../../assets/images/home/edit.png");
+  const logo = require("../../../assets/illustrations/mascot-box/branding/logo.png");
+  const statsImage = require("../../../assets/images/home/stats.png");
+  const customImage = require("../../../assets/images/home/customize.png");
   const tutorialImage = require("../../../assets/images/home/tutorial.png");
-  const supportImage = require("../../../assets/images/home/wsparcie.png");
+  const supportImage = require("../../../assets/images/home/support.png");
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 

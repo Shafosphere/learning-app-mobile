@@ -19,7 +19,7 @@ type LogoMessageVariant =
   | "activate"
   | "done";
 
-const LOGO_SOURCE = require("@/assets/illustrations/box/logo.png");
+const LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 
 const DEFAULT_COPY: Record<
   LogoMessageVariant,

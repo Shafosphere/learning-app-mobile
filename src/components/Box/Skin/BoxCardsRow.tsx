@@ -1,6 +1,6 @@
-import Card1 from "@/assets/illustrations/box/miniflashcard1.png";
-import Card2 from "@/assets/illustrations/box/miniflashcard2.png";
-import Card3 from "@/assets/illustrations/box/miniflashcard3.png";
+import Card1 from "@/assets/illustrations/mascot-box/cards/mini-flashcard-1.png";
+import Card2 from "@/assets/illustrations/mascot-box/cards/mini-flashcard-2.png";
+import Card3 from "@/assets/illustrations/mascot-box/cards/mini-flashcard-3.png";
 import React from "react";
 import { Image, ImageStyle, View, ViewStyle } from "react-native";
 

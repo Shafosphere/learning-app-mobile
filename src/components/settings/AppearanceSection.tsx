@@ -20,10 +20,10 @@ import {
 import { useTranslation } from "react-i18next";
 import type { UiLanguage } from "@/src/i18n";
 
-const classicPreview = require("@/assets/images/settings/sett_classic.png");
-const carouselPreview = require("@/assets/images/settings/sett_caro.png");
-const topButtonsPreview = require("@/assets/images/settings/twoHand.png");
-const bottomButtonsPreview = require("@/assets/images/settings/onehand.png");
+const classicPreview = require("@/assets/images/settings/layout-classic.png");
+const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
+const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
+const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
 
 type LayoutOption = {
   key: "classic" | "carousel";

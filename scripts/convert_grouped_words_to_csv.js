@@ -2,7 +2,7 @@ const fs = require('fs');
 const path = require('path');
 const Papa = require('papaparse');
 
-const sourcePath = path.join(__dirname, '..', 'assets', 'data', 'words_grouped.json');
+const sourcePath = path.join(__dirname, '..', 'assets', 'data', 'json', 'words-grouped.json');
 const outputDir = path.join(__dirname, '..', 'tools', 'prebuild-data');
 const levels = process.argv.slice(2);
 const targetLevels = levels.length ? levels.map((l) => l.toUpperCase()) : ['A1', 'A2'];

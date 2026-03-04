@@ -1,14 +1,14 @@
 import type { ImageSourcePropType } from "react-native";
 
-import PL_FLAG from "@/assets/flags/PL.png";
-import PL_FLAG_GRAY from "@/assets/flags/PLgray.png";
-import ES_FLAG from "@/assets/flags/ES.png";
-import ES_FLAG_GRAY from "@/assets/flags/ESgray.png";
-import FR_FLAG from "@/assets/flags/PM.png";
-import FR_FLAG_GRAY from "@/assets/flags/PMgray.png";
-import US_FLAG from "@/assets/flags/US.png";
-import US_FLAG_GRAY from "@/assets/flags/USgray.png";
-import KR_FLAG from "@/assets/flags/KR.png";
+import PL_FLAG from "@/assets/flags/language/pl/active.png";
+import PL_FLAG_GRAY from "@/assets/flags/language/pl/inactive.png";
+import ES_FLAG from "@/assets/flags/language/es/active.png";
+import ES_FLAG_GRAY from "@/assets/flags/language/es/inactive.png";
+import FR_FLAG from "@/assets/flags/language/fr/active.png";
+import FR_FLAG_GRAY from "@/assets/flags/language/fr/inactive.png";
+import US_FLAG from "@/assets/flags/language/en-us/active.png";
+import US_FLAG_GRAY from "@/assets/flags/language/en-us/inactive.png";
+import KR_FLAG from "@/assets/flags/language/ko/active.png";
 
 export type FlagVariant = "active" | "inactive";
 

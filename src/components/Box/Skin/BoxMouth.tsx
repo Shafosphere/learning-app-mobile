@@ -1,6 +1,6 @@
-import Happy from "@/assets/illustrations/box/happy.svgx";
-import Smile from "@/assets/illustrations/box/smile.svgx";
-import Surprised from "@/assets/illustrations/box/surprised.svgx";
+import Happy from "@/assets/illustrations/mascot-box/face/happy.svgx";
+import Smile from "@/assets/illustrations/mascot-box/face/smile.svgx";
+import Surprised from "@/assets/illustrations/mascot-box/face/surprised.svgx";
 import React from "react";
 import { ViewStyle } from "react-native";
 

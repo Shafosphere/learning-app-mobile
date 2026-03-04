@@ -8,7 +8,7 @@ const Papa = require("papaparse");
 
 const ROOT_DIR = path.resolve(__dirname, "../..");
 const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
-const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "db", "prebuilt.db");
+const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 
 const OFFICIAL_PACKS = [
   {

@@ -9,7 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
-    "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts"
+    "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts",
+    "assets:check-paths": "bash ./scripts/check-legacy-asset-paths.sh"
   },
   "dependencies": {
     "@expo/vector-icons": "^15.0.3",

@@ -283,12 +283,12 @@ def merge_pair(
     return s, tx, ty, len(outline_pts), len(pattern_pts)
 
 
-def pair_bases(base_dir: Path) -> list[str]:
-    outlines = sorted(base_dir.glob("*-outline.svg"))
+def pair_bases(outline_dir: Path, pattern_dir: Path) -> list[str]:
+    outlines = sorted(outline_dir.glob("*-outline.svg"))
     bases: list[str] = []
     for o in outlines:
         base = o.name[: -len("-outline.svg")]
-        if (base_dir / f"{base}-pattern.svg").exists():
+        if (pattern_dir / f"{base}-pattern.svg").exists():
             bases.append(base)
     return bases
 
@@ -301,13 +301,13 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--base-dir",
         type=Path,
-        default=Path("assets/images/forFlashcards/gwiazdozbiory"),
-        help="Directory with source SVG files.",
+        default=Path("assets/learning/flashcards/constellations/source"),
+        help="Directory with source SVG files (expects outline/ and pattern/ subdirectories).",
     )
     parser.add_argument(
         "--output-dir",
         type=Path,
-        default=Path("assets/images/forFlashcards/gwiazdozbiory/generated"),
+        default=Path("assets/learning/flashcards/constellations/generated/merged"),
         help="Directory for generated merged SVG files.",
     )
     parser.add_argument("--all", action="store_true", help="Generate merged files for all pairs.")
@@ -320,14 +320,16 @@ def main() -> int:
     args = parse_args()
 
     if args.all:
-        bases = pair_bases(args.base_dir)
+        outline_dir = args.base_dir / "outline"
+        pattern_dir = args.base_dir / "pattern"
+        bases = pair_bases(outline_dir, pattern_dir)
         if not bases:
             print("No matching outline/pattern pairs found.")
             return 1
         print(f"Found {len(bases)} pairs. Generating...")
         for base in bases:
-            outline = args.base_dir / f"{base}-outline.svg"
-            pattern = args.base_dir / f"{base}-pattern.svg"
+            outline = outline_dir / f"{base}-outline.svg"
+            pattern = pattern_dir / f"{base}-pattern.svg"
             output = args.output_dir / f"{base}-merged.svg"
             s, tx, ty, oc, pc = merge_pair(
                 outline, pattern, output, args.outline_stroke, args.pattern_color
