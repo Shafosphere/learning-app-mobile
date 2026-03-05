@@ -35,7 +35,15 @@ export default function BoxCarousel({
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
-  const BOX_STAGE_HEIGHT = 270;
+  const BOX_SKIN_HEIGHT = 122;
+  const ACTIVE_BOX_SCALE = 2.05;
+  const ACTIVE_BOX_LIFT = 12;
+  const BOX_STAGE_VERTICAL_PADDING = 40;
+  const BOX_STAGE_HEIGHT = Math.ceil(
+    BOX_SKIN_HEIGHT * ACTIVE_BOX_SCALE +
+      ACTIVE_BOX_LIFT * 2 +
+      BOX_STAGE_VERTICAL_PADDING
+  );
 
     const items = useMemo(() => {
         const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
@@ -230,7 +238,8 @@ export default function BoxCarousel({
                     initialScrollIndex={initialIndex}
                     contentContainerStyle={{
                         paddingHorizontal: spacerWidth,
-                        alignItems: "flex-start",
+                        paddingVertical: 14,
+                        alignItems: "center",
                     }}
                     renderItem={({ item, index }) => {
                         const inputRange = [
@@ -245,7 +254,7 @@ export default function BoxCarousel({
                         });
                         const translateY = scrollX.interpolate({
                             inputRange,
-                            outputRange: [16, -22, 16],
+                            outputRange: [14, -12, 14],
                             extrapolate: "clamp",
                         });
                         const isActive = index === activeIndex;

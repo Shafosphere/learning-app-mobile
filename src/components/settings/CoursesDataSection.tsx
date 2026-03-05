@@ -183,7 +183,7 @@ const CoursesDataSection: React.FC = () => {
           color="my_green"
           onPress={handleExportUserData}
           disabled={exportingData}
-          width={160}
+          width={130}
         />
       </View>
 
@@ -200,7 +200,7 @@ const CoursesDataSection: React.FC = () => {
           onPress={handleExportUserDataToDrive}
           color="my_green"
           disabled={exportingToDrive}
-          width={160}
+          width={64}
           accessibilityLabel={t("settings.coursesData.rows.exportGoogleDrive.accessibilityLabel")}
         >
           {exportingToDrive ? (
@@ -211,12 +211,9 @@ const CoursesDataSection: React.FC = () => {
             <View style={styles.driveButtonContent}>
               <MaterialCommunityIcons
                 name="google-drive"
-                size={18}
+                size={22}
                 color={colors.headline}
               />
-              <Text style={[styles.driveButtonText, { color: colors.headline }]}>
-                {t("settings.coursesData.rows.exportGoogleDrive.button")}
-              </Text>
             </View>
           )}
         </MyButton>
@@ -240,7 +237,7 @@ const CoursesDataSection: React.FC = () => {
           color="my_green"
           onPress={handleImportUserData}
           disabled={importingData}
-          width={160}
+          width={130}
         />
       </View>
 
@@ -262,7 +259,7 @@ const CoursesDataSection: React.FC = () => {
           color="my_yellow"
           onPress={handleResetLearningSettings}
           disabled={resettingLearning}
-          width={160}
+          width={130}
         />
       </View>
     </View>

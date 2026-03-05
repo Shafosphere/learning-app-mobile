@@ -3,14 +3,11 @@ import { usePopup } from "@/src/contexts/PopupContext";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TextStyle, View } from "react-native";
-import { useCustomCourseFormStyles } from "../editcourse/components/courseContent/CustomCourseForm-styles";
+import { ScrollView, Text, TextInput, TextStyle, View } from "react-native";
 import { CourseIconColorSelector } from "../editcourse/components/iconEdit/iconEdit";
-import { CourseNameField } from "../editcourse/components/nameEdit/nameEdit";
 import { useStyles } from "./CourseAppearanceScreen-styles";
 export default function CustomCourseScreen() {
   const styles = useStyles();
-  const formStyles = useCustomCourseFormStyles();
   const router = useRouter();
   const {
     courseName,
@@ -18,7 +15,9 @@ export default function CustomCourseScreen() {
     iconId,
     setIconId,
     iconColor,
+    setIconColor,
     colorId,
+    setColorId,
     reviewsEnabled,
     handleColorChange,
   } = useCustomCourseDraft();
@@ -84,30 +83,45 @@ export default function CustomCourseScreen() {
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>NOWY KURS</Text>
 
-          <View style={formStyles.content}>
+          <View style={styles.formContent}>
             <View>
-              <CourseNameField
-                value={courseName}
-                onChange={setCourseName}
-              />
+              <View style={styles.labelRow}>
+                <Text style={styles.sectionLabel}>NAZWA</Text>
+              </View>
+              <View style={styles.nameInputWrap}>
+                <View style={styles.nameInputDot} />
+                <TextInput
+                  style={styles.nameInput}
+                  placeholder="np. Fiszki podróżnicze"
+                  placeholderTextColor={styles.nameInput.color}
+                  accessibilityLabel="Nazwa kursu"
+                  maxLength={38}
+                  autoCorrect={false}
+                  autoCapitalize="none"
+                  spellCheck={false}
+                  returnKeyType="done"
+                  editable
+                  keyboardType="default"
+                  textContentType="none"
+                  importantForAutofill="no"
+                  value={courseName}
+                  onChangeText={setCourseName}
+                />
+              </View>
             </View>
 
-            <View style={formStyles.iconSection}>
-              <Text style={formStyles.label}>ikona</Text>
+            <View>
               <CourseIconColorSelector
                 selectedIcon={iconId}
                 selectedColor={iconColor}
                 selectedColorId={colorId ?? undefined}
                 onIconChange={(value) => setIconId(value)}
                 onColorChange={handleColorChange}
-                styles={{
-                  iconsContainer: formStyles.iconsContainer,
-                  iconWrapper: formStyles.iconWrapper,
-                  iconWrapperSelected: formStyles.iconWrapperSelected,
-                  colorsContainer: formStyles.colorsContainer,
-                  colorSwatch: formStyles.courseColor,
-                  colorSwatchSelected: formStyles.courseColorSelected,
+                onColorHexChange={(hex) => {
+                  setIconColor(hex);
+                  setColorId(null);
                 }}
+                previewName={courseName}
               />
             </View>
           </View>

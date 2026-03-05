@@ -1,16 +1,15 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { TrackSlider } from "@/src/components/slider/TrackSlider";
 import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
   useEffect,
-  useMemo,
   useRef,
   useState,
 } from "react";
 import {
   Modal,
-  PanResponder,
   Image,
   Switch,
   Text,
@@ -71,134 +70,11 @@ const uiLanguageOptions: {
   { key: "en", labelKey: "settings.uiLanguage.english" },
 ];
 
-type ThickSliderProps = {
-  value: number;
-  minimumValue?: number;
-  maximumValue?: number;
-  step?: number;
-  disabled?: boolean;
-  onValueChange: (value: number) => void;
-  onSlidingComplete?: (value: number) => void;
-};
-
-const ThickSlider: React.FC<ThickSliderProps> = ({
-  value,
-  minimumValue = 0,
-  maximumValue = 1,
-  step = 0.01,
-  disabled = false,
-  onValueChange,
-  onSlidingComplete,
-}) => {
-  const styles = useStyles();
-  const trackRef = useRef<View | null>(null);
-  const [trackLayout, setTrackLayout] = useState<{
-    pageX: number;
-    width: number;
-  } | null>(null);
-
-  const clampToStep = useCallback(
-    (input: number) => {
-      const clamped = Math.min(Math.max(input, minimumValue), maximumValue);
-      if (!step) return clamped;
-      const stepped = Math.round(clamped / step) * step;
-      return Math.min(Math.max(stepped, minimumValue), maximumValue);
-    },
-    [minimumValue, maximumValue, step]
-  );
-
-  const updateFromPageX = useCallback(
-    (pageX: number, finalize = false) => {
-      if (!trackLayout) return;
-      const relative = pageX - trackLayout.pageX;
-      const boundedPx = Math.min(
-        Math.max(relative, 0),
-        Math.max(trackLayout.width, 1)
-      );
-      const ratio =
-        trackLayout.width === 0 ? 0 : boundedPx / trackLayout.width;
-      const raw = minimumValue + ratio * (maximumValue - minimumValue);
-      const nextValue = clampToStep(raw);
-      onValueChange(nextValue);
-      if (finalize && onSlidingComplete) {
-        onSlidingComplete(nextValue);
-      }
-    },
-    [
-      trackLayout,
-      minimumValue,
-      maximumValue,
-      clampToStep,
-      onValueChange,
-      onSlidingComplete,
-    ]
-  );
-
-  const panResponder = useMemo(
-    () =>
-      PanResponder.create({
-        onStartShouldSetPanResponder: () => !disabled,
-        onMoveShouldSetPanResponder: () => !disabled,
-        onPanResponderGrant: (evt) => {
-          if (disabled) return;
-          updateFromPageX(evt.nativeEvent.pageX);
-        },
-        onPanResponderMove: (evt) => {
-          if (disabled) return;
-          updateFromPageX(evt.nativeEvent.pageX);
-        },
-        onPanResponderRelease: (evt) => {
-          if (disabled) return;
-          updateFromPageX(evt.nativeEvent.pageX, true);
-        },
-        onPanResponderTerminate: (evt) => {
-          if (disabled) return;
-          updateFromPageX(evt.nativeEvent.pageX, true);
-        },
-        onPanResponderTerminationRequest: () => true,
-      }),
-    [disabled, updateFromPageX]
-  );
-
-  const handleLayout = useCallback(() => {
-    trackRef.current?.measure((_, __, width, ___, pageX) => {
-      if (width) {
-        setTrackLayout({ pageX, width });
-      }
-    });
-  }, []);
-
-  const clampedValue = Math.min(Math.max(value, minimumValue), maximumValue);
-  const percent =
-    maximumValue === minimumValue
-      ? 0
-      : (clampedValue - minimumValue) / (maximumValue - minimumValue);
-  const thumbOffset = (trackLayout?.width ?? 0) * percent;
-
-  return (
-    <View
-      ref={trackRef}
-      onLayout={handleLayout}
-      style={[styles.sliderWrapper, disabled && styles.sliderDisabled]}
-      {...panResponder.panHandlers}
-    >
-      <View style={styles.sliderTrack} />
-      <View style={[styles.sliderFill, { width: `${percent * 100}%` }]} />
-      <View
-        style={[
-          styles.sliderThumb,
-          { transform: [{ translateX: thumbOffset - 14 }] },
-        ]}
-        pointerEvents="none"
-      />
-    </View>
-  );
-};
-
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
   const { t } = useTranslation();
   const {
+    colors,
     uiLanguage,
     setUiLanguage,
     theme,
@@ -444,13 +320,23 @@ const AppearanceSection: React.FC = () => {
           </Text>
         </View>
         <View style={styles.sliderRow}>
-          <ThickSlider
+          <TrackSlider
+            testID="effects-volume-slider"
             value={volumePreview}
             onValueChange={handleVolumePreviewChange}
             onSlidingComplete={handleVolumeCommit}
             minimumValue={0}
             maximumValue={1}
             step={0.01}
+            mode="solid"
+            trackHeight={12}
+            thumbSize={28}
+            thumbBorderWidth={2}
+            trackColor={colors.border}
+            fillColor={colors.my_green}
+            thumbColor={colors.background}
+            thumbBorderColor={colors.my_green}
+            style={styles.sliderWrapper}
           />
 
           <Text style={styles.sliderValue}>

@@ -8,6 +8,7 @@ type Props = {
   placeholder?: string;
   editable?: boolean;
   disabled?: boolean;
+  variant?: "accent" | "panel";
 };
 
 export function CourseNameField({
@@ -16,18 +17,22 @@ export function CourseNameField({
   placeholder = "np. Fiszki podróżnicze",
   editable = true,
   disabled = false,
+  variant = "accent",
 }: Props) {
   const styles = useStyles();
+  const isPanelVariant = variant === "panel";
 
   return (
     <>
-      <Text style={styles.label}>nazwa</Text>
+      <Text style={isPanelVariant ? styles.panelLabel : styles.label}>nazwa</Text>
       <TextInput
-        style={styles.nameInput}
+        style={isPanelVariant ? styles.panelNameInput : styles.nameInput}
         value={value}
         onChangeText={onChange}
         placeholder={placeholder}
-        placeholderTextColor={styles.nameInput.color}
+        placeholderTextColor={
+          isPanelVariant ? styles.panelNameInput.color : styles.nameInput.color
+        }
         accessibilityLabel="Nazwa kursu"
         editable={editable && !disabled}
       />
@@ -36,4 +41,3 @@ export function CourseNameField({
 }
 
 export default CourseNameField;
-

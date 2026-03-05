@@ -16,9 +16,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 120,
   },
   section: {
-    backgroundColor: colors.secondBackground,
+    // backgroundColor: colors.secondBackground,
     borderRadius: 16,
-    padding: 16,
+    // padding: 16,
     paddingTop: 32,
   },
   sectionHeader: {
@@ -26,8 +26,50 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textTransform: "uppercase",
     position: "absolute" as const,
     fontWeight: "900",
-    right: 24,
-    top: 24,
+    right: 0,
+    top: 20,
+    color: colors.headline,
+  },
+  formContent: {
+    gap: 14,
+  },
+  labelRow: {
+    flexDirection: "row" as const,
+    alignItems: "baseline" as const,
+    justifyContent: "space-between" as const,
+    gap: 10,
+    marginBottom: 10,
+  },
+  sectionLabel: {
+    fontSize: 12,
+    fontWeight: "900",
+    letterSpacing: 0.9,
+    color: colors.paragraph,
+  },
+  nameInputWrap: {
+    minHeight: 50,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor:
+      colors.secondBackground === colors.background
+        ? colors.background
+        : colors.secondBackground,
+    paddingHorizontal: 12,
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    gap: 10,
+  },
+  nameInputDot: {
+    width: 10,
+    height: 10,
+    borderRadius: 999,
+    backgroundColor: colors.my_green,
+  },
+  nameInput: {
+    flex: 1,
+    fontSize: 16,
+    fontWeight: "700",
     color: colors.headline,
   },
   manualAddIcon: {

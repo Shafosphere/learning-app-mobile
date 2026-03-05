@@ -43,6 +43,11 @@ export function useCustomCourseDraft(options: UseCustomCourseDraftOptions = {}) 
   const initialStateRef = useRef<CustomCourseDraftState | null>(null);
 
   if (!initialStateRef.current) {
+    const initialColorId =
+      options.initialColorId !== undefined
+        ? options.initialColorId
+        : defaultColor?.id ?? null;
+
     initialStateRef.current = {
       courseName: options.initialName ?? "",
       iconId: options.initialIconId ?? COURSE_ICONS[0]?.id ?? null,
@@ -50,10 +55,7 @@ export function useCustomCourseDraft(options: UseCustomCourseDraftOptions = {}) 
         options.initialIconColor ??
         defaultColor?.hex ??
         DEFAULT_COURSE_COLOR,
-      colorId:
-        options.initialColorId ??
-        defaultColor?.id ??
-        null,
+      colorId: initialColorId,
       reviewsEnabled: options.initialReviewsEnabled ?? false,
     };
   }

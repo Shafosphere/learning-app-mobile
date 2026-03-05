@@ -92,7 +92,9 @@ export default function CustomCourseEditor({
     iconId,
     setIconId,
     iconColor,
+    setIconColor,
     colorId,
+    setColorId,
     reviewsEnabled,
     setReviewsEnabled,
     handleColorChange,
@@ -697,15 +699,14 @@ export default function CustomCourseEditor({
                   selectedColorId={colorId ?? undefined}
                   onIconChange={(value) => setIconId(value)}
                   onColorChange={handleColorChange}
+                  onColorHexChange={(hex) => {
+                    setIconColor(hex);
+                    setColorId(null);
+                  }}
+                  previewName={courseName}
                   disabled={isSaving}
                   styles={{
                     container: styles.iconSection,
-                    iconsContainer: styles.iconsContainer,
-                    iconWrapper: styles.iconWrapper,
-                    iconWrapperSelected: styles.iconWrapperSelected,
-                    colorsContainer: styles.colorsContainer,
-                    colorSwatch: styles.courseColor,
-                    colorSwatchSelected: styles.courseColorSelected,
                   }}
                 />
               </View>

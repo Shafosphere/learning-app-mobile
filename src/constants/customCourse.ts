@@ -82,43 +82,72 @@ export function getCourseColorsForTheme(
 
 export const COURSE_COLORS = createCourseColors(themeMap.light);
 
-export type CourseIconComponent = ComponentType<{
-  name: string;
-  size?: number;
-  color?: string;
-}>;
+export type CourseIconComponent = ComponentType<any>;
 
 export interface CourseIconDefinition {
   id: string;
   Component: CourseIconComponent;
   name: string;
+  category:
+    | "general"
+    | "science"
+    | "travel"
+    | "tech"
+    | "lifestyle"
+    | "sport";
 }
 
 export const COURSE_ICONS: CourseIconDefinition[] = [
-  { id: "heart", Component: AntDesign, name: "heart" },
-  { id: "coffee", Component: MaterialCommunityIcons, name: "coffee" },
-  { id: "suitcase", Component: Entypo, name: "suitcase" },
-  { id: "star", Component: AntDesign, name: "star" },
-  { id: "house", Component: FontAwesome6, name: "house-chimney" },
-  { id: "cloud", Component: AntDesign, name: "cloud" },
-  { id: "eye", Component: AntDesign, name: "eye" },
-  { id: "leaf", Component: Ionicons, name: "leaf" },
-  { id: "book", Component: MaterialCommunityIcons, name: "book-open-variant" },
-  { id: "music", Component: Ionicons, name: "musical-notes" },
-  { id: "camera", Component: Entypo, name: "camera" },
-  { id: "brain", Component: MaterialCommunityIcons, name: "brain" },
-  { id: "lightbulb", Component: AntDesign, name: "bulb" },
-  { id: "planet", Component: Ionicons, name: "planet" },
-  { id: "puzzle", Component: MaterialCommunityIcons, name: "puzzle-outline" },
-  { id: "globe", Component: MaterialCommunityIcons, name: "earth" },
-  { id: "mountain", Component: MaterialCommunityIcons, name: "terrain" },
-  { id: "compass", Component: MaterialCommunityIcons, name: "compass-outline" },
-  { id: "dna", Component: MaterialCommunityIcons, name: "dna" },
-  { id: "microscope", Component: MaterialCommunityIcons, name: "flask" },
-  { id: "tree", Component: MaterialCommunityIcons, name: "pine-tree" },
-  { id: "code", Component: MaterialCommunityIcons, name: "laptop" },
-  { id: "chip", Component: MaterialCommunityIcons, name: "memory" },
-  { id: "robot", Component: MaterialCommunityIcons, name: "robot-outline" },
+  { id: "heart", Component: AntDesign, name: "heart", category: "lifestyle" },
+  { id: "star", Component: AntDesign, name: "star", category: "general" },
+  { id: "house", Component: FontAwesome6, name: "house-chimney", category: "general" },
+  { id: "cloud", Component: AntDesign, name: "cloud", category: "general" },
+  { id: "eye", Component: AntDesign, name: "eye", category: "general" },
+  { id: "leaf", Component: Ionicons, name: "leaf", category: "science" },
+  { id: "book", Component: MaterialCommunityIcons, name: "book-open-variant", category: "science" },
+  { id: "music", Component: Ionicons, name: "musical-notes", category: "lifestyle" },
+  { id: "camera", Component: Entypo, name: "camera", category: "lifestyle" },
+  { id: "brain", Component: MaterialCommunityIcons, name: "brain", category: "science" },
+  { id: "lightbulb", Component: AntDesign, name: "bulb", category: "science" },
+  { id: "planet", Component: Ionicons, name: "planet", category: "science" },
+  { id: "puzzle", Component: MaterialCommunityIcons, name: "puzzle-outline", category: "general" },
+  { id: "globe", Component: MaterialCommunityIcons, name: "earth", category: "travel" },
+  { id: "mountain", Component: MaterialCommunityIcons, name: "terrain", category: "travel" },
+  { id: "compass", Component: MaterialCommunityIcons, name: "compass-outline", category: "travel" },
+  { id: "dna", Component: MaterialCommunityIcons, name: "dna", category: "science" },
+  { id: "microscope", Component: MaterialCommunityIcons, name: "flask", category: "science" },
+  { id: "tree", Component: MaterialCommunityIcons, name: "pine-tree", category: "science" },
+  { id: "code", Component: MaterialCommunityIcons, name: "laptop", category: "tech" },
+  { id: "chip", Component: MaterialCommunityIcons, name: "memory", category: "tech" },
+  { id: "robot", Component: MaterialCommunityIcons, name: "robot-outline", category: "tech" },
+  { id: "coffee", Component: MaterialCommunityIcons, name: "coffee", category: "lifestyle" },
+  { id: "school", Component: Ionicons, name: "school", category: "science" },
+  { id: "calculator", Component: Ionicons, name: "calculator", category: "science" },
+  { id: "language", Component: Ionicons, name: "language", category: "science" },
+  { id: "airplane", Component: Ionicons, name: "airplane", category: "travel" },
+  { id: "train", Component: Ionicons, name: "train", category: "travel" },
+  { id: "car", Component: Ionicons, name: "car-sport", category: "travel" },
+  { id: "map", Component: Ionicons, name: "map", category: "travel" },
+  { id: "rocket", Component: Ionicons, name: "rocket", category: "tech" },
+  { id: "construct", Component: Ionicons, name: "construct", category: "tech" },
+  { id: "gamepad", Component: Ionicons, name: "game-controller", category: "tech" },
+  { id: "palette", Component: Ionicons, name: "color-palette", category: "lifestyle" },
+  { id: "mic", Component: Ionicons, name: "mic", category: "lifestyle" },
+  { id: "headset", Component: Ionicons, name: "headset", category: "lifestyle" },
+  { id: "stats", Component: Ionicons, name: "stats-chart", category: "tech" },
+  { id: "briefcase", Component: Ionicons, name: "briefcase", category: "general" },
+  { id: "people", Component: Ionicons, name: "people", category: "general" },
+  { id: "trophy", Component: Ionicons, name: "trophy", category: "sport" },
+  { id: "medal", Component: Ionicons, name: "medal", category: "sport" },
+  { id: "football", Component: Ionicons, name: "football", category: "sport" },
+  { id: "basketball", Component: Ionicons, name: "basketball", category: "sport" },
+  { id: "barbell", Component: Ionicons, name: "barbell", category: "sport" },
+  { id: "fitness", Component: Ionicons, name: "fitness", category: "sport" },
+  { id: "shield", Component: Ionicons, name: "shield-checkmark", category: "tech" },
+  { id: "sparkles", Component: Ionicons, name: "sparkles", category: "general" },
+  { id: "paw", Component: Ionicons, name: "paw", category: "lifestyle" },
+  { id: "pizza", Component: Ionicons, name: "pizza", category: "lifestyle" },
+  { id: "suitcase", Component: Entypo, name: "suitcase", category: "travel" },
 ];
 
 export function getCourseIconById(id: string | null | undefined) {
