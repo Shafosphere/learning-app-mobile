@@ -9,7 +9,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 0,
   },
   section: {
-    backgroundColor: colors.secondBackground,
+    backgroundColor: colors.background,
     borderRadius: 16,
     padding: 16,
     paddingTop: 32,
@@ -26,31 +26,60 @@ export const useStyles = createThemeStylesHook((colors) => ({
     top: 24,
     color: colors.headline,
   },
-  segmentedControl: {
+  addModeTabs: {
     marginTop: 28,
-    flexDirection: "row" as const,
-    backgroundColor: colors.secondBackground,
-    borderRadius: 8,
-    borderWidth: 1,
-    borderColor: colors.border,
+    width: "100%",
+    flexDirection: "row",
+    alignItems: "center",
+    position: "relative",
+    padding: 4,
+    borderRadius: 16,
+    backgroundColor: colors.background,
     overflow: "hidden",
   },
-  segmentOption: {
+  addModeThumb: {
+    position: "absolute",
+    top: 4,
+    bottom: 4,
+    borderRadius: 6,
+    backgroundColor: colors.secondBackground,
+  },
+  addModeTab: {
     flex: 1,
-    paddingVertical: 12,
+    minHeight: 44,
+    borderRadius: 12,
     alignItems: "center" as const,
     justifyContent: "center" as const,
+    zIndex: 2,
   },
-  segmentOptionLabel: {
-    fontSize: 15,
-    fontWeight: "600",
-    color: colors.paragraph,
+  addModeTabContent: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "center",
+    gap: 8,
   },
-  segmentOptionActive: {
+  addModeDot: {
+    width: 8,
+    height: 8,
+    borderRadius: 99,
+    backgroundColor: "rgba(15, 23, 42, 0.18)",
+  },
+  addModeDotActive: {
     backgroundColor: colors.my_green,
+    shadowColor: colors.my_green,
+    shadowOpacity: 0.3,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 0 },
+    elevation: 1,
   },
-  segmentOptionLabelActive: {
-    color: colors.darkbg,
+  addModeTabText: {
+    color: colors.paragraph,
+    fontSize: 14,
+    fontWeight: 800,
+    textAlign: "center",
+  },
+  addModeTabTextActive: {
+    color: colors.headline,
   },
   modeContainer: {
     marginTop: 12,
@@ -175,8 +204,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 8,
     paddingBottom: 10,
     backgroundColor: colors.background,
-    borderTopWidth: 1,
-    borderTopColor: colors.border,
   },
   manualToolbar: {
     flexDirection: "row" as const,

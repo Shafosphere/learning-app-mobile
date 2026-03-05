@@ -52,7 +52,7 @@
       },
       "actionsSelector": {
         "title": "Wybierz układ",
-        "subtitle": "Wybierz rozmieszczenie przycisków w trybach: prawda/fałsz oraz umiem/nie umiem.",
+        "subtitle": "Wybierz rozmieszczenie przycisków",
         "top": "U góry",
         "bottom": "Na dole"
       }
@@ -96,7 +96,7 @@
       },
       "reminders": {
         "title": "Przypomnienia o nauce",
-        "subtitle": "Inteligentne lokalne przypomnienia na bazie Twojej aktywności.",
+        "subtitle": "Przypomnienia o nauce.",
         "profile": {
           "morning": "poranny",
           "afternoon": "popołudniowy",
@@ -111,7 +111,6 @@
         "status": {
           "next": "Następne przypomnienie: {{value}}",
           "profileAndDays": "Profil: {{profile}}, aktywne dni: {{days}}",
-          "collecting": "Zbieramy dane, tymczasowo używamy bezpiecznego domyślnego czasu.",
           "permissionDenied": "Brak zgody na powiadomienia. Włącz uprawnienia w ustawieniach systemu.",
           "allDays": "codziennie"
         }
@@ -154,7 +153,7 @@
       },
       "resetLearningConfirm": {
         "title": "Przywróć ustawienia nauki",
-        "message": "Przywróć domyślne ustawienia (spellcheck, ogonki, miny pudełek, layout, batch, przypomnienia)?",
+        "message": "Przywróć domyślne ustawienia (spellcheck, ogonki, miny pudełek, layout, przypomnienia)?",
         "cancel": "Anuluj",
         "confirm": "Przywróć"
       },
@@ -184,7 +183,7 @@
         },
         "resetLearning": {
           "title": "Przywróć ustawienia nauki",
-          "subtitle": "Spellcheck, diakrytyki, miny pudełek, layout, batch size, przypomnienia.",
+          "subtitle": "Spellcheck, diakrytyki, miny pudełek, layout, przypomnienia.",
           "button": "Przywróć domyślne",
           "buttonLoading": "Przywracam..."
         }
@@ -420,6 +419,158 @@
         "title": "Wyłączanie powtórek",
         "description": "W ustawieniach kursu możesz wyłączyć powtórki - wtedy nie pojawi się na tej liście."
       }
+    }
+  },
+  "courseCreator": {
+    "import": {
+      "defaultFileName": "plik",
+      "addModeCsv": "Import z pliku",
+      "addModeManual": "Dodaj ręcznie",
+      "cardTypeLabel": "Typ fiszki",
+      "cardTypes": {
+        "text": "Odpowiedź tekstowa",
+        "trueFalse": "Prawda/Fałsz",
+        "knowDontKnow": "Umiem/Nie umiem"
+      },
+      "sectionHeader": "ZAWARTOŚĆ",
+      "addModeA11y": "Sposób dodawania fiszek",
+      "previewTitle": "Podgląd importu",
+      "stats": {
+        "rows": "Wiersze",
+        "importable": "Da się zaimportować",
+        "errors": "Błędy do poprawy",
+        "warnings": "Ostrzeżenia"
+      },
+      "issueRow": " wiersz {{row}}",
+      "moreIssues": "+{{count}} kolejnych wpisów w raporcie.",
+      "importing": "Importowanie...",
+      "importValid": "Importuj poprawne",
+      "clearReport": "Wyczyść raport",
+      "flashcardsHeader": "fiszki",
+      "addCardA11y": "Dodaj nową fiszkę",
+      "backA11y": "Wróć do tworzenia kursu",
+      "next": "Dalej",
+      "nextA11y": "Przejdź do ustawień kursu",
+      "shareDialogTitle": "Pobierz wzór CSV",
+      "popups": {
+        "noRows": "Nie ma jeszcze wierszy, które da się zaimportować.",
+        "analyzedWithErrors": "Sprawdzono plik: {{validRows}} da się zaimportować, {{errorCount}} trzeba poprawić.",
+        "analyzedWithWarnings": "Sprawdzono plik: {{validRows}} da się zaimportować, {{warningCount}} ma ostrzeżenia.",
+        "analyzedSuccess": "Super! {{validRows}} wierszy jest gotowych do importu.",
+        "analysisError": "Błąd analizy pliku.",
+        "templateDownloaded": "Pobrano wzór: {{fileName}}",
+        "templateDirectoryMissing": "Nie wybrano katalogu do zapisu wzoru CSV.",
+        "templateSaved": "Zapisano wzór: {{fileName}}",
+        "templateSavedLocally": "Wzór zapisany lokalnie: {{fileName}}",
+        "templateReady": "Wzór gotowy: {{fileName}}",
+        "templateDownloadError": "Nie udało się pobrać wzoru CSV.",
+        "noCardsToImport": "Nie ma kart, które da się teraz zaimportować.",
+        "importedWithSkipped": "Zaimportowano {{cardsCount}} fiszek, pominięto {{skipped}} błędnych wierszy.",
+        "importedWithWarnings": "Zaimportowano {{cardsCount}} fiszek ({{warningCount}} ostrzeżeń).",
+        "importedSuccess": "Zaimportowano {{cardsCount}} fiszek.",
+        "importError": "Błąd podczas importu fiszek.",
+        "missingCourseName": "Najpierw nadaj nazwę kursowi",
+        "missingCourseIcon": "Wybierz ikonę kursu",
+        "addAtLeastOne": "Dodaj przynajmniej jedną fiszkę"
+      }
+    },
+    "csvGuide": {
+      "required": "Wymagane",
+      "optional": "Opcjonalne",
+      "important": "Ważne",
+      "downloading": "Przygotowuję...",
+      "downloadTemplate": "Pobierz wzór",
+      "importTitle": "Import",
+      "step1": "1. Przygotuj plik CSV albo TXT z nagłówkami kolumn.",
+      "step2": "2. Wybierz poniżej format pliku i importuj.",
+      "pickCsv": "Wybierz CSV",
+      "pickTxt": "Wybierz TXT",
+      "analyzing": "Analizuję...",
+      "cardTypes": "Typy fiszek",
+      "imagesTitle": "Jak dodawać obrazy",
+      "imagesDescription": "Obok pliku CSV lub TXT z fiszkami utwórz folder images. Dodaj do niego obrazy, a w wierszach pliku wpisuj nazwy plików, np. dog.png. Obsługiwane formaty: .png, .jpg, .jpeg, .svg.",
+      "sections": {
+        "selfAssess": {
+          "title": "1) Samoocena",
+          "summary": "Użytkownik ocenia: umiem albo nie umiem.",
+          "fields": {
+            "frontText": {
+              "description": "Pytanie lub temat do samooceny."
+            },
+            "explanation": {
+              "description": "Treść, która pokazuje się po samoocenie."
+            }
+          }
+        },
+        "traditional": {
+          "title": "2) Odpowiedź tekstowa",
+          "summary": "Klasyczna fiszka: pytanie z przodu, odpowiedź z tyłu.",
+          "fields": {
+            "frontText": {
+              "description": "Awers fiszki: pytanie, hasło albo stwierdzenie."
+            },
+            "backText": {
+              "description": "Rewers fiszki: poprawna odpowiedź tekstowa.",
+              "note": "Możesz wpisać wiele odpowiedzi, oddzielając je przecinkiem lub średnikiem."
+            },
+            "explanation": {
+              "description": "Dodatkowe wyjaśnienie pokazywane po odpowiedzi."
+            },
+            "flip": {
+              "description": "Jeśli true, karta będzie odwracana przy nauce."
+            }
+          }
+        },
+        "trueFalse": {
+          "title": "3) Prawda/Fałsz",
+          "summary": "Użytkownik zaznacza, czy zdanie jest prawdziwe.",
+          "fields": {
+            "frontText": {
+              "description": "Treść pytania albo zdania do oceny."
+            },
+            "tfAnswer": {
+              "description": "Poprawna odpowiedź: true/false albo 1/0."
+            },
+            "explanation": {
+              "description": "Wyjaśnienie po odpowiedzi."
+            }
+          }
+        },
+        "mixed": {
+          "title": "4) Mieszane",
+          "summary": "W jednym pliku łączysz różne typy fiszek.",
+          "fields": {
+            "type": {
+              "description": "Typ fiszki dla każdego wiersza.",
+              "note": "Wartości: traditional, true_false, self_assess (lub polskie aliasy)."
+            }
+          },
+          "tip": "Układ kolumn pozostaje taki sam jak w sekcjach powyżej."
+        }
+      }
+    },
+    "manualEditor": {
+      "disableFlip": "Wyłącz",
+      "enableFlip": "Włącz",
+      "flipForCard": "odwracanie dla fiszki {{index}}",
+      "frontPlaceholder": "Awers",
+      "backPlaceholder": "Rewers",
+      "addImage": "Dodaj obraz",
+      "none": "Brak",
+      "removeOrCloseImageForCard": "Usuń obraz lub zamknij pole obrazu dla fiszki {{index}}",
+      "answerLabel": "Odpowiedź",
+      "trueLabel": "Prawda",
+      "falseLabel": "Fałsz",
+      "optionForCard": "{{option}} dla fiszki {{index}}",
+      "removeAnswerForCard": "Usuń odpowiedź {{answerIndex}} dla fiszki {{index}}",
+      "explanationLabel": "Wyjaśnienie",
+      "optional": "opcjonalnie",
+      "actionForCard": "Akcja dla fiszki {{index}}",
+      "removeCard": "Usuń fiszkę {{index}}",
+      "addAnswerForCard": "Dodaj tłumaczenie dla fiszki {{index}}",
+      "addImageForCard": "Dodaj obrazek dla fiszki {{index}}",
+      "removeImageForCard": "Usuń obraz dla fiszki {{index}}",
+      "addNewCard": "Dodaj nową fiszkę"
     }
   }
 }

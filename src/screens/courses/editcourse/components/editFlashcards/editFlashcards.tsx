@@ -5,6 +5,7 @@ import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import { ReactNode, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Image,
   Pressable,
@@ -133,6 +134,7 @@ export const ManualCardsEditor = ({
   actionButtons,
   showDefaultBottomAddButton = true,
 }: ManualCardsEditorProps) => {
+  const { t } = useTranslation();
   const styles = useStyles();
   const [openImageSlots, setOpenImageSlots] = useState<Record<string, boolean>>(
     {}
@@ -286,8 +288,12 @@ export const ManualCardsEditor = ({
                     <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={`${
-                        card.flipped ? "Wyłącz" : "Włącz"
-                      } odwracanie dla fiszki ${index + 1}`}
+                        card.flipped
+                          ? t("courseCreator.manualEditor.disableFlip")
+                          : t("courseCreator.manualEditor.enableFlip")
+                      } ${t("courseCreator.manualEditor.flipForCard", {
+                        index: index + 1,
+                      })}`}
                       onPress={() => {
                         console.log("Toggling flip for card:", {
                           id: card.id,
@@ -335,7 +341,7 @@ export const ManualCardsEditor = ({
                           !card.front?.trim().length &&
                             styles.cardInputPlaceholderState,
                         ]}
-                        placeholder="Awers"
+                        placeholder={t("courseCreator.manualEditor.frontPlaceholder")}
                         placeholderTextColor={styles.cardPlaceholder?.color}
                         onChangeText={(value) =>
                           handleFrontChange(card.id, value)
@@ -368,16 +374,18 @@ export const ManualCardsEditor = ({
                           />
                         ) : (
                           <Text style={styles.imagePlaceholder}>
-                            {canEditImages ? "Dodaj obraz" : "Brak"}
+                            {canEditImages
+                              ? t("courseCreator.manualEditor.addImage")
+                              : t("courseCreator.manualEditor.none")}
                           </Text>
                         )}
                       </Pressable>
                       {shouldShowImagesRow && canEditImages ? (
                         <Pressable
                           accessibilityRole="button"
-                          accessibilityLabel={`Usuń obraz lub zamknij pole obrazu dla fiszki ${
-                            index + 1
-                          }`}
+                          accessibilityLabel={t("courseCreator.manualEditor.removeOrCloseImageForCard", {
+                            index: index + 1,
+                          })}
                           hitSlop={8}
                           onPress={() => {
                             clearImage(card.id, imageSideToClear);
@@ -400,16 +408,16 @@ export const ManualCardsEditor = ({
               <View style={styles.answersContainer}>
                 {isTrueFalseType ? (
                   <View style={styles.trueFalseContainer}>
-                    <Text style={styles.trueFalseLabel}>Odpowiedź</Text>
+                    <Text style={styles.trueFalseLabel}>{t("courseCreator.manualEditor.answerLabel")}</Text>
                     <View style={styles.trueFalseOptions}>
                       {[
                         {
                           key: "true",
-                          label: "Prawda",
+                          label: t("courseCreator.manualEditor.trueLabel"),
                         },
                         {
                           key: "false",
-                          label: "Fałsz",
+                          label: t("courseCreator.manualEditor.falseLabel"),
                         },
                       ].map((option) => {
                         const isActive = trueFalseValue === option.key;
@@ -419,9 +427,10 @@ export const ManualCardsEditor = ({
                             key={option.key}
                             accessibilityRole="button"
                             accessibilityState={{ selected: isActive }}
-                            accessibilityLabel={`${option.label} dla fiszki ${
-                              index + 1
-                            }`}
+                            accessibilityLabel={t("courseCreator.manualEditor.optionForCard", {
+                              option: option.label,
+                              index: index + 1,
+                            })}
                             style={[
                               styles.trueFalseOption,
                               isActive &&
@@ -450,7 +459,7 @@ export const ManualCardsEditor = ({
                   </View>
                 ) : isKnowDontKnowType ? null : (
                   card.answers.map((answer, answerIndex) => {
-                    const placeholder = "Rewers";
+                    const placeholder = t("courseCreator.manualEditor.backPlaceholder");
                     return (
                       <View
                         key={`${card.id}-answer-${answerIndex}`}
@@ -489,9 +498,10 @@ export const ManualCardsEditor = ({
                         {!isDisplayMode && card.answers.length > 1 && (
                           <Pressable
                             accessibilityRole="button"
-                            accessibilityLabel={`Usuń odpowiedź ${
-                              answerIndex + 1
-                            } dla fiszki ${index + 1}`}
+                            accessibilityLabel={t("courseCreator.manualEditor.removeAnswerForCard", {
+                              answerIndex: answerIndex + 1,
+                              index: index + 1,
+                            })}
                             style={styles.answerRemoveButton}
                             hitSlop={8}
                             onPress={() =>
@@ -510,7 +520,7 @@ export const ManualCardsEditor = ({
                   })
                 )}
                 <View style={styles.explanationContainer}>
-                  <Text style={styles.explanationLabel}>Explanation</Text>
+                  <Text style={styles.explanationLabel}>{t("courseCreator.manualEditor.explanationLabel")}</Text>
                   {isDisplayMode ? (
                     <Text style={styles.explanationInput}>
                       {card.explanation?.trim().length ? card.explanation : "—"}
@@ -523,7 +533,7 @@ export const ManualCardsEditor = ({
                         !(card.explanation ?? "").trim().length &&
                           styles.explanationInputPlaceholderState,
                       ]}
-                      placeholder="opcjonalnie"
+                      placeholder={t("courseCreator.manualEditor.optional")}
                       placeholderTextColor={styles.cardPlaceholder?.color}
                       onChangeText={(value) =>
                         handleExplanationChange(card.id, value)
@@ -542,7 +552,9 @@ export const ManualCardsEditor = ({
                         accessibilityRole="button"
                         accessibilityLabel={
                           resolvedAccessibilityLabel ??
-                          `Akcja dla fiszki ${index + 1}`
+                          t("courseCreator.manualEditor.actionForCard", {
+                            index: index + 1,
+                          })
                         }
                         style={styles.cardActionButton}
                         hitSlop={8}
@@ -556,7 +568,9 @@ export const ManualCardsEditor = ({
                   <>
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel={`Usuń fiszkę ${index + 1}`}
+                      accessibilityLabel={t("courseCreator.manualEditor.removeCard", {
+                        index: index + 1,
+                      })}
                       style={[
                         styles.cardActionButton,
                         isSingleCard && styles.removeButtonDisabled,
@@ -574,9 +588,9 @@ export const ManualCardsEditor = ({
                     {!isBooleanCardType && (
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={`Dodaj tłumaczenie dla fiszki ${
-                          index + 1
-                        }`}
+                        accessibilityLabel={t("courseCreator.manualEditor.addAnswerForCard", {
+                          index: index + 1,
+                        })}
                         style={[
                           styles.cardActionButton,
                         ]}
@@ -593,7 +607,9 @@ export const ManualCardsEditor = ({
                     {canEditImages && !hasFrontImage ? (
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={`Dodaj obrazek dla fiszki ${index + 1}`}
+                        accessibilityLabel={t("courseCreator.manualEditor.addImageForCard", {
+                          index: index + 1,
+                        })}
                         style={[
                           styles.cardActionButton,
                           styles.cardActionButtonAddImage,
@@ -616,7 +632,9 @@ export const ManualCardsEditor = ({
                     {hasFrontImage && canEditImages ? (
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={`Usuń obraz dla fiszki ${index + 1}`}
+                        accessibilityLabel={t("courseCreator.manualEditor.removeImageForCard", {
+                          index: index + 1,
+                        })}
                         style={[
                           styles.cardActionButton,
                           styles.imageClearButton,
@@ -656,7 +674,7 @@ export const ManualCardsEditor = ({
           ))}
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Dodaj nową fiszkę"
+            accessibilityLabel={t("courseCreator.manualEditor.addNewCard")}
             style={styles.manualAddButton}
             onPress={handleAddCardPress}
           >

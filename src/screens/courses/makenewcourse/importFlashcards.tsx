@@ -22,14 +22,24 @@ import {
   getCsvTemplate,
   type CsvTemplateKey,
 } from "@/src/screens/courses/makenewcourse/csvImport/templates";
+import { getCsvFieldLabel } from "@/src/screens/courses/makenewcourse/csvImport/schema";
 import type { CsvAnalysisResult } from "@/src/screens/courses/makenewcourse/csvImport/types";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
+import { useTranslation } from "react-i18next";
 import * as Sharing from "expo-sharing";
-import { Animated, Platform, Pressable, ScrollView, Text, View } from "react-native";
+import {
+  Animated,
+  LayoutChangeEvent,
+  Platform,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import {
   CONTENT_DRAFT_STORAGE_KEY,
   type AddMode,
@@ -41,34 +51,37 @@ import {
 } from "./contentDraft";
 import { useStyles } from "./importFlashcards-styles";
 
-const segmentOptions: { key: AddMode; label: string }[] = [
-  { key: "csv", label: "Import z pliku" },
-  { key: "manual", label: "Dodaj ręcznie" },
-];
-
-const cardTypeOptions: { key: ManualCardType; label: string }[] = [
-  {
-    key: "text",
-    label: "Tradycyjne",
-  },
-  {
-    key: "true_false",
-    label: "Prawda / Fałsz",
-  },
-  {
-    key: "know_dont_know",
-    label: "Umiem / Nie umiem",
-  },
-];
-
 type CsvStep = "idle" | "analyzing" | "preview" | "importing";
 
 export default function CustomCourseContentScreen() {
+  const segmentedPad = 4;
   const styles = useStyles();
   const setPopup = usePopup();
   const router = useRouter();
   const pathname = usePathname();
   const params = useLocalSearchParams();
+  const { t, i18n } = useTranslation();
+  const locale: "pl" | "en" = i18n.resolvedLanguage?.startsWith("en") ? "en" : "pl";
+
+  const segmentOptions: { key: AddMode; label: string }[] = [
+    { key: "csv", label: t("courseCreator.import.addModeCsv") },
+    { key: "manual", label: t("courseCreator.import.addModeManual") },
+  ];
+
+  const cardTypeOptions: { key: ManualCardType; label: string }[] = [
+    {
+      key: "text",
+      label: t("courseCreator.import.cardTypes.text"),
+    },
+    {
+      key: "true_false",
+      label: t("courseCreator.import.cardTypes.trueFalse"),
+    },
+    {
+      key: "know_dont_know",
+      label: t("courseCreator.import.cardTypes.knowDontKnow"),
+    },
+  ];
 
   const courseName = useMemo(() => {
     const raw = params.name;
@@ -101,6 +114,8 @@ export default function CustomCourseContentScreen() {
   }, [params.reviewsEnabled]);
 
   const [addMode, setAddMode] = useState<AddMode>("manual");
+  const [addModeTabsWidth, setAddModeTabsWidth] = useState(0);
+  const addModeSliderX = useState(() => new Animated.Value(0))[0];
   const {
     manualCards,
     replaceManualCards,
@@ -125,6 +140,11 @@ export default function CustomCourseContentScreen() {
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
 
   const shouldShowManualToolbar = addMode === "manual";
+  const addModeSliderWidth = Math.max(0, (addModeTabsWidth - segmentedPad * 2) / 2);
+
+  const handleAddModeTabsLayout = useCallback((event: LayoutChangeEvent) => {
+    setAddModeTabsWidth(event.nativeEvent.layout.width);
+  }, []);
 
   const draftScopeKey = useMemo(
     () =>
@@ -177,6 +197,18 @@ export default function CustomCourseContentScreen() {
   }, [draftScopeKey, replaceManualCards]);
 
   useEffect(() => {
+    if (addModeSliderWidth <= 0) {
+      return;
+    }
+    const targetX = addMode === "manual" ? addModeSliderWidth : 0;
+    Animated.timing(addModeSliderX, {
+      toValue: targetX,
+      duration: 220,
+      useNativeDriver: true,
+    }).start();
+  }, [addMode, addModeSliderWidth, addModeSliderX]);
+
+  useEffect(() => {
     if (!isDraftHydrated) return;
     const timeoutId = setTimeout(() => {
       const payload: ContentDraftPayload = {
@@ -206,15 +238,16 @@ export default function CustomCourseContentScreen() {
       }
 
       const asset = picked.assets[0];
-      const fileName = asset.name ?? "plik";
+      const fileName = asset.name ?? t("courseCreator.import.defaultFileName");
       setCsvFileName(fileName);
       setCsvStep("analyzing");
 
       const parsed = await parseImportFile({
         uri: asset.uri,
         name: asset.name,
+        locale,
       });
-      const analysis = analyzeRows(parsed);
+      const analysis = analyzeRows(parsed, { locale });
       setCsvAnalysis(analysis);
       setCsvStep("preview");
 
@@ -223,7 +256,7 @@ export default function CustomCourseContentScreen() {
 
       if (analysis.validRows.length === 0) {
         setPopup({
-          message: "Nie ma jeszcze wierszy, ktore da sie zaimportowac.",
+          message: t("courseCreator.import.popups.noRows"),
           color: "angry",
           duration: 3500,
         });
@@ -233,10 +266,18 @@ export default function CustomCourseContentScreen() {
       setPopup({
         message:
           errorCount > 0
-            ? `Sprawdzono plik: ${analysis.validRows.length} da sie zaimportowac, ${errorCount} trzeba poprawic.`
+            ? t("courseCreator.import.popups.analyzedWithErrors", {
+                validRows: analysis.validRows.length,
+                errorCount,
+              })
             : warningCount > 0
-              ? `Sprawdzono plik: ${analysis.validRows.length} da sie zaimportowac, ${warningCount} ma ostrzezenia.`
-              : `Super! ${analysis.validRows.length} wierszy jest gotowych do importu.`,
+              ? t("courseCreator.import.popups.analyzedWithWarnings", {
+                  validRows: analysis.validRows.length,
+                  warningCount,
+                })
+              : t("courseCreator.import.popups.analyzedSuccess", {
+                  validRows: analysis.validRows.length,
+                }),
         color: warningCount > 0 || errorCount > 0 ? "disoriented" : "calm",
         duration: 3500,
       });
@@ -244,7 +285,7 @@ export default function CustomCourseContentScreen() {
       console.error("File parse/analyze error", error);
       setCsvStep("idle");
       setPopup({
-        message: "Błąd analizy pliku.",
+        message: t("courseCreator.import.popups.analysisError"),
         color: "angry",
         duration: 4000,
       });
@@ -269,7 +310,7 @@ export default function CustomCourseContentScreen() {
 
   const handleDownloadTemplate = async (templateKey: CsvTemplateKey) => {
     setDownloadingTemplateKey(templateKey);
-    const template = getCsvTemplate(templateKey);
+    const template = getCsvTemplate(templateKey, { locale });
 
     try {
       if (Platform.OS === "web") {
@@ -308,7 +349,9 @@ export default function CustomCourseContentScreen() {
         web.URL.revokeObjectURL(url);
 
         setPopup({
-          message: `Pobrano wzor: ${template.fileName}`,
+          message: t("courseCreator.import.popups.templateDownloaded", {
+            fileName: template.fileName,
+          }),
           color: "calm",
           duration: 2500,
         });
@@ -320,7 +363,7 @@ export default function CustomCourseContentScreen() {
           await FileSystem.StorageAccessFramework.requestDirectoryPermissionsAsync();
         if (!permissions.granted) {
           setPopup({
-            message: "Nie wybrano katalogu do zapisu wzoru CSV.",
+            message: t("courseCreator.import.popups.templateDirectoryMissing"),
             color: "disoriented",
             duration: 3200,
           });
@@ -338,7 +381,9 @@ export default function CustomCourseContentScreen() {
         });
 
         setPopup({
-          message: `Zapisano wzor: ${template.fileName}`,
+          message: t("courseCreator.import.popups.templateSaved", {
+            fileName: template.fileName,
+          }),
           color: "calm",
           duration: 3000,
         });
@@ -359,7 +404,9 @@ export default function CustomCourseContentScreen() {
       );
       if (!sharingAvailable) {
         setPopup({
-          message: `Wzor zapisany lokalnie: ${template.fileName}`,
+          message: t("courseCreator.import.popups.templateSavedLocally", {
+            fileName: template.fileName,
+          }),
           color: "calm",
           duration: 3000,
         });
@@ -369,18 +416,20 @@ export default function CustomCourseContentScreen() {
       await Sharing.shareAsync(fileUri, {
         mimeType: "text/csv",
         UTI: "public.comma-separated-values-text",
-        dialogTitle: "Pobierz wzor CSV",
+        dialogTitle: t("courseCreator.import.shareDialogTitle"),
       });
 
       setPopup({
-        message: `Wzor gotowy: ${template.fileName}`,
+        message: t("courseCreator.import.popups.templateReady", {
+          fileName: template.fileName,
+        }),
         color: "calm",
         duration: 2500,
       });
     } catch (error) {
       console.error("CSV template download error", error);
       setPopup({
-        message: "Nie udalo sie pobrac wzoru CSV.",
+        message: t("courseCreator.import.popups.templateDownloadError"),
         color: "angry",
         duration: 3500,
       });
@@ -397,7 +446,7 @@ export default function CustomCourseContentScreen() {
 
       if (!cards.length) {
         setPopup({
-          message: "Nie ma kart, ktore da sie teraz zaimportowac.",
+          message: t("courseCreator.import.popups.noCardsToImport"),
           color: "angry",
           duration: 3500,
         });
@@ -416,10 +465,18 @@ export default function CustomCourseContentScreen() {
       setPopup({
         message:
           skipped > 0
-            ? `Zaimportowano ${cards.length} fiszek, pominięto ${skipped} błędnych wierszy.`
+            ? t("courseCreator.import.popups.importedWithSkipped", {
+                cardsCount: cards.length,
+                skipped,
+              })
             : warningCount > 0
-              ? `Zaimportowano ${cards.length} fiszek (${warningCount} ostrzeżeń).`
-              : `Zaimportowano ${cards.length} fiszek.`,
+              ? t("courseCreator.import.popups.importedWithWarnings", {
+                  cardsCount: cards.length,
+                  warningCount,
+                })
+              : t("courseCreator.import.popups.importedSuccess", {
+                  cardsCount: cards.length,
+                }),
         color: skipped > 0 ? "disoriented" : "calm",
         duration: 4000,
       });
@@ -427,7 +484,7 @@ export default function CustomCourseContentScreen() {
     } catch (error) {
       console.error("CSV import error", error);
       setPopup({
-        message: "Błąd podczas importu fiszek.",
+        message: t("courseCreator.import.popups.importError"),
         color: "angry",
         duration: 4000,
       });
@@ -444,7 +501,7 @@ export default function CustomCourseContentScreen() {
     const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
-        message: "Najpierw nadaj nazwę kursowi",
+        message: t("courseCreator.import.popups.missingCourseName"),
         color: "angry",
         duration: 3000,
       });
@@ -453,7 +510,7 @@ export default function CustomCourseContentScreen() {
     }
     if (!iconId) {
       setPopup({
-        message: "Wybierz ikonę kursu",
+        message: t("courseCreator.import.popups.missingCourseIcon"),
         color: "angry",
         duration: 3000,
       });
@@ -504,7 +561,7 @@ export default function CustomCourseContentScreen() {
 
     if (trimmedCards.length === 0) {
       setPopup({
-        message: "Dodaj przynajmniej jedną fiszkę",
+        message: t("courseCreator.import.popups.addAtLeastOne"),
         color: "angry",
         duration: 3000,
       });
@@ -572,28 +629,48 @@ export default function CustomCourseContentScreen() {
             shouldShowManualToolbar && styles.sectionWithManualToolbar,
           ]}
         >
-          <Text style={styles.sectionHeader}>ZAWARTOSC</Text>
-          <View style={styles.segmentedControl}>
+          <Text style={styles.sectionHeader}>{t("courseCreator.import.sectionHeader")}</Text>
+          <View
+            style={styles.addModeTabs}
+            accessibilityRole="tablist"
+            accessibilityLabel={t("courseCreator.import.addModeA11y")}
+            onLayout={handleAddModeTabsLayout}
+          >
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.addModeThumb,
+                {
+                  width: addModeSliderWidth,
+                  left: segmentedPad,
+                  transform: [{ translateX: addModeSliderX }],
+                },
+              ]}
+            />
             {segmentOptions.map((option) => (
               <Pressable
                 key={option.key}
                 onPress={() => setAddMode(option.key)}
-                accessibilityRole="button"
+                accessibilityRole="tab"
                 accessibilityState={{ selected: addMode === option.key }}
-                style={({ pressed }) => [
-                  styles.segmentOption,
-                  addMode === option.key && styles.segmentOptionActive,
-                  pressed && { opacity: 0.8 },
-                ]}
+                style={styles.addModeTab}
               >
-                <Text
-                  style={[
-                    styles.segmentOptionLabel,
-                    addMode === option.key && styles.segmentOptionLabelActive,
-                  ]}
-                >
-                  {option.label}
-                </Text>
+                <View style={styles.addModeTabContent}>
+                  <View
+                    style={[
+                      styles.addModeDot,
+                      addMode === option.key && styles.addModeDotActive,
+                    ]}
+                  />
+                  <Text
+                    style={[
+                      styles.addModeTabText,
+                      addMode === option.key && styles.addModeTabTextActive,
+                    ]}
+                  >
+                    {option.label}
+                  </Text>
+                </View>
               </Pressable>
             ))}
           </View>
@@ -611,36 +688,36 @@ export default function CustomCourseContentScreen() {
 
               {csvAnalysis ? (
                 <View style={styles.csvPreviewCard}>
-                  <Text style={styles.csvPreviewTitle}>Podgląd importu</Text>
+                  <Text style={styles.csvPreviewTitle}>{t("courseCreator.import.previewTitle")}</Text>
 
                   <View style={styles.csvStatsGrid}>
                     <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>Wiersze</Text>
+                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.rows")}</Text>
                       <Text style={styles.csvStatValue}>{csvAnalysis.totalRows}</Text>
                     </View>
                     <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>Da sie zaimportowac</Text>
+                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.importable")}</Text>
                       <Text style={styles.csvStatValue}>{csvAnalysis.validRows.length}</Text>
                     </View>
                     <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>Bledy do poprawy</Text>
+                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.errors")}</Text>
                       <Text style={styles.csvStatValue}>{csvErrorCount}</Text>
                     </View>
                     <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>Ostrzezenia</Text>
+                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.warnings")}</Text>
                       <Text style={styles.csvStatValue}>{csvWarningCount}</Text>
                     </View>
                   </View>
 
                   <View style={styles.csvTypeStatsRow}>
                     <Text style={styles.csvTypePill}>
-                      Traditional: {csvAnalysis.statsByType.traditional}
+                      {t("courseCreator.import.cardTypes.text")}: {csvAnalysis.statsByType.traditional}
                     </Text>
                     <Text style={styles.csvTypePill}>
-                      True/False: {csvAnalysis.statsByType.true_false}
+                      {t("courseCreator.import.cardTypes.trueFalse")}: {csvAnalysis.statsByType.true_false}
                     </Text>
                     <Text style={styles.csvTypePill}>
-                      Self-assess: {csvAnalysis.statsByType.self_assess}
+                      {t("courseCreator.import.cardTypes.knowDontKnow")}: {csvAnalysis.statsByType.self_assess}
                     </Text>
                   </View>
 
@@ -652,13 +729,19 @@ export default function CustomCourseContentScreen() {
                           style={styles.csvIssueText}
                         >
                           [{issue.severity.toUpperCase()}]
-                          {issue.row ? ` wiersz ${issue.row}` : ""}
-                          {issue.field ? ` (${issue.field})` : ""}: {issue.message}
+                          {issue.row
+                            ? t("courseCreator.import.issueRow", { row: issue.row })
+                            : ""}
+                          {issue.field
+                            ? ` (${getCsvFieldLabel(issue.field, locale)})`
+                            : ""}: {issue.message}
                         </Text>
                       ))}
                       {csvAnalysis.issues.length > 12 ? (
                         <Text style={styles.csvIssueTextMuted}>
-                          +{csvAnalysis.issues.length - 12} kolejnych wpisów w raporcie.
+                          {t("courseCreator.import.moreIssues", {
+                            count: csvAnalysis.issues.length - 12,
+                          })}
                         </Text>
                       ) : null}
                     </View>
@@ -666,14 +749,16 @@ export default function CustomCourseContentScreen() {
 
                   <View style={styles.csvActionRow}>
                     <MyButton
-                      text={csvStep === "importing" ? "Importowanie..." : "Importuj poprawne"}
+                      text={csvStep === "importing"
+                        ? t("courseCreator.import.importing")
+                        : t("courseCreator.import.importValid")}
                       color="my_green"
                       width={190}
                       disabled={csvStep === "importing" || csvAnalysis.validRows.length === 0}
                       onPress={handleImportAnalyzedRows}
                     />
                     <MyButton
-                      text="Wyczyść raport"
+                      text={t("courseCreator.import.clearReport")}
                       color="my_yellow"
                       width={150}
                       disabled={csvStep === "importing"}
@@ -685,7 +770,7 @@ export default function CustomCourseContentScreen() {
             </View>
           ) : (
             <View style={styles.modeContainer}>
-              <Text style={styles.miniSectionHeader}>fiszki</Text>
+              <Text style={styles.miniSectionHeader}>{t("courseCreator.import.flashcardsHeader")}</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
                 cardType={newCardType}
@@ -715,7 +800,7 @@ export default function CustomCourseContentScreen() {
               options={cardTypeOptions}
               value={newCardType}
               onChange={setNewCardType}
-              label="Typ fiszki"
+              label={t("courseCreator.import.cardTypeLabel")}
               labelHidden
               size="compact"
               dropdownDirection="up"
@@ -723,7 +808,7 @@ export default function CustomCourseContentScreen() {
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Dodaj nową fiszkę"
+              accessibilityLabel={t("courseCreator.import.addCardA11y")}
               style={styles.manualAddButton}
               hitSlop={8}
               onPress={() => handleAddCard(newCardType)}
@@ -743,16 +828,16 @@ export default function CustomCourseContentScreen() {
             onPress={handleGoBack}
             disabled={false}
             width={60}
-            accessibilityLabel="Wróć do tworzenia kursu"
+            accessibilityLabel={t("courseCreator.import.backA11y")}
           >
             <Ionicons name="arrow-back" size={28} style={styles.returnbtn} />
           </MyButton>
 
           <MyButton
-            text="Dalej"
+            text={t("courseCreator.import.next")}
             color="my_green"
             onPress={handleNavigateToSettings}
-            accessibilityLabel="Przejdź do ustawień kursu"
+            accessibilityLabel={t("courseCreator.import.nextA11y")}
           />
         </View>
       </View>

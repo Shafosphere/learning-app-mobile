@@ -1,8 +1,10 @@
 import MyButton from "@/src/components/button/button";
+import { getCsvFieldLabel } from "@/src/screens/courses/makenewcourse/csvImport/schema";
 import type { CsvTemplateKey } from "@/src/screens/courses/makenewcourse/csvImport/templates";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Ionicons } from "@expo/vector-icons";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 import { Platform, Pressable, Text, View } from "react-native";
 
 interface CsvImportGuideProps {
@@ -239,96 +241,11 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
 }));
 
-const GUIDE_SECTIONS: GuideSection[] = [
-  {
-    key: "self_assess",
-    title: "3) Samoocena",
-    summary: "Uzytkownik ocenia: umiem albo nie umiem.",
-    fields: [
-      {
-        key: "front_text",
-        description: "Pytanie lub temat do samooceny.",
-        required: true,
-      },
-      {
-        key: "explanation",
-        description: "Tresc, ktora pokazuje sie po samoocenie.",
-        required: false,
-      },
-    ],
-  },
-  {
-    key: "traditional",
-    title: "1) Odpowiedz otwarta",
-    summary: "Klasyczna fiszka: pytanie z przodu, odpowiedz z tylu.",
-    fields: [
-      {
-        key: "front_text",
-        description: "Przod fiszki: pytanie, haslo albo stwierdzenie.",
-        required: true,
-      },
-      {
-        key: "back_text",
-        description: "Tyl fiszki: poprawna odpowiedz tekstowa.",
-        required: true,
-        note: "Mozesz wpisac wiele odpowiedzi, oddzielajac je przecinkiem lub srednikiem.",
-      },
-      {
-        key: "explanation",
-        description: "Dodatkowe wyjasnienie pokazywane po odpowiedzi.",
-        required: false,
-      },
-      {
-        key: "flip",
-        description: "Jesli true, karta bedzie odwracana przy nauce.",
-        required: false,
-      },
-    ],
-  },
-  {
-    key: "true_false",
-    title: "2) Prawda/Falsz",
-    summary: "Uzytkownik zaznacza, czy zdanie jest prawdziwe.",
-    fields: [
-      {
-        key: "front_text",
-        description: "Tresc pytania albo zdania do oceny.",
-        required: true,
-      },
-      {
-        key: "tf_answer",
-        description: "Poprawna odpowiedz: true/false albo 1/0.",
-        required: true,
-      },
-      {
-        key: "explanation",
-        description: "Wyjasnienie po odpowiedzi.",
-        required: false,
-      },
-    ],
-  },
-  {
-    key: "mixed",
-    title: "4) Mieszane",
-    summary: "W jednym pliku laczysz rozne typy fiszek.",
-    fields: [
-      {
-        key: "type",
-        description: "Typ fiszki dla kazdego wiersza.",
-        required: true,
-        note: "wartosci: traditional, true_false, self_assess.",
-      },
-    ],
-    tips: [
-      "Uklad kolumn pozostaje taki sam jak w sekcjach powyzej.",
-    ],
-  },
-];
-
 type GuideAccordionSectionProps = {
   section: GuideSection;
   index: number;
   expanded: boolean;
+  locale: "pl" | "en";
   downloadingTemplateKey?: CsvTemplateKey | null;
   onDownloadTemplate: (templateKey: CsvTemplateKey) => void;
   onPress: () => void;
@@ -339,11 +256,13 @@ function GuideAccordionSection({
   section,
   index,
   expanded,
+  locale,
   onDownloadTemplate,
   downloadingTemplateKey,
   onPress,
   styles,
 }: GuideAccordionSectionProps) {
+  const { t } = useTranslation();
   const isDownloadingTemplate = downloadingTemplateKey === section.key;
 
   return (
@@ -380,7 +299,9 @@ function GuideAccordionSection({
             <View key={field.key} style={styles.fieldCard}>
               <View style={styles.fieldHeaderRow}>
                 <View style={styles.fieldNameBadge}>
-                  <Text style={styles.fieldNameText}>{field.key}</Text>
+                  <Text style={styles.fieldNameText}>
+                    {getCsvFieldLabel(field.key, locale)}
+                  </Text>
                 </View>
 
                 <View
@@ -399,7 +320,9 @@ function GuideAccordionSection({
                         : styles.requiredPillOptionalText,
                     ]}
                   >
-                    {field.required ? "Wymagane" : "Opcjonalne"}
+                    {field.required
+                      ? t("courseCreator.csvGuide.required")
+                      : t("courseCreator.csvGuide.optional")}
                   </Text>
                 </View>
               </View>
@@ -411,7 +334,7 @@ function GuideAccordionSection({
 
           {section.tips?.length ? (
             <View style={styles.tipsBox}>
-              <Text style={styles.tipsTitle}>Wazne</Text>
+              <Text style={styles.tipsTitle}>{t("courseCreator.csvGuide.important")}</Text>
               {section.tips.map((tip) => (
                 <Text key={tip} style={styles.tipsLine}>
                   • {tip}
@@ -422,7 +345,11 @@ function GuideAccordionSection({
 
           <View style={styles.templateButtonRow}>
             <MyButton
-              text={isDownloadingTemplate ? "Przygotowuje..." : "Pobierz wzor"}
+              text={
+                isDownloadingTemplate
+                  ? t("courseCreator.csvGuide.downloading")
+                  : t("courseCreator.csvGuide.downloadTemplate")
+              }
               onPress={
                 isDownloadingTemplate
                   ? undefined
@@ -446,28 +373,116 @@ export function CsvImportGuide({
   selectedFileName,
   isAnalyzing = false,
 }: CsvImportGuideProps) {
+  const { t, i18n } = useTranslation();
   const styles = useStyles();
+  const locale: "pl" | "en" = i18n.resolvedLanguage?.startsWith("en") ? "en" : "pl";
   const [expandedKey, setExpandedKey] = useState<GuideSectionKey>("self_assess");
+
+  const guideSections: GuideSection[] = [
+    {
+      key: "self_assess",
+      title: t("courseCreator.csvGuide.sections.selfAssess.title"),
+      summary: t("courseCreator.csvGuide.sections.selfAssess.summary"),
+      fields: [
+        {
+          key: "front_text",
+          description: t("courseCreator.csvGuide.sections.selfAssess.fields.frontText.description"),
+          required: true,
+        },
+        {
+          key: "explanation",
+          description: t("courseCreator.csvGuide.sections.selfAssess.fields.explanation.description"),
+          required: false,
+        },
+      ],
+    },
+    {
+      key: "traditional",
+      title: t("courseCreator.csvGuide.sections.traditional.title"),
+      summary: t("courseCreator.csvGuide.sections.traditional.summary"),
+      fields: [
+        {
+          key: "front_text",
+          description: t("courseCreator.csvGuide.sections.traditional.fields.frontText.description"),
+          required: true,
+        },
+        {
+          key: "back_text",
+          description: t("courseCreator.csvGuide.sections.traditional.fields.backText.description"),
+          required: true,
+          note: t("courseCreator.csvGuide.sections.traditional.fields.backText.note"),
+        },
+        {
+          key: "explanation",
+          description: t("courseCreator.csvGuide.sections.traditional.fields.explanation.description"),
+          required: false,
+        },
+        {
+          key: "flip",
+          description: t("courseCreator.csvGuide.sections.traditional.fields.flip.description"),
+          required: false,
+        },
+      ],
+    },
+    {
+      key: "true_false",
+      title: t("courseCreator.csvGuide.sections.trueFalse.title"),
+      summary: t("courseCreator.csvGuide.sections.trueFalse.summary"),
+      fields: [
+        {
+          key: "front_text",
+          description: t("courseCreator.csvGuide.sections.trueFalse.fields.frontText.description"),
+          required: true,
+        },
+        {
+          key: "tf_answer",
+          description: t("courseCreator.csvGuide.sections.trueFalse.fields.tfAnswer.description"),
+          required: true,
+        },
+        {
+          key: "explanation",
+          description: t("courseCreator.csvGuide.sections.trueFalse.fields.explanation.description"),
+          required: false,
+        },
+      ],
+    },
+    {
+      key: "mixed",
+      title: t("courseCreator.csvGuide.sections.mixed.title"),
+      summary: t("courseCreator.csvGuide.sections.mixed.summary"),
+      fields: [
+        {
+          key: "type",
+          description: t("courseCreator.csvGuide.sections.mixed.fields.type.description"),
+          required: true,
+          note: t("courseCreator.csvGuide.sections.mixed.fields.type.note"),
+        },
+      ],
+      tips: [t("courseCreator.csvGuide.sections.mixed.tip")],
+    },
+  ];
 
   return (
     <View style={styles.container}>
       <View style={styles.card}>
-        <Text style={styles.cardTitle}>Import</Text>
-        <Text style={styles.listItem}>
-          1. Przygotuj plik CSV albo TXT z naglowkami kolumn.
-        </Text>
-        <Text style={styles.listItem}>2. Wybierz ponizej format pliku i importuj.</Text>
+        <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.importTitle")}</Text>
+        <Text style={styles.listItem}>{t("courseCreator.csvGuide.step1")}</Text>
+        <Text style={styles.listItem}>{t("courseCreator.csvGuide.step2")}</Text>
       </View>
 
       <View style={styles.actionsRow}>
         <MyButton
-          text="Wybierz CSV"
+          text={t("courseCreator.csvGuide.pickCsv")}
           onPress={isAnalyzing ? undefined : onPickCsvFile}
           disabled={isAnalyzing}
           width={140}
         />
         <MyButton
-          text={isAnalyzing ? "Analizuje..." : "Wybierz TXT"}
+          text={
+            isAnalyzing
+              ? t("courseCreator.csvGuide.analyzing")
+              : t("courseCreator.csvGuide.pickTxt")
+          }
           onPress={isAnalyzing ? undefined : onPickTxtFile}
           disabled={isAnalyzing}
           width={140}
@@ -486,13 +501,14 @@ export function CsvImportGuide({
         </View>
       ) : null}
 
-      <Text style={styles.sectionTitle}>Typy fiszek</Text>
-      {GUIDE_SECTIONS.map((section, index) => (
+      <Text style={styles.sectionTitle}>{t("courseCreator.csvGuide.cardTypes")}</Text>
+      {guideSections.map((section, index) => (
         <GuideAccordionSection
           key={section.key}
           section={section}
           index={index}
           expanded={expandedKey === section.key}
+          locale={locale}
           onDownloadTemplate={onDownloadTemplate}
           downloadingTemplateKey={downloadingTemplateKey}
           onPress={() => setExpandedKey(section.key)}
@@ -501,13 +517,8 @@ export function CsvImportGuide({
       ))}
 
       <View style={styles.card}>
-
-        <Text style={styles.cardTitle}>Jak dodawac obrazy</Text>
-        <Text style={styles.paragraph}>
-          Obok pliku CSV lub TXT z fiszkami utworz folder images. Dodaj do
-          niego obrazy, a w wierszach pliku wpisuj nazwy plikow, np. dog.png.
-          Obslugiwane formaty: .png, .jpg, .jpeg, .svg.
-        </Text>
+        <Text style={styles.cardTitle}>{t("courseCreator.csvGuide.imagesTitle")}</Text>
+        <Text style={styles.paragraph}>{t("courseCreator.csvGuide.imagesDescription")}</Text>
       </View>
     </View>
   );

@@ -1,10 +1,11 @@
 import type {
   CsvAnalysisResult,
-  CsvCardType,
   CsvIssue,
   NormalizedCsvRow,
   ParsedCsvInput,
 } from "./types";
+import { getCsvFieldLabel, parseCsvCardType } from "./schema";
+import type { CsvCardType } from "./types";
 
 const KNOWN_HEADERS = new Set([
   "type",
@@ -29,26 +30,18 @@ const parseBooleanValue = (value: unknown): boolean => {
   return TRUE_VALUES.has(normalized);
 };
 
-const parseCsvCardType = (value: unknown): CsvCardType | null => {
-  const normalized = asTrimmedString(value).toLowerCase();
-  if (!normalized) return null;
-  if (
-    normalized === "traditional" ||
-    normalized === "true_false" ||
-    normalized === "self_assess"
-  ) {
-    return normalized as CsvCardType;
-  }
-  return null;
-};
-
 const mapCsvTypeToManualType = (type: CsvCardType) => {
   if (type === "traditional") return "text" as const;
   if (type === "true_false") return "true_false" as const;
   return "know_dont_know" as const;
 };
 
-export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
+export const analyzeRows = (
+  input: ParsedCsvInput,
+  options?: { locale?: "pl" | "en" }
+): CsvAnalysisResult => {
+  const locale = options?.locale === "en" ? "en" : "pl";
+  const isPolish = locale === "pl";
   const issues: CsvIssue[] = [...input.parseIssues];
   const validRows: NormalizedCsvRow[] = [];
   const statsByType: Record<CsvCardType, number> = {
@@ -70,7 +63,13 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
       field: "header",
       severity: "warning",
       code: "unknown_header",
-      message: `Nieznane kolumny: ${unknownHeaders.join(", ")}. Zostaną zignorowane.`,
+      message: isPolish
+        ? `Nieznane kolumny: ${unknownHeaders
+            .map((header) => getCsvFieldLabel(header, locale))
+            .join(", ")}. Zostaną zignorowane.`
+        : `Unknown columns: ${unknownHeaders
+            .map((header) => getCsvFieldLabel(header, locale))
+            .join(", ")}. They will be ignored.`,
     });
   }
 
@@ -87,8 +86,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
         field: "type",
         severity: "error",
         code: "invalid_type",
-        message:
-          "Niepoprawny type. Dozwolone: traditional, true_false, self_assess.",
+        message: isPolish
+          ? "Niepoprawny typ. Dozwolone: traditional, true_false, self_assess, odpowiedz_tekstowa, prawda_falsz, samoocena."
+          : "Invalid type. Allowed: traditional, true_false, self_assess, text, prawda_falsz, samoocena.",
       });
     }
 
@@ -102,7 +102,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
         field: "type",
         severity: "warning",
         code: "inferred_type",
-        message: `Brak type, typ ustawiony automatycznie na ${resolvedType}.`,
+        message: isPolish
+          ? `Brak typu, ustawiono automatycznie: ${resolvedType}.`
+          : `Missing type, inferred automatically as: ${resolvedType}.`,
       });
     }
 
@@ -120,8 +122,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
         field: "front_text",
         severity: "error",
         code: "missing_front_text",
-        message:
-          "Ten wiersz nie ma ani tekstu z przodu, ani obrazka, wiec karta nie moze powstac.",
+        message: isPolish
+          ? "Ten wiersz nie ma ani awersu, ani obrazka, więc karta nie może powstać."
+          : "This row has neither front text nor image, so the card cannot be created.",
       });
     }
 
@@ -131,7 +134,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
         field: "tf_answer",
         severity: "error",
         code: "missing_tf_answer",
-        message: "Dla type=true_false kolumna tf_answer jest wymagana.",
+        message: isPolish
+          ? `Dla typu true_false kolumna ${getCsvFieldLabel("tf_answer", locale)} jest wymagana.`
+          : `For type=true_false, column ${getCsvFieldLabel("tf_answer", locale)} is required.`,
       });
     }
 
@@ -147,7 +152,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
             field: field.key,
             severity: "warning",
             code: "missing_image",
-            message: `Nie znaleziono obrazka \"${field.value}\" w ZIP (folder images/).`,
+            message: isPolish
+              ? `Nie znaleziono obrazka "${field.value}" w ZIP (folder images/).`
+              : `Image "${field.value}" not found in ZIP (images/ folder).`,
           });
         }
       }
@@ -167,8 +174,9 @@ export const analyzeRows = (input: ParsedCsvInput): CsvAnalysisResult => {
             field: field.key,
             severity: "warning",
             code: "unsupported_image_reference",
-            message:
-              "Dla zwykłego CSV/TXT obrazki muszą mieć ścieżkę file:// lub content://. Alternatywnie użyj ZIP z folderem images/.",
+            message: isPolish
+              ? "Dla zwykłego CSV/TXT obrazki muszą mieć ścieżkę file:// lub content://. Alternatywnie użyj ZIP z folderem images/."
+              : "For plain CSV/TXT, images must use file:// or content:// path. Alternatively use ZIP with images/ folder.",
           });
         }
       }

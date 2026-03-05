@@ -1,4 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import { Platform } from "react-native";
 
 const REMINDER_NOTIFICATION_ID_KEY = "learningReminder.notificationId";
 const REMINDER_KIND = "learning_reminder";
@@ -34,9 +36,20 @@ type NotificationsModule = {
 let cachedNotificationsModule: NotificationsModule | null | undefined;
 let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
 
+function isExpoGoAndroid(): boolean {
+  return (
+    Platform.OS === "android" &&
+    Constants.executionEnvironment === "storeClient"
+  );
+}
+
 async function getNotificationsModule(): Promise<NotificationsModule | null> {
   if (cachedNotificationsModule !== undefined) {
     return cachedNotificationsModule;
+  }
+  if (isExpoGoAndroid()) {
+    cachedNotificationsModule = null;
+    return null;
   }
   notificationsModulePromise ??= import("expo-notifications")
     .then((module) => {

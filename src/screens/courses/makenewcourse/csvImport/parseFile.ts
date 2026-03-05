@@ -2,11 +2,13 @@ import { importImageFromZip, saveImage } from "@/src/services/imageService";
 import * as FileSystem from "expo-file-system/legacy";
 import JSZip, { JSZipObject } from "jszip";
 import Papa from "papaparse";
+import { normalizeCsvHeaderKey } from "./schema";
 import type { CsvIssue, CsvParsedRow, ParsedCsvInput } from "./types";
 
 type FileAsset = {
   uri: string;
   name?: string | null;
+  locale?: "pl" | "en";
 };
 
 type ParsedCsvRaw = {
@@ -18,7 +20,7 @@ type ParsedCsvRaw = {
 const normalizeRecordKeys = (input: Record<string, unknown>): Record<string, unknown> => {
   const normalized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(input)) {
-    normalized[key.trim().toLowerCase()] = value;
+    normalized[normalizeCsvHeaderKey(key)] = value;
   }
   return normalized;
 };
@@ -34,7 +36,7 @@ const parseCsvText = (
     delimitersToGuess: options?.delimitersToGuess,
   });
 
-  const headers = (parsed.meta.fields ?? []).map((item) => item.trim().toLowerCase());
+  const headers = (parsed.meta.fields ?? []).map((item) => normalizeCsvHeaderKey(item));
 
   const rows = (parsed.data ?? []).map((raw, index) => ({
     rowNumber: index + 2,
@@ -78,7 +80,9 @@ const findCsvInZip = (zip: JSZip): JSZipObject | null => {
 };
 
 export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput> => {
-  const fileName = (asset.name ?? "").trim() || "plik";
+  const fileName =
+    (asset.name ?? "").trim() || (asset.locale === "pl" ? "plik" : "file");
+  const locale = asset.locale === "pl" ? "pl" : "en";
   const lowerName = fileName.toLowerCase();
   const isZip = lowerName.endsWith(".zip");
   const isTxt = lowerName.endsWith(".txt");
@@ -141,7 +145,10 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
           field: null,
           severity: "error",
           code: "missing_csv_in_zip",
-          message: "Brak pliku CSV w archiwum ZIP.",
+          message:
+            locale === "pl"
+              ? "Brak pliku CSV w archiwum ZIP."
+              : "Missing CSV file in ZIP archive.",
         },
       ],
       resolveImage: async () => null,

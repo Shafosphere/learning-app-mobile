@@ -52,7 +52,7 @@
       },
       "actionsSelector": {
         "title": "Choose button layout",
-        "subtitle": "Choose button placement in true/false and know/don't know modes.",
+        "subtitle": "Choose button placement",
         "top": "Top",
         "bottom": "Bottom"
       }
@@ -96,7 +96,7 @@
       },
       "reminders": {
         "title": "Learning reminders",
-        "subtitle": "Smart local reminders based on your learning pattern.",
+        "subtitle": "Study reminders.",
         "profile": {
           "morning": "morning",
           "afternoon": "afternoon",
@@ -111,7 +111,6 @@
         "status": {
           "next": "Next reminder: {{value}}",
           "profileAndDays": "Profile: {{profile}}, active days: {{days}}",
-          "collecting": "Collecting data, using a safe default reminder time for now.",
           "permissionDenied": "Notifications permission is blocked. Enable it in system settings.",
           "allDays": "every day"
         }
@@ -154,7 +153,7 @@
       },
       "resetLearningConfirm": {
         "title": "Restore learning settings",
-        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, batch, reminders)?",
+        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, reminders)?",
         "cancel": "Cancel",
         "confirm": "Restore"
       },
@@ -184,7 +183,7 @@
         },
         "resetLearning": {
           "title": "Restore learning settings",
-          "subtitle": "Spellcheck, diacritics, box faces, layout, batch size, reminders.",
+          "subtitle": "Spellcheck, diacritics, box faces, layout, reminders.",
           "button": "Restore defaults",
           "buttonLoading": "Restoring..."
         }
@@ -420,6 +419,158 @@
         "title": "Disabling reviews",
         "description": "You can disable reviews in course settings - then it won't appear on this list."
       }
+    }
+  },
+  "courseCreator": {
+    "import": {
+      "defaultFileName": "file",
+      "addModeCsv": "Import from file",
+      "addModeManual": "Add manually",
+      "cardTypeLabel": "Flashcard type",
+      "cardTypes": {
+        "text": "Text answer",
+        "trueFalse": "True/False",
+        "knowDontKnow": "Know/Don't know"
+      },
+      "sectionHeader": "CONTENT",
+      "addModeA11y": "Flashcard adding mode",
+      "previewTitle": "Import preview",
+      "stats": {
+        "rows": "Rows",
+        "importable": "Importable",
+        "errors": "Errors to fix",
+        "warnings": "Warnings"
+      },
+      "issueRow": " row {{row}}",
+      "moreIssues": "+{{count}} more items in report.",
+      "importing": "Importing...",
+      "importValid": "Import valid rows",
+      "clearReport": "Clear report",
+      "flashcardsHeader": "flashcards",
+      "addCardA11y": "Add a new flashcard",
+      "backA11y": "Back to course creation",
+      "next": "Next",
+      "nextA11y": "Go to course settings",
+      "shareDialogTitle": "Download CSV template",
+      "popups": {
+        "noRows": "No rows can be imported yet.",
+        "analyzedWithErrors": "File checked: {{validRows}} importable, {{errorCount}} need fixes.",
+        "analyzedWithWarnings": "File checked: {{validRows}} importable, {{warningCount}} have warnings.",
+        "analyzedSuccess": "Great! {{validRows}} rows are ready to import.",
+        "analysisError": "File analysis error.",
+        "templateDownloaded": "Template downloaded: {{fileName}}",
+        "templateDirectoryMissing": "No directory selected to save the CSV template.",
+        "templateSaved": "Template saved: {{fileName}}",
+        "templateSavedLocally": "Template saved locally: {{fileName}}",
+        "templateReady": "Template ready: {{fileName}}",
+        "templateDownloadError": "Could not download CSV template.",
+        "noCardsToImport": "There are no cards to import now.",
+        "importedWithSkipped": "Imported {{cardsCount}} flashcards, skipped {{skipped}} invalid rows.",
+        "importedWithWarnings": "Imported {{cardsCount}} flashcards ({{warningCount}} warnings).",
+        "importedSuccess": "Imported {{cardsCount}} flashcards.",
+        "importError": "Flashcard import error.",
+        "missingCourseName": "Set a course name first",
+        "missingCourseIcon": "Choose a course icon",
+        "addAtLeastOne": "Add at least one flashcard"
+      }
+    },
+    "csvGuide": {
+      "required": "Required",
+      "optional": "Optional",
+      "important": "Important",
+      "downloading": "Preparing...",
+      "downloadTemplate": "Download template",
+      "importTitle": "Import",
+      "step1": "1. Prepare a CSV or TXT file with column headers.",
+      "step2": "2. Pick the file format below and import.",
+      "pickCsv": "Pick CSV",
+      "pickTxt": "Pick TXT",
+      "analyzing": "Analyzing...",
+      "cardTypes": "Flashcard types",
+      "imagesTitle": "How to add images",
+      "imagesDescription": "Next to your CSV or TXT file, create an images folder. Add images there, then put file names in rows, e.g. dog.png. Supported formats: .png, .jpg, .jpeg, .svg.",
+      "sections": {
+        "selfAssess": {
+          "title": "1) Self-assess",
+          "summary": "User evaluates: I know it / I don't know it.",
+          "fields": {
+            "frontText": {
+              "description": "Question or topic for self-assessment."
+            },
+            "explanation": {
+              "description": "Content shown after self-assessment."
+            }
+          }
+        },
+        "traditional": {
+          "title": "2) Text answer",
+          "summary": "Classic flashcard: prompt on front, answer on back.",
+          "fields": {
+            "frontText": {
+              "description": "Card front: question, keyword, or statement."
+            },
+            "backText": {
+              "description": "Card back: correct text answer.",
+              "note": "You can enter multiple answers separated by commas or semicolons."
+            },
+            "explanation": {
+              "description": "Additional explanation shown after answer."
+            },
+            "flip": {
+              "description": "If true, card will be flipped during study."
+            }
+          }
+        },
+        "trueFalse": {
+          "title": "3) True/False",
+          "summary": "User marks whether the statement is true.",
+          "fields": {
+            "frontText": {
+              "description": "Question or statement to evaluate."
+            },
+            "tfAnswer": {
+              "description": "Correct answer: true/false or 1/0."
+            },
+            "explanation": {
+              "description": "Explanation shown after answer."
+            }
+          }
+        },
+        "mixed": {
+          "title": "4) Mixed",
+          "summary": "Use multiple flashcard types in one file.",
+          "fields": {
+            "type": {
+              "description": "Flashcard type for each row.",
+              "note": "Values: traditional, true_false, self_assess (plus Polish aliases)."
+            }
+          },
+          "tip": "Column layout stays the same as in sections above."
+        }
+      }
+    },
+    "manualEditor": {
+      "disableFlip": "Disable",
+      "enableFlip": "Enable",
+      "flipForCard": "flip for flashcard {{index}}",
+      "frontPlaceholder": "Front",
+      "backPlaceholder": "Back",
+      "addImage": "Add image",
+      "none": "None",
+      "removeOrCloseImageForCard": "Remove image or close image slot for flashcard {{index}}",
+      "answerLabel": "Answer",
+      "trueLabel": "True",
+      "falseLabel": "False",
+      "optionForCard": "{{option}} for flashcard {{index}}",
+      "removeAnswerForCard": "Remove answer {{answerIndex}} for flashcard {{index}}",
+      "explanationLabel": "Explanation",
+      "optional": "optional",
+      "actionForCard": "Action for flashcard {{index}}",
+      "removeCard": "Remove flashcard {{index}}",
+      "addAnswerForCard": "Add translation for flashcard {{index}}",
+      "addImageForCard": "Add image for flashcard {{index}}",
+      "removeImageForCard": "Remove image for flashcard {{index}}",
+      "addNewCard": "Add new flashcard"
     }
   }
 }
