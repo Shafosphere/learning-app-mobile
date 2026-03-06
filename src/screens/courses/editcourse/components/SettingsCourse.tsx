@@ -140,7 +140,7 @@ export function CourseSettingsSection({
           <View style={toggleTextWrapper}>
             <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
             <Text style={toggleSubtitle}>
-              Po złej odpowiedzi od razu pokaż następną fiszkę (dotyczy fiszek tradycyjnych).
+              Po złej odpowiedzi od razu pokaż następną fiszkę (dotyczy fiszek z odpowiedzią tekstową).
             </Text>
           </View>
           <Switch

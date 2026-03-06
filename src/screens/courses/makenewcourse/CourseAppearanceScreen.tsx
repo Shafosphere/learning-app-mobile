@@ -3,7 +3,7 @@ import { usePopup } from "@/src/contexts/PopupContext";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import { ScrollView, Text, TextInput, TextStyle, View } from "react-native";
+import { ScrollView, Text, TextStyle, View } from "react-native";
 import { CourseIconColorSelector } from "../editcourse/components/iconEdit/iconEdit";
 import { useStyles } from "./CourseAppearanceScreen-styles";
 export default function CustomCourseScreen() {
@@ -79,39 +79,17 @@ export default function CustomCourseScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
+        scrollEnabled={false}
+        bounces={false}
       >
         <View style={styles.section}>
           <Text style={styles.sectionHeader}>NOWY KURS</Text>
 
           <View style={styles.formContent}>
             <View>
-              <View style={styles.labelRow}>
-                <Text style={styles.sectionLabel}>NAZWA</Text>
-              </View>
-              <View style={styles.nameInputWrap}>
-                <View style={styles.nameInputDot} />
-                <TextInput
-                  style={styles.nameInput}
-                  placeholder="np. Fiszki podróżnicze"
-                  placeholderTextColor={styles.nameInput.color}
-                  accessibilityLabel="Nazwa kursu"
-                  maxLength={38}
-                  autoCorrect={false}
-                  autoCapitalize="none"
-                  spellCheck={false}
-                  returnKeyType="done"
-                  editable
-                  keyboardType="default"
-                  textContentType="none"
-                  importantForAutofill="no"
-                  value={courseName}
-                  onChangeText={setCourseName}
-                />
-              </View>
-            </View>
-
-            <View>
               <CourseIconColorSelector
+                courseName={courseName}
+                onCourseNameChange={setCourseName}
                 selectedIcon={iconId}
                 selectedColor={iconColor}
                 selectedColorId={colorId ?? undefined}
@@ -122,6 +100,8 @@ export default function CustomCourseScreen() {
                   setColorId(null);
                 }}
                 previewName={courseName}
+                iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
+                colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
               />
             </View>
           </View>

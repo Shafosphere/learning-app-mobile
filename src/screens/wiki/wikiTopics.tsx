@@ -6,7 +6,19 @@ import MyButton from "@/src/components/button/button";
 import Card from "@/src/components/card/card";
 import { CardHint } from "@/src/components/card/subcomponents/CardHint";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import type {
+  ManualCard,
+  ManualCardType,
+} from "@/src/hooks/useManualCardsForm";
+import { ManualCardsEditor } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import type { ManualCardsEditorStyles } from "@/src/screens/courses/editcourse/components/editFlashcards/editFlashcards";
+import { CourseIconColorSelector } from "@/src/screens/courses/editcourse/components/iconEdit/iconEdit";
+import { CourseSettingsSection } from "@/src/screens/courses/editcourse/components/SettingsCourse";
+import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEditScreen-styles";
+import { CardTypeSelector } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
+import { CsvImportGuide } from "@/src/screens/courses/makenewcourse/components/CsvImportGuide";
 import type { WordWithTranslations } from "@/src/types/boxes";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { ThemeColors } from "@/src/theme/theme";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -60,6 +72,126 @@ const SAMPLE_PIN_COURSES = SAMPLE_COURSES.map((course, index) => ({
 const handlePlaceholderCoursePress = () => {};
 const handlePlaceholderEditCourse = () => {};
 const handlePlaceholderPinToggle = () => {};
+const noop = () => {};
+
+const SAMPLE_MANUAL_CARD: ManualCard = {
+  id: "wiki-card-1",
+  front: "Bonjour",
+  answers: ["Dzień dobry", "Cześć"],
+  flipped: false,
+  type: "text",
+  answerOnly: false,
+  hintFront: "",
+  hintBack: "",
+  imageFront: null,
+  imageBack: null,
+  explanation: null,
+};
+
+function CourseAppearancePreview() {
+  return (
+    <CourseIconColorSelector
+      courseName="Francuski w podróży"
+      onCourseNameChange={noop}
+      selectedIcon="book"
+      selectedColor="#F4B942"
+      selectedColorId="amber"
+      onIconChange={noop}
+      onColorChange={noop}
+      previewName="Francuski w podróży"
+      nameSectionDescription="Nazwa pojawia się na liście kursów i pomaga szybko znaleźć właściwy zestaw."
+      iconSectionDescription="To ten symbol widzisz później przy kursie na liście i w podglądzie."
+      colorSectionDescription="Kolor jest akcentem kursu i pomaga odróżnić go od innych."
+      disabled
+    />
+  );
+}
+
+function ManualCardLockPreview() {
+  return (
+    <ManualCardsEditor
+      manualCards={[SAMPLE_MANUAL_CARD]}
+      styles={{} as ManualCardsEditorStyles}
+      onCardFrontChange={noop}
+      onCardAnswerChange={noop}
+      onAddAnswer={noop}
+      onRemoveAnswer={noop}
+      onAddCard={noop}
+      onRemoveCard={noop}
+      onToggleFlipped={noop}
+      showDefaultBottomAddButton={false}
+    />
+  );
+}
+
+function CardTypePreview({
+  value = "text",
+}: {
+  value?: ManualCardType;
+}) {
+  return (
+    <CardTypeSelector
+      label="Typ nowej fiszki"
+      value={value}
+      onChange={noop}
+      options={[
+        { key: "text", label: "Tekstowa" },
+        { key: "true_false", label: "Prawda / Fałsz" },
+        { key: "know_dont_know", label: "Umiem / Nie umiem" },
+      ]}
+    />
+  );
+}
+
+function CsvImportGuidePreview() {
+  return (
+    <CsvImportGuide
+      onPickCsvFile={noop}
+      onPickTxtFile={noop}
+      onDownloadTemplate={noop}
+      selectedFileName="francuski-podroze.csv"
+      isAnalyzing={false}
+    />
+  );
+}
+
+function CourseSettingsPreview() {
+  const styles = useCourseEditStyles();
+  const { colors } = useSettings();
+
+  return (
+    <CourseSettingsSection
+      styles={styles}
+      colors={colors}
+      switchColors={{
+        thumb: "#FFFFFF",
+        trackFalse: "#CBD5E1",
+        trackTrue: "#4ADE80",
+      }}
+      boxZeroEnabled
+      onToggleBoxZero={noop}
+      autoflowEnabled
+      onToggleAutoflow={noop}
+      reviewsEnabled
+      onToggleReviews={noop}
+      skipCorrectionEnabled={false}
+      onToggleSkipCorrection={noop}
+      trueFalseButtonsVariant="true_false"
+      onSelectTrueFalseButtonsVariant={noop}
+      showTrueFalseButtonsVariant
+      cardSize="large"
+      onSelectCardSize={noop}
+      showImageSizeOptions
+      imageSize="medium"
+      imageSizeOptions={["dynamic", "small", "medium", "large", "very_large"]}
+      onSelectImageSize={noop}
+      imageSizeEnabled
+      showImageFrameOption
+      imageFrameEnabled
+      onToggleImageFrame={noop}
+    />
+  );
+}
 
 function CardPreview({
   mode,
@@ -726,39 +858,108 @@ export const WIKI_TOPICS: WikiTopic[] = [
     blocks: [
       {
         type: "paragraph",
-        text: "Chcesz stworzyć własny kurs? Super pomysł! Tutaj dowiesz się jak.",
+        text: "Kreator własnego kursu ma teraz trzy etapy: najpierw wygląd, potem treść, a na końcu ustawienia. Dzięki temu najpierw nadajesz kursowi tożsamość, później dodajesz fiszki, a dopiero na końcu decydujesz, jak kurs ma działać w nauce.",
       },
-      { type: "heading", icon: "📝", text: "Tworzenie od zera", tone: "green" },
       {
-        type: "list",
-        items: [
-          "Dodawaj fiszki ręcznie – wprowadzasz po kolei przód i tył fiszki",
-          "Importuj z pliku CSV – przygotuj plik w odpowiednim formacie",
-        ],
+        type: "heading",
+        icon: "1",
+        text: "Etap 1. Wygląd kursu",
         tone: "green",
-      },
-      { type: "heading", icon: "📊", text: "Typy fiszek", tone: "green" },
-      {
-        type: "list",
-        items: [
-          "Tradycyjne – przód / tył (np. słowo po polsku / słowo po koreańsku)",
-          "Prawda / Fałsz – pytanie + odpowiedź tak/nie",
-          "Z obrazkiem – grafika (np. flaga kraju → nazwa kraju)",
-        ],
-        tone: "green",
-      },
-      { type: "heading", icon: "📥", text: "Import z CSV", tone: "pink" },
-      {
-        type: "paragraph",
-        text: "W jednym pliku CSV mozesz miec rozne rodzaje fiszek. Kreator pokazuje prosty przewodnik i gotowy przyklad.",
       },
       {
         type: "paragraph",
-        text: "Po wybraniu pliku aplikacja najpierw go sprawdza i pokazuje raport: co da sie zaimportowac, a co trzeba poprawic.",
+        text: "Na pierwszym ekranie ustawiasz nazwę, ikonę i kolor. Nazwa jest obowiązkowa, bo to ona pojawi się później na liście kursów. Ikona pomaga rozpoznać kurs jednym spojrzeniem, a kolor działa jako jego akcent wizualny.",
+      },
+      {
+        type: "list",
+        items: [
+          "Pole nazwy kursu jest wymagane, więc bez niego nie przejdziesz dalej.",
+          "Ikona będzie widoczna przy kursie na listach, w aktywacji i podczas edycji.",
+          "Kolor nie zmienia treści fiszek, ale pomaga szybko odróżnić kurs od innych.",
+          "Strzałka wstecz cofa Cię do poprzedniego ekranu, a przycisk „dalej” prowadzi do etapu dodawania treści.",
+        ],
+        tone: "green",
+      },
+      {
+        type: "example",
+        tone: "green",
+        render: () => <CourseAppearancePreview />,
+      },
+      {
+        type: "heading",
+        icon: "2",
+        text: "Etap 2. Treść i import",
+        tone: "pink",
+      },
+      {
+        type: "paragraph",
+        text: "Drugi etap służy do wypełnienia kursu fiszkami. Możesz robić to ręcznie albo przez import pliku. To tutaj decydujesz też, jaki typ ma nowo dodawana karta.",
+      },
+      {
+        type: "list",
+        tone: "pink",
+        items: [
+          "Tryb „ręcznie” pozwala wpisywać awers i odpowiedzi od razu w edytorze.",
+          "Tryb „CSV” lub import tekstu otwiera przewodnik i pozwala wczytać większą paczkę kart naraz.",
+          "Selektor typu karty określa format nowo dodawanych fiszek: tekstowa, Prawda / Fałsz albo Umiem / Nie umiem.",
+          "Po imporcie aplikacja analizuje plik i pokazuje, ile wierszy da się wczytać, a które trzeba poprawić.",
+        ],
+      },
+      {
+        type: "paragraph",
+        text: "Kłódka przy polu „Awers” steruje kierunkiem danej fiszki. Gdy ją przełączysz, karta zostaje odwrócona i zmienia się to, z której strony pytasz, a z której odpowiadasz.",
+      },
+      {
+        type: "example",
+        tone: "pink",
+        render: () => <ManualCardLockPreview />,
+      },
+      {
+        type: "example",
+        tone: "pink",
+        render: () => <CardTypePreview />,
+      },
+      {
+        type: "example",
+        tone: "pink",
+        render: () => <CsvImportGuidePreview />,
       },
       {
         type: "callout",
-        text: "Zacznij od małego kursu (20-30 fiszek), żeby ogarnąć jak działa. Potem możesz tworzyć większe. 📚",
+        text: "Import nie zapisuje pliku w ciemno. Najpierw dostajesz analizę z ostrzeżeniami i błędami, więc łatwo sprawdzisz, co rzeczywiście trafi do kursu.",
+        tone: "pink",
+      },
+      {
+        type: "heading",
+        icon: "3",
+        text: "Etap 3. Ustawienia kursu",
+        tone: "green",
+      },
+      {
+        type: "paragraph",
+        text: "Na końcu ustawiasz, jak kurs ma zachowywać się podczas nauki. To nie jest kosmetyka: te przełączniki wpływają na tempo dodawania fiszek, tryb powtórek i sposób prezentacji kart.",
+      },
+      {
+        type: "list",
+        tone: "green",
+        items: [
+          "Faza zapoznania (Pudełko 0) dodaje łagodniejszy etap wejściowy przed zwykłą nauką.",
+          "Automat fiszek sam przełącza pudełka i dobiera nowe słowa, żeby nauka szła płynniej.",
+          "Włącz powtórki dodaje karty z tego kursu do codziennych sesji powtórkowych.",
+          "Pomiń poprawkę po błędzie od razu przechodzi do kolejnej fiszki po złej odpowiedzi tekstowej.",
+          "Rodzaj przycisków w Prawda / Fałsz zmienia podpisy przycisków na wariant bardziej logiczny albo bardziej intuicyjny.",
+          "Rozmiar fiszki decyduje, czy karta ma być duża i pokazywać cały tekst, czy mniejsza i bardziej zwarta.",
+          "Rozmiar obrazu oraz Ramka obrazu wpływają na wygląd kart z grafikami.",
+        ],
+      },
+      {
+        type: "example",
+        tone: "green",
+        render: () => <CourseSettingsPreview />,
+      },
+      {
+        type: "callout",
+        text: "Dobry start to mały kurs z 20-30 fiszkami. Najłatwiej wtedy zobaczyć, jak działają ustawienia i które z nich naprawdę pasują do Twojego stylu nauki.",
         tone: "green",
       },
     ],

@@ -137,6 +137,8 @@ export interface CourseIconColorSelectorStyles {
 }
 
 export interface CourseIconColorSelectorProps {
+  courseName?: string;
+  onCourseNameChange?: (value: string) => void;
   selectedIcon: string | null;
   selectedColor: string;
   selectedColorId?: string | null;
@@ -144,23 +146,31 @@ export interface CourseIconColorSelectorProps {
   onColorChange: (color: CourseColorOption) => void;
   onColorHexChange?: (hex: string) => void;
   disabled?: boolean;
+  nameEditable?: boolean;
+  namePlaceholder?: string;
   styles?: CourseIconColorSelectorStyles;
   iconSize?: number;
   previewName?: string;
+  nameSectionDescription?: string;
   iconSectionDescription?: string;
   colorSectionDescription?: string;
   enableIconSearch?: boolean;
 }
 
 function CourseIconColorSelectorComponent({
+  courseName,
+  onCourseNameChange,
   selectedIcon,
   selectedColor,
   onIconChange,
   onColorChange,
   onColorHexChange,
   disabled = false,
+  nameEditable = true,
+  namePlaceholder = "np. Fiszki podróżnicze",
   styles,
   previewName,
+  nameSectionDescription = "Krótko i konkretnie, np. „Fiszki podróżnicze”.",
   iconSectionDescription = "Wybierz ikonę z listy",
   colorSectionDescription = "Wybierz swój kolor",
   enableIconSearch = true,
@@ -212,6 +222,7 @@ function CourseIconColorSelectorComponent({
   const selectedHex = selectedColor?.trim() || "#000000";
   const currentHex = useMemo(() => hsvToHex(hsv), [hsv]);
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
+  const isNameEditable = Boolean(onCourseNameChange) && nameEditable && !disabled;
 
   useEffect(() => {
     const justOpened = isColorSheetOpen && !wasColorSheetOpenRef.current;
@@ -291,10 +302,6 @@ function CourseIconColorSelectorComponent({
   return (
     <View style={[componentStyles.root, styles?.container]}>
       <View style={componentStyles.previewCard}>
-        <View style={componentStyles.previewHeaderRow}>
-          <Text style={componentStyles.sectionLabel}>PODGLĄD</Text>
-        </View>
-
         <View style={componentStyles.previewRow}>
           <View style={componentStyles.previewBadge}>
             <View
@@ -305,7 +312,7 @@ function CourseIconColorSelectorComponent({
             />
             <SelectedIconComponent
               name={selectedIconMeta.name as never}
-              size={24}
+              size={26}
               color={selectedHex}
             />
           </View>
@@ -313,100 +320,145 @@ function CourseIconColorSelectorComponent({
             <Text numberOfLines={1} style={componentStyles.previewTitle}>
               {previewTitle}
             </Text>
-            <Text numberOfLines={1} style={componentStyles.previewSubtitle}>
-              {`Ikona: ${selectedIconMeta.id} • Kolor: ${selectedHex.toUpperCase()}`}
-            </Text>
+            <View style={componentStyles.previewMetaRow}>
+              <View style={componentStyles.pill}>
+                <View
+                  style={[
+                    componentStyles.dot,
+                    { backgroundColor: selectedHex },
+                  ]}
+                />
+                <Text style={componentStyles.pillStrong}>
+                  {selectedHex.toUpperCase()}
+                </Text>
+              </View>
+              <View style={componentStyles.pill}>
+                <Text style={componentStyles.pillLabel}>Ikona:</Text>
+                <Text style={componentStyles.pillStrong}>{selectedIconMeta.id}</Text>
+              </View>
+            </View>
           </View>
         </View>
+        <Text style={componentStyles.previewHint}>
+          Tip: u góry masz „efekt końcowy”, poniżej ustawienia.
+        </Text>
+      </View>
 
-        <View style={componentStyles.listWrap}>
-          <View style={componentStyles.itemCard}>
-            <View style={componentStyles.itemIconWrap}>
-              <SelectedIconComponent
-                name={selectedIconMeta.name as never}
-                size={18}
-                color={selectedHex}
-              />
-            </View>
+      <View style={componentStyles.sectionCard}>
+        <View style={componentStyles.sectionHeaderBlock}>
+          <Text style={componentStyles.sectionLabel}>NAZWA</Text>
+          <Text style={componentStyles.sectionDescription}>
+            {nameSectionDescription}
+          </Text>
+        </View>
+        <TextInput
+          style={componentStyles.nameInput}
+          value={courseName ?? ""}
+          onChangeText={onCourseNameChange}
+          placeholder={namePlaceholder}
+          placeholderTextColor={componentStyles.nameInput.color}
+          accessibilityLabel="Nazwa kursu"
+          editable={isNameEditable}
+          maxLength={38}
+          autoCorrect={false}
+          autoCapitalize="none"
+          spellCheck={false}
+          returnKeyType="done"
+          keyboardType="default"
+          textContentType="none"
+          importantForAutofill="no"
+        />
+      </View>
 
-            <View style={componentStyles.itemMain}>
-              <Text style={componentStyles.pickerTitle}>Ikona</Text>
-              <Text numberOfLines={1} style={componentStyles.pickerDescription}>
+      <View style={componentStyles.sectionCard}>
+        <View style={componentStyles.pickerRow}>
+          <View style={componentStyles.pickerLeft}>
+            <View style={componentStyles.sectionHeaderBlock}>
+              <Text style={componentStyles.sectionLabel}>IKONA</Text>
+              <Text style={componentStyles.sectionDescription}>
                 {iconSectionDescription}
               </Text>
-              <View style={componentStyles.chipRow}>
-                <View style={componentStyles.chip}>
-                  <Text style={componentStyles.chipLabel}>Wybrana:</Text>
-                  <Text style={componentStyles.chipStrong}>{selectedIconMeta.id}</Text>
-                </View>
+            </View>
+
+            <View style={componentStyles.chipRow}>
+              <View style={componentStyles.chip}>
+                <SelectedIconComponent
+                  name={selectedIconMeta.name as never}
+                  size={16}
+                  color={selectedHex}
+                />
+                <Text style={componentStyles.chipStrong}>Wybrana</Text>
+                <Text style={componentStyles.chipMono}>{selectedIconMeta.id}</Text>
               </View>
             </View>
-
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Zmień ikonę kursu"
-              onPress={() => setIsIconSheetOpen(true)}
-              disabled={disabled}
-              hitSlop={8}
-              style={({ pressed }) => [
-                componentStyles.changeIconButton,
-                pressed && componentStyles.changeButtonPressed,
-                disabled && componentStyles.changeIconButtonDisabled,
-              ]}
-            >
-              <FontAwesome6
-                name="edit"
-                size={24}
-                color={componentStyles.changeIconButtonIcon.color}
-              />
-            </Pressable>
           </View>
 
-          <View style={componentStyles.itemCard}>
-            <View style={componentStyles.itemIconWrap}>
-              <View style={componentStyles.itemColorOverlay} />
-              <View
-                style={[componentStyles.colorSwatchMini, { backgroundColor: selectedHex }]}
-              />
-            </View>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Zmień ikonę kursu"
+            onPress={() => setIsIconSheetOpen(true)}
+            disabled={disabled}
+            hitSlop={8}
+            style={({ pressed }) => [
+              componentStyles.changeIconButton,
+              pressed && componentStyles.changeButtonPressed,
+              disabled && componentStyles.changeIconButtonDisabled,
+            ]}
+          >
+            <FontAwesome6
+              name="edit"
+              size={18}
+              color={componentStyles.changeIconButtonIcon.color}
+            />
+          </Pressable>
+        </View>
+      </View>
 
-            <View style={componentStyles.itemMain}>
-              <Text style={componentStyles.pickerTitle}>Kolor</Text>
-              <Text numberOfLines={1} style={componentStyles.pickerDescription}>
+      <View style={componentStyles.sectionCard}>
+        <View style={componentStyles.pickerRow}>
+          <View style={componentStyles.pickerLeft}>
+            <View style={componentStyles.sectionHeaderBlock}>
+              <Text style={componentStyles.sectionLabel}>KOLOR</Text>
+              <Text style={componentStyles.sectionDescription}>
                 {colorSectionDescription}
               </Text>
-              <View style={componentStyles.chipRow}>
-                <View style={componentStyles.chip}>
-                  <View
-                    style={[
-                      componentStyles.colorSwatchMini,
-                      { backgroundColor: selectedHex },
-                    ]}
-                  />
-                  <Text style={componentStyles.chipMono}>{selectedHex.toUpperCase()}</Text>
-                </View>
-              </View>
             </View>
 
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel="Zmień kolor kursu"
-              onPress={() => setIsColorSheetOpen(true)}
-              disabled={disabled}
-              hitSlop={8}
-              style={({ pressed }) => [
-                componentStyles.changeIconButton,
-                pressed && componentStyles.changeButtonPressed,
-                disabled && componentStyles.changeIconButtonDisabled,
-              ]}
-            >
-              <FontAwesome6
-                name="edit"
-                size={24}
-                color={componentStyles.changeIconButtonIcon.color}
-              />
-            </Pressable>
+            <View style={componentStyles.chipRow}>
+              <View style={componentStyles.chip}>
+                <View
+                  style={[
+                    componentStyles.dot,
+                    { backgroundColor: selectedHex },
+                  ]}
+                />
+                <Text style={componentStyles.chipMono}>{selectedHex.toUpperCase()}</Text>
+              </View>
+              <View style={componentStyles.chip}>
+                <Text style={componentStyles.chipStrong}>Tryb:</Text>
+                <Text style={componentStyles.chipMono}>picker</Text>
+              </View>
+            </View>
           </View>
+
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel="Zmień kolor kursu"
+            onPress={() => setIsColorSheetOpen(true)}
+            disabled={disabled}
+            hitSlop={8}
+            style={({ pressed }) => [
+              componentStyles.changeIconButton,
+              pressed && componentStyles.changeButtonPressed,
+              disabled && componentStyles.changeIconButtonDisabled,
+            ]}
+          >
+            <FontAwesome6
+              name="edit"
+              size={18}
+              color={componentStyles.changeIconButtonIcon.color}
+            />
+          </Pressable>
         </View>
       </View>
 

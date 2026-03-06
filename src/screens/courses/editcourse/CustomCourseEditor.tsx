@@ -52,7 +52,6 @@ import {
 } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
 import { CourseIconColorSelector } from "@/src/screens/courses/editcourse/components/iconEdit/iconEdit";
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
-import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useStyles } from "./CustomCourseEditor-styles";
 export type CustomCourseEditorProps = {
   courseId: number;
@@ -610,15 +609,6 @@ export default function CustomCourseEditor({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.sectionCard}>
-          <CourseNameField
-            value={courseName}
-            onChange={setCourseName}
-            editable={!isOfficialCourse}
-            disabled={isSaving || isDeleting}
-          />
-        </View>
-
-        <View style={styles.sectionCard}>
           <CourseSettingsPanel
             styles={styles}
             settingsProps={{
@@ -694,6 +684,8 @@ export default function CustomCourseEditor({
               <Text style={styles.sectionLabel}>wygląd</Text>
               <View style={styles.iconSelectorWrapper}>
                 <CourseIconColorSelector
+                  courseName={courseName}
+                  onCourseNameChange={setCourseName}
                   selectedIcon={iconId}
                   selectedColor={iconColor}
                   selectedColorId={colorId ?? undefined}
@@ -704,10 +696,13 @@ export default function CustomCourseEditor({
                     setColorId(null);
                   }}
                   previewName={courseName}
+                  nameEditable={!isOfficialCourse}
                   disabled={isSaving}
                   styles={{
                     container: styles.iconSection,
                   }}
+                  iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
+                  colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
                 />
               </View>
             </View>
