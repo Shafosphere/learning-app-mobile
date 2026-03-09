@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import { SUPPORT_EMAIL } from "@/src/constants/support";
 import { useStyles } from "@/src/screens/support/SupportScreen-styles";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
@@ -6,8 +7,8 @@ import * as MailComposer from "expo-mail-composer";
 import { Link } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { Linking, Platform, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
-const SUPPORT_EMAIL = "support@example.com";
 const BUG_REPORT_SUBJECT = "Zgłoszenie błędu - Learning App";
 const SUGGESTION_SUBJECT = "Sugestia / pomysł - Learning App";
 const SUGGESTION_BODY =
@@ -58,6 +59,7 @@ function formatBody(selectedDiagnostics: string[]) {
 
 export default function SupportScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const diagnosticEntries = useMemo(buildDiagnosticEntries, []);
@@ -250,6 +252,20 @@ export default function SupportScreen() {
           <View style={styles.buttonWrapper}>
             <Link href="/wiki" asChild>
               <MyButton text="co i jak" color="my_green" width={140} />
+            </Link>
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.header}>{t("legal.entry.title")}</Text>
+          <Text style={styles.subtitle}>{t("legal.entry.subtitle")}</Text>
+          <View style={styles.buttonWrapper}>
+            <Link href="/legal" asChild>
+              <MyButton
+                text={t("legal.entry.button")}
+                color="my_yellow"
+                width={220}
+              />
             </Link>
           </View>
         </View>

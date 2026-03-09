@@ -3,7 +3,7 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 export const useStyles = createThemeStylesHook((colors) => ({
   button: {
     // paddingVertical: 12,
-    // paddingHorizontal: 20,
+    paddingHorizontal: 10,
     borderRadius: 11,
     alignItems: "center",
     justifyContent: 'center',

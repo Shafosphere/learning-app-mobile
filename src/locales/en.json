@@ -328,6 +328,96 @@
       }
     }
   },
+  "legal": {
+    "entry": {
+      "title": "Privacy policy and licenses",
+      "subtitle": "Review information about app data, support contact, and third-party materials.",
+      "button": "Open legal information"
+    },
+    "hero": {
+      "eyebrow": "Legal information",
+      "title": "Privacy policy and licenses",
+      "subtitle": "Key information about data, permissions, contact, and third-party materials.",
+      "updatedLabel": "Last updated",
+      "updatedValue": "March 9, 2026"
+    },
+    "sections": {
+      "privacy": {
+        "title": "Privacy policy",
+        "body": "Memicard stores data needed for app functionality and personalization mainly on the user's device. This policy covers information stored locally by the app and data that the user may voluntarily provide when contacting support by email."
+      },
+      "localData": {
+        "title": "Data stored locally",
+        "body": "The app stores locally the data required for learning progress and user features.",
+        "bullets": [
+          "learning progress, statistics, and review state",
+          "pinned courses, custom courses, and custom flashcards",
+          "app settings and interface preferences",
+          "supporting data needed for features such as checkpoints or saved options"
+        ],
+        "noteLabel": "Technical note",
+        "note": "Data is stored locally on the device mainly with SQLite and AsyncStorage."
+      },
+      "permissions": {
+        "title": "Permissions and device features",
+        "body": "Memicard uses device features only when needed for selected app functionality.",
+        "bullets": [
+          "local notifications for study reminders are used only after the user grants permission",
+          "file access is used for data import and export",
+          "system sharing may be used when exporting data copies",
+          "the app can open the default mail client to prepare a support email",
+          "when adding custom flashcard images, the app may open the user's photo library only for that feature"
+        ]
+      },
+      "contact": {
+        "title": "Contact",
+        "body": "If the user wants to report a problem or send a suggestion, the app can prepare a message in the default mail client.",
+        "bullets": [
+          "the message is prepared with the support email address and a suggested subject",
+          "diagnostic details may be added to the body, such as app version, platform, OS version, and device model",
+          "the user sees the draft before sending and decides whether to send it"
+        ],
+        "noteLabel": "Support handling",
+        "note": "Information sent by email is used only to handle the request, reply to the message, and diagnose the issue."
+      },
+      "noTracking": {
+        "title": "What the app does not do",
+        "body": "Based on the current implementation, Memicard:",
+        "bullets": [
+          "does not sell user data",
+          "does not use behavioral advertising",
+          "does not track activity across apps",
+          "does not send user data to its own server for normal app operation"
+        ]
+      },
+      "deletion": {
+        "title": "Data deletion",
+        "body": "The user keeps control over data stored by the app on the device.",
+        "bullets": [
+          "some data can be removed inside the app, for example by deleting custom courses or resetting selected settings",
+          "uninstalling the app removes its local data from the device according to system behavior",
+          "data copies exported to files or external services remain outside the app and are managed by the user"
+        ]
+      },
+      "licenses": {
+        "title": "Licenses and third-party materials",
+        "body": "Memicard may use selected third-party materials, such as images, illustrations, or other educational assets, in accordance with their license terms or usage rules defined by the rights holders.",
+        "bullets": [
+          "when attribution is required, the app provides the source and basic information about the usage conditions",
+          "some materials may be subject to additional limitations, for example regarding logos, trademarks, or presentation style",
+          "detailed terms for selected sources may be available under external links"
+        ],
+        "sourceCard": {
+          "title": "Astronomy materials - NOIRLab",
+          "body": "Some constellation images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, these materials are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Use of these materials does not mean that NOIRLab endorses or recommends the app.",
+          "bullets": [],
+          "noteLabel": "",
+          "note": "",
+          "button": "Open source terms"
+        }
+      }
+    }
+  },
   "onboarding": {
     "nextMessage": "Next message",
     "languageIntro": {
