@@ -167,7 +167,7 @@ export default function StatsScreen() {
           <View style={styles.miniStatCard}>
             <Text style={styles.miniStatValue}>{boxPromotionsCount}</Text>
           </View>
-          <Text style={styles.miniStatLabel}>Przeskoki fiszek</Text>
+          <Text style={styles.miniStatLabel}>Skoki</Text>
         </View>
       </View>
 

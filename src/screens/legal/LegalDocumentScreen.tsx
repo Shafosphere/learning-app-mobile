@@ -1,19 +1,12 @@
 import MyButton from "@/src/components/button/button";
-import { NOIRLAB_LICENSE_URL, SUPPORT_EMAIL } from "@/src/constants/support";
+import { NOIRLAB_LICENSE_URL } from "@/src/constants/support";
 import { useStyles } from "@/src/screens/legal/LegalScreen-styles";
 import React, { useCallback } from "react";
 import { Linking, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 type LegalSection = {
-  key:
-    | "privacy"
-    | "localData"
-    | "permissions"
-    | "contact"
-    | "noTracking"
-    | "deletion"
-    | "licenses";
+  key: string;
   title: string;
   body: string;
   bullets?: string[];
@@ -30,6 +23,12 @@ type LegalSection = {
   };
 };
 
+type LegalDocumentScreenProps = {
+  heroKey: string;
+  sectionKeys: string[];
+  emphasizedSectionKeys?: string[];
+};
+
 function toBulletList(value: unknown): string[] {
   if (!Array.isArray(value)) {
     return [];
@@ -40,99 +39,77 @@ function toBulletList(value: unknown): string[] {
   );
 }
 
-function useLegalSections(): LegalSection[] {
-  const { t } = useTranslation();
-
-  return [
-    {
-      key: "privacy",
-      title: t("legal.sections.privacy.title"),
-      body: t("legal.sections.privacy.body"),
-    },
-    {
-      key: "localData",
-      title: t("legal.sections.localData.title"),
-      body: t("legal.sections.localData.body"),
-      bullets: toBulletList(
-        t("legal.sections.localData.bullets", {
-          returnObjects: true,
-        }),
-      ),
-      noteLabel: t("legal.sections.localData.noteLabel"),
-      note: t("legal.sections.localData.note"),
-    },
-    {
-      key: "permissions",
-      title: t("legal.sections.permissions.title"),
-      body: t("legal.sections.permissions.body"),
-      bullets: toBulletList(
-        t("legal.sections.permissions.bullets", {
-          returnObjects: true,
-        }),
-      ),
-    },
-    {
-      key: "contact",
-      title: t("legal.sections.contact.title"),
-      body: t("legal.sections.contact.body"),
-      bullets: toBulletList(
-        t("legal.sections.contact.bullets", {
-          returnObjects: true,
-        }),
-      ),
-      noteLabel: t("legal.sections.contact.noteLabel"),
-      note: t("legal.sections.contact.note"),
-      emphasis: true,
-    },
-    {
-      key: "noTracking",
-      title: t("legal.sections.noTracking.title"),
-      body: t("legal.sections.noTracking.body"),
-      bullets: toBulletList(
-        t("legal.sections.noTracking.bullets", {
-          returnObjects: true,
-        }),
-      ),
-    },
-    {
-      key: "deletion",
-      title: t("legal.sections.deletion.title"),
-      body: t("legal.sections.deletion.body"),
-      bullets: toBulletList(
-        t("legal.sections.deletion.bullets", {
-          returnObjects: true,
-        }),
-      ),
-    },
-    {
-      key: "licenses",
-      title: t("legal.sections.licenses.title"),
-      body: t("legal.sections.licenses.body"),
-      bullets: toBulletList(
-        t("legal.sections.licenses.bullets", {
-          returnObjects: true,
-        }),
-      ),
-      sourceCard: {
-        title: t("legal.sections.licenses.sourceCard.title"),
-        body: t("legal.sections.licenses.sourceCard.body"),
-        bullets: toBulletList(
-          t("legal.sections.licenses.sourceCard.bullets", {
-            returnObjects: true,
-          }),
-        ),
-        noteLabel: t("legal.sections.licenses.sourceCard.noteLabel"),
-        note: t("legal.sections.licenses.sourceCard.note"),
-        button: t("legal.sections.licenses.sourceCard.button"),
-      },
-    },
-  ];
+function getOptionalText(
+  t: ReturnType<typeof useTranslation>["t"],
+  key: string,
+): string | undefined {
+  const value = t(key, { defaultValue: "" });
+  return typeof value === "string" && value.trim().length > 0 ? value : undefined;
 }
 
-export default function LegalScreen() {
+function useLegalSections({
+  baseKey,
+  sectionKeys,
+  emphasizedSectionKeys,
+}: {
+  baseKey: string;
+  sectionKeys: string[];
+  emphasizedSectionKeys?: string[];
+}): LegalSection[] {
+  const { t } = useTranslation();
+  const emphasized = new Set(emphasizedSectionKeys ?? []);
+
+  return sectionKeys.map((sectionKey) => {
+    const sectionBaseKey = `${baseKey}.sections.${sectionKey}`;
+    const sourceCardButton = getOptionalText(t, `${sectionBaseKey}.sourceCard.button`);
+
+    return {
+      key: sectionKey,
+      title: t(`${sectionBaseKey}.title`),
+      body: t(`${sectionBaseKey}.body`),
+      bullets: toBulletList(
+        t(`${sectionBaseKey}.bullets`, {
+          returnObjects: true,
+          defaultValue: [],
+        }),
+      ),
+      noteLabel: getOptionalText(t, `${sectionBaseKey}.noteLabel`),
+      note: getOptionalText(t, `${sectionBaseKey}.note`),
+      emphasis: emphasized.has(sectionKey),
+      sourceCard: sourceCardButton
+        ? {
+            title: t(`${sectionBaseKey}.sourceCard.title`),
+            body: t(`${sectionBaseKey}.sourceCard.body`),
+            bullets: toBulletList(
+              t(`${sectionBaseKey}.sourceCard.bullets`, {
+                returnObjects: true,
+                defaultValue: [],
+              }),
+            ),
+            noteLabel: getOptionalText(
+              t,
+              `${sectionBaseKey}.sourceCard.noteLabel`,
+            ),
+            note: getOptionalText(t, `${sectionBaseKey}.sourceCard.note`),
+            button: sourceCardButton,
+          }
+        : undefined,
+    };
+  });
+}
+
+export default function LegalDocumentScreen({
+  heroKey,
+  sectionKeys,
+  emphasizedSectionKeys,
+}: LegalDocumentScreenProps) {
   const { t } = useTranslation();
   const styles = useStyles();
-  const sections = useLegalSections();
+  const sections = useLegalSections({
+    baseKey: heroKey,
+    sectionKeys,
+    emphasizedSectionKeys,
+  });
 
   const openNoirlabLicense = useCallback(async () => {
     try {
@@ -149,17 +126,21 @@ export default function LegalScreen() {
       showsVerticalScrollIndicator={false}
     >
       <View style={styles.heroCard}>
-        <Text style={styles.heroTitle}>{t("legal.hero.title")}</Text>
-        <Text style={styles.heroSubtitle}>{t("legal.hero.subtitle")}</Text>
+        <Text style={styles.heroTitle}>{t(`${heroKey}.hero.title`)}</Text>
+        <Text style={styles.heroSubtitle}>{t(`${heroKey}.hero.subtitle`)}</Text>
         <View style={styles.updatedCard}>
-          <Text style={styles.updatedLabel}>{t("legal.hero.updatedLabel")}</Text>
-          <Text style={styles.updatedValue}>{t("legal.hero.updatedValue")}</Text>
+          <Text style={styles.updatedLabel}>
+            {t(`${heroKey}.hero.updatedLabel`)}
+          </Text>
+          <Text style={styles.updatedValue}>
+            {t(`${heroKey}.hero.updatedValue`)}
+          </Text>
         </View>
       </View>
 
       {sections.map((section) => (
         <View
-          key={section.title}
+          key={section.key}
           style={[
             styles.sectionCard,
             section.emphasis ? styles.sectionCardEmphasis : null,
@@ -167,12 +148,6 @@ export default function LegalScreen() {
         >
           <Text style={styles.sectionTitle}>{section.title}</Text>
           <Text style={styles.sectionBody}>{section.body}</Text>
-
-          {section.key === "contact" ? (
-            <View style={styles.emailChip}>
-              <Text style={styles.emailChipText}>{SUPPORT_EMAIL}</Text>
-            </View>
-          ) : null}
 
           {section.bullets?.length ? (
             <View style={styles.bulletList}>

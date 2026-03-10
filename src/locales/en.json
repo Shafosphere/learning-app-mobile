@@ -330,90 +330,163 @@
   },
   "legal": {
     "entry": {
-      "title": "Privacy policy and licenses",
-      "subtitle": "Review information about app data, support contact, and third-party materials.",
-      "button": "Open legal information"
+      "title": "Legal information",
+      "subtitle": "Open the privacy policy and the licenses and third-party materials pages separately.",
+      "privacyButton": "Privacy policy",
+      "licensesButton": "Licenses and materials"
     },
-    "hero": {
-      "eyebrow": "Legal information",
-      "title": "Privacy policy and licenses",
-      "subtitle": "Key information about data, permissions, contact, and third-party materials.",
-      "updatedLabel": "Last updated",
-      "updatedValue": "March 9, 2026"
-    },
-    "sections": {
-      "privacy": {
+    "privacyPolicy": {
+      "hero": {
         "title": "Privacy policy",
-        "body": "Memicard stores data needed for app functionality and personalization mainly on the user's device. This policy covers information stored locally by the app and data that the user may voluntarily provide when contacting support by email."
+        "subtitle": "This document describes what data Memicard processes, for what purposes, to whom it may be disclosed, how long it is stored, and what rights the user has.",
+        "updatedLabel": "Last updated",
+        "updatedValue": "March 9, 2026"
       },
-      "localData": {
-        "title": "Data stored locally",
-        "body": "The app stores locally the data required for learning progress and user features.",
-        "bullets": [
-          "learning progress, statistics, and review state",
-          "pinned courses, custom courses, and custom flashcards",
-          "app settings and interface preferences",
-          "supporting data needed for features such as checkpoints or saved options"
-        ],
-        "noteLabel": "Technical note",
-        "note": "Data is stored locally on the device mainly with SQLite and AsyncStorage."
-      },
-      "permissions": {
-        "title": "Permissions and device features",
-        "body": "Memicard uses device features only when needed for selected app functionality.",
-        "bullets": [
-          "local notifications for study reminders are used only after the user grants permission",
-          "file access is used for data import and export",
-          "system sharing may be used when exporting data copies",
-          "the app can open the default mail client to prepare a support email",
-          "when adding custom flashcard images, the app may open the user's photo library only for that feature"
-        ]
-      },
-      "contact": {
-        "title": "Contact",
-        "body": "If the user wants to report a problem or send a suggestion, the app can prepare a message in the default mail client.",
-        "bullets": [
-          "the message is prepared with the support email address and a suggested subject",
-          "diagnostic details may be added to the body, such as app version, platform, OS version, and device model",
-          "the user sees the draft before sending and decides whether to send it"
-        ],
-        "noteLabel": "Support handling",
-        "note": "Information sent by email is used only to handle the request, reply to the message, and diagnose the issue."
-      },
-      "noTracking": {
-        "title": "What the app does not do",
-        "body": "Based on the current implementation, Memicard:",
-        "bullets": [
-          "does not sell user data",
-          "does not use behavioral advertising",
-          "does not track activity across apps",
-          "does not send user data to its own server for normal app operation"
-        ]
-      },
-      "deletion": {
-        "title": "Data deletion",
-        "body": "The user keeps control over data stored by the app on the device.",
-        "bullets": [
-          "some data can be removed inside the app, for example by deleting custom courses or resetting selected settings",
-          "uninstalling the app removes its local data from the device according to system behavior",
-          "data copies exported to files or external services remain outside the app and are managed by the user"
-        ]
-      },
-      "licenses": {
+      "sections": {
+        "overview": {
+          "title": "Policy scope",
+          "body": "Memicard stores most data locally on the user's device as a general rule. This policy covers data stored by the app, data voluntarily provided by the user, and information related to optional device features used by the app.",
+          "bullets": [
+            "the app does not require a user account for its basic operation",
+            "the app does not use its own backend for ongoing user data handling",
+            "this policy reflects the current state of the app as of March 9, 2026"
+          ]
+        },
+        "controller": {
+          "title": "Data controller and contact",
+          "body": "The data controller for personal data processed in connection with the use of Memicard is [Controller full name]. Privacy contact: [Privacy contact email address].",
+          "bullets": [
+            "optional registered or correspondence address: [Registered address]",
+            "the technical support email address may be different from the privacy contact address",
+            "before publishing this policy, the placeholders should be replaced with the controller's real details"
+          ]
+        },
+        "purposes": {
+          "title": "Purposes and legal bases",
+          "body": "Data is processed only to the extent necessary for the app to work or to respond to the user's request.",
+          "bullets": [
+            "local data is processed to operate the app, store progress, statistics, settings, and user-created content, on the basis of providing the service or taking steps requested by the user",
+            "local study reminders are enabled only after the user gives permission",
+            "data import and export, file selection, and image selection happen only at the user's request",
+            "data sent by email is processed to handle the request, reply to the message, diagnose an issue, and ensure security, on the basis of legitimate interest or steps taken at the user's request"
+          ]
+        },
+        "localData": {
+          "title": "Categories of data processed locally",
+          "body": "The app stores application data and user content locally when needed for learning and app features.",
+          "bullets": [
+            "learning progress, statistics, review state, and support data used by the learning mechanics",
+            "pinned courses, custom courses, custom flashcards, and settings related to editing them",
+            "app settings, interface preferences, and helper states saved by the app",
+            "if the user enters personal data into their own flashcards, courses, or descriptions, that data is also stored locally on the device"
+          ],
+          "noteLabel": "Technical note",
+          "note": "Data is stored locally mainly with SQLite and AsyncStorage."
+        },
+        "permissions": {
+          "title": "Permissions and device features",
+          "body": "Memicard uses device features only when they are needed for a selected feature.",
+          "bullets": [
+            "local notifications for study reminders are used only after the user grants permission",
+            "file access is used for data import, export, and user data copies",
+            "system sharing may be used when exporting data outside the app",
+            "the app may open the default mail client to prepare a support message",
+            "the app requests access to the photo library only when the user wants to add their own image to a flashcard"
+          ]
+        },
+        "recipients": {
+          "title": "Recipients and third parties",
+          "body": "As a rule, Memicard does not send user data to the developer's servers for normal app operation.",
+          "bullets": [
+            "data stays on the user's device unless the user chooses to export it, share it, or send it by email",
+            "when the user contacts support by email, data may be processed by the user's email provider and system mail services",
+            "when the user exports or shares files, data may be stored outside the app according to the service, location, or app chosen by the user",
+            "based on the current state of the app, no third-party advertising SDKs or cross-app tracking systems are used"
+          ]
+        },
+        "retention": {
+          "title": "Retention period",
+          "body": "The storage period depends on the type of data and how the app is used.",
+          "bullets": [
+            "local data is stored until the user deletes it, resets the app, removes selected content, or removes the app",
+            "data sent by email is stored for the time needed to handle the request and is then deleted or anonymized, generally for no longer than 12 months, unless the law requires longer retention",
+            "files exported outside the app remain outside Memicard's control and are stored until deleted by the user or by the selected service provider"
+          ]
+        },
+        "noTracking": {
+          "title": "What the app does not do",
+          "body": "According to the current state of the app as of March 9, 2026, Memicard:",
+          "bullets": [
+            "does not sell user data",
+            "does not use behavioral advertising",
+            "does not track activity across apps",
+            "does not send user data to its own server for normal app operation"
+          ]
+        },
+        "deletion": {
+          "title": "Data deletion",
+          "body": "The user keeps control over data stored by the app on the device.",
+          "bullets": [
+            "some data can be removed inside the app, for example by deleting custom courses, custom flashcards, or resetting selected settings",
+            "removing the app generally removes its local data from the device, subject to backup or restore mechanisms offered by the operating system or user services",
+            "data copies exported to files or external services remain outside the app and are managed by the user"
+          ]
+        },
+        "transfers": {
+          "title": "Transfers outside the EU or EEA",
+          "body": "As a rule, Memicard does not transfer user data to its own servers outside the European Economic Area.",
+          "bullets": [
+            "when the user contacts support by email or uses third-party services chosen by the user, data may be processed under those providers' own rules",
+            "the scope and location of processing by an external provider depends on the service selected by the user, and Memicard does not control those providers' privacy policies"
+          ]
+        },
+        "security": {
+          "title": "Data security",
+          "body": "The app follows a data minimization approach and uses system permissions only when needed for a selected feature.",
+          "bullets": [
+            "local data stays on the user's device unless the user chooses to export or send it",
+            "support email drafts are shown to the user before sending",
+            "the app does not request more permissions than needed for the features included in the current version"
+          ]
+        },
+        "rights": {
+          "title": "User rights",
+          "body": "The user has rights under personal data protection laws to the extent that they apply to the way the app is used.",
+          "bullets": [
+            "the right to access data, rectify it, delete it, and receive a copy of the data",
+            "the right to restrict processing and to object to processing based on legitimate interest",
+            "the right to withdraw consent at any time where processing is based on consent; withdrawal does not affect the lawfulness of earlier processing",
+            "the right to lodge a complaint with the President of the Personal Data Protection Office in Poland (PUODO)"
+          ],
+          "noteLabel": "How to exercise rights",
+          "note": "Privacy requests can be sent to [Privacy contact email address]. If data exists only locally on the user's device, some rights may be exercised directly by deleting the data in the app or by removing the app."
+        }
+      }
+    },
+    "licenses": {
+      "hero": {
         "title": "Licenses and third-party materials",
-        "body": "Memicard may use selected third-party materials, such as images, illustrations, or other educational assets, in accordance with their license terms or usage rules defined by the rights holders.",
-        "bullets": [
-          "when attribution is required, the app provides the source and basic information about the usage conditions",
-          "some materials may be subject to additional limitations, for example regarding logos, trademarks, or presentation style",
-          "detailed terms for selected sources may be available under external links"
-        ],
-        "sourceCard": {
-          "title": "Astronomy materials - NOIRLab",
-          "body": "Some constellation images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, these materials are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Use of these materials does not mean that NOIRLab endorses or recommends the app.",
-          "bullets": [],
-          "noteLabel": "",
-          "note": "",
-          "button": "Open source terms"
+        "subtitle": "This page describes selected third-party materials and the terms under which they are used in the app. It is not part of the privacy policy.",
+        "updatedLabel": "Last updated",
+        "updatedValue": "March 9, 2026"
+      },
+      "sections": {
+        "materials": {
+          "title": "Third-party materials",
+          "body": "Memicard may use selected third-party materials, such as images, illustrations, or other educational assets, in accordance with their license terms or usage rules defined by the rights holders.",
+          "bullets": [
+            "when attribution is required, the app provides the source and basic information about the usage conditions",
+            "some materials may be subject to additional limitations, for example regarding logos, trademarks, or presentation style",
+            "detailed terms for selected sources may be available under external links"
+          ],
+          "sourceCard": {
+            "title": "Astronomy materials - NOIRLab",
+            "body": "Some constellation images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, these materials are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Use of these materials does not mean that NOIRLab endorses or recommends the app.",
+            "bullets": [],
+            "noteLabel": "",
+            "note": "",
+            "button": "Open source terms"
+          }
         }
       }
     }

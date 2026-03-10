@@ -330,90 +330,163 @@
   },
   "legal": {
     "entry": {
-      "title": "Polityka prywatności i licencje",
-      "subtitle": "Sprawdź zasady dotyczące danych, kontaktu z supportem i wykorzystanych materiałów.",
-      "button": "Zobacz informacje prawne"
+      "title": "Informacje prawne",
+      "subtitle": "Sprawdź osobno politykę prywatności oraz licencje i wykorzystane materiały.",
+      "privacyButton": "Polityka prywatności",
+      "licensesButton": "Licencje i materiały"
     },
-    "hero": {
-      "eyebrow": "Informacje prawne",
-      "title": "Polityka prywatności i licencje",
-      "subtitle": "Najważniejsze informacje o danych, uprawnieniach, kontakcie i wykorzystanych materiałach.",
-      "updatedLabel": "Ostatnia aktualizacja",
-      "updatedValue": "9 marca 2026"
-    },
-    "sections": {
-      "privacy": {
+    "privacyPolicy": {
+      "hero": {
         "title": "Polityka prywatności",
-        "body": "Memicard zapisuje dane potrzebne do działania i personalizacji aplikacji głównie na urządzeniu użytkownika. Polityka obejmuje informacje przechowywane lokalnie przez aplikację oraz dane, które użytkownik może dobrowolnie przekazać podczas kontaktu e-mailowego."
+        "subtitle": "Ten dokument opisuje, jakie dane aplikacja Memicard przetwarza, w jakich celach, komu mogą być ujawniane, jak długo są przechowywane oraz jakie prawa przysługują użytkownikowi.",
+        "updatedLabel": "Ostatnia aktualizacja",
+        "updatedValue": "9 marca 2026"
       },
-      "localData": {
-        "title": "Dane przechowywane lokalnie",
-        "body": "Aplikacja zapisuje lokalnie dane potrzebne do nauki i działania funkcji użytkownika.",
-        "bullets": [
-          "postępy w nauce, statystyki i powtórki",
-          "przypięte kursy, własne kursy oraz własne fiszki",
-          "ustawienia aplikacji i preferencje interfejsu",
-          "dane pomocnicze potrzebne do działania funkcji, takie jak checkpointy czy wybrane opcje"
-        ],
-        "noteLabel": "Technicznie",
-        "note": "Dane są przechowywane lokalnie na urządzeniu przede wszystkim z użyciem SQLite i AsyncStorage."
-      },
-      "permissions": {
-        "title": "Uprawnienia i funkcje urządzenia",
-        "body": "Memicard korzysta z funkcji urządzenia wyłącznie wtedy, gdy są potrzebne do działania wybranych opcji aplikacji.",
-        "bullets": [
-          "powiadomienia lokalne do przypomnień o nauce są używane tylko po zgodzie użytkownika",
-          "dostęp do plików jest wykorzystywany przy imporcie i eksporcie danych",
-          "systemowe udostępnianie może zostać użyte przy eksporcie kopii danych",
-          "aplikacja może otworzyć domyślnego klienta pocztowego w celu przygotowania wiadomości do supportu",
-          "przy dodawaniu własnych obrazów do fiszek aplikacja może otworzyć bibliotekę zdjęć użytkownika tylko dla tej funkcji"
-        ]
-      },
-      "contact": {
-        "title": "Kontakt",
-        "body": "Jeśli użytkownik chce zgłosić problem albo przesłać sugestię, aplikacja może przygotować wiadomość w domyślnym kliencie pocztowym.",
-        "bullets": [
-          "wiadomość jest przygotowywana z adresem supportu i sugerowanym tematem",
-          "do treści mogą zostać dołączone dane diagnostyczne, takie jak wersja aplikacji, platforma, wersja systemu oraz model urządzenia",
-          "użytkownik widzi wiadomość przed wysłaniem i sam decyduje, czy ją wysłać"
-        ],
-        "noteLabel": "Obsługa zgłoszeń",
-        "note": "Dane przesłane e-mailem są wykorzystywane wyłącznie do obsługi zgłoszenia, odpowiedzi na wiadomość oraz diagnozy problemu."
-      },
-      "noTracking": {
-        "title": "Czego aplikacja nie robi",
-        "body": "Zgodnie z aktualnym stanem aplikacji Memicard:",
-        "bullets": [
-          "nie sprzedaje danych użytkownika",
-          "nie używa reklam behawioralnych",
-          "nie śledzi aktywności użytkownika między aplikacjami",
-          "nie przesyła danych użytkownika na własny serwer w celu bieżącego działania aplikacji"
-        ]
-      },
-      "deletion": {
-        "title": "Usuwanie danych",
-        "body": "Użytkownik zachowuje kontrolę nad danymi zapisanymi przez aplikację na urządzeniu.",
-        "bullets": [
-          "część danych można usunąć w samej aplikacji, na przykład usuwając własne kursy albo resetując wybrane ustawienia",
-          "odinstalowanie aplikacji usuwa jej lokalne dane z urządzenia zgodnie z zachowaniem systemu",
-          "kopie danych wyeksportowane do plików lub usług zewnętrznych pozostają poza aplikacją i użytkownik zarządza nimi samodzielnie"
-        ]
-      },
-      "licenses": {
+      "sections": {
+        "overview": {
+          "title": "Zakres polityki",
+          "body": "Memicard co do zasady przechowuje większość danych lokalnie na urządzeniu użytkownika. Polityka obejmuje dane zapisane przez aplikację, dane przekazane dobrowolnie przez użytkownika oraz informacje związane z korzystaniem z opcjonalnych funkcji urządzenia.",
+          "bullets": [
+            "aplikacja nie wymaga konta użytkownika do podstawowego działania",
+            "aplikacja nie korzysta z własnego backendu do bieżącej obsługi danych użytkownika",
+            "treść polityki odnosi się do aktualnego stanu aplikacji na dzień 9 marca 2026"
+          ]
+        },
+        "controller": {
+          "title": "Administrator danych i kontakt",
+          "body": "Administratorem danych osobowych przetwarzanych w związku z korzystaniem z aplikacji Memicard jest [Imię i nazwisko administratora]. Kontakt w sprawach prywatności: [Adres e-mail do spraw prywatności].",
+          "bullets": [
+            "opcjonalny adres rejestrowy lub korespondencyjny: [Adres rejestrowy]",
+            "adres supportu technicznego może różnić się od adresu do spraw prywatności",
+            "przed publikacją polityki placeholdery należy zastąpić prawidłowymi danymi administratora"
+          ]
+        },
+        "purposes": {
+          "title": "Cele i podstawy przetwarzania",
+          "body": "Dane są przetwarzane wyłącznie w zakresie potrzebnym do działania aplikacji lub realizacji żądania użytkownika.",
+          "bullets": [
+            "dane lokalne są przetwarzane w celu działania aplikacji, zapisu postępów, statystyk, ustawień i własnych treści użytkownika, na podstawie wykonania usługi lub działań podejmowanych na żądanie użytkownika",
+            "powiadomienia lokalne o nauce są aktywowane wyłącznie po zgodzie użytkownika",
+            "import i eksport danych, wybór plików oraz wybór obrazów odbywają się wyłącznie na żądanie użytkownika",
+            "dane przesłane e-mailem są przetwarzane w celu obsługi zgłoszenia, odpowiedzi na wiadomość, diagnozy problemu oraz zapewnienia bezpieczeństwa, na podstawie uzasadnionego interesu lub działań podjętych na żądanie użytkownika"
+          ]
+        },
+        "localData": {
+          "title": "Kategorie danych przetwarzanych lokalnie",
+          "body": "Aplikacja zapisuje lokalnie dane aplikacyjne oraz treści użytkownika potrzebne do nauki i działania funkcji.",
+          "bullets": [
+            "postępy w nauce, statystyki, powtórki i dane pomocnicze używane przez mechanikę nauki",
+            "przypięte kursy, własne kursy, własne fiszki oraz ustawienia związane z ich edycją",
+            "ustawienia aplikacji, preferencje interfejsu i stany pomocnicze zapisywane przez aplikację",
+            "jeżeli użytkownik sam wpisze dane osobowe do własnych fiszek, kursów lub opisów, dane te również pozostają zapisane lokalnie na urządzeniu"
+          ],
+          "noteLabel": "Technicznie",
+          "note": "Dane są przechowywane lokalnie głównie z użyciem SQLite i AsyncStorage."
+        },
+        "permissions": {
+          "title": "Uprawnienia i funkcje urządzenia",
+          "body": "Memicard korzysta z funkcji urządzenia wyłącznie wtedy, gdy są potrzebne do działania wybranej funkcji.",
+          "bullets": [
+            "powiadomienia lokalne do przypomnień o nauce są używane tylko po wyrażeniu zgody przez użytkownika",
+            "dostęp do plików jest wykorzystywany przy imporcie i eksporcie danych oraz kopii użytkownika",
+            "systemowe udostępnianie może zostać użyte przy eksporcie danych poza aplikację",
+            "aplikacja może otworzyć domyślnego klienta pocztowego w celu przygotowania wiadomości do supportu",
+            "aplikacja prosi o dostęp do biblioteki zdjęć wyłącznie wtedy, gdy użytkownik chce dodać własny obraz do fiszki"
+          ]
+        },
+        "recipients": {
+          "title": "Odbiorcy danych i podmioty trzecie",
+          "body": "Co do zasady Memicard nie przesyła danych użytkownika na serwery dewelopera w celu bieżącego działania aplikacji.",
+          "bullets": [
+            "dane pozostają na urządzeniu użytkownika, chyba że użytkownik sam zdecyduje o eksporcie, udostępnieniu lub wysłaniu wiadomości e-mail",
+            "w przypadku kontaktu e-mailowego dane mogą być przetwarzane przez dostawcę poczty elektronicznej i systemowe usługi pocztowe wybrane przez użytkownika",
+            "w przypadku eksportu lub udostępnienia plików dane mogą zostać zapisane poza aplikacją, zgodnie z usługą, lokalizacją lub aplikacją wybraną przez użytkownika",
+            "zgodnie z aktualnym stanem aplikacji nie są używane zewnętrzne SDK reklamowe ani systemy śledzenia aktywności między aplikacjami"
+          ]
+        },
+        "retention": {
+          "title": "Okres przechowywania danych",
+          "body": "Okres przechowywania zależy od rodzaju danych i sposobu korzystania z aplikacji.",
+          "bullets": [
+            "dane lokalne są przechowywane do czasu ich usunięcia przez użytkownika, resetu aplikacji, usunięcia wybranych treści albo usunięcia aplikacji",
+            "dane przesłane e-mailem są przechowywane przez czas niezbędny do obsługi zgłoszenia, a następnie usuwane lub anonimizowane, co do zasady nie dłużej niż 12 miesięcy, chyba że przepisy prawa wymagają dłuższego przechowywania",
+            "pliki wyeksportowane poza aplikację pozostają poza kontrolą Memicard i są przechowywane do czasu ich usunięcia przez użytkownika lub dostawcę wybranej usługi"
+          ]
+        },
+        "noTracking": {
+          "title": "Czego aplikacja nie robi",
+          "body": "Zgodnie z aktualnym stanem aplikacji na dzień 9 marca 2026 Memicard:",
+          "bullets": [
+            "nie sprzedaje danych użytkownika",
+            "nie używa reklam behawioralnych",
+            "nie śledzi aktywności użytkownika między aplikacjami",
+            "nie przesyła danych użytkownika na własny serwer w celu bieżącego działania aplikacji"
+          ]
+        },
+        "deletion": {
+          "title": "Usuwanie danych",
+          "body": "Użytkownik zachowuje kontrolę nad danymi zapisanymi przez aplikację na urządzeniu.",
+          "bullets": [
+            "część danych można usunąć w samej aplikacji, na przykład usuwając własne kursy, własne fiszki albo resetując wybrane ustawienia",
+            "usunięcie aplikacji co do zasady powoduje usunięcie jej lokalnych danych z urządzenia, z zastrzeżeniem mechanizmów kopii zapasowych lub przywracania danych oferowanych przez system operacyjny albo usługi użytkownika",
+            "kopie danych wyeksportowane do plików lub usług zewnętrznych pozostają poza aplikacją i użytkownik zarządza nimi samodzielnie"
+          ]
+        },
+        "transfers": {
+          "title": "Przekazywanie danych poza UE lub EOG",
+          "body": "Memicard co do zasady nie przekazuje danych użytkownika na własne serwery poza Europejski Obszar Gospodarczy.",
+          "bullets": [
+            "w przypadku kontaktu e-mailowego lub korzystania z usług zewnętrznych wybranych przez użytkownika dane mogą być przetwarzane zgodnie z zasadami tych dostawców",
+            "zakres i miejsce przetwarzania przez zewnętrznego dostawcę zależą od usługi wybranej przez użytkownika, a Memicard nie kontroluje polityk prywatności takich dostawców"
+          ]
+        },
+        "security": {
+          "title": "Bezpieczeństwo danych",
+          "body": "Aplikacja stosuje podejście oparte na minimalizacji danych i korzysta z uprawnień systemowych tylko wtedy, gdy są potrzebne do wybranej funkcji.",
+          "bullets": [
+            "dane lokalne pozostają na urządzeniu użytkownika, chyba że użytkownik sam zdecyduje o ich eksporcie lub wysłaniu",
+            "wiadomość e-mail do supportu jest przygotowywana do wglądu użytkownika przed wysłaniem",
+            "aplikacja nie pobiera więcej uprawnień niż to konieczne do działania funkcji obecnych w aktualnej wersji"
+          ]
+        },
+        "rights": {
+          "title": "Prawa użytkownika",
+          "body": "Użytkownikowi przysługują prawa wynikające z przepisów o ochronie danych osobowych, w zakresie w jakim mają zastosowanie do sposobu korzystania z aplikacji.",
+          "bullets": [
+            "prawo dostępu do danych, ich sprostowania, usunięcia oraz otrzymania kopii danych",
+            "prawo do ograniczenia przetwarzania oraz wniesienia sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie",
+            "prawo do cofnięcia zgody w dowolnym momencie, jeśli przetwarzanie odbywa się na podstawie zgody; cofnięcie zgody nie wpływa na zgodność z prawem wcześniejszego przetwarzania",
+            "prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (PUODO)"
+          ],
+          "noteLabel": "Jak skorzystać z praw",
+          "note": "Żądania dotyczące prywatności można kierować na adres [Adres e-mail do spraw prywatności]. Jeżeli dane znajdują się wyłącznie lokalnie na urządzeniu użytkownika, część uprawnień może być realizowana bezpośrednio przez usunięcie danych w aplikacji lub usunięcie aplikacji."
+        }
+      }
+    },
+    "licenses": {
+      "hero": {
         "title": "Licencje i wykorzystane materiały",
-        "body": "Memicard może wykorzystywać wybrane materiały zewnętrzne, takie jak obrazy, ilustracje lub inne zasoby edukacyjne, zgodnie z warunkami ich licencji lub zasadami wykorzystania określonymi przez właścicieli praw.",
-        "bullets": [
-          "w przypadku materiałów wymagających atrybucji aplikacja podaje źródło oraz podstawowe informacje o warunkach wykorzystania",
-          "niektóre materiały mogą podlegać dodatkowym ograniczeniom, na przykład w zakresie użycia logo, znaków towarowych lub sposobu prezentacji",
-          "szczegółowe warunki dla wybranych źródeł mogą być dostępne pod linkami zewnętrznymi"
-        ],
-        "sourceCard": {
-          "title": "NOIRLab",
-          "body": "Niektóre obrazy konstelacji wykorzystane w aplikacji pochodzą z NOIRLab. O ile przy danym materiale nie wskazano inaczej, materiały te są używane zgodnie z licencją Creative Commons Attribution 4.0 International (CC BY 4.0). Źródło: NOIRLab. Użycie tych materiałów nie oznacza, że NOIRLab popiera lub rekomenduje aplikację.",
-          "bullets": [],
-          "noteLabel": "",
-          "note": "",
-          "button": "Otwórz warunki źródła"
+        "subtitle": "Ten ekran opisuje wybrane materiały zewnętrzne i zasady ich wykorzystania w aplikacji. Nie stanowi części polityki prywatności.",
+        "updatedLabel": "Ostatnia aktualizacja",
+        "updatedValue": "9 marca 2026"
+      },
+      "sections": {
+        "materials": {
+          "title": "Materiały zewnętrzne",
+          "body": "Memicard może wykorzystywać wybrane materiały zewnętrzne, takie jak obrazy, ilustracje lub inne zasoby edukacyjne, zgodnie z warunkami ich licencji lub zasadami wykorzystania określonymi przez właścicieli praw.",
+          "bullets": [
+            "w przypadku materiałów wymagających atrybucji aplikacja podaje źródło oraz podstawowe informacje o warunkach wykorzystania",
+            "niektóre materiały mogą podlegać dodatkowym ograniczeniom, na przykład w zakresie użycia logo, znaków towarowych lub sposobu prezentacji",
+            "szczegółowe warunki dla wybranych źródeł mogą być dostępne pod linkami zewnętrznymi"
+          ],
+          "sourceCard": {
+            "title": "NOIRLab",
+            "body": "Niektóre obrazy konstelacji wykorzystane w aplikacji pochodzą z NOIRLab. O ile przy danym materiale nie wskazano inaczej, materiały te są używane zgodnie z licencją Creative Commons Attribution 4.0 International (CC BY 4.0). Źródło: NOIRLab. Użycie tych materiałów nie oznacza, że NOIRLab popiera lub rekomenduje aplikację.",
+            "bullets": [],
+            "noteLabel": "",
+            "note": "",
+            "button": "Otwórz warunki źródła"
+          }
         }
       }
     }

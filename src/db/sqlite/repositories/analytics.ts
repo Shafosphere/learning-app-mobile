@@ -187,8 +187,12 @@ export async function getGlobalDailyStreakDays(
 ): Promise<number> {
   const db = await getDB();
   const rows = await db.getAllAsync<{ d: string }>(
-    `SELECT DISTINCT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime') AS d
+    `SELECT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime') AS d
      FROM custom_learning_events
+     WHERE result = 'ok'
+       AND box IN ('boxOne', 'boxTwo', 'boxThree', 'boxFour')
+     GROUP BY d
+     HAVING COUNT(*) >= 10
      ORDER BY d DESC;`
   );
 

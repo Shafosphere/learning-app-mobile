@@ -260,10 +260,19 @@ export default function SupportScreen() {
           <Text style={styles.header}>{t("legal.entry.title")}</Text>
           <Text style={styles.subtitle}>{t("legal.entry.subtitle")}</Text>
           <View style={styles.buttonWrapper}>
-            <Link href="/legal" asChild>
+            <Link href="/privacy-policy" asChild>
               <MyButton
-                text={t("legal.entry.button")}
+                text={t("legal.entry.privacyButton")}
                 color="my_yellow"
+                width={190}
+              />
+            </Link>
+          </View>
+          <View style={styles.buttonWrapper}>
+            <Link href="/licenses" asChild>
+              <MyButton
+                text={t("legal.entry.licensesButton")}
+                color="my_green"
                 width={220}
               />
             </Link>
