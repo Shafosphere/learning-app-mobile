@@ -251,7 +251,7 @@ export default function SupportScreen() {
           </Text>
           <View style={styles.buttonWrapper}>
             <Link href="/wiki" asChild>
-              <MyButton text="co i jak" color="my_green" width={140} />
+              <MyButton text="co i jak" color="my_green" width={160} />
             </Link>
           </View>
         </View>
@@ -264,7 +264,7 @@ export default function SupportScreen() {
               <MyButton
                 text={t("legal.entry.privacyButton")}
                 color="my_yellow"
-                width={190}
+                width={160}
               />
             </Link>
           </View>
@@ -273,7 +273,7 @@ export default function SupportScreen() {
               <MyButton
                 text={t("legal.entry.licensesButton")}
                 color="my_green"
-                width={220}
+                width={160}
               />
             </Link>
           </View>

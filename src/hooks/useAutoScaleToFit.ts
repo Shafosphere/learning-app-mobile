@@ -16,6 +16,7 @@ type UseAutoScaleToFitResult = {
 
 const DEFAULT_MIN_SCALE = 0.72;
 const EPSILON = 0.0001;
+const LAYOUT_JITTER_TOLERANCE_PX = 1;
 
 export function useAutoScaleToFit({
   minScale = DEFAULT_MIN_SCALE,
@@ -25,13 +26,23 @@ export function useAutoScaleToFit({
 
   const onViewportLayout = useCallback((event: LayoutChangeEvent) => {
     const nextHeight = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
-    setViewportHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    setViewportHeight((prev) => {
+      if (prev === 0) return nextHeight;
+      return Math.abs(prev - nextHeight) <= LAYOUT_JITTER_TOLERANCE_PX
+        ? prev
+        : nextHeight;
+    });
   }, []);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
     // Measure the content container in its natural (unscaled) layout.
     const nextHeight = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
-    setContentHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    setContentHeight((prev) => {
+      if (prev === 0) return nextHeight;
+      return Math.abs(prev - nextHeight) <= LAYOUT_JITTER_TOLERANCE_PX
+        ? prev
+        : nextHeight;
+    });
   }, []);
 
   const ratio =

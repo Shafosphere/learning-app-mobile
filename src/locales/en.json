@@ -481,11 +481,11 @@
           ],
           "sourceCard": {
             "title": "Astronomy materials - NOIRLab",
-            "body": "Some constellation images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, these materials are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Use of these materials does not mean that NOIRLab endorses or recommends the app.",
+            "body": "Some images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, they are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. The images used in the app have been modified for interface purposes, in particular through cropping, resizing, compression, or other minor visual adjustments. Use of these materials does not imply endorsement or recommendation of the app by NOIRLab.",
             "bullets": [],
             "noteLabel": "",
             "note": "",
-            "button": "Open source terms"
+            "button": "source"
           }
         }
       }

@@ -6,6 +6,7 @@ const SMALL_CARD_HEIGHT = 120;
 const LARGE_CARD_MAX_HEIGHT = 325;
 const LARGE_CARD_GAP = 6;
 const SHRINK_SETTLE_DELAY_MS = 140;
+const LAYOUT_JITTER_TOLERANCE_PX = 1;
 
 type LayoutHandlers = {
   onPromptLayout: (height: number) => void;
@@ -79,12 +80,22 @@ export default function LargeCardContainer({
 
   const handlePromptLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
-    setPromptHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    setPromptHeight((prev) => {
+      if (prev == null) return nextHeight;
+      return Math.abs(prev - nextHeight) <= LAYOUT_JITTER_TOLERANCE_PX
+        ? prev
+        : nextHeight;
+    });
   }, []);
 
   const handleInputLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
-    setInputHeight((prev) => (prev === nextHeight ? prev : nextHeight));
+    setInputHeight((prev) => {
+      if (prev == null) return nextHeight;
+      return Math.abs(prev - nextHeight) <= LAYOUT_JITTER_TOLERANCE_PX
+        ? prev
+        : nextHeight;
+    });
   }, []);
 
   useEffect(() => {

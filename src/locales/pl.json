@@ -481,11 +481,11 @@
           ],
           "sourceCard": {
             "title": "NOIRLab",
-            "body": "Niektóre obrazy konstelacji wykorzystane w aplikacji pochodzą z NOIRLab. O ile przy danym materiale nie wskazano inaczej, materiały te są używane zgodnie z licencją Creative Commons Attribution 4.0 International (CC BY 4.0). Źródło: NOIRLab. Użycie tych materiałów nie oznacza, że NOIRLab popiera lub rekomenduje aplikację.",
+            "body": "Niektóre obrazy wykorzystane w aplikacji pochodzą z NOIRLab. O ile przy danym materiale nie wskazano inaczej, są one używane zgodnie z licencją Creative Commons Attribution 4.0 International (CC BY 4.0). Źródło: NOIRLab. Obrazy wykorzystane w aplikacji zostały zmodyfikowane na potrzeby interfejsu, w szczególności poprzez przycięcie, zmianę rozmiaru, kompresję lub inne drobne dostosowania wizualne. Wykorzystanie tych materiałów nie oznacza poparcia ani rekomendacji aplikacji przez NOIRLab.",
             "bullets": [],
             "noteLabel": "",
             "note": "",
-            "button": "Otwórz warunki źródła"
+            "button": "źródło"
           }
         }
       }
