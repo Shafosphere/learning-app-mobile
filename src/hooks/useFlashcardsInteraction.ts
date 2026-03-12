@@ -19,15 +19,26 @@ type CorrectionState = {
   mode: CorrectionMode;
 };
 
+export type RegisterKnownWordResult = {
+  wasNewMastered: boolean;
+  nextKnownWordsCount: number;
+};
+
+export type CorrectAnswerMeta = {
+  word: WordWithTranslations;
+  wasNewMastered: boolean;
+  logLearningEventPromise: Promise<void>;
+};
+
 export type UseFlashcardsInteractionParams = {
   boxes: BoxesState;
   setBoxes: React.Dispatch<React.SetStateAction<BoxesState>>;
   checkSpelling: SpellcheckFn;
   addUsedWordIds: (ids: number[] | number) => void;
-  registerKnownWord: (wordId: number) => void;
+  registerKnownWord: (wordId: number) => RegisterKnownWordResult;
   reversedBoxes?: readonly (keyof BoxesState)[];
   onWordPromotedOut?: (word: WordWithTranslations) => void;
-  onCorrectAnswer?: (box: keyof BoxesState) => void;
+  onCorrectAnswer?: (box: keyof BoxesState, meta: CorrectAnswerMeta) => void;
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
 };
@@ -333,12 +344,14 @@ export function useFlashcardsInteraction({
           ? checkSpelling(answerToUse, wordForCheck.text)
           : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
       const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
-      void logCustomLearningEvent({
+      const logLearningEventPromise = logCustomLearningEvent({
         flashcardId: wordForCheck.id,
         courseId: activeCustomCourseId ?? null,
         box: activeBox ?? null,
         result: ok ? "ok" : "wrong",
         durationMs: duration ?? undefined,
+      }).catch((error) => {
+        console.warn("[Flashcards] Failed to log learning event", error);
       });
       if (learningRemindersEnabled) {
         if (reminderRefreshTimerRef.current != null) {
@@ -382,11 +395,19 @@ export function useFlashcardsInteraction({
           }
         }
         setResult(true);
+        const registerKnownWordResult =
+          activeBox === "boxFive"
+            ? registerKnownWord(wordForCheck.id)
+            : {
+                wasNewMastered: false,
+                nextKnownWordsCount: 0,
+              };
         if (activeBox) {
-          onCorrectAnswer?.(activeBox);
-        }
-        if (activeBox === "boxFive") {
-          registerKnownWord(wordForCheck.id);
+          onCorrectAnswer?.(activeBox, {
+            word: wordForCheck,
+            wasNewMastered: registerKnownWordResult.wasNewMastered,
+            logLearningEventPromise,
+          });
         }
         const normalize = (s: string) => {
           let v = s.trim().toLowerCase();

@@ -1,7 +1,8 @@
-import { countTotalLearnedWordsGlobal } from "@/src/db/sqlite/db";
+import Ionicons from "@expo/vector-icons/Ionicons";
+import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import { StyleSheet, Text, View } from "react-native";
 import { OrganicFireEffect } from "./OrganicFireEffect";
 
@@ -29,6 +30,13 @@ const useStyles = createThemeStylesHook((colors) => ({
   bigNumberWithFlames: {
     marginTop: -20, // Adjust for visual balance with flames
   },
+  cornerIcon: {
+    position: "absolute",
+    right: 18,
+    bottom: 18,
+    opacity: 0.95,
+    zIndex: 10,
+  },
   label: {
     fontSize: 16,
     fontWeight: "600",
@@ -46,22 +54,8 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 const BigKnownWordsCard: React.FC = () => {
   const styles = useStyles();
-  const { statsFireEffectEnabled } = useSettings();
-  const [total, setTotal] = useState<number>(0);
-
-  useEffect(() => {
-    let mounted = true;
-    void countTotalLearnedWordsGlobal()
-      .then((cnt) => {
-        if (mounted) setTotal(cnt | 0);
-      })
-      .catch(() => {
-        if (mounted) setTotal(0);
-      });
-    return () => {
-      mounted = false;
-    };
-  }, []);
+  const { statsFireEffectEnabled, colors } = useSettings();
+  const { stats } = useNavbarStats();
 
   return (
     <View style={styles.container}>
@@ -76,9 +70,15 @@ const BigKnownWordsCard: React.FC = () => {
           statsFireEffectEnabled && styles.bigNumberWithFlames,
         ]}
       >
-        {total}
+        {stats.masteredCount}
       </Text>
       <Text style={styles.label}>Opanowane fiszki</Text>
+      <Ionicons
+        style={styles.cornerIcon}
+        name="trophy-outline"
+        size={32}
+        color={colors.my_yellow}
+      />
     </View>
   );
 };

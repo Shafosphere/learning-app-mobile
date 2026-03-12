@@ -1,6 +1,9 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
+import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
+import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
@@ -9,8 +12,6 @@ import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import {
-  countGlobalBoxPromotions,
-  getGlobalDailyStreakDays,
   getDailyLearnedCountsCustom,
   getDailyLearningTimeMsCustom,
   getTotalLearningTimeMs,
@@ -18,15 +19,14 @@ import {
 
 export default function StatsScreen() {
   const styles = useStyles();
-  const { statsBookshelfEnabled } = useSettings();
+  const { statsBookshelfEnabled, colors } = useSettings();
+  const { stats } = useNavbarStats();
   const [heatmapData, setHeatmapData] = useState<HeatmapDay[]>([]);
   const [learningTime, setLearningTime] = useState({
     week: 0,
     month: 0,
     year: 0,
   });
-  const [streakDays, setStreakDays] = useState(0);
-  const [boxPromotionsCount, setBoxPromotionsCount] = useState(0);
   const [isBookshelfEditing, setIsBookshelfEditing] = useState(false);
 
   useEffect(() => {
@@ -72,28 +72,6 @@ export default function StatsScreen() {
         if (mounted) {
           setHeatmapData([]);
         }
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, []);
-
-  useEffect(() => {
-    let mounted = true;
-    (async () => {
-      try {
-        const [streak, promotions] = await Promise.all([
-          getGlobalDailyStreakDays(),
-          countGlobalBoxPromotions(),
-        ]);
-        if (!mounted) return;
-        setStreakDays(streak);
-        setBoxPromotionsCount(promotions);
-      } catch {
-        if (!mounted) return;
-        setStreakDays(0);
-        setBoxPromotionsCount(0);
       }
     })();
     return () => {
@@ -159,13 +137,25 @@ export default function StatsScreen() {
       <View style={styles.miniStatsRow}>
         <View style={styles.miniStatItem}>
           <View style={styles.miniStatCard}>
-            <Text style={styles.miniStatValue}>{streakDays}</Text>
+            <Text style={styles.miniStatValue}>{stats.streakDays}</Text>
+            <MaterialIcons
+              style={styles.miniStatCornerIcon}
+              name="local-fire-department"
+              size={18}
+              color={colors.my_red}
+            />
           </View>
-          <Text style={styles.miniStatLabel}>Daily streak</Text>
+          <Text style={styles.miniStatLabel}>Codzienna passa</Text>
         </View>
         <View style={styles.miniStatItem}>
           <View style={styles.miniStatCard}>
-            <Text style={styles.miniStatValue}>{boxPromotionsCount}</Text>
+            <Text style={styles.miniStatValue}>{stats.promotionsCount}</Text>
+            <Ionicons
+              style={styles.miniStatCornerIcon}
+              name="trending-up-outline"
+              size={16}
+              color={colors.my_green}
+            />
           </View>
           <Text style={styles.miniStatLabel}>Skoki</Text>
         </View>

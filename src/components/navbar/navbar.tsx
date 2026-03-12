@@ -2,7 +2,6 @@ import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
-import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -34,6 +33,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import NavbarStatsRotator from "./NavbarStatsRotator";
 import { useStyles } from "./navbar-styles";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
@@ -92,7 +92,6 @@ export default function Navbar({ children }: NavbarProps) {
   const [displayCourse, setDisplayCourse] = useState<DisplayCourse | null>(
     derivedDisplayCourse,
   );
-  const { knownWordsCount } = useLearningStats();
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
 
@@ -420,19 +419,7 @@ export default function Navbar({ children }: NavbarProps) {
           </View>
 
           <View style={styles.rightGroup}>
-            <Pressable
-              style={({ pressed }) => [
-                styles.iconButton,
-                pressed && styles.iconButtonPressed,
-              ]}
-              onPress={() => router.push("/stats")}
-              accessibilityRole="button"
-              accessibilityLabel={`Opanowane słówka: ${knownWordsCount}. Przejdź do statystyk`}
-            >
-              <Text style={styles.counterText} allowFontScaling>
-                {knownWordsCount}
-              </Text>
-            </Pressable>
+            <NavbarStatsRotator onPress={() => router.push("/stats")} />
             <Pressable
               style={({ pressed }) => [
                 styles.iconButton,

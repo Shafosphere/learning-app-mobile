@@ -29,6 +29,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     paddingVertical: 16,
     paddingHorizontal: 14,
+    position: "relative",
     justifyContent: "center",
     alignItems: "center",
     shadowColor: "#000",
@@ -40,6 +41,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 34,
     fontWeight: "800",
     color: colors.headline,
+  },
+  miniStatCornerIcon: {
+    position: "absolute",
+    right: 12,
+    bottom: 12,
+    opacity: 0.95,
   },
   miniStatLabel: {
     marginTop: 6,

@@ -7,18 +7,26 @@ import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import {
+  type StatBurst,
+  useNavbarStats,
+} from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CustomCourseRecord } from "@/src/db/sqlite/db";
 import {
   getCustomCourseById,
   getCustomFlashcards,
+  getGlobalDailyStreakDays,
   scheduleCustomReview,
   updateCustomFlashcardHints,
 } from "@/src/db/sqlite/db";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
-import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import {
+  type CorrectAnswerMeta,
+  useFlashcardsInteraction,
+} from "@/src/hooks/useFlashcardsInteraction";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
@@ -103,6 +111,7 @@ export default function Flashcards() {
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
+  const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const { triggerQuote } = useQuote();
   const isFocused = useIsFocused();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
@@ -122,6 +131,64 @@ export default function Flashcards() {
     storageKey: "@flashcards_intro_seen_v1",
     triggerStrategy: "post_onboarding",
   });
+
+  const handleStatsBurst = useCallback(
+    (boxKey: keyof BoxesState, meta: CorrectAnswerMeta) => {
+      if (boxKey === "boxFive") {
+        setShouldCelebrate(false);
+        requestAnimationFrame(() => {
+          setShouldCelebrate(true);
+          triggerQuote({
+            trigger: "quote_box_five_win",
+            category: "win_mastery",
+            probability: 1,
+            cooldownMs: 5 * 60 * 1000,
+          });
+        });
+      }
+
+      const baseBurst: StatBurst = {
+        masteredDelta: meta.wasNewMastered ? 1 : 0,
+        streakDelta: 0,
+        promotionsDelta:
+          boxKey === "boxOne" ||
+          boxKey === "boxTwo" ||
+          boxKey === "boxThree" ||
+          boxKey === "boxFour"
+            ? 1
+            : 0,
+      };
+
+      const hasBaseDelta =
+        baseBurst.masteredDelta > 0 || baseBurst.promotionsDelta > 0;
+
+      void (async () => {
+        await meta.logLearningEventPromise;
+
+        let streakDelta: 0 | 1 = 0;
+        if (baseBurst.promotionsDelta > 0) {
+          try {
+            const nextStreak = await getGlobalDailyStreakDays();
+            if (nextStreak > getStatsSnapshot().streakDays) {
+              streakDelta = 1;
+            }
+          } catch (error) {
+            console.warn("[Flashcards] Failed to refresh streak after answer", error);
+          }
+        }
+
+        if (!hasBaseDelta && streakDelta === 0) {
+          return;
+        }
+
+        applyStatBurst({
+          ...baseBurst,
+          streakDelta,
+        });
+      })();
+    },
+    [applyStatBurst, getStatsSnapshot, triggerQuote],
+  );
 
   const {
     boxes,
@@ -202,19 +269,7 @@ export default function Flashcards() {
         void scheduleCustomReview(word.id, activeCustomCourseId, 0);
       }
     },
-    onCorrectAnswer: (boxKey) => {
-      if (boxKey !== "boxFive") return;
-      setShouldCelebrate(false);
-      requestAnimationFrame(() => {
-        setShouldCelebrate(true);
-        triggerQuote({
-          trigger: "quote_box_five_win",
-          category: "win_mastery",
-          probability: 1, // Mastery moment should always feel rewarding?
-          cooldownMs: 5 * 60 * 1000,
-        });
-      });
-    },
+    onCorrectAnswer: handleStatsBurst,
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
   });

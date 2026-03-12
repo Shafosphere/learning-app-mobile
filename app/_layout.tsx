@@ -6,6 +6,7 @@ import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
+import { NavbarStatsProvider } from "@/src/contexts/NavbarStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 import { QuoteProvider } from "@/src/contexts/QuoteContext";
 import { SettingsProvider } from "@/src/contexts/SettingsContext";
@@ -112,13 +113,15 @@ export default function RootLayout() {
             <QuoteSystemInitializer />
             <LearningRemindersInitializer />
             <LearningStatsProvider>
-              <PopupProvider>
-                <Navbar>
-                  <OnboardingGate />
-                  <Stack screenOptions={{ headerShown: false }} />
-                </Navbar>
-                <QuoteBubble />
-              </PopupProvider>
+              <NavbarStatsProvider>
+                <PopupProvider>
+                  <Navbar>
+                    <OnboardingGate />
+                    <Stack screenOptions={{ headerShown: false }} />
+                  </Navbar>
+                  <QuoteBubble />
+                </PopupProvider>
+              </NavbarStatsProvider>
             </LearningStatsProvider>
           </QuoteProvider>
         </SettingsProvider>

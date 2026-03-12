@@ -1,4 +1,5 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { StyleSheet } from "react-native";
 const LOGO_ASPECT_RATIO = 523 / 555;
 export const useStyles = createThemeStylesHook((colors) => ({
   layout: {
@@ -25,12 +26,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     gap: 6,
     flex: 1,
+    minWidth: 0,
+    paddingRight: 8,
   },
   rightGroup: {
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
     flex: 1,
+    flexShrink: 0,
+    marginLeft: 8,
   },
   content: {
     flex: 1,
@@ -61,6 +66,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 6,
     borderRadius: 8,
     // marginRight: 6,
+    overflow: "visible",
   },
   iconButtonPressed: {
     backgroundColor: colors.my_green,
@@ -145,12 +151,105 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   counterText: {
-    marginLeft: 8,
-    marginRight: 8,
     color: colors.headline,
     fontWeight: "700",
     fontSize: 16,
     textAlign: "right",
+  },
+  counterButton: {
+    minWidth: 90,
+    minHeight: 36,
+    borderRadius: 12,
+    paddingHorizontal: 8,
+    justifyContent: "center",
+    alignItems: "flex-end",
+    position: "relative",
+    overflow: "visible",
+  },
+  counterGlow: {
+    ...StyleSheet.absoluteFillObject,
+    borderRadius: 12,
+  },
+  counterContentWrap: {
+    minWidth: 72,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  counterAnimatedSlot: {
+    minHeight: 22,
+    alignItems: "flex-end",
+    justifyContent: "center",
+  },
+  counterAnimatedInner: {
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    gap: 6,
+  },
+  counterNumberWrap: {
+    minWidth: 38,
+    alignItems: "flex-end",
+  },
+  counterValueText: {
+    color: colors.headline,
+    fontWeight: "700",
+    fontSize: 16,
+    textAlign: "right",
+  },
+  counterIconWrap: {
+    width: 14,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  counterBurstViewport: {
+    position: "absolute",
+    top: 36,
+    left: 0,
+    right: 0,
+    height: 44,
+    overflow: "hidden",
+  },
+  counterBurstLayer: {
+    paddingTop: 14,
+    alignItems: "center",
+    paddingRight: 0,
+    paddingLeft: 30,
+    gap: 6,
+    overflow: "visible",
+  },
+  counterBurstPill: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 4,
+    paddingHorizontal: 8,
+    paddingVertical: 4,
+    borderRadius: 999,
+    backgroundColor: colors.secondBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    shadowColor: "#000",
+    shadowOpacity: 0.08,
+    shadowRadius: 8,
+    elevation: 2,
+  },
+  counterBurstText: {
+    color: colors.headline,
+    fontWeight: "700",
+    fontSize: 12,
+  },
+  counterSparkleLayer: {
+    position: "absolute",
+    top: 34,
+    right: 12,
+    width: 54,
+    height: 28,
+    overflow: "visible",
+  },
+  counterSparkleDot: {
+    position: "absolute",
+    width: 6,
+    height: 6,
+    borderRadius: 999,
   },
   courseName: {
     marginLeft: 8,

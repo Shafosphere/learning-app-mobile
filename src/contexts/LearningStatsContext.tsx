@@ -7,7 +7,10 @@ type LearningStatsContextValue = {
   lastKnownWordDate: string; // ISO date (YYYY-MM-DD)
   dailyProgressCount: number;
   dailyProgressDate: string;
-  registerKnownWord: (wordId: number) => void;
+  registerKnownWord: (wordId: number) => {
+    wasNewMastered: boolean;
+    nextKnownWordsCount: number;
+  };
 };
 
 const defaultValue: LearningStatsContextValue = {
@@ -15,7 +18,10 @@ const defaultValue: LearningStatsContextValue = {
   lastKnownWordDate: "",
   dailyProgressCount: 0,
   dailyProgressDate: "",
-  registerKnownWord: () => {},
+  registerKnownWord: () => ({
+    wasNewMastered: false,
+    nextKnownWordsCount: 0,
+  }),
 };
 
 const LearningStatsContext =
@@ -55,10 +61,12 @@ export const LearningStatsProvider: React.FC<{
 
     const alreadyKnown = knownWords.ids.includes(wordId);
     let nextKnownWordsTotal = knownWords.ids.length;
+    let wasNewMastered = false;
 
     if (!alreadyKnown) {
       const nextIds = [wordId, ...knownWords.ids];
       nextKnownWordsTotal = nextIds.length;
+      wasNewMastered = true;
       void setKnownWords({
         ids: nextIds,
         lastLearnedDate: today,
@@ -80,8 +88,13 @@ export const LearningStatsProvider: React.FC<{
         setDbKnownWordsCount(total);
       })
       .catch((error) => {
-        console.log("Nie udało się odczytać liczby opanowanych słówek:", error);
+          console.log("Nie udało się odczytać liczby opanowanych słówek:", error);
       });
+
+    return {
+      wasNewMastered,
+      nextKnownWordsCount: nextKnownWordsTotal,
+    };
   };
 
   useEffect(() => {
