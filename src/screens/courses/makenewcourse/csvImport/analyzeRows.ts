@@ -1,11 +1,11 @@
 import type {
+  CsvCardType,
   CsvAnalysisResult,
   CsvIssue,
   NormalizedCsvRow,
   ParsedCsvInput,
 } from "./types";
 import { getCsvFieldLabel, parseCsvCardType } from "./schema";
-import type { CsvCardType } from "./types";
 
 const KNOWN_HEADERS = new Set([
   "type",

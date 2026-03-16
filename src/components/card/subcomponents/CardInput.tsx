@@ -208,7 +208,6 @@ export function CardInput({
     suggestionProps,
     handleConfirm,
     hangulTarget,
-    handleConfirm,
     mainInputRef,
     setAnswer,
     setIsMainInputFocused,
@@ -217,7 +216,8 @@ export function CardInput({
     isMainAnswerDate,
     isMainAnswerNumeric,
     styles,
-    typoDiff
+    textColorOverride,
+    typoDiff,
   ]);
 
   const imageBlock = promptImageUri ? (

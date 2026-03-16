@@ -308,6 +308,7 @@ export default function CustomCourseEditor({
     getCustomCourseAutoflowEnabled,
     getCustomCourseBoxZeroEnabled,
     getCustomCourseCardSize,
+    getCustomCourseImageSize,
     getCustomCourseImageFrameEnabled,
     getCustomCourseSkipCorrectionEnabled,
     getCustomCourseTrueFalseButtonsVariant,
@@ -318,7 +319,6 @@ export default function CustomCourseEditor({
     initialImageFrameEnabled,
     initialSkipCorrectionEnabled,
     lockAppearance,
-    normalizeAnswers,
     replaceManualCards,
   ]);
 

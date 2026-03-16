@@ -326,19 +326,6 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
-  const explanationText =
-    typeof selectedItem?.explanation === "string"
-      ? selectedItem.explanation.trim()
-      : "";
-  const isKnowDontKnowType = selectedItem?.type === "know_dont_know";
-  const isExplanationVisible = Boolean(
-    !showCorrectionInputs &&
-      explanationText.length > 0 &&
-      ((selectedItem?.type === "true_false" && result === false) ||
-        (isKnowDontKnowType && result !== null) ||
-        ((selectedItem?.answerOnly ?? false) && result !== null)),
-  );
-
   // Decide if we should use large layout: either global setting OR image is present
   // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,
   // żeby tekst nie był ucinany nawet bez obrazka.
@@ -497,6 +484,7 @@ export default function Card({
       setHangulTarget,
       setIsCorrectionInput1Focused,
       shouldUseHangulKeyboardCorrection1,
+      trimTrailingSpaces,
     ],
   );
 

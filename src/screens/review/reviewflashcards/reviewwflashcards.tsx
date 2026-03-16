@@ -294,14 +294,13 @@ export default function ReviewFlashcardsPlaceholder() {
         if (firstBox) {
           queuesRef.current = {
             boxZero: [],
-            boxOne: [],
-            boxTwo: [],
-            boxThree: [],
-            boxFour: [],
-            boxFive: [],
+            boxOne: nextBoxes.boxOne.length > 0 ? [...nextBoxes.boxOne] : [],
+            boxTwo: nextBoxes.boxTwo.length > 0 ? [...nextBoxes.boxTwo] : [],
+            boxThree:
+              nextBoxes.boxThree.length > 0 ? [...nextBoxes.boxThree] : [],
+            boxFour: nextBoxes.boxFour.length > 0 ? [...nextBoxes.boxFour] : [],
+            boxFive: nextBoxes.boxFive.length > 0 ? [...nextBoxes.boxFive] : [],
           };
-          syncQueueWithBox(firstBox);
-          ensureQueueHasItems(firstBox);
           const first = queuesRef.current[firstBox]?.[0] ?? null;
           setSelectedItem(first ?? null);
         } else {
@@ -427,6 +426,7 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     courseId,
     checkSpelling,
+    answerOnly,
     effectiveReversed,
     scheduleReturnToBox,
     selectedItem,
@@ -438,7 +438,7 @@ export default function ReviewFlashcardsPlaceholder() {
     setCorrection(null);
     setQuestionShownAt(selectedItem ? Date.now() : null);
     setLongThink(false);
-  }, [selectedItem?.id]);
+  }, [selectedItem]);
 
   useEffect(() => {
     if (!activeBox) return;
@@ -489,7 +489,7 @@ export default function ReviewFlashcardsPlaceholder() {
     );
   };
 
-  const handleConfirm = (
+  const handleConfirm = useCallback((
     _selectedTranslation?: string,
     answerOverride?: string,
   ) => {
@@ -662,7 +662,15 @@ export default function ReviewFlashcardsPlaceholder() {
       setIsBetweenCards(true);
       setTimeout(() => setIsBetweenCards(false), 300);
     }, delayMs);
-  };
+  }, [
+    activeBox,
+    answer,
+    checkSpelling,
+    courseId,
+    effectiveReversed,
+    scheduleReturnToBox,
+    selectedItem,
+  ]);
 
   const handleTrueFalseAnswer = useMemo(
     () =>

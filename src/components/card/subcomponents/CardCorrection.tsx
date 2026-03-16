@@ -1,6 +1,7 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
+import { CardCorrectionType } from "../card-types";
 import {
   ImageStyle,
   Platform,
@@ -35,8 +36,6 @@ const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
   const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
   return { height: target, maxHeight: target };
 };
-
-import { CardCorrectionType } from "../card-types";
 
 type CardCorrectionProps = {
   correction: CardCorrectionType;

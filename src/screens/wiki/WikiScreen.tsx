@@ -68,7 +68,7 @@ export default function WikiScreen() {
           return colors.headline;
       }
     },
-    [colors.headline, colors.my_green, colors.my_red, colors.my_yellow],
+    [colors],
   );
 
   const renderBlock = React.useCallback(
@@ -154,8 +154,7 @@ export default function WikiScreen() {
       return null;
     },
     [
-      colors.background,
-      colors.secondBackground,
+      colors,
       styles.peekHeadingRow,
       styles.peekHeadingIcon,
       styles.peekHeadingText,

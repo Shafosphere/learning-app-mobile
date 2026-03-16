@@ -1,6 +1,6 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Localization from "expo-localization";
-import i18n from "i18next";
+import { createInstance, type i18n as I18nInstance } from "i18next";
 import { initReactI18next } from "react-i18next";
 
 import en from "@/src/locales/en.json";
@@ -63,8 +63,9 @@ async function resolveInitialLanguage(): Promise<SupportedLanguage> {
 }
 
 let initializationPromise: Promise<typeof i18n> | null = null;
+const i18n = createInstance();
 
-export function ensureI18nInitialized(): Promise<typeof i18n> {
+export function ensureI18nInitialized(): Promise<I18nInstance> {
   if (i18n.isInitialized) {
     return Promise.resolve(i18n);
   }

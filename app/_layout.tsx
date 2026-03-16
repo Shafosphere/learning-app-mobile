@@ -1,7 +1,7 @@
 // _layout.tsx
 import "@/src/i18n";
 import Navbar from "@/src/components/navbar/navbar";
-import OnboardingGate from "@/src/components/onboarding/OnboardingGate";
+import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";

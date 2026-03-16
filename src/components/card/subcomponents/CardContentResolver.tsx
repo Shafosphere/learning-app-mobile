@@ -74,7 +74,6 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     result,
     isIntroMode,
     selectedItem,
-    isBetweenCards,
     promptText,
     promptImageUri,
     promptImageSizeMode,

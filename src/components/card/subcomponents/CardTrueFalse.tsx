@@ -18,6 +18,13 @@ type CardTrueFalseProps = {
 };
 
 const DEFAULT_VIRTUAL_INPUT_HEIGHT = 24;
+const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
+    dynamic: 1,
+    small: 0.4,
+    medium: 0.6,
+    large: 1,
+    very_large: 1.7,
+};
 
 export function CardTrueFalse({
     promptText,
@@ -36,13 +43,6 @@ export function CardTrueFalse({
     const hasText = useMemo(() => promptText.trim().length > 0, [promptText]);
     const hasImage = Boolean(promptImageUri);
 
-    const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
-        dynamic: 1,
-        small: 0.4,
-        medium: 0.6,
-        large: 1,
-        very_large: 1.7,
-    };
     const promptImageStyle: ImageStyle = useMemo(() => {
         const fraction = IMAGE_SIZE_MULTIPLIER[imageSizeMode] ?? 1;
         const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
