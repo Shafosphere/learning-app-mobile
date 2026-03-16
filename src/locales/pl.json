@@ -6,6 +6,27 @@
       "finishingSetup": "Wczytuję",
       "launching": "Uruchamiam aplikację…",
       "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi."
+    },
+    "error": {
+      "title": "Nie udało się uruchomić aplikacji",
+      "description": "Lokalna baza danych SQLite nie została poprawnie zainicjalizowana, więc na razie nie wpuszczamy Cię do środka.",
+      "backupHint": "Jeśli masz kopię zapasową danych, użyj „Wczytaj kopię zapasową”, aby przywrócić pełniejsze dane, w tym własne kursy i fiszki.",
+      "genericReason": "Wystąpił nieoczekiwany błąd podczas startu bazy danych.",
+      "debugMessage": "To testowy ekran błędu uruchomiony z sekcji Debug.",
+      "debugBadge": "Tryb testowy ekranu błędu",
+      "actions": {
+        "retry": "Spróbuj ponownie",
+        "importBackup": "Wczytaj kopię zapasową",
+        "importing": "Przygotowuję bazę i wczytuję kopię zapasową…",
+        "reset": "Zresetuj aplikację",
+        "resetting": "Resetuję lokalną bazę i przygotowuję aplikację…"
+      },
+      "reset": {
+        "confirmTitle": "Zresetować lokalne dane aplikacji?",
+        "confirmMessage": "To usunie lokalną bazę SQLite i utworzy nową od zera. Jeśli nie masz kopii zapasowej, lokalne dane nauki zapisane tylko na tym urządzeniu mogą zostać utracone.",
+        "cancel": "Anuluj",
+        "confirm": "Resetuj"
+      }
     }
   },
   "settings": {
@@ -230,7 +251,9 @@
         "hangulTitle": "Hangul",
         "hangulTyped": "Wpisałeś: {{value}}",
         "hangulEmpty": "Brak znaków do zatwierdzenia.",
-        "trophiesAdded": "Dodano 3 testowe osiągnięcia."
+        "trophiesAdded": "Dodano 3 testowe osiągnięcia.",
+        "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Wyjdź z niego przez „Spróbuj ponownie”.",
+        "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
       },
       "rows": {
         "testPopup": {
@@ -238,6 +261,12 @@
           "subtitle": "Podgląd komunikatu (tylko środowisko deweloperskie).",
           "button": "Pokaż popup",
           "message": "Hej! To ja, Boxik. Dymek działa!"
+        },
+        "testDbErrorScreen": {
+          "title": "Test ekranu błędu bazy",
+          "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",
+          "button": "Pokaż ekran",
+          "buttonLoading": "Otwieram..."
         },
         "testQuotes": {
           "title": "Testuj cytaty (QuoteBubble)",

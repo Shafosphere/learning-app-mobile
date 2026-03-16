@@ -244,24 +244,29 @@ export async function seedOfficialPacks(): Promise<void> {
 }
 
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
-  notifyDbInitializationListeners({ type: "start" });
-  notifyDbInitializationListeners({ type: "import-start" });
-  await ensurePrebuiltDatabaseImported();
-  notifyDbInitializationListeners({ type: "import-finish" });
-
-  const db = await openDatabase();
-  await applySchema(db);
-  await configurePragmas(db);
-
   try {
-    await seedOfficialPacksWithDb(db);
-  } catch (error) {
-    console.warn("[DB] Failed during official metadata sync", error);
-  }
+    notifyDbInitializationListeners({ type: "start" });
+    notifyDbInitializationListeners({ type: "import-start" });
+    await ensurePrebuiltDatabaseImported();
+    notifyDbInitializationListeners({ type: "import-finish" });
 
-  notifyDbInitializationListeners({
-    type: "ready",
-    initialImport: false,
-  });
-  return db;
+    const db = await openDatabase();
+    await applySchema(db);
+    await configurePragmas(db);
+
+    try {
+      await seedOfficialPacksWithDb(db);
+    } catch (error) {
+      console.warn("[DB] Failed during official metadata sync", error);
+    }
+
+    notifyDbInitializationListeners({
+      type: "ready",
+      initialImport: false,
+    });
+    return db;
+  } catch (error) {
+    notifyDbInitializationListeners({ type: "error", error });
+    throw error;
+  }
 }

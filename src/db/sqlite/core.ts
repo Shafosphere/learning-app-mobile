@@ -48,6 +48,7 @@ export async function openDatabase(): Promise<SQLite.SQLiteDatabase> {
 
 let dbInitializationPromise: Promise<SQLite.SQLiteDatabase> | null = null;
 let dbInitializer: (() => Promise<SQLite.SQLiteDatabase>) | null = null;
+let activeDb: SQLite.SQLiteDatabase | null = null;
 
 export function setDbInitializer(
   initializer: () => Promise<SQLite.SQLiteDatabase>
@@ -62,7 +63,48 @@ export function getDB(): Promise<SQLite.SQLiteDatabase> {
         "DB Initializer not set! Make sure to import the db setup."
       );
     }
-    dbInitializationPromise = dbInitializer();
+    dbInitializationPromise = dbInitializer()
+      .then((db) => {
+        activeDb = db;
+        return db;
+      })
+      .catch((error) => {
+        dbInitializationPromise = null;
+        throw error;
+      });
   }
   return dbInitializationPromise;
+}
+
+export function getActiveDb(): SQLite.SQLiteDatabase | null {
+  return activeDb;
+}
+
+export async function closeActiveDb(): Promise<void> {
+  if (!activeDb) {
+    return;
+  }
+  try {
+    await activeDb.closeAsync();
+  } catch (error) {
+    console.warn("[DB] Failed to close active database", error);
+  } finally {
+    activeDb = null;
+  }
+}
+
+export async function resetDbInitializationState(): Promise<void> {
+  dbInitializationPromise = null;
+  await closeActiveDb();
+}
+
+export async function retryDbInitialization(): Promise<SQLite.SQLiteDatabase> {
+  await resetDbInitializationState();
+  return getDB();
+}
+
+export async function deleteAndReinitializeDB(): Promise<SQLite.SQLiteDatabase> {
+  await resetDbInitializationState();
+  await SQLite.deleteDatabaseAsync(DATABASE_NAME);
+  return getDB();
 }

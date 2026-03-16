@@ -9,6 +9,7 @@ import {
 } from "@/src/db/sqlite/db";
 import { unlockAchievement } from "@/src/db/sqlite/repositories/achievements";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useRouter } from "expo-router";
@@ -40,6 +41,7 @@ const DebuggingSection: React.FC = () => {
   const [showLogoMessage, setShowLogoMessage] = useState(false);
   const [logoFloating, setLogoFloating] = useState(true);
   const [clearingStorage, setClearingStorage] = useState(false);
+  const [openingDbErrorScreen, setOpeningDbErrorScreen] = useState(false);
   const [resettingIntro, setResettingIntro] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
 
@@ -208,6 +210,24 @@ const DebuggingSection: React.FC = () => {
     }
   };
 
+  const handleOpenDbErrorScreen = async () => {
+    setOpeningDbErrorScreen(true);
+    try {
+      await enableDbInitDebugOverride();
+      Alert.alert(
+        t("settings.debug.alerts.doneTitle"),
+        t("settings.debug.alerts.dbErrorScreenOpened")
+      );
+    } catch {
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.dbErrorScreenOpenError")
+      );
+    } finally {
+      setOpeningDbErrorScreen(false);
+    }
+  };
+
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>{t("settings.debug.section.tools")}</Text>
@@ -223,6 +243,28 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.testPopup.button")}
           color="my_yellow"
           onPress={handleTestPopup}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.testDbErrorScreen.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.testDbErrorScreen.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            openingDbErrorScreen
+              ? t("settings.debug.rows.testDbErrorScreen.buttonLoading")
+              : t("settings.debug.rows.testDbErrorScreen.button")
+          }
+          color="my_yellow"
+          onPress={handleOpenDbErrorScreen}
+          disabled={openingDbErrorScreen}
           width={140}
         />
       </View>

@@ -6,6 +6,27 @@
       "finishingSetup": "Finishing setup...",
       "launching": "Launching app...",
       "dbError": "Could not initialize the database. Check logs."
+    },
+    "error": {
+      "title": "Could not start the app",
+      "description": "The local SQLite database did not initialize correctly, so the app stays blocked until we recover or retry.",
+      "backupHint": "If you have a backup file, use “Import backup” to restore fuller data, including custom courses and flashcards.",
+      "genericReason": "An unexpected error happened while starting the database.",
+      "debugMessage": "This is a test error screen opened from the Debug section.",
+      "debugBadge": "Error screen test mode",
+      "actions": {
+        "retry": "Try again",
+        "importBackup": "Import backup",
+        "importing": "Preparing database and importing backup...",
+        "reset": "Reset app",
+        "resetting": "Resetting local database and preparing the app..."
+      },
+      "reset": {
+        "confirmTitle": "Reset local app data?",
+        "confirmMessage": "This will delete the local SQLite database and create a fresh one. If you do not have a backup, local learning data stored only on this device may be lost.",
+        "cancel": "Cancel",
+        "confirm": "Reset"
+      }
     }
   },
   "settings": {
@@ -230,7 +251,9 @@
         "hangulTitle": "Hangul",
         "hangulTyped": "You typed: {{value}}",
         "hangulEmpty": "No characters to submit.",
-        "trophiesAdded": "Added 3 test achievements."
+        "trophiesAdded": "Added 3 test achievements.",
+        "dbErrorScreenOpened": "Enabled the SQLite error screen test mode. Leave it with “Try again”.",
+        "dbErrorScreenOpenError": "Could not enable the test error screen."
       },
       "rows": {
         "testPopup": {
@@ -238,6 +261,12 @@
           "subtitle": "Preview message (development only).",
           "button": "Show popup",
           "message": "Hey! It's me, Boxik. Popup works!"
+        },
+        "testDbErrorScreen": {
+          "title": "Test database error screen",
+          "subtitle": "Shows the SQLite failure screen without damaging the real database.",
+          "button": "Show screen",
+          "buttonLoading": "Opening..."
         },
         "testQuotes": {
           "title": "Test quotes (QuoteBubble)",
