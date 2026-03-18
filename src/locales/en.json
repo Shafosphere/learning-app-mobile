@@ -158,6 +158,46 @@
         "shareSupported": "Share sheet opened - choose Save/Share or cancel.",
         "shareUnsupported": "System sharing is unavailable on this platform. Copy the file manually."
       },
+      "googleDrive": {
+        "sectionTitle": "Google Drive auto-backup",
+        "actionButton": "Google Drive action",
+        "loadingShort": "Busy",
+        "status": {
+          "notConfigured": "This feature is not configured in the current app build yet. Reason: {{reason}}",
+          "notConfiguredFallback": "missing OAuth configuration",
+          "disconnected": "Google Drive is not connected. After connecting, the app will be able to upload a daily ZIP backup on startup.",
+          "connected": "Connected. Auto-backup: {{mode}}.\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
+          "autoEnabled": "enabled",
+          "autoDisabled": "disabled",
+          "never": "never",
+          "noErrors": "none"
+        },
+        "connectDone": {
+          "title": "Google Drive connected",
+          "message": "Google Drive connection has been saved. You can run a manual backup now or leave the once-per-day startup auto-backup enabled."
+        },
+        "backupDone": {
+          "title": "Backup uploaded",
+          "message": "The latest ZIP backup was saved to the app's private folder on Google Drive."
+        },
+        "restoreTitle": "Restore from Google Drive",
+        "restoreSubtitle": "Download the latest ZIP backup from Google Drive and replace local user data with it.",
+        "restoreButton": "Restore",
+        "restoreLoading": "Restoring...",
+        "restoreConfirm": {
+          "title": "Restore data from Google Drive?",
+          "message": "This will replace local user data with the latest copy from Google Drive, including private courses, progress, and images.",
+          "confirm": "Restore"
+        },
+        "disconnectTitle": "Disconnect Google Drive",
+        "disconnectSubtitle": "Turn off auto-backup and remove the locally stored Google account connection.",
+        "disconnectButton": "Disconnect",
+        "disconnectLoading": "Disconnecting...",
+        "disconnectDone": {
+          "title": "Google Drive disconnected",
+          "message": "Auto-backup has been disabled and the local Google Drive connection removed."
+        }
+      },
       "exportDrive": {
         "readyTitle": "Export ready",
         "readyMessage": "Prepared file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\nChoose Google Drive in share sheet to save a copy.",
@@ -170,7 +210,7 @@
       },
       "importDone": {
         "title": "Import completed",
-        "message": "Data imported successfully.\n\nCourses (custom): {{coursesCreated}}\nFlashcards restored: {{flashcardsCreated}}\nReviews (custom): {{reviewsRestored}}\nOfficial courses: {{officialCoursesProcessed}}\nReviews (official courses): {{officialReviewsRestored}}\nReviews (builtin DB): {{builtinReviewsRestored}}\nHints (official courses): {{officialHintsUpdated}}\nBox states: {{boxesSnapshotsRestored}}"
+        "message": "Data imported successfully.\n\nCourses (custom): {{coursesCreated}}\nFlashcards restored: {{flashcardsCreated}}\nReviews (custom): {{reviewsRestored}}\nOfficial courses: {{officialCoursesProcessed}}\nReviews (official courses): {{officialReviewsRestored}}\nReviews (builtin DB): {{builtinReviewsRestored}}\nHints (official courses): {{officialHintsUpdated}}\nBox states: {{boxesSnapshotsRestored}}\nLearning events: {{learningEventsRestored}}\nAchievements: {{achievementsRestored}}"
       },
       "resetLearningConfirm": {
         "title": "Restore learning settings",
@@ -383,7 +423,7 @@
         },
         "controller": {
           "title": "Data controller and contact",
-          "body": "The data controller for personal data processed in connection with the use of Memicard is [Controller full name]. Privacy contact: [Privacy contact email address].",
+          "body": "The data controller for personal data processed in connection with the use of Memicard is [Controller full name]. Privacy contact: contact@memicard.com.",
           "bullets": [
             "optional registered or correspondence address: [Registered address]",
             "the technical support email address may be different from the privacy contact address",
@@ -488,7 +528,7 @@
             "the right to lodge a complaint with the President of the Personal Data Protection Office in Poland (PUODO)"
           ],
           "noteLabel": "How to exercise rights",
-          "note": "Privacy requests can be sent to [Privacy contact email address]. If data exists only locally on the user's device, some rights may be exercised directly by deleting the data in the app or by removing the app."
+          "note": "Privacy requests can be sent to contact@memicard.com. If data exists only locally on the user's device, some rights may be exercised directly by deleting the data in the app or by removing the app."
         }
       }
     },

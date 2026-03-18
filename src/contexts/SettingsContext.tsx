@@ -49,6 +49,16 @@ import {
   computeSmartReminderPlan,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
+import type { ImportResult } from "@/src/services/importUserData";
+import {
+  connectGoogleDrive,
+  disconnectGoogleDrive,
+  getGoogleDriveConfigurationError,
+  isGoogleDriveConfigured,
+  maybeRunStartupBackup,
+  restoreBackupFromDrive,
+  uploadLatestBackupToDrive,
+} from "@/src/services/googleDriveBackup";
 
 // Rozszerzamy typ Text, aby uwzględnić defaultProps
 type TextWithDefaultProps = typeof Text & {
@@ -315,6 +325,23 @@ interface SettingsContextValue {
   learningReminderPreferredWeekdays: number[];
   learningReminderPermissionState: ReminderPermissionState;
   refreshLearningReminderSchedule: () => Promise<void>;
+  googleDriveConfigured: boolean;
+  googleDriveConfigurationError: string | null;
+  googleDriveBackupEnabled: boolean;
+  setGoogleDriveBackupEnabled: (value: boolean) => Promise<void>;
+  googleDriveConnected: boolean;
+  lastSuccessfulGoogleDriveBackupAt: number | null;
+  lastGoogleDriveBackupAttemptAt: number | null;
+  googleDriveBackupError: string | null;
+  driveBackupFileId: string | null;
+  connectGoogleDriveBackup: () => Promise<{
+    connected: boolean;
+    cancelled: boolean;
+  }>;
+  disconnectGoogleDriveBackup: () => Promise<void>;
+  backupUserDataToGoogleDriveNow: () => Promise<void>;
+  restoreUserDataFromGoogleDrive: () => Promise<ImportResult>;
+  maybeRunGoogleDriveStartupBackup: () => Promise<void>;
   statsFireEffectEnabled: boolean;
   setStatsFireEffectEnabled: (value: boolean) => Promise<void>;
   toggleStatsFireEffectEnabled: () => Promise<void>;
@@ -438,6 +465,20 @@ const defaultValue: SettingsContextValue = {
   learningReminderPreferredWeekdays: [],
   learningReminderPermissionState: "undetermined",
   refreshLearningReminderSchedule: async () => {},
+  googleDriveConfigured: false,
+  googleDriveConfigurationError: null,
+  googleDriveBackupEnabled: false,
+  setGoogleDriveBackupEnabled: async () => {},
+  googleDriveConnected: false,
+  lastSuccessfulGoogleDriveBackupAt: null,
+  lastGoogleDriveBackupAttemptAt: null,
+  googleDriveBackupError: null,
+  driveBackupFileId: null,
+  connectGoogleDriveBackup: async () => ({ connected: false, cancelled: true }),
+  disconnectGoogleDriveBackup: async () => {},
+  backupUserDataToGoogleDriveNow: async () => {},
+  restoreUserDataFromGoogleDrive: async () => ({ success: false }),
+  maybeRunGoogleDriveStartupBackup: async () => {},
   statsFireEffectEnabled: false,
   setStatsFireEffectEnabled: async () => {},
   toggleStatsFireEffectEnabled: async () => {},
@@ -620,7 +661,26 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "learningReminder.permissionState",
       "undetermined"
     );
+  const [googleDriveBackupEnabled, setGoogleDriveBackupEnabledState] =
+    usePersistedState<boolean>("googleDriveBackup.enabled", false);
+  const [googleDriveConnected, setGoogleDriveConnectedState] =
+    usePersistedState<boolean>("googleDriveBackup.connected", false);
+  const [
+    lastSuccessfulGoogleDriveBackupAt,
+    setLastSuccessfulGoogleDriveBackupAt,
+  ] = usePersistedState<number | null>(
+    "googleDriveBackup.lastSuccessfulBackupAt",
+    null
+  );
+  const [lastGoogleDriveBackupAttemptAt, setLastGoogleDriveBackupAttemptAt] =
+    usePersistedState<number | null>("googleDriveBackup.lastBackupAttemptAt", null);
+  const [googleDriveBackupError, setGoogleDriveBackupError] =
+    usePersistedState<string | null>("googleDriveBackup.lastBackupError", null);
+  const [driveBackupFileId, setDriveBackupFileId] = usePersistedState<
+    string | null
+  >("googleDriveBackup.fileId", null);
   const learningRemindersEnabledRef = useRef(learningRemindersEnabledState);
+  const googleDriveStartupBackupInFlightRef = useRef(false);
   const [statsFireEffectEnabledState, _setStatsFireEffectEnabled] =
     usePersistedState<boolean>("stats.fireEffectEnabled", false);
   const [statsBookshelfEnabledState, _setStatsBookshelfEnabled] =
@@ -641,6 +701,8 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   );
   const [rawMemoryBoardSize, setRawMemoryBoardSize] =
     usePersistedState<string>("memory.boardSize", "twoByThree");
+  const googleDriveConfigured = isGoogleDriveConfigured();
+  const googleDriveConfigurationError = getGoogleDriveConfigurationError();
   const memoryBoardSize = useMemo<MemoryBoardSize>(
     () => sanitizeMemoryBoardSize(rawMemoryBoardSize),
     [rawMemoryBoardSize]
@@ -1714,6 +1776,216 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
   }, [learningRemindersEnabledState, setLearningRemindersEnabled]);
 
+  const setGoogleDriveBackupEnabled = useCallback(
+    async (value: boolean) => {
+      await setGoogleDriveBackupEnabledState(value);
+      if (!value) {
+        await setGoogleDriveBackupError(null);
+      }
+    },
+    [setGoogleDriveBackupEnabledState, setGoogleDriveBackupError]
+  );
+
+  const connectGoogleDriveBackup = useCallback(async () => {
+    if (!googleDriveConfigured) {
+      throw new Error(
+        googleDriveConfigurationError ??
+          "Google Drive backup nie jest skonfigurowany."
+      );
+    }
+
+    const result = await connectGoogleDrive();
+    if (result.connected) {
+      await Promise.all([
+        setGoogleDriveConnectedState(true),
+        setGoogleDriveBackupEnabledState(true),
+        setGoogleDriveBackupError(null),
+      ]);
+    }
+    return result;
+  }, [
+    googleDriveConfigured,
+    googleDriveConfigurationError,
+    setGoogleDriveBackupEnabledState,
+    setGoogleDriveBackupError,
+    setGoogleDriveConnectedState,
+  ]);
+
+  const disconnectGoogleDriveBackup = useCallback(async () => {
+    await disconnectGoogleDrive();
+    await Promise.all([
+      setGoogleDriveConnectedState(false),
+      setGoogleDriveBackupEnabledState(false),
+      setGoogleDriveBackupError(null),
+      setDriveBackupFileId(null),
+    ]);
+  }, [
+    setDriveBackupFileId,
+    setGoogleDriveBackupEnabledState,
+    setGoogleDriveBackupError,
+    setGoogleDriveConnectedState,
+  ]);
+
+  const backupUserDataToGoogleDriveNow = useCallback(async () => {
+    if (!googleDriveConfigured) {
+      throw new Error(
+        googleDriveConfigurationError ??
+          "Google Drive backup nie jest skonfigurowany."
+      );
+    }
+
+    const now = Date.now();
+    await Promise.all([
+      setLastGoogleDriveBackupAttemptAt(now),
+      setGoogleDriveBackupError(null),
+    ]);
+
+    try {
+      const metadata = await uploadLatestBackupToDrive(driveBackupFileId);
+      await Promise.all([
+        setGoogleDriveConnectedState(true),
+        setDriveBackupFileId(metadata.fileId),
+        setLastSuccessfulGoogleDriveBackupAt(now),
+        setGoogleDriveBackupError(null),
+      ]);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nie udało się wysłać backupu na Google Drive.";
+      await setGoogleDriveBackupError(message);
+      throw error;
+    }
+  }, [
+    driveBackupFileId,
+    googleDriveConfigured,
+    googleDriveConfigurationError,
+    setDriveBackupFileId,
+    setGoogleDriveBackupError,
+    setGoogleDriveConnectedState,
+    setLastGoogleDriveBackupAttemptAt,
+    setLastSuccessfulGoogleDriveBackupAt,
+  ]);
+
+  const resetCustomCourseDependentSettings = useCallback(async () => {
+    await Promise.all([
+      setActiveCustomCourseIdState(null),
+      setPinnedOfficialCourseIds([]),
+      setBoxZeroOverrides({
+        builtin: { ...boxZeroOverrides.builtin },
+        custom: {},
+      }),
+      setAutoflowOverrides({
+        builtin: { ...autoflowOverrides.builtin },
+        custom: {},
+      }),
+      setCardSizeOverrides({
+        builtin: { ...cardSizeOverrides.builtin },
+        custom: {},
+      }),
+      setImageSizeOverrides({
+        builtin: { ...imageSizeOverrides.builtin },
+        custom: {},
+      }),
+      setImageFrameOverrides({
+        builtin: { ...imageFrameOverrides.builtin },
+        custom: {},
+      }),
+      setSkipCorrectionOverrides({
+        builtin: { ...skipCorrectionOverrides.builtin },
+        custom: {},
+      }),
+      setTrueFalseButtonsOverrides({
+        builtin: { ...trueFalseButtonsOverrides.builtin },
+        custom: {},
+      }),
+    ]);
+  }, [
+    autoflowOverrides.builtin,
+    boxZeroOverrides.builtin,
+    cardSizeOverrides.builtin,
+    imageFrameOverrides.builtin,
+    imageSizeOverrides.builtin,
+    setActiveCustomCourseIdState,
+    setAutoflowOverrides,
+    setBoxZeroOverrides,
+    setCardSizeOverrides,
+    setImageFrameOverrides,
+    setImageSizeOverrides,
+    setPinnedOfficialCourseIds,
+    setSkipCorrectionOverrides,
+    setTrueFalseButtonsOverrides,
+    skipCorrectionOverrides.builtin,
+    trueFalseButtonsOverrides.builtin,
+  ]);
+
+  const restoreUserDataFromGoogleDrive = useCallback(async () => {
+    if (!googleDriveConfigured) {
+      throw new Error(
+        googleDriveConfigurationError ??
+          "Google Drive backup nie jest skonfigurowany."
+      );
+    }
+
+    const result = await restoreBackupFromDrive(driveBackupFileId);
+    await Promise.all([
+      resetCustomCourseDependentSettings(),
+      setDriveBackupFileId(result.metadata.fileId),
+      setGoogleDriveConnectedState(true),
+      setGoogleDriveBackupError(null),
+    ]);
+    return result.restoreResult;
+  }, [
+    driveBackupFileId,
+    googleDriveConfigured,
+    googleDriveConfigurationError,
+    resetCustomCourseDependentSettings,
+    setDriveBackupFileId,
+    setGoogleDriveBackupError,
+    setGoogleDriveConnectedState,
+  ]);
+
+  const maybeRunGoogleDriveStartupBackup = useCallback(async () => {
+    if (googleDriveStartupBackupInFlightRef.current) {
+      return;
+    }
+    googleDriveStartupBackupInFlightRef.current = true;
+
+    try {
+      const result = await maybeRunStartupBackup({
+        enabled: googleDriveBackupEnabled,
+        connected: googleDriveConnected,
+        lastSuccessfulBackupAt: lastSuccessfulGoogleDriveBackupAt,
+        driveBackupFileId,
+      });
+      if (result.attempted) {
+        await Promise.all([
+          setDriveBackupFileId(result.fileId ?? null),
+          setLastGoogleDriveBackupAttemptAt(result.backupAt ?? Date.now()),
+          setLastSuccessfulGoogleDriveBackupAt(result.backupAt ?? Date.now()),
+          setGoogleDriveBackupError(null),
+        ]);
+      }
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nie udało się wykonać automatycznego backupu Google Drive.";
+      await setGoogleDriveBackupError(message);
+    } finally {
+      googleDriveStartupBackupInFlightRef.current = false;
+    }
+  }, [
+    driveBackupFileId,
+    googleDriveBackupEnabled,
+    googleDriveConnected,
+    lastSuccessfulGoogleDriveBackupAt,
+    setDriveBackupFileId,
+    setGoogleDriveBackupError,
+    setLastGoogleDriveBackupAttemptAt,
+    setLastSuccessfulGoogleDriveBackupAt,
+  ]);
+
   const setStatsFireEffectEnabled = async (value: boolean) => {
     await _setStatsFireEffectEnabled(value);
   };
@@ -1918,6 +2190,20 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         learningReminderPreferredWeekdays: learningReminderPreferredWeekdaysState,
         learningReminderPermissionState,
         refreshLearningReminderSchedule,
+        googleDriveConfigured,
+        googleDriveConfigurationError,
+        googleDriveBackupEnabled,
+        setGoogleDriveBackupEnabled,
+        googleDriveConnected,
+        lastSuccessfulGoogleDriveBackupAt,
+        lastGoogleDriveBackupAttemptAt,
+        googleDriveBackupError,
+        driveBackupFileId,
+        connectGoogleDriveBackup,
+        disconnectGoogleDriveBackup,
+        backupUserDataToGoogleDriveNow,
+        restoreUserDataFromGoogleDrive,
+        maybeRunGoogleDriveStartupBackup,
         statsFireEffectEnabled: statsFireEffectEnabledState,
         setStatsFireEffectEnabled,
         toggleStatsFireEffectEnabled,

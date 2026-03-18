@@ -1,24 +1,88 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
-import {
-  exportAndShareUserData,
-  exportUserDataToGoogleDrive,
-} from "@/src/services/exportUserData";
+import { exportAndShareUserData } from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
+type DriveAction =
+  | "connect"
+  | "backup"
+  | "restore"
+  | "disconnect"
+  | null;
+
 const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
-  const { t } = useTranslation();
-  const { resetLearningSettings, colors } = useSettings();
+  const { t, i18n } = useTranslation();
+  const {
+    resetLearningSettings,
+    colors,
+    googleDriveConfigured,
+    googleDriveConfigurationError,
+    googleDriveBackupEnabled,
+    googleDriveConnected,
+    lastSuccessfulGoogleDriveBackupAt,
+    lastGoogleDriveBackupAttemptAt,
+    googleDriveBackupError,
+    connectGoogleDriveBackup,
+    disconnectGoogleDriveBackup,
+    backupUserDataToGoogleDriveNow,
+    restoreUserDataFromGoogleDrive,
+  } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
   const [exportingData, setExportingData] = useState(false);
-  const [exportingToDrive, setExportingToDrive] = useState(false);
   const [importingData, setImportingData] = useState(false);
+  const [driveAction, setDriveAction] = useState<DriveAction>(null);
+
+  const driveStatusText = useMemo(() => {
+    if (!googleDriveConfigured) {
+      return t("settings.coursesData.googleDrive.status.notConfigured", {
+        reason:
+          googleDriveConfigurationError ??
+          t("settings.coursesData.googleDrive.status.notConfiguredFallback"),
+      });
+    }
+    if (!googleDriveConnected) {
+      return t("settings.coursesData.googleDrive.status.disconnected");
+    }
+
+    const formatter = new Intl.DateTimeFormat(i18n.language, {
+      dateStyle: "medium",
+      timeStyle: "short",
+    });
+
+    const lastSuccess = lastSuccessfulGoogleDriveBackupAt
+      ? formatter.format(new Date(lastSuccessfulGoogleDriveBackupAt))
+      : t("settings.coursesData.googleDrive.status.never");
+    const lastAttempt = lastGoogleDriveBackupAttemptAt
+      ? formatter.format(new Date(lastGoogleDriveBackupAttemptAt))
+      : t("settings.coursesData.googleDrive.status.never");
+
+    return t("settings.coursesData.googleDrive.status.connected", {
+      mode: googleDriveBackupEnabled
+        ? t("settings.coursesData.googleDrive.status.autoEnabled")
+        : t("settings.coursesData.googleDrive.status.autoDisabled"),
+      lastSuccess,
+      lastAttempt,
+      error:
+        googleDriveBackupError ??
+        t("settings.coursesData.googleDrive.status.noErrors"),
+    });
+  }, [
+    googleDriveBackupEnabled,
+    googleDriveConfigurationError,
+    googleDriveConfigured,
+    googleDriveConnected,
+    googleDriveBackupError,
+    i18n.language,
+    lastGoogleDriveBackupAttemptAt,
+    lastSuccessfulGoogleDriveBackupAt,
+    t,
+  ]);
 
   const handleExportUserData = async () => {
     setExportingData(true);
@@ -47,51 +111,124 @@ const CoursesDataSection: React.FC = () => {
     }
   };
 
-  const handleExportUserDataToDrive = async () => {
-    setExportingToDrive(true);
+  const handleConnectDrive = async () => {
+    setDriveAction("connect");
     try {
-      const result = await exportUserDataToGoogleDrive();
-      const sizeKb = (result.bytesWritten / 1024).toFixed(1);
-
-      if (result.shared) {
+      const result = await connectGoogleDriveBackup();
+      if (result.connected) {
         Alert.alert(
-          t("settings.coursesData.exportDrive.readyTitle"),
-          t("settings.coursesData.exportDrive.readyMessage", {
-            fileUri: result.fileUri,
-            sizeKb,
-          })
+          t("settings.coursesData.googleDrive.connectDone.title"),
+          t("settings.coursesData.googleDrive.connectDone.message")
         );
-        return;
       }
-
-      if (result.cancelled) {
-        Alert.alert(
-          t("settings.coursesData.exportDrive.cancelTitle"),
-          t("settings.coursesData.exportDrive.cancelMessage")
-        );
-        return;
-      }
-
-      if (!result.sharingSupported) {
-        Alert.alert(
-          t("settings.coursesData.exportDrive.unsupportedTitle"),
-          t("settings.coursesData.exportDrive.unsupportedMessage")
-        );
-        return;
-      }
-
-      Alert.alert(
-        t("settings.coursesData.exportDrive.incompleteTitle"),
-        t("settings.coursesData.exportDrive.incompleteMessage")
-      );
     } catch (error) {
-      console.error("[CoursesDataSection] google drive export error", error);
+      console.error("[CoursesDataSection] Google Drive connect error", error);
       Alert.alert(
         t("settings.coursesData.errors.generic"),
-        t("settings.coursesData.errors.exportGoogleDrive")
+        error instanceof Error
+          ? error.message
+          : t("settings.coursesData.errors.exportGoogleDrive")
       );
     } finally {
-      setExportingToDrive(false);
+      setDriveAction(null);
+    }
+  };
+
+  const handleBackupNow = async () => {
+    setDriveAction("backup");
+    try {
+      await backupUserDataToGoogleDriveNow();
+      Alert.alert(
+        t("settings.coursesData.googleDrive.backupDone.title"),
+        t("settings.coursesData.googleDrive.backupDone.message")
+      );
+    } catch (error) {
+      console.error("[CoursesDataSection] Google Drive backup error", error);
+      Alert.alert(
+        t("settings.coursesData.errors.generic"),
+        error instanceof Error
+          ? error.message
+          : t("settings.coursesData.errors.exportGoogleDrive")
+      );
+    } finally {
+      setDriveAction(null);
+    }
+  };
+
+  const handleRestoreDrive = async () => {
+    Alert.alert(
+      t("settings.coursesData.googleDrive.restoreConfirm.title"),
+      t("settings.coursesData.googleDrive.restoreConfirm.message"),
+      [
+        {
+          text: t("settings.coursesData.resetLearningConfirm.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("settings.coursesData.googleDrive.restoreConfirm.confirm"),
+          style: "destructive",
+          onPress: async () => {
+            setDriveAction("restore");
+            try {
+              const result = await restoreUserDataFromGoogleDrive();
+              if (result.success) {
+                const stats = result.stats;
+                Alert.alert(
+                  t("settings.coursesData.importDone.title"),
+                  t("settings.coursesData.importDone.message", {
+                    coursesCreated: stats?.coursesCreated,
+                    flashcardsCreated: stats?.flashcardsCreated,
+                    reviewsRestored: stats?.reviewsRestored,
+                    officialCoursesProcessed: stats?.officialCoursesProcessed,
+                    officialReviewsRestored: stats?.officialReviewsRestored,
+                    builtinReviewsRestored: stats?.builtinReviewsRestored,
+                    officialHintsUpdated: stats?.officialHintsUpdated,
+                    boxesSnapshotsRestored: stats?.boxesSnapshotsRestored,
+                    learningEventsRestored: stats?.learningEventsRestored,
+                    achievementsRestored: stats?.achievementsRestored,
+                  })
+                );
+              } else if (result.message) {
+                Alert.alert(
+                  t("settings.coursesData.errors.importTitle"),
+                  result.message
+                );
+              }
+            } catch (error) {
+              console.error("[CoursesDataSection] Google Drive restore error", error);
+              Alert.alert(
+                t("settings.coursesData.errors.generic"),
+                error instanceof Error
+                  ? error.message
+                  : t("settings.coursesData.errors.import")
+              );
+            } finally {
+              setDriveAction(null);
+            }
+          },
+        },
+      ]
+    );
+  };
+
+  const handleDisconnectDrive = async () => {
+    setDriveAction("disconnect");
+    try {
+      await disconnectGoogleDriveBackup();
+      Alert.alert(
+        t("settings.coursesData.googleDrive.disconnectDone.title"),
+        t("settings.coursesData.googleDrive.disconnectDone.message")
+      );
+    } catch (error) {
+      console.error("[CoursesDataSection] Google Drive disconnect error", error);
+      Alert.alert(
+        t("settings.coursesData.errors.generic"),
+        error instanceof Error
+          ? error.message
+          : t("settings.coursesData.errors.exportGoogleDrive")
+      );
+    } finally {
+      setDriveAction(null);
     }
   };
 
@@ -112,12 +249,12 @@ const CoursesDataSection: React.FC = () => {
             builtinReviewsRestored: stats?.builtinReviewsRestored,
             officialHintsUpdated: stats?.officialHintsUpdated,
             boxesSnapshotsRestored: stats?.boxesSnapshotsRestored,
+            learningEventsRestored: stats?.learningEventsRestored,
+            achievementsRestored: stats?.achievementsRestored,
           })
         );
-      } else {
-        if (result.message !== "Anulowano wybór pliku.") {
-          Alert.alert(t("settings.coursesData.errors.importTitle"), result.message);
-        }
+      } else if (result.message !== "Anulowano wybór pliku.") {
+        Alert.alert(t("settings.coursesData.errors.importTitle"), result.message);
       }
     } catch (error) {
       console.error("[CoursesDataSection] import error", error);
@@ -190,23 +327,29 @@ const CoursesDataSection: React.FC = () => {
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>
-            {t("settings.coursesData.rows.exportGoogleDrive.title")}
+            {t("settings.coursesData.googleDrive.sectionTitle")}
           </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.coursesData.rows.exportGoogleDrive.subtitle")}
-          </Text>
+          <Text style={styles.rowSubtitle}>{driveStatusText}</Text>
         </View>
         <MyButton
-          onPress={handleExportUserDataToDrive}
+          onPress={googleDriveConnected ? handleBackupNow : handleConnectDrive}
           color="my_green"
-          disabled={exportingToDrive}
-          width={64}
-          accessibilityLabel={t("settings.coursesData.rows.exportGoogleDrive.accessibilityLabel")}
+          disabled={driveAction === "connect" || driveAction === "backup"}
+          width={74}
+          accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
         >
-          {exportingToDrive ? (
+          {driveAction === "connect" || driveAction === "backup" ? (
             <Text style={[styles.driveButtonText, { color: colors.headline }]}>
-              {t("settings.coursesData.rows.exportGoogleDrive.buttonLoading")}
+              {t("settings.coursesData.googleDrive.loadingShort")}
             </Text>
+          ) : googleDriveConnected ? (
+            <View style={styles.driveButtonContent}>
+              <MaterialCommunityIcons
+                name="cloud-upload-outline"
+                size={22}
+                color={colors.headline}
+              />
+            </View>
           ) : (
             <View style={styles.driveButtonContent}>
               <MaterialCommunityIcons
@@ -217,6 +360,50 @@ const CoursesDataSection: React.FC = () => {
             </View>
           )}
         </MyButton>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.googleDrive.restoreTitle")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.coursesData.googleDrive.restoreSubtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            driveAction === "restore"
+              ? t("settings.coursesData.googleDrive.restoreLoading")
+              : t("settings.coursesData.googleDrive.restoreButton")
+          }
+          color="my_green"
+          onPress={handleRestoreDrive}
+          disabled={!googleDriveConnected || driveAction === "restore"}
+          width={130}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.coursesData.googleDrive.disconnectTitle")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.coursesData.googleDrive.disconnectSubtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            driveAction === "disconnect"
+              ? t("settings.coursesData.googleDrive.disconnectLoading")
+              : t("settings.coursesData.googleDrive.disconnectButton")
+          }
+          color="my_yellow"
+          onPress={handleDisconnectDrive}
+          disabled={!googleDriveConnected || driveAction === "disconnect"}
+          width={130}
+        />
       </View>
 
       <View style={styles.row}>

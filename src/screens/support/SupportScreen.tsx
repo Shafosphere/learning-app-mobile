@@ -9,8 +9,8 @@ import React, { useCallback, useMemo, useState } from "react";
 import { Linking, Platform, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-const BUG_REPORT_SUBJECT = "Zgłoszenie błędu - Learning App";
-const SUGGESTION_SUBJECT = "Sugestia / pomysł - Learning App";
+const BUG_REPORT_SUBJECT = "Zgłoszenie błędu - Memicard";
+const SUGGESTION_SUBJECT = "Sugestia / pomysł - Memicard";
 const SUGGESTION_BODY =
   "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne.";
 

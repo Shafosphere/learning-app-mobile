@@ -158,6 +158,46 @@
         "shareSupported": "Otworzyłem okno udostępniania - wybierz Zapisz/Podziel się lub anuluj.",
         "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
       },
+      "googleDrive": {
+        "sectionTitle": "Google Drive auto-backup",
+        "actionButton": "Akcja Google Drive",
+        "loadingShort": "Trwa",
+        "status": {
+          "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w buildzie aplikacji. Powód: {{reason}}",
+          "notConfiguredFallback": "brak konfiguracji OAuth",
+          "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja będzie mogła raz dziennie wysłać backup ZIP przy starcie.",
+          "connected": "Połączono. Auto-backup: {{mode}}.\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
+          "autoEnabled": "włączony",
+          "autoDisabled": "wyłączony",
+          "never": "nigdy",
+          "noErrors": "brak"
+        },
+        "connectDone": {
+          "title": "Google Drive połączony",
+          "message": "Połączenie z Google Drive zostało zapisane. Możesz teraz uruchomić backup ręcznie albo zostawić auto-backup raz dziennie przy starcie."
+        },
+        "backupDone": {
+          "title": "Backup wysłany",
+          "message": "Najnowsza kopia ZIP została zapisana w prywatnym folderze aplikacji na Google Drive."
+        },
+        "restoreTitle": "Przywróć z Google Drive",
+        "restoreSubtitle": "Pobierz najnowszy backup ZIP z Google Drive i zastąp nim lokalne dane użytkownika.",
+        "restoreButton": "Przywróć",
+        "restoreLoading": "Przywracam...",
+        "restoreConfirm": {
+          "title": "Przywrócić dane z Google Drive?",
+          "message": "To zastąpi lokalne dane użytkownika najnowszą kopią z Google Drive, łącznie z kursami prywatnymi, postępem i zdjęciami.",
+          "confirm": "Przywróć"
+        },
+        "disconnectTitle": "Rozłącz Google Drive",
+        "disconnectSubtitle": "Wyłącz auto-backup i usuń lokalnie zapisane połączenie z kontem Google.",
+        "disconnectButton": "Rozłącz",
+        "disconnectLoading": "Rozłączam...",
+        "disconnectDone": {
+          "title": "Google Drive rozłączony",
+          "message": "Auto-backup został wyłączony, a lokalne połączenie z Google Drive usunięte."
+        }
+      },
       "exportDrive": {
         "readyTitle": "Eksport gotowy",
         "readyMessage": "Przygotowano plik:\n{{fileUri}}\n\nRozmiar: {{sizeKb}} kB\n\nWybierz Google Drive w oknie udostępniania, aby zapisać kopię.",
@@ -170,7 +210,7 @@
       },
       "importDone": {
         "title": "Import zakończony",
-        "message": "Pomyślnie zaimportowano dane.\n\nKursy (własne): {{coursesCreated}}\nFiszki przywrócone: {{flashcardsCreated}}\nPowtórki (własne): {{reviewsRestored}}\nKursy oficjalne: {{officialCoursesProcessed}}\nPowtórki (oficjalne kursy): {{officialReviewsRestored}}\nPowtórki (builtin DB): {{builtinReviewsRestored}}\nHinty (oficjalne kursy): {{officialHintsUpdated}}\nStany pudełek: {{boxesSnapshotsRestored}}"
+        "message": "Pomyślnie zaimportowano dane.\n\nKursy (własne): {{coursesCreated}}\nFiszki przywrócone: {{flashcardsCreated}}\nPowtórki (własne): {{reviewsRestored}}\nKursy oficjalne: {{officialCoursesProcessed}}\nPowtórki (oficjalne kursy): {{officialReviewsRestored}}\nPowtórki (builtin DB): {{builtinReviewsRestored}}\nHinty (oficjalne kursy): {{officialHintsUpdated}}\nStany pudełek: {{boxesSnapshotsRestored}}\nZdarzenia nauki: {{learningEventsRestored}}\nOsiągnięcia: {{achievementsRestored}}"
       },
       "resetLearningConfirm": {
         "title": "Przywróć ustawienia nauki",
@@ -383,7 +423,7 @@
         },
         "controller": {
           "title": "Administrator danych i kontakt",
-          "body": "Administratorem danych osobowych przetwarzanych w związku z korzystaniem z aplikacji Memicard jest [Imię i nazwisko administratora]. Kontakt w sprawach prywatności: [Adres e-mail do spraw prywatności].",
+          "body": "Administratorem danych osobowych przetwarzanych w związku z korzystaniem z aplikacji Memicard jest [Imię i nazwisko administratora]. Kontakt w sprawach prywatności: contact@memicard.com.",
           "bullets": [
             "opcjonalny adres rejestrowy lub korespondencyjny: [Adres rejestrowy]",
             "adres supportu technicznego może różnić się od adresu do spraw prywatności",
@@ -488,7 +528,7 @@
             "prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (PUODO)"
           ],
           "noteLabel": "Jak skorzystać z praw",
-          "note": "Żądania dotyczące prywatności można kierować na adres [Adres e-mail do spraw prywatności]. Jeżeli dane znajdują się wyłącznie lokalnie na urządzeniu użytkownika, część uprawnień może być realizowana bezpośrednio przez usunięcie danych w aplikacji lub usunięcie aplikacji."
+          "note": "Żądania dotyczące prywatności można kierować na adres contact@memicard.com. Jeżeli dane znajdują się wyłącznie lokalnie na urządzeniu użytkownika, część uprawnień może być realizowana bezpośrednio przez usunięcie danych w aplikacji lub usunięcie aplikacji."
         }
       }
     },

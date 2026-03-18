@@ -49,6 +49,14 @@
       "expo-web-browser",
       "expo-mail-composer"
     ],
+    "extra": {
+      "googleDriveBackup": {
+        "androidClientId": "",
+        "iosClientId": "",
+        "webClientId": "",
+        "backupFileName": "memicard-drive-backup-latest.zip"
+      }
+    },
     "experiments": {
       "typedRoutes": true
     }

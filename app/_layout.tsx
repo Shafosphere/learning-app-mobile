@@ -5,6 +5,7 @@ import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
+import GoogleDriveBackupInitializer from "@/src/components/reminders/GoogleDriveBackupInitializer";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { NavbarStatsProvider } from "@/src/contexts/NavbarStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
@@ -272,6 +273,7 @@ export default function RootLayout() {
             <QuoteProvider>
               <QuoteSystemInitializer />
               <LearningRemindersInitializer />
+              <GoogleDriveBackupInitializer />
               <LearningStatsProvider>
                 <NavbarStatsProvider>
                   <PopupProvider>
