@@ -22,6 +22,7 @@ import {
   clearCustomReviewsForCourse,
   deleteCustomCourse,
   getCustomCourseById,
+  getCustomCourseNameCandidates,
   getCustomFlashcards,
   replaceCustomFlashcards,
   resetCustomReviewsForCourse,
@@ -42,6 +43,10 @@ import {
   useManualCardsForm,
   type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
+import {
+  findCourseNameConflict,
+  type CourseNameCandidate,
+} from "@/src/utils/customCourseNameConflicts";
 import {
   ManualCardsEditor,
   type ManualCardsEditorStyles,
@@ -172,6 +177,7 @@ export default function CustomCourseEditor({
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [existingCourses, setExistingCourses] = useState<CourseNameCandidate[]>([]);
   const [isOfficialCourse, setIsOfficialCourse] = useState(lockAppearance);
   const [resettingBoxes, setResettingBoxes] = useState(false);
   const [resettingReviews, setResettingReviews] = useState(false);
@@ -221,13 +227,27 @@ export default function CustomCourseEditor({
   ];
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError;
+  const nameConflict = useMemo(
+    () => findCourseNameConflict(courseName, existingCourses, courseId),
+    [courseId, courseName, existingCourses],
+  );
+  const nameValidationMessage = useMemo(() => {
+    if (nameConflict.kind === "duplicate" && nameConflict.matchedCourse) {
+      return `Kurs o nazwie „${nameConflict.matchedCourse.name}” już istnieje.`;
+    }
+    if (nameConflict.kind === "similar" && nameConflict.matchedCourse) {
+      return `Podobna nazwa już istnieje: „${nameConflict.matchedCourse.name}”.`;
+    }
+    return null;
+  }, [nameConflict]);
 
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
     try {
-      const [courseRow, cardRows] = await Promise.all([
+      const [courseRow, nameRows, flashcardRows] = await Promise.all([
         getCustomCourseById(courseId),
+        getCustomCourseNameCandidates(),
         getCustomFlashcards(courseId),
       ]);
 
@@ -243,6 +263,7 @@ export default function CustomCourseEditor({
         setLoading(false);
         return;
       }
+      setExistingCourses(nameRows);
 
       hydrateDraft({
         courseName: courseRow.name,
@@ -264,7 +285,7 @@ export default function CustomCourseEditor({
         getCustomCourseTrueFalseButtonsVariant(courseRow.id)
       );
 
-      const incomingCards = cardRows.map((card, index) => {
+      const incomingCards = flashcardRows.map((card, index) => {
         const answersSource =
           card.answers && card.answers.length > 0
             ? card.answers
@@ -531,6 +552,14 @@ export default function CustomCourseEditor({
       });
       return;
     }
+    if (nameConflict.kind === "duplicate") {
+      setPopup({
+        message: "Ta nazwa kursu jest już zajęta.",
+        color: "angry",
+        duration: 3200,
+      });
+      return;
+    }
 
     const trimmedCards = manualCards.reduce<CustomFlashcardInput[]>(
       (acc, card) => {
@@ -696,6 +725,8 @@ export default function CustomCourseEditor({
                     setColorId(null);
                   }}
                   previewName={courseName}
+                  nameValidationState={nameConflict.kind}
+                  nameValidationMessage={nameValidationMessage}
                   nameEditable={!isOfficialCourse}
                   disabled={isSaving}
                   styles={{
@@ -797,7 +828,7 @@ export default function CustomCourseEditor({
                   text="zapisz"
                   color="my_green"
                   width={90}
-                  disabled={isSaving}
+                  disabled={isSaving || nameConflict.kind === "duplicate"}
                   onPress={handleSave}
                   accessibilityLabel="Zapisz zmiany w kursie"
                 />

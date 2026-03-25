@@ -154,8 +154,8 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
     imageMap: imageMaps.constellations,
   },
   {
-    slug: "polska_historia_300",
-    name: "Historia Polski (300 dat)",
+    slug: "polska_historia",
+    name: "Historia Polski",
     iconId: "book",
     iconColor: "#DC2626",
     reviewsEnabled: true,

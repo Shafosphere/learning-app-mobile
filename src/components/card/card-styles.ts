@@ -199,6 +199,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontWeight: 800,
     color: colors.headline,
   },
+  dateInputMask: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 52,
+    paddingLeft: 8,
+    paddingRight: 8,
+    fontSize: 24,
+    fontWeight: 800,
+    lineHeight: 52,
+    color: colors.paragraph,
+    opacity: 0.55,
+    pointerEvents: "none",
+  },
   myinput: {
     height: 44, // stała wysokość inputa
     lineHeight: 28, // stała wysokość

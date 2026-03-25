@@ -1,4 +1,5 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import type { DatePattern } from "@/src/utils/dateInput";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import { CardCorrectionType } from "../card-types";
@@ -71,8 +72,10 @@ type CardCorrectionProps = {
   shouldUseHangulKeyboardCorrection1: boolean;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
+  correctionInput1DatePattern?: DatePattern | null;
   isCorrectionInput2Numeric: boolean;
   isCorrectionInput2Date: boolean;
+  correctionInput2DatePattern?: DatePattern | null;
   previousCorrectionInput2: React.MutableRefObject<string>;
   canToggleTranslations: boolean;
   next: () => void;
@@ -113,8 +116,10 @@ export function CardCorrection({
   shouldUseHangulKeyboardCorrection1,
   isCorrectionInput1Numeric,
   isCorrectionInput1Date,
+  correctionInput1DatePattern,
   isCorrectionInput2Numeric,
   isCorrectionInput2Date,
+  correctionInput2DatePattern,
   previousCorrectionInput2,
   canToggleTranslations,
   next,
@@ -163,7 +168,6 @@ export function CardCorrection({
     () => buildPromptImageStyle(imageSizeMode),
     [imageSizeMode],
   );
-
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
     const chars = value.split("");

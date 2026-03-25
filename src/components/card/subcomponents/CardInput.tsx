@@ -1,5 +1,6 @@
 import Octicons from "@expo/vector-icons/Octicons";
-import { useMemo } from "react";
+import { getDateInputPlaceholder, type DatePattern } from "@/src/utils/dateInput";
+import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
@@ -41,6 +42,7 @@ type CardInputProps = {
   shouldUseHangulKeyboardMain: boolean;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
+  mainDatePattern?: DatePattern | null;
   setIsMainInputFocused: (focused: boolean) => void;
   setHangulTarget: (target: "main" | "correction1" | null) => void;
   canToggleTranslations: boolean;
@@ -70,6 +72,7 @@ export function CardInput({
   shouldUseHangulKeyboardMain,
   isMainAnswerNumeric,
   isMainAnswerDate,
+  mainDatePattern,
   setIsMainInputFocused,
   setHangulTarget,
   canToggleTranslations,
@@ -116,43 +119,66 @@ export function CardInput({
     () => buildPromptImageStyle(imageSizeMode),
     [imageSizeMode]
   );
+  const datePlaceholder = useMemo(
+    () => getDateInputPlaceholder(mainDatePattern),
+    [mainDatePattern]
+  );
+  const renderDateMask = useCallback(
+    (value: string, mask: string) => {
+      const typedPrefix = value.slice(0, mask.length);
+      const remainingMask = mask.slice(typedPrefix.length);
+
+      return (
+        <Text style={styles.dateInputMask} numberOfLines={1}>
+          {typedPrefix.length > 0 ? (
+            <Text style={{ color: "transparent" }}>{typedPrefix}</Text>
+          ) : null}
+          {remainingMask}
+        </Text>
+      );
+    },
+    [styles.dateInputMask],
+  );
 
   const renderedInput = useMemo(() => {
     if (!typoDiff) {
       return (
-        <TextInput
-          style={[
-            styles.cardInput,
-            styles.cardFont,
-            textColorOverride ? { color: textColorOverride } : null,
-          ]}
-          value={answer}
-          onChangeText={setAnswer}
-          autoCapitalize="none"
-          {...suggestionProps}
-          keyboardType={
-            isMainAnswerDate
-              ? "number-pad"
-              : isMainAnswerNumeric
-                ? "decimal-pad"
-                : suggestionProps?.keyboardType
-          }
-          ref={mainInputRef}
-          returnKeyType="done"
-          blurOnSubmit={false}
-          onSubmitEditing={handleConfirm}
-          showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
-          onFocus={() => {
-            setIsMainInputFocused(true);
-            setHangulTarget("main");
-          }}
-          onBlur={() => {
-            setIsMainInputFocused(false);
-            if (hangulTarget === "main") {
-              setHangulTarget(null);
+        <View style={{ width: "100%", position: "relative" }}>
+          {datePlaceholder ? renderDateMask(answer, datePlaceholder) : null}
+          <TextInput
+            style={[
+              styles.cardInput,
+              styles.cardFont,
+              textColorOverride ? { color: textColorOverride } : null,
+            ]}
+            value={answer}
+            onChangeText={setAnswer}
+            autoCapitalize="none"
+            {...suggestionProps}
+            keyboardType={
+              isMainAnswerDate
+                ? "number-pad"
+                : isMainAnswerNumeric
+                  ? "decimal-pad"
+                  : suggestionProps?.keyboardType
             }
-          }}
-        />
+            ref={mainInputRef}
+            returnKeyType="done"
+            blurOnSubmit={false}
+            onSubmitEditing={handleConfirm}
+            showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
+            onFocus={() => {
+              setIsMainInputFocused(true);
+              setHangulTarget("main");
+            }}
+            onBlur={() => {
+              setIsMainInputFocused(false);
+              if (hangulTarget === "main") {
+                setHangulTarget(null);
+              }
+            }}
+          />
+        </View>
       );
     }
 
@@ -215,6 +241,8 @@ export function CardInput({
     shouldUseHangulKeyboardMain,
     isMainAnswerDate,
     isMainAnswerNumeric,
+    datePlaceholder,
+    renderDateMask,
     styles,
     textColorOverride,
     typoDiff,

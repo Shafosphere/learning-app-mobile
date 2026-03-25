@@ -1,5 +1,5 @@
 // _layout.tsx
-import "@/src/i18n";
+import i18n from "@/src/i18n";
 import Navbar from "@/src/components/navbar/navbar";
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
@@ -83,7 +83,7 @@ export default function RootLayout() {
         const debugOverrideEnabled = await isDbInitDebugOverrideEnabled();
         if (debugOverrideEnabled) {
           setIsDebugErrorOverride(true);
-          setErrorMessage(t("app.error.debugMessage"));
+          setErrorMessage(i18n.t("app.error.debugMessage"));
           setStatus("error");
           return;
         }
@@ -92,12 +92,14 @@ export default function RootLayout() {
       } catch (error) {
         console.error("Błąd podczas inicjalizacji bazy danych:", error);
         setErrorMessage(
-          error instanceof Error ? error.message : t("app.error.genericReason")
+          error instanceof Error
+            ? error.message
+            : i18n.t("app.error.genericReason")
         );
         setStatus("error");
       }
     },
-    [t]
+    []
   );
 
   const handleRetry = useCallback(async () => {
@@ -134,11 +136,13 @@ export default function RootLayout() {
     } catch (error) {
       console.error("[App] Failed to import backup", error);
       setErrorMessage(
-        error instanceof Error ? error.message : t("app.error.genericReason")
+        error instanceof Error
+          ? error.message
+          : i18n.t("app.error.genericReason")
       );
       setStatus("error");
     }
-  }, [prepareApp, t]);
+  }, [prepareApp]);
 
   const handleResetApp = useCallback(() => {
     Alert.alert(
@@ -167,7 +171,7 @@ export default function RootLayout() {
                 setErrorMessage(
                   error instanceof Error
                     ? error.message
-                    : t("app.error.genericReason")
+                    : i18n.t("app.error.genericReason")
                 );
                 setStatus("error");
               }
@@ -203,7 +207,7 @@ export default function RootLayout() {
     const unsubscribeDebugOverride = subscribeDbInitDebugOverride((enabled) => {
       setIsDebugErrorOverride(enabled);
       if (enabled) {
-        setErrorMessage(t("app.error.debugMessage"));
+        setErrorMessage(i18n.t("app.error.debugMessage"));
         setStatus("error");
       }
     });
@@ -214,7 +218,7 @@ export default function RootLayout() {
       unsubscribe();
       unsubscribeDebugOverride();
     };
-  }, [prepareApp, t]);
+  }, [prepareApp]);
 
   const renderBlockingState = () => {
     if (status === "error") {

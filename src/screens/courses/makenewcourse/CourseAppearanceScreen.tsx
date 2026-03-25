@@ -1,8 +1,14 @@
 import MyButton from "@/src/components/button/button";
 import { usePopup } from "@/src/contexts/PopupContext";
+import { getCustomCourseNameCandidates } from "@/src/db/sqlite/db";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
+import {
+  findCourseNameConflict,
+  type CourseNameCandidate,
+} from "@/src/utils/customCourseNameConflicts";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
+import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, TextStyle, View } from "react-native";
 import { CourseIconColorSelector } from "../editcourse/components/iconEdit/iconEdit";
 import { useStyles } from "./CourseAppearanceScreen-styles";
@@ -21,8 +27,37 @@ export default function CustomCourseScreen() {
     reviewsEnabled,
     handleColorChange,
   } = useCustomCourseDraft();
+  const [existingCourses, setExistingCourses] = useState<CourseNameCandidate[]>([]);
 
   const setPopup = usePopup();
+  useEffect(() => {
+    let isMounted = true;
+    void getCustomCourseNameCandidates()
+      .then((rows) => {
+        if (isMounted) {
+          setExistingCourses(rows);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load custom course names", error);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
+  const nameConflict = useMemo(
+    () => findCourseNameConflict(courseName, existingCourses),
+    [courseName, existingCourses],
+  );
+  const nameValidationMessage = useMemo(() => {
+    if (nameConflict.kind === "duplicate" && nameConflict.matchedCourse) {
+      return `Kurs o nazwie „${nameConflict.matchedCourse.name}” już istnieje.`;
+    }
+    if (nameConflict.kind === "similar" && nameConflict.matchedCourse) {
+      return `Podobna nazwa już istnieje: „${nameConflict.matchedCourse.name}”.`;
+    }
+    return null;
+  }, [nameConflict]);
 
   const handleNavigateToContent = () => {
     const name = courseName.trim();
@@ -47,6 +82,14 @@ export default function CustomCourseScreen() {
         message: "Musisz wybrać ikonę",
         color: "angry",
         duration: 3000,
+      });
+      return;
+    }
+    if (nameConflict.kind === "duplicate") {
+      setPopup({
+        message: "Ta nazwa kursu jest już zajęta.",
+        color: "angry",
+        duration: 3200,
       });
       return;
     }
@@ -100,6 +143,8 @@ export default function CustomCourseScreen() {
                   setColorId(null);
                 }}
                 previewName={courseName}
+                nameValidationState={nameConflict.kind}
+                nameValidationMessage={nameValidationMessage}
                 iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
                 colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
               />
@@ -124,6 +169,7 @@ export default function CustomCourseScreen() {
             color="my_green"
             text="dalej"
             onPress={handleNavigateToContent}
+            disabled={nameConflict.kind === "duplicate"}
             accessibilityLabel="Przejdź do ustawień zawartości kursu"
           ></MyButton>
         </View>

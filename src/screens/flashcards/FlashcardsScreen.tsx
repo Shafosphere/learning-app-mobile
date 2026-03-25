@@ -31,6 +31,7 @@ import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { getExplanationState } from "@/src/utils/explanationState";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
@@ -276,18 +277,13 @@ export default function Flashcards() {
   const correctionLocked = correction != null;
 
   const resultPending = result !== null;
-  const explanationText =
-    typeof selectedItem?.explanation === "string"
-      ? selectedItem.explanation.trim()
-      : "";
   const isKnowDontKnow = selectedItem?.type === "know_dont_know";
+  const initialExplanationState = getExplanationState({
+    selectedItem,
+    result,
+  });
   const waitingForOk =
-    !correction &&
-    !isBetweenCards &&
-    explanationText.length > 0 &&
-    ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null) ||
-      (selectedItem?.answerOnly && result !== null));
+    !correction && !isBetweenCards && initialExplanationState.isExplanationPending;
   const boxSelectionLocked =
     correctionLocked || waitingForOk || resultPending || isBetweenCards;
 
@@ -729,22 +725,18 @@ export default function Flashcards() {
     if (isActionCooldownActive) return;
     acknowledgeExplanation();
   }, [acknowledgeExplanation, isActionCooldownActive]);
-  const shouldShowExplanation =
-    explanationText.length > 0 &&
-    ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null) ||
-      (selectedItem?.answerOnly && result !== null));
   const isIntroMode = Boolean(introModeActive && correction?.mode === "intro");
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
-  const isExplanationVisible = Boolean(
-    !showCorrectionInputs &&
-    explanationText.length > 0 &&
-    ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null) ||
-      (selectedItem?.answerOnly && result !== null)),
-  );
+  const {
+    isExplanationVisible,
+    isExplanationPending,
+  } = getExplanationState({
+    selectedItem,
+    result,
+    showCorrectionInputs,
+  });
   const shouldUseTrueFalseActionBar =
     courseHasOnlyTrueFalse ||
     selectedItem?.type === "true_false" ||
@@ -752,8 +744,8 @@ export default function Flashcards() {
   const shouldShowTrueFalseActions =
     shouldUseTrueFalseActionBar && shouldShowBoxes && !correction;
   const trueFalseActionsMode =
-    shouldShowExplanation && shouldUseTrueFalseActionBar ? "ok" : "answer";
-  const trueFalseActionsDisabled = shouldShowExplanation
+    isExplanationPending && shouldUseTrueFalseActionBar ? "ok" : "answer";
+  const trueFalseActionsDisabled = isExplanationPending
     ? isBetweenCards || isActionCooldownActive
     : result !== null || isBetweenCards || isActionCooldownActive;
   const showCardActions = !(

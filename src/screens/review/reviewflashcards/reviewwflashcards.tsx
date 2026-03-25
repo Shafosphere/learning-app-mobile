@@ -20,6 +20,7 @@ import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { getExplanationState } from "@/src/utils/explanationState";
 import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
@@ -135,6 +136,10 @@ export default function ReviewFlashcardsPlaceholder() {
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<boolean | null>(null);
   const [correction, setCorrection] = useState<CardCorrectionType | null>(null);
+  const [pendingExplanationMove, setPendingExplanationMove] = useState<{
+    cardId: number;
+    promote: boolean;
+  } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
   const scheduledTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(
     new Map(),
@@ -379,6 +384,20 @@ export default function ReviewFlashcardsPlaceholder() {
       boxes[activeBox]?.find((item) => item.id === correction.cardId) ??
       boxes[activeBox]?.[0] ??
       null;
+    const explanationState = getExplanationState({
+      selectedItem: selectedItem ?? card ?? null,
+      result: false,
+    });
+    if (explanationState.isExplanationPending) {
+      setPendingExplanationMove({
+        cardId: correction.cardId,
+        promote: false,
+      });
+      setCorrection(null);
+      setResult(false);
+      setAnswer("");
+      return;
+    }
     const currentStage = card?.stage ?? boxToStage(activeBox);
     const baseCard: WordWithTranslations | null = card
       ? { ...card, stage: currentStage }
@@ -419,6 +438,7 @@ export default function ReviewFlashcardsPlaceholder() {
     setCorrection(null);
     setResult(null);
     setAnswer("");
+    setPendingExplanationMove(null);
     setQueueNext(true);
   }, [
     activeBox,
@@ -428,6 +448,7 @@ export default function ReviewFlashcardsPlaceholder() {
     checkSpelling,
     answerOnly,
     effectiveReversed,
+    pendingExplanationMove,
     scheduleReturnToBox,
     selectedItem,
   ]);
@@ -436,6 +457,7 @@ export default function ReviewFlashcardsPlaceholder() {
     setResult(null);
     setAnswer("");
     setCorrection(null);
+    setPendingExplanationMove(null);
     setQuestionShownAt(selectedItem ? Date.now() : null);
     setLongThink(false);
   }, [selectedItem]);
@@ -498,6 +520,63 @@ export default function ReviewFlashcardsPlaceholder() {
       clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = null;
     }
+    if (
+      pendingExplanationMove &&
+      pendingExplanationMove.cardId === selectedItem.id &&
+      result !== null
+    ) {
+      const currentCardId = selectedItem.id;
+      void (async () => {
+        try {
+          if (pendingExplanationMove.promote) {
+            const { stage: nextStage, nextReview } = await advanceCustomReview(
+              currentCardId,
+              courseId,
+            );
+            scheduleReturnToBox(
+              { ...selectedItem, stage: selectedItem.stage ?? boxToStage(activeBox) },
+              nextStage,
+              nextReview,
+            );
+          } else {
+            const { stage: demotedStage, nextReview } = await scheduleCustomReview(
+              currentCardId,
+              courseId,
+              1,
+            );
+            scheduleReturnToBox(
+              { ...selectedItem, stage: selectedItem.stage ?? boxToStage(activeBox) },
+              demotedStage,
+              nextReview,
+            );
+          }
+        } catch (error) {
+          console.error("Failed to finalize explanation move", error);
+        }
+      })();
+      setBoxes((prev) => {
+        const current = prev[activeBox] ?? [];
+        const remaining = current.filter((item) => item.id !== currentCardId);
+        const nextState: BoxesState = {
+          ...prev,
+          [activeBox]: remaining,
+        };
+        if (remaining.length === 0) {
+          const nextActive = findFirstActiveBox(nextState);
+          if (nextActive !== activeBox) {
+            setActiveBox(nextActive);
+          }
+        }
+        return nextState;
+      });
+      setPendingExplanationMove(null);
+      setAnswer("");
+      setResult(null);
+      setQueueNext(true);
+      setIsBetweenCards(true);
+      setTimeout(() => setIsBetweenCards(false), 300);
+      return;
+    }
     const userAnswer = (answerOverride ?? answer).trim();
     const isKnowDontKnow = selectedItem.type === "know_dont_know";
     const ok = isKnowDontKnow
@@ -519,11 +598,19 @@ export default function ReviewFlashcardsPlaceholder() {
     const currentStage = selectedItem.stage ?? boxToStage(activeBox);
 
     if (!ok) {
+      const wrongExplanationState = getExplanationState({
+        selectedItem,
+        result: false,
+      });
       if (isKnowDontKnow) {
-        const hasExplanation =
-          typeof selectedItem.explanation === "string" &&
-          selectedItem.explanation.trim().length > 0;
-        const delayMs = hasExplanation ? 3500 : 1500;
+        if (wrongExplanationState.isExplanationPending) {
+          setPendingExplanationMove({
+            cardId: selectedItem.id,
+            promote: false,
+          });
+          return;
+        }
+        const delayMs = wrongExplanationState.hasExplanation ? 3500 : 1500;
         void (async () => {
           try {
             const { stage: demotedStage, nextReview } = await scheduleCustomReview(
@@ -578,6 +665,13 @@ export default function ReviewFlashcardsPlaceholder() {
         }, delayMs);
         return;
       }
+      if (selectedItem.type === "true_false" && wrongExplanationState.isExplanationPending) {
+        setPendingExplanationMove({
+          cardId: selectedItem.id,
+          promote: false,
+        });
+        return;
+      }
       setCorrection({
         cardId: selectedItem.id,
         awers: selectedItem.text,
@@ -600,9 +694,19 @@ export default function ReviewFlashcardsPlaceholder() {
         (t) => normalizedUser === normalizeStrict(t),
       );
     })();
-    const hasExplanation =
-      typeof selectedItem.explanation === "string" &&
-      selectedItem.explanation.trim().length > 0;
+    const correctExplanationState = getExplanationState({
+      selectedItem,
+      result: true,
+    });
+    const hasExplanation = correctExplanationState.hasExplanation;
+    if (correctExplanationState.isExplanationPending) {
+      setPendingExplanationMove({
+        cardId: selectedItem.id,
+        promote: true,
+      });
+      setResult(true);
+      return;
+    }
     const delayMs = isKnowDontKnow
       ? hasExplanation ? 3500 : 1500
       : isPerfect ? 1500 : 3000;
@@ -668,6 +772,8 @@ export default function ReviewFlashcardsPlaceholder() {
     checkSpelling,
     courseId,
     effectiveReversed,
+    pendingExplanationMove,
+    result,
     scheduleReturnToBox,
     selectedItem,
   ]);
@@ -680,24 +786,26 @@ export default function ReviewFlashcardsPlaceholder() {
       }),
     [handleConfirm, setAnswer],
   );
+  const handleTrueFalseOk = useCallback(() => {
+    if (isLoading) return;
+    handleConfirm();
+  }, [handleConfirm, isLoading]);
 
   const shouldShowTrueFalseActions =
     (selectedItem?.type === "true_false" ||
       selectedItem?.type === "know_dont_know") &&
     !correction;
-  const trueFalseActionsDisabled = result !== null || isLoading;
-  const explanationText =
-    typeof selectedItem?.explanation === "string"
-      ? selectedItem.explanation.trim()
-      : "";
   const showCorrectionInputs = Boolean(correction && result === false);
-  const isExplanationVisible = Boolean(
-    !showCorrectionInputs &&
-      explanationText.length > 0 &&
-      ((selectedItem?.type === "true_false" && result === false) ||
-        (selectedItem?.type === "know_dont_know" && result !== null) ||
-        ((selectedItem?.answerOnly ?? false) && result !== null)),
-  );
+  const { isExplanationVisible, isExplanationPending } = getExplanationState({
+    selectedItem,
+    result,
+    showCorrectionInputs,
+  });
+  const trueFalseActionsMode =
+    isExplanationPending && shouldShowTrueFalseActions ? "ok" : "answer";
+  const trueFalseActionsDisabled = isExplanationPending
+    ? isLoading
+    : result !== null || isLoading;
   const showCardActions = !(
     shouldShowTrueFalseActions ||
     selectedItem?.type === "true_false" ||
@@ -773,6 +881,8 @@ export default function ReviewFlashcardsPlaceholder() {
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
+      trueFalseActionsMode={trueFalseActionsMode}
+      onTrueFalseOk={handleTrueFalseOk}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}

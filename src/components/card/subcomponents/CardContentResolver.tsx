@@ -1,4 +1,6 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import type { DatePattern } from "@/src/utils/dateInput";
+import { getExplanationState } from "@/src/utils/explanationState";
 import React from "react";
 import { Text } from "react-native";
 import { useStyles } from "../card-styles";
@@ -25,10 +27,13 @@ interface CardContentResolverProps {
   shouldCorrectRewers: boolean;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
+  mainDatePattern?: DatePattern | null;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
+  correctionInput1DatePattern?: DatePattern | null;
   isCorrectionInput2Numeric: boolean;
   isCorrectionInput2Date: boolean;
+  correctionInput2DatePattern?: DatePattern | null;
   useLargeLayout: boolean;
   layoutHandlers?: {
     onPromptLayout?: (height: number) => void;
@@ -84,10 +89,13 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     shouldCorrectRewers,
     isMainAnswerNumeric,
     isMainAnswerDate,
+    mainDatePattern,
     isCorrectionInput1Numeric,
     isCorrectionInput1Date,
+    correctionInput1DatePattern,
     isCorrectionInput2Numeric,
     isCorrectionInput2Date,
+    correctionInput2DatePattern,
     useLargeLayout,
     layoutHandlers,
     correctionInput1Ref,
@@ -123,19 +131,14 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     textColorOverride,
   } = props;
 
-  const explanation =
-    typeof selectedItem?.explanation === "string"
-      ? selectedItem.explanation.trim()
-      : "";
-  const hasExplanation = explanation.length > 0;
   const showCorrection = correction && (result === false || isIntroMode);
   const isKnowDontKnow = selectedItem?.type === "know_dont_know";
-  const showExplanation =
-    !showCorrection &&
-    hasExplanation &&
-    ((selectedItem?.type === "true_false" && result === false) ||
-      (isKnowDontKnow && result !== null) ||
-      (selectedItem?.answerOnly && result !== null));
+  const { explanationText, isExplanationVisible } = getExplanationState({
+    selectedItem,
+    result,
+    showCorrectionInputs: Boolean(showCorrection),
+  });
+  const showExplanation = isExplanationVisible;
   const showTrueFalse =
     !showCorrection &&
     !showExplanation &&
@@ -185,8 +188,10 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           }
           isCorrectionInput1Numeric={isCorrectionInput1Numeric}
           isCorrectionInput1Date={isCorrectionInput1Date}
+          correctionInput1DatePattern={correctionInput1DatePattern}
           isCorrectionInput2Numeric={isCorrectionInput2Numeric}
           isCorrectionInput2Date={isCorrectionInput2Date}
+          correctionInput2DatePattern={correctionInput2DatePattern}
           previousCorrectionInput2={previousCorrectionInput2}
           canToggleTranslations={canToggleTranslations}
           next={next}
@@ -213,7 +218,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
       )}
       {showExplanation && (
         <CardExplanation
-          explanation={explanation}
+          explanation={explanationText}
           onPromptLayout={layoutHandlers?.onPromptLayout}
           onInputLayout={layoutHandlers?.onInputLayout}
           textColorOverride={textColorOverride}
@@ -235,6 +240,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           shouldUseHangulKeyboardMain={shouldUseHangulKeyboardMain}
           isMainAnswerNumeric={isMainAnswerNumeric}
           isMainAnswerDate={isMainAnswerDate}
+          mainDatePattern={mainDatePattern}
           setIsMainInputFocused={setIsMainInputFocused}
           setHangulTarget={setHangulTarget}
           canToggleTranslations={canToggleTranslations}

@@ -86,6 +86,17 @@ export async function getCustomCourses(): Promise<CustomCourseRecord[]> {
   return rows.map(mapCustomCourseRow);
 }
 
+export async function getCustomCourseNameCandidates(): Promise<
+  { id: number; name: string }[]
+> {
+  const db = await getDB();
+  return db.getAllAsync<{ id: number; name: string }>(
+    `SELECT id, name
+     FROM custom_courses
+     ORDER BY created_at DESC, id DESC;`
+  );
+}
+
 export async function getCustomCoursesWithCardCounts(): Promise<
   CustomCourseSummary[]
 > {

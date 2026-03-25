@@ -155,6 +155,8 @@ export interface CourseIconColorSelectorProps {
   iconSectionDescription?: string;
   colorSectionDescription?: string;
   enableIconSearch?: boolean;
+  nameValidationState?: "none" | "duplicate" | "similar";
+  nameValidationMessage?: string | null;
 }
 
 function CourseIconColorSelectorComponent({
@@ -174,6 +176,8 @@ function CourseIconColorSelectorComponent({
   iconSectionDescription = "Wybierz ikonę z listy",
   colorSectionDescription = "Wybierz swój kolor",
   enableIconSearch = true,
+  nameValidationState = "none",
+  nameValidationMessage = null,
 }: CourseIconColorSelectorProps) {
   const componentStyles = useStyles();
   const { colors } = useSettings();
@@ -352,7 +356,11 @@ function CourseIconColorSelectorComponent({
           </Text>
         </View>
         <TextInput
-          style={componentStyles.nameInput}
+          style={[
+            componentStyles.nameInput,
+            nameValidationState === "duplicate" && componentStyles.nameInputError,
+            nameValidationState === "similar" && componentStyles.nameInputWarning,
+          ]}
           value={courseName ?? ""}
           onChangeText={onCourseNameChange}
           placeholder={namePlaceholder}
@@ -368,6 +376,18 @@ function CourseIconColorSelectorComponent({
           textContentType="none"
           importantForAutofill="no"
         />
+        {nameValidationMessage ? (
+          <Text
+            style={[
+              componentStyles.nameFeedback,
+              nameValidationState === "duplicate"
+                ? componentStyles.nameFeedbackError
+                : componentStyles.nameFeedbackWarning,
+            ]}
+          >
+            {nameValidationMessage}
+          </Text>
+        ) : null}
       </View>
 
       <View style={componentStyles.sectionCard}>

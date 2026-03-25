@@ -48,6 +48,7 @@ type NavbarProps = {
 
 const REVIEW_MINIGAME_PREFIX = "/review/minigames";
 const REVIEW_SESSION_PATHS = new Set(["/review/brain", "/review/table"]);
+const FLASHCARDS_PATHS = new Set(["/flashcards", "/flashcards_custom"]);
 
 export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
@@ -325,6 +326,10 @@ export default function Navbar({ children }: NavbarProps) {
   );
 
   const handlePadPress = async () => {
+    if (FLASHCARDS_PATHS.has(pathname)) {
+      return;
+    }
+
     if (activeCustomCourseId != null) {
       router.push("/flashcards_custom");
       return;

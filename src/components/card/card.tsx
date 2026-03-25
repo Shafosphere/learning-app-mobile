@@ -2,6 +2,8 @@ import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOve
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAchievements } from "@/src/hooks/useAchievements";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { getExplanationState } from "@/src/utils/explanationState";
+import type { DatePattern } from "@/src/utils/dateInput";
 import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import {
   useCallback,
@@ -35,8 +37,6 @@ const INPUT_HORIZONTAL_PADDING = 8;
 const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
 
 type AnswerInputKind = "text" | "number" | "year" | "date";
-type DatePattern = "ym" | "ymd";
-
 const detectInputKind = (value: string): AnswerInputKind => {
   const trimmed = value.trim();
   if (!trimmed) return "text";
@@ -326,6 +326,11 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
+  const { isExplanationVisible, isExplanationPending } = getExplanationState({
+    selectedItem,
+    result,
+    showCorrectionInputs,
+  });
   // Decide if we should use large layout: either global setting OR image is present
   // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,
   // żeby tekst nie był ucinany nawet bez obrazka.
@@ -946,10 +951,13 @@ export default function Card({
     shouldCorrectRewers,
     isMainAnswerNumeric,
     isMainAnswerDate,
+    mainDatePattern,
     isCorrectionInput1Numeric,
     isCorrectionInput1Date,
+    correctionInput1DatePattern,
     isCorrectionInput2Numeric,
     isCorrectionInput2Date,
+    correctionInput2DatePattern,
     useLargeLayout,
     correctionInput1Ref,
     correctionInput2Ref,
@@ -980,6 +988,8 @@ export default function Card({
     setIsMainInputFocused,
     hangulTarget,
     typoDiff,
+    isExplanationVisible,
+    isExplanationPending,
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;

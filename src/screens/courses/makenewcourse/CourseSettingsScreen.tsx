@@ -3,10 +3,18 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
+  createCustomCourse,
+  getCustomCourseNameCandidates,
+  replaceCustomFlashcards,
+} from "@/src/db/sqlite/db";
+import {
+  findCourseNameConflict,
+  type CourseNameCandidate,
+} from "@/src/utils/customCourseNameConflicts";
+import {
   useSettings,
   type FlashcardsImageSize,
 } from "@/src/contexts/SettingsContext";
-import { createCustomCourse, replaceCustomFlashcards } from "@/src/db/sqlite/db";
 import { normalizeAnswers, type ManualCard } from "@/src/hooks/useManualCardsForm";
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -111,6 +119,7 @@ export default function CourseSettingsScreen() {
   }, [colorId, courseName, iconColor, iconId, initialReviewsEnabled]);
 
   const [manualCards, setManualCards] = useState<ManualCard[]>([]);
+  const [existingCourses, setExistingCourses] = useState<CourseNameCandidate[]>([]);
   const [hydrating, setHydrating] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const restoredScopeRef = useRef<string | null>(null);
@@ -133,10 +142,30 @@ export default function CourseSettingsScreen() {
   const [imageFrameEnabled, setImageFrameEnabled] = useState(
     getCustomCourseImageFrameEnabled(-1)
   );
+  const nameConflict = useMemo(
+    () => findCourseNameConflict(courseName, existingCourses),
+    [courseName, existingCourses],
+  );
 
   useEffect(() => {
     setReviewsEnabled(initialReviewsEnabled);
   }, [initialReviewsEnabled]);
+
+  useEffect(() => {
+    let isMounted = true;
+    void getCustomCourseNameCandidates()
+      .then((rows) => {
+        if (isMounted) {
+          setExistingCourses(rows);
+        }
+      })
+      .catch((error) => {
+        console.error("Failed to load custom course names", error);
+      });
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (restoredScopeRef.current === draftScopeKey) {
@@ -360,6 +389,14 @@ export default function CourseSettingsScreen() {
   ];
 
   const handleCreateCourse = async () => {
+    if (nameConflict.kind === "duplicate") {
+      setPopup({
+        message: "Ta nazwa kursu jest już zajęta.",
+        color: "angry",
+        duration: 3200,
+      });
+      return;
+    }
     if (!courseName || !iconId) {
       setPopup({
         message: "Brak nazwy lub ikony kursu.",

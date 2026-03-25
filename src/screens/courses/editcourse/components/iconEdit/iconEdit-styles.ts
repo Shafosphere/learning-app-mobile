@@ -95,6 +95,23 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     fontWeight: "700" as const,
   },
+  nameInputError: {
+    borderColor: colors.my_red,
+  },
+  nameInputWarning: {
+    borderColor: colors.my_yellow,
+  },
+  nameFeedback: {
+    marginTop: -2,
+    fontSize: 13,
+    fontWeight: "600" as const,
+  },
+  nameFeedbackError: {
+    color: colors.my_red,
+  },
+  nameFeedbackWarning: {
+    color: colors.my_yellow,
+  },
   pickerRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,

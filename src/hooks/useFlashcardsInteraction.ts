@@ -2,6 +2,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent } from "@/src/db/sqlite/db";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { getExplanationState } from "@/src/utils/explanationState";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
@@ -430,17 +431,11 @@ export function useFlashcardsInteraction({
 
         const delay = isKnowDontKnow ? 1500 : isPerfect ? 1500 : 3000;
 
-        const hasExplanation =
-          typeof wordForCheck.explanation === "string" &&
-          wordForCheck.explanation.trim().length > 0;
-        if (isKnowDontKnow && hasExplanation) {
-          setPendingExplanationMove({
-            cardId: wordForCheck.id,
-            promote: true,
-          });
-          return;
-        }
-        if (isAnswerOnlyCard(wordForCheck) && hasExplanation) {
+        const { isExplanationPending } = getExplanationState({
+          selectedItem: wordForCheck,
+          result: true,
+        });
+        if (isExplanationPending) {
           setPendingExplanationMove({
             cardId: wordForCheck.id,
             promote: true,
@@ -455,11 +450,12 @@ export function useFlashcardsInteraction({
         }, delay);
       } else {
         setResult(false);
-        const hasExplanation =
-          typeof wordForCheck.explanation === "string" &&
-          wordForCheck.explanation.trim().length > 0;
+        const { hasExplanation, isExplanationPending } = getExplanationState({
+          selectedItem: wordForCheck,
+          result: false,
+        });
         if (isKnowDontKnow) {
-          if (hasExplanation) {
+          if (isExplanationPending) {
             setPendingExplanationMove({
               cardId: wordForCheck.id,
               promote: false,
@@ -476,7 +472,7 @@ export function useFlashcardsInteraction({
           return;
         }
         if (wordForCheck.type === "true_false") {
-          if (hasExplanation) {
+          if (isExplanationPending) {
             setPendingExplanationMove({
               cardId: wordForCheck.id,
               promote: false,
@@ -493,7 +489,7 @@ export function useFlashcardsInteraction({
           return;
         }
         if (skipDemotionCorrection) {
-          if (isAnswerOnlyCard(wordForCheck) && hasExplanation) {
+          if (isExplanationPending) {
             setPendingExplanationMove({
               cardId: wordForCheck.id,
               promote: false,
@@ -642,8 +638,7 @@ export function useFlashcardsInteraction({
         const hasExplanation =
           typeof selectedItem.explanation === "string" &&
           selectedItem.explanation.trim().length > 0;
-        const answerOnly = isAnswerOnlyCard(selectedItem);
-        if (correction.mode === "demote" && hasExplanation && answerOnly) {
+        if (correction.mode === "demote" && hasExplanation) {
           setPendingExplanationMove({
             cardId: selectedItem.id,
             promote: false,
