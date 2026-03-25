@@ -22,15 +22,23 @@ export interface CustomFlashcardRow {
   position: number | null;
   flipped: number;
   answerOnly: number;
+  externalId: string | null;
+  isOfficial: number;
+  resetProgressOnUpdate: number;
   type: string;
   createdAt: number;
   updatedAt: number;
 }
 
 export interface CustomFlashcardRecord
-  extends Omit<CustomFlashcardRow, "flipped" | "answerOnly"> {
+  extends Omit<
+    CustomFlashcardRow,
+    "flipped" | "answerOnly" | "isOfficial" | "resetProgressOnUpdate"
+  > {
   flipped: boolean;
   answerOnly: boolean;
+  isOfficial: boolean;
+  resetProgressOnUpdate: boolean;
   type: string;
 }
 
@@ -46,6 +54,9 @@ export interface CustomFlashcardInput {
   position?: number | null;
   flipped?: boolean;
   answerOnly?: boolean;
+  externalId?: string | null;
+  isOfficial?: boolean;
+  resetProgressOnUpdate?: boolean;
   type?: "text" | "true_false" | "know_dont_know";
 }
 
@@ -66,6 +77,9 @@ export async function getCustomFlashcards(
     position: number | null;
     flipped: number;
     answerOnly: number;
+    externalId: string | null;
+    isOfficial: number;
+    resetProgressOnUpdate: number;
     type: string;
     createdAt: number;
     updatedAt: number;
@@ -84,6 +98,9 @@ export async function getCustomFlashcards(
        cf.position       AS position,
        cf.flipped        AS flipped,
        cf.answer_only    AS answerOnly,
+       cf.external_id    AS externalId,
+       cf.is_official    AS isOfficial,
+       cf.reset_progress_on_update AS resetProgressOnUpdate,
        cf.type           AS type,
        cf.created_at     AS createdAt,
        cf.updated_at     AS updatedAt,
@@ -118,6 +135,9 @@ export async function getCustomFlashcards(
         position: row.position,
         flipped: row.flipped,
         answerOnly: row.answerOnly,
+        externalId: row.externalId,
+        isOfficial: row.isOfficial,
+        resetProgressOnUpdate: row.resetProgressOnUpdate,
         type: row.type,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -126,6 +146,8 @@ export async function getCustomFlashcards(
         ...rowData,
         flipped: rowData.flipped === 1,
         answerOnly: rowData.answerOnly === 1,
+        isOfficial: rowData.isOfficial === 1,
+        resetProgressOnUpdate: rowData.resetProgressOnUpdate === 1,
       };
       byId.set(row.id, record);
       ordered.push(record);
@@ -205,8 +227,8 @@ export async function replaceCustomFlashcardsWithDb(
 
       const insertResult = await db.runAsync(
         `INSERT INTO custom_flashcards
-           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, created_at, updated_at)
-         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+           (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, external_id, is_official, reset_progress_on_update, type, created_at, updated_at)
+         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
         courseId,
         front,
         serializedBackText,
@@ -218,6 +240,9 @@ export async function replaceCustomFlashcardsWithDb(
         position,
         flippedValue, // domyślnie 0 (bez odwracania)
         answerOnlyValue,
+        card.externalId ?? null,
+        card.isOfficial ? 1 : 0,
+        card.resetProgressOnUpdate ? 1 : 0,
         typeValue,
         now,
         now

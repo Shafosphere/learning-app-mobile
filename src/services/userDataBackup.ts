@@ -509,8 +509,8 @@ async function restoreCustomCourse(
   const { course, flashcards, reviews, learningEvents } = courseExport;
   const now = Date.now();
   const insertCourseResult = await db.runAsync(
-    `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+    `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
     course.name,
     course.iconId,
     course.iconColor,
@@ -519,7 +519,8 @@ async function restoreCustomCourse(
     course.createdAt,
     now,
     course.isOfficial ? 1 : 0,
-    course.slug ?? null
+    course.slug ?? null,
+    course.packVersion ?? 1
   );
   const newCourseId = Number(insertCourseResult.lastInsertRowId ?? 0);
 
@@ -531,8 +532,8 @@ async function restoreCustomCourse(
   for (const card of flashcards) {
     const insertCardResult = await db.runAsync(
       `INSERT INTO custom_flashcards
-         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, external_id, is_official, reset_progress_on_update, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       newCourseId,
       card.frontText,
       card.backText,
@@ -545,6 +546,9 @@ async function restoreCustomCourse(
       card.flipped ? 1 : 0,
       card.answerOnly ? 1 : 0,
       normalizeImportedType(card.type),
+      card.externalId ?? null,
+      card.isOfficial ? 1 : 0,
+      card.resetProgressOnUpdate ? 1 : 0,
       card.createdAt,
       now
     );
@@ -620,14 +624,37 @@ async function restoreOfficialCourse(
     );
     if (existing?.id) {
       targetCourseId = existing.id;
+      const now = Date.now();
+      await db.runAsync(
+        `UPDATE custom_courses
+           SET name = ?,
+               icon_id = ?,
+               icon_color = ?,
+               color_id = ?,
+               reviews_enabled = ?,
+               is_official = 1,
+               slug = ?,
+               pack_version = ?,
+               updated_at = ?
+         WHERE id = ?;`,
+        courseExport.course.name,
+        courseExport.course.iconId,
+        courseExport.course.iconColor,
+        courseExport.course.colorId ?? null,
+        courseExport.course.reviewsEnabled ? 1 : 0,
+        slug,
+        courseExport.course.packVersion ?? 1,
+        now,
+        targetCourseId
+      );
     }
   }
 
   if (targetCourseId == null) {
     const now = Date.now();
     const inserted = await db.runAsync(
-      `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?);`,
+      `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version)
+       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
       courseExport.course.name,
       courseExport.course.iconId,
       courseExport.course.iconColor,
@@ -635,7 +662,8 @@ async function restoreOfficialCourse(
       courseExport.course.reviewsEnabled ? 1 : 0,
       courseExport.course.createdAt ?? now,
       now,
-      slug
+      slug,
+      courseExport.course.packVersion ?? 1
     );
     targetCourseId = Number(inserted.lastInsertRowId ?? 0);
   }
@@ -656,6 +684,9 @@ async function restoreOfficialCourse(
     position: number | null;
     flipped: number;
     answerOnly: number;
+    externalId: string | null;
+    isOfficial: number;
+    resetProgressOnUpdate: number;
     type: string | null;
     createdAt: number;
     updatedAt: number;
@@ -673,6 +704,9 @@ async function restoreOfficialCourse(
        cf.position      AS position,
        cf.flipped       AS flipped,
        cf.answer_only   AS answerOnly,
+       cf.external_id   AS externalId,
+       cf.is_official   AS isOfficial,
+       cf.reset_progress_on_update AS resetProgressOnUpdate,
        cf.type          AS type,
        cf.created_at    AS createdAt,
        cf.updated_at    AS updatedAt,
@@ -688,6 +722,7 @@ async function restoreOfficialCourse(
   );
 
   const existingById = new Map<number, CustomFlashcardRecord>();
+  const externalIdMap = new Map<string, CustomFlashcardRecord>();
   const positionMap = new Map<number, CustomFlashcardRecord>();
   const frontBackMap = new Map<string, CustomFlashcardRecord[]>();
 
@@ -708,11 +743,17 @@ async function restoreOfficialCourse(
         position: row.position,
         flipped: row.flipped === 1,
         answerOnly: row.answerOnly === 1,
+        externalId: row.externalId,
+        isOfficial: row.isOfficial === 1,
+        resetProgressOnUpdate: row.resetProgressOnUpdate === 1,
         type: row.type ?? "text",
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
       };
       existingById.set(row.id, record);
+      if (record.externalId) {
+        externalIdMap.set(record.externalId, record);
+      }
       if (record.position != null) {
         positionMap.set(record.position, record);
       }
@@ -736,6 +777,9 @@ async function restoreOfficialCourse(
   const findExistingCard = (
     card: BackupFlashcardRecord
   ): CustomFlashcardRecord | null => {
+    if (card.externalId && externalIdMap.has(card.externalId)) {
+      return externalIdMap.get(card.externalId) ?? null;
+    }
     if (card.position != null && positionMap.has(card.position)) {
       return positionMap.get(card.position) ?? null;
     }
@@ -754,6 +798,8 @@ async function restoreOfficialCourse(
       const nextImageFront = await persistImageIfAvailable(card.imageFront);
       const nextImageBack = await persistImageIfAvailable(card.imageBack);
       const nextType = normalizeImportedType(card.type);
+      const nextExternalId = card.externalId ?? null;
+      const nextResetProgressOnUpdate = card.resetProgressOnUpdate ?? false;
       const shouldUpdateHints =
         nextHintFront !== (existing.hintFront ?? null) ||
         nextHintBack !== (existing.hintBack ?? null);
@@ -763,16 +809,30 @@ async function restoreOfficialCourse(
         nextImageFront !== (existing.imageFront ?? null) ||
         nextImageBack !== (existing.imageBack ?? null);
       const shouldUpdateType = nextType !== (existing.type ?? "text");
+      const shouldUpdateSyncFields =
+        nextExternalId !== (existing.externalId ?? null) ||
+        !existing.isOfficial ||
+        nextResetProgressOnUpdate !== (existing.resetProgressOnUpdate ?? false);
 
       if (
         shouldUpdateHints ||
         shouldUpdateAnswerOnly ||
         shouldUpdateImages ||
-        shouldUpdateType
+        shouldUpdateType ||
+        shouldUpdateSyncFields
       ) {
         await db.runAsync(
           `UPDATE custom_flashcards
-             SET hint_front = ?, hint_back = ?, image_front = ?, image_back = ?, answer_only = ?, type = ?, updated_at = ?
+             SET hint_front = ?,
+                 hint_back = ?,
+                 image_front = ?,
+                 image_back = ?,
+                 answer_only = ?,
+                 type = ?,
+                 external_id = ?,
+                 is_official = 1,
+                 reset_progress_on_update = ?,
+                 updated_at = ?
            WHERE id = ?;`,
           nextHintFront,
           nextHintBack,
@@ -780,6 +840,8 @@ async function restoreOfficialCourse(
           nextImageBack,
           nextAnswerOnly ? 1 : 0,
           nextType,
+          nextExternalId,
+          nextResetProgressOnUpdate ? 1 : 0,
           now,
           existing.id
         );
@@ -800,8 +862,8 @@ async function restoreOfficialCourse(
 
     const insertCardResult = await db.runAsync(
       `INSERT INTO custom_flashcards
-         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, external_id, is_official, reset_progress_on_update, created_at, updated_at)
+       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       targetCourseId,
       card.frontText,
       card.backText,
@@ -814,6 +876,9 @@ async function restoreOfficialCourse(
       card.flipped ? 1 : 0,
       card.answerOnly ? 1 : 0,
       normalizeImportedType(card.type),
+      card.externalId ?? null,
+      1,
+      card.resetProgressOnUpdate ? 1 : 0,
       card.createdAt ?? now,
       now
     );

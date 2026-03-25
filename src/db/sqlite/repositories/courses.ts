@@ -13,6 +13,7 @@ export interface CustomCourseRecord {
   // optional metadata
   isOfficial?: boolean;
   slug?: string | null;
+  packVersion?: number;
 }
 
 export interface CustomCourseInput {
@@ -38,6 +39,7 @@ export type CustomCourseSqlRow = {
   updatedAt: number;
   isOfficial?: number;
   slug?: string | null;
+  packVersion?: number;
 };
 
 export type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
@@ -52,6 +54,7 @@ export function mapCustomCourseRow(
     reviewsEnabled: row.reviewsEnabled === 1,
     isOfficial: row.isOfficial === 1,
     slug: row.slug ?? null,
+    packVersion: row.packVersion ?? 1,
   };
 }
 
@@ -79,7 +82,8 @@ export async function getCustomCourses(): Promise<CustomCourseRecord[]> {
        created_at  AS createdAt,
        updated_at  AS updatedAt,
        COALESCE(is_official, 0) AS isOfficial,
-       slug AS slug
+       slug AS slug,
+       COALESCE(pack_version, 1) AS packVersion
      FROM custom_courses
      ORDER BY created_at DESC, id DESC;`
   );
@@ -113,6 +117,7 @@ export async function getCustomCoursesWithCardCounts(): Promise<
        cp.updated_at  AS updatedAt,
        COALESCE(cp.is_official, 0) AS isOfficial,
        cp.slug AS slug,
+       COALESCE(cp.pack_version, 1) AS packVersion,
        (
          SELECT COUNT(*)
          FROM custom_flashcards cf
@@ -139,7 +144,8 @@ export async function getCustomCourseById(
        created_at  AS createdAt,
        updated_at  AS updatedAt,
        COALESCE(is_official, 0) AS isOfficial,
-       slug
+       slug,
+       COALESCE(pack_version, 1) AS packVersion
      FROM custom_courses
      WHERE id = ?
      LIMIT 1;`,
@@ -209,10 +215,13 @@ export async function ensureOfficialCourse(
   iconId: string,
   iconColor: string,
   reviewsEnabled: boolean
-): Promise<number> {
+): Promise<{ id: number; packVersion: number }> {
   console.log("[DB] ensureOfficialCourse: start", slug);
-  const existing = await db.getFirstAsync<{ id: number }>(
-    `SELECT id FROM custom_courses WHERE slug = ? LIMIT 1;`,
+  const existing = await db.getFirstAsync<{ id: number; packVersion: number }>(
+    `SELECT id, COALESCE(pack_version, 1) AS packVersion
+     FROM custom_courses
+     WHERE slug = ?
+     LIMIT 1;`,
     slug
   );
   const now = Date.now();
@@ -229,13 +238,16 @@ export async function ensureOfficialCourse(
       now,
       existing.id
     );
-    return existing.id;
+    return {
+      id: existing.id,
+      packVersion: existing.packVersion ?? 1,
+    };
   }
   console.log("[DB] ensureOfficialCourse: insert new", slug);
   const result = await db.runAsync(
     `INSERT INTO custom_courses
-       (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug)
-     VALUES (?, ?, ?, NULL, ?, ?, ?, 1, ?);`,
+       (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version)
+     VALUES (?, ?, ?, NULL, ?, ?, ?, 1, ?, 0);`,
     name,
     iconId,
     iconColor,
@@ -248,7 +260,10 @@ export async function ensureOfficialCourse(
     "[DB] ensureOfficialCourse: inserted id=",
     Number(result.lastInsertRowId ?? 0)
   );
-  return Number(result.lastInsertRowId ?? 0);
+  return {
+    id: Number(result.lastInsertRowId ?? 0),
+    packVersion: 0,
+  };
 }
 
 export async function getOfficialCustomCoursesWithCardCounts(): Promise<
@@ -267,6 +282,7 @@ export async function getOfficialCustomCoursesWithCardCounts(): Promise<
        cp.updated_at  AS updatedAt,
        COALESCE(cp.is_official, 0) AS isOfficial,
        cp.slug AS slug,
+       COALESCE(cp.pack_version, 1) AS packVersion,
        (
          SELECT COUNT(*) FROM custom_flashcards cf WHERE cf.course_id = cp.id
        ) AS cardsCount

@@ -250,10 +250,14 @@ const OFFICIAL_PACKS = [
     defaultFlip: false,
     csvFile: "test.csv",
   },
-];
+].map((pack) => ({
+  packVersion: 1,
+  ...pack,
+}));
 
 const TRUE_VALUES = new Set(["true", "1", "yes", "y", "tak", "t"]);
 const KNOWN_CSV_HEADERS = new Set([
+  "external_id",
   "type",
   "front_text",
   "back_text",
@@ -262,6 +266,7 @@ const KNOWN_CSV_HEADERS = new Set([
   "tf_answer",
   "flip",
   "explanation",
+  "reset_progress_on_update",
 ]);
 
 const ANSWER_SPLIT_REGEX = /[;,\n]/;
@@ -340,9 +345,11 @@ function readCardsFromCsv(pack) {
 
     const frontText = String(row.front_text ?? "").trim();
     const backRaw = String(row.back_text ?? "").trim();
+    const externalIdRaw = row.external_id;
     const tfAnswerRaw = row.tf_answer;
     const hasTrueFalseFlag =
       tfAnswerRaw != null && String(tfAnswerRaw).trim().length > 0;
+    const resetProgressRaw = row.reset_progress_on_update;
 
     const imageFront =
       row.front_image != null && String(row.front_image).trim().length > 0
@@ -402,8 +409,20 @@ function readCardsFromCsv(pack) {
     }
 
     const backText = answers.length > 0 ? answers.join("; ") : backRaw;
+    const normalizedExternalId =
+      externalIdRaw != null && String(externalIdRaw).trim().length > 0
+        ? String(externalIdRaw).trim()
+        : null;
+
+    if (!normalizedExternalId) {
+      throw new Error(
+        `Missing external_id in official pack CSV "${pack.csvFile}" at row ${idx + 2}. ` +
+          `Official cards must use stable external_id values.`
+      );
+    }
 
     cards.push({
+      externalId: normalizedExternalId,
       frontText,
       backText,
       answers,
@@ -415,6 +434,8 @@ function readCardsFromCsv(pack) {
       position: idx,
       flipped: finalFlipped,
       answerOnly,
+      isOfficial: true,
+      resetProgressOnUpdate: parseBooleanValue(resetProgressRaw),
       type: mappedType,
     });
   });
@@ -435,6 +456,7 @@ CREATE TABLE IF NOT EXISTS custom_courses (
   reviews_enabled INTEGER NOT NULL DEFAULT 0,
   is_official     INTEGER NOT NULL DEFAULT 0,
   slug            TEXT,
+  pack_version    INTEGER NOT NULL DEFAULT 1,
   created_at      INTEGER NOT NULL,
   updated_at      INTEGER NOT NULL
 );
@@ -457,9 +479,16 @@ CREATE TABLE IF NOT EXISTS custom_flashcards (
   flipped     INTEGER NOT NULL DEFAULT 0,
   answer_only INTEGER NOT NULL DEFAULT 0,
   type        TEXT NOT NULL DEFAULT 'text',
+  external_id TEXT,
+  is_official INTEGER NOT NULL DEFAULT 0,
+  reset_progress_on_update INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL,
   updated_at  INTEGER NOT NULL
 );
+
+CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_flashcards_course_external_id
+  ON custom_flashcards(course_id, external_id)
+  WHERE external_id IS NOT NULL;
 
 CREATE TABLE IF NOT EXISTS custom_flashcard_answers (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -521,12 +550,12 @@ function buildDataSql() {
     const cards = readCardsFromCsv(pack);
 
     statements.push(
-      `INSERT INTO custom_courses (id, name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug) VALUES (${sqlValue(courseId)}, ${sqlValue(pack.name)}, ${sqlValue(pack.iconId)}, ${sqlValue(pack.iconColor)}, NULL, ${sqlValue(pack.reviewsEnabled ? 1 : 0)}, ${sqlValue(now)}, ${sqlValue(now)}, 1, ${sqlValue(pack.slug)});`
+      `INSERT INTO custom_courses (id, name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version) VALUES (${sqlValue(courseId)}, ${sqlValue(pack.name)}, ${sqlValue(pack.iconId)}, ${sqlValue(pack.iconColor)}, NULL, ${sqlValue(pack.reviewsEnabled ? 1 : 0)}, ${sqlValue(now)}, ${sqlValue(now)}, 1, ${sqlValue(pack.slug)}, ${sqlValue(pack.packVersion ?? 1)});`
     );
 
     for (const card of cards) {
       statements.push(
-        `INSERT INTO custom_flashcards (id, course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, created_at, updated_at) VALUES (${sqlValue(flashcardId)}, ${sqlValue(courseId)}, ${sqlValue(card.frontText)}, ${sqlValue(card.backText)}, ${sqlValue(card.hintFront)}, ${sqlValue(card.hintBack)}, ${sqlValue(card.imageFront)}, ${sqlValue(card.imageBack)}, ${sqlValue(card.explanation)}, ${sqlValue(card.position)}, ${sqlValue(card.flipped ? 1 : 0)}, ${sqlValue(card.answerOnly ? 1 : 0)}, ${sqlValue(card.type)}, ${sqlValue(now)}, ${sqlValue(now)});`
+        `INSERT INTO custom_flashcards (id, course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, external_id, is_official, reset_progress_on_update, created_at, updated_at) VALUES (${sqlValue(flashcardId)}, ${sqlValue(courseId)}, ${sqlValue(card.frontText)}, ${sqlValue(card.backText)}, ${sqlValue(card.hintFront)}, ${sqlValue(card.hintBack)}, ${sqlValue(card.imageFront)}, ${sqlValue(card.imageBack)}, ${sqlValue(card.explanation)}, ${sqlValue(card.position)}, ${sqlValue(card.flipped ? 1 : 0)}, ${sqlValue(card.answerOnly ? 1 : 0)}, ${sqlValue(card.type)}, ${sqlValue(card.externalId)}, 1, ${sqlValue(card.resetProgressOnUpdate ? 1 : 0)}, ${sqlValue(now)}, ${sqlValue(now)});`
       );
 
       for (const answer of card.answers) {

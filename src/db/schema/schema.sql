@@ -7,6 +7,7 @@ CREATE TABLE custom_courses (
   reviews_enabled INTEGER NOT NULL DEFAULT 0,
   is_official     INTEGER NOT NULL DEFAULT 0,
   slug            TEXT,
+  pack_version    INTEGER NOT NULL DEFAULT 1,
   created_at      INTEGER NOT NULL,
   updated_at      INTEGER NOT NULL
 );
@@ -24,12 +25,21 @@ CREATE TABLE custom_flashcards (
   hint_back   TEXT,
   image_front TEXT,
   image_back  TEXT,
+  explanation TEXT,
   position    INTEGER,
   flipped     INTEGER NOT NULL DEFAULT 0,
   answer_only INTEGER NOT NULL DEFAULT 0,
+  type        TEXT NOT NULL DEFAULT 'text',
+  external_id TEXT,
+  is_official INTEGER NOT NULL DEFAULT 0,
+  reset_progress_on_update INTEGER NOT NULL DEFAULT 0,
   created_at  INTEGER NOT NULL,
   updated_at  INTEGER NOT NULL
 );
+
+CREATE UNIQUE INDEX idx_custom_flashcards_course_external_id
+  ON custom_flashcards(course_id, external_id)
+  WHERE external_id IS NOT NULL;
 
 CREATE TABLE custom_flashcard_answers (
   id            INTEGER PRIMARY KEY AUTOINCREMENT,

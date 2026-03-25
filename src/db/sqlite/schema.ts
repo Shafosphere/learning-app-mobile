@@ -74,6 +74,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       icon_color  TEXT    NOT NULL,
       color_id    TEXT,
       reviews_enabled INTEGER NOT NULL DEFAULT 0,
+      pack_version INTEGER NOT NULL DEFAULT 1,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -91,6 +92,9 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       flipped     INTEGER NOT NULL DEFAULT 0,
       answer_only INTEGER NOT NULL DEFAULT 0,
       type        TEXT NOT NULL DEFAULT 'text',
+      external_id TEXT,
+      is_official INTEGER NOT NULL DEFAULT 0,
+      reset_progress_on_update INTEGER NOT NULL DEFAULT 0,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -135,6 +139,12 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     "reviews_enabled",
     "INTEGER NOT NULL DEFAULT 0"
   );
+  await ensureColumn(
+    db,
+    "custom_courses",
+    "pack_version",
+    "INTEGER NOT NULL DEFAULT 1"
+  );
   await ensureColumn(db, "custom_flashcards", "hint_front", "TEXT");
   await ensureColumn(db, "custom_flashcards", "hint_back", "TEXT");
   await ensureColumn(db, "custom_flashcards", "image_front", "TEXT");
@@ -151,6 +161,19 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     "custom_flashcards",
     "type",
     "TEXT NOT NULL DEFAULT 'text'"
+  );
+  await ensureColumn(db, "custom_flashcards", "external_id", "TEXT");
+  await ensureColumn(
+    db,
+    "custom_flashcards",
+    "is_official",
+    "INTEGER NOT NULL DEFAULT 0"
+  );
+  await ensureColumn(
+    db,
+    "custom_flashcards",
+    "reset_progress_on_update",
+    "INTEGER NOT NULL DEFAULT 0"
   );
   await db.execAsync(
     `UPDATE custom_flashcards
@@ -170,6 +193,11 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     `CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_courses_slug
        ON custom_courses(slug)
        WHERE slug IS NOT NULL;`
+  );
+  await db.execAsync(
+    `CREATE UNIQUE INDEX IF NOT EXISTS idx_custom_flashcards_course_external_id
+       ON custom_flashcards(course_id, external_id)
+       WHERE external_id IS NOT NULL;`
   );
 
   const achievementsSchema = `

@@ -17,6 +17,7 @@ export type OfficialPackCourseSettings = {
 
 export type OfficialPackDef = {
   slug: string;
+  packVersion: number;
   name: string;
   // Optional global order (lower value appears first).
   // When omitted, UI falls back to existing alphabetical ordering.
@@ -38,9 +39,11 @@ export type OfficialPackDef = {
   settings?: OfficialPackCourseSettings;
 };
 
+const DEFAULT_PACK_VERSION = 1;
+
 // Manifest of official (built-in) packs included with the app bundle.
 // Add new entries here to ship additional packs.
-export const OFFICIAL_PACKS: OfficialPackDef[] = [
+export const OFFICIAL_PACKS: OfficialPackDef[] = ([
   {
     slug: "fiszki_podstawy_en_pl_slowa",
     name: "Podstawowe słówka",
@@ -410,4 +413,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = [
   //   },
   //   imageMap: imageMaps.europeFlags,
   // },
-];
+].map((pack) => ({
+  packVersion: DEFAULT_PACK_VERSION,
+  ...pack,
+})) as OfficialPackDef[]);

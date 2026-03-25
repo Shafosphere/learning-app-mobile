@@ -143,6 +143,9 @@ export async function getDueCustomReviewFlashcards(
     position: number | null;
     flipped: number;
     answerOnly: number;
+    externalId: string | null;
+    isOfficial: number;
+    resetProgressOnUpdate: number;
     createdAt: number;
     updatedAt: number;
     answerText: string | null;
@@ -163,6 +166,9 @@ export async function getDueCustomReviewFlashcards(
        cf.updated_at    AS updatedAt,
        cf.flipped       AS flipped,
        cf.answer_only  AS answerOnly,
+       cf.external_id   AS externalId,
+       cf.is_official   AS isOfficial,
+       cf.reset_progress_on_update AS resetProgressOnUpdate,
        cf.type          AS type,
        cfa.answer_text  AS answerText
      FROM custom_flashcards cf
@@ -197,6 +203,9 @@ export async function getDueCustomReviewFlashcards(
         position: row.position,
         flipped: row.flipped === 1,
         answerOnly: row.answerOnly === 1,
+        externalId: row.externalId,
+        isOfficial: row.isOfficial === 1,
+        resetProgressOnUpdate: row.resetProgressOnUpdate === 1,
         type: (row.type as "text" | "true_false" | "know_dont_know") || "text",
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
