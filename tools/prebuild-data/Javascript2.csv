@@ -1,51 +1,51 @@
-front_text,tf_answer
-W JavaScript operator '==' porównuje wartości po dokonaniu niejawnej konwersji typów.,true
-"Operator '===' (strict equality) zwraca true, jeśli wartości są równe, nawet gdy mają różne typy.",false
-Słowo kluczowe 'const' pozwala na redefinicję (ponowne przypisanie) wartości zmiennej.,false
-Zmienne zadeklarowane przez 'let' mają zasięg blokowy (block scope).,true
-Funkcje strzałkowe (arrow functions) posiadają własne powiązanie 'this'.,false
-"Metoda 'map()' modyfikuje oryginalną tablicę, na której została wywołana.",false
-JavaScript jest językiem jednowątkowym.,true
-Wynik działania 'typeof null' to 'object'.,true
-Wartość 'NaN' jest typu 'number'.,true
-Metoda 'forEach()' zawsze zwraca nową tablicę.,false
-Wszystkie obiekty w JavaScript dziedziczą po 'Object.prototype' (bezpośrednio lub pośrednio).,true
-Słowo kluczowe 'await' może być użyte tylko wewnątrz funkcji oznaczonej jako 'async'.,true
-"Promis (Promise) może znajdować się w trzech stanach: pending, fulfilled lub rejected.",true
-Metoda 'Array.push()' dodaje element na początek tablicy.,false
-Zmienne zadeklarowane słowem 'var' podlegają hoistingowi.,true
-Wyrażenie '[] == ![]' zwraca true w JavaScript.,true
-JSON.stringify() służy do zamiany obiektu JavaScript na ciąg znaków JSON.,true
-Metoda 'filter()' zwraca tylko pierwszy element spełniający warunek.,false
-"Operator logiczny '&&' zwraca pierwszą wartość, jeśli jest ona falsy.",true
-W JavaScript 'undefined' i 'null' to dokładnie to samo.,false
-"Każda funkcja w JS zwraca 'undefined', jeśli nie określono jawnie instrukcji 'return'.",true
-Closures (domknięcia) pozwalają funkcji na dostęp do zmiennych z jej zakresu zewnętrznego nawet po zakończeniu działania tej funkcji.,true
-Instrukcja 'use strict' wyłącza hoisting w całym pliku.,false
-Metoda 'Object.keys()' zwraca tablicę zawierającą wartości właściwości obiektu.,false
-W JavaScript można dodawać nowe właściwości do obiektów zadeklarowanych jako 'const'.,true
-Metoda 'splice()' nie zmienia oryginalnej tablicy.,false
-Wyrażenie '0 == false' zwraca true.,true
-Spread operator (...) może być użyty do płytkiego kopiowania obiektów.,true
-"Funkcja 'setTimeout' gwarantuje wykonanie kodu dokładnie po określonym czasie, nawet jeśli wątek główny jest zajęty.",false
-"Domyślnie parametry funkcji w JS mają wartość 'null', jeśli nie zostaną przekazane.",false
-Metoda 'reduce()' służy do redukcji tablicy do pojedynczej wartości.,true
-Szablony literałów (template literals) używają backticków (`) zamiast cudzysłowów.,true
-"Wartość 'false' jest traktowana jako falsy, ale pusty obiekt '{}' jest traktowany jako truthy.",true
-"Destrukturyzacja tablic opiera się na nazwach kluczy, a nie na kolejności elementów.",false
-Globalny obiekt w przeglądarce to 'window'.,true
-Metoda 'find()' zwraca tablicę wszystkich elementów spełniających warunek.,false
-Wyrażenie 'typeof []' zwraca 'array'.,false
-Klasy w JavaScript (wprowadzone w ES6) to w rzeczywistości lukier składniowy nad prototypami.,true
-"Metoda 'includes()' działa zarówno na tablicach, jak i na ciągach znaków.",true
-"Operator '||' (OR) zwraca drugą wartość tylko wtedy, gdy pierwsza jest 'false'.",false
-Metoda 'shift()' usuwa pierwszy element z tablicy.,true
-Obiekty typu 'Set' mogą przechowywać zduplikowane wartości.,false
-"Wyrażenie '1 + \1\""' daje w wyniku liczbę 2.""",false
-Zmienna zadeklarowana bez słowa kluczowego (np. x = 5) staje się zmienną globalną (w trybie nie-strict).,true
-Metoda 'bind()' wywołuje funkcję natychmiast z nowym kontekstem 'this'.,false
-W JavaScript '10' > '2' zwraca false (porównanie tekstowe).,false
-Protokół 'Event Loop' odpowiada za obsługę asynchroniczności w JS.,true
-Obiekt 'Map' zachowuje kolejność wstawiania kluczy.,true
-"Funkcja 'isNan()' poprawnie sprawdza, czy wartość jest NaN bez żadnych efektów ubocznych konwersji.",false
-Operator '??' (nullish coalescing) zwraca prawą stronę tylko jeśli lewa strona to null lub undefined.,true
+external_id,front_text,tf_answer
+0001,W JavaScript operator '==' porównuje wartości po dokonaniu niejawnej konwersji typów.,true
+0002,"Operator '===' (strict equality) zwraca true, jeśli wartości są równe, nawet gdy mają różne typy.",false
+0003,Słowo kluczowe 'const' pozwala na redefinicję (ponowne przypisanie) wartości zmiennej.,false
+0004,Zmienne zadeklarowane przez 'let' mają zasięg blokowy (block scope).,true
+0005,Funkcje strzałkowe (arrow functions) posiadają własne powiązanie 'this'.,false
+0006,"Metoda 'map()' modyfikuje oryginalną tablicę, na której została wywołana.",false
+0007,JavaScript jest językiem jednowątkowym.,true
+0008,Wynik działania 'typeof null' to 'object'.,true
+0009,Wartość 'NaN' jest typu 'number'.,true
+0010,Metoda 'forEach()' zawsze zwraca nową tablicę.,false
+0011,Wszystkie obiekty w JavaScript dziedziczą po 'Object.prototype' (bezpośrednio lub pośrednio).,true
+0012,Słowo kluczowe 'await' może być użyte tylko wewnątrz funkcji oznaczonej jako 'async'.,true
+0013,"Promis (Promise) może znajdować się w trzech stanach: pending, fulfilled lub rejected.",true
+0014,Metoda 'Array.push()' dodaje element na początek tablicy.,false
+0015,Zmienne zadeklarowane słowem 'var' podlegają hoistingowi.,true
+0016,Wyrażenie '[] == ![]' zwraca true w JavaScript.,true
+0017,JSON.stringify() służy do zamiany obiektu JavaScript na ciąg znaków JSON.,true
+0018,Metoda 'filter()' zwraca tylko pierwszy element spełniający warunek.,false
+0019,"Operator logiczny '&&' zwraca pierwszą wartość, jeśli jest ona falsy.",true
+0020,W JavaScript 'undefined' i 'null' to dokładnie to samo.,false
+0021,"Każda funkcja w JS zwraca 'undefined', jeśli nie określono jawnie instrukcji 'return'.",true
+0022,Closures (domknięcia) pozwalają funkcji na dostęp do zmiennych z jej zakresu zewnętrznego nawet po zakończeniu działania tej funkcji.,true
+0023,Instrukcja 'use strict' wyłącza hoisting w całym pliku.,false
+0024,Metoda 'Object.keys()' zwraca tablicę zawierającą wartości właściwości obiektu.,false
+0025,W JavaScript można dodawać nowe właściwości do obiektów zadeklarowanych jako 'const'.,true
+0026,Metoda 'splice()' nie zmienia oryginalnej tablicy.,false
+0027,Wyrażenie '0 == false' zwraca true.,true
+0028,Spread operator (...) może być użyty do płytkiego kopiowania obiektów.,true
+0029,"Funkcja 'setTimeout' gwarantuje wykonanie kodu dokładnie po określonym czasie, nawet jeśli wątek główny jest zajęty.",false
+0030,"Domyślnie parametry funkcji w JS mają wartość 'null', jeśli nie zostaną przekazane.",false
+0031,Metoda 'reduce()' służy do redukcji tablicy do pojedynczej wartości.,true
+0032,Szablony literałów (template literals) używają backticków (`) zamiast cudzysłowów.,true
+0033,"Wartość 'false' jest traktowana jako falsy, ale pusty obiekt '{}' jest traktowany jako truthy.",true
+0034,"Destrukturyzacja tablic opiera się na nazwach kluczy, a nie na kolejności elementów.",false
+0035,Globalny obiekt w przeglądarce to 'window'.,true
+0036,Metoda 'find()' zwraca tablicę wszystkich elementów spełniających warunek.,false
+0037,Wyrażenie 'typeof []' zwraca 'array'.,false
+0038,Klasy w JavaScript (wprowadzone w ES6) to w rzeczywistości lukier składniowy nad prototypami.,true
+0039,"Metoda 'includes()' działa zarówno na tablicach, jak i na ciągach znaków.",true
+0040,"Operator '||' (OR) zwraca drugą wartość tylko wtedy, gdy pierwsza jest 'false'.",false
+0041,Metoda 'shift()' usuwa pierwszy element z tablicy.,true
+0042,Obiekty typu 'Set' mogą przechowywać zduplikowane wartości.,false
+0043,"Wyrażenie '1 + \1\""' daje w wyniku liczbę 2.""",false
+0044,Zmienna zadeklarowana bez słowa kluczowego (np. x = 5) staje się zmienną globalną (w trybie nie-strict).,true
+0045,Metoda 'bind()' wywołuje funkcję natychmiast z nowym kontekstem 'this'.,false
+0046,W JavaScript '10' > '2' zwraca false (porównanie tekstowe).,false
+0047,Protokół 'Event Loop' odpowiada za obsługę asynchroniczności w JS.,true
+0048,Obiekt 'Map' zachowuje kolejność wstawiania kluczy.,true
+0049,"Funkcja 'isNan()' poprawnie sprawdza, czy wartość jest NaN bez żadnych efektów ubocznych konwersji.",false
+0050,Operator '??' (nullish coalescing) zwraca prawą stronę tylko jeśli lewa strona to null lub undefined.,true

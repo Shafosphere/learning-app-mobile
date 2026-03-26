@@ -1,50 +1,50 @@
-front_text,back_text
-Rosja,Moskwa
-Afganistan,Kabul
-Arabia Saudyjska,Rijad
-Armenia,Erywań
-Azerbejdżan,Baku
-Bahrajn,Manama
-Bangladesz,Dhaka
-Bhutan,Thimphu
-Brunei,Bandar Seri Begawan
-Chiny,Pekin
-Cypr,Nikozja
-Filipiny,Manila
-Gruzja,Tbilisi
-Indie,Nowe Delhi
-Indonezja,Dżakarta
-Irak,Bagdad
-Iran,Teheran
-Izrael,Jerozolima
-Japonia,Tokio
-Jemen,Sana
-Jordania,Amman
-Kambodża,Phnom Penh
-Katar,Doha
-Kirgistan,Biszkek
-Korea Południowa,Seul
-Korea Północna,Pjongjang
-Kuwejt,Kuwejt
-Laos,Wientian
-Liban,Bejrut
-Malediwy,Male
-Malezja,Kuala Lumpur / Putrajaya
-Mjanma,Naypyidaw
-Mongolia,Ułan Bator
-Nepal,Katmandu
-Oman,Maskat
-Pakistan,Islamabad
-Singapur,Singapur
-Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
-Syria,Damaszek
-Tadżykistan,Duszanbe
-Tajlandia,Bangkok
-Timor Wschodni,Dili
-Turkmenistan,Aszchabad
-Uzbekistan,Taszkent
-Wietnam,Hanoi
-Zjednoczone Emiraty Arabskie,Abu Zabi
-Kazachstan,Astana
-Turcja,Ankara
-Egipt,Kair
+external_id,front_text,back_text
+0001,Rosja,Moskwa
+0002,Afganistan,Kabul
+0003,Arabia Saudyjska,Rijad
+0004,Armenia,Erywań
+0005,Azerbejdżan,Baku
+0006,Bahrajn,Manama
+0007,Bangladesz,Dhaka
+0008,Bhutan,Thimphu
+0009,Brunei,Bandar Seri Begawan
+0010,Chiny,Pekin
+0011,Cypr,Nikozja
+0012,Filipiny,Manila
+0013,Gruzja,Tbilisi
+0014,Indie,Nowe Delhi
+0015,Indonezja,Dżakarta
+0016,Irak,Bagdad
+0017,Iran,Teheran
+0018,Izrael,Jerozolima
+0019,Japonia,Tokio
+0020,Jemen,Sana
+0021,Jordania,Amman
+0022,Kambodża,Phnom Penh
+0023,Katar,Doha
+0024,Kirgistan,Biszkek
+0025,Korea Południowa,Seul
+0026,Korea Północna,Pjongjang
+0027,Kuwejt,Kuwejt
+0028,Laos,Wientian
+0029,Liban,Bejrut
+0030,Malediwy,Male
+0031,Malezja,Kuala Lumpur / Putrajaya
+0032,Mjanma,Naypyidaw
+0033,Mongolia,Ułan Bator
+0034,Nepal,Katmandu
+0035,Oman,Maskat
+0036,Pakistan,Islamabad
+0037,Singapur,Singapur
+0038,Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
+0039,Syria,Damaszek
+0040,Tadżykistan,Duszanbe
+0041,Tajlandia,Bangkok
+0042,Timor Wschodni,Dili
+0043,Turkmenistan,Aszchabad
+0044,Uzbekistan,Taszkent
+0045,Wietnam,Hanoi
+0046,Zjednoczone Emiraty Arabskie,Abu Zabi
+0047,Kazachstan,Astana
+0048,Turcja,Ankara
+0049,Egipt,Kair

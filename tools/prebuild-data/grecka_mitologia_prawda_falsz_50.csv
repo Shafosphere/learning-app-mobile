@@ -1,0 +1,51 @@
+external_id,front_text,tf_answer,explanation
+0001,Zeus był królem bogów olimpijskich.,true,Zeus był najważniejszym bogiem olimpijskim i władcą nieba oraz piorunów.
+0002,Hera była boginią małżeństwa.,true,"Hera opiekowała się małżeństwem, rodziną i kobietami zamężnymi."
+0003,Posejdon władał morzami.,true,"Posejdon był bogiem mórz, trzęsień ziemi i koni."
+0004,Atena narodziła się z głowy Zeusa.,true,Według mitu Atena wyskoczyła z głowy Zeusa już jako w pełni ukształtowana bogini.
+0005,Hermes był posłańcem bogów.,true,Hermes przekazywał wiadomości bogów i opiekował się podróżnymi oraz kupcami.
+0006,Dionizos był bogiem wina.,true,"Dionizos był związany z winem, ucztami, teatrem i religijnym uniesieniem."
+0007,Demeter była matką Persefony.,true,"Demeter, bogini urodzaju, była matką Persefony porwanej przez Hadesa."
+0008,Cerber strzegł wejścia do Hadesu.,true,"Cerber, trzygłowy pies, pilnował świata zmarłych."
+0009,Tezeusz zabił Minotaura.,true,Tezeusz pokonał Minotaura w labiryncie na Krecie.
+0010,Dedal był ojcem Ikara.,true,Dedal był genialnym rzemieślnikiem i ojcem Ikara.
+0011,Perseusz zabił Meduzę.,true,"Perseusz ściął głowę Meduzie, jednej z Gorgon."
+0012,Herakles wykonał dwanaście prac.,true,Dwanaście prac Heraklesa to jeden z najsłynniejszych cykli mitologii greckiej.
+0013,Odyseusz był królem Itaki.,true,Odyseusz rządził Itaką i po wojnie trojańskiej długo wracał do domu.
+0014,Charon przewoził dusze przez Styks.,true,Charon był przewoźnikiem dusz do świata zmarłych.
+0015,Prometeusz ukradł ogień dla ludzi.,true,"Prometeusz dał ludziom ogień, za co został surowo ukarany przez Zeusa."
+0016,Orfeusz próbował odzyskać Eurydykę z podziemi.,true,"Orfeusz zszedł do świata zmarłych, aby odzyskać ukochaną Eurydykę."
+0017,Pegaz był skrzydlatym koniem.,true,Pegaz to mityczny skrzydlaty koń związany m.in. z Perseuszem i Muzami.
+0018,Eros był bogiem miłości.,true,Eros uosabiał miłość i pożądanie.
+0019,Nike była boginią zwycięstwa.,true,Nike symbolizowała zwycięstwo w wojnie i zawodach.
+0020,Helios był związany ze słońcem.,true,Helios był personifikacją słońca i przemierzał niebo słonecznym rydwanem.
+0021,Atlas dźwigał sklepienie niebieskie.,true,W mitach Atlas został skazany na dźwiganie sklepienia niebieskiego.
+0022,Parys był związany z początkiem wojny trojańskiej.,true,To wybór Parysa i porwanie Heleny doprowadziły do wojny trojańskiej.
+0023,Penelopa była żoną Odyseusza.,true,Penelopa wiernie czekała na powrót Odyseusza do Itaki.
+0024,Kronos pożerał swoje dzieci.,true,"Kronos połykał dzieci, bo obawiał się utraty władzy."
+0025,Ariadna pomogła Tezeuszowi wyjść z Labiryntu.,true,"Dała mu nić, dzięki której mógł odnaleźć drogę powrotną."
+0026,Hades był bogiem mórz.,false,Bogiem mórz był Posejdon; Hades władał światem zmarłych.
+0027,Apollo był bogiem kowalstwa.,false,Bogiem kowalstwa był Hefajstos; Apollo był związany m.in. z muzyką i proroctwem.
+0028,Artemida była boginią wojny.,false,Artemida była boginią łowów i dzikiej przyrody; z wojną kojarzono Aresa.
+0029,Ares był bogiem mądrości.,false,Boginią mądrości była Atena; Ares był bogiem wojny.
+0030,Hefajstos był bogiem miłości.,false,Za miłość odpowiadała głównie Afrodyta; Hefajstos był bogiem ognia i kowalstwa.
+0031,Hestia była boginią polowań.,false,"Hestia opiekowała się ogniskiem domowym, a boginią łowów była Artemida."
+0032,Minotaur mieszkał na Olimpie.,false,"Minotaur żył w labiryncie na Krecie, nie na Olimpie."
+0033,Achilles był całkowicie niewrażliwy na ciosy.,false,W tradycji mitycznej jego słabym punktem była pięta.
+0034,Ikar bezpiecznie doleciał do celu.,false,"Lecąc zbyt wysoko, zbliżył się do słońca i spadł do morza."
+0035,Meduza miała włosy z piór.,false,Meduza była przedstawiana z wężami zamiast włosów.
+0036,Pandora wypuściła na świat wyłącznie dobre rzeczy.,false,"Mit mówi, że po otwarciu naczynia na świat wydostały się nieszczęścia."
+0037,Eurydyka wróciła z Orfeuszem do świata żywych.,false,Orfeusz obejrzał się za wcześnie i utracił Eurydykę.
+0038,"Midas zamieniał wszystko, czego dotknął, w kamień.",false,Midas otrzymał dar przemieniania wszystkiego w złoto.
+0039,Syreny pomagały Odyseuszowi odnaleźć drogę do domu.,false,Syreny próbowały zwabić go śpiewem na zgubę.
+0040,Sfinks nagradzał milczeniem każdego podróżnego.,false,"Sfinks zadawał zagadkę i był śmiertelnym zagrożeniem dla tych, którzy jej nie rozwiązywali."
+0041,Narcyz zakochał się w Herze.,false,Narcyz zakochał się we własnym odbiciu.
+0042,Tyche była boginią wojny.,false,"Tyche była związana z losem, przypadkiem i powodzeniem."
+0043,Gorgony były łagodnymi boginiami domowego ogniska.,false,"Gorgony były budzącymi grozę istotami, a domowym ogniskiem opiekowała się Hestia."
+0044,Homer napisał Teogonię.,false,Autorem Teogonii był Hezjod; Homerowi przypisuje się Iliadę i Odyseję.
+0045,Herakles był synem Posejdona.,false,Herakles był synem Zeusa i Alkmeny.
+0046,Persefona przez cały rok przebywała wyłącznie na Olimpie.,false,"Część roku spędzała w podziemiach u Hadesa, a część z matką Demeter."
+0047,Zeus nie był spokrewniony z Herą.,false,"Zeus i Hera byli rodzeństwem, a zarazem małżeństwem w mitologii greckiej."
+0048,Koń trojański był prawdziwym koniem podarowanym Trojanom.,false,"Była to drewniana konstrukcja, w której ukryli się greccy wojownicy."
+0049,Odyseusz wrócił do domu dzień po upadku Troi.,false,Jego powrót trwał wiele lat i był pełen przeszkód.
+0050,Tezeusz pokonał Minotaura bez żadnej pomocy.,false,"Pomogła mu Ariadna, dając nić potrzebną do wyjścia z labiryntu."

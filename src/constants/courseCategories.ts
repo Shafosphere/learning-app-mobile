@@ -25,6 +25,12 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         description: "Historia Polski",
         icon: "landmark",
     },
+    mitologia: {
+        id: "mitologia",
+        label: "Mitologia",
+        description: "Mity, bogowie i bohaterowie",
+        icon: "book-open",
+    },
     programming: {
         id: "programming",
         label: "Programowanie",

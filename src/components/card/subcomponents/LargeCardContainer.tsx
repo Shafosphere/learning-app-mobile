@@ -18,6 +18,8 @@ type LargeCardContainerProps = {
   hasContent: boolean;
   showCorrectionInputs: boolean;
   backgroundColorOverride?: string;
+  shrinkImmediately?: boolean;
+  contentKey?: string;
   children: (handlers: LayoutHandlers) => React.ReactNode;
 };
 
@@ -26,11 +28,14 @@ export default function LargeCardContainer({
   hasContent,
   showCorrectionInputs: _showCorrectionInputs,
   backgroundColorOverride,
+  shrinkImmediately = false,
+  contentKey,
   children,
 }: LargeCardContainerProps) {
   const styles = useStyles();
   const [promptHeight, setPromptHeight] = useState<number | null>(null);
   const [inputHeight, setInputHeight] = useState<number | null>(null);
+  const [isWaitingForFreshLayout, setIsWaitingForFreshLayout] = useState(hasContent);
   const lastStableHeight = useRef<number | null>(null);
   const initialCardHeight =
     hasContent && lastStableHeight.current != null
@@ -66,7 +71,7 @@ export default function LargeCardContainer({
       LARGE_CARD_MAX_HEIGHT,
       Math.max(SMALL_CARD_HEIGHT, Math.ceil(desired))
     );
-  }, [hasContent, promptHeight, inputHeight]);
+  }, [hasContent, inputHeight, promptHeight]);
 
   const rawTargetCardHeight = useMemo(() => {
     if (!hasContent) {
@@ -75,8 +80,8 @@ export default function LargeCardContainer({
     // Keep card height driven by current measurements so the "correction" state
     // matches the neutral one. Use the last stable value only as a fallback
     // while measurements are being gathered.
-    return baseCardHeight ?? lastStableHeight.current ?? SMALL_CARD_HEIGHT;
-  }, [hasContent, baseCardHeight]);
+    return baseCardHeight ?? SMALL_CARD_HEIGHT;
+  }, [baseCardHeight, hasContent]);
 
   const handlePromptLayout = useCallback((height: number) => {
     const nextHeight = Math.ceil(height);
@@ -97,6 +102,23 @@ export default function LargeCardContainer({
         : nextHeight;
     });
   }, []);
+
+  useEffect(() => {
+    setPromptHeight(null);
+    setInputHeight(null);
+    setIsWaitingForFreshLayout(hasContent);
+  }, [contentKey, hasContent]);
+
+  useEffect(() => {
+    if (!hasContent) {
+      setIsWaitingForFreshLayout(false);
+      return;
+    }
+    if (promptHeight == null || inputHeight == null) {
+      return;
+    }
+    setIsWaitingForFreshLayout(false);
+  }, [hasContent, inputHeight, promptHeight]);
 
   useEffect(() => {
     if (!hasContent) {
@@ -133,6 +155,14 @@ export default function LargeCardContainer({
         return rawTargetCardHeight;
       }
 
+      if (shrinkImmediately) {
+        if (shrinkTimeoutRef.current) {
+          clearTimeout(shrinkTimeoutRef.current);
+          shrinkTimeoutRef.current = null;
+        }
+        return rawTargetCardHeight;
+      }
+
       if (shrinkTimeoutRef.current) {
         clearTimeout(shrinkTimeoutRef.current);
       }
@@ -142,7 +172,7 @@ export default function LargeCardContainer({
       }, SHRINK_SETTLE_DELAY_MS);
       return prev;
     });
-  }, [hasContent, rawTargetCardHeight]);
+  }, [hasContent, rawTargetCardHeight, shrinkImmediately]);
 
   useEffect(() => {
     animatedCardHeight.stopAnimation();
@@ -154,17 +184,23 @@ export default function LargeCardContainer({
     }).start();
   }, [animatedCardHeight, stableTargetHeight]);
 
+  const sharedStyle = [
+    styles.card,
+    styles.cardLarge,
+    emptyAlignmentStyle,
+    cardStateStyle,
+    backgroundColorOverride
+      ? { backgroundColor: backgroundColorOverride }
+      : null,
+  ];
+
   return (
     <Animated.View
       style={[
-        styles.card,
-        styles.cardLarge,
-        { height: animatedCardHeight },
-        emptyAlignmentStyle,
-        cardStateStyle,
-        backgroundColorOverride
-          ? { backgroundColor: backgroundColorOverride }
-          : null,
+        ...sharedStyle,
+        isWaitingForFreshLayout
+          ? { minHeight: animatedCardHeight }
+          : { height: animatedCardHeight },
       ]}
     >
       {children({

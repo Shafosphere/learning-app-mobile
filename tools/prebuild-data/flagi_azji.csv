@@ -1,51 +1,51 @@
-front_image,back_text
-ae.svg,Zjednoczone Emiraty Arabskie
-af.svg,Afganistan
-am.svg,Armenia
-az.svg,Azerbejdżan
-bd.svg,Bangladesz
-bh.svg,Bahrajn
-bn.svg,Brunei
-bt.svg,Bhutan
-cn.svg,Chiny
-ge.svg,Gruzja
-hk.svg,Hongkong
-id.svg,Indonezja
-il.svg,Izrael
-in.svg,Indie
-iq.svg,Irak
-ir.svg,Iran
-jo.svg,Jordania
-jp.svg,Japonia
-kg.svg,Kirgistan
-kh.svg,Kambodża
-kp.svg,Korea Północna
-kr.svg,Korea Południowa
-kw.svg,Kuwejt
-kz.svg,Kazachstan
-la.svg,Laos
-lb.svg,Liban
-lk.svg,Sri Lanka
-mm.svg,Mjanma
-mn.svg,Mongolia
-mo.svg,Makau
-mv.svg,Malediwy
-my.svg,Malezja
-np.svg,Nepal
-om.svg,Oman
-ph.svg,Filipiny
-pk.svg,Pakistan
-ps.svg,Palestyna
-qa.svg,Katar
-sa.svg,Arabia Saudyjska
-sg.svg,Singapur
-sy.svg,Syria
-th.svg,Tajlandia
-tj.svg,Tadżykistan
-tl.svg,Timor Wschodni
-tm.svg,Turkmenistan
-tr.svg,Turcja
-tw.svg,Tajwan
-uz.svg,Uzbekistan
-vn.svg,Wietnam
-ye.svg,Jemen
+external_id,front_image,back_text
+0001,ae.svg,Zjednoczone Emiraty Arabskie
+0002,af.svg,Afganistan
+0003,am.svg,Armenia
+0004,az.svg,Azerbejdżan
+0005,bd.svg,Bangladesz
+0006,bh.svg,Bahrajn
+0007,bn.svg,Brunei
+0008,bt.svg,Bhutan
+0009,cn.svg,Chiny
+0010,ge.svg,Gruzja
+0011,hk.svg,Hongkong
+0012,id.svg,Indonezja
+0013,il.svg,Izrael
+0014,in.svg,Indie
+0015,iq.svg,Irak
+0016,ir.svg,Iran
+0017,jo.svg,Jordania
+0018,jp.svg,Japonia
+0019,kg.svg,Kirgistan
+0020,kh.svg,Kambodża
+0021,kp.svg,Korea Północna
+0022,kr.svg,Korea Południowa
+0023,kw.svg,Kuwejt
+0024,kz.svg,Kazachstan
+0025,la.svg,Laos
+0026,lb.svg,Liban
+0027,lk.svg,Sri Lanka
+0028,mm.svg,Mjanma
+0029,mn.svg,Mongolia
+0030,mo.svg,Makau
+0031,mv.svg,Malediwy
+0032,my.svg,Malezja
+0033,np.svg,Nepal
+0034,om.svg,Oman
+0035,ph.svg,Filipiny
+0036,pk.svg,Pakistan
+0037,ps.svg,Palestyna
+0038,qa.svg,Katar
+0039,sa.svg,Arabia Saudyjska
+0040,sg.svg,Singapur
+0041,sy.svg,Syria
+0042,th.svg,Tajlandia
+0043,tj.svg,Tadżykistan
+0044,tl.svg,Timor Wschodni
+0045,tm.svg,Turkmenistan
+0046,tr.svg,Turcja
+0047,tw.svg,Tajwan
+0048,uz.svg,Uzbekistan
+0049,vn.svg,Wietnam
+0050,ye.svg,Jemen

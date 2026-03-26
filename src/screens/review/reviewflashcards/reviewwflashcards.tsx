@@ -884,6 +884,9 @@ export default function ReviewFlashcardsPlaceholder() {
       trueFalseActionsMode={trueFalseActionsMode}
       onTrueFalseOk={handleTrueFalseOk}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
+      selectedTrueFalseAnswer={
+        answer === "true" ? true : answer === "false" ? false : null
+      }
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={async () => undefined}

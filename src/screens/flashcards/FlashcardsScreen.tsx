@@ -47,6 +47,7 @@ import {
   useMemo,
   useRef,
   useState,
+  useLayoutEffect,
 } from "react";
 import {
   ActivityIndicator,
@@ -818,7 +819,7 @@ export default function Flashcards() {
     !loadError &&
     customCards.length > 0;
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (selectedItemId == null) return;
     if (lastActionCooldownCardIdRef.current === selectedItemId) return;
     lastActionCooldownCardIdRef.current = selectedItemId;
@@ -937,6 +938,9 @@ export default function Flashcards() {
       trueFalseActionsMode={trueFalseActionsMode}
       onTrueFalseOk={handleTrueFalseOk}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
+      selectedTrueFalseAnswer={
+        answer === "true" ? true : answer === "false" ? false : null
+      }
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={downloadData}

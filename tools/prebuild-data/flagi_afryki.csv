@@ -1,58 +1,58 @@
-front_image,back_text
-ao.svg,Angola
-bf.svg,Burkina Faso
-bi.svg,Burundi
-bj.svg,Benin
-bw.svg,Botswana
-cd.svg,Demokratyczna Republika Konga
-cf.svg,Republika Środkowoafrykańska
-cg.svg,Republika Konga
-ci.svg,Wybrzeże Kości Słoniowej
-cm.svg,Kamerun
-cv.svg,Republika Zielonego Przylądka
-dj.svg,Dżibuti
-dz.svg,Algieria
-eg.svg,Egipt
-eh.svg,Sahara Zachodnia
-er.svg,Erytrea
-et.svg,Etiopia
-ga.svg,Gabon
-gh.svg,Ghana
-gm.svg,Gambia
-gn.svg,Gwinea
-gq.svg,Gwinea Równikowa
-gw.svg,Gwinea Bissau
-ke.svg,Kenia
-km.svg,Komory
-lr.svg,Liberia
-ls.svg,Lesotho
-ly.svg,Libia
-ma.svg,Maroko
-mg.svg,Madagaskar
-ml.svg,Mali
-mr.svg,Mauretania
-mu.svg,Mauritius
-mw.svg,Malawi
-mz.svg,Mozambik
-na.svg,Namibia
-ne.svg,Niger
-ng.svg,Nigeria
-re.svg,Reunion
-rw.svg,Rwanda
-sc.svg,Seszele
-sd.svg,Sudan
-sl.svg,Sierra Leone
-sn.svg,Senegal
-so.svg,Somalia
-ss.svg,Sudan Południowy
-st.svg,Wyspy Świętego Tomasza i Książęca
-sz.svg,Eswatini
-td.svg,Czad
-tg.svg,Togo
-tn.svg,Tunezja
-tz.svg,Tanzania
-ug.svg,Uganda
-yt.svg,Majotta
-za.svg,Republika Południowej Afryki
-zm.svg,Zambia
-zw.svg,Zimbabwe
+external_id,front_image,back_text
+0001,ao.svg,Angola
+0002,bf.svg,Burkina Faso
+0003,bi.svg,Burundi
+0004,bj.svg,Benin
+0005,bw.svg,Botswana
+0006,cd.svg,Demokratyczna Republika Konga
+0007,cf.svg,Republika Środkowoafrykańska
+0008,cg.svg,Republika Konga
+0009,ci.svg,Wybrzeże Kości Słoniowej
+0010,cm.svg,Kamerun
+0011,cv.svg,Republika Zielonego Przylądka
+0012,dj.svg,Dżibuti
+0013,dz.svg,Algieria
+0014,eg.svg,Egipt
+0015,eh.svg,Sahara Zachodnia
+0016,er.svg,Erytrea
+0017,et.svg,Etiopia
+0018,ga.svg,Gabon
+0019,gh.svg,Ghana
+0020,gm.svg,Gambia
+0021,gn.svg,Gwinea
+0022,gq.svg,Gwinea Równikowa
+0023,gw.svg,Gwinea Bissau
+0024,ke.svg,Kenia
+0025,km.svg,Komory
+0026,lr.svg,Liberia
+0027,ls.svg,Lesotho
+0028,ly.svg,Libia
+0029,ma.svg,Maroko
+0030,mg.svg,Madagaskar
+0031,ml.svg,Mali
+0032,mr.svg,Mauretania
+0033,mu.svg,Mauritius
+0034,mw.svg,Malawi
+0035,mz.svg,Mozambik
+0036,na.svg,Namibia
+0037,ne.svg,Niger
+0038,ng.svg,Nigeria
+0039,re.svg,Reunion
+0040,rw.svg,Rwanda
+0041,sc.svg,Seszele
+0042,sd.svg,Sudan
+0043,sl.svg,Sierra Leone
+0044,sn.svg,Senegal
+0045,so.svg,Somalia
+0046,ss.svg,Sudan Południowy
+0047,st.svg,Wyspy Świętego Tomasza i Książęca
+0048,sz.svg,Eswatini
+0049,td.svg,Czad
+0050,tg.svg,Togo
+0051,tn.svg,Tunezja
+0052,tz.svg,Tanzania
+0053,ug.svg,Uganda
+0054,yt.svg,Majotta
+0055,za.svg,Republika Południowej Afryki
+0056,zm.svg,Zambia
+0057,zw.svg,Zimbabwe

@@ -1,198 +1,198 @@
-front_text,back_text
-Albania,Tirana
-Andora,Andora
-Austria,Wiedeń
-Belgia,Bruksela
-Białoruś,Mińsk
-Bośnia i Hercegowina,Sarajewo
-Bułgaria,Sofia
-Chorwacja,Zagrzeb
-Czarnogóra,Podgorica
-Czechy,Praga
-Dania,Kopenhaga
-Estonia,Tallinn
-Finlandia,Helsinki
-Francja,Paryż
-Grecja,Ateny
-Hiszpania,Madryt
-Holandia,Amsterdam / Haga
-Irlandia,Dublin
-Islandia,Reykjavík
-Kosowo,Prisztina
-Liechtenstein,Vaduz
-Litwa,Wilno
-Luksemburg,Luksemburg
-Macedonia Północna,Skopje
-Malta,Valletta
-Monako,Monako
-Mołdawia,Kiszyniów
-Niemcy,Berlin
-Norwegia,Oslo
-Polska,Warszawa
-Portugalia,Lizbona
-Rumunia,Bukareszt
-San Marino,San Marino
-Serbia,Belgrad
-Szwajcaria,Berno
-Szwecja,Sztokholm
-Słowacja,Bratysława
-Słowenia,Lublana
-Ukraina,Kijów
-Watykan,Watykan
-Wielka Brytania,Londyn
-Węgry,Budapeszt
-Włochy,Rzym
-Łotwa,Ryga
-Rosja,Moskwa
-Afganistan,Kabul
-Arabia Saudyjska,Rijad
-Armenia,Erywań
-Azerbejdżan,Baku
-Bahrajn,Manama
-Bangladesz,Dhaka
-Bhutan,Thimphu
-Brunei,Bandar Seri Begawan
-Chiny,Pekin
-Cypr,Nikozja
-Filipiny,Manila
-Gruzja,Tbilisi
-Indie,Nowe Delhi
-Indonezja,Dżakarta
-Irak,Bagdad
-Iran,Teheran
-Izrael,Jerozolima
-Japonia,Tokio
-Jemen,Sana
-Jordania,Amman
-Kambodża,Phnom Penh
-Katar,Doha
-Kirgistan,Biszkek
-Korea Południowa,Seul
-Korea Północna,Pjongjang
-Kuwejt,Kuwejt
-Laos,Wientian
-Liban,Bejrut
-Malediwy,Male
-Malezja,Kuala Lumpur / Putrajaya
-Mjanma,Naypyidaw
-Mongolia,Ułan Bator
-Nepal,Katmandu
-Oman,Maskat
-Pakistan,Islamabad
-Singapur,Singapur
-Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
-Syria,Damaszek
-Tadżykistan,Duszanbe
-Tajlandia,Bangkok
-Timor Wschodni,Dili
-Turkmenistan,Aszchabad
-Uzbekistan,Taszkent
-Wietnam,Hanoi
-Zjednoczone Emiraty Arabskie,Abu Zabi
-Kazachstan,Astana
-Turcja,Ankara
-Algieria,Algier
-Angola,Luanda
-Benin,Porto-Novo / Kotonu
-Botswana,Gaborone
-Burkina Faso,Wagadugu
-Burundi,Gitega / Bużumbura
-Czad,Ndżamena
-Demokratyczna Republika Konga,Kinszasa
-Dżibuti,Dżibuti
-Erytrea,Asmara
-Eswatini,Mbabane / Lobamba
-Etiopia,Addis Abeba
-Gabon,Libreville
-Gambia,Bandżul
-Ghana,Akra
-Gwinea,Konakry
-Gwinea Bissau,Bissau
-Gwinea Równikowa,Malabo
-Kamerun,Jaunde
-Kenia,Nairobi
-Komory,Moroni
-Kongo,Brazzaville
-Lesotho,Maseru
-Liberia,Monrovia
-Libia,Trypolis
-Madagaskar,Antananarywa
-Malawi,Lilongwe
-Mali,Bamako
-Maroko,Rabat
-Mauretania,Nawakszut
-Mauritius,Port Louis
-Mozambik,Maputo
-Namibia,Windhuk
-Niger,Niamey
-Nigeria,Abudża
-Południowa Afryka,Pretoria
-Republika Zielonego Przylądka,Praia
-Republika Środkowoafrykańska,Bangi
-Rwanda,Kigali
-Senegal,Dakar
-Seszele,Victoria
-Sierra Leone,Freetown
-Somalia,Mogadiszu
-Sudan,Chartum
-Sudan Południowy,Dżuba
-Tanzania,Dodoma / Dar es Salaam
-Togo,Lomé
-Tunezja,Tunis
-Uganda,Kampala
-Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
-Wyspy Świętego Tomasza i Książęca,São Tomé
-Zambia,Lusaka
-Zimbabwe,Harare
-Egipt,Kair
-Antigua i Barbuda,Saint John’s
-Bahamy,Nassau
-Barbados,Bridgetown
-Belize,Belmopan
-Dominika,Roseau
-Dominikana,Santo Domingo
-Grenada,Saint George’s
-Gwatemala,Gwatemala
-Haiti,Port-au-Prince
-Honduras,Tegucigalpa
-Jamajka,Kingston
-Kanada,Ottawa
-Kostaryka,San José
-Kuba,Hawana
-Meksyk,Meksyk
-Nikaragua,Managua
-Panama,Panama
-Saint Kitts i Nevis,Basseterre
-Saint Lucia,Castries
-Saint Vincent i Grenadyny,Kingstown
-Salwador,San Salvador
-Stany Zjednoczone,Waszyngton
-Argentyna,Buenos Aires
-Boliwia,Sucre
-Brazylia,Brasília
-Chile,Santiago
-Ekwador,Quito
-Gujana,Georgetown
-Kolumbia,Bogota
-Paragwaj,Asunción
-Peru,Lima
-Surinam,Paramaribo
-Trynidad i Tobago,Port-of-Spain
-Urugwaj,Montevideo
-Wenezuela,Caracas
-Australia,Canberra
-Fidżi,Suva
-Kiribati,Bairiki
-Mikronezja,Palikir
-Nauru,Yaren
-Niue,Alofi
-Nowa Zelandia,Wellington
-Palau,Ngerulmud
-Papua-Nowa Gwinea,Port Moresby
-Samoa,Apia
-Tonga,Nuku’alofa
-Tuvalu,Vaiaku
-Vanuatu,Port Vila
-Wyspy Cooka,Avarua
-Wyspy Marshalla,Delap
-Wyspy Salomona,Honiara
+external_id,front_text,back_text
+0001,Albania,Tirana
+0002,Andora,Andora
+0003,Austria,Wiedeń
+0004,Belgia,Bruksela
+0005,Białoruś,Mińsk
+0006,Bośnia i Hercegowina,Sarajewo
+0007,Bułgaria,Sofia
+0008,Chorwacja,Zagrzeb
+0009,Czarnogóra,Podgorica
+0010,Czechy,Praga
+0011,Dania,Kopenhaga
+0012,Estonia,Tallinn
+0013,Finlandia,Helsinki
+0014,Francja,Paryż
+0015,Grecja,Ateny
+0016,Hiszpania,Madryt
+0017,Holandia,Amsterdam / Haga
+0018,Irlandia,Dublin
+0019,Islandia,Reykjavík
+0020,Kosowo,Prisztina
+0021,Liechtenstein,Vaduz
+0022,Litwa,Wilno
+0023,Luksemburg,Luksemburg
+0024,Macedonia Północna,Skopje
+0025,Malta,Valletta
+0026,Monako,Monako
+0027,Mołdawia,Kiszyniów
+0028,Niemcy,Berlin
+0029,Norwegia,Oslo
+0030,Polska,Warszawa
+0031,Portugalia,Lizbona
+0032,Rumunia,Bukareszt
+0033,San Marino,San Marino
+0034,Serbia,Belgrad
+0035,Szwajcaria,Berno
+0036,Szwecja,Sztokholm
+0037,Słowacja,Bratysława
+0038,Słowenia,Lublana
+0039,Ukraina,Kijów
+0040,Watykan,Watykan
+0041,Wielka Brytania,Londyn
+0042,Węgry,Budapeszt
+0043,Włochy,Rzym
+0044,Łotwa,Ryga
+0045,Rosja,Moskwa
+0046,Afganistan,Kabul
+0047,Arabia Saudyjska,Rijad
+0048,Armenia,Erywań
+0049,Azerbejdżan,Baku
+0050,Bahrajn,Manama
+0051,Bangladesz,Dhaka
+0052,Bhutan,Thimphu
+0053,Brunei,Bandar Seri Begawan
+0054,Chiny,Pekin
+0055,Cypr,Nikozja
+0056,Filipiny,Manila
+0057,Gruzja,Tbilisi
+0058,Indie,Nowe Delhi
+0059,Indonezja,Dżakarta
+0060,Irak,Bagdad
+0061,Iran,Teheran
+0062,Izrael,Jerozolima
+0063,Japonia,Tokio
+0064,Jemen,Sana
+0065,Jordania,Amman
+0066,Kambodża,Phnom Penh
+0067,Katar,Doha
+0068,Kirgistan,Biszkek
+0069,Korea Południowa,Seul
+0070,Korea Północna,Pjongjang
+0071,Kuwejt,Kuwejt
+0072,Laos,Wientian
+0073,Liban,Bejrut
+0074,Malediwy,Male
+0075,Malezja,Kuala Lumpur / Putrajaya
+0076,Mjanma,Naypyidaw
+0077,Mongolia,Ułan Bator
+0078,Nepal,Katmandu
+0079,Oman,Maskat
+0080,Pakistan,Islamabad
+0081,Singapur,Singapur
+0082,Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
+0083,Syria,Damaszek
+0084,Tadżykistan,Duszanbe
+0085,Tajlandia,Bangkok
+0086,Timor Wschodni,Dili
+0087,Turkmenistan,Aszchabad
+0088,Uzbekistan,Taszkent
+0089,Wietnam,Hanoi
+0090,Zjednoczone Emiraty Arabskie,Abu Zabi
+0091,Kazachstan,Astana
+0092,Turcja,Ankara
+0093,Algieria,Algier
+0094,Angola,Luanda
+0095,Benin,Porto-Novo / Kotonu
+0096,Botswana,Gaborone
+0097,Burkina Faso,Wagadugu
+0098,Burundi,Gitega / Bużumbura
+0099,Czad,Ndżamena
+0100,Demokratyczna Republika Konga,Kinszasa
+0101,Dżibuti,Dżibuti
+0102,Erytrea,Asmara
+0103,Eswatini,Mbabane / Lobamba
+0104,Etiopia,Addis Abeba
+0105,Gabon,Libreville
+0106,Gambia,Bandżul
+0107,Ghana,Akra
+0108,Gwinea,Konakry
+0109,Gwinea Bissau,Bissau
+0110,Gwinea Równikowa,Malabo
+0111,Kamerun,Jaunde
+0112,Kenia,Nairobi
+0113,Komory,Moroni
+0114,Kongo,Brazzaville
+0115,Lesotho,Maseru
+0116,Liberia,Monrovia
+0117,Libia,Trypolis
+0118,Madagaskar,Antananarywa
+0119,Malawi,Lilongwe
+0120,Mali,Bamako
+0121,Maroko,Rabat
+0122,Mauretania,Nawakszut
+0123,Mauritius,Port Louis
+0124,Mozambik,Maputo
+0125,Namibia,Windhuk
+0126,Niger,Niamey
+0127,Nigeria,Abudża
+0128,Południowa Afryka,Pretoria
+0129,Republika Zielonego Przylądka,Praia
+0130,Republika Środkowoafrykańska,Bangi
+0131,Rwanda,Kigali
+0132,Senegal,Dakar
+0133,Seszele,Victoria
+0134,Sierra Leone,Freetown
+0135,Somalia,Mogadiszu
+0136,Sudan,Chartum
+0137,Sudan Południowy,Dżuba
+0138,Tanzania,Dodoma / Dar es Salaam
+0139,Togo,Lomé
+0140,Tunezja,Tunis
+0141,Uganda,Kampala
+0142,Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
+0143,Wyspy Świętego Tomasza i Książęca,São Tomé
+0144,Zambia,Lusaka
+0145,Zimbabwe,Harare
+0146,Egipt,Kair
+0147,Antigua i Barbuda,Saint John’s
+0148,Bahamy,Nassau
+0149,Barbados,Bridgetown
+0150,Belize,Belmopan
+0151,Dominika,Roseau
+0152,Dominikana,Santo Domingo
+0153,Grenada,Saint George’s
+0154,Gwatemala,Gwatemala
+0155,Haiti,Port-au-Prince
+0156,Honduras,Tegucigalpa
+0157,Jamajka,Kingston
+0158,Kanada,Ottawa
+0159,Kostaryka,San José
+0160,Kuba,Hawana
+0161,Meksyk,Meksyk
+0162,Nikaragua,Managua
+0163,Panama,Panama
+0164,Saint Kitts i Nevis,Basseterre
+0165,Saint Lucia,Castries
+0166,Saint Vincent i Grenadyny,Kingstown
+0167,Salwador,San Salvador
+0168,Stany Zjednoczone,Waszyngton
+0169,Argentyna,Buenos Aires
+0170,Boliwia,Sucre
+0171,Brazylia,Brasília
+0172,Chile,Santiago
+0173,Ekwador,Quito
+0174,Gujana,Georgetown
+0175,Kolumbia,Bogota
+0176,Paragwaj,Asunción
+0177,Peru,Lima
+0178,Surinam,Paramaribo
+0179,Trynidad i Tobago,Port-of-Spain
+0180,Urugwaj,Montevideo
+0181,Wenezuela,Caracas
+0182,Australia,Canberra
+0183,Fidżi,Suva
+0184,Kiribati,Bairiki
+0185,Mikronezja,Palikir
+0186,Nauru,Yaren
+0187,Niue,Alofi
+0188,Nowa Zelandia,Wellington
+0189,Palau,Ngerulmud
+0190,Papua-Nowa Gwinea,Port Moresby
+0191,Samoa,Apia
+0192,Tonga,Nuku’alofa
+0193,Tuvalu,Vaiaku
+0194,Vanuatu,Port Vila
+0195,Wyspy Cooka,Avarua
+0196,Wyspy Marshalla,Delap
+0197,Wyspy Salomona,Honiara

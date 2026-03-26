@@ -1,48 +1,48 @@
-front_text,back_text
-Albania,Tirana
-Andora,Andora
-Austria,Wiedeń
-Belgia,Bruksela
-Białoruś,Mińsk
-Bośnia i Hercegowina,Sarajewo
-Bułgaria,Sofia
-Chorwacja,Zagrzeb
-Czarnogóra,Podgorica
-Czechy,Praga
-Dania,Kopenhaga
-Estonia,Tallinn
-Finlandia,Helsinki
-Francja,Paryż
-Grecja,Ateny
-Hiszpania,Madryt
-Holandia,Amsterdam / Haga
-Irlandia,Dublin
-Islandia,Reykjavík
-Kosowo,Prisztina
-Liechtenstein,Vaduz
-Litwa,Wilno
-Luksemburg,Luksemburg
-Macedonia Północna,Skopje
-Malta,Valletta
-Monako,Monako
-Mołdawia,Kiszyniów
-Niemcy,Berlin
-Norwegia,Oslo
-Polska,Warszawa
-Portugalia,Lizbona
-Rumunia,Bukareszt
-San Marino,San Marino
-Serbia,Belgrad
-Szwajcaria,Berno
-Szwecja,Sztokholm
-Słowacja,Bratysława
-Słowenia,Lublana
-Ukraina,Kijów
-Watykan,Watykan
-Wielka Brytania,Londyn
-Węgry,Budapeszt
-Włochy,Rzym
-Łotwa,Ryga
-Rosja,Moskwa
-Kazachstan,Astana
-Turcja,Ankara
+external_id,front_text,back_text
+0001,Albania,Tirana
+0002,Andora,Andora
+0003,Austria,Wiedeń
+0004,Belgia,Bruksela
+0005,Białoruś,Mińsk
+0006,Bośnia i Hercegowina,Sarajewo
+0007,Bułgaria,Sofia
+0008,Chorwacja,Zagrzeb
+0009,Czarnogóra,Podgorica
+0010,Czechy,Praga
+0011,Dania,Kopenhaga
+0012,Estonia,Tallinn
+0013,Finlandia,Helsinki
+0014,Francja,Paryż
+0015,Grecja,Ateny
+0016,Hiszpania,Madryt
+0017,Holandia,Amsterdam / Haga
+0018,Irlandia,Dublin
+0019,Islandia,Reykjavík
+0020,Kosowo,Prisztina
+0021,Liechtenstein,Vaduz
+0022,Litwa,Wilno
+0023,Luksemburg,Luksemburg
+0024,Macedonia Północna,Skopje
+0025,Malta,Valletta
+0026,Monako,Monako
+0027,Mołdawia,Kiszyniów
+0028,Niemcy,Berlin
+0029,Norwegia,Oslo
+0030,Polska,Warszawa
+0031,Portugalia,Lizbona
+0032,Rumunia,Bukareszt
+0033,San Marino,San Marino
+0034,Serbia,Belgrad
+0035,Szwajcaria,Berno
+0036,Szwecja,Sztokholm
+0037,Słowacja,Bratysława
+0038,Słowenia,Lublana
+0039,Ukraina,Kijów
+0040,Watykan,Watykan
+0041,Wielka Brytania,Londyn
+0042,Węgry,Budapeszt
+0043,Włochy,Rzym
+0044,Łotwa,Ryga
+0045,Rosja,Moskwa
+0046,Kazachstan,Astana
+0047,Turcja,Ankara

@@ -993,6 +993,19 @@ export default function Card({
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
+  const largeCardContentKey = useMemo(() => {
+    const cardId = selectedItem?.id ?? "empty";
+    const mode = showCorrectionInputs
+      ? "correction"
+      : isExplanationVisible
+        ? "explanation"
+        : selectedItem?.type === "true_false" || selectedItem?.type === "know_dont_know"
+          ? "true_false"
+          : selectedItem
+            ? "input"
+            : "empty";
+    return `${cardId}:${mode}`;
+  }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -1033,6 +1046,8 @@ export default function Card({
           hasContent={Boolean(selectedItem)}
           showCorrectionInputs={showCorrectionInputs}
           backgroundColorOverride={backgroundColorOverride}
+          shrinkImmediately={isBetweenCards}
+          contentKey={largeCardContentKey}
         >
           {(handlers) => (
             <CardContentResolver

@@ -1,36 +1,36 @@
-front_text,back_text
-Antigua i Barbuda,Saint John’s
-Bahamy,Nassau
-Barbados,Bridgetown
-Belize,Belmopan
-Dominika,Roseau
-Dominikana,Santo Domingo
-Grenada,Saint George’s
-Gwatemala,Gwatemala
-Haiti,Port-au-Prince
-Honduras,Tegucigalpa
-Jamajka,Kingston
-Kanada,Ottawa
-Kostaryka,San José
-Kuba,Hawana
-Meksyk,Meksyk
-Nikaragua,Managua
-Panama,Panama
-Saint Kitts i Nevis,Basseterre
-Saint Lucia,Castries
-Saint Vincent i Grenadyny,Kingstown
-Salwador,San Salvador
-Stany Zjednoczone,Waszyngton
-Argentyna,Buenos Aires
-Boliwia,Sucre
-Brazylia,Brasília
-Chile,Santiago
-Ekwador,Quito
-Gujana,Georgetown
-Kolumbia,Bogota
-Paragwaj,Asunción
-Peru,Lima
-Surinam,Paramaribo
-Trynidad i Tobago,Port-of-Spain
-Urugwaj,Montevideo
-Wenezuela,Caracas
+external_id,front_text,back_text
+0001,Antigua i Barbuda,Saint John’s
+0002,Bahamy,Nassau
+0003,Barbados,Bridgetown
+0004,Belize,Belmopan
+0005,Dominika,Roseau
+0006,Dominikana,Santo Domingo
+0007,Grenada,Saint George’s
+0008,Gwatemala,Gwatemala
+0009,Haiti,Port-au-Prince
+0010,Honduras,Tegucigalpa
+0011,Jamajka,Kingston
+0012,Kanada,Ottawa
+0013,Kostaryka,San José
+0014,Kuba,Hawana
+0015,Meksyk,Meksyk
+0016,Nikaragua,Managua
+0017,Panama,Panama
+0018,Saint Kitts i Nevis,Basseterre
+0019,Saint Lucia,Castries
+0020,Saint Vincent i Grenadyny,Kingstown
+0021,Salwador,San Salvador
+0022,Stany Zjednoczone,Waszyngton
+0023,Argentyna,Buenos Aires
+0024,Boliwia,Sucre
+0025,Brazylia,Brasília
+0026,Chile,Santiago
+0027,Ekwador,Quito
+0028,Gujana,Georgetown
+0029,Kolumbia,Bogota
+0030,Paragwaj,Asunción
+0031,Peru,Lima
+0032,Surinam,Paramaribo
+0033,Trynidad i Tobago,Port-of-Spain
+0034,Urugwaj,Montevideo
+0035,Wenezuela,Caracas

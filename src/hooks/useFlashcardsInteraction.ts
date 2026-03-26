@@ -445,7 +445,6 @@ export function useFlashcardsInteraction({
         setTimeout(() => {
           setAnswer("");
           moveElement(wordForCheck.id, true);
-          setResult(null);
           setQueueNext(true);
         }, delay);
       } else {
@@ -466,7 +465,6 @@ export function useFlashcardsInteraction({
           setTimeout(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
-            setResult(null);
             setQueueNext(true);
           }, delay);
           return;
@@ -483,7 +481,6 @@ export function useFlashcardsInteraction({
           setTimeout(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
-            setResult(null);
             setQueueNext(true);
           }, delay);
           return;
@@ -500,7 +497,6 @@ export function useFlashcardsInteraction({
           setTimeout(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
-            setResult(null);
             setQueueNext(true);
           }, delay);
           return;
@@ -557,7 +553,6 @@ export function useFlashcardsInteraction({
       setAnswer("");
       moveElement(selectedItem.id, pendingExplanationMove.promote);
       setPendingExplanationMove(null);
-      setResult(null);
       setQueueNext(true);
       return;
     }
@@ -566,7 +561,6 @@ export function useFlashcardsInteraction({
       setAnswer("");
       moveElement(selectedItem.id, false);
       setPendingExplanationMove(null);
-      setResult(null);
       setQueueNext(true);
       return;
     }
@@ -575,7 +569,6 @@ export function useFlashcardsInteraction({
       setAnswer("");
       moveElement(selectedItem.id, result);
       setPendingExplanationMove(null);
-      setResult(null);
       setQueueNext(true);
     }
   }, [moveElement, pendingExplanationMove, result, selectedItem]);
@@ -654,7 +647,6 @@ export function useFlashcardsInteraction({
       // Inaczej przez jedną klatkę nowa karta może odziedziczyć stary tekst
       // (widoczny "B" na screenach), co wygląda jak mignięcie błędnej karty.
       setAnswer("");
-      setResult(null);
       setCorrection(null);
       setQueueNext(true);
     }

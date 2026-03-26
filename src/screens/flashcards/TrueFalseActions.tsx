@@ -11,6 +11,7 @@ type TrueFalseActionsProps = {
   disabled?: boolean;
   dense?: boolean;
   variant?: TrueFalseButtonsVariant;
+  selectedAnswer?: boolean | null;
 };
 
 export function TrueFalseActions({
@@ -21,6 +22,7 @@ export function TrueFalseActions({
   disabled = false,
   dense = false,
   variant = "true_false",
+  selectedAnswer = null,
 }: TrueFalseActionsProps) {
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
@@ -43,6 +45,34 @@ export function TrueFalseActions({
             width={140}
             disabled
             accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
+          />
+          <View style={styles.spacer} />
+          <MyButton
+            text={okLabel}
+            color="my_yellow"
+            onPress={onOk}
+            width={140}
+            disabled={disabled}
+            accessibilityLabel="Potwierdź i przejdź dalej"
+          />
+        </View>
+      );
+    }
+    if (selectedAnswer !== null) {
+      const inactiveLabel = selectedAnswer ? labels.falseLabel : labels.trueLabel;
+      const inactiveColor = selectedAnswer ? "my_red" : "my_green";
+      return (
+        <View
+          style={[styles.container, disabled && styles.disabled]}
+          collapsable={false}
+        >
+          <MyButton
+            text={inactiveLabel}
+            color={inactiveColor}
+            onPress={() => undefined}
+            width={140}
+            disabled
+            accessibilityLabel={`Oznacz jako ${inactiveLabel}`}
           />
           <View style={styles.spacer} />
           <MyButton
@@ -108,6 +138,7 @@ type TrueFalseActionsAnimatedProps = {
   disabled?: boolean;
   dense?: boolean;
   variant?: TrueFalseButtonsVariant;
+  selectedAnswer?: boolean | null;
 };
 
 export function TrueFalseActionsAnimated({
@@ -119,6 +150,7 @@ export function TrueFalseActionsAnimated({
   disabled = false,
   dense = false,
   variant = "true_false",
+  selectedAnswer = null,
 }: TrueFalseActionsAnimatedProps) {
   const opacity = useRef(new Animated.Value(visible ? 1 : 0)).current;
   const translateY = useRef(new Animated.Value(visible ? 0 : 8)).current;
@@ -167,6 +199,7 @@ export function TrueFalseActionsAnimated({
         disabled={disabled}
         dense={dense}
         variant={variant}
+        selectedAnswer={selectedAnswer}
       />
     </Animated.View>
   );

@@ -1,57 +1,57 @@
-front_image,back_text
-ag.svg,Antigua i Barbuda
-ai.svg,Anguilla
-aw.svg,Aruba
-bb.svg,Barbados
-bl.svg,Saint-Barthélemy
-bm.svg,Bermudy
-bq.svg,Karaiby Niderlandzkie
-bs.svg,Bahamy
-ca.svg,Kanada
-cr.svg,Kostaryka
-cu.svg,Kuba
-dm.svg,Dominika
-do.svg,Dominikana
-gd.svg,Grenada
-gg.svg,Guernsey
-gl.svg,Grenlandia
-gp.svg,Gwadelupa
-gt.svg,Gwatemala
-hn.svg,Honduras
-ht.svg,Haiti
-im.svg,Wyspa Man
-je.svg,Jersey
-jm.svg,Jamajka
-kn.svg,Saint Kitts i Nevis
-ky.svg,Kajmany
-lc.svg,Saint Lucia
-mf.svg,Saint-Martin
-mq.svg,Martynika
-ms.svg,Montserrat
-mx.svg,Meksyk
-ni.svg,Nikaragua
-pa.svg,Panama
-pm.svg,Saint-Pierre i Miquelon
-pr.svg,Portoryko
-sv.svg,Salwador
-sx.svg,Sint Maarten
-tc.svg,Turks i Caicos
-us.svg,Stany Zjednoczone
-vc.svg,Saint Vincent i Grenadyny
-vg.svg,Brytyjskie Wyspy Dziewicze
-vi.svg,Wyspy Dziewicze Stanów Zjednoczonych
-ar.svg,Argentyna
-bo.svg,Boliwia
-br.svg,Brazylia
-cl.svg,Chile
-co.svg,Kolumbia
-ec.svg,Ekwador
-fk.svg,Falklandy
-gf.svg,Gujana Francuska
-gs.svg,Georgia Południowa i Sandwich Południowy
-gy.svg,Gujana
-pe.svg,Peru
-py.svg,Paragwaj
-sr.svg,Surinam
-uy.svg,Urugwaj
-ve.svg,Wenezuela
+external_id,front_image,back_text
+0001,ag.svg,Antigua i Barbuda
+0002,ai.svg,Anguilla
+0003,aw.svg,Aruba
+0004,bb.svg,Barbados
+0005,bl.svg,Saint-Barthélemy
+0006,bm.svg,Bermudy
+0007,bq.svg,Karaiby Niderlandzkie
+0008,bs.svg,Bahamy
+0009,ca.svg,Kanada
+0010,cr.svg,Kostaryka
+0011,cu.svg,Kuba
+0012,dm.svg,Dominika
+0013,do.svg,Dominikana
+0014,gd.svg,Grenada
+0015,gg.svg,Guernsey
+0016,gl.svg,Grenlandia
+0017,gp.svg,Gwadelupa
+0018,gt.svg,Gwatemala
+0019,hn.svg,Honduras
+0020,ht.svg,Haiti
+0021,im.svg,Wyspa Man
+0022,je.svg,Jersey
+0023,jm.svg,Jamajka
+0024,kn.svg,Saint Kitts i Nevis
+0025,ky.svg,Kajmany
+0026,lc.svg,Saint Lucia
+0027,mf.svg,Saint-Martin
+0028,mq.svg,Martynika
+0029,ms.svg,Montserrat
+0030,mx.svg,Meksyk
+0031,ni.svg,Nikaragua
+0032,pa.svg,Panama
+0033,pm.svg,Saint-Pierre i Miquelon
+0034,pr.svg,Portoryko
+0035,sv.svg,Salwador
+0036,sx.svg,Sint Maarten
+0037,tc.svg,Turks i Caicos
+0038,us.svg,Stany Zjednoczone
+0039,vc.svg,Saint Vincent i Grenadyny
+0040,vg.svg,Brytyjskie Wyspy Dziewicze
+0041,vi.svg,Wyspy Dziewicze Stanów Zjednoczonych
+0042,ar.svg,Argentyna
+0043,bo.svg,Boliwia
+0044,br.svg,Brazylia
+0045,cl.svg,Chile
+0046,co.svg,Kolumbia
+0047,ec.svg,Ekwador
+0048,fk.svg,Falklandy
+0049,gf.svg,Gujana Francuska
+0050,gs.svg,Georgia Południowa i Sandwich Południowy
+0051,gy.svg,Gujana
+0052,pe.svg,Peru
+0053,py.svg,Paragwaj
+0054,sr.svg,Surinam
+0055,uy.svg,Urugwaj
+0056,ve.svg,Wenezuela

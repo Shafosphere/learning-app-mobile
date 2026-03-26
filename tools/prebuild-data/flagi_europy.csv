@@ -1,55 +1,55 @@
-front_image,back_text
-ad.svg,Andora
-al.svg,Albania
-at.svg,Austria
-ax.svg,Wyspy Alandzkie
-ba.svg,Bośnia i Hercegowina
-be.svg,Belgia
-bg.svg,Bułgaria
-by.svg,Białoruś
-ch.svg,Szwajcaria
-cy.svg,Cypr
-cz.svg,Czechy
-de.svg,Niemcy
-dk.svg,Dania
-ee.svg,Estonia
-es.svg,Hiszpania
-eu.svg,Unia Europejska
-fi.svg,Finlandia
-fo.svg,Wyspy Owcze
-fr.svg,Francja
-gb-eng.svg,Anglia
-gb-nir.svg,Irlandia Północna
-gb-sct.svg,Szkocja
-gb.svg,Wielka Brytania
-gb-wls.svg,Walia
-gr.svg,Grecja
-hr.svg,Chorwacja
-hu.svg,Węgry
-ie.svg,Irlandia
-is.svg,Islandia
-it.svg,Włochy
-li.svg,Liechtenstein
-lt.svg,Litwa
-lu.svg,Luksemburg
-lv.svg,Łotwa
-mc.svg,Monako
-md.svg,Mołdawia
-me.svg,Czarnogóra
-mk.svg,Macedonia Północna
-mt.svg,Malta
-nl.svg,Niderlandy
-no.svg,Norwegia
-pl.svg,Polska
-pt.svg,Portugalia
-ro.svg,Rumunia
-rs.svg,Serbia
-ru.svg,Rosja
-se.svg,Szwecja
-si.svg,Słowenia
-sj.svg,Svalbard i Jan Mayen
-sk.svg,Słowacja
-sm.svg,San Marino
-ua.svg,Ukraina
-va.svg,Watykan
-xk.svg,Kosowo
+external_id,front_image,back_text
+0001,ad.svg,Andora
+0002,al.svg,Albania
+0003,at.svg,Austria
+0004,ax.svg,Wyspy Alandzkie
+0005,ba.svg,Bośnia i Hercegowina
+0006,be.svg,Belgia
+0007,bg.svg,Bułgaria
+0008,by.svg,Białoruś
+0009,ch.svg,Szwajcaria
+0010,cy.svg,Cypr
+0011,cz.svg,Czechy
+0012,de.svg,Niemcy
+0013,dk.svg,Dania
+0014,ee.svg,Estonia
+0015,es.svg,Hiszpania
+0016,eu.svg,Unia Europejska
+0017,fi.svg,Finlandia
+0018,fo.svg,Wyspy Owcze
+0019,fr.svg,Francja
+0020,gb-eng.svg,Anglia
+0021,gb-nir.svg,Irlandia Północna
+0022,gb-sct.svg,Szkocja
+0023,gb.svg,Wielka Brytania
+0024,gb-wls.svg,Walia
+0025,gr.svg,Grecja
+0026,hr.svg,Chorwacja
+0027,hu.svg,Węgry
+0028,ie.svg,Irlandia
+0029,is.svg,Islandia
+0030,it.svg,Włochy
+0031,li.svg,Liechtenstein
+0032,lt.svg,Litwa
+0033,lu.svg,Luksemburg
+0034,lv.svg,Łotwa
+0035,mc.svg,Monako
+0036,md.svg,Mołdawia
+0037,me.svg,Czarnogóra
+0038,mk.svg,Macedonia Północna
+0039,mt.svg,Malta
+0040,nl.svg,Niderlandy
+0041,no.svg,Norwegia
+0042,pl.svg,Polska
+0043,pt.svg,Portugalia
+0044,ro.svg,Rumunia
+0045,rs.svg,Serbia
+0046,ru.svg,Rosja
+0047,se.svg,Szwecja
+0048,si.svg,Słowenia
+0049,sj.svg,Svalbard i Jan Mayen
+0050,sk.svg,Słowacja
+0051,sm.svg,San Marino
+0052,ua.svg,Ukraina
+0053,va.svg,Watykan
+0054,xk.svg,Kosowo

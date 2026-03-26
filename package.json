@@ -10,6 +10,7 @@
     "web": "expo start --web",
     "lint": "expo lint",
     "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts",
+    "csv:external-ids": "node --experimental-strip-types ./tools/scripts/add-external-ids.ts",
     "assets:check-paths": "bash ./scripts/check-legacy-asset-paths.sh"
   },
   "dependencies": {

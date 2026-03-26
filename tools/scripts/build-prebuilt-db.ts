@@ -122,6 +122,16 @@ const OFFICIAL_PACKS = [
     csvFile: "Javascript2.csv",
   },
   {
+    slug: "grecka_mitologia_prawda_falsz_50",
+    name: "Mitologia Grecka (P/F)",
+    iconId: "book",
+    iconColor: "#A855F7",
+    reviewsEnabled: true,
+    defaultType: "true_false",
+    defaultFlip: false,
+    csvFile: "grecka_mitologia_prawda_falsz_50.csv",
+  },
+  {
     slug: "flagi_europy",
     name: "Flagi Europy",
     iconId: "globe",

@@ -16,6 +16,7 @@ export type FlashcardsButtonsProps = {
   trueFalseActionsMode?: "answer" | "ok";
   onTrueFalseOk?: () => void;
   trueFalseButtonsVariant?: TrueFalseButtonsVariant;
+  selectedTrueFalseAnswer?: boolean | null;
 
   // Card Actions (Download + OK)
   showCardActions: boolean;
@@ -34,6 +35,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   trueFalseActionsMode = "answer",
   onTrueFalseOk,
   trueFalseButtonsVariant = "true_false",
+  selectedTrueFalseAnswer = null,
   showCardActions,
   onCardActionsConfirm,
   onDownload,
@@ -62,6 +64,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
             mode={trueFalseActionsMode}
             dense
             variant={trueFalseButtonsVariant}
+            selectedAnswer={selectedTrueFalseAnswer}
           />
         </View>
       ) : (
@@ -80,6 +83,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
             mode={trueFalseActionsMode}
             dense
             variant={trueFalseButtonsVariant}
+            selectedAnswer={selectedTrueFalseAnswer}
           />
         </View>
       )}

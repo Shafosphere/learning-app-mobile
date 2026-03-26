@@ -1,55 +1,55 @@
-front_text,back_text
-Algieria,Algier
-Angola,Luanda
-Benin,Porto-Novo / Kotonu
-Botswana,Gaborone
-Burkina Faso,Wagadugu
-Burundi,Gitega / Bużumbura
-Czad,Ndżamena
-Demokratyczna Republika Konga,Kinszasa
-Dżibuti,Dżibuti
-Erytrea,Asmara
-Eswatini,Mbabane / Lobamba
-Etiopia,Addis Abeba
-Gabon,Libreville
-Gambia,Bandżul
-Ghana,Akra
-Gwinea,Konakry
-Gwinea Bissau,Bissau
-Gwinea Równikowa,Malabo
-Kamerun,Jaunde
-Kenia,Nairobi
-Komory,Moroni
-Kongo,Brazzaville
-Lesotho,Maseru
-Liberia,Monrovia
-Libia,Trypolis
-Madagaskar,Antananarywa
-Malawi,Lilongwe
-Mali,Bamako
-Maroko,Rabat
-Mauretania,Nawakszut
-Mauritius,Port Louis
-Mozambik,Maputo
-Namibia,Windhuk
-Niger,Niamey
-Nigeria,Abudża
-Południowa Afryka,Pretoria
-Republika Zielonego Przylądka,Praia
-Republika Środkowoafrykańska,Bangi
-Rwanda,Kigali
-Senegal,Dakar
-Seszele,Victoria
-Sierra Leone,Freetown
-Somalia,Mogadiszu
-Sudan,Chartum
-Sudan Południowy,Dżuba
-Tanzania,Dodoma / Dar es Salaam
-Togo,Lomé
-Tunezja,Tunis
-Uganda,Kampala
-Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
-Wyspy Świętego Tomasza i Książęca,São Tomé
-Zambia,Lusaka
-Zimbabwe,Harare
-Egipt,Kair
+external_id,front_text,back_text
+0001,Algieria,Algier
+0002,Angola,Luanda
+0003,Benin,Porto-Novo / Kotonu
+0004,Botswana,Gaborone
+0005,Burkina Faso,Wagadugu
+0006,Burundi,Gitega / Bużumbura
+0007,Czad,Ndżamena
+0008,Demokratyczna Republika Konga,Kinszasa
+0009,Dżibuti,Dżibuti
+0010,Erytrea,Asmara
+0011,Eswatini,Mbabane / Lobamba
+0012,Etiopia,Addis Abeba
+0013,Gabon,Libreville
+0014,Gambia,Bandżul
+0015,Ghana,Akra
+0016,Gwinea,Konakry
+0017,Gwinea Bissau,Bissau
+0018,Gwinea Równikowa,Malabo
+0019,Kamerun,Jaunde
+0020,Kenia,Nairobi
+0021,Komory,Moroni
+0022,Kongo,Brazzaville
+0023,Lesotho,Maseru
+0024,Liberia,Monrovia
+0025,Libia,Trypolis
+0026,Madagaskar,Antananarywa
+0027,Malawi,Lilongwe
+0028,Mali,Bamako
+0029,Maroko,Rabat
+0030,Mauretania,Nawakszut
+0031,Mauritius,Port Louis
+0032,Mozambik,Maputo
+0033,Namibia,Windhuk
+0034,Niger,Niamey
+0035,Nigeria,Abudża
+0036,Południowa Afryka,Pretoria
+0037,Republika Zielonego Przylądka,Praia
+0038,Republika Środkowoafrykańska,Bangi
+0039,Rwanda,Kigali
+0040,Senegal,Dakar
+0041,Seszele,Victoria
+0042,Sierra Leone,Freetown
+0043,Somalia,Mogadiszu
+0044,Sudan,Chartum
+0045,Sudan Południowy,Dżuba
+0046,Tanzania,Dodoma / Dar es Salaam
+0047,Togo,Lomé
+0048,Tunezja,Tunis
+0049,Uganda,Kampala
+0050,Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
+0051,Wyspy Świętego Tomasza i Książęca,São Tomé
+0052,Zambia,Lusaka
+0053,Zimbabwe,Harare
+0054,Egipt,Kair

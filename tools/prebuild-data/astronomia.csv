@@ -1,58 +1,58 @@
-front_text,back_text,explanation
-Ile planet jest w Układzie Słonecznym?,8,"Planety: Merkury, Wenus, Ziemia, Mars, Jowisz, Saturn, Uran, Neptun."
-Najbliższa Słońcu planeta?,Merkury,"Średnia odległość Merkurego od Słońca to ok. 57,9 mln km (0,39 AU)."
-Druga planeta od Słońca?,Wenus,
-Trzecia planeta od Słońca?,Ziemia,
-Czwarta planeta od Słońca?,Mars,
-Piąta planeta od Słońca?,Jowisz,
-Szósta planeta od Słońca?,Saturn,
-Siódma planeta od Słońca?,Uran,
-Ósma planeta od Słońca?,Neptun,
-Największa planeta Układu Słonecznego?,Jowisz,Jowisz ma średnicę ok. 142 984 km (równikową) i masę ~318 mas Ziemi.
-Najmniejsza planeta Układu Słonecznego?,Merkury,Merkury ma średnicę ok. 4 879 km.
-Najgorętsza planeta Układu Słonecznego?,Wenus,To Wenus — gęsta atmosfera CO₂ powoduje silny efekt cieplarniany (~465°C na powierzchni).
-Planeta nazywana 'Czerwoną'?,Mars,
-Planeta z najsłynniejszymi pierścieniami?,Saturn,Pierścienie Saturna składają się głównie z lodu i drobin skalnych.
-Ile księżyców ma Ziemia?,1,Naturalny satelita Ziemi to Księżyc (1).
-Ile księżyców ma Mars?,2,Mars ma 2 księżyce: Fobosa i Deimosa.
-Jak nazywa się bliższy księżyc Marsa?,Fobos,
-Jak nazywa się dalszy księżyc Marsa?,Deimos,
-Ile księżyców ma Merkury?,0,
-Ile księżyców ma Wenus?,0,
-Największy księżyc Układu Słonecznego?,Ganimedes,Ganimedes (księżyc Jowisza) ma średnicę ok. 5 268 km.
-Księżyc Jowisza kojarzony z oceanem pod lodem?,Europa,Europa prawdopodobnie skrywa globalny ocean pod lodową skorupą.
-Największy księżyc Saturna?,Tytan,Tytan ma gęstą atmosferę azotową i średnicę ok. 5 150 km.
-Księżyc Saturna z gejzerami lodu?,Enceladus,
-Największy księżyc Neptuna?,Tryton,
-Skrót jednostki astronomicznej?,AU,1 AU to 149 597 871 – jest to średnia odległość Ziemi od słońca
-Najbliższa gwiazda (poza Słońcem)?,Proxima Centauri,"Proxima Centauri znajduje się w odległości około 4,24–4,26 lat świetlnych od Ziemi"
-W jakiej galaktyce jest Ziemia?,Droga Mleczna,
-Najbliższa duża galaktyka względem Drogi Mlecznej?,Andromeda,
-Najjaśniejsza gwiazda nocnego nieba?,Syriusz,
-Jak nazywa się Gwiazda Polarna?,Polaris,
-Jak nazywa się teleskop kosmiczny uruchomiony w 1990?,Hubble,
-Jaka sonda minęła Plutona w 2015?,New Horizons,
-Planeta karłowata w pasie planetoid?,Ceres,
-Region za Neptunem z Plutonem?,Pas Kuipera,
-Jak nazywa się obłok obiegający Słońce,Oorta,"hipotetyczny, sferyczny obłok, składający się z pyłu, drobnych okruchów i planetoid obiegających Słońce w odległości od 300 do 100 000 j.a. "
-Jak nazywa się granica wpływu wiatru słonecznego?,heliopauza,
-Jak nazywa się jednostka 1 pc?,parsek,"jeden parsek to około 3,2616 lat świetlnych "
-Jak nazywa się 'spadająca gwiazda'?,meteor,
-"Jak nazywa się obiekt, który spadł na Ziemię?",meteoryt,
-Jak nazywa się obiekt w kosmosie przed wejściem w atmosferę?,meteoroid,
-W jakim gwiazdozbiorze jest Wielki Wóz?,Wielka Niedźwiedzica,
-"Prędkość światła w próżni (km/s, zaokrąglona)?",300000,"Dokładnie: 299 792 km/s, zwykle zaokrągla się do 300 000 km/s."
-Jak nazywa się obszar planetoid między Marsem a Jowiszem?,Pas Główny,
-Jak nazywa się gwiazda w centrum Układu Słonecznego?,Słońce,
-Co jest większe: Księżyc czy Merkury?,Merkury,Średnice: Merkury: 4879km. Księżyc 3474km. 
-Co jest większe: Wenus czy Ziemia?,Ziemia,Średnice: Wenus:12104km. Ziemia: 12756km
-Co jest większe: Uran czy Neptun?,Uran,Średnice: Uran: 51118km. Neptun: 49526km
-Co jest większe: Pluton czy Księżyc?,Księżyc,Średnice: Księżyc: 3474km. Pluton: 2370 km
-Średnia odległość Ziemi od Księżyca (km)?,384400,"Średnio ok. 384 400 km (orbita eliptyczna, więc odległość się zmienia)."
-Ile dni trwa obieg Merkurego wokół Słońca?,88,
-Ile dni trwa obieg Wenus wokół Słońca?,225,
-Ile lat trwa obieg Jowisza wokół Słońca?,11.9,
-Ile lat trwa obieg Saturna wokół Słońca?,29.5,
-Ile lat trwa obieg Neptuna wokół Słońca?,164.8,
-Ile godzin trwa jeden dzień na Wenus?,5832,
-Ile godzin trwa jeden dzień na Jowiszu?,9.9,
+external_id,front_text,back_text,explanation
+0001,Ile planet jest w Układzie Słonecznym?,8,"Planety: Merkury, Wenus, Ziemia, Mars, Jowisz, Saturn, Uran, Neptun."
+0002,Najbliższa Słońcu planeta?,Merkury,"Średnia odległość Merkurego od Słońca to ok. 57,9 mln km (0,39 AU)."
+0003,Druga planeta od Słońca?,Wenus,
+0004,Trzecia planeta od Słońca?,Ziemia,
+0005,Czwarta planeta od Słońca?,Mars,
+0006,Piąta planeta od Słońca?,Jowisz,
+0007,Szósta planeta od Słońca?,Saturn,
+0008,Siódma planeta od Słońca?,Uran,
+0009,Ósma planeta od Słońca?,Neptun,
+0010,Największa planeta Układu Słonecznego?,Jowisz,Jowisz ma średnicę ok. 142 984 km (równikową) i masę ~318 mas Ziemi.
+0011,Najmniejsza planeta Układu Słonecznego?,Merkury,Merkury ma średnicę ok. 4 879 km.
+0012,Najgorętsza planeta Układu Słonecznego?,Wenus,To Wenus — gęsta atmosfera CO₂ powoduje silny efekt cieplarniany (~465°C na powierzchni).
+0013,Planeta nazywana 'Czerwoną'?,Mars,
+0014,Planeta z najsłynniejszymi pierścieniami?,Saturn,Pierścienie Saturna składają się głównie z lodu i drobin skalnych.
+0015,Ile księżyców ma Ziemia?,1,Naturalny satelita Ziemi to Księżyc (1).
+0016,Ile księżyców ma Mars?,2,Mars ma 2 księżyce: Fobosa i Deimosa.
+0017,Jak nazywa się bliższy księżyc Marsa?,Fobos,
+0018,Jak nazywa się dalszy księżyc Marsa?,Deimos,
+0019,Ile księżyców ma Merkury?,0,
+0020,Ile księżyców ma Wenus?,0,
+0021,Największy księżyc Układu Słonecznego?,Ganimedes,Ganimedes (księżyc Jowisza) ma średnicę ok. 5 268 km.
+0022,Księżyc Jowisza kojarzony z oceanem pod lodem?,Europa,Europa prawdopodobnie skrywa globalny ocean pod lodową skorupą.
+0023,Największy księżyc Saturna?,Tytan,Tytan ma gęstą atmosferę azotową i średnicę ok. 5 150 km.
+0024,Księżyc Saturna z gejzerami lodu?,Enceladus,
+0025,Największy księżyc Neptuna?,Tryton,
+0026,Skrót jednostki astronomicznej?,AU,1 AU to 149 597 871 – jest to średnia odległość Ziemi od słońca
+0027,Najbliższa gwiazda (poza Słońcem)?,Proxima Centauri,"Proxima Centauri znajduje się w odległości około 4,24–4,26 lat świetlnych od Ziemi"
+0028,W jakiej galaktyce jest Ziemia?,Droga Mleczna,
+0029,Najbliższa duża galaktyka względem Drogi Mlecznej?,Andromeda,
+0030,Najjaśniejsza gwiazda nocnego nieba?,Syriusz,
+0031,Jak nazywa się Gwiazda Polarna?,Polaris,
+0032,Jak nazywa się teleskop kosmiczny uruchomiony w 1990?,Hubble,
+0033,Jaka sonda minęła Plutona w 2015?,New Horizons,
+0034,Planeta karłowata w pasie planetoid?,Ceres,
+0035,Region za Neptunem z Plutonem?,Pas Kuipera,
+0036,Jak nazywa się obłok obiegający Słońce,Oorta,"hipotetyczny, sferyczny obłok, składający się z pyłu, drobnych okruchów i planetoid obiegających Słońce w odległości od 300 do 100 000 j.a. "
+0037,Jak nazywa się granica wpływu wiatru słonecznego?,heliopauza,
+0038,Jak nazywa się jednostka 1 pc?,parsek,"jeden parsek to około 3,2616 lat świetlnych "
+0039,Jak nazywa się 'spadająca gwiazda'?,meteor,
+0040,"Jak nazywa się obiekt, który spadł na Ziemię?",meteoryt,
+0041,Jak nazywa się obiekt w kosmosie przed wejściem w atmosferę?,meteoroid,
+0042,W jakim gwiazdozbiorze jest Wielki Wóz?,Wielka Niedźwiedzica,
+0043,"Prędkość światła w próżni (km/s, zaokrąglona)?",300000,"Dokładnie: 299 792 km/s, zwykle zaokrągla się do 300 000 km/s."
+0044,Jak nazywa się obszar planetoid między Marsem a Jowiszem?,Pas Główny,
+0045,Jak nazywa się gwiazda w centrum Układu Słonecznego?,Słońce,
+0046,Co jest większe: Księżyc czy Merkury?,Merkury,Średnice: Merkury: 4879km. Księżyc 3474km. 
+0047,Co jest większe: Wenus czy Ziemia?,Ziemia,Średnice: Wenus:12104km. Ziemia: 12756km
+0048,Co jest większe: Uran czy Neptun?,Uran,Średnice: Uran: 51118km. Neptun: 49526km
+0049,Co jest większe: Pluton czy Księżyc?,Księżyc,Średnice: Księżyc: 3474km. Pluton: 2370 km
+0050,Średnia odległość Ziemi od Księżyca (km)?,384400,"Średnio ok. 384 400 km (orbita eliptyczna, więc odległość się zmienia)."
+0051,Ile dni trwa obieg Merkurego wokół Słońca?,88,
+0052,Ile dni trwa obieg Wenus wokół Słońca?,225,
+0053,Ile lat trwa obieg Jowisza wokół Słońca?,11.9,
+0054,Ile lat trwa obieg Saturna wokół Słońca?,29.5,
+0055,Ile lat trwa obieg Neptuna wokół Słońca?,164.8,
+0056,Ile godzin trwa jeden dzień na Wenus?,5832,
+0057,Ile godzin trwa jeden dzień na Jowiszu?,9.9,

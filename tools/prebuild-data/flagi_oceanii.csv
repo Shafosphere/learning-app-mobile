@@ -1,32 +1,32 @@
-front_image,back_text
-as.svg,Samoa Amerykańskie
-au.svg,Australia
-cc.svg,Wyspy Kokosowe
-ck.svg,Wyspy Cooka
-cx.svg,Wyspa Bożego Narodzenia
-fj.svg,Fidżi
-fm.svg,Mikronezja
-gu.svg,Guam
-hm.svg,Wyspy Heard i McDonalda
-io.svg,Brytyjskie Terytorium Oceanu Indyjskiego
-ki.svg,Kiribati
-mh.svg,Wyspy Marshalla
-mp.svg,Mariany Północne
-nc.svg,Nowa Kaledonia
-nf.svg,Wyspa Norfolk
-nr.svg,Nauru
-nu.svg,Niue
-nz.svg,Nowa Zelandia
-pf.svg,Polinezja Francuska
-pg.svg,Papua-Nowa Gwinea
-pn.svg,Pitcairn
-pw.svg,Palau
-sb.svg,Wyspy Salomona
-tf.svg,Francuskie Terytoria Południowe
-tk.svg,Tokelau
-to.svg,Tonga
-tv.svg,Tuvalu
-um.svg,Dalekie Wyspy Mniejsze Stanów Zjednoczonych
-vu.svg,Vanuatu
-wf.svg,Wallis i Futuna
-ws.svg,Samoa
+external_id,front_image,back_text
+0001,as.svg,Samoa Amerykańskie
+0002,au.svg,Australia
+0003,cc.svg,Wyspy Kokosowe
+0004,ck.svg,Wyspy Cooka
+0005,cx.svg,Wyspa Bożego Narodzenia
+0006,fj.svg,Fidżi
+0007,fm.svg,Mikronezja
+0008,gu.svg,Guam
+0009,hm.svg,Wyspy Heard i McDonalda
+0010,io.svg,Brytyjskie Terytorium Oceanu Indyjskiego
+0011,ki.svg,Kiribati
+0012,mh.svg,Wyspy Marshalla
+0013,mp.svg,Mariany Północne
+0014,nc.svg,Nowa Kaledonia
+0015,nf.svg,Wyspa Norfolk
+0016,nr.svg,Nauru
+0017,nu.svg,Niue
+0018,nz.svg,Nowa Zelandia
+0019,pf.svg,Polinezja Francuska
+0020,pg.svg,Papua-Nowa Gwinea
+0021,pn.svg,Pitcairn
+0022,pw.svg,Palau
+0023,sb.svg,Wyspy Salomona
+0024,tf.svg,Francuskie Terytoria Południowe
+0025,tk.svg,Tokelau
+0026,to.svg,Tonga
+0027,tv.svg,Tuvalu
+0028,um.svg,Dalekie Wyspy Mniejsze Stanów Zjednoczonych
+0029,vu.svg,Vanuatu
+0030,wf.svg,Wallis i Futuna
+0031,ws.svg,Samoa
