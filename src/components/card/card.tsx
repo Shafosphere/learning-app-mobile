@@ -23,11 +23,11 @@ import {
   Platform,
 } from "react-native";
 import { useStyles } from "./card-styles";
-import type { CardProps } from "./card-types";
+import type { CardDisplayMode, CardProps } from "./card-types";
 import { CardContentResolver } from "./subcomponents/CardContentResolver";
+import CardFrame from "./subcomponents/CardFrame";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
-import LargeCardContainer from "./subcomponents/LargeCardContainer";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
@@ -172,10 +172,8 @@ export default function Card({
   const previousIntroMode = useRef<boolean>(false);
   const previousSelectedId = useRef<number | null>(null);
   const hasSeenInitialCardRef = useRef(false);
-  const lastRenderLogRef = useRef<{ id: number | null; ts: number }>({
-    id: null,
-    ts: 0,
-  });
+  const initialLayoutCardIdRef = useRef<number | null>(null);
+  const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
   const lastTranslationItemId = useRef<number | null>(null);
   const lastCorrectionFocusedId = useRef<number | null>(null);
   const needsCorrectionFocus = useRef<boolean>(false);
@@ -189,9 +187,12 @@ export default function Card({
   const [input2ExpectedWidth, setInput2ExpectedWidth] = useState(0);
   const input1ScrollRef = useRef<ScrollView | null>(null);
   const input2ScrollRef = useRef<ScrollView | null>(null);
+  const selectedItemId = selectedItem?.id ?? null;
+  const activeTranslationIndex =
+    lastTranslationItemId.current === selectedItemId ? translations : 0;
 
   const awers = selectedItem?.text ?? "";
-  const rewers = selectedItem?.translations?.[translations] ?? "";
+  const rewers = selectedItem?.translations?.[activeTranslationIndex] ?? "";
   const promptImageFront = selectedItem?.imageFront ?? null;
   const promptImageBack = selectedItem?.imageBack ?? null;
   const hasTextPrompt = Boolean(awers.trim());
@@ -326,7 +327,7 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
-  const { isExplanationVisible, isExplanationPending } = getExplanationState({
+  const { explanationText, isExplanationVisible, isExplanationPending } = getExplanationState({
     selectedItem,
     result,
     showCorrectionInputs,
@@ -361,22 +362,6 @@ export default function Card({
       ? correctionInput1Ref
       : correctionInput2Ref;
 
-  useEffect(() => {
-    if (!selectedItem) return;
-    const now = Date.now();
-    const last = lastRenderLogRef.current;
-    if (last.id === selectedItem.id && now - last.ts < 250) {
-      return;
-    }
-    lastRenderLogRef.current = { id: selectedItem.id, ts: now };
-    const tsIso = new Date(now).toISOString();
-    console.log(
-      `[Card] ${tsIso} (${now}) render id=${selectedItem.id} type=${selectedItem.type ?? "text"} ` +
-        `text="${(selectedItem.text ?? "").toString().slice(0, 60)}" ` +
-        `imageFront=${Boolean(selectedItem.imageFront)} imageBack=${Boolean(selectedItem.imageBack)}`
-    );
-  }, [selectedItem]);
-
   const len = selectedItem?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
   const canToggleTranslations = isShowingTranslation && len > 1;
@@ -386,7 +371,7 @@ export default function Card({
   };
 
   useLayoutEffect(() => {
-    const currentId = selectedItem?.id ?? null;
+    const currentId = selectedItemId;
     if (!isFocused) {
       return;
     }
@@ -396,17 +381,18 @@ export default function Card({
 
     lastTranslationItemId.current = currentId;
     setTranslations((prev) => (prev === 0 ? prev : 0));
-  }, [isFocused, selectedItem?.id]);
+  }, [isFocused, selectedItemId]);
 
   useEffect(() => {
     if (!isIntroMode || !setCorrectionRewers) return;
-    const nextTranslation = selectedItem?.translations?.[translations] ?? "";
+    const nextTranslation =
+      selectedItem?.translations?.[activeTranslationIndex] ?? "";
     setCorrectionRewers(nextTranslation);
   }, [
+    activeTranslationIndex,
     isIntroMode,
     selectedItem?.translations,
     setCorrectionRewers,
-    translations,
   ]);
 
   const focusWithDelay = useCallback(
@@ -712,6 +698,15 @@ export default function Card({
   ]);
 
   useEffect(() => {
+    if (selectedItemId == null) return;
+    if (initialLayoutCardIdRef.current == null) {
+      initialLayoutCardIdRef.current = selectedItemId;
+      return;
+    }
+    setIsLayoutAnimationArmed((prev) => (prev ? prev : true));
+  }, [selectedItemId]);
+
+  useEffect(() => {
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
     hintDialogVisible.current = false;
@@ -935,12 +930,21 @@ export default function Card({
     ignoreDiacriticsInSpellcheck,
   ]);
 
+  const displayMode = useMemo<CardDisplayMode>(() => {
+    if (showCorrectionInputs) return "correction";
+    if (isExplanationVisible) return "explanation";
+    if (selectedItem?.type === "true_false" || selectedItem?.type === "know_dont_know") {
+      return "true_false";
+    }
+    if (selectedItem) return "question";
+    return "empty";
+  }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
+
   const resolverProps = {
+    displayMode,
     correction,
-    result,
     isIntroMode,
-    selectedItem,
-    isBetweenCards,
+    explanationText,
     promptText,
     promptImageUri,
     promptImageSizeMode,
@@ -988,24 +992,10 @@ export default function Card({
     setIsMainInputFocused,
     hangulTarget,
     typoDiff,
-    isExplanationVisible,
-    isExplanationPending,
+    textColorOverride,
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
-  const largeCardContentKey = useMemo(() => {
-    const cardId = selectedItem?.id ?? "empty";
-    const mode = showCorrectionInputs
-      ? "correction"
-      : isExplanationVisible
-        ? "explanation"
-        : selectedItem?.type === "true_false" || selectedItem?.type === "know_dont_know"
-          ? "true_false"
-          : selectedItem
-            ? "input"
-            : "empty";
-    return `${cardId}:${mode}`;
-  }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
 
   const handleCloseHangulKeyboard = () => {
     const target = hangulTarget;
@@ -1040,42 +1030,14 @@ export default function Card({
           onHintInputBlur={cancelHintEditing}
         />
       )}
-      {useLargeLayout ? (
-        <LargeCardContainer
-          cardStateStyle={cardStateStyle}
-          hasContent={Boolean(selectedItem)}
-          showCorrectionInputs={showCorrectionInputs}
-          backgroundColorOverride={backgroundColorOverride}
-          shrinkImmediately={isBetweenCards}
-          contentKey={largeCardContentKey}
-        >
-          {(handlers) => (
-            <CardContentResolver
-              {...resolverProps}
-              layoutHandlers={handlers}
-              textColorOverride={textColorOverride}
-            />
-          )}
-        </LargeCardContainer>
-      ) : (
-        <View
-          style={[
-            styles.card,
-            styles.cardSmall,
-            cardStateStyle,
-            backgroundColorOverride
-              ? { backgroundColor: backgroundColorOverride }
-              : null,
-          ]}
-        >
-          <View style={styles.cardSmallContent}>
-            <CardContentResolver
-              {...resolverProps}
-              textColorOverride={textColorOverride}
-            />
-          </View>
-        </View>
-      )}
+      <CardFrame
+        compact={!useLargeLayout}
+        animateLayout={isLayoutAnimationArmed}
+        cardStateStyle={cardStateStyle}
+        backgroundColorOverride={backgroundColorOverride}
+      >
+        <CardContentResolver {...resolverProps} />
+      </CardFrame>
       <HangulKeyboardOverlay
         visible={showHangulKeyboard}
         value={hangulOverlayConfig?.value ?? ""}

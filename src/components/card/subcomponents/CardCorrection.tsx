@@ -48,8 +48,6 @@ type CardCorrectionProps = {
   showAwersInput: boolean;
   showRewersInput: boolean;
   allowMultilinePrompt: boolean;
-  onPromptLayout?: (height: number) => void;
-  onInputLayout?: (height: number) => void;
   input1Ref: React.RefObject<TextInput | null>;
   input2Ref: React.RefObject<TextInput | null>;
   input1ScrollRef: React.RefObject<ScrollView | null>;
@@ -95,8 +93,6 @@ export function CardCorrection({
   showAwersInput,
   showRewersInput,
   allowMultilinePrompt,
-  onPromptLayout,
-  onInputLayout,
   input1Ref,
   input2Ref,
   input1ScrollRef,
@@ -236,11 +232,6 @@ export function CardCorrection({
       uri={promptImageUri}
       imageStyle={[styles.promptImage, promptImageStyle]}
       renderMode="correction"
-      onHeightChange={(height) => {
-        if (allowMultilinePrompt && onPromptLayout) {
-          onPromptLayout(height);
-        }
-      }}
     />
   ) : null;
 
@@ -477,11 +468,6 @@ export function CardCorrection({
             styles.inputContainerLarge,
             styles.inputContainerLargeCorrection,
           ]}
-          onLayout={({ nativeEvent }) => {
-            if (onInputLayout) {
-              onInputLayout(nativeEvent.layout.height);
-            }
-          }}
         >
           {showAwersInput ? input1Block : null}
           {showRewersInput ? input2Block : null}

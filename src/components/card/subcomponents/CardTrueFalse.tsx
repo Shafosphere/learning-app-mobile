@@ -1,6 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import { StyleSheet, Text, View, type ImageStyle } from "react-native";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
@@ -12,12 +12,8 @@ type CardTrueFalseProps = {
     onAnswer: (value: boolean) => void;
     allowMultilinePrompt?: boolean;
     showButtons?: boolean;
-    onPromptLayout?: (height: number) => void;
-    onInputLayout?: (height: number) => void;
     imageSizeMode?: FlashcardsImageSize;
 };
-
-const DEFAULT_VIRTUAL_INPUT_HEIGHT = 24;
 const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
     dynamic: 1,
     small: 0.4,
@@ -32,8 +28,6 @@ export function CardTrueFalse({
     onAnswer,
     allowMultilinePrompt,
     showButtons = true,
-    onPromptLayout,
-    onInputLayout,
     imageSizeMode = "dynamic",
 }: CardTrueFalseProps) {
     const { colors } = useSettings();
@@ -49,26 +43,20 @@ export function CardTrueFalse({
         return { height: target, maxHeight: target };
     }, [imageSizeMode]);
 
-    useEffect(() => {
-        if (!showButtons) {
-            // Reserve a small vertical buffer so long prompts don't get clipped.
-            onInputLayout?.(DEFAULT_VIRTUAL_INPUT_HEIGHT);
-        }
-    }, [onInputLayout, showButtons]);
-
     return (
-        <View style={[styles.container, hasImage ? styles.containerTop : styles.containerCentered]}>
+        <View
+            style={[
+                styles.container,
+                !showButtons && styles.containerPromptOnly,
+                hasImage ? styles.containerTop : styles.containerCentered,
+            ]}
+        >
             <View
                 style={[
                     styles.promptContainer,
                     hasImage ? styles.promptContainerTop : styles.promptContainerCentered,
                     hasImage && hasText ? styles.promptContainerStacked : null,
                 ]}
-                onLayout={(event) => {
-                    if (allowMultilinePrompt) {
-                        onPromptLayout?.(event.nativeEvent.layout.height);
-                    }
-                }}
             >
                 {promptImageUri ? (
                     <PromptImage
@@ -109,12 +97,7 @@ export function CardTrueFalse({
             </View>
 
             {showButtons ? (
-                <View
-                    style={styles.buttonsRow}
-                    onLayout={(event) => {
-                        onInputLayout?.(event.nativeEvent.layout.height);
-                    }}
-                >
+                <View style={styles.buttonsRow}>
                     <MyButton
                         text="FAŁSZ"
                         color="my_red"
@@ -139,11 +122,12 @@ export function CardTrueFalse({
 const makeStyles = (colors: any) =>
     StyleSheet.create({
         container: {
-            flex: 1,
             width: "100%",
             alignItems: "center",
-            paddingTop: 10,
-            paddingBottom: 6,
+            paddingVertical: 10,
+        },
+        containerPromptOnly: {
+            minHeight: 100,
         },
         containerTop: {
             justifyContent: "flex-start",

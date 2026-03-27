@@ -100,6 +100,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // alignItems: "center",
     // justifyContent: "center",
   },
+  cardFrame: {
+    overflow: "hidden",
+    minHeight: 120,
+    alignItems: "stretch",
+    justifyContent: "center",
+  },
   cardSmall: {
     minHeight: 120,
     width: 325,
@@ -160,6 +166,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexShrink: 1,
     maxWidth: "100%",
     width: "100%",
+  },
+  emptyScene: {
+    flex: 1,
+    width: "100%",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingVertical: 10,
+    paddingHorizontal: 16,
   },
   containerButton: {
     display: "flex",
@@ -254,12 +268,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
   },
   cardContentLarge: {
-    flex: 1,
     width: "100%",
     alignSelf: "stretch",
+    paddingVertical: 10,
+    gap: 10,
+    justifyContent: "center",
   },
   topContainerLarge: {
-    flex: 1,
     alignItems: "center",
     justifyContent: "center",
     // backgroundColor: colors.my_green,
@@ -274,7 +289,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingRight: 8,
   },
   inputContainerLarge: {
-    justifyContent: "flex-end",
     width: "100%",
     paddingBottom: 14,
   },

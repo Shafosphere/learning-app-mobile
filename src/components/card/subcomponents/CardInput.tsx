@@ -31,8 +31,6 @@ const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
 type CardInputProps = {
   promptText: string;
   allowMultilinePrompt: boolean;
-  onPromptLayout?: (height: number) => void;
-  onInputLayout?: (height: number) => void;
   promptImageUri?: string | null;
   answer: string;
   setAnswer: (text: string) => void;
@@ -61,8 +59,6 @@ type CardInputProps = {
 export function CardInput({
   promptText,
   allowMultilinePrompt,
-  onPromptLayout,
-  onInputLayout,
   promptImageUri,
   answer,
   setAnswer,
@@ -309,10 +305,6 @@ export function CardInput({
       >
         <View
           style={{ width: "100%", gap: 8 }}
-          onLayout={({ nativeEvent }) => {
-            if (!allowMultilinePrompt || !onPromptLayout) return;
-            onPromptLayout(nativeEvent.layout.height);
-          }}
         >
           {promptImageUri ? imageBlock : null}
           {hasPromptText ? (
@@ -335,14 +327,7 @@ export function CardInput({
       </View>
 
       {allowMultilinePrompt ? (
-        <View
-          style={styles.inputContainerLarge}
-          onLayout={({ nativeEvent }) => {
-            if (onInputLayout) {
-              onInputLayout(nativeEvent.layout.height);
-            }
-          }}
-        >
+        <View style={styles.inputContainerLarge}>
           {renderedInput}
         </View>
       ) : (

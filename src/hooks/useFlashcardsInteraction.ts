@@ -279,7 +279,15 @@ export function useFlashcardsInteraction({
         if (target) {
           const targetQueue = queuesRef.current[target] ?? [];
           const exists = targetQueue.some((item) => item.id === element.id);
-          queuesRef.current[target] = exists ? targetQueue : [...targetQueue, element];
+          if (exists) {
+            queuesRef.current[target] = targetQueue;
+          } else if (targetQueue.length === 0 && prev[target].length > 0) {
+            // If the target queue was exhausted, restore the box's current order first
+            // and only then append the newly promoted card at the tail.
+            queuesRef.current[target] = [...prev[target], element];
+          } else {
+            queuesRef.current[target] = [...targetQueue, element];
+          }
         }
 
         return nextState;
@@ -309,6 +317,7 @@ export function useFlashcardsInteraction({
 
   const confirm = useCallback(
     (selectedTranslation?: string, answerOverride?: string) => {
+      const confirmStartedAt = Date.now();
       if (activeBox === "boxZero") {
         return;
       }
@@ -344,6 +353,18 @@ export function useFlashcardsInteraction({
         : reversed
           ? checkSpelling(answerToUse, wordForCheck.text)
           : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
+      if (__DEV__) {
+        console.log("[Flashcards][confirm] evaluated", {
+          cardId: wordForCheck.id,
+          type: wordForCheck.type ?? "text",
+          activeBox,
+          reversed,
+          answerLength: answerToUse.length,
+          translationsCount: wordForCheck.translations.length,
+          ok,
+          evalMs: Date.now() - confirmStartedAt,
+        });
+      }
       const duration = questionShownAt != null ? Date.now() - questionShownAt : null;
       const logLearningEventPromise = logCustomLearningEvent({
         flashcardId: wordForCheck.id,
@@ -435,6 +456,13 @@ export function useFlashcardsInteraction({
           selectedItem: wordForCheck,
           result: true,
         });
+        if (__DEV__) {
+          console.log("[Flashcards][confirm] success-path", {
+            cardId: wordForCheck.id,
+            resultSetMs: Date.now() - confirmStartedAt,
+            isExplanationPending,
+          });
+        }
         if (isExplanationPending) {
           setPendingExplanationMove({
             cardId: wordForCheck.id,
@@ -453,6 +481,15 @@ export function useFlashcardsInteraction({
           selectedItem: wordForCheck,
           result: false,
         });
+        if (__DEV__) {
+          console.log("[Flashcards][confirm] failure-path", {
+            cardId: wordForCheck.id,
+            resultSetMs: Date.now() - confirmStartedAt,
+            hasExplanation,
+            isExplanationPending,
+            type: wordForCheck.type ?? "text",
+          });
+        }
         if (isKnowDontKnow) {
           if (isExplanationPending) {
             setPendingExplanationMove({

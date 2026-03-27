@@ -104,7 +104,7 @@
     "learning": {
       "section": "Nauka",
       "spellcheck": {
-        "title": "Spellchecking",
+        "title": "Sprawdzanie pisowni",
         "subtitle": "Tolerancja 1 błędu przy sprawdzaniu."
       },
       "keyboardSuggestions": {

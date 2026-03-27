@@ -34,7 +34,6 @@ import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
-import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
 import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
@@ -217,6 +216,13 @@ export default function Flashcards() {
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
+  const [selectedTrueFalseUiState, setSelectedTrueFalseUiState] = useState<{
+    cardId: number | null;
+    answer: boolean | null;
+  }>({
+    cardId: null,
+    answer: null,
+  });
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -276,12 +282,59 @@ export default function Flashcards() {
     skipDemotionCorrection: skipCorrection,
   });
   const correctionLocked = correction != null;
+  const selectedItemId = selectedItem?.id ?? null;
+  const [displayResultState, setDisplayResultState] = useState<{
+    cardId: number | null;
+    result: boolean | null;
+  }>({
+    cardId: null,
+    result: null,
+  });
+  const lastObservedResultRef = useRef<boolean | null>(null);
+  const lastTrueFalseTapRef = useRef<{
+    cardId: number | null;
+    ts: number;
+    answer: boolean | null;
+  } | null>(null);
+  const selectedTrueFalseAnswer =
+    selectedTrueFalseUiState.cardId === selectedItemId
+      ? selectedTrueFalseUiState.answer
+      : null;
+
+  useEffect(() => {
+    const didResultChange = lastObservedResultRef.current !== result;
+    lastObservedResultRef.current = result;
+
+    if (!didResultChange && result !== null) {
+      return;
+    }
+    if (result === null) {
+      setDisplayResultState((current) =>
+        current.cardId === null && current.result === null
+          ? current
+          : { cardId: null, result: null },
+      );
+      return;
+    }
+    if (selectedItemId != null) {
+      setDisplayResultState({
+        cardId: selectedItemId,
+        result,
+      });
+    }
+  }, [result, selectedItemId]);
+
+  const displayResult =
+    displayResultState.cardId != null &&
+    displayResultState.cardId === selectedItemId
+      ? displayResultState.result
+      : null;
 
   const resultPending = result !== null;
   const isKnowDontKnow = selectedItem?.type === "know_dont_know";
   const initialExplanationState = getExplanationState({
     selectedItem,
-    result,
+    result: displayResult,
   });
   const waitingForOk =
     !correction && !isBetweenCards && initialExplanationState.isExplanationPending;
@@ -321,14 +374,32 @@ export default function Flashcards() {
   );
 
   useEffect(() => {
-    if (result === null) return;
-    playFeedbackSound(result);
+    if (displayResult === null) return;
+    if (__DEV__) {
+      const tap = lastTrueFalseTapRef.current;
+      const isCurrentTap = tap?.cardId != null && tap.cardId === selectedItemId;
+      console.log("[Flashcards][TF] displayResult", {
+        cardId: selectedItemId,
+        result: displayResult,
+        elapsedFromTapMs:
+          isCurrentTap && tap ? Date.now() - tap.ts : null,
+        tappedAnswer:
+          isCurrentTap && tap
+            ? tap.answer === null
+              ? null
+              : tap.answer
+                ? "true"
+                : "false"
+            : null,
+      });
+    }
+    playFeedbackSound(displayResult);
     const now = Date.now();
     const elapsed = questionStartRef.current
       ? now - questionStartRef.current
       : null;
 
-    if (result === true) {
+    if (displayResult === true) {
       const hadComeback = wrongStreakRef.current >= 3;
       wrongStreakRef.current = 0;
       correctStreakRef.current += 1;
@@ -406,7 +477,7 @@ export default function Flashcards() {
         cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
       });
     }
-  }, [result, selectedItem, triggerQuote]);
+  }, [displayResult, selectedItem, triggerQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
@@ -503,10 +574,10 @@ export default function Flashcards() {
   const canAutoflowSwitch = !boxSelectionLocked && !resultPending;
 
   useEffect(() => {
-    if (selectedItem && result === null) {
+    if (selectedItem && displayResult === null) {
       questionStartRef.current = Date.now();
     }
-  }, [result, selectedItem]);
+  }, [displayResult, selectedItem]);
 
   useFlashcardsAutoflow({
     enabled: autoflowEnabled && isFocused,
@@ -713,14 +784,33 @@ export default function Flashcards() {
     !loadError &&
     customCards.length > 0;
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
-  const handleTrueFalseAnswer = useMemo(
-    () =>
-      makeTrueFalseHandler({
-        setAnswer,
-        confirm,
-        passChoiceAsSelectedTranslation: true,
-      }),
-    [confirm, setAnswer],
+  const handleTrueFalseAnswer = useCallback(
+    (value: boolean) => {
+      const tapTs = Date.now();
+      lastTrueFalseTapRef.current = {
+        cardId: selectedItemId,
+        ts: tapTs,
+        answer: value,
+      };
+      if (__DEV__) {
+        console.log("[Flashcards][TF] tap", {
+          cardId: selectedItemId,
+          answer: value ? "true" : "false",
+          isActionCooldownActive,
+          isBetweenCards,
+          displayResult,
+          tapTs,
+        });
+      }
+      const choice = value ? "true" : "false";
+      setSelectedTrueFalseUiState({
+        cardId: selectedItemId,
+        answer: value,
+      });
+      setAnswer(choice);
+      confirm(choice, choice);
+    },
+    [confirm, displayResult, isActionCooldownActive, isBetweenCards, selectedItemId, setAnswer],
   );
   const handleTrueFalseOk = useCallback(() => {
     if (isActionCooldownActive) return;
@@ -728,14 +818,14 @@ export default function Flashcards() {
   }, [acknowledgeExplanation, isActionCooldownActive]);
   const isIntroMode = Boolean(introModeActive && correction?.mode === "intro");
   const showCorrectionInputs = Boolean(
-    correction && (result === false || isIntroMode),
+    correction && (displayResult === false || isIntroMode),
   );
   const {
     isExplanationVisible,
     isExplanationPending,
   } = getExplanationState({
     selectedItem,
-    result,
+    result: displayResult,
     showCorrectionInputs,
   });
   const shouldUseTrueFalseActionBar =
@@ -746,9 +836,15 @@ export default function Flashcards() {
     shouldUseTrueFalseActionBar && shouldShowBoxes && !correction;
   const trueFalseActionsMode =
     isExplanationPending && shouldUseTrueFalseActionBar ? "ok" : "answer";
+  const isImmediateActionLockActive =
+    selectedItemId != null &&
+    lastActionCooldownCardIdRef.current !== selectedItemId;
   const trueFalseActionsDisabled = isExplanationPending
-    ? isBetweenCards || isActionCooldownActive
-    : result !== null || isBetweenCards || isActionCooldownActive;
+    ? isBetweenCards || isActionCooldownActive || isImmediateActionLockActive
+    : displayResult !== null ||
+      isBetweenCards ||
+      isActionCooldownActive ||
+      isImmediateActionLockActive;
   const showCardActions = !(
     courseHasOnlyTrueFalse ||
     shouldShowTrueFalseActions ||
@@ -759,8 +855,12 @@ export default function Flashcards() {
     ? handleTrueFalseOk
     : () => confirm();
   const cardActionsDownloadDisabled =
-    downloadDisabled || isExplanationVisible || isActionCooldownActive;
-  const cardActionsConfirmDisabled = isActionCooldownActive;
+    downloadDisabled ||
+    isExplanationVisible ||
+    isActionCooldownActive ||
+    isImmediateActionLockActive;
+  const cardActionsConfirmDisabled =
+    isActionCooldownActive || isImmediateActionLockActive;
   const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
@@ -811,7 +911,6 @@ export default function Flashcards() {
     keyboardTopCorrection: 44,
     debug: true,
   });
-  const selectedItemId = selectedItem?.id ?? null;
   const shouldHideMainUiDuringWarmup =
     isUiWarmupActive &&
     !isLoadingData &&
@@ -831,6 +930,18 @@ export default function Flashcards() {
       setIsActionCooldownActive(false);
       actionCooldownTimerRef.current = null;
     }, TRUE_FALSE_POST_OK_COOLDOWN_MS);
+  }, [selectedItemId]);
+
+  useEffect(() => {
+    setSelectedTrueFalseUiState((current) => {
+      if (current.cardId === selectedItemId && current.answer === null) {
+        return current;
+      }
+      return {
+        cardId: selectedItemId,
+        answer: null,
+      };
+    });
   }, [selectedItemId]);
 
   useEffect(() => {
@@ -913,7 +1024,7 @@ export default function Flashcards() {
         selectedItem={selectedItem}
         setAnswer={setAnswer}
         answer={answer}
-        result={result}
+        result={displayResult}
         confirm={confirm}
         reversed={reversed}
         setResult={setResult}
@@ -938,9 +1049,7 @@ export default function Flashcards() {
       trueFalseActionsMode={trueFalseActionsMode}
       onTrueFalseOk={handleTrueFalseOk}
       trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-      selectedTrueFalseAnswer={
-        answer === "true" ? true : answer === "false" ? false : null
-      }
+      selectedTrueFalseAnswer={selectedTrueFalseAnswer}
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={downloadData}

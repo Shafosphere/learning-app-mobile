@@ -169,7 +169,6 @@ const LearningSection: React.FC = () => {
           style={styles.switch}
           value={ignoreDiacriticsInSpellcheck}
           onValueChange={handleDiacriticsToggle}
-          disabled={!spellChecking}
         />
       </View>
 

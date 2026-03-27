@@ -32,65 +32,20 @@ export function TrueFalseActions({
       : { falseLabel: "FAŁSZ", trueLabel: "PRAWDA" };
 
   if (mode === "ok") {
-    if (variant === "know_dont_know") {
-      return (
-        <View
-          style={[styles.container, disabled && styles.disabled]}
-          collapsable={false}
-        >
-          <MyButton
-            text={labels.falseLabel}
-            color="my_red"
-            onPress={() => undefined}
-            width={140}
-            disabled
-            accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
-          />
-          <View style={styles.spacer} />
-          <MyButton
-            text={okLabel}
-            color="my_yellow"
-            onPress={onOk}
-            width={140}
-            disabled={disabled}
-            accessibilityLabel="Potwierdź i przejdź dalej"
-          />
-        </View>
-      );
-    }
-    if (selectedAnswer !== null) {
-      const inactiveLabel = selectedAnswer ? labels.falseLabel : labels.trueLabel;
-      const inactiveColor = selectedAnswer ? "my_red" : "my_green";
-      return (
-        <View
-          style={[styles.container, disabled && styles.disabled]}
-          collapsable={false}
-        >
-          <MyButton
-            text={inactiveLabel}
-            color={inactiveColor}
-            onPress={() => undefined}
-            width={140}
-            disabled
-            accessibilityLabel={`Oznacz jako ${inactiveLabel}`}
-          />
-          <View style={styles.spacer} />
-          <MyButton
-            text={okLabel}
-            color="my_yellow"
-            onPress={onOk}
-            width={140}
-            disabled={disabled}
-            accessibilityLabel="Potwierdź i przejdź dalej"
-          />
-        </View>
-      );
-    }
     return (
       <View
         style={[styles.container, disabled && styles.disabled]}
         collapsable={false}
       >
+        <MyButton
+          text={labels.falseLabel}
+          color="my_red"
+          onPress={() => undefined}
+          width={140}
+          disabled
+          accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
+        />
+        <View style={styles.spacer} />
         <MyButton
           text={okLabel}
           color="my_yellow"

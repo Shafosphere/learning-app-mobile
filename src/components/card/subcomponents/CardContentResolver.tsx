@@ -1,22 +1,18 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
-import { getExplanationState } from "@/src/utils/explanationState";
 import React from "react";
-import { Text } from "react-native";
-import { useStyles } from "../card-styles";
-import type { CardProps } from "../card-types";
-import { CardCorrection } from "./CardCorrection";
-import { CardExplanation } from "./CardExplanation";
-import { CardInput } from "./CardInput";
-import { CardTrueFalse } from "./CardTrueFalse";
+import type { CardDisplayMode, CardProps } from "../card-types";
+import { CardSceneCorrection } from "./CardSceneCorrection";
+import { CardSceneEmpty } from "./CardSceneEmpty";
+import { CardSceneExplanation } from "./CardSceneExplanation";
+import { CardSceneQuestion } from "./CardSceneQuestion";
+import { CardSceneTrueFalse } from "./CardSceneTrueFalse";
 
 interface CardContentResolverProps {
-  // Props derived from main Card logic or passed through
+  displayMode: CardDisplayMode;
   correction: CardProps["correction"];
-  result: CardProps["result"];
   isIntroMode: boolean;
-  selectedItem: CardProps["selectedItem"];
-  isBetweenCards?: CardProps["isBetweenCards"];
+  explanationText: string;
   promptText: string;
   promptImageUri: string | null;
   promptImageSizeMode: FlashcardsImageSize | "dynamic";
@@ -35,10 +31,6 @@ interface CardContentResolverProps {
   isCorrectionInput2Date: boolean;
   correctionInput2DatePattern?: DatePattern | null;
   useLargeLayout: boolean;
-  layoutHandlers?: {
-    onPromptLayout?: (height: number) => void;
-    onInputLayout?: (height: number) => void;
-  };
   correctionInput1Ref: React.MutableRefObject<any>;
   correctionInput2Ref: React.MutableRefObject<any>;
   input1ScrollRef: React.MutableRefObject<any>;
@@ -73,12 +65,11 @@ interface CardContentResolverProps {
 }
 
 export const CardContentResolver = (props: CardContentResolverProps) => {
-  const styles = useStyles();
   const {
+    displayMode,
     correction,
-    result,
     isIntroMode,
-    selectedItem,
+    explanationText,
     promptText,
     promptImageUri,
     promptImageSizeMode,
@@ -97,7 +88,6 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     isCorrectionInput2Date,
     correctionInput2DatePattern,
     useLargeLayout,
-    layoutHandlers,
     correctionInput1Ref,
     correctionInput2Ref,
     input1ScrollRef,
@@ -131,42 +121,19 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     textColorOverride,
   } = props;
 
-  const showCorrection = correction && (result === false || isIntroMode);
-  const isKnowDontKnow = selectedItem?.type === "know_dont_know";
-  const { explanationText, isExplanationVisible } = getExplanationState({
-    selectedItem,
-    result,
-    showCorrectionInputs: Boolean(showCorrection),
-  });
-  const showExplanation = isExplanationVisible;
-  const showTrueFalse =
-    !showCorrection &&
-    !showExplanation &&
-    (selectedItem?.type === "true_false" || isKnowDontKnow);
-  const showInput =
-    !showCorrection && !showTrueFalse && !showExplanation && selectedItem;
-  const showEmpty =
-    !showCorrection && !showTrueFalse && !showExplanation && !showInput;
-
-  return (
-    <>
-      {showCorrection && (
-        <CardCorrection
-          correction={{
-            ...correction!,
-            input2: correction!.input2 ?? "",
-          }}
+  switch (displayMode) {
+    case "correction":
+      return correction ? (
+        <CardSceneCorrection
+          correction={correction}
           promptText={promptText}
           promptImageUri={promptImageUri}
-          imageSizeMode={promptImageSizeMode}
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           answerOnly={answerOnly}
           showAwersInput={shouldCorrectAwers}
           showRewersInput={shouldCorrectRewers}
           allowMultilinePrompt={useLargeLayout}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
           input1Ref={correctionInput1Ref}
           input2Ref={correctionInput2Ref}
           input1ScrollRef={input1ScrollRef}
@@ -183,9 +150,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           focusWithDelay={focusWithDelay}
           setIsCorrectionInput1Focused={setIsCorrectionInput1Focused}
           setHangulTarget={setHangulTarget}
-          shouldUseHangulKeyboardCorrection1={
-            shouldUseHangulKeyboardCorrection1
-          }
+          shouldUseHangulKeyboardCorrection1={shouldUseHangulKeyboardCorrection1}
           isCorrectionInput1Numeric={isCorrectionInput1Numeric}
           isCorrectionInput1Date={isCorrectionInput1Date}
           correctionInput1DatePattern={correctionInput1DatePattern}
@@ -197,43 +162,35 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           next={next}
           input1LayoutWidth={input1LayoutWidth}
           input2LayoutWidth={input2LayoutWidth}
+          imageSizeMode={promptImageSizeMode === "dynamic" ? "dynamic" : promptImageSizeMode}
           textColorOverride={textColorOverride}
         />
-      )}
-      {showTrueFalse && (
-        <CardTrueFalse
-          promptText={promptText}
-          promptImageUri={promptImageUri}
-          allowMultilinePrompt={useLargeLayout}
-          onAnswer={noopTrueFalseAnswer}
-          showButtons={false}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
-          imageSizeMode={
-            promptImageSizeMode === "dynamic"
-              ? "dynamic"
-              : (promptImageSizeMode as any)
-          }
-        />
-      )}
-      {showExplanation && (
-        <CardExplanation
+      ) : null;
+    case "explanation":
+      return (
+        <CardSceneExplanation
           explanation={explanationText}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
           textColorOverride={textColorOverride}
         />
-      )}
-      {showInput && (
-        <CardInput
+      );
+    case "true_false":
+      return (
+        <CardSceneTrueFalse
           promptText={promptText}
-          allowMultilinePrompt={useLargeLayout}
-          onPromptLayout={layoutHandlers?.onPromptLayout}
-          onInputLayout={layoutHandlers?.onInputLayout}
           promptImageUri={promptImageUri}
+          allowMultilinePrompt={useLargeLayout}
+          imageSizeMode={promptImageSizeMode}
+        />
+      );
+    case "question":
+      return (
+        <CardSceneQuestion
+          promptText={promptText}
+          promptImageUri={promptImageUri}
+          allowMultilinePrompt={useLargeLayout}
           imageSizeMode={promptImageSizeMode}
           answer={answer}
-          setAnswer={handleAnswerChange}
+          handleAnswerChange={handleAnswerChange}
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}
           handleConfirm={handleConfirm}
@@ -249,10 +206,9 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           typoDiff={typoDiff}
           textColorOverride={textColorOverride}
         />
-      )}
-      {showEmpty && (
-        <Text style={styles.empty}>Wybierz pudełko z słowkami</Text>
-      )}
-    </>
-  );
+      );
+    case "empty":
+    default:
+      return <CardSceneEmpty />;
+  }
 };

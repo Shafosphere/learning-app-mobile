@@ -9,6 +9,13 @@ export type CardCorrectionType = {
   cardId?: number;
 };
 
+export type CardDisplayMode =
+  | "empty"
+  | "question"
+  | "true_false"
+  | "explanation"
+  | "correction";
+
 export type CardProps = {
   selectedItem: WordWithTranslations | null;
   reversed?: boolean;
