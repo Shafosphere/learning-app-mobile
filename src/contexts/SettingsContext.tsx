@@ -126,6 +126,16 @@ type CourseAutoflowOverrides = {
   custom: Record<string, boolean>;
 };
 
+type CourseShowExplanationOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
+type CourseExplanationOnlyOnWrongOverrides = {
+  builtin: Record<string, boolean>;
+  custom: Record<string, boolean>;
+};
+
 
 type CourseImageSizeOverrides = {
   builtin: Record<string, FlashcardsImageSize>;
@@ -143,6 +153,16 @@ const DEFAULT_COURSE_BOX_ZERO_OVERRIDES: CourseBoxZeroOverrides = {
 };
 
 const DEFAULT_COURSE_AUTOFLOW_OVERRIDES: CourseAutoflowOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_SHOW_EXPLANATION_OVERRIDES: CourseShowExplanationOverrides = {
+  builtin: {},
+  custom: {},
+};
+
+const DEFAULT_COURSE_EXPLANATION_ONLY_ON_WRONG_OVERRIDES: CourseExplanationOnlyOnWrongOverrides = {
   builtin: {},
   custom: {},
 };
@@ -222,6 +242,32 @@ interface SettingsContextValue {
   ) => Promise<void>;
   getCustomCourseAutoflowEnabled: (courseId: number) => boolean;
   setCustomCourseAutoflowEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
+  showExplanationEnabled: boolean;
+  getBuiltinCourseShowExplanationEnabled: (
+    params: CourseBoxZeroKeyParams
+  ) => boolean;
+  setBuiltinCourseShowExplanationEnabled: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseShowExplanationEnabled: (courseId: number) => boolean;
+  setCustomCourseShowExplanationEnabled: (
+    courseId: number,
+    enabled: boolean
+  ) => Promise<void>;
+  explanationOnlyOnWrong: boolean;
+  getBuiltinCourseExplanationOnlyOnWrong: (
+    params: CourseBoxZeroKeyParams
+  ) => boolean;
+  setBuiltinCourseExplanationOnlyOnWrong: (
+    params: CourseBoxZeroKeyParams,
+    enabled: boolean
+  ) => Promise<void>;
+  getCustomCourseExplanationOnlyOnWrong: (courseId: number) => boolean;
+  setCustomCourseExplanationOnlyOnWrong: (
     courseId: number,
     enabled: boolean
   ) => Promise<void>;
@@ -383,6 +429,7 @@ type CourseTrueFalseButtonsOverrides = {
   builtin: Record<string, TrueFalseButtonsVariant>;
   custom: Record<string, TrueFalseButtonsVariant>;
 };
+
 type CourseSkipCorrectionOverrides = {
   builtin: Record<string, boolean>;
   custom: Record<string, boolean>;
@@ -420,6 +467,16 @@ const defaultValue: SettingsContextValue = {
   setBuiltinCourseAutoflowEnabled: async () => {},
   getCustomCourseAutoflowEnabled: () => true,
   setCustomCourseAutoflowEnabled: async () => {},
+  showExplanationEnabled: true,
+  getBuiltinCourseShowExplanationEnabled: () => true,
+  setBuiltinCourseShowExplanationEnabled: async () => {},
+  getCustomCourseShowExplanationEnabled: () => true,
+  setCustomCourseShowExplanationEnabled: async () => {},
+  explanationOnlyOnWrong: false,
+  getBuiltinCourseExplanationOnlyOnWrong: () => false,
+  setBuiltinCourseExplanationOnlyOnWrong: async () => {},
+  getCustomCourseExplanationOnlyOnWrong: () => false,
+  setCustomCourseExplanationOnlyOnWrong: async () => {},
   skipCorrectionEnabled: false,
   getBuiltinCourseSkipCorrectionEnabled: () => false,
   setBuiltinCourseSkipCorrectionEnabled: async () => {},
@@ -590,6 +647,26 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       "flashcards.courseAutoflowOverrides",
       DEFAULT_COURSE_AUTOFLOW_OVERRIDES
     );
+  const [showExplanationDefaultEnabled] = usePersistedState<boolean>(
+    "flashcards.showExplanationEnabled",
+    true
+  );
+  const [showExplanationOverrides, setShowExplanationOverrides] =
+    usePersistedState<CourseShowExplanationOverrides>(
+      "flashcards.courseShowExplanationOverrides",
+      DEFAULT_COURSE_SHOW_EXPLANATION_OVERRIDES
+    );
+  const [explanationOnlyOnWrongDefaultEnabled] = usePersistedState<boolean>(
+    "flashcards.explanationOnlyOnWrong",
+    false
+  );
+  const [
+    explanationOnlyOnWrongOverrides,
+    setExplanationOnlyOnWrongOverrides,
+  ] = usePersistedState<CourseExplanationOnlyOnWrongOverrides>(
+    "flashcards.courseExplanationOnlyOnWrongOverrides",
+    DEFAULT_COURSE_EXPLANATION_ONLY_ON_WRONG_OVERRIDES
+  );
   const [cardSizeOverrides, setCardSizeOverrides] =
     usePersistedState<CourseCardSizeOverrides>(
       "flashcards.courseCardSizeOverrides",
@@ -1185,6 +1262,170 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     ]
   );
 
+  const getBuiltinCourseShowExplanationEnabled = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = showExplanationOverrides.builtin[key];
+      return override ?? showExplanationDefaultEnabled;
+    },
+    [showExplanationDefaultEnabled, showExplanationOverrides.builtin]
+  );
+
+  const setBuiltinCourseShowExplanationEnabled = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = showExplanationOverrides.builtin[key];
+      const shouldRemove = enabled === showExplanationDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...showExplanationOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setShowExplanationOverrides({
+        builtin: nextBuiltin,
+        custom: { ...showExplanationOverrides.custom },
+      });
+    },
+    [
+      setShowExplanationOverrides,
+      showExplanationDefaultEnabled,
+      showExplanationOverrides,
+    ]
+  );
+
+  const getCustomCourseShowExplanationEnabled = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = showExplanationOverrides.custom[key];
+      return override ?? showExplanationDefaultEnabled;
+    },
+    [showExplanationDefaultEnabled, showExplanationOverrides.custom]
+  );
+
+  const setCustomCourseShowExplanationEnabled = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = showExplanationOverrides.custom[key];
+      const shouldRemove = enabled === showExplanationDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...showExplanationOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setShowExplanationOverrides({
+        builtin: { ...showExplanationOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [
+      setShowExplanationOverrides,
+      showExplanationDefaultEnabled,
+      showExplanationOverrides,
+    ]
+  );
+
+  const getBuiltinCourseExplanationOnlyOnWrong = useCallback(
+    ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
+      const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
+      const override = explanationOnlyOnWrongOverrides.builtin[key];
+      return override ?? explanationOnlyOnWrongDefaultEnabled;
+    },
+    [
+      explanationOnlyOnWrongDefaultEnabled,
+      explanationOnlyOnWrongOverrides.builtin,
+    ]
+  );
+
+  const setBuiltinCourseExplanationOnlyOnWrong = useCallback(
+    async (
+      params: CourseBoxZeroKeyParams,
+      enabled: boolean
+    ): Promise<void> => {
+      const key = makeBuiltinCourseKey(params);
+      const current = explanationOnlyOnWrongOverrides.builtin[key];
+      const shouldRemove = enabled === explanationOnlyOnWrongDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextBuiltin = { ...explanationOnlyOnWrongOverrides.builtin };
+      if (shouldRemove) {
+        delete nextBuiltin[key];
+      } else {
+        nextBuiltin[key] = enabled;
+      }
+      await setExplanationOnlyOnWrongOverrides({
+        builtin: nextBuiltin,
+        custom: { ...explanationOnlyOnWrongOverrides.custom },
+      });
+    },
+    [
+      explanationOnlyOnWrongDefaultEnabled,
+      explanationOnlyOnWrongOverrides,
+      setExplanationOnlyOnWrongOverrides,
+    ]
+  );
+
+  const getCustomCourseExplanationOnlyOnWrong = useCallback(
+    (courseId: number) => {
+      const key = courseId.toString();
+      const override = explanationOnlyOnWrongOverrides.custom[key];
+      return override ?? explanationOnlyOnWrongDefaultEnabled;
+    },
+    [
+      explanationOnlyOnWrongDefaultEnabled,
+      explanationOnlyOnWrongOverrides.custom,
+    ]
+  );
+
+  const setCustomCourseExplanationOnlyOnWrong = useCallback(
+    async (courseId: number, enabled: boolean): Promise<void> => {
+      const key = courseId.toString();
+      const current = explanationOnlyOnWrongOverrides.custom[key];
+      const shouldRemove = enabled === explanationOnlyOnWrongDefaultEnabled;
+      if (shouldRemove && current === undefined) {
+        return;
+      }
+      if (!shouldRemove && current === enabled) {
+        return;
+      }
+      const nextCustom = { ...explanationOnlyOnWrongOverrides.custom };
+      if (shouldRemove) {
+        delete nextCustom[key];
+      } else {
+        nextCustom[key] = enabled;
+      }
+      await setExplanationOnlyOnWrongOverrides({
+        builtin: { ...explanationOnlyOnWrongOverrides.builtin },
+        custom: nextCustom,
+      });
+    },
+    [
+      explanationOnlyOnWrongDefaultEnabled,
+      explanationOnlyOnWrongOverrides,
+      setExplanationOnlyOnWrongOverrides,
+    ]
+  );
+
   const getBuiltinCourseSkipCorrectionEnabled = useCallback(
     ({ sourceLang, targetLang, level }: CourseBoxZeroKeyParams) => {
       const key = makeBuiltinCourseKey({ sourceLang, targetLang, level });
@@ -1616,6 +1857,54 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     flashcardsImageFrameDefaultEnabled,
     getBuiltinCourseImageFrameEnabled,
     getCustomCourseImageFrameEnabled,
+  ]);
+
+  const showExplanationEnabled = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseShowExplanationEnabled(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseShowExplanationEnabled({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return showExplanationDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    getBuiltinCourseShowExplanationEnabled,
+    getCustomCourseShowExplanationEnabled,
+    showExplanationDefaultEnabled,
+  ]);
+
+  const explanationOnlyOnWrong = useMemo(() => {
+    if (activeCustomCourseId != null) {
+      return getCustomCourseExplanationOnlyOnWrong(activeCustomCourseId);
+    }
+    if (activeCourseIdx != null) {
+      const course = courses[activeCourseIdx];
+      if (course) {
+        return getBuiltinCourseExplanationOnlyOnWrong({
+          sourceLang: course.sourceLang,
+          targetLang: course.targetLang,
+          level: course.level ?? null,
+        });
+      }
+    }
+    return explanationOnlyOnWrongDefaultEnabled;
+  }, [
+    activeCourseIdx,
+    activeCustomCourseId,
+    courses,
+    explanationOnlyOnWrongDefaultEnabled,
+    getBuiltinCourseExplanationOnlyOnWrong,
+    getCustomCourseExplanationOnlyOnWrong,
   ]);
 
   const skipCorrectionEnabled = useMemo(() => {
@@ -2135,6 +2424,16 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         setBuiltinCourseAutoflowEnabled,
         getCustomCourseAutoflowEnabled,
         setCustomCourseAutoflowEnabled,
+        showExplanationEnabled,
+        getBuiltinCourseShowExplanationEnabled,
+        setBuiltinCourseShowExplanationEnabled,
+        getCustomCourseShowExplanationEnabled,
+        setCustomCourseShowExplanationEnabled,
+        explanationOnlyOnWrong,
+        getBuiltinCourseExplanationOnlyOnWrong,
+        setBuiltinCourseExplanationOnlyOnWrong,
+        getCustomCourseExplanationOnlyOnWrong,
+        setCustomCourseExplanationOnlyOnWrong,
         skipCorrectionEnabled,
         getBuiltinCourseSkipCorrectionEnabled,
         setBuiltinCourseSkipCorrectionEnabled,

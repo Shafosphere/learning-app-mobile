@@ -101,7 +101,12 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{ courseId?: string }>();
   const styles = useStyles();
-  const { trueFalseButtonsVariant, actionButtonsPosition } = useSettings();
+  const {
+    trueFalseButtonsVariant,
+    actionButtonsPosition,
+    getCustomCourseShowExplanationEnabled,
+    getCustomCourseExplanationOnlyOnWrong,
+  } = useSettings();
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -116,6 +121,16 @@ export default function ReviewFlashcardsPlaceholder() {
           : NaN;
     return Number.isFinite(num) ? num : null;
   }, [params?.courseId]);
+  const showExplanationEnabled = useMemo(
+    () =>
+      courseId != null ? getCustomCourseShowExplanationEnabled(courseId) : true,
+    [courseId, getCustomCourseShowExplanationEnabled]
+  );
+  const explanationOnlyOnWrong = useMemo(
+    () =>
+      courseId != null ? getCustomCourseExplanationOnlyOnWrong(courseId) : false,
+    [courseId, getCustomCourseExplanationOnlyOnWrong]
+  );
   const [boxes, setBoxes] = useState<BoxesState>(() => createEmptyBoxes());
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>("boxOne");
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(
@@ -387,6 +402,8 @@ export default function ReviewFlashcardsPlaceholder() {
     const explanationState = getExplanationState({
       selectedItem: selectedItem ?? card ?? null,
       result: false,
+      showExplanationEnabled,
+      explanationOnlyOnWrong,
     });
     if (explanationState.isExplanationPending) {
       setPendingExplanationMove({
@@ -601,6 +618,8 @@ export default function ReviewFlashcardsPlaceholder() {
       const wrongExplanationState = getExplanationState({
         selectedItem,
         result: false,
+        showExplanationEnabled,
+        explanationOnlyOnWrong,
       });
       if (isKnowDontKnow) {
         if (wrongExplanationState.isExplanationPending) {
@@ -697,6 +716,8 @@ export default function ReviewFlashcardsPlaceholder() {
     const correctExplanationState = getExplanationState({
       selectedItem,
       result: true,
+      showExplanationEnabled,
+      explanationOnlyOnWrong,
     });
     const hasExplanation = correctExplanationState.hasExplanation;
     if (correctExplanationState.isExplanationPending) {
@@ -800,6 +821,8 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem,
     result,
     showCorrectionInputs,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
   });
   const trueFalseActionsMode =
     isExplanationPending && shouldShowTrueFalseActions ? "ok" : "answer";
@@ -936,6 +959,8 @@ export default function ReviewFlashcardsPlaceholder() {
         onHintUpdate={() => undefined}
         hideHints
         isFocused={!isLoading}
+        showExplanationEnabled={showExplanationEnabled}
+        explanationOnlyOnWrong={explanationOnlyOnWrong}
       />
 
       <View

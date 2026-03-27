@@ -174,6 +174,10 @@ function CourseSettingsPreview() {
       onToggleAutoflow={noop}
       reviewsEnabled
       onToggleReviews={noop}
+      showExplanationEnabled
+      onToggleShowExplanation={noop}
+      explanationOnlyOnWrong={false}
+      onToggleExplanationOnlyOnWrong={noop}
       skipCorrectionEnabled={false}
       onToggleSkipCorrection={noop}
       trueFalseButtonsVariant="true_false"

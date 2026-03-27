@@ -51,7 +51,7 @@
     ],
     "extra": {
       "googleDriveBackup": {
-        "androidClientId": "",
+        "androidClientId": "493135568689-a4usr5krf7jiaici7b5jocmb9u1c6l5k.apps.googleusercontent.com",
         "iosClientId": "",
         "webClientId": "",
         "backupFileName": "memicard-drive-backup-latest.zip"

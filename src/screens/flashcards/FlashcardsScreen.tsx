@@ -106,6 +106,8 @@ export default function Flashcards() {
     flashcardsBatchSize,
     boxZeroEnabled,
     autoflowEnabled,
+    explanationOnlyOnWrong,
+    showExplanationEnabled,
     skipCorrectionEnabled,
     trueFalseButtonsVariant,
     actionButtonsPosition,
@@ -335,6 +337,8 @@ export default function Flashcards() {
   const initialExplanationState = getExplanationState({
     selectedItem,
     result: displayResult,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
   });
   const waitingForOk =
     !correction && !isBetweenCards && initialExplanationState.isExplanationPending;
@@ -827,6 +831,8 @@ export default function Flashcards() {
     selectedItem,
     result: displayResult,
     showCorrectionInputs,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
   });
   const shouldUseTrueFalseActionBar =
     courseHasOnlyTrueFalse ||
@@ -1036,6 +1042,8 @@ export default function Flashcards() {
         isFocused={isFocused}
         isBetweenCards={isBetweenCards}
         hideHints={shouldHideHintsForActiveBox}
+        showExplanationEnabled={showExplanationEnabled}
+        explanationOnlyOnWrong={explanationOnlyOnWrong}
       />
     );
   }

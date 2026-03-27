@@ -56,6 +56,10 @@ export default function CourseSettingsScreen() {
     setCustomCourseBoxZeroEnabled,
     getCustomCourseAutoflowEnabled,
     setCustomCourseAutoflowEnabled,
+    getCustomCourseShowExplanationEnabled,
+    setCustomCourseShowExplanationEnabled,
+    getCustomCourseExplanationOnlyOnWrong,
+    setCustomCourseExplanationOnlyOnWrong,
     getCustomCourseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
     getCustomCourseCardSize,
@@ -131,6 +135,12 @@ export default function CourseSettingsScreen() {
     getCustomCourseAutoflowEnabled(-1)
   );
   const [reviewsEnabled, setReviewsEnabled] = useState(initialReviewsEnabled);
+  const [showExplanationEnabled, setShowExplanationEnabled] = useState(
+    getCustomCourseShowExplanationEnabled(-1)
+  );
+  const [explanationOnlyOnWrong, setExplanationOnlyOnWrong] = useState(
+    getCustomCourseExplanationOnlyOnWrong(-1)
+  );
   const [skipCorrectionEnabled, setSkipCorrectionEnabled] = useState(
     getCustomCourseSkipCorrectionEnabled(-1)
   );
@@ -267,6 +277,12 @@ export default function CourseSettingsScreen() {
           if (typeof parsedSettingsDraft.reviewsEnabled === "boolean") {
             setReviewsEnabled(parsedSettingsDraft.reviewsEnabled);
           }
+          if (typeof parsedSettingsDraft.showExplanationEnabled === "boolean") {
+            setShowExplanationEnabled(parsedSettingsDraft.showExplanationEnabled);
+          }
+          if (typeof parsedSettingsDraft.explanationOnlyOnWrong === "boolean") {
+            setExplanationOnlyOnWrong(parsedSettingsDraft.explanationOnlyOnWrong);
+          }
           if (typeof parsedSettingsDraft.skipCorrectionEnabled === "boolean") {
             setSkipCorrectionEnabled(parsedSettingsDraft.skipCorrectionEnabled);
           }
@@ -341,6 +357,8 @@ export default function CourseSettingsScreen() {
         boxZeroEnabled,
         autoflowEnabled,
         reviewsEnabled,
+        showExplanationEnabled,
+        explanationOnlyOnWrong,
         skipCorrectionEnabled,
         trueFalseButtonsVariant,
         cardSize,
@@ -360,6 +378,8 @@ export default function CourseSettingsScreen() {
     imageSize,
     imageFrameEnabled,
     reviewsEnabled,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
     skipCorrectionEnabled,
     trueFalseButtonsVariant,
   ]);
@@ -478,6 +498,11 @@ export default function CourseSettingsScreen() {
       await replaceCustomFlashcards(courseId, trimmedCards);
       await setCustomCourseBoxZeroEnabled(courseId, boxZeroEnabled);
       await setCustomCourseAutoflowEnabled(courseId, autoflowEnabled);
+      await setCustomCourseShowExplanationEnabled(courseId, showExplanationEnabled);
+      await setCustomCourseExplanationOnlyOnWrong(
+        courseId,
+        explanationOnlyOnWrong
+      );
       await setCustomCourseSkipCorrectionEnabled(courseId, skipCorrectionEnabled);
       await setCustomCourseTrueFalseButtonsVariant(
         courseId,
@@ -541,6 +566,10 @@ export default function CourseSettingsScreen() {
               onToggleAutoflow: setAutoflowEnabled,
               reviewsEnabled,
               onToggleReviews: setReviewsEnabled,
+              showExplanationEnabled,
+              onToggleShowExplanation: setShowExplanationEnabled,
+              explanationOnlyOnWrong,
+              onToggleExplanationOnlyOnWrong: setExplanationOnlyOnWrong,
               skipCorrectionEnabled,
               onToggleSkipCorrection: setSkipCorrectionEnabled,
               skipCorrectionLocked: courseIsTrueFalseOnly,

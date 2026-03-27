@@ -122,6 +122,10 @@ function BuiltinCourseEditor({
     setBuiltinCourseBoxZeroEnabled,
     getBuiltinCourseAutoflowEnabled,
     setBuiltinCourseAutoflowEnabled,
+    getBuiltinCourseShowExplanationEnabled,
+    setBuiltinCourseShowExplanationEnabled,
+    getBuiltinCourseExplanationOnlyOnWrong,
+    setBuiltinCourseExplanationOnlyOnWrong,
     getBuiltinCourseSkipCorrectionEnabled,
     setBuiltinCourseSkipCorrectionEnabled,
     getBuiltinCourseCardSize,
@@ -154,6 +158,20 @@ function BuiltinCourseEditor({
   );
   const [skipCorrectionEnabled, setSkipCorrectionEnabled] = useState(() =>
     getBuiltinCourseSkipCorrectionEnabled({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [showExplanationEnabled, setShowExplanationEnabled] = useState(() =>
+    getBuiltinCourseShowExplanationEnabled({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
+  const [explanationOnlyOnWrong, setExplanationOnlyOnWrong] = useState(() =>
+    getBuiltinCourseExplanationOnlyOnWrong({
       sourceLang: normalizedSource,
       targetLang: normalizedTarget,
       level: normalizedLevel,
@@ -233,6 +251,30 @@ function BuiltinCourseEditor({
   const handleSkipCorrectionToggle = async (value: boolean) => {
     setSkipCorrectionEnabled(value);
     await setBuiltinCourseSkipCorrectionEnabled(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleShowExplanationToggle = async (value: boolean) => {
+    setShowExplanationEnabled(value);
+    await setBuiltinCourseShowExplanationEnabled(
+      {
+        sourceLang: normalizedSource,
+        targetLang: normalizedTarget,
+        level: normalizedLevel,
+      },
+      value
+    );
+  };
+
+  const handleExplanationOnlyOnWrongToggle = async (value: boolean) => {
+    setExplanationOnlyOnWrong(value);
+    await setBuiltinCourseExplanationOnlyOnWrong(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
@@ -454,6 +496,11 @@ function BuiltinCourseEditor({
               onToggleAutoflow: handleAutoflowToggle,
               reviewsEnabled,
               onToggleReviews: setReviewsEnabled,
+              showExplanationEnabled,
+              onToggleShowExplanation: handleShowExplanationToggle,
+              explanationOnlyOnWrong,
+              onToggleExplanationOnlyOnWrong:
+                handleExplanationOnlyOnWrongToggle,
               skipCorrectionEnabled,
               onToggleSkipCorrection: handleSkipCorrectionToggle,
               hideSkipCorrectionOption: false,

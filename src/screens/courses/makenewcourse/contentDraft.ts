@@ -18,6 +18,8 @@ export type SettingsDraftPayload = {
   boxZeroEnabled: boolean;
   autoflowEnabled: boolean;
   reviewsEnabled: boolean;
+  showExplanationEnabled: boolean;
+  explanationOnlyOnWrong: boolean;
   skipCorrectionEnabled: boolean;
   trueFalseButtonsVariant: "true_false" | "know_dont_know";
   cardSize: "large" | "small";

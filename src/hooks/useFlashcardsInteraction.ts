@@ -79,9 +79,11 @@ export function useFlashcardsInteraction({
   });
   const {
     activeCustomCourseId,
+    explanationOnlyOnWrong,
     ignoreDiacriticsInSpellcheck,
     learningRemindersEnabled,
     refreshLearningReminderSchedule,
+    showExplanationEnabled,
   } = useSettings();
   const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
@@ -455,6 +457,8 @@ export function useFlashcardsInteraction({
         const { isExplanationPending } = getExplanationState({
           selectedItem: wordForCheck,
           result: true,
+          showExplanationEnabled,
+          explanationOnlyOnWrong,
         });
         if (__DEV__) {
           console.log("[Flashcards][confirm] success-path", {
@@ -480,6 +484,8 @@ export function useFlashcardsInteraction({
         const { hasExplanation, isExplanationPending } = getExplanationState({
           selectedItem: wordForCheck,
           result: false,
+          showExplanationEnabled,
+          explanationOnlyOnWrong,
         });
         if (__DEV__) {
           console.log("[Flashcards][confirm] failure-path", {

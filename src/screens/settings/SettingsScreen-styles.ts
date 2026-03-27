@@ -71,6 +71,46 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     marginBottom: 12,
   },
+  settingsGroup: {
+    rowGap: 6,
+  },
+  settingsGroupTitle: {
+    fontSize: 13,
+    fontWeight: "900",
+    letterSpacing: 0.6,
+    textTransform: "uppercase",
+    color: colors.paragraph,
+    opacity: 0.7,
+    marginBottom: 2,
+  },
+  settingsDivider: {
+    height: 1,
+    backgroundColor: colors.border,
+    opacity: 0.7,
+    marginVertical: 12,
+  },
+  statusCard: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    marginBottom: 4,
+  },
+  statusTitleRow: {
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 8,
+    marginBottom: 4,
+  },
+  statusTitle: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: colors.paragraph,
+  },
+  statusTitleIcon: {
+    color: colors.paragraph,
+    opacity: 0.9,
+  },
   row: {
     flexDirection: "row",
     alignItems: "center",
@@ -92,14 +132,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.75,
     marginTop: 4,
   },
-  driveButtonContent: {
-    flexDirection: "row",
-    alignItems: "center",
-    justifyContent: "center",
-    columnGap: 8,
-  },
   driveButtonText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: "900",
     textTransform: "uppercase",
     textAlign: "center",

@@ -144,6 +144,10 @@
     },
     "coursesData": {
       "section": "Other",
+      "groups": {
+        "localBackup": "Local backup",
+        "googleDrive": "Google Drive"
+      },
       "errors": {
         "generic": "Error",
         "exportUserData": "Could not export user data.",
@@ -162,6 +166,12 @@
         "sectionTitle": "Google Drive auto-backup",
         "actionButton": "Google Drive action",
         "loadingShort": "Busy",
+        "connectTitle": "Connect Google Drive",
+        "connectSubtitle": "Connect your Google account to enable ZIP backup and once-per-day auto-backup on app startup.",
+        "connectButton": "Connect",
+        "manualBackupTitle": "Upload backup now",
+        "manualBackupSubtitle": "Manually save the latest ZIP copy to the app's private folder on Google Drive.",
+        "backupNowButton": "Backup now",
         "status": {
           "notConfigured": "This feature is not configured in the current app build yet. Reason: {{reason}}",
           "notConfiguredFallback": "missing OAuth configuration",

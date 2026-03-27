@@ -22,6 +22,10 @@ export type CourseSettingsSectionProps = {
   onToggleAutoflow: (value: boolean) => void;
   reviewsEnabled: boolean;
   onToggleReviews: (value: boolean) => void;
+  showExplanationEnabled: boolean;
+  onToggleShowExplanation: (value: boolean) => void;
+  explanationOnlyOnWrong: boolean;
+  onToggleExplanationOnlyOnWrong: (value: boolean) => void;
   skipCorrectionEnabled: boolean;
   onToggleSkipCorrection: (value: boolean) => void;
   skipCorrectionLocked?: boolean;
@@ -51,6 +55,10 @@ export function CourseSettingsSection({
   onToggleAutoflow,
   reviewsEnabled,
   onToggleReviews,
+  showExplanationEnabled,
+  onToggleShowExplanation,
+  explanationOnlyOnWrong,
+  onToggleExplanationOnlyOnWrong,
   skipCorrectionEnabled,
   onToggleSkipCorrection,
   skipCorrectionLocked = false,
@@ -132,6 +140,62 @@ export function CourseSettingsSection({
           onValueChange={onToggleReviews}
           trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
           thumbColor={switchColors.thumb}
+        />
+      </View>
+
+      <View style={toggleRow}>
+        <View style={toggleTextWrapper}>
+          <Text style={toggleTitle}>Wyświetlaj wyjaśnienie</Text>
+          <Text style={toggleSubtitle}>
+            Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada.
+          </Text>
+        </View>
+        <Switch
+          value={showExplanationEnabled}
+          onValueChange={onToggleShowExplanation}
+          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
+          thumbColor={switchColors.thumb}
+        />
+      </View>
+
+      <View
+        style={[
+          toggleRow,
+          {
+            marginLeft: 18,
+            paddingLeft: 14,
+            borderLeftWidth: 2,
+            borderLeftColor: showExplanationEnabled
+              ? colors.border
+              : `${colors.text_secondary}55`,
+            opacity: showExplanationEnabled ? 1 : 0.62,
+          },
+        ]}
+      >
+        <View style={[toggleTextWrapper, { paddingRight: 8 }]}>
+          <Text
+            style={[
+              toggleTitle,
+              !showExplanationEnabled && { color: colors.text_secondary },
+            ]}
+          >
+            Tylko po błędnej odpowiedzi
+          </Text>
+          <Text
+            style={[
+              toggleSubtitle,
+              !showExplanationEnabled && { color: colors.text_secondary },
+            ]}
+          >
+            Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi.
+          </Text>
+        </View>
+        <Switch
+          value={showExplanationEnabled ? explanationOnlyOnWrong : false}
+          onValueChange={onToggleExplanationOnlyOnWrong}
+          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
+          thumbColor={switchColors.thumb}
+          disabled={!showExplanationEnabled}
         />
       </View>
 

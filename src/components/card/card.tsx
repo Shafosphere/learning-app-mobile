@@ -124,9 +124,13 @@ export default function Card({
   textColorOverride,
   hideHints = false,
   isBetweenCards = false,
+  showExplanationEnabled: showExplanationEnabledProp,
+  explanationOnlyOnWrong: explanationOnlyOnWrongProp,
 }: CardProps) {
   const styles = useStyles();
   const {
+    explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
+    showExplanationEnabled: showExplanationEnabledSetting,
     ignoreDiacriticsInSpellcheck,
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
@@ -327,10 +331,16 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
+  const showExplanationEnabled =
+    showExplanationEnabledProp ?? showExplanationEnabledSetting;
+  const explanationOnlyOnWrong =
+    explanationOnlyOnWrongProp ?? explanationOnlyOnWrongSetting;
   const { explanationText, isExplanationVisible, isExplanationPending } = getExplanationState({
     selectedItem,
     result,
     showCorrectionInputs,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
   });
   // Decide if we should use large layout: either global setting OR image is present
   // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,

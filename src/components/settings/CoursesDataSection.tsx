@@ -20,7 +20,6 @@ const CoursesDataSection: React.FC = () => {
   const { t, i18n } = useTranslation();
   const {
     resetLearningSettings,
-    colors,
     googleDriveConfigured,
     googleDriveConfigurationError,
     googleDriveBackupEnabled,
@@ -298,135 +297,158 @@ const CoursesDataSection: React.FC = () => {
     );
   };
 
+  const driveActionButtonText =
+    driveAction === "connect" || driveAction === "backup"
+      ? t("settings.coursesData.googleDrive.loadingShort")
+      : googleDriveConnected
+        ? t("settings.coursesData.googleDrive.backupNowButton")
+        : t("settings.coursesData.googleDrive.connectButton");
+
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>{t("settings.coursesData.section")}</Text>
 
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.coursesData.rows.exportUserData.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.coursesData.rows.exportUserData.subtitle")}
-          </Text>
+      <View style={styles.settingsGroup}>
+        <Text style={styles.settingsGroupTitle}>
+          {t("settings.coursesData.groups.localBackup")}
+        </Text>
+
+        <View style={styles.row}>
+          <View style={styles.rowTextWrapper}>
+            <Text style={styles.rowTitle}>
+              {t("settings.coursesData.rows.exportUserData.title")}
+            </Text>
+            <Text style={styles.rowSubtitle}>
+              {t("settings.coursesData.rows.exportUserData.subtitle")}
+            </Text>
+          </View>
+          <MyButton
+            text={
+              exportingData
+                ? t("settings.coursesData.rows.exportUserData.buttonLoading")
+                : t("settings.coursesData.rows.exportUserData.button")
+            }
+            color="my_green"
+            onPress={handleExportUserData}
+            disabled={exportingData}
+            width={130}
+          />
         </View>
-        <MyButton
-          text={
-            exportingData
-              ? t("settings.coursesData.rows.exportUserData.buttonLoading")
-              : t("settings.coursesData.rows.exportUserData.button")
-          }
-          color="my_green"
-          onPress={handleExportUserData}
-          disabled={exportingData}
-          width={130}
-        />
+
+        <View style={styles.row}>
+          <View style={styles.rowTextWrapper}>
+            <Text style={styles.rowTitle}>
+              {t("settings.coursesData.rows.importUserData.title")}
+            </Text>
+            <Text style={styles.rowSubtitle}>
+              {t("settings.coursesData.rows.importUserData.subtitle")}
+            </Text>
+          </View>
+          <MyButton
+            text={
+              importingData
+                ? t("settings.coursesData.rows.importUserData.buttonLoading")
+                : t("settings.coursesData.rows.importUserData.button")
+            }
+            color="my_green"
+            onPress={handleImportUserData}
+            disabled={importingData}
+            width={130}
+          />
+        </View>
       </View>
 
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.coursesData.googleDrive.sectionTitle")}
-          </Text>
+      <View style={styles.settingsDivider} />
+
+      <View style={styles.settingsGroup}>
+        <Text style={styles.settingsGroupTitle}>
+          {t("settings.coursesData.groups.googleDrive")}
+        </Text>
+
+        <View style={styles.statusCard}>
+          <View style={styles.statusTitleRow}>
+            <MaterialCommunityIcons
+              name="google-drive"
+              size={20}
+              style={styles.statusTitleIcon}
+            />
+            <Text style={styles.statusTitle}>
+              {t("settings.coursesData.googleDrive.sectionTitle")}
+            </Text>
+          </View>
           <Text style={styles.rowSubtitle}>{driveStatusText}</Text>
         </View>
-        <MyButton
-          onPress={googleDriveConnected ? handleBackupNow : handleConnectDrive}
-          color="my_green"
-          disabled={driveAction === "connect" || driveAction === "backup"}
-          width={74}
-          accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
-        >
-          {driveAction === "connect" || driveAction === "backup" ? (
-            <Text style={[styles.driveButtonText, { color: colors.headline }]}>
-              {t("settings.coursesData.googleDrive.loadingShort")}
+
+        <View style={styles.row}>
+          <View style={styles.rowTextWrapper}>
+            <Text style={styles.rowTitle}>
+              {googleDriveConnected
+                ? t("settings.coursesData.googleDrive.manualBackupTitle")
+                : t("settings.coursesData.googleDrive.connectTitle")}
             </Text>
-          ) : googleDriveConnected ? (
-            <View style={styles.driveButtonContent}>
-              <MaterialCommunityIcons
-                name="cloud-upload-outline"
-                size={22}
-                color={colors.headline}
-              />
-            </View>
-          ) : (
-            <View style={styles.driveButtonContent}>
-              <MaterialCommunityIcons
-                name="google-drive"
-                size={22}
-                color={colors.headline}
-              />
-            </View>
-          )}
-        </MyButton>
+            <Text style={styles.rowSubtitle}>
+              {googleDriveConnected
+                ? t("settings.coursesData.googleDrive.manualBackupSubtitle")
+                : t("settings.coursesData.googleDrive.connectSubtitle")}
+            </Text>
+          </View>
+          <MyButton
+            text={driveActionButtonText}
+            onPress={googleDriveConnected ? handleBackupNow : handleConnectDrive}
+            color="my_green"
+            disabled={driveAction === "connect" || driveAction === "backup"}
+            width={130}
+            accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
+            textStyle={styles.driveButtonText}
+          />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.rowTextWrapper}>
+            <Text style={styles.rowTitle}>
+              {t("settings.coursesData.googleDrive.restoreTitle")}
+            </Text>
+            <Text style={styles.rowSubtitle}>
+              {t("settings.coursesData.googleDrive.restoreSubtitle")}
+            </Text>
+          </View>
+          <MyButton
+            text={
+              driveAction === "restore"
+                ? t("settings.coursesData.googleDrive.restoreLoading")
+                : t("settings.coursesData.googleDrive.restoreButton")
+            }
+            color="my_green"
+            onPress={handleRestoreDrive}
+            disabled={!googleDriveConnected || driveAction === "restore"}
+            width={130}
+          />
+        </View>
+
+        <View style={styles.row}>
+          <View style={styles.rowTextWrapper}>
+            <Text style={styles.rowTitle}>
+              {t("settings.coursesData.googleDrive.disconnectTitle")}
+            </Text>
+            <Text style={styles.rowSubtitle}>
+              {t("settings.coursesData.googleDrive.disconnectSubtitle")}
+            </Text>
+          </View>
+          <MyButton
+            text={
+              driveAction === "disconnect"
+                ? t("settings.coursesData.googleDrive.disconnectLoading")
+                : t("settings.coursesData.googleDrive.disconnectButton")
+            }
+            color="my_yellow"
+            onPress={handleDisconnectDrive}
+            disabled={!googleDriveConnected || driveAction === "disconnect"}
+            width={130}
+          />
+        </View>
       </View>
 
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.coursesData.googleDrive.restoreTitle")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.coursesData.googleDrive.restoreSubtitle")}
-          </Text>
-        </View>
-        <MyButton
-          text={
-            driveAction === "restore"
-              ? t("settings.coursesData.googleDrive.restoreLoading")
-              : t("settings.coursesData.googleDrive.restoreButton")
-          }
-          color="my_green"
-          onPress={handleRestoreDrive}
-          disabled={!googleDriveConnected || driveAction === "restore"}
-          width={130}
-        />
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.coursesData.googleDrive.disconnectTitle")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.coursesData.googleDrive.disconnectSubtitle")}
-          </Text>
-        </View>
-        <MyButton
-          text={
-            driveAction === "disconnect"
-              ? t("settings.coursesData.googleDrive.disconnectLoading")
-              : t("settings.coursesData.googleDrive.disconnectButton")
-          }
-          color="my_yellow"
-          onPress={handleDisconnectDrive}
-          disabled={!googleDriveConnected || driveAction === "disconnect"}
-          width={130}
-        />
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.coursesData.rows.importUserData.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.coursesData.rows.importUserData.subtitle")}
-          </Text>
-        </View>
-        <MyButton
-          text={
-            importingData
-              ? t("settings.coursesData.rows.importUserData.buttonLoading")
-              : t("settings.coursesData.rows.importUserData.button")
-          }
-          color="my_green"
-          onPress={handleImportUserData}
-          disabled={importingData}
-          width={130}
-        />
-      </View>
+      <View style={styles.settingsDivider} />
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

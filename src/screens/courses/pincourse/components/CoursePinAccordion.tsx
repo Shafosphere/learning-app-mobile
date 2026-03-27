@@ -150,6 +150,8 @@ export function CoursePinAccordion({
 
             {expanded ? (
               <View style={styles.accordionBody}>
+                <View pointerEvents="none" style={styles.accordionBodySideMaskLeft} />
+                <View pointerEvents="none" style={styles.accordionBodySideMaskRight} />
                 {hasRegular ? (
                   <>
                     <Text style={styles.accordionSectionTitle}>Kursy</Text>

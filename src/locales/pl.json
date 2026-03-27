@@ -144,6 +144,10 @@
     },
     "coursesData": {
       "section": "Inne",
+      "groups": {
+        "localBackup": "Kopia lokalna",
+        "googleDrive": "Google Drive"
+      },
       "errors": {
         "generic": "Błąd",
         "exportUserData": "Nie udało się wyeksportować danych użytkownika.",
@@ -162,6 +166,12 @@
         "sectionTitle": "Google Drive auto-backup",
         "actionButton": "Akcja Google Drive",
         "loadingShort": "Trwa",
+        "connectTitle": "Połącz Google Drive",
+        "connectSubtitle": "Połącz konto Google, żeby włączyć backup ZIP i codzienny auto-backup przy starcie aplikacji.",
+        "connectButton": "Połącz",
+        "manualBackupTitle": "Wyślij backup teraz",
+        "manualBackupSubtitle": "Ręcznie zapisz najnowszą kopię ZIP w prywatnym folderze aplikacji na Google Drive.",
+        "backupNowButton": "Backup teraz",
         "status": {
           "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w buildzie aplikacji. Powód: {{reason}}",
           "notConfiguredFallback": "brak konfiguracji OAuth",
