@@ -46,14 +46,11 @@
       "expo-audio",
       "expo-font",
       "expo-notifications",
-      "expo-web-browser",
       "expo-mail-composer"
     ],
     "extra": {
       "googleDriveBackup": {
-        "androidClientId": "493135568689-a4usr5krf7jiaici7b5jocmb9u1c6l5k.apps.googleusercontent.com",
-        "iosClientId": "",
-        "webClientId": "",
+        "webClientId": "493135568689-p2rjn4hfgmq9gfe0qa0krt5j0pt3smud.apps.googleusercontent.com",
         "backupFileName": "memicard-drive-backup-latest.zip"
       }
     },

@@ -1,16 +1,7 @@
-import Constants from "expo-constants";
-import * as FileSystem from "expo-file-system/legacy";
-import {
-  AuthRequest,
-  ResponseType,
-  exchangeCodeAsync,
-  makeRedirectUri,
-  refreshAsync,
-  revokeAsync,
-} from "expo-auth-session";
-import * as WebBrowser from "expo-web-browser";
-import { Platform } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants, { ExecutionEnvironment } from "expo-constants";
+import * as FileSystem from "expo-file-system/legacy";
+import { Platform } from "react-native";
 import {
   createBackupZip,
   readBackupArchive,
@@ -18,39 +9,48 @@ import {
   type ImportResult,
 } from "@/src/services/userDataBackup";
 
-WebBrowser.maybeCompleteAuthSession();
-
 const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
-const GOOGLE_DISCOVERY = {
-  authorizationEndpoint: "https://accounts.google.com/o/oauth2/v2/auth",
-  tokenEndpoint: "https://oauth2.googleapis.com/token",
-  revocationEndpoint: "https://oauth2.googleapis.com/revoke",
-};
-
-const AUTH_STORAGE_KEY = "googleDriveBackup.auth";
+const LEGACY_AUTH_STORAGE_KEY = "googleDriveBackup.auth";
 const DEFAULT_BACKUP_FILENAME = "memicard-drive-backup-latest.zip";
 const STARTUP_BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
 
-type StoredGoogleDriveAuth = {
-  clientId: string;
-  redirectUri: string;
-  token: {
-    accessToken: string;
-    tokenType: string;
-    expiresIn?: number;
-    refreshToken?: string;
-    scope?: string;
-    state?: string;
-    idToken?: string;
-    issuedAt: number;
-  };
-};
-
 type GoogleDriveExtraConfig = {
-  androidClientId?: string;
-  iosClientId?: string;
   webClientId?: string;
   backupFileName?: string;
+};
+
+type GoogleDriveUser = {
+  scopes: string[];
+};
+
+type GoogleSigninModule = {
+  GoogleSignin: {
+    configure: (options?: { webClientId?: string }) => void;
+    hasPlayServices: (options: {
+      showPlayServicesUpdateDialog: boolean;
+    }) => Promise<boolean>;
+    signIn: () => Promise<
+      | { type: "success"; data: GoogleDriveUser }
+      | { type: "cancelled"; data: null }
+    >;
+    addScopes: (options: { scopes: string[] }) => Promise<
+      | { type: "success"; data: GoogleDriveUser }
+      | { type: "cancelled"; data: null }
+      | null
+    >;
+    signInSilently: () => Promise<
+      | { type: "success"; data: GoogleDriveUser }
+      | { type: "noSavedCredentialFound"; data: null }
+    >;
+    signOut: () => Promise<null>;
+    revokeAccess: () => Promise<null>;
+    hasPreviousSignIn: () => boolean;
+    getCurrentUser: () => GoogleDriveUser | null;
+    getTokens: () => Promise<{ accessToken: string; idToken: string }>;
+  };
+  statusCodes: {
+    PLAY_SERVICES_NOT_AVAILABLE: string;
+  };
 };
 
 export type GoogleDriveBackupMetadata = {
@@ -77,32 +77,18 @@ export type StartupBackupResult = {
   backupAt?: number;
 };
 
+let googleSigninConfigured = false;
+let legacyStateCleanupPromise: Promise<void> | null = null;
+let googleSigninModuleCache: GoogleSigninModule | null | undefined;
+
 function getExtraConfig(): GoogleDriveExtraConfig {
   return (Constants.expoConfig?.extra?.googleDriveBackup ??
     {}) as GoogleDriveExtraConfig;
 }
 
-function getConfiguredClientId(): string | null {
-  const config = getExtraConfig();
-  if (Platform.OS === "android") {
-    return config.androidClientId ?? null;
-  }
-  if (Platform.OS === "ios") {
-    return config.iosClientId ?? null;
-  }
-  return config.webClientId ?? null;
-}
-
-export function getGoogleDriveConfigurationError(): string | null {
-  const clientId = getConfiguredClientId();
-  if (!clientId) {
-    return "Brak skonfigurowanego Google OAuth client ID dla tej platformy.";
-  }
-  return null;
-}
-
-export function isGoogleDriveConfigured(): boolean {
-  return getGoogleDriveConfigurationError() == null;
+function getConfiguredWebClientId(): string | null {
+  const webClientId = getExtraConfig().webClientId?.trim();
+  return webClientId ? webClientId : null;
 }
 
 function getBackupFileName(): string {
@@ -112,85 +98,173 @@ function getBackupFileName(): string {
     : DEFAULT_BACKUP_FILENAME;
 }
 
-function getRedirectUri(): string {
-  const schemeConfig = Constants.expoConfig?.scheme;
-  const scheme = Array.isArray(schemeConfig) ? schemeConfig[0] : schemeConfig;
-  return makeRedirectUri({
-    scheme: scheme ?? "memicard",
-    path: "oauthredirect",
-  });
-}
-
-async function saveStoredAuth(auth: StoredGoogleDriveAuth): Promise<void> {
-  await AsyncStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(auth));
-}
-
-async function loadStoredAuth(): Promise<StoredGoogleDriveAuth | null> {
-  const raw = await AsyncStorage.getItem(AUTH_STORAGE_KEY);
-  if (!raw) return null;
-  try {
-    return JSON.parse(raw) as StoredGoogleDriveAuth;
-  } catch (error) {
-    console.warn("[googleDriveBackup] Failed to parse auth state", error);
-    return null;
+function startLegacyStateCleanup(): Promise<void> {
+  if (!legacyStateCleanupPromise) {
+    legacyStateCleanupPromise = AsyncStorage.removeItem(
+      LEGACY_AUTH_STORAGE_KEY
+    ).catch((error) => {
+      console.warn(
+        "[googleDriveBackup] Failed to clear legacy OAuth state",
+        error
+      );
+    });
   }
+
+  return legacyStateCleanupPromise;
 }
 
-async function clearStoredAuth(): Promise<void> {
-  await AsyncStorage.removeItem(AUTH_STORAGE_KEY);
+function isExpoGo(): boolean {
+  return Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
 }
 
-async function getFreshToken(): Promise<StoredGoogleDriveAuth> {
-  const stored = await loadStoredAuth();
-  if (!stored) {
+function canUseNativeGoogleSignin(): boolean {
+  return Platform.OS === "android" && !isExpoGo();
+}
+
+function getGoogleSigninModule(): GoogleSigninModule | null {
+  if (googleSigninModuleCache !== undefined) {
+    return googleSigninModuleCache;
+  }
+
+  if (!canUseNativeGoogleSignin()) {
+    googleSigninModuleCache = null;
+    return googleSigninModuleCache;
+  }
+
+  try {
+    googleSigninModuleCache =
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      require("@react-native-google-signin/google-signin") as GoogleSigninModule;
+  } catch (error) {
+    console.warn("[googleDriveBackup] Google Sign-In native module unavailable", error);
+    googleSigninModuleCache = null;
+  }
+
+  return googleSigninModuleCache;
+}
+
+function getGoogleDriveUnsupportedReason(): string | null {
+  if (Platform.OS !== "android") {
+    return "Google Drive backup jest obecnie wspierany tylko na Androidzie.";
+  }
+
+  if (isExpoGo()) {
+    return "Google Drive backup wymaga development builda albo APK i nie działa w Expo Go.";
+  }
+
+  if (!getGoogleSigninModule()) {
+    return "Ten build Androida nie zawiera natywnego modułu Google Sign-In.";
+  }
+
+  return null;
+}
+
+function ensureGoogleSigninConfigured(): void {
+  if (googleSigninConfigured) {
+    return;
+  }
+
+  const googleSigninModule = getGoogleSigninModule();
+  if (!googleSigninModule) {
+    throw new Error(
+      getGoogleDriveUnsupportedReason() ??
+        "Google Sign-In nie jest dostępny w tym buildzie."
+    );
+  }
+
+  const webClientId = getConfiguredWebClientId();
+  googleSigninModule.GoogleSignin.configure(webClientId ? { webClientId } : {});
+  googleSigninConfigured = true;
+  void startLegacyStateCleanup();
+}
+
+function hasDriveScope(user: GoogleDriveUser | null): boolean {
+  return Boolean(user?.scopes?.includes(GOOGLE_DRIVE_SCOPE));
+}
+
+function getPlayServicesErrorMessage(error: unknown): string {
+  const googleSigninModule = getGoogleSigninModule();
+  if (
+    googleSigninModule &&
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    error.code === googleSigninModule.statusCodes.PLAY_SERVICES_NOT_AVAILABLE
+  ) {
+    return "Google Play Services są niedostępne albo wymagają aktualizacji.";
+  }
+
+  return "Nie udało się uruchomić logowania Google na tym urządzeniu.";
+}
+
+function getTokenErrorMessage(error: unknown): string {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+  return "Nie udało się pobrać dostępu do Google Drive. Połącz konto ponownie.";
+}
+
+async function requireSignedInUser(): Promise<GoogleDriveUser> {
+  ensureGoogleSigninConfigured();
+  const googleSigninModule = getGoogleSigninModule();
+  if (!googleSigninModule) {
+    throw new Error(
+      getGoogleDriveUnsupportedReason() ??
+        "Google Sign-In nie jest dostępny w tym buildzie."
+    );
+  }
+
+  const currentUser = googleSigninModule.GoogleSignin.getCurrentUser();
+  if (currentUser) {
+    return currentUser;
+  }
+
+  if (!googleSigninModule.GoogleSignin.hasPreviousSignIn()) {
     throw new Error("Brak połączenia z Google Drive.");
   }
 
-  const token = stored.token;
-  const expiresAt =
-    typeof token.expiresIn === "number"
-      ? token.issuedAt + token.expiresIn
-      : Number.POSITIVE_INFINITY;
-  const nowSeconds = Math.floor(Date.now() / 1000);
-  const isStillFresh = expiresAt - nowSeconds > 60;
-
-  if (isStillFresh || !token.refreshToken) {
-    return stored;
+  const result = await googleSigninModule.GoogleSignin.signInSilently();
+  if (result.type !== "success") {
+    throw new Error("Brak połączenia z Google Drive.");
   }
 
-  const refreshed = await refreshAsync(
-    {
-      clientId: stored.clientId,
-      refreshToken: token.refreshToken,
-      scopes: [GOOGLE_DRIVE_SCOPE],
-    },
-    GOOGLE_DISCOVERY
-  );
+  return result.data;
+}
 
-  const refreshedStored: StoredGoogleDriveAuth = {
-    ...stored,
-    token: {
-      accessToken: refreshed.accessToken,
-      tokenType: refreshed.tokenType,
-      expiresIn: refreshed.expiresIn,
-      refreshToken: refreshed.refreshToken ?? token.refreshToken,
-      scope: refreshed.scope,
-      state: refreshed.state,
-      idToken: refreshed.idToken,
-      issuedAt: refreshed.issuedAt,
-    },
-  };
-  await saveStoredAuth(refreshedStored);
-  return refreshedStored;
+async function getFreshAccessToken(): Promise<string> {
+  const user = await requireSignedInUser();
+  if (!hasDriveScope(user)) {
+    throw new Error(
+      "Brak wymaganego uprawnienia Google Drive. Połącz konto ponownie."
+    );
+  }
+
+  try {
+    const googleSigninModule = getGoogleSigninModule();
+    if (!googleSigninModule) {
+      throw new Error(
+        getGoogleDriveUnsupportedReason() ??
+          "Google Sign-In nie jest dostępny w tym buildzie."
+      );
+    }
+
+    const tokens = await googleSigninModule.GoogleSignin.getTokens();
+    if (!tokens.accessToken) {
+      throw new Error("Brak tokenu dostępu Google Drive.");
+    }
+    return tokens.accessToken;
+  } catch (error) {
+    throw new Error(getTokenErrorMessage(error));
+  }
 }
 
 async function authorizedFetch(
   url: string,
   options?: RequestInit
 ): Promise<Response> {
-  const auth = await getFreshToken();
+  const accessToken = await getFreshAccessToken();
   const headers = new Headers(options?.headers ?? {});
-  headers.set("Authorization", `Bearer ${auth.token.accessToken}`);
+  headers.set("Authorization", `Bearer ${accessToken}`);
   return fetch(url, {
     ...options,
     headers,
@@ -255,7 +329,7 @@ async function uploadZipToDrive(
   zipUri: string,
   fileId: string
 ): Promise<GoogleDriveBackupMetadata> {
-  const auth = await getFreshToken();
+  const accessToken = await getFreshAccessToken();
   const uploadResult = await FileSystem.uploadAsync(
     `https://www.googleapis.com/upload/drive/v3/files/${fileId}?uploadType=media&fields=id,name,modifiedTime,size`,
     zipUri,
@@ -263,7 +337,7 @@ async function uploadZipToDrive(
       httpMethod: "PATCH",
       uploadType: FileSystem.FileSystemUploadType.BINARY_CONTENT,
       headers: {
-        Authorization: `Bearer ${auth.token.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
         "Content-Type": "application/zip",
       },
     }
@@ -288,59 +362,65 @@ async function uploadZipToDrive(
   };
 }
 
-export async function connectGoogleDrive(): Promise<ConnectGoogleDriveResult> {
-  const clientId = getConfiguredClientId();
-  if (!clientId) {
-    throw new Error(getGoogleDriveConfigurationError() ?? "Brak client ID.");
+export function initializeGoogleDriveBackup(): void {
+  if (!canUseNativeGoogleSignin()) {
+    return;
   }
 
-  const redirectUri = getRedirectUri();
-  const request = new AuthRequest({
-    clientId,
-    redirectUri,
-    scopes: [GOOGLE_DRIVE_SCOPE],
-    responseType: ResponseType.Code,
-    usePKCE: true,
-    extraParams: {
-      access_type: "offline",
-      prompt: "consent",
-    },
-  });
+  try {
+    ensureGoogleSigninConfigured();
+  } catch (error) {
+    console.warn("[googleDriveBackup] Google Sign-In configure failed", error);
+  }
+}
 
-  const result = await request.promptAsync(GOOGLE_DISCOVERY);
-  if (result.type !== "success" || !result.params.code) {
+export function getGoogleDriveConfigurationError(): string | null {
+  return getGoogleDriveUnsupportedReason();
+}
+
+export function isGoogleDriveConfigured(): boolean {
+  return getGoogleDriveConfigurationError() == null;
+}
+
+export async function connectGoogleDrive(): Promise<ConnectGoogleDriveResult> {
+  ensureGoogleSigninConfigured();
+  await startLegacyStateCleanup();
+  const googleSigninModule = getGoogleSigninModule();
+  if (!googleSigninModule) {
+    throw new Error(
+      getGoogleDriveUnsupportedReason() ??
+        "Google Sign-In nie jest dostępny w tym buildzie."
+    );
+  }
+
+  try {
+    await googleSigninModule.GoogleSignin.hasPlayServices({
+      showPlayServicesUpdateDialog: true,
+    });
+  } catch (error) {
+    throw new Error(getPlayServicesErrorMessage(error));
+  }
+
+  const signInResult = await googleSigninModule.GoogleSignin.signIn();
+  if (signInResult.type !== "success") {
     return {
       connected: false,
       cancelled: true,
     };
   }
 
-  const token = await exchangeCodeAsync(
-    {
-      clientId,
-      code: result.params.code,
-      redirectUri,
-      extraParams: {
-        code_verifier: request.codeVerifier ?? "",
-      },
-    },
-    GOOGLE_DISCOVERY
-  );
+  const scopeResult = hasDriveScope(signInResult.data)
+    ? signInResult
+    : await googleSigninModule.GoogleSignin.addScopes({
+        scopes: [GOOGLE_DRIVE_SCOPE],
+      });
 
-  await saveStoredAuth({
-    clientId,
-    redirectUri,
-    token: {
-      accessToken: token.accessToken,
-      tokenType: token.tokenType,
-      expiresIn: token.expiresIn,
-      refreshToken: token.refreshToken,
-      scope: token.scope,
-      state: token.state,
-      idToken: token.idToken,
-      issuedAt: token.issuedAt,
-    },
-  });
+  if (!scopeResult || scopeResult.type !== "success") {
+    return {
+      connected: false,
+      cancelled: true,
+    };
+  }
 
   return {
     connected: true,
@@ -349,34 +429,31 @@ export async function connectGoogleDrive(): Promise<ConnectGoogleDriveResult> {
 }
 
 export async function disconnectGoogleDrive(): Promise<void> {
-  const stored = await loadStoredAuth();
-  if (stored?.token?.refreshToken) {
-    try {
-      await revokeAsync(
-        {
-          token: stored.token.refreshToken,
-          clientId: stored.clientId,
-        },
-        GOOGLE_DISCOVERY
-      );
-    } catch (error) {
-      console.warn("[googleDriveBackup] Refresh token revoke failed", error);
-    }
-  } else if (stored?.token?.accessToken) {
-    try {
-      await revokeAsync(
-        {
-          token: stored.token.accessToken,
-          clientId: stored.clientId,
-        },
-        GOOGLE_DISCOVERY
-      );
-    } catch (error) {
-      console.warn("[googleDriveBackup] Access token revoke failed", error);
-    }
+  if (!canUseNativeGoogleSignin()) {
+    await startLegacyStateCleanup();
+    return;
   }
 
-  await clearStoredAuth();
+  ensureGoogleSigninConfigured();
+  const googleSigninModule = getGoogleSigninModule();
+  if (!googleSigninModule) {
+    await startLegacyStateCleanup();
+    return;
+  }
+
+  try {
+    await googleSigninModule.GoogleSignin.revokeAccess();
+  } catch (error) {
+    console.warn("[googleDriveBackup] Google revokeAccess failed", error);
+  }
+
+  try {
+    await googleSigninModule.GoogleSignin.signOut();
+  } catch (error) {
+    console.warn("[googleDriveBackup] Google signOut failed", error);
+  }
+
+  await startLegacyStateCleanup();
 }
 
 export async function getLatestDriveBackupMetadata(
@@ -436,13 +513,13 @@ export async function restoreBackupFromDrive(
     throw new Error("Brak katalogu tymczasowego do pobrania backupu.");
   }
 
-  const auth = await getFreshToken();
+  const accessToken = await getFreshAccessToken();
   const download = await FileSystem.downloadAsync(
     `https://www.googleapis.com/drive/v3/files/${metadata.fileId}?alt=media`,
     targetUri,
     {
       headers: {
-        Authorization: `Bearer ${auth.token.accessToken}`,
+        Authorization: `Bearer ${accessToken}`,
       },
     }
   );

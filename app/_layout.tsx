@@ -24,6 +24,7 @@ import {
   subscribeDbInitDebugOverride,
 } from "@/src/services/dbInitDebugOverride";
 import { importUserData } from "@/src/services/importUserData";
+import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -183,6 +184,8 @@ export default function RootLayout() {
   }, [prepareApp, t]);
 
   useEffect(() => {
+    initializeGoogleDriveBackup();
+
     const handleDbEvent = (event: DbInitializationEvent) => {
       switch (event.type) {
         case "start":
