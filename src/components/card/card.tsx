@@ -124,6 +124,7 @@ export default function Card({
   textColorOverride,
   hideHints = false,
   isBetweenCards = false,
+  disableLayoutAnimation = false,
   showExplanationEnabled: showExplanationEnabledProp,
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
 }: CardProps) {
@@ -708,13 +709,28 @@ export default function Card({
   ]);
 
   useEffect(() => {
-    if (selectedItemId == null) return;
+    if (disableLayoutAnimation || !isFocused) {
+      initialLayoutCardIdRef.current = null;
+      setIsLayoutAnimationArmed(false);
+      return;
+    }
+
+    if (selectedItemId == null) {
+      initialLayoutCardIdRef.current = null;
+      return;
+    }
+
     if (initialLayoutCardIdRef.current == null) {
       initialLayoutCardIdRef.current = selectedItemId;
       return;
     }
+
+    if (initialLayoutCardIdRef.current === selectedItemId) {
+      return;
+    }
+
     setIsLayoutAnimationArmed((prev) => (prev ? prev : true));
-  }, [selectedItemId]);
+  }, [disableLayoutAnimation, isFocused, selectedItemId]);
 
   useEffect(() => {
     setIsEditingHint(false);
@@ -1042,7 +1058,7 @@ export default function Card({
       )}
       <CardFrame
         compact={!useLargeLayout}
-        animateLayout={isLayoutAnimationArmed}
+        animateLayout={!disableLayoutAnimation && isLayoutAnimationArmed}
         cardStateStyle={cardStateStyle}
         backgroundColorOverride={backgroundColorOverride}
       >

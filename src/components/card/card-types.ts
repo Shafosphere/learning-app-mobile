@@ -38,6 +38,7 @@ export type CardProps = {
   textColorOverride?: string;
   hideHints?: boolean;
   isBetweenCards?: boolean;
+  disableLayoutAnimation?: boolean;
   showExplanationEnabled?: boolean;
   explanationOnlyOnWrong?: boolean;
   isExplanationVisible?: boolean;

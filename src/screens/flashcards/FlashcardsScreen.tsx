@@ -218,6 +218,7 @@ export default function Flashcards() {
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
+  const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [selectedTrueFalseUiState, setSelectedTrueFalseUiState] = useState<{
     cardId: number | null;
     answer: boolean | null;
@@ -229,6 +230,7 @@ export default function Flashcards() {
     null,
   );
   const uiWarmupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const loadingOverlayOpacity = useRef(new Animated.Value(1)).current;
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
@@ -778,6 +780,42 @@ export default function Flashcards() {
   }, [activeCustomCourseId, isFocused]);
 
   const isUiWarmupActive = isFocused && !isUiReady;
+  const shouldKeepLoadingOverlayVisible =
+    activeCustomCourseId != null &&
+    !loadError &&
+    (isLoadingData || loadedCourseId !== activeCustomCourseId);
+
+  useEffect(() => {
+    if (shouldKeepLoadingOverlayVisible) {
+      loadingOverlayOpacity.stopAnimation();
+      loadingOverlayOpacity.setValue(1);
+      setShowLoadingOverlay(true);
+      return;
+    }
+
+    if (!showLoadingOverlay) {
+      loadingOverlayOpacity.setValue(0);
+      return;
+    }
+
+    const fadeOut = Animated.timing(loadingOverlayOpacity, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: true,
+    });
+    fadeOut.start(({ finished }) => {
+      if (!finished) return;
+      setShowLoadingOverlay(false);
+    });
+
+    return () => {
+      fadeOut.stop();
+    };
+  }, [
+    loadingOverlayOpacity,
+    shouldKeepLoadingOverlayVisible,
+    showLoadingOverlay,
+  ]);
 
   const downloadDisabled =
     customCards.length === 0 || isLoadingData || !isReady;
@@ -918,6 +956,7 @@ export default function Flashcards() {
     debug: true,
   });
   const shouldHideMainUiDuringWarmup =
+    !showLoadingOverlay &&
     isUiWarmupActive &&
     !isLoadingData &&
     activeCustomCourseId != null &&
@@ -1004,12 +1043,6 @@ export default function Flashcards() {
         </Text>
       </View>
     );
-  } else if (isLoadingData) {
-    cardSection = (
-      <View style={{ paddingHorizontal: 32, alignItems: "center" }}>
-        <ActivityIndicator size="large" color={colors.paragraph} />
-      </View>
-    );
   } else if (loadError) {
     cardSection = (
       <View style={{ paddingHorizontal: 32 }}>
@@ -1041,6 +1074,11 @@ export default function Flashcards() {
         onHintUpdate={handleHintUpdate}
         isFocused={isFocused}
         isBetweenCards={isBetweenCards}
+        disableLayoutAnimation={
+          shouldKeepLoadingOverlayVisible ||
+          showLoadingOverlay ||
+          shouldHideMainUiDuringWarmup
+        }
         hideHints={shouldHideHintsForActiveBox}
         showExplanationEnabled={showExplanationEnabled}
         explanationOnlyOnWrong={explanationOnlyOnWrong}
@@ -1095,8 +1133,13 @@ export default function Flashcards() {
       <Confetti generateConfetti={shouldCelebrate} />
 
       <View
-        style={{ flex: 1, opacity: shouldHideMainUiDuringWarmup ? 0 : 1 }}
-        pointerEvents={shouldHideMainUiDuringWarmup ? "none" : "auto"}
+        style={{
+          flex: 1,
+          opacity: shouldHideMainUiDuringWarmup ? 0 : 1,
+        }}
+        pointerEvents={
+          shouldHideMainUiDuringWarmup || showLoadingOverlay ? "none" : "auto"
+        }
       >
         <View style={styles.cardSectionWrapper}>{cardSection}</View>
 
@@ -1197,6 +1240,20 @@ export default function Flashcards() {
           </View>
         )}
       </View>
+
+      {showLoadingOverlay ? (
+        <Animated.View
+          pointerEvents="auto"
+          style={[
+            styles.loadingOverlay,
+            { opacity: loadingOverlayOpacity },
+          ]}
+        >
+          <View style={styles.loadingOverlayContent}>
+            <ActivityIndicator size="large" color={colors.paragraph} />
+          </View>
+        </Animated.View>
+      ) : null}
 
       {shouldHideMainUiDuringWarmup ? (
         <View
