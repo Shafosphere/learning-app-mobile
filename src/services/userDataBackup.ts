@@ -1003,6 +1003,7 @@ async function resetReplaceableStorageState(): Promise<void> {
 
   await AsyncStorage.multiSet([
     ["activeCustomCourseId", JSON.stringify(null)],
+    ["flashcards.customCourseEntrySettingsSeen", JSON.stringify({})],
     ["officialPinnedCourseIds", JSON.stringify([])],
   ]);
 }

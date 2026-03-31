@@ -1,9 +1,9 @@
 {
   "app": {
     "loading": {
-      "initializing": "Wczytuję aplikację…",
-      "importingCsv": "Importuję dane z CSV…",
-      "finishingSetup": "Wczytuję",
+      "initializing": "Przygotowuję bazę danych…",
+      "importingCsv": "Importuję dane…",
+      "finishingSetup": "Kończę konfigurację…",
       "launching": "Uruchamiam aplikację…",
       "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi."
     },
@@ -324,6 +324,11 @@
           "win": "Win",
           "loss": "Loss",
           "startup": "Startup"
+        },
+        "startupScreenPreview": {
+          "title": "Podgląd ekranu startowego",
+          "subtitle": "Na chwilę pokazuje nowy ekran ładowania z ikoną aplikacji i spinnerem.",
+          "button": "Pokaż ekran"
         },
         "hangul": {
           "title": "Testuj klawiaturę Hangul",

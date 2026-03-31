@@ -9,6 +9,8 @@ const Papa = require("papaparse");
 const ROOT_DIR = path.resolve(__dirname, "../..");
 const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
+const INCLUDE_DEV_ONLY_PACKS = process.env.PREBUILD_INCLUDE_DEV_PACKS === "1";
+const DEV_ONLY_PACK_SLUGS = new Set(["hangul_polish_reading", "test_mixed_types"]);
 
 const OFFICIAL_PACKS = [
   {
@@ -263,7 +265,7 @@ const OFFICIAL_PACKS = [
 ].map((pack) => ({
   packVersion: 1,
   ...pack,
-}));
+})).filter((pack) => INCLUDE_DEV_ONLY_PACKS || !DEV_ONLY_PACK_SLUGS.has(pack.slug));
 
 const TRUE_VALUES = new Set(["true", "1", "yes", "y", "tak", "t"]);
 const KNOWN_CSV_HEADERS = new Set([

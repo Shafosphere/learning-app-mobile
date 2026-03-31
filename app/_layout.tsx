@@ -25,12 +25,14 @@ import {
 } from "@/src/services/dbInitDebugOverride";
 import { importUserData } from "@/src/services/importUserData";
 import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
+import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
+  Image,
   Pressable,
   StyleSheet,
   Text,
@@ -41,6 +43,8 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 
 SplashScreen.preventAutoHideAsync();
 
+const STARTUP_ICON = require("@/assets/app/icons/generated/web/icon-192.png");
+
 type RootStatus = "loading" | "ready" | "error" | "importing" | "resetting";
 
 export default function RootLayout() {
@@ -49,9 +53,13 @@ export default function RootLayout() {
   const [loadingMessageKey, setLoadingMessageKey] = useState(
     "app.loading.initializing"
   );
+  const [previewLoadingMessageKey, setPreviewLoadingMessageKey] = useState<string | null>(
+    null
+  );
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDebugErrorOverride, setIsDebugErrorOverride] = useState(false);
   const splashHiddenRef = useRef(false);
+  const previewTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {
@@ -214,12 +222,29 @@ export default function RootLayout() {
         setStatus("error");
       }
     });
+    const unsubscribeStartupPreview = subscribeStartupScreenPreview(
+      ({ durationMs, messageKey }) => {
+        if (previewTimeoutRef.current) {
+          clearTimeout(previewTimeoutRef.current);
+        }
+
+        setPreviewLoadingMessageKey(messageKey);
+        previewTimeoutRef.current = setTimeout(() => {
+          setPreviewLoadingMessageKey(null);
+          previewTimeoutRef.current = null;
+        }, durationMs);
+      }
+    );
 
     void prepareApp();
 
     return () => {
       unsubscribe();
       unsubscribeDebugOverride();
+      unsubscribeStartupPreview();
+      if (previewTimeoutRef.current) {
+        clearTimeout(previewTimeoutRef.current);
+      }
     };
   }, [prepareApp]);
 
@@ -260,14 +285,37 @@ export default function RootLayout() {
 
     return (
       <View style={styles.blockingContainer}>
-        <ActivityIndicator size="large" />
+        <View style={styles.loadingLogoWrap}>
+          <Image source={STARTUP_ICON} style={styles.loadingLogo} resizeMode="contain" />
+        </View>
         <Text style={styles.loadingText}>
-          {status === "importing"
+          {previewLoadingMessageKey
+            ? t(previewLoadingMessageKey)
+            : status === "importing"
             ? t("app.error.actions.importing")
             : status === "resetting"
               ? t("app.error.actions.resetting")
               : t(loadingMessageKey)}
         </Text>
+        <ActivityIndicator size="large" color="#22577a" />
+      </View>
+    );
+  };
+
+  const renderPreviewOverlay = () => {
+    if (previewLoadingMessageKey == null) {
+      return null;
+    }
+
+    return (
+      <View style={styles.previewOverlay}>
+        <View style={styles.blockingContainer}>
+          <View style={styles.loadingLogoWrap}>
+            <Image source={STARTUP_ICON} style={styles.loadingLogo} resizeMode="contain" />
+          </View>
+          <Text style={styles.loadingText}>{t(previewLoadingMessageKey)}</Text>
+          <ActivityIndicator size="large" color="#22577a" />
+        </View>
       </View>
     );
   };
@@ -297,6 +345,7 @@ export default function RootLayout() {
         ) : (
           renderBlockingState()
         )}
+        {status === "ready" ? renderPreviewOverlay() : null}
       </View>
     </SafeAreaProvider>
   );
@@ -336,18 +385,43 @@ function ActionButton({
 }
 
 const styles = StyleSheet.create({
+  previewOverlay: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 10,
+  },
   blockingContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
-    gap: 14,
+    gap: 18,
     backgroundColor: "#fffdf8",
   },
+  loadingLogoWrap: {
+    width: 148,
+    height: 148,
+    alignItems: "center",
+    justifyContent: "center",
+    borderRadius: 36,
+    backgroundColor: "#ffffff",
+    shadowColor: "#d6e4f0",
+    shadowOffset: { width: 0, height: 10 },
+    shadowOpacity: 0.3,
+    shadowRadius: 24,
+    elevation: 6,
+    marginBottom: 6,
+  },
+  loadingLogo: {
+    width: 112,
+    height: 112,
+  },
   loadingText: {
-    fontSize: 16,
-    color: "#3d3d3d",
+    fontSize: 17,
+    lineHeight: 24,
+    fontWeight: "600",
+    color: "#2f3e46",
     textAlign: "center",
+    maxWidth: 280,
   },
   errorTitle: {
     fontSize: 24,

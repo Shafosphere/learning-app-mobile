@@ -302,8 +302,8 @@ export default function Card({
     if (!value) return false;
     return HANGUL_CHAR_REGEX.test(value);
   }, [correction?.awers]);
-  const shouldUseHangulKeyboardMain = expectsHangulAnswer;
-  const shouldUseHangulKeyboardCorrection1 = expectsHangulCorrectionAwers;
+  const shouldUseHangulKeyboardMain = __DEV__ && expectsHangulAnswer;
+  const shouldUseHangulKeyboardCorrection1 = __DEV__ && expectsHangulCorrectionAwers;
   const showMainHangulKeyboard =
     hangulTarget === "main" &&
     shouldUseHangulKeyboardMain &&

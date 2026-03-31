@@ -40,10 +40,11 @@ export type OfficialPackDef = {
 };
 
 const DEFAULT_PACK_VERSION = 1;
+const DEV_ONLY_PACK_SLUGS = new Set(["hangul_polish_reading", "test_mixed_types"]);
 
 // Manifest of official (built-in) packs included with the app bundle.
 // Add new entries here to ship additional packs.
-export const OFFICIAL_PACKS: OfficialPackDef[] = ([
+const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "fiszki_podstawy_en_pl_slowa",
     name: "Podstawowe słówka",
@@ -427,7 +428,9 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = ([
   //   },
   //   imageMap: imageMaps.europeFlags,
   // },
-].map((pack) => ({
+]) satisfies Omit<OfficialPackDef, "packVersion">[];
+
+export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack) => ({
   packVersion: DEFAULT_PACK_VERSION,
   ...pack,
-})) as OfficialPackDef[]);
+})).filter((pack) => __DEV__ || !DEV_ONLY_PACK_SLUGS.has(pack.slug));

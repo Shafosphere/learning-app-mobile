@@ -203,13 +203,15 @@ export default function CourseActivateScreen() {
   }, []);
 
   const notifyActivated = useCallback(() => {
-    void setOnboardingCheckpoint("done");
+    if (startedInOnboarding) {
+      void setOnboardingCheckpoint("done");
+    }
     setPopup({
       message: "Aktywowałem kurs :3",
       color: "calm",
       duration: 3000,
     });
-  }, [setPopup]);
+  }, [setPopup, startedInOnboarding]);
 
   const handleCustomCoursePress = useCallback(
     async (id: number) => {

@@ -1,8 +1,8 @@
 {
   "app": {
     "loading": {
-      "initializing": "Loading app...",
-      "importingCsv": "Importing CSV data...",
+      "initializing": "Preparing the database...",
+      "importingCsv": "Importing data...",
       "finishingSetup": "Finishing setup...",
       "launching": "Launching app...",
       "dbError": "Could not initialize the database. Check logs."
@@ -324,6 +324,11 @@
           "win": "Win",
           "loss": "Loss",
           "startup": "Startup"
+        },
+        "startupScreenPreview": {
+          "title": "Startup screen preview",
+          "subtitle": "Briefly shows the new loading screen with the app icon and spinner.",
+          "button": "Show screen"
         },
         "hangul": {
           "title": "Test Hangul keyboard",

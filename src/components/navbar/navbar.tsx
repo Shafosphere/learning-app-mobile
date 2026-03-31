@@ -48,7 +48,11 @@ type NavbarProps = {
 
 const REVIEW_MINIGAME_PREFIX = "/review/minigames";
 const REVIEW_SESSION_PATHS = new Set(["/review/brain", "/review/table"]);
-const FLASHCARDS_PATHS = new Set(["/flashcards", "/flashcards_custom"]);
+const FLASHCARDS_PATHS = new Set([
+  "/flashcards",
+  "/flashcards_custom",
+  "/course-entry-settings",
+]);
 
 export default function Navbar({ children }: NavbarProps) {
   const router = useRouter();
@@ -59,6 +63,8 @@ export default function Navbar({ children }: NavbarProps) {
     theme,
     toggleTheme,
     activeCustomCourseId,
+    customCourseEntrySettingsSeenHydrated,
+    hasSeenCustomCourseEntrySettings,
     selectedLevel,
     activeCourse,
     colors,
@@ -306,6 +312,14 @@ export default function Navbar({ children }: NavbarProps) {
     }
 
     if (activeCustomCourseId != null) {
+      if (
+        customCourseEntrySettingsSeenHydrated &&
+        !hasSeenCustomCourseEntrySettings(activeCustomCourseId)
+      ) {
+        router.push("/course-entry-settings");
+        return;
+      }
+
       router.push("/flashcards_custom");
       return;
     }
@@ -313,6 +327,14 @@ export default function Navbar({ children }: NavbarProps) {
     if (pinnedOfficialCourseIds.length > 0) {
       const firstPinned = pinnedOfficialCourseIds[0];
       await setActiveCustomCourseId(firstPinned);
+      if (
+        customCourseEntrySettingsSeenHydrated &&
+        !hasSeenCustomCourseEntrySettings(firstPinned)
+      ) {
+        router.push("/course-entry-settings");
+        return;
+      }
+
       router.push("/flashcards_custom");
       return;
     }

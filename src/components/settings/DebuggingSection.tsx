@@ -11,9 +11,10 @@ import { unlockAchievement } from "@/src/db/sqlite/repositories/achievements";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
+import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { useRouter } from "expo-router";
 import * as FileSystem from "expo-file-system/legacy";
+import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Switch, Text, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -356,6 +357,27 @@ const DebuggingSection: React.FC = () => {
       </View>
 
       <Text style={styles.sectionHeader}>{t("settings.debug.section.uiPreview")}</Text>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.startupScreenPreview.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.startupScreenPreview.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.startupScreenPreview.button")}
+          color="my_yellow"
+          onPress={() =>
+            triggerStartupScreenPreview({
+              messageKey: "app.loading.initializing",
+            })
+          }
+          width={140}
+        />
+      </View>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>

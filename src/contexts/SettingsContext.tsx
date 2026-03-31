@@ -22,7 +22,10 @@ import {
   MemoryBoardSize,
   sanitizeMemoryBoardSize,
 } from "../constants/memoryGame";
-import { usePersistedState } from "../hooks/usePersistedState";
+import {
+  useHydratedPersistedState,
+  usePersistedState,
+} from "../hooks/usePersistedState";
 import {
   ColorBlindMode,
   resolveThemeColors,
@@ -136,6 +139,7 @@ type CourseExplanationOnlyOnWrongOverrides = {
   custom: Record<string, boolean>;
 };
 
+type CustomCourseEntrySettingsSeenMap = Record<string, true>;
 
 type CourseImageSizeOverrides = {
   builtin: Record<string, FlashcardsImageSize>;
@@ -166,6 +170,8 @@ const DEFAULT_COURSE_EXPLANATION_ONLY_ON_WRONG_OVERRIDES: CourseExplanationOnlyO
   builtin: {},
   custom: {},
 };
+
+const DEFAULT_CUSTOM_COURSE_ENTRY_SETTINGS_SEEN: CustomCourseEntrySettingsSeenMap = {};
 
 const DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES: CourseSkipCorrectionOverrides = {
   builtin: {},
@@ -307,6 +313,9 @@ interface SettingsContextValue {
   activeCourse: LanguageCourse | null;
   activeCustomCourseId: number | null;
   setActiveCustomCourseId: (id: number | null) => Promise<void>;
+  customCourseEntrySettingsSeenHydrated: boolean;
+  hasSeenCustomCourseEntrySettings: (courseId: number) => boolean;
+  markCustomCourseEntrySettingsSeen: (courseId: number) => Promise<void>;
   // Pinned official packs (custom courses marked as official)
   pinnedOfficialCourseIds: number[];
   pinOfficialCourse: (id: number) => Promise<void>;
@@ -495,6 +504,9 @@ const defaultValue: SettingsContextValue = {
   activeCourse: null,
   activeCustomCourseId: null,
   setActiveCustomCourseId: async () => {},
+  customCourseEntrySettingsSeenHydrated: false,
+  hasSeenCustomCourseEntrySettings: () => false,
+  markCustomCourseEntrySettingsSeen: async () => {},
   pinnedOfficialCourseIds: [],
   pinOfficialCourse: async () => {},
   unpinOfficialCourse: async () => {},
@@ -613,6 +625,14 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
 
   const [activeCustomCourseId, setActiveCustomCourseIdState] =
     usePersistedState<number | null>("activeCustomCourseId", null);
+  const [
+    customCourseEntrySettingsSeen,
+    setCustomCourseEntrySettingsSeen,
+    customCourseEntrySettingsSeenHydrated,
+  ] = useHydratedPersistedState<CustomCourseEntrySettingsSeenMap>(
+      "flashcards.customCourseEntrySettingsSeen",
+      DEFAULT_CUSTOM_COURSE_ENTRY_SETTINGS_SEEN
+    );
 
   // Pinned official packs
   const [pinnedOfficialCourseIds, setPinnedOfficialCourseIds] =
@@ -897,6 +917,25 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
       await setActiveCustomCourseIdState(courseId);
     },
     [setActiveCustomCourseIdState, setActiveCourseIdxState]
+  );
+
+  const hasSeenCustomCourseEntrySettings = useCallback(
+    (courseId: number) => customCourseEntrySettingsSeen[courseId.toString()] === true,
+    [customCourseEntrySettingsSeen]
+  );
+
+  const markCustomCourseEntrySettingsSeen = useCallback(
+    async (courseId: number) => {
+      const key = courseId.toString();
+      if (customCourseEntrySettingsSeen[key] === true) {
+        return;
+      }
+      await setCustomCourseEntrySettingsSeen({
+        ...customCourseEntrySettingsSeen,
+        [key]: true,
+      });
+    },
+    [customCourseEntrySettingsSeen, setCustomCourseEntrySettingsSeen]
   );
 
   const getBuiltinCourseBoxZeroEnabled = useCallback(
@@ -2159,6 +2198,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
   const resetCustomCourseDependentSettings = useCallback(async () => {
     await Promise.all([
       setActiveCustomCourseIdState(null),
+      setCustomCourseEntrySettingsSeen({}),
       setPinnedOfficialCourseIds([]),
       setBoxZeroOverrides({
         builtin: { ...boxZeroOverrides.builtin },
@@ -2199,6 +2239,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     setAutoflowOverrides,
     setBoxZeroOverrides,
     setCardSizeOverrides,
+    setCustomCourseEntrySettingsSeen,
     setImageFrameOverrides,
     setImageSizeOverrides,
     setPinnedOfficialCourseIds,
@@ -2403,6 +2444,9 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
         activeCourse,
         activeCustomCourseId,
         setActiveCustomCourseId,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+        markCustomCourseEntrySettingsSeen,
         pinnedOfficialCourseIds,
         pinOfficialCourse,
         unpinOfficialCourse,
