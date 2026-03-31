@@ -11,7 +11,6 @@ import {
   getCustomCoursesWithCardCounts,
   type CustomCourseRecord,
 } from "@/src/db/sqlite/db";
-import { useCourseActivateProfileRender } from "@/src/screens/courses/activatecourse/highlightProfiling";
 import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
@@ -78,27 +77,13 @@ export default function Navbar({ children }: NavbarProps) {
   );
   const [dueReviewCount, setDueReviewCount] = useState<number>(0);
 
-  useCourseActivateProfileRender("Navbar", `pathname=${pathname}`);
-
-  type DisplayCourse =
-    | { kind: "custom"; course: CustomCourseRecord }
-    | { kind: "builtin"; course: LanguageCourse };
-  const derivedDisplayCourse = useMemo<DisplayCourse | null>(() => {
-    if (activeCustomCourseId != null && customCourse) {
-      return { kind: "custom", course: customCourse };
-    }
-
-    if (activeCustomCourseId == null && activeCourse) {
-      return { kind: "builtin", course: activeCourse as LanguageCourse };
-    }
-
-    return null;
-  }, [activeCourse, activeCustomCourseId, customCourse]);
-  const [displayCourse, setDisplayCourse] = useState<DisplayCourse | null>(
-    derivedDisplayCourse,
-  );
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
+
+  const displayedCustomCourse =
+    activeCustomCourseId != null ? customCourse : null;
+  const displayedBuiltinCourse =
+    activeCustomCourseId == null ? (activeCourse as LanguageCourse | null) : null;
 
   useEffect(() => {
     if (Platform.OS !== "android") {
@@ -157,9 +142,6 @@ export default function Navbar({ children }: NavbarProps) {
       .then((course) => {
         if (isMounted) {
           setCustomCourse(course);
-          if (course) {
-            setDisplayCourse({ kind: "custom", course });
-          }
         }
       })
       .catch((error) => {
@@ -173,17 +155,6 @@ export default function Navbar({ children }: NavbarProps) {
       isMounted = false;
     };
   }, [activeCustomCourseId]);
-
-  useEffect(() => {
-    if (derivedDisplayCourse) {
-      setDisplayCourse(derivedDisplayCourse);
-    }
-  }, [derivedDisplayCourse]);
-
-  const displayedCustomCourse =
-    displayCourse?.kind === "custom" ? displayCourse.course : null;
-  const displayedBuiltinCourse =
-    displayCourse?.kind === "builtin" ? displayCourse.course : null;
 
   const courseFlagSource = useMemo(() => {
     if (!displayedBuiltinCourse?.sourceLang) {

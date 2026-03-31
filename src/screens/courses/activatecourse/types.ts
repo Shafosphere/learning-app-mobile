@@ -20,5 +20,3 @@ export type CourseGroup = {
     targetFlag?: ReturnType<typeof getFlagSource>;
     official: OfficialCourseListItem[];
 };
-
-export type SelectedCourse = { type: "custom"; id: number };

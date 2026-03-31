@@ -2,12 +2,12 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import React from "react";
 import { Image, Text, View } from "react-native";
 import { useStyles } from "../CourseActivateScreen-styles";
-import { CourseGroup, OfficialCourseListItem, SelectedCourse } from "../types";
+import { CourseGroup, OfficialCourseListItem } from "../types";
 import { OfficialCourseSection } from "./OfficialCourseSection";
 
 interface CourseGroupListProps {
     groups: CourseGroup[];
-    committedCourse: SelectedCourse | null;
+    activeCourseId: number | null;
     colors: { headline: string };
     onPress: (id: number) => void;
     onEdit: (course: OfficialCourseListItem) => void;
@@ -15,7 +15,7 @@ interface CourseGroupListProps {
 
 export const CourseGroupList = ({
     groups,
-    committedCourse,
+    activeCourseId,
     colors,
     onPress,
     onEdit,
@@ -110,7 +110,7 @@ export const CourseGroupList = ({
                                     title="Kursy"
                                     list={regularOfficial}
                                     showTitle={showRegular}
-                                    committedCourse={committedCourse}
+                                    activeCourseId={activeCourseId}
                                     colors={colors}
                                     onPress={onPress}
                                     onEdit={onEdit}
@@ -119,7 +119,7 @@ export const CourseGroupList = ({
                                     title="Mini kursy"
                                     list={miniOfficial}
                                     showTitle={showRegular && showMini}
-                                    committedCourse={committedCourse}
+                                    activeCourseId={activeCourseId}
                                     colors={colors}
                                     onPress={onPress}
                                     onEdit={onEdit}

@@ -2,7 +2,6 @@ import Popup, { PopupColor } from "@/src/components/popup/popup";
 import { QuoteCategory } from "@/src/constants/quotes";
 import { usePopupAnchorX } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
-import { useCourseActivateProfileRender } from "@/src/screens/courses/activatecourse/highlightProfiling";
 import React, { useEffect, useMemo, useRef } from "react";
 import { StyleSheet, View } from "react-native";
 
@@ -32,11 +31,6 @@ export default function QuoteBubble() {
     const { quote, isVisible, hideQuote } = useQuote();
     const popupAnchorX = usePopupAnchorX();
     const lastShowTsRef = useRef<number>(0);
-
-    useCourseActivateProfileRender(
-        "QuoteBubble",
-        isVisible ? "visible=true" : "visible=false"
-    );
 
     const popupMessage = useMemo(() => {
         if (!quote) return "";

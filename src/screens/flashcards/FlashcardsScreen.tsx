@@ -783,7 +783,11 @@ export default function Flashcards() {
   const shouldKeepLoadingOverlayVisible =
     activeCustomCourseId != null &&
     !loadError &&
-    (isLoadingData || loadedCourseId !== activeCustomCourseId);
+    (isLoadingData ||
+      loadedCourseId !== activeCustomCourseId ||
+      isUiWarmupActive);
+  const shouldRenderLoadingOverlay =
+    shouldKeepLoadingOverlayVisible || showLoadingOverlay;
 
   useEffect(() => {
     if (shouldKeepLoadingOverlayVisible) {
@@ -955,14 +959,6 @@ export default function Flashcards() {
     keyboardTopCorrection: 44,
     debug: true,
   });
-  const shouldHideMainUiDuringWarmup =
-    !showLoadingOverlay &&
-    isUiWarmupActive &&
-    !isLoadingData &&
-    activeCustomCourseId != null &&
-    !loadError &&
-    customCards.length > 0;
-
   useLayoutEffect(() => {
     if (selectedItemId == null) return;
     if (lastActionCooldownCardIdRef.current === selectedItemId) return;
@@ -1076,8 +1072,7 @@ export default function Flashcards() {
         isBetweenCards={isBetweenCards}
         disableLayoutAnimation={
           shouldKeepLoadingOverlayVisible ||
-          showLoadingOverlay ||
-          shouldHideMainUiDuringWarmup
+          showLoadingOverlay
         }
         hideHints={shouldHideHintsForActiveBox}
         showExplanationEnabled={showExplanationEnabled}
@@ -1133,13 +1128,8 @@ export default function Flashcards() {
       <Confetti generateConfetti={shouldCelebrate} />
 
       <View
-        style={{
-          flex: 1,
-          opacity: shouldHideMainUiDuringWarmup ? 0 : 1,
-        }}
-        pointerEvents={
-          shouldHideMainUiDuringWarmup || showLoadingOverlay ? "none" : "auto"
-        }
+        style={{ flex: 1 }}
+        pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
       >
         <View style={styles.cardSectionWrapper}>{cardSection}</View>
 
@@ -1241,35 +1231,22 @@ export default function Flashcards() {
         )}
       </View>
 
-      {showLoadingOverlay ? (
+      {shouldRenderLoadingOverlay ? (
         <Animated.View
           pointerEvents="auto"
           style={[
             styles.loadingOverlay,
-            { opacity: loadingOverlayOpacity },
+            {
+              opacity: shouldKeepLoadingOverlayVisible
+                ? 1
+                : loadingOverlayOpacity,
+            },
           ]}
         >
           <View style={styles.loadingOverlayContent}>
             <ActivityIndicator size="large" color={colors.paragraph} />
           </View>
         </Animated.View>
-      ) : null}
-
-      {shouldHideMainUiDuringWarmup ? (
-        <View
-          pointerEvents="none"
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            alignItems: "center",
-            justifyContent: "center",
-          }}
-        >
-          <ActivityIndicator size="large" color={colors.paragraph} />
-        </View>
       ) : null}
 
       <FlashcardsPeekOverlay

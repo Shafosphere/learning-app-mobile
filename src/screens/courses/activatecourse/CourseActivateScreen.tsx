@@ -18,16 +18,11 @@ import {
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
-import {
-  beginCourseHighlightProfile,
-  markCourseHighlightCommitted,
-  useCourseActivateProfileRender,
-} from "./highlightProfiling";
 import { CourseGroupList } from "./components/CourseGroupList";
-import { CourseGroup, OfficialCourseListItem, SelectedCourse } from "./types";
+import { CourseGroup, OfficialCourseListItem } from "./types";
 
 
 
@@ -38,10 +33,6 @@ export default function CourseActivateScreen() {
     colors,
     pinnedOfficialCourseIds,
   } = useSettings();
-
-  const [committedCourse, setCommittedCourse] = useState<SelectedCourse | null>(
-    null
-  );
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
@@ -49,13 +40,6 @@ export default function CourseActivateScreen() {
   const router = useRouter();
   const setPopup = usePopup();
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
-
-  useCourseActivateProfileRender(
-    "CourseActivateScreen",
-    activeCustomCourseId != null
-      ? `activeCustomCourseId=${activeCustomCourseId}`
-      : "activeCustomCourseId=null"
-  );
 
   const { IntroOverlay } = useScreenIntro({
     messages: COURSE_ACTIVATE_INTRO_MESSAGES,
@@ -165,22 +149,6 @@ export default function CourseActivateScreen() {
   const isEmptyState =
     !hasPinnedOfficialCourses && !hasUserCustomCourses;
 
-  useEffect(() => {
-    if (activeCustomCourseId != null) {
-      setCommittedCourse({ type: "custom", id: activeCustomCourseId });
-      return;
-    }
-    setCommittedCourse(null);
-  }, [activeCustomCourseId]);
-
-  useEffect(() => {
-    if (committedCourse?.type !== "custom") {
-      return;
-    }
-    markCourseHighlightCommitted(committedCourse.id);
-  }, [committedCourse]);
-
-
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
@@ -245,16 +213,14 @@ export default function CourseActivateScreen() {
 
   const handleCustomCoursePress = useCallback(
     async (id: number) => {
-      const current = committedCourse;
-      if (current?.type === "custom" && current.id === id) {
+      if (activeCustomCourseId === id) {
         return;
       }
       if (!canActivate()) return;
-      beginCourseHighlightProfile(id);
       await setActiveCustomCourseId(id);
       notifyActivated();
     },
-    [canActivate, committedCourse, notifyActivated, setActiveCustomCourseId]
+    [activeCustomCourseId, canActivate, notifyActivated, setActiveCustomCourseId]
   );
 
   const handleEditCustomCourse = (course: CustomCourseSummary) => {
@@ -295,7 +261,7 @@ export default function CourseActivateScreen() {
                   <Text style={styles.title}>Stworzone przez nas</Text>
                   <CourseGroupList
                     groups={courseGroups}
-                    committedCourse={committedCourse}
+                    activeCourseId={activeCustomCourseId}
                     colors={colors}
                     onPress={handleCustomCoursePress}
                     onEdit={handleEditCustomCourse}
@@ -310,13 +276,10 @@ export default function CourseActivateScreen() {
                   </Text>
                   <View style={styles.customList}>
                     {userCustomCourses.map((course) => {
-                      const isHighlighted =
-                        committedCourse?.type === "custom" &&
-                        committedCourse.id === course.id;
+                      const isHighlighted = activeCustomCourseId === course.id;
                       return (
                         <CourseListCard
                           key={course.id}
-                          debugProfileCourseId={course.id}
                           title={course.name}
                           subtitle={`fiszki: ${course.cardsCount}`}
                           iconId={course.iconId}
