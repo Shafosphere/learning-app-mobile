@@ -1,9 +1,12 @@
-
-import type { ReactNode } from "react";
+import { useEffect, type ReactNode } from "react";
 import type { StyleProp, ViewStyle } from "react-native";
 
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
+import {
+    markCourseHighlightVisible,
+    useCourseActivateProfileRender,
+} from "@/src/screens/courses/activatecourse/highlightProfiling";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { CourseCard } from "./CourseCard";
 
@@ -17,6 +20,7 @@ type CourseListCardProps = {
     rightAccessory?: ReactNode;
     isHighlighted?: boolean;
     containerStyle?: StyleProp<ViewStyle>;
+    debugProfileCourseId?: number;
 };
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -89,11 +93,26 @@ export function CourseListCard({
     rightAccessory,
     isHighlighted,
     containerStyle,
+    debugProfileCourseId,
 }: CourseListCardProps) {
     const styles = useStyles();
 
+    useCourseActivateProfileRender(
+        debugProfileCourseId != null
+            ? `CourseListCard#${debugProfileCourseId}`
+            : "",
+        isHighlighted ? "highlighted=true" : "highlighted=false"
+    );
+
     const iconProps = resolveCourseIconProps(iconId, iconColor);
     const flagSource = flagCode ? getFlagSource(flagCode) : undefined;
+
+    useEffect(() => {
+        if (debugProfileCourseId == null || !isHighlighted) {
+            return;
+        }
+        markCourseHighlightVisible(debugProfileCourseId);
+    }, [debugProfileCourseId, isHighlighted]);
 
     return (
         <CourseCard

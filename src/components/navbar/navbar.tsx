@@ -11,6 +11,7 @@ import {
   getCustomCoursesWithCardCounts,
   type CustomCourseRecord,
 } from "@/src/db/sqlite/db";
+import { useCourseActivateProfileRender } from "@/src/screens/courses/activatecourse/highlightProfiling";
 import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
@@ -76,6 +77,9 @@ export default function Navbar({ children }: NavbarProps) {
     null,
   );
   const [dueReviewCount, setDueReviewCount] = useState<number>(0);
+
+  useCourseActivateProfileRender("Navbar", `pathname=${pathname}`);
+
   type DisplayCourse =
     | { kind: "custom"; course: CustomCourseRecord }
     | { kind: "builtin"; course: LanguageCourse };

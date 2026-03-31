@@ -21,6 +21,11 @@ import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
+import {
+  beginCourseHighlightProfile,
+  markCourseHighlightCommitted,
+  useCourseActivateProfileRender,
+} from "./highlightProfiling";
 import { CourseGroupList } from "./components/CourseGroupList";
 import { CourseGroup, OfficialCourseListItem, SelectedCourse } from "./types";
 
@@ -44,6 +49,13 @@ export default function CourseActivateScreen() {
   const router = useRouter();
   const setPopup = usePopup();
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
+
+  useCourseActivateProfileRender(
+    "CourseActivateScreen",
+    activeCustomCourseId != null
+      ? `activeCustomCourseId=${activeCustomCourseId}`
+      : "activeCustomCourseId=null"
+  );
 
   const { IntroOverlay } = useScreenIntro({
     messages: COURSE_ACTIVATE_INTRO_MESSAGES,
@@ -161,6 +173,13 @@ export default function CourseActivateScreen() {
     setCommittedCourse(null);
   }, [activeCustomCourseId]);
 
+  useEffect(() => {
+    if (committedCourse?.type !== "custom") {
+      return;
+    }
+    markCourseHighlightCommitted(committedCourse.id);
+  }, [committedCourse]);
+
 
   useFocusEffect(
     useCallback(() => {
@@ -231,6 +250,7 @@ export default function CourseActivateScreen() {
         return;
       }
       if (!canActivate()) return;
+      beginCourseHighlightProfile(id);
       await setActiveCustomCourseId(id);
       notifyActivated();
     },
@@ -296,6 +316,7 @@ export default function CourseActivateScreen() {
                       return (
                         <CourseListCard
                           key={course.id}
+                          debugProfileCourseId={course.id}
                           title={course.name}
                           subtitle={`fiszki: ${course.cardsCount}`}
                           iconId={course.iconId}

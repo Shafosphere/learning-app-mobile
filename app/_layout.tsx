@@ -23,6 +23,7 @@ import {
   isDbInitDebugOverrideEnabled,
   subscribeDbInitDebugOverride,
 } from "@/src/services/dbInitDebugOverride";
+import { useCourseActivateProfileRender } from "@/src/screens/courses/activatecourse/highlightProfiling";
 import { importUserData } from "@/src/services/importUserData";
 import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { Stack } from "expo-router";
@@ -52,6 +53,8 @@ export default function RootLayout() {
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isDebugErrorOverride, setIsDebugErrorOverride] = useState(false);
   const splashHiddenRef = useRef(false);
+
+  useCourseActivateProfileRender("RootLayout", `status=${status}`);
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {

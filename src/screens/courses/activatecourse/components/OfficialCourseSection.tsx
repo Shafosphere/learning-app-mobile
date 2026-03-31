@@ -40,6 +40,7 @@ export const OfficialCourseSection = ({
                 return (
                     <CourseListCard
                         key={`official-${course.id}`}
+                        debugProfileCourseId={course.id}
                         title={course.name}
                         subtitle={`fiszki: ${course.cardsCount}`}
                         iconId={course.iconId}
