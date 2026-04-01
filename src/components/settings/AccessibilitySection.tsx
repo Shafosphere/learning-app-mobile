@@ -1,10 +1,11 @@
 import React, { useCallback, useState } from "react";
-import { View, Text, Switch, TouchableOpacity, Modal } from "react-native";
+import { View, Text, TouchableOpacity, Modal } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { useTranslation } from "react-i18next";
 import type { ColorBlindMode } from "@/src/theme/theme";
+import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 
 const colorBlindModeOptions: {
   key: ColorBlindMode;
@@ -121,11 +122,13 @@ const AccessibilitySection: React.FC = () => {
             {t("settings.accessibility.highContrast.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={highContrastEnabled}
-          onValueChange={handleHighContrastToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={highContrastEnabled}
+            onPress={() => void handleHighContrastToggle(!highContrastEnabled)}
+            accessibilityLabel={t("settings.accessibility.highContrast.title")}
+          />
+        </View>
       </View>
 
       <View style={[styles.row, { alignItems: "flex-start" }]}>
@@ -213,11 +216,13 @@ const AccessibilitySection: React.FC = () => {
             {t("settings.accessibility.largeFont.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={largeFontEnabled}
-          onValueChange={handleLargeFontToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={largeFontEnabled}
+            onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
+            accessibilityLabel={t("settings.accessibility.largeFont.title")}
+          />
+        </View>
       </View>
     </View>
   );

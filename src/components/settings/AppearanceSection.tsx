@@ -11,13 +11,13 @@ import React, {
 import {
   Modal,
   Image,
-  Switch,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { UiLanguage } from "@/src/i18n";
+import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 
 const classicPreview = require("@/assets/images/settings/layout-classic.png");
 const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
@@ -271,11 +271,13 @@ const AppearanceSection: React.FC = () => {
             {t("settings.appearance.darkTheme.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={theme === "dark"}
-          onValueChange={handleThemeToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={theme === "dark"}
+            onPress={() => void handleThemeToggle(theme !== "dark")}
+            accessibilityLabel={t("settings.appearance.darkTheme.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -287,11 +289,13 @@ const AppearanceSection: React.FC = () => {
             {t("settings.appearance.vibrations.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={feedbackEnabled}
-          onValueChange={handleFeedbackToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={feedbackEnabled}
+            onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
+            accessibilityLabel={t("settings.appearance.vibrations.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -303,11 +307,13 @@ const AppearanceSection: React.FC = () => {
             {t("settings.appearance.disableReactions.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={!quotesEnabled}
-          onValueChange={handleQuotesToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={!quotesEnabled}
+            onPress={() => void handleQuotesToggle(quotesEnabled)}
+            accessibilityLabel={t("settings.appearance.disableReactions.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.sliderSection}>
@@ -354,11 +360,13 @@ const AppearanceSection: React.FC = () => {
             {t("settings.appearance.boxFaces.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={showBoxFaces}
-          onValueChange={handleFacesToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={showBoxFaces}
+            onPress={() => void handleFacesToggle(!showBoxFaces)}
+            accessibilityLabel={t("settings.appearance.boxFaces.title")}
+          />
+        </View>
       </View>
 
       <View style={[styles.row, { alignItems: "flex-start" }]}>

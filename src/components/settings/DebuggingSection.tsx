@@ -15,8 +15,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Switch, Text, View } from "react-native";
+import { Alert, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
@@ -586,11 +587,13 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.learningReminders.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={learningRemindersEnabled}
-          onValueChange={toggleLearningRemindersEnabled}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={learningRemindersEnabled}
+            onPress={() => void toggleLearningRemindersEnabled()}
+            accessibilityLabel={t("settings.debug.rows.flags.learningReminders.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -602,11 +605,13 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.statsFire.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={statsFireEffectEnabled}
-          onValueChange={toggleStatsFireEffectEnabled}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={statsFireEffectEnabled}
+            onPress={() => void toggleStatsFireEffectEnabled()}
+            accessibilityLabel={t("settings.debug.rows.flags.statsFire.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -618,11 +623,13 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.statsBookshelf.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={statsBookshelfEnabled}
-          onValueChange={toggleStatsBookshelfEnabled}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={statsBookshelfEnabled}
+            onPress={() => void toggleStatsBookshelfEnabled()}
+            accessibilityLabel={t("settings.debug.rows.flags.statsBookshelf.title")}
+          />
+        </View>
       </View>
     </View>
   );

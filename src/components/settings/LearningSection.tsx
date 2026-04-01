@@ -1,9 +1,10 @@
 import React, { useCallback, useMemo } from "react";
-import { View, Text, Switch } from "react-native";
+import { View, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { useTranslation } from "react-i18next";
+import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 
 const LearningSection: React.FC = () => {
   const styles = useStyles();
@@ -133,11 +134,13 @@ const LearningSection: React.FC = () => {
             {t("settings.learning.spellcheck.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={spellChecking}
-          onValueChange={handleSpellCheckToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={spellChecking}
+            onPress={() => void handleSpellCheckToggle(!spellChecking)}
+            accessibilityLabel={t("settings.learning.spellcheck.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -149,11 +152,13 @@ const LearningSection: React.FC = () => {
             {t("settings.learning.keyboardSuggestions.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={flashcardsSuggestionsEnabled}
-          onValueChange={handleSuggestionsToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={flashcardsSuggestionsEnabled}
+            onPress={() => void handleSuggestionsToggle(!flashcardsSuggestionsEnabled)}
+            accessibilityLabel={t("settings.learning.keyboardSuggestions.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -165,11 +170,13 @@ const LearningSection: React.FC = () => {
             {t("settings.learning.ignoreDiacritics.subtitle")}
           </Text>
         </View>
-        <Switch
-          style={styles.switch}
-          value={ignoreDiacriticsInSpellcheck}
-          onValueChange={handleDiacriticsToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={ignoreDiacriticsInSpellcheck}
+            onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
+            accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -186,11 +193,13 @@ const LearningSection: React.FC = () => {
             </Text>
           ))}
         </View>
-        <Switch
-          style={styles.switch}
-          value={learningRemindersEnabled}
-          onValueChange={handleRemindersToggle}
-        />
+        <View style={styles.switch}>
+          <ToggleSwitch
+            value={learningRemindersEnabled}
+            onPress={() => void handleRemindersToggle(!learningRemindersEnabled)}
+            accessibilityLabel={t("settings.learning.reminders.title")}
+          />
+        </View>
       </View>
     </View>
   );
