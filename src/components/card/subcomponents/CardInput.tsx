@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import type { FocusTarget, KeyboardMode } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
@@ -41,11 +42,11 @@ type CardInputProps = {
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
-  setIsMainInputFocused: (focused: boolean) => void;
-  setHangulTarget: (target: "main" | "correction1" | null) => void;
+  focusTarget: FocusTarget;
+  keyboardMode: KeyboardMode;
+  requestFocus: (target: FocusTarget) => void;
   canToggleTranslations: boolean;
   next: () => void;
-  hangulTarget: "main" | "correction1" | null;
   typoDiff?: {
     type: "substitution" | "insertion" | "deletion";
     index: number;
@@ -69,16 +70,18 @@ export function CardInput({
   isMainAnswerNumeric,
   isMainAnswerDate,
   mainDatePattern,
-  setIsMainInputFocused,
-  setHangulTarget,
+  focusTarget,
+  keyboardMode,
+  requestFocus,
   canToggleTranslations,
   next,
-  hangulTarget,
   typoDiff,
   imageSizeMode,
   textColorOverride,
 }: CardInputProps) {
   const styles = useStyles();
+  const isHangulMainActive =
+    focusTarget === "main" && keyboardMode === "hangul";
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -162,17 +165,10 @@ export function CardInput({
             returnKeyType="done"
             blurOnSubmit={false}
             onSubmitEditing={handleConfirm}
-            showSoftInputOnFocus={!shouldUseHangulKeyboardMain}
-            onFocus={() => {
-              setIsMainInputFocused(true);
-              setHangulTarget("main");
-            }}
-            onBlur={() => {
-              setIsMainInputFocused(false);
-              if (hangulTarget === "main") {
-                setHangulTarget(null);
-              }
-            }}
+            showSoftInputOnFocus={
+              !shouldUseHangulKeyboardMain && !isHangulMainActive
+            }
+            onFocus={() => requestFocus("main")}
           />
         </View>
       );
@@ -227,13 +223,13 @@ export function CardInput({
     );
   }, [
     answer,
+    focusTarget,
     suggestionProps,
+    keyboardMode,
     handleConfirm,
-    hangulTarget,
     mainInputRef,
+    requestFocus,
     setAnswer,
-    setIsMainInputFocused,
-    setHangulTarget,
     shouldUseHangulKeyboardMain,
     isMainAnswerDate,
     isMainAnswerNumeric,

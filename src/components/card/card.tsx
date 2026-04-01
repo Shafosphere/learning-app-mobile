@@ -28,6 +28,8 @@ import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import CardFrame from "./subcomponents/CardFrame";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
+import { useCardFocusController } from "./useCardFocusController";
+import { useFocusExecutor } from "./useFocusExecutor";
 
 const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
@@ -162,27 +164,15 @@ export default function Card({
   const trimTrailingSpaces = useCallback((value: string) => {
     return value.replace(/ +$/, "");
   }, []);
-  const [isMainInputFocused, setIsMainInputFocused] = useState(false);
-  const [isCorrectionInput1Focused, setIsCorrectionInput1Focused] =
-    useState(false);
-  const [hangulTarget, setHangulTarget] = useState<
-    "main" | "correction1" | null
-  >(null);
   const noopTextChange = useCallback((_: string) => {}, []);
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
   const correctionInput1Ref = useRef<TextInput | null>(null);
   const correctionInput2Ref = useRef<TextInput | null>(null);
-  const previousResult = useRef<boolean | null>(null);
-  const previousIntroMode = useRef<boolean>(false);
-  const previousSelectedId = useRef<number | null>(null);
-  const hasSeenInitialCardRef = useRef(false);
+  const hintInputRef = useRef<TextInput | null>(null);
   const initialLayoutCardIdRef = useRef<number | null>(null);
   const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
   const lastTranslationItemId = useRef<number | null>(null);
-  const lastCorrectionFocusedId = useRef<number | null>(null);
-  const needsCorrectionFocus = useRef<boolean>(false);
-  const timeouts = useRef<ReturnType<typeof setTimeout>[]>([]);
   const previousCorrectionInput2 = useRef<string>("");
   const [input1LayoutWidth, setInput1LayoutWidth] = useState(0);
   const [input2LayoutWidth, setInput2LayoutWidth] = useState(0);
@@ -302,20 +292,9 @@ export default function Card({
     if (!value) return false;
     return HANGUL_CHAR_REGEX.test(value);
   }, [correction?.awers]);
+  const [isEditingHint, setIsEditingHint] = useState(false);
   const shouldUseHangulKeyboardMain = __DEV__ && expectsHangulAnswer;
   const shouldUseHangulKeyboardCorrection1 = __DEV__ && expectsHangulCorrectionAwers;
-  const showMainHangulKeyboard =
-    hangulTarget === "main" &&
-    shouldUseHangulKeyboardMain &&
-    isMainInputFocused;
-  const showCorrectionHangulKeyboard =
-    !answerOnly &&
-    hangulTarget === "correction1" &&
-    shouldUseHangulKeyboardCorrection1 &&
-    isCorrectionInput1Focused;
-  const showHangulKeyboard =
-    showMainHangulKeyboard || showCorrectionHangulKeyboard;
-  const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");
   const hintDialogVisible = useRef(false);
   const hintActionsAnim = useRef(new Animated.Value(0)).current;
@@ -332,6 +311,30 @@ export default function Card({
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
+  const correctionPrimaryTarget = shouldCorrectAwers ? "correction1" : "correction2";
+  const {
+    focusTarget,
+    keyboardMode,
+    focusRequestId,
+    requestFocus,
+    onCorrection1Completed,
+    onHangulClosed,
+    onHintEditStarted,
+  } = useCardFocusController({
+    isFocused,
+    selectedItemId,
+    result,
+    isIntroMode,
+    showCorrectionInputs,
+    correctionCardId: correction?.cardId ?? null,
+    correctionPrimaryTarget,
+    shouldUseHangulKeyboardMain,
+    shouldUseHangulKeyboardCorrection1,
+    isEditingHint,
+  });
+  const showHangulKeyboard =
+    keyboardMode === "hangul" &&
+    (focusTarget === "main" || focusTarget === "correction1");
   const showExplanationEnabled =
     showExplanationEnabledProp ?? showExplanationEnabledSetting;
   const explanationOnlyOnWrong =
@@ -368,10 +371,21 @@ export default function Card({
     return Math.max(padded, input2LayoutWidth || 0);
   }, [input2ExpectedWidth, input2LayoutWidth, input2TextWidth]);
 
-  const correctionPrimaryRef =
-    shouldCorrectAwers && correctionInput1Ref
-      ? correctionInput1Ref
-      : correctionInput2Ref;
+  const focusRefs = useMemo(
+    () => ({
+      main: mainInputRef,
+      correction1: correctionInput1Ref,
+      correction2: correctionInput2Ref,
+      hint: hintInputRef,
+    }),
+    [],
+  );
+  useFocusExecutor({
+    focusTarget,
+    keyboardMode,
+    focusRequestId,
+    refs: focusRefs,
+  });
 
   const len = selectedItem?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
@@ -405,17 +419,6 @@ export default function Card({
     selectedItem?.translations,
     setCorrectionRewers,
   ]);
-
-  const focusWithDelay = useCallback(
-    (ref: React.RefObject<TextInput | null>, delay = 50) => {
-      const timeoutId = setTimeout(() => {
-        ref.current?.focus();
-        timeouts.current = timeouts.current.filter((id) => id !== timeoutId);
-      }, delay);
-      timeouts.current.push(timeoutId);
-    },
-    [],
-  );
 
   const handleWrongInputChange = useCallback(
     (which: 1 | 2, value: string) => {
@@ -470,22 +473,15 @@ export default function Card({
             normalizeString(correction.awers) &&
           trimTrailingSpaces(t).length === correction.awers.length;
         if (matches) {
-          setHangulTarget(null);
-          setIsCorrectionInput1Focused(false);
-          correctionInput1Ref.current?.blur();
-          const delay = shouldUseHangulKeyboardCorrection1 ? 200 : 50;
-          focusWithDelay(correctionInput2Ref, delay);
+          onCorrection1Completed();
         }
       }
     },
     [
       correction?.awers,
-      focusWithDelay,
       handleWrongInputChange,
       ignoreDiacriticsInSpellcheck,
-      setHangulTarget,
-      setIsCorrectionInput1Focused,
-      shouldUseHangulKeyboardCorrection1,
+      onCorrection1Completed,
       trimTrailingSpaces,
     ],
   );
@@ -517,96 +513,30 @@ export default function Card({
   }, [confirm, rewers, selectedItem?.translations, setTranslations]);
 
   const hangulOverlayConfig = useMemo(() => {
-    if (showMainHangulKeyboard) {
+    if (showHangulKeyboard && focusTarget === "main") {
       return {
         value: answer,
         onChangeText: handleAnswerChange,
         onSubmit: handleConfirm,
       };
     }
-    if (showCorrectionHangulKeyboard && correction) {
+    if (showHangulKeyboard && focusTarget === "correction1" && correction) {
       return {
         value: correction.input1,
         onChangeText: handleCorrectionInput1Change,
-        onSubmit: () => {
-          setHangulTarget(null);
-          setIsCorrectionInput1Focused(false);
-          correctionInput1Ref.current?.blur();
-          const delay = shouldUseHangulKeyboardCorrection1 ? 200 : 50;
-          focusWithDelay(correctionInput2Ref, delay);
-        },
+        onSubmit: onCorrection1Completed,
       };
     }
     return null;
   }, [
-    showMainHangulKeyboard,
     answer,
+    correction,
     handleAnswerChange,
-    handleConfirm,
-    showCorrectionHangulKeyboard,
-    correction,
     handleCorrectionInput1Change,
-    focusWithDelay,
-    setHangulTarget,
-    setIsCorrectionInput1Focused,
-    shouldUseHangulKeyboardCorrection1,
-  ]);
-
-  useEffect(() => {
-    return () => {
-      timeouts.current.forEach((timeoutId) => clearTimeout(timeoutId));
-      timeouts.current = [];
-    };
-  }, []);
-
-  useEffect(() => {
-    const movedToCorrection =
-      result === false && previousResult.current !== false;
-    const backToMain = result !== false && previousResult.current === false;
-
-    if (movedToCorrection) {
-      needsCorrectionFocus.current = true;
-      if (correction) {
-        if (isFocused) {
-          focusWithDelay(correctionPrimaryRef);
-        }
-        needsCorrectionFocus.current = false;
-      }
-    }
-
-    if (backToMain && !isIntroMode) {
-      needsCorrectionFocus.current = false;
-      setAnswer("");
-      if (selectedItem && isFocused) {
-        focusWithDelay(mainInputRef);
-      }
-    }
-
-    if (isIntroMode && !previousIntroMode.current && correction && isFocused) {
-      focusWithDelay(correctionPrimaryRef);
-      needsCorrectionFocus.current = false;
-    }
-
-    if (!isIntroMode && previousIntroMode.current && result !== false) {
-      if (selectedItem && isFocused) {
-        focusWithDelay(mainInputRef);
-      }
-    }
-
-    previousResult.current = result;
-    previousIntroMode.current = isIntroMode;
-  }, [
-    correction,
-    focusWithDelay,
-    isIntroMode,
-    result,
-    selectedItem,
-    isFocused,
-    setAnswer,
-    answerOnly,
-    type,
-    showCorrectionInputs,
-    correctionPrimaryRef,
+    handleConfirm,
+    focusTarget,
+    onCorrection1Completed,
+    showHangulKeyboard,
   ]);
 
   // Achievements integration
@@ -619,55 +549,15 @@ export default function Card({
     }
   }, [result, reportResult]);
 
+  const previousResultForAnswerResetRef = useRef<boolean | null>(null);
   useEffect(() => {
-    if (correction && (result === false || isIntroMode)) {
-      const hasFocusedThisCorrection =
-        lastCorrectionFocusedId.current === correction.cardId;
-      if (needsCorrectionFocus.current || !hasFocusedThisCorrection) {
-        if (isFocused) {
-          focusWithDelay(correctionPrimaryRef);
-        }
-        needsCorrectionFocus.current = false;
-        lastCorrectionFocusedId.current = correction.cardId ?? null;
-      }
+    const backToMain =
+      result !== false && previousResultForAnswerResetRef.current === false;
+    if (backToMain && !isIntroMode) {
+      setAnswer("");
     }
-  }, [
-    correction,
-    isIntroMode,
-    result,
-    focusWithDelay,
-    isFocused,
-    answerOnly,
-    correctionPrimaryRef,
-  ]);
-
-  useEffect(() => {
-    const currentId = selectedItem?.id ?? null;
-    if (currentId !== previousSelectedId.current) {
-      if (currentId != null) {
-        if (!hasSeenInitialCardRef.current) {
-          // Avoid opening keyboard on screen entry; autofocus starts from second card.
-          hasSeenInitialCardRef.current = true;
-        } else if (!isFocused) {
-          // Do not autofocus when screen is not actively focused.
-        } else if (isIntroMode) {
-          focusWithDelay(correctionPrimaryRef);
-          needsCorrectionFocus.current = false;
-        } else if (result !== false) {
-          focusWithDelay(mainInputRef);
-        }
-      }
-      previousSelectedId.current = currentId;
-    }
-  }, [
-    isIntroMode,
-    selectedItem,
-    result,
-    focusWithDelay,
-    isFocused,
-    answerOnly,
-    correctionPrimaryRef,
-  ]);
+    previousResultForAnswerResetRef.current = result;
+  }, [isIntroMode, result, setAnswer]);
 
   useEffect(() => {
     previousCorrectionInput2.current = trimTrailingSpaces(
@@ -779,7 +669,8 @@ export default function Card({
     if (!selectedItem || !onHintUpdate) return;
     setHintDraft(currentHint ?? "");
     setIsEditingHint(true);
-  }, [currentHint, onHintUpdate, selectedItem]);
+    onHintEditStarted();
+  }, [currentHint, onHintEditStarted, onHintUpdate, selectedItem]);
 
   const deleteHint = useCallback(() => {
     if (!selectedItem || !onHintUpdate) return;
@@ -826,7 +717,7 @@ export default function Card({
       setIsEditingHint(false);
       setHintDraft(value ?? "");
     },
-    [hintDraft, onHintUpdate, effectiveReversed, selectedItem],
+    [effectiveReversed, hintDraft, onHintUpdate, selectedItem],
   );
 
   const finishHintEditing = useCallback(() => {
@@ -1001,9 +892,10 @@ export default function Card({
     input2ContentWidth,
     setInput1LayoutWidth,
     setInput2LayoutWidth,
-    focusWithDelay,
-    setIsCorrectionInput1Focused,
-    setHangulTarget,
+    focusTarget,
+    keyboardMode,
+    requestFocus,
+    onCorrection1Completed,
     shouldUseHangulKeyboardCorrection1,
     previousCorrectionInput2,
     canToggleTranslations,
@@ -1015,8 +907,6 @@ export default function Card({
     mainInputRef,
     handleConfirm,
     shouldUseHangulKeyboardMain,
-    setIsMainInputFocused,
-    hangulTarget,
     typoDiff,
     textColorOverride,
   };
@@ -1024,15 +914,7 @@ export default function Card({
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
 
   const handleCloseHangulKeyboard = () => {
-    const target = hangulTarget;
-    setHangulTarget(null);
-    if (target === "main") {
-      setIsMainInputFocused(false);
-      mainInputRef.current?.blur();
-    } else if (target === "correction1") {
-      setIsCorrectionInput1Focused(false);
-      correctionInput1Ref.current?.blur();
-    }
+    onHangulClosed();
   };
 
   return (
@@ -1053,6 +935,7 @@ export default function Card({
           shouldMarqueeHint={shouldMarqueeHint}
           selectedItem={selectedItem}
           onHintUpdate={onHintUpdate}
+          inputRef={hintInputRef}
           onHintInputBlur={cancelHintEditing}
         />
       )}

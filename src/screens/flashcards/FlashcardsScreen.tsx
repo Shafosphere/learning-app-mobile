@@ -56,6 +56,7 @@ import {
   Text,
   View,
 } from "react-native";
+import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const STREAK_TARGET = 5;
@@ -71,6 +72,7 @@ const HINT_FAIL_THRESHOLD = 3;
 const HINT_COOLDOWN_MS = 10 * 60 * 1000;
 const TRUE_FALSE_POST_OK_COOLDOWN_MS = 1000;
 const UI_WARMUP_DELAY_MS = 250;
+const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -788,6 +790,7 @@ export default function Flashcards() {
       isUiWarmupActive);
   const shouldRenderLoadingOverlay =
     shouldKeepLoadingOverlayVisible || showLoadingOverlay;
+  const isCardFocusEnabled = isFocused && !shouldRenderLoadingOverlay;
 
   useEffect(() => {
     if (shouldKeepLoadingOverlayVisible) {
@@ -1068,7 +1071,7 @@ export default function Flashcards() {
         setCorrectionRewers={setCorrectionRewers}
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
-        isFocused={isFocused}
+        isFocused={isCardFocusEnabled}
         isBetweenCards={isBetweenCards}
         disableLayoutAnimation={
           shouldKeepLoadingOverlayVisible ||
@@ -1121,6 +1124,11 @@ export default function Flashcards() {
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
+  const shouldAnimateScreenLayout =
+    !shouldKeepLoadingOverlayVisible && !showLoadingOverlay;
+  const screenSectionLayout = shouldAnimateScreenLayout
+    ? SCREEN_LAYOUT_TRANSITION
+    : undefined;
 
   return (
     <View style={styles.container}>
@@ -1131,14 +1139,25 @@ export default function Flashcards() {
         style={{ flex: 1 }}
         pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
       >
-        <View style={styles.cardSectionWrapper}>{cardSection}</View>
+        <Reanimated.View
+          layout={screenSectionLayout}
+          style={styles.cardSectionWrapper}
+        >
+          {cardSection}
+        </Reanimated.View>
 
         {areButtonsOnTop ? (
-          <View style={styles.topButtonsWrapper}>{renderButtons("top")}</View>
+          <Reanimated.View
+            layout={screenSectionLayout}
+            style={styles.topButtonsWrapper}
+          >
+            {renderButtons("top")}
+          </Reanimated.View>
         ) : null}
 
         {shouldShowBoxes && (
-          <View
+          <Reanimated.View
+            layout={screenSectionLayout}
             style={[
               styles.boxesWrapper,
               !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
@@ -1212,7 +1231,10 @@ export default function Flashcards() {
                 ref={bottomButtonsAnchorRef}
                 onLayout={measureBottomButtons}
                 collapsable={false}
-                style={styles.bottomButtonsWrapper}
+                style={[
+                  styles.bottomButtonsWrapper,
+                  !keyboardVisible && { marginBottom: 14 },
+                ]}
               >
                 <Animated.View
                   style={{
@@ -1227,7 +1249,7 @@ export default function Flashcards() {
                 </Animated.View>
               </View>
             ) : null}
-          </View>
+          </Reanimated.View>
         )}
       </View>
 

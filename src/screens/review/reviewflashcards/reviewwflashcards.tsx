@@ -26,11 +26,13 @@ import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
 import { Animated, ScrollView, View } from "react-native";
+import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 
 const BOX_SPAM_WINDOW_MS = 2000;
 const BOX_SPAM_THRESHOLD = 20;
 const LONG_THINK_MS = 12 * 1000;
+const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 
 const NON_INTRO_BOXES: readonly (keyof BoxesState)[] = [
   "boxOne",
@@ -943,27 +945,34 @@ export default function ReviewFlashcardsPlaceholder() {
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
 
-      {areButtonsOnTop ? renderButtons("top") : null}
-      <Card
-        selectedItem={selectedItem}
-        setAnswer={setAnswer}
-        answer={answer}
-        result={result}
-        confirm={handleConfirm}
-        reversed={reversed}
-        setResult={setResult}
-        correction={correction}
-        wrongInputChange={wrongInputChange}
-        setCorrectionRewers={setCorrectionRewers}
-        introMode={false}
-        onHintUpdate={() => undefined}
-        hideHints
-        isFocused={!isLoading}
-        showExplanationEnabled={showExplanationEnabled}
-        explanationOnlyOnWrong={explanationOnlyOnWrong}
-      />
+      {areButtonsOnTop ? (
+        <Reanimated.View layout={SCREEN_LAYOUT_TRANSITION}>
+          {renderButtons("top")}
+        </Reanimated.View>
+      ) : null}
+      <Reanimated.View layout={SCREEN_LAYOUT_TRANSITION}>
+        <Card
+          selectedItem={selectedItem}
+          setAnswer={setAnswer}
+          answer={answer}
+          result={result}
+          confirm={handleConfirm}
+          reversed={reversed}
+          setResult={setResult}
+          correction={correction}
+          wrongInputChange={wrongInputChange}
+          setCorrectionRewers={setCorrectionRewers}
+          introMode={false}
+          onHintUpdate={() => undefined}
+          hideHints
+          isFocused={!isLoading}
+          showExplanationEnabled={showExplanationEnabled}
+          explanationOnlyOnWrong={explanationOnlyOnWrong}
+        />
+      </Reanimated.View>
 
-      <View
+      <Reanimated.View
+        layout={SCREEN_LAYOUT_TRANSITION}
         style={[
           styles.boxesWrapper,
           !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
@@ -1038,7 +1047,7 @@ export default function ReviewFlashcardsPlaceholder() {
             </Animated.View>
           </View>
         ) : null}
-      </View>
+      </Reanimated.View>
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

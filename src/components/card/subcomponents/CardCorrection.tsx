@@ -2,7 +2,7 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import { CardCorrectionType } from "../card-types";
+import type { CardCorrectionType, FocusTarget, KeyboardMode } from "../card-types";
 import {
   ImageStyle,
   Platform,
@@ -61,12 +61,10 @@ type CardCorrectionProps = {
   input2ContentWidth: number;
   setInput1LayoutWidth: (width: number) => void;
   setInput2LayoutWidth: (width: number) => void;
-  focusWithDelay: (
-    ref: React.RefObject<TextInput | null>,
-    delay?: number,
-  ) => void;
-  setIsCorrectionInput1Focused: (focused: boolean) => void;
-  setHangulTarget: (target: "main" | "correction1" | null) => void;
+  focusTarget: FocusTarget;
+  keyboardMode: KeyboardMode;
+  requestFocus: (target: FocusTarget) => void;
+  onCorrection1Completed: () => void;
   shouldUseHangulKeyboardCorrection1: boolean;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
@@ -106,9 +104,10 @@ export function CardCorrection({
   input2ContentWidth,
   setInput1LayoutWidth,
   setInput2LayoutWidth,
-  focusWithDelay,
-  setIsCorrectionInput1Focused,
-  setHangulTarget,
+  focusTarget,
+  keyboardMode,
+  requestFocus,
+  onCorrection1Completed,
   shouldUseHangulKeyboardCorrection1,
   isCorrectionInput1Numeric,
   isCorrectionInput1Date,
@@ -125,6 +124,8 @@ export function CardCorrection({
   textColorOverride,
 }: CardCorrectionProps) {
   const styles = useStyles();
+  const isHangulCorrection1Active =
+    focusTarget === "correction1" && keyboardMode === "hangul";
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -318,7 +319,7 @@ export function CardCorrection({
             ref={input1Ref}
             returnKeyType="next"
             blurOnSubmit={false}
-            onSubmitEditing={() => focusWithDelay(input2Ref)}
+            onSubmitEditing={onCorrection1Completed}
             autoCapitalize="none"
             {...suggestionProps}
             keyboardType={
@@ -328,15 +329,10 @@ export function CardCorrection({
                   ? "decimal-pad"
                   : suggestionProps?.keyboardType
             }
-            showSoftInputOnFocus={!shouldUseHangulKeyboardCorrection1}
-            onFocus={() => {
-              setIsCorrectionInput1Focused(true);
-              setHangulTarget("correction1");
-            }}
-            onBlur={() => {
-              setIsCorrectionInput1Focused(false);
-              setHangulTarget(null);
-            }}
+            showSoftInputOnFocus={
+              !shouldUseHangulKeyboardCorrection1 && !isHangulCorrection1Active
+            }
+            onFocus={() => requestFocus("correction1")}
           />
           {isIntroMode ? (
             <Text
@@ -404,7 +400,7 @@ export function CardCorrection({
               previousCorrectionInput2.current = adjusted;
               wrongInputChange(2, adjusted);
               if (shouldFocusPrevious) {
-                focusWithDelay(input1Ref);
+                requestFocus("correction1");
               }
             }}
             style={[
@@ -422,13 +418,14 @@ export function CardCorrection({
                   ? "decimal-pad"
                   : suggestionProps?.keyboardType
             }
+            onFocus={() => requestFocus("correction2")}
             onKeyPress={({ nativeEvent }) => {
               if (
                 !answerOnly &&
                 nativeEvent.key === "Backspace" &&
                 (correction.input2 ?? "").length <= 1
               ) {
-                focusWithDelay(input1Ref);
+                requestFocus("correction1");
               }
             }}
           />

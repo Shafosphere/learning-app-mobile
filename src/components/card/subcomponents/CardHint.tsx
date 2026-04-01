@@ -17,6 +17,7 @@ type CardHintProps = {
     shouldMarqueeHint: boolean;
     selectedItem: any;
     onHintUpdate: any;
+    inputRef?: React.RefObject<TextInput | null>;
     onHintInputBlur: () => void;
 };
 
@@ -33,6 +34,7 @@ export function CardHint({
     shouldMarqueeHint,
     selectedItem,
     onHintUpdate,
+    inputRef,
     onHintInputBlur,
 }: CardHintProps) {
     const styles = useStyles();
@@ -64,6 +66,7 @@ export function CardHint({
             ) : (
                 <View style={styles.hintRow}>
                     <TextInput
+                        ref={inputRef}
                         value={hintDraft}
                         onChangeText={setHintDraft}
                         onSubmitEditing={finishHintEditing}
@@ -71,7 +74,6 @@ export function CardHint({
                         placeholder="Wpisz podpowiedź..."
                         placeholderTextColor={colors.paragraph}
                         style={styles.hintInput}
-                        autoFocus
                         returnKeyType="done"
                     />
                     <Animated.View style={[styles.hintActions, hintActionsStyle]}>
