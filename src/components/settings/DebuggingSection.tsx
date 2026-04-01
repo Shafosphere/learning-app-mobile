@@ -1,5 +1,4 @@
 import MyButton from "@/src/components/button/button";
-import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
@@ -16,7 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Alert, Switch, Text, TextInput, View } from "react-native";
+import { Alert, Switch, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 const DebuggingSection: React.FC = () => {
@@ -25,7 +24,6 @@ const DebuggingSection: React.FC = () => {
   const router = useRouter();
   const {
     activeCustomCourseId,
-    colors,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
     statsBookshelfEnabled,
@@ -37,8 +35,6 @@ const DebuggingSection: React.FC = () => {
   const setPopup = usePopup();
   const { showQuote } = useQuote();
   const [customBusy, setCustomBusy] = useState(false);
-  const [hangulValue, setHangulValue] = useState("");
-  const [showHangulKeyboard, setShowHangulKeyboard] = useState(false);
   const [showLogoMessage, setShowLogoMessage] = useState(false);
   const [logoFloating, setLogoFloating] = useState(true);
   const [clearingStorage, setClearingStorage] = useState(false);
@@ -303,57 +299,6 @@ const DebuggingSection: React.FC = () => {
             width={100}
           />
         </View>
-      </View>
-
-      <View style={styles.keyboardSection}>
-        <Text style={styles.rowTitle}>{t("settings.debug.rows.hangul.title")}</Text>
-        <Text style={styles.rowSubtitle}>
-          {t("settings.debug.rows.hangul.subtitle")}
-        </Text>
-        <TextInput
-          style={[styles.input, styles.keyboardInput]}
-          value={hangulValue}
-          editable={false}
-          placeholder={t("settings.debug.rows.hangul.placeholder")}
-          placeholderTextColor={colors.paragraph}
-        />
-        <View style={styles.keyboardActions}>
-          <View style={styles.keyboardButtonWrapper}>
-            <MyButton
-              text={
-                showHangulKeyboard
-                  ? t("settings.debug.rows.hangul.hide")
-                  : t("settings.debug.rows.hangul.show")
-              }
-              color="my_green"
-              onPress={() => setShowHangulKeyboard((prev) => !prev)}
-              width={220}
-            />
-          </View>
-          <View style={styles.keyboardButtonWrapper}>
-            <MyButton
-              text={t("settings.debug.rows.hangul.clear")}
-              color="my_red"
-              onPress={() => setHangulValue("")}
-              disabled={hangulValue.length === 0}
-              width={120}
-            />
-          </View>
-        </View>
-        <HangulKeyboardOverlay
-          visible={showHangulKeyboard}
-          value={hangulValue}
-          onChangeText={setHangulValue}
-          onSubmit={() =>
-            Alert.alert(
-              t("settings.debug.alerts.hangulTitle"),
-              hangulValue.length > 0
-                ? t("settings.debug.alerts.hangulTyped", { value: hangulValue })
-                : t("settings.debug.alerts.hangulEmpty")
-            )
-          }
-          onRequestClose={() => setShowHangulKeyboard(false)}
-        />
       </View>
 
       <Text style={styles.sectionHeader}>{t("settings.debug.section.uiPreview")}</Text>

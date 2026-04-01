@@ -1,4 +1,3 @@
-import { HangulKeyboardOverlay } from "@/src/components/hangul/HangulKeyboardOverlay";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAchievements } from "@/src/hooks/useAchievements";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -31,7 +30,6 @@ import { CardMeasure } from "./subcomponents/CardMeasure";
 import { useCardFocusController } from "./useCardFocusController";
 import { useFocusExecutor } from "./useFocusExecutor";
 
-const HANGUL_CHAR_REGEX = /[\u1100-\u11FF\u3130-\u318F\uAC00-\uD7AF]/;
 const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
 const YEAR_ANSWER_REGEX = /^\d{3,4}$/;
 const DATE_ANSWER_REGEX = /^\d{3,4}-\d{2}(?:-\d{2})?$/;
@@ -164,7 +162,6 @@ export default function Card({
   const trimTrailingSpaces = useCallback((value: string) => {
     return value.replace(/ +$/, "");
   }, []);
-  const noopTextChange = useCallback((_: string) => {}, []);
   const [translations, setTranslations] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
   const correctionInput1Ref = useRef<TextInput | null>(null);
@@ -281,20 +278,7 @@ export default function Card({
     [answer, isMainAnswerDate, mainDatePattern, setAnswer],
   );
 
-  const expectsHangulAnswer = useMemo(() => {
-    if (!effectiveReversed) return false;
-    const expected = selectedItem?.text ?? "";
-    return HANGUL_CHAR_REGEX.test(expected);
-  }, [effectiveReversed, selectedItem?.text]);
-
-  const expectsHangulCorrectionAwers = useMemo(() => {
-    const value = correction?.awers ?? "";
-    if (!value) return false;
-    return HANGUL_CHAR_REGEX.test(value);
-  }, [correction?.awers]);
   const [isEditingHint, setIsEditingHint] = useState(false);
-  const shouldUseHangulKeyboardMain = __DEV__ && expectsHangulAnswer;
-  const shouldUseHangulKeyboardCorrection1 = __DEV__ && expectsHangulCorrectionAwers;
   const [hintDraft, setHintDraft] = useState("");
   const hintDialogVisible = useRef(false);
   const hintActionsAnim = useRef(new Animated.Value(0)).current;
@@ -314,11 +298,9 @@ export default function Card({
   const correctionPrimaryTarget = shouldCorrectAwers ? "correction1" : "correction2";
   const {
     focusTarget,
-    keyboardMode,
     focusRequestId,
     requestFocus,
     onCorrection1Completed,
-    onHangulClosed,
     onHintEditStarted,
   } = useCardFocusController({
     isFocused,
@@ -328,13 +310,8 @@ export default function Card({
     showCorrectionInputs,
     correctionCardId: correction?.cardId ?? null,
     correctionPrimaryTarget,
-    shouldUseHangulKeyboardMain,
-    shouldUseHangulKeyboardCorrection1,
     isEditingHint,
   });
-  const showHangulKeyboard =
-    keyboardMode === "hangul" &&
-    (focusTarget === "main" || focusTarget === "correction1");
   const showExplanationEnabled =
     showExplanationEnabledProp ?? showExplanationEnabledSetting;
   const explanationOnlyOnWrong =
@@ -382,7 +359,6 @@ export default function Card({
   );
   useFocusExecutor({
     focusTarget,
-    keyboardMode,
     focusRequestId,
     refs: focusRefs,
   });
@@ -511,33 +487,6 @@ export default function Card({
     }
     confirm(rewers);
   }, [confirm, rewers, selectedItem?.translations, setTranslations]);
-
-  const hangulOverlayConfig = useMemo(() => {
-    if (showHangulKeyboard && focusTarget === "main") {
-      return {
-        value: answer,
-        onChangeText: handleAnswerChange,
-        onSubmit: handleConfirm,
-      };
-    }
-    if (showHangulKeyboard && focusTarget === "correction1" && correction) {
-      return {
-        value: correction.input1,
-        onChangeText: handleCorrectionInput1Change,
-        onSubmit: onCorrection1Completed,
-      };
-    }
-    return null;
-  }, [
-    answer,
-    correction,
-    handleAnswerChange,
-    handleCorrectionInput1Change,
-    handleConfirm,
-    focusTarget,
-    onCorrection1Completed,
-    showHangulKeyboard,
-  ]);
 
   // Achievements integration
   const { reportResult } = useAchievements();
@@ -893,10 +842,8 @@ export default function Card({
     setInput1LayoutWidth,
     setInput2LayoutWidth,
     focusTarget,
-    keyboardMode,
     requestFocus,
     onCorrection1Completed,
-    shouldUseHangulKeyboardCorrection1,
     previousCorrectionInput2,
     canToggleTranslations,
     next,
@@ -906,16 +853,11 @@ export default function Card({
     handleAnswerChange,
     mainInputRef,
     handleConfirm,
-    shouldUseHangulKeyboardMain,
     typoDiff,
     textColorOverride,
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
-
-  const handleCloseHangulKeyboard = () => {
-    onHangulClosed();
-  };
 
   return (
     <View style={styles.container}>
@@ -947,13 +889,6 @@ export default function Card({
       >
         <CardContentResolver {...resolverProps} />
       </CardFrame>
-      <HangulKeyboardOverlay
-        visible={showHangulKeyboard}
-        value={hangulOverlayConfig?.value ?? ""}
-        onChangeText={hangulOverlayConfig?.onChangeText ?? noopTextChange}
-        onSubmit={hangulOverlayConfig?.onSubmit ?? handleConfirm}
-        onRequestClose={handleCloseHangulKeyboard}
-      />
 
       {showCorrectionInputs && correction ? (
         <CardMeasure

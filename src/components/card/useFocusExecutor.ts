@@ -2,7 +2,7 @@ import { useEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { TextInput } from "react-native";
 
-import type { FocusTarget, KeyboardMode } from "./card-types";
+import type { FocusTarget } from "./card-types";
 
 type FocusExecutorRefs = Record<
   Exclude<FocusTarget, "none">,
@@ -11,23 +11,19 @@ type FocusExecutorRefs = Record<
 
 type UseFocusExecutorArgs = {
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   focusRequestId: number;
   refs: FocusExecutorRefs;
 };
 
 const DEFAULT_FOCUS_DELAY_MS = 50;
-const HANGUL_TO_SYSTEM_DELAY_MS = 200;
 
 export function useFocusExecutor({
   focusTarget,
-  keyboardMode,
   focusRequestId,
   refs,
 }: UseFocusExecutorArgs) {
   const timeoutIdsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
   const activeTargetRef = useRef<FocusTarget>("none");
-  const previousKeyboardModeRef = useRef<KeyboardMode>(keyboardMode);
 
   useEffect(() => {
     return () => {
@@ -46,7 +42,6 @@ export function useFocusExecutor({
     if (focusTarget === "none") {
       blurTarget?.current?.blur();
       activeTargetRef.current = "none";
-      previousKeyboardModeRef.current = keyboardMode;
       return;
     }
 
@@ -54,17 +49,11 @@ export function useFocusExecutor({
       refs[activeTargetRef.current].current?.blur();
     }
 
-    const delay =
-      previousKeyboardModeRef.current === "hangul" && keyboardMode === "system"
-        ? HANGUL_TO_SYSTEM_DELAY_MS
-        : DEFAULT_FOCUS_DELAY_MS;
-
     const timeoutId = setTimeout(() => {
       refs[focusTarget].current?.focus();
       activeTargetRef.current = focusTarget;
-    }, delay);
+    }, DEFAULT_FOCUS_DELAY_MS);
 
     timeoutIdsRef.current.push(timeoutId);
-    previousKeyboardModeRef.current = keyboardMode;
-  }, [focusRequestId, focusTarget, keyboardMode, refs]);
+  }, [focusRequestId, focusTarget, refs]);
 }

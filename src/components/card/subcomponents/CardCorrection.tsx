@@ -2,7 +2,7 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import type { CardCorrectionType, FocusTarget, KeyboardMode } from "../card-types";
+import type { CardCorrectionType, FocusTarget } from "../card-types";
 import {
   ImageStyle,
   Platform,
@@ -62,10 +62,8 @@ type CardCorrectionProps = {
   setInput1LayoutWidth: (width: number) => void;
   setInput2LayoutWidth: (width: number) => void;
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   requestFocus: (target: FocusTarget) => void;
   onCorrection1Completed: () => void;
-  shouldUseHangulKeyboardCorrection1: boolean;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
   correctionInput1DatePattern?: DatePattern | null;
@@ -105,10 +103,8 @@ export function CardCorrection({
   setInput1LayoutWidth,
   setInput2LayoutWidth,
   focusTarget,
-  keyboardMode,
   requestFocus,
   onCorrection1Completed,
-  shouldUseHangulKeyboardCorrection1,
   isCorrectionInput1Numeric,
   isCorrectionInput1Date,
   correctionInput1DatePattern,
@@ -124,8 +120,6 @@ export function CardCorrection({
   textColorOverride,
 }: CardCorrectionProps) {
   const styles = useStyles();
-  const isHangulCorrection1Active =
-    focusTarget === "correction1" && keyboardMode === "hangul";
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -328,9 +322,6 @@ export function CardCorrection({
                 : isCorrectionInput1Numeric
                   ? "decimal-pad"
                   : suggestionProps?.keyboardType
-            }
-            showSoftInputOnFocus={
-              !shouldUseHangulKeyboardCorrection1 && !isHangulCorrection1Active
             }
             onFocus={() => requestFocus("correction1")}
           />

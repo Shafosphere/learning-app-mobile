@@ -298,9 +298,6 @@
         "checkpointSetError": "Could not set checkpoint.",
         "introResetDone": "Intro reset. Onboarding starts from language selection.",
         "introResetError": "Could not reset intro bubbles.",
-        "hangulTitle": "Hangul",
-        "hangulTyped": "You typed: {{value}}",
-        "hangulEmpty": "No characters to submit.",
         "trophiesAdded": "Added 3 test achievements.",
         "dbErrorScreenOpened": "Enabled the SQLite error screen test mode. Leave it with “Try again”.",
         "dbErrorScreenOpenError": "Could not enable the test error screen."
@@ -329,14 +326,6 @@
           "title": "Startup screen preview",
           "subtitle": "Briefly shows the new loading screen with the app icon and spinner.",
           "button": "Show screen"
-        },
-        "hangul": {
-          "title": "Test Hangul keyboard",
-          "subtitle": "Type Korean characters without system keyboard.",
-          "placeholder": "Tap Show, then add characters",
-          "show": "Show keyboard",
-          "hide": "Hide keyboard",
-          "clear": "Clear"
         },
         "logo": {
           "title": "Logo bubble",

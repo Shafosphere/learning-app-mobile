@@ -40,7 +40,6 @@ export type OfficialPackDef = {
 };
 
 const DEFAULT_PACK_VERSION = 1;
-const DEV_ONLY_PACK_SLUGS = new Set(["hangul_polish_reading", "test_mixed_types"]);
 
 // Manifest of official (built-in) packs included with the app bundle.
 // Add new entries here to ship additional packs.
@@ -110,19 +109,6 @@ const OFFICIAL_PACKS_MANIFEST = ([
     targetLang: "pl",
     smallFlag: "pl",
     isMini: false,
-  },
-  {
-    slug: "hangul_polish_reading",
-    name: "Hangul – czytanie",
-    iconId: "book",
-    iconColor: "#F97316",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: true,
-    sourceLang: "kr",
-    targetLang: "pl",
-    smallFlag: "kr",
-    isMini: true,
   },
   {
     slug: "astronomia",
@@ -411,26 +397,9 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: true,
     categoryId: "geography",
   },
-  // {
-  //   slug: "test_mixed_types",
-  //   name: "Test (Mixed Types)",
-  //   iconId: "lab",
-  //   iconColor: "#0EA5E9",
-  //   reviewsEnabled: true,
-  //   defaultFlip: false,
-  //   sourceLang: "pl",
-  //   targetLang: "pl",
-  //   smallFlag: "pl",
-  //   isMini: true,
-  //   categoryId: "test",
-  //   settings: {
-  //     imageSize: "medium",
-  //   },
-  //   imageMap: imageMaps.europeFlags,
-  // },
 ]) satisfies Omit<OfficialPackDef, "packVersion">[];
 
 export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack) => ({
   packVersion: DEFAULT_PACK_VERSION,
   ...pack,
-})).filter((pack) => __DEV__ || !DEV_ONLY_PACK_SLUGS.has(pack.slug));
+}));

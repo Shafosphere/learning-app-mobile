@@ -1,7 +1,7 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
-import type { CardDisplayMode, CardProps, FocusTarget, KeyboardMode } from "../card-types";
+import type { CardDisplayMode, CardProps, FocusTarget } from "../card-types";
 import { CardSceneCorrection } from "./CardSceneCorrection";
 import { CardSceneEmpty } from "./CardSceneEmpty";
 import { CardSceneExplanation } from "./CardSceneExplanation";
@@ -44,10 +44,8 @@ interface CardContentResolverProps {
   setInput1LayoutWidth: any;
   setInput2LayoutWidth: any;
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   requestFocus: (target: FocusTarget) => void;
   onCorrection1Completed: () => void;
-  shouldUseHangulKeyboardCorrection1: boolean;
   previousCorrectionInput2: React.MutableRefObject<string>;
   canToggleTranslations: boolean;
   next: () => void;
@@ -58,7 +56,6 @@ interface CardContentResolverProps {
   handleAnswerChange: (val: string) => void;
   mainInputRef: React.MutableRefObject<any>;
   handleConfirm: () => void;
-  shouldUseHangulKeyboardMain: boolean;
   typoDiff: any;
   textColorOverride?: string;
 }
@@ -100,10 +97,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     setInput1LayoutWidth,
     setInput2LayoutWidth,
     focusTarget,
-    keyboardMode,
     requestFocus,
     onCorrection1Completed,
-    shouldUseHangulKeyboardCorrection1,
     previousCorrectionInput2,
     canToggleTranslations,
     next,
@@ -114,7 +109,6 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     handleAnswerChange,
     mainInputRef,
     handleConfirm,
-    shouldUseHangulKeyboardMain,
     typoDiff,
     textColorOverride,
   } = props;
@@ -146,10 +140,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           setInput1LayoutWidth={setInput1LayoutWidth}
           setInput2LayoutWidth={setInput2LayoutWidth}
           focusTarget={focusTarget}
-          keyboardMode={keyboardMode}
           requestFocus={requestFocus}
           onCorrection1Completed={onCorrection1Completed}
-          shouldUseHangulKeyboardCorrection1={shouldUseHangulKeyboardCorrection1}
           isCorrectionInput1Numeric={isCorrectionInput1Numeric}
           isCorrectionInput1Date={isCorrectionInput1Date}
           correctionInput1DatePattern={correctionInput1DatePattern}
@@ -193,12 +185,10 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}
           handleConfirm={handleConfirm}
-          shouldUseHangulKeyboardMain={shouldUseHangulKeyboardMain}
           isMainAnswerNumeric={isMainAnswerNumeric}
           isMainAnswerDate={isMainAnswerDate}
           mainDatePattern={mainDatePattern}
           focusTarget={focusTarget}
-          keyboardMode={keyboardMode}
           requestFocus={requestFocus}
           canToggleTranslations={canToggleTranslations}
           next={next}

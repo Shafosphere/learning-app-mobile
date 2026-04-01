@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
-import type { FocusTarget, KeyboardMode } from "./card-types";
+import type { FocusTarget } from "./card-types";
 
 type CardFocusControllerArgs = {
   isFocused: boolean;
@@ -10,42 +10,17 @@ type CardFocusControllerArgs = {
   showCorrectionInputs: boolean;
   correctionCardId: number | null;
   correctionPrimaryTarget: Exclude<FocusTarget, "none" | "main" | "hint">;
-  shouldUseHangulKeyboardMain: boolean;
-  shouldUseHangulKeyboardCorrection1: boolean;
   isEditingHint: boolean;
 };
 
 type CardFocusControllerResult = {
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   focusRequestId: number;
   requestFocus: (target: FocusTarget) => void;
   clearFocus: () => void;
   onCorrection1Completed: () => void;
-  onHangulClosed: () => void;
   onHintEditStarted: () => void;
   onHintEditFinished: () => void;
-};
-
-type KeyboardModeResolverArgs = Pick<
-  CardFocusControllerArgs,
-  "shouldUseHangulKeyboardMain" | "shouldUseHangulKeyboardCorrection1"
->;
-
-const resolveKeyboardMode = (
-  target: FocusTarget,
-  {
-    shouldUseHangulKeyboardMain,
-    shouldUseHangulKeyboardCorrection1,
-  }: KeyboardModeResolverArgs,
-): KeyboardMode => {
-  if (target === "main" && shouldUseHangulKeyboardMain) {
-    return "hangul";
-  }
-  if (target === "correction1" && shouldUseHangulKeyboardCorrection1) {
-    return "hangul";
-  }
-  return "system";
 };
 
 const buildDefaultFocusTarget = ({
@@ -73,8 +48,6 @@ export function useCardFocusController({
   showCorrectionInputs,
   correctionCardId,
   correctionPrimaryTarget,
-  shouldUseHangulKeyboardMain,
-  shouldUseHangulKeyboardCorrection1,
   isEditingHint,
 }: CardFocusControllerArgs): CardFocusControllerResult {
   const [focusTarget, setFocusTarget] = useState<FocusTarget>("none");
@@ -105,10 +78,6 @@ export function useCardFocusController({
   const onCorrection1Completed = useCallback(() => {
     requestFocus("correction2");
   }, [requestFocus]);
-
-  const onHangulClosed = useCallback(() => {
-    clearFocus();
-  }, [clearFocus]);
 
   const onHintEditStarted = useCallback(() => {
     requestFocus("hint");
@@ -236,27 +205,12 @@ export function useCardFocusController({
     showCorrectionInputs,
   ]);
 
-  const keyboardMode = useMemo(
-    () =>
-      resolveKeyboardMode(focusTarget, {
-        shouldUseHangulKeyboardMain,
-        shouldUseHangulKeyboardCorrection1,
-      }),
-    [
-      focusTarget,
-      shouldUseHangulKeyboardCorrection1,
-      shouldUseHangulKeyboardMain,
-    ],
-  );
-
   return {
     focusTarget,
-    keyboardMode,
     focusRequestId,
     requestFocus,
     clearFocus,
     onCorrection1Completed,
-    onHangulClosed,
     onHintEditStarted,
     onHintEditFinished,
   };

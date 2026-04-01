@@ -23,8 +23,6 @@ export type FocusTarget =
   | "correction2"
   | "hint";
 
-export type KeyboardMode = "system" | "hangul";
-
 export type CardProps = {
   selectedItem: WordWithTranslations | null;
   reversed?: boolean;

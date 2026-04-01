@@ -3,7 +3,7 @@ import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
 import type { TextInput } from "react-native";
 
-import type { FocusTarget, KeyboardMode } from "../card-types";
+import type { FocusTarget } from "../card-types";
 import { CardInput } from "./CardInput";
 
 type CardSceneQuestionProps = {
@@ -16,12 +16,10 @@ type CardSceneQuestionProps = {
   mainInputRef: React.MutableRefObject<TextInput | null>;
   suggestionProps: any;
   handleConfirm: () => void;
-  shouldUseHangulKeyboardMain: boolean;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   requestFocus: (target: FocusTarget) => void;
   canToggleTranslations: boolean;
   next: () => void;
@@ -41,12 +39,10 @@ export function CardSceneQuestion(props: CardSceneQuestionProps) {
       mainInputRef={props.mainInputRef}
       suggestionProps={props.suggestionProps}
       handleConfirm={props.handleConfirm}
-      shouldUseHangulKeyboardMain={props.shouldUseHangulKeyboardMain}
       isMainAnswerNumeric={props.isMainAnswerNumeric}
       isMainAnswerDate={props.isMainAnswerDate}
       mainDatePattern={props.mainDatePattern}
       focusTarget={props.focusTarget}
-      keyboardMode={props.keyboardMode}
       requestFocus={props.requestFocus}
       canToggleTranslations={props.canToggleTranslations}
       next={props.next}

@@ -298,9 +298,6 @@
         "checkpointSetError": "Nie udało się ustawić checkpointu.",
         "introResetDone": "Intro zresetowane. Onboarding startuje od wyboru języka.",
         "introResetError": "Nie udało się zresetować dymków.",
-        "hangulTitle": "Hangul",
-        "hangulTyped": "Wpisałeś: {{value}}",
-        "hangulEmpty": "Brak znaków do zatwierdzenia.",
         "trophiesAdded": "Dodano 3 testowe osiągnięcia.",
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Wyjdź z niego przez „Spróbuj ponownie”.",
         "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
@@ -329,14 +326,6 @@
           "title": "Podgląd ekranu startowego",
           "subtitle": "Na chwilę pokazuje nowy ekran ładowania z ikoną aplikacji i spinnerem.",
           "button": "Pokaż ekran"
-        },
-        "hangul": {
-          "title": "Testuj klawiaturę Hangul",
-          "subtitle": "Wpisz koreańskie znaki bez systemowej klawiatury.",
-          "placeholder": "Kliknij Pokaż, a potem dodawaj znaki",
-          "show": "Pokaż klawiaturę",
-          "hide": "Ukryj klawiaturę",
-          "clear": "Wyczyść"
         },
         "logo": {
           "title": "Dymek z logo",

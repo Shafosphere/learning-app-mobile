@@ -4,7 +4,7 @@ import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
-import type { FocusTarget, KeyboardMode } from "../card-types";
+import type { FocusTarget } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
@@ -38,12 +38,10 @@ type CardInputProps = {
   mainInputRef: React.RefObject<TextInput | null>;
   suggestionProps: any;
   handleConfirm: () => void;
-  shouldUseHangulKeyboardMain: boolean;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   requestFocus: (target: FocusTarget) => void;
   canToggleTranslations: boolean;
   next: () => void;
@@ -66,12 +64,10 @@ export function CardInput({
   mainInputRef,
   suggestionProps,
   handleConfirm,
-  shouldUseHangulKeyboardMain,
   isMainAnswerNumeric,
   isMainAnswerDate,
   mainDatePattern,
   focusTarget,
-  keyboardMode,
   requestFocus,
   canToggleTranslations,
   next,
@@ -80,8 +76,6 @@ export function CardInput({
   textColorOverride,
 }: CardInputProps) {
   const styles = useStyles();
-  const isHangulMainActive =
-    focusTarget === "main" && keyboardMode === "hangul";
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -165,9 +159,6 @@ export function CardInput({
             returnKeyType="done"
             blurOnSubmit={false}
             onSubmitEditing={handleConfirm}
-            showSoftInputOnFocus={
-              !shouldUseHangulKeyboardMain && !isHangulMainActive
-            }
             onFocus={() => requestFocus("main")}
           />
         </View>
@@ -225,12 +216,10 @@ export function CardInput({
     answer,
     focusTarget,
     suggestionProps,
-    keyboardMode,
     handleConfirm,
     mainInputRef,
     requestFocus,
     setAnswer,
-    shouldUseHangulKeyboardMain,
     isMainAnswerDate,
     isMainAnswerNumeric,
     datePlaceholder,

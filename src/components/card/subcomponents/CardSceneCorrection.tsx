@@ -4,7 +4,7 @@ import type { MutableRefObject } from "react";
 import type { ScrollView, TextInput } from "react-native";
 
 import type { CardCorrectionType } from "../card-types";
-import type { FocusTarget, KeyboardMode } from "../card-types";
+import type { FocusTarget } from "../card-types";
 import { CardCorrection } from "./CardCorrection";
 
 type CardSceneCorrectionProps = {
@@ -31,10 +31,8 @@ type CardSceneCorrectionProps = {
   setInput1LayoutWidth: (width: number) => void;
   setInput2LayoutWidth: (width: number) => void;
   focusTarget: FocusTarget;
-  keyboardMode: KeyboardMode;
   requestFocus: (target: FocusTarget) => void;
   onCorrection1Completed: () => void;
-  shouldUseHangulKeyboardCorrection1: boolean;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
   correctionInput1DatePattern?: DatePattern | null;
@@ -76,10 +74,8 @@ export function CardSceneCorrection(props: CardSceneCorrectionProps) {
       setInput1LayoutWidth={props.setInput1LayoutWidth}
       setInput2LayoutWidth={props.setInput2LayoutWidth}
       focusTarget={props.focusTarget}
-      keyboardMode={props.keyboardMode}
       requestFocus={props.requestFocus}
       onCorrection1Completed={props.onCorrection1Completed}
-      shouldUseHangulKeyboardCorrection1={props.shouldUseHangulKeyboardCorrection1}
       isCorrectionInput1Numeric={props.isCorrectionInput1Numeric}
       isCorrectionInput1Date={props.isCorrectionInput1Date}
       correctionInput1DatePattern={props.correctionInput1DatePattern}
