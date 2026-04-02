@@ -132,6 +132,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.75,
     marginTop: 4,
   },
+  appearanceRowTitle: {
+    fontSize: 17,
+    fontWeight: "600",
+    color: colors.paragraph,
+  },
+  appearanceRowSubtitle: {
+    fontSize: 14,
+    color: colors.paragraph,
+    opacity: 0.78,
+    marginTop: 4,
+  },
   driveButtonText: {
     fontSize: 15,
     fontWeight: "900",

@@ -264,10 +264,10 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
+          <Text style={styles.appearanceRowTitle}>
             {t("settings.appearance.darkTheme.title")}
           </Text>
-          <Text style={styles.rowSubtitle}>
+          <Text style={styles.appearanceRowSubtitle}>
             {t("settings.appearance.darkTheme.subtitle")}
           </Text>
         </View>
@@ -282,10 +282,10 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
+          <Text style={styles.appearanceRowTitle}>
             {t("settings.appearance.vibrations.title")}
           </Text>
-          <Text style={styles.rowSubtitle}>
+          <Text style={styles.appearanceRowSubtitle}>
             {t("settings.appearance.vibrations.subtitle")}
           </Text>
         </View>
@@ -300,10 +300,10 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
+          <Text style={styles.appearanceRowTitle}>
             {t("settings.appearance.disableReactions.title")}
           </Text>
-          <Text style={styles.rowSubtitle}>
+          <Text style={styles.appearanceRowSubtitle}>
             {t("settings.appearance.disableReactions.subtitle")}
           </Text>
         </View>
@@ -318,10 +318,10 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.sliderSection}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
+          <Text style={styles.appearanceRowTitle}>
             {t("settings.appearance.effectsVolume.title")}
           </Text>
-          <Text style={styles.rowSubtitle}>
+          <Text style={styles.appearanceRowSubtitle}>
             {t("settings.appearance.effectsVolume.subtitle")}
           </Text>
         </View>
@@ -353,10 +353,10 @@ const AppearanceSection: React.FC = () => {
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
+          <Text style={styles.appearanceRowTitle}>
             {t("settings.appearance.boxFaces.title")}
           </Text>
-          <Text style={styles.rowSubtitle}>
+          <Text style={styles.appearanceRowSubtitle}>
             {t("settings.appearance.boxFaces.subtitle")}
           </Text>
         </View>
