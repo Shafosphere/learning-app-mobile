@@ -72,16 +72,6 @@ const OFFICIAL_PACKS = [
     csvFile: "astronomia.csv",
   },
   {
-    slug: "gwiazdozbiory",
-    name: "Gwiazdozbiory",
-    iconId: "planet",
-    iconColor: "#3B82F6",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: false,
-    csvFile: "gwiazdozbiory.csv",
-  },
-  {
     slug: "polska_historia",
     name: "Historia Polski",
     iconId: "book",
