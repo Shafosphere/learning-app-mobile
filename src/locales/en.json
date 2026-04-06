@@ -401,6 +401,43 @@
       }
     }
   },
+  "support": {
+    "report": {
+      "title": "Report a problem",
+      "subtitle": "We will open your mail app with a prepared subject and basic app details. Add the issue description and send the message.",
+      "button": "Send email",
+      "subject": "Bug report - Memicard"
+    },
+    "suggestion": {
+      "title": "Send a suggestion",
+      "subtitle": "Have an idea for a new feature or improvement? Share it and we will review how we can implement it.",
+      "button": "Share your idea",
+      "subject": "Suggestion / idea - Memicard",
+      "body": "Do you have an idea for a new feature or improvement? Describe what you want to change and why it would help."
+    },
+    "guide": {
+      "title": "Guide / How it works",
+      "subtitle": "Check the instructions and tips before sending a report, or if you want to get familiar with the app faster.",
+      "button": "How it works"
+    },
+    "about": {
+      "title": "About the app",
+      "subtitle": "This information is also attached automatically to a problem report."
+    },
+    "legal": {
+      "title": "Privacy and licenses",
+      "subtitle": "Open the privacy policy and the licenses and third-party materials pages separately."
+    },
+    "status": {
+      "mailClientFailed": "Could not open the mail client. Copy the data manually and send the message yourself.",
+      "reportSent": "Sent through the mail app. Thank you!",
+      "suggestionSent": "Suggestion sent. Thank you for the idea!",
+      "sendCancelled": "Sending was cancelled. You can try again.",
+      "mailtoOpenedReport": "Opened mailto:. Add the description and send the message.",
+      "mailtoOpenedSuggestion": "Opened mailto:. Describe your idea and send the message.",
+      "composerFailed": "Could not open the composer. Try again or use mailto."
+    }
+  },
   "legal": {
     "entry": {
       "title": "Legal information",

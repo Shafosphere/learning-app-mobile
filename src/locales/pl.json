@@ -401,6 +401,43 @@
       }
     }
   },
+  "support": {
+    "report": {
+      "title": "Zgłoś problem",
+      "subtitle": "Otworzymy Twoją aplikację poczty z gotowym tematem i podstawowymi danymi o aplikacji. Dodaj opis problemu i wyślij wiadomość.",
+      "button": "Wyślij e-mail",
+      "subject": "Zgłoszenie błędu - Memicard"
+    },
+    "suggestion": {
+      "title": "Wyślij sugestię",
+      "subtitle": "Masz pomysł na nową funkcję lub poprawkę? Podziel się nim, a sprawdzimy jak możemy go wdrożyć.",
+      "button": "Podziel się pomysłem",
+      "subject": "Sugestia / pomysł - Memicard",
+      "body": "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne."
+    },
+    "guide": {
+      "title": "Poradnik / Co i jak",
+      "subtitle": "Zajrzyj do instrukcji i wskazówek, zanim wyślesz zgłoszenie lub jeśli chcesz szybciej odnaleźć się w aplikacji.",
+      "button": "Co i jak"
+    },
+    "about": {
+      "title": "O aplikacji",
+      "subtitle": "Te informacje są też automatycznie dołączane do zgłoszenia problemu."
+    },
+    "legal": {
+      "title": "Prywatność i licencje",
+      "subtitle": "Sprawdź osobno politykę prywatności oraz licencje i wykorzystane materiały."
+    },
+    "status": {
+      "mailClientFailed": "Nie udało się otworzyć klienta poczty. Skopiuj dane ręcznie i wyślij własnoręcznie.",
+      "reportSent": "Wysłane przez klienta poczty. Dziękujemy!",
+      "suggestionSent": "Sugestia wysłana. Dziękujemy za pomysł!",
+      "sendCancelled": "Wysyłka anulowana. Możesz spróbować ponownie.",
+      "mailtoOpenedReport": "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
+      "mailtoOpenedSuggestion": "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
+      "composerFailed": "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto."
+    }
+  },
   "legal": {
     "entry": {
       "title": "Informacje prawne",

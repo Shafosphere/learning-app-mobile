@@ -5,5 +5,6 @@ module.exports = (() => {
   config.transformer.babelTransformerPath = require.resolve('./svgx-transformer');
   config.resolver.assetExts.push('csv');
   config.resolver.assetExts.push('db');
+  config.resolver.assetExts.push('ogg');
   return config;
 })();

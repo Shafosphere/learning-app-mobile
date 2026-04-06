@@ -6,55 +6,56 @@ import * as Device from "expo-device";
 import * as MailComposer from "expo-mail-composer";
 import { Link } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, Platform, ScrollView, Text, View } from "react-native";
+import { Linking, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-const BUG_REPORT_SUBJECT = "Zgłoszenie błędu - Memicard";
-const SUGGESTION_SUBJECT = "Sugestia / pomysł - Memicard";
-const SUGGESTION_BODY =
-  "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne.";
-
 type DiagnosticEntry = {
-  key: "app" | "platform" | "device";
+  key: "version" | "build" | "device" | "system";
   label: string;
   value: string;
 };
 
 function buildDiagnosticEntries(): DiagnosticEntry[] {
-  const version = Constants.expoConfig?.version ?? "unknown";
-  const androidVersionCode =
-    Constants.expoConfig?.android?.versionCode ?? "n/a";
-  const iosBuildNumber = Constants.expoConfig?.ios?.buildNumber ?? "n/a";
-  const deviceModel = Device.modelName ?? "unknown";
-  const deviceName = Device.deviceName ?? "unknown";
-  const osName = Device.osName ?? Platform.OS;
-  const osVersion = Device.osVersion ?? "unknown";
+  const version =
+    Constants.expoConfig?.version ??
+    Constants.nativeAppVersion ??
+    "niedostępny";
+  const build = Constants.nativeBuildVersion ?? "niedostępny";
+  const deviceModel = Device.modelName ?? "niedostępny";
+  const osName = Device.osName ?? "System";
+  const osVersion = Device.osVersion ?? "niedostępny";
 
   return [
     {
-      key: "app",
+      key: "version",
       label: "Wersja aplikacji",
-      value: `App version: ${version} (android: ${androidVersionCode}, ios: ${iosBuildNumber})`,
+      value: version,
     },
     {
-      key: "platform",
-      label: "Platforma i OS",
-      value: `Platform: ${Platform.OS}; OS: ${osName} ${osVersion}`,
+      key: "build",
+      label: "Build",
+      value: build,
     },
     {
       key: "device",
       label: "Model urządzenia",
-      value: `Device: ${deviceModel} (${deviceName})`,
+      value: deviceModel,
+    },
+    {
+      key: "system",
+      label: "System",
+      value: `${osName} ${osVersion}`.trim(),
     },
   ];
 }
 
-function formatBody(selectedDiagnostics: string[]) {
+function formatBody(selectedDiagnostics: DiagnosticEntry[]) {
   const intro = "Opisz problem (kroki, co widzisz):";
+  const diagnostics = selectedDiagnostics
+    .map((entry) => `${entry.label}: ${entry.value}`)
+    .join("\n");
 
-  return `${intro}\n\n---\nDane techniczne (dołączone automatycznie):\n${selectedDiagnostics.join(
-    "\n",
-  )}`;
+  return `${intro}\n\n---\nO aplikacji (dołączone automatycznie):\n${diagnostics}`;
 }
 
 export default function SupportScreen() {
@@ -63,15 +64,7 @@ export default function SupportScreen() {
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const diagnosticEntries = useMemo(buildDiagnosticEntries, []);
-  const selectedDiagnostics = useMemo(
-    () => diagnosticEntries.map((entry) => entry.value),
-    [diagnosticEntries],
-  );
-
-  const emailBody = useMemo(
-    () => formatBody(selectedDiagnostics),
-    [selectedDiagnostics],
-  );
+  const emailBody = useMemo(() => formatBody(diagnosticEntries), [diagnosticEntries]);
 
   const openMailto = useCallback(
     async (subject: string, body: string, successMessage: string) => {
@@ -83,12 +76,10 @@ export default function SupportScreen() {
         setStatus(successMessage);
       } catch (error) {
         console.warn("[Support] mailto failed", error);
-        setStatus(
-          "Nie udało się otworzyć klienta poczty. Skopiuj dane ręcznie i wyślij własnoręcznie.",
-        );
+        setStatus(t("support.status.mailClientFailed"));
       }
     },
-    [],
+    [t],
   );
 
   const handleSendEmail = useCallback(async () => {
@@ -100,40 +91,38 @@ export default function SupportScreen() {
       if (available) {
         const result = await MailComposer.composeAsync({
           recipients: [SUPPORT_EMAIL],
-          subject: BUG_REPORT_SUBJECT,
+          subject: t("support.report.subject"),
           body: emailBody,
         });
 
         if (result.status === MailComposer.MailComposerStatus.SENT) {
-          setStatus("Wysłane przez klienta poczty. Dziękujemy!");
+          setStatus(t("support.status.reportSent"));
           return;
         }
 
         if (result.status === MailComposer.MailComposerStatus.CANCELLED) {
-          setStatus("Wysyłka anulowana. Możesz spróbować ponownie.");
+          setStatus(t("support.status.sendCancelled"));
           return;
         }
       }
 
       await openMailto(
-        BUG_REPORT_SUBJECT,
+        t("support.report.subject"),
         emailBody,
-        "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
+        t("support.status.mailtoOpenedReport"),
       );
     } catch (error) {
       console.warn("[Support] send email failed", error);
-      setStatus(
-        "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto.",
-      );
+      setStatus(t("support.status.composerFailed"));
       await openMailto(
-        BUG_REPORT_SUBJECT,
+        t("support.report.subject"),
         emailBody,
-        "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
+        t("support.status.mailtoOpenedReport"),
       );
     } finally {
       setBusy(false);
     }
-  }, [emailBody, openMailto]);
+  }, [emailBody, openMailto, t]);
 
   const handleSendSuggestion = useCallback(async () => {
     setBusy(true);
@@ -144,40 +133,38 @@ export default function SupportScreen() {
       if (available) {
         const result = await MailComposer.composeAsync({
           recipients: [SUPPORT_EMAIL],
-          subject: SUGGESTION_SUBJECT,
-          body: SUGGESTION_BODY,
+          subject: t("support.suggestion.subject"),
+          body: t("support.suggestion.body"),
         });
 
         if (result.status === MailComposer.MailComposerStatus.SENT) {
-          setStatus("Sugestia wysłana. Dziękujemy za pomysł!");
+          setStatus(t("support.status.suggestionSent"));
           return;
         }
 
         if (result.status === MailComposer.MailComposerStatus.CANCELLED) {
-          setStatus("Wysyłka anulowana. Możesz spróbować ponownie.");
+          setStatus(t("support.status.sendCancelled"));
           return;
         }
       }
 
       await openMailto(
-        SUGGESTION_SUBJECT,
-        SUGGESTION_BODY,
-        "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
+        t("support.suggestion.subject"),
+        t("support.suggestion.body"),
+        t("support.status.mailtoOpenedSuggestion"),
       );
     } catch (error) {
       console.warn("[Support] send suggestion failed", error);
-      setStatus(
-        "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto.",
-      );
+      setStatus(t("support.status.composerFailed"));
       await openMailto(
-        SUGGESTION_SUBJECT,
-        SUGGESTION_BODY,
-        "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
+        t("support.suggestion.subject"),
+        t("support.suggestion.body"),
+        t("support.status.mailtoOpenedSuggestion"),
       );
     } finally {
       setBusy(false);
     }
-  }, [openMailto]);
+  }, [openMailto, t]);
 
   return (
     <View style={styles.container}>
@@ -186,31 +173,11 @@ export default function SupportScreen() {
         showsVerticalScrollIndicator={false}
       >
         <View style={styles.section}>
-          <Text style={styles.header}>Wyślij sugestię</Text>
-          <Text style={styles.subtitle}>
-            Masz pomysł na nową funkcję lub poprawkę? Podziel się nim, a my
-            sprawdzimy jak możemy go wdrożyć.
-          </Text>
+          <Text style={styles.header}>{t("support.report.title")}</Text>
+          <Text style={styles.subtitle}>{t("support.report.subtitle")}</Text>
           <View style={styles.buttonWrapper}>
             <MyButton
-              text="Podziel się pomysłem"
-              onPress={handleSendSuggestion}
-              width={160}
-              disabled={busy}
-            />
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.header}>Zgłoś problem</Text>
-          <Text style={styles.subtitle}>
-            Otworzymy Twoją domyślną aplikację poczty z uzupełnionym tematem i
-            danymi technicznymi (wersja, platforma/OS, model). Dodaj opis i
-            wyślij.
-          </Text>
-          <View style={styles.buttonWrapper}>
-            <MyButton
-              text="Wyślij e-mail"
+              text={t("support.report.button")}
               onPress={handleSendEmail}
               width={160}
               disabled={busy}
@@ -219,12 +186,37 @@ export default function SupportScreen() {
           {status ? <Text style={styles.status}>{status}</Text> : null}
         </View>
 
+        <View style={styles.section}>
+          <Text style={styles.header}>{t("support.suggestion.title")}</Text>
+          <Text style={styles.subtitle}>{t("support.suggestion.subtitle")}</Text>
+          <View style={styles.buttonWrapper}>
+            <MyButton
+              text={t("support.suggestion.button")}
+              onPress={handleSendSuggestion}
+              width={160}
+              disabled={busy}
+            />
+          </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.header}>{t("support.guide.title")}</Text>
+          <Text style={styles.subtitle}>{t("support.guide.subtitle")}</Text>
+          <View style={styles.buttonWrapper}>
+            <Link href="/wiki" asChild>
+              <MyButton
+                text={t("support.guide.button")}
+                color="my_green"
+                width={160}
+              />
+            </Link>
+          </View>
+        </View>
+
         <View style={styles.panel}>
           <View style={styles.panelHeader}>
-            <Text style={styles.panelTitle}>Dane techniczne</Text>
-            <Text style={styles.panelSubtitle}>
-              Dołączamy je automatycznie do zgłoszenia.
-            </Text>
+            <Text style={styles.panelTitle}>{t("support.about.title")}</Text>
+            <Text style={styles.panelSubtitle}>{t("support.about.subtitle")}</Text>
           </View>
 
           <View style={styles.panelBody}>
@@ -234,7 +226,7 @@ export default function SupportScreen() {
                   <View style={styles.chipBox}>
                     <View style={styles.chipCheck} />
                   </View>
-                  <View style={{ flex: 1 }}>
+                  <View style={styles.staticContent}>
                     <Text style={styles.chipText}>{entry.label}</Text>
                     <Text style={styles.staticValue}>{entry.value}</Text>
                   </View>
@@ -245,20 +237,8 @@ export default function SupportScreen() {
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.header}>Potrzebujesz wskazówki?</Text>
-          <Text style={styles.subtitle}>
-            Zanim wyślesz zgłoszenie możesz sprawdzić nasz poradnik.
-          </Text>
-          <View style={styles.buttonWrapper}>
-            <Link href="/wiki" asChild>
-              <MyButton text="co i jak" color="my_green" width={160} />
-            </Link>
-          </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.header}>{t("legal.entry.title")}</Text>
-          <Text style={styles.subtitle}>{t("legal.entry.subtitle")}</Text>
+          <Text style={styles.header}>{t("support.legal.title")}</Text>
+          <Text style={styles.subtitle}>{t("support.legal.subtitle")}</Text>
           <View style={styles.buttonWrapper}>
             <Link href="/privacy-policy" asChild>
               <MyButton

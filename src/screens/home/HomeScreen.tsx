@@ -68,8 +68,8 @@ export default function HomeScreen() {
     },
     {
       key: "support",
-      title: "Kontakt",
-      subtitle: "Błedy i sugestie",
+      title: "Wsparcie",
+      subtitle: "Pomoc i informacje",
       image: supportImage,
       action: goToSupport,
     },

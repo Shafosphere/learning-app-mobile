@@ -1,7 +1,7 @@
 export const SOUNDS = {
-  pop: require("@/assets/audio/ui/pop.wav"),
-  pup: require("@/assets/audio/ui/pup.wav"),
-  error: require("@/assets/audio/ui/error.wav"),
+  pop: require("@/assets/audio/ui/drop_002.ogg"),
+  pup: require("@/assets/audio/ui/drop_003.ogg"),
+  error: require("@/assets/audio/ui/error_005.ogg"),
 } as const;
 
 export type SoundId = keyof typeof SOUNDS;

@@ -125,6 +125,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.border,
     backgroundColor: colors.background,
   },
+  staticContent: {
+    flex: 1,
+  },
   staticValue: {
     marginTop: 4,
     fontSize: 13,
