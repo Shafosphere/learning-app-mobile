@@ -10,7 +10,7 @@ import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { NavbarStatsProvider } from "@/src/contexts/NavbarStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
 import { QuoteProvider } from "@/src/contexts/QuoteContext";
-import { SettingsProvider } from "@/src/contexts/SettingsContext";
+import { SettingsProvider, useSettings } from "@/src/contexts/SettingsContext";
 import {
   addDbInitializationListener,
   deleteAndReinitializeDB,
@@ -26,12 +26,18 @@ import {
 import { importUserData } from "@/src/services/importUserData";
 import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
+import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
+import type { Theme } from "@/src/theme/theme";
+import * as NavigationBar from "expo-navigation-bar";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
+import { StatusBar } from "expo-status-bar";
+import * as SystemUI from "expo-system-ui";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
   Image,
+  Platform,
   Pressable,
   StyleSheet,
   Text,
@@ -48,6 +54,8 @@ type RootStatus = "loading" | "ready" | "error" | "importing" | "resetting";
 
 export default function RootLayout() {
   const { t } = useTranslation();
+  const [startupTheme, setStartupTheme] = useState<Theme | null>(null);
+  const [isStartupReady, setIsStartupReady] = useState(false);
   const [status, setStatus] = useState<RootStatus>("loading");
   const [loadingMessageKey, setLoadingMessageKey] = useState(
     "app.loading.initializing"
@@ -59,6 +67,7 @@ export default function RootLayout() {
   const [isDebugErrorOverride, setIsDebugErrorOverride] = useState(false);
   const splashHiddenRef = useRef(false);
   const previewTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const rootViewLaidOutRef = useRef(false);
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {
@@ -69,10 +78,16 @@ export default function RootLayout() {
   }, []);
 
   const onLayoutRootView = useCallback(() => {
+    rootViewLaidOutRef.current = true;
+    const shouldHideSplash =
+      isStartupReady && (status === "ready" || status === "error");
+    if (!shouldHideSplash) {
+      return;
+    }
     hideSplashOnce().catch((error) => {
       console.warn("[App] Splash hide failed", error);
     });
-  }, [hideSplashOnce]);
+  }, [hideSplashOnce, isStartupReady, status]);
 
   const prepareApp = useCallback(
     async (options?: { retry?: boolean; clearDebugOverride?: boolean }) => {
@@ -191,6 +206,7 @@ export default function RootLayout() {
   }, [prepareApp, t]);
 
   useEffect(() => {
+    let mounted = true;
     initializeGoogleDriveBackup();
 
     const handleDbEvent = (event: DbInitializationEvent) => {
@@ -235,9 +251,27 @@ export default function RootLayout() {
       }
     );
 
+    void loadStartupTheme()
+      .then((theme) => {
+        if (!mounted) {
+          return;
+        }
+        setStartupTheme(theme);
+        setIsStartupReady(true);
+      })
+      .catch((error) => {
+        console.warn("[App] Failed to load startup theme", error);
+        if (!mounted) {
+          return;
+        }
+        setStartupTheme("light");
+        setIsStartupReady(true);
+      });
+
     void prepareApp();
 
     return () => {
+      mounted = false;
       unsubscribe();
       unsubscribeDebugOverride();
       unsubscribeStartupPreview();
@@ -247,20 +281,94 @@ export default function RootLayout() {
     };
   }, [prepareApp]);
 
+  const shouldRenderApp = isStartupReady && status === "ready";
+  const shouldRenderBlockingState =
+    status === "error" || status === "importing" || status === "resetting";
+  const shouldHideSplash =
+    isStartupReady &&
+    rootViewLaidOutRef.current &&
+    (status === "ready" || status === "error");
+
+  useEffect(() => {
+    if (!shouldHideSplash) {
+      return;
+    }
+
+    hideSplashOnce().catch((error) => {
+      console.warn("[App] Splash hide failed", error);
+    });
+  }, [hideSplashOnce, shouldHideSplash]);
+
+  const effectiveStartupTheme = startupTheme ?? "light";
+  const startupUi = getStartupThemeUi(effectiveStartupTheme);
+
+  useEffect(() => {
+    if (!isStartupReady) {
+      return;
+    }
+
+    void SystemUI.setBackgroundColorAsync(startupUi.backgroundColor).catch(
+      (error) => {
+        console.warn("[App] Failed to set system UI background", error);
+      }
+    );
+
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    void NavigationBar.setButtonStyleAsync(startupUi.statusBarStyle).catch(
+      (error) => {
+        console.warn("[App] Failed to set Android navigation bar buttons", error);
+      }
+    );
+    void NavigationBar.setBackgroundColorAsync(startupUi.backgroundColor).catch(
+      (error) => {
+        console.warn("[App] Failed to set Android navigation bar background", error);
+      }
+    );
+  }, [isStartupReady, startupUi.backgroundColor, startupUi.statusBarStyle]);
+
   const renderBlockingState = () => {
     if (status === "error") {
       return (
-        <View style={styles.blockingContainer}>
-          <Text style={styles.errorTitle}>{t("app.error.title")}</Text>
-          <Text style={styles.errorText}>{t("app.error.description")}</Text>
-          <Text style={styles.errorText}>{t("app.error.backupHint")}</Text>
+        <View
+          style={[
+            styles.blockingContainer,
+            { backgroundColor: startupUi.backgroundColor },
+          ]}
+        >
+          <Text style={[styles.errorTitle, { color: startupUi.primaryTextColor }]}>
+            {t("app.error.title")}
+          </Text>
+          <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
+            {t("app.error.description")}
+          </Text>
+          <Text style={[styles.errorText, { color: startupUi.secondaryTextColor }]}>
+            {t("app.error.backupHint")}
+          </Text>
           {isDebugErrorOverride ? (
-            <Text style={styles.debugBadge}>{t("app.error.debugBadge")}</Text>
+            <Text
+              style={[
+                styles.debugBadge,
+                {
+                  backgroundColor: startupUi.errorBadgeBackgroundColor,
+                  color: startupUi.errorBadgeTextColor,
+                },
+              ]}
+            >
+              {t("app.error.debugBadge")}
+            </Text>
           ) : null}
-          {errorMessage ? <Text style={styles.errorReason}>{errorMessage}</Text> : null}
+          {errorMessage ? (
+            <Text style={[styles.errorReason, { color: startupUi.errorTextColor }]}>
+              {errorMessage}
+            </Text>
+          ) : null}
           <View style={styles.actions}>
             <ActionButton
               label={t("app.error.actions.retry")}
+              startupUi={startupUi}
               onPress={() => {
                 void handleRetry();
               }}
@@ -268,6 +376,7 @@ export default function RootLayout() {
             <ActionButton
               label={t("app.error.actions.importBackup")}
               variant="ghost"
+              startupUi={startupUi}
               onPress={() => {
                 void handleImportBackup();
               }}
@@ -275,6 +384,7 @@ export default function RootLayout() {
             <ActionButton
               label={t("app.error.actions.reset")}
               variant="secondary"
+              startupUi={startupUi}
               onPress={handleResetApp}
             />
           </View>
@@ -283,9 +393,18 @@ export default function RootLayout() {
     }
 
     return (
-      <View style={styles.blockingContainer}>
-        <Image source={STARTUP_ICON} style={styles.loadingLogo} resizeMode="contain" />
-        <Text style={styles.loadingText}>
+      <View
+        style={[
+          styles.blockingContainer,
+          { backgroundColor: startupUi.backgroundColor },
+        ]}
+      >
+        <Image
+          source={STARTUP_ICON}
+          style={[styles.loadingLogo, { shadowColor: startupUi.shadowColor }]}
+          resizeMode="contain"
+        />
+        <Text style={[styles.loadingText, { color: startupUi.primaryTextColor }]}>
           {previewLoadingMessageKey
             ? t(previewLoadingMessageKey)
             : status === "importing"
@@ -305,9 +424,20 @@ export default function RootLayout() {
 
     return (
       <View style={styles.previewOverlay}>
-        <View style={styles.blockingContainer}>
-          <Image source={STARTUP_ICON} style={styles.loadingLogo} resizeMode="contain" />
-          <Text style={styles.loadingText}>{t(previewLoadingMessageKey)}</Text>
+        <View
+          style={[
+            styles.blockingContainer,
+            { backgroundColor: startupUi.backgroundColor },
+          ]}
+        >
+          <Image
+            source={STARTUP_ICON}
+            style={[styles.loadingLogo, { shadowColor: startupUi.shadowColor }]}
+            resizeMode="contain"
+          />
+          <Text style={[styles.loadingText, { color: startupUi.primaryTextColor }]}>
+            {t(previewLoadingMessageKey)}
+          </Text>
         </View>
       </View>
     );
@@ -315,9 +445,13 @@ export default function RootLayout() {
 
   return (
     <SafeAreaProvider>
-      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-        {status === "ready" ? (
-          <SettingsProvider>
+      <View
+        style={[styles.root, { backgroundColor: startupUi.backgroundColor }]}
+        onLayout={onLayoutRootView}
+      >
+        {shouldRenderApp ? (
+          <SettingsProvider initialTheme={effectiveStartupTheme}>
+            <AppThemeSystemUiSync />
             <QuoteProvider>
               <QuoteSystemInitializer />
               <LearningRemindersInitializer />
@@ -335,10 +469,13 @@ export default function RootLayout() {
               </LearningStatsProvider>
             </QuoteProvider>
           </SettingsProvider>
-        ) : (
-          renderBlockingState()
-        )}
-        {status === "ready" ? renderPreviewOverlay() : null}
+        ) : shouldRenderBlockingState ? (
+          <>
+            <StatusBar style={startupUi.statusBarStyle} />
+            {renderBlockingState()}
+          </>
+        ) : null}
+        {shouldRenderApp ? renderPreviewOverlay() : null}
       </View>
     </SafeAreaProvider>
   );
@@ -348,36 +485,80 @@ function ActionButton({
   label,
   onPress,
   variant = "primary",
+  startupUi,
 }: {
   label: string;
   onPress: () => void;
   variant?: "primary" | "secondary" | "ghost";
+  startupUi: ReturnType<typeof getStartupThemeUi>;
 }) {
+  const backgroundColor =
+    variant === "secondary"
+      ? startupUi.secondaryButtonBackgroundColor
+      : variant === "ghost"
+        ? startupUi.ghostButtonBackgroundColor
+        : startupUi.primaryButtonBackgroundColor;
+  const textColor =
+    variant === "secondary"
+      ? startupUi.secondaryButtonTextColor
+      : variant === "ghost"
+        ? startupUi.ghostButtonTextColor
+        : startupUi.primaryButtonTextColor;
+
   return (
     <Pressable
       accessibilityRole="button"
       onPress={onPress}
       style={({ pressed }) => [
         styles.actionButton,
-        variant === "secondary" && styles.actionButtonSecondary,
-        variant === "ghost" && styles.actionButtonGhost,
+        {
+          backgroundColor,
+          borderColor:
+            variant === "ghost" ? startupUi.ghostButtonBorderColor : "transparent",
+          borderWidth: variant === "ghost" ? 1 : 0,
+        },
         pressed && styles.actionButtonPressed,
       ]}
     >
-      <Text
-        style={[
-          styles.actionButtonText,
-          variant === "secondary" && styles.actionButtonTextSecondary,
-          variant === "ghost" && styles.actionButtonTextGhost,
-        ]}
-      >
-        {label}
-      </Text>
+      <Text style={[styles.actionButtonText, { color: textColor }]}>{label}</Text>
     </Pressable>
   );
 }
 
+function AppThemeSystemUiSync() {
+  const { theme } = useSettings();
+  const currentUi = getStartupThemeUi(theme);
+
+  useEffect(() => {
+    void SystemUI.setBackgroundColorAsync(currentUi.backgroundColor).catch(
+      (error) => {
+        console.warn("[App] Failed to sync system UI background", error);
+      },
+    );
+
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    void NavigationBar.setButtonStyleAsync(currentUi.statusBarStyle).catch(
+      (error) => {
+        console.warn("[App] Failed to sync Android navigation bar buttons", error);
+      },
+    );
+    void NavigationBar.setBackgroundColorAsync(currentUi.backgroundColor).catch(
+      (error) => {
+        console.warn("[App] Failed to sync Android navigation bar background", error);
+      },
+    );
+  }, [currentUi.backgroundColor, currentUi.statusBarStyle]);
+
+  return <StatusBar style={currentUi.statusBarStyle} />;
+}
+
 const styles = StyleSheet.create({
+  root: {
+    flex: 1,
+  },
   previewOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 10,
@@ -388,7 +569,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
     padding: 24,
     gap: 22,
-    backgroundColor: "#ffffff",
   },
   loadingLogo: {
     width: 176,
@@ -405,35 +585,29 @@ const styles = StyleSheet.create({
     fontSize: 18,
     lineHeight: 26,
     fontWeight: "600",
-    color: "#111827",
     textAlign: "center",
     maxWidth: 260,
   },
   errorTitle: {
     fontSize: 24,
     fontWeight: "700",
-    color: "#1f2937",
     textAlign: "center",
   },
   errorText: {
     fontSize: 15,
     lineHeight: 22,
-    color: "#4b5563",
     textAlign: "center",
     maxWidth: 420,
   },
   errorReason: {
     fontSize: 13,
     lineHeight: 18,
-    color: "#991b1b",
     textAlign: "center",
     maxWidth: 420,
   },
   debugBadge: {
     fontSize: 13,
     fontWeight: "600",
-    color: "#92400e",
-    backgroundColor: "#fef3c7",
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 999,
@@ -446,31 +620,15 @@ const styles = StyleSheet.create({
   },
   actionButton: {
     borderRadius: 16,
-    backgroundColor: "#1f7a5c",
     paddingHorizontal: 18,
     paddingVertical: 14,
     alignItems: "center",
-  },
-  actionButtonSecondary: {
-    backgroundColor: "#f6c453",
-  },
-  actionButtonGhost: {
-    backgroundColor: "#ffffff",
-    borderWidth: 1,
-    borderColor: "#d1d5db",
   },
   actionButtonPressed: {
     opacity: 0.85,
   },
   actionButtonText: {
-    color: "#ffffff",
     fontSize: 15,
     fontWeight: "700",
-  },
-  actionButtonTextSecondary: {
-    color: "#1f2937",
-  },
-  actionButtonTextGhost: {
-    color: "#374151",
   },
 });

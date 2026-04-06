@@ -1,4 +1,5 @@
 import HomeScreen from "@/src/screens/home/HomeScreen";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Redirect } from "expo-router";
@@ -59,6 +60,7 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
 }
 
 export default function StartupIndexRoute() {
+  const { colors } = useSettings();
   const [targetRoute, setTargetRoute] = useState<StartupRoute | null>(null);
 
   useEffect(() => {
@@ -76,7 +78,7 @@ export default function StartupIndexRoute() {
   }, []);
 
   if (targetRoute == null) {
-    return <View style={{ flex: 1, backgroundColor: "#ffffff" }} />;
+    return <View style={{ flex: 1, backgroundColor: colors.background }} />;
   }
 
   if (targetRoute !== "/") {

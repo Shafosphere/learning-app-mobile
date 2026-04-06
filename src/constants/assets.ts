@@ -1,6 +1,6 @@
 export const APP_ASSETS = {
   icon: require("@/assets/app/icons/generated/ios/AppIcon~ios-marketing.png"),
-  splash: require("@/assets/app/splash/splash-icon.png"),
+  splash: require("@/assets/app/splash/splash-icon-v2.png"),
   favicon: require("@/assets/app/icons/legacy/favicon.png"),
 } as const;
 

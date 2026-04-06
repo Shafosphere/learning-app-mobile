@@ -25,6 +25,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  content: {
+    flex: 1,
+  },
   cardSectionWrapper: {
     marginBottom: 10,
   },
@@ -64,6 +67,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   bottomButtonsWrapper: {
     marginTop: 4,
     marginBottom: 2,
+  },
+  bottomButtonsDock: {
+    position: "absolute",
+    left: 0,
+    right: 0,
+    zIndex: 10,
   },
   addButton: {
     position: "absolute",

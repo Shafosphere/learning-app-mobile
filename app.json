@@ -21,9 +21,9 @@
       "package": "com.anonymous.memicard"
     },
     "splash": {
-      "image": "./assets/app/splash/splash-icon.png",
+      "image": "./assets/app/splash/splash-icon-v2.png",
       "resizeMode": "contain",
-      "backgroundColor": "#ffffff"
+      "backgroundColor": "#f2f4f6"
     },
     "web": {
       "bundler": "metro",
@@ -35,10 +35,14 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/app/splash/splash-icon.png",
+          "image": "./assets/app/splash/splash-icon-v2.png",
           "imageWidth": 200,
           "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
+          "backgroundColor": "#f2f4f6",
+          "dark": {
+            "backgroundColor": "#001534",
+            "image": "./assets/app/splash/splash-icon-v2.png"
+          }
         }
       ],
       "expo-sqlite",

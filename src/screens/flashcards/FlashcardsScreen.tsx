@@ -73,6 +73,9 @@ const HINT_COOLDOWN_MS = 10 * 60 * 1000;
 const TRUE_FALSE_POST_OK_COOLDOWN_MS = 1000;
 const UI_WARMUP_DELAY_MS = 250;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
+const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
+const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
+const BOTTOM_BUTTONS_KEYBOARD_DURATION_MS = 320;
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -932,6 +935,7 @@ export default function Flashcards() {
   const shouldHideHintsForActiveBox =
     activeBox === "boxFour" || activeBox === "boxFive";
   const bottomButtonsAnchorRef = useRef<View | null>(null);
+  const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
     useState<number | null>(null);
   const measureBottomButtons = useCallback(() => {
@@ -945,7 +949,7 @@ export default function Flashcards() {
         });
       });
     });
-  }, []);
+  }, [selectedItemId, shouldShowTrueFalseActions, showCardActions]);
   const effectiveTrueFalseButtonsVariant = isKnowDontKnow
     ? "know_dont_know"
     : selectedItem?.answerOnly
@@ -956,12 +960,12 @@ export default function Flashcards() {
   const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
-    enabled: !areButtonsOnTop,
-    gap: 8,
-    targetBottomInWindow: bottomButtonsBottomInWindow,
-    keyboardTopCorrection: 44,
-    debug: true,
-  });
+      enabled: !areButtonsOnTop,
+      gap: 8,
+      targetBottomInWindow: bottomButtonsBottomInWindow,
+      keyboardTopCorrection: 44,
+      androidDurationMs: BOTTOM_BUTTONS_KEYBOARD_DURATION_MS,
+    });
   useLayoutEffect(() => {
     if (selectedItemId == null) return;
     if (lastActionCooldownCardIdRef.current === selectedItemId) return;
@@ -1074,8 +1078,7 @@ export default function Flashcards() {
         isFocused={isCardFocusEnabled}
         isBetweenCards={isBetweenCards}
         disableLayoutAnimation={
-          shouldKeepLoadingOverlayVisible ||
-          showLoadingOverlay
+          shouldKeepLoadingOverlayVisible || showLoadingOverlay
         }
         hideHints={shouldHideHintsForActiveBox}
         showExplanationEnabled={showExplanationEnabled}
@@ -1129,6 +1132,11 @@ export default function Flashcards() {
   const screenSectionLayout = shouldAnimateScreenLayout
     ? SCREEN_LAYOUT_TRANSITION
     : undefined;
+  const shouldRenderBottomButtons = !areButtonsOnTop && shouldShowBoxes;
+  const bottomButtonsReservedSpace = shouldRenderBottomButtons
+    ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
+      BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+    : 0;
 
   return (
     <View style={styles.container}>
@@ -1136,7 +1144,12 @@ export default function Flashcards() {
       <Confetti generateConfetti={shouldCelebrate} />
 
       <View
-        style={{ flex: 1 }}
+        style={[
+          styles.content,
+          shouldRenderBottomButtons
+            ? { paddingBottom: bottomButtonsReservedSpace }
+            : null,
+        ]}
         pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
       >
         <Reanimated.View
@@ -1201,10 +1214,7 @@ export default function Flashcards() {
                 </View>
               </ScrollView>
             ) : (
-              <View
-                style={styles.boxesViewport}
-                onLayout={onBoxesViewportLayout}
-              >
+              <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
                 <View
                   style={[
                     styles.boxesScaledContent,
@@ -1226,31 +1236,43 @@ export default function Flashcards() {
               </View>
             )}
 
-            {!areButtonsOnTop ? (
-              <View
-                ref={bottomButtonsAnchorRef}
-                onLayout={measureBottomButtons}
-                collapsable={false}
-                style={[
-                  styles.bottomButtonsWrapper,
-                  !keyboardVisible && { marginBottom: 14 },
-                ]}
-              >
-                <Animated.View
-                  style={{
-                    transform: [
-                      {
-                        translateY: Animated.multiply(bottomButtonsOffset, -1),
-                      },
-                    ],
-                  }}
-                >
-                  {renderButtons("bottom")}
-                </Animated.View>
-              </View>
-            ) : null}
           </Reanimated.View>
         )}
+
+        {shouldRenderBottomButtons ? (
+          <View
+            style={[
+              styles.bottomButtonsDock,
+              { bottom: BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET },
+            ]}
+            pointerEvents="box-none"
+          >
+            <View
+              ref={bottomButtonsAnchorRef}
+              onLayout={(event) => {
+                const nextHeight = event.nativeEvent.layout.height;
+                setBottomButtonsHeight((prev) =>
+                  Math.abs(prev - nextHeight) < 1 ? prev : nextHeight,
+                );
+                measureBottomButtons();
+              }}
+              collapsable={false}
+              style={styles.bottomButtonsWrapper}
+            >
+              <Animated.View
+                style={{
+                  transform: [
+                    {
+                      translateY: Animated.multiply(bottomButtonsOffset, -1),
+                    },
+                  ],
+                }}
+              >
+                {renderButtons("bottom")}
+              </Animated.View>
+            </View>
+          </View>
+        ) : null}
       </View>
 
       {shouldRenderLoadingOverlay ? (

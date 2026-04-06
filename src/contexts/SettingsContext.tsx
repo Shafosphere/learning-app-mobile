@@ -590,9 +590,10 @@ const defaultValue: SettingsContextValue = {
 };
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
-export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
-  children,
-}) => {
+export const SettingsProvider: React.FC<{
+  children: ReactNode;
+  initialTheme?: Theme;
+}> = ({ children, initialTheme = "light" }) => {
   const [uiLanguageRaw, setUiLanguageState] = usePersistedState<string>(
     "uiLanguage",
     resolveSystemLanguage()
@@ -605,7 +606,7 @@ export const SettingsProvider: React.FC<{ children: ReactNode }> = ({
     "selectedLevel",
     "A1"
   );
-  const [theme, setTheme] = usePersistedState<Theme>("theme", "light");
+  const [theme, setTheme] = usePersistedState<Theme>("theme", initialTheme);
   const [boxesLayoutState, _setBoxesLayout] = usePersistedState<
     "classic" | "carousel"
   >("boxesLayout", "classic");

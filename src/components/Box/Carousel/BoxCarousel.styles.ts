@@ -23,7 +23,8 @@ export const useBoxCarouselStyles = createThemeStylesHook((colors) => ({
         justifyContent: "flex-start",
     },
     activeCounterWrap: {
-        minHeight: 56,
+        minHeight: 48,
+        marginTop: -18,
         alignItems: "center",
         justifyContent: "flex-start",
     },
