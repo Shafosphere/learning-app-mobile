@@ -1,4 +1,14 @@
 import MyButton from "@/src/components/button/button";
+import dingWav from "@/assets/audio/ui/ding.wav";
+import dongWav from "@/assets/audio/ui/dong.wav";
+import drop002Ogg from "@/assets/audio/ui/drop_002.ogg";
+import drop003Ogg from "@/assets/audio/ui/drop_003.ogg";
+import errorWav from "@/assets/audio/ui/error.wav";
+import error005Ogg from "@/assets/audio/ui/error_005.ogg";
+import pluck001Ogg from "@/assets/audio/ui/pluck_001.ogg";
+import pluck002Ogg from "@/assets/audio/ui/pluck_002.ogg";
+import popWav from "@/assets/audio/ui/pop.wav";
+import pupWav from "@/assets/audio/ui/pup.wav";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
@@ -11,6 +21,7 @@ import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
+import { playSoundAsset } from "@/src/utils/soundPlayer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
 import { useRouter } from "expo-router";
@@ -18,6 +29,59 @@ import React, { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+
+const DEBUG_AUDIO_SAMPLES = [
+  {
+    key: "debug-audio-drop-002",
+    label: "drop_002.ogg",
+    asset: drop002Ogg,
+  },
+  {
+    key: "debug-audio-drop-003",
+    label: "drop_003.ogg",
+    asset: drop003Ogg,
+  },
+  {
+    key: "debug-audio-error-005",
+    label: "error_005.ogg",
+    asset: error005Ogg,
+  },
+  {
+    key: "debug-audio-pluck-001",
+    label: "pluck_001.ogg",
+    asset: pluck001Ogg,
+  },
+  {
+    key: "debug-audio-pluck-002",
+    label: "pluck_002.ogg",
+    asset: pluck002Ogg,
+  },
+  {
+    key: "debug-audio-pop-wav",
+    label: "pop.wav",
+    asset: popWav,
+  },
+  {
+    key: "debug-audio-pup-wav",
+    label: "pup.wav",
+    asset: pupWav,
+  },
+  {
+    key: "debug-audio-error-wav",
+    label: "error.wav",
+    asset: errorWav,
+  },
+  {
+    key: "debug-audio-ding-wav",
+    label: "ding.wav",
+    asset: dingWav,
+  },
+  {
+    key: "debug-audio-dong-wav",
+    label: "dong.wav",
+    asset: dongWav,
+  },
+] as const;
 
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
@@ -300,6 +364,31 @@ const DebuggingSection: React.FC = () => {
             width={100}
           />
         </View>
+      </View>
+
+      <Text style={styles.sectionHeader}>{t("settings.debug.section.audio")}</Text>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>{t("settings.debug.rows.audio.title")}</Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.audio.subtitle")}
+          </Text>
+        </View>
+      </View>
+      <View style={styles.keyboardActions}>
+        {DEBUG_AUDIO_SAMPLES.map((sample) => (
+          <View key={sample.key} style={styles.keyboardButtonWrapper}>
+            <MyButton
+              text={sample.label}
+              color="my_yellow"
+              onPress={() => {
+                void playSoundAsset(sample.key, sample.asset);
+              }}
+              width={150}
+            />
+          </View>
+        ))}
       </View>
 
       <Text style={styles.sectionHeader}>{t("settings.debug.section.uiPreview")}</Text>

@@ -1,7 +1,11 @@
+import popWav from "@/assets/audio/ui/pop.wav";
+import pupWav from "@/assets/audio/ui/pup.wav";
+import error005 from "@/assets/audio/ui/error_005.ogg";
+
 export const SOUNDS = {
-  pop: require("@/assets/audio/ui/drop_002.ogg"),
-  pup: require("@/assets/audio/ui/drop_003.ogg"),
-  error: require("@/assets/audio/ui/error_005.ogg"),
+  pop: popWav,
+  pup: pupWav,
+  error: error005,
 } as const;
 
 export type SoundId = keyof typeof SOUNDS;

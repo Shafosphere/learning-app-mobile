@@ -263,6 +263,7 @@
     "debug": {
       "section": {
         "tools": "Debug / dev tools",
+        "audio": "Audio",
         "uiPreview": "UI preview",
         "seed": "Seed danych",
         "hardReset": "Twarde resety (dev)",
@@ -321,6 +322,10 @@
           "win": "Win",
           "loss": "Loss",
           "startup": "Startup"
+        },
+        "audio": {
+          "title": "Test dźwięków",
+          "subtitle": "Każdy przycisk odtwarza jeden plik audio z assets/audio/ui."
         },
         "startupScreenPreview": {
           "title": "Podgląd ekranu startowego",

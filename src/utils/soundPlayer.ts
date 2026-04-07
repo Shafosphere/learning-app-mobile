@@ -1,9 +1,9 @@
 import { createAudioPlayer, setAudioModeAsync } from "expo-audio";
 
-import { SOUNDS, SoundId } from "@/src/constants/sounds";
+import { SOUNDS, SoundAsset, SoundId } from "@/src/constants/sounds";
 
 type SoundInstance = ReturnType<typeof createAudioPlayer>;
-type LoadedSounds = Partial<Record<SoundId, SoundInstance>>;
+type LoadedSounds = Partial<Record<string, SoundInstance>>;
 
 const loadedSounds: LoadedSounds = {};
 let audioModeConfigured = false;
@@ -31,26 +31,32 @@ const configureAudioMode = async () => {
   }
 };
 
-const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> => {
-  const cached = loadedSounds[soundId];
+const loadSoundByKey = async (
+  cacheKey: string,
+  source: SoundAsset,
+): Promise<SoundInstance | null> => {
+  const cached = loadedSounds[cacheKey];
   if (cached) {
     cached.volume = feedbackVolume;
     return cached;
   }
 
   try {
-    const player = createAudioPlayer(SOUNDS[soundId]);
+    const player = createAudioPlayer(source);
     player.volume = feedbackVolume;
-    loadedSounds[soundId] = player;
+    loadedSounds[cacheKey] = player;
     return player;
   } catch (error) {
     console.warn("[soundPlayer] Failed to load sound", {
-      soundId,
+      cacheKey,
       error,
     });
     return null;
   }
 };
+
+const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> =>
+  loadSoundByKey(soundId, SOUNDS[soundId]);
 
 export const playSound = async (soundId: SoundId) => {
   await configureAudioMode();
@@ -66,6 +72,25 @@ export const playSound = async (soundId: SoundId) => {
   } catch (error) {
     console.warn("[soundPlayer] Failed to play sound", {
       soundId,
+      error,
+    });
+  }
+};
+
+export const playSoundAsset = async (cacheKey: string, source: SoundAsset) => {
+  await configureAudioMode();
+  const sound = await loadSoundByKey(cacheKey, source);
+  if (!sound) {
+    return;
+  }
+  sound.volume = feedbackVolume;
+
+  try {
+    await sound.seekTo(0);
+    sound.play();
+  } catch (error) {
+    console.warn("[soundPlayer] Failed to play sound asset", {
+      cacheKey,
       error,
     });
   }

@@ -322,11 +322,6 @@ export default function RootLayout() {
         console.warn("[App] Failed to set Android navigation bar buttons", error);
       }
     );
-    void NavigationBar.setBackgroundColorAsync(startupUi.backgroundColor).catch(
-      (error) => {
-        console.warn("[App] Failed to set Android navigation bar background", error);
-      }
-    );
   }, [isStartupReady, startupUi.backgroundColor, startupUi.statusBarStyle]);
 
   const renderBlockingState = () => {
@@ -543,11 +538,6 @@ function AppThemeSystemUiSync() {
     void NavigationBar.setButtonStyleAsync(currentUi.statusBarStyle).catch(
       (error) => {
         console.warn("[App] Failed to sync Android navigation bar buttons", error);
-      },
-    );
-    void NavigationBar.setBackgroundColorAsync(currentUi.backgroundColor).catch(
-      (error) => {
-        console.warn("[App] Failed to sync Android navigation bar background", error);
       },
     );
   }, [currentUi.backgroundColor, currentUi.statusBarStyle]);

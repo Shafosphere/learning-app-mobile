@@ -263,6 +263,7 @@
     "debug": {
       "section": {
         "tools": "Debug / dev tools",
+        "audio": "Audio",
         "uiPreview": "UI preview",
         "seed": "Data seed",
         "hardReset": "Hard resets (dev)",
@@ -321,6 +322,10 @@
           "win": "Win",
           "loss": "Loss",
           "startup": "Startup"
+        },
+        "audio": {
+          "title": "Audio test",
+          "subtitle": "Each button plays one audio file from assets/audio/ui."
         },
         "startupScreenPreview": {
           "title": "Startup screen preview",
