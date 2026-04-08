@@ -51,7 +51,7 @@ const DEFAULT_COPY: Record<
   },
 };
 
-export type LogoMessageProps = {
+type LogoMessageProps = {
   variant?: LogoMessageVariant;
   title?: string;
   description?: string;

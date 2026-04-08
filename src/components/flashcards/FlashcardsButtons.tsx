@@ -6,7 +6,7 @@ import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
 import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
 
-export type FlashcardsButtonsProps = {
+type FlashcardsButtonsProps = {
   position: "top" | "bottom";
 
   // True/False Actions

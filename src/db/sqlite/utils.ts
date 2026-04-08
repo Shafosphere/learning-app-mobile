@@ -1,7 +1,6 @@
 import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
-import type { CEFRLevel } from "@/src/types/language";
 
-export const ANSWER_SPLIT_REGEX = /[;,\n]/;
+const ANSWER_SPLIT_REGEX = /[;,\n]/;
 
 export function dedupeOrdered(values: string[]): string[] {
   const seen = new Set<string>();
@@ -67,15 +66,4 @@ export function computeNextReviewFromStage(
 ): number {
   const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
   return nowMs + REVIEW_INTERVALS_MS[idx];
-}
-
-export function createEmptyLevelCounts(): Record<CEFRLevel, number> {
-  return {
-    A1: 0,
-    A2: 0,
-    B1: 0,
-    B2: 0,
-    C1: 0,
-    C2: 0,
-  };
 }

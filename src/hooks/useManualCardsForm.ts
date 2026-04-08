@@ -16,13 +16,13 @@ export type ManualCard = {
   explanation?: string | null;
 };
 
-export interface UseManualCardsFormOptions {
+interface UseManualCardsFormOptions {
   initialCards?: ManualCard[];
   enableHistory?: boolean;
   historyLimit?: number;
 }
 
-export interface ReplaceManualCardsOptions {
+interface ReplaceManualCardsOptions {
   resetHistory?: boolean;
 }
 
@@ -48,7 +48,7 @@ export const createEmptyManualCard = (
 const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
   cards.map((card) => ({ ...card, answers: [...card.answers] }));
 
-export const ensureCardHasAnswer = (card: ManualCard): ManualCard =>
+const ensureCardHasAnswer = (card: ManualCard): ManualCard =>
   card.answers.length === 0 ? { ...card, answers: [""] } : card;
 
 export const ensureCardsNormalized = (cards: ManualCard[]): ManualCard[] =>
@@ -304,5 +304,3 @@ export const useManualCardsForm = (
     clearHistory,
   };
 };
-
-export type UseManualCardsFormReturn = ReturnType<typeof useManualCardsForm>;

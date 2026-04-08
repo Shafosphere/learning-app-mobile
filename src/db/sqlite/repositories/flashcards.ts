@@ -293,17 +293,6 @@ export async function replaceCustomFlashcards(
   return replaceCustomFlashcardsWithDb(db, courseId, cards);
 }
 
-export async function countCustomFlashcardsForCourse(
-  courseId: number
-): Promise<number> {
-  const db = await getDB();
-  const row = await db.getFirstAsync<{ cnt: number }>(
-    `SELECT COUNT(*) AS cnt FROM custom_flashcards WHERE course_id = ?;`,
-    courseId
-  );
-  return row?.cnt ?? 0;
-}
-
 export async function updateCustomFlashcardHints(
   flashcardId: number,
   hints: { hintFront: string | null; hintBack: string | null }

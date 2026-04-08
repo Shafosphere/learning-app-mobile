@@ -104,7 +104,6 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     next,
     input1LayoutWidth,
     input2LayoutWidth,
-    noopTrueFalseAnswer = () => {},
     answer,
     handleAnswerChange,
     mainInputRef,

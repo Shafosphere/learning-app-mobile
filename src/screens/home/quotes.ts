@@ -1,4 +1,4 @@
-export type Quote = {
+type Quote = {
   text: string;
   author: string;
 };

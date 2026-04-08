@@ -1,6 +1,6 @@
-export type DiffType = "substitution" | "insertion" | "deletion";
+type DiffType = "substitution" | "insertion" | "deletion";
 
-export interface TypoDiff {
+interface TypoDiff {
     type: DiffType;
     index: number;
     expectedChar: string; // The char that should be there (or empty for insertion)

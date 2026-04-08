@@ -1,5 +1,4 @@
 import {
-  Theme,
   ThemeColors,
   ThemePalette,
   themeMap,
@@ -70,21 +69,15 @@ function createCourseColors(palette: ThemeColors): CourseColorOption[] {
 
 export const DEFAULT_COURSE_COLOR = themeMap.light.headline;
 
-export function getDefaultCourseColor(theme: Theme): string {
-  return themeMap[theme]?.headline ?? DEFAULT_COURSE_COLOR;
-}
-
 export function getCourseColorsForTheme(
   palette: ThemeColors
 ): CourseColorOption[] {
   return createCourseColors(palette);
 }
 
-export const COURSE_COLORS = createCourseColors(themeMap.light);
+type CourseIconComponent = ComponentType<any>;
 
-export type CourseIconComponent = ComponentType<any>;
-
-export interface CourseIconDefinition {
+interface CourseIconDefinition {
   id: string;
   Component: CourseIconComponent;
   name: string;

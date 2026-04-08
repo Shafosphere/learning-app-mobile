@@ -71,11 +71,3 @@ export async function setOnboardingCheckpoint(
     console.warn("[OnboardingCheckpoint] Failed to write", error);
   }
 }
-
-export async function clearOnboardingCheckpoint(): Promise<void> {
-  try {
-    await AsyncStorage.removeItem(STORAGE_KEY);
-  } catch (error) {
-    console.warn("[OnboardingCheckpoint] Failed to clear", error);
-  }
-}

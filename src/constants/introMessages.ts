@@ -61,18 +61,3 @@ export const FLASHCARDS_INTRO_MESSAGES: IntroMessage[] = [
     gateId: "box_selected",
   },
 ];
-
-export const BRAIN_INTRO_MESSAGES: IntroMessage[] = [
-  {
-    titleKey: "onboarding.brain.step1.title",
-    descriptionKey: "onboarding.brain.step1.description",
-  },
-  {
-    titleKey: "onboarding.brain.step2.title",
-    descriptionKey: "onboarding.brain.step2.description",
-  },
-  {
-    titleKey: "onboarding.brain.step3.title",
-    descriptionKey: "onboarding.brain.step3.description",
-  },
-];

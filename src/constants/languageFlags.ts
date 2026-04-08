@@ -10,14 +10,14 @@ import US_FLAG from "@/assets/flags/language/en-us/active.png";
 import US_FLAG_GRAY from "@/assets/flags/language/en-us/inactive.png";
 import KR_FLAG from "@/assets/flags/language/ko/active.png";
 
-export type FlagVariant = "active" | "inactive";
+type FlagVariant = "active" | "inactive";
 
-export type LanguageFlagSources = {
+type LanguageFlagSources = {
   active: ImageSourcePropType;
   inactive?: ImageSourcePropType;
 };
 
-export const languageFlags = {
+const languageFlags = {
   pl: {
     active: PL_FLAG,
     inactive: PL_FLAG_GRAY,
@@ -42,12 +42,6 @@ export const languageFlags = {
     active: KR_FLAG,
   },
 } as const satisfies Record<string, LanguageFlagSources>;
-
-export type LanguageCode = keyof typeof languageFlags;
-
-export const supportedLanguageCodes = Object.keys(
-  languageFlags
-) as LanguageCode[];
 
 export function getFlagSource(
   code: string,

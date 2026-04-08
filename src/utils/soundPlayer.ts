@@ -58,7 +58,7 @@ const loadSoundByKey = async (
 const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> =>
   loadSoundByKey(soundId, SOUNDS[soundId]);
 
-export const playSound = async (soundId: SoundId) => {
+const playSound = async (soundId: SoundId) => {
   await configureAudioMode();
   const sound = await loadSound(soundId);
   if (!sound) {

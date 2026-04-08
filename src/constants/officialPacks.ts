@@ -15,7 +15,7 @@ export type OfficialPackCourseSettings = {
   imageFrameEnabled?: boolean;
 };
 
-export type OfficialPackDef = {
+type OfficialPackDef = {
   slug: string;
   packVersion: number;
   name: string;

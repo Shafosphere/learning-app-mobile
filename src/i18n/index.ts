@@ -9,7 +9,7 @@ import pl from "@/src/locales/pl.json";
 export type SupportedLanguage = "pl" | "en";
 export type UiLanguage = SupportedLanguage;
 
-export const UI_LANGUAGE_STORAGE_KEY = "uiLanguage";
+const UI_LANGUAGE_STORAGE_KEY = "uiLanguage";
 
 const resources = {
   pl: { translation: pl },
@@ -65,7 +65,7 @@ async function resolveInitialLanguage(): Promise<SupportedLanguage> {
 let initializationPromise: Promise<typeof i18n> | null = null;
 const i18n = createInstance();
 
-export function ensureI18nInitialized(): Promise<I18nInstance> {
+function ensureI18nInitialized(): Promise<I18nInstance> {
   if (i18n.isInitialized) {
     return Promise.resolve(i18n);
   }

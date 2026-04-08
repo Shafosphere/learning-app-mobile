@@ -214,7 +214,6 @@ export function CardInput({
     );
   }, [
     answer,
-    focusTarget,
     suggestionProps,
     handleConfirm,
     mainInputRef,

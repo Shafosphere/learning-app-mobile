@@ -20,7 +20,7 @@ type CorrectionState = {
   mode: CorrectionMode;
 };
 
-export type RegisterKnownWordResult = {
+type RegisterKnownWordResult = {
   wasNewMastered: boolean;
   nextKnownWordsCount: number;
 };
@@ -31,7 +31,7 @@ export type CorrectAnswerMeta = {
   logLearningEventPromise: Promise<void>;
 };
 
-export type UseFlashcardsInteractionParams = {
+type UseFlashcardsInteractionParams = {
   boxes: BoxesState;
   setBoxes: React.Dispatch<React.SetStateAction<BoxesState>>;
   checkSpelling: SpellcheckFn;

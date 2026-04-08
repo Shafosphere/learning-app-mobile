@@ -3,8 +3,7 @@ import type { DatePattern } from "@/src/utils/dateInput";
 import type { MutableRefObject } from "react";
 import type { ScrollView, TextInput } from "react-native";
 
-import type { CardCorrectionType } from "../card-types";
-import type { FocusTarget } from "../card-types";
+import type { CardCorrectionType, FocusTarget } from "../card-types";
 import { CardCorrection } from "./CardCorrection";
 
 type CardSceneCorrectionProps = {

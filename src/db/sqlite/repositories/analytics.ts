@@ -1,7 +1,7 @@
 import { getDB } from "../core";
 
-export type DailyCount = { date: string; count: number };
-export type DailyTime = { date: string; ms: number };
+type DailyCount = { date: string; count: number };
+type DailyTime = { date: string; ms: number };
 export type WeekdayActivityDistribution = number[];
 export type LearningEventsSummary = {
   totalEvents: number;
@@ -78,26 +78,6 @@ export async function getDailyLearningTimeMsCustom(
     toMs
   );
   return rows.map((r) => ({ date: r.d, ms: r.ms | 0 }));
-}
-
-export async function getHourlyActivityCounts(
-  fromMs: number,
-  toMs: number
-): Promise<number[]> {
-  const db = await getDB();
-  const hours = Array.from({ length: 24 }, () => 0);
-  const rows = await db.getAllAsync<{ h: string; cnt: number }>(
-    `SELECT strftime('%H', created_at/1000, 'unixepoch') AS h, COUNT(*) AS cnt
-     FROM custom_learning_events WHERE created_at BETWEEN ? AND ?
-     GROUP BY h;`,
-    fromMs,
-    toMs
-  );
-  for (const r of rows) {
-    const idx = parseInt(r.h, 10) | 0;
-    if (idx >= 0 && idx < 24) hours[idx] += r.cnt | 0;
-  }
-  return hours;
 }
 
 export async function getLearningEventsHourlyDistribution(

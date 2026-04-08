@@ -35,6 +35,3 @@ export const sanitizeMemoryBoardSize = (
 
   return LEGACY_MEMORY_BOARD_SIZE_MAP[value] ?? "twoByThree";
 };
-
-export const getMemoryBoardLayout = (size: MemoryBoardSize) =>
-  MEMORY_BOARD_LAYOUTS[size];

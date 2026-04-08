@@ -16,7 +16,7 @@ import {
   ViewStyle,
 } from "react-native";
 import { useStyles } from "./editFlashcards-styles";
-export interface ManualCardsEditorButtonConfig {
+interface ManualCardsEditorButtonConfig {
   key: string;
   onPress: () => void;
   accessibilityLabel: string;
@@ -79,7 +79,7 @@ export interface ManualCardsEditorStyles {
   imageClearIcon?: TextStyle;
 }
 
-export interface ManualCardsEditorProps {
+interface ManualCardsEditorProps {
   manualCards: ManualCard[];
   styles: ManualCardsEditorStyles;
   mode?: "edit" | "display";
@@ -107,13 +107,13 @@ export interface ManualCardsEditorProps {
   showDefaultBottomAddButton?: boolean;
 }
 
-export interface ManualCardsDisplayAction {
+interface ManualCardsDisplayAction {
   icon: ReactNode | ((card: ManualCard, index: number) => ReactNode);
   onPress?: (card: ManualCard, index: number) => void;
   accessibilityLabel?: string | ((card: ManualCard, index: number) => string);
 }
 
-export type ManualCardDisplayStatus = "pending" | "correct" | "incorrect";
+type ManualCardDisplayStatus = "pending" | "correct" | "incorrect";
 
 export const ManualCardsEditor = ({
   manualCards,

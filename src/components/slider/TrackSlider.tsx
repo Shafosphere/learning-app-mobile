@@ -8,12 +8,12 @@ import {
 } from "react-native";
 import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 
-export type TrackSliderRainbowStop = {
+type TrackSliderRainbowStop = {
   offset: string;
   color: string;
 };
 
-export type TrackSliderProps = {
+type TrackSliderProps = {
   value: number;
   minimumValue?: number;
   maximumValue?: number;
@@ -278,4 +278,3 @@ const styles = StyleSheet.create({
 });
 
 export const TrackSlider = memo(TrackSliderComponent);
-export default TrackSlider;

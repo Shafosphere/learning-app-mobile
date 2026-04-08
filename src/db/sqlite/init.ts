@@ -568,7 +568,7 @@ export async function seedOfficialPacksWithDb(
 
 export async function seedOfficialPacks(): Promise<void> {
   const db = await getDB();
-  return seedOfficialPacksWithDb(db);
+  await seedOfficialPacksWithDb(db);
 }
 
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {

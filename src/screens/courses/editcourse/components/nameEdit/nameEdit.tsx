@@ -39,5 +39,3 @@ export function CourseNameField({
     </>
   );
 }
-
-export default CourseNameField;

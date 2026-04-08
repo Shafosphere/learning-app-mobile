@@ -106,9 +106,6 @@ async function writeExportToLocalFile(): Promise<{
   };
 }
 
-export { buildUserDataExport };
-export type { UserDataExport } from "@/src/services/userDataBackup";
-
 export async function exportUserDataToFile(): Promise<{
   fileUri: string;
   bytesWritten: number;

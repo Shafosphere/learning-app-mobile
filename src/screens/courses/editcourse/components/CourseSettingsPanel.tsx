@@ -3,7 +3,7 @@ import { CourseSettingsSection, type CourseSettingsSectionProps } from "@/src/sc
 import type { ThemeColorKey } from "@/src/theme/theme";
 import { Text, View } from "react-native";
 
-export type CourseSettingsResetAction = {
+type CourseSettingsResetAction = {
   key: string;
   title: string;
   subtitle: string;

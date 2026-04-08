@@ -7,7 +7,7 @@ import {
 } from "@/src/constants/customCourse";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
-export interface CustomCourseDraftState {
+interface CustomCourseDraftState {
   courseName: string;
   iconId: string | null;
   iconColor: string;
@@ -15,7 +15,7 @@ export interface CustomCourseDraftState {
   reviewsEnabled: boolean;
 }
 
-export interface UseCustomCourseDraftOptions {
+interface UseCustomCourseDraftOptions {
   initialName?: string;
   initialIconId?: string | null;
   initialIconColor?: string | null;

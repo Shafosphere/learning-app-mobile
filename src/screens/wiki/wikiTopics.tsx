@@ -303,7 +303,7 @@ export type WikiBlock =
       tone?: BlockTone;
     };
 
-export type WikiTopic = {
+type WikiTopic = {
   title: string;
   subtitle: string;
   blocks: WikiBlock[];

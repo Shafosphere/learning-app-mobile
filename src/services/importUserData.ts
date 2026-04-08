@@ -8,7 +8,6 @@ import {
 } from "@/src/services/userDataBackup";
 
 export type { ImportResult } from "@/src/services/userDataBackup";
-export { restoreUserData } from "@/src/services/userDataBackup";
 
 function normalizeImportedPayload(
   fileUri: string,

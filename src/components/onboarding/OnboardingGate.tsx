@@ -108,5 +108,3 @@ export function OnboardingGate() {
 
   return null;
 }
-
-export default OnboardingGate;

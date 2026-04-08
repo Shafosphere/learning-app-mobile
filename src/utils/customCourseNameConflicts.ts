@@ -1,13 +1,13 @@
 import { stripDiacritics } from "@/src/utils/diacritics";
 
-export type CourseNameConflictKind = "none" | "duplicate" | "similar";
+type CourseNameConflictKind = "none" | "duplicate" | "similar";
 
 export type CourseNameCandidate = {
   id: number;
   name: string;
 };
 
-export type CourseNameConflictResult = {
+type CourseNameConflictResult = {
   kind: CourseNameConflictKind;
   matchedCourse: CourseNameCandidate | null;
 };
@@ -15,7 +15,7 @@ export type CourseNameConflictResult = {
 const normalizeWhitespace = (value: string) =>
   value.trim().replace(/\s+/g, " ");
 
-export const normalizeCourseNameForComparison = (value: string): string => {
+const normalizeCourseNameForComparison = (value: string): string => {
   const normalized = stripDiacritics(normalizeWhitespace(value).toLowerCase());
   return normalized.replace(/[-_]+/g, " ").replace(/\s+/g, " ").trim();
 };

@@ -58,7 +58,7 @@ import {
 import { CourseIconColorSelector } from "@/src/screens/courses/editcourse/components/iconEdit/iconEdit";
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
 import { useStyles } from "./CustomCourseEditor-styles";
-export type CustomCourseEditorProps = {
+type CustomCourseEditorProps = {
   courseId: number;
   initialName: string;
   lockAppearance: boolean;

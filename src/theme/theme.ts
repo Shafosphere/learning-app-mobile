@@ -62,7 +62,7 @@ const darkBasePalette: ThemePalette = {
   lightbg: "#fffffe",
 };
 
-export const lightColors: ThemeColors = {
+const lightColors: ThemeColors = {
   ...lightBasePalette,
   variants: {
     highContrast: {
@@ -94,7 +94,7 @@ export const lightColors: ThemeColors = {
   },
 };
 
-export const darkColors: ThemeColors = {
+const darkColors: ThemeColors = {
   ...darkBasePalette,
   variants: {
     highContrast: {
@@ -131,12 +131,12 @@ export const themeMap: Record<Theme, ThemeColors> = {
   dark: darkColors,
 };
 
-export interface ThemeResolutionOptions {
+interface ThemeResolutionOptions {
   highContrast?: boolean;
   colorBlindMode?: ColorBlindMode;
 }
 
-export const DEFAULT_THEME_RESOLUTION: Required<ThemeResolutionOptions> = {
+const DEFAULT_THEME_RESOLUTION: Required<ThemeResolutionOptions> = {
   highContrast: false,
   colorBlindMode: "none",
 };

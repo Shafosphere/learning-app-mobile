@@ -316,7 +316,7 @@ export default function Card({
     showExplanationEnabledProp ?? showExplanationEnabledSetting;
   const explanationOnlyOnWrong =
     explanationOnlyOnWrongProp ?? explanationOnlyOnWrongSetting;
-  const { explanationText, isExplanationVisible, isExplanationPending } = getExplanationState({
+  const { explanationText, isExplanationVisible } = getExplanationState({
     selectedItem,
     result,
     showCorrectionInputs,

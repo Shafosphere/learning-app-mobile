@@ -63,18 +63,6 @@ export async function advanceCustomReview(
   return { nextReview, stage: newStage };
 }
 
-export async function removeCustomReview(
-  flashcardId: number,
-  courseId: number
-): Promise<void> {
-  const db = await getDB();
-  await db.runAsync(
-    `DELETE FROM custom_reviews WHERE flashcard_id = ? AND course_id = ?;`,
-    flashcardId,
-    courseId
-  );
-}
-
 export async function clearCustomReviewsForCourse(
   courseId: number
 ): Promise<void> {

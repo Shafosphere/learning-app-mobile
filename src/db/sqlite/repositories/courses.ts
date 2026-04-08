@@ -28,7 +28,7 @@ export interface CustomCourseSummary extends CustomCourseRecord {
   cardsCount: number;
 }
 
-export type CustomCourseSqlRow = {
+type CustomCourseSqlRow = {
   id: number;
   name: string;
   iconId: string;
@@ -42,7 +42,7 @@ export type CustomCourseSqlRow = {
   packVersion?: number;
 };
 
-export type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
+type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
   cardsCount: number;
 };
 

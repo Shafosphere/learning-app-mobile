@@ -4,7 +4,7 @@ import { resolveThemeColors, type Theme } from "./theme";
 
 const STARTUP_THEME_STORAGE_KEY = "theme";
 
-export interface StartupThemeUi {
+interface StartupThemeUi {
   theme: Theme;
   backgroundColor: string;
   surfaceColor: string;
@@ -24,7 +24,7 @@ export interface StartupThemeUi {
   statusBarStyle: "light" | "dark";
 }
 
-export function normalizeStoredTheme(value: string | null): Theme {
+function normalizeStoredTheme(value: string | null): Theme {
   if (value == null) {
     return "light";
   }

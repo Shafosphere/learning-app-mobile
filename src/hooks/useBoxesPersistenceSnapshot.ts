@@ -5,7 +5,7 @@ import { AppState, type AppStateStatus } from "react-native";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 // ---- Public helpers --------------------------------------------------------
-export type BoxName = keyof BoxesState;
+type BoxName = keyof BoxesState;
 export const boxOrder: BoxName[] = [
   "boxZero",
   "boxOne",
@@ -14,23 +14,6 @@ export const boxOrder: BoxName[] = [
   "boxFour",
   "boxFive",
 ];
-
-export function makeCourseKey(course: {
-  sourceLangId?: number | null;
-  targetLangId?: number | null;
-  sourceLang?: string | null; // e.g. "EN"
-  targetLang?: string | null; // e.g. "PL"
-}) {
-  const byId =
-    course.sourceLangId != null && course.targetLangId != null
-      ? `${course.sourceLangId}-${course.targetLangId}`
-      : null;
-  const byCode =
-    course.sourceLang && course.targetLang
-      ? `${course.sourceLang}-${course.targetLang}`
-      : null;
-  return byId ?? byCode ?? "unknown-course";
-}
 
 export type SavedBoxesV2 = {
   v: 2;
@@ -52,34 +35,6 @@ export function makeScopeId(
   level: string
 ) {
   return `${sourceLangId}-${targetLangId}-${level}`;
-}
-
-// Helper: remove a single wordId from usedWordIds inside saved snapshot
-export async function removeWordIdFromUsedWordIds(params: {
-  sourceLangId: number;
-  targetLangId: number;
-  level: string; // CEFR
-  wordId: number;
-  storageNamespace?: string; // defaults to 'boxes'
-}): Promise<void> {
-  const { sourceLangId, targetLangId, level, wordId, storageNamespace = "boxes" } = params;
-  const storageKey = `${storageNamespace}:${makeScopeId(sourceLangId, targetLangId, level)}`;
-  const raw = await AsyncStorage.getItem(storageKey);
-  if (!raw) return;
-  try {
-    const parsed = JSON.parse(raw) as SavedBoxesV2;
-    if (!parsed || parsed.v !== 2) return;
-    const current = Array.isArray(parsed.usedWordIds) ? parsed.usedWordIds : [];
-    const next = current.filter((id) => id !== wordId);
-    const updated: SavedBoxesV2 = {
-      ...parsed,
-      updatedAt: Date.now(),
-      usedWordIds: next,
-    };
-    await AsyncStorage.setItem(storageKey, JSON.stringify(updated));
-  } catch (err) {
-      console.warn("[removeWordIdFromUsedWordIds] Parse or write error", { err, storageKey });
-  }
 }
 
 async function loadFromStorageSnapshot(

@@ -22,7 +22,7 @@ export async function ensureColumn(
   );
 }
 
-export async function backfillCustomFlashcardAnswers(
+async function backfillCustomFlashcardAnswers(
   db: SQLite.SQLiteDatabase
 ): Promise<void> {
   const cardsNeedingAnswers = await db.getAllAsync<{

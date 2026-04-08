@@ -1,6 +1,6 @@
-export type AchievementType = "streak" | "course_completion" | "total_words" | "speed";
+type AchievementType = "streak" | "course_completion" | "total_words" | "speed";
 
-export interface AchievementDef {
+interface AchievementDef {
   id: string;
   title: string;
   description: string;

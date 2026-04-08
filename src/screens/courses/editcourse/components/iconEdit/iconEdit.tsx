@@ -132,11 +132,11 @@ function hexToHsv(hexColor: string): HsvColor {
   return { h, s, v };
 }
 
-export interface CourseIconColorSelectorStyles {
+interface CourseIconColorSelectorStyles {
   container?: StyleProp<ViewStyle>;
 }
 
-export interface CourseIconColorSelectorProps {
+interface CourseIconColorSelectorProps {
   courseName?: string;
   onCourseNameChange?: (value: string) => void;
   selectedIcon: string | null;
@@ -817,5 +817,3 @@ function CourseIconColorSelectorComponent({
 }
 
 export const CourseIconColorSelector = memo(CourseIconColorSelectorComponent);
-
-export default CourseIconColorSelector;

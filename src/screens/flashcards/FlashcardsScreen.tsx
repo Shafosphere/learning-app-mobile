@@ -949,7 +949,7 @@ export default function Flashcards() {
         });
       });
     });
-  }, [selectedItemId, shouldShowTrueFalseActions, showCardActions]);
+  }, []);
   const effectiveTrueFalseButtonsVariant = isKnowDontKnow
     ? "know_dont_know"
     : selectedItem?.answerOnly
