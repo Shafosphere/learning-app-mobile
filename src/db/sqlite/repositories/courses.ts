@@ -1,3 +1,4 @@
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import * as SQLite from "expo-sqlite";
 import { getDB } from "../core";
 
@@ -270,6 +271,11 @@ export async function getOfficialCustomCoursesWithCardCounts(): Promise<
   CustomCourseSummary[]
 > {
   const db = await getDB();
+  const officialSlugs = OFFICIAL_PACKS.map((pack) => pack.slug).filter(Boolean);
+  if (officialSlugs.length === 0) {
+    return [];
+  }
+  const placeholders = officialSlugs.map(() => "?").join(", ");
   const rows = await db.getAllAsync<CustomCourseSummarySqlRow>(
     `SELECT
        cp.id,
@@ -288,7 +294,9 @@ export async function getOfficialCustomCoursesWithCardCounts(): Promise<
        ) AS cardsCount
      FROM custom_courses cp
      WHERE COALESCE(cp.is_official, 0) = 1
-     ORDER BY cp.created_at DESC, cp.id DESC;`
+       AND cp.slug IN (${placeholders})
+     ORDER BY cp.created_at DESC, cp.id DESC;`,
+    ...officialSlugs
   );
   return rows.map(mapCustomCourseSummaryRow);
 }

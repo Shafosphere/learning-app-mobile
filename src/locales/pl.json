@@ -220,7 +220,18 @@
       },
       "importDone": {
         "title": "Import zakończony",
-        "message": "Pomyślnie zaimportowano dane.\n\nKursy (własne): {{coursesCreated}}\nFiszki przywrócone: {{flashcardsCreated}}\nPowtórki (własne): {{reviewsRestored}}\nKursy oficjalne: {{officialCoursesProcessed}}\nPowtórki (oficjalne kursy): {{officialReviewsRestored}}\nPowtórki (builtin DB): {{builtinReviewsRestored}}\nHinty (oficjalne kursy): {{officialHintsUpdated}}\nStany pudełek: {{boxesSnapshotsRestored}}\nZdarzenia nauki: {{learningEventsRestored}}\nOsiągnięcia: {{achievementsRestored}}"
+        "message": "Pomyślnie zaimportowano dane.",
+        "labels": {
+          "customCourses": "Własne kursy",
+          "customFlashcards": "Własne fiszki",
+          "boxSnapshots": "Stan nauki",
+          "customReviews": "Powtórki we własnych kursach",
+          "officialReviews": "Powtórki w kursach oficjalnych",
+          "officialPinnedCourses": "Przypięte kursy oficjalne",
+          "officialActiveCourse": "Aktywny kurs oficjalny",
+          "learningEvents": "Historia nauki",
+          "achievements": "Osiągnięcia"
+        }
       },
       "resetLearningConfirm": {
         "title": "Przywróć ustawienia nauki",

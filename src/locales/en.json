@@ -220,7 +220,18 @@
       },
       "importDone": {
         "title": "Import completed",
-        "message": "Data imported successfully.\n\nCourses (custom): {{coursesCreated}}\nFlashcards restored: {{flashcardsCreated}}\nReviews (custom): {{reviewsRestored}}\nOfficial courses: {{officialCoursesProcessed}}\nReviews (official courses): {{officialReviewsRestored}}\nReviews (builtin DB): {{builtinReviewsRestored}}\nHints (official courses): {{officialHintsUpdated}}\nBox states: {{boxesSnapshotsRestored}}\nLearning events: {{learningEventsRestored}}\nAchievements: {{achievementsRestored}}"
+        "message": "Data imported successfully.",
+        "labels": {
+          "customCourses": "Custom courses",
+          "customFlashcards": "Custom flashcards",
+          "boxSnapshots": "Learning state",
+          "customReviews": "Reviews in custom courses",
+          "officialReviews": "Reviews in official courses",
+          "officialPinnedCourses": "Pinned official courses",
+          "officialActiveCourse": "Active official course",
+          "learningEvents": "Learning history",
+          "achievements": "Achievements"
+        }
       },
       "resetLearningConfirm": {
         "title": "Restore learning settings",

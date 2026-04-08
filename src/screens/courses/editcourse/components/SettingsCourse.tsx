@@ -1,4 +1,5 @@
-import { Pressable, StyleSheet, Switch, Text, View } from "react-native";
+import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import { Pressable, StyleSheet, Text, View } from "react-native";
 import type {
   FlashcardsCardSize,
   FlashcardsImageSize,
@@ -85,6 +86,7 @@ export function CourseSettingsSection({
     toggleTextWrapper,
     toggleTitle,
     toggleSubtitle,
+    switch: switchStyle,
   } = styles as {
     sectionGroup: object;
     sectionLabel: object;
@@ -92,6 +94,7 @@ export function CourseSettingsSection({
     toggleTextWrapper: object;
     toggleTitle: object;
     toggleSubtitle: object;
+    switch: object;
   };
 
   return (
@@ -105,12 +108,13 @@ export function CourseSettingsSection({
             To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami.
           </Text>
         </View>
-        <Switch
-          value={boxZeroEnabled}
-          onValueChange={onToggleBoxZero}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-        />
+        <View style={switchStyle}>
+          <ToggleSwitch
+            value={boxZeroEnabled}
+            onPress={() => onToggleBoxZero(!boxZeroEnabled)}
+            accessibilityLabel="Przełącz fazę zapoznania"
+          />
+        </View>
       </View>
 
       <View style={toggleRow}>
@@ -120,12 +124,13 @@ export function CourseSettingsSection({
             Automatycznie przełączaj pudełka i pobieraj nowe słowa.
           </Text>
         </View>
-        <Switch
-          value={autoflowEnabled}
-          onValueChange={onToggleAutoflow}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-        />
+        <View style={switchStyle}>
+          <ToggleSwitch
+            value={autoflowEnabled}
+            onPress={() => onToggleAutoflow(!autoflowEnabled)}
+            accessibilityLabel="Przełącz automat fiszek"
+          />
+        </View>
       </View>
 
       <View style={toggleRow}>
@@ -135,12 +140,13 @@ export function CourseSettingsSection({
             Dodaj fiszki z tego kursu do codziennych powtórek.
           </Text>
         </View>
-        <Switch
-          value={reviewsEnabled}
-          onValueChange={onToggleReviews}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-        />
+        <View style={switchStyle}>
+          <ToggleSwitch
+            value={reviewsEnabled}
+            onPress={() => onToggleReviews(!reviewsEnabled)}
+            accessibilityLabel="Przełącz powtórki"
+          />
+        </View>
       </View>
 
       <View style={toggleRow}>
@@ -150,12 +156,13 @@ export function CourseSettingsSection({
             Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada.
           </Text>
         </View>
-        <Switch
-          value={showExplanationEnabled}
-          onValueChange={onToggleShowExplanation}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-        />
+        <View style={switchStyle}>
+          <ToggleSwitch
+            value={showExplanationEnabled}
+            onPress={() => onToggleShowExplanation(!showExplanationEnabled)}
+            accessibilityLabel="Przełącz wyświetlanie wyjaśnień"
+          />
+        </View>
       </View>
 
       <View
@@ -190,13 +197,18 @@ export function CourseSettingsSection({
             Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi.
           </Text>
         </View>
-        <Switch
-          value={showExplanationEnabled ? explanationOnlyOnWrong : false}
-          onValueChange={onToggleExplanationOnlyOnWrong}
-          trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-          thumbColor={switchColors.thumb}
-          disabled={!showExplanationEnabled}
-        />
+        <View style={switchStyle}>
+          <ToggleSwitch
+            value={showExplanationEnabled ? explanationOnlyOnWrong : false}
+            onPress={() =>
+              onToggleExplanationOnlyOnWrong(
+                !(showExplanationEnabled ? explanationOnlyOnWrong : false)
+              )
+            }
+            accessibilityLabel="Przełącz wyjaśnienie tylko po błędnej odpowiedzi"
+            disabled={!showExplanationEnabled}
+          />
+        </View>
       </View>
 
       {hideSkipCorrectionOption ? null : (
@@ -207,13 +219,20 @@ export function CourseSettingsSection({
               Po złej odpowiedzi od razu pokaż następną fiszkę (dotyczy fiszek z odpowiedzią tekstową).
             </Text>
           </View>
-          <Switch
-            value={skipCorrectionLocked ? true : skipCorrectionEnabled}
-            onValueChange={skipCorrectionLocked ? undefined : onToggleSkipCorrection}
-            trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-            thumbColor={switchColors.thumb}
-            disabled={skipCorrectionLocked}
-          />
+          <View style={switchStyle}>
+            <ToggleSwitch
+              value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+              onPress={() =>
+                skipCorrectionLocked
+                  ? undefined
+                  : onToggleSkipCorrection(
+                      !(skipCorrectionLocked ? true : skipCorrectionEnabled)
+                    )
+              }
+              accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
+              disabled={skipCorrectionLocked}
+            />
+          </View>
         </View>
       )}
 
@@ -428,12 +447,13 @@ export function CourseSettingsSection({
               Pokazuj obramowanie wokół obrazka na fiszce.
             </Text>
           </View>
-          <Switch
-            value={imageFrameEnabled}
-            onValueChange={onToggleImageFrame}
-            trackColor={{ false: switchColors.trackFalse, true: switchColors.trackTrue }}
-            thumbColor={switchColors.thumb}
-          />
+          <View style={switchStyle}>
+            <ToggleSwitch
+              value={imageFrameEnabled}
+              onPress={() => onToggleImageFrame?.(!imageFrameEnabled)}
+              accessibilityLabel="Przełącz ramkę obrazu"
+            />
+          </View>
         </View>
       ) : null}
     </View>

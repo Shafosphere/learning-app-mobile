@@ -52,6 +52,7 @@ import {
   computeSmartReminderPlan,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
+import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import type { ImportResult } from "@/src/services/importUserData";
 import {
   connectGoogleDrive,
@@ -396,6 +397,7 @@ interface SettingsContextValue {
   disconnectGoogleDriveBackup: () => Promise<void>;
   backupUserDataToGoogleDriveNow: () => Promise<void>;
   restoreUserDataFromGoogleDrive: () => Promise<ImportResult>;
+  applyImportedAppState: (result: ImportResult) => Promise<void>;
   maybeRunGoogleDriveStartupBackup: () => Promise<void>;
   statsFireEffectEnabled: boolean;
   setStatsFireEffectEnabled: (value: boolean) => Promise<void>;
@@ -547,6 +549,7 @@ const defaultValue: SettingsContextValue = {
   disconnectGoogleDriveBackup: async () => {},
   backupUserDataToGoogleDriveNow: async () => {},
   restoreUserDataFromGoogleDrive: async () => ({ success: false }),
+  applyImportedAppState: async () => {},
   maybeRunGoogleDriveStartupBackup: async () => {},
   statsFireEffectEnabled: false,
   setStatsFireEffectEnabled: async () => {},
@@ -2155,6 +2158,34 @@ export const SettingsProvider: React.FC<{
     setGoogleDriveConnectedState,
   ]);
 
+  const applyImportedAppState = useCallback(
+    async (result: ImportResult) => {
+      const restoredState = result.restoredState;
+      if (!restoredState) {
+        return;
+      }
+
+      console.log("[SettingsContext] applyImportedAppState", restoredState);
+
+      if (restoredState.shouldApplySelection) {
+        await Promise.all([
+          setPinnedOfficialCourseIds(restoredState.pinnedOfficialCourseIds),
+          setActiveCustomCourseIdState(restoredState.activeCustomCourseId),
+          setActiveCourseIdxState(restoredState.activeCourseIdx),
+        ]);
+      }
+
+      if (restoredState.shouldMarkOnboardingDone) {
+        await setOnboardingCheckpoint("done");
+      }
+    },
+    [
+      setActiveCourseIdxState,
+      setActiveCustomCourseIdState,
+      setPinnedOfficialCourseIds,
+    ]
+  );
+
   const backupUserDataToGoogleDriveNow = useCallback(async () => {
     if (!googleDriveConfigured) {
       throw new Error(
@@ -2196,60 +2227,6 @@ export const SettingsProvider: React.FC<{
     setLastSuccessfulGoogleDriveBackupAt,
   ]);
 
-  const resetCustomCourseDependentSettings = useCallback(async () => {
-    await Promise.all([
-      setActiveCustomCourseIdState(null),
-      setCustomCourseEntrySettingsSeen({}),
-      setPinnedOfficialCourseIds([]),
-      setBoxZeroOverrides({
-        builtin: { ...boxZeroOverrides.builtin },
-        custom: {},
-      }),
-      setAutoflowOverrides({
-        builtin: { ...autoflowOverrides.builtin },
-        custom: {},
-      }),
-      setCardSizeOverrides({
-        builtin: { ...cardSizeOverrides.builtin },
-        custom: {},
-      }),
-      setImageSizeOverrides({
-        builtin: { ...imageSizeOverrides.builtin },
-        custom: {},
-      }),
-      setImageFrameOverrides({
-        builtin: { ...imageFrameOverrides.builtin },
-        custom: {},
-      }),
-      setSkipCorrectionOverrides({
-        builtin: { ...skipCorrectionOverrides.builtin },
-        custom: {},
-      }),
-      setTrueFalseButtonsOverrides({
-        builtin: { ...trueFalseButtonsOverrides.builtin },
-        custom: {},
-      }),
-    ]);
-  }, [
-    autoflowOverrides.builtin,
-    boxZeroOverrides.builtin,
-    cardSizeOverrides.builtin,
-    imageFrameOverrides.builtin,
-    imageSizeOverrides.builtin,
-    setActiveCustomCourseIdState,
-    setAutoflowOverrides,
-    setBoxZeroOverrides,
-    setCardSizeOverrides,
-    setCustomCourseEntrySettingsSeen,
-    setImageFrameOverrides,
-    setImageSizeOverrides,
-    setPinnedOfficialCourseIds,
-    setSkipCorrectionOverrides,
-    setTrueFalseButtonsOverrides,
-    skipCorrectionOverrides.builtin,
-    trueFalseButtonsOverrides.builtin,
-  ]);
-
   const restoreUserDataFromGoogleDrive = useCallback(async () => {
     if (!googleDriveConfigured) {
       throw new Error(
@@ -2260,7 +2237,6 @@ export const SettingsProvider: React.FC<{
 
     const result = await restoreBackupFromDrive(driveBackupFileId);
     await Promise.all([
-      resetCustomCourseDependentSettings(),
       setDriveBackupFileId(result.metadata.fileId),
       setGoogleDriveConnectedState(true),
       setGoogleDriveBackupError(null),
@@ -2270,7 +2246,6 @@ export const SettingsProvider: React.FC<{
     driveBackupFileId,
     googleDriveConfigured,
     googleDriveConfigurationError,
-    resetCustomCourseDependentSettings,
     setDriveBackupFileId,
     setGoogleDriveBackupError,
     setGoogleDriveConnectedState,
@@ -2547,6 +2522,7 @@ export const SettingsProvider: React.FC<{
         disconnectGoogleDriveBackup,
         backupUserDataToGoogleDriveNow,
         restoreUserDataFromGoogleDrive,
+        applyImportedAppState,
         maybeRunGoogleDriveStartupBackup,
         statsFireEffectEnabled: statsFireEffectEnabledState,
         setStatsFireEffectEnabled,

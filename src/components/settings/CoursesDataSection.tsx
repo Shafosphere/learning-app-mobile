@@ -15,6 +15,18 @@ type DriveAction =
   | "disconnect"
   | null;
 
+type ImportStatsLike = {
+  coursesCreated?: number;
+  flashcardsCreated?: number;
+  reviewsRestored?: number;
+  officialPinnedCoursesRestored?: number;
+  officialActiveCourseRestored?: number;
+  officialReviewsRestored?: number;
+  boxSnapshotsRestored?: number;
+  learningEventsRestored?: number;
+  achievementsRestored?: number;
+};
+
 const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
   const { t, i18n } = useTranslation();
@@ -31,11 +43,41 @@ const CoursesDataSection: React.FC = () => {
     disconnectGoogleDriveBackup,
     backupUserDataToGoogleDriveNow,
     restoreUserDataFromGoogleDrive,
+    applyImportedAppState,
   } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
   const [exportingData, setExportingData] = useState(false);
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
+
+  const buildImportDoneMessage = (stats?: ImportStatsLike) => {
+    const lines = [
+      ["customCourses", stats?.coursesCreated ?? 0],
+      ["customFlashcards", stats?.flashcardsCreated ?? 0],
+      ["boxSnapshots", stats?.boxSnapshotsRestored ?? 0],
+      ["customReviews", stats?.reviewsRestored ?? 0],
+      ["officialReviews", stats?.officialReviewsRestored ?? 0],
+      ["officialPinnedCourses", stats?.officialPinnedCoursesRestored ?? 0],
+      ["officialActiveCourse", stats?.officialActiveCourseRestored ?? 0],
+      ["learningEvents", stats?.learningEventsRestored ?? 0],
+      ["achievements", stats?.achievementsRestored ?? 0],
+    ]
+      .filter(([, value]) => value > 0)
+      .map(
+        ([labelKey, value]) =>
+          `${t(
+            `settings.coursesData.importDone.labels.${labelKey}`
+          )}: ${value}`
+      );
+
+    if (lines.length === 0) {
+      return t("settings.coursesData.importDone.message");
+    }
+
+    return `${t("settings.coursesData.importDone.message")}\n\n${lines.join(
+      "\n"
+    )}`;
+  };
 
   const driveStatusText = useMemo(() => {
     if (!googleDriveConfigured) {
@@ -171,21 +213,11 @@ const CoursesDataSection: React.FC = () => {
             try {
               const result = await restoreUserDataFromGoogleDrive();
               if (result.success) {
+                await applyImportedAppState(result);
                 const stats = result.stats;
                 Alert.alert(
                   t("settings.coursesData.importDone.title"),
-                  t("settings.coursesData.importDone.message", {
-                    coursesCreated: stats?.coursesCreated,
-                    flashcardsCreated: stats?.flashcardsCreated,
-                    reviewsRestored: stats?.reviewsRestored,
-                    officialCoursesProcessed: stats?.officialCoursesProcessed,
-                    officialReviewsRestored: stats?.officialReviewsRestored,
-                    builtinReviewsRestored: stats?.builtinReviewsRestored,
-                    officialHintsUpdated: stats?.officialHintsUpdated,
-                    boxesSnapshotsRestored: stats?.boxesSnapshotsRestored,
-                    learningEventsRestored: stats?.learningEventsRestored,
-                    achievementsRestored: stats?.achievementsRestored,
-                  })
+                  buildImportDoneMessage(stats)
                 );
               } else if (result.message) {
                 Alert.alert(
@@ -236,21 +268,11 @@ const CoursesDataSection: React.FC = () => {
     try {
       const result = await importUserData();
       if (result.success) {
+        await applyImportedAppState(result);
         const stats = result.stats;
         Alert.alert(
           t("settings.coursesData.importDone.title"),
-          t("settings.coursesData.importDone.message", {
-            coursesCreated: stats?.coursesCreated,
-            flashcardsCreated: stats?.flashcardsCreated,
-            reviewsRestored: stats?.reviewsRestored,
-            officialCoursesProcessed: stats?.officialCoursesProcessed,
-            officialReviewsRestored: stats?.officialReviewsRestored,
-            builtinReviewsRestored: stats?.builtinReviewsRestored,
-            officialHintsUpdated: stats?.officialHintsUpdated,
-            boxesSnapshotsRestored: stats?.boxesSnapshotsRestored,
-            learningEventsRestored: stats?.learningEventsRestored,
-            achievementsRestored: stats?.achievementsRestored,
-          })
+          buildImportDoneMessage(stats)
         );
       } else if (result.message !== "Anulowano wybór pliku.") {
         Alert.alert(t("settings.coursesData.errors.importTitle"), result.message);

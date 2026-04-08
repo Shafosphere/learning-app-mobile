@@ -45,16 +45,21 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   },
   toggleTextWrapper: {
     flex: 1,
+    paddingRight: 12,
   },
   toggleTitle: {
     fontSize: 16,
-    fontWeight: "800",
-    color: colors.headline,
+    fontWeight: "600",
+    color: colors.paragraph,
   },
   toggleSubtitle: {
     fontSize: 13,
     color: colors.paragraph,
-    marginTop: 2,
+    opacity: 0.75,
+    marginTop: 4,
+  },
+  switch: {
+    transform: [{ scaleX: 1.12 }, { scaleY: 1.12 }],
   },
   iconSection: {
     gap: 12,

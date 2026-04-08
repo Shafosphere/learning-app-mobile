@@ -7,8 +7,8 @@ import {
 } from "@/src/db/sqlite/db";
 import { getCustomCourses } from "@/src/db/sqlite/repositories/courses";
 import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
+import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import {
-  deleteImage,
   imagesDir,
   importImageFromZip,
   isManagedImageUri,
@@ -59,7 +59,48 @@ export type BackupFlashcardRecord = Omit<
   imageBack: string | null;
 };
 
+export type OfficialFlashcardIdentityExport = {
+  externalId: string | null;
+  position: number | null;
+  frontText: string;
+  backText: string;
+};
+
+export type OfficialCourseReviewExportRow = OfficialFlashcardIdentityExport & {
+  stage: number;
+  learnedAt: number;
+  nextReview: number;
+};
+
+export type OfficialCourseLearningEventExportRow =
+  OfficialFlashcardIdentityExport & {
+    box: string | null;
+    result: "ok" | "wrong";
+    durationMs: number | null;
+    createdAt: number;
+  };
+
+export type OfficialCourseHintExportRow = OfficialFlashcardIdentityExport & {
+  hintFront: string | null;
+  hintBack: string | null;
+};
+
+export type OfficialCourseSnapshotExport = {
+  slug: string;
+  reviews: OfficialCourseReviewExportRow[];
+  learningEvents: OfficialCourseLearningEventExportRow[];
+  hints: OfficialCourseHintExportRow[];
+};
+
+export type OfficialCourseStateExport = {
+  pinnedOfficialCourseSlugs: string[];
+  lastActiveOfficialCourseSlug: string | null;
+  boxSnapshots: Record<string, SavedBoxesV2>;
+  courses: OfficialCourseSnapshotExport[];
+};
+
 export type CustomCourseExport = {
+  backupCourseKey: string;
   course: CustomCourseRecord;
   flashcards: BackupFlashcardRecord[];
   reviews: CustomReviewExportRow[];
@@ -67,48 +108,36 @@ export type CustomCourseExport = {
 };
 
 export type UserDataExport = {
-  version: 2;
+  version: 3;
   generatedAt: number;
   builtinReviews: BuiltinReviewExportRow[];
   boxesSnapshots: Record<string, SavedBoxesV2>;
-  customBoxesSnapshots: Record<string, SavedBoxesV2>;
+  customCourseBoxSnapshots: Record<string, SavedBoxesV2>;
   customCourses: CustomCourseExport[];
-  officialCourses?: CustomCourseExport[];
+  officialCourseState: OfficialCourseStateExport;
   achievements: UserAchievementExportRow[];
 };
-
-export type LegacyUserDataExport = {
-  version: 1;
-  generatedAt: number;
-  builtinReviews: BuiltinReviewExportRow[];
-  boxesSnapshots: Record<string, SavedBoxesV2>;
-  customBoxesSnapshots: Record<string, SavedBoxesV2>;
-  customCourses: {
-    course: CustomCourseRecord;
-    flashcards: CustomFlashcardRecord[];
-    reviews: CustomReviewExportRow[];
-  }[];
-  officialCourses?: {
-    course: CustomCourseRecord;
-    flashcards: CustomFlashcardRecord[];
-    reviews: CustomReviewExportRow[];
-  }[];
-};
-
-export type AnyUserDataExport = UserDataExport | LegacyUserDataExport;
 
 export type ImportResult = {
   success: boolean;
   message?: string;
+  restoredState?: {
+    pinnedOfficialCourseIds: number[];
+    activeCustomCourseId: number | null;
+    activeCourseIdx: number | null;
+    shouldApplySelection: boolean;
+    shouldMarkOnboardingDone: boolean;
+  };
   stats?: {
     coursesCreated: number;
     flashcardsCreated: number;
     reviewsRestored: number;
     builtinReviewsRestored: number;
-    boxesSnapshotsRestored: number;
-    officialCoursesProcessed: number;
+    officialPinnedCoursesRestored: number;
+    officialActiveCourseRestored: number;
+    boxSnapshotsRestored: number;
     officialReviewsRestored: number;
-    officialHintsUpdated: number;
+    officialCoursesSkipped: number;
     learningEventsRestored: number;
     achievementsRestored: number;
   };
@@ -125,6 +154,8 @@ type ImportRestoreOptions = {
 };
 
 type RestoredCourseStats = {
+  backupCourseKey: string;
+  courseId: number;
   flashcardsCreated: number;
   reviewsRestored: number;
   learningEventsRestored: number;
@@ -171,6 +202,158 @@ async function collectBoxesSnapshots(prefixes: string[]): Promise<
   return snapshots;
 }
 
+function makeCustomCourseBackupKey(courseId: number): string {
+  return `custom-course:${courseId}`;
+}
+
+function buildCustomRuntimeSnapshotKey(courseId: number): string {
+  return `customBoxes:${courseId}-${courseId}-custom-${courseId}`;
+}
+
+function parseCustomCourseIdFromSnapshot(
+  storageKey: string,
+  snapshot: SavedBoxesV2
+): number | null {
+  const keyMatch = /^customBoxes:(\d+)-(\d+)-custom-(\d+)$/.exec(storageKey);
+  if (keyMatch) {
+    const [, sourceId, targetId, levelId] = keyMatch;
+    if (sourceId === targetId && targetId === levelId) {
+      return Number(levelId);
+    }
+  }
+
+  const levelMatch = /^custom-(\d+)$/.exec(snapshot.level);
+  if (levelMatch) {
+    return Number(levelMatch[1]);
+  }
+
+  if (
+    snapshot.sourceLangId === snapshot.targetLangId &&
+    snapshot.sourceLangId > 0
+  ) {
+    return snapshot.sourceLangId;
+  }
+
+  return null;
+}
+
+function remapSnapshotToCourseId(
+  snapshot: SavedBoxesV2,
+  courseId: number
+): SavedBoxesV2 {
+  return {
+    ...snapshot,
+    courseId: `${courseId}-${courseId}-custom-${courseId}`,
+    sourceLangId: courseId,
+    targetLangId: courseId,
+    level: `custom-${courseId}`,
+  };
+}
+
+function buildWordIdentityKey(
+  item: Pick<CustomFlashcardRecord, "frontText" | "backText" | "answers"> | {
+    text: string;
+    translations: string[];
+  }
+): string {
+  if ("frontText" in item) {
+    const answers = (item.answers ?? [])
+      .map((answer) => answer.trim())
+      .filter((answer) => answer.length > 0);
+    const backValues =
+      answers.length > 0
+        ? answers
+        : (item.backText ?? "")
+            .split(/[;,\n]/)
+            .map((entry) => entry.trim())
+            .filter((entry) => entry.length > 0);
+    return `${item.frontText.trim()}|||${backValues.join("|")}`;
+  }
+
+  return `${item.text.trim()}|||${(item.translations ?? [])
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0)
+    .join("|")}`;
+}
+
+async function rehydrateOfficialSnapshot(
+  courseId: number,
+  snapshot: SavedBoxesV2
+): Promise<SavedBoxesV2> {
+  const currentCards = await getCustomFlashcards(courseId);
+  const currentWords = currentCards.map(mapCustomCardToWord);
+  const currentByIdentity = new Map(
+    currentCards.map((card, index) => [
+      buildWordIdentityKey(card),
+      currentWords[index],
+    ])
+  );
+
+  const remapBox = (items: SavedBoxesV2["flashcards"]["boxZero"]) =>
+    items.map((item) => {
+      const current = currentByIdentity.get(buildWordIdentityKey(item));
+      if (!current) {
+        return {
+          ...item,
+          id: item.id,
+          imageFront: null,
+          imageBack: null,
+        };
+      }
+
+      return {
+        ...item,
+        id: current.id,
+        text: current.text,
+        translations: current.translations,
+        flipped: current.flipped,
+        answerOnly: current.answerOnly,
+        hintFront: current.hintFront,
+        hintBack: current.hintBack,
+        imageFront: current.imageFront ?? null,
+        imageBack: current.imageBack ?? null,
+        explanation: current.explanation ?? null,
+        type: current.type ?? "text",
+      };
+    });
+
+  console.log("[userDataBackup] rehydrate official snapshot", {
+    courseId,
+    currentCardsCount: currentCards.length,
+    boxCounts: {
+      boxZero: snapshot.flashcards.boxZero.length,
+      boxOne: snapshot.flashcards.boxOne.length,
+      boxTwo: snapshot.flashcards.boxTwo.length,
+      boxThree: snapshot.flashcards.boxThree.length,
+      boxFour: snapshot.flashcards.boxFour.length,
+      boxFive: snapshot.flashcards.boxFive.length,
+    },
+  });
+
+  return {
+    ...snapshot,
+    flashcards: {
+      boxZero: remapBox(snapshot.flashcards.boxZero),
+      boxOne: remapBox(snapshot.flashcards.boxOne),
+      boxTwo: remapBox(snapshot.flashcards.boxTwo),
+      boxThree: remapBox(snapshot.flashcards.boxThree),
+      boxFour: remapBox(snapshot.flashcards.boxFour),
+      boxFive: remapBox(snapshot.flashcards.boxFive),
+    },
+  };
+}
+
+function toOfficialFlashcardIdentity(
+  card: BackupFlashcardRecord
+): OfficialFlashcardIdentityExport {
+  return {
+    externalId: card.externalId ?? null,
+    position: card.position ?? null,
+    frontText: card.frontText,
+    backText: card.backText,
+  };
+}
+
 async function buildCourseExport(
   course: CustomCourseRecord
 ): Promise<CustomCourseExport> {
@@ -205,6 +388,7 @@ async function buildCourseExport(
   ]);
 
   return {
+    backupCourseKey: makeCustomCourseBackupKey(course.id),
     course,
     flashcards: flashcards.map((card) => ({
       ...card,
@@ -213,6 +397,64 @@ async function buildCourseExport(
     })),
     reviews,
     learningEvents,
+  };
+}
+
+function buildOfficialCourseStateExport(
+  courseExport: CustomCourseExport
+): OfficialCourseSnapshotExport | null {
+  const slug = courseExport.course.slug?.trim();
+  if (!slug) {
+    return null;
+  }
+
+  const flashcardsById = new Map<number, BackupFlashcardRecord>();
+  const hints: OfficialCourseHintExportRow[] = [];
+  for (const card of courseExport.flashcards) {
+    flashcardsById.set(card.id, card);
+    if (card.hintFront != null || card.hintBack != null) {
+      hints.push({
+        ...toOfficialFlashcardIdentity(card),
+        hintFront: card.hintFront ?? null,
+        hintBack: card.hintBack ?? null,
+      });
+    }
+  }
+
+  const reviews = courseExport.reviews
+    .map<OfficialCourseReviewExportRow | null>((review) => {
+      const card = flashcardsById.get(review.flashcardId);
+      if (!card) return null;
+      return {
+        ...toOfficialFlashcardIdentity(card),
+        stage: review.stage,
+        learnedAt: review.learnedAt,
+        nextReview: review.nextReview,
+      };
+    })
+    .filter((entry): entry is OfficialCourseReviewExportRow => entry != null);
+
+  const learningEvents = courseExport.learningEvents
+    .map<OfficialCourseLearningEventExportRow | null>((event) => {
+      const card = flashcardsById.get(event.flashcardId);
+      if (!card) return null;
+      return {
+        ...toOfficialFlashcardIdentity(card),
+        box: event.box ?? null,
+        result: event.result,
+        durationMs: event.durationMs ?? null,
+        createdAt: event.createdAt,
+      };
+    })
+    .filter(
+      (entry): entry is OfficialCourseLearningEventExportRow => entry != null
+    );
+
+  return {
+    slug,
+    reviews,
+    learningEvents,
+    hints,
   };
 }
 
@@ -238,23 +480,96 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
   const customCourses = allCourses.filter((course) => !course.isOfficial);
   const officialCourses = allCourses.filter((course) => course.isOfficial);
 
-  const [customCoursesExport, officialCoursesExport, boxesSnapshots, customBoxesSnapshots, achievements] =
-    await Promise.all([
-      Promise.all(customCourses.map((course) => buildCourseExport(course))),
-      Promise.all(officialCourses.map((course) => buildCourseExport(course))),
-      collectBoxesSnapshots(["boxes:"]),
-      collectBoxesSnapshots(["customBoxes:"]),
-      getUnlockedAchievements(),
-    ]);
+  const [
+    customCoursesExport,
+    officialCoursesExport,
+    boxesSnapshots,
+    customBoxesSnapshots,
+    achievements,
+    pinnedOfficialCourseIdsRaw,
+    activeCustomCourseIdRaw,
+  ] = await Promise.all([
+    Promise.all(customCourses.map((course) => buildCourseExport(course))),
+    Promise.all(officialCourses.map((course) => buildCourseExport(course))),
+    collectBoxesSnapshots(["boxes:"]),
+    collectBoxesSnapshots(["customBoxes:"]),
+    getUnlockedAchievements(),
+    AsyncStorage.getItem("officialPinnedCourseIds"),
+    AsyncStorage.getItem("activeCustomCourseId"),
+  ]);
+
+  const officialCoursesById = new Map<number, CustomCourseRecord>(
+    officialCourses.map((course) => [course.id, course])
+  );
+  const customCoursesById = new Map<number, CustomCourseExport>(
+    customCoursesExport.map((courseExport) => [courseExport.course.id, courseExport])
+  );
+
+  const customCourseBoxSnapshots: Record<string, SavedBoxesV2> = {};
+  const officialBoxSnapshots: Record<string, SavedBoxesV2> = {};
+  for (const [storageKey, snapshot] of Object.entries(customBoxesSnapshots)) {
+    const courseId = parseCustomCourseIdFromSnapshot(storageKey, snapshot);
+    if (courseId == null) {
+      continue;
+    }
+
+    const officialCourse = officialCoursesById.get(courseId);
+    if (officialCourse?.slug) {
+      officialBoxSnapshots[officialCourse.slug] = snapshot;
+      continue;
+    }
+
+    const customCourse = customCoursesById.get(courseId);
+    if (customCourse) {
+      customCourseBoxSnapshots[customCourse.backupCourseKey] = snapshot;
+    }
+  }
+
+  const pinnedIds = (() => {
+    if (!pinnedOfficialCourseIdsRaw) return [] as number[];
+    try {
+      const parsed = JSON.parse(pinnedOfficialCourseIdsRaw) as number[];
+      return Array.isArray(parsed)
+        ? parsed.filter((value) => Number.isInteger(value))
+        : [];
+    } catch {
+      return [];
+    }
+  })();
+  const pinnedOfficialCourseSlugs = pinnedIds
+    .map((id) => officialCoursesById.get(id)?.slug ?? null)
+    .filter((slug): slug is string => Boolean(slug));
+
+  const lastActiveOfficialCourseSlug = (() => {
+    if (!activeCustomCourseIdRaw) return null;
+    try {
+      const parsed = JSON.parse(activeCustomCourseIdRaw) as number | null;
+      if (typeof parsed !== "number") {
+        return null;
+      }
+      return officialCoursesById.get(parsed)?.slug ?? null;
+    } catch {
+      return null;
+    }
+  })();
+
+  const officialCourseState: OfficialCourseStateExport = {
+    pinnedOfficialCourseSlugs,
+    lastActiveOfficialCourseSlug,
+    boxSnapshots: officialBoxSnapshots,
+    courses: officialCoursesExport
+      .map((courseExport) => buildOfficialCourseStateExport(courseExport))
+      .filter((entry): entry is OfficialCourseSnapshotExport => entry != null),
+  };
 
   return {
-    version: 2,
+    version: 3,
     generatedAt: Date.now(),
     builtinReviews,
     boxesSnapshots,
-    customBoxesSnapshots,
+    customCourseBoxSnapshots,
     customCourses: customCoursesExport,
-    officialCourses: officialCoursesExport,
+    officialCourseState,
     achievements,
   };
 }
@@ -350,9 +665,6 @@ export async function createBackupZip(): Promise<BackupArchiveResult> {
   const archivePayload: UserDataExport = {
     ...payload,
     customCourses: await mapCourseImages(payload.customCourses),
-    officialCourses: payload.officialCourses
-      ? await mapCourseImages(payload.officialCourses)
-      : [],
   };
 
   zip.file("manifest.json", JSON.stringify(archivePayload, null, 2));
@@ -417,37 +729,46 @@ async function materializeZipImages(
   return mapped;
 }
 
-function normalizeImportedData(data: AnyUserDataExport): UserDataExport {
-  if (data.version === 2) {
-    return {
-      ...data,
-      achievements: data.achievements ?? [],
-      officialCourses: data.officialCourses ?? [],
-    };
+function normalizeImportedData(data: unknown): UserDataExport {
+  if (typeof data !== "object" || data == null || !("version" in data)) {
+    throw new Error("Backup ma nieprawidłowy format.");
   }
 
-  const mapLegacyCourse = (
-    courseExport: LegacyUserDataExport["customCourses"][number]
-  ): CustomCourseExport => ({
-    course: courseExport.course,
-    flashcards: courseExport.flashcards.map((card) => ({
-      ...card,
-      imageFront: card.imageFront ?? null,
-      imageBack: card.imageBack ?? null,
-    })),
-    reviews: courseExport.reviews,
-    learningEvents: [],
-  });
+  if ((data as { version?: number }).version !== 3) {
+    throw new Error(
+      "Ten backup pochodzi ze starej wersji aplikacji i nie jest już wspierany."
+    );
+  }
 
+  const typed = data as UserDataExport;
   return {
-    version: 2,
-    generatedAt: data.generatedAt,
-    builtinReviews: data.builtinReviews ?? [],
-    boxesSnapshots: data.boxesSnapshots ?? {},
-    customBoxesSnapshots: data.customBoxesSnapshots ?? {},
-    customCourses: (data.customCourses ?? []).map(mapLegacyCourse),
-    officialCourses: (data.officialCourses ?? []).map(mapLegacyCourse),
-    achievements: [],
+    version: 3,
+    generatedAt: typed.generatedAt,
+    builtinReviews: typed.builtinReviews ?? [],
+    boxesSnapshots: typed.boxesSnapshots ?? {},
+    customCourseBoxSnapshots: typed.customCourseBoxSnapshots ?? {},
+    customCourses: (typed.customCourses ?? []).map((courseExport) => ({
+      backupCourseKey:
+        courseExport.backupCourseKey ??
+        makeCustomCourseBackupKey(courseExport.course.id),
+      course: courseExport.course,
+      flashcards: courseExport.flashcards.map((card) => ({
+        ...card,
+        imageFront: card.imageFront ?? null,
+        imageBack: card.imageBack ?? null,
+      })),
+      reviews: courseExport.reviews ?? [],
+      learningEvents: courseExport.learningEvents ?? [],
+    })),
+    officialCourseState: {
+      pinnedOfficialCourseSlugs:
+        typed.officialCourseState?.pinnedOfficialCourseSlugs ?? [],
+      lastActiveOfficialCourseSlug:
+        typed.officialCourseState?.lastActiveOfficialCourseSlug ?? null,
+      boxSnapshots: typed.officialCourseState?.boxSnapshots ?? {},
+      courses: typed.officialCourseState?.courses ?? [],
+    },
+    achievements: typed.achievements ?? [],
   };
 }
 
@@ -464,16 +785,11 @@ export async function readBackupArchive(
   }
 
   const manifestText = await manifestEntry.async("text");
-  const normalized = normalizeImportedData(
-    JSON.parse(manifestText) as AnyUserDataExport
-  );
+  const normalized = normalizeImportedData(JSON.parse(manifestText) as unknown);
 
   return {
     ...normalized,
     customCourses: await materializeZipImages(zip, normalized.customCourses),
-    officialCourses: normalized.officialCourses
-      ? await materializeZipImages(zip, normalized.officialCourses)
-      : [],
   };
 }
 
@@ -506,7 +822,8 @@ async function restoreCustomCourse(
   db: Awaited<ReturnType<typeof getDB>>,
   courseExport: CustomCourseExport
 ): Promise<RestoredCourseStats> {
-  const { course, flashcards, reviews, learningEvents } = courseExport;
+  const { backupCourseKey, course, flashcards, reviews, learningEvents } =
+    courseExport;
   const now = Date.now();
   const insertCourseResult = await db.runAsync(
     `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version)
@@ -603,6 +920,8 @@ async function restoreCustomCourse(
   }
 
   return {
+    backupCourseKey,
+    courseId: newCourseId,
     flashcardsCreated,
     reviewsRestored,
     learningEventsRestored,
@@ -610,68 +929,15 @@ async function restoreCustomCourse(
   };
 }
 
-async function restoreOfficialCourse(
+async function restoreOfficialCourseState(
   db: Awaited<ReturnType<typeof getDB>>,
-  courseExport: CustomCourseExport
-): Promise<RestoredCourseStats> {
-  const slug = courseExport.course.slug ?? null;
-  let targetCourseId: number | null = null;
-
-  if (slug) {
-    const existing = await db.getFirstAsync<{ id: number }>(
-      `SELECT id FROM custom_courses WHERE slug = ? LIMIT 1;`,
-      slug
-    );
-    if (existing?.id) {
-      targetCourseId = existing.id;
-      const now = Date.now();
-      await db.runAsync(
-        `UPDATE custom_courses
-           SET name = ?,
-               icon_id = ?,
-               icon_color = ?,
-               color_id = ?,
-               reviews_enabled = ?,
-               is_official = 1,
-               slug = ?,
-               pack_version = ?,
-               updated_at = ?
-         WHERE id = ?;`,
-        courseExport.course.name,
-        courseExport.course.iconId,
-        courseExport.course.iconColor,
-        courseExport.course.colorId ?? null,
-        courseExport.course.reviewsEnabled ? 1 : 0,
-        slug,
-        courseExport.course.packVersion ?? 1,
-        now,
-        targetCourseId
-      );
-    }
-  }
-
-  if (targetCourseId == null) {
-    const now = Date.now();
-    const inserted = await db.runAsync(
-      `INSERT INTO custom_courses (name, icon_id, icon_color, color_id, reviews_enabled, created_at, updated_at, is_official, slug, pack_version)
-       VALUES (?, ?, ?, ?, ?, ?, ?, 1, ?, ?);`,
-      courseExport.course.name,
-      courseExport.course.iconId,
-      courseExport.course.iconColor,
-      courseExport.course.colorId ?? null,
-      courseExport.course.reviewsEnabled ? 1 : 0,
-      courseExport.course.createdAt ?? now,
-      now,
-      slug,
-      courseExport.course.packVersion ?? 1
-    );
-    targetCourseId = Number(inserted.lastInsertRowId ?? 0);
-  }
-
-  if (!targetCourseId) {
-    throw new Error("Nie udało się odtworzyć kursu oficjalnego.");
-  }
-
+  targetCourseId: number,
+  courseState: OfficialCourseSnapshotExport
+): Promise<{
+  reviewsRestored: number;
+  learningEventsRestored: number;
+  hintsUpdated: number;
+}> {
   const existingCards = await db.getAllAsync<{
     id: number;
     frontText: string;
@@ -767,146 +1033,59 @@ async function restoreOfficialCourse(
     }
   }
 
-  const oldToNewFlashcardId = new Map<number, number>();
-  let flashcardsCreated = 0;
   let reviewsRestored = 0;
   let learningEventsRestored = 0;
   let hintsUpdated = 0;
   const now = Date.now();
 
   const findExistingCard = (
-    card: BackupFlashcardRecord
+    identity: OfficialFlashcardIdentityExport
   ): CustomFlashcardRecord | null => {
-    if (card.externalId && externalIdMap.has(card.externalId)) {
-      return externalIdMap.get(card.externalId) ?? null;
+    if (identity.externalId && externalIdMap.has(identity.externalId)) {
+      return externalIdMap.get(identity.externalId) ?? null;
     }
-    if (card.position != null && positionMap.has(card.position)) {
-      return positionMap.get(card.position) ?? null;
+    if (identity.position != null && positionMap.has(identity.position)) {
+      return positionMap.get(identity.position) ?? null;
     }
-    const key = `${card.frontText}|||${card.backText}`;
+    const key = `${identity.frontText}|||${identity.backText}`;
     const list = frontBackMap.get(key);
     return list?.[0] ?? null;
   };
 
-  for (const card of courseExport.flashcards) {
-    const existing = findExistingCard(card);
-    if (existing) {
-      oldToNewFlashcardId.set(card.id, existing.id);
-      const nextHintFront = card.hintFront ?? null;
-      const nextHintBack = card.hintBack ?? null;
-      const nextAnswerOnly = card.answerOnly ?? false;
-      const nextImageFront = await persistImageIfAvailable(card.imageFront);
-      const nextImageBack = await persistImageIfAvailable(card.imageBack);
-      const nextType = normalizeImportedType(card.type);
-      const nextExternalId = card.externalId ?? null;
-      const nextResetProgressOnUpdate = card.resetProgressOnUpdate ?? false;
-      const shouldUpdateHints =
-        nextHintFront !== (existing.hintFront ?? null) ||
-        nextHintBack !== (existing.hintBack ?? null);
-      const shouldUpdateAnswerOnly =
-        nextAnswerOnly !== (existing.answerOnly ?? false);
-      const shouldUpdateImages =
-        nextImageFront !== (existing.imageFront ?? null) ||
-        nextImageBack !== (existing.imageBack ?? null);
-      const shouldUpdateType = nextType !== (existing.type ?? "text");
-      const shouldUpdateSyncFields =
-        nextExternalId !== (existing.externalId ?? null) ||
-        !existing.isOfficial ||
-        nextResetProgressOnUpdate !== (existing.resetProgressOnUpdate ?? false);
+  for (const hint of courseState.hints) {
+    const existing = findExistingCard(hint);
+    if (!existing) continue;
+    const nextHintFront = hint.hintFront ?? null;
+    const nextHintBack = hint.hintBack ?? null;
+    const shouldUpdateHints =
+      nextHintFront !== (existing.hintFront ?? null) ||
+      nextHintBack !== (existing.hintBack ?? null);
 
-      if (
-        shouldUpdateHints ||
-        shouldUpdateAnswerOnly ||
-        shouldUpdateImages ||
-        shouldUpdateType ||
-        shouldUpdateSyncFields
-      ) {
-        await db.runAsync(
-          `UPDATE custom_flashcards
-             SET hint_front = ?,
-                 hint_back = ?,
-                 image_front = ?,
-                 image_back = ?,
-                 answer_only = ?,
-                 type = ?,
-                 external_id = ?,
-                 is_official = 1,
-                 reset_progress_on_update = ?,
-                 updated_at = ?
-           WHERE id = ?;`,
-          nextHintFront,
-          nextHintBack,
-          nextImageFront,
-          nextImageBack,
-          nextAnswerOnly ? 1 : 0,
-          nextType,
-          nextExternalId,
-          nextResetProgressOnUpdate ? 1 : 0,
-          now,
-          existing.id
-        );
-        if (shouldUpdateImages) {
-          if (existing.imageFront && existing.imageFront !== nextImageFront) {
-            await deleteImage(existing.imageFront);
-          }
-          if (existing.imageBack && existing.imageBack !== nextImageBack) {
-            await deleteImage(existing.imageBack);
-          }
-        }
-        if (shouldUpdateHints) {
-          hintsUpdated++;
-        }
-      }
-      continue;
-    }
+    if (!shouldUpdateHints) continue;
 
-    const insertCardResult = await db.runAsync(
-      `INSERT INTO custom_flashcards
-         (course_id, front_text, back_text, hint_front, hint_back, image_front, image_back, explanation, position, flipped, answer_only, type, external_id, is_official, reset_progress_on_update, created_at, updated_at)
-       VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
-      targetCourseId,
-      card.frontText,
-      card.backText,
-      card.hintFront ?? null,
-      card.hintBack ?? null,
-      await persistImageIfAvailable(card.imageFront),
-      await persistImageIfAvailable(card.imageBack),
-      card.explanation ?? null,
-      card.position,
-      card.flipped ? 1 : 0,
-      card.answerOnly ? 1 : 0,
-      normalizeImportedType(card.type),
-      card.externalId ?? null,
-      1,
-      card.resetProgressOnUpdate ? 1 : 0,
-      card.createdAt ?? now,
-      now
+    await db.runAsync(
+      `UPDATE custom_flashcards
+         SET hint_front = ?,
+             hint_back = ?,
+             updated_at = ?
+       WHERE id = ?;`,
+      nextHintFront,
+      nextHintBack,
+      now,
+      existing.id
     );
-    const newFlashcardId = Number(insertCardResult.lastInsertRowId ?? 0);
-    oldToNewFlashcardId.set(card.id, newFlashcardId);
-    flashcardsCreated++;
-
-    for (const answer of card.answers ?? []) {
-      await db.runAsync(
-        `INSERT OR IGNORE INTO custom_flashcard_answers
-           (flashcard_id, answer_text, created_at)
-         VALUES (?, ?, ?);`,
-        newFlashcardId,
-        answer,
-        now
-      );
-    }
+    hintsUpdated++;
   }
 
-  for (const review of courseExport.reviews) {
-    const newFlashcardId = oldToNewFlashcardId.get(review.flashcardId);
-    if (!newFlashcardId) continue;
+  for (const review of courseState.reviews) {
+    const existing = findExistingCard(review);
+    if (!existing) continue;
     await db.runAsync(
       `INSERT OR REPLACE INTO custom_reviews
          (course_id, flashcard_id, learned_at, next_review, stage)
        VALUES (?, ?, ?, ?, ?);`,
       targetCourseId,
-      newFlashcardId,
+      existing.id,
       review.learnedAt,
       review.nextReview,
       review.stage
@@ -914,14 +1093,14 @@ async function restoreOfficialCourse(
     reviewsRestored++;
   }
 
-  for (const event of courseExport.learningEvents ?? []) {
-    const newFlashcardId = oldToNewFlashcardId.get(event.flashcardId);
-    if (!newFlashcardId) continue;
+  for (const event of courseState.learningEvents) {
+    const existing = findExistingCard(event);
+    if (!existing) continue;
     await db.runAsync(
       `INSERT INTO custom_learning_events
          (flashcard_id, course_id, box, result, duration_ms, created_at)
        VALUES (?, ?, ?, ?, ?, ?);`,
-      newFlashcardId,
+      existing.id,
       targetCourseId,
       event.box ?? null,
       event.result,
@@ -932,7 +1111,6 @@ async function restoreOfficialCourse(
   }
 
   return {
-    flashcardsCreated,
     reviewsRestored,
     learningEventsRestored,
     hintsUpdated,
@@ -1009,7 +1187,7 @@ async function resetReplaceableStorageState(): Promise<void> {
 }
 
 export async function restoreUserData(
-  input: AnyUserDataExport,
+  input: UserDataExport,
   options?: ImportRestoreOptions & {
     targetDb?: Awaited<ReturnType<typeof getDB>>;
   }
@@ -1029,11 +1207,14 @@ export async function restoreUserData(
     let flashcardsCreatedTotal = 0;
     let reviewsRestoredTotal = 0;
     let builtinReviewsRestored = 0;
-    let officialCoursesProcessed = 0;
+    let officialPinnedCoursesRestored = 0;
+    let officialActiveCourseRestored = 0;
+    let boxSnapshotsRestored = 0;
     let officialReviewsRestored = 0;
-    let officialHintsUpdated = 0;
+    const skippedOfficialCourseSlugs = new Set<string>();
     let learningEventsRestored = 0;
     let achievementsRestored = 0;
+    const restoredCustomCourseIdsByBackupKey = new Map<string, number>();
 
     await db.execAsync("BEGIN TRANSACTION;");
     try {
@@ -1058,6 +1239,7 @@ export async function restoreUserData(
       for (const courseExport of normalized.customCourses ?? []) {
         const stats = await restoreCustomCourse(db, courseExport);
         coursesCreated++;
+        restoredCustomCourseIdsByBackupKey.set(stats.backupCourseKey, stats.courseId);
         flashcardsCreatedTotal += stats.flashcardsCreated;
         reviewsRestoredTotal += stats.reviewsRestored;
         learningEventsRestored += stats.learningEventsRestored;
@@ -1079,26 +1261,156 @@ export async function restoreUserData(
     }
 
     const officialDb = options?.targetDb ? db : await getDB();
-    for (const courseExport of normalized.officialCourses ?? []) {
-      const stats = await restoreOfficialCourse(officialDb, courseExport);
-      officialCoursesProcessed++;
-      flashcardsCreatedTotal += stats.flashcardsCreated;
+    const officialCourseRows = await officialDb.getAllAsync<{
+      id: number;
+      slug: string | null;
+    }>(
+      `SELECT id, slug
+         FROM custom_courses
+        WHERE COALESCE(is_official, 0) = 1
+          AND slug IS NOT NULL;`
+    );
+    const officialCourseIdsBySlug = new Map<string, number>();
+    officialCourseRows.forEach((row) => {
+      const slug = row.slug?.trim();
+      if (slug) {
+        officialCourseIdsBySlug.set(slug, row.id);
+      }
+    });
+
+    for (const courseState of normalized.officialCourseState.courses ?? []) {
+      const targetCourseId = officialCourseIdsBySlug.get(courseState.slug);
+      if (!targetCourseId) {
+        skippedOfficialCourseSlugs.add(courseState.slug);
+        continue;
+      }
+      const stats = await restoreOfficialCourseState(
+        officialDb,
+        targetCourseId,
+        courseState
+      );
       officialReviewsRestored += stats.reviewsRestored;
-      officialHintsUpdated += stats.hintsUpdated;
       learningEventsRestored += stats.learningEventsRestored;
     }
 
     const pairs: [string, string][] = [];
-    let boxesSnapshotsRestored = 0;
     for (const [key, value] of Object.entries(normalized.boxesSnapshots ?? {})) {
       pairs.push([key, JSON.stringify(value)]);
-      boxesSnapshotsRestored++;
+      boxSnapshotsRestored++;
     }
-    for (const [key, value] of Object.entries(
-      normalized.customBoxesSnapshots ?? {}
+
+    for (const [backupCourseKey, value] of Object.entries(
+      normalized.customCourseBoxSnapshots ?? {}
     )) {
-      pairs.push([key, JSON.stringify(value)]);
-      boxesSnapshotsRestored++;
+      const restoredCourseId = restoredCustomCourseIdsByBackupKey.get(backupCourseKey);
+      if (!restoredCourseId) {
+        continue;
+      }
+      pairs.push([
+        buildCustomRuntimeSnapshotKey(restoredCourseId),
+        JSON.stringify(remapSnapshotToCourseId(value, restoredCourseId)),
+      ]);
+      boxSnapshotsRestored++;
+    }
+
+    for (const [slug, value] of Object.entries(
+      normalized.officialCourseState.boxSnapshots ?? {}
+    )) {
+      const restoredCourseId = officialCourseIdsBySlug.get(slug);
+      if (!restoredCourseId) {
+        skippedOfficialCourseSlugs.add(slug);
+        continue;
+      }
+      const rehydratedSnapshot = await rehydrateOfficialSnapshot(
+        restoredCourseId,
+        value
+      );
+      pairs.push([
+        buildCustomRuntimeSnapshotKey(restoredCourseId),
+        JSON.stringify(
+          remapSnapshotToCourseId(rehydratedSnapshot, restoredCourseId)
+        ),
+      ]);
+      boxSnapshotsRestored++;
+    }
+
+    const restoredPinnedOfficialIds = normalized.officialCourseState.pinnedOfficialCourseSlugs
+      .map((slug) => officialCourseIdsBySlug.get(slug) ?? null)
+      .filter((id): id is number => id != null);
+    officialPinnedCoursesRestored = restoredPinnedOfficialIds.length;
+
+    const requestedActiveOfficialId =
+      normalized.officialCourseState.lastActiveOfficialCourseSlug
+        ? officialCourseIdsBySlug.get(
+            normalized.officialCourseState.lastActiveOfficialCourseSlug
+          ) ?? null
+        : null;
+    const restoredActiveOfficialId = requestedActiveOfficialId;
+    officialActiveCourseRestored = restoredActiveOfficialId != null ? 1 : 0;
+
+    const [currentPinnedOfficialIdsRaw, currentActiveCustomCourseIdRaw, currentActiveCourseIdxRaw] =
+      await Promise.all([
+        AsyncStorage.getItem("officialPinnedCourseIds"),
+        AsyncStorage.getItem("activeCustomCourseId"),
+        AsyncStorage.getItem("activeCourseIdx"),
+      ]);
+
+    const currentPinnedOfficialIds = (() => {
+      if (!currentPinnedOfficialIdsRaw) return [] as number[];
+      try {
+        const parsed = JSON.parse(currentPinnedOfficialIdsRaw) as number[];
+        return Array.isArray(parsed) ? parsed : [];
+      } catch {
+        return [];
+      }
+    })();
+
+    const currentActiveCustomCourseId = (() => {
+      if (!currentActiveCustomCourseIdRaw) return null;
+      try {
+        const parsed = JSON.parse(currentActiveCustomCourseIdRaw) as number | null;
+        return typeof parsed === "number" ? parsed : null;
+      } catch {
+        return null;
+      }
+    })();
+
+    const currentActiveCourseIdx = (() => {
+      if (!currentActiveCourseIdxRaw) return null;
+      try {
+        const parsed = JSON.parse(currentActiveCourseIdxRaw) as number | null;
+        return typeof parsed === "number" ? parsed : null;
+      } catch {
+        return null;
+      }
+    })();
+
+    const shouldRestoreCourseSelection =
+      options?.replaceExistingData === true ||
+      (currentPinnedOfficialIds.length === 0 &&
+        currentActiveCustomCourseId == null &&
+        currentActiveCourseIdx == null);
+
+    console.log("[userDataBackup] restore selection decision", {
+      replaceExistingData: options?.replaceExistingData === true,
+      currentPinnedOfficialIdsCount: currentPinnedOfficialIds.length,
+      currentActiveCustomCourseId,
+      currentActiveCourseIdx,
+      restoredPinnedOfficialIdsCount: restoredPinnedOfficialIds.length,
+      restoredActiveOfficialId,
+      shouldRestoreCourseSelection,
+    });
+
+    if (shouldRestoreCourseSelection) {
+      pairs.push([
+        "officialPinnedCourseIds",
+        JSON.stringify(restoredPinnedOfficialIds),
+      ]);
+      pairs.push([
+        "activeCustomCourseId",
+        JSON.stringify(restoredActiveOfficialId),
+      ]);
+      pairs.push(["activeCourseIdx", JSON.stringify(null)]);
     }
 
     if (pairs.length > 0) {
@@ -1107,15 +1419,33 @@ export async function restoreUserData(
 
     return {
       success: true,
+      restoredState: {
+        pinnedOfficialCourseIds: restoredPinnedOfficialIds,
+        activeCustomCourseId: restoredActiveOfficialId,
+        activeCourseIdx: null,
+        shouldApplySelection: shouldRestoreCourseSelection,
+        shouldMarkOnboardingDone:
+          coursesCreated > 0 ||
+          flashcardsCreatedTotal > 0 ||
+          reviewsRestoredTotal > 0 ||
+          builtinReviewsRestored > 0 ||
+          restoredPinnedOfficialIds.length > 0 ||
+          restoredActiveOfficialId != null ||
+          boxSnapshotsRestored > 0 ||
+          officialReviewsRestored > 0 ||
+          learningEventsRestored > 0 ||
+          achievementsRestored > 0,
+      },
       stats: {
         coursesCreated,
         flashcardsCreated: flashcardsCreatedTotal,
         reviewsRestored: reviewsRestoredTotal,
         builtinReviewsRestored,
-        boxesSnapshotsRestored,
-        officialCoursesProcessed,
+        officialPinnedCoursesRestored,
+        officialActiveCourseRestored,
+        boxSnapshotsRestored,
         officialReviewsRestored,
-        officialHintsUpdated,
+        officialCoursesSkipped: skippedOfficialCourseSlugs.size,
         learningEventsRestored,
         achievementsRestored,
       },
