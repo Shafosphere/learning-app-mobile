@@ -504,22 +504,27 @@
         },
         "permissions": {
           "title": "Uprawnienia i funkcje urządzenia",
-          "body": "Memicard korzysta z funkcji urządzenia wyłącznie wtedy, gdy są potrzebne do działania wybranej funkcji.",
+          "body": "Memicard może korzystać z funkcji urządzenia wyłącznie w zakresie potrzebnym do działania wybranych przez użytkownika funkcji aplikacji.",
           "bullets": [
-            "powiadomienia lokalne do przypomnień o nauce są używane tylko po wyrażeniu zgody przez użytkownika",
-            "dostęp do plików jest wykorzystywany przy imporcie i eksporcie danych oraz kopii użytkownika",
-            "systemowe udostępnianie może zostać użyte przy eksporcie danych poza aplikację",
+            "dostęp do plików jest wykorzystywany w celu importu lub eksportu danych",
+            "dostęp do zdjęć lub wybranych plików graficznych może być używany przy dodawaniu własnych obrazów do fiszek lub kursów",
+            "lokalne powiadomienia przypominające o nauce są używane tylko po wyrażeniu zgody przez użytkownika",
             "aplikacja może otworzyć domyślnego klienta pocztowego w celu przygotowania wiadomości do supportu",
-            "aplikacja prosi o dostęp do biblioteki zdjęć wyłącznie wtedy, gdy użytkownik chce dodać własny obraz do fiszki"
-          ]
+            "dobrowolne połączenie konta Google jest używane wyłącznie w celu utworzenia lub przywrócenia kopii zapasowej w Google Drive"
+          ],
+          "noteLabel": "Zakres użycia",
+          "note": "Aplikacja nie korzysta z tych funkcji automatycznie w celach niezwiązanych z działaniem wybranym przez użytkownika."
         },
         "recipients": {
           "title": "Odbiorcy danych i podmioty trzecie",
-          "body": "Co do zasady Memicard nie przesyła danych użytkownika na serwery dewelopera w celu bieżącego działania aplikacji.",
+          "body": "Memicard działa głównie lokalnie, co oznacza, że dane użytkownika są przechowywane przede wszystkim na urządzeniu.",
           "bullets": [
-            "dane pozostają na urządzeniu użytkownika, chyba że użytkownik sam zdecyduje o eksporcie, udostępnieniu lub wysłaniu wiadomości e-mail",
+            "dane mogą zostać przekazane poza urządzenie tylko wtedy, gdy użytkownik sam skorzysta z określonej funkcji aplikacji, na przykład eksportu, udostępniania, kontaktu e-mail lub opcjonalnej kopii zapasowej w Google Drive",
+            "dane mogą zostać zapisane lub przekazane do usługi, aplikacji albo lokalizacji wybranej przez użytkownika",
             "w przypadku kontaktu e-mailowego dane mogą być przetwarzane przez dostawcę poczty elektronicznej i systemowe usługi pocztowe wybrane przez użytkownika",
             "w przypadku eksportu lub udostępnienia plików dane mogą zostać zapisane poza aplikacją, zgodnie z usługą, lokalizacją lub aplikacją wybraną przez użytkownika",
+            "jeżeli użytkownik połączy konto Google i włączy funkcję kopii zapasowej, kopia danych może zostać zapisana w usłudze Google Drive powiązanej z jego kontem Google",
+            "dane zapisane w Google Drive są przetwarzane zgodnie z zasadami i polityką prywatności Google",
             "zgodnie z aktualnym stanem aplikacji nie są używane zewnętrzne SDK reklamowe ani systemy śledzenia aktywności między aplikacjami"
           ]
         },
@@ -544,18 +549,22 @@
         },
         "deletion": {
           "title": "Usuwanie danych",
-          "body": "Użytkownik zachowuje kontrolę nad danymi zapisanymi przez aplikację na urządzeniu.",
+          "body": "Użytkownik może usunąć dane zapisane lokalnie, usuwając je z poziomu aplikacji lub odinstalowując aplikację z urządzenia.",
           "bullets": [
             "część danych można usunąć w samej aplikacji, na przykład usuwając własne kursy, własne fiszki albo resetując wybrane ustawienia",
             "usunięcie aplikacji co do zasady powoduje usunięcie jej lokalnych danych z urządzenia, z zastrzeżeniem mechanizmów kopii zapasowych lub przywracania danych oferowanych przez system operacyjny albo usługi użytkownika",
-            "kopie danych wyeksportowane do plików lub usług zewnętrznych pozostają poza aplikacją i użytkownik zarządza nimi samodzielnie"
-          ]
+            "kopie danych wyeksportowane do plików lub usług zewnętrznych pozostają poza aplikacją i użytkownik zarządza nimi samodzielnie",
+            "usunięcie aplikacji nie powoduje automatycznego usunięcia kopii danych zapisanej wcześniej w usłudze zewnętrznej, na przykład w Google Drive"
+          ],
+          "noteLabel": "Usuwanie kopii zewnętrznych",
+          "note": "Kopia zapisana w usłudze zewnętrznej powinna zostać usunięta osobno z konta użytkownika w danej usłudze."
         },
         "transfers": {
           "title": "Przekazywanie danych poza UE lub EOG",
           "body": "Memicard co do zasady nie przekazuje danych użytkownika na własne serwery poza Europejski Obszar Gospodarczy.",
           "bullets": [
             "w przypadku kontaktu e-mailowego lub korzystania z usług zewnętrznych wybranych przez użytkownika dane mogą być przetwarzane zgodnie z zasadami tych dostawców",
+            "jeżeli użytkownik korzysta z opcjonalnej funkcji kopii zapasowej w Google Drive, dane mogą być przetwarzane przez Google zgodnie z zasadami obowiązującymi u tego dostawcy, również poza UE lub EOG, zależnie od używanej infrastruktury technicznej",
             "zakres i miejsce przetwarzania przez zewnętrznego dostawcę zależą od usługi wybranej przez użytkownika, a Memicard nie kontroluje polityk prywatności takich dostawców"
           ]
         },

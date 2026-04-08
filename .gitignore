@@ -31,7 +31,11 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
+.env.*
 .env*.local
+!.env.example
+!.env*.example
 
 # typescript
 *.tsbuildinfo
@@ -50,6 +54,18 @@ assets/images/*
 *.png
 *.svg
 *.svgx
+
+# Mobile signing / release credentials
+*.keystore
+keystore.properties
+credentials.json
+play-account*.json
+service-account*.json
+google-service-account*.json
+GoogleService-Info.plist
+google-services.json
+.npmrc
+.yarnrc.yml
 
 # User documentation
 docs/opis_aplikacji.md

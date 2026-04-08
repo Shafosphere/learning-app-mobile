@@ -504,22 +504,27 @@
         },
         "permissions": {
           "title": "Permissions and device features",
-          "body": "Memicard uses device features only when they are needed for a selected feature.",
+          "body": "Memicard may use device features only to the extent needed for features selected by the user.",
           "bullets": [
-            "local notifications for study reminders are used only after the user grants permission",
-            "file access is used for data import, export, and user data copies",
-            "system sharing may be used when exporting data outside the app",
+            "file access is used for importing or exporting data",
+            "access to photos or selected image files may be used when adding custom images to flashcards or courses",
+            "local study reminders are used only after the user grants permission",
             "the app may open the default mail client to prepare a support message",
-            "the app requests access to the photo library only when the user wants to add their own image to a flashcard"
-          ]
+            "a voluntary Google account connection is used only to create or restore a backup in Google Drive"
+          ],
+          "noteLabel": "Scope of use",
+          "note": "The app does not use these features automatically for purposes unrelated to the action selected by the user."
         },
         "recipients": {
           "title": "Recipients and third parties",
-          "body": "As a rule, Memicard does not send user data to the developer's servers for normal app operation.",
+          "body": "Memicard works mainly locally, which means user data is stored primarily on the device.",
           "bullets": [
-            "data stays on the user's device unless the user chooses to export it, share it, or send it by email",
+            "data may leave the device only when the user actively uses a specific app feature, for example export, sharing, email contact, or an optional Google Drive backup",
+            "data may be saved or transferred to a service, app, or location selected by the user",
             "when the user contacts support by email, data may be processed by the user's email provider and system mail services",
             "when the user exports or shares files, data may be stored outside the app according to the service, location, or app chosen by the user",
+            "if the user connects a Google account and enables the backup feature, a copy of the data may be stored in the Google Drive service linked to that Google account",
+            "data stored in Google Drive is processed in accordance with Google's own terms and privacy policy",
             "based on the current state of the app, no third-party advertising SDKs or cross-app tracking systems are used"
           ]
         },
@@ -544,18 +549,22 @@
         },
         "deletion": {
           "title": "Data deletion",
-          "body": "The user keeps control over data stored by the app on the device.",
+          "body": "The user can remove data stored locally by deleting it in the app or by uninstalling the app from the device.",
           "bullets": [
             "some data can be removed inside the app, for example by deleting custom courses, custom flashcards, or resetting selected settings",
             "removing the app generally removes its local data from the device, subject to backup or restore mechanisms offered by the operating system or user services",
-            "data copies exported to files or external services remain outside the app and are managed by the user"
-          ]
+            "data copies exported to files or external services remain outside the app and are managed by the user",
+            "removing the app does not automatically delete a copy of data previously stored in an external service, for example Google Drive"
+          ],
+          "noteLabel": "Deleting external copies",
+          "note": "A copy stored in an external service should be deleted separately from the user's account in that service."
         },
         "transfers": {
           "title": "Transfers outside the EU or EEA",
           "body": "As a rule, Memicard does not transfer user data to its own servers outside the European Economic Area.",
           "bullets": [
             "when the user contacts support by email or uses third-party services chosen by the user, data may be processed under those providers' own rules",
+            "if the user uses the optional Google Drive backup feature, data may be processed by Google in accordance with that provider's rules, including outside the EU or EEA depending on the technical infrastructure used",
             "the scope and location of processing by an external provider depends on the service selected by the user, and Memicard does not control those providers' privacy policies"
           ]
         },
