@@ -16,7 +16,6 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
 } from "@/src/db/sqlite/db";
-import { unlockAchievement } from "@/src/db/sqlite/repositories/achievements";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
@@ -523,29 +522,6 @@ const DebuggingSection: React.FC = () => {
           disabled={customBusy || activeCustomCourseId == null}
           onPress={handleResetCustomReviews}
           width={160}
-        />
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>{t("settings.debug.rows.addTrophies.title")}</Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.debug.rows.addTrophies.subtitle")}
-          </Text>
-        </View>
-        <MyButton
-          text={t("settings.debug.rows.addTrophies.button")}
-          color="my_green"
-          onPress={async () => {
-            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
-            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
-            await unlockAchievement("debug_" + Math.random().toString().slice(2, 6));
-            Alert.alert(
-              t("settings.debug.alerts.doneTitle"),
-              t("settings.debug.alerts.trophiesAdded")
-            );
-          }}
-          width={140}
         />
       </View>
 

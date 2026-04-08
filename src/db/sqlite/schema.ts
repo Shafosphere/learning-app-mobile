@@ -200,14 +200,6 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
        WHERE external_id IS NOT NULL;`
   );
 
-  const achievementsSchema = `
-    CREATE TABLE IF NOT EXISTS user_achievements (
-      id TEXT PRIMARY KEY,
-      unlocked_at INTEGER NOT NULL
-    );
-  `;
-  await db.execAsync(achievementsSchema);
-
   await backfillCustomFlashcardAnswers(db);
 }
 

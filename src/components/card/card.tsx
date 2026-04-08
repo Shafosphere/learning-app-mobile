@@ -1,5 +1,4 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useAchievements } from "@/src/hooks/useAchievements";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import type { DatePattern } from "@/src/utils/dateInput";
@@ -487,16 +486,6 @@ export default function Card({
     }
     confirm(rewers);
   }, [confirm, rewers, selectedItem?.translations, setTranslations]);
-
-  // Achievements integration
-  const { reportResult } = useAchievements();
-  useEffect(() => {
-    if (result === true) {
-      reportResult(true);
-    } else if (result === false) {
-      reportResult(false);
-    }
-  }, [result, reportResult]);
 
   const previousResultForAnswerResetRef = useRef<boolean | null>(null);
   useEffect(() => {

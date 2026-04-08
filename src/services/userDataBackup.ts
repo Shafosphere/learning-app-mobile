@@ -17,7 +17,6 @@ import {
 import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import * as FileSystem from "expo-file-system/legacy";
 import JSZip from "jszip";
-import { getUnlockedAchievements } from "@/src/db/sqlite/repositories/achievements";
 
 export type BuiltinReviewExportRow = {
   wordId: number;
@@ -44,11 +43,6 @@ export type CustomLearningEventExportRow = {
   result: "ok" | "wrong";
   durationMs: number | null;
   createdAt: number;
-};
-
-export type UserAchievementExportRow = {
-  id: string;
-  unlockedAt: number;
 };
 
 export type BackupFlashcardRecord = Omit<
@@ -115,7 +109,6 @@ export type UserDataExport = {
   customCourseBoxSnapshots: Record<string, SavedBoxesV2>;
   customCourses: CustomCourseExport[];
   officialCourseState: OfficialCourseStateExport;
-  achievements: UserAchievementExportRow[];
 };
 
 export type ImportResult = {
@@ -139,7 +132,6 @@ export type ImportResult = {
     officialReviewsRestored: number;
     officialCoursesSkipped: number;
     learningEventsRestored: number;
-    achievementsRestored: number;
   };
 };
 
@@ -160,6 +152,15 @@ type RestoredCourseStats = {
   reviewsRestored: number;
   learningEventsRestored: number;
   hintsUpdated: number;
+};
+
+type LegacyUserAchievementExportRow = {
+  id: string;
+  unlockedAt: number;
+};
+
+type LegacyUserDataExport = UserDataExport & {
+  achievements?: LegacyUserAchievementExportRow[];
 };
 
 async function tableExists(
@@ -485,7 +486,6 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     officialCoursesExport,
     boxesSnapshots,
     customBoxesSnapshots,
-    achievements,
     pinnedOfficialCourseIdsRaw,
     activeCustomCourseIdRaw,
   ] = await Promise.all([
@@ -493,7 +493,6 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     Promise.all(officialCourses.map((course) => buildCourseExport(course))),
     collectBoxesSnapshots(["boxes:"]),
     collectBoxesSnapshots(["customBoxes:"]),
-    getUnlockedAchievements(),
     AsyncStorage.getItem("officialPinnedCourseIds"),
     AsyncStorage.getItem("activeCustomCourseId"),
   ]);
@@ -570,7 +569,6 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     customCourseBoxSnapshots,
     customCourses: customCoursesExport,
     officialCourseState,
-    achievements,
   };
 }
 
@@ -740,7 +738,7 @@ function normalizeImportedData(data: unknown): UserDataExport {
     );
   }
 
-  const typed = data as UserDataExport;
+  const typed = data as LegacyUserDataExport;
   return {
     version: 3,
     generatedAt: typed.generatedAt,
@@ -768,7 +766,6 @@ function normalizeImportedData(data: unknown): UserDataExport {
       boxSnapshots: typed.officialCourseState?.boxSnapshots ?? {},
       courses: typed.officialCourseState?.courses ?? [],
     },
-    achievements: typed.achievements ?? [],
   };
 }
 
@@ -1213,7 +1210,6 @@ export async function restoreUserData(
     let officialReviewsRestored = 0;
     const skippedOfficialCourseSlugs = new Set<string>();
     let learningEventsRestored = 0;
-    let achievementsRestored = 0;
     const restoredCustomCourseIdsByBackupKey = new Map<string, number>();
 
     await db.execAsync("BEGIN TRANSACTION;");
@@ -1243,15 +1239,6 @@ export async function restoreUserData(
         flashcardsCreatedTotal += stats.flashcardsCreated;
         reviewsRestoredTotal += stats.reviewsRestored;
         learningEventsRestored += stats.learningEventsRestored;
-      }
-
-      for (const achievement of normalized.achievements ?? []) {
-        await db.runAsync(
-          `INSERT OR REPLACE INTO user_achievements (id, unlocked_at) VALUES (?, ?);`,
-          achievement.id,
-          achievement.unlockedAt
-        );
-        achievementsRestored++;
       }
 
       await db.execAsync("COMMIT;");
@@ -1433,8 +1420,7 @@ export async function restoreUserData(
           restoredActiveOfficialId != null ||
           boxSnapshotsRestored > 0 ||
           officialReviewsRestored > 0 ||
-          learningEventsRestored > 0 ||
-          achievementsRestored > 0,
+          learningEventsRestored > 0,
       },
       stats: {
         coursesCreated,
@@ -1447,7 +1433,6 @@ export async function restoreUserData(
         officialReviewsRestored,
         officialCoursesSkipped: skippedOfficialCourseSlugs.size,
         learningEventsRestored,
-        achievementsRestored,
       },
     };
   } catch (error) {

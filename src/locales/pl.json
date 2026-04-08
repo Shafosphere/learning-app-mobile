@@ -229,8 +229,7 @@
           "officialReviews": "Powtórki w kursach oficjalnych",
           "officialPinnedCourses": "Przypięte kursy oficjalne",
           "officialActiveCourse": "Aktywny kurs oficjalny",
-          "learningEvents": "Historia nauki",
-          "achievements": "Osiągnięcia"
+          "learningEvents": "Historia nauki"
         }
       },
       "resetLearningConfirm": {
@@ -310,7 +309,6 @@
         "checkpointSetError": "Nie udało się ustawić checkpointu.",
         "introResetDone": "Intro zresetowane. Onboarding startuje od wyboru języka.",
         "introResetError": "Nie udało się zresetować dymków.",
-        "trophiesAdded": "Dodano 3 testowe osiągnięcia.",
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Wyjdź z niego przez „Spróbuj ponownie”.",
         "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
       },
@@ -371,11 +369,6 @@
           "subtitle": "Usuń wpisy powtórek aktywnego kursu własnego.",
           "button": "Reset custom",
           "buttonLoading": "Resetuję..."
-        },
-        "addTrophies": {
-          "title": "Dodaj testowe puchary",
-          "subtitle": "Odblokuj losowe 3 osiągnięcia (test bookshelf).",
-          "button": "Daj puchary"
         },
         "clearStorage": {
           "title": "Wyczyść AsyncStorage",

@@ -229,8 +229,7 @@
           "officialReviews": "Reviews in official courses",
           "officialPinnedCourses": "Pinned official courses",
           "officialActiveCourse": "Active official course",
-          "learningEvents": "Learning history",
-          "achievements": "Achievements"
+          "learningEvents": "Learning history"
         }
       },
       "resetLearningConfirm": {
@@ -310,7 +309,6 @@
         "checkpointSetError": "Could not set checkpoint.",
         "introResetDone": "Intro reset. Onboarding starts from language selection.",
         "introResetError": "Could not reset intro bubbles.",
-        "trophiesAdded": "Added 3 test achievements.",
         "dbErrorScreenOpened": "Enabled the SQLite error screen test mode. Leave it with “Try again”.",
         "dbErrorScreenOpenError": "Could not enable the test error screen."
       },
@@ -371,11 +369,6 @@
           "subtitle": "Delete review entries for active custom course.",
           "button": "Reset custom",
           "buttonLoading": "Resetting..."
-        },
-        "addTrophies": {
-          "title": "Add test trophies",
-          "subtitle": "Unlock 3 random achievements (bookshelf test).",
-          "button": "Give trophies"
         },
         "clearStorage": {
           "title": "Clear AsyncStorage",

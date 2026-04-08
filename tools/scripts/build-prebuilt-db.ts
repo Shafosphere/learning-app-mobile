@@ -500,11 +500,6 @@ CREATE TABLE IF NOT EXISTS custom_learning_events (
   created_at     INTEGER NOT NULL
 );
 
-CREATE TABLE IF NOT EXISTS user_achievements (
-  id TEXT PRIMARY KEY,
-  unlocked_at INTEGER NOT NULL
-);
-
 CREATE INDEX IF NOT EXISTS idx_custom_flashcards_course
   ON custom_flashcards(course_id, position);
 CREATE INDEX IF NOT EXISTS idx_custom_flashcard_answers_card

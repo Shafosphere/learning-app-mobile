@@ -24,7 +24,6 @@ type ImportStatsLike = {
   officialReviewsRestored?: number;
   boxSnapshotsRestored?: number;
   learningEventsRestored?: number;
-  achievementsRestored?: number;
 };
 
 const CoursesDataSection: React.FC = () => {
@@ -51,7 +50,7 @@ const CoursesDataSection: React.FC = () => {
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
 
   const buildImportDoneMessage = (stats?: ImportStatsLike) => {
-    const lines = [
+    const statLines: Array<[string, number]> = [
       ["customCourses", stats?.coursesCreated ?? 0],
       ["customFlashcards", stats?.flashcardsCreated ?? 0],
       ["boxSnapshots", stats?.boxSnapshotsRestored ?? 0],
@@ -60,8 +59,9 @@ const CoursesDataSection: React.FC = () => {
       ["officialPinnedCourses", stats?.officialPinnedCoursesRestored ?? 0],
       ["officialActiveCourse", stats?.officialActiveCourseRestored ?? 0],
       ["learningEvents", stats?.learningEventsRestored ?? 0],
-      ["achievements", stats?.achievementsRestored ?? 0],
-    ]
+    ];
+
+    const lines = statLines
       .filter(([, value]) => value > 0)
       .map(
         ([labelKey, value]) =>
