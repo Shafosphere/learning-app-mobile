@@ -4,19 +4,22 @@ import * as FileSystem from "expo-file-system/legacy";
 import { Platform } from "react-native";
 import {
   createBackupZip,
-  readBackupArchive,
+  readBackupArchiveManifest,
+  readBackupArchivePackage,
   restoreUserData,
+  type BackupArchiveManifest,
   type ImportResult,
 } from "@/src/services/userDataBackup";
 
 const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const LEGACY_AUTH_STORAGE_KEY = "googleDriveBackup.auth";
-const DEFAULT_BACKUP_FILENAME = "memicard-drive-backup-latest.zip";
-const STARTUP_BACKUP_INTERVAL_MS = 24 * 60 * 60 * 1000;
+const BACKUP_FILE_QUERY_PREFIX = "memicard-backup-";
+const LEGACY_BACKUP_FILENAME = "memicard-drive-backup-latest.zip";
+const BACKUP_KIND = "memicard-backup";
+const DEFAULT_LIST_LIMIT = 10;
 
 type GoogleDriveExtraConfig = {
   webClientId?: string;
-  backupFileName?: string;
 };
 
 type GoogleDriveUser = {
@@ -60,6 +63,12 @@ export type GoogleDriveBackupMetadata = {
   size: number | null;
 };
 
+export type GoogleDriveBackupSnapshot = GoogleDriveBackupMetadata & {
+  manifest: BackupArchiveManifest | null;
+  isCompatible: boolean;
+  compatibilityMessage: string | null;
+};
+
 export type ConnectGoogleDriveResult =
   | {
       connected: true;
@@ -69,13 +78,6 @@ export type ConnectGoogleDriveResult =
       connected: false;
       cancelled: true;
     };
-
-export type StartupBackupResult = {
-  attempted: boolean;
-  skippedReason?: "disabled" | "not_connected" | "not_due";
-  fileId?: string;
-  backupAt?: number;
-};
 
 let googleSigninConfigured = false;
 let legacyStateCleanupPromise: Promise<void> | null = null;
@@ -89,13 +91,6 @@ function getExtraConfig(): GoogleDriveExtraConfig {
 function getConfiguredWebClientId(): string | null {
   const webClientId = getExtraConfig().webClientId?.trim();
   return webClientId ? webClientId : null;
-}
-
-function getBackupFileName(): string {
-  const configured = getExtraConfig().backupFileName?.trim();
-  return configured && configured.length > 0
-    ? configured
-    : DEFAULT_BACKUP_FILENAME;
 }
 
 function startLegacyStateCleanup(): Promise<void> {
@@ -271,37 +266,20 @@ async function authorizedFetch(
   });
 }
 
-async function resolveBackupFileId(
-  preferredFileId?: string | null
-): Promise<string | null> {
-  if (preferredFileId) {
-    const response = await authorizedFetch(
-      `https://www.googleapis.com/drive/v3/files/${preferredFileId}?fields=id,name,modifiedTime,size`
-    );
-    if (response.ok) {
-      const body = (await response.json()) as {
-        id: string;
-      };
-      return body.id;
-    }
-  }
-
+function buildSnapshotListQuery(limit: number, pageToken?: string): string {
   const q = encodeURIComponent(
-    `name='${getBackupFileName()}' and 'appDataFolder' in parents and trashed=false`
+    `'appDataFolder' in parents and trashed=false and mimeType='application/zip'`
   );
-  const response = await authorizedFetch(
-    `https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&fields=files(id,name,modifiedTime,size)&pageSize=1&orderBy=modifiedTime desc`
-  );
-  if (!response.ok) {
-    throw new Error("Nie udało się odnaleźć pliku backupu na Google Drive.");
-  }
-  const body = (await response.json()) as {
-    files?: { id: string }[];
-  };
-  return body.files?.[0]?.id ?? null;
+  const tokenParam = pageToken
+    ? `&pageToken=${encodeURIComponent(pageToken)}`
+    : "";
+  return `https://www.googleapis.com/drive/v3/files?q=${q}&spaces=appDataFolder&fields=files(id,name,modifiedTime,size),nextPageToken&pageSize=${limit}&orderBy=modifiedTime desc${tokenParam}`;
 }
 
-async function createDriveBackupFileMetadata(): Promise<string> {
+async function createDriveBackupFileMetadata(
+  backupName: string,
+  manifest: BackupArchiveManifest
+): Promise<string> {
   const response = await authorizedFetch(
     "https://www.googleapis.com/drive/v3/files?fields=id",
     {
@@ -310,9 +288,15 @@ async function createDriveBackupFileMetadata(): Promise<string> {
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        name: getBackupFileName(),
+        name: backupName,
         parents: ["appDataFolder"],
         mimeType: "application/zip",
+        appProperties: {
+          kind: BACKUP_KIND,
+          schemaVersion: String(manifest.schemaVersion),
+          createdAt: manifest.createdAt,
+          appVersion: manifest.appVersion,
+        },
       }),
     }
   );
@@ -360,6 +344,87 @@ async function uploadZipToDrive(
     modifiedTime: body.modifiedTime ?? null,
     size: body.size ? Number(body.size) : null,
   };
+}
+
+function mapDriveMetadata(body: {
+  id: string;
+  name: string;
+  modifiedTime?: string;
+  size?: string;
+}): GoogleDriveBackupMetadata {
+  return {
+    fileId: body.id,
+    name: body.name,
+    modifiedTime: body.modifiedTime ?? null,
+    size: body.size ? Number(body.size) : null,
+  };
+}
+
+function buildDownloadTargetUri(prefix: string, fileId: string): string {
+  const baseDir = FileSystem.cacheDirectory ?? FileSystem.documentDirectory;
+  if (!baseDir) {
+    throw new Error("Brak katalogu tymczasowego do pobrania backupu.");
+  }
+  return `${baseDir}${prefix}-${fileId}.zip`;
+}
+
+async function downloadBackupFile(fileId: string, prefix: string): Promise<string> {
+  const targetUri = buildDownloadTargetUri(prefix, fileId);
+  const accessToken = await getFreshAccessToken();
+  const download = await FileSystem.downloadAsync(
+    `https://www.googleapis.com/drive/v3/files/${fileId}?alt=media`,
+    targetUri,
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+      },
+    }
+  );
+
+  if (download.status < 200 || download.status >= 300) {
+    throw new Error("Nie udało się pobrać backupu z Google Drive.");
+  }
+
+  return download.uri;
+}
+
+async function enrichSnapshotMetadata(
+  metadata: GoogleDriveBackupMetadata
+): Promise<GoogleDriveBackupSnapshot> {
+  try {
+    const fileUri = await downloadBackupFile(metadata.fileId, "google-drive-manifest");
+    const manifest = await readBackupArchiveManifest(fileUri);
+    return {
+      ...metadata,
+      manifest,
+      isCompatible: true,
+      compatibilityMessage: null,
+    };
+  } catch (error) {
+    const compatibilityMessage =
+      error instanceof Error
+        ? error.message
+        : "Nie udało się odczytać manifestu backupu.";
+    return {
+      ...metadata,
+      manifest: null,
+      isCompatible: false,
+      compatibilityMessage,
+    };
+  }
+}
+
+async function deleteDriveFile(fileId: string): Promise<void> {
+  const response = await authorizedFetch(
+    `https://www.googleapis.com/drive/v3/files/${fileId}`,
+    {
+      method: "DELETE",
+    }
+  );
+
+  if (!response.ok) {
+    throw new Error("Nie udało się usunąć starego backupu z Google Drive.");
+  }
 }
 
 export function initializeGoogleDriveBackup(): void {
@@ -456,122 +521,160 @@ export async function disconnectGoogleDrive(): Promise<void> {
   await startLegacyStateCleanup();
 }
 
-export async function getLatestDriveBackupMetadata(
-  preferredFileId?: string | null
-): Promise<GoogleDriveBackupMetadata | null> {
-  const fileId = await resolveBackupFileId(preferredFileId);
-  if (!fileId) return null;
-
-  const response = await authorizedFetch(
-    `https://www.googleapis.com/drive/v3/files/${fileId}?fields=id,name,modifiedTime,size`
-  );
+export async function listBackupSnapshots(
+  limit = DEFAULT_LIST_LIMIT
+): Promise<GoogleDriveBackupMetadata[]> {
+  const response = await authorizedFetch(buildSnapshotListQuery(limit));
   if (!response.ok) {
-    throw new Error("Nie udało się pobrać metadanych backupu z Google Drive.");
+    throw new Error("Nie udało się pobrać listy backupów z Google Drive.");
   }
 
   const body = (await response.json()) as {
-    id: string;
-    name: string;
-    modifiedTime?: string;
-    size?: string;
+    files?: {
+      id: string;
+      name: string;
+      modifiedTime?: string;
+      size?: string;
+    }[];
   };
 
-  return {
-    fileId: body.id,
-    name: body.name,
-    modifiedTime: body.modifiedTime ?? null,
-    size: body.size ? Number(body.size) : null,
-  };
+  return (body.files ?? [])
+    .filter(
+      (file) =>
+        typeof file.name === "string" &&
+        (file.name.startsWith(BACKUP_FILE_QUERY_PREFIX) ||
+          file.name === LEGACY_BACKUP_FILENAME)
+    )
+    .map(mapDriveMetadata);
 }
 
-export async function uploadLatestBackupToDrive(
-  preferredFileId?: string | null
-): Promise<GoogleDriveBackupMetadata> {
+async function listAllBackupSnapshots(): Promise<GoogleDriveBackupMetadata[]> {
+  const snapshots: GoogleDriveBackupMetadata[] = [];
+  let nextPageToken: string | undefined;
+
+  do {
+    const response = await authorizedFetch(
+      buildSnapshotListQuery(DEFAULT_LIST_LIMIT, nextPageToken)
+    );
+    if (!response.ok) {
+      throw new Error("Nie udało się pobrać listy backupów z Google Drive.");
+    }
+
+    const body = (await response.json()) as {
+      files?: {
+        id: string;
+        name: string;
+        modifiedTime?: string;
+        size?: string;
+      }[];
+      nextPageToken?: string;
+    };
+
+    snapshots.push(
+      ...(body.files ?? [])
+        .filter(
+          (file) =>
+            typeof file.name === "string" &&
+            (file.name.startsWith(BACKUP_FILE_QUERY_PREFIX) ||
+              file.name === LEGACY_BACKUP_FILENAME)
+        )
+        .map(mapDriveMetadata)
+    );
+
+    nextPageToken = body.nextPageToken;
+  } while (nextPageToken);
+
+  return snapshots;
+}
+
+export async function listRecentBackupSnapshots(
+  limit = 3
+): Promise<GoogleDriveBackupSnapshot[]> {
+  const snapshots = await listBackupSnapshots(limit);
+  return Promise.all(snapshots.map((snapshot) => enrichSnapshotMetadata(snapshot)));
+}
+
+export async function createBackupSnapshot(): Promise<GoogleDriveBackupSnapshot> {
   const backup = await createBackupZip();
-  let fileId = await resolveBackupFileId(preferredFileId);
-  if (!fileId) {
-    fileId = await createDriveBackupFileMetadata();
+  try {
+    const fileId = await createDriveBackupFileMetadata(
+      backup.fileUri.split("/").pop() ?? `${BACKUP_FILE_QUERY_PREFIX}${Date.now()}.zip`,
+      backup.manifest
+    );
+    const metadata = await uploadZipToDrive(backup.fileUri, fileId);
+
+    return {
+      ...metadata,
+      manifest: backup.manifest,
+      isCompatible: true,
+      compatibilityMessage: null,
+    };
+  } finally {
+    await FileSystem.deleteAsync(backup.fileUri, { idempotent: true }).catch(
+      (error) => {
+        console.warn("[googleDriveBackup] Failed to clean up local temp backup", {
+          fileUri: backup.fileUri,
+          error,
+        });
+      }
+    );
   }
-  return uploadZipToDrive(backup.fileUri, fileId);
+}
+
+export async function pruneOldBackupSnapshots(keep = 3): Promise<void> {
+  const snapshots = await listAllBackupSnapshots();
+  const snapshotsToDelete = snapshots.slice(keep);
+  await Promise.all(
+    snapshotsToDelete.map(async (snapshot) => {
+      try {
+        await deleteDriveFile(snapshot.fileId);
+      } catch (error) {
+        console.warn("[googleDriveBackup] Failed to prune old snapshot", {
+          fileId: snapshot.fileId,
+          error,
+        });
+      }
+    })
+  );
+}
+
+export async function readBackupManifestFromDrive(
+  fileId: string
+): Promise<BackupArchiveManifest> {
+  const fileUri = await downloadBackupFile(fileId, "google-drive-read");
+  return readBackupArchiveManifest(fileUri);
 }
 
 export async function restoreBackupFromDrive(
-  preferredFileId?: string | null
+  fileId: string
 ): Promise<{
-  metadata: GoogleDriveBackupMetadata;
+  metadata: GoogleDriveBackupSnapshot;
   restoreResult: ImportResult;
 }> {
-  const metadata = await getLatestDriveBackupMetadata(preferredFileId);
+  const snapshots = await listRecentBackupSnapshots(DEFAULT_LIST_LIMIT);
+  const metadata = snapshots.find((snapshot) => snapshot.fileId === fileId);
   if (!metadata) {
-    throw new Error("Nie znaleziono backupu na Google Drive.");
+    throw new Error("Nie znaleziono wybranej kopii na Google Drive.");
+  }
+  if (!metadata.isCompatible) {
+    throw new Error(
+      metadata.compatibilityMessage ??
+        "Ta kopia została utworzona w nieobsługiwanym formacie i nie może zostać przywrócona automatycznie."
+    );
   }
 
-  const targetUri = `${
-    FileSystem.cacheDirectory ?? FileSystem.documentDirectory
-  }google-drive-restore.zip`;
-  if (!targetUri) {
-    throw new Error("Brak katalogu tymczasowego do pobrania backupu.");
-  }
-
-  const accessToken = await getFreshAccessToken();
-  const download = await FileSystem.downloadAsync(
-    `https://www.googleapis.com/drive/v3/files/${metadata.fileId}?alt=media`,
-    targetUri,
-    {
-      headers: {
-        Authorization: `Bearer ${accessToken}`,
-      },
-    }
-  );
-
-  if (download.status < 200 || download.status >= 300) {
-    throw new Error("Nie udało się pobrać backupu z Google Drive.");
-  }
-
-  const payload = await readBackupArchive(download.uri);
-  const restoreResult = await restoreUserData(payload, {
+  const downloadUri = await downloadBackupFile(fileId, "google-drive-restore");
+  const archivePackage = await readBackupArchivePackage(downloadUri);
+  const restoreResult = await restoreUserData(archivePackage.payload, {
     replaceExistingData: true,
   });
   return {
-    metadata,
+    metadata: {
+      ...metadata,
+      manifest: archivePackage.manifest,
+      isCompatible: true,
+      compatibilityMessage: null,
+    },
     restoreResult,
-  };
-}
-
-export async function maybeRunStartupBackup(params: {
-  enabled: boolean;
-  connected: boolean;
-  lastSuccessfulBackupAt: number | null;
-  driveBackupFileId?: string | null;
-}): Promise<StartupBackupResult> {
-  if (!params.enabled) {
-    return {
-      attempted: false,
-      skippedReason: "disabled",
-    };
-  }
-  if (!params.connected) {
-    return {
-      attempted: false,
-      skippedReason: "not_connected",
-    };
-  }
-
-  const now = Date.now();
-  if (
-    params.lastSuccessfulBackupAt &&
-    now - params.lastSuccessfulBackupAt < STARTUP_BACKUP_INTERVAL_MS
-  ) {
-    return {
-      attempted: false,
-      skippedReason: "not_due",
-    };
-  }
-
-  const metadata = await uploadLatestBackupToDrive(params.driveBackupFileId);
-  return {
-    attempted: true,
-    fileId: metadata.fileId,
-    backupAt: now,
   };
 }

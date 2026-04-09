@@ -290,7 +290,8 @@ export default function Flashcards() {
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
   });
-  const correctionLocked = correction != null;
+  const correctionLocked =
+    correction != null && correction.mode !== "intro";
   const selectedItemId = selectedItem?.id ?? null;
   const [displayResultState, setDisplayResultState] = useState<{
     cardId: number | null;

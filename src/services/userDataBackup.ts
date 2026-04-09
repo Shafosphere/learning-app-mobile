@@ -15,8 +15,10 @@ import {
   saveImage,
 } from "@/src/services/imageService";
 import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system/legacy";
 import JSZip from "jszip";
+import { Platform } from "react-native";
 
 export type BuiltinReviewExportRow = {
   wordId: number;
@@ -111,6 +113,27 @@ export type UserDataExport = {
   officialCourseState: OfficialCourseStateExport;
 };
 
+export type BackupContentSummary = {
+  customCoursesCount: number;
+  customFlashcardsCount: number;
+  reviewEntriesCount: number;
+  learningEventsCount: number;
+  officialCoursesCount: number;
+};
+
+export type BackupArchiveManifest = {
+  schemaVersion: 1;
+  appVersion: string;
+  createdAt: string;
+  backupSource: string;
+  contentSummary: BackupContentSummary;
+};
+
+export type BackupArchivePackage = {
+  manifest: BackupArchiveManifest;
+  payload: UserDataExport;
+};
+
 export type ImportResult = {
   success: boolean;
   message?: string;
@@ -138,6 +161,7 @@ export type ImportResult = {
 export type BackupArchiveResult = {
   fileUri: string;
   bytesWritten: number;
+  manifest: BackupArchiveManifest;
   payload: UserDataExport;
 };
 
@@ -580,8 +604,123 @@ function extractExtension(uri?: string | null): string {
   return ext === "jpeg" ? "jpg" : ext;
 }
 
-function buildArchiveName(): string {
-  return "memicard-drive-backup-latest.zip";
+function buildArchiveName(createdAtIso: string): string {
+  const timestamp = createdAtIso.replace(/[:.]/g, "-");
+  return `memicard-backup-${timestamp}.zip`;
+}
+
+function buildBackupContentSummary(payload: UserDataExport): BackupContentSummary {
+  const customFlashcardsCount = payload.customCourses.reduce(
+    (sum, courseExport) => sum + courseExport.flashcards.length,
+    0
+  );
+  const reviewEntriesCount =
+    payload.builtinReviews.length +
+    payload.customCourses.reduce(
+      (sum, courseExport) => sum + courseExport.reviews.length,
+      0
+    ) +
+    payload.officialCourseState.courses.reduce(
+      (sum, courseExport) => sum + courseExport.reviews.length,
+      0
+    );
+  const learningEventsCount =
+    payload.customCourses.reduce(
+      (sum, courseExport) => sum + (courseExport.learningEvents?.length ?? 0),
+      0
+    ) +
+    payload.officialCourseState.courses.reduce(
+      (sum, courseExport) => sum + (courseExport.learningEvents?.length ?? 0),
+      0
+    );
+
+  return {
+    customCoursesCount: payload.customCourses.length,
+    customFlashcardsCount,
+    reviewEntriesCount,
+    learningEventsCount,
+    officialCoursesCount: payload.officialCourseState.courses.length,
+  };
+}
+
+function buildBackupSource(): string {
+  const appVersion =
+    Constants.expoConfig?.version ??
+    Constants.nativeAppVersion ??
+    "unknown-version";
+  return `memicard/${Platform.OS}/${appVersion}`;
+}
+
+function buildBackupManifest(payload: UserDataExport): BackupArchiveManifest {
+  return {
+    schemaVersion: 1,
+    appVersion:
+      Constants.expoConfig?.version ??
+      Constants.nativeAppVersion ??
+      "unknown-version",
+    createdAt: new Date(payload.generatedAt).toISOString(),
+    backupSource: buildBackupSource(),
+    contentSummary: buildBackupContentSummary(payload),
+  };
+}
+
+function normalizeManifest(input: unknown): BackupArchiveManifest {
+  if (typeof input !== "object" || input == null) {
+    throw new Error("Backup ZIP zawiera nieprawidłowy manifest.");
+  }
+
+  const typed = input as Partial<BackupArchiveManifest>;
+  if (typed.schemaVersion !== 1) {
+    throw new Error(
+      "Ta kopia została utworzona w nieobsługiwanym formacie i nie może zostać przywrócona automatycznie."
+    );
+  }
+  if (typeof typed.createdAt !== "string" || Number.isNaN(Date.parse(typed.createdAt))) {
+    throw new Error("Backup ZIP zawiera nieprawidłową datę utworzenia.");
+  }
+  if (typeof typed.appVersion !== "string" || typed.appVersion.trim().length === 0) {
+    throw new Error("Backup ZIP nie zawiera wersji aplikacji.");
+  }
+  if (
+    typeof typed.backupSource !== "string" ||
+    typed.backupSource.trim().length === 0
+  ) {
+    throw new Error("Backup ZIP nie zawiera źródła kopii.");
+  }
+
+  const contentSummary = typed.contentSummary;
+  if (typeof contentSummary !== "object" || contentSummary == null) {
+    throw new Error("Backup ZIP zawiera nieprawidłowe podsumowanie danych.");
+  }
+
+  return {
+    schemaVersion: 1,
+    appVersion: typed.appVersion,
+    createdAt: typed.createdAt,
+    backupSource: typed.backupSource,
+    contentSummary: {
+      customCoursesCount:
+        typeof contentSummary.customCoursesCount === "number"
+          ? contentSummary.customCoursesCount
+          : 0,
+      customFlashcardsCount:
+        typeof contentSummary.customFlashcardsCount === "number"
+          ? contentSummary.customFlashcardsCount
+          : 0,
+      reviewEntriesCount:
+        typeof contentSummary.reviewEntriesCount === "number"
+          ? contentSummary.reviewEntriesCount
+          : 0,
+      learningEventsCount:
+        typeof contentSummary.learningEventsCount === "number"
+          ? contentSummary.learningEventsCount
+          : 0,
+      officialCoursesCount:
+        typeof contentSummary.officialCoursesCount === "number"
+          ? contentSummary.officialCoursesCount
+          : 0,
+    },
+  };
 }
 
 function getWritableDir(): string {
@@ -664,11 +803,13 @@ export async function createBackupZip(): Promise<BackupArchiveResult> {
     ...payload,
     customCourses: await mapCourseImages(payload.customCourses),
   };
+  const manifest = buildBackupManifest(archivePayload);
 
-  zip.file("manifest.json", JSON.stringify(archivePayload, null, 2));
+  zip.file("manifest.json", JSON.stringify(manifest, null, 2));
+  zip.file("data.json", JSON.stringify(archivePayload, null, 2));
 
   const zipBase64 = await zip.generateAsync({ type: "base64" });
-  const fileUri = `${getWritableDir()}${buildArchiveName()}`;
+  const fileUri = `${getWritableDir()}${buildArchiveName(manifest.createdAt)}`;
   await FileSystem.writeAsStringAsync(fileUri, zipBase64, {
     encoding: FileSystem.EncodingType.Base64,
   });
@@ -677,6 +818,7 @@ export async function createBackupZip(): Promise<BackupArchiveResult> {
   return {
     fileUri,
     bytesWritten: info.exists ? info.size : Math.floor((zipBase64.length * 3) / 4),
+    manifest,
     payload,
   };
 }
@@ -769,9 +911,39 @@ function normalizeImportedData(data: unknown): UserDataExport {
   };
 }
 
-export async function readBackupArchive(
+export async function readBackupArchivePackage(
   fileUri: string
-): Promise<UserDataExport> {
+): Promise<BackupArchivePackage> {
+  const zipBase64 = await FileSystem.readAsStringAsync(fileUri, {
+    encoding: FileSystem.EncodingType.Base64,
+  });
+  const zip = await JSZip.loadAsync(zipBase64, { base64: true });
+  const manifestEntry = zip.file("manifest.json");
+  if (!manifestEntry) {
+    throw new Error("Backup ZIP nie zawiera pliku manifest.json.");
+  }
+  const dataEntry = zip.file("data.json");
+  if (!dataEntry) {
+    throw new Error("Backup ZIP nie zawiera pliku data.json.");
+  }
+
+  const manifestText = await manifestEntry.async("text");
+  const manifest = normalizeManifest(JSON.parse(manifestText) as unknown);
+  const dataText = await dataEntry.async("text");
+  const normalized = normalizeImportedData(JSON.parse(dataText) as unknown);
+
+  return {
+    manifest,
+    payload: {
+      ...normalized,
+      customCourses: await materializeZipImages(zip, normalized.customCourses),
+    },
+  };
+}
+
+export async function readBackupArchiveManifest(
+  fileUri: string
+): Promise<BackupArchiveManifest> {
   const zipBase64 = await FileSystem.readAsStringAsync(fileUri, {
     encoding: FileSystem.EncodingType.Base64,
   });
@@ -782,12 +954,14 @@ export async function readBackupArchive(
   }
 
   const manifestText = await manifestEntry.async("text");
-  const normalized = normalizeImportedData(JSON.parse(manifestText) as unknown);
+  return normalizeManifest(JSON.parse(manifestText) as unknown);
+}
 
-  return {
-    ...normalized,
-    customCourses: await materializeZipImages(zip, normalized.customCourses),
-  };
+export async function readBackupArchive(
+  fileUri: string
+): Promise<UserDataExport> {
+  const archivePackage = await readBackupArchivePackage(fileUri);
+  return archivePackage.payload;
 }
 
 async function persistImageIfAvailable(uri?: string | null): Promise<string | null> {

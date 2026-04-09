@@ -3,17 +3,13 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { exportAndShareUserData } from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
+import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
-import React, { useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
-type DriveAction =
-  | "connect"
-  | "backup"
-  | "restore"
-  | "disconnect"
-  | null;
+type DriveAction = "connect" | "backup" | "disconnect" | "refresh" | null;
 
 type ImportStatsLike = {
   coursesCreated?: number;
@@ -33,15 +29,20 @@ const CoursesDataSection: React.FC = () => {
     resetLearningSettings,
     googleDriveConfigured,
     googleDriveConfigurationError,
-    googleDriveBackupEnabled,
     googleDriveConnected,
     lastSuccessfulGoogleDriveBackupAt,
     lastGoogleDriveBackupAttemptAt,
     googleDriveBackupError,
+    googleDriveBackupSnapshots,
+    googleDriveBackupSnapshotsLoading,
+    googleDriveBackupSnapshotsError,
+    googleDriveBackupInProgress,
+    googleDriveRestoreInProgress,
     connectGoogleDriveBackup,
     disconnectGoogleDriveBackup,
     backupUserDataToGoogleDriveNow,
     restoreUserDataFromGoogleDrive,
+    refreshGoogleDriveBackupSnapshots,
     applyImportedAppState,
   } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
@@ -49,8 +50,33 @@ const CoursesDataSection: React.FC = () => {
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
 
+  const formatter = useMemo(
+    () =>
+      new Intl.DateTimeFormat(i18n.language, {
+        dateStyle: "medium",
+        timeStyle: "short",
+      }),
+    [i18n.language]
+  );
+
+  const formatDate = useCallback(
+    (value?: string | number | null): string => {
+      if (!value) {
+        return t("settings.coursesData.googleDrive.status.never");
+      }
+
+      const date = typeof value === "number" ? new Date(value) : new Date(value);
+      if (Number.isNaN(date.getTime())) {
+        return t("settings.coursesData.googleDrive.status.unknownDate");
+      }
+
+      return formatter.format(date);
+    },
+    [formatter, t]
+  );
+
   const buildImportDoneMessage = (stats?: ImportStatsLike) => {
-    const statLines: Array<[string, number]> = [
+    const statLines: [string, number][] = [
       ["customCourses", stats?.coursesCreated ?? 0],
       ["customFlashcards", stats?.flashcardsCreated ?? 0],
       ["boxSnapshots", stats?.boxSnapshotsRestored ?? 0],
@@ -79,6 +105,28 @@ const CoursesDataSection: React.FC = () => {
     )}`;
   };
 
+  const formatSnapshotSummary = (snapshot: GoogleDriveBackupSnapshot): string => {
+    const manifest = snapshot.manifest;
+    if (!manifest) {
+      return snapshot.compatibilityMessage ?? t("settings.coursesData.googleDrive.snapshotSummaryUnavailable");
+    }
+
+    const details = [
+      `${t("settings.coursesData.googleDrive.snapshotLabels.customCourses")}: ${manifest.contentSummary.customCoursesCount}`,
+      `${t("settings.coursesData.googleDrive.snapshotLabels.flashcards")}: ${manifest.contentSummary.customFlashcardsCount}`,
+      `${t("settings.coursesData.googleDrive.snapshotLabels.reviews")}: ${manifest.contentSummary.reviewEntriesCount}`,
+      `${t("settings.coursesData.googleDrive.snapshotLabels.events")}: ${manifest.contentSummary.learningEventsCount}`,
+    ];
+
+    return `${details.join(" • ")}\n${t(
+      "settings.coursesData.googleDrive.snapshotMeta",
+      {
+        appVersion: manifest.appVersion,
+        backupSource: manifest.backupSource,
+      }
+    )}`;
+  };
+
   const driveStatusText = useMemo(() => {
     if (!googleDriveConfigured) {
       return t("settings.coursesData.googleDrive.status.notConfigured", {
@@ -90,36 +138,46 @@ const CoursesDataSection: React.FC = () => {
     if (!googleDriveConnected) {
       return t("settings.coursesData.googleDrive.status.disconnected");
     }
+    if (googleDriveBackupSnapshotsLoading && googleDriveBackupSnapshots.length === 0) {
+      return t("settings.coursesData.googleDrive.status.loadingList");
+    }
+    if (googleDriveBackupSnapshotsError) {
+      return t("settings.coursesData.googleDrive.status.listError", {
+        error: googleDriveBackupSnapshotsError,
+      });
+    }
+    if (googleDriveBackupSnapshots.length === 0) {
+      return t("settings.coursesData.googleDrive.status.noBackups", {
+        lastSuccess: formatDate(lastSuccessfulGoogleDriveBackupAt),
+        lastAttempt: formatDate(lastGoogleDriveBackupAttemptAt),
+        error:
+          googleDriveBackupError ??
+          t("settings.coursesData.googleDrive.status.noErrors"),
+      });
+    }
 
-    const formatter = new Intl.DateTimeFormat(i18n.language, {
-      dateStyle: "medium",
-      timeStyle: "short",
-    });
-
-    const lastSuccess = lastSuccessfulGoogleDriveBackupAt
-      ? formatter.format(new Date(lastSuccessfulGoogleDriveBackupAt))
-      : t("settings.coursesData.googleDrive.status.never");
-    const lastAttempt = lastGoogleDriveBackupAttemptAt
-      ? formatter.format(new Date(lastGoogleDriveBackupAttemptAt))
-      : t("settings.coursesData.googleDrive.status.never");
+    const newestSnapshot = googleDriveBackupSnapshots[0];
+    const backupDate =
+      newestSnapshot.manifest?.createdAt ?? newestSnapshot.modifiedTime ?? null;
 
     return t("settings.coursesData.googleDrive.status.connected", {
-      mode: googleDriveBackupEnabled
-        ? t("settings.coursesData.googleDrive.status.autoEnabled")
-        : t("settings.coursesData.googleDrive.status.autoDisabled"),
-      lastSuccess,
-      lastAttempt,
+      count: googleDriveBackupSnapshots.length,
+      latest: formatDate(backupDate),
+      lastSuccess: formatDate(lastSuccessfulGoogleDriveBackupAt),
+      lastAttempt: formatDate(lastGoogleDriveBackupAttemptAt),
       error:
         googleDriveBackupError ??
         t("settings.coursesData.googleDrive.status.noErrors"),
     });
   }, [
-    googleDriveBackupEnabled,
+    formatDate,
+    googleDriveBackupError,
+    googleDriveBackupSnapshots,
+    googleDriveBackupSnapshotsError,
+    googleDriveBackupSnapshotsLoading,
     googleDriveConfigurationError,
     googleDriveConfigured,
     googleDriveConnected,
-    googleDriveBackupError,
-    i18n.language,
     lastGoogleDriveBackupAttemptAt,
     lastSuccessfulGoogleDriveBackupAt,
     t,
@@ -196,10 +254,23 @@ const CoursesDataSection: React.FC = () => {
     }
   };
 
-  const handleRestoreDrive = async () => {
+  const handleRefreshSnapshots = async () => {
+    setDriveAction("refresh");
+    try {
+      await refreshGoogleDriveBackupSnapshots();
+    } catch (error) {
+      console.error("[CoursesDataSection] Google Drive refresh error", error);
+    } finally {
+      setDriveAction(null);
+    }
+  };
+
+  const handleRestoreSnapshot = (snapshot: GoogleDriveBackupSnapshot) => {
     Alert.alert(
       t("settings.coursesData.googleDrive.restoreConfirm.title"),
-      t("settings.coursesData.googleDrive.restoreConfirm.message"),
+      t("settings.coursesData.googleDrive.restoreConfirm.message", {
+        createdAt: formatDate(snapshot.manifest?.createdAt ?? snapshot.modifiedTime),
+      }),
       [
         {
           text: t("settings.coursesData.resetLearningConfirm.cancel"),
@@ -209,15 +280,13 @@ const CoursesDataSection: React.FC = () => {
           text: t("settings.coursesData.googleDrive.restoreConfirm.confirm"),
           style: "destructive",
           onPress: async () => {
-            setDriveAction("restore");
             try {
-              const result = await restoreUserDataFromGoogleDrive();
+              const result = await restoreUserDataFromGoogleDrive(snapshot.fileId);
               if (result.success) {
                 await applyImportedAppState(result);
-                const stats = result.stats;
                 Alert.alert(
                   t("settings.coursesData.importDone.title"),
-                  buildImportDoneMessage(stats)
+                  buildImportDoneMessage(result.stats)
                 );
               } else if (result.message) {
                 Alert.alert(
@@ -233,8 +302,6 @@ const CoursesDataSection: React.FC = () => {
                   ? error.message
                   : t("settings.coursesData.errors.import")
               );
-            } finally {
-              setDriveAction(null);
             }
           },
         },
@@ -269,10 +336,9 @@ const CoursesDataSection: React.FC = () => {
       const result = await importUserData();
       if (result.success) {
         await applyImportedAppState(result);
-        const stats = result.stats;
         Alert.alert(
           t("settings.coursesData.importDone.title"),
-          buildImportDoneMessage(stats)
+          buildImportDoneMessage(result.stats)
         );
       } else if (result.message !== "Anulowano wybór pliku.") {
         Alert.alert(t("settings.coursesData.errors.importTitle"), result.message);
@@ -320,11 +386,16 @@ const CoursesDataSection: React.FC = () => {
   };
 
   const driveActionButtonText =
-    driveAction === "connect" || driveAction === "backup"
+    driveAction === "connect" || driveAction === "backup" || googleDriveBackupInProgress
       ? t("settings.coursesData.googleDrive.loadingShort")
       : googleDriveConnected
         ? t("settings.coursesData.googleDrive.backupNowButton")
         : t("settings.coursesData.googleDrive.connectButton");
+
+  const refreshButtonText =
+    driveAction === "refresh" || googleDriveBackupSnapshotsLoading
+      ? t("settings.coursesData.googleDrive.loadingShort")
+      : t("settings.coursesData.googleDrive.refreshButton");
 
   return (
     <View style={styles.sectionCard}>
@@ -418,7 +489,11 @@ const CoursesDataSection: React.FC = () => {
             text={driveActionButtonText}
             onPress={googleDriveConnected ? handleBackupNow : handleConnectDrive}
             color="my_green"
-            disabled={driveAction === "connect" || driveAction === "backup"}
+            disabled={
+              driveAction === "connect" ||
+              driveAction === "backup" ||
+              googleDriveBackupInProgress
+            }
             width={130}
             accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
             textStyle={styles.driveButtonText}
@@ -435,17 +510,73 @@ const CoursesDataSection: React.FC = () => {
             </Text>
           </View>
           <MyButton
-            text={
-              driveAction === "restore"
-                ? t("settings.coursesData.googleDrive.restoreLoading")
-                : t("settings.coursesData.googleDrive.restoreButton")
-            }
+            text={refreshButtonText}
             color="my_green"
-            onPress={handleRestoreDrive}
-            disabled={!googleDriveConnected || driveAction === "restore"}
+            onPress={handleRefreshSnapshots}
+            disabled={
+              !googleDriveConnected ||
+              driveAction === "refresh" ||
+              googleDriveBackupSnapshotsLoading
+            }
             width={130}
           />
         </View>
+
+        {googleDriveConnected ? (
+          <View style={styles.snapshotList}>
+            {googleDriveBackupSnapshotsLoading && googleDriveBackupSnapshots.length === 0 ? (
+              <Text style={styles.snapshotEmptyText}>
+                {t("settings.coursesData.googleDrive.snapshotStates.loading")}
+              </Text>
+            ) : null}
+
+            {!googleDriveBackupSnapshotsLoading &&
+            googleDriveBackupSnapshotsError ? (
+              <Text style={styles.snapshotEmptyText}>
+                {t("settings.coursesData.googleDrive.snapshotStates.error", {
+                  error: googleDriveBackupSnapshotsError,
+                })}
+              </Text>
+            ) : null}
+
+            {!googleDriveBackupSnapshotsLoading &&
+            !googleDriveBackupSnapshotsError &&
+            googleDriveBackupSnapshots.length === 0 ? (
+              <Text style={styles.snapshotEmptyText}>
+                {t("settings.coursesData.googleDrive.snapshotStates.empty")}
+              </Text>
+            ) : null}
+
+            {googleDriveBackupSnapshots.map((snapshot) => (
+              <View key={snapshot.fileId} style={styles.snapshotCard}>
+                <View style={styles.snapshotCardText}>
+                  <Text style={styles.snapshotTitle}>
+                    {t("settings.coursesData.googleDrive.snapshotTitle", {
+                      createdAt: formatDate(
+                        snapshot.manifest?.createdAt ?? snapshot.modifiedTime
+                      ),
+                    })}
+                  </Text>
+                  <Text style={styles.snapshotSubtitle}>
+                    {formatSnapshotSummary(snapshot)}
+                  </Text>
+                  {!snapshot.isCompatible && snapshot.compatibilityMessage ? (
+                    <Text style={styles.snapshotWarning}>
+                      {snapshot.compatibilityMessage}
+                    </Text>
+                  ) : null}
+                </View>
+                <MyButton
+                  text={t("settings.coursesData.googleDrive.restoreButton")}
+                  color="my_green"
+                  onPress={() => handleRestoreSnapshot(snapshot)}
+                  disabled={!snapshot.isCompatible || googleDriveRestoreInProgress}
+                  width={118}
+                />
+              </View>
+            ))}
+          </View>
+        ) : null}
 
         <View style={styles.row}>
           <View style={styles.rowTextWrapper}>

@@ -2,7 +2,7 @@
   "expo": {
     "name": "Memicard",
     "slug": "memicard",
-    "version": "0.0.4",
+    "version": "0.0.5",
     "orientation": "portrait",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",
@@ -54,8 +54,7 @@
     ],
     "extra": {
       "googleDriveBackup": {
-        "webClientId": "493135568689-p2rjn4hfgmq9gfe0qa0krt5j0pt3smud.apps.googleusercontent.com",
-        "backupFileName": "memicard-drive-backup-latest.zip"
+        "webClientId": "493135568689-p2rjn4hfgmq9gfe0qa0krt5j0pt3smud.apps.googleusercontent.com"
       }
     },
     "experiments": {

@@ -15,6 +15,7 @@ import {
   useEffect,
   useMemo,
   useRef,
+  useState,
 } from "react";
 import { StyleProp, Text, TextProps, TextStyle } from "react-native";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "../config/appConfig";
@@ -55,13 +56,15 @@ import {
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import type { ImportResult } from "@/src/services/importUserData";
 import {
+  createBackupSnapshot,
   connectGoogleDrive,
   disconnectGoogleDrive,
   getGoogleDriveConfigurationError,
   isGoogleDriveConfigured,
-  maybeRunStartupBackup,
+  listRecentBackupSnapshots,
+  pruneOldBackupSnapshots,
   restoreBackupFromDrive,
-  uploadLatestBackupToDrive,
+  type GoogleDriveBackupSnapshot,
 } from "@/src/services/googleDriveBackup";
 
 // Rozszerzamy typ Text, aby uwzględnić defaultProps
@@ -383,22 +386,24 @@ interface SettingsContextValue {
   refreshLearningReminderSchedule: () => Promise<void>;
   googleDriveConfigured: boolean;
   googleDriveConfigurationError: string | null;
-  googleDriveBackupEnabled: boolean;
-  setGoogleDriveBackupEnabled: (value: boolean) => Promise<void>;
   googleDriveConnected: boolean;
   lastSuccessfulGoogleDriveBackupAt: number | null;
   lastGoogleDriveBackupAttemptAt: number | null;
   googleDriveBackupError: string | null;
-  driveBackupFileId: string | null;
+  googleDriveBackupSnapshots: GoogleDriveBackupSnapshot[];
+  googleDriveBackupSnapshotsLoading: boolean;
+  googleDriveBackupSnapshotsError: string | null;
+  googleDriveBackupInProgress: boolean;
+  googleDriveRestoreInProgress: boolean;
   connectGoogleDriveBackup: () => Promise<{
     connected: boolean;
     cancelled: boolean;
   }>;
   disconnectGoogleDriveBackup: () => Promise<void>;
   backupUserDataToGoogleDriveNow: () => Promise<void>;
-  restoreUserDataFromGoogleDrive: () => Promise<ImportResult>;
+  restoreUserDataFromGoogleDrive: (fileId: string) => Promise<ImportResult>;
+  refreshGoogleDriveBackupSnapshots: () => Promise<void>;
   applyImportedAppState: (result: ImportResult) => Promise<void>;
-  maybeRunGoogleDriveStartupBackup: () => Promise<void>;
   statsFireEffectEnabled: boolean;
   setStatsFireEffectEnabled: (value: boolean) => Promise<void>;
   toggleStatsFireEffectEnabled: () => Promise<void>;
@@ -538,19 +543,21 @@ const defaultValue: SettingsContextValue = {
   refreshLearningReminderSchedule: async () => {},
   googleDriveConfigured: false,
   googleDriveConfigurationError: null,
-  googleDriveBackupEnabled: false,
-  setGoogleDriveBackupEnabled: async () => {},
   googleDriveConnected: false,
   lastSuccessfulGoogleDriveBackupAt: null,
   lastGoogleDriveBackupAttemptAt: null,
   googleDriveBackupError: null,
-  driveBackupFileId: null,
+  googleDriveBackupSnapshots: [],
+  googleDriveBackupSnapshotsLoading: false,
+  googleDriveBackupSnapshotsError: null,
+  googleDriveBackupInProgress: false,
+  googleDriveRestoreInProgress: false,
   connectGoogleDriveBackup: async () => ({ connected: false, cancelled: true }),
   disconnectGoogleDriveBackup: async () => {},
   backupUserDataToGoogleDriveNow: async () => {},
   restoreUserDataFromGoogleDrive: async () => ({ success: false }),
+  refreshGoogleDriveBackupSnapshots: async () => {},
   applyImportedAppState: async () => {},
-  maybeRunGoogleDriveStartupBackup: async () => {},
   statsFireEffectEnabled: false,
   setStatsFireEffectEnabled: async () => {},
   toggleStatsFireEffectEnabled: async () => {},
@@ -762,8 +769,6 @@ export const SettingsProvider: React.FC<{
       "learningReminder.permissionState",
       "undetermined"
     );
-  const [googleDriveBackupEnabled, setGoogleDriveBackupEnabledState] =
-    usePersistedState<boolean>("googleDriveBackup.enabled", false);
   const [googleDriveConnected, setGoogleDriveConnectedState] =
     usePersistedState<boolean>("googleDriveBackup.connected", false);
   const [
@@ -777,11 +782,20 @@ export const SettingsProvider: React.FC<{
     usePersistedState<number | null>("googleDriveBackup.lastBackupAttemptAt", null);
   const [googleDriveBackupError, setGoogleDriveBackupError] =
     usePersistedState<string | null>("googleDriveBackup.lastBackupError", null);
-  const [driveBackupFileId, setDriveBackupFileId] = usePersistedState<
-    string | null
-  >("googleDriveBackup.fileId", null);
   const learningRemindersEnabledRef = useRef(learningRemindersEnabledState);
-  const googleDriveStartupBackupInFlightRef = useRef(false);
+  const googleDriveBackupInFlightRef = useRef(false);
+  const googleDriveRestoreInFlightRef = useRef(false);
+  const [googleDriveBackupSnapshots, setGoogleDriveBackupSnapshots] = useState<
+    GoogleDriveBackupSnapshot[]
+  >([]);
+  const [googleDriveBackupSnapshotsLoading, setGoogleDriveBackupSnapshotsLoading] =
+    useState(false);
+  const [googleDriveBackupSnapshotsError, setGoogleDriveBackupSnapshotsError] =
+    useState<string | null>(null);
+  const [googleDriveBackupInProgress, setGoogleDriveBackupInProgress] =
+    useState(false);
+  const [googleDriveRestoreInProgress, setGoogleDriveRestoreInProgress] =
+    useState(false);
   const [statsFireEffectEnabledState, _setStatsFireEffectEnabled] =
     usePersistedState<boolean>("stats.fireEffectEnabled", false);
   const [statsBookshelfEnabledState, _setStatsBookshelfEnabled] =
@@ -2108,15 +2122,30 @@ export const SettingsProvider: React.FC<{
     await setLearningRemindersEnabled(!learningRemindersEnabledState);
   }, [learningRemindersEnabledState, setLearningRemindersEnabled]);
 
-  const setGoogleDriveBackupEnabled = useCallback(
-    async (value: boolean) => {
-      await setGoogleDriveBackupEnabledState(value);
-      if (!value) {
-        await setGoogleDriveBackupError(null);
-      }
-    },
-    [setGoogleDriveBackupEnabledState, setGoogleDriveBackupError]
-  );
+  const refreshGoogleDriveBackupSnapshots = useCallback(async () => {
+    if (!googleDriveConfigured || !googleDriveConnected) {
+      setGoogleDriveBackupSnapshots([]);
+      setGoogleDriveBackupSnapshotsError(null);
+      setGoogleDriveBackupSnapshotsLoading(false);
+      return;
+    }
+
+    setGoogleDriveBackupSnapshotsLoading(true);
+    setGoogleDriveBackupSnapshotsError(null);
+    try {
+      const snapshots = await listRecentBackupSnapshots(3);
+      setGoogleDriveBackupSnapshots(snapshots);
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : "Nie udało się pobrać listy backupów z Google Drive.";
+      setGoogleDriveBackupSnapshots([]);
+      setGoogleDriveBackupSnapshotsError(message);
+    } finally {
+      setGoogleDriveBackupSnapshotsLoading(false);
+    }
+  }, [googleDriveConfigured, googleDriveConnected]);
 
   const connectGoogleDriveBackup = useCallback(async () => {
     if (!googleDriveConfigured) {
@@ -2130,15 +2159,28 @@ export const SettingsProvider: React.FC<{
     if (result.connected) {
       await Promise.all([
         setGoogleDriveConnectedState(true),
-        setGoogleDriveBackupEnabledState(true),
         setGoogleDriveBackupError(null),
       ]);
+      setGoogleDriveBackupSnapshotsLoading(true);
+      try {
+        const snapshots = await listRecentBackupSnapshots(3);
+        setGoogleDriveBackupSnapshots(snapshots);
+        setGoogleDriveBackupSnapshotsError(null);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+          : "Nie udało się pobrać listy backupów z Google Drive.";
+        setGoogleDriveBackupSnapshots([]);
+        setGoogleDriveBackupSnapshotsError(message);
+      } finally {
+        setGoogleDriveBackupSnapshotsLoading(false);
+      }
     }
     return result;
   }, [
     googleDriveConfigured,
     googleDriveConfigurationError,
-    setGoogleDriveBackupEnabledState,
     setGoogleDriveBackupError,
     setGoogleDriveConnectedState,
   ]);
@@ -2147,13 +2189,12 @@ export const SettingsProvider: React.FC<{
     await disconnectGoogleDrive();
     await Promise.all([
       setGoogleDriveConnectedState(false),
-      setGoogleDriveBackupEnabledState(false),
       setGoogleDriveBackupError(null),
-      setDriveBackupFileId(null),
     ]);
+    setGoogleDriveBackupSnapshots([]);
+    setGoogleDriveBackupSnapshotsError(null);
+    setGoogleDriveBackupSnapshotsLoading(false);
   }, [
-    setDriveBackupFileId,
-    setGoogleDriveBackupEnabledState,
     setGoogleDriveBackupError,
     setGoogleDriveConnectedState,
   ]);
@@ -2193,6 +2234,11 @@ export const SettingsProvider: React.FC<{
           "Google Drive backup nie jest skonfigurowany."
       );
     }
+    if (googleDriveBackupInFlightRef.current) {
+      return;
+    }
+    googleDriveBackupInFlightRef.current = true;
+    setGoogleDriveBackupInProgress(true);
 
     const now = Date.now();
     await Promise.all([
@@ -2201,13 +2247,33 @@ export const SettingsProvider: React.FC<{
     ]);
 
     try {
-      const metadata = await uploadLatestBackupToDrive(driveBackupFileId);
+      await createBackupSnapshot();
       await Promise.all([
         setGoogleDriveConnectedState(true),
-        setDriveBackupFileId(metadata.fileId),
         setLastSuccessfulGoogleDriveBackupAt(now),
         setGoogleDriveBackupError(null),
       ]);
+
+      try {
+        const snapshots = await listRecentBackupSnapshots(3);
+        setGoogleDriveBackupSnapshots(snapshots);
+        setGoogleDriveBackupSnapshotsError(null);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Nie udało się pobrać listy backupów z Google Drive.";
+        setGoogleDriveBackupSnapshotsError(message);
+      }
+
+      try {
+        await pruneOldBackupSnapshots(3);
+        const snapshots = await listRecentBackupSnapshots(3);
+        setGoogleDriveBackupSnapshots(snapshots);
+        setGoogleDriveBackupSnapshotsError(null);
+      } catch (error) {
+        console.warn("[SettingsContext] Google Drive prune failed", error);
+      }
     } catch (error) {
       const message =
         error instanceof Error
@@ -2215,81 +2281,48 @@ export const SettingsProvider: React.FC<{
           : "Nie udało się wysłać backupu na Google Drive.";
       await setGoogleDriveBackupError(message);
       throw error;
+    } finally {
+      googleDriveBackupInFlightRef.current = false;
+      setGoogleDriveBackupInProgress(false);
     }
   }, [
-    driveBackupFileId,
     googleDriveConfigured,
     googleDriveConfigurationError,
-    setDriveBackupFileId,
     setGoogleDriveBackupError,
     setGoogleDriveConnectedState,
     setLastGoogleDriveBackupAttemptAt,
     setLastSuccessfulGoogleDriveBackupAt,
   ]);
 
-  const restoreUserDataFromGoogleDrive = useCallback(async () => {
+  const restoreUserDataFromGoogleDrive = useCallback(async (fileId: string) => {
     if (!googleDriveConfigured) {
       throw new Error(
         googleDriveConfigurationError ??
           "Google Drive backup nie jest skonfigurowany."
       );
     }
-
-    const result = await restoreBackupFromDrive(driveBackupFileId);
-    await Promise.all([
-      setDriveBackupFileId(result.metadata.fileId),
-      setGoogleDriveConnectedState(true),
-      setGoogleDriveBackupError(null),
-    ]);
-    return result.restoreResult;
-  }, [
-    driveBackupFileId,
-    googleDriveConfigured,
-    googleDriveConfigurationError,
-    setDriveBackupFileId,
-    setGoogleDriveBackupError,
-    setGoogleDriveConnectedState,
-  ]);
-
-  const maybeRunGoogleDriveStartupBackup = useCallback(async () => {
-    if (googleDriveStartupBackupInFlightRef.current) {
-      return;
+    if (googleDriveRestoreInFlightRef.current) {
+      return { success: false };
     }
-    googleDriveStartupBackupInFlightRef.current = true;
+    googleDriveRestoreInFlightRef.current = true;
+    setGoogleDriveRestoreInProgress(true);
 
     try {
-      const result = await maybeRunStartupBackup({
-        enabled: googleDriveBackupEnabled,
-        connected: googleDriveConnected,
-        lastSuccessfulBackupAt: lastSuccessfulGoogleDriveBackupAt,
-        driveBackupFileId,
-      });
-      if (result.attempted) {
-        await Promise.all([
-          setDriveBackupFileId(result.fileId ?? null),
-          setLastGoogleDriveBackupAttemptAt(result.backupAt ?? Date.now()),
-          setLastSuccessfulGoogleDriveBackupAt(result.backupAt ?? Date.now()),
-          setGoogleDriveBackupError(null),
-        ]);
-      }
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Nie udało się wykonać automatycznego backupu Google Drive.";
-      await setGoogleDriveBackupError(message);
+      const result = await restoreBackupFromDrive(fileId);
+      await Promise.all([
+        setGoogleDriveConnectedState(true),
+        setGoogleDriveBackupError(null),
+      ]);
+      return result.restoreResult;
     } finally {
-      googleDriveStartupBackupInFlightRef.current = false;
+      googleDriveRestoreInFlightRef.current = false;
+      setGoogleDriveRestoreInProgress(false);
     }
   }, [
-    driveBackupFileId,
-    googleDriveBackupEnabled,
-    googleDriveConnected,
-    lastSuccessfulGoogleDriveBackupAt,
-    setDriveBackupFileId,
+    googleDriveConfigured,
+    googleDriveConfigurationError,
     setGoogleDriveBackupError,
-    setLastGoogleDriveBackupAttemptAt,
-    setLastSuccessfulGoogleDriveBackupAt,
+    setGoogleDriveConnectedState,
   ]);
 
   const setStatsFireEffectEnabled = async (value: boolean) => {
@@ -2511,19 +2544,21 @@ export const SettingsProvider: React.FC<{
         refreshLearningReminderSchedule,
         googleDriveConfigured,
         googleDriveConfigurationError,
-        googleDriveBackupEnabled,
-        setGoogleDriveBackupEnabled,
         googleDriveConnected,
         lastSuccessfulGoogleDriveBackupAt,
         lastGoogleDriveBackupAttemptAt,
         googleDriveBackupError,
-        driveBackupFileId,
+        googleDriveBackupSnapshots,
+        googleDriveBackupSnapshotsLoading,
+        googleDriveBackupSnapshotsError,
+        googleDriveBackupInProgress,
+        googleDriveRestoreInProgress,
         connectGoogleDriveBackup,
         disconnectGoogleDriveBackup,
         backupUserDataToGoogleDriveNow,
         restoreUserDataFromGoogleDrive,
+        refreshGoogleDriveBackupSnapshots,
         applyImportedAppState,
-        maybeRunGoogleDriveStartupBackup,
         statsFireEffectEnabled: statsFireEffectEnabledState,
         setStatsFireEffectEnabled,
         toggleStatsFireEffectEnabled,

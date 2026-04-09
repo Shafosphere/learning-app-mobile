@@ -163,49 +163,65 @@
         "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
       },
       "googleDrive": {
-        "sectionTitle": "Google Drive auto-backup",
+        "sectionTitle": "Google Drive backup",
         "actionButton": "Akcja Google Drive",
         "loadingShort": "Trwa",
         "connectTitle": "Połącz Google Drive",
-        "connectSubtitle": "Połącz konto Google, żeby włączyć backup ZIP i codzienny auto-backup przy starcie aplikacji.",
+        "connectSubtitle": "Połącz konto Google, aby zapisywać kopie ZIP w prywatnym folderze aplikacji na Google Drive.",
         "connectButton": "Połącz",
         "manualBackupTitle": "Wyślij backup teraz",
-        "manualBackupSubtitle": "Ręcznie zapisz najnowszą kopię ZIP w prywatnym folderze aplikacji na Google Drive.",
+        "manualBackupSubtitle": "Utwórz nowy snapshot ZIP i zachowaj do 3 ostatnich kopii w prywatnym folderze aplikacji na Google Drive.",
         "backupNowButton": "Backup teraz",
+        "refreshButton": "Odśwież listę",
         "status": {
           "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w buildzie aplikacji. Powód: {{reason}}",
           "notConfiguredFallback": "brak konfiguracji OAuth",
-          "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja będzie mogła raz dziennie wysłać backup ZIP przy starcie.",
-          "connected": "Połączono. Auto-backup: {{mode}}.\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
-          "autoEnabled": "włączony",
-          "autoDisabled": "wyłączony",
+          "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja odczyta listę kopii i pozwoli tworzyć nowe snapshoty ręcznie.",
+          "loadingList": "Połączono z Google Drive. Trwa pobieranie listy kopii...",
+          "noBackups": "Połączono, ale nie znaleziono jeszcze kopii.\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
+          "connected": "Połączono. Dostępne kopie: {{count}}.\nNajnowsza kopia: {{latest}}\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
+          "listError": "Połączono z Google Drive, ale nie udało się pobrać listy kopii: {{error}}",
           "never": "nigdy",
-          "noErrors": "brak"
+          "noErrors": "brak",
+          "unknownDate": "nieznana data"
         },
         "connectDone": {
           "title": "Google Drive połączony",
-          "message": "Połączenie z Google Drive zostało zapisane. Możesz teraz uruchomić backup ręcznie albo zostawić auto-backup raz dziennie przy starcie."
+          "message": "Połączenie z Google Drive zostało zapisane. Możesz teraz odświeżyć listę kopii albo utworzyć nowy backup ręcznie."
         },
         "backupDone": {
           "title": "Backup wysłany",
-          "message": "Najnowsza kopia ZIP została zapisana w prywatnym folderze aplikacji na Google Drive."
+          "message": "Nowa kopia ZIP została zapisana w prywatnym folderze aplikacji na Google Drive."
         },
-        "restoreTitle": "Przywróć z Google Drive",
-        "restoreSubtitle": "Pobierz najnowszy backup ZIP z Google Drive i zastąp nim lokalne dane użytkownika.",
+        "restoreTitle": "Lista kopii do przywrócenia",
+        "restoreSubtitle": "Pobierz listę 3 ostatnich kopii z Google Drive i wybierz konkretny snapshot do przywrócenia.",
         "restoreButton": "Przywróć",
-        "restoreLoading": "Przywracam...",
         "restoreConfirm": {
           "title": "Przywrócić dane z Google Drive?",
-          "message": "To zastąpi lokalne dane użytkownika najnowszą kopią z Google Drive, łącznie z kursami prywatnymi, postępem i zdjęciami.",
+          "message": "To zastąpi lokalne dane użytkownika kopią z {{createdAt}}, łącznie z kursami prywatnymi, postępem i zdjęciami.",
           "confirm": "Przywróć"
         },
+        "snapshotTitle": "Backup z {{createdAt}}",
+        "snapshotMeta": "Wersja aplikacji: {{appVersion}} • Źródło: {{backupSource}}",
+        "snapshotSummaryUnavailable": "Nie udało się odczytać szczegółów tej kopii.",
+        "snapshotLabels": {
+          "customCourses": "Kursy",
+          "flashcards": "Fiszki",
+          "reviews": "Powtórki",
+          "events": "Historia"
+        },
+        "snapshotStates": {
+          "loading": "Pobieram listę kopii z Google Drive...",
+          "empty": "Brak kopii do przywrócenia. Utwórz pierwszy backup ręcznie.",
+          "error": "Nie udało się pobrać listy kopii: {{error}}"
+        },
         "disconnectTitle": "Rozłącz Google Drive",
-        "disconnectSubtitle": "Wyłącz auto-backup i usuń lokalnie zapisane połączenie z kontem Google.",
+        "disconnectSubtitle": "Usuń lokalnie zapisane połączenie z kontem Google i wyczyść listę kopii w aplikacji.",
         "disconnectButton": "Rozłącz",
         "disconnectLoading": "Rozłączam...",
         "disconnectDone": {
           "title": "Google Drive rozłączony",
-          "message": "Auto-backup został wyłączony, a lokalne połączenie z Google Drive usunięte."
+          "message": "Lokalne połączenie z Google Drive zostało usunięte."
         }
       },
       "exportDrive": {

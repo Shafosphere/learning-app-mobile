@@ -149,6 +149,46 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textTransform: "uppercase",
     textAlign: "center",
   },
+  snapshotList: {
+    rowGap: 8,
+    marginTop: 4,
+  },
+  snapshotCard: {
+    backgroundColor: colors.background,
+    borderRadius: 12,
+    paddingHorizontal: 12,
+    paddingVertical: 12,
+    flexDirection: "row",
+    alignItems: "center",
+    columnGap: 12,
+  },
+  snapshotCardText: {
+    flex: 1,
+  },
+  snapshotTitle: {
+    fontSize: 14,
+    fontWeight: "800",
+    color: colors.paragraph,
+  },
+  snapshotSubtitle: {
+    fontSize: 12,
+    color: colors.paragraph,
+    opacity: 0.8,
+    marginTop: 4,
+  },
+  snapshotWarning: {
+    fontSize: 12,
+    color: colors.my_yellow,
+    marginTop: 6,
+    fontWeight: "700",
+  },
+  snapshotEmptyText: {
+    fontSize: 13,
+    color: colors.paragraph,
+    opacity: 0.78,
+    marginTop: 2,
+    marginBottom: 2,
+  },
   sliderSection: {
     paddingVertical: 6,
   },

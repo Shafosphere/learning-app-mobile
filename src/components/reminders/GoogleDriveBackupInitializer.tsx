@@ -2,23 +2,15 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useEffect } from "react";
 
 export default function GoogleDriveBackupInitializer() {
-  const {
-    googleDriveBackupEnabled,
-    googleDriveConnected,
-    maybeRunGoogleDriveStartupBackup,
-  } = useSettings();
+  const { googleDriveConnected, refreshGoogleDriveBackupSnapshots } = useSettings();
 
   useEffect(() => {
-    if (!googleDriveBackupEnabled || !googleDriveConnected) {
+    if (!googleDriveConnected) {
       return;
     }
 
-    void maybeRunGoogleDriveStartupBackup();
-  }, [
-    googleDriveBackupEnabled,
-    googleDriveConnected,
-    maybeRunGoogleDriveStartupBackup,
-  ]);
+    void refreshGoogleDriveBackupSnapshots();
+  }, [googleDriveConnected, refreshGoogleDriveBackupSnapshots]);
 
   return null;
 }

@@ -163,49 +163,65 @@
         "shareUnsupported": "System sharing is unavailable on this platform. Copy the file manually."
       },
       "googleDrive": {
-        "sectionTitle": "Google Drive auto-backup",
+        "sectionTitle": "Google Drive backup",
         "actionButton": "Google Drive action",
         "loadingShort": "Busy",
         "connectTitle": "Connect Google Drive",
-        "connectSubtitle": "Connect your Google account to enable ZIP backup and once-per-day auto-backup on app startup.",
+        "connectSubtitle": "Connect your Google account to store ZIP backups in the app's private Google Drive folder.",
         "connectButton": "Connect",
         "manualBackupTitle": "Upload backup now",
-        "manualBackupSubtitle": "Manually save the latest ZIP copy to the app's private folder on Google Drive.",
+        "manualBackupSubtitle": "Create a new ZIP snapshot and keep up to 3 latest copies in the app's private Google Drive folder.",
         "backupNowButton": "Backup now",
+        "refreshButton": "Refresh list",
         "status": {
           "notConfigured": "This feature is not configured in the current app build yet. Reason: {{reason}}",
           "notConfiguredFallback": "missing OAuth configuration",
-          "disconnected": "Google Drive is not connected. After connecting, the app will be able to upload a daily ZIP backup on startup.",
-          "connected": "Connected. Auto-backup: {{mode}}.\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
-          "autoEnabled": "enabled",
-          "autoDisabled": "disabled",
+          "disconnected": "Google Drive is not connected. After connecting, the app can read the backup list and create new snapshots manually.",
+          "loadingList": "Connected to Google Drive. Loading backup list...",
+          "noBackups": "Connected, but no backups were found yet.\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
+          "connected": "Connected. Available backups: {{count}}.\nLatest backup: {{latest}}\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
+          "listError": "Connected to Google Drive, but the backup list could not be loaded: {{error}}",
           "never": "never",
-          "noErrors": "none"
+          "noErrors": "none",
+          "unknownDate": "unknown date"
         },
         "connectDone": {
           "title": "Google Drive connected",
-          "message": "Google Drive connection has been saved. You can run a manual backup now or leave the once-per-day startup auto-backup enabled."
+          "message": "Google Drive connection has been saved. You can now refresh the backup list or create a manual backup."
         },
         "backupDone": {
           "title": "Backup uploaded",
-          "message": "The latest ZIP backup was saved to the app's private folder on Google Drive."
+          "message": "A new ZIP backup was saved to the app's private Google Drive folder."
         },
-        "restoreTitle": "Restore from Google Drive",
-        "restoreSubtitle": "Download the latest ZIP backup from Google Drive and replace local user data with it.",
+        "restoreTitle": "Backups to restore",
+        "restoreSubtitle": "Load the 3 latest backups from Google Drive and choose the exact snapshot to restore.",
         "restoreButton": "Restore",
-        "restoreLoading": "Restoring...",
         "restoreConfirm": {
           "title": "Restore data from Google Drive?",
-          "message": "This will replace local user data with the latest copy from Google Drive, including private courses, progress, and images.",
+          "message": "This will replace local user data with the copy from {{createdAt}}, including private courses, progress, and images.",
           "confirm": "Restore"
         },
+        "snapshotTitle": "Backup from {{createdAt}}",
+        "snapshotMeta": "App version: {{appVersion}} • Source: {{backupSource}}",
+        "snapshotSummaryUnavailable": "Could not read the details of this backup.",
+        "snapshotLabels": {
+          "customCourses": "Courses",
+          "flashcards": "Flashcards",
+          "reviews": "Reviews",
+          "events": "History"
+        },
+        "snapshotStates": {
+          "loading": "Loading backups from Google Drive...",
+          "empty": "No backups to restore yet. Create your first manual backup.",
+          "error": "Could not load the backup list: {{error}}"
+        },
         "disconnectTitle": "Disconnect Google Drive",
-        "disconnectSubtitle": "Turn off auto-backup and remove the locally stored Google account connection.",
+        "disconnectSubtitle": "Remove the locally stored Google account connection and clear the backup list in the app.",
         "disconnectButton": "Disconnect",
         "disconnectLoading": "Disconnecting...",
         "disconnectDone": {
           "title": "Google Drive disconnected",
-          "message": "Auto-backup has been disabled and the local Google Drive connection removed."
+          "message": "The local Google Drive connection has been removed."
         }
       },
       "exportDrive": {

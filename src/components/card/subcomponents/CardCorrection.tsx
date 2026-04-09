@@ -244,7 +244,7 @@ export function CardCorrection({
       ) : (
         <View style={styles.promptRow}>
           {promptContent}
-          {canToggleTranslations ? (
+          {canToggleTranslations && !isIntroMode ? (
             <Pressable
               style={styles.cardIconWrapper}
               onPress={next}
