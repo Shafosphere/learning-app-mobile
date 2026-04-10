@@ -18,6 +18,7 @@ import {
 import { useTranslation } from "react-i18next";
 import type { UiLanguage } from "@/src/i18n";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 
 const classicPreview = require("@/assets/images/settings/layout-classic.png");
 const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
@@ -194,33 +195,235 @@ const AppearanceSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>{t("settings.appearance.section")}</Text>
+      <Text style={styles.appearanceSectionHeader}>
+        {t("settings.appearance.section")}
+      </Text>
 
-      <View style={[styles.row, { alignItems: "flex-start" }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>{t("settings.uiLanguage.title")}</Text>
-          {/* <Text style={styles.rowSubtitle}>
-            {t("settings.uiLanguage.subtitle")}
-          </Text> */}
+      <Text style={styles.appearanceGroupLabel}>JĘZYK</Text>
+      <View style={styles.appearanceGroupCard}>
+        <View style={styles.appearanceBlockHeader}>
+          <Text style={styles.appearanceBlockTitle}>
+            {t("settings.uiLanguage.title")}
+          </Text>
+        </View>
+        <View style={styles.languageSegment}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setLanguageMenuOpen(true)}
+            style={styles.languageSelectTrigger}
+          >
+            <Text style={styles.languageSelectTriggerText}>
+              {
+                t(
+                  uiLanguageOptions.find((option) => option.key === uiLanguage)
+                    ?.labelKey ?? "settings.uiLanguage.english"
+                )
+              }
+            </Text>
+            <Text style={styles.languageSelectChevron}>▾</Text>
+          </TouchableOpacity>
         </View>
       </View>
 
-      <View style={styles.languageSegment}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          onPress={() => setLanguageMenuOpen(true)}
-          style={styles.languageSelectTrigger}
-        >
-          <Text style={styles.languageSelectTriggerText}>
-            {
-              t(
-                uiLanguageOptions.find((option) => option.key === uiLanguage)
-                  ?.labelKey ?? "settings.uiLanguage.english"
-              )
-            }
+      <Text style={styles.appearanceGroupLabel}>INTERFEJS</Text>
+      <View style={styles.appearanceGroupCard}>
+        <View style={styles.appearanceGroupRows}>
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.appearance.darkTheme.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.appearance.darkTheme.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={theme === "dark"}
+                onPress={() => void handleThemeToggle(theme !== "dark")}
+                accessibilityLabel={t("settings.appearance.darkTheme.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.appearance.vibrations.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.appearance.vibrations.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={feedbackEnabled}
+                onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
+                accessibilityLabel={t("settings.appearance.vibrations.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.appearance.disableReactions.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.appearance.disableReactions.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={!quotesEnabled}
+                onPress={() => void handleQuotesToggle(quotesEnabled)}
+                accessibilityLabel={t("settings.appearance.disableReactions.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.appearance.boxFaces.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.appearance.boxFaces.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={showBoxFaces}
+                onPress={() => void handleFacesToggle(!showBoxFaces)}
+                accessibilityLabel={t("settings.appearance.boxFaces.title")}
+              />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <Text style={styles.appearanceGroupLabel}>DŹWIĘK</Text>
+      <View style={styles.appearancePlainBlock}>
+        <View style={styles.appearanceBlockHeader}>
+          <Text style={styles.appearanceBlockDescription}>
+            {preventWidowsPl(t("settings.appearance.effectsVolume.subtitle"))}
           </Text>
-          <Text style={styles.languageSelectChevron}>▾</Text>
-        </TouchableOpacity>
+        </View>
+        <View style={styles.sliderSection}>
+          <View style={styles.sliderRow}>
+            <TrackSlider
+              testID="effects-volume-slider"
+              value={volumePreview}
+              onValueChange={handleVolumePreviewChange}
+              onSlidingComplete={handleVolumeCommit}
+              minimumValue={0}
+              maximumValue={1}
+              step={0.01}
+              mode="solid"
+              trackHeight={12}
+              thumbSize={28}
+              thumbBorderWidth={2}
+              trackColor={colors.border}
+              fillColor={colors.my_green}
+              thumbColor={colors.background}
+              thumbBorderColor={colors.my_green}
+              style={styles.sliderWrapper}
+            />
+
+            <Text style={styles.sliderValue}>
+              {Math.round(volumePreview * 100)}%
+            </Text>
+          </View>
+        </View>
+      </View>
+
+      <Text style={styles.appearanceGroupLabel}>UKŁAD</Text>
+
+      <View style={styles.appearanceChoiceCard}>
+        <View style={styles.layoutOptionsRow}>
+          {layoutOptions.map((option) => {
+            const isActive = boxesLayout === option.key;
+            return (
+              <TouchableOpacity
+                key={option.key}
+                activeOpacity={0.7}
+                onPress={() => handleLayoutSelect(option.key)}
+                style={[
+                  styles.layoutOption,
+                  isActive && styles.layoutOptionActive,
+                ]}
+              >
+                <View style={styles.layoutPreviewWrapper}>
+                  <Image
+                    source={option.preview}
+                    style={[styles.layoutPreview, styles.layoutPreviewImage]}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.layoutLabel,
+                    isActive && styles.layoutLabelActive,
+                  ]}
+                >
+                  {t(option.labelKey)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <View style={styles.appearanceBlockHeader}>
+          <Text style={styles.appearanceBlockDescription}>
+            {preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
+          </Text>
+        </View>
+      </View>
+
+      <View style={styles.appearanceChoiceCard}>
+        <View style={styles.actionOptionsRow}>
+          {actionButtonsOptions.map((option) => {
+            const isActive = actionButtonsPosition === option.key;
+            return (
+              <TouchableOpacity
+                key={option.key}
+                activeOpacity={0.8}
+                onPress={() => handleActionButtonsPosition(option.key)}
+                style={[
+                  styles.layoutOption,
+                  styles.actionOption,
+                  isActive && styles.layoutOptionActive,
+                ]}
+              >
+                <View style={styles.layoutPreviewWrapper}>
+                  <Image
+                    source={option.preview}
+                    style={[styles.layoutPreview, styles.actionPreviewImage]}
+                    resizeMode="contain"
+                  />
+                </View>
+                <Text
+                  style={[
+                    styles.layoutLabel,
+                    isActive && styles.layoutLabelActive,
+                  ]}
+                >
+                  {t(option.labelKey)}
+                </Text>
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+        <View style={styles.appearanceBlockHeader}>
+          <Text style={styles.appearanceBlockDescription}>
+            {preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
+          </Text>
+        </View>
       </View>
 
       <Modal
@@ -261,204 +464,6 @@ const AppearanceSection: React.FC = () => {
           </View>
         </TouchableOpacity>
       </Modal>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.appearanceRowTitle}>
-            {t("settings.appearance.darkTheme.title")}
-          </Text>
-          <Text style={styles.appearanceRowSubtitle}>
-            {t("settings.appearance.darkTheme.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={theme === "dark"}
-            onPress={() => void handleThemeToggle(theme !== "dark")}
-            accessibilityLabel={t("settings.appearance.darkTheme.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.appearanceRowTitle}>
-            {t("settings.appearance.vibrations.title")}
-          </Text>
-          <Text style={styles.appearanceRowSubtitle}>
-            {t("settings.appearance.vibrations.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={feedbackEnabled}
-            onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
-            accessibilityLabel={t("settings.appearance.vibrations.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.appearanceRowTitle}>
-            {t("settings.appearance.disableReactions.title")}
-          </Text>
-          <Text style={styles.appearanceRowSubtitle}>
-            {t("settings.appearance.disableReactions.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={!quotesEnabled}
-            onPress={() => void handleQuotesToggle(quotesEnabled)}
-            accessibilityLabel={t("settings.appearance.disableReactions.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.sliderSection}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.appearanceRowTitle}>
-            {t("settings.appearance.effectsVolume.title")}
-          </Text>
-          <Text style={styles.appearanceRowSubtitle}>
-            {t("settings.appearance.effectsVolume.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.sliderRow}>
-          <TrackSlider
-            testID="effects-volume-slider"
-            value={volumePreview}
-            onValueChange={handleVolumePreviewChange}
-            onSlidingComplete={handleVolumeCommit}
-            minimumValue={0}
-            maximumValue={1}
-            step={0.01}
-            mode="solid"
-            trackHeight={12}
-            thumbSize={28}
-            thumbBorderWidth={2}
-            trackColor={colors.border}
-            fillColor={colors.my_green}
-            thumbColor={colors.background}
-            thumbBorderColor={colors.my_green}
-            style={styles.sliderWrapper}
-          />
-
-          <Text style={styles.sliderValue}>
-            {Math.round(volumePreview * 100)}%
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.appearanceRowTitle}>
-            {t("settings.appearance.boxFaces.title")}
-          </Text>
-          <Text style={styles.appearanceRowSubtitle}>
-            {t("settings.appearance.boxFaces.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={showBoxFaces}
-            onPress={() => void handleFacesToggle(!showBoxFaces)}
-            accessibilityLabel={t("settings.appearance.boxFaces.title")}
-          />
-        </View>
-      </View>
-
-      <View style={[styles.row, { alignItems: "flex-start" }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.appearance.layoutSelector.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.appearance.layoutSelector.subtitle")}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.layoutOptionsRow}>
-        {layoutOptions.map((option) => {
-          const isActive = boxesLayout === option.key;
-          return (
-            <TouchableOpacity
-              key={option.key}
-              activeOpacity={0.7}
-              onPress={() => handleLayoutSelect(option.key)}
-              style={[
-                styles.layoutOption,
-                isActive && styles.layoutOptionActive,
-              ]}
-            >
-              <View style={styles.layoutPreviewWrapper}>
-                <Image
-                  source={option.preview}
-                  style={styles.layoutPreview}
-                  resizeMode="contain"
-                />
-              </View>
-              <Text
-                style={[
-                  styles.layoutLabel,
-                  isActive && styles.layoutLabelActive,
-                ]}
-              >
-                {t(option.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
-      <View style={[styles.row, { alignItems: "flex-start", marginTop: 6 }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.appearance.actionsSelector.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.appearance.actionsSelector.subtitle")}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.actionOptionsRow}>
-        {actionButtonsOptions.map((option) => {
-          const isActive = actionButtonsPosition === option.key;
-          return (
-            <TouchableOpacity
-              key={option.key}
-              activeOpacity={0.8}
-              onPress={() => handleActionButtonsPosition(option.key)}
-              style={[
-                styles.layoutOption,
-                styles.actionOption,
-                isActive && styles.layoutOptionActive,
-              ]}
-            >
-              <View style={[styles.layoutPreviewWrapper, styles.actionPreview]}>
-                <Image
-                  source={option.preview}
-                  style={[styles.layoutPreview, styles.actionPreviewImage]}
-                  resizeMode="cover"
-                />
-              </View>
-              <Text
-                style={[
-                  styles.layoutLabel,
-                  styles.actionLabel,
-                  isActive && styles.layoutLabelActive,
-                ]}
-              >
-                {t(option.labelKey)}
-              </Text>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
-
     </View>
   );
 };

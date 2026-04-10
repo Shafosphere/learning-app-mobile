@@ -1,5 +1,6 @@
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
-import { Pressable, StyleSheet, Text, View } from "react-native";
+import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
+import { Pressable, Text, View } from "react-native";
 import type {
   FlashcardsCardSize,
   FlashcardsImageSize,
@@ -46,9 +47,200 @@ export type CourseSettingsSectionProps = {
   onToggleImageFrame?: (value: boolean) => void;
 };
 
+type SharedStyles = {
+  sectionGroup: object;
+  switch: object;
+  settingsSectionHeader: object;
+  settingsGroupLabel: object;
+  settingsGroupCard: object;
+  settingsGroupRows: object;
+  settingsGroupRow: object;
+  settingsGroupDivider: object;
+  settingsRowText: object;
+  settingsRowTitle: object;
+  settingsRowDescription: object;
+  settingsDependentRow: object;
+  settingsDependentRowDisabled: object;
+  settingsChoiceBlock: object;
+  settingsChoiceHeader: object;
+  settingsChoiceTitle: object;
+  settingsChoiceDescription: object;
+  settingsChoiceHint: object;
+  settingsChoiceGrid: object;
+  settingsChoiceOption: object;
+  settingsChoiceOptionActive: object;
+  settingsChoiceOptionDisabled: object;
+  settingsChoiceOptionTitle: object;
+  settingsChoiceOptionDescription: object;
+};
+
+type ToggleRowProps = {
+  styles: SharedStyles;
+  title: string;
+  description: string;
+  value: boolean;
+  onPress: () => void;
+  accessibilityLabel: string;
+  disabled?: boolean;
+  dependent?: boolean;
+  dimmed?: boolean;
+};
+
+type ChoiceOption<T extends string> = {
+  key: T;
+  title: string;
+  subtitle: string;
+};
+
+type ChoiceBlockProps<T extends string> = {
+  styles: SharedStyles;
+  title: string;
+  description: string;
+  hint?: string;
+  options: ChoiceOption<T>[];
+  value: T;
+  onSelect?: (value: T) => void;
+  disabled?: boolean;
+};
+
+const TRUE_FALSE_OPTIONS: ChoiceOption<TrueFalseButtonsVariant>[] = [
+  {
+    key: "true_false",
+    title: "Stwierdzenie",
+    subtitle: "Prawda / Fałsz",
+  },
+  {
+    key: "know_dont_know",
+    title: "Opanowanie",
+    subtitle: "Umiem / Nie umiem",
+  },
+];
+
+const CARD_SIZE_OPTIONS: ChoiceOption<FlashcardsCardSize>[] = [
+  {
+    key: "large",
+    title: "Duża",
+    subtitle: "Karta rozszerza się pionowo i pokazuje cały tekst.",
+  },
+  {
+    key: "small",
+    title: "Mała",
+    subtitle: "Tekst zostaje w jednej linii i przesuwa się.",
+  },
+];
+
+const IMAGE_SIZE_LABELS: Record<
+  FlashcardsImageSize,
+  { title: string; subtitle: string }
+> = {
+  dynamic: {
+    title: "Dynamiczny",
+    subtitle: "Naturalne proporcje obrazka.",
+  },
+  small: {
+    title: "Mały",
+    subtitle: "40% maksymalnej wysokości.",
+  },
+  medium: {
+    title: "Średni",
+    subtitle: "60% maksymalnej wysokości.",
+  },
+  large: {
+    title: "Duży",
+    subtitle: "100% maksymalnej wysokości.",
+  },
+  very_large: {
+    title: "Bardzo duży",
+    subtitle: "170% maksymalnej wysokości.",
+  },
+};
+
+function SettingsToggleRow({
+  styles,
+  title,
+  description,
+  value,
+  onPress,
+  accessibilityLabel,
+  disabled = false,
+  dependent = false,
+  dimmed = false,
+}: ToggleRowProps) {
+  return (
+    <View
+      style={[
+        styles.settingsGroupRow,
+        dependent && styles.settingsDependentRow,
+        dimmed && styles.settingsDependentRowDisabled,
+      ]}
+    >
+      <View style={styles.settingsRowText}>
+        <Text style={styles.settingsRowTitle}>{title}</Text>
+        <Text style={styles.settingsRowDescription}>
+          {preventWidowsPl(description)}
+        </Text>
+      </View>
+      <View style={styles.switch}>
+        <ToggleSwitch
+          value={value}
+          onPress={onPress}
+          accessibilityLabel={accessibilityLabel}
+          disabled={disabled}
+        />
+      </View>
+    </View>
+  );
+}
+
+function SettingsChoiceBlock<T extends string>({
+  styles,
+  title,
+  description,
+  hint,
+  options,
+  value,
+  onSelect,
+  disabled = false,
+}: ChoiceBlockProps<T>) {
+  return (
+    <View style={styles.settingsChoiceBlock}>
+      <View style={styles.settingsChoiceHeader}>
+        <Text style={styles.settingsChoiceTitle}>{title}</Text>
+        <Text style={styles.settingsChoiceDescription}>
+          {preventWidowsPl(description)}
+        </Text>
+        {hint ? (
+          <Text style={styles.settingsChoiceHint}>{preventWidowsPl(hint)}</Text>
+        ) : null}
+      </View>
+      <View style={styles.settingsChoiceGrid}>
+        {options.map((option) => {
+          const isActive = value === option.key;
+          return (
+            <Pressable
+              key={option.key}
+              style={[
+                styles.settingsChoiceOption,
+                isActive && styles.settingsChoiceOptionActive,
+                disabled && styles.settingsChoiceOptionDisabled,
+              ]}
+              onPress={disabled || !onSelect ? undefined : () => onSelect(option.key)}
+              disabled={disabled || !onSelect}
+            >
+              <Text style={styles.settingsChoiceOptionTitle}>{option.title}</Text>
+              <Text style={styles.settingsChoiceOptionDescription}>
+                {preventWidowsPl(option.subtitle)}
+              </Text>
+            </Pressable>
+          );
+        })}
+      </View>
+    </View>
+  );
+}
+
 export function CourseSettingsSection({
   styles,
-  switchColors,
   colors,
   boxZeroEnabled,
   onToggleBoxZero,
@@ -78,70 +270,47 @@ export function CourseSettingsSection({
   imageFrameEnabled = true,
   onToggleImageFrame,
 }: CourseSettingsSectionProps) {
-  const cardSizeStyles = localStyles(switchColors, colors);
-  const {
-    sectionGroup,
-    sectionLabel,
-    toggleRow,
-    toggleTextWrapper,
-    toggleTitle,
-    toggleSubtitle,
-    switch: switchStyle,
-  } = styles as {
-    sectionGroup: object;
-    sectionLabel: object;
-    toggleRow: object;
-    toggleTextWrapper: object;
-    toggleTitle: object;
-    toggleSubtitle: object;
-    switch: object;
-  };
+  const sharedStyles = styles as SharedStyles;
+
+  const imageOptions = (imageSizeOptions ?? [
+    "dynamic",
+    "small",
+    "medium",
+    "large",
+  ]).map((key) => ({
+    key,
+    ...IMAGE_SIZE_LABELS[key],
+  }));
 
   return (
-    <View style={sectionGroup}>
-      <Text style={sectionLabel}>ustawienia</Text>
+    <View style={sharedStyles.sectionGroup}>
+      <Text style={sharedStyles.settingsSectionHeader}>USTAWIENIA</Text>
 
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Faza zapoznania (Pudełko 0)</Text>
-          <Text style={toggleSubtitle}>
-            To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami.
-          </Text>
-        </View>
-        <View style={switchStyle}>
-          <ToggleSwitch
+      <Text style={sharedStyles.settingsGroupLabel}>PRZEPŁYW</Text>
+      <View style={sharedStyles.settingsGroupCard}>
+        <View style={sharedStyles.settingsGroupRows}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Faza zapoznania (Pudełko 0)"
+            description="To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami."
             value={boxZeroEnabled}
             onPress={() => onToggleBoxZero(!boxZeroEnabled)}
             accessibilityLabel="Przełącz fazę zapoznania"
           />
-        </View>
-      </View>
-
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Automat fiszek</Text>
-          <Text style={toggleSubtitle}>
-            Automatycznie przełączaj pudełka i pobieraj nowe słowa.
-          </Text>
-        </View>
-        <View style={switchStyle}>
-          <ToggleSwitch
+          <View style={sharedStyles.settingsGroupDivider} />
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Automat fiszek"
+            description="Automatycznie przełączaj pudełka i pobieraj nowe słowa."
             value={autoflowEnabled}
             onPress={() => onToggleAutoflow(!autoflowEnabled)}
             accessibilityLabel="Przełącz automat fiszek"
           />
-        </View>
-      </View>
-
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Włącz powtórki</Text>
-          <Text style={toggleSubtitle}>
-            Dodaj fiszki z tego kursu do codziennych powtórek.
-          </Text>
-        </View>
-        <View style={switchStyle}>
-          <ToggleSwitch
+          <View style={sharedStyles.settingsGroupDivider} />
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Włącz powtórki"
+            description="Dodaj fiszki z tego kursu do codziennych powtórek."
             value={reviewsEnabled}
             onPress={() => onToggleReviews(!reviewsEnabled)}
             accessibilityLabel="Przełącz powtórki"
@@ -149,56 +318,22 @@ export function CourseSettingsSection({
         </View>
       </View>
 
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Wyświetlaj wyjaśnienie</Text>
-          <Text style={toggleSubtitle}>
-            Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada.
-          </Text>
-        </View>
-        <View style={switchStyle}>
-          <ToggleSwitch
+      <Text style={sharedStyles.settingsGroupLabel}>WYJAŚNIENIA</Text>
+      <View style={sharedStyles.settingsGroupCard}>
+        <View style={sharedStyles.settingsGroupRows}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Wyświetlaj wyjaśnienie"
+            description="Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada."
             value={showExplanationEnabled}
             onPress={() => onToggleShowExplanation(!showExplanationEnabled)}
             accessibilityLabel="Przełącz wyświetlanie wyjaśnień"
           />
-        </View>
-      </View>
-
-      <View
-        style={[
-          toggleRow,
-          {
-            marginLeft: 18,
-            paddingLeft: 14,
-            borderLeftWidth: 2,
-            borderLeftColor: showExplanationEnabled
-              ? colors.border
-              : `${colors.text_secondary}55`,
-            opacity: showExplanationEnabled ? 1 : 0.62,
-          },
-        ]}
-      >
-        <View style={[toggleTextWrapper, { paddingRight: 8 }]}>
-          <Text
-            style={[
-              toggleTitle,
-              !showExplanationEnabled && { color: colors.text_secondary },
-            ]}
-          >
-            Tylko po błędnej odpowiedzi
-          </Text>
-          <Text
-            style={[
-              toggleSubtitle,
-              !showExplanationEnabled && { color: colors.text_secondary },
-            ]}
-          >
-            Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi.
-          </Text>
-        </View>
-        <View style={switchStyle}>
-          <ToggleSwitch
+          <View style={sharedStyles.settingsGroupDivider} />
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Tylko po błędnej odpowiedzi"
+            description="Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi."
             value={showExplanationEnabled ? explanationOnlyOnWrong : false}
             onPress={() =>
               onToggleExplanationOnlyOnWrong(
@@ -207,319 +342,84 @@ export function CourseSettingsSection({
             }
             accessibilityLabel="Przełącz wyjaśnienie tylko po błędnej odpowiedzi"
             disabled={!showExplanationEnabled}
+            dependent
+            dimmed={!showExplanationEnabled}
           />
         </View>
       </View>
 
-      {hideSkipCorrectionOption ? null : (
-        <View style={toggleRow}>
-          <View style={toggleTextWrapper}>
-            <Text style={toggleTitle}>Pomiń poprawkę po błędzie</Text>
-            <Text style={toggleSubtitle}>
-              Po złej odpowiedzi od razu pokaż następną fiszkę (dotyczy fiszek z odpowiedzią tekstową).
-            </Text>
-          </View>
-          <View style={switchStyle}>
-            <ToggleSwitch
-              value={skipCorrectionLocked ? true : skipCorrectionEnabled}
-              onPress={() =>
-                skipCorrectionLocked
-                  ? undefined
-                  : onToggleSkipCorrection(
-                      !(skipCorrectionLocked ? true : skipCorrectionEnabled)
-                    )
-              }
-              accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
-              disabled={skipCorrectionLocked}
-            />
-          </View>
+      <Text style={sharedStyles.settingsGroupLabel}>ODPOWIEDZI</Text>
+      {!hideSkipCorrectionOption ? (
+        <View style={sharedStyles.settingsGroupCard}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Pomiń poprawkę po błędzie"
+            description="Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową."
+            value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+            onPress={() =>
+              skipCorrectionLocked
+                ? undefined
+                : onToggleSkipCorrection(
+                    !(skipCorrectionLocked ? true : skipCorrectionEnabled)
+                  )
+            }
+            accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
+            disabled={skipCorrectionLocked}
+            dimmed={skipCorrectionLocked}
+          />
         </View>
-      )}
-
-      {showTrueFalseButtonsVariant ? (
-        <>
-          <View style={toggleRow}>
-            <View style={toggleTextWrapper}>
-              <Text style={toggleTitle}>Rodzaj przycisków w Prawda / Fałsz</Text>
-              <Text style={toggleSubtitle}>
-                Wybierz, jakie napisy mają mieć przyciski.
-              </Text>
-            </View>
-          </View>
-          <View style={cardSizeStyles.cardSizeRow}>
-            {[
-              {
-                key: "true_false" as TrueFalseButtonsVariant,
-                title: "Stwierdzenie",
-                subtitle: "Prawda / Fałsz",
-              },
-              {
-                key: "know_dont_know" as TrueFalseButtonsVariant,
-                title: "Opanowanie",
-                subtitle: "Umiem / Nie umiem",
-              },
-            ].map((option, idx) => {
-              const isActive = trueFalseButtonsVariant === option.key;
-              return (
-                <Pressable
-                  key={option.key}
-                  style={[
-                    cardSizeStyles.cardSizeOption,
-                    idx === 0 && cardSizeStyles.cardSizeOptionFirst,
-                    idx === 1 && cardSizeStyles.cardSizeOptionLast,
-                    isActive
-                      ? cardSizeStyles.cardSizeOptionActive
-                      : cardSizeStyles.cardSizeOptionInactive,
-                  ]}
-                  onPress={() => onSelectTrueFalseButtonsVariant(option.key)}
-                >
-                  <Text
-                    style={[
-                      toggleTitle,
-                      cardSizeStyles.cardSizeTitle,
-                      isActive && cardSizeStyles.cardSizeTitleActive,
-                    ]}
-                  >
-                    {option.title}
-                  </Text>
-                  <Text style={[toggleSubtitle, cardSizeStyles.cardSizeSubtitle]}>
-                    {option.subtitle}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </>
       ) : null}
 
-      <View style={toggleRow}>
-        <View style={toggleTextWrapper}>
-          <Text style={toggleTitle}>Rozmiar fiszki</Text>
-          <Text style={toggleSubtitle}>
-            Zmień wielkość karty tylko dla tego kursu.
-          </Text>
-        </View>
-      </View>
-      <View style={cardSizeStyles.cardSizeRow}>
-        {[
-          {
-            key: "large" as FlashcardsCardSize,
-            title: "Duża",
-            subtitle: "Karta rozszerza się pionowo i widzisz cały tekst.",
-          },
-          {
-            key: "small" as FlashcardsCardSize,
-            title: "Mała",
-            subtitle: "Tekst jest w jednej linii i przesuwa się.",
-          },
-        ].map((option, idx) => {
-          const isActive = cardSize === option.key;
-          return (
-            <Pressable
-              key={option.key}
-              style={[
-                cardSizeStyles.cardSizeOption,
-                idx === 0 && cardSizeStyles.cardSizeOptionFirst,
-                idx === 1 && cardSizeStyles.cardSizeOptionLast,
-                isActive
-                  ? cardSizeStyles.cardSizeOptionActive
-                  : cardSizeStyles.cardSizeOptionInactive,
-              ]}
-              onPress={() => onSelectCardSize(option.key)}
-            >
-              <Text
-                style={[
-                  toggleTitle,
-                  cardSizeStyles.cardSizeTitle,
-                  isActive && cardSizeStyles.cardSizeTitleActive,
-                ]}
-              >
-                {option.title}
-              </Text>
-              <Text style={[toggleSubtitle, cardSizeStyles.cardSizeSubtitle]}>
-                {option.subtitle}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
+      {showTrueFalseButtonsVariant ? (
+        <SettingsChoiceBlock
+          styles={sharedStyles}
+          title="Rodzaj przycisków w Prawda / Fałsz"
+          description="Wybierz, jakie napisy mają mieć przyciski w tym kursie."
+          options={TRUE_FALSE_OPTIONS}
+          value={trueFalseButtonsVariant}
+          onSelect={onSelectTrueFalseButtonsVariant}
+        />
+      ) : null}
+
+      <Text style={sharedStyles.settingsGroupLabel}>KARTA</Text>
+      <SettingsChoiceBlock
+        styles={sharedStyles}
+        title="Rozmiar fiszki"
+        description="Zmień wielkość karty tylko dla tego kursu."
+        options={CARD_SIZE_OPTIONS}
+        value={cardSize}
+        onSelect={onSelectCardSize}
+      />
 
       {showImageSizeOptions ? (
-        <>
-          <View style={toggleRow}>
-            <View style={toggleTextWrapper}>
-              <Text style={toggleTitle}>Rozmiar obrazu</Text>
-              <Text style={toggleSubtitle}>
-                Dopasuj wysokość obrazków w dużych fiszkach.
-              </Text>
-              {!imageSizeEnabled ? (
-                <Text style={[toggleSubtitle, cardSizeStyles.imageSizeHint]}>
-                  Dostępne tylko dla dużych kart z obrazkami.
-                </Text>
-              ) : null}
-            </View>
-          </View>
-          <View style={cardSizeStyles.imageSizeRow}>
-            {(imageSizeOptions ?? [
-              "dynamic",
-              "small",
-              "medium",
-              "large",
-            ]).map((key) => {
-              const optionByKey: Record<
-                FlashcardsImageSize,
-                { title: string; subtitle: string }
-              > = {
-                dynamic: {
-                  title: "Dynamiczny",
-                  subtitle: "Użyj naturalnych proporcji",
-                },
-                small: {
-                  title: "Mały",
-                  subtitle: "40% maksymalnej wysokości",
-                },
-                medium: {
-                  title: "Średni",
-                  subtitle: "60% maksymalnej wysokości",
-                },
-                large: {
-                  title: "Duży",
-                  subtitle: "100% maksymalnej wysokości",
-                },
-                very_large: {
-                  title: "Bardzo duży",
-                  subtitle: "170% maksymalnej wysokości",
-                },
-              };
-              const option = {
-                key,
-                ...optionByKey[key],
-              };
-              const isActive = imageSize === option.key;
-              const isDisabled = !imageSizeEnabled || !onSelectImageSize;
-              return (
-                <Pressable
-                  key={option.key}
-                  style={[
-                    cardSizeStyles.cardSizeOption,
-                    cardSizeStyles.imageSizeOption,
-                    isActive
-                      ? cardSizeStyles.cardSizeOptionActive
-                      : cardSizeStyles.cardSizeOptionInactive,
-                    isDisabled && cardSizeStyles.cardSizeOptionDisabled,
-                  ]}
-                  onPress={
-                    isDisabled ? undefined : () => onSelectImageSize(option.key)
-                  }
-                  disabled={isDisabled}
-                >
-                  <Text
-                    style={[
-                      toggleTitle,
-                      cardSizeStyles.cardSizeTitle,
-                      isActive && cardSizeStyles.cardSizeTitleActive,
-                      isDisabled && cardSizeStyles.cardSizeTitleDisabled,
-                    ]}
-                  >
-                    {option.title}
-                  </Text>
-                  <Text
-                    style={[
-                      toggleSubtitle,
-                      cardSizeStyles.cardSizeSubtitle,
-                      isDisabled && cardSizeStyles.cardSizeSubtitleDisabled,
-                    ]}
-                  >
-                    {option.subtitle}
-                  </Text>
-                </Pressable>
-              );
-            })}
-          </View>
-        </>
+        <SettingsChoiceBlock
+          styles={sharedStyles}
+          title="Rozmiar obrazu"
+          description="Dopasuj wysokość obrazków w dużych fiszkach."
+          hint={
+            imageSizeEnabled
+              ? undefined
+              : "Dostępne tylko dla dużych kart z obrazkami."
+          }
+          options={imageOptions}
+          value={imageSize ?? "dynamic"}
+          onSelect={onSelectImageSize}
+          disabled={!imageSizeEnabled || !onSelectImageSize}
+        />
       ) : null}
 
       {showImageFrameOption ? (
-        <View style={toggleRow}>
-          <View style={toggleTextWrapper}>
-            <Text style={toggleTitle}>Ramka obrazu</Text>
-            <Text style={toggleSubtitle}>
-              Pokazuj obramowanie wokół obrazka na fiszce.
-            </Text>
-          </View>
-          <View style={switchStyle}>
-            <ToggleSwitch
-              value={imageFrameEnabled}
-              onPress={() => onToggleImageFrame?.(!imageFrameEnabled)}
-              accessibilityLabel="Przełącz ramkę obrazu"
-            />
-          </View>
+        <View style={sharedStyles.settingsGroupCard}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title="Ramka obrazu"
+            description="Pokazuj obramowanie wokół obrazka na fiszce."
+            value={imageFrameEnabled}
+            onPress={() => onToggleImageFrame?.(!imageFrameEnabled)}
+            accessibilityLabel="Przełącz ramkę obrazu"
+          />
         </View>
       ) : null}
     </View>
   );
 }
-
-const localStyles = (switchColors: SwitchColors, colors: ThemeColors) =>
-  StyleSheet.create({
-    cardSizeRow: {
-      flexDirection: "row",
-      paddingHorizontal: 4,
-    },
-    cardSizeOption: {
-      flex: 1,
-      borderRadius: 12,
-      borderWidth: 1,
-      paddingHorizontal: 14,
-      paddingVertical: 10,
-    },
-    cardSizeOptionFirst: {
-      marginRight: 6,
-    },
-    cardSizeOptionLast: {
-      marginLeft: 6,
-    },
-    cardSizeOptionActive: {
-      backgroundColor: switchColors.trackTrue,
-      borderColor: switchColors.trackTrue,
-    },
-    cardSizeOptionInactive: {
-      backgroundColor: "transparent",
-      borderColor: switchColors.trackFalse,
-    },
-    cardSizeTitle: {
-      fontWeight: "600",
-      color: colors.headline,
-    },
-    cardSizeTitleActive: {
-      color: colors.font,
-    },
-    cardSizeSubtitle: {
-      color: colors.paragraph,
-      marginTop: 4,
-    },
-    imageSizeRow: {
-      flexDirection: "row",
-      flexWrap: "wrap",
-      paddingHorizontal: 4,
-      marginTop: 6,
-    },
-    imageSizeOption: {
-      minWidth: "48%",
-      marginBottom: 8,
-      marginRight: 6,
-    },
-    cardSizeOptionDisabled: {
-      opacity: 0.5,
-    },
-    cardSizeTitleDisabled: {
-      color: colors.paragraph,
-    },
-    cardSizeSubtitleDisabled: {
-      color: colors.paragraph,
-    },
-    imageSizeHint: {
-      marginTop: 4,
-      color: colors.paragraph,
-    },
-  });

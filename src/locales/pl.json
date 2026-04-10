@@ -163,23 +163,23 @@
         "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
       },
       "googleDrive": {
-        "sectionTitle": "Google Drive backup",
+        "sectionTitle": "Kopia zapasowa Google Drive",
         "actionButton": "Akcja Google Drive",
         "loadingShort": "Trwa",
         "connectTitle": "Połącz Google Drive",
         "connectSubtitle": "Połącz konto Google, aby zapisywać kopie ZIP w prywatnym folderze aplikacji na Google Drive.",
         "connectButton": "Połącz",
-        "manualBackupTitle": "Wyślij backup teraz",
+        "manualBackupTitle": "Utwórz kopię zapasową teraz",
         "manualBackupSubtitle": "Utwórz nowy snapshot ZIP i zachowaj do 3 ostatnich kopii w prywatnym folderze aplikacji na Google Drive.",
-        "backupNowButton": "Backup teraz",
+        "backupNowButton": "Utwórz kopię",
         "refreshButton": "Odśwież listę",
         "status": {
           "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w buildzie aplikacji. Powód: {{reason}}",
           "notConfiguredFallback": "brak konfiguracji OAuth",
           "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja odczyta listę kopii i pozwoli tworzyć nowe snapshoty ręcznie.",
           "loadingList": "Połączono z Google Drive. Trwa pobieranie listy kopii...",
-          "noBackups": "Połączono, ale nie znaleziono jeszcze kopii.\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
-          "connected": "Połączono. Dostępne kopie: {{count}}.\nNajnowsza kopia: {{latest}}\nOstatni udany backup: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
+          "noBackups": "Połączono, ale nie znaleziono jeszcze kopii.\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
+          "connected": "Połączono. Dostępne kopie: {{count}}.\nNajnowsza kopia: {{latest}}\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
           "listError": "Połączono z Google Drive, ale nie udało się pobrać listy kopii: {{error}}",
           "never": "nigdy",
           "noErrors": "brak",
@@ -187,10 +187,10 @@
         },
         "connectDone": {
           "title": "Google Drive połączony",
-          "message": "Połączenie z Google Drive zostało zapisane. Możesz teraz odświeżyć listę kopii albo utworzyć nowy backup ręcznie."
+          "message": "Połączenie z Google Drive zostało zapisane. Możesz teraz odświeżyć listę kopii albo ręcznie utworzyć nową kopię zapasową."
         },
         "backupDone": {
-          "title": "Backup wysłany",
+          "title": "Kopia zapasowa wysłana",
           "message": "Nowa kopia ZIP została zapisana w prywatnym folderze aplikacji na Google Drive."
         },
         "restoreTitle": "Lista kopii do przywrócenia",
@@ -226,7 +226,7 @@
         },
         "snapshotStates": {
           "loading": "Pobieram listę kopii z Google Drive...",
-          "empty": "Brak kopii do przywrócenia. Utwórz pierwszy backup ręcznie.",
+          "empty": "Brak kopii do przywrócenia. Utwórz pierwszą kopię zapasową ręcznie.",
           "error": "Nie udało się pobrać listy kopii: {{error}}"
         },
         "disconnectTitle": "Rozłącz Google Drive",

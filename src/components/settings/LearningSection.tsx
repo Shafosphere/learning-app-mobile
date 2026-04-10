@@ -5,6 +5,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { useTranslation } from "react-i18next";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 
 const LearningSection: React.FC = () => {
   const styles = useStyles();
@@ -125,80 +126,98 @@ const LearningSection: React.FC = () => {
 
   return (
     <View style={styles.sectionCard}>
-      <Text style={styles.sectionHeader}>{t("settings.learning.section")}</Text>
+      <Text style={styles.appearanceSectionHeader}>
+        {t("settings.learning.section")}
+      </Text>
 
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>{t("settings.learning.spellcheck.title")}</Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.learning.spellcheck.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={spellChecking}
-            onPress={() => void handleSpellCheckToggle(!spellChecking)}
-            accessibilityLabel={t("settings.learning.spellcheck.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.learning.keyboardSuggestions.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.learning.keyboardSuggestions.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={flashcardsSuggestionsEnabled}
-            onPress={() => void handleSuggestionsToggle(!flashcardsSuggestionsEnabled)}
-            accessibilityLabel={t("settings.learning.keyboardSuggestions.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.learning.ignoreDiacritics.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.learning.ignoreDiacritics.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={ignoreDiacriticsInSpellcheck}
-            onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
-            accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
-          />
-        </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>
-            {t("settings.learning.reminders.title")}
-          </Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.learning.reminders.subtitle")}
-          </Text>
-          {reminderStatusLines.map((line) => (
-            <Text key={line} style={styles.rowSubtitle}>
-              {line}
+      <View style={styles.learningHeroCard}>
+        <View style={styles.appearanceGroupRow}>
+          <View style={styles.appearanceRowText}>
+            <Text style={styles.appearanceBlockTitle}>
+              {t("settings.learning.reminders.title")}
             </Text>
-          ))}
+            <Text style={styles.appearanceBlockDescription}>
+              {preventWidowsPl("Pomaga utrzymać rytm nauki w wybrane dni.")}
+            </Text>
+            {reminderStatusLines[0] ? (
+              <Text style={styles.settingStatus}>{reminderStatusLines[0]}</Text>
+            ) : null}
+            {reminderStatusLines.slice(1).map((line) => (
+              <Text key={line} style={styles.settingMeta}>
+                {line}
+              </Text>
+            ))}
+          </View>
+          <View style={styles.switch}>
+            <ToggleSwitch
+              value={learningRemindersEnabled}
+              onPress={() => void handleRemindersToggle(!learningRemindersEnabled)}
+              accessibilityLabel={t("settings.learning.reminders.title")}
+            />
+          </View>
         </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={learningRemindersEnabled}
-            onPress={() => void handleRemindersToggle(!learningRemindersEnabled)}
-            accessibilityLabel={t("settings.learning.reminders.title")}
-          />
+      </View>
+
+      <Text style={styles.appearanceGroupLabel}>PISANIE</Text>
+      <View style={styles.appearanceGroupCard}>
+        <View style={styles.appearanceGroupRows}>
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.learning.spellcheck.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.spellcheck.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={spellChecking}
+                onPress={() => void handleSpellCheckToggle(!spellChecking)}
+                accessibilityLabel={t("settings.learning.spellcheck.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.learning.keyboardSuggestions.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.keyboardSuggestions.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={flashcardsSuggestionsEnabled}
+                onPress={() => void handleSuggestionsToggle(!flashcardsSuggestionsEnabled)}
+                accessibilityLabel={t("settings.learning.keyboardSuggestions.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.learning.ignoreDiacritics.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.ignoreDiacritics.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={ignoreDiacriticsInSpellcheck}
+                onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
+                accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
+              />
+            </View>
+          </View>
         </View>
       </View>
     </View>

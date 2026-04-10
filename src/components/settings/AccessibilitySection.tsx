@@ -3,6 +3,7 @@ import { View, Text, TouchableOpacity, Modal } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import SettingsItemCard from "@/src/components/settings/SettingsItemCard";
 import { useTranslation } from "react-i18next";
 import type { ColorBlindMode } from "@/src/theme/theme";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
@@ -106,63 +107,66 @@ const AccessibilitySection: React.FC = () => {
       accessibilityLabel={t("settings.accessibility.cardLabel")}
     >
       <Text
-        style={styles.sectionHeader}
+        style={styles.appearanceSectionHeader}
         allowFontScaling
         accessibilityRole="header"
       >
         {t("settings.accessibility.section")}
       </Text>
+      <View style={styles.settingsList}>
+        <SettingsItemCard
+          title={t("settings.accessibility.highContrast.title")}
+          description={t("settings.accessibility.highContrast.subtitle")}
+          control={(
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={highContrastEnabled}
+                onPress={() => void handleHighContrastToggle(!highContrastEnabled)}
+                accessibilityLabel={t("settings.accessibility.highContrast.title")}
+              />
+            </View>
+          )}
+        />
 
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle} allowFontScaling>
-            {t("settings.accessibility.highContrast.title")}
-          </Text>
-          <Text style={styles.rowSubtitle} allowFontScaling>
-            {t("settings.accessibility.highContrast.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={highContrastEnabled}
-            onPress={() => void handleHighContrastToggle(!highContrastEnabled)}
-            accessibilityLabel={t("settings.accessibility.highContrast.title")}
-          />
-        </View>
-      </View>
-
-      <View style={[styles.row, { alignItems: "flex-start" }]}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle} allowFontScaling>
-            {t("settings.accessibility.colorBlind.title", {
-              defaultValue: "Color blind mode",
-            })}
-          </Text>
-          <Text style={styles.rowSubtitle} allowFontScaling>
-            {t("settings.accessibility.colorBlind.subtitle", {
-              defaultValue:
-                "Applies a palette adjusted for the selected color vision deficiency type.",
-            })}
-          </Text>
-          <Text style={styles.rowSubtitle} allowFontScaling>
-            {currentModeLabel}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.languageSegment}>
-        <TouchableOpacity
-          activeOpacity={0.8}
-          accessibilityRole="button"
-          accessibilityLabel={currentModeLabel}
-          onPress={handleColorBlindPress}
-          style={styles.languageSelectTrigger}
+        <SettingsItemCard
+          title={t("settings.accessibility.colorBlind.title", {
+            defaultValue: "Color blind mode",
+          })}
+          description={t("settings.accessibility.colorBlind.subtitle", {
+            defaultValue:
+              "Applies a palette adjusted for the selected color vision deficiency type.",
+          })}
+          status={currentModeLabel}
         >
-          <Text style={styles.languageSelectTriggerText} allowFontScaling>
-            {colorBlindModeLabel}
-          </Text>
-          <Text style={styles.languageSelectChevron}>▾</Text>
-        </TouchableOpacity>
+          <View style={styles.languageSegment}>
+            <TouchableOpacity
+              activeOpacity={0.8}
+              accessibilityRole="button"
+              accessibilityLabel={currentModeLabel}
+              onPress={handleColorBlindPress}
+              style={styles.languageSelectTrigger}
+            >
+              <Text style={styles.languageSelectTriggerText} allowFontScaling>
+                {colorBlindModeLabel}
+              </Text>
+              <Text style={styles.languageSelectChevron}>▾</Text>
+            </TouchableOpacity>
+          </View>
+        </SettingsItemCard>
+
+        <SettingsItemCard
+          title={t("settings.accessibility.largeFont.title")}
+          description={t("settings.accessibility.largeFont.subtitle")}
+          control={(
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={largeFontEnabled}
+                onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
+                accessibilityLabel={t("settings.accessibility.largeFont.title")}
+              />
+            </View>
+          )}
+        />
       </View>
 
       <Modal
@@ -206,24 +210,6 @@ const AccessibilitySection: React.FC = () => {
           </View>
         </TouchableOpacity>
       </Modal>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle} allowFontScaling>
-            {t("settings.accessibility.largeFont.title")}
-          </Text>
-          <Text style={styles.rowSubtitle} allowFontScaling>
-            {t("settings.accessibility.largeFont.subtitle")}
-          </Text>
-        </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={largeFontEnabled}
-            onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
-            accessibilityLabel={t("settings.accessibility.largeFont.title")}
-          />
-        </View>
-      </View>
     </View>
   );
 };

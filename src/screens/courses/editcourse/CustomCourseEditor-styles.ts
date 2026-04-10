@@ -6,19 +6,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   scrollContent: {
-    paddingHorizontal: 24,
+    paddingHorizontal: 18,
     paddingBottom: 120,
-    paddingTop: 24,
+    paddingTop: 32,
     gap: 24,
   },
   scrollContentWithManualToolbar: {
     paddingBottom: 236,
   },
   sectionCard: {
-    backgroundColor: colors.secondBackground,
+    backgroundColor: colors.background,
     borderRadius: 16,
-    padding: 20,
-    gap: 16,
+    padding: 16,
+    paddingTop: 32,
+    gap: 18,
   },
   sectionHeader: {
     fontSize: 24,
@@ -31,8 +32,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
   },
   sectionGroup: {
-    marginTop: 8,
-    gap: 12,
+    gap: 0,
   },
   sectionLabel: {
     fontSize: 16,
@@ -63,6 +63,171 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   switch: {
     transform: [{ scaleX: 1.12 }, { scaleY: 1.12 }],
+  },
+  settingsSectionHeader: {
+    fontSize: 24,
+    textTransform: "uppercase" as const,
+    fontWeight: "900",
+    color: colors.headline,
+    textAlign: "right" as const,
+    marginBottom: 20,
+  },
+  settingsGroupLabel: {
+    marginTop: 2,
+    marginBottom: 8,
+    fontSize: 13,
+    textTransform: "uppercase" as const,
+    fontWeight: "900",
+    letterSpacing: 0.4,
+    color: colors.paragraph,
+  },
+  settingsGroupCard: {
+    backgroundColor: colors.background,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 16,
+    gap: 10,
+  },
+  settingsGroupRows: {
+    gap: 0,
+  },
+  settingsGroupRow: {
+    flexDirection: "row" as const,
+    alignItems: "center" as const,
+    justifyContent: "space-between" as const,
+    columnGap: 12,
+    paddingVertical: 10,
+  },
+  settingsGroupDivider: {
+    height: 1,
+    backgroundColor: colors.border,
+    opacity: 0.75,
+  },
+  settingsRowText: {
+    flex: 1,
+    minWidth: 0,
+    paddingRight: 8,
+  },
+  settingsRowTitle: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    color: colors.headline,
+  },
+  settingsRowDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.paragraph,
+    opacity: 0.82,
+    marginTop: 4,
+  },
+  settingsDependentRow: {
+    paddingLeft: 12,
+  },
+  settingsDependentRowDisabled: {
+    opacity: 0.58,
+  },
+  settingsChoiceBlock: {
+    backgroundColor: colors.background,
+    borderRadius: 14,
+    padding: 14,
+    borderWidth: 1,
+    borderColor: colors.border,
+    marginBottom: 16,
+    gap: 12,
+  },
+  settingsChoiceHeader: {
+    gap: 4,
+  },
+  settingsChoiceTitle: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    color: colors.headline,
+  },
+  settingsChoiceDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.paragraph,
+    opacity: 0.82,
+  },
+  settingsChoiceHint: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.paragraph,
+    opacity: 0.72,
+  },
+  settingsChoiceGrid: {
+    flexDirection: "row" as const,
+    flexWrap: "wrap" as const,
+    gap: 10,
+  },
+  settingsChoiceOption: {
+    flexGrow: 1,
+    flexBasis: 0,
+    minWidth: "48%",
+    borderRadius: 14,
+    borderWidth: 2,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    paddingHorizontal: 14,
+    paddingVertical: 12,
+    gap: 4,
+  },
+  settingsChoiceOptionActive: {
+    borderColor: colors.my_green,
+  },
+  settingsChoiceOptionDisabled: {
+    opacity: 0.5,
+  },
+  settingsChoiceOptionTitle: {
+    fontSize: 15,
+    fontWeight: "800" as const,
+    color: colors.headline,
+  },
+  settingsChoiceOptionDescription: {
+    fontSize: 13,
+    lineHeight: 18,
+    color: colors.paragraph,
+    opacity: 0.8,
+  },
+  settingsActionCard: {
+    backgroundColor: colors.background,
+    borderRadius: 14,
+    paddingHorizontal: 14,
+    paddingTop: 14,
+    paddingBottom: 0,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 12,
+  },
+  settingsActionCardStandalone: {
+    paddingBottom: 14,
+  },
+  settingsActionCardSections: {
+    gap: 0,
+  },
+  settingsActionCardSection: {
+    paddingTop: 2,
+    paddingBottom: 0,
+    gap: 12,
+  },
+  settingsActionCardHeader: {
+    gap: 4,
+  },
+  settingsActionCardTitle: {
+    fontSize: 16,
+    fontWeight: "800" as const,
+    color: colors.headline,
+  },
+  settingsActionCardDescription: {
+    fontSize: 14,
+    lineHeight: 20,
+    color: colors.paragraph,
+    opacity: 0.82,
+  },
+  settingsActionCardButtonRow: {
+    alignItems: "flex-end" as const,
   },
   iconSection: {
     gap: 12,

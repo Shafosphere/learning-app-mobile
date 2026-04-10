@@ -20,6 +20,7 @@ import {
   ViewStyle,
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useStyles } from "./iconEdit-styles";
 
 const MAX_HUE = 360;
@@ -181,6 +182,7 @@ function CourseIconColorSelectorComponent({
 }: CourseIconColorSelectorProps) {
   const componentStyles = useStyles();
   const { colors } = useSettings();
+  const insets = useSafeAreaInsets();
   const [isIconSheetOpen, setIsIconSheetOpen] = useState(false);
   const [isColorSheetOpen, setIsColorSheetOpen] = useState(false);
   const [iconSearch, setIconSearch] = useState("");
@@ -226,6 +228,7 @@ function CourseIconColorSelectorComponent({
   const selectedHex = selectedColor?.trim() || "#000000";
   const currentHex = useMemo(() => hsvToHex(hsv), [hsv]);
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
+  const colorSheetBottomInset = Math.max(insets.bottom, 18);
   const isNameEditable = Boolean(onCourseNameChange) && nameEditable && !disabled;
 
   useEffect(() => {
@@ -628,7 +631,10 @@ function CourseIconColorSelectorComponent({
 
             <ScrollView
               style={componentStyles.colorScroll}
-              contentContainerStyle={componentStyles.colorScrollContent}
+              contentContainerStyle={[
+                componentStyles.colorScrollContent,
+                { paddingBottom: colorSheetBottomInset + 16 },
+              ]}
               keyboardShouldPersistTaps="handled"
               scrollEnabled={!isSvDragging}
             >

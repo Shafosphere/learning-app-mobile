@@ -1,5 +1,9 @@
 import MyButton from "@/src/components/button/button";
-import { CourseSettingsSection, type CourseSettingsSectionProps } from "@/src/screens/courses/editcourse/components/SettingsCourse";
+import {
+  CourseSettingsSection,
+  type CourseSettingsSectionProps,
+} from "@/src/screens/courses/editcourse/components/SettingsCourse";
+import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import type { ThemeColorKey } from "@/src/theme/theme";
 import { Text, View } from "react-native";
 
@@ -21,37 +25,70 @@ type Props = {
   resetActions?: CourseSettingsResetAction[];
 };
 
+type SharedStyles = {
+  settingsGroupLabel: object;
+  settingsActionCard: object;
+  settingsActionCardStandalone: object;
+  settingsActionCardSections: object;
+  settingsActionCardSection: object;
+  settingsGroupDivider: object;
+  settingsActionCardHeader: object;
+  settingsActionCardTitle: object;
+  settingsActionCardDescription: object;
+  settingsActionCardButtonRow: object;
+};
+
 export function CourseSettingsPanel({
   styles,
   settingsProps,
   resetActions = [],
 }: Props) {
-  const { toggleRow, toggleTextWrapper, toggleTitle, toggleSubtitle } =
-    styles as {
-      toggleRow: object;
-      toggleTextWrapper: object;
-      toggleTitle: object;
-      toggleSubtitle: object;
-    };
+  const sharedStyles = styles as SharedStyles;
 
   return (
     <>
       <CourseSettingsSection {...settingsProps} />
-      {resetActions.map((action) => (
-        <View key={action.key} style={toggleRow}>
-          <View style={toggleTextWrapper}>
-            <Text style={toggleTitle}>{action.title}</Text>
-            <Text style={toggleSubtitle}>{action.subtitle}</Text>
+
+      {resetActions.length > 0 ? (
+        <>
+          <Text style={sharedStyles.settingsGroupLabel}>RESET</Text>
+          <View
+            style={[
+              sharedStyles.settingsActionCard,
+              sharedStyles.settingsActionCardStandalone,
+            ]}
+          >
+            <View style={sharedStyles.settingsActionCardSections}>
+              {resetActions.map((action, index) => (
+                <View key={action.key}>
+                  {index > 0 ? (
+                    <View style={sharedStyles.settingsGroupDivider} />
+                  ) : null}
+                  <View style={sharedStyles.settingsActionCardSection}>
+                    <View style={sharedStyles.settingsActionCardHeader}>
+                      <Text style={sharedStyles.settingsActionCardTitle}>
+                        {action.title}
+                      </Text>
+                      <Text style={sharedStyles.settingsActionCardDescription}>
+                        {preventWidowsPl(action.subtitle)}
+                      </Text>
+                    </View>
+                    <View style={sharedStyles.settingsActionCardButtonRow}>
+                      <MyButton
+                        text={action.loading ? "Resetuję..." : action.ctaText}
+                        color={action.buttonColor ?? "my_red"}
+                        onPress={action.onPress}
+                        disabled={action.disabled ?? false}
+                        width={action.buttonWidth ?? 170}
+                      />
+                    </View>
+                  </View>
+                </View>
+              ))}
+            </View>
           </View>
-          <MyButton
-            text={action.loading ? "Resetuję..." : action.ctaText}
-            color={action.buttonColor ?? "my_red"}
-            onPress={action.onPress}
-            disabled={action.disabled ?? false}
-            width={action.buttonWidth ?? 150}
-          />
-        </View>
-      ))}
+        </>
+      ) : null}
     </>
   );
 }
