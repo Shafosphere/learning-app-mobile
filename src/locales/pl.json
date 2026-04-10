@@ -204,6 +204,20 @@
         "snapshotTitle": "Backup z {{createdAt}}",
         "snapshotMeta": "Wersja aplikacji: {{appVersion}} • Źródło: {{backupSource}}",
         "snapshotSummaryUnavailable": "Nie udało się odczytać szczegółów tej kopii.",
+        "snapshotCard": {
+          "stateReady": "Gotowy do przywrócenia",
+          "stateAttention": "Wymaga uwagi",
+          "stateUnavailable": "Nie działa",
+          "summaryReady": "Ta kopia wygląda poprawnie i może zostać przywrócona.",
+          "summaryAttention": "Ta kopia wymaga dodatkowego sprawdzenia przed przywróceniem.",
+          "summaryUnavailable": "Ta kopia nie może zostać przywrócona automatycznie.",
+          "detailsButton": "Pokaż szczegóły",
+          "whyButton": "Dlaczego?",
+          "hideButton": "Ukryj szczegóły",
+          "detailsTitle": "Szczegóły",
+          "detailsDescription": "Opis: {{value}}",
+          "detailsStats": "Zakres danych: {{value}}"
+        },
         "snapshotLabels": {
           "customCourses": "Kursy",
           "flashcards": "Fiszki",

@@ -6,10 +6,11 @@ import { importUserData } from "@/src/services/importUserData";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React, { useCallback, useMemo, useState } from "react";
-import { Alert, Text, View } from "react-native";
+import { Alert, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 type DriveAction = "connect" | "backup" | "disconnect" | "refresh" | null;
+type SnapshotCardTone = "ok" | "warn" | "bad";
 
 type ImportStatsLike = {
   coursesCreated?: number;
@@ -25,6 +26,7 @@ type ImportStatsLike = {
 const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
   const { t, i18n } = useTranslation();
+  const { width } = useWindowDimensions();
   const {
     resetLearningSettings,
     googleDriveConfigured,
@@ -49,6 +51,8 @@ const CoursesDataSection: React.FC = () => {
   const [exportingData, setExportingData] = useState(false);
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
+  const [expandedSnapshotIds, setExpandedSnapshotIds] = useState<string[]>([]);
+  const isCompactSnapshotLayout = width < 360;
 
   const formatter = useMemo(
     () =>
@@ -105,27 +109,100 @@ const CoursesDataSection: React.FC = () => {
     )}`;
   };
 
-  const formatSnapshotSummary = (snapshot: GoogleDriveBackupSnapshot): string => {
-    const manifest = snapshot.manifest;
-    if (!manifest) {
-      return snapshot.compatibilityMessage ?? t("settings.coursesData.googleDrive.snapshotSummaryUnavailable");
-    }
-
-    const details = [
-      `${t("settings.coursesData.googleDrive.snapshotLabels.customCourses")}: ${manifest.contentSummary.customCoursesCount}`,
-      `${t("settings.coursesData.googleDrive.snapshotLabels.flashcards")}: ${manifest.contentSummary.customFlashcardsCount}`,
-      `${t("settings.coursesData.googleDrive.snapshotLabels.reviews")}: ${manifest.contentSummary.reviewEntriesCount}`,
-      `${t("settings.coursesData.googleDrive.snapshotLabels.events")}: ${manifest.contentSummary.learningEventsCount}`,
-    ];
-
-    return `${details.join(" • ")}\n${t(
-      "settings.coursesData.googleDrive.snapshotMeta",
-      {
-        appVersion: manifest.appVersion,
-        backupSource: manifest.backupSource,
+  const formatSnapshotSummary = useCallback(
+    (snapshot: GoogleDriveBackupSnapshot): string => {
+      const manifest = snapshot.manifest;
+      if (!manifest) {
+        return t("settings.coursesData.googleDrive.snapshotSummaryUnavailable");
       }
-    )}`;
-  };
+
+      const details = [
+        `${t("settings.coursesData.googleDrive.snapshotLabels.customCourses")}: ${manifest.contentSummary.customCoursesCount}`,
+        `${t("settings.coursesData.googleDrive.snapshotLabels.flashcards")}: ${manifest.contentSummary.customFlashcardsCount}`,
+        `${t("settings.coursesData.googleDrive.snapshotLabels.reviews")}: ${manifest.contentSummary.reviewEntriesCount}`,
+        `${t("settings.coursesData.googleDrive.snapshotLabels.events")}: ${manifest.contentSummary.learningEventsCount}`,
+      ];
+
+      return `${details.join(" • ")}\n${t(
+        "settings.coursesData.googleDrive.snapshotMeta",
+        {
+          appVersion: manifest.appVersion,
+          backupSource: manifest.backupSource,
+        }
+      )}`;
+    },
+    [t]
+  );
+
+  const getSnapshotPresentation = useCallback(
+    (snapshot: GoogleDriveBackupSnapshot): {
+      tone: SnapshotCardTone;
+      label: string;
+      summary: string;
+      toggleLabel: string;
+      details: string;
+    } => {
+      const manifestSummary = formatSnapshotSummary(snapshot);
+
+      if (!snapshot.isCompatible) {
+        const reason =
+          snapshot.compatibilityMessage ??
+          t("settings.coursesData.googleDrive.snapshotCard.summaryUnavailable");
+
+        return {
+          tone: "bad",
+          label: t("settings.coursesData.googleDrive.snapshotCard.stateUnavailable"),
+          summary: t("settings.coursesData.googleDrive.snapshotCard.summaryUnavailable"),
+          toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.whyButton"),
+          details: [
+            t("settings.coursesData.googleDrive.snapshotCard.detailsDescription", {
+              value: reason,
+            }),
+          ].join("\n\n"),
+        };
+      }
+
+      if (!snapshot.manifest) {
+        return {
+          tone: "warn",
+          label: t("settings.coursesData.googleDrive.snapshotCard.stateAttention"),
+          summary: t("settings.coursesData.googleDrive.snapshotCard.summaryAttention"),
+          toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.whyButton"),
+          details: [
+            t("settings.coursesData.googleDrive.snapshotCard.detailsDescription", {
+              value: t(
+                "settings.coursesData.googleDrive.snapshotSummaryUnavailable"
+              ),
+            }),
+          ].join("\n\n"),
+        };
+      }
+
+      return {
+        tone: "ok",
+        label: t("settings.coursesData.googleDrive.snapshotCard.stateReady"),
+        summary: t("settings.coursesData.googleDrive.snapshotCard.summaryReady"),
+        toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.detailsButton"),
+        details: [
+          t("settings.coursesData.googleDrive.snapshotCard.detailsDescription", {
+            value: t("settings.coursesData.googleDrive.snapshotCard.summaryReady"),
+          }),
+          t("settings.coursesData.googleDrive.snapshotCard.detailsStats", {
+            value: manifestSummary,
+          }),
+        ].join("\n\n"),
+      };
+    },
+    [formatSnapshotSummary, t]
+  );
+
+  const toggleSnapshotExpanded = useCallback((snapshotId: string) => {
+    setExpandedSnapshotIds((current) =>
+      current.includes(snapshotId)
+        ? current.filter((id) => id !== snapshotId)
+        : [...current, snapshotId]
+    );
+  }, []);
 
   const driveStatusText = useMemo(() => {
     if (!googleDriveConfigured) {
@@ -548,32 +625,112 @@ const CoursesDataSection: React.FC = () => {
             ) : null}
 
             {googleDriveBackupSnapshots.map((snapshot) => (
-              <View key={snapshot.fileId} style={styles.snapshotCard}>
-                <View style={styles.snapshotCardText}>
-                  <Text style={styles.snapshotTitle}>
-                    {t("settings.coursesData.googleDrive.snapshotTitle", {
-                      createdAt: formatDate(
-                        snapshot.manifest?.createdAt ?? snapshot.modifiedTime
-                      ),
-                    })}
-                  </Text>
-                  <Text style={styles.snapshotSubtitle}>
-                    {formatSnapshotSummary(snapshot)}
-                  </Text>
-                  {!snapshot.isCompatible && snapshot.compatibilityMessage ? (
-                    <Text style={styles.snapshotWarning}>
-                      {snapshot.compatibilityMessage}
-                    </Text>
-                  ) : null}
-                </View>
-                <MyButton
-                  text={t("settings.coursesData.googleDrive.restoreButton")}
-                  color="my_green"
-                  onPress={() => handleRestoreSnapshot(snapshot)}
-                  disabled={!snapshot.isCompatible || googleDriveRestoreInProgress}
-                  width={118}
-                />
-              </View>
+              (() => {
+                const presentation = getSnapshotPresentation(snapshot);
+                const isExpanded = expandedSnapshotIds.includes(snapshot.fileId);
+
+                return (
+                  <View key={snapshot.fileId} style={styles.snapshotCard}>
+                    <View
+                      style={[
+                        styles.snapshotMain,
+                        isCompactSnapshotLayout && styles.snapshotMainCompact,
+                      ]}
+                    >
+                      <View style={styles.snapshotCardText}>
+                        <View style={styles.snapshotTopline}>
+                          <View
+                            style={[
+                              styles.snapshotStatusDot,
+                              presentation.tone === "ok" && styles.snapshotStatusDotOk,
+                              presentation.tone === "warn" &&
+                                styles.snapshotStatusDotWarn,
+                              presentation.tone === "bad" && styles.snapshotStatusDotBad,
+                            ]}
+                          />
+                          <Text style={styles.snapshotTitle}>
+                            {t("settings.coursesData.googleDrive.snapshotTitle", {
+                              createdAt: formatDate(
+                                snapshot.manifest?.createdAt ?? snapshot.modifiedTime
+                              ),
+                            })}
+                          </Text>
+                        </View>
+                        <Text style={styles.snapshotSubtitle}>{presentation.summary}</Text>
+                        {!snapshot.isCompatible && snapshot.compatibilityMessage ? (
+                          <Text style={styles.snapshotWarning}>
+                            {snapshot.compatibilityMessage}
+                          </Text>
+                        ) : null}
+                      </View>
+
+                      <MyButton
+                        text={t("settings.coursesData.googleDrive.restoreButton")}
+                        color="my_green"
+                        onPress={() => handleRestoreSnapshot(snapshot)}
+                        disabled={!snapshot.isCompatible || googleDriveRestoreInProgress}
+                        width={isCompactSnapshotLayout ? "100%" : 112}
+                        style={[
+                          styles.snapshotButton,
+                          isCompactSnapshotLayout && styles.snapshotButtonCompact,
+                        ]}
+                        textStyle={styles.snapshotButtonText}
+                      />
+                    </View>
+
+                    <View style={styles.snapshotFooter}>
+                      <View
+                        style={[
+                          styles.snapshotFooterTag,
+                          presentation.tone === "ok" && styles.snapshotFooterTagOk,
+                          presentation.tone === "warn" && styles.snapshotFooterTagWarn,
+                          presentation.tone === "bad" && styles.snapshotFooterTagBad,
+                        ]}
+                      >
+                        <Text
+                          style={[
+                            styles.snapshotFooterTagText,
+                            presentation.tone === "ok" &&
+                              styles.snapshotFooterTagTextOk,
+                            presentation.tone === "warn" &&
+                              styles.snapshotFooterTagTextWarn,
+                            presentation.tone === "bad" &&
+                              styles.snapshotFooterTagTextBad,
+                          ]}
+                        >
+                          {presentation.label}
+                        </Text>
+                      </View>
+
+                      <Pressable
+                        onPress={() => toggleSnapshotExpanded(snapshot.fileId)}
+                        accessibilityRole="button"
+                        accessibilityState={{ expanded: isExpanded }}
+                        style={styles.snapshotDetailsToggle}
+                      >
+                        <Text style={styles.snapshotDetailsToggleText}>
+                          {isExpanded
+                            ? t(
+                                "settings.coursesData.googleDrive.snapshotCard.hideButton"
+                              )
+                            : presentation.toggleLabel}
+                        </Text>
+                      </Pressable>
+                    </View>
+
+                    {isExpanded ? (
+                      <View style={styles.snapshotDetails}>
+                        <Text style={styles.snapshotDetailsTitle}>
+                          {t("settings.coursesData.googleDrive.snapshotCard.detailsTitle")}
+                        </Text>
+                        <Text style={styles.snapshotDetailsText}>
+                          {presentation.details}
+                        </Text>
+                      </View>
+                    ) : null}
+                  </View>
+                );
+              })()
             ))}
           </View>
         ) : null}

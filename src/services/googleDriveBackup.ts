@@ -82,6 +82,7 @@ export type ConnectGoogleDriveResult =
 let googleSigninConfigured = false;
 let legacyStateCleanupPromise: Promise<void> | null = null;
 let googleSigninModuleCache: GoogleSigninModule | null | undefined;
+let freshAccessTokenPromise: Promise<string> | null = null;
 
 function getExtraConfig(): GoogleDriveExtraConfig {
   return (Constants.expoConfig?.extra?.googleDriveBackup ??
@@ -199,6 +200,18 @@ function getTokenErrorMessage(error: unknown): string {
   return "Nie udało się pobrać dostępu do Google Drive. Połącz konto ponownie.";
 }
 
+function isGoogleDriveSessionErrorMessage(message: string): boolean {
+  return (
+    message.includes("getTokens") ||
+    message.includes("Google Drive") ||
+    message.includes("Google Sign-In") ||
+    message.includes("tokenu dostępu") ||
+    message.includes("dostępu do Google Drive") ||
+    message.includes("Brak połączenia z Google Drive") ||
+    message.includes("Brak wymaganego uprawnienia Google Drive")
+  );
+}
+
 async function requireSignedInUser(): Promise<GoogleDriveUser> {
   ensureGoogleSigninConfigured();
   const googleSigninModule = getGoogleSigninModule();
@@ -235,19 +248,31 @@ async function getFreshAccessToken(): Promise<string> {
   }
 
   try {
-    const googleSigninModule = getGoogleSigninModule();
-    if (!googleSigninModule) {
-      throw new Error(
-        getGoogleDriveUnsupportedReason() ??
-          "Google Sign-In nie jest dostępny w tym buildzie."
-      );
+    if (!freshAccessTokenPromise) {
+      freshAccessTokenPromise = (async () => {
+        const googleSigninModule = getGoogleSigninModule();
+        if (!googleSigninModule) {
+          throw new Error(
+            getGoogleDriveUnsupportedReason() ??
+              "Google Sign-In nie jest dostępny w tym buildzie."
+          );
+        }
+
+        const tokens = await googleSigninModule.GoogleSignin.getTokens();
+        if (!tokens.accessToken) {
+          throw new Error("Brak tokenu dostępu Google Drive.");
+        }
+        return tokens.accessToken;
+      })();
+
+      freshAccessTokenPromise.finally(() => {
+        if (freshAccessTokenPromise) {
+          freshAccessTokenPromise = null;
+        }
+      });
     }
 
-    const tokens = await googleSigninModule.GoogleSignin.getTokens();
-    if (!tokens.accessToken) {
-      throw new Error("Brak tokenu dostępu Google Drive.");
-    }
-    return tokens.accessToken;
+    return await freshAccessTokenPromise;
   } catch (error) {
     throw new Error(getTokenErrorMessage(error));
   }
@@ -405,6 +430,11 @@ async function enrichSnapshotMetadata(
       error instanceof Error
         ? error.message
         : "Nie udało się odczytać manifestu backupu.";
+
+    if (isGoogleDriveSessionErrorMessage(compatibilityMessage)) {
+      throw new Error(compatibilityMessage);
+    }
+
     return {
       ...metadata,
       manifest: null,
@@ -591,7 +621,13 @@ export async function listRecentBackupSnapshots(
   limit = 3
 ): Promise<GoogleDriveBackupSnapshot[]> {
   const snapshots = await listBackupSnapshots(limit);
-  return Promise.all(snapshots.map((snapshot) => enrichSnapshotMetadata(snapshot)));
+  const enrichedSnapshots: GoogleDriveBackupSnapshot[] = [];
+
+  for (const snapshot of snapshots) {
+    enrichedSnapshots.push(await enrichSnapshotMetadata(snapshot));
+  }
+
+  return enrichedSnapshots;
 }
 
 export async function createBackupSnapshot(): Promise<GoogleDriveBackupSnapshot> {

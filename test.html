@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+    <title>Lista backupów — wersja minimalna</title>
+    <style>
+      :root {
+        --bg: #04162f;
+        --surface: #0b2245;
+        --surface-2: #11305e;
+        --surface-3: #0e2a53;
+        --line: rgba(255, 255, 255, 0.08);
+        --text: #f5f8ff;
+        --muted: #9fb1d1;
+        --ok: #26d6b4;
+        --warn: #f3c44d;
+        --bad: #ff7f98;
+        --btn: #12356d;
+        --btn-hover: #184587;
+        --shadow: 0 12px 28px rgba(0, 0, 0, 0.22);
+        --radius-card: 18px;
+        --radius-pill: 999px;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        margin: 0;
+        min-height: 100%;
+        font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background:
+          radial-gradient(circle at top, rgba(39, 91, 172, 0.16), transparent 28%),
+          linear-gradient(180deg, #031123 0%, var(--bg) 100%);
+        color: var(--text);
+      }
+
+      body {
+        display: flex;
+        justify-content: center;
+        padding: 12px;
+      }
+
+      .phone {
+        width: min(100%, 390px);
+        min-height: calc(100vh - 24px);
+        padding: 10px 8px 28px;
+      }
+
+      .section-title {
+        margin: 0 0 6px;
+        font-size: 1.45rem;
+        line-height: 1.1;
+        letter-spacing: -0.02em;
+      }
+
+      .section-subtitle {
+        margin: 0 0 14px;
+        color: var(--muted);
+        font-size: 0.95rem;
+        line-height: 1.4;
+      }
+
+      .backup-list {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .backup-item {
+        border: 1px solid var(--line);
+        border-radius: var(--radius-card);
+        background: linear-gradient(180deg, rgba(255,255,255,0.02), rgba(255,255,255,0)), var(--surface);
+        box-shadow: var(--shadow);
+        overflow: hidden;
+      }
+
+      .backup-main {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr) auto;
+        gap: 12px;
+        align-items: center;
+        padding: 14px;
+      }
+
+      .backup-left {
+        min-width: 0;
+      }
+
+      .backup-topline {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        min-width: 0;
+      }
+
+      .status-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        flex: 0 0 auto;
+        box-shadow: 0 0 0 4px rgba(255,255,255,0.03);
+      }
+
+      .status-dot.ok {
+        background: var(--ok);
+      }
+
+      .status-dot.warn {
+        background: var(--warn);
+      }
+
+      .status-dot.bad {
+        background: var(--bad);
+      }
+
+      .backup-date {
+        margin: 0;
+        font-size: 1.03rem;
+        line-height: 1.25;
+        font-weight: 800;
+        letter-spacing: -0.01em;
+        color: var(--text);
+      }
+
+      .backup-status {
+        margin: 6px 0 0 18px;
+        color: var(--muted);
+        font-size: 0.9rem;
+        line-height: 1.35;
+      }
+
+      .restore-btn {
+        appearance: none;
+        border: 0;
+        border-radius: 14px;
+        min-width: 104px;
+        padding: 12px 14px;
+        background: linear-gradient(180deg, #173f7e 0%, var(--btn) 100%);
+        color: var(--text);
+        font-size: 0.92rem;
+        font-weight: 900;
+        letter-spacing: 0.01em;
+        box-shadow: inset 0 1px 0 rgba(255,255,255,0.08);
+        transition: transform 120ms ease, background 120ms ease;
+      }
+
+      .restore-btn:hover {
+        background: linear-gradient(180deg, #1d4a92 0%, var(--btn-hover) 100%);
+      }
+
+      .restore-btn:active {
+        transform: translateY(1px);
+      }
+
+      .restore-btn[disabled] {
+        background: rgba(255,255,255,0.08);
+        color: rgba(245, 248, 255, 0.55);
+        box-shadow: none;
+      }
+
+      .backup-footer {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        padding: 0 14px 12px 14px;
+      }
+
+      .footer-tag {
+        display: inline-flex;
+        align-items: center;
+        min-height: 28px;
+        padding: 4px 10px;
+        border-radius: var(--radius-pill);
+        font-size: 0.78rem;
+        font-weight: 800;
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .footer-tag.ok {
+        color: #82f4df;
+        background: rgba(38, 214, 180, 0.12);
+      }
+
+      .footer-tag.warn {
+        color: #ffd978;
+        background: rgba(243, 196, 77, 0.12);
+      }
+
+      .footer-tag.bad {
+        color: #ff9fb1;
+        background: rgba(255, 127, 152, 0.12);
+      }
+
+      .details-toggle {
+        appearance: none;
+        border: 0;
+        background: transparent;
+        color: var(--muted);
+        font-size: 0.86rem;
+        font-weight: 800;
+        padding: 6px 0;
+      }
+
+      .details-toggle::after {
+        content: "▾";
+        display: inline-block;
+        margin-left: 6px;
+        transition: transform 120ms ease;
+      }
+
+      .backup-item[data-open="true"] .details-toggle::after {
+        transform: rotate(180deg);
+      }
+
+      .backup-details {
+        display: none;
+        margin: 0 14px 14px;
+        padding: 12px;
+        border-radius: 14px;
+        background: rgba(0, 0, 0, 0.18);
+        border: 1px solid rgba(255,255,255,0.06);
+      }
+
+      .backup-item[data-open="true"] .backup-details {
+        display: block;
+      }
+
+      .details-title {
+        margin: 0 0 6px;
+        font-size: 0.78rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        color: var(--muted);
+      }
+
+      .details-text {
+        margin: 0;
+        color: var(--text);
+        font-size: 0.9rem;
+        line-height: 1.45;
+        word-break: break-word;
+        white-space: pre-wrap;
+      }
+
+      @media (max-width: 360px) {
+        .backup-main {
+          grid-template-columns: 1fr;
+        }
+
+        .restore-btn {
+          width: 100%;
+        }
+
+        .backup-footer {
+          flex-wrap: wrap;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <main class="phone">
+      <h1 class="section-title">Lista kopii do przywrócenia</h1>
+      <p class="section-subtitle">
+        Minimalna wersja: najpierw tylko data i stan, a reszta dopiero po rozwinięciu.
+      </p>
+
+      <section id="backupList" class="backup-list"></section>
+    </main>
+
+    <script>
+      const backups = [
+        {
+          id: 1,
+          date: '10 kwi 2026, 13:07',
+          state: 'warn',
+          label: 'Wymaga uwagi',
+          canRestore: true,
+          reason: 'Podczas sprawdzania tej kopii pojawił się problem z pobieraniem tokenu Google. Sama kopia jest na liście, ale warto zobaczyć szczegóły.',
+          raw: 'Warning: previous promise did not settle and was overwritten. You\'ve called "getTokens" while "getTokens" was already in progress and has not completed yet.',
+        },
+        {
+          id: 2,
+          date: '9 kwi 2026, 12:18',
+          state: 'ok',
+          label: 'Gotowy do przywrócenia',
+          canRestore: true,
+          reason: 'Ta kopia wygląda poprawnie i może zostać przywrócona.',
+          raw: 'Backup gotowy do przywrócenia.',
+        },
+        {
+          id: 3,
+          date: '9 kwi 2026, 10:49',
+          state: 'bad',
+          label: 'Nie działa',
+          canRestore: false,
+          reason: 'Ta kopia została utworzona w nieobsługiwanym formacie i nie może zostać przywrócona automatycznie.',
+          raw: 'Ta kopia została utworzona w nieobsługiwanym formacie i nie może zostać przywrócona automatycznie.',
+        },
+      ];
+
+      const tagClass = {
+        ok: 'ok',
+        warn: 'warn',
+        bad: 'bad',
+      };
+
+      const list = document.getElementById('backupList');
+
+      function createBackupItem(item) {
+        const article = document.createElement('article');
+        article.className = 'backup-item';
+        article.dataset.open = 'false';
+
+        const toggleLabel = item.state === 'ok' ? 'Pokaż szczegóły' : 'Dlaczego?';
+
+        article.innerHTML = `
+          <div class="backup-main">
+            <div class="backup-left">
+              <div class="backup-topline">
+                <span class="status-dot ${tagClass[item.state]}"></span>
+                <h2 class="backup-date">Backup z ${item.date}</h2>
+              </div>
+              <p class="backup-status">${item.label}</p>
+            </div>
+
+            <button class="restore-btn" ${item.canRestore ? '' : 'disabled'}>
+              Przywróć
+            </button>
+          </div>
+
+          <div class="backup-footer">
+            <span class="footer-tag ${tagClass[item.state]}">${item.label}</span>
+            <button class="details-toggle" type="button">${toggleLabel}</button>
+          </div>
+
+          <div class="backup-details" aria-hidden="true">
+            <p class="details-title">Szczegóły</p>
+            <p class="details-text">${item.reason}\n\n${item.raw}</p>
+          </div>
+        `;
+
+        const toggle = article.querySelector('.details-toggle');
+        const details = article.querySelector('.backup-details');
+
+        toggle.addEventListener('click', () => {
+          const isOpen = article.dataset.open === 'true';
+          article.dataset.open = String(!isOpen);
+          details.setAttribute('aria-hidden', String(isOpen));
+        });
+
+        return article;
+      }
+
+      backups.forEach((backup) => list.appendChild(createBackupItem(backup)));
+    </script>
+  </body>
+</html>

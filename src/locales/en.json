@@ -204,6 +204,20 @@
         "snapshotTitle": "Backup from {{createdAt}}",
         "snapshotMeta": "App version: {{appVersion}} • Source: {{backupSource}}",
         "snapshotSummaryUnavailable": "Could not read the details of this backup.",
+        "snapshotCard": {
+          "stateReady": "Ready to restore",
+          "stateAttention": "Needs attention",
+          "stateUnavailable": "Unavailable",
+          "summaryReady": "This backup looks valid and can be restored.",
+          "summaryAttention": "This backup needs an additional check before restore.",
+          "summaryUnavailable": "This backup cannot be restored automatically.",
+          "detailsButton": "Show details",
+          "whyButton": "Why?",
+          "hideButton": "Hide details",
+          "detailsTitle": "Details",
+          "detailsDescription": "Description: {{value}}",
+          "detailsStats": "Data scope: {{value}}"
+        },
         "snapshotLabels": {
           "customCourses": "Courses",
           "flashcards": "Flashcards",

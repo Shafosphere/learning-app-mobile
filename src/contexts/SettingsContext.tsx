@@ -785,6 +785,7 @@ export const SettingsProvider: React.FC<{
   const learningRemindersEnabledRef = useRef(learningRemindersEnabledState);
   const googleDriveBackupInFlightRef = useRef(false);
   const googleDriveRestoreInFlightRef = useRef(false);
+  const googleDriveSnapshotsRefreshInFlightRef = useRef<Promise<void> | null>(null);
   const [googleDriveBackupSnapshots, setGoogleDriveBackupSnapshots] = useState<
     GoogleDriveBackupSnapshot[]
   >([]);
@@ -2130,21 +2131,32 @@ export const SettingsProvider: React.FC<{
       return;
     }
 
-    setGoogleDriveBackupSnapshotsLoading(true);
-    setGoogleDriveBackupSnapshotsError(null);
-    try {
-      const snapshots = await listRecentBackupSnapshots(3);
-      setGoogleDriveBackupSnapshots(snapshots);
-    } catch (error) {
-      const message =
-        error instanceof Error
-          ? error.message
-          : "Nie udało się pobrać listy backupów z Google Drive.";
-      setGoogleDriveBackupSnapshots([]);
-      setGoogleDriveBackupSnapshotsError(message);
-    } finally {
-      setGoogleDriveBackupSnapshotsLoading(false);
+    if (googleDriveSnapshotsRefreshInFlightRef.current) {
+      await googleDriveSnapshotsRefreshInFlightRef.current;
+      return;
     }
+
+    const refreshPromise = (async () => {
+      setGoogleDriveBackupSnapshotsLoading(true);
+      setGoogleDriveBackupSnapshotsError(null);
+      try {
+        const snapshots = await listRecentBackupSnapshots(3);
+        setGoogleDriveBackupSnapshots(snapshots);
+      } catch (error) {
+        const message =
+          error instanceof Error
+            ? error.message
+            : "Nie udało się pobrać listy backupów z Google Drive.";
+        setGoogleDriveBackupSnapshots([]);
+        setGoogleDriveBackupSnapshotsError(message);
+      } finally {
+        setGoogleDriveBackupSnapshotsLoading(false);
+        googleDriveSnapshotsRefreshInFlightRef.current = null;
+      }
+    })();
+
+    googleDriveSnapshotsRefreshInFlightRef.current = refreshPromise;
+    await refreshPromise;
   }, [googleDriveConfigured, googleDriveConnected]);
 
   const connectGoogleDriveBackup = useCallback(async () => {
@@ -2161,26 +2173,13 @@ export const SettingsProvider: React.FC<{
         setGoogleDriveConnectedState(true),
         setGoogleDriveBackupError(null),
       ]);
-      setGoogleDriveBackupSnapshotsLoading(true);
-      try {
-        const snapshots = await listRecentBackupSnapshots(3);
-        setGoogleDriveBackupSnapshots(snapshots);
-        setGoogleDriveBackupSnapshotsError(null);
-      } catch (error) {
-        const message =
-          error instanceof Error
-            ? error.message
-          : "Nie udało się pobrać listy backupów z Google Drive.";
-        setGoogleDriveBackupSnapshots([]);
-        setGoogleDriveBackupSnapshotsError(message);
-      } finally {
-        setGoogleDriveBackupSnapshotsLoading(false);
-      }
+      await refreshGoogleDriveBackupSnapshots();
     }
     return result;
   }, [
     googleDriveConfigured,
     googleDriveConfigurationError,
+    refreshGoogleDriveBackupSnapshots,
     setGoogleDriveBackupError,
     setGoogleDriveConnectedState,
   ]);
