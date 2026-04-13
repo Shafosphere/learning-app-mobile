@@ -108,6 +108,7 @@ export default function Flashcards() {
   const styles = useStyles();
   const {
     activeCustomCourseId,
+    setActiveCustomCourseId,
     boxesLayout,
     flashcardsBatchSize,
     boxZeroEnabled,
@@ -681,7 +682,9 @@ export default function Flashcards() {
         if (!courseRow) {
           setCustomCourse(null);
           setCustomCards([]);
+          setLoadedCourseId(null);
           setLoadError("Wybrany kurs nie istnieje.");
+          void setActiveCustomCourseId(null);
           return;
         }
         setCustomCourse(courseRow);
@@ -704,7 +707,13 @@ export default function Flashcards() {
     return () => {
       isMounted = false;
     };
-  }, [activeCustomCourseId, isFocused, customCards.length, loadedCourseId]);
+  }, [
+    activeCustomCourseId,
+    customCards.length,
+    isFocused,
+    loadedCourseId,
+    setActiveCustomCourseId,
+  ]);
 
   useEffect(() => {
     if (!isReady) return;

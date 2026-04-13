@@ -35,8 +35,10 @@ import type {
   FlashcardsImageSize,
   TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
-import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
-import { clearPersistedBoxesKeepProgress } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import {
+  clearPersistedBoxesKeepProgress,
+  makeScopeId,
+} from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   createEmptyManualCard,
@@ -77,6 +79,8 @@ export default function CustomCourseEditor({
   const router = useRouter();
   const setPopup = usePopup();
   const {
+    activeCustomCourseId,
+    setActiveCustomCourseId,
     colors,
     getCustomCourseBoxZeroEnabled,
     setCustomCourseBoxZeroEnabled,
@@ -565,6 +569,10 @@ export default function CustomCourseEditor({
               setIsDeleting(true);
               try {
                 await deleteCustomCourse(courseId);
+                await AsyncStorage.removeItem(customBoxesStorageKey);
+                if (activeCustomCourseId === courseId) {
+                  await setActiveCustomCourseId(null);
+                }
                 setPopup({
                   message: "Kurs został usunięty",
                   color: "calm",
