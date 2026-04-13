@@ -951,7 +951,6 @@ export const WIKI_TOPICS: WikiTopic[] = [
           "Automat fiszek sam przełącza pudełka i dobiera nowe słowa, żeby nauka szła płynniej.",
           "Włącz powtórki dodaje karty z tego kursu do codziennych sesji powtórkowych.",
           "Pomiń poprawkę po błędzie od razu przechodzi do kolejnej fiszki po złej odpowiedzi tekstowej.",
-          "Rodzaj przycisków w Prawda / Fałsz zmienia podpisy przycisków na wariant bardziej logiczny albo bardziej intuicyjny.",
           "Rozmiar fiszki decyduje, czy karta ma być duża i pokazywać cały tekst, czy mniejsza i bardziej zwarta.",
           "Rozmiar obrazu oraz Ramka obrazu wpływają na wygląd kart z grafikami.",
         ],

@@ -101,6 +101,7 @@ type ChoiceBlockProps<T extends string> = {
   value: T;
   onSelect?: (value: T) => void;
   disabled?: boolean;
+  titleStyle?: object;
 };
 
 const TRUE_FALSE_OPTIONS: ChoiceOption<TrueFalseButtonsVariant>[] = [
@@ -201,11 +202,12 @@ function SettingsChoiceBlock<T extends string>({
   value,
   onSelect,
   disabled = false,
+  titleStyle,
 }: ChoiceBlockProps<T>) {
   return (
     <View style={styles.settingsChoiceBlock}>
       <View style={styles.settingsChoiceHeader}>
-        <Text style={styles.settingsChoiceTitle}>{title}</Text>
+        <Text style={titleStyle ?? styles.settingsChoiceTitle}>{title}</Text>
         <Text style={styles.settingsChoiceDescription}>
           {preventWidowsPl(description)}
         </Text>
@@ -281,11 +283,11 @@ export function CourseSettingsSection({
     key,
     ...IMAGE_SIZE_LABELS[key],
   }));
+  const shouldShowAnswersSection =
+    !hideSkipCorrectionOption || showTrueFalseButtonsVariant;
 
   return (
     <View style={sharedStyles.sectionGroup}>
-      <Text style={sharedStyles.settingsSectionHeader}>USTAWIENIA</Text>
-
       <Text style={sharedStyles.settingsGroupLabel}>PRZEPŁYW</Text>
       <View style={sharedStyles.settingsGroupCard}>
         <View style={sharedStyles.settingsGroupRows}>
@@ -348,43 +350,47 @@ export function CourseSettingsSection({
         </View>
       </View>
 
-      <Text style={sharedStyles.settingsGroupLabel}>ODPOWIEDZI</Text>
-      {!hideSkipCorrectionOption ? (
-        <View style={sharedStyles.settingsGroupCard}>
-          <SettingsToggleRow
-            styles={sharedStyles}
-            title="Pomiń poprawkę po błędzie"
-            description="Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową."
-            value={skipCorrectionLocked ? true : skipCorrectionEnabled}
-            onPress={() =>
-              skipCorrectionLocked
-                ? undefined
-                : onToggleSkipCorrection(
-                    !(skipCorrectionLocked ? true : skipCorrectionEnabled)
-                  )
-            }
-            accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
-            disabled={skipCorrectionLocked}
-            dimmed={skipCorrectionLocked}
-          />
-        </View>
+      {shouldShowAnswersSection ? (
+        <>
+          <Text style={sharedStyles.settingsGroupLabel}>ODPOWIEDZI</Text>
+          {!hideSkipCorrectionOption ? (
+            <View style={sharedStyles.settingsGroupCard}>
+              <SettingsToggleRow
+                styles={sharedStyles}
+                title="Pomiń poprawkę po błędzie"
+                description="Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową."
+                value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+                onPress={() =>
+                  skipCorrectionLocked
+                    ? undefined
+                    : onToggleSkipCorrection(
+                        !(skipCorrectionLocked ? true : skipCorrectionEnabled)
+                      )
+                }
+                accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
+                disabled={skipCorrectionLocked}
+                dimmed={skipCorrectionLocked}
+              />
+            </View>
+          ) : null}
+
+          {showTrueFalseButtonsVariant ? (
+            <SettingsChoiceBlock
+              styles={sharedStyles}
+              title="Rodzaj przycisków w Prawda / Fałsz"
+              description="Wybierz, jakie napisy mają mieć przyciski w tym kursie."
+              options={TRUE_FALSE_OPTIONS}
+              value={trueFalseButtonsVariant}
+              onSelect={onSelectTrueFalseButtonsVariant}
+            />
+          ) : null}
+        </>
       ) : null}
 
-      {showTrueFalseButtonsVariant ? (
-        <SettingsChoiceBlock
-          styles={sharedStyles}
-          title="Rodzaj przycisków w Prawda / Fałsz"
-          description="Wybierz, jakie napisy mają mieć przyciski w tym kursie."
-          options={TRUE_FALSE_OPTIONS}
-          value={trueFalseButtonsVariant}
-          onSelect={onSelectTrueFalseButtonsVariant}
-        />
-      ) : null}
-
-      <Text style={sharedStyles.settingsGroupLabel}>KARTA</Text>
       <SettingsChoiceBlock
         styles={sharedStyles}
         title="Rozmiar fiszki"
+        titleStyle={sharedStyles.settingsGroupLabel}
         description="Zmień wielkość karty tylko dla tego kursu."
         options={CARD_SIZE_OPTIONS}
         value={cardSize}
@@ -395,6 +401,7 @@ export function CourseSettingsSection({
         <SettingsChoiceBlock
           styles={sharedStyles}
           title="Rozmiar obrazu"
+          titleStyle={sharedStyles.settingsGroupLabel}
           description="Dopasuj wysokość obrazków w dużych fiszkach."
           hint={
             imageSizeEnabled

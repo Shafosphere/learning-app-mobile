@@ -115,7 +115,6 @@ export default function Flashcards() {
     explanationOnlyOnWrong,
     showExplanationEnabled,
     skipCorrectionEnabled,
-    trueFalseButtonsVariant,
     actionButtonsPosition,
     colors,
   } = useSettings();
@@ -987,13 +986,10 @@ export default function Flashcards() {
       });
     });
   }, []);
-  const effectiveTrueFalseButtonsVariant = isKnowDontKnow
-    ? "know_dont_know"
-    : selectedItem?.answerOnly
+  const effectiveTrueFalseButtonsVariant =
+    isKnowDontKnow || selectedItem?.answerOnly || courseHasOnlyKnowDontKnow
       ? "know_dont_know"
-      : courseHasOnlyKnowDontKnow
-        ? "know_dont_know"
-        : trueFalseButtonsVariant;
+      : "true_false";
   const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({

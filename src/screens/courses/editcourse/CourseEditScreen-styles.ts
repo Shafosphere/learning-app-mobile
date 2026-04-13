@@ -128,11 +128,9 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   settingsChoiceBlock: {
     backgroundColor: colors.background,
     borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
     borderColor: colors.border,
     marginBottom: 16,
-    gap: 12,
+    gap: 6,
   },
   settingsChoiceHeader: {
     gap: 4,

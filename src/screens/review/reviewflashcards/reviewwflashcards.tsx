@@ -104,7 +104,6 @@ export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{ courseId?: string }>();
   const styles = useStyles();
   const {
-    trueFalseButtonsVariant,
     actionButtonsPosition,
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
@@ -856,7 +855,9 @@ export default function ReviewFlashcardsPlaceholder() {
   const cardActionsConfirmDisabled = false;
   const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
   const effectiveTrueFalseButtonsVariant =
-    selectedItem?.type === "know_dont_know" ? "know_dont_know" : trueFalseButtonsVariant;
+    selectedItem?.type === "know_dont_know" || selectedItem?.answerOnly
+      ? "know_dont_know"
+      : "true_false";
   const isCarouselLayout = layout !== "classic";
   const carouselMinScale = 0.42;
   const {

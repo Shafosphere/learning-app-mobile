@@ -15,6 +15,7 @@ import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import MyButton from "@/src/components/button/button";
+import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -64,6 +65,8 @@ type CustomCourseEditorProps = {
   initialName: string;
   lockAppearance: boolean;
 };
+
+type CustomCourseEditTab = "options" | "content";
 
 export default function CustomCourseEditor({
   courseId,
@@ -192,6 +195,7 @@ export default function CustomCourseEditor({
     useState<TrueFalseButtonsVariant>(() =>
       getCustomCourseTrueFalseButtonsVariant(courseId)
     );
+  const [activeTab, setActiveTab] = useState<CustomCourseEditTab>("options");
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -244,8 +248,9 @@ export default function CustomCourseEditor({
     "large",
     "very_large",
   ];
+  const shouldShowTabSwitcher = !isOfficialCourse;
   const shouldShowManualToolbar =
-    !isOfficialCourse && !loading && !loadError;
+    !isOfficialCourse && !loading && !loadError && activeTab === "content";
   const nameConflict = useMemo(
     () => findCourseNameConflict(courseName, existingCourses, courseId),
     [courseId, courseName, existingCourses],
@@ -678,112 +683,137 @@ export default function CustomCourseEditor({
         ]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.sectionCard}>
-          <CourseSettingsPanel
-            styles={styles}
-            settingsProps={{
-              styles,
-              switchColors: {
-                thumb: colors.background,
-                trackFalse: colors.border,
-                trackTrue: colors.my_green,
-              },
-              colors,
-              boxZeroEnabled: courseBoxZeroEnabled,
-              onToggleBoxZero: handleCourseBoxZeroToggle,
-              autoflowEnabled: courseAutoflowEnabled,
-              onToggleAutoflow: handleCourseAutoflowToggle,
-              reviewsEnabled,
-              onToggleReviews: handleCourseReviewsToggle,
-              showExplanationEnabled: courseShowExplanationEnabled,
-              onToggleShowExplanation: handleCourseShowExplanationToggle,
-              explanationOnlyOnWrong: courseExplanationOnlyOnWrong,
-              onToggleExplanationOnlyOnWrong:
-                handleCourseExplanationOnlyOnWrongToggle,
-              skipCorrectionEnabled: courseSkipCorrectionEnabled,
-              onToggleSkipCorrection: handleCourseSkipCorrectionToggle,
-              skipCorrectionLocked: courseIsTrueFalseOnly,
-              hideSkipCorrectionOption: courseIsTrueFalseOnly,
-              showTrueFalseButtonsVariant: courseIsTrueFalseOnly,
-              trueFalseButtonsVariant: courseTrueFalseButtonsVariant,
-              onSelectTrueFalseButtonsVariant:
-                handleCourseTrueFalseButtonsVariantChange,
-              cardSize: courseCardSize,
-              onSelectCardSize: handleCourseCardSizeChange,
-              showImageSizeOptions: courseHasImageCards,
-              imageSize: courseImageSize,
-              imageSizeOptions,
-              onSelectImageSize: handleCourseImageSizeChange,
-              imageSizeEnabled: imageSizeOptionsEnabled,
-              showImageFrameOption: courseHasImageCards,
-              imageFrameEnabled: courseImageFrameEnabled,
-              onToggleImageFrame: handleCourseImageFrameToggle,
-            }}
-            resetActions={[
-              {
-                key: "boxes",
-                title: "Wyczyść stan pudełek",
-                subtitle:
-                  "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
-                ctaText: "Wyczyść",
-                loadingText: "Czyszczę...",
-                loading: resettingBoxes,
-                onPress: handleResetBoxes,
-                disabled: resettingBoxes,
-              },
-              {
-                key: "reviews",
-                title: "Usuń powtórki",
-                subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
-                ctaText: "Usuń",
-                loadingText: "Usuwam...",
-                loading: resettingReviews,
-                onPress: handleResetReviews,
-                disabled: resettingReviews,
-              },
-              {
-                key: "all",
-                title: "Przywróć kurs od początku",
-                subtitle:
-                  "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
-                ctaText: "Przywróć",
-                loadingText: "Przywracam...",
-                loading: resettingAll,
-                onPress: handleResetAll,
-                disabled: resettingAll,
-              },
-            ]}
-          />
-        </View>
+        {shouldShowTabSwitcher ? (
+          <View style={styles.topSection}>
+            <Text style={styles.topSectionTitle}>
+              {activeTab === "options" ? "ustawienia" : "zawartość"}
+            </Text>
+            <SegmentedTabs
+              options={[
+                { key: "options", label: "Opcje" },
+                { key: "content", label: "Treść" },
+              ]}
+              value={activeTab}
+              onChange={setActiveTab}
+              accessibilityLabel="Sekcje edycji kursu"
+              containerStyle={styles.viewModeTabs}
+            />
+          </View>
+        ) : null}
 
-        {!isOfficialCourse ? (
+        {isOfficialCourse || activeTab === "options" ? (
           <>
             <View style={styles.sectionCard}>
-              <Text style={styles.sectionLabel}>wygląd</Text>
-              <View style={styles.iconSelectorWrapper}>
-                <CourseIconColorSelector
-                  courseName={courseName}
-                  onCourseNameChange={setCourseName}
-                  selectedIcon={iconId}
-                  selectedColor={iconColor}
-                  selectedColorId={colorId ?? undefined}
-                  onIconChange={(value) => setIconId(value)}
-                  onColorChange={handleColorChange}
-                  onColorHexChange={(hex) => {
-                    setIconColor(hex);
-                    setColorId(null);
-                  }}
-                  previewName={courseName}
-                  nameValidationState={nameConflict.kind}
-                  nameValidationMessage={nameValidationMessage}
-                  nameEditable={!isOfficialCourse}
-                  disabled={isSaving}
-                  styles={{
-                    container: styles.iconSection,
-                  }}
-                  iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
-                  colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
-                />
+              <CourseSettingsPanel
+                styles={styles}
+                settingsProps={{
+                  styles,
+                  switchColors: {
+                    thumb: colors.background,
+                    trackFalse: colors.border,
+                    trackTrue: colors.my_green,
+                  },
+                  colors,
+                  boxZeroEnabled: courseBoxZeroEnabled,
+                  onToggleBoxZero: handleCourseBoxZeroToggle,
+                  autoflowEnabled: courseAutoflowEnabled,
+                  onToggleAutoflow: handleCourseAutoflowToggle,
+                  reviewsEnabled,
+                  onToggleReviews: handleCourseReviewsToggle,
+                  showExplanationEnabled: courseShowExplanationEnabled,
+                  onToggleShowExplanation: handleCourseShowExplanationToggle,
+                  explanationOnlyOnWrong: courseExplanationOnlyOnWrong,
+                  onToggleExplanationOnlyOnWrong:
+                    handleCourseExplanationOnlyOnWrongToggle,
+                  skipCorrectionEnabled: courseSkipCorrectionEnabled,
+                  onToggleSkipCorrection: handleCourseSkipCorrectionToggle,
+                  skipCorrectionLocked: courseIsTrueFalseOnly,
+                  hideSkipCorrectionOption: courseIsTrueFalseOnly,
+                  showTrueFalseButtonsVariant: false,
+                  trueFalseButtonsVariant: courseTrueFalseButtonsVariant,
+                  onSelectTrueFalseButtonsVariant:
+                    handleCourseTrueFalseButtonsVariantChange,
+                  cardSize: courseCardSize,
+                  onSelectCardSize: handleCourseCardSizeChange,
+                  showImageSizeOptions: courseHasImageCards,
+                  imageSize: courseImageSize,
+                  imageSizeOptions,
+                  onSelectImageSize: handleCourseImageSizeChange,
+                  imageSizeEnabled: imageSizeOptionsEnabled,
+                  showImageFrameOption: courseHasImageCards,
+                  imageFrameEnabled: courseImageFrameEnabled,
+                  onToggleImageFrame: handleCourseImageFrameToggle,
+                }}
+                resetActions={[
+                  {
+                    key: "boxes",
+                    title: "Wyczyść stan pudełek",
+                    subtitle:
+                      "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
+                    ctaText: "Wyczyść",
+                    loadingText: "Czyszczę...",
+                    loading: resettingBoxes,
+                    onPress: handleResetBoxes,
+                    disabled: resettingBoxes,
+                  },
+                  {
+                    key: "reviews",
+                    title: "Usuń powtórki",
+                    subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
+                    ctaText: "Usuń",
+                    loadingText: "Usuwam...",
+                    loading: resettingReviews,
+                    onPress: handleResetReviews,
+                    disabled: resettingReviews,
+                  },
+                  {
+                    key: "all",
+                    title: "Przywróć kurs od początku",
+                    subtitle:
+                      "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
+                    ctaText: "Przywróć",
+                    loadingText: "Przywracam...",
+                    loading: resettingAll,
+                    onPress: handleResetAll,
+                    disabled: resettingAll,
+                  },
+                ]}
+              />
+            </View>
+
+          </>
+        ) : null}
+
+        {!isOfficialCourse && activeTab === "content" ? (
+          <>
+            <View style={styles.sectionCard}>
+              <View style={styles.sectionGroup}>
+                <Text style={styles.settingsGroupLabel}>WYGLĄD</Text>
+                <View style={styles.iconSelectorWrapper}>
+                  <CourseIconColorSelector
+                    courseName={courseName}
+                    onCourseNameChange={setCourseName}
+                    selectedIcon={iconId}
+                    selectedColor={iconColor}
+                    selectedColorId={colorId ?? undefined}
+                    onIconChange={(value) => setIconId(value)}
+                    onColorChange={handleColorChange}
+                    onColorHexChange={(hex) => {
+                      setIconColor(hex);
+                      setColorId(null);
+                    }}
+                    previewName={courseName}
+                    nameValidationState={nameConflict.kind}
+                    nameValidationMessage={nameValidationMessage}
+                    nameEditable={!isOfficialCourse}
+                    disabled={isSaving}
+                    styles={{
+                      container: styles.iconSection,
+                    }}
+                    iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
+                    colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
+                  />
+                </View>
               </View>
             </View>
 
@@ -797,12 +827,9 @@ export default function CustomCourseEditor({
                   {loadError}
                 </Text>
               ) : (
-                <>
+                <View style={styles.sectionGroup}>
                   <View style={styles.manualHeader}>
-                    <Text style={styles.manualTitle}>fiszki</Text>
-                    <Text style={styles.manualHint}>
-                      Zmieniaj zawartość kursu
-                    </Text>
+                    <Text style={styles.settingsGroupLabel}>FISZKI</Text>
                   </View>
                   <ManualCardsEditor
                     manualCards={manualCards}
@@ -819,7 +846,7 @@ export default function CustomCourseEditor({
                     onCardExplanationChange={handleManualCardExplanationChange}
                     showDefaultBottomAddButton={false}
                   />
-                </>
+                </View>
               )}
             </View>
           </>

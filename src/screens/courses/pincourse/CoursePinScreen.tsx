@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
 import {
   COURSE_CATEGORIES,
@@ -19,9 +20,7 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
-  Animated,
   Image,
-  LayoutChangeEvent,
   Pressable,
   ScrollView,
   Text,
@@ -61,7 +60,6 @@ type CourseGroup = {
 type CourseViewMode = "languages" | "general";
 
 export default function CoursePinScreen() {
-  const segmentedPad = 4;
   const styles = useStyles();
   const router = useRouter();
   const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
@@ -70,18 +68,10 @@ export default function CoursePinScreen() {
     OfficialCourseListItem[]
   >([]);
   const [viewMode, setViewMode] = useState<CourseViewMode>("languages");
-  const [tabsWidth, setTabsWidth] = useState(0);
-  const sliderX = useState(() => new Animated.Value(0))[0];
   // Local checkpoint state used for immediate UI updates (buttons)
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
-  const tabSliderWidth = Math.max(0, (tabsWidth - segmentedPad * 2) / 2);
-
-  const handleTabsLayout = useCallback((event: LayoutChangeEvent) => {
-    const nextWidth = event.nativeEvent.layout.width;
-    setTabsWidth(nextWidth);
-  }, []);
 
   const { IntroOverlay, unlockGate } = useScreenIntro({
     messages: COURSE_PIN_INTRO_MESSAGES,
@@ -257,18 +247,6 @@ export default function CoursePinScreen() {
     }
   }, [hasAnyPinned, unlockGate]);
 
-  useEffect(() => {
-    if (tabSliderWidth <= 0) {
-      return;
-    }
-    const targetX = viewMode === "general" ? tabSliderWidth : 0;
-    Animated.timing(sliderX, {
-      toValue: targetX,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
-  }, [sliderX, tabSliderWidth, viewMode]);
-
   const introActive = checkpoint !== "done";
   const categorizedCourses = useMemo(
     () => groupedCourses.filter((group) => Boolean(group.category)),
@@ -374,70 +352,16 @@ export default function CoursePinScreen() {
       >
         <View style={styles.minicontainer}>
           <Text style={styles.title}>Czego sie uczymy?</Text>
-          <View
-            style={styles.viewModeTabs}
-            accessibilityRole="tablist"
+          <SegmentedTabs
+            options={[
+              { key: "languages", label: "Języki" },
+              { key: "general", label: "Wiedza" },
+            ]}
+            value={viewMode}
+            onChange={setViewMode}
             accessibilityLabel="Filtr typu kursów"
-            onLayout={handleTabsLayout}
-          >
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.viewModeThumb,
-                {
-                  width: tabSliderWidth,
-                  left: segmentedPad,
-                  transform: [{ translateX: sliderX }],
-                },
-              ]}
-            />
-            <Pressable
-              accessibilityRole="tab"
-              accessibilityState={{ selected: viewMode === "languages" }}
-              style={styles.viewModeTab}
-              onPress={() => setViewMode("languages")}
-            >
-              <View style={styles.viewModeTabContent}>
-                <View
-                  style={[
-                    styles.viewModeDot,
-                    viewMode === "languages" && styles.viewModeDotActive,
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.viewModeTabText,
-                    viewMode === "languages" && styles.viewModeTabTextActive,
-                  ]}
-                >
-                  Języki
-                </Text>
-              </View>
-            </Pressable>
-            <Pressable
-              accessibilityRole="tab"
-              accessibilityState={{ selected: viewMode === "general" }}
-              style={styles.viewModeTab}
-              onPress={() => setViewMode("general")}
-            >
-              <View style={styles.viewModeTabContent}>
-                <View
-                  style={[
-                    styles.viewModeDot,
-                    viewMode === "general" && styles.viewModeDotActive,
-                  ]}
-                />
-                <Text
-                  style={[
-                    styles.viewModeTabText,
-                    viewMode === "general" && styles.viewModeTabTextActive,
-                  ]}
-                >
-                  Wiedza
-                </Text>
-              </View>
-            </Pressable>
-          </View>
+            containerStyle={styles.viewModeTabs}
+          />
 
           {viewMode === "languages" ? (
             <>

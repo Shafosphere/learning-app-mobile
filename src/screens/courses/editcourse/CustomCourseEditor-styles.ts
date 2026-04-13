@@ -9,10 +9,24 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 18,
     paddingBottom: 120,
     paddingTop: 32,
-    gap: 24,
+    gap: 0,
   },
   scrollContentWithManualToolbar: {
-    paddingBottom: 236,
+    paddingBottom: 320,
+  },
+  topSection: {
+    gap: 12,
+  },
+  topSectionTitle: {
+    fontSize: 24,
+    fontWeight: "900" as const,
+    textTransform: "uppercase" as const,
+    color: colors.headline,
+    textAlign: "right" as const,
+    paddingRight: 10,
+  },
+  viewModeTabs: {
+    width: "100%",
   },
   sectionCard: {
     backgroundColor: colors.background,
@@ -131,11 +145,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   settingsChoiceBlock: {
     backgroundColor: colors.background,
     borderRadius: 14,
-    padding: 14,
-    borderWidth: 1,
     borderColor: colors.border,
     marginBottom: 16,
-    gap: 12,
+    gap: 6,
   },
   settingsChoiceHeader: {
     gap: 4,
@@ -268,26 +280,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderColor: colors.my_green,
   },
   manualHeader: {
-    flexDirection: "row" as const,
-    alignItems: "center" as const,
-    justifyContent: "space-between" as const,
-  },
-  manualTitle: {
-    fontSize: 18,
-    fontWeight: "900",
-    color: colors.headline,
-    textTransform: "uppercase" as const,
-  },
-  manualHint: {
-    fontSize: 13,
-    color: colors.paragraph,
+    gap: 0,
   },
   manualToolbarWrap: {
     paddingHorizontal: 24,
     paddingTop: 8,
     paddingBottom: 10,
     backgroundColor: colors.background,
-    borderTopWidth: 1,
+    // borderTopWidth: 1,
     borderTopColor: colors.border,
   },
   manualToolbar: {

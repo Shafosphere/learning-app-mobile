@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { usePopup } from "@/src/contexts/PopupContext";
 import {
@@ -33,7 +34,6 @@ import { useTranslation } from "react-i18next";
 import * as Sharing from "expo-sharing";
 import {
   Animated,
-  LayoutChangeEvent,
   Platform,
   Pressable,
   ScrollView,
@@ -54,7 +54,6 @@ import { useStyles } from "./importFlashcards-styles";
 type CsvStep = "idle" | "analyzing" | "preview" | "importing";
 
 export default function CustomCourseContentScreen() {
-  const segmentedPad = 4;
   const styles = useStyles();
   const setPopup = usePopup();
   const router = useRouter();
@@ -114,8 +113,6 @@ export default function CustomCourseContentScreen() {
   }, [params.reviewsEnabled]);
 
   const [addMode, setAddMode] = useState<AddMode>("manual");
-  const [addModeTabsWidth, setAddModeTabsWidth] = useState(0);
-  const addModeSliderX = useState(() => new Animated.Value(0))[0];
   const {
     manualCards,
     replaceManualCards,
@@ -140,11 +137,6 @@ export default function CustomCourseContentScreen() {
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
 
   const shouldShowManualToolbar = addMode === "manual";
-  const addModeSliderWidth = Math.max(0, (addModeTabsWidth - segmentedPad * 2) / 2);
-
-  const handleAddModeTabsLayout = useCallback((event: LayoutChangeEvent) => {
-    setAddModeTabsWidth(event.nativeEvent.layout.width);
-  }, []);
 
   const draftScopeKey = useMemo(
     () =>
@@ -195,18 +187,6 @@ export default function CustomCourseContentScreen() {
       isMounted = false;
     };
   }, [draftScopeKey, replaceManualCards]);
-
-  useEffect(() => {
-    if (addModeSliderWidth <= 0) {
-      return;
-    }
-    const targetX = addMode === "manual" ? addModeSliderWidth : 0;
-    Animated.timing(addModeSliderX, {
-      toValue: targetX,
-      duration: 220,
-      useNativeDriver: true,
-    }).start();
-  }, [addMode, addModeSliderWidth, addModeSliderX]);
 
   useEffect(() => {
     if (!isDraftHydrated) return;
@@ -630,50 +610,13 @@ export default function CustomCourseContentScreen() {
           ]}
         >
           <Text style={styles.sectionHeader}>{t("courseCreator.import.sectionHeader")}</Text>
-          <View
-            style={styles.addModeTabs}
-            accessibilityRole="tablist"
+          <SegmentedTabs
+            options={segmentOptions}
+            value={addMode}
+            onChange={setAddMode}
             accessibilityLabel={t("courseCreator.import.addModeA11y")}
-            onLayout={handleAddModeTabsLayout}
-          >
-            <Animated.View
-              pointerEvents="none"
-              style={[
-                styles.addModeThumb,
-                {
-                  width: addModeSliderWidth,
-                  left: segmentedPad,
-                  transform: [{ translateX: addModeSliderX }],
-                },
-              ]}
-            />
-            {segmentOptions.map((option) => (
-              <Pressable
-                key={option.key}
-                onPress={() => setAddMode(option.key)}
-                accessibilityRole="tab"
-                accessibilityState={{ selected: addMode === option.key }}
-                style={styles.addModeTab}
-              >
-                <View style={styles.addModeTabContent}>
-                  <View
-                    style={[
-                      styles.addModeDot,
-                      addMode === option.key && styles.addModeDotActive,
-                    ]}
-                  />
-                  <Text
-                    style={[
-                      styles.addModeTabText,
-                      addMode === option.key && styles.addModeTabTextActive,
-                    ]}
-                  >
-                    {option.label}
-                  </Text>
-                </View>
-              </Pressable>
-            ))}
-          </View>
+            containerStyle={styles.addModeTabs}
+          />
 
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>

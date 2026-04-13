@@ -574,7 +574,7 @@ export default function CourseSettingsScreen() {
               onToggleSkipCorrection: setSkipCorrectionEnabled,
               skipCorrectionLocked: courseIsTrueFalseOnly,
               hideSkipCorrectionOption: courseIsTrueFalseOnly,
-              showTrueFalseButtonsVariant: courseIsTrueFalseOnly,
+              showTrueFalseButtonsVariant: false,
               trueFalseButtonsVariant,
               onSelectTrueFalseButtonsVariant: setTrueFalseButtonsVariant,
               cardSize,
