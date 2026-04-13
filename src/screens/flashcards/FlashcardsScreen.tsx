@@ -16,6 +16,7 @@ import type { CustomCourseRecord } from "@/src/db/sqlite/db";
 import {
   getCustomCourseById,
   getCustomFlashcards,
+  getCustomReviewedFlashcardIds,
   getGlobalDailyStreakDays,
   scheduleCustomReview,
   updateCustomFlashcardHints,
@@ -202,6 +203,7 @@ export default function Flashcards() {
     boxes,
     setBoxes,
     isReady,
+    usedWordIds,
     addUsedWordIds,
     removeUsedWordIds,
     setBatchIndex,
@@ -535,6 +537,40 @@ export default function Flashcards() {
       boxes.boxFive.length
     );
   }, [boxes]);
+
+  useEffect(() => {
+    if (activeCustomCourseId == null) return;
+    if (!isReady) return;
+    if (customCards.length === 0) return;
+    if (totalCardsInBoxes > 0 || usedWordIds.length > 0) return;
+
+    let cancelled = false;
+
+    void getCustomReviewedFlashcardIds(activeCustomCourseId)
+      .then((reviewedIds) => {
+        if (cancelled || reviewedIds.length === 0) {
+          return;
+        }
+        addUsedWordIds(reviewedIds);
+      })
+      .catch((error) => {
+        console.warn(
+          `[Flashcards] Failed to seed reviewed ids for course ${activeCustomCourseId}`,
+          error
+        );
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [
+    activeCustomCourseId,
+    addUsedWordIds,
+    customCards.length,
+    isReady,
+    totalCardsInBoxes,
+    usedWordIds.length,
+  ]);
 
   const downloadData = useCallback(async (): Promise<void> => {
     if (!customCards.length) return;

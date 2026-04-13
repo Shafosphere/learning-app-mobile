@@ -70,6 +70,25 @@ const createEmptyBoxes = (): BoxesState => ({
   boxFive: [],
 });
 
+export async function clearPersistedBoxesKeepProgress(
+  storageKey: string
+): Promise<void> {
+  const saved = await loadFromStorageSnapshot(storageKey);
+  if (!saved) {
+    await AsyncStorage.removeItem(storageKey);
+    return;
+  }
+
+  const nextPayload: SavedBoxesV2 = {
+    ...saved.parsed,
+    updatedAt: Date.now(),
+    flashcards: createEmptyBoxes(),
+    lastWriteMs: Date.now(),
+  };
+
+  await AsyncStorage.setItem(storageKey, JSON.stringify(nextPayload));
+}
+
 const normalizeBoxes = (source?: BoxesState | null): BoxesState => {
   const empty = createEmptyBoxes();
   if (!source) {

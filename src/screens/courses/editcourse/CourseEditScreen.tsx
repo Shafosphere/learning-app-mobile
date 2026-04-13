@@ -4,6 +4,10 @@ import CustomCourseEditor from "@/src/screens/courses/editcourse/CustomCourseEdi
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
 import { CourseNameField } from "@/src/screens/courses/editcourse/components/nameEdit/nameEdit";
 import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEditScreen-styles";
+import {
+  getCustomCourseBySlug,
+  resetCustomReviewsForCourse,
+} from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
 import type {
   FlashcardsCardSize,
@@ -15,7 +19,10 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import {
+  clearPersistedBoxesKeepProgress,
+  makeScopeId,
+} from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 
 type CourseEditParams = {
@@ -69,6 +76,11 @@ type BuiltinProps = {
   sourceLang: string | null;
   targetLang: string | null;
   level: string | null;
+};
+
+type BuiltinReviewResetScope = {
+  courseId: number;
+  boxesStorageKey: string;
 };
 
 export default function CourseEditScreen() {
@@ -224,6 +236,46 @@ function BuiltinCourseEditor({
       return sameSource && sameTarget && sameLevel;
     });
 
+  const getBuiltinReviewResetScope = (): BuiltinReviewResetScope | null => {
+    const matchingCourse = getMatchingCourse();
+    const courseSlug =
+      (matchingCourse as { slug?: string | null } | undefined)?.slug ?? null;
+    const matchingManifest = OFFICIAL_PACKS.find(
+      (pack) => (courseSlug && pack.slug === courseSlug) || pack.name === courseName
+    );
+    const effectiveSlug = courseSlug ?? matchingManifest?.slug ?? null;
+
+    if (!effectiveSlug) {
+      return null;
+    }
+    return {
+      courseId: -1,
+      boxesStorageKey: effectiveSlug,
+    };
+  };
+
+  const resolveBuiltinReviewResetScope =
+    async (): Promise<BuiltinReviewResetScope | null> => {
+      const provisionalScope = getBuiltinReviewResetScope();
+      if (!provisionalScope) {
+        return null;
+      }
+
+      const courseRow = await getCustomCourseBySlug(provisionalScope.boxesStorageKey);
+      if (!courseRow?.id) {
+        return null;
+      }
+
+      return {
+        courseId: courseRow.id,
+        boxesStorageKey: `customBoxes:${makeScopeId(
+          courseRow.id,
+          courseRow.id,
+          `custom-${courseRow.id}`
+        )}`,
+      };
+    };
+
   const handleBoxZeroToggle = async (value: boolean) => {
     setBoxZeroEnabled(value);
     await setBuiltinCourseBoxZeroEnabled(
@@ -336,31 +388,25 @@ function BuiltinCourseEditor({
 
   const performResetBoxes = async () => {
     setResettingBoxes(true);
-    const matchingCourse = getMatchingCourse();
+    const scope = await resolveBuiltinReviewResetScope();
 
-    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
+    if (!scope) {
       setResettingBoxes(false);
       Alert.alert(
         "Brak danych kursu",
-        "Nie znaleziono identyfikatorów języków dla tego kursu."
+        "Nie udało się odnaleźć lokalnych danych tego kursu."
       );
       return;
     }
 
     try {
-      const scopeId = makeScopeId(
-        matchingCourse.sourceLangId,
-        matchingCourse.targetLangId,
-        normalizedLevel ?? "A1"
-      );
-      const storageKey = `boxes:${scopeId}`;
-      await AsyncStorage.removeItem(storageKey);
+      await clearPersistedBoxesKeepProgress(scope.boxesStorageKey);
       Alert.alert(
-        "Zresetowano pudełka",
-        "Stan pudełek i użyte słówka tego kursu został wyczyszczony."
+        "Wyczyszczono stan pudełek",
+        "Fiszki, które są aktualnie w pudełkach, zostały z nich usunięte i wróciły do puli nieznanych."
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować pudełek.");
+      Alert.alert("Błąd", "Nie udało się wyczyścić stanu pudełek.");
     } finally {
       setResettingBoxes(false);
     }
@@ -368,61 +414,76 @@ function BuiltinCourseEditor({
 
   const handleResetBoxes = () => {
     Alert.alert(
-      "Reset pudełek",
-      "Czyści stan pudełek dla tego kursu i przenosi fiszki do puli nieznanych. Kontynuować?",
+      "Wyczyścić stan pudełek?",
+      "Fiszki, które są aktualnie w pudełkach, zostaną z nich usunięte i wrócą do puli nieznanych. Nie usunie to powtórek ani ogólnego postępu kursu.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetBoxes },
+        { text: "Wyczyść", style: "destructive", onPress: performResetBoxes },
       ]
     );
   };
 
   const performResetReviews = async () => {
     setResettingReviews(true);
-    Alert.alert(
-      "Reset powtórek",
-      "Powtórki dla kursów wbudowanych są wyłączone w nowym formacie."
-    );
-    setResettingReviews(false);
+    const scope = await resolveBuiltinReviewResetScope();
+
+    if (!scope) {
+      setResettingReviews(false);
+      Alert.alert(
+        "Brak danych kursu",
+        "Nie udało się odnaleźć lokalnych danych tego kursu."
+      );
+      return;
+    }
+
+    try {
+      const deleted = await resetCustomReviewsForCourse(scope.courseId);
+      Alert.alert(
+        "Usunięto powtórki",
+        deleted > 0
+          ? `Usunięto ${deleted} zapisanych powtórek tego kursu.`
+          : "Nie było zapisanych powtórek do usunięcia."
+      );
+    } catch {
+      Alert.alert("Błąd", "Nie udało się usunąć powtórek.");
+    } finally {
+      setResettingReviews(false);
+    }
   };
 
   const handleResetReviews = () => {
     Alert.alert(
-      "Reset powtórek",
-      "Usuniesz zapisane powtórki dla tego kursu. Kontynuować?",
+      "Usunąć powtórki?",
+      "Ta operacja usunie wszystkie zapisane powtórki dla tego kursu.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetReviews },
+        { text: "Usuń", style: "destructive", onPress: performResetReviews },
       ]
     );
   };
 
   const performResetAll = async () => {
     setResettingAll(true);
-    const matchingCourse = getMatchingCourse();
+    const scope = await resolveBuiltinReviewResetScope();
 
-    if (!matchingCourse?.sourceLangId || !matchingCourse?.targetLangId) {
+    if (!scope) {
       setResettingAll(false);
       Alert.alert(
         "Brak danych kursu",
-        "Nie znaleziono identyfikatorów języków dla tego kursu."
+        "Nie udało się odnaleźć lokalnych danych tego kursu."
       );
       return;
     }
 
     try {
-      const scopeId = makeScopeId(
-        matchingCourse.sourceLangId,
-        matchingCourse.targetLangId,
-        normalizedLevel ?? "A1"
-      );
-      await AsyncStorage.removeItem(`boxes:${scopeId}`);
+      await AsyncStorage.removeItem(scope.boxesStorageKey);
+      await resetCustomReviewsForCourse(scope.courseId);
       Alert.alert(
-        "Reset całkowity",
-        "Wyczyszczono pudełka i przywrócono fiszki jako nieznane."
+        "Przywrócono kurs od początku",
+        "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych."
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się wykonać pełnego resetu.");
+      Alert.alert("Błąd", "Nie udało się przywrócić kursu od początku.");
     } finally {
       setResettingAll(false);
     }
@@ -430,11 +491,11 @@ function BuiltinCourseEditor({
 
   const handleResetAll = () => {
     Alert.alert(
-      "Reset całkowity",
-      "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane dla tego kursu. Kontynuować?",
+      "Przywrócić kurs od początku?",
+      "Ta operacja wyczyści stan pudełek i powtórki oraz przywróci wszystkie fiszki do puli nieznanych.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetAll },
+        { text: "Przywróć", style: "destructive", onPress: performResetAll },
       ]
     );
   };
@@ -521,29 +582,32 @@ function BuiltinCourseEditor({
             resetActions={[
               {
                 key: "boxes",
-                title: "Reset pudełek",
+                title: "Wyczyść stan pudełek",
                 subtitle:
-                  "Czyści stan pudełek i przywraca fiszki do puli nieznanych.",
-                ctaText: "Reset pudełek",
+                  "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
+                ctaText: "Wyczyść",
+                loadingText: "Czyszczę...",
                 loading: resettingBoxes,
                 onPress: handleResetBoxes,
                 disabled: resettingBoxes,
               },
               {
                 key: "reviews",
-                title: "Reset powtórek",
-                subtitle: "Usuwa zapisane powtórki dla tego kursu.",
-                ctaText: "Reset powtórek",
+                title: "Usuń powtórki",
+                subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
+                ctaText: "Usuń",
+                loadingText: "Usuwam...",
                 loading: resettingReviews,
                 onPress: handleResetReviews,
                 disabled: resettingReviews,
               },
               {
                 key: "all",
-                title: "Reset całkowity",
+                title: "Przywróć kurs od początku",
                 subtitle:
-                  "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.",
-                ctaText: "Reset całkowity",
+                  "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
+                ctaText: "Przywróć",
+                loadingText: "Przywracam...",
                 loading: resettingAll,
                 onPress: handleResetAll,
                 disabled: resettingAll,

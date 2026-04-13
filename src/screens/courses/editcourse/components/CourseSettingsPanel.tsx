@@ -12,6 +12,7 @@ type CourseSettingsResetAction = {
   title: string;
   subtitle: string;
   ctaText: string;
+  loadingText?: string;
   onPress: () => void;
   loading?: boolean;
   disabled?: boolean;
@@ -26,6 +27,7 @@ type Props = {
 };
 
 type SharedStyles = {
+  sectionGroup: object;
   settingsGroupLabel: object;
   settingsActionCard: object;
   settingsActionCardStandalone: object;
@@ -46,7 +48,7 @@ export function CourseSettingsPanel({
   const sharedStyles = styles as SharedStyles;
 
   return (
-    <>
+    <View style={sharedStyles.sectionGroup}>
       <CourseSettingsSection {...settingsProps} />
 
       {resetActions.length > 0 ? (
@@ -75,11 +77,15 @@ export function CourseSettingsPanel({
                     </View>
                     <View style={sharedStyles.settingsActionCardButtonRow}>
                       <MyButton
-                        text={action.loading ? "Resetuję..." : action.ctaText}
+                        text={
+                          action.loading
+                            ? (action.loadingText ?? "Trwa operacja...")
+                            : action.ctaText
+                        }
                         color={action.buttonColor ?? "my_red"}
                         onPress={action.onPress}
                         disabled={action.disabled ?? false}
-                        width={action.buttonWidth ?? 170}
+                        width={action.buttonWidth ?? 130}
                       />
                     </View>
                   </View>
@@ -89,6 +95,6 @@ export function CourseSettingsPanel({
           </View>
         </>
       ) : null}
-    </>
+    </View>
   );
 }

@@ -195,21 +195,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
     borderRadius: 14,
     paddingHorizontal: 14,
-    paddingTop: 14,
+    paddingTop: 0,
     paddingBottom: 0,
     borderWidth: 1,
     borderColor: colors.border,
     gap: 12,
   },
   settingsActionCardStandalone: {
-    paddingBottom: 14,
+    paddingBottom: 0,
   },
   settingsActionCardSections: {
     gap: 0,
   },
   settingsActionCardSection: {
-    paddingTop: 2,
-    paddingBottom: 0,
+    paddingTop: 14,
+    paddingBottom: 14,
     gap: 12,
   },
   settingsActionCardHeader: {

@@ -12,6 +12,63 @@ export interface CustomReviewFlashcard extends CustomFlashcardRecord {
   nextReview: number;
 }
 
+export async function resetBuiltinReviewsForCourse(
+  sourceLangId: number,
+  targetLangId: number,
+  level: string
+): Promise<number> {
+  if (!sourceLangId || !targetLangId || !level) return 0;
+  const db = await getDB();
+  const result = await db.runAsync(
+    `DELETE FROM reviews
+     WHERE source_lang_id = ?
+       AND target_lang_id = ?
+       AND level = ?;`,
+    sourceLangId,
+    targetLangId,
+    level
+  );
+  return Number(result?.changes ?? 0);
+}
+
+export async function countDueBuiltinReviews(
+  sourceLangId: number,
+  targetLangId: number,
+  level: string,
+  nowMs: number = Date.now()
+): Promise<number> {
+  if (!sourceLangId || !targetLangId || !level) return 0;
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt
+     FROM reviews
+     WHERE source_lang_id = ?
+       AND target_lang_id = ?
+       AND level = ?
+       AND next_review <= ?;`,
+    sourceLangId,
+    targetLangId,
+    level,
+    nowMs
+  );
+  return row?.cnt ?? 0;
+}
+
+export async function getCustomReviewedFlashcardIds(
+  courseId: number
+): Promise<number[]> {
+  if (!courseId) return [];
+  const db = await getDB();
+  const rows = await db.getAllAsync<{ flashcardId: number }>(
+    `SELECT flashcard_id AS flashcardId
+     FROM custom_reviews
+     WHERE course_id = ?
+     ORDER BY flashcard_id ASC;`,
+    courseId
+  );
+  return rows.map((row) => row.flashcardId);
+}
+
 export async function scheduleCustomReview(
   flashcardId: number,
   courseId: number,

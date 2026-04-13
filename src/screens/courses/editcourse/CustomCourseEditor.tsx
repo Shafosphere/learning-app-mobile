@@ -35,6 +35,7 @@ import type {
   TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
 import { makeScopeId } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { clearPersistedBoxesKeepProgress } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
 import {
   createEmptyManualCard,
@@ -457,13 +458,13 @@ export default function CustomCourseEditor({
   const performResetBoxes = async () => {
     setResettingBoxes(true);
     try {
-      await AsyncStorage.removeItem(customBoxesStorageKey);
+      await clearPersistedBoxesKeepProgress(customBoxesStorageKey);
       Alert.alert(
-        "Zresetowano pudełka",
-        "Stan pudełek i użyte słówka tego kursu został wyczyszczony."
+        "Wyczyszczono stan pudełek",
+        "Fiszki, które są aktualnie w pudełkach, zostały z nich usunięte i wróciły do puli nieznanych."
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować pudełek.");
+      Alert.alert("Błąd", "Nie udało się wyczyścić stanu pudełek.");
     } finally {
       setResettingBoxes(false);
     }
@@ -471,11 +472,11 @@ export default function CustomCourseEditor({
 
   const handleResetBoxes = () => {
     Alert.alert(
-      "Reset pudełek",
-      "Czyści stan pudełek dla tego kursu i przenosi fiszki z powrotem do puli nieznanych. Kontynuować?",
+      "Wyczyścić stan pudełek?",
+      "Fiszki, które są aktualnie w pudełkach, zostaną z nich usunięte i wrócą do puli nieznanych. Nie usunie to powtórek ani ogólnego postępu kursu.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetBoxes },
+        { text: "Wyczyść", style: "destructive", onPress: performResetBoxes },
       ]
     );
   };
@@ -485,13 +486,13 @@ export default function CustomCourseEditor({
     try {
       const deleted = await resetCustomReviewsForCourse(courseId);
       Alert.alert(
-        "Zresetowano powtórki",
+        "Usunięto powtórki",
         deleted > 0
           ? `Usunięto ${deleted} wpisów powtórek tego kursu.`
           : "Nie było zapisanych powtórek do usunięcia."
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się zresetować powtórek.");
+      Alert.alert("Błąd", "Nie udało się usunąć powtórek.");
     } finally {
       setResettingReviews(false);
     }
@@ -499,11 +500,11 @@ export default function CustomCourseEditor({
 
   const handleResetReviews = () => {
     Alert.alert(
-      "Reset powtórek",
-      "Usuniesz zapisane powtórki dla tego kursu. Kontynuować?",
+      "Usunąć powtórki?",
+      "Ta operacja usunie wszystkie zapisane powtórki dla tego kursu.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetReviews },
+        { text: "Usuń", style: "destructive", onPress: performResetReviews },
       ]
     );
   };
@@ -514,11 +515,11 @@ export default function CustomCourseEditor({
       await AsyncStorage.removeItem(customBoxesStorageKey);
       await resetCustomReviewsForCourse(courseId);
       Alert.alert(
-        "Reset całkowity",
-        "Wyczyszczono pudełka, powtórki i przywrócono fiszki jako nieznane."
+        "Przywrócono kurs od początku",
+        "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych."
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się wykonać pełnego resetu.");
+      Alert.alert("Błąd", "Nie udało się przywrócić kursu od początku.");
     } finally {
       setResettingAll(false);
     }
@@ -526,11 +527,11 @@ export default function CustomCourseEditor({
 
   const handleResetAll = () => {
     Alert.alert(
-      "Reset całkowity",
-      "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane dla tego kursu. Kontynuować?",
+      "Przywrócić kurs od początku?",
+      "Ta operacja wyczyści stan pudełek i powtórki oraz przywróci wszystkie fiszki do puli nieznanych.",
       [
         { text: "Anuluj", style: "cancel" },
-        { text: "Resetuj", style: "destructive", onPress: performResetAll },
+        { text: "Przywróć", style: "destructive", onPress: performResetAll },
       ]
     );
   };
@@ -721,29 +722,32 @@ export default function CustomCourseEditor({
             resetActions={[
               {
                 key: "boxes",
-                title: "Reset pudełek",
+                title: "Wyczyść stan pudełek",
                 subtitle:
-                  "Czyści stan pudełek i przywraca fiszki do puli nieznanych.",
-                ctaText: "Reset pudełek",
+                  "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
+                ctaText: "Wyczyść",
+                loadingText: "Czyszczę...",
                 loading: resettingBoxes,
                 onPress: handleResetBoxes,
                 disabled: resettingBoxes,
               },
               {
                 key: "reviews",
-                title: "Reset powtórek",
-                subtitle: "Usuwa zapisane powtórki dla tego kursu.",
-                ctaText: "Reset powtórek",
+                title: "Usuń powtórki",
+                subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
+                ctaText: "Usuń",
+                loadingText: "Usuwam...",
                 loading: resettingReviews,
                 onPress: handleResetReviews,
                 disabled: resettingReviews,
               },
               {
                 key: "all",
-                title: "Reset całkowity",
+                title: "Przywróć kurs od początku",
                 subtitle:
-                  "Czyści pudełka, powtórki i przywraca wszystkie fiszki jako nieznane.",
-                ctaText: "Reset całkowity",
+                  "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
+                ctaText: "Przywróć",
+                loadingText: "Przywracam...",
                 loading: resettingAll,
                 onPress: handleResetAll,
                 disabled: resettingAll,

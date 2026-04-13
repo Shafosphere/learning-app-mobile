@@ -67,6 +67,20 @@ async function backfillCustomFlashcardAnswers(
 
 export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
   const customSchema = `
+    CREATE TABLE IF NOT EXISTS reviews (
+      word_id        INTEGER NOT NULL,
+      source_lang_id INTEGER NOT NULL,
+      target_lang_id INTEGER NOT NULL,
+      level          TEXT    NOT NULL,
+      stage          INTEGER NOT NULL DEFAULT 0,
+      learned_at     INTEGER NOT NULL,
+      next_review    INTEGER NOT NULL,
+      PRIMARY KEY (word_id, source_lang_id, target_lang_id, level)
+    );
+    CREATE INDEX IF NOT EXISTS idx_reviews_scope
+      ON reviews(source_lang_id, target_lang_id, level);
+    CREATE INDEX IF NOT EXISTS idx_reviews_due
+      ON reviews(next_review);
     CREATE TABLE IF NOT EXISTS custom_courses (
       id          INTEGER PRIMARY KEY AUTOINCREMENT,
       name        TEXT    NOT NULL,
@@ -133,6 +147,9 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
 
   await db.execAsync(customSchema);
 
+  await ensureColumn(db, "reviews", "stage", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn(db, "reviews", "learned_at", "INTEGER NOT NULL DEFAULT 0");
+  await ensureColumn(db, "reviews", "next_review", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn(
     db,
     "custom_courses",

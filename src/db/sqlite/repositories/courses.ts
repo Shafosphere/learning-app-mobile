@@ -155,6 +155,35 @@ export async function getCustomCourseById(
   return row ? mapCustomCourseRow(row) : null;
 }
 
+export async function getCustomCourseBySlug(
+  slug: string
+): Promise<CustomCourseRecord | null> {
+  const normalizedSlug = slug.trim();
+  if (!normalizedSlug) {
+    return null;
+  }
+  const db = await getDB();
+  const row = await db.getFirstAsync<CustomCourseSqlRow>(
+    `SELECT
+       id,
+       name,
+       icon_id     AS iconId,
+       icon_color  AS iconColor,
+       color_id    AS colorId,
+       COALESCE(reviews_enabled, 0) AS reviewsEnabled,
+       created_at  AS createdAt,
+       updated_at  AS updatedAt,
+       COALESCE(is_official, 0) AS isOfficial,
+       slug,
+       COALESCE(pack_version, 1) AS packVersion
+     FROM custom_courses
+     WHERE slug = ?
+     LIMIT 1;`,
+    normalizedSlug
+  );
+  return row ? mapCustomCourseRow(row) : null;
+}
+
 export async function createCustomCourse(
   course: CustomCourseInput
 ): Promise<number> {
