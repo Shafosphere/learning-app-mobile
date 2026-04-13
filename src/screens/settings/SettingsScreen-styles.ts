@@ -462,42 +462,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   snapshotFooter: {
     flexDirection: "row",
     alignItems: "center",
-    justifyContent: "space-between",
-    columnGap: 12,
+    justifyContent: "flex-end",
     marginTop: 12,
-    flexWrap: "wrap",
-  },
-  snapshotFooterTag: {
-    minHeight: 28,
-    borderRadius: 999,
-    paddingHorizontal: 10,
-    paddingVertical: 4,
-    alignItems: "center",
-    justifyContent: "center",
-    borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.06)",
-  },
-  snapshotFooterTagOk: {
-    backgroundColor: "rgba(38, 214, 180, 0.12)",
-  },
-  snapshotFooterTagWarn: {
-    backgroundColor: "rgba(243, 196, 77, 0.12)",
-  },
-  snapshotFooterTagBad: {
-    backgroundColor: "rgba(255, 127, 152, 0.12)",
-  },
-  snapshotFooterTagText: {
-    fontSize: 12,
-    fontWeight: "800",
-  },
-  snapshotFooterTagTextOk: {
-    color: "#82f4df",
-  },
-  snapshotFooterTagTextWarn: {
-    color: "#ffd978",
-  },
-  snapshotFooterTagTextBad: {
-    color: "#ff9fb1",
   },
   snapshotDetailsToggle: {
     paddingVertical: 6,

@@ -138,7 +138,6 @@ const CoursesDataSection: React.FC = () => {
   const getSnapshotPresentation = useCallback(
     (snapshot: GoogleDriveBackupSnapshot): {
       tone: SnapshotCardTone;
-      label: string;
       summary: string;
       toggleLabel: string;
       details: string;
@@ -152,7 +151,6 @@ const CoursesDataSection: React.FC = () => {
 
         return {
           tone: "bad",
-          label: t("settings.coursesData.googleDrive.snapshotCard.stateUnavailable"),
           summary: t("settings.coursesData.googleDrive.snapshotCard.summaryUnavailable"),
           toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.whyButton"),
           details: [
@@ -166,7 +164,6 @@ const CoursesDataSection: React.FC = () => {
       if (!snapshot.manifest) {
         return {
           tone: "warn",
-          label: t("settings.coursesData.googleDrive.snapshotCard.stateAttention"),
           summary: t("settings.coursesData.googleDrive.snapshotCard.summaryAttention"),
           toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.whyButton"),
           details: [
@@ -181,7 +178,6 @@ const CoursesDataSection: React.FC = () => {
 
       return {
         tone: "ok",
-        label: t("settings.coursesData.googleDrive.snapshotCard.stateReady"),
         summary: t("settings.coursesData.googleDrive.snapshotCard.summaryReady"),
         toggleLabel: t("settings.coursesData.googleDrive.snapshotCard.detailsButton"),
         details: [
@@ -463,12 +459,15 @@ const CoursesDataSection: React.FC = () => {
     );
   };
 
-  const driveActionButtonText =
-    driveAction === "connect" || driveAction === "backup" || googleDriveBackupInProgress
+  const connectButtonText =
+    driveAction === "connect"
       ? t("settings.coursesData.googleDrive.loadingShort")
-      : googleDriveConnected
-        ? t("settings.coursesData.googleDrive.backupNowButton")
-        : t("settings.coursesData.googleDrive.connectButton");
+      : t("settings.coursesData.googleDrive.connectButton");
+
+  const backupNowButtonText =
+    driveAction === "backup" || googleDriveBackupInProgress
+      ? t("settings.coursesData.googleDrive.loadingShort")
+      : t("settings.coursesData.googleDrive.backupNowButton");
 
   const refreshButtonText =
     driveAction === "refresh" || googleDriveBackupSnapshotsLoading
@@ -561,94 +560,6 @@ const CoursesDataSection: React.FC = () => {
           <Text style={styles.rowSubtitle}>{driveStatusText}</Text>
         </View>
 
-        <View style={styles.actionCard}>
-          <View style={styles.actionCardSections}>
-            <View style={styles.actionCardSection}>
-              <View style={styles.actionCardHeader}>
-                <Text style={styles.actionCardTitle}>
-                  {googleDriveConnected
-                    ? t("settings.coursesData.googleDrive.manualBackupTitle")
-                    : t("settings.coursesData.googleDrive.connectTitle")}
-                </Text>
-                <Text style={styles.actionCardDescription}>
-                  {preventWidowsPl(
-                    googleDriveConnected
-                      ? t("settings.coursesData.googleDrive.manualBackupSubtitle")
-                      : t("settings.coursesData.googleDrive.connectSubtitle")
-                  )}
-                </Text>
-              </View>
-              <View style={styles.actionCardButtonRow}>
-                <MyButton
-                  text={driveActionButtonText}
-                  onPress={googleDriveConnected ? handleBackupNow : handleConnectDrive}
-                  color="my_green"
-                  disabled={
-                    driveAction === "connect" ||
-                    driveAction === "backup" ||
-                    googleDriveBackupInProgress
-                  }
-                  width={130}
-                  accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
-                  textStyle={styles.driveButtonText}
-                />
-              </View>
-            </View>
-
-            <View style={styles.appearanceGroupDivider} />
-
-            <View style={styles.actionCardSection}>
-              <View style={styles.actionCardHeader}>
-                <Text style={styles.actionCardTitle}>
-                  {t("settings.coursesData.googleDrive.restoreTitle")}
-                </Text>
-                <Text style={styles.actionCardDescription}>
-                  {preventWidowsPl(t("settings.coursesData.googleDrive.restoreSubtitle"))}
-                </Text>
-              </View>
-              <View style={styles.actionCardButtonRow}>
-                <MyButton
-                  text={refreshButtonText}
-                  color="my_green"
-                  onPress={handleRefreshSnapshots}
-                  disabled={
-                    !googleDriveConnected ||
-                    driveAction === "refresh" ||
-                    googleDriveBackupSnapshotsLoading
-                  }
-                  width={130}
-                />
-              </View>
-            </View>
-
-            <View style={styles.appearanceGroupDivider} />
-
-            <View style={styles.actionCardSection}>
-              <View style={styles.actionCardHeader}>
-                <Text style={styles.actionCardTitle}>
-                  {t("settings.coursesData.googleDrive.disconnectTitle")}
-                </Text>
-                <Text style={styles.actionCardDescription}>
-                  {preventWidowsPl(t("settings.coursesData.googleDrive.disconnectSubtitle"))}
-                </Text>
-              </View>
-              <View style={styles.actionCardButtonRow}>
-                <MyButton
-                  text={
-                    driveAction === "disconnect"
-                      ? t("settings.coursesData.googleDrive.disconnectLoading")
-                      : t("settings.coursesData.googleDrive.disconnectButton")
-                  }
-                  color="my_yellow"
-                  onPress={handleDisconnectDrive}
-                  disabled={!googleDriveConnected || driveAction === "disconnect"}
-                  width={130}
-                />
-              </View>
-            </View>
-          </View>
-        </View>
-
         {googleDriveConnected ? (
           <View style={styles.snapshotList}>
             {googleDriveBackupSnapshotsLoading && googleDriveBackupSnapshots.length === 0 ? (
@@ -729,29 +640,6 @@ const CoursesDataSection: React.FC = () => {
                     </View>
 
                     <View style={styles.snapshotFooter}>
-                      <View
-                        style={[
-                          styles.snapshotFooterTag,
-                          presentation.tone === "ok" && styles.snapshotFooterTagOk,
-                          presentation.tone === "warn" && styles.snapshotFooterTagWarn,
-                          presentation.tone === "bad" && styles.snapshotFooterTagBad,
-                        ]}
-                      >
-                        <Text
-                          style={[
-                            styles.snapshotFooterTagText,
-                            presentation.tone === "ok" &&
-                              styles.snapshotFooterTagTextOk,
-                            presentation.tone === "warn" &&
-                              styles.snapshotFooterTagTextWarn,
-                            presentation.tone === "bad" &&
-                              styles.snapshotFooterTagTextBad,
-                          ]}
-                        >
-                          {presentation.label}
-                        </Text>
-                      </View>
-
                       <Pressable
                         onPress={() => toggleSnapshotExpanded(snapshot.fileId)}
                         accessibilityRole="button"
@@ -784,6 +672,114 @@ const CoursesDataSection: React.FC = () => {
             ))}
           </View>
         ) : null}
+
+        <View style={styles.actionCard}>
+          <View style={styles.actionCardSections}>
+            <View style={styles.actionCardSection}>
+              <View style={styles.actionCardHeader}>
+                <Text style={styles.actionCardTitle}>
+                  {t("settings.coursesData.googleDrive.connectTitle")}
+                </Text>
+                <Text style={styles.actionCardDescription}>
+                  {preventWidowsPl(
+                    t("settings.coursesData.googleDrive.connectSubtitle")
+                  )}
+                </Text>
+              </View>
+              <View style={styles.actionCardButtonRow}>
+                <MyButton
+                  text={connectButtonText}
+                  onPress={handleConnectDrive}
+                  color="my_green"
+                  disabled={driveAction === "connect"}
+                  width={130}
+                  accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
+                  textStyle={styles.driveButtonText}
+                />
+              </View>
+            </View>
+
+            <View style={styles.appearanceGroupDivider} />
+
+            <View style={styles.actionCardSection}>
+              <View style={styles.actionCardHeader}>
+                <Text style={styles.actionCardTitle}>
+                  {t("settings.coursesData.googleDrive.manualBackupTitle")}
+                </Text>
+                <Text style={styles.actionCardDescription}>
+                  {preventWidowsPl(t("settings.coursesData.googleDrive.manualBackupSubtitle"))}
+                </Text>
+              </View>
+              <View style={styles.actionCardButtonRow}>
+                <MyButton
+                  text={backupNowButtonText}
+                  color="my_green"
+                  onPress={handleBackupNow}
+                  disabled={
+                    driveAction === "backup" ||
+                    googleDriveBackupInProgress ||
+                    !googleDriveConnected
+                  }
+                  width={130}
+                  accessibilityLabel={t("settings.coursesData.googleDrive.backupNowButton")}
+                  textStyle={styles.driveButtonText}
+                />
+              </View>
+            </View>
+
+            <View style={styles.appearanceGroupDivider} />
+
+            <View style={styles.actionCardSection}>
+              <View style={styles.actionCardHeader}>
+                <Text style={styles.actionCardTitle}>
+                  {t("settings.coursesData.googleDrive.restoreTitle")}
+                </Text>
+                <Text style={styles.actionCardDescription}>
+                  {preventWidowsPl(t("settings.coursesData.googleDrive.restoreSubtitle"))}
+                </Text>
+              </View>
+              <View style={styles.actionCardButtonRow}>
+                <MyButton
+                  text={refreshButtonText}
+                  color="my_green"
+                  onPress={handleRefreshSnapshots}
+                  disabled={
+                    !googleDriveConnected ||
+                    driveAction === "refresh" ||
+                    googleDriveBackupSnapshotsLoading
+                  }
+                  width={130}
+                />
+              </View>
+            </View>
+
+            <View style={styles.appearanceGroupDivider} />
+
+            <View style={styles.actionCardSection}>
+              <View style={styles.actionCardHeader}>
+                <Text style={styles.actionCardTitle}>
+                  {t("settings.coursesData.googleDrive.disconnectTitle")}
+                </Text>
+                <Text style={styles.actionCardDescription}>
+                  {preventWidowsPl(t("settings.coursesData.googleDrive.disconnectSubtitle"))}
+                </Text>
+              </View>
+              <View style={styles.actionCardButtonRow}>
+                <MyButton
+                  text={
+                    driveAction === "disconnect"
+                      ? t("settings.coursesData.googleDrive.disconnectLoading")
+                      : t("settings.coursesData.googleDrive.disconnectButton")
+                  }
+                  color="my_yellow"
+                  onPress={handleDisconnectDrive}
+                  disabled={!googleDriveConnected || driveAction === "disconnect"}
+                  width={130}
+                />
+              </View>
+            </View>
+          </View>
+        </View>
       </View>
 
       <View style={styles.settingsDivider} />
