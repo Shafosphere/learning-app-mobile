@@ -494,11 +494,11 @@ export default function CoursePinScreen() {
               <Ionicons name="arrow-back" size={28} color={colors.headline} />
             </MyButton>
             <MyButton
-              text="własny"
+              text="zrób własny"
               color="my_green"
               onPress={() => router.push("/custom_course")}
               disabled={false}
-              width={90}
+              width={140}
             />
           </View>
         </View>

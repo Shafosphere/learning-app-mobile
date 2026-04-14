@@ -36,26 +36,37 @@ export const useStyles = createThemeStylesHook((colors) => ({
   textContent: {
     paddingBottom: 2,
   },
-  closeButton: {
+  navRow: {
     position: "absolute",
-    top: 6,
-    right: 6,
-    width: 36,
-    height: 36,
-    borderRadius: 18,
+    right: 12,
+    bottom: -52,
+    flexDirection: "row",
+    gap: 10,
+  },
+  navButton: {
+    width: 44,
+    height: 44,
+    borderRadius: 12,
     alignItems: "center",
     justifyContent: "center",
-    backgroundColor: colors.background,
-    borderWidth: 1,
-    borderColor: colors.border,
-    zIndex: 10,
   },
-  closeLabel: {
-    fontSize: 18,
-    fontWeight: "800",
+  navButtonBack: {
+    backgroundColor: colors.my_yellow,
+  },
+  navButtonForward: {
+    backgroundColor: colors.my_green,
+  },
+  navButtonPressed: {
+    opacity: 0.82,
+  },
+  navButtonDisabled: {
+    opacity: 0.45,
+  },
+  navIcon: {
+    color: colors.headline,
+  },
+  navIconDisabled: {
     color: colors.paragraph,
-    lineHeight: 20,
-    textAlign: "center",
   },
   title: {
     fontSize: 16,

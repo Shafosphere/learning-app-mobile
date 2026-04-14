@@ -174,11 +174,13 @@ export function useScreenIntro({
         };
     }, [storageKey, triggerStrategy]); // Removed onCheckpointLoaded from deps
 
-    const handleClose = useCallback(() => {
+    const goNext = useCallback(() => {
         setIntroStep((prev) => {
             const next = prev + 1;
             if (next >= messages.length) {
                 setShowIntro(false);
+                setIsIntroActive(false);
+                setAwaitingGateStep(null);
                 void AsyncStorage.setItem(storageKey, "1");
                 return prev;
             }
@@ -194,6 +196,11 @@ export function useScreenIntro({
             return next;
         });
     }, [messages, openGates, storageKey]);
+
+    const goPrev = useCallback(() => {
+        setAwaitingGateStep(null);
+        setIntroStep((prev) => Math.max(0, prev - 1));
+    }, []);
 
     const unlockGate = useCallback(
         (gateId: string) => {
@@ -276,8 +283,11 @@ export function useScreenIntro({
                         maxBodyHeight={maxBodyHeight}
                         title={t(messages[introStep].titleKey)}
                         description={t(messages[introStep].descriptionKey)}
-                        onClose={handleClose}
-                        closeLabel={t("onboarding.nextMessage")}
+                        onPrevious={goPrev}
+                        onNext={goNext}
+                        canGoPrevious={introStep > 0}
+                        previousLabel={t("onboarding.previousMessage")}
+                        nextLabel={t("onboarding.nextMessage")}
                     />
                 </Animated.View>
             </View>
@@ -288,7 +298,8 @@ export function useScreenIntro({
         introStep,
         containerStyle,
         floatingOffset,
-        handleClose,
+        goNext,
+        goPrev,
         animatedBottom,
         maxBodyHeight,
         t,

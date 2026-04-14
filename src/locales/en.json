@@ -650,6 +650,7 @@
     }
   },
   "onboarding": {
+    "previousMessage": "Previous message",
     "nextMessage": "Next message",
     "languageIntro": {
       "title": "Choose your native language",

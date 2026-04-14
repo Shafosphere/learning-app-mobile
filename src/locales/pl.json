@@ -650,6 +650,7 @@
     }
   },
   "onboarding": {
+    "previousMessage": "Poprzedni komunikat",
     "nextMessage": "Następny komunikat",
     "languageIntro": {
       "title": "Zaznacz twój język ojczysty",

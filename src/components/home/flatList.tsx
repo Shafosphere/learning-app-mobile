@@ -34,20 +34,30 @@ export const renderHomeTile =
           accessibilityLabel={item.title}
           style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
         >
-          <View style={styles.iconBox}>
-            {item.icon ? (
-              item.icon
-            ) : item.image ? (
-              <Image source={item.image} style={styles.iconImage} />
-            ) : null}
+          <View style={styles.tileVisualArea}>
+            <View style={styles.iconBox}>
+              {item.icon ? (
+                item.icon
+              ) : item.image ? (
+                <Image source={item.image} style={styles.iconImage} />
+              ) : null}
+            </View>
           </View>
           <View style={styles.tileText}>
-            <Text style={styles.tileTitle}>{item.title}</Text>
+            <Text
+              style={styles.tileTitle}
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.85}
+            >
+              {item.title}
+            </Text>
             <Text
               style={[
                 styles.tileSubtitle,
                 !item.subtitle && styles.tileSubtitleHidden,
               ]}
+              numberOfLines={2}
             >
               {item.subtitle || "placeholder"}
             </Text>

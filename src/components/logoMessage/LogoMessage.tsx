@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import {
   Image,
@@ -65,8 +66,11 @@ type LogoMessageProps = {
   }>;
   maxBodyHeight?: number;
   onLayout?: (event: LayoutChangeEvent) => void;
-  onClose?: () => void;
-  closeLabel?: string;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  canGoPrevious?: boolean;
+  previousLabel?: string;
+  nextLabel?: string;
 };
 
 export default function LogoMessage({
@@ -78,8 +82,11 @@ export default function LogoMessage({
   offset,
   maxBodyHeight,
   onLayout,
-  onClose,
-  closeLabel = "Zamknij",
+  onPrevious,
+  onNext,
+  canGoPrevious = true,
+  previousLabel = "Previous message",
+  nextLabel = "Next message",
 }: LogoMessageProps) {
   const styles = useStyles();
   const copy = DEFAULT_COPY[variant];
@@ -123,16 +130,46 @@ export default function LogoMessage({
           ) : null}
         </View>
       )}
-      {onClose ? (
-        <Pressable
-          accessibilityRole="button"
-          accessibilityLabel={closeLabel}
-          hitSlop={16}
-          style={styles.closeButton}
-          onPress={onClose}
-        >
-          <Text style={styles.closeLabel}>×</Text>
-        </Pressable>
+      {(onPrevious || onNext) ? (
+        <View style={styles.navRow}>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={previousLabel}
+            accessibilityState={{ disabled: !canGoPrevious }}
+            disabled={!canGoPrevious}
+            hitSlop={12}
+            style={({ pressed }) => [
+              styles.navButton,
+              styles.navButtonBack,
+              !canGoPrevious && styles.navButtonDisabled,
+              pressed && canGoPrevious && styles.navButtonPressed,
+            ]}
+            onPress={onPrevious}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={canGoPrevious ? styles.navIcon.color : styles.navIconDisabled.color}
+            />
+          </Pressable>
+          <Pressable
+            accessibilityRole="button"
+            accessibilityLabel={nextLabel}
+            hitSlop={12}
+            style={({ pressed }) => [
+              styles.navButton,
+              styles.navButtonForward,
+              pressed && styles.navButtonPressed,
+            ]}
+            onPress={onNext}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color={styles.navIcon.color}
+            />
+          </Pressable>
+        </View>
       ) : null}
     </View>
   );

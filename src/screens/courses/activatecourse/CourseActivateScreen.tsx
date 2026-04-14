@@ -342,11 +342,13 @@ export default function CourseActivateScreen() {
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
             <MyButton
-              text="nowy"
+              text={"dodaj\nkurs"}
+              textLines={2}
+              accessibilityLabel="Dodaj kurs"
               color="my_yellow"
               onPress={() => router.push("/createcourse")}
               disabled={false}
-              width={70}
+              width={96}
             />
           </View>
         </View>

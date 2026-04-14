@@ -48,6 +48,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
   tilePressed: {
     transform: [{ scale: 0.98 }],
   },
+  tileVisualArea: {
+    position: "absolute",
+    top: 20,
+    left: 14,
+    right: 14,
+    bottom: 62,
+    alignItems: "center",
+    justifyContent: "center",
+  },
   iconBox: {
     width: 90,
     height: 90,
@@ -55,7 +64,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.secondBackground,
-    marginBottom: 40,
     transform: [{ rotate: "5deg" }],
   },
   iconFlipped: {
@@ -72,18 +80,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     right: 14,
     bottom: 14,
     alignItems: "center",
+    justifyContent: "flex-end",
+    minHeight: 54,
   },
   tileTitle: {
     fontSize: 24,
     fontWeight: "800",
     color: colors.headline,
+    textAlign: "center",
   },
   tileSubtitle: {
     fontSize: 12,
     color: colors.headline,
     textAlign: "center",
-    // lineHeight: 18,
-    // minHeight: 18 * 2,
+    lineHeight: 16,
+    minHeight: 16,
   },
   tileSubtitleHidden: {
     opacity: 0,

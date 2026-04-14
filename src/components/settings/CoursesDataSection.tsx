@@ -723,6 +723,7 @@ const CoursesDataSection: React.FC = () => {
                   width={130}
                   accessibilityLabel={t("settings.coursesData.googleDrive.backupNowButton")}
                   textStyle={styles.driveButtonText}
+                  textLines={2}
                 />
               </View>
             </View>
@@ -749,6 +750,7 @@ const CoursesDataSection: React.FC = () => {
                     googleDriveBackupSnapshotsLoading
                   }
                   width={130}
+                  textLines={2}
                 />
               </View>
             </View>
@@ -805,6 +807,7 @@ const CoursesDataSection: React.FC = () => {
             onPress={handleResetLearningSettings}
             disabled={resettingLearning}
             width={130}
+            textLines={2}
           />
         </View>
       </View>

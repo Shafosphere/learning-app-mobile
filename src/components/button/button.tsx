@@ -16,6 +16,7 @@ interface MyButtonBaseProps {
   color?: ThemeColorKey;
   disabled?: boolean;
   width?: DimensionValue;
+  textLines?: number;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -33,6 +34,7 @@ export default function MyButton({
   color = "my_green",
   disabled = false,
   width = 130,
+  textLines = 1,
   accessibilityLabel,
   style,
   textStyle,
@@ -56,7 +58,13 @@ export default function MyButton({
         : colors.headline;
 
     return (
-      <Text style={[styles.text, { color: textColor }, textStyle]} allowFontScaling>
+      <Text
+        style={[styles.text, { color: textColor }, textStyle]}
+        allowFontScaling={false}
+        numberOfLines={textLines}
+        adjustsFontSizeToFit
+        minimumFontScale={0.85}
+      >
         {text}
       </Text>
     );

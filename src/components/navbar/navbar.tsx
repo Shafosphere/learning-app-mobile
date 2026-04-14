@@ -37,6 +37,7 @@ import NavbarStatsRotator from "./NavbarStatsRotator";
 import { useStyles } from "./navbar-styles";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
+import Foundation from "@expo/vector-icons/Foundation";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 
@@ -364,6 +365,10 @@ export default function Navbar({ children }: NavbarProps) {
     router.push("/review");
   };
 
+  const handleHomePress = () => {
+    router.push("/");
+  };
+
   const handleSettingsPress = () => {
     router.push("/settings");
   };
@@ -479,6 +484,18 @@ export default function Navbar({ children }: NavbarProps) {
                   </Text>
                 </View>
               </View>
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.bottomIconButton,
+                pressed && styles.bottomIconButtonPressed,
+              ]}
+              onPress={handleHomePress}
+              accessibilityRole="button"
+              accessibilityLabel="Przejdź do menu głównego"
+            >
+              <Foundation name="home" size={28} color={colors.headline} />
             </Pressable>
 
             <Pressable

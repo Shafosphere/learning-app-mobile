@@ -206,19 +206,20 @@ export const useStyles = createThemeStylesHook((colors) => {
     manualAddButton: {
       alignSelf: "flex-end" as const,
       backgroundColor: colors.my_yellow,
-      width: 56,
-      height: 56,
-      borderRadius: 18,
+      width: 72,
+      height: 72,
+      borderRadius: 20,
       alignItems: "center" as const,
       justifyContent: "center" as const,
       marginTop: 16,
-      fontSize: 30,
     },
-    manualAddIcon: {
+    manualAddLabel: {
       color: colors.headline,
-      fontSize: 30,
+      fontSize: 15,
       fontWeight: "900",
-      lineHeight: 30,
+      lineHeight: 17,
+      textAlign: "center" as const,
+      textTransform: "uppercase" as const,
     },
     flipRow: {
       flexDirection: "row",

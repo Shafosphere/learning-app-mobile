@@ -678,7 +678,7 @@ export const ManualCardsEditor = ({
             style={styles.manualAddButton}
             onPress={handleAddCardPress}
           >
-            <Text style={styles.manualAddIcon}>+</Text>
+            <Text style={styles.manualAddLabel}>dodaj{"\n"}kurs</Text>
           </Pressable>
         </View>
       )}
