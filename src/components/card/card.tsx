@@ -107,6 +107,7 @@ const formatDateLikeInput = (
 };
 
 export default function Card({
+  coachmarkId,
   selectedItem,
   reversed = false,
   answer,
@@ -871,6 +872,7 @@ export default function Card({
         />
       )}
       <CardFrame
+        coachmarkId={coachmarkId}
         compact={!useLargeLayout}
         animateLayout={!disableLayoutAnimation && isLayoutAnimationArmed}
         cardStateStyle={cardStateStyle}

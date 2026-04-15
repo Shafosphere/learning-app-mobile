@@ -11,6 +11,8 @@ interface CourseGroupListProps {
     colors: { headline: string };
     onPress: (id: number) => void;
     onEdit: (course: OfficialCourseListItem) => void;
+    firstCoachmarkCourseId: number | null;
+    scrollRef: React.RefObject<any>;
 }
 
 export const CourseGroupList = ({
@@ -19,6 +21,8 @@ export const CourseGroupList = ({
     colors,
     onPress,
     onEdit,
+    firstCoachmarkCourseId,
+    scrollRef,
 }: CourseGroupListProps) => {
     const styles = useStyles();
 
@@ -114,6 +118,8 @@ export const CourseGroupList = ({
                                     colors={colors}
                                     onPress={onPress}
                                     onEdit={onEdit}
+                                    firstCoachmarkCourseId={firstCoachmarkCourseId}
+                                    scrollRef={scrollRef}
                                 />
                                 <OfficialCourseSection
                                     title="Mini kursy"
@@ -123,6 +129,8 @@ export const CourseGroupList = ({
                                     colors={colors}
                                     onPress={onPress}
                                     onEdit={onEdit}
+                                    firstCoachmarkCourseId={firstCoachmarkCourseId}
+                                    scrollRef={scrollRef}
                                 />
                             </>
                         ) : null}

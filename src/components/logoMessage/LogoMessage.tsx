@@ -1,15 +1,19 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import {
-  Image,
   type LayoutChangeEvent,
   Pressable,
   ScrollView,
   StyleProp,
-  Text,
   View,
   ViewStyle,
 } from "react-native";
+import Animated, {
+  interpolate,
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import { useStyles } from "./LogoMessage-styles";
 
 type LogoMessageVariant =
@@ -19,6 +23,8 @@ type LogoMessageVariant =
   | "postPin"
   | "activate"
   | "done";
+
+type LogoMessageLayoutVariant = "default" | "centered_intro";
 
 const LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 
@@ -69,8 +75,10 @@ type LogoMessageProps = {
   onPrevious?: () => void;
   onNext?: () => void;
   canGoPrevious?: boolean;
+  canGoNext?: boolean;
   previousLabel?: string;
   nextLabel?: string;
+  layoutVariant?: LogoMessageLayoutVariant;
 };
 
 export default function LogoMessage({
@@ -85,20 +93,60 @@ export default function LogoMessage({
   onPrevious,
   onNext,
   canGoPrevious = true,
+  canGoNext = true,
   previousLabel = "Previous message",
   nextLabel = "Next message",
+  layoutVariant = "default",
 }: LogoMessageProps) {
   const styles = useStyles();
   const copy = DEFAULT_COPY[variant];
   const resolvedTitle = title ?? copy?.title ?? "";
   const resolvedDescription = description ?? copy?.description ?? "";
+  const isCenteredIntro = layoutVariant === "centered_intro";
+  const layoutProgress = useSharedValue(isCenteredIntro ? 1 : 0);
+
+  React.useEffect(() => {
+    layoutProgress.value = withTiming(isCenteredIntro ? 1 : 0, {
+      duration: 280,
+    });
+  }, [isCenteredIntro, layoutProgress]);
+
+  const containerAnimatedStyle = useAnimatedStyle(() => ({
+    minHeight: interpolate(layoutProgress.value, [0, 1], [0, 152]),
+    paddingTop: interpolate(layoutProgress.value, [0, 1], [14, 16]),
+    paddingBottom: interpolate(layoutProgress.value, [0, 1], [14, 18]),
+    paddingLeft: interpolate(layoutProgress.value, [0, 1], [78, 126]),
+    paddingRight: interpolate(layoutProgress.value, [0, 1], [16, 20]),
+  }));
+
+  const logoAnimatedStyle = useAnimatedStyle(() => ({
+    left: interpolate(layoutProgress.value, [0, 1], [-12, -24]),
+    bottom: interpolate(layoutProgress.value, [0, 1], [-10, -30]),
+    width: interpolate(layoutProgress.value, [0, 1], [68, 141]),
+    height: interpolate(layoutProgress.value, [0, 1], [68, 141]),
+  }));
+
+  const textWrapperAnimatedStyle = useAnimatedStyle(() => ({
+    paddingLeft: interpolate(layoutProgress.value, [0, 1], [0, 6]),
+  }));
+
+  const titleAnimatedStyle = useAnimatedStyle(() => ({
+    fontSize: interpolate(layoutProgress.value, [0, 1], [16, 18]),
+    marginBottom: interpolate(layoutProgress.value, [0, 1], [4, 8]),
+  }));
+
+  const descriptionAnimatedStyle = useAnimatedStyle(() => ({
+    fontSize: interpolate(layoutProgress.value, [0, 1], [14, 15]),
+    lineHeight: interpolate(layoutProgress.value, [0, 1], [20, 22]),
+  }));
 
   return (
-    <View
+    <Animated.View
       style={[
         styles.container,
         floating && styles.floating,
         floating && offset,
+        containerAnimatedStyle,
         style,
       ]}
       pointerEvents={floating ? "auto" : undefined}
@@ -106,29 +154,74 @@ export default function LogoMessage({
       accessible
       accessibilityRole="text"
     >
-      <Image source={LOGO_SOURCE} style={styles.logo} />
+      <Animated.Image
+        source={LOGO_SOURCE}
+        style={[styles.logo, logoAnimatedStyle]}
+      />
       {typeof maxBodyHeight === "number" ? (
         <ScrollView
-          style={[styles.textWrapper, { maxHeight: maxBodyHeight }]}
-          contentContainerStyle={styles.textContent}
+          style={[
+            styles.textWrapper,
+            styles.textWrapperCenteredIntro,
+            textWrapperAnimatedStyle,
+            { maxHeight: maxBodyHeight },
+          ]}
+          contentContainerStyle={[
+            styles.textContent,
+            styles.textContentCenteredIntro,
+          ]}
           showsVerticalScrollIndicator={false}
         >
           {resolvedTitle ? (
-            <Text style={styles.title}>{resolvedTitle}</Text>
+            <Animated.Text
+              style={[styles.title, styles.titleCenteredIntro, titleAnimatedStyle]}
+            >
+              {resolvedTitle}
+            </Animated.Text>
           ) : null}
           {resolvedDescription ? (
-            <Text style={styles.description}>{resolvedDescription}</Text>
+            <Animated.Text
+              style={[
+                styles.description,
+                styles.descriptionCenteredIntro,
+                descriptionAnimatedStyle,
+              ]}
+            >
+              {resolvedDescription}
+            </Animated.Text>
           ) : null}
         </ScrollView>
       ) : (
-        <View style={styles.textWrapper}>
+        <Animated.View
+          style={[
+            styles.textWrapper,
+            isCenteredIntro ? styles.textWrapperCenteredIntro : null,
+            textWrapperAnimatedStyle,
+          ]}
+        >
           {resolvedTitle ? (
-            <Text style={styles.title}>{resolvedTitle}</Text>
+            <Animated.Text
+              style={[
+                styles.title,
+                isCenteredIntro ? styles.titleCenteredIntro : null,
+                titleAnimatedStyle,
+              ]}
+            >
+              {resolvedTitle}
+            </Animated.Text>
           ) : null}
           {resolvedDescription ? (
-            <Text style={styles.description}>{resolvedDescription}</Text>
+            <Animated.Text
+              style={[
+                styles.description,
+                isCenteredIntro ? styles.descriptionCenteredIntro : null,
+                descriptionAnimatedStyle,
+              ]}
+            >
+              {resolvedDescription}
+            </Animated.Text>
           ) : null}
-        </View>
+        </Animated.View>
       )}
       {(onPrevious || onNext) ? (
         <View style={styles.navRow}>
@@ -155,22 +248,25 @@ export default function LogoMessage({
           <Pressable
             accessibilityRole="button"
             accessibilityLabel={nextLabel}
+            accessibilityState={{ disabled: !canGoNext }}
+            disabled={!canGoNext}
             hitSlop={12}
             style={({ pressed }) => [
               styles.navButton,
               styles.navButtonForward,
-              pressed && styles.navButtonPressed,
+              !canGoNext && styles.navButtonDisabled,
+              pressed && canGoNext && styles.navButtonPressed,
             ]}
             onPress={onNext}
           >
             <Ionicons
               name="chevron-forward"
               size={24}
-              color={styles.navIcon.color}
+              color={canGoNext ? styles.navIcon.color : styles.navIconDisabled.color}
             />
           </Pressable>
         </View>
       ) : null}
-    </View>
+    </Animated.View>
   );
 }

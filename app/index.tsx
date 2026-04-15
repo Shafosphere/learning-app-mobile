@@ -6,7 +6,12 @@ import { Redirect } from "expo-router";
 import { useEffect, useState } from "react";
 import { View } from "react-native";
 
-type StartupRoute = "/" | "/createprofile" | "/createcourse" | "/coursepanel";
+type StartupRoute =
+  | "/"
+  | "/createprofile"
+  | "/createcourse"
+  | "/coursepanel"
+  | "/course-entry-settings";
 
 function parseStoredJson<T>(value: string | null, fallback: T): T {
   if (value == null) {
@@ -40,6 +45,13 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
   const hasActiveCourse = activeCourseIdx != null || activeCustomCourseId != null;
   const hasPinnedCourses = courses.length > 0 || pinnedOfficialCourseIds.length > 0;
 
+  if (
+    checkpoint === "course_entry_settings_required" &&
+    activeCustomCourseId != null
+  ) {
+    return "/course-entry-settings";
+  }
+
   if (hasActiveCourse) {
     return "/";
   }
@@ -54,6 +66,10 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
 
   if (checkpoint === "activate_required") {
     return "/coursepanel";
+  }
+
+  if (checkpoint === "course_entry_settings_required") {
+    return "/course-entry-settings";
   }
 
   return "/createcourse";

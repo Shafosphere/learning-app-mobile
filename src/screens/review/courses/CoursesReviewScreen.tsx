@@ -17,7 +17,6 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
-import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import { DueCountBadge } from "./components/DueCountBadge";
 import { ReviewCourseSection } from "./components/ReviewCourseSection";
 import { useStyles } from "./CoursesScreen-styles";
@@ -38,28 +37,6 @@ export default function CoursesReviewScreen() {
   const [officialCounts, setOfficialCounts] = useState<Record<number, number>>(
     {}
   );
-  const { IntroOverlay } = useScreenIntro({
-    storageKey: "@review_courses_intro_seen_v1",
-    triggerStrategy: "post_onboarding",
-    messages: [
-      {
-        titleKey: "onboarding.reviewCourses.step1.title",
-        descriptionKey: "onboarding.reviewCourses.step1.description",
-      },
-      {
-        titleKey: "onboarding.reviewCourses.step2.title",
-        descriptionKey: "onboarding.reviewCourses.step2.description",
-      },
-      {
-        titleKey: "onboarding.reviewCourses.step3.title",
-        descriptionKey: "onboarding.reviewCourses.step3.description",
-      },
-      {
-        titleKey: "onboarding.reviewCourses.step4.title",
-        descriptionKey: "onboarding.reviewCourses.step4.description",
-      },
-    ],
-  });
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
@@ -243,7 +220,6 @@ export default function CoursesReviewScreen() {
 
   return (
     <View style={styles.container}>
-      <IntroOverlay />
       <ScrollView
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}

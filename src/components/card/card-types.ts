@@ -24,6 +24,7 @@ export type FocusTarget =
   | "hint";
 
 export type CardProps = {
+  coachmarkId?: string;
   selectedItem: WordWithTranslations | null;
   reversed?: boolean;
   answer: string;

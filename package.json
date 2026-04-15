@@ -14,6 +14,7 @@
     "assets:check-paths": "bash ./scripts/check-legacy-asset-paths.sh"
   },
   "dependencies": {
+    "@edwardloopez/react-native-coachmark": "^0.5.2",
     "@expo/vector-icons": "^15.0.3",
     "@react-native-async-storage/async-storage": "^2.2.0",
     "@react-native-google-signin/google-signin": "^16.1.2",

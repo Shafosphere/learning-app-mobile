@@ -1,7 +1,8 @@
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { COURSE_ACTIVATE_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import { COURSE_CATEGORIES, CourseCategory } from "@/src/constants/courseCategories";
-import { COURSE_ACTIVATE_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -11,14 +12,16 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
-import { useScreenIntro } from "@/src/hooks/useScreenIntro";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
+  getOnboardingCheckpoint,
   setOnboardingCheckpoint
 } from "@/src/services/onboardingCheckpoint";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseGroupList } from "./components/CourseGroupList";
@@ -37,21 +40,22 @@ export default function CourseActivateScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
+  const rootRef = useRef<View | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
   const router = useRouter();
   const setPopup = usePopup();
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
 
-  const { IntroOverlay } = useScreenIntro({
-    messages: COURSE_ACTIVATE_INTRO_MESSAGES,
-    storageKey: "@course_activate_intro_seen_v1",
-    triggerStrategy: "on_onboarding",
-    onCheckpointLoaded: (cp) => {
-      if (cp !== "done") {
-        setStartedInOnboarding(true);
-      }
-    },
-    floatingOffset: { top: 8, left: 8, right: 8 },
-  });
+  useEffect(() => {
+    let mounted = true;
+    getOnboardingCheckpoint().then((checkpoint) => {
+      if (!mounted) return;
+      setStartedInOnboarding(checkpoint !== "done");
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
   const userCustomCourses = useMemo(
     () => customCourses.filter((course) => !course.isOfficial),
@@ -203,27 +207,12 @@ export default function CourseActivateScreen() {
   }, []);
 
   const notifyActivated = useCallback(() => {
-    if (startedInOnboarding) {
-      void setOnboardingCheckpoint("done");
-    }
     setPopup({
       message: "Aktywowałem kurs :3",
       color: "calm",
       duration: 3000,
     });
-  }, [setPopup, startedInOnboarding]);
-
-  const handleCustomCoursePress = useCallback(
-    async (id: number) => {
-      if (activeCustomCourseId === id) {
-        return;
-      }
-      if (!canActivate()) return;
-      await setActiveCustomCourseId(id);
-      notifyActivated();
-    },
-    [activeCustomCourseId, canActivate, notifyActivated, setActiveCustomCourseId]
-  );
+  }, [setPopup]);
 
   const handleEditCustomCourse = (course: CustomCourseSummary) => {
     const encodedName = encodeURIComponent(course.name);
@@ -240,11 +229,46 @@ export default function CourseActivateScreen() {
 
   const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
+  const firstPinnedOfficialCourseId = pinnedOfficialCourses[0]?.id ?? null;
+  const coachmark = useCoachmarkFlow({
+    flowKey: "course-activate-guided",
+    storageKey: "@course_activate_intro_seen_v1",
+    shouldStart: startedInOnboarding,
+    steps: COURSE_ACTIVATE_COACHMARK_STEPS,
+    completionState: {
+      activate_course: hasActiveCourse,
+    },
+  });
+
+  const handleCustomCoursePress = useCallback(
+    async (id: number) => {
+      if (activeCustomCourseId === id) {
+        return;
+      }
+      if (!canActivate()) return;
+      await setActiveCustomCourseId(id);
+      void coachmark.advanceByEvent("activate_course");
+      notifyActivated();
+    },
+    [
+      activeCustomCourseId,
+      canActivate,
+      coachmark,
+      notifyActivated,
+      setActiveCustomCourseId,
+    ]
+  );
 
   return (
-    <View style={styles.container}>
-      <IntroOverlay />
+    <View ref={rootRef} style={styles.container}>
+      <CoachmarkAnchor
+        id="course-activate-bubble-anchor"
+        shape="rect"
+        radius={12}
+        style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
+      />
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
@@ -261,13 +285,15 @@ export default function CourseActivateScreen() {
               {hasPinnedOfficialCourses ? (
                 <>
                   <Text style={styles.title}>Stworzone przez nas</Text>
-                  <CourseGroupList
-                    groups={courseGroups}
-                    activeCourseId={activeCustomCourseId}
-                    colors={colors}
-                    onPress={handleCustomCoursePress}
-                    onEdit={handleEditCustomCourse}
-                  />
+                      <CourseGroupList
+                        groups={courseGroups}
+                        activeCourseId={activeCustomCourseId}
+                        colors={colors}
+                        onPress={handleCustomCoursePress}
+                        onEdit={handleEditCustomCourse}
+                        firstCoachmarkCourseId={firstPinnedOfficialCourseId}
+                        scrollRef={scrollRef}
+                      />
                 </>
               ) : null}
 
@@ -321,21 +347,43 @@ export default function CourseActivateScreen() {
       {showOnboardingNext ? (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
-            <MyButton
-              text="Dalej"
-              accessibilityLabel="Przejdź dalej"
-              disabled={!hasActiveCourse}
-              onPress={() => {
-                void setOnboardingCheckpoint("done");
-                if (activeCustomCourseId != null) {
-                  router.replace("/flashcards_custom");
-                } else {
-                  router.replace("/flashcards");
-                }
-              }}
-              color="my_green"
-              width={90}
-            />
+            <CoachmarkAnchor
+              id="course-activate-next-button"
+              shape="rect"
+              radius={18}
+              padding={2}
+              style={{ alignSelf: "flex-end" }}
+            >
+              <MyButton
+                text="Dalej"
+                accessibilityLabel="Przejdź dalej"
+                disabled={!hasActiveCourse}
+                onPress={() => {
+                  if (coachmark.isActive) {
+                    void coachmark.advanceByEvent("press_next").then((allowed) => {
+                      if (!allowed) return;
+                      if (activeCustomCourseId != null) {
+                        void setOnboardingCheckpoint("course_entry_settings_required");
+                        router.replace("/course-entry-settings");
+                      } else {
+                        void setOnboardingCheckpoint("done");
+                        router.replace("/flashcards");
+                      }
+                    });
+                    return;
+                  }
+                  if (activeCustomCourseId != null) {
+                    void setOnboardingCheckpoint("course_entry_settings_required");
+                    router.replace("/course-entry-settings");
+                  } else {
+                    void setOnboardingCheckpoint("done");
+                    router.replace("/flashcards");
+                  }
+                }}
+                color="my_green"
+                width={90}
+              />
+            </CoachmarkAnchor>
           </View>
         </View>
       ) : (
@@ -353,6 +401,18 @@ export default function CourseActivateScreen() {
           </View>
         </View>
       )}
+      {coachmark.isActive ? (
+        <GuidedCoachmarkLayer
+          rootRef={rootRef}
+          currentStep={coachmark.currentStep}
+          currentIndex={coachmark.currentIndex}
+          totalSteps={coachmark.totalSteps}
+          canGoBack={coachmark.canGoBack}
+          canGoNext={coachmark.canGoNext}
+          onBack={coachmark.goBack}
+          onNext={coachmark.goNext}
+        />
+      ) : null}
     </View>
   );
 }

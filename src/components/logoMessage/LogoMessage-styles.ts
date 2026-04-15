@@ -17,6 +17,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     shadowOffset: { width: 0, height: 4 },
     elevation: 3,
   },
+  centeredIntro: {
+    minHeight: 152,
+    paddingTop: 16,
+    paddingBottom: 18,
+    paddingLeft: 126,
+    paddingRight: 20,
+  },
   floating: {
     position: "absolute",
     zIndex: 30,
@@ -30,11 +37,23 @@ export const useStyles = createThemeStylesHook((colors) => ({
     height: 68,
     resizeMode: "contain",
   },
+  logoCenteredIntro: {
+    left: -24,
+    bottom: -30,
+    width: 141,
+    height: 141,
+  },
   textWrapper: {
     flex: 1,
   },
+  textWrapperCenteredIntro: {
+    paddingLeft: 6,
+  },
   textContent: {
     paddingBottom: 2,
+  },
+  textContentCenteredIntro: {
+    justifyContent: "center",
   },
   navRow: {
     position: "absolute",
@@ -79,5 +98,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     lineHeight: 20,
     color: colors.paragraph,
     opacity: 0.85,
+  },
+  titleCenteredIntro: {
+    fontSize: 18,
+    marginBottom: 8,
+  },
+  descriptionCenteredIntro: {
+    fontSize: 15,
+    lineHeight: 22,
   },
 }));

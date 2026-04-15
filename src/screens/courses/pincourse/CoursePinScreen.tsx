@@ -1,24 +1,27 @@
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { COURSE_PIN_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
   COURSE_CATEGORIES,
   CourseCategory,
 } from "@/src/constants/courseCategories";
-import { COURSE_PIN_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
-import { useScreenIntro } from "@/src/hooks/useScreenIntro";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
+  getOnboardingCheckpoint,
   OnboardingCheckpoint,
   setOnboardingCheckpoint
 } from "@/src/services/onboardingCheckpoint";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useLocalSearchParams, useRouter } from "expo-router";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
   Pressable,
@@ -62,6 +65,10 @@ type CourseViewMode = "languages" | "general";
 export default function CoursePinScreen() {
   const styles = useStyles();
   const router = useRouter();
+  const params = useLocalSearchParams<{ replayIntro?: string }>();
+  const rootRef = useRef<View | null>(null);
+  const scrollRef = useRef<ScrollView | null>(null);
+  const tabSwitcherRef = useRef<View | null>(null);
   const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
     useSettings();
   const [officialCourses, setOfficialCourses] = useState<
@@ -72,16 +79,7 @@ export default function CoursePinScreen() {
   const [checkpoint, setCheckpoint] = useState<OnboardingCheckpoint | null>(
     null
   );
-
-  const { IntroOverlay, unlockGate } = useScreenIntro({
-    messages: COURSE_PIN_INTRO_MESSAGES,
-    storageKey: "@course_pin_intro_seen_v1",
-    triggerStrategy: "on_onboarding",
-    onCheckpointLoaded: (cp) => {
-      setCheckpoint(cp ?? "pin_required");
-    },
-    floatingOffset: { top: 12, left: 12, right: 12 },
-  });
+  const [coachmarkTargetsReady, setCoachmarkTargetsReady] = useState(false);
 
   const persistCheckpointIfNeeded = useCallback(
     (next: OnboardingCheckpoint) => {
@@ -212,42 +210,21 @@ export default function CoursePinScreen() {
     return sortedGroups;
   }, [officialCourses]);
 
-  const handleOfficialPinToggle = useCallback(
-    async (id: number) => {
-      const isPinned = pinnedOfficialCourseIds.includes(id);
-      try {
-        if (isPinned) {
-          await unpinOfficialCourse(id);
-          const remaining = pinnedOfficialCourseIds.length - 1;
-          if (remaining <= 0) {
-            persistCheckpointIfNeeded("pin_required");
-          }
-        } else {
-          await pinOfficialCourse(id);
-          unlockGate("course_pinned");
-          persistCheckpointIfNeeded("activate_required");
-        }
-      } catch (error) {
-        console.error(
-          `[CoursePin] Failed to toggle official pack ${id} `,
-          error
-        );
-      }
-    },
-    [pinOfficialCourse, pinnedOfficialCourseIds, persistCheckpointIfNeeded, unpinOfficialCourse, unlockGate]
-  );
-
   const hasAnyPinned = useMemo(() => {
     return pinnedOfficialCourseIds.length > 0;
   }, [pinnedOfficialCourseIds]);
 
   useEffect(() => {
-    if (hasAnyPinned) {
-      unlockGate("course_pinned");
-    }
-  }, [hasAnyPinned, unlockGate]);
+    let mounted = true;
+    getOnboardingCheckpoint().then((value) => {
+      if (!mounted) return;
+      setCheckpoint(value ?? "pin_required");
+    });
+    return () => {
+      mounted = false;
+    };
+  }, []);
 
-  const introActive = checkpoint !== "done";
   const categorizedCourses = useMemo(
     () => groupedCourses.filter((group) => Boolean(group.category)),
     [groupedCourses]
@@ -296,12 +273,81 @@ export default function CoursePinScreen() {
     return nextGroups;
   }, [categorizedCourses]);
 
+  const firstVisiblePackId = useMemo(() => {
+    const firstLanguagePack = languageCourses[0]?.officialPacks[0]?.id ?? null;
+    const firstGeneralPack =
+      accordionGroups[0]?.regularItems[0]?.id ??
+      accordionGroups[0]?.miniItems[0]?.id ??
+      null;
+    return viewMode === "languages"
+      ? firstLanguagePack ?? firstGeneralPack
+      : firstGeneralPack ?? firstLanguagePack;
+  }, [accordionGroups, languageCourses, viewMode]);
+
+  const introActive = checkpoint !== "done";
+  const coachmark = useCoachmarkFlow({
+    flowKey: "course-pin-guided",
+    storageKey: "@course_pin_intro_seen_v1",
+    shouldStart:
+      introActive && coachmarkTargetsReady && firstVisiblePackId !== null,
+    steps: COURSE_PIN_COACHMARK_STEPS,
+    completionState: {
+      pin_course: hasAnyPinned,
+    },
+    restartToken: params.replayIntro,
+  });
+
+  useEffect(() => {
+    const currentTarget = coachmark.currentStep?.targetId;
+    if (
+      coachmark.isActive &&
+      (currentTarget === "course-pin-first-card" ||
+        currentTarget === "course-pin-first-pin-button") &&
+      viewMode !== "languages"
+    ) {
+      setViewMode("languages");
+    }
+  }, [coachmark.currentStep?.targetId, coachmark.isActive, viewMode]);
+
+  const handleOfficialPinToggle = useCallback(
+    async (id: number) => {
+      const isPinned = pinnedOfficialCourseIds.includes(id);
+      try {
+        if (isPinned) {
+          await unpinOfficialCourse(id);
+          const remaining = pinnedOfficialCourseIds.length - 1;
+          if (remaining <= 0) {
+            persistCheckpointIfNeeded("pin_required");
+          }
+          return;
+        }
+
+        await pinOfficialCourse(id);
+        persistCheckpointIfNeeded("activate_required");
+        void coachmark.advanceByEvent("pin_course");
+      } catch (error) {
+        console.error(
+          `[CoursePin] Failed to toggle official pack ${id} `,
+          error
+        );
+      }
+    },
+    [
+      coachmark,
+      pinOfficialCourse,
+      pinnedOfficialCourseIds,
+      persistCheckpointIfNeeded,
+      unpinOfficialCourse,
+    ]
+  );
+
   const renderOfficialPackCard = useCallback(
     (pack: OfficialCourseListItem) => {
       const isPinned = pinnedOfficialCourseIds.includes(pack.id);
       const flagLang = pack.smallFlag ?? pack.sourceLang;
+      const isFirstVisible = pack.id === firstVisiblePackId;
 
-      return (
+      const card = (
         <CourseListCard
           key={`official-${pack.id}`}
           title={pack.name}
@@ -311,57 +357,145 @@ export default function CoursePinScreen() {
           flagCode={flagLang}
           onPress={() => void handleOfficialPinToggle(pack.id)}
           rightAccessory={
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={
-                isPinned
-                  ? `Odepnij zestaw ${pack.name} `
-                  : `Przypnij zestaw ${pack.name} `
-              }
-              style={styles.pinButton}
-              onPress={(event) => {
-                event.stopPropagation();
-                void handleOfficialPinToggle(pack.id);
-              }}
-            >
-              <View
-                style={[
-                  styles.pinCheckbox,
-                  isPinned && styles.pinCheckboxActive,
-                ]}
+            isFirstVisible ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isPinned
+                    ? `Odepnij zestaw ${pack.name} `
+                    : `Przypnij zestaw ${pack.name} `
+                }
+                style={styles.pinButton}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  void handleOfficialPinToggle(pack.id);
+                }}
               >
-                {isPinned ? (
-                  <Octicons name="pin" size={20} color={colors.headline} />
-                ) : null}
-              </View>
-            </Pressable>
+                <CoachmarkAnchor
+                  id="course-pin-first-pin-button"
+                  shape="rect"
+                  radius={14}
+                  padding={1}
+                >
+                  <View
+                    style={[
+                      styles.pinCheckbox,
+                      isPinned && styles.pinCheckboxActive,
+                    ]}
+                  >
+                    {isPinned ? (
+                      <Octicons name="pin" size={20} color={colors.headline} />
+                    ) : null}
+                  </View>
+                </CoachmarkAnchor>
+              </Pressable>
+            ) : (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={
+                  isPinned
+                    ? `Odepnij zestaw ${pack.name} `
+                    : `Przypnij zestaw ${pack.name} `
+                }
+                style={styles.pinButton}
+                onPress={(event) => {
+                  event.stopPropagation();
+                  void handleOfficialPinToggle(pack.id);
+                }}
+              >
+                <View
+                  style={[
+                    styles.pinCheckbox,
+                    isPinned && styles.pinCheckboxActive,
+                  ]}
+                >
+                  {isPinned ? (
+                    <Octicons name="pin" size={20} color={colors.headline} />
+                  ) : null}
+                </View>
+              </Pressable>
+            )
           }
         />
       );
+
+      if (isFirstVisible) {
+        return (
+          <CoachmarkAnchor
+            key={`anchor-official-${pack.id}`}
+            id="course-pin-first-card"
+            shape="rect"
+            radius={20}
+            padding={2}
+            scrollRef={scrollRef}
+            style={{ alignSelf: "stretch" }}
+          >
+            {card}
+          </CoachmarkAnchor>
+        );
+      }
+
+      return card;
     },
-    [colors.headline, handleOfficialPinToggle, pinnedOfficialCourseIds, styles]
+    [
+      colors.headline,
+      firstVisiblePackId,
+      handleOfficialPinToggle,
+      pinnedOfficialCourseIds,
+      styles,
+    ]
   );
 
   return (
-    <View style={styles.container}>
-      <IntroOverlay />
+    <View
+      ref={rootRef}
+      style={styles.container}
+      onLayout={() => {
+        if (!coachmarkTargetsReady) {
+          setCoachmarkTargetsReady(true);
+        }
+      }}
+    >
+      <CoachmarkAnchor
+        id="course-pin-bubble-anchor"
+        shape="rect"
+        radius={12}
+        style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
+      />
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        scrollEnabled={!coachmark.currentStep?.scrollLocked}
       >
         <View style={styles.minicontainer}>
           <Text style={styles.title}>Czego sie uczymy?</Text>
-          <SegmentedTabs
-            options={[
-              { key: "languages", label: "Języki" },
-              { key: "general", label: "Wiedza" },
-            ]}
-            value={viewMode}
-            onChange={setViewMode}
-            accessibilityLabel="Filtr typu kursów"
-            containerStyle={styles.viewModeTabs}
-          />
+          <View style={styles.viewModeTabsSection}>
+            <CoachmarkAnchor
+              id="course-pin-tab-switcher"
+              shape="rect"
+              radius={18}
+              padding={2}
+              style={styles.viewModeTabsAnchor}
+            >
+              <View
+                ref={tabSwitcherRef}
+                style={styles.viewModeTabsAnchor}
+              >
+                <SegmentedTabs
+                  options={[
+                    { key: "languages", label: "Języki" },
+                    { key: "general", label: "Wiedza" },
+                  ]}
+                  value={viewMode}
+                  onChange={setViewMode}
+                  accessibilityLabel="Filtr typu kursów"
+                  containerStyle={styles.viewModeTabs}
+                />
+              </View>
+            </CoachmarkAnchor>
+          </View>
 
           {viewMode === "languages" ? (
             <>
@@ -467,18 +601,35 @@ export default function CoursePinScreen() {
       {introActive ? (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
-            <MyButton
-              text="Dalej"
-              accessibilityLabel="Przejdź dalej do aktywacji"
-              disabled={!hasAnyPinned}
-              onPress={() => {
-                setCheckpoint("activate_required");
-                void setOnboardingCheckpoint("activate_required");
-                router.replace("/coursepanel");
-              }}
-              color="my_green"
-              width={90}
-            />
+            <CoachmarkAnchor
+              id="course-pin-next-button"
+              shape="rect"
+              radius={18}
+              padding={2}
+              style={{ alignSelf: "flex-end" }}
+            >
+              <MyButton
+                text="Dalej"
+                accessibilityLabel="Przejdź dalej do aktywacji"
+                disabled={!hasAnyPinned}
+                onPress={() => {
+                  if (coachmark.isActive) {
+                    void coachmark.advanceByEvent("press_next").then((allowed) => {
+                      if (!allowed) return;
+                      setCheckpoint("activate_required");
+                      void setOnboardingCheckpoint("activate_required");
+                      router.replace("/coursepanel");
+                    });
+                    return;
+                  }
+                  setCheckpoint("activate_required");
+                  void setOnboardingCheckpoint("activate_required");
+                  router.replace("/coursepanel");
+                }}
+                color="my_green"
+                width={90}
+              />
+            </CoachmarkAnchor>
           </View>
         </View>
       ) : (
@@ -503,6 +654,18 @@ export default function CoursePinScreen() {
           </View>
         </View>
       )}
+      {coachmark.isActive ? (
+        <GuidedCoachmarkLayer
+          rootRef={rootRef}
+          currentStep={coachmark.currentStep}
+          currentIndex={coachmark.currentIndex}
+          totalSteps={coachmark.totalSteps}
+          canGoBack={coachmark.canGoBack}
+          canGoNext={coachmark.canGoNext}
+          onBack={coachmark.goBack}
+          onNext={coachmark.goNext}
+        />
+      ) : null}
     </View>
   );
 }

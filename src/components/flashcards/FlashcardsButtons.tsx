@@ -1,5 +1,6 @@
 import React from "react";
 import { View } from "react-native";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 import { CardActions } from "@/src/components/card/subcomponents/CardActions";
 import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
@@ -8,6 +9,7 @@ import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/screens/flashc
 
 type FlashcardsButtonsProps = {
   position: "top" | "bottom";
+  coachmarkId?: string;
 
   // True/False Actions
   showTrueFalseActions: boolean;
@@ -29,6 +31,7 @@ type FlashcardsButtonsProps = {
 
 export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   position,
+  coachmarkId,
   showTrueFalseActions,
   trueFalseActionsDisabled,
   onTrueFalseAnswer,
@@ -48,7 +51,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   const noop = React.useCallback(() => undefined, []);
   const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };
 
-  return (
+  const content = (
     <View collapsable={false}>
       {position === "bottom" ? (
         <View
@@ -102,5 +105,15 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
         />
       </View>
     </View>
+  );
+
+  if (!coachmarkId) {
+    return content;
+  }
+
+  return (
+    <CoachmarkAnchor id={coachmarkId} shape="rect" radius={24}>
+      <View collapsable={false}>{content}</View>
+    </CoachmarkAnchor>
   );
 };

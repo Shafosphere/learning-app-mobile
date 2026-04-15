@@ -312,6 +312,7 @@ interface SettingsContextValue {
   resetLearningSettings: () => Promise<void>;
   resetActiveCourseReviews: () => Promise<number>;
   resetActiveCustomCourseReviews: () => Promise<number>;
+  resetOnboardingState: () => Promise<void>;
   activeCourseIdx: number | null; // NEW
   setActiveCourseIdx: (i: number | null) => Promise<void>; // NEW
   activeCourse: LanguageCourse | null;
@@ -506,6 +507,7 @@ const defaultValue: SettingsContextValue = {
   resetLearningSettings: async () => {},
   resetActiveCourseReviews: async () => 0,
   resetActiveCustomCourseReviews: async () => 0,
+  resetOnboardingState: async () => {},
   activeCourseIdx: null,
   setActiveCourseIdx: async () => {},
   activeCourse: null,
@@ -2431,6 +2433,22 @@ export const SettingsProvider: React.FC<{
     return resetCustomReviewsForCourse(activeCustomCourseId);
   }, [activeCustomCourseId]);
 
+  const resetOnboardingState = useCallback(async () => {
+    await Promise.all([
+      setCourses([]),
+      setPinnedOfficialCourseIds([]),
+      setActiveCourseIdxState(null),
+      setActiveCustomCourseIdState(null),
+      setCustomCourseEntrySettingsSeen(DEFAULT_CUSTOM_COURSE_ENTRY_SETTINGS_SEEN),
+    ]);
+  }, [
+    setActiveCourseIdxState,
+    setActiveCustomCourseIdState,
+    setCustomCourseEntrySettingsSeen,
+    setCourses,
+    setPinnedOfficialCourseIds,
+  ]);
+
   return (
     <SettingsContext.Provider
       value={{
@@ -2499,6 +2517,7 @@ export const SettingsProvider: React.FC<{
         resetLearningSettings,
         resetActiveCourseReviews,
         resetActiveCustomCourseReviews,
+        resetOnboardingState,
         flashcardsBatchSize,
         setFlashcardsBatchSize,
         flashcardsSuggestionsEnabled,

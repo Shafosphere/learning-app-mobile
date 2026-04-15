@@ -10,7 +10,17 @@ import {
 
 const PIN_ROUTE = "/createcourse";
 const ACTIVATE_ROUTE = "/coursepanel";
+const COURSE_ENTRY_SETTINGS_ROUTE = "/course-entry-settings";
 const LANGUAGE_ROUTE = "/createprofile";
+
+function isSettingsPath(pathname: string | null): boolean {
+  if (!pathname) return false;
+  return (
+    pathname === "/settings" ||
+    pathname.endsWith("/settings") ||
+    pathname.includes("/settings?")
+  );
+}
 
 export function OnboardingGate() {
   const router = useRouter();
@@ -20,6 +30,7 @@ export function OnboardingGate() {
     pinnedOfficialCourseIds,
     activeCourse,
     activeCustomCourseId,
+    hasSeenCustomCourseEntrySettings,
   } = useSettings();
   const coursesCount = courses.length;
   const pinnedCount = pinnedOfficialCourseIds?.length ?? 0;
@@ -55,11 +66,29 @@ export function OnboardingGate() {
   const resolvedCheckpoint = useMemo<OnboardingCheckpoint>(() => {
     const hasActive = !!activeCourse || activeCustomCourseId != null;
     const hasPinned = coursesCount > 0 || pinnedCount > 0;
+    const requiresCourseEntrySettings =
+      activeCustomCourseId != null &&
+      !hasSeenCustomCourseEntrySettings(activeCustomCourseId);
 
+    if (checkpoint === "course_entry_settings_required") {
+      return requiresCourseEntrySettings
+        ? "course_entry_settings_required"
+        : "done";
+    }
     if (hasActive) return "done";
+    if (requiresCourseEntrySettings) {
+      return "done";
+    }
     if (hasPinned) return "activate_required";
     return checkpoint;
-  }, [activeCourse, activeCustomCourseId, checkpoint, coursesCount, pinnedCount]);
+  }, [
+    activeCourse,
+    activeCustomCourseId,
+    checkpoint,
+    coursesCount,
+    hasSeenCustomCourseEntrySettings,
+    pinnedCount,
+  ]);
 
   useEffect(() => {
     if (!hydrated) return;
@@ -76,12 +105,21 @@ export function OnboardingGate() {
     if (!hydrated) return;
     if (resolvedCheckpoint === "done") return;
 
+    // Allow access to settings/debug tools during onboarding so intro state
+    // can be reset and tested without being trapped on onboarding routes.
+    if (isSettingsPath(pathname)) {
+      lastRedirectRef.current = null;
+      return;
+    }
+
     const target =
       resolvedCheckpoint === "language_required"
         ? LANGUAGE_ROUTE
         : resolvedCheckpoint === "pin_required"
           ? PIN_ROUTE
-          : ACTIVATE_ROUTE;
+          : resolvedCheckpoint === "activate_required"
+            ? ACTIVATE_ROUTE
+            : COURSE_ENTRY_SETTINGS_ROUTE;
 
     // W trybie aktywacji pozwalamy zostać na ekranie przypinania,
     // żeby użytkownik sam przeszedł dalej.

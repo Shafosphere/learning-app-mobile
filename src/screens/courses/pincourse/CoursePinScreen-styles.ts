@@ -24,8 +24,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 20,
     marginBottom: 16,
   },
-  viewModeTabs: {
+  viewModeTabsSection: {
+    width: "100%",
     marginBottom: 16,
+  },
+  viewModeTabsAnchor: {
+    width: "100%",
+    alignSelf: "stretch",
+  },
+  viewModeTabs: {
+    width: "100%",
   },
   emptyStateText: {
     marginTop: 8,

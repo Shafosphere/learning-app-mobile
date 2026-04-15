@@ -662,84 +662,106 @@
     },
     "courseActivate": {
       "step1": {
-        "title": "Activate course",
-        "description": "This is where you activate a course. Games will use flashcards from the active course."
+        "title": "Where am I now?",
+        "description": "You are now on the screen where a course is activated."
       },
       "step2": {
-        "title": "Course settings",
-        "description": "Each course has its own settings that you can change anytime."
+        "title": "What for?",
+        "description": "This active course is the one the game will use for flashcards."
+      },
+      "step3": {
+        "title": "How do I activate it?",
+        "description": "Activation happens when you tap a course tile."
+      },
+      "step4": {
+        "title": "zzzZZZZzzz",
+        "description": "(waiting until you activate any course)"
+      },
+      "step5": {
+        "title": "Great! You activated the course!",
+        "description": "You can start playing now. Tap the Next button at the bottom right."
+      }
+    },
+    "courseEntrySettings": {
+      "step1": {
+        "title": "What is this screen?",
+        "description": "This is the screen that appears once at the start of each course."
+      },
+      "step2": {
+        "title": "What matters here?",
+        "description": "There are three more important options here that let the user adjust the course."
+      },
+      "step3": {
+        "title": "For now",
+        "description": "For now, I recommend leaving them as they are."
+      },
+      "step4": {
+        "title": "No worries",
+        "description": "Later, you will still be able to change these settings."
+      },
+      "step5": {
+        "title": "What now?",
+        "description": "Click next if you are ready to move on to the game."
+      }
+    },
+    "flashcards": {
+      "step1": {
+        "title": "This is our main game",
+        "description": "This is where you learn with flashcards and move through the boxes."
+      },
+      "step2": {
+        "title": "But before we start, the interface",
+        "description": "First, I'll quickly show you what is where on this screen."
+      },
+      "step3": {
+        "title": "This is the card with a question, word, or image",
+        "description": "This is where the current flashcard appears, together with the answer area."
+      },
+      "step4": {
+        "title": "Here are the boxes",
+        "description": "You use them to control the learning flow and choose where flashcards come from."
+      },
+      "step5": {
+        "title": "And here are the control buttons",
+        "description": "This is where you confirm an answer or move on, depending on the flashcard type."
       }
     },
     "coursePin": {
       "step1": {
         "title": "Hi, I'm Memicard",
-        "description": "I'll guide you through the app. Let's start by picking courses."
+        "description": "I'll show you how to get started. Here's a short guide on what to do :3"
       },
       "step2": {
-        "title": "Pin a few courses",
-        "description": "At start, pick courses you care about. You can pin more than one for faster access."
+        "title": "What is this?",
+        "description": "On this screen you can see the list of courses available in the app."
       },
       "step3": {
-        "title": "After pinning, tap Next",
-        "description": "Bottom button will enable after you pin at least one course."
+        "title": "What kinds of courses?",
+        "description": "One course is one tile with its proper name."
       },
       "step4": {
-        "title": "Custom courses!",
-        "description": "Later you'll be able to create your own courses with your own flashcards! :3"
-      }
-    },
-    "flashcards": {
-      "step1": {
-        "title": "This is the main game",
-        "description": "Inspired by the Leitner system. This is where we learn words."
-      },
-      "step2": {
-        "title": "Game goal",
-        "description": "Goal is to move a flashcard through all boxes."
-      },
-      "step3": {
-        "title": "Activate a box",
-        "description": "By tapping a box, you activate it and draw a new flashcard."
-      },
-      "step4": {
-        "title": "Give an answer",
-        "description": "A drawn flashcard appears. Depending on type, answer or tap a button."
+        "title": "What do you do here?",
+        "description": "You choose the courses that interest you and pin them."
       },
       "step5": {
-        "title": "Too complicated?",
-        "description": "If something is unclear, check the guide on home screen via my top-bar avatar."
-      }
-    },
-    "brain": {
-      "step1": {
-        "title": "What is this?",
-        "description": "Here you choose review method."
+        "title": "How do I pin one?",
+        "description": "You pin it by tapping the small square inside a course tile."
       },
-      "step2": {
-        "title": "Choose review mode",
-        "description": "Start is a quick mini-game session. Traditional is classic translation typing."
+      "step6": {
+        "title": "And one more thing",
+        "description": "At the top you have categories."
       },
-      "step3": {
-        "title": "After session",
-        "description": "At the end of both modes you'll see a summary table."
-      }
-    },
-    "reviewCourses": {
-      "step1": {
-        "title": "Choose a course for reviews",
-        "description": "Tap a tile to open the game and review flashcards from this course."
+      "step7": {
+        "title": "zzzZZZZzzz",
+        "description": "(waiting until you pin the courses you like)"
       },
-      "step2": {
-        "title": "How often do they appear?",
-        "description": "Maybe in 2 days, maybe in a week, maybe in a year. To remember, first you need to forget ;)"
+      "step8": {
+        "title": "Great! The course has been pinned!",
+        "description": "Remember, you can pin more than one."
       },
-      "step3": {
-        "title": "What do the numbers mean?",
-        "description": "Red number means overdue reviews. Green means nothing is waiting now."
-      },
-      "step4": {
-        "title": "Disabling reviews",
-        "description": "You can disable reviews in course settings - then it won't appear on this list."
+      "step9": {
+        "title": "What now?",
+        "description": "If you already pinned what interests you, you can tap the Next button at the bottom right."
       }
     }
   },

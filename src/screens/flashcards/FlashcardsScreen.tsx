@@ -5,7 +5,9 @@ import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
+import { FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import {
   type StatBurst,
@@ -30,16 +32,16 @@ import {
 } from "@/src/hooks/useFlashcardsInteraction";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useIsFocused } from "@react-navigation/native";
 // import { useRouter } from "expo-router";
-import { FLASHCARDS_INTRO_MESSAGES } from "@/src/constants/introMessages";
 import { useQuote } from "@/src/contexts/QuoteContext";
-import { useScreenIntro } from "@/src/hooks/useScreenIntro";
 import {
   type ReactNode,
   useCallback,
@@ -52,6 +54,7 @@ import {
 import {
   ActivityIndicator,
   Animated,
+  Keyboard,
   Pressable,
   ScrollView,
   Text,
@@ -106,6 +109,7 @@ function dedupeById<T extends { id: number }>(list: T[]): T[] {
 export default function Flashcards() {
   // const router = useRouter();
   const styles = useStyles();
+  const rootRef = useRef<View | null>(null);
   const {
     activeCustomCourseId,
     setActiveCustomCourseId,
@@ -135,12 +139,6 @@ export default function Flashcards() {
     ts: number;
     count: number;
   }>({ box: null, ts: 0, count: 0 });
-  const { IntroOverlay, unlockGate } = useScreenIntro({
-    messages: FLASHCARDS_INTRO_MESSAGES,
-    storageKey: "@flashcards_intro_seen_v1",
-    triggerStrategy: "post_onboarding",
-  });
-
   const handleStatsBurst = useCallback(
     (boxKey: keyof BoxesState, meta: CorrectAnswerMeta) => {
       if (boxKey === "boxFive") {
@@ -610,12 +608,6 @@ export default function Flashcards() {
   const introBoxLimitReached = boxZeroEnabled
     ? boxes.boxZero.length >= 30
     : boxes.boxOne.length >= 30;
-
-  useEffect(() => {
-    if (activeBox) {
-      unlockGate("box_selected");
-    }
-  }, [activeBox, unlockGate]);
 
   // Allow autoflow to switch boxes even when a card is shown,
   // otherwise it never jumps to a clogged box until the current box is emptied.
@@ -1105,6 +1097,7 @@ export default function Flashcards() {
   } else {
     cardSection = (
       <Card
+        coachmarkId="flashcards-card-section"
         selectedItem={selectedItem}
         setAnswer={setAnswer}
         answer={answer}
@@ -1132,6 +1125,7 @@ export default function Flashcards() {
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
       position={position}
+      coachmarkId="flashcards-buttons-section"
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
@@ -1179,11 +1173,33 @@ export default function Flashcards() {
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
+  const coachmark = useCoachmarkFlow({
+    flowKey: "flashcards-guided",
+    storageKey: "@flashcards_intro_seen_v1",
+    shouldStart:
+      isFocused &&
+      isUiReady &&
+      shouldShowBoxes &&
+      !shouldRenderLoadingOverlay,
+    steps: FLASHCARDS_COACHMARK_STEPS,
+  });
+
+  useEffect(() => {
+    if (!coachmark.isActive) {
+      return;
+    }
+    Keyboard.dismiss();
+  }, [coachmark.currentIndex, coachmark.isActive]);
 
   return (
-    <View style={styles.container}>
-      <IntroOverlay />
+    <View ref={rootRef} style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
+      <CoachmarkAnchor
+        id="flashcards-bubble-anchor"
+        shape="rect"
+        radius={12}
+        style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
+      />
 
       <View
         style={[
@@ -1242,17 +1258,24 @@ export default function Flashcards() {
                     boxesScaledHeight ? { height: boxesScaledHeight } : null,
                   ]}
                 >
-                  <View
-                    style={{
-                      transform: [
-                        { translateY: -boxesScaleOffsetY },
-                        { scale: boxesScale },
-                      ],
-                    }}
-                    onLayout={onBoxesContentLayout}
+                  <CoachmarkAnchor
+                    id="flashcards-boxes-section"
+                    shape="rect"
+                    radius={28}
                   >
-                    {boxesContent}
-                  </View>
+                    <View
+                      collapsable={false}
+                      style={{
+                        transform: [
+                          { translateY: -boxesScaleOffsetY },
+                          { scale: boxesScale },
+                        ],
+                      }}
+                      onLayout={onBoxesContentLayout}
+                    >
+                      {boxesContent}
+                    </View>
+                  </CoachmarkAnchor>
                 </View>
               </ScrollView>
             ) : (
@@ -1263,21 +1286,27 @@ export default function Flashcards() {
                     boxesScaledHeight ? { height: boxesScaledHeight } : null,
                   ]}
                 >
-                  <View
-                    style={{
-                      transform: [
-                        { translateY: -boxesScaleOffsetY },
-                        { scale: boxesScale },
-                      ],
-                    }}
-                    onLayout={onBoxesContentLayout}
+                  <CoachmarkAnchor
+                    id="flashcards-boxes-section"
+                    shape="rect"
+                    radius={28}
                   >
-                    {boxesContent}
-                  </View>
+                    <View
+                      collapsable={false}
+                      style={{
+                        transform: [
+                          { translateY: -boxesScaleOffsetY },
+                          { scale: boxesScale },
+                        ],
+                      }}
+                      onLayout={onBoxesContentLayout}
+                    >
+                      {boxesContent}
+                    </View>
+                  </CoachmarkAnchor>
                 </View>
               </View>
             )}
-
           </Reanimated.View>
         )}
 
@@ -1343,6 +1372,18 @@ export default function Flashcards() {
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
       />
+      {coachmark.isActive ? (
+        <GuidedCoachmarkLayer
+          rootRef={rootRef}
+          currentStep={coachmark.currentStep}
+          currentIndex={coachmark.currentIndex}
+          totalSteps={coachmark.totalSteps}
+          canGoBack={coachmark.canGoBack}
+          canGoNext={coachmark.canGoNext}
+          onBack={coachmark.goBack}
+          onNext={coachmark.goNext}
+        />
+      ) : null}
     </View>
   );
 }

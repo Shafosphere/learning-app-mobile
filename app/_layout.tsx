@@ -29,6 +29,7 @@ import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPrevi
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
+import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -446,23 +447,25 @@ export default function RootLayout() {
       >
         {shouldRenderApp ? (
           <SettingsProvider initialTheme={effectiveStartupTheme}>
-            <AppThemeSystemUiSync />
-            <QuoteProvider>
-              <QuoteSystemInitializer />
-              <LearningRemindersInitializer />
-              <GoogleDriveBackupInitializer />
-              <LearningStatsProvider>
-                <NavbarStatsProvider>
-                  <PopupProvider>
-                    <Navbar>
-                      <OnboardingGate />
-                      <Stack screenOptions={{ headerShown: false }} />
-                    </Navbar>
-                    <QuoteBubble />
-                  </PopupProvider>
-                </NavbarStatsProvider>
-              </LearningStatsProvider>
-            </QuoteProvider>
+            <CoachmarkProvider>
+              <AppThemeSystemUiSync />
+              <QuoteProvider>
+                <QuoteSystemInitializer />
+                <LearningRemindersInitializer />
+                <GoogleDriveBackupInitializer />
+                <LearningStatsProvider>
+                  <NavbarStatsProvider>
+                    <PopupProvider>
+                      <Navbar>
+                        <OnboardingGate />
+                        <Stack screenOptions={{ headerShown: false }} />
+                      </Navbar>
+                      <QuoteBubble />
+                    </PopupProvider>
+                  </NavbarStatsProvider>
+                </LearningStatsProvider>
+              </QuoteProvider>
+            </CoachmarkProvider>
           </SettingsProvider>
         ) : shouldRenderBlockingState ? (
           <>

@@ -89,6 +89,7 @@ const DebuggingSection: React.FC = () => {
   const {
     activeCustomCourseId,
     learningRemindersEnabled,
+    resetOnboardingState,
     toggleLearningRemindersEnabled,
     statsBookshelfEnabled,
     toggleStatsBookshelfEnabled,
@@ -230,6 +231,7 @@ const DebuggingSection: React.FC = () => {
       | "language_required"
       | "pin_required"
       | "activate_required"
+      | "course_entry_settings_required"
       | "done"
   ) => {
     try {
@@ -249,18 +251,20 @@ const DebuggingSection: React.FC = () => {
   const handleResetIntro = async () => {
     setResettingIntro(true);
     try {
+      await resetOnboardingState();
       await AsyncStorage.multiRemove([
+        "@onboarding_checkpoint_v1",
         "@course_pin_intro_seen_v1",
         "@course_activate_intro_seen_v1",
+        "@course_entry_settings_intro_seen_v1",
         "@flashcards_intro_seen_v1",
-        "@review_brain_intro_seen_v1",
-        "@review_courses_intro_seen_v1",
       ]);
       await setOnboardingCheckpoint("language_required");
       Alert.alert(
         t("settings.debug.alerts.doneTitle"),
         t("settings.debug.alerts.introResetDone")
       );
+      router.replace("/createprofile");
     } catch {
       Alert.alert(
         t("settings.debug.alerts.errorTitle"),
@@ -609,6 +613,14 @@ const DebuggingSection: React.FC = () => {
             color="my_yellow"
             onPress={() => handleSetOnboarding("activate_required")}
             width={140}
+          />
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="course_entry_settings_required"
+            color="my_yellow"
+            onPress={() => handleSetOnboarding("course_entry_settings_required")}
+            width={220}
           />
         </View>
         <View style={styles.keyboardButtonWrapper}>

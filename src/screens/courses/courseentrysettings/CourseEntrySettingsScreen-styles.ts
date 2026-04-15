@@ -19,7 +19,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   contentContainerInner: {
     paddingHorizontal: 20,
     paddingTop: 30,
-    paddingBottom: 24,
+    paddingBottom: 200,
     flexGrow: 1,
   },
   content: {

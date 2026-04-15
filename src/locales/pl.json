@@ -662,84 +662,106 @@
     },
     "courseActivate": {
       "step1": {
-        "title": "Aktywuj kurs",
-        "description": "Tutaj aktywujesz kurs, gry będą używać fiszek z aktywnego kursu."
+        "title": "Gdzie teraz jestem?",
+        "description": "Teraz jesteś na ekranie, gdzie aktywuje się kurs."
       },
       "step2": {
-        "title": "Ustawienia kursu",
-        "description": "Każdy kurs ma swoje ustawienia, które możesz zmieniać w każdej chwili."
+        "title": "Po co?",
+        "description": "To właśnie z tego aktywnego kursu gra będzie brała fiszki."
+      },
+      "step3": {
+        "title": "Jak aktywować?",
+        "description": "Aktywowanie następuje po kliknięciu w kafelek kursu."
+      },
+      "step4": {
+        "title": "zzzZZZZzzz",
+        "description": "(czeka aż aktywujesz jakiś kurs)"
+      },
+      "step5": {
+        "title": "Brawo! Aktywowałeś kurs!",
+        "description": "Możesz teraz zacząć grać. Kliknij przycisk Dalej na dole po prawej."
+      }
+    },
+    "courseEntrySettings": {
+      "step1": {
+        "title": "Co to za ekran?",
+        "description": "To jest ekran, który wyświetla się jednorazowo na starcie każdego kursu."
+      },
+      "step2": {
+        "title": "Co tu jest ważne?",
+        "description": "Są tutaj trzy ważniejsze opcje, którymi użytkownik dostosowuje kurs."
+      },
+      "step3": {
+        "title": "Na teraz",
+        "description": "Na razie polecam zostawić je takie, jakie są."
+      },
+      "step4": {
+        "title": "Spokojnie",
+        "description": "Później nadal będziesz mógł zmieniać te ustawienia."
+      },
+      "step5": {
+        "title": "I co teraz?",
+        "description": "Kliknij dalej, jeżeli jesteś gotów przejść do gry."
+      }
+    },
+    "flashcards": {
+      "step1": {
+        "title": "To jest nasza główna gra",
+        "description": "Tutaj uczysz się fiszek i przechodzisz przez kolejne pudełka."
+      },
+      "step2": {
+        "title": "Ale zanim zaczniemy to interfejs",
+        "description": "Najpierw szybko pokażę Ci, co jest gdzie na tym ekranie."
+      },
+      "step3": {
+        "title": "To jest karta z pytaniem, słówkiem albo obrazkiem",
+        "description": "Tutaj pojawia się aktualna fiszka i miejsce na odpowiedź."
+      },
+      "step4": {
+        "title": "Tutaj są pudełka",
+        "description": "To nimi sterujesz przebiegiem nauki i wybierasz skąd losować fiszki."
+      },
+      "step5": {
+        "title": "A tutaj przyciski sterujące",
+        "description": "Tutaj zatwierdzasz odpowiedź albo przechodzisz dalej, zależnie od typu fiszki."
       }
     },
     "coursePin": {
       "step1": {
         "title": "Cześć, jestem Memicard",
-        "description": "Oprowadzę Cię po aplikacji. Zacznijmy od wybrania kursów"
+        "description": "Pokażę Ci, jak zacząć. A to krótki poradnik co i jak :3"
       },
       "step2": {
-        "title": "Przypnij kilka kursów",
-        "description": "Na starcie wybierzmy kursy które Cię interesują, możesz przypiąć więcej niż jeden kurs. Będziesz mieć szybszy dostęp do tych przypiętych."
+        "title": "Co tu jest?",
+        "description": "Na tym ekranie widać listę kursów, które są dostępne w aplikacji."
       },
       "step3": {
-        "title": "Po przypięciu kliknij Dalej",
-        "description": "Przycisk u dołu włączy się, gdy przypniesz co najmniej jeden kurs."
+        "title": "Jakich kursów?",
+        "description": "Jeden kurs to jeden kafelek z adekwatną nazwą."
       },
       "step4": {
-        "title": "Własne kursy!",
-        "description": "Później będziesz mógł zrobić własne kursy ze swoimi fiszkami! :3"
-      }
-    },
-    "flashcards": {
-      "step1": {
-        "title": "To jest główna gra",
-        "description": "Inspirowana systemem Leitnera. Tutaj uczymy się słówek."
-      },
-      "step2": {
-        "title": "Cel gry",
-        "description": "Celem gry jest przeniesienie słówka przez wszystkie pudełka."
-      },
-      "step3": {
-        "title": "Aktywuj pudełko",
-        "description": "Klikając pudełko, aktywujesz je i losujesz przy okazji nową fiszkę."
-      },
-      "step4": {
-        "title": "Podaj odpowiedź",
-        "description": "W karcie pojawia się wylosowana fiszka, w zależności od jej typu masz podać odpowiedź lub kliknąć przycisk"
+        "title": "I co tu robisz?",
+        "description": "Wybierasz sobie kursy, które Cię interesują, i przypinasz."
       },
       "step5": {
-        "title": "Za skomplikowane?",
-        "description": "Jeśli czegoś nie rozumiesz, zajrzyj do przewodnika na stronie głównej. Możesz tam przejść, klikając moją miniaturkę na górnym pasku."
-      }
-    },
-    "brain": {
-      "step1": {
-        "title": "Co to?",
-        "description": "Tutaj wybierasz metodę powtórki."
+        "title": "A jak przypinam?",
+        "description": "Przypinasz poprzez kliknięcie w kwadracik w kafelku danego kursu."
       },
-      "step2": {
-        "title": "Wybierz tryb powtórek",
-        "description": "Przycisk start to szybka sesja mini gier. Przycisk Tradycyjne to klasyczne wpisywanie tłumaczeń."
+      "step6": {
+        "title": "A i jeszcze coś",
+        "description": "U góry masz kategorie."
       },
-      "step3": {
-        "title": "Po sesji",
-        "description": "Na końcu obu trybów zobaczysz tabelę z podsumowaniem wyników."
-      }
-    },
-    "reviewCourses": {
-      "step1": {
-        "title": "Wybierz kurs do powtórek",
-        "description": "Dotknij kafelka, by przejść do gry i powtórzyć fiszki z tego kursu."
+      "step7": {
+        "title": "zzzZZZZzzz",
+        "description": "(czeka aż przypniesz kursy, które Ci się podobają)"
       },
-      "step2": {
-        "title": "Jak często się pojawiają?",
-        "description": "Może za 2 dni, może za tydzień, a może za rok? Pamiętaj, że żeby zapamiętać, trzeba zapomnieć ;)"
+      "step8": {
+        "title": "Brawo! Kurs został przypięty!",
+        "description": "Pamiętaj, możesz przypiąć ich więcej niż jeden."
       },
-      "step3": {
-        "title": "Co oznaczają liczby",
-        "description": "Czerwona liczba to zaległe powtórki. Zielona oznacza, że na razie nic nie czeka."
-      },
-      "step4": {
-        "title": "Wyłączanie powtórek",
-        "description": "W ustawieniach kursu możesz wyłączyć powtórki - wtedy nie pojawi się na tej liście."
+      "step9": {
+        "title": "I co teraz?",
+        "description": "Jeżeli przypiąłeś to, co Cię interesuje, możesz kliknąć przycisk Dalej na dole po prawej."
       }
     }
   },

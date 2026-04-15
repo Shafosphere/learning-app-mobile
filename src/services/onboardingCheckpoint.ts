@@ -4,6 +4,7 @@ export type OnboardingCheckpoint =
   | "language_required"
   | "pin_required"
   | "activate_required"
+  | "course_entry_settings_required"
   | "done";
 
 type OnboardingCheckpointListener = (checkpoint: OnboardingCheckpoint) => void;
@@ -50,6 +51,7 @@ export async function getOnboardingCheckpoint(): Promise<
       value === "language_required" ||
       value === "pin_required" ||
       value === "activate_required" ||
+      value === "course_entry_settings_required" ||
       value === "done"
     ) {
       return value;

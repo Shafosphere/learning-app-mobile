@@ -1,4 +1,5 @@
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
@@ -13,6 +14,8 @@ interface OfficialCourseSectionProps {
     colors: { headline: string };
     onPress: (id: number) => void;
     onEdit: (course: OfficialCourseListItem) => void;
+    firstCoachmarkCourseId: number | null;
+    scrollRef: React.RefObject<any>;
 }
 
 export const OfficialCourseSection = ({
@@ -23,6 +26,8 @@ export const OfficialCourseSection = ({
     colors,
     onPress,
     onEdit,
+    firstCoachmarkCourseId,
+    scrollRef,
 }: OfficialCourseSectionProps) => {
     const styles = useStyles();
 
@@ -34,8 +39,9 @@ export const OfficialCourseSection = ({
             {list.map((course) => {
                 const isHighlighted = activeCourseId === course.id;
                 const flagLang = course.smallFlag ?? course.sourceLang;
+                const isCoachmarkTarget = course.id === firstCoachmarkCourseId;
 
-                return (
+                const card = (
                     <CourseListCard
                         key={`official-${course.id}`}
                         title={course.name}
@@ -65,6 +71,24 @@ export const OfficialCourseSection = ({
                         }
                     />
                 );
+
+                if (isCoachmarkTarget) {
+                    return (
+                        <CoachmarkAnchor
+                            key={`coachmark-official-${course.id}`}
+                            id="course-activate-first-card"
+                            shape="rect"
+                            radius={20}
+                            padding={2}
+                            scrollRef={scrollRef}
+                            style={{ alignSelf: "stretch" }}
+                        >
+                            {card}
+                        </CoachmarkAnchor>
+                    );
+                }
+
+                return card;
             })}
         </View>
     );
