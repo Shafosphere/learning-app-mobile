@@ -1,8 +1,15 @@
+import type { BoxesState } from "@/src/types/boxes";
+
 export type CoachmarkAdvanceEvent =
   | "manual"
   | "pin_course"
   | "activate_course"
-  | "press_next";
+  | "press_next"
+  | "box_selected"
+  | "answer_submitted"
+  | "forced_correct_answer_shown"
+  | "box_promoted"
+  | "confetti_demo_shown";
 
 export type CoachmarkFlowStep = {
   id: string;
@@ -16,6 +23,14 @@ export type CoachmarkFlowStep = {
   blockSpotlight?: boolean;
   layout?: "default" | "centered_intro";
   scrollLocked?: boolean;
+  expectedBox?: keyof BoxesState;
+  forceCorrectOnSubmit?: boolean;
+  dismissKeyboardOnAdvance?: boolean;
+  showDemoBoxCounts?: Partial<Record<keyof BoxesState, number>>;
+  triggerDemoConfetti?: boolean;
+  successVariant?: "normal" | "assisted";
+  autoAdvanceDelayMs?: number;
+  floatingIndicator?: "arrow_u_down_right";
 };
 
 export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
@@ -248,7 +263,7 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-4",
-    targetId: "flashcards-boxes-section",
+    targetId: "flashcards-buttons-section",
     titleKey: "onboarding.flashcards.step4.title",
     descriptionKey: "onboarding.flashcards.step4.description",
     kind: "info",
@@ -259,13 +274,218 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-5",
-    targetId: "flashcards-buttons-section",
+    targetId: "flashcards-boxes-section",
     titleKey: "onboarding.flashcards.step5.title",
     descriptionKey: "onboarding.flashcards.step5.description",
     kind: "info",
     advanceOn: "manual",
     spotlight: true,
     blockOutside: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-6",
+    targetId: "flashcards-box-one",
+    titleKey: "onboarding.flashcards.step6.title",
+    descriptionKey: "onboarding.flashcards.step6.description",
+    kind: "info",
+    advanceOn: "manual",
+    spotlight: true,
+    blockOutside: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-7",
+    targetId: "flashcards-box-one-count",
+    titleKey: "onboarding.flashcards.step7.title",
+    descriptionKey: "onboarding.flashcards.step7.description",
+    kind: "info",
+    advanceOn: "manual",
+    spotlight: true,
+    blockOutside: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-8",
+    targetId: "flashcards-bubble-anchor",
+    titleKey: "onboarding.flashcards.step8.title",
+    descriptionKey: "onboarding.flashcards.step8.description",
+    kind: "action",
+    advanceOn: "box_selected",
+    expectedBox: "boxOne",
+  },
+  {
+    id: "flashcards-step-9",
+    targetId: "flashcards-card-section",
+    titleKey: "onboarding.flashcards.step9.title",
+    descriptionKey: "onboarding.flashcards.step9.description",
+    kind: "action",
+    advanceOn: "answer_submitted",
+    forceCorrectOnSubmit: true,
+    dismissKeyboardOnAdvance: true,
+  },
+  {
+    id: "flashcards-step-10",
+    targetId: "flashcards-bubble-anchor",
+    titleKey: "onboarding.flashcards.step10.title",
+    descriptionKey: "onboarding.flashcards.step10.description",
+    kind: "success",
+    advanceOn: "forced_correct_answer_shown",
+    blockOutside: true,
+    successVariant: "normal",
+    autoAdvanceDelayMs: 1200,
+  },
+  {
+    id: "flashcards-step-11",
+    targetId: "flashcards-box-two",
+    titleKey: "onboarding.flashcards.step11.title",
+    descriptionKey: "onboarding.flashcards.step11.description",
+    kind: "info",
+    advanceOn: "box_promoted",
+    spotlight: true,
+    blockOutside: true,
+    autoAdvanceDelayMs: 1400,
+    showDemoBoxCounts: {
+      boxTwo: 1,
+    },
+  },
+  {
+    id: "flashcards-step-12",
+    targetId: "flashcards-promotion-arrow-anchor",
+    titleKey: "onboarding.flashcards.step12.title",
+    descriptionKey: "onboarding.flashcards.step12.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    floatingIndicator: "arrow_u_down_right",
+  },
+  {
+    id: "flashcards-step-13",
+    targetId: "flashcards-boxes-section",
+    titleKey: "onboarding.flashcards.step13.title",
+    descriptionKey: "onboarding.flashcards.step13.description",
+    kind: "info",
+    advanceOn: "manual",
+    spotlight: true,
+    blockOutside: true,
+    showDemoBoxCounts: {
+      boxOne: 0,
+      boxTwo: 0,
+      boxFive: 1,
+    },
+  },
+  {
+    id: "flashcards-step-14",
+    targetId: "flashcards-boxes-section",
+    titleKey: "onboarding.flashcards.step14.title",
+    descriptionKey: "onboarding.flashcards.step14.description",
+    kind: "success",
+    advanceOn: "manual",
+    spotlight: true,
+    blockOutside: true,
+    showDemoBoxCounts: {
+      boxOne: 0,
+      boxTwo: 0,
+      boxThree: 0,
+      boxFour: 0,
+      boxFive: 0,
+    },
+    triggerDemoConfetti: true,
+  },
+  {
+    id: "flashcards-step-15",
+    targetId: "flashcards-boxes-section",
+    titleKey: "onboarding.flashcards.step15.title",
+    descriptionKey: "onboarding.flashcards.step15.description",
+    kind: "info",
+    advanceOn: "manual",
+    spotlight: true,
+    blockOutside: true,
+  },
+  {
+    id: "flashcards-step-16",
+    targetId: "flashcards-bubble-anchor",
+    titleKey: "onboarding.flashcards.step16.title",
+    descriptionKey: "onboarding.flashcards.step16.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+  },
+  {
+    id: "flashcards-step-17",
+    targetId: "flashcards-home-button",
+    titleKey: "onboarding.flashcards.step17.title",
+    descriptionKey: "onboarding.flashcards.step17.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-18",
+    targetId: "flashcards-course-button",
+    titleKey: "onboarding.flashcards.step18.title",
+    descriptionKey: "onboarding.flashcards.step18.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-19",
+    targetId: "flashcards-stats-button",
+    titleKey: "onboarding.flashcards.step19.title",
+    descriptionKey: "onboarding.flashcards.step19.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-20",
+    targetId: "flashcards-theme-button",
+    titleKey: "onboarding.flashcards.step20.title",
+    descriptionKey: "onboarding.flashcards.step20.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-21",
+    targetId: "flashcards-review-button",
+    titleKey: "onboarding.flashcards.step21.title",
+    descriptionKey: "onboarding.flashcards.step21.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-22",
+    targetId: "flashcards-game-button",
+    titleKey: "onboarding.flashcards.step22.title",
+    descriptionKey: "onboarding.flashcards.step22.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
+    id: "flashcards-step-23",
+    targetId: "flashcards-settings-button",
+    titleKey: "onboarding.flashcards.step23.title",
+    descriptionKey: "onboarding.flashcards.step23.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
     blockSpotlight: true,
   },
 ];

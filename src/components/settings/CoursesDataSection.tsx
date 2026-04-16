@@ -4,7 +4,10 @@ import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { exportAndShareUserData } from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
+import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useRouter } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { Alert, Pressable, Text, useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -27,9 +30,11 @@ type ImportStatsLike = {
 const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
   const { t, i18n } = useTranslation();
+  const router = useRouter();
   const { width } = useWindowDimensions();
   const {
     resetLearningSettings,
+    resetOnboardingState,
     googleDriveConfigured,
     googleDriveConfigurationError,
     googleDriveConnected,
@@ -49,11 +54,21 @@ const CoursesDataSection: React.FC = () => {
     applyImportedAppState,
   } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
+  const [resettingIntro, setResettingIntro] = useState(false);
   const [exportingData, setExportingData] = useState(false);
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
   const [expandedSnapshotIds, setExpandedSnapshotIds] = useState<string[]>([]);
   const isCompactSnapshotLayout = width < 360;
+  const introStorageKeys = [
+    "@onboarding_checkpoint_v1",
+    "@course_pin_intro_seen_v1",
+    "@course_activate_intro_seen_v1",
+    "@course_entry_settings_intro_seen_v1",
+    "@flashcards_intro_seen_v1",
+    "flashcards.actionsPositionNudgeSeen",
+    "flashcards.actionsPositionNudgeAnswerCount",
+  ] as const;
 
   const formatter = useMemo(
     () =>
@@ -459,6 +474,36 @@ const CoursesDataSection: React.FC = () => {
     );
   };
 
+  const handleResetIntro = () => {
+    Alert.alert(
+      t("settings.coursesData.resetIntroConfirm.title"),
+      t("settings.coursesData.resetIntroConfirm.message"),
+      [
+        { text: t("settings.coursesData.resetIntroConfirm.cancel"), style: "cancel" },
+        {
+          text: t("settings.coursesData.resetIntroConfirm.confirm"),
+          style: "destructive",
+          onPress: async () => {
+            setResettingIntro(true);
+            try {
+              await resetOnboardingState();
+              await AsyncStorage.multiRemove([...introStorageKeys]);
+              await setOnboardingCheckpoint("language_required");
+              router.replace("/createprofile");
+            } catch {
+              Alert.alert(
+                t("settings.coursesData.errors.generic"),
+                t("settings.coursesData.errors.resetIntro")
+              );
+            } finally {
+              setResettingIntro(false);
+            }
+          },
+        },
+      ]
+    );
+  };
+
   const connectButtonText =
     driveAction === "connect"
       ? t("settings.coursesData.googleDrive.loadingShort")
@@ -788,27 +833,58 @@ const CoursesDataSection: React.FC = () => {
 
       <Text style={styles.appearanceGroupLabel}>RESET</Text>
       <View style={[styles.actionCard, styles.actionCardStandalone]}>
-        <View style={styles.actionCardHeader}>
-          <Text style={styles.actionCardTitle}>
-            {t("settings.coursesData.rows.resetLearning.title")}
-          </Text>
-          <Text style={styles.actionCardDescription}>
-            {preventWidowsPl(t("settings.coursesData.rows.resetLearning.subtitle"))}
-          </Text>
-        </View>
-        <View style={styles.actionCardButtonRow}>
-          <MyButton
-            text={
-              resettingLearning
-                ? t("settings.coursesData.rows.resetLearning.buttonLoading")
-                : t("settings.coursesData.rows.resetLearning.button")
-            }
-            color="my_yellow"
-            onPress={handleResetLearningSettings}
-            disabled={resettingLearning}
-            width={130}
-            textLines={2}
-          />
+        <View style={styles.actionCardSections}>
+          <View style={styles.actionCardSection}>
+            <View style={styles.actionCardHeader}>
+              <Text style={styles.actionCardTitle}>
+                {t("settings.coursesData.rows.resetLearning.title")}
+              </Text>
+              <Text style={styles.actionCardDescription}>
+                {preventWidowsPl(t("settings.coursesData.rows.resetLearning.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.actionCardButtonRow}>
+              <MyButton
+                text={
+                  resettingLearning
+                    ? t("settings.coursesData.rows.resetLearning.buttonLoading")
+                    : t("settings.coursesData.rows.resetLearning.button")
+                }
+                color="my_yellow"
+                onPress={handleResetLearningSettings}
+                disabled={resettingLearning}
+                width={130}
+                textLines={2}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.actionCardSection}>
+            <View style={styles.actionCardHeader}>
+              <Text style={styles.actionCardTitle}>
+                {t("settings.coursesData.rows.resetIntro.title")}
+              </Text>
+              <Text style={styles.actionCardDescription}>
+                {preventWidowsPl(t("settings.coursesData.rows.resetIntro.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.actionCardButtonRow}>
+              <MyButton
+                text={
+                  resettingIntro
+                    ? t("settings.coursesData.rows.resetIntro.buttonLoading")
+                    : t("settings.coursesData.rows.resetIntro.button")
+                }
+                color="my_yellow"
+                onPress={handleResetIntro}
+                disabled={resettingIntro}
+                width={130}
+                textLines={2}
+              />
+            </View>
+          </View>
         </View>
       </View>
     </View>

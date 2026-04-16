@@ -101,6 +101,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   bottomIconButtonPressed: {
     backgroundColor: colors.my_green,
   },
+  bottomCoachmarkOverlay: {
+    ...StyleSheet.absoluteFillObject,
+  },
+  bottomCoachmarkTarget: {
+    flex: 1,
+  },
   reviewIconWrapper: {
     position: "relative",
     alignItems: "center",

@@ -6,7 +6,7 @@ export function CardSceneEmpty() {
   const styles = useStyles();
   return (
     <View style={styles.emptyScene}>
-      <Text style={styles.empty}>Wybierz pudełko z słowkami</Text>
+      <Text style={styles.empty}>Wybierz pudełko z fiszkami</Text>
     </View>
   );
 }

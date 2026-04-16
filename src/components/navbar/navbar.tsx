@@ -15,6 +15,7 @@ import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
 import { usePathname, useRouter } from "expo-router";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import {
   useCallback,
   useEffect,
@@ -403,44 +404,50 @@ export default function Navbar({ children }: NavbarProps) {
             >
               <Image source={logo} style={styles.logo} contentFit="contain" />
             </TouchableOpacity>
-            <TouchableOpacity
-              onPress={() => router.push("/coursepanel")}
-              style={styles.courseButton}
-              accessibilityRole="button"
-              accessibilityLabel={courseAccessibilityLabel}
-            >
-              {courseGraphic}
-              {displayedCustomCourse ? (
-                <CourseTitleMarquee
-                  text={displayedCustomCourse.name}
-                  containerStyle={styles.courseName}
-                  textStyle={styles.courseNameText}
-                />
-              ) : null}
-              {displayedBuiltinCourse && selectedLevel ? (
-                <Text style={styles.courseLevel} allowFontScaling>
-                  {selectedLevel}
-                </Text>
-              ) : null}
-            </TouchableOpacity>
+            <CoachmarkAnchor id="flashcards-course-button" shape="rect" radius={18}>
+              <TouchableOpacity
+                onPress={() => router.push("/coursepanel")}
+                style={styles.courseButton}
+                accessibilityRole="button"
+                accessibilityLabel={courseAccessibilityLabel}
+              >
+                {courseGraphic}
+                {displayedCustomCourse ? (
+                  <CourseTitleMarquee
+                    text={displayedCustomCourse.name}
+                    containerStyle={styles.courseName}
+                    textStyle={styles.courseNameText}
+                  />
+                ) : null}
+                {displayedBuiltinCourse && selectedLevel ? (
+                  <Text style={styles.courseLevel} allowFontScaling>
+                    {selectedLevel}
+                  </Text>
+                ) : null}
+              </TouchableOpacity>
+            </CoachmarkAnchor>
           </View>
 
           <View style={styles.rightGroup}>
-            <NavbarStatsRotator onPress={() => router.push("/stats")} />
-            <Pressable
-              style={({ pressed }) => [
-                styles.iconButton,
-                pressed && styles.iconButtonPressed,
-              ]}
-              onPress={toggleTheme}
-            >
-              <MaterialIcons
-                style={styles.icon}
-                name="dark-mode"
-                size={24}
-                color={colors.headline}
-              />
-            </Pressable>
+            <CoachmarkAnchor id="flashcards-stats-button" shape="rect" radius={18}>
+              <NavbarStatsRotator onPress={() => router.push("/stats")} />
+            </CoachmarkAnchor>
+            <CoachmarkAnchor id="flashcards-theme-button" shape="rect" radius={18}>
+              <Pressable
+                style={({ pressed }) => [
+                  styles.iconButton,
+                  pressed && styles.iconButtonPressed,
+                ]}
+                onPress={toggleTheme}
+              >
+                <MaterialIcons
+                  style={styles.icon}
+                  name="dark-mode"
+                  size={24}
+                  color={colors.headline}
+                />
+              </Pressable>
+            </CoachmarkAnchor>
           </View>
         </View>
       </View>
@@ -461,6 +468,14 @@ export default function Navbar({ children }: NavbarProps) {
               accessibilityRole="button"
               accessibilityLabel="Przejdź do powtórek"
             >
+              <CoachmarkAnchor
+                id="flashcards-review-button"
+                shape="rect"
+                radius={18}
+                style={styles.bottomCoachmarkOverlay}
+              >
+                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+              </CoachmarkAnchor>
               <View style={styles.reviewIconWrapper}>
                 <FontAwesome5
                   name="hourglass-end"
@@ -495,6 +510,14 @@ export default function Navbar({ children }: NavbarProps) {
               accessibilityRole="button"
               accessibilityLabel="Przejdź do menu głównego"
             >
+              <CoachmarkAnchor
+                id="flashcards-home-button"
+                shape="rect"
+                radius={18}
+                style={styles.bottomCoachmarkOverlay}
+              >
+                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+              </CoachmarkAnchor>
               <Foundation name="home" size={28} color={colors.headline} />
             </Pressable>
 
@@ -507,6 +530,14 @@ export default function Navbar({ children }: NavbarProps) {
               accessibilityRole="button"
               accessibilityLabel="Przejdź do gry fiszek"
             >
+              <CoachmarkAnchor
+                id="flashcards-game-button"
+                shape="rect"
+                radius={24}
+                style={styles.bottomCoachmarkOverlay}
+              >
+                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+              </CoachmarkAnchor>
               <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
             </Pressable>
 
@@ -519,6 +550,14 @@ export default function Navbar({ children }: NavbarProps) {
               accessibilityRole="button"
               accessibilityLabel="Przejdź do ustawień"
             >
+              <CoachmarkAnchor
+                id="flashcards-settings-button"
+                shape="rect"
+                radius={18}
+                style={styles.bottomCoachmarkOverlay}
+              >
+                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+              </CoachmarkAnchor>
               <Ionicons
                 style={styles.icon}
                 name="settings-sharp"

@@ -21,6 +21,7 @@ type UseKeyboardBottomOffsetOptions = {
 
 type UseKeyboardBottomOffsetResult = {
   keyboardVisible: boolean;
+  keyboardTopInWindow: number | null;
   bottomOffset: Animated.Value;
 };
 
@@ -52,6 +53,9 @@ export function useKeyboardBottomOffset({
   };
 
   const [keyboardVisible, setKeyboardVisible] = useState(false);
+  const [keyboardTopInWindow, setKeyboardTopInWindow] = useState<number | null>(
+    null,
+  );
   const bottomOffset = useRef(new Animated.Value(0)).current;
   const lastKeyboardTopRef = useRef<number | null>(null);
   const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -175,6 +179,7 @@ export function useKeyboardBottomOffset({
 
       lastKeyboardTopRef.current = liveTop;
       setKeyboardVisible(true);
+      setKeyboardTopInWindow(liveTop);
       animateTo(computeTargetOffset(liveTop), duration);
       return true;
     },
@@ -199,6 +204,7 @@ export function useKeyboardBottomOffset({
     if (!enabled) {
       clearPendingHide();
       setKeyboardVisible(false);
+      setKeyboardTopInWindow(null);
       lastKeyboardTopRef.current = null;
       animateTo(0, 120);
       return;
@@ -221,6 +227,7 @@ export function useKeyboardBottomOffset({
       clearPendingHide();
       lastKeyboardTopRef.current = keyboardTopRaw;
       setKeyboardVisible(true);
+      setKeyboardTopInWindow(keyboardTopRaw);
       animateTo(computeTargetOffset(keyboardTopRaw), getDuration(event));
     };
 
@@ -234,14 +241,15 @@ export function useKeyboardBottomOffset({
 
       clearPendingHide();
       const hideDuration = getDuration(event);
+      setKeyboardVisible(false);
+      setKeyboardTopInWindow(null);
+      lastKeyboardTopRef.current = null;
+      animateTo(0, hideDuration);
       hideTimerRef.current = setTimeout(() => {
         hideTimerRef.current = null;
         if (syncFromLiveKeyboard(120)) {
           return;
         }
-        setKeyboardVisible(false);
-        lastKeyboardTopRef.current = null;
-        animateTo(0, hideDuration);
       }, 110);
     };
 
@@ -296,5 +304,5 @@ export function useKeyboardBottomOffset({
     syncFromLiveKeyboard,
   ]);
 
-  return { keyboardVisible, bottomOffset };
+  return { keyboardVisible, keyboardTopInWindow, bottomOffset };
 }

@@ -31,10 +31,13 @@ export function useCoachmarkFlow({
   const [hasSeen, setHasSeen] = useState(true);
   const startAttemptedRef = useRef(false);
   const autoAdvanceStepIdRef = useRef<string | null>(null);
+  const autoAdvancedStepIdsRef = useRef<Set<string>>(new Set());
 
   useEffect(() => {
     if (restartToken == null || restartToken === "") return;
     startAttemptedRef.current = false;
+    autoAdvanceStepIdRef.current = null;
+    autoAdvancedStepIdsRef.current.clear();
     setHasSeen(false);
     setIsReady(true);
   }, [restartToken]);
@@ -65,6 +68,8 @@ export function useCoachmarkFlow({
 
   const isActive = state.isActive && state.activeTour?.key === flowKey;
   const currentStep = isActive ? steps[state.index] ?? null : null;
+  const isPendingStart =
+    isReady && !hasSeen && shouldStart && !isActive && !startAttemptedRef.current;
 
   useEffect(() => {
     if (!isReady || hasSeen || !shouldStart || isActive || startAttemptedRef.current) {
@@ -72,7 +77,11 @@ export function useCoachmarkFlow({
     }
 
     startAttemptedRef.current = true;
+    autoAdvanceStepIdRef.current = null;
+    autoAdvancedStepIdsRef.current.clear();
+    let didStart = false;
     const timeout = setTimeout(() => {
+      didStart = true;
       void start(
         createTour(
           flowKey,
@@ -83,9 +92,14 @@ export function useCoachmarkFlow({
           }))
         )
       );
-    }, 120);
+    }, 600);
 
-    return () => clearTimeout(timeout);
+    return () => {
+      clearTimeout(timeout);
+      if (!didStart) {
+        startAttemptedRef.current = false;
+      }
+    };
   }, [flowKey, hasSeen, isActive, isReady, shouldStart, start, steps]);
 
   useEffect(() => {
@@ -101,19 +115,26 @@ export function useCoachmarkFlow({
       autoAdvanceStepIdRef.current = null;
       return;
     }
+    if (autoAdvancedStepIdsRef.current.has(currentStep.id)) {
+      autoAdvanceStepIdRef.current = currentStep.id;
+      return;
+    }
     if (autoAdvanceStepIdRef.current === currentStep.id) {
       return;
     }
     autoAdvanceStepIdRef.current = currentStep.id;
 
     const timeout = setTimeout(() => {
+      autoAdvancedStepIdsRef.current.add(currentStep.id);
       next();
-    }, 180);
+    }, currentStep.autoAdvanceDelayMs ?? 180);
     return () => clearTimeout(timeout);
   }, [completionState, currentStep, next]);
 
   const finishFlow = useCallback(async () => {
     await AsyncStorage.setItem(storageKey, "1");
+    autoAdvanceStepIdRef.current = null;
+    autoAdvancedStepIdsRef.current.clear();
     setHasSeen(true);
     await stop("completed");
   }, [storageKey, stop]);
@@ -158,6 +179,8 @@ export function useCoachmarkFlow({
   return useMemo(
     () => ({
       isActive,
+      isPendingStart,
+      hasSeen,
       isReady,
       currentStep,
       currentIndex: isActive ? state.index : -1,
@@ -174,7 +197,9 @@ export function useCoachmarkFlow({
       currentStep,
       goBack,
       goNext,
+      hasSeen,
       isActive,
+      isPendingStart,
       isReady,
       state.index,
       steps.length,

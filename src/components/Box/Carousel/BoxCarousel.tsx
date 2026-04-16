@@ -1,5 +1,6 @@
 // BoxCarousel.tsx
 import { BoxesState } from "@/src/types/boxes";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
     Animated,
@@ -23,6 +24,7 @@ interface BoxesProps {
     hideBoxZero?: boolean;
     onBoxLongPress?: (name: keyof BoxesState) => void;
     disabled?: boolean;
+    countOverrides?: Partial<Record<keyof BoxesState, number>>;
 }
 
 export default function BoxCarousel({
@@ -32,6 +34,7 @@ export default function BoxCarousel({
     hideBoxZero = false,
     onBoxLongPress,
     disabled = false,
+    countOverrides,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
@@ -48,20 +51,31 @@ export default function BoxCarousel({
     const items = useMemo(() => {
         const keys = Object.keys(boxes ?? {}) as (keyof BoxesState)[];
         const filtered = hideBoxZero ? keys.filter((k) => k !== "boxZero") : keys;
-        return filtered.map((key) => ({ key, count: boxes[key]?.length ?? 0 }));
-    }, [boxes, hideBoxZero]);
+        return filtered.map((key) => ({
+            key,
+            count: countOverrides?.[key] ?? boxes[key]?.length ?? 0,
+        }));
+    }, [boxes, countOverrides, hideBoxZero]);
 
     const baseSize = Math.min(150, Math.max(120, width * 0.34));
     const itemGap = baseSize * 0.5;
     const itemWidth = baseSize + itemGap;
     const spacerWidth = Math.max((width - itemWidth) / 2, 0);
+    const defaultIndex = useMemo(() => {
+        if (!items.length) return 0;
+        const boxOneIdx = items.findIndex((item) => item.key === "boxOne");
+        if (boxOneIdx >= 0) {
+            return boxOneIdx;
+        }
+        return Math.max(0, Math.floor(items.length / 2));
+    }, [items]);
 
     const initialIndex = useMemo(() => {
         if (!items.length) return 0;
-        if (!activeBox) return Math.max(0, Math.floor(items.length / 2));
+        if (!activeBox) return defaultIndex;
         const idx = items.findIndex((i) => i.key === activeBox);
-        return idx >= 0 ? idx : Math.max(0, Math.floor(items.length / 2));
-    }, [activeBox, items]);
+        return idx >= 0 ? idx : defaultIndex;
+    }, [activeBox, defaultIndex, items]);
 
     const scrollX = useRef(new Animated.Value(initialIndex * itemWidth)).current;
     const flatListRef =
@@ -69,6 +83,7 @@ export default function BoxCarousel({
     const lastSelectedRef = useRef<keyof BoxesState | null>(activeBox);
     const prevItemWidthRef = useRef(itemWidth);
     const [activeIndex, setActiveIndex] = useState(initialIndex);
+    const [scrollOffset, setScrollOffset] = useState(initialIndex * itemWidth);
     const [faces, setFaces] = useState<FaceState>({});
     const prevActiveIndexRef = useRef<number | null>(null);
     const faceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,11 +97,10 @@ export default function BoxCarousel({
         if (!widthChanged && activeBox && activeBox === lastSelectedRef.current)
             return;
 
-        const fallbackIdx = Math.max(0, Math.floor(items.length / 2));
         const targetIdx = activeBox
             ? items.findIndex((i) => i.key === activeBox)
-            : fallbackIdx;
-        const resolvedIdx = targetIdx >= 0 ? targetIdx : fallbackIdx;
+            : defaultIndex;
+        const resolvedIdx = targetIdx >= 0 ? targetIdx : defaultIndex;
 
         flatListRef.current?.scrollToOffset({
             offset: resolvedIdx * itemWidth,
@@ -94,8 +108,9 @@ export default function BoxCarousel({
         });
         scrollX.setValue(resolvedIdx * itemWidth);
         setActiveIndex(resolvedIdx);
+        setScrollOffset(resolvedIdx * itemWidth);
         lastSelectedRef.current = activeBox ?? null;
-    }, [activeBox, itemWidth, items, scrollX]);
+    }, [activeBox, defaultIndex, itemWidth, items, scrollX]);
 
     const handleMomentumEnd = (
         event: NativeSyntheticEvent<NativeScrollEvent>
@@ -208,6 +223,16 @@ export default function BoxCarousel({
         return <View style={styles.container} />;
     }
     const activeCount = items[activeIndex]?.count ?? 0;
+    const boxOneIndex = items.findIndex((item) => item.key === "boxOne");
+    const boxTwoIndex = items.findIndex((item) => item.key === "boxTwo");
+    const shouldShowPromotionAnchor = boxOneIndex >= 0 && boxTwoIndex >= 0;
+    const promotionArrowLeft =
+        shouldShowPromotionAnchor
+            ? spacerWidth +
+              ((boxOneIndex + boxTwoIndex + 1) * itemWidth) / 2 -
+              scrollOffset -
+              0.5
+            : 0;
 
     return (
         <View style={styles.container}>
@@ -227,7 +252,12 @@ export default function BoxCarousel({
                     onMomentumScrollEnd={handleMomentumEnd}
                     onScroll={Animated.event(
                         [{ nativeEvent: { contentOffset: { x: scrollX } } }],
-                        { useNativeDriver: false }
+                        {
+                            useNativeDriver: false,
+                            listener: (event: NativeSyntheticEvent<NativeScrollEvent>) => {
+                                setScrollOffset(event.nativeEvent.contentOffset.x);
+                            },
+                        }
                     )}
                     scrollEventThrottle={16}
                     getItemLayout={(_, index) => ({
@@ -274,44 +304,112 @@ export default function BoxCarousel({
                                         },
                                     ]}
                                 >
-                                    <TouchableOpacity
-                                        activeOpacity={1}
-                                        disabled={disabled}
-                                        onPressIn={() => {
-                                            if (disabled) return;
-                                            longPressTriggeredRef.current = false;
-                                        }}
-                                        onLongPress={() => {
-                                            if (disabled) return;
-                                            longPressTriggeredRef.current = true;
-                                            onBoxLongPress?.(item.key);
-                                        }}
-                                        delayLongPress={400}
-                                        onPress={() => {
-                                            if (longPressTriggeredRef.current) {
-                                                longPressTriggeredRef.current = false;
-                                                return;
+                                    {item.key === "boxOne" || item.key === "boxTwo" ? (
+                                        <CoachmarkAnchor
+                                            id={
+                                                item.key === "boxOne"
+                                                    ? "flashcards-box-one"
+                                                    : "flashcards-box-two"
                                             }
-                                            scrollToIndex(index);
-                                        }}
-                                    >
-                                        <BoxSkin
-                                            wordCount={item.count}
-                                            face={face}
-                                            isActive={isActive}
-                                            isCaro={false}
-                                        />
-                                    </TouchableOpacity>
+                                            shape="rect"
+                                            radius={24}
+                                        >
+                                            <View collapsable={false}>
+                                                <TouchableOpacity
+                                                    activeOpacity={1}
+                                                    disabled={disabled}
+                                                    onPressIn={() => {
+                                                        if (disabled) return;
+                                                        longPressTriggeredRef.current = false;
+                                                    }}
+                                                    onLongPress={() => {
+                                                        if (disabled) return;
+                                                        longPressTriggeredRef.current = true;
+                                                        onBoxLongPress?.(item.key);
+                                                    }}
+                                                    delayLongPress={400}
+                                                    onPress={() => {
+                                                        if (longPressTriggeredRef.current) {
+                                                            longPressTriggeredRef.current = false;
+                                                            return;
+                                                        }
+                                                        scrollToIndex(index);
+                                                    }}
+                                                >
+                                                    <BoxSkin
+                                                        wordCount={item.count}
+                                                        face={face}
+                                                        isActive={isActive}
+                                                        isCaro={false}
+                                                    />
+                                                </TouchableOpacity>
+                                            </View>
+                                        </CoachmarkAnchor>
+                                    ) : (
+                                        <TouchableOpacity
+                                            activeOpacity={1}
+                                            disabled={disabled}
+                                            onPressIn={() => {
+                                                if (disabled) return;
+                                                longPressTriggeredRef.current = false;
+                                            }}
+                                            onLongPress={() => {
+                                                if (disabled) return;
+                                                longPressTriggeredRef.current = true;
+                                                onBoxLongPress?.(item.key);
+                                            }}
+                                            delayLongPress={400}
+                                            onPress={() => {
+                                                if (longPressTriggeredRef.current) {
+                                                    longPressTriggeredRef.current = false;
+                                                    return;
+                                                }
+                                                scrollToIndex(index);
+                                            }}
+                                        >
+                                            <BoxSkin
+                                                wordCount={item.count}
+                                                face={face}
+                                                isActive={isActive}
+                                                isCaro={false}
+                                            />
+                                        </TouchableOpacity>
+                                    )}
                                 </Animated.View>
                             </View>
                         );
                     }}
                 />
+                {shouldShowPromotionAnchor ? (
+                    <CoachmarkAnchor
+                        id="flashcards-promotion-arrow-anchor"
+                        shape="rect"
+                        radius={12}
+                        style={[
+                            styles.hiddenPromotionAnchor,
+                            { left: promotionArrowLeft, width: 1, height: 1 },
+                        ]}
+                    >
+                        <View />
+                    </CoachmarkAnchor>
+                ) : null}
             </View>
             <View style={styles.activeCounterWrap}>
-                <Text style={[styles.number, styles.numberUpdate]}>
-                    {activeCount}
-                </Text>
+                {items[activeIndex]?.key === "boxOne" ? (
+                    <CoachmarkAnchor
+                        id="flashcards-box-one-count"
+                        shape="rect"
+                        radius={12}
+                    >
+                        <Text style={[styles.number, styles.numberUpdate]}>
+                            {activeCount}
+                        </Text>
+                    </CoachmarkAnchor>
+                ) : (
+                    <Text style={[styles.number, styles.numberUpdate]}>
+                        {activeCount}
+                    </Text>
+                )}
             </View>
         </View>
     );

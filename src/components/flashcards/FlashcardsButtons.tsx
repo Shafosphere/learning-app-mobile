@@ -112,8 +112,15 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   }
 
   return (
-    <CoachmarkAnchor id={coachmarkId} shape="rect" radius={24}>
-      <View collapsable={false}>{content}</View>
+    <CoachmarkAnchor
+      id={coachmarkId}
+      shape="rect"
+      radius={24}
+      style={{ alignSelf: "center" }}
+    >
+      <View collapsable={false} style={{ alignSelf: "center" }}>
+        {content}
+      </View>
     </CoachmarkAnchor>
   );
 };

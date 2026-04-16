@@ -1,6 +1,7 @@
 import { BoxesState } from "@/src/types/boxes";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import React, { useEffect, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
 import BoxSkin from "../Skin/BoxSkin";
 import { useBoxListStyles } from "./BoxList.styles";
 
@@ -11,6 +12,7 @@ interface BoxesProps {
     hideBoxZero?: boolean;
     onBoxLongPress?: (name: keyof BoxesState) => void;
     disabled?: boolean;
+    countOverrides?: Partial<Record<keyof BoxesState, number>>;
 }
 
 export default function BoxList({
@@ -20,6 +22,7 @@ export default function BoxList({
     hideBoxZero = false,
     onBoxLongPress,
     disabled = false,
+    countOverrides,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     type Face = "smile" | "happy" | "surprised";
@@ -32,6 +35,9 @@ export default function BoxList({
     >({});
     const activeBoxRef = useRef<typeof activeBox>(activeBox);
     const longPressTriggeredRef = useRef(false);
+    const [measuredBoxes, setMeasuredBoxes] = useState<
+        Partial<Record<"boxOne" | "boxTwo", { x: number; y: number; width: number; height: number }>>
+    >({});
 
     useEffect(() => {
         activeBoxRef.current = activeBox;
@@ -53,11 +59,45 @@ export default function BoxList({
     const displayedEntries = hideBoxZero
         ? entries.filter(([boxName]) => boxName !== "boxZero")
         : entries;
+    const boxOneLayout = measuredBoxes.boxOne;
+    const boxTwoLayout = measuredBoxes.boxTwo;
+    const shouldRenderPromotionAnchor = boxOneLayout != null && boxTwoLayout != null;
+    const promotionArrowLeft = shouldRenderPromotionAnchor
+        ? boxOneLayout.x +
+          boxOneLayout.width +
+          (boxTwoLayout.x - (boxOneLayout.x + boxOneLayout.width)) / 2 -
+          0.5
+        : 0;
+    const promotionArrowTop = shouldRenderPromotionAnchor
+        ? Math.min(boxOneLayout.y, boxTwoLayout.y) - 10
+        : 0;
+
+    const handleMeasuredBoxLayout =
+        (boxName: "boxOne" | "boxTwo") => (event: LayoutChangeEvent) => {
+            const { x, y, width, height } = event.nativeEvent.layout;
+            setMeasuredBoxes((prev) => {
+                const current = prev[boxName];
+                if (
+                    current &&
+                    current.x === x &&
+                    current.y === y &&
+                    current.width === width &&
+                    current.height === height
+                ) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    [boxName]: { x, y, width, height },
+                };
+            });
+        };
 
     return (
         <View style={styles.container}>
             <View style={styles.containerTop}>
                 {displayedEntries.map(([boxName, words]) => {
+                    const wordCount = countOverrides?.[boxName] ?? words.length;
                     const storedFace = faces[boxName];
                     const isActive = activeBox === boxName;
                     const currentFace: Face =
@@ -92,31 +132,88 @@ export default function BoxList({
                     };
 
                     return (
-                        <Pressable
+                        <View
                             key={boxName}
-                            disabled={disabled}
-                            onPressIn={() => {
-                                if (disabled) return;
-                                longPressTriggeredRef.current = false;
-                            }}
-                            onLongPress={() => {
-                                if (disabled) return;
-                                longPressTriggeredRef.current = true;
-                                onBoxLongPress?.(boxName);
-                            }}
-                            delayLongPress={400}
-                            onPress={onPress}
+                            onLayout={
+                                boxName === "boxOne" || boxName === "boxTwo"
+                                    ? handleMeasuredBoxLayout(boxName)
+                                    : undefined
+                            }
                         >
-                            <BoxSkin
-                                wordCount={words.length}
-                                face={currentFace}
-                                isActive={activeBox === boxName}
-                                isCaro={false}
-                            />
-                            <Text style={styles.boxWords}>{words.length}</Text>
-                        </Pressable>
+                            <Pressable
+                                disabled={disabled}
+                                onPressIn={() => {
+                                    if (disabled) return;
+                                    longPressTriggeredRef.current = false;
+                                }}
+                                onLongPress={() => {
+                                    if (disabled) return;
+                                    longPressTriggeredRef.current = true;
+                                    onBoxLongPress?.(boxName);
+                                }}
+                                delayLongPress={400}
+                                onPress={onPress}
+                            >
+                                {boxName === "boxOne" || boxName === "boxTwo" ? (
+                                    <CoachmarkAnchor
+                                        id={
+                                            boxName === "boxOne"
+                                                ? "flashcards-box-one"
+                                                : "flashcards-box-two"
+                                        }
+                                        shape="rect"
+                                        radius={24}
+                                    >
+                                        <View collapsable={false}>
+                                            <BoxSkin
+                                                wordCount={wordCount}
+                                                face={currentFace}
+                                                isActive={activeBox === boxName}
+                                                isCaro={false}
+                                            />
+                                        </View>
+                                    </CoachmarkAnchor>
+                                ) : (
+                                    <BoxSkin
+                                        wordCount={wordCount}
+                                        face={currentFace}
+                                        isActive={activeBox === boxName}
+                                        isCaro={false}
+                                    />
+                                )}
+                                {boxName === "boxOne" ? (
+                                    <CoachmarkAnchor
+                                        id="flashcards-box-one-count"
+                                        shape="rect"
+                                        radius={12}
+                                    >
+                                        <Text style={styles.boxWords}>{wordCount}</Text>
+                                    </CoachmarkAnchor>
+                                ) : (
+                                    <Text style={styles.boxWords}>{wordCount}</Text>
+                                )}
+                            </Pressable>
+                        </View>
                     );
                 })}
+                {shouldRenderPromotionAnchor ? (
+                    <CoachmarkAnchor
+                        id="flashcards-promotion-arrow-anchor"
+                        shape="rect"
+                        radius={12}
+                        style={[
+                            styles.hiddenPromotionAnchor,
+                            {
+                                left: promotionArrowLeft,
+                                top: promotionArrowTop,
+                                width: 1,
+                                height: 1,
+                            },
+                        ]}
+                    >
+                        <View />
+                    </CoachmarkAnchor>
+                ) : null}
             </View>
         </View>
     );

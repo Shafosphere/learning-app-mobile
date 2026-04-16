@@ -7,7 +7,11 @@ import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
+import {
+  FLASHCARDS_COACHMARK_STEPS,
+  type CoachmarkAdvanceEvent,
+  type CoachmarkFlowStep,
+} from "@/src/constants/coachmarkFlows";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import {
   type StatBurst,
@@ -26,6 +30,10 @@ import {
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
+import {
+  useHydratedPersistedState,
+  usePersistedState,
+} from "@/src/hooks/usePersistedState";
 import {
   type CorrectAnswerMeta,
   useFlashcardsInteraction,
@@ -54,14 +62,18 @@ import {
 import {
   ActivityIndicator,
   Animated,
+  Image,
   Keyboard,
+  Modal,
   Pressable,
   ScrollView,
   Text,
+  TouchableOpacity,
   View,
 } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
+import { useTranslation } from "react-i18next";
 
 const STREAK_TARGET = 5;
 const STREAK_COOLDOWN_MS = 15 * 60 * 1000;
@@ -80,6 +92,11 @@ const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
 const BOTTOM_BUTTONS_KEYBOARD_DURATION_MS = 320;
+const ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS = 7;
+const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
+const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
+
+type TutorialCompletionState = Partial<Record<CoachmarkAdvanceEvent, boolean>>;
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -109,6 +126,7 @@ function dedupeById<T extends { id: number }>(list: T[]): T[] {
 export default function Flashcards() {
   // const router = useRouter();
   const styles = useStyles();
+  const { t } = useTranslation();
   const rootRef = useRef<View | null>(null);
   const {
     activeCustomCourseId,
@@ -121,6 +139,7 @@ export default function Flashcards() {
     showExplanationEnabled,
     skipCorrectionEnabled,
     actionButtonsPosition,
+    setActionButtonsPosition,
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
@@ -134,6 +153,7 @@ export default function Flashcards() {
   const wrongStreakRef = useRef(0);
   const questionStartRef = useRef<number | null>(null);
   const perCardFailRef = useRef<Record<number, number>>({});
+  const isCoachmarkActiveRef = useRef(false);
   const boxSpamRef = useRef<{
     box: keyof BoxesState | null;
     ts: number;
@@ -141,7 +161,7 @@ export default function Flashcards() {
   }>({ box: null, ts: 0, count: 0 });
   const handleStatsBurst = useCallback(
     (boxKey: keyof BoxesState, meta: CorrectAnswerMeta) => {
-      if (boxKey === "boxFive") {
+      if (!isCoachmarkActiveRef.current && boxKey === "boxFive") {
         setShouldCelebrate(false);
         requestAnimationFrame(() => {
           setShouldCelebrate(true);
@@ -231,6 +251,34 @@ export default function Flashcards() {
     cardId: null,
     answer: null,
   });
+  const [tutorialCompletionState, setTutorialCompletionState] =
+    useState<TutorialCompletionState>({});
+  const [tutorialBoxCountOverrides, setTutorialBoxCountOverrides] = useState<
+    Partial<Record<keyof BoxesState, number>> | null
+  >(null);
+  const [tutorialSuccessVariant, setTutorialSuccessVariant] = useState<
+    "normal" | "assisted"
+  >("normal");
+  const [
+    actionsPositionNudgeAnswerCount,
+    setActionsPositionNudgeAnswerCount,
+    isActionsPositionNudgeAnswerCountHydrated,
+  ] = useHydratedPersistedState<number>(
+    "flashcards.actionsPositionNudgeAnswerCount",
+    0,
+  );
+  const [
+    actionsPositionNudgeSeen,
+    setActionsPositionNudgeSeen,
+    isActionsPositionNudgeSeenHydrated,
+  ] = useHydratedPersistedState<boolean>(
+    "flashcards.actionsPositionNudgeSeen",
+    false,
+  );
+  const [isActionsPositionNudgeVisible, setIsActionsPositionNudgeVisible] =
+    useState(false);
+  const isActionsPositionNudgeHydrated =
+    isActionsPositionNudgeAnswerCountHydrated && isActionsPositionNudgeSeenHydrated;
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
@@ -306,10 +354,64 @@ export default function Flashcards() {
     ts: number;
     answer: boolean | null;
   } | null>(null);
+  const tutorialExpectedBoxRef = useRef<keyof BoxesState | null>(null);
+  const tutorialForceCorrectRef = useRef(false);
+  const tutorialDismissKeyboardRef = useRef(false);
+  const [tutorialCardFocusToken, setTutorialCardFocusToken] = useState(0);
   const selectedTrueFalseAnswer =
     selectedTrueFalseUiState.cardId === selectedItemId
       ? selectedTrueFalseUiState.answer
       : null;
+
+  const setTutorialEventCompleted = useCallback((event: CoachmarkAdvanceEvent) => {
+    setTutorialCompletionState((prev) =>
+      prev[event] ? prev : { ...prev, [event]: true },
+    );
+  }, []);
+
+  const getForcedTutorialAnswer = useCallback(
+    (item: WordWithTranslations) => {
+      if (item.type === "true_false" || item.type === "know_dont_know") {
+        return {
+          selectedTranslation: "true",
+          answerText: "true",
+        };
+      }
+
+      if (reversed) {
+        return {
+          selectedTranslation: item.text,
+          answerText: item.text,
+        };
+      }
+
+      const translation = item.translations[0] ?? "";
+      return {
+        selectedTranslation: translation,
+        answerText: translation,
+      };
+    },
+    [reversed],
+  );
+
+  const isTutorialAnswerAlreadyCorrect = useCallback(
+    (item: WordWithTranslations, candidateAnswer: string) => {
+      const trimmed = candidateAnswer.trim();
+      if (trimmed.length === 0) {
+        return false;
+      }
+      if (item.type === "true_false" || item.type === "know_dont_know") {
+        return trimmed.toLowerCase() === "true";
+      }
+      if (reversed) {
+        return checkSpelling(trimmed, item.text);
+      }
+      return item.translations.some((translation) =>
+        checkSpelling(trimmed, translation),
+      );
+    },
+    [checkSpelling, reversed],
+  );
 
   useEffect(() => {
     const didResultChange = lastObservedResultRef.current !== result;
@@ -332,7 +434,19 @@ export default function Flashcards() {
         result,
       });
     }
-  }, [result, selectedItemId]);
+    if (!isActionsPositionNudgeHydrated) {
+      return;
+    }
+    if (actionsPositionNudgeAnswerCount < ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS) {
+      void setActionsPositionNudgeAnswerCount(actionsPositionNudgeAnswerCount + 1);
+    }
+  }, [
+    actionsPositionNudgeAnswerCount,
+    isActionsPositionNudgeHydrated,
+    result,
+    selectedItemId,
+    setActionsPositionNudgeAnswerCount,
+  ]);
 
   const displayResult =
     displayResultState.cardId != null &&
@@ -370,7 +484,7 @@ export default function Flashcards() {
       }
       boxSpamRef.current.ts = now;
 
-      if (boxSpamRef.current.count >= BOX_SPAM_THRESHOLD) {
+      if (!isCoachmarkActiveRef.current && boxSpamRef.current.count >= BOX_SPAM_THRESHOLD) {
         triggerQuote({
           trigger: `quote_box_spam_${boxName}`,
           category: "box_spam",
@@ -380,9 +494,13 @@ export default function Flashcards() {
         boxSpamRef.current.count = 0;
       }
 
+      if (tutorialExpectedBoxRef.current === boxName) {
+        setTutorialEventCompleted("box_selected");
+      }
+
       baseHandleSelectBox(boxName);
     },
-    [baseHandleSelectBox, boxSelectionLocked, triggerQuote],
+    [baseHandleSelectBox, boxSelectionLocked, setTutorialEventCompleted, triggerQuote],
   );
 
   useEffect(() => {
@@ -420,7 +538,7 @@ export default function Flashcards() {
         perCardFailRef.current[selectedItem.id] = 0;
       }
 
-      if (correctStreakRef.current >= STREAK_TARGET) {
+      if (!isCoachmarkActiveRef.current && correctStreakRef.current >= STREAK_TARGET) {
         triggerQuote({
           trigger: "quote_streak",
           category: "streak",
@@ -428,7 +546,7 @@ export default function Flashcards() {
         });
       }
 
-      if (hadComeback) {
+      if (!isCoachmarkActiveRef.current && hadComeback) {
         triggerQuote({
           trigger: "quote_comeback",
           category: "comeback",
@@ -439,14 +557,14 @@ export default function Flashcards() {
 
       const isFast = elapsed !== null && elapsed < 3000;
 
-      if (isFast) {
+      if (!isCoachmarkActiveRef.current && isFast) {
         triggerQuote({
           trigger: "quote_win_fast",
           category: "win_fast",
           cooldownMs: 2 * 60 * 1000,
           probability: 0.6,
         });
-      } else {
+      } else if (!isCoachmarkActiveRef.current) {
         // Standard win
         triggerQuote({
           trigger: "quote_win_standard",
@@ -456,7 +574,7 @@ export default function Flashcards() {
         });
       }
 
-      if (elapsed !== null && elapsed > LONG_THINK_MS) {
+      if (!isCoachmarkActiveRef.current && elapsed !== null && elapsed > LONG_THINK_MS) {
         triggerQuote({
           trigger: "quote_long_think",
           category: "long_think",
@@ -472,7 +590,7 @@ export default function Flashcards() {
       if (cardId != null) {
         const nextFailCount = (perCardFailRef.current[cardId] ?? 0) + 1;
         perCardFailRef.current[cardId] = nextFailCount;
-        if (nextFailCount >= HINT_FAIL_THRESHOLD) {
+        if (!isCoachmarkActiveRef.current && nextFailCount >= HINT_FAIL_THRESHOLD) {
           triggerQuote({
             trigger: `quote_hint_${cardId}`,
             category: "hint",
@@ -482,14 +600,16 @@ export default function Flashcards() {
         }
       }
 
-      triggerQuote({
-        trigger: "quote_loss_random",
-        category: "loss",
-        probability: 0.1, // ~50% rzadziej
-        cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
-      });
+      if (!isCoachmarkActiveRef.current) {
+        triggerQuote({
+          trigger: "quote_loss_random",
+          category: "loss",
+          probability: 0.1, // ~50% rzadziej
+          cooldownMs: LOSS_QUOTE_COOLDOWN_MS,
+        });
+      }
     }
-  }, [displayResult, selectedItem, triggerQuote]);
+  }, [displayResult, selectedItem, selectedItemId, triggerQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
@@ -618,19 +738,6 @@ export default function Flashcards() {
       questionStartRef.current = Date.now();
     }
   }, [displayResult, selectedItem]);
-
-  useFlashcardsAutoflow({
-    enabled: autoflowEnabled && isFocused,
-    boxes,
-    activeBox,
-    handleSelectBox: baseHandleSelectBox,
-    canSwitch: canAutoflowSwitch,
-    boxZeroEnabled,
-    isReady: isReady,
-    downloadMore: downloadData,
-    introBoxLimitReached,
-    totalFlashcardsInCourse: totalCards,
-  });
 
   useEffect(() => {
     if (boxZeroEnabled) return;
@@ -872,7 +979,101 @@ export default function Flashcards() {
     !isLoadingData &&
     !loadError &&
     customCards.length > 0;
+  const shouldRunFlashcardsCoachmark = !boxZeroEnabled;
+  const coachmark = useCoachmarkFlow({
+    flowKey: "flashcards-guided",
+    storageKey: "@flashcards_intro_seen_v1",
+    shouldStart:
+      shouldRunFlashcardsCoachmark &&
+      isFocused &&
+      isUiReady &&
+      shouldShowBoxes &&
+      !shouldRenderLoadingOverlay,
+    steps: FLASHCARDS_COACHMARK_STEPS,
+    completionState: tutorialCompletionState,
+  });
+  useEffect(() => {
+    isCoachmarkActiveRef.current = coachmark.isActive;
+  }, [coachmark.isActive]);
+  useFlashcardsAutoflow({
+    enabled:
+      autoflowEnabled &&
+      isFocused &&
+      (!shouldRunFlashcardsCoachmark || coachmark.hasSeen) &&
+      !coachmark.isActive &&
+      !coachmark.isPendingStart,
+    boxes,
+    activeBox,
+    handleSelectBox: baseHandleSelectBox,
+    canSwitch: canAutoflowSwitch,
+    boxZeroEnabled,
+    isReady: isReady,
+    downloadMore: downloadData,
+    introBoxLimitReached,
+    totalFlashcardsInCourse: totalCards,
+  });
+  const currentFlashcardsStep = coachmark.currentStep;
+  const shouldDisableTutorialCardAutofocus =
+    coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9";
+  useEffect(() => {
+    if (!isActionsPositionNudgeHydrated) return;
+    if (actionsPositionNudgeSeen) return;
+    if (isActionsPositionNudgeVisible) return;
+    if (actionsPositionNudgeAnswerCount < ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS) {
+      return;
+    }
+    if (actionButtonsPosition !== "top") return;
+    if (!shouldShowBoxes || shouldRenderLoadingOverlay) return;
+    if (coachmark.isActive || coachmark.isPendingStart) return;
+
+    setIsActionsPositionNudgeVisible(true);
+    void setActionsPositionNudgeSeen(true);
+  }, [
+    actionButtonsPosition,
+    actionsPositionNudgeAnswerCount,
+    isActionsPositionNudgeHydrated,
+    actionsPositionNudgeSeen,
+    coachmark.isActive,
+    coachmark.isPendingStart,
+    isActionsPositionNudgeVisible,
+    setActionsPositionNudgeSeen,
+    shouldRenderLoadingOverlay,
+    shouldShowBoxes,
+  ]);
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
+  const confirmWithTutorial = useCallback(
+    (selectedTranslation?: string, answerOverride?: string) => {
+      if (!tutorialForceCorrectRef.current || !selectedItem) {
+        confirm(selectedTranslation, answerOverride);
+        return;
+      }
+
+      const forcedAnswer = getForcedTutorialAnswer(selectedItem);
+      const userAnswer = answerOverride ?? answer;
+      setTutorialSuccessVariant(
+        isTutorialAnswerAlreadyCorrect(selectedItem, userAnswer)
+          ? "normal"
+          : "assisted",
+      );
+      setAnswer(forcedAnswer.answerText);
+      confirm(forcedAnswer.selectedTranslation, forcedAnswer.answerText);
+      if (tutorialDismissKeyboardRef.current) {
+        Keyboard.dismiss();
+      }
+      setTutorialEventCompleted("answer_submitted");
+      setTutorialEventCompleted("forced_correct_answer_shown");
+      setTutorialEventCompleted("box_promoted");
+    },
+    [
+      answer,
+      confirm,
+      getForcedTutorialAnswer,
+      isTutorialAnswerAlreadyCorrect,
+      selectedItem,
+      setTutorialEventCompleted,
+      setAnswer,
+    ],
+  );
   const handleTrueFalseAnswer = useCallback(
     (value: boolean) => {
       const tapTs = Date.now();
@@ -896,10 +1097,23 @@ export default function Flashcards() {
         cardId: selectedItemId,
         answer: value,
       });
+      if (tutorialForceCorrectRef.current && selectedItem) {
+        confirmWithTutorial(choice, choice);
+        return;
+      }
       setAnswer(choice);
       confirm(choice, choice);
     },
-    [confirm, displayResult, isActionCooldownActive, isBetweenCards, selectedItemId, setAnswer],
+    [
+      confirm,
+      confirmWithTutorial,
+      displayResult,
+      isActionCooldownActive,
+      isBetweenCards,
+      selectedItem,
+      selectedItemId,
+      setAnswer,
+    ],
   );
   const handleTrueFalseOk = useCallback(() => {
     if (isActionCooldownActive) return;
@@ -944,7 +1158,13 @@ export default function Flashcards() {
   );
   const handleCardActionsConfirm = isExplanationVisible
     ? handleTrueFalseOk
-    : () => confirm();
+    : () => {
+        if (tutorialForceCorrectRef.current && selectedItem) {
+          confirmWithTutorial();
+          return;
+        }
+        confirm();
+      };
   const cardActionsDownloadDisabled =
     downloadDisabled ||
     isExplanationVisible ||
@@ -1102,7 +1322,7 @@ export default function Flashcards() {
         setAnswer={setAnswer}
         answer={answer}
         result={displayResult}
-        confirm={confirm}
+        confirm={confirmWithTutorial}
         reversed={reversed}
         setResult={setResult}
         correction={correction}
@@ -1110,7 +1330,8 @@ export default function Flashcards() {
         setCorrectionRewers={setCorrectionRewers}
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
-        isFocused={isCardFocusEnabled}
+        isFocused={isCardFocusEnabled && !shouldDisableTutorialCardAutofocus}
+        focusRequestToken={tutorialCardFocusToken}
         isBetweenCards={isBetweenCards}
         disableLayoutAnimation={
           shouldKeepLoadingOverlayVisible || showLoadingOverlay
@@ -1151,6 +1372,7 @@ export default function Flashcards() {
         hideBoxZero={!boxZeroEnabled}
         onBoxLongPress={handleBoxLongPress}
         disabled={boxSelectionLocked}
+        countOverrides={tutorialBoxCountOverrides ?? undefined}
       />
     ) : (
       <BoxesCarousel
@@ -1160,6 +1382,7 @@ export default function Flashcards() {
         hideBoxZero={!boxZeroEnabled}
         onBoxLongPress={handleBoxLongPress}
         disabled={boxSelectionLocked}
+        countOverrides={tutorialBoxCountOverrides ?? undefined}
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
@@ -1173,23 +1396,103 @@ export default function Flashcards() {
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
-  const coachmark = useCoachmarkFlow({
-    flowKey: "flashcards-guided",
-    storageKey: "@flashcards_intro_seen_v1",
-    shouldStart:
-      isFocused &&
-      isUiReady &&
-      shouldShowBoxes &&
-      !shouldRenderLoadingOverlay,
-    steps: FLASHCARDS_COACHMARK_STEPS,
-  });
+  const handleActionButtonsNudgeSelect = useCallback(
+    async (position: "top" | "bottom") => {
+      setIsActionsPositionNudgeVisible(false);
+      if (position !== actionButtonsPosition) {
+        await setActionButtonsPosition(position);
+      }
+    },
+    [actionButtonsPosition, setActionButtonsPosition],
+  );
+
+  useEffect(() => {
+    tutorialExpectedBoxRef.current = currentFlashcardsStep?.expectedBox ?? null;
+    tutorialForceCorrectRef.current =
+      currentFlashcardsStep?.forceCorrectOnSubmit === true;
+    tutorialDismissKeyboardRef.current =
+      currentFlashcardsStep?.dismissKeyboardOnAdvance === true;
+  }, [currentFlashcardsStep]);
+
+  useEffect(() => {
+    if (!coachmark.isActive) {
+      setTutorialCompletionState({});
+      setTutorialBoxCountOverrides(null);
+      setTutorialSuccessVariant("normal");
+      tutorialExpectedBoxRef.current = null;
+      tutorialForceCorrectRef.current = false;
+      tutorialDismissKeyboardRef.current = false;
+      return;
+    }
+
+    setTutorialBoxCountOverrides(currentFlashcardsStep?.showDemoBoxCounts ?? null);
+  }, [coachmark.isActive, currentFlashcardsStep]);
+
+  useEffect(() => {
+    if (!coachmark.isActive || !currentFlashcardsStep?.triggerDemoConfetti) {
+      return;
+    }
+
+    setShouldCelebrate(false);
+    requestAnimationFrame(() => {
+      setShouldCelebrate(true);
+      setTutorialEventCompleted("confetti_demo_shown");
+    });
+  }, [
+    coachmark.isActive,
+    currentFlashcardsStep?.id,
+    currentFlashcardsStep?.triggerDemoConfetti,
+    setTutorialEventCompleted,
+  ]);
 
   useEffect(() => {
     if (!coachmark.isActive) {
       return;
     }
+    if (currentFlashcardsStep?.id === "flashcards-step-9") {
+      return;
+    }
     Keyboard.dismiss();
-  }, [coachmark.currentIndex, coachmark.isActive]);
+  }, [coachmark.currentIndex, coachmark.isActive, currentFlashcardsStep?.id]);
+
+  useEffect(() => {
+    if (!coachmark.isActive || currentFlashcardsStep?.id !== "flashcards-step-9") {
+      return;
+    }
+
+    setTutorialCardFocusToken((prev) => prev + 1);
+  }, [coachmark.isActive, currentFlashcardsStep?.id]);
+
+  const guidedCoachmarkStep: CoachmarkFlowStep | null = useMemo(() => {
+    if (!currentFlashcardsStep) {
+      return null;
+    }
+    if (currentFlashcardsStep.id === "flashcards-step-9") {
+      if (selectedItem?.type === "true_false") {
+        return {
+          ...currentFlashcardsStep,
+          descriptionKey: "onboarding.flashcards.step9.descriptionTrueFalse",
+        };
+      }
+      if (selectedItem?.type === "know_dont_know") {
+        return {
+          ...currentFlashcardsStep,
+          descriptionKey: "onboarding.flashcards.step9.descriptionKnowDontKnow",
+        };
+      }
+    }
+    if (
+      currentFlashcardsStep.id === "flashcards-step-10" &&
+      tutorialSuccessVariant === "assisted"
+    ) {
+      return {
+        ...currentFlashcardsStep,
+        descriptionKey: "onboarding.flashcards.step10.descriptionAssisted",
+        successVariant: "assisted",
+      };
+    }
+    return currentFlashcardsStep;
+  }, [currentFlashcardsStep, selectedItem?.type, tutorialSuccessVariant]);
 
   return (
     <View ref={rootRef} style={styles.container}>
@@ -1375,7 +1678,7 @@ export default function Flashcards() {
       {coachmark.isActive ? (
         <GuidedCoachmarkLayer
           rootRef={rootRef}
-          currentStep={coachmark.currentStep}
+          currentStep={guidedCoachmarkStep}
           currentIndex={coachmark.currentIndex}
           totalSteps={coachmark.totalSteps}
           canGoBack={coachmark.canGoBack}
@@ -1384,6 +1687,72 @@ export default function Flashcards() {
           onNext={coachmark.goNext}
         />
       ) : null}
+
+      <Modal
+        animationType="fade"
+        transparent
+        visible={isActionsPositionNudgeVisible}
+        onRequestClose={() => setIsActionsPositionNudgeVisible(false)}
+      >
+        <View style={styles.actionsPositionNudgeBackdrop}>
+          <View style={styles.actionsPositionNudgeCard}>
+            <Text style={styles.actionsPositionNudgeTitle}>
+              {t("onboarding.flashcards.actionsPositionNudge.title")}
+            </Text>
+            <Text style={styles.actionsPositionNudgeSubtitle}>
+              {t("onboarding.flashcards.actionsPositionNudge.subtitle")}
+            </Text>
+
+            <View style={styles.actionsPositionNudgeOptions}>
+              {[
+                {
+                  key: "top" as const,
+                  preview: topButtonsPreview,
+                  label: t("settings.appearance.actionsSelector.top"),
+                },
+                {
+                  key: "bottom" as const,
+                  preview: bottomButtonsPreview,
+                  label: t("settings.appearance.actionsSelector.bottom"),
+                },
+              ].map((option) => {
+                const isActive = actionButtonsPosition === option.key;
+                return (
+                  <TouchableOpacity
+                    key={option.key}
+                    activeOpacity={0.85}
+                    onPress={() => void handleActionButtonsNudgeSelect(option.key)}
+                    style={[
+                      styles.actionsPositionNudgeOption,
+                      isActive && styles.actionsPositionNudgeOptionActive,
+                    ]}
+                  >
+                    <View style={styles.actionsPositionNudgePreviewWrapper}>
+                      <Image
+                        source={option.preview}
+                        style={styles.actionsPositionNudgePreview}
+                        resizeMode="contain"
+                      />
+                    </View>
+                    <Text style={styles.actionsPositionNudgeOptionLabel}>
+                      {option.label}
+                    </Text>
+                  </TouchableOpacity>
+                );
+              })}
+            </View>
+
+            <Pressable
+              onPress={() => setIsActionsPositionNudgeVisible(false)}
+              style={styles.actionsPositionNudgeDismiss}
+            >
+              <Text style={styles.actionsPositionNudgeDismissText}>
+                {t("onboarding.flashcards.actionsPositionNudge.dismiss")}
+              </Text>
+            </Pressable>
+          </View>
+        </View>
+      </Modal>
     </View>
   );
 }

@@ -1,10 +1,10 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { Platform } from "react-native";
 
-export const useStyles = createThemeStylesHook(() => ({
+export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
-    backgroundColor: "#f3f6f8",
+    backgroundColor: colors.background,
   },
   content: {
     flex: 1,
@@ -22,7 +22,7 @@ export const useStyles = createThemeStylesHook(() => ({
     fontWeight: "900",
     lineHeight: 35,
     letterSpacing: 0.2,
-    color: "#0b2d4a",
+    color: colors.headline,
     marginBottom: 18,
   },
   flagsWrap: {
@@ -101,7 +101,7 @@ export const useStyles = createThemeStylesHook(() => ({
   },
   hint: {
     marginTop: 10,
-    color: "#6b7a88",
+    color: colors.paragraph,
     fontSize: 13,
     textAlign: "right",
   },

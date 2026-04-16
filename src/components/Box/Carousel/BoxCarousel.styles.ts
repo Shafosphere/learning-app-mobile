@@ -7,6 +7,7 @@ export const useBoxCarouselStyles = createThemeStylesHook((colors) => ({
     },
     listContainer: {
         width: "100%",
+        position: "relative",
     },
     itemContainer: {
         alignItems: "center",
@@ -37,5 +38,9 @@ export const useBoxCarouselStyles = createThemeStylesHook((colors) => ({
     },
     numberUpdate: {
         marginTop: 0,
+    },
+    hiddenPromotionAnchor: {
+        position: "absolute",
+        top: 18,
     },
 }));

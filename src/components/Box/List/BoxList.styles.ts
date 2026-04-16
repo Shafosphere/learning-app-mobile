@@ -13,6 +13,7 @@ export const useBoxListStyles = createThemeStylesHook((colors) => ({
         flexDirection: "row",
         flexWrap: "wrap",
         justifyContent: "center",
+        position: "relative",
     },
     boxWords: {
         color: colors.headline,
@@ -20,5 +21,8 @@ export const useBoxListStyles = createThemeStylesHook((colors) => ({
         textAlign: "center",
         fontSize: 20,
         margin: 4,
+    },
+    hiddenPromotionAnchor: {
+        position: "absolute",
     },
 }));

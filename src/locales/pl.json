@@ -154,7 +154,8 @@
         "exportGoogleDrive": "Nie udało się wyeksportować danych do Google Drive.",
         "import": "Wystąpił nieoczekiwany błąd podczas importu.",
         "importTitle": "Błąd importu",
-        "resetLearning": "Nie udało się przywrócić ustawień nauki."
+        "resetLearning": "Nie udało się przywrócić ustawień nauki.",
+        "resetIntro": "Nie udało się zresetować intro."
       },
       "exportFile": {
         "title": "Eksport zapisany",
@@ -272,6 +273,16 @@
         "title": "Gotowe",
         "message": "Ustawienia nauki przywrócone."
       },
+      "resetIntroConfirm": {
+        "title": "Zresetować intro?",
+        "message": "Intro uruchomi się od początku. Przypięte kursy zostaną odpięte, a aktywny kurs zostanie wyłączony. Progres nauki i zapisane dane nie zostaną usunięte.",
+        "cancel": "Anuluj",
+        "confirm": "Resetuj intro"
+      },
+      "resetIntroDone": {
+        "title": "Gotowe",
+        "message": "Intro zresetowane. Onboarding startuje od wyboru języka."
+      },
       "rows": {
         "exportUserData": {
           "title": "Eksportuj dane użytkownika",
@@ -297,6 +308,12 @@
           "subtitle": "Spellcheck, diakrytyki, miny pudełek, layout, przypomnienia.",
           "button": "Przywróć domyślne",
           "buttonLoading": "Przywracam..."
+        },
+        "resetIntro": {
+          "title": "Zresetuj intro",
+          "subtitle": "Uruchamia onboarding od początku. Odpina kursy i wyłącza aktywny kurs, ale nie usuwa progresu.",
+          "button": "Reset intro",
+          "buttonLoading": "Resetuję..."
         }
       }
     },
@@ -706,24 +723,104 @@
     },
     "flashcards": {
       "step1": {
-        "title": "To jest nasza główna gra",
-        "description": "Tutaj uczysz się fiszek i przechodzisz przez kolejne pudełka."
+        "title": "Tutaj uczysz się fiszek",
+        "description": "To jest główny ekran nauki. Tutaj dzieje się magia."
       },
       "step2": {
-        "title": "Ale zanim zaczniemy to interfejs",
-        "description": "Najpierw szybko pokażę Ci, co jest gdzie na tym ekranie."
+        "title": "Powoli!",
+        "description": "Najpierw oprowadzę Cię i pokażę, co jest czym."
       },
       "step3": {
-        "title": "To jest karta z pytaniem, słówkiem albo obrazkiem",
-        "description": "Tutaj pojawia się aktualna fiszka i miejsce na odpowiedź."
+        "title": "To jest aktualna fiszka",
+        "description": "W tym miejscu zobaczysz pytanie, słowo, obrazek albo inne zadanie. Jeżeli odpowiedź jest tekstowa, tutaj wpiszesz swoją odpowiedź."
       },
       "step4": {
-        "title": "Tutaj są pudełka",
-        "description": "To nimi sterujesz przebiegiem nauki i wybierasz skąd losować fiszki."
+        "title": "Tutaj są przyciski akcji",
+        "description": "W zależności od rodzaju fiszki będziesz widzieć tutaj różne warianty przycisków."
       },
       "step5": {
-        "title": "A tutaj przyciski sterujące",
-        "description": "Tutaj zatwierdzasz odpowiedź albo przechodzisz dalej, zależnie od typu fiszki."
+        "title": "Na dole są pudełka nauki",
+        "description": "To są pudełka z fiszkami, najważniejszy element gry."
+      },
+      "step6": {
+        "title": "A teraz zasady!",
+        "description": "Każda nowa fiszka trafia najpierw do pudełka numer jeden."
+      },
+      "step7": {
+        "title": "A teraz zasady!",
+        "description": "Liczba pod pudełkiem pokazuje, ile fiszek aktualnie się w nim znajduje."
+      },
+      "step8": {
+        "title": "A teraz zasady!",
+        "description": "Kliknij teraz pudełko numer jeden."
+      },
+      "step9": {
+        "title": "A teraz zasady!",
+        "description": "Teraz wpisz odpowiedź i ją zatwierdź.",
+        "descriptionTrueFalse": "Teraz wybierz PRAWDA albo FAŁSZ.",
+        "descriptionKnowDontKnow": "Teraz wybierz UMIEM albo NIE UMIEM."
+      },
+      "step10": {
+        "title": "A teraz zasady!",
+        "description": "Brawo, podałeś/aś prawidłową odpowiedź!",
+        "descriptionAssisted": "Brawo, podałeś/aś prawidłową odpowiedź! Trochę Ci pomogłem."
+      },
+      "step11": {
+        "title": "A teraz zasady!",
+        "description": "Jak widać, fiszka trafiła teraz do pudełka numer dwa."
+      },
+      "step12": {
+        "title": "A teraz zasady!",
+        "description": "Za każdym razem, kiedy podajesz prawidłową odpowiedź, fiszka leci do kolejnego pudełka."
+      },
+      "step13": {
+        "title": "A teraz zasady!",
+        "description": "Żeby fiszka została uznana za nauczoną, musi przejść przez wszystkie 5 pudełek."
+      },
+      "step14": {
+        "title": "A teraz zasady!",
+        "description": "A kiedy poprawnie odpowiesz w pudełku numer pięć, zobaczysz ten efekt."
+      },
+      "step15": {
+        "title": "A teraz zasady!",
+        "description": "Ale uważaj! Za każdym razem, kiedy odpowiesz źle, fiszka wraca do pudełka numer jeden."
+      },
+      "step16": {
+        "title": "I jeszcze na koniec",
+        "description": "Szybko pokażę Ci przyciski wokół ekranu gry."
+      },
+      "step17": {
+        "title": "Tutaj masz ekran główny",
+        "description": "Ten przycisk przenosi Cię do strony głównej aplikacji."
+      },
+      "step18": {
+        "title": "Tutaj zmieniasz aktywny kurs",
+        "description": "Tutaj otwierasz panel kursów i wybierasz, z czego chcesz się uczyć."
+      },
+      "step19": {
+        "title": "Tutaj masz statystyki",
+        "description": "Tutaj podejrzysz swoje postępy i wyniki nauki."
+      },
+      "step20": {
+        "title": "Tym przyciskiem zmieniasz tryb ciemny",
+        "description": "Jednym kliknięciem przełączysz motyw aplikacji."
+      },
+      "step21": {
+        "title": "Tutaj są powtórki",
+        "description": "Ten przycisk otwiera ekran powtórek i zaległych fiszek."
+      },
+      "step22": {
+        "title": "Tutaj jest gra",
+        "description": "Tym przyciskiem wracasz do fiszek i aktywnego kursu."
+      },
+      "step23": {
+        "title": "A tu ustawienia",
+        "description": "Tutaj zmienisz wygląd aplikacji, naukę i inne opcje."
+      },
+      "actionsPositionNudge": {
+        "title": "A może chcesz przyciski niżej?",
+        "subtitle": "Możesz zmienić ich położenie teraz, a później wrócić do tego w ustawieniach.",
+        "dismiss": "Zostaw jak jest"
       }
     },
     "coursePin": {

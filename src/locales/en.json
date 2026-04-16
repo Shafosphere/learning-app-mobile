@@ -154,7 +154,8 @@
         "exportGoogleDrive": "Could not export data to Google Drive.",
         "import": "Unexpected import error occurred.",
         "importTitle": "Import error",
-        "resetLearning": "Could not restore learning settings."
+        "resetLearning": "Could not restore learning settings.",
+        "resetIntro": "Could not reset intro."
       },
       "exportFile": {
         "title": "Export saved",
@@ -272,6 +273,16 @@
         "title": "Done",
         "message": "Learning settings restored."
       },
+      "resetIntroConfirm": {
+        "title": "Reset intro?",
+        "message": "Intro will start from the beginning. Pinned courses will be unpinned and the active course will be turned off. Learning progress and saved data will not be deleted.",
+        "cancel": "Cancel",
+        "confirm": "Reset intro"
+      },
+      "resetIntroDone": {
+        "title": "Done",
+        "message": "Intro reset. Onboarding starts from language selection."
+      },
       "rows": {
         "exportUserData": {
           "title": "Export user data",
@@ -297,6 +308,12 @@
           "subtitle": "Spellcheck, diacritics, box faces, layout, reminders.",
           "button": "Restore defaults",
           "buttonLoading": "Restoring..."
+        },
+        "resetIntro": {
+          "title": "Reset intro",
+          "subtitle": "Starts onboarding from the beginning. Unpins courses and turns off the active course, but keeps learning progress.",
+          "button": "Reset intro",
+          "buttonLoading": "Resetting..."
         }
       }
     },
@@ -706,24 +723,104 @@
     },
     "flashcards": {
       "step1": {
-        "title": "This is our main game",
-        "description": "This is where you learn with flashcards and move through the boxes."
+        "title": "This is where you learn with flashcards",
+        "description": "This is the main learning screen. This is where the magic happens."
       },
       "step2": {
-        "title": "But before we start, the interface",
-        "description": "First, I'll quickly show you what is where on this screen."
+        "title": "Easy there!",
+        "description": "First I'll guide you around and show you what is what."
       },
       "step3": {
-        "title": "This is the card with a question, word, or image",
-        "description": "This is where the current flashcard appears, together with the answer area."
+        "title": "This is the current flashcard",
+        "description": "Here you will see a question, word, image, or another task. If the answer is text-based, this is also where you will type it."
       },
       "step4": {
-        "title": "Here are the boxes",
-        "description": "You use them to control the learning flow and choose where flashcards come from."
+        "title": "These are the action buttons",
+        "description": "Depending on the flashcard type, you will see different button variants here."
       },
       "step5": {
-        "title": "And here are the control buttons",
-        "description": "This is where you confirm an answer or move on, depending on the flashcard type."
+        "title": "At the bottom are the learning boxes",
+        "description": "These are the flashcard boxes, the most important part of the game."
+      },
+      "step6": {
+        "title": "Now the rules!",
+        "description": "Every new flashcard goes first to box number one."
+      },
+      "step7": {
+        "title": "Now the rules!",
+        "description": "The number under a box shows how many flashcards are currently inside it."
+      },
+      "step8": {
+        "title": "Now the rules!",
+        "description": "Tap box number one now."
+      },
+      "step9": {
+        "title": "Now the rules!",
+        "description": "Now type your answer and confirm it.",
+        "descriptionTrueFalse": "Now choose TRUE or FALSE.",
+        "descriptionKnowDontKnow": "Now choose I KNOW or I DON'T KNOW."
+      },
+      "step10": {
+        "title": "Now the rules!",
+        "description": "Nice job, you gave the correct answer!",
+        "descriptionAssisted": "Nice job, you gave the correct answer! I helped a little."
+      },
+      "step11": {
+        "title": "Now the rules!",
+        "description": "As you can see, the flashcard has now moved to box number two."
+      },
+      "step12": {
+        "title": "Now the rules!",
+        "description": "Each time you give a correct answer, the flashcard moves to the next box."
+      },
+      "step13": {
+        "title": "Now the rules!",
+        "description": "For a flashcard to be considered learned, it has to pass through all 5 boxes."
+      },
+      "step14": {
+        "title": "Now the rules!",
+        "description": "When a flashcard reaches the end, you can get an effect like this."
+      },
+      "step15": {
+        "title": "Now the rules!",
+        "description": "But be careful! Every time you answer incorrectly, the flashcard goes back to box number one."
+      },
+      "step16": {
+        "title": "And one last thing",
+        "description": "Let me quickly show you the buttons around the game screen."
+      },
+      "step17": {
+        "title": "Here is the home screen",
+        "description": "This button takes you to the main screen of the app."
+      },
+      "step18": {
+        "title": "Here you change the active course",
+        "description": "Open the courses panel here and choose what you want to study."
+      },
+      "step19": {
+        "title": "Here are your stats",
+        "description": "This is where you can check your progress and learning results."
+      },
+      "step20": {
+        "title": "This button switches dark mode",
+        "description": "Tap it once to change the app theme."
+      },
+      "step21": {
+        "title": "Here are reviews",
+        "description": "This button opens reviews and due flashcards."
+      },
+      "step22": {
+        "title": "Here is the game",
+        "description": "This button brings you back to flashcards and the active course."
+      },
+      "step23": {
+        "title": "And here are settings",
+        "description": "This is where you change the app look, learning options, and more."
+      },
+      "actionsPositionNudge": {
+        "title": "Want the buttons lower?",
+        "subtitle": "You can switch their position now and still change it later in settings.",
+        "dismiss": "Keep it as is"
       }
     },
     "coursePin": {

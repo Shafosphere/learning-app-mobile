@@ -143,7 +143,7 @@ export function TrueFalseActionsAnimated({
 
   return (
     <Animated.View
-      style={{ opacity, transform: [{ translateY }], width: "100%" }}
+      style={{ opacity, transform: [{ translateY }], alignSelf: "center" }}
       pointerEvents={visible && !disabled ? "auto" : "none"}
     >
       <TrueFalseActions

@@ -3,11 +3,20 @@ import {
   useCoachmarkContext,
   useTourMeasurement,
 } from "@edwardloopez/react-native-coachmark";
+import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import type { CoachmarkFlowStep } from "@/src/constants/coachmarkFlows";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
-import React, { RefObject, useEffect, useMemo, useRef, useState } from "react";
+import React, {
+  RefObject,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   LayoutChangeEvent,
   Platform,
@@ -22,8 +31,17 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 
 type Rect = { x: number; y: number; width: number; height: number };
+type BubblePlacement = "top" | "bottom";
+
+type BubbleFrame = {
+  left: number;
+  top: number;
+  maxWidth: number;
+  placement: BubblePlacement;
+};
 
 type GuidedCoachmarkLayerProps = {
   rootRef: RefObject<View | null>;
@@ -35,6 +53,198 @@ type GuidedCoachmarkLayerProps = {
   onBack: () => void;
   onNext: () => void | Promise<void>;
 };
+
+const BUBBLE_KEYBOARD_GAP = 12;
+const BUBBLE_EDGE_PADDING = 12;
+const BUBBLE_CENTERED_PADDING = 18;
+const DEFAULT_BUBBLE_HEIGHT = 132;
+const CENTERED_INTRO_BUBBLE_HEIGHT = 160;
+const BUBBLE_MIN_WIDTH = 240;
+const BUBBLE_MAX_WIDTH = 380;
+const CENTERED_INTRO_MIN_WIDTH = 280;
+const CENTERED_INTRO_MAX_WIDTH = 420;
+const BUBBLE_TARGET_GAP = 12;
+
+function clamp(value: number, min: number, max: number): number {
+  if (max <= min) {
+    return min;
+  }
+
+  return Math.min(Math.max(value, min), max);
+}
+
+function computeOverflow(
+  top: number,
+  height: number,
+  minTop: number,
+  maxBottom: number,
+): number {
+  return Math.max(0, minTop - top) + Math.max(0, top + height - maxBottom);
+}
+
+function rangesOverlap(
+  startA: number,
+  endA: number,
+  startB: number,
+  endB: number,
+): boolean {
+  return startA < endB && endA > startB;
+}
+
+function computeBubbleFrame({
+  rootLayout,
+  bubbleHeight,
+  localTargetRect,
+  isSpotlightStep,
+  layout,
+  minTop,
+  maxBottom,
+}: {
+  rootLayout: { width: number; height: number };
+  bubbleHeight: number;
+  localTargetRect: Rect | null;
+  isSpotlightStep: boolean;
+  layout?: CoachmarkFlowStep["layout"];
+  minTop: number;
+  maxBottom: number;
+}): BubbleFrame {
+  if (layout === "centered_intro") {
+    const maxWidth = Math.max(
+      CENTERED_INTRO_MIN_WIDTH,
+      Math.min(rootLayout.width - BUBBLE_CENTERED_PADDING * 2, CENTERED_INTRO_MAX_WIDTH),
+    );
+
+    return {
+      left: Math.max(BUBBLE_CENTERED_PADDING, (rootLayout.width - maxWidth) / 2),
+      top: Math.max(
+        BUBBLE_CENTERED_PADDING,
+        (rootLayout.height - CENTERED_INTRO_BUBBLE_HEIGHT) / 2,
+      ),
+      maxWidth,
+      placement: "bottom",
+    };
+  }
+
+  const maxWidth = Math.max(
+    BUBBLE_MIN_WIDTH,
+    Math.min(rootLayout.width - BUBBLE_EDGE_PADDING * 2, BUBBLE_MAX_WIDTH),
+  );
+  const bubbleWidth = maxWidth;
+  const maxLeft = Math.max(BUBBLE_EDGE_PADDING, rootLayout.width - bubbleWidth - BUBBLE_EDGE_PADDING);
+  const maxTop = Math.max(minTop, maxBottom - bubbleHeight);
+  const defaultLeft = clamp(
+    (rootLayout.width - maxWidth) / 2,
+    BUBBLE_EDGE_PADDING,
+    maxLeft,
+  );
+  const defaultBottomOffset = Math.max(72, rootLayout.height * 0.2);
+  const defaultTop = clamp(
+    rootLayout.height - defaultBottomOffset - bubbleHeight,
+    minTop,
+    maxTop,
+  );
+
+  if (isSpotlightStep && localTargetRect) {
+    const bottomTop = localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP;
+    const topTop = localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP;
+    const targetZoneTop = localTargetRect.y - BUBBLE_TARGET_GAP;
+    const targetZoneBottom =
+      localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP;
+    const defaultOverlapsTarget =
+      rangesOverlap(
+        defaultLeft,
+        defaultLeft + bubbleWidth,
+        localTargetRect.x,
+        localTargetRect.x + localTargetRect.width,
+      ) &&
+      rangesOverlap(
+        defaultTop,
+        defaultTop + bubbleHeight,
+        targetZoneTop,
+        targetZoneBottom,
+      );
+
+    if (!defaultOverlapsTarget) {
+      return {
+        left: defaultLeft,
+        top: defaultTop,
+        maxWidth,
+        placement: "bottom",
+      };
+    }
+
+    const candidates: {
+      placement: BubblePlacement;
+      rawTop: number;
+      top: number;
+      overflow: number;
+      distanceFromDefault: number;
+    }[] = [
+      {
+        placement: "bottom",
+        rawTop: bottomTop,
+        top: clamp(bottomTop, minTop, maxTop),
+        overflow: computeOverflow(bottomTop, bubbleHeight, minTop, maxBottom),
+        distanceFromDefault: Math.abs(bottomTop - defaultTop),
+      },
+      {
+        placement: "top",
+        rawTop: topTop,
+        top: clamp(topTop, minTop, maxTop),
+        overflow: computeOverflow(topTop, bubbleHeight, minTop, maxBottom),
+        distanceFromDefault: Math.abs(topTop - defaultTop),
+      },
+    ];
+
+    const idealCandidate = candidates
+      .filter((candidate) => candidate.overflow === 0)
+      .sort((a, b) => a.distanceFromDefault - b.distanceFromDefault)[0];
+    const resolvedCandidate =
+      idealCandidate ??
+      candidates.sort((a, b) => {
+        if (a.overflow !== b.overflow) {
+          return a.overflow - b.overflow;
+        }
+
+        return a.distanceFromDefault - b.distanceFromDefault;
+      })[0];
+
+    return {
+      left: defaultLeft,
+      top: resolvedCandidate.top,
+      maxWidth,
+      placement: resolvedCandidate.placement,
+    };
+  }
+
+  return {
+    left: defaultLeft,
+    top: defaultTop,
+    maxWidth,
+    placement: "bottom",
+  };
+}
+
+function isLikelyInvalidSpotlightRect(rect: Rect | null): boolean {
+  if (!rect) {
+    return false;
+  }
+
+  const isTiny = rect.width < 24 || rect.height < 24;
+  const isNearOrigin = rect.x < 0 || rect.y < 0;
+
+  return isTiny && isNearOrigin;
+}
+
+function getEstimatedBubbleHeight(
+  layout: CoachmarkFlowStep["layout"] | undefined,
+): number {
+  if (layout === "centered_intro") {
+    return CENTERED_INTRO_BUBBLE_HEIGHT;
+  }
+
+  return DEFAULT_BUBBLE_HEIGHT;
+}
 
 function measureInWindow(ref: any): Promise<Rect> {
   return new Promise((resolve, reject) => {
@@ -63,6 +273,7 @@ export function GuidedCoachmarkLayer({
   const { state, getAnchor, setMeasured, next, theme } = useCoachmarkContext();
   const { colors } = useSettings();
   const { t } = useTranslation();
+  const insets = useSafeAreaInsets();
   const { width: windowWidth, height: windowHeight } = useWindowDimensions();
   const holeX = useSharedValue(0);
   const holeY = useSharedValue(0);
@@ -74,19 +285,24 @@ export function GuidedCoachmarkLayer({
   const localHoleHeight = useSharedValue(1);
   const [rootWindowRect, setRootWindowRect] = useState<Rect | null>(null);
   const [rootLayout, setRootLayout] = useState({ width: 0, height: 0 });
-  const [bubbleSize, setBubbleSize] = useState({ width: 0, height: 0 });
   const [renderSpotlightLayer, setRenderSpotlightLayer] = useState(false);
   const [isBubbleReady, setIsBubbleReady] = useState(false);
+  const [isSpotlightPositionReady, setIsSpotlightPositionReady] = useState(false);
   const hasInitializedBubbleRef = useRef(false);
+  const hasPresentedSpotlightRef = useRef(false);
+  const hasPositionedIndicatorRef = useRef(false);
+  const spotlightRemeasureAttemptsRef = useRef(0);
   const bubbleLeft = useSharedValue(12);
   const bubbleTop = useSharedValue(12);
   const bubbleWidth = useSharedValue(320);
+  const indicatorLeft = useSharedValue(0);
+  const indicatorTop = useSharedValue(0);
   const introBackdropOpacity = useSharedValue(0);
   const spotlightOpacity = useSharedValue(0);
 
   const activeStep = state.activeTour?.steps[state.index];
 
-  const { targetRect } = useTourMeasurement({
+  const { targetRect, remeasure } = useTourMeasurement({
     activeStep,
     index: state.index,
     tourKey: state.activeTour?.key,
@@ -121,38 +337,101 @@ export function GuidedCoachmarkLayer({
   }, [currentIndex, currentStep, rootRef, windowHeight, windowWidth]);
 
   const localTargetRect = useMemo(() => {
-    if (!currentStep?.spotlight || !targetRect || !rootWindowRect) return null;
+    if (!targetRect || !rootWindowRect) return null;
     return {
       x: targetRect.x - rootWindowRect.x,
       y: targetRect.y - rootWindowRect.y,
       width: targetRect.width,
       height: targetRect.height,
     };
-  }, [currentStep?.spotlight, rootWindowRect, targetRect]);
+  }, [rootWindowRect, targetRect]);
 
-  const bubbleFrame = useMemo(() => {
-    if (currentStep?.layout === "centered_intro") {
-      const padding = 18;
-      const maxWidth = Math.max(280, Math.min(rootLayout.width - padding * 2, 420));
-      const bubbleHeight = 160;
-      return {
-        left: Math.max(padding, (rootLayout.width - maxWidth) / 2),
-        top: Math.max(padding, (rootLayout.height - bubbleHeight) / 2),
-        maxWidth,
-      };
+  const topBoundary = useMemo(() => {
+    if (!rootWindowRect) {
+      return BUBBLE_EDGE_PADDING;
     }
-    const padding = 12;
-    const maxWidth = Math.max(240, Math.min(rootLayout.width - padding * 2, 380));
-    const defaultHeight = 132;
-    const left = Math.min(
-      Math.max(padding, (rootLayout.width - maxWidth) / 2),
-      Math.max(padding, rootLayout.width - maxWidth - padding)
-    );
-    const bottomOffset = Math.max(72, rootLayout.height * 0.2);
-    const top = Math.max(padding, rootLayout.height - bottomOffset - defaultHeight);
 
-    return { left, top, maxWidth };
-  }, [currentStep?.layout, rootLayout.height, rootLayout.width]);
+    const safeAreaTopInLocal = Math.max(
+      0,
+      insets.top - rootWindowRect.y + BUBBLE_EDGE_PADDING,
+    );
+
+    return Math.max(BUBBLE_EDGE_PADDING, safeAreaTopInLocal);
+  }, [insets.top, rootWindowRect]);
+  const estimatedBubbleHeight = useMemo(
+    () => getEstimatedBubbleHeight(currentStep?.layout),
+    [currentStep?.layout],
+  );
+  const nonSpotlightDefaultTop = useMemo(() => {
+    const defaultBottomOffset = Math.max(72, rootLayout.height * 0.2);
+    const maxTop = Math.max(
+      topBoundary,
+      rootLayout.height - estimatedBubbleHeight - BUBBLE_EDGE_PADDING,
+    );
+
+    return clamp(
+      rootLayout.height - defaultBottomOffset - estimatedBubbleHeight,
+      topBoundary,
+      maxTop,
+    );
+  }, [estimatedBubbleHeight, rootLayout.height, topBoundary]);
+  const {
+    keyboardVisible,
+    keyboardTopInWindow,
+  } = useKeyboardBottomOffset({
+    enabled: currentStep?.layout !== "centered_intro",
+    gap: BUBBLE_KEYBOARD_GAP,
+    targetBottomInWindow:
+      currentStep?.spotlight || rootWindowRect == null
+        ? null
+        : rootWindowRect.y +
+          nonSpotlightDefaultTop +
+          estimatedBubbleHeight,
+    keyboardTopCorrection: 44,
+  });
+  const bottomBoundary = useMemo(() => {
+    const safeBottomLimit = Math.max(
+      BUBBLE_EDGE_PADDING,
+      rootLayout.height - Math.max(BUBBLE_EDGE_PADDING, insets.bottom + BUBBLE_EDGE_PADDING),
+    );
+
+    if (!keyboardVisible || keyboardTopInWindow == null || !rootWindowRect) {
+      return safeBottomLimit;
+    }
+
+    const keyboardLimit =
+      keyboardTopInWindow - rootWindowRect.y - BUBBLE_KEYBOARD_GAP;
+
+    return Math.max(
+      BUBBLE_EDGE_PADDING,
+      Math.min(safeBottomLimit, keyboardLimit),
+    );
+  }, [
+    insets.bottom,
+    keyboardTopInWindow,
+    keyboardVisible,
+    rootLayout.height,
+    rootWindowRect,
+  ]);
+  const bubbleFrame = useMemo(() => {
+    return computeBubbleFrame({
+      rootLayout,
+      bubbleHeight: estimatedBubbleHeight,
+      localTargetRect,
+      isSpotlightStep: Boolean(currentStep?.spotlight),
+      layout: currentStep?.layout,
+      minTop: topBoundary,
+      maxBottom: bottomBoundary,
+    });
+  }, [
+    bottomBoundary,
+    currentStep?.layout,
+    currentStep?.spotlight,
+    estimatedBubbleHeight,
+    localTargetRect,
+    rootLayout,
+    topBoundary,
+  ]);
   const highlightAnimatedStyle = useAnimatedStyle(() => ({
     left: localHoleX.value - 2,
     top: localHoleY.value - 2,
@@ -163,6 +442,10 @@ export function GuidedCoachmarkLayer({
     left: bubbleLeft.value,
     top: bubbleTop.value,
     width: bubbleWidth.value,
+  }));
+  const indicatorAnimatedStyle = useAnimatedStyle(() => ({
+    left: indicatorLeft.value,
+    top: indicatorTop.value,
   }));
   const introBackdropAnimatedStyle = useAnimatedStyle(() => ({
     opacity: introBackdropOpacity.value,
@@ -200,12 +483,53 @@ export function GuidedCoachmarkLayer({
   ]);
 
   const isCenteredIntro = currentStep?.layout === "centered_intro";
+  const hasInvalidSpotlightRect = isLikelyInvalidSpotlightRect(localTargetRect);
+  const shouldShowSpotlight = Boolean(
+    currentStep?.spotlight && localTargetRect && !hasInvalidSpotlightRect,
+  );
+  const shouldShowFloatingIndicator =
+    currentStep?.floatingIndicator === "arrow_u_down_right" && localTargetRect != null;
 
   useEffect(() => {
-    if (!localTargetRect) {
+    if (!currentStep?.spotlight) {
+      spotlightRemeasureAttemptsRef.current = 0;
       return;
     }
 
+    if (!hasInvalidSpotlightRect) {
+      spotlightRemeasureAttemptsRef.current = 0;
+      return;
+    }
+
+    if (!localTargetRect || spotlightRemeasureAttemptsRef.current >= 8) {
+      return;
+    }
+
+    spotlightRemeasureAttemptsRef.current += 1;
+
+    const timeout = setTimeout(() => {
+      void remeasure();
+    }, 120);
+
+    return () => clearTimeout(timeout);
+  }, [currentStep, hasInvalidSpotlightRect, localTargetRect, remeasure]);
+
+  useLayoutEffect(() => {
+    if (!currentStep?.spotlight || !localTargetRect || hasInvalidSpotlightRect) {
+      return;
+    }
+
+    if (!hasPresentedSpotlightRef.current) {
+      hasPresentedSpotlightRef.current = true;
+      localHoleX.value = localTargetRect.x;
+      localHoleY.value = localTargetRect.y;
+      localHoleWidth.value = localTargetRect.width;
+      localHoleHeight.value = localTargetRect.height;
+      setIsSpotlightPositionReady(true);
+      return;
+    }
+
+    setIsSpotlightPositionReady(true);
     localHoleX.value = withTiming(localTargetRect.x, {
       duration: theme.motion.durationMs,
     });
@@ -219,6 +543,8 @@ export function GuidedCoachmarkLayer({
       duration: theme.motion.durationMs,
     });
   }, [
+    hasInvalidSpotlightRect,
+    currentStep?.spotlight,
     localHoleHeight,
     localHoleWidth,
     localHoleX,
@@ -227,25 +553,64 @@ export function GuidedCoachmarkLayer({
     theme.motion.durationMs,
   ]);
 
+  useLayoutEffect(() => {
+    if (!localTargetRect || currentStep?.floatingIndicator !== "arrow_u_down_right") {
+      return;
+    }
+
+    const nextLeft = localTargetRect.x - 34;
+    const nextTop = Math.max(20, localTargetRect.y - 28);
+
+    if (!hasPositionedIndicatorRef.current) {
+      hasPositionedIndicatorRef.current = true;
+      indicatorLeft.value = nextLeft;
+      indicatorTop.value = nextTop;
+      return;
+    }
+
+    indicatorLeft.value = withTiming(nextLeft, { duration: theme.motion.durationMs });
+    indicatorTop.value = withTiming(nextTop, { duration: theme.motion.durationMs });
+  }, [
+    currentStep?.floatingIndicator,
+    indicatorLeft,
+    indicatorTop,
+    localTargetRect,
+    theme.motion.durationMs,
+  ]);
+
+  useEffect(() => {
+    if (shouldShowSpotlight) {
+      return;
+    }
+
+    hasPresentedSpotlightRef.current = false;
+    setIsSpotlightPositionReady(false);
+  }, [shouldShowSpotlight]);
+
+  useEffect(() => {
+    if (shouldShowFloatingIndicator) {
+      return;
+    }
+
+    hasPositionedIndicatorRef.current = false;
+  }, [shouldShowFloatingIndicator]);
+
   useEffect(() => {
     introBackdropOpacity.value = withTiming(isCenteredIntro ? 0.62 : 0, {
       duration: 340,
     });
   }, [introBackdropOpacity, isCenteredIntro]);
 
-  if (!currentStep) return null;
-
-  const shouldShowSpotlight = Boolean(currentStep.spotlight && localTargetRect);
   const shouldBlockOutside =
-    Boolean(currentStep.blockOutside) ||
-    (currentStep.advanceOn !== "manual" && shouldShowSpotlight);
-  const shouldBlockSpotlight = Boolean(currentStep.blockSpotlight && shouldShowSpotlight);
+    Boolean(currentStep?.blockOutside) ||
+    (currentStep?.advanceOn !== "manual" && shouldShowSpotlight);
+  const shouldBlockSpotlight = Boolean(currentStep?.blockSpotlight && shouldShowSpotlight);
   const shouldRenderFullscreenBlocker = shouldBlockOutside && !shouldShowSpotlight;
 
   useEffect(() => {
     const duration = 280;
 
-    if (shouldShowSpotlight) {
+    if (shouldShowSpotlight && isSpotlightPositionReady) {
       setRenderSpotlightLayer(true);
       spotlightOpacity.value = withTiming(1, { duration });
       return;
@@ -257,7 +622,10 @@ export function GuidedCoachmarkLayer({
     }, duration);
 
     return () => clearTimeout(timeout);
-  }, [shouldShowSpotlight, spotlightOpacity]);
+  }, [isSpotlightPositionReady, shouldShowSpotlight, spotlightOpacity]);
+
+  if (!currentStep) return null;
+
   return (
     <View
       pointerEvents="box-none"
@@ -376,34 +744,43 @@ export function GuidedCoachmarkLayer({
         </Animated.View>
       ) : null}
 
-      {isBubbleReady ? (
+      {shouldShowFloatingIndicator ? (
         <Animated.View
-          style={[
-            styles.bubbleWrap,
-            bubbleAnimatedStyle,
-          ]}
-          pointerEvents="box-none"
-          onLayout={(event) => {
-            const { width, height } = event.nativeEvent.layout;
-            if (width !== bubbleSize.width || height !== bubbleSize.height) {
-              setBubbleSize({ width, height });
-            }
-          }}
+          pointerEvents="none"
+          style={[styles.indicatorBubble, indicatorAnimatedStyle]}
         >
-          <LogoMessage
-            title={t(currentStep.titleKey)}
-            description={t(currentStep.descriptionKey)}
-            layoutVariant={isCenteredIntro ? "centered_intro" : "default"}
-            onPrevious={onBack}
-            onNext={() => {
-              void onNext();
-            }}
-            canGoPrevious={canGoBack}
-            canGoNext={canGoNext}
-            previousLabel={t("onboarding.previousMessage")}
-            nextLabel={t("onboarding.nextMessage")}
+          <MaterialCommunityIcons
+            name="arrow-u-down-right-bold"
+            size={96}
+            color={colors.my_green}
           />
         </Animated.View>
+      ) : null}
+
+      {isBubbleReady ? (
+        <View pointerEvents="box-none" style={styles.bubbleHost}>
+          <Animated.View
+            style={[
+              styles.bubbleWrap,
+              bubbleAnimatedStyle,
+            ]}
+            pointerEvents="box-none"
+          >
+            <LogoMessage
+              title={t(currentStep.titleKey)}
+              description={t(currentStep.descriptionKey)}
+              layoutVariant={isCenteredIntro ? "centered_intro" : "default"}
+              onPrevious={onBack}
+              onNext={() => {
+                void onNext();
+              }}
+              canGoPrevious={canGoBack}
+              canGoNext={canGoNext}
+              previousLabel={t("onboarding.previousMessage")}
+              nextLabel={t("onboarding.nextMessage")}
+            />
+          </Animated.View>
+        </View>
       ) : null}
     </View>
   );
@@ -414,9 +791,16 @@ const styles = StyleSheet.create({
     position: "absolute",
     backgroundColor: "transparent",
   },
+  bubbleHost: {
+    position: "relative",
+  },
   bubbleWrap: {
     position: "absolute",
     zIndex: 50,
+  },
+  indicatorBubble: {
+    position: "absolute",
+    zIndex: 45,
   },
   highlight: {
     position: "absolute",

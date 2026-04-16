@@ -125,6 +125,7 @@ export default function Card({
   hideHints = false,
   isBetweenCards = false,
   disableLayoutAnimation = false,
+  focusRequestToken = 0,
   showExplanationEnabled: showExplanationEnabledProp,
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
 }: CardProps) {
@@ -312,6 +313,19 @@ export default function Card({
     correctionPrimaryTarget,
     isEditingHint,
   });
+  useEffect(() => {
+    if (!isFocused || selectedItemId == null || showCorrectionInputs) {
+      return;
+    }
+
+    requestFocus("main");
+  }, [
+    focusRequestToken,
+    isFocused,
+    requestFocus,
+    selectedItemId,
+    showCorrectionInputs,
+  ]);
   const showExplanationEnabled =
     showExplanationEnabledProp ?? showExplanationEnabledSetting;
   const explanationOnlyOnWrong =

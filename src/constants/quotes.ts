@@ -232,7 +232,7 @@ export const QUOTES: Quote[] = [
 
   // --- Hints ---
   {
-    text: "Może wpisz sobie podpowiedź?",
+    text: "huh",
     category: "hint",
   },
   {

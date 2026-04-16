@@ -89,7 +89,6 @@ const DebuggingSection: React.FC = () => {
   const {
     activeCustomCourseId,
     learningRemindersEnabled,
-    resetOnboardingState,
     toggleLearningRemindersEnabled,
     statsBookshelfEnabled,
     toggleStatsBookshelfEnabled,
@@ -104,7 +103,6 @@ const DebuggingSection: React.FC = () => {
   const [logoFloating, setLogoFloating] = useState(true);
   const [clearingStorage, setClearingStorage] = useState(false);
   const [openingDbErrorScreen, setOpeningDbErrorScreen] = useState(false);
-  const [resettingIntro, setResettingIntro] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
 
   const handleAddRandomCustom = async () => {
@@ -245,33 +243,6 @@ const DebuggingSection: React.FC = () => {
         t("settings.debug.alerts.errorTitle"),
         t("settings.debug.alerts.checkpointSetError")
       );
-    }
-  };
-
-  const handleResetIntro = async () => {
-    setResettingIntro(true);
-    try {
-      await resetOnboardingState();
-      await AsyncStorage.multiRemove([
-        "@onboarding_checkpoint_v1",
-        "@course_pin_intro_seen_v1",
-        "@course_activate_intro_seen_v1",
-        "@course_entry_settings_intro_seen_v1",
-        "@flashcards_intro_seen_v1",
-      ]);
-      await setOnboardingCheckpoint("language_required");
-      Alert.alert(
-        t("settings.debug.alerts.doneTitle"),
-        t("settings.debug.alerts.introResetDone")
-      );
-      router.replace("/createprofile");
-    } catch {
-      Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
-        t("settings.debug.alerts.introResetError")
-      );
-    } finally {
-      setResettingIntro(false);
     }
   };
 
@@ -631,26 +602,6 @@ const DebuggingSection: React.FC = () => {
             width={120}
           />
         </View>
-      </View>
-
-      <View style={styles.row}>
-        <View style={styles.rowTextWrapper}>
-          <Text style={styles.rowTitle}>{t("settings.debug.rows.resetIntro.title")}</Text>
-          <Text style={styles.rowSubtitle}>
-            {t("settings.debug.rows.resetIntro.subtitle")}
-          </Text>
-        </View>
-        <MyButton
-          text={
-            resettingIntro
-              ? t("settings.debug.rows.resetIntro.buttonLoading")
-              : t("settings.debug.rows.resetIntro.button")
-          }
-          color="my_red"
-          onPress={handleResetIntro}
-          disabled={resettingIntro}
-          width={160}
-        />
       </View>
 
       <Text style={styles.sectionHeader}>{t("settings.debug.section.flags")}</Text>

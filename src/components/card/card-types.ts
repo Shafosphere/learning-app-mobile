@@ -47,6 +47,7 @@ export type CardProps = {
   hideHints?: boolean;
   isBetweenCards?: boolean;
   disableLayoutAnimation?: boolean;
+  focusRequestToken?: number;
   showExplanationEnabled?: boolean;
   explanationOnlyOnWrong?: boolean;
   isExplanationVisible?: boolean;
