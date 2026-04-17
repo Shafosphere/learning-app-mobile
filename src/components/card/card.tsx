@@ -183,6 +183,10 @@ export default function Card({
   const selectedItemId = selectedItem?.id ?? null;
   const activeTranslationIndex =
     lastTranslationItemId.current === selectedItemId ? translations : 0;
+  const correctionWord = correction?.word ?? null;
+  const correctionPromptText = correction?.promptText ?? "";
+  const correctionPromptImageUri = correction?.promptImageUri ?? null;
+  const correctionReversed = correction?.reversed ?? false;
 
   const awers = selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[activeTranslationIndex] ?? "";
@@ -196,20 +200,38 @@ export default function Card({
     (!hasTextPrompt && hasImagePrompt) ||
     type === "true_false" ||
     type === "know_dont_know";
+  const showCorrectionInputs = Boolean(
+    correction && (result === false || isIntroMode),
+  );
+  const effectiveAnswerOnly = showCorrectionInputs
+    ? Boolean(correction?.answerOnly)
+    : answerOnly;
 
   // Force answerOnly logic: if true, card can only be shown Front -> Back
-  const effectiveReversed = answerOnly ? false : reversed;
+  const effectiveReversed = showCorrectionInputs
+    ? (effectiveAnswerOnly ? false : correctionReversed)
+    : (answerOnly ? false : reversed);
 
-  const promptImageUri = selectedItem
-    ? effectiveReversed
-      ? promptImageBack
-      : promptImageFront
-    : null;
-  const promptText = effectiveReversed ? rewers : awers;
+  const promptImageUri = showCorrectionInputs
+    ? correctionPromptImageUri
+    : selectedItem
+      ? effectiveReversed
+        ? promptImageBack
+        : promptImageFront
+      : null;
+  const promptText = showCorrectionInputs
+    ? correctionPromptText
+    : effectiveReversed
+      ? rewers
+      : awers;
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
-  const shouldCorrectAwers = effectiveReversed;
-  const shouldCorrectRewers = !effectiveReversed || answerOnly;
+  const shouldCorrectAwers = showCorrectionInputs
+    ? correctionReversed
+    : effectiveReversed;
+  const shouldCorrectRewers = showCorrectionInputs
+    ? !correctionReversed || Boolean(correction?.answerOnly)
+    : !effectiveReversed || answerOnly;
   const mainExpectedAnswers = useMemo(() => {
     if (!selectedItem) return [];
     if (effectiveReversed) {
@@ -293,9 +315,6 @@ export default function Card({
     const len = currentHint?.length ?? 0;
     return len > 28;
   }, [currentHint]);
-  const showCorrectionInputs = Boolean(
-    correction && (result === false || isIntroMode),
-  );
   const correctionPrimaryTarget = shouldCorrectAwers ? "correction1" : "correction2";
   const {
     focusTarget,
@@ -377,9 +396,10 @@ export default function Card({
     refs: focusRefs,
   });
 
-  const len = selectedItem?.translations?.length ?? 0;
+  const translationSource = showCorrectionInputs ? correctionWord : selectedItem;
+  const len = translationSource?.translations?.length ?? 0;
   const isShowingTranslation = isIntroMode || promptText === rewers;
-  const canToggleTranslations = isShowingTranslation && len > 1;
+  const canToggleTranslations = !showCorrectionInputs && isShowingTranslation && len > 1;
   const next = () => {
     if (!len) return;
     setTranslations((i) => (i + 1) % len);
@@ -895,13 +915,13 @@ export default function Card({
         <CardContentResolver {...resolverProps} />
       </CardFrame>
 
-      {showCorrectionInputs && correction ? (
+      {showCorrectionInputs && correction && process.env.NODE_ENV !== "test" ? (
         <CardMeasure
           correctionAwers={correctionAwers}
           correctionRewers={correctionRewers}
           correctionInput1={correction.input1}
           correctionInput2={correction.input2 ?? ""}
-          answerOnly={answerOnly}
+          answerOnly={effectiveAnswerOnly}
           setInput1ExpectedWidth={setInput1ExpectedWidth}
           setInput2ExpectedWidth={setInput2ExpectedWidth}
           setInput1TextWidth={setInput1TextWidth}

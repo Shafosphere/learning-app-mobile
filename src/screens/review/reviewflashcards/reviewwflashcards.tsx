@@ -358,6 +358,7 @@ export default function ReviewFlashcardsPlaceholder() {
     }
     if (isBetweenCards) return;
     setActiveBox(box);
+    if (correction) return;
     selectNextWord(box);
   };
 
@@ -380,13 +381,19 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know";
   const effectiveReversed = answerOnly ? false : reversed;
+  const correctionAnswerOnly = correction?.answerOnly ?? false;
+  const correctionEffectiveReversed = correctionAnswerOnly
+    ? false
+    : (correction?.reversed ?? false);
 
   useEffect(() => {
     if (!correction || !activeBox || !courseId) return;
     if (transitionTimerRef.current) return;
 
-    const expectsAwersInput = !answerOnly && effectiveReversed;
-    const expectsRewersInput = answerOnly || !effectiveReversed;
+    const expectsAwersInput =
+      !correctionAnswerOnly && correctionEffectiveReversed;
+    const expectsRewersInput =
+      correctionAnswerOnly || !correctionEffectiveReversed;
     const awersOk =
       !expectsAwersInput || checkSpelling(correction.input1, correction.awers);
     const rewersOk =
@@ -397,8 +404,10 @@ export default function ReviewFlashcardsPlaceholder() {
     if (!correction.cardId) return;
 
     const card =
-      boxes[activeBox]?.find((item) => item.id === correction.cardId) ??
-      boxes[activeBox]?.[0] ??
+      correction.word ??
+      Object.values(boxes)
+        .flat()
+        .find((item) => item.id === correction.cardId) ??
       null;
     const explanationState = getExplanationState({
       selectedItem: selectedItem ?? card ?? null,
@@ -439,17 +448,18 @@ export default function ReviewFlashcardsPlaceholder() {
     })();
 
     setBoxes((prev) => {
-      const current = prev[activeBox] ?? [];
-      const remaining = current.filter((item) => item.id !== correction.cardId);
-      const nextState: BoxesState = {
-        ...prev,
-        [activeBox]: remaining,
-      };
-      if (remaining.length === 0) {
-        const nextActive = findFirstActiveBox(nextState);
-        if (nextActive !== activeBox) {
-          setActiveBox(nextActive);
-        }
+      const nextState = (Object.keys(prev) as Array<keyof BoxesState>).reduce(
+        (acc, boxKey) => {
+          acc[boxKey] = (prev[boxKey] ?? []).filter(
+            (item) => item.id !== correction.cardId,
+          );
+          return acc;
+        },
+        {} as BoxesState,
+      );
+      const nextActive = findFirstActiveBox(nextState);
+      if ((nextState[activeBox] ?? []).length === 0 && nextActive !== activeBox) {
+        setActiveBox(nextActive);
       }
       return nextState;
     });
@@ -464,24 +474,30 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     courseId,
     checkSpelling,
-    answerOnly,
-    effectiveReversed,
+    correctionAnswerOnly,
+    correctionEffectiveReversed,
     pendingExplanationMove,
     scheduleReturnToBox,
     selectedItem,
   ]);
 
   useEffect(() => {
+    if (correction) {
+      setQuestionShownAt(selectedItem ? Date.now() : null);
+      setLongThink(false);
+      return;
+    }
     setResult(null);
     setAnswer("");
     setCorrection(null);
     setPendingExplanationMove(null);
     setQuestionShownAt(selectedItem ? Date.now() : null);
     setLongThink(false);
-  }, [selectedItem]);
+  }, [correction, selectedItem]);
 
   useEffect(() => {
     if (!activeBox) return;
+    if (correction) return;
     if (queueNext) {
       selectNextWord(activeBox);
       setQueueNext(false);
@@ -497,7 +513,7 @@ export default function ReviewFlashcardsPlaceholder() {
       return;
     }
     selectNextWord(activeBox);
-  }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
+  }, [activeBox, boxes, correction, queueNext, selectNextWord, selectedItem]);
 
   useEffect(() => {
     if (!selectedItem) return;
@@ -698,7 +714,10 @@ export default function ReviewFlashcardsPlaceholder() {
         rewers: selectedItem.translations[0] ?? "",
         input1: "",
         input2: "",
+        answerOnly,
         mode: "demote",
+        reversed,
+        word: selectedItem,
       });
       return;
     }

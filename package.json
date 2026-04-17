@@ -9,6 +9,8 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "lint": "expo lint",
+    "test": "jest",
+    "test:mass-correction": "jest src/hooks/__tests__/useFlashcardsInteraction.mass.test.ts --runInBand",
     "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts",
     "csv:external-ids": "node --experimental-strip-types ./tools/scripts/add-external-ids.ts",
     "assets:check-paths": "bash ./scripts/check-legacy-asset-paths.sh"
@@ -67,12 +69,18 @@
   },
   "devDependencies": {
     "@babel/core": "^7.25.2",
+    "@testing-library/jest-native": "^5.4.3",
+    "@testing-library/react-native": "^13.3.3",
+    "@types/jest": "^30.0.0",
     "@types/papaparse": "^5.3.16",
     "@types/react": "~19.1.10",
     "baseline-browser-mapping": "^2.9.18",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
+    "jest": "^29.7.0",
+    "jest-expo": "^55.0.16",
     "knip": "^6.3.0",
+    "react-test-renderer": "^19.1.0",
     "typescript": "~5.9.2"
   },
   "private": true

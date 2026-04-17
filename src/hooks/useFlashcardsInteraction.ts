@@ -18,6 +18,10 @@ type CorrectionState = {
   input2: string;
   answerOnly?: boolean;
   mode: CorrectionMode;
+  promptText: string;
+  promptImageUri: string | null;
+  reversed: boolean;
+  word: WordWithTranslations;
 };
 
 type RegisterKnownWordResult = {
@@ -86,6 +90,26 @@ export function useFlashcardsInteraction({
     showExplanationEnabled,
   } = useSettings();
   const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+
+  const clearTransitionTimers = useCallback(() => {
+    transitionTimersRef.current.forEach((timer) => {
+      clearTimeout(timer);
+    });
+    transitionTimersRef.current.clear();
+  }, []);
+
+  const scheduleTransition = useCallback(
+    (callback: () => void, delay: number) => {
+      const timer = setTimeout(() => {
+        transitionTimersRef.current.delete(timer);
+        callback();
+      }, delay);
+      transitionTimersRef.current.add(timer);
+      return timer;
+    },
+    []
+  );
 
   const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
     if (!card) return false;
@@ -474,7 +498,7 @@ export function useFlashcardsInteraction({
           });
           return;
         }
-        setTimeout(() => {
+        scheduleTransition(() => {
           setAnswer("");
           moveElement(wordForCheck.id, true);
           setQueueNext(true);
@@ -505,7 +529,7 @@ export function useFlashcardsInteraction({
             return;
           }
           const delay = 1500;
-          setTimeout(() => {
+          scheduleTransition(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
             setQueueNext(true);
@@ -521,7 +545,7 @@ export function useFlashcardsInteraction({
             return;
           }
           const delay = 1500;
-          setTimeout(() => {
+          scheduleTransition(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
             setQueueNext(true);
@@ -537,7 +561,7 @@ export function useFlashcardsInteraction({
             return;
           }
           const delay = hasExplanation ? 4000 : 1500;
-          setTimeout(() => {
+          scheduleTransition(() => {
             setAnswer("");
             moveElement(wordForCheck.id, false);
             setQueueNext(true);
@@ -553,6 +577,14 @@ export function useFlashcardsInteraction({
           input2: "",
           answerOnly,
           mode: "demote",
+          promptText: reversed
+            ? wordForCheck.translations[0] ?? ""
+            : wordForCheck.text,
+          promptImageUri: reversed
+            ? wordForCheck.imageBack ?? null
+            : wordForCheck.imageFront ?? null,
+          reversed,
+          word: wordForCheck,
         });
       }
     },
@@ -570,11 +602,14 @@ export function useFlashcardsInteraction({
       learningRemindersEnabled,
       refreshLearningReminderSchedule,
       reversed,
+      scheduleTransition,
       selectedItem,
       setBoxes,
       moveTranslationToFront,
       isAnswerOnlyCard,
       setPendingExplanationMove,
+      explanationOnlyOnWrong,
+      showExplanationEnabled,
     ]
   );
 
@@ -583,8 +618,9 @@ export function useFlashcardsInteraction({
       if (reminderRefreshTimerRef.current != null) {
         clearTimeout(reminderRefreshTimerRef.current);
       }
+      clearTransitionTimers();
     };
-  }, []);
+  }, [clearTransitionTimers]);
 
   const acknowledgeExplanation = useCallback(() => {
     if (!selectedItem) return;
@@ -670,13 +706,14 @@ export function useFlashcardsInteraction({
       matchesCorrectionField(correction.input2, correction.rewers);
 
     if (awersOk && rewersOk) {
-      if (selectedItem) {
+      const correctionWord = correction.word;
+      if (correctionWord) {
         const hasExplanation =
-          typeof selectedItem.explanation === "string" &&
-          selectedItem.explanation.trim().length > 0;
+          typeof correctionWord.explanation === "string" &&
+          correctionWord.explanation.trim().length > 0;
         if (correction.mode === "demote" && hasExplanation) {
           setPendingExplanationMove({
-            cardId: selectedItem.id,
+            cardId: correction.cardId,
             promote: false,
           });
           setAnswer("");
@@ -684,7 +721,7 @@ export function useFlashcardsInteraction({
           return;
         }
         const promote = correction.mode === "intro";
-        moveElement(selectedItem.id, promote);
+        moveElement(correction.cardId, promote);
       }
       // Wyczyść poprzednią odpowiedź zanim pokażemy kolejną fiszkę.
       // Inaczej przez jedną klatkę nowa karta może odziedziczyć stary tekst
@@ -735,6 +772,7 @@ export function useFlashcardsInteraction({
   }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
 
   const resetInteractionState = useCallback(() => {
+    clearTransitionTimers();
     setActiveBox(null);
     setSelectedItem(null);
     setAnswer("");
@@ -744,7 +782,7 @@ export function useFlashcardsInteraction({
     setQueueNext(false);
     setQuestionShownAt(null);
     lastServedIdRef.current = null;
-  }, []);
+  }, [clearTransitionTimers]);
 
   const clearSelection = useCallback(() => {
     setSelectedItem(null);
@@ -821,6 +859,10 @@ export function useFlashcardsInteraction({
         input2: isSameIntroCard ? prev.input2 : "",
         answerOnly,
         mode: "intro",
+        promptText: selectedItem.text,
+        promptImageUri: selectedItem.imageFront ?? null,
+        reversed: false,
+        word: selectedItem,
       };
     });
   }, [

@@ -488,4 +488,22 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
     spotlight: true,
     blockSpotlight: true,
   },
+  {
+    id: "flashcards-step-24",
+    targetId: "flashcards-bubble-anchor",
+    titleKey: "onboarding.flashcards.step24.title",
+    descriptionKey: "onboarding.flashcards.step24.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+  },
+  {
+    id: "flashcards-step-25",
+    targetId: "flashcards-bubble-anchor",
+    titleKey: "onboarding.flashcards.step25.title",
+    descriptionKey: "onboarding.flashcards.step25.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+  },
 ];

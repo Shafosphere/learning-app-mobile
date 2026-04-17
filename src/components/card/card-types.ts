@@ -7,6 +7,11 @@ export type CardCorrectionType = {
   input2?: string;
   mode?: "demote" | "intro";
   cardId?: number;
+  answerOnly?: boolean;
+  promptText?: string;
+  promptImageUri?: string | null;
+  reversed?: boolean;
+  word?: WordWithTranslations;
 };
 
 export type CardDisplayMode =
