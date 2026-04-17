@@ -670,7 +670,7 @@
     "previousMessage": "Previous message",
     "nextMessage": "Next message",
     "languageIntro": {
-      "title": "Choose your native language",
+      "title": "Choose language",
       "confirm": "Next",
       "polish": "Polish",
       "english": "English",
@@ -679,34 +679,34 @@
     },
     "courseActivate": {
       "step1": {
-        "title": "Where am I now?",
+        "title": "Where am I?",
         "description": "You are now on the screen where a course is activated."
       },
       "step2": {
         "title": "What for?",
-        "description": "This active course is the one the game will use for flashcards."
+        "description": "The game will use flashcards from the active course."
       },
       "step3": {
-        "title": "How do I activate it?",
-        "description": "Activation happens when you tap a course tile."
+        "title": "How to enable?",
+        "description": "To activate a course, tap its tile."
       },
       "step4": {
-        "title": "zzzZZZZzzz",
-        "description": "(waiting until you activate any course)"
+        "title": "zzzzZZZZzzzz",
+        "description": "(waiting for you to activate a course)"
       },
       "step5": {
-        "title": "Great! You activated the course!",
-        "description": "You can start playing now. Tap the Next button at the bottom right."
+        "title": "Course active",
+        "description": "Done, the course is now active. You can start playing. Tap the Next button at the bottom right."
       }
     },
     "courseEntrySettings": {
       "step1": {
-        "title": "What is this screen?",
-        "description": "This is the screen that appears once at the start of each course."
+        "title": "What is this?",
+        "description": "This is the screen that appears once when you start each course."
       },
       "step2": {
-        "title": "What matters here?",
-        "description": "There are three more important options here that let the user adjust the course."
+        "title": "What matters?",
+        "description": "There are three more important options here that let you adjust the course to your liking."
       },
       "step3": {
         "title": "For now",
@@ -714,151 +714,159 @@
       },
       "step4": {
         "title": "No worries",
-        "description": "Later, you will still be able to change these settings."
+        "description": "You will still be able to change these settings later."
       },
       "step5": {
-        "title": "What now?",
-        "description": "Click next if you are ready to move on to the game."
+        "title": "What next?",
+        "description": "Tap Next if you want to move on to the game."
       }
     },
     "flashcards": {
       "step1": {
-        "title": "This is where you learn with flashcards",
-        "description": "This is the main learning screen. This is where the magic happens."
+        "title": "Here are flashcards",
+        "description": "This is the main learning screen. This is where all the magic happens."
       },
       "step2": {
-        "title": "Easy there!",
-        "description": "First I'll guide you around and show you what is what."
+        "title": "One sec",
+        "description": "First, I'll show you around and explain what is what."
       },
       "step3": {
-        "title": "This is the current flashcard",
-        "description": "Here you will see a question, word, image, or another task. If the answer is text-based, this is also where you will type it."
+        "title": "Your flashcard",
+        "description": "Here you will see a question, a word, an image, or another task. If the answer is text-based, this is where you type it."
       },
       "step4": {
-        "title": "These are the action buttons",
-        "description": "Depending on the flashcard type, you will see different button variants here."
+        "title": "Action buttons",
+        "description": "Depending on the flashcard type, you will see different buttons here."
       },
       "step5": {
-        "title": "At the bottom are the learning boxes",
-        "description": "These are the flashcard boxes, the most important part of the game."
+        "title": "Learning boxes",
+        "description": "These are the flashcard boxes — the most important part of the game."
       },
       "step6": {
-        "title": "Now the rules!",
-        "description": "Every new flashcard goes first to box number one."
+        "title": "Rule one",
+        "description": "Every new flashcard goes to box number one first."
       },
       "step7": {
-        "title": "Now the rules!",
+        "title": "Rule two",
         "description": "The number under a box shows how many flashcards are currently inside it."
       },
       "step8": {
-        "title": "Now the rules!",
-        "description": "Tap box number one now."
+        "title": "Tap the box",
+        "description": "Now tap box number one."
       },
       "step9": {
-        "title": "Now the rules!",
+        "title": "Your turn",
         "description": "Now type your answer and confirm it.",
         "descriptionTrueFalse": "Now choose TRUE or FALSE.",
         "descriptionKnowDontKnow": "Now choose I KNOW or I DON'T KNOW."
       },
       "step10": {
-        "title": "Now the rules!",
-        "description": "Nice job, you gave the correct answer!",
-        "descriptionAssisted": "Nice job, you gave the correct answer! I helped a little."
+        "title": "Nice one",
+        "description": "Good job, you gave the correct answer!",
+        "descriptionAssisted": "Good job, you gave the correct answer! ( I helped a little, just this one time :3 )"
       },
       "step11": {
-        "title": "Now the rules!",
+        "title": "Up we go",
         "description": "As you can see, the flashcard has now moved to box number two."
       },
       "step12": {
-        "title": "Now the rules!",
-        "description": "Each time you give a correct answer, the flashcard moves to the next box."
+        "title": "Correct answer",
+        "description": "Each time you answer correctly, the flashcard moves to the next box."
       },
       "step13": {
-        "title": "Now the rules!",
-        "description": "For a flashcard to be considered learned, it has to pass through all 5 boxes."
+        "title": "When is it done?",
+        "description": "For a flashcard to count as learned, it must pass through all 5 boxes."
       },
       "step14": {
-        "title": "Now the rules!",
-        "description": "When a flashcard reaches the end, you can get an effect like this."
+        "title": "Final effect",
+        "description": "And when you answer correctly in box number five, you will see this effect."
       },
       "step15": {
-        "title": "Now the rules!",
-        "description": "But be careful! Every time you answer incorrectly, the flashcard goes back to box number one."
+        "title": "Small catch",
+        "description": "But careful! If you answer incorrectly, the flashcard goes back to box number one."
       },
       "step16": {
-        "title": "And one last thing",
-        "description": "Let me quickly show you the buttons around the game screen."
+        "title": "Almost done",
+        "description": "Finally, I'll quickly show you the buttons around the game screen."
       },
       "step17": {
-        "title": "Here is the home screen",
-        "description": "This button takes you to the main screen of the app."
+        "title": "Home screen",
+        "description": "This button takes you to the app's main screen."
       },
       "step18": {
-        "title": "Here you change the active course",
-        "description": "Open the courses panel here and choose what you want to study."
+        "title": "Change course",
+        "description": "Here you open the courses panel and choose what you want to study."
       },
       "step19": {
-        "title": "Here are your stats",
-        "description": "This is where you can check your progress and learning results."
+        "title": "Statistics",
+        "description": "Here you can check your progress and learning results."
       },
       "step20": {
-        "title": "This button switches dark mode",
-        "description": "Tap it once to change the app theme."
+        "title": "Dark mode",
+        "description": "With one tap, you can switch the app theme."
       },
       "step21": {
-        "title": "Here are reviews",
-        "description": "This button opens reviews and due flashcards."
+        "title": "Reviews",
+        "description": "This button opens the reviews screen and due flashcards."
       },
       "step22": {
-        "title": "Here is the game",
-        "description": "This button brings you back to flashcards and the active course."
+        "title": "Back to game",
+        "description": "This button takes you back to flashcards and the active course."
       },
       "step23": {
-        "title": "And here are settings",
-        "description": "This is where you change the app look, learning options, and more."
+        "title": "Settings",
+        "description": "Here you can change the app look, learning settings, and other options."
+      },
+      "step24": {
+        "title": "And that's it for now. ",
+        "description": "If anything was unclear, you can find the guide in the main menu, and in settings you can start the tutorial from the beginning."
+      },
+      "step25": {
+        "title": "See you later :*",
+        "description": ""
       },
       "actionsPositionNudge": {
-        "title": "Want the buttons lower?",
-        "subtitle": "You can switch their position now and still change it later in settings.",
+        "title": "Buttons lower?",
+        "subtitle": "You can change their position now, and later go back to this in settings.",
         "dismiss": "Keep it as is"
       }
     },
     "coursePin": {
       "step1": {
-        "title": "Hi, I'm Memicard",
-        "description": "I'll show you how to get started. Here's a short guide on what to do :3"
+        "title": "Hey, it's me",
+        "description": "I'll show you how to get started. This will be a short guide on what to do and how :3"
       },
       "step2": {
-        "title": "What is this?",
-        "description": "On this screen you can see the list of courses available in the app."
+        "title": "What's here?",
+        "description": "On this screen, you can see the list of courses available in the app."
       },
       "step3": {
-        "title": "What kinds of courses?",
-        "description": "One course is one tile with its proper name."
+        "title": "What courses?",
+        "description": "One course is one tile with its name on it."
       },
       "step4": {
-        "title": "What do you do here?",
+        "title": "What do you do?",
         "description": "You choose the courses that interest you and pin them."
       },
       "step5": {
-        "title": "How do I pin one?",
-        "description": "You pin it by tapping the small square inside a course tile."
+        "title": "How to pin?",
+        "description": "To pin a course, tap the small square on its tile."
       },
       "step6": {
-        "title": "And one more thing",
-        "description": "At the top you have categories."
+        "title": "One more thing",
+        "description": "At the top, you will find categories."
       },
       "step7": {
-        "title": "zzzZZZZzzz",
-        "description": "(waiting until you pin the courses you like)"
+        "title": "zzzzZZZZzzzz",
+        "description": "(waiting for you to pin the courses you like)"
       },
       "step8": {
-        "title": "Great! The course has been pinned!",
-        "description": "Remember, you can pin more than one."
+        "title": "Course pinned",
+        "description": "Nice, the course has been pinned! Remember, you can pin more than one."
       },
       "step9": {
-        "title": "What now?",
-        "description": "If you already pinned what interests you, you can tap the Next button at the bottom right."
+        "title": "What next?",
+        "description": "If you already pinned what interests you, tap the Next button at the bottom right."
       }
     }
   },

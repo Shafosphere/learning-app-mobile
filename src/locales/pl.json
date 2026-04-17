@@ -12,7 +12,7 @@
       "description": "Lokalna baza danych SQLite nie została poprawnie zainicjalizowana, więc na razie nie wpuszczamy Cię do środka.",
       "backupHint": "Jeśli masz kopię zapasową danych, użyj „Wczytaj kopię zapasową”, aby przywrócić pełniejsze dane, w tym własne kursy i fiszki.",
       "genericReason": "Wystąpił nieoczekiwany błąd podczas startu bazy danych.",
-      "debugMessage": "To testowy ekran błędu uruchomiony z sekcji Debug.",
+      "debugMessage": "To testowy ekran błędu uruchomiony z sekcji diagnostycznej.",
       "debugBadge": "Tryb testowy ekranu błędu",
       "actions": {
         "retry": "Spróbuj ponownie",
@@ -31,17 +31,17 @@
   },
   "settings": {
     "tabs": {
-      "ui": "UI",
+      "ui": "Interfejs",
       "accessibility": "Dostępność",
       "learning": "Nauka",
       "coursesData": "Kursy i dane",
-      "debug": "Debug"
+      "debug": "Diagnostyka"
     },
     "uiLanguage": {
       "title": "Język interfejsu",
       "subtitle": "Wybierz język aplikacji niezależnie od języka kursu.",
       "polish": "Polski",
-      "english": "English"
+      "english": "Angielski"
     },
     "appearance": {
       "section": "Wygląd",
@@ -55,7 +55,7 @@
       },
       "disableReactions": {
         "title": "Wyłącz reakcje",
-        "subtitle": "Wycisza bąbelki z cytatami/reakcjami w aplikacji. Nie dotyczy powiadomień kursu."
+        "subtitle": "Wycisza dymki z cytatami i reakcjami w aplikacji. Nie dotyczy powiadomień kursu."
       },
       "effectsVolume": {
         "title": "Głośność efektów",
@@ -63,7 +63,7 @@
       },
       "boxFaces": {
         "title": "Miny pudełek",
-        "subtitle": "Uśmiechnięte / smutne pudełka w zależności od statusu."
+        "subtitle": "Uśmiechnięte albo smutne pudełka, zależnie od statusu."
       },
       "layoutSelector": {
         "title": "Wybierz schemat pudełek",
@@ -73,7 +73,7 @@
       },
       "actionsSelector": {
         "title": "Wybierz układ",
-        "subtitle": "Wybierz rozmieszczenie przycisków",
+        "subtitle": "Wybierz układ przycisków.",
         "top": "U góry",
         "bottom": "Na dole"
       }
@@ -117,7 +117,7 @@
       },
       "reminders": {
         "title": "Przypomnienia o nauce",
-        "subtitle": "Przypomnienia o nauce.",
+        "subtitle": "Ustaw przypomnienia o nauce.",
         "profile": {
           "morning": "poranny",
           "afternoon": "popołudniowy",
@@ -137,7 +137,7 @@
         }
       },
       "batchSize": {
-        "title": "Liczba fiszek w partii",
+        "title": "Liczba fiszek w serii",
         "subtitle": "Zakres 1-200 fiszek na jedną sesję nauki.",
         "placeholder": "np. 10"
       }
@@ -155,29 +155,29 @@
         "import": "Wystąpił nieoczekiwany błąd podczas importu.",
         "importTitle": "Błąd importu",
         "resetLearning": "Nie udało się przywrócić ustawień nauki.",
-        "resetIntro": "Nie udało się zresetować intro."
+        "resetIntro": "Nie udało się zresetować wprowadzenia."
       },
       "exportFile": {
         "title": "Eksport zapisany",
         "message": "Zapisano do pliku:\n{{fileUri}}\n\nRozmiar: {{sizeKb}} kB\n\n{{shareNote}}",
-        "shareSupported": "Otworzyłem okno udostępniania - wybierz Zapisz/Podziel się lub anuluj.",
+        "shareSupported": "Otwarto okno udostępniania. Wybierz „Zapisz” lub „Udostępnij”, albo anuluj.",
         "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
       },
       "googleDrive": {
         "sectionTitle": "Kopia zapasowa Google Drive",
-        "actionButton": "Akcja Google Drive",
-        "loadingShort": "Trwa",
+        "actionButton": "Opcje Google Drive",
+        "loadingShort": "Trwa...",
         "connectTitle": "Połącz Google Drive",
         "connectSubtitle": "Połącz konto Google, aby zapisywać kopie ZIP w prywatnym folderze aplikacji na Google Drive.",
         "connectButton": "Połącz",
         "manualBackupTitle": "Utwórz kopię zapasową teraz",
-        "manualBackupSubtitle": "Utwórz nowy snapshot ZIP i zachowaj do 3 ostatnich kopii w prywatnym folderze aplikacji na Google Drive.",
+        "manualBackupSubtitle": "Utwórz nowe archiwum ZIP i zachowaj maksymalnie 3 ostatnie kopie w prywatnym folderze aplikacji na Google Drive.",
         "backupNowButton": "Utwórz kopię",
         "refreshButton": "Odśwież listę",
         "status": {
-          "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w buildzie aplikacji. Powód: {{reason}}",
-          "notConfiguredFallback": "brak konfiguracji OAuth",
-          "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja odczyta listę kopii i pozwoli tworzyć nowe snapshoty ręcznie.",
+          "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w tej wersji aplikacji. Powód: {{reason}}",
+          "notConfiguredFallback": "brak konfiguracji logowania Google",
+          "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja odczyta listę kopii i pozwoli ręcznie tworzyć nowe kopie.",
           "loadingList": "Połączono z Google Drive. Trwa pobieranie listy kopii...",
           "noBackups": "Połączono, ale nie znaleziono jeszcze kopii.\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
           "connected": "Połączono. Dostępne kopie: {{count}}.\nNajnowsza kopia: {{latest}}\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
@@ -195,14 +195,14 @@
           "message": "Nowa kopia ZIP została zapisana w prywatnym folderze aplikacji na Google Drive."
         },
         "restoreTitle": "Lista kopii do przywrócenia",
-        "restoreSubtitle": "Pobierz listę 3 ostatnich kopii z Google Drive i wybierz konkretny snapshot do przywrócenia.",
+        "restoreSubtitle": "Pobierz listę 3 ostatnich kopii z Google Drive i wybierz konkretną kopię do przywrócenia.",
         "restoreButton": "Przywróć",
         "restoreConfirm": {
           "title": "Przywrócić dane z Google Drive?",
           "message": "To zastąpi lokalne dane użytkownika kopią z {{createdAt}}, łącznie z kursami prywatnymi, postępem i zdjęciami.",
           "confirm": "Przywróć"
         },
-        "snapshotTitle": "Backup z {{createdAt}}",
+        "snapshotTitle": "Kopia z {{createdAt}}",
         "snapshotMeta": "Wersja aplikacji: {{appVersion}} • Źródło: {{backupSource}}",
         "snapshotSummaryUnavailable": "Nie udało się odczytać szczegółów tej kopii.",
         "snapshotCard": {
@@ -265,7 +265,7 @@
       },
       "resetLearningConfirm": {
         "title": "Przywróć ustawienia nauki",
-        "message": "Przywróć domyślne ustawienia (spellcheck, ogonki, miny pudełek, layout, przypomnienia)?",
+        "message": "Przywrócić domyślne ustawienia nauki (sprawdzanie pisowni, ogonki, miny pudełek, układ, przypomnienia)?",
         "cancel": "Anuluj",
         "confirm": "Przywróć"
       },
@@ -274,14 +274,14 @@
         "message": "Ustawienia nauki przywrócone."
       },
       "resetIntroConfirm": {
-        "title": "Zresetować intro?",
-        "message": "Intro uruchomi się od początku. Przypięte kursy zostaną odpięte, a aktywny kurs zostanie wyłączony. Progres nauki i zapisane dane nie zostaną usunięte.",
+        "title": "Zresetować wprowadzenie?",
+        "message": "Wprowadzenie uruchomi się od początku. Przypięte kursy zostaną odpięte, a aktywny kurs zostanie wyłączony. Postęp nauki i zapisane dane nie zostaną usunięte.",
         "cancel": "Anuluj",
-        "confirm": "Resetuj intro"
+        "confirm": "Resetuj wprowadzenie"
       },
       "resetIntroDone": {
         "title": "Gotowe",
-        "message": "Intro zresetowane. Onboarding startuje od wyboru języka."
+        "message": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka."
       },
       "rows": {
         "exportUserData": {
@@ -305,27 +305,27 @@
         },
         "resetLearning": {
           "title": "Przywróć ustawienia nauki",
-          "subtitle": "Spellcheck, diakrytyki, miny pudełek, layout, przypomnienia.",
+          "subtitle": "Sprawdzanie pisowni, diakrytyki, miny pudełek, układ, przypomnienia.",
           "button": "Przywróć domyślne",
           "buttonLoading": "Przywracam..."
         },
         "resetIntro": {
-          "title": "Zresetuj intro",
-          "subtitle": "Uruchamia onboarding od początku. Odpina kursy i wyłącza aktywny kurs, ale nie usuwa progresu.",
-          "button": "Reset intro",
+          "title": "Zresetuj wprowadzenie",
+          "subtitle": "Uruchamia samouczek od początku. Odpina kursy i wyłącza aktywny kurs, ale nie usuwa postępu.",
+          "button": "Resetuj wprowadzenie",
           "buttonLoading": "Resetuję..."
         }
       }
     },
     "debug": {
       "section": {
-        "tools": "Debug / dev tools",
+        "tools": "Narzędzia diagnostyczne / deweloperskie",
         "audio": "Audio",
-        "uiPreview": "UI preview",
-        "seed": "Seed danych",
-        "hardReset": "Twarde resety (dev)",
-        "onboarding": "Onboarding checkpoint",
-        "flags": "Feature flags / eksperymenty"
+        "uiPreview": "Podgląd interfejsu",
+        "seed": "Dane testowe",
+        "hardReset": "Twarde resety (deweloperskie)",
+        "onboarding": "Punkt kontrolny samouczka",
+        "flags": "Flagi funkcji / eksperymenty"
       },
       "alerts": {
         "missingCourseTitle": "Brak kursu",
@@ -340,10 +340,10 @@
         "resetCustomNone": "Brak wpisów do usunięcia.",
         "resetCustomError": "Nie udało się zresetować kursu własnego.",
         "clearStorageTitle": "Wyczyść AsyncStorage",
-        "clearStorageMessage": "Usunie WSZYSTKIE zapisane ustawienia (również poza settings). Na dev tylko.",
+        "clearStorageMessage": "Usunie WSZYSTKIE zapisane ustawienia (również poza ustawieniami). Tylko w wersji deweloperskiej.",
         "clearStorageConfirm": "Wyczyść",
         "deleteDbTitle": "Usuń bazę SQLite",
-        "deleteDbMessage": "Skasuje lokalną bazę mygame.db (flashcards/custom). Potrzebny restart aplikacji.",
+        "deleteDbMessage": "Usunie lokalną bazę mygame.db (fiszki i własne kursy). Wymagany restart aplikacji.",
         "deleteDbConfirm": "Usuń bazę",
         "cancel": "Anuluj",
         "doneTitle": "Gotowe",
@@ -352,18 +352,18 @@
         "dbDeleted": "Baza mygame.db została usunięta.",
         "dbDeleteError": "Nie udało się usunąć bazy.",
         "checkpointSet": "Ustawiono",
-        "checkpointValue": "Checkpoint: {{checkpoint}}",
-        "checkpointSetError": "Nie udało się ustawić checkpointu.",
-        "introResetDone": "Intro zresetowane. Onboarding startuje od wyboru języka.",
+        "checkpointValue": "Punkt kontrolny: {{checkpoint}}",
+        "checkpointSetError": "Nie udało się ustawić punktu kontrolnego.",
+        "introResetDone": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka.",
         "introResetError": "Nie udało się zresetować dymków.",
-        "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Wyjdź z niego przez „Spróbuj ponownie”.",
+        "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Zamknij go przez „Spróbuj ponownie”.",
         "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
       },
       "rows": {
         "testPopup": {
-          "title": "Przetestuj popup Boxika",
-          "subtitle": "Podgląd komunikatu (tylko środowisko deweloperskie).",
-          "button": "Pokaż popup",
+          "title": "Przetestuj dymek Boxika",
+          "subtitle": "Podgląd komunikatu (tylko w środowisku deweloperskim).",
+          "button": "Pokaż dymek",
           "message": "Hej! To ja, Boxik. Dymek działa!"
         },
         "testDbErrorScreen": {
@@ -373,11 +373,11 @@
           "buttonLoading": "Otwieram..."
         },
         "testQuotes": {
-          "title": "Testuj cytaty (QuoteBubble)",
+          "title": "Testuj cytaty (dymek cytatu)",
           "subtitle": "Wywołaj losowy cytat w zależności od kategorii.",
           "win": "Win",
           "loss": "Loss",
-          "startup": "Startup"
+          "startup": "Start"
         },
         "audio": {
           "title": "Test dźwięków",
@@ -385,41 +385,41 @@
         },
         "startupScreenPreview": {
           "title": "Podgląd ekranu startowego",
-          "subtitle": "Na chwilę pokazuje nowy ekran ładowania z ikoną aplikacji i spinnerem.",
+          "subtitle": "Na chwilę pokazuje nowy ekran ładowania z ikoną aplikacji i wskaźnikiem ładowania.",
           "button": "Pokaż ekran"
         },
         "logo": {
           "title": "Dymek z logo",
-          "subtitle": "Podgląd komunikatu onboardingowego z logo.",
+          "subtitle": "Podgląd komunikatu samouczka z logo.",
           "show": "Pokaż",
           "hide": "Ukryj"
         },
         "floating": {
-          "title": "Tryb floating",
-          "subtitle": "Wyświetlaj dymek nad zawartością (absolute).",
-          "on": "Floating: ON",
-          "off": "Floating: OFF"
+          "title": "Tryb pływający",
+          "subtitle": "Wyświetlaj dymek nad zawartością (pozycjonowanie bezwzględne).",
+          "on": "Tryb pływający: WŁ.",
+          "off": "Tryb pływający: WYŁ."
         },
         "logoMessage": {
           "title": "Dodaj kurs kodem",
           "description": "To Twoje miejsce do fiszek. Zacznij od przypięcia kursu kodem od prowadzącego."
         },
         "addCustomReviews": {
-          "title": "Dodaj customowe powtórki",
+          "title": "Dodaj własne powtórki",
           "subtitle": "Wstaw losowe fiszki z aktywnego kursu własnego.",
           "button": "Dodaj 10",
           "buttonLoading": "Dodawanie..."
         },
         "selectCourseInfo": "Najpierw wybierz własny kurs w panelu kursów.",
         "resetCustom": {
-          "title": "Reset kursu własnego (dev)",
+          "title": "Reset kursu własnego (deweloperskie)",
           "subtitle": "Usuń wpisy powtórek aktywnego kursu własnego.",
-          "button": "Reset custom",
+          "button": "Resetuj kurs własny",
           "buttonLoading": "Resetuję..."
         },
         "clearStorage": {
           "title": "Wyczyść AsyncStorage",
-          "subtitle": "Usuwa wszystkie klucze aplikacji (tylko na dev).",
+          "subtitle": "Usuwa wszystkie klucze aplikacji (tylko w wersji deweloperskiej).",
           "button": "Wyczyść",
           "buttonLoading": "Czyszczę..."
         },
@@ -430,28 +430,28 @@
           "buttonLoading": "Usuwam..."
         },
         "resetIntro": {
-          "title": "Zresetuj dymki intro",
-          "subtitle": "Usuwa flagi seen dla wszystkich ekranów.",
-          "button": "Reset Intro",
+          "title": "Zresetuj dymki wprowadzenia",
+          "subtitle": "Usuwa flagi „seen” dla wszystkich ekranów.",
+          "button": "Resetuj wprowadzenie",
           "buttonLoading": "Resetuję..."
         },
         "openLanguageIntro": {
           "title": "Przejdź do wyboru języka",
-          "subtitle": "Otwórz pierwszy ekran onboardingu z flagami PL/EN.",
+          "subtitle": "Otwórz pierwszy ekran samouczka z flagami PL i EN.",
           "button": "Ekran języka"
         },
         "flags": {
           "learningReminders": {
-            "title": "Powiadomienia o nauce (dev)",
+            "title": "Powiadomienia o nauce (deweloperskie)",
             "subtitle": "Szybki toggle na niewydany ficzer przypomnień."
           },
           "statsFire": {
-            "title": "Statystyki: animacja ognia (dev)",
+            "title": "Statystyki: animacja ognia (deweloperskie)",
             "subtitle": "Pokazuje animowane płomienie w tle \"Opanowane słówka\"."
           },
           "statsBookshelf": {
-            "title": "Statystyki: komoda z półkami (dev)",
-            "subtitle": "Pokazuje moduł bookshelf / puchary na ekranie statystyk."
+            "title": "Statystyki: komoda z półkami (deweloperskie)",
+            "subtitle": "Pokazuje moduł regału / puchary na ekranie statystyk."
           }
         }
       }
@@ -472,7 +472,7 @@
       "body": "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne."
     },
     "guide": {
-      "title": "Poradnik / Co i jak",
+      "title": "Poradnik i wskazówki",
       "subtitle": "Zajrzyj do instrukcji i wskazówek, zanim wyślesz zgłoszenie lub jeśli chcesz szybciej odnaleźć się w aplikacji.",
       "button": "Co i jak"
     },
@@ -489,9 +489,9 @@
       "reportSent": "Wysłane przez klienta poczty. Dziękujemy!",
       "suggestionSent": "Sugestia wysłana. Dziękujemy za pomysł!",
       "sendCancelled": "Wysyłka anulowana. Możesz spróbować ponownie.",
-      "mailtoOpenedReport": "Otworzyłem mailto:. Dopisz opis i wyślij wiadomość.",
-      "mailtoOpenedSuggestion": "Otworzyłem mailto:. Opisz swój pomysł i wyślij wiadomość.",
-      "composerFailed": "Nie udało się otworzyć composer-a. Spróbuj ponownie lub użyj mailto."
+      "mailtoOpenedReport": "Otwarto wiadomość e-mail. Dopisz opis i wyślij wiadomość.",
+      "mailtoOpenedSuggestion": "Otwarto wiadomość e-mail. Opisz swój pomysł i wyślij wiadomość.",
+      "composerFailed": "Nie udało się otworzyć okna tworzenia wiadomości. Spróbuj ponownie albo użyj odnośnika mailto:."
     }
   },
   "legal": {
@@ -670,195 +670,203 @@
     "previousMessage": "Poprzedni komunikat",
     "nextMessage": "Następny komunikat",
     "languageIntro": {
-      "title": "Zaznacz twój język ojczysty",
+      "title": "Wybierz język",
       "confirm": "Dalej",
       "polish": "Polski",
-      "english": "English",
-      "hintDefault": "Wybierz język, żeby aktywować przycisk.",
+      "english": "Angielski",
+      "hintDefault": "Wybierz język, aby aktywować przycisk.",
       "hintSelected": "Wybrano: {{language}}"
     },
     "courseActivate": {
       "step1": {
-        "title": "Gdzie teraz jestem?",
-        "description": "Teraz jesteś na ekranie, gdzie aktywuje się kurs."
+        "title": "Gdzie jestem?",
+        "description": "Jesteś teraz na ekranie, na którym aktywuje się kurs."
       },
       "step2": {
         "title": "Po co?",
-        "description": "To właśnie z tego aktywnego kursu gra będzie brała fiszki."
+        "description": "To właśnie z aktywnego kursu gra będzie brała fiszki."
       },
       "step3": {
-        "title": "Jak aktywować?",
-        "description": "Aktywowanie następuje po kliknięciu w kafelek kursu."
+        "title": "Jak włączyć?",
+        "description": "Aby aktywować kurs, kliknij jego kafelek."
       },
       "step4": {
-        "title": "zzzZZZZzzz",
-        "description": "(czeka aż aktywujesz jakiś kurs)"
+        "title": "zzzzZZZZzzzz",
+        "description": "(czekam, aż aktywujesz jakiś kurs)"
       },
       "step5": {
-        "title": "Brawo! Aktywowałeś kurs!",
-        "description": "Możesz teraz zacząć grać. Kliknij przycisk Dalej na dole po prawej."
+        "title": "Kurs aktywny",
+        "description": "Gotowe, kurs jest aktywny. Możesz zacząć grać. Kliknij przycisk Dalej na dole po prawej."
       }
     },
     "courseEntrySettings": {
       "step1": {
-        "title": "Co to za ekran?",
-        "description": "To jest ekran, który wyświetla się jednorazowo na starcie każdego kursu."
+        "title": "Co to?",
+        "description": "To ekran, który pojawia się jednorazowo przy starcie każdego kursu."
       },
       "step2": {
-        "title": "Co tu jest ważne?",
-        "description": "Są tutaj trzy ważniejsze opcje, którymi użytkownik dostosowuje kurs."
+        "title": "Co ważne?",
+        "description": "Są tu trzy ważniejsze opcje, którymi dostosujesz kurs pod siebie."
       },
       "step3": {
-        "title": "Na teraz",
-        "description": "Na razie polecam zostawić je takie, jakie są."
+        "title": "Na start",
+        "description": "Na razie polecam zostawić je tak, jak są."
       },
       "step4": {
         "title": "Spokojnie",
-        "description": "Później nadal będziesz mógł zmieniać te ustawienia."
+        "description": "Później nadal będziesz mógł zmienić te ustawienia."
       },
       "step5": {
-        "title": "I co teraz?",
-        "description": "Kliknij dalej, jeżeli jesteś gotów przejść do gry."
+        "title": "I co dalej?",
+        "description": "Kliknij Dalej, jeśli chcesz przejść do gry."
       }
     },
     "flashcards": {
       "step1": {
-        "title": "Tutaj uczysz się fiszek",
-        "description": "To jest główny ekran nauki. Tutaj dzieje się magia."
+        "title": "Tu są fiszki",
+        "description": "To główny ekran nauki. Tutaj dzieje się cała magia."
       },
       "step2": {
-        "title": "Powoli!",
-        "description": "Najpierw oprowadzę Cię i pokażę, co jest czym."
+        "title": "Momencik",
+        "description": "Najpierw Cię oprowadzę i pokażę, co jest czym."
       },
       "step3": {
-        "title": "To jest aktualna fiszka",
-        "description": "W tym miejscu zobaczysz pytanie, słowo, obrazek albo inne zadanie. Jeżeli odpowiedź jest tekstowa, tutaj wpiszesz swoją odpowiedź."
+        "title": "Twoja fiszka",
+        "description": "Tutaj zobaczysz pytanie, słowo, obrazek albo inne zadanie. Jeśli odpowiedź jest tekstowa, to właśnie tu ją wpiszesz."
       },
       "step4": {
-        "title": "Tutaj są przyciski akcji",
-        "description": "W zależności od rodzaju fiszki będziesz widzieć tutaj różne warianty przycisków."
+        "title": "Przyciski akcji",
+        "description": "W zależności od rodzaju fiszki zobaczysz tu różne przyciski."
       },
       "step5": {
-        "title": "Na dole są pudełka nauki",
-        "description": "To są pudełka z fiszkami, najważniejszy element gry."
+        "title": "Pudełka nauki",
+        "description": "To pudełka z fiszkami — najważniejszy element gry."
       },
       "step6": {
-        "title": "A teraz zasady!",
+        "title": "Zasada jedna",
         "description": "Każda nowa fiszka trafia najpierw do pudełka numer jeden."
       },
       "step7": {
-        "title": "A teraz zasady!",
+        "title": "Zasada dwa",
         "description": "Liczba pod pudełkiem pokazuje, ile fiszek aktualnie się w nim znajduje."
       },
       "step8": {
-        "title": "A teraz zasady!",
+        "title": "Kliknij pudełko",
         "description": "Kliknij teraz pudełko numer jeden."
       },
       "step9": {
-        "title": "A teraz zasady!",
+        "title": "Twoja kolej",
         "description": "Teraz wpisz odpowiedź i ją zatwierdź.",
         "descriptionTrueFalse": "Teraz wybierz PRAWDA albo FAŁSZ.",
         "descriptionKnowDontKnow": "Teraz wybierz UMIEM albo NIE UMIEM."
       },
       "step10": {
-        "title": "A teraz zasady!",
-        "description": "Brawo, podałeś/aś prawidłową odpowiedź!",
-        "descriptionAssisted": "Brawo, podałeś/aś prawidłową odpowiedź! Trochę Ci pomogłem."
+        "title": "Dobrze poszło",
+        "description": "Brawo, to poprawna odpowiedź!",
+        "descriptionAssisted": "Brawo, to poprawna odpowiedź! (Tym razem była mała podpowiedź :3)"
       },
       "step11": {
-        "title": "A teraz zasady!",
+        "title": "Hop wyżej",
         "description": "Jak widać, fiszka trafiła teraz do pudełka numer dwa."
       },
       "step12": {
-        "title": "A teraz zasady!",
-        "description": "Za każdym razem, kiedy podajesz prawidłową odpowiedź, fiszka leci do kolejnego pudełka."
+        "title": "Dobra odpowiedź",
+        "description": "Za każdym razem, gdy odpowiesz poprawnie, fiszka leci do kolejnego pudełka."
       },
       "step13": {
-        "title": "A teraz zasady!",
-        "description": "Żeby fiszka została uznana za nauczoną, musi przejść przez wszystkie 5 pudełek."
+        "title": "Kiedy ukończysz?",
+        "description": "Aby fiszka została uznana za nauczoną, musi przejść przez wszystkie 5 pudełek."
       },
       "step14": {
-        "title": "A teraz zasady!",
-        "description": "A kiedy poprawnie odpowiesz w pudełku numer pięć, zobaczysz ten efekt."
+        "title": "Efekt końcowy",
+        "description": "A gdy poprawnie odpowiesz w pudełku numer pięć, zobaczysz ten efekt."
       },
       "step15": {
-        "title": "A teraz zasady!",
-        "description": "Ale uważaj! Za każdym razem, kiedy odpowiesz źle, fiszka wraca do pudełka numer jeden."
+        "title": "Mały haczyk",
+        "description": "Ale uważaj! Gdy odpowiesz źle, fiszka wraca do pudełka numer jeden."
       },
       "step16": {
-        "title": "I jeszcze na koniec",
-        "description": "Szybko pokażę Ci przyciski wokół ekranu gry."
+        "title": "Jeszcze chwilka",
+        "description": "Na koniec szybko pokażę Ci przyciski wokół ekranu gry."
       },
       "step17": {
-        "title": "Tutaj masz ekran główny",
-        "description": "Ten przycisk przenosi Cię do strony głównej aplikacji."
+        "title": "Ekran główny",
+        "description": "Ten przycisk przenosi Cię na stronę główną aplikacji."
       },
       "step18": {
-        "title": "Tutaj zmieniasz aktywny kurs",
+        "title": "Zmiana kursu",
         "description": "Tutaj otwierasz panel kursów i wybierasz, z czego chcesz się uczyć."
       },
       "step19": {
-        "title": "Tutaj masz statystyki",
+        "title": "Statystyki",
         "description": "Tutaj podejrzysz swoje postępy i wyniki nauki."
       },
       "step20": {
-        "title": "Tym przyciskiem zmieniasz tryb ciemny",
+        "title": "Tryb ciemny",
         "description": "Jednym kliknięciem przełączysz motyw aplikacji."
       },
       "step21": {
-        "title": "Tutaj są powtórki",
+        "title": "Powtórki",
         "description": "Ten przycisk otwiera ekran powtórek i zaległych fiszek."
       },
       "step22": {
-        "title": "Tutaj jest gra",
+        "title": "Powrót do gry",
         "description": "Tym przyciskiem wracasz do fiszek i aktywnego kursu."
       },
       "step23": {
-        "title": "A tu ustawienia",
+        "title": "Ustawienia",
         "description": "Tutaj zmienisz wygląd aplikacji, naukę i inne opcje."
       },
+      "step24": {
+        "title": "To już wszystko",
+        "description": "Jeśli coś było niejasne, w menu głównym znajdziesz przewodnik, a w ustawieniach możesz uruchomić poradnik od początku."
+      },
+      "step25": {
+        "title": "Do zobaczenia! :*",
+        "description": ""
+      },
       "actionsPositionNudge": {
-        "title": "A może chcesz przyciski niżej?",
+        "title": "Przyciski niżej?",
         "subtitle": "Możesz zmienić ich położenie teraz, a później wrócić do tego w ustawieniach.",
         "dismiss": "Zostaw jak jest"
       }
     },
     "coursePin": {
       "step1": {
-        "title": "Cześć, jestem Memicard",
-        "description": "Pokażę Ci, jak zacząć. A to krótki poradnik co i jak :3"
+        "title": "Hej, to ja",
+        "description": "Pokażę Ci, jak zacząć. To będzie krótki poradnik, co i jak :3"
       },
       "step2": {
         "title": "Co tu jest?",
-        "description": "Na tym ekranie widać listę kursów, które są dostępne w aplikacji."
+        "description": "Na tym ekranie widzisz listę kursów dostępnych w aplikacji."
       },
       "step3": {
-        "title": "Jakich kursów?",
-        "description": "Jeden kurs to jeden kafelek z adekwatną nazwą."
+        "title": "Jakie kursy?",
+        "description": "Jeden kurs to jeden kafelek z odpowiednią nazwą."
       },
       "step4": {
-        "title": "I co tu robisz?",
-        "description": "Wybierasz sobie kursy, które Cię interesują, i przypinasz."
+        "title": "Co tu robisz?",
+        "description": "Wybierasz kursy, które Cię interesują, i przypinasz je."
       },
       "step5": {
-        "title": "A jak przypinam?",
-        "description": "Przypinasz poprzez kliknięcie w kwadracik w kafelku danego kursu."
+        "title": "Jak przypiąć?",
+        "description": "Aby przypiąć kurs, kliknij kwadracik w jego kafelku."
       },
       "step6": {
-        "title": "A i jeszcze coś",
-        "description": "U góry masz kategorie."
+        "title": "Jeszcze coś",
+        "description": "U góry znajdziesz kategorie."
       },
       "step7": {
-        "title": "zzzZZZZzzz",
-        "description": "(czeka aż przypniesz kursy, które Ci się podobają)"
+        "title": "zzzzZZZZzzzz",
+        "description": "(czekam, aż przypniesz kursy, które Ci się podobają)"
       },
       "step8": {
-        "title": "Brawo! Kurs został przypięty!",
-        "description": "Pamiętaj, możesz przypiąć ich więcej niż jeden."
+        "title": "Kurs przypięty",
+        "description": "Brawo, kurs został przypięty! Pamiętaj, możesz przypiąć więcej niż jeden."
       },
       "step9": {
-        "title": "I co teraz?",
-        "description": "Jeżeli przypiąłeś to, co Cię interesuje, możesz kliknąć przycisk Dalej na dole po prawej."
+        "title": "I co dalej?",
+        "description": "Jeśli masz już przypięte to, co Cię interesuje, kliknij przycisk „Dalej” na dole po prawej."
       }
     }
   },
@@ -871,7 +879,7 @@
       "cardTypes": {
         "text": "Odpowiedź tekstowa",
         "trueFalse": "Prawda/Fałsz",
-        "knowDontKnow": "Umiem/Nie umiem"
+        "knowDontKnow": "Umiem / Nie umiem"
       },
       "sectionHeader": "ZAWARTOŚĆ",
       "addModeA11y": "Sposób dodawania fiszek",
@@ -970,7 +978,7 @@
               "description": "Treść pytania albo zdania do oceny."
             },
             "tfAnswer": {
-              "description": "Poprawna odpowiedź: true/false albo 1/0."
+              "description": "Poprawna odpowiedź: prawda/fałsz albo 1/0."
             },
             "explanation": {
               "description": "Wyjaśnienie po odpowiedzi."

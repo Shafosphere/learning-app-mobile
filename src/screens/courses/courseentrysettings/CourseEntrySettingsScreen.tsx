@@ -1,5 +1,5 @@
 import MyButton from "@/src/components/button/button";
-import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_ENTRY_SETTINGS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -15,7 +15,7 @@ import {
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useStyles } from "./CourseEntrySettingsScreen-styles";
 
@@ -49,8 +49,6 @@ export default function CourseEntrySettingsScreen() {
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
-  const rootRef = useRef<View | null>(null);
-
   useEffect(() => {
     let mounted = true;
     getOnboardingCheckpoint().then((checkpoint) => {
@@ -141,6 +139,36 @@ export default function CourseEntrySettingsScreen() {
     steps: COURSE_ENTRY_SETTINGS_COACHMARK_STEPS,
   });
 
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive
+        ? {
+            currentStep: coachmark.currentStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.currentStep,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+    ],
+  );
+
+  useCoachmarkLayerPortal(
+    "course-entry-settings-screen",
+    coachmarkLayer,
+  );
+
   const handleContinue = async () => {
     if (!course || isSaving) {
       return;
@@ -189,7 +217,7 @@ export default function CourseEntrySettingsScreen() {
   }
 
   return (
-    <View ref={rootRef} style={styles.container}>
+    <View style={styles.container}>
       <CoachmarkAnchor
         id="course-entry-settings-bubble-anchor"
         shape="rect"
@@ -319,18 +347,6 @@ export default function CourseEntrySettingsScreen() {
           </CoachmarkAnchor>
         </View>
       </View>
-      {coachmark.isActive ? (
-        <GuidedCoachmarkLayer
-          rootRef={rootRef}
-          currentStep={coachmark.currentStep}
-          currentIndex={coachmark.currentIndex}
-          totalSteps={coachmark.totalSteps}
-          canGoBack={coachmark.canGoBack}
-          canGoNext={coachmark.canGoNext}
-          onBack={coachmark.goBack}
-          onNext={coachmark.goNext}
-        />
-      ) : null}
     </View>
   );
 }

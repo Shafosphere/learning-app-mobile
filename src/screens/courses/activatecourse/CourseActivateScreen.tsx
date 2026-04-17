@@ -1,6 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
-import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_ACTIVATE_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import { COURSE_CATEGORIES, CourseCategory } from "@/src/constants/courseCategories";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -40,7 +40,6 @@ export default function CourseActivateScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
-  const rootRef = useRef<View | null>(null);
   const scrollRef = useRef<ScrollView | null>(null);
   const router = useRouter();
   const setPopup = usePopup();
@@ -240,6 +239,36 @@ export default function CourseActivateScreen() {
     },
   });
 
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive
+        ? {
+            currentStep: coachmark.currentStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.currentStep,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+    ],
+  );
+
+  useCoachmarkLayerPortal(
+    "course-activate-screen",
+    coachmarkLayer,
+  );
+
   const handleCustomCoursePress = useCallback(
     async (id: number) => {
       if (activeCustomCourseId === id) {
@@ -260,7 +289,7 @@ export default function CourseActivateScreen() {
   );
 
   return (
-    <View ref={rootRef} style={styles.container}>
+    <View style={styles.container}>
       <CoachmarkAnchor
         id="course-activate-bubble-anchor"
         shape="rect"
@@ -401,18 +430,6 @@ export default function CourseActivateScreen() {
           </View>
         </View>
       )}
-      {coachmark.isActive ? (
-        <GuidedCoachmarkLayer
-          rootRef={rootRef}
-          currentStep={coachmark.currentStep}
-          currentIndex={coachmark.currentIndex}
-          totalSteps={coachmark.totalSteps}
-          canGoBack={coachmark.canGoBack}
-          canGoNext={coachmark.canGoNext}
-          onBack={coachmark.goBack}
-          onNext={coachmark.goNext}
-        />
-      ) : null}
     </View>
   );
 }

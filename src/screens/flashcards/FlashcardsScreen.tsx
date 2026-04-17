@@ -5,7 +5,7 @@ import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
-import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import {
   FLASHCARDS_COACHMARK_STEPS,
@@ -127,7 +127,6 @@ export default function Flashcards() {
   // const router = useRouter();
   const styles = useStyles();
   const { t } = useTranslation();
-  const rootRef = useRef<View | null>(null);
   const {
     activeCustomCourseId,
     setActiveCustomCourseId,
@@ -1494,8 +1493,35 @@ export default function Flashcards() {
     return currentFlashcardsStep;
   }, [currentFlashcardsStep, selectedItem?.type, tutorialSuccessVariant]);
 
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive
+        ? {
+            currentStep: guidedCoachmarkStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+      guidedCoachmarkStep,
+    ],
+  );
+
+  useCoachmarkLayerPortal("flashcards-screen", coachmarkLayer);
+
   return (
-    <View ref={rootRef} style={styles.container}>
+    <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
       <CoachmarkAnchor
         id="flashcards-bubble-anchor"
@@ -1675,19 +1701,6 @@ export default function Flashcards() {
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
       />
-      {coachmark.isActive ? (
-        <GuidedCoachmarkLayer
-          rootRef={rootRef}
-          currentStep={guidedCoachmarkStep}
-          currentIndex={coachmark.currentIndex}
-          totalSteps={coachmark.totalSteps}
-          canGoBack={coachmark.canGoBack}
-          canGoNext={coachmark.canGoNext}
-          onBack={coachmark.goBack}
-          onNext={coachmark.goNext}
-        />
-      ) : null}
-
       <Modal
         animationType="fade"
         transparent

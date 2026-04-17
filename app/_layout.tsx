@@ -1,6 +1,7 @@
 // _layout.tsx
 import i18n from "@/src/i18n";
 import Navbar from "@/src/components/navbar/navbar";
+import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
@@ -456,11 +457,13 @@ export default function RootLayout() {
                 <LearningStatsProvider>
                   <NavbarStatsProvider>
                     <PopupProvider>
-                      <Navbar>
-                        <OnboardingGate />
-                        <Stack screenOptions={{ headerShown: false }} />
-                      </Navbar>
-                      <QuoteBubble />
+                      <CoachmarkLayerPortalProvider>
+                        <Navbar>
+                          <OnboardingGate />
+                          <Stack screenOptions={{ headerShown: false }} />
+                        </Navbar>
+                        <QuoteBubble />
+                      </CoachmarkLayerPortalProvider>
                     </PopupProvider>
                   </NavbarStatsProvider>
                 </LearningStatsProvider>

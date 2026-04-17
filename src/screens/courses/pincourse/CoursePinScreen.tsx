@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
-import { GuidedCoachmarkLayer } from "@/src/components/onboarding/GuidedCoachmarkLayer";
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_PIN_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
   COURSE_CATEGORIES,
@@ -66,7 +66,6 @@ export default function CoursePinScreen() {
   const styles = useStyles();
   const router = useRouter();
   const params = useLocalSearchParams<{ replayIntro?: string }>();
-  const rootRef = useRef<View | null>(null);
   const scrollRef = useRef<ScrollView | null>(null);
   const tabSwitcherRef = useRef<View | null>(null);
   const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
@@ -297,6 +296,36 @@ export default function CoursePinScreen() {
     restartToken: params.replayIntro,
   });
 
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive
+        ? {
+            currentStep: coachmark.currentStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.currentStep,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+    ],
+  );
+
+  useCoachmarkLayerPortal(
+    "course-pin-screen",
+    coachmarkLayer,
+  );
+
   useEffect(() => {
     const currentTarget = coachmark.currentStep?.targetId;
     if (
@@ -448,7 +477,6 @@ export default function CoursePinScreen() {
 
   return (
     <View
-      ref={rootRef}
       style={styles.container}
       onLayout={() => {
         if (!coachmarkTargetsReady) {
@@ -654,18 +682,6 @@ export default function CoursePinScreen() {
           </View>
         </View>
       )}
-      {coachmark.isActive ? (
-        <GuidedCoachmarkLayer
-          rootRef={rootRef}
-          currentStep={coachmark.currentStep}
-          currentIndex={coachmark.currentIndex}
-          totalSteps={coachmark.totalSteps}
-          canGoBack={coachmark.canGoBack}
-          canGoNext={coachmark.canGoNext}
-          onBack={coachmark.goBack}
-          onNext={coachmark.goNext}
-        />
-      ) : null}
     </View>
   );
 }

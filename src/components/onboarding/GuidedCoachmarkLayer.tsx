@@ -10,7 +10,6 @@ import type { CoachmarkFlowStep } from "@/src/constants/coachmarkFlows";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
 import React, {
-  RefObject,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -19,9 +18,7 @@ import React, {
 } from "react";
 import {
   LayoutChangeEvent,
-  Platform,
   Pressable,
-  StatusBar,
   StyleSheet,
   View,
   useWindowDimensions,
@@ -43,8 +40,7 @@ type BubbleFrame = {
   placement: BubblePlacement;
 };
 
-type GuidedCoachmarkLayerProps = {
-  rootRef: RefObject<View | null>;
+export type GuidedCoachmarkLayerProps = {
   currentStep: CoachmarkFlowStep | null;
   currentIndex: number;
   totalSteps: number;
@@ -246,22 +242,7 @@ function getEstimatedBubbleHeight(
   return DEFAULT_BUBBLE_HEIGHT;
 }
 
-function measureInWindow(ref: any): Promise<Rect> {
-  return new Promise((resolve, reject) => {
-    if (!ref || !ref.measureInWindow) {
-      reject(new Error("Invalid ref"));
-      return;
-    }
-    ref.measureInWindow((x: number, y: number, width: number, height: number) => {
-      const statusBarHeight =
-        Platform.OS === "android" ? Math.ceil(StatusBar.currentHeight || 0) : 0;
-      resolve({ x, y: y + statusBarHeight, width, height });
-    });
-  });
-}
-
 export function GuidedCoachmarkLayer({
-  rootRef,
   currentStep,
   currentIndex,
   totalSteps,
@@ -288,6 +269,7 @@ export function GuidedCoachmarkLayer({
   const [renderSpotlightLayer, setRenderSpotlightLayer] = useState(false);
   const [isBubbleReady, setIsBubbleReady] = useState(false);
   const [isSpotlightPositionReady, setIsSpotlightPositionReady] = useState(false);
+  const overlayRootRef = useRef<View | null>(null);
   const hasInitializedBubbleRef = useRef(false);
   const hasPresentedSpotlightRef = useRef(false);
   const hasPositionedIndicatorRef = useRef(false);
@@ -318,23 +300,16 @@ export function GuidedCoachmarkLayer({
   });
 
   useEffect(() => {
-    if (!currentStep || !rootRef.current) return;
-    let cancelled = false;
-
-    const run = async () => {
-      try {
-        const rect = await measureInWindow(rootRef.current);
-        if (!cancelled) setRootWindowRect(rect);
-      } catch (error) {
-        console.warn("[Coachmark] Failed to measure root", error);
-      }
-    };
-
-    void run();
-    return () => {
-      cancelled = true;
-    };
-  }, [currentIndex, currentStep, rootRef, windowHeight, windowWidth]);
+    if (!currentStep) {
+      return;
+    }
+    setRootWindowRect({
+      x: 0,
+      y: 0,
+      width: rootLayout.width || windowWidth,
+      height: rootLayout.height || windowHeight,
+    });
+  }, [currentIndex, currentStep, rootLayout.height, rootLayout.width, windowHeight, windowWidth]);
 
   const localTargetRect = useMemo(() => {
     if (!targetRect || !rootWindowRect) return null;
@@ -628,165 +603,178 @@ export function GuidedCoachmarkLayer({
 
   return (
     <View
+      ref={overlayRootRef}
+      collapsable={false}
       pointerEvents="box-none"
-      style={StyleSheet.absoluteFill}
+      style={styles.overlayRoot}
       onLayout={(event: LayoutChangeEvent) => {
         const { width, height } = event.nativeEvent.layout;
         if (width !== rootLayout.width || height !== rootLayout.height) {
           setRootLayout({ width, height });
         }
+        setRootWindowRect({ x: 0, y: 0, width, height });
       }}
     >
-      {isCenteredIntro ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[
-            StyleSheet.absoluteFill,
-            { backgroundColor: colors.darkbg },
-            introBackdropAnimatedStyle,
-          ]}
-        />
-      ) : null}
-      {shouldRenderFullscreenBlocker ? (
-        <Pressable style={StyleSheet.absoluteFill} />
-      ) : null}
-      {renderSpotlightLayer && localTargetRect ? (
-        <Animated.View
-          pointerEvents="box-none"
-          style={[StyleSheet.absoluteFill, spotlightAnimatedStyle]}
-        >
-          <AnimatedMask
-            width={rootLayout.width || windowWidth}
-            height={rootLayout.height || windowHeight}
-            holes={[
-              {
-                x: localHoleX,
-                y: localHoleY,
-                width: localHoleWidth,
-                height: localHoleHeight,
-                shape: "rect",
-                radius: 16,
-              },
+        {isCenteredIntro ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[
+              StyleSheet.absoluteFill,
+              { backgroundColor: colors.darkbg },
+              introBackdropAnimatedStyle,
             ]}
-            backdropColor={colors.darkbg}
-            backdropOpacity={0.55}
           />
-          {shouldBlockOutside ? (
-            <>
-              <Pressable
-                style={[
-                  styles.blocker,
-                  { left: 0, top: 0, width: rootLayout.width, height: Math.max(0, localTargetRect.y) },
-                ]}
-              />
-              <Pressable
-                style={[
-                  styles.blocker,
-                  {
-                    left: 0,
-                    top: localTargetRect.y + localTargetRect.height,
-                    width: rootLayout.width,
-                    height: Math.max(
-                      0,
-                      rootLayout.height - (localTargetRect.y + localTargetRect.height)
-                    ),
-                  },
-                ]}
-              />
-              <Pressable
-                style={[
-                  styles.blocker,
-                  {
-                    left: 0,
-                    top: localTargetRect.y,
-                    width: Math.max(0, localTargetRect.x),
-                    height: localTargetRect.height,
-                  },
-                ]}
-              />
-              <Pressable
-                style={[
-                  styles.blocker,
-                  {
-                    left: localTargetRect.x + localTargetRect.width,
-                    top: localTargetRect.y,
-                    width: Math.max(
-                      0,
-                      rootLayout.width - (localTargetRect.x + localTargetRect.width)
-                    ),
-                    height: localTargetRect.height,
-                  },
-                ]}
-              />
-              {shouldBlockSpotlight ? (
+        ) : null}
+        {shouldRenderFullscreenBlocker ? (
+          <Pressable style={StyleSheet.absoluteFill} />
+        ) : null}
+        {renderSpotlightLayer && localTargetRect ? (
+          <Animated.View
+            pointerEvents="box-none"
+            style={[StyleSheet.absoluteFill, spotlightAnimatedStyle]}
+          >
+            <AnimatedMask
+              width={rootLayout.width || windowWidth}
+              height={rootLayout.height || windowHeight}
+              holes={[
+                {
+                  x: localHoleX,
+                  y: localHoleY,
+                  width: localHoleWidth,
+                  height: localHoleHeight,
+                  shape: "rect",
+                  radius: 16,
+                },
+              ]}
+              backdropColor={colors.darkbg}
+              backdropOpacity={0.55}
+            />
+            {shouldBlockOutside ? (
+              <>
                 <Pressable
                   style={[
                     styles.blocker,
                     {
-                      left: localTargetRect.x,
+                      left: 0,
+                      top: 0,
+                      width: rootLayout.width,
+                      height: Math.max(0, localTargetRect.y),
+                    },
+                  ]}
+                />
+                <Pressable
+                  style={[
+                    styles.blocker,
+                    {
+                      left: 0,
+                      top: localTargetRect.y + localTargetRect.height,
+                      width: rootLayout.width,
+                      height: Math.max(
+                        0,
+                        rootLayout.height - (localTargetRect.y + localTargetRect.height)
+                      ),
+                    },
+                  ]}
+                />
+                <Pressable
+                  style={[
+                    styles.blocker,
+                    {
+                      left: 0,
                       top: localTargetRect.y,
-                      width: localTargetRect.width,
+                      width: Math.max(0, localTargetRect.x),
                       height: localTargetRect.height,
                     },
                   ]}
                 />
-              ) : null}
-            </>
-          ) : null}
-          <Animated.View
-            pointerEvents="none"
-            style={[
-              styles.highlight,
-              highlightAnimatedStyle,
-              { borderColor: colors.my_yellow },
-            ]}
-          />
-        </Animated.View>
-      ) : null}
-
-      {shouldShowFloatingIndicator ? (
-        <Animated.View
-          pointerEvents="none"
-          style={[styles.indicatorBubble, indicatorAnimatedStyle]}
-        >
-          <MaterialCommunityIcons
-            name="arrow-u-down-right-bold"
-            size={96}
-            color={colors.my_green}
-          />
-        </Animated.View>
-      ) : null}
-
-      {isBubbleReady ? (
-        <View pointerEvents="box-none" style={styles.bubbleHost}>
-          <Animated.View
-            style={[
-              styles.bubbleWrap,
-              bubbleAnimatedStyle,
-            ]}
-            pointerEvents="box-none"
-          >
-            <LogoMessage
-              title={t(currentStep.titleKey)}
-              description={t(currentStep.descriptionKey)}
-              layoutVariant={isCenteredIntro ? "centered_intro" : "default"}
-              onPrevious={onBack}
-              onNext={() => {
-                void onNext();
-              }}
-              canGoPrevious={canGoBack}
-              canGoNext={canGoNext}
-              previousLabel={t("onboarding.previousMessage")}
-              nextLabel={t("onboarding.nextMessage")}
+                <Pressable
+                  style={[
+                    styles.blocker,
+                    {
+                      left: localTargetRect.x + localTargetRect.width,
+                      top: localTargetRect.y,
+                      width: Math.max(
+                        0,
+                        rootLayout.width - (localTargetRect.x + localTargetRect.width)
+                      ),
+                      height: localTargetRect.height,
+                    },
+                  ]}
+                />
+                {shouldBlockSpotlight ? (
+                  <Pressable
+                    style={[
+                      styles.blocker,
+                      {
+                        left: localTargetRect.x,
+                        top: localTargetRect.y,
+                        width: localTargetRect.width,
+                        height: localTargetRect.height,
+                      },
+                    ]}
+                  />
+                ) : null}
+              </>
+            ) : null}
+            <Animated.View
+              pointerEvents="none"
+              style={[
+                styles.highlight,
+                highlightAnimatedStyle,
+                { borderColor: colors.my_yellow },
+              ]}
             />
           </Animated.View>
-        </View>
-      ) : null}
+        ) : null}
+
+        {shouldShowFloatingIndicator ? (
+          <Animated.View
+            pointerEvents="none"
+            style={[styles.indicatorBubble, indicatorAnimatedStyle]}
+          >
+            <MaterialCommunityIcons
+              name="arrow-u-down-right-bold"
+              size={96}
+              color={colors.my_green}
+            />
+          </Animated.View>
+        ) : null}
+
+        {isBubbleReady ? (
+          <View pointerEvents="box-none" style={styles.bubbleHost}>
+            <Animated.View
+              style={[
+                styles.bubbleWrap,
+                bubbleAnimatedStyle,
+              ]}
+              pointerEvents="box-none"
+            >
+              <LogoMessage
+                title={t(currentStep.titleKey)}
+                description={t(currentStep.descriptionKey)}
+                layoutVariant={isCenteredIntro ? "centered_intro" : "default"}
+                onPrevious={onBack}
+                onNext={() => {
+                  void onNext();
+                }}
+                canGoPrevious={canGoBack}
+                canGoNext={canGoNext}
+                previousLabel={t("onboarding.previousMessage")}
+                nextLabel={t("onboarding.nextMessage")}
+              />
+            </Animated.View>
+          </View>
+        ) : null}
     </View>
   );
 }
 
 const styles = StyleSheet.create({
+  overlayRoot: {
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 1000,
+    elevation: 1000,
+  },
   blocker: {
     position: "absolute",
     backgroundColor: "transparent",
