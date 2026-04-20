@@ -276,6 +276,35 @@ describe("reviewflashcards correction desync regression", () => {
     jest.clearAllMocks();
   });
 
+  it("shows both prompt at the top and correction target at the bottom for a normal card in correction mode", async () => {
+    const sourceCard = makeReviewCard({
+      id: 31,
+      frontText: "cat",
+      backText: "kot",
+      answers: ["kot"],
+      stage: 1,
+      flipped: false,
+    });
+
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([sourceCard]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
+    });
+
+    await act(async () => {
+      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
+    });
+
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(screen.queryByText("cat")).not.toBeNull();
+      expect(screen.queryByText("kot")).not.toBeNull();
+    });
+  });
+
   it("keeps normal correction bound to the original translation after switching to a reversed foreign card", async () => {
     const sourceCard = makeReviewCard({
       id: 1,
@@ -301,8 +330,8 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("kot")).not.toBeNull();
+      expect(screen.queryByText("cat")).not.toBeNull();
       expect(screen.queryByText("pies")).toBeNull();
-      expect(screen.queryByText("cat")).toBeNull();
     });
   });
 
@@ -331,7 +360,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).toBeNull();
+      expect(screen.queryByText("kot")).not.toBeNull();
       expect(screen.queryByText("pies")).toBeNull();
     });
   });
@@ -361,9 +390,9 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("kot")).not.toBeNull();
+      expect(screen.queryByText("cat")).not.toBeNull();
       expect(screen.queryByText("kotek")).toBeNull();
       expect(screen.queryByText("pies")).toBeNull();
-      expect(screen.queryByText("cat")).toBeNull();
     });
   });
 });

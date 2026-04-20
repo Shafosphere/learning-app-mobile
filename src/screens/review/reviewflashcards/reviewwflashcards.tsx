@@ -33,6 +33,8 @@ const BOX_SPAM_WINDOW_MS = 2000;
 const BOX_SPAM_THRESHOLD = 20;
 const LONG_THINK_MS = 12 * 1000;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
+const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
+const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
 
 const NON_INTRO_BOXES: readonly (keyof BoxesState)[] = [
   "boxOne",
@@ -716,6 +718,12 @@ export default function ReviewFlashcardsPlaceholder() {
         input2: "",
         answerOnly,
         mode: "demote",
+        promptText: effectiveReversed
+          ? selectedItem.translations[0] ?? ""
+          : selectedItem.text,
+        promptImageUri: effectiveReversed
+          ? selectedItem.imageBack ?? null
+          : selectedItem.imageFront ?? null,
         reversed,
         word: selectedItem,
       });
@@ -855,6 +863,7 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem?.type === "know_dont_know"
   );
   const bottomButtonsAnchorRef = useRef<View | null>(null);
+  const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
     useState<number | null>(null);
   const measureBottomButtons = useCallback(() => {
@@ -890,12 +899,11 @@ export default function ReviewFlashcardsPlaceholder() {
   const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
-    enabled: !areButtonsOnTop,
-    gap: 8,
-    targetBottomInWindow: bottomButtonsBottomInWindow,
-    keyboardTopCorrection: 44,
-    debug: true,
-  });
+      enabled: !areButtonsOnTop,
+      gap: 8,
+      targetBottomInWindow: bottomButtonsBottomInWindow,
+      keyboardTopCorrection: 44,
+    });
 
   useEffect(() => {
     if (areButtonsOnTop) return;
@@ -960,114 +968,149 @@ export default function ReviewFlashcardsPlaceholder() {
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
+  const shouldRenderBottomButtons = !areButtonsOnTop;
+  const bottomButtonsReservedSpace = shouldRenderBottomButtons
+    ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
+      BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+    : 0;
 
   return (
     <View style={styles.container}>
       <Confetti generateConfetti={shouldCelebrate} />
 
-      {areButtonsOnTop ? (
-        <Reanimated.View layout={SCREEN_LAYOUT_TRANSITION}>
-          {renderButtons("top")}
-        </Reanimated.View>
-      ) : null}
-      <Reanimated.View layout={SCREEN_LAYOUT_TRANSITION}>
-        <Card
-          selectedItem={selectedItem}
-          setAnswer={setAnswer}
-          answer={answer}
-          result={result}
-          confirm={handleConfirm}
-          reversed={reversed}
-          setResult={setResult}
-          correction={correction}
-          wrongInputChange={wrongInputChange}
-          setCorrectionRewers={setCorrectionRewers}
-          introMode={false}
-          onHintUpdate={() => undefined}
-          hideHints
-          isFocused={!isLoading}
-          showExplanationEnabled={showExplanationEnabled}
-          explanationOnlyOnWrong={explanationOnlyOnWrong}
-        />
-      </Reanimated.View>
-
-      <Reanimated.View
-        layout={SCREEN_LAYOUT_TRANSITION}
+      <View
         style={[
-          styles.boxesWrapper,
-          !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+          styles.content,
+          shouldRenderBottomButtons
+            ? { paddingBottom: bottomButtonsReservedSpace }
+            : null,
         ]}
       >
-        {boxesNeedScrollFallback ? (
-          <ScrollView
-            style={styles.boxesViewport}
-            contentContainerStyle={styles.boxesViewportScrollContent}
-            onLayout={onBoxesViewportLayout}
-            showsVerticalScrollIndicator={false}
-          >
-            <View
-              style={[
-                styles.boxesScaledContent,
-                boxesScaledHeight ? { height: boxesScaledHeight } : null,
-              ]}
-            >
-              <View
-                style={{
-                  transform: [
-                    { translateY: -boxesScaleOffsetY },
-                    { scale: boxesScale },
-                  ],
-                }}
-                onLayout={onBoxesContentLayout}
-              >
-                {boxesContent}
-              </View>
-            </View>
-          </ScrollView>
-        ) : (
-          <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
-            <View
-              style={[
-                styles.boxesScaledContent,
-                boxesScaledHeight ? { height: boxesScaledHeight } : null,
-              ]}
-            >
-              <View
-                style={{
-                  transform: [
-                    { translateY: -boxesScaleOffsetY },
-                    { scale: boxesScale },
-                  ],
-                }}
-                onLayout={onBoxesContentLayout}
-              >
-                {boxesContent}
-              </View>
-            </View>
-          </View>
-        )}
+        <Reanimated.View
+          layout={SCREEN_LAYOUT_TRANSITION}
+          style={styles.cardSectionWrapper}
+        >
+          <Card
+            selectedItem={selectedItem}
+            setAnswer={setAnswer}
+            answer={answer}
+            result={result}
+            confirm={handleConfirm}
+            reversed={reversed}
+            setResult={setResult}
+            correction={correction}
+            wrongInputChange={wrongInputChange}
+            setCorrectionRewers={setCorrectionRewers}
+            introMode={false}
+            onHintUpdate={() => undefined}
+            hideHints
+            isFocused={!isLoading}
+            showExplanationEnabled={showExplanationEnabled}
+            explanationOnlyOnWrong={explanationOnlyOnWrong}
+          />
+        </Reanimated.View>
 
-        {!areButtonsOnTop ? (
-          <View
-            ref={bottomButtonsAnchorRef}
-            onLayout={measureBottomButtons}
-            collapsable={false}
-            style={styles.bottomButtonsWrapper}
+        {areButtonsOnTop ? (
+          <Reanimated.View
+            layout={SCREEN_LAYOUT_TRANSITION}
+            style={styles.topButtonsWrapper}
           >
-            <Animated.View
-              style={{
-                transform: [
-                  {
-                    translateY: Animated.multiply(bottomButtonsOffset, -1),
-                  },
-                ],
-              }}
+            {renderButtons("top")}
+          </Reanimated.View>
+        ) : null}
+
+        <Reanimated.View
+          layout={SCREEN_LAYOUT_TRANSITION}
+          style={[
+            styles.boxesWrapper,
+            !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+          ]}
+        >
+          {boxesNeedScrollFallback ? (
+            <ScrollView
+              style={styles.boxesViewport}
+              contentContainerStyle={styles.boxesViewportScrollContent}
+              onLayout={onBoxesViewportLayout}
+              showsVerticalScrollIndicator={false}
             >
-              {renderButtons("bottom")}
-            </Animated.View>
+              <View
+                style={[
+                  styles.boxesScaledContent,
+                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                ]}
+              >
+                <View
+                  style={{
+                    transform: [
+                      { translateY: -boxesScaleOffsetY },
+                      { scale: boxesScale },
+                    ],
+                  }}
+                  onLayout={onBoxesContentLayout}
+                >
+                  {boxesContent}
+                </View>
+              </View>
+            </ScrollView>
+          ) : (
+            <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
+              <View
+                style={[
+                  styles.boxesScaledContent,
+                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                ]}
+              >
+                <View
+                  style={{
+                    transform: [
+                      { translateY: -boxesScaleOffsetY },
+                      { scale: boxesScale },
+                    ],
+                  }}
+                  onLayout={onBoxesContentLayout}
+                >
+                  {boxesContent}
+                </View>
+              </View>
+            </View>
+          )}
+        </Reanimated.View>
+
+        {shouldRenderBottomButtons ? (
+          <View
+            style={[
+              styles.bottomButtonsDock,
+              { bottom: BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET },
+            ]}
+            pointerEvents="box-none"
+          >
+            <View
+              ref={bottomButtonsAnchorRef}
+              onLayout={(event) => {
+                const nextHeight = event.nativeEvent.layout.height;
+                setBottomButtonsHeight((prev) =>
+                  Math.abs(prev - nextHeight) < 1 ? prev : nextHeight,
+                );
+                measureBottomButtons();
+              }}
+              collapsable={false}
+              style={styles.bottomButtonsWrapper}
+            >
+              <Animated.View
+                style={{
+                  transform: [
+                    {
+                      translateY: Animated.multiply(bottomButtonsOffset, -1),
+                    },
+                  ],
+                }}
+              >
+                {renderButtons("bottom")}
+              </Animated.View>
+            </View>
           </View>
         ) : null}
-      </Reanimated.View>
+      </View>
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}
