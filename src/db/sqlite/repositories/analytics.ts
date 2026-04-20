@@ -2,6 +2,15 @@ import { getDB } from "../core";
 
 type DailyCount = { date: string; count: number };
 type DailyTime = { date: string; ms: number };
+export type DailyActivitySummary = {
+  date: string;
+  learnedCount: number;
+  timeMs: number;
+  correctCount: number;
+  wrongCount: number;
+  promotionsCount: number;
+  totalCount: number;
+};
 export type WeekdayActivityDistribution = number[];
 export type LearningEventsSummary = {
   totalEvents: number;
@@ -78,6 +87,79 @@ export async function getDailyLearningTimeMsCustom(
     toMs
   );
   return rows.map((r) => ({ date: r.d, ms: r.ms | 0 }));
+}
+
+export async function getDailyActivitySummariesCustom(
+  fromMs: number,
+  toMs: number
+): Promise<DailyActivitySummary[]> {
+  const db = await getDB();
+  const [learnedRows, eventRows] = await Promise.all([
+    db.getAllAsync<{ d: string; learnedCount: number }>(
+      `SELECT strftime('%Y-%m-%d', learned_at/1000, 'unixepoch', 'localtime') AS d,
+              COUNT(*) AS learnedCount
+       FROM custom_reviews
+       WHERE learned_at BETWEEN ? AND ?
+       GROUP BY d
+       ORDER BY d ASC;`,
+      fromMs,
+      toMs
+    ),
+    db.getAllAsync<{
+      d: string;
+      timeMs: number;
+      correctCount: number;
+      wrongCount: number;
+      promotionsCount: number;
+      totalCount: number;
+    }>(
+      `SELECT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime') AS d,
+              SUM(COALESCE(duration_ms, 0)) AS timeMs,
+              SUM(CASE WHEN result = 'ok' THEN 1 ELSE 0 END) AS correctCount,
+              SUM(CASE WHEN result = 'wrong' THEN 1 ELSE 0 END) AS wrongCount,
+              SUM(CASE
+                    WHEN result = 'ok' AND box IN ('boxOne', 'boxTwo', 'boxThree', 'boxFour')
+                    THEN 1
+                    ELSE 0
+                  END) AS promotionsCount,
+              COUNT(*) AS totalCount
+       FROM custom_learning_events
+       WHERE created_at BETWEEN ? AND ?
+       GROUP BY d
+       ORDER BY d ASC;`,
+      fromMs,
+      toMs
+    ),
+  ]);
+
+  const merged = new Map<string, DailyActivitySummary>();
+
+  for (const row of learnedRows) {
+    merged.set(row.d, {
+      date: row.d,
+      learnedCount: row.learnedCount | 0,
+      timeMs: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      promotionsCount: 0,
+      totalCount: 0,
+    });
+  }
+
+  for (const row of eventRows) {
+    const prev = merged.get(row.d);
+    merged.set(row.d, {
+      date: row.d,
+      learnedCount: prev?.learnedCount ?? 0,
+      timeMs: row.timeMs | 0,
+      correctCount: row.correctCount | 0,
+      wrongCount: row.wrongCount | 0,
+      promotionsCount: row.promotionsCount | 0,
+      totalCount: row.totalCount | 0,
+    });
+  }
+
+  return Array.from(merged.values()).sort((a, b) => a.date.localeCompare(b.date));
 }
 
 export async function getLearningEventsHourlyDistribution(

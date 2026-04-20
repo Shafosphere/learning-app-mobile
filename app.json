@@ -2,7 +2,7 @@
   "expo": {
     "name": "Memicard",
     "slug": "memicard",
-    "version": "0.0.9",
+    "version": "0.0.10",
     "orientation": "portrait",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",

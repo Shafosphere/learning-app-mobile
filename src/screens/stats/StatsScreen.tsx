@@ -5,15 +5,14 @@ import { ScrollView, Text, View } from "react-native";
 import { useStyles } from "./StatsScreen-styles";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import ActivityHeatmap, { type HeatmapDay } from "@/src/components/stats/ActivityHeatmap";
+import ActivityHeatmap, { type ActivityDay } from "@/src/components/stats/ActivityHeatmap";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
 // import MedalsShowcase from "@/src/components/stats/bookshelf";
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import {
-  getDailyLearnedCountsCustom,
-  getDailyLearningTimeMsCustom,
+  getDailyActivitySummariesCustom,
   getTotalLearningTimeMs,
 } from "@/src/db/sqlite/db";
 
@@ -21,7 +20,7 @@ export default function StatsScreen() {
   const styles = useStyles();
   const { statsBookshelfEnabled, colors } = useSettings();
   const { stats } = useNavbarStats();
-  const [heatmapData, setHeatmapData] = useState<HeatmapDay[]>([]);
+  const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
   const [learningTime, setLearningTime] = useState({
     week: 0,
     month: 0,
@@ -39,35 +38,15 @@ export default function StatsScreen() {
       const now = new Date();
       const end = new Date(now);
       end.setHours(23, 59, 59, 999);
-      const start = new Date(end);
-      start.setDate(start.getDate() - 89);
+      const start = new Date(end.getFullYear(), end.getMonth() - 11, 1);
       start.setHours(0, 0, 0, 0);
       try {
-        const [customCounts, customTimes] = await Promise.all([
-          getDailyLearnedCountsCustom(start.getTime(), end.getTime()),
-          getDailyLearningTimeMsCustom(start.getTime(), end.getTime()),
-        ]);
-        if (!mounted) return;
-        const merged = new Map<string, HeatmapDay>();
-        for (const item of customCounts) {
-          merged.set(item.date, {
-            date: item.date,
-            count: item.count,
-            timeMs: 0,
-          });
-        }
-        for (const item of customTimes) {
-          const prev = merged.get(item.date);
-          merged.set(item.date, {
-            date: item.date,
-            count: prev?.count ?? 0,
-            timeMs: item.ms,
-          });
-        }
-        const arr: HeatmapDay[] = Array.from(merged.values()).sort((a, b) =>
-          a.date.localeCompare(b.date)
+        const summaries = await getDailyActivitySummariesCustom(
+          start.getTime(),
+          end.getTime()
         );
-        setHeatmapData(arr);
+        if (!mounted) return;
+        setHeatmapData(summaries);
       } catch {
         if (mounted) {
           setHeatmapData([]);
@@ -167,7 +146,7 @@ export default function StatsScreen() {
 
       <PinnedCoursesProgress />
 
-      <ActivityHeatmap data={heatmapData} days={90} />
+      <ActivityHeatmap data={heatmapData} months={12} />
 
       <HardWordsList />
 

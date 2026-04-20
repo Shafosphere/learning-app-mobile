@@ -1035,6 +1035,7 @@ export default function Flashcards() {
   const shouldDisableTutorialCardAutofocus =
     coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9";
   useEffect(() => {
+    if (!isFocused) return;
     if (!isActionsPositionNudgeHydrated) return;
     if (actionsPositionNudgeSeen) return;
     if (isActionsPositionNudgeVisible) return;
@@ -1050,6 +1051,7 @@ export default function Flashcards() {
   }, [
     actionButtonsPosition,
     actionsPositionNudgeAnswerCount,
+    isFocused,
     isActionsPositionNudgeHydrated,
     actionsPositionNudgeSeen,
     coachmark.isActive,
@@ -1059,6 +1061,13 @@ export default function Flashcards() {
     shouldRenderLoadingOverlay,
     shouldShowBoxes,
   ]);
+  useEffect(() => {
+    if (isFocused || !isActionsPositionNudgeVisible) {
+      return;
+    }
+
+    setIsActionsPositionNudgeVisible(false);
+  }, [isFocused, isActionsPositionNudgeVisible]);
   const introModeActive = boxZeroEnabled && activeBox === "boxZero";
   const confirmWithTutorial = useCallback(
     (selectedTranslation?: string, answerOverride?: string) => {

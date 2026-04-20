@@ -377,7 +377,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const answerOnly =
     (selectedItem?.answerOnly ?? false) ||
     (!selectedItem?.text?.trim() &&
-      (selectedItem?.imageFront || selectedItem?.imageBack)) ||
+      Boolean(selectedItem?.imageFront || selectedItem?.imageBack)) ||
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know";
   const effectiveReversed = answerOnly ? false : reversed;

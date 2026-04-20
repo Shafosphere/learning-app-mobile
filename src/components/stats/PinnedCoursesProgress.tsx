@@ -31,15 +31,58 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     fontSize: 13,
   },
+  skeletonRow: {
+    marginBottom: 14,
+  },
+  skeletonLabel: {
+    width: "58%",
+    height: 16,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+    opacity: 0.18,
+    marginBottom: 8,
+  },
+  skeletonMetaRow: {
+    flexDirection: "row",
+    justifyContent: "space-between",
+    alignItems: "center",
+    marginBottom: 8,
+  },
+  skeletonMetaLeft: {
+    width: 52,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+    opacity: 0.16,
+  },
+  skeletonMetaRight: {
+    width: 26,
+    height: 14,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+    opacity: 0.16,
+  },
+  skeletonBar: {
+    height: 15,
+    marginHorizontal: 4,
+    borderRadius: 999,
+    backgroundColor: colors.border,
+    opacity: 0.14,
+  },
 }));
+
+const SKELETON_ROWS = 4;
 
 export default function PinnedCoursesProgress() {
   const styles = useStyles();
   const { pinnedOfficialCourseIds } = useSettings();
   const [items, setItems] = useState<Item[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     let mounted = true;
+    setIsLoading(true);
+
     (async () => {
       try {
         const allCourses = await getCustomCoursesWithCardCounts();
@@ -52,21 +95,27 @@ export default function PinnedCoursesProgress() {
           return true;
         });
 
-        const results: Item[] = [];
-        for (const course of eligible) {
-          const learned = await countCustomLearnedForCourse(course.id);
-          const total = course.cardsCount ?? 0;
-          results.push({
-            key: course.id.toString(),
-            label: course.name,
-            learned,
-            total,
-            progress: total > 0 ? Math.min(1, learned / total) : 0,
-          });
-        }
-        if (mounted) setItems(results);
+        const results = await Promise.all(
+          eligible.map(async (course) => {
+            const learned = await countCustomLearnedForCourse(course.id);
+            const total = course.cardsCount ?? 0;
+            return {
+              key: course.id.toString(),
+              label: course.name,
+              learned,
+              total,
+              progress: total > 0 ? Math.min(1, learned / total) : 0,
+            };
+          })
+        );
+
+        if (!mounted) return;
+        setItems(results);
+        setIsLoading(false);
       } catch {
-        if (mounted) setItems([]);
+        if (!mounted) return;
+        setItems([]);
+        setIsLoading(false);
       }
     })();
     return () => {
@@ -76,7 +125,20 @@ export default function PinnedCoursesProgress() {
 
   return (
     <StatsCard title="Postęp przypiętych kursów">
-      {items.length === 0 ? (
+      {isLoading ? (
+        <View>
+          {Array.from({ length: SKELETON_ROWS }, (_, index) => (
+            <View key={index} style={styles.skeletonRow}>
+              <View style={styles.skeletonLabel} />
+              <View style={styles.skeletonMetaRow}>
+                <View style={styles.skeletonMetaLeft} />
+                <View style={styles.skeletonMetaRight} />
+              </View>
+              <View style={styles.skeletonBar} />
+            </View>
+          ))}
+        </View>
+      ) : items.length === 0 ? (
         <Text style={styles.empty}>Brak danych do wyświetlenia.</Text>
       ) : (
         <View>
