@@ -817,14 +817,21 @@ export default function Flashcards() {
     if (!isReady) return;
     if (isLoadingData || customCards.length === 0) return;
 
-    const allowedIds = new Set(customCards.map((card) => card.id));
+    const latestById = new Map(customCards.map((card) => [card.id, card] as const));
+    const allowedIds = new Set(latestById.keys());
 
     setBoxes((prev) => {
       let mutated = false;
       const sanitize = (list: WordWithTranslations[]) => {
         const filtered = list.filter((item) => allowedIds.has(item.id));
-        const deduped = dedupeById(filtered);
-        if (deduped.length !== list.length) mutated = true;
+        const remapped = filtered.map((item) => latestById.get(item.id) ?? item);
+        const deduped = dedupeById(remapped);
+        if (
+          deduped.length !== list.length ||
+          deduped.some((item, index) => item !== list[index])
+        ) {
+          mutated = true;
+        }
         return deduped;
       };
 
@@ -841,10 +848,23 @@ export default function Flashcards() {
 
     setLearned((current) => {
       const filtered = current.filter((card) => allowedIds.has(card.id));
-      const deduped = dedupeById(filtered);
-      return deduped.length === current.length ? current : deduped;
+      const remapped = filtered.map((card) => latestById.get(card.id) ?? card);
+      const deduped = dedupeById(remapped);
+      const changed =
+        deduped.length !== current.length ||
+        deduped.some((card, index) => card !== current[index]);
+      return changed ? deduped : current;
     });
-  }, [customCards, isReady, isLoadingData, learned, setBoxes, setLearned]);
+
+    updateSelectedItem((current) => latestById.get(current.id) ?? current);
+  }, [
+    customCards,
+    isReady,
+    isLoadingData,
+    setBoxes,
+    setLearned,
+    updateSelectedItem,
+  ]);
 
   useEffect(() => {
     if (!isReady) return;

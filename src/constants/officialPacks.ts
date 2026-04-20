@@ -46,6 +46,7 @@ const DEFAULT_PACK_VERSION = 1;
 const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "fiszki_podstawy_en_pl_slowa",
+    packVersion: 2,
     name: "Podstawowe słówka",
     position: 1,
     iconId: "flag:en",
@@ -378,9 +379,11 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: true,
     categoryId: "geography",
   },
-]) satisfies Omit<OfficialPackDef, "packVersion">[];
+]) satisfies (Omit<OfficialPackDef, "packVersion"> & {
+  packVersion?: number;
+})[];
 
 export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack) => ({
-  packVersion: DEFAULT_PACK_VERSION,
+  packVersion: pack.packVersion ?? DEFAULT_PACK_VERSION,
   ...pack,
 }));

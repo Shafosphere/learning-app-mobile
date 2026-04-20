@@ -60,6 +60,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "fiszki_podstawy_EN-PL_slowa.csv",
   },
   {

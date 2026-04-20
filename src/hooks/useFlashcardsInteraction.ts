@@ -145,9 +145,12 @@ export function useFlashcardsInteraction({
         queuesRef.current[box] = [];
         return;
       }
+      const latestById = new Map(boxItems.map((item) => [item.id, item] as const));
       const allowedIds = new Set(boxItems.map((item) => item.id));
       const existing = queuesRef.current[box] ?? [];
-      const trimmed = existing.filter((item) => allowedIds.has(item.id));
+      const trimmed = existing
+        .filter((item) => allowedIds.has(item.id))
+        .map((item) => latestById.get(item.id) ?? item);
       const queuedIds = new Set(trimmed.map((item) => item.id));
       const newItems = boxItems.filter((item) => !queuedIds.has(item.id));
       queuesRef.current[box] = [...trimmed, ...newItems];

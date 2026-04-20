@@ -2,8 +2,8 @@ external_id,type,front_text,back_text
 0001,traditional,hey,hej
 0002,traditional,hi,cześć
 0003,traditional,hello,witaj
-0004,traditional,welcome,witaj
-0005,traditional,goodbye,pa
+0004,traditional,welcome,"witaj, proszę"
+0005,traditional,goodbye,do widzenia
 0006,traditional,bye,pa
 0007,traditional,morning,rano
 0008,traditional,evening,wieczór
@@ -14,17 +14,12 @@ external_id,type,front_text,back_text
 0013,traditional,please,proszę
 0014,traditional,sorry,przepraszam
 0015,traditional,pardon,wybacz
-0016,traditional,please,proszę
 0017,traditional,thankyou,dziękuję
-0018,traditional,thanks,dzięki
-0019,traditional,sorry,przepraszam
-0020,traditional,excuse,wybacz
-0021,traditional,welcome,proszę
+0020,traditional,excuse,wymówka
 0022,traditional,sir,pan
 0023,traditional,madam,pani
 0024,traditional,miss,panno
-0025,traditional,mister,pan
-0026,traditional,kind,życzliwy
+0026,traditional,kind,"życzliwy, miły"
 0027,traditional,polite,uprzejmy
 0028,traditional,respect,szacunek
 0029,traditional,help,pomoc
@@ -40,7 +35,7 @@ external_id,type,front_text,back_text
 0039,traditional,explain,wyjaśnić
 0040,traditional,translate,tłumaczyć
 0041,traditional,spell,literować
-0042,traditional,write,napisać
+0042,traditional,write,"napisać, pisać"
 0043,traditional,listen,słuchać
 0044,traditional,speak,mówić
 0045,traditional,pronunciation,wymowa
@@ -66,14 +61,14 @@ external_id,type,front_text,back_text
 0065,traditional,city,miasto
 0066,traditional,language,język
 0067,traditional,job,praca
-0068,traditional,student,student
+0068,traditional,student,"student, uczeń"
 0069,traditional,from,z
 0070,traditional,live,mieszkać
-0071,traditional,work,pracować
-0072,traditional,study,uczyć się
+0071,traditional,work,"pracować, praca"
+0072,traditional,study,badanie
 0073,traditional,hobby,hobby
 0074,traditional,friend,przyjaciel
-0075,traditional,nice,miły
+0075,traditional,nice,"miły, sympatyczny"
 0076,traditional,zero,zero
 0077,traditional,one,jeden
 0078,traditional,two,dwa
@@ -165,7 +160,6 @@ external_id,type,front_text,back_text
 0164,traditional,husband,mąż
 0165,traditional,wife,żona
 0166,traditional,partner,partner
-0167,traditional,friend,przyjaciel
 0168,traditional,cousin,kuzyn
 0169,traditional,aunt,ciocia
 0170,traditional,uncle,wujek
@@ -188,8 +182,6 @@ external_id,type,front_text,back_text
 0187,traditional,weak,słaby
 0188,traditional,skin,skóra
 0189,traditional,face,twarz
-0190,traditional,kind,miły
-0191,traditional,nice,sympatyczny
 0192,traditional,funny,zabawny
 0193,traditional,serious,poważny
 0194,traditional,shy,nieśmiały
@@ -202,7 +194,6 @@ external_id,type,front_text,back_text
 0201,traditional,calm,spokojny
 0202,traditional,friendly,przyjazny
 0203,traditional,rude,niegrzeczny
-0204,traditional,polite,uprzejmy
 0205,traditional,red,czerwony
 0206,traditional,blue,niebieski
 0207,traditional,green,zielony
@@ -230,13 +221,12 @@ external_id,type,front_text,back_text
 0229,traditional,jeans,dżinsy
 0230,traditional,dress,sukienka
 0231,traditional,skirt,spódnica
-0232,traditional,shoes,buty
+0232,traditional,shoes,obuwie
 0233,traditional,socks,skarpetki
 0234,traditional,hat,czapka
 0235,traditional,scarf,szalik
 0236,traditional,gloves,rękawiczki
 0237,traditional,size,rozmiar
-0238,traditional,small,mały
 0239,traditional,medium,średni
 0240,traditional,large,duży
 0241,traditional,home,dom
@@ -256,7 +246,7 @@ external_id,type,front_text,back_text
 0255,traditional,door,drzwi
 0256,traditional,window,okno
 0257,traditional,bed,łóżko
-0258,traditional,table,stół
+0258,traditional,table,"stół, stolik"
 0259,traditional,chair,krzesło
 0260,traditional,sofa,kanapa
 0261,traditional,wardrobe,szafa
@@ -270,27 +260,23 @@ external_id,type,front_text,back_text
 0269,traditional,kettle,czajnik
 0270,traditional,dishwasher,zmywarka
 0271,traditional,washingmachine,pralka
-0272,traditional,shower,prysznic
+0272,traditional,shower,"prysznic, myć się"
 0273,traditional,toilet,toaleta
 0274,traditional,sink,umywalka
 0275,traditional,wake,budzić się
 0276,traditional,sleep,spać
 0277,traditional,eat,jeść
 0278,traditional,drink,pić
-0279,traditional,work,pracować
-0280,traditional,study,uczyć się
 0281,traditional,go,iść
 0282,traditional,come,przyjść
 0283,traditional,leave,wyjść
 0284,traditional,return,wrócić
 0285,traditional,read,czytać
-0286,traditional,write,pisać
 0287,traditional,learn,uczyć się
 0288,traditional,play,grać
 0289,traditional,rest,odpoczywać
 0290,traditional,cook,gotować
 0291,traditional,clean,sprzątać
-0292,traditional,shower,myć się
 0293,traditional,bread,chleb
 0294,traditional,milk,mleko
 0295,traditional,water,woda
@@ -316,7 +302,6 @@ external_id,type,front_text,back_text
 0315,traditional,fruit,owoce
 0316,traditional,menu,menu
 0317,traditional,waiter,kelner
-0318,traditional,table,stolik
 0319,traditional,order,zamówienie
 0320,traditional,bill,rachunek
 0321,traditional,tip,napiwek
@@ -325,28 +310,19 @@ external_id,type,front_text,back_text
 0324,traditional,soup,zupa
 0325,traditional,salad,sałatka
 0326,traditional,steak,stek
-0327,traditional,coffee,kawa
-0328,traditional,tea,herbata
 0329,traditional,cup,kubek
 0330,traditional,plate,talerz
 0331,traditional,fork,widelec
 0332,traditional,knife,nóż
 0333,traditional,spoon,łyżka
-0334,traditional,store,sklep
+0334,traditional,store,zapas
 0335,traditional,market,rynek
 0336,traditional,supermarket,supermarket
-0337,traditional,checkout,kasa
+0337,traditional,checkout,"kasa, wymeldowanie"
 0338,traditional,basket,koszyk
 0339,traditional,bag,torba
-0340,traditional,price,cena
-0341,traditional,discount,zniżka
-0342,traditional,sale,wyprzedaż
-0343,traditional,receipt,paragon
-0344,traditional,cash,gotówka
-0345,traditional,card,karta
 0346,traditional,bank,bank
 0347,traditional,atm,bankomat
-0348,traditional,change,reszta
 0349,traditional,refund,zwrot
 0350,traditional,exchange,wymiana
 0351,traditional,warranty,gwarancja
@@ -355,13 +331,11 @@ external_id,type,front_text,back_text
 0354,traditional,hotel,hotel
 0355,traditional,hospital,szpital
 0356,traditional,pharmacy,apteka
-0357,traditional,bank,bank
 0358,traditional,postoffice,poczta
 0359,traditional,police,policja
 0360,traditional,museum,muzeum
 0361,traditional,park,park
 0362,traditional,restaurant,restauracja
-0363,traditional,toilet,toaleta
 0364,traditional,library,biblioteka
 0365,traditional,school,szkoła
 0366,traditional,office,biuro
@@ -391,7 +365,7 @@ external_id,type,front_text,back_text
 0390,traditional,train,pociąg
 0391,traditional,subway,metro
 0392,traditional,taxi,taksówka
-0393,traditional,stop,przystanek
+0393,traditional,stop,"przystanek, stop"
 0394,traditional,platform,peron
 0395,traditional,schedule,rozkład
 0396,traditional,departure,odjazd
@@ -401,23 +375,17 @@ external_id,type,front_text,back_text
 0400,traditional,passport,paszport
 0401,traditional,border,granica
 0402,traditional,trip,podróż
-0403,traditional,travel,podróżować
-0404,traditional,room,pokój
+0403,traditional,travel,"podróżować, podróże"
 0405,traditional,key,klucz
 0406,traditional,reception,recepcja
-0407,traditional,reservation,rezerwacja
 0408,traditional,breakfast,śniadanie
 0409,traditional,elevator,winda
-0410,traditional,stairs,schody
-0411,traditional,floor,piętro
-0412,traditional,bathroom,łazienka
 0413,traditional,towel,ręcznik
 0414,traditional,pillow,poduszka
 0415,traditional,blanket,koc
 0416,traditional,wifi,wi-fi
 0417,traditional,password,hasło
 0418,traditional,lobby,hol
-0419,traditional,checkout,wymeldowanie
 0420,traditional,checkin,zameldowanie
 0421,traditional,head,głowa
 0422,traditional,eye,oko
@@ -439,14 +407,14 @@ external_id,type,front_text,back_text
 0438,traditional,pain,ból
 0439,traditional,fever,gorączka
 0440,traditional,cough,kaszel
-0441,traditional,cold,przeziębienie
+0441,traditional,cold,"przeziębienie, zimno"
 0442,traditional,flu,grypa
 0443,traditional,allergy,alergia
 0444,traditional,medicine,lek
 0445,traditional,doctor,lekarz
 0446,traditional,nurse,pielęgniarka
 0447,traditional,appointment,wizyta
-0448,traditional,emergency,nagły
+0448,traditional,emergency,"nagły, awaria"
 0449,traditional,sick,chory
 0450,traditional,hurt,boleć
 0451,traditional,burn,oparzenie
@@ -461,16 +429,11 @@ external_id,type,front_text,back_text
 0460,traditional,cloud,chmura
 0461,traditional,storm,burza
 0462,traditional,hot,gorąco
-0463,traditional,cold,zimno
 0464,traditional,warm,ciepło
 0465,traditional,wet,mokro
 0466,traditional,dry,sucho
 0467,traditional,umbrella,parasol
-0468,traditional,coat,płaszcz
-0469,traditional,jacket,kurtka
 0470,traditional,boots,buty
-0471,traditional,scarf,szalik
-0472,traditional,gloves,rękawiczki
 0473,traditional,music,muzyka
 0474,traditional,movie,film
 0475,traditional,series,serial
@@ -480,15 +443,12 @@ external_id,type,front_text,back_text
 0479,traditional,running,bieganie
 0480,traditional,swimming,pływanie
 0481,traditional,cooking,gotowanie
-0482,traditional,travel,podróże
 0483,traditional,photography,fotografia
 0484,traditional,walking,spacer
 0485,traditional,gym,siłownia
 0486,traditional,dance,taniec
 0487,traditional,drawing,rysowanie
 0488,traditional,hiking,wędrówka
-0489,traditional,work,praca
-0490,traditional,office,biuro
 0491,traditional,meeting,spotkanie
 0492,traditional,boss,szef
 0493,traditional,colleague,kolega
@@ -496,26 +456,20 @@ external_id,type,front_text,back_text
 0495,traditional,task,zadanie
 0496,traditional,deadline,termin
 0497,traditional,salary,pensja
-0498,traditional,school,szkoła
 0499,traditional,class,klasa
 0500,traditional,lesson,lekcja
 0501,traditional,teacher,nauczyciel
-0502,traditional,student,uczeń
-0503,traditional,homework,zadanie
+0503,traditional,homework,praca domowa
 0504,traditional,exam,egzamin
 0505,traditional,break,przerwa
-0506,traditional,help,pomoc
 0507,traditional,lost,zgubiony
 0508,traditional,danger,niebezpieczeństwo
 0509,traditional,fire,pożar
-0510,traditional,police,policja
 0511,traditional,ambulance,karetka
 0512,traditional,accident,wypadek
 0513,traditional,thief,złodziej
 0514,traditional,wallet,portfel
 0515,traditional,phone,telefon
 0516,traditional,call,dzwonić
-0517,traditional,stop,stop
 0518,traditional,quiet,cisza
 0519,traditional,panic,panika
-0520,traditional,emergency,awaria
