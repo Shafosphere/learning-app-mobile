@@ -8,6 +8,8 @@
     "android": "expo run:android",
     "ios": "expo run:ios",
     "web": "expo start --web",
+    "autoflow-sim": "vite --config tools/autoflow-sim/vite.config.ts",
+    "autoflow-sim:build": "vite build --config tools/autoflow-sim/vite.config.ts",
     "lint": "expo lint",
     "test": "jest",
     "test:mass-correction": "jest src/hooks/__tests__/useFlashcardsInteraction.mass.test.ts --runInBand",
@@ -74,6 +76,7 @@
     "@types/jest": "^30.0.0",
     "@types/papaparse": "^5.3.16",
     "@types/react": "~19.1.10",
+    "@vitejs/plugin-react": "^6.0.1",
     "baseline-browser-mapping": "^2.9.18",
     "eslint": "^9.25.0",
     "eslint-config-expo": "~10.0.0",
@@ -81,7 +84,8 @@
     "jest-expo": "^55.0.16",
     "knip": "^6.3.0",
     "react-test-renderer": "^19.1.0",
-    "typescript": "~5.9.2"
+    "typescript": "~5.9.2",
+    "vite": "^8.0.8"
   },
   "private": true
 }

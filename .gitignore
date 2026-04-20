@@ -70,3 +70,4 @@ google-services.json
 # User documentation
 docs/opis_aplikacji.md
 tools/prebuild-data/howToMake.md
+tools/autoflow-sim/
