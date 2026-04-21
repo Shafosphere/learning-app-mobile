@@ -36,20 +36,22 @@ import {
 import { LanguageCourse } from "../types/course";
 import type { CEFRLevel } from "../types/language";
 import {
+  hasLearningProgressOnDate,
   resetCustomReviewsForCourse,
   getLearningEventsHourlyDistribution,
   getLearningEventsSummary,
-  getLearningEventsWeekdayDistribution,
 } from "../db/sqlite/db";
 import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
 import {
   type ReminderPermissionState,
   cancelLearningReminderNotification,
+  cancelLearningReminderNotificationsForDate,
   getReminderPermissionState,
   requestReminderPermissions,
-  scheduleLearningReminderNotification,
+  scheduleLearningReminderNotifications,
 } from "@/src/services/learningReminderNotifications";
 import {
+  buildReminderSeriesSchedule,
   computeSmartReminderPlan,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
@@ -116,6 +118,14 @@ function findCourseIndex(
 
 const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 const REMINDER_ANALYTICS_WINDOW_MS = 28 * 24 * 60 * 60 * 1000;
+
+function resolveNextScheduledReminderAt(
+  dates: Date[],
+  nowMs: number = Date.now()
+): number | null {
+  const next = dates.find((date) => date.getTime() > nowMs);
+  return next?.getTime() ?? null;
+}
 
 export type CourseBoxZeroKeyParams = {
   sourceLang?: string | null;
@@ -382,9 +392,9 @@ interface SettingsContextValue {
   toggleLearningRemindersEnabled: () => Promise<void>;
   learningReminderNextAt: number | null;
   learningReminderProfile: SmartReminderProfile;
-  learningReminderPreferredWeekdays: number[];
   learningReminderPermissionState: ReminderPermissionState;
   refreshLearningReminderSchedule: () => Promise<void>;
+  cancelTodayLearningReminderSchedule: () => Promise<void>;
   googleDriveConfigured: boolean;
   googleDriveConfigurationError: string | null;
   googleDriveConnected: boolean;
@@ -540,9 +550,9 @@ const defaultValue: SettingsContextValue = {
   toggleLearningRemindersEnabled: async () => {},
   learningReminderNextAt: null,
   learningReminderProfile: "unknown",
-  learningReminderPreferredWeekdays: [],
   learningReminderPermissionState: "undetermined",
   refreshLearningReminderSchedule: async () => {},
+  cancelTodayLearningReminderSchedule: async () => {},
   googleDriveConfigured: false,
   googleDriveConfigurationError: null,
   googleDriveConnected: false,
@@ -762,10 +772,6 @@ export const SettingsProvider: React.FC<{
     usePersistedState<number | null>("learningReminder.nextAt", null);
   const [learningReminderProfileState, setLearningReminderProfileState] =
     usePersistedState<SmartReminderProfile>("learningReminder.profile", "unknown");
-  const [
-    learningReminderPreferredWeekdaysState,
-    setLearningReminderPreferredWeekdaysState,
-  ] = usePersistedState<number[]>("learningReminder.preferredWeekdays", []);
   const [learningReminderPermissionState, setLearningReminderPermissionState] =
     usePersistedState<ReminderPermissionState>(
       "learningReminder.permissionState",
@@ -2047,34 +2053,55 @@ export const SettingsProvider: React.FC<{
 
     const now = Date.now();
     const fromMs = now - REMINDER_ANALYTICS_WINDOW_MS;
-    const [hourlyDistribution, weekdayDistribution, summary] = await Promise.all([
+    const [hourlyDistribution, summary] = await Promise.all([
       getLearningEventsHourlyDistribution(fromMs, now),
-      getLearningEventsWeekdayDistribution(fromMs, now),
       getLearningEventsSummary(fromMs, now),
     ]);
 
     const plan = computeSmartReminderPlan({
       hourlyDistribution,
-      weekdayDistribution,
       summary,
     });
 
-    await scheduleLearningReminderNotification(new Date(plan.nextReminderAt), {
+    const nowDate = new Date();
+    const skipDateKeys = (await hasLearningProgressOnDate(nowDate))
+      ? [
+          `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}-${String(
+            nowDate.getDate()
+          ).padStart(2, "0")}`,
+        ]
+      : [];
+    const reminderDates = buildReminderSeriesSchedule({
+      now: nowDate,
+      targetMinutes: plan.targetMinutes,
+      horizonDays: 7,
+      skipDateKeys,
+    }).map((value) => new Date(value));
+
+    await scheduleLearningReminderNotifications(reminderDates, {
       title: i18n.t("settings.learning.reminders.notification.title"),
       body: i18n.t("settings.learning.reminders.notification.body"),
     });
 
     await Promise.all([
-      setLearningReminderNextAtState(plan.nextReminderAt),
+      setLearningReminderNextAtState(
+        resolveNextScheduledReminderAt(reminderDates, nowDate.getTime())
+      ),
       setLearningReminderProfileState(plan.profile),
-      setLearningReminderPreferredWeekdaysState(plan.preferredWeekdays),
     ]);
   }, [
     setLearningReminderNextAtState,
     setLearningReminderPermissionState,
-    setLearningReminderPreferredWeekdaysState,
     setLearningReminderProfileState,
   ]);
+
+  const cancelTodayLearningReminderSchedule = useCallback(async () => {
+    const today = new Date();
+    const remainingDates = await cancelLearningReminderNotificationsForDate(today);
+    await setLearningReminderNextAtState(
+      resolveNextScheduledReminderAt(remainingDates, Date.now())
+    );
+  }, [setLearningReminderNextAtState]);
 
   const refreshLearningReminderSchedule = useCallback(async () => {
     if (!learningRemindersEnabledRef.current) {
@@ -2092,7 +2119,6 @@ export const SettingsProvider: React.FC<{
           cancelLearningReminderNotification(),
           setLearningReminderNextAtState(null),
           setLearningReminderProfileState("unknown"),
-          setLearningReminderPreferredWeekdaysState([]),
         ]);
         return;
       }
@@ -2116,7 +2142,6 @@ export const SettingsProvider: React.FC<{
       computeAndScheduleLearningReminder,
       setLearningReminderNextAtState,
       setLearningReminderPermissionState,
-      setLearningReminderPreferredWeekdaysState,
       setLearningReminderProfileState,
     ]
   );
@@ -2557,9 +2582,9 @@ export const SettingsProvider: React.FC<{
         toggleLearningRemindersEnabled,
         learningReminderNextAt: learningReminderNextAtState,
         learningReminderProfile: learningReminderProfileState,
-        learningReminderPreferredWeekdays: learningReminderPreferredWeekdaysState,
         learningReminderPermissionState,
         refreshLearningReminderSchedule,
+        cancelTodayLearningReminderSchedule,
         googleDriveConfigured,
         googleDriveConfigurationError,
         googleDriveConnected,

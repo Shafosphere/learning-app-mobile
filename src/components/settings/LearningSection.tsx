@@ -1,4 +1,4 @@
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { View, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -19,11 +19,7 @@ const LearningSection: React.FC = () => {
     toggleFlashcardsSuggestions,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
-    learningReminderNextAt,
-    learningReminderProfile,
-    learningReminderPreferredWeekdays,
     learningReminderPermissionState,
-    resolvedLanguage,
     feedbackEnabled,
   } = useSettings();
 
@@ -64,65 +60,15 @@ const LearningSection: React.FC = () => {
     }
   };
 
-  const reminderWeekdaysLabel = useMemo(() => {
-    if (learningReminderPreferredWeekdays.length === 0) {
-      return t("settings.learning.reminders.status.allDays");
-    }
-    const labels = learningReminderPreferredWeekdays
-      .slice()
-      .sort((a, b) => a - b)
-      .map((weekday) => {
-        const date = new Date(Date.UTC(2023, 0, 1 + weekday));
-        return new Intl.DateTimeFormat(resolvedLanguage, {
-          weekday: "short",
-          timeZone: "UTC",
-        }).format(date);
-      });
-    return labels.join("/");
-  }, [learningReminderPreferredWeekdays, resolvedLanguage, t]);
-
-  const reminderStatusLines = useMemo(() => {
+  const reminderStatusLines = (() => {
     if (!learningRemindersEnabled) {
       return [];
     }
     if (learningReminderPermissionState === "denied") {
       return [t("settings.learning.reminders.status.permissionDenied")];
     }
-
-    const lines: string[] = [];
-    if (learningReminderNextAt != null) {
-      const formatted = new Intl.DateTimeFormat(resolvedLanguage, {
-        weekday: "long",
-        hour: "2-digit",
-        minute: "2-digit",
-      }).format(new Date(learningReminderNextAt));
-      lines.push(
-        t("settings.learning.reminders.status.next", {
-          value: formatted,
-        })
-      );
-    }
-
-    if (learningReminderProfile === "unknown") {
-      return lines;
-    }
-
-    lines.push(
-      t("settings.learning.reminders.status.profileAndDays", {
-        profile: t(`settings.learning.reminders.profile.${learningReminderProfile}`),
-        days: reminderWeekdaysLabel,
-      })
-    );
-    return lines;
-  }, [
-    learningReminderNextAt,
-    learningReminderPermissionState,
-    learningReminderProfile,
-    learningRemindersEnabled,
-    reminderWeekdaysLabel,
-    resolvedLanguage,
-    t,
-  ]);
+    return [];
+  })();
 
   return (
     <View style={styles.sectionCard}>
@@ -137,7 +83,7 @@ const LearningSection: React.FC = () => {
               {t("settings.learning.reminders.title")}
             </Text>
             <Text style={styles.appearanceBlockDescription}>
-              {preventWidowsPl("Pomaga utrzymać rytm nauki w wybrane dni.")}
+              {preventWidowsPl("Pomaga utrzymać rytm nauki.")}
             </Text>
             {reminderStatusLines[0] ? (
               <Text style={styles.settingStatus}>{reminderStatusLines[0]}</Text>

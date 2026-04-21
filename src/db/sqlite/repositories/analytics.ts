@@ -229,6 +229,27 @@ export async function getLearningEventsSummary(
   };
 }
 
+export async function hasLearningProgressOnDate(date: Date): Promise<boolean> {
+  const db = await getDB();
+  const start = new Date(date.getTime());
+  start.setHours(0, 0, 0, 0);
+  const end = new Date(start.getTime());
+  end.setDate(end.getDate() + 1);
+
+  const row = await db.getFirstAsync<{ cnt: number }>(
+    `SELECT COUNT(*) AS cnt
+     FROM custom_learning_events
+     WHERE created_at >= ?
+       AND created_at < ?
+       AND result = 'ok'
+       AND box IN ('boxZero', 'boxOne', 'boxTwo', 'boxThree', 'boxFour');`,
+    start.getTime(),
+    end.getTime()
+  );
+
+  return (row?.cnt ?? 0) > 0;
+}
+
 export async function getTotalLearningTimeMs(
   fromMs: number,
   toMs: number

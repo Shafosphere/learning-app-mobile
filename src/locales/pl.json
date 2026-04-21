@@ -130,8 +130,6 @@
           "body": "Masz chwilę? Krótka sesja fiszek utrzyma rytm."
         },
         "status": {
-          "next": "Następne przypomnienie: {{value}}",
-          "profileAndDays": "Profil: {{profile}}, aktywne dni: {{days}}",
           "permissionDenied": "Brak zgody na powiadomienia. Włącz uprawnienia w ustawieniach systemu.",
           "allDays": "codziennie"
         }

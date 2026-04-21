@@ -130,8 +130,6 @@
           "body": "Have a minute? A short flashcards session keeps the streak alive."
         },
         "status": {
-          "next": "Next reminder: {{value}}",
-          "profileAndDays": "Profile: {{profile}}, active days: {{days}}",
           "permissionDenied": "Notifications permission is blocked. Enable it in system settings.",
           "allDays": "every day"
         }

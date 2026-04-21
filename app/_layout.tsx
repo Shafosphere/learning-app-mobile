@@ -30,6 +30,7 @@ import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPrevi
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
+import * as Notifications from "expo-notifications";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -47,8 +48,17 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaProvider } from "react-native-safe-area-context";
+import { LEARNING_REMINDER_CHANNEL_ID } from "@/src/services/learningReminderNotifications";
 
 SplashScreen.preventAutoHideAsync();
+Notifications.setNotificationHandler({
+  handleNotification: async () => ({
+    shouldShowBanner: true,
+    shouldShowList: true,
+    shouldPlaySound: true,
+    shouldSetBadge: false,
+  }),
+});
 
 const STARTUP_ICON = require("@/assets/app/icons/generated/ios/AppIcon~ios-marketing.png");
 
@@ -282,6 +292,20 @@ export default function RootLayout() {
       }
     };
   }, [prepareApp]);
+
+  useEffect(() => {
+    if (Platform.OS !== "android") {
+      return;
+    }
+
+    void Notifications.setNotificationChannelAsync(LEARNING_REMINDER_CHANNEL_ID, {
+      name: i18n.t("settings.learning.reminders.title"),
+      importance: Notifications.AndroidImportance.DEFAULT,
+      sound: "default",
+    }).catch((error) => {
+      console.warn("[Notifications] Failed to initialize learning reminders channel", error);
+    });
+  }, []);
 
   const shouldRenderApp = isStartupReady && status === "ready";
   const shouldRenderBlockingState =

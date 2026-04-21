@@ -83,6 +83,7 @@ export function useFlashcardsInteraction({
   });
   const {
     activeCustomCourseId,
+    cancelTodayLearningReminderSchedule,
     explanationOnlyOnWrong,
     ignoreDiacriticsInSpellcheck,
     learningRemindersEnabled,
@@ -322,11 +323,17 @@ export function useFlashcardsInteraction({
         return nextState;
       });
 
+      if (promote && learningRemindersEnabled) {
+        void cancelTodayLearningReminderSchedule();
+      }
+
     },
     [
       activeBox,
       addUsedWordIds,
       boxZeroEnabled,
+      cancelTodayLearningReminderSchedule,
+      learningRemindersEnabled,
       onWordPromotedOut,
       selectNextWord,
       setBoxes,
