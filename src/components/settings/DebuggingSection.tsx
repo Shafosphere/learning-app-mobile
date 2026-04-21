@@ -18,6 +18,7 @@ import {
 } from "@/src/db/sqlite/db";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
+import { triggerActionsPositionNudgePreview } from "@/src/services/actionsPositionNudgePreview";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { playSoundAsset } from "@/src/utils/soundPlayer";
@@ -139,6 +140,11 @@ const DebuggingSection: React.FC = () => {
       color: "disoriented",
       duration: 3600,
     });
+  };
+
+  const handlePreviewActionsPositionNudge = () => {
+    triggerActionsPositionNudgePreview();
+    router.push("/flashcards");
   };
 
   const handleResetCustomReviews = async () => {
@@ -279,6 +285,23 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.testPopup.button")}
           color="my_yellow"
           onPress={handleTestPopup}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewActionsPositionNudge.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewActionsPositionNudge.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.previewActionsPositionNudge.button")}
+          color="my_yellow"
+          onPress={handlePreviewActionsPositionNudge}
           width={140}
         />
       </View>

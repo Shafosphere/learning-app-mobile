@@ -130,8 +130,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
   courseButton: {
     flexDirection: "row",
     alignItems: "center",
+    flexShrink: 1,
+    minWidth: 0,
+    maxWidth: "100%",
     paddingVertical: 4,
     paddingHorizontal: 4,
+    overflow: "hidden",
   },
   courseFlag: {
     width: 99 / 2.7,
@@ -271,6 +275,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   courseLevel: {
     marginLeft: 8,
+    flexShrink: 0,
     color: colors.headline,
     fontWeight: "600",
     fontSize: 16,

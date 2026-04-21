@@ -183,14 +183,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 12,
     gap: 12,
   },
-  appearanceChoiceCard: {
-    backgroundColor: colors.background,
-    borderRadius: 14,
-    padding: 0,
-    borderWidth: 0,
-    marginBottom: 16,
-    gap: 12,
-  },
   appearancePlainBlock: {
     marginBottom: 16,
     gap: 10,
@@ -571,14 +563,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   switch: {
     transform: [{ scaleX: 1.04 }, { scaleY: 1.04 }],
   },
-  layoutOptionsRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    width: "100%",
-    justifyContent: "space-between",
-    columnGap: 12,
-    marginTop: 6,
-  },
   languageSegment: {
     flexDirection: "column",
     alignItems: "stretch",
@@ -637,64 +621,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   languageMenuOptionTextActive: {
     color: colors.my_green,
-  },
-  layoutOption: {
-    flex: 1,
-    flexBasis: 0,
-    minWidth: 0,
-    borderRadius: 14,
-    overflow: "hidden",
-    borderWidth: 2,
-    borderColor: colors.border,
-    backgroundColor: colors.secondBackground,
-    paddingTop: 0,
-    paddingBottom: 10,
-    alignItems: "center",
-  },
-  layoutOptionActive: {
-    borderColor: colors.my_green,
-  },
-  layoutPreviewWrapper: {
-    width: "100%",
-    aspectRatio: 1.2,
-    alignItems: "center",
-    justifyContent: "center",
-    overflow: "hidden",
-  },
-  layoutPreview: {
-    width: "100%",
-    height: "100%",
-  },
-  layoutPreviewImage: {
-    transform: [{ scale: 1.3 }, { translateY: 11 }],
-
-  },
-  actionPreviewImage: {
-    transform: [{ scale: 2.7 }, { translateY: 11 }],
-  },
-  layoutLabel: {
-    fontSize: 14,
-    fontWeight: "800",
-    color: colors.headline,
-    textAlign: "center",
-    borderTopWidth: 1,
-    borderColor: colors.border,
-    width: "100%",
-    paddingTop: 10,
-  },
-  layoutLabelActive: {
-    color: colors.headline,
-  },
-  actionOptionsRow: {
-    flexDirection: "row",
-    alignItems: "stretch",
-    width: "100%",
-    justifyContent: "space-between",
-    columnGap: 12,
-    marginTop: 6,
-  },
-  actionOption: {
-    minWidth: 0,
   },
   memoryOptions: {
     flexDirection: "row",

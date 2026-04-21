@@ -40,7 +40,7 @@ export function CourseTitleMarquee({
   return (
     <View style={containerStyle} pointerEvents="none">
       <TextTicker
-        style={[textStyle, { flexShrink: 0 }]}
+        style={[textStyle, { flexShrink: 1, minWidth: 0 }]}
         animationType="auto"
         duration={marqueeDuration + REPEAT_SPACER_PX}
         repeatSpacer={REPEAT_SPACER_PX}
@@ -53,4 +53,3 @@ export function CourseTitleMarquee({
     </View>
   );
 }
-

@@ -366,6 +366,11 @@
           "button": "Show popup",
           "message": "Hey! It's me, Boxik. Popup works!"
         },
+        "previewActionsPositionNudge": {
+          "title": "Preview button layout chooser",
+          "subtitle": "Opens the flashcards screen and artificially shows the one-time button placement dialog.",
+          "button": "Show dialog"
+        },
         "testDbErrorScreen": {
           "title": "Test database error screen",
           "subtitle": "Shows the SQLite failure screen without damaging the real database.",
@@ -826,9 +831,10 @@
         "description": ""
       },
       "actionsPositionNudge": {
-        "title": "Buttons lower?",
+        "title": "Which button layout",
         "subtitle": "You can change their position now, and later go back to this in settings.",
-        "dismiss": "Keep it as is"
+        "dismiss": "Keep it as is",
+        "confirm": "Confirm"
       }
     },
     "coursePin": {

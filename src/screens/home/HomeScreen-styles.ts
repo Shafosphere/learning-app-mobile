@@ -7,11 +7,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 30,
     backgroundColor: colors.background,
   },
+  grid: {
+    flex: 1,
+  },
   header: {
     gap: 8,
     width: "100%",
-    height: 110,
+    minHeight: 110,
     justifyContent: "center",
+  },
+  headerCompact: {
+    minHeight: 86,
+    gap: 4,
+    marginBottom: 6,
   },
   quote: {
     fontSize: 18,
@@ -19,6 +27,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     lineHeight: 26,
     textAlign: "center",
+  },
+  quoteCompact: {
+    fontSize: 16,
+    lineHeight: 22,
   },
   quoteAuthor: {
     fontSize: 14,
@@ -28,9 +40,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingRight: 30,
     fontStyle: "italic",
   },
+  quoteAuthorCompact: {
+    fontSize: 12,
+    paddingRight: 18,
+  },
   gridContent: {
-    paddingBottom: 32,
+    paddingBottom: 40,
     gap: 14,
+  },
+  gridContentCompact: {
+    paddingBottom: 72,
   },
   gridRow: {
     gap: 14,

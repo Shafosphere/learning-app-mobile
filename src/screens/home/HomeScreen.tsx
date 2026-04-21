@@ -1,7 +1,7 @@
 // index.tsx
 import { useRouter } from "expo-router";
 import type React from "react";
-import { FlatList, View, Text } from "react-native";
+import { FlatList, View, Text, useWindowDimensions } from "react-native";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useStyles } from "./HomeScreen-styles";
 import { quotes } from "./quotes";
@@ -9,11 +9,13 @@ import { quotes } from "./quotes";
 export default function HomeScreen() {
   const router = useRouter();
   const styles = useStyles();
+  const { height: screenHeight } = useWindowDimensions();
   const logo = require("../../../assets/illustrations/mascot-box/branding/logo.png");
   const statsImage = require("../../../assets/images/home/stats.png");
   const customImage = require("../../../assets/images/home/customize.png");
   const tutorialImage = require("../../../assets/images/home/tutorial.png");
   const supportImage = require("../../../assets/images/home/support.png");
+  const isCompactHeight = screenHeight < 760;
 
   const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
 
@@ -41,14 +43,14 @@ export default function HomeScreen() {
     {
       key: "courses",
       title: "Kursy",
-      subtitle: "Twoje przypięte kursy",
+      subtitle: "Przypięte kursy",
       image: logo,
       action: goToCoursePanel,
     },
     {
       key: "custom",
       title: "Stwórz",
-      subtitle: "Kreator własnych kursów",
+      subtitle: "Kreator kursów",
       image: customImage,
       action: goToCustomCourse,
     },
@@ -94,28 +96,41 @@ export default function HomeScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.header}>
+      <View style={[styles.header, isCompactHeight && styles.headerCompact]}>
         <Text
-          style={styles.quote}
-          numberOfLines={3}
+          style={[styles.quote, isCompactHeight && styles.quoteCompact]}
+          numberOfLines={isCompactHeight ? 2 : 3}
           adjustsFontSizeToFit
-          minimumFontScale={0.9}
+          minimumFontScale={isCompactHeight ? 0.72 : 0.82}
           ellipsizeMode="tail"
         >
           {randomQuote.text}
         </Text>
-        <Text style={styles.quoteAuthor}>{randomQuote.author}</Text>
+        <Text
+          style={[styles.quoteAuthor, isCompactHeight && styles.quoteAuthorCompact]}
+          numberOfLines={1}
+          adjustsFontSizeToFit
+          minimumFontScale={0.85}
+        >
+          {randomQuote.author}
+        </Text>
       </View>
 
       <FlatList
+        style={styles.grid}
         data={listData}
         keyExtractor={(item) => item.key}
         renderItem={renderTile}
         numColumns={2}
-        scrollEnabled={false}
+        scrollEnabled
+        bounces={false}
+        alwaysBounceVertical={false}
         showsVerticalScrollIndicator={false}
         columnWrapperStyle={styles.gridRow}
-        contentContainerStyle={styles.gridContent}
+        contentContainerStyle={[
+          styles.gridContent,
+          isCompactHeight && styles.gridContentCompact,
+        ]}
       />
     </View>
   );

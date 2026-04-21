@@ -128,6 +128,11 @@ const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     gap: 12,
   },
+  detailsHeaderTextBlock: {
+    flex: 1,
+    minWidth: 0,
+    flexShrink: 1,
+  },
   detailsTitle: {
     fontSize: 16,
     fontWeight: "700",
@@ -142,6 +147,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     borderRadius: 14,
     paddingVertical: 6,
     paddingHorizontal: 10,
+    flexShrink: 0,
   },
   detailsBadgeText: {
     fontSize: 13,
@@ -592,7 +598,7 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
         {displayedDay ? (
           <View style={styles.detailsCard}>
             <View style={styles.detailsHeader}>
-              <View>
+              <View style={styles.detailsHeaderTextBlock}>
                 <ScrambleText
                   text={formatDayLabel(displayedDay.date)}
                   animateKey={`${animateKeyBase}-date`}

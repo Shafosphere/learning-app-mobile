@@ -4,8 +4,13 @@ import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
+import MyButton from "@/src/components/button/button";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
+import {
+  PreviewOptionSelector,
+  type PreviewOptionSelectorOption,
+} from "@/src/components/selection/PreviewOptionSelector";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import {
   FLASHCARDS_COACHMARK_STEPS,
@@ -32,7 +37,6 @@ import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import {
   useHydratedPersistedState,
-  usePersistedState,
 } from "@/src/hooks/usePersistedState";
 import {
   type CorrectAnswerMeta,
@@ -62,17 +66,19 @@ import {
 import {
   ActivityIndicator,
   Animated,
-  Image,
   Keyboard,
   Modal,
   Pressable,
   ScrollView,
   Text,
-  TouchableOpacity,
   View,
 } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
+import {
+  consumeActionsPositionNudgePreview,
+  subscribeActionsPositionNudgePreview,
+} from "@/src/services/actionsPositionNudgePreview";
 import { useTranslation } from "react-i18next";
 
 const STREAK_TARGET = 5;
@@ -276,6 +282,9 @@ export default function Flashcards() {
   );
   const [isActionsPositionNudgeVisible, setIsActionsPositionNudgeVisible] =
     useState(false);
+  const [actionsPositionNudgePreview, setActionsPositionNudgePreview] = useState<
+    "top" | "bottom"
+  >("top");
   const isActionsPositionNudgeHydrated =
     isActionsPositionNudgeAnswerCountHydrated && isActionsPositionNudgeSeenHydrated;
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -1034,6 +1043,25 @@ export default function Flashcards() {
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =
     coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9";
+  const tryOpenActionsPositionNudgePreview = useCallback(() => {
+    if (!isFocused) return;
+    if (!consumeActionsPositionNudgePreview()) return;
+
+    setIsActionsPositionNudgeVisible(true);
+  }, [isFocused]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeActionsPositionNudgePreview(() => {
+      tryOpenActionsPositionNudgePreview();
+    });
+
+    return unsubscribe;
+  }, [tryOpenActionsPositionNudgePreview]);
+
+  useEffect(() => {
+    tryOpenActionsPositionNudgePreview();
+  }, [tryOpenActionsPositionNudgePreview]);
+
   useEffect(() => {
     if (!isFocused) return;
     if (!isActionsPositionNudgeHydrated) return;
@@ -1061,6 +1089,13 @@ export default function Flashcards() {
     shouldRenderLoadingOverlay,
     shouldShowBoxes,
   ]);
+  useEffect(() => {
+    if (!isActionsPositionNudgeVisible) {
+      return;
+    }
+
+    setActionsPositionNudgePreview(actionButtonsPosition);
+  }, [actionButtonsPosition, isActionsPositionNudgeVisible]);
   useEffect(() => {
     if (isFocused || !isActionsPositionNudgeVisible) {
       return;
@@ -1424,14 +1459,42 @@ export default function Flashcards() {
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
-  const handleActionButtonsNudgeSelect = useCallback(
-    async (position: "top" | "bottom") => {
-      setIsActionsPositionNudgeVisible(false);
-      if (position !== actionButtonsPosition) {
-        await setActionButtonsPosition(position);
-      }
+  const handleActionButtonsNudgeConfirm = useCallback(async () => {
+    if (actionsPositionNudgePreview !== actionButtonsPosition) {
+      await setActionButtonsPosition(actionsPositionNudgePreview);
+    }
+    setIsActionsPositionNudgeVisible(false);
+  }, [
+    actionButtonsPosition,
+    actionsPositionNudgePreview,
+    setActionButtonsPosition,
+  ]);
+  const handleActionButtonsNudgeClose = useCallback(() => {
+    setActionsPositionNudgePreview(actionButtonsPosition);
+    setIsActionsPositionNudgeVisible(false);
+  }, [actionButtonsPosition]);
+  const handleActionButtonsNudgePreviewSelect = useCallback(
+    (position: "top" | "bottom") => {
+      setActionsPositionNudgePreview(position);
     },
-    [actionButtonsPosition, setActionButtonsPosition],
+    [],
+  );
+  const actionsPositionNudgeOptions = useMemo<
+    PreviewOptionSelectorOption<"top" | "bottom">[]
+  >(
+    () => [
+      {
+        key: "top",
+        label: t("settings.appearance.actionsSelector.top"),
+        preview: topButtonsPreview,
+      },
+      {
+        key: "bottom",
+        label: t("settings.appearance.actionsSelector.bottom"),
+        preview: bottomButtonsPreview,
+      },
+    ],
+    [t],
   );
 
   useEffect(() => {
@@ -1734,64 +1797,45 @@ export default function Flashcards() {
         animationType="fade"
         transparent
         visible={isActionsPositionNudgeVisible}
-        onRequestClose={() => setIsActionsPositionNudgeVisible(false)}
+        onRequestClose={handleActionButtonsNudgeClose}
       >
         <View style={styles.actionsPositionNudgeBackdrop}>
           <View style={styles.actionsPositionNudgeCard}>
+            <Pressable
+              onPress={handleActionButtonsNudgeClose}
+              style={styles.actionsPositionNudgeCloseButton}
+              hitSlop={10}
+            >
+              <Ionicons
+                name="close"
+                size={18}
+                color={colors.lightbg}
+              />
+            </Pressable>
+
             <Text style={styles.actionsPositionNudgeTitle}>
               {t("onboarding.flashcards.actionsPositionNudge.title")}
             </Text>
-            <Text style={styles.actionsPositionNudgeSubtitle}>
-              {t("onboarding.flashcards.actionsPositionNudge.subtitle")}
-            </Text>
 
-            <View style={styles.actionsPositionNudgeOptions}>
-              {[
-                {
-                  key: "top" as const,
-                  preview: topButtonsPreview,
-                  label: t("settings.appearance.actionsSelector.top"),
-                },
-                {
-                  key: "bottom" as const,
-                  preview: bottomButtonsPreview,
-                  label: t("settings.appearance.actionsSelector.bottom"),
-                },
-              ].map((option) => {
-                const isActive = actionButtonsPosition === option.key;
-                return (
-                  <TouchableOpacity
-                    key={option.key}
-                    activeOpacity={0.85}
-                    onPress={() => void handleActionButtonsNudgeSelect(option.key)}
-                    style={[
-                      styles.actionsPositionNudgeOption,
-                      isActive && styles.actionsPositionNudgeOptionActive,
-                    ]}
-                  >
-                    <View style={styles.actionsPositionNudgePreviewWrapper}>
-                      <Image
-                        source={option.preview}
-                        style={styles.actionsPositionNudgePreview}
-                        resizeMode="contain"
-                      />
-                    </View>
-                    <Text style={styles.actionsPositionNudgeOptionLabel}>
-                      {option.label}
-                    </Text>
-                  </TouchableOpacity>
-                );
-              })}
+            <PreviewOptionSelector
+              options={actionsPositionNudgeOptions}
+              value={actionsPositionNudgePreview}
+              onChange={handleActionButtonsNudgePreviewSelect}
+              description={t("onboarding.flashcards.actionsPositionNudge.subtitle")}
+              variant="modal"
+              imageFit="cover"
+              previewAspectRatio={1.02}
+              testIDPrefix="flashcards-actions-nudge"
+            />
+
+            <View style={styles.actionsPositionNudgeActions}>
+              <MyButton
+                text={t("onboarding.flashcards.actionsPositionNudge.confirm")}
+                color="my_green"
+                onPress={() => void handleActionButtonsNudgeConfirm()}
+                width={164}
+              />
             </View>
-
-            <Pressable
-              onPress={() => setIsActionsPositionNudgeVisible(false)}
-              style={styles.actionsPositionNudgeDismiss}
-            >
-              <Text style={styles.actionsPositionNudgeDismissText}>
-                {t("onboarding.flashcards.actionsPositionNudge.dismiss")}
-              </Text>
-            </Pressable>
           </View>
         </View>
       </Modal>

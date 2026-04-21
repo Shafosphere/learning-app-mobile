@@ -366,6 +366,11 @@
           "button": "Pokaż dymek",
           "message": "Hej! To ja, Boxik. Dymek działa!"
         },
+        "previewActionsPositionNudge": {
+          "title": "Podgląd wyboru układu przycisków",
+          "subtitle": "Otwiera ekran fiszek i sztucznie pokazuje jednorazowe okno wyboru położenia przycisków.",
+          "button": "Pokaż okno"
+        },
         "testDbErrorScreen": {
           "title": "Test ekranu błędu bazy",
           "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",
@@ -826,9 +831,10 @@
         "description": ""
       },
       "actionsPositionNudge": {
-        "title": "Przyciski niżej?",
+        "title": "Jaki układ przycisków",
         "subtitle": "Możesz zmienić ich położenie teraz, a później wrócić do tego w ustawieniach.",
-        "dismiss": "Zostaw jak jest"
+        "dismiss": "Zostaw jak jest",
+        "confirm": "Zatwierdź"
       }
     },
     "coursePin": {

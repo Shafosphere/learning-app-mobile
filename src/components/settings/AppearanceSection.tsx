@@ -1,6 +1,11 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+  PreviewOptionSelector,
+  type PreviewOptionSelectorOption,
+} from "@/src/components/selection/PreviewOptionSelector";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { TrackSlider } from "@/src/components/slider/TrackSlider";
+import { Asset } from "expo-asset";
 import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
@@ -10,7 +15,6 @@ import React, {
 } from "react";
 import {
   Modal,
-  Image,
   Text,
   TouchableOpacity,
   View,
@@ -24,44 +28,6 @@ const classicPreview = require("@/assets/images/settings/layout-classic.png");
 const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
 const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
 const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
-
-type LayoutOption = {
-  key: "classic" | "carousel";
-  labelKey: string;
-  preview: number;
-};
-
-const layoutOptions: LayoutOption[] = [
-  {
-    key: "classic",
-    labelKey: "settings.appearance.layoutSelector.classic",
-    preview: classicPreview,
-  },
-  {
-    key: "carousel",
-    labelKey: "settings.appearance.layoutSelector.carousel",
-    preview: carouselPreview,
-  },
-];
-
-type ActionButtonsOption = {
-  key: "top" | "bottom";
-  labelKey: string;
-  preview: number;
-};
-
-const actionButtonsOptions: ActionButtonsOption[] = [
-  {
-    key: "top",
-    labelKey: "settings.appearance.actionsSelector.top",
-    preview: topButtonsPreview,
-  },
-  {
-    key: "bottom",
-    labelKey: "settings.appearance.actionsSelector.bottom",
-    preview: bottomButtonsPreview,
-  },
-];
 
 const uiLanguageOptions: {
   key: UiLanguage;
@@ -185,6 +151,15 @@ const AppearanceSection: React.FC = () => {
   }, [feedbackVolume]);
 
   useEffect(() => {
+    void Asset.loadAsync([
+      classicPreview,
+      carouselPreview,
+      topButtonsPreview,
+      bottomButtonsPreview,
+    ]);
+  }, []);
+
+  useEffect(() => {
     return () => {
       if (volumeDebounce.current) {
         clearTimeout(volumeDebounce.current);
@@ -192,6 +167,32 @@ const AppearanceSection: React.FC = () => {
       }
     };
   }, []);
+
+  const layoutOptions: PreviewOptionSelectorOption<"classic" | "carousel">[] = [
+    {
+      key: "classic",
+      label: t("settings.appearance.layoutSelector.classic"),
+      preview: classicPreview,
+    },
+    {
+      key: "carousel",
+      label: t("settings.appearance.layoutSelector.carousel"),
+      preview: carouselPreview,
+    },
+  ];
+
+  const actionButtonsOptions: PreviewOptionSelectorOption<"top" | "bottom">[] = [
+    {
+      key: "top",
+      label: t("settings.appearance.actionsSelector.top"),
+      preview: topButtonsPreview,
+    },
+    {
+      key: "bottom",
+      label: t("settings.appearance.actionsSelector.bottom"),
+      preview: bottomButtonsPreview,
+    },
+  ];
 
   return (
     <View style={styles.sectionCard}>
@@ -343,88 +344,25 @@ const AppearanceSection: React.FC = () => {
         </View>
       </View>
 
-      <Text style={styles.appearanceGroupLabel}>UKŁAD</Text>
+      <PreviewOptionSelector
+        options={layoutOptions}
+        value={boxesLayout}
+        onChange={(key) => void handleLayoutSelect(key)}
+        description={preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
+        previewAspectRatio={1.18}
+        imageFit="contain"
+        testIDPrefix="settings-layout-selector"
+      />
 
-      <View style={styles.appearanceChoiceCard}>
-        <View style={styles.layoutOptionsRow}>
-          {layoutOptions.map((option) => {
-            const isActive = boxesLayout === option.key;
-            return (
-              <TouchableOpacity
-                key={option.key}
-                activeOpacity={0.7}
-                onPress={() => handleLayoutSelect(option.key)}
-                style={[
-                  styles.layoutOption,
-                  isActive && styles.layoutOptionActive,
-                ]}
-              >
-                <View style={styles.layoutPreviewWrapper}>
-                  <Image
-                    source={option.preview}
-                    style={[styles.layoutPreview, styles.layoutPreviewImage]}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.layoutLabel,
-                    isActive && styles.layoutLabelActive,
-                  ]}
-                >
-                  {t(option.labelKey)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        <View style={styles.appearanceBlockHeader}>
-          <Text style={styles.appearanceBlockDescription}>
-            {preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
-          </Text>
-        </View>
-      </View>
-
-      <View style={styles.appearanceChoiceCard}>
-        <View style={styles.actionOptionsRow}>
-          {actionButtonsOptions.map((option) => {
-            const isActive = actionButtonsPosition === option.key;
-            return (
-              <TouchableOpacity
-                key={option.key}
-                activeOpacity={0.8}
-                onPress={() => handleActionButtonsPosition(option.key)}
-                style={[
-                  styles.layoutOption,
-                  styles.actionOption,
-                  isActive && styles.layoutOptionActive,
-                ]}
-              >
-                <View style={styles.layoutPreviewWrapper}>
-                  <Image
-                    source={option.preview}
-                    style={[styles.layoutPreview, styles.actionPreviewImage]}
-                    resizeMode="contain"
-                  />
-                </View>
-                <Text
-                  style={[
-                    styles.layoutLabel,
-                    isActive && styles.layoutLabelActive,
-                  ]}
-                >
-                  {t(option.labelKey)}
-                </Text>
-              </TouchableOpacity>
-            );
-          })}
-        </View>
-        <View style={styles.appearanceBlockHeader}>
-          <Text style={styles.appearanceBlockDescription}>
-            {preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
-          </Text>
-        </View>
-      </View>
+      <PreviewOptionSelector
+        options={actionButtonsOptions}
+        value={actionButtonsPosition}
+        onChange={(key) => void handleActionButtonsPosition(key)}
+        description={preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
+        previewAspectRatio={1.02}
+        imageFit="cover"
+        testIDPrefix="settings-actions-selector"
+      />
 
       <Modal
         animationType="fade"
