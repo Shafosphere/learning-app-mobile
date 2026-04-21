@@ -865,7 +865,10 @@ export default function Flashcards() {
       return changed ? deduped : current;
     });
 
-    updateSelectedItem((current) => latestById.get(current.id) ?? current);
+    updateSelectedItem((current) => {
+      if (current == null) return current;
+      return latestById.get(current.id) ?? current;
+    });
   }, [
     customCards,
     isReady,

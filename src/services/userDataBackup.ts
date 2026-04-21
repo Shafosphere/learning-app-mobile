@@ -95,6 +95,27 @@ export type OfficialCourseStateExport = {
   courses: OfficialCourseSnapshotExport[];
 };
 
+export type KnownWordsStatsExport = {
+  ids: number[];
+  lastLearnedDate: string;
+};
+
+export type DailyProgressStatsExport = {
+  date: string;
+  count: number;
+};
+
+export type StatsUiStateExport = {
+  fireEffectEnabled: boolean;
+  bookshelfEnabled: boolean;
+};
+
+export type StatsStateExport = {
+  knownWords: KnownWordsStatsExport;
+  dailyProgress: DailyProgressStatsExport;
+  statsUi: StatsUiStateExport;
+};
+
 export type CustomCourseExport = {
   backupCourseKey: string;
   course: CustomCourseRecord;
@@ -111,6 +132,7 @@ export type UserDataExport = {
   customCourseBoxSnapshots: Record<string, SavedBoxesV2>;
   customCourses: CustomCourseExport[];
   officialCourseState: OfficialCourseStateExport;
+  statsState: StatsStateExport;
 };
 
 export type BackupContentSummary = {
@@ -142,6 +164,8 @@ export type ImportResult = {
     activeCustomCourseId: number | null;
     activeCourseIdx: number | null;
     shouldApplySelection: boolean;
+    progressStateApplied: boolean;
+    statsUiStateApplied: boolean;
     shouldMarkOnboardingDone: boolean;
   };
   stats?: {
@@ -185,7 +209,41 @@ type LegacyUserAchievementExportRow = {
 
 type LegacyUserDataExport = UserDataExport & {
   achievements?: LegacyUserAchievementExportRow[];
+  statsState?: Partial<StatsStateExport>;
 };
+
+const DEFAULT_STATS_STATE: StatsStateExport = {
+  knownWords: {
+    ids: [],
+    lastLearnedDate: "",
+  },
+  dailyProgress: {
+    date: "",
+    count: 0,
+  },
+  statsUi: {
+    fireEffectEnabled: false,
+    bookshelfEnabled: false,
+  },
+};
+
+function isDefaultProgressState(statsState: StatsStateExport): boolean {
+  return (
+    statsState.knownWords.ids.length === 0 &&
+    statsState.knownWords.lastLearnedDate === "" &&
+    statsState.dailyProgress.date === "" &&
+    statsState.dailyProgress.count === 0
+  );
+}
+
+function isDefaultStatsUiState(statsState: StatsStateExport): boolean {
+  return (
+    statsState.statsUi.fireEffectEnabled ===
+      DEFAULT_STATS_STATE.statsUi.fireEffectEnabled &&
+    statsState.statsUi.bookshelfEnabled ===
+      DEFAULT_STATS_STATE.statsUi.bookshelfEnabled
+  );
+}
 
 async function tableExists(
   db: Awaited<ReturnType<typeof getDB>>,
@@ -225,6 +283,116 @@ async function collectBoxesSnapshots(prefixes: string[]): Promise<
     }
   }
   return snapshots;
+}
+
+async function readPersistedStatsState(): Promise<StatsStateExport> {
+  const [
+    knownWordsRaw,
+    dailyProgressRaw,
+    fireEffectEnabledRaw,
+    bookshelfEnabledRaw,
+  ] = await Promise.all([
+    AsyncStorage.getItem("knownWords"),
+    AsyncStorage.getItem("dailyProgress"),
+    AsyncStorage.getItem("stats.fireEffectEnabled"),
+    AsyncStorage.getItem("stats.bookshelfEnabled"),
+  ]);
+
+  const knownWords = (() => {
+    if (!knownWordsRaw) {
+      return DEFAULT_STATS_STATE.knownWords;
+    }
+    try {
+      const parsed = JSON.parse(knownWordsRaw) as Partial<KnownWordsStatsExport>;
+      return {
+        ids: Array.isArray(parsed?.ids)
+          ? parsed.ids.filter((value): value is number => Number.isInteger(value))
+          : [],
+        lastLearnedDate:
+          typeof parsed?.lastLearnedDate === "string" ? parsed.lastLearnedDate : "",
+      };
+    } catch {
+      return DEFAULT_STATS_STATE.knownWords;
+    }
+  })();
+
+  const dailyProgress = (() => {
+    if (!dailyProgressRaw) {
+      return DEFAULT_STATS_STATE.dailyProgress;
+    }
+    try {
+      const parsed = JSON.parse(dailyProgressRaw) as Partial<DailyProgressStatsExport>;
+      return {
+        date: typeof parsed?.date === "string" ? parsed.date : "",
+        count: typeof parsed?.count === "number" ? parsed.count : 0,
+      };
+    } catch {
+      return DEFAULT_STATS_STATE.dailyProgress;
+    }
+  })();
+
+  const readBoolean = (raw: string | null, fallback: boolean): boolean => {
+    if (!raw) return fallback;
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      return typeof parsed === "boolean" ? parsed : fallback;
+    } catch {
+      return fallback;
+    }
+  };
+
+  return {
+    knownWords,
+    dailyProgress,
+    statsUi: {
+      fireEffectEnabled: readBoolean(
+        fireEffectEnabledRaw,
+        DEFAULT_STATS_STATE.statsUi.fireEffectEnabled
+      ),
+      bookshelfEnabled: readBoolean(
+        bookshelfEnabledRaw,
+        DEFAULT_STATS_STATE.statsUi.bookshelfEnabled
+      ),
+    },
+  };
+}
+
+function normalizeStatsState(
+  statsState?: Partial<StatsStateExport>
+): StatsStateExport {
+  return {
+    knownWords: {
+      ids: Array.isArray(statsState?.knownWords?.ids)
+        ? statsState.knownWords.ids.filter(
+            (value): value is number => Number.isInteger(value)
+          )
+        : DEFAULT_STATS_STATE.knownWords.ids,
+      lastLearnedDate:
+        typeof statsState?.knownWords?.lastLearnedDate === "string"
+          ? statsState.knownWords.lastLearnedDate
+          : DEFAULT_STATS_STATE.knownWords.lastLearnedDate,
+    },
+    dailyProgress: {
+      date:
+        typeof statsState?.dailyProgress?.date === "string"
+          ? statsState.dailyProgress.date
+          : DEFAULT_STATS_STATE.dailyProgress.date,
+      count:
+        typeof statsState?.dailyProgress?.count === "number"
+          ? statsState.dailyProgress.count
+          : DEFAULT_STATS_STATE.dailyProgress.count,
+    },
+    statsUi: {
+      fireEffectEnabled:
+        typeof statsState?.statsUi?.fireEffectEnabled === "boolean"
+          ? statsState.statsUi.fireEffectEnabled
+          : DEFAULT_STATS_STATE.statsUi.fireEffectEnabled,
+      bookshelfEnabled:
+        typeof statsState?.statsUi?.bookshelfEnabled === "boolean"
+          ? statsState.statsUi.bookshelfEnabled
+          : DEFAULT_STATS_STATE.statsUi.bookshelfEnabled,
+    },
+  };
 }
 
 function makeCustomCourseBackupKey(courseId: number): string {
@@ -512,6 +680,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     customBoxesSnapshots,
     pinnedOfficialCourseIdsRaw,
     activeCustomCourseIdRaw,
+    statsState,
   ] = await Promise.all([
     Promise.all(customCourses.map((course) => buildCourseExport(course))),
     Promise.all(officialCourses.map((course) => buildCourseExport(course))),
@@ -519,6 +688,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     collectBoxesSnapshots(["customBoxes:"]),
     AsyncStorage.getItem("officialPinnedCourseIds"),
     AsyncStorage.getItem("activeCustomCourseId"),
+    readPersistedStatsState(),
   ]);
 
   const officialCoursesById = new Map<number, CustomCourseRecord>(
@@ -560,7 +730,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     }
   })();
   const pinnedOfficialCourseSlugs = pinnedIds
-    .map((id) => officialCoursesById.get(id)?.slug ?? null)
+    .map((id) => officialCoursesById.get(id)?.slug?.trim() ?? null)
     .filter((slug): slug is string => Boolean(slug));
 
   const lastActiveOfficialCourseSlug = (() => {
@@ -570,7 +740,8 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
       if (typeof parsed !== "number") {
         return null;
       }
-      return officialCoursesById.get(parsed)?.slug ?? null;
+      const slug = officialCoursesById.get(parsed)?.slug?.trim();
+      return slug ? slug : null;
     } catch {
       return null;
     }
@@ -593,6 +764,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     customCourseBoxSnapshots,
     customCourses: customCoursesExport,
     officialCourseState,
+    statsState,
   };
 }
 
@@ -908,6 +1080,7 @@ function normalizeImportedData(data: unknown): UserDataExport {
       boxSnapshots: typed.officialCourseState?.boxSnapshots ?? {},
       courses: typed.officialCourseState?.courses ?? [],
     },
+    statsState: normalizeStatsState(typed.statsState),
   };
 }
 
@@ -1509,12 +1682,17 @@ export async function restoreUserData(
     const restoredActiveOfficialId = requestedActiveOfficialId;
     officialActiveCourseRestored = restoredActiveOfficialId != null ? 1 : 0;
 
-    const [currentPinnedOfficialIdsRaw, currentActiveCustomCourseIdRaw, currentActiveCourseIdxRaw] =
-      await Promise.all([
-        AsyncStorage.getItem("officialPinnedCourseIds"),
-        AsyncStorage.getItem("activeCustomCourseId"),
-        AsyncStorage.getItem("activeCourseIdx"),
-      ]);
+    const [
+      currentPinnedOfficialIdsRaw,
+      currentActiveCustomCourseIdRaw,
+      currentActiveCourseIdxRaw,
+      currentStatsState,
+    ] = await Promise.all([
+      AsyncStorage.getItem("officialPinnedCourseIds"),
+      AsyncStorage.getItem("activeCustomCourseId"),
+      AsyncStorage.getItem("activeCourseIdx"),
+      readPersistedStatsState(),
+    ]);
 
     const currentPinnedOfficialIds = (() => {
       if (!currentPinnedOfficialIdsRaw) return [] as number[];
@@ -1551,6 +1729,12 @@ export async function restoreUserData(
       (currentPinnedOfficialIds.length === 0 &&
         currentActiveCustomCourseId == null &&
         currentActiveCourseIdx == null);
+    const shouldRestoreProgressState =
+      options?.replaceExistingData === true ||
+      isDefaultProgressState(currentStatsState);
+    const shouldRestoreStatsUiState =
+      options?.replaceExistingData === true ||
+      isDefaultStatsUiState(currentStatsState);
 
     console.log("[userDataBackup] restore selection decision", {
       replaceExistingData: options?.replaceExistingData === true,
@@ -1560,6 +1744,10 @@ export async function restoreUserData(
       restoredPinnedOfficialIdsCount: restoredPinnedOfficialIds.length,
       restoredActiveOfficialId,
       shouldRestoreCourseSelection,
+      currentProgressStateIsDefault: isDefaultProgressState(currentStatsState),
+      currentStatsUiStateIsDefault: isDefaultStatsUiState(currentStatsState),
+      shouldRestoreProgressState,
+      shouldRestoreStatsUiState,
     });
 
     if (shouldRestoreCourseSelection) {
@@ -1574,6 +1762,25 @@ export async function restoreUserData(
       pairs.push(["activeCourseIdx", JSON.stringify(null)]);
     }
 
+    if (shouldRestoreProgressState) {
+      pairs.push(["knownWords", JSON.stringify(normalized.statsState.knownWords)]);
+      pairs.push([
+        "dailyProgress",
+        JSON.stringify(normalized.statsState.dailyProgress),
+      ]);
+    }
+
+    if (shouldRestoreStatsUiState) {
+      pairs.push([
+        "stats.fireEffectEnabled",
+        JSON.stringify(normalized.statsState.statsUi.fireEffectEnabled),
+      ]);
+      pairs.push([
+        "stats.bookshelfEnabled",
+        JSON.stringify(normalized.statsState.statsUi.bookshelfEnabled),
+      ]);
+    }
+
     if (pairs.length > 0) {
       await AsyncStorage.multiSet(pairs);
     }
@@ -1585,6 +1792,8 @@ export async function restoreUserData(
         activeCustomCourseId: restoredActiveOfficialId,
         activeCourseIdx: null,
         shouldApplySelection: shouldRestoreCourseSelection,
+        progressStateApplied: shouldRestoreProgressState,
+        statsUiStateApplied: shouldRestoreStatsUiState,
         shouldMarkOnboardingDone:
           coursesCreated > 0 ||
           flashcardsCreatedTotal > 0 ||
@@ -1594,7 +1803,11 @@ export async function restoreUserData(
           restoredActiveOfficialId != null ||
           boxSnapshotsRestored > 0 ||
           officialReviewsRestored > 0 ||
-          learningEventsRestored > 0,
+          learningEventsRestored > 0 ||
+          normalized.statsState.knownWords.ids.length > 0 ||
+          normalized.statsState.dailyProgress.count > 0 ||
+          normalized.statsState.statsUi.fireEffectEnabled ||
+          normalized.statsState.statsUi.bookshelfEnabled,
       },
       stats: {
         coursesCreated,

@@ -1,4 +1,5 @@
 import MyButton from "@/src/components/button/button";
+import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { exportAndShareUserData } from "@/src/services/exportUserData";
@@ -31,6 +32,7 @@ const CoursesDataSection: React.FC = () => {
   const styles = useStyles();
   const { t, i18n } = useTranslation();
   const router = useRouter();
+  const { refreshStats } = useLearningStats();
   const { width } = useWindowDimensions();
   const {
     resetLearningSettings,
@@ -373,6 +375,7 @@ const CoursesDataSection: React.FC = () => {
               const result = await restoreUserDataFromGoogleDrive(snapshot.fileId);
               if (result.success) {
                 await applyImportedAppState(result);
+                await refreshStats();
                 Alert.alert(
                   t("settings.coursesData.importDone.title"),
                   buildImportDoneMessage(result.stats)
@@ -425,6 +428,7 @@ const CoursesDataSection: React.FC = () => {
       const result = await importUserData();
       if (result.success) {
         await applyImportedAppState(result);
+        await refreshStats();
         Alert.alert(
           t("settings.coursesData.importDone.title"),
           buildImportDoneMessage(result.stats)

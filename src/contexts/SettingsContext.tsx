@@ -2242,11 +2242,36 @@ export const SettingsProvider: React.FC<{
         ]);
       }
 
+      if (restoredState.statsUiStateApplied) {
+        const [statsFireEffectEnabledRaw, statsBookshelfEnabledRaw] =
+          await Promise.all([
+            AsyncStorage.getItem("stats.fireEffectEnabled"),
+            AsyncStorage.getItem("stats.bookshelfEnabled"),
+          ]);
+
+        const readBoolean = (raw: string | null): boolean => {
+          if (!raw) return false;
+          try {
+            const parsed = JSON.parse(raw) as unknown;
+            return typeof parsed === "boolean" ? parsed : false;
+          } catch {
+            return false;
+          }
+        };
+
+        await Promise.all([
+          _setStatsFireEffectEnabled(readBoolean(statsFireEffectEnabledRaw)),
+          _setStatsBookshelfEnabled(readBoolean(statsBookshelfEnabledRaw)),
+        ]);
+      }
+
       if (restoredState.shouldMarkOnboardingDone) {
         await setOnboardingCheckpoint("done");
       }
     },
     [
+      _setStatsBookshelfEnabled,
+      _setStatsFireEffectEnabled,
       setActiveCourseIdxState,
       setActiveCustomCourseIdState,
       setPinnedOfficialCourseIds,

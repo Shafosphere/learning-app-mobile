@@ -1,4 +1,5 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import React, { createContext, useCallback, useContext, useEffect, useState } from "react";
 import { usePersistedState } from "../hooks/usePersistedState";
 import { countTotalLearnedWordsGlobal } from "../db/sqlite/db";
 
@@ -11,6 +12,7 @@ type LearningStatsContextValue = {
     wasNewMastered: boolean;
     nextKnownWordsCount: number;
   };
+  refreshStats: () => Promise<void>;
 };
 
 const defaultValue: LearningStatsContextValue = {
@@ -22,6 +24,7 @@ const defaultValue: LearningStatsContextValue = {
     wasNewMastered: false,
     nextKnownWordsCount: 0,
   }),
+  refreshStats: async () => {},
 };
 
 const LearningStatsContext =
@@ -37,6 +40,44 @@ type KnownWordsState = {
   lastLearnedDate: string;
 };
 
+function parseKnownWordsState(raw: string | null): KnownWordsState {
+  if (!raw) {
+    return { ids: [], lastLearnedDate: "" };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<KnownWordsState>;
+    return {
+      ids: Array.isArray(parsed?.ids)
+        ? parsed.ids.filter((value): value is number => Number.isInteger(value))
+        : [],
+      lastLearnedDate:
+        typeof parsed?.lastLearnedDate === "string" ? parsed.lastLearnedDate : "",
+    };
+  } catch {
+    return { ids: [], lastLearnedDate: "" };
+  }
+}
+
+function parseDailyProgressState(raw: string | null): {
+  date: string;
+  count: number;
+} {
+  if (!raw) {
+    return { date: "", count: 0 };
+  }
+
+  try {
+    const parsed = JSON.parse(raw) as Partial<{ date: string; count: number }>;
+    return {
+      date: typeof parsed?.date === "string" ? parsed.date : "",
+      count: typeof parsed?.count === "number" ? parsed.count : 0,
+    };
+  } catch {
+    return { date: "", count: 0 };
+  }
+}
+
 export const LearningStatsProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
@@ -51,6 +92,20 @@ export const LearningStatsProvider: React.FC<{
     date: string;
     count: number;
   }>("dailyProgress", { date: "", count: 0 });
+  const refreshStats = useCallback(async () => {
+    const [knownWordsRaw, dailyProgressRaw, total] = await Promise.all([
+      AsyncStorage.getItem("knownWords"),
+      AsyncStorage.getItem("dailyProgress"),
+      countTotalLearnedWordsGlobal(),
+    ]);
+
+    await Promise.all([
+      setKnownWords(parseKnownWordsState(knownWordsRaw)),
+      setDailyProgress(parseDailyProgressState(dailyProgressRaw)),
+    ]);
+    setDbKnownWordsCount(total);
+  }, [setDailyProgress, setKnownWords]);
+
   const registerKnownWord = (wordId: number) => {
     const today = isoDateOnly(new Date());
     const baseDailyCount =
@@ -132,6 +187,7 @@ export const LearningStatsProvider: React.FC<{
         dailyProgressCount: dailyProgress.count,
         dailyProgressDate: dailyProgress.date,
         registerKnownWord,
+        refreshStats,
       }}
     >
       {children}
