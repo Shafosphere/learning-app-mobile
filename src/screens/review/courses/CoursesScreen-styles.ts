@@ -32,6 +32,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexWrap: "wrap",
     justifyContent: "space-between",
   },
+  courseCardSlot: {
+    width: 145,
+    height: 145,
+    marginBottom: 20,
+  },
   groupContainer: {
     width: "100%",
     marginBottom: 16,
@@ -87,8 +92,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
   },
   courseCard: {
-    width: 145,
-    height: 145,
+    width: "100%",
+    height: "100%",
     display: "flex",
     flexDirection: "column",
     justifyContent: "center",
@@ -96,10 +101,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     borderRadius: 15,
     aspectRatio: 1,
-    // padding: 16,
-    marginBottom: 20,
-    // paddingLeft: "10%",
-    // paddingRight: "6%",
     position: "relative",
   },
   courseCardDisabled: {

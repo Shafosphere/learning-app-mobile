@@ -6,6 +6,7 @@ import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import MyButton from "@/src/components/button/button";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/FlashcardsPlaceholderCard";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import {
   PreviewOptionSelector,
@@ -1360,25 +1361,19 @@ export default function Flashcards() {
   let cardSection: ReactNode;
   if (activeCustomCourseId == null) {
     cardSection = (
-      <View style={{ paddingHorizontal: 32 }}>
-        <Text allowFontScaling>
-          Wybierz własny kurs w panelu kursów, aby rozpocząć naukę.
-        </Text>
-      </View>
+      <FlashcardsPlaceholderCard
+        title="Brak wybranego kursu"
+        description="Wybierz własny kurs w panelu kursów, aby rozpocząć naukę."
+      />
     );
   } else if (loadError) {
-    cardSection = (
-      <View style={{ paddingHorizontal: 32 }}>
-        <Text allowFontScaling>{loadError}</Text>
-      </View>
-    );
+    cardSection = <FlashcardsPlaceholderCard title={loadError} />;
   } else if (!customCards.length) {
     cardSection = (
-      <View style={{ paddingHorizontal: 32 }}>
-        <Text allowFontScaling>
-          Dodaj fiszki do tego kursu, aby móc z nich korzystać.
-        </Text>
-      </View>
+      <FlashcardsPlaceholderCard
+        title="Brak fiszek w kursie"
+        description="Dodaj fiszki do tego kursu, aby móc z nich korzystać."
+      />
     );
   } else {
     cardSection = (

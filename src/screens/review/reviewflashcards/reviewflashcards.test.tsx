@@ -15,9 +15,18 @@ import {
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 
+type ReviewFlashcardsRouteParams = {
+  courseId?: string;
+  onboarding?: string;
+};
+
+const mockedUseLocalSearchParams = jest.fn<ReviewFlashcardsRouteParams, []>(() => ({
+  courseId: "77",
+}));
 jest.mock("expo-router", () => ({
-  useLocalSearchParams: jest.fn(() => ({ courseId: "77" })),
+  useLocalSearchParams: () => mockedUseLocalSearchParams(),
 }));
 
 jest.mock("@react-navigation/native", () => ({
@@ -29,6 +38,27 @@ jest.mock("@react-navigation/native", () => ({
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
+}));
+
+jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
+  useCoachmarkFlow: jest.fn(() => ({
+    isActive: false,
+    isPendingStart: false,
+    hasSeen: false,
+    isReady: true,
+    currentStep: null,
+    currentIndex: 0,
+    totalSteps: 10,
+    canGoBack: false,
+    canGoNext: true,
+    goBack: jest.fn(),
+    goNext: jest.fn(),
+    advanceByEvent: jest.fn(() => Promise.resolve(true)),
+  })),
+}));
+
+jest.mock("@/src/components/onboarding/CoachmarkLayerPortal", () => ({
+  useCoachmarkLayerPortal: jest.fn(),
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -235,7 +265,17 @@ jest.mock("@expo/vector-icons/Octicons", () => {
 });
 
 jest.mock("@edwardloopez/react-native-coachmark", () => ({
-  CoachmarkAnchor: ({ children }: { children: React.ReactNode }) => children,
+  CoachmarkAnchor: ({
+    children,
+    id,
+  }: {
+    children: React.ReactNode;
+    id?: string;
+  }) => {
+    const React = require("react");
+    const { View } = require("react-native");
+    return <View testID={id}>{children}</View>;
+  },
 }));
 
 jest.mock("react-native-text-ticker", () => {
@@ -291,6 +331,7 @@ type ReviewCardRow = {
 };
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
@@ -318,6 +359,35 @@ function makeReviewCard(
   };
 }
 
+function stageToBoxName(stage: number) {
+  if (stage <= 0) return "boxZero";
+  if (stage === 1) return "boxOne";
+  if (stage === 2) return "boxTwo";
+  if (stage === 3) return "boxThree";
+  if (stage === 4) return "boxFour";
+  return "boxFive";
+}
+
+async function startReviewFromStage(
+  screen: ReturnType<typeof render>,
+  stage: number
+) {
+  const boxName = stageToBoxName(stage);
+
+  await waitFor(() => {
+    expect(screen.getByText(new RegExp(`^${boxName}:[1-9]\\d*$`))).not.toBeNull();
+  });
+
+  fireEvent.press(screen.getByTestId(`box-button-${boxName}`));
+
+  await waitFor(() => {
+    expect(
+      screen.UNSAFE_queryAllByType(TextInput).length > 0 ||
+        screen.queryByTestId("true-answer-button") != null
+    ).toBe(true);
+  });
+}
+
 async function renderAndForceCorrectionSwitch(
   cards: ReviewCardRow[],
   switchedBox: "boxOne" | "boxTwo" | "boxThree" | "boxFour" | "boxFive"
@@ -325,9 +395,7 @@ async function renderAndForceCorrectionSwitch(
   mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce(cards);
   const screen = render(<ReviewFlashcardsPlaceholder />);
 
-  await waitFor(() => {
-    expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-  });
+  await startReviewFromStage(screen, cards[0]?.stage ?? 1);
 
   const inputs = screen.UNSAFE_getAllByType(TextInput);
   await act(async () => {
@@ -342,6 +410,7 @@ async function renderAndForceCorrectionSwitch(
 
 describe("reviewflashcards correction desync regression", () => {
   beforeEach(() => {
+    mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -352,6 +421,20 @@ describe("reviewflashcards correction desync regression", () => {
       flashcardsSuggestionsEnabled: false,
       flashcardsCardSize: "normal",
       flashcardsImageSize: "dynamic",
+    });
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      isPendingStart: false,
+      hasSeen: false,
+      isReady: true,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 10,
+      canGoBack: false,
+      canGoNext: true,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
     });
   });
 
@@ -372,9 +455,7 @@ describe("reviewflashcards correction desync regression", () => {
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([sourceCard]);
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, sourceCard.stage);
 
     await act(async () => {
       fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
@@ -501,6 +582,127 @@ describe("reviewflashcards correction desync regression", () => {
     expect(screen.getByText("boxOne:0")).not.toBeNull();
   });
 
+  it("starts the review onboarding only when opened from review courses and cards are available", async () => {
+    mockedUseLocalSearchParams.mockReturnValue({
+      courseId: "77",
+      onboarding: "review-flashcards",
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 101,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
+    });
+
+    const lastCall = mockedUseCoachmarkFlow.mock.calls.at(-1)?.[0];
+    expect(lastCall?.shouldStart).toBe(true);
+    expect(lastCall?.storageKey).toBe("@review_flashcards_intro_seen_v1");
+  });
+
+  it("does not start the review onboarding without the handoff param or when there are no due cards", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
+    });
+
+    const withoutParam = mockedUseCoachmarkFlow.mock.calls.at(-1)?.[0];
+    expect(withoutParam?.shouldStart).toBe(false);
+
+    jest.clearAllMocks();
+    mockedUseLocalSearchParams.mockReturnValue({
+      courseId: "77",
+      onboarding: "review-flashcards",
+    });
+    mockedUseSettings.mockReturnValue({
+      actionButtonsPosition: "top",
+      getCustomCourseShowExplanationEnabled: jest.fn(() => false),
+      getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      ignoreDiacriticsInSpellcheck: false,
+      flashcardsSuggestionsEnabled: false,
+      flashcardsCardSize: "normal",
+      flashcardsImageSize: "dynamic",
+    });
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      isPendingStart: false,
+      hasSeen: false,
+      isReady: true,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 10,
+      canGoBack: false,
+      canGoNext: true,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
+    });
+
+    const withoutCards = mockedUseCoachmarkFlow.mock.calls.at(-1)?.[0];
+    expect(withoutCards?.shouldStart).toBe(false);
+  });
+
+  it("renders dedicated review coachmark anchors for card, buttons and boxes", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 102,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByTestId("review-flashcards-bubble-anchor")).toBeTruthy();
+      expect(screen.getByTestId("review-flashcards-card-section")).toBeTruthy();
+      expect(screen.getByTestId("review-flashcards-buttons-section")).toBeTruthy();
+      expect(screen.getByTestId("review-flashcards-boxes-section")).toBeTruthy();
+    });
+  });
+
+  it("does not auto-activate a review box after loading the session", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 111,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
+    });
+
+    expect(screen.UNSAFE_queryAllByType(TextInput)).toHaveLength(0);
+  });
+
   it("keeps the add flashcards button disabled on the review screen", async () => {
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
@@ -539,9 +741,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, 4);
 
     await act(async () => {
       fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
@@ -579,9 +779,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, 1);
 
     await act(async () => {
       fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
@@ -626,9 +824,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, 4);
 
     await act(async () => {
       fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "planeta");
@@ -661,9 +857,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, 4);
 
     await act(async () => {
       jest.setSystemTime(new Date("2026-04-21T10:00:04.000Z"));
@@ -712,9 +906,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.UNSAFE_getAllByType(TextInput).length).toBeGreaterThan(0);
-    });
+    await startReviewFromStage(screen, 1);
 
     await act(async () => {
       jest.setSystemTime(new Date("2026-04-21T10:00:03.500Z"));
@@ -773,9 +965,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId("true-answer-button")).not.toBeNull();
-    });
+    await startReviewFromStage(screen, 2);
 
     await act(async () => {
       jest.setSystemTime(new Date("2026-04-21T10:00:02.250Z"));

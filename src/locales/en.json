@@ -352,6 +352,8 @@
         "checkpointSet": "Set",
         "checkpointValue": "Checkpoint: {{checkpoint}}",
         "checkpointSetError": "Could not set checkpoint.",
+        "reviewCoursesIntroResetDone": "The review screen onboarding has been reset.",
+        "reviewCoursesIntroResetError": "Could not reset the review screen onboarding.",
         "introResetDone": "Intro reset. Onboarding starts from language selection.",
         "introResetError": "Could not reset intro bubbles.",
         "dbErrorScreenOpened": "Enabled the SQLite error screen test mode. Leave it with “Try again”.",
@@ -442,6 +444,11 @@
           "title": "Go to language selection",
           "subtitle": "Open the first onboarding screen with PL/EN flags.",
           "button": "Language screen"
+        },
+        "resetReviewCoursesIntro": {
+          "title": "Reset reviews onboarding",
+          "subtitle": "Removes the seen flag only for the reviews list screen.",
+          "button": "Reset review"
         },
         "flags": {
           "learningReminders": {
@@ -871,6 +878,74 @@
       "step9": {
         "title": "What next?",
         "description": "If you already pinned what interests you, tap the Next button at the bottom right."
+      }
+    },
+    "reviewCourses": {
+      "step1": {
+        "title": "Review screen",
+        "description": "Hey, I’ll quickly show you how the review screen works :3"
+      },
+      "step2": {
+        "title": "Where to tap?",
+        "description": "You can open reviews with this button on the bottom bar."
+      },
+      "step3": {
+        "title": "Number on icon",
+        "description": "If you see a number here, it means some flashcards are waiting for you to review."
+      },
+      "step4": {
+        "title": "Courses separately",
+        "description": "Each tile on this list is a separate course with its own reviews."
+      },
+      "step5": {
+        "title": "How many cards?",
+        "description": "The number on the tile shows how many flashcards from that course are waiting for review right now."
+      },
+      "step6": {
+        "title": "Now hop in",
+        "description": "Now tap your first course and hop into a review :3"
+      }
+    },
+    "reviewFlashcards": {
+      "step1": {
+        "title": "Review screen",
+        "description": "Hey, you’re on the review screen now. This is where flashcards wait for their moment :3"
+      },
+      "step2": {
+        "title": "Like flashcards",
+        "description": "This screen works almost like regular flashcards, but the rules are a little different here."
+      },
+      "step3": {
+        "title": "Everything waits",
+        "description": "The boxes already contain all the flashcards that are waiting for review right now."
+      },
+      "step4": {
+        "title": "No adding",
+        "description": "That’s why the \"ADD FLASHCARDS\" button does not work here. In this mode, we do not add anything manually."
+      },
+      "step5": {
+        "title": "Six boxes",
+        "description": "Here you always have 6 boxes, not 5 like in the regular game."
+      },
+      "step6": {
+        "title": "Biggest difference",
+        "description": "The biggest difference here is time."
+      },
+      "step7": {
+        "title": "Not right away",
+        "description": "When you answer a flashcard correctly, it does not move to the next box right away."
+      },
+      "step8": {
+        "title": "Wait a moment",
+        "description": "You need to wait a little. The further you get, the longer the breaks become."
+      },
+      "step9": {
+        "title": "Why this?",
+        "description": "This is intentional. To really remember something, you need a chance to recall it after a break. Reviews like this strengthen your memory much better :3"
+      },
+      "step10": {
+        "title": "You got this",
+        "description": "That’s everything. You already know the rules, so good luck and see you later :3"
       }
     }
   },

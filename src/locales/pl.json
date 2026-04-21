@@ -304,13 +304,13 @@
         "resetLearning": {
           "title": "Przywróć ustawienia nauki",
           "subtitle": "Sprawdzanie pisowni, diakrytyki, miny pudełek, układ, przypomnienia.",
-          "button": "Przywróć domyślne",
+          "button": "Przywróć",
           "buttonLoading": "Przywracam..."
         },
         "resetIntro": {
           "title": "Zresetuj wprowadzenie",
           "subtitle": "Uruchamia samouczek od początku. Odpina kursy i wyłącza aktywny kurs, ale nie usuwa postępu.",
-          "button": "Resetuj wprowadzenie",
+          "button": "Resetuj",
           "buttonLoading": "Resetuję..."
         }
       }
@@ -352,6 +352,8 @@
         "checkpointSet": "Ustawiono",
         "checkpointValue": "Punkt kontrolny: {{checkpoint}}",
         "checkpointSetError": "Nie udało się ustawić punktu kontrolnego.",
+        "reviewCoursesIntroResetDone": "Onboarding ekranu powtórek został zresetowany.",
+        "reviewCoursesIntroResetError": "Nie udało się zresetować onboardingu ekranu powtórek.",
         "introResetDone": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka.",
         "introResetError": "Nie udało się zresetować dymków.",
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Zamknij go przez „Spróbuj ponownie”.",
@@ -442,6 +444,11 @@
           "title": "Przejdź do wyboru języka",
           "subtitle": "Otwórz pierwszy ekran samouczka z flagami PL i EN.",
           "button": "Ekran języka"
+        },
+        "resetReviewCoursesIntro": {
+          "title": "Reset onboardingu powtórek",
+          "subtitle": "Usuwa flagę zobaczenia tylko dla ekranu listy powtórek.",
+          "button": "Resetuj review"
         },
         "flags": {
           "learningReminders": {
@@ -871,6 +878,74 @@
       "step9": {
         "title": "I co dalej?",
         "description": "Jeśli masz już przypięte to, co Cię interesuje, kliknij przycisk „Dalej” na dole po prawej."
+      }
+    },
+    "reviewCourses": {
+      "step1": {
+        "title": "Ekran powtórek",
+        "description": "Hej, szybciutko pokażę Ci, jak działa ekran powtórek :3"
+      },
+      "step2": {
+        "title": "Gdzie kliknąć?",
+        "description": "Do powtórek wejdziesz tym przyciskiem na dolnym pasku."
+      },
+      "step3": {
+        "title": "Liczba przy ikonie",
+        "description": "Jeśli widzisz tu liczbę, to znaczy, że czekają na Ciebie fiszki do powtórzenia."
+      },
+      "step4": {
+        "title": "Kursy osobno",
+        "description": "Każdy kafelek na tej liście to osobny kurs z własnymi powtórkami."
+      },
+      "step5": {
+        "title": "Ile fiszek?",
+        "description": "Liczba na kafelku pokazuje, ile fiszek z tego kursu czeka teraz na powtórkę."
+      },
+      "step6": {
+        "title": "No to hop",
+        "description": "Teraz kliknij swój pierwszy kurs i wskocz do powtórki :3"
+      }
+    },
+    "reviewFlashcards": {
+      "step1": {
+        "title": "Ekran powtórek",
+        "description": "Hej, jesteś teraz na ekranie powtórek. Tu fiszki czekają na swój moment :3"
+      },
+      "step2": {
+        "title": "Prawie jak fiszki",
+        "description": "Ten ekran działa podobnie do zwykłych fiszek, ale tutaj zasady są troszkę inne."
+      },
+      "step3": {
+        "title": "Wszystko czeka",
+        "description": "W pudełkach są już wszystkie fiszki, które czekają teraz na powtórkę."
+      },
+      "step4": {
+        "title": "Bez dodawania",
+        "description": "Dlatego przycisk „DODAJ FISZKI” tutaj nie działa. W tym trybie niczego nie dokładamy ręcznie."
+      },
+      "step5": {
+        "title": "Sześć pudełek",
+        "description": "Tutaj zawsze masz 6 pudełek, a nie 5 jak w zwykłej grze."
+      },
+      "step6": {
+        "title": "Największa różnica",
+        "description": "Największą różnicą jest tutaj czas."
+      },
+      "step7": {
+        "title": "Nie od razu",
+        "description": "Gdy odpowiesz na fiszkę poprawnie, nie przechodzi ona od razu do następnego pudełka."
+      },
+      "step8": {
+        "title": "Trzeba poczekać",
+        "description": "Trzeba chwilkę odczekać. Im dalej dojdziesz, tym dłuższe będą przerwy."
+      },
+      "step9": {
+        "title": "Po co to?",
+        "description": "To celowe. Żeby coś naprawdę zapamiętać, trzeba dostać szansę przypomnienia sobie tego po przerwie. Takie powtórki dużo lepiej utrwalają wiedzę :3"
+      },
+      "step10": {
+        "title": "Dasz radę",
+        "description": "To wszystko. Zasady już znasz, więc powodzenia i do zobaczenia później :3"
       }
     }
   },

@@ -147,6 +147,24 @@ const DebuggingSection: React.FC = () => {
     router.push("/flashcards");
   };
 
+  const handleResetReviewCoursesIntro = async () => {
+    try {
+      await Promise.all([
+        AsyncStorage.removeItem("@review_courses_intro_seen_v1"),
+        AsyncStorage.removeItem("@review_flashcards_intro_seen_v1"),
+      ]);
+      Alert.alert(
+        t("settings.debug.alerts.doneTitle"),
+        t("settings.debug.alerts.reviewCoursesIntroResetDone")
+      );
+    } catch {
+      Alert.alert(
+        t("settings.debug.alerts.errorTitle"),
+        t("settings.debug.alerts.reviewCoursesIntroResetError")
+      );
+    }
+  };
+
   const handleResetCustomReviews = async () => {
     setCustomBusy(true);
     try {
@@ -580,6 +598,23 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.openLanguageIntro.button")}
           color="my_green"
           onPress={() => router.push("/createprofile")}
+          width={170}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.resetReviewCoursesIntro.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.resetReviewCoursesIntro.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.resetReviewCoursesIntro.button")}
+          color="my_green"
+          onPress={handleResetReviewCoursesIntro}
           width={170}
         />
       </View>

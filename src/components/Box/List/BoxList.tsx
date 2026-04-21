@@ -13,6 +13,7 @@ interface BoxesProps {
     onBoxLongPress?: (name: keyof BoxesState) => void;
     disabled?: boolean;
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
+    countsCoachmarkId?: string;
 }
 
 export default function BoxList({
@@ -23,6 +24,7 @@ export default function BoxList({
     onBoxLongPress,
     disabled = false,
     countOverrides,
+    countsCoachmarkId,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     type Face = "smile" | "happy" | "surprised";
@@ -37,6 +39,16 @@ export default function BoxList({
     const longPressTriggeredRef = useRef(false);
     const [measuredBoxes, setMeasuredBoxes] = useState<
         Partial<Record<"boxOne" | "boxTwo", { x: number; y: number; width: number; height: number }>>
+    >({});
+    const [containerLayout, setContainerLayout] = useState<{
+        width: number;
+        height: number;
+    } | null>(null);
+    const [measuredCounts, setMeasuredCounts] = useState<
+        Partial<Record<keyof BoxesState, { x: number; y: number; width: number; height: number }>>
+    >({});
+    const [measuredPressables, setMeasuredPressables] = useState<
+        Partial<Record<keyof BoxesState, { x: number; y: number }>>
     >({});
 
     useEffect(() => {
@@ -93,9 +105,85 @@ export default function BoxList({
             });
         };
 
+    const handleMeasuredCountLayout =
+        (boxName: keyof BoxesState) => (event: LayoutChangeEvent) => {
+            const { x, y, width, height } = event.nativeEvent.layout;
+            setMeasuredCounts((prev) => {
+                const current = prev[boxName];
+                if (
+                    current &&
+                    current.x === x &&
+                    current.y === y &&
+                    current.width === width &&
+                    current.height === height
+                ) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    [boxName]: { x, y, width, height },
+                };
+            });
+        };
+    const handleMeasuredPressableLayout =
+        (boxName: keyof BoxesState) => (event: LayoutChangeEvent) => {
+            const { x, y } = event.nativeEvent.layout;
+            setMeasuredPressables((prev) => {
+                const current = prev[boxName];
+                if (current && current.x === x && current.y === y) {
+                    return prev;
+                }
+                return {
+                    ...prev,
+                    [boxName]: { x, y },
+                };
+            });
+        };
+
+    const countRects = displayedEntries
+        .map(([boxName]) => {
+            const countLayout = measuredCounts[boxName];
+            const pressableLayout = measuredPressables[boxName];
+            if (!countLayout || !pressableLayout) {
+                return null;
+            }
+
+            return {
+                x: pressableLayout.x + countLayout.x,
+                y: pressableLayout.y + countLayout.y,
+                width: countLayout.width,
+                height: countLayout.height,
+            };
+        })
+        .filter((value): value is { x: number; y: number; width: number; height: number } => value != null);
+    const countsAnchorFrame =
+        countRects.length > 0
+            ? {
+                left: Math.min(...countRects.map((rect) => rect.x)) - 4,
+                top: Math.min(...countRects.map((rect) => rect.y)) - 4,
+                right: Math.max(...countRects.map((rect) => rect.x + rect.width)) + 4,
+                bottom: Math.max(...countRects.map((rect) => rect.y + rect.height)) + 4,
+            }
+            : null;
+
     return (
         <View style={styles.container}>
-            <View style={styles.containerTop}>
+            <View
+                style={styles.containerTop}
+                onLayout={(event) => {
+                    const { width, height } = event.nativeEvent.layout;
+                    setContainerLayout((current) => {
+                        if (
+                            current &&
+                            current.width === width &&
+                            current.height === height
+                        ) {
+                            return current;
+                        }
+                        return { width, height };
+                    });
+                }}
+            >
                 {displayedEntries.map(([boxName, words]) => {
                     const wordCount = countOverrides?.[boxName] ?? words.length;
                     const storedFace = faces[boxName];
@@ -142,6 +230,7 @@ export default function BoxList({
                         >
                             <Pressable
                                 disabled={disabled}
+                                onLayout={handleMeasuredPressableLayout(boxName)}
                                 onPressIn={() => {
                                     if (disabled) return;
                                     longPressTriggeredRef.current = false;
@@ -187,10 +276,20 @@ export default function BoxList({
                                         shape="rect"
                                         radius={12}
                                     >
-                                        <Text style={styles.boxWords}>{wordCount}</Text>
+                                        <Text
+                                            style={styles.boxWords}
+                                            onLayout={handleMeasuredCountLayout(boxName)}
+                                        >
+                                            {wordCount}
+                                        </Text>
                                     </CoachmarkAnchor>
                                 ) : (
-                                    <Text style={styles.boxWords}>{wordCount}</Text>
+                                    <Text
+                                        style={styles.boxWords}
+                                        onLayout={handleMeasuredCountLayout(boxName)}
+                                    >
+                                        {wordCount}
+                                    </Text>
                                 )}
                             </Pressable>
                         </View>
@@ -208,6 +307,30 @@ export default function BoxList({
                                 top: promotionArrowTop,
                                 width: 1,
                                 height: 1,
+                            },
+                        ]}
+                    >
+                        <View />
+                    </CoachmarkAnchor>
+                ) : null}
+                {countsCoachmarkId && countsAnchorFrame && containerLayout ? (
+                    <CoachmarkAnchor
+                        id={countsCoachmarkId}
+                        shape="rect"
+                        radius={12}
+                        style={[
+                            styles.hiddenCountsAnchor,
+                            {
+                                left: Math.max(0, countsAnchorFrame.left),
+                                top: Math.max(0, countsAnchorFrame.top),
+                                width: Math.min(
+                                    containerLayout.width,
+                                    countsAnchorFrame.right - countsAnchorFrame.left
+                                ),
+                                height: Math.min(
+                                    containerLayout.height,
+                                    countsAnchorFrame.bottom - countsAnchorFrame.top
+                                ),
                             },
                         ]}
                     >

@@ -1,10 +1,12 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useMemo, useState } from "react";
-import { Image, Pressable, ScrollView, Text, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Image, NativeSyntheticEvent, NativeScrollEvent, Pressable, ScrollView, Text, View } from "react-native";
 
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
+import { REVIEW_COURSES_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
   getCourseIconById
 } from "@/src/constants/customCourse";
@@ -17,14 +19,23 @@ import {
   getOfficialCustomCoursesWithCardCounts,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { DueCountBadge } from "./components/DueCountBadge";
 import { ReviewCourseSection } from "./components/ReviewCourseSection";
 import { useStyles } from "./CoursesScreen-styles";
 import { OfficialCourseReviewItem, OfficialGroup } from "./types";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 export default function CoursesReviewScreen() {
   const styles = useStyles();
   const router = useRouter();
+  const scrollRef = useRef<ScrollView | null>(null);
+  const contentRef = useRef<View | null>(null);
+  const firstAvailableCourseRef = useRef<View | null>(null);
+  const autoScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const autoScrollRevealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const currentScrollYRef = useRef(0);
+  const pendingScrollYRef = useRef<number | null>(null);
   const {
     setActiveCustomCourseId,
     pinnedOfficialCourseIds,
@@ -37,11 +48,15 @@ export default function CoursesReviewScreen() {
   const [officialCounts, setOfficialCounts] = useState<Record<number, number>>(
     {}
   );
+  const [isLoading, setIsLoading] = useState(true);
+  const [pendingScrollTargetId, setPendingScrollTargetId] = useState<number | null>(null);
+  const [isAutoScrollingToTarget, setIsAutoScrollingToTarget] = useState(false);
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
 
     try {
+      setIsLoading(true);
       const [allCustomRows, officialRows] = await Promise.all([
         getCustomCoursesWithCardCounts(),
         getOfficialCustomCoursesWithCardCounts(),
@@ -116,6 +131,8 @@ export default function CoursesReviewScreen() {
       setCustomCounts({});
       setOfficialCourses([]);
       setOfficialCounts({});
+    } finally {
+      setIsLoading(false);
     }
   }, []);
 
@@ -138,18 +155,6 @@ export default function CoursesReviewScreen() {
       };
     }, [refreshData])
   );
-
-  const handleSelectCustomCourse = useCallback(
-    (courseId: number) => {
-      void (async () => {
-        await setActiveCustomCourseId(courseId);
-        router.push({ pathname: "/review/reviewflashcards", params: { courseId } });
-      })();
-    },
-    [router, setActiveCustomCourseId]
-  );
-
-
 
   const visibleCustomCourses = customCourses.filter(
     (course) => course.reviewsEnabled
@@ -217,15 +222,230 @@ export default function CoursesReviewScreen() {
     });
   }, [visibleOfficialCourses]);
   const hasOfficialGroups = officialGroups.length > 0;
+  const orderedVisibleOfficialCourses = useMemo(
+    () =>
+      officialGroups.flatMap((group) => {
+        const regularOfficial = (group.courses ?? []).filter(
+          (course) => course.isMini === false
+        );
+        const miniOfficial = (group.courses ?? []).filter(
+          (course) => course.isMini !== false
+        );
+
+        return [...regularOfficial, ...miniOfficial];
+      }),
+    [officialGroups]
+  );
+  const firstAvailableOfficialCourse = orderedVisibleOfficialCourses.find(
+    (course) => (officialCounts[course.id] ?? 0) > 0
+  );
+  const firstAvailableCustomCourse = visibleCustomCourses.find(
+    (course) => (customCounts[course.id] ?? 0) > 0
+  );
+  const firstAvailableCourseId =
+    firstAvailableOfficialCourse?.id ?? firstAvailableCustomCourse?.id ?? null;
+  const coachmark = useCoachmarkFlow({
+    flowKey: "review-courses-guided",
+    storageKey: "@review_courses_intro_seen_v1",
+    shouldStart: !isLoading && firstAvailableCourseId != null,
+    steps: REVIEW_COURSES_COACHMARK_STEPS,
+  });
+  const currentStepId = coachmark.currentStep?.id ?? null;
+  const shouldAutoScrollToCoachmarkTarget =
+    currentStepId === "review-courses-step-4" ||
+    currentStepId === "review-courses-step-5" ||
+    currentStepId === "review-courses-step-6";
+
+  const handleSelectCustomCourse = useCallback(
+    (courseId: number) => {
+      void (async () => {
+        const shouldContinueOnboarding =
+          courseId === firstAvailableCourseId &&
+          coachmark.currentStep?.id === "review-courses-step-6";
+        if (courseId === firstAvailableCourseId) {
+          await coachmark.advanceByEvent("open_review_course");
+        }
+        await setActiveCustomCourseId(courseId);
+        router.push({
+          pathname: "/review/reviewflashcards",
+          params: {
+            courseId,
+            ...(shouldContinueOnboarding
+              ? { onboarding: "review-flashcards" }
+              : {}),
+          },
+        });
+      })();
+    },
+    [coachmark, firstAvailableCourseId, router, setActiveCustomCourseId]
+  );
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive && !isAutoScrollingToTarget
+        ? {
+            currentStep: coachmark.currentStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.currentStep,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+      isAutoScrollingToTarget,
+    ]
+  );
+
+  useCoachmarkLayerPortal("review-courses-screen", coachmarkLayer);
+
+  const getCourseCoachmarkTargetId = useCallback(
+    (courseId: number) =>
+      courseId === firstAvailableCourseId ? "review-courses-first-card" : undefined,
+    [firstAvailableCourseId]
+  );
+  const getCourseBadgeCoachmarkTargetId = useCallback(
+    (courseId: number) =>
+      courseId === firstAvailableCourseId
+        ? "review-courses-first-card-badge"
+        : undefined,
+    [firstAvailableCourseId]
+  );
+  const getCourseRef = useCallback(
+    (courseId: number) =>
+      courseId === firstAvailableCourseId ? firstAvailableCourseRef : undefined,
+    [firstAvailableCourseId]
+  );
+
+  useEffect(() => {
+    return () => {
+      if (autoScrollTimeoutRef.current) {
+        clearTimeout(autoScrollTimeoutRef.current);
+      }
+      if (autoScrollRevealTimeoutRef.current) {
+        clearTimeout(autoScrollRevealTimeoutRef.current);
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (firstAvailableCourseId == null) {
+      setPendingScrollTargetId(null);
+      setIsAutoScrollingToTarget(false);
+      pendingScrollYRef.current = null;
+      return;
+    }
+
+    if (shouldAutoScrollToCoachmarkTarget) {
+      setPendingScrollTargetId(firstAvailableCourseId);
+    }
+  }, [firstAvailableCourseId, shouldAutoScrollToCoachmarkTarget]);
+
+  const finishAutoScroll = useCallback(() => {
+    if (autoScrollTimeoutRef.current) {
+      clearTimeout(autoScrollTimeoutRef.current);
+      autoScrollTimeoutRef.current = null;
+    }
+    if (autoScrollRevealTimeoutRef.current) {
+      clearTimeout(autoScrollRevealTimeoutRef.current);
+    }
+    pendingScrollYRef.current = null;
+    setPendingScrollTargetId(null);
+    autoScrollRevealTimeoutRef.current = setTimeout(() => {
+      setIsAutoScrollingToTarget(false);
+      autoScrollRevealTimeoutRef.current = null;
+    }, 140);
+  }, []);
+
+  const scrollToFirstAvailableCourse = useCallback(() => {
+    const scrollNode = scrollRef.current;
+    const contentNode = contentRef.current;
+    const courseNode = firstAvailableCourseRef.current;
+
+    if (!scrollNode || !contentNode || !courseNode) {
+      return;
+    }
+
+    courseNode.measureLayout(
+      contentNode,
+      (_x, y) => {
+        const targetY = Math.max(0, y - 24);
+        const distance = Math.abs(currentScrollYRef.current - targetY);
+        if (distance <= 2) {
+          finishAutoScroll();
+          return;
+        }
+
+        pendingScrollYRef.current = targetY;
+        setIsAutoScrollingToTarget(true);
+        scrollNode.scrollTo({ x: 0, y: targetY, animated: true });
+
+        if (autoScrollTimeoutRef.current) {
+          clearTimeout(autoScrollTimeoutRef.current);
+        }
+        autoScrollTimeoutRef.current = setTimeout(() => {
+          finishAutoScroll();
+        }, 420);
+      },
+      () => {
+        // Retry on the next layout pass if the node is not measurable yet.
+      }
+    );
+  }, [finishAutoScroll]);
+
+  useEffect(() => {
+    if (pendingScrollTargetId == null) {
+      return;
+    }
+
+    requestAnimationFrame(() => {
+      scrollToFirstAvailableCourse();
+    });
+  }, [pendingScrollTargetId, scrollToFirstAvailableCourse]);
+
+  const handleScroll = useCallback((event: NativeSyntheticEvent<NativeScrollEvent>) => {
+    currentScrollYRef.current = event.nativeEvent.contentOffset.y;
+  }, []);
+
+  const handleScrollSettled = useCallback(() => {
+    const pendingScrollY = pendingScrollYRef.current;
+    if (pendingScrollY == null) {
+      return;
+    }
+
+    if (Math.abs(currentScrollYRef.current - pendingScrollY) <= 2) {
+      finishAutoScroll();
+    }
+  }, [finishAutoScroll]);
 
   return (
     <View style={styles.container}>
+      <CoachmarkAnchor
+        id="review-courses-bubble-anchor"
+        shape="rect"
+        radius={12}
+        style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
+      />
       <ScrollView
+        ref={scrollRef}
         style={styles.scrollArea}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
+        scrollEnabled={!coachmark.currentStep?.scrollLocked && !isAutoScrollingToTarget}
+        onScroll={handleScroll}
+        onMomentumScrollEnd={handleScrollSettled}
+        onScrollEndDrag={handleScrollSettled}
+        scrollEventThrottle={16}
       >
-        <View style={styles.minicontainer}>
+        <View ref={contentRef} collapsable={false} style={styles.minicontainer}>
           {/* <Text style={styles.title}>Powtórki</Text> */}
 
           <View style={styles.section}>
@@ -285,6 +505,9 @@ export default function CoursesReviewScreen() {
                       list={regularOfficial}
                       counts={officialCounts}
                       onSelect={handleSelectCustomCourse}
+                      getCourseCoachmarkTargetId={getCourseCoachmarkTargetId}
+                      getCourseBadgeCoachmarkTargetId={getCourseBadgeCoachmarkTargetId}
+                      getCourseRef={getCourseRef}
                     />
                   )}
                   {showMini && (
@@ -293,6 +516,9 @@ export default function CoursesReviewScreen() {
                       list={miniOfficial}
                       counts={officialCounts}
                       onSelect={handleSelectCustomCourse}
+                      getCourseCoachmarkTargetId={getCourseCoachmarkTargetId}
+                      getCourseBadgeCoachmarkTargetId={getCourseBadgeCoachmarkTargetId}
+                      getCourseRef={getCourseRef}
                     />
                   )}
                 </View>
@@ -326,27 +552,53 @@ export default function CoursesReviewScreen() {
                   return (
                     <Pressable
                       key={`${course.id}-${index}`}
-                      style={[
-                        styles.courseCard,
-                        dueCount === 0 && styles.courseCardDisabled,
-                      ]}
+                      style={styles.courseCardSlot}
                       disabled={dueCount === 0}
                       accessibilityState={{ disabled: dueCount === 0 }}
                       onPress={() => handleSelectCustomCourse(course.id)}
                     >
-                      <IconComponent
-                        name={iconName}
-                        size={48}
-                        color={course.iconColor}
-                      />
-                      <CourseTitleMarquee
-                        text={course.name}
-                        containerStyle={styles.courseCardTitleContainer}
-                        textStyle={styles.courseCardText}
-                      />
-                      <View style={styles.courseCount}>
-                        <DueCountBadge count={dueCount} />
-                      </View>
+                      <CoachmarkAnchor
+                        id={
+                          course.id === firstAvailableCourseId
+                            ? "review-courses-first-card"
+                            : `review-courses-custom-${course.id}`
+                        }
+                        shape="rect"
+                        radius={15}
+                      >
+                        <View
+                          ref={course.id === firstAvailableCourseId ? firstAvailableCourseRef : undefined}
+                          collapsable={false}
+                          style={[
+                            styles.courseCard,
+                            dueCount === 0 && styles.courseCardDisabled,
+                          ]}
+                        >
+                          <IconComponent
+                            name={iconName}
+                            size={48}
+                            color={course.iconColor}
+                          />
+                          <CourseTitleMarquee
+                            text={course.name}
+                            containerStyle={styles.courseCardTitleContainer}
+                            textStyle={styles.courseCardText}
+                          />
+                          <View style={styles.courseCount}>
+                            {course.id === firstAvailableCourseId ? (
+                              <CoachmarkAnchor
+                                id="review-courses-first-card-badge"
+                                shape="rect"
+                                radius={16}
+                              >
+                                <DueCountBadge count={dueCount} />
+                              </CoachmarkAnchor>
+                            ) : (
+                              <DueCountBadge count={dueCount} />
+                            )}
+                          </View>
+                        </View>
+                      </CoachmarkAnchor>
                     </Pressable>
                   );
                 })}

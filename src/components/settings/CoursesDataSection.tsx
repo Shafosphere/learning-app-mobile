@@ -67,6 +67,8 @@ const CoursesDataSection: React.FC = () => {
     "@course_pin_intro_seen_v1",
     "@course_activate_intro_seen_v1",
     "@course_entry_settings_intro_seen_v1",
+    "@review_courses_intro_seen_v1",
+    "@review_flashcards_intro_seen_v1",
     "@flashcards_intro_seen_v1",
     "flashcards.actionsPositionNudgeSeen",
     "flashcards.actionsPositionNudgeAnswerCount",

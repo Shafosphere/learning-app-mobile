@@ -8,6 +8,9 @@ import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/FlashcardsPlaceholderCard";
+import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
+import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
@@ -17,6 +20,7 @@ import {
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -26,6 +30,7 @@ import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { Animated, ScrollView, View } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
@@ -105,7 +110,10 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
 
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
-  const params = useLocalSearchParams<{ courseId?: string }>();
+  const params = useLocalSearchParams<{
+    courseId?: string;
+    onboarding?: string;
+  }>();
   const styles = useStyles();
   const {
     actionButtonsPosition,
@@ -126,6 +134,7 @@ export default function ReviewFlashcardsPlaceholder() {
           : NaN;
     return Number.isFinite(num) ? num : null;
   }, [params?.courseId]);
+  const shouldStartReviewCoachmark = params?.onboarding === "review-flashcards";
   const showExplanationEnabled = useMemo(
     () =>
       courseId != null ? getCustomCourseShowExplanationEnabled(courseId) : true,
@@ -137,7 +146,7 @@ export default function ReviewFlashcardsPlaceholder() {
     [courseId, getCustomCourseExplanationOnlyOnWrong]
   );
   const [boxes, setBoxes] = useState<BoxesState>(() => createEmptyBoxes());
-  const [activeBox, setActiveBox] = useState<keyof BoxesState | null>("boxOne");
+  const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(
     null,
   );
@@ -172,9 +181,8 @@ export default function ReviewFlashcardsPlaceholder() {
   });
 
   const resetSessionState = useCallback((nextBoxes: BoxesState) => {
-    const firstBox = findFirstActiveBox(nextBoxes);
     setBoxes(nextBoxes);
-    setActiveBox(firstBox);
+    setActiveBox(null);
     queuesRef.current = {
       boxZero: nextBoxes.boxZero.length > 0 ? [...nextBoxes.boxZero] : [],
       boxOne: nextBoxes.boxOne.length > 0 ? [...nextBoxes.boxOne] : [],
@@ -183,11 +191,11 @@ export default function ReviewFlashcardsPlaceholder() {
       boxFour: nextBoxes.boxFour.length > 0 ? [...nextBoxes.boxFour] : [],
       boxFive: nextBoxes.boxFive.length > 0 ? [...nextBoxes.boxFive] : [],
     };
-    setSelectedItem(firstBox ? queuesRef.current[firstBox]?.[0] ?? null : null);
+    setSelectedItem(null);
     setQueueNext(false);
     setPeekBox(null);
     setPeekCards([]);
-    setQuestionShownAt(firstBox ? Date.now() : null);
+    setQuestionShownAt(null);
     setLongThink(false);
     setIsBetweenCards(false);
     setAnswer("");
@@ -848,6 +856,7 @@ export default function ReviewFlashcardsPlaceholder() {
       onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={async () => undefined}
       downloadDisabled={cardActionsDownloadDisabled}
+      downloadCoachmarkId="review-flashcards-add-button"
       confirmDisabled={cardActionsConfirmDisabled}
       confirmLabel={cardActionsConfirmLabel}
     />
@@ -860,6 +869,7 @@ export default function ReviewFlashcardsPlaceholder() {
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
         onBoxLongPress={handleBoxLongPress}
+        countsCoachmarkId="review-flashcards-box-counts"
       />
     ) : (
       <BoxesCarousel
@@ -875,10 +885,52 @@ export default function ReviewFlashcardsPlaceholder() {
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
-  const isSessionEmpty = !isLoading && selectedItem == null;
+  const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
+  const shouldPromptBoxSelection =
+    !isLoading && selectedItem == null && hasCardsInSession && activeBox == null;
+  const isSessionEmpty = !isLoading && selectedItem == null && !hasCardsInSession;
+  const coachmark = useCoachmarkFlow({
+    flowKey: "review-flashcards-guided",
+    storageKey: "@review_flashcards_intro_seen_v1",
+    shouldStart:
+      shouldStartReviewCoachmark && !isLoading && hasCardsInSession,
+    steps: REVIEW_FLASHCARDS_COACHMARK_STEPS,
+  });
+  const coachmarkLayer = useMemo(
+    () =>
+      coachmark.isActive
+        ? {
+            currentStep: coachmark.currentStep,
+            currentIndex: coachmark.currentIndex,
+            totalSteps: coachmark.totalSteps,
+            canGoBack: coachmark.canGoBack,
+            canGoNext: coachmark.canGoNext,
+            onBack: coachmark.goBack,
+            onNext: coachmark.goNext,
+          }
+        : null,
+    [
+      coachmark.canGoBack,
+      coachmark.canGoNext,
+      coachmark.currentIndex,
+      coachmark.currentStep,
+      coachmark.goBack,
+      coachmark.goNext,
+      coachmark.isActive,
+      coachmark.totalSteps,
+    ],
+  );
+
+  useCoachmarkLayerPortal("review-flashcards-screen", coachmarkLayer);
 
   return (
     <View style={styles.container}>
+      <CoachmarkAnchor
+        id="review-flashcards-bubble-anchor"
+        shape="rect"
+        radius={12}
+        style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
+      />
       <Confetti generateConfetti={shouldCelebrate} />
 
       <View
@@ -893,61 +945,35 @@ export default function ReviewFlashcardsPlaceholder() {
           layout={SCREEN_LAYOUT_TRANSITION}
           style={styles.cardSectionWrapper}
         >
-          {isSessionEmpty ? (
-            <View
-              style={{
-                minHeight: 240,
-                borderRadius: 24,
-                paddingHorizontal: 24,
-                paddingVertical: 28,
-                justifyContent: "center",
-                alignItems: "center",
-                backgroundColor: "rgba(255,255,255,0.08)",
-                gap: 12,
-              }}
-            >
-              <View style={{ gap: 6, alignItems: "center" }}>
-                <Animated.Text
-                  style={{
-                    fontSize: 22,
-                    fontWeight: "700",
-                    color: "#FFFFFF",
-                    textAlign: "center",
-                  }}
-                >
-                  Brak fiszek w tej sesji
-                </Animated.Text>
-                <Animated.Text
-                  style={{
-                    fontSize: 15,
-                    color: "rgba(255,255,255,0.78)",
-                    textAlign: "center",
-                  }}
-                >
-                  Odśwież ekran albo wróć później, gdy kolejne powtórki będą gotowe.
-                </Animated.Text>
-              </View>
+          <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
+            <View collapsable={false}>
+              {isSessionEmpty ? (
+                <FlashcardsPlaceholderCard
+                  title="Brak fiszek w tej sesji"
+                  description="Odśwież ekran albo wróć później, gdy kolejne powtórki będą gotowe."
+                />
+              ) : (
+                <Card
+                  selectedItem={selectedItem}
+                  setAnswer={setAnswer}
+                  answer={answer}
+                  result={result}
+                  confirm={handleConfirm}
+                  reversed={reversed}
+                  setResult={setResult}
+                  correction={correction}
+                  wrongInputChange={wrongInputChange}
+                  setCorrectionRewers={setCorrectionRewers}
+                  introMode={false}
+                  onHintUpdate={() => undefined}
+                  hideHints
+                  isFocused={!isLoading}
+                  showExplanationEnabled={showExplanationEnabled}
+                  explanationOnlyOnWrong={explanationOnlyOnWrong}
+                />
+              )}
             </View>
-          ) : (
-            <Card
-              selectedItem={selectedItem}
-              setAnswer={setAnswer}
-              answer={answer}
-              result={result}
-              confirm={handleConfirm}
-              reversed={reversed}
-              setResult={setResult}
-              correction={correction}
-              wrongInputChange={wrongInputChange}
-              setCorrectionRewers={setCorrectionRewers}
-              introMode={false}
-              onHintUpdate={() => undefined}
-              hideHints
-              isFocused={!isLoading}
-              showExplanationEnabled={showExplanationEnabled}
-              explanationOnlyOnWrong={explanationOnlyOnWrong}
-            />
-          )}
+          </CoachmarkAnchor>
         </Reanimated.View>
 
         {areButtonsOnTop ? (
@@ -955,7 +981,13 @@ export default function ReviewFlashcardsPlaceholder() {
             layout={SCREEN_LAYOUT_TRANSITION}
             style={styles.topButtonsWrapper}
           >
-            {renderButtons("top")}
+            <CoachmarkAnchor
+              id="review-flashcards-buttons-section"
+              shape="rect"
+              radius={24}
+            >
+              <View collapsable={false}>{renderButtons("top")}</View>
+            </CoachmarkAnchor>
           </Reanimated.View>
         ) : null}
 
@@ -966,54 +998,58 @@ export default function ReviewFlashcardsPlaceholder() {
             !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
           ]}
         >
-          {boxesNeedScrollFallback ? (
-            <ScrollView
-              style={styles.boxesViewport}
-              contentContainerStyle={styles.boxesViewportScrollContent}
-              onLayout={onBoxesViewportLayout}
-              showsVerticalScrollIndicator={false}
-            >
-              <View
-                style={[
-                  styles.boxesScaledContent,
-                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
-                ]}
-              >
-                <View
-                  style={{
-                    transform: [
-                      { translateY: -boxesScaleOffsetY },
-                      { scale: boxesScale },
-                    ],
-                  }}
-                  onLayout={onBoxesContentLayout}
+          <CoachmarkAnchor id="review-flashcards-boxes-section" shape="rect" radius={24}>
+            <View collapsable={false}>
+              {boxesNeedScrollFallback ? (
+                <ScrollView
+                  style={styles.boxesViewport}
+                  contentContainerStyle={styles.boxesViewportScrollContent}
+                  onLayout={onBoxesViewportLayout}
+                  showsVerticalScrollIndicator={false}
                 >
-                  {boxesContent}
+                  <View
+                    style={[
+                      styles.boxesScaledContent,
+                      boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        transform: [
+                          { translateY: -boxesScaleOffsetY },
+                          { scale: boxesScale },
+                        ],
+                      }}
+                      onLayout={onBoxesContentLayout}
+                    >
+                      {boxesContent}
+                    </View>
+                  </View>
+                </ScrollView>
+              ) : (
+                <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
+                  <View
+                    style={[
+                      styles.boxesScaledContent,
+                      boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                    ]}
+                  >
+                    <View
+                      style={{
+                        transform: [
+                          { translateY: -boxesScaleOffsetY },
+                          { scale: boxesScale },
+                        ],
+                      }}
+                      onLayout={onBoxesContentLayout}
+                    >
+                      {boxesContent}
+                    </View>
+                  </View>
                 </View>
-              </View>
-            </ScrollView>
-          ) : (
-            <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
-              <View
-                style={[
-                  styles.boxesScaledContent,
-                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
-                ]}
-              >
-                <View
-                  style={{
-                    transform: [
-                      { translateY: -boxesScaleOffsetY },
-                      { scale: boxesScale },
-                    ],
-                  }}
-                  onLayout={onBoxesContentLayout}
-                >
-                  {boxesContent}
-                </View>
-              </View>
+              )}
             </View>
-          )}
+          </CoachmarkAnchor>
         </Reanimated.View>
 
         {shouldRenderBottomButtons ? (
@@ -1036,17 +1072,25 @@ export default function ReviewFlashcardsPlaceholder() {
               collapsable={false}
               style={styles.bottomButtonsWrapper}
             >
-              <Animated.View
-                style={{
-                  transform: [
-                    {
-                      translateY: Animated.multiply(bottomButtonsOffset, -1),
-                    },
-                  ],
-                }}
+              <CoachmarkAnchor
+                id="review-flashcards-buttons-section"
+                shape="rect"
+                radius={24}
               >
-                {renderButtons("bottom")}
-              </Animated.View>
+                <View collapsable={false}>
+                  <Animated.View
+                    style={{
+                      transform: [
+                        {
+                          translateY: Animated.multiply(bottomButtonsOffset, -1),
+                        },
+                      ],
+                    }}
+                  >
+                    {renderButtons("bottom")}
+                  </Animated.View>
+                </View>
+              </CoachmarkAnchor>
             </View>
           </View>
         ) : null}

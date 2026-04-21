@@ -3,6 +3,7 @@ import {
     getCourseIconById,
     resolveCourseIconProps,
 } from "@/src/constants/customCourse";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import { Image, Pressable, Text, View } from "react-native";
@@ -15,6 +16,9 @@ interface ReviewCourseSectionProps {
     list: OfficialCourseReviewItem[];
     counts: Record<number, number>;
     onSelect: (id: number) => void;
+    getCourseCoachmarkTargetId?: (id: number) => string | undefined;
+    getCourseBadgeCoachmarkTargetId?: (id: number) => string | undefined;
+    getCourseRef?: (id: number) => React.Ref<View> | undefined;
 }
 
 export const ReviewCourseSection = ({
@@ -22,6 +26,9 @@ export const ReviewCourseSection = ({
     list,
     counts,
     onSelect,
+    getCourseCoachmarkTargetId,
+    getCourseBadgeCoachmarkTargetId,
+    getCourseRef,
 }: ReviewCourseSectionProps) => {
     const styles = useStyles();
 
@@ -44,17 +51,17 @@ export const ReviewCourseSection = ({
                         "grid-outline") as never;
                     const dueCount = counts[course.id] ?? 0;
                     const mainFlag = iconProps.mainImageSource;
+                    const courseCoachmarkId = getCourseCoachmarkTargetId?.(course.id);
+                    const badgeCoachmarkId = getCourseBadgeCoachmarkTargetId?.(course.id);
 
-                    return (
-                        <Pressable
-                            key={`official-${course.id}`}
+                    const cardFace = (
+                        <View
+                            ref={getCourseRef?.(course.id)}
+                            collapsable={false}
                             style={[
                                 styles.courseCard,
                                 dueCount === 0 && styles.courseCardDisabled,
                             ]}
-                            disabled={dueCount === 0}
-                            accessibilityState={{ disabled: dueCount === 0 }}
-                            onPress={() => onSelect(course.id)}
                         >
                             {mainFlag ? (
                                 <Image
@@ -74,8 +81,38 @@ export const ReviewCourseSection = ({
                                 textStyle={styles.courseCardText}
                             />
                             <View style={styles.courseCount}>
-                                <DueCountBadge count={dueCount} />
+                                {badgeCoachmarkId ? (
+                                    <CoachmarkAnchor id={badgeCoachmarkId} shape="rect" radius={16}>
+                                        <DueCountBadge count={dueCount} />
+                                    </CoachmarkAnchor>
+                                ) : (
+                                    <DueCountBadge count={dueCount} />
+                                )}
                             </View>
+                        </View>
+                    );
+
+                    const measuredCard = courseCoachmarkId ? (
+                        <CoachmarkAnchor
+                            id={courseCoachmarkId}
+                            shape="rect"
+                            radius={15}
+                        >
+                            {cardFace}
+                        </CoachmarkAnchor>
+                    ) : (
+                        cardFace
+                    );
+
+                    return (
+                        <Pressable
+                            key={`official-${course.id}`}
+                            style={styles.courseCardSlot}
+                            disabled={dueCount === 0}
+                            accessibilityState={{ disabled: dueCount === 0 }}
+                            onPress={() => onSelect(course.id)}
+                        >
+                            {measuredCard}
                         </Pressable>
                     );
                 })}

@@ -25,4 +25,7 @@ export const useBoxListStyles = createThemeStylesHook((colors) => ({
     hiddenPromotionAnchor: {
         position: "absolute",
     },
+    hiddenCountsAnchor: {
+        position: "absolute",
+    },
 }));
