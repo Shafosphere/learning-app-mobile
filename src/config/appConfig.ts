@@ -1,12 +1,12 @@
 export const DEFAULT_FLASHCARDS_BATCH_SIZE = 10;
 
-// Review intervals in milliseconds: [2d, 7d, 30d, 90d, 180d, 365d]
-export const REVIEW_INTERVALS_MS = [
-  // Index 0 is the “immediate” interval (Box 0), indexes 1–5 map to boxes one through five.
-  0, // immediate
-  60 * 1000, // 1 minute
-  5 * 60 * 1000, // 5 minutes
-  15 * 60 * 1000, // 15 minutes
-  60 * 60 * 1000, // 1 hour
-  2 * 60 * 60 * 1000, // 2 hours
-];
+const DAY_MS = 24 * 60 * 60 * 1000;
+
+export const REVIEW_INTERVAL_RANGES_MS = [
+  [1 * DAY_MS, 2 * DAY_MS],
+  [4 * DAY_MS, 5 * DAY_MS],
+  [7 * DAY_MS, 10 * DAY_MS],
+  [17 * DAY_MS, 20 * DAY_MS],
+  [20 * DAY_MS, 40 * DAY_MS],
+  [40 * DAY_MS, 80 * DAY_MS],
+] as const;

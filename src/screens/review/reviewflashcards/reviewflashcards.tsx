@@ -1,3 +1,4 @@
+import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 
 import Card from "@/src/components/card/card";
@@ -7,10 +8,10 @@ import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
-import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -37,6 +38,7 @@ const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
 
 const NON_INTRO_BOXES: readonly (keyof BoxesState)[] = [
+  "boxZero",
   "boxOne",
   "boxTwo",
   "boxThree",
@@ -54,10 +56,10 @@ const createEmptyBoxes = (): BoxesState => ({
 });
 
 const stageToBox = (stage?: number): keyof BoxesState => {
-  const value = typeof stage === "number" ? stage : 1;
+  const value = typeof stage === "number" ? stage : 0;
   const clamped = Math.max(0, Math.min(value, 5));
-  // Stage 0 (immediate) trafia tutaj do boxOne, bo boxZero jest ukryty na tym ekranie.
-  if (clamped <= 1) return "boxOne";
+  if (clamped === 0) return "boxZero";
+  if (clamped === 1) return "boxOne";
   if (clamped === 2) return "boxTwo";
   if (clamped === 3) return "boxThree";
   if (clamped === 4) return "boxFour";
@@ -79,7 +81,7 @@ const boxToStage = (box: keyof BoxesState | null | undefined): number => {
     case "boxFive":
       return 5;
     default:
-      return 1;
+      return 0;
   }
 };
 
@@ -159,9 +161,6 @@ export default function ReviewFlashcardsPlaceholder() {
     promote: boolean;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const scheduledTimersRef = useRef<Map<number, ReturnType<typeof setTimeout>>>(
-    new Map(),
-  );
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
     boxZero: [],
@@ -172,17 +171,78 @@ export default function ReviewFlashcardsPlaceholder() {
     boxFive: [],
   });
 
-  const clearScheduledTimers = useCallback(() => {
-    const timers = scheduledTimersRef.current;
-    timers.forEach((timer) => {
-      if (timer) clearTimeout(timer);
-    });
-    timers.clear();
+  const resetSessionState = useCallback((nextBoxes: BoxesState) => {
+    const firstBox = findFirstActiveBox(nextBoxes);
+    setBoxes(nextBoxes);
+    setActiveBox(firstBox);
+    queuesRef.current = {
+      boxZero: nextBoxes.boxZero.length > 0 ? [...nextBoxes.boxZero] : [],
+      boxOne: nextBoxes.boxOne.length > 0 ? [...nextBoxes.boxOne] : [],
+      boxTwo: nextBoxes.boxTwo.length > 0 ? [...nextBoxes.boxTwo] : [],
+      boxThree: nextBoxes.boxThree.length > 0 ? [...nextBoxes.boxThree] : [],
+      boxFour: nextBoxes.boxFour.length > 0 ? [...nextBoxes.boxFour] : [],
+      boxFive: nextBoxes.boxFive.length > 0 ? [...nextBoxes.boxFive] : [],
+    };
+    setSelectedItem(firstBox ? queuesRef.current[firstBox]?.[0] ?? null : null);
+    setQueueNext(false);
+    setPeekBox(null);
+    setPeekCards([]);
+    setQuestionShownAt(firstBox ? Date.now() : null);
+    setLongThink(false);
+    setIsBetweenCards(false);
+    setAnswer("");
+    setResult(null);
+    setCorrection(null);
+    setPendingExplanationMove(null);
+  }, []);
+
+  const clearTransitionTimer = useCallback(() => {
     if (transitionTimerRef.current) {
       clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = null;
     }
   }, []);
+
+  const removeCardFromSession = useCallback((cardId: number, box: keyof BoxesState) => {
+    setBoxes((prev) => {
+      const nextState = (Object.keys(prev) as Array<keyof BoxesState>).reduce(
+        (acc, boxKey) => {
+          acc[boxKey] = (prev[boxKey] ?? []).filter((item) => item.id !== cardId);
+          return acc;
+        },
+        {} as BoxesState,
+      );
+      const nextActive = findFirstActiveBox(nextState);
+      if ((nextState[box] ?? []).length === 0 && nextActive !== box) {
+        setActiveBox(nextActive);
+      }
+      if (nextActive == null) {
+        setSelectedItem(null);
+        setQuestionShownAt(null);
+        setLongThink(false);
+      }
+      return nextState;
+    });
+  }, []);
+
+  const reloadSession = useCallback(async () => {
+    clearTransitionTimer();
+    if (!courseId) {
+      resetSessionState(createEmptyBoxes());
+      return;
+    }
+    setIsLoading(true);
+    try {
+      const cards = await getDueCustomReviewFlashcards(courseId);
+      const mapped = cards.map(mapReviewCardToWord);
+      resetSessionState(distributeByStage(mapped));
+    } catch (err) {
+      console.error("Failed to load review flashcards", err);
+      resetSessionState(createEmptyBoxes());
+    } finally {
+      setIsLoading(false);
+    }
+  }, [clearTransitionTimer, courseId, resetSessionState]);
 
   const syncQueueWithBox = useCallback(
     (box: keyof BoxesState) => {
@@ -248,101 +308,20 @@ export default function ReviewFlashcardsPlaceholder() {
     [boxes, ensureQueueHasItems, syncQueueWithBox],
   );
 
-  const scheduleReturnToBox = useCallback(
-    (card: WordWithTranslations, nextStage: number, nextReview: number) => {
-      const targetBox = stageToBox(nextStage);
-      const delay = Math.max(0, nextReview - Date.now());
-      const timers = scheduledTimersRef.current;
+  useEffect(() => {
+    return () => {
+      clearTransitionTimer();
+    };
+  }, [clearTransitionTimer]);
 
-      if (timers.has(card.id)) {
-        clearTimeout(timers.get(card.id)!);
-        timers.delete(card.id);
-      }
-
-      const requeue = () => {
-        timers.delete(card.id);
-        const updatedCard: WordWithTranslations = {
-          ...card,
-          stage: nextStage,
-          nextReview,
-        };
-
-        setBoxes((prev) => {
-          const existing = prev[targetBox]?.some((item) => item.id === card.id);
-          if (existing) return prev;
-          const updatedTarget = [...(prev[targetBox] ?? []), updatedCard];
-          return {
-            ...prev,
-            [targetBox]: updatedTarget,
-          };
-        });
-        setActiveBox((current) => current ?? targetBox);
+  useFocusEffect(
+    useCallback(() => {
+      void reloadSession();
+      return () => {
+        clearTransitionTimer();
       };
-
-      if (delay <= 0) {
-        requeue();
-        return;
-      }
-
-      const timer = setTimeout(requeue, delay);
-      timers.set(card.id, timer);
-    },
-    [],
+    }, [clearTransitionTimer, reloadSession]),
   );
-
-  useEffect(() => {
-    return () => {
-      clearScheduledTimers();
-    };
-  }, [clearScheduledTimers]);
-
-  useEffect(() => {
-    let cancelled = false;
-    clearScheduledTimers();
-
-    if (!courseId) {
-      setBoxes(createEmptyBoxes());
-      setActiveBox(null);
-      return;
-    }
-    setIsLoading(true);
-    void getDueCustomReviewFlashcards(courseId, DEFAULT_FLASHCARDS_BATCH_SIZE)
-      .then((cards) => {
-        if (cancelled) return;
-        const mapped = cards.map(mapReviewCardToWord);
-        const nextBoxes = distributeByStage(mapped);
-        setBoxes(nextBoxes);
-        const firstBox = findFirstActiveBox(nextBoxes);
-        setActiveBox(firstBox);
-        if (firstBox) {
-          queuesRef.current = {
-            boxZero: [],
-            boxOne: nextBoxes.boxOne.length > 0 ? [...nextBoxes.boxOne] : [],
-            boxTwo: nextBoxes.boxTwo.length > 0 ? [...nextBoxes.boxTwo] : [],
-            boxThree:
-              nextBoxes.boxThree.length > 0 ? [...nextBoxes.boxThree] : [],
-            boxFour: nextBoxes.boxFour.length > 0 ? [...nextBoxes.boxFour] : [],
-            boxFive: nextBoxes.boxFive.length > 0 ? [...nextBoxes.boxFive] : [],
-          };
-          const first = queuesRef.current[firstBox]?.[0] ?? null;
-          setSelectedItem(first ?? null);
-        } else {
-          setSelectedItem(null);
-        }
-      })
-      .catch((err) => {
-        console.error("Failed to load review flashcards", err);
-        if (cancelled) return;
-        setBoxes(createEmptyBoxes());
-        setActiveBox(null);
-      })
-      .finally(() => {
-        if (!cancelled) setIsLoading(false);
-      });
-    return () => {
-      cancelled = true;
-    };
-  }, [clearScheduledTimers, courseId]);
 
   const handleSelectBox = (box: keyof BoxesState) => {
     const now = Date.now();
@@ -427,44 +406,19 @@ export default function ReviewFlashcardsPlaceholder() {
       setAnswer("");
       return;
     }
-    const currentStage = card?.stage ?? boxToStage(activeBox);
-    const baseCard: WordWithTranslations | null = card
-      ? { ...card, stage: currentStage }
-      : selectedItem
-        ? { ...selectedItem, stage: currentStage }
-        : null;
-
     void (async () => {
       try {
-        const { stage: demotedStage, nextReview } = await scheduleCustomReview(
+        await scheduleCustomReview(
           correction.cardId!,
           courseId,
-          1,
+          0,
         );
-        if (baseCard) {
-          scheduleReturnToBox(baseCard, demotedStage, nextReview);
-        }
       } catch (error) {
         console.error("Failed to demote after correction", error);
       }
     })();
 
-    setBoxes((prev) => {
-      const nextState = (Object.keys(prev) as Array<keyof BoxesState>).reduce(
-        (acc, boxKey) => {
-          acc[boxKey] = (prev[boxKey] ?? []).filter(
-            (item) => item.id !== correction.cardId,
-          );
-          return acc;
-        },
-        {} as BoxesState,
-      );
-      const nextActive = findFirstActiveBox(nextState);
-      if ((nextState[activeBox] ?? []).length === 0 && nextActive !== activeBox) {
-        setActiveBox(nextActive);
-      }
-      return nextState;
-    });
+    removeCardFromSession(correction.cardId, activeBox);
     setCorrection(null);
     setResult(null);
     setAnswer("");
@@ -479,8 +433,8 @@ export default function ReviewFlashcardsPlaceholder() {
     correctionAnswerOnly,
     correctionEffectiveReversed,
     pendingExplanationMove,
-    scheduleReturnToBox,
     selectedItem,
+    removeCardFromSession,
   ]);
 
   useEffect(() => {
@@ -565,46 +519,22 @@ export default function ReviewFlashcardsPlaceholder() {
       void (async () => {
         try {
           if (pendingExplanationMove.promote) {
-            const { stage: nextStage, nextReview } = await advanceCustomReview(
+            await advanceCustomReview(
               currentCardId,
               courseId,
-            );
-            scheduleReturnToBox(
-              { ...selectedItem, stage: selectedItem.stage ?? boxToStage(activeBox) },
-              nextStage,
-              nextReview,
             );
           } else {
-            const { stage: demotedStage, nextReview } = await scheduleCustomReview(
+            await scheduleCustomReview(
               currentCardId,
               courseId,
-              1,
-            );
-            scheduleReturnToBox(
-              { ...selectedItem, stage: selectedItem.stage ?? boxToStage(activeBox) },
-              demotedStage,
-              nextReview,
+              0,
             );
           }
         } catch (error) {
           console.error("Failed to finalize explanation move", error);
         }
       })();
-      setBoxes((prev) => {
-        const current = prev[activeBox] ?? [];
-        const remaining = current.filter((item) => item.id !== currentCardId);
-        const nextState: BoxesState = {
-          ...prev,
-          [activeBox]: remaining,
-        };
-        if (remaining.length === 0) {
-          const nextActive = findFirstActiveBox(nextState);
-          if (nextActive !== activeBox) {
-            setActiveBox(nextActive);
-          }
-        }
-        return nextState;
-      });
+      removeCardFromSession(currentCardId, activeBox);
       setPendingExplanationMove(null);
       setAnswer("");
       setResult(null);
@@ -632,8 +562,23 @@ export default function ReviewFlashcardsPlaceholder() {
     };
 
     const currentStage = selectedItem.stage ?? boxToStage(activeBox);
+    const currentBox = selectedItem.stage != null ? stageToBox(selectedItem.stage) : activeBox;
+    const durationMs =
+      questionShownAt != null ? Math.max(0, Date.now() - questionShownAt) : undefined;
+    const logAttemptEvent = (resultValue: "ok" | "wrong") => {
+      void logCustomLearningEvent({
+        flashcardId: selectedItem.id,
+        courseId,
+        box: currentBox,
+        result: resultValue,
+        durationMs,
+      }).catch((error) => {
+        console.warn("[Review] Failed to log learning event", error);
+      });
+    };
 
     if (!ok) {
+      logAttemptEvent("wrong");
       const wrongExplanationState = getExplanationState({
         selectedItem,
         result: false,
@@ -651,16 +596,11 @@ export default function ReviewFlashcardsPlaceholder() {
         const delayMs = wrongExplanationState.hasExplanation ? 3500 : 1500;
         void (async () => {
           try {
-            const { stage: demotedStage, nextReview } = await scheduleCustomReview(
+            await scheduleCustomReview(
               selectedItem.id,
               courseId,
-              1,
+              0,
             );
-            const baseCard: WordWithTranslations = {
-              ...selectedItem,
-              stage: currentStage,
-            };
-            scheduleReturnToBox(baseCard, demotedStage, nextReview);
           } catch (error) {
             console.error("Failed to demote after know/dont know", error);
             setBoxes((prev) => {
@@ -678,23 +618,7 @@ export default function ReviewFlashcardsPlaceholder() {
         })();
 
         transitionTimerRef.current = setTimeout(() => {
-          setBoxes((prev) => {
-            const current = prev[activeBox] ?? [];
-            const remaining = current.filter((item) => item.id !== selectedItem.id);
-            const nextState: BoxesState = {
-              ...prev,
-              [activeBox]: remaining,
-            };
-
-            if (remaining.length === 0) {
-              const nextActive = findFirstActiveBox(nextState);
-              if (nextActive !== activeBox) {
-                setActiveBox(nextActive);
-              }
-            }
-
-            return nextState;
-          });
+          removeCardFromSession(selectedItem.id, activeBox);
           reset();
           transitionTimerRef.current = null;
           setQueueNext(true);
@@ -730,6 +654,7 @@ export default function ReviewFlashcardsPlaceholder() {
       return;
     }
 
+    logAttemptEvent("ok");
     const isPerfect = (() => {
       const normalizeStrict = (s: string) =>
         stripDiacritics(s.trim().toLowerCase());
@@ -766,15 +691,10 @@ export default function ReviewFlashcardsPlaceholder() {
 
     void (async () => {
       try {
-        const { stage: nextStage, nextReview } = await advanceCustomReview(
+        await advanceCustomReview(
           selectedItem.id,
           courseId,
         );
-        const baseCard: WordWithTranslations = {
-          ...selectedItem,
-          stage: currentStage,
-        };
-        scheduleReturnToBox(baseCard, nextStage, nextReview);
       } catch (error) {
         console.error("Failed to advance custom review", error);
         setBoxes((prev) => {
@@ -792,23 +712,7 @@ export default function ReviewFlashcardsPlaceholder() {
     })();
 
     transitionTimerRef.current = setTimeout(() => {
-      setBoxes((prev) => {
-        const current = prev[activeBox] ?? [];
-        const remaining = current.filter((item) => item.id !== selectedItem.id);
-        const nextState: BoxesState = {
-          ...prev,
-          [activeBox]: remaining,
-        };
-
-        if (remaining.length === 0) {
-          const nextActive = findFirstActiveBox(nextState);
-          if (nextActive !== activeBox) {
-            setActiveBox(nextActive);
-          }
-        }
-
-        return nextState;
-      });
+      removeCardFromSession(selectedItem.id, activeBox);
       reset();
       transitionTimerRef.current = null;
       setQueueNext(true);
@@ -822,8 +726,8 @@ export default function ReviewFlashcardsPlaceholder() {
     courseId,
     effectiveReversed,
     pendingExplanationMove,
+    removeCardFromSession,
     result,
-    scheduleReturnToBox,
     selectedItem,
   ]);
 
@@ -955,7 +859,6 @@ export default function ReviewFlashcardsPlaceholder() {
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
-        hideBoxZero
         onBoxLongPress={handleBoxLongPress}
       />
     ) : (
@@ -963,7 +866,6 @@ export default function ReviewFlashcardsPlaceholder() {
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
-        hideBoxZero
         onBoxLongPress={handleBoxLongPress}
       />
     );
@@ -973,6 +875,7 @@ export default function ReviewFlashcardsPlaceholder() {
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
+  const isSessionEmpty = !isLoading && selectedItem == null;
 
   return (
     <View style={styles.container}>
@@ -990,24 +893,61 @@ export default function ReviewFlashcardsPlaceholder() {
           layout={SCREEN_LAYOUT_TRANSITION}
           style={styles.cardSectionWrapper}
         >
-          <Card
-            selectedItem={selectedItem}
-            setAnswer={setAnswer}
-            answer={answer}
-            result={result}
-            confirm={handleConfirm}
-            reversed={reversed}
-            setResult={setResult}
-            correction={correction}
-            wrongInputChange={wrongInputChange}
-            setCorrectionRewers={setCorrectionRewers}
-            introMode={false}
-            onHintUpdate={() => undefined}
-            hideHints
-            isFocused={!isLoading}
-            showExplanationEnabled={showExplanationEnabled}
-            explanationOnlyOnWrong={explanationOnlyOnWrong}
-          />
+          {isSessionEmpty ? (
+            <View
+              style={{
+                minHeight: 240,
+                borderRadius: 24,
+                paddingHorizontal: 24,
+                paddingVertical: 28,
+                justifyContent: "center",
+                alignItems: "center",
+                backgroundColor: "rgba(255,255,255,0.08)",
+                gap: 12,
+              }}
+            >
+              <View style={{ gap: 6, alignItems: "center" }}>
+                <Animated.Text
+                  style={{
+                    fontSize: 22,
+                    fontWeight: "700",
+                    color: "#FFFFFF",
+                    textAlign: "center",
+                  }}
+                >
+                  Brak fiszek w tej sesji
+                </Animated.Text>
+                <Animated.Text
+                  style={{
+                    fontSize: 15,
+                    color: "rgba(255,255,255,0.78)",
+                    textAlign: "center",
+                  }}
+                >
+                  Odśwież ekran albo wróć później, gdy kolejne powtórki będą gotowe.
+                </Animated.Text>
+              </View>
+            </View>
+          ) : (
+            <Card
+              selectedItem={selectedItem}
+              setAnswer={setAnswer}
+              answer={answer}
+              result={result}
+              confirm={handleConfirm}
+              reversed={reversed}
+              setResult={setResult}
+              correction={correction}
+              wrongInputChange={wrongInputChange}
+              setCorrectionRewers={setCorrectionRewers}
+              introMode={false}
+              onHintUpdate={() => undefined}
+              hideHints
+              isFocused={!isLoading}
+              showExplanationEnabled={showExplanationEnabled}
+              explanationOnlyOnWrong={explanationOnlyOnWrong}
+            />
+          )}
         </Reanimated.View>
 
         {areButtonsOnTop ? (

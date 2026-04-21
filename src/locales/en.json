@@ -778,11 +778,11 @@
       },
       "step13": {
         "title": "When is it done?",
-        "description": "For a flashcard to count as learned, it must pass through all 5 boxes."
+        "description": "For a flashcard to count as learned, it must pass through all 6 boxes."
       },
       "step14": {
         "title": "Final effect",
-        "description": "And when you answer correctly in box number five, you will see this effect."
+        "description": "And when you answer correctly in box number six, you will see this effect."
       },
       "step15": {
         "title": "Small catch",

@@ -1,4 +1,4 @@
-import { REVIEW_INTERVALS_MS } from "@/src/config/appConfig";
+import { REVIEW_INTERVAL_RANGES_MS } from "@/src/config/appConfig";
 
 const ANSWER_SPLIT_REGEX = /[;,\n]/;
 
@@ -64,6 +64,9 @@ export function computeNextReviewFromStage(
   stage: number,
   nowMs: number
 ): number {
-  const idx = Math.max(0, Math.min(stage, REVIEW_INTERVALS_MS.length - 1));
-  return nowMs + REVIEW_INTERVALS_MS[idx];
+  const idx = Math.max(0, Math.min(stage, REVIEW_INTERVAL_RANGES_MS.length - 1));
+  const [minMs, maxMs] = REVIEW_INTERVAL_RANGES_MS[idx];
+  const span = Math.max(0, maxMs - minMs);
+  const offset = span === 0 ? 0 : Math.floor(Math.random() * (span + 1));
+  return nowMs + minMs + offset;
 }

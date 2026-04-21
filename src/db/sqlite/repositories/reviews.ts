@@ -107,7 +107,7 @@ export async function advanceCustomReview(
   if (!row) {
     return scheduleCustomReview(flashcardId, courseId, 0);
   }
-  const newStage = ((row.stage ?? 0) + 1) | 0;
+  const newStage = Math.min(5, ((row.stage ?? 0) + 1) | 0);
   const now = Date.now();
   const nextReview = computeNextReviewFromStage(newStage, now);
   await db.runAsync(
@@ -145,13 +145,18 @@ export async function countDueCustomReviews(
 
 export async function getDueCustomReviewFlashcards(
   courseId: number,
-  limit: number,
+  limit?: number | null,
   nowMs: number = Date.now()
 ): Promise<CustomReviewFlashcard[]> {
-  if (!courseId || limit <= 0) {
+  if (!courseId) {
     return [];
   }
   const db = await getDB();
+  const normalizedLimit =
+    typeof limit === "number" && Number.isFinite(limit) ? Math.max(0, limit) : null;
+  if (normalizedLimit === 0) {
+    return [];
+  }
   const seedRows = await db.getAllAsync<{
     id: number;
     stage: number;
@@ -165,10 +170,8 @@ export async function getDueCustomReviewFlashcards(
      WHERE cr.course_id = ?
        AND cr.next_review <= ?
      ORDER BY RANDOM()
-     LIMIT ?;`,
-    courseId,
-    nowMs,
-    limit
+     ${normalizedLimit == null ? "" : "LIMIT ?"};`,
+    ...(normalizedLimit == null ? [courseId, nowMs] : [courseId, nowMs, normalizedLimit])
   );
   if (seedRows.length === 0) {
     return [];

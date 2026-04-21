@@ -7,6 +7,7 @@ import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
 import GoogleDriveBackupInitializer from "@/src/components/reminders/GoogleDriveBackupInitializer";
+import { DueReviewsProvider } from "@/src/contexts/DueReviewsContext";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { NavbarStatsProvider } from "@/src/contexts/NavbarStatsContext";
 import { PopupProvider } from "@/src/contexts/PopupContext";
@@ -29,8 +30,8 @@ import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
+import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as NavigationBar from "expo-navigation-bar";
-import * as Notifications from "expo-notifications";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
 import { Stack } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
@@ -51,14 +52,46 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LEARNING_REMINDER_CHANNEL_ID } from "@/src/services/learningReminderNotifications";
 
 SplashScreen.preventAutoHideAsync();
-Notifications.setNotificationHandler({
-  handleNotification: async () => ({
-    shouldShowBanner: true,
-    shouldShowList: true,
-    shouldPlaySound: true,
-    shouldSetBadge: false,
-  }),
-});
+
+type LayoutNotificationsModule = {
+  AndroidImportance: {
+    DEFAULT: number;
+  };
+  setNotificationHandler: (handler: {
+    handleNotification: () => Promise<{
+      shouldShowBanner: boolean;
+      shouldShowList: boolean;
+      shouldPlaySound: boolean;
+      shouldSetBadge: boolean;
+    }>;
+  }) => void;
+  setNotificationChannelAsync: (
+    channelId: string,
+    options: {
+      name: string;
+      importance: number;
+      sound: "default";
+    }
+  ) => Promise<void>;
+};
+
+function isExpoGo(): boolean {
+  return Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
+}
+
+async function getLayoutNotificationsModule(): Promise<LayoutNotificationsModule | null> {
+  if (isExpoGo()) {
+    return null;
+  }
+
+  try {
+    const module = await import("expo-notifications");
+    return module as unknown as LayoutNotificationsModule;
+  } catch (error) {
+    console.warn("[Notifications] Native notifications module unavailable", error);
+    return null;
+  }
+}
 
 const STARTUP_ICON = require("@/assets/app/icons/generated/ios/AppIcon~ios-marketing.png");
 
@@ -294,17 +327,43 @@ export default function RootLayout() {
   }, [prepareApp]);
 
   useEffect(() => {
-    if (Platform.OS !== "android") {
-      return;
-    }
+    let cancelled = false;
 
-    void Notifications.setNotificationChannelAsync(LEARNING_REMINDER_CHANNEL_ID, {
-      name: i18n.t("settings.learning.reminders.title"),
-      importance: Notifications.AndroidImportance.DEFAULT,
-      sound: "default",
-    }).catch((error) => {
-      console.warn("[Notifications] Failed to initialize learning reminders channel", error);
-    });
+    void getLayoutNotificationsModule()
+      .then((notifications) => {
+        if (cancelled || !notifications) {
+          return;
+        }
+
+        notifications.setNotificationHandler({
+          handleNotification: async () => ({
+            shouldShowBanner: true,
+            shouldShowList: true,
+            shouldPlaySound: true,
+            shouldSetBadge: false,
+          }),
+        });
+
+        if (Platform.OS !== "android") {
+          return;
+        }
+
+        return notifications.setNotificationChannelAsync(
+          LEARNING_REMINDER_CHANNEL_ID,
+          {
+            name: i18n.t("settings.learning.reminders.title"),
+            importance: notifications.AndroidImportance.DEFAULT,
+            sound: "default",
+          }
+        );
+      })
+      .catch((error) => {
+        console.warn("[Notifications] Failed to initialize notifications", error);
+      });
+
+    return () => {
+      cancelled = true;
+    };
   }, []);
 
   const shouldRenderApp = isStartupReady && status === "ready";
@@ -474,24 +533,26 @@ export default function RootLayout() {
           <SettingsProvider initialTheme={effectiveStartupTheme}>
             <CoachmarkProvider>
               <AppThemeSystemUiSync />
-              <QuoteProvider>
-                <QuoteSystemInitializer />
-                <LearningRemindersInitializer />
-                <GoogleDriveBackupInitializer />
-                <LearningStatsProvider>
-                  <NavbarStatsProvider>
-                    <PopupProvider>
-                      <CoachmarkLayerPortalProvider>
-                        <Navbar>
-                          <OnboardingGate />
-                          <Stack screenOptions={{ headerShown: false }} />
-                        </Navbar>
-                        <QuoteBubble />
-                      </CoachmarkLayerPortalProvider>
-                    </PopupProvider>
-                  </NavbarStatsProvider>
-                </LearningStatsProvider>
-              </QuoteProvider>
+              <DueReviewsProvider>
+                <QuoteProvider>
+                  <QuoteSystemInitializer />
+                  <LearningRemindersInitializer />
+                  <GoogleDriveBackupInitializer />
+                  <LearningStatsProvider>
+                    <NavbarStatsProvider>
+                      <PopupProvider>
+                        <CoachmarkLayerPortalProvider>
+                          <Navbar>
+                            <OnboardingGate />
+                            <Stack screenOptions={{ headerShown: false }} />
+                          </Navbar>
+                          <QuoteBubble />
+                        </CoachmarkLayerPortalProvider>
+                      </PopupProvider>
+                    </NavbarStatsProvider>
+                  </LearningStatsProvider>
+                </QuoteProvider>
+              </DueReviewsProvider>
             </CoachmarkProvider>
           </SettingsProvider>
         ) : shouldRenderBlockingState ? (

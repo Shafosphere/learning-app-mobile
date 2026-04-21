@@ -3,7 +3,7 @@
 Dokument opisuje aktualne działanie aplikacji, dostępne opcje, ekrany, logikę nauki, strukturę danych (AsyncStorage + SQLite) oraz główne moduły.
 
 ## Cel i skrót działania
-- Aplikacja uczy słownictwa metodą pudełek (5 pudełek) z wpisywaniem odpowiedzi.
+- Aplikacja uczy słownictwa metodą pudełek (6 pudełek) z wpisywaniem odpowiedzi.
 - Dane słów importowane są z CSV (EN→PL) do lokalnej bazy SQLite; obsługa kursów językowych i poziomów CEFR.
 - Postęp i stan pudełek zapisywane są w AsyncStorage (snapshoty per kurs/poziom); nauczone słowa trafiają do systemu powtórek (spaced repetition) z terminami w tabeli `reviews`.
 
@@ -19,7 +19,7 @@ Dokument opisuje aktualne działanie aplikacji, dostępne opcje, ekrany, logikę
 Górna nawigacja (`src/components/navbar/navbar.tsx`) daje skróty do: Home, Boxy/Level, Ustawienia, Kursy, Review, przełączanie motywu oraz licznik opanowanych słówek.
 
 ## Nauka – logika pudełek i fiszek
-- 5 pudełek: `boxOne` … `boxFive` (typy: `src/types/boxes.ts`).
+- 6 pudełek: `boxZero` … `boxFive` (typy: `src/types/boxes.ts`).
 - Wybór aktywnego pudełka powoduje losowanie słowa z jego zawartości.
 - Kierunek pytania naprzemienny: pudełka parzyste (`boxTwo`, `boxFour`) odwracają kierunek (wpisujesz oryginał na podstawie tłumaczenia).
 - Odpowiedź:

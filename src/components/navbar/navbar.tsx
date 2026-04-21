@@ -1,3 +1,4 @@
+import { useDueReviews } from "@/src/contexts/DueReviewsContext";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -5,12 +6,7 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import {
-  countDueCustomReviews,
-  getCustomCourseById,
-  getCustomCoursesWithCardCounts,
-  type CustomCourseRecord,
-} from "@/src/db/sqlite/db";
+import { getCustomCourseById, type CustomCourseRecord } from "@/src/db/sqlite/db";
 import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
 import * as NavigationBar from "expo-navigation-bar";
@@ -73,6 +69,7 @@ export default function Navbar({ children }: NavbarProps) {
     pinnedOfficialCourseIds,
     setActiveCustomCourseId,
   } = useSettings();
+  const { dueReviewCount, refreshDueReviewCount } = useDueReviews();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const statusBarHeight =
@@ -83,7 +80,6 @@ export default function Navbar({ children }: NavbarProps) {
   const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
     null,
   );
-  const [dueReviewCount, setDueReviewCount] = useState<number>(0);
 
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
@@ -211,46 +207,6 @@ export default function Navbar({ children }: NavbarProps) {
     );
   }, [displayedCustomCourse, colors.headline]);
 
-  const refreshDueReviewCount = useCallback(async () => {
-    const now = Date.now();
-    try {
-      let total = 0;
-
-      const customRows = await getCustomCoursesWithCardCounts();
-      const officialIds = new Set(pinnedOfficialCourseIds);
-      const customCoursesToCount = customRows.filter((course) => {
-        if (!course.reviewsEnabled) {
-          return false;
-        }
-        if (course.isOfficial) {
-          return officialIds.has(course.id);
-        }
-        return true;
-      });
-      const customCounts = await Promise.all(
-        customCoursesToCount.map(async (course) => {
-          try {
-            return await countDueCustomReviews(course.id, now);
-          } catch (error) {
-            console.warn(
-              `[Navbar] Failed to count custom reviews for course ${course.id}`,
-              error,
-            );
-            return 0;
-          }
-        }),
-      );
-      for (const count of customCounts) {
-        total += count;
-      }
-
-      setDueReviewCount(total);
-    } catch (error) {
-      console.warn("[Navbar] Failed to refresh review count", error);
-      setDueReviewCount(0);
-    }
-  }, [pinnedOfficialCourseIds]);
-
   const handleLogoPress = useCallback(() => {
     const now = Date.now();
     const withinWindow = now - logoTapRef.current.ts < 2000;
@@ -360,7 +316,7 @@ export default function Navbar({ children }: NavbarProps) {
     return () => {
       cancelled = true;
     };
-  }, [refreshDueReviewCount, pathname]);
+  }, [pathname, refreshDueReviewCount]);
 
   const handleReviewPress = () => {
     router.push("/review");
