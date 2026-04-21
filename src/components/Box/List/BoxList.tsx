@@ -300,6 +300,7 @@ export default function BoxList({
                         id="flashcards-promotion-arrow-anchor"
                         shape="rect"
                         radius={12}
+                        pointerEvents="none"
                         style={[
                             styles.hiddenPromotionAnchor,
                             {
@@ -310,7 +311,7 @@ export default function BoxList({
                             },
                         ]}
                     >
-                        <View />
+                        <View pointerEvents="none" />
                     </CoachmarkAnchor>
                 ) : null}
                 {countsCoachmarkId && countsAnchorFrame && containerLayout ? (
@@ -318,6 +319,7 @@ export default function BoxList({
                         id={countsCoachmarkId}
                         shape="rect"
                         radius={12}
+                        pointerEvents="none"
                         style={[
                             styles.hiddenCountsAnchor,
                             {
@@ -334,7 +336,7 @@ export default function BoxList({
                             },
                         ]}
                     >
-                        <View />
+                        <View pointerEvents="none" />
                     </CoachmarkAnchor>
                 ) : null}
             </View>
