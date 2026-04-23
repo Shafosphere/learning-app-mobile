@@ -1,3 +1,5 @@
+import type * as SQLite from "expo-sqlite";
+
 import { getDB } from "../core";
 import {
   addAnswerIfPresent,
@@ -120,14 +122,21 @@ export async function advanceCustomReview(
   return { nextReview, stage: newStage };
 }
 
-export async function clearCustomReviewsForCourse(
+export async function clearCustomReviewsForCourseWithDb(
+  db: SQLite.SQLiteDatabase,
   courseId: number
 ): Promise<void> {
-  const db = await getDB();
   await db.runAsync(
     `DELETE FROM custom_reviews WHERE course_id = ?;`,
     courseId
   );
+}
+
+export async function clearCustomReviewsForCourse(
+  courseId: number
+): Promise<void> {
+  const db = await getDB();
+  await clearCustomReviewsForCourseWithDb(db, courseId);
 }
 
 export async function countDueCustomReviews(

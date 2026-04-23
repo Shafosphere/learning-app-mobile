@@ -1,3 +1,5 @@
+import type * as SQLite from "expo-sqlite";
+
 import { getDB } from "../core";
 
 type DailyCount = { date: string; count: number };
@@ -15,6 +17,12 @@ export type WeekdayActivityDistribution = number[];
 export type LearningEventsSummary = {
   totalEvents: number;
   activeDays: number;
+};
+export type CourseCompletionSummary = {
+  totalAnswers: number;
+  correctCount: number;
+  wrongCount: number;
+  timeMs: number;
 };
 export type HardFlashcard = {
   id: number;
@@ -52,6 +60,25 @@ export async function logCustomLearningEvent(params: {
     params.durationMs ?? null,
     now
   );
+}
+
+export async function clearCustomLearningEventsForCourseWithDb(
+  db: SQLite.SQLiteDatabase,
+  courseId: number
+): Promise<number> {
+  if (!courseId) return 0;
+  const result = await db.runAsync(
+    `DELETE FROM custom_learning_events WHERE course_id = ?;`,
+    courseId
+  );
+  return Number(result?.changes ?? 0);
+}
+
+export async function clearCustomLearningEventsForCourse(
+  courseId: number
+): Promise<number> {
+  const db = await getDB();
+  return clearCustomLearningEventsForCourseWithDb(db, courseId);
 }
 
 export async function getDailyLearnedCountsCustom(
@@ -226,6 +253,47 @@ export async function getLearningEventsSummary(
   return {
     totalEvents: row?.totalEvents ?? 0,
     activeDays: row?.activeDays ?? 0,
+  };
+}
+
+export async function getCourseCompletionSummary(
+  courseId: number,
+  options?: { fromCreatedAtMs?: number | null }
+): Promise<CourseCompletionSummary> {
+  if (!courseId) {
+    return {
+      totalAnswers: 0,
+      correctCount: 0,
+      wrongCount: 0,
+      timeMs: 0,
+    };
+  }
+
+  const db = await getDB();
+  const fromCreatedAtMs =
+    options?.fromCreatedAtMs != null ? Math.max(0, options.fromCreatedAtMs) : null;
+  const row = await db.getFirstAsync<{
+    totalAnswers: number;
+    correctCount: number;
+    wrongCount: number;
+    timeMs: number;
+  }>(
+    `SELECT
+       COUNT(*) AS totalAnswers,
+       SUM(CASE WHEN result = 'ok' THEN 1 ELSE 0 END) AS correctCount,
+       SUM(CASE WHEN result = 'wrong' THEN 1 ELSE 0 END) AS wrongCount,
+       SUM(COALESCE(duration_ms, 0)) AS timeMs
+     FROM custom_learning_events
+     WHERE course_id = ?
+       ${fromCreatedAtMs == null ? "" : "AND created_at >= ?"};`,
+    ...(fromCreatedAtMs == null ? [courseId] : [courseId, fromCreatedAtMs])
+  );
+
+  return {
+    totalAnswers: row?.totalAnswers ?? 0,
+    correctCount: row?.correctCount ?? 0,
+    wrongCount: row?.wrongCount ?? 0,
+    timeMs: row?.timeMs ?? 0,
   };
 }
 

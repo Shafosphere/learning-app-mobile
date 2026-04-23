@@ -371,6 +371,11 @@
           "subtitle": "Otwiera ekran fiszek i sztucznie pokazuje jednorazowe okno wyboru położenia przycisków.",
           "button": "Pokaż okno"
         },
+        "courseFinishedPanelPreview": {
+          "title": "Podgląd panelu ukończenia kursu",
+          "subtitle": "Otwiera ekran z komponentem CourseFinishedPanel na przykładowych danych.",
+          "button": "Pokaż panel"
+        },
         "testDbErrorScreen": {
           "title": "Test ekranu błędu bazy",
           "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",

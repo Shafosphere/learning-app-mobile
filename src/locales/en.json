@@ -371,6 +371,11 @@
           "subtitle": "Opens the flashcards screen and artificially shows the one-time button placement dialog.",
           "button": "Show dialog"
         },
+        "courseFinishedPanelPreview": {
+          "title": "Preview course finished panel",
+          "subtitle": "Opens a screen with the CourseFinishedPanel component using sample data.",
+          "button": "Show panel"
+        },
         "testDbErrorScreen": {
           "title": "Test database error screen",
           "subtitle": "Shows the SQLite failure screen without damaging the real database.",

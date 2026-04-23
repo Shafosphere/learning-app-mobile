@@ -1,6 +1,13 @@
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { deleteImage } from "@/src/services/imageService";
 import * as SQLite from "expo-sqlite";
 import { getDB } from "../core";
+import {
+  clearCustomLearningEventsForCourseWithDb,
+} from "./analytics";
+import type { CustomFlashcardInput } from "./flashcards";
+import { replaceCustomFlashcardsWithoutTransactionWithDb } from "./flashcards";
+import { clearCustomReviewsForCourseWithDb } from "./reviews";
 
 export interface CustomCourseRecord {
   id: number;
@@ -208,11 +215,11 @@ export async function createCustomCourse(
   return Number(result.lastInsertRowId ?? 0);
 }
 
-export async function updateCustomCourse(
+export async function updateCustomCourseWithDb(
+  db: SQLite.SQLiteDatabase,
   id: number,
   course: CustomCourseInput
 ): Promise<void> {
-  const db = await getDB();
   const now = Date.now();
   const name = course.name.trim();
   if (!name) {
@@ -229,8 +236,44 @@ export async function updateCustomCourse(
     course.colorId ?? null,
     reviewsEnabled,
     now,
-    id
+     id
   );
+}
+
+export async function updateCustomCourse(
+  id: number,
+  course: CustomCourseInput
+): Promise<void> {
+  const db = await getDB();
+  await updateCustomCourseWithDb(db, id, course);
+}
+
+export async function saveCustomCourseEdits(
+  id: number,
+  course: CustomCourseInput,
+  cards: CustomFlashcardInput[]
+): Promise<void> {
+  const db = await getDB();
+  let deletedImages: string[] = [];
+  await db.execAsync("BEGIN TRANSACTION;");
+  try {
+    await updateCustomCourseWithDb(db, id, course);
+    deletedImages = await replaceCustomFlashcardsWithoutTransactionWithDb(
+      db,
+      id,
+      cards
+    );
+    await clearCustomReviewsForCourseWithDb(db, id);
+    await clearCustomLearningEventsForCourseWithDb(db, id);
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await db.execAsync("ROLLBACK;");
+    throw error;
+  }
+
+  for (const uri of deletedImages) {
+    await deleteImage(uri);
+  }
 }
 
 export async function deleteCustomCourse(id: number): Promise<void> {

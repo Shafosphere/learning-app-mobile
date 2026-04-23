@@ -147,6 +147,10 @@ const DebuggingSection: React.FC = () => {
     router.push("/flashcards");
   };
 
+  const handleOpenCourseFinishedPanelPreview = () => {
+    router.push("/debug/course-finished-panel");
+  };
+
   const handleResetReviewCoursesIntro = async () => {
     try {
       await Promise.all([
@@ -320,6 +324,23 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.previewActionsPositionNudge.button")}
           color="my_yellow"
           onPress={handlePreviewActionsPositionNudge}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.courseFinishedPanelPreview.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.courseFinishedPanelPreview.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.courseFinishedPanelPreview.button")}
+          color="my_yellow"
+          onPress={handleOpenCourseFinishedPanelPreview}
           width={140}
         />
       </View>

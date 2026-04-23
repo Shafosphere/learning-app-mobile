@@ -20,14 +20,13 @@ import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
-  clearCustomReviewsForCourse,
+  clearCustomLearningEventsForCourse,
   deleteCustomCourse,
   getCustomCourseById,
   getCustomCourseNameCandidates,
   getCustomFlashcards,
-  replaceCustomFlashcards,
   resetCustomReviewsForCourse,
-  updateCustomCourse,
+  saveCustomCourseEdits,
 } from "@/src/db/sqlite/db";
 import type { CustomFlashcardInput } from "@/src/db/sqlite/repositories/flashcards";
 import type {
@@ -61,6 +60,7 @@ import {
 } from "@/src/screens/courses/makenewcourse/components/CardTypeSelector";
 import { CourseIconColorSelector } from "@/src/screens/courses/editcourse/components/iconEdit/iconEdit";
 import { CourseSettingsPanel } from "@/src/screens/courses/editcourse/components/CourseSettingsPanel";
+import { clearCourseCompletionRun } from "@/src/screens/flashcards/courseCompletionRun";
 import { useStyles } from "./CustomCourseEditor-styles";
 type CustomCourseEditorProps = {
   courseId: number;
@@ -523,6 +523,10 @@ export default function CustomCourseEditor({
     try {
       await AsyncStorage.removeItem(customBoxesStorageKey);
       await resetCustomReviewsForCourse(courseId);
+      await clearCustomLearningEventsForCourse(courseId);
+      await clearCourseCompletionRun(courseId).catch((error) => {
+        console.warn("Failed to clear course completion run", error);
+      });
       Alert.alert(
         "Przywrócono kurs od początku",
         "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych."
@@ -570,6 +574,9 @@ export default function CustomCourseEditor({
               try {
                 await deleteCustomCourse(courseId);
                 await AsyncStorage.removeItem(customBoxesStorageKey);
+                await clearCourseCompletionRun(courseId).catch((error) => {
+                  console.warn("Failed to clear course completion run", error);
+                });
                 if (activeCustomCourseId === courseId) {
                   await setActiveCustomCourseId(null);
                 }
@@ -651,18 +658,18 @@ export default function CustomCourseEditor({
       return;
     }
 
-    await clearCustomReviewsForCourse(courseId);
     setIsSaving(true);
     try {
-      await updateCustomCourse(courseId, {
+      await saveCustomCourseEdits(courseId, {
         name: cleanName,
         iconId: iconId ?? "heart",
         iconColor,
         colorId: colorId ?? undefined,
         reviewsEnabled,
+      }, trimmedCards);
+      await clearCourseCompletionRun(courseId).catch((error) => {
+        console.warn("Failed to clear course completion run", error);
       });
-
-      await replaceCustomFlashcards(courseId, trimmedCards);
 
       setPopup({
         message: "Zmiany zapisane!",

@@ -3,7 +3,14 @@ import { act, render } from "@testing-library/react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { getCustomFlashcards } from "@/src/db/sqlite/db";
+import {
+  getCourseCompletionSummary,
+  getCustomFlashcards,
+  getCustomReviewedFlashcardIds,
+} from "@/src/db/sqlite/db";
+import {
+  getCourseCompletionRunStartedAt,
+} from "@/src/screens/flashcards/courseCompletionRun";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -36,7 +43,15 @@ jest.mock("@/src/contexts/QuoteContext", () => ({
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getCustomCourseById: jest.fn(() =>
-    Promise.resolve({ id: 7, reviewsEnabled: false }),
+    Promise.resolve({ id: 7, name: "Ang A2", reviewsEnabled: false, slug: "eng_to_pl_a2" }),
+  ),
+  getCourseCompletionSummary: jest.fn(() =>
+    Promise.resolve({
+      totalAnswers: 10,
+      correctCount: 8,
+      wrongCount: 2,
+      timeMs: 12 * 60 * 1000,
+    }),
   ),
   getCustomFlashcards: jest.fn(() => Promise.resolve([])),
   getCustomReviewedFlashcardIds: jest.fn(() => Promise.resolve([])),
@@ -45,23 +60,58 @@ jest.mock("@/src/db/sqlite/db", () => ({
   updateCustomFlashcardHints: jest.fn(() => Promise.resolve(undefined)),
 }));
 
-const currentBoxes: BoxesState = {
-  boxZero: [],
-  boxOne: [],
-  boxTwo: [],
-  boxThree: [],
-  boxFour: [],
-  boxFive: [],
-};
+jest.mock("@/src/screens/flashcards/courseCompletionRun", () => ({
+  ensureCourseCompletionRunStarted: jest.fn(() => Promise.resolve(0)),
+  getCourseCompletionRunStartedAt: jest.fn(() => Promise.resolve(null)),
+}));
+
+function createEmptyBoxes(): BoxesState {
+  return {
+    boxZero: [],
+    boxOne: [],
+    boxTwo: [],
+    boxThree: [],
+    boxFour: [],
+    boxFive: [],
+  };
+}
+
+let mockCurrentBoxes: BoxesState = createEmptyBoxes();
+let mockCurrentUsedWordIds: number[] = [];
+
+function mockCloneBoxes(boxes: BoxesState): BoxesState {
+  return {
+    boxZero: [...boxes.boxZero],
+    boxOne: [...boxes.boxOne],
+    boxTwo: [...boxes.boxTwo],
+    boxThree: [...boxes.boxThree],
+    boxFour: [...boxes.boxFour],
+    boxFive: [...boxes.boxFive],
+  };
+}
 
 jest.mock("@/src/hooks/useBoxesPersistenceSnapshot", () => ({
   useBoxesPersistenceSnapshot: jest.fn(() => ({
-    boxes: currentBoxes,
-    setBoxes: jest.fn(),
+    boxes: mockCloneBoxes(mockCurrentBoxes),
+    setBoxes: jest.fn((update: BoxesState | ((prev: BoxesState) => BoxesState)) => {
+      const next =
+        typeof update === "function" ? update(mockCloneBoxes(mockCurrentBoxes)) : update;
+      mockCurrentBoxes = mockCloneBoxes(next);
+    }),
     isReady: true,
-    usedWordIds: [],
-    addUsedWordIds: jest.fn(),
-    removeUsedWordIds: jest.fn(),
+    usedWordIds: [...mockCurrentUsedWordIds],
+    addUsedWordIds: jest.fn((ids: number[] | number) => {
+      const nextIds = Array.isArray(ids) ? ids : [ids];
+      mockCurrentUsedWordIds = Array.from(
+        new Set([...mockCurrentUsedWordIds, ...nextIds])
+      );
+    }),
+    removeUsedWordIds: jest.fn((ids: number[] | number) => {
+      const idsToRemove = new Set(Array.isArray(ids) ? ids : [ids]);
+      mockCurrentUsedWordIds = mockCurrentUsedWordIds.filter(
+        (id) => !idsToRemove.has(id)
+      );
+    }),
     setBatchIndex: jest.fn(),
   })),
 }));
@@ -134,6 +184,12 @@ jest.mock("@react-navigation/native", () => ({
   useIsFocused: jest.fn(() => true),
 }));
 
+jest.mock("expo-router", () => ({
+  useRouter: jest.fn(() => ({
+    push: jest.fn(),
+  })),
+}));
+
 jest.mock("@edwardloopez/react-native-coachmark", () => ({
   CoachmarkAnchor: ({ children }: { children: React.ReactNode }) => children,
 }));
@@ -200,9 +256,29 @@ jest.mock("@/src/components/confetti/Confetti", () => {
   };
 });
 
+type CourseFinishedPanelProps = React.ComponentProps<
+  typeof import("@/src/screens/flashcards/components/CourseFinishedPanel").CourseFinishedPanel
+>;
+
+let latestFinishedPanelProps: CourseFinishedPanelProps | null = null;
+
+jest.mock("@/src/screens/flashcards/components/CourseFinishedPanel", () => ({
+  CourseFinishedPanel: (props: CourseFinishedPanelProps) => {
+    const { Text: MockText } = require("react-native");
+    latestFinishedPanelProps = props;
+    return <MockText testID="course-finished-panel">Course finished</MockText>;
+  },
+}));
+
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
+const mockedGetCustomReviewedFlashcardIds =
+  getCustomReviewedFlashcardIds as jest.Mock;
+const mockedGetCourseCompletionSummary =
+  getCourseCompletionSummary as jest.Mock;
+const mockedGetCourseCompletionRunStartedAt =
+  getCourseCompletionRunStartedAt as jest.Mock;
 
 type InteractionState = ReturnType<typeof createInteractionState>;
 
@@ -255,10 +331,12 @@ function createInteractionState(
 
 function renderScreenWithState(
   initialState: InteractionState,
-  cards: WordWithTranslations[],
+  cards?: WordWithTranslations[],
 ) {
   let state = initialState;
-  mockedGetCustomFlashcards.mockResolvedValue(cards);
+  if (cards) {
+    mockedGetCustomFlashcards.mockResolvedValue(cards);
+  }
   mockedUseFlashcardsInteraction.mockImplementation(() => state);
   const screen = render(<Flashcards />);
 
@@ -273,13 +351,38 @@ function renderScreenWithState(
   return { ...screen, rerenderWithState };
 }
 
+async function flushScreenState() {
+  await act(async () => {
+    await Promise.resolve();
+  });
+
+  act(() => {
+    jest.advanceTimersByTime(600);
+  });
+
+  await act(async () => {
+    await Promise.resolve();
+  });
+}
+
 describe("FlashcardsScreen UI state regressions", () => {
   beforeEach(() => {
     jest.useFakeTimers();
     jest.spyOn(console, "log").mockImplementation(() => {});
+    mockCurrentBoxes = createEmptyBoxes();
+    mockCurrentUsedWordIds = [];
     latestCardProps = null;
     latestButtonsProps = null;
     latestBoxListProps = null;
+    latestFinishedPanelProps = null;
+    mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
+    mockedGetCourseCompletionSummary.mockResolvedValue({
+      totalAnswers: 10,
+      correctCount: 8,
+      wrongCount: 2,
+      timeMs: 12 * 60 * 1000,
+    });
+    mockedGetCourseCompletionRunStartedAt.mockResolvedValue(null);
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
       setActiveCustomCourseId: jest.fn(),
@@ -481,5 +584,106 @@ describe("FlashcardsScreen UI state regressions", () => {
     });
 
     expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
+  });
+
+  it("shows the finished panel when the active course has an exhausted pool", async () => {
+    const cardA = makeCard({
+      id: 51,
+      text: "apple",
+      translations: ["jablko"],
+    });
+    mockCurrentUsedWordIds = [cardA.id];
+
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
+    expect(latestFinishedPanelProps?.courseName).toBe("Ang A2");
+    expect(latestFinishedPanelProps?.cardsCountLabel).toBe("1");
+    expect(latestFinishedPanelProps?.accuracyLabel).toBe("80%");
+    expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
+  });
+
+  it("shows only current completion run stats when run start exists", async () => {
+    const cardA = makeCard({
+      id: 52,
+      text: "banana",
+      translations: ["banan"],
+    });
+    mockCurrentUsedWordIds = [cardA.id];
+    mockedGetCourseCompletionRunStartedAt.mockResolvedValue(999);
+    mockedGetCourseCompletionSummary
+      .mockResolvedValueOnce({
+        totalAnswers: 10,
+        correctCount: 8,
+        wrongCount: 2,
+        timeMs: 12 * 60 * 1000,
+      })
+      .mockResolvedValueOnce({
+        totalAnswers: 2,
+        correctCount: 1,
+        wrongCount: 1,
+        timeMs: 2 * 60 * 1000,
+      });
+
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
+    expect(latestFinishedPanelProps?.accuracyLabel).toBe("50%");
+    expect(latestFinishedPanelProps?.learningTimeLabel).toBe("2 min");
+    expect(mockedGetCourseCompletionSummary).toHaveBeenNthCalledWith(1, 7);
+    expect(mockedGetCourseCompletionSummary).toHaveBeenNthCalledWith(2, 7, {
+      fromCreatedAtMs: 999,
+    });
+  });
+
+  it("does not show the finished panel when there are still new flashcards to distribute", async () => {
+    const cardA = makeCard({
+      id: 61,
+      text: "pear",
+      translations: ["gruszka"],
+    });
+
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenState();
+
+    expect(screen.queryByTestId("course-finished-panel")).toBeNull();
+  });
+
+  it("does not show the finished panel when any box still has cards", async () => {
+    const cardA = makeCard({
+      id: 71,
+      text: "plum",
+      translations: ["sliwka"],
+    });
+    mockCurrentUsedWordIds = [cardA.id];
+    mockCurrentBoxes = {
+      ...createEmptyBoxes(),
+      boxOne: [cardA],
+    };
+
+    const screen = renderScreenWithState(createInteractionState(cardA), [cardA]);
+
+    await flushScreenState();
+
+    expect(screen.queryByTestId("course-finished-panel")).toBeNull();
+  });
+
+  it("does not show the finished panel while course data is still loading", () => {
+    mockedGetCustomFlashcards.mockImplementationOnce(
+      () => new Promise(() => undefined),
+    );
+
+    const screen = renderScreenWithState(createInteractionState(null));
+
+    expect(screen.queryByTestId("course-finished-panel")).toBeNull();
   });
 });

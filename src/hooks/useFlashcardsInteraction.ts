@@ -36,11 +36,13 @@ export type CorrectAnswerMeta = {
   isPromotion: boolean;
   isTerminalSuccess: boolean;
   fromBox: keyof BoxesState;
+  durationMs: number;
 };
 
 export type WrongAnswerMeta = {
   word: WordWithTranslations;
   fromBox: keyof BoxesState;
+  durationMs: number;
 };
 
 type UseFlashcardsInteractionParams = {
@@ -488,6 +490,7 @@ export function useFlashcardsInteraction({
             isPromotion: activeBox !== "boxFive",
             isTerminalSuccess: activeBox === "boxFive",
             fromBox: activeBox,
+            durationMs: duration ?? 0,
           });
         }
         const normalize = (s: string) => {
@@ -542,6 +545,7 @@ export function useFlashcardsInteraction({
           onWrongAnswer?.(activeBox, {
             word: wordForCheck,
             fromBox: activeBox,
+            durationMs: duration ?? 0,
           });
         }
         const { hasExplanation, isExplanationPending } = getExplanationState({

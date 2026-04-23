@@ -172,6 +172,23 @@ export async function replaceCustomFlashcardsWithDb(
   courseId: number,
   cards: CustomFlashcardInput[]
 ): Promise<void> {
+  const deletedImages = await replaceCustomFlashcardsWithDbTransaction(
+    db,
+    courseId,
+    cards,
+    true
+  );
+  for (const uri of deletedImages) {
+    await deleteImage(uri);
+  }
+}
+
+async function replaceCustomFlashcardsWithDbTransaction(
+  db: SQLite.SQLiteDatabase,
+  courseId: number,
+  cards: CustomFlashcardInput[],
+  manageTransaction: boolean
+): Promise<string[]> {
   console.log("[DB] replaceCustomFlashcardsWithDb: start", {
     courseId,
     count: cards.length,
@@ -187,7 +204,9 @@ export async function replaceCustomFlashcardsWithDb(
     if (row.imageBack) existingImages.add(row.imageBack);
   }
 
-  await db.execAsync("BEGIN TRANSACTION;");
+  if (manageTransaction) {
+    await db.execAsync("BEGIN TRANSACTION;");
+  }
   const now = Date.now();
   try {
     await db.runAsync(
@@ -268,14 +287,15 @@ export async function replaceCustomFlashcardsWithDb(
       fallbackPosition += 1;
     }
 
-    await db.execAsync("COMMIT;");
-    console.log("[DB] replaceCustomFlashcardsWithDb: committed");
-    const toDelete = [...existingImages].filter((uri) => !newImages.has(uri));
-    for (const uri of toDelete) {
-      await deleteImage(uri);
+    if (manageTransaction) {
+      await db.execAsync("COMMIT;");
     }
+    console.log("[DB] replaceCustomFlashcardsWithDb: committed");
+    return [...existingImages].filter((uri) => !newImages.has(uri));
   } catch (error) {
-    await db.execAsync("ROLLBACK;");
+    if (manageTransaction) {
+      await db.execAsync("ROLLBACK;");
+    }
     console.warn(
       "[DB] replaceCustomFlashcardsWithDb: rollback due to error",
       error
@@ -291,6 +311,14 @@ export async function replaceCustomFlashcards(
   const db = await getDB();
   console.log("[DB] replaceCustomFlashcards: delegating to WithDb");
   return replaceCustomFlashcardsWithDb(db, courseId, cards);
+}
+
+export async function replaceCustomFlashcardsWithoutTransactionWithDb(
+  db: SQLite.SQLiteDatabase,
+  courseId: number,
+  cards: CustomFlashcardInput[]
+): Promise<string[]> {
+  return replaceCustomFlashcardsWithDbTransaction(db, courseId, cards, false);
 }
 
 export async function updateCustomFlashcardHints(

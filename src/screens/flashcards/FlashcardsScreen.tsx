@@ -18,14 +18,21 @@ import {
   type CoachmarkAdvanceEvent,
   type CoachmarkFlowStep,
 } from "@/src/constants/coachmarkFlows";
+import { resolveCourseIconProps } from "@/src/constants/customCourse";
+import { getFlagSource } from "@/src/constants/languageFlags";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import {
   type StatBurst,
   useNavbarStats,
 } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import type { CustomCourseRecord } from "@/src/db/sqlite/db";
+import type {
+  CourseCompletionSummary,
+  CustomCourseRecord,
+} from "@/src/db/sqlite/db";
 import {
+  getCourseCompletionSummary,
   getCustomCourseById,
   getCustomFlashcards,
   getCustomReviewedFlashcardIds,
@@ -54,7 +61,7 @@ import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useIsFocused } from "@react-navigation/native";
-// import { useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import {
   type ReactNode,
@@ -77,6 +84,11 @@ import {
 } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
+import { CourseFinishedPanel } from "@/src/screens/flashcards/components/CourseFinishedPanel";
+import {
+  ensureCourseCompletionRunStarted,
+  getCourseCompletionRunStartedAt,
+} from "@/src/screens/flashcards/courseCompletionRun";
 import {
   consumeActionsPositionNudgePreview,
   subscribeActionsPositionNudgePreview,
@@ -103,6 +115,12 @@ const BOTTOM_BUTTONS_KEYBOARD_DURATION_MS = 320;
 const ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS = 7;
 const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
 const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
+const EMPTY_COURSE_COMPLETION_SUMMARY: CourseCompletionSummary = {
+  totalAnswers: 0,
+  correctCount: 0,
+  wrongCount: 0,
+  timeMs: 0,
+};
 
 type TutorialCompletionState = Partial<Record<CoachmarkAdvanceEvent, boolean>>;
 
@@ -130,9 +148,24 @@ function dedupeById<T extends { id: number }>(list: T[]): T[] {
   return next;
 }
 
+function formatLearningTime(timeMs: number): string {
+  if (!Number.isFinite(timeMs) || timeMs <= 0) {
+    return "0 min";
+  }
+
+  const totalMinutes = Math.max(0, Math.round(timeMs / 60000));
+  if (totalMinutes < 60) {
+    return `${totalMinutes} min`;
+  }
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return minutes === 0 ? `${hours} h` : `${hours} h ${minutes} min`;
+}
+
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
-  // const router = useRouter();
+  const router = useRouter();
   const styles = useStyles();
   const { t } = useTranslation();
   const {
@@ -256,7 +289,16 @@ export default function Flashcards() {
     null,
   );
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
+  const [courseCompletionSummary, setCourseCompletionSummary] =
+    useState<CourseCompletionSummary>(EMPTY_COURSE_COMPLETION_SUMMARY);
+  const [loadedCourseLifetimeCompletionSummary, setLoadedCourseLifetimeCompletionSummary] =
+    useState<CourseCompletionSummary>(EMPTY_COURSE_COMPLETION_SUMMARY);
+  const [courseCompletionRunStartedAt, setCourseCompletionRunStartedAt] =
+    useState<number | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
+  const [isReviewedIdsSeedLoading, setIsReviewedIdsSeedLoading] = useState(false);
+  const [reviewedIdsSeedResolvedCourseId, setReviewedIdsSeedResolvedCourseId] =
+    useState<number | null>(null);
   const [isUiReady, setIsUiReady] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
   const [loadError, setLoadError] = useState<string | null>(null);
@@ -305,6 +347,7 @@ export default function Flashcards() {
   );
   const uiWarmupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadingOverlayOpacity = useRef(new Animated.Value(1)).current;
+  const courseCompletionRunStartedAtRef = useRef<number | null>(null);
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const totalCards = customCards.length;
   const courseHasOnlyTrueFalse = useMemo(
@@ -320,6 +363,41 @@ export default function Flashcards() {
       customCards.length > 0 &&
       customCards.every((card) => card.type === "know_dont_know"),
     [customCards],
+  );
+  const applyCompletionSummaryAnswer = useCallback(
+    (answerResult: "ok" | "wrong", durationMs: number) => {
+      setCourseCompletionSummary((prev) => ({
+        totalAnswers: prev.totalAnswers + 1,
+        correctCount: prev.correctCount + (answerResult === "ok" ? 1 : 0),
+        wrongCount: prev.wrongCount + (answerResult === "wrong" ? 1 : 0),
+        timeMs: prev.timeMs + Math.max(0, durationMs),
+      }));
+    },
+    [],
+  );
+  useEffect(() => {
+    courseCompletionRunStartedAtRef.current = courseCompletionRunStartedAt;
+  }, [courseCompletionRunStartedAt]);
+
+  const ensureCompletionRunStarted = useCallback(
+    (fallbackNowMs?: number) => {
+      if (activeCustomCourseId == null) {
+        return;
+      }
+      if (courseCompletionRunStartedAtRef.current != null) {
+        return;
+      }
+
+      const startedAt = Math.max(0, fallbackNowMs ?? Date.now());
+      courseCompletionRunStartedAtRef.current = startedAt;
+      setCourseCompletionRunStartedAt(startedAt);
+      void ensureCourseCompletionRunStarted(activeCustomCourseId, startedAt).catch(
+        (error) => {
+          console.warn("[Flashcards] Failed to persist completion run start", error);
+        }
+      );
+    },
+    [activeCustomCourseId]
   );
   const skipCorrection = courseHasOnlyTrueFalse || skipCorrectionEnabled;
   const checkSpelling = useSpellchecking();
@@ -356,6 +434,8 @@ export default function Flashcards() {
       }
     },
     onCorrectAnswer: (boxKey, meta) => {
+      ensureCompletionRunStarted();
+      applyCompletionSummaryAnswer("ok", meta.durationMs);
       handleStatsBurst(boxKey, meta);
       boxFacesControllerRef.current.handleCorrectAnswer(boxKey, {
         preferLove:
@@ -364,7 +444,9 @@ export default function Flashcards() {
           meta.fromBox === "boxFour",
       });
     },
-    onWrongAnswer: (boxKey) => {
+    onWrongAnswer: (boxKey, meta) => {
+      ensureCompletionRunStarted();
+      applyCompletionSummaryAnswer("wrong", meta.durationMs);
       boxFacesControllerRef.current.handleWrongAnswer(boxKey);
     },
     boxZeroEnabled,
@@ -732,12 +814,22 @@ export default function Flashcards() {
   }, [boxes]);
 
   useEffect(() => {
-    if (activeCustomCourseId == null) return;
-    if (!isReady) return;
-    if (customCards.length === 0) return;
-    if (totalCardsInBoxes > 0 || usedWordIds.length > 0) return;
+    if (activeCustomCourseId == null) {
+      setIsReviewedIdsSeedLoading(false);
+      setReviewedIdsSeedResolvedCourseId(null);
+      return;
+    }
+    if (!isReady || customCards.length === 0) {
+      return;
+    }
+    if (totalCardsInBoxes > 0 || usedWordIds.length > 0) {
+      setIsReviewedIdsSeedLoading(false);
+      setReviewedIdsSeedResolvedCourseId(activeCustomCourseId);
+      return;
+    }
 
     let cancelled = false;
+    setIsReviewedIdsSeedLoading(true);
 
     void getCustomReviewedFlashcardIds(activeCustomCourseId)
       .then((reviewedIds) => {
@@ -751,6 +843,12 @@ export default function Flashcards() {
           `[Flashcards] Failed to seed reviewed ids for course ${activeCustomCourseId}`,
           error
         );
+      })
+      .finally(() => {
+        if (!cancelled) {
+          setIsReviewedIdsSeedLoading(false);
+          setReviewedIdsSeedResolvedCourseId(activeCustomCourseId);
+        }
       });
 
     return () => {
@@ -836,6 +934,11 @@ export default function Flashcards() {
     if (activeCustomCourseId == null) {
       setCustomCourse(null);
       setCustomCards([]);
+      setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+      setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+      setCourseCompletionRunStartedAt(null);
+      courseCompletionRunStartedAtRef.current = null;
+      setReviewedIdsSeedResolvedCourseId(null);
       setLoadError(null);
       setLoadedCourseId(null);
       setIsLoadingData(false);
@@ -847,17 +950,31 @@ export default function Flashcards() {
     const shouldShowLoader =
       loadedCourseId !== activeCustomCourseId || customCards.length === 0;
     setIsLoadingData(shouldShowLoader);
+    setReviewedIdsSeedResolvedCourseId(null);
     setLoadError(null);
 
-    void Promise.all([
-      getCustomCourseById(activeCustomCourseId),
-      getCustomFlashcards(activeCustomCourseId),
-    ])
-      .then(([courseRow, flashcardRows]) => {
+    void (async () => {
+      const runStartedAt = await getCourseCompletionRunStartedAt(activeCustomCourseId);
+      const [courseRow, flashcardRows, lifetimeCompletionSummary, runCompletionSummary] =
+        await Promise.all([
+          getCustomCourseById(activeCustomCourseId),
+          getCustomFlashcards(activeCustomCourseId),
+          getCourseCompletionSummary(activeCustomCourseId),
+          runStartedAt == null
+            ? Promise.resolve(EMPTY_COURSE_COMPLETION_SUMMARY)
+            : getCourseCompletionSummary(activeCustomCourseId, {
+                fromCreatedAtMs: runStartedAt,
+              }),
+        ]);
+
         if (!isMounted) return;
         if (!courseRow) {
           setCustomCourse(null);
           setCustomCards([]);
+          setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+          setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+          setCourseCompletionRunStartedAt(null);
+          courseCompletionRunStartedAtRef.current = null;
           setLoadedCourseId(null);
           setLoadError("Wybrany kurs nie istnieje.");
           void setActiveCustomCourseId(null);
@@ -865,15 +982,23 @@ export default function Flashcards() {
         }
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
-        // console.log('After mapping flashcards:', mapped);
         setCustomCards(mapped);
+        setLoadedCourseLifetimeCompletionSummary(
+          lifetimeCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY
+        );
+        setCourseCompletionRunStartedAt(runStartedAt);
+        courseCompletionRunStartedAtRef.current = runStartedAt;
+        setCourseCompletionSummary(runCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY);
         setLoadedCourseId(activeCustomCourseId);
-      })
-      .catch((error) => {
+      })().catch((error) => {
         console.error("Failed to load custom flashcards", error);
         if (!isMounted) return;
         setCustomCourse(null);
         setCustomCards([]);
+        setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+        setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+        setCourseCompletionRunStartedAt(null);
+        courseCompletionRunStartedAtRef.current = null;
         setLoadError("Nie udało się wczytać fiszek.");
       })
       .finally(() => {
@@ -885,9 +1010,7 @@ export default function Flashcards() {
     };
   }, [
     activeCustomCourseId,
-    customCards.length,
     isFocused,
-    loadedCourseId,
     setActiveCustomCourseId,
   ]);
 
@@ -950,7 +1073,9 @@ export default function Flashcards() {
   useEffect(() => {
     if (!isReady) return;
     if (isLoadingData) return;
+    if (isReviewedIdsSeedLoading) return;
     if (activeCustomCourseId == null) return;
+    if (reviewedIdsSeedResolvedCourseId !== activeCustomCourseId) return;
     if (totalCardsInBoxes > 0) return;
     if (allCardsDistributed) return;
     if (!customCards.length) return;
@@ -959,7 +1084,9 @@ export default function Flashcards() {
   }, [
     isReady,
     isLoadingData,
+    isReviewedIdsSeedLoading,
     activeCustomCourseId,
+    reviewedIdsSeedResolvedCourseId,
     totalCardsInBoxes,
     allCardsDistributed,
     customCards,
@@ -1029,10 +1156,15 @@ export default function Flashcards() {
   }, [activeCustomCourseId, isFocused]);
 
   const isUiWarmupActive = isFocused && !isUiReady;
+  const isReviewedIdsSeedResolved =
+    activeCustomCourseId != null &&
+    reviewedIdsSeedResolvedCourseId === activeCustomCourseId;
   const shouldKeepLoadingOverlayVisible =
     activeCustomCourseId != null &&
     !loadError &&
     (isLoadingData ||
+      isReviewedIdsSeedLoading ||
+      (customCards.length > 0 && !isReviewedIdsSeedResolved) ||
       loadedCourseId !== activeCustomCourseId ||
       isUiWarmupActive);
   const shouldRenderLoadingOverlay =
@@ -1073,12 +1205,72 @@ export default function Flashcards() {
 
   const downloadDisabled =
     customCards.length === 0 || isLoadingData || !isReady;
-  const shouldShowBoxes =
+  const baseShouldShowBoxes =
     activeCustomCourseId != null &&
     isReady &&
     !isLoadingData &&
     !loadError &&
     customCards.length > 0;
+  const isCourseFinishedVisible =
+    baseShouldShowBoxes &&
+    !shouldRenderLoadingOverlay &&
+    remainingNewFlashcardsCount === 0 &&
+    totalCardsInBoxes === 0 &&
+    selectedItem == null;
+  const shouldShowBoxes = baseShouldShowBoxes && !isCourseFinishedVisible;
+
+  useEffect(() => {
+    if (courseCompletionRunStartedAt != null) {
+      return;
+    }
+    if (!isCourseFinishedVisible) {
+      return;
+    }
+    if (courseCompletionSummary.totalAnswers > 0) {
+      return;
+    }
+    if (loadedCourseLifetimeCompletionSummary.totalAnswers <= 0) {
+      return;
+    }
+
+    setCourseCompletionSummary(loadedCourseLifetimeCompletionSummary);
+  }, [
+    courseCompletionRunStartedAt,
+    courseCompletionSummary.totalAnswers,
+    isCourseFinishedVisible,
+    loadedCourseLifetimeCompletionSummary,
+  ]);
+
+  const courseFinishedAccuracyLabel =
+    courseCompletionSummary.totalAnswers > 0
+      ? `${Math.round(
+          (courseCompletionSummary.correctCount /
+            courseCompletionSummary.totalAnswers) *
+            100
+        )}%`
+      : "0%";
+  const courseFinishedTimeLabel = formatLearningTime(
+    courseCompletionSummary.timeMs
+  );
+  const courseFinishedFlagSource = useMemo(() => {
+    if (!customCourse?.slug) {
+      return undefined;
+    }
+
+    const manifest = OFFICIAL_PACKS.find((pack) => pack.slug === customCourse.slug);
+    const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
+    return flagLang ? getFlagSource(flagLang) : undefined;
+  }, [customCourse?.slug]);
+  const courseFinishedIconProps = useMemo(() => {
+    if (!customCourse) {
+      return null;
+    }
+
+    return resolveCourseIconProps(
+      customCourse.iconId,
+      customCourse.iconColor ?? colors.headline
+    );
+  }, [customCourse, colors.headline]);
   const shouldRunFlashcardsCoachmark = !boxZeroEnabled;
   const coachmark = useCoachmarkFlow({
     flowKey: "flashcards-guided",
@@ -1445,6 +1637,19 @@ export default function Flashcards() {
         description="Dodaj fiszki do tego kursu, aby móc z nich korzystać."
       />
     );
+  } else if (isCourseFinishedVisible) {
+    cardSection = (
+      <CourseFinishedPanel
+        courseName={customCourse?.name?.trim() || "Kurs"}
+        courseFlagSource={courseFinishedFlagSource}
+        customCourseFlagSource={courseFinishedFlagSource}
+        courseIconProps={courseFinishedIconProps}
+        cardsCountLabel={String(customCards.length)}
+        accuracyLabel={courseFinishedAccuracyLabel}
+        learningTimeLabel={courseFinishedTimeLabel}
+        onBackToCourses={() => router.push("/coursepanel")}
+      />
+    );
   } else {
     cardSection = (
       <Card
@@ -1605,6 +1810,19 @@ export default function Flashcards() {
     currentFlashcardsStep?.triggerDemoConfetti,
     setTutorialEventCompleted,
   ]);
+
+  const wasCourseFinishedVisibleRef = useRef(false);
+
+  useEffect(() => {
+    if (isCourseFinishedVisible && !wasCourseFinishedVisibleRef.current) {
+      setShouldCelebrate(false);
+      requestAnimationFrame(() => {
+        setShouldCelebrate(true);
+      });
+    }
+
+    wasCourseFinishedVisibleRef.current = isCourseFinishedVisible;
+  }, [isCourseFinishedVisible]);
 
   useEffect(() => {
     if (!coachmark.isActive) {
