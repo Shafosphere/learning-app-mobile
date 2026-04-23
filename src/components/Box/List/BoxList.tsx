@@ -1,8 +1,9 @@
 import { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
 import BoxSkin from "../Skin/BoxSkin";
+import { resolveBoxFace, type BoxFacesByBox } from "../Skin/boxFaces";
 import { useBoxListStyles } from "./BoxList.styles";
 
 interface BoxesProps {
@@ -14,6 +15,7 @@ interface BoxesProps {
     disabled?: boolean;
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
     countsCoachmarkId?: string;
+    faces?: BoxFacesByBox;
 }
 
 export default function BoxList({
@@ -25,17 +27,9 @@ export default function BoxList({
     disabled = false,
     countOverrides,
     countsCoachmarkId,
+    faces,
 }: BoxesProps) {
     const styles = useBoxListStyles();
-    type Face = "smile" | "happy" | "surprised";
-
-    const [faces, setFaces] = useState<Partial<Record<keyof BoxesState, Face>>>(
-        {}
-    );
-    const timersRef = useRef<
-        Partial<Record<keyof BoxesState, ReturnType<typeof setTimeout>>>
-    >({});
-    const activeBoxRef = useRef<typeof activeBox>(activeBox);
     const longPressTriggeredRef = useRef(false);
     const [measuredBoxes, setMeasuredBoxes] = useState<
         Partial<Record<"boxOne" | "boxTwo", { x: number; y: number; width: number; height: number }>>
@@ -50,19 +44,6 @@ export default function BoxList({
     const [measuredPressables, setMeasuredPressables] = useState<
         Partial<Record<keyof BoxesState, { x: number; y: number }>>
     >({});
-
-    useEffect(() => {
-        activeBoxRef.current = activeBox;
-    }, [activeBox]);
-
-    useEffect(() => {
-        const timers = timersRef.current;
-        return () => {
-            Object.values(timers).forEach((t) => {
-                if (t) clearTimeout(t);
-            });
-        };
-    }, []);
 
     const entries = Object.entries(boxes) as [
         keyof BoxesState,
@@ -186,38 +167,12 @@ export default function BoxList({
             >
                 {displayedEntries.map(([boxName, words]) => {
                     const wordCount = countOverrides?.[boxName] ?? words.length;
-                    const storedFace = faces[boxName];
                     const isActive = activeBox === boxName;
-                    const currentFace: Face =
-                        storedFace === "surprised"
-                            ? "surprised"
-                            : isActive
-                                ? "happy"
-                                : "smile";
-
-                    const onPress = () => {
-                        if (disabled) {
-                            return;
-                        }
-                        if (longPressTriggeredRef.current) {
-                            longPressTriggeredRef.current = false;
-                            return;
-                        }
-                        setFaces((prev) => ({ ...prev, [boxName]: "surprised" }));
-
-                        handleSelectBox(boxName);
-
-                        if (timersRef.current[boxName]) {
-                            clearTimeout(timersRef.current[boxName]!);
-                        }
-                        timersRef.current[boxName] = setTimeout(() => {
-                            setFaces((prev) => {
-                                const next = { ...prev };
-                                delete next[boxName];
-                                return next;
-                            });
-                        }, 500);
-                    };
+                    const currentFace =
+                        faces?.[boxName] ??
+                        resolveBoxFace({
+                            isActive,
+                        });
 
                     return (
                         <View
@@ -241,7 +196,16 @@ export default function BoxList({
                                     onBoxLongPress?.(boxName);
                                 }}
                                 delayLongPress={400}
-                                onPress={onPress}
+                                onPress={() => {
+                                    if (disabled) {
+                                        return;
+                                    }
+                                    if (longPressTriggeredRef.current) {
+                                        longPressTriggeredRef.current = false;
+                                        return;
+                                    }
+                                    handleSelectBox(boxName);
+                                }}
                             >
                                 {boxName === "boxOne" || boxName === "boxTwo" ? (
                                     <CoachmarkAnchor

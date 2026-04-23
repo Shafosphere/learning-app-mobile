@@ -162,6 +162,9 @@ type ButtonsProps = React.ComponentProps<
 >;
 
 let latestButtonsProps: ButtonsProps | null = null;
+let latestBoxListProps: {
+  faces?: Partial<Record<keyof BoxesState, string>>;
+} | null = null;
 
 jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
   FlashcardsButtons: (props: ButtonsProps) => {
@@ -171,7 +174,10 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 }));
 
 jest.mock("@/src/components/Box/List/BoxList", () => {
-  return function BoxesMock() {
+  return function BoxesMock(props: {
+    faces?: Partial<Record<keyof BoxesState, string>>;
+  }) {
+    latestBoxListProps = props;
     return null;
   };
 });
@@ -273,6 +279,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     jest.spyOn(console, "log").mockImplementation(() => {});
     latestCardProps = null;
     latestButtonsProps = null;
+    latestBoxListProps = null;
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
       setActiveCustomCourseId: jest.fn(),
@@ -458,5 +465,21 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.result).toBeNull();
     expect(latestButtonsProps?.selectedTrueFalseAnswer).toBeNull();
     expect(latestButtonsProps?.trueFalseButtonsVariant).toBe("know_dont_know");
+  });
+
+  it("passes computed box faces down to the box renderer", async () => {
+    const cardA = makeCard({
+      id: 41,
+      text: "sun",
+      translations: ["slonce"],
+    });
+
+    renderScreenWithState(createInteractionState(cardA), [cardA]);
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
   });
 });

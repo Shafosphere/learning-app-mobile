@@ -1,20 +1,11 @@
 import BoxBottom from "@/assets/illustrations/mascot-box/body/bottom-box.png";
-import LeftEyeImg from "@/assets/illustrations/mascot-box/face/left-eye-img.svgx";
-import LeftPupilImg from "@/assets/illustrations/mascot-box/face/left-pupil-img.svgx";
-import RightEyeImg from "@/assets/illustrations/mascot-box/face/right-eye-img.svgx";
-import RightPupilImg from "@/assets/illustrations/mascot-box/face/right-pupil-img.svgx";
 import BoxTop from "@/assets/illustrations/mascot-box/body/top-box.png";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import React from "react";
 import { Image, View } from "react-native";
-// import Happy from "@/assets/illustrations/mascot-box/face/happy.svgx";
-// import Smile from "@/assets/illustrations/mascot-box/face/smile.svgx";
-// import Surprised from "@/assets/illustrations/mascot-box/face/surprised.svgx";
 import { BoxCardsRow } from "./BoxCardsRow";
-import { BoxMouth } from "./BoxMouth";
 import { useBoxSkinStyles } from "./BoxSkin.styles";
-
-type Face = "smile" | "happy" | "surprised";
+import { BOX_FACE_ASSETS, type Face } from "./boxFaces";
 
 interface BoxSkinProps {
     wordCount: number;
@@ -26,6 +17,7 @@ interface BoxSkinProps {
 const BoxSkin: React.FC<BoxSkinProps> = ({ wordCount, face, isActive, isCaro }) => {
     const styles = useBoxSkinStyles();
     const { showBoxFaces } = useSettings();
+    const faceSource = BOX_FACE_ASSETS[face];
 
     const accessibilityLabel = `Pudełko z ${wordCount} słowami${showBoxFaces ? `, nastrój: ${face}` : ""
         }`;
@@ -41,13 +33,12 @@ const BoxSkin: React.FC<BoxSkinProps> = ({ wordCount, face, isActive, isCaro }) 
             <Image source={BoxTop} style={styles.skin} />
             <BoxCardsRow wordCount={wordCount} styles={styles} />
             {showBoxFaces && (
-                <>
-                    <BoxMouth face={face} style={styles.mouth} />
-                    <LeftPupilImg style={styles.leftpupil} width={4} height={4} />
-                    <LeftEyeImg style={styles.lefteye} width={12} height={12} />
-                    <RightPupilImg style={styles.rightpupil} width={4} height={4} />
-                    <RightEyeImg style={styles.righteye} width={12} height={12} />
-                </>
+                <Image
+                    source={faceSource}
+                    style={styles.face}
+                    resizeMode="contain"
+                    testID="box-skin-face"
+                />
             )}
             <Image source={BoxBottom} style={styles.skin} />
         </View>
