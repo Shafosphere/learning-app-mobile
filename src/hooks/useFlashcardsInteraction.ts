@@ -33,6 +33,14 @@ export type CorrectAnswerMeta = {
   word: WordWithTranslations;
   wasNewMastered: boolean;
   logLearningEventPromise: Promise<void>;
+  isPromotion: boolean;
+  isTerminalSuccess: boolean;
+  fromBox: keyof BoxesState;
+};
+
+export type WrongAnswerMeta = {
+  word: WordWithTranslations;
+  fromBox: keyof BoxesState;
 };
 
 type UseFlashcardsInteractionParams = {
@@ -44,6 +52,7 @@ type UseFlashcardsInteractionParams = {
   reversedBoxes?: readonly (keyof BoxesState)[];
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState, meta: CorrectAnswerMeta) => void;
+  onWrongAnswer?: (box: keyof BoxesState, meta: WrongAnswerMeta) => void;
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
 };
@@ -57,6 +66,7 @@ export function useFlashcardsInteraction({
   reversedBoxes = ["boxTwo", "boxFour"],
   onWordPromotedOut,
   onCorrectAnswer,
+  onWrongAnswer,
   boxZeroEnabled = true,
   skipDemotionCorrection = false,
 }: UseFlashcardsInteractionParams) {
@@ -475,6 +485,9 @@ export function useFlashcardsInteraction({
             word: wordForCheck,
             wasNewMastered: registerKnownWordResult.wasNewMastered,
             logLearningEventPromise,
+            isPromotion: activeBox !== "boxFive",
+            isTerminalSuccess: activeBox === "boxFive",
+            fromBox: activeBox,
           });
         }
         const normalize = (s: string) => {
@@ -525,6 +538,12 @@ export function useFlashcardsInteraction({
         }, delay);
       } else {
         setResult(false);
+        if (activeBox) {
+          onWrongAnswer?.(activeBox, {
+            word: wordForCheck,
+            fromBox: activeBox,
+          });
+        }
         const { hasExplanation, isExplanationPending } = getExplanationState({
           selectedItem: wordForCheck,
           result: false,
@@ -618,6 +637,7 @@ export function useFlashcardsInteraction({
       ignoreDiacriticsInSpellcheck,
       moveElement,
       onCorrectAnswer,
+      onWrongAnswer,
       questionShownAt,
       registerKnownWord,
       learningRemindersEnabled,

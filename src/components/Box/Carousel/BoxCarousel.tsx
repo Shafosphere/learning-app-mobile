@@ -12,10 +12,8 @@ import {
     type NativeSyntheticEvent,
 } from "react-native";
 import BoxSkin from "../Skin/BoxSkin";
+import { resolveBoxFace, type BoxFacesByBox } from "../Skin/boxFaces";
 import { useBoxCarouselStyles } from "./BoxCarousel.styles";
-
-type Face = "smile" | "happy" | "surprised";
-type FaceState = Partial<Record<keyof BoxesState, Face>>;
 
 interface BoxesProps {
     boxes: BoxesState;
@@ -25,6 +23,7 @@ interface BoxesProps {
     onBoxLongPress?: (name: keyof BoxesState) => void;
     disabled?: boolean;
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
+    faces?: BoxFacesByBox;
 }
 
 export default function BoxCarousel({
@@ -35,6 +34,7 @@ export default function BoxCarousel({
     onBoxLongPress,
     disabled = false,
     countOverrides,
+    faces,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
@@ -84,9 +84,6 @@ export default function BoxCarousel({
     const prevItemWidthRef = useRef(itemWidth);
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const [scrollOffset, setScrollOffset] = useState(initialIndex * itemWidth);
-    const [faces, setFaces] = useState<FaceState>({});
-    const prevActiveIndexRef = useRef<number | null>(null);
-    const faceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const longPressTriggeredRef = useRef(false);
 
     useEffect(() => {
@@ -147,77 +144,6 @@ export default function BoxCarousel({
         }
         setActiveIndex(clamped);
     };
-
-    useEffect(() => {
-        setFaces((prev) => {
-            const next: FaceState = {};
-            items.forEach((item, idx) => {
-                next[item.key] = prev[item.key] ?? (idx === activeIndex ? "happy" : "smile");
-            });
-            return next;
-        });
-    }, [items, activeIndex]);
-
-    useEffect(() => {
-        if (!items.length) return;
-
-        const currentKey = items[activeIndex]?.key;
-        if (!currentKey) return;
-
-        if (prevActiveIndexRef.current === null) {
-            setFaces((prev) => ({ ...prev, [currentKey]: "happy" }));
-            prevActiveIndexRef.current = activeIndex;
-            return;
-        }
-        if (prevActiveIndexRef.current === activeIndex) {
-            return;
-        }
-
-        const previousIdx = prevActiveIndexRef.current;
-        const previousKey = previousIdx !== null ? items[previousIdx]?.key : null;
-
-        if (previousKey && previousKey !== currentKey) {
-            setFaces((prev) => ({ ...prev, [previousKey]: "smile" }));
-        }
-
-        if (faceTimerRef.current) {
-            clearTimeout(faceTimerRef.current);
-        }
-
-        setFaces((prev) => ({ ...prev, [currentKey]: "surprised" }));
-        faceTimerRef.current = setTimeout(() => {
-            setFaces((prev) => ({ ...prev, [currentKey]: "happy" }));
-        }, 500);
-
-        prevActiveIndexRef.current = activeIndex;
-
-        return () => {
-            if (faceTimerRef.current) {
-                clearTimeout(faceTimerRef.current);
-            }
-        };
-    }, [activeIndex, items]);
-
-    useEffect(() => {
-        return () => {
-            if (faceTimerRef.current) {
-                clearTimeout(faceTimerRef.current);
-            }
-        };
-    }, []);
-
-    useEffect(() => {
-        // Ensure transient surprised faces do not linger after major layout/card changes.
-        setFaces((prev) => {
-            const next: FaceState = {};
-            items.forEach((item, idx) => {
-                const isCurrent = idx === activeIndex;
-                const face = prev[item.key];
-                next[item.key] = face === "surprised" ? (isCurrent ? "happy" : "smile") : (face ?? (isCurrent ? "happy" : "smile"));
-            });
-            return next;
-        });
-    }, [activeIndex, items]);
 
     if (!items.length) {
         return <View style={styles.container} />;
@@ -289,7 +215,10 @@ export default function BoxCarousel({
                         });
                         const isActive = index === activeIndex;
                         const face =
-                            faces[item.key] ?? (isActive ? "happy" : "smile");
+                            faces?.[item.key] ??
+                            resolveBoxFace({
+                                isActive,
+                            });
 
                         return (
                             <View

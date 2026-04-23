@@ -20,6 +20,7 @@ import {
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
+import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
@@ -69,25 +70,6 @@ const stageToBox = (stage?: number): keyof BoxesState => {
   if (clamped === 3) return "boxThree";
   if (clamped === 4) return "boxFour";
   return "boxFive";
-};
-
-const boxToStage = (box: keyof BoxesState | null | undefined): number => {
-  switch (box) {
-    case "boxZero":
-      return 0;
-    case "boxOne":
-      return 1;
-    case "boxTwo":
-      return 2;
-    case "boxThree":
-      return 3;
-    case "boxFour":
-      return 4;
-    case "boxFive":
-      return 5;
-    default:
-      return 0;
-  }
 };
 
 const distributeByStage = (words: WordWithTranslations[]): BoxesState => {
@@ -156,6 +138,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
   const [longThink, setLongThink] = useState(false);
   const [isBetweenCards, setIsBetweenCards] = useState(false);
+  const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{ box: keyof BoxesState | null; ts: number; count: number }>({
     box: null,
     ts: 0,
@@ -178,6 +161,16 @@ export default function ReviewFlashcardsPlaceholder() {
     boxThree: [],
     boxFour: [],
     boxFive: [],
+  });
+  const {
+    faces: boxFaces,
+    handleSelection: handleBoxFaceSelection,
+    handleBlockedInteraction: handleBlockedBoxInteraction,
+    handleCorrectAnswer: handleBoxFaceCorrectAnswer,
+    handleWrongAnswer: handleBoxFaceWrongAnswer,
+  } = useBoxFacesController({
+    boxes,
+    activeBox,
   });
 
   const resetSessionState = useCallback((nextBoxes: BoxesState) => {
@@ -213,7 +206,7 @@ export default function ReviewFlashcardsPlaceholder() {
 
   const removeCardFromSession = useCallback((cardId: number, box: keyof BoxesState) => {
     setBoxes((prev) => {
-      const nextState = (Object.keys(prev) as Array<keyof BoxesState>).reduce(
+      const nextState = (Object.keys(prev) as (keyof BoxesState)[]).reduce(
         (acc, boxKey) => {
           acc[boxKey] = (prev[boxKey] ?? []).filter((item) => item.id !== cardId);
           return acc;
@@ -332,6 +325,10 @@ export default function ReviewFlashcardsPlaceholder() {
   );
 
   const handleSelectBox = (box: keyof BoxesState) => {
+    if (isLoading || correction) {
+      handleBlockedBoxInteraction(box);
+      return;
+    }
     const now = Date.now();
     const spam = boxSpamRef.current;
     const isSameBox = spam.box === box && now - spam.ts <= BOX_SPAM_WINDOW_MS;
@@ -343,13 +340,23 @@ export default function ReviewFlashcardsPlaceholder() {
     }
     spam.ts = now;
     if (spam.count > BOX_SPAM_THRESHOLD) {
+      handleBlockedBoxInteraction(box);
       return; // soft guard: ignore excessive taps
     }
-    if (isBetweenCards) return;
+    if (isBetweenCards) {
+      handleBlockedBoxInteraction(box);
+      return;
+    }
     setActiveBox(box);
-    if (correction) return;
     selectNextWord(box);
   };
+
+  useEffect(() => {
+    if (activeBox && previousFaceActiveBoxRef.current !== activeBox) {
+      handleBoxFaceSelection(activeBox);
+    }
+    previousFaceActiveBoxRef.current = activeBox;
+  }, [activeBox, handleBoxFaceSelection]);
 
   const handleBoxLongPress = (box: keyof BoxesState) => {
     const cards = boxes[box] ?? [];
@@ -440,9 +447,11 @@ export default function ReviewFlashcardsPlaceholder() {
     checkSpelling,
     correctionAnswerOnly,
     correctionEffectiveReversed,
+    explanationOnlyOnWrong,
     pendingExplanationMove,
     selectedItem,
     removeCardFromSession,
+    showExplanationEnabled,
   ]);
 
   useEffect(() => {
@@ -569,7 +578,6 @@ export default function ReviewFlashcardsPlaceholder() {
       setResult(null);
     };
 
-    const currentStage = selectedItem.stage ?? boxToStage(activeBox);
     const currentBox = selectedItem.stage != null ? stageToBox(selectedItem.stage) : activeBox;
     const durationMs =
       questionShownAt != null ? Math.max(0, Date.now() - questionShownAt) : undefined;
@@ -586,6 +594,7 @@ export default function ReviewFlashcardsPlaceholder() {
     };
 
     if (!ok) {
+      handleBoxFaceWrongAnswer(activeBox);
       logAttemptEvent("wrong");
       const wrongExplanationState = getExplanationState({
         selectedItem,
@@ -663,6 +672,9 @@ export default function ReviewFlashcardsPlaceholder() {
     }
 
     logAttemptEvent("ok");
+    handleBoxFaceCorrectAnswer(activeBox, {
+      preferLove: activeBox === "boxFour" || activeBox === "boxFive",
+    });
     const isPerfect = (() => {
       const normalizeStrict = (s: string) =>
         stripDiacritics(s.trim().toLowerCase());
@@ -730,13 +742,20 @@ export default function ReviewFlashcardsPlaceholder() {
   }, [
     activeBox,
     answer,
+    answerOnly,
     checkSpelling,
     courseId,
     effectiveReversed,
+    explanationOnlyOnWrong,
+    handleBoxFaceCorrectAnswer,
+    handleBoxFaceWrongAnswer,
     pendingExplanationMove,
+    questionShownAt,
     removeCardFromSession,
+    reversed,
     result,
     selectedItem,
+    showExplanationEnabled,
   ]);
 
   const handleTrueFalseAnswer = useMemo(
@@ -870,6 +889,8 @@ export default function ReviewFlashcardsPlaceholder() {
         handleSelectBox={handleSelectBox}
         onBoxLongPress={handleBoxLongPress}
         countsCoachmarkId="review-flashcards-box-counts"
+        disabled={isBetweenCards || isLoading || correction != null}
+        faces={boxFaces}
       />
     ) : (
       <BoxesCarousel
@@ -877,6 +898,8 @@ export default function ReviewFlashcardsPlaceholder() {
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
         onBoxLongPress={handleBoxLongPress}
+        disabled={isBetweenCards || isLoading || correction != null}
+        faces={boxFaces}
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
@@ -886,8 +909,6 @@ export default function ReviewFlashcardsPlaceholder() {
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
   const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
-  const shouldPromptBoxSelection =
-    !isLoading && selectedItem == null && hasCardsInSession && activeBox == null;
   const isSessionEmpty = !isLoading && selectedItem == null && !hasCardsInSession;
   const coachmark = useCoachmarkFlow({
     flowKey: "review-flashcards-guided",

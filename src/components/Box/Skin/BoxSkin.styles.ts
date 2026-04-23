@@ -27,34 +27,12 @@ export const useBoxSkinStyles = createThemeStylesHook((colors) => ({
         width: "100%",
         height: "100%",
     },
-    mouth: {
+    face: {
         position: "absolute",
-        bottom: 15,
-        right: 30,
-        zIndex: 1000,
-    },
-    lefteye: {
-        position: "absolute",
-        bottom: 30,
-        right: 50,
-        zIndex: 999,
-    },
-    leftpupil: {
-        position: "absolute",
-        bottom: 36,
-        right: 53,
-        zIndex: 1000,
-    },
-    righteye: {
-        position: "absolute",
-        bottom: 32,
-        right: 20,
-        zIndex: 999,
-    },
-    rightpupil: {
-        position: "absolute",
-        bottom: 38,
-        right: 23,
+        width: 56,
+        height: 52,
+        bottom: 5,
+        right: 12,
         zIndex: 1000,
     },
     card1: {

@@ -36,6 +36,7 @@ import {
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
+import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import {
   useHydratedPersistedState,
 } from "@/src/hooks/usePersistedState";
@@ -160,11 +161,22 @@ export default function Flashcards() {
   const questionStartRef = useRef<number | null>(null);
   const perCardFailRef = useRef<Record<number, number>>({});
   const isCoachmarkActiveRef = useRef(false);
+  const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{
     box: keyof BoxesState | null;
     ts: number;
     count: number;
   }>({ box: null, ts: 0, count: 0 });
+  const boxFacesControllerRef = useRef<{
+    handleCorrectAnswer: (
+      box: keyof BoxesState,
+      options?: { preferLove?: boolean }
+    ) => void;
+    handleWrongAnswer: (box: keyof BoxesState) => void;
+  }>({
+    handleCorrectAnswer: () => undefined,
+    handleWrongAnswer: () => undefined,
+  });
   const handleStatsBurst = useCallback(
     (boxKey: keyof BoxesState, meta: CorrectAnswerMeta) => {
       if (!isCoachmarkActiveRef.current && boxKey === "boxFive") {
@@ -343,10 +355,41 @@ export default function Flashcards() {
         void scheduleCustomReview(word.id, activeCustomCourseId, 0);
       }
     },
-    onCorrectAnswer: handleStatsBurst,
+    onCorrectAnswer: (boxKey, meta) => {
+      handleStatsBurst(boxKey, meta);
+      boxFacesControllerRef.current.handleCorrectAnswer(boxKey, {
+        preferLove:
+          meta.isTerminalSuccess ||
+          meta.wasNewMastered ||
+          meta.fromBox === "boxFour",
+      });
+    },
+    onWrongAnswer: (boxKey) => {
+      boxFacesControllerRef.current.handleWrongAnswer(boxKey);
+    },
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
   });
+  const {
+    faces: boxFaces,
+    handleSelection: handleBoxFaceSelection,
+    handleBlockedInteraction: handleBlockedBoxInteraction,
+    handleCorrectAnswer: handleBoxFaceCorrectAnswer,
+    handleWrongAnswer: handleBoxFaceWrongAnswer,
+  } = useBoxFacesController({
+    boxes,
+    activeBox,
+  });
+  boxFacesControllerRef.current = {
+    handleCorrectAnswer: handleBoxFaceCorrectAnswer,
+    handleWrongAnswer: handleBoxFaceWrongAnswer,
+  };
+  useEffect(() => {
+    if (activeBox && previousFaceActiveBoxRef.current !== activeBox) {
+      handleBoxFaceSelection(activeBox);
+    }
+    previousFaceActiveBoxRef.current = activeBox;
+  }, [activeBox, handleBoxFaceSelection]);
   const correctionLocked =
     correction != null && correction.mode !== "intro";
   const selectedItemId = selectedItem?.id ?? null;
@@ -479,6 +522,7 @@ export default function Flashcards() {
   const handleSelectBox = useCallback(
     (boxName: keyof BoxesState) => {
       if (boxSelectionLocked) {
+        handleBlockedBoxInteraction(boxName);
         return;
       }
       const now = Date.now();
@@ -509,7 +553,13 @@ export default function Flashcards() {
 
       baseHandleSelectBox(boxName);
     },
-    [baseHandleSelectBox, boxSelectionLocked, setTutorialEventCompleted, triggerQuote],
+    [
+      baseHandleSelectBox,
+      boxSelectionLocked,
+      handleBlockedBoxInteraction,
+      setTutorialEventCompleted,
+      triggerQuote,
+    ],
   );
 
   useEffect(() => {
@@ -1454,6 +1504,7 @@ export default function Flashcards() {
         onBoxLongPress={handleBoxLongPress}
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
+        faces={boxFaces}
       />
     ) : (
       <BoxesCarousel
@@ -1464,6 +1515,7 @@ export default function Flashcards() {
         onBoxLongPress={handleBoxLongPress}
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
+        faces={boxFaces}
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
