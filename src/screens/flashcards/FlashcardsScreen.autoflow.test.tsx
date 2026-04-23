@@ -5,6 +5,8 @@ import Flashcards from "@/src/screens/flashcards/FlashcardsScreen";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { getCustomFlashcards } from "@/src/db/sqlite/db";
+import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
@@ -195,10 +197,44 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
+const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
+const mockedUseBoxesPersistenceSnapshot =
+  useBoxesPersistenceSnapshot as jest.Mock;
 
 describe("FlashcardsScreen autoflow guard", () => {
   beforeEach(() => {
     jest.spyOn(console, "log").mockImplementation(() => {});
+    mockedGetCustomFlashcards.mockResolvedValue([]);
+    mockedUseBoxesPersistenceSnapshot.mockReturnValue({
+      boxes: {
+        boxZero: [],
+        boxOne: [
+          {
+            id: 1,
+            text: "cat",
+            translations: ["kot"],
+            flipped: false,
+            answerOnly: false,
+            hintFront: null,
+            hintBack: null,
+            imageFront: null,
+            imageBack: null,
+            explanation: null,
+            type: "text",
+          },
+        ],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: jest.fn(),
+      isReady: true,
+      usedWordIds: [],
+      addUsedWordIds: jest.fn(),
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+    });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
       setActiveCustomCourseId: jest.fn(),
@@ -282,7 +318,240 @@ describe("FlashcardsScreen autoflow guard", () => {
       activeBox: "boxOne",
       boxZeroEnabled: false,
       isReady: true,
+      incomingBatchSize: 20,
+      remainingNewFlashcardsCount: 0,
     });
+  });
+
+  it("passes remainingNewFlashcardsCount based on customCards minus trackedIds", async () => {
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 2,
+        text: "dog",
+        translations: ["pies"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 3,
+        text: "bird",
+        translations: ["ptak"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+    ]);
+
+    mockedUseBoxesPersistenceSnapshot.mockReturnValue({
+      boxes: {
+        boxZero: [],
+        boxOne: [
+          {
+            id: 1,
+            text: "cat",
+            translations: ["kot"],
+            flipped: false,
+            answerOnly: false,
+            hintFront: null,
+            hintBack: null,
+            imageFront: null,
+            imageBack: null,
+            explanation: null,
+            type: "text",
+          },
+        ],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: jest.fn(),
+      isReady: true,
+      usedWordIds: [],
+      addUsedWordIds: jest.fn(),
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+    });
+
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+
+    expect(lastCall).toMatchObject({
+      incomingBatchSize: 20,
+      remainingNewFlashcardsCount: 2,
+    });
+  });
+
+  it("treats persisted usedWordIds as already distributed after app restart", async () => {
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 2,
+        text: "dog",
+        translations: ["pies"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 3,
+        text: "bird",
+        translations: ["ptak"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+    ]);
+
+    const addUsedWordIds = jest.fn();
+    mockedUseBoxesPersistenceSnapshot.mockReturnValue({
+      boxes: {
+        boxZero: [],
+        boxOne: [],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: jest.fn(),
+      isReady: true,
+      usedWordIds: [1, 2, 3],
+      addUsedWordIds,
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+    });
+
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+
+    expect(lastCall).toMatchObject({
+      remainingNewFlashcardsCount: 0,
+    });
+    expect(addUsedWordIds).not.toHaveBeenCalled();
+  });
+
+  it("ignores stale persisted usedWordIds that no longer belong to the course", async () => {
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 2,
+        text: "dog",
+        translations: ["pies"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 3,
+        text: "bird",
+        translations: ["ptak"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+    ]);
+
+    const setBoxes = jest.fn();
+    mockedUseBoxesPersistenceSnapshot.mockReturnValue({
+      boxes: {
+        boxZero: [],
+        boxOne: [],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes,
+      isReady: true,
+      usedWordIds: [91, 92, 93],
+      addUsedWordIds: jest.fn(),
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+    });
+
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+
+    expect(lastCall).toMatchObject({
+      remainingNewFlashcardsCount: 3,
+    });
+    expect(setBoxes).toHaveBeenCalled();
   });
 
   it("resets interaction when the active course changes", async () => {

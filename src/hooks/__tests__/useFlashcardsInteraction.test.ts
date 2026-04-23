@@ -345,7 +345,7 @@ describe("useFlashcardsInteraction", () => {
     ]);
   });
 
-  it("keeps correction tied to original card even if selected item changes externally", async () => {
+  it("does not let external selected item changes replace the visible card during demotion correction", async () => {
     const cardA = makeWord({
       id: 201,
       text: "sun",
@@ -380,7 +380,7 @@ describe("useFlashcardsInteraction", () => {
       result.current.interaction.updateSelectedItem(() => cardB);
     });
 
-    expect(result.current.interaction.selectedItem?.id).toBe(cardB.id);
+    expect(result.current.interaction.selectedItem?.id).toBe(cardA.id);
     expect(result.current.interaction.correction).toMatchObject({
       cardId: cardA.id,
       awers: cardA.text,
@@ -443,7 +443,7 @@ describe("useFlashcardsInteraction", () => {
     });
   });
 
-  it("keeps correction snapshot bound to original card when selected item changes in the same act as confirm", async () => {
+  it("keeps the visible card stable when selected item changes in the same act as confirm", async () => {
     const cardA = makeWord({
       id: 401,
       text: "forest",
@@ -470,7 +470,7 @@ describe("useFlashcardsInteraction", () => {
     });
 
     await waitFor(() => {
-      expect(result.current.interaction.selectedItem?.id).toBe(cardB.id);
+      expect(result.current.interaction.selectedItem?.id).toBe(cardA.id);
       expect(result.current.interaction.result).toBe(false);
       expect(result.current.interaction.correction).toMatchObject({
         cardId: cardA.id,
@@ -485,7 +485,7 @@ describe("useFlashcardsInteraction", () => {
     });
   });
 
-  it("keeps correction snapshot bound to original card when the answered card disappears from the active box", async () => {
+  it("keeps the visible card stable when the answered card disappears from the active box", async () => {
     const cardA = makeWord({
       id: 501,
       text: "winter",
@@ -515,6 +515,7 @@ describe("useFlashcardsInteraction", () => {
     });
 
     await waitFor(() => {
+      expect(result.current.interaction.selectedItem?.id).toBe(cardA.id);
       expect(result.current.interaction.correction).toMatchObject({
         cardId: cardA.id,
         awers: cardA.text,
@@ -530,9 +531,7 @@ describe("useFlashcardsInteraction", () => {
     });
   });
 
-  it("keeps correction payload bound to the answered card during rapid reselect attempts", async () => {
-    jest.useFakeTimers();
-
+  it("blocks box switching while demotion correction is active", async () => {
     const cardA = makeWord({
       id: 601,
       text: "earth",
@@ -556,14 +555,12 @@ describe("useFlashcardsInteraction", () => {
 
     act(() => {
       result.current.interaction.confirm(undefined, "__wrong__");
-      setTimeout(() => {
-        result.current.interaction.handleSelectBox("boxTwo");
-      }, 0);
-      jest.runOnlyPendingTimers();
+      result.current.interaction.handleSelectBox("boxTwo");
     });
 
     await waitFor(() => {
-      expect(result.current.interaction.selectedItem?.id).toBe(cardB.id);
+      expect(result.current.interaction.activeBox).toBe("boxOne");
+      expect(result.current.interaction.selectedItem?.id).toBe(cardA.id);
       expect(result.current.interaction.correction).toMatchObject({
         cardId: cardA.id,
         awers: cardA.text,
@@ -574,6 +571,9 @@ describe("useFlashcardsInteraction", () => {
         }),
       });
     });
+
+    expect(result.current.boxes.boxOne.map((card) => card.id)).toEqual([cardA.id]);
+    expect(result.current.boxes.boxTwo.map((card) => card.id)).toEqual([cardB.id]);
   });
 
   it("does not move a correct-answer card after resetInteractionState clears pending timers", async () => {

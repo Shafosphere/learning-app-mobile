@@ -117,6 +117,7 @@ export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
     descriptionKey: "onboarding.coursePin.step8.description",
     kind: "success",
     advanceOn: "manual",
+    blockOutside: true,
   },
   {
     id: "course-pin-step-9",
@@ -209,6 +210,7 @@ export const COURSE_ENTRY_SETTINGS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
     descriptionKey: "onboarding.courseEntrySettings.step3.description",
     kind: "info",
     advanceOn: "manual",
+    blockOutside: true,
   },
   {
     id: "course-entry-settings-step-4",

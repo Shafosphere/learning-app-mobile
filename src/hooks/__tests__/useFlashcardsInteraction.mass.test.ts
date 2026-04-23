@@ -251,7 +251,9 @@ describe("useFlashcardsInteraction mass correction regression", () => {
           hook.result.current.interaction.updateSelectedItem(() => helperCard);
         });
 
-        expect(hook.result.current.interaction.selectedItem?.id).toBe(helperCard.id);
+        expect(hook.result.current.interaction.selectedItem?.id).toBe(
+          testedCard.id
+        );
         expect(hook.result.current.interaction.correction?.cardId).toBe(
           testedCard.id
         );

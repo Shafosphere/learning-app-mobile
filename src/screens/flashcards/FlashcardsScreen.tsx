@@ -651,9 +651,25 @@ export default function Flashcards() {
       for (const item of list) ids.add(item.id);
     }
     for (const item of learned) ids.add(item.id);
+    for (const id of usedWordIds) ids.add(id);
     return ids;
-  }, [boxes, learned]);
-  const allCardsDistributed = totalCards > 0 && trackedIds.size >= totalCards;
+  }, [boxes, learned, usedWordIds]);
+  const currentCourseCardIds = useMemo(
+    () => new Set(customCards.map((card) => card.id)),
+    [customCards]
+  );
+  const distributedCurrentCourseCount = useMemo(() => {
+    let count = 0;
+    for (const id of trackedIds) {
+      if (currentCourseCardIds.has(id)) count += 1;
+    }
+    return count;
+  }, [currentCourseCardIds, trackedIds]);
+  const remainingNewFlashcardsCount = useMemo(() => {
+    return customCards.filter((card) => !trackedIds.has(card.id)).length;
+  }, [customCards, trackedIds]);
+  const allCardsDistributed =
+    totalCards > 0 && distributedCurrentCourseCount >= totalCards;
   const totalCardsInBoxes = useMemo(() => {
     return (
       boxes.boxZero.length +
@@ -737,6 +753,8 @@ export default function Flashcards() {
   const introBoxLimitReached = boxZeroEnabled
     ? boxes.boxZero.length >= 30
     : boxes.boxOne.length >= 30;
+  const incomingBatchSize =
+    flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
 
   // Allow autoflow to switch boxes even when a card is shown,
   // otherwise it never jumps to a clogged box until the current box is emptied.
@@ -1042,7 +1060,9 @@ export default function Flashcards() {
     isReady: isReady,
     downloadMore: downloadData,
     introBoxLimitReached,
+    incomingBatchSize,
     totalFlashcardsInCourse: totalCards,
+    remainingNewFlashcardsCount,
   });
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =

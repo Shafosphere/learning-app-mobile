@@ -92,6 +92,7 @@ export function useFlashcardsInteraction({
   } = useSettings();
   const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const demotionCorrectionLockRef = useRef<number | null>(null);
 
   const clearTransitionTimers = useCallback(() => {
     transitionTimersRef.current.forEach((timer) => {
@@ -188,10 +189,16 @@ export function useFlashcardsInteraction({
     box: null,
   });
   const selectNextWord = useCallback(
-    (box: keyof BoxesState) => {
+    (box: keyof BoxesState, options?: { force?: boolean }) => {
       const now = Date.now();
       const last = lastSelectionRef.current;
-      if (now - last.ts < 80 && last.box === box && selectedItem != null) {
+      const force = options?.force ?? false;
+      if (
+        !force &&
+        now - last.ts < 80 &&
+        last.box === box &&
+        selectedItem != null
+      ) {
         return;
       }
       lastSelectionRef.current = { ts: now, box };
@@ -239,6 +246,9 @@ export function useFlashcardsInteraction({
 
   const handleSelectBox = useCallback(
     (box: keyof BoxesState) => {
+      if (demotionCorrectionLockRef.current != null) {
+        return;
+      }
       if (box === "boxZero" && !boxZeroEnabled) {
         setActiveBox(null);
         setSelectedItem(null);
@@ -262,11 +272,11 @@ export function useFlashcardsInteraction({
     (id: number, promote = false) => {
       if (!activeBox) return;
       if (activeBox === "boxZero" && !promote) {
-        selectNextWord(activeBox);
+        selectNextWord(activeBox, { force: true });
         return;
       }
       if (activeBox === "boxOne" && promote === false && !boxZeroEnabled) {
-        selectNextWord(activeBox);
+        selectNextWord(activeBox, { force: true });
         return;
       }
 
@@ -579,6 +589,7 @@ export function useFlashcardsInteraction({
           return;
         }
         const answerOnly = isAnswerOnlyCard(wordForCheck);
+        demotionCorrectionLockRef.current = wordForCheck.id;
         setCorrection({
           cardId: wordForCheck.id,
           awers: wordForCheck.text,
@@ -703,6 +714,11 @@ export function useFlashcardsInteraction({
   );
 
   useEffect(() => {
+    demotionCorrectionLockRef.current =
+      correction?.mode === "demote" ? correction.cardId : null;
+  }, [correction]);
+
+  useEffect(() => {
     if (!correction) {
       return;
     }
@@ -753,21 +769,28 @@ export function useFlashcardsInteraction({
     if (queueNext && activeBox) {
       // Upewnij się, że pole odpowiedzi jest puste zanim załadujemy nową kartę.
       setAnswer("");
-      selectNextWord(activeBox);
+      const currentId = selectedItem?.id ?? null;
+      const currentList = boxes[activeBox] ?? [];
+      const currentStillBelongsToActiveBox =
+        currentId != null && currentList.some((item) => item.id === currentId);
+      if (!currentStillBelongsToActiveBox) {
+        selectNextWord(activeBox, { force: true });
+      }
       setResult(null);
       setQueueNext(false);
     }
-  }, [activeBox, boxes, queueNext, selectNextWord]);
+  }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
 
   useEffect(() => {
     if (!activeBox) return;
     // Avoid double-selecting a new card when a transition is already queued
     if (queueNext) return;
+    if (demotionCorrectionLockRef.current != null) return;
 
     const list = boxes[activeBox];
     if (!list || list.length === 0) {
       if (selectedItem != null) {
-        selectNextWord(activeBox);
+        selectNextWord(activeBox, { force: true });
       }
       return;
     }
@@ -777,12 +800,13 @@ export function useFlashcardsInteraction({
       currentId != null && list.some((item) => item.id === currentId);
 
     if (!itemStillAvailable) {
-      selectNextWord(activeBox);
+      selectNextWord(activeBox, { force: true });
     }
   }, [activeBox, boxes, queueNext, selectNextWord, selectedItem]);
 
   const resetInteractionState = useCallback(() => {
     clearTransitionTimers();
+    demotionCorrectionLockRef.current = null;
     setActiveBox(null);
     setSelectedItem(null);
     setAnswer("");
@@ -795,6 +819,9 @@ export function useFlashcardsInteraction({
   }, [clearTransitionTimers]);
 
   const clearSelection = useCallback(() => {
+    if (demotionCorrectionLockRef.current != null) {
+      return;
+    }
     setSelectedItem(null);
     setQuestionShownAt(null);
     lastServedIdRef.current = null;
@@ -804,7 +831,14 @@ export function useFlashcardsInteraction({
     (updater: (item: WordWithTranslations) => WordWithTranslations) => {
       setSelectedItem((prev) => {
         if (!prev) return prev;
-        return updater(prev);
+        const next = updater(prev);
+        if (
+          demotionCorrectionLockRef.current != null &&
+          next.id !== demotionCorrectionLockRef.current
+        ) {
+          return prev;
+        }
+        return next;
       });
     },
     []
