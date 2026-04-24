@@ -376,6 +376,11 @@
           "subtitle": "Opens a screen with the CourseFinishedPanel component using sample data.",
           "button": "Show panel"
         },
+        "courseFinishedScreenSimulation": {
+          "title": "Simulate finished course",
+          "subtitle": "Opens the real flashcards screen and forces the finished view for the active course.",
+          "button": "Simulate"
+        },
         "testDbErrorScreen": {
           "title": "Test database error screen",
           "subtitle": "Shows the SQLite failure screen without damaging the real database.",

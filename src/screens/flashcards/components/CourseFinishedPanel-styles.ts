@@ -1,8 +1,12 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
-  container: {
+  scroll: {
     flex: 1,
+    width: "100%",
+  },
+  container: {
+    flexGrow: 1,
     width: "100%",
     paddingHorizontal: 20,
     paddingTop: 16,

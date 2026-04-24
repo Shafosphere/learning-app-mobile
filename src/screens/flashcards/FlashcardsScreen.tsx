@@ -93,6 +93,10 @@ import {
   consumeActionsPositionNudgePreview,
   subscribeActionsPositionNudgePreview,
 } from "@/src/services/actionsPositionNudgePreview";
+import {
+  consumeCourseFinishedPreview,
+  subscribeCourseFinishedPreview,
+} from "@/src/services/courseFinishedPreview";
 import { useTranslation } from "react-i18next";
 
 const STREAK_TARGET = 5;
@@ -120,6 +124,15 @@ const EMPTY_COURSE_COMPLETION_SUMMARY: CourseCompletionSummary = {
   correctCount: 0,
   wrongCount: 0,
   timeMs: 0,
+};
+
+const EMPTY_BOXES_STATE: BoxesState = {
+  boxZero: [],
+  boxOne: [],
+  boxTwo: [],
+  boxThree: [],
+  boxFour: [],
+  boxFive: [],
 };
 
 type TutorialCompletionState = Partial<Record<CoachmarkAdvanceEvent, boolean>>;
@@ -291,8 +304,6 @@ export default function Flashcards() {
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [courseCompletionSummary, setCourseCompletionSummary] =
     useState<CourseCompletionSummary>(EMPTY_COURSE_COMPLETION_SUMMARY);
-  const [loadedCourseLifetimeCompletionSummary, setLoadedCourseLifetimeCompletionSummary] =
-    useState<CourseCompletionSummary>(EMPTY_COURSE_COMPLETION_SUMMARY);
   const [courseCompletionRunStartedAt, setCourseCompletionRunStartedAt] =
     useState<number | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -340,6 +351,8 @@ export default function Flashcards() {
   const [actionsPositionNudgePreview, setActionsPositionNudgePreview] = useState<
     "top" | "bottom"
   >("top");
+  const [isCourseFinishedPreviewVisible, setIsCourseFinishedPreviewVisible] =
+    useState(false);
   const isActionsPositionNudgeHydrated =
     isActionsPositionNudgeAnswerCountHydrated && isActionsPositionNudgeSeenHydrated;
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -935,7 +948,6 @@ export default function Flashcards() {
       setCustomCourse(null);
       setCustomCards([]);
       setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
-      setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
       setCourseCompletionRunStartedAt(null);
       courseCompletionRunStartedAtRef.current = null;
       setReviewedIdsSeedResolvedCourseId(null);
@@ -955,16 +967,11 @@ export default function Flashcards() {
 
     void (async () => {
       const runStartedAt = await getCourseCompletionRunStartedAt(activeCustomCourseId);
-      const [courseRow, flashcardRows, lifetimeCompletionSummary, runCompletionSummary] =
+      const [courseRow, flashcardRows, lifetimeCompletionSummary] =
         await Promise.all([
           getCustomCourseById(activeCustomCourseId),
           getCustomFlashcards(activeCustomCourseId),
           getCourseCompletionSummary(activeCustomCourseId),
-          runStartedAt == null
-            ? Promise.resolve(EMPTY_COURSE_COMPLETION_SUMMARY)
-            : getCourseCompletionSummary(activeCustomCourseId, {
-                fromCreatedAtMs: runStartedAt,
-              }),
         ]);
 
         if (!isMounted) return;
@@ -972,7 +979,6 @@ export default function Flashcards() {
           setCustomCourse(null);
           setCustomCards([]);
           setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
-          setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
           setCourseCompletionRunStartedAt(null);
           courseCompletionRunStartedAtRef.current = null;
           setLoadedCourseId(null);
@@ -983,12 +989,11 @@ export default function Flashcards() {
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
         setCustomCards(mapped);
-        setLoadedCourseLifetimeCompletionSummary(
-          lifetimeCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY
-        );
         setCourseCompletionRunStartedAt(runStartedAt);
         courseCompletionRunStartedAtRef.current = runStartedAt;
-        setCourseCompletionSummary(runCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY);
+        setCourseCompletionSummary(
+          lifetimeCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY
+        );
         setLoadedCourseId(activeCustomCourseId);
       })().catch((error) => {
         console.error("Failed to load custom flashcards", error);
@@ -996,7 +1001,6 @@ export default function Flashcards() {
         setCustomCourse(null);
         setCustomCards([]);
         setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
-        setLoadedCourseLifetimeCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
         setCourseCompletionRunStartedAt(null);
         courseCompletionRunStartedAtRef.current = null;
         setLoadError("Nie udało się wczytać fiszek.");
@@ -1211,34 +1215,64 @@ export default function Flashcards() {
     !isLoadingData &&
     !loadError &&
     customCards.length > 0;
-  const isCourseFinishedVisible =
+  const isCourseFinishedActuallyVisible =
     baseShouldShowBoxes &&
     !shouldRenderLoadingOverlay &&
     remainingNewFlashcardsCount === 0 &&
     totalCardsInBoxes === 0 &&
     selectedItem == null;
+  const isCourseFinishedPreviewEligible =
+    __DEV__ &&
+    baseShouldShowBoxes &&
+    !shouldRenderLoadingOverlay;
+  const isCourseFinishedVisible =
+    isCourseFinishedActuallyVisible ||
+    (isCourseFinishedPreviewVisible && isCourseFinishedPreviewEligible);
   const shouldShowBoxes = baseShouldShowBoxes && !isCourseFinishedVisible;
 
-  useEffect(() => {
-    if (courseCompletionRunStartedAt != null) {
-      return;
-    }
-    if (!isCourseFinishedVisible) {
-      return;
-    }
-    if (courseCompletionSummary.totalAnswers > 0) {
-      return;
-    }
-    if (loadedCourseLifetimeCompletionSummary.totalAnswers <= 0) {
-      return;
-    }
+  const tryOpenCourseFinishedPreview = useCallback(() => {
+    if (!isFocused) return;
+    if (!isCourseFinishedPreviewEligible) return;
+    if (!consumeCourseFinishedPreview()) return;
 
-    setCourseCompletionSummary(loadedCourseLifetimeCompletionSummary);
+    resetInteractionState();
+    clearSelection();
+    setBoxes(EMPTY_BOXES_STATE);
+    addUsedWordIds(customCards.map((card) => card.id));
+    setIsCourseFinishedPreviewVisible(true);
   }, [
-    courseCompletionRunStartedAt,
-    courseCompletionSummary.totalAnswers,
-    isCourseFinishedVisible,
-    loadedCourseLifetimeCompletionSummary,
+    addUsedWordIds,
+    clearSelection,
+    customCards,
+    isCourseFinishedPreviewEligible,
+    isFocused,
+    resetInteractionState,
+    setBoxes,
+  ]);
+
+  useEffect(() => {
+    const unsubscribe = subscribeCourseFinishedPreview(() => {
+      tryOpenCourseFinishedPreview();
+    });
+
+    return unsubscribe;
+  }, [tryOpenCourseFinishedPreview]);
+
+  useEffect(() => {
+    tryOpenCourseFinishedPreview();
+  }, [tryOpenCourseFinishedPreview]);
+
+  useEffect(() => {
+    if (!isCourseFinishedPreviewVisible) {
+      return;
+    }
+    if (!isFocused || !isCourseFinishedPreviewEligible) {
+      setIsCourseFinishedPreviewVisible(false);
+    }
+  }, [
+    isCourseFinishedPreviewEligible,
+    isCourseFinishedPreviewVisible,
+    isFocused,
   ]);
 
   const courseFinishedAccuracyLabel =
@@ -1921,12 +1955,15 @@ export default function Flashcards() {
       >
         <Reanimated.View
           layout={screenSectionLayout}
-          style={styles.cardSectionWrapper}
+          style={[
+            styles.cardSectionWrapper,
+            isCourseFinishedVisible && styles.finishedCardSectionWrapper,
+          ]}
         >
           {cardSection}
         </Reanimated.View>
 
-        {areButtonsOnTop ? (
+        {areButtonsOnTop && shouldShowBoxes ? (
           <Reanimated.View
             layout={screenSectionLayout}
             style={styles.topButtonsWrapper}

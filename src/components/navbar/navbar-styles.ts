@@ -149,6 +149,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: 32,
     height: 32,
   },
+  customCourseMainImage: {
+    width: 32,
+    height: 32,
+  },
   customCourseFlag: {
     position: "absolute",
     bottom: 0,

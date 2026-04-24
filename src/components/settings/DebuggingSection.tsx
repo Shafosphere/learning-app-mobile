@@ -19,6 +19,7 @@ import {
 import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { triggerActionsPositionNudgePreview } from "@/src/services/actionsPositionNudgePreview";
+import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { playSoundAsset } from "@/src/utils/soundPlayer";
@@ -149,6 +150,19 @@ const DebuggingSection: React.FC = () => {
 
   const handleOpenCourseFinishedPanelPreview = () => {
     router.push("/debug/course-finished-panel");
+  };
+
+  const handleSimulateCourseFinished = () => {
+    if (activeCustomCourseId == null) {
+      Alert.alert(
+        t("settings.debug.alerts.missingCourseTitle"),
+        t("settings.debug.alerts.missingCourseMessage")
+      );
+      return;
+    }
+
+    triggerCourseFinishedPreview();
+    router.push("/flashcards");
   };
 
   const handleResetReviewCoursesIntro = async () => {
@@ -341,6 +355,24 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.courseFinishedPanelPreview.button")}
           color="my_yellow"
           onPress={handleOpenCourseFinishedPanelPreview}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.courseFinishedScreenSimulation.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.courseFinishedScreenSimulation.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.courseFinishedScreenSimulation.button")}
+          color="my_yellow"
+          onPress={handleSimulateCourseFinished}
+          disabled={activeCustomCourseId == null}
           width={140}
         />
       </View>

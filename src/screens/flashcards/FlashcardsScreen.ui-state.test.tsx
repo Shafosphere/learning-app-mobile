@@ -11,6 +11,7 @@ import {
 import {
   getCourseCompletionRunStartedAt,
 } from "@/src/screens/flashcards/courseCompletionRun";
+import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -224,8 +225,9 @@ let latestBoxListProps: {
 
 jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
   FlashcardsButtons: (props: ButtonsProps) => {
+    const { Text: MockText } = require("react-native");
     latestButtonsProps = props;
-    return null;
+    return <MockText testID="flashcards-buttons">Flashcards buttons</MockText>;
   },
 }));
 
@@ -605,9 +607,10 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestFinishedPanelProps?.cardsCountLabel).toBe("1");
     expect(latestFinishedPanelProps?.accuracyLabel).toBe("80%");
     expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
+    expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
   });
 
-  it("shows only current completion run stats when run start exists", async () => {
+  it("shows lifetime completion stats on finished panel even when run start exists", async () => {
     const cardA = makeCard({
       id: 52,
       text: "banana",
@@ -615,19 +618,12 @@ describe("FlashcardsScreen UI state regressions", () => {
     });
     mockCurrentUsedWordIds = [cardA.id];
     mockedGetCourseCompletionRunStartedAt.mockResolvedValue(999);
-    mockedGetCourseCompletionSummary
-      .mockResolvedValueOnce({
-        totalAnswers: 10,
-        correctCount: 8,
-        wrongCount: 2,
-        timeMs: 12 * 60 * 1000,
-      })
-      .mockResolvedValueOnce({
-        totalAnswers: 2,
-        correctCount: 1,
-        wrongCount: 1,
-        timeMs: 2 * 60 * 1000,
-      });
+    mockedGetCourseCompletionSummary.mockResolvedValueOnce({
+      totalAnswers: 10,
+      correctCount: 8,
+      wrongCount: 2,
+      timeMs: 12 * 60 * 1000,
+    });
 
     const screen = renderScreenWithState(createInteractionState(null), [cardA]);
 
@@ -636,12 +632,10 @@ describe("FlashcardsScreen UI state regressions", () => {
     await flushScreenState();
 
     expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
-    expect(latestFinishedPanelProps?.accuracyLabel).toBe("50%");
-    expect(latestFinishedPanelProps?.learningTimeLabel).toBe("2 min");
+    expect(latestFinishedPanelProps?.accuracyLabel).toBe("80%");
+    expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
     expect(mockedGetCourseCompletionSummary).toHaveBeenNthCalledWith(1, 7);
-    expect(mockedGetCourseCompletionSummary).toHaveBeenNthCalledWith(2, 7, {
-      fromCreatedAtMs: 999,
-    });
+    expect(mockedGetCourseCompletionSummary).toHaveBeenCalledTimes(1);
   });
 
   it("does not show the finished panel when there are still new flashcards to distribute", async () => {
@@ -656,6 +650,50 @@ describe("FlashcardsScreen UI state regressions", () => {
     await flushScreenState();
 
     expect(screen.queryByTestId("course-finished-panel")).toBeNull();
+  });
+
+  it("can force the finished panel through the debug simulation", async () => {
+    const cardA = makeCard({
+      id: 62,
+      text: "peach",
+      translations: ["brzoskwinia"],
+    });
+
+    triggerCourseFinishedPreview();
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
+    expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
+    expect(mockCurrentUsedWordIds).toContain(cardA.id);
+    expect(mockCurrentBoxes).toEqual(createEmptyBoxes());
+  });
+
+  it("debug simulation finishes the active course even when a card is selected", async () => {
+    const cardA = makeCard({
+      id: 63,
+      text: "grape",
+      translations: ["winogrono"],
+    });
+    mockCurrentBoxes = {
+      ...createEmptyBoxes(),
+      boxOne: [cardA],
+    };
+
+    triggerCourseFinishedPreview();
+    const screen = renderScreenWithState(createInteractionState(cardA), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
+    expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
+    expect(mockCurrentUsedWordIds).toContain(cardA.id);
+    expect(mockCurrentBoxes).toEqual(createEmptyBoxes());
   });
 
   it("does not show the finished panel when any box still has cards", async () => {

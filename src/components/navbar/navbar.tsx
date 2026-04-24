@@ -235,19 +235,19 @@ export default function Navbar({ children }: NavbarProps) {
       {courseIconProps?.mainImageSource ? (
         <Image
           source={courseIconProps.mainImageSource}
-          style={{ width: 24, height: 24 }}
+          style={styles.customCourseMainImage}
           contentFit="contain"
         />
       ) : courseIconProps?.icon ? (
         <courseIconProps.icon.Component
           name={courseIconProps.icon.name as never}
-          size={24}
+          size={30}
           color={courseIconProps.icon.color}
         />
       ) : (
         <Ionicons
           name="person-circle-outline"
-          size={24}
+          size={30}
           color={colors.headline}
         />
       )}

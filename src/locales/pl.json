@@ -376,6 +376,11 @@
           "subtitle": "Otwiera ekran z komponentem CourseFinishedPanel na przykładowych danych.",
           "button": "Pokaż panel"
         },
+        "courseFinishedScreenSimulation": {
+          "title": "Symuluj ukończony kurs",
+          "subtitle": "Otwiera prawdziwy ekran fiszek i wymusza widok ukończenia aktywnego kursu.",
+          "button": "Symuluj"
+        },
         "testDbErrorScreen": {
           "title": "Test ekranu błędu bazy",
           "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",

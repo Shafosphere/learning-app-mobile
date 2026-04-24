@@ -10,7 +10,7 @@ import type { ImageSourcePropType } from "react-native";
 import AntDesign from "@expo/vector-icons/AntDesign";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import Octicons from "@expo/vector-icons/Octicons";
-import { Text, View, useWindowDimensions } from "react-native";
+import { ScrollView, Text, View, useWindowDimensions } from "react-native";
 import Animated, {
   Easing,
   FadeIn,
@@ -209,7 +209,12 @@ export function CourseFinishedPanel({
   }, []);
 
   return (
-    <View style={styles.container} testID="course-finished-panel">
+    <ScrollView
+      style={styles.scroll}
+      contentContainerStyle={styles.container}
+      showsVerticalScrollIndicator={false}
+      testID="course-finished-panel"
+    >
       <Confetti generateConfetti={showConfetti} />
       <Animated.Text
         style={styles.heading}
@@ -252,13 +257,13 @@ export function CourseFinishedPanel({
             ) : courseIconProps?.icon ? (
               <courseIconProps.icon.Component
                 name={courseIconProps.icon.name as never}
-                size={24}
+                size={48}
                 color={courseIconProps.icon.color}
               />
             ) : (
               <Ionicons
                 name="person-circle-outline"
-                size={24}
+                size={48}
                 color={styles.courseName.color}
               />
             )}
@@ -368,6 +373,6 @@ export function CourseFinishedPanel({
           onPress={onBackToCourses}
         />
       </Animated.View>
-    </View>
+    </ScrollView>
   );
 }

@@ -31,6 +31,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
   cardSectionWrapper: {
     marginBottom: 10,
   },
+  finishedCardSectionWrapper: {
+    flex: 1,
+    minHeight: 0,
+  },
   topButtonsWrapper: {
     marginBottom: 10,
   },
