@@ -1,4 +1,4 @@
-import HomeScreen from "@/src/screens/home/HomeScreen";
+import HomeScreen from "@/src/screens/home/HomeScreen/HomeScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import AsyncStorage from "@react-native-async-storage/async-storage";

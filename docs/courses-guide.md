@@ -1,0 +1,9 @@
+- `src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen.tsx` - ekran wyboru aktywnego kursu. Grupuje kursy wbudowane i oficjalne, pozwala przełączać kurs aktywny oraz zapamiętuje ostatni wybór użytkownika.
+- `src/screens/courses/editcourse/CourseEditScreen/CourseEditScreen.tsx` - główny edytor kursu. Obsługuje kursy wbudowane i własne.
+- `src/screens/courses/makenewcourse/CourseAppearanceScreen/CourseAppearanceScreen.tsx` - pierwszy krok kreatora nowego kursu: nazwa, ikona i kolor.
+- `src/screens/courses/makenewcourse/ImportFlashcardsScreen/ImportFlashcardsScreen.tsx` - drugi krok kreatora: import CSV lub ręczne dodawanie fiszek.
+- `src/screens/courses/makenewcourse/CourseSettingsScreen/CourseSettingsScreen.tsx` - ustawienia nowego kursu przed zapisem.
+- `src/screens/courses/pincourse/CoursePinScreen/CoursePinScreen.tsx` - ekran przypinania kursów.
+- `src/components/courseEditor/` - komponenty edytora kursu: ustawienia, nazwa, ikona, ręczna edycja fiszek, selector typu karty i przewodnik importu CSV.
+- `src/components/course/` - komponenty list, sekcji i akordeonów kursów używane przez ekrany kursów.
+- `src/features/customCourse/` - drafty, typy pomocnicze i import CSV dla kursów własnych.

@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/review/reviewflashcards/reviewflashcards";
+export { default } from "@/src/screens/review/reviewflashcards/reviewflashcards/reviewflashcards";

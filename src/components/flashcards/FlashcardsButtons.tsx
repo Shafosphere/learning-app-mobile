@@ -4,8 +4,8 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 import { CardActions } from "@/src/components/card/subcomponents/CardActions";
 import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen-styles";
-import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/screens/flashcards/TrueFalseActions";
+import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
+import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/components/flashcards/TrueFalseActions";
 
 type FlashcardsButtonsProps = {
   position: "top" | "bottom";

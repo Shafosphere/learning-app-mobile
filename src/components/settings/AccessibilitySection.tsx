@@ -2,7 +2,7 @@ import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import SettingsItemCard from "@/src/components/settings/SettingsItemCard";
 import { useTranslation } from "react-i18next";
 import type { ColorBlindMode } from "@/src/theme/theme";

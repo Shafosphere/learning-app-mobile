@@ -3,7 +3,7 @@ import {
   PreviewOptionSelector,
   type PreviewOptionSelectorOption,
 } from "@/src/components/selection/PreviewOptionSelector";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { TrackSlider } from "@/src/components/slider/TrackSlider";
 import { Asset } from "expo-asset";
 import * as Haptics from "expo-haptics";

@@ -16,7 +16,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
 } from "@/src/db/sqlite/db";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { triggerActionsPositionNudgePreview } from "@/src/services/actionsPositionNudgePreview";
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";

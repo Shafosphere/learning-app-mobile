@@ -6,7 +6,7 @@ import {
   View,
   type ListRenderItem,
 } from "react-native";
-import type { HomeScreenStyles } from "@/src/screens/home/HomeScreen-styles";
+import type { HomeScreenStyles } from "@/src/screens/home/HomeScreen/HomeScreen-styles";
 
 export type HomeTile = {
   key: string;

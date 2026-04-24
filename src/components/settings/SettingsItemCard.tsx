@@ -1,6 +1,6 @@
 import React, { type ReactNode } from "react";
 import { Text, View } from "react-native";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 
 type SettingsItemCardProps = {
   title: string;

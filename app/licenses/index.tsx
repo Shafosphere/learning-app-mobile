@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/legal/LicensesScreen";
+export { default } from "@/src/screens/legal/LicensesScreen/LicensesScreen";

@@ -2,7 +2,7 @@ import React, { useCallback } from "react";
 import { View, Text } from "react-native";
 import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { useTranslation } from "react-i18next";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";

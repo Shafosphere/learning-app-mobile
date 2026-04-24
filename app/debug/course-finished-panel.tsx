@@ -1,1 +1,1 @@
-export { default } from "@/src/screens/debug/CourseFinishedPanelPreviewScreen";
+export { default } from "@/src/screens/debug/CourseFinishedPanelPreviewScreen/CourseFinishedPanelPreviewScreen";

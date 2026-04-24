@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useStyles } from "@/src/screens/settings/SettingsScreen-styles";
+import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { exportAndShareUserData } from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
