@@ -32,6 +32,7 @@ export type CoachmarkFlowStep = {
   successVariant?: "normal" | "assisted";
   autoAdvanceDelayMs?: number;
   floatingIndicator?: "arrow_u_down_right";
+  avoidTargetIds?: string[];
 };
 
 export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
@@ -305,7 +306,12 @@ export const REVIEW_COURSES_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
 ];
 
-export const REVIEW_FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
+const REVIEW_FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS = [
+  "review-flashcards-add-button",
+  "review-flashcards-confirm-button",
+];
+
+const REVIEW_FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   {
     id: "review-flashcards-step-1",
     targetId: "review-flashcards-bubble-anchor",
@@ -414,7 +420,18 @@ export const REVIEW_FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
 ];
 
-export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
+export const REVIEW_FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] =
+  REVIEW_FLASHCARDS_COACHMARK_BASE_STEPS.map((step) => ({
+    ...step,
+    avoidTargetIds: REVIEW_FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS,
+  }));
+
+const FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS = [
+  "flashcards-add-button",
+  "flashcards-confirm-button",
+];
+
+const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   {
     id: "flashcards-step-1",
     targetId: "flashcards-bubble-anchor",
@@ -690,3 +707,9 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
     blockOutside: true,
   },
 ];
+
+export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] =
+  FLASHCARDS_COACHMARK_BASE_STEPS.map((step) => ({
+    ...step,
+    avoidTargetIds: FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS,
+  }));

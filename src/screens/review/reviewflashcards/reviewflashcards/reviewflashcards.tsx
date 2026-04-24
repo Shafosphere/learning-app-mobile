@@ -875,6 +875,7 @@ export default function ReviewFlashcardsPlaceholder() {
       onDownload={async () => undefined}
       downloadDisabled={cardActionsDownloadDisabled}
       downloadCoachmarkId="review-flashcards-add-button"
+      confirmCoachmarkId="review-flashcards-confirm-button"
       confirmDisabled={cardActionsConfirmDisabled}
       confirmLabel={cardActionsConfirmLabel}
     />

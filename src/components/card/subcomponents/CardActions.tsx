@@ -8,6 +8,7 @@ type CardActionsProps = {
   onDownload: () => Promise<void>;
   downloadDisabled: boolean;
   downloadCoachmarkId?: string;
+  confirmCoachmarkId?: string;
   confirmDisabled?: boolean;
   confirmLabel?: string;
   hidden?: boolean;
@@ -18,6 +19,7 @@ export function CardActions({
   onDownload,
   downloadDisabled,
   downloadCoachmarkId,
+  confirmCoachmarkId,
   confirmDisabled = false,
   confirmLabel = "OK",
   hidden = false,
@@ -32,7 +34,7 @@ export function CardActions({
     <MyButton
       text="DODAJ FISZKI"
       color="my_yellow"
-       width={140}
+      width={140}
       onPress={onDownload}
       disabled={downloadDisabled}
     />
@@ -47,13 +49,27 @@ export function CardActions({
       ) : (
         downloadButton
       )}
-      <MyButton
-       width={140}
-        text={confirmLabel}
-        color="my_green"
-        disabled={confirmDisabled}
-        onPress={handleConfirm}
-      />
+      {confirmCoachmarkId ? (
+        <CoachmarkAnchor id={confirmCoachmarkId} shape="rect" radius={18}>
+          <View collapsable={false}>
+            <MyButton
+              width={140}
+              text={confirmLabel}
+              color="my_green"
+              disabled={confirmDisabled}
+              onPress={handleConfirm}
+            />
+          </View>
+        </CoachmarkAnchor>
+      ) : (
+        <MyButton
+          width={140}
+          text={confirmLabel}
+          color="my_green"
+          disabled={confirmDisabled}
+          onPress={handleConfirm}
+        />
+      )}
     </View>
   );
 }

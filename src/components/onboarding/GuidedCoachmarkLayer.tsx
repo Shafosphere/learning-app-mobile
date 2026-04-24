@@ -18,14 +18,18 @@ import React, {
 } from "react";
 import {
   LayoutChangeEvent,
+  Platform,
   Pressable,
   StyleSheet,
+  StatusBar,
   View,
   useWindowDimensions,
 } from "react-native";
 import Animated, {
+  cancelAnimation,
   useAnimatedStyle,
   useSharedValue,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
@@ -60,6 +64,7 @@ const BUBBLE_MAX_WIDTH = 380;
 const CENTERED_INTRO_MIN_WIDTH = 280;
 const CENTERED_INTRO_MAX_WIDTH = 420;
 const BUBBLE_TARGET_GAP = 12;
+const BUBBLE_AVOID_GAP = 12;
 
 function clamp(value: number, min: number, max: number): number {
   if (max <= min) {
@@ -87,10 +92,61 @@ function rangesOverlap(
   return startA < endB && endA > startB;
 }
 
+function rectsOverlap(rectA: Rect, rectB: Rect): boolean {
+  return (
+    rangesOverlap(rectA.x, rectA.x + rectA.width, rectB.x, rectB.x + rectB.width) &&
+    rangesOverlap(rectA.y, rectA.y + rectA.height, rectB.y, rectB.y + rectB.height)
+  );
+}
+
+function getOverlapArea(rectA: Rect, rectB: Rect): number {
+  const overlapWidth = Math.max(
+    0,
+    Math.min(rectA.x + rectA.width, rectB.x + rectB.width) - Math.max(rectA.x, rectB.x),
+  );
+  const overlapHeight = Math.max(
+    0,
+    Math.min(rectA.y + rectA.height, rectB.y + rectB.height) - Math.max(rectA.y, rectB.y),
+  );
+
+  return overlapWidth * overlapHeight;
+}
+
+function expandRect(rect: Rect, gap: number): Rect {
+  return {
+    x: rect.x - gap,
+    y: rect.y - gap,
+    width: rect.width + gap * 2,
+    height: rect.height + gap * 2,
+  };
+}
+
+function measureInWindow(ref: any): Promise<Rect> {
+  return new Promise((resolve, reject) => {
+    if (!ref?.measureInWindow) {
+      reject(new Error("Invalid ref or measureInWindow not available"));
+      return;
+    }
+
+    ref.measureInWindow((x: number, y: number, width: number, height: number) => {
+      const statusBarHeight =
+        Platform.OS === "android" ? Math.ceil(StatusBar.currentHeight || 0) : 0;
+
+      resolve({
+        x,
+        y: y + statusBarHeight,
+        width,
+        height,
+      });
+    });
+  });
+}
+
 function computeBubbleFrame({
   rootLayout,
   bubbleHeight,
   localTargetRect,
+  localAvoidRects,
   isSpotlightStep,
   layout,
   minTop,
@@ -99,6 +155,7 @@ function computeBubbleFrame({
   rootLayout: { width: number; height: number };
   bubbleHeight: number;
   localTargetRect: Rect | null;
+  localAvoidRects: Rect[];
   isSpotlightStep: boolean;
   layout?: CoachmarkFlowStep["layout"];
   minTop: number;
@@ -139,28 +196,108 @@ function computeBubbleFrame({
     minTop,
     maxTop,
   );
+  const makeBubbleRect = (top: number): Rect => ({
+    x: defaultLeft,
+    y: top,
+    width: bubbleWidth,
+    height: bubbleHeight,
+  });
+  const expandedAvoidRects = localAvoidRects.map((rect) => expandRect(rect, BUBBLE_AVOID_GAP));
+  const targetAvoidRect =
+    isSpotlightStep && localTargetRect
+      ? expandRect(localTargetRect, BUBBLE_TARGET_GAP)
+      : null;
+  const scoreCandidate = ({
+    rawTop,
+    top,
+  }: {
+    rawTop: number;
+    top: number;
+  }) => {
+    const bubbleRect = makeBubbleRect(top);
+
+    return {
+      targetOverlap: targetAvoidRect ? getOverlapArea(bubbleRect, targetAvoidRect) : 0,
+      avoidOverlap: expandedAvoidRects.reduce(
+        (total, avoidRect) => total + getOverlapArea(bubbleRect, avoidRect),
+        0,
+      ),
+      overflow: computeOverflow(rawTop, bubbleHeight, minTop, maxBottom),
+      distanceFromDefault: Math.abs(rawTop - defaultTop),
+    };
+  };
+  const resolveCandidate = (
+    candidates: {
+      placement: BubblePlacement;
+      rawTop: number;
+      top: number;
+    }[],
+  ) => {
+    return candidates
+      .map((candidate) => ({
+        ...candidate,
+        score: scoreCandidate(candidate),
+      }))
+      .sort((a, b) => {
+        if (a.score.targetOverlap !== b.score.targetOverlap) {
+          return a.score.targetOverlap - b.score.targetOverlap;
+        }
+        if (a.score.avoidOverlap !== b.score.avoidOverlap) {
+          return a.score.avoidOverlap - b.score.avoidOverlap;
+        }
+        if (a.score.overflow !== b.score.overflow) {
+          return a.score.overflow - b.score.overflow;
+        }
+
+        return a.score.distanceFromDefault - b.score.distanceFromDefault;
+      })[0];
+  };
+  const defaultAndAvoidCandidates = [
+    {
+      placement: "bottom" as const,
+      rawTop: defaultTop,
+      top: clamp(defaultTop, minTop, maxTop),
+    },
+    {
+      placement: "top" as const,
+      rawTop: minTop,
+      top: minTop,
+    },
+    {
+      placement: "bottom" as const,
+      rawTop: maxTop,
+      top: maxTop,
+    },
+    ...expandedAvoidRects.flatMap((avoidRect) => [
+      {
+        placement: "top" as const,
+        rawTop: avoidRect.y - bubbleHeight - BUBBLE_AVOID_GAP,
+        top: clamp(avoidRect.y - bubbleHeight - BUBBLE_AVOID_GAP, minTop, maxTop),
+      },
+      {
+        placement: "bottom" as const,
+        rawTop: avoidRect.y + avoidRect.height + BUBBLE_AVOID_GAP,
+        top: clamp(avoidRect.y + avoidRect.height + BUBBLE_AVOID_GAP, minTop, maxTop),
+      },
+    ]),
+  ];
 
   if (isSpotlightStep && localTargetRect) {
-    const bottomTop = localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP;
-    const topTop = localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP;
     const targetZoneTop = localTargetRect.y - BUBBLE_TARGET_GAP;
     const targetZoneBottom =
       localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP;
     const defaultOverlapsTarget =
-      rangesOverlap(
-        defaultLeft,
-        defaultLeft + bubbleWidth,
-        localTargetRect.x,
-        localTargetRect.x + localTargetRect.width,
-      ) &&
-      rangesOverlap(
-        defaultTop,
-        defaultTop + bubbleHeight,
-        targetZoneTop,
-        targetZoneBottom,
-      );
+      rectsOverlap(makeBubbleRect(defaultTop), {
+        x: localTargetRect.x,
+        y: targetZoneTop,
+        width: localTargetRect.width,
+        height: targetZoneBottom - targetZoneTop,
+      });
 
-    if (!defaultOverlapsTarget) {
+    if (
+      !defaultOverlapsTarget &&
+      expandedAvoidRects.every((avoidRect) => !rectsOverlap(makeBubbleRect(defaultTop), avoidRect))
+    ) {
       return {
         left: defaultLeft,
         top: defaultTop,
@@ -169,41 +306,30 @@ function computeBubbleFrame({
       };
     }
 
-    const candidates: {
-      placement: BubblePlacement;
-      rawTop: number;
-      top: number;
-      overflow: number;
-      distanceFromDefault: number;
-    }[] = [
-      {
-        placement: "bottom",
-        rawTop: bottomTop,
-        top: clamp(bottomTop, minTop, maxTop),
-        overflow: computeOverflow(bottomTop, bubbleHeight, minTop, maxBottom),
-        distanceFromDefault: Math.abs(bottomTop - defaultTop),
-      },
-      {
-        placement: "top",
-        rawTop: topTop,
-        top: clamp(topTop, minTop, maxTop),
-        overflow: computeOverflow(topTop, bubbleHeight, minTop, maxBottom),
-        distanceFromDefault: Math.abs(topTop - defaultTop),
-      },
-    ];
-
-    const idealCandidate = candidates
-      .filter((candidate) => candidate.overflow === 0)
-      .sort((a, b) => a.distanceFromDefault - b.distanceFromDefault)[0];
-    const resolvedCandidate =
-      idealCandidate ??
-      candidates.sort((a, b) => {
-        if (a.overflow !== b.overflow) {
-          return a.overflow - b.overflow;
-        }
-
-        return a.distanceFromDefault - b.distanceFromDefault;
-      })[0];
+    const targetCandidates = defaultOverlapsTarget
+      ? [
+          {
+            placement: "bottom" as const,
+            rawTop: localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP,
+            top: clamp(
+              localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP,
+              minTop,
+              maxTop,
+            ),
+          },
+          {
+            placement: "top" as const,
+            rawTop: localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP,
+            top: clamp(
+              localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP,
+              minTop,
+              maxTop,
+            ),
+          },
+        ]
+      : [];
+    const candidates = [...defaultAndAvoidCandidates, ...targetCandidates];
+    const resolvedCandidate = resolveCandidate(candidates);
 
     return {
       left: defaultLeft,
@@ -213,11 +339,13 @@ function computeBubbleFrame({
     };
   }
 
+  const resolvedCandidate = resolveCandidate(defaultAndAvoidCandidates);
+
   return {
     left: defaultLeft,
-    top: defaultTop,
+    top: resolvedCandidate.top,
     maxWidth,
-    placement: "bottom",
+    placement: resolvedCandidate.placement,
   };
 }
 
@@ -265,6 +393,7 @@ export function GuidedCoachmarkLayer({
   const localHoleWidth = useSharedValue(1);
   const localHoleHeight = useSharedValue(1);
   const [rootWindowRect, setRootWindowRect] = useState<Rect | null>(null);
+  const [localAvoidRects, setLocalAvoidRects] = useState<Rect[]>([]);
   const [rootLayout, setRootLayout] = useState({ width: 0, height: 0 });
   const [renderSpotlightLayer, setRenderSpotlightLayer] = useState(false);
   const [isBubbleReady, setIsBubbleReady] = useState(false);
@@ -277,6 +406,7 @@ export function GuidedCoachmarkLayer({
   const bubbleLeft = useSharedValue(12);
   const bubbleTop = useSharedValue(12);
   const bubbleWidth = useSharedValue(320);
+  const bubbleShakeRotation = useSharedValue(0);
   const indicatorLeft = useSharedValue(0);
   const indicatorTop = useSharedValue(0);
   const introBackdropOpacity = useSharedValue(0);
@@ -320,6 +450,61 @@ export function GuidedCoachmarkLayer({
       height: targetRect.height,
     };
   }, [rootWindowRect, targetRect]);
+  const avoidTargetIdsKey = currentStep?.avoidTargetIds?.join("|") ?? "";
+
+  useEffect(() => {
+    const avoidTargetIds = currentStep?.avoidTargetIds ?? [];
+    if (!rootWindowRect || avoidTargetIds.length === 0) {
+      setLocalAvoidRects([]);
+      return;
+    }
+
+    let mounted = true;
+    const measureAvoidTargets = () => {
+      void Promise.all(
+        avoidTargetIds.map(async (targetId) => {
+          const anchor = getAnchor(targetId);
+          const ref = anchor?.getRef();
+          if (!ref) return null;
+
+          try {
+            const rect = await measureInWindow(ref);
+            if (rect.width <= 0 || rect.height <= 0) return null;
+
+            return {
+              x: rect.x - rootWindowRect.x,
+              y: rect.y - rootWindowRect.y,
+              width: rect.width,
+              height: rect.height,
+            };
+          } catch {
+            return null;
+          }
+        }),
+      ).then((rects) => {
+        if (!mounted) return;
+        setLocalAvoidRects(rects.filter((rect): rect is Rect => rect != null));
+      });
+    };
+    const frame = requestAnimationFrame(measureAvoidTargets);
+    const timers = [120, 280, 520].map((delay) =>
+      setTimeout(measureAvoidTargets, delay),
+    );
+
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(frame);
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [
+    avoidTargetIdsKey,
+    currentIndex,
+    currentStep?.avoidTargetIds,
+    getAnchor,
+    rootLayout.height,
+    rootLayout.width,
+    rootWindowRect,
+  ]);
 
   const topBoundary = useMemo(() => {
     if (!rootWindowRect) {
@@ -393,6 +578,7 @@ export function GuidedCoachmarkLayer({
       rootLayout,
       bubbleHeight: estimatedBubbleHeight,
       localTargetRect,
+      localAvoidRects,
       isSpotlightStep: Boolean(currentStep?.spotlight),
       layout: currentStep?.layout,
       minTop: topBoundary,
@@ -403,6 +589,7 @@ export function GuidedCoachmarkLayer({
     currentStep?.layout,
     currentStep?.spotlight,
     estimatedBubbleHeight,
+    localAvoidRects,
     localTargetRect,
     rootLayout,
     topBoundary,
@@ -417,6 +604,7 @@ export function GuidedCoachmarkLayer({
     left: bubbleLeft.value,
     top: bubbleTop.value,
     width: bubbleWidth.value,
+    transform: [{ rotateZ: `${bubbleShakeRotation.value}deg` }],
   }));
   const indicatorAnimatedStyle = useAnimatedStyle(() => ({
     left: indicatorLeft.value,
@@ -428,6 +616,17 @@ export function GuidedCoachmarkLayer({
   const spotlightAnimatedStyle = useAnimatedStyle(() => ({
     opacity: spotlightOpacity.value,
   }));
+  const triggerBubbleShake = () => {
+    cancelAnimation(bubbleShakeRotation);
+    bubbleShakeRotation.value = 0;
+    bubbleShakeRotation.value = withSequence(
+      withTiming(-7, { duration: 70 }),
+      withTiming(7, { duration: 110 }),
+      withTiming(-4, { duration: 90 }),
+      withTiming(3, { duration: 80 }),
+      withTiming(0, { duration: 100 }),
+    );
+  };
 
   useEffect(() => {
     if (rootLayout.width <= 0 || rootLayout.height <= 0) {
@@ -626,7 +825,10 @@ export function GuidedCoachmarkLayer({
           />
         ) : null}
         {shouldRenderFullscreenBlocker ? (
-          <Pressable style={StyleSheet.absoluteFill} />
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={triggerBubbleShake}
+          />
         ) : null}
         {renderSpotlightLayer && localTargetRect ? (
           <Animated.View
@@ -652,6 +854,7 @@ export function GuidedCoachmarkLayer({
             {shouldBlockOutside ? (
               <>
                 <Pressable
+                  onPress={triggerBubbleShake}
                   style={[
                     styles.blocker,
                     {
@@ -663,6 +866,7 @@ export function GuidedCoachmarkLayer({
                   ]}
                 />
                 <Pressable
+                  onPress={triggerBubbleShake}
                   style={[
                     styles.blocker,
                     {
@@ -677,6 +881,7 @@ export function GuidedCoachmarkLayer({
                   ]}
                 />
                 <Pressable
+                  onPress={triggerBubbleShake}
                   style={[
                     styles.blocker,
                     {
@@ -688,6 +893,7 @@ export function GuidedCoachmarkLayer({
                   ]}
                 />
                 <Pressable
+                  onPress={triggerBubbleShake}
                   style={[
                     styles.blocker,
                     {
@@ -703,6 +909,7 @@ export function GuidedCoachmarkLayer({
                 />
                 {shouldBlockSpotlight ? (
                   <Pressable
+                    onPress={triggerBubbleShake}
                     style={[
                       styles.blocker,
                       {

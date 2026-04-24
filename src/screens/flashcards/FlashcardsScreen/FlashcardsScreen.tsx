@@ -1728,6 +1728,8 @@ export default function Flashcards() {
       onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={downloadData}
       downloadDisabled={cardActionsDownloadDisabled}
+      downloadCoachmarkId="flashcards-add-button"
+      confirmCoachmarkId="flashcards-confirm-button"
       confirmDisabled={cardActionsConfirmDisabled}
       confirmLabel={cardActionsConfirmLabel}
     />
