@@ -754,7 +754,7 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Brak fiszek w tej sesji")).not.toBeNull();
+      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
     });
 
     expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(301, 77);
@@ -799,7 +799,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(mockedScheduleCustomReview).toHaveBeenCalledWith(401, 77, 0);
-      expect(screen.getByText("Brak fiszek w tej sesji")).not.toBeNull();
+      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
     });
 
     expect(screen.getByText("boxZero:0")).not.toBeNull();

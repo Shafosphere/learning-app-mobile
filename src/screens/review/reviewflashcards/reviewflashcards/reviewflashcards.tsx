@@ -8,7 +8,6 @@ import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
-import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/FlashcardsPlaceholderCard";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
@@ -909,7 +908,6 @@ export default function ReviewFlashcardsPlaceholder() {
       BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : 0;
   const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
-  const isSessionEmpty = !isLoading && selectedItem == null && !hasCardsInSession;
   const coachmark = useCoachmarkFlow({
     flowKey: "review-flashcards-guided",
     storageKey: "@review_flashcards_intro_seen_v1",
@@ -968,31 +966,24 @@ export default function ReviewFlashcardsPlaceholder() {
         >
           <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
             <View collapsable={false}>
-              {isSessionEmpty ? (
-                <FlashcardsPlaceholderCard
-                  title="Brak fiszek w tej sesji"
-                  description="Odśwież ekran albo wróć później, gdy kolejne powtórki będą gotowe."
-                />
-              ) : (
-                <Card
-                  selectedItem={selectedItem}
-                  setAnswer={setAnswer}
-                  answer={answer}
-                  result={result}
-                  confirm={handleConfirm}
-                  reversed={reversed}
-                  setResult={setResult}
-                  correction={correction}
-                  wrongInputChange={wrongInputChange}
-                  setCorrectionRewers={setCorrectionRewers}
-                  introMode={false}
-                  onHintUpdate={() => undefined}
-                  hideHints
-                  isFocused={!isLoading}
-                  showExplanationEnabled={showExplanationEnabled}
-                  explanationOnlyOnWrong={explanationOnlyOnWrong}
-                />
-              )}
+              <Card
+                selectedItem={selectedItem}
+                setAnswer={setAnswer}
+                answer={answer}
+                result={result}
+                confirm={handleConfirm}
+                reversed={reversed}
+                setResult={setResult}
+                correction={correction}
+                wrongInputChange={wrongInputChange}
+                setCorrectionRewers={setCorrectionRewers}
+                introMode={false}
+                onHintUpdate={() => undefined}
+                hideHints
+                isFocused={!isLoading}
+                showExplanationEnabled={showExplanationEnabled}
+                explanationOnlyOnWrong={explanationOnlyOnWrong}
+              />
             </View>
           </CoachmarkAnchor>
         </Reanimated.View>
