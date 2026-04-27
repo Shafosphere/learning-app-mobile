@@ -13,6 +13,7 @@ import { SvgUri, SvgXml } from "react-native-svg";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { getHardFlashcards, type HardFlashcard } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import StatsSectionHeader from "./StatsSectionHeader";
 
 const useStyles = createThemeStylesHook((colors) => ({
   card: {
@@ -27,39 +28,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     overflow: "hidden",
   },
   header: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
     marginBottom: 18,
-  },
-  headerIconWrap: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
-    backgroundColor: "#EDE7FF",
-    alignItems: "center",
-    justifyContent: "center",
-    shadowColor: "#6D4EDB",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  headerCopy: {
-    flex: 1,
-    minWidth: 0,
-  },
-  title: {
-    color: colors.headline,
-    fontSize: 22,
-    fontWeight: "800",
-  },
-  subtitle: {
-    marginTop: 3,
-    color: colors.paragraph,
-    fontSize: 14,
-    lineHeight: 18,
-    minHeight: 36,
-    opacity: 0.78,
   },
   pager: {
     alignSelf: "stretch",
@@ -332,7 +301,7 @@ export default function HardWordsList() {
       <View key={item.id} style={styles.item}>
         {renderThumbnail(item)}
         <View style={styles.content}>
-          <Text style={styles.word} numberOfLines={1}>
+          <Text style={styles.word} numberOfLines={1} ellipsizeMode="tail">
             {getFlashcardLabel(item)}
           </Text>
           <View style={styles.track}>
@@ -371,17 +340,12 @@ export default function HardWordsList() {
 
   return (
     <View style={styles.card}>
-      <View style={styles.header}>
-        <View style={styles.headerIconWrap}>
-          <Ionicons name="trophy-outline" size={30} color="#5B3FD6" />
-        </View>
-        <View style={styles.headerCopy}>
-          <Text style={styles.title}>Trudne fiszki</Text>
-          <Text style={styles.subtitle} numberOfLines={2}>
-            {visiblePage?.subtitle ?? "Najczęściej mylone fiszki ogólnie"}
-          </Text>
-        </View>
-      </View>
+      <StatsSectionHeader
+        style={styles.header}
+        icon={<Ionicons name="trophy-outline" size={30} color="#5B3FD6" />}
+        title="Trudne fiszki"
+        subtitle={visiblePage?.subtitle ?? "Najczęściej mylone fiszki ogólnie"}
+      />
 
       <View
         testID="hard-words-pager-frame"

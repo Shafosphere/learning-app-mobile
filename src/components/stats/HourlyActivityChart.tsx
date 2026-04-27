@@ -1,7 +1,8 @@
 import React from "react";
 import { View, Text } from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import StatsCard from "./StatsCard";
+import StatsSectionHeader from "./StatsSectionHeader";
 
 type Props = {
   timeMs: {
@@ -11,39 +12,104 @@ type Props = {
   };
 };
 
+const CLOCK_COLOR = "#079A7F";
+
+function withAlpha(color: string, alpha: string) {
+  if (/^#[0-9a-f]{8}$/i.test(color)) {
+    return `${color.slice(0, 7)}${alpha}`;
+  }
+  if (/^#[0-9a-f]{6}$/i.test(color)) {
+    return `${color}${alpha}`;
+  }
+  return color;
+}
+
 const useStyles = createThemeStylesHook((colors) => ({
-  list: {
-    gap: 10,
-    marginTop: 4,
+  card: {
+    backgroundColor: colors.secondBackground,
+    borderRadius: 16,
+    padding: 16,
+    marginBottom: 16,
+    shadowColor: "#000",
+    shadowOpacity: 0.05,
+    shadowRadius: 8,
+    elevation: 2,
+    overflow: "hidden",
   },
-  row: {
+  header: {
+    marginBottom: 18,
+  },
+  metricsRow: {
     flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
+    gap: 12,
   },
-  label: {
+  metricCard: {
+    flex: 1,
+    minHeight: 116,
+    borderWidth: 1,
+    borderColor: withAlpha(colors.my_green, "22"),
+    borderRadius: 14,
+    backgroundColor: withAlpha(colors.my_green, "08"),
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 8,
+    paddingVertical: 14,
+  },
+  metricLabel: {
     color: colors.paragraph,
     fontSize: 14,
+    lineHeight: 18,
+    textAlign: "center",
+    opacity: 0.86,
   },
-  value: {
+  metricValue: {
+    marginTop: 18,
+    color: colors.headline,
+    fontSize: 32,
+    lineHeight: 38,
+    fontWeight: "800",
+    textAlign: "center",
+  },
+  metricUnit: {
     color: colors.headline,
     fontSize: 16,
-    fontWeight: "700",
+    lineHeight: 20,
+    textAlign: "center",
   },
-  hint: {
-    marginTop: 10,
+  infoBox: {
+    marginTop: 18,
+    borderRadius: 16,
+    backgroundColor: withAlpha(colors.my_green, "10"),
+    borderWidth: 1,
+    borderColor: withAlpha(colors.my_green, "20"),
+    paddingHorizontal: 16,
+    paddingVertical: 16,
+  },
+  infoCopy: {
+    minWidth: 0,
+  },
+  infoTitle: {
+    color: colors.headline,
+    fontSize: 15,
+    lineHeight: 19,
+    fontWeight: "800",
+  },
+  infoText: {
+    marginTop: 5,
     color: colors.paragraph,
-    fontSize: 12,
+    fontSize: 13,
+    lineHeight: 18,
+    opacity: 0.8,
   },
 }));
 
-function formatDuration(ms: number): string {
-  if (!ms || ms <= 0) return "0 min";
+function formatDuration(ms: number) {
+  if (!ms || ms <= 0) return { value: "0", unit: "min" };
   const hours = ms / 3_600_000;
-  if (hours >= 10) return `${Math.round(hours)} h`;
-  if (hours >= 1) return `${hours.toFixed(1)} h`;
+  if (hours >= 10) return { value: `${Math.round(hours)}`, unit: "h" };
+  if (hours >= 1) return { value: hours.toFixed(1), unit: "h" };
   const minutes = Math.max(1, Math.round(ms / 60_000));
-  return `${minutes} min`;
+  return { value: `${minutes}`, unit: "min" };
 }
 
 export default function LearningTimeCard({ timeMs }: Props) {
@@ -55,18 +121,35 @@ export default function LearningTimeCard({ timeMs }: Props) {
   ];
 
   return (
-    <StatsCard title="Czas w nauce" subtitle="Suma czasu spędzonego na kartach">
-      <View style={styles.list}>
+    <View style={styles.card}>
+      <StatsSectionHeader
+        style={styles.header}
+        icon={<Ionicons name="time-outline" size={30} color={CLOCK_COLOR} />}
+        iconBackgroundColor="#DFF7EF"
+        iconShadowColor={CLOCK_COLOR}
+        title="Czas w nauce"
+        subtitle="Suma czasu spędzonego na kartach"
+      />
+
+      <View style={styles.metricsRow}>
         {rows.map((row) => (
-          <View key={row.label} style={styles.row}>
-            <Text style={styles.label}>{row.label}</Text>
-            <Text style={styles.value}>{row.value}</Text>
+          <View key={row.label} style={styles.metricCard}>
+            <Text style={styles.metricLabel}>{row.label}</Text>
+            <Text style={styles.metricValue}>{row.value.value}</Text>
+            <Text style={styles.metricUnit}>{row.value.unit}</Text>
           </View>
         ))}
       </View>
-      <Text style={styles.hint}>
-        Liczymy czas od pokazania karty do potwierdzenia odpowiedzi (bez przerw między kartami).
-      </Text>
-    </StatsCard>
+
+      <View style={styles.infoBox}>
+        <View style={styles.infoCopy}>
+          <Text style={styles.infoTitle}>Jak liczymy czas?</Text>
+          <Text style={styles.infoText}>
+            Czas liczony jest od momentu pokazania karty do potwierdzenia
+            odpowiedzi (bez przerw między kartami).
+          </Text>
+        </View>
+      </View>
+    </View>
   );
 }

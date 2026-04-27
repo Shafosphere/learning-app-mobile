@@ -68,29 +68,29 @@ external_id,front_text,explanation
 0067,Jaki jest wzór na kapitał końcowy przy procencie składanym?,"Jeżeli kapitał początkowy $K_0$ złożymy na $n$ lat przy oprocentowaniu $p\%$ rocznie i kapitalizacji po każdym roku, to $K_n=K_0\cdot \left(1+\frac{p}{100}\right)^n$."
 0068,Jak definiujemy $\sin \alpha$ w trójkącie prostokątnym?,$\sin \alpha$ to stosunek długości przyprostokątnej leżącej naprzeciw kąta $\alpha$ do długości przeciwprostokątnej: $\sin \alpha=\frac{\text{przyprostokątna naprzeciw }\alpha}{\text{przeciwprostokątna}}$.
 0069,Jak definiujemy $\cos \alpha$ w trójkącie prostokątnym?,$\cos \alpha$ to stosunek długości przyprostokątnej leżącej przy kącie $\alpha$ do długości przeciwprostokątnej: $\cos \alpha=\frac{\text{przyprostokątna przy }\alpha}{\text{przeciwprostokątna}}$.
-0070,Jak definiujemy $\tg \alpha$ w trójkącie prostokątnym?,$\tg \alpha$ to stosunek długości przyprostokątnej leżącej naprzeciw kąta $\alpha$ do długości przyprostokątnej leżącej przy tym kącie: $\tg \alpha=\frac{\text{przyprostokątna naprzeciw }\alpha}{\text{przyprostokątna przy }\alpha}$.
+0070,Jak definiujemy $\operatorname{tg} \alpha$ w trójkącie prostokątnym?,$\operatorname{tg} \alpha$ to stosunek długości przyprostokątnej leżącej naprzeciw kąta $\alpha$ do długości przyprostokątnej leżącej przy tym kącie: $\operatorname{tg} \alpha=\frac{\text{przyprostokątna naprzeciw }\alpha}{\text{przyprostokątna przy }\alpha}$.
 0071,"Jak obliczamy $r$ w definicjach trygonometrycznych dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $r=|OM|=\sqrt{x^2+y^2}>0$."
 0072,"Jak definiujemy $\sin \alpha$ dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $\sin \alpha=\frac{y}{r}$."
 0073,"Jak definiujemy $\cos \alpha$ dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $\cos \alpha=\frac{x}{r}$."
-0074,"Jak definiujemy $\tg \alpha$ dla punktu $M(x,y)$?","Jeżeli $x\ne 0$, to $\tg \alpha=\frac{y}{x}$."
+0074,"Jak definiujemy $\operatorname{tg} \alpha$ dla punktu $M(x,y)$?","Jeżeli $x\ne 0$, to $\operatorname{tg} \alpha=\frac{y}{x}$."
 0075,Ile wynosi $\sin 0^\circ$?,$\sin 0^\circ=0$.
 0076,Ile wynosi $\cos 0^\circ$?,$\cos 0^\circ=1$.
-0077,Ile wynosi $\tg 0^\circ$?,$\tg 0^\circ=0$.
+0077,Ile wynosi $\operatorname{tg} 0^\circ$?,$\operatorname{tg} 0^\circ=0$.
 0078,Ile wynosi $\sin 30^\circ$?,$\sin 30^\circ=\frac{1}{2}$.
 0079,Ile wynosi $\cos 30^\circ$?,$\cos 30^\circ=\frac{\sqrt{3}}{2}$.
-0080,Ile wynosi $\tg 30^\circ$?,$\tg 30^\circ=\frac{\sqrt{3}}{3}$.
+0080,Ile wynosi $\operatorname{tg} 30^\circ$?,$\operatorname{tg} 30^\circ=\frac{\sqrt{3}}{3}$.
 0081,Ile wynosi $\sin 45^\circ$?,$\sin 45^\circ=\frac{\sqrt{2}}{2}$.
 0082,Ile wynosi $\cos 45^\circ$?,$\cos 45^\circ=\frac{\sqrt{2}}{2}$.
-0083,Ile wynosi $\tg 45^\circ$?,$\tg 45^\circ=1$.
+0083,Ile wynosi $\operatorname{tg} 45^\circ$?,$\operatorname{tg} 45^\circ=1$.
 0084,Ile wynosi $\sin 60^\circ$?,$\sin 60^\circ=\frac{\sqrt{3}}{2}$.
 0085,Ile wynosi $\cos 60^\circ$?,$\cos 60^\circ=\frac{1}{2}$.
-0086,Ile wynosi $\tg 60^\circ$?,$\tg 60^\circ=\sqrt{3}$.
+0086,Ile wynosi $\operatorname{tg} 60^\circ$?,$\operatorname{tg} 60^\circ=\sqrt{3}$.
 0087,Ile wynosi $\sin 90^\circ$?,$\sin 90^\circ=1$.
 0088,Ile wynosi $\cos 90^\circ$?,$\cos 90^\circ=0$.
-0089,Czy istnieje $\tg 90^\circ$?,$\tg 90^\circ$ nie istnieje.
+0089,Czy istnieje $\operatorname{tg} 90^\circ$?,$\operatorname{tg} 90^\circ$ nie istnieje.
 0090,Jaki jest podstawowy związek między $\sin \alpha$ i $\cos \alpha$?,Zachodzi $\sin^2\alpha+\cos^2\alpha=1$.
-0091,"Jaki jest związek między $\tg \alpha$, $\sin \alpha$ i $\cos \alpha$?","Zachodzi $\tg \alpha=\frac{\sin \alpha}{\cos \alpha}$, gdy wyrażenie jest określone."
-0092,Kiedy wzór $\tg \alpha=\frac{\sin \alpha}{\cos \alpha}$ nie może być użyty?,"Tego wzoru nie używamy, gdy $\cos \alpha=0$."
+0091,"Jaki jest związek między $\operatorname{tg} \alpha$, $\sin \alpha$ i $\cos \alpha$?","Zachodzi $\operatorname{tg} \alpha=\frac{\sin \alpha}{\cos \alpha}$, gdy wyrażenie jest określone."
+0092,Kiedy wzór $\operatorname{tg} \alpha=\frac{\sin \alpha}{\cos \alpha}$ nie może być użyty?,"Tego wzoru nie używamy, gdy $\cos \alpha=0$."
 0093,Jak oznaczamy połowę obwodu trójkąta $ABC$?,Połowę obwodu oznaczamy przez $p$ i obliczamy ze wzoru $p=\frac{a+b+c}{2}$.
 0094,Jak brzmi twierdzenie Pitagorasa dla trójkąta $ABC$ z kątem prostym $\gamma$?,"Jeżeli kąt $\gamma$ jest prosty, to $a^2+b^2=c^2$."
 0095,Jak brzmi twierdzenie odwrotne do twierdzenia Pitagorasa?,"Jeżeli w trójkącie $ABC$ zachodzi $a^2+b^2=c^2$, to kąt $\gamma$ jest kątem prostym."
@@ -107,8 +107,8 @@ external_id,front_text,explanation
 0106,Jaki jest wzór na promień $R$ okręgu opisanego na trójkącie prostokątnym?,$R=\frac{1}{2}c$.
 0107,Jak można wyrazić bok $a$ przez przeciwprostokątną $c$ i kąt $\alpha$ w trójkącie prostokątnym?,$a=c\cdot \sin \alpha$.
 0108,Jak można wyrazić bok $a$ przez przeciwprostokątną $c$ i kąt $\beta$ w trójkącie prostokątnym?,$a=c\cdot \cos \beta$.
-0109,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\alpha$ w trójkącie prostokątnym?,$a=b\cdot \tg \alpha$.
-0110,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\beta$ w trójkącie prostokątnym?,$a=b\cdot \frac{1}{\tg \beta}$.
+0109,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\alpha$ w trójkącie prostokątnym?,$a=b\cdot \operatorname{tg} \alpha$.
+0110,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\beta$ w trójkącie prostokątnym?,$a=b\cdot \frac{1}{\operatorname{tg} \beta}$.
 0111,Jaki jest wzór na wysokość trójkąta równobocznego o boku $a$?,$h=\frac{a\sqrt{3}}{2}$.
 0112,Jaki jest wzór na pole trójkąta równobocznego o boku $a$?,$P_{\Delta}=\frac{a^2\sqrt{3}}{4}$.
 0113,Jaki jest wzór na promień $r$ okręgu wpisanego w trójkąt równoboczny?,$r=\frac{1}{3}h$.
@@ -141,7 +141,7 @@ external_id,front_text,explanation
 0140,Jaki jest wzór na współrzędną $y_S$ środka odcinka $AB$?,"Jeżeli $S=(x_S,y_S)$ jest środkiem odcinka o końcach $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$, to $y_S=\frac{y_A+y_B}{2}$."
 0141,Kiedy prostą można opisać równaniem kierunkowym?,"Jeżeli prosta nie jest równoległa do osi $Oy$, to można ją opisać równaniem kierunkowym $y=ax+b$."
 0142,Co oznacza liczba $a$ w równaniu kierunkowym prostej $y=ax+b$?,Liczba $a$ jest współczynnikiem kierunkowym prostej.
-0143,Jaki jest związek współczynnika kierunkowego $a$ z kątem $\alpha$?,Zachodzi $a=\tg\alpha$.
+0143,Jaki jest związek współczynnika kierunkowego $a$ z kątem $\alpha$?,Zachodzi $a=\operatorname{tg}\alpha$.
 0144,W jakim punkcie prosta $y=ax+b$ przecina oś $Oy$?,"Prosta $y=ax+b$ przecina oś $Oy$ w punkcie $(0,b)$."
 0145,"Jakie jest równanie kierunkowe prostej o współczynniku kierunkowym $a$, przechodzącej przez punkt $P=(x_0,y_0)$?",Równanie tej prostej ma postać $y=a(x-x_0)+y_0$.
 0146,"Jakie jest równanie kierunkowe prostej przechodzącej przez punkty $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$?","Równanie ma postać $y-y_A=a(x-x_A)$, gdzie $a=\frac{y_B-y_A}{x_B-x_A}$ przy warunku $x_B\ne x_A$."
