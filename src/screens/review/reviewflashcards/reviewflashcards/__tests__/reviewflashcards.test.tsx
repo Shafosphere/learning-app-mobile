@@ -11,10 +11,12 @@ import ReviewFlashcardsPlaceholder from "@/src/screens/review/reviewflashcards/r
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  getGlobalDailyStreakDays,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 
 type ReviewFlashcardsRouteParams = {
@@ -38,6 +40,13 @@ jest.mock("@react-navigation/native", () => ({
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
+}));
+
+jest.mock("@/src/contexts/NavbarStatsContext", () => ({
+  useNavbarStats: jest.fn(() => ({
+    applyStatBurst: jest.fn(),
+    getStatsSnapshot: jest.fn(() => ({ streakDays: 0 })),
+  })),
 }));
 
 jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
@@ -66,6 +75,7 @@ jest.mock("@/src/db/sqlite/db", () => ({
     Promise.resolve({ stage: 2, nextReview: Date.now() })
   ),
   getDueCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
+  getGlobalDailyStreakDays: jest.fn(() => Promise.resolve(0)),
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
   scheduleCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 1, nextReview: Date.now() })
@@ -331,9 +341,11 @@ type ReviewCardRow = {
 };
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
+const mockedGetGlobalDailyStreakDays = getGlobalDailyStreakDays as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
 const mockedAdvanceCustomReview = advanceCustomReview as jest.Mock;
 const mockedScheduleCustomReview = scheduleCustomReview as jest.Mock;
@@ -409,7 +421,21 @@ async function renderAndForceCorrectionSwitch(
 }
 
 describe("reviewflashcards correction desync regression", () => {
+  let applyStatBurstMock: jest.Mock;
+  let getStatsSnapshotMock: jest.Mock;
+
   beforeEach(() => {
+    applyStatBurstMock = jest.fn();
+    getStatsSnapshotMock = jest.fn(() => ({
+      masteredCount: 0,
+      streakDays: 0,
+      promotionsCount: 0,
+    }));
+    mockedUseNavbarStats.mockReturnValue({
+      applyStatBurst: applyStatBurstMock,
+      getStatsSnapshot: getStatsSnapshotMock,
+    });
+    mockedGetGlobalDailyStreakDays.mockResolvedValue(0);
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
@@ -891,6 +917,72 @@ describe("reviewflashcards correction desync regression", () => {
     jest.useRealTimers();
   });
 
+  it("applies promotion and streak burst after a correct promotion answer", async () => {
+    mockedGetGlobalDailyStreakDays.mockResolvedValueOnce(1);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 611,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 4,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 4);
+
+    await act(async () => {
+      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+    });
+
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(applyStatBurstMock).toHaveBeenCalledWith({
+        masteredDelta: 0,
+        promotionsDelta: 1,
+        streakDelta: 1,
+      });
+    });
+    expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not apply a promotion burst for a correct box five answer without streak growth", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 612,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 5,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 5);
+
+    await act(async () => {
+      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+    });
+
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(mockedLogCustomLearningEvent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          flashcardId: 612,
+          box: "boxFive",
+          result: "ok",
+        })
+      );
+    });
+    expect(mockedGetGlobalDailyStreakDays).not.toHaveBeenCalled();
+    expect(applyStatBurstMock).not.toHaveBeenCalled();
+  });
+
   it("logs a single wrong event with duration and does not duplicate it after correction", async () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date("2026-04-21T10:00:00.000Z"));
@@ -946,6 +1038,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(mockedScheduleCustomReview).toHaveBeenCalledWith(701, 77, 0);
     });
     expect(mockedLogCustomLearningEvent).toHaveBeenCalledTimes(1);
+    expect(applyStatBurstMock).not.toHaveBeenCalled();
     jest.useRealTimers();
   });
 

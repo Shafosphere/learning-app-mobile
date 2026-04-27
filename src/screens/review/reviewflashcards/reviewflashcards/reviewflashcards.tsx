@@ -13,9 +13,14 @@ import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlow
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  getGlobalDailyStreakDays,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
+import {
+  type StatBurst,
+  useNavbarStats,
+} from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
@@ -96,6 +101,7 @@ export default function ReviewFlashcardsPlaceholder() {
     onboarding?: string;
   }>();
   const styles = useStyles();
+  const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const {
     actionButtonsPosition,
     getCustomCourseShowExplanationEnabled,
@@ -171,6 +177,50 @@ export default function ReviewFlashcardsPlaceholder() {
     boxes,
     activeBox,
   });
+
+  const handleStatsBurst = useCallback(
+    (boxKey: keyof BoxesState, logLearningEventPromise: Promise<void>) => {
+      const baseBurst: StatBurst = {
+        masteredDelta: 0,
+        streakDelta: 0,
+        promotionsDelta:
+          boxKey === "boxOne" ||
+          boxKey === "boxTwo" ||
+          boxKey === "boxThree" ||
+          boxKey === "boxFour"
+            ? 1
+            : 0,
+      };
+
+      const hasBaseDelta = baseBurst.promotionsDelta > 0;
+
+      void (async () => {
+        await logLearningEventPromise;
+
+        let streakDelta: 0 | 1 = 0;
+        if (baseBurst.promotionsDelta > 0) {
+          try {
+            const nextStreak = await getGlobalDailyStreakDays();
+            if (nextStreak > getStatsSnapshot().streakDays) {
+              streakDelta = 1;
+            }
+          } catch (error) {
+            console.warn("[Review] Failed to refresh streak after answer", error);
+          }
+        }
+
+        if (!hasBaseDelta && streakDelta === 0) {
+          return;
+        }
+
+        applyStatBurst({
+          ...baseBurst,
+          streakDelta,
+        });
+      })();
+    },
+    [applyStatBurst, getStatsSnapshot],
+  );
 
   const resetSessionState = useCallback((nextBoxes: BoxesState) => {
     setBoxes(nextBoxes);
@@ -580,8 +630,8 @@ export default function ReviewFlashcardsPlaceholder() {
     const currentBox = selectedItem.stage != null ? stageToBox(selectedItem.stage) : activeBox;
     const durationMs =
       questionShownAt != null ? Math.max(0, Date.now() - questionShownAt) : undefined;
-    const logAttemptEvent = (resultValue: "ok" | "wrong") => {
-      void logCustomLearningEvent({
+    const logAttemptEvent = (resultValue: "ok" | "wrong") =>
+      logCustomLearningEvent({
         flashcardId: selectedItem.id,
         courseId,
         box: currentBox,
@@ -590,11 +640,10 @@ export default function ReviewFlashcardsPlaceholder() {
       }).catch((error) => {
         console.warn("[Review] Failed to log learning event", error);
       });
-    };
 
     if (!ok) {
       handleBoxFaceWrongAnswer(activeBox);
-      logAttemptEvent("wrong");
+      void logAttemptEvent("wrong");
       const wrongExplanationState = getExplanationState({
         selectedItem,
         result: false,
@@ -670,7 +719,8 @@ export default function ReviewFlashcardsPlaceholder() {
       return;
     }
 
-    logAttemptEvent("ok");
+    const logLearningEventPromise = logAttemptEvent("ok");
+    handleStatsBurst(currentBox, logLearningEventPromise);
     handleBoxFaceCorrectAnswer(activeBox, {
       preferLove: activeBox === "boxFour" || activeBox === "boxFive",
     });
@@ -748,6 +798,7 @@ export default function ReviewFlashcardsPlaceholder() {
     explanationOnlyOnWrong,
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
+    handleStatsBurst,
     pendingExplanationMove,
     questionShownAt,
     removeCardFromSession,

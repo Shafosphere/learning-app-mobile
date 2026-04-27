@@ -22,7 +22,13 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, ScrollView, Text, View } from "react-native";
+import {
+  ActivityIndicator,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseGroupList } from "@/src/components/course/CourseGroupList";
 import { CourseGroup, OfficialCourseListItem } from "@/src/features/customCourse/courseActivationTypes";
@@ -40,6 +46,7 @@ export default function CourseActivateScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
+  const [isLoadingCourses, setIsLoadingCourses] = useState(true);
   const scrollRef = useRef<ScrollView | null>(null);
   const router = useRouter();
   const setPopup = usePopup();
@@ -155,36 +162,63 @@ export default function CourseActivateScreen() {
   useFocusEffect(
     useCallback(() => {
       let isMounted = true;
-      getCustomCoursesWithCardCounts()
-        .then((rows) => {
-          if (isMounted) setCustomCourses(rows);
-        })
-        .catch((error) => {
-          console.error("Failed to load custom courses", error);
-        });
-      getOfficialCustomCoursesWithCardCounts()
-        .then((rows) => {
-          if (isMounted) {
-            const mapped = rows.map<OfficialCourseListItem>((row) => {
-              const manifest = OFFICIAL_PACKS.find(
-                (pack) => pack.slug === row.slug
-              );
-              return {
-                ...row,
-                sourceLang: manifest?.sourceLang ?? null,
-                targetLang: manifest?.targetLang ?? null,
-                smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
-                isMini: manifest?.isMini ?? true,
-                categoryId: manifest?.categoryId,
-                position: manifest?.position,
-              };
-            });
-            setOfficialCourses(mapped);
+
+      const loadCourses = async () => {
+        setIsLoadingCourses(true);
+        try {
+          const [customResult, officialResult] = await Promise.allSettled([
+            getCustomCoursesWithCardCounts(),
+            getOfficialCustomCoursesWithCardCounts(),
+          ]);
+          if (!isMounted) return;
+
+          if (customResult.status === "fulfilled") {
+            setCustomCourses(customResult.value);
+          } else {
+            console.error("Failed to load custom courses", customResult.reason);
+            setCustomCourses([]);
           }
-        })
-        .catch((error) => {
-          console.error("Failed to load official courses", error);
-        });
+
+          if (officialResult.status === "fulfilled") {
+            const mappedOfficialRows =
+              officialResult.value.map<OfficialCourseListItem>((row) => {
+                const manifest = OFFICIAL_PACKS.find(
+                  (pack) => pack.slug === row.slug
+                );
+                return {
+                  ...row,
+                  sourceLang: manifest?.sourceLang ?? null,
+                  targetLang: manifest?.targetLang ?? null,
+                  smallFlag:
+                    manifest?.smallFlag ?? manifest?.sourceLang ?? null,
+                  isMini: manifest?.isMini ?? true,
+                  categoryId: manifest?.categoryId,
+                  position: manifest?.position,
+                };
+              });
+
+            setOfficialCourses(mappedOfficialRows);
+          } else {
+            console.error(
+              "Failed to load official courses",
+              officialResult.reason
+            );
+            setOfficialCourses([]);
+          }
+        } catch (error) {
+          console.error("Failed to load courses", error);
+          if (!isMounted) return;
+          setCustomCourses([]);
+          setOfficialCourses([]);
+        } finally {
+          if (isMounted) {
+            setIsLoadingCourses(false);
+          }
+        }
+      };
+
+      void loadCourses();
+
       return () => {
         isMounted = false;
       };
@@ -303,7 +337,7 @@ export default function CourseActivateScreen() {
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.minicontainer}>
-          {isEmptyState ? (
+          {!isLoadingCourses && isEmptyState ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyState}>
                 nic tu nie ma :(, czas wybrać kurs!
@@ -430,6 +464,13 @@ export default function CourseActivateScreen() {
           </View>
         </View>
       )}
+      {isLoadingCourses ? (
+        <View style={styles.loadingOverlay} testID="course-activate-loading">
+          <View style={styles.loadingOverlayContent}>
+            <ActivityIndicator size="large" color={colors.paragraph} />
+          </View>
+        </View>
+      ) : null}
     </View>
   );
 }
