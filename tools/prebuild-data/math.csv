@@ -1,0 +1,259 @@
+external_id,front_text,explanation
+0001,Jak definiujemy wartość bezwzględną liczby rzeczywistej $x$?,Wartość bezwzględną definiujemy wzorem: $|x| = x$ dla $x \ge 0$ oraz $|x| = -x$ dla $x < 0$.
+0002,Jak interpretujemy geometrycznie wartość bezwzględną $|x|$?,Liczba $|x|$ jest odległością na osi liczbowej punktu o współrzędnej $x$ od punktu o współrzędnej $0$.
+0003,Jaką nierówność spełnia wartość bezwzględna dowolnej liczby $x$?,Dla dowolnej liczby $x$ mamy $|x| \ge 0$.
+0004,Kiedy wartość bezwzględna liczby $x$ jest równa $0$?,"Zachodzi $|x| = 0$ wtedy i tylko wtedy, gdy $x = 0$."
+0005,Jaka jest zależność między $|-x|$ oraz $|x|$?,Dla dowolnej liczby $x$ mamy $|-x| = |x|$.
+0006,Jak wygląda nierówność trójkąta dla wartości bezwzględnej sumy?,"Dla dowolnych liczb rzeczywistych $x, y$ mamy $|x + y| \le |x| + |y|$."
+0007,Jak oszacować wartość bezwzględną różnicy $x-y$?,"Dla dowolnych liczb rzeczywistych $x, y$ mamy $|x - y| \le |x| + |y|$."
+0008,Jak obliczamy wartość bezwzględną iloczynu $x \cdot y$?,"Dla dowolnych liczb rzeczywistych $x, y$ mamy $|x \cdot y| = |x| \cdot |y|$."
+0009,Jak obliczamy wartość bezwzględną ilorazu $\frac{x}{y}$?,"Jeżeli $y \ne 0$, to $\left|\frac{x}{y}\right| = \frac{|x|}{|y|}$."
+0010,Z czym równoważna jest nierówność $|x-a| \le r$ dla $r \ge 0$?,"Dla dowolnych liczb rzeczywistych $a$ oraz $r \ge 0$ mamy $|x-a| \le r$ wtedy i tylko wtedy, gdy $a-r \le x \le a+r$."
+0011,Z czym równoważna jest nierówność $|x-a| \ge r$ dla $r \ge 0$?,"Dla dowolnych liczb rzeczywistych $a$ oraz $r \ge 0$ mamy $|x-a| \ge r$ wtedy i tylko wtedy, gdy $x \le a-r$ lub $x \ge a+r$."
+0012,"Jak definiujemy $n$-tą potęgę liczby rzeczywistej $a$, gdy $n$ jest dodatnią liczbą całkowitą?",Definiujemy $a^n = \underbrace{a \cdot a \cdot \ldots \cdot a}_{n\ \text{razy}}$.
+0013,Jak definiujemy pierwiastek arytmetyczny stopnia $n$ z liczby $a \ge 0$?,"Pierwiastkiem arytmetycznym $\sqrt[n]{a}$ nazywamy liczbę $b \ge 0$ taką, że $b^n = a$."
+0014,Jaki jest szczególny wzór dla $\sqrt{a^2}$?,Dla każdej liczby rzeczywistej $a$ zachodzi $\sqrt{a^2} = |a|$.
+0015,"Co oznacza $\sqrt[n]{a}$, gdy $a < 0$ oraz $n$ jest nieparzyste?","Oznacza liczbę $b < 0$ taką, że $b^n = a$."
+0016,Czy w zbiorze liczb rzeczywistych istnieją pierwiastki stopni parzystych z liczb ujemnych?,Nie. W zbiorze liczb rzeczywistych pierwiastki stopni parzystych z liczb ujemnych nie istnieją.
+0017,Jak definiujemy potęgę $a^{-n}$ dla $a \ne 0$?,Dla $a \ne 0$ mamy $a^{-n} = \frac{1}{a^n}$.
+0018,Ile wynosi $a^0$ dla $a \ne 0$?,Dla $a \ne 0$ przyjmujemy $a^0 = 1$.
+0019,Jak definiujemy potęgę $a^{\frac{m}{n}}$ dla $a \ge 0$?,Dla $a \ge 0$ mamy $a^{\frac{m}{n}} = \sqrt[n]{a^m}$.
+0020,Jak definiujemy potęgę $a^{-\frac{m}{n}}$ dla $a > 0$?,Dla $a > 0$ mamy $a^{-\frac{m}{n}} = \frac{1}{\sqrt[n]{a^m}}$.
+0021,Jaki jest wzór na iloczyn potęg o tej samej podstawie?,"Jeżeli $a > 0$, to $a^r \cdot a^s = a^{r+s}$."
+0022,Jaki jest wzór na potęgę potęgi?,"Jeżeli $a > 0$, to $(a^r)^s = a^{r \cdot s}$."
+0023,Jaki jest wzór na iloraz potęg o tej samej podstawie?,"Jeżeli $a > 0$, to $\frac{a^r}{a^s} = a^{r-s}$."
+0024,Jaki jest wzór na potęgę iloczynu?,"Jeżeli $a > 0$ i $b > 0$, to $(a \cdot b)^r = a^r \cdot b^r$."
+0025,Jaki jest wzór na potęgę ilorazu?,"Jeżeli $a > 0$ i $b > 0$, to $\left(\frac{a}{b}\right)^r = \frac{a^r}{b^r}$."
+0026,"Jakie warunki trzeba spełnić, aby stosować prawa działań na potęgach z wykładnikami rzeczywistymi?","Przy wykładnikach rzeczywistych podstawy potęg powinny być dodatnie: $a>0$ i $b>0$. Wtedy można stosować m.in. $a^r\cdot a^s=a^{r+s}$, $\frac{a^r}{a^s}=a^{r-s}$ oraz $(ab)^r=a^r b^r$."
+0027,Kiedy prawa działań na potęgach można stosować dla podstaw różnych od zera?,"Gdy wykładniki są liczbami całkowitymi. Wtedy podstawy mogą być dodatnie lub ujemne, ale nie mogą być równe zero: $a\ne0$ i $b\ne0$."
+0028,"Jak porównujemy potęgi $a^x$ i $a^y$, gdy $a \in (0,1)$?","Jeżeli $a \in (0,1)$, to nierówność $a^x < a^y$ jest równoważna nierówności $x > y$."
+0029,"Jak porównujemy potęgi $a^x$ i $a^y$, gdy $a \in (1,+\infty)$?","Jeżeli $a \in (1,+\infty)$, to nierówność $a^x < a^y$ jest równoważna nierówności $x < y$."
+0030,Jak definiujemy logarytm $\log_a b$?,"Jeżeli $a > 0$, $a \ne 1$ oraz $b > 0$, to $\log_a b$ jest wykładnikiem $c$, do którego należy podnieść $a$, aby otrzymać $b$."
+0031,Z czym równoważny jest zapis $\log_a b = c$?,"Przy warunkach $a > 0$, $a \ne 1$, $b > 0$ zachodzi $\log_a b = c$ wtedy i tylko wtedy, gdy $a^c = b$."
+0032,Jaki jest związek między logarytmem a potęgowaniem w zapisie $a^{\log_a b}$?,"Przy warunkach $a > 0$, $a \ne 1$, $b > 0$ zachodzi $a^{\log_a b} = b$."
+0033,Jaki jest wzór na logarytm iloczynu?,Dla $x > 0$ i $y > 0$ mamy $\log_a(x \cdot y) = \log_a x + \log_a y$.
+0034,Jaki jest wzór na logarytm ilorazu?,Dla $x > 0$ i $y > 0$ mamy $\log_a\left(\frac{x}{y}\right) = \log_a x - \log_a y$.
+0035,Jaki jest wzór na logarytm potęgi?,Dla $x > 0$ oraz dowolnej liczby rzeczywistej $r$ mamy $\log_a x^r = r \cdot \log_a x$.
+0036,Co oznaczają zapisy $\log x$ oraz $\lg x$?,Zapisy $\log x$ oraz $\lg x$ oznaczają $\log_{10} x$.
+0037,Jaki jest wzór skróconego mnożenia na kwadrat sumy?,"Dla dowolnych liczb rzeczywistych $a, b$ mamy $(a+b)^2 = a^2 + 2ab + b^2$."
+0038,Jaki jest wzór skróconego mnożenia na kwadrat różnicy?,"Dla dowolnych liczb rzeczywistych $a, b$ mamy $(a-b)^2 = a^2 - 2ab + b^2$."
+0039,Jaki jest wzór skróconego mnożenia na różnicę kwadratów?,"Dla dowolnych liczb rzeczywistych $a, b$ mamy $a^2 - b^2 = (a-b)(a+b)$."
+0040,Jaki jest szczególny przypadek wzoru na różnicę kwadratów dla $b=1$?,Dla dowolnej liczby rzeczywistej $a$ mamy $a^2 - 1 = (a-1)(a+1)$.
+0041,Jak definiujemy wyróżnik $\Delta$ trójmianu kwadratowego $ax^2+bx+c$?,Dla $a \ne 0$ wyróżnikiem trójmianu kwadratowego $ax^2+bx+c$ jest liczba $\Delta = b^2 - 4ac$.
+0042,Jaka jest postać ogólna funkcji kwadratowej?,"Postać ogólna funkcji kwadratowej to $f(x) = ax^2 + bx + c$, gdzie $a \ne 0$, $b,c \in \mathbb{R}$ oraz $x \in \mathbb{R}$."
+0043,Czym jest wykres funkcji kwadratowej?,Wykresem funkcji kwadratowej jest parabola.
+0044,Jak zapisujemy wierzchołek paraboli funkcji kwadratowej?,"Wierzchołek paraboli zapisujemy jako $W = (p,q)$."
+0045,Jaki jest wzór na współrzędną $p$ wierzchołka paraboli?,Dla funkcji kwadratowej $f(x)=ax^2+bx+c$ mamy $p = -\frac{b}{2a}$.
+0046,Jaki jest wzór na współrzędną $q$ wierzchołka paraboli?,Dla funkcji kwadratowej $f(x)=ax^2+bx+c$ mamy $q = -\frac{\Delta}{4a}$.
+0047,"Jak są skierowane ramiona paraboli, gdy $a < 0$?","Gdy $a < 0$, ramiona paraboli skierowane są ku dołowi."
+0048,"Jak są skierowane ramiona paraboli, gdy $a > 0$?","Gdy $a > 0$, ramiona paraboli skierowane są ku górze."
+0049,"Ile miejsc zerowych ma funkcja kwadratowa, gdy $\Delta > 0$?","Jeżeli $\Delta > 0$, to funkcja kwadratowa ma dwa miejsca zerowe."
+0050,"Jak obliczamy pierwsze miejsce zerowe funkcji kwadratowej, gdy $\Delta > 0$?","Gdy $\Delta > 0$, pierwsze miejsce zerowe wynosi $x_1 = \frac{-b-\sqrt{\Delta}}{2a}$."
+0051,"Jak obliczamy drugie miejsce zerowe funkcji kwadratowej, gdy $\Delta > 0$?","Gdy $\Delta > 0$, drugie miejsce zerowe wynosi $x_2 = \frac{-b+\sqrt{\Delta}}{2a}$."
+0052,"Ile miejsc zerowych ma funkcja kwadratowa, gdy $\Delta = 0$?","Jeżeli $\Delta = 0$, to funkcja kwadratowa ma dokładnie jedno miejsce zerowe."
+0053,"Jak obliczamy jedyne miejsce zerowe funkcji kwadratowej, gdy $\Delta = 0$?","Gdy $\Delta = 0$, mamy $x_1 = x_2 = -\frac{b}{2a}$."
+0054,"Ile miejsc zerowych ma funkcja kwadratowa, gdy $\Delta < 0$?","Jeżeli $\Delta < 0$, to funkcja kwadratowa nie ma miejsc zerowych."
+0055,Jaka jest postać kanoniczna funkcji kwadratowej?,Postać kanoniczna funkcji kwadratowej to $f(x) = a(x-p)^2 + q$.
+0056,Kiedy funkcję kwadratową można zapisać w postaci iloczynowej?,"Jeżeli $\Delta \ge 0$, to funkcję kwadratową można przedstawić w postaci iloczynowej."
+0057,Jaka jest postać iloczynowa funkcji kwadratowej?,"Jeżeli $\Delta \ge 0$, to $f(x)=a(x-x_1)(x-x_2)$."
+0058,Co oznaczają $x_1$ i $x_2$ w postaci iloczynowej funkcji kwadratowej?,Liczby $x_1$ i $x_2$ oznaczają miejsca zerowe funkcji kwadratowej.
+0059,Jaki jest wzór na $n$-ty wyraz ciągu arytmetycznego?,Dla ciągu arytmetycznego o pierwszym wyrazie $a_1$ i różnicy $r$ mamy $a_n=a_1+(n-1)r$.
+0060,Jaki jest wzór na sumę $S_n$ początkowych $n$ wyrazów ciągu arytmetycznego z użyciem $a_1$ i $a_n$?,Suma wynosi $S_n=\frac{a_1+a_n}{2}\cdot n$.
+0061,Jaki jest wzór na sumę $S_n$ początkowych $n$ wyrazów ciągu arytmetycznego z użyciem $a_1$ i $r$?,Suma wynosi $S_n=\frac{2a_1+(n-1)r}{2}\cdot n$.
+0062,Jaka własność zachodzi dla sąsiednich wyrazów ciągu arytmetycznego?,Dla $n \ge 2$ zachodzi $a_n=\frac{a_{n-1}+a_{n+1}}{2}$.
+0063,Jaki jest wzór na $n$-ty wyraz ciągu geometrycznego?,Dla ciągu geometrycznego o pierwszym wyrazie $a_1$ i ilorazie $q$ mamy $a_n=a_1\cdot q^{n-1}$ dla $n \ge 2$.
+0064,"Jaki jest wzór na sumę $S_n$ początkowych $n$ wyrazów ciągu geometrycznego, gdy $q \ne 1$?","Jeżeli $q \ne 1$, to $S_n=a_1\cdot \frac{1-q^n}{1-q}$."
+0065,"Jaki jest wzór na sumę $S_n$ początkowych $n$ wyrazów ciągu geometrycznego, gdy $q=1$?","Jeżeli $q=1$, to $S_n=n\cdot a_1$."
+0066,Jaka własność zachodzi dla sąsiednich wyrazów ciągu geometrycznego?,Dla $n \ge 2$ zachodzi $(a_n)^2=a_{n-1}\cdot a_{n+1}$.
+0067,Jaki jest wzór na kapitał końcowy przy procencie składanym?,"Jeżeli kapitał początkowy $K_0$ złożymy na $n$ lat przy oprocentowaniu $p\%$ rocznie i kapitalizacji po każdym roku, to $K_n=K_0\cdot \left(1+\frac{p}{100}\right)^n$."
+0068,Jak definiujemy $\sin \alpha$ w trójkącie prostokątnym?,$\sin \alpha$ to stosunek długości przyprostokątnej leżącej naprzeciw kąta $\alpha$ do długości przeciwprostokątnej: $\sin \alpha=\frac{\text{przyprostokątna naprzeciw }\alpha}{\text{przeciwprostokątna}}$.
+0069,Jak definiujemy $\cos \alpha$ w trójkącie prostokątnym?,$\cos \alpha$ to stosunek długości przyprostokątnej leżącej przy kącie $\alpha$ do długości przeciwprostokątnej: $\cos \alpha=\frac{\text{przyprostokątna przy }\alpha}{\text{przeciwprostokątna}}$.
+0070,Jak definiujemy $\tg \alpha$ w trójkącie prostokątnym?,$\tg \alpha$ to stosunek długości przyprostokątnej leżącej naprzeciw kąta $\alpha$ do długości przyprostokątnej leżącej przy tym kącie: $\tg \alpha=\frac{\text{przyprostokątna naprzeciw }\alpha}{\text{przyprostokątna przy }\alpha}$.
+0071,"Jak obliczamy $r$ w definicjach trygonometrycznych dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $r=|OM|=\sqrt{x^2+y^2}>0$."
+0072,"Jak definiujemy $\sin \alpha$ dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $\sin \alpha=\frac{y}{r}$."
+0073,"Jak definiujemy $\cos \alpha$ dla punktu $M(x,y)$?","Dla punktu $M(x,y)$ mamy $\cos \alpha=\frac{x}{r}$."
+0074,"Jak definiujemy $\tg \alpha$ dla punktu $M(x,y)$?","Jeżeli $x\ne 0$, to $\tg \alpha=\frac{y}{x}$."
+0075,Ile wynosi $\sin 0^\circ$?,$\sin 0^\circ=0$.
+0076,Ile wynosi $\cos 0^\circ$?,$\cos 0^\circ=1$.
+0077,Ile wynosi $\tg 0^\circ$?,$\tg 0^\circ=0$.
+0078,Ile wynosi $\sin 30^\circ$?,$\sin 30^\circ=\frac{1}{2}$.
+0079,Ile wynosi $\cos 30^\circ$?,$\cos 30^\circ=\frac{\sqrt{3}}{2}$.
+0080,Ile wynosi $\tg 30^\circ$?,$\tg 30^\circ=\frac{\sqrt{3}}{3}$.
+0081,Ile wynosi $\sin 45^\circ$?,$\sin 45^\circ=\frac{\sqrt{2}}{2}$.
+0082,Ile wynosi $\cos 45^\circ$?,$\cos 45^\circ=\frac{\sqrt{2}}{2}$.
+0083,Ile wynosi $\tg 45^\circ$?,$\tg 45^\circ=1$.
+0084,Ile wynosi $\sin 60^\circ$?,$\sin 60^\circ=\frac{\sqrt{3}}{2}$.
+0085,Ile wynosi $\cos 60^\circ$?,$\cos 60^\circ=\frac{1}{2}$.
+0086,Ile wynosi $\tg 60^\circ$?,$\tg 60^\circ=\sqrt{3}$.
+0087,Ile wynosi $\sin 90^\circ$?,$\sin 90^\circ=1$.
+0088,Ile wynosi $\cos 90^\circ$?,$\cos 90^\circ=0$.
+0089,Czy istnieje $\tg 90^\circ$?,$\tg 90^\circ$ nie istnieje.
+0090,Jaki jest podstawowy związek między $\sin \alpha$ i $\cos \alpha$?,Zachodzi $\sin^2\alpha+\cos^2\alpha=1$.
+0091,"Jaki jest związek między $\tg \alpha$, $\sin \alpha$ i $\cos \alpha$?","Zachodzi $\tg \alpha=\frac{\sin \alpha}{\cos \alpha}$, gdy wyrażenie jest określone."
+0092,Kiedy wzór $\tg \alpha=\frac{\sin \alpha}{\cos \alpha}$ nie może być użyty?,"Tego wzoru nie używamy, gdy $\cos \alpha=0$."
+0093,Jak oznaczamy połowę obwodu trójkąta $ABC$?,Połowę obwodu oznaczamy przez $p$ i obliczamy ze wzoru $p=\frac{a+b+c}{2}$.
+0094,Jak brzmi twierdzenie Pitagorasa dla trójkąta $ABC$ z kątem prostym $\gamma$?,"Jeżeli kąt $\gamma$ jest prosty, to $a^2+b^2=c^2$."
+0095,Jak brzmi twierdzenie odwrotne do twierdzenia Pitagorasa?,"Jeżeli w trójkącie $ABC$ zachodzi $a^2+b^2=c^2$, to kąt $\gamma$ jest kątem prostym."
+0096,Jaki jest wzór z twierdzenia cosinusów dla boku $a$?,$a^2=b^2+c^2-2bc\cdot \cos \alpha$.
+0097,Jaki jest wzór z twierdzenia cosinusów dla boku $b$?,$b^2=a^2+c^2-2ac\cdot \cos \beta$.
+0098,Jaki jest wzór z twierdzenia cosinusów dla boku $c$?,$c^2=a^2+b^2-2ab\cdot \cos \gamma$.
+0099,Jaki jest wzór na pole trójkąta z podstawą $a$ i wysokością $h_a$?,$P_{\Delta ABC}=\frac{1}{2}a\cdot h_a$.
+0100,Jaki jest wzór na pole trójkąta z podstawą $b$ i wysokością $h_b$?,$P_{\Delta ABC}=\frac{1}{2}b\cdot h_b$.
+0101,Jaki jest wzór na pole trójkąta z podstawą $c$ i wysokością $h_c$?,$P_{\Delta ABC}=\frac{1}{2}c\cdot h_c$.
+0102,"Jaki jest wzór na pole trójkąta z bokami $a$, $b$ i kątem $\gamma$ między nimi?",$P_{\Delta ABC}=\frac{1}{2}ab\cdot \sin \gamma$.
+0103,"Jaki jest wzór na pole trójkąta z bokami $b$, $c$ i kątem $\alpha$ między nimi?",$P_{\Delta ABC}=\frac{1}{2}bc\cdot \sin \alpha$.
+0104,"Jaki jest wzór na pole trójkąta z bokami $c$, $a$ i kątem $\beta$ między nimi?",$P_{\Delta ABC}=\frac{1}{2}ca\cdot \sin \beta$.
+0105,"Jaki jest wzór na wysokość $h_c$ w trójkącie prostokątnym z bokami $a,b,c$?",$h_c=\frac{ab}{c}$.
+0106,Jaki jest wzór na promień $R$ okręgu opisanego na trójkącie prostokątnym?,$R=\frac{1}{2}c$.
+0107,Jak można wyrazić bok $a$ przez przeciwprostokątną $c$ i kąt $\alpha$ w trójkącie prostokątnym?,$a=c\cdot \sin \alpha$.
+0108,Jak można wyrazić bok $a$ przez przeciwprostokątną $c$ i kąt $\beta$ w trójkącie prostokątnym?,$a=c\cdot \cos \beta$.
+0109,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\alpha$ w trójkącie prostokątnym?,$a=b\cdot \tg \alpha$.
+0110,Jak można wyrazić bok $a$ przez bok $b$ i kąt $\beta$ w trójkącie prostokątnym?,$a=b\cdot \frac{1}{\tg \beta}$.
+0111,Jaki jest wzór na wysokość trójkąta równobocznego o boku $a$?,$h=\frac{a\sqrt{3}}{2}$.
+0112,Jaki jest wzór na pole trójkąta równobocznego o boku $a$?,$P_{\Delta}=\frac{a^2\sqrt{3}}{4}$.
+0113,Jaki jest wzór na promień $r$ okręgu wpisanego w trójkąt równoboczny?,$r=\frac{1}{3}h$.
+0114,Jaki jest wzór na promień $R$ okręgu opisanego na trójkącie równobocznym?,$R=\frac{2}{3}h$.
+0115,Na czym polega cecha podobieństwa trójkątów „bok–bok–bok”?,"Długości boków jednego trójkąta są proporcjonalne do odpowiednich długości boków drugiego, np. $\frac{|AB|}{|KL|}=\frac{|BC|}{|LM|}=\frac{|CA|}{|MK|}$."
+0116,Na czym polega cecha podobieństwa trójkątów „bok–kąt–bok”?,"Dwie pary odpowiednich boków są proporcjonalne, a kąty między nimi są przystające, np. $\frac{|AB|}{|KL|}=\frac{|AC|}{|KM|}$ oraz $|\angle BAC|=|\angle LKM|$."
+0117,Na czym polega cecha podobieństwa trójkątów „kąt–kąt–kąt”?,"Odpowiednie kąty obu trójkątów są przystające, np. $|\angle BAC|=|\angle LKM|$, $|\angle ABC|=|\angle KLM|$ oraz $|\angle ACB|=|\angle KML|$."
+0118,"Jaki związek daje twierdzenie Talesa, gdy proste $AC$ i $BD$ są równoległe?","Jeżeli $AC \parallel BD$, to $\frac{|AB|}{|PA|}=\frac{|CD|}{|PC|}$."
+0119,Jaki jest wzór na pole koła o promieniu $r$?,Pole koła wynosi $P=\pi r^2$.
+0120,Jaki jest wzór na obwód koła o promieniu $r$?,Obwód koła wynosi $L=2\pi r$.
+0121,Jaki jest wzór na pole wycinka koła o promieniu $r$ i kącie środkowym $\alpha$ w stopniach?,Pole wycinka wynosi $P=\frac{\alpha}{360^\circ}\cdot \pi r^2$.
+0122,Jaki jest wzór na długość łuku wycinka koła o promieniu $r$ i kącie środkowym $\alpha$ w stopniach?,Długość łuku wynosi $L=\frac{\alpha}{360^\circ}\cdot 2\pi r$.
+0123,Jaka jest zależność między kątem wpisanym i środkowym opartymi na tym samym łuku?,Miara kąta wpisanego jest równa połowie miary kąta środkowego opartego na tym samym łuku.
+0124,Jaki jest szczególny przypadek kąta wpisanego opartego na półokręgu?,Kąt wpisany oparty na półokręgu jest kątem prostym.
+0125,Co wiadomo o kątach wpisanych opartych na tym samym łuku?,Miary kątów wpisanych opartych na tym samym łuku są równe.
+0126,Jaki jest wzór z twierdzenia o odcinkach stycznych?,"Jeżeli styczne do okręgu w punktach $A$ i $B$ przecinają się w punkcie $P$, to $|PA|=|PB|$."
+0127,Czym jest trapez?,"Trapez to czworokąt, który ma co najmniej jedną parę boków równoległych."
+0128,Jaki jest wzór na pole trapezu?,Pole trapezu wynosi $P=\frac{a+b}{2}\cdot h$.
+0129,Czym jest równoległobok?,"Równoległobok to czworokąt, który ma dwie pary boków równoległych."
+0130,Jaki jest wzór na pole równoległoboku z podstawą $a$ i wysokością $h$?,Pole równoległoboku wynosi $P=ah$.
+0131,"Jaki jest wzór na pole równoległoboku z bokami $a,b$ i kątem $\alpha$?",Pole równoległoboku wynosi $P=a\cdot b\cdot \sin \alpha$.
+0132,"Jaki jest wzór na pole równoległoboku z przekątnymi $AC$, $BD$ i kątem $\gamma$ między nimi?",Pole równoległoboku wynosi $P=\frac{1}{2}\cdot |AC|\cdot |BD|\cdot \sin \gamma$.
+0133,Czym jest romb?,"Romb to czworokąt, który ma wszystkie boki jednakowej długości."
+0134,Jaki jest wzór na pole rombu z bokiem $a$ i wysokością $h$?,Pole rombu wynosi $P=ah$.
+0135,Jaki jest wzór na pole rombu z bokiem $a$ i kątem $\alpha$?,Pole rombu wynosi $P=a^2\cdot \sin \alpha$.
+0136,Jaki jest wzór na pole rombu z przekątnymi $AC$ i $BD$?,Pole rombu wynosi $P=\frac{1}{2}\cdot |AC|\cdot |BD|$.
+0137,Jaki jest związek pól figur podobnych w skali $k$?,"Jeżeli figura $\mathcal{B}$ o polu $P_{\mathcal{B}}$ jest podobna do figury $\mathcal{A}$ o polu $P_{\mathcal{A}}\ne 0$ w skali $k$, to $\frac{P_{\mathcal{B}}}{P_{\mathcal{A}}}=k^2$."
+0138,"Jaki jest wzór na długość odcinka $AB$ o końcach $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$?",Długość odcinka wynosi $|AB|=\sqrt{(x_B-x_A)^2+(y_B-y_A)^2}$.
+0139,Jaki jest wzór na współrzędną $x_S$ środka odcinka $AB$?,"Jeżeli $S=(x_S,y_S)$ jest środkiem odcinka o końcach $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$, to $x_S=\frac{x_A+x_B}{2}$."
+0140,Jaki jest wzór na współrzędną $y_S$ środka odcinka $AB$?,"Jeżeli $S=(x_S,y_S)$ jest środkiem odcinka o końcach $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$, to $y_S=\frac{y_A+y_B}{2}$."
+0141,Kiedy prostą można opisać równaniem kierunkowym?,"Jeżeli prosta nie jest równoległa do osi $Oy$, to można ją opisać równaniem kierunkowym $y=ax+b$."
+0142,Co oznacza liczba $a$ w równaniu kierunkowym prostej $y=ax+b$?,Liczba $a$ jest współczynnikiem kierunkowym prostej.
+0143,Jaki jest związek współczynnika kierunkowego $a$ z kątem $\alpha$?,Zachodzi $a=\tg\alpha$.
+0144,W jakim punkcie prosta $y=ax+b$ przecina oś $Oy$?,"Prosta $y=ax+b$ przecina oś $Oy$ w punkcie $(0,b)$."
+0145,"Jakie jest równanie kierunkowe prostej o współczynniku kierunkowym $a$, przechodzącej przez punkt $P=(x_0,y_0)$?",Równanie tej prostej ma postać $y=a(x-x_0)+y_0$.
+0146,"Jakie jest równanie kierunkowe prostej przechodzącej przez punkty $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$?","Równanie ma postać $y-y_A=a(x-x_A)$, gdzie $a=\frac{y_B-y_A}{x_B-x_A}$ przy warunku $x_B\ne x_A$."
+0147,Jaką postać ma równanie ogólne prostej?,"Równanie ogólne prostej ma postać $Ax+By+C=0$, gdzie $A,B,C\in\mathbb{R}$ oraz $A^2+B^2\ne0$."
+0148,Co wynika z warunku $A=0$ w równaniu ogólnym prostej $Ax+By+C=0$?,"Jeżeli $A=0$, to prosta jest równoległa do osi $Ox$."
+0149,Co wynika z warunku $B=0$ w równaniu ogólnym prostej $Ax+By+C=0$?,"Jeżeli $B=0$, to prosta jest równoległa do osi $Oy$."
+0150,Co wynika z warunku $C=0$ w równaniu ogólnym prostej $Ax+By+C=0$?,"Jeżeli $C=0$, to prosta przechodzi przez początek układu współrzędnych."
+0151,"Jakie jest równanie ogólne prostej przechodzącej przez punkty $A=(x_A,y_A)$ oraz $B=(x_B,y_B)$?",Równanie ma postać $(y-y_A)(x_B-x_A)-(y_B-y_A)(x-x_A)=0$.
+0152,Kiedy dwie proste w postaci kierunkowej $y=a_1x+b_1$ oraz $y=a_2x+b_2$ są równoległe?,"Dwie takie proste są równoległe wtedy i tylko wtedy, gdy $a_1=a_2$."
+0153,Kiedy dwie proste w postaci ogólnej $A_1x+B_1y+C_1=0$ oraz $A_2x+B_2y+C_2=0$ są równoległe?,"Dwie takie proste są równoległe wtedy i tylko wtedy, gdy $A_1B_2-A_2B_1=0$."
+0154,"Jakie jest równanie okręgu o środku $S=(a,b)$ i promieniu $r>0$ w postaci kanonicznej?",Równanie kanoniczne okręgu ma postać $(x-a)^2+(y-b)^2=r^2$.
+0155,"Jak symetria osiowa względem osi $Ox$ przekształca punkt $P=(x,y)$?","Symetria względem osi $Ox$ przekształca punkt $P=(x,y)$ na punkt $P'=(x,-y)$."
+0156,"Jak symetria osiowa względem osi $Oy$ przekształca punkt $P=(x,y)$?","Symetria względem osi $Oy$ przekształca punkt $P=(x,y)$ na punkt $P'=(-x,y)$."
+0157,"Jak symetria środkowa względem początku układu współrzędnych przekształca punkt $P=(x,y)$?","Symetria środkowa względem początku układu współrzędnych przekształca punkt $P=(x,y)$ na punkt $P'=(-x,-y)$."
+0158,Co oznacza $P_c$ w dziale stereometrii?,Symbol $P_c$ oznacza pole powierzchni całkowitej.
+0159,Co oznacza $P_b$ w dziale stereometrii?,Symbol $P_b$ oznacza pole powierzchni bocznej.
+0160,Co oznacza $P_p$ w dziale stereometrii?,Symbol $P_p$ oznacza pole podstawy.
+0161,Co oznacza $V$ w dziale stereometrii?,Symbol $V$ oznacza objętość.
+0162,Jaki jest wzór na pole powierzchni całkowitej prostopadłościanu?,"Jeżeli $a,b,c$ są długościami krawędzi prostopadłościanu, to $P_c=2(ab+bc+ca)$."
+0163,Jaki jest wzór na objętość prostopadłościanu?,"Jeżeli $a,b,c$ są długościami krawędzi prostopadłościanu, to $V=abc$."
+0164,Jaki jest wzór na pole powierzchni bocznej graniastosłupa prostego?,"Pole powierzchni bocznej graniastosłupa prostego wynosi $P_b=O_b\cdot h$, gdzie $O_b$ jest obwodem podstawy, a $h$ wysokością graniastosłupa."
+0165,Jaki jest wzór na objętość graniastosłupa prostego?,"Objętość graniastosłupa prostego wynosi $V=P_p\cdot h$, gdzie $P_p$ jest polem podstawy, a $h$ wysokością graniastosłupa."
+0166,Jaki jest wzór na objętość ostrosłupa?,"Objętość ostrosłupa wynosi $V=\frac{1}{3}\cdot P_p\cdot h$, gdzie $h$ jest wysokością ostrosłupa."
+0167,Jaki jest wzór na pole powierzchni bocznej walca?,Pole powierzchni bocznej walca wynosi $P_b=2\pi rh$.
+0168,Jaki jest wzór na pole powierzchni całkowitej walca?,Pole powierzchni całkowitej walca wynosi $P_c=2\pi r(r+h)$.
+0169,Jaki jest wzór na objętość walca?,Objętość walca wynosi $V=\pi r^2h$.
+0170,Co oznacza $r$ we wzorach na walec?,Symbol $r$ oznacza promień podstawy walca.
+0171,Co oznacza $h$ we wzorach na walec?,Symbol $h$ oznacza wysokość walca.
+0172,Jaki jest wzór na pole powierzchni bocznej stożka?,Pole powierzchni bocznej stożka wynosi $P_b=\pi rl$.
+0173,Jaki jest wzór na pole powierzchni całkowitej stożka?,Pole powierzchni całkowitej stożka wynosi $P_c=\pi r(r+l)$.
+0174,Jaki jest wzór na objętość stożka?,Objętość stożka wynosi $V=\frac{1}{3}\pi r^2h$.
+0175,Co oznacza $r$ we wzorach na stożek?,Symbol $r$ oznacza promień podstawy stożka.
+0176,Co oznacza $h$ we wzorach na stożek?,Symbol $h$ oznacza wysokość stożka.
+0177,Co oznacza $l$ we wzorach na stożek?,Symbol $l$ oznacza tworzącą stożka.
+0178,Jaki jest wzór na pole powierzchni całkowitej kuli?,Pole powierzchni całkowitej kuli wynosi $P_c=4\pi r^2$.
+0179,Jaki jest wzór na objętość kuli?,Objętość kuli wynosi $V=\frac{4}{3}\pi r^3$.
+0180,Co oznacza $r$ we wzorach na kulę?,Symbol $r$ oznacza promień kuli.
+0181,Jakie ograniczenie spełnia prawdopodobieństwo dowolnego zdarzenia $A\subset\Omega$?,Dla każdego zdarzenia $A\subset\Omega$ zachodzi $0\le P(A)\le 1$.
+0182,Ile wynosi prawdopodobieństwo zdarzenia niemożliwego $\emptyset$?,Zachodzi $P(\emptyset)=0$.
+0183,Ile wynosi prawdopodobieństwo zdarzenia pewnego $\Omega$?,Zachodzi $P(\Omega)=1$.
+0184,"Jaka zależność zachodzi, gdy $A\subset B\subset\Omega$?","Dla zdarzeń $A$ oraz $B$ takich, że $A\subset B\subset\Omega$, zachodzi $P(A)\le P(B)$."
+0185,Jaki jest wzór na prawdopodobieństwo zdarzenia przeciwnego $A'$?,Dla zdarzenia $A\subset\Omega$ zachodzi $P(A')=1-P(A)$.
+0186,Jaki jest wzór na prawdopodobieństwo sumy dwóch zdarzeń $A\cup B$?,"Dla zdarzeń $A,B\subset\Omega$ zachodzi $P(A\cup B)=P(A)+P(B)-P(A\cap B)$."
+0187,Jak oszacować prawdopodobieństwo sumy dwóch zdarzeń $A\cup B$?,"Dla zdarzeń $A,B\subset\Omega$ zachodzi $P(A\cup B)\le P(A)+P(B)$."
+0188,Jak brzmi klasyczna definicja prawdopodobieństwa?,"Jeżeli $\Omega$ jest niepustym skończonym zbiorem wszystkich zdarzeń elementarnych i wszystkie zdarzenia jednoelementowe są jednakowo prawdopodobne, to $P(A)=\frac{|A|}{|\Omega|}$."
+0189,Co oznacza $|A|$ we wzorze $P(A)=\frac{|A|}{|\Omega|}$?,Symbol $|A|$ oznacza liczbę zdarzeń elementarnych sprzyjających zdarzeniu losowemu $A$.
+0190,Co oznacza $|\Omega|$ we wzorze $P(A)=\frac{|A|}{|\Omega|}$?,Symbol $|\Omega|$ oznacza liczbę elementów zbioru $\Omega$.
+0191,"Jaki jest wzór na średnią arytmetyczną liczb $a_1,a_2,\ldots,a_n$?",Średnia arytmetyczna wynosi $\bar{a}=\frac{a_1+a_2+\ldots+a_n}{n}$.
+0192,"Jaki jest wzór na średnią ważoną liczb $a_1,a_2,\ldots,a_n$ z wagami $w_1,w_2,\ldots,w_n$?",Średnia ważona wynosi $\bar{s}=\frac{w_1a_1+w_2a_2+\ldots+w_na_n}{w_1+w_2+\ldots+w_n}$.
+0193,Jak wyznaczamy medianę dla nieparzystej liczby danych?,"Dla uporządkowanego niemalejąco zbioru $n$ danych, gdy $n$ jest nieparzyste, medianą jest $a_{\frac{n+1}{2}}$."
+0194,Jak wyznaczamy medianę dla parzystej liczby danych?,"Dla uporządkowanego niemalejąco zbioru $n$ danych, gdy $n$ jest parzyste, medianą jest $\frac{1}{2}\left(a_{\frac{n}{2}}+a_{\frac{n}{2}+1}\right)$."
+0195,Co mówi reguła dodawania w kombinatoryce?,"Jeżeli można wybrać jedną z kilku rozłącznych możliwości, to liczby możliwości dodajemy, np. $m+n$."
+0196,Kiedy stosujemy regułę dodawania?,"Gdy wybieramy albo jedną możliwość, albo drugą, a przypadki się nie pokrywają."
+0197,Co mówi reguła mnożenia w kombinatoryce?,"Jeżeli wybór składa się z kolejnych etapów, to liczby możliwości mnożymy, np. $m \cdot n$."
+0198,Kiedy stosujemy regułę mnożenia?,"Gdy wykonujemy kilka wyborów po kolei, np. wybór cyfry setek, potem dziesiątek, potem jedności."
+0199,Jak odróżnić regułę dodawania od reguły mnożenia?,"Dodawanie odpowiada sytuacji „lub”, a mnożenie sytuacji „i potem”."
+0200,Dlaczego przypadki w regule dodawania muszą być rozłączne?,Bo inaczej ten sam wynik może zostać policzony więcej niż raz.
+0201,Jak liczyć zadania z cyframi w kombinatoryce?,Dzielimy problem na miejsca i mnożymy liczbę możliwości na każdym miejscu.
+0202,"Czy na podstawie trzeba znać permutacje, kombinacje i wariacje?",Nie. Na poziomie podstawowym zwykle wystarcza reguła dodawania i reguła mnożenia.
+0203,Czym jest dominanta?,"To wartość, która występuje najczęściej w zbiorze danych."
+0204,Co jeśli są dwie dominanty?,"Zestaw ma dwie dominanty, jeśli dwie wartości występują najczęściej i mają tę samą największą liczebność."
+0205,Czy zawsze istnieje dominanta?,"Nie. Dominanta nie istnieje, jeśli wszystkie wartości występują tyle samo razy."
+0206,Jak znaleźć dominantę?,Szukamy wartości z największą liczebnością.
+0207,Czym jest punkt przecięcia dwóch prostych?,"To punkt, który spełnia oba równania prostych."
+0208,Jak znaleźć punkt przecięcia dwóch prostych?,Rozwiązujemy układ równań tych dwóch prostych.
+0209,Jak znaleźć punkt przecięcia prostych $y=a_1x+b_1$ i $y=a_2x+b_2$?,"Rozwiązujemy równanie $a_1x+b_1=a_2x+b_2$, a potem podstawiamy wyznaczone $x$ do jednego z równań prostych."
+0210,Kiedy proste nie mają punktu wspólnego?,"Gdy mają ten sam współczynnik kierunkowy i różne wyrazy wolne, czyli są równoległe i różne."
+0211,Kiedy proste mają nieskończenie wiele punktów wspólnych?,Gdy są tą samą prostą.
+0212,Czym jest nierówność kwadratowa?,"To nierówność typu $ax^2+bx+c>0$, $ax^2+bx+c<0$, $ax^2+bx+c \ge 0$ albo $ax^2+bx+c \le 0$, gdzie $a \ne 0$."
+0213,Jak rozwiązuje się nierówność kwadratową?,Wyznaczamy miejsca zerowe funkcji kwadratowej i badamy znak paraboli na przedziałach.
+0214,Jak znak współczynnika $a$ wpływa na wykres funkcji kwadratowej?,"Jeśli $a>0$, ramiona paraboli są skierowane w górę. Jeśli $a<0$, ramiona paraboli są skierowane w dół."
+0215,Jak rozwiązać nierówność $ax^2+bx+c>0$ gdy $a>0$?,"Jeśli są dwa miejsca zerowe $x_1$ i $x_2$, rozwiązaniem są przedziały poza miejscami zerowymi: $(-\infty,x_1) \cup (x_2,\infty)$."
+0216,Jak rozwiązać nierówność $ax^2+bx+c<0$ gdy $a>0$?,"Jeśli są dwa miejsca zerowe $x_1$ i $x_2$, rozwiązaniem jest przedział między miejscami zerowymi: $(x_1,x_2)$."
+0217,Co oznacza $\Delta=0$ w nierówności kwadratowej?,Funkcja ma jedno miejsce zerowe i nie zmienia znaku po jego obu stronach.
+0218,Co oznacza $\Delta<0$ w nierówności kwadratowej?,Funkcja nie ma miejsc zerowych i ma stały znak zależny od współczynnika $a$.
+0219,Czym jest zadanie optymalizacyjne?,"To zadanie, w którym szukamy największej albo najmniejszej wartości pewnej funkcji."
+0220,Gdzie funkcja kwadratowa ma ekstremum?,Funkcja kwadratowa ma ekstremum w wierzchołku paraboli.
+0221,Kiedy funkcja kwadratowa ma minimum?,"Funkcja kwadratowa ma minimum, gdy $a>0$."
+0222,Kiedy funkcja kwadratowa ma maksimum?,"Funkcja kwadratowa ma maksimum, gdy $a<0$."
+0223,Jak rozwiązywać optymalizację funkcją kwadratową na przedziale?,"Sprawdzamy wartość funkcji na końcach przedziału oraz w wierzchołku, jeśli wierzchołek należy do tego przedziału."
+0224,"Jak sprawdzić, czy ciąg jest arytmetyczny?","Sprawdzamy, czy różnica $a_{n+1}-a_n$ jest stała."
+0225,Czym jest różnica ciągu arytmetycznego?,"To stała liczba $r$, dla której $a_{n+1}-a_n=r$."
+0226,"Jak sprawdzić, czy ciąg jest geometryczny?","Sprawdzamy, czy iloraz $\frac{a_{n+1}}{a_n}$ jest stały dla wyrazów $a_n \ne 0$."
+0227,Czym jest iloraz ciągu geometrycznego?,"To stała liczba $q$, dla której $\frac{a_{n+1}}{a_n}=q$."
+0228,Kiedy ciąg jest rosnący?,"Ciąg jest rosnący, gdy $a_{n+1}>a_n$ dla każdego rozpatrywanego $n$."
+0229,Kiedy ciąg jest malejący?,"Ciąg jest malejący, gdy $a_{n+1}<a_n$ dla każdego rozpatrywanego $n$."
+0230,Jak badać monotoniczność ciągu?,Analizujemy znak różnicy $a_{n+1}-a_n$.
+0231,Jak monotoniczność ciągu arytmetycznego zależy od $r$?,"Jeśli $r>0$, ciąg jest rosnący. Jeśli $r<0$, ciąg jest malejący. Jeśli $r=0$, ciąg jest stały."
+0232,Jakie są wartości funkcji trygonometrycznych dla $180^\circ$?,"Mamy $\sin 180^\circ=0$, $\cos 180^\circ=-1$ oraz $\operatorname{tg} 180^\circ=0$."
+0233,Czym jest wielokąt foremny?,"To wielokąt, który ma wszystkie boki równe i wszystkie kąty równe."
+0234,Ile wynosi suma kątów wewnętrznych $n$-kąta?,Suma kątów wewnętrznych $n$-kąta wynosi $(n-2) \cdot 180^\circ$.
+0235,Ile wynosi kąt wewnętrzny $n$-kąta foremnego?,Kąt wewnętrzny $n$-kąta foremnego ma miarę $\frac{(n-2) \cdot 180^\circ}{n}$.
+0236,Ile wynosi kąt zewnętrzny $n$-kąta foremnego?,Kąt zewnętrzny $n$-kąta foremnego ma miarę $\frac{360^\circ}{n}$.
+0237,Ile wynosi kąt środkowy $n$-kąta foremnego?,Kąt środkowy $n$-kąta foremnego ma miarę $\frac{360^\circ}{n}$.
+0238,Czym jest kąt między prostą a płaszczyzną?,To kąt między prostą a jej rzutem prostokątnym na tę płaszczyznę.
+0239,Jaki kąt tworzy prosta prostopadła do płaszczyzny?,Prosta prostopadła do płaszczyzny tworzy z nią kąt $90^\circ$.
+0240,Jaki kąt tworzy prosta równoległa do płaszczyzny?,Prosta równoległa do płaszczyzny tworzy z nią kąt $0^\circ$.
+0241,Czym jest kąt dwuścienny?,"To kąt między dwiema półpłaszczyznami, czyli w praktyce np. kąt między dwiema ścianami bryły."
+0242,Jak liczyć przekątną prostopadłościanu?,Przekątną prostopadłościanu liczymy ze wzoru $d=\sqrt{a^2+b^2+c^2}$.
+0243,Jak liczyć przekątną sześcianu?,Przekątną sześcianu liczymy ze wzoru $d=a\sqrt{3}$.
+0244,Jak liczyć przekątną ściany sześcianu?,Przekątną ściany sześcianu liczymy ze wzoru $d=a\sqrt{2}$.
+0245,"Jeżeli każdy wymiar sześcianu zwiększymy $2$ razy, jak zmieni się długość jego krawędzi?",Długość krawędzi zwiększy się $2$ razy. To jest skala podobieństwa długości: $k=2$.
+0246,"Jeżeli każdy wymiar sześcianu zwiększymy $2$ razy, jak zmieni się pole jednej ściany?","Pole jednej ściany zwiększy się $2^2=4$ razy, bo pole zależy od dwóch wymiarów: długości i szerokości."
+0247,"Jeżeli każdy wymiar sześcianu zwiększymy $2$ razy, jak zmieni się jego objętość?","Objętość zwiększy się $2^3=8$ razy, bo objętość zależy od trzech wymiarów: długości, szerokości i wysokości."
+0248,Bryła $B$ jest podobna do bryły $A$ w skali $k=3$. Ile razy większe są odpowiadające sobie długości?,"Odpowiadające sobie długości są $3$ razy większe, bo długości zmieniają się w skali $k$."
+0249,Bryła $B$ jest podobna do bryły $A$ w skali $k=3$. Ile razy większe są odpowiadające sobie pola powierzchni?,"Odpowiadające sobie pola są $3^2=9$ razy większe, bo pola zmieniają się w skali $k^2$."
+0250,Bryła $B$ jest podobna do bryły $A$ w skali $k=3$. Ile razy większe są objętości?,"Objętości są $3^3=27$ razy większe, bo objętości zmieniają się w skali $k^3$."
+0251,Dwie podobne bryły mają skalę podobieństwa długości $k=4$. Jaką skalę mają ich pola i objętości?,"Pola są w skali $k^2=4^2=16$, a objętości w skali $k^3=4^3=64$."
+0252,Objętości dwóch podobnych brył są w stosunku $8:1$. Jaka jest skala podobieństwa długości?,"Skoro objętości są w stosunku $8:1$, to $k^3=8$, więc $k=2$."
+0253,Objętości dwóch podobnych brył są w stosunku $27:1$. W jakim stosunku są ich pola powierzchni?,"Najpierw liczymy skalę długości: $k^3=27$, więc $k=3$. Pola są w stosunku $k^2=9$, czyli $9:1$."
+0254,Pola powierzchni dwóch podobnych brył są w stosunku $16:1$. W jakim stosunku są ich objętości?,"Najpierw liczymy skalę długości: $k^2=16$, więc $k=4$. Objętości są w stosunku $k^3=64$, czyli $64:1$."
+0255,Jak brzmi twierdzenie o dwusiecznej kąta w trójkącie?,"Jeżeli dwusieczna kąta przy wierzchołku $C$ przecina bok $AB$ w punkcie $D$, to $\frac{|AD|}{|BD|}=\frac{|AC|}{|BC|}$."
+0256,Jaki jest wzór na wysokość trójkąta prostokątnego opuszczoną na przeciwprostokątną?,"Jeżeli $D$ jest spodkiem wysokości opuszczonej z wierzchołka kąta prostego na przeciwprostokątną, to $h_c=\sqrt{|AD|\cdot|DB|}$."
+0257,Jaki jest wzór na promień okręgu wpisanego w trójkąt prostokątny?,"Dla przyprostokątnych $a$, $b$ i przeciwprostokątnej $c$ promień okręgu wpisanego wynosi $r=\frac{a+b-c}{2}$."
+0258,"Trójkąt ma wierzchołki $A=(x_A,y_A)$, $B=(x_B,y_B)$, $C=(x_C,y_C)$. Jak obliczyć współrzędne środka ciężkości $S$?","Środek ciężkości ma współrzędne $S=\left(\frac{x_A+x_B+x_C}{3},\frac{y_A+y_B+y_C}{3}\right)$."
