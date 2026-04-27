@@ -826,7 +826,7 @@ export function GuidedCoachmarkLayer({
         ) : null}
         {shouldRenderFullscreenBlocker ? (
           <Pressable
-            style={StyleSheet.absoluteFill}
+            style={[StyleSheet.absoluteFill, styles.blocker]}
             onPress={triggerBubbleShake}
           />
         ) : null}
@@ -985,13 +985,18 @@ const styles = StyleSheet.create({
   blocker: {
     position: "absolute",
     backgroundColor: "transparent",
+    zIndex: 10,
+    elevation: 10,
   },
   bubbleHost: {
-    position: "relative",
+    ...StyleSheet.absoluteFillObject,
+    zIndex: 80,
+    elevation: 80,
   },
   bubbleWrap: {
     position: "absolute",
     zIndex: 50,
+    elevation: 50,
   },
   indicatorBubble: {
     position: "absolute",

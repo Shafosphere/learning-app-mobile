@@ -103,6 +103,7 @@ export default function LogoMessage({
   const resolvedTitle = title ?? copy?.title ?? "";
   const resolvedDescription = description ?? copy?.description ?? "";
   const isCenteredIntro = layoutVariant === "centered_intro";
+  const hasNavigation = Boolean(onPrevious || onNext);
   const layoutProgress = useSharedValue(isCenteredIntro ? 1 : 0);
 
   React.useEffect(() => {
@@ -141,89 +142,97 @@ export default function LogoMessage({
   }));
 
   return (
-    <Animated.View
+    <View
       style={[
-        styles.container,
+        styles.messageShell,
+        hasNavigation && styles.messageShellWithNavigation,
         floating && styles.floating,
         floating && offset,
-        containerAnimatedStyle,
         style,
       ]}
       pointerEvents={floating ? "auto" : undefined}
       onLayout={onLayout}
-      accessible
-      accessibilityRole="text"
+      accessible={false}
     >
-      <Animated.Image
-        source={LOGO_SOURCE}
-        style={[styles.logo, logoAnimatedStyle]}
-      />
-      {typeof maxBodyHeight === "number" ? (
-        <ScrollView
-          style={[
-            styles.textWrapper,
-            styles.textWrapperCenteredIntro,
-            textWrapperAnimatedStyle,
-            { maxHeight: maxBodyHeight },
-          ]}
-          contentContainerStyle={[
-            styles.textContent,
-            styles.textContentCenteredIntro,
-          ]}
-          showsVerticalScrollIndicator={false}
-        >
-          {resolvedTitle ? (
-            <Animated.Text
-              style={[styles.title, styles.titleCenteredIntro, titleAnimatedStyle]}
-            >
-              {resolvedTitle}
-            </Animated.Text>
-          ) : null}
-          {resolvedDescription ? (
-            <Animated.Text
-              style={[
-                styles.description,
-                styles.descriptionCenteredIntro,
-                descriptionAnimatedStyle,
-              ]}
-            >
-              {resolvedDescription}
-            </Animated.Text>
-          ) : null}
-        </ScrollView>
-      ) : (
-        <Animated.View
-          style={[
-            styles.textWrapper,
-            isCenteredIntro ? styles.textWrapperCenteredIntro : null,
-            textWrapperAnimatedStyle,
-          ]}
-        >
-          {resolvedTitle ? (
-            <Animated.Text
-              style={[
-                styles.title,
-                isCenteredIntro ? styles.titleCenteredIntro : null,
-                titleAnimatedStyle,
-              ]}
-            >
-              {resolvedTitle}
-            </Animated.Text>
-          ) : null}
-          {resolvedDescription ? (
-            <Animated.Text
-              style={[
-                styles.description,
-                isCenteredIntro ? styles.descriptionCenteredIntro : null,
-                descriptionAnimatedStyle,
-              ]}
-            >
-              {resolvedDescription}
-            </Animated.Text>
-          ) : null}
-        </Animated.View>
-      )}
-      {(onPrevious || onNext) ? (
+      <Animated.View
+        style={[
+          styles.container,
+          containerAnimatedStyle,
+        ]}
+        accessible
+        accessibilityRole="text"
+      >
+        <Animated.Image
+          source={LOGO_SOURCE}
+          style={[styles.logo, logoAnimatedStyle]}
+        />
+        {typeof maxBodyHeight === "number" ? (
+          <ScrollView
+            style={[
+              styles.textWrapper,
+              styles.textWrapperCenteredIntro,
+              textWrapperAnimatedStyle,
+              { maxHeight: maxBodyHeight },
+            ]}
+            contentContainerStyle={[
+              styles.textContent,
+              styles.textContentCenteredIntro,
+            ]}
+            showsVerticalScrollIndicator={false}
+          >
+            {resolvedTitle ? (
+              <Animated.Text
+                style={[styles.title, styles.titleCenteredIntro, titleAnimatedStyle]}
+              >
+                {resolvedTitle}
+              </Animated.Text>
+            ) : null}
+            {resolvedDescription ? (
+              <Animated.Text
+                style={[
+                  styles.description,
+                  styles.descriptionCenteredIntro,
+                  descriptionAnimatedStyle,
+                ]}
+              >
+                {resolvedDescription}
+              </Animated.Text>
+            ) : null}
+          </ScrollView>
+        ) : (
+          <Animated.View
+            style={[
+              styles.textWrapper,
+              isCenteredIntro ? styles.textWrapperCenteredIntro : null,
+              textWrapperAnimatedStyle,
+            ]}
+          >
+            {resolvedTitle ? (
+              <Animated.Text
+                style={[
+                  styles.title,
+                  isCenteredIntro ? styles.titleCenteredIntro : null,
+                  titleAnimatedStyle,
+                ]}
+              >
+                {resolvedTitle}
+              </Animated.Text>
+            ) : null}
+            {resolvedDescription ? (
+              <Animated.Text
+                style={[
+                  styles.description,
+                  isCenteredIntro ? styles.descriptionCenteredIntro : null,
+                  descriptionAnimatedStyle,
+                ]}
+              >
+                {resolvedDescription}
+              </Animated.Text>
+            ) : null}
+          </Animated.View>
+        )}
+      </Animated.View>
+      {hasNavigation ? (
         <View style={styles.navRow}>
           <Pressable
             accessibilityRole="button"
@@ -267,6 +276,6 @@ export default function LogoMessage({
           </Pressable>
         </View>
       ) : null}
-    </Animated.View>
+    </View>
   );
 }

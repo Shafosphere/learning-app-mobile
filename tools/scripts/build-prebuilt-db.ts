@@ -106,8 +106,8 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_europy",
     name: "Flagi Europy",
-    iconId: "globe",
-    iconColor: "#22C55E",
+    iconId: "flag",
+    iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -116,8 +116,8 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_afryki",
     name: "Flagi Afryki",
-    iconId: "globe",
-    iconColor: "#F59E0B",
+    iconId: "flag",
+    iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -126,8 +126,8 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_azji",
     name: "Flagi Azji",
-    iconId: "globe",
-    iconColor: "#EF4444",
+    iconId: "flag",
+    iconColor: "#FBBF24",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -136,8 +136,8 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_ameryki",
     name: "Flagi Ameryki",
-    iconId: "globe",
-    iconColor: "#06B6D4",
+    iconId: "flag",
+    iconColor: "#EF4444",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -146,7 +146,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_oceanii",
     name: "Flagi Oceanii",
-    iconId: "globe",
+    iconId: "flag",
     iconColor: "#8B5CF6",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -156,7 +156,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "flagi_swiata",
     name: "Flagi Świata",
-    iconId: "globe",
+    iconId: "flag",
     iconColor: "#0EA5E9",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -167,7 +167,7 @@ const OFFICIAL_PACKS = [
     slug: "panstwa_i_stolice_europy",
     name: "Państwa i Stolice Europy",
     iconId: "globe",
-    iconColor: "#22C55E",
+    iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -177,7 +177,7 @@ const OFFICIAL_PACKS = [
     slug: "panstwa_i_stolice_afryki",
     name: "Państwa i Stolice Afryki",
     iconId: "globe",
-    iconColor: "#F59E0B",
+    iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -187,7 +187,7 @@ const OFFICIAL_PACKS = [
     slug: "panstwa_i_stolice_azji",
     name: "Państwa i Stolice Azji",
     iconId: "globe",
-    iconColor: "#EF4444",
+    iconColor: "#FBBF24",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -197,7 +197,7 @@ const OFFICIAL_PACKS = [
     slug: "panstwa_i_stolice_ameryki",
     name: "Państwa i Stolice Ameryki",
     iconId: "globe",
-    iconColor: "#06B6D4",
+    iconColor: "#EF4444",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
@@ -565,21 +565,27 @@ function runSqliteStatement(dbPath, sql) {
 function main() {
   ensurePaths();
 
-  if (fs.existsSync(OUTPUT_DB_PATH)) {
-    fs.rmSync(OUTPUT_DB_PATH);
-  }
-
   const tempSqlPath = path.join(os.tmpdir(), `prebuilt-${Date.now()}.sql`);
+  const tempDbPath = path.join(
+    path.dirname(OUTPUT_DB_PATH),
+    `.prebuilt-${process.pid}-${Date.now()}.db`
+  );
   const schemaSql = buildSchemaSql();
   const dataSql = buildDataSql();
   const fullSql = `${schemaSql}\n${dataSql}\n`;
 
+  let movedTempDb = false;
   fs.writeFileSync(tempSqlPath, fullSql, "utf8");
   try {
-    runSqliteFile(OUTPUT_DB_PATH, tempSqlPath);
-    runSqliteStatement(OUTPUT_DB_PATH, "ANALYZE; VACUUM;");
+    runSqliteFile(tempDbPath, tempSqlPath);
+    runSqliteStatement(tempDbPath, "ANALYZE; VACUUM;");
+    fs.renameSync(tempDbPath, OUTPUT_DB_PATH);
+    movedTempDb = true;
   } finally {
     fs.rmSync(tempSqlPath, { force: true });
+    if (!movedTempDb) {
+      fs.rmSync(tempDbPath, { force: true });
+    }
   }
 
   const sizeBytes = fs.statSync(OUTPUT_DB_PATH).size;

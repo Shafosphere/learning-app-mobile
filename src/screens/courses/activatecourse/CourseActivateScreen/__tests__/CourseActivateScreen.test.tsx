@@ -1,8 +1,9 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import CourseActivateScreen from "@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
@@ -48,6 +49,7 @@ jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
     totalSteps: 2,
     canGoBack: false,
     canGoNext: true,
+    hasSeen: true,
     goBack: jest.fn(),
     goNext: jest.fn(),
     advanceByEvent: jest.fn(() => Promise.resolve(true)),
@@ -74,18 +76,26 @@ jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActiv
 jest.mock("@/src/components/button/button", () => {
   const React = require("react");
   const { Text } = require("react-native");
-  return ({ text }: { text: string }) => <Text>{text}</Text>;
+  function MockButton({ text }: { text: string }) {
+    return <Text>{text}</Text>;
+  }
+  return MockButton;
 });
 
 jest.mock("@/src/components/course/CourseListCard", () => {
   const React = require("react");
   const { Text } = require("react-native");
+  function MockCourseListCard({ title, onPress }: { title: string; onPress?: () => void }) {
+    return <Text onPress={onPress}>{title}</Text>;
+  }
   return {
-    CourseListCard: ({ title }: { title: string }) => <Text>{title}</Text>,
+    CourseListCard: MockCourseListCard,
   };
 });
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
+const { getOnboardingCheckpoint } = require("@/src/services/onboardingCheckpoint");
 const mockedGetCustomCoursesWithCardCounts =
   getCustomCoursesWithCardCounts as jest.Mock;
 const mockedGetOfficialCustomCoursesWithCardCounts =
@@ -94,6 +104,19 @@ const mockedGetOfficialCustomCoursesWithCardCounts =
 describe("CourseActivateScreen loading state", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    getOnboardingCheckpoint.mockResolvedValue("done");
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 2,
+      canGoBack: false,
+      canGoNext: true,
+      hasSeen: true,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+    });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
@@ -181,5 +204,110 @@ describe("CourseActivateScreen loading state", () => {
       expect.any(Error)
     );
     consoleErrorSpy.mockRestore();
+  });
+
+  it("blocks course activation during onboarding before the activation step is visible", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    const advanceByEvent = jest.fn(() => Promise.resolve(true));
+    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: null,
+      setActiveCustomCourseId,
+      colors: {
+        paragraph: "#222",
+        headline: "#111",
+      },
+      pinnedOfficialCourseIds: [],
+    });
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 5,
+      canGoBack: false,
+      canGoNext: false,
+      hasSeen: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent,
+    });
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 11,
+        name: "Custom course",
+        iconId: "book-outline",
+        iconColor: "#000",
+        cardsCount: 12,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CourseActivateScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Custom course")).toBeTruthy();
+    });
+    fireEvent.press(screen.getByText("Custom course"));
+
+    expect(setActiveCustomCourseId).not.toHaveBeenCalled();
+    expect(advanceByEvent).not.toHaveBeenCalled();
+  });
+
+  it("allows course activation on the onboarding activation step", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    const advanceByEvent = jest.fn(() => Promise.resolve(true));
+    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: null,
+      setActiveCustomCourseId,
+      colors: {
+        paragraph: "#222",
+        headline: "#111",
+      },
+      pinnedOfficialCourseIds: [],
+    });
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: true,
+      currentStep: {
+        id: "course-activate-step-4",
+        targetId: "course-activate-bubble-anchor",
+        titleKey: "onboarding.courseActivate.step4.title",
+        descriptionKey: "onboarding.courseActivate.step4.description",
+        kind: "action",
+        advanceOn: "activate_course",
+      },
+      currentIndex: 3,
+      totalSteps: 5,
+      canGoBack: true,
+      canGoNext: false,
+      hasSeen: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent,
+    });
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 11,
+        name: "Custom course",
+        iconId: "book-outline",
+        iconColor: "#000",
+        cardsCount: 12,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CourseActivateScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Custom course")).toBeTruthy();
+    });
+    fireEvent.press(screen.getByText("Custom course"));
+
+    await waitFor(() => {
+      expect(setActiveCustomCourseId).toHaveBeenCalledWith(11);
+    });
+    expect(advanceByEvent).toHaveBeenCalledWith("activate_course");
   });
 });

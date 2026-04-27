@@ -380,11 +380,13 @@ export async function countGlobalBoxPromotions(): Promise<number> {
 }
 
 export async function getHardFlashcards(
-  courseId: number,
+  courseId?: number | null,
   limit: number = 10
 ): Promise<HardFlashcard[]> {
-  if (!courseId || limit <= 0) return [];
+  if (limit <= 0) return [];
+  if (courseId != null && !courseId) return [];
   const db = await getDB();
+  const hasCourseFilter = courseId != null;
   const rows = await db.getAllAsync<{
     id: number;
     frontText: string;
@@ -404,13 +406,12 @@ export async function getHardFlashcards(
        COALESCE(SUM(CASE WHEN e.result = 'wrong' THEN 1 ELSE 0 END), 0) AS wrongCount
      FROM custom_flashcards cf
      LEFT JOIN custom_learning_events e ON e.flashcard_id = cf.id
-     WHERE cf.course_id = ?
+     ${hasCourseFilter ? "WHERE cf.course_id = ?" : ""}
      GROUP BY cf.id, cf.front_text, cf.back_text, cf.image_front, cf.image_back, cf.type
      HAVING wrongCount > 0
      ORDER BY wrongCount DESC, cf.id ASC
      LIMIT ?;`,
-    courseId,
-    limit
+    ...(hasCourseFilter ? [courseId, limit] : [limit])
   );
   return rows.map((r) => ({
     id: r.id,

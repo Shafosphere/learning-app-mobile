@@ -1,6 +1,12 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const useStyles = createThemeStylesHook((colors) => ({
+  messageShell: {
+    position: "relative",
+  },
+  messageShellWithNavigation: {
+    paddingBottom: 56,
+  },
   container: {
     position: "relative",
     backgroundColor: colors.secondBackground,
@@ -58,7 +64,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   navRow: {
     position: "absolute",
     right: 12,
-    bottom: -52,
+    bottom: 0,
     flexDirection: "row",
     gap: 10,
   },

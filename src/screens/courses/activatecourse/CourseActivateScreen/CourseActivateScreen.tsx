@@ -303,8 +303,19 @@ export default function CourseActivateScreen() {
     coachmarkLayer,
   );
 
+  const isActivationBlockedByOnboarding =
+    startedInOnboarding &&
+    !coachmark.hasSeen &&
+    (
+      !coachmark.isActive ||
+      coachmark.currentStep?.advanceOn !== "activate_course"
+    );
+
   const handleCustomCoursePress = useCallback(
     async (id: number) => {
+      if (isActivationBlockedByOnboarding) {
+        return;
+      }
       if (activeCustomCourseId === id) {
         return;
       }
@@ -317,6 +328,7 @@ export default function CourseActivateScreen() {
       activeCustomCourseId,
       canActivate,
       coachmark,
+      isActivationBlockedByOnboarding,
       notifyActivated,
       setActiveCustomCourseId,
     ]
