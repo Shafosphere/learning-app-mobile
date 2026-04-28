@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef } from "react";
 import type { RefObject } from "react";
 import type { TextInput } from "react-native";
 
@@ -15,7 +15,7 @@ type UseFocusExecutorArgs = {
   refs: FocusExecutorRefs;
 };
 
-const DEFAULT_FOCUS_DELAY_MS = 50;
+const FOCUS_RETRY_DELAYS_MS = [50, 120];
 
 export function useFocusExecutor({
   focusTarget,
@@ -32,7 +32,7 @@ export function useFocusExecutor({
     };
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     timeoutIdsRef.current.forEach((timeoutId) => clearTimeout(timeoutId));
     timeoutIdsRef.current = [];
 
@@ -45,15 +45,15 @@ export function useFocusExecutor({
       return;
     }
 
-    if (activeTargetRef.current !== "none" && activeTargetRef.current !== focusTarget) {
-      refs[activeTargetRef.current].current?.blur();
-    }
+    const targetRef = refs[focusTarget];
+    targetRef.current?.focus();
+    activeTargetRef.current = focusTarget;
 
-    const timeoutId = setTimeout(() => {
-      refs[focusTarget].current?.focus();
-      activeTargetRef.current = focusTarget;
-    }, DEFAULT_FOCUS_DELAY_MS);
-
-    timeoutIdsRef.current.push(timeoutId);
+    FOCUS_RETRY_DELAYS_MS.forEach((delay) => {
+      const timeoutId = setTimeout(() => {
+        targetRef.current?.focus();
+      }, delay);
+      timeoutIdsRef.current.push(timeoutId);
+    });
   }, [focusRequestId, focusTarget, refs]);
 }

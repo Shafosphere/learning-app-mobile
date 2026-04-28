@@ -169,6 +169,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_europy",
+    packVersion: 2,
     name: "Flagi Europy",
     iconId: "flag",
     iconColor: "#2563EB",
@@ -262,7 +263,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_swiata",
-    packVersion: 3,
+    packVersion: 4,
     name: "Flagi Świata",
     iconId: "flag",
     iconColor: "#0EA5E9",

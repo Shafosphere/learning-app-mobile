@@ -1,6 +1,7 @@
 import { act, renderHook } from "@testing-library/react-native";
 import { useBoxFacesController } from "../useBoxFacesController";
 import type { BoxesState } from "@/src/types/boxes";
+import { getFaceDurationForGameplayEvent } from "@/src/components/Box/Skin/boxFaces";
 
 const baseBoxes: BoxesState = {
   boxZero: [],
@@ -89,7 +90,7 @@ describe("useBoxFacesController", () => {
     expect(result.current.faces.boxOne).toBe("blushed");
 
     act(() => {
-      jest.advanceTimersByTime(1000);
+      jest.advanceTimersByTime(getFaceDurationForGameplayEvent("correct"));
     });
 
     expect(result.current.faces.boxOne).toBe("happy");

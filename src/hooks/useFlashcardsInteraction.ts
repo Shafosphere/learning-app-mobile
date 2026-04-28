@@ -1,6 +1,7 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent } from "@/src/db/sqlite/db";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -10,7 +11,7 @@ type SpellcheckFn = (input: string, expected: string) => boolean;
 
 type CorrectionMode = "demote" | "intro";
 
-type CorrectionState = {
+export type CorrectionState = {
   cardId: number;
   awers: string;
   rewers: string;
@@ -710,24 +711,14 @@ export function useFlashcardsInteraction({
   }, []);
 
   const normalizeUserInput = useCallback(
-    (value: string) => {
-      const normalized = value.trim().toLowerCase();
-      if (!ignoreDiacriticsInSpellcheck) {
-        return normalized;
-      }
-      return stripDiacritics(normalized);
-    },
+    (value: string) =>
+      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck),
     [ignoreDiacriticsInSpellcheck]
   );
 
   const normalizeExpected = useCallback(
-    (value: string) => {
-      const normalized = value.toLowerCase();
-      if (!ignoreDiacriticsInSpellcheck) {
-        return normalized;
-      }
-      return stripDiacritics(normalized);
-    },
+    (value: string) =>
+      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck),
     [ignoreDiacriticsInSpellcheck]
   );
 

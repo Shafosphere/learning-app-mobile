@@ -1,14 +1,10 @@
 import { useSettings } from "../contexts/SettingsContext";
-import { stripDiacritics } from "../utils/diacritics";
+import { normalizeAnswerText } from "../utils/answerNormalization";
 export default function useSpellchecking() {
   const { spellChecking, ignoreDiacriticsInSpellcheck } = useSettings();
 
   function prepareWord(rawValue: string): string {
-    const cleaned = rawValue.trim().toLowerCase();
-    if (!ignoreDiacriticsInSpellcheck) {
-      return cleaned;
-    }
-    return stripDiacritics(cleaned);
+    return normalizeAnswerText(rawValue, ignoreDiacriticsInSpellcheck);
   }
 
   function containsDigit(value: string): boolean {

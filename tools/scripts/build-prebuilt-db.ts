@@ -111,6 +111,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "flagi_europy.csv",
   },
   {
@@ -164,7 +165,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 3,
+    packVersion: 4,
     csvFile: "flagi_swiata.csv",
   },
   {

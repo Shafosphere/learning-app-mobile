@@ -11,6 +11,7 @@ import {
 } from "react-native";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { SvgUri, SvgXml } from "react-native-svg";
+import { getPreloadedImage } from "@/src/features/flashcards/flashcardImagePreload";
 
 type PromptImageProps = {
   uri: string;
@@ -244,6 +245,43 @@ export function PromptImage({
 
   useEffect(() => {
     let cancelled = false;
+
+    const applySvgXml = (xml: string) => {
+      const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
+      const mergedMode = isMergedConstellationSvg(xml, uri);
+      const normalized = inlineSvgClassStyles(xml);
+      const enhancedOutline = constellationMode
+        ? boostConstellationOutlineContrast(normalized)
+        : normalized;
+      const enhanced = mergedMode
+        ? enhanceMergedConstellationSvg(enhancedOutline, colors.headline, overlayColor)
+        : enhancedOutline;
+      const parsedViewBox = parseSvgViewBox(enhanced);
+
+      setIsSvg(true);
+      setSvgXml(enhanced);
+      setContentRatio(parsedViewBox ? parsedViewBox.width / parsedViewBox.height : 1);
+      setIsConstellationOutline(constellationMode);
+      setIsConstellationMerged(mergedMode);
+      setHasResolvedDimensions(true);
+    };
+
+    const preloaded = getPreloadedImage(uri);
+    if (preloaded) {
+      if (preloaded.kind === "svg") {
+        applySvgXml(preloaded.xml);
+      } else {
+        setIsSvg(false);
+        setSvgXml(null);
+        setContentRatio(preloaded.ratio);
+        setIsConstellationOutline(false);
+        setIsConstellationMerged(false);
+        setHasResolvedDimensions(true);
+      }
+      return () => {
+        cancelled = true;
+      };
+    }
 
     const load = async () => {
       try {

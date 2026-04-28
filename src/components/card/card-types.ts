@@ -53,6 +53,7 @@ export type CardProps = {
   isBetweenCards?: boolean;
   disableLayoutAnimation?: boolean;
   focusRequestToken?: number;
+  skipCorrectionEnabled?: boolean;
   showExplanationEnabled?: boolean;
   explanationOnlyOnWrong?: boolean;
   isExplanationVisible?: boolean;

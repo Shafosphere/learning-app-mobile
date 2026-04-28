@@ -8,6 +8,7 @@ import {
   updateCustomFlashcardHints,
 } from "@/src/db/sqlite/db";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
@@ -60,6 +61,7 @@ let mockCurrentBoxes: BoxesState;
 let mockCurrentUsedWordIds: number[];
 let mockCurrentSelectedItem: WordWithTranslations | null;
 let mockCurrentLearned: WordWithTranslations[];
+let mockCurrentResult: boolean | null;
 const mockSetBoxes = jest.fn();
 const mockAddUsedWordIds = jest.fn();
 const mockRemoveUsedWordIds = jest.fn();
@@ -109,7 +111,7 @@ jest.mock("@/src/hooks/useFlashcardsInteraction", () => ({
     selectedItem: mockCurrentSelectedItem,
     answer: "",
     setAnswer: jest.fn(),
-    result: null,
+    result: mockCurrentResult,
     setResult: jest.fn(),
     confirm: jest.fn(),
     reversed: false,
@@ -253,6 +255,7 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
 const mockedUpdateCustomFlashcardHints = updateCustomFlashcardHints as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
+const mockedPlayFeedbackSound = playFeedbackSound as jest.Mock;
 
 function makeCard(
   overrides: Partial<WordWithTranslations> & Pick<WordWithTranslations, "id">,
@@ -284,6 +287,7 @@ describe("FlashcardsScreen patchCardHints integration", () => {
     mockRemoveUsedWordIds.mockClear();
     mockSetBatchIndex.mockClear();
     mockCurrentUsedWordIds = [];
+    mockCurrentResult = null;
 
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
@@ -404,5 +408,45 @@ describe("FlashcardsScreen patchCardHints integration", () => {
       hintFront: untouchedCard.hintFront,
       hintBack: untouchedCard.hintBack,
     });
+  });
+
+  it("does not replay wrong feedback when a hint update refreshes the selected card", async () => {
+    const targetCard = makeCard({
+      id: 11,
+      text: "cat",
+      translations: ["kot"],
+      hintFront: "old front",
+      hintBack: "old back",
+    });
+
+    mockCurrentBoxes = {
+      boxZero: [],
+      boxOne: [targetCard],
+      boxTwo: [],
+      boxThree: [],
+      boxFour: [],
+      boxFive: [],
+    };
+    mockCurrentLearned = [];
+    mockCurrentSelectedItem = targetCard;
+    mockCurrentResult = false;
+    mockedGetCustomFlashcards.mockResolvedValue([targetCard]);
+
+    render(<Flashcards />);
+
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(mockedPlayFeedbackSound).toHaveBeenCalledTimes(1);
+    expect(mockedPlayFeedbackSound).toHaveBeenCalledWith(false);
+
+    await act(async () => {
+      await latestCardProps?.onHintUpdate?.(targetCard.id, "new front", "new back");
+      await Promise.resolve();
+    });
+
+    expect(mockedPlayFeedbackSound).toHaveBeenCalledTimes(1);
   });
 });

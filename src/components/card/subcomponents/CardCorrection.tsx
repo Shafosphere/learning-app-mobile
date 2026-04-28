@@ -325,7 +325,7 @@ export function CardCorrection({
             }
             onFocus={() => requestFocus("correction1")}
           />
-          {isIntroMode ? (
+          {correction.input1 ? (
             <Text
               style={styles.inputOverlay}
               numberOfLines={1}
@@ -420,7 +420,7 @@ export function CardCorrection({
               }
             }}
           />
-          {isIntroMode ? (
+          {correction.input2 ? (
             <Text
               style={styles.inputOverlay}
               numberOfLines={1}

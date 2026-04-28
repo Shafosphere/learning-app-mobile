@@ -11,6 +11,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     gap: 15,
     // marginTop: 5,
   },
+  keyboardBridgeInput: {
+    position: "absolute",
+    width: 1,
+    height: 1,
+    opacity: 0.01,
+    top: 0,
+    left: 0,
+  },
   hintContainer: {
     width: 325,
     // backgroundColor: colors.my_yellow,
@@ -250,7 +258,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // color: "tra"
   },
   overlayCharError: {
-    color: colors.my_red,
+    color: colors.my_yellow,
   },
   overlayCharNeutral: {
     color: colors.headline,

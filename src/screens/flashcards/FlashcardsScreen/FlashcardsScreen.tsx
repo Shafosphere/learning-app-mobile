@@ -89,6 +89,8 @@ import {
   ensureCourseCompletionRunStarted,
   getCourseCompletionRunStartedAt,
 } from "@/src/features/flashcards/courseCompletionRun";
+import { preloadFlashcardImageUris } from "@/src/features/flashcards/flashcardImagePreload";
+import { buildFlashcardImagePreloadPlan } from "@/src/features/flashcards/flashcardImagePreloadPlan";
 import {
   consumeActionsPositionNudgePreview,
   subscribeActionsPositionNudgePreview,
@@ -206,6 +208,7 @@ export default function Flashcards() {
   const wrongStreakRef = useRef(0);
   const questionStartRef = useRef<number | null>(null);
   const perCardFailRef = useRef<Record<number, number>>({});
+  const handledDisplayResultEventRef = useRef<string | null>(null);
   const isCoachmarkActiveRef = useRef(false);
   const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{
@@ -465,6 +468,18 @@ export default function Flashcards() {
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
   });
+  useEffect(() => {
+    if (!isFocused) return;
+
+    const uris = buildFlashcardImagePreloadPlan({
+      selectedItem,
+      correction,
+      activeBox,
+      getQueueForBox,
+    });
+    preloadFlashcardImageUris(uris);
+  }, [activeBox, correction, getQueueForBox, isFocused, selectedItem]);
+
   const {
     faces: boxFaces,
     handleSelection: handleBoxFaceSelection,
@@ -658,7 +673,16 @@ export default function Flashcards() {
   );
 
   useEffect(() => {
-    if (displayResult === null) return;
+    if (displayResult === null) {
+      handledDisplayResultEventRef.current = null;
+      return;
+    }
+    const resultEventKey = `${selectedItemId ?? "none"}:${displayResult}`;
+    if (handledDisplayResultEventRef.current === resultEventKey) {
+      return;
+    }
+    handledDisplayResultEventRef.current = resultEventKey;
+
     if (__DEV__) {
       const tap = lastTrueFalseTapRef.current;
       const isCurrentTap = tap?.cardId != null && tap.cardId === selectedItemId;
@@ -688,8 +712,8 @@ export default function Flashcards() {
       wrongStreakRef.current = 0;
       correctStreakRef.current += 1;
 
-      if (selectedItem?.id != null) {
-        perCardFailRef.current[selectedItem.id] = 0;
+      if (selectedItemId != null) {
+        perCardFailRef.current[selectedItemId] = 0;
       }
 
       if (!isCoachmarkActiveRef.current && correctStreakRef.current >= STREAK_TARGET) {
@@ -740,7 +764,7 @@ export default function Flashcards() {
       correctStreakRef.current = 0;
       wrongStreakRef.current += 1;
 
-      const cardId = selectedItem?.id;
+      const cardId = selectedItemId;
       if (cardId != null) {
         const nextFailCount = (perCardFailRef.current[cardId] ?? 0) + 1;
         perCardFailRef.current[cardId] = nextFailCount;
@@ -763,7 +787,7 @@ export default function Flashcards() {
         });
       }
     }
-  }, [displayResult, selectedItem, selectedItemId, triggerQuote]);
+  }, [displayResult, selectedItemId, triggerQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
@@ -1706,6 +1730,7 @@ export default function Flashcards() {
         disableLayoutAnimation={
           shouldKeepLoadingOverlayVisible || showLoadingOverlay
         }
+        skipCorrectionEnabled={skipCorrection}
         hideHints={shouldHideHintsForActiveBox}
         showExplanationEnabled={showExplanationEnabled}
         explanationOnlyOnWrong={explanationOnlyOnWrong}

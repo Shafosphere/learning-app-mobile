@@ -1,4 +1,6 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
+import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import type { DatePattern } from "@/src/utils/dateInput";
@@ -33,7 +35,8 @@ const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
 const YEAR_ANSWER_REGEX = /^\d{3,4}$/;
 const DATE_ANSWER_REGEX = /^\d{3,4}-\d{2}(?:-\d{2})?$/;
 const INPUT_HORIZONTAL_PADDING = 8;
-const INPUT_SCROLL_AHEAD = 48; // keep ~2-3 letters visible ahead of the caret
+const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
+const MAX_INPUT_SCROLL_AHEAD = 180;
 
 type AnswerInputKind = "text" | "number" | "year" | "date";
 const detectInputKind = (value: string): AnswerInputKind => {
@@ -126,10 +129,12 @@ export default function Card({
   isBetweenCards = false,
   disableLayoutAnimation = false,
   focusRequestToken = 0,
+  skipCorrectionEnabled = false,
   showExplanationEnabled: showExplanationEnabledProp,
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
 }: CardProps) {
   const styles = useStyles();
+  const checkSpelling = useSpellchecking();
   const {
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
     showExplanationEnabled: showExplanationEnabledSetting,
@@ -168,6 +173,7 @@ export default function Card({
   const correctionInput1Ref = useRef<TextInput | null>(null);
   const correctionInput2Ref = useRef<TextInput | null>(null);
   const hintInputRef = useRef<TextInput | null>(null);
+  const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const initialLayoutCardIdRef = useRef<number | null>(null);
   const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
   const lastTranslationItemId = useRef<number | null>(null);
@@ -301,6 +307,10 @@ export default function Card({
     [answer, isMainAnswerDate, mainDatePattern, setAnswer],
   );
 
+  const primeKeyboardBridge = useCallback(() => {
+    keyboardBridgeInputRef.current?.focus();
+  }, []);
+
   const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");
   const hintDialogVisible = useRef(false);
@@ -431,29 +441,95 @@ export default function Card({
     setCorrectionRewers,
   ]);
 
+  const matchesCorrectionText = useCallback(
+    (value: string, expected: string) =>
+      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck) ===
+      normalizeAnswerText(expected, ignoreDiacriticsInSpellcheck),
+    [ignoreDiacriticsInSpellcheck],
+  );
+
+  const willCompleteCorrection = useCallback(
+    (which: 1 | 2, value: string) => {
+      if (!correction || !showCorrectionInputs) {
+        return false;
+      }
+      const nextInput1 = which === 1 ? value : correction.input1;
+      const nextInput2 = which === 2 ? value : (correction.input2 ?? "");
+      const awersOk =
+        !shouldCorrectAwers ||
+        matchesCorrectionText(nextInput1, correctionAwers);
+      const rewersOk =
+        !shouldCorrectRewers ||
+        matchesCorrectionText(nextInput2, correctionRewers);
+
+      return awersOk && rewersOk;
+    },
+    [
+      correction,
+      correctionAwers,
+      correctionRewers,
+      matchesCorrectionText,
+      shouldCorrectAwers,
+      shouldCorrectRewers,
+      showCorrectionInputs,
+    ],
+  );
+
+  const willEnterCorrectionMode = useCallback(() => {
+    if (!selectedItem || skipCorrectionEnabled) {
+      return false;
+    }
+    if (
+      selectedItem.type === "true_false" ||
+      selectedItem.type === "know_dont_know"
+    ) {
+      return false;
+    }
+
+    const answerToUse = answer.replace(/ +$/, "");
+    const isCorrect = reversed
+      ? checkSpelling(answerToUse, selectedItem.text)
+      : selectedItem.translations.some((entry) =>
+          checkSpelling(answerToUse, entry),
+        );
+
+    return !isCorrect;
+  }, [answer, checkSpelling, reversed, selectedItem, skipCorrectionEnabled]);
+
   const handleWrongInputChange = useCallback(
     (which: 1 | 2, value: string) => {
       if (which === 1 && isCorrectionInput1Date && correctionInput1DatePattern) {
+        const nextValue = formatDateLikeInput(
+          value,
+          correctionInput1DatePattern,
+          correction?.input1,
+        );
+        if (willCompleteCorrection(1, nextValue)) {
+          primeKeyboardBridge();
+        }
         wrongInputChange(
           1,
-          formatDateLikeInput(
-            value,
-            correctionInput1DatePattern,
-            correction?.input1,
-          ),
+          nextValue,
         );
         return;
       }
       if (which === 2 && isCorrectionInput2Date && correctionInput2DatePattern) {
+        const nextValue = formatDateLikeInput(
+          value,
+          correctionInput2DatePattern,
+          correction?.input2 ?? "",
+        );
+        if (willCompleteCorrection(2, nextValue)) {
+          primeKeyboardBridge();
+        }
         wrongInputChange(
           2,
-          formatDateLikeInput(
-            value,
-            correctionInput2DatePattern,
-            correction?.input2 ?? "",
-          ),
+          nextValue,
         );
         return;
+      }
+      if (willCompleteCorrection(which, value)) {
+        primeKeyboardBridge();
       }
       wrongInputChange(which, value);
     },
@@ -464,6 +540,8 @@ export default function Card({
       correctionInput2DatePattern,
       isCorrectionInput1Date,
       isCorrectionInput2Date,
+      primeKeyboardBridge,
+      willCompleteCorrection,
       wrongInputChange,
     ],
   );
@@ -506,9 +584,13 @@ export default function Card({
     ) => {
       if (!visibleWidth) return;
       const maxOffset = Math.max(0, contentWidth - visibleWidth);
+      const lookAhead = Math.max(
+        MIN_INPUT_SCROLL_AHEAD,
+        Math.min(MAX_INPUT_SCROLL_AHEAD, visibleWidth * 0.45),
+      );
       const desiredOffset = Math.max(
         0,
-        caretX - (visibleWidth - INPUT_SCROLL_AHEAD),
+        caretX - (visibleWidth - lookAhead),
       );
       const nextOffset = Math.min(desiredOffset, maxOffset);
       ref.current?.scrollTo({ x: nextOffset, animated: false });
@@ -520,8 +602,18 @@ export default function Card({
     if (selectedItem?.translations && selectedItem.translations.length > 1) {
       setTranslations(0);
     }
+    if (willEnterCorrectionMode()) {
+      primeKeyboardBridge();
+    }
     confirm(rewers);
-  }, [confirm, rewers, selectedItem?.translations, setTranslations]);
+  }, [
+    confirm,
+    primeKeyboardBridge,
+    rewers,
+    selectedItem?.translations,
+    setTranslations,
+    willEnterCorrectionMode,
+  ]);
 
   const previousResultForAnswerResetRef = useRef<boolean | null>(null);
   useEffect(() => {
@@ -886,6 +978,18 @@ export default function Card({
 
   return (
     <View style={styles.container}>
+      {/* Keeps the native keyboard attached while the visible input is swapped. */}
+      <TextInput
+        ref={keyboardBridgeInputRef}
+        style={styles.keyboardBridgeInput}
+        value=""
+        caretHidden
+        autoCorrect={false}
+        spellCheck={false}
+        autoCapitalize="none"
+        importantForAutofill="no"
+        textContentType="none"
+      />
       {hideHints || isBetweenCards ? (
         <View style={styles.hintContainer} />
       ) : (
