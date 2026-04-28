@@ -4,6 +4,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import i18n from "@/src/i18n";
 import type { UiLanguage } from "@/src/i18n";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
@@ -13,19 +14,30 @@ import { useStyles } from "./LanguageIntroScreen-styles";
 type LanguageOption = {
   key: UiLanguage;
   flagCode: "pl" | "en";
-  labelKey: "onboarding.languageIntro.polish" | "onboarding.languageIntro.english";
+  title: string;
+  subtitle: string;
 };
 
 const languageOptions: LanguageOption[] = [
-  { key: "pl", flagCode: "pl", labelKey: "onboarding.languageIntro.polish" },
-  { key: "en", flagCode: "en", labelKey: "onboarding.languageIntro.english" },
+  {
+    key: "pl",
+    flagCode: "pl",
+    title: "Polski",
+    subtitle: "Interfejs po polsku",
+  },
+  {
+    key: "en",
+    flagCode: "en",
+    title: "English",
+    subtitle: "Interface in English",
+  },
 ];
 
 export default function LanguageIntroScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const router = useRouter();
-  const { uiLanguage, setUiLanguage } = useSettings();
+  const { uiLanguage, setUiLanguage, colors } = useSettings();
   const [selectedLanguage, setSelectedLanguage] = useState<UiLanguage>(uiLanguage);
   const [isSaving, setIsSaving] = useState(false);
   const screenLanguage = selectedLanguage ?? uiLanguage;
@@ -33,16 +45,12 @@ export default function LanguageIntroScreen() {
     ? {
         title: "Zaznacz twój język ojczysty",
         confirm: "Dalej",
-        polish: "Polski",
-        english: "English",
         hintDefault: "Wybierz język, żeby aktywować przycisk.",
         hintSelected: "Wybrano: {{language}}",
       }
     : {
         title: "Choose your native language",
         confirm: "Next",
-        polish: "Polish",
-        english: "English",
         hintDefault: "Choose a language to enable the button.",
         hintSelected: "Selected: {{language}}",
       };
@@ -52,8 +60,6 @@ export default function LanguageIntroScreen() {
       key:
         | "onboarding.languageIntro.title"
         | "onboarding.languageIntro.confirm"
-        | "onboarding.languageIntro.polish"
-        | "onboarding.languageIntro.english"
         | "onboarding.languageIntro.hintDefault"
         | "onboarding.languageIntro.hintSelected",
       options?: Record<string, unknown>
@@ -96,7 +102,7 @@ export default function LanguageIntroScreen() {
             })}
           </Text>
 
-          <View style={styles.flagsWrap}>
+          <View style={styles.languageTiles}>
             {languageOptions.map((option) => {
               const isActive = selectedLanguage === option.key;
               const source = getFlagSource(option.flagCode, "active");
@@ -106,18 +112,29 @@ export default function LanguageIntroScreen() {
                 <Pressable
                   key={option.key}
                   style={({ pressed }) => [
-                    styles.flagButton,
-                    isActive && styles.flagButtonActive,
-                    pressed && styles.flagButtonPressed,
+                    styles.languageTile,
+                    isActive && styles.languageTileActive,
+                    pressed && styles.languageTilePressed,
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={tr(option.labelKey, {
-                    defaultValue: option.key === "pl" ? fallback.polish : fallback.english,
-                  })}
+                  accessibilityLabel={`${option.title}. ${option.subtitle}`}
                   accessibilityState={{ selected: isActive }}
                   onPress={() => onSelectLanguage(option.key)}
                 >
-                  <Image source={source} style={styles.flagImage} />
+                  <Image source={source} style={styles.languageFlag} />
+                  <View style={styles.languageInfo}>
+                    <Text style={styles.languageTitle} allowFontScaling>
+                      {option.title}
+                    </Text>
+                    <Text style={styles.languageSubtitle} allowFontScaling>
+                      {option.subtitle}
+                    </Text>
+                  </View>
+                  <Ionicons
+                    name={isActive ? "checkmark-circle" : "ellipse-outline"}
+                    size={34}
+                    color={colors.headline}
+                  />
                 </Pressable>
               );
             })}

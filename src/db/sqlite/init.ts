@@ -18,6 +18,7 @@ const BUNDLED_SYNC_DATABASE_NAME = "official-sync.db";
 type OfficialCourseSnapshot = {
   id: number;
   packVersion: number;
+  flashcardsCount: number;
 };
 
 type OfficialFlashcardSeedRow = {
@@ -263,13 +264,35 @@ async function getBundledOfficialCourseSnapshot(
   return bundledDb.getFirstAsync<OfficialCourseSnapshot>(
     `SELECT
        id,
-       COALESCE(pack_version, 1) AS packVersion
+       COALESCE(pack_version, 1) AS packVersion,
+       (
+         SELECT COUNT(*)
+         FROM custom_flashcards cf
+         WHERE cf.course_id = custom_courses.id
+           AND cf.external_id IS NOT NULL
+           AND COALESCE(cf.is_official, 0) = 1
+       ) AS flashcardsCount
      FROM custom_courses
      WHERE slug = ?
        AND COALESCE(is_official, 0) = 1
      LIMIT 1;`,
     slug
   );
+}
+
+async function getOfficialFlashcardsCount(
+  db: SQLite.SQLiteDatabase,
+  courseId: number
+): Promise<number> {
+  const row = await db.getFirstAsync<{ flashcardsCount: number }>(
+    `SELECT COUNT(*) AS flashcardsCount
+     FROM custom_flashcards
+     WHERE course_id = ?
+       AND external_id IS NOT NULL
+       AND COALESCE(is_official, 0) = 1;`,
+    courseId
+  );
+  return row?.flashcardsCount ?? 0;
 }
 
 async function getOfficialFlashcardSeedRecords(
@@ -539,17 +562,27 @@ export async function seedOfficialPacksWithDb(
           def.slug
         );
 
-        if (
-          bundledCourse &&
-          (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1)
-        ) {
-          await syncOfficialCourseFlashcards(
+        if (bundledCourse) {
+          const localFlashcardsCount = await getOfficialFlashcardsCount(
             db,
-            bundledDb,
-            localCourse.id,
-            bundledCourse.id,
-            bundledCourse.packVersion
+            localCourse.id
           );
+          const shouldSyncFlashcards =
+            (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1) ||
+            localFlashcardsCount !== bundledCourse.flashcardsCount;
+
+          if (shouldSyncFlashcards) {
+            console.log(
+              `[DB] Syncing official pack ${def.slug}: local version=${localCourse.packVersion ?? 0}, bundled version=${bundledCourse.packVersion}; local cards=${localFlashcardsCount}, bundled cards=${bundledCourse.flashcardsCount}`
+            );
+            await syncOfficialCourseFlashcards(
+              db,
+              bundledDb,
+              localCourse.id,
+              bundledCourse.id,
+              bundledCourse.packVersion
+            );
+          }
         }
 
         if (def.settings) {

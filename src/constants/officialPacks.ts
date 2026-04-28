@@ -187,6 +187,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_afryki",
+    packVersion: 2,
     name: "Flagi Afryki",
     iconId: "flag",
     iconColor: "#F97316",
@@ -223,6 +224,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_ameryki",
+    packVersion: 3,
     name: "Flagi Ameryk",
     iconId: "flag",
     iconColor: "#EF4444",
@@ -241,6 +243,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_oceanii",
+    packVersion: 2,
     name: "Flagi Oceanii",
     iconId: "flag",
     iconColor: "#8B5CF6",
@@ -259,6 +262,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_swiata",
+    packVersion: 3,
     name: "Flagi Świata",
     iconId: "flag",
     iconColor: "#0EA5E9",
@@ -284,7 +288,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_europy",
     name: "Stolice Europy",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -298,7 +302,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_afryki",
     name: "Stolice Afryki",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -312,7 +316,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_azji",
     name: "Stolice Azji",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#FBBF24",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -326,7 +330,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_ameryki",
     name: "Stolice Ameryk",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#EF4444",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -340,7 +344,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_oceanii",
     name: "Stolice Oceanii",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#8B5CF6",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -354,7 +358,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "panstwa_i_stolice_swiata",
     name: "Stolice Świata",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#0EA5E9",
     reviewsEnabled: true,
     defaultType: "traditional",

@@ -106,6 +106,7 @@ export const COURSE_ICONS: CourseIconDefinition[] = [
   { id: "puzzle", Component: MaterialCommunityIcons, name: "puzzle-outline", category: "general" },
   { id: "flag", Component: AntDesign, name: "flag", category: "travel" },
   { id: "globe", Component: MaterialCommunityIcons, name: "earth", category: "travel" },
+  { id: "city", Component: MaterialCommunityIcons, name: "city-variant-outline", category: "travel" },
   { id: "mountain", Component: MaterialCommunityIcons, name: "terrain", category: "travel" },
   { id: "compass", Component: MaterialCommunityIcons, name: "compass-outline", category: "travel" },
   { id: "dna", Component: MaterialCommunityIcons, name: "dna", category: "science" },

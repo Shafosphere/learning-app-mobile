@@ -91,7 +91,6 @@ external_id,front_image,back_text
 0090,na.svg,Namibia
 0091,ne.svg,Niger
 0092,ng.svg,Nigeria
-0093,re.svg,Reunion
 0094,rw.svg,Rwanda
 0095,sc.svg,Seszele
 0096,sd.svg,Sudan
@@ -106,7 +105,6 @@ external_id,front_image,back_text
 0105,tn.svg,Tunezja
 0106,tz.svg,Tanzania
 0107,ug.svg,Uganda
-0108,yt.svg,Majotta
 0109,za.svg,"Republika Południowej Afryki, RPA"
 0110,zm.svg,Zambia
 0111,zw.svg,Zimbabwe
@@ -164,9 +162,7 @@ external_id,front_image,back_text
 0163,ai.svg,Anguilla
 0164,aw.svg,Aruba
 0165,bb.svg,Barbados
-0166,bl.svg,Saint-Barthélemy
 0167,bm.svg,Bermudy
-0168,bq.svg,Karaiby Niderlandzkie
 0169,bs.svg,Bahamy
 0170,ca.svg,Kanada
 0171,cr.svg,Kostaryka
@@ -176,7 +172,6 @@ external_id,front_image,back_text
 0175,gd.svg,Grenada
 0176,gg.svg,Guernsey
 0177,gl.svg,Grenlandia
-0178,gp.svg,Gwadelupa
 0179,gt.svg,Gwatemala
 0180,hn.svg,Honduras
 0181,ht.svg,Haiti
@@ -186,13 +181,10 @@ external_id,front_image,back_text
 0185,kn.svg,Saint Kitts i Nevis
 0186,ky.svg,Kajmany
 0187,lc.svg,Saint Lucia
-0188,mf.svg,Saint-Martin
-0189,mq.svg,Martynika
 0190,ms.svg,Montserrat
 0191,mx.svg,Meksyk
 0192,ni.svg,Nikaragua
 0193,pa.svg,Panama
-0194,pm.svg,Saint-Pierre i Miquelon
 0195,pr.svg,Portoryko
 0196,sv.svg,Salwador
 0197,sx.svg,Sint Maarten
@@ -200,7 +192,7 @@ external_id,front_image,back_text
 0199,us.svg,Stany Zjednoczone
 0200,vc.svg,Saint Vincent i Grenadyny
 0201,vg.svg,Brytyjskie Wyspy Dziewicze
-0202,vi.svg,Wyspy Dziewicze Stanów Zjednoczonych
+0202,vi.svg,"Wyspy Dziewicze Stanów; Wyspy Dziewicze Stanów Zjednoczonych; Wyspy Dziewicze USA"
 0203,ar.svg,Argentyna
 0204,bo.svg,Boliwia
 0205,br.svg,Brazylia
@@ -208,7 +200,6 @@ external_id,front_image,back_text
 0207,co.svg,Kolumbia
 0208,ec.svg,Ekwador
 0209,fk.svg,Falklandy
-0210,gf.svg,Gujana Francuska
 0211,gs.svg,Georgia Południowa i Sandwich Południowy
 0212,gy.svg,Gujana
 0213,pe.svg,Peru
@@ -229,7 +220,6 @@ external_id,front_image,back_text
 0228,ki.svg,Kiribati
 0229,mh.svg,Wyspy Marshalla
 0230,mp.svg,Mariany Północne
-0231,nc.svg,Nowa Kaledonia
 0232,nf.svg,Wyspa Norfolk
 0233,nr.svg,Nauru
 0234,nu.svg,Niue
@@ -239,11 +229,9 @@ external_id,front_image,back_text
 0238,pn.svg,Pitcairn
 0239,pw.svg,Palau
 0240,sb.svg,Wyspy Salomona
-0241,tf.svg,Francuskie Terytoria Południowe
 0242,tk.svg,Tokelau
 0243,to.svg,Tonga
 0244,tv.svg,Tuvalu
-0245,um.svg,Dalekie Wyspy Mniejsze Stanów Zjednoczonych
 0246,vu.svg,Vanuatu
 0247,wf.svg,Wallis i Futuna
 0248,ws.svg,Samoa

@@ -1,5 +1,4 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import { Platform } from "react-native";
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
@@ -15,7 +14,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   card: {
     width: "100%",
-    maxWidth: 340,
+    maxWidth: 460,
   },
   title: {
     fontSize: 32,
@@ -25,79 +24,58 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.headline,
     marginBottom: 18,
   },
-  flagsWrap: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    columnGap: 18,
-    rowGap: 18,
-    width: 312,
+  languageTiles: {
+    width: "100%",
     marginTop: 18,
+    gap: 14,
   },
-  flagButton: {
-    width: 92,
-    height: 62,
-    borderRadius: 14,
-    borderWidth: 5,
-    borderColor: "transparent",
-    overflow: "hidden",
-    backgroundColor: "transparent",
-    // shadowColor: "#000000",
-    // shadowOpacity: 0.08,
-    // shadowRadius: 6,
-    // shadowOffset: { width: 0, height: 3 },
-    // elevation: 2,
+  languageTile: {
+    minHeight: 92,
+    width: "100%",
+    borderRadius: 15,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    flexDirection: "row",
+    alignItems: "center",
+    paddingLeft: "7%",
+    paddingRight: "6%",
   },
-  flagButtonActive: {
-    borderColor: "rgba(8,225,195,0.90)",
-    shadowColor: "#08e1c3",
-    shadowOpacity: 0.22,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 6 },
-    elevation: 4,
+  languageTileActive: {
+    borderColor: colors.my_green,
+    backgroundColor: colors.my_green,
   },
-  flagButtonPressed: {
+  languageTilePressed: {
     transform: [{ scale: 0.98 }],
   },
-  flagImage: {
-    width: "100%",
-    height: "100%",
+  languageFlag: {
+    width: 72,
+    height: 48,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+  },
+  languageInfo: {
+    flex: 1,
+    minWidth: 0,
+    marginLeft: 28,
+    marginRight: 14,
+  },
+  languageTitle: {
+    fontSize: 26,
+    fontWeight: "900",
+    color: colors.headline,
+  },
+  languageSubtitle: {
+    marginTop: 4,
+    fontSize: 16,
+    fontWeight: "500",
+    color: colors.paragraph,
   },
   confirmWrap: {
     marginTop: 40,
     alignSelf: "flex-end",
-  },
-  confirmButton: {
-    minWidth: 154,
-    borderRadius: 14,
-    paddingVertical: 14,
-    paddingHorizontal: 22,
-    alignItems: "center",
-    justifyContent: "center",
-    backgroundColor: "#08e1c3",
-    shadowColor: "#000000",
-    shadowOpacity: 0.1,
-    shadowRadius: 10,
-    shadowOffset: { width: 0, height: 4 },
-    elevation: 4,
-  },
-  confirmButtonPressed: {
-    transform: [{ scale: 0.98 }],
-    backgroundColor: "#06cbb1",
-  },
-  confirmButtonDisabled: {
-    opacity: 0.65,
-    ...Platform.select({
-      ios: { shadowOpacity: 0 },
-      android: { elevation: 0 },
-      default: {},
-    }),
-  },
-  confirmLabel: {
-    fontSize: 16,
-    fontWeight: "900",
-    textTransform: "uppercase",
-    letterSpacing: 0.4,
-    color: "#053233",
   },
   hint: {
     marginTop: 10,

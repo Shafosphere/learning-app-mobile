@@ -121,6 +121,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "flagi_afryki.csv",
   },
   {
@@ -141,6 +142,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 3,
     csvFile: "flagi_ameryki.csv",
   },
   {
@@ -151,6 +153,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "flagi_oceanii.csv",
   },
   {
@@ -161,12 +164,13 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 3,
     csvFile: "flagi_swiata.csv",
   },
   {
     slug: "panstwa_i_stolice_europy",
     name: "Państwa i Stolice Europy",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -176,7 +180,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "panstwa_i_stolice_afryki",
     name: "Państwa i Stolice Afryki",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -186,7 +190,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "panstwa_i_stolice_azji",
     name: "Państwa i Stolice Azji",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#FBBF24",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -196,7 +200,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "panstwa_i_stolice_ameryki",
     name: "Państwa i Stolice Ameryki",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#EF4444",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -206,7 +210,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "panstwa_i_stolice_oceanii",
     name: "Państwa i Stolice Oceanii",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#8B5CF6",
     reviewsEnabled: true,
     defaultType: "traditional",
@@ -216,7 +220,7 @@ const OFFICIAL_PACKS = [
   {
     slug: "panstwa_i_stolice_swiata",
     name: "Państwa i Stolice Świata",
-    iconId: "globe",
+    iconId: "city",
     iconColor: "#0EA5E9",
     reviewsEnabled: true,
     defaultType: "traditional",

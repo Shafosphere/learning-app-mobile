@@ -153,9 +153,9 @@ export function useCardFocusController({
       result === false && previousResultRef.current !== false;
     const backToMain = result !== false && previousResultRef.current === false;
 
-    if (movedToCorrection && showCorrectionInputs) {
+    if (movedToCorrection && showCorrectionInputs && isFocused) {
       requestFocus(correctionPrimaryTarget);
-    } else if (backToMain && !isIntroMode) {
+    } else if (backToMain && !isIntroMode && isFocused) {
       requestFocus(defaultFocusTarget);
     }
 
@@ -163,6 +163,7 @@ export function useCardFocusController({
   }, [
     correctionPrimaryTarget,
     defaultFocusTarget,
+    isFocused,
     isIntroMode,
     requestFocus,
     result,
@@ -173,9 +174,9 @@ export function useCardFocusController({
     const enteredIntroMode = isIntroMode && !previousIntroModeRef.current;
     const exitedIntroMode = !isIntroMode && previousIntroModeRef.current;
 
-    if (enteredIntroMode && showCorrectionInputs) {
+    if (enteredIntroMode && showCorrectionInputs && isFocused) {
       requestFocus(correctionPrimaryTarget);
-    } else if (exitedIntroMode && result !== false) {
+    } else if (exitedIntroMode && result !== false && isFocused) {
       requestFocus(defaultFocusTarget);
     }
 
@@ -183,6 +184,7 @@ export function useCardFocusController({
   }, [
     correctionPrimaryTarget,
     defaultFocusTarget,
+    isFocused,
     isIntroMode,
     requestFocus,
     result,
@@ -190,6 +192,9 @@ export function useCardFocusController({
   ]);
 
   useEffect(() => {
+    if (!isFocused) {
+      return;
+    }
     if (!showCorrectionInputs) {
       previousCorrectionCardIdRef.current = correctionCardId;
       return;
@@ -201,6 +206,7 @@ export function useCardFocusController({
   }, [
     correctionCardId,
     correctionPrimaryTarget,
+    isFocused,
     requestFocus,
     showCorrectionInputs,
   ]);

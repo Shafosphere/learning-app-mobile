@@ -135,16 +135,6 @@ function pickSharedAutoflowDecision(
   const baseCount = count(baseBox);
   const boxTwo = CLEANUP_BOXES[0];
 
-  // Intro box has absolute priority when enabled and non-empty.
-  if (boxZeroEnabled) {
-    if (activeBox === introBox && boxZeroCount > 0) {
-      return { targetBox: introBox, shouldDownloadNew: false };
-    }
-    if (boxZeroCount > 0) {
-      return { targetBox: introBox, shouldDownloadNew: false };
-    }
-  }
-
   // When inside a cleanup session (boxes 2-5), stay there until empty.
   if (activeBox && CLEANUP_BOXES.includes(activeBox)) {
     if (count(activeBox) > 0) {
@@ -202,6 +192,12 @@ function pickSharedAutoflowDecision(
     return { targetBox: baseBox, shouldDownloadNew: false };
   }
 
+  // Intro cards behave like the lower intake stack: important, but not an
+  // interrupt for cleanup/backpressure work above.
+  if (boxZeroEnabled && boxZeroCount > 0) {
+    return { targetBox: introBox, shouldDownloadNew: false };
+  }
+
   // Nothing urgent above, Box 1 is light -> consider pulling a new batch.
   const downloadCount = count(downloadTarget);
   const shouldDownloadNew = canDownloadMore && downloadCount <= BASE_STACK_TARGET;
@@ -218,11 +214,7 @@ export function pickEarlyGameAutoflowDecision(
 export function pickEndGameAutoflowDecision(
   params: PickAutoflowDecisionParams
 ): AutoflowDecision {
-  const { boxes, boxZeroEnabled, lockedEndGameDrainTarget } = params;
-
-  if (boxZeroEnabled && (boxes.boxZero?.length ?? 0) > 0) {
-    return pickSharedAutoflowDecision(params);
-  }
+  const { boxes, lockedEndGameDrainTarget } = params;
 
   const lockedTarget = resolveLockedEndGameDrainTarget(
     boxes,

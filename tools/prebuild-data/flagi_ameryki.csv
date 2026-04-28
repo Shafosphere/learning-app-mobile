@@ -3,9 +3,7 @@ external_id,front_image,back_text
 0002,ai.svg,Anguilla
 0003,aw.svg,Aruba
 0004,bb.svg,Barbados
-0005,bl.svg,Saint-Barthélemy
 0006,bm.svg,Bermudy
-0007,bq.svg,Karaiby Niderlandzkie
 0008,bs.svg,Bahamy
 0009,ca.svg,Kanada
 0010,cr.svg,Kostaryka
@@ -15,7 +13,6 @@ external_id,front_image,back_text
 0014,gd.svg,Grenada
 0015,gg.svg,Guernsey
 0016,gl.svg,Grenlandia
-0017,gp.svg,Gwadelupa
 0018,gt.svg,Gwatemala
 0019,hn.svg,Honduras
 0020,ht.svg,Haiti
@@ -25,13 +22,10 @@ external_id,front_image,back_text
 0024,kn.svg,Saint Kitts i Nevis
 0025,ky.svg,Kajmany
 0026,lc.svg,Saint Lucia
-0027,mf.svg,Saint-Martin
-0028,mq.svg,Martynika
 0029,ms.svg,Montserrat
 0030,mx.svg,Meksyk
 0031,ni.svg,Nikaragua
 0032,pa.svg,Panama
-0033,pm.svg,Saint-Pierre i Miquelon
 0034,pr.svg,Portoryko
 0035,sv.svg,Salwador
 0036,sx.svg,Sint Maarten
@@ -39,7 +33,7 @@ external_id,front_image,back_text
 0038,us.svg,Stany Zjednoczone
 0039,vc.svg,Saint Vincent i Grenadyny
 0040,vg.svg,Brytyjskie Wyspy Dziewicze
-0041,vi.svg,Wyspy Dziewicze Stanów Zjednoczonych
+0041,vi.svg,"Wyspy Dziewicze Stanów; Wyspy Dziewicze Stanów Zjednoczonych; Wyspy Dziewicze USA"
 0042,ar.svg,Argentyna
 0043,bo.svg,Boliwia
 0044,br.svg,Brazylia
@@ -47,7 +41,6 @@ external_id,front_image,back_text
 0046,co.svg,Kolumbia
 0047,ec.svg,Ekwador
 0048,fk.svg,Falklandy
-0049,gf.svg,Gujana Francuska
 0050,gs.svg,Georgia Południowa i Sandwich Południowy
 0051,gy.svg,Gujana
 0052,pe.svg,Peru

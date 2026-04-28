@@ -333,12 +333,13 @@ export default function Card({
     isEditingHint,
   });
   useEffect(() => {
-    if (!isFocused || selectedItemId == null || showCorrectionInputs) {
+    if (!isFocused || selectedItemId == null) {
       return;
     }
 
-    requestFocus("main");
+    requestFocus(showCorrectionInputs ? correctionPrimaryTarget : "main");
   }, [
+    correctionPrimaryTarget,
     focusRequestToken,
     isFocused,
     requestFocus,
