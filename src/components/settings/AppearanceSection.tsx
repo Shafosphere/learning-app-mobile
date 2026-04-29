@@ -20,7 +20,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import type { UiLanguage } from "@/src/i18n";
+import type { NativeLanguage, UiLanguage } from "@/src/i18n";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 
@@ -36,6 +36,13 @@ const uiLanguageOptions: {
   { key: "pl", labelKey: "settings.uiLanguage.polish" },
   { key: "en", labelKey: "settings.uiLanguage.english" },
 ];
+const nativeLanguageOptions: {
+  key: NativeLanguage;
+  labelKey: "settings.nativeLanguage.polish" | "settings.nativeLanguage.english";
+}[] = [
+  { key: "pl", labelKey: "settings.nativeLanguage.polish" },
+  { key: "en", labelKey: "settings.nativeLanguage.english" },
+];
 
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
@@ -43,7 +50,9 @@ const AppearanceSection: React.FC = () => {
   const {
     colors,
     uiLanguage,
+    nativeLanguage,
     setUiLanguage,
+    setNativeLanguage,
     theme,
     toggleTheme,
     feedbackEnabled,
@@ -61,7 +70,9 @@ const AppearanceSection: React.FC = () => {
   } = useSettings();
 
   const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
-  const [languageMenuOpen, setLanguageMenuOpen] = useState(false);
+  const [languageMenuOpen, setLanguageMenuOpen] = useState<
+    "ui" | "native" | null
+  >(null);
   const volumeDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerHaptics = useCallback(async () => {
@@ -122,7 +133,14 @@ const AppearanceSection: React.FC = () => {
       await setUiLanguage(nextLanguage);
       await triggerHaptics();
     }
-    setLanguageMenuOpen(false);
+    setLanguageMenuOpen(null);
+  };
+  const handleNativeLanguageSelect = async (nextLanguage: NativeLanguage) => {
+    if (nextLanguage !== nativeLanguage) {
+      await setNativeLanguage(nextLanguage);
+      await triggerHaptics();
+    }
+    setLanguageMenuOpen(null);
   };
 
   const handleVolumePreviewChange = useCallback((value: number) => {
@@ -206,11 +224,14 @@ const AppearanceSection: React.FC = () => {
           <Text style={styles.appearanceBlockTitle}>
             {t("settings.uiLanguage.title")}
           </Text>
+          <Text style={styles.appearanceBlockDescription}>
+            {preventWidowsPl(t("settings.uiLanguage.subtitle"))}
+          </Text>
         </View>
         <View style={styles.languageSegment}>
           <TouchableOpacity
             activeOpacity={0.8}
-            onPress={() => setLanguageMenuOpen(true)}
+            onPress={() => setLanguageMenuOpen("ui")}
             style={styles.languageSelectTrigger}
           >
             <Text style={styles.languageSelectTriggerText}>
@@ -218,6 +239,33 @@ const AppearanceSection: React.FC = () => {
                 t(
                   uiLanguageOptions.find((option) => option.key === uiLanguage)
                     ?.labelKey ?? "settings.uiLanguage.english"
+                )
+              }
+            </Text>
+            <Text style={styles.languageSelectChevron}>▾</Text>
+          </TouchableOpacity>
+        </View>
+        <View style={styles.appearanceGroupDivider} />
+        <View style={styles.appearanceBlockHeader}>
+          <Text style={styles.appearanceBlockTitle}>
+            {t("settings.nativeLanguage.title")}
+          </Text>
+          <Text style={styles.appearanceBlockDescription}>
+            {preventWidowsPl(t("settings.nativeLanguage.subtitle"))}
+          </Text>
+        </View>
+        <View style={styles.languageSegment}>
+          <TouchableOpacity
+            activeOpacity={0.8}
+            onPress={() => setLanguageMenuOpen("native")}
+            style={styles.languageSelectTrigger}
+          >
+            <Text style={styles.languageSelectTriggerText}>
+              {
+                t(
+                  nativeLanguageOptions.find(
+                    (option) => option.key === nativeLanguage
+                  )?.labelKey ?? "settings.nativeLanguage.english"
                 )
               }
             </Text>
@@ -367,17 +415,23 @@ const AppearanceSection: React.FC = () => {
       <Modal
         animationType="fade"
         transparent
-        visible={languageMenuOpen}
-        onRequestClose={() => setLanguageMenuOpen(false)}
+        visible={languageMenuOpen !== null}
+        onRequestClose={() => setLanguageMenuOpen(null)}
       >
         <TouchableOpacity
           activeOpacity={1}
           style={styles.languageModalBackdrop}
-          onPress={() => setLanguageMenuOpen(false)}
+          onPress={() => setLanguageMenuOpen(null)}
         >
           <View style={styles.languageModalCard}>
-            {uiLanguageOptions.map((option) => {
-              const isActive = uiLanguage === option.key;
+            {(languageMenuOpen === "native"
+              ? nativeLanguageOptions
+              : uiLanguageOptions
+            ).map((option) => {
+              const isActive =
+                languageMenuOpen === "native"
+                  ? nativeLanguage === option.key
+                  : uiLanguage === option.key;
               return (
                 <TouchableOpacity
                   key={option.key}
@@ -386,7 +440,13 @@ const AppearanceSection: React.FC = () => {
                     styles.languageMenuOption,
                     isActive && styles.languageMenuOptionActive,
                   ]}
-                  onPress={() => handleUiLanguageSelect(option.key)}
+                  onPress={() => {
+                    if (languageMenuOpen === "native") {
+                      void handleNativeLanguageSelect(option.key);
+                      return;
+                    }
+                    void handleUiLanguageSelect(option.key);
+                  }}
                 >
                   <Text
                     style={[

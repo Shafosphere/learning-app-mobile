@@ -43,6 +43,12 @@
       "polish": "Polski",
       "english": "Angielski"
     },
+    "nativeLanguage": {
+      "title": "Język ojczysty",
+      "subtitle": "Określa, które oficjalne kursy zobaczysz przy przypinaniu.",
+      "polish": "Polski",
+      "english": "Angielski"
+    },
     "appearance": {
       "section": "Wygląd",
       "darkTheme": {
@@ -694,6 +700,8 @@
     "nextMessage": "Następny komunikat",
     "languageIntro": {
       "title": "Wybierz język",
+      "appTitle": "Wybierz język aplikacji",
+      "nativeTitle": "Twój język ojczysty",
       "confirm": "Dalej",
       "polish": "Polski",
       "english": "Angielski",

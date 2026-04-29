@@ -70,6 +70,12 @@ export function OnboardingGate() {
       activeCustomCourseId != null &&
       !hasSeenCustomCourseEntrySettings(activeCustomCourseId);
 
+    if (
+      checkpoint === "language_required" ||
+      checkpoint === "native_language_required"
+    ) {
+      return checkpoint;
+    }
     if (checkpoint === "course_entry_settings_required") {
       return requiresCourseEntrySettings
         ? "course_entry_settings_required"
@@ -115,6 +121,8 @@ export function OnboardingGate() {
     const target =
       resolvedCheckpoint === "language_required"
         ? LANGUAGE_ROUTE
+        : resolvedCheckpoint === "native_language_required"
+          ? LANGUAGE_ROUTE
         : resolvedCheckpoint === "pin_required"
           ? PIN_ROUTE
           : resolvedCheckpoint === "activate_required"

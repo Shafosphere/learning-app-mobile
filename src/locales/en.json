@@ -43,6 +43,12 @@
       "polish": "Polish",
       "english": "English"
     },
+    "nativeLanguage": {
+      "title": "Native language",
+      "subtitle": "Controls which official courses you see while pinning.",
+      "polish": "Polish",
+      "english": "English"
+    },
     "appearance": {
       "section": "Appearance",
       "darkTheme": {
@@ -694,6 +700,8 @@
     "nextMessage": "Next message",
     "languageIntro": {
       "title": "Choose language",
+      "appTitle": "Choose app language",
+      "nativeTitle": "Your native language",
       "confirm": "Next",
       "polish": "Polish",
       "english": "English",

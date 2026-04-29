@@ -15,7 +15,7 @@ external_id,front_text,back_text
 0014,Francja,Paryż
 0015,Grecja,Ateny
 0016,Hiszpania,Madryt
-0017,Holandia,Amsterdam / Haga
+0017,Holandia,"Amsterdam, Haga"
 0018,Irlandia,Dublin
 0019,Islandia,Reykjavík
 0020,Kosowo,Prisztina
@@ -73,14 +73,14 @@ external_id,front_text,back_text
 0072,Laos,Wientian
 0073,Liban,Bejrut
 0074,Malediwy,Male
-0075,Malezja,Kuala Lumpur / Putrajaya
+0075,Malezja,"Kuala Lumpur, Putrajaya"
 0076,Mjanma,Naypyidaw
 0077,Mongolia,Ułan Bator
 0078,Nepal,Katmandu
 0079,Oman,Maskat
 0080,Pakistan,Islamabad
 0081,Singapur,Singapur
-0082,Sri Lanka,Sri Dźajawardanapura Kotte / Kolombo
+0082,Sri Lanka,"Sri Dźajawardanapura Kotte, Kolombo"
 0083,Syria,Damaszek
 0084,Tadżykistan,Duszanbe
 0085,Tajlandia,Bangkok
@@ -93,15 +93,15 @@ external_id,front_text,back_text
 0092,Turcja,Ankara
 0093,Algieria,Algier
 0094,Angola,Luanda
-0095,Benin,Porto-Novo / Kotonu
+0095,Benin,"Porto-Novo, Kotonu"
 0096,Botswana,Gaborone
 0097,Burkina Faso,Wagadugu
-0098,Burundi,Gitega / Bużumbura
+0098,Burundi,"Gitega, Bużumbura"
 0099,Czad,Ndżamena
 0100,Demokratyczna Republika Konga,Kinszasa
 0101,Dżibuti,Dżibuti
 0102,Erytrea,Asmara
-0103,Eswatini,Mbabane / Lobamba
+0103,Eswatini,"Mbabane, Lobamba"
 0104,Etiopia,Addis Abeba
 0105,Gabon,Libreville
 0106,Gambia,Bandżul
@@ -136,11 +136,11 @@ external_id,front_text,back_text
 0135,Somalia,Mogadiszu
 0136,Sudan,Chartum
 0137,Sudan Południowy,Dżuba
-0138,Tanzania,Dodoma / Dar es Salaam
+0138,Tanzania,"Dodoma, Dar es Salaam"
 0139,Togo,Lomé
 0140,Tunezja,Tunis
 0141,Uganda,Kampala
-0142,Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
+0142,Wybrzeże Kości Słoniowej,"Jamusukro, Abidżan"
 0143,Wyspy Świętego Tomasza i Książęca,São Tomé
 0144,Zambia,Lusaka
 0145,Zimbabwe,Harare
@@ -182,7 +182,7 @@ external_id,front_text,back_text
 0181,Wenezuela,Caracas
 0182,Australia,Canberra
 0183,Fidżi,Suva
-0184,Kiribati,Bairiki
+0184,Kiribati,Tarawa
 0185,Mikronezja,Palikir
 0186,Nauru,Yaren
 0187,Niue,Alofi
@@ -191,8 +191,8 @@ external_id,front_text,back_text
 0190,Papua-Nowa Gwinea,Port Moresby
 0191,Samoa,Apia
 0192,Tonga,Nuku’alofa
-0193,Tuvalu,Vaiaku
+0193,Tuvalu,Funafuti
 0194,Vanuatu,Port Vila
 0195,Wyspy Cooka,Avarua
-0196,Wyspy Marshalla,Delap
+0196,Wyspy Marshalla,Majuro
 0197,Wyspy Salomona,Honiara

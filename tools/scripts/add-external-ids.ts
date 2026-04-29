@@ -19,11 +19,29 @@ function nextExternalId(nextNumber, width) {
 }
 
 function listCsvFiles() {
-  return fs
-    .readdirSync(SOURCE_DIR, { withFileTypes: true })
-    .filter((entry) => entry.isFile() && entry.name.toLowerCase().endsWith(CSV_EXTENSION))
-    .map((entry) => entry.name)
-    .sort((a, b) => a.localeCompare(b));
+  const result = [];
+
+  function walk(currentDir, relativeDir = "") {
+    const entries = fs.readdirSync(currentDir, { withFileTypes: true });
+    for (const entry of entries) {
+      const relativePath = relativeDir
+        ? path.join(relativeDir, entry.name)
+        : entry.name;
+      const absolutePath = path.join(currentDir, entry.name);
+
+      if (entry.isDirectory()) {
+        walk(absolutePath, relativePath);
+        continue;
+      }
+
+      if (entry.isFile() && entry.name.toLowerCase().endsWith(CSV_EXTENSION)) {
+        result.push(relativePath);
+      }
+    }
+  }
+
+  walk(SOURCE_DIR);
+  return result.sort((a, b) => a.localeCompare(b));
 }
 
 function parseCsv(csvPath) {

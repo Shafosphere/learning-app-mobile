@@ -1,0 +1,236 @@
+external_id,front_image,back_text
+0001,ad.svg,Andorra
+0002,al.svg,Albania
+0003,at.svg,Austria
+0004,ax.svg,Åland Islands
+0005,ba.svg,Bosnia and Herzegovina
+0006,be.svg,Belgium
+0007,bg.svg,Bulgaria
+0008,by.svg,Belarus
+0009,ch.svg,Switzerland
+0010,cy.svg,Cyprus
+0011,cz.svg,Czechia
+0012,de.svg,Germany
+0013,dk.svg,Denmark
+0014,ee.svg,Estonia
+0015,es.svg,Spain
+0016,eu.svg,European Union
+0017,fi.svg,Finland
+0018,fo.svg,Faroe Islands
+0019,fr.svg,France
+0020,gb-eng.svg,England
+0021,gb-nir.svg,Northern Ireland
+0022,gb-sct.svg,Scotland
+0023,gb.svg,United Kingdom
+0024,gb-wls.svg,Wales
+0025,gr.svg,Greece
+0026,hr.svg,Croatia
+0027,hu.svg,Hungary
+0028,ie.svg,Ireland
+0029,is.svg,Iceland
+0030,it.svg,Italy
+0031,li.svg,Liechtenstein
+0032,lt.svg,Lithuania
+0033,lu.svg,Luxembourg
+0034,lv.svg,Latvia
+0035,mc.svg,Monaco
+0036,md.svg,Moldova
+0037,me.svg,Montenegro
+0038,mk.svg,North Macedonia
+0039,mt.svg,Malta
+0040,nl.svg,Netherlands
+0041,no.svg,Norway
+0042,pl.svg,Poland
+0043,pt.svg,Portugal
+0044,ro.svg,Romania
+0045,rs.svg,Serbia
+0046,ru.svg,Russia
+0047,se.svg,Sweden
+0048,si.svg,Slovenia
+0050,sk.svg,Slovakia
+0051,sm.svg,San Marino
+0052,ua.svg,Ukraine
+0053,va.svg,Vatican City
+0054,xk.svg,Kosovo
+0055,ao.svg,Angola
+0056,bf.svg,Burkina Faso
+0057,bi.svg,Burundi
+0058,bj.svg,Benin
+0059,bw.svg,Botswana
+0060,cd.svg,Democratic Republic of the Congo
+0061,cf.svg,Central African Republic
+0062,cg.svg,Republic of the Congo
+0063,ci.svg,Ivory Coast
+0064,cm.svg,Cameroon
+0065,cv.svg,Cape Verde
+0066,dj.svg,Djibouti
+0067,dz.svg,Algeria
+0068,eg.svg,Egypt
+0069,eh.svg,Western Sahara
+0070,er.svg,Eritrea
+0071,et.svg,Ethiopia
+0072,ga.svg,Gabon
+0073,gh.svg,Ghana
+0074,gm.svg,Gambia
+0075,gn.svg,Guinea
+0076,gq.svg,Equatorial Guinea
+0077,gw.svg,Guinea-Bissau
+0078,ke.svg,Kenya
+0079,km.svg,Comoros
+0080,lr.svg,Liberia
+0081,ls.svg,Lesotho
+0082,ly.svg,Libya
+0083,ma.svg,Morocco
+0084,mg.svg,Madagascar
+0085,ml.svg,Mali
+0086,mr.svg,Mauritania
+0087,mu.svg,Mauritius
+0088,mw.svg,Malawi
+0089,mz.svg,Mozambique
+0090,na.svg,Namibia
+0091,ne.svg,Niger
+0092,ng.svg,Nigeria
+0094,rw.svg,Rwanda
+0095,sc.svg,Seychelles
+0096,sd.svg,Sudan
+0097,sl.svg,Sierra Leone
+0098,sn.svg,Senegal
+0099,so.svg,Somalia
+0100,ss.svg,South Sudan
+0101,st.svg,São Tomé and Príncipe
+0102,sz.svg,Eswatini
+0103,td.svg,Chad
+0104,tg.svg,Togo
+0105,tn.svg,Tunisia
+0106,tz.svg,Tanzania
+0107,ug.svg,Uganda
+0109,za.svg,"South Africa, ""RSA"""
+0110,zm.svg,Zambia
+0111,zw.svg,Zimbabwe
+0112,ae.svg,United Arab Emirates
+0113,af.svg,Afghanistan
+0114,am.svg,Armenia
+0115,az.svg,Azerbaijan
+0116,bd.svg,Bangladesh
+0117,bh.svg,Bahrain
+0118,bn.svg,Brunei
+0119,bt.svg,Bhutan
+0120,cn.svg,China
+0121,ge.svg,Georgia
+0122,hk.svg,Hong Kong
+0123,id.svg,Indonesia
+0124,il.svg,Israel
+0125,in.svg,India
+0126,iq.svg,Iraq
+0127,ir.svg,Iran
+0128,jo.svg,Jordan
+0129,jp.svg,Japan
+0130,kg.svg,Kyrgyzstan
+0131,kh.svg,Cambodia
+0132,kp.svg,North Korea
+0133,kr.svg,South Korea
+0134,kw.svg,Kuwait
+0135,kz.svg,Kazakhstan
+0136,la.svg,Laos
+0137,lb.svg,Lebanon
+0138,lk.svg,Sri Lanka
+0139,mm.svg,Myanmar
+0140,mn.svg,Mongolia
+0141,mo.svg,Macau
+0142,mv.svg,Maldives
+0143,my.svg,Malaysia
+0144,np.svg,Nepal
+0145,om.svg,Oman
+0146,ph.svg,Philippines
+0147,pk.svg,Pakistan
+0148,ps.svg,Palestine
+0149,qa.svg,Qatar
+0150,sa.svg,Saudi Arabia
+0151,sg.svg,Singapore
+0152,sy.svg,Syria
+0153,th.svg,Thailand
+0154,tj.svg,Tajikistan
+0155,tl.svg,Timor-Leste
+0156,tm.svg,Turkmenistan
+0157,tr.svg,Turkey
+0158,tw.svg,Taiwan
+0159,uz.svg,Uzbekistan
+0160,vn.svg,Vietnam
+0161,ye.svg,Yemen
+0162,ag.svg,Antigua and Barbuda
+0163,ai.svg,Anguilla
+0164,aw.svg,Aruba
+0165,bb.svg,Barbados
+0167,bm.svg,Bermuda
+0169,bs.svg,Bahamas
+0170,ca.svg,Canada
+0171,cr.svg,Costa Rica
+0172,cu.svg,Cuba
+0173,dm.svg,Dominica
+0174,do.svg,Dominican Republic
+0175,gd.svg,Grenada
+0176,gg.svg,Guernsey
+0177,gl.svg,Greenland
+0179,gt.svg,Guatemala
+0180,hn.svg,Honduras
+0181,ht.svg,Haiti
+0182,im.svg,Isle of Man
+0183,je.svg,Jersey
+0184,jm.svg,Jamaica
+0185,kn.svg,Saint Kitts and Nevis
+0186,ky.svg,Cayman Islands
+0187,lc.svg,Saint Lucia
+0190,ms.svg,Montserrat
+0191,mx.svg,Mexico
+0192,ni.svg,Nicaragua
+0193,pa.svg,Panama
+0195,pr.svg,Puerto Rico
+0196,sv.svg,El Salvador
+0197,sx.svg,Sint Maarten
+0198,tc.svg,Turks and Caicos Islands
+0199,us.svg,"United States, ""USA"""
+0200,vc.svg,Saint Vincent and the Grenadines
+0201,vg.svg,British Virgin Islands
+0202,vi.svg,U.S. Virgin Islands; United States Virgin Islands; US Virgin Islands
+0203,ar.svg,Argentina
+0204,bo.svg,Bolivia
+0205,br.svg,Brazil
+0206,cl.svg,Chile
+0207,co.svg,Colombia
+0208,ec.svg,Ecuador
+0209,fk.svg,Falkland Islands
+0211,gs.svg,South Georgia and the South Sandwich Islands
+0212,gy.svg,Guyana
+0213,pe.svg,Peru
+0214,py.svg,Paraguay
+0215,sr.svg,Suriname
+0216,uy.svg,Uruguay
+0217,ve.svg,Venezuela
+0218,as.svg,American Samoa
+0219,au.svg,Australia
+0220,cc.svg,Cocos (Keeling) Islands
+0221,ck.svg,Cook Islands
+0222,cx.svg,Christmas Island
+0223,fj.svg,Fiji
+0224,fm.svg,Micronesia
+0225,gu.svg,Guam
+0226,hm.svg,Heard Island and McDonald Islands
+0227,io.svg,British Indian Ocean Territory
+0228,ki.svg,Kiribati
+0229,mh.svg,Marshall Islands
+0230,mp.svg,Northern Mariana Islands
+0232,nf.svg,Norfolk Island
+0233,nr.svg,Nauru
+0234,nu.svg,Niue
+0235,nz.svg,New Zealand
+0236,pf.svg,French Polynesia
+0237,pg.svg,Papua New Guinea
+0238,pn.svg,Pitcairn Islands
+0239,pw.svg,Palau
+0240,sb.svg,Solomon Islands
+0242,tk.svg,Tokelau
+0243,to.svg,Tonga
+0244,tv.svg,Tuvalu
+0246,vu.svg,Vanuatu
+0247,wf.svg,Wallis and Futuna
+0248,ws.svg,Samoa

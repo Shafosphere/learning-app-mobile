@@ -1,0 +1,50 @@
+external_id,front_image,back_text
+0001,ag.svg,Antigua and Barbuda
+0002,ai.svg,Anguilla
+0003,aw.svg,Aruba
+0004,bb.svg,Barbados
+0006,bm.svg,Bermuda
+0008,bs.svg,Bahamas
+0009,ca.svg,Canada
+0010,cr.svg,Costa Rica
+0011,cu.svg,Cuba
+0012,dm.svg,Dominica
+0013,do.svg,Dominican Republic
+0014,gd.svg,Grenada
+0015,gg.svg,Guernsey
+0016,gl.svg,Greenland
+0018,gt.svg,Guatemala
+0019,hn.svg,Honduras
+0020,ht.svg,Haiti
+0021,im.svg,Isle of Man
+0022,je.svg,Jersey
+0023,jm.svg,Jamaica
+0024,kn.svg,Saint Kitts and Nevis
+0025,ky.svg,Cayman Islands
+0026,lc.svg,Saint Lucia
+0029,ms.svg,Montserrat
+0030,mx.svg,Mexico
+0031,ni.svg,Nicaragua
+0032,pa.svg,Panama
+0034,pr.svg,Puerto Rico
+0035,sv.svg,El Salvador
+0036,sx.svg,Sint Maarten
+0037,tc.svg,Turks and Caicos Islands
+0038,us.svg,"United States, USA, United States of America"
+0039,vc.svg,Saint Vincent and the Grenadines
+0040,vg.svg,British Virgin Islands
+0041,vi.svg,U.S. Virgin Islands; United States Virgin Islands; US Virgin Islands
+0042,ar.svg,Argentina
+0043,bo.svg,Bolivia
+0044,br.svg,Brazil
+0045,cl.svg,Chile
+0046,co.svg,Colombia
+0047,ec.svg,Ecuador
+0048,fk.svg,Falkland Islands
+0050,gs.svg,South Georgia and the South Sandwich Islands
+0051,gy.svg,Guyana
+0052,pe.svg,Peru
+0053,py.svg,Paraguay
+0054,sr.svg,Suriname
+0055,uy.svg,Uruguay
+0056,ve.svg,Venezuela

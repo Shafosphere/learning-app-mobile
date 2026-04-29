@@ -8,6 +8,7 @@ import pl from "@/src/locales/pl.json";
 
 export type SupportedLanguage = "pl" | "en";
 export type UiLanguage = SupportedLanguage;
+export type NativeLanguage = SupportedLanguage;
 
 const UI_LANGUAGE_STORAGE_KEY = "uiLanguage";
 
@@ -47,6 +48,16 @@ export function normalizeUiLanguage(
     return resolveSystemLanguage();
   }
   return resolveSystemLanguage();
+}
+
+export function normalizeNativeLanguage(
+  value: string | null | undefined,
+  fallback: NativeLanguage
+): NativeLanguage {
+  if (value === "pl" || value === "en") {
+    return value;
+  }
+  return fallback;
 }
 
 export function resolveLanguage(uiLanguage: UiLanguage): SupportedLanguage {

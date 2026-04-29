@@ -2,21 +2,25 @@ import MyButton from "@/src/components/button/button";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import i18n from "@/src/i18n";
-import type { UiLanguage } from "@/src/i18n";
-import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
+import type { NativeLanguage, UiLanguage } from "@/src/i18n";
+import {
+  getOnboardingCheckpoint,
+  setOnboardingCheckpoint,
+} from "@/src/services/onboardingCheckpoint";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
-import React, { useCallback, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./LanguageIntroScreen-styles";
 
 type LanguageOption = {
-  key: UiLanguage;
+  key: UiLanguage | NativeLanguage;
   flagCode: "pl" | "en";
   title: string;
   subtitle: string;
 };
+type LanguageIntroMode = "app" | "native";
 
 const languageOptions: LanguageOption[] = [
   {
@@ -37,19 +41,30 @@ export default function LanguageIntroScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const router = useRouter();
-  const { uiLanguage, setUiLanguage, colors } = useSettings();
-  const [selectedLanguage, setSelectedLanguage] = useState<UiLanguage>(uiLanguage);
+  const {
+    uiLanguage,
+    nativeLanguage,
+    setUiLanguage,
+    setNativeLanguage,
+    colors,
+  } = useSettings();
+  const [mode, setMode] = useState<LanguageIntroMode>("app");
+  const [selectedLanguage, setSelectedLanguage] = useState<
+    UiLanguage | NativeLanguage
+  >(uiLanguage);
   const [isSaving, setIsSaving] = useState(false);
-  const screenLanguage = selectedLanguage ?? uiLanguage;
+  const screenLanguage = mode === "app" ? selectedLanguage : uiLanguage;
   const fallback = screenLanguage === "pl"
     ? {
-        title: "Zaznacz twój język ojczysty",
+        appTitle: "Wybierz język aplikacji",
+        nativeTitle: "Twój język ojczysty",
         confirm: "Dalej",
         hintDefault: "Wybierz język, żeby aktywować przycisk.",
         hintSelected: "Wybrano: {{language}}",
       }
     : {
-        title: "Choose your native language",
+        appTitle: "Choose app language",
+        nativeTitle: "Your native language",
         confirm: "Next",
         hintDefault: "Choose a language to enable the button.",
         hintSelected: "Selected: {{language}}",
@@ -58,7 +73,8 @@ export default function LanguageIntroScreen() {
   const tr = useCallback(
     (
       key:
-        | "onboarding.languageIntro.title"
+        | "onboarding.languageIntro.appTitle"
+        | "onboarding.languageIntro.nativeTitle"
         | "onboarding.languageIntro.confirm"
         | "onboarding.languageIntro.hintDefault"
         | "onboarding.languageIntro.hintSelected",
@@ -67,24 +83,51 @@ export default function LanguageIntroScreen() {
     [screenLanguage, t]
   );
 
+  useEffect(() => {
+    let mounted = true;
+    getOnboardingCheckpoint().then((checkpoint) => {
+      if (!mounted) return;
+      const nextMode =
+        checkpoint === "native_language_required" ? "native" : "app";
+      setMode(nextMode);
+      setSelectedLanguage(nextMode === "native" ? nativeLanguage : uiLanguage);
+    });
+    return () => {
+      mounted = false;
+    };
+  }, [nativeLanguage, uiLanguage]);
+
   const onSelectLanguage = useCallback(
-    (language: UiLanguage) => {
+    (language: UiLanguage | NativeLanguage) => {
       if (isSaving) return;
       setSelectedLanguage(language);
+      if (mode === "native") {
+        void setNativeLanguage(language).catch((error) => {
+          console.warn("[LanguageIntro] Failed to apply native language", error);
+        });
+        return;
+      }
       void Promise.all([
-        i18n.changeLanguage(language),
-        setUiLanguage(language),
+        i18n.changeLanguage(language as UiLanguage),
+        setUiLanguage(language as UiLanguage),
       ]).catch((error) => {
         console.warn("[LanguageIntro] Failed to apply language immediately", error);
       });
     },
-    [isSaving, setUiLanguage]
+    [isSaving, mode, setNativeLanguage, setUiLanguage]
   );
 
   const onConfirm = async () => {
     if (isSaving) return;
     setIsSaving(true);
     try {
+      if (mode === "app") {
+        await setOnboardingCheckpoint("native_language_required");
+        setMode("native");
+        setSelectedLanguage(selectedLanguage as NativeLanguage);
+        return;
+      }
+      await setNativeLanguage(selectedLanguage as NativeLanguage);
       await setOnboardingCheckpoint("pin_required");
       router.replace("/createcourse");
     } finally {
@@ -97,9 +140,15 @@ export default function LanguageIntroScreen() {
       <View style={styles.content}>
         <View style={styles.card}>
           <Text style={styles.title} allowFontScaling>
-            {tr("onboarding.languageIntro.title", {
-              defaultValue: fallback.title,
-            })}
+            {tr(
+              mode === "app"
+                ? "onboarding.languageIntro.appTitle"
+                : "onboarding.languageIntro.nativeTitle",
+              {
+                defaultValue:
+                  mode === "app" ? fallback.appTitle : fallback.nativeTitle,
+              }
+            )}
           </Text>
 
           <View style={styles.languageTiles}>
@@ -127,7 +176,11 @@ export default function LanguageIntroScreen() {
                       {option.title}
                     </Text>
                     <Text style={styles.languageSubtitle} allowFontScaling>
-                      {option.subtitle}
+                      {mode === "app"
+                        ? option.subtitle
+                        : screenLanguage === "pl"
+                          ? "Język ojczysty"
+                          : "Native language"}
                     </Text>
                   </View>
                   <Ionicons

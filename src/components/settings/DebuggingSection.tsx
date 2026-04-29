@@ -269,6 +269,7 @@ const DebuggingSection: React.FC = () => {
   const handleSetOnboarding = async (
     checkpoint:
       | "language_required"
+      | "native_language_required"
       | "pin_required"
       | "activate_required"
       | "course_entry_settings_required"
@@ -687,6 +688,14 @@ const DebuggingSection: React.FC = () => {
             color="my_yellow"
             onPress={() => handleSetOnboarding("pin_required")}
             width={140}
+          />
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text="native_language_required"
+            color="my_yellow"
+            onPress={() => handleSetOnboarding("native_language_required")}
+            width={220}
           />
         </View>
         <View style={styles.keyboardButtonWrapper}>

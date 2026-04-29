@@ -10,6 +10,7 @@ const Papa = require("papaparse");
 const ROOT_DIR = path.resolve(__dirname, "../..");
 const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
+const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 
 const OFFICIAL_PACKS = [
   {
@@ -64,6 +65,17 @@ const OFFICIAL_PACKS = [
     csvFile: "fiszki_podstawy_EN-PL_slowa.csv",
   },
   {
+    slug: "basic_english_to_spanish_50",
+    name: "Basic Spanish",
+    iconId: "flag:es",
+    iconColor: "#F97316",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvLocale: "en",
+    csvFile: "basic_english_to_spanish_50.csv",
+  },
+  {
     slug: "astronomia",
     name: "Astronomia",
     iconId: "planet",
@@ -111,7 +123,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 2,
+    packVersion: 3,
     csvFile: "flagi_europy.csv",
   },
   {
@@ -122,7 +134,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 2,
+    packVersion: 3,
     csvFile: "flagi_afryki.csv",
   },
   {
@@ -133,6 +145,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "flagi_azji.csv",
   },
   {
@@ -143,7 +156,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 3,
+    packVersion: 4,
     csvFile: "flagi_ameryki.csv",
   },
   {
@@ -154,7 +167,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 2,
+    packVersion: 3,
     csvFile: "flagi_oceanii.csv",
   },
   {
@@ -165,7 +178,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 4,
+    packVersion: 5,
     csvFile: "flagi_swiata.csv",
   },
   {
@@ -176,6 +189,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_europy.csv",
   },
   {
@@ -186,6 +200,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_afryki.csv",
   },
   {
@@ -196,6 +211,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_azji.csv",
   },
   {
@@ -206,6 +222,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_ameryki.csv",
   },
   {
@@ -216,6 +233,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_oceanii.csv",
   },
   {
@@ -226,7 +244,140 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
+    packVersion: 2,
     csvFile: "panstwa_i_stolice_swiata.csv",
+  },
+  {
+    slug: "flagi_europy_en",
+    name: "Flags of Europe",
+    iconId: "flag",
+    iconColor: "#2563EB",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_europy_en.csv",
+  },
+  {
+    slug: "flagi_afryki_en",
+    name: "Flags of Africa",
+    iconId: "flag",
+    iconColor: "#F97316",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_afryki_en.csv",
+  },
+  {
+    slug: "flagi_azji_en",
+    name: "Flags of Asia",
+    iconId: "flag",
+    iconColor: "#FBBF24",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_azji_en.csv",
+  },
+  {
+    slug: "flagi_ameryki_en",
+    name: "Flags of the Americas",
+    iconId: "flag",
+    iconColor: "#EF4444",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_ameryki_en.csv",
+  },
+  {
+    slug: "flagi_oceanii_en",
+    name: "Flags of Oceania",
+    iconId: "flag",
+    iconColor: "#8B5CF6",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_oceanii_en.csv",
+  },
+  {
+    slug: "flagi_swiata_en",
+    name: "Flags of the World",
+    iconId: "flag",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "flagi_swiata_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_europy_en",
+    name: "Capitals of Europe",
+    iconId: "city",
+    iconColor: "#2563EB",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_europy_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_afryki_en",
+    name: "Capitals of Africa",
+    iconId: "city",
+    iconColor: "#F97316",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_afryki_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_azji_en",
+    name: "Capitals of Asia",
+    iconId: "city",
+    iconColor: "#FBBF24",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_azji_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_ameryki_en",
+    name: "Capitals of the Americas",
+    iconId: "city",
+    iconColor: "#EF4444",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_ameryki_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_oceanii_en",
+    name: "Capitals of Oceania",
+    iconId: "city",
+    iconColor: "#8B5CF6",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_oceanii_en.csv",
+  },
+  {
+    slug: "panstwa_i_stolice_swiata_en",
+    name: "Capitals of the World",
+    iconId: "city",
+    iconColor: "#0EA5E9",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: "panstwa_i_stolice_swiata_en.csv",
   },
 ].map((pack) => ({
   packVersion: 1,
@@ -290,6 +441,37 @@ function splitBackTextIntoAnswers(raw) {
   return dedupeOrdered(candidates);
 }
 
+function uniquePaths(paths) {
+  return Array.from(new Set(paths));
+}
+
+function resolveCsvPath(pack) {
+  const candidates = [];
+
+  if (pack.csvLocale) {
+    candidates.push(path.join(SOURCE_DIR, pack.csvLocale, pack.csvFile));
+  }
+
+  candidates.push(path.join(SOURCE_DIR, pack.csvFile));
+
+  for (const locale of SOURCE_LANGUAGE_DIRS) {
+    candidates.push(path.join(SOURCE_DIR, locale, pack.csvFile));
+  }
+
+  const uniqueCandidates = uniquePaths(candidates);
+  const found = uniqueCandidates.find((candidate) => fs.existsSync(candidate));
+  if (found) {
+    return found;
+  }
+
+  const relativeCandidates = uniqueCandidates
+    .map((candidate) => path.relative(ROOT_DIR, candidate))
+    .join(", ");
+  throw new Error(
+    `Missing CSV for official pack "${pack.slug}" (${pack.csvFile}). Tried: ${relativeCandidates}`
+  );
+}
+
 function escapeSqlString(value) {
   return `'${String(value).replace(/'/g, "''")}'`;
 }
@@ -302,7 +484,7 @@ function sqlValue(value) {
 }
 
 function readCardsFromCsv(pack) {
-  const csvPath = path.join(SOURCE_DIR, pack.csvFile);
+  const csvPath = resolveCsvPath(pack);
   const rawCsv = fs.readFileSync(csvPath, "utf8");
   const normalizedCsv = rawCsv.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const parsed = Papa.parse(normalizedCsv, {

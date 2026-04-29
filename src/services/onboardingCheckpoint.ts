@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 export type OnboardingCheckpoint =
   | "language_required"
+  | "native_language_required"
   | "pin_required"
   | "activate_required"
   | "course_entry_settings_required"
@@ -49,6 +50,7 @@ export async function getOnboardingCheckpoint(): Promise<
     if (!value) return null;
     if (
       value === "language_required" ||
+      value === "native_language_required" ||
       value === "pin_required" ||
       value === "activate_required" ||
       value === "course_entry_settings_required" ||

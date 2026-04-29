@@ -1,9 +1,11 @@
 // src/contexts/SettingsContext.tsx
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import i18n, {
+  normalizeNativeLanguage,
   normalizeUiLanguage,
   resolveLanguage,
   resolveSystemLanguage,
+  type NativeLanguage,
   type SupportedLanguage,
   type UiLanguage,
 } from "../i18n";
@@ -219,8 +221,10 @@ function makeBuiltinCourseKey({
 
 interface SettingsContextValue {
   uiLanguage: UiLanguage;
+  nativeLanguage: NativeLanguage;
   resolvedLanguage: SupportedLanguage;
   setUiLanguage: (value: UiLanguage) => Promise<void>;
+  setNativeLanguage: (value: NativeLanguage) => Promise<void>;
   theme: Theme;
   colors: ThemeColors;
   toggleTheme: () => Promise<void>;
@@ -464,8 +468,10 @@ type CourseSkipCorrectionOverrides = {
 
 const defaultValue: SettingsContextValue = {
   uiLanguage: "pl",
+  nativeLanguage: "pl",
   resolvedLanguage: "pl",
   setUiLanguage: async () => {},
+  setNativeLanguage: async () => {},
   theme: "light",
   colors: resolveThemeColors("light"),
   toggleTheme: async () => {},
@@ -623,6 +629,12 @@ export const SettingsProvider: React.FC<{
   const uiLanguage = useMemo<UiLanguage>(
     () => normalizeUiLanguage(uiLanguageRaw),
     [uiLanguageRaw]
+  );
+  const [nativeLanguageRaw, setNativeLanguageState] =
+    useHydratedPersistedState<string | null>("nativeLanguage", null);
+  const nativeLanguage = useMemo<NativeLanguage>(
+    () => normalizeNativeLanguage(nativeLanguageRaw, uiLanguage),
+    [nativeLanguageRaw, uiLanguage]
   );
   const [selectedLevel, persistSelectedLevel] = usePersistedState<CEFRLevel>(
     "selectedLevel",
@@ -853,6 +865,12 @@ export const SettingsProvider: React.FC<{
       void setUiLanguageState(normalized);
     }
   }, [uiLanguageRaw, setUiLanguageState]);
+  useEffect(() => {
+    const normalized = normalizeNativeLanguage(nativeLanguageRaw, uiLanguage);
+    if (nativeLanguageRaw != null && nativeLanguageRaw !== normalized) {
+      void setNativeLanguageState(normalized);
+    }
+  }, [nativeLanguageRaw, setNativeLanguageState, uiLanguage]);
   const toggleSpellChecking = async () => {
     await setSpellChecking(!spellChecking);
   };
@@ -871,6 +889,12 @@ export const SettingsProvider: React.FC<{
       await setUiLanguageState(value);
     },
     [setUiLanguageState]
+  );
+  const setNativeLanguage = useCallback(
+    async (value: NativeLanguage) => {
+      await setNativeLanguageState(value);
+    },
+    [setNativeLanguageState]
   );
   const colors = useMemo(
     () =>
@@ -2503,8 +2527,10 @@ export const SettingsProvider: React.FC<{
     <SettingsContext.Provider
       value={{
         uiLanguage,
+        nativeLanguage,
         resolvedLanguage,
         setUiLanguage,
+        setNativeLanguage,
         theme,
         colors,
         toggleTheme,

@@ -84,7 +84,7 @@ external_id,front_text,back_text,explanation
 0083,Jak nazywa się sonda NASA badająca Jowisza od orbity polarnej?,Juno,Juno bada atmosferę pole magnetyczne i wnętrze Jowisza.
 0084,Jaka misja przez wiele lat badała Saturna?,Cassini,Cassini krążyła wokół Saturna i badała jego księżyce.
 0085,Jaka sonda podleciała najbliżej Słońca?,Parker Solar Probe,"To sonda zaprojektowana do badania zewnętrznej atmosfery Słońca. została zaprojektowana, aby wytrzymać ekstremalne temperatury dochodzące do prawie 1400 stopni Celsjusza."
-0086,W jakim punkcie pracuje teleskop Jamesa Webba?,L2, "Punkt Lagrange’a to miejsce w przestrzeni, w układzie dwóch ciał, gdzie przyciąganie grawitacyjne obu ciał równoważy siłę odśrodkową działającą na mały obiekt"
+0086,W jakim punkcie pracuje teleskop Jamesa Webba?,L2,"Punkt Lagrange’a to miejsce w przestrzeni, w układzie dwóch ciał, gdzie przyciąganie grawitacyjne obu ciał równoważy siłę odśrodkową działającą na mały obiekt"
 0087,Jak nazywa się planeta poza Układem Słonecznym?,egzoplaneta,To planeta krążąca wokół innej gwiazdy niż Słońce.
 0088,Jak nazywa się pierwszy sfotografowany obiekt typu czarna dziura?,M87*,To czarna dziura w galaktyce Messier 87.
 0089,Jak szybko Międzynarodowa Stacja Kosmiczna okrąża Ziemię? (minut), 90, "porusza się z prędkością 28 000 km/h".
@@ -103,6 +103,6 @@ external_id,front_text,back_text,explanation
 0102,Jak często mniej więcej kometa Halleya wraca w okolice Słońca? (lat),76,Jest kometą okresową.
 0103,Jak nazywa się jasna planeta często widoczna wieczorem lub rano?,Wenus,Dlatego bywa nazywana Gwiazdą Wieczorną lub Poranną.
 0104,Jak nazywa się planeta z Wielką Czerwoną Plamą?,Jowisz,Wielka Czerwona Plama to ogromna burza w atmosferze Jowisza.
-0105,Która planeta odwraca sie 'bokiem',Uran, "Taka geometria sprawia, że bieguny planety przez ok. 42 lata są nieustannie oświetlone przez Słońce, a przez kolejne 42 lata pogrążone w całkowitej ciemności"
+0105,Która planeta odwraca sie 'bokiem',Uran,"Taka geometria sprawia, że bieguny planety przez ok. 42 lata są nieustannie oświetlone przez Słońce, a przez kolejne 42 lata pogrążone w całkowitej ciemności"
 0106,Jak nazywa się największy księżyc Plutona?,Charon,Charon jest na tyle duży że Pluton i Charon tworzą nietypowy układ.
 0107,Jak nazywa się pierwszy znany obiekt międzygwiazdowy przelatujący przez Układ Słoneczny?,ʻOumuamua,"Posiada ekstremalnie wydłużony kształt, przypominający cygaro lub dysk, co jest rzadko spotykane wśród ciał niebieskich w naszym systemie."

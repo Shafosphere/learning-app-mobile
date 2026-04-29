@@ -25,7 +25,7 @@ function parseStoredJson<T>(value: string | null, fallback: T): T {
   }
 }
 
-async function resolveStartupRoute(): Promise<StartupRoute> {
+export async function resolveStartupRoute(): Promise<StartupRoute> {
   const [checkpoint, coursesRaw, pinnedRaw, activeCourseIdxRaw, activeCustomCourseIdRaw] =
     await Promise.all([
       getOnboardingCheckpoint(),
@@ -45,6 +45,14 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
   const hasActiveCourse = activeCourseIdx != null || activeCustomCourseId != null;
   const hasPinnedCourses = courses.length > 0 || pinnedOfficialCourseIds.length > 0;
 
+  if (checkpoint === "language_required") {
+    return "/createprofile";
+  }
+
+  if (checkpoint === "native_language_required") {
+    return "/createprofile";
+  }
+
   if (
     checkpoint === "course_entry_settings_required" &&
     activeCustomCourseId != null
@@ -60,10 +68,6 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
     return "/coursepanel";
   }
 
-  if (checkpoint === "language_required") {
-    return "/createprofile";
-  }
-
   if (checkpoint === "activate_required") {
     return "/coursepanel";
   }
@@ -72,7 +76,7 @@ async function resolveStartupRoute(): Promise<StartupRoute> {
     return "/course-entry-settings";
   }
 
-  return "/createcourse";
+  return "/createprofile";
 }
 
 export default function StartupIndexRoute() {

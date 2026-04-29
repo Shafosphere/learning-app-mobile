@@ -11,6 +11,7 @@ import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
+import { filterCoursesForNativeLanguage } from "@/src/features/courses/courseVisibility";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
@@ -68,8 +69,13 @@ export default function CoursePinScreen() {
   const params = useLocalSearchParams<{ replayIntro?: string }>();
   const scrollRef = useRef<ScrollView | null>(null);
   const tabSwitcherRef = useRef<View | null>(null);
-  const { colors, pinnedOfficialCourseIds, pinOfficialCourse, unpinOfficialCourse } =
-    useSettings();
+  const {
+    colors,
+    nativeLanguage,
+    pinnedOfficialCourseIds,
+    pinOfficialCourse,
+    unpinOfficialCourse,
+  } = useSettings();
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
@@ -129,6 +135,11 @@ export default function CoursePinScreen() {
 
   const groupedCourses = useMemo(() => {
     const map = new Map<string, CourseGroup>();
+    const visibleOfficialCourses = filterCoursesForNativeLanguage(
+      officialCourses,
+      nativeLanguage,
+      pinnedOfficialCourseIds
+    );
 
     const ensureGroup = (
       sourceLang: string | null,
@@ -161,7 +172,7 @@ export default function CoursePinScreen() {
       return group;
     };
 
-    officialCourses.forEach((pack) => {
+    visibleOfficialCourses.forEach((pack) => {
       ensureGroup(
         pack.sourceLang,
         pack.targetLang,
@@ -207,7 +218,7 @@ export default function CoursePinScreen() {
     });
 
     return sortedGroups;
-  }, [officialCourses]);
+  }, [nativeLanguage, officialCourses, pinnedOfficialCourseIds]);
 
   const hasAnyPinned = useMemo(() => {
     return pinnedOfficialCourseIds.length > 0;

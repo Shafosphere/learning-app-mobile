@@ -1,0 +1,198 @@
+external_id,front_text,back_text
+0001,Albania,Tirana
+0002,Andorra,Andorra la Vella
+0003,Austria,Vienna
+0004,Belgium,Brussels
+0005,Belarus,Minsk
+0006,Bosnia and Herzegovina,Sarajevo
+0007,Bulgaria,Sofia
+0008,Croatia,Zagreb
+0009,Montenegro,Podgorica
+0010,Czechia,Prague
+0011,Denmark,Copenhagen
+0012,Estonia,Tallinn
+0013,Finland,Helsinki
+0014,France,Paris
+0015,Greece,Athens
+0016,Spain,Madrid
+0017,Netherlands,"Amsterdam, The Hague"
+0018,Ireland,Dublin
+0019,Iceland,Reykjavík
+0020,Kosovo,Pristina
+0021,Liechtenstein,Vaduz
+0022,Lithuania,Vilnius
+0023,Luxembourg,Luxembourg
+0024,North Macedonia,Skopje
+0025,Malta,Valletta
+0026,Monaco,Monaco
+0027,Moldova,Chișinău
+0028,Germany,Berlin
+0029,Norway,Oslo
+0030,Poland,Warsaw
+0031,Portugal,Lisbon
+0032,Romania,Bucharest
+0033,San Marino,San Marino
+0034,Serbia,Belgrade
+0035,Switzerland,Bern
+0036,Sweden,Stockholm
+0037,Slovakia,Bratislava
+0038,Slovenia,Ljubljana
+0039,Ukraine,Kyiv
+0040,Vatican City,Vatican City
+0041,United Kingdom,London
+0042,Hungary,Budapest
+0043,Italy,Rome
+0044,Latvia,Riga
+0045,Russia,Moscow
+0046,Afghanistan,Kabul
+0047,Saudi Arabia,Riyadh
+0048,Armenia,Yerevan
+0049,Azerbaijan,Baku
+0050,Bahrain,Manama
+0051,Bangladesh,Dhaka
+0052,Bhutan,Thimphu
+0053,Brunei,Bandar Seri Begawan
+0054,China,Beijing
+0055,Cyprus,Nicosia
+0056,Philippines,Manila
+0057,Georgia,Tbilisi
+0058,India,New Delhi
+0059,Indonesia,Jakarta
+0060,Iraq,Baghdad
+0061,Iran,Tehran
+0062,Israel,Jerusalem
+0063,Japan,Tokyo
+0064,Yemen,Sana'a
+0065,Jordan,Amman
+0066,Cambodia,Phnom Penh
+0067,Qatar,Doha
+0068,Kyrgyzstan,Bishkek
+0069,South Korea,Seoul
+0070,North Korea,Pyongyang
+0071,Kuwait,Kuwait City
+0072,Laos,Vientiane
+0073,Lebanon,Beirut
+0074,Maldives,Malé
+0075,Malaysia,"Kuala Lumpur, Putrajaya"
+0076,Myanmar,Naypyidaw
+0077,Mongolia,Ulaanbaatar
+0078,Nepal,Kathmandu
+0079,Oman,Muscat
+0080,Pakistan,Islamabad
+0081,Singapore,Singapore
+0082,Sri Lanka,"Sri Jayawardenepura Kotte, Colombo"
+0083,Syria,Damascus
+0084,Tajikistan,Dushanbe
+0085,Thailand,Bangkok
+0086,East Timor,Dili
+0087,Turkmenistan,Ashgabat
+0088,Uzbekistan,Tashkent
+0089,Vietnam,Hanoi
+0090,United Arab Emirates,Abu Dhabi
+0091,Kazakhstan,Astana
+0092,Turkey,Ankara
+0093,Algeria,Algiers
+0094,Angola,Luanda
+0095,Benin,"Porto-Novo, Cotonou"
+0096,Botswana,Gaborone
+0097,Burkina Faso,Ouagadougou
+0098,Burundi,"Gitega, Bujumbura"
+0099,Chad,N'Djamena
+0100,Democratic Republic of the Congo,Kinshasa
+0101,Djibouti,Djibouti
+0102,Eritrea,Asmara
+0103,Eswatini,"Mbabane, Lobamba"
+0104,Ethiopia,Addis Ababa
+0105,Gabon,Libreville
+0106,Gambia,Banjul
+0107,Ghana,Accra
+0108,Guinea,Conakry
+0109,Guinea-Bissau,Bissau
+0110,Equatorial Guinea,Malabo
+0111,Cameroon,Yaoundé
+0112,Kenya,Nairobi
+0113,Comoros,Moroni
+0114,Republic of the Congo,Brazzaville
+0115,Lesotho,Maseru
+0116,Liberia,Monrovia
+0117,Libya,Tripoli
+0118,Madagascar,Antananarivo
+0119,Malawi,Lilongwe
+0120,Mali,Bamako
+0121,Morocco,Rabat
+0122,Mauritania,Nouakchott
+0123,Mauritius,Port Louis
+0124,Mozambique,Maputo
+0125,Namibia,Windhoek
+0126,Niger,Niamey
+0127,Nigeria,Abuja
+0128,South Africa,Pretoria
+0129,Cape Verde,Praia
+0130,Central African Republic,Bangui
+0131,Rwanda,Kigali
+0132,Senegal,Dakar
+0133,Seychelles,Victoria
+0134,Sierra Leone,Freetown
+0135,Somalia,Mogadishu
+0136,Sudan,Khartoum
+0137,South Sudan,Juba
+0138,Tanzania,"Dodoma, Dar es Salaam"
+0139,Togo,Lomé
+0140,Tunisia,Tunis
+0141,Uganda,Kampala
+0142,Ivory Coast,"Yamoussoukro, Abidjan"
+0143,São Tomé and Príncipe,São Tomé
+0144,Zambia,Lusaka
+0145,Zimbabwe,Harare
+0146,Egypt,Cairo
+0147,Antigua and Barbuda,Saint John’s
+0148,Bahamas,Nassau
+0149,Barbados,Bridgetown
+0150,Belize,Belmopan
+0151,Dominica,Roseau
+0152,Dominican Republic,Santo Domingo
+0153,Grenada,Saint George’s
+0154,Guatemala,Guatemala City
+0155,Haiti,Port-au-Prince
+0156,Honduras,Tegucigalpa
+0157,Jamaica,Kingston
+0158,Canada,Ottawa
+0159,Costa Rica,San José
+0160,Cuba,Havana
+0161,Mexico,Mexico City
+0162,Nicaragua,Managua
+0163,Panama,Panama City
+0164,Saint Kitts and Nevis,Basseterre
+0165,Saint Lucia,Castries
+0166,Saint Vincent and the Grenadines,Kingstown
+0167,El Salvador,San Salvador
+0168,United States,"Washington, D.C."
+0169,Argentina,Buenos Aires
+0170,Bolivia,Sucre
+0171,Brazil,Brasília
+0172,Chile,Santiago
+0173,Ecuador,Quito
+0174,Guyana,Georgetown
+0175,Colombia,Bogotá
+0176,Paraguay,Asunción
+0177,Peru,Lima
+0178,Suriname,Paramaribo
+0179,Trinidad and Tobago,Port of Spain
+0180,Uruguay,Montevideo
+0181,Venezuela,Caracas
+0182,Australia,Canberra
+0183,Fiji,Suva
+0184,Kiribati,Tarawa
+0185,Micronesia,Palikir
+0186,Nauru,Yaren
+0187,Niue,Alofi
+0188,New Zealand,Wellington
+0189,Palau,Ngerulmud
+0190,Papua New Guinea,Port Moresby
+0191,Samoa,Apia
+0192,Tonga,Nukuʻalofa
+0193,Tuvalu,Funafuti
+0194,Vanuatu,Port Vila
+0195,Cook Islands,Avarua
+0196,Marshall Islands,Majuro
+0197,Solomon Islands,Honiara

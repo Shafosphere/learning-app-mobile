@@ -1,15 +1,15 @@
 external_id,front_text,back_text
 0001,Algieria,Algier
 0002,Angola,Luanda
-0003,Benin,Porto-Novo / Kotonu
+0003,Benin,"Porto-Novo, Kotonu"
 0004,Botswana,Gaborone
 0005,Burkina Faso,Wagadugu
-0006,Burundi,Gitega / Bużumbura
+0006,Burundi,"Gitega, Bużumbura"
 0007,Czad,Ndżamena
 0008,Demokratyczna Republika Konga,Kinszasa
 0009,Dżibuti,Dżibuti
 0010,Erytrea,Asmara
-0011,Eswatini,Mbabane / Lobamba
+0011,Eswatini,"Mbabane, Lobamba"
 0012,Etiopia,Addis Abeba
 0013,Gabon,Libreville
 0014,Gambia,Bandżul
@@ -44,11 +44,11 @@ external_id,front_text,back_text
 0043,Somalia,Mogadiszu
 0044,Sudan,Chartum
 0045,Sudan Południowy,Dżuba
-0046,Tanzania,Dodoma / Dar es Salaam
+0046,Tanzania,"Dodoma, Dar es Salaam"
 0047,Togo,Lomé
 0048,Tunezja,Tunis
 0049,Uganda,Kampala
-0050,Wybrzeże Kości Słoniowej,Jamusukro / Abidżan
+0050,Wybrzeże Kości Słoniowej,"Jamusukro, Abidżan"
 0051,Wyspy Świętego Tomasza i Książęca,São Tomé
 0052,Zambia,Lusaka
 0053,Zimbabwe,Harare
