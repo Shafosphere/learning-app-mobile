@@ -289,16 +289,18 @@ export function CardCorrection({
         ]}
       >
         <View style={[styles.inputRow, { width: input1ContentWidth }]}>
-          <Text
-            style={[
-              styles.myplaceholder,
-              textColorOverride ? { color: textColorOverride } : null,
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="clip"
-          >
-            {correctionAwers}
-          </Text>
+          {!correction.input1 ? (
+            <Text
+              style={[
+                styles.myplaceholder,
+                textColorOverride ? { color: textColorOverride } : null,
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="clip"
+            >
+              {correctionAwers}
+            </Text>
+          ) : null}
           <TextInput
             value={correction.input1}
             onChangeText={(text) =>
@@ -368,16 +370,18 @@ export function CardCorrection({
         ]}
       >
         <View style={[styles.inputRow, { width: input2ContentWidth }]}>
-          <Text
-            style={[
-              styles.myplaceholder,
-              textColorOverride ? { color: textColorOverride } : null,
-            ]}
-            numberOfLines={1}
-            ellipsizeMode="clip"
-          >
-            {correctionRewers}
-          </Text>
+          {!correction.input2 ? (
+            <Text
+              style={[
+                styles.myplaceholder,
+                textColorOverride ? { color: textColorOverride } : null,
+              ]}
+              numberOfLines={1}
+              ellipsizeMode="clip"
+            >
+              {correctionRewers}
+            </Text>
+          ) : null}
           <TextInput
             value={correction.input2 ?? ""}
             onChangeText={(t) => {

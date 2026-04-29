@@ -161,10 +161,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
   actionCardHeader: {
     gap: 4,
   },
+  actionCardTitleRow: {
+    flexDirection: "row",
+    alignItems: "baseline",
+    columnGap: 8,
+    flexWrap: "wrap",
+  },
   actionCardTitle: {
     fontSize: 16,
     fontWeight: "800",
     color: colors.headline,
+  },
+  actionCardTitleStruck: {
+    textDecorationLine: "line-through",
+    opacity: 0.7,
   },
   actionCardDescription: {
     fontSize: 14,
@@ -173,7 +183,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.82,
   },
   actionCardButtonRow: {
-    alignItems: "flex-end",
+    flexDirection: "row",
+    alignItems: "center",
+    justifyContent: "flex-end",
+    columnGap: 10,
+  },
+  comingSoonText: {
+    fontSize: 12,
+    lineHeight: 16,
+    fontWeight: "800",
+    color: colors.paragraph,
+    opacity: 0.7,
+    textTransform: "uppercase",
+    flexShrink: 1,
   },
   actionCardSections: {
     gap: 0,

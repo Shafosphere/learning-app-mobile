@@ -728,9 +728,22 @@ const CoursesDataSection: React.FC = () => {
           <View style={styles.actionCardSections}>
             <View style={styles.actionCardSection}>
               <View style={styles.actionCardHeader}>
-                <Text style={styles.actionCardTitle}>
-                  {t("settings.coursesData.googleDrive.connectTitle")}
-                </Text>
+                <View style={styles.actionCardTitleRow}>
+                  <Text
+                    style={[
+                      styles.actionCardTitle,
+                      styles.actionCardTitleStruck,
+                    ]}
+                  >
+                    {t("settings.coursesData.googleDrive.connectTitleAction")}
+                  </Text>
+                  <Text style={styles.actionCardTitle}>
+                    {t("settings.coursesData.googleDrive.comingSoon")}
+                  </Text>
+                  <Text style={styles.actionCardTitle}>
+                    {t("settings.coursesData.googleDrive.connectTitleService")}
+                  </Text>
+                </View>
                 <Text style={styles.actionCardDescription}>
                   {preventWidowsPl(
                     t("settings.coursesData.googleDrive.connectSubtitle")
@@ -742,7 +755,7 @@ const CoursesDataSection: React.FC = () => {
                   text={connectButtonText}
                   onPress={handleConnectDrive}
                   color="my_green"
-                  disabled={driveAction === "connect"}
+                  disabled
                   width={130}
                   accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
                   textStyle={styles.driveButtonText}

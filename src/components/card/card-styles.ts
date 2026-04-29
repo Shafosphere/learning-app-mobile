@@ -2,6 +2,22 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 export const PROMPT_IMAGE_MAX_HEIGHT = 140;
 
+const withAlpha = (color: string, alpha: number) => {
+  if (!color.startsWith("#")) return color;
+  const hex = color.slice(1);
+  const normalized = hex.length === 3
+    ? hex.split("").map((char) => char + char).join("")
+    : hex;
+  const rgbHex = normalized.slice(0, 6);
+  if (rgbHex.length !== 6) return color;
+  const value = Number.parseInt(rgbHex, 16);
+  if (Number.isNaN(value)) return color;
+  const r = (value >> 16) & 255;
+  const g = (value >> 8) & 255;
+  const b = value & 255;
+  return `rgba(${r}, ${g}, ${b}, ${alpha})`;
+};
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     // flex: 1,
@@ -262,6 +278,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   overlayCharNeutral: {
     color: colors.headline,
+  },
+  overlayExpectedSuffix: {
+    color: withAlpha(colors.headline, 0.38),
   },
   topContainer: {
     flexDirection: "column",

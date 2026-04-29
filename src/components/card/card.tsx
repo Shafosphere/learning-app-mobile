@@ -37,6 +37,7 @@ const DATE_ANSWER_REGEX = /^\d{3,4}-\d{2}(?:-\d{2})?$/;
 const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
 const MAX_INPUT_SCROLL_AHEAD = 180;
+const INPUT_SCROLL_TRAILING_BUFFER = 120;
 
 type AnswerInputKind = "text" | "number" | "year" | "date";
 const detectInputKind = (value: string): AnswerInputKind => {
@@ -383,12 +384,14 @@ export default function Card({
 
   const input1ContentWidth = useMemo(() => {
     const measured = Math.max(input1TextWidth, input1ExpectedWidth);
-    const padded = measured + INPUT_HORIZONTAL_PADDING * 2;
+    const padded =
+      measured + INPUT_HORIZONTAL_PADDING * 2 + INPUT_SCROLL_TRAILING_BUFFER;
     return Math.max(padded, input1LayoutWidth || 0);
   }, [input1ExpectedWidth, input1LayoutWidth, input1TextWidth]);
   const input2ContentWidth = useMemo(() => {
     const measured = Math.max(input2TextWidth, input2ExpectedWidth);
-    const padded = measured + INPUT_HORIZONTAL_PADDING * 2;
+    const padded =
+      measured + INPUT_HORIZONTAL_PADDING * 2 + INPUT_SCROLL_TRAILING_BUFFER;
     return Math.max(padded, input2LayoutWidth || 0);
   }, [input2ExpectedWidth, input2LayoutWidth, input2TextWidth]);
 
@@ -717,7 +720,7 @@ export default function Card({
 
   function renderOverlayText(value: string, expected: string) {
     if (!value) return null;
-    return value.split("").map((char, idx) => {
+    const typedChars = value.split("").map((char, idx) => {
       const mismatch = isCharMismatchAt(value, expected, idx);
       const displayChar = char === " " ? "\u00A0" : char;
       const charStyle = mismatch
@@ -729,6 +732,17 @@ export default function Card({
         </Text>
       );
     });
+    const expectedSuffix =
+      value.length < expected.length ? expected.slice(value.length) : "";
+    if (!expectedSuffix) {
+      return typedChars;
+    }
+    return [
+      ...typedChars,
+      <Text key="overlay-expected-suffix" style={styles.overlayExpectedSuffix}>
+        {expectedSuffix.replace(/ /g, "\u00A0")}
+      </Text>,
+    ];
   }
 
   const startHintEditing = useCallback(() => {
