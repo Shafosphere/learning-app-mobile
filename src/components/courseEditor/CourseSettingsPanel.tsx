@@ -6,6 +6,7 @@ import {
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import type { ThemeColorKey } from "@/src/theme/theme";
 import { Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 type CourseSettingsResetAction = {
   key: string;
@@ -45,6 +46,7 @@ export function CourseSettingsPanel({
   settingsProps,
   resetActions = [],
 }: Props) {
+  const { t } = useTranslation();
   const sharedStyles = styles as SharedStyles;
 
   return (
@@ -53,7 +55,9 @@ export function CourseSettingsPanel({
 
       {resetActions.length > 0 ? (
         <>
-          <Text style={sharedStyles.settingsGroupLabel}>RESET</Text>
+          <Text style={sharedStyles.settingsGroupLabel}>
+            {t("components.courseEditor.courseSettingsPanel.textChild.reset")}
+          </Text>
           <View
             style={[
               sharedStyles.settingsActionCard,
@@ -79,7 +83,10 @@ export function CourseSettingsPanel({
                       <MyButton
                         text={
                           action.loading
-                            ? (action.loadingText ?? "Trwa operacja...")
+                            ? action.loadingText ??
+                              t(
+                                "components.courseEditor.courseSettingsPanel.loadingText.operationInProgress"
+                              )
                             : action.ctaText
                         }
                         color={action.buttonColor ?? "my_red"}

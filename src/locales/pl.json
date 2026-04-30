@@ -24,9 +24,20 @@
       "reset": {
         "confirmTitle": "Zresetować lokalne dane aplikacji?",
         "confirmMessage": "To usunie lokalną bazę SQLite i utworzy nową od zera. Jeśli nie masz kopii zapasowej, lokalne dane nauki zapisane tylko na tym urządzeniu mogą zostać utracone.",
-        "cancel": "Anuluj",
         "confirm": "Resetuj"
       }
+    },
+    "actions": {
+      "cancel": "Anuluj",
+      "next": "Dalej",
+      "restore": "Przywróć",
+      "delete": "Usuń",
+      "clear": "Wyczyść"
+    },
+    "status": {
+      "done": "Gotowe",
+      "error": "Błąd",
+      "resetting": "Resetuję…"
     }
   },
   "settings": {
@@ -39,18 +50,19 @@
     },
     "uiLanguage": {
       "title": "Język interfejsu",
-      "subtitle": "Wybierz język aplikacji niezależnie od języka kursu.",
-      "polish": "Polski",
-      "english": "Angielski"
+      "subtitle": "Wybierz język aplikacji niezależnie od języka kursu."
     },
     "nativeLanguage": {
       "title": "Język ojczysty",
-      "subtitle": "Określa, które oficjalne kursy zobaczysz przy przypinaniu.",
-      "polish": "Polski",
-      "english": "Angielski"
+      "subtitle": "Określa, które oficjalne kursy zobaczysz przy przypinaniu."
     },
     "appearance": {
       "section": "Wygląd",
+      "groups": {
+        "language": "JĘZYK",
+        "interface": "INTERFEJS",
+        "sound": "DŹWIĘK"
+      },
       "darkTheme": {
         "title": "Ciemny motyw",
         "subtitle": "Przełącz interfejs pomiędzy jasnym a ciemnym trybem."
@@ -124,6 +136,7 @@
       "reminders": {
         "title": "Przypomnienia o nauce",
         "subtitle": "Ustaw przypomnienia o nauce.",
+        "shortSubtitle": "Pomaga utrzymać rytm nauki.",
         "profile": {
           "morning": "poranny",
           "afternoon": "popołudniowy",
@@ -144,16 +157,19 @@
         "title": "Liczba fiszek w serii",
         "subtitle": "Zakres 1-200 fiszek na jedną sesję nauki.",
         "placeholder": "np. 10"
+      },
+      "groups": {
+        "writing": "PISANIE"
       }
     },
     "coursesData": {
       "section": "Inne",
       "groups": {
         "localBackup": "Kopia lokalna",
-        "googleDrive": "Google Drive"
+        "googleDrive": "Google Drive",
+        "reset": "RESET"
       },
       "errors": {
-        "generic": "Błąd",
         "exportUserData": "Nie udało się wyeksportować danych użytkownika.",
         "exportGoogleDrive": "Nie udało się wyeksportować danych do Google Drive.",
         "import": "Wystąpił nieoczekiwany błąd podczas importu.",
@@ -170,7 +186,7 @@
       "googleDrive": {
         "sectionTitle": "Kopia zapasowa Google Drive",
         "actionButton": "Opcje Google Drive",
-        "loadingShort": "Trwa...",
+        "loadingShort": "Trwa…",
         "connectTitle": "Połącz Google Drive",
         "connectTitleAction": "Połącz",
         "connectTitleService": "Google Drive",
@@ -185,7 +201,7 @@
           "notConfigured": "Funkcja nie jest jeszcze skonfigurowana w tej wersji aplikacji. Powód: {{reason}}",
           "notConfiguredFallback": "brak konfiguracji logowania Google",
           "disconnected": "Nie połączono z Google Drive. Po połączeniu aplikacja odczyta listę kopii i pozwoli ręcznie tworzyć nowe kopie.",
-          "loadingList": "Połączono z Google Drive. Trwa pobieranie listy kopii...",
+          "loadingList": "Połączono z Google Drive. Trwa pobieranie listy kopii…",
           "noBackups": "Połączono, ale nie znaleziono jeszcze kopii.\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
           "connected": "Połączono. Dostępne kopie: {{count}}.\nNajnowsza kopia: {{latest}}\nOstatnia udana kopia zapasowa: {{lastSuccess}}\nOstatnia próba: {{lastAttempt}}\nOstatni błąd: {{error}}",
           "listError": "Połączono z Google Drive, ale nie udało się pobrać listy kopii: {{error}}",
@@ -203,11 +219,9 @@
         },
         "restoreTitle": "Lista kopii do przywrócenia",
         "restoreSubtitle": "Pobierz listę 3 ostatnich kopii z Google Drive i wybierz konkretną kopię do przywrócenia.",
-        "restoreButton": "Przywróć",
         "restoreConfirm": {
           "title": "Przywrócić dane z Google Drive?",
-          "message": "To zastąpi lokalne dane użytkownika kopią z {{createdAt}}, łącznie z kursami prywatnymi, postępem i zdjęciami.",
-          "confirm": "Przywróć"
+          "message": "To zastąpi lokalne dane użytkownika kopią z {{createdAt}}, łącznie z kursami prywatnymi, postępem i zdjęciami."
         },
         "snapshotTitle": "Kopia z {{createdAt}}",
         "snapshotMeta": "Wersja aplikacji: {{appVersion}} • Źródło: {{backupSource}}",
@@ -227,9 +241,7 @@
           "detailsStats": "Zakres danych: {{value}}"
         },
         "snapshotLabels": {
-          "customCourses": "Kursy",
           "flashcards": "Fiszki",
-          "reviews": "Powtórki",
           "events": "Historia"
         },
         "snapshotStates": {
@@ -240,7 +252,7 @@
         "disconnectTitle": "Rozłącz Google Drive",
         "disconnectSubtitle": "Usuń lokalnie zapisane połączenie z kontem Google i wyczyść listę kopii w aplikacji.",
         "disconnectButton": "Rozłącz",
-        "disconnectLoading": "Rozłączam...",
+        "disconnectLoading": "Rozłączam…",
         "disconnectDone": {
           "title": "Google Drive rozłączony",
           "message": "Lokalne połączenie z Google Drive zostało usunięte."
@@ -272,22 +284,17 @@
       },
       "resetLearningConfirm": {
         "title": "Przywróć ustawienia nauki",
-        "message": "Przywrócić domyślne ustawienia nauki (sprawdzanie pisowni, ogonki, miny pudełek, układ, przypomnienia)?",
-        "cancel": "Anuluj",
-        "confirm": "Przywróć"
+        "message": "Przywrócić domyślne ustawienia nauki (sprawdzanie pisowni, ogonki, miny pudełek, układ, przypomnienia)?"
       },
       "resetLearningDone": {
-        "title": "Gotowe",
         "message": "Ustawienia nauki przywrócone."
       },
       "resetIntroConfirm": {
         "title": "Zresetować wprowadzenie?",
         "message": "Wprowadzenie uruchomi się od początku. Przypięte kursy zostaną odpięte, a aktywny kurs zostanie wyłączony. Postęp nauki i zapisane dane nie zostaną usunięte.",
-        "cancel": "Anuluj",
         "confirm": "Resetuj wprowadzenie"
       },
       "resetIntroDone": {
-        "title": "Gotowe",
         "message": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka."
       },
       "rows": {
@@ -295,32 +302,31 @@
           "title": "Eksportuj dane użytkownika",
           "subtitle": "Postępy w kursach, pudełka i własne kursy zostaną zapisane do pliku JSON w pamięci urządzenia.",
           "button": "Eksportuj",
-          "buttonLoading": "Eksportuję..."
+          "buttonLoading": "Eksportuję…"
         },
         "exportGoogleDrive": {
           "title": "Eksportuj do Google Drive",
           "subtitle": "Otwórz okno udostępniania i wybierz Google Drive, aby zapisać kopię JSON.",
           "button": "Dysk Google",
-          "buttonLoading": "Eksportuję...",
+          "buttonLoading": "Eksportuję…",
           "accessibilityLabel": "Eksportuj dane do Google Drive"
         },
         "importUserData": {
           "title": "Importuj dane użytkownika",
           "subtitle": "Wczytaj postępy i kursy z pliku JSON.",
           "button": "Importuj",
-          "buttonLoading": "Importuję..."
+          "buttonLoading": "Importuję…"
         },
         "resetLearning": {
           "title": "Przywróć ustawienia nauki",
           "subtitle": "Sprawdzanie pisowni, diakrytyki, miny pudełek, układ, przypomnienia.",
           "button": "Przywróć",
-          "buttonLoading": "Przywracam..."
+          "buttonLoading": "Przywracam…"
         },
         "resetIntro": {
           "title": "Zresetuj wprowadzenie",
           "subtitle": "Uruchamia samouczek od początku. Odpina kursy i wyłącza aktywny kurs, ale nie usuwa postępu.",
-          "button": "Resetuj",
-          "buttonLoading": "Resetuję..."
+          "button": "Resetuj"
         }
       }
     },
@@ -340,7 +346,6 @@
         "addedTitle": "Dodano",
         "addedSome": "Dodano {{inserted}} fiszek do powtórek kursu.",
         "addedNone": "Brak nowych fiszek do dodania.",
-        "errorTitle": "Błąd",
         "addError": "Nie udało się dodać fiszek.",
         "resetCustomTitle": "Zresetowano kurs własny",
         "resetCustomSome": "Usunięto {{deleted}} wpisów powtórek kursu własnego.",
@@ -348,12 +353,9 @@
         "resetCustomError": "Nie udało się zresetować kursu własnego.",
         "clearStorageTitle": "Wyczyść AsyncStorage",
         "clearStorageMessage": "Usunie WSZYSTKIE zapisane ustawienia (również poza ustawieniami). Tylko w wersji deweloperskiej.",
-        "clearStorageConfirm": "Wyczyść",
         "deleteDbTitle": "Usuń bazę SQLite",
         "deleteDbMessage": "Usunie lokalną bazę mygame.db (fiszki i własne kursy). Wymagany restart aplikacji.",
         "deleteDbConfirm": "Usuń bazę",
-        "cancel": "Anuluj",
-        "doneTitle": "Gotowe",
         "storageCleared": "AsyncStorage wyczyszczony.",
         "storageClearError": "Nie udało się wyczyścić AsyncStorage.",
         "dbDeleted": "Baza mygame.db została usunięta.",
@@ -367,6 +369,14 @@
         "introResetError": "Nie udało się zresetować dymków.",
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Zamknij go przez „Spróbuj ponownie”.",
         "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
+      },
+      "onboardingCheckpoints": {
+        "languageRequired": "language_required",
+        "pinRequired": "pin_required",
+        "nativeLanguageRequired": "native_language_required",
+        "activateRequired": "activate_required",
+        "courseEntrySettingsRequired": "course_entry_settings_required",
+        "done": "done"
       },
       "rows": {
         "testPopup": {
@@ -394,7 +404,7 @@
           "title": "Test ekranu błędu bazy",
           "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",
           "button": "Pokaż ekran",
-          "buttonLoading": "Otwieram..."
+          "buttonLoading": "Otwieram…"
         },
         "testQuotes": {
           "title": "Testuj cytaty (dymek cytatu)",
@@ -432,32 +442,29 @@
           "title": "Dodaj własne powtórki",
           "subtitle": "Wstaw losowe fiszki z aktywnego kursu własnego.",
           "button": "Dodaj 10",
-          "buttonLoading": "Dodawanie..."
+          "buttonLoading": "Dodawanie…"
         },
         "selectCourseInfo": "Najpierw wybierz własny kurs w panelu kursów.",
         "resetCustom": {
           "title": "Reset kursu własnego (deweloperskie)",
           "subtitle": "Usuń wpisy powtórek aktywnego kursu własnego.",
-          "button": "Resetuj kurs własny",
-          "buttonLoading": "Resetuję..."
+          "button": "Resetuj kurs własny"
         },
         "clearStorage": {
           "title": "Wyczyść AsyncStorage",
           "subtitle": "Usuwa wszystkie klucze aplikacji (tylko w wersji deweloperskiej).",
-          "button": "Wyczyść",
-          "buttonLoading": "Czyszczę..."
+          "buttonLoading": "Czyszczę…"
         },
         "deleteDb": {
           "title": "Usuń bazę mygame.db",
           "subtitle": "Kasuje lokalną bazę SQLite (wymaga restartu).",
           "button": "Usuń bazę",
-          "buttonLoading": "Usuwam..."
+          "buttonLoading": "Usuwam…"
         },
         "resetIntro": {
           "title": "Zresetuj dymki wprowadzenia",
           "subtitle": "Usuwa flagi „seen” dla wszystkich ekranów.",
-          "button": "Resetuj wprowadzenie",
-          "buttonLoading": "Resetuję..."
+          "button": "Resetuj wprowadzenie"
         },
         "openLanguageIntro": {
           "title": "Przejdź do wyboru języka",
@@ -495,10 +502,10 @@
     },
     "suggestion": {
       "title": "Wyślij sugestię",
-      "subtitle": "Masz pomysł na nową funkcję lub poprawkę? Podziel się nim, a sprawdzimy jak możemy go wdrożyć.",
+      "subtitle": "Masz pomysł na nową funkcję lub poprawkę? Podziel się nim, a sprawdzimy, jak możemy go wdrożyć.",
       "button": "Podziel się pomysłem",
       "subject": "Sugestia / pomysł - Memicard",
-      "body": "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach co chcesz zmienić i dlaczego będzie to pomocne."
+      "body": "Masz pomysł na nową funkcję lub ulepszenie? Opisz w kilku zdaniach, co chcesz zmienić i dlaczego będzie to pomocne."
     },
     "guide": {
       "title": "Poradnik i wskazówki",
@@ -655,7 +662,7 @@
         },
         "rights": {
           "title": "Prawa użytkownika",
-          "body": "Użytkownikowi przysługują prawa wynikające z przepisów o ochronie danych osobowych, w zakresie w jakim mają zastosowanie do sposobu korzystania z aplikacji.",
+          "body": "Użytkownikowi przysługują prawa wynikające z przepisów o ochronie danych osobowych, w zakresie, w jakim mają zastosowanie do sposobu korzystania z aplikacji.",
           "bullets": [
             "prawo dostępu do danych, ich sprostowania, usunięcia oraz otrzymania kopii danych",
             "prawo do ograniczenia przetwarzania oraz wniesienia sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie",
@@ -689,7 +696,7 @@
             "bullets": [],
             "noteLabel": "",
             "note": "",
-            "button": "źródło"
+            "button": "Źródło"
           }
         }
       }
@@ -702,9 +709,6 @@
       "title": "Wybierz język",
       "appTitle": "Wybierz język aplikacji",
       "nativeTitle": "Twój język ojczysty",
-      "confirm": "Dalej",
-      "polish": "Polski",
-      "english": "Angielski",
       "hintDefault": "Wybierz język, aby aktywować przycisk.",
       "hintSelected": "Wybrano: {{language}}"
     },
@@ -837,7 +841,6 @@
         "description": "Jednym kliknięciem przełączysz motyw aplikacji."
       },
       "step21": {
-        "title": "Powtórki",
         "description": "Ten przycisk otwiera ekran powtórek i zaległych fiszek."
       },
       "step22": {
@@ -857,7 +860,7 @@
         "description": ""
       },
       "actionsPositionNudge": {
-        "title": "Jaki układ przycisków",
+        "title": "Jaki układ przycisków?",
         "subtitle": "Możesz zmienić ich położenie teraz, a później wrócić do tego w ustawieniach.",
         "dismiss": "Zostaw jak jest",
         "confirm": "Zatwierdź"
@@ -946,7 +949,7 @@
       },
       "step5": {
         "title": "Sześć pudełek",
-        "description": "Tutaj zawsze masz 6 pudełek, a nie 5 jak w zwykłej grze."
+        "description": "Tutaj zawsze masz 6 pudełek, a nie 5, jak w zwykłej grze."
       },
       "step6": {
         "title": "Największa różnica",
@@ -970,6 +973,329 @@
       }
     }
   },
+  "flashcards": {
+    "card": {
+      "actions": {
+        "addFlashcards": "DODAJ FISZKI"
+      },
+      "peek": {
+        "flashcard": "Fiszka",
+        "flashcardNumber": "FISZKA #{{number}}",
+        "image": "Obrazek",
+        "front": "Awers",
+        "back": "Rewers",
+        "question": "Pytanie:",
+        "answer": "Odpowiedź:",
+        "emptyContent": "Brak treści",
+        "emptyTranslation": "Brak tłumaczenia",
+        "emptyAnswer": "Brak odpowiedzi",
+        "textType": "Tekst",
+        "true": "Prawda",
+        "false": "Fałsz",
+        "otherCorrect": "Pozostałe poprawne:",
+        "boxTitle": "Pudełko nr {{box}}",
+        "listHint": "Lista fiszek w tym pudełku.",
+        "countOne": "{{count}} fiszka",
+        "countMany": "{{count}} fiszek",
+        "emptyCount": "Brak fiszek",
+        "previewCourse": "podgląd",
+        "close": "Zamknij",
+        "emptyBoxTitle": "Pudełko jest puste",
+        "emptyBoxDescription": "Fiszki trafią tutaj, gdy osiągniesz odpowiedni poziom nauki."
+      },
+      "hint": {
+        "placeholder": "Wpisz podpowiedź…",
+        "save": "Zapisz",
+        "saveDialogTitle": "Zapisać podpowiedź?",
+        "saveDialogMessage": "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+        "targetDialogTitle": "Gdzie zapisać podpowiedź?",
+        "targetDialogMessage": "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
+        "thisSideOnly": "Tylko ta strona",
+        "bothSides": "Obie strony fiszki"
+      },
+      "emptyScene": {
+        "chooseBox": "Wybierz pudełko z fiszkami"
+      },
+      "trueFalse": {
+        "true": "PRAWDA",
+        "false": "FAŁSZ",
+        "markTrue": "Oznacz jako Prawda",
+        "markFalse": "Oznacz jako Fałsz"
+      }
+    }
+  },
+  "courses": {
+    "groups": {
+      "mini": "Minikursy",
+      "categoryA11y": "Kategoria {{title}}, {{count}} kursów"
+    },
+    "official": {
+      "cardsCount": "fiszki: {{count}}",
+      "editCourse": "Edytuj kurs {{name}}"
+    }
+  },
+  "components": {
+    "logoMessage": {
+      "logoMessage": {
+        "title": {
+          "witajWAplikacjiDoFiszek": "Witaj w aplikacji do fiszek",
+          "dodajKursKodem": "Dodaj kurs kodem",
+          "nieZnalezionoKursu": "Nie znaleziono kursu",
+          "kursDodany": "Kurs dodany",
+          "aktywujKurs": "Aktywuj kurs",
+          "gotowe": "Gotowe!"
+        },
+        "description": {
+          "dodajKursKodemOdProwadzacego": "Dodaj kurs kodem od prowadzącego i odblokuj materiały.",
+          "wpiszKodKursuZebyPrzypiac": "Wpisz kod kursu, żeby przypiąć go do swojego profilu.",
+          "sprawdzKodAlboPoprosProwadzacego": "Sprawdź kod albo poproś prowadzącego o poprawny.",
+          "aktywujGoByPobracMaterialy": "Aktywuj go, by pobrać materiały i śledzić postęp.",
+          "potwierdzAbyOdblokowacFiszkiI": "Potwierdź, aby odblokować fiszki i zapisywać postępy.",
+          "kursAktywnyLecimyDoFiszek": "Kurs aktywny. Lecimy do fiszek."
+        }
+      }
+    },
+    "navbar": {
+      "navbar": {
+        "accessibilityLabel": {
+          "przejdzDoStronyGlownej": "Przejdź do strony głównej",
+          "przejdzDoPowtorek": "Przejdź do powtórek",
+          "przejdzDoMenuGlownego": "Przejdź do menu głównego",
+          "przejdzDoGryFiszek": "Przejdź do gry fiszek",
+          "przejdzDoUstawien": "Przejdź do ustawień"
+        }
+      },
+      "navbarStatsRotator": {
+        "label": {
+          "dailyStreak": "Daily streak"
+        },
+        "accessibilityLabel": {
+          "valueValuePrzejdzDoStatystyk": "{{label}}: {{value}}. Przejdź do statystyk"
+        }
+      }
+    },
+    "stats": {
+      "activityHeatmap": {
+        "textChild": {
+          "ostatniaAktywnosc": "Ostatnia aktywność"
+        },
+        "months": {
+          "0": "styczeń",
+          "1": "luty",
+          "2": "marzec",
+          "3": "kwiecień",
+          "4": "maj",
+          "5": "czerwiec",
+          "6": "lipiec",
+          "7": "sierpień",
+          "8": "wrzesień",
+          "9": "październik",
+          "10": "listopad",
+          "11": "grudzień"
+        },
+        "details": {
+          "selectedDayActivity": "Szczegóły aktywności z wybranego dnia.",
+          "noActivityForDay": "Tego dnia nie zapisano jeszcze aktywności."
+        },
+        "stats": {
+          "correct": "Dobre odpowiedzi",
+          "wrong": "Błędy"
+        }
+      },
+      "hardWordsList": {
+        "accessibilityLabel": {
+          "wypelnienieBledowValue": "Wypełnienie błędów {{value}}"
+        },
+        "textChild": {
+          "ladowanie": "Ładowanie…",
+          "brakDanychSprobujPogracDluzej": "Brak danych – spróbuj pograć dłużej."
+        },
+        "title": {
+          "trudneFiszki": "Trudne fiszki"
+        },
+        "subtitle": {
+          "activeCourse": "Najczęściej mylone fiszki z aktywnego kursu",
+          "global": "Najczęściej mylone fiszki ogólnie"
+        }
+      },
+      "hourlyActivityChart": {
+        "title": {
+          "czasWNauce": "Czas w nauce"
+        },
+        "subtitle": {
+          "sumaCzasuSpedzonegoNaKartach": "Suma czasu spędzonego na kartach"
+        },
+        "textChild": {
+          "jakLiczymyCzas": "Jak liczymy czas?",
+          "czasLiczonyJestOdMomentu": "Czas liczony jest od momentu pokazania karty do potwierdzenia odpowiedzi (bez przerw między kartami)."
+        },
+        "period": {
+          "thisWeek": "Ten tydzień",
+          "thisMonth": "Ten miesiąc",
+          "thisYear": "Ten rok"
+        }
+      },
+      "pinnedCoursesProgress": {
+        "title": {
+          "postepPrzypietychKursow": "Postęp przypiętych kursów"
+        },
+        "textChild": {
+          "brakDanychDoWyswietlenia": "Brak danych do wyświetlenia."
+        },
+        "label": {
+          "valueValue": "{{learned}} / {{total}}"
+        }
+      },
+      "progressBar": {
+        "textChildTemplate": {
+          "value": "{{value}}%"
+        }
+      }
+    },
+    "wiki": {
+      "wikiPeek": {
+        "accessibilityLabel": {
+          "zamknij": "Zamknij"
+        },
+        "text": {
+          "ok": "OK"
+        }
+      }
+    },
+    "courseEditor": {
+      "courseSettingsPanel": {
+        "textChild": {
+          "reset": "RESET"
+        },
+        "loadingText": {
+          "operationInProgress": "Trwa operacja…"
+        }
+      },
+      "nameEdit": {
+        "nameEdit": {
+          "placeholder": {
+            "npFiszkiPodroznicze": "np. Fiszki podróżnicze"
+          },
+          "textChild": {
+            "nazwa": "nazwa"
+          },
+          "accessibilityLabel": {
+            "nazwaKursu": "Nazwa kursu"
+          }
+        }
+      },
+      "settingsCourse": {
+        "title": {
+          "stwierdzenie": "Stwierdzenie",
+          "opanowanie": "Opanowanie",
+          "duza": "Duża",
+          "mala": "Mała",
+          "dynamiczny": "Dynamiczny",
+          "maly": "Mały",
+          "sredni": "Średni",
+          "duzy": "Duży",
+          "bardzoDuzy": "Bardzo duży",
+          "fazaZapoznaniaPudelko0": "Faza zapoznania (Pudełko 0)",
+          "automatFiszek": "Automat fiszek",
+          "wlaczPowtorki": "Włącz powtórki",
+          "wyswietlajWyjasnienie": "Wyświetlaj wyjaśnienie",
+          "tylkoPoBlednejOdpowiedzi": "Tylko po błędnej odpowiedzi",
+          "pominPoprawkePoBledzie": "Pomiń poprawkę po błędzie",
+          "rodzajPrzyciskowWPrawdaFalsz": "Rodzaj przycisków w Prawda / Fałsz",
+          "rozmiarFiszki": "Rozmiar fiszki",
+          "rozmiarObrazu": "Rozmiar obrazu",
+          "ramkaObrazu": "Ramka obrazu"
+        },
+        "subtitle": {
+          "kartaRozszerzaSie": "Karta rozszerza się pionowo i pokazuje cały tekst.",
+          "tekstZostaje": "Tekst zostaje w jednej linii i przesuwa się.",
+          "naturalneProporcje": "Naturalne proporcje obrazka.",
+          "czterdziesciProcent": "40% maksymalnej wysokości.",
+          "szescdziesiatProcent": "60% maksymalnej wysokości.",
+          "stoProcent": "100% maksymalnej wysokości.",
+          "stoSiedemdziesiatProcent": "170% maksymalnej wysokości."
+        },
+        "description": {
+          "dodatkowePudelko": "To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami.",
+          "automatyczniePrzelaczaj": "Automatycznie przełączaj pudełka i pobieraj nowe słowa.",
+          "dodajFiszkiDoPowtorek": "Dodaj fiszki z tego kursu do codziennych powtórek.",
+          "pokazujWyjasnienie": "Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada.",
+          "gdyWylaczone": "Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi.",
+          "poZlejOdpowiedzi": "Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową.",
+          "wybierzNapisyPrzyciskow": "Wybierz, jakie napisy mają mieć przyciski w tym kursie.",
+          "zmienWielkoscKarty": "Zmień wielkość karty tylko dla tego kursu.",
+          "dopasujWysokosc": "Dopasuj wysokość obrazków w dużych fiszkach.",
+          "pokazujObramowanie": "Pokazuj obramowanie wokół obrazka na fiszce."
+        },
+        "hint": {
+          "dostepneTylkoDlaDuzych": "Dostępne tylko dla dużych kart z obrazkami."
+        },
+        "textChild": {
+          "przeplyw": "PRZEPŁYW",
+          "wyjasnienia": "WYJAŚNIENIA",
+          "odpowiedzi": "ODPOWIEDZI"
+        },
+        "accessibilityLabel": {
+          "przelaczFazeZapoznania": "Przełącz fazę zapoznania",
+          "przelaczAutomatFiszek": "Przełącz automat fiszek",
+          "przelaczPowtorki": "Przełącz powtórki",
+          "przelaczWyswietlanieWyjasnien": "Przełącz wyświetlanie wyjaśnień",
+          "przelaczWyjasnienieTylkoPoBlednej": "Przełącz wyjaśnienie tylko po błędnej odpowiedzi",
+          "przelaczPomijaniePoprawkiPoBledzie": "Przełącz pomijanie poprawki po błędzie",
+          "przelaczRamkeObrazu": "Przełącz ramkę obrazu"
+        }
+      }
+    },
+    "flashcards": {
+      "courseFinishedPanel": {
+        "courseFinishedPanel": {
+          "heading": "Gratulacje!",
+          "subheading": "Ukończyłeś kurs",
+          "statsHeading": "Twój wynik",
+          "label": {
+            "fiszek": "fiszek",
+            "skutecznosc": "skuteczność",
+            "czasNauki": "czas nauki"
+          },
+          "text": {
+            "wrocDoKursow": "Wróć do kursów"
+          }
+        }
+      },
+      "trueFalseActions": {
+        "label": {
+          "nieUmiem": "NIE UMIEM",
+          "umiem": "UMIEM",
+          "falsz": "FAŁSZ",
+          "prawda": "PRAWDA"
+        },
+        "accessibilityLabel": {
+          "oznaczJakoValue": "Oznacz jako {{value}}",
+          "potwierdzIPrzejdzDalej": "Potwierdź i przejdź dalej"
+        }
+      }
+    }
+  },
+  "constants": {
+    "courseCategories": {
+      "description": {
+        "stoliceIFlagi": "Stolice i flagi",
+        "astronomiaGwiazdozbiory": "Astronomia, gwiazdozbiory",
+        "historiaPolski": "Historia Polski",
+        "mityBogowieIBohaterowie": "Mity, bogowie i bohaterowie",
+        "javascript": "JavaScript",
+        "matematyka": "Matematyka"
+      }
+    }
+  },
+  "contexts": {
+    "settingsContext": {
+      "message": {
+        "nieUdaloSiePobracListy": "Nie udało się pobrać listy backupów z Google Drive.",
+        "nieUdaloSieWyslacBackupu": "Nie udało się wysłać backupu na Google Drive."
+      }
+    }
+  },
   "courseCreator": {
     "import": {
       "defaultFileName": "plik",
@@ -978,8 +1304,7 @@
       "cardTypeLabel": "Typ fiszki",
       "cardTypes": {
         "text": "Odpowiedź tekstowa",
-        "trueFalse": "Prawda/Fałsz",
-        "knowDontKnow": "Umiem / Nie umiem"
+        "trueFalse": "Prawda/Fałsz"
       },
       "sectionHeader": "ZAWARTOŚĆ",
       "addModeA11y": "Sposób dodawania fiszek",
@@ -992,13 +1317,12 @@
       },
       "issueRow": " wiersz {{row}}",
       "moreIssues": "+{{count}} kolejnych wpisów w raporcie.",
-      "importing": "Importowanie...",
+      "importing": "Importowanie…",
       "importValid": "Importuj poprawne",
       "clearReport": "Wyczyść raport",
       "flashcardsHeader": "fiszki",
       "addCardA11y": "Dodaj nową fiszkę",
       "backA11y": "Wróć do tworzenia kursu",
-      "next": "Dalej",
       "nextA11y": "Przejdź do ustawień kursu",
       "shareDialogTitle": "Pobierz wzór CSV",
       "popups": {
@@ -1018,23 +1342,23 @@
         "importedWithWarnings": "Zaimportowano {{cardsCount}} fiszek ({{warningCount}} ostrzeżeń).",
         "importedSuccess": "Zaimportowano {{cardsCount}} fiszek.",
         "importError": "Błąd podczas importu fiszek.",
-        "missingCourseName": "Najpierw nadaj nazwę kursowi",
-        "missingCourseIcon": "Wybierz ikonę kursu",
-        "addAtLeastOne": "Dodaj przynajmniej jedną fiszkę"
+        "missingCourseName": "Najpierw nadaj nazwę kursowi.",
+        "missingCourseIcon": "Wybierz ikonę kursu.",
+        "addAtLeastOne": "Dodaj przynajmniej jedną fiszkę."
       }
     },
     "csvGuide": {
       "required": "Wymagane",
       "optional": "Opcjonalne",
       "important": "Ważne",
-      "downloading": "Przygotowuję...",
+      "downloading": "Przygotowuję…",
       "downloadTemplate": "Pobierz wzór",
       "importTitle": "Import",
       "step1": "1. Przygotuj plik CSV albo TXT z nagłówkami kolumn.",
       "step2": "2. Wybierz poniżej format pliku i importuj.",
       "pickCsv": "Wybierz CSV",
       "pickTxt": "Wybierz TXT",
-      "analyzing": "Analizuję...",
+      "analyzing": "Analizuję…",
       "cardTypes": "Typy fiszek",
       "imagesTitle": "Jak dodawać obrazy",
       "imagesDescription": "Obok pliku CSV lub TXT z fiszkami utwórz folder images. Dodaj do niego obrazy, a w wierszach pliku wpisuj nazwy plików, np. dog.png. Obsługiwane formaty: .png, .jpg, .jpeg, .svg.",
@@ -1119,7 +1443,398 @@
       "addAnswerForCard": "Dodaj tłumaczenie dla fiszki {{index}}",
       "addImageForCard": "Dodaj obrazek dla fiszki {{index}}",
       "removeImageForCard": "Usuń obraz dla fiszki {{index}}",
-      "addNewCard": "Dodaj nową fiszkę"
+      "addNewCard": "Dodaj nową fiszkę",
+      "addCourse": "dodaj\nkurs"
+    },
+    "customEditor": {
+      "tabs": {
+        "options": "ustawienia",
+        "content": "zawartość",
+        "optionsLabel": "Opcje",
+        "contentLabel": "Treść",
+        "a11y": "Sekcje edycji kursu"
+      },
+      "popups": {
+        "undo": "Cofnięto ostatnią zmianę",
+        "loadFailed": "Nie udało się wczytać danych kursu.",
+        "officialDeleteBlocked": "Nie można usunąć oficjalnego kursu.",
+        "deleted": "Kurs został usunięty.",
+        "deleteFailed": "Nie udało się usunąć kursu.",
+        "missingName": "Podaj nazwę kursu.",
+        "missingCards": "Dodaj co najmniej jedną fiszkę.",
+        "saved": "Zmiany zapisane!",
+        "saveFailed": "Nie udało się zapisać zmian."
+      },
+      "alerts": {
+        "resetBoxesDoneTitle": "Wyczyszczono stan pudełek",
+        "resetBoxesDoneMessage": "Fiszki, które są aktualnie w pudełkach, zostały z nich usunięte i wróciły do puli nieznanych.",
+        "resetBoxesFailed": "Nie udało się wyczyścić stanu pudełek.",
+        "resetBoxesConfirmTitle": "Wyczyścić stan pudełek?",
+        "resetBoxesConfirmMessage": "Fiszki, które są aktualnie w pudełkach, zostaną z nich usunięte i wrócą do puli nieznanych. Nie usunie to powtórek ani ogólnego postępu kursu.",
+        "resetReviewsDoneTitle": "Usunięto powtórki",
+        "resetReviewsDoneMessage": "Usunięto {{count}} wpisów powtórek tego kursu.",
+        "resetReviewsDoneEmpty": "Nie było zapisanych powtórek do usunięcia.",
+        "resetReviewsFailed": "Nie udało się usunąć powtórek.",
+        "resetReviewsConfirmTitle": "Usunąć powtórki?",
+        "resetReviewsConfirmMessage": "Ta operacja usunie wszystkie zapisane powtórki dla tego kursu.",
+        "resetAllDoneTitle": "Przywrócono kurs od początku",
+        "resetAllDoneMessage": "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych.",
+        "resetAllFailed": "Nie udało się przywrócić kursu od początku.",
+        "resetAllConfirmTitle": "Przywrócić kurs od początku?",
+        "resetAllConfirmMessage": "Ta operacja wyczyści stan pudełek i powtórki oraz przywróci wszystkie fiszki do puli nieznanych.",
+        "deleteTitle": "Usuń kurs",
+        "deleteMessage": "Czy na pewno chcesz usunąć ten kurs? Tego działania nie można cofnąć."
+      },
+      "resetActions": {
+        "boxes": {
+          "title": "Wyczyść stan pudełek",
+          "subtitle": "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
+          "loading": "Czyszczę…"
+        },
+        "reviews": {
+          "title": "Usuń powtórki",
+          "subtitle": "Usuwa wszystkie zapisane powtórki tego kursu.",
+          "loading": "Usuwam…"
+        },
+        "all": {
+          "title": "Przywróć kurs od początku",
+          "subtitle": "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
+          "loading": "Przywracam…"
+        }
+      },
+      "appearance": {
+        "section": "WYGLĄD",
+        "iconDescription": "Wybierz symbol, który łatwo rozpoznasz na liście kursów.",
+        "colorDescription": "Kolor jest akcentem (avatar, przycisk, chipy)."
+      },
+      "flashcardsSection": "FISZKI",
+      "cardTypes": {
+        "text": "Tradycyjne"
+      },
+      "cardTypeLabel": "Typ fiszki",
+      "addCardA11y": "Dodaj nową fiszkę",
+      "deleteButton": "usuń",
+      "deleteA11y": "Usuń ten kurs",
+      "saveButton": "zapisz",
+      "saveA11y": "Zapisz zmiany w kursie",
+      "undoA11y": "Cofnij ostatnią zmianę w fiszkach"
+    },
+    "iconEdit": {
+      "categories": {
+        "all": "Wszystkie",
+        "general": "Ogólne",
+        "science": "Nauka",
+        "tech": "Tech",
+        "travel": "Podróże",
+        "lifestyle": "Styl życia",
+        "sport": "Sport"
+      },
+      "customColorLabel": "Niestandardowy",
+      "defaultCourseName": "Nowy kurs",
+      "namePlaceholder": "np. Fiszki podróżnicze",
+      "nameDescription": "Krótko i konkretnie, np. „Fiszki podróżnicze”.",
+      "iconDescription": "Wybierz ikonę z listy.",
+      "colorDescription": "Wybierz swój kolor.",
+      "iconLabel": "Ikona:",
+      "previewHint": "Tip: u góry masz „efekt końcowy”, poniżej ustawienia.",
+      "nameSection": "NAZWA",
+      "nameA11y": "Nazwa kursu",
+      "iconSection": "IKONA",
+      "selected": "Wybrana",
+      "changeIconA11y": "Zmień ikonę kursu",
+      "colorSection": "KOLOR",
+      "modeLabel": "Tryb:",
+      "pickerMode": "picker",
+      "changeColorA11y": "Zmień kolor kursu",
+      "chooseIcon": "Wybierz ikonę",
+      "closeIconPickerA11y": "Zamknij wybór ikony",
+      "searchIcon": "Szukaj ikony",
+      "categoryFilterA11y": "Filtr kategorii: {{label}}",
+      "chooseIconA11y": "Wybierz ikonę {{id}}",
+      "emptyResults": "Brak wyników",
+      "chooseColor": "Wybierz kolor",
+      "closeColorPickerA11y": "Zamknij wybór koloru",
+      "hue": "HUE",
+      "saturation": "SATURATION",
+      "value": "VALUE",
+      "preview": "PODGLĄD",
+      "confirm": "zatwierdź",
+      "confirmColorA11y": "Zatwierdź wybrany kolor"
+    }
+  },
+  "features": {
+    "wiki": {
+      "wikiTopics": {
+        "label": {
+          "typNowejFiszki": "Typ nowej fiszki"
+        },
+        "title": {
+          "przypinanieKursu": "Przypinanie kursu",
+          "aktywacjaKursu": "Aktywacja kursu",
+          "ustawienia": "Ustawienia",
+          "hangulCzytanie": "Hangul - czytanie",
+          "fiszki": "Fiszki",
+          "tworzenieKursu": "Tworzenie kursu"
+        },
+        "subtitle": {
+          "fiszki120": "fiszki: 120"
+        },
+        "accessibilityLabel": {
+          "edytujKursValue": "Edytuj kurs {{value}}",
+          "ustawieniaKursuHangulCzytanie": "Ustawienia kursu Hangul - czytanie"
+        },
+        "text": {
+          "dodajFiszki": "Dodaj fiszki",
+          "zatwierdz": "Zatwierdź"
+        },
+        "textChild": {
+          "przyciskiPodKartaDodawanieNowych": "Przyciski pod kartą: dodawanie nowych fiszek i zatwierdzanie odpowiedzi.",
+          "mniejszyPrzyciskDodajFiszkiKtory": "Mniejszy przycisk Dodaj fiszki, który występuje w trybie prawda / fałsz",
+          "aktywnePudelkoLosujeFiszkiDo": "Aktywne pudełko losuje fiszki do karty. Przytrzymaj palec na pudełku, aby podejrzeć jego zawartość.",
+          "mozeszDodacKrotkieSkojarzenieLub": "Możesz dodać krótkie skojarzenie lub wskazówkę widoczną przy tej fiszce w trakcie nauki."
+        }
+      }
+    }
+  },
+  "services": {
+    "googleDriveBackup": {
+      "message": {
+        "nieUdaloSieOdczytacManifestu": "Nie udało się odczytać manifestu backupu."
+      }
+    },
+    "importUserData": {
+      "message": {
+        "anulowanoWyborPliku": "Anulowano wybór pliku.",
+        "wystapilBladPodczasImportuDanych": "Wystąpił błąd podczas importu danych."
+      }
+    },
+    "userDataBackup": {
+      "message": {
+        "wystapilBladPodczasPrzywracaniaDanych": "Wystąpił błąd podczas przywracania danych."
+      }
+    }
+  },
+  "screens": {
+    "onboarding": {
+      "languageIntro": {
+        "languageIntro": {
+          "accessibilityLabel": {
+            "valueValue": "{{title}}. {{subtitle}}"
+          }
+        }
+      }
+    },
+    "courses": {
+      "activatecourse": {
+        "courseActivate": {
+          "courseActivate": {
+            "message": {
+              "aktywowalemKurs3": "Aktywowałem kurs :3"
+            },
+            "textChild": {
+              "nicTuNieMaCzas": "Nic tu nie ma :(, czas wybrać kurs!",
+              "stworzonePrzezNas": "Stworzone przez nas",
+              "stworzonePrzezCiebie": "Stworzone przez Ciebie"
+            },
+            "accessibilityLabel": {
+              "edytujKursValue": "Edytuj kurs {{value}}",
+              "przejdzDalej": "Przejdź dalej",
+              "dodajKurs": "Dodaj kurs"
+            },
+            "text": {
+              "dodajKurs": "dodaj\nkurs"
+            }
+          }
+        }
+      },
+      "courseentrysettings": {
+        "courseEntrySettings": {
+          "courseEntrySettings": {
+            "message": {
+              "nieUdaloSieZnalezcKursu": "Nie udało się znaleźć kursu",
+              "nieUdaloSieWczytacUstawien": "Nie udało się wczytać ustawień kursu",
+              "nieUdaloSieZapisacUstawien": "Nie udało się zapisać ustawień kursu"
+            },
+            "textChild": {
+              "ustawStartNaukiPoSwojemu": "Ustaw start nauki po swojemu",
+              "teOpcjePokazaSieTylko": "Te opcje pokażą się tylko teraz. Później nadal zmienisz je w ustawieniach kursu.",
+              "automatFiszek": "Automat fiszek",
+              "samPrzelaczaPudelkaIDobiera": "Sam przełącza pudełka i dobiera kolejne fiszki podczas nauki.",
+              "codziennePowtorki": "Codzienne powtórki",
+              "dodajeFiszkiZTegoKursu": "Dodaje fiszki z tego kursu do ogólnej sesji codziennych powtórek.",
+              "pokazWyjasnienia": "Pokaż wyjaśnienia",
+              "poOdpowiedziPokazeDodatkoweObjasnienie": "Po odpowiedzi pokaże dodatkowe objaśnienie, jeśli fiszka je posiada."
+            },
+            "accessibilityLabel": {
+              "przelaczAutomatFiszek": "Przełącz automat fiszek",
+              "przelaczCodziennePowtorki": "Przełącz codzienne powtórki",
+              "przelaczPokazywanieWyjasnien": "Przełącz pokazywanie wyjaśnień",
+              "zapiszOpcjeStartoweIPrzejdz": "Zapisz opcje startowe i przejdź do fiszek"
+            },
+            "text": {
+              "trwaZapis": "TRWA ZAPIS...",
+              "zaczynajmy": "ZACZYNAJMY"
+            }
+          }
+        }
+      },
+      "editcourse": {
+        "courseEdit": {
+          "courseEdit": {
+            "alert": {
+              "brakDanychKursu": "Brak danych kursu",
+              "nieUdaloSieOdnalezcLokalnych": "Nie udało się odnaleźć lokalnych danych tego kursu.",
+              "usunietoValueZapisanychPowtorekTego": "Usunięto {{value}} zapisanych powtórek tego kursu."
+            },
+            "textChild": {
+              "ustawieniaKursu": "USTAWIENIA KURSU",
+              "nieZnalezionoDanychKursu": "Nie znaleziono danych kursu."
+            },
+            "text": {
+              "wroc": "wróć"
+            }
+          }
+        }
+      },
+      "makenewcourse": {
+        "courseAppearance": {
+          "courseAppearance": {
+            "message": {
+              "musiszPodacNazweKursuI": "Musisz podać nazwę kursu i wybrać ikonę.",
+              "musiszPodacNazweKursu": "Musisz podać nazwę kursu.",
+              "musiszWybracIkone": "Musisz wybrać ikonę."
+            },
+            "validation": {
+              "kursONazwieJuzIstnieje": "Kurs o nazwie „{{name}}” już istnieje.",
+              "podobnaNazwaJuzIstnieje": "Podobna nazwa już istnieje: „{{name}}”."
+            },
+            "textChild": {
+              "nowyKurs": "NOWY KURS"
+            },
+            "accessibilityLabel": {
+              "przejdzDoUstawienZawartosciKursu": "Przejdź do ustawień zawartości kursu"
+            },
+            "text": {
+              "dalej": "dalej"
+            }
+          }
+        },
+        "courseSettings": {
+          "courseSettings": {
+            "message": {
+              "brakZawartosciKursuUzupelnijFiszki": "Brak zawartości kursu. Uzupełnij fiszki najpierw.",
+              "dodajPrzynajmniejJednaFiszkePrzed": "Dodaj przynajmniej jedną fiszkę przed ustawieniami.",
+              "nieUdaloSieOdczytacDanych": "Nie udało się odczytać danych kreatora.",
+              "brakNazwyLubIkonyKursu": "Brak nazwy lub ikony kursu.",
+              "brakFiszekDoZapisania": "Brak fiszek do zapisania.",
+              "dodajPrzynajmniejJednaFiszke": "Dodaj przynajmniej jedną fiszkę.",
+              "kursZapisany": "Kurs zapisany!",
+              "nieUdaloSieStworzycKursu": "Nie udało się stworzyć kursu."
+            },
+            "accessibilityLabel": {
+              "wrocDoUstawianiaZawartosciKursu": "Wróć do ustawiania zawartości kursu",
+              "stworzKursZAktualnaZawartoscia": "Stwórz kurs z aktualną zawartością i ustawieniami"
+            },
+            "text": {
+              "stworz": "Stwórz"
+            }
+          }
+        }
+      },
+      "pincourse": {
+        "coursePin": {
+          "coursePin": {
+            "textChild": {
+              "czegoSieUczymy": "Czego się uczymy?",
+              "brakKursowJezykowych": "Brak kursów językowych",
+              "miniKursy": "Mini kursy",
+              "brakKursowWiedzyOgolnej": "Brak kursów wiedzy ogólnej",
+              "kiedysBedzieTuIchWiecej": "Kiedyś będzie tu ich więcej :)"
+            },
+            "accessibilityLabel": {
+              "filtrTypuKursow": "Filtr typu kursów",
+              "przejdzDalejDoAktywacji": "Przejdź dalej do aktywacji"
+            },
+            "text": {
+              "zrobWlasny": "zrób własny"
+            }
+          }
+        }
+      }
+    },
+    "flashcards": {
+      "flashcards": {
+        "flashcards": {
+          "title": {
+            "brakWybranegoKursu": "Brak wybranego kursu",
+            "brakFiszekWKursie": "Brak fiszek w kursie"
+          },
+          "accessibilityLabel": {
+            "dodajNoweFiszkiDoPudelek": "Dodaj nowe fiszki do pudełek"
+          }
+        }
+      }
+    },
+    "home": {
+      "home": {
+        "home": {
+          "title": {
+            "stworz": "Stwórz",
+            "statystyki": "Statystyki",
+            "przewodnik": "Przewodnik",
+            "wsparcie": "Wsparcie"
+          }
+        }
+      }
+    },
+    "review": {
+      "courses": {
+        "coursesReview": {
+          "coursesReview": {
+            "textChild": {
+              "nieMaszJeszczePrzypietychKursow": "Nie masz jeszcze przypiętych kursów do powtórek.",
+              "twoje": "Twoje",
+              "nieMaszJeszczeWlasnychFiszek": "Nie masz jeszcze własnych fiszek.",
+              "wszystkieKursyMajaWylaczonePowtorki": "Wszystkie kursy mają wyłączone powtórki."
+            },
+            "title": {
+              "miniKursy": "Mini kursy"
+            }
+          }
+        }
+      }
+    },
+    "stats": {
+      "stats": {
+        "stats": {
+          "textChild": {
+            "codziennaPassa": "Codzienna passa"
+          }
+        }
+      }
+    }
+  },
+  "repeats": {
+    "labels": {
+      "courses": "Kursy",
+      "reviews": "Powtórki",
+      "knownFlashcards": "Opanowane fiszki",
+      "jumps": "Skoki",
+      "polish": "Polski",
+      "english": "Angielski"
+    },
+    "cardTypes": {
+      "knowDontKnow": "Umiem / Nie umiem",
+      "trueFalse": "Prawda / Fałsz"
+    },
+    "messages": {
+      "duplicateCourseName": "Ta nazwa kursu jest już zajęta."
+    },
+    "a11y": {
+      "backToCoursesPanel": "Wróć do panelu kursów"
+    },
+    "format": {
+      "flashcardsValue": "fiszki: {{value}}"
     }
   }
 }

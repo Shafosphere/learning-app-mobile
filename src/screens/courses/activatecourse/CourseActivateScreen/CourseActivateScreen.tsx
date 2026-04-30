@@ -22,6 +22,7 @@ import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Pressable,
@@ -36,6 +37,7 @@ import { CourseGroup, OfficialCourseListItem } from "@/src/features/customCourse
 
 
 export default function CourseActivateScreen() {
+  const { t } = useTranslation();
   const {
     activeCustomCourseId,
     setActiveCustomCourseId,
@@ -241,11 +243,13 @@ export default function CourseActivateScreen() {
 
   const notifyActivated = useCallback(() => {
     setPopup({
-      message: "Aktywowałem kurs :3",
+      message: t(
+        "screens.courses.activatecourse.courseActivate.courseActivate.message.aktywowalemKurs3"
+      ),
       color: "calm",
       duration: 3000,
     });
-  }, [setPopup]);
+  }, [setPopup, t]);
 
   const handleEditCustomCourse = (course: CustomCourseSummary) => {
     const encodedName = encodeURIComponent(course.name);
@@ -352,14 +356,20 @@ export default function CourseActivateScreen() {
           {!isLoadingCourses && isEmptyState ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyState}>
-                nic tu nie ma :(, czas wybrać kurs!
+                {t(
+                  "screens.courses.activatecourse.courseActivate.courseActivate.textChild.nicTuNieMaCzas"
+                )}
               </Text>
             </View>
           ) : (
             <>
               {hasPinnedOfficialCourses ? (
                 <>
-                  <Text style={styles.title}>Stworzone przez nas</Text>
+                  <Text style={styles.title}>
+                    {t(
+                      "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezNas"
+                    )}
+                  </Text>
                       <CourseGroupList
                         groups={courseGroups}
                         activeCourseId={activeCustomCourseId}
@@ -375,7 +385,9 @@ export default function CourseActivateScreen() {
               {hasUserCustomCourses ? (
                 <View style={styles.customSection}>
                   <Text style={styles.customSectionTitle}>
-                    Stworzone przez Ciebie
+                    {t(
+                      "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezCiebie"
+                    )}
                   </Text>
                   <View style={styles.customList}>
                     {userCustomCourses.map((course) => {
@@ -384,7 +396,10 @@ export default function CourseActivateScreen() {
                         <CourseListCard
                           key={course.id}
                           title={course.name}
-                          subtitle={`fiszki: ${course.cardsCount}`}
+                          subtitle={t(
+                            "repeats.format.flashcardsValue",
+                            { value: course.cardsCount }
+                          )}
                           iconId={course.iconId}
                           iconColor={course.iconColor}
                           flagCode={null} // Custom courses typically don't have a flag logic derived here yet or use the icon itself
@@ -393,7 +408,10 @@ export default function CourseActivateScreen() {
                           rightAccessory={
                             <Pressable
                               accessibilityRole="button"
-                              accessibilityLabel={`Edytuj kurs ${course.name}`}
+                              accessibilityLabel={t(
+                                "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.edytujKursValue",
+                                { value: course.name }
+                              )}
                               style={styles.customEditButton}
                               onPress={(event) => {
                                 event.stopPropagation();
@@ -430,8 +448,12 @@ export default function CourseActivateScreen() {
               style={{ alignSelf: "flex-end" }}
             >
               <MyButton
-                text="Dalej"
-                accessibilityLabel="Przejdź dalej"
+                text={t(
+                  "app.actions.next"
+                )}
+                accessibilityLabel={t(
+                  "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.przejdzDalej"
+                )}
                 disabled={!hasActiveCourse}
                 onPress={() => {
                   if (coachmark.isActive) {
@@ -465,9 +487,13 @@ export default function CourseActivateScreen() {
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
             <MyButton
-              text={"dodaj\nkurs"}
+              text={t(
+                "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"
+              )}
               textLines={2}
-              accessibilityLabel="Dodaj kurs"
+              accessibilityLabel={t(
+                "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs"
+              )}
               color="my_yellow"
               onPress={() => router.push("/createcourse")}
               disabled={false}

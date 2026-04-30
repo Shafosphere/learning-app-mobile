@@ -83,7 +83,7 @@ const LearningSection: React.FC = () => {
               {t("settings.learning.reminders.title")}
             </Text>
             <Text style={styles.appearanceBlockDescription}>
-              {preventWidowsPl("Pomaga utrzymać rytm nauki.")}
+              {preventWidowsPl(t("settings.learning.reminders.shortSubtitle"))}
             </Text>
             {reminderStatusLines[0] ? (
               <Text style={styles.settingStatus}>{reminderStatusLines[0]}</Text>
@@ -104,7 +104,9 @@ const LearningSection: React.FC = () => {
         </View>
       </View>
 
-      <Text style={styles.appearanceGroupLabel}>PISANIE</Text>
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.learning.groups.writing")}
+      </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
           <View style={styles.appearanceGroupRow}>

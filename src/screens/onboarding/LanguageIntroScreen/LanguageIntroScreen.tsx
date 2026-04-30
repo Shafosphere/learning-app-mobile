@@ -17,7 +17,7 @@ import { useStyles } from "./LanguageIntroScreen-styles";
 type LanguageOption = {
   key: UiLanguage | NativeLanguage;
   flagCode: "pl" | "en";
-  title: string;
+  titleKey: "repeats.labels.polish" | "repeats.labels.english";
   subtitle: string;
 };
 type LanguageIntroMode = "app" | "native";
@@ -26,13 +26,13 @@ const languageOptions: LanguageOption[] = [
   {
     key: "pl",
     flagCode: "pl",
-    title: "Polski",
+    titleKey: "repeats.labels.polish",
     subtitle: "Interfejs po polsku",
   },
   {
     key: "en",
     flagCode: "en",
-    title: "English",
+    titleKey: "repeats.labels.english",
     subtitle: "Interface in English",
   },
 ];
@@ -75,7 +75,7 @@ export default function LanguageIntroScreen() {
       key:
         | "onboarding.languageIntro.appTitle"
         | "onboarding.languageIntro.nativeTitle"
-        | "onboarding.languageIntro.confirm"
+        | "app.actions.next"
         | "onboarding.languageIntro.hintDefault"
         | "onboarding.languageIntro.hintSelected",
       options?: Record<string, unknown>
@@ -155,6 +155,12 @@ export default function LanguageIntroScreen() {
             {languageOptions.map((option) => {
               const isActive = selectedLanguage === option.key;
               const source = getFlagSource(option.flagCode, "active");
+              const title = t(option.titleKey, { lng: screenLanguage });
+              const subtitle = mode === "app"
+                ? option.subtitle
+                : screenLanguage === "pl"
+                  ? "Język ojczysty"
+                  : "Native language";
               if (!source) return null;
 
               return (
@@ -166,21 +172,25 @@ export default function LanguageIntroScreen() {
                     pressed && styles.languageTilePressed,
                   ]}
                   accessibilityRole="button"
-                  accessibilityLabel={`${option.title}. ${option.subtitle}`}
+                  accessibilityLabel={t(
+                    "screens.onboarding.languageIntro.languageIntro.accessibilityLabel.valueValue",
+                    {
+                      lng: screenLanguage,
+                      title,
+                      subtitle,
+                      defaultValue: [title, subtitle].join(". "),
+                    }
+                  )}
                   accessibilityState={{ selected: isActive }}
                   onPress={() => onSelectLanguage(option.key)}
                 >
                   <Image source={source} style={styles.languageFlag} />
                   <View style={styles.languageInfo}>
                     <Text style={styles.languageTitle} allowFontScaling>
-                      {option.title}
+                      {title}
                     </Text>
                     <Text style={styles.languageSubtitle} allowFontScaling>
-                      {mode === "app"
-                        ? option.subtitle
-                        : screenLanguage === "pl"
-                          ? "Język ojczysty"
-                          : "Native language"}
+                      {subtitle}
                     </Text>
                   </View>
                   <Ionicons
@@ -195,7 +205,7 @@ export default function LanguageIntroScreen() {
 
           <View style={styles.confirmWrap}>
             <MyButton
-              text={tr("onboarding.languageIntro.confirm", {
+              text={tr("app.actions.next", {
                 defaultValue: fallback.confirm,
               })}
               onPress={onConfirm}

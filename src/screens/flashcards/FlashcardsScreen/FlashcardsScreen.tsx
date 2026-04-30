@@ -1682,7 +1682,7 @@ export default function Flashcards() {
   if (activeCustomCourseId == null) {
     cardSection = (
       <FlashcardsPlaceholderCard
-        title="Brak wybranego kursu"
+        title={t("screens.flashcards.flashcards.flashcards.title.brakWybranegoKursu")}
         description="Wybierz własny kurs w panelu kursów, aby rozpocząć naukę."
       />
     );
@@ -1691,7 +1691,7 @@ export default function Flashcards() {
   } else if (!customCards.length) {
     cardSection = (
       <FlashcardsPlaceholderCard
-        title="Brak fiszek w kursie"
+        title={t("screens.flashcards.flashcards.flashcards.title.brakFiszekWKursie")}
         description="Dodaj fiszki do tego kursu, aby móc z nich korzystać."
       />
     );
@@ -2012,7 +2012,9 @@ export default function Flashcards() {
                 style={styles.addButton}
                 onPress={downloadData}
                 disabled={addButtonDisabled}
-                accessibilityLabel="Dodaj nowe fiszki do pudełek"
+                accessibilityLabel={t(
+                  "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"
+                )}
               >
                 <Ionicons name="add" size={26} color="#0F172A" />
               </Pressable>

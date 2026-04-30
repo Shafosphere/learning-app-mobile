@@ -127,7 +127,7 @@ const DebuggingSection: React.FC = () => {
       );
     } catch {
       Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
+        t("app.status.error"),
         t("settings.debug.alerts.addError")
       );
     } finally {
@@ -172,12 +172,12 @@ const DebuggingSection: React.FC = () => {
         AsyncStorage.removeItem("@review_flashcards_intro_seen_v1"),
       ]);
       Alert.alert(
-        t("settings.debug.alerts.doneTitle"),
+        t("app.status.done"),
         t("settings.debug.alerts.reviewCoursesIntroResetDone")
       );
     } catch {
       Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
+        t("app.status.error"),
         t("settings.debug.alerts.reviewCoursesIntroResetError")
       );
     }
@@ -195,7 +195,7 @@ const DebuggingSection: React.FC = () => {
       );
     } catch {
       Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
+        t("app.status.error"),
         t("settings.debug.alerts.resetCustomError")
       );
     } finally {
@@ -208,21 +208,21 @@ const DebuggingSection: React.FC = () => {
       t("settings.debug.alerts.clearStorageTitle"),
       t("settings.debug.alerts.clearStorageMessage"),
       [
-        { text: t("settings.debug.alerts.cancel"), style: "cancel" },
+        { text: t("app.actions.cancel"), style: "cancel" },
         {
-          text: t("settings.debug.alerts.clearStorageConfirm"),
+          text: t("app.actions.clear"),
           style: "destructive",
           onPress: async () => {
             setClearingStorage(true);
             try {
               await AsyncStorage.clear();
               Alert.alert(
-                t("settings.debug.alerts.doneTitle"),
+                t("app.status.done"),
                 t("settings.debug.alerts.storageCleared")
               );
             } catch {
               Alert.alert(
-                t("settings.debug.alerts.errorTitle"),
+                t("app.status.error"),
                 t("settings.debug.alerts.storageClearError")
               );
             } finally {
@@ -239,7 +239,7 @@ const DebuggingSection: React.FC = () => {
       t("settings.debug.alerts.deleteDbTitle"),
       t("settings.debug.alerts.deleteDbMessage"),
       [
-        { text: t("settings.debug.alerts.cancel"), style: "cancel" },
+        { text: t("app.actions.cancel"), style: "cancel" },
         {
           text: t("settings.debug.alerts.deleteDbConfirm"),
           style: "destructive",
@@ -249,12 +249,12 @@ const DebuggingSection: React.FC = () => {
               const dbPath = `${FileSystem.documentDirectory}SQLite/mygame.db`;
               await FileSystem.deleteAsync(dbPath, { idempotent: true });
               Alert.alert(
-                t("settings.debug.alerts.doneTitle"),
+                t("app.status.done"),
                 t("settings.debug.alerts.dbDeleted")
               );
             } catch {
               Alert.alert(
-                t("settings.debug.alerts.errorTitle"),
+                t("app.status.error"),
                 t("settings.debug.alerts.dbDeleteError")
               );
             } finally {
@@ -283,7 +283,7 @@ const DebuggingSection: React.FC = () => {
       );
     } catch {
       Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
+        t("app.status.error"),
         t("settings.debug.alerts.checkpointSetError")
       );
     }
@@ -294,12 +294,12 @@ const DebuggingSection: React.FC = () => {
     try {
       await enableDbInitDebugOverride();
       Alert.alert(
-        t("settings.debug.alerts.doneTitle"),
+        t("app.status.done"),
         t("settings.debug.alerts.dbErrorScreenOpened")
       );
     } catch {
       Alert.alert(
-        t("settings.debug.alerts.errorTitle"),
+        t("app.status.error"),
         t("settings.debug.alerts.dbErrorScreenOpenError")
       );
     } finally {
@@ -585,7 +585,7 @@ const DebuggingSection: React.FC = () => {
         <MyButton
           text={
             customBusy
-              ? t("settings.debug.rows.resetCustom.buttonLoading")
+              ? t("app.status.resetting")
               : t("settings.debug.rows.resetCustom.button")
           }
           color="my_red"
@@ -608,7 +608,7 @@ const DebuggingSection: React.FC = () => {
           text={
             clearingStorage
               ? t("settings.debug.rows.clearStorage.buttonLoading")
-              : t("settings.debug.rows.clearStorage.button")
+              : t("app.actions.clear")
           }
           color="my_red"
           onPress={handleClearAsyncStorage}
@@ -676,7 +676,7 @@ const DebuggingSection: React.FC = () => {
       <View style={styles.keyboardActions}>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="language_required"
+            text={t("settings.debug.onboardingCheckpoints.languageRequired")}
             color="my_yellow"
             onPress={() => handleSetOnboarding("language_required")}
             width={170}
@@ -684,7 +684,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="pin_required"
+            text={t("settings.debug.onboardingCheckpoints.pinRequired")}
             color="my_yellow"
             onPress={() => handleSetOnboarding("pin_required")}
             width={140}
@@ -692,7 +692,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="native_language_required"
+            text={t("settings.debug.onboardingCheckpoints.nativeLanguageRequired")}
             color="my_yellow"
             onPress={() => handleSetOnboarding("native_language_required")}
             width={220}
@@ -700,7 +700,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="activate_required"
+            text={t("settings.debug.onboardingCheckpoints.activateRequired")}
             color="my_yellow"
             onPress={() => handleSetOnboarding("activate_required")}
             width={140}
@@ -708,7 +708,9 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="course_entry_settings_required"
+            text={t(
+              "settings.debug.onboardingCheckpoints.courseEntrySettingsRequired"
+            )}
             color="my_yellow"
             onPress={() => handleSetOnboarding("course_entry_settings_required")}
             width={220}
@@ -716,7 +718,7 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text="done"
+            text={t("settings.debug.onboardingCheckpoints.done")}
             color="my_green"
             onPress={() => handleSetOnboarding("done")}
             width={120}

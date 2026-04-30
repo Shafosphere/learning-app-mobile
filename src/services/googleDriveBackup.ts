@@ -10,6 +10,7 @@ import {
   type BackupArchiveManifest,
   type ImportResult,
 } from "@/src/services/userDataBackup";
+import i18n from "@/src/i18n";
 
 const GOOGLE_DRIVE_SCOPE = "https://www.googleapis.com/auth/drive.appdata";
 const LEGACY_AUTH_STORAGE_KEY = "googleDriveBackup.auth";
@@ -429,7 +430,9 @@ async function enrichSnapshotMetadata(
     const compatibilityMessage =
       error instanceof Error
         ? error.message
-        : "Nie udało się odczytać manifestu backupu.";
+        : i18n.t(
+            "services.googleDriveBackup.message.nieUdaloSieOdczytacManifestu"
+          );
 
     if (isGoogleDriveSessionErrorMessage(compatibilityMessage)) {
       throw new Error(compatibilityMessage);

@@ -17,6 +17,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./CourseEntrySettingsScreen-styles";
 
 type CourseState = {
@@ -31,6 +32,7 @@ type CourseState = {
 export default function CourseEntrySettingsScreen() {
   const router = useRouter();
   const styles = useStyles();
+  const { t } = useTranslation();
   const setPopup = usePopup();
   const {
     colors,
@@ -81,7 +83,9 @@ export default function CourseEntrySettingsScreen() {
         }
         if (!courseRow) {
           setPopup({
-            message: "Nie udało się znaleźć kursu",
+            message: t(
+              "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.message.nieUdaloSieZnalezcKursu"
+            ),
             color: "angry",
             duration: 3000,
           });
@@ -105,7 +109,9 @@ export default function CourseEntrySettingsScreen() {
       } catch (error) {
         console.error("Failed to load course entry settings", error);
         setPopup({
-          message: "Nie udało się wczytać ustawień kursu",
+          message: t(
+            "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.message.nieUdaloSieWczytacUstawien"
+          ),
           color: "angry",
           duration: 3500,
         });
@@ -130,6 +136,7 @@ export default function CourseEntrySettingsScreen() {
     hasSeenCustomCourseEntrySettings,
     router,
     setPopup,
+    t,
   ]);
 
   const coachmark = useCoachmarkFlow({
@@ -195,7 +202,9 @@ export default function CourseEntrySettingsScreen() {
     } catch (error) {
       console.error("Failed to save course entry settings", error);
       setPopup({
-        message: "Nie udało się zapisać ustawień kursu",
+        message: t(
+          "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.message.nieUdaloSieZapisacUstawien"
+        ),
         color: "angry",
         duration: 3500,
       });
@@ -233,10 +242,15 @@ export default function CourseEntrySettingsScreen() {
         overScrollMode="never"
       >
         <View style={styles.content}>
-          <Text style={styles.title}>Ustaw start nauki po swojemu</Text>
+          <Text style={styles.title}>
+            {t(
+              "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.ustawStartNaukiPoSwojemu"
+            )}
+          </Text>
           <Text style={styles.lead}>
-            Te opcje pokażą się tylko teraz. Później nadal zmienisz je w
-            ustawieniach kursu.
+            {t(
+              "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.teOpcjePokazaSieTylko"
+            )}
           </Text>
 
           <CoachmarkAnchor
@@ -251,10 +265,15 @@ export default function CourseEntrySettingsScreen() {
                     <Text style={styles.iconText}>⚡</Text>
                   </View>
                   <View style={styles.optionTextWrap}>
-                    <Text style={styles.optionTitle}>Automat fiszek</Text>
+                    <Text style={styles.optionTitle}>
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.automatFiszek"
+                      )}
+                    </Text>
                     <Text style={styles.optionDescription}>
-                      Sam przełącza pudełka i dobiera kolejne fiszki podczas
-                      nauki.
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.samPrzelaczaPudelkaIDobiera"
+                      )}
                     </Text>
                   </View>
                 </View>
@@ -262,7 +281,9 @@ export default function CourseEntrySettingsScreen() {
                   <ToggleSwitch
                     value={autoflowEnabled}
                     onPress={() => setAutoflowEnabledState((prev) => !prev)}
-                    accessibilityLabel="Przełącz automat fiszek"
+                    accessibilityLabel={t(
+                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczAutomatFiszek"
+                    )}
                   />
                 </View>
               </View>
@@ -273,10 +294,15 @@ export default function CourseEntrySettingsScreen() {
                     <Text style={styles.iconText}>🗓️</Text>
                   </View>
                   <View style={styles.optionTextWrap}>
-                    <Text style={styles.optionTitle}>Codzienne powtórki</Text>
+                    <Text style={styles.optionTitle}>
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.codziennePowtorki"
+                      )}
+                    </Text>
                     <Text style={styles.optionDescription}>
-                      Dodaje fiszki z tego kursu do ogólnej sesji codziennych
-                      powtórek.
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.dodajeFiszkiZTegoKursu"
+                      )}
                     </Text>
                   </View>
                 </View>
@@ -284,7 +310,9 @@ export default function CourseEntrySettingsScreen() {
                   <ToggleSwitch
                     value={reviewsEnabled}
                     onPress={() => setReviewsEnabled((prev) => !prev)}
-                    accessibilityLabel="Przełącz codzienne powtórki"
+                    accessibilityLabel={t(
+                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczCodziennePowtorki"
+                    )}
                   />
                 </View>
               </View>
@@ -295,10 +323,15 @@ export default function CourseEntrySettingsScreen() {
                     <Text style={styles.iconText}>💡</Text>
                   </View>
                   <View style={styles.optionTextWrap}>
-                    <Text style={styles.optionTitle}>Pokaż wyjaśnienia</Text>
+                    <Text style={styles.optionTitle}>
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.pokazWyjasnienia"
+                      )}
+                    </Text>
                     <Text style={styles.optionDescription}>
-                      Po odpowiedzi pokaże dodatkowe objaśnienie, jeśli fiszka je
-                      posiada.
+                      {t(
+                        "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.textChild.poOdpowiedziPokazeDodatkoweObjasnienie"
+                      )}
                     </Text>
                   </View>
                 </View>
@@ -306,7 +339,9 @@ export default function CourseEntrySettingsScreen() {
                   <ToggleSwitch
                     value={showExplanationEnabled}
                     onPress={() => setShowExplanationEnabledState((prev) => !prev)}
-                    accessibilityLabel="Przełącz pokazywanie wyjaśnień"
+                    accessibilityLabel={t(
+                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczPokazywanieWyjasnien"
+                    )}
                   />
                 </View>
               </View>
@@ -325,7 +360,11 @@ export default function CourseEntrySettingsScreen() {
             style={{ alignSelf: "flex-end" }}
           >
             <MyButton
-              text={isSaving ? "TRWA ZAPIS..." : "ZACZYNAJMY"}
+              text={t(
+                isSaving
+                  ? "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.text.trwaZapis"
+                  : "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.text.zaczynajmy"
+              )}
               color="my_green"
               onPress={() => {
                 if (coachmark.isActive) {
@@ -341,7 +380,9 @@ export default function CourseEntrySettingsScreen() {
               style={styles.ctaButton}
               pressedStyle={styles.ctaButtonPressed}
               textStyle={styles.ctaLabel}
-              accessibilityLabel="Zapisz opcje startowe i przejdź do fiszek"
+              accessibilityLabel={t(
+                "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.zapiszOpcjeStartoweIPrzejdz"
+              )}
               disabled={isSaving}
             />
           </CoachmarkAnchor>

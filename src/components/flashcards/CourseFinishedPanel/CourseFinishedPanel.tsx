@@ -18,6 +18,7 @@ import Animated, {
   ZoomIn,
   useReducedMotion,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./CourseFinishedPanel-styles";
 
 const BOX_SHADOW_SOURCE = require("@/assets/illustrations/mascot-box/body/shadow.svg");
@@ -152,6 +153,7 @@ export function CourseFinishedPanel({
   learningTimeLabel,
   onBackToCourses,
 }: CourseFinishedPanelProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const reduceMotion = useReducedMotion();
   const { width: screenWidth, fontScale } = useWindowDimensions();
@@ -225,7 +227,7 @@ export function CourseFinishedPanel({
         minimumFontScale={0.76}
         maxFontSizeMultiplier={1.25}
       >
-        Gratulacje!
+        {t("components.flashcards.courseFinishedPanel.courseFinishedPanel.heading")}
       </Animated.Text>
       <Animated.Text
         style={styles.subheading}
@@ -236,7 +238,9 @@ export function CourseFinishedPanel({
         minimumFontScale={0.85}
         maxFontSizeMultiplier={1.2}
       >
-        Ukończyłeś kurs
+        {t(
+          "components.flashcards.courseFinishedPanel.courseFinishedPanel.subheading"
+        )}
       </Animated.Text>
 
       <Animated.View
@@ -316,7 +320,9 @@ export function CourseFinishedPanel({
         minimumFontScale={0.85}
         maxFontSizeMultiplier={1.2}
       >
-        Twój wynik
+        {t(
+          "components.flashcards.courseFinishedPanel.courseFinishedPanel.statsHeading"
+        )}
       </Animated.Text>
 
       <View
@@ -329,7 +335,9 @@ export function CourseFinishedPanel({
           enteringContent={enteringFadeRise}
           icon={<Octicons name="check-circle-fill" size={30} color="#00caacff" />}
           value={cardsCountLabel}
-          label="fiszek"
+          label={t(
+            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.fiszek"
+          )}
           styles={styles}
         />
 
@@ -340,7 +348,9 @@ export function CourseFinishedPanel({
           enteringContent={enteringFadeRise}
           icon={<AntDesign name="star" size={34} color="#fde24f" />}
           value={accuracyLabel}
-          label="skuteczność"
+          label={t(
+            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.skutecznosc"
+          )}
           styles={styles}
         />
 
@@ -357,7 +367,9 @@ export function CourseFinishedPanel({
             />
           }
           value={learningTimeLabel}
-          label="czas nauki"
+          label={t(
+            "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.czasNauki"
+          )}
           styles={styles}
         />
       </View>
@@ -367,7 +379,9 @@ export function CourseFinishedPanel({
         entering={enteringFadeRise(ACTIONS_DELAY)}
       >
         <MyButton
-          text="Wróć do kursów"
+          text={t(
+            "components.flashcards.courseFinishedPanel.courseFinishedPanel.text.wrocDoKursow"
+          )}
           width="100%"
           color="my_green"
           onPress={onBackToCourses}

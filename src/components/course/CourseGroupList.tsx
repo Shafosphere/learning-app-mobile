@@ -4,6 +4,7 @@ import { Image, Text, View } from "react-native";
 import { useStyles } from "@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen-styles";
 import { CourseGroup, OfficialCourseListItem } from "@/src/features/customCourse/courseActivationTypes";
 import { OfficialCourseSection } from "./OfficialCourseSection";
+import { useTranslation } from "react-i18next";
 
 interface CourseGroupListProps {
     groups: CourseGroup[];
@@ -24,6 +25,7 @@ export const CourseGroupList = ({
     firstCoachmarkCourseId,
     scrollRef,
 }: CourseGroupListProps) => {
+    const { t } = useTranslation();
     const styles = useStyles();
 
     return (
@@ -111,7 +113,7 @@ export const CourseGroupList = ({
                         {hasOfficial ? (
                             <>
                                 <OfficialCourseSection
-                                    title="Kursy"
+                                    title={t("repeats.labels.courses")}
                                     list={regularOfficial}
                                     showTitle={showRegular}
                                     activeCourseId={activeCourseId}
@@ -122,7 +124,7 @@ export const CourseGroupList = ({
                                     scrollRef={scrollRef}
                                 />
                                 <OfficialCourseSection
-                                    title="Mini kursy"
+                                    title={t("courses.groups.mini")}
                                     list={miniOfficial}
                                     showTitle={showRegular && showMini}
                                     activeCourseId={activeCourseId}

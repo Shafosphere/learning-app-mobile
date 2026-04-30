@@ -21,6 +21,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useCourseEditStyles } from "./CourseSettingsScreen-styles";
 import {
   CONTENT_DRAFT_STORAGE_KEY,
@@ -46,6 +47,7 @@ const getFirstValue = (value: string | string[] | undefined): string => {
 
 export default function CourseSettingsScreen() {
   const styles = useCourseEditStyles();
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const setPopup = usePopup();
@@ -223,7 +225,9 @@ export default function CourseSettingsScreen() {
             });
           }
           setPopup({
-            message: "Brak zawartości kursu. Uzupełnij fiszki najpierw.",
+            message: t(
+              "screens.courses.makenewcourse.courseSettings.courseSettings.message.brakZawartosciKursuUzupelnijFiszki"
+            ),
             color: "angry",
             duration: 3500,
           });
@@ -250,7 +254,9 @@ export default function CourseSettingsScreen() {
             console.log("[CourseSettingsScreen] No valid cards in draft");
           }
           setPopup({
-            message: "Dodaj przynajmniej jedną fiszkę przed ustawieniami.",
+            message: t(
+              "screens.courses.makenewcourse.courseSettings.courseSettings.message.dodajPrzynajmniejJednaFiszkePrzed"
+            ),
             color: "angry",
             duration: 3500,
           });
@@ -319,7 +325,9 @@ export default function CourseSettingsScreen() {
       } catch (error) {
         console.error("Failed to restore course settings draft", error);
         setPopup({
-          message: "Nie udało się odczytać danych kreatora.",
+          message: t(
+            "screens.courses.makenewcourse.courseSettings.courseSettings.message.nieUdaloSieOdczytacDanych"
+          ),
           color: "angry",
           duration: 3500,
         });
@@ -346,6 +354,7 @@ export default function CourseSettingsScreen() {
     initialReviewsEnabled,
     router,
     setPopup,
+    t,
     hydrating,
   ]);
 
@@ -411,7 +420,9 @@ export default function CourseSettingsScreen() {
   const handleCreateCourse = async () => {
     if (nameConflict.kind === "duplicate") {
       setPopup({
-        message: "Ta nazwa kursu jest już zajęta.",
+        message: t(
+          "repeats.messages.duplicateCourseName"
+        ),
         color: "angry",
         duration: 3200,
       });
@@ -419,7 +430,9 @@ export default function CourseSettingsScreen() {
     }
     if (!courseName || !iconId) {
       setPopup({
-        message: "Brak nazwy lub ikony kursu.",
+        message: t(
+          "screens.courses.makenewcourse.courseSettings.courseSettings.message.brakNazwyLubIkonyKursu"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -428,7 +441,9 @@ export default function CourseSettingsScreen() {
     }
     if (manualCards.length === 0) {
       setPopup({
-        message: "Brak fiszek do zapisania.",
+        message: t(
+          "screens.courses.makenewcourse.courseSettings.courseSettings.message.brakFiszekDoZapisania"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -478,7 +493,9 @@ export default function CourseSettingsScreen() {
 
     if (trimmedCards.length === 0) {
       setPopup({
-        message: "Dodaj przynajmniej jedną fiszkę.",
+        message: t(
+          "screens.courses.makenewcourse.courseSettings.courseSettings.message.dodajPrzynajmniejJednaFiszke"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -518,7 +535,9 @@ export default function CourseSettingsScreen() {
       ]);
 
       setPopup({
-        message: "Kurs zapisany!",
+        message: t(
+          "screens.courses.makenewcourse.courseSettings.courseSettings.message.kursZapisany"
+        ),
         color: "calm",
         duration: 3200,
       });
@@ -526,7 +545,9 @@ export default function CourseSettingsScreen() {
     } catch (error) {
       console.error("Failed to create custom course", error);
       setPopup({
-        message: "Nie udało się stworzyć kursu.",
+        message: t(
+          "screens.courses.makenewcourse.courseSettings.courseSettings.message.nieUdaloSieStworzycKursu"
+        ),
         color: "angry",
         duration: 3500,
       });
@@ -598,17 +619,23 @@ export default function CourseSettingsScreen() {
             color="my_yellow"
             width={60}
             onPress={() => router.back()}
-            accessibilityLabel="Wróć do ustawiania zawartości kursu"
+            accessibilityLabel={t(
+              "screens.courses.makenewcourse.courseSettings.courseSettings.accessibilityLabel.wrocDoUstawianiaZawartosciKursu"
+            )}
           >
             <Ionicons name="arrow-back" size={28} color={colors.headline} />
           </MyButton>
           <View style={{ flex: 1 }} />
           <MyButton
-            text="Stwórz"
+            text={t(
+              "screens.courses.makenewcourse.courseSettings.courseSettings.text.stworz"
+            )}
             color="my_green"
             onPress={handleCreateCourse}
             disabled={isSaving}
-            accessibilityLabel="Stwórz kurs z aktualną zawartością i ustawieniami"
+            accessibilityLabel={t(
+              "screens.courses.makenewcourse.courseSettings.courseSettings.accessibilityLabel.stworzKursZAktualnaZawartoscia"
+            )}
           />
         </View>
       </View>

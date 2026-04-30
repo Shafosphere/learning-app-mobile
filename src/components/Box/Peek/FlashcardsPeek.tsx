@@ -12,6 +12,7 @@ import {
   useWindowDimensions,
 } from "react-native";
 import { Image } from "expo-image";
+import { useTranslation } from "react-i18next";
 
 type FlashcardsPeekOverlayProps = {
   visible: boolean;
@@ -39,6 +40,7 @@ export default function FlashcardsPeekOverlay({
   activeCourseName,
   onClose,
 }: FlashcardsPeekOverlayProps) {
+  const { t } = useTranslation();
   const styles = usePeekStyles();
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -95,28 +97,30 @@ export default function FlashcardsPeekOverlay({
     const answerImage = boxIsReversed && shouldFlip ? item.imageFront : item.imageBack;
     const hasPromptImage = Boolean(promptImage);
     const hasAnswerImage = Boolean(answerImage);
-    const displayPrompt = prompt?.trim() || (hasPromptImage ? "" : "Brak treści");
+    const displayPrompt =
+      prompt?.trim() || (hasPromptImage ? "" : t("flashcards.card.peek.emptyContent"));
     const translations =
       item.translations?.map((t) => t?.trim()).filter(Boolean) ?? [];
-    const mainTranslation = translations[0] ?? "Brak tłumaczenia";
+    const mainTranslation =
+      translations[0] ?? t("flashcards.card.peek.emptyTranslation");
     const isBooleanType = type === "true_false" || type === "know_dont_know";
     const isKnowDontKnow = type === "know_dont_know";
     const extraTranslations = isBooleanType ? [] : translations.slice(1);
     const normalizedTrueFalse = translations[0]?.toLowerCase() ?? "";
     const trueFalseAnswer =
       isKnowDontKnow
-        ? "Umiem / Nie umiem"
+        ? t("repeats.cardTypes.knowDontKnow")
         : normalizedTrueFalse === "true"
-          ? "Prawda"
+          ? t("flashcards.card.peek.true")
           : normalizedTrueFalse === "false"
-            ? "Fałsz"
-            : translations[0]?.trim() || "Brak odpowiedzi";
+            ? t("flashcards.card.peek.false")
+            : translations[0]?.trim() || t("flashcards.card.peek.emptyAnswer");
     const typeLabel =
       isBooleanType
         ? isKnowDontKnow
-          ? "Umiem / Nie umiem"
-          : "Prawda / Fałsz"
-        : "Tekst";
+          ? t("repeats.cardTypes.knowDontKnow")
+          : t("repeats.cardTypes.trueFalse")
+        : t("flashcards.card.peek.textType");
     const showPromptImageOnly =
       hasPromptImage && !displayPrompt;
     const showTrueFalseAnswer = isBooleanType && isBoxZero;
@@ -126,7 +130,7 @@ export default function FlashcardsPeekOverlay({
         {isBoxZero ? (
           <View style={[styles.cardContent, styles.cardContentBoxZero]}>
             <View style={styles.cardSide}>
-              <Text style={styles.cardSideLabel}>Fiszka</Text>
+              <Text style={styles.cardSideLabel}>{t("flashcards.card.peek.flashcard")}</Text>
               <Text style={styles.cardSideIndex}>#{index + 1}</Text>
             </View>
 
@@ -137,7 +141,7 @@ export default function FlashcardsPeekOverlay({
                 </View>
                 {hasPromptImage ? (
                   <View style={styles.typePill}>
-                    <Text style={styles.typePillText}>Obrazek</Text>
+                    <Text style={styles.typePillText}>{t("flashcards.card.peek.image")}</Text>
                   </View>
                 ) : null}
               </View>
@@ -151,7 +155,7 @@ export default function FlashcardsPeekOverlay({
                 </View>
               ) : (
                 <View style={styles.cardLine}>
-                  <Text style={styles.cardTag}>Awers</Text>
+                  <Text style={styles.cardTag}>{t("flashcards.card.peek.front")}</Text>
                   <View style={styles.cardValue}>
                     {hasPromptImage ? (
                       <Image
@@ -170,13 +174,13 @@ export default function FlashcardsPeekOverlay({
                       </Text>
                     ) : null}
                     {!hasPromptImage && !displayPrompt ? (
-                      <Text style={styles.cardEmptyValue}>Brak treści</Text>
+                      <Text style={styles.cardEmptyValue}>{t("flashcards.card.peek.emptyContent")}</Text>
                     ) : null}
                   </View>
                 </View>
               )}
               <View style={styles.cardLine}>
-                <Text style={[styles.cardTag]}>Rewers</Text>
+                <Text style={[styles.cardTag]}>{t("flashcards.card.peek.back")}</Text>
                 <View style={styles.cardValue}>
                   {hasAnswerImage ? (
                     <Image
@@ -197,14 +201,14 @@ export default function FlashcardsPeekOverlay({
                       {isBooleanType ? trueFalseAnswer : mainTranslation}
                     </Text>
                     {!hasAnswerImage && !mainTranslation ? (
-                      <Text style={styles.cardEmptyValue}>Brak tłumaczenia</Text>
+                      <Text style={styles.cardEmptyValue}>{t("flashcards.card.peek.emptyTranslation")}</Text>
                     ) : null}
                   </View>
               </View>
               {extraTranslations.length ? (
                 <Text style={styles.cardAlternatives}>
                   <Text style={styles.cardAlternativesLabel}>
-                    Pozostałe poprawne:{" "}
+                    {t("flashcards.card.peek.otherCorrect")}{" "}
                   </Text>
                   {extraTranslations.join(", ")}
                 </Text>
@@ -214,14 +218,16 @@ export default function FlashcardsPeekOverlay({
         ) : (
           <View style={[styles.cardContentSimple]}>
             <View style={styles.cardMetaRow}>
-              <Text style={styles.cardSimpleIndex}>FISZKA #{index + 1}</Text>
+              <Text style={styles.cardSimpleIndex}>
+                {t("flashcards.card.peek.flashcardNumber", { number: index + 1 })}
+              </Text>
               <View style={styles.cardMetaTags}>
                 <View style={styles.typePill}>
                   <Text style={styles.typePillText}>{typeLabel}</Text>
                 </View>
                 {hasPromptImage ? (
                   <View style={styles.typePill}>
-                    <Text style={styles.typePillText}>Obrazek</Text>
+                    <Text style={styles.typePillText}>{t("flashcards.card.peek.image")}</Text>
                   </View>
                 ) : null}
               </View>
@@ -237,7 +243,7 @@ export default function FlashcardsPeekOverlay({
                 </View>
               ) : (
                 <>
-                  <Text style={styles.cardTag}>Pytanie:</Text>
+                  <Text style={styles.cardTag}>{t("flashcards.card.peek.question")}</Text>
                   <View style={styles.cardValue}>
                     {hasPromptImage ? (
                       <Image
@@ -256,7 +262,7 @@ export default function FlashcardsPeekOverlay({
                       </Text>
                     ) : null}
                     {!hasPromptImage && !displayPrompt ? (
-                      <Text style={styles.cardEmptyValue}>Brak treści</Text>
+                      <Text style={styles.cardEmptyValue}>{t("flashcards.card.peek.emptyContent")}</Text>
                     ) : null}
                   </View>
                 </>
@@ -264,7 +270,7 @@ export default function FlashcardsPeekOverlay({
             </View>
             {showTrueFalseAnswer ? (
               <View style={styles.cardLine}>
-                <Text style={styles.cardTag}>Odpowiedź:</Text>
+                <Text style={styles.cardTag}>{t("flashcards.card.peek.answer")}</Text>
                 <Text style={[styles.cardSecondary, styles.cardTrueFalse]}>
                   {trueFalseAnswer}
                 </Text>
@@ -276,11 +282,16 @@ export default function FlashcardsPeekOverlay({
     );
   };
 
-  const hintText = cards.length ? "Lista fiszek w tym pudełku." : "";
+  const hintText = cards.length ? t("flashcards.card.peek.listHint") : "";
   const countLabel = cards.length
-    ? `${cards.length} ${cards.length === 1 ? "fiszka" : "fiszek"}`
-    : "Brak fiszek";
-  const courseLabel = activeCourseName?.trim() || "podgląd";
+    ? t(
+        cards.length === 1
+          ? "flashcards.card.peek.countOne"
+          : "flashcards.card.peek.countMany",
+        { count: cards.length }
+      )
+    : t("flashcards.card.peek.emptyCount");
+  const courseLabel = activeCourseName?.trim() || t("flashcards.card.peek.previewCourse");
 
   return (
     <Modal
@@ -306,7 +317,7 @@ export default function FlashcardsPeekOverlay({
           <View style={styles.sectionHeader}>
             <View style={styles.header}>
               <View style={styles.headerContent}>
-                <Text style={styles.title}>Pudełko nr {boxLabel}</Text>
+                <Text style={styles.title}>{t("flashcards.card.peek.boxTitle", { box: boxLabel })}</Text>
                 {hintText ? (
                   <Text style={styles.subtitle}>{hintText}</Text>
                 ) : null}
@@ -314,7 +325,7 @@ export default function FlashcardsPeekOverlay({
               <Pressable
                 onPress={onClose}
                 accessibilityRole="button"
-                accessibilityLabel="Zamknij"
+                accessibilityLabel={t("flashcards.card.peek.close")}
                 hitSlop={12}
                 style={({ pressed }) => [
                   styles.closeButton,
@@ -350,9 +361,9 @@ export default function FlashcardsPeekOverlay({
                     color={styles.emptyIcon.color}
                   />
                 </View>
-                <Text style={styles.emptyTitle}>Pudełko jest puste</Text>
+                <Text style={styles.emptyTitle}>{t("flashcards.card.peek.emptyBoxTitle")}</Text>
                 <Text style={styles.emptyDescription}>
-                  Fiszki trafią tutaj, gdy osiągniesz odpowiedni poziom nauki.
+                  {t("flashcards.card.peek.emptyBoxDescription")}
                 </Text>
               </View>
             ) : (

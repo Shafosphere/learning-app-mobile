@@ -18,6 +18,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   clearPersistedBoxesKeepProgress,
@@ -127,6 +128,7 @@ function BuiltinCourseEditor({
 }: BuiltinProps) {
   const styles = useCourseEditStyles();
   const router = useRouter();
+  const { t } = useTranslation();
   const {
     colors,
     courses,
@@ -393,8 +395,10 @@ function BuiltinCourseEditor({
     if (!scope) {
       setResettingBoxes(false);
       Alert.alert(
-        "Brak danych kursu",
-        "Nie udało się odnaleźć lokalnych danych tego kursu."
+        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
+        t(
+          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
+        )
       );
       return;
     }
@@ -402,11 +406,14 @@ function BuiltinCourseEditor({
     try {
       await clearPersistedBoxesKeepProgress(scope.boxesStorageKey);
       Alert.alert(
-        "Wyczyszczono stan pudełek",
-        "Fiszki, które są aktualnie w pudełkach, zostały z nich usunięte i wróciły do puli nieznanych."
+        t("components.courseEditor.customEditor.alerts.resetBoxesDoneTitle"),
+        t("components.courseEditor.customEditor.alerts.resetBoxesDoneMessage")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się wyczyścić stanu pudełek.");
+      Alert.alert(
+        t("components.courseEditor.customEditor.alerts.error"),
+        t("components.courseEditor.customEditor.alerts.resetBoxesFailed")
+      );
     } finally {
       setResettingBoxes(false);
     }
@@ -414,11 +421,18 @@ function BuiltinCourseEditor({
 
   const handleResetBoxes = () => {
     Alert.alert(
-      "Wyczyścić stan pudełek?",
-      "Fiszki, które są aktualnie w pudełkach, zostaną z nich usunięte i wrócą do puli nieznanych. Nie usunie to powtórek ani ogólnego postępu kursu.",
+      t("components.courseEditor.customEditor.alerts.resetBoxesConfirmTitle"),
+      t("components.courseEditor.customEditor.alerts.resetBoxesConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Wyczyść", style: "destructive", onPress: performResetBoxes },
+        {
+          text: t("components.courseEditor.customEditor.alerts.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("components.courseEditor.customEditor.alerts.resetBoxesAction"),
+          style: "destructive",
+          onPress: performResetBoxes,
+        },
       ]
     );
   };
@@ -430,8 +444,10 @@ function BuiltinCourseEditor({
     if (!scope) {
       setResettingReviews(false);
       Alert.alert(
-        "Brak danych kursu",
-        "Nie udało się odnaleźć lokalnych danych tego kursu."
+        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
+        t(
+          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
+        )
       );
       return;
     }
@@ -439,13 +455,19 @@ function BuiltinCourseEditor({
     try {
       const deleted = await resetCustomReviewsForCourse(scope.courseId);
       Alert.alert(
-        "Usunięto powtórki",
+        t("components.courseEditor.customEditor.alerts.resetReviewsDoneTitle"),
         deleted > 0
-          ? `Usunięto ${deleted} zapisanych powtórek tego kursu.`
-          : "Nie było zapisanych powtórek do usunięcia."
+          ? t(
+              "screens.courses.editcourse.courseEdit.courseEdit.alert.usunietoValueZapisanychPowtorekTego",
+              { value: deleted }
+            )
+          : t("components.courseEditor.customEditor.alerts.resetReviewsDoneEmpty")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się usunąć powtórek.");
+      Alert.alert(
+        t("components.courseEditor.customEditor.alerts.error"),
+        t("components.courseEditor.customEditor.alerts.resetReviewsFailed")
+      );
     } finally {
       setResettingReviews(false);
     }
@@ -453,11 +475,18 @@ function BuiltinCourseEditor({
 
   const handleResetReviews = () => {
     Alert.alert(
-      "Usunąć powtórki?",
-      "Ta operacja usunie wszystkie zapisane powtórki dla tego kursu.",
+      t("components.courseEditor.customEditor.alerts.resetReviewsConfirmTitle"),
+      t("components.courseEditor.customEditor.alerts.resetReviewsConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Usuń", style: "destructive", onPress: performResetReviews },
+        {
+          text: t("components.courseEditor.customEditor.alerts.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("components.courseEditor.customEditor.alerts.resetReviewsAction"),
+          style: "destructive",
+          onPress: performResetReviews,
+        },
       ]
     );
   };
@@ -469,8 +498,10 @@ function BuiltinCourseEditor({
     if (!scope) {
       setResettingAll(false);
       Alert.alert(
-        "Brak danych kursu",
-        "Nie udało się odnaleźć lokalnych danych tego kursu."
+        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
+        t(
+          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
+        )
       );
       return;
     }
@@ -479,11 +510,14 @@ function BuiltinCourseEditor({
       await AsyncStorage.removeItem(scope.boxesStorageKey);
       await resetCustomReviewsForCourse(scope.courseId);
       Alert.alert(
-        "Przywrócono kurs od początku",
-        "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych."
+        t("components.courseEditor.customEditor.alerts.resetAllDoneTitle"),
+        t("components.courseEditor.customEditor.alerts.resetAllDoneMessage")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się przywrócić kursu od początku.");
+      Alert.alert(
+        t("components.courseEditor.customEditor.alerts.error"),
+        t("components.courseEditor.customEditor.alerts.resetAllFailed")
+      );
     } finally {
       setResettingAll(false);
     }
@@ -491,11 +525,18 @@ function BuiltinCourseEditor({
 
   const handleResetAll = () => {
     Alert.alert(
-      "Przywrócić kurs od początku?",
-      "Ta operacja wyczyści stan pudełek i powtórki oraz przywróci wszystkie fiszki do puli nieznanych.",
+      t("components.courseEditor.customEditor.alerts.resetAllConfirmTitle"),
+      t("components.courseEditor.customEditor.alerts.resetAllConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Przywróć", style: "destructive", onPress: performResetAll },
+        {
+          text: t("components.courseEditor.customEditor.alerts.cancel"),
+          style: "cancel",
+        },
+        {
+          text: t("components.courseEditor.customEditor.alerts.resetAllAction"),
+          style: "destructive",
+          onPress: performResetAll,
+        },
       ]
     );
   };
@@ -523,7 +564,11 @@ function BuiltinCourseEditor({
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>USTAWIENIA KURSU</Text>
+          <Text style={styles.sectionHeader}>
+            {t(
+              "screens.courses.editcourse.courseEdit.courseEdit.textChild.ustawieniaKursu"
+            )}
+          </Text>
           {/* {languagePair ? (
             <Text
               style={styles.sectionDescription}
@@ -582,32 +627,42 @@ function BuiltinCourseEditor({
             resetActions={[
               {
                 key: "boxes",
-                title: "Wyczyść stan pudełek",
-                subtitle:
-                  "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
-                ctaText: "Wyczyść",
-                loadingText: "Czyszczę...",
+                title: t("components.courseEditor.customEditor.resetActions.boxes.title"),
+                subtitle: t(
+                  "components.courseEditor.customEditor.resetActions.boxes.subtitle"
+                ),
+                ctaText: t("components.courseEditor.customEditor.alerts.resetBoxesAction"),
+                loadingText: t(
+                  "components.courseEditor.customEditor.resetActions.boxes.loading"
+                ),
                 loading: resettingBoxes,
                 onPress: handleResetBoxes,
                 disabled: resettingBoxes,
               },
               {
                 key: "reviews",
-                title: "Usuń powtórki",
-                subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
-                ctaText: "Usuń",
-                loadingText: "Usuwam...",
+                title: t("components.courseEditor.customEditor.resetActions.reviews.title"),
+                subtitle: t(
+                  "components.courseEditor.customEditor.resetActions.reviews.subtitle"
+                ),
+                ctaText: t("components.courseEditor.customEditor.alerts.resetReviewsAction"),
+                loadingText: t(
+                  "components.courseEditor.customEditor.resetActions.reviews.loading"
+                ),
                 loading: resettingReviews,
                 onPress: handleResetReviews,
                 disabled: resettingReviews,
               },
               {
                 key: "all",
-                title: "Przywróć kurs od początku",
-                subtitle:
-                  "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
-                ctaText: "Przywróć",
-                loadingText: "Przywracam...",
+                title: t("components.courseEditor.customEditor.resetActions.all.title"),
+                subtitle: t(
+                  "components.courseEditor.customEditor.resetActions.all.subtitle"
+                ),
+                ctaText: t("components.courseEditor.customEditor.alerts.resetAllAction"),
+                loadingText: t(
+                  "components.courseEditor.customEditor.resetActions.all.loading"
+                ),
                 loading: resettingAll,
                 onPress: handleResetAll,
                 disabled: resettingAll,
@@ -623,7 +678,9 @@ function BuiltinCourseEditor({
             color="my_yellow"
             width={60}
             onPress={() => router.back()}
-            accessibilityLabel="Wróć do panelu kursów"
+            accessibilityLabel={t(
+              "repeats.a11y.backToCoursesPanel"
+            )}
           >
             <Ionicons name="arrow-back" size={28} color={colors.headline} />
           </MyButton>
@@ -636,6 +693,7 @@ function BuiltinCourseEditor({
 function MissingCourseFallback() {
   const styles = useCourseEditStyles();
   const router = useRouter();
+  const { t } = useTranslation();
   return (
     <View
       style={[
@@ -644,10 +702,12 @@ function MissingCourseFallback() {
       ]}
     >
       <Text style={{ fontSize: 18, fontWeight: "600", marginBottom: 16 }}>
-        Nie znaleziono danych kursu.
+        {t(
+          "screens.courses.editcourse.courseEdit.courseEdit.textChild.nieZnalezionoDanychKursu"
+        )}
       </Text>
       <MyButton
-        text="wróć"
+        text={t("screens.courses.editcourse.courseEdit.courseEdit.text.wroc")}
         color="my_yellow"
         width={120}
         onPress={() => router.back()}

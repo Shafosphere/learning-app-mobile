@@ -9,6 +9,7 @@ import {
   View,
   type ImageSourcePropType,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "@/src/screens/courses/pincourse/CoursePinScreen/CoursePinScreen-styles";
 
 type OfficialCourseListItem = {
@@ -93,6 +94,7 @@ export function CoursePinAccordion({
   groups,
   renderCourseCard,
 }: CoursePinAccordionProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
 
@@ -113,7 +115,10 @@ export function CoursePinAccordion({
             <Pressable
               accessibilityRole="button"
               accessibilityState={{ expanded }}
-              accessibilityLabel={`Kategoria ${group.title}, ${group.count} kursów`}
+              accessibilityLabel={t("courses.groups.categoryA11y", {
+                title: group.title,
+                count: group.count,
+              })}
               onPress={() => {
                 setExpandedGroupKey((current) =>
                   current === group.key ? null : group.key
@@ -154,7 +159,9 @@ export function CoursePinAccordion({
                 <View pointerEvents="none" style={styles.accordionBodySideMaskRight} />
                 {hasRegular ? (
                   <>
-                    <Text style={styles.accordionSectionTitle}>Kursy</Text>
+                    <Text style={styles.accordionSectionTitle}>
+                      {t("repeats.labels.courses")}
+                    </Text>
                     <View style={styles.accordionCardsList}>
                       {group.regularItems.map(renderCourseCard)}
                     </View>

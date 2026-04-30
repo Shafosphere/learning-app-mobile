@@ -22,6 +22,7 @@ import {
   View,
   Platform,
 } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./card-styles";
 import type { CardDisplayMode, CardProps } from "./card-types";
 import { CardContentResolver } from "./subcomponents/CardContentResolver";
@@ -135,6 +136,7 @@ export default function Card({
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
 }: CardProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const checkSpelling = useSpellchecking();
   const {
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
@@ -813,11 +815,11 @@ export default function Card({
     hintDialogVisible.current = true;
     if (!canShowBackAsPrompt) {
       Alert.alert(
-        "Zapisać podpowiedź?",
-        "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+        t("flashcards.card.hint.saveDialogTitle"),
+        t("flashcards.card.hint.saveDialogMessage"),
         [
           {
-            text: "Anuluj",
+            text: t("app.actions.cancel"),
             style: "cancel",
             onPress: () => {
               hintDialogVisible.current = false;
@@ -825,7 +827,7 @@ export default function Card({
             },
           },
           {
-            text: "Zapisz",
+            text: t("flashcards.card.hint.save"),
             onPress: () => {
               hintDialogVisible.current = false;
               applyHintToSides(false);
@@ -836,11 +838,11 @@ export default function Card({
       return;
     }
     Alert.alert(
-      "Gdzie zapisać podpowiedź?",
-      "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
+      t("flashcards.card.hint.targetDialogTitle"),
+      t("flashcards.card.hint.targetDialogMessage"),
       [
         {
-          text: "Anuluj",
+          text: t("app.actions.cancel"),
           style: "cancel",
           onPress: () => {
             hintDialogVisible.current = false;
@@ -848,14 +850,14 @@ export default function Card({
           },
         },
         {
-          text: "Tylko ta strona",
+          text: t("flashcards.card.hint.thisSideOnly"),
           onPress: () => {
             hintDialogVisible.current = false;
             applyHintToSides(false);
           },
         },
         {
-          text: "Obie strony fiszki",
+          text: t("flashcards.card.hint.bothSides"),
           onPress: () => {
             hintDialogVisible.current = false;
             applyHintToSides(true);
@@ -863,7 +865,7 @@ export default function Card({
         },
       ],
     );
-  }, [applyHintToSides, canShowBackAsPrompt, hintDraft, selectedItem]);
+  }, [applyHintToSides, canShowBackAsPrompt, hintDraft, selectedItem, t]);
 
   const hintActionsStyle = useMemo(
     () => ({

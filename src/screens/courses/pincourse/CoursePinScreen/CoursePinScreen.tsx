@@ -22,6 +22,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
+import { useTranslation } from "react-i18next";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   Image,
@@ -65,6 +66,7 @@ type CourseViewMode = "languages" | "general";
 
 export default function CoursePinScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ replayIntro?: string }>();
   const scrollRef = useRef<ScrollView | null>(null);
@@ -272,7 +274,9 @@ export default function CoursePinScreen() {
       nextGroups.push({
         key: group.key,
         title,
-        subtitle: group.category?.description ?? "",
+        subtitle: group.category?.descriptionKey
+          ? t(group.category.descriptionKey)
+          : "",
         count,
         regularItems,
         miniItems,
@@ -281,7 +285,7 @@ export default function CoursePinScreen() {
     });
 
     return nextGroups;
-  }, [categorizedCourses]);
+  }, [categorizedCourses, t]);
 
   const firstVisiblePackId = useMemo(() => {
     const firstLanguagePack = languageCourses[0]?.officialPacks[0]?.id ?? null;
@@ -391,7 +395,10 @@ export default function CoursePinScreen() {
         <CourseListCard
           key={`official-${pack.id}`}
           title={pack.name}
-          subtitle={`fiszki: ${pack.cardsCount}`}
+          subtitle={t(
+            "repeats.format.flashcardsValue",
+            { value: pack.cardsCount }
+          )}
           iconId={pack.iconId}
           iconColor={pack.iconColor}
           flagCode={flagLang}
@@ -483,6 +490,7 @@ export default function CoursePinScreen() {
       handleOfficialPinToggle,
       pinnedOfficialCourseIds,
       styles,
+      t,
     ]
   );
 
@@ -509,7 +517,9 @@ export default function CoursePinScreen() {
         scrollEnabled={!coachmark.currentStep?.scrollLocked}
       >
         <View style={styles.minicontainer}>
-          <Text style={styles.title}>Czego sie uczymy?</Text>
+          <Text style={styles.title}>
+            {t("screens.courses.pincourse.coursePin.coursePin.textChild.czegoSieUczymy")}
+          </Text>
           <View style={styles.viewModeTabsSection}>
             <CoachmarkAnchor
               id="course-pin-tab-switcher"
@@ -529,7 +539,9 @@ export default function CoursePinScreen() {
                   ]}
                   value={viewMode}
                   onChange={setViewMode}
-                  accessibilityLabel="Filtr typu kursów"
+                  accessibilityLabel={t(
+                    "screens.courses.pincourse.coursePin.coursePin.accessibilityLabel.filtrTypuKursow"
+                  )}
                   containerStyle={styles.viewModeTabs}
                 />
               </View>
@@ -539,7 +551,11 @@ export default function CoursePinScreen() {
           {viewMode === "languages" ? (
             <>
               {languageCourses.length === 0 ? (
-                <Text style={styles.emptyStateText}>Brak kursów językowych</Text>
+                <Text style={styles.emptyStateText}>
+                  {t(
+                    "screens.courses.pincourse.coursePin.coursePin.textChild.brakKursowJezykowych"
+                  )}
+                </Text>
               ) : null}
               {languageCourses.map((group) => {
                 const regularOfficialPacks = group.officialPacks.filter(
@@ -598,7 +614,11 @@ export default function CoursePinScreen() {
 
                     {showRegular ? (
                       <>
-                        <Text style={styles.subTitle}>Kursy</Text>
+                        <Text style={styles.subTitle}>
+                          {t(
+                            "repeats.labels.courses"
+                          )}
+                        </Text>
                         <View style={styles.cardsList}>
                           {regularOfficialPacks.map(renderOfficialPackCard)}
                         </View>
@@ -608,7 +628,11 @@ export default function CoursePinScreen() {
                     {showMini ? (
                       <>
                         {showRegular ? (
-                          <Text style={styles.subTitle}>Mini kursy</Text>
+                          <Text style={styles.subTitle}>
+                            {t(
+                              "screens.courses.pincourse.coursePin.coursePin.textChild.miniKursy"
+                            )}
+                          </Text>
                         ) : null}
                         <View style={styles.cardsList}>
                           {miniOfficialPacks.map(renderOfficialPackCard)}
@@ -623,7 +647,9 @@ export default function CoursePinScreen() {
             <>
               {accordionGroups.length === 0 ? (
                 <Text style={styles.emptyStateText}>
-                  Brak kursów wiedzy ogólnej
+                  {t(
+                    "screens.courses.pincourse.coursePin.coursePin.textChild.brakKursowWiedzyOgolnej"
+                  )}
                 </Text>
               ) : null}
               <CoursePinAccordion
@@ -633,7 +659,11 @@ export default function CoursePinScreen() {
             </>
           )}
 
-          <Text style={styles.footerNote}>kiedys bedzie tu ich wiecej :)</Text>
+          <Text style={styles.footerNote}>
+            {t(
+              "screens.courses.pincourse.coursePin.coursePin.textChild.kiedysBedzieTuIchWiecej"
+            )}
+          </Text>
         </View>
       </ScrollView>
 
@@ -648,8 +678,10 @@ export default function CoursePinScreen() {
               style={{ alignSelf: "flex-end" }}
             >
               <MyButton
-                text="Dalej"
-                accessibilityLabel="Przejdź dalej do aktywacji"
+                text={t("app.actions.next")}
+                accessibilityLabel={t(
+                  "screens.courses.pincourse.coursePin.coursePin.accessibilityLabel.przejdzDalejDoAktywacji"
+                )}
                 disabled={!hasAnyPinned}
                 onPress={() => {
                   if (coachmark.isActive) {
@@ -679,12 +711,16 @@ export default function CoursePinScreen() {
               onPress={() => router.push("/coursepanel")}
               disabled={false}
               width={60}
-              accessibilityLabel="Wróć do panelu kursów"
+              accessibilityLabel={t(
+                "repeats.a11y.backToCoursesPanel"
+              )}
             >
               <Ionicons name="arrow-back" size={28} color={colors.headline} />
             </MyButton>
             <MyButton
-              text="zrób własny"
+              text={t(
+                "screens.courses.pincourse.coursePin.coursePin.text.zrobWlasny"
+              )}
               color="my_green"
               onPress={() => router.push("/custom_course")}
               disabled={false}

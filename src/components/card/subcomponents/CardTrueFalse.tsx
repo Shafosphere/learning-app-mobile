@@ -2,6 +2,7 @@ import MyButton from "@/src/components/button/button";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useMemo } from "react";
 import { StyleSheet, Text, View, type ImageStyle } from "react-native";
+import { useTranslation } from "react-i18next";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import { PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
@@ -31,6 +32,7 @@ export function CardTrueFalse({
     imageSizeMode = "dynamic",
 }: CardTrueFalseProps) {
     const { colors } = useSettings();
+    const { t } = useTranslation();
     const styles = useMemo(() => makeStyles(colors), [colors]);
 
     const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
@@ -99,19 +101,19 @@ export function CardTrueFalse({
             {showButtons ? (
                 <View style={styles.buttonsRow}>
                     <MyButton
-                        text="FAŁSZ"
+                        text={t("flashcards.card.trueFalse.false")}
                         color="my_red"
                         onPress={() => onAnswer(false)}
                         width={140}
-                        accessibilityLabel="Oznacz jako Fałsz"
+                        accessibilityLabel={t("flashcards.card.trueFalse.markFalse")}
                     />
                     <View style={styles.spacer} />
                     <MyButton
-                        text="PRAWDA"
+                        text={t("flashcards.card.trueFalse.true")}
                         color="my_green"
                         onPress={() => onAnswer(true)}
                         width={140}
-                        accessibilityLabel="Oznacz jako Prawda"
+                        accessibilityLabel={t("flashcards.card.trueFalse.markTrue")}
                     />
                 </View>
             ) : null}

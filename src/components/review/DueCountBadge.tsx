@@ -15,7 +15,7 @@ export const DueCountBadge = ({ count }: DueCountBadgeProps) => {
         <Text
             style={[
                 styles.countNumber,
-                { color: count > 0 ? colors.my_red : colors.my_green },
+                { color: count !== 0 ? colors.my_red : colors.my_green },
             ]}
         >
             {count}

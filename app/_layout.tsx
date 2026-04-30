@@ -218,7 +218,7 @@ export default function RootLayout() {
       t("app.error.reset.confirmMessage"),
       [
         {
-          text: t("app.error.reset.cancel"),
+          text: t("app.actions.cancel"),
           style: "cancel",
         },
         {

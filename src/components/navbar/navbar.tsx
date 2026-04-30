@@ -30,6 +30,7 @@ import {
   View,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import NavbarStatsRotator from "./NavbarStatsRotator";
 import { useStyles } from "./navbar-styles";
 
@@ -53,6 +54,7 @@ const FLASHCARDS_PATHS = new Set([
 ]);
 
 export default function Navbar({ children }: NavbarProps) {
+  const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
   const { triggerQuote } = useQuote();
@@ -356,7 +358,9 @@ export default function Navbar({ children }: NavbarProps) {
               onLayout={updatePopupAnchor}
               style={styles.logoButton}
               accessibilityRole="button"
-              accessibilityLabel="Przejdź do strony głównej"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoStronyGlownej"
+              )}
             >
               <Image source={logo} style={styles.logo} contentFit="contain" />
             </TouchableOpacity>
@@ -422,7 +426,9 @@ export default function Navbar({ children }: NavbarProps) {
               ]}
               onPress={handleReviewPress}
               accessibilityRole="button"
-              accessibilityLabel="Przejdź do powtórek"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoPowtorek"
+              )}
             >
               <CoachmarkAnchor
                 id="flashcards-review-button"
@@ -464,7 +470,9 @@ export default function Navbar({ children }: NavbarProps) {
               ]}
               onPress={handleHomePress}
               accessibilityRole="button"
-              accessibilityLabel="Przejdź do menu głównego"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoMenuGlownego"
+              )}
             >
               <CoachmarkAnchor
                 id="flashcards-home-button"
@@ -484,7 +492,9 @@ export default function Navbar({ children }: NavbarProps) {
               ]}
               onPress={handlePadPress}
               accessibilityRole="button"
-              accessibilityLabel="Przejdź do gry fiszek"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"
+              )}
             >
               <CoachmarkAnchor
                 id="flashcards-game-button"
@@ -504,7 +514,9 @@ export default function Navbar({ children }: NavbarProps) {
               ]}
               onPress={handleSettingsPress}
               accessibilityRole="button"
-              accessibilityLabel="Przejdź do ustawień"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoUstawien"
+              )}
             >
               <CoachmarkAnchor
                 id="flashcards-settings-button"

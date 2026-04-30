@@ -2,6 +2,7 @@ import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { Animated, Pressable, Text, TextInput, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "../card-styles";
 
 type CardHintProps = {
@@ -39,6 +40,7 @@ export function CardHint({
 }: CardHintProps) {
     const styles = useStyles();
     const { colors } = useSettings();
+    const { t } = useTranslation();
     const canDelete = Boolean(currentHint);
 
     return (
@@ -71,14 +73,14 @@ export function CardHint({
                         onChangeText={setHintDraft}
                         onSubmitEditing={finishHintEditing}
                         onBlur={onHintInputBlur}
-                        placeholder="Wpisz podpowiedź..."
+                        placeholder={t("flashcards.card.hint.placeholder")}
                         placeholderTextColor={colors.paragraph}
                         style={styles.hintInput}
                         returnKeyType="done"
                     />
                     <Animated.View style={[styles.hintActions, hintActionsStyle]}>
                         <MyButton
-                            text={canDelete ? "Usuń" : "Anuluj"}
+                            text={canDelete ? t("app.actions.delete") : t("app.actions.cancel")}
                             onPress={canDelete ? deleteHint : cancelHintEditing}
                             color="secondBackground"
                             width="auto"
@@ -93,7 +95,7 @@ export function CardHint({
                             ]}
                         />
                         <MyButton
-                            text="Zapisz"
+                            text={t("flashcards.card.hint.save")}
                             onPress={finishHintEditing}
                             disabled={!hintDraft.trim()}
                             color="secondBackground"

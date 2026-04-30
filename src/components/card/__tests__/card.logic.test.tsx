@@ -77,6 +77,26 @@ jest.mock("@/src/components/card/useFocusExecutor", () => ({
   useFocusExecutor: jest.fn(),
 }));
 
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        "app.actions.cancel": "Anuluj",
+        "flashcards.card.hint.bothSides": "Obie strony fiszki",
+        "flashcards.card.hint.save": "Zapisz",
+        "flashcards.card.hint.saveDialogMessage":
+          "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+        "flashcards.card.hint.saveDialogTitle": "Zapisać podpowiedź?",
+        "flashcards.card.hint.targetDialogMessage":
+          "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
+        "flashcards.card.hint.targetDialogTitle": "Gdzie zapisać podpowiedź?",
+        "flashcards.card.hint.thisSideOnly": "Tylko ta strona",
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 let latestResolverProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/card/subcomponents/CardContentResolver", () => ({

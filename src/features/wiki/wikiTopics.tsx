@@ -22,6 +22,10 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { ThemeColors } from "@/src/theme/theme";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Octicons from "@expo/vector-icons/Octicons";
+import i18n from "@/src/i18n";
+
+const wt = (key: string, options?: Record<string, unknown>) =>
+  i18n.t(key, options);
 
 const SAMPLE_WORD: WordWithTranslations = {
   id: 1,
@@ -131,7 +135,7 @@ function CardTypePreview({
 }) {
   return (
     <CardTypeSelector
-      label="Typ nowej fiszki"
+      label={wt("features.wiki.wikiTopics.label.typNowejFiszki")}
       value={value}
       onChange={noop}
       options={[
@@ -343,7 +347,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
   //   ],
   // },
   {
-    title: "Przypinanie kursu",
+    title: wt("features.wiki.wikiTopics.title.przypinanieKursu"),
     subtitle: "Jak przypiąć kurs",
     blocks: [
       {
@@ -374,7 +378,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
               <CourseListCard
                 key={course.id}
                 title={course.name}
-                subtitle={`fiszki: ${course.cardsCount}`}
+                subtitle={wt("repeats.format.flashcardsValue", {
+                  value: course.cardsCount,
+                })}
                 iconId={course.iconId}
                 iconColor={course.iconColor}
                 flagCode={course.flagCode}
@@ -433,7 +439,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
-    title: "Aktywacja kursu",
+    title: wt("features.wiki.wikiTopics.title.aktywacjaKursu"),
     subtitle: "Jak aktywować kurs",
     blocks: [
       {
@@ -459,7 +465,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
               <CourseListCard
                 key={course.id}
                 title={course.name}
-                subtitle={`fiszki: ${course.cardsCount}`}
+                subtitle={wt("repeats.format.flashcardsValue", {
+                  value: course.cardsCount,
+                })}
                 iconId={course.iconId}
                 iconColor={course.iconColor}
                 flagCode={course.flagCode}
@@ -469,7 +477,10 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 rightAccessory={
                   <Pressable
                     accessibilityRole="button"
-                    accessibilityLabel={`Edytuj kurs ${course.name}`}
+                    accessibilityLabel={wt(
+                      "features.wiki.wikiTopics.accessibilityLabel.edytujKursValue",
+                      { value: course.name }
+                    )}
                     style={{ padding: 6 }}
                     onPress={(event) => {
                       event.stopPropagation();
@@ -497,7 +508,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
-    title: "Ustawienia",
+    title: wt("features.wiki.wikiTopics.title.ustawienia"),
     subtitle: "Dostosuj pod siebie",
     blocks: [
       {
@@ -559,8 +570,8 @@ export const WIKI_TOPICS: WikiTopic[] = [
         tone: "green",
         render: (colors) => (
           <CourseListCard
-            title="Hangul - czytanie"
-            subtitle="fiszki: 120"
+            title={wt("features.wiki.wikiTopics.title.hangulCzytanie")}
+            subtitle={wt("features.wiki.wikiTopics.subtitle.fiszki120")}
             iconId="book"
             iconColor="#F4B942"
             flagCode="kr"
@@ -569,7 +580,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
             rightAccessory={
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Ustawienia kursu Hangul - czytanie"
+                accessibilityLabel={wt(
+                  "features.wiki.wikiTopics.accessibilityLabel.ustawieniaKursuHangulCzytanie"
+                )}
                 style={{ padding: 6 }}
                 onPress={(event) => {
                   event.stopPropagation();
@@ -609,7 +622,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
-    title: "Fiszki",
+    title: wt("features.wiki.wikiTopics.title.fiszki"),
     subtitle: "Jak działa gra?",
     blocks: [
 
@@ -670,8 +683,14 @@ export const WIKI_TOPICS: WikiTopic[] = [
         render: (colors) => (
           <View style={{ alignItems: "center", gap: 12 }}>
             <View style={{ flexDirection: "row", gap: 15 }}>
-              <MyButton text="Dodaj fiszki" color="my_yellow" />
-              <MyButton text="Zatwierdź" color="my_green" />
+              <MyButton
+                text={wt("features.wiki.wikiTopics.text.dodajFiszki")}
+                color="my_yellow"
+              />
+              <MyButton
+                text={wt("features.wiki.wikiTopics.text.zatwierdz")}
+                color="my_green"
+              />
             </View>
             <Text
               style={{
@@ -680,8 +699,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Przyciski pod kartą: dodawanie nowych fiszek i zatwierdzanie
-              odpowiedzi.
+              {wt(
+                "features.wiki.wikiTopics.textChild.przyciskiPodKartaDodawanieNowych"
+              )}
             </Text>
           </View>
         ),
@@ -715,7 +735,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Mniejszy przycisk Dodaj fiszki który wystepuje w trybie prawda / fałsz
+              {wt(
+                "features.wiki.wikiTopics.textChild.mniejszyPrzyciskDodajFiszkiKtory"
+              )}
             </Text>
           </View>
         ),
@@ -764,8 +786,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Aktywne pudełko losuje fiszki do karty. Przytrzymaj palec na pudełku, aby
-              podejrzeć jego zawartość.
+              {wt(
+                "features.wiki.wikiTopics.textChild.aktywnePudelkoLosujeFiszkiDo"
+              )}
             </Text>
           </View>
         ),
@@ -837,7 +860,9 @@ export const WIKI_TOPICS: WikiTopic[] = [
                 textAlign: "center",
               }}
             >
-              Możesz dodać krótkie skojarzenie lub wskazówkę widoczną przy tej fiszce w trakcie nauki.
+              {wt(
+                "features.wiki.wikiTopics.textChild.mozeszDodacKrotkieSkojarzenieLub"
+              )}
             </Text>
           </View>
         ),
@@ -857,7 +882,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
   },
 
   {
-    title: "Tworzenie kursu",
+    title: wt("features.wiki.wikiTopics.title.tworzenieKursu"),
     subtitle: "Jak stworzyć własny kurs",
     blocks: [
       {
@@ -968,7 +993,7 @@ export const WIKI_TOPICS: WikiTopic[] = [
     ],
   },
   {
-    title: "Powtórki",
+    title: wt("repeats.labels.reviews"),
     subtitle: "Jak robić powtórki",
     blocks: [
       {

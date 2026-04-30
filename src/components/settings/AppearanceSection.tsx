@@ -31,17 +31,17 @@ const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand
 
 const uiLanguageOptions: {
   key: UiLanguage;
-  labelKey: "settings.uiLanguage.polish" | "settings.uiLanguage.english";
+  labelKey: "repeats.labels.polish" | "repeats.labels.english";
 }[] = [
-  { key: "pl", labelKey: "settings.uiLanguage.polish" },
-  { key: "en", labelKey: "settings.uiLanguage.english" },
+  { key: "pl", labelKey: "repeats.labels.polish" },
+  { key: "en", labelKey: "repeats.labels.english" },
 ];
 const nativeLanguageOptions: {
   key: NativeLanguage;
-  labelKey: "settings.nativeLanguage.polish" | "settings.nativeLanguage.english";
+  labelKey: "repeats.labels.polish" | "repeats.labels.english";
 }[] = [
-  { key: "pl", labelKey: "settings.nativeLanguage.polish" },
-  { key: "en", labelKey: "settings.nativeLanguage.english" },
+  { key: "pl", labelKey: "repeats.labels.polish" },
+  { key: "en", labelKey: "repeats.labels.english" },
 ];
 
 const AppearanceSection: React.FC = () => {
@@ -218,7 +218,9 @@ const AppearanceSection: React.FC = () => {
         {t("settings.appearance.section")}
       </Text>
 
-      <Text style={styles.appearanceGroupLabel}>JĘZYK</Text>
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.appearance.groups.language")}
+      </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceBlockHeader}>
           <Text style={styles.appearanceBlockTitle}>
@@ -238,7 +240,7 @@ const AppearanceSection: React.FC = () => {
               {
                 t(
                   uiLanguageOptions.find((option) => option.key === uiLanguage)
-                    ?.labelKey ?? "settings.uiLanguage.english"
+                    ?.labelKey ?? "repeats.labels.english"
                 )
               }
             </Text>
@@ -265,7 +267,7 @@ const AppearanceSection: React.FC = () => {
                 t(
                   nativeLanguageOptions.find(
                     (option) => option.key === nativeLanguage
-                  )?.labelKey ?? "settings.nativeLanguage.english"
+                  )?.labelKey ?? "repeats.labels.english"
                 )
               }
             </Text>
@@ -274,7 +276,9 @@ const AppearanceSection: React.FC = () => {
         </View>
       </View>
 
-      <Text style={styles.appearanceGroupLabel}>INTERFEJS</Text>
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.appearance.groups.interface")}
+      </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
           <View style={styles.appearanceGroupRow}>
@@ -357,7 +361,9 @@ const AppearanceSection: React.FC = () => {
         </View>
       </View>
 
-      <Text style={styles.appearanceGroupLabel}>DŹWIĘK</Text>
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.appearance.groups.sound")}
+      </Text>
       <View style={styles.appearancePlainBlock}>
         <View style={styles.appearanceBlockHeader}>
           <Text style={styles.appearanceBlockDescription}>

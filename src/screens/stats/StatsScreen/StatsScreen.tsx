@@ -2,6 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
 import React, { useEffect, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./StatsScreen-styles";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -18,6 +19,7 @@ import {
 
 export default function StatsScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { statsBookshelfEnabled, colors } = useSettings();
   const { stats } = useNavbarStats();
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
@@ -124,7 +126,9 @@ export default function StatsScreen() {
               color={colors.my_red}
             />
           </View>
-          <Text style={styles.miniStatLabel}>Codzienna passa</Text>
+          <Text style={styles.miniStatLabel}>
+            {t("screens.stats.stats.stats.textChild.codziennaPassa")}
+          </Text>
         </View>
         <View style={styles.miniStatItem}>
           <View style={styles.miniStatCard}>
@@ -136,7 +140,9 @@ export default function StatsScreen() {
               color={colors.my_green}
             />
           </View>
-          <Text style={styles.miniStatLabel}>Skoki</Text>
+          <Text style={styles.miniStatLabel}>
+            {t("repeats.labels.jumps")}
+          </Text>
         </View>
       </View>
 

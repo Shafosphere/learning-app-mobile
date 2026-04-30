@@ -3,6 +3,7 @@ import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Image, NativeSyntheticEvent, NativeScrollEvent, Pressable, ScrollView, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
@@ -28,6 +29,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 export default function CoursesReviewScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const router = useRouter();
   const scrollRef = useRef<ScrollView | null>(null);
   const contentRef = useRef<View | null>(null);
@@ -446,10 +448,12 @@ export default function CoursesReviewScreen() {
         scrollEventThrottle={16}
       >
         <View ref={contentRef} collapsable={false} style={styles.minicontainer}>
-          {/* <Text style={styles.title}>Powtórki</Text> */}
-
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Powtórki</Text>
+            <Text style={styles.sectionTitle}>
+              {t(
+                "repeats.labels.reviews"
+              )}
+            </Text>
             {officialGroups.map((group) => {
               const targetCode = group.targetLang
                 ? group.targetLang.toUpperCase()
@@ -501,7 +505,9 @@ export default function CoursesReviewScreen() {
 
                   {showRegular && (
                     <ReviewCourseSection
-                      title="Kursy"
+                      title={t(
+                        "repeats.labels.courses"
+                      )}
                       list={regularOfficial}
                       counts={officialCounts}
                       onSelect={handleSelectCustomCourse}
@@ -512,7 +518,9 @@ export default function CoursesReviewScreen() {
                   )}
                   {showMini && (
                     <ReviewCourseSection
-                      title="Mini kursy"
+                      title={t(
+                        "screens.review.courses.coursesReview.coursesReview.title.miniKursy"
+                      )}
                       list={miniOfficial}
                       counts={officialCounts}
                       onSelect={handleSelectCustomCourse}
@@ -526,20 +534,30 @@ export default function CoursesReviewScreen() {
             })}
             {!hasOfficialGroups ? (
               <Text style={styles.emptyText}>
-                Nie masz jeszcze przypiętych kursów do powtórek.
+                {t(
+                  "screens.review.courses.coursesReview.coursesReview.textChild.nieMaszJeszczePrzypietychKursow"
+                )}
               </Text>
             ) : null}
           </View>
 
           <View style={styles.section}>
-            <Text style={styles.sectionTitle}>Twoje</Text>
+            <Text style={styles.sectionTitle}>
+              {t(
+                "screens.review.courses.coursesReview.coursesReview.textChild.twoje"
+              )}
+            </Text>
             {!hasCustomCourses ? (
               <Text style={styles.emptyText}>
-                Nie masz jeszcze własnych fiszek.
+                {t(
+                  "screens.review.courses.coursesReview.coursesReview.textChild.nieMaszJeszczeWlasnychFiszek"
+                )}
               </Text>
             ) : !hasVisibleCustomCourses ? (
               <Text style={styles.emptyText}>
-                Wszystkie kursy mają wyłączone powtórki.
+                {t(
+                  "screens.review.courses.coursesReview.coursesReview.textChild.wszystkieKursyMajaWylaczonePowtorki"
+                )}
               </Text>
             ) : (
               <View style={styles.courseGrid}>

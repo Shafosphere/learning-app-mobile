@@ -254,6 +254,13 @@ export const ManualCardsEditor = ({
         const trueFalseValue =
           card.answers[0]?.toLowerCase() === "false" ? "false" : "true";
         const showFrontInput = true;
+        const flipAccessibilityLabel = `${
+          card.flipped
+            ? t("courseCreator.manualEditor.disableFlip")
+            : t("courseCreator.manualEditor.enableFlip")
+        } ${t("courseCreator.manualEditor.flipForCard", {
+          index: index + 1,
+        })}`;
 
         return (
           <View
@@ -287,13 +294,7 @@ export const ManualCardsEditor = ({
                   {!isDisplayMode && !isBooleanCardType && (
                     <Pressable
                       accessibilityRole="button"
-                      accessibilityLabel={`${
-                        card.flipped
-                          ? t("courseCreator.manualEditor.disableFlip")
-                          : t("courseCreator.manualEditor.enableFlip")
-                      } ${t("courseCreator.manualEditor.flipForCard", {
-                        index: index + 1,
-                      })}`}
+                      accessibilityLabel={flipAccessibilityLabel}
                       onPress={() => {
                         console.log("Toggling flip for card:", {
                           id: card.id,
@@ -678,7 +679,9 @@ export const ManualCardsEditor = ({
             style={styles.manualAddButton}
             onPress={handleAddCardPress}
           >
-            <Text style={styles.manualAddLabel}>dodaj{"\n"}kurs</Text>
+            <Text style={styles.manualAddLabel}>
+              {t("courseCreator.manualEditor.addCourse")}
+            </Text>
           </Pressable>
         </View>
       )}

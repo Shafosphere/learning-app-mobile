@@ -3,6 +3,7 @@ import { View, Text } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import StatsSectionHeader from "./StatsSectionHeader";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   timeMs: {
@@ -114,10 +115,20 @@ function formatDuration(ms: number) {
 
 export default function LearningTimeCard({ timeMs }: Props) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const rows = [
-    { label: "Ten tydzień", value: formatDuration(timeMs.week) },
-    { label: "Ten miesiąc", value: formatDuration(timeMs.month) },
-    { label: "Ten rok", value: formatDuration(timeMs.year) },
+    {
+      label: t("components.stats.hourlyActivityChart.period.thisWeek"),
+      value: formatDuration(timeMs.week),
+    },
+    {
+      label: t("components.stats.hourlyActivityChart.period.thisMonth"),
+      value: formatDuration(timeMs.month),
+    },
+    {
+      label: t("components.stats.hourlyActivityChart.period.thisYear"),
+      value: formatDuration(timeMs.year),
+    },
   ];
 
   return (
@@ -127,8 +138,10 @@ export default function LearningTimeCard({ timeMs }: Props) {
         icon={<Ionicons name="time-outline" size={30} color={CLOCK_COLOR} />}
         iconBackgroundColor="#DFF7EF"
         iconShadowColor={CLOCK_COLOR}
-        title="Czas w nauce"
-        subtitle="Suma czasu spędzonego na kartach"
+        title={t("components.stats.hourlyActivityChart.title.czasWNauce")}
+        subtitle={t(
+          "components.stats.hourlyActivityChart.subtitle.sumaCzasuSpedzonegoNaKartach"
+        )}
       />
 
       <View style={styles.metricsRow}>
@@ -143,10 +156,13 @@ export default function LearningTimeCard({ timeMs }: Props) {
 
       <View style={styles.infoBox}>
         <View style={styles.infoCopy}>
-          <Text style={styles.infoTitle}>Jak liczymy czas?</Text>
+          <Text style={styles.infoTitle}>
+            {t("components.stats.hourlyActivityChart.textChild.jakLiczymyCzas")}
+          </Text>
           <Text style={styles.infoText}>
-            Czas liczony jest od momentu pokazania karty do potwierdzenia
-            odpowiedzi (bez przerw między kartami).
+            {t(
+              "components.stats.hourlyActivityChart.textChild.czasLiczonyJestOdMomentu"
+            )}
           </Text>
         </View>
       </View>

@@ -13,6 +13,7 @@ import { useRouter } from "expo-router";
 import { useFocusEffect } from "@react-navigation/native";
 import Entypo from "@expo/vector-icons/Entypo";
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { useTranslation } from "react-i18next";
 
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
@@ -75,6 +76,7 @@ export default function CustomCourseEditor({
   initialName,
   lockAppearance,
 }: CustomCourseEditorProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const router = useRouter();
   const setPopup = usePopup();
@@ -220,9 +222,9 @@ export default function CustomCourseEditor({
   );
 
   const newCardTypeOptions: CardTypeOption<ManualCardType>[] = [
-    { key: "text", label: "Tradycyjne" },
-    { key: "true_false", label: "Prawda / Fałsz" },
-    { key: "know_dont_know", label: "Umiem / Nie umiem" },
+    { key: "text", label: t("courseCreator.customEditor.cardTypes.text") },
+    { key: "true_false", label: t("repeats.cardTypes.trueFalse") },
+    { key: "know_dont_know", label: t("repeats.cardTypes.knowDontKnow") },
   ];
 
   const courseIsTrueFalseOnly = useMemo(
@@ -345,7 +347,7 @@ export default function CustomCourseEditor({
       replaceManualCards(ensureCardsNormalized(incomingCards));
     } catch (error) {
       console.error("Failed to load custom course for edit", error);
-      setLoadError("Nie udało się wczytać danych kursu.");
+      setLoadError(t("courseCreator.customEditor.popups.loadFailed"));
       setIsOfficialCourse(lockAppearance);
       setCourseBoxZeroEnabled(initialBoxZeroEnabled);
       setCourseAutoflowEnabled(initialAutoflowEnabled);
@@ -381,6 +383,7 @@ export default function CustomCourseEditor({
     initialSkipCorrectionEnabled,
     lockAppearance,
     replaceManualCards,
+    t,
   ]);
 
   useFocusEffect(
@@ -395,7 +398,7 @@ export default function CustomCourseEditor({
     if (!canUndo) return;
     undo();
     setPopup({
-      message: "Cofnięto ostatnią zmianę",
+      message: t("courseCreator.customEditor.popups.undo"),
       color: "disoriented",
       duration: 2500,
     });
@@ -469,11 +472,14 @@ export default function CustomCourseEditor({
     try {
       await clearPersistedBoxesKeepProgress(customBoxesStorageKey);
       Alert.alert(
-        "Wyczyszczono stan pudełek",
-        "Fiszki, które są aktualnie w pudełkach, zostały z nich usunięte i wróciły do puli nieznanych."
+        t("courseCreator.customEditor.alerts.resetBoxesDoneTitle"),
+        t("courseCreator.customEditor.alerts.resetBoxesDoneMessage")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się wyczyścić stanu pudełek.");
+      Alert.alert(
+        t("app.status.error"),
+        t("courseCreator.customEditor.alerts.resetBoxesFailed")
+      );
     } finally {
       setResettingBoxes(false);
     }
@@ -481,11 +487,15 @@ export default function CustomCourseEditor({
 
   const handleResetBoxes = () => {
     Alert.alert(
-      "Wyczyścić stan pudełek?",
-      "Fiszki, które są aktualnie w pudełkach, zostaną z nich usunięte i wrócą do puli nieznanych. Nie usunie to powtórek ani ogólnego postępu kursu.",
+      t("courseCreator.customEditor.alerts.resetBoxesConfirmTitle"),
+      t("courseCreator.customEditor.alerts.resetBoxesConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Wyczyść", style: "destructive", onPress: performResetBoxes },
+        { text: t("app.actions.cancel"), style: "cancel" },
+        {
+          text: t("app.actions.clear"),
+          style: "destructive",
+          onPress: performResetBoxes,
+        },
       ]
     );
   };
@@ -495,13 +505,18 @@ export default function CustomCourseEditor({
     try {
       const deleted = await resetCustomReviewsForCourse(courseId);
       Alert.alert(
-        "Usunięto powtórki",
+        t("courseCreator.customEditor.alerts.resetReviewsDoneTitle"),
         deleted > 0
-          ? `Usunięto ${deleted} wpisów powtórek tego kursu.`
-          : "Nie było zapisanych powtórek do usunięcia."
+          ? t("courseCreator.customEditor.alerts.resetReviewsDoneMessage", {
+              count: deleted,
+            })
+          : t("courseCreator.customEditor.alerts.resetReviewsDoneEmpty")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się usunąć powtórek.");
+      Alert.alert(
+        t("app.status.error"),
+        t("courseCreator.customEditor.alerts.resetReviewsFailed")
+      );
     } finally {
       setResettingReviews(false);
     }
@@ -509,11 +524,15 @@ export default function CustomCourseEditor({
 
   const handleResetReviews = () => {
     Alert.alert(
-      "Usunąć powtórki?",
-      "Ta operacja usunie wszystkie zapisane powtórki dla tego kursu.",
+      t("courseCreator.customEditor.alerts.resetReviewsConfirmTitle"),
+      t("courseCreator.customEditor.alerts.resetReviewsConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Usuń", style: "destructive", onPress: performResetReviews },
+        { text: t("app.actions.cancel"), style: "cancel" },
+        {
+          text: t("app.actions.delete"),
+          style: "destructive",
+          onPress: performResetReviews,
+        },
       ]
     );
   };
@@ -528,11 +547,14 @@ export default function CustomCourseEditor({
         console.warn("Failed to clear course completion run", error);
       });
       Alert.alert(
-        "Przywrócono kurs od początku",
-        "Wyczyszczono stan pudełek i powtórki. Wszystkie fiszki wróciły do puli nieznanych."
+        t("courseCreator.customEditor.alerts.resetAllDoneTitle"),
+        t("courseCreator.customEditor.alerts.resetAllDoneMessage")
       );
     } catch {
-      Alert.alert("Błąd", "Nie udało się przywrócić kursu od początku.");
+      Alert.alert(
+        t("app.status.error"),
+        t("courseCreator.customEditor.alerts.resetAllFailed")
+      );
     } finally {
       setResettingAll(false);
     }
@@ -540,11 +562,15 @@ export default function CustomCourseEditor({
 
   const handleResetAll = () => {
     Alert.alert(
-      "Przywrócić kurs od początku?",
-      "Ta operacja wyczyści stan pudełek i powtórki oraz przywróci wszystkie fiszki do puli nieznanych.",
+      t("courseCreator.customEditor.alerts.resetAllConfirmTitle"),
+      t("courseCreator.customEditor.alerts.resetAllConfirmMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
-        { text: "Przywróć", style: "destructive", onPress: performResetAll },
+        { text: t("app.actions.cancel"), style: "cancel" },
+        {
+          text: t("app.actions.restore"),
+          style: "destructive",
+          onPress: performResetAll,
+        },
       ]
     );
   };
@@ -552,7 +578,7 @@ export default function CustomCourseEditor({
   const handleDeleteCourse = () => {
     if (isOfficialCourse) {
       setPopup({
-        message: "Nie można usunąć oficjalnego kursu",
+        message: t("courseCreator.customEditor.popups.officialDeleteBlocked"),
         color: "angry",
         duration: 4000,
       });
@@ -560,12 +586,12 @@ export default function CustomCourseEditor({
     }
 
     Alert.alert(
-      "Usuń kurs",
-      "Czy na pewno chcesz usunąć ten kurs? Tego działania nie można cofnąć.",
+      t("courseCreator.customEditor.alerts.deleteTitle"),
+      t("courseCreator.customEditor.alerts.deleteMessage"),
       [
-        { text: "Anuluj", style: "cancel" },
+        { text: t("app.actions.cancel"), style: "cancel" },
         {
-          text: "Usuń",
+          text: t("app.actions.delete"),
           style: "destructive",
           onPress: () => {
             if (isDeleting) return;
@@ -581,7 +607,7 @@ export default function CustomCourseEditor({
                   await setActiveCustomCourseId(null);
                 }
                 setPopup({
-                  message: "Kurs został usunięty",
+                  message: t("courseCreator.customEditor.popups.deleted"),
                   color: "calm",
                   duration: 3500,
                 });
@@ -589,7 +615,7 @@ export default function CustomCourseEditor({
               } catch (error) {
                 console.error("Failed to delete custom course", error);
                 setPopup({
-                  message: "Nie udało się usunąć kursu",
+                  message: t("courseCreator.customEditor.popups.deleteFailed"),
                   color: "angry",
                   duration: 4000,
                 });
@@ -607,7 +633,7 @@ export default function CustomCourseEditor({
     const cleanName = courseName.trim();
     if (!cleanName) {
       setPopup({
-        message: "Podaj nazwę kursu",
+        message: t("courseCreator.customEditor.popups.missingName"),
         color: "angry",
         duration: 3000,
       });
@@ -615,7 +641,7 @@ export default function CustomCourseEditor({
     }
     if (nameConflict.kind === "duplicate") {
       setPopup({
-        message: "Ta nazwa kursu jest już zajęta.",
+        message: t("repeats.messages.duplicateCourseName"),
         color: "angry",
         duration: 3200,
       });
@@ -651,7 +677,7 @@ export default function CustomCourseEditor({
 
     if (trimmedCards.length === 0) {
       setPopup({
-        message: "Dodaj co najmniej jedną fiszkę",
+        message: t("courseCreator.customEditor.popups.missingCards"),
         color: "angry",
         duration: 3000,
       });
@@ -672,7 +698,7 @@ export default function CustomCourseEditor({
       });
 
       setPopup({
-        message: "Zmiany zapisane!",
+        message: t("courseCreator.customEditor.popups.saved"),
         color: "calm",
         duration: 3500,
       });
@@ -680,7 +706,7 @@ export default function CustomCourseEditor({
     } catch (error) {
       console.error("Failed to save custom course", error);
       setPopup({
-        message: "Nie udało się zapisać zmian",
+        message: t("courseCreator.customEditor.popups.saveFailed"),
         color: "angry",
         duration: 4000,
       });
@@ -701,16 +727,24 @@ export default function CustomCourseEditor({
         {shouldShowTabSwitcher ? (
           <View style={styles.topSection}>
             <Text style={styles.topSectionTitle}>
-              {activeTab === "options" ? "ustawienia" : "zawartość"}
+              {activeTab === "options"
+                ? t("courseCreator.customEditor.tabs.options")
+                : t("courseCreator.customEditor.tabs.content")}
             </Text>
             <SegmentedTabs
               options={[
-                { key: "options", label: "Opcje" },
-                { key: "content", label: "Treść" },
+                {
+                  key: "options",
+                  label: t("courseCreator.customEditor.tabs.optionsLabel"),
+                },
+                {
+                  key: "content",
+                  label: t("courseCreator.customEditor.tabs.contentLabel"),
+                },
               ]}
               value={activeTab}
               onChange={setActiveTab}
-              accessibilityLabel="Sekcje edycji kursu"
+              accessibilityLabel={t("courseCreator.customEditor.tabs.a11y")}
               containerStyle={styles.viewModeTabs}
             />
           </View>
@@ -762,32 +796,30 @@ export default function CustomCourseEditor({
                 resetActions={[
                   {
                     key: "boxes",
-                    title: "Wyczyść stan pudełek",
-                    subtitle:
-                      "Fiszki, które są aktualnie w pudełkach, zostają z nich usunięte i wracają do puli nieznanych.",
-                    ctaText: "Wyczyść",
-                    loadingText: "Czyszczę...",
+                    title: t("courseCreator.customEditor.resetActions.boxes.title"),
+                    subtitle: t("courseCreator.customEditor.resetActions.boxes.subtitle"),
+                    ctaText: t("app.actions.clear"),
+                    loadingText: t("courseCreator.customEditor.resetActions.boxes.loading"),
                     loading: resettingBoxes,
                     onPress: handleResetBoxes,
                     disabled: resettingBoxes,
                   },
                   {
                     key: "reviews",
-                    title: "Usuń powtórki",
-                    subtitle: "Usuwa wszystkie zapisane powtórki tego kursu.",
-                    ctaText: "Usuń",
-                    loadingText: "Usuwam...",
+                    title: t("courseCreator.customEditor.resetActions.reviews.title"),
+                    subtitle: t("courseCreator.customEditor.resetActions.reviews.subtitle"),
+                    ctaText: t("app.actions.delete"),
+                    loadingText: t("courseCreator.customEditor.resetActions.reviews.loading"),
                     loading: resettingReviews,
                     onPress: handleResetReviews,
                     disabled: resettingReviews,
                   },
                   {
                     key: "all",
-                    title: "Przywróć kurs od początku",
-                    subtitle:
-                      "Czyści stan pudełek i powtórki oraz przywraca wszystkie fiszki do puli nieznanych.",
-                    ctaText: "Przywróć",
-                    loadingText: "Przywracam...",
+                    title: t("courseCreator.customEditor.resetActions.all.title"),
+                    subtitle: t("courseCreator.customEditor.resetActions.all.subtitle"),
+                    ctaText: t("app.actions.restore"),
+                    loadingText: t("courseCreator.customEditor.resetActions.all.loading"),
                     loading: resettingAll,
                     onPress: handleResetAll,
                     disabled: resettingAll,
@@ -803,7 +835,9 @@ export default function CustomCourseEditor({
           <>
             <View style={styles.sectionCard}>
               <View style={styles.sectionGroup}>
-                <Text style={styles.settingsGroupLabel}>WYGLĄD</Text>
+                <Text style={styles.settingsGroupLabel}>
+                  {t("courseCreator.customEditor.appearance.section")}
+                </Text>
                 <View style={styles.iconSelectorWrapper}>
                   <CourseIconColorSelector
                     courseName={courseName}
@@ -825,8 +859,12 @@ export default function CustomCourseEditor({
                     styles={{
                       container: styles.iconSection,
                     }}
-                    iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
-                    colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
+                    iconSectionDescription={t(
+                      "courseCreator.customEditor.appearance.iconDescription"
+                    )}
+                    colorSectionDescription={t(
+                      "courseCreator.customEditor.appearance.colorDescription"
+                    )}
                   />
                 </View>
               </View>
@@ -844,7 +882,9 @@ export default function CustomCourseEditor({
               ) : (
                 <View style={styles.sectionGroup}>
                   <View style={styles.manualHeader}>
-                    <Text style={styles.settingsGroupLabel}>FISZKI</Text>
+                    <Text style={styles.settingsGroupLabel}>
+                      {t("courseCreator.customEditor.flashcardsSection")}
+                    </Text>
                   </View>
                   <ManualCardsEditor
                     manualCards={manualCards}
@@ -877,7 +917,7 @@ export default function CustomCourseEditor({
               options={newCardTypeOptions}
               value={newCardType}
               onChange={setNewCardType}
-              label="Typ fiszki"
+              label={t("courseCreator.customEditor.cardTypeLabel")}
               labelHidden
               size="compact"
               dropdownDirection="up"
@@ -885,7 +925,7 @@ export default function CustomCourseEditor({
             />
             <Pressable
               accessibilityRole="button"
-              accessibilityLabel="Dodaj nową fiszkę"
+              accessibilityLabel={t("courseCreator.customEditor.addCardA11y")}
               style={styles.manualAddButton}
               hitSlop={8}
               onPress={() => handleAddCard(newCardType)}
@@ -900,12 +940,12 @@ export default function CustomCourseEditor({
         <View style={styles.buttonsRow}>
           {!isOfficialCourse ? (
             <MyButton
-              text="usuń"
+              text={t("courseCreator.customEditor.deleteButton")}
               color="my_red"
               width={90}
               disabled={isSaving || isDeleting}
               onPress={handleDeleteCourse}
-              accessibilityLabel="Usuń ten kurs"
+              accessibilityLabel={t("courseCreator.customEditor.deleteA11y")}
             />
           ) : null}
 
@@ -916,19 +956,19 @@ export default function CustomCourseEditor({
             {!isOfficialCourse && hasManualChanges ? (
               <>
                 <MyButton
-                  text="zapisz"
+                  text={t("courseCreator.customEditor.saveButton")}
                   color="my_green"
                   width={90}
                   disabled={isSaving || nameConflict.kind === "duplicate"}
                   onPress={handleSave}
-                  accessibilityLabel="Zapisz zmiany w kursie"
+                  accessibilityLabel={t("courseCreator.customEditor.saveA11y")}
                 />
                 <MyButton
                   color="my_yellow"
                   width={60}
                   disabled={!hasManualChanges}
                   onPress={handleUndoManualChanges}
-                  accessibilityLabel="Cofnij ostatnią zmianę w fiszkach"
+                  accessibilityLabel={t("courseCreator.customEditor.undoA11y")}
                 >
                   <Entypo name="ccw" size={32} color={colors.headline} />
                 </MyButton>
@@ -939,7 +979,7 @@ export default function CustomCourseEditor({
               color="my_yellow"
               width={60}
               onPress={() => router.back()}
-              accessibilityLabel="Wróć do panelu kursów"
+              accessibilityLabel={t("repeats.a11y.backToCoursesPanel")}
             >
               <Ionicons name="arrow-back" size={32} color={colors.headline} />
             </MyButton>

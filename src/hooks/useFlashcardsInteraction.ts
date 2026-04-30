@@ -242,9 +242,9 @@ export function useFlashcardsInteraction({
       queuesRef.current[box] = rest;
       if (__DEV__) {
         const upcoming = rest[0] ?? null;
-        const currentLabel = `id=${next.id} type=${next.type ?? "text"} text="${(next.text ?? "").slice(0, 60)}"`;
+        const currentLabel = `id=${next.id} type=${next.type ?? "text"} front="${(next.text ?? "").slice(0, 60)}"`;
         const upcomingLabel = upcoming
-          ? `id=${upcoming.id} type=${upcoming.type ?? "text"} text="${(upcoming.text ?? "").slice(0, 60)}"`
+          ? `id=${upcoming.id} type=${upcoming.type ?? "text"} front="${(upcoming.text ?? "").slice(0, 60)}"`
           : "none";
         console.log(
           `[Flashcards] queue:${box} current:${currentLabel} upcoming:${upcomingLabel}`

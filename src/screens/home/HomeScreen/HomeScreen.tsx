@@ -2,12 +2,14 @@
 import { useRouter } from "expo-router";
 import type React from "react";
 import { FlatList, View, Text, useWindowDimensions } from "react-native";
+import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useStyles } from "./HomeScreen-styles";
 import { quotes } from "@/src/constants/homeQuotes";
 
 export default function HomeScreen() {
   const router = useRouter();
+  const { t } = useTranslation();
   const styles = useStyles();
   const { height: screenHeight } = useWindowDimensions();
   const logo = require("../../../../assets/illustrations/mascot-box/branding/logo.png");
@@ -42,35 +44,35 @@ export default function HomeScreen() {
   const buildHomeTiles = (): HomeTile[] => [
     {
       key: "courses",
-      title: "Kursy",
+      title: t("repeats.labels.courses"),
       subtitle: "Przypięte kursy",
       image: logo,
       action: goToCoursePanel,
     },
     {
       key: "custom",
-      title: "Stwórz",
+      title: t("screens.home.home.home.title.stworz"),
       subtitle: "Kreator kursów",
       image: customImage,
       action: goToCustomCourse,
     },
     {
       key: "stats",
-      title: "Statystyki",
+      title: t("screens.home.home.home.title.statystyki"),
       subtitle: "Zobacz wyniki",
       image: statsImage,
       action: goToStats,
     },
     {
       key: "wiki",
-      title: "Przewodnik",
+      title: t("screens.home.home.home.title.przewodnik"),
       subtitle: "Instrukcje i wskazówki",
       image: tutorialImage,
       action: goToWiki,
     },
     {
       key: "support",
-      title: "Wsparcie",
+      title: t("screens.home.home.home.title.wsparcie"),
       subtitle: "Pomoc i informacje",
       image: supportImage,
       action: goToSupport,

@@ -14,6 +14,7 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { getHardFlashcards, type HardFlashcard } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import StatsSectionHeader from "./StatsSectionHeader";
+import { useTranslation } from "react-i18next";
 
 const useStyles = createThemeStylesHook((colors) => ({
   card: {
@@ -167,6 +168,7 @@ function formatWrongCount(count: number) {
 
 export default function HardWordsList() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { activeCustomCourseId, colors } = useSettings();
   const listRef = useRef<FlatList<HardWordsPage> | null>(null);
   const [globalItems, setGlobalItems] = useState<HardFlashcard[]>([]);
@@ -209,17 +211,17 @@ export default function HardWordsList() {
     if (activeCustomCourseId != null) {
       next.push({
         key: "active",
-        subtitle: "Najczęściej mylone fiszki z aktywnego kursu",
+        subtitle: t("components.stats.hardWordsList.subtitle.activeCourse"),
         items: activeItems,
       });
     }
     next.push({
       key: "global",
-      subtitle: "Najczęściej mylone fiszki ogólnie",
+      subtitle: t("components.stats.hardWordsList.subtitle.global"),
       items: globalItems,
     });
     return next;
-  }, [activeCustomCourseId, activeItems, globalItems]);
+  }, [activeCustomCourseId, activeItems, globalItems, t]);
 
   useEffect(() => {
     const nextIndex = Math.max(0, pages.length - 1);
@@ -307,7 +309,10 @@ export default function HardWordsList() {
           <View style={styles.track}>
             <View
               testID={`hard-word-fill-${item.id}`}
-              accessibilityLabel={`Wypełnienie błędów ${progressPercent}`}
+              accessibilityLabel={t(
+                "components.stats.hardWordsList.accessibilityLabel.wypelnienieBledowValue",
+                { value: progressPercent }
+              )}
               style={[styles.fill, { width: progressPercent }]}
             />
           </View>
@@ -328,9 +333,15 @@ export default function HardWordsList() {
     return (
       <View style={[styles.page, { width: pageWidth }]}>
         {isLoading ? (
-          <Text style={styles.loading}>Ładowanie...</Text>
+          <Text style={styles.loading}>
+            {t("components.stats.hardWordsList.textChild.ladowanie")}
+          </Text>
         ) : item.items.length === 0 ? (
-          <Text style={styles.empty}>Brak danych – spróbuj pograć dłużej.</Text>
+          <Text style={styles.empty}>
+            {t(
+              "components.stats.hardWordsList.textChild.brakDanychSprobujPogracDluzej"
+            )}
+          </Text>
         ) : (
           <View>{item.items.map((flashcard) => renderItem(flashcard, maxWrongCount))}</View>
         )}
@@ -343,8 +354,11 @@ export default function HardWordsList() {
       <StatsSectionHeader
         style={styles.header}
         icon={<Ionicons name="trophy-outline" size={30} color="#5B3FD6" />}
-        title="Trudne fiszki"
-        subtitle={visiblePage?.subtitle ?? "Najczęściej mylone fiszki ogólnie"}
+        title={t("components.stats.hardWordsList.title.trudneFiszki")}
+        subtitle={
+          visiblePage?.subtitle ??
+          t("components.stats.hardWordsList.subtitle.global")
+        }
       />
 
       <View

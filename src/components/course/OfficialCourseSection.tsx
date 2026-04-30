@@ -3,6 +3,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import React from "react";
 import { Pressable, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen-styles";
 import { OfficialCourseListItem } from "@/src/features/customCourse/courseActivationTypes";
 
@@ -29,6 +30,7 @@ export const OfficialCourseSection = ({
     firstCoachmarkCourseId,
     scrollRef,
 }: OfficialCourseSectionProps) => {
+    const { t } = useTranslation();
     const styles = useStyles();
 
     if (!list.length) return null;
@@ -45,7 +47,9 @@ export const OfficialCourseSection = ({
                     <CourseListCard
                         key={`official-${course.id}`}
                         title={course.name}
-                        subtitle={`fiszki: ${course.cardsCount}`}
+                        subtitle={t("courses.official.cardsCount", {
+                            count: course.cardsCount,
+                        })}
                         iconId={course.iconId}
                         iconColor={course.iconColor}
                         flagCode={flagLang}
@@ -54,7 +58,9 @@ export const OfficialCourseSection = ({
                         rightAccessory={
                             <Pressable
                                 accessibilityRole="button"
-                                accessibilityLabel={`Edytuj kurs ${course.name}`}
+                                accessibilityLabel={t("courses.official.editCourse", {
+                                    name: course.name,
+                                })}
                                 style={styles.customEditButton}
                                 onPress={(event) => {
                                     event.stopPropagation();

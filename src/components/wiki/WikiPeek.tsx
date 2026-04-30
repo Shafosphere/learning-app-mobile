@@ -1,6 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import Octicons from "@expo/vector-icons/Octicons";
 import React, { useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 import {
   Animated,
   Modal,
@@ -33,6 +34,7 @@ export function WikiPeek({
   content,
 }: WikiPeekProps) {
   const styles = useWikiPeekStyles();
+  const { t } = useTranslation();
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const { width, height } = useWindowDimensions();
@@ -90,7 +92,9 @@ export function WikiPeek({
               <Pressable
                 onPress={onClose}
                 accessibilityRole="button"
-                accessibilityLabel="Zamknij"
+                accessibilityLabel={t(
+                  "components.wiki.wikiPeek.accessibilityLabel.zamknij"
+                )}
                 hitSlop={12}
                 style={({ pressed }) => [
                   styles.closeButton,
@@ -113,7 +117,7 @@ export function WikiPeek({
             </ScrollView>
             <View style={styles.footer}>
               <MyButton
-                text="OK"
+                text={t("components.wiki.wikiPeek.text.ok")}
                 onPress={okEnabled ? onConfirm : undefined}
                 color="my_green"
                 disabled={!okEnabled}

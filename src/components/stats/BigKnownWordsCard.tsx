@@ -4,6 +4,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import React from "react";
 import { StyleSheet, Text, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { OrganicFireEffect } from "./OrganicFireEffect";
 
 const useStyles = createThemeStylesHook((colors) => ({
@@ -54,6 +55,7 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 const BigKnownWordsCard: React.FC = () => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { statsFireEffectEnabled, colors } = useSettings();
   const { stats } = useNavbarStats();
 
@@ -72,7 +74,9 @@ const BigKnownWordsCard: React.FC = () => {
       >
         {stats.masteredCount}
       </Text>
-      <Text style={styles.label}>Opanowane fiszki</Text>
+      <Text style={styles.label}>
+        {t("repeats.labels.knownFlashcards")}
+      </Text>
       <Ionicons
         style={styles.cornerIcon}
         name="trophy-outline"

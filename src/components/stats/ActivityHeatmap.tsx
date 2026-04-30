@@ -11,6 +11,8 @@ import {
 } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 
 export type ActivityDay = {
   date: string;
@@ -43,21 +45,6 @@ type ScrambleTextProps = {
   style?: StyleProp<TextStyle>;
   durationMs?: number;
 };
-
-const MONTH_NAMES = [
-  "styczeń",
-  "luty",
-  "marzec",
-  "kwiecień",
-  "maj",
-  "czerwiec",
-  "lipiec",
-  "sierpień",
-  "wrzesień",
-  "październik",
-  "listopad",
-  "grudzień",
-] as const;
 
 const SCRAMBLE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
@@ -191,13 +178,17 @@ function parseLocalDate(date: string) {
   return new Date(year, (month || 1) - 1, day || 1);
 }
 
-function formatMonthLabel(date: Date) {
-  return `${MONTH_NAMES[date.getMonth()]} ${date.getFullYear()}`;
+function getMonthName(monthIndex: number, t: TFunction) {
+  return t(`components.stats.activityHeatmap.months.${monthIndex}`);
 }
 
-function formatDayLabel(date: string) {
+function formatMonthLabel(date: Date, t: TFunction) {
+  return `${getMonthName(date.getMonth(), t)} ${date.getFullYear()}`;
+}
+
+function formatDayLabel(date: string, t: TFunction) {
   const parsed = parseLocalDate(date);
-  return `${parsed.getDate()} ${MONTH_NAMES[parsed.getMonth()]} ${parsed.getFullYear()}`;
+  return `${parsed.getDate()} ${getMonthName(parsed.getMonth(), t)} ${parsed.getFullYear()}`;
 }
 
 function formatDuration(ms: number) {
@@ -332,6 +323,7 @@ function ScrambleText({
 
 export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { colors } = useSettings();
   const listRef = useRef<FlatList<ActivityMonth> | null>(null);
   const didInitScrollRef = useRef(false);
@@ -399,7 +391,7 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
 
       result.push({
         key: `${year}-${String(monthIndex + 1).padStart(2, "0")}`,
-        label: formatMonthLabel(monthDate),
+        label: formatMonthLabel(monthDate, t),
         days,
         totalTimeMs: days.reduce((sum, item) => sum + item.timeMs, 0),
         totalLearnedCount: days.reduce((sum, item) => sum + item.learnedCount, 0),
@@ -411,7 +403,7 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
     }
 
     return result;
-  }, [dataMap, months]);
+  }, [dataMap, months, t]);
 
   const visibleMonth = monthsData[visibleMonthIndex] ?? monthsData[0] ?? null;
   const selectedDay = useMemo(() => {
@@ -570,7 +562,9 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
       onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
     >
       <View style={styles.headerRow}>
-        <Text style={styles.title}>Ostatnia aktywność</Text>
+        <Text style={styles.title}>
+          {t("components.stats.activityHeatmap.textChild.ostatniaAktywnosc")}
+        </Text>
         {visibleMonth ? (
           <View>
             <Text style={styles.monthLabel}>{visibleMonth.label}</Text>
@@ -600,15 +594,19 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
             <View style={styles.detailsHeader}>
               <View style={styles.detailsHeaderTextBlock}>
                 <ScrambleText
-                  text={formatDayLabel(displayedDay.date)}
+                  text={formatDayLabel(displayedDay.date, t)}
                   animateKey={`${animateKeyBase}-date`}
                   style={styles.detailsTitle}
                   durationMs={780}
                 />
                 <Text style={styles.detailsSubtitle}>
                   {displayedDay.totalCount > 0
-                    ? "Szczegóły aktywności z wybranego dnia."
-                    : "Tego dnia nie zapisano jeszcze aktywności."}
+                    ? t(
+                        "components.stats.activityHeatmap.details.selectedDayActivity"
+                      )
+                    : t(
+                        "components.stats.activityHeatmap.details.noActivityForDay"
+                      )}
                 </Text>
               </View>
               <View
@@ -640,22 +638,22 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
               {[
                 {
                   key: "promotions",
-                  label: "Skoki",
+                  label: t("repeats.labels.jumps"),
                   value: String(displayedDay.promotionsCount),
                 },
                 {
                   key: "learned",
-                  label: "Opanowane fiszki",
+                  label: t("repeats.labels.knownFlashcards"),
                   value: String(displayedDay.learnedCount),
                 },
                 {
                   key: "correct",
-                  label: "Dobre odpowiedzi",
+                  label: t("components.stats.activityHeatmap.stats.correct"),
                   value: String(displayedDay.correctCount),
                 },
                 {
                   key: "wrong",
-                  label: "Błędy",
+                  label: t("components.stats.activityHeatmap.stats.wrong"),
                   value: String(displayedDay.wrongCount),
                 },
               ].map((stat) => (

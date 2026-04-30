@@ -2197,7 +2197,9 @@ export const SettingsProvider: React.FC<{
         const message =
           error instanceof Error
             ? error.message
-            : "Nie udało się pobrać listy backupów z Google Drive.";
+            : i18n.t(
+                "contexts.settingsContext.message.nieUdaloSiePobracListy"
+              );
         setGoogleDriveBackupSnapshots([]);
         setGoogleDriveBackupSnapshotsError(message);
       } finally {
@@ -2337,7 +2339,9 @@ export const SettingsProvider: React.FC<{
         const message =
           error instanceof Error
             ? error.message
-            : "Nie udało się pobrać listy backupów z Google Drive.";
+            : i18n.t(
+                "contexts.settingsContext.message.nieUdaloSiePobracListy"
+              );
         setGoogleDriveBackupSnapshotsError(message);
       }
 
@@ -2353,7 +2357,9 @@ export const SettingsProvider: React.FC<{
       const message =
         error instanceof Error
           ? error.message
-          : "Nie udało się wysłać backupu na Google Drive.";
+          : i18n.t(
+              "contexts.settingsContext.message.nieUdaloSieWyslacBackupu"
+            );
       await setGoogleDriveBackupError(message);
       throw error;
     } finally {

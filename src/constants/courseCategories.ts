@@ -2,7 +2,7 @@
 export interface CourseCategory {
     id: string;
     label: string;
-    description: string;
+    descriptionKey: string;
     icon?: string;
 }
 
@@ -10,43 +10,43 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
     geography: {
         id: "geography",
         label: "Geografia",
-        description: "Stolice i flagi",
+        descriptionKey: "constants.courseCategories.description.stoliceIFlagi",
         icon: "earth-europe",
     },
     kosmos: {
         id: "kosmos",
         label: "Kosmos",
-        description: "Astronomia, gwiazdozbiory",
+        descriptionKey: "constants.courseCategories.description.astronomiaGwiazdozbiory",
         icon: "rocket",
     },
     historia: {
         id: "historia",
         label: "historia",
-        description: "Historia Polski",
+        descriptionKey: "constants.courseCategories.description.historiaPolski",
         icon: "landmark",
     },
     mitologia: {
         id: "mitologia",
         label: "Mitologia",
-        description: "Mity, bogowie i bohaterowie",
+        descriptionKey: "constants.courseCategories.description.mityBogowieIBohaterowie",
         icon: "book-open",
     },
     programming: {
         id: "programming",
         label: "Programowanie",
-        description: "JavaScript",
+        descriptionKey: "constants.courseCategories.description.javascript",
         icon: "code",
     },
     science: {
         id: "science",
         label: "Nauka",
-        description: "Astronomia, gwiazdozbiory",
+        descriptionKey: "constants.courseCategories.description.astronomiaGwiazdozbiory",
         icon: "atom",
     },
     math: {
         id: "Matura",
         label: "Matura",
-        description: "Matematyka",
+        descriptionKey: "constants.courseCategories.description.matematyka",
         icon: "calculator",
     },
 };

@@ -21,6 +21,7 @@ import {
 } from "react-native";
 import Svg, { Circle, Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./iconEdit-styles";
 
 const MAX_HUE = 360;
@@ -28,13 +29,13 @@ const MAX_SATURATION = 100;
 const MAX_VALUE = 100;
 
 const ICON_CATEGORY_OPTIONS = [
-  { id: "all", label: "Wszystkie" },
-  { id: "general", label: "Ogólne" },
-  { id: "science", label: "Nauka" },
-  { id: "tech", label: "Tech" },
-  { id: "travel", label: "Podróże" },
-  { id: "lifestyle", label: "Styl życia" },
-  { id: "sport", label: "Sport" },
+  { id: "all", labelKey: "courseCreator.iconEdit.categories.all" },
+  { id: "general", labelKey: "courseCreator.iconEdit.categories.general" },
+  { id: "science", labelKey: "courseCreator.iconEdit.categories.science" },
+  { id: "tech", labelKey: "courseCreator.iconEdit.categories.tech" },
+  { id: "travel", labelKey: "courseCreator.iconEdit.categories.travel" },
+  { id: "lifestyle", labelKey: "courseCreator.iconEdit.categories.lifestyle" },
+  { id: "sport", labelKey: "courseCreator.iconEdit.categories.sport" },
 ] as const;
 
 type IconCategoryFilter = (typeof ICON_CATEGORY_OPTIONS)[number]["id"];
@@ -170,16 +171,17 @@ function CourseIconColorSelectorComponent({
   onColorHexChange,
   disabled = false,
   nameEditable = true,
-  namePlaceholder = "np. Fiszki podróżnicze",
+  namePlaceholder,
   styles,
   previewName,
-  nameSectionDescription = "Krótko i konkretnie, np. „Fiszki podróżnicze”.",
-  iconSectionDescription = "Wybierz ikonę z listy",
-  colorSectionDescription = "Wybierz swój kolor",
+  nameSectionDescription,
+  iconSectionDescription,
+  colorSectionDescription,
   enableIconSearch = true,
   nameValidationState = "none",
   nameValidationMessage = null,
 }: CourseIconColorSelectorProps) {
+  const { t } = useTranslation();
   const componentStyles = useStyles();
   const { colors } = useSettings();
   const insets = useSafeAreaInsets();
@@ -224,7 +226,15 @@ function CourseIconColorSelectorComponent({
     });
   }, [activeIconCategory, normalizedSearch]);
 
-  const previewTitle = previewName?.trim() || "Nowy kurs";
+  const resolvedNamePlaceholder =
+    namePlaceholder ?? t("courseCreator.iconEdit.namePlaceholder");
+  const resolvedNameSectionDescription =
+    nameSectionDescription ?? t("courseCreator.iconEdit.nameDescription");
+  const resolvedIconSectionDescription =
+    iconSectionDescription ?? t("courseCreator.iconEdit.iconDescription");
+  const resolvedColorSectionDescription =
+    colorSectionDescription ?? t("courseCreator.iconEdit.colorDescription");
+  const previewTitle = previewName?.trim() || t("courseCreator.iconEdit.defaultCourseName");
   const selectedHex = selectedColor?.trim() || "#000000";
   const currentHex = useMemo(() => hsvToHex(hsv), [hsv]);
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
@@ -252,12 +262,12 @@ function CourseIconColorSelectorComponent({
       } else {
         onColorChange({
           id: "custom",
-          label: "Niestandardowy",
+          label: t("courseCreator.iconEdit.customColorLabel"),
           hex: normalizedHex,
         });
       }
     },
-    [onColorChange, onColorHexChange, selectedColor]
+    [onColorChange, onColorHexChange, selectedColor, t]
   );
 
   useEffect(() => {
@@ -340,22 +350,26 @@ function CourseIconColorSelectorComponent({
                 </Text>
               </View>
               <View style={componentStyles.pill}>
-                <Text style={componentStyles.pillLabel}>Ikona:</Text>
+                <Text style={componentStyles.pillLabel}>
+                  {t("courseCreator.iconEdit.iconLabel")}
+                </Text>
                 <Text style={componentStyles.pillStrong}>{selectedIconMeta.id}</Text>
               </View>
             </View>
           </View>
         </View>
         <Text style={componentStyles.previewHint}>
-          Tip: u góry masz „efekt końcowy”, poniżej ustawienia.
+          {t("courseCreator.iconEdit.previewHint")}
         </Text>
       </View>
 
       <View style={componentStyles.sectionCard}>
         <View style={componentStyles.sectionHeaderBlock}>
-          <Text style={componentStyles.sectionLabel}>NAZWA</Text>
+          <Text style={componentStyles.sectionLabel}>
+            {t("courseCreator.iconEdit.nameSection")}
+          </Text>
           <Text style={componentStyles.sectionDescription}>
-            {nameSectionDescription}
+            {resolvedNameSectionDescription}
           </Text>
         </View>
         <TextInput
@@ -366,9 +380,9 @@ function CourseIconColorSelectorComponent({
           ]}
           value={courseName ?? ""}
           onChangeText={onCourseNameChange}
-          placeholder={namePlaceholder}
+          placeholder={resolvedNamePlaceholder}
           placeholderTextColor={componentStyles.nameInput.color}
-          accessibilityLabel="Nazwa kursu"
+          accessibilityLabel={t("courseCreator.iconEdit.nameA11y")}
           editable={isNameEditable}
           maxLength={38}
           autoCorrect={false}
@@ -397,9 +411,11 @@ function CourseIconColorSelectorComponent({
         <View style={componentStyles.pickerRow}>
           <View style={componentStyles.pickerLeft}>
             <View style={componentStyles.sectionHeaderBlock}>
-              <Text style={componentStyles.sectionLabel}>IKONA</Text>
+              <Text style={componentStyles.sectionLabel}>
+                {t("courseCreator.iconEdit.iconSection")}
+              </Text>
               <Text style={componentStyles.sectionDescription}>
-                {iconSectionDescription}
+                {resolvedIconSectionDescription}
               </Text>
             </View>
 
@@ -410,7 +426,9 @@ function CourseIconColorSelectorComponent({
                   size={16}
                   color={selectedHex}
                 />
-                <Text style={componentStyles.chipStrong}>Wybrana</Text>
+                <Text style={componentStyles.chipStrong}>
+                  {t("courseCreator.iconEdit.selected")}
+                </Text>
                 <Text style={componentStyles.chipMono}>{selectedIconMeta.id}</Text>
               </View>
             </View>
@@ -418,7 +436,7 @@ function CourseIconColorSelectorComponent({
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Zmień ikonę kursu"
+            accessibilityLabel={t("courseCreator.iconEdit.changeIconA11y")}
             onPress={() => setIsIconSheetOpen(true)}
             disabled={disabled}
             hitSlop={8}
@@ -441,9 +459,11 @@ function CourseIconColorSelectorComponent({
         <View style={componentStyles.pickerRow}>
           <View style={componentStyles.pickerLeft}>
             <View style={componentStyles.sectionHeaderBlock}>
-              <Text style={componentStyles.sectionLabel}>KOLOR</Text>
+              <Text style={componentStyles.sectionLabel}>
+                {t("courseCreator.iconEdit.colorSection")}
+              </Text>
               <Text style={componentStyles.sectionDescription}>
-                {colorSectionDescription}
+                {resolvedColorSectionDescription}
               </Text>
             </View>
 
@@ -458,15 +478,19 @@ function CourseIconColorSelectorComponent({
                 <Text style={componentStyles.chipMono}>{selectedHex.toUpperCase()}</Text>
               </View>
               <View style={componentStyles.chip}>
-                <Text style={componentStyles.chipStrong}>Tryb:</Text>
-                <Text style={componentStyles.chipMono}>picker</Text>
+                <Text style={componentStyles.chipStrong}>
+                  {t("courseCreator.iconEdit.modeLabel")}
+                </Text>
+                <Text style={componentStyles.chipMono}>
+                  {t("courseCreator.iconEdit.pickerMode")}
+                </Text>
               </View>
             </View>
           </View>
 
           <Pressable
             accessibilityRole="button"
-            accessibilityLabel="Zmień kolor kursu"
+            accessibilityLabel={t("courseCreator.iconEdit.changeColorA11y")}
             onPress={() => setIsColorSheetOpen(true)}
             disabled={disabled}
             hitSlop={8}
@@ -498,10 +522,12 @@ function CourseIconColorSelectorComponent({
           <Pressable style={componentStyles.sheet} onPress={() => undefined}>
             <View style={componentStyles.sheetGrabber} />
             <View style={componentStyles.sheetHeader}>
-              <Text style={componentStyles.sheetTitle}>Wybierz ikonę</Text>
+              <Text style={componentStyles.sheetTitle}>
+                {t("courseCreator.iconEdit.chooseIcon")}
+              </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Zamknij wybór ikony"
+                accessibilityLabel={t("courseCreator.iconEdit.closeIconPickerA11y")}
                 onPress={() => setIsIconSheetOpen(false)}
                 style={({ pressed }) => [
                   componentStyles.closeSquareButton,
@@ -521,20 +547,23 @@ function CourseIconColorSelectorComponent({
                 <TextInput
                   value={iconSearch}
                   onChangeText={setIconSearch}
-                  placeholder="Szukaj ikony"
+                  placeholder={t("courseCreator.iconEdit.searchIcon")}
                   placeholderTextColor={componentStyles.searchInput.color}
                   style={componentStyles.searchInput}
-                  accessibilityLabel="Szukaj ikony"
+                  accessibilityLabel={t("courseCreator.iconEdit.searchIcon")}
                 />
               ) : null}
               <View style={componentStyles.categoryRow}>
                 {ICON_CATEGORY_OPTIONS.map((category) => {
                   const isActive = category.id === activeIconCategory;
+                  const categoryLabel = t(category.labelKey);
                   return (
                     <Pressable
                       key={category.id}
                       accessibilityRole="button"
-                      accessibilityLabel={`Filtr kategorii: ${category.label}`}
+                      accessibilityLabel={t("courseCreator.iconEdit.categoryFilterA11y", {
+                        label: categoryLabel,
+                      })}
                       onPress={() => setActiveIconCategory(category.id)}
                       style={({ pressed }) => [
                         componentStyles.categoryButton,
@@ -548,7 +577,7 @@ function CourseIconColorSelectorComponent({
                           isActive && componentStyles.categoryButtonTextActive,
                         ]}
                       >
-                        {category.label}
+                        {categoryLabel}
                       </Text>
                     </Pressable>
                   );
@@ -569,7 +598,9 @@ function CourseIconColorSelectorComponent({
                     <View key={icon.id} style={componentStyles.iconTileCell}>
                       <Pressable
                         accessibilityRole="button"
-                        accessibilityLabel={`Wybierz ikonę ${icon.id}`}
+                        accessibilityLabel={t("courseCreator.iconEdit.chooseIconA11y", {
+                          id: icon.id,
+                        })}
                         onPress={() => {
                           onIconChange(icon.id);
                           setIsIconSheetOpen(false);
@@ -590,7 +621,9 @@ function CourseIconColorSelectorComponent({
                   );
                 })}
                 {filteredIcons.length === 0 ? (
-                  <Text style={componentStyles.emptyStateText}>Brak wyników</Text>
+                  <Text style={componentStyles.emptyStateText}>
+                    {t("courseCreator.iconEdit.emptyResults")}
+                  </Text>
                 ) : null}
               </View>
             </ScrollView>
@@ -611,10 +644,12 @@ function CourseIconColorSelectorComponent({
           <Pressable style={componentStyles.sheet} onPress={() => undefined}>
             <View style={componentStyles.sheetGrabber} />
             <View style={componentStyles.sheetHeader}>
-              <Text style={componentStyles.sheetTitle}>Wybierz kolor</Text>
+              <Text style={componentStyles.sheetTitle}>
+                {t("courseCreator.iconEdit.chooseColor")}
+              </Text>
               <Pressable
                 accessibilityRole="button"
-                accessibilityLabel="Zamknij wybór koloru"
+                accessibilityLabel={t("courseCreator.iconEdit.closeColorPickerA11y")}
                 onPress={() => setIsColorSheetOpen(false)}
                 style={({ pressed }) => [
                   componentStyles.closeSquareButton,
@@ -720,7 +755,9 @@ function CourseIconColorSelectorComponent({
               </View>
 
               <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>HUE</Text>
+                <Text style={componentStyles.sliderLabel}>
+                  {t("courseCreator.iconEdit.hue")}
+                </Text>
                 <TrackSlider
                   testID="hue-slider"
                   value={hsv.h}
@@ -742,7 +779,9 @@ function CourseIconColorSelectorComponent({
               </View>
 
               <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>SATURATION</Text>
+                <Text style={componentStyles.sliderLabel}>
+                  {t("courseCreator.iconEdit.saturation")}
+                </Text>
                 <TrackSlider
                   testID="sat-slider"
                   value={hsv.s * 100}
@@ -766,7 +805,9 @@ function CourseIconColorSelectorComponent({
               </View>
 
               <View style={componentStyles.sliderGroup}>
-                <Text style={componentStyles.sliderLabel}>VALUE</Text>
+                <Text style={componentStyles.sliderLabel}>
+                  {t("courseCreator.iconEdit.value")}
+                </Text>
                 <TrackSlider
                   testID="val-slider"
                   value={hsv.v * 100}
@@ -791,7 +832,9 @@ function CourseIconColorSelectorComponent({
 
               <View style={componentStyles.colorActionRow}>
                 <View style={componentStyles.colorFooterTextWrap}>
-                  <Text style={componentStyles.colorPreviewLabel}>PODGLĄD</Text>
+                  <Text style={componentStyles.colorPreviewLabel}>
+                    {t("courseCreator.iconEdit.preview")}
+                  </Text>
                   <Text style={componentStyles.colorPreviewHex}>{currentHex}</Text>
                 </View>
                 <View style={componentStyles.colorActionRight}>
@@ -803,12 +846,12 @@ function CourseIconColorSelectorComponent({
                     />
                   </View>
                   <MyButton
-                    text="zatwierdź"
+                    text={t("courseCreator.iconEdit.confirm")}
                     color="my_green"
                     width={126}
                     disabled={disabled}
                     onPress={() => setIsColorSheetOpen(false)}
-                    accessibilityLabel="Zatwierdź wybrany kolor"
+                    accessibilityLabel={t("courseCreator.iconEdit.confirmColorA11y")}
                     style={componentStyles.applyMyButton}
                     textStyle={componentStyles.applyMyButtonText}
                   />

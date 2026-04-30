@@ -3,6 +3,7 @@ import { View, Text } from "react-native";
 import Svg, { Polygon } from "react-native-svg";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useTranslation } from "react-i18next";
 
 type Props = {
   value: number; // 0..1
@@ -51,6 +52,7 @@ const ProgressBar: React.FC<Props> = ({
   color,
 }) => {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { colors } = useSettings();
   const pct = clamp01(value) * 100;
   const [barWidth, setBarWidth] = useState<number | null>(null);
@@ -75,7 +77,11 @@ const ProgressBar: React.FC<Props> = ({
         <View style={styles.labelRow}>
           <Text style={styles.label}>{label}</Text>
           {showPercent ? (
-            <Text style={styles.valueText}>{`${Math.round(pct)}%`}</Text>
+            <Text style={styles.valueText}>
+              {t("components.stats.progressBar.textChildTemplate.value", {
+                value: Math.round(pct),
+              })}
+            </Text>
           ) : null}
         </View>
       ) : null}

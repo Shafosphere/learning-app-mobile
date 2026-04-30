@@ -137,9 +137,9 @@ const CoursesDataSection: React.FC = () => {
       }
 
       const details = [
-        `${t("settings.coursesData.googleDrive.snapshotLabels.customCourses")}: ${manifest.contentSummary.customCoursesCount}`,
+        `${t("repeats.labels.courses")}: ${manifest.contentSummary.customCoursesCount}`,
         `${t("settings.coursesData.googleDrive.snapshotLabels.flashcards")}: ${manifest.contentSummary.customFlashcardsCount}`,
-        `${t("settings.coursesData.googleDrive.snapshotLabels.reviews")}: ${manifest.contentSummary.reviewEntriesCount}`,
+        `${t("repeats.labels.reviews")}: ${manifest.contentSummary.reviewEntriesCount}`,
         `${t("settings.coursesData.googleDrive.snapshotLabels.events")}: ${manifest.contentSummary.learningEventsCount}`,
       ];
 
@@ -295,7 +295,7 @@ const CoursesDataSection: React.FC = () => {
     } catch (error) {
       console.error("[CoursesDataSection] export error", error);
       Alert.alert(
-        t("settings.coursesData.errors.generic"),
+        t("app.status.error"),
         t("settings.coursesData.errors.exportUserData")
       );
     } finally {
@@ -316,7 +316,7 @@ const CoursesDataSection: React.FC = () => {
     } catch (error) {
       console.error("[CoursesDataSection] Google Drive connect error", error);
       Alert.alert(
-        t("settings.coursesData.errors.generic"),
+        t("app.status.error"),
         error instanceof Error
           ? error.message
           : t("settings.coursesData.errors.exportGoogleDrive")
@@ -337,7 +337,7 @@ const CoursesDataSection: React.FC = () => {
     } catch (error) {
       console.error("[CoursesDataSection] Google Drive backup error", error);
       Alert.alert(
-        t("settings.coursesData.errors.generic"),
+        t("app.status.error"),
         error instanceof Error
           ? error.message
           : t("settings.coursesData.errors.exportGoogleDrive")
@@ -366,11 +366,11 @@ const CoursesDataSection: React.FC = () => {
       }),
       [
         {
-          text: t("settings.coursesData.resetLearningConfirm.cancel"),
+          text: t("app.actions.cancel"),
           style: "cancel",
         },
         {
-          text: t("settings.coursesData.googleDrive.restoreConfirm.confirm"),
+          text: t("app.actions.restore"),
           style: "destructive",
           onPress: async () => {
             try {
@@ -391,7 +391,7 @@ const CoursesDataSection: React.FC = () => {
             } catch (error) {
               console.error("[CoursesDataSection] Google Drive restore error", error);
               Alert.alert(
-                t("settings.coursesData.errors.generic"),
+                t("app.status.error"),
                 error instanceof Error
                   ? error.message
                   : t("settings.coursesData.errors.import")
@@ -414,7 +414,7 @@ const CoursesDataSection: React.FC = () => {
     } catch (error) {
       console.error("[CoursesDataSection] Google Drive disconnect error", error);
       Alert.alert(
-        t("settings.coursesData.errors.generic"),
+        t("app.status.error"),
         error instanceof Error
           ? error.message
           : t("settings.coursesData.errors.exportGoogleDrive")
@@ -441,7 +441,7 @@ const CoursesDataSection: React.FC = () => {
     } catch (error) {
       console.error("[CoursesDataSection] import error", error);
       Alert.alert(
-        t("settings.coursesData.errors.generic"),
+        t("app.status.error"),
         t("settings.coursesData.errors.import")
       );
     } finally {
@@ -454,21 +454,21 @@ const CoursesDataSection: React.FC = () => {
       t("settings.coursesData.resetLearningConfirm.title"),
       t("settings.coursesData.resetLearningConfirm.message"),
       [
-        { text: t("settings.coursesData.resetLearningConfirm.cancel"), style: "cancel" },
+        { text: t("app.actions.cancel"), style: "cancel" },
         {
-          text: t("settings.coursesData.resetLearningConfirm.confirm"),
+          text: t("app.actions.restore"),
           style: "default",
           onPress: async () => {
             setResettingLearning(true);
             try {
               await resetLearningSettings();
               Alert.alert(
-                t("settings.coursesData.resetLearningDone.title"),
+                t("app.status.done"),
                 t("settings.coursesData.resetLearningDone.message")
               );
             } catch {
               Alert.alert(
-                t("settings.coursesData.errors.generic"),
+                t("app.status.error"),
                 t("settings.coursesData.errors.resetLearning")
               );
             } finally {
@@ -485,7 +485,7 @@ const CoursesDataSection: React.FC = () => {
       t("settings.coursesData.resetIntroConfirm.title"),
       t("settings.coursesData.resetIntroConfirm.message"),
       [
-        { text: t("settings.coursesData.resetIntroConfirm.cancel"), style: "cancel" },
+        { text: t("app.actions.cancel"), style: "cancel" },
         {
           text: t("settings.coursesData.resetIntroConfirm.confirm"),
           style: "destructive",
@@ -498,7 +498,7 @@ const CoursesDataSection: React.FC = () => {
               router.replace("/createprofile");
             } catch {
               Alert.alert(
-                t("settings.coursesData.errors.generic"),
+                t("app.status.error"),
                 t("settings.coursesData.errors.resetIntro")
               );
             } finally {
@@ -677,7 +677,7 @@ const CoursesDataSection: React.FC = () => {
                       </View>
 
                       <MyButton
-                        text={t("settings.coursesData.googleDrive.restoreButton")}
+                        text={t("app.actions.restore")}
                         color="my_green"
                         onPress={() => handleRestoreSnapshot(snapshot)}
                         disabled={!snapshot.isCompatible || googleDriveRestoreInProgress}
@@ -850,7 +850,9 @@ const CoursesDataSection: React.FC = () => {
 
       <View style={styles.settingsDivider} />
 
-      <Text style={styles.appearanceGroupLabel}>RESET</Text>
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.coursesData.groups.reset")}
+      </Text>
       <View style={[styles.actionCard, styles.actionCardStandalone]}>
         <View style={styles.actionCardSections}>
           <View style={styles.actionCardSection}>
@@ -893,7 +895,7 @@ const CoursesDataSection: React.FC = () => {
               <MyButton
                 text={
                   resettingIntro
-                    ? t("settings.coursesData.rows.resetIntro.buttonLoading")
+                    ? t("app.status.resetting")
                     : t("settings.coursesData.rows.resetIntro.button")
                 }
                 color="my_yellow"

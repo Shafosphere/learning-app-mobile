@@ -20,8 +20,14 @@ jest.mock("expo-router", () => ({
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (_key: string, options?: { defaultValue?: string }) =>
-      options?.defaultValue ?? _key,
+    t: (_key: string, options?: { defaultValue?: string }) => {
+      const translations: Record<string, string> = {
+        "app.actions.next": "Next",
+        "repeats.labels.english": "English",
+        "repeats.labels.polish": "Polski",
+      };
+      return options?.defaultValue ?? translations[_key] ?? _key;
+    },
   }),
 }));
 

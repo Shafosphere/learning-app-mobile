@@ -24,9 +24,20 @@
       "reset": {
         "confirmTitle": "Reset local app data?",
         "confirmMessage": "This will delete the local SQLite database and create a fresh one. If you do not have a backup, local learning data stored only on this device may be lost.",
-        "cancel": "Cancel",
         "confirm": "Reset"
       }
+    },
+    "actions": {
+      "cancel": "Cancel",
+      "next": "Next",
+      "restore": "Restore",
+      "delete": "Delete",
+      "clear": "Clear"
+    },
+    "status": {
+      "done": "Done",
+      "error": "Error",
+      "resetting": "Resetting..."
     }
   },
   "settings": {
@@ -39,15 +50,11 @@
     },
     "uiLanguage": {
       "title": "Interface language",
-      "subtitle": "Choose app language independently from course language.",
-      "polish": "Polish",
-      "english": "English"
+      "subtitle": "Choose app language independently from course language."
     },
     "nativeLanguage": {
       "title": "Native language",
-      "subtitle": "Controls which official courses you see while pinning.",
-      "polish": "Polish",
-      "english": "English"
+      "subtitle": "Controls which official courses you see while pinning."
     },
     "appearance": {
       "section": "Appearance",
@@ -153,7 +160,6 @@
         "googleDrive": "Google Drive"
       },
       "errors": {
-        "generic": "Error",
         "exportUserData": "Could not export user data.",
         "exportGoogleDrive": "Could not export data to Google Drive.",
         "import": "Unexpected import error occurred.",
@@ -203,11 +209,9 @@
         },
         "restoreTitle": "Backups to restore",
         "restoreSubtitle": "Load the 3 latest backups from Google Drive and choose the exact snapshot to restore.",
-        "restoreButton": "Restore",
         "restoreConfirm": {
           "title": "Restore data from Google Drive?",
-          "message": "This will replace local user data with the copy from {{createdAt}}, including private courses, progress, and images.",
-          "confirm": "Restore"
+          "message": "This will replace local user data with the copy from {{createdAt}}, including private courses, progress, and images."
         },
         "snapshotTitle": "Backup from {{createdAt}}",
         "snapshotMeta": "App version: {{appVersion}} • Source: {{backupSource}}",
@@ -227,9 +231,7 @@
           "detailsStats": "Data scope: {{value}}"
         },
         "snapshotLabels": {
-          "customCourses": "Courses",
           "flashcards": "Flashcards",
-          "reviews": "Reviews",
           "events": "History"
         },
         "snapshotStates": {
@@ -272,22 +274,17 @@
       },
       "resetLearningConfirm": {
         "title": "Restore learning settings",
-        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, reminders)?",
-        "cancel": "Cancel",
-        "confirm": "Restore"
+        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, reminders)?"
       },
       "resetLearningDone": {
-        "title": "Done",
         "message": "Learning settings restored."
       },
       "resetIntroConfirm": {
         "title": "Reset intro?",
         "message": "Intro will start from the beginning. Pinned courses will be unpinned and the active course will be turned off. Learning progress and saved data will not be deleted.",
-        "cancel": "Cancel",
         "confirm": "Reset intro"
       },
       "resetIntroDone": {
-        "title": "Done",
         "message": "Intro reset. Onboarding starts from language selection."
       },
       "rows": {
@@ -319,8 +316,7 @@
         "resetIntro": {
           "title": "Reset intro",
           "subtitle": "Starts onboarding from the beginning. Unpins courses and turns off the active course, but keeps learning progress.",
-          "button": "Reset intro",
-          "buttonLoading": "Resetting..."
+          "button": "Reset intro"
         }
       }
     },
@@ -340,7 +336,6 @@
         "addedTitle": "Added",
         "addedSome": "Added {{inserted}} flashcards to course reviews.",
         "addedNone": "No new flashcards to add.",
-        "errorTitle": "Error",
         "addError": "Could not add flashcards.",
         "resetCustomTitle": "Custom course reset",
         "resetCustomSome": "Removed {{deleted}} custom course review entries.",
@@ -348,12 +343,9 @@
         "resetCustomError": "Could not reset custom course.",
         "clearStorageTitle": "Clear AsyncStorage",
         "clearStorageMessage": "Removes ALL stored settings (also outside settings). Dev only.",
-        "clearStorageConfirm": "Clear",
         "deleteDbTitle": "Delete SQLite database",
         "deleteDbMessage": "Deletes local mygame.db (flashcards/custom). App restart required.",
         "deleteDbConfirm": "Delete database",
-        "cancel": "Cancel",
-        "doneTitle": "Done",
         "storageCleared": "AsyncStorage cleared.",
         "storageClearError": "Could not clear AsyncStorage.",
         "dbDeleted": "mygame.db has been deleted.",
@@ -438,13 +430,11 @@
         "resetCustom": {
           "title": "Reset custom course (dev)",
           "subtitle": "Delete review entries for active custom course.",
-          "button": "Reset custom",
-          "buttonLoading": "Resetting..."
+          "button": "Reset custom"
         },
         "clearStorage": {
           "title": "Clear AsyncStorage",
           "subtitle": "Removes all app keys (dev only).",
-          "button": "Clear",
           "buttonLoading": "Clearing..."
         },
         "deleteDb": {
@@ -456,8 +446,7 @@
         "resetIntro": {
           "title": "Reset intro bubbles",
           "subtitle": "Removes seen flags for all screens.",
-          "button": "Reset intro",
-          "buttonLoading": "Resetting..."
+          "button": "Reset intro"
         },
         "openLanguageIntro": {
           "title": "Go to language selection",
@@ -702,9 +691,6 @@
       "title": "Choose language",
       "appTitle": "Choose app language",
       "nativeTitle": "Your native language",
-      "confirm": "Next",
-      "polish": "Polish",
-      "english": "English",
       "hintDefault": "Choose a language to enable the button.",
       "hintSelected": "Selected: {{language}}"
     },
@@ -837,7 +823,6 @@
         "description": "With one tap, you can switch the app theme."
       },
       "step21": {
-        "title": "Reviews",
         "description": "This button opens the reviews screen and due flashcards."
       },
       "step22": {
@@ -970,6 +955,62 @@
       }
     }
   },
+  "flashcards": {
+    "card": {
+      "actions": {
+        "addFlashcards": "ADD FLASHCARDS"
+      },
+      "peek": {
+        "flashcard": "Flashcard",
+        "flashcardNumber": "FLASHCARD #{{number}}",
+        "image": "Image",
+        "front": "Front",
+        "back": "Back",
+        "question": "Question:",
+        "answer": "Answer:",
+        "emptyContent": "No content",
+        "emptyTranslation": "No translation",
+        "emptyAnswer": "No answer",
+        "textType": "Text",
+        "true": "True",
+        "false": "False",
+        "otherCorrect": "Other correct answers:",
+        "boxTitle": "Box no. {{box}}",
+        "listHint": "Flashcards in this box.",
+        "countOne": "{{count}} flashcard",
+        "countMany": "{{count}} flashcards",
+        "emptyCount": "No flashcards",
+        "previewCourse": "preview",
+        "close": "Close",
+        "emptyBoxTitle": "Box is empty",
+        "emptyBoxDescription": "Flashcards will appear here when you reach the right learning level."
+      },
+      "hint": {
+        "placeholder": "Enter a hint...",
+        "save": "Save",
+        "saveDialogTitle": "Save hint?",
+        "saveDialogMessage": "This flashcard always shows one side, so the hint will be visible here.",
+        "targetDialogTitle": "Where should the hint be saved?",
+        "targetDialogMessage": "It can be visible only on this side of the flashcard or on both sides.",
+        "thisSideOnly": "Only this side",
+        "bothSides": "Both sides"
+      },
+      "emptyScene": {
+        "chooseBox": "Choose a flashcard box"
+      },
+      "trueFalse": {
+        "true": "TRUE",
+        "false": "FALSE",
+        "markTrue": "Mark as True",
+        "markFalse": "Mark as False"
+      }
+    }
+  },
+  "courses": {
+    "groups": {
+      "mini": "Mini courses"
+    }
+  },
   "courseCreator": {
     "import": {
       "defaultFileName": "file",
@@ -978,8 +1019,7 @@
       "cardTypeLabel": "Flashcard type",
       "cardTypes": {
         "text": "Text answer",
-        "trueFalse": "True/False",
-        "knowDontKnow": "Know/Don't know"
+        "trueFalse": "True/False"
       },
       "sectionHeader": "CONTENT",
       "addModeA11y": "Flashcard adding mode",
@@ -998,7 +1038,6 @@
       "flashcardsHeader": "flashcards",
       "addCardA11y": "Add a new flashcard",
       "backA11y": "Back to course creation",
-      "next": "Next",
       "nextA11y": "Go to course settings",
       "shareDialogTitle": "Download CSV template",
       "popups": {
@@ -1120,6 +1159,29 @@
       "addImageForCard": "Add image for flashcard {{index}}",
       "removeImageForCard": "Remove image for flashcard {{index}}",
       "addNewCard": "Add new flashcard"
+    }
+  },
+  "repeats": {
+    "labels": {
+      "courses": "Courses",
+      "reviews": "Reviews",
+      "knownFlashcards": "Mastered flashcards",
+      "jumps": "Jumps",
+      "polish": "Polish",
+      "english": "English"
+    },
+    "cardTypes": {
+      "knowDontKnow": "Know / Don't know",
+      "trueFalse": "True / False"
+    },
+    "messages": {
+      "duplicateCourseName": "This course name is already taken."
+    },
+    "a11y": {
+      "backToCoursesPanel": "Back to courses panel"
+    },
+    "format": {
+      "flashcardsValue": "flashcards: {{value}}"
     }
   }
 }

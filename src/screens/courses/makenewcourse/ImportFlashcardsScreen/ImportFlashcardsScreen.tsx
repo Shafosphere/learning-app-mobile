@@ -78,7 +78,7 @@ export default function CustomCourseContentScreen() {
     },
     {
       key: "know_dont_know",
-      label: t("courseCreator.import.cardTypes.knowDontKnow"),
+      label: t("repeats.cardTypes.knowDontKnow"),
     },
   ];
 
@@ -660,7 +660,7 @@ export default function CustomCourseContentScreen() {
                       {t("courseCreator.import.cardTypes.trueFalse")}: {csvAnalysis.statsByType.true_false}
                     </Text>
                     <Text style={styles.csvTypePill}>
-                      {t("courseCreator.import.cardTypes.knowDontKnow")}: {csvAnalysis.statsByType.self_assess}
+                      {t("repeats.cardTypes.knowDontKnow")}: {csvAnalysis.statsByType.self_assess}
                     </Text>
                   </View>
 
@@ -777,7 +777,7 @@ export default function CustomCourseContentScreen() {
           </MyButton>
 
           <MyButton
-            text={t("courseCreator.import.next")}
+            text={t("app.actions.next")}
             color="my_green"
             onPress={handleNavigateToSettings}
             accessibilityLabel={t("courseCreator.import.nextA11y")}

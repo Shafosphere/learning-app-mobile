@@ -1,7 +1,11 @@
 import MyButton from "@/src/components/button/button";
-import { useSettings, type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
+import {
+  useSettings,
+  type TrueFalseButtonsVariant,
+} from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo, useRef } from "react";
 import { Animated, StyleSheet, View } from "react-native";
+import { useTranslation } from "react-i18next";
 
 type TrueFalseActionsProps = {
   onAnswer: (value: boolean) => void;
@@ -24,12 +28,26 @@ export function TrueFalseActions({
   variant = "true_false",
   selectedAnswer = null,
 }: TrueFalseActionsProps) {
+  const { t } = useTranslation();
   const { colors } = useSettings();
   const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
   const labels =
     variant === "know_dont_know"
-      ? { falseLabel: "NIE UMIEM", trueLabel: "UMIEM" }
-      : { falseLabel: "FAŁSZ", trueLabel: "PRAWDA" };
+      ? {
+          falseLabel: t("components.flashcards.trueFalseActions.label.nieUmiem"),
+          trueLabel: t("components.flashcards.trueFalseActions.label.umiem"),
+        }
+      : {
+          falseLabel: t("components.flashcards.trueFalseActions.label.falsz"),
+          trueLabel: t("components.flashcards.trueFalseActions.label.prawda"),
+        };
+  const getMarkLabel = (value: string) =>
+    t(
+      "components.flashcards.trueFalseActions.accessibilityLabel.oznaczJakoValue",
+      {
+        value,
+      }
+    );
 
   if (mode === "ok") {
     return (
@@ -43,7 +61,7 @@ export function TrueFalseActions({
           onPress={() => undefined}
           width={140}
           disabled
-          accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
+          accessibilityLabel={getMarkLabel(labels.falseLabel)}
         />
         <View style={styles.spacer} />
         <MyButton
@@ -52,7 +70,9 @@ export function TrueFalseActions({
           onPress={onOk}
           width={140}
           disabled={disabled}
-          accessibilityLabel="Potwierdź i przejdź dalej"
+          accessibilityLabel={t(
+            "components.flashcards.trueFalseActions.accessibilityLabel.potwierdzIPrzejdzDalej"
+          )}
         />
       </View>
     );
@@ -69,7 +89,7 @@ export function TrueFalseActions({
         onPress={() => onAnswer(false)}
         width={140}
         disabled={disabled}
-        accessibilityLabel={`Oznacz jako ${labels.falseLabel}`}
+        accessibilityLabel={getMarkLabel(labels.falseLabel)}
       />
       <View style={styles.spacer} />
       <MyButton
@@ -78,7 +98,7 @@ export function TrueFalseActions({
         onPress={() => onAnswer(true)}
         width={140}
         disabled={disabled}
-        accessibilityLabel={`Oznacz jako ${labels.trueLabel}`}
+        accessibilityLabel={getMarkLabel(labels.trueLabel)}
       />
     </View>
   );

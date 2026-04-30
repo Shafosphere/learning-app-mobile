@@ -1,6 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "../card-styles";
 
 type CardActionsProps = {
@@ -25,6 +26,7 @@ export function CardActions({
   hidden = false,
 }: CardActionsProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
 
   if (hidden) {
     return null;
@@ -32,7 +34,7 @@ export function CardActions({
 
   const downloadButton = (
     <MyButton
-      text="DODAJ FISZKI"
+      text={t("flashcards.card.actions.addFlashcards")}
       color="my_yellow"
       width={140}
       onPress={onDownload}

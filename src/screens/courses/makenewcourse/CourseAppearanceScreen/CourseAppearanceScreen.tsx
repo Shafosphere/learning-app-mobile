@@ -10,10 +10,12 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import { ScrollView, Text, TextStyle, View } from "react-native";
+import { useTranslation } from "react-i18next";
 import { CourseIconColorSelector } from "@/src/components/courseEditor/iconEdit/iconEdit";
 import { useStyles } from "./CourseAppearanceScreen-styles";
 export default function CustomCourseScreen() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const router = useRouter();
   const {
     courseName,
@@ -51,19 +53,27 @@ export default function CustomCourseScreen() {
   );
   const nameValidationMessage = useMemo(() => {
     if (nameConflict.kind === "duplicate" && nameConflict.matchedCourse) {
-      return `Kurs o nazwie „${nameConflict.matchedCourse.name}” już istnieje.`;
+      return t(
+        "screens.courses.makenewcourse.courseAppearance.courseAppearance.validation.kursONazwieJuzIstnieje",
+        { name: nameConflict.matchedCourse.name }
+      );
     }
     if (nameConflict.kind === "similar" && nameConflict.matchedCourse) {
-      return `Podobna nazwa już istnieje: „${nameConflict.matchedCourse.name}”.`;
+      return t(
+        "screens.courses.makenewcourse.courseAppearance.courseAppearance.validation.podobnaNazwaJuzIstnieje",
+        { name: nameConflict.matchedCourse.name }
+      );
     }
     return null;
-  }, [nameConflict]);
+  }, [nameConflict, t]);
 
   const handleNavigateToContent = () => {
     const name = courseName.trim();
     if (!name && !iconId) {
       setPopup({
-        message: "Musisz podać nazwę kursu i wybrać ikonę",
+        message: t(
+          "screens.courses.makenewcourse.courseAppearance.courseAppearance.message.musiszPodacNazweKursuI"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -71,7 +81,9 @@ export default function CustomCourseScreen() {
     }
     if (!name) {
       setPopup({
-        message: "Musisz podać nazwę kursu",
+        message: t(
+          "screens.courses.makenewcourse.courseAppearance.courseAppearance.message.musiszPodacNazweKursu"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -79,7 +91,9 @@ export default function CustomCourseScreen() {
     }
     if (!iconId) {
       setPopup({
-        message: "Musisz wybrać ikonę",
+        message: t(
+          "screens.courses.makenewcourse.courseAppearance.courseAppearance.message.musiszWybracIkone"
+        ),
         color: "angry",
         duration: 3000,
       });
@@ -87,7 +101,9 @@ export default function CustomCourseScreen() {
     }
     if (nameConflict.kind === "duplicate") {
       setPopup({
-        message: "Ta nazwa kursu jest już zajęta.",
+        message: t(
+          "repeats.messages.duplicateCourseName"
+        ),
         color: "angry",
         duration: 3200,
       });
@@ -126,7 +142,11 @@ export default function CustomCourseScreen() {
         bounces={false}
       >
         <View style={styles.section}>
-          <Text style={styles.sectionHeader}>NOWY KURS</Text>
+          <Text style={styles.sectionHeader}>
+            {t(
+              "screens.courses.makenewcourse.courseAppearance.courseAppearance.textChild.nowyKurs"
+            )}
+          </Text>
 
           <View style={styles.formContent}>
             <View>
@@ -145,8 +165,12 @@ export default function CustomCourseScreen() {
                 previewName={courseName}
                 nameValidationState={nameConflict.kind}
                 nameValidationMessage={nameValidationMessage}
-                iconSectionDescription="Wybierz symbol, który łatwo rozpoznasz na liście kursów."
-                colorSectionDescription="Kolor jest akcentem (avatar, przycisk, chipy)."
+                iconSectionDescription={t(
+                  "components.courseEditor.customEditor.appearance.iconDescription"
+                )}
+                colorSectionDescription={t(
+                  "components.courseEditor.customEditor.appearance.colorDescription"
+                )}
               />
             </View>
           </View>
@@ -160,17 +184,23 @@ export default function CustomCourseScreen() {
             onPress={handleGoBack}
             disabled={false}
             width={60}
-            accessibilityLabel="Wróć do panelu kursów"
+            accessibilityLabel={t(
+              "repeats.a11y.backToCoursesPanel"
+            )}
           >
             <Ionicons name="arrow-back" size={28} color={actionIconColor} />
           </MyButton>
 
           <MyButton
             color="my_green"
-            text="dalej"
+            text={t(
+              "screens.courses.makenewcourse.courseAppearance.courseAppearance.text.dalej"
+            )}
             onPress={handleNavigateToContent}
             disabled={nameConflict.kind === "duplicate"}
-            accessibilityLabel="Przejdź do ustawień zawartości kursu"
+            accessibilityLabel={t(
+              "screens.courses.makenewcourse.courseAppearance.courseAppearance.accessibilityLabel.przejdzDoUstawienZawartosciKursu"
+            )}
           ></MyButton>
         </View>
       </View>

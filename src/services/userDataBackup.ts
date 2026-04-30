@@ -8,6 +8,7 @@ import {
 import { getCustomCourses } from "@/src/db/sqlite/repositories/courses";
 import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
+import i18n from "@/src/i18n";
 import {
   imagesDir,
   importImageFromZip,
@@ -1826,7 +1827,9 @@ export async function restoreUserData(
     console.error("[userDataBackup] Restore failed", error);
     return {
       success: false,
-      message: "Wystąpił błąd podczas przywracania danych.",
+      message: i18n.t(
+        "services.userDataBackup.message.wystapilBladPodczasPrzywracaniaDanych"
+      ),
     };
   }
 }

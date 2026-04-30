@@ -1,5 +1,6 @@
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
+import i18n from "@/src/i18n";
 import {
   readBackupArchive,
   restoreUserData,
@@ -35,7 +36,10 @@ export async function importUserData(): Promise<ImportResult> {
     });
 
     if (result.canceled) {
-      return { success: false, message: "Anulowano wybór pliku." };
+      return {
+        success: false,
+        message: i18n.t("services.importUserData.message.anulowanoWyborPliku"),
+      };
     }
 
     const asset = result.assets[0];
@@ -48,7 +52,9 @@ export async function importUserData(): Promise<ImportResult> {
     console.error("[importUserData] Error", error);
     return {
       success: false,
-      message: "Wystąpił błąd podczas importu danych.",
+      message: i18n.t(
+        "services.importUserData.message.wystapilBladPodczasImportuDanych"
+      ),
     };
   }
 }

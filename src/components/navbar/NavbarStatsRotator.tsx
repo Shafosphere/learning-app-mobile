@@ -8,6 +8,8 @@ import {
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, View } from "react-native";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import Animated, {
   Easing,
   FadeIn,
@@ -49,10 +51,14 @@ const getCountFor = (
   return stats.promotionsCount;
 };
 
-const getStatLabel = (statKey: NavbarStatKey) => {
-  if (statKey === "mastered") return "Opanowane fiszki";
-  if (statKey === "streak") return "Daily streak";
-  return "Skoki";
+const getStatLabel = (statKey: NavbarStatKey, t: TFunction) => {
+  if (statKey === "mastered") {
+    return t("repeats.labels.knownFlashcards");
+  }
+  if (statKey === "streak") {
+    return t("components.navbar.navbarStatsRotator.label.dailyStreak");
+  }
+  return t("repeats.labels.jumps");
 };
 
 const getStatAccent = (
@@ -81,6 +87,7 @@ const renderStatIcon = (
 export default function NavbarStatsRotator({
   onPress,
 }: NavbarStatsRotatorProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
   const { colors } = useSettings();
   const {
@@ -241,7 +248,13 @@ export default function NavbarStatsRotator({
       ]}
       onPress={onPress}
       accessibilityRole="button"
-      accessibilityLabel={`${getStatLabel(activeStatKey)}: ${currentValue}. Przejdź do statystyk`}
+      accessibilityLabel={t(
+        "components.navbar.navbarStatsRotator.accessibilityLabel.valueValuePrzejdzDoStatystyk",
+        {
+          label: getStatLabel(activeStatKey, t),
+          value: currentValue,
+        }
+      )}
     >
       <Animated.View
         pointerEvents="none"

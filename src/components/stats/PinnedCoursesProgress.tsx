@@ -8,6 +8,7 @@ import {
   countCustomLearnedForCourse,
   getCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
+import { useTranslation } from "react-i18next";
 
 type Item = {
   key: string;
@@ -75,6 +76,7 @@ const SKELETON_ROWS = 4;
 
 export default function PinnedCoursesProgress() {
   const styles = useStyles();
+  const { t } = useTranslation();
   const { pinnedOfficialCourseIds } = useSettings();
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -124,7 +126,11 @@ export default function PinnedCoursesProgress() {
   }, [pinnedOfficialCourseIds]);
 
   return (
-    <StatsCard title="Postęp przypiętych kursów">
+    <StatsCard
+      title={t(
+        "components.stats.pinnedCoursesProgress.title.postepPrzypietychKursow"
+      )}
+    >
       {isLoading ? (
         <View>
           {Array.from({ length: SKELETON_ROWS }, (_, index) => (
@@ -139,13 +145,24 @@ export default function PinnedCoursesProgress() {
           ))}
         </View>
       ) : items.length === 0 ? (
-        <Text style={styles.empty}>Brak danych do wyświetlenia.</Text>
+        <Text style={styles.empty}>
+          {t(
+            "components.stats.pinnedCoursesProgress.textChild.brakDanychDoWyswietlenia"
+          )}
+        </Text>
       ) : (
         <View>
           {items.map((it) => (
             <View key={it.key} style={styles.row}>
               <Text style={styles.label}>{it.label}</Text>
-              <ProgressBar value={it.progress} label={`${it.learned} / ${it.total}`} showPercent={true} />
+              <ProgressBar
+                value={it.progress}
+                label={t(
+                  "components.stats.pinnedCoursesProgress.label.valueValue",
+                  { learned: it.learned, total: it.total }
+                )}
+                showPercent={true}
+              />
             </View>
           ))}
         </View>

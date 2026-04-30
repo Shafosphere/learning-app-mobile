@@ -14,6 +14,7 @@ import Animated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./LogoMessage-styles";
 
 type LogoMessageVariant =
@@ -28,33 +29,39 @@ type LogoMessageLayoutVariant = "default" | "centered_intro";
 
 const LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 
-const DEFAULT_COPY: Record<
+const COPY_KEYS: Record<
   LogoMessageVariant,
   { title: string; description: string }
 > = {
   start: {
-    title: "Witaj w aplikacji do fiszek",
-    description: "Dodaj kurs kodem od prowadzącego i odblokuj materiały.",
+    title: "components.logoMessage.logoMessage.title.witajWAplikacjiDoFiszek",
+    description:
+      "components.logoMessage.logoMessage.description.dodajKursKodemOdProwadzacego",
   },
   pin: {
-    title: "Dodaj kurs kodem",
-    description: "Wpisz kod kursu, żeby przypiąć go do swojego profilu.",
+    title: "components.logoMessage.logoMessage.title.dodajKursKodem",
+    description:
+      "components.logoMessage.logoMessage.description.wpiszKodKursuZebyPrzypiac",
   },
   pinError: {
-    title: "Nie znaleziono kursu",
-    description: "Sprawdź kod albo poproś prowadzącego o poprawny.",
+    title: "components.logoMessage.logoMessage.title.nieZnalezionoKursu",
+    description:
+      "components.logoMessage.logoMessage.description.sprawdzKodAlboPoprosProwadzacego",
   },
   postPin: {
-    title: "Kurs dodany",
-    description: "Aktywuj go, by pobrać materiały i śledzić postęp.",
+    title: "components.logoMessage.logoMessage.title.kursDodany",
+    description:
+      "components.logoMessage.logoMessage.description.aktywujGoByPobracMaterialy",
   },
   activate: {
-    title: "Aktywuj kurs",
-    description: "Potwierdź, aby odblokować fiszki i zapisywać postępy.",
+    title: "components.logoMessage.logoMessage.title.aktywujKurs",
+    description:
+      "components.logoMessage.logoMessage.description.potwierdzAbyOdblokowacFiszkiI",
   },
   done: {
-    title: "Gotowe!",
-    description: "Kurs aktywny. Lecimy do fiszek.",
+    title: "components.logoMessage.logoMessage.title.gotowe",
+    description:
+      "components.logoMessage.logoMessage.description.kursAktywnyLecimyDoFiszek",
   },
 };
 
@@ -98,10 +105,11 @@ export default function LogoMessage({
   nextLabel = "Next message",
   layoutVariant = "default",
 }: LogoMessageProps) {
+  const { t } = useTranslation();
   const styles = useStyles();
-  const copy = DEFAULT_COPY[variant];
-  const resolvedTitle = title ?? copy?.title ?? "";
-  const resolvedDescription = description ?? copy?.description ?? "";
+  const copy = COPY_KEYS[variant];
+  const resolvedTitle = title ?? (copy ? t(copy.title) : "");
+  const resolvedDescription = description ?? (copy ? t(copy.description) : "");
   const isCenteredIntro = layoutVariant === "centered_intro";
   const hasNavigation = Boolean(onPrevious || onNext);
   const layoutProgress = useSharedValue(isCenteredIntro ? 1 : 0);

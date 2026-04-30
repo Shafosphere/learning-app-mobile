@@ -1,6 +1,8 @@
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { Pressable, Text, View } from "react-native";
+import type { TFunction } from "i18next";
+import { useTranslation } from "react-i18next";
 import type {
   FlashcardsCardSize,
   FlashcardsImageSize,
@@ -104,57 +106,70 @@ type ChoiceBlockProps<T extends string> = {
   titleStyle?: object;
 };
 
-const TRUE_FALSE_OPTIONS: ChoiceOption<TrueFalseButtonsVariant>[] = [
+const buildTrueFalseOptions = (
+  t: TFunction
+): ChoiceOption<TrueFalseButtonsVariant>[] => [
   {
     key: "true_false",
-    title: "Stwierdzenie",
-    subtitle: "Prawda / Fałsz",
+    title: t("components.courseEditor.settingsCourse.title.stwierdzenie"),
+    subtitle: t("repeats.cardTypes.trueFalse"),
   },
   {
     key: "know_dont_know",
-    title: "Opanowanie",
-    subtitle: "Umiem / Nie umiem",
+    title: t("components.courseEditor.settingsCourse.title.opanowanie"),
+    subtitle: t("repeats.cardTypes.knowDontKnow"),
   },
 ];
 
-const CARD_SIZE_OPTIONS: ChoiceOption<FlashcardsCardSize>[] = [
+const buildCardSizeOptions = (
+  t: TFunction
+): ChoiceOption<FlashcardsCardSize>[] => [
   {
     key: "large",
-    title: "Duża",
-    subtitle: "Karta rozszerza się pionowo i pokazuje cały tekst.",
+    title: t("components.courseEditor.settingsCourse.title.duza"),
+    subtitle: t(
+      "components.courseEditor.settingsCourse.subtitle.kartaRozszerzaSie"
+    ),
   },
   {
     key: "small",
-    title: "Mała",
-    subtitle: "Tekst zostaje w jednej linii i przesuwa się.",
+    title: t("components.courseEditor.settingsCourse.title.mala"),
+    subtitle: t("components.courseEditor.settingsCourse.subtitle.tekstZostaje"),
   },
 ];
 
-const IMAGE_SIZE_LABELS: Record<
-  FlashcardsImageSize,
-  { title: string; subtitle: string }
-> = {
+const buildImageSizeLabels = (
+  t: TFunction
+): Record<FlashcardsImageSize, { title: string; subtitle: string }> => ({
   dynamic: {
-    title: "Dynamiczny",
-    subtitle: "Naturalne proporcje obrazka.",
+    title: t("components.courseEditor.settingsCourse.title.dynamiczny"),
+    subtitle: t(
+      "components.courseEditor.settingsCourse.subtitle.naturalneProporcje"
+    ),
   },
   small: {
-    title: "Mały",
-    subtitle: "40% maksymalnej wysokości.",
+    title: t("components.courseEditor.settingsCourse.title.maly"),
+    subtitle: t(
+      "components.courseEditor.settingsCourse.subtitle.czterdziesciProcent"
+    ),
   },
   medium: {
-    title: "Średni",
-    subtitle: "60% maksymalnej wysokości.",
+    title: t("components.courseEditor.settingsCourse.title.sredni"),
+    subtitle: t(
+      "components.courseEditor.settingsCourse.subtitle.szescdziesiatProcent"
+    ),
   },
   large: {
-    title: "Duży",
-    subtitle: "100% maksymalnej wysokości.",
+    title: t("components.courseEditor.settingsCourse.title.duzy"),
+    subtitle: t("components.courseEditor.settingsCourse.subtitle.stoProcent"),
   },
   very_large: {
-    title: "Bardzo duży",
-    subtitle: "170% maksymalnej wysokości.",
+    title: t("components.courseEditor.settingsCourse.title.bardzoDuzy"),
+    subtitle: t(
+      "components.courseEditor.settingsCourse.subtitle.stoSiedemdziesiatProcent"
+    ),
   },
-};
+});
 
 function SettingsToggleRow({
   styles,
@@ -272,7 +287,11 @@ export function CourseSettingsSection({
   imageFrameEnabled = true,
   onToggleImageFrame,
 }: CourseSettingsSectionProps) {
+  const { t } = useTranslation();
   const sharedStyles = styles as SharedStyles;
+  const trueFalseOptions = buildTrueFalseOptions(t);
+  const cardSizeOptions = buildCardSizeOptions(t);
+  const imageSizeLabels = buildImageSizeLabels(t);
 
   const imageOptions = (imageSizeOptions ?? [
     "dynamic",
@@ -281,68 +300,98 @@ export function CourseSettingsSection({
     "large",
   ]).map((key) => ({
     key,
-    ...IMAGE_SIZE_LABELS[key],
+    ...imageSizeLabels[key],
   }));
   const shouldShowAnswersSection =
     !hideSkipCorrectionOption || showTrueFalseButtonsVariant;
 
   return (
     <View style={sharedStyles.sectionGroup}>
-      <Text style={sharedStyles.settingsGroupLabel}>PRZEPŁYW</Text>
+      <Text style={sharedStyles.settingsGroupLabel}>
+        {t("components.courseEditor.settingsCourse.textChild.przeplyw")}
+      </Text>
       <View style={sharedStyles.settingsGroupCard}>
         <View style={sharedStyles.settingsGroupRows}>
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Faza zapoznania (Pudełko 0)"
-            description="To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami."
+            title={t(
+              "components.courseEditor.settingsCourse.title.fazaZapoznaniaPudelko0"
+            )}
+            description={t(
+              "components.courseEditor.settingsCourse.description.dodatkowePudelko"
+            )}
             value={boxZeroEnabled}
             onPress={() => onToggleBoxZero(!boxZeroEnabled)}
-            accessibilityLabel="Przełącz fazę zapoznania"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania"
+            )}
           />
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Automat fiszek"
-            description="Automatycznie przełączaj pudełka i pobieraj nowe słowa."
+            title={t("components.courseEditor.settingsCourse.title.automatFiszek")}
+            description={t(
+              "components.courseEditor.settingsCourse.description.automatyczniePrzelaczaj"
+            )}
             value={autoflowEnabled}
             onPress={() => onToggleAutoflow(!autoflowEnabled)}
-            accessibilityLabel="Przełącz automat fiszek"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczAutomatFiszek"
+            )}
           />
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Włącz powtórki"
-            description="Dodaj fiszki z tego kursu do codziennych powtórek."
+            title={t("components.courseEditor.settingsCourse.title.wlaczPowtorki")}
+            description={t(
+              "components.courseEditor.settingsCourse.description.dodajFiszkiDoPowtorek"
+            )}
             value={reviewsEnabled}
             onPress={() => onToggleReviews(!reviewsEnabled)}
-            accessibilityLabel="Przełącz powtórki"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki"
+            )}
           />
         </View>
       </View>
 
-      <Text style={sharedStyles.settingsGroupLabel}>WYJAŚNIENIA</Text>
+      <Text style={sharedStyles.settingsGroupLabel}>
+        {t("components.courseEditor.settingsCourse.textChild.wyjasnienia")}
+      </Text>
       <View style={sharedStyles.settingsGroupCard}>
         <View style={sharedStyles.settingsGroupRows}>
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Wyświetlaj wyjaśnienie"
-            description="Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada."
+            title={t(
+              "components.courseEditor.settingsCourse.title.wyswietlajWyjasnienie"
+            )}
+            description={t(
+              "components.courseEditor.settingsCourse.description.pokazujWyjasnienie"
+            )}
             value={showExplanationEnabled}
             onPress={() => onToggleShowExplanation(!showExplanationEnabled)}
-            accessibilityLabel="Przełącz wyświetlanie wyjaśnień"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyswietlanieWyjasnien"
+            )}
           />
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Tylko po błędnej odpowiedzi"
-            description="Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi."
+            title={t(
+              "components.courseEditor.settingsCourse.title.tylkoPoBlednejOdpowiedzi"
+            )}
+            description={t(
+              "components.courseEditor.settingsCourse.description.gdyWylaczone"
+            )}
             value={showExplanationEnabled ? explanationOnlyOnWrong : false}
             onPress={() =>
               onToggleExplanationOnlyOnWrong(
                 !(showExplanationEnabled ? explanationOnlyOnWrong : false)
               )
             }
-            accessibilityLabel="Przełącz wyjaśnienie tylko po błędnej odpowiedzi"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyjasnienieTylkoPoBlednej"
+            )}
             disabled={!showExplanationEnabled}
             dependent
             dimmed={!showExplanationEnabled}
@@ -352,13 +401,19 @@ export function CourseSettingsSection({
 
       {shouldShowAnswersSection ? (
         <>
-          <Text style={sharedStyles.settingsGroupLabel}>ODPOWIEDZI</Text>
+          <Text style={sharedStyles.settingsGroupLabel}>
+            {t("components.courseEditor.settingsCourse.textChild.odpowiedzi")}
+          </Text>
           {!hideSkipCorrectionOption ? (
             <View style={sharedStyles.settingsGroupCard}>
               <SettingsToggleRow
                 styles={sharedStyles}
-                title="Pomiń poprawkę po błędzie"
-                description="Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową."
+                title={t(
+                  "components.courseEditor.settingsCourse.title.pominPoprawkePoBledzie"
+                )}
+                description={t(
+                  "components.courseEditor.settingsCourse.description.poZlejOdpowiedzi"
+                )}
                 value={skipCorrectionLocked ? true : skipCorrectionEnabled}
                 onPress={() =>
                   skipCorrectionLocked
@@ -367,7 +422,9 @@ export function CourseSettingsSection({
                         !(skipCorrectionLocked ? true : skipCorrectionEnabled)
                       )
                 }
-                accessibilityLabel="Przełącz pomijanie poprawki po błędzie"
+                accessibilityLabel={t(
+                  "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPomijaniePoprawkiPoBledzie"
+                )}
                 disabled={skipCorrectionLocked}
                 dimmed={skipCorrectionLocked}
               />
@@ -377,9 +434,13 @@ export function CourseSettingsSection({
           {showTrueFalseButtonsVariant ? (
             <SettingsChoiceBlock
               styles={sharedStyles}
-              title="Rodzaj przycisków w Prawda / Fałsz"
-              description="Wybierz, jakie napisy mają mieć przyciski w tym kursie."
-              options={TRUE_FALSE_OPTIONS}
+              title={t(
+                "components.courseEditor.settingsCourse.title.rodzajPrzyciskowWPrawdaFalsz"
+              )}
+              description={t(
+                "components.courseEditor.settingsCourse.description.wybierzNapisyPrzyciskow"
+              )}
+              options={trueFalseOptions}
               value={trueFalseButtonsVariant}
               onSelect={onSelectTrueFalseButtonsVariant}
             />
@@ -389,10 +450,12 @@ export function CourseSettingsSection({
 
       <SettingsChoiceBlock
         styles={sharedStyles}
-        title="Rozmiar fiszki"
+        title={t("components.courseEditor.settingsCourse.title.rozmiarFiszki")}
         titleStyle={sharedStyles.settingsGroupLabel}
-        description="Zmień wielkość karty tylko dla tego kursu."
-        options={CARD_SIZE_OPTIONS}
+        description={t(
+          "components.courseEditor.settingsCourse.description.zmienWielkoscKarty"
+        )}
+        options={cardSizeOptions}
         value={cardSize}
         onSelect={onSelectCardSize}
       />
@@ -400,13 +463,17 @@ export function CourseSettingsSection({
       {showImageSizeOptions ? (
         <SettingsChoiceBlock
           styles={sharedStyles}
-          title="Rozmiar obrazu"
+          title={t("components.courseEditor.settingsCourse.title.rozmiarObrazu")}
           titleStyle={sharedStyles.settingsGroupLabel}
-          description="Dopasuj wysokość obrazków w dużych fiszkach."
+          description={t(
+            "components.courseEditor.settingsCourse.description.dopasujWysokosc"
+          )}
           hint={
             imageSizeEnabled
               ? undefined
-              : "Dostępne tylko dla dużych kart z obrazkami."
+              : t(
+                  "components.courseEditor.settingsCourse.hint.dostepneTylkoDlaDuzych"
+                )
           }
           options={imageOptions}
           value={imageSize ?? "dynamic"}
@@ -419,11 +486,15 @@ export function CourseSettingsSection({
         <View style={sharedStyles.settingsGroupCard}>
           <SettingsToggleRow
             styles={sharedStyles}
-            title="Ramka obrazu"
-            description="Pokazuj obramowanie wokół obrazka na fiszce."
+            title={t("components.courseEditor.settingsCourse.title.ramkaObrazu")}
+            description={t(
+              "components.courseEditor.settingsCourse.description.pokazujObramowanie"
+            )}
             value={imageFrameEnabled}
             onPress={() => onToggleImageFrame?.(!imageFrameEnabled)}
-            accessibilityLabel="Przełącz ramkę obrazu"
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczRamkeObrazu"
+            )}
           />
         </View>
       ) : null}

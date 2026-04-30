@@ -658,7 +658,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   {
     id: "flashcards-step-21",
     targetId: "flashcards-review-button",
-    titleKey: "onboarding.flashcards.step21.title",
+    titleKey: "repeats.labels.reviews",
     descriptionKey: "onboarding.flashcards.step21.description",
     kind: "info",
     advanceOn: "manual",
