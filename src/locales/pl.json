@@ -1,4 +1,64 @@
 {
+  "quotes": {
+    "reactions": {
+      "startup_morning_0": "Dzień dobry! Kawa już była?",
+      "startup_morning_1": "Wstawaj szkoda dnia! :D",
+      "startup_morning_2": "Słoneczko świeci (chyba), czas na naukę.",
+      "startup_morning_3": "Pora obudzić ten mózg.",
+      "startup_day_0": "Hejooo, co tam?",
+      "startup_day_1": "Gotowy na powtóreczki?",
+      "startup_day_2": "Działamy, działamy!",
+      "startup_day_3": "Szybka sesyjka?",
+      "startup_evening_0": "Wieczorne zakuwanie? Szanuję.",
+      "startup_evening_1": "Dobry wieczór :)",
+      "startup_evening_2": "Relaks przy fiszkach?",
+      "startup_night_0": "Jeszcze nie śpisz? :o",
+      "startup_night_1": "Nocna zmiana widzę.",
+      "startup_night_2": "Sowy górą!",
+      "startup_night_3": "Tylko nie siedź do rana...",
+      "first_time_0": "Uczyć się to nic innego jak przypominać sobie",
+      "first_time_1": "Każdy ekspert był kiedyś początkujący.",
+      "return_0": "O, wróciłeś! Tęskniłem.",
+      "return_1": "Dawno cię nie było!",
+      "win_fast_0": "Speedrun?!",
+      "win_fast_1": "Ale szybko!",
+      "win_fast_2": "Błyskawica!",
+      "win_fast_3": "EZ",
+      "win_mastery_0": "Sigma.",
+      "win_mastery_1": "Mistrzostwo świata!",
+      "win_mastery_2": "Król/Królowa fiszek!",
+      "win_standard_0": "Tak jest!",
+      "win_standard_1": "Dobra robota.",
+      "win_standard_2": "Piąteczka! :D",
+      "win_standard_3": ":D",
+      "win_standard_4": "Lecisz z tym!",
+      "streak_0": "Ale seria! :o",
+      "streak_1": "Nie do zatrzymania!",
+      "streak_2": "On fire! 🔥",
+      "comeback_0": "No w końcu!",
+      "comeback_1": "Wracamy do gry!",
+      "comeback_2": "Odbicie od dna!",
+      "loss_0": "Oj...",
+      "loss_1": "Zdarza się najlepszym.",
+      "loss_2": "Następnym razem pójdzie lepiej.",
+      "loss_3": ":(",
+      "loss_4": "Głowa do góry.",
+      "long_think_0": "Hmmmmm...",
+      "hint_0": "huh",
+      "hint_1": "Znowu to samo? :(",
+      "box_spam_0": "co tak go klikasz?",
+      "box_spam_1": "zostaw mojego braciaka! :c",
+      "box_spam_2": "przestań go klikać!",
+      "box_spam_3": "ZOSTAW GO!",
+      "box_spam_4": "...",
+      "box_spam_5": "serio, przestań.",
+      "easter_0": "OwO",
+      "easter_1": "ała!",
+      "easter_2": "przestań tykać logo >:<",
+      "easter_3": "I kto za to płaci?",
+      "general_0": "Powodzenia!"
+    }
+  },
   "app": {
     "loading": {
       "initializing": "Przygotowuję bazę danych…",
@@ -498,7 +558,9 @@
       "title": "Zgłoś problem",
       "subtitle": "Otworzymy Twoją aplikację poczty z gotowym tematem i podstawowymi danymi o aplikacji. Dodaj opis problemu i wyślij wiadomość.",
       "button": "Wyślij e-mail",
-      "subject": "Zgłoszenie błędu - Memicard"
+      "subject": "Zgłoszenie błędu - Memicard",
+      "bodyIntro": "Opisz problem (kroki, co widzisz):",
+      "bodyDiagnosticsTitle": "O aplikacji (dołączone automatycznie)"
     },
     "suggestion": {
       "title": "Wyślij sugestię",
@@ -515,6 +577,15 @@
     "about": {
       "title": "O aplikacji",
       "subtitle": "Te informacje są też automatycznie dołączane do zgłoszenia problemu."
+    },
+    "diagnostics": {
+      "unavailable": "niedostępny",
+      "labels": {
+        "version": "Wersja aplikacji",
+        "build": "Build",
+        "device": "Model urządzenia",
+        "system": "System"
+      }
     },
     "legal": {
       "title": "Prywatność i licencje",
@@ -976,7 +1047,9 @@
   "flashcards": {
     "card": {
       "actions": {
-        "addFlashcards": "DODAJ FISZKI"
+        "addFlashcards": "DODAJ FISZKI",
+        "confirm": "ZATWIERDŹ",
+        "ok": "OK"
       },
       "peek": {
         "flashcard": "Fiszka",
@@ -1278,6 +1351,15 @@
   },
   "constants": {
     "courseCategories": {
+      "label": {
+        "geography": "Geografia",
+        "kosmos": "Kosmos",
+        "historia": "Historia",
+        "mitologia": "Mitologia",
+        "programming": "Programowanie",
+        "science": "Nauka",
+        "math": "Matura"
+      },
       "description": {
         "stoliceIFlagi": "Stolice i flagi",
         "astronomiaGwiazdozbiory": "Astronomia, gwiazdozbiory",
@@ -1783,7 +1865,160 @@
             "statystyki": "Statystyki",
             "przewodnik": "Przewodnik",
             "wsparcie": "Wsparcie"
-          }
+          },
+          "subtitle": {
+            "przypieteKursy": "Przypięte kursy",
+            "kreatorKursow": "Kreator kursów",
+            "zobaczWyniki": "Zobacz wyniki",
+            "instrukcjeIWskazowki": "Instrukcje i wskazówki",
+            "pomocIInformacje": "Pomoc i informacje"
+          },
+          "quotes": [
+            {
+              "text": "Nie musisz być świetny, żeby zacząć. Musisz zacząć, żeby być świetny.",
+              "author": "Zig Ziglar"
+            },
+            {
+              "text": "Nie czekaj. Czas nigdy nie będzie idealny.",
+              "author": "Napoleon Hill"
+            },
+            {
+              "text": "Amatorzy siedzą i czekają na inspirację. Reszta po prostu wstaje i idzie do roboty.",
+              "author": "Stephen King"
+            },
+            {
+              "text": "Zacznij tam, gdzie jesteś. Użyj tego, co masz. Zrób to, co możesz.",
+              "author": "Arthur Ashe"
+            },
+            {
+              "text": "Sekret ruszenia do przodu to zacząć.",
+              "author": "Mark Twain"
+            },
+            {
+              "text": "Motywacja pozwala zacząć. Nawyk pozwala wytrwać.",
+              "author": "Jim Ryun"
+            },
+            {
+              "text": "Albo ty rządzisz swoim dniem, albo dzień rządzi tobą.",
+              "author": "Jim Rohn"
+            },
+            {
+              "text": "Działanie jest podstawowym kluczem do każdego sukcesu.",
+              "author": "Pablo Picasso"
+            },
+            {
+              "text": "Nic nie zadziała, jeśli ty nie zadziałasz.",
+              "author": "Maya Angelou"
+            },
+            {
+              "text": "Dziś rób to, czego inni nie chcą, jutro zrobisz to, czego inni nie potrafią.",
+              "author": "Jerry Rice"
+            },
+            {
+              "text": "Dać mniej niż z siebie wszystko, to zmarnować dar.",
+              "author": "Steve Prefontaine"
+            },
+            {
+              "text": "Sukces to suma małych wysiłków, powtarzanych dzień po dniu.",
+              "author": "Robert Collier"
+            },
+            {
+              "text": "Pudłowałem, przegrywałem, zawodziłem.. i dlatego wygrywam.",
+              "author": "Michael Jordan"
+            },
+            {
+              "text": "Nie musisz być ekstremalny, wystarczy konsekwencja.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Jeśli nie zrobisz tego dla siebie, nikt nie zrobi tego za ciebie.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Twoja konkurencja pracuje, kiedy ty śpisz.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Nawet powolny postęp to postęp. Bądź dumny, że w ogóle się pojawiasz.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Pewnego dnia albo dzień pierwszy, ty decydujesz.",
+              "author": "Paulo Coelho"
+            },
+            {
+              "text": "Tego, czego nie zmieniasz, w praktyce wybierasz.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Nikt nie zrobi tego za ciebie. Jesteś twórcą i niszczycielem własnego losu.",
+              "author": "u/prashantpatel518 (Reddit)"
+            },
+            {
+              "text": "Nic się nie zmieni, jeśli nic nie zmienisz.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Tak czy inaczej, czas i tak minie.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Musimy być własnymi trenerami, bo tylko my jesteśmy zawsze dostępni.",
+              "author": "Steven Pressfield"
+            },
+            {
+              "text": "Pudłujesz 100% strzałów, których nie oddajesz.",
+              "author": "Wayne Gretzky"
+            },
+            {
+              "text": "Dać mniej niż z siebie wszystko to zmarnować dar.",
+              "author": "Steve Prefontaine"
+            },
+            {
+              "text": "Czasem lepiej zrobić to dobrze, a czasem lepiej zrobić to teraz.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Za rok będziesz żałować, że nie zacząłeś dziś.",
+              "author": "Karen Lamb"
+            },
+            {
+              "text": "Pamiętasz, jak bardzo chciałeś być tam, gdzie jesteś teraz?",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Sukces jest wynajmowany, a czynsz płaci się codziennie.",
+              "author": "Rory Vaden"
+            },
+            {
+              "text": "Musimy cierpieć z jednego z dwóch powodów: bólu dyscypliny albo bólu żalu.",
+              "author": "Jim Rohn"
+            },
+            {
+              "text": "Nie ma dróg na skróty.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Buduj własne marzenia, bo inaczej ktoś cię zatrudni, żebyś budował jego.",
+              "author": "Farrah Gray"
+            },
+            {
+              "text": "Coś niedoskonałe dzisiaj jest lepsze niż coś idealne jutro.",
+              "author": "Anonimowy"
+            },
+            {
+              "text": "Nie da się zaorać pola, przewracając je tylko w myślach. Żeby zacząć, zacznij.",
+              "author": "Gordon B. Hinckley"
+            },
+            {
+              "text": "Mistrz poniósł porażkę więcej razy, niż nowicjusz w ogóle spróbował.",
+              "author": "Stephen McCranie"
+            },
+            {
+              "text": "Problem w tym, że wydaje ci się, że masz czas.",
+              "author": "Anonimowy"
+            }
+          ]
         }
       }
     },

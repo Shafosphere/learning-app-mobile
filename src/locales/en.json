@@ -1,29 +1,89 @@
 {
+  "quotes": {
+    "reactions": {
+      "startup_morning_0": "Good morning! Had coffee yet?",
+      "startup_morning_1": "Get up, the day is waiting! :D",
+      "startup_morning_2": "Sun is shining (probably), time to learn.",
+      "startup_morning_3": "Time to wake up that brain.",
+      "startup_day_0": "Heyyy, what's up?",
+      "startup_day_1": "Ready for reviews?",
+      "startup_day_2": "Let's go, let's go!",
+      "startup_day_3": "Quick little session?",
+      "startup_evening_0": "Evening cramming? Respect.",
+      "startup_evening_1": "Good evening :)",
+      "startup_evening_2": "Relaxing with flashcards?",
+      "startup_night_0": "Still awake? :o",
+      "startup_night_1": "Night shift, I see.",
+      "startup_night_2": "Night owls win!",
+      "startup_night_3": "Just don't stay up until morning...",
+      "first_time_0": "Learning is nothing but remembering",
+      "first_time_1": "Every expert was once a beginner.",
+      "return_0": "Oh, you're back! I missed you.",
+      "return_1": "You have been away for a while!",
+      "win_fast_0": "Speedrun?!",
+      "win_fast_1": "So fast!",
+      "win_fast_2": "Lightning!",
+      "win_fast_3": "EZ",
+      "win_mastery_0": "Sigma.",
+      "win_mastery_1": "World-class mastery!",
+      "win_mastery_2": "Flashcard king/queen!",
+      "win_standard_0": "That's it!",
+      "win_standard_1": "Good job.",
+      "win_standard_2": "High five! :D",
+      "win_standard_3": ":D",
+      "win_standard_4": "Keep going!",
+      "streak_0": "What a streak! :o",
+      "streak_1": "Unstoppable!",
+      "streak_2": "On fire! 🔥",
+      "comeback_0": "Finally!",
+      "comeback_1": "Back in the game!",
+      "comeback_2": "Bounce back!",
+      "loss_0": "Oof...",
+      "loss_1": "Happens to the best.",
+      "loss_2": "Next time will go better.",
+      "loss_3": ":(",
+      "loss_4": "Keep your head up.",
+      "long_think_0": "Hmmmmm...",
+      "hint_0": "huh",
+      "hint_1": "Same one again? :(",
+      "box_spam_0": "why are you clicking him so much?",
+      "box_spam_1": "leave my bro alone! :c",
+      "box_spam_2": "stop clicking him!",
+      "box_spam_3": "LEAVE HIM ALONE!",
+      "box_spam_4": "...",
+      "box_spam_5": "seriously, stop.",
+      "easter_0": "OwO",
+      "easter_1": "ouch!",
+      "easter_2": "stop poking the logo >:<",
+      "easter_3": "And who pays for that?",
+      "general_0": "Good luck!"
+    }
+  },
   "app": {
     "loading": {
-      "initializing": "Preparing the database...",
-      "importingCsv": "Importing data...",
-      "finishingSetup": "Finishing setup...",
-      "launching": "Launching app...",
-      "dbError": "Could not initialize the database. Check logs."
+      "initializing": "Preparing the database…",
+      "importingCsv": "Importing data…",
+      "finishingSetup": "Finishing setup…",
+      "launching": "Launching the app…",
+      "dbError": "Could not prepare the database. Check the logs."
     },
     "error": {
       "title": "Could not start the app",
-      "description": "The local SQLite database did not initialize correctly, so the app stays blocked until we recover or retry.",
-      "backupHint": "If you have a backup file, use “Import backup” to restore fuller data, including custom courses and flashcards.",
-      "genericReason": "An unexpected error happened while starting the database.",
-      "debugMessage": "This is a test error screen opened from the Debug section.",
+      "description": "The local SQLite database was not initialized correctly, so we are not letting you in for now.",
+      "backupHint": "If you have a data backup, use “Load backup” to restore fuller data, including your own courses and flashcards.",
+      "genericReason": "An unexpected error occurred while starting the database.",
+      "debugMessage": "This is a test error screen launched from the diagnostics section.",
       "debugBadge": "Error screen test mode",
       "actions": {
         "retry": "Try again",
-        "importBackup": "Import backup",
-        "importing": "Preparing database and importing backup...",
+        "importBackup": "Load backup",
+        "importing": "Preparing the database and loading the backup…",
         "reset": "Reset app",
-        "resetting": "Resetting local database and preparing the app..."
+        "resetting": "Resetting the local database and preparing the app…"
       },
       "reset": {
         "confirmTitle": "Reset local app data?",
-        "confirmMessage": "This will delete the local SQLite database and create a fresh one. If you do not have a backup, local learning data stored only on this device may be lost.",
+        "confirmMessage": "This will delete the local SQLite database and create a new one from scratch. If you do not have a backup, local learning data saved only on this device may be lost.",
         "confirm": "Reset"
       }
     },
@@ -37,58 +97,63 @@
     "status": {
       "done": "Done",
       "error": "Error",
-      "resetting": "Resetting..."
+      "resetting": "Resetting…"
     }
   },
   "settings": {
     "tabs": {
-      "ui": "UI",
+      "ui": "Interface",
       "accessibility": "Accessibility",
       "learning": "Learning",
-      "coursesData": "Courses & data",
-      "debug": "Debug"
+      "coursesData": "Courses and data",
+      "debug": "Diagnostics"
     },
     "uiLanguage": {
       "title": "Interface language",
-      "subtitle": "Choose app language independently from course language."
+      "subtitle": "Choose the app language independently of the course language."
     },
     "nativeLanguage": {
       "title": "Native language",
-      "subtitle": "Controls which official courses you see while pinning."
+      "subtitle": "Determines which official courses you will see when pinning courses."
     },
     "appearance": {
       "section": "Appearance",
+      "groups": {
+        "language": "LANGUAGE",
+        "interface": "INTERFACE",
+        "sound": "SOUND"
+      },
       "darkTheme": {
         "title": "Dark theme",
-        "subtitle": "Switch interface between light and dark mode."
+        "subtitle": "Switch the interface between light and dark mode."
       },
       "vibrations": {
-        "title": "Vibration",
+        "title": "Vibrations",
         "subtitle": "Short vibrations during key app interactions."
       },
       "disableReactions": {
         "title": "Disable reactions",
-        "subtitle": "Mutes quote/reaction bubbles in the app. Does not affect course notifications."
+        "subtitle": "Mutes quote and reaction bubbles in the app. Does not affect course notifications."
       },
       "effectsVolume": {
         "title": "Effects volume",
-        "subtitle": "Adjust in-app sound volume."
+        "subtitle": "Adjust the volume of sounds in the app."
       },
       "boxFaces": {
         "title": "Box faces",
-        "subtitle": "Smiling/sad boxes depending on status."
+        "subtitle": "Happy or sad boxes, depending on their status."
       },
       "layoutSelector": {
         "title": "Choose box layout",
-        "subtitle": "Preferred flashcard list view during study.",
+        "subtitle": "Preferred flashcard list view during learning.",
         "classic": "Classic",
         "carousel": "Carousel"
       },
       "actionsSelector": {
-        "title": "Choose button layout",
-        "subtitle": "Choose button placement",
-        "top": "Top",
-        "bottom": "Bottom"
+        "title": "Choose layout",
+        "subtitle": "Choose the button layout.",
+        "top": "At the top",
+        "bottom": "At the bottom"
       }
     },
     "accessibility": {
@@ -96,11 +161,11 @@
       "cardLabel": "Accessibility settings",
       "highContrast": {
         "title": "High contrast",
-        "subtitle": "Switches interface colors to higher contrast variants."
+        "subtitle": "Replaces interface colors with higher-contrast variants."
       },
       "colorBlind": {
-        "title": "Color blind mode",
-        "subtitle": "Applies a palette adjusted for the selected color vision deficiency type.",
+        "title": "Color-blind mode",
+        "subtitle": "Applies a color palette adjusted to the selected type of color vision deficiency.",
         "currentLabel": "Current mode: {{mode}}",
         "modes": {
           "none": "Off",
@@ -111,26 +176,27 @@
       },
       "largeFont": {
         "title": "Larger font",
-        "subtitle": "Increases base font size in the app."
+        "subtitle": "Increases the base font size in the app."
       }
     },
     "learning": {
       "section": "Learning",
       "spellcheck": {
         "title": "Spell checking",
-        "subtitle": "Allows one typo during answer check."
+        "subtitle": "Allows 1 mistake during checking."
       },
       "keyboardSuggestions": {
         "title": "Keyboard suggestions",
-        "subtitle": "Enable or disable suggestions and autocorrect in flashcards. Note: some keyboards (Samsung, Gboard) may still show suggestions."
+        "subtitle": "Enable or disable suggestions and autocorrect in flashcards. Note: some keyboards, such as Samsung Keyboard or Gboard, may still show the suggestion bar."
       },
       "ignoreDiacritics": {
         "title": "Ignore diacritics",
-        "subtitle": "Compare words without diacritics, e.g. ą -> a."
+        "subtitle": "Compare words without accents, e.g. ą -> a."
       },
       "reminders": {
         "title": "Learning reminders",
-        "subtitle": "Study reminders.",
+        "subtitle": "Set learning reminders.",
+        "shortSubtitle": "Helps maintain your learning rhythm.",
         "profile": {
           "morning": "morning",
           "afternoon": "afternoon",
@@ -139,79 +205,83 @@
           "unknown": "unknown"
         },
         "notification": {
-          "title": "Time to study",
-          "body": "Have a minute? A short flashcards session keeps the streak alive."
+          "title": "Time to learn",
+          "body": "Got a moment? A short flashcard session will keep your rhythm going."
         },
         "status": {
-          "permissionDenied": "Notifications permission is blocked. Enable it in system settings.",
+          "permissionDenied": "No notification permission. Enable permissions in system settings.",
           "allDays": "every day"
         }
       },
       "batchSize": {
-        "title": "Flashcards per batch",
-        "subtitle": "Range 1-200 cards per study session.",
+        "title": "Number of flashcards per batch",
+        "subtitle": "Range: 1-200 flashcards per learning session.",
         "placeholder": "e.g. 10"
+      },
+      "groups": {
+        "writing": "WRITING"
       }
     },
     "coursesData": {
       "section": "Other",
       "groups": {
         "localBackup": "Local backup",
-        "googleDrive": "Google Drive"
+        "googleDrive": "Google Drive",
+        "reset": "RESET"
       },
       "errors": {
         "exportUserData": "Could not export user data.",
         "exportGoogleDrive": "Could not export data to Google Drive.",
-        "import": "Unexpected import error occurred.",
+        "import": "An unexpected error occurred during import.",
         "importTitle": "Import error",
         "resetLearning": "Could not restore learning settings.",
-        "resetIntro": "Could not reset intro."
+        "resetIntro": "Could not reset the introduction."
       },
       "exportFile": {
         "title": "Export saved",
         "message": "Saved to file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\n{{shareNote}}",
-        "shareSupported": "Share sheet opened - choose Save/Share or cancel.",
-        "shareUnsupported": "System sharing is unavailable on this platform. Copy the file manually."
+        "shareSupported": "The sharing window has been opened. Choose “Save” or “Share”, or cancel.",
+        "shareUnsupported": "System sharing is not available on this platform. Copy the file manually."
       },
       "googleDrive": {
         "sectionTitle": "Google Drive backup",
-        "actionButton": "Google Drive action",
-        "loadingShort": "Busy",
+        "actionButton": "Google Drive options",
+        "loadingShort": "Working…",
         "connectTitle": "Connect Google Drive",
         "connectTitleAction": "Connect",
         "connectTitleService": "Google Drive",
-        "connectSubtitle": "Connect your Google account to store ZIP backups in the app's private Google Drive folder.",
+        "connectSubtitle": "Connect your Google account to save ZIP backups in the app's private folder on Google Drive.",
         "connectButton": "Connect",
-        "comingSoon": "soon",
-        "manualBackupTitle": "Upload backup now",
-        "manualBackupSubtitle": "Create a new ZIP snapshot and keep up to 3 latest copies in the app's private Google Drive folder.",
-        "backupNowButton": "Backup now",
+        "comingSoon": "coming soon",
+        "manualBackupTitle": "Create backup now",
+        "manualBackupSubtitle": "Create a new ZIP archive and keep up to the 3 latest backups in the app's private folder on Google Drive.",
+        "backupNowButton": "Create backup",
         "refreshButton": "Refresh list",
         "status": {
-          "notConfigured": "This feature is not configured in the current app build yet. Reason: {{reason}}",
-          "notConfiguredFallback": "missing OAuth configuration",
-          "disconnected": "Google Drive is not connected. After connecting, the app can read the backup list and create new snapshots manually.",
-          "loadingList": "Connected to Google Drive. Loading backup list...",
+          "notConfigured": "This feature is not configured in this version of the app yet. Reason: {{reason}}",
+          "notConfiguredFallback": "missing Google sign-in configuration",
+          "disconnected": "Not connected to Google Drive. After connecting, the app will read the backup list and allow you to create new backups manually.",
+          "loadingList": "Connected to Google Drive. Loading backup list…",
           "noBackups": "Connected, but no backups were found yet.\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
           "connected": "Connected. Available backups: {{count}}.\nLatest backup: {{latest}}\nLast successful backup: {{lastSuccess}}\nLast attempt: {{lastAttempt}}\nLast error: {{error}}",
-          "listError": "Connected to Google Drive, but the backup list could not be loaded: {{error}}",
+          "listError": "Connected to Google Drive, but could not load the backup list: {{error}}",
           "never": "never",
           "noErrors": "none",
           "unknownDate": "unknown date"
         },
         "connectDone": {
           "title": "Google Drive connected",
-          "message": "Google Drive connection has been saved. You can now refresh the backup list or create a manual backup."
+          "message": "The Google Drive connection has been saved. You can now refresh the backup list or manually create a new backup."
         },
         "backupDone": {
           "title": "Backup uploaded",
-          "message": "A new ZIP backup was saved to the app's private Google Drive folder."
+          "message": "The new ZIP backup has been saved in the app's private folder on Google Drive."
         },
-        "restoreTitle": "Backups to restore",
-        "restoreSubtitle": "Load the 3 latest backups from Google Drive and choose the exact snapshot to restore.",
+        "restoreTitle": "Backups available for restore",
+        "restoreSubtitle": "Load the list of the 3 latest backups from Google Drive and choose a specific backup to restore.",
         "restoreConfirm": {
           "title": "Restore data from Google Drive?",
-          "message": "This will replace local user data with the copy from {{createdAt}}, including private courses, progress, and images."
+          "message": "This will replace local user data with the backup from {{createdAt}}, including private courses, progress, and images."
         },
         "snapshotTitle": "Backup from {{createdAt}}",
         "snapshotMeta": "App version: {{appVersion}} • Source: {{backupSource}}",
@@ -221,7 +291,7 @@
           "stateAttention": "Needs attention",
           "stateUnavailable": "Unavailable",
           "summaryReady": "This backup looks valid and can be restored.",
-          "summaryAttention": "This backup needs an additional check before restore.",
+          "summaryAttention": "This backup needs an additional check before restoring.",
           "summaryUnavailable": "This backup cannot be restored automatically.",
           "detailsButton": "Show details",
           "whyButton": "Why?",
@@ -235,14 +305,14 @@
           "events": "History"
         },
         "snapshotStates": {
-          "loading": "Loading backups from Google Drive...",
-          "empty": "No backups to restore yet. Create your first manual backup.",
-          "error": "Could not load the backup list: {{error}}"
+          "loading": "Loading backup list from Google Drive...",
+          "empty": "No backups available to restore. Create your first backup manually.",
+          "error": "Could not load backup list: {{error}}"
         },
         "disconnectTitle": "Disconnect Google Drive",
-        "disconnectSubtitle": "Remove the locally stored Google account connection and clear the backup list in the app.",
+        "disconnectSubtitle": "Remove the locally saved Google account connection and clear the backup list in the app.",
         "disconnectButton": "Disconnect",
-        "disconnectLoading": "Disconnecting...",
+        "disconnectLoading": "Disconnecting…",
         "disconnectDone": {
           "title": "Google Drive disconnected",
           "message": "The local Google Drive connection has been removed."
@@ -250,9 +320,9 @@
       },
       "exportDrive": {
         "readyTitle": "Export ready",
-        "readyMessage": "Prepared file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\nChoose Google Drive in share sheet to save a copy.",
-        "cancelTitle": "Export canceled",
-        "cancelMessage": "Share sheet was closed. Data was not sent to Google Drive.",
+        "readyMessage": "Prepared file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\nChoose Google Drive in the sharing window to save a copy.",
+        "cancelTitle": "Export cancelled",
+        "cancelMessage": "The sharing window was closed. Data was not sent to Google Drive.",
         "unsupportedTitle": "Sharing unavailable",
         "unsupportedMessage": "System sharing is not available on this device.",
         "incompleteTitle": "Export not completed",
@@ -274,202 +344,210 @@
       },
       "resetLearningConfirm": {
         "title": "Restore learning settings",
-        "message": "Restore default settings (spellcheck, diacritics, box faces, layout, reminders)?"
+        "message": "Restore default learning settings: spell checking, diacritics, box faces, layout, and reminders?"
       },
       "resetLearningDone": {
         "message": "Learning settings restored."
       },
       "resetIntroConfirm": {
-        "title": "Reset intro?",
-        "message": "Intro will start from the beginning. Pinned courses will be unpinned and the active course will be turned off. Learning progress and saved data will not be deleted.",
-        "confirm": "Reset intro"
+        "title": "Reset introduction?",
+        "message": "The introduction will start from the beginning. Pinned courses will be unpinned, and the active course will be disabled. Learning progress and saved data will not be deleted.",
+        "confirm": "Reset introduction"
       },
       "resetIntroDone": {
-        "message": "Intro reset. Onboarding starts from language selection."
+        "message": "Introduction reset. The tutorial will start from language selection."
       },
       "rows": {
         "exportUserData": {
           "title": "Export user data",
-          "subtitle": "Progress, box states, and custom courses will be saved as JSON file on device storage.",
+          "subtitle": "Course progress, boxes, and custom courses will be saved to a JSON file in device storage.",
           "button": "Export",
-          "buttonLoading": "Exporting..."
+          "buttonLoading": "Exporting…"
         },
         "exportGoogleDrive": {
           "title": "Export to Google Drive",
-          "subtitle": "Open share sheet and choose Google Drive to save JSON copy.",
+          "subtitle": "Open the sharing window and choose Google Drive to save a JSON backup.",
           "button": "Google Drive",
-          "buttonLoading": "Exporting...",
+          "buttonLoading": "Exporting…",
           "accessibilityLabel": "Export data to Google Drive"
         },
         "importUserData": {
           "title": "Import user data",
-          "subtitle": "Load progress and courses from JSON file.",
+          "subtitle": "Load progress and courses from a JSON file.",
           "button": "Import",
-          "buttonLoading": "Importing..."
+          "buttonLoading": "Importing…"
         },
         "resetLearning": {
           "title": "Restore learning settings",
-          "subtitle": "Spellcheck, diacritics, box faces, layout, reminders.",
-          "button": "Restore defaults",
-          "buttonLoading": "Restoring..."
+          "subtitle": "Spell checking, diacritics, box faces, layout, reminders.",
+          "button": "Restore",
+          "buttonLoading": "Restoring…"
         },
         "resetIntro": {
-          "title": "Reset intro",
-          "subtitle": "Starts onboarding from the beginning. Unpins courses and turns off the active course, but keeps learning progress.",
-          "button": "Reset intro"
+          "title": "Reset introduction",
+          "subtitle": "Starts the tutorial from the beginning. Unpins courses and disables the active course, but does not delete progress.",
+          "button": "Reset"
         }
       }
     },
     "debug": {
       "section": {
-        "tools": "Debug / dev tools",
+        "tools": "Diagnostics / developer tools",
         "audio": "Audio",
-        "uiPreview": "UI preview",
-        "seed": "Data seed",
-        "hardReset": "Hard resets (dev)",
-        "onboarding": "Onboarding checkpoint",
+        "uiPreview": "Interface preview",
+        "seed": "Test data",
+        "hardReset": "Hard resets (developer)",
+        "onboarding": "Tutorial checkpoint",
         "flags": "Feature flags / experiments"
       },
       "alerts": {
         "missingCourseTitle": "No course",
-        "missingCourseMessage": "Select a custom flashcard course in settings.",
+        "missingCourseMessage": "Choose a custom flashcard course in settings.",
         "addedTitle": "Added",
         "addedSome": "Added {{inserted}} flashcards to course reviews.",
         "addedNone": "No new flashcards to add.",
         "addError": "Could not add flashcards.",
         "resetCustomTitle": "Custom course reset",
-        "resetCustomSome": "Removed {{deleted}} custom course review entries.",
-        "resetCustomNone": "No entries to remove.",
+        "resetCustomSome": "Deleted {{deleted}} custom course review entries.",
+        "resetCustomNone": "No entries to delete.",
         "resetCustomError": "Could not reset custom course.",
         "clearStorageTitle": "Clear AsyncStorage",
-        "clearStorageMessage": "Removes ALL stored settings (also outside settings). Dev only.",
+        "clearStorageMessage": "This will delete ALL saved settings, including settings outside this screen. Developer version only.",
         "deleteDbTitle": "Delete SQLite database",
-        "deleteDbMessage": "Deletes local mygame.db (flashcards/custom). App restart required.",
+        "deleteDbMessage": "This will delete the local mygame.db database, including flashcards and custom courses. App restart required.",
         "deleteDbConfirm": "Delete database",
         "storageCleared": "AsyncStorage cleared.",
         "storageClearError": "Could not clear AsyncStorage.",
-        "dbDeleted": "mygame.db has been deleted.",
-        "dbDeleteError": "Could not delete database.",
+        "dbDeleted": "The mygame.db database has been deleted.",
+        "dbDeleteError": "Could not delete the database.",
         "checkpointSet": "Set",
         "checkpointValue": "Checkpoint: {{checkpoint}}",
         "checkpointSetError": "Could not set checkpoint.",
-        "reviewCoursesIntroResetDone": "The review screen onboarding has been reset.",
-        "reviewCoursesIntroResetError": "Could not reset the review screen onboarding.",
-        "introResetDone": "Intro reset. Onboarding starts from language selection.",
-        "introResetError": "Could not reset intro bubbles.",
-        "dbErrorScreenOpened": "Enabled the SQLite error screen test mode. Leave it with “Try again”.",
+        "reviewCoursesIntroResetDone": "Review screen onboarding has been reset.",
+        "reviewCoursesIntroResetError": "Could not reset review screen onboarding.",
+        "introResetDone": "Introduction reset. The tutorial will start from language selection.",
+        "introResetError": "Could not reset bubbles.",
+        "dbErrorScreenOpened": "SQLite test error screen enabled. Close it using “Try again”.",
         "dbErrorScreenOpenError": "Could not enable the test error screen."
+      },
+      "onboardingCheckpoints": {
+        "languageRequired": "language_required",
+        "pinRequired": "pin_required",
+        "nativeLanguageRequired": "native_language_required",
+        "activateRequired": "activate_required",
+        "courseEntrySettingsRequired": "course_entry_settings_required",
+        "done": "done"
       },
       "rows": {
         "testPopup": {
-          "title": "Test Boxik popup",
-          "subtitle": "Preview message (development only).",
-          "button": "Show popup",
-          "message": "Hey! It's me, Boxik. Popup works!"
+          "title": "Test Boxik bubble",
+          "subtitle": "Message preview, developer environment only.",
+          "button": "Show bubble",
+          "message": "Hey! It's me, Boxik. The bubble works!"
         },
         "previewActionsPositionNudge": {
           "title": "Preview button layout chooser",
-          "subtitle": "Opens the flashcards screen and artificially shows the one-time button placement dialog.",
-          "button": "Show dialog"
+          "subtitle": "Opens the flashcards screen and artificially shows the one-time button position chooser.",
+          "button": "Show window"
         },
         "courseFinishedPanelPreview": {
-          "title": "Preview course finished panel",
+          "title": "Preview course completion panel",
           "subtitle": "Opens a screen with the CourseFinishedPanel component using sample data.",
           "button": "Show panel"
         },
         "courseFinishedScreenSimulation": {
-          "title": "Simulate finished course",
-          "subtitle": "Opens the real flashcards screen and forces the finished view for the active course.",
+          "title": "Simulate completed course",
+          "subtitle": "Opens the real flashcards screen and forces the completion view for the active course.",
           "button": "Simulate"
         },
         "testDbErrorScreen": {
           "title": "Test database error screen",
           "subtitle": "Shows the SQLite failure screen without damaging the real database.",
           "button": "Show screen",
-          "buttonLoading": "Opening..."
+          "buttonLoading": "Opening…"
         },
         "testQuotes": {
-          "title": "Test quotes (QuoteBubble)",
-          "subtitle": "Trigger random quote by category.",
+          "title": "Test quotes / quote bubble",
+          "subtitle": "Trigger a random quote depending on category.",
           "win": "Win",
           "loss": "Loss",
-          "startup": "Startup"
+          "startup": "Start"
         },
         "audio": {
-          "title": "Audio test",
+          "title": "Sound test",
           "subtitle": "Each button plays one audio file from assets/audio/ui."
         },
         "startupScreenPreview": {
           "title": "Startup screen preview",
-          "subtitle": "Briefly shows the new loading screen with the app icon and spinner.",
+          "subtitle": "Briefly shows the new loading screen with the app icon and loading indicator.",
           "button": "Show screen"
         },
         "logo": {
           "title": "Logo bubble",
-          "subtitle": "Preview onboarding message with logo.",
+          "subtitle": "Preview a tutorial message with the logo.",
           "show": "Show",
           "hide": "Hide"
         },
         "floating": {
           "title": "Floating mode",
-          "subtitle": "Display bubble above content (absolute).",
-          "on": "Floating: ON",
-          "off": "Floating: OFF"
+          "subtitle": "Display the bubble above the content using absolute positioning.",
+          "on": "Floating mode: ON.",
+          "off": "Floating mode: OFF."
         },
         "logoMessage": {
           "title": "Add course with code",
-          "description": "This is your flashcard space. Start by pinning a course with teacher's code."
+          "description": "This is your flashcard space. Start by pinning a course with a teacher's code."
         },
         "addCustomReviews": {
           "title": "Add custom reviews",
-          "subtitle": "Insert random flashcards from active custom course.",
+          "subtitle": "Insert random flashcards from the active custom course.",
           "button": "Add 10",
-          "buttonLoading": "Adding..."
+          "buttonLoading": "Adding…"
         },
-        "selectCourseInfo": "First select a custom course in courses panel.",
+        "selectCourseInfo": "First choose a custom course in the courses panel.",
         "resetCustom": {
-          "title": "Reset custom course (dev)",
-          "subtitle": "Delete review entries for active custom course.",
-          "button": "Reset custom"
+          "title": "Reset custom course (developer)",
+          "subtitle": "Delete review entries for the active custom course.",
+          "button": "Reset custom course"
         },
         "clearStorage": {
           "title": "Clear AsyncStorage",
-          "subtitle": "Removes all app keys (dev only).",
-          "buttonLoading": "Clearing..."
+          "subtitle": "Deletes all app keys, developer version only.",
+          "buttonLoading": "Clearing…"
         },
         "deleteDb": {
-          "title": "Delete mygame.db",
-          "subtitle": "Deletes local SQLite database (restart required).",
-          "button": "Delete DB",
-          "buttonLoading": "Deleting..."
+          "title": "Delete mygame.db database",
+          "subtitle": "Deletes the local SQLite database, restart required.",
+          "button": "Delete database",
+          "buttonLoading": "Deleting…"
         },
         "resetIntro": {
-          "title": "Reset intro bubbles",
-          "subtitle": "Removes seen flags for all screens.",
-          "button": "Reset intro"
+          "title": "Reset introduction bubbles",
+          "subtitle": "Deletes “seen” flags for all screens.",
+          "button": "Reset introduction"
         },
         "openLanguageIntro": {
           "title": "Go to language selection",
-          "subtitle": "Open the first onboarding screen with PL/EN flags.",
+          "subtitle": "Open the first tutorial screen with PL and EN flags.",
           "button": "Language screen"
         },
         "resetReviewCoursesIntro": {
-          "title": "Reset reviews onboarding",
-          "subtitle": "Removes the seen flag only for the reviews list screen.",
+          "title": "Reset review onboarding",
+          "subtitle": "Deletes the seen flag only for the review list screen.",
           "button": "Reset review"
         },
         "flags": {
           "learningReminders": {
-            "title": "Learning reminders (dev)",
-            "subtitle": "Quick toggle for unreleased reminders feature."
+            "title": "Learning notifications (developer)",
+            "subtitle": "Quick toggle for the unreleased reminders feature."
           },
           "statsFire": {
-            "title": "Stats: fire animation (dev)",
-            "subtitle": "Shows animated flames in mastered words background."
+            "title": "Stats: fire animation (developer)",
+            "subtitle": "Shows animated flames in the “Mastered words” background."
           },
           "statsBookshelf": {
-            "title": "Stats: bookshelf cabinet (dev)",
-            "subtitle": "Shows bookshelf/trophies module on stats screen."
+            "title": "Stats: shelf cabinet (developer)",
+            "subtitle": "Shows the shelf / trophies module on the stats screen."
           }
         }
       }
@@ -478,128 +556,139 @@
   "support": {
     "report": {
       "title": "Report a problem",
-      "subtitle": "We will open your mail app with a prepared subject and basic app details. Add the issue description and send the message.",
+      "subtitle": "We will open your mail app with a ready subject and basic app data. Add a description of the problem and send the message.",
       "button": "Send email",
-      "subject": "Bug report - Memicard"
+      "subject": "Bug report - Memicard",
+      "bodyIntro": "Describe the problem (steps, what you see):",
+      "bodyDiagnosticsTitle": "About the app (attached automatically)"
     },
     "suggestion": {
-      "title": "Send a suggestion",
-      "subtitle": "Have an idea for a new feature or improvement? Share it and we will review how we can implement it.",
+      "title": "Send suggestion",
+      "subtitle": "Have an idea for a new feature or improvement? Share it, and we will check how we can implement it.",
       "button": "Share your idea",
       "subject": "Suggestion / idea - Memicard",
-      "body": "Do you have an idea for a new feature or improvement? Describe what you want to change and why it would help."
+      "body": "Have an idea for a new feature or improvement? Describe in a few sentences what you want to change and why it would be helpful."
     },
     "guide": {
-      "title": "Guide / How it works",
-      "subtitle": "Check the instructions and tips before sending a report, or if you want to get familiar with the app faster.",
+      "title": "Guide and tips",
+      "subtitle": "Check the instructions and tips before sending a report, or if you want to find your way around the app faster.",
       "button": "How it works"
     },
     "about": {
       "title": "About the app",
-      "subtitle": "This information is also attached automatically to a problem report."
+      "subtitle": "This information is also automatically attached to problem reports."
+    },
+    "diagnostics": {
+      "unavailable": "unavailable",
+      "labels": {
+        "version": "App version",
+        "build": "Build",
+        "device": "Device model",
+        "system": "System"
+      }
     },
     "legal": {
       "title": "Privacy and licenses",
-      "subtitle": "Open the privacy policy and the licenses and third-party materials pages separately."
+      "subtitle": "Check the privacy policy, licenses, and used materials separately."
     },
     "status": {
-      "mailClientFailed": "Could not open the mail client. Copy the data manually and send the message yourself.",
-      "reportSent": "Sent through the mail app. Thank you!",
+      "mailClientFailed": "Could not open the mail client. Copy the data manually and send it yourself.",
+      "reportSent": "Sent through the mail client. Thank you!",
       "suggestionSent": "Suggestion sent. Thank you for the idea!",
-      "sendCancelled": "Sending was cancelled. You can try again.",
-      "mailtoOpenedReport": "Opened mailto:. Add the description and send the message.",
-      "mailtoOpenedSuggestion": "Opened mailto:. Describe your idea and send the message.",
-      "composerFailed": "Could not open the composer. Try again or use mailto."
+      "sendCancelled": "Sending cancelled. You can try again.",
+      "mailtoOpenedReport": "Email message opened. Add a description and send the message.",
+      "mailtoOpenedSuggestion": "Email message opened. Describe your idea and send the message.",
+      "composerFailed": "Could not open the message composer. Try again or use the mailto: link."
     }
   },
   "legal": {
     "entry": {
       "title": "Legal information",
-      "subtitle": "Open the privacy policy and the licenses and third-party materials pages separately.",
+      "subtitle": "Check the privacy policy, licenses, and used materials separately.",
       "privacyButton": "Privacy policy",
       "licensesButton": "Licenses and materials"
     },
     "privacyPolicy": {
       "hero": {
         "title": "Privacy policy",
-        "subtitle": "This document describes what data Memicard processes, for what purposes, to whom it may be disclosed, how long it is stored, and what rights the user has.",
+        "subtitle": "This document describes what data the Memicard app processes, for what purposes, to whom it may be disclosed, how long it is stored, and what rights the user has.",
         "updatedLabel": "Last updated",
         "updatedValue": "March 9, 2026"
       },
       "sections": {
         "overview": {
           "title": "Policy scope",
-          "body": "Memicard stores most data locally on the user's device as a general rule. This policy covers data stored by the app, data voluntarily provided by the user, and information related to optional device features used by the app.",
+          "body": "As a general rule, Memicard stores most data locally on the user's device. This policy covers data saved by the app, data voluntarily provided by the user, and information related to the use of optional device features.",
           "bullets": [
-            "the app does not require a user account for its basic operation",
+            "the app does not require a user account for basic operation",
             "the app does not use its own backend for ongoing user data handling",
-            "this policy reflects the current state of the app as of March 9, 2026"
+            "the policy reflects the current state of the app as of March 9, 2026"
           ]
         },
         "controller": {
           "title": "Data controller and contact",
-          "body": "The data controller for personal data processed in connection with the use of Memicard is [Controller full name]. Privacy contact: contact@memicard.com.",
+          "body": "The controller of personal data processed in connection with the use of the Memicard app is [Controller full name]. Privacy contact: contact@memicard.com.",
           "bullets": [
             "optional registered or correspondence address: [Registered address]",
-            "the technical support email address may be different from the privacy contact address",
-            "before publishing this policy, the placeholders should be replaced with the controller's real details"
+            "the technical support address may differ from the privacy contact address",
+            "before publishing the policy, placeholders should be replaced with the controller's correct details"
           ]
         },
         "purposes": {
-          "title": "Purposes and legal bases",
-          "body": "Data is processed only to the extent necessary for the app to work or to respond to the user's request.",
+          "title": "Purposes and legal bases of processing",
+          "body": "Data is processed only to the extent necessary for the app to function or to fulfill the user's request.",
           "bullets": [
-            "local data is processed to operate the app, store progress, statistics, settings, and user-created content, on the basis of providing the service or taking steps requested by the user",
-            "local study reminders are enabled only after the user gives permission",
-            "data import and export, file selection, and image selection happen only at the user's request",
-            "data sent by email is processed to handle the request, reply to the message, diagnose an issue, and ensure security, on the basis of legitimate interest or steps taken at the user's request"
+            "local data is processed to operate the app, save progress, statistics, settings, and the user's own content, on the basis of providing the service or actions taken at the user's request",
+            "local learning notifications are activated only after the user's consent",
+            "data import and export, file selection, and image selection take place only at the user's request",
+            "data sent by e-mail is processed to handle the report, reply to the message, diagnose the issue, and ensure security, on the basis of legitimate interest or actions taken at the user's request"
           ]
         },
         "localData": {
           "title": "Categories of data processed locally",
-          "body": "The app stores application data and user content locally when needed for learning and app features.",
+          "body": "The app stores app data and user content locally when needed for learning and app features.",
           "bullets": [
-            "learning progress, statistics, review state, and support data used by the learning mechanics",
+            "learning progress, statistics, reviews, and helper data used by the learning mechanics",
             "pinned courses, custom courses, custom flashcards, and settings related to editing them",
             "app settings, interface preferences, and helper states saved by the app",
-            "if the user enters personal data into their own flashcards, courses, or descriptions, that data is also stored locally on the device"
+            "if the user enters personal data into their own flashcards, courses, or descriptions, that data also remains stored locally on the device"
           ],
           "noteLabel": "Technical note",
-          "note": "Data is stored locally mainly with SQLite and AsyncStorage."
+          "note": "Data is stored locally mainly using SQLite and AsyncStorage."
         },
         "permissions": {
           "title": "Permissions and device features",
           "body": "Memicard may use device features only to the extent needed for features selected by the user.",
           "bullets": [
-            "file access is used for importing or exporting data",
+            "file access is used to import or export data",
             "access to photos or selected image files may be used when adding custom images to flashcards or courses",
-            "local study reminders are used only after the user grants permission",
+            "local learning reminder notifications are used only after the user grants permission",
             "the app may open the default mail client to prepare a support message",
-            "a voluntary Google account connection is used only to create or restore a backup in Google Drive"
+            "voluntary Google account connection is used only to create or restore a backup in Google Drive"
           ],
           "noteLabel": "Scope of use",
           "note": "The app does not use these features automatically for purposes unrelated to the action selected by the user."
         },
         "recipients": {
-          "title": "Recipients and third parties",
+          "title": "Data recipients and third parties",
           "body": "Memicard works mainly locally, which means user data is stored primarily on the device.",
           "bullets": [
-            "data may leave the device only when the user actively uses a specific app feature, for example export, sharing, email contact, or an optional Google Drive backup",
+            "data may leave the device only when the user actively uses a specific app feature, for example export, sharing, e-mail contact, or an optional Google Drive backup",
             "data may be saved or transferred to a service, app, or location selected by the user",
-            "when the user contacts support by email, data may be processed by the user's email provider and system mail services",
-            "when the user exports or shares files, data may be stored outside the app according to the service, location, or app chosen by the user",
-            "if the user connects a Google account and enables the backup feature, a copy of the data may be stored in the Google Drive service linked to that Google account",
-            "data stored in Google Drive is processed in accordance with Google's own terms and privacy policy",
-            "based on the current state of the app, no third-party advertising SDKs or cross-app tracking systems are used"
+            "in the case of e-mail contact, data may be processed by the user's e-mail provider and system mail services selected by the user",
+            "in the case of exporting or sharing files, data may be saved outside the app according to the service, location, or app selected by the user",
+            "if the user connects a Google account and enables the backup feature, a copy of the data may be saved in the Google Drive service linked to their Google account",
+            "data saved in Google Drive is processed according to Google's terms and privacy policy",
+            "according to the current state of the app, no external advertising SDKs or cross-app activity tracking systems are used"
           ]
         },
         "retention": {
-          "title": "Retention period",
-          "body": "The storage period depends on the type of data and how the app is used.",
+          "title": "Data retention period",
+          "body": "The retention period depends on the type of data and how the app is used.",
           "bullets": [
-            "local data is stored until the user deletes it, resets the app, removes selected content, or removes the app",
-            "data sent by email is stored for the time needed to handle the request and is then deleted or anonymized, generally for no longer than 12 months, unless the law requires longer retention",
-            "files exported outside the app remain outside Memicard's control and are stored until deleted by the user or by the selected service provider"
+            "local data is stored until it is deleted by the user, the app is reset, selected content is removed, or the app is uninstalled",
+            "data sent by e-mail is stored for the time necessary to handle the report, and then deleted or anonymized, generally for no longer than 12 months, unless the law requires longer retention",
+            "files exported outside the app remain outside Memicard's control and are stored until deleted by the user or the provider of the selected service"
           ]
         },
         "noTracking": {
@@ -608,77 +697,77 @@
           "bullets": [
             "does not sell user data",
             "does not use behavioral advertising",
-            "does not track activity across apps",
-            "does not send user data to its own server for normal app operation"
+            "does not track user activity across apps",
+            "does not send user data to its own server for the app's ongoing operation"
           ]
         },
         "deletion": {
           "title": "Data deletion",
-          "body": "The user can remove data stored locally by deleting it in the app or by uninstalling the app from the device.",
+          "body": "The user can delete locally stored data by removing it from within the app or by uninstalling the app from the device.",
           "bullets": [
-            "some data can be removed inside the app, for example by deleting custom courses, custom flashcards, or resetting selected settings",
-            "removing the app generally removes its local data from the device, subject to backup or restore mechanisms offered by the operating system or user services",
-            "data copies exported to files or external services remain outside the app and are managed by the user",
-            "removing the app does not automatically delete a copy of data previously stored in an external service, for example Google Drive"
+            "some data can be deleted inside the app, for example by deleting custom courses, custom flashcards, or resetting selected settings",
+            "uninstalling the app generally deletes its local data from the device, subject to backup or restore mechanisms provided by the operating system or the user's services",
+            "copies of data exported to files or external services remain outside the app and are managed by the user independently",
+            "uninstalling the app does not automatically delete a copy of data previously saved in an external service, for example Google Drive"
           ],
           "noteLabel": "Deleting external copies",
-          "note": "A copy stored in an external service should be deleted separately from the user's account in that service."
+          "note": "A copy saved in an external service should be deleted separately from the user's account in that service."
         },
         "transfers": {
           "title": "Transfers outside the EU or EEA",
-          "body": "As a rule, Memicard does not transfer user data to its own servers outside the European Economic Area.",
+          "body": "As a general rule, Memicard does not transfer user data to its own servers outside the European Economic Area.",
           "bullets": [
-            "when the user contacts support by email or uses third-party services chosen by the user, data may be processed under those providers' own rules",
-            "if the user uses the optional Google Drive backup feature, data may be processed by Google in accordance with that provider's rules, including outside the EU or EEA depending on the technical infrastructure used",
-            "the scope and location of processing by an external provider depends on the service selected by the user, and Memicard does not control those providers' privacy policies"
+            "in the case of e-mail contact or use of external services selected by the user, data may be processed according to the rules of those providers",
+            "if the user uses the optional Google Drive backup feature, data may be processed by Google according to the rules applicable to that provider, including outside the EU or EEA, depending on the technical infrastructure used",
+            "the scope and location of processing by an external provider depend on the service selected by the user, and Memicard does not control the privacy policies of such providers"
           ]
         },
         "security": {
           "title": "Data security",
-          "body": "The app follows a data minimization approach and uses system permissions only when needed for a selected feature.",
+          "body": "The app follows a data minimization approach and uses system permissions only when they are needed for the selected feature.",
           "bullets": [
-            "local data stays on the user's device unless the user chooses to export or send it",
-            "support email drafts are shown to the user before sending",
-            "the app does not request more permissions than needed for the features included in the current version"
+            "local data remains on the user's device unless the user decides to export or send it",
+            "the support e-mail message is prepared for the user's review before sending",
+            "the app does not request more permissions than necessary for the features present in the current version"
           ]
         },
         "rights": {
           "title": "User rights",
-          "body": "The user has rights under personal data protection laws to the extent that they apply to the way the app is used.",
+          "body": "The user has rights under personal data protection laws, to the extent that they apply to the way the app is used.",
           "bullets": [
             "the right to access data, rectify it, delete it, and receive a copy of the data",
-            "the right to restrict processing and to object to processing based on legitimate interest",
-            "the right to withdraw consent at any time where processing is based on consent; withdrawal does not affect the lawfulness of earlier processing",
+            "the right to restrict processing and object to processing based on legitimate interest",
+            "the right to withdraw consent at any time if processing is based on consent; withdrawing consent does not affect the lawfulness of earlier processing",
             "the right to lodge a complaint with the President of the Personal Data Protection Office in Poland (PUODO)"
           ],
-          "noteLabel": "How to exercise rights",
-          "note": "Privacy requests can be sent to contact@memicard.com. If data exists only locally on the user's device, some rights may be exercised directly by deleting the data in the app or by removing the app."
+          "noteLabel": "How to exercise your rights",
+          "note": "Privacy-related requests can be sent to contact@memicard.com. If data exists only locally on the user's device, some rights may be exercised directly by deleting data in the app or uninstalling the app."
         }
       }
     },
     "licenses": {
       "hero": {
-        "title": "Licenses and third-party materials",
-        "subtitle": "This page describes selected third-party materials and the terms under which they are used in the app. It is not part of the privacy policy.",
+        "title": "Licenses and used materials",
+        "subtitle": "This screen describes selected external materials and the rules for using them in the app. It is not part of the privacy policy.",
         "updatedLabel": "Last updated",
         "updatedValue": "March 9, 2026"
       },
       "sections": {
         "materials": {
-          "title": "Third-party materials",
-          "body": "Memicard may use selected third-party materials, such as images, illustrations, or other educational assets, in accordance with their license terms or usage rules defined by the rights holders.",
+          "title": "External materials",
+          "body": "Memicard may use selected external materials, such as images, illustrations, or other educational resources, according to their license terms or usage rules defined by the rights holders.",
           "bullets": [
-            "when attribution is required, the app provides the source and basic information about the usage conditions",
-            "some materials may be subject to additional limitations, for example regarding logos, trademarks, or presentation style",
-            "detailed terms for selected sources may be available under external links"
+            "for materials requiring attribution, the app provides the source and basic information about the terms of use",
+            "some materials may be subject to additional restrictions, for example regarding the use of logos, trademarks, or presentation method",
+            "detailed terms for selected sources may be available through external links"
           ],
           "sourceCard": {
-            "title": "Astronomy materials - NOIRLab",
-            "body": "Some images used in the app come from NOIRLab. Unless otherwise stated for a specific asset, they are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. The images used in the app have been modified for interface purposes, in particular through cropping, resizing, compression, or other minor visual adjustments. Use of these materials does not imply endorsement or recommendation of the app by NOIRLab.",
+            "title": "NOIRLab",
+            "body": "Some images used in the app come from NOIRLab. Unless otherwise stated for a given material, they are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Images used in the app have been modified for the interface, in particular through cropping, resizing, compression, or other minor visual adjustments. The use of these materials does not imply endorsement or recommendation of the app by NOIRLab.",
             "bullets": [],
             "noteLabel": "",
             "note": "",
-            "button": "source"
+            "button": "Source"
           }
         }
       }
@@ -691,7 +780,7 @@
       "title": "Choose language",
       "appTitle": "Choose app language",
       "nativeTitle": "Your native language",
-      "hintDefault": "Choose a language to enable the button.",
+      "hintDefault": "Choose a language to activate the button.",
       "hintSelected": "Selected: {{language}}"
     },
     "courseActivate": {
@@ -700,11 +789,11 @@
         "description": "You are now on the screen where a course is activated."
       },
       "step2": {
-        "title": "What for?",
-        "description": "The game will use flashcards from the active course."
+        "title": "Why?",
+        "description": "The game will take flashcards from the active course."
       },
       "step3": {
-        "title": "How to enable?",
+        "title": "How to enable it?",
         "description": "To activate a course, tap its tile."
       },
       "step4": {
@@ -713,20 +802,20 @@
       },
       "step5": {
         "title": "Course active",
-        "description": "Done, the course is now active. You can start playing. Tap the Next button at the bottom right."
+        "description": "Done, the course is active. You can start playing. Tap the Next button at the bottom right."
       }
     },
     "courseEntrySettings": {
       "step1": {
         "title": "What is this?",
-        "description": "This is the screen that appears once when you start each course."
+        "description": "This is the screen that appears once when starting each course."
       },
       "step2": {
         "title": "What matters?",
-        "description": "There are three more important options here that let you adjust the course to your liking."
+        "description": "There are three more important options here that let you adjust the course to your needs."
       },
       "step3": {
-        "title": "For now",
+        "title": "For starters",
         "description": "For now, I recommend leaving them as they are."
       },
       "step4": {
@@ -735,7 +824,7 @@
       },
       "step5": {
         "title": "What next?",
-        "description": "Tap Next if you want to move on to the game."
+        "description": "Tap Next if you want to go to the game."
       }
     },
     "flashcards": {
@@ -744,12 +833,12 @@
         "description": "This is the main learning screen. This is where all the magic happens."
       },
       "step2": {
-        "title": "One sec",
-        "description": "First, I'll show you around and explain what is what."
+        "title": "One moment",
+        "description": "First, I will show you around and explain what is what."
       },
       "step3": {
         "title": "Your flashcard",
-        "description": "Here you will see a question, a word, an image, or another task. If the answer is text-based, this is where you type it."
+        "description": "Here you will see a question, word, image, or another task. If the answer is text-based, this is where you will type it."
       },
       "step4": {
         "title": "Action buttons",
@@ -757,11 +846,11 @@
       },
       "step5": {
         "title": "Learning boxes",
-        "description": "These are the flashcard boxes — the most important part of the game."
+        "description": "These are boxes with flashcards — the most important part of the game."
       },
       "step6": {
         "title": "Rule one",
-        "description": "Every new flashcard goes to box number one first."
+        "description": "Every new flashcard first goes to box number one."
       },
       "step7": {
         "title": "Rule two",
@@ -773,26 +862,26 @@
       },
       "step9": {
         "title": "Your turn",
-        "description": "Now type your answer and confirm it.",
+        "description": "Now type the answer and confirm it.",
         "descriptionTrueFalse": "Now choose TRUE or FALSE.",
         "descriptionKnowDontKnow": "Now choose I KNOW or I DON'T KNOW."
       },
       "step10": {
-        "title": "Nice one",
-        "description": "Good job, you gave the correct answer!",
-        "descriptionAssisted": "Good job, you gave the correct answer! ( I helped a little, just this one time :3 )"
+        "title": "That went well",
+        "description": "Great, that is the correct answer!",
+        "descriptionAssisted": "Great, that is the correct answer! (This time there was a small hint :3)"
       },
       "step11": {
-        "title": "Up we go",
+        "title": "Up it goes",
         "description": "As you can see, the flashcard has now moved to box number two."
       },
       "step12": {
         "title": "Correct answer",
-        "description": "Each time you answer correctly, the flashcard moves to the next box."
+        "description": "Every time you answer correctly, the flashcard moves to the next box."
       },
       "step13": {
-        "title": "When is it done?",
-        "description": "For a flashcard to count as learned, it must pass through all 6 boxes."
+        "title": "When do you finish?",
+        "description": "For a flashcard to be considered learned, it has to pass through all 5 boxes."
       },
       "step14": {
         "title": "Final effect",
@@ -800,69 +889,69 @@
       },
       "step15": {
         "title": "Small catch",
-        "description": "But careful! If you answer incorrectly, the flashcard goes back to box number one."
+        "description": "But be careful! When you answer incorrectly, the flashcard returns to box number one."
       },
       "step16": {
-        "title": "Almost done",
-        "description": "Finally, I'll quickly show you the buttons around the game screen."
+        "title": "Just a moment",
+        "description": "At the end, I will quickly show you the buttons around the game screen."
       },
       "step17": {
         "title": "Home screen",
-        "description": "This button takes you to the app's main screen."
+        "description": "This button takes you to the app's home screen."
       },
       "step18": {
         "title": "Change course",
-        "description": "Here you open the courses panel and choose what you want to study."
+        "description": "Here you open the course panel and choose what you want to learn."
       },
       "step19": {
         "title": "Statistics",
-        "description": "Here you can check your progress and learning results."
+        "description": "Here you can check your learning progress and results."
       },
       "step20": {
         "title": "Dark mode",
-        "description": "With one tap, you can switch the app theme."
+        "description": "Switch the app theme with one tap."
       },
       "step21": {
-        "description": "This button opens the reviews screen and due flashcards."
+        "description": "This button opens the review screen and overdue flashcards."
       },
       "step22": {
-        "title": "Back to game",
+        "title": "Back to the game",
         "description": "This button takes you back to flashcards and the active course."
       },
       "step23": {
         "title": "Settings",
-        "description": "Here you can change the app look, learning settings, and other options."
+        "description": "Here you can change the app appearance, learning options, and other settings."
       },
       "step24": {
-        "title": "And that's it for now. ",
-        "description": "If anything was unclear, you can find the guide in the main menu, and in settings you can start the tutorial from the beginning."
+        "title": "That's everything",
+        "description": "If something was unclear, you can find a guide in the main menu, and in settings you can restart the tutorial from the beginning."
       },
       "step25": {
-        "title": "See you later :*",
+        "title": "See you! :*",
         "description": ""
       },
       "actionsPositionNudge": {
-        "title": "Which button layout",
-        "subtitle": "You can change their position now, and later go back to this in settings.",
-        "dismiss": "Keep it as is",
+        "title": "Which button layout?",
+        "subtitle": "You can change their position now, and later return to this in settings.",
+        "dismiss": "Leave as is",
         "confirm": "Confirm"
       }
     },
     "coursePin": {
       "step1": {
         "title": "Hey, it's me",
-        "description": "I'll show you how to get started. This will be a short guide on what to do and how :3"
+        "description": "I will show you how to start. This will be a short guide on what is what :3"
       },
       "step2": {
-        "title": "What's here?",
+        "title": "What is here?",
         "description": "On this screen, you can see the list of courses available in the app."
       },
       "step3": {
         "title": "What courses?",
-        "description": "One course is one tile with its name on it."
+        "description": "One course is one tile with the matching name."
       },
       "step4": {
-        "title": "What do you do?",
+        "title": "What do you do here?",
         "description": "You choose the courses that interest you and pin them."
       },
       "step5": {
@@ -875,59 +964,59 @@
       },
       "step7": {
         "title": "zzzzZZZZzzzz",
-        "description": "(waiting for you to pin the courses you like)"
+        "description": "(waiting until you pin the courses you like)"
       },
       "step8": {
         "title": "Course pinned",
-        "description": "Nice, the course has been pinned! Remember, you can pin more than one."
+        "description": "Great, the course has been pinned! Remember, you can pin more than one."
       },
       "step9": {
         "title": "What next?",
-        "description": "If you already pinned what interests you, tap the Next button at the bottom right."
+        "description": "If you have already pinned what interests you, tap the “Next” button at the bottom right."
       }
     },
     "reviewCourses": {
       "step1": {
         "title": "Review screen",
-        "description": "Hey, I’ll quickly show you how the review screen works :3"
+        "description": "Hey, I will quickly show you how the review screen works :3"
       },
       "step2": {
         "title": "Where to tap?",
-        "description": "You can open reviews with this button on the bottom bar."
+        "description": "You can enter reviews using this button on the bottom bar."
       },
       "step3": {
-        "title": "Number on icon",
-        "description": "If you see a number here, it means some flashcards are waiting for you to review."
+        "title": "Number by the icon",
+        "description": "If you see a number here, it means there are flashcards waiting for you to review."
       },
       "step4": {
         "title": "Courses separately",
         "description": "Each tile on this list is a separate course with its own reviews."
       },
       "step5": {
-        "title": "How many cards?",
-        "description": "The number on the tile shows how many flashcards from that course are waiting for review right now."
+        "title": "How many flashcards?",
+        "description": "The number on the tile shows how many flashcards from that course are currently waiting for review."
       },
       "step6": {
         "title": "Now hop in",
-        "description": "Now tap your first course and hop into a review :3"
+        "description": "Now tap your first course and jump into the review :3"
       }
     },
     "reviewFlashcards": {
       "step1": {
         "title": "Review screen",
-        "description": "Hey, you’re on the review screen now. This is where flashcards wait for their moment :3"
+        "description": "Hey, you are now on the review screen. Here, flashcards wait for their moment :3"
       },
       "step2": {
-        "title": "Like flashcards",
-        "description": "This screen works almost like regular flashcards, but the rules are a little different here."
+        "title": "Almost like flashcards",
+        "description": "This screen works similarly to regular flashcards, but the rules here are a little different."
       },
       "step3": {
-        "title": "Everything waits",
-        "description": "The boxes already contain all the flashcards that are waiting for review right now."
+        "title": "Everything is waiting",
+        "description": "The boxes already contain all the flashcards that are currently waiting for review."
       },
       "step4": {
         "title": "No adding",
-        "description": "That’s why the \"ADD FLASHCARDS\" button does not work here. In this mode, we do not add anything manually."
+        "description": "That is why the “ADD FLASHCARDS” button does not work here. In this mode, we do not add anything manually."
       },
       "step5": {
         "title": "Six boxes",
@@ -938,27 +1027,29 @@
         "description": "The biggest difference here is time."
       },
       "step7": {
-        "title": "Not right away",
-        "description": "When you answer a flashcard correctly, it does not move to the next box right away."
+        "title": "Not immediately",
+        "description": "When you answer a flashcard correctly, it does not move to the next box immediately."
       },
       "step8": {
-        "title": "Wait a moment",
+        "title": "You need to wait",
         "description": "You need to wait a little. The further you get, the longer the breaks become."
       },
       "step9": {
-        "title": "Why this?",
-        "description": "This is intentional. To really remember something, you need a chance to recall it after a break. Reviews like this strengthen your memory much better :3"
+        "title": "Why?",
+        "description": "This is intentional. To really remember something, you need a chance to recall it after a break. These kinds of reviews strengthen knowledge much better :3"
       },
       "step10": {
-        "title": "You got this",
-        "description": "That’s everything. You already know the rules, so good luck and see you later :3"
+        "title": "You can do it",
+        "description": "That's everything. You already know the rules, so good luck and see you later :3"
       }
     }
   },
   "flashcards": {
     "card": {
       "actions": {
-        "addFlashcards": "ADD FLASHCARDS"
+        "addFlashcards": "ADD FLASHCARDS",
+        "confirm": "CONFIRM",
+        "ok": "OK"
       },
       "peek": {
         "flashcard": "Flashcard",
@@ -976,27 +1067,27 @@
         "false": "False",
         "otherCorrect": "Other correct answers:",
         "boxTitle": "Box no. {{box}}",
-        "listHint": "Flashcards in this box.",
+        "listHint": "List of flashcards in this box.",
         "countOne": "{{count}} flashcard",
         "countMany": "{{count}} flashcards",
         "emptyCount": "No flashcards",
         "previewCourse": "preview",
         "close": "Close",
-        "emptyBoxTitle": "Box is empty",
-        "emptyBoxDescription": "Flashcards will appear here when you reach the right learning level."
+        "emptyBoxTitle": "The box is empty",
+        "emptyBoxDescription": "Flashcards will go here when you reach the right learning level."
       },
       "hint": {
-        "placeholder": "Enter a hint...",
+        "placeholder": "Enter a hint…",
         "save": "Save",
         "saveDialogTitle": "Save hint?",
         "saveDialogMessage": "This flashcard always shows one side, so the hint will be visible here.",
-        "targetDialogTitle": "Where should the hint be saved?",
+        "targetDialogTitle": "Where to save the hint?",
         "targetDialogMessage": "It can be visible only on this side of the flashcard or on both sides.",
-        "thisSideOnly": "Only this side",
-        "bothSides": "Both sides"
+        "thisSideOnly": "This side only",
+        "bothSides": "Both sides of the flashcard"
       },
       "emptyScene": {
-        "chooseBox": "Choose a flashcard box"
+        "chooseBox": "Choose a box with flashcards"
       },
       "trueFalse": {
         "true": "TRUE",
@@ -1008,7 +1099,283 @@
   },
   "courses": {
     "groups": {
-      "mini": "Mini courses"
+      "mini": "Mini-courses",
+      "categoryA11y": "Category {{title}}, {{count}} courses"
+    },
+    "official": {
+      "cardsCount": "flashcards: {{count}}",
+      "editCourse": "Edit course {{name}}"
+    }
+  },
+  "components": {
+    "logoMessage": {
+      "logoMessage": {
+        "title": {
+          "witajWAplikacjiDoFiszek": "Welcome to the flashcard app",
+          "dodajKursKodem": "Add course with code",
+          "nieZnalezionoKursu": "Course not found",
+          "kursDodany": "Course added",
+          "aktywujKurs": "Activate course",
+          "gotowe": "Done!"
+        },
+        "description": {
+          "dodajKursKodemOdProwadzacego": "Add a course with a code from your teacher and unlock the materials.",
+          "wpiszKodKursuZebyPrzypiac": "Enter the course code to pin it to your profile.",
+          "sprawdzKodAlboPoprosProwadzacego": "Check the code or ask your teacher for the correct one.",
+          "aktywujGoByPobracMaterialy": "Activate it to download materials and track progress.",
+          "potwierdzAbyOdblokowacFiszkiI": "Confirm to unlock flashcards and save progress.",
+          "kursAktywnyLecimyDoFiszek": "Course active. Let's go to flashcards."
+        }
+      }
+    },
+    "navbar": {
+      "navbar": {
+        "accessibilityLabel": {
+          "przejdzDoStronyGlownej": "Go to the home screen",
+          "przejdzDoPowtorek": "Go to reviews",
+          "przejdzDoMenuGlownego": "Go to the main menu",
+          "przejdzDoGryFiszek": "Go to the flashcard game",
+          "przejdzDoUstawien": "Go to settings"
+        }
+      },
+      "navbarStatsRotator": {
+        "label": {
+          "dailyStreak": "Daily streak"
+        },
+        "accessibilityLabel": {
+          "valueValuePrzejdzDoStatystyk": "{{label}}: {{value}}. Go to statistics"
+        }
+      }
+    },
+    "stats": {
+      "activityHeatmap": {
+        "textChild": {
+          "ostatniaAktywnosc": "Recent activity"
+        },
+        "months": {
+          "0": "January",
+          "1": "February",
+          "2": "March",
+          "3": "April",
+          "4": "May",
+          "5": "June",
+          "6": "July",
+          "7": "August",
+          "8": "September",
+          "9": "October",
+          "10": "November",
+          "11": "December"
+        },
+        "details": {
+          "selectedDayActivity": "Activity details for the selected day.",
+          "noActivityForDay": "No activity has been saved for this day yet."
+        },
+        "stats": {
+          "correct": "Correct answers",
+          "wrong": "Mistakes"
+        }
+      },
+      "hardWordsList": {
+        "accessibilityLabel": {
+          "wypelnienieBledowValue": "Mistake fill {{value}}"
+        },
+        "textChild": {
+          "ladowanie": "Loading…",
+          "brakDanychSprobujPogracDluzej": "No data — try playing longer."
+        },
+        "title": {
+          "trudneFiszki": "Hard flashcards"
+        },
+        "subtitle": {
+          "activeCourse": "Most often missed flashcards from the active course",
+          "global": "Most often missed flashcards overall"
+        }
+      },
+      "hourlyActivityChart": {
+        "title": {
+          "czasWNauce": "Learning time"
+        },
+        "subtitle": {
+          "sumaCzasuSpedzonegoNaKartach": "Total time spent on cards"
+        },
+        "textChild": {
+          "jakLiczymyCzas": "How do we count time?",
+          "czasLiczonyJestOdMomentu": "Time is counted from the moment the card is shown until the answer is confirmed, excluding breaks between cards."
+        },
+        "period": {
+          "thisWeek": "This week",
+          "thisMonth": "This month",
+          "thisYear": "This year"
+        }
+      },
+      "pinnedCoursesProgress": {
+        "title": {
+          "postepPrzypietychKursow": "Pinned course progress"
+        },
+        "textChild": {
+          "brakDanychDoWyswietlenia": "No data to display."
+        },
+        "label": {
+          "valueValue": "{{learned}} / {{total}}"
+        }
+      },
+      "progressBar": {
+        "textChildTemplate": {
+          "value": "{{value}}%"
+        }
+      }
+    },
+    "wiki": {
+      "wikiPeek": {
+        "accessibilityLabel": {
+          "zamknij": "Close"
+        },
+        "text": {
+          "ok": "OK"
+        }
+      }
+    },
+    "courseEditor": {
+      "courseSettingsPanel": {
+        "textChild": {
+          "reset": "RESET"
+        },
+        "loadingText": {
+          "operationInProgress": "Operation in progress…"
+        }
+      },
+      "nameEdit": {
+        "nameEdit": {
+          "placeholder": {
+            "npFiszkiPodroznicze": "e.g. Travel flashcards"
+          },
+          "textChild": {
+            "nazwa": "name"
+          },
+          "accessibilityLabel": {
+            "nazwaKursu": "Course name"
+          }
+        }
+      },
+      "settingsCourse": {
+        "title": {
+          "stwierdzenie": "Statement",
+          "opanowanie": "Mastery",
+          "duza": "Large",
+          "mala": "Small",
+          "dynamiczny": "Dynamic",
+          "maly": "Small",
+          "sredni": "Medium",
+          "duzy": "Large",
+          "bardzoDuzy": "Very large",
+          "fazaZapoznaniaPudelko0": "Introduction phase (Box 0)",
+          "automatFiszek": "Flashcard auto-flow",
+          "wlaczPowtorki": "Enable reviews",
+          "wyswietlajWyjasnienie": "Show explanation",
+          "tylkoPoBlednejOdpowiedzi": "Only after an incorrect answer",
+          "pominPoprawkePoBledzie": "Skip correction after mistake",
+          "rodzajPrzyciskowWPrawdaFalsz": "Button type in True / False",
+          "rozmiarFiszki": "Flashcard size",
+          "rozmiarObrazu": "Image size",
+          "ramkaObrazu": "Image frame"
+        },
+        "subtitle": {
+          "kartaRozszerzaSie": "The card expands vertically and shows the full text.",
+          "tekstZostaje": "The text stays on one line and scrolls.",
+          "naturalneProporcje": "Natural image proportions.",
+          "czterdziesciProcent": "40% of maximum height.",
+          "szescdziesiatProcent": "60% of maximum height.",
+          "stoProcent": "100% of maximum height.",
+          "stoSiedemdziesiatProcent": "170% of maximum height."
+        },
+        "description": {
+          "dodatkowePudelko": "This is an extra box that makes it easier to quickly get familiar with flashcards.",
+          "automatyczniePrzelaczaj": "Automatically switch boxes and fetch new words.",
+          "dodajFiszkiDoPowtorek": "Add flashcards from this course to daily reviews.",
+          "pokazujWyjasnienie": "Show the explanation after answering, if the flashcard has one.",
+          "gdyWylaczone": "When disabled, the explanation will be shown after both correct and incorrect answers.",
+          "poZlejOdpowiedzi": "After a wrong answer, immediately show the next flashcard. Applies to text-answer flashcards.",
+          "wybierzNapisyPrzyciskow": "Choose what labels the buttons should have in this course.",
+          "zmienWielkoscKarty": "Change the card size only for this course.",
+          "dopasujWysokosc": "Adjust image height in large flashcards.",
+          "pokazujObramowanie": "Show a border around the image on the flashcard."
+        },
+        "hint": {
+          "dostepneTylkoDlaDuzych": "Available only for large cards with images."
+        },
+        "textChild": {
+          "przeplyw": "FLOW",
+          "wyjasnienia": "EXPLANATIONS",
+          "odpowiedzi": "ANSWERS"
+        },
+        "accessibilityLabel": {
+          "przelaczFazeZapoznania": "Toggle introduction phase",
+          "przelaczAutomatFiszek": "Toggle flashcard auto-flow",
+          "przelaczPowtorki": "Toggle reviews",
+          "przelaczWyswietlanieWyjasnien": "Toggle showing explanations",
+          "przelaczWyjasnienieTylkoPoBlednej": "Toggle explanation only after incorrect answer",
+          "przelaczPomijaniePoprawkiPoBledzie": "Toggle skipping correction after mistake",
+          "przelaczRamkeObrazu": "Toggle image frame"
+        }
+      }
+    },
+    "flashcards": {
+      "courseFinishedPanel": {
+        "courseFinishedPanel": {
+          "heading": "Congratulations!",
+          "subheading": "You completed the course",
+          "statsHeading": "Your score",
+          "label": {
+            "fiszek": "flashcards",
+            "skutecznosc": "accuracy",
+            "czasNauki": "learning time"
+          },
+          "text": {
+            "wrocDoKursow": "Back to courses"
+          }
+        }
+      },
+      "trueFalseActions": {
+        "label": {
+          "nieUmiem": "I DON'T KNOW",
+          "umiem": "I KNOW",
+          "falsz": "FALSE",
+          "prawda": "TRUE"
+        },
+        "accessibilityLabel": {
+          "oznaczJakoValue": "Mark as {{value}}",
+          "potwierdzIPrzejdzDalej": "Confirm and continue"
+        }
+      }
+    }
+  },
+  "constants": {
+    "courseCategories": {
+      "label": {
+        "geography": "Geography",
+        "kosmos": "Space",
+        "historia": "History",
+        "mitologia": "Mythology",
+        "programming": "Programming",
+        "science": "Science",
+        "math": "Final exam"
+      },
+      "description": {
+        "stoliceIFlagi": "Capitals and flags",
+        "astronomiaGwiazdozbiory": "Astronomy, constellations",
+        "historiaPolski": "History of Poland",
+        "mityBogowieIBohaterowie": "Myths, gods, and heroes",
+        "javascript": "JavaScript",
+        "matematyka": "Mathematics"
+      }
+    }
+  },
+  "contexts": {
+    "settingsContext": {
+      "message": {
+        "nieUdaloSiePobracListy": "Could not load the list of backups from Google Drive.",
+        "nieUdaloSieWyslacBackupu": "Could not upload the backup to Google Drive."
+      }
     }
   },
   "courseCreator": {
@@ -1022,65 +1389,65 @@
         "trueFalse": "True/False"
       },
       "sectionHeader": "CONTENT",
-      "addModeA11y": "Flashcard adding mode",
+      "addModeA11y": "Flashcard adding method",
       "previewTitle": "Import preview",
       "stats": {
         "rows": "Rows",
-        "importable": "Importable",
+        "importable": "Can be imported",
         "errors": "Errors to fix",
         "warnings": "Warnings"
       },
       "issueRow": " row {{row}}",
-      "moreIssues": "+{{count}} more items in report.",
-      "importing": "Importing...",
-      "importValid": "Import valid rows",
+      "moreIssues": "+{{count}} more entries in the report.",
+      "importing": "Importing…",
+      "importValid": "Import valid",
       "clearReport": "Clear report",
       "flashcardsHeader": "flashcards",
-      "addCardA11y": "Add a new flashcard",
+      "addCardA11y": "Add new flashcard",
       "backA11y": "Back to course creation",
       "nextA11y": "Go to course settings",
       "shareDialogTitle": "Download CSV template",
       "popups": {
-        "noRows": "No rows can be imported yet.",
-        "analyzedWithErrors": "File checked: {{validRows}} importable, {{errorCount}} need fixes.",
-        "analyzedWithWarnings": "File checked: {{validRows}} importable, {{warningCount}} have warnings.",
+        "noRows": "There are no rows that can be imported yet.",
+        "analyzedWithErrors": "File checked: {{validRows}} can be imported, {{errorCount}} need fixing.",
+        "analyzedWithWarnings": "File checked: {{validRows}} can be imported, {{warningCount}} have warnings.",
         "analyzedSuccess": "Great! {{validRows}} rows are ready to import.",
         "analysisError": "File analysis error.",
         "templateDownloaded": "Template downloaded: {{fileName}}",
-        "templateDirectoryMissing": "No directory selected to save the CSV template.",
+        "templateDirectoryMissing": "No directory selected for saving the CSV template.",
         "templateSaved": "Template saved: {{fileName}}",
         "templateSavedLocally": "Template saved locally: {{fileName}}",
         "templateReady": "Template ready: {{fileName}}",
-        "templateDownloadError": "Could not download CSV template.",
-        "noCardsToImport": "There are no cards to import now.",
+        "templateDownloadError": "Could not download the CSV template.",
+        "noCardsToImport": "There are no cards that can be imported right now.",
         "importedWithSkipped": "Imported {{cardsCount}} flashcards, skipped {{skipped}} invalid rows.",
         "importedWithWarnings": "Imported {{cardsCount}} flashcards ({{warningCount}} warnings).",
         "importedSuccess": "Imported {{cardsCount}} flashcards.",
-        "importError": "Flashcard import error.",
-        "missingCourseName": "Set a course name first",
-        "missingCourseIcon": "Choose a course icon",
-        "addAtLeastOne": "Add at least one flashcard"
+        "importError": "Error while importing flashcards.",
+        "missingCourseName": "Name the course first.",
+        "missingCourseIcon": "Choose a course icon.",
+        "addAtLeastOne": "Add at least one flashcard."
       }
     },
     "csvGuide": {
       "required": "Required",
       "optional": "Optional",
       "important": "Important",
-      "downloading": "Preparing...",
+      "downloading": "Preparing…",
       "downloadTemplate": "Download template",
       "importTitle": "Import",
       "step1": "1. Prepare a CSV or TXT file with column headers.",
-      "step2": "2. Pick the file format below and import.",
-      "pickCsv": "Pick CSV",
-      "pickTxt": "Pick TXT",
-      "analyzing": "Analyzing...",
+      "step2": "2. Choose the file format below and import it.",
+      "pickCsv": "Choose CSV",
+      "pickTxt": "Choose TXT",
+      "analyzing": "Analyzing…",
       "cardTypes": "Flashcard types",
       "imagesTitle": "How to add images",
-      "imagesDescription": "Next to your CSV or TXT file, create an images folder. Add images there, then put file names in rows, e.g. dog.png. Supported formats: .png, .jpg, .jpeg, .svg.",
+      "imagesDescription": "Next to the CSV or TXT file with flashcards, create an images folder. Add images to it, and in the file rows enter file names, e.g. dog.png. Supported formats: .png, .jpg, .jpeg, .svg.",
       "sections": {
         "selfAssess": {
-          "title": "1) Self-assess",
-          "summary": "User evaluates: I know it / I don't know it.",
+          "title": "1) Self-assessment",
+          "summary": "The user evaluates: I know or I don't know.",
           "fields": {
             "frontText": {
               "description": "Question or topic for self-assessment."
@@ -1092,60 +1459,60 @@
         },
         "traditional": {
           "title": "2) Text answer",
-          "summary": "Classic flashcard: prompt on front, answer on back.",
+          "summary": "Classic flashcard: question on the front, answer on the back.",
           "fields": {
             "frontText": {
-              "description": "Card front: question, keyword, or statement."
+              "description": "Flashcard front: question, term, or statement."
             },
             "backText": {
-              "description": "Card back: correct text answer.",
-              "note": "You can enter multiple answers separated by commas or semicolons."
+              "description": "Flashcard back: correct text answer.",
+              "note": "You can enter multiple answers by separating them with a comma or semicolon."
             },
             "explanation": {
-              "description": "Additional explanation shown after answer."
+              "description": "Additional explanation shown after answering."
             },
             "flip": {
-              "description": "If true, card will be flipped during study."
+              "description": "If true, the card will be flipped during learning."
             }
           }
         },
         "trueFalse": {
           "title": "3) True/False",
-          "summary": "User marks whether the statement is true.",
+          "summary": "The user marks whether the sentence is true.",
           "fields": {
             "frontText": {
-              "description": "Question or statement to evaluate."
+              "description": "Question or sentence to evaluate."
             },
             "tfAnswer": {
               "description": "Correct answer: true/false or 1/0."
             },
             "explanation": {
-              "description": "Explanation shown after answer."
+              "description": "Explanation after answering."
             }
           }
         },
         "mixed": {
           "title": "4) Mixed",
-          "summary": "Use multiple flashcard types in one file.",
+          "summary": "Combine different flashcard types in one file.",
           "fields": {
             "type": {
               "description": "Flashcard type for each row.",
-              "note": "Values: traditional, true_false, self_assess (plus Polish aliases)."
+              "note": "Values: traditional, true_false, self_assess (or Polish aliases)."
             }
           },
-          "tip": "Column layout stays the same as in sections above."
+          "tip": "The column layout remains the same as in the sections above."
         }
       }
     },
     "manualEditor": {
       "disableFlip": "Disable",
       "enableFlip": "Enable",
-      "flipForCard": "flip for flashcard {{index}}",
+      "flipForCard": "flipping for flashcard {{index}}",
       "frontPlaceholder": "Front",
       "backPlaceholder": "Back",
       "addImage": "Add image",
       "none": "None",
-      "removeOrCloseImageForCard": "Remove image or close image slot for flashcard {{index}}",
+      "removeOrCloseImageForCard": "Remove image or close image field for flashcard {{index}}",
       "answerLabel": "Answer",
       "trueLabel": "True",
       "falseLabel": "False",
@@ -1158,7 +1525,528 @@
       "addAnswerForCard": "Add translation for flashcard {{index}}",
       "addImageForCard": "Add image for flashcard {{index}}",
       "removeImageForCard": "Remove image for flashcard {{index}}",
-      "addNewCard": "Add new flashcard"
+      "addNewCard": "Add new flashcard",
+      "addCourse": "add\ncourse"
+    },
+    "customEditor": {
+      "tabs": {
+        "options": "settings",
+        "content": "content",
+        "optionsLabel": "Options",
+        "contentLabel": "Content",
+        "a11y": "Course editing sections"
+      },
+      "popups": {
+        "undo": "Last change undone",
+        "loadFailed": "Could not load course data.",
+        "officialDeleteBlocked": "Official courses cannot be deleted.",
+        "deleted": "Course has been deleted.",
+        "deleteFailed": "Could not delete the course.",
+        "missingName": "Enter the course name.",
+        "missingCards": "Add at least one flashcard.",
+        "saved": "Changes saved!",
+        "saveFailed": "Could not save changes."
+      },
+      "alerts": {
+        "resetBoxesDoneTitle": "Box state cleared",
+        "resetBoxesDoneMessage": "Flashcards currently in boxes have been removed from them and returned to the unknown pool.",
+        "resetBoxesFailed": "Could not clear box state.",
+        "resetBoxesConfirmTitle": "Clear box state?",
+        "resetBoxesConfirmMessage": "Flashcards currently in boxes will be removed from them and returned to the unknown pool. This will not delete reviews or overall course progress.",
+        "resetReviewsDoneTitle": "Reviews deleted",
+        "resetReviewsDoneMessage": "Deleted {{count}} review entries for this course.",
+        "resetReviewsDoneEmpty": "There were no saved reviews to delete.",
+        "resetReviewsFailed": "Could not delete reviews.",
+        "resetReviewsConfirmTitle": "Delete reviews?",
+        "resetReviewsConfirmMessage": "This operation will delete all saved reviews for this course.",
+        "resetAllDoneTitle": "Course restored from the beginning",
+        "resetAllDoneMessage": "Box state and reviews have been cleared. All flashcards returned to the unknown pool.",
+        "resetAllFailed": "Could not restore the course from the beginning.",
+        "resetAllConfirmTitle": "Restore course from the beginning?",
+        "resetAllConfirmMessage": "This operation will clear box state and reviews, and return all flashcards to the unknown pool.",
+        "deleteTitle": "Delete course",
+        "deleteMessage": "Are you sure you want to delete this course? This action cannot be undone."
+      },
+      "resetActions": {
+        "boxes": {
+          "title": "Clear box state",
+          "subtitle": "Flashcards currently in boxes are removed from them and returned to the unknown pool.",
+          "loading": "Clearing…"
+        },
+        "reviews": {
+          "title": "Delete reviews",
+          "subtitle": "Deletes all saved reviews for this course.",
+          "loading": "Deleting…"
+        },
+        "all": {
+          "title": "Restore course from the beginning",
+          "subtitle": "Clears box state and reviews, and returns all flashcards to the unknown pool.",
+          "loading": "Restoring…"
+        }
+      },
+      "appearance": {
+        "section": "APPEARANCE",
+        "iconDescription": "Choose a symbol that you will easily recognize on the course list.",
+        "colorDescription": "The color is used as an accent: avatar, button, chips."
+      },
+      "flashcardsSection": "FLASHCARDS",
+      "cardTypes": {
+        "text": "Traditional"
+      },
+      "cardTypeLabel": "Flashcard type",
+      "addCardA11y": "Add new flashcard",
+      "deleteButton": "delete",
+      "deleteA11y": "Delete this course",
+      "saveButton": "save",
+      "saveA11y": "Save course changes",
+      "undoA11y": "Undo the last change in flashcards"
+    },
+    "iconEdit": {
+      "categories": {
+        "all": "All",
+        "general": "General",
+        "science": "Science",
+        "tech": "Tech",
+        "travel": "Travel",
+        "lifestyle": "Lifestyle",
+        "sport": "Sport"
+      },
+      "customColorLabel": "Custom",
+      "defaultCourseName": "New course",
+      "namePlaceholder": "e.g. Travel flashcards",
+      "nameDescription": "Short and specific, e.g. “Travel flashcards”.",
+      "iconDescription": "Choose an icon from the list.",
+      "colorDescription": "Choose your color.",
+      "iconLabel": "Icon:",
+      "previewHint": "Tip: the “final result” is at the top, settings are below.",
+      "nameSection": "NAME",
+      "nameA11y": "Course name",
+      "iconSection": "ICON",
+      "selected": "Selected",
+      "changeIconA11y": "Change course icon",
+      "colorSection": "COLOR",
+      "modeLabel": "Mode:",
+      "pickerMode": "picker",
+      "changeColorA11y": "Change course color",
+      "chooseIcon": "Choose icon",
+      "closeIconPickerA11y": "Close icon picker",
+      "searchIcon": "Search icon",
+      "categoryFilterA11y": "Category filter: {{label}}",
+      "chooseIconA11y": "Choose icon {{id}}",
+      "emptyResults": "No results",
+      "chooseColor": "Choose color",
+      "closeColorPickerA11y": "Close color picker",
+      "hue": "HUE",
+      "saturation": "SATURATION",
+      "value": "VALUE",
+      "preview": "PREVIEW",
+      "confirm": "confirm",
+      "confirmColorA11y": "Confirm selected color"
+    }
+  },
+  "features": {
+    "wiki": {
+      "wikiTopics": {
+        "label": {
+          "typNowejFiszki": "New flashcard type"
+        },
+        "title": {
+          "przypinanieKursu": "Pinning a course",
+          "aktywacjaKursu": "Activating a course",
+          "ustawienia": "Settings",
+          "hangulCzytanie": "Hangul - reading",
+          "fiszki": "Flashcards",
+          "tworzenieKursu": "Creating a course"
+        },
+        "subtitle": {
+          "fiszki120": "flashcards: 120"
+        },
+        "accessibilityLabel": {
+          "edytujKursValue": "Edit course {{value}}",
+          "ustawieniaKursuHangulCzytanie": "Settings for Hangul - reading course"
+        },
+        "text": {
+          "dodajFiszki": "Add flashcards",
+          "zatwierdz": "Confirm"
+        },
+        "textChild": {
+          "przyciskiPodKartaDodawanieNowych": "Buttons under the card: adding new flashcards and confirming answers.",
+          "mniejszyPrzyciskDodajFiszkiKtory": "Smaller Add flashcards button used in true / false mode",
+          "aktywnePudelkoLosujeFiszkiDo": "The active box draws flashcards for the card. Hold your finger on the box to preview its contents.",
+          "mozeszDodacKrotkieSkojarzenieLub": "You can add a short association or hint visible with this flashcard during learning."
+        }
+      }
+    }
+  },
+  "services": {
+    "googleDriveBackup": {
+      "message": {
+        "nieUdaloSieOdczytacManifestu": "Could not read the backup manifest."
+      }
+    },
+    "importUserData": {
+      "message": {
+        "anulowanoWyborPliku": "File selection cancelled.",
+        "wystapilBladPodczasImportuDanych": "An error occurred while importing data."
+      }
+    },
+    "userDataBackup": {
+      "message": {
+        "wystapilBladPodczasPrzywracaniaDanych": "An error occurred while restoring data."
+      }
+    }
+  },
+  "screens": {
+    "onboarding": {
+      "languageIntro": {
+        "languageIntro": {
+          "accessibilityLabel": {
+            "valueValue": "{{title}}. {{subtitle}}"
+          }
+        }
+      }
+    },
+    "courses": {
+      "activatecourse": {
+        "courseActivate": {
+          "courseActivate": {
+            "message": {
+              "aktywowalemKurs3": "I activated the course :3"
+            },
+            "textChild": {
+              "nicTuNieMaCzas": "There is nothing here :( time to choose a course!",
+              "stworzonePrzezNas": "Created by us",
+              "stworzonePrzezCiebie": "Created by you"
+            },
+            "accessibilityLabel": {
+              "edytujKursValue": "Edit course {{value}}",
+              "przejdzDalej": "Continue",
+              "dodajKurs": "Add course"
+            },
+            "text": {
+              "dodajKurs": "add\ncourse"
+            }
+          }
+        }
+      },
+      "courseentrysettings": {
+        "courseEntrySettings": {
+          "courseEntrySettings": {
+            "message": {
+              "nieUdaloSieZnalezcKursu": "Could not find the course",
+              "nieUdaloSieWczytacUstawien": "Could not load course settings",
+              "nieUdaloSieZapisacUstawien": "Could not save course settings"
+            },
+            "textChild": {
+              "ustawStartNaukiPoSwojemu": "Set up the start of learning your way",
+              "teOpcjePokazaSieTylko": "These options will be shown only now. Later, you can still change them in course settings.",
+              "automatFiszek": "Flashcard auto-flow",
+              "samPrzelaczaPudelkaIDobiera": "Automatically switches boxes and selects the next flashcards during learning.",
+              "codziennePowtorki": "Daily reviews",
+              "dodajeFiszkiZTegoKursu": "Adds flashcards from this course to the general daily review session.",
+              "pokazWyjasnienia": "Show explanations",
+              "poOdpowiedziPokazeDodatkoweObjasnienie": "After answering, it will show an additional explanation if the flashcard has one."
+            },
+            "accessibilityLabel": {
+              "przelaczAutomatFiszek": "Toggle flashcard auto-flow",
+              "przelaczCodziennePowtorki": "Toggle daily reviews",
+              "przelaczPokazywanieWyjasnien": "Toggle showing explanations",
+              "zapiszOpcjeStartoweIPrzejdz": "Save start options and go to flashcards"
+            },
+            "text": {
+              "trwaZapis": "SAVING...",
+              "zaczynajmy": "LET'S START"
+            }
+          }
+        }
+      },
+      "editcourse": {
+        "courseEdit": {
+          "courseEdit": {
+            "alert": {
+              "brakDanychKursu": "No course data",
+              "nieUdaloSieOdnalezcLokalnych": "Could not find local data for this course.",
+              "usunietoValueZapisanychPowtorekTego": "Deleted {{value}} saved reviews for this course."
+            },
+            "textChild": {
+              "ustawieniaKursu": "COURSE SETTINGS",
+              "nieZnalezionoDanychKursu": "Course data not found."
+            },
+            "text": {
+              "wroc": "back"
+            }
+          }
+        }
+      },
+      "makenewcourse": {
+        "courseAppearance": {
+          "courseAppearance": {
+            "message": {
+              "musiszPodacNazweKursuI": "You need to enter a course name and choose an icon.",
+              "musiszPodacNazweKursu": "You need to enter a course name.",
+              "musiszWybracIkone": "You need to choose an icon."
+            },
+            "validation": {
+              "kursONazwieJuzIstnieje": "A course named “{{name}}” already exists.",
+              "podobnaNazwaJuzIstnieje": "A similar name already exists: “{{name}}”."
+            },
+            "textChild": {
+              "nowyKurs": "NEW COURSE"
+            },
+            "accessibilityLabel": {
+              "przejdzDoUstawienZawartosciKursu": "Go to course content settings"
+            },
+            "text": {
+              "dalej": "next"
+            }
+          }
+        },
+        "courseSettings": {
+          "courseSettings": {
+            "message": {
+              "brakZawartosciKursuUzupelnijFiszki": "No course content. Add flashcards first.",
+              "dodajPrzynajmniejJednaFiszkePrzed": "Add at least one flashcard before settings.",
+              "nieUdaloSieOdczytacDanych": "Could not read creator data.",
+              "brakNazwyLubIkonyKursu": "Missing course name or icon.",
+              "brakFiszekDoZapisania": "No flashcards to save.",
+              "dodajPrzynajmniejJednaFiszke": "Add at least one flashcard.",
+              "kursZapisany": "Course saved!",
+              "nieUdaloSieStworzycKursu": "Could not create the course."
+            },
+            "accessibilityLabel": {
+              "wrocDoUstawianiaZawartosciKursu": "Go back to setting course content",
+              "stworzKursZAktualnaZawartoscia": "Create course with current content and settings"
+            },
+            "text": {
+              "stworz": "Create"
+            }
+          }
+        }
+      },
+      "pincourse": {
+        "coursePin": {
+          "coursePin": {
+            "textChild": {
+              "czegoSieUczymy": "What are we learning?",
+              "brakKursowJezykowych": "No language courses",
+              "miniKursy": "Mini-courses",
+              "brakKursowWiedzyOgolnej": "No general knowledge courses",
+              "kiedysBedzieTuIchWiecej": "There will be more here someday :)"
+            },
+            "accessibilityLabel": {
+              "filtrTypuKursow": "Course type filter",
+              "przejdzDalejDoAktywacji": "Continue to activation"
+            },
+            "text": {
+              "zrobWlasny": "make your own"
+            }
+          }
+        }
+      }
+    },
+    "flashcards": {
+      "flashcards": {
+        "flashcards": {
+          "title": {
+            "brakWybranegoKursu": "No course selected",
+            "brakFiszekWKursie": "No flashcards in the course"
+          },
+          "accessibilityLabel": {
+            "dodajNoweFiszkiDoPudelek": "Add new flashcards to boxes"
+          }
+        }
+      }
+    },
+    "home": {
+      "home": {
+        "home": {
+          "title": {
+            "stworz": "Create",
+            "statystyki": "Statistics",
+            "przewodnik": "Guide",
+            "wsparcie": "Support"
+          },
+          "subtitle": {
+            "przypieteKursy": "Pinned courses",
+            "kreatorKursow": "Course creator",
+            "zobaczWyniki": "View results",
+            "instrukcjeIWskazowki": "Instructions and tips",
+            "pomocIInformacje": "Help and information"
+          },
+          "quotes": [
+            {
+              "text": "You do not have to be great to start. You have to start to be great.",
+              "author": "Zig Ziglar"
+            },
+            {
+              "text": "Do not wait. The time will never be just right.",
+              "author": "Napoleon Hill"
+            },
+            {
+              "text": "Amateurs sit and wait for inspiration. The rest just get up and go to work.",
+              "author": "Stephen King"
+            },
+            {
+              "text": "Start where you are. Use what you have. Do what you can.",
+              "author": "Arthur Ashe"
+            },
+            {
+              "text": "The secret of getting ahead is getting started.",
+              "author": "Mark Twain"
+            },
+            {
+              "text": "Motivation gets you started. Habit keeps you going.",
+              "author": "Jim Ryun"
+            },
+            {
+              "text": "Either you run the day, or the day runs you.",
+              "author": "Jim Rohn"
+            },
+            {
+              "text": "Action is the foundational key to every success.",
+              "author": "Pablo Picasso"
+            },
+            {
+              "text": "Nothing will work unless you do.",
+              "author": "Maya Angelou"
+            },
+            {
+              "text": "Today I will do what others will not, so tomorrow I can do what others cannot.",
+              "author": "Jerry Rice"
+            },
+            {
+              "text": "To give anything less than your best is to sacrifice the gift.",
+              "author": "Steve Prefontaine"
+            },
+            {
+              "text": "Success is the sum of small efforts, repeated day in and day out.",
+              "author": "Robert Collier"
+            },
+            {
+              "text": "I have missed, lost, and failed.. and that is why I win.",
+              "author": "Michael Jordan"
+            },
+            {
+              "text": "You do not have to be extreme. You just have to be consistent.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "If you do not do it for yourself, nobody will do it for you.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Your competition is working while you sleep.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Even slow progress is progress. Be proud that you keep showing up.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "One day or day one. You decide.",
+              "author": "Paulo Coelho"
+            },
+            {
+              "text": "What you are not changing, you are choosing.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Nobody will do it for you. You are the creator and destroyer of your own destiny.",
+              "author": "u/prashantpatel518 (Reddit)"
+            },
+            {
+              "text": "Nothing changes if nothing changes.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Either way, time will pass.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "We have to be our own coaches, because only we are always available.",
+              "author": "Steven Pressfield"
+            },
+            {
+              "text": "You miss 100% of the shots you do not take.",
+              "author": "Wayne Gretzky"
+            },
+            {
+              "text": "To give anything less than your best is to sacrifice the gift.",
+              "author": "Steve Prefontaine"
+            },
+            {
+              "text": "Sometimes it is better to do it well, and sometimes it is better to do it now.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "A year from now, you will wish you had started today.",
+              "author": "Karen Lamb"
+            },
+            {
+              "text": "Do you remember how badly you wanted to be where you are now?",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Success is rented, and the rent is due every day.",
+              "author": "Rory Vaden"
+            },
+            {
+              "text": "We must all suffer from one of two pains: the pain of discipline or the pain of regret.",
+              "author": "Jim Rohn"
+            },
+            {
+              "text": "There are no shortcuts.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "Build your own dreams, or someone else will hire you to build theirs.",
+              "author": "Farrah Gray"
+            },
+            {
+              "text": "Something imperfect today is better than something perfect tomorrow.",
+              "author": "Anonymous"
+            },
+            {
+              "text": "You cannot plow a field by turning it over in your mind. To begin, begin.",
+              "author": "Gordon B. Hinckley"
+            },
+            {
+              "text": "The master has failed more times than the beginner has even tried.",
+              "author": "Stephen McCranie"
+            },
+            {
+              "text": "The trouble is, you think you have time.",
+              "author": "Anonymous"
+            }
+          ]
+        }
+      }
+    },
+    "review": {
+      "courses": {
+        "coursesReview": {
+          "coursesReview": {
+            "textChild": {
+              "nieMaszJeszczePrzypietychKursow": "You do not have any courses pinned for reviews yet.",
+              "twoje": "Yours",
+              "nieMaszJeszczeWlasnychFiszek": "You do not have any custom flashcards yet.",
+              "wszystkieKursyMajaWylaczonePowtorki": "All courses have reviews disabled."
+            },
+            "title": {
+              "miniKursy": "Mini-courses"
+            }
+          }
+        }
+      }
+    },
+    "stats": {
+      "stats": {
+        "stats": {
+          "textChild": {
+            "codziennaPassa": "Daily streak"
+          }
+        }
+      }
     }
   },
   "repeats": {
@@ -1171,14 +2059,14 @@
       "english": "English"
     },
     "cardTypes": {
-      "knowDontKnow": "Know / Don't know",
+      "knowDontKnow": "I know / I don't know",
       "trueFalse": "True / False"
     },
     "messages": {
       "duplicateCourseName": "This course name is already taken."
     },
     "a11y": {
-      "backToCoursesPanel": "Back to courses panel"
+      "backToCoursesPanel": "Go back to the courses panel"
     },
     "format": {
       "flashcardsValue": "flashcards: {{value}}"

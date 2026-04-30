@@ -45,6 +45,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     columnGap: 12,
     marginTop: 8,
   },
+  legalButtonText: {
+    lineHeight: 18,
+  },
   status: {
     marginTop: 10,
     fontSize: 13,

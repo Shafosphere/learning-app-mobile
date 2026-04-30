@@ -73,7 +73,7 @@ export const CourseGroupList = ({
                                         <Text
                                             style={[styles.groupHeaderCode, { fontSize: 24 }]}
                                         >
-                                            {group.category.label.toUpperCase()}
+                                            {t(group.category.labelKey).toUpperCase()}
                                         </Text>
                                     </View>
                                 ) : (

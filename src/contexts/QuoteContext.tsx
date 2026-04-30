@@ -9,6 +9,7 @@ import {
   useState,
 } from "react";
 import { useSettings } from "./SettingsContext";
+import { useTranslation } from "react-i18next";
 
 export interface QuoteTriggerRequest {
   trigger: string;
@@ -16,6 +17,7 @@ export interface QuoteTriggerRequest {
   cooldownMs?: number;
   probability?: number;
   respectGlobalCooldown?: boolean;
+  excludeQuoteIds?: string[];
   excludeQuoteTexts?: string[];
 }
 
@@ -45,6 +47,7 @@ const QuoteContext = createContext<QuoteContextType>({
 
 export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const { quotesEnabled } = useSettings();
+  const { t } = useTranslation();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const lastQuoteTimestampRef = useRef<number>(0);
@@ -56,17 +59,26 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const lastCategoryQuoteRef =
     useRef<Partial<Record<QuoteCategory, Quote | null>>>({});
 
-  const showQuote = useCallback((category: QuoteCategory, excludeQuoteTexts: string[] = []) => {
+  const showQuote = useCallback((category: QuoteCategory, excludeQuoteTexts: string[] = [], excludeQuoteIds: string[] = []) => {
     const excludedTexts = new Set(excludeQuoteTexts);
-    const availableQuotes = QUOTES.filter(
-      (q) => q.category === category && !excludedTexts.has(q.text)
+    const excludedIds = new Set(excludeQuoteIds);
+    const localizedQuotes: Quote[] = QUOTES.map((q) => ({
+      ...q,
+      text: t(q.textKey),
+      author: q.authorKey ? t(q.authorKey) : undefined,
+    }));
+    const availableQuotes = localizedQuotes.filter(
+      (q) =>
+        q.category === category &&
+        !excludedIds.has(q.id) &&
+        !excludedTexts.has(q.text)
     );
 
     // Fallback to general if no quotes found for category
     const pool =
       availableQuotes.length > 0
         ? availableQuotes
-        : QUOTES.filter((q) => q.category === "general");
+        : localizedQuotes.filter((q) => q.category === "general");
 
     if (pool.length === 0) return;
 
@@ -126,7 +138,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
     logQuote("show", { category, text: candidate.text });
     setQuote(candidate);
     setIsVisible(true);
-  }, []);
+  }, [t]);
 
   const triggerQuote = useCallback(
     (request: QuoteTriggerRequest) => {
@@ -141,6 +153,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
         cooldownMs = 5 * 60 * 1000,
         probability = 1,
         respectGlobalCooldown = true,
+        excludeQuoteIds = [],
         excludeQuoteTexts = [],
       } = request;
 
@@ -186,7 +199,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
       }
 
       logQuote("fire", { trigger, category, cooldownMs, respectGlobalCooldown });
-      showQuote(category, excludeQuoteTexts);
+      showQuote(category, excludeQuoteTexts, excludeQuoteIds);
     },
     [quotesEnabled, showQuote]
   );

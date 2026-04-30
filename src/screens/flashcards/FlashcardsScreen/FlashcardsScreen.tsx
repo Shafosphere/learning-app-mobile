@@ -1559,7 +1559,9 @@ export default function Flashcards() {
     isImmediateActionLockActive;
   const cardActionsConfirmDisabled =
     isActionCooldownActive || isImmediateActionLockActive;
-  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
+  const cardActionsConfirmLabel = isExplanationVisible
+    ? t("flashcards.card.actions.ok")
+    : t("flashcards.card.actions.confirm");
   const addButtonDisabled = downloadDisabled;
   const shouldShowFloatingAdd =
     shouldShowBoxes &&

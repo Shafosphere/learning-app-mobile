@@ -94,7 +94,8 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
   badge: {
     minWidth: 68,
-    borderRadius: 12,
+    borderRadius: 999,
+    overflow: "hidden",
     paddingVertical: 7,
     paddingHorizontal: 8,
     backgroundColor: `${colors.my_red}14`,

@@ -5,7 +5,10 @@ import { FlatList, View, Text, useWindowDimensions } from "react-native";
 import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useStyles } from "./HomeScreen-styles";
-import { quotes } from "@/src/constants/homeQuotes";
+import {
+  HOME_QUOTES_TRANSLATION_KEY,
+  normalizeHomeQuotes,
+} from "@/src/constants/homeQuotes";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -19,7 +22,13 @@ export default function HomeScreen() {
   const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
 
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)];
+  const quotes = normalizeHomeQuotes(
+    t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true })
+  );
+  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)] ?? {
+    text: "",
+    author: "",
+  };
 
   const goToCoursePanel = () => {
     router.push("/coursepanel");
@@ -45,35 +54,35 @@ export default function HomeScreen() {
     {
       key: "courses",
       title: t("repeats.labels.courses"),
-      subtitle: "Przypięte kursy",
+      subtitle: t("screens.home.home.home.subtitle.przypieteKursy"),
       image: logo,
       action: goToCoursePanel,
     },
     {
       key: "custom",
       title: t("screens.home.home.home.title.stworz"),
-      subtitle: "Kreator kursów",
+      subtitle: t("screens.home.home.home.subtitle.kreatorKursow"),
       image: customImage,
       action: goToCustomCourse,
     },
     {
       key: "stats",
       title: t("screens.home.home.home.title.statystyki"),
-      subtitle: "Zobacz wyniki",
+      subtitle: t("screens.home.home.home.subtitle.zobaczWyniki"),
       image: statsImage,
       action: goToStats,
     },
     {
       key: "wiki",
       title: t("screens.home.home.home.title.przewodnik"),
-      subtitle: "Instrukcje i wskazówki",
+      subtitle: t("screens.home.home.home.subtitle.instrukcjeIWskazowki"),
       image: tutorialImage,
       action: goToWiki,
     },
     {
       key: "support",
       title: t("screens.home.home.home.title.wsparcie"),
-      subtitle: "Pomoc i informacje",
+      subtitle: t("screens.home.home.home.subtitle.pomocIInformacje"),
       image: supportImage,
       action: goToSupport,
     },

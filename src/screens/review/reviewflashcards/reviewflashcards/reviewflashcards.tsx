@@ -38,6 +38,7 @@ import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { Animated, ScrollView, View } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
+import { useTranslation } from "react-i18next";
 import { useStyles } from "./reviewflashcards-styles";
 
 const BOX_SPAM_WINDOW_MS = 2000;
@@ -101,6 +102,7 @@ export default function ReviewFlashcardsPlaceholder() {
     onboarding?: string;
   }>();
   const styles = useStyles();
+  const { t } = useTranslation();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const {
     actionButtonsPosition,
@@ -862,7 +864,9 @@ export default function ReviewFlashcardsPlaceholder() {
   const handleCardActionsConfirm = () => handleConfirm();
   const cardActionsDownloadDisabled = true;
   const cardActionsConfirmDisabled = false;
-  const cardActionsConfirmLabel = isExplanationVisible ? "OK" : "ZATWIERDŹ";
+  const cardActionsConfirmLabel = isExplanationVisible
+    ? t("flashcards.card.actions.ok")
+    : t("flashcards.card.actions.confirm");
   const effectiveTrueFalseButtonsVariant =
     selectedItem?.type === "know_dont_know" || selectedItem?.answerOnly
       ? "know_dont_know"

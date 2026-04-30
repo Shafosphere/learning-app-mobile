@@ -8,6 +8,7 @@ import { Link } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
 import { Linking, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import type { TFunction } from "i18next";
 
 type DiagnosticEntry = {
   key: "version" | "build" | "device" | "system";
@@ -15,47 +16,48 @@ type DiagnosticEntry = {
   value: string;
 };
 
-function buildDiagnosticEntries(): DiagnosticEntry[] {
+function buildDiagnosticEntries(t: TFunction): DiagnosticEntry[] {
+  const unavailable = t("support.diagnostics.unavailable");
   const version =
     Constants.expoConfig?.version ??
     Constants.nativeAppVersion ??
-    "niedostępny";
-  const build = Constants.nativeBuildVersion ?? "niedostępny";
-  const deviceModel = Device.modelName ?? "niedostępny";
-  const osName = Device.osName ?? "System";
-  const osVersion = Device.osVersion ?? "niedostępny";
+    unavailable;
+  const build = Constants.nativeBuildVersion ?? unavailable;
+  const deviceModel = Device.modelName ?? unavailable;
+  const osName = Device.osName ?? t("support.diagnostics.labels.system");
+  const osVersion = Device.osVersion ?? unavailable;
 
   return [
     {
       key: "version",
-      label: "Wersja aplikacji",
+      label: t("support.diagnostics.labels.version"),
       value: version,
     },
     {
       key: "build",
-      label: "Build",
+      label: t("support.diagnostics.labels.build"),
       value: build,
     },
     {
       key: "device",
-      label: "Model urządzenia",
+      label: t("support.diagnostics.labels.device"),
       value: deviceModel,
     },
     {
       key: "system",
-      label: "System",
+      label: t("support.diagnostics.labels.system"),
       value: `${osName} ${osVersion}`.trim(),
     },
   ];
 }
 
-function formatBody(selectedDiagnostics: DiagnosticEntry[]) {
-  const intro = "Opisz problem (kroki, co widzisz):";
+function formatBody(selectedDiagnostics: DiagnosticEntry[], t: TFunction) {
+  const intro = t("support.report.bodyIntro");
   const diagnostics = selectedDiagnostics
     .map((entry) => `${entry.label}: ${entry.value}`)
     .join("\n");
 
-  return `${intro}\n\n---\nO aplikacji (dołączone automatycznie):\n${diagnostics}`;
+  return `${intro}\n\n---\n${t("support.report.bodyDiagnosticsTitle")}:\n${diagnostics}`;
 }
 
 export default function SupportScreen() {
@@ -63,8 +65,11 @@ export default function SupportScreen() {
   const { t } = useTranslation();
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const diagnosticEntries = useMemo(buildDiagnosticEntries, []);
-  const emailBody = useMemo(() => formatBody(diagnosticEntries), [diagnosticEntries]);
+  const diagnosticEntries = useMemo(() => buildDiagnosticEntries(t), [t]);
+  const emailBody = useMemo(
+    () => formatBody(diagnosticEntries, t),
+    [diagnosticEntries, t]
+  );
 
   const openMailto = useCallback(
     async (subject: string, body: string, successMessage: string) => {
@@ -254,6 +259,8 @@ export default function SupportScreen() {
                 text={t("legal.entry.licensesButton")}
                 color="my_green"
                 width={160}
+                textLines={2}
+                textStyle={styles.legalButtonText}
               />
             </Link>
           </View>

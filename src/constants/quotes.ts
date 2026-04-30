@@ -18,6 +18,8 @@ export type QuoteCategory =
   | "general";
 
 export interface Quote {
+  id: string;
+  textKey: string;
   text: string;
   author?: string;
   category: QuoteCategory;
@@ -29,271 +31,330 @@ export interface Quote {
   sequenceIndex?: number;
 }
 
-export const QUOTES: Quote[] = [
+export type QuoteDefinition = Omit<Quote, "text" | "author"> & {
+  authorKey?: string;
+};
+
+export const QUOTES: QuoteDefinition[] = [
   // --- Startup Time-Based ---
   // Morning (05:00 - 12:00)
   {
-    text: "Dzień dobry! Kawa już była?",
+    id: "startup_morning_0",
+    textKey: "quotes.reactions.startup_morning_0",
     category: "startup_morning",
   },
   {
-    text: "Wstawaj szkoda dnia! :D",
+    id: "startup_morning_1",
+    textKey: "quotes.reactions.startup_morning_1",
     category: "startup_morning",
   },
   {
-    text: "Słoneczko świeci (chyba), czas na naukę.",
+    id: "startup_morning_2",
+    textKey: "quotes.reactions.startup_morning_2",
     category: "startup_morning",
   },
   {
-    text: "Pora obudzić ten mózg.",
+    id: "startup_morning_3",
+    textKey: "quotes.reactions.startup_morning_3",
     category: "startup_morning",
   },
 
   // Day (12:00 - 18:00)
   {
-    text: "Hejooo, co tam?",
+    id: "startup_day_0",
+    textKey: "quotes.reactions.startup_day_0",
     category: "startup_day",
   },
   {
-    text: "Gotowy na powtóreczki?",
+    id: "startup_day_1",
+    textKey: "quotes.reactions.startup_day_1",
     category: "startup_day",
   },
   {
-    text: "Działamy, działamy!",
+    id: "startup_day_2",
+    textKey: "quotes.reactions.startup_day_2",
     category: "startup_day",
   },
   {
-    text: "Szybka sesyjka?",
+    id: "startup_day_3",
+    textKey: "quotes.reactions.startup_day_3",
     category: "startup_day",
   },
 
   // Evening (18:00 - 22:00)
   {
-    text: "Wieczorne zakuwanie? Szanuję.",
+    id: "startup_evening_0",
+    textKey: "quotes.reactions.startup_evening_0",
     category: "startup_evening",
   },
   {
-    text: "Dobry wieczór :)",
+    id: "startup_evening_1",
+    textKey: "quotes.reactions.startup_evening_1",
     category: "startup_evening",
   },
   {
-    text: "Relaks przy fiszkach?",
+    id: "startup_evening_2",
+    textKey: "quotes.reactions.startup_evening_2",
     category: "startup_evening",
   },
 
   // Night (22:00 - 05:00)
   {
-    text: "Jeszcze nie śpisz? :o",
+    id: "startup_night_0",
+    textKey: "quotes.reactions.startup_night_0",
     category: "startup_night",
   },
   {
-    text: "Nocna zmiana widzę.",
+    id: "startup_night_1",
+    textKey: "quotes.reactions.startup_night_1",
     category: "startup_night",
   },
   {
-    text: "Sowy górą!",
+    id: "startup_night_2",
+    textKey: "quotes.reactions.startup_night_2",
     category: "startup_night",
   },
   {
-    text: "Tylko nie siedź do rana...",
+    id: "startup_night_3",
+    textKey: "quotes.reactions.startup_night_3",
     category: "startup_night",
   },
 
   // --- First Time (narazie wyłączyłem) --- 
   {
-    text: "Uczyć się to nic innego jak przypominać sobie",
+    id: "first_time_0",
+    textKey: "quotes.reactions.first_time_0",
     category: "first_time",
   },
   {
-    text: "Każdy ekspert był kiedyś początkujący.",
+    id: "first_time_1",
+    textKey: "quotes.reactions.first_time_1",
     category: "first_time",
   },
 
   // --- Return (long break) ---
   {
-    text: "O, wróciłeś! Tęskniłem.",
+    id: "return_0",
+    textKey: "quotes.reactions.return_0",
     category: "return",
   },
   {
-    text: "Dawno cię nie było!",
+    id: "return_1",
+    textKey: "quotes.reactions.return_1",
     category: "return",
   },
 
   // --- Wins ---
   // Win Fast (<3s)
   {
-    text: "Speedrun?!",
+    id: "win_fast_0",
+    textKey: "quotes.reactions.win_fast_0",
     category: "win_fast",
   },
   {
-    text: "Ale szybko!",
+    id: "win_fast_1",
+    textKey: "quotes.reactions.win_fast_1",
     category: "win_fast",
   },
   {
-    text: "Błyskawica!",
+    id: "win_fast_2",
+    textKey: "quotes.reactions.win_fast_2",
     category: "win_fast",
   },
   {
-    text: "EZ",
+    id: "win_fast_3",
+    textKey: "quotes.reactions.win_fast_3",
     category: "win_fast",
   },
 
   // Win Mastery (Box 5)
   {
-    text: "Sigma.",
+    id: "win_mastery_0",
+    textKey: "quotes.reactions.win_mastery_0",
     category: "win_mastery",
   },
   {
-    text: "Mistrzostwo świata!",
+    id: "win_mastery_1",
+    textKey: "quotes.reactions.win_mastery_1",
     category: "win_mastery",
   },
   {
-    text: "Król/Królowa fiszek!",
+    id: "win_mastery_2",
+    textKey: "quotes.reactions.win_mastery_2",
     category: "win_mastery",
   },
 
   // Win Standard
   {
-    text: "Tak jest!",
+    id: "win_standard_0",
+    textKey: "quotes.reactions.win_standard_0",
     category: "win_standard",
   },
   {
-    text: "Dobra robota.",
+    id: "win_standard_1",
+    textKey: "quotes.reactions.win_standard_1",
     category: "win_standard",
   },
   {
-    text: "Piąteczka! :D",
+    id: "win_standard_2",
+    textKey: "quotes.reactions.win_standard_2",
     category: "win_standard",
   },
   {
-    text: ":D",
+    id: "win_standard_3",
+    textKey: "quotes.reactions.win_standard_3",
     category: "win_standard",
   },
   {
-    text: "Lecisz z tym!",
+    id: "win_standard_4",
+    textKey: "quotes.reactions.win_standard_4",
     category: "win_standard",
   },
 
   // --- Streak ---
   {
-    text: "Ale seria! :o",
+    id: "streak_0",
+    textKey: "quotes.reactions.streak_0",
     category: "streak",
   },
   {
-    text: "Nie do zatrzymania!",
+    id: "streak_1",
+    textKey: "quotes.reactions.streak_1",
     category: "streak",
   },
   {
-    text: "On fire! 🔥",
+    id: "streak_2",
+    textKey: "quotes.reactions.streak_2",
     category: "streak",
   },
 
   // --- Comeback ---
   {
-    text: "No w końcu!",
+    id: "comeback_0",
+    textKey: "quotes.reactions.comeback_0",
     category: "comeback",
   },
   {
-    text: "Wracamy do gry!",
+    id: "comeback_1",
+    textKey: "quotes.reactions.comeback_1",
     category: "comeback",
   },
   {
-    text: "Odbicie od dna!",
+    id: "comeback_2",
+    textKey: "quotes.reactions.comeback_2",
     category: "comeback",
   },
 
   // --- Loss ---
   {
-    text: "Oj...",
+    id: "loss_0",
+    textKey: "quotes.reactions.loss_0",
     category: "loss",
   },
   {
-    text: "Zdarza się najlepszym.",
+    id: "loss_1",
+    textKey: "quotes.reactions.loss_1",
     category: "loss",
   },
   {
-    text: "Następnym razem pójdzie lepiej.",
+    id: "loss_2",
+    textKey: "quotes.reactions.loss_2",
     category: "loss",
   },
   {
-    text: ":(",
+    id: "loss_3",
+    textKey: "quotes.reactions.loss_3",
     category: "loss",
   },
   {
-    text: "Głowa do góry.",
+    id: "loss_4",
+    textKey: "quotes.reactions.loss_4",
     category: "loss",
   },
 
   // --- Long Think ---
   {
-    text: "Hmmmmm...",
+    id: "long_think_0",
+    textKey: "quotes.reactions.long_think_0",
     category: "long_think",
   },
 
   // --- Hints ---
   {
-    text: "huh",
+    id: "hint_0",
+    textKey: "quotes.reactions.hint_0",
     category: "hint",
   },
   {
-    text: "Znowu to samo? :(",
+    id: "hint_1",
+    textKey: "quotes.reactions.hint_1",
     category: "hint",
   },
 
   // --- Box Spam (Sequential) ---
   {
-    text: "co tak go klikasz?",
+    id: "box_spam_0",
+    textKey: "quotes.reactions.box_spam_0",
     category: "box_spam",
     sequenceIndex: 0,
   },
   {
-    text: "zostaw mojego braciaka! :c",
+    id: "box_spam_1",
+    textKey: "quotes.reactions.box_spam_1",
     category: "box_spam",
     sequenceIndex: 1,
   },
   {
-    text: "przestań go klikać!",
+    id: "box_spam_2",
+    textKey: "quotes.reactions.box_spam_2",
     category: "box_spam",
     sequenceIndex: 2,
   },
   {
-    text: "ZOSTAW GO!",
+    id: "box_spam_3",
+    textKey: "quotes.reactions.box_spam_3",
     category: "box_spam",
     sequenceIndex: 3,
   },
   {
-    text: "...",
+    id: "box_spam_4",
+    textKey: "quotes.reactions.box_spam_4",
     category: "box_spam",
     sequenceIndex: 4,
   },
   {
-    text: "serio, przestań.",
+    id: "box_spam_5",
+    textKey: "quotes.reactions.box_spam_5",
     category: "box_spam",
     sequenceIndex: 5,
   },
 
   // --- Easter ---
   {
-    text: "OwO",
+    id: "easter_0",
+    textKey: "quotes.reactions.easter_0",
     category: "easter",
   },
   {
-    text: "ała!",
+    id: "easter_1",
+    textKey: "quotes.reactions.easter_1",
     category: "easter",
   },
   {
-    text: "przestań tykać logo >:<",
+    id: "easter_2",
+    textKey: "quotes.reactions.easter_2",
     category: "easter",
   },
   {
-    text: "I kto za to płaci?",
+    id: "easter_3",
+    textKey: "quotes.reactions.easter_3",
     category: "easter",
   },
 
   // --- General Fallback ---
   {
-    text: "Powodzenia!",
+    id: "general_0",
+    textKey: "quotes.reactions.general_0",
     category: "general",
   },
 ];
-

@@ -206,8 +206,8 @@ export default function CoursePinScreen() {
     };
 
     const sortedGroups = Array.from(map.values()).sort((a, b) => {
-      const categoryA = a.category?.label ?? "";
-      const categoryB = b.category?.label ?? "";
+      const categoryA = a.category ? t(a.category.labelKey) : "";
+      const categoryB = b.category ? t(b.category.labelKey) : "";
       const categoryDiff = categoryA.localeCompare(categoryB);
       if (categoryDiff !== 0) return categoryDiff;
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
@@ -220,7 +220,7 @@ export default function CoursePinScreen() {
     });
 
     return sortedGroups;
-  }, [nativeLanguage, officialCourses, pinnedOfficialCourseIds]);
+  }, [nativeLanguage, officialCourses, pinnedOfficialCourseIds, t]);
 
   const hasAnyPinned = useMemo(() => {
     return pinnedOfficialCourseIds.length > 0;
@@ -263,9 +263,11 @@ export default function CoursePinScreen() {
 
       const targetCode = group.targetLang ? group.targetLang.toUpperCase() : "?";
       const sourceCode = group.sourceLang ? group.sourceLang.toUpperCase() : "?";
-      const title = group.category?.label ?? (group.sourceLang
-        ? `${targetCode} / ${sourceCode}`
-        : targetCode);
+      const title = group.category
+        ? t(group.category.labelKey)
+        : group.sourceLang
+          ? `${targetCode} / ${sourceCode}`
+          : targetCode;
 
       const icon: AccordionGroupItem["icon"] = group.category?.icon
         ? { kind: "fa6", name: group.category.icon }

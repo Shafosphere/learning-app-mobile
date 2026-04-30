@@ -39,6 +39,8 @@ export function CardActions({
       width={140}
       onPress={onDownload}
       disabled={downloadDisabled}
+      textLines={2}
+      textStyle={styles.cardActionButtonText}
     />
   );
 

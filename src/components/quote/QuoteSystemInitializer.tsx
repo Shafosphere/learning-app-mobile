@@ -73,14 +73,14 @@ export default function QuoteSystemInitializer() {
                             category = "startup_night";
                         }
 
-                        const excludeQuoteTexts: string[] = [];
+                        const excludeQuoteIds: string[] = [];
                         if (category === "startup_day") {
                             try {
                                 if (
                                     lastRefreshedAtRef.current != null &&
                                     dueReviewCountRef.current <= 0
                                 ) {
-                                    excludeQuoteTexts.push("Gotowy na powtóreczki?");
+                                    excludeQuoteIds.push("startup_day_1");
                                 }
                             } catch (error) {
                                 console.warn("[QuoteSystemInitializer] failed to count due reviews", error);
@@ -92,7 +92,7 @@ export default function QuoteSystemInitializer() {
                             category: category,
                             respectGlobalCooldown: false,
                             cooldownMs: 60 * 60 * 1000, // max raz na godzinę
-                            excludeQuoteTexts,
+                            excludeQuoteIds,
                         });
                         })();
                     }, STARTUP_DELAY_MS);

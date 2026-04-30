@@ -131,7 +131,8 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
   },
   detailsBadge: {
-    borderRadius: 14,
+    borderRadius: 999,
+    overflow: "hidden",
     paddingVertical: 6,
     paddingHorizontal: 10,
     flexShrink: 0,

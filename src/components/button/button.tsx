@@ -41,17 +41,23 @@ export default function MyButton({
   pressedStyle,
 }: MyButtonProps) {
   const styles = useStyles();
-  const { colors } = useSettings();
+  const { colors, highContrastEnabled } = useSettings();
   const derivedLabel =
     accessibilityLabel ?? (typeof text === "string" ? text : undefined);
-  const backgroundColor = disabled ? colors.border : colors[color];
+  const disabledHighContrast = disabled && highContrastEnabled;
+  const backgroundColor = disabled
+    ? disabledHighContrast
+      ? colors.secondBackground
+      : colors.border
+    : colors[color];
 
   const renderContent = (pressed: boolean) => {
     if (children) return children;
     if (text === undefined) return null;
 
-    const textColor =
-      color === "my_yellow" && !disabled
+    const textColor = disabledHighContrast
+      ? colors.paragraph
+      : color === "my_yellow" && !disabled
         ? pressed
           ? colors.headline
           : colors.font
@@ -59,7 +65,12 @@ export default function MyButton({
 
     return (
       <Text
-        style={[styles.text, { color: textColor }, textStyle]}
+        style={[
+          styles.text,
+          { color: textColor },
+          textStyle,
+          disabledHighContrast && { color: textColor },
+        ]}
         allowFontScaling={false}
         numberOfLines={textLines}
         adjustsFontSizeToFit
@@ -80,6 +91,10 @@ export default function MyButton({
       style={({ pressed }) => [
         styles.button,
         { width, backgroundColor },
+        disabledHighContrast && {
+          borderColor: colors.border,
+          borderWidth: 2,
+        },
         !disabled && pressed && (pressedStyle ?? styles.pressed),
         style,
       ]}

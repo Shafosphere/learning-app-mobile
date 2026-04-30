@@ -1,7 +1,7 @@
 
 export interface CourseCategory {
     id: string;
-    label: string;
+    labelKey: string;
     descriptionKey: string;
     icon?: string;
 }
@@ -9,43 +9,43 @@ export interface CourseCategory {
 export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
     geography: {
         id: "geography",
-        label: "Geografia",
+        labelKey: "constants.courseCategories.label.geography",
         descriptionKey: "constants.courseCategories.description.stoliceIFlagi",
         icon: "earth-europe",
     },
     kosmos: {
         id: "kosmos",
-        label: "Kosmos",
+        labelKey: "constants.courseCategories.label.kosmos",
         descriptionKey: "constants.courseCategories.description.astronomiaGwiazdozbiory",
         icon: "rocket",
     },
     historia: {
         id: "historia",
-        label: "historia",
+        labelKey: "constants.courseCategories.label.historia",
         descriptionKey: "constants.courseCategories.description.historiaPolski",
         icon: "landmark",
     },
     mitologia: {
         id: "mitologia",
-        label: "Mitologia",
+        labelKey: "constants.courseCategories.label.mitologia",
         descriptionKey: "constants.courseCategories.description.mityBogowieIBohaterowie",
         icon: "book-open",
     },
     programming: {
         id: "programming",
-        label: "Programowanie",
+        labelKey: "constants.courseCategories.label.programming",
         descriptionKey: "constants.courseCategories.description.javascript",
         icon: "code",
     },
     science: {
         id: "science",
-        label: "Nauka",
+        labelKey: "constants.courseCategories.label.science",
         descriptionKey: "constants.courseCategories.description.astronomiaGwiazdozbiory",
         icon: "atom",
     },
     math: {
         id: "Matura",
-        label: "Matura",
+        labelKey: "constants.courseCategories.label.math",
         descriptionKey: "constants.courseCategories.description.matematyka",
         icon: "calculator",
     },

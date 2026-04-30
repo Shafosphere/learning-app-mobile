@@ -206,6 +206,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     gap: 20,
   },
+  cardActionButtonText: {
+    lineHeight: 18,
+  },
   containerInput: {
     position: "relative",
     width: "100%",
