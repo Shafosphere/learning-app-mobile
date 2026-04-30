@@ -380,6 +380,12 @@ function stageToBoxName(stage: number) {
   return "boxFive";
 }
 
+function getVisibleTextInputs(screen: ReturnType<typeof render>) {
+  return screen
+    .UNSAFE_queryAllByType(TextInput)
+    .filter((input) => input.props.caretHidden !== true);
+}
+
 async function startReviewFromStage(
   screen: ReturnType<typeof render>,
   stage: number
@@ -394,7 +400,7 @@ async function startReviewFromStage(
 
   await waitFor(() => {
     expect(
-      screen.UNSAFE_queryAllByType(TextInput).length > 0 ||
+      getVisibleTextInputs(screen).length > 0 ||
         screen.queryByTestId("true-answer-button") != null
     ).toBe(true);
   });
@@ -409,7 +415,7 @@ async function renderAndForceCorrectionSwitch(
 
   await startReviewFromStage(screen, cards[0]?.stage ?? 1);
 
-  const inputs = screen.UNSAFE_getAllByType(TextInput);
+  const inputs = getVisibleTextInputs(screen);
   await act(async () => {
     fireEvent.changeText(inputs[0], "__wrong_answer__");
   });
@@ -484,7 +490,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, sourceCard.stage);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -726,7 +732,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
     });
 
-    expect(screen.UNSAFE_queryAllByType(TextInput)).toHaveLength(0);
+    expect(getVisibleTextInputs(screen)).toHaveLength(0);
   });
 
   it("keeps the add flashcards button disabled on the review screen", async () => {
@@ -770,7 +776,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, 4);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -808,7 +814,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, 1);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -818,7 +824,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.queryByText("kot")).not.toBeNull();
     });
 
-    const correctionInputs = screen.UNSAFE_getAllByType(TextInput);
+    const correctionInputs = getVisibleTextInputs(screen);
     await act(async () => {
       fireEvent.changeText(correctionInputs[0], "kot");
     });
@@ -853,7 +859,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, 4);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "planeta");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "planeta");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -887,7 +893,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await act(async () => {
       jest.setSystemTime(new Date("2026-04-21T10:00:04.000Z"));
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -934,7 +940,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, 4);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -965,7 +971,7 @@ describe("reviewflashcards correction desync regression", () => {
     await startReviewFromStage(screen, 5);
 
     await act(async () => {
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "kot");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -1002,7 +1008,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await act(async () => {
       jest.setSystemTime(new Date("2026-04-21T10:00:03.500Z"));
-      fireEvent.changeText(screen.UNSAFE_getAllByType(TextInput)[0], "__wrong_answer__");
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
     });
 
     fireEvent.press(screen.getByTestId("confirm-button"));
@@ -1029,7 +1035,7 @@ describe("reviewflashcards correction desync regression", () => {
     expect(loggedEvent?.durationMs).toBeGreaterThanOrEqual(2500);
     expect(loggedEvent?.durationMs).toBeLessThanOrEqual(3500);
 
-    const correctionInputs = screen.UNSAFE_getAllByType(TextInput);
+    const correctionInputs = getVisibleTextInputs(screen);
     await act(async () => {
       fireEvent.changeText(correctionInputs[0], "kot");
     });

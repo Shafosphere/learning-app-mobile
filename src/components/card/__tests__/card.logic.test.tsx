@@ -1,14 +1,43 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react-native";
+import { act, render, waitFor } from "@testing-library/react-native";
+import { Alert } from "react-native";
 
 import Card from "@/src/components/card/card";
+import { useCardFocusController } from "@/src/components/card/useCardFocusController";
+import { useFocusExecutor } from "@/src/components/card/useFocusExecutor";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { WordWithTranslations } from "@/src/types/boxes";
 
+let mockTextInputFocus = jest.fn();
+let mockTextInputBlur = jest.fn();
+
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
 }));
+
+jest.mock("react-native", () => {
+  // eslint-disable-next-line @typescript-eslint/no-require-imports
+  const React = require("react");
+  const RN = jest.requireActual("react-native");
+
+  const TextInput = React.forwardRef((props: Record<string, unknown>, ref: React.Ref<unknown>) => {
+    React.useImperativeHandle(ref, () => ({
+      focus: () => mockTextInputFocus(),
+      blur: () => mockTextInputBlur(),
+    }));
+
+    return React.createElement(RN.View, props);
+  });
+  TextInput.displayName = "TextInput";
+
+  return new Proxy(RN, {
+    get(target: Record<string, unknown>, prop: string | symbol) {
+      if (prop === "TextInput") return TextInput;
+      return target[prop as keyof typeof target];
+    },
+  });
+});
 
 jest.mock("@/src/components/card/card-styles", () => ({
   useStyles: jest.fn(() =>
@@ -21,8 +50,13 @@ jest.mock("@/src/components/card/card-styles", () => ({
   ),
 }));
 
+let latestCardHintProps: Record<string, unknown> | null = null;
+
 jest.mock("@/src/components/card/subcomponents/CardHint", () => ({
-  CardHint: () => null,
+  CardHint: (props: Record<string, unknown>) => {
+    latestCardHintProps = props;
+    return null;
+  },
 }));
 
 jest.mock("@/src/components/card/subcomponents/CardFrame", () => {
@@ -36,13 +70,7 @@ jest.mock("@/src/components/card/subcomponents/CardFrame", () => {
 });
 
 jest.mock("@/src/components/card/useCardFocusController", () => ({
-  useCardFocusController: jest.fn(() => ({
-    focusTarget: "none",
-    focusRequestId: 0,
-    requestFocus: jest.fn(),
-    onCorrection1Completed: jest.fn(),
-    onHintEditStarted: jest.fn(),
-  })),
+  useCardFocusController: jest.fn(),
 }));
 
 jest.mock("@/src/components/card/useFocusExecutor", () => ({
@@ -59,6 +87,10 @@ jest.mock("@/src/components/card/subcomponents/CardContentResolver", () => ({
 }));
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseCardFocusController = useCardFocusController as jest.Mock;
+const mockedUseFocusExecutor = useFocusExecutor as jest.Mock;
+
+let mockRequestFocus: jest.Mock;
 
 function makeCard(
   overrides: Partial<WordWithTranslations> & Pick<WordWithTranslations, "id">,
@@ -102,9 +134,35 @@ function createProps(overrides: Partial<CardProps> = {}): CardProps {
   };
 }
 
+function renderCard(
+  props: CardProps,
+  options: { textInputFocus?: jest.Mock; textInputBlur?: jest.Mock } = {},
+) {
+  mockTextInputFocus = options.textInputFocus ?? jest.fn();
+  mockTextInputBlur = options.textInputBlur ?? jest.fn();
+
+  return render(<Card {...props} />, {
+    createNodeMock: () => ({
+      focus: options.textInputFocus ?? jest.fn(),
+      blur: options.textInputBlur ?? jest.fn(),
+      scrollTo: jest.fn(),
+    }),
+  });
+}
+
 describe("Card logic props", () => {
   beforeEach(() => {
     latestResolverProps = null;
+    latestCardHintProps = null;
+    mockRequestFocus = jest.fn();
+    mockedUseCardFocusController.mockReturnValue({
+      focusTarget: "none",
+      focusRequestId: 0,
+      requestFocus: mockRequestFocus,
+      onCorrection1Completed: jest.fn(),
+      onHintEditStarted: jest.fn(),
+    });
+    mockedUseFocusExecutor.mockImplementation(() => undefined);
     mockedUseSettings.mockReturnValue({
       explanationOnlyOnWrong: false,
       showExplanationEnabled: false,
@@ -315,5 +373,219 @@ describe("Card logic props", () => {
       shouldCorrectRewers: true,
     });
     expect(setCorrectionRewers).toHaveBeenCalledWith("kot");
+  });
+
+  it("requests main focus when leaving correction mode", async () => {
+    const screen = renderCard(
+      createProps({
+        result: false,
+        correction: {
+          cardId: 16,
+          awers: "cat",
+          rewers: "kot",
+          input1: "",
+          input2: "",
+          mode: "demote",
+          promptText: "cat",
+          reversed: false,
+        },
+        selectedItem: makeCard({
+          id: 16,
+          text: "cat",
+          translations: ["kot"],
+        }),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(mockRequestFocus).toHaveBeenCalledWith("correction2");
+    });
+
+    mockRequestFocus.mockClear();
+
+    screen.rerender(
+      <Card
+        {...createProps({
+          result: null,
+          correction: null,
+          selectedItem: makeCard({
+            id: 16,
+            text: "cat",
+            translations: ["kot"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(mockRequestFocus).toHaveBeenCalledWith("main");
+    });
+    expect(mockRequestFocus).not.toHaveBeenCalledWith("none");
+  });
+
+  it("primes the keyboard bridge before confirming an answer that enters correction", async () => {
+    const confirm = jest.fn();
+    const textInputFocus = jest.fn();
+
+    renderCard(
+      createProps({
+        answer: "pies",
+        confirm,
+        selectedItem: makeCard({
+          id: 17,
+          text: "cat",
+          translations: ["kot"],
+        }),
+      }),
+      { textInputFocus },
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.handleConfirm).toEqual(expect.any(Function));
+    });
+
+    act(() => {
+      (latestResolverProps?.handleConfirm as () => void)();
+    });
+
+    expect(textInputFocus).toHaveBeenCalledTimes(1);
+    expect(confirm).toHaveBeenCalledWith("kot");
+    expect(textInputFocus.mock.invocationCallOrder[0]).toBeLessThan(
+      confirm.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("primes the keyboard bridge before completing correction input changes", async () => {
+    const wrongInputChange = jest.fn();
+    const textInputFocus = jest.fn();
+
+    renderCard(
+      createProps({
+        result: false,
+        correction: {
+          cardId: 18,
+          awers: "cat",
+          rewers: "kot",
+          input1: "",
+          input2: "",
+          mode: "demote",
+          promptText: "cat",
+          reversed: false,
+        },
+        wrongInputChange,
+        selectedItem: makeCard({
+          id: 18,
+          text: "cat",
+          translations: ["kot"],
+        }),
+      }),
+      { textInputFocus },
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.wrongInputChange).toEqual(expect.any(Function));
+    });
+
+    act(() => {
+      (latestResolverProps?.wrongInputChange as (
+        which: 1 | 2,
+        value: string,
+      ) => void)(2, "kot");
+    });
+
+    expect(textInputFocus).toHaveBeenCalledTimes(1);
+    expect(wrongInputChange).toHaveBeenCalledWith(2, "kot");
+    expect(textInputFocus.mock.invocationCallOrder[0]).toBeLessThan(
+      wrongInputChange.mock.invocationCallOrder[0],
+    );
+  });
+
+  it("uses a simple confirm alert for hints on cards that cannot be reversed", async () => {
+    const onHintUpdate = jest.fn();
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(jest.fn());
+
+    renderCard(
+      createProps({
+        onHintUpdate,
+        selectedItem: makeCard({
+          id: 19,
+          text: "Is this true?",
+          translations: ["true"],
+          type: "true_false",
+        }),
+      }),
+    );
+
+    act(() => {
+      (latestCardHintProps?.setHintDraft as (value: string) => void)("hint");
+    });
+
+    await waitFor(() => {
+      expect(latestCardHintProps?.hintDraft).toBe("hint");
+    });
+
+    act(() => {
+      (latestCardHintProps?.finishHintEditing as () => void)();
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      "Zapisać podpowiedź?",
+      "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+      expect.any(Array),
+    );
+
+    const buttons = alertSpy.mock.calls[0][2] as Array<{
+      text: string;
+      onPress?: () => void;
+    }>;
+    expect(buttons.map((button) => button.text)).toEqual([
+      "Anuluj",
+      "Zapisz",
+    ]);
+
+    act(() => {
+      buttons[1].onPress?.();
+    });
+
+    expect(onHintUpdate).toHaveBeenCalledWith(19, "hint", null);
+  });
+
+  it("keeps side-choice hint alert for normal cards that can be reversed", async () => {
+    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(jest.fn());
+
+    renderCard(
+      createProps({
+        selectedItem: makeCard({
+          id: 20,
+          text: "cat",
+          translations: ["kot"],
+        }),
+      }),
+    );
+
+    act(() => {
+      (latestCardHintProps?.setHintDraft as (value: string) => void)("hint");
+    });
+
+    await waitFor(() => {
+      expect(latestCardHintProps?.hintDraft).toBe("hint");
+    });
+
+    act(() => {
+      (latestCardHintProps?.finishHintEditing as () => void)();
+    });
+
+    expect(alertSpy).toHaveBeenCalledWith(
+      "Gdzie zapisać podpowiedź?",
+      "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
+      expect.any(Array),
+    );
+
+    const buttons = alertSpy.mock.calls[0][2] as Array<{ text: string }>;
+    expect(buttons.map((button) => button.text)).toEqual([
+      "Anuluj",
+      "Tylko ta strona",
+      "Obie strony fiszki",
+    ]);
   });
 });

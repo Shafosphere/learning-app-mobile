@@ -207,6 +207,7 @@ export default function Card({
     (!hasTextPrompt && hasImagePrompt) ||
     type === "true_false" ||
     type === "know_dont_know";
+  const canShowBackAsPrompt = !answerOnly;
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),
   );
@@ -810,31 +811,59 @@ export default function Card({
     }
     if (hintDialogVisible.current) return;
     hintDialogVisible.current = true;
-    Alert.alert("Gdzie wyświetlić podpowiedź?", undefined, [
-      {
-        text: "Anuluj",
-        style: "cancel",
-        onPress: () => {
-          hintDialogVisible.current = false;
-          setIsEditingHint(false);
+    if (!canShowBackAsPrompt) {
+      Alert.alert(
+        "Zapisać podpowiedź?",
+        "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+        [
+          {
+            text: "Anuluj",
+            style: "cancel",
+            onPress: () => {
+              hintDialogVisible.current = false;
+              setIsEditingHint(false);
+            },
+          },
+          {
+            text: "Zapisz",
+            onPress: () => {
+              hintDialogVisible.current = false;
+              applyHintToSides(false);
+            },
+          },
+        ],
+      );
+      return;
+    }
+    Alert.alert(
+      "Gdzie zapisać podpowiedź?",
+      "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
+      [
+        {
+          text: "Anuluj",
+          style: "cancel",
+          onPress: () => {
+            hintDialogVisible.current = false;
+            setIsEditingHint(false);
+          },
         },
-      },
-      {
-        text: "Tylko tu",
-        onPress: () => {
-          hintDialogVisible.current = false;
-          applyHintToSides(false);
+        {
+          text: "Tylko ta strona",
+          onPress: () => {
+            hintDialogVisible.current = false;
+            applyHintToSides(false);
+          },
         },
-      },
-      {
-        text: "Obie strony",
-        onPress: () => {
-          hintDialogVisible.current = false;
-          applyHintToSides(true);
+        {
+          text: "Obie strony fiszki",
+          onPress: () => {
+            hintDialogVisible.current = false;
+            applyHintToSides(true);
+          },
         },
-      },
-    ]);
-  }, [applyHintToSides, hintDraft, selectedItem]);
+      ],
+    );
+  }, [applyHintToSides, canShowBackAsPrompt, hintDraft, selectedItem]);
 
   const hintActionsStyle = useMemo(
     () => ({
