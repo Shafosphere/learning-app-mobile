@@ -1,5 +1,6 @@
 import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { useIsFocused } from "@react-navigation/native";
 import { act, render, waitFor } from "@testing-library/react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
@@ -224,11 +225,13 @@ const mockedGetCustomReviewedFlashcardIds =
   getCustomReviewedFlashcardIds as jest.Mock;
 const mockedUseBoxesPersistenceSnapshot =
   useBoxesPersistenceSnapshot as jest.Mock;
+const mockedUseIsFocused = useIsFocused as jest.Mock;
 
 describe("FlashcardsScreen autoflow guard", () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
     jest.spyOn(console, "log").mockImplementation(() => {});
+    mockedUseIsFocused.mockReturnValue(true);
     mockedGetCustomCourseById.mockResolvedValue({ id: 7, reviewsEnabled: false });
     mockedGetCustomFlashcards.mockResolvedValue([]);
     mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
@@ -755,5 +758,123 @@ describe("FlashcardsScreen autoflow guard", () => {
 
     expect(addUsedWordIds).toHaveBeenCalledWith([2]);
     expect(removeUsedWordIds).toHaveBeenCalledWith([1, 3]);
+  });
+
+  it("does not sanitize boxes with stale cards while flashcards is unfocused", async () => {
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+    ]);
+
+    const inactiveSetBoxes = jest.fn();
+    const focusedPersistence = {
+      boxes: {
+        boxZero: [],
+        boxOne: [
+          {
+            id: 1,
+            text: "cat",
+            translations: ["kot"],
+            flipped: false,
+            answerOnly: false,
+            hintFront: null,
+            hintBack: null,
+            imageFront: null,
+            imageBack: null,
+            explanation: null,
+            type: "text",
+          },
+        ],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: jest.fn(),
+      isReady: true,
+      usedWordIds: [1],
+      addUsedWordIds: jest.fn(),
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:7-7-custom-7",
+    };
+    const inactivePersistence = {
+      boxes: {
+        boxZero: [],
+        boxOne: [
+          {
+            id: 8,
+            text: "red",
+            translations: ["czerwony"],
+            flipped: false,
+            answerOnly: false,
+            hintFront: null,
+            hintBack: null,
+            imageFront: null,
+            imageBack: null,
+            explanation: null,
+            type: "text",
+          },
+        ],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: inactiveSetBoxes,
+      isReady: true,
+      usedWordIds: [8],
+      addUsedWordIds: jest.fn(),
+      removeUsedWordIds: jest.fn(),
+      setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:8-8-custom-8",
+    };
+
+    let persistence = focusedPersistence;
+    mockedUseBoxesPersistenceSnapshot.mockImplementation(() => persistence);
+
+    const { rerender } = render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    mockedUseIsFocused.mockReturnValue(false);
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 8,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: true,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "top",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    persistence = inactivePersistence;
+
+    rerender(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(inactiveSetBoxes).not.toHaveBeenCalled();
   });
 });

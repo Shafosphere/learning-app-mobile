@@ -299,7 +299,7 @@ export default function Flashcards() {
     targetLangId: activeCustomCourseId ?? 0,
     level: `custom-${activeCustomCourseId ?? 0}`,
     storageNamespace: "customBoxes",
-    autosave: activeCustomCourseId !== null,
+    autosave: activeCustomCourseId !== null && isFocused,
     saveDelayMs: 1000,
   });
 
@@ -318,6 +318,8 @@ export default function Flashcards() {
     useState<number | null>(null);
   const [isUiReady, setIsUiReady] = useState(false);
   const [loadedCourseId, setLoadedCourseId] = useState<number | null>(null);
+  const loadedCourseIdRef = useRef<number | null>(null);
+  const customCardsLengthRef = useRef(0);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
@@ -416,6 +418,12 @@ export default function Flashcards() {
   useEffect(() => {
     courseCompletionRunStartedAtRef.current = courseCompletionRunStartedAt;
   }, [courseCompletionRunStartedAt]);
+  useEffect(() => {
+    loadedCourseIdRef.current = loadedCourseId;
+  }, [loadedCourseId]);
+  useEffect(() => {
+    customCardsLengthRef.current = customCards.length;
+  }, [customCards.length]);
 
   const ensureCompletionRunStarted = useCallback(
     (fallbackNowMs?: number) => {
@@ -878,6 +886,7 @@ export default function Flashcards() {
   }, [boxes]);
 
   useEffect(() => {
+    if (!isFocused) return;
     if (activeCustomCourseId == null) {
       setIsReviewedIdsSeedLoading(false);
       setReviewedCardIds([]);
@@ -925,14 +934,17 @@ export default function Flashcards() {
     activeCustomCourseId,
     customCourse?.reviewsEnabled,
     customCards.length,
+    isFocused,
     isLoadingData,
     isReady,
   ]);
 
   useEffect(() => {
+    if (!isFocused) return;
     if (!isReady) return;
     if (isLoadingData) return;
     if (activeCustomCourseId == null) return;
+    if (loadedCourseId !== activeCustomCourseId) return;
     if (reviewedIdsSeedResolvedCourseId !== activeCustomCourseId) return;
     if (!customCourse?.reviewsEnabled) return;
     if (!customCards.length) return;
@@ -965,9 +977,11 @@ export default function Flashcards() {
     boxes,
     customCards,
     customCourse?.reviewsEnabled,
+    isFocused,
     isLoadingData,
     isReady,
     learned,
+    loadedCourseId,
     removeUsedWordIds,
     reviewedCardIds,
     reviewedIdsSeedResolvedCourseId,
@@ -975,6 +989,9 @@ export default function Flashcards() {
   ]);
 
   const downloadData = useCallback(async (): Promise<void> => {
+    if (!isFocused) return;
+    if (activeCustomCourseId == null) return;
+    if (loadedCourseId !== activeCustomCourseId) return;
     if (!customCards.length) return;
 
     const remaining = customCards.filter((card) => !trackedIds.has(card.id));
@@ -1017,6 +1034,8 @@ export default function Flashcards() {
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,
+    isFocused,
+    loadedCourseId,
     setBatchIndex,
     storageKey,
     trackedIds,
@@ -1080,6 +1099,9 @@ export default function Flashcards() {
   }, [displayResult, selectedItem]);
 
   useEffect(() => {
+    if (!isFocused) return;
+    if (activeCustomCourseId == null) return;
+    if (loadedCourseId !== activeCustomCourseId) return;
     if (boxZeroEnabled) return;
     if (!boxes.boxZero.length) return;
 
@@ -1089,7 +1111,15 @@ export default function Flashcards() {
       boxZero: [],
     }));
     removeUsedWordIds(wordsToReset.map((word) => word.id));
-  }, [boxZeroEnabled, boxes.boxZero, removeUsedWordIds, setBoxes]);
+  }, [
+    activeCustomCourseId,
+    boxZeroEnabled,
+    boxes.boxZero,
+    isFocused,
+    loadedCourseId,
+    removeUsedWordIds,
+    setBoxes,
+  ]);
 
   useEffect(() => {
     if (!isFocused) return;
@@ -1112,7 +1142,8 @@ export default function Flashcards() {
     }
 
     const shouldShowLoader =
-      loadedCourseId !== activeCustomCourseId || customCards.length === 0;
+      loadedCourseIdRef.current !== activeCustomCourseId ||
+      customCardsLengthRef.current === 0;
     setIsLoadingData(shouldShowLoader);
     setReviewedIdsSeedResolvedCourseId(null);
     setLoadError(null);
@@ -1190,7 +1221,10 @@ export default function Flashcards() {
   ]);
 
   useEffect(() => {
+    if (!isFocused) return;
     if (!isReady) return;
+    if (activeCustomCourseId == null) return;
+    if (loadedCourseId !== activeCustomCourseId) return;
     if (isLoadingData || customCards.length === 0) return;
 
     const latestById = new Map(customCards.map((card) => [card.id, card] as const));
@@ -1238,18 +1272,23 @@ export default function Flashcards() {
     });
   }, [
     customCards,
+    activeCustomCourseId,
+    isFocused,
     isReady,
     isLoadingData,
+    loadedCourseId,
     setBoxes,
     setLearned,
     updateSelectedItem,
   ]);
 
   useEffect(() => {
+    if (!isFocused) return;
     if (!isReady) return;
     if (isLoadingData) return;
     if (isReviewedIdsSeedLoading) return;
     if (activeCustomCourseId == null) return;
+    if (loadedCourseId !== activeCustomCourseId) return;
     if (reviewedIdsSeedResolvedCourseId !== activeCustomCourseId) return;
     if (totalCardsInBoxes > 0) return;
     if (allCardsDistributed) return;
@@ -1258,9 +1297,11 @@ export default function Flashcards() {
     void handleAutoEmptyDownload();
   }, [
     isReady,
+    isFocused,
     isLoadingData,
     isReviewedIdsSeedLoading,
     activeCustomCourseId,
+    loadedCourseId,
     reviewedIdsSeedResolvedCourseId,
     totalCardsInBoxes,
     allCardsDistributed,

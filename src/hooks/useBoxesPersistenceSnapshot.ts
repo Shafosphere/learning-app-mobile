@@ -401,14 +401,17 @@ export function useBoxesPersistenceSnapshot(params: {
 
   // Autosave when boxes change
   useEffect(() => {
+    clearSavingTimer();
+
     if (!autosave || !isReady) return;
     if (isRestoringRef.current) return; // avoid saving right after load
 
-    clearSavingTimer();
     savingTimer.current = setTimeout(() => {
       const write = buildSerializedSnapshot();
       void enqueuePersist(write, false);
     }, saveDelayMs);
+
+    return clearSavingTimer;
   }, [
     autosave,
     batchIndex,
@@ -440,10 +443,11 @@ export function useBoxesPersistenceSnapshot(params: {
 
   const flushNow = useCallback(async () => {
     clearSavingTimer();
+    if (!autosave) return;
     if (!isReadyRef.current || isRestoringRef.current) return;
     const write = buildSerializedSnapshot();
     await enqueuePersist(write, true);
-  }, [buildSerializedSnapshot, clearSavingTimer, enqueuePersist]);
+  }, [autosave, buildSerializedSnapshot, clearSavingTimer, enqueuePersist]);
 
   useEffect(() => {
     if (!flushOnAppStateChange) return;
