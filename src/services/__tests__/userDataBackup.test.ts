@@ -5,6 +5,7 @@ import {
   restoreUserData,
   type UserDataExport,
 } from "@/src/services/userDataBackup";
+import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { getDB } from "@/src/db/sqlite/db";
 import { getCustomCourses } from "@/src/db/sqlite/repositories/courses";
 import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
@@ -62,7 +63,12 @@ const mockedGetCustomFlashcards = getCustomFlashcards as jest.MockedFunction<
   typeof getCustomFlashcards
 >;
 
-function makeSnapshot(courseId: number, wordId: number, front = "front", back = "back") {
+function makeSnapshot(
+  courseId: number,
+  wordId: number,
+  front = "front",
+  back = "back"
+): SavedBoxesV2 {
   return {
     v: 2 as const,
     updatedAt: 1700000000000,
@@ -103,7 +109,7 @@ function createMockDb(): MockDb {
   let nextFlashcardId = 601;
 
   return {
-    execAsync: jest.fn(async () => {}),
+    execAsync: jest.fn<Promise<void>, [string]>(async () => {}),
     getFirstAsync: jest.fn(async (sql: string) => {
       if (sql.includes("sqlite_master")) {
         return { name: "reviews" };
@@ -849,7 +855,7 @@ describe("userDataBackup", () => {
         boxSnapshots: {},
         courses: [],
       },
-    } as UserDataExport;
+    } as unknown as UserDataExport;
 
     const result = await restoreUserData(legacyPayload, { targetDb: db as never });
 

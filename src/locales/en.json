@@ -560,7 +560,13 @@
       "button": "Send email",
       "subject": "Bug report - Memicard",
       "bodyIntro": "Describe the problem (steps, what you see):",
-      "bodyDiagnosticsTitle": "About the app (attached automatically)"
+      "bodyDiagnosticsTitle": "About the app (attached automatically)",
+      "attachBasicData": "Attach basic app data",
+      "attachBasicDataSubtitle": "We will add the app version, build, device model, and system to the message body.",
+      "attachDiagnostics": "Attach diagnostic logs",
+      "attachDiagnosticsSubtitle": "We will add a JSON file with metadata, recent technical logs, and a compact box-state summary.",
+      "diagnosticsAttachmentNote": "Attached a JSON diagnostic report.",
+      "mailtoDiagnosticsUnavailable": "Diagnostic logs were selected, but this mail client path cannot attach files from the app. Try again with the system mail composer."
     },
     "suggestion": {
       "title": "Send suggestion",
@@ -597,6 +603,7 @@
       "suggestionSent": "Suggestion sent. Thank you for the idea!",
       "sendCancelled": "Sending cancelled. You can try again.",
       "mailtoOpenedReport": "Email message opened. Add a description and send the message.",
+      "mailtoOpenedReportNoAttachment": "Email message opened without the diagnostic attachment. The mailto client does not support attachments.",
       "mailtoOpenedSuggestion": "Email message opened. Describe your idea and send the message.",
       "composerFailed": "Could not open the message composer. Try again or use the mailto: link."
     }

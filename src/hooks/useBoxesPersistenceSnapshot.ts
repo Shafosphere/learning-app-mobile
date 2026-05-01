@@ -1,8 +1,19 @@
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+  type SetStateAction,
+} from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { AppState, type AppStateStatus } from "react-native";
 // Adjust import path to your project
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import {
+  appendBoxesDropAlert,
+  appendDebugEvent,
+  summarizeBoxes,
+} from "@/src/services/debugEvents";
 
 // ---- Public helpers --------------------------------------------------------
 type BoxName = keyof BoxesState;
@@ -87,6 +98,13 @@ export async function clearPersistedBoxesKeepProgress(
   };
 
   await AsyncStorage.setItem(storageKey, JSON.stringify(nextPayload));
+  void appendDebugEvent("boxes", "snapshot.clearKeepProgress", {
+    storageKey,
+    courseId: saved.parsed.courseId,
+    beforeCounts: summarizeBoxes(normalizeBoxes(saved.parsed.flashcards)),
+    afterCounts: summarizeBoxes(nextPayload.flashcards),
+    usedWordIdsCount: nextPayload.usedWordIds?.length ?? 0,
+  });
 }
 
 const normalizeBoxes = (source?: BoxesState | null): BoxesState => {
@@ -194,6 +212,20 @@ export function useBoxesPersistenceSnapshot(params: {
 
         const startedAt = Date.now();
         await AsyncStorage.setItem(current.key, current.serialized);
+        try {
+          const snapshot = JSON.parse(current.serialized) as SavedBoxesV2;
+          void appendDebugEvent("boxes", "snapshot.save", {
+            storageKey: current.key,
+            courseId: snapshot.courseId,
+            counts: summarizeBoxes(normalizeBoxes(snapshot.flashcards)),
+            usedWordIdsCount: snapshot.usedWordIds?.length ?? 0,
+            batchIndex: snapshot.batchIndex,
+          });
+        } catch {
+          void appendDebugEvent("boxes", "snapshot.save.unparseable", {
+            storageKey: current.key,
+          });
+        }
         const durationMs = Date.now() - startedAt;
         const bytes = estimatePayloadBytes(current.serialized);
         lastSerializedRef.current = current.serialized;
@@ -260,6 +292,44 @@ export function useBoxesPersistenceSnapshot(params: {
     isReadyRef.current = isReady;
   }, [isReady]);
 
+  const setLoggedBoxes = useCallback(
+    (updater: SetStateAction<BoxesState>) => {
+      setBoxes((prev) => {
+        const next =
+          typeof updater === "function"
+            ? (updater as (current: BoxesState) => BoxesState)(prev)
+            : updater;
+
+        if (next === prev) {
+          return prev;
+        }
+
+        const beforeCounts = summarizeBoxes(prev);
+        const afterCounts = summarizeBoxes(next);
+        void appendDebugEvent("boxes", "boxes.set", {
+          storageKey,
+          courseId: makeScopeId(sourceLangId, targetLangId, level),
+          beforeCounts,
+          afterCounts,
+          deltaTotal: afterCounts.total - beforeCounts.total,
+          usedWordIdsCount: usedWordIdsRef.current.length,
+        });
+        void appendBoxesDropAlert("boxes", {
+          before: prev,
+          after: next,
+          context: {
+            storageKey,
+            courseId: makeScopeId(sourceLangId, targetLangId, level),
+            usedWordIdsCount: usedWordIdsRef.current.length,
+          },
+        });
+
+        return next;
+      });
+    },
+    [level, sourceLangId, storageKey, targetLangId]
+  );
+
   useEffect(() => {
     let mounted = true;
     isRestoringRef.current = true;
@@ -271,9 +341,17 @@ export function useBoxesPersistenceSnapshot(params: {
         if (saved) {
           if (mounted) {
             lastSerializedRef.current = saved.raw;
-            setBoxes(normalizeBoxes(saved.parsed.flashcards));
+            const normalized = normalizeBoxes(saved.parsed.flashcards);
+            setBoxes(normalized);
             setBatchIndex(saved.parsed.batchIndex ?? 0);
             setUsedWordIds(saved.parsed.usedWordIds ?? []);
+            void appendDebugEvent("boxes", "snapshot.load", {
+              storageKey,
+              courseId: saved.parsed.courseId,
+              counts: summarizeBoxes(normalized),
+              usedWordIdsCount: saved.parsed.usedWordIds?.length ?? 0,
+              batchIndex: saved.parsed.batchIndex ?? 0,
+            });
           }
         } else if (initialWords && mounted) {
           lastSerializedRef.current = null;
@@ -283,11 +361,24 @@ export function useBoxesPersistenceSnapshot(params: {
           });
           setBatchIndex(0);
           setUsedWordIds(initialWords.map((w) => w.id));
+          void appendDebugEvent("boxes", "snapshot.initialWords", {
+            storageKey,
+            counts: {
+              ...summarizeBoxes(createEmptyBoxes()),
+              boxOne: initialWords.length,
+            },
+            usedWordIdsCount: initialWords.length,
+          });
         } else if (mounted) {
           lastSerializedRef.current = null;
           setBoxes(createEmptyBoxes());
           setBatchIndex(0);
           setUsedWordIds([]);
+          void appendDebugEvent("boxes", "snapshot.empty", {
+            storageKey,
+            counts: summarizeBoxes(createEmptyBoxes()),
+            usedWordIdsCount: 0,
+          });
         }
       } finally {
         isRestoringRef.current = false;
@@ -339,7 +430,13 @@ export function useBoxesPersistenceSnapshot(params: {
     lastSerializedRef.current = null;
     lastPersistMetaRef.current = null;
     await AsyncStorage.removeItem(storageKey);
-  }, [clearSavingTimer, storageKey]);
+    void appendDebugEvent("boxes", "snapshot.reset", {
+      storageKey,
+      courseId: makeScopeId(sourceLangId, targetLangId, level),
+      counts: summarizeBoxes(boxesRef.current),
+      usedWordIdsCount: usedWordIdsRef.current.length,
+    });
+  }, [clearSavingTimer, level, sourceLangId, storageKey, targetLangId]);
 
   const flushNow = useCallback(async () => {
     clearSavingTimer();
@@ -388,19 +485,41 @@ export function useBoxesPersistenceSnapshot(params: {
       if (list.length === 0) return prev;
       const set = new Set(prev);
       for (const id of list) set.add(id);
-      return Array.from(set);
+      const next = Array.from(set);
+      if (next.length !== prev.length) {
+        void appendDebugEvent("boxes", "usedWordIds.add", {
+          storageKey,
+          courseId: makeScopeId(sourceLangId, targetLangId, level),
+          addedIds: list,
+          beforeCount: prev.length,
+          afterCount: next.length,
+        });
+      }
+      return next;
     });
-  }, []);
+  }, [level, sourceLangId, storageKey, targetLangId]);
 
   const removeUsedWordIds = useCallback((ids: number[] | number) => {
     const list = Array.isArray(ids) ? ids : [ids];
     if (list.length === 0) return;
-    setUsedWordIds((prev) => prev.filter((id) => !list.includes(id)));
-  }, []);
+    setUsedWordIds((prev) => {
+      const next = prev.filter((id) => !list.includes(id));
+      if (next.length !== prev.length) {
+        void appendDebugEvent("boxes", "usedWordIds.remove", {
+          storageKey,
+          courseId: makeScopeId(sourceLangId, targetLangId, level),
+          removedIds: list,
+          beforeCount: prev.length,
+          afterCount: next.length,
+        });
+      }
+      return next;
+    });
+  }, [level, sourceLangId, storageKey, targetLangId]);
 
   return {
     boxes,
-    setBoxes,
+    setBoxes: setLoggedBoxes,
     batchIndex,
     setBatchIndex,
     isReady,

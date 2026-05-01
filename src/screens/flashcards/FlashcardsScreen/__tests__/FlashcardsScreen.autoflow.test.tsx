@@ -1,12 +1,18 @@
 import React from "react";
-import { act, render } from "@testing-library/react-native";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { act, render, waitFor } from "@testing-library/react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { getCustomFlashcards } from "@/src/db/sqlite/db";
+import {
+  getCustomCourseById,
+  getCustomFlashcards,
+  getCustomReviewedFlashcardIds,
+} from "@/src/db/sqlite/db";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
+import { DEBUG_EVENTS_STORAGE_KEY } from "@/src/services/debugEvents";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
@@ -83,6 +89,7 @@ jest.mock("@/src/hooks/useBoxesPersistenceSnapshot", () => ({
     addUsedWordIds: jest.fn(),
     removeUsedWordIds: jest.fn(),
     setBatchIndex: jest.fn(),
+    storageKey: "customBoxes:test",
   })),
 }));
 
@@ -211,14 +218,20 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
+const mockedGetCustomCourseById = getCustomCourseById as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
+const mockedGetCustomReviewedFlashcardIds =
+  getCustomReviewedFlashcardIds as jest.Mock;
 const mockedUseBoxesPersistenceSnapshot =
   useBoxesPersistenceSnapshot as jest.Mock;
 
 describe("FlashcardsScreen autoflow guard", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
     jest.spyOn(console, "log").mockImplementation(() => {});
+    mockedGetCustomCourseById.mockResolvedValue({ id: 7, reviewsEnabled: false });
     mockedGetCustomFlashcards.mockResolvedValue([]);
+    mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
     mockedUseBoxesPersistenceSnapshot.mockReturnValue({
       boxes: {
         boxZero: [],
@@ -248,6 +261,7 @@ describe("FlashcardsScreen autoflow guard", () => {
       addUsedWordIds: jest.fn(),
       removeUsedWordIds: jest.fn(),
       setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:test",
     });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
@@ -337,6 +351,38 @@ describe("FlashcardsScreen autoflow guard", () => {
     });
   });
 
+  it("exposes autoflow diagnostics callbacks", async () => {
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+
+    await act(async () => {
+      lastCall.onDebugEvent("flashcards", "autoflow.switch_box", {
+        fromBox: "boxOne",
+        toBox: "boxTwo",
+      });
+      await lastCall.downloadMore();
+    });
+
+    await waitFor(async () => {
+      const events = JSON.parse(
+        (await AsyncStorage.getItem(DEBUG_EVENTS_STORAGE_KEY)) ?? "[]"
+      );
+      expect(events.map((event: { event: string }) => event.event)).toEqual(
+        expect.arrayContaining([
+          "autoflow.switch_box",
+          "flashcards.autoflow_download",
+        ])
+      );
+    });
+  });
+
   it("passes remainingNewFlashcardsCount based on customCards minus trackedIds", async () => {
     mockedGetCustomFlashcards.mockResolvedValue([
       {
@@ -403,6 +449,7 @@ describe("FlashcardsScreen autoflow guard", () => {
       addUsedWordIds: jest.fn(),
       removeUsedWordIds: jest.fn(),
       setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:test",
     });
 
     render(<Flashcards />);
@@ -475,6 +522,7 @@ describe("FlashcardsScreen autoflow guard", () => {
       addUsedWordIds,
       removeUsedWordIds: jest.fn(),
       setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:test",
     });
 
     render(<Flashcards />);
@@ -547,6 +595,7 @@ describe("FlashcardsScreen autoflow guard", () => {
       addUsedWordIds: jest.fn(),
       removeUsedWordIds: jest.fn(),
       setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:test",
     });
 
     render(<Flashcards />);
@@ -635,5 +684,76 @@ describe("FlashcardsScreen autoflow guard", () => {
     });
 
     expect(resetInteractionState).toHaveBeenCalledTimes(2);
+  });
+
+  it("releases orphaned usedWordIds for review-enabled courses", async () => {
+    mockedGetCustomCourseById.mockResolvedValue({ id: 7, reviewsEnabled: true });
+    mockedGetCustomReviewedFlashcardIds.mockResolvedValue([2]);
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 2,
+        text: "dog",
+        translations: ["pies"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      {
+        id: 3,
+        text: "bird",
+        translations: ["ptak"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+    ]);
+
+    const addUsedWordIds = jest.fn();
+    const removeUsedWordIds = jest.fn();
+    mockedUseBoxesPersistenceSnapshot.mockReturnValue({
+      boxes: {
+        boxZero: [],
+        boxOne: [],
+        boxTwo: [],
+        boxThree: [],
+        boxFour: [],
+        boxFive: [],
+      },
+      setBoxes: jest.fn(),
+      isReady: true,
+      usedWordIds: [1, 3],
+      addUsedWordIds,
+      removeUsedWordIds,
+      setBatchIndex: jest.fn(),
+      storageKey: "customBoxes:test",
+    });
+
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    expect(addUsedWordIds).toHaveBeenCalledWith([2]);
+    expect(removeUsedWordIds).toHaveBeenCalledWith([1, 3]);
   });
 });

@@ -27,6 +27,10 @@ import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
+import {
+  appendDebugEvent,
+  summarizeBoxes,
+} from "@/src/services/debugEvents";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -124,6 +128,19 @@ export default function ReviewFlashcardsPlaceholder() {
     return Number.isFinite(num) ? num : null;
   }, [params?.courseId]);
   const shouldStartReviewCoachmark = params?.onboarding === "review-flashcards";
+  useEffect(() => {
+    void appendDebugEvent("review", "review.enter", {
+      screen: "review",
+      courseId,
+    });
+    return () => {
+      void appendDebugEvent("review", "review.exit", {
+        screen: "review",
+        courseId,
+      });
+    };
+  }, [courseId]);
+
   const showExplanationEnabled = useMemo(
     () =>
       courseId != null ? getCustomCourseShowExplanationEnabled(courseId) : true,
@@ -273,9 +290,20 @@ export default function ReviewFlashcardsPlaceholder() {
         setQuestionShownAt(null);
         setLongThink(false);
       }
+      void appendDebugEvent("review", "review.card.remove", {
+        screen: "review",
+        courseId,
+        cardId,
+        fromBox: box,
+      });
+      void appendDebugEvent("review", "review.session_counts", {
+        screen: "review",
+        courseId,
+        counts: summarizeBoxes(nextState),
+      });
       return nextState;
     });
-  }, []);
+  }, [courseId]);
 
   const reloadSession = useCallback(async () => {
     clearTransitionTimer();
@@ -284,13 +312,29 @@ export default function ReviewFlashcardsPlaceholder() {
       return;
     }
     setIsLoading(true);
+    void appendDebugEvent("review", "review.load.start", {
+      screen: "review",
+      courseId,
+    });
     try {
       const cards = await getDueCustomReviewFlashcards(courseId);
       const mapped = cards.map(mapReviewCardToWord);
-      resetSessionState(distributeByStage(mapped));
+      const nextBoxes = distributeByStage(mapped);
+      resetSessionState(nextBoxes);
+      void appendDebugEvent("review", "review.load.success", {
+        screen: "review",
+        courseId,
+        reviewIdsCount: mapped.length,
+        counts: summarizeBoxes(nextBoxes),
+      });
     } catch (err) {
       console.error("Failed to load review flashcards", err);
       resetSessionState(createEmptyBoxes());
+      void appendDebugEvent("review", "review.load.error", {
+        screen: "review",
+        courseId,
+        message: err instanceof Error ? err.message : String(err),
+      });
     } finally {
       setIsLoading(false);
     }
@@ -398,6 +442,12 @@ export default function ReviewFlashcardsPlaceholder() {
       handleBlockedBoxInteraction(box);
       return;
     }
+    void appendDebugEvent("review", "review.box_select", {
+      screen: "review",
+      courseId,
+      box,
+      counts: summarizeBoxes(boxes),
+    });
     setActiveBox(box);
     selectNextWord(box);
   };
@@ -474,6 +524,12 @@ export default function ReviewFlashcardsPlaceholder() {
     }
     void (async () => {
       try {
+        void appendDebugEvent("review", "review.demote", {
+          screen: "review",
+          courseId,
+          cardId: correction.cardId,
+          fromBox: activeBox,
+        });
         await scheduleCustomReview(
           correction.cardId!,
           courseId,
@@ -587,11 +643,23 @@ export default function ReviewFlashcardsPlaceholder() {
       void (async () => {
         try {
           if (pendingExplanationMove.promote) {
+            void appendDebugEvent("review", "review.advance", {
+              screen: "review",
+              courseId,
+              cardId: currentCardId,
+              fromBox: activeBox,
+            });
             await advanceCustomReview(
               currentCardId,
               courseId,
             );
           } else {
+            void appendDebugEvent("review", "review.demote", {
+              screen: "review",
+              courseId,
+              cardId: currentCardId,
+              fromBox: activeBox,
+            });
             await scheduleCustomReview(
               currentCardId,
               courseId,
@@ -644,6 +712,13 @@ export default function ReviewFlashcardsPlaceholder() {
       });
 
     if (!ok) {
+      void appendDebugEvent("review", "review.answer.wrong", {
+        screen: "review",
+        courseId,
+        cardId: selectedItem.id,
+        fromBox: currentBox,
+        durationMs: durationMs ?? 0,
+      });
       handleBoxFaceWrongAnswer(activeBox);
       void logAttemptEvent("wrong");
       const wrongExplanationState = getExplanationState({
@@ -663,6 +738,12 @@ export default function ReviewFlashcardsPlaceholder() {
         const delayMs = wrongExplanationState.hasExplanation ? 3500 : 1500;
         void (async () => {
           try {
+            void appendDebugEvent("review", "review.demote", {
+              screen: "review",
+              courseId,
+              cardId: selectedItem.id,
+              fromBox: activeBox,
+            });
             await scheduleCustomReview(
               selectedItem.id,
               courseId,
@@ -715,13 +796,21 @@ export default function ReviewFlashcardsPlaceholder() {
         promptImageUri: effectiveReversed
           ? selectedItem.imageBack ?? null
           : selectedItem.imageFront ?? null,
-        reversed,
+        reversed: effectiveReversed,
         word: selectedItem,
       });
       return;
     }
 
     const logLearningEventPromise = logAttemptEvent("ok");
+    void appendDebugEvent("review", "review.answer.correct", {
+      screen: "review",
+      courseId,
+      cardId: selectedItem.id,
+      fromBox: currentBox,
+      durationMs: durationMs ?? 0,
+      isTerminalSuccess: activeBox === "boxFive",
+    });
     handleStatsBurst(currentBox, logLearningEventPromise);
     handleBoxFaceCorrectAnswer(activeBox, {
       preferLove: activeBox === "boxFour" || activeBox === "boxFive",
@@ -762,6 +851,12 @@ export default function ReviewFlashcardsPlaceholder() {
 
     void (async () => {
       try {
+        void appendDebugEvent("review", "review.advance", {
+          screen: "review",
+          courseId,
+          cardId: selectedItem.id,
+          fromBox: activeBox,
+        });
         await advanceCustomReview(
           selectedItem.id,
           courseId,

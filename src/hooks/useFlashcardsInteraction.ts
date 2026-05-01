@@ -1,5 +1,9 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent } from "@/src/db/sqlite/db";
+import {
+  appendDebugEvent,
+  type DebugContext,
+} from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -58,6 +62,7 @@ type UseFlashcardsInteractionParams = {
   onWrongAnswer?: (box: keyof BoxesState, meta: WrongAnswerMeta) => void;
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
+  debugContext?: DebugContext;
 };
 
 export function useFlashcardsInteraction({
@@ -72,6 +77,7 @@ export function useFlashcardsInteraction({
   onWrongAnswer,
   boxZeroEnabled = true,
   skipDemotionCorrection = false,
+  debugContext,
 }: UseFlashcardsInteractionParams) {
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
@@ -282,7 +288,11 @@ export function useFlashcardsInteraction({
   );
 
   const moveElement = useCallback(
-    (id: number, promote = false) => {
+    (
+      id: number,
+      promote = false,
+      resultPath: "correct" | "wrong" = promote ? "correct" : "wrong"
+    ) => {
       if (!activeBox) return;
       if (activeBox === "boxZero" && !promote) {
         selectNextWord(activeBox, { force: true });
@@ -320,6 +330,15 @@ export function useFlashcardsInteraction({
           onWordPromotedOut?.(element);
         }
 
+        void appendDebugEvent("flashcards", "card.move", {
+          ...debugContext,
+          cardId: element.id,
+          fromBox: from,
+          toBox: target,
+          promote,
+          resultPath,
+        });
+
         addUsedWordIds(element.id);
 
         // Keep queues in sync with the move: remove from source queue, append to target queue.
@@ -356,6 +375,7 @@ export function useFlashcardsInteraction({
       addUsedWordIds,
       boxZeroEnabled,
       cancelTodayLearningReminderSchedule,
+      debugContext,
       learningRemindersEnabled,
       onWordPromotedOut,
       selectNextWord,
@@ -484,6 +504,14 @@ export function useFlashcardsInteraction({
                 nextKnownWordsCount: 0,
               };
         if (activeBox) {
+          void appendDebugEvent("flashcards", "answer.correct", {
+            ...debugContext,
+            cardId: wordForCheck.id,
+            fromBox: activeBox,
+            durationMs: duration ?? 0,
+            isPromotion: activeBox !== "boxFive",
+            isTerminalSuccess: activeBox === "boxFive",
+          });
           onCorrectAnswer?.(activeBox, {
             word: wordForCheck,
             wasNewMastered: registerKnownWordResult.wasNewMastered,
@@ -537,12 +565,20 @@ export function useFlashcardsInteraction({
         }
         scheduleTransition(() => {
           setAnswer("");
-          moveElement(wordForCheck.id, true);
+          moveElement(wordForCheck.id, true, "correct");
           setQueueNext(true);
         }, delay);
       } else {
         setResult(false);
         if (activeBox) {
+          void appendDebugEvent("flashcards", "answer.wrong", {
+            ...debugContext,
+            cardId: wordForCheck.id,
+            fromBox: activeBox,
+            durationMs: duration ?? 0,
+            isPromotion: false,
+            isTerminalSuccess: false,
+          });
           onWrongAnswer?.(activeBox, {
             word: wordForCheck,
             fromBox: activeBox,
@@ -575,7 +611,7 @@ export function useFlashcardsInteraction({
           const delay = 1500;
           scheduleTransition(() => {
             setAnswer("");
-            moveElement(wordForCheck.id, false);
+            moveElement(wordForCheck.id, false, "wrong");
             setQueueNext(true);
           }, delay);
           return;
@@ -591,7 +627,7 @@ export function useFlashcardsInteraction({
           const delay = 1500;
           scheduleTransition(() => {
             setAnswer("");
-            moveElement(wordForCheck.id, false);
+            moveElement(wordForCheck.id, false, "wrong");
             setQueueNext(true);
           }, delay);
           return;
@@ -607,7 +643,7 @@ export function useFlashcardsInteraction({
           const delay = hasExplanation ? 4000 : 1500;
           scheduleTransition(() => {
             setAnswer("");
-            moveElement(wordForCheck.id, false);
+            moveElement(wordForCheck.id, false, "wrong");
             setQueueNext(true);
           }, delay);
           return;
@@ -638,6 +674,7 @@ export function useFlashcardsInteraction({
       activeCustomCourseId,
       answer,
       checkSpelling,
+      debugContext,
       skipDemotionCorrection,
       ignoreDiacriticsInSpellcheck,
       moveElement,
@@ -676,7 +713,11 @@ export function useFlashcardsInteraction({
       result !== null
     ) {
       setAnswer("");
-      moveElement(selectedItem.id, pendingExplanationMove.promote);
+      moveElement(
+        selectedItem.id,
+        pendingExplanationMove.promote,
+        pendingExplanationMove.promote ? "correct" : "wrong"
+      );
       setPendingExplanationMove(null);
       setQueueNext(true);
       return;
@@ -684,7 +725,7 @@ export function useFlashcardsInteraction({
     if (selectedItem.type === "true_false") {
       if (result !== false) return;
       setAnswer("");
-      moveElement(selectedItem.id, false);
+      moveElement(selectedItem.id, false, "wrong");
       setPendingExplanationMove(null);
       setQueueNext(true);
       return;
@@ -692,7 +733,7 @@ export function useFlashcardsInteraction({
     if (selectedItem.type === "know_dont_know") {
       if (result == null) return;
       setAnswer("");
-      moveElement(selectedItem.id, result);
+      moveElement(selectedItem.id, result, result ? "correct" : "wrong");
       setPendingExplanationMove(null);
       setQueueNext(true);
     }
@@ -762,7 +803,7 @@ export function useFlashcardsInteraction({
           return;
         }
         const promote = correction.mode === "intro";
-        moveElement(correction.cardId, promote);
+        moveElement(correction.cardId, promote, promote ? "correct" : "wrong");
       }
       // Wyczyść poprzednią odpowiedź zanim pokażemy kolejną fiszkę.
       // Inaczej przez jedną klatkę nowa karta może odziedziczyć stary tekst

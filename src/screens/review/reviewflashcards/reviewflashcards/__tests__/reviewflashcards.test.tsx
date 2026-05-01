@@ -1,4 +1,5 @@
 import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   act,
   fireEvent,
@@ -323,6 +324,14 @@ jest.mock("@/src/components/card/subcomponents/CardSceneTrueFalse", () => ({
   CardSceneTrueFalse: () => null,
 }));
 
+jest.mock("@/src/components/card/subcomponents/PromptImage", () => ({
+  PromptImage: ({ uri }: { uri: string }) => {
+    const React = require("react");
+    const { View } = require("react-native");
+    return <View testID={`prompt-image-${uri}`} />;
+  },
+}));
+
 type ReviewCardRow = {
   id: number;
   frontText: string;
@@ -349,6 +358,7 @@ const mockedGetGlobalDailyStreakDays = getGlobalDailyStreakDays as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
 const mockedAdvanceCustomReview = advanceCustomReview as jest.Mock;
 const mockedScheduleCustomReview = scheduleCustomReview as jest.Mock;
+const CHOOSE_BOX_TEXT = "flashcards.card.emptyScene.chooseBox";
 
 function makeReviewCard(
   overrides: Partial<ReviewCardRow> & Pick<ReviewCardRow, "id" | "frontText">
@@ -499,6 +509,39 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.queryByText("cat")).not.toBeNull();
       expect(screen.queryByText("kot")).not.toBeNull();
     });
+  });
+
+  it("does not write flashcards box snapshots while answering review cards", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 901,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(901, 77);
+    });
+
+    const snapshotWrites = (AsyncStorage.setItem as jest.Mock).mock.calls.filter(
+      ([key]) =>
+        typeof key === "string" &&
+        (key.startsWith("boxes:") || key.startsWith("customBoxes:"))
+    );
+    expect(snapshotWrites).toHaveLength(0);
+    expect(AsyncStorage.removeItem).not.toHaveBeenCalled();
   });
 
   it("keeps normal correction bound to the original translation after switching to a reversed foreign card", async () => {
@@ -715,6 +758,36 @@ describe("reviewflashcards correction desync regression", () => {
     });
   });
 
+  it("shows only the answer input during correction for flipped image prompt cards", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 103,
+        frontText: "",
+        backText: "Andora",
+        answers: ["Andora"],
+        imageFront: "ad.svg",
+        flipped: true,
+        stage: 2,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 2);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      const correctionInputs = getVisibleTextInputs(screen);
+      expect(correctionInputs).toHaveLength(1);
+      expect(correctionInputs[0].props.value).toBe("");
+      expect(screen.queryByText("Andora")).not.toBeNull();
+    });
+  });
+
   it("does not auto-activate a review box after loading the session", async () => {
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
@@ -729,7 +802,7 @@ describe("reviewflashcards correction desync regression", () => {
     const screen = render(<ReviewFlashcardsPlaceholder />);
 
     await waitFor(() => {
-      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
+      expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
     });
 
     expect(getVisibleTextInputs(screen)).toHaveLength(0);
@@ -786,7 +859,7 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     await waitFor(() => {
-      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
+      expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
     });
 
     expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(301, 77);
@@ -831,7 +904,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(mockedScheduleCustomReview).toHaveBeenCalledWith(401, 77, 0);
-      expect(screen.getByText("Wybierz pudełko z fiszkami")).not.toBeNull();
+      expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
     });
 
     expect(screen.getByText("boxZero:0")).not.toBeNull();

@@ -237,7 +237,7 @@ export default function Card({
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
   const shouldCorrectAwers = showCorrectionInputs
-    ? correctionReversed
+    ? !effectiveAnswerOnly && correctionReversed
     : effectiveReversed;
   const shouldCorrectRewers = showCorrectionInputs
     ? !correctionReversed || Boolean(correction?.answerOnly)

@@ -34,7 +34,7 @@ export default function MyButton({
   color = "my_green",
   disabled = false,
   width = 130,
-  textLines = 1,
+  textLines = 2,
   accessibilityLabel,
   style,
   textStyle,

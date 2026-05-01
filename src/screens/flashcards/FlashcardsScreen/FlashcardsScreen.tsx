@@ -99,6 +99,7 @@ import {
   consumeCourseFinishedPreview,
   subscribeCourseFinishedPreview,
 } from "@/src/services/courseFinishedPreview";
+import { appendDebugEvent } from "@/src/services/debugEvents";
 import { useTranslation } from "react-i18next";
 
 const STREAK_TARGET = 5;
@@ -292,6 +293,7 @@ export default function Flashcards() {
     addUsedWordIds,
     removeUsedWordIds,
     setBatchIndex,
+    storageKey,
   } = useBoxesPersistenceSnapshot({
     sourceLangId: activeCustomCourseId ?? 0,
     targetLangId: activeCustomCourseId ?? 0,
@@ -311,6 +313,7 @@ export default function Flashcards() {
     useState<number | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
   const [isReviewedIdsSeedLoading, setIsReviewedIdsSeedLoading] = useState(false);
+  const [reviewedCardIds, setReviewedCardIds] = useState<number[]>([]);
   const [reviewedIdsSeedResolvedCourseId, setReviewedIdsSeedResolvedCourseId] =
     useState<number | null>(null);
   const [isUiReady, setIsUiReady] = useState(false);
@@ -356,6 +359,9 @@ export default function Flashcards() {
   >("top");
   const [isCourseFinishedPreviewVisible, setIsCourseFinishedPreviewVisible] =
     useState(false);
+  const downloadSourceRef = useRef<"manual" | "autoflow" | "auto-empty" | null>(
+    null
+  );
   const isActionsPositionNudgeHydrated =
     isActionsPositionNudgeAnswerCountHydrated && isActionsPositionNudgeSeenHydrated;
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
@@ -366,6 +372,22 @@ export default function Flashcards() {
   const courseCompletionRunStartedAtRef = useRef<number | null>(null);
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const totalCards = customCards.length;
+  useEffect(() => {
+    if (!isFocused) return;
+    void appendDebugEvent("flashcards", "flashcards.enter", {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+    });
+    return () => {
+      void appendDebugEvent("flashcards", "flashcards.exit", {
+        screen: "flashcards",
+        courseId: activeCustomCourseId,
+        storageKey,
+      });
+    };
+  }, [activeCustomCourseId, isFocused, storageKey]);
+
   const courseHasOnlyTrueFalse = useMemo(
     () =>
       customCards.length > 0 &&
@@ -467,6 +489,11 @@ export default function Flashcards() {
     },
     boxZeroEnabled,
     skipDemotionCorrection: skipCorrection,
+    debugContext: {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+    },
   });
   useEffect(() => {
     if (!isFocused) return;
@@ -853,14 +880,17 @@ export default function Flashcards() {
   useEffect(() => {
     if (activeCustomCourseId == null) {
       setIsReviewedIdsSeedLoading(false);
+      setReviewedCardIds([]);
       setReviewedIdsSeedResolvedCourseId(null);
       return;
     }
-    if (!isReady || customCards.length === 0) {
+    if (!isReady || customCards.length === 0 || isLoadingData) {
       return;
     }
-    if (totalCardsInBoxes > 0 || usedWordIds.length > 0) {
+
+    if (!customCourse?.reviewsEnabled) {
       setIsReviewedIdsSeedLoading(false);
+      setReviewedCardIds([]);
       setReviewedIdsSeedResolvedCourseId(activeCustomCourseId);
       return;
     }
@@ -870,10 +900,10 @@ export default function Flashcards() {
 
     void getCustomReviewedFlashcardIds(activeCustomCourseId)
       .then((reviewedIds) => {
-        if (cancelled || reviewedIds.length === 0) {
+        if (cancelled) {
           return;
         }
-        addUsedWordIds(reviewedIds);
+        setReviewedCardIds(reviewedIds);
       })
       .catch((error) => {
         console.warn(
@@ -893,11 +923,55 @@ export default function Flashcards() {
     };
   }, [
     activeCustomCourseId,
-    addUsedWordIds,
+    customCourse?.reviewsEnabled,
     customCards.length,
+    isLoadingData,
     isReady,
-    totalCardsInBoxes,
-    usedWordIds.length,
+  ]);
+
+  useEffect(() => {
+    if (!isReady) return;
+    if (isLoadingData) return;
+    if (activeCustomCourseId == null) return;
+    if (reviewedIdsSeedResolvedCourseId !== activeCustomCourseId) return;
+    if (!customCourse?.reviewsEnabled) return;
+    if (!customCards.length) return;
+
+    const currentCourseCardIds = new Set(customCards.map((card) => card.id));
+    const retainedIds = new Set<number>(reviewedCardIds);
+
+    for (const list of Object.values(boxes)) {
+      for (const item of list) retainedIds.add(item.id);
+    }
+    for (const item of learned) retainedIds.add(item.id);
+
+    const usedIds = new Set(usedWordIds);
+    const reviewedIdsToAdd = reviewedCardIds.filter(
+      (id) => currentCourseCardIds.has(id) && !usedIds.has(id)
+    );
+    if (reviewedIdsToAdd.length > 0) {
+      addUsedWordIds(reviewedIdsToAdd);
+    }
+
+    const staleUsedIds = usedWordIds.filter(
+      (id) => currentCourseCardIds.has(id) && !retainedIds.has(id)
+    );
+    if (staleUsedIds.length > 0) {
+      removeUsedWordIds(staleUsedIds);
+    }
+  }, [
+    activeCustomCourseId,
+    addUsedWordIds,
+    boxes,
+    customCards,
+    customCourse?.reviewsEnabled,
+    isLoadingData,
+    isReady,
+    learned,
+    removeUsedWordIds,
+    reviewedCardIds,
+    reviewedIdsSeedResolvedCourseId,
+    usedWordIds,
   ]);
 
   const downloadData = useCallback(async (): Promise<void> => {
@@ -906,6 +980,7 @@ export default function Flashcards() {
     const remaining = customCards.filter((card) => !trackedIds.has(card.id));
     if (remaining.length === 0) return;
 
+    const source = downloadSourceRef.current;
     const batchSize = flashcardsBatchSize ?? DEFAULT_FLASHCARDS_BATCH_SIZE;
     const nextBatch = pickRandomBatch(remaining, batchSize);
     let actuallyAdded: WordWithTranslations[] = [];
@@ -923,17 +998,70 @@ export default function Flashcards() {
       };
     });
     if (actuallyAdded.length === 0) return;
+    void appendDebugEvent("flashcards", "flashcards.batch_add", {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+      source,
+      requested: nextBatch.length,
+      added: actuallyAdded.length,
+      targetBox: boxZeroEnabled ? "boxZero" : "boxOne",
+      remainingBefore: remaining.length,
+      usedWordIdsCount: usedWordIds.length,
+    });
     addUsedWordIds(actuallyAdded.map((card) => card.id));
     setBatchIndex((prev) => prev + 1);
   }, [
+    activeCustomCourseId,
     addUsedWordIds,
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,
     setBatchIndex,
+    storageKey,
     trackedIds,
     setBoxes,
+    usedWordIds.length,
   ]);
+
+  const handleManualAddFlashcards = useCallback(async () => {
+    void appendDebugEvent("flashcards", "flashcards.add_click", {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+      usedWordIdsCount: usedWordIds.length,
+    });
+    downloadSourceRef.current = "manual";
+    try {
+      await downloadData();
+    } finally {
+      downloadSourceRef.current = null;
+    }
+  }, [activeCustomCourseId, downloadData, storageKey, usedWordIds.length]);
+
+  const handleAutoflowDownload = useCallback(async () => {
+    void appendDebugEvent("flashcards", "flashcards.autoflow_download", {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+      usedWordIdsCount: usedWordIds.length,
+    });
+    downloadSourceRef.current = "autoflow";
+    try {
+      await downloadData();
+    } finally {
+      downloadSourceRef.current = null;
+    }
+  }, [activeCustomCourseId, downloadData, storageKey, usedWordIds.length]);
+
+  const handleAutoEmptyDownload = useCallback(async () => {
+    downloadSourceRef.current = "auto-empty";
+    try {
+      await downloadData();
+    } finally {
+      downloadSourceRef.current = null;
+    }
+  }, [downloadData]);
 
   const introBoxLimitReached = boxZeroEnabled
     ? boxes.boxZero.length >= 30
@@ -988,6 +1116,11 @@ export default function Flashcards() {
     setIsLoadingData(shouldShowLoader);
     setReviewedIdsSeedResolvedCourseId(null);
     setLoadError(null);
+    void appendDebugEvent("flashcards", "flashcards.data_load.start", {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+    });
 
     void (async () => {
       const runStartedAt = await getCourseCompletionRunStartedAt(activeCustomCourseId);
@@ -1012,6 +1145,13 @@ export default function Flashcards() {
         }
         setCustomCourse(courseRow);
         const mapped = flashcardRows.map(mapCustomCardToWord);
+        void appendDebugEvent("flashcards", "flashcards.data_load.success", {
+          screen: "flashcards",
+          courseId: activeCustomCourseId,
+          storageKey,
+          flashcardsCount: mapped.length,
+          reviewsEnabled: courseRow.reviewsEnabled,
+        });
         setCustomCards(mapped);
         setCourseCompletionRunStartedAt(runStartedAt);
         courseCompletionRunStartedAtRef.current = runStartedAt;
@@ -1021,6 +1161,12 @@ export default function Flashcards() {
         setLoadedCourseId(activeCustomCourseId);
       })().catch((error) => {
         console.error("Failed to load custom flashcards", error);
+        void appendDebugEvent("flashcards", "flashcards.data_load.error", {
+          screen: "flashcards",
+          courseId: activeCustomCourseId,
+          storageKey,
+          message: error instanceof Error ? error.message : String(error),
+        });
         if (!isMounted) return;
         setCustomCourse(null);
         setCustomCards([]);
@@ -1040,6 +1186,7 @@ export default function Flashcards() {
     activeCustomCourseId,
     isFocused,
     setActiveCustomCourseId,
+    storageKey,
   ]);
 
   useEffect(() => {
@@ -1108,7 +1255,7 @@ export default function Flashcards() {
     if (allCardsDistributed) return;
     if (!customCards.length) return;
 
-    void downloadData();
+    void handleAutoEmptyDownload();
   }, [
     isReady,
     isLoadingData,
@@ -1118,7 +1265,7 @@ export default function Flashcards() {
     totalCardsInBoxes,
     allCardsDistributed,
     customCards,
-    downloadData,
+    handleAutoEmptyDownload,
   ]);
 
   useEffect(() => {
@@ -1358,11 +1505,19 @@ export default function Flashcards() {
     canSwitch: canAutoflowSwitch,
     boxZeroEnabled,
     isReady: isReady,
-    downloadMore: downloadData,
+    downloadMore: handleAutoflowDownload,
     introBoxLimitReached,
     incomingBatchSize,
     totalFlashcardsInCourse: totalCards,
     remainingNewFlashcardsCount,
+    onDebugEvent: (_area, event, payload) => {
+      void appendDebugEvent("flashcards", event, {
+        screen: "flashcards",
+        courseId: activeCustomCourseId,
+        storageKey,
+        ...payload,
+      });
+    },
   });
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =
@@ -1753,7 +1908,7 @@ export default function Flashcards() {
       selectedTrueFalseAnswer={selectedTrueFalseAnswer}
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}
-      onDownload={downloadData}
+      onDownload={handleManualAddFlashcards}
       downloadDisabled={cardActionsDownloadDisabled}
       downloadCoachmarkId="flashcards-add-button"
       confirmCoachmarkId="flashcards-confirm-button"
@@ -2012,7 +2167,7 @@ export default function Flashcards() {
             {shouldShowFloatingAdd && (
               <Pressable
                 style={styles.addButton}
-                onPress={downloadData}
+                onPress={handleManualAddFlashcards}
                 disabled={addButtonDisabled}
                 accessibilityLabel={t(
                   "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"

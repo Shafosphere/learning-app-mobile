@@ -1,9 +1,12 @@
 import React from "react";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent } from "@/src/db/sqlite/db";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
+import { DEBUG_EVENTS_STORAGE_KEY } from "@/src/services/debugEvents";
+import type { DebugContext } from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
@@ -57,6 +60,7 @@ type RenderInteractionOptions = {
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
   settingsOverride?: Partial<ReturnType<typeof createMockSettings>>;
+  debugContext?: DebugContext;
 };
 
 function createMockSettings() {
@@ -162,6 +166,7 @@ function renderInteraction(
       onWordPromotedOut,
       boxZeroEnabled: currentBoxZeroEnabled,
       skipDemotionCorrection: currentSkipDemotionCorrection,
+      debugContext: options.debugContext,
     });
 
     latestBoxes = boxes;
@@ -210,7 +215,8 @@ function renderInteraction(
 }
 
 describe("useFlashcardsInteraction", () => {
-  beforeEach(() => {
+  beforeEach(async () => {
+    await AsyncStorage.clear();
     jest.spyOn(Math, "random").mockReturnValue(0.999999);
     jest.spyOn(console, "log").mockImplementation(() => {});
     mockedUseSettings.mockReturnValue(createMockSettings());
@@ -222,6 +228,11 @@ describe("useFlashcardsInteraction", () => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
   });
+
+  async function readDebugEvents() {
+    const raw = await AsyncStorage.getItem(DEBUG_EVENTS_STORAGE_KEY);
+    return JSON.parse(raw ?? "[]");
+  }
 
   it("creates correction bound to the answered card after wrong answer", async () => {
     const cardA = makeWord({
@@ -264,6 +275,102 @@ describe("useFlashcardsInteraction", () => {
         id: cardA.id,
         text: cardA.text,
       }),
+    });
+  });
+
+  it("logs correct answers and card moves", async () => {
+    const card = makeWord({
+      id: 1201,
+      text: "cat",
+      translations: ["kot"],
+      explanation: "Because it is a cat.",
+    });
+    const { result } = renderInteraction(
+      makeBoxesState({
+        boxOne: [card],
+      }),
+      {
+        settingsOverride: {
+          showExplanationEnabled: true,
+        },
+        debugContext: {
+          screen: "flashcards",
+          courseId: 7,
+          storageKey: "customBoxes:test",
+        },
+      }
+    );
+
+    act(() => {
+      result.current.interaction.handleSelectBox("boxOne");
+    });
+    await waitFor(() => {
+      expect(result.current.interaction.selectedItem?.id).toBe(card.id);
+    });
+
+    act(() => {
+      result.current.interaction.confirm(undefined, "kot");
+    });
+
+    await waitFor(() => {
+      expect(result.current.interaction.result).toBe(true);
+    });
+
+    act(() => {
+      result.current.interaction.acknowledgeExplanation();
+    });
+
+    await waitFor(async () => {
+      const events = await readDebugEvents();
+      expect(events.map((event: { event: string }) => event.event)).toEqual(
+        expect.arrayContaining(["answer.correct", "card.move"])
+      );
+    });
+  });
+
+  it("logs wrong answers and demotion moves", async () => {
+    const card = makeWord({
+      id: 1202,
+      text: "dog",
+      translations: ["pies"],
+    });
+    const { result } = renderInteraction(
+      makeBoxesState({
+        boxOne: [card],
+      }),
+      {
+        debugContext: {
+          screen: "flashcards",
+          courseId: 7,
+          storageKey: "customBoxes:test",
+        },
+      }
+    );
+
+    act(() => {
+      result.current.interaction.handleSelectBox("boxOne");
+    });
+    await waitFor(() => {
+      expect(result.current.interaction.selectedItem?.id).toBe(card.id);
+    });
+
+    act(() => {
+      result.current.interaction.confirm(undefined, "nope");
+    });
+
+    await waitFor(() => {
+      expect(result.current.interaction.correction?.cardId).toBe(card.id);
+    });
+
+    act(() => {
+      result.current.interaction.wrongInputChange(2, "pies");
+    });
+
+    await waitFor(async () => {
+      const events = await readDebugEvents();
+      expect(events.map((event: { event: string }) => event.event)).toEqual(
+        expect.arrayContaining(["answer.wrong", "card.move"])
+      );
     });
   });
 

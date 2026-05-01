@@ -14,6 +14,11 @@ type AutoflowParams = {
   incomingBatchSize?: number;
   remainingNewFlashcardsCount?: number;
   totalFlashcardsInCourse?: number | null;
+  onDebugEvent?: (
+    area: string,
+    event: string,
+    payload?: Record<string, unknown>
+  ) => void;
 };
 
 export const FLASHCARDS_AUTOFLOW_VERSION = "2026-04-22v3";
@@ -258,8 +263,10 @@ export function useFlashcardsAutoflow({
   isReady,
   downloadMore,
   introBoxLimitReached,
+  incomingBatchSize,
   remainingNewFlashcardsCount,
   totalFlashcardsInCourse,
+  onDebugEvent,
 }: AutoflowParams) {
   const switchLockedUntil = useRef(0);
   const fetchInFlight = useRef(false);
@@ -310,6 +317,21 @@ export function useFlashcardsAutoflow({
     });
 
     if (decision.shouldDownloadNew && canDownloadMore) {
+      onDebugEvent?.("flashcards", "autoflow.decision", {
+        phase,
+        activeBox,
+        targetBox: decision.targetBox,
+        shouldDownloadNew: true,
+        flushThreshold,
+        remainingNewFlashcardsCount: remainingNewFlashcardsCount ?? null,
+      });
+      onDebugEvent?.("flashcards", "autoflow.download", {
+        phase,
+        activeBox,
+        targetBox: decision.targetBox,
+        incomingBatchSize: incomingBatchSize ?? null,
+        remainingNewFlashcardsCount: remainingNewFlashcardsCount ?? null,
+      });
       fetchInFlight.current = true;
       void downloadMore().finally(() => {
         fetchInFlight.current = false;
@@ -345,6 +367,20 @@ export function useFlashcardsAutoflow({
     if (!targetBox) return;
     if (targetBox === activeBox) return;
 
+    onDebugEvent?.("flashcards", "autoflow.decision", {
+      phase,
+      activeBox,
+      targetBox,
+      shouldDownloadNew: false,
+      flushThreshold,
+      remainingNewFlashcardsCount: remainingNewFlashcardsCount ?? null,
+    });
+    onDebugEvent?.("flashcards", "autoflow.switch_box", {
+      phase,
+      fromBox: activeBox,
+      toBox: targetBox,
+      flushThreshold,
+    });
     handleSelectBox(targetBox);
     switchLockedUntil.current = now + SWITCH_STICKY_MS;
   }, [
@@ -356,8 +392,10 @@ export function useFlashcardsAutoflow({
     enabled,
     handleSelectBox,
     introBoxLimitReached,
+    incomingBatchSize,
     isReady,
     flushThreshold,
+    onDebugEvent,
     remainingNewFlashcardsCount,
     totalFlashcardsInCourse,
   ]);

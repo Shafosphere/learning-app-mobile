@@ -1,12 +1,13 @@
 import MyButton from "@/src/components/button/button";
 import { SUPPORT_EMAIL } from "@/src/constants/support";
 import { useStyles } from "@/src/screens/support/SupportScreen/SupportScreen-styles";
+import { createSupportDiagnosticsAttachment } from "@/src/services/supportDiagnostics";
 import Constants from "expo-constants";
 import * as Device from "expo-device";
 import * as MailComposer from "expo-mail-composer";
 import { Link } from "expo-router";
 import React, { useCallback, useMemo, useState } from "react";
-import { Linking, ScrollView, Text, View } from "react-native";
+import { Linking, Pressable, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { TFunction } from "i18next";
 
@@ -53,6 +54,10 @@ function buildDiagnosticEntries(t: TFunction): DiagnosticEntry[] {
 
 function formatBody(selectedDiagnostics: DiagnosticEntry[], t: TFunction) {
   const intro = t("support.report.bodyIntro");
+  if (selectedDiagnostics.length === 0) {
+    return intro;
+  }
+
   const diagnostics = selectedDiagnostics
     .map((entry) => `${entry.label}: ${entry.value}`)
     .join("\n");
@@ -65,10 +70,13 @@ export default function SupportScreen() {
   const { t } = useTranslation();
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [attachBasicData, setAttachBasicData] = useState(true);
+  const [attachDiagnostics, setAttachDiagnostics] = useState(false);
   const diagnosticEntries = useMemo(() => buildDiagnosticEntries(t), [t]);
+  const selectedDiagnosticEntries = attachBasicData ? diagnosticEntries : [];
   const emailBody = useMemo(
-    () => formatBody(diagnosticEntries, t),
-    [diagnosticEntries, t]
+    () => formatBody(selectedDiagnosticEntries, t),
+    [selectedDiagnosticEntries, t]
   );
 
   const openMailto = useCallback(
@@ -92,12 +100,22 @@ export default function SupportScreen() {
     setStatus(null);
 
     try {
+      let attachments: string[] | undefined;
+      let body = emailBody;
+      if (attachDiagnostics) {
+        const diagnosticsFileUri =
+          await createSupportDiagnosticsAttachment(diagnosticEntries);
+        attachments = [diagnosticsFileUri];
+        body = `${body}\n\n${t("support.report.diagnosticsAttachmentNote")}`;
+      }
+
       const available = await MailComposer.isAvailableAsync();
       if (available) {
         const result = await MailComposer.composeAsync({
           recipients: [SUPPORT_EMAIL],
           subject: t("support.report.subject"),
-          body: emailBody,
+          body,
+          attachments,
         });
 
         if (result.status === MailComposer.MailComposerStatus.SENT) {
@@ -113,21 +131,29 @@ export default function SupportScreen() {
 
       await openMailto(
         t("support.report.subject"),
-        emailBody,
-        t("support.status.mailtoOpenedReport"),
+        attachDiagnostics
+          ? `${emailBody}\n\n${t("support.report.mailtoDiagnosticsUnavailable")}`
+          : emailBody,
+        attachDiagnostics
+          ? t("support.status.mailtoOpenedReportNoAttachment")
+          : t("support.status.mailtoOpenedReport"),
       );
     } catch (error) {
       console.warn("[Support] send email failed", error);
       setStatus(t("support.status.composerFailed"));
       await openMailto(
         t("support.report.subject"),
-        emailBody,
-        t("support.status.mailtoOpenedReport"),
+        attachDiagnostics
+          ? `${emailBody}\n\n${t("support.report.mailtoDiagnosticsUnavailable")}`
+          : emailBody,
+        attachDiagnostics
+          ? t("support.status.mailtoOpenedReportNoAttachment")
+          : t("support.status.mailtoOpenedReport"),
       );
     } finally {
       setBusy(false);
     }
-  }, [emailBody, openMailto, t]);
+  }, [attachDiagnostics, diagnosticEntries, emailBody, openMailto, t]);
 
   const handleSendSuggestion = useCallback(async () => {
     setBusy(true);
@@ -180,6 +206,52 @@ export default function SupportScreen() {
         <View style={styles.section}>
           <Text style={styles.header}>{t("support.report.title")}</Text>
           <Text style={styles.subtitle}>{t("support.report.subtitle")}</Text>
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: attachBasicData }}
+            onPress={() => setAttachBasicData((value) => !value)}
+            style={styles.checkboxRow}
+          >
+            <View
+              style={[
+                styles.checkboxBox,
+                attachBasicData ? styles.checkboxBoxActive : null,
+              ]}
+            >
+              {attachBasicData ? <View style={styles.checkboxDot} /> : null}
+            </View>
+            <View style={styles.checkboxTextGroup}>
+              <Text style={styles.checkboxTitle}>
+                {t("support.report.attachBasicData")}
+              </Text>
+              <Text style={styles.checkboxSubtitle}>
+                {t("support.report.attachBasicDataSubtitle")}
+              </Text>
+            </View>
+          </Pressable>
+          <Pressable
+            accessibilityRole="checkbox"
+            accessibilityState={{ checked: attachDiagnostics }}
+            onPress={() => setAttachDiagnostics((value) => !value)}
+            style={styles.checkboxRow}
+          >
+            <View
+              style={[
+                styles.checkboxBox,
+                attachDiagnostics ? styles.checkboxBoxActive : null,
+              ]}
+            >
+              {attachDiagnostics ? <View style={styles.checkboxDot} /> : null}
+            </View>
+            <View style={styles.checkboxTextGroup}>
+              <Text style={styles.checkboxTitle}>
+                {t("support.report.attachDiagnostics")}
+              </Text>
+              <Text style={styles.checkboxSubtitle}>
+                {t("support.report.attachDiagnosticsSubtitle")}
+              </Text>
+            </View>
+          </Pressable>
           <View style={styles.buttonWrapper}>
             <MyButton
               text={t("support.report.button")}

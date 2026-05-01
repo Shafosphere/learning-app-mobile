@@ -54,6 +54,53 @@ export const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     opacity: 0.85,
   },
+  checkboxRow: {
+    flexDirection: "row",
+    alignItems: "flex-start",
+    gap: 10,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.background,
+    marginTop: 2,
+  },
+  checkboxBox: {
+    width: 22,
+    height: 22,
+    borderRadius: 7,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    marginTop: 1,
+  },
+  checkboxBoxActive: {
+    borderColor: colors.my_green,
+  },
+  checkboxDot: {
+    width: 12,
+    height: 12,
+    borderRadius: 4,
+    backgroundColor: colors.my_green,
+  },
+  checkboxTextGroup: {
+    flex: 1,
+  },
+  checkboxTitle: {
+    fontSize: 14,
+    fontWeight: "700",
+    color: colors.headline,
+  },
+  checkboxSubtitle: {
+    marginTop: 3,
+    fontSize: 12,
+    lineHeight: 16,
+    color: colors.paragraph,
+    opacity: 0.78,
+  },
 
   // Panel (diagnostics)
   panel: {

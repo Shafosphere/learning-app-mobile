@@ -560,7 +560,13 @@
       "button": "Wyślij e-mail",
       "subject": "Zgłoszenie błędu - Memicard",
       "bodyIntro": "Opisz problem (kroki, co widzisz):",
-      "bodyDiagnosticsTitle": "O aplikacji (dołączone automatycznie)"
+      "bodyDiagnosticsTitle": "O aplikacji (dołączone automatycznie)",
+      "attachBasicData": "Dołącz podstawowe dane aplikacji",
+      "attachBasicDataSubtitle": "Dodamy do treści wiadomości wersję aplikacji, build, model urządzenia i system.",
+      "attachDiagnostics": "Dołącz logi diagnostyczne",
+      "attachDiagnosticsSubtitle": "Do wiadomości dodamy plik JSON z metadanymi, ostatnimi logami technicznymi i skrótem stanu pudełek.",
+      "diagnosticsAttachmentNote": "Załączono raport diagnostyczny JSON.",
+      "mailtoDiagnosticsUnavailable": "Wybrano dołączenie logów diagnostycznych, ale ten klient poczty nie obsługuje załączników z aplikacji. Spróbuj ponownie przez systemowe okno poczty."
     },
     "suggestion": {
       "title": "Wyślij sugestię",
@@ -597,6 +603,7 @@
       "suggestionSent": "Sugestia wysłana. Dziękujemy za pomysł!",
       "sendCancelled": "Wysyłka anulowana. Możesz spróbować ponownie.",
       "mailtoOpenedReport": "Otwarto wiadomość e-mail. Dopisz opis i wyślij wiadomość.",
+      "mailtoOpenedReportNoAttachment": "Otwarto wiadomość e-mail, ale bez załącznika diagnostycznego. Klient mailto nie obsługuje załączników.",
       "mailtoOpenedSuggestion": "Otwarto wiadomość e-mail. Opisz swój pomysł i wyślij wiadomość.",
       "composerFailed": "Nie udało się otworzyć okna tworzenia wiadomości. Spróbuj ponownie albo użyj odnośnika mailto:."
     }
