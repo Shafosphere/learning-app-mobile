@@ -20,6 +20,7 @@ export type StatBurst = {
   masteredDelta: 0 | 1;
   streakDelta: 0 | 1;
   promotionsDelta: 0 | 1;
+  streakDaysOverride?: number;
 };
 
 export type NavbarStatsSnapshot = {
@@ -110,6 +111,7 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
   const currentBurstRef = useRef<NavbarStatBurstEvent | null>(null);
   const burstQueueRef = useRef<NavbarStatBurstEvent[]>([]);
   const burstIdRef = useRef(1);
+  const localStreakBurstVersionRef = useRef(0);
   const pinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPinnedRef = useRef(false);
 
@@ -179,10 +181,14 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
 
       const keys = getBurstKeys(burst);
       const comboCount = keys.length;
+      if (burst.streakDelta > 0 || burst.streakDaysOverride != null) {
+        localStreakBurstVersionRef.current += 1;
+      }
 
       syncStats((current) => ({
         masteredCount: current.masteredCount + burst.masteredDelta,
-        streakDays: current.streakDays + burst.streakDelta,
+        streakDays:
+          burst.streakDaysOverride ?? current.streakDays + burst.streakDelta,
         promotionsCount: current.promotionsCount + burst.promotionsDelta,
       }));
 
@@ -220,6 +226,7 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
+    const streakBurstVersionAtReadStart = localStreakBurstVersionRef.current;
 
     void (async () => {
       try {
@@ -234,7 +241,10 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
 
         syncStats((current) => ({
           masteredCount: knownWordsCount,
-          streakDays: Math.max(current.streakDays, streakDays),
+          streakDays:
+            localStreakBurstVersionRef.current === streakBurstVersionAtReadStart
+              ? streakDays
+              : Math.max(current.streakDays, streakDays),
           promotionsCount: Math.max(
             current.promotionsCount,
             promotionsCount,

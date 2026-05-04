@@ -738,9 +738,6 @@ const CoursesDataSection: React.FC = () => {
                     {t("settings.coursesData.googleDrive.connectTitleAction")}
                   </Text>
                   <Text style={styles.actionCardTitle}>
-                    {t("settings.coursesData.googleDrive.comingSoon")}
-                  </Text>
-                  <Text style={styles.actionCardTitle}>
                     {t("settings.coursesData.googleDrive.connectTitleService")}
                   </Text>
                 </View>
@@ -756,7 +753,7 @@ const CoursesDataSection: React.FC = () => {
                   onPress={handleConnectDrive}
                   color="my_green"
                   disabled
-                  width={130}
+                  width={160}
                   accessibilityLabel={t("settings.coursesData.googleDrive.actionButton")}
                   textStyle={styles.driveButtonText}
                 />

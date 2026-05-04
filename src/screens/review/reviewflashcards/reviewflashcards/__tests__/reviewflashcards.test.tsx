@@ -1023,6 +1023,7 @@ describe("reviewflashcards correction desync regression", () => {
         masteredDelta: 0,
         promotionsDelta: 1,
         streakDelta: 1,
+        streakDaysOverride: 1,
       });
     });
     expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalledTimes(1);
@@ -1058,7 +1059,7 @@ describe("reviewflashcards correction desync regression", () => {
         })
       );
     });
-    expect(mockedGetGlobalDailyStreakDays).not.toHaveBeenCalled();
+    expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalledTimes(1);
     expect(applyStatBurstMock).not.toHaveBeenCalled();
   });
 

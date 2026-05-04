@@ -17,6 +17,17 @@ type ParsedCsvRaw = {
   parseIssues: CsvIssue[];
 };
 
+const KNOWN_NORMALIZED_HEADERS = new Set([
+  "type",
+  "front_text",
+  "back_text",
+  "front_image",
+  "back_image",
+  "tf_answer",
+  "flip",
+  "explanation",
+]);
+
 const normalizeRecordKeys = (input: Record<string, unknown>): Record<string, unknown> => {
   const normalized: Record<string, unknown> = {};
   for (const [key, value] of Object.entries(input)) {
@@ -25,7 +36,7 @@ const normalizeRecordKeys = (input: Record<string, unknown>): Record<string, unk
   return normalized;
 };
 
-const parseCsvText = (
+export const parseCsvText = (
   csvText: string,
   options?: { delimitersToGuess?: string[] }
 ): ParsedCsvRaw => {
@@ -37,6 +48,36 @@ const parseCsvText = (
   });
 
   const headers = (parsed.meta.fields ?? []).map((item) => normalizeCsvHeaderKey(item));
+  const isSingleColumnWithoutHeader =
+    headers.length === 1 && !KNOWN_NORMALIZED_HEADERS.has(headers[0]);
+
+  if (isSingleColumnWithoutHeader) {
+    const originalHeader = parsed.meta.fields?.[0]?.trim() ?? "";
+    const rows: CsvParsedRow[] = [];
+
+    if (originalHeader.length > 0) {
+      rows.push({
+        rowNumber: 1,
+        raw: { front_text: originalHeader },
+      });
+    }
+
+    for (const [index, raw] of (parsed.data ?? []).entries()) {
+      const value = raw[parsed.meta.fields?.[0] ?? ""];
+      const frontText = typeof value === "string" ? value.trim() : `${value ?? ""}`.trim();
+      if (!frontText) continue;
+      rows.push({
+        rowNumber: index + 2,
+        raw: { front_text: frontText },
+      });
+    }
+
+    return {
+      rows,
+      headers: ["front_text"],
+      parseIssues: [],
+    };
+  }
 
   const rows = (parsed.data ?? []).map((raw, index) => ({
     rowNumber: index + 2,

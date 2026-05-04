@@ -217,25 +217,33 @@ export default function ReviewFlashcardsPlaceholder() {
         await logLearningEventPromise;
 
         let streakDelta: 0 | 1 = 0;
-        if (baseBurst.promotionsDelta > 0) {
-          try {
-            const nextStreak = await getGlobalDailyStreakDays();
-            if (nextStreak > getStatsSnapshot().streakDays) {
-              streakDelta = 1;
-            }
-          } catch (error) {
-            console.warn("[Review] Failed to refresh streak after answer", error);
+        let streakDaysOverride: number | undefined;
+        try {
+          const nextStreak = await getGlobalDailyStreakDays();
+          if (nextStreak > getStatsSnapshot().streakDays) {
+            streakDelta = 1;
+            streakDaysOverride = nextStreak;
           }
+        } catch (error) {
+          console.warn("[Review] Failed to refresh streak after answer", error);
         }
 
         if (!hasBaseDelta && streakDelta === 0) {
           return;
         }
 
-        applyStatBurst({
-          ...baseBurst,
-          streakDelta,
-        });
+        applyStatBurst(
+          streakDaysOverride == null
+            ? {
+                ...baseBurst,
+                streakDelta,
+              }
+            : {
+                ...baseBurst,
+                streakDelta,
+                streakDaysOverride,
+              }
+        );
       })();
     },
     [applyStatBurst, getStatsSnapshot],

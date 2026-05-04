@@ -44,6 +44,7 @@ const FIELD_ALIASES: Record<string, CanonicalCsvField> = {
   tf_answer: "tf_answer",
   tf: "tf_answer",
   true_false_answer: "tf_answer",
+  czy_prawda: "tf_answer",
   odpowiedz_tf: "tf_answer",
   flip: "flip",
   odwroc: "flip",
@@ -86,7 +87,7 @@ export const getCsvFieldLabel = (field: string, locale: "pl" | "en"): string => 
       back_text: "rewers",
       front_image: "obraz_awers",
       back_image: "obraz_rewers",
-      tf_answer: "odpowiedz_tf",
+      tf_answer: "czy_prawda",
       flip: "odwroc",
       explanation: "wyjasnienie",
     };
@@ -94,4 +95,3 @@ export const getCsvFieldLabel = (field: string, locale: "pl" | "en"): string => 
   }
   return canonical;
 };
-

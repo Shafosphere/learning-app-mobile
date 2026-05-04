@@ -341,9 +341,8 @@ export async function getGlobalDailyStreakDays(
     `SELECT strftime('%Y-%m-%d', created_at/1000, 'unixepoch', 'localtime') AS d
      FROM custom_learning_events
      WHERE result = 'ok'
-       AND box IN ('boxOne', 'boxTwo', 'boxThree', 'boxFour')
+       AND box IN ('boxZero', 'boxOne', 'boxTwo', 'boxThree', 'boxFour', 'boxFive')
      GROUP BY d
-     HAVING COUNT(*) >= 10
      ORDER BY d DESC;`
   );
 
@@ -354,6 +353,15 @@ export async function getGlobalDailyStreakDays(
 
   const cursor = new Date(nowMs);
   cursor.setHours(0, 0, 0, 0);
+  const todayKey = formatLocalDateOnly(cursor);
+  if (!activeDays.has(todayKey)) {
+    cursor.setDate(cursor.getDate() - 1);
+    const yesterdayKey = formatLocalDateOnly(cursor);
+    if (!activeDays.has(yesterdayKey)) {
+      return 0;
+    }
+  }
+
   let streak = 0;
 
   while (true) {

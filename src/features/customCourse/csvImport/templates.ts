@@ -23,7 +23,7 @@ const CSV_HEADER: Record<CsvTemplateLocale, string[]> = {
     "rewers",
     "obraz_awers",
     "obraz_rewers",
-    "odpowiedz_tf",
+    "czy_prawda",
     "odwroc",
     "wyjasnienie",
   ],
@@ -54,8 +54,8 @@ const CSV_TEMPLATE_DEFINITIONS: Record<
   true_false: {
     fileName: "wzor_fiszki_prawda_falsz.csv",
     rows: [
-      ["true_false", "Slonce jest gwiazda", "", "", "", "true", "", ""],
-      ["true_false", "Woda wrze w 10 C", "", "", "", "false", "", ""],
+      ["prawda_falsz", "Slonce jest gwiazda", "", "", "", "prawda", "", ""],
+      ["prawda_falsz", "Woda wrze w 10 C", "", "", "", "falsz", "", ""],
     ],
   },
   self_assess: {
@@ -87,7 +87,7 @@ const CSV_TEMPLATE_DEFINITIONS: Record<
     fileName: "wzor_fiszki_mieszane.csv",
     rows: [
       ["odpowiedz_tekstowa", "Bonjour", "Hello", "", "", "", "", ""],
-      ["prawda_falsz", "Ziemia jest plaska", "", "", "", "false", "", ""],
+      ["prawda_falsz", "Ziemia jest plaska", "", "", "", "falsz", "", ""],
     ],
   },
   },

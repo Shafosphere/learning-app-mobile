@@ -18,7 +18,10 @@ const KNOWN_HEADERS = new Set([
   "explanation",
 ]);
 
-const TRUE_VALUES = new Set(["true", "1", "yes", "y", "tak", "t"]);
+const removeDiacritics = (value: string): string =>
+  value.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+
+const TRUE_VALUES = new Set(["true", "1", "yes", "y", "tak", "t", "prawda"]);
 
 const asTrimmedString = (value: unknown): string =>
   typeof value === "string" ? value.trim() : `${value ?? ""}`.trim();
@@ -26,7 +29,7 @@ const asTrimmedString = (value: unknown): string =>
 const hasValue = (value: unknown): boolean => asTrimmedString(value).length > 0;
 
 const parseBooleanValue = (value: unknown): boolean => {
-  const normalized = asTrimmedString(value).toLowerCase();
+  const normalized = removeDiacritics(asTrimmedString(value).toLowerCase());
   return TRUE_VALUES.has(normalized);
 };
 
@@ -56,7 +59,6 @@ export const analyzeRows = (
   const unknownHeaders = input.headers.filter(
     (header) => header.length > 0 && !KNOWN_HEADERS.has(header.toLowerCase())
   );
-
   if (unknownHeaders.length > 0) {
     issues.push({
       row: null,
@@ -79,6 +81,7 @@ export const analyzeRows = (
     const explicitType = parseCsvCardType(row.raw.type);
     const hasTypeValue = hasValue(row.raw.type);
     const hasTfAnswer = hasValue(row.raw.tf_answer);
+    const hasBackText = hasValue(row.raw.back_text);
 
     if (hasTypeValue && !explicitType) {
       rowIssues.push({
@@ -92,7 +95,8 @@ export const analyzeRows = (
       });
     }
 
-    const resolvedType: CsvCardType = explicitType ?? (hasTfAnswer ? "true_false" : "traditional");
+    const resolvedType: CsvCardType =
+      explicitType ?? (hasTfAnswer ? "true_false" : hasBackText ? "traditional" : "self_assess");
     const typeInferred = !explicitType;
 
     if (typeInferred) {

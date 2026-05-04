@@ -8,6 +8,7 @@ jest.mock("@/src/db/sqlite/core", () => ({
 import {
   clearCustomLearningEventsForCourse,
   getCourseCompletionSummary,
+  getGlobalDailyStreakDays,
   getHardFlashcards,
 } from "@/src/db/sqlite/repositories/analytics";
 
@@ -103,6 +104,106 @@ describe("analytics repository", () => {
       41
     );
     expect(result).toBe(6);
+  });
+
+  it("counts one correct boxZero event as today's daily streak", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([{ d: "2026-05-02" }]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+    const [sql] = getAllAsync.mock.calls[0];
+
+    expect(sql).toContain("'boxZero'");
+    expect(sql).toContain("'boxFive'");
+    expect(sql).not.toContain("HAVING COUNT(*) >= 10");
+    expect(result).toBe(1);
+  });
+
+  it("counts one correct boxFive event as today's daily streak", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([{ d: "2026-05-02" }]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+    const [sql] = getAllAsync.mock.calls[0];
+
+    expect(sql).toContain("result = 'ok'");
+    expect(result).toBe(1);
+  });
+
+  it("counts consecutive active days with one event per day", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([
+      { d: "2026-05-02" },
+      { d: "2026-05-01" },
+      { d: "2026-04-30" },
+    ]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+
+    expect(result).toBe(3);
+  });
+
+  it("keeps yesterday's streak visible before today's learning", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([
+      { d: "2026-05-01" },
+      { d: "2026-04-30" },
+    ]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+
+    expect(result).toBe(2);
+  });
+
+  it("resets the streak when the latest active day is older than yesterday", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([{ d: "2026-04-30" }]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+
+    expect(result).toBe(0);
+  });
+
+  it("stops counting at the first missing day", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([
+      { d: "2026-05-02" },
+      { d: "2026-04-30" },
+    ]);
+
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+    });
+
+    const result = await getGlobalDailyStreakDays(
+      new Date(2026, 4, 2, 12).getTime()
+    );
+
+    expect(result).toBe(1);
   });
 
   it("returns global hard flashcards without filtering by course", async () => {
