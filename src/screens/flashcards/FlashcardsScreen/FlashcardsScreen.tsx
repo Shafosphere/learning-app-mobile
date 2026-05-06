@@ -2228,7 +2228,7 @@ export default function Flashcards() {
 
             {boxesNeedScrollFallback ? (
               <ScrollView
-                style={styles.boxesViewport}
+                style={styles.boxesScrollViewport}
                 contentContainerStyle={styles.boxesViewportScrollContent}
                 onLayout={onBoxesViewportLayout}
                 showsVerticalScrollIndicator={false}

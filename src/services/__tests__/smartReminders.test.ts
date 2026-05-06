@@ -1,4 +1,5 @@
 import {
+  buildReminderSeriesEntries,
   buildReminderSeriesSchedule,
   computeSmartReminderPlan,
 } from "@/src/services/smartReminders";
@@ -24,6 +25,28 @@ describe("smart reminders", () => {
       { day: 10, hour: 18, minute: 0 },
       { day: 10, hour: 19, minute: 0 },
       { day: 10, hour: 20, minute: 0 },
+    ]);
+  });
+
+  it("labels reminder series entries with lead, due and follow-up slots", () => {
+    const now = new Date(2026, 0, 10, 17, 30, 0, 0);
+
+    const entries = buildReminderSeriesEntries({
+      targetMinutes: 19 * 60,
+      now,
+      horizonDays: 1,
+    });
+
+    expect(
+      entries.map((entry) => ({
+        hour: new Date(entry.scheduledAt).getHours(),
+        minute: new Date(entry.scheduledAt).getMinutes(),
+        slot: entry.slot,
+      }))
+    ).toEqual([
+      { hour: 18, minute: 0, slot: "lead" },
+      { hour: 19, minute: 0, slot: "due" },
+      { hour: 20, minute: 0, slot: "followUp" },
     ]);
   });
 

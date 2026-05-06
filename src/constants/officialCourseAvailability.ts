@@ -16,6 +16,8 @@ const POLISH_GENERAL_COURSE_SLUGS = [
   "astronomia",
   "polska_historia",
   "math",
+  "javascript_podstawy",
+  "react_podstawy",
   "grecka_mitologia_prawda_falsz_50",
   "flagi_europy",
   "flagi_afryki",

@@ -60,6 +60,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     alignItems: "center",
   },
+  boxesScrollViewport: {
+    flex: 1,
+    minHeight: 0,
+    width: "100%",
+  },
   boxesViewportScrollContent: {
     width: "100%",
     alignItems: "center",

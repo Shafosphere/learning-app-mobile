@@ -1,0 +1,301 @@
+external_id,type,front_text,back_text,tf_answer,explanation
+js_basic_001_slice_from_2,traditional,"Co zwróci `[""ant"", ""bison"", ""camel"", ""duck"", ""elephant""].slice(2)`?","[""camel"", ""duck"", ""elephant""]",,`slice(2)` tworzy nową tablicę od indeksu `2` do końca.
+js_basic_002_slice_1_3,traditional,"Co zwróci `[""ant"", ""bison"", ""camel"", ""duck""].slice(1, 3)`?","[""bison"", ""camel""]",,"Drugi argument `slice` jest końcem zakresu, ale nie jest wliczany."
+js_basic_003_slice_negative,traditional,"Co zwróci `[""a"", ""b"", ""c"", ""d""].slice(-2)`?","[""c"", ""d""]",,Ujemny indeks liczy pozycję od końca tablicy.
+js_basic_004_index_access,traditional,"Co zwróci `[""ant"", ""bison"", ""camel""][1]`?","""bison""",,"Indeksowanie tablic zaczyna się od `0`, więc indeks `1` to drugi element."
+js_basic_005_array_length,traditional,"Co zwróci `[""a"", ""b"", ""c""].length`?",3,,`length` zwraca liczbę elementów tablicy.
+js_basic_006_string_length,traditional,"Co zwróci `""JavaScript"".length`?",10,,`length` dla stringa zwraca liczbę znaków.
+js_basic_007_push_return,traditional,"Co zwróci `const arr = [1, 2]; arr.push(3);` jako wartość `arr`?","[1, 2, 3]",,`push(3)` dodaje element na końcu tablicy i modyfikuje oryginał.
+js_basic_008_push_result,traditional,"Co zwróci `[1, 2].push(3)`?",3,,"`push()` zwraca nową długość tablicy, nie samą tablicę."
+js_basic_009_pop_result,traditional,"Co zwróci `[1, 2, 3].pop()`?",3,,`pop()` usuwa i zwraca ostatni element tablicy.
+js_basic_010_shift_result,traditional,"Co zwróci `[1, 2, 3].shift()`?",1,,`shift()` usuwa i zwraca pierwszy element tablicy.
+js_basic_011_unshift_result,traditional,"Co zwróci `[2, 3].unshift(1)`?",3,,`unshift()` dodaje element na początku i zwraca nową długość tablicy.
+js_basic_012_includes_true,traditional,"Co zwróci `[""a"", ""b"", ""c""].includes(""b"")`?",true,,"`includes()` sprawdza, czy dana wartość znajduje się w tablicy."
+js_basic_013_includes_false,traditional,"Co zwróci `[""a"", ""b"", ""c""].includes(""d"")`?",false,,"Wartości `""d""` nie ma w tej tablicy."
+js_basic_014_indexof_found,traditional,"Co zwróci `[""a"", ""b"", ""c""].indexOf(""c"")`?",2,,`indexOf()` zwraca indeks pierwszego znalezionego elementu.
+js_basic_015_indexof_not_found,traditional,"Co zwróci `[""a"", ""b"", ""c""].indexOf(""x"")`?",-1,,"Gdy element nie istnieje, `indexOf()` zwraca `-1`."
+js_basic_016_join_dash,traditional,"Co zwróci `[""a"", ""b"", ""c""].join(""-"")`?","""a-b-c""",,"`join(""-"")` łączy elementy tablicy separatorem `-`."
+js_basic_017_split_comma,traditional,"Co zwróci `""a,b,c"".split("","")`?","[""a"", ""b"", ""c""]",,"`split("","")` dzieli string według przecinków i zwraca tablicę."
+js_basic_018_split_empty,traditional,"Co zwróci `""abc"".split("""")`?","[""a"", ""b"", ""c""]",,Pusty separator dzieli string na pojedyncze znaki.
+js_basic_019_trim,traditional,"Co zwróci `""  hello  "".trim()`?","""hello""",,`trim()` usuwa białe znaki z początku i końca stringa.
+js_basic_020_touppercase,traditional,"Co zwróci `""abc"".toUpperCase()`?","""ABC""",,`toUpperCase()` zwraca nowy string zapisany wielkimi literami.
+js_basic_021_tolowercase,traditional,"Co zwróci `""ABC"".toLowerCase()`?","""abc""",,`toLowerCase()` zwraca nowy string zapisany małymi literami.
+js_basic_022_startswith,traditional,"Co zwróci `""JavaScript"".startsWith(""Java"")`?",true,,`startsWith()` sprawdza początek stringa.
+js_basic_023_endswith,traditional,"Co zwróci `""JavaScript"".endsWith(""Script"")`?",true,,`endsWith()` sprawdza koniec stringa.
+js_basic_024_string_includes,traditional,"Co zwróci `""JavaScript"".includes(""Script"")`?",true,,"`includes()` dla stringa sprawdza, czy fragment tekstu występuje w stringu."
+js_basic_025_char_at_index,traditional,"Co zwróci `""abc""[0]`?","""a""",,String można odczytywać po indeksie podobnie jak tablicę.
+js_basic_026_number_add,traditional,Co zwróci `2 + 3`?,5,,Dwa typy `number` są dodawane matematycznie.
+js_basic_027_string_concat,traditional,"Co zwróci `""2"" + 3`?","""23""",,Operator `+` ze stringiem wykonuje konkatenację.
+js_basic_028_subtract_string_number,traditional,"Co zwróci `""5"" - 2`?",3,,Przy odejmowaniu JavaScript próbuje zamienić string na liczbę.
+js_basic_029_multiply_string_number,traditional,"Co zwróci `""4"" * 2`?",8,,Przy mnożeniu JavaScript próbuje zamienić string na liczbę.
+js_basic_030_nan_example,traditional,"Co zwróci `Number(""abc"")`?",NaN,,"`Number(""abc"")` nie może zamienić tekstu na poprawną liczbę."
+js_basic_031_parseint,traditional,"Co zwróci `parseInt(""42px"")`?",42,,`parseInt()` czyta liczbę od początku stringa do pierwszego niepasującego znaku.
+js_basic_032_parsefloat,traditional,"Co zwróci `parseFloat(""3.14px"")`?",3.14,,`parseFloat()` odczytuje liczbę zmiennoprzecinkową z początku stringa.
+js_basic_033_boolean_zero,traditional,Co zwróci `Boolean(0)`?,false,,`0` jest wartością falsy.
+js_basic_034_boolean_empty_string,traditional,"Co zwróci `Boolean("""")`?",false,,Pusty string jest wartością falsy.
+js_basic_035_boolean_nonempty_string,traditional,"Co zwróci `Boolean(""false"")`?",true,,"Niepusty string jest truthy, nawet jeżeli zawiera tekst `false`."
+js_basic_036_strict_equal_false,traditional,"Co zwróci `2 === ""2""`?",false,,`===` porównuje wartość i typ.
+js_basic_037_loose_equal_true,traditional,"Co zwróci `2 == ""2""`?",true,,`==` może wykonać konwersję typu przed porównaniem.
+js_basic_038_not_equal,traditional,"Co zwróci `2 !== ""2""`?",true,,"`!==` sprawdza, czy wartość lub typ są różne."
+js_basic_039_and_operator,traditional,Co zwróci `true && false`?,false,,"`&&` zwraca prawdę tylko wtedy, gdy obie strony są prawdziwe."
+js_basic_040_or_operator,traditional,Co zwróci `true || false`?,true,,"`||` zwraca prawdę, gdy przynajmniej jedna strona jest prawdziwa."
+js_basic_041_not_operator,traditional,Co zwróci `!true`?,false,,`!` odwraca wartość logiczną.
+js_basic_042_nullish,traditional,"Co zwróci `null ?? ""brak""`?","""brak""",,`??` zwraca prawą stronę tylko dla `null` albo `undefined`.
+js_basic_043_nullish_zero,traditional,"Co zwróci `0 ?? ""brak""`?",0,,"`0` nie jest `null` ani `undefined`, więc zostaje zwrócone."
+js_basic_044_or_zero,traditional,"Co zwróci `0 || ""brak""`?","""brak""",,`||` traktuje `0` jako falsy i wybiera prawą stronę.
+js_basic_045_ternary,traditional,"Co zwróci `5 > 3 ? ""tak"" : ""nie""`?","""tak""",,"Operator trójargumentowy wybiera pierwszą wartość, gdy warunek jest prawdziwy."
+js_basic_046_map_numbers,traditional,"Co zwróci `[1, 2, 3].map(n => n * 2)`?","[2, 4, 6]",,`map()` tworzy nową tablicę z wynikiem działania funkcji dla każdego elementu.
+js_basic_047_filter_numbers,traditional,"Co zwróci `[1, 2, 3, 4].filter(n => n > 2)`?","[3, 4]",,`filter()` zostawia elementy spełniające warunek.
+js_basic_048_find_number,traditional,"Co zwróci `[1, 2, 3, 4].find(n => n > 2)`?",3,,`find()` zwraca pierwszy element spełniający warunek.
+js_basic_049_some_true,traditional,"Co zwróci `[1, 2, 3].some(n => n > 2)`?",true,,"`some()` sprawdza, czy przynajmniej jeden element spełnia warunek."
+js_basic_050_every_false,traditional,"Co zwróci `[1, 2, 3].every(n => n > 1)`?",false,,"`every()` wymaga, żeby wszystkie elementy spełniały warunek."
+js_basic_051_reduce_sum,traditional,"Co zwróci `[1, 2, 3].reduce((sum, n) => sum + n, 0)`?",6,,"`reduce()` akumuluje wynik, tutaj sumuje liczby."
+js_basic_052_object_property,traditional,"Co zwróci `const user = { name: ""Ala"", age: 20 }; user.name`?","""Ala""",,Kropka pozwala odczytać właściwość obiektu.
+js_basic_053_object_bracket,traditional,"Co zwróci `const user = { name: ""Ala"" }; user[""name""]`?","""Ala""",,Nawiasy kwadratowe pozwalają odczytać właściwość po nazwie jako stringu.
+js_basic_054_array_of_objects,traditional,"Co zwróci `[{ id: 1 }, { id: 2 }][1].id`?",2,,"Najpierw pobierany jest drugi obiekt z tablicy, potem jego właściwość `id`."
+js_basic_055_typeof_string,traditional,"Co zwróci `typeof ""hello""`?","""string""",,`typeof` zwraca nazwę typu jako string.
+js_basic_056_typeof_number,traditional,Co zwróci `typeof 123`?,"""number""",,Liczby w JavaScript mają typ `number`.
+js_basic_057_typeof_boolean,traditional,Co zwróci `typeof true`?,"""boolean""",,Wartości `true` i `false` mają typ `boolean`.
+js_basic_058_typeof_undefined,traditional,Co zwróci `typeof undefined`?,"""undefined""",,`undefined` oznacza brak przypisanej wartości.
+js_basic_059_typeof_null,traditional,Co zwróci `typeof null`?,"""object""",,To historyczna osobliwość JavaScript.
+js_basic_060_function_return,traditional,"Co zwróci `function add(a, b) { return a + b; } add(2, 3);`?",5,,`return` zwraca wynik funkcji.
+js_basic_061_arrow_return,traditional,"Co zwróci `const add = (a, b) => a + b; add(2, 3);`?",5,,Arrow function bez klamr zwraca wyrażenie automatycznie.
+js_basic_062_no_return,traditional,Co zwróci `function test() { const x = 5; } test();`?,undefined,,Funkcja bez `return` zwraca `undefined`.
+js_basic_063_template_literal,traditional,"Co zwróci `` `Cześć ${""Ala""}` ``?","""Cześć Ala""",,Template literal wstawia wartość wyrażenia w miejscu `${...}`.
+js_basic_064_math_floor,traditional,Co zwróci `Math.floor(3.9)`?,3,,`Math.floor()` zaokrągla w dół.
+js_basic_065_math_ceil,traditional,Co zwróci `Math.ceil(3.1)`?,4,,`Math.ceil()` zaokrągla w górę.
+js_basic_066_math_round,traditional,Co zwróci `Math.round(3.5)`?,4,,`Math.round()` zaokrągla do najbliższej liczby całkowitej.
+js_basic_067_json_parse,traditional,"Co zwróci `JSON.parse(""{\""name\"":\""Ala\""}"").name`?","""Ala""",,`JSON.parse()` zamienia tekst JSON na obiekt JavaScript.
+js_basic_068_json_stringify,traditional,"Co zwróci `JSON.stringify({ name: ""Ala"" })`?","""{""name"":""Ala""}""",,`JSON.stringify()` zamienia obiekt na tekst JSON.
+js_basic_069_method_slice,traditional,Jaka metoda zwraca fragment tablicy bez zmiany oryginału?,slice(),,`slice()` tworzy kopię fragmentu tablicy.
+js_basic_070_method_splice,traditional,Jaka metoda może usuwać albo wstawiać elementy i zmienia oryginalną tablicę?,splice(),,"`splice()` modyfikuje tablicę, dlatego trzeba używać jej ostrożnie."
+js_basic_071_method_push,traditional,Jaka metoda dodaje element na końcu tablicy?,push(),,`push()` zmienia oryginalną tablicę.
+js_basic_072_method_pop,traditional,Jaka metoda usuwa ostatni element tablicy?,pop(),,`pop()` usuwa i zwraca ostatni element.
+js_basic_073_method_shift,traditional,Jaka metoda usuwa pierwszy element tablicy?,shift(),,`shift()` usuwa i zwraca pierwszy element.
+js_basic_074_method_unshift,traditional,Jaka metoda dodaje element na początku tablicy?,unshift(),,`unshift()` zmienia oryginalną tablicę i zwraca nową długość.
+js_basic_075_method_map,traditional,Jaka metoda tworzy nową tablicę po przekształceniu każdego elementu?,map(),,"`map()` jest używane, gdy chcesz zamienić każdy element na inną wartość."
+js_basic_076_tf_const_reassign,true_false,Zmienna zadeklarowana przez `const` może zostać ponownie przypisana do innej wartości.,,false,`const` blokuje ponowne przypisanie zmiennej.
+js_basic_077_tf_let_reassign,true_false,Zmienna zadeklarowana przez `let` może zostać ponownie przypisana.,,true,`let` pozwala zmienić wartość zmiennej.
+js_basic_078_tf_array_index_zero,true_false,Pierwszy element tablicy ma indeks `0`.,,true,Indeksy tablic w JavaScript zaczynają się od `0`.
+js_basic_079_tf_slice_mutates,true_false,Metoda `slice()` modyfikuje oryginalną tablicę.,,false,`slice()` zwraca nową tablicę i nie zmienia oryginału.
+js_basic_080_tf_splice_mutates,true_false,Metoda `splice()` modyfikuje oryginalną tablicę.,,true,"`splice()` działa bezpośrednio na tablicy, na której została wywołana."
+js_basic_081_tf_map_mutates,true_false,Metoda `map()` zwykle tworzy nową tablicę zamiast zmieniać oryginalną.,,true,`map()` zwraca nową tablicę z przekształconymi elementami.
+js_basic_082_tf_strict_equal,true_false,Operator `===` porównuje wartość i typ.,,true,`===` nie wykonuje luźnej konwersji typu tak jak `==`.
+js_basic_083_tf_null_typeof,true_false,"`typeof null` zwraca `""null""`.",,false,"W JavaScript `typeof null` zwraca `""object""`."
+js_basic_084_tf_nan_equal,true_false,`NaN === NaN` zwraca `true`.,,false,`NaN` nie jest równe samemu sobie; do sprawdzania używa się np. `Number.isNaN()`.
+js_basic_085_tf_queryselector,true_false,"`document.querySelector("".box"")` wybiera pierwszy element pasujący do selektora `.box`.",,true,`querySelector()` zwraca pierwszy pasujący element albo `null`.
+js_basic_086_tf_dom_textcontent,true_false,Właściwość `textContent` pozwala odczytać lub ustawić tekst elementu DOM.,,true,`textContent` dotyczy tekstowej zawartości elementu.
+js_basic_087_tf_event_click,true_false,Zdarzenie `click` uruchamia się po kliknięciu elementu.,,true,`click` jest jednym z podstawowych zdarzeń w DOM.
+js_basic_088_tf_localstorage_string,true_false,`localStorage` przechowuje wartości jako stringi.,,true,Obiekty i tablice trzeba zwykle zapisać przez `JSON.stringify()`.
+js_basic_089_tf_foreach_returns,true_false,Metoda `forEach()` zwraca nową tablicę.,,false,`forEach()` służy do wykonania funkcji dla elementów i zwraca `undefined`.
+js_basic_090_tf_filter_all,true_false,"Metoda `filter()` zwraca elementy, które spełniają warunek.",,true,`filter()` tworzy nową tablicę tylko z pasujących elementów.
+js_basic_091_self_var_let_const,self_assess,"Wyjaśnij własnymi słowami różnicę między `var`, `let` i `const`.",,,"`var` ma starsze zasady zakresu funkcyjnego, `let` i `const` mają zakres blokowy, a `const` dodatkowo blokuje ponowne przypisanie."
+js_basic_092_self_array_methods,self_assess,Wyjaśnij różnicę między `slice()` i `splice()`.,,,"`slice()` zwraca fragment bez zmiany oryginału, a `splice()` modyfikuje oryginalną tablicę."
+js_basic_093_self_map_filter,self_assess,Wyjaśnij różnicę między `map()` i `filter()`.,,,"`map()` przekształca każdy element, a `filter()` wybiera tylko elementy spełniające warunek."
+js_basic_094_self_truthy_falsy,self_assess,"Wyjaśnij, czym są wartości truthy i falsy.",,,"Truthy zachowują się jak `true` w warunku, a falsy jak `false`, np. `0`, `""""`, `null`, `undefined`, `NaN`."
+js_basic_095_self_function_return,self_assess,"Wyjaśnij, po co w funkcji używa się `return`.",,,`return` kończy funkcję i przekazuje wynik w miejsce jej wywołania.
+js_basic_096_self_dom_selector,self_assess,"Wyjaśnij, do czego służy `document.querySelector()`.",,,Służy do pobrania pierwszego elementu DOM pasującego do selektora CSS.
+js_basic_097_self_event_listener,self_assess,"Wyjaśnij, do czego służy `addEventListener()`.",,,"Pozwala przypisać funkcję, która uruchomi się po wystąpieniu zdarzenia, np. kliknięcia."
+js_basic_098_self_json,self_assess,"Wyjaśnij, po co używa się `JSON.parse()` i `JSON.stringify()`.",,,"`JSON.parse()` zamienia tekst JSON na dane JavaScript, a `JSON.stringify()` zamienia dane JavaScript na tekst JSON."
+js_basic_099_self_async_basic,self_assess,"Wyjaśnij bardzo krótko, do czego służy `async/await`.",,,"`async/await` ułatwia pisanie kodu asynchronicznego, np. przy pobieraniu danych z API."
+js_basic_100_self_trycatch,self_assess,"Wyjaśnij, do czego służy `try...catch`.",,,`try...catch` pozwala obsłużyć błąd bez natychmiastowego przerwania całego programu.
+js_basic_101_array_at_negative,traditional,"Co zwróci `[""a"", ""b"", ""c""].at(-1)`?","""c""",,Metoda `at(-1)` pobiera ostatni element tablicy. Ujemny indeks liczy od końca.
+js_basic_102_array_concat,traditional,"Co zwróci `[1, 2].concat([3, 4])`?","[1, 2, 3, 4]",,`concat()` tworzy nową tablicę z połączonych elementów i nie zmienia oryginałów.
+js_basic_103_array_reverse_mutated,traditional,"Co będzie wartością `arr` po kodzie `const arr = [1, 2, 3]; arr.reverse();`?","[3, 2, 1]",,`reverse()` odwraca kolejność elementów w tej samej tablicy.
+js_basic_104_array_sort_strings,traditional,"Co zwróci `[""b"", ""a"", ""c""].sort()`?","[""a"", ""b"", ""c""]",,Bez funkcji porównującej `sort()` sortuje elementy według ich reprezentacji tekstowej.
+js_basic_105_array_sort_numbers_default,traditional,"Co zwróci `[10, 2, 1].sort()`?","[1, 10, 2]",,"Domyślne `sort()` porównuje wartości jako stringi, dlatego `10` trafia przed `2`."
+js_basic_106_array_sort_numbers_compare,traditional,"Co zwróci `[10, 2, 1].sort((a, b) => a - b)`?","[1, 2, 10]",,"Funkcja `(a, b) => a - b` sortuje liczby rosnąco według wartości liczbowej."
+js_basic_107_array_flat_one,traditional,"Co zwróci `[1, [2, 3], [4]].flat()`?","[1, 2, 3, 4]",,Domyślne `flat()` spłaszcza tablicę o jeden poziom.
+js_basic_108_array_flat_two,traditional,"Co zwróci `[1, [2, [3]]].flat(2)`?","[1, 2, 3]",,Argument `2` oznacza spłaszczenie tablicy o dwa poziomy zagnieżdżenia.
+js_basic_109_array_fill_range,traditional,"Co zwróci `[0, 0, 0].fill(9, 1)`?","[0, 9, 9]",,"`fill(9, 1)` wstawia `9` od indeksu `1` do końca tablicy."
+js_basic_110_array_from_string,traditional,"Co zwróci `Array.from(""abc"")`?","[""a"", ""b"", ""c""]",,"`Array.from()` tworzy tablicę z obiektu iterowalnego, tutaj ze stringa."
+js_basic_111_array_isarray,traditional,Co zwróci `Array.isArray([])`?,true,,"`Array.isArray()` sprawdza, czy przekazana wartość jest tablicą."
+js_basic_112_set_size_unique,traditional,"Co zwróci `new Set([1, 1, 2]).size`?",2,,"`Set` przechowuje unikalne wartości, więc powtórzona `1` jest liczona tylko raz."
+js_basic_113_set_to_array_spread,traditional,"Co zwróci `[...new Set([""a"", ""a"", ""b""])]`?","[""a"", ""b""]",,Rozwinięcie `Set` operatorem spread tworzy tablicę z unikalnych wartości.
+js_basic_114_map_get_value,traditional,"Co zwróci `const m = new Map(); m.set(""a"", 1); m.get(""a"")`?",1,,`Map#get()` zwraca wartość zapisaną pod podanym kluczem.
+js_basic_115_map_has_key,traditional,"Co zwróci `const m = new Map([[""x"", 0]]); m.has(""x"")`?",true,,"`Map#has()` sprawdza obecność klucza, niezależnie od tego, czy jego wartość jest truthy czy falsy."
+js_basic_116_object_keys,traditional,"Co zwróci `Object.keys({ a: 1, b: 2 })`?","[""a"", ""b""]",,"`Object.keys()` zwraca tablicę nazw własnych, wyliczalnych właściwości obiektu."
+js_basic_117_object_values,traditional,"Co zwróci `Object.values({ a: 1, b: 2 })`?","[1, 2]",,`Object.values()` zwraca tablicę wartości właściwości obiektu.
+js_basic_118_object_entries,traditional,Co zwróci `Object.entries({ a: 1 })`?,"[[""a"", 1]]",,"`Object.entries()` zwraca tablicę par `[klucz, wartość]`."
+js_basic_119_object_hasownproperty,traditional,"Co zwróci `({ a: 1 }).hasOwnProperty(""a"")`?",true,,"`hasOwnProperty()` sprawdza, czy obiekt ma daną własną właściwość."
+js_basic_120_delete_object_prop,traditional,"Co zwróci `const user = { name: ""Ala"", age: 20 }; delete user.age; user.age`?",undefined,,Po usunięciu właściwości odczyt `user.age` daje `undefined`.
+js_basic_121_object_spread_overwrite,traditional,"Co zwróci `const obj = { a: 1, ...{ a: 2, b: 3 } }; obj.a`?",2,,Przy spreadzie w obiekcie późniejsza właściwość o tej samej nazwie nadpisuje wcześniejszą.
+js_basic_122_array_spread_insert,traditional,"Co zwróci `[0, ...[1, 2], 3]`?","[0, 1, 2, 3]",,Operator spread rozwija elementy tablicy wewnątrz nowej tablicy.
+js_basic_123_rest_params_length,traditional,"Co zwróci `function count(...items) { return items.length; } count(1, 2, 3)`?",3,,Parametr rest zbiera przekazane argumenty do tablicy.
+js_basic_124_array_destructuring_second,traditional,"Co zwróci `const [a, b] = [10, 20]; b`?",20,,Destrukturyzacja tablicy przypisuje elementy według pozycji.
+js_basic_125_array_destructuring_skip,traditional,"Co zwróci `const [, second] = [""a"", ""b""]; second`?","""b""",,Puste miejsce przed przecinkiem pomija pierwszy element tablicy.
+js_basic_126_object_destructuring_name,traditional,"Co zwróci `const { name } = { name: ""Ala"", age: 20 }; name`?","""Ala""",,Destrukturyzacja obiektu wyciąga wartość właściwości o podanej nazwie.
+js_basic_127_destructuring_default,traditional,"Co zwróci `const { role = ""user"" } = {}; role`?","""user""",,"Wartość domyślna działa, gdy właściwość jest `undefined`."
+js_basic_128_default_parameter,traditional,"Co zwróci `function greet(name = ""gość"") { return name; } greet()`?","""gość""",,"Parametr domyślny jest używany, gdy argument nie został przekazany."
+js_basic_129_optional_chaining_missing,traditional,Co zwróci `const user = {}; user.address?.city`?,undefined,,"Optional chaining zatrzymuje odczyt, gdy `address` jest `null` albo `undefined`."
+js_basic_130_optional_chaining_existing,traditional,"Co zwróci `const user = { address: { city: ""Kraków"" } }; user.address?.city`?","""Kraków""",,"Gdy pośrednia właściwość istnieje, optional chaining normalnie odczytuje dalszą wartość."
+js_basic_131_nullish_undefined,traditional,"Co zwróci `undefined ?? ""x""`?","""x""",,Operator `??` wybiera prawą stronę tylko dla `null` albo `undefined`.
+js_basic_132_logical_and_value,traditional,"Co zwróci `""Ala"" && ""Ola""`?","""Ola""",,"Operator `&&` zwraca ostatni operand, jeśli wszystkie wcześniejsze są truthy."
+js_basic_133_logical_or_value,traditional,"Co zwróci `""Ala"" || ""Ola""`?","""Ala""",,Operator `||` zwraca pierwszy truthy operand.
+js_basic_134_logical_or_empty,traditional,"Co zwróci `"""" || ""brak""`?","""brak""",,"Pusty string jest falsy, więc `||` zwraca prawą stronę."
+js_basic_135_number_isnan_nan,traditional,Co zwróci `Number.isNaN(NaN)`?,true,,`Number.isNaN()` zwraca `true` tylko dla rzeczywistej wartości `NaN`.
+js_basic_136_number_isnan_string,traditional,"Co zwróci `Number.isNaN(""abc"")`?",false,,`Number.isNaN()` nie wykonuje konwersji typu przed sprawdzeniem.
+js_basic_137_global_isnan_string,traditional,"Co zwróci `isNaN(""abc"")`?",true,,Globalne `isNaN()` najpierw próbuje przekonwertować argument na liczbę.
+js_basic_138_number_isfinite_infinity,traditional,Co zwróci `Number.isFinite(Infinity)`?,false,,`Infinity` nie jest skończoną liczbą.
+js_basic_139_number_tofixed,traditional,Co zwróci `(3.14159).toFixed(2)`?,"""3.14""",,`toFixed(2)` zwraca string z liczbą zapisaną do dwóch miejsc po przecinku.
+js_basic_140_math_max_spread,traditional,"Co zwróci `Math.max(...[1, 5, 3])`?",5,,Spread przekazuje elementy tablicy jako osobne argumenty do `Math.max()`.
+js_basic_141_math_min,traditional,"Co zwróci `Math.min(1, 5, 3)`?",1,,`Math.min()` zwraca najmniejszą z przekazanych liczb.
+js_basic_142_exponentiation,traditional,Co zwróci `2 ** 3`?,8,,Operator `**` oznacza potęgowanie.
+js_basic_143_modulo,traditional,Co zwróci `5 % 2`?,1,,Operator `%` zwraca resztę z dzielenia.
+js_basic_144_string_slice_from_1,traditional,"Co zwróci `""abc"".slice(1)`?","""bc""",,`slice(1)` zwraca fragment stringa od indeksu `1` do końca.
+js_basic_145_string_slice_range,traditional,"Co zwróci `""JavaScript"".slice(0, 4)`?","""Java""",,Drugi argument `slice()` wskazuje koniec zakresu i nie jest wliczany.
+js_basic_146_string_replace_first,traditional,"Co zwróci `""hello"".replace(""l"", ""x"")`?","""hexlo""",,`replace()` z tekstowym wzorcem zamienia tylko pierwsze dopasowanie.
+js_basic_147_string_replace_all,traditional,"Co zwróci `""hello"".replaceAll(""l"", ""x"")`?","""hexxo""",,`replaceAll()` zamienia wszystkie dopasowania podanego fragmentu.
+js_basic_148_string_padstart,traditional,"Co zwróci `""5"".padStart(3, ""0"")`?","""005""",,"`padStart(3, ""0"")` dopełnia string od lewej do długości `3`."
+js_basic_149_string_charat,traditional,"Co zwróci `""abc"".charAt(1)`?","""b""",,`charAt(1)` zwraca znak na indeksie `1`.
+js_basic_150_string_includes_false,traditional,"Co zwróci `""abc"".includes(""z"")`?",false,,"Metoda `includes()` zwraca `false`, jeśli fragment nie występuje w stringu."
+js_basic_151_split_dash_length,traditional,"Co zwróci `""a-b-c"".split(""-"").length`?",3,,"`split(""-"")` tworzy trzy elementy: `""a""`, `""b""`, `""c""`."
+js_basic_152_slice_join_chain,traditional,"Co zwróci `[""a"", ""b"", ""c""].slice(1).join("""")`?","""bc""",,"Najpierw `slice(1)` daje `[""b"", ""c""]`, a potem `join("""")` łączy elementy bez separatora."
+js_basic_153_findindex_found,traditional,"Co zwróci `[5, 10, 15].findIndex(n => n > 8)`?",1,,"Pierwszy element większy od `8` to `10`, który ma indeks `1`."
+js_basic_154_findindex_not_found,traditional,"Co zwróci `[5, 10, 15].findIndex(n => n > 20)`?",-1,,"`findIndex()` zwraca `-1`, gdy nie znajdzie pasującego elementu."
+js_basic_155_some_false,traditional,"Co zwróci `[1, 2, 3].some(n => n > 5)`?",false,,"`some()` zwraca `true` tylko wtedy, gdy przynajmniej jeden element spełnia warunek."
+js_basic_156_every_true,traditional,"Co zwróci `[2, 4, 6].every(n => n % 2 === 0)`?",true,,"Wszystkie elementy są parzyste, więc `every()` zwraca `true`."
+js_basic_157_filter_length,traditional,"Co zwróci `[1, 2, 3, 4].filter(n => n % 2 === 0).length`?",2,,"Po filtrowaniu zostają `2` i `4`, więc długość wynosi `2`."
+js_basic_158_reduce_no_initial,traditional,"Co zwróci `[1, 2, 3].reduce((a, b) => a + b)`?",6,,Bez wartości początkowej `reduce()` bierze pierwszy element jako początkowy akumulator.
+js_basic_159_for_loop_sum,traditional,Co zwróci `let x = 0; for (let i = 0; i < 3; i++) { x += i; } x`?,3,,"Pętla dodaje `0 + 1 + 2`, co daje `3`."
+js_basic_160_forof_sum,traditional,"Co zwróci `let sum = 0; for (const n of [1, 2, 3]) { sum += n; } sum`?",6,,`for...of` przechodzi po wartościach tablicy.
+js_basic_161_break_loop_sum,traditional,Co zwróci `let x = 0; for (let i = 0; i < 5; i++) { if (i === 2) break; x += i; } x`?,1,,"Pętla zatrzymuje się przy `i === 2`, więc dodane zostają tylko `0` i `1`."
+js_basic_162_continue_loop_sum,traditional,Co zwróci `let x = 0; for (let i = 0; i < 4; i++) { if (i === 2) continue; x += i; } x`?,4,,"`continue` pomija dodanie `2`, więc wynik to `0 + 1 + 3`."
+js_basic_163_block_scope_let,traditional,Co zwróci `let x = 1; { let x = 2; } x`?,1,,"`let` ma zakres blokowy, więc wewnętrzne `x` nie nadpisuje zewnętrznego."
+js_basic_164_block_scope_var,traditional,Co zwróci `var x = 1; { var x = 2; } x`?,2,,"`var` nie ma zakresu blokowego, więc przypisanie w bloku dotyczy tej samej zmiennej."
+js_basic_165_var_hoisting,traditional,Co zwróci `function test() { return x; var x = 5; } test()`?,undefined,,"Deklaracja `var x` jest hoistowana, ale przypisanie `5` zostaje w swoim miejscu."
+js_basic_166_function_declaration_hoisting,traditional,"Co zwróci `hello(); function hello() { return ""hi""; }`?","""hi""",,"Deklaracje funkcji są hoistowane, dlatego można je wywołać przed miejscem deklaracji."
+js_basic_167_closure_result,traditional,Co zwróci `function make() { let x = 1; return () => x + 1; } make()()`?,2,,"Zwrócona funkcja pamięta zmienną `x` z zakresu, w którym została utworzona."
+js_basic_168_iife_result,traditional,Co zwróci `(() => 5)()`?,5,,"To natychmiast wywołana funkcja strzałkowa, która zwraca `5`."
+js_basic_169_promise_instance,traditional,Co zwróci `Promise.resolve(5) instanceof Promise`?,true,,`Promise.resolve()` zwraca obiekt typu `Promise`.
+js_basic_170_async_returns_promise,traditional,Co zwróci `async function f() { return 1; } f() instanceof Promise`?,true,,"Każda funkcja `async` zwraca `Promise`, nawet jeśli w środku zwraca zwykłą wartość."
+js_basic_171_try_catch_message,traditional,"Co zwróci `(() => { try { throw new Error(""x""); } catch (e) { return e.message; } })()`?","""x""",,"Blok `catch` przechwytuje błąd, a `message` zawiera tekst przekazany do `Error`."
+js_basic_172_finally_return_override,traditional,Co zwróci `(() => { try { return 1; } finally { return 2; } })()`?,2,,`return` w `finally` nadpisuje wcześniejszy `return` z bloku `try`.
+js_basic_173_json_parse_array_length,traditional,"Co zwróci `JSON.parse(""[1,2]"").length`?",2,,`JSON.parse()` zamienia tekst JSON na tablicę z dwoma elementami.
+js_basic_174_json_stringify_array,traditional,"Co zwróci `JSON.stringify([1, ""a""])`?","""[1,\""a\""]""",,`JSON.stringify()` zamienia tablicę na string w formacie JSON.
+js_basic_175_typeof_arrow_function,traditional,Co zwróci `typeof (() => {})`?,"""function""",,"Funkcje strzałkowe również mają typ zwracany przez `typeof` jako `""function""`."
+js_basic_176_tf_reverse_mutates,true_false,Metoda `reverse()` modyfikuje oryginalną tablicę.,,true,"`reverse()` działa mutująco, czyli zmienia kolejność elementów w tej samej tablicy."
+js_basic_177_tf_concat_mutates,true_false,"Metoda `concat()` modyfikuje pierwszą tablicę, do której jest wywołana.",,false,`concat()` zwraca nową tablicę i nie zmienia tablic wejściowych.
+js_basic_178_tf_default_sort_numeric,true_false,Domyślne `sort()` sortuje liczby numerycznie rosnąco.,,false,"Domyślne `sort()` porównuje elementy jako stringi. Do sortowania liczb zwykle używa się `(a, b) => a - b`."
+js_basic_179_tf_set_unique,true_false,`Set` przechowuje tylko unikalne wartości.,,true,Dodanie tej samej wartości drugi raz nie zwiększa rozmiaru `Set`.
+js_basic_180_tf_map_object_keys,true_false,W `Map` kluczem może być obiekt.,,true,"`Map` pozwala używać jako kluczy nie tylko stringów, ale też obiektów, funkcji i innych wartości."
+js_basic_181_tf_object_keys_values,true_false,`Object.keys()` zwraca wartości właściwości obiektu.,,false,`Object.keys()` zwraca klucze. Do wartości służy `Object.values()`.
+js_basic_182_tf_spread_deep_copy,true_false,Spread `{ ...obj }` tworzy głęboką kopię obiektu.,,false,Spread tworzy płytką kopię. Zagnieżdżone obiekty nadal są współdzielonymi referencjami.
+js_basic_183_tf_destructuring_mutates,true_false,Destrukturyzacja obiektu sama z siebie zmienia oryginalny obiekt.,,false,Destrukturyzacja tylko odczytuje wartości i przypisuje je do zmiennych.
+js_basic_184_tf_optional_chaining_safe,true_false,Optional chaining `?.` pomaga uniknąć błędu przy odczycie właściwości z `null` albo `undefined`.,,true,"Gdy po lewej stronie jest `null` lub `undefined`, wynik całego odczytu to `undefined`."
+js_basic_185_tf_number_isnan_string,true_false,"`Number.isNaN(""abc"")` zwraca `true`.",,false,"`Number.isNaN()` nie konwertuje stringa na liczbę, więc dla `""abc""` zwraca `false`."
+js_basic_186_tf_async_returns_promise,true_false,Funkcja oznaczona jako `async` zawsze zwraca `Promise`.,,true,Zwrócona zwykła wartość jest automatycznie opakowywana w spełniony `Promise`.
+js_basic_187_tf_then_fulfilled_value,true_false,Callback przekazany do `.then()` otrzymuje wartość spełnionego Promise.,,true,`.then(value => ...)` uruchamia callback po spełnieniu Promise i przekazuje do niego wynik.
+js_basic_188_tf_json_stringify_functions,true_false,`JSON.stringify()` normalnie serializuje funkcje jako kod funkcji.,,false,"Funkcje nie są poprawnymi wartościami JSON; w obiektach zwykle są pomijane, a samodzielnie dają `undefined`."
+js_basic_189_tf_queryselectorall_first,true_false,`querySelectorAll()` zwraca tylko pierwszy pasujący element.,,false,`querySelectorAll()` zwraca listę wszystkich pasujących elementów. Pierwszy element wybiera `querySelector()`.
+js_basic_190_tf_multiple_event_handlers,true_false,`addEventListener()` pozwala dodać więcej niż jeden handler do tego samego typu zdarzenia.,,true,Do jednego elementu można przypiąć wiele listenerów dla tego samego typu zdarzenia.
+js_basic_191_self_spread_vs_rest,self_assess,Wyjaśnij różnicę między operatorem spread `...` a parametrem rest `...`.,,,"Spread rozwija elementy, np. w tablicy lub argumentach funkcji. Rest zbiera wiele argumentów albo pozostałe wartości do jednej zmiennej."
+js_basic_192_self_shallow_deep_copy,self_assess,Wyjaśnij różnicę między płytką kopią a głęboką kopią obiektu.,,,Płytka kopia kopiuje tylko pierwszy poziom. Głębsze obiekty nadal mogą być współdzielone. Głęboka kopia tworzy osobne kopie także dla zagnieżdżonych struktur.
+js_basic_193_self_set_use_case,self_assess,"Podaj przykład sytuacji, w której użycie `Set` jest lepsze niż zwykłej tablicy.",,,"`Set` jest przydatny, gdy chcesz pilnować unikalnych wartości, np. usunąć duplikaty identyfikatorów albo szybko sprawdzać, czy wartość już istnieje."
+js_basic_194_self_map_vs_object,self_assess,"Wyjaśnij krótko, kiedy `Map` może być wygodniejszy niż zwykły obiekt.",,,"`Map` jest wygodny, gdy klucze nie muszą być stringami, gdy często dodajesz/usuwasz pary albo gdy zależy Ci na jasnym API typu `set`, `get`, `has`."
+js_basic_195_self_optional_nullish,self_assess,"Wyjaśnij, jak razem mogą działać optional chaining `?.` i nullish coalescing `??`.",,,"`?.` bezpiecznie odczytuje zagnieżdżoną wartość, a `??` ustawia wartość zapasową tylko wtedy, gdy wynik to `null` albo `undefined`."
+js_basic_196_self_promise_states,self_assess,Wymień i krótko opisz trzy podstawowe stany Promise.,,,"Promise może być `pending` — oczekujący, `fulfilled` — spełniony z wartością, albo `rejected` — odrzucony z błędem/powodem."
+js_basic_197_self_async_error_handling,self_assess,"Wyjaśnij, jak obsłużyć błąd w funkcji `async` używającej `await`.",,,"Najczęściej używa się `try...catch`. Kod z `await` trafia do `try`, a błąd z odrzuconego Promise można obsłużyć w `catch`."
+js_basic_198_self_event_bubbling,self_assess,"Wyjaśnij własnymi słowami, czym jest propagacja zdarzeń w DOM.",,,Zdarzenie może przechodzić przez kolejne elementy drzewa DOM. W fazie bubbling idzie od elementu docelowego w górę do rodziców.
+js_basic_199_self_modules_import_export,self_assess,Wyjaśnij różnicę między `export default` a nazwanym `export`.,,,`export default` oznacza jedną główną wartość modułu. Nazwane exporty pozwalają eksportować wiele wartości po ich nazwach i importować je zwykle w `{ }`.
+js_basic_200_self_hoisting_var_let,self_assess,Wyjaśnij różnicę w hoistingu między `var` a `let`.,,,"`var` jest hoistowany i przed przypisaniem ma wartość `undefined`. `let` też ma fazę przed deklaracją, ale dostęp przed deklaracją powoduje błąd przez temporal dead zone."
+js_theory_201_tf_execution_context_per_call,true_false,Każde wywołanie funkcji tworzy nowy kontekst wykonania.,,true,"Przy wywołaniu funkcji silnik tworzy kontekst z własnym zakresem, parametrami i informacjami potrzebnymi do wykonania kodu."
+js_theory_202_tf_call_stack_lifo,true_false,Call stack działa według zasady LIFO: ostatnia dodana funkcja kończy się jako pierwsza.,,true,"Stos wywołań działa jak stos talerzy: ostatnie wywołanie trafia na górę i musi zejść ze stosu przed funkcją, która je wywołała."
+js_theory_203_tf_event_loop_schedules_callbacks,true_false,"Event loop pomaga przekazywać gotowe callbacki asynchroniczne do wykonania, gdy call stack jest pusty.",,true,"Event loop koordynuje wykonywanie kodu synchronicznego oraz kolejek zadań, ale nie oznacza równoległego wykonywania zwykłego kodu JS w tym samym wątku."
+js_theory_204_tf_microtasks_before_tasks,true_false,"Po opróżnieniu call stacka kolejka microtasków jest zwykle obsługiwana przed kolejnym zwykłym taskiem, np. `setTimeout`.",,true,"Callbacki Promise trafiają do microtask queue, która ma pierwszeństwo przed typowymi taskami takimi jak callback z `setTimeout`."
+js_theory_205_tf_promise_then_microtask,true_false,Callback przekazany do `.then()` trafia do kolejki microtasków.,,true,Obsługa spełnionego albo odrzuconego Promise przez `.then()` lub `.catch()` jest planowana jako microtask.
+js_theory_206_tf_settimeout_microtask,true_false,Callback z `setTimeout()` jest microtaskiem tak samo jak callback z `.then()`.,,false,`setTimeout()` planuje zwykły task. Callbacki Promise są microtaskami i zwykle wykonują się wcześniej niż gotowe taski timeoutów.
+js_theory_207_tf_promise_executor_sync,true_false,Funkcja przekazana do `new Promise(...)` jako executor wykonuje się synchronicznie.,,true,Sam executor uruchamia się od razu. Asynchroniczne jest dopiero późniejsze przekazanie wyniku do `.then()` lub `.catch()`.
+js_theory_208_tf_await_blocks_thread,true_false,`await` blokuje cały wątek JavaScriptu do momentu zakończenia Promise.,,false,"`await` wstrzymuje dalsze wykonanie bieżącej funkcji `async`, ale nie zatrzymuje całego środowiska ani obsługi innych zadań."
+js_theory_209_tf_unhandled_rejection_same_as_sync_throw,true_false,Nieobsłużone odrzucenie Promise jest dokładnie tym samym mechanizmem co zwykły synchroniczny `throw` złapany przez najbliższy `try...catch`.,,false,Odrzucenie Promise obsługuje się przez `.catch()` albo `try...catch` wewnątrz funkcji `async` z `await`. Zewnętrzny synchroniczny `try...catch` nie łapie automatycznie przyszłego odrzucenia.
+js_theory_210_tf_finally_always_attempted,true_false,"Blok `finally` jest wykonywany zarówno po udanym `try`, jak i po błędzie obsłużonym przez `catch`.",,true,"`finally` służy do kodu sprzątającego, który powinien wykonać się niezależnie od tego, czy wystąpił błąd."
+js_theory_211_tf_numbers_are_ints,true_false,Standardowy typ `number` w JavaScript przechowuje wyłącznie liczby całkowite.,,false,`number` reprezentuje liczby zmiennoprzecinkowe podwójnej precyzji. Do dużych liczb całkowitych można używać `BigInt`.
+js_theory_212_tf_bigint_mix_number_arithmetic,true_false,`BigInt` można bezpośrednio mieszać z typem `number` w zwykłych działaniach arytmetycznych.,,false,JavaScript nie pozwala bezpośrednio mieszać `BigInt` i `number` w arytmetyce. Jedną ze stron trzeba jawnie przekonwertować.
+js_theory_213_tf_symbol_unique,true_false,"Każde wywołanie `Symbol()` tworzy unikalną wartość, nawet jeśli opis tekstowy jest taki sam.",,true,"Opis Symbola pomaga w debugowaniu, ale nie decyduje o równości. Dwa osobne `Symbol(""id"")` nie są tą samą wartością."
+js_theory_214_tf_symbol_description_equality,true_false,"Dwa symbole z tym samym opisem, np. `Symbol(""x"")` i `Symbol(""x"")`, są sobie równe przez `===`.",,false,Każdy nowy `Symbol()` jest unikalny. Ten sam opis nie tworzy tej samej wartości.
+js_theory_215_tf_undefined_no_value_assigned,true_false,"`undefined` często oznacza, że zmienna albo właściwość nie ma przypisanej wartości.",,true,"`undefined` pojawia się m.in. przy zadeklarowanej zmiennej bez wartości, brakującej właściwości obiektu albo funkcji bez `return`."
+js_theory_216_tf_null_intentional_absence,true_false,`null` zwykle oznacza celowo ustawiony brak wartości.,,true,`null` jest często używany jako świadomy sygnał: „tutaj nie ma obiektu/wartości”.
+js_theory_217_tf_object_comparison_by_structure,true_false,Dwa osobne obiekty z takimi samymi właściwościami są równe przez `===`.,,false,"Obiekty są porównywane przez tożsamość referencji, a nie przez identyczną strukturę właściwości."
+js_theory_218_tf_arrays_are_objects,true_false,Tablice w JavaScript są specjalnym rodzajem obiektów.,,true,"Tablice mają indeksy, długość i metody tablicowe, ale nadal są obiektami w sensie języka."
+js_theory_219_tf_functions_are_objects,true_false,"Funkcje w JavaScript mogą mieć właściwości, bo są obiektami wywoływalnymi.",,true,"Funkcja może być wywołana, przekazana jako wartość, przypisana do zmiennej i posiadać własne właściwości."
+js_theory_220_tf_typeof_array_array,true_false,"`typeof []` zwraca string `""array""`.",,false,"`typeof []` zwraca `""object""`. Do sprawdzania tablic używa się `Array.isArray()`."
+js_theory_221_tf_missing_property_undefined,true_false,Odczyt nieistniejącej właściwości istniejącego obiektu zwykle zwraca `undefined`.,,true,"Jeśli sam obiekt istnieje, ale właściwości nie ma, odczyt zwraca `undefined`. Błąd pojawia się np. przy próbie odczytu właściwości z `null` albo `undefined`."
+js_theory_222_tf_destructuring_default_null,true_false,"Domyślna wartość w destrukturyzacji użyje się zarówno dla `undefined`, jak i dla `null`.",,false,"Domyślna wartość w destrukturyzacji działa przy `undefined`. Jeśli wartość to `null`, domyślna wartość nie zostanie użyta."
+js_theory_223_tf_default_param_null,true_false,"Domyślny parametr funkcji zostanie użyty, gdy argument ma wartość `null`.",,false,"Domyślny parametr działa, gdy argument jest pominięty albo ma wartość `undefined`. `null` jest normalnie przekazaną wartością."
+js_theory_224_tf_rest_real_array,true_false,"Parametr rest, np. `...args`, zbiera pozostałe argumenty do prawdziwej tablicy.",,true,"Parametr rest tworzy zwykłą tablicę, więc można bezpośrednio używać metod takich jak `map()`, `filter()` czy `reduce()`."
+js_theory_225_tf_rest_must_be_last,true_false,Parametr rest może znajdować się w dowolnym miejscu listy parametrów funkcji.,,false,"Parametr rest musi być ostatnim parametrem, bo zbiera wszystkie pozostałe argumenty."
+js_theory_226_tf_array_spread_requires_iterable,true_false,"Spread w literale tablicy, np. `[...value]`, wymaga wartości iterowalnej.",,true,"W tablicy spread działa na iterables, np. tablicach, stringach, Setach czy Mapach."
+js_theory_227_tf_plain_object_iterable_by_default,true_false,Zwykły obiekt `{ a: 1 }` jest domyślnie iterowalny w `for...of`.,,false,"Zwykłe obiekty nie są domyślnie iterable. Do ich danych używa się np. `Object.keys()`, `Object.values()` albo `Object.entries()`."
+js_theory_228_tf_forof_iterable_values,true_false,"`for...of` przechodzi po wartościach obiektu iterowalnego, np. po elementach tablicy.",,true,`for...of` korzysta z protokołu iterable i pobiera kolejne wartości z iteratora.
+js_theory_229_tf_forin_enumerable_keys,true_false,"`for...in` przechodzi po enumerable keys, a nie bezpośrednio po wartościach tablicy lub obiektu.",,true,`for...in` iteruje po kluczach właściwości. Dla tablic zwykle lepszy jest `for...of` albo metody tablicowe.
+js_theory_230_tf_object_keys_own_enumerable,true_false,`Object.keys()` zwraca własne enumerable string keys obiektu.,,true,`Object.keys()` nie zwraca właściwości z prototypu ani nieenumerowalnych właściwości.
+js_theory_231_tf_prototype_chain_lookup,true_false,"Gdy właściwości nie ma bezpośrednio w obiekcie, JavaScript może szukać jej wyżej w łańcuchu prototypów.",,true,To podstawowy mechanizm dziedziczenia prototypowego: obiekt może delegować odczyt właściwości do swojego prototypu.
+js_theory_232_tf_class_no_prototype,true_false,Składnia `class` całkowicie zastępuje prototypy i nie używa mechanizmu prototypowego.,,false,`class` jest wygodną składnią opartą na prototypach. Metody instancji trafiają zwykle na prototyp klasy.
+js_theory_233_tf_private_fields_hash,true_false,"Prywatne pola klas w JavaScript zapisuje się składnią z `#`, np. `#count`.",,true,Pole z `#` jest prywatne na poziomie składni języka i nie może być normalnie odczytane z zewnątrz klasy.
+js_theory_234_tf_static_method_instance,true_false,"Metodę `static` wywołuje się na instancji klasy, a nie na samej klasie.",,false,"Metody statyczne należą do klasy jako konstruktora, np. `User.create()`, a nie do pojedynczych instancji `new User()`."
+js_theory_235_tf_arrow_constructor,true_false,Arrow function może być użyta jako konstruktor z operatorem `new`.,,false,Arrow functions nie mają własnego mechanizmu konstruktora i nie można ich używać z `new`.
+js_theory_236_tf_arrow_own_arguments,true_false,Arrow function ma własny obiekt `arguments` tak samo jak zwykła funkcja.,,false,Arrow function nie tworzy własnego `arguments`. Do wielu argumentów używa się zwykle parametru rest.
+js_theory_237_tf_arrow_this_lexical,true_false,`this` w arrow function jest brane z otaczającego zakresu leksykalnego.,,true,"Arrow function nie ustawia własnego `this`; przejmuje je z miejsca, w którym została utworzona."
+js_theory_238_tf_bind_arrow_this,true_false,`bind()` może trwale zmienić `this` wewnątrz arrow function.,,false,"Arrow function ignoruje zmianę `this` przez `bind()`, `call()` i `apply()`, bo ma `this` leksykalne."
+js_theory_239_tf_call_apply_bind_normal,true_false,"`call()`, `apply()` i `bind()` służą m.in. do ustawiania `this` dla zwykłych funkcji.",,true,"`call()` i `apply()` od razu wywołują funkcję, a `bind()` zwraca nową funkcję z ustawionym `this`."
+js_theory_240_tf_modules_strict_mode,true_false,Moduły ES działają domyślnie w trybie ścisłym.,,true,"Kod w module ES jest wykonywany w strict mode bez potrzeby dopisywania `""use strict""`."
+js_theory_241_tf_static_import_anywhere,true_false,Statyczny `import` można umieścić wewnątrz dowolnej funkcji albo bloku `if`.,,false,Statyczne importy muszą być na najwyższym poziomie modułu. Do ładowania warunkowego służy dynamiczne `import()`.
+js_theory_242_tf_dynamic_import_promise,true_false,Dynamiczne `import()` zwraca Promise.,,true,"Dynamiczne importowanie modułu jest asynchroniczne, więc wynik obsługuje się przez `await` albo `.then()`."
+js_theory_243_tf_named_import_renaming,true_false,Nazwany import można zaaliasować składnią `as`.,,true,"Przykład: `import { getUser as fetchUser } from ""./api.js""`. Alias zmienia lokalną nazwę importu."
+js_theory_244_tf_default_import_same_name,true_false,Default import musi mieć dokładnie taką samą nazwę jak default export w pliku źródłowym.,,false,"Default export importuje się pod dowolną lokalną nazwą, bo nie jest wybierany przez nazwę eksportu."
+js_theory_245_tf_object_freeze_shallow,true_false,"`Object.freeze()` zamraża obiekt płytko, a nie rekurencyjnie wszystkie zagnieżdżone obiekty.",,true,"Po `Object.freeze(obj)` nie można łatwo zmieniać bezpośrednich właściwości `obj`, ale zagnieżdżone obiekty mogą nadal być mutowalne."
+js_theory_246_tf_object_assign_deep_clone,true_false,"`Object.assign({}, obj)` tworzy pełną głęboką kopię obiektu.",,false,`Object.assign()` tworzy kopię płytką. Zagnieżdżone obiekty pozostają współdzielone przez referencję.
+js_theory_247_tf_structuredclone_functions,true_false,"`structuredClone()` potrafi sklonować każdą wartość JavaScript, w tym funkcje.",,false,"`structuredClone()` obsługuje wiele typów danych, ale nie klonuje funkcji i ma swoje ograniczenia."
+js_theory_248_tf_json_date_preserves_date_object,true_false,Po `JSON.stringify()` i `JSON.parse()` obiekt `Date` wraca automatycznie jako instancja `Date`.,,false,"Data jest zwykle serializowana do stringa. Po `JSON.parse()` trzeba ją ręcznie zamienić z powrotem na `Date`, jeśli jest to potrzebne."
+js_theory_249_tf_event_preventdefault_stopprop,true_false,`preventDefault()` i `stopPropagation()` robią dokładnie to samo.,,false,"`preventDefault()` blokuje domyślne zachowanie przeglądarki, a `stopPropagation()` zatrzymuje dalszą propagację zdarzenia."
+js_theory_250_tf_weakmap_keys_primitives,true_false,"Kluczami w `WeakMap` mogą być zwykłe prymitywy, np. stringi i liczby.",,false,"Kluczami w `WeakMap` muszą być obiekty. Dzięki temu wpisy mogą być usunięte przez garbage collector, gdy obiekt-klucz nie jest już używany."
+js_theory_251_self_call_stack,self_assess,"Wyjaśnij własnymi słowami, czym jest call stack w JavaScript.",,,"Call stack to stos aktywnych wywołań funkcji. Gdy funkcja wywołuje kolejną funkcję, nowe wywołanie trafia na górę stosu; gdy kończy działanie, zostaje ze stosu zdjęte."
+js_theory_252_self_event_loop,self_assess,"Wyjaśnij, jaką rolę pełni event loop w wykonywaniu kodu asynchronicznego.",,,"Event loop pilnuje, kiedy gotowe zadania asynchroniczne mogą trafić do wykonania. Kod synchroniczny wykonuje się najpierw na call stacku, a callbacki czekają w odpowiednich kolejkach."
+js_theory_253_self_microtask_vs_task,self_assess,Wyjaśnij różnicę między microtask queue a zwykłą kolejką tasków.,,,"Microtaski, np. callbacki Promise, zwykle wykonują się po zakończeniu bieżącego kodu synchronicznego, ale przed kolejnymi taskami typu `setTimeout`."
+js_theory_254_self_promise_executor_sync,self_assess,"Wyjaśnij, dlaczego executor w `new Promise()` może wykonać się zanim pojawi się `.then()`.",,,Executor Promise uruchamia się natychmiast podczas tworzenia Promise. `.then()` jedynie rejestruje reakcję na późniejszy wynik.
+js_theory_255_self_await_pauses_function,self_assess,"Wyjaśnij, co oznacza, że `await` wstrzymuje funkcję, ale nie cały program.",,,Po `await` dalszy kod danej funkcji `async` czeka na wynik Promise. Inne zadania środowiska mogą nadal być obsługiwane.
+js_theory_256_self_sync_vs_async,self_assess,Wyjaśnij różnicę między kodem synchronicznym a asynchronicznym.,,,Kod synchroniczny wykonuje się linia po linii i blokuje dalszy kod do zakończenia. Kod asynchroniczny pozwala zaplanować pracę i wrócić do wyniku później.
+js_theory_257_self_lexical_scope,self_assess,"Wyjaśnij, czym jest zakres leksykalny w JavaScript.",,,"Zakres leksykalny wynika z miejsca zapisania kodu w pliku. Funkcja ma dostęp do zmiennych z własnego zakresu i z zakresów zewnętrznych, w których została utworzona."
+js_theory_258_self_scope_chain,self_assess,"Wyjaśnij, czym jest scope chain.",,,"Scope chain to łańcuch zakresów, po których JavaScript szuka zmiennej. Jeśli zmiennej nie ma lokalnie, silnik sprawdza kolejne zakresy zewnętrzne."
+js_theory_259_self_closure_use_case,self_assess,"Wyjaśnij, czym jest closure i podaj prosty przypadek użycia.",,,"Closure powstaje, gdy funkcja pamięta zmienne z zakresu, w którym została utworzona. Przydaje się np. do enkapsulacji stanu albo tworzenia liczników."
+js_theory_260_self_temporal_dead_zone,self_assess,"Wyjaśnij, czym jest temporal dead zone dla `let` i `const`.",,,Temporal dead zone to okres od wejścia w blok do faktycznej deklaracji zmiennej. W tym czasie dostęp do zmiennej `let`/`const` powoduje błąd.
+js_theory_261_self_function_decl_vs_expression,self_assess,Wyjaśnij różnicę między deklaracją funkcji a wyrażeniem funkcyjnym.,,,Deklaracja funkcji jest hoistowana jako funkcja i często może być wywołana przed miejscem zapisu. Wyrażenie funkcyjne działa jak wartość przypisana do zmiennej.
+js_theory_262_self_side_effect,self_assess,"Wyjaśnij, czym jest efekt uboczny funkcji.",,,"Efekt uboczny to wpływ funkcji na coś poza jej lokalnym wynikiem, np. zmiana obiektu z zewnątrz, zapis do DOM, request HTTP albo zapis do localStorage."
+js_theory_263_self_pure_function,self_assess,"Wyjaśnij, czym jest funkcja czysta.",,,Funkcja czysta dla tych samych argumentów zwraca ten sam wynik i nie powoduje efektów ubocznych. Dzięki temu łatwiej ją testować i przewidywać.
+js_theory_264_self_immutability,self_assess,"Wyjaśnij, czym jest niemutowalne podejście do pracy z danymi.",,,"Zamiast zmieniać istniejący obiekt lub tablicę, tworzy się nową wersję danych. To zmniejsza ryzyko przypadkowych zmian w wielu miejscach aplikacji."
+js_theory_265_self_mutation_debugging,self_assess,"Wyjaśnij, dlaczego niekontrolowana mutacja obiektów może utrudniać debugowanie.",,,"Jeśli wiele miejsc ma referencję do tego samego obiektu, jedna zmiana może wpływać na inne fragmenty kodu. Trudniej wtedy ustalić, gdzie i kiedy stan został zmieniony."
+js_theory_266_self_primitive_vs_reference_compare,self_assess,Wyjaśnij różnicę między porównywaniem prymitywów a porównywaniem obiektów.,,,"Prymitywy są porównywane według wartości. Obiekty, tablice i funkcje są porównywane według tożsamości referencji, czyli czy to dokładnie ten sam obiekt."
+js_theory_267_self_prototype_object,self_assess,"Wyjaśnij, czym jest prototyp obiektu.",,,"Prototyp to obiekt, do którego dany obiekt może delegować odczyt właściwości. Jeśli właściwości nie ma lokalnie, JavaScript sprawdza prototyp."
+js_theory_268_self_prototype_chain_lookup,self_assess,"Wyjaśnij, jak działa wyszukiwanie właściwości w łańcuchu prototypów.",,,"Najpierw sprawdzany jest sam obiekt. Jeśli właściwości nie ma, JavaScript idzie do prototypu, potem do prototypu prototypu, aż znajdzie wartość albo dojdzie do końca łańcucha."
+js_theory_269_self_class_syntax,self_assess,"Wyjaśnij, czym naprawdę jest składnia `class` w JavaScript.",,,`class` to czytelniejsza składnia do tworzenia konstruktorów i metod opartych na prototypach. Nie działa identycznie jak klasy w każdym języku obiektowym.
+js_theory_270_self_instance_vs_static_method,self_assess,Wyjaśnij różnicę między metodą instancji a metodą statyczną klasy.,,,"Metodę instancji wywołuje się na obiekcie utworzonym przez `new`. Metodę statyczną wywołuje się na samej klasie, np. jako funkcję pomocniczą powiązaną z typem."
+js_theory_271_self_private_class_fields,self_assess,"Wyjaśnij, do czego służą prywatne pola klasy oznaczane przez `#`.",,,Pola `#` służą do ukrywania wewnętrznego stanu klasy przed kodem z zewnątrz. Pomagają wymusić enkapsulację.
+js_theory_272_self_this_normal_function,self_assess,"Wyjaśnij, od czego zależy wartość `this` w zwykłej funkcji.",,,"W zwykłej funkcji `this` zależy głównie od sposobu wywołania funkcji, np. jako metoda obiektu, samodzielna funkcja albo funkcja wywołana przez `call()`/`bind()`."
+js_theory_273_self_this_arrow_function,self_assess,"Wyjaśnij, jak działa `this` w arrow function.",,,"Arrow function nie ma własnego `this`. Bierze `this` z otaczającego zakresu, w którym została utworzona."
+js_theory_274_self_method_lost_this,self_assess,"Wyjaśnij, dlaczego metoda obiektu przekazana jako callback może „zgubić” `this`.",,,Po przekazaniu samej referencji do metody funkcja może zostać wywołana bez obiektu po lewej stronie kropki. Wtedy `this` nie wskazuje już pierwotnego obiektu.
+js_theory_275_self_call_apply_bind,self_assess,"Wyjaśnij różnicę między `call()`, `apply()` i `bind()`.",,,`call()` wywołuje funkcję z argumentami podanymi osobno. `apply()` wywołuje ją z argumentami jako tablicą. `bind()` zwraca nową funkcję z ustawionym `this` i opcjonalnymi argumentami.
+js_theory_276_self_iterable,self_assess,"Wyjaśnij, czym jest obiekt iterowalny.",,,"Obiekt iterowalny potrafi zwracać kolejne wartości przez iterator. Dzięki temu działa z `for...of`, spreadem w tablicy czy `Array.from()`."
+js_theory_277_self_forof_vs_forin,self_assess,Wyjaśnij różnicę między `for...of` a `for...in`.,,,`for...of` przechodzi po wartościach iterable. `for...in` przechodzi po kluczach enumerable właściwości obiektu.
+js_theory_278_self_generator,self_assess,"Wyjaśnij, czym jest generator function.",,,"Generator to funkcja oznaczona `function*`, która może zatrzymywać i wznawiać wykonanie przez `yield`. Zwraca iterator."
+js_theory_279_self_symbol_iterator,self_assess,"Wyjaśnij, do czego służy `Symbol.iterator`.",,,"`Symbol.iterator` wskazuje metodę, która zwraca iterator obiektu. Dzięki temu obiekt może działać z mechanizmami iteracji."
+js_theory_280_self_map_vs_weakmap,self_assess,Wyjaśnij różnicę między `Map` a `WeakMap`.,,,"`Map` może mieć różne typy kluczy i jest iterowalna. `WeakMap` przyjmuje obiekty jako klucze i nie jest iterowalna, co pomaga w pracy z danymi powiązanymi z obiektami bez blokowania garbage collectora."
+js_theory_281_self_weakmap_non_iterable,self_assess,"Wyjaśnij, dlaczego `WeakMap` nie udostępnia łatwej iteracji po wszystkich elementach.",,,"Klucze w `WeakMap` są słabo trzymane i mogą zostać usunięte przez garbage collector. Gdyby dało się je normalnie iterować, ten model byłby trudniejszy do utrzymania."
+js_theory_282_self_enumerable_properties,self_assess,"Wyjaśnij, czym są właściwości enumerable.",,,"Właściwości enumerable to takie, które pojawiają się w typowych mechanizmach wyliczania, np. `Object.keys()` albo `for...in`."
+js_theory_283_self_property_descriptor,self_assess,"Wyjaśnij, czym jest property descriptor obiektu.",,,"Property descriptor opisuje cechy właściwości, np. `value`, `writable`, `enumerable`, `configurable`, albo gettery i settery."
+js_theory_284_self_freeze_vs_const,self_assess,Wyjaśnij różnicę między `const` a `Object.freeze()`.,,,"`const` blokuje ponowne przypisanie zmiennej. `Object.freeze()` ogranicza zmianę właściwości konkretnego obiektu, ale działa płytko."
+js_theory_285_self_structuredclone_limits,self_assess,"Wyjaśnij, do czego służy `structuredClone()` i jakie ma ograniczenia.",,,"`structuredClone()` służy do głębszego klonowania wielu typów danych. Nie klonuje jednak wszystkiego, np. funkcji."
+js_theory_286_self_runtime_vs_syntax_error,self_assess,Wyjaśnij różnicę między błędem składniowym a błędem wykonania.,,,"Błąd składniowy oznacza, że kod nie może zostać poprawnie sparsowany. Błąd wykonania pojawia się dopiero podczas działania programu."
+js_theory_287_self_throw_mechanism,self_assess,"Wyjaśnij, jak działa `throw` w JavaScript.",,,`throw` przerywa normalny przepływ wykonania i zgłasza błąd. Najbliższy pasujący `try...catch` może ten błąd przechwycić.
+js_theory_288_self_error_vs_string_throw,self_assess,"Wyjaśnij, dlaczego zwykle lepiej rzucać `Error` niż zwykły string.",,,"`Error` przechowuje m.in. nazwę, wiadomość i często stack trace. Zwykły string ma mniej informacji diagnostycznych."
+js_theory_289_self_custom_error_class,self_assess,"Wyjaśnij, kiedy może się przydać własna klasa błędu.",,,"Własna klasa błędu pomaga rozróżniać typy problemów, np. błąd walidacji, błąd autoryzacji albo błąd sieciowy."
+js_theory_290_self_json_serialization_limits,self_assess,"Wyjaśnij, czym jest serializacja JSON i jakie ma podstawowe ograniczenia.",,,"Serializacja zamienia dane na tekst JSON. JSON nie zachowuje wszystkich typów JS, np. funkcji, `undefined`, Symboli czy instancji klas w ich oryginalnej formie."
+js_theory_291_self_safe_json_parse,self_assess,"Wyjaśnij, dlaczego `JSON.parse()` dla niepewnych danych warto obsłużyć przez `try...catch`.",,,Niepoprawny tekst JSON powoduje wyjątek. `try...catch` pozwala obsłużyć uszkodzone albo nieoczekiwane dane bez wywracania całego programu.
+js_theory_292_self_localstorage_vs_sessionstorage,self_assess,Wyjaśnij różnicę między `localStorage` a `sessionStorage`.,,,"`localStorage` przechowuje dane dłużej, zwykle po zamknięciu przeglądarki. `sessionStorage` jest powiązane z daną sesją/kartą przeglądarki."
+js_theory_293_self_event_delegation,self_assess,"Wyjaśnij, czym jest event delegation.",,,Event delegation polega na obsłudze zdarzeń na elemencie nadrzędnym zamiast dodawania listenera do każdego dziecka. Wykorzystuje propagację zdarzeń.
+js_theory_294_self_preventdefault_vs_stoppropagation,self_assess,Wyjaśnij różnicę między `preventDefault()` a `stopPropagation()`.,,,"`preventDefault()` blokuje domyślną akcję, np. przeładowanie formularza. `stopPropagation()` zatrzymuje przechodzenie zdarzenia do kolejnych elementów."
+js_theory_295_self_capturing_vs_bubbling,self_assess,Wyjaśnij różnicę między fazą capturing a bubbling w zdarzeniach DOM.,,,Capturing idzie od elementów nadrzędnych w stronę celu zdarzenia. Bubbling idzie od elementu docelowego z powrotem ku rodzicom.
+js_theory_296_self_debounce,self_assess,"Wyjaśnij, czym jest debounce i kiedy się przydaje.",,,"Debounce opóźnia wykonanie funkcji do momentu, aż zdarzenia przestaną szybko napływać. Przydaje się np. przy wyszukiwaniu podczas pisania."
+js_theory_297_self_throttle,self_assess,"Wyjaśnij, czym jest throttle i kiedy się przydaje.",,,"Throttle ogranicza częstotliwość wykonywania funkcji, np. maksymalnie raz na określony czas. Przydaje się przy scrollu, resize albo ruchu myszy."
+js_theory_298_self_memory_leak,self_assess,"Wyjaśnij, czym jest memory leak w aplikacji JavaScript.",,,"Memory leak powstaje, gdy program niepotrzebnie nadal trzyma referencje do danych, które powinny być już usunięte przez garbage collector."
+js_theory_299_self_remove_event_listeners,self_assess,"Wyjaśnij, dlaczego czasem trzeba usuwać niepotrzebne event listenery.",,,"Nieusunięte listenery mogą dalej reagować na zdarzenia i trzymać referencje do danych lub elementów, co może powodować błędy i wycieki pamięci."
+js_theory_300_self_dynamic_import_use_case,self_assess,"Wyjaśnij, kiedy może przydać się dynamiczne `import()`.",,,"Dynamiczne `import()` przydaje się, gdy moduł ma być załadowany dopiero w określonym momencie, np. po kliknięciu, wejściu na stronę albo spełnieniu warunku."

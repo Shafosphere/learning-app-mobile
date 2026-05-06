@@ -52,6 +52,7 @@ android/
 assets/images/*
 !assets/images/.gitkeep
 *.png
+!assets/app/icons/notification-icon.png
 *.svg
 *.svgx
 
@@ -70,4 +71,5 @@ google-services.json
 # User documentation
 docs/opis_aplikacji.md
 tools/prebuild-data/howToMake.md
+tools/prebuild-data/notatka.md
 tools/autoflow-sim/

@@ -10,6 +10,13 @@ type ReminderNotificationData = {
 };
 
 export type ReminderPermissionState = "granted" | "denied" | "undetermined";
+export type LearningReminderNotificationRequest = {
+  when: Date;
+  content: {
+    title: string;
+    body: string;
+  };
+};
 type NotificationsModule = {
   getPermissionsAsync: () => Promise<{ status: string }>;
   requestPermissionsAsync: () => Promise<{ status: string }>;
@@ -41,6 +48,14 @@ type NotificationsModule = {
 let cachedNotificationsModule: NotificationsModule | null | undefined;
 let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
 let reminderScheduleOperation: Promise<void> = Promise.resolve();
+
+export function __setLearningReminderNotificationsModuleForTests(
+  notifications: unknown
+): void {
+  cachedNotificationsModule = notifications as NotificationsModule | null | undefined;
+  notificationsModulePromise = null;
+  reminderScheduleOperation = Promise.resolve();
+}
 
 async function getNotificationsModule(): Promise<NotificationsModule | null> {
   if (cachedNotificationsModule !== undefined) {
@@ -239,11 +254,7 @@ export async function cancelLearningReminderNotificationsForDate(
 }
 
 export async function scheduleLearningReminderNotifications(
-  whenList: Date[],
-  content: {
-    title: string;
-    body: string;
-  }
+  requests: LearningReminderNotificationRequest[]
 ): Promise<string[]> {
   return enqueueReminderOperation(async () => {
     const notifications = await getNotificationsModule();
@@ -254,26 +265,26 @@ export async function scheduleLearningReminderNotifications(
 
     await cancelLearningReminderNotificationInternal(notifications);
 
-    const upcomingDates = whenList
-      .filter((when) => when.getTime() > Date.now())
-      .sort((a, b) => a.getTime() - b.getTime());
+    const upcomingRequests = requests
+      .filter((request) => request.when.getTime() > Date.now())
+      .sort((a, b) => a.when.getTime() - b.when.getTime());
 
     const notificationIds: string[] = [];
     try {
-      for (const when of upcomingDates) {
+      for (const request of upcomingRequests) {
         const notificationId = await notifications.scheduleNotificationAsync({
           content: {
-            title: content.title,
-            body: content.body,
+            title: request.content.title,
+            body: request.content.body,
             sound: "default",
             data: {
               kind: REMINDER_KIND,
-              scheduledAt: when.toISOString(),
+              scheduledAt: request.when.toISOString(),
             },
           },
           trigger: {
             type: notifications.SchedulableTriggerInputTypes.DATE,
-            date: when,
+            date: request.when,
             channelId: LEARNING_REMINDER_CHANNEL_ID,
           },
         });

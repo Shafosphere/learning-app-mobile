@@ -53,7 +53,11 @@ import {
   scheduleLearningReminderNotifications,
 } from "@/src/services/learningReminderNotifications";
 import {
-  buildReminderSeriesSchedule,
+  getLearningReminderNotificationTitle,
+  selectLearningReminderNotificationBody,
+} from "@/src/services/learningReminderMessages";
+import {
+  buildReminderSeriesEntries,
   computeSmartReminderPlan,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
@@ -2095,17 +2099,32 @@ export const SettingsProvider: React.FC<{
           ).padStart(2, "0")}`,
         ]
       : [];
-    const reminderDates = buildReminderSeriesSchedule({
+    const reminderEntries = buildReminderSeriesEntries({
       now: nowDate,
       targetMinutes: plan.targetMinutes,
       horizonDays: 7,
       skipDateKeys,
-    }).map((value) => new Date(value));
-
-    await scheduleLearningReminderNotifications(reminderDates, {
-      title: i18n.t("settings.learning.reminders.notification.title"),
-      body: i18n.t("settings.learning.reminders.notification.body"),
     });
+    const reminderDates = reminderEntries.map((entry) => new Date(entry.scheduledAt));
+    const notificationTitle = getLearningReminderNotificationTitle(i18n.language);
+
+    await scheduleLearningReminderNotifications(
+      reminderEntries.map((entry) => {
+        const scheduledAt = new Date(entry.scheduledAt);
+        return {
+          when: scheduledAt,
+          content: {
+            title: notificationTitle,
+            body: selectLearningReminderNotificationBody({
+              language: i18n.language,
+              profile: plan.profile,
+              slot: entry.slot,
+              scheduledAt,
+            }),
+          },
+        };
+      })
+    );
 
     await Promise.all([
       setLearningReminderNextAtState(

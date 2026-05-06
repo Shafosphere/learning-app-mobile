@@ -7,6 +7,13 @@ export type SmartReminderProfile =
   | "night"
   | "unknown";
 
+export type ReminderSeriesSlot = "lead" | "due" | "followUp";
+
+export type ReminderSeriesEntry = {
+  scheduledAt: number;
+  slot: ReminderSeriesSlot;
+};
+
 export type SmartReminderPlan = {
   profile: SmartReminderProfile;
   targetMinutes: number;
@@ -97,35 +104,49 @@ export function buildReminderSeriesSchedule(input: {
   horizonDays?: number;
   skipDateKeys?: string[];
 }): number[] {
+  return buildReminderSeriesEntries(input).map((entry) => entry.scheduledAt);
+}
+
+export function buildReminderSeriesEntries(input: {
+  targetMinutes: number;
+  now?: Date;
+  horizonDays?: number;
+  skipDateKeys?: string[];
+}): ReminderSeriesEntry[] {
   const now = input.now ?? new Date();
   const horizonDays = Math.max(1, input.horizonDays ?? 7);
   const skipDateKeys = new Set(input.skipDateKeys ?? []);
   const anchorHour = Math.floor(input.targetMinutes / 60);
   const anchorMinute = input.targetMinutes % 60;
-  const offsets = [
-    -REMINDER_SERIES_START_LEAD_MINUTES,
-    0,
-    REMINDER_SERIES_TOTAL_DURATION_MINUTES - REMINDER_SERIES_START_LEAD_MINUTES,
+  const offsets: { minutes: number; slot: ReminderSeriesSlot }[] = [
+    { minutes: -REMINDER_SERIES_START_LEAD_MINUTES, slot: "lead" },
+    { minutes: 0, slot: "due" },
+    {
+      minutes: REMINDER_SERIES_TOTAL_DURATION_MINUTES - REMINDER_SERIES_START_LEAD_MINUTES,
+      slot: "followUp",
+    },
   ];
 
-  const scheduled = new Set<number>();
+  const scheduled = new Map<number, ReminderSeriesSlot>();
   for (let dayOffset = 0; dayOffset < horizonDays; dayOffset += 1) {
     const anchor = new Date(now.getTime());
     anchor.setSeconds(0, 0);
     anchor.setDate(anchor.getDate() + dayOffset);
     anchor.setHours(anchorHour, anchorMinute, 0, 0);
 
-    for (const offsetMinutes of offsets) {
+    for (const { minutes, slot } of offsets) {
       const candidate = new Date(anchor.getTime());
-      candidate.setMinutes(candidate.getMinutes() + offsetMinutes);
+      candidate.setMinutes(candidate.getMinutes() + minutes);
       if (
         candidate.getTime() > now.getTime() &&
         !skipDateKeys.has(makeDateKey(candidate))
       ) {
-        scheduled.add(candidate.getTime());
+        scheduled.set(candidate.getTime(), slot);
       }
     }
   }
 
-  return Array.from(scheduled).sort((a, b) => a - b);
+  return Array.from(scheduled, ([scheduledAt, slot]) => ({ scheduledAt, slot })).sort(
+    (a, b) => a.scheduledAt - b.scheduledAt
+  );
 }
