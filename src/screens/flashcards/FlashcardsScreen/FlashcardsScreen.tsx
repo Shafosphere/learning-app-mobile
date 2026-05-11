@@ -381,6 +381,7 @@ export default function Flashcards() {
   const loadingOverlayOpacity = useRef(new Animated.Value(1)).current;
   const courseCompletionRunStartedAtRef = useRef<number | null>(null);
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
+  const previousKeyboardVisibleRef = useRef<boolean | null>(null);
   const totalCards = customCards.length;
   useEffect(() => {
     if (!isFocused) return;
@@ -1813,6 +1814,87 @@ export default function Flashcards() {
       keyboardTopCorrection: 44,
       androidDurationMs: BOTTOM_BUTTONS_KEYBOARD_DURATION_MS,
     });
+  useEffect(() => {
+    if (!isFocused) return;
+    if (previousKeyboardVisibleRef.current === keyboardVisible) return;
+    previousKeyboardVisibleRef.current = keyboardVisible;
+
+    const payload = {
+      screen: "flashcards",
+      courseId: activeCustomCourseId,
+      storageKey,
+      keyboardVisible,
+      selectedItemId,
+      result: displayResult,
+      activeBox,
+      correctionActive: correction != null,
+      correctionCardId: correction?.cardId ?? null,
+      correctionMode: correction?.mode ?? null,
+    };
+
+    console.log("[keyboard-debug] screen.keyboard.visibility", payload);
+    void appendDebugEvent("flashcards", "keyboard.visibility", payload);
+  }, [
+    activeBox,
+    activeCustomCourseId,
+    correction,
+    displayResult,
+    isFocused,
+    keyboardVisible,
+    selectedItemId,
+    storageKey,
+  ]);
+  useEffect(() => {
+    if (!isFocused) return;
+
+    const eventNames = [
+      "keyboardWillShow",
+      "keyboardDidShow",
+      "keyboardWillHide",
+      "keyboardDidHide",
+    ] as const;
+    const subscriptions = eventNames.map((keyboardEventName) =>
+      Keyboard.addListener(keyboardEventName, (event) => {
+        const payload = {
+          screen: "flashcards",
+          courseId: activeCustomCourseId,
+          storageKey,
+          selectedItemId,
+          result: displayResult,
+          activeBox,
+          correctionActive: correction != null,
+          correctionCardId: correction?.cardId ?? null,
+          correctionMode: correction?.mode ?? null,
+          duration: event.duration,
+          easing: event.easing,
+          startCoordinates: event.startCoordinates,
+          endCoordinates: event.endCoordinates,
+        };
+
+        console.log(
+          `[keyboard-debug] screen.${keyboardEventName}`,
+          payload,
+        );
+        void appendDebugEvent(
+          "flashcards",
+          `keyboard.raw.${keyboardEventName}`,
+          payload,
+        );
+      }),
+    );
+
+    return () => {
+      subscriptions.forEach((subscription) => subscription.remove());
+    };
+  }, [
+    activeBox,
+    activeCustomCourseId,
+    correction,
+    displayResult,
+    isFocused,
+    selectedItemId,
+    storageKey,
+  ]);
   useLayoutEffect(() => {
     if (selectedItemId == null) return;
     if (lastActionCooldownCardIdRef.current === selectedItemId) return;

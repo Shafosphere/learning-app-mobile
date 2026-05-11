@@ -7,6 +7,30 @@ jest.mock("../CourseFinishedPanel-styles", () => ({
   useStyles: () => new Proxy({}, { get: () => ({}) }),
 }));
 
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.heading":
+          "Gratulacje!",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.subheading":
+          "Ukończyłeś kurs",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.statsHeading":
+          "Twój wynik",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.fiszek":
+          "fiszek",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.skutecznosc":
+          "skuteczność",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.label.czasNauki":
+          "czas nauki",
+        "components.flashcards.courseFinishedPanel.courseFinishedPanel.text.wrocDoKursow":
+          "Wróć do kursów",
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 jest.mock("@/src/components/button/button", () => {
   const React = require("react");
   const { Pressable, Text } = require("react-native");

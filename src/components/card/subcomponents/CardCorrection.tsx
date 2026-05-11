@@ -63,6 +63,8 @@ type CardCorrectionProps = {
   setInput2LayoutWidth: (width: number) => void;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onCorrectionInputFocus?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
+  onCorrectionInputBlur?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
   onCorrection1Completed: () => void;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
@@ -104,6 +106,8 @@ export function CardCorrection({
   setInput2LayoutWidth,
   focusTarget,
   requestFocus,
+  onCorrectionInputFocus,
+  onCorrectionInputBlur,
   onCorrection1Completed,
   isCorrectionInput1Numeric,
   isCorrectionInput1Date,
@@ -325,7 +329,11 @@ export function CardCorrection({
                   ? "decimal-pad"
                   : suggestionProps?.keyboardType
             }
-            onFocus={() => requestFocus("correction1")}
+            onFocus={() => {
+              onCorrectionInputFocus?.("correction1");
+              requestFocus("correction1");
+            }}
+            onBlur={() => onCorrectionInputBlur?.("correction1")}
           />
           {correction.input1 ? (
             <Text
@@ -413,7 +421,11 @@ export function CardCorrection({
                   ? "decimal-pad"
                   : suggestionProps?.keyboardType
             }
-            onFocus={() => requestFocus("correction2")}
+            onFocus={() => {
+              onCorrectionInputFocus?.("correction2");
+              requestFocus("correction2");
+            }}
+            onBlur={() => onCorrectionInputBlur?.("correction2")}
             onKeyPress={({ nativeEvent }) => {
               if (
                 !answerOnly &&

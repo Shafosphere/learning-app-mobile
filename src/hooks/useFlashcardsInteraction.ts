@@ -6,6 +6,7 @@ import {
 } from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -650,6 +651,15 @@ export function useFlashcardsInteraction({
         }
         const answerOnly = isAnswerOnlyCard(wordForCheck);
         demotionCorrectionLockRef.current = wordForCheck.id;
+        void appendDebugEvent("flashcards", "correction.enter", {
+          ...debugContext,
+          cardId: wordForCheck.id,
+          fromBox: activeBox,
+          reversed,
+          answerOnly,
+          answerLength: answerToUse.length,
+          promptImageSide: reversed ? "back" : "front",
+        });
         setCorrection({
           cardId: wordForCheck.id,
           awers: wordForCheck.text,
@@ -778,8 +788,10 @@ export function useFlashcardsInteraction({
     if (!correction) {
       return;
     }
-    const expectsAwersInput = !correction.answerOnly && reversed;
-    const expectsRewersInput = correction.answerOnly || !reversed;
+    const correctionFieldRequirements =
+      getCorrectionFieldRequirements(correction);
+    const expectsAwersInput = correctionFieldRequirements.awers;
+    const expectsRewersInput = correctionFieldRequirements.rewers;
     const awersOk =
       !expectsAwersInput ||
       matchesCorrectionField(correction.input1, correction.awers);
@@ -814,11 +826,8 @@ export function useFlashcardsInteraction({
     }
   }, [
     correction,
-    isAnswerOnlyCard,
     matchesCorrectionField,
     moveElement,
-    reversed,
-    selectedItem,
   ]);
 
   useEffect(() => {

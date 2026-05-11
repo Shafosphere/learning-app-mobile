@@ -1,6 +1,8 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { appendDebugEvent } from "@/src/services/debugEvents";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import type { DatePattern } from "@/src/utils/dateInput";
@@ -16,6 +18,7 @@ import {
 import {
   Alert,
   Animated,
+  Keyboard,
   ScrollView,
   Text,
   TextInput,
@@ -39,6 +42,29 @@ const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
 const MAX_INPUT_SCROLL_AHEAD = 180;
 const INPUT_SCROLL_TRAILING_BUFFER = 120;
+
+type KeyboardMetricsSnapshot = {
+  screenY?: number;
+  height?: number;
+};
+
+const readKeyboardSnapshot = () => {
+  const keyboardApi = Keyboard as typeof Keyboard & {
+    metrics?: () => KeyboardMetricsSnapshot | undefined;
+    isVisible?: () => boolean;
+  };
+  const metrics = keyboardApi.metrics?.();
+
+  return {
+    visibleByApi: keyboardApi.isVisible?.() ?? null,
+    metrics: metrics
+      ? {
+          screenY: metrics.screenY,
+          height: metrics.height,
+        }
+      : null,
+  };
+};
 
 type AnswerInputKind = "text" | "number" | "year" | "date";
 const detectInputKind = (value: string): AnswerInputKind => {
@@ -236,11 +262,14 @@ export default function Card({
       : awers;
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
+  const correctionFieldRequirements = correction
+    ? getCorrectionFieldRequirements(correction)
+    : null;
   const shouldCorrectAwers = showCorrectionInputs
-    ? !effectiveAnswerOnly && correctionReversed
+    ? Boolean(correctionFieldRequirements?.awers)
     : effectiveReversed;
   const shouldCorrectRewers = showCorrectionInputs
-    ? !correctionReversed || Boolean(correction?.answerOnly)
+    ? Boolean(correctionFieldRequirements?.rewers)
     : !effectiveReversed || answerOnly;
   const mainExpectedAnswers = useMemo(() => {
     if (!selectedItem) return [];
@@ -311,10 +340,6 @@ export default function Card({
     [answer, isMainAnswerDate, mainDatePattern, setAnswer],
   );
 
-  const primeKeyboardBridge = useCallback(() => {
-    keyboardBridgeInputRef.current?.focus();
-  }, []);
-
   const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");
   const hintDialogVisible = useRef(false);
@@ -346,6 +371,66 @@ export default function Card({
     correctionPrimaryTarget,
     isEditingHint,
   });
+  const buildFocusDiagnosticsPayload = useCallback(
+    (extra: Record<string, unknown> = {}) => ({
+      selectedItemId,
+      correctionCardId: correction?.cardId ?? null,
+      correctionMode: correction?.mode ?? null,
+      result,
+      showCorrectionInputs,
+      correctionPrimaryTarget,
+      focusTarget,
+      focusRequestId,
+      keyboard: readKeyboardSnapshot(),
+      ...extra,
+    }),
+    [
+      correction?.cardId,
+      correction?.mode,
+      correctionPrimaryTarget,
+      focusRequestId,
+      focusTarget,
+      result,
+      selectedItemId,
+      showCorrectionInputs,
+    ],
+  );
+  const shouldLogFocusDiagnostics =
+    showCorrectionInputs || correction != null || focusTarget !== "main";
+  const logKeyboardDebug = useCallback(
+    (event: string, extra: Record<string, unknown> = {}) => {
+      if (process.env.NODE_ENV === "test") return;
+      const payload = buildFocusDiagnosticsPayload(extra);
+      console.log(`[keyboard-debug] ${event}`, payload);
+      void appendDebugEvent("flashcards", event, payload);
+    },
+    [buildFocusDiagnosticsPayload],
+  );
+  const primeKeyboardBridge = useCallback(
+    (reason: string) => {
+      const hasBridgeRef = keyboardBridgeInputRef.current != null;
+      keyboardBridgeInputRef.current?.focus();
+      if (process.env.NODE_ENV === "test") {
+        return;
+      }
+      console.log(
+        "[keyboard-debug] card.focus.keyboard_bridge",
+        buildFocusDiagnosticsPayload({
+          reason,
+          hasBridgeRef,
+        }),
+      );
+      void appendDebugEvent(
+        "flashcards",
+        "card.focus.keyboard_bridge",
+        buildFocusDiagnosticsPayload({
+          reason,
+          hasBridgeRef,
+        }),
+      );
+    },
+    [buildFocusDiagnosticsPayload],
+  );
   useEffect(() => {
     if (!isFocused || selectedItemId == null) {
       return;
@@ -359,6 +444,69 @@ export default function Card({
     requestFocus,
     selectedItemId,
     showCorrectionInputs,
+  ]);
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV === "test" ||
+      !isFocused ||
+      selectedItemId == null ||
+      !shouldLogFocusDiagnostics
+    ) {
+      return;
+    }
+
+    const eventNames = [
+      "keyboardWillShow",
+      "keyboardDidShow",
+      "keyboardWillHide",
+      "keyboardDidHide",
+    ] as const;
+    const subscriptions = eventNames.map((keyboardEventName) =>
+      Keyboard.addListener(keyboardEventName, (event) => {
+        logKeyboardDebug(`card.${keyboardEventName}`, {
+          duration: event.duration,
+          easing: event.easing,
+          startCoordinates: event.startCoordinates,
+          endCoordinates: event.endCoordinates,
+        });
+      }),
+    );
+
+    return () => {
+      subscriptions.forEach((subscription) => subscription.remove());
+    };
+  }, [
+    isFocused,
+    logKeyboardDebug,
+    selectedItemId,
+    shouldLogFocusDiagnostics,
+  ]);
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV === "test" ||
+      !isFocused ||
+      selectedItemId == null ||
+      !shouldLogFocusDiagnostics
+    ) {
+      return;
+    }
+
+    void appendDebugEvent(
+      "flashcards",
+      "card.focus.request",
+      buildFocusDiagnosticsPayload(),
+    );
+    console.log(
+      "[keyboard-debug] card.focus.request",
+      buildFocusDiagnosticsPayload(),
+    );
+  }, [
+    buildFocusDiagnosticsPayload,
+    focusRequestId,
+    focusTarget,
+    isFocused,
+    selectedItemId,
+    shouldLogFocusDiagnostics,
   ]);
   const showExplanationEnabled =
     showExplanationEnabledProp ?? showExplanationEnabledSetting;
@@ -411,7 +559,40 @@ export default function Card({
     focusTarget,
     focusRequestId,
     refs: focusRefs,
+    onFocusAttempt: (event) => {
+      if (
+        process.env.NODE_ENV === "test" ||
+        !shouldLogFocusDiagnostics
+      ) {
+        return;
+      }
+      console.log(
+        "[keyboard-debug] card.focus.native_attempt",
+        buildFocusDiagnosticsPayload(event),
+      );
+      void appendDebugEvent(
+        "flashcards",
+        "card.focus.native_attempt",
+        buildFocusDiagnosticsPayload(event),
+      );
+    },
   });
+  const handleCorrectionInputFocus = useCallback(
+    (target: "correction1" | "correction2") => {
+      logKeyboardDebug("card.input.focus", {
+        target,
+      });
+    },
+    [logKeyboardDebug],
+  );
+  const handleCorrectionInputBlur = useCallback(
+    (target: "correction1" | "correction2") => {
+      logKeyboardDebug("card.input.blur", {
+        target,
+      });
+    },
+    [logKeyboardDebug],
+  );
 
   const translationSource = showCorrectionInputs ? correctionWord : selectedItem;
   const len = translationSource?.translations?.length ?? 0;
@@ -511,7 +692,7 @@ export default function Card({
           correction?.input1,
         );
         if (willCompleteCorrection(1, nextValue)) {
-          primeKeyboardBridge();
+          primeKeyboardBridge("correction_will_complete");
         }
         wrongInputChange(
           1,
@@ -526,7 +707,7 @@ export default function Card({
           correction?.input2 ?? "",
         );
         if (willCompleteCorrection(2, nextValue)) {
-          primeKeyboardBridge();
+          primeKeyboardBridge("correction_will_complete");
         }
         wrongInputChange(
           2,
@@ -535,7 +716,7 @@ export default function Card({
         return;
       }
       if (willCompleteCorrection(which, value)) {
-        primeKeyboardBridge();
+        primeKeyboardBridge("correction_will_complete");
       }
       wrongInputChange(which, value);
     },
@@ -609,7 +790,7 @@ export default function Card({
       setTranslations(0);
     }
     if (willEnterCorrectionMode()) {
-      primeKeyboardBridge();
+      primeKeyboardBridge("answer_will_enter_correction");
     }
     confirm(rewers);
   }, [
@@ -1005,6 +1186,8 @@ export default function Card({
     setInput2LayoutWidth,
     focusTarget,
     requestFocus,
+    onCorrectionInputFocus: handleCorrectionInputFocus,
+    onCorrectionInputBlur: handleCorrectionInputBlur,
     onCorrection1Completed,
     previousCorrectionInput2,
     canToggleTranslations,
@@ -1034,6 +1217,8 @@ export default function Card({
         autoCapitalize="none"
         importantForAutofill="no"
         textContentType="none"
+        onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
+        onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
       />
       {hideHints || isBetweenCards ? (
         <View style={styles.hintContainer} />

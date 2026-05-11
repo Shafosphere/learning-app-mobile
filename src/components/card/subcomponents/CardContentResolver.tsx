@@ -45,6 +45,8 @@ interface CardContentResolverProps {
   setInput2LayoutWidth: any;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onCorrectionInputFocus?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
+  onCorrectionInputBlur?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
   onCorrection1Completed: () => void;
   previousCorrectionInput2: React.MutableRefObject<string>;
   canToggleTranslations: boolean;
@@ -98,6 +100,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     setInput2LayoutWidth,
     focusTarget,
     requestFocus,
+    onCorrectionInputFocus,
+    onCorrectionInputBlur,
     onCorrection1Completed,
     previousCorrectionInput2,
     canToggleTranslations,
@@ -140,6 +144,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           setInput2LayoutWidth={setInput2LayoutWidth}
           focusTarget={focusTarget}
           requestFocus={requestFocus}
+          onCorrectionInputFocus={onCorrectionInputFocus}
+          onCorrectionInputBlur={onCorrectionInputBlur}
           onCorrection1Completed={onCorrection1Completed}
           isCorrectionInput1Numeric={isCorrectionInput1Numeric}
           isCorrectionInput1Date={isCorrectionInput1Date}

@@ -33,6 +33,7 @@ import {
 } from "@/src/services/debugEvents";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
@@ -486,19 +487,15 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem?.type === "true_false" ||
     selectedItem?.type === "know_dont_know";
   const effectiveReversed = answerOnly ? false : reversed;
-  const correctionAnswerOnly = correction?.answerOnly ?? false;
-  const correctionEffectiveReversed = correctionAnswerOnly
-    ? false
-    : (correction?.reversed ?? false);
 
   useEffect(() => {
     if (!correction || !activeBox || !courseId) return;
     if (transitionTimerRef.current) return;
 
-    const expectsAwersInput =
-      !correctionAnswerOnly && correctionEffectiveReversed;
-    const expectsRewersInput =
-      correctionAnswerOnly || !correctionEffectiveReversed;
+    const correctionFieldRequirements =
+      getCorrectionFieldRequirements(correction);
+    const expectsAwersInput = correctionFieldRequirements.awers;
+    const expectsRewersInput = correctionFieldRequirements.rewers;
     const awersOk =
       !expectsAwersInput || checkSpelling(correction.input1, correction.awers);
     const rewersOk =
@@ -560,8 +557,6 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     courseId,
     checkSpelling,
-    correctionAnswerOnly,
-    correctionEffectiveReversed,
     explanationOnlyOnWrong,
     pendingExplanationMove,
     selectedItem,
@@ -907,7 +902,6 @@ export default function ReviewFlashcardsPlaceholder() {
     pendingExplanationMove,
     questionShownAt,
     removeCardFromSession,
-    reversed,
     result,
     selectedItem,
     showExplanationEnabled,

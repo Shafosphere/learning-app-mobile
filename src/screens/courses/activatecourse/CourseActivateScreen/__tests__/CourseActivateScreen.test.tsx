@@ -9,7 +9,7 @@ import {
   getOfficialCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
 
-const EMPTY_TEXT = "nic tu nie ma :(, czas wybrać kurs!";
+const EMPTY_TEXT = "Nic tu nie ma :(, czas wybrać kurs!";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
@@ -34,6 +34,22 @@ jest.mock("@/src/contexts/PopupContext", () => ({
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
+}));
+
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string) => {
+      const translations: Record<string, string> = {
+        "screens.courses.activatecourse.courseActivate.courseActivate.textChild.nicTuNieMaCzas":
+          "Nic tu nie ma :(, czas wybrać kurs!",
+        "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs":
+          "Dodaj kurs",
+        "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs":
+          "Dodaj kurs",
+      };
+      return translations[key] ?? key;
+    },
+  }),
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({

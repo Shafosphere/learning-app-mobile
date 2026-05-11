@@ -18,6 +18,26 @@ jest.mock("@/src/db/sqlite/db", () => ({
   getHardFlashcards: jest.fn(),
 }));
 
+jest.mock("react-i18next", () => ({
+  useTranslation: () => ({
+    t: (key: string, options?: Record<string, unknown>) => {
+      const translations: Record<string, string> = {
+        "components.stats.hardWordsList.accessibilityLabel.wypelnienieBledowValue":
+          `Wypełnienie błędów ${options?.value ?? ""}`.trim(),
+        "components.stats.hardWordsList.textChild.ladowanie": "Ładowanie…",
+        "components.stats.hardWordsList.textChild.brakDanychSprobujPogracDluzej":
+          "Brak danych – spróbuj pograć dłużej.",
+        "components.stats.hardWordsList.title.trudneFiszki": "Trudne fiszki",
+        "components.stats.hardWordsList.subtitle.activeCourse":
+          "Najczęściej mylone fiszki z aktywnego kursu",
+        "components.stats.hardWordsList.subtitle.global":
+          "Najczęściej mylone fiszki ogólnie",
+      };
+      return translations[key] ?? key;
+    },
+  }),
+}));
+
 jest.mock("expo-image", () => {
   const React = require("react");
   const { View } = require("react-native");

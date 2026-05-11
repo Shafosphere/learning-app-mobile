@@ -31,6 +31,8 @@ type CardSceneCorrectionProps = {
   setInput2LayoutWidth: (width: number) => void;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onCorrectionInputFocus?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
+  onCorrectionInputBlur?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
   onCorrection1Completed: () => void;
   isCorrectionInput1Numeric: boolean;
   isCorrectionInput1Date: boolean;
@@ -74,6 +76,8 @@ export function CardSceneCorrection(props: CardSceneCorrectionProps) {
       setInput2LayoutWidth={props.setInput2LayoutWidth}
       focusTarget={props.focusTarget}
       requestFocus={props.requestFocus}
+      onCorrectionInputFocus={props.onCorrectionInputFocus}
+      onCorrectionInputBlur={props.onCorrectionInputBlur}
       onCorrection1Completed={props.onCorrection1Completed}
       isCorrectionInput1Numeric={props.isCorrectionInput1Numeric}
       isCorrectionInput1Date={props.isCorrectionInput1Date}
