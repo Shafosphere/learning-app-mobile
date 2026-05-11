@@ -8,8 +8,10 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
+  getCompletedCustomCoursesWithCardCounts,
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
+  type CompletedCustomCourseSummary,
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -48,6 +50,9 @@ export default function CourseActivateScreen() {
   const [officialCourses, setOfficialCourses] = useState<
     OfficialCourseListItem[]
   >([]);
+  const [completedCourses, setCompletedCourses] = useState<
+    CompletedCustomCourseSummary[]
+  >([]);
   const [isLoadingCourses, setIsLoadingCourses] = useState(true);
   const scrollRef = useRef<ScrollView | null>(null);
   const router = useRouter();
@@ -65,17 +70,27 @@ export default function CourseActivateScreen() {
     };
   }, []);
 
+  const completedCourseIds = useMemo(
+    () => new Set(completedCourses.map((course) => course.id)),
+    [completedCourses]
+  );
+
   const userCustomCourses = useMemo(
-    () => customCourses.filter((course) => !course.isOfficial),
-    [customCourses]
+    () =>
+      customCourses.filter(
+        (course) => !course.isOfficial && !completedCourseIds.has(course.id)
+      ),
+    [completedCourseIds, customCourses]
   );
 
   const pinnedOfficialCourses = useMemo(
     () =>
-      officialCourses.filter((course) =>
-        pinnedOfficialCourseIds.includes(course.id)
+      officialCourses.filter(
+        (course) =>
+          pinnedOfficialCourseIds.includes(course.id) &&
+          !completedCourseIds.has(course.id)
       ),
-    [officialCourses, pinnedOfficialCourseIds]
+    [completedCourseIds, officialCourses, pinnedOfficialCourseIds]
   );
 
   const courseGroups = useMemo(() => {
@@ -168,10 +183,12 @@ export default function CourseActivateScreen() {
       const loadCourses = async () => {
         setIsLoadingCourses(true);
         try {
-          const [customResult, officialResult] = await Promise.allSettled([
-            getCustomCoursesWithCardCounts(),
-            getOfficialCustomCoursesWithCardCounts(),
-          ]);
+          const [customResult, officialResult, completedResult] =
+            await Promise.allSettled([
+              getCustomCoursesWithCardCounts(),
+              getOfficialCustomCoursesWithCardCounts(),
+              getCompletedCustomCoursesWithCardCounts(),
+            ]);
           if (!isMounted) return;
 
           if (customResult.status === "fulfilled") {
@@ -207,11 +224,22 @@ export default function CourseActivateScreen() {
             );
             setOfficialCourses([]);
           }
+
+          if (completedResult.status === "fulfilled") {
+            setCompletedCourses(completedResult.value);
+          } else {
+            console.error(
+              "Failed to load completed courses",
+              completedResult.reason
+            );
+            setCompletedCourses([]);
+          }
         } catch (error) {
           console.error("Failed to load courses", error);
           if (!isMounted) return;
           setCustomCourses([]);
           setOfficialCourses([]);
+          setCompletedCourses([]);
         } finally {
           if (isMounted) {
             setIsLoadingCourses(false);
@@ -266,6 +294,7 @@ export default function CourseActivateScreen() {
 
   const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
+  const hasCompletedCourses = completedCourses.length > 0;
   const firstPinnedOfficialCourseId = pinnedOfficialCourses[0]?.id ?? null;
   const coachmark = useCoachmarkFlow({
     flowKey: "course-activate-guided",
@@ -486,6 +515,21 @@ export default function CourseActivateScreen() {
       ) : (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
+            {hasCompletedCourses ? (
+              <MyButton
+                text={t(
+                  "screens.courses.activatecourse.courseActivate.courseActivate.text.ukonczone"
+                )}
+                textLines={2}
+                accessibilityLabel={t(
+                  "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.ukonczone"
+                )}
+                color="my_green"
+                onPress={() => router.push("/completed-courses")}
+                disabled={false}
+                width={104}
+              />
+            ) : null}
             <MyButton
               text={t(
                 "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"

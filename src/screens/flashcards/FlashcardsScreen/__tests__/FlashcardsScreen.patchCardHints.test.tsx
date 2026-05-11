@@ -50,6 +50,12 @@ jest.mock("@/src/db/sqlite/db", () => ({
       timeMs: 0,
     }),
   ),
+  getCustomCourseMasteryProgress: jest.fn(() =>
+    Promise.resolve({
+      cardsCount: 0,
+      completedCardsCount: 0,
+    }),
+  ),
   getCustomFlashcards: jest.fn(),
   getCustomReviewedFlashcardIds: jest.fn(() => Promise.resolve([])),
   getGlobalDailyStreakDays: jest.fn(() => Promise.resolve(0)),

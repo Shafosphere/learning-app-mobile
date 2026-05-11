@@ -88,6 +88,7 @@
       }
     },
     "actions": {
+      "back": "Wróć",
       "cancel": "Anuluj",
       "next": "Dalej",
       "restore": "Przywróć",
@@ -1728,13 +1729,20 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edytuj kurs {{value}}",
               "przejdzDalej": "Przejdź dalej",
-              "dodajKurs": "Dodaj kurs"
+              "dodajKurs": "Dodaj kurs",
+              "ukonczone": "Pokaż ukończone kursy"
             },
             "text": {
-              "dodajKurs": "dodaj\nkurs"
+              "dodajKurs": "dodaj\nkurs",
+              "ukonczone": "ukończone"
             }
           }
         }
+      },
+      "completedCourses": {
+        "title": "Ukończone kursy",
+        "empty": "Nie masz jeszcze ukończonych kursów.",
+        "editA11y": "Edytuj ukończony kurs {{value}}"
       },
       "courseentrysettings": {
         "courseEntrySettings": {

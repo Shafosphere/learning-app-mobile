@@ -1,11 +1,12 @@
-import React, { useEffect, useState } from "react";
+import { useFocusEffect } from "@react-navigation/native";
+import React, { useCallback, useState } from "react";
 import { Text, View } from "react-native";
 import StatsCard from "./StatsCard";
 import ProgressBar from "./ProgressBar";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
-  countCustomLearnedForCourse,
+  getCustomCourseMasteryProgress,
   getCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
 import { useTranslation } from "react-i18next";
@@ -77,53 +78,59 @@ const SKELETON_ROWS = 4;
 export default function PinnedCoursesProgress() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { pinnedOfficialCourseIds } = useSettings();
+  const { activeCustomCourseId, pinnedOfficialCourseIds } = useSettings();
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    let mounted = true;
-    setIsLoading(true);
+  useFocusEffect(
+    useCallback(() => {
+      let mounted = true;
+      setIsLoading(true);
 
-    (async () => {
-      try {
-        const allCourses = await getCustomCoursesWithCardCounts();
-        const officialPinned = new Set(pinnedOfficialCourseIds);
-        const eligible = allCourses.filter((course) => {
-          if (!course.reviewsEnabled) return false;
-          if (course.isOfficial) {
-            return officialPinned.has(course.id);
-          }
-          return true;
-        });
+      (async () => {
+        try {
+          const allCourses = await getCustomCoursesWithCardCounts();
+          const officialPinned = new Set(pinnedOfficialCourseIds);
+          const eligible = allCourses.filter((course) => {
+            if (!course.reviewsEnabled) return false;
+            if (course.isOfficial) {
+              return (
+                officialPinned.has(course.id) ||
+                course.id === activeCustomCourseId
+              );
+            }
+            return true;
+          });
 
-        const results = await Promise.all(
-          eligible.map(async (course) => {
-            const learned = await countCustomLearnedForCourse(course.id);
-            const total = course.cardsCount ?? 0;
-            return {
-              key: course.id.toString(),
-              label: course.name,
-              learned,
-              total,
-              progress: total > 0 ? Math.min(1, learned / total) : 0,
-            };
-          })
-        );
+          const results = await Promise.all(
+            eligible.map(async (course) => {
+              const mastery = await getCustomCourseMasteryProgress(course.id);
+              const total = course.cardsCount ?? 0;
+              const learned = Math.min(total, mastery.completedCardsCount);
+              return {
+                key: course.id.toString(),
+                label: course.name,
+                learned,
+                total,
+                progress: total > 0 ? Math.min(1, learned / total) : 0,
+              };
+            })
+          );
 
-        if (!mounted) return;
-        setItems(results);
-        setIsLoading(false);
-      } catch {
-        if (!mounted) return;
-        setItems([]);
-        setIsLoading(false);
-      }
-    })();
-    return () => {
-      mounted = false;
-    };
-  }, [pinnedOfficialCourseIds]);
+          if (!mounted) return;
+          setItems(results);
+          setIsLoading(false);
+        } catch {
+          if (!mounted) return;
+          setItems([]);
+          setIsLoading(false);
+        }
+      })();
+      return () => {
+        mounted = false;
+      };
+    }, [activeCustomCourseId, pinnedOfficialCourseIds])
+  );
 
   return (
     <StatsCard

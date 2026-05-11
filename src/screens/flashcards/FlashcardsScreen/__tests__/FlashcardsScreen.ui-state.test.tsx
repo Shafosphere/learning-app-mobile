@@ -5,6 +5,7 @@ import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScre
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   getCourseCompletionSummary,
+  getCustomCourseMasteryProgress,
   getCustomFlashcards,
   getCustomReviewedFlashcardIds,
 } from "@/src/db/sqlite/db";
@@ -52,6 +53,12 @@ jest.mock("@/src/db/sqlite/db", () => ({
       correctCount: 8,
       wrongCount: 2,
       timeMs: 12 * 60 * 1000,
+    }),
+  ),
+  getCustomCourseMasteryProgress: jest.fn(() =>
+    Promise.resolve({
+      cardsCount: 0,
+      completedCardsCount: 0,
     }),
   ),
   getCustomFlashcards: jest.fn(() => Promise.resolve([])),
@@ -279,6 +286,8 @@ const mockedGetCustomReviewedFlashcardIds =
   getCustomReviewedFlashcardIds as jest.Mock;
 const mockedGetCourseCompletionSummary =
   getCourseCompletionSummary as jest.Mock;
+const mockedGetCustomCourseMasteryProgress =
+  getCustomCourseMasteryProgress as jest.Mock;
 const mockedGetCourseCompletionRunStartedAt =
   getCourseCompletionRunStartedAt as jest.Mock;
 
@@ -383,6 +392,10 @@ describe("FlashcardsScreen UI state regressions", () => {
       correctCount: 8,
       wrongCount: 2,
       timeMs: 12 * 60 * 1000,
+    });
+    mockedGetCustomCourseMasteryProgress.mockResolvedValue({
+      cardsCount: 0,
+      completedCardsCount: 0,
     });
     mockedGetCourseCompletionRunStartedAt.mockResolvedValue(null);
     mockedUseSettings.mockReturnValue({
@@ -676,6 +689,27 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
     expect(mockedGetCourseCompletionSummary).toHaveBeenNthCalledWith(1, 7);
     expect(mockedGetCourseCompletionSummary).toHaveBeenCalledTimes(1);
+  });
+
+  it("shows the finished panel when DB mastery says the course is complete", async () => {
+    const cardA = makeCard({
+      id: 53,
+      text: "orange",
+      translations: ["pomarancza"],
+    });
+    mockedGetCustomCourseMasteryProgress.mockResolvedValueOnce({
+      cardsCount: 1,
+      completedCardsCount: 1,
+    });
+
+    const screen = renderScreenWithState(createInteractionState(cardA), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
+    expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
   });
 
   it("does not show the finished panel when there are still new flashcards to distribute", async () => {

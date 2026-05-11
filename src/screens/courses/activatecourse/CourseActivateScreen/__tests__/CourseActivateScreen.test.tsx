@@ -5,6 +5,7 @@ import CourseActivateScreen from "@/src/screens/courses/activatecourse/CourseAct
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
+  getCompletedCustomCoursesWithCardCounts,
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
@@ -46,6 +47,10 @@ jest.mock("react-i18next", () => ({
           "Dodaj kurs",
         "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs":
           "Dodaj kurs",
+        "screens.courses.activatecourse.courseActivate.courseActivate.text.ukonczone":
+          "completed",
+        "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.ukonczone":
+          "Show completed courses",
       };
       return translations[key] ?? key;
     },
@@ -55,6 +60,7 @@ jest.mock("react-i18next", () => ({
 jest.mock("@/src/db/sqlite/db", () => ({
   getCustomCoursesWithCardCounts: jest.fn(),
   getOfficialCustomCoursesWithCardCounts: jest.fn(),
+  getCompletedCustomCoursesWithCardCounts: jest.fn(),
 }));
 
 jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
@@ -92,8 +98,8 @@ jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActiv
 jest.mock("@/src/components/button/button", () => {
   const React = require("react");
   const { Text } = require("react-native");
-  function MockButton({ text }: { text: string }) {
-    return <Text>{text}</Text>;
+  function MockButton({ text, onPress }: { text: string; onPress?: () => void }) {
+    return <Text onPress={onPress}>{text}</Text>;
   }
   return MockButton;
 });
@@ -116,6 +122,8 @@ const mockedGetCustomCoursesWithCardCounts =
   getCustomCoursesWithCardCounts as jest.Mock;
 const mockedGetOfficialCustomCoursesWithCardCounts =
   getOfficialCustomCoursesWithCardCounts as jest.Mock;
+const mockedGetCompletedCustomCoursesWithCardCounts =
+  getCompletedCustomCoursesWithCardCounts as jest.Mock;
 
 describe("CourseActivateScreen loading state", () => {
   beforeEach(() => {
@@ -144,6 +152,7 @@ describe("CourseActivateScreen loading state", () => {
     });
     mockedGetCustomCoursesWithCardCounts.mockResolvedValue([]);
     mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([]);
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([]);
   });
 
   it("shows loading instead of empty state while course data is pending", () => {
@@ -187,6 +196,74 @@ describe("CourseActivateScreen loading state", () => {
       expect(screen.queryByTestId("course-activate-loading")).toBeNull();
       expect(screen.getByText(EMPTY_TEXT)).toBeTruthy();
     });
+  });
+
+  it("hides completed courses from the activation list", async () => {
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 11,
+        name: "Visible course",
+        iconId: "book-outline",
+        iconColor: "#000",
+        cardsCount: 12,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+      {
+        id: 12,
+        name: "Completed course",
+        iconId: "star",
+        iconColor: "#111",
+        cardsCount: 8,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 12,
+        name: "Completed course",
+        iconId: "star",
+        iconColor: "#111",
+        cardsCount: 8,
+        completedCardsCount: 8,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CourseActivateScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Visible course")).toBeTruthy();
+      expect(screen.queryByText("Completed course")).toBeNull();
+      expect(screen.getByText("completed")).toBeTruthy();
+    });
+  });
+
+  it("opens completed courses from the footer button", async () => {
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 12,
+        name: "Completed course",
+        iconId: "star",
+        iconColor: "#111",
+        cardsCount: 8,
+        completedCardsCount: 8,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CourseActivateScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("completed")).toBeTruthy();
+    });
+
+    fireEvent.press(screen.getByText("completed"));
+
+    expect(mockPush).toHaveBeenCalledWith("/completed-courses");
   });
 
   it("keeps custom courses visible when official courses fail to load", async () => {

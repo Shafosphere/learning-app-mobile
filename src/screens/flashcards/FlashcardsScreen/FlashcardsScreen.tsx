@@ -29,11 +29,13 @@ import {
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type {
   CourseCompletionSummary,
+  CustomCourseMasteryProgress,
   CustomCourseRecord,
 } from "@/src/db/sqlite/db";
 import {
   getCourseCompletionSummary,
   getCustomCourseById,
+  getCustomCourseMasteryProgress,
   getCustomFlashcards,
   getCustomReviewedFlashcardIds,
   getGlobalDailyStreakDays,
@@ -127,6 +129,10 @@ const EMPTY_COURSE_COMPLETION_SUMMARY: CourseCompletionSummary = {
   correctCount: 0,
   wrongCount: 0,
   timeMs: 0,
+};
+const EMPTY_COURSE_MASTERY_PROGRESS: CustomCourseMasteryProgress = {
+  cardsCount: 0,
+  completedCardsCount: 0,
 };
 
 const EMPTY_BOXES_STATE: BoxesState = {
@@ -317,6 +323,8 @@ export default function Flashcards() {
   const [customCards, setCustomCards] = useState<WordWithTranslations[]>([]);
   const [courseCompletionSummary, setCourseCompletionSummary] =
     useState<CourseCompletionSummary>(EMPTY_COURSE_COMPLETION_SUMMARY);
+  const [courseMasteryProgress, setCourseMasteryProgress] =
+    useState<CustomCourseMasteryProgress>(EMPTY_COURSE_MASTERY_PROGRESS);
   const [courseCompletionRunStartedAt, setCourseCompletionRunStartedAt] =
     useState<number | null>(null);
   const [isLoadingData, setIsLoadingData] = useState(false);
@@ -1139,6 +1147,7 @@ export default function Flashcards() {
       setCustomCourse(null);
       setCustomCards([]);
       setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+      setCourseMasteryProgress(EMPTY_COURSE_MASTERY_PROGRESS);
       setCourseCompletionRunStartedAt(null);
       courseCompletionRunStartedAtRef.current = null;
       setReviewedIdsSeedResolvedCourseId(null);
@@ -1164,11 +1173,12 @@ export default function Flashcards() {
 
     void (async () => {
       const runStartedAt = await getCourseCompletionRunStartedAt(activeCustomCourseId);
-      const [courseRow, flashcardRows, lifetimeCompletionSummary] =
+      const [courseRow, flashcardRows, lifetimeCompletionSummary, masteryProgress] =
         await Promise.all([
           getCustomCourseById(activeCustomCourseId),
           getCustomFlashcards(activeCustomCourseId),
           getCourseCompletionSummary(activeCustomCourseId),
+          getCustomCourseMasteryProgress(activeCustomCourseId),
         ]);
 
         if (!isMounted) return;
@@ -1176,6 +1186,7 @@ export default function Flashcards() {
           setCustomCourse(null);
           setCustomCards([]);
           setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+          setCourseMasteryProgress(EMPTY_COURSE_MASTERY_PROGRESS);
           setCourseCompletionRunStartedAt(null);
           courseCompletionRunStartedAtRef.current = null;
           setLoadedCourseId(null);
@@ -1198,6 +1209,9 @@ export default function Flashcards() {
         setCourseCompletionSummary(
           lifetimeCompletionSummary ?? EMPTY_COURSE_COMPLETION_SUMMARY
         );
+        setCourseMasteryProgress(
+          masteryProgress ?? EMPTY_COURSE_MASTERY_PROGRESS
+        );
         setLoadedCourseId(activeCustomCourseId);
       })().catch((error) => {
         console.error("Failed to load custom flashcards", error);
@@ -1211,6 +1225,7 @@ export default function Flashcards() {
         setCustomCourse(null);
         setCustomCards([]);
         setCourseCompletionSummary(EMPTY_COURSE_COMPLETION_SUMMARY);
+        setCourseMasteryProgress(EMPTY_COURSE_MASTERY_PROGRESS);
         setCourseCompletionRunStartedAt(null);
         courseCompletionRunStartedAtRef.current = null;
         setLoadError("Nie udało się wczytać fiszek.");
@@ -1439,9 +1454,17 @@ export default function Flashcards() {
   const isCourseFinishedActuallyVisible =
     baseShouldShowBoxes &&
     !shouldRenderLoadingOverlay &&
-    remainingNewFlashcardsCount === 0 &&
-    totalCardsInBoxes === 0 &&
-    selectedItem == null;
+    (
+      (
+        remainingNewFlashcardsCount === 0 &&
+        totalCardsInBoxes === 0 &&
+        selectedItem == null
+      ) ||
+      (
+        courseMasteryProgress.cardsCount > 0 &&
+        courseMasteryProgress.completedCardsCount >= courseMasteryProgress.cardsCount
+      )
+    );
   const isCourseFinishedPreviewEligible =
     __DEV__ &&
     baseShouldShowBoxes &&

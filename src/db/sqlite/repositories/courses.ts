@@ -36,6 +36,15 @@ export interface CustomCourseSummary extends CustomCourseRecord {
   cardsCount: number;
 }
 
+export interface CompletedCustomCourseSummary extends CustomCourseSummary {
+  completedCardsCount: number;
+}
+
+export type CustomCourseMasteryProgress = {
+  cardsCount: number;
+  completedCardsCount: number;
+};
+
 type CustomCourseSqlRow = {
   id: number;
   name: string;
@@ -52,6 +61,10 @@ type CustomCourseSqlRow = {
 
 type CustomCourseSummarySqlRow = CustomCourseSqlRow & {
   cardsCount: number;
+};
+
+type CompletedCustomCourseSummarySqlRow = CustomCourseSummarySqlRow & {
+  completedCardsCount: number;
 };
 
 export function mapCustomCourseRow(
@@ -74,6 +87,15 @@ export function mapCustomCourseSummaryRow(
   return {
     ...base,
     cardsCount,
+  };
+}
+
+export function mapCompletedCustomCourseSummaryRow(
+  row: CompletedCustomCourseSummarySqlRow
+): CompletedCustomCourseSummary {
+  return {
+    ...mapCustomCourseSummaryRow(row),
+    completedCardsCount: row.completedCardsCount,
   };
 }
 
@@ -135,6 +157,90 @@ export async function getCustomCoursesWithCardCounts(): Promise<
      ORDER BY cp.created_at DESC, cp.id DESC;`
   );
   return rows.map(mapCustomCourseSummaryRow);
+}
+
+export async function getCompletedCustomCoursesWithCardCounts(): Promise<
+  CompletedCustomCourseSummary[]
+> {
+  const db = await getDB();
+  const rows = await db.getAllAsync<CompletedCustomCourseSummarySqlRow>(
+    `SELECT
+       cp.id,
+       cp.name,
+       cp.icon_id     AS iconId,
+       cp.icon_color  AS iconColor,
+       cp.color_id    AS colorId,
+       COALESCE(cp.reviews_enabled, 0) AS reviewsEnabled,
+       cp.created_at  AS createdAt,
+       cp.updated_at  AS updatedAt,
+       COALESCE(cp.is_official, 0) AS isOfficial,
+       cp.slug AS slug,
+       COALESCE(cp.pack_version, 1) AS packVersion,
+       COUNT(cf.id) AS cardsCount,
+       SUM(
+         CASE
+           WHEN EXISTS (
+             SELECT 1
+             FROM custom_learning_events cle
+             WHERE cle.course_id = cp.id
+               AND cle.flashcard_id = cf.id
+               AND cle.result = 'ok'
+               AND cle.box = 'boxFive'
+             LIMIT 1
+           )
+           THEN 1
+           ELSE 0
+         END
+       ) AS completedCardsCount
+     FROM custom_courses cp
+     INNER JOIN custom_flashcards cf ON cf.course_id = cp.id
+     GROUP BY cp.id
+     HAVING cardsCount > 0
+        AND completedCardsCount = cardsCount
+     ORDER BY cp.created_at DESC, cp.id DESC;`
+  );
+  return rows.map(mapCompletedCustomCourseSummaryRow);
+}
+
+export async function getCustomCourseMasteryProgress(
+  courseId: number
+): Promise<CustomCourseMasteryProgress> {
+  if (!courseId) {
+    return { cardsCount: 0, completedCardsCount: 0 };
+  }
+
+  const db = await getDB();
+  const row = await db.getFirstAsync<{
+    cardsCount: number;
+    completedCardsCount: number;
+  }>(
+    `SELECT
+       COUNT(cf.id) AS cardsCount,
+       SUM(
+         CASE
+           WHEN EXISTS (
+             SELECT 1
+             FROM custom_learning_events cle
+             WHERE cle.course_id = ?
+               AND cle.flashcard_id = cf.id
+               AND cle.result = 'ok'
+               AND cle.box = 'boxFive'
+             LIMIT 1
+           )
+           THEN 1
+           ELSE 0
+         END
+       ) AS completedCardsCount
+     FROM custom_flashcards cf
+     WHERE cf.course_id = ?;`,
+    courseId,
+    courseId
+  );
+
+  return {
+    cardsCount: row?.cardsCount ?? 0,
+    completedCardsCount: row?.completedCardsCount ?? 0,
+  };
 }
 
 export async function getCustomCourseById(

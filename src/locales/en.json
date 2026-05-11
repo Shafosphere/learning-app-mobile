@@ -88,6 +88,7 @@
       }
     },
     "actions": {
+      "back": "Back",
       "cancel": "Cancel",
       "next": "Next",
       "restore": "Restore",
@@ -1728,13 +1729,20 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edit course {{value}}",
               "przejdzDalej": "Continue",
-              "dodajKurs": "Add course"
+              "dodajKurs": "Add course",
+              "ukonczone": "Show completed courses"
             },
             "text": {
-              "dodajKurs": "add\ncourse"
+              "dodajKurs": "add\ncourse",
+              "ukonczone": "completed"
             }
           }
         }
+      },
+      "completedCourses": {
+        "title": "Completed courses",
+        "empty": "No completed courses yet.",
+        "editA11y": "Edit completed course {{value}}"
       },
       "courseentrysettings": {
         "courseEntrySettings": {

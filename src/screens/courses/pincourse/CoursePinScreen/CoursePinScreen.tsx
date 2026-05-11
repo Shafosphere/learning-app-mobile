@@ -64,6 +64,10 @@ type CourseGroup = {
 
 type CourseViewMode = "languages" | "general";
 
+const COURSE_PIN_WAIT_FOR_PIN_STEP_INDEX = COURSE_PIN_COACHMARK_STEPS.findIndex(
+  (step) => step.id === "course-pin-step-7"
+);
+
 export default function CoursePinScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
@@ -342,6 +346,19 @@ export default function CoursePinScreen() {
     "course-pin-screen",
     coachmarkLayer,
   );
+
+  useEffect(() => {
+    if (
+      !coachmark.isActive ||
+      hasAnyPinned ||
+      COURSE_PIN_WAIT_FOR_PIN_STEP_INDEX < 0 ||
+      coachmark.currentIndex <= COURSE_PIN_WAIT_FOR_PIN_STEP_INDEX
+    ) {
+      return;
+    }
+
+    coachmark.goBack();
+  }, [coachmark, hasAnyPinned]);
 
   useEffect(() => {
     const currentTarget = coachmark.currentStep?.targetId;
