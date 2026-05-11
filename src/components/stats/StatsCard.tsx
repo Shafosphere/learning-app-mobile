@@ -3,7 +3,7 @@ import { View, Text, ViewProps } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 type Props = ViewProps & {
-  title: string;
+  title?: string;
   subtitle?: string;
   action?: React.ReactNode;
   children: React.ReactNode;
@@ -39,6 +39,9 @@ const useStyles = createThemeStylesHook((colors) => ({
   content: {
     marginTop: 12,
   },
+  contentWithoutHeader: {
+    marginTop: 0,
+  },
 }));
 
 const StatsCard: React.FC<Props> = ({
@@ -50,15 +53,22 @@ const StatsCard: React.FC<Props> = ({
   ...rest
 }) => {
   const styles = useStyles();
+  const hasHeader = Boolean(title || subtitle || action);
 
   return (
     <View style={[styles.container, style]} {...rest}>
-      <View style={styles.header}>
-        <Text style={styles.title}>{title}</Text>
-        {action}
+      {hasHeader ? (
+        <>
+          <View style={styles.header}>
+            {title ? <Text style={styles.title}>{title}</Text> : <View />}
+            {action}
+          </View>
+          {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
+        </>
+      ) : null}
+      <View style={[styles.content, !hasHeader && styles.contentWithoutHeader]}>
+        {children}
       </View>
-      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
-      <View style={styles.content}>{children}</View>
     </View>
   );
 };

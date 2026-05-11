@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
+import { Text } from "react-native";
 
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -68,6 +69,15 @@ const colors = {
   border: "#ddd",
 };
 
+const mockCourseProgress = (progressByCourseId: Record<number, number>) => {
+  mockedGetCustomCourseMasteryProgress.mockImplementation(
+    async (courseId: number) => ({
+      cardsCount: 100,
+      completedCardsCount: progressByCourseId[courseId] ?? 0,
+    })
+  );
+};
+
 describe("PinnedCoursesProgress", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -96,8 +106,90 @@ describe("PinnedCoursesProgress", () => {
     const screen = render(<PinnedCoursesProgress />);
 
     await waitFor(() => {
+      expect(screen.getByText("Postęp przypiętych kursów")).toBeTruthy();
       expect(screen.getByText("Flagi Azji")).toBeTruthy();
       expect(screen.getByText("50/50 100%")).toBeTruthy();
+    });
+  });
+
+  it("sorts courses by progress descending", async () => {
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 1,
+        name: "Kurs 25",
+        cardsCount: 100,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+      {
+        id: 2,
+        name: "Kurs 100",
+        cardsCount: 100,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+      {
+        id: 3,
+        name: "Kurs 60",
+        cardsCount: 100,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+    mockCourseProgress({ 1: 25, 2: 100, 3: 60 });
+
+    const screen = render(<PinnedCoursesProgress />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Kurs 100")).toBeTruthy();
+      expect(screen.getByText("Kurs 60")).toBeTruthy();
+      expect(screen.getByText("Kurs 25")).toBeTruthy();
+    });
+
+    const labels = screen
+      .UNSAFE_getAllByType(Text)
+      .map((node) => node.props.children);
+
+    expect(labels.indexOf("Kurs 100")).toBeLessThan(
+      labels.indexOf("Kurs 60")
+    );
+    expect(labels.indexOf("Kurs 60")).toBeLessThan(labels.indexOf("Kurs 25"));
+  });
+
+  it("limits visible list height from the measured progress rows", async () => {
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue(
+      Array.from({ length: 6 }, (_, index) => ({
+        id: index + 1,
+        name: `Kurs ${index + 1}`,
+        cardsCount: 100,
+        reviewsEnabled: true,
+        isOfficial: false,
+      }))
+    );
+    mockCourseProgress({ 1: 10, 2: 20, 3: 30, 4: 40, 5: 50, 6: 60 });
+
+    const screen = render(<PinnedCoursesProgress />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Kurs 1")).toBeTruthy();
+      expect(screen.getByText("Kurs 6")).toBeTruthy();
+    });
+
+    const list = screen.getByTestId("pinned-courses-progress-list");
+    expect(list.props.showsVerticalScrollIndicator).toBe(true);
+
+    for (let index = 6; index >= 2; index -= 1) {
+      const row = screen.getByText(`Kurs ${index}`).parent;
+      expect(row).toBeTruthy();
+      fireEvent(row!, "layout", {
+        nativeEvent: { layout: { height: 76 } },
+      });
+    }
+
+    await waitFor(() => {
+      expect(
+        screen.getByTestId("pinned-courses-progress-list").props.style
+      ).toEqual(expect.objectContaining({ maxHeight: 428 }));
     });
   });
 });
