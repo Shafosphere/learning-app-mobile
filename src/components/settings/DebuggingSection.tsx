@@ -10,6 +10,7 @@ import pluck002Ogg from "@/assets/audio/ui/pluck_002.ogg";
 import popWav from "@/assets/audio/ui/pop.wav";
 import pupWav from "@/assets/audio/ui/pup.wav";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import { useDueReviews } from "@/src/contexts/DueReviewsContext";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -100,6 +101,7 @@ const DebuggingSection: React.FC = () => {
   } = useSettings();
   const setPopup = usePopup();
   const { showQuote } = useQuote();
+  const { refreshDueReviewCount } = useDueReviews();
   const [customBusy, setCustomBusy] = useState(false);
   const [showLogoMessage, setShowLogoMessage] = useState(false);
   const [logoFloating, setLogoFloating] = useState(true);
@@ -119,6 +121,7 @@ const DebuggingSection: React.FC = () => {
     setCustomBusy(true);
     try {
       const inserted = await addRandomCustomReviews(activeCustomCourseId, 10);
+      await refreshDueReviewCount();
       Alert.alert(
         t("settings.debug.alerts.addedTitle"),
         inserted > 0
@@ -187,6 +190,7 @@ const DebuggingSection: React.FC = () => {
     setCustomBusy(true);
     try {
       const deleted = await resetActiveCustomCourseReviews();
+      await refreshDueReviewCount();
       Alert.alert(
         t("settings.debug.alerts.resetCustomTitle"),
         deleted > 0

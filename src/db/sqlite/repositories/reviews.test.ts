@@ -1,3 +1,5 @@
+/* eslint-disable import/first */
+
 const mockGetDB = jest.fn();
 
 jest.mock("@/src/db/sqlite/core", () => ({
@@ -5,6 +7,7 @@ jest.mock("@/src/db/sqlite/core", () => ({
 }));
 
 import {
+  addRandomCustomReviews,
   advanceCustomReview,
   getDueCustomReviewFlashcards,
   scheduleCustomReview,
@@ -110,5 +113,46 @@ describe("custom review repository", () => {
     expect(getAllAsync.mock.calls[0][0]).not.toContain("LIMIT ?");
     expect(result).toHaveLength(2);
     expect(result.map((card) => card.stage)).toEqual([0, 5]);
+  });
+
+  it("seeds random custom reviews as due now and preserves existing stages", async () => {
+    const getAllAsync = jest.fn().mockResolvedValue([
+      { id: 11, stage: 0 },
+      { id: 12, stage: 3 },
+    ]);
+    const runAsync = jest.fn().mockResolvedValue(undefined);
+    mockGetDB.mockResolvedValue({
+      getAllAsync,
+      runAsync,
+    });
+    jest.spyOn(Date, "now").mockReturnValue(10_000);
+
+    const result = await addRandomCustomReviews(77, 10);
+
+    expect(result).toBe(2);
+    expect(getAllAsync).toHaveBeenCalledWith(
+      expect.stringContaining("cr.id IS NULL OR cr.next_review > ?"),
+      77,
+      10_000,
+      10
+    );
+    expect(runAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringContaining("INSERT INTO custom_reviews"),
+      11,
+      77,
+      10_000,
+      9_999,
+      0
+    );
+    expect(runAsync).toHaveBeenNthCalledWith(
+      2,
+      expect.stringContaining("INSERT INTO custom_reviews"),
+      12,
+      77,
+      10_000,
+      9_999,
+      3
+    );
   });
 });

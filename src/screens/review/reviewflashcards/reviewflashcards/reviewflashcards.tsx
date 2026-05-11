@@ -1,5 +1,5 @@
 import { useFocusEffect } from "@react-navigation/native";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import Card from "@/src/components/card/card";
 import type { CardCorrectionType } from "@/src/components/card/card-types";
@@ -49,6 +49,7 @@ import { useStyles } from "./reviewflashcards-styles";
 const BOX_SPAM_WINDOW_MS = 2000;
 const BOX_SPAM_THRESHOLD = 20;
 const LONG_THINK_MS = 12 * 1000;
+const ACTION_POST_ANSWER_COOLDOWN_MS = 1000;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
@@ -178,7 +179,12 @@ export default function ReviewFlashcardsPlaceholder() {
     promote: boolean;
   } | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
+    null,
+  );
+  const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
     boxZero: [],
     boxOne: [],
@@ -272,6 +278,12 @@ export default function ReviewFlashcardsPlaceholder() {
     setResult(null);
     setCorrection(null);
     setPendingExplanationMove(null);
+    setIsActionCooldownActive(false);
+    lastActionCooldownCardIdRef.current = null;
+    if (actionCooldownTimerRef.current) {
+      clearTimeout(actionCooldownTimerRef.current);
+      actionCooldownTimerRef.current = null;
+    }
   }, []);
 
   const clearTransitionTimer = useCallback(() => {
@@ -416,8 +428,36 @@ export default function ReviewFlashcardsPlaceholder() {
   useEffect(() => {
     return () => {
       clearTransitionTimer();
+      if (actionCooldownTimerRef.current) {
+        clearTimeout(actionCooldownTimerRef.current);
+        actionCooldownTimerRef.current = null;
+      }
     };
   }, [clearTransitionTimer]);
+
+  const selectedItemId = selectedItem?.id ?? null;
+
+  useLayoutEffect(() => {
+    if (selectedItemId == null) {
+      lastActionCooldownCardIdRef.current = null;
+      setIsActionCooldownActive(false);
+      if (actionCooldownTimerRef.current) {
+        clearTimeout(actionCooldownTimerRef.current);
+        actionCooldownTimerRef.current = null;
+      }
+      return;
+    }
+    if (lastActionCooldownCardIdRef.current === selectedItemId) return;
+    lastActionCooldownCardIdRef.current = selectedItemId;
+    setIsActionCooldownActive(true);
+    if (actionCooldownTimerRef.current) {
+      clearTimeout(actionCooldownTimerRef.current);
+    }
+    actionCooldownTimerRef.current = setTimeout(() => {
+      setIsActionCooldownActive(false);
+      actionCooldownTimerRef.current = null;
+    }, ACTION_POST_ANSWER_COOLDOWN_MS);
+  }, [selectedItemId]);
 
   useFocusEffect(
     useCallback(() => {
@@ -916,9 +956,9 @@ export default function ReviewFlashcardsPlaceholder() {
     [handleConfirm, setAnswer],
   );
   const handleTrueFalseOk = useCallback(() => {
-    if (isLoading) return;
+    if (isLoading || isActionCooldownActive) return;
     handleConfirm();
-  }, [handleConfirm, isLoading]);
+  }, [handleConfirm, isActionCooldownActive, isLoading]);
 
   const shouldShowTrueFalseActions =
     (selectedItem?.type === "true_false" ||
@@ -934,9 +974,15 @@ export default function ReviewFlashcardsPlaceholder() {
   });
   const trueFalseActionsMode =
     isExplanationPending && shouldShowTrueFalseActions ? "ok" : "answer";
+  const isImmediateActionLockActive =
+    selectedItemId != null &&
+    lastActionCooldownCardIdRef.current !== selectedItemId;
   const trueFalseActionsDisabled = isExplanationPending
-    ? isLoading
-    : result !== null || isLoading;
+    ? isLoading || isActionCooldownActive || isImmediateActionLockActive
+    : result !== null ||
+      isLoading ||
+      isActionCooldownActive ||
+      isImmediateActionLockActive;
   const showCardActions = !(
     shouldShowTrueFalseActions ||
     selectedItem?.type === "true_false" ||
@@ -959,8 +1005,20 @@ export default function ReviewFlashcardsPlaceholder() {
     });
   }, []);
   const handleCardActionsConfirm = () => handleConfirm();
+  const handleCardConfirm = useCallback(
+    (selectedTranslation?: string, answerOverride?: string) => {
+      if (isActionCooldownActive || isImmediateActionLockActive) return;
+      handleConfirm(selectedTranslation, answerOverride);
+    },
+    [
+      handleConfirm,
+      isActionCooldownActive,
+      isImmediateActionLockActive,
+    ],
+  );
   const cardActionsDownloadDisabled = true;
-  const cardActionsConfirmDisabled = false;
+  const cardActionsConfirmDisabled =
+    isActionCooldownActive || isImmediateActionLockActive;
   const cardActionsConfirmLabel = isExplanationVisible
     ? t("flashcards.card.actions.ok")
     : t("flashcards.card.actions.confirm");
@@ -1124,7 +1182,7 @@ export default function ReviewFlashcardsPlaceholder() {
                 setAnswer={setAnswer}
                 answer={answer}
                 result={result}
-                confirm={handleConfirm}
+                confirm={handleCardConfirm}
                 reversed={reversed}
                 setResult={setResult}
                 correction={correction}
@@ -1134,6 +1192,7 @@ export default function ReviewFlashcardsPlaceholder() {
                 onHintUpdate={() => undefined}
                 hideHints
                 isFocused={!isLoading}
+                isBetweenCards={isBetweenCards || isActionCooldownActive}
                 showExplanationEnabled={showExplanationEnabled}
                 explanationOnlyOnWrong={explanationOnlyOnWrong}
               />

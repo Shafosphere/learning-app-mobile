@@ -302,19 +302,36 @@ export async function addRandomCustomReviews(
     return 0;
   }
   const db = await getDB();
-  const rows = await db.getAllAsync<{ id: number }>(
+  const now = Date.now();
+  const dueNow = now - 1;
+  const rows = await db.getAllAsync<{ id: number; stage: number }>(
     `SELECT cf.id
+          , COALESCE(cr.stage, 0) AS stage
      FROM custom_flashcards cf
      LEFT JOIN custom_reviews cr ON cr.flashcard_id = cf.id
      WHERE cf.course_id = ?
-       AND cr.id IS NULL
+       AND (cr.id IS NULL OR cr.next_review > ?)
      ORDER BY RANDOM()
      LIMIT ?;`,
     courseId,
+    now,
     count
   );
   for (const row of rows) {
-    await scheduleCustomReview(row.id, courseId, 0);
+    await db.runAsync(
+      `INSERT INTO custom_reviews (flashcard_id, course_id, learned_at, next_review, stage)
+       VALUES (?, ?, ?, ?, ?)
+       ON CONFLICT(flashcard_id) DO UPDATE SET
+         course_id = excluded.course_id,
+         next_review = excluded.next_review,
+         stage = excluded.stage,
+         learned_at = CASE WHEN custom_reviews.learned_at IS NULL THEN excluded.learned_at ELSE custom_reviews.learned_at END;`,
+      row.id,
+      courseId,
+      now,
+      dueNow,
+      row.stage ?? 0
+    );
   }
   return rows.length;
 }

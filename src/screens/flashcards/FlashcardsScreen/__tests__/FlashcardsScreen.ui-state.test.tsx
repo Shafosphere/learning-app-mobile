@@ -526,6 +526,46 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestButtonsProps?.trueFalseActionsDisabled).toBe(false);
   });
 
+  it("ignores typed card submit while action cooldown is active", async () => {
+    const card = makeCard({
+      id: 41,
+      text: "cat",
+      translations: ["kot"],
+      type: "text",
+    });
+    const confirm = jest.fn();
+    renderScreenWithState(
+      createInteractionState(card, {
+        answer: "kot",
+        confirm,
+      }),
+      [card],
+    );
+
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    expect(latestButtonsProps?.confirmDisabled).toBe(true);
+
+    act(() => {
+      latestCardProps?.confirm(undefined, "kot");
+      latestButtonsProps?.onCardActionsConfirm?.();
+    });
+
+    expect(confirm).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.runOnlyPendingTimers();
+    });
+
+    act(() => {
+      latestCardProps?.confirm(undefined, "kot");
+    });
+
+    expect(confirm).toHaveBeenCalledWith(undefined, "kot");
+  });
+
   it("resets selected answer and keeps the know_dont_know variant after switching cards", async () => {
     const cardA = makeCard({
       id: 31,

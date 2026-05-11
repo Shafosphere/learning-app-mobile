@@ -1751,12 +1751,24 @@ export default function Flashcards() {
   const handleCardActionsConfirm = isExplanationVisible
     ? handleTrueFalseOk
     : () => {
+        if (isActionCooldownActive || isImmediateActionLockActive) return;
         if (tutorialForceCorrectRef.current && selectedItem) {
           confirmWithTutorial();
           return;
         }
         confirm();
       };
+  const handleCardConfirm = useCallback(
+    (selectedTranslation?: string, answerOverride?: string) => {
+      if (isActionCooldownActive || isImmediateActionLockActive) return;
+      confirmWithTutorial(selectedTranslation, answerOverride);
+    },
+    [
+      confirmWithTutorial,
+      isActionCooldownActive,
+      isImmediateActionLockActive,
+    ],
+  );
   const cardActionsDownloadDisabled =
     downloadDisabled ||
     isExplanationVisible ||
@@ -2004,7 +2016,7 @@ export default function Flashcards() {
         setAnswer={setAnswer}
         answer={answer}
         result={displayResult}
-        confirm={confirmWithTutorial}
+        confirm={handleCardConfirm}
         reversed={reversed}
         setResult={setResult}
         correction={correction}
