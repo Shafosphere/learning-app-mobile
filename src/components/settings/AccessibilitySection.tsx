@@ -46,6 +46,8 @@ const AccessibilitySection: React.FC = () => {
     setColorBlindMode,
     largeFontEnabled,
     toggleLargeFont,
+    correctionErrorMarkersEnabled,
+    toggleCorrectionErrorMarkers,
   } = useSettings();
   const [colorBlindMenuOpen, setColorBlindMenuOpen] = useState(false);
 
@@ -97,6 +99,13 @@ const AccessibilitySection: React.FC = () => {
   const handleLargeFontToggle = async (value: boolean) => {
     if (value !== largeFontEnabled) {
       await toggleLargeFont();
+      await triggerHaptics();
+    }
+  };
+
+  const handleCorrectionErrorMarkersToggle = async (value: boolean) => {
+    if (value !== correctionErrorMarkersEnabled) {
+      await toggleCorrectionErrorMarkers();
       await triggerHaptics();
     }
   };
@@ -163,6 +172,26 @@ const AccessibilitySection: React.FC = () => {
                 value={largeFontEnabled}
                 onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
                 accessibilityLabel={t("settings.accessibility.largeFont.title")}
+              />
+            </View>
+          )}
+        />
+
+        <SettingsItemCard
+          title={t("settings.accessibility.correctionErrorMarkers.title")}
+          description={t("settings.accessibility.correctionErrorMarkers.subtitle")}
+          control={(
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={correctionErrorMarkersEnabled}
+                onPress={() =>
+                  void handleCorrectionErrorMarkersToggle(
+                    !correctionErrorMarkersEnabled,
+                  )
+                }
+                accessibilityLabel={t(
+                  "settings.accessibility.correctionErrorMarkers.title",
+                )}
               />
             </View>
           )}

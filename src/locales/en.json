@@ -178,6 +178,10 @@
       "largeFont": {
         "title": "Larger font",
         "subtitle": "Increases the base font size in the app."
+      },
+      "correctionErrorMarkers": {
+        "title": "Typo star markers",
+        "subtitle": "Shows a small star under the wrong letter in flashcard correction mode."
       }
     },
     "learning": {

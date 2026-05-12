@@ -376,6 +376,20 @@ async function flushScreenState() {
   });
 }
 
+async function flushScreenStateWithoutTimers() {
+  await act(async () => {
+    await Promise.resolve();
+  });
+
+  await act(async () => {
+    await Promise.resolve();
+  });
+
+  await act(async () => {
+    await Promise.resolve();
+  });
+}
+
 describe("FlashcardsScreen UI state regressions", () => {
   beforeEach(() => {
     jest.useFakeTimers();
@@ -660,6 +674,22 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestFinishedPanelProps?.cardsCountLabel).toBe("1");
     expect(latestFinishedPanelProps?.accuracyLabel).toBe("80%");
     expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
+    expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
+  });
+
+  it("prepares the finished panel under the loading overlay before fade-out completes", async () => {
+    const cardA = makeCard({
+      id: 511,
+      text: "kiwi",
+      translations: ["kiwi"],
+    });
+    mockCurrentUsedWordIds = [cardA.id];
+
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenStateWithoutTimers();
+
+    expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
     expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
   });
 

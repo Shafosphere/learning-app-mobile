@@ -171,6 +171,7 @@ export default function Card({
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
     flashcardsImageSize,
+    correctionErrorMarkersEnabled,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -911,7 +912,7 @@ export default function Card({
         styles.overlayCharText,
         mismatch ? styles.overlayCharError : styles.overlayCharNeutral,
       ];
-      if (mismatch) {
+      if (mismatch && correctionErrorMarkersEnabled) {
         return (
           <View key={`overlay-${idx}`} style={styles.overlayCharBox}>
             <Text style={charStyle}>{displayChar}</Text>

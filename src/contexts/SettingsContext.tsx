@@ -436,6 +436,8 @@ interface SettingsContextValue {
   toggleColorBlindMode: () => Promise<void>;
   largeFontEnabled: boolean;
   toggleLargeFont: () => Promise<void>;
+  correctionErrorMarkersEnabled: boolean;
+  toggleCorrectionErrorMarkers: () => Promise<void>;
   fontScaleMultiplier: number;
   memoryBoardSize: MemoryBoardSize;
   setMemoryBoardSize: (size: MemoryBoardSize) => Promise<void>;
@@ -443,6 +445,7 @@ interface SettingsContextValue {
     highContrastEnabled: boolean;
     colorBlindMode: ColorBlindMode;
     largeFontEnabled: boolean;
+    correctionErrorMarkersEnabled: boolean;
   };
 }
 
@@ -611,6 +614,8 @@ const defaultValue: SettingsContextValue = {
   toggleColorBlindMode: async () => {},
   largeFontEnabled: false,
   toggleLargeFont: async () => {},
+  correctionErrorMarkersEnabled: true,
+  toggleCorrectionErrorMarkers: async () => {},
   fontScaleMultiplier: 1,
   memoryBoardSize: "twoByThree",
   setMemoryBoardSize: async () => {},
@@ -618,6 +623,7 @@ const defaultValue: SettingsContextValue = {
     highContrastEnabled: false,
     colorBlindMode: "none",
     largeFontEnabled: false,
+    correctionErrorMarkersEnabled: true,
   },
 };
 
@@ -835,6 +841,8 @@ export const SettingsProvider: React.FC<{
     "accessibility.largeFont",
     false
   );
+  const [correctionErrorMarkersEnabled, setCorrectionErrorMarkersEnabled] =
+    usePersistedState<boolean>("accessibility.correctionErrorMarkers", true);
   const resolvedLanguage = useMemo(
     () => resolveLanguage(uiLanguage),
     [uiLanguage]
@@ -2477,6 +2485,10 @@ export const SettingsProvider: React.FC<{
     await setLargeFontEnabled(!largeFontEnabled);
   };
 
+  const toggleCorrectionErrorMarkers = async () => {
+    await setCorrectionErrorMarkersEnabled(!correctionErrorMarkersEnabled);
+  };
+
   const setMemoryBoardSize = useCallback(
     async (size: MemoryBoardSize) => {
       await setRawMemoryBoardSize(size);
@@ -2691,6 +2703,8 @@ export const SettingsProvider: React.FC<{
         toggleColorBlindMode,
         largeFontEnabled,
         toggleLargeFont,
+        correctionErrorMarkersEnabled,
+        toggleCorrectionErrorMarkers,
         fontScaleMultiplier,
         memoryBoardSize,
         setMemoryBoardSize,
@@ -2698,6 +2712,7 @@ export const SettingsProvider: React.FC<{
           highContrastEnabled,
           colorBlindMode,
           largeFontEnabled,
+          correctionErrorMarkersEnabled,
         },
       }}
     >

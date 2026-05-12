@@ -1445,15 +1445,17 @@ export default function Flashcards() {
 
   const downloadDisabled =
     customCards.length === 0 || isLoadingData || !isReady;
-  const baseShouldShowBoxes =
+  const isCourseDisplayReady =
     activeCustomCourseId != null &&
     isReady &&
     !isLoadingData &&
     !loadError &&
+    loadedCourseId === activeCustomCourseId &&
+    isReviewedIdsSeedResolved &&
     customCards.length > 0;
+  const baseShouldShowBoxes = isCourseDisplayReady;
   const isCourseFinishedActuallyVisible =
     baseShouldShowBoxes &&
-    !shouldRenderLoadingOverlay &&
     (
       (
         remainingNewFlashcardsCount === 0 &&
@@ -1467,8 +1469,7 @@ export default function Flashcards() {
     );
   const isCourseFinishedPreviewEligible =
     __DEV__ &&
-    baseShouldShowBoxes &&
-    !shouldRenderLoadingOverlay;
+    baseShouldShowBoxes;
   const isCourseFinishedVisible =
     isCourseFinishedActuallyVisible ||
     (isCourseFinishedPreviewVisible && isCourseFinishedPreviewEligible);

@@ -178,6 +178,10 @@
       "largeFont": {
         "title": "Większa czcionka",
         "subtitle": "Powiększa podstawowy rozmiar czcionki w aplikacji."
+      },
+      "correctionErrorMarkers": {
+        "title": "Gwiazdki przy literówkach",
+        "subtitle": "Pokazuje małą gwiazdkę pod błędną literą w trybie poprawki fiszek."
       }
     },
     "learning": {
