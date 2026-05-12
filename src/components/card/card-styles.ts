@@ -269,15 +269,32 @@ export const useStyles = createThemeStylesHook((colors) => ({
     top: 8,
     left: 8,
     height: 44, // stała wysokość inputa
-    lineHeight: 28, // stała wysokość
     width: "100%",
-    fontSize: 24,
-    fontWeight: 800,
+    flexDirection: "row",
+    alignItems: "flex-start",
     pointerEvents: "none",
     // color: "tra"
   },
+  overlayCharText: {
+    fontSize: 24,
+    fontWeight: 800,
+    lineHeight: 28,
+  },
+  overlayCharBox: {
+    position: "relative",
+    height: 44,
+    alignItems: "center",
+  },
   overlayCharError: {
     color: colors.my_yellow,
+  },
+  overlayErrorMarker: {
+    position: "absolute",
+    top: 25,
+    color: colors.my_yellow,
+    fontSize: 11,
+    fontWeight: 800,
+    lineHeight: 12,
   },
   overlayCharNeutral: {
     color: colors.headline,

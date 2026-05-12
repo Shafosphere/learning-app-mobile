@@ -19,8 +19,8 @@ type CsvTemplate = {
 const CSV_HEADER: Record<CsvTemplateLocale, string[]> = {
   pl: [
     "typ",
-    "awers",
-    "rewers",
+    "pytanie",
+    "odpowiedz",
     "obraz_awers",
     "obraz_rewers",
     "czy_prawda",
@@ -29,8 +29,8 @@ const CSV_HEADER: Record<CsvTemplateLocale, string[]> = {
   ],
   en: [
     "type",
-    "front_text",
-    "back_text",
+    "question",
+    "answer",
     "front_image",
     "back_image",
     "tf_answer",
@@ -62,7 +62,7 @@ const CSV_TEMPLATE_DEFINITIONS: Record<
     fileName: "wzor_fiszki_samoocena.csv",
     rows: [
       [
-        "self_assess",
+        "samoocena",
         "Wzor na pole kola",
         "",
         "",
@@ -72,7 +72,7 @@ const CSV_TEMPLATE_DEFINITIONS: Record<
         "Pi razy r do kwadratu",
       ],
       [
-        "self_assess",
+        "samoocena",
         "II zasada dynamiki Newtona",
         "",
         "",

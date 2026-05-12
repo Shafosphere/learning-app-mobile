@@ -1470,10 +1470,10 @@
           "summary": "Klasyczna fiszka: pytanie z przodu, odpowiedź z tyłu.",
           "fields": {
             "frontText": {
-              "description": "Awers fiszki: pytanie, hasło albo stwierdzenie."
+              "description": "Pytanie, hasło albo stwierdzenie."
             },
             "backText": {
-              "description": "Rewers fiszki: poprawna odpowiedź tekstowa.",
+              "description": "Poprawna odpowiedź tekstowa.",
               "note": "Możesz wpisać wiele odpowiedzi, oddzielając je przecinkiem lub średnikiem."
             },
             "explanation": {
@@ -1505,7 +1505,7 @@
           "fields": {
             "type": {
               "description": "Typ fiszki dla każdego wiersza.",
-              "note": "Wartości: traditional, true_false, self_assess (lub polskie aliasy)."
+              "note": "Wartości: odpowiedz_tekstowa, prawda_falsz, samoocena."
             }
           },
           "tip": "Układ kolumn pozostaje taki sam jak w sekcjach powyżej."
@@ -1516,8 +1516,8 @@
       "disableFlip": "Wyłącz",
       "enableFlip": "Włącz",
       "flipForCard": "odwracanie dla fiszki {{index}}",
-      "frontPlaceholder": "Awers",
-      "backPlaceholder": "Rewers",
+      "frontPlaceholder": "Pytanie",
+      "backPlaceholder": "Odpowiedź",
       "addImage": "Dodaj obraz",
       "none": "Brak",
       "removeOrCloseImageForCard": "Usuń obraz lub zamknij pole obrazu dla fiszki {{index}}",

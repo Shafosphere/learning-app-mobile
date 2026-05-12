@@ -1470,10 +1470,10 @@
           "summary": "Classic flashcard: question on the front, answer on the back.",
           "fields": {
             "frontText": {
-              "description": "Flashcard front: question, term, or statement."
+              "description": "Question, term, or statement."
             },
             "backText": {
-              "description": "Flashcard back: correct text answer.",
+              "description": "Correct text answer.",
               "note": "You can enter multiple answers by separating them with a comma or semicolon."
             },
             "explanation": {
@@ -1516,8 +1516,8 @@
       "disableFlip": "Disable",
       "enableFlip": "Enable",
       "flipForCard": "flipping for flashcard {{index}}",
-      "frontPlaceholder": "Front",
-      "backPlaceholder": "Back",
+      "frontPlaceholder": "Question",
+      "backPlaceholder": "Answer",
       "addImage": "Add image",
       "none": "None",
       "removeOrCloseImageForCard": "Remove image or close image field for flashcard {{index}}",

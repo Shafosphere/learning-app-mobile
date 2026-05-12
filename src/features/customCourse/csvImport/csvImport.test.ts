@@ -1,6 +1,7 @@
 import { analyzeRows } from "./analyzeRows";
 import { parseCsvText } from "./parseFile";
 import { normalizeCsvHeaderKey } from "./schema";
+import { getCsvTemplate } from "./templates";
 import type { ParsedCsvInput } from "./types";
 
 const makeParsedInput = (
@@ -34,6 +35,17 @@ describe("custom course CSV import", () => {
   it("uses czy_prawda as the Polish true/false answer column", () => {
     expect(normalizeCsvHeaderKey("czy_prawda")).toBe("tf_answer");
     expect(normalizeCsvHeaderKey("odpowiedz_tf")).toBe("tf_answer");
+  });
+
+  it("maps preferred Polish question and answer columns", () => {
+    expect(normalizeCsvHeaderKey("pytanie")).toBe("front_text");
+    expect(normalizeCsvHeaderKey("odpowiedz")).toBe("back_text");
+    expect(normalizeCsvHeaderKey("odpowiedź")).toBe("back_text");
+  });
+
+  it("maps preferred English question and answer columns", () => {
+    expect(normalizeCsvHeaderKey("question")).toBe("front_text");
+    expect(normalizeCsvHeaderKey("answer")).toBe("back_text");
   });
 
   it("imports Polish true/false values", () => {
@@ -222,6 +234,41 @@ describe("custom course CSV import", () => {
     ]);
   });
 
+  it("imports preferred Polish pytanie,odpowiedz as text-answer cards", () => {
+    const result = analyzeCsv(
+      ["pytanie,odpowiedz", "Stolica Polski,Warszawa"].join("\n")
+    );
+
+    expect(result.invalidRowsCount).toBe(0);
+    expect(result.statsByType.traditional).toBe(1);
+    expect(result.validRows).toMatchObject([
+      {
+        type: "traditional",
+        mappedType: "text",
+        frontText: "Stolica Polski",
+        backText: "Warszawa",
+      },
+    ]);
+  });
+
+  it("imports preferred English question,answer as text-answer cards", () => {
+    const result = analyzeCsv(
+      ["question,answer", "Capital of Poland,Warsaw"].join("\n"),
+      "en"
+    );
+
+    expect(result.invalidRowsCount).toBe(0);
+    expect(result.statsByType.traditional).toBe(1);
+    expect(result.validRows).toMatchObject([
+      {
+        type: "traditional",
+        mappedType: "text",
+        frontText: "Capital of Poland",
+        backText: "Warsaw",
+      },
+    ]);
+  });
+
   it("imports guide example awers,rewers,wyjasnienie,odwroc as flipped text-answer cards", () => {
     const result = analyzeCsv(
       [
@@ -309,6 +356,29 @@ describe("custom course CSV import", () => {
     ]);
   });
 
+  it("imports all preferred Polish type aliases", () => {
+    const result = analyzeCsv(
+      [
+        "typ,pytanie,odpowiedz,czy_prawda,wyjasnienie",
+        "odpowiedz_tekstowa,Stolica Polski,Warszawa,,",
+        "prawda_falsz,Slonce jest gwiazda,,prawda,",
+        "samoocena,Wzor na pole kola,,,Pi razy r do kwadratu",
+      ].join("\n")
+    );
+
+    expect(result.invalidRowsCount).toBe(0);
+    expect(result.statsByType).toEqual({
+      traditional: 1,
+      true_false: 1,
+      self_assess: 1,
+    });
+    expect(result.validRows).toMatchObject([
+      { type: "traditional", mappedType: "text" },
+      { type: "true_false", mappedType: "true_false" },
+      { type: "self_assess", mappedType: "know_dont_know" },
+    ]);
+  });
+
   it("treats a single-column CSV without a header as front-only rows", () => {
     const parsed = parseCsvText(
       ["Wzor na pole kola", "II zasada dynamiki Newtona", "Prawo Ohma"].join("\n")
@@ -348,5 +418,28 @@ describe("custom course CSV import", () => {
       mappedType: "know_dont_know",
       frontText: "Wzor na pole kola",
     });
+  });
+
+  it("generates Polish templates with preferred question and answer headers", () => {
+    const template = getCsvTemplate("traditional", { locale: "pl" });
+
+    expect(template.content.split("\n")[0]).toBe(
+      "typ,pytanie,odpowiedz,obraz_awers,obraz_rewers,czy_prawda,odwroc,wyjasnienie"
+    );
+  });
+
+  it("generates Polish self-assessment templates with the Polish type value", () => {
+    const template = getCsvTemplate("self_assess", { locale: "pl" });
+
+    expect(template.content.split("\n")[1]?.split(",")[0]).toBe("samoocena");
+    expect(template.content).not.toContain("self_assess");
+  });
+
+  it("generates English templates with preferred question and answer headers", () => {
+    const template = getCsvTemplate("traditional", { locale: "en" });
+
+    expect(template.content.split("\n")[0]).toBe(
+      "type,question,answer,front_image,back_image,tf_answer,flip,explanation"
+    );
   });
 });

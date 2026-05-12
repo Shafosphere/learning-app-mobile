@@ -336,13 +336,9 @@ export function CardCorrection({
             onBlur={() => onCorrectionInputBlur?.("correction1")}
           />
           {correction.input1 ? (
-            <Text
-              style={styles.inputOverlay}
-              numberOfLines={1}
-              ellipsizeMode="clip"
-            >
+            <View style={styles.inputOverlay}>
               {renderOverlayText(correction.input1, correctionAwers)}
-            </Text>
+            </View>
           ) : null}
         </View>
       </ScrollView>
@@ -437,13 +433,9 @@ export function CardCorrection({
             }}
           />
           {correction.input2 ? (
-            <Text
-              style={styles.inputOverlay}
-              numberOfLines={1}
-              ellipsizeMode="clip"
-            >
+            <View style={styles.inputOverlay}>
               {renderOverlayText(correction.input2 ?? "", correctionRewers)}
-            </Text>
+            </View>
           ) : null}
         </View>
       </ScrollView>

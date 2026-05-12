@@ -90,7 +90,7 @@ export const analyzeRows = (
         severity: "error",
         code: "invalid_type",
         message: isPolish
-          ? "Niepoprawny typ. Dozwolone: traditional, true_false, self_assess, odpowiedz_tekstowa, prawda_falsz, samoocena."
+          ? "Niepoprawny typ. Dozwolone: odpowiedz_tekstowa, prawda_falsz, samoocena."
           : "Invalid type. Allowed: traditional, true_false, self_assess, text, prawda_falsz, samoocena.",
       });
     }

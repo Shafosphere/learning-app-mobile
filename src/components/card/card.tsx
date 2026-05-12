@@ -907,9 +907,18 @@ export default function Card({
     const typedChars = value.split("").map((char, idx) => {
       const mismatch = isCharMismatchAt(value, expected, idx);
       const displayChar = char === " " ? "\u00A0" : char;
-      const charStyle = mismatch
-        ? styles.overlayCharError
-        : styles.overlayCharNeutral;
+      const charStyle = [
+        styles.overlayCharText,
+        mismatch ? styles.overlayCharError : styles.overlayCharNeutral,
+      ];
+      if (mismatch) {
+        return (
+          <View key={`overlay-${idx}`} style={styles.overlayCharBox}>
+            <Text style={charStyle}>{displayChar}</Text>
+            <Text style={styles.overlayErrorMarker}>*</Text>
+          </View>
+        );
+      }
       return (
         <Text key={`overlay-${idx}`} style={charStyle}>
           {displayChar}
@@ -923,7 +932,10 @@ export default function Card({
     }
     return [
       ...typedChars,
-      <Text key="overlay-expected-suffix" style={styles.overlayExpectedSuffix}>
+      <Text
+        key="overlay-expected-suffix"
+        style={[styles.overlayCharText, styles.overlayExpectedSuffix]}
+      >
         {expectedSuffix.replace(/ /g, "\u00A0")}
       </Text>,
     ];

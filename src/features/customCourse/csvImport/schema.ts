@@ -24,11 +24,13 @@ const FIELD_ALIASES: Record<string, CanonicalCsvField> = {
   front_text: "front_text",
   front: "front_text",
   question: "front_text",
+  pytanie: "front_text",
   awers: "front_text",
   przod: "front_text",
   back_text: "back_text",
   back: "back_text",
   answer: "back_text",
+  odpowiedz: "back_text",
   rewers: "back_text",
   tyl: "back_text",
   front_image: "front_image",
@@ -83,8 +85,8 @@ export const getCsvFieldLabel = (field: string, locale: "pl" | "en"): string => 
   if (locale === "pl") {
     const plLabels: Record<string, string> = {
       type: "typ",
-      front_text: "awers",
-      back_text: "rewers",
+      front_text: "pytanie",
+      back_text: "odpowiedz",
       front_image: "obraz_awers",
       back_image: "obraz_rewers",
       tf_answer: "czy_prawda",
@@ -93,5 +95,9 @@ export const getCsvFieldLabel = (field: string, locale: "pl" | "en"): string => 
     };
     return plLabels[canonical] ?? canonical;
   }
-  return canonical;
+  const enLabels: Record<string, string> = {
+    front_text: "question",
+    back_text: "answer",
+  };
+  return enLabels[canonical] ?? canonical;
 };
