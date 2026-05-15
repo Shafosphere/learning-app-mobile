@@ -6,6 +6,7 @@ import { useStyles } from "../card-styles";
 
 type CardActionsProps = {
   handleConfirm: () => void;
+  onConfirmPressIn?: () => void;
   onDownload: () => Promise<void>;
   downloadDisabled: boolean;
   downloadCoachmarkId?: string;
@@ -17,6 +18,7 @@ type CardActionsProps = {
 
 export function CardActions({
   handleConfirm,
+  onConfirmPressIn,
   onDownload,
   downloadDisabled,
   downloadCoachmarkId,
@@ -61,6 +63,7 @@ export function CardActions({
               text={confirmLabel}
               color="my_green"
               disabled={confirmDisabled}
+              onPressIn={onConfirmPressIn}
               onPress={handleConfirm}
             />
           </View>
@@ -71,6 +74,7 @@ export function CardActions({
           text={confirmLabel}
           color="my_green"
           disabled={confirmDisabled}
+          onPressIn={onConfirmPressIn}
           onPress={handleConfirm}
         />
       )}

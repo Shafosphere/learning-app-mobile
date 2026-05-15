@@ -21,6 +21,8 @@ type CardSceneQuestionProps = {
   mainDatePattern?: DatePattern | null;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onMainInputFocus?: () => void;
+  onMainInputBlur?: () => void;
   canToggleTranslations: boolean;
   next: () => void;
   typoDiff: any;
@@ -44,6 +46,8 @@ export function CardSceneQuestion(props: CardSceneQuestionProps) {
       mainDatePattern={props.mainDatePattern}
       focusTarget={props.focusTarget}
       requestFocus={props.requestFocus}
+      onMainInputFocus={props.onMainInputFocus}
+      onMainInputBlur={props.onMainInputBlur}
       canToggleTranslations={props.canToggleTranslations}
       next={props.next}
       typoDiff={props.typoDiff}

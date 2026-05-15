@@ -83,6 +83,51 @@ describe("useCardFocusController", () => {
     });
   });
 
+  it("focuses correction when the card id arrives before correction inputs mount", async () => {
+    const { result, rerender } = renderHook(
+      (props: ControllerProps) => useCardFocusController(props),
+      {
+        initialProps: createProps({
+          correctionPrimaryTarget: "correction2",
+        }),
+      },
+    );
+
+    act(() => {
+      result.current.requestFocus("main");
+    });
+
+    await waitFor(() => {
+      expect(result.current.focusTarget).toBe<FocusTarget>("main");
+    });
+
+    rerender(
+      createProps({
+        correctionPrimaryTarget: "correction2",
+        result: false,
+        showCorrectionInputs: false,
+        correctionCardId: 6981,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.focusTarget).toBe<FocusTarget>("main");
+    });
+
+    rerender(
+      createProps({
+        correctionPrimaryTarget: "correction2",
+        result: false,
+        showCorrectionInputs: true,
+        correctionCardId: 6981,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.focusTarget).toBe<FocusTarget>("correction2");
+    });
+  });
+
   it("hands focus from correction back to normal input without clearing it", async () => {
     const { result, rerender } = renderHook(
       (props: ControllerProps) => useCardFocusController(props),

@@ -196,7 +196,6 @@ export function useCardFocusController({
       return;
     }
     if (!showCorrectionInputs) {
-      previousCorrectionCardIdRef.current = correctionCardId;
       return;
     }
     if (correctionCardId == null) return;

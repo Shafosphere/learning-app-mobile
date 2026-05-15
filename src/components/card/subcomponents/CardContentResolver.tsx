@@ -45,6 +45,8 @@ interface CardContentResolverProps {
   setInput2LayoutWidth: any;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onMainInputFocus?: () => void;
+  onMainInputBlur?: () => void;
   onCorrectionInputFocus?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
   onCorrectionInputBlur?: (target: Extract<FocusTarget, "correction1" | "correction2">) => void;
   onCorrection1Completed: () => void;
@@ -100,6 +102,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     setInput2LayoutWidth,
     focusTarget,
     requestFocus,
+    onMainInputFocus,
+    onMainInputBlur,
     onCorrectionInputFocus,
     onCorrectionInputBlur,
     onCorrection1Completed,
@@ -195,6 +199,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           mainDatePattern={mainDatePattern}
           focusTarget={focusTarget}
           requestFocus={requestFocus}
+          onMainInputFocus={onMainInputFocus}
+          onMainInputBlur={onMainInputBlur}
           canToggleTranslations={canToggleTranslations}
           next={next}
           typoDiff={typoDiff}

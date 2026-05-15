@@ -12,6 +12,8 @@ import { getExplanationState } from "@/src/utils/explanationState";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
+const ENABLE_FLASHCARDS_CONSOLE_LOGS = false;
+
 type SpellcheckFn = (input: string, expected: string) => boolean;
 
 type CorrectionMode = "demote" | "intro";
@@ -247,7 +249,7 @@ export function useFlashcardsInteraction({
         return;
       }
       queuesRef.current[box] = rest;
-      if (__DEV__) {
+      if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
         const upcoming = rest[0] ?? null;
         const currentLabel = `id=${next.id} type=${next.type ?? "text"} front="${(next.text ?? "").slice(0, 60)}"`;
         const upcomingLabel = upcoming
@@ -274,7 +276,7 @@ export function useFlashcardsInteraction({
         setSelectedItem(null);
         return;
       }
-      if (__DEV__) {
+      if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
         const queued = getQueueForBox(box);
         const next = queued[0] ?? null;
         const cardLabel = next
@@ -433,7 +435,7 @@ export function useFlashcardsInteraction({
         : reversed
           ? checkSpelling(answerToUse, wordForCheck.text)
           : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
-      if (__DEV__) {
+      if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
         console.log("[Flashcards][confirm] evaluated", {
           cardId: wordForCheck.id,
           type: wordForCheck.type ?? "text",
@@ -550,7 +552,7 @@ export function useFlashcardsInteraction({
           showExplanationEnabled,
           explanationOnlyOnWrong,
         });
-        if (__DEV__) {
+        if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
           console.log("[Flashcards][confirm] success-path", {
             cardId: wordForCheck.id,
             resultSetMs: Date.now() - confirmStartedAt,
@@ -592,7 +594,7 @@ export function useFlashcardsInteraction({
           showExplanationEnabled,
           explanationOnlyOnWrong,
         });
-        if (__DEV__) {
+        if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
           console.log("[Flashcards][confirm] failure-path", {
             cardId: wordForCheck.id,
             resultSetMs: Date.now() - confirmStartedAt,

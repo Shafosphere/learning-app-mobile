@@ -23,6 +23,7 @@ type FlashcardsButtonsProps = {
   // Card Actions (Download + OK)
   showCardActions: boolean;
   onCardActionsConfirm?: () => void;
+  onCardActionsConfirmPressIn?: () => void;
   onDownload?: () => Promise<void>;
   downloadDisabled?: boolean;
   downloadCoachmarkId?: string;
@@ -43,6 +44,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   selectedTrueFalseAnswer = null,
   showCardActions,
   onCardActionsConfirm,
+  onCardActionsConfirmPressIn,
   onDownload,
   downloadDisabled = false,
   downloadCoachmarkId,
@@ -102,6 +104,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
       >
         <CardActions
           handleConfirm={onCardActionsConfirm ?? noop}
+          onConfirmPressIn={onCardActionsConfirmPressIn}
           onDownload={onDownload ?? noopAsync}
           downloadDisabled={downloadDisabled}
           downloadCoachmarkId={downloadCoachmarkId}

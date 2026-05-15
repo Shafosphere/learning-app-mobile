@@ -42,6 +42,7 @@ const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
 const MAX_INPUT_SCROLL_AHEAD = 180;
 const INPUT_SCROLL_TRAILING_BUFFER = 120;
+const ENABLE_KEYBOARD_CONSOLE_LOGS = false;
 
 type KeyboardMetricsSnapshot = {
   screenY?: number;
@@ -402,7 +403,9 @@ export default function Card({
     (event: string, extra: Record<string, unknown> = {}) => {
       if (process.env.NODE_ENV === "test") return;
       const payload = buildFocusDiagnosticsPayload(extra);
-      console.log(`[keyboard-debug] ${event}`, payload);
+      if (ENABLE_KEYBOARD_CONSOLE_LOGS) {
+        console.log(`[keyboard-debug] ${event}`, payload);
+      }
       void appendDebugEvent("flashcards", event, payload);
     },
     [buildFocusDiagnosticsPayload],
@@ -414,13 +417,15 @@ export default function Card({
       if (process.env.NODE_ENV === "test") {
         return;
       }
-      console.log(
-        "[keyboard-debug] card.focus.keyboard_bridge",
-        buildFocusDiagnosticsPayload({
-          reason,
-          hasBridgeRef,
-        }),
-      );
+      if (ENABLE_KEYBOARD_CONSOLE_LOGS) {
+        console.log(
+          "[keyboard-debug] card.focus.keyboard_bridge",
+          buildFocusDiagnosticsPayload({
+            reason,
+            hasBridgeRef,
+          }),
+        );
+      }
       void appendDebugEvent(
         "flashcards",
         "card.focus.keyboard_bridge",
@@ -497,10 +502,12 @@ export default function Card({
       "card.focus.request",
       buildFocusDiagnosticsPayload(),
     );
-    console.log(
-      "[keyboard-debug] card.focus.request",
-      buildFocusDiagnosticsPayload(),
-    );
+    if (ENABLE_KEYBOARD_CONSOLE_LOGS) {
+      console.log(
+        "[keyboard-debug] card.focus.request",
+        buildFocusDiagnosticsPayload(),
+      );
+    }
   }, [
     buildFocusDiagnosticsPayload,
     focusRequestId,
@@ -567,10 +574,12 @@ export default function Card({
       ) {
         return;
       }
-      console.log(
-        "[keyboard-debug] card.focus.native_attempt",
-        buildFocusDiagnosticsPayload(event),
-      );
+      if (ENABLE_KEYBOARD_CONSOLE_LOGS) {
+        console.log(
+          "[keyboard-debug] card.focus.native_attempt",
+          buildFocusDiagnosticsPayload(event),
+        );
+      }
       void appendDebugEvent(
         "flashcards",
         "card.focus.native_attempt",
@@ -594,6 +603,57 @@ export default function Card({
     },
     [logKeyboardDebug],
   );
+  const handleMainInputFocus = useCallback(() => {
+    logKeyboardDebug("card.input.focus", {
+      target: "main",
+    });
+  }, [logKeyboardDebug]);
+  const handleMainInputBlur = useCallback(() => {
+    logKeyboardDebug("card.input.blur", {
+      target: "main",
+    });
+  }, [logKeyboardDebug]);
+  useEffect(() => {
+    if (
+      process.env.NODE_ENV === "test" ||
+      !showCorrectionInputs ||
+      !correction ||
+      !shouldLogFocusDiagnostics
+    ) {
+      return;
+    }
+
+    const hasCorrection1Ref = correctionInput1Ref.current != null;
+    const hasCorrection2Ref = correctionInput2Ref.current != null;
+
+    logKeyboardDebug("card.correction_inputs.ready", {
+      correctionCardId: correction.cardId,
+      hasCorrection1Ref,
+      hasCorrection2Ref,
+      shouldCorrectAwers,
+      shouldCorrectRewers,
+      answerOnly: effectiveAnswerOnly,
+    });
+
+    return () => {
+      logKeyboardDebug("card.correction_inputs.cleanup", {
+        correctionCardId: correction.cardId,
+        hasCorrection1Ref,
+        hasCorrection2Ref,
+        shouldCorrectAwers,
+        shouldCorrectRewers,
+        answerOnly: effectiveAnswerOnly,
+      });
+    };
+  }, [
+    correction,
+    effectiveAnswerOnly,
+    logKeyboardDebug,
+    shouldCorrectAwers,
+    shouldCorrectRewers,
+    shouldLogFocusDiagnostics,
+    showCorrectionInputs,
+  ]);
 
   const translationSource = showCorrectionInputs ? correctionWord : selectedItem;
   const len = translationSource?.translations?.length ?? 0;
@@ -1199,6 +1259,8 @@ export default function Card({
     setInput2LayoutWidth,
     focusTarget,
     requestFocus,
+    onMainInputFocus: handleMainInputFocus,
+    onMainInputBlur: handleMainInputBlur,
     onCorrectionInputFocus: handleCorrectionInputFocus,
     onCorrectionInputBlur: handleCorrectionInputBlur,
     onCorrection1Completed,

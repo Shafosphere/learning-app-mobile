@@ -23,10 +23,11 @@ export interface QuoteTriggerRequest {
 
 const GLOBAL_QUOTE_COOLDOWN_MS = 60 * 1000; // max 1 visible quote per minute
 const GLOBAL_COOLDOWN_EXEMPT_CATEGORIES: QuoteCategory[] = ["box_spam"];
+const ENABLE_QUOTE_CONSOLE_LOGS = false;
 
 const isDev = typeof __DEV__ !== "undefined" ? __DEV__ : true;
 const logQuote = (...args: unknown[]) => {
-  if (isDev) console.log("[Quote]", ...args);
+  if (isDev && ENABLE_QUOTE_CONSOLE_LOGS) console.log("[Quote]", ...args);
 };
 
 interface QuoteContextType {

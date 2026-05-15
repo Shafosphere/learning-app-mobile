@@ -82,6 +82,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  TextInput,
   View,
 } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
@@ -122,6 +123,7 @@ const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
 const BOTTOM_BUTTONS_KEYBOARD_DURATION_MS = 320;
 const ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS = 7;
+const ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS = false;
 const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
 const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
 const EMPTY_COURSE_COMPLETION_SUMMARY: CourseCompletionSummary = {
@@ -190,6 +192,7 @@ export default function Flashcards() {
   const router = useRouter();
   const styles = useStyles();
   const { t } = useTranslation();
+  const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
     activeCustomCourseId,
     setActiveCustomCourseId,
@@ -626,6 +629,38 @@ export default function Flashcards() {
     },
     [checkSpelling, reversed],
   );
+  const willEnterDemotionCorrection = useCallback(() => {
+    if (!selectedItem || skipCorrection) {
+      return false;
+    }
+    if (
+      selectedItem.type === "true_false" ||
+      selectedItem.type === "know_dont_know"
+    ) {
+      return false;
+    }
+
+    const answerToUse = answer.replace(/ +$/, "");
+    const ok = reversed
+      ? checkSpelling(answerToUse, selectedItem.text)
+      : selectedItem.translations.some((translation) =>
+          checkSpelling(answerToUse, translation),
+        );
+
+    return !ok;
+  }, [answer, checkSpelling, reversed, selectedItem, skipCorrection]);
+  const primeKeyboardBridgeForCorrection = useCallback(() => {
+    if (!willEnterDemotionCorrection()) {
+      return;
+    }
+
+    keyboardBridgeInputRef.current?.focus();
+    void appendDebugEvent("flashcards", "screen.focus.keyboard_bridge", {
+      selectedItemId,
+      reason: "actions_confirm_will_enter_correction",
+      keyboardVisible: Keyboard.isVisible?.() ?? null,
+    });
+  }, [selectedItemId, willEnterDemotionCorrection]);
 
   useEffect(() => {
     const didResultChange = lastObservedResultRef.current !== result;
@@ -735,7 +770,7 @@ export default function Flashcards() {
     }
     handledDisplayResultEventRef.current = resultEventKey;
 
-    if (__DEV__) {
+    if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
       const tap = lastTrueFalseTapRef.current;
       const isCurrentTap = tap?.cardId != null && tap.cardId === selectedItemId;
       console.log("[Flashcards][TF] displayResult", {
@@ -1698,7 +1733,7 @@ export default function Flashcards() {
         ts: tapTs,
         answer: value,
       };
-      if (__DEV__) {
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
         console.log("[Flashcards][TF] tap", {
           cardId: selectedItemId,
           answer: value ? "true" : "false",
@@ -1868,7 +1903,9 @@ export default function Flashcards() {
       correctionMode: correction?.mode ?? null,
     };
 
-    console.log("[keyboard-debug] screen.keyboard.visibility", payload);
+    if (ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+      console.log("[keyboard-debug] screen.keyboard.visibility", payload);
+    }
     void appendDebugEvent("flashcards", "keyboard.visibility", payload);
   }, [
     activeBox,
@@ -1907,10 +1944,12 @@ export default function Flashcards() {
           endCoordinates: event.endCoordinates,
         };
 
-        console.log(
-          `[keyboard-debug] screen.${keyboardEventName}`,
-          payload,
-        );
+        if (ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+          console.log(
+            `[keyboard-debug] screen.${keyboardEventName}`,
+            payload,
+          );
+        }
         void appendDebugEvent(
           "flashcards",
           `keyboard.raw.${keyboardEventName}`,
@@ -2075,6 +2114,9 @@ export default function Flashcards() {
       selectedTrueFalseAnswer={selectedTrueFalseAnswer}
       showCardActions={showCardActions}
       onCardActionsConfirm={handleCardActionsConfirm}
+      onCardActionsConfirmPressIn={
+        isExplanationVisible ? undefined : primeKeyboardBridgeForCorrection
+      }
       onDownload={handleManualAddFlashcards}
       downloadDisabled={cardActionsDownloadDisabled}
       downloadCoachmarkId="flashcards-add-button"
@@ -2287,6 +2329,17 @@ export default function Flashcards() {
 
   return (
     <View style={styles.container}>
+      <TextInput
+        ref={keyboardBridgeInputRef}
+        style={styles.keyboardBridgeInput}
+        value=""
+        caretHidden
+        autoCorrect={false}
+        spellCheck={false}
+        autoCapitalize="none"
+        importantForAutofill="no"
+        textContentType="none"
+      />
       <Confetti generateConfetti={shouldCelebrate} />
       <CoachmarkAnchor
         id="flashcards-bubble-anchor"

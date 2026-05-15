@@ -43,6 +43,8 @@ type CardInputProps = {
   mainDatePattern?: DatePattern | null;
   focusTarget: FocusTarget;
   requestFocus: (target: FocusTarget) => void;
+  onMainInputFocus?: () => void;
+  onMainInputBlur?: () => void;
   canToggleTranslations: boolean;
   next: () => void;
   typoDiff?: {
@@ -69,6 +71,8 @@ export function CardInput({
   mainDatePattern,
   focusTarget,
   requestFocus,
+  onMainInputFocus,
+  onMainInputBlur,
   canToggleTranslations,
   next,
   typoDiff,
@@ -159,7 +163,11 @@ export function CardInput({
             returnKeyType="done"
             blurOnSubmit={false}
             onSubmitEditing={handleConfirm}
-            onFocus={() => requestFocus("main")}
+            onFocus={() => {
+              onMainInputFocus?.();
+              requestFocus("main");
+            }}
+            onBlur={onMainInputBlur}
           />
         </View>
       );
@@ -217,6 +225,8 @@ export function CardInput({
     suggestionProps,
     handleConfirm,
     mainInputRef,
+    onMainInputBlur,
+    onMainInputFocus,
     requestFocus,
     setAnswer,
     isMainAnswerDate,

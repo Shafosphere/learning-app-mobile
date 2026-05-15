@@ -13,6 +13,7 @@ import { useStyles } from "./button-styles";
 
 interface MyButtonBaseProps {
   onPress?: () => void;
+  onPressIn?: () => void;
   color?: ThemeColorKey;
   disabled?: boolean;
   width?: DimensionValue;
@@ -31,6 +32,7 @@ export default function MyButton({
   text,
   children,
   onPress,
+  onPressIn,
   color = "my_green",
   disabled = false,
   width = 130,
@@ -84,6 +86,7 @@ export default function MyButton({
   return (
     <Pressable
       onPress={onPress}
+      onPressIn={onPressIn}
       disabled={disabled}
       accessibilityRole="button"
       accessibilityLabel={derivedLabel}
