@@ -1,7 +1,6 @@
 import MyButton from "@/src/components/button/button";
-import { NOIRLAB_LICENSE_URL } from "@/src/constants/support";
 import { useStyles } from "@/src/components/legal/LegalScreen-styles";
-import React, { useCallback } from "react";
+import React from "react";
 import { Linking, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -13,14 +12,6 @@ type LegalSection = {
   noteLabel?: string;
   note?: string;
   emphasis?: boolean;
-  sourceCard?: {
-    title: string;
-    body: string;
-    bullets?: string[];
-    noteLabel?: string;
-    note?: string;
-    button: string;
-  };
 };
 
 type LegalDocumentScreenProps = {
@@ -61,7 +52,6 @@ function useLegalSections({
 
   return sectionKeys.map((sectionKey) => {
     const sectionBaseKey = `${baseKey}.sections.${sectionKey}`;
-    const sourceCardButton = getOptionalText(t, `${sectionBaseKey}.sourceCard.button`);
 
     return {
       key: sectionKey,
@@ -76,24 +66,6 @@ function useLegalSections({
       noteLabel: getOptionalText(t, `${sectionBaseKey}.noteLabel`),
       note: getOptionalText(t, `${sectionBaseKey}.note`),
       emphasis: emphasized.has(sectionKey),
-      sourceCard: sourceCardButton
-        ? {
-            title: t(`${sectionBaseKey}.sourceCard.title`),
-            body: t(`${sectionBaseKey}.sourceCard.body`),
-            bullets: toBulletList(
-              t(`${sectionBaseKey}.sourceCard.bullets`, {
-                returnObjects: true,
-                defaultValue: [],
-              }),
-            ),
-            noteLabel: getOptionalText(
-              t,
-              `${sectionBaseKey}.sourceCard.noteLabel`,
-            ),
-            note: getOptionalText(t, `${sectionBaseKey}.sourceCard.note`),
-            button: sourceCardButton,
-          }
-        : undefined,
     };
   });
 }
@@ -105,19 +77,13 @@ export default function LegalDocumentScreen({
 }: LegalDocumentScreenProps) {
   const { t } = useTranslation();
   const styles = useStyles();
+  const onlineUrl = getOptionalText(t, `${heroKey}.hero.onlineUrl`);
+  const onlineButton = getOptionalText(t, `${heroKey}.hero.onlineButton`);
   const sections = useLegalSections({
     baseKey: heroKey,
     sectionKeys,
     emphasizedSectionKeys,
   });
-
-  const openNoirlabLicense = useCallback(async () => {
-    try {
-      await Linking.openURL(NOIRLAB_LICENSE_URL);
-    } catch (error) {
-      console.warn("[Legal] Failed to open NOIRLab license page", error);
-    }
-  }, []);
 
   return (
     <ScrollView
@@ -128,13 +94,29 @@ export default function LegalDocumentScreen({
       <View style={styles.heroCard}>
         <Text style={styles.heroTitle}>{t(`${heroKey}.hero.title`)}</Text>
         <Text style={styles.heroSubtitle}>{t(`${heroKey}.hero.subtitle`)}</Text>
-        <View style={styles.updatedCard}>
-          <Text style={styles.updatedLabel}>
-            {t(`${heroKey}.hero.updatedLabel`)}
-          </Text>
-          <Text style={styles.updatedValue}>
-            {t(`${heroKey}.hero.updatedValue`)}
-          </Text>
+        <View style={styles.heroMetaRow}>
+          <View style={styles.updatedCard}>
+            <Text style={styles.updatedLabel}>
+              {t(`${heroKey}.hero.updatedLabel`)}
+            </Text>
+            <Text style={styles.updatedValue}>
+              {t(`${heroKey}.hero.updatedValue`)}
+            </Text>
+          </View>
+          {onlineUrl ? (
+            <MyButton
+              text={onlineButton ?? onlineUrl}
+              color="my_yellow"
+              width={116}
+              textLines={1}
+              accessibilityLabel={onlineButton ?? onlineUrl}
+              style={styles.onlineButton}
+              onPress={() => {
+                void Linking.openURL(onlineUrl);
+              }}
+              textStyle={styles.onlineButtonText}
+            />
+          ) : null}
         </View>
       </View>
 
@@ -169,42 +151,6 @@ export default function LegalDocumentScreen({
             </View>
           ) : null}
 
-          {section.sourceCard ? (
-            <View style={styles.sourceCard}>
-              <Text style={styles.sectionTitle}>{section.sourceCard.title}</Text>
-              <Text style={styles.sectionBody}>{section.sourceCard.body}</Text>
-
-              {section.sourceCard.bullets?.length ? (
-                <View style={styles.bulletList}>
-                  {section.sourceCard.bullets.map((bullet) => (
-                    <View key={bullet} style={styles.bulletRow}>
-                      <View style={styles.bulletDot} />
-                      <Text style={styles.bulletText}>{bullet}</Text>
-                    </View>
-                  ))}
-                </View>
-              ) : null}
-
-              {section.sourceCard.note ? (
-                <View style={styles.inlineNote}>
-                  {section.sourceCard.noteLabel ? (
-                    <Text style={styles.inlineNoteLabel}>
-                      {section.sourceCard.noteLabel}
-                    </Text>
-                  ) : null}
-                  <Text style={styles.sectionBody}>{section.sourceCard.note}</Text>
-                </View>
-              ) : null}
-
-              <View style={styles.buttonRow}>
-                <MyButton
-                  text={section.sourceCard.button}
-                  onPress={openNoirlabLicense}
-                  width={140}
-                />
-              </View>
-            </View>
-          ) : null}
         </View>
       ))}
     </ScrollView>

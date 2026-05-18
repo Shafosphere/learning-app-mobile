@@ -623,133 +623,65 @@
     "privacyPolicy": {
       "hero": {
         "title": "Polityka prywatności",
-        "subtitle": "Ten dokument opisuje, jakie dane aplikacja Memicard przetwarza, w jakich celach, komu mogą być ujawniane, jak długo są przechowywane oraz jakie prawa przysługują użytkownikowi.",
+        "subtitle": "Ten ekran zawiera krótkie streszczenie informacji o prywatności. Pełna, oficjalna i aktualna wersja polityki dla strony WWW i aplikacji jest dostępna online.",
+        "onlineButton": "Online",
+        "onlineUrl": "https://memicard.com/privacy.html",
         "updatedLabel": "Ostatnia aktualizacja",
-        "updatedValue": "9 marca 2026"
+        "updatedValue": "18 maja 2026"
       },
       "sections": {
         "overview": {
-          "title": "Zakres polityki",
-          "body": "Memicard co do zasady przechowuje większość danych lokalnie na urządzeniu użytkownika. Polityka obejmuje dane zapisane przez aplikację, dane przekazane dobrowolnie przez użytkownika oraz informacje związane z korzystaniem z opcjonalnych funkcji urządzenia.",
+          "title": "Najważniejsze informacje",
+          "body": "Memicard przechowuje dane nauki przede wszystkim lokalnie na urządzeniu użytkownika. Dane mogą opuścić urządzenie tylko wtedy, gdy użytkownik skorzysta z funkcji, która tego wymaga, np. eksportu, udostępnienia, kontaktu e-mail albo opcjonalnej kopii zapasowej Google Drive. Pełna, oficjalna i aktualna wersja polityki prywatności jest dostępna online.",
           "bullets": [
+            "aktualna wersja polityki jest dostępna pod adresem https://memicard.com/privacy.html",
             "aplikacja nie wymaga konta użytkownika do podstawowego działania",
-            "aplikacja nie korzysta z własnego backendu do bieżącej obsługi danych użytkownika",
-            "treść polityki odnosi się do aktualnego stanu aplikacji na dzień 9 marca 2026"
+            "aplikacja nie korzysta z własnego backendu do bieżącej obsługi danych użytkownika"
           ]
         },
         "controller": {
           "title": "Administrator danych i kontakt",
-          "body": "Administratorem danych osobowych przetwarzanych w związku z korzystaniem z aplikacji Memicard jest [Imię i nazwisko administratora]. Kontakt w sprawach prywatności: contact@memicard.com.",
+          "body": "Administratorem danych osobowych przetwarzanych w związku z korzystaniem ze strony internetowej i aplikacji Memicard jest {{legalControllerName}}, twórca aplikacji Memicard. Kontakt w sprawach prywatności: contact@memicard.com.",
           "bullets": [
-            "opcjonalny adres rejestrowy lub korespondencyjny: [Adres rejestrowy]",
-            "adres supportu technicznego może różnić się od adresu do spraw prywatności",
-            "przed publikacją polityki placeholdery należy zastąpić prawidłowymi danymi administratora"
-          ]
-        },
-        "purposes": {
-          "title": "Cele i podstawy przetwarzania",
-          "body": "Dane są przetwarzane wyłącznie w zakresie potrzebnym do działania aplikacji lub realizacji żądania użytkownika.",
-          "bullets": [
-            "dane lokalne są przetwarzane w celu działania aplikacji, zapisu postępów, statystyk, ustawień i własnych treści użytkownika, na podstawie wykonania usługi lub działań podejmowanych na żądanie użytkownika",
-            "powiadomienia lokalne o nauce są aktywowane wyłącznie po zgodzie użytkownika",
-            "import i eksport danych, wybór plików oraz wybór obrazów odbywają się wyłącznie na żądanie użytkownika",
-            "dane przesłane e-mailem są przetwarzane w celu obsługi zgłoszenia, odpowiedzi na wiadomość, diagnozy problemu oraz zapewnienia bezpieczeństwa, na podstawie uzasadnionego interesu lub działań podjętych na żądanie użytkownika"
+            "adres contact@memicard.com służy do pytań o prywatność oraz kontaktu z supportem",
+            "jeżeli dane pozostają wyłącznie lokalnie na urządzeniu, administrator może nie mieć do nich technicznego dostępu, dopóki użytkownik sam ich nie prześle"
           ]
         },
         "localData": {
-          "title": "Kategorie danych przetwarzanych lokalnie",
-          "body": "Aplikacja zapisuje lokalnie dane aplikacyjne oraz treści użytkownika potrzebne do nauki i działania funkcji.",
+          "title": "Dane lokalne",
+          "body": "Aplikacja zapisuje lokalnie dane potrzebne do nauki i działania wybranych funkcji.",
           "bullets": [
             "postępy w nauce, statystyki, powtórki i dane pomocnicze używane przez mechanikę nauki",
             "przypięte kursy, własne kursy, własne fiszki oraz ustawienia związane z ich edycją",
             "ustawienia aplikacji, preferencje interfejsu i stany pomocnicze zapisywane przez aplikację",
             "jeżeli użytkownik sam wpisze dane osobowe do własnych fiszek, kursów lub opisów, dane te również pozostają zapisane lokalnie na urządzeniu"
-          ],
-          "noteLabel": "Technicznie",
-          "note": "Dane są przechowywane lokalnie głównie z użyciem SQLite i AsyncStorage."
-        },
-        "permissions": {
-          "title": "Uprawnienia i funkcje urządzenia",
-          "body": "Memicard może korzystać z funkcji urządzenia wyłącznie w zakresie potrzebnym do działania wybranych przez użytkownika funkcji aplikacji.",
-          "bullets": [
-            "dostęp do plików jest wykorzystywany w celu importu lub eksportu danych",
-            "dostęp do zdjęć lub wybranych plików graficznych może być używany przy dodawaniu własnych obrazów do fiszek lub kursów",
-            "lokalne powiadomienia przypominające o nauce są używane tylko po wyrażeniu zgody przez użytkownika",
-            "aplikacja może otworzyć domyślnego klienta pocztowego w celu przygotowania wiadomości do supportu",
-            "dobrowolne połączenie konta Google jest używane wyłącznie w celu utworzenia lub przywrócenia kopii zapasowej w Google Drive"
-          ],
-          "noteLabel": "Zakres użycia",
-          "note": "Aplikacja nie korzysta z tych funkcji automatycznie w celach niezwiązanych z działaniem wybranym przez użytkownika."
-        },
-        "recipients": {
-          "title": "Odbiorcy danych i podmioty trzecie",
-          "body": "Memicard działa głównie lokalnie, co oznacza, że dane użytkownika są przechowywane przede wszystkim na urządzeniu.",
-          "bullets": [
-            "dane mogą zostać przekazane poza urządzenie tylko wtedy, gdy użytkownik sam skorzysta z określonej funkcji aplikacji, na przykład eksportu, udostępniania, kontaktu e-mail lub opcjonalnej kopii zapasowej w Google Drive",
-            "dane mogą zostać zapisane lub przekazane do usługi, aplikacji albo lokalizacji wybranej przez użytkownika",
-            "w przypadku kontaktu e-mailowego dane mogą być przetwarzane przez dostawcę poczty elektronicznej i systemowe usługi pocztowe wybrane przez użytkownika",
-            "w przypadku eksportu lub udostępnienia plików dane mogą zostać zapisane poza aplikacją, zgodnie z usługą, lokalizacją lub aplikacją wybraną przez użytkownika",
-            "jeżeli użytkownik połączy konto Google i włączy funkcję kopii zapasowej, kopia danych może zostać zapisana w usłudze Google Drive powiązanej z jego kontem Google",
-            "dane zapisane w Google Drive są przetwarzane zgodnie z zasadami i polityką prywatności Google",
-            "zgodnie z aktualnym stanem aplikacji nie są używane zewnętrzne SDK reklamowe ani systemy śledzenia aktywności między aplikacjami"
           ]
         },
-        "retention": {
-          "title": "Okres przechowywania danych",
-          "body": "Okres przechowywania zależy od rodzaju danych i sposobu korzystania z aplikacji.",
+        "exportSharingAndEmail": {
+          "title": "Eksport, udostępnianie i e-mail",
+          "body": "Dane mogą opuścić urządzenie, gdy użytkownik sam wybierze funkcję, która przekazuje je poza aplikację.",
           "bullets": [
-            "dane lokalne są przechowywane do czasu ich usunięcia przez użytkownika, resetu aplikacji, usunięcia wybranych treści albo usunięcia aplikacji",
-            "dane przesłane e-mailem są przechowywane przez czas niezbędny do obsługi zgłoszenia, a następnie usuwane lub anonimizowane, co do zasady nie dłużej niż 12 miesięcy, chyba że przepisy prawa wymagają dłuższego przechowywania",
-            "pliki wyeksportowane poza aplikację pozostają poza kontrolą Memicard i są przechowywane do czasu ich usunięcia przez użytkownika lub dostawcę wybranej usługi"
+            "eksport i udostępnianie mogą zapisać albo przekazać dane do miejsca wybranego przez użytkownika, np. menedżera plików, aplikacji pocztowej, Dysku Google albo innej aplikacji z systemowego okna udostępniania",
+            "aplikacja może otworzyć klienta pocztowego, aby przygotować wiadomość do supportu; wysłanie wiadomości zależy od użytkownika",
+            "pliki i wiadomości przekazane poza aplikację są dalej obsługiwane przez wybraną usługę, aplikację albo dostawcę poczty"
           ]
         },
-        "noTracking": {
-          "title": "Czego aplikacja nie robi",
-          "body": "Zgodnie z aktualnym stanem aplikacji na dzień 9 marca 2026 Memicard:",
+        "googleDrive": {
+          "title": "Kopia zapasowa Google Drive",
+          "body": "W aktualnym stanie funkcja kopii zapasowej Google Drive jest widoczna w aplikacji, ale połączenie konta Google jest czasowo nieaktywne dla użytkownika. Dopóki użytkownik nie może jej włączyć, aplikacja nie zapisuje kopii danych na Dysku Google.",
           "bullets": [
-            "nie sprzedaje danych użytkownika",
-            "nie używa reklam behawioralnych",
-            "nie śledzi aktywności użytkownika między aplikacjami",
-            "nie przesyła danych użytkownika na własny serwer w celu bieżącego działania aplikacji"
-          ]
-        },
-        "deletion": {
-          "title": "Usuwanie danych",
-          "body": "Użytkownik może usunąć dane zapisane lokalnie, usuwając je z poziomu aplikacji lub odinstalowując aplikację z urządzenia.",
-          "bullets": [
-            "część danych można usunąć w samej aplikacji, na przykład usuwając własne kursy, własne fiszki albo resetując wybrane ustawienia",
-            "usunięcie aplikacji co do zasady powoduje usunięcie jej lokalnych danych z urządzenia, z zastrzeżeniem mechanizmów kopii zapasowych lub przywracania danych oferowanych przez system operacyjny albo usługi użytkownika",
-            "kopie danych wyeksportowane do plików lub usług zewnętrznych pozostają poza aplikacją i użytkownik zarządza nimi samodzielnie",
-            "usunięcie aplikacji nie powoduje automatycznego usunięcia kopii danych zapisanej wcześniej w usłudze zewnętrznej, na przykład w Google Drive"
-          ],
-          "noteLabel": "Usuwanie kopii zewnętrznych",
-          "note": "Kopia zapisana w usłudze zewnętrznej powinna zostać usunięta osobno z konta użytkownika w danej usłudze."
-        },
-        "transfers": {
-          "title": "Przekazywanie danych poza UE lub EOG",
-          "body": "Memicard co do zasady nie przekazuje danych użytkownika na własne serwery poza Europejski Obszar Gospodarczy.",
-          "bullets": [
-            "w przypadku kontaktu e-mailowego lub korzystania z usług zewnętrznych wybranych przez użytkownika dane mogą być przetwarzane zgodnie z zasadami tych dostawców",
-            "jeżeli użytkownik korzysta z opcjonalnej funkcji kopii zapasowej w Google Drive, dane mogą być przetwarzane przez Google zgodnie z zasadami obowiązującymi u tego dostawcy, również poza UE lub EOG, zależnie od używanej infrastruktury technicznej",
-            "zakres i miejsce przetwarzania przez zewnętrznego dostawcę zależą od usługi wybranej przez użytkownika, a Memicard nie kontroluje polityk prywatności takich dostawców"
-          ]
-        },
-        "security": {
-          "title": "Bezpieczeństwo danych",
-          "body": "Aplikacja stosuje podejście oparte na minimalizacji danych i korzysta z uprawnień systemowych tylko wtedy, gdy są potrzebne do wybranej funkcji.",
-          "bullets": [
-            "dane lokalne pozostają na urządzeniu użytkownika, chyba że użytkownik sam zdecyduje o ich eksporcie lub wysłaniu",
-            "wiadomość e-mail do supportu jest przygotowywana do wglądu użytkownika przed wysłaniem",
-            "aplikacja nie pobiera więcej uprawnień niż to konieczne do działania funkcji obecnych w aktualnej wersji"
+            "po aktywacji funkcja będzie działać tylko po dobrowolnej autoryzacji konta Google przez użytkownika",
+            "kopia może być zapisywana w prywatnym folderze aplikacji na Google Drive",
+            "kopia może zawierać fiszki, kursy, ustawienia, postępy nauki i dane potrzebne do przywrócenia stanu aplikacji"
           ]
         },
         "rights": {
           "title": "Prawa użytkownika",
-          "body": "Użytkownikowi przysługują prawa wynikające z przepisów o ochronie danych osobowych, w zakresie, w jakim mają zastosowanie do sposobu korzystania z aplikacji.",
+          "body": "Użytkownikowi przysługują prawa wynikające z przepisów o ochronie danych osobowych, w zakresie, w jakim mają zastosowanie do sposobu korzystania z aplikacji. Szczegóły są opisane w pełnej wersji polityki online.",
           "bullets": [
-            "prawo dostępu do danych, ich sprostowania, usunięcia oraz otrzymania kopii danych",
+            "prawo dostępu do danych, ich sprostowania, usunięcia, otrzymania kopii danych oraz przenoszenia danych",
             "prawo do ograniczenia przetwarzania oraz wniesienia sprzeciwu wobec przetwarzania opartego na uzasadnionym interesie",
-            "prawo do cofnięcia zgody w dowolnym momencie, jeśli przetwarzanie odbywa się na podstawie zgody; cofnięcie zgody nie wpływa na zgodność z prawem wcześniejszego przetwarzania",
+            "prawo do cofnięcia zgody, jeśli przetwarzanie odbywa się na podstawie zgody",
             "prawo wniesienia skargi do Prezesa Urzędu Ochrony Danych Osobowych (PUODO)"
           ],
           "noteLabel": "Jak skorzystać z praw",
@@ -772,15 +704,7 @@
             "w przypadku materiałów wymagających atrybucji aplikacja podaje źródło oraz podstawowe informacje o warunkach wykorzystania",
             "niektóre materiały mogą podlegać dodatkowym ograniczeniom, na przykład w zakresie użycia logo, znaków towarowych lub sposobu prezentacji",
             "szczegółowe warunki dla wybranych źródeł mogą być dostępne pod linkami zewnętrznymi"
-          ],
-          "sourceCard": {
-            "title": "NOIRLab",
-            "body": "Niektóre obrazy wykorzystane w aplikacji pochodzą z NOIRLab. O ile przy danym materiale nie wskazano inaczej, są one używane zgodnie z licencją Creative Commons Attribution 4.0 International (CC BY 4.0). Źródło: NOIRLab. Obrazy wykorzystane w aplikacji zostały zmodyfikowane na potrzeby interfejsu, w szczególności poprzez przycięcie, zmianę rozmiaru, kompresję lub inne drobne dostosowania wizualne. Wykorzystanie tych materiałów nie oznacza poparcia ani rekomendacji aplikacji przez NOIRLab.",
-            "bullets": [],
-            "noteLabel": "",
-            "note": "",
-            "button": "Źródło"
-          }
+          ]
         }
       }
     }

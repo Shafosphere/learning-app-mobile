@@ -4,15 +4,9 @@ import React from "react";
 const PRIVACY_SECTION_KEYS = [
   "overview",
   "controller",
-  "purposes",
   "localData",
-  "permissions",
-  "recipients",
-  "retention",
-  "noTracking",
-  "deletion",
-  "transfers",
-  "security",
+  "exportSharingAndEmail",
+  "googleDrive",
   "rights",
 ] as const;
 

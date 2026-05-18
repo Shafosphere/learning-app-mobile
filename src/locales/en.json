@@ -623,133 +623,65 @@
     "privacyPolicy": {
       "hero": {
         "title": "Privacy policy",
-        "subtitle": "This document describes what data the Memicard app processes, for what purposes, to whom it may be disclosed, how long it is stored, and what rights the user has.",
+        "subtitle": "This screen contains a short summary of privacy information. The full, official, and current version of the policy for the website and app is available online.",
+        "onlineButton": "Online",
+        "onlineUrl": "https://memicard.com/privacy.html",
         "updatedLabel": "Last updated",
-        "updatedValue": "March 9, 2026"
+        "updatedValue": "May 18, 2026"
       },
       "sections": {
         "overview": {
-          "title": "Policy scope",
-          "body": "As a general rule, Memicard stores most data locally on the user's device. This policy covers data saved by the app, data voluntarily provided by the user, and information related to the use of optional device features.",
+          "title": "Key points",
+          "body": "Memicard stores learning data primarily locally on the user's device. Data may leave the device only when the user uses a feature that requires it, such as export, sharing, e-mail contact, or optional Google Drive backup. The full, official, and current version of the privacy policy is available online.",
           "bullets": [
+            "the current version of the policy is available at https://memicard.com/privacy.html",
             "the app does not require a user account for basic operation",
-            "the app does not use its own backend for ongoing user data handling",
-            "the policy reflects the current state of the app as of March 9, 2026"
+            "the app does not use its own backend for ongoing user data handling"
           ]
         },
         "controller": {
           "title": "Data controller and contact",
-          "body": "The controller of personal data processed in connection with the use of the Memicard app is [Controller full name]. Privacy contact: contact@memicard.com.",
+          "body": "The controller of personal data processed in connection with the use of the Memicard website and mobile app is {{legalControllerName}}, creator of the Memicard app. Privacy contact: contact@memicard.com.",
           "bullets": [
-            "optional registered or correspondence address: [Registered address]",
-            "the technical support address may differ from the privacy contact address",
-            "before publishing the policy, placeholders should be replaced with the controller's correct details"
-          ]
-        },
-        "purposes": {
-          "title": "Purposes and legal bases of processing",
-          "body": "Data is processed only to the extent necessary for the app to function or to fulfill the user's request.",
-          "bullets": [
-            "local data is processed to operate the app, save progress, statistics, settings, and the user's own content, on the basis of providing the service or actions taken at the user's request",
-            "local learning notifications are activated only after the user's consent",
-            "data import and export, file selection, and image selection take place only at the user's request",
-            "data sent by e-mail is processed to handle the report, reply to the message, diagnose the issue, and ensure security, on the basis of legitimate interest or actions taken at the user's request"
+            "contact@memicard.com is used for privacy questions and support contact",
+            "if data remains only locally on the device, the controller may not have technical access to it unless the user sends it"
           ]
         },
         "localData": {
-          "title": "Categories of data processed locally",
-          "body": "The app stores app data and user content locally when needed for learning and app features.",
+          "title": "Local data",
+          "body": "The app stores data locally when needed for learning and selected app features.",
           "bullets": [
             "learning progress, statistics, reviews, and helper data used by the learning mechanics",
             "pinned courses, custom courses, custom flashcards, and settings related to editing them",
             "app settings, interface preferences, and helper states saved by the app",
             "if the user enters personal data into their own flashcards, courses, or descriptions, that data also remains stored locally on the device"
-          ],
-          "noteLabel": "Technical note",
-          "note": "Data is stored locally mainly using SQLite and AsyncStorage."
-        },
-        "permissions": {
-          "title": "Permissions and device features",
-          "body": "Memicard may use device features only to the extent needed for features selected by the user.",
-          "bullets": [
-            "file access is used to import or export data",
-            "access to photos or selected image files may be used when adding custom images to flashcards or courses",
-            "local learning reminder notifications are used only after the user grants permission",
-            "the app may open the default mail client to prepare a support message",
-            "voluntary Google account connection is used only to create or restore a backup in Google Drive"
-          ],
-          "noteLabel": "Scope of use",
-          "note": "The app does not use these features automatically for purposes unrelated to the action selected by the user."
-        },
-        "recipients": {
-          "title": "Data recipients and third parties",
-          "body": "Memicard works mainly locally, which means user data is stored primarily on the device.",
-          "bullets": [
-            "data may leave the device only when the user actively uses a specific app feature, for example export, sharing, e-mail contact, or an optional Google Drive backup",
-            "data may be saved or transferred to a service, app, or location selected by the user",
-            "in the case of e-mail contact, data may be processed by the user's e-mail provider and system mail services selected by the user",
-            "in the case of exporting or sharing files, data may be saved outside the app according to the service, location, or app selected by the user",
-            "if the user connects a Google account and enables the backup feature, a copy of the data may be saved in the Google Drive service linked to their Google account",
-            "data saved in Google Drive is processed according to Google's terms and privacy policy",
-            "according to the current state of the app, no external advertising SDKs or cross-app activity tracking systems are used"
           ]
         },
-        "retention": {
-          "title": "Data retention period",
-          "body": "The retention period depends on the type of data and how the app is used.",
+        "exportSharingAndEmail": {
+          "title": "Export, sharing, and e-mail",
+          "body": "Data may leave the device when the user chooses a feature that sends it outside the app.",
           "bullets": [
-            "local data is stored until it is deleted by the user, the app is reset, selected content is removed, or the app is uninstalled",
-            "data sent by e-mail is stored for the time necessary to handle the report, and then deleted or anonymized, generally for no longer than 12 months, unless the law requires longer retention",
-            "files exported outside the app remain outside Memicard's control and are stored until deleted by the user or the provider of the selected service"
+            "export and sharing may save or transfer data to a place selected by the user, such as a file manager, mail app, Google Drive, or another app from the system sharing sheet",
+            "the app may open a mail client to prepare a support message; sending the message is the user's decision",
+            "files and messages sent outside the app are then handled by the selected service, app, or e-mail provider"
           ]
         },
-        "noTracking": {
-          "title": "What the app does not do",
-          "body": "According to the current state of the app as of March 9, 2026, Memicard:",
+        "googleDrive": {
+          "title": "Google Drive backup",
+          "body": "In the current state, the Google Drive backup feature is visible in the app, but connecting a Google account is temporarily inactive for the user. Until the user can enable it, the app does not save data backups to Google Drive.",
           "bullets": [
-            "does not sell user data",
-            "does not use behavioral advertising",
-            "does not track user activity across apps",
-            "does not send user data to its own server for the app's ongoing operation"
-          ]
-        },
-        "deletion": {
-          "title": "Data deletion",
-          "body": "The user can delete locally stored data by removing it from within the app or by uninstalling the app from the device.",
-          "bullets": [
-            "some data can be deleted inside the app, for example by deleting custom courses, custom flashcards, or resetting selected settings",
-            "uninstalling the app generally deletes its local data from the device, subject to backup or restore mechanisms provided by the operating system or the user's services",
-            "copies of data exported to files or external services remain outside the app and are managed by the user independently",
-            "uninstalling the app does not automatically delete a copy of data previously saved in an external service, for example Google Drive"
-          ],
-          "noteLabel": "Deleting external copies",
-          "note": "A copy saved in an external service should be deleted separately from the user's account in that service."
-        },
-        "transfers": {
-          "title": "Transfers outside the EU or EEA",
-          "body": "As a general rule, Memicard does not transfer user data to its own servers outside the European Economic Area.",
-          "bullets": [
-            "in the case of e-mail contact or use of external services selected by the user, data may be processed according to the rules of those providers",
-            "if the user uses the optional Google Drive backup feature, data may be processed by Google according to the rules applicable to that provider, including outside the EU or EEA, depending on the technical infrastructure used",
-            "the scope and location of processing by an external provider depend on the service selected by the user, and Memicard does not control the privacy policies of such providers"
-          ]
-        },
-        "security": {
-          "title": "Data security",
-          "body": "The app follows a data minimization approach and uses system permissions only when they are needed for the selected feature.",
-          "bullets": [
-            "local data remains on the user's device unless the user decides to export or send it",
-            "the support e-mail message is prepared for the user's review before sending",
-            "the app does not request more permissions than necessary for the features present in the current version"
+            "after activation, the feature will work only after voluntary Google account authorization by the user",
+            "the backup may be stored in the app's private folder on Google Drive",
+            "the backup may contain flashcards, courses, settings, learning progress, and data needed to restore the app state"
           ]
         },
         "rights": {
           "title": "User rights",
-          "body": "The user has rights under personal data protection laws, to the extent that they apply to the way the app is used.",
+          "body": "The user has rights under personal data protection laws, to the extent that they apply to the way the app is used. Details are described in the full online policy.",
           "bullets": [
-            "the right to access data, rectify it, delete it, and receive a copy of the data",
+            "the right to access data, rectify it, delete it, receive a copy of the data, and data portability",
             "the right to restrict processing and object to processing based on legitimate interest",
-            "the right to withdraw consent at any time if processing is based on consent; withdrawing consent does not affect the lawfulness of earlier processing",
+            "the right to withdraw consent if processing is based on consent",
             "the right to lodge a complaint with the President of the Personal Data Protection Office in Poland (PUODO)"
           ],
           "noteLabel": "How to exercise your rights",
@@ -772,15 +704,7 @@
             "for materials requiring attribution, the app provides the source and basic information about the terms of use",
             "some materials may be subject to additional restrictions, for example regarding the use of logos, trademarks, or presentation method",
             "detailed terms for selected sources may be available through external links"
-          ],
-          "sourceCard": {
-            "title": "NOIRLab",
-            "body": "Some images used in the app come from NOIRLab. Unless otherwise stated for a given material, they are used under the Creative Commons Attribution 4.0 International license (CC BY 4.0). Source: NOIRLab. Images used in the app have been modified for the interface, in particular through cropping, resizing, compression, or other minor visual adjustments. The use of these materials does not imply endorsement or recommendation of the app by NOIRLab.",
-            "bullets": [],
-            "noteLabel": "",
-            "note": "",
-            "button": "Source"
-          }
+          ]
         }
       }
     }

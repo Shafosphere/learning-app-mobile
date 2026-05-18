@@ -11,6 +11,9 @@ export type UiLanguage = SupportedLanguage;
 export type NativeLanguage = SupportedLanguage;
 
 const UI_LANGUAGE_STORAGE_KEY = "uiLanguage";
+const LEGAL_CONTROLLER_NAME =
+  process.env.EXPO_PUBLIC_LEGAL_CONTROLLER_NAME?.trim() ||
+  "[controller full name]";
 
 const resources = {
   pl: { translation: pl },
@@ -93,6 +96,9 @@ function ensureI18nInitialized(): Promise<I18nInstance> {
           fallbackLng: "pl",
           interpolation: {
             escapeValue: false,
+            defaultVariables: {
+              legalControllerName: LEGAL_CONTROLLER_NAME,
+            },
           },
           react: {
             useSuspense: false,
