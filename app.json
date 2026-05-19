@@ -2,7 +2,7 @@
   "expo": {
     "name": "Memicard",
     "slug": "memicard",
-    "version": "0.0.34",
+    "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",
@@ -17,8 +17,18 @@
         "foregroundImage": "./assets/app/icons/generated/android/res/mipmap-xxxhdpi/ic_launcher_foreground.png",
         "backgroundImage": "./assets/app/icons/generated/android/res/mipmap-xxxhdpi/ic_launcher_background.png"
       },
+      "blockedPermissions": [
+        "android.permission.CAMERA",
+        "android.permission.FOREGROUND_SERVICE",
+        "android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK",
+        "android.permission.MODIFY_AUDIO_SETTINGS",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.RECORD_AUDIO",
+        "android.permission.SYSTEM_ALERT_WINDOW",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ],
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.memicard"
+      "package": "com.memicard.app"
     },
     "splash": {
       "image": "./assets/app/splash/splash-icon-v2.png",
