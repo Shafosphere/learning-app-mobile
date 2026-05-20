@@ -13,6 +13,18 @@ type ShareResult = {
   shareError?: unknown;
 };
 
+export type UserDataExportDelivery =
+  | "saved_to_selected_folder"
+  | "saved_to_app_storage"
+  | "shared";
+
+type UserDataExportFileResult = {
+  fileUri: string;
+  fileName: string;
+  bytesWritten: number;
+  payload: UserDataExport;
+};
+
 function buildExportFileName(): string {
   const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
   return `learning-app-export-${timestamp}.json`;
@@ -80,11 +92,7 @@ async function shareJsonFile(
   }
 }
 
-async function writeExportToLocalFile(): Promise<{
-  fileUri: string;
-  bytesWritten: number;
-  payload: UserDataExport;
-}> {
+async function writeExportToLocalFile(): Promise<UserDataExportFileResult> {
   const payload = await buildUserDataExport();
   const json = JSON.stringify(payload, null, 2);
   const fileName = buildExportFileName();
@@ -101,16 +109,13 @@ async function writeExportToLocalFile(): Promise<{
 
   return {
     fileUri,
+    fileName,
     bytesWritten: info.exists ? info.size : json.length,
     payload,
   };
 }
 
-export async function exportUserDataToFile(): Promise<{
-  fileUri: string;
-  bytesWritten: number;
-  payload: UserDataExport;
-}> {
+export async function exportUserDataToFile(): Promise<UserDataExportFileResult> {
   const payload = await buildUserDataExport();
   const json = JSON.stringify(payload, null, 2);
   const fileName = buildExportFileName();
@@ -135,6 +140,7 @@ export async function exportUserDataToFile(): Promise<{
 
     return {
       fileUri: uri,
+      fileName,
       bytesWritten: json.length,
       payload,
     };
@@ -145,8 +151,10 @@ export async function exportUserDataToFile(): Promise<{
 
 export async function exportAndShareUserData(): Promise<{
   fileUri: string;
+  fileName: string;
   bytesWritten: number;
   payload: UserDataExport;
+  delivery: UserDataExportDelivery;
   sharingSupported: boolean;
   shared: boolean;
   shareError?: unknown;
@@ -157,8 +165,9 @@ export async function exportAndShareUserData(): Promise<{
     if (Platform.OS === "android") {
       return {
         ...result,
-        sharingSupported: true,
-        shared: true,
+        delivery: "saved_to_selected_folder",
+        sharingSupported: false,
+        shared: false,
       };
     }
 
@@ -166,6 +175,7 @@ export async function exportAndShareUserData(): Promise<{
 
     return {
       ...result,
+      delivery: shareResult.shared ? "shared" : "saved_to_app_storage",
       sharingSupported: shareResult.sharingSupported,
       shared: shareResult.shared,
       shareError: shareResult.shareError,

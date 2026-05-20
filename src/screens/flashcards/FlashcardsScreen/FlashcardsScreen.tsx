@@ -4,9 +4,9 @@ import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
-import MyButton from "@/src/components/button/button";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
 import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/FlashcardsPlaceholderCard";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import {
   PreviewOptionSelector,
@@ -78,10 +78,8 @@ import {
   ActivityIndicator,
   Animated,
   Keyboard,
-  Modal,
   Pressable,
   ScrollView,
-  Text,
   TextInput,
   View,
 } from "react-native";
@@ -2524,52 +2522,24 @@ export default function Flashcards() {
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
       />
-      <Modal
-        animationType="fade"
-        transparent
+      <NudgeModal
         visible={isActionsPositionNudgeVisible}
-        onRequestClose={handleActionButtonsNudgeClose}
+        title={t("onboarding.flashcards.actionsPositionNudge.title")}
+        confirmLabel={t("onboarding.flashcards.actionsPositionNudge.confirm")}
+        onConfirm={() => void handleActionButtonsNudgeConfirm()}
+        onClose={handleActionButtonsNudgeClose}
       >
-        <View style={styles.actionsPositionNudgeBackdrop}>
-          <View style={styles.actionsPositionNudgeCard}>
-            <Pressable
-              onPress={handleActionButtonsNudgeClose}
-              style={styles.actionsPositionNudgeCloseButton}
-              hitSlop={10}
-            >
-              <Ionicons
-                name="close"
-                size={18}
-                color={colors.lightbg}
-              />
-            </Pressable>
-
-            <Text style={styles.actionsPositionNudgeTitle}>
-              {t("onboarding.flashcards.actionsPositionNudge.title")}
-            </Text>
-
-            <PreviewOptionSelector
-              options={actionsPositionNudgeOptions}
-              value={actionsPositionNudgePreview}
-              onChange={handleActionButtonsNudgePreviewSelect}
-              description={t("onboarding.flashcards.actionsPositionNudge.subtitle")}
-              variant="modal"
-              imageFit="cover"
-              previewAspectRatio={1.02}
-              testIDPrefix="flashcards-actions-nudge"
-            />
-
-            <View style={styles.actionsPositionNudgeActions}>
-              <MyButton
-                text={t("onboarding.flashcards.actionsPositionNudge.confirm")}
-                color="my_green"
-                onPress={() => void handleActionButtonsNudgeConfirm()}
-                width={164}
-              />
-            </View>
-          </View>
-        </View>
-      </Modal>
+        <PreviewOptionSelector
+          options={actionsPositionNudgeOptions}
+          value={actionsPositionNudgePreview}
+          onChange={handleActionButtonsNudgePreviewSelect}
+          description={t("onboarding.flashcards.actionsPositionNudge.subtitle")}
+          variant="modal"
+          imageFit="cover"
+          previewAspectRatio={1.02}
+          testIDPrefix="flashcards-actions-nudge"
+        />
+      </NudgeModal>
     </View>
   );
 }

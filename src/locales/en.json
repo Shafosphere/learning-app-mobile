@@ -101,6 +101,13 @@
       "resetting": "Resetting…"
     }
   },
+  "localExportReminder": {
+    "title": "Time for a data copy",
+    "description": "Save a local copy of your data so you do not lose courses, flashcards, and progress.",
+    "confirm": "Export",
+    "confirmLoading": "Exporting…",
+    "later": "Later"
+  },
   "settings": {
     "tabs": {
       "ui": "Interface",
@@ -243,10 +250,9 @@
         "resetIntro": "Could not reset the introduction."
       },
       "exportFile": {
-        "title": "Export saved",
-        "message": "Saved to file:\n{{fileUri}}\n\nSize: {{sizeKb}} kB\n\n{{shareNote}}",
-        "shareSupported": "The sharing window has been opened. Choose “Save” or “Share”, or cancel.",
-        "shareUnsupported": "System sharing is not available on this platform. Copy the file manually."
+        "successTitle": "Copy saved",
+        "successMessage": "A local copy of your data has been saved. File size: {{sizeKb}} kB.",
+        "successConfirm": "OK"
       },
       "googleDrive": {
         "sectionTitle": "Google Drive backup",
@@ -455,6 +461,11 @@
           "subtitle": "Opens the flashcards screen and artificially shows the one-time button position chooser.",
           "button": "Show window"
         },
+        "previewLocalExportReminder": {
+          "title": "Preview backup reminder",
+          "subtitle": "Shows the window reminding the user to create a local data backup.",
+          "button": "Show window"
+        },
         "courseFinishedPanelPreview": {
           "title": "Preview course completion panel",
           "subtitle": "Opens a screen with the CourseFinishedPanel component using sample data.",
@@ -625,7 +636,7 @@
         "title": "Privacy policy",
         "subtitle": "This screen contains a short summary of privacy information. The full, official, and current version of the policy for the website and app is available online.",
         "onlineButton": "Online",
-        "onlineUrl": "https://memicard.com/privacy.html",
+        "onlineUrl": "https://memicard.com/privacy",
         "updatedLabel": "Last updated",
         "updatedValue": "May 18, 2026"
       },
@@ -634,7 +645,7 @@
           "title": "Key points",
           "body": "Memicard stores learning data primarily locally on the user's device. Data may leave the device only when the user uses a feature that requires it, such as export, sharing, e-mail contact, or optional Google Drive backup. The full, official, and current version of the privacy policy is available online.",
           "bullets": [
-            "the current version of the policy is available at https://memicard.com/privacy.html",
+            "the current version of the policy is available at https://memicard.com/privacy",
             "the app does not require a user account for basic operation",
             "the app does not use its own backend for ongoing user data handling"
           ]

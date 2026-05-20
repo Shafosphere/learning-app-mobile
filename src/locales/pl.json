@@ -101,6 +101,13 @@
       "resetting": "Resetuję…"
     }
   },
+  "localExportReminder": {
+    "title": "Czas na kopię danych",
+    "description": "Zapisz lokalną kopię danych, żeby nie stracić kursów, fiszek i postępów.",
+    "confirm": "Eksportuj",
+    "confirmLoading": "Eksportuję…",
+    "later": "Później"
+  },
   "settings": {
     "tabs": {
       "ui": "Interfejs",
@@ -243,10 +250,9 @@
         "resetIntro": "Nie udało się zresetować wprowadzenia."
       },
       "exportFile": {
-        "title": "Eksport zapisany",
-        "message": "Zapisano do pliku:\n{{fileUri}}\n\nRozmiar: {{sizeKb}} kB\n\n{{shareNote}}",
-        "shareSupported": "Otwarto okno udostępniania. Wybierz „Zapisz” lub „Udostępnij”, albo anuluj.",
-        "shareUnsupported": "Udostępnianie systemowe jest niedostępne na tej platformie. Skopiuj plik ręcznie."
+        "successTitle": "Kopia zapisana",
+        "successMessage": "Lokalna kopia danych została zapisana. Rozmiar pliku: {{sizeKb}} kB.",
+        "successConfirm": "OK"
       },
       "googleDrive": {
         "sectionTitle": "Kopia zapasowa Google Drive",
@@ -455,6 +461,11 @@
           "subtitle": "Otwiera ekran fiszek i sztucznie pokazuje jednorazowe okno wyboru położenia przycisków.",
           "button": "Pokaż okno"
         },
+        "previewLocalExportReminder": {
+          "title": "Podgląd przypomnienia o kopii",
+          "subtitle": "Pokazuje okno przypominające o zrobieniu lokalnej kopii danych.",
+          "button": "Pokaż okno"
+        },
         "courseFinishedPanelPreview": {
           "title": "Podgląd panelu ukończenia kursu",
           "subtitle": "Otwiera ekran z komponentem CourseFinishedPanel na przykładowych danych.",
@@ -625,7 +636,7 @@
         "title": "Polityka prywatności",
         "subtitle": "Ten ekran zawiera krótkie streszczenie informacji o prywatności. Pełna, oficjalna i aktualna wersja polityki dla strony WWW i aplikacji jest dostępna online.",
         "onlineButton": "Online",
-        "onlineUrl": "https://memicard.com/privacy.html",
+        "onlineUrl": "https://memicard.com/privacy",
         "updatedLabel": "Ostatnia aktualizacja",
         "updatedValue": "18 maja 2026"
       },
@@ -634,7 +645,7 @@
           "title": "Najważniejsze informacje",
           "body": "Memicard przechowuje dane nauki przede wszystkim lokalnie na urządzeniu użytkownika. Dane mogą opuścić urządzenie tylko wtedy, gdy użytkownik skorzysta z funkcji, która tego wymaga, np. eksportu, udostępnienia, kontaktu e-mail albo opcjonalnej kopii zapasowej Google Drive. Pełna, oficjalna i aktualna wersja polityki prywatności jest dostępna online.",
           "bullets": [
-            "aktualna wersja polityki jest dostępna pod adresem https://memicard.com/privacy.html",
+            "aktualna wersja polityki jest dostępna pod adresem https://memicard.com/privacy",
             "aplikacja nie wymaga konta użytkownika do podstawowego działania",
             "aplikacja nie korzysta z własnego backendu do bieżącej obsługi danych użytkownika"
           ]

@@ -1,8 +1,9 @@
 import MyButton from "@/src/components/button/button";
+import { UserDataExportSuccessModal } from "@/src/components/export/UserDataExportSuccessModal";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useUserDataExportAction } from "@/src/hooks/useUserDataExportAction";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
-import { exportAndShareUserData } from "@/src/services/exportUserData";
 import { importUserData } from "@/src/services/importUserData";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
@@ -57,10 +58,15 @@ const CoursesDataSection: React.FC = () => {
   } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
   const [resettingIntro, setResettingIntro] = useState(false);
-  const [exportingData, setExportingData] = useState(false);
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
   const [expandedSnapshotIds, setExpandedSnapshotIds] = useState<string[]>([]);
+  const {
+    exporting: exportingData,
+    runExport: handleExportUserData,
+    successSummary,
+    dismissSuccess,
+  } = useUserDataExportAction();
   const isCompactSnapshotLayout = width < 360;
   const introStorageKeys = [
     "@onboarding_checkpoint_v1",
@@ -275,33 +281,6 @@ const CoursesDataSection: React.FC = () => {
     lastSuccessfulGoogleDriveBackupAt,
     t,
   ]);
-
-  const handleExportUserData = async () => {
-    setExportingData(true);
-    try {
-      const result = await exportAndShareUserData();
-      const sizeKb = (result.bytesWritten / 1024).toFixed(1);
-      const shareNote = result.sharingSupported
-        ? t("settings.coursesData.exportFile.shareSupported")
-        : t("settings.coursesData.exportFile.shareUnsupported");
-      Alert.alert(
-        t("settings.coursesData.exportFile.title"),
-        t("settings.coursesData.exportFile.message", {
-          fileUri: result.fileUri,
-          sizeKb,
-          shareNote,
-        })
-      );
-    } catch (error) {
-      console.error("[CoursesDataSection] export error", error);
-      Alert.alert(
-        t("app.status.error"),
-        t("settings.coursesData.errors.exportUserData")
-      );
-    } finally {
-      setExportingData(false);
-    }
-  };
 
   const handleConnectDrive = async () => {
     setDriveAction("connect");
@@ -526,7 +505,8 @@ const CoursesDataSection: React.FC = () => {
       : t("settings.coursesData.googleDrive.refreshButton");
 
   return (
-    <View style={styles.sectionCard}>
+    <>
+      <View style={styles.sectionCard}>
       <Text style={styles.appearanceSectionHeader}>
         {t("settings.coursesData.section")}
       </Text>
@@ -905,7 +885,13 @@ const CoursesDataSection: React.FC = () => {
           </View>
         </View>
       </View>
-    </View>
+      </View>
+      <UserDataExportSuccessModal
+        visible={successSummary != null}
+        sizeKb={successSummary?.sizeKb}
+        onClose={dismissSuccess}
+      />
+    </>
   );
 };
 

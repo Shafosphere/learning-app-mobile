@@ -7,6 +7,7 @@ import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
 import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
 import GoogleDriveBackupInitializer from "@/src/components/reminders/GoogleDriveBackupInitializer";
+import LocalExportReminder from "@/src/components/reminders/LocalExportReminder";
 import { DueReviewsProvider } from "@/src/contexts/DueReviewsContext";
 import { LearningStatsProvider } from "@/src/contexts/LearningStatsContext";
 import { NavbarStatsProvider } from "@/src/contexts/NavbarStatsContext";
@@ -538,6 +539,7 @@ export default function RootLayout() {
                   <QuoteSystemInitializer />
                   <LearningRemindersInitializer />
                   <GoogleDriveBackupInitializer />
+                  <LocalExportReminder />
                   <LearningStatsProvider>
                     <NavbarStatsProvider>
                       <PopupProvider>

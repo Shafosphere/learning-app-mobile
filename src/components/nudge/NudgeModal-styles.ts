@@ -1,0 +1,81 @@
+import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+
+export const useStyles = createThemeStylesHook((colors) => ({
+  backdrop: {
+    flex: 1,
+    backgroundColor: "#00000040",
+    justifyContent: "center",
+    paddingHorizontal: 20,
+    paddingVertical: 24,
+  },
+  card: {
+    backgroundColor: colors.background,
+    alignSelf: "center",
+    width: "100%",
+    maxWidth: 372,
+    borderRadius: 24,
+    borderWidth: 1,
+    borderColor: colors.border,
+    paddingHorizontal: 16,
+    paddingTop: 18,
+    paddingBottom: 12,
+    shadowColor: "#000",
+    shadowOpacity: 0.12,
+    shadowRadius: 18,
+    shadowOffset: {
+      width: 0,
+      height: 10,
+    },
+    elevation: 8,
+  },
+  closeButton: {
+    position: "absolute",
+    top: 16,
+    right: 16,
+    width: 26,
+    height: 26,
+    borderRadius: 4,
+    alignItems: "center",
+    justifyContent: "center",
+    backgroundColor: colors.my_red,
+    zIndex: 1,
+  },
+  title: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "900",
+    color: colors.headline,
+    textAlign: "left",
+    paddingRight: 40,
+  },
+  description: {
+    color: colors.paragraph,
+    fontSize: 14,
+    lineHeight: 20,
+    marginTop: 8,
+  },
+  content: {
+    marginTop: 0,
+  },
+  actions: {
+    alignItems: "flex-end",
+    paddingTop: 10,
+    paddingBottom: 4,
+  },
+  actionsWithSecondary: {
+    alignItems: "center",
+    flexDirection: "row",
+    justifyContent: "flex-end",
+    gap: 12,
+  },
+  secondaryButton: {
+    minHeight: 40,
+    justifyContent: "center",
+    paddingHorizontal: 4,
+  },
+  secondaryButtonText: {
+    color: colors.paragraph,
+    fontSize: 14,
+    fontWeight: "800",
+  },
+}));
