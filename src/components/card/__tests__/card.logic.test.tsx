@@ -1,6 +1,5 @@
 import React from "react";
 import { act, render, waitFor } from "@testing-library/react-native";
-import { Alert } from "react-native";
 
 import Card from "@/src/components/card/card";
 import { useCardFocusController } from "@/src/components/card/useCardFocusController";
@@ -51,10 +50,18 @@ jest.mock("@/src/components/card/card-styles", () => ({
 }));
 
 let latestCardHintProps: Record<string, unknown> | null = null;
+let latestNudgeModalProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/card/subcomponents/CardHint", () => ({
   CardHint: (props: Record<string, unknown>) => {
     latestCardHintProps = props;
+    return null;
+  },
+}));
+
+jest.mock("@/src/components/nudge/NudgeModal", () => ({
+  NudgeModal: (props: Record<string, unknown>) => {
+    latestNudgeModalProps = props;
     return null;
   },
 }));
@@ -174,6 +181,7 @@ describe("Card logic props", () => {
   beforeEach(() => {
     latestResolverProps = null;
     latestCardHintProps = null;
+    latestNudgeModalProps = null;
     mockRequestFocus = jest.fn();
     mockedUseCardFocusController.mockReturnValue({
       focusTarget: "none",
@@ -520,9 +528,8 @@ describe("Card logic props", () => {
     );
   });
 
-  it("uses a simple confirm alert for hints on cards that cannot be reversed", async () => {
+  it("uses a simple confirm modal for hints on cards that cannot be reversed", async () => {
     const onHintUpdate = jest.fn();
-    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(jest.fn());
 
     renderCard(
       createProps({
@@ -548,33 +555,29 @@ describe("Card logic props", () => {
       (latestCardHintProps?.finishHintEditing as () => void)();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Zapisać podpowiedź?",
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+    expect(latestNudgeModalProps?.title).toBe("Zapisać podpowiedź?");
+    expect(latestNudgeModalProps?.description).toBe(
       "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
-      expect.any(Array),
     );
-
-    const buttons = alertSpy.mock.calls[0][2] as Array<{
-      text: string;
-      onPress?: () => void;
-    }>;
-    expect(buttons.map((button) => button.text)).toEqual([
-      "Anuluj",
-      "Zapisz",
-    ]);
+    expect(latestNudgeModalProps?.confirmLabel).toBe("Zapisz");
+    expect(latestNudgeModalProps?.secondaryLabel).toBe("Anuluj");
 
     act(() => {
-      buttons[1].onPress?.();
+      (latestNudgeModalProps?.onConfirm as () => void)();
     });
 
     expect(onHintUpdate).toHaveBeenCalledWith(19, "hint", null);
   });
 
-  it("keeps side-choice hint alert for normal cards that can be reversed", async () => {
-    const alertSpy = jest.spyOn(Alert, "alert").mockImplementation(jest.fn());
+  it("uses a side-choice hint modal for normal cards that can be reversed", async () => {
+    const onHintUpdate = jest.fn();
 
     renderCard(
       createProps({
+        onHintUpdate,
         selectedItem: makeCard({
           id: 20,
           text: "cat",
@@ -595,17 +598,42 @@ describe("Card logic props", () => {
       (latestCardHintProps?.finishHintEditing as () => void)();
     });
 
-    expect(alertSpy).toHaveBeenCalledWith(
-      "Gdzie zapisać podpowiedź?",
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+    expect(latestNudgeModalProps?.title).toBe("Gdzie zapisać podpowiedź?");
+    expect(latestNudgeModalProps?.description).toBe(
       "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
-      expect.any(Array),
     );
+    expect(latestNudgeModalProps?.confirmLabel).toBe("Obie strony fiszki");
+    expect(latestNudgeModalProps?.secondaryLabel).toBe("Tylko ta strona");
 
-    const buttons = alertSpy.mock.calls[0][2] as Array<{ text: string }>;
-    expect(buttons.map((button) => button.text)).toEqual([
-      "Anuluj",
-      "Tylko ta strona",
-      "Obie strony fiszki",
-    ]);
+    act(() => {
+      (latestNudgeModalProps?.onSecondaryPress as () => void)();
+    });
+
+    expect(onHintUpdate).toHaveBeenCalledWith(20, "hint", null);
+
+    act(() => {
+      (latestCardHintProps?.setHintDraft as (value: string) => void)("both");
+    });
+
+    await waitFor(() => {
+      expect(latestCardHintProps?.hintDraft).toBe("both");
+    });
+
+    act(() => {
+      (latestCardHintProps?.finishHintEditing as () => void)();
+    });
+
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+
+    act(() => {
+      (latestNudgeModalProps?.onConfirm as () => void)();
+    });
+
+    expect(onHintUpdate).toHaveBeenCalledWith(20, "both", "both");
   });
 });

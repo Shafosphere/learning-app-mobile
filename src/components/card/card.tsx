@@ -7,6 +7,7 @@ import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import type { DatePattern } from "@/src/utils/dateInput";
 import { calculateTypoDiff } from "@/src/utils/typoDiff";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import {
   useCallback,
   useEffect,
@@ -16,7 +17,6 @@ import {
   useState,
 } from "react";
 import {
-  Alert,
   Animated,
   Keyboard,
   ScrollView,
@@ -43,6 +43,8 @@ const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead o
 const MAX_INPUT_SCROLL_AHEAD = 180;
 const INPUT_SCROLL_TRAILING_BUFFER = 120;
 const ENABLE_KEYBOARD_CONSOLE_LOGS = false;
+
+type HintModalMode = "save" | "target";
 
 type KeyboardMetricsSnapshot = {
   screenY?: number;
@@ -344,7 +346,8 @@ export default function Card({
 
   const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");
-  const hintDialogVisible = useRef(false);
+  const [hintModal, setHintModal] = useState<HintModalMode | null>(null);
+  const [pendingHintDraft, setPendingHintDraft] = useState<string | null>(null);
   const hintActionsAnim = useRef(new Animated.Value(0)).current;
   const currentHint = useMemo(() => {
     if (!selectedItem) return null;
@@ -939,7 +942,8 @@ export default function Card({
   useEffect(() => {
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
-    hintDialogVisible.current = false;
+    setHintModal(null);
+    setPendingHintDraft(null);
   }, [currentHint, effectiveReversed, selectedItem?.id]);
 
   function normalizeChar(char: string | undefined): string {
@@ -1025,7 +1029,8 @@ export default function Card({
   const cancelHintEditing = useCallback(() => {
     setIsEditingHint(false);
     setHintDraft(currentHint ?? "");
-    hintDialogVisible.current = false;
+    setHintModal(null);
+    setPendingHintDraft(null);
   }, [currentHint]);
 
   const applyHintToSides = useCallback(
@@ -1034,7 +1039,7 @@ export default function Card({
         setIsEditingHint(false);
         return;
       }
-      const normalized = hintDraft.trim();
+      const normalized = (pendingHintDraft ?? hintDraft).trim();
       const value = normalized.length > 0 ? normalized : null;
       if (!onHintUpdate) {
         setIsEditingHint(false);
@@ -1052,10 +1057,18 @@ export default function Card({
           : (selectedItem.hintBack ?? null);
       onHintUpdate(selectedItem.id, nextFront, nextBack);
       setIsEditingHint(false);
+      setHintModal(null);
+      setPendingHintDraft(null);
       setHintDraft(value ?? "");
     },
-    [effectiveReversed, hintDraft, onHintUpdate, selectedItem],
+    [effectiveReversed, hintDraft, onHintUpdate, pendingHintDraft, selectedItem],
   );
+
+  const closeHintModal = useCallback(() => {
+    setHintModal(null);
+    setPendingHintDraft(null);
+    setIsEditingHint(false);
+  }, []);
 
   const finishHintEditing = useCallback(() => {
     if (!selectedItem) return;
@@ -1065,61 +1078,22 @@ export default function Card({
       setHintDraft("");
       return;
     }
-    if (hintDialogVisible.current) return;
-    hintDialogVisible.current = true;
-    if (!canShowBackAsPrompt) {
-      Alert.alert(
-        t("flashcards.card.hint.saveDialogTitle"),
-        t("flashcards.card.hint.saveDialogMessage"),
-        [
-          {
-            text: t("app.actions.cancel"),
-            style: "cancel",
-            onPress: () => {
-              hintDialogVisible.current = false;
-              setIsEditingHint(false);
-            },
-          },
-          {
-            text: t("flashcards.card.hint.save"),
-            onPress: () => {
-              hintDialogVisible.current = false;
-              applyHintToSides(false);
-            },
-          },
-        ],
-      );
+    if (hintModal) return;
+    setPendingHintDraft(normalized);
+    setHintModal(canShowBackAsPrompt ? "target" : "save");
+  }, [canShowBackAsPrompt, hintDraft, hintModal, selectedItem]);
+
+  const confirmHintModal = useCallback(() => {
+    applyHintToSides(hintModal === "target");
+  }, [applyHintToSides, hintModal]);
+
+  const handleHintModalSecondaryPress = useCallback(() => {
+    if (hintModal === "target") {
+      applyHintToSides(false);
       return;
     }
-    Alert.alert(
-      t("flashcards.card.hint.targetDialogTitle"),
-      t("flashcards.card.hint.targetDialogMessage"),
-      [
-        {
-          text: t("app.actions.cancel"),
-          style: "cancel",
-          onPress: () => {
-            hintDialogVisible.current = false;
-            setIsEditingHint(false);
-          },
-        },
-        {
-          text: t("flashcards.card.hint.thisSideOnly"),
-          onPress: () => {
-            hintDialogVisible.current = false;
-            applyHintToSides(false);
-          },
-        },
-        {
-          text: t("flashcards.card.hint.bothSides"),
-          onPress: () => {
-            hintDialogVisible.current = false;
-            applyHintToSides(true);
-          },
-        },
-      ],
-    );
-  }, [applyHintToSides, canShowBackAsPrompt, hintDraft, selectedItem, t]);
+    closeHintModal();
+  }, [applyHintToSides, closeHintModal, hintModal]);
 
   const hintActionsStyle = useMemo(
     () => ({
@@ -1347,6 +1321,32 @@ export default function Card({
         Actions (True/False, Download/OK) are now rendered outside Card
         from FlashcardsScreen via FlashcardsButtons.
       */}
+      <NudgeModal
+        visible={hintModal !== null}
+        title={
+          hintModal === "target"
+            ? t("flashcards.card.hint.targetDialogTitle")
+            : t("flashcards.card.hint.saveDialogTitle")
+        }
+        description={
+          hintModal === "target"
+            ? t("flashcards.card.hint.targetDialogMessage")
+            : t("flashcards.card.hint.saveDialogMessage")
+        }
+        confirmLabel={
+          hintModal === "target"
+            ? t("flashcards.card.hint.bothSides")
+            : t("flashcards.card.hint.save")
+        }
+        onConfirm={confirmHintModal}
+        onClose={closeHintModal}
+        secondaryLabel={
+          hintModal === "target"
+            ? t("flashcards.card.hint.thisSideOnly")
+            : t("app.actions.cancel")
+        }
+        onSecondaryPress={handleHintModalSecondaryPress}
+      />
     </View>
   );
 }
