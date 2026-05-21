@@ -210,7 +210,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "flagi_europy",
-    packVersion: 3,
+    packVersion: 4,
     name: "Flagi Europy",
     iconId: "flag",
     iconColor: "#2563EB",

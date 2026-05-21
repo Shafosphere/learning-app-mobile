@@ -143,7 +143,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    packVersion: 3,
+    packVersion: 4,
     csvFile: "flagi_europy.csv",
   },
   {
