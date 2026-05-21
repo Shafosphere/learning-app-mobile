@@ -13,7 +13,6 @@ import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlow
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
-  getGlobalDailyStreakDays,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
@@ -31,6 +30,7 @@ import {
   appendDebugEvent,
   summarizeBoxes,
 } from "@/src/services/debugEvents";
+import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
@@ -225,32 +225,38 @@ export default function ReviewFlashcardsPlaceholder() {
 
         let streakDelta: 0 | 1 = 0;
         let streakDaysOverride: number | undefined;
+        let shieldCountOverride: 0 | 1 | 2 | undefined;
         try {
-          const nextStreak = await getGlobalDailyStreakDays();
-          if (nextStreak > getStatsSnapshot().streakDays) {
-            streakDelta = 1;
-            streakDaysOverride = nextStreak;
+          const nextStreak = await registerProtectedDailyActivity();
+          const currentStats = getStatsSnapshot();
+          if (nextStreak.streakDays !== currentStats.streakDays) {
+            if (nextStreak.streakDays > currentStats.streakDays) {
+              streakDelta = 1;
+            }
+            streakDaysOverride = nextStreak.streakDays;
+          }
+          if (nextStreak.shieldCount !== currentStats.shieldCount) {
+            shieldCountOverride = nextStreak.shieldCount;
           }
         } catch (error) {
           console.warn("[Review] Failed to refresh streak after answer", error);
         }
 
-        if (!hasBaseDelta && streakDelta === 0) {
+        if (
+          !hasBaseDelta &&
+          streakDelta === 0 &&
+          streakDaysOverride == null &&
+          shieldCountOverride == null
+        ) {
           return;
         }
 
-        applyStatBurst(
-          streakDaysOverride == null
-            ? {
-                ...baseBurst,
-                streakDelta,
-              }
-            : {
-                ...baseBurst,
-                streakDelta,
-                streakDaysOverride,
-              }
-        );
+        applyStatBurst({
+          ...baseBurst,
+          streakDelta,
+          ...(streakDaysOverride == null ? {} : { streakDaysOverride }),
+          ...(shieldCountOverride == null ? {} : { shieldCountOverride }),
+        });
       })();
     },
     [applyStatBurst, getStatsSnapshot],

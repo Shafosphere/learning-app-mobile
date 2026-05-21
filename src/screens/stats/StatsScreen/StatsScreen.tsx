@@ -118,6 +118,19 @@ export default function StatsScreen() {
       <View style={styles.miniStatsRow}>
         <View style={styles.miniStatItem}>
           <View style={styles.miniStatCard}>
+            {stats.shieldCount > 0 && (
+              <View style={styles.miniStatShieldStack}>
+                {Array.from({ length: stats.shieldCount }).map((_, index) => (
+                  <Ionicons
+                    key={index}
+                    testID={`streak-shield-${index}`}
+                    name="shield-checkmark"
+                    size={15}
+                    color={colors.my_green}
+                  />
+                ))}
+              </View>
+            )}
             <Text style={styles.miniStatValue}>{stats.streakDays}</Text>
             <MaterialIcons
               style={styles.miniStatCornerIcon}

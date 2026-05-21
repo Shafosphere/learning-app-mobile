@@ -38,7 +38,6 @@ import {
   getCustomCourseMasteryProgress,
   getCustomFlashcards,
   getCustomReviewedFlashcardIds,
-  getGlobalDailyStreakDays,
   scheduleCustomReview,
   updateCustomFlashcardHints,
 } from "@/src/db/sqlite/db";
@@ -101,6 +100,7 @@ import {
   subscribeCourseFinishedPreview,
 } from "@/src/services/courseFinishedPreview";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { useTranslation } from "react-i18next";
 
 const STREAK_TARGET = 5;
@@ -269,32 +269,38 @@ export default function Flashcards() {
 
         let streakDelta: 0 | 1 = 0;
         let streakDaysOverride: number | undefined;
+        let shieldCountOverride: 0 | 1 | 2 | undefined;
         try {
-          const nextStreak = await getGlobalDailyStreakDays();
-          if (nextStreak > getStatsSnapshot().streakDays) {
-            streakDelta = 1;
-            streakDaysOverride = nextStreak;
+          const nextStreak = await registerProtectedDailyActivity();
+          const currentStats = getStatsSnapshot();
+          if (nextStreak.streakDays !== currentStats.streakDays) {
+            if (nextStreak.streakDays > currentStats.streakDays) {
+              streakDelta = 1;
+            }
+            streakDaysOverride = nextStreak.streakDays;
+          }
+          if (nextStreak.shieldCount !== currentStats.shieldCount) {
+            shieldCountOverride = nextStreak.shieldCount;
           }
         } catch (error) {
           console.warn("[Flashcards] Failed to refresh streak after answer", error);
         }
 
-        if (!hasBaseDelta && streakDelta === 0) {
+        if (
+          !hasBaseDelta &&
+          streakDelta === 0 &&
+          streakDaysOverride == null &&
+          shieldCountOverride == null
+        ) {
           return;
         }
 
-        applyStatBurst(
-          streakDaysOverride == null
-            ? {
-                ...baseBurst,
-                streakDelta,
-              }
-            : {
-                ...baseBurst,
-                streakDelta,
-                streakDaysOverride,
-              }
-        );
+        applyStatBurst({
+          ...baseBurst,
+          streakDelta,
+          ...(streakDaysOverride == null ? {} : { streakDaysOverride }),
+          ...(shieldCountOverride == null ? {} : { shieldCountOverride }),
+        });
       })();
     },
     [applyStatBurst, getStatsSnapshot, triggerQuote],

@@ -15,6 +15,13 @@ import {
   isManagedImageUri,
   saveImage,
 } from "@/src/services/imageService";
+import {
+  getProtectedDailyStreakState,
+  initializeStreakProtectionFromHistory,
+  normalizeStreakProtectionState,
+  STREAK_PROTECTION_STORAGE_KEY,
+  type StreakProtectionState,
+} from "@/src/services/streakProtection";
 import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import Constants from "expo-constants";
 import * as FileSystem from "expo-file-system/legacy";
@@ -114,6 +121,7 @@ export type StatsUiStateExport = {
 export type StatsStateExport = {
   knownWords: KnownWordsStatsExport;
   dailyProgress: DailyProgressStatsExport;
+  streakProtection: StreakProtectionState;
   statsUi: StatsUiStateExport;
 };
 
@@ -222,6 +230,12 @@ const DEFAULT_STATS_STATE: StatsStateExport = {
     date: "",
     count: 0,
   },
+  streakProtection: {
+    streakDays: 0,
+    shieldCount: 0,
+    lastActiveDate: "",
+    coveredThroughDate: "",
+  },
   statsUi: {
     fireEffectEnabled: false,
     bookshelfEnabled: false,
@@ -233,7 +247,10 @@ function isDefaultProgressState(statsState: StatsStateExport): boolean {
     statsState.knownWords.ids.length === 0 &&
     statsState.knownWords.lastLearnedDate === "" &&
     statsState.dailyProgress.date === "" &&
-    statsState.dailyProgress.count === 0
+    statsState.dailyProgress.count === 0 &&
+    statsState.streakProtection.streakDays === 0 &&
+    statsState.streakProtection.shieldCount === 0 &&
+    statsState.streakProtection.lastActiveDate === ""
   );
 }
 
@@ -243,6 +260,17 @@ function isDefaultStatsUiState(statsState: StatsStateExport): boolean {
       DEFAULT_STATS_STATE.statsUi.fireEffectEnabled &&
     statsState.statsUi.bookshelfEnabled ===
       DEFAULT_STATS_STATE.statsUi.bookshelfEnabled
+  );
+}
+
+function isDefaultStreakProtectionState(
+  state: StreakProtectionState
+): boolean {
+  return (
+    state.streakDays === 0 &&
+    state.shieldCount === 0 &&
+    state.lastActiveDate === "" &&
+    state.coveredThroughDate === ""
   );
 }
 
@@ -290,11 +318,13 @@ async function readPersistedStatsState(): Promise<StatsStateExport> {
   const [
     knownWordsRaw,
     dailyProgressRaw,
+    streakProtection,
     fireEffectEnabledRaw,
     bookshelfEnabledRaw,
   ] = await Promise.all([
     AsyncStorage.getItem("knownWords"),
     AsyncStorage.getItem("dailyProgress"),
+    getProtectedDailyStreakState(),
     AsyncStorage.getItem("stats.fireEffectEnabled"),
     AsyncStorage.getItem("stats.bookshelfEnabled"),
   ]);
@@ -345,6 +375,7 @@ async function readPersistedStatsState(): Promise<StatsStateExport> {
   return {
     knownWords,
     dailyProgress,
+    streakProtection,
     statsUi: {
       fireEffectEnabled: readBoolean(
         fireEffectEnabledRaw,
@@ -383,6 +414,9 @@ function normalizeStatsState(
           ? statsState.dailyProgress.count
           : DEFAULT_STATS_STATE.dailyProgress.count,
     },
+    streakProtection: normalizeStreakProtectionState(
+      statsState?.streakProtection
+    ),
     statsUi: {
       fireEffectEnabled:
         typeof statsState?.statsUi?.fireEffectEnabled === "boolean"
@@ -1764,10 +1798,19 @@ export async function restoreUserData(
     }
 
     if (shouldRestoreProgressState) {
+      const streakProtection = isDefaultStreakProtectionState(
+        normalized.statsState.streakProtection
+      )
+        ? await initializeStreakProtectionFromHistory()
+        : normalized.statsState.streakProtection;
       pairs.push(["knownWords", JSON.stringify(normalized.statsState.knownWords)]);
       pairs.push([
         "dailyProgress",
         JSON.stringify(normalized.statsState.dailyProgress),
+      ]);
+      pairs.push([
+        STREAK_PROTECTION_STORAGE_KEY,
+        JSON.stringify(streakProtection),
       ]);
     }
 
@@ -1807,6 +1850,8 @@ export async function restoreUserData(
           learningEventsRestored > 0 ||
           normalized.statsState.knownWords.ids.length > 0 ||
           normalized.statsState.dailyProgress.count > 0 ||
+          normalized.statsState.streakProtection.streakDays > 0 ||
+          normalized.statsState.streakProtection.shieldCount > 0 ||
           normalized.statsState.statsUi.fireEffectEnabled ||
           normalized.statsState.statsUi.bookshelfEnabled,
       },

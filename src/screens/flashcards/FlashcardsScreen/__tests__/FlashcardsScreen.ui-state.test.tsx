@@ -33,7 +33,7 @@ jest.mock("@/src/contexts/LearningStatsContext", () => ({
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
   useNavbarStats: jest.fn(() => ({
     applyStatBurst: jest.fn(),
-    getStatsSnapshot: jest.fn(() => ({ streakDays: 0 })),
+    getStatsSnapshot: jest.fn(() => ({ streakDays: 0, shieldCount: 0 })),
   })),
 }));
 
@@ -63,9 +63,14 @@ jest.mock("@/src/db/sqlite/db", () => ({
   ),
   getCustomFlashcards: jest.fn(() => Promise.resolve([])),
   getCustomReviewedFlashcardIds: jest.fn(() => Promise.resolve([])),
-  getGlobalDailyStreakDays: jest.fn(() => Promise.resolve(0)),
   scheduleCustomReview: jest.fn(() => Promise.resolve(undefined)),
   updateCustomFlashcardHints: jest.fn(() => Promise.resolve(undefined)),
+}));
+
+jest.mock("@/src/services/streakProtection", () => ({
+  registerProtectedDailyActivity: jest.fn(() =>
+    Promise.resolve({ streakDays: 0, shieldCount: 0 })
+  ),
 }));
 
 jest.mock("@/src/features/flashcards/courseCompletionRun", () => ({

@@ -1,7 +1,7 @@
 import {
   countGlobalBoxPromotions,
-  getGlobalDailyStreakDays,
 } from "@/src/db/sqlite/db";
+import { getProtectedDailyStreakSnapshot } from "@/src/services/streakProtection";
 import {
   createContext,
   useCallback,
@@ -21,11 +21,13 @@ export type StatBurst = {
   streakDelta: 0 | 1;
   promotionsDelta: 0 | 1;
   streakDaysOverride?: number;
+  shieldCountOverride?: 0 | 1 | 2;
 };
 
 export type NavbarStatsSnapshot = {
   masteredCount: number;
   streakDays: number;
+  shieldCount: 0 | 1 | 2;
   promotionsCount: number;
 };
 
@@ -59,6 +61,7 @@ const BASE_PIN_MS = 2800;
 const defaultStats: NavbarStatsSnapshot = {
   masteredCount: 0,
   streakDays: 0,
+  shieldCount: 0,
   promotionsCount: 0,
 };
 
@@ -99,6 +102,7 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
   const [stats, setStats] = useState<NavbarStatsSnapshot>({
     masteredCount: knownWordsCount,
     streakDays: 0,
+    shieldCount: 0,
     promotionsCount: 0,
   });
   const statsRef = useRef(stats);
@@ -111,7 +115,7 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
   const currentBurstRef = useRef<NavbarStatBurstEvent | null>(null);
   const burstQueueRef = useRef<NavbarStatBurstEvent[]>([]);
   const burstIdRef = useRef(1);
-  const localStreakBurstVersionRef = useRef(0);
+  const localProtectedStreakBurstVersionRef = useRef(0);
   const pinTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isPinnedRef = useRef(false);
 
@@ -175,22 +179,28 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
   const applyStatBurst = useCallback(
     (burst: StatBurst) => {
       const pinKey = getPinKey(burst);
-      if (!pinKey) {
-        return;
-      }
-
-      const keys = getBurstKeys(burst);
-      const comboCount = keys.length;
-      if (burst.streakDelta > 0 || burst.streakDaysOverride != null) {
-        localStreakBurstVersionRef.current += 1;
+      if (
+        burst.streakDelta > 0 ||
+        burst.streakDaysOverride != null ||
+        burst.shieldCountOverride != null
+      ) {
+        localProtectedStreakBurstVersionRef.current += 1;
       }
 
       syncStats((current) => ({
         masteredCount: current.masteredCount + burst.masteredDelta,
         streakDays:
           burst.streakDaysOverride ?? current.streakDays + burst.streakDelta,
+        shieldCount: burst.shieldCountOverride ?? current.shieldCount,
         promotionsCount: current.promotionsCount + burst.promotionsDelta,
       }));
+
+      if (!pinKey) {
+        return;
+      }
+
+      const keys = getBurstKeys(burst);
+      const comboCount = keys.length;
 
       const event: NavbarStatBurstEvent = {
         id: burstIdRef.current++,
@@ -226,12 +236,13 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     let mounted = true;
-    const streakBurstVersionAtReadStart = localStreakBurstVersionRef.current;
+    const streakBurstVersionAtReadStart =
+      localProtectedStreakBurstVersionRef.current;
 
     void (async () => {
       try {
-        const [streakDays, promotionsCount] = await Promise.all([
-          getGlobalDailyStreakDays(),
+        const [protectedStreak, promotionsCount] = await Promise.all([
+          getProtectedDailyStreakSnapshot(),
           countGlobalBoxPromotions(),
         ]);
 
@@ -242,9 +253,15 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
         syncStats((current) => ({
           masteredCount: knownWordsCount,
           streakDays:
-            localStreakBurstVersionRef.current === streakBurstVersionAtReadStart
-              ? streakDays
-              : Math.max(current.streakDays, streakDays),
+            localProtectedStreakBurstVersionRef.current ===
+            streakBurstVersionAtReadStart
+              ? protectedStreak.streakDays
+              : Math.max(current.streakDays, protectedStreak.streakDays),
+          shieldCount:
+            localProtectedStreakBurstVersionRef.current ===
+            streakBurstVersionAtReadStart
+              ? protectedStreak.shieldCount
+              : current.shieldCount,
           promotionsCount: Math.max(
             current.promotionsCount,
             promotionsCount,

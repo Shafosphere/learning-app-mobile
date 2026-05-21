@@ -12,10 +12,10 @@ import ReviewFlashcardsPlaceholder from "@/src/screens/review/reviewflashcards/r
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
-  getGlobalDailyStreakDays,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
+import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -46,7 +46,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
   useNavbarStats: jest.fn(() => ({
     applyStatBurst: jest.fn(),
-    getStatsSnapshot: jest.fn(() => ({ streakDays: 0 })),
+    getStatsSnapshot: jest.fn(() => ({ streakDays: 0, shieldCount: 0 })),
   })),
 }));
 
@@ -71,15 +71,24 @@ jest.mock("@/src/components/onboarding/CoachmarkLayerPortal", () => ({
   useCoachmarkLayerPortal: jest.fn(),
 }));
 
+jest.mock("@/src/components/nudge/NudgeModal", () => ({
+  NudgeModal: () => null,
+}));
+
 jest.mock("@/src/db/sqlite/db", () => ({
   advanceCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 2, nextReview: Date.now() })
   ),
   getDueCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
-  getGlobalDailyStreakDays: jest.fn(() => Promise.resolve(0)),
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
   scheduleCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 1, nextReview: Date.now() })
+  ),
+}));
+
+jest.mock("@/src/services/streakProtection", () => ({
+  registerProtectedDailyActivity: jest.fn(() =>
+    Promise.resolve({ streakDays: 0, shieldCount: 0 })
   ),
 }));
 
@@ -354,7 +363,8 @@ const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
-const mockedGetGlobalDailyStreakDays = getGlobalDailyStreakDays as jest.Mock;
+const mockedRegisterProtectedDailyActivity =
+  registerProtectedDailyActivity as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
 const mockedAdvanceCustomReview = advanceCustomReview as jest.Mock;
 const mockedScheduleCustomReview = scheduleCustomReview as jest.Mock;
@@ -445,13 +455,17 @@ describe("reviewflashcards correction desync regression", () => {
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
       streakDays: 0,
+      shieldCount: 0,
       promotionsCount: 0,
     }));
     mockedUseNavbarStats.mockReturnValue({
       applyStatBurst: applyStatBurstMock,
       getStatsSnapshot: getStatsSnapshotMock,
     });
-    mockedGetGlobalDailyStreakDays.mockResolvedValue(0);
+    mockedRegisterProtectedDailyActivity.mockResolvedValue({
+      streakDays: 0,
+      shieldCount: 0,
+    });
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
@@ -997,7 +1011,10 @@ describe("reviewflashcards correction desync regression", () => {
   });
 
   it("applies promotion and streak burst after a correct promotion answer", async () => {
-    mockedGetGlobalDailyStreakDays.mockResolvedValueOnce(1);
+    mockedRegisterProtectedDailyActivity.mockResolvedValueOnce({
+      streakDays: 1,
+      shieldCount: 1,
+    });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
         id: 611,
@@ -1024,9 +1041,10 @@ describe("reviewflashcards correction desync regression", () => {
         promotionsDelta: 1,
         streakDelta: 1,
         streakDaysOverride: 1,
+        shieldCountOverride: 1,
       });
     });
-    expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalledTimes(1);
+    expect(mockedRegisterProtectedDailyActivity).toHaveBeenCalledTimes(1);
   });
 
   it("does not apply a promotion burst for a correct box five answer without streak growth", async () => {
@@ -1059,7 +1077,7 @@ describe("reviewflashcards correction desync regression", () => {
         })
       );
     });
-    expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalledTimes(1);
+    expect(mockedRegisterProtectedDailyActivity).toHaveBeenCalledTimes(1);
     expect(applyStatBurstMock).not.toHaveBeenCalled();
   });
 

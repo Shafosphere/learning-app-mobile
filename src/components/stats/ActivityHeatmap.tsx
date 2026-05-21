@@ -201,8 +201,30 @@ function formatDuration(ms: number) {
   return minutes > 0 ? `${hours} h ${minutes} min` : `${hours} h`;
 }
 
-function getScale(base: string, zero: string) {
-  return [zero, `${base}22`, `${base}55`, `${base}88`, base];
+function withAlpha(color: string, alpha: string) {
+  if (/^#[0-9A-Fa-f]{8}$/.test(color)) {
+    return `${color.slice(0, 7)}${alpha}`;
+  }
+
+  if (/^#[0-9A-Fa-f]{6}$/.test(color)) {
+    return `${color}${alpha}`;
+  }
+
+  return color;
+}
+
+function getScale(base: string, zero: string, isDarkTheme: boolean) {
+  const activeAlphas = isDarkTheme
+    ? ["66", "88", "AA", "CC"]
+    : ["38", "66", "99", "FF"];
+
+  return [
+    zero,
+    withAlpha(base, activeAlphas[0]),
+    withAlpha(base, activeAlphas[1]),
+    withAlpha(base, activeAlphas[2]),
+    withAlpha(base, activeAlphas[3]),
+  ];
 }
 
 function isScrambleChar(char: string) {
@@ -325,12 +347,12 @@ function ScrambleText({
 export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { colors } = useSettings();
+  const { colors, theme } = useSettings();
   const listRef = useRef<FlatList<ActivityMonth> | null>(null);
   const didInitScrollRef = useRef(false);
   const scale = useMemo(
-    () => getScale(colors.my_green, colors.border),
-    [colors.border, colors.my_green]
+    () => getScale(colors.my_green, colors.border, theme === "dark"),
+    [colors.border, colors.my_green, theme]
   );
   const [containerWidth, setContainerWidth] = useState(0);
   const [visibleMonthIndex, setVisibleMonthIndex] = useState(
@@ -511,7 +533,7 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
             !isFuture &&
             (day.timeMs > 0 || day.learnedCount > 0 || day.totalCount > 0);
           const backgroundColor = isFuture
-            ? `${colors.border}66`
+            ? withAlpha(colors.border, "66")
             : pickColor(day.timeMs);
           const textColor = isFuture
             ? colors.paragraph
@@ -616,8 +638,8 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
                   {
                     backgroundColor:
                       displayedDay.timeMs > 0
-                        ? `${colors.my_green}22`
-                        : `${colors.my_red}18`,
+                        ? withAlpha(colors.my_green, theme === "dark" ? "2E" : "22")
+                        : withAlpha(colors.my_red, "18"),
                   },
                 ]}
               >
@@ -663,8 +685,8 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
                   style={[
                     styles.detailsStat,
                     {
-                      backgroundColor: `${colors.background}AA`,
-                      borderColor: `${colors.border}CC`,
+                      backgroundColor: withAlpha(colors.background, "AA"),
+                      borderColor: withAlpha(colors.border, "CC"),
                     },
                   ]}
                 >

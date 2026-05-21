@@ -9,6 +9,10 @@ import type { SavedBoxesV2 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { getDB } from "@/src/db/sqlite/db";
 import { getCustomCourses } from "@/src/db/sqlite/repositories/courses";
 import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
+import {
+  getProtectedDailyStreakState,
+  initializeStreakProtectionFromHistory,
+} from "@/src/services/streakProtection";
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getDB: jest.fn(),
@@ -29,6 +33,45 @@ jest.mock("@/src/services/imageService", () => ({
   isManagedImageUri: jest.fn(() => false),
   saveImage: jest.fn(async (uri: string) => `managed:${uri}`),
 }));
+
+jest.mock("@/src/services/streakProtection", () => {
+  const normalize = (value?: any) => ({
+    streakDays:
+      typeof value?.streakDays === "number"
+        ? Math.max(0, Math.floor(value.streakDays))
+        : 0,
+    shieldCount:
+      typeof value?.shieldCount === "number"
+        ? Math.max(0, Math.min(2, Math.floor(value.shieldCount)))
+        : 0,
+    lastActiveDate:
+      typeof value?.lastActiveDate === "string" ? value.lastActiveDate : "",
+    coveredThroughDate:
+      typeof value?.coveredThroughDate === "string"
+        ? value.coveredThroughDate
+        : "",
+  });
+  return {
+    STREAK_PROTECTION_STORAGE_KEY: "stats.streakProtection",
+    getProtectedDailyStreakState: jest.fn(() =>
+      Promise.resolve({
+        streakDays: 3,
+        shieldCount: 1,
+        lastActiveDate: "2026-04-21",
+        coveredThroughDate: "2026-04-21",
+      })
+    ),
+    initializeStreakProtectionFromHistory: jest.fn(() =>
+      Promise.resolve({
+        streakDays: 4,
+        shieldCount: 0,
+        lastActiveDate: "2026-04-20",
+        coveredThroughDate: "2026-04-20",
+      })
+    ),
+    normalizeStreakProtectionState: jest.fn(normalize),
+  };
+});
 
 jest.mock("@/src/utils/flashcardsMapper", () => ({
   mapCustomCardToWord: jest.fn((card: any) => ({
@@ -62,6 +105,14 @@ const mockedGetCustomCourses = getCustomCourses as jest.MockedFunction<
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.MockedFunction<
   typeof getCustomFlashcards
 >;
+const mockedGetProtectedDailyStreakState =
+  getProtectedDailyStreakState as jest.MockedFunction<
+    typeof getProtectedDailyStreakState
+  >;
+const mockedInitializeStreakProtectionFromHistory =
+  initializeStreakProtectionFromHistory as jest.MockedFunction<
+    typeof initializeStreakProtectionFromHistory
+  >;
 
 function makeSnapshot(
   courseId: number,
@@ -228,6 +279,18 @@ describe("userDataBackup", () => {
     jest.spyOn(console, "error").mockImplementation(() => {});
     await AsyncStorage.clear();
     jest.clearAllMocks();
+    mockedGetProtectedDailyStreakState.mockResolvedValue({
+      streakDays: 0,
+      shieldCount: 0,
+      lastActiveDate: "",
+      coveredThroughDate: "",
+    });
+    mockedInitializeStreakProtectionFromHistory.mockResolvedValue({
+      streakDays: 4,
+      shieldCount: 0,
+      lastActiveDate: "2026-04-20",
+      coveredThroughDate: "2026-04-20",
+    });
   });
 
   afterEach(() => {
@@ -237,6 +300,12 @@ describe("userDataBackup", () => {
   it("exports stats state, custom course state and splits box snapshots by course type", async () => {
     const db = createMockDb();
     mockedGetDb.mockResolvedValue(db as never);
+    mockedGetProtectedDailyStreakState.mockResolvedValue({
+      streakDays: 3,
+      shieldCount: 1,
+      lastActiveDate: "2026-04-21",
+      coveredThroughDate: "2026-04-21",
+    });
     mockedGetCustomCourses.mockResolvedValue([
       {
         id: 11,
@@ -335,6 +404,12 @@ describe("userDataBackup", () => {
     expect(payload.statsState).toEqual({
       knownWords: { ids: [9, 7], lastLearnedDate: "2026-04-20" },
       dailyProgress: { date: "2026-04-21", count: 5 },
+      streakProtection: {
+        streakDays: 3,
+        shieldCount: 1,
+        lastActiveDate: "2026-04-21",
+        coveredThroughDate: "2026-04-21",
+      },
       statsUi: { fireEffectEnabled: true, bookshelfEnabled: false },
     });
     expect(payload.boxesSnapshots).toHaveProperty("boxes:1-2-A1");
@@ -742,6 +817,12 @@ describe("userDataBackup", () => {
       statsState: {
         knownWords: { ids: [4, 8], lastLearnedDate: "2026-04-21" },
         dailyProgress: { date: "2026-04-21", count: 9 },
+        streakProtection: {
+          streakDays: 7,
+          shieldCount: 2,
+          lastActiveDate: "2026-04-21",
+          coveredThroughDate: "2026-04-21",
+        },
         statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
       },
     };
@@ -773,6 +854,11 @@ describe("userDataBackup", () => {
     expect(
       JSON.parse((await AsyncStorage.getItem("dailyProgress")) ?? "null")
     ).toEqual(payload.statsState.dailyProgress);
+    expect(
+      JSON.parse(
+        (await AsyncStorage.getItem("stats.streakProtection")) ?? "null"
+      )
+    ).toEqual(payload.statsState.streakProtection);
     expect(
       JSON.parse(
         (await AsyncStorage.getItem("stats.fireEffectEnabled")) ?? "false"
@@ -872,6 +958,17 @@ describe("userDataBackup", () => {
       date: "",
       count: 0,
     });
+    expect(mockedInitializeStreakProtectionFromHistory).toHaveBeenCalled();
+    expect(
+      JSON.parse(
+        (await AsyncStorage.getItem("stats.streakProtection")) ?? "null"
+      )
+    ).toEqual({
+      streakDays: 4,
+      shieldCount: 0,
+      lastActiveDate: "2026-04-20",
+      coveredThroughDate: "2026-04-20",
+    });
     expect(
       JSON.parse(
         (await AsyncStorage.getItem("stats.fireEffectEnabled")) ?? "false"
@@ -909,6 +1006,12 @@ describe("userDataBackup", () => {
       statsState: {
         knownWords: { ids: [4, 8], lastLearnedDate: "2026-04-20" },
         dailyProgress: { date: "2026-04-20", count: 2 },
+        streakProtection: {
+          streakDays: 3,
+          shieldCount: 1,
+          lastActiveDate: "2026-04-20",
+          coveredThroughDate: "2026-04-20",
+        },
         statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
       },
     };
@@ -965,6 +1068,12 @@ describe("userDataBackup", () => {
       statsState: {
         knownWords: { ids: [4, 8], lastLearnedDate: "2026-04-20" },
         dailyProgress: { date: "2026-04-20", count: 2 },
+        streakProtection: {
+          streakDays: 3,
+          shieldCount: 1,
+          lastActiveDate: "2026-04-20",
+          coveredThroughDate: "2026-04-20",
+        },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: true },
       },
     };
@@ -1227,6 +1336,12 @@ describe("userDataBackup", () => {
       statsState: {
         knownWords: { ids: [], lastLearnedDate: "" },
         dailyProgress: { date: "", count: 0 },
+        streakProtection: {
+          streakDays: 0,
+          shieldCount: 0,
+          lastActiveDate: "",
+          coveredThroughDate: "",
+        },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: false },
       },
     };
@@ -1430,6 +1545,12 @@ describe("userDataBackup", () => {
       statsState: {
         knownWords: { ids: [], lastLearnedDate: "" },
         dailyProgress: { date: "", count: 0 },
+        streakProtection: {
+          streakDays: 0,
+          shieldCount: 0,
+          lastActiveDate: "",
+          coveredThroughDate: "",
+        },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: false },
       },
     };

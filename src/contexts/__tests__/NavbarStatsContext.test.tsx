@@ -9,7 +9,10 @@ jest.mock("@/src/contexts/LearningStatsContext", () => ({
 
 jest.mock("@/src/db/sqlite/db", () => ({
   countGlobalBoxPromotions: jest.fn(),
-  getGlobalDailyStreakDays: jest.fn(),
+}));
+
+jest.mock("@/src/services/streakProtection", () => ({
+  getProtectedDailyStreakSnapshot: jest.fn(),
 }));
 
 import { act, renderHook, waitFor } from "@testing-library/react-native";
@@ -19,18 +22,16 @@ import {
   NavbarStatsProvider,
   useNavbarStats,
 } from "@/src/contexts/NavbarStatsContext";
-import {
-  countGlobalBoxPromotions,
-  getGlobalDailyStreakDays,
-} from "@/src/db/sqlite/db";
+import { countGlobalBoxPromotions } from "@/src/db/sqlite/db";
+import { getProtectedDailyStreakSnapshot } from "@/src/services/streakProtection";
 
 const mockedCountGlobalBoxPromotions =
   countGlobalBoxPromotions as jest.MockedFunction<
     typeof countGlobalBoxPromotions
   >;
-const mockedGetGlobalDailyStreakDays =
-  getGlobalDailyStreakDays as jest.MockedFunction<
-    typeof getGlobalDailyStreakDays
+const mockedGetProtectedDailyStreakSnapshot =
+  getProtectedDailyStreakSnapshot as jest.MockedFunction<
+    typeof getProtectedDailyStreakSnapshot
   >;
 
 const wrapper = ({ children }: { children: React.ReactNode }) => (
@@ -42,16 +43,22 @@ describe("NavbarStatsContext", () => {
     jest.clearAllMocks();
     mockedKnownWordsCount = 0;
     mockedCountGlobalBoxPromotions.mockResolvedValue(0);
-    mockedGetGlobalDailyStreakDays.mockResolvedValue(0);
+    mockedGetProtectedDailyStreakSnapshot.mockResolvedValue({
+      streakDays: 0,
+      shieldCount: 0,
+    });
   });
 
   it("sets streak days from the database instead of incrementing by one", async () => {
-    mockedGetGlobalDailyStreakDays.mockResolvedValue(0);
+    mockedGetProtectedDailyStreakSnapshot.mockResolvedValue({
+      streakDays: 0,
+      shieldCount: 0,
+    });
 
     const { result } = renderHook(() => useNavbarStats(), { wrapper });
 
     await waitFor(() => {
-      expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalled();
+      expect(mockedGetProtectedDailyStreakSnapshot).toHaveBeenCalled();
     });
 
     act(() => {
@@ -70,7 +77,7 @@ describe("NavbarStatsContext", () => {
     const { result } = renderHook(() => useNavbarStats(), { wrapper });
 
     await waitFor(() => {
-      expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalled();
+      expect(mockedGetProtectedDailyStreakSnapshot).toHaveBeenCalled();
     });
 
     act(() => {
@@ -95,8 +102,11 @@ describe("NavbarStatsContext", () => {
   });
 
   it("preserves a local streak burst when an older provider refresh resolves later", async () => {
-    let resolveStreakRead: (value: number) => void = () => {};
-    mockedGetGlobalDailyStreakDays.mockReturnValueOnce(
+    let resolveStreakRead: (value: {
+      streakDays: number;
+      shieldCount: 0 | 1 | 2;
+    }) => void = () => {};
+    mockedGetProtectedDailyStreakSnapshot.mockReturnValueOnce(
       new Promise((resolve) => {
         resolveStreakRead = resolve;
       }),
@@ -105,7 +115,7 @@ describe("NavbarStatsContext", () => {
     const { result } = renderHook(() => useNavbarStats(), { wrapper });
 
     await waitFor(() => {
-      expect(mockedGetGlobalDailyStreakDays).toHaveBeenCalled();
+      expect(mockedGetProtectedDailyStreakSnapshot).toHaveBeenCalled();
     });
 
     act(() => {
@@ -120,7 +130,7 @@ describe("NavbarStatsContext", () => {
     expect(result.current.stats.streakDays).toBe(1);
 
     await act(async () => {
-      resolveStreakRead(0);
+      resolveStreakRead({ streakDays: 0, shieldCount: 0 });
     });
 
     expect(result.current.stats.streakDays).toBe(1);
@@ -128,7 +138,10 @@ describe("NavbarStatsContext", () => {
 
   it("syncs expired streak back to zero on provider refresh", async () => {
     mockedKnownWordsCount = 1;
-    mockedGetGlobalDailyStreakDays.mockResolvedValueOnce(4);
+    mockedGetProtectedDailyStreakSnapshot.mockResolvedValueOnce({
+      streakDays: 4,
+      shieldCount: 0,
+    });
 
     const { result, rerender } = renderHook(() => useNavbarStats(), { wrapper });
 
@@ -137,7 +150,10 @@ describe("NavbarStatsContext", () => {
     });
 
     mockedKnownWordsCount = 2;
-    mockedGetGlobalDailyStreakDays.mockResolvedValueOnce(0);
+    mockedGetProtectedDailyStreakSnapshot.mockResolvedValueOnce({
+      streakDays: 0,
+      shieldCount: 0,
+    });
 
     rerender(undefined);
 

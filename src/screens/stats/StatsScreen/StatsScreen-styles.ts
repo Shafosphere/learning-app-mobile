@@ -48,6 +48,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     bottom: 12,
     opacity: 0.95,
   },
+  miniStatShieldStack: {
+    position: "absolute",
+    left: 12,
+    bottom: 12,
+    flexDirection: "row",
+    gap: 2,
+    opacity: 0.95,
+  },
   miniStatLabel: {
     marginTop: 6,
     fontSize: 12,
