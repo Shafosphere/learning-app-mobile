@@ -16,6 +16,7 @@ import {
   getDailyActivitySummariesCustom,
   getTotalLearningTimeMs,
 } from "@/src/db/sqlite/db";
+import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
 
 export default function StatsScreen() {
   const styles = useStyles();
@@ -23,6 +24,7 @@ export default function StatsScreen() {
   const { statsBookshelfEnabled, colors } = useSettings();
   const { stats } = useNavbarStats();
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
+  const [shieldedDates, setShieldedDates] = useState<string[]>([]);
   const [learningTime, setLearningTime] = useState({
     week: 0,
     month: 0,
@@ -52,6 +54,18 @@ export default function StatsScreen() {
       } catch {
         if (mounted) {
           setHeatmapData([]);
+          setShieldedDates([]);
+        }
+        return;
+      }
+
+      try {
+        const streakProtection = await getProtectedDailyStreakState();
+        if (!mounted) return;
+        setShieldedDates(streakProtection.shieldUsedDates);
+      } catch {
+        if (mounted) {
+          setShieldedDates([]);
         }
       }
     })();
@@ -165,7 +179,11 @@ export default function StatsScreen() {
 
       <PinnedCoursesProgress />
 
-      <ActivityHeatmap data={heatmapData} months={12} />
+      <ActivityHeatmap
+        data={heatmapData}
+        months={12}
+        shieldedDates={shieldedDates}
+      />
 
       <HardWordsList />
 

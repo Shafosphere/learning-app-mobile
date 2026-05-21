@@ -235,6 +235,7 @@ const DEFAULT_STATS_STATE: StatsStateExport = {
     shieldCount: 0,
     lastActiveDate: "",
     coveredThroughDate: "",
+    shieldUsedDates: [],
   },
   statsUi: {
     fireEffectEnabled: false,
@@ -250,7 +251,8 @@ function isDefaultProgressState(statsState: StatsStateExport): boolean {
     statsState.dailyProgress.count === 0 &&
     statsState.streakProtection.streakDays === 0 &&
     statsState.streakProtection.shieldCount === 0 &&
-    statsState.streakProtection.lastActiveDate === ""
+    statsState.streakProtection.lastActiveDate === "" &&
+    statsState.streakProtection.shieldUsedDates.length === 0
   );
 }
 
@@ -270,7 +272,8 @@ function isDefaultStreakProtectionState(
     state.streakDays === 0 &&
     state.shieldCount === 0 &&
     state.lastActiveDate === "" &&
-    state.coveredThroughDate === ""
+    state.coveredThroughDate === "" &&
+    state.shieldUsedDates.length === 0
   );
 }
 
@@ -1852,6 +1855,7 @@ export async function restoreUserData(
           normalized.statsState.dailyProgress.count > 0 ||
           normalized.statsState.streakProtection.streakDays > 0 ||
           normalized.statsState.streakProtection.shieldCount > 0 ||
+          normalized.statsState.streakProtection.shieldUsedDates.length > 0 ||
           normalized.statsState.statsUi.fireEffectEnabled ||
           normalized.statsState.statsUi.bookshelfEnabled,
       },

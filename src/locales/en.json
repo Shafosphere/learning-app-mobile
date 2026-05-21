@@ -439,7 +439,9 @@
         "introResetDone": "Introduction reset. The tutorial will start from language selection.",
         "introResetError": "Could not reset bubbles.",
         "dbErrorScreenOpened": "SQLite test error screen enabled. Close it using “Try again”.",
-        "dbErrorScreenOpenError": "Could not enable the test error screen."
+        "dbErrorScreenOpenError": "Could not enable the test error screen.",
+        "yesterdayShielded": "Yesterday has been marked as protected by a shield. Open stats to check the heatmap.",
+        "yesterdayShieldError": "Could not mark yesterday as shield-protected."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -481,6 +483,12 @@
           "subtitle": "Shows the SQLite failure screen without damaging the real database.",
           "button": "Show screen",
           "buttonLoading": "Opening…"
+        },
+        "yesterdayShielded": {
+          "title": "Mark yesterday as shielded",
+          "subtitle": "Adds yesterday to the shield usage history for checking the heatmap. The shield appears only if that day has no activity.",
+          "button": "Add shield",
+          "buttonLoading": "Adding…"
         },
         "testQuotes": {
           "title": "Test quotes / quote bubble",

@@ -24,6 +24,7 @@ import { triggerLocalExportReminderPreview } from "@/src/services/localExportRem
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
+import { markYesterdayAsShieldUsedForDebug } from "@/src/services/streakProtection";
 import { playSoundAsset } from "@/src/utils/soundPlayer";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as FileSystem from "expo-file-system/legacy";
@@ -109,6 +110,7 @@ const DebuggingSection: React.FC = () => {
   const [clearingStorage, setClearingStorage] = useState(false);
   const [openingDbErrorScreen, setOpeningDbErrorScreen] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
+  const [markingShieldDay, setMarkingShieldDay] = useState(false);
 
   const handleAddRandomCustom = async () => {
     if (activeCustomCourseId == null) {
@@ -316,6 +318,24 @@ const DebuggingSection: React.FC = () => {
     }
   };
 
+  const handleMarkYesterdayShielded = async () => {
+    setMarkingShieldDay(true);
+    try {
+      await markYesterdayAsShieldUsedForDebug();
+      Alert.alert(
+        t("app.status.done"),
+        t("settings.debug.alerts.yesterdayShielded")
+      );
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.yesterdayShieldError")
+      );
+    } finally {
+      setMarkingShieldDay(false);
+    }
+  };
+
   return (
     <View style={styles.sectionCard}>
       <Text style={styles.sectionHeader}>{t("settings.debug.section.tools")}</Text>
@@ -423,6 +443,28 @@ const DebuggingSection: React.FC = () => {
           onPress={handleOpenDbErrorScreen}
           disabled={openingDbErrorScreen}
           width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.yesterdayShielded.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.yesterdayShielded.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            markingShieldDay
+              ? t("settings.debug.rows.yesterdayShielded.buttonLoading")
+              : t("settings.debug.rows.yesterdayShielded.button")
+          }
+          color="my_yellow"
+          onPress={handleMarkYesterdayShielded}
+          disabled={markingShieldDay}
+          width={150}
         />
       </View>
 

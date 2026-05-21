@@ -1,3 +1,4 @@
+import Ionicons from "@expo/vector-icons/Ionicons";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
@@ -36,6 +37,7 @@ type ActivityMonth = {
 type Props = {
   data: ActivityDay[];
   months?: number;
+  shieldedDates?: string[];
   onSelect?: (day: ActivityDay | null) => void;
 };
 
@@ -84,6 +86,7 @@ const useStyles = createThemeStylesHook((colors) => ({
   cell: {
     alignItems: "center",
     justifyContent: "center",
+    overflow: "hidden",
   },
   selectedCell: {
     shadowColor: "#000",
@@ -94,6 +97,7 @@ const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 15,
     fontWeight: "700",
     includeFontPadding: false,
+    zIndex: 1,
   },
   detailsWrap: {
     overflow: "hidden",
@@ -344,7 +348,12 @@ function ScrambleText({
   return <Text style={style}>{displayText}</Text>;
 }
 
-export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) {
+export default function ActivityHeatmap({
+  data,
+  months = 12,
+  shieldedDates = [],
+  onSelect,
+}: Props) {
   const styles = useStyles();
   const { t } = useTranslation();
   const { colors, theme } = useSettings();
@@ -353,6 +362,10 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
   const scale = useMemo(
     () => getScale(colors.my_green, colors.border, theme === "dark"),
     [colors.border, colors.my_green, theme]
+  );
+  const shieldedDateSet = useMemo(
+    () => new Set(shieldedDates),
+    [shieldedDates]
   );
   const [containerWidth, setContainerWidth] = useState(0);
   const [visibleMonthIndex, setVisibleMonthIndex] = useState(
@@ -532,6 +545,8 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
           const isActive =
             !isFuture &&
             (day.timeMs > 0 || day.learnedCount > 0 || day.totalCount > 0);
+          const isShielded =
+            shieldedDateSet.has(day.date) && !isActive && !isFuture;
           const backgroundColor = isFuture
             ? withAlpha(colors.border, "66")
             : pickColor(day.timeMs);
@@ -561,6 +576,18 @@ export default function ActivityHeatmap({ data, months = 12, onSelect }: Props) 
                 },
               ]}
               >
+                {isShielded ? (
+                  <Ionicons
+                    testID={`activity-heatmap-shield-${day.date}`}
+                    name="shield-checkmark"
+                    size={Math.round(cellSize * 0.82)}
+                    color={colors.my_green}
+                    style={{
+                      position: "absolute",
+                      opacity: theme === "dark" ? 0.34 : 0.28,
+                    }}
+                  />
+                ) : null}
                 <Text
                   style={[
                     styles.dayNumber,

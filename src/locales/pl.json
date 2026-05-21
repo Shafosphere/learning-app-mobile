@@ -439,7 +439,9 @@
         "introResetDone": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka.",
         "introResetError": "Nie udało się zresetować dymków.",
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Zamknij go przez „Spróbuj ponownie”.",
-        "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu."
+        "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu.",
+        "yesterdayShielded": "Wczorajszy dzień został oznaczony jako ochroniony tarczą. Otwórz statystyki, żeby sprawdzić heatmapę.",
+        "yesterdayShieldError": "Nie udało się oznaczyć wczorajszego dnia tarczą."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -481,6 +483,12 @@
           "subtitle": "Pokazuje ekran awarii SQLite bez uszkadzania prawdziwej bazy danych.",
           "button": "Pokaż ekran",
           "buttonLoading": "Otwieram…"
+        },
+        "yesterdayShielded": {
+          "title": "Oznacz wczoraj jako dzień z tarczą",
+          "subtitle": "Dodaje wczoraj do historii zużytych tarcz, aby sprawdzić wygląd na heatmapie. Tarcza pokaże się tylko, jeśli ten dzień nie ma aktywności.",
+          "button": "Dodaj tarczę",
+          "buttonLoading": "Dodaję…"
         },
         "testQuotes": {
           "title": "Testuj cytaty (dymek cytatu)",

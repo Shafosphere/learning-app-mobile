@@ -8,6 +8,8 @@ jest.mock("@/src/db/sqlite/db", () => ({
 
 import {
   getProtectedDailyStreakSnapshot,
+  getProtectedDailyStreakState,
+  normalizeShieldUsedDates,
   registerProtectedDailyActivity,
   STREAK_PROTECTION_STORAGE_KEY,
   type StreakProtectionState,
@@ -22,7 +24,7 @@ function mockActiveDates(dates: string[]) {
   });
 }
 
-async function setStoredState(state: StreakProtectionState) {
+async function setStoredState(state: Partial<StreakProtectionState>) {
   await AsyncStorage.setItem(STREAK_PROTECTION_STORAGE_KEY, JSON.stringify(state));
 }
 
@@ -55,6 +57,7 @@ describe("streakProtection", () => {
       shieldCount: 1,
       lastActiveDate: "2026-05-04",
       coveredThroughDate: "2026-05-04",
+      shieldUsedDates: ["2026-05-02", "2026-05-03"],
     });
   });
 
@@ -125,6 +128,70 @@ describe("streakProtection", () => {
       shieldCount: 0,
       lastActiveDate: "2026-05-01",
       coveredThroughDate: "2026-05-02",
+      shieldUsedDates: ["2026-05-02"],
     });
+  });
+
+  it("normalizes legacy stored states without shield usage dates", async () => {
+    mockActiveDates(["2026-05-01"]);
+    await setStoredState({
+      streakDays: 3,
+      shieldCount: 0,
+      lastActiveDate: "2026-05-01",
+      coveredThroughDate: "2026-05-01",
+    });
+
+    await expect(
+      getProtectedDailyStreakState(dateMs(2026, 5, 2))
+    ).resolves.toEqual({
+      streakDays: 3,
+      shieldCount: 0,
+      lastActiveDate: "2026-05-01",
+      coveredThroughDate: "2026-05-01",
+      shieldUsedDates: [],
+    });
+  });
+
+  it("does not duplicate shield usage dates when reconciling again", async () => {
+    mockActiveDates(["2026-05-01"]);
+    await setStoredState({
+      streakDays: 10,
+      shieldCount: 1,
+      lastActiveDate: "2026-05-01",
+      coveredThroughDate: "2026-05-01",
+      shieldUsedDates: ["2026-05-02"],
+    });
+
+    await getProtectedDailyStreakState(dateMs(2026, 5, 3));
+    await getProtectedDailyStreakState(dateMs(2026, 5, 3));
+
+    expect((await getStoredState()).shieldUsedDates).toEqual(["2026-05-02"]);
+  });
+
+  it("normalizes shield usage dates by sorting, deduplicating, and trimming", () => {
+    const oldDates = Array.from({ length: 402 }, (_, index) =>
+      `2025-01-${String((index % 28) + 1).padStart(2, "0")}`
+    );
+    const uniqueDates = Array.from({ length: 405 }, (_, index) => {
+      const date = new Date(2025, 0, 1);
+      date.setDate(date.getDate() + index);
+      return date.toISOString().slice(0, 10);
+    });
+
+    const result = normalizeShieldUsedDates([
+      "not-a-date",
+      "2026-05-03",
+      "2026-05-02",
+      "2026-05-03",
+      ...oldDates,
+      ...uniqueDates,
+    ]);
+
+    expect(result).toHaveLength(400);
+    expect(result).toEqual([...new Set(result)].sort());
+    expect(result).not.toContain("not-a-date");
+    expect(result).not.toContain("2025-01-01");
+    expect(result).toContain("2026-05-02");
+    expect(result).toContain("2026-05-03");
   });
 });

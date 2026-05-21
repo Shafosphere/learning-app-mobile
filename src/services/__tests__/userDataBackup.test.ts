@@ -12,6 +12,7 @@ import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
 import {
   getProtectedDailyStreakState,
   initializeStreakProtectionFromHistory,
+  type StreakProtectionState,
 } from "@/src/services/streakProtection";
 
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -50,6 +51,11 @@ jest.mock("@/src/services/streakProtection", () => {
       typeof value?.coveredThroughDate === "string"
         ? value.coveredThroughDate
         : "",
+    shieldUsedDates: Array.isArray(value?.shieldUsedDates)
+      ? value.shieldUsedDates.filter((item: unknown): item is string =>
+          typeof item === "string"
+        )
+      : [],
   });
   return {
     STREAK_PROTECTION_STORAGE_KEY: "stats.streakProtection",
@@ -59,6 +65,7 @@ jest.mock("@/src/services/streakProtection", () => {
         shieldCount: 1,
         lastActiveDate: "2026-04-21",
         coveredThroughDate: "2026-04-21",
+        shieldUsedDates: [],
       })
     ),
     initializeStreakProtectionFromHistory: jest.fn(() =>
@@ -67,6 +74,7 @@ jest.mock("@/src/services/streakProtection", () => {
         shieldCount: 0,
         lastActiveDate: "2026-04-20",
         coveredThroughDate: "2026-04-20",
+        shieldUsedDates: [],
       })
     ),
     normalizeStreakProtectionState: jest.fn(normalize),
@@ -284,12 +292,14 @@ describe("userDataBackup", () => {
       shieldCount: 0,
       lastActiveDate: "",
       coveredThroughDate: "",
+      shieldUsedDates: [],
     });
     mockedInitializeStreakProtectionFromHistory.mockResolvedValue({
       streakDays: 4,
       shieldCount: 0,
       lastActiveDate: "2026-04-20",
       coveredThroughDate: "2026-04-20",
+      shieldUsedDates: [],
     });
   });
 
@@ -305,6 +315,7 @@ describe("userDataBackup", () => {
       shieldCount: 1,
       lastActiveDate: "2026-04-21",
       coveredThroughDate: "2026-04-21",
+      shieldUsedDates: [],
     });
     mockedGetCustomCourses.mockResolvedValue([
       {
@@ -409,6 +420,7 @@ describe("userDataBackup", () => {
         shieldCount: 1,
         lastActiveDate: "2026-04-21",
         coveredThroughDate: "2026-04-21",
+        shieldUsedDates: [],
       },
       statsUi: { fireEffectEnabled: true, bookshelfEnabled: false },
     });
@@ -822,6 +834,7 @@ describe("userDataBackup", () => {
           shieldCount: 2,
           lastActiveDate: "2026-04-21",
           coveredThroughDate: "2026-04-21",
+          shieldUsedDates: [],
         },
         statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
       },
@@ -968,6 +981,7 @@ describe("userDataBackup", () => {
       shieldCount: 0,
       lastActiveDate: "2026-04-20",
       coveredThroughDate: "2026-04-20",
+      shieldUsedDates: [],
     });
     expect(
       JSON.parse(
@@ -1011,6 +1025,7 @@ describe("userDataBackup", () => {
           shieldCount: 1,
           lastActiveDate: "2026-04-20",
           coveredThroughDate: "2026-04-20",
+          shieldUsedDates: [],
         },
         statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
       },
@@ -1043,6 +1058,132 @@ describe("userDataBackup", () => {
     ).toBe(true);
   });
 
+  it("preserves local stats during non-destructive import when only shield history exists", async () => {
+    const db = createMockDb();
+    const localStreakProtection: StreakProtectionState = {
+      streakDays: 0,
+      shieldCount: 0,
+      lastActiveDate: "",
+      coveredThroughDate: "",
+      shieldUsedDates: ["2026-04-19"],
+    };
+    mockedGetProtectedDailyStreakState.mockResolvedValue(localStreakProtection);
+    await AsyncStorage.multiSet([
+      ["knownWords", JSON.stringify({ ids: [], lastLearnedDate: "" })],
+      ["dailyProgress", JSON.stringify({ date: "", count: 0 })],
+      ["stats.streakProtection", JSON.stringify(localStreakProtection)],
+      ["stats.fireEffectEnabled", JSON.stringify(false)],
+      ["stats.bookshelfEnabled", JSON.stringify(false)],
+    ]);
+
+    const payload: UserDataExport = {
+      version: 3,
+      generatedAt: 123,
+      builtinReviews: [],
+      boxesSnapshots: {},
+      customCourseBoxSnapshots: {},
+      customCourses: [],
+      officialCourseState: {
+        pinnedOfficialCourseSlugs: [],
+        lastActiveOfficialCourseSlug: null,
+        boxSnapshots: {},
+        courses: [],
+      },
+      statsState: {
+        knownWords: { ids: [4, 8], lastLearnedDate: "2026-04-20" },
+        dailyProgress: { date: "2026-04-20", count: 2 },
+        streakProtection: {
+          streakDays: 3,
+          shieldCount: 1,
+          lastActiveDate: "2026-04-20",
+          coveredThroughDate: "2026-04-20",
+          shieldUsedDates: [],
+        },
+        statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
+      },
+    };
+
+    const result = await restoreUserData(payload, { targetDb: db as never });
+
+    expect(result.success).toBe(true);
+    expect(result.restoredState?.progressStateApplied).toBe(false);
+    expect(JSON.parse((await AsyncStorage.getItem("knownWords")) ?? "null")).toEqual({
+      ids: [],
+      lastLearnedDate: "",
+    });
+    expect(
+      JSON.parse((await AsyncStorage.getItem("dailyProgress")) ?? "null")
+    ).toEqual({
+      date: "",
+      count: 0,
+    });
+    expect(
+      JSON.parse(
+        (await AsyncStorage.getItem("stats.streakProtection")) ?? "null"
+      )
+    ).toEqual(localStreakProtection);
+  });
+
+  it("restores progress during non-destructive import when only local coveredThroughDate exists", async () => {
+    const db = createMockDb();
+    mockedGetProtectedDailyStreakState.mockResolvedValue({
+      streakDays: 0,
+      shieldCount: 0,
+      lastActiveDate: "",
+      coveredThroughDate: "2026-04-19",
+      shieldUsedDates: [],
+    });
+    await AsyncStorage.multiSet([
+      ["knownWords", JSON.stringify({ ids: [], lastLearnedDate: "" })],
+      ["dailyProgress", JSON.stringify({ date: "", count: 0 })],
+      ["stats.fireEffectEnabled", JSON.stringify(false)],
+      ["stats.bookshelfEnabled", JSON.stringify(false)],
+    ]);
+
+    const payload: UserDataExport = {
+      version: 3,
+      generatedAt: 123,
+      builtinReviews: [],
+      boxesSnapshots: {},
+      customCourseBoxSnapshots: {},
+      customCourses: [],
+      officialCourseState: {
+        pinnedOfficialCourseSlugs: [],
+        lastActiveOfficialCourseSlug: null,
+        boxSnapshots: {},
+        courses: [],
+      },
+      statsState: {
+        knownWords: { ids: [4, 8], lastLearnedDate: "2026-04-20" },
+        dailyProgress: { date: "2026-04-20", count: 2 },
+        streakProtection: {
+          streakDays: 3,
+          shieldCount: 1,
+          lastActiveDate: "2026-04-20",
+          coveredThroughDate: "2026-04-20",
+          shieldUsedDates: [],
+        },
+        statsUi: { fireEffectEnabled: true, bookshelfEnabled: true },
+      },
+    };
+
+    const result = await restoreUserData(payload, { targetDb: db as never });
+
+    expect(result.success).toBe(true);
+    expect(result.restoredState?.progressStateApplied).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem("knownWords")) ?? "null")).toEqual(
+      payload.statsState.knownWords
+    );
+    expect(
+      JSON.parse((await AsyncStorage.getItem("dailyProgress")) ?? "null")
+    ).toEqual(payload.statsState.dailyProgress);
+    expect(
+      JSON.parse(
+        (await AsyncStorage.getItem("stats.streakProtection")) ?? "null"
+      )
+    ).toEqual(payload.statsState.streakProtection);
+  });
+
   it("restores progress during non-destructive import even when local stats UI prefs were changed", async () => {
     const db = createMockDb();
     await AsyncStorage.multiSet([
@@ -1073,6 +1214,7 @@ describe("userDataBackup", () => {
           shieldCount: 1,
           lastActiveDate: "2026-04-20",
           coveredThroughDate: "2026-04-20",
+          shieldUsedDates: [],
         },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: true },
       },
@@ -1341,6 +1483,7 @@ describe("userDataBackup", () => {
           shieldCount: 0,
           lastActiveDate: "",
           coveredThroughDate: "",
+          shieldUsedDates: [],
         },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: false },
       },
@@ -1550,6 +1693,7 @@ describe("userDataBackup", () => {
           shieldCount: 0,
           lastActiveDate: "",
           coveredThroughDate: "",
+          shieldUsedDates: [],
         },
         statsUi: { fireEffectEnabled: false, bookshelfEnabled: false },
       },

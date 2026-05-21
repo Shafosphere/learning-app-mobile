@@ -10,6 +10,7 @@ export type StreakProtectionState = {
   shieldCount: 0 | 1 | 2;
   lastActiveDate: string;
   coveredThroughDate: string;
+  shieldUsedDates: string[];
 };
 
 export type ProtectedDailyStreakSnapshot = Pick<
@@ -73,6 +74,22 @@ function normalizeDate(value: unknown): string {
   return typeof value === "string" && parseLocalDateOnly(value) ? value : "";
 }
 
+export function normalizeShieldUsedDates(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+
+  return [
+    ...new Set(
+      value.filter(
+        (item): item is string =>
+          typeof item === "string" && /^\d{4}-\d{2}-\d{2}$/.test(item)
+      )
+    ),
+  ]
+    .filter((dateKey) => parseLocalDateOnly(dateKey))
+    .sort()
+    .slice(-400);
+}
+
 export function normalizeStreakProtectionState(
   value?: Partial<StreakProtectionState> | null
 ): StreakProtectionState {
@@ -84,6 +101,7 @@ export function normalizeStreakProtectionState(
     shieldCount: clampShieldCount(value?.shieldCount),
     lastActiveDate: normalizeDate(value?.lastActiveDate),
     coveredThroughDate: normalizeDate(value?.coveredThroughDate),
+    shieldUsedDates: normalizeShieldUsedDates(value?.shieldUsedDates),
   };
 }
 
@@ -133,6 +151,7 @@ function buildInitialState(activeDateKeys: string[], nowMs: number): StreakProte
     shieldCount: 0,
     lastActiveDate,
     coveredThroughDate: lastActiveDate === todayKey ? todayKey : getYesterdayKey(nowMs),
+    shieldUsedDates: [],
   };
 }
 
@@ -194,6 +213,10 @@ function reconcileThroughDate(
         next = {
           ...next,
           shieldCount: clampShieldCount(next.shieldCount - 1),
+          shieldUsedDates: normalizeShieldUsedDates([
+            ...next.shieldUsedDates,
+            cursor,
+          ]),
         };
       } else {
         next = {
@@ -276,5 +299,22 @@ export async function initializeStreakProtectionFromHistory(
     const state = buildInitialState(await getActiveDateKeys(), nowMs);
     await persistState(state);
     return state;
+  });
+}
+
+export async function markYesterdayAsShieldUsedForDebug(
+  nowMs: number = Date.now()
+): Promise<StreakProtectionState> {
+  return withStreakProtectionLock(async () => {
+    const state = await getReconciledState(nowMs);
+    const next = normalizeStreakProtectionState({
+      ...state,
+      shieldUsedDates: normalizeShieldUsedDates([
+        ...state.shieldUsedDates,
+        getYesterdayKey(nowMs),
+      ]),
+    });
+    await persistState(next);
+    return next;
   });
 }
