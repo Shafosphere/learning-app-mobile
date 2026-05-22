@@ -44,7 +44,7 @@ const MAX_INPUT_SCROLL_AHEAD = 180;
 const INPUT_SCROLL_TRAILING_BUFFER = 120;
 const ENABLE_KEYBOARD_CONSOLE_LOGS = false;
 
-type HintModalMode = "save" | "target";
+type HintModalMode = "target";
 
 type KeyboardMetricsSnapshot = {
   screenY?: number;
@@ -153,6 +153,9 @@ export default function Card({
   introMode = false,
   setCorrectionRewers,
   onHintUpdate,
+  hintCoachmarkId,
+  shouldStartHintEditing,
+  hintEditRequestToken = 0,
   isFocused = true,
   backgroundColorOverride,
   textColorOverride,
@@ -348,6 +351,7 @@ export default function Card({
   const [hintDraft, setHintDraft] = useState("");
   const [hintModal, setHintModal] = useState<HintModalMode | null>(null);
   const [pendingHintDraft, setPendingHintDraft] = useState<string | null>(null);
+  const previousHintEditRequestTokenRef = useRef(hintEditRequestToken);
   const hintActionsAnim = useRef(new Animated.Value(0)).current;
   const currentHint = useMemo(() => {
     if (!selectedItem) return null;
@@ -1013,6 +1017,17 @@ export default function Card({
     onHintEditStarted();
   }, [currentHint, onHintEditStarted, onHintUpdate, selectedItem]);
 
+  useEffect(() => {
+    if (previousHintEditRequestTokenRef.current === hintEditRequestToken) {
+      return;
+    }
+    previousHintEditRequestTokenRef.current = hintEditRequestToken;
+    if (hintEditRequestToken <= 0) {
+      return;
+    }
+    startHintEditing();
+  }, [hintEditRequestToken, startHintEditing]);
+
   const deleteHint = useCallback(() => {
     if (!selectedItem || !onHintUpdate) return;
     const nextFront = effectiveReversed
@@ -1034,12 +1049,12 @@ export default function Card({
   }, [currentHint]);
 
   const applyHintToSides = useCallback(
-    (applyToBoth: boolean) => {
+    (applyToBoth: boolean, draftOverride?: string) => {
       if (!selectedItem) {
         setIsEditingHint(false);
         return;
       }
-      const normalized = (pendingHintDraft ?? hintDraft).trim();
+      const normalized = (draftOverride ?? pendingHintDraft ?? hintDraft).trim();
       const value = normalized.length > 0 ? normalized : null;
       if (!onHintUpdate) {
         setIsEditingHint(false);
@@ -1079,9 +1094,19 @@ export default function Card({
       return;
     }
     if (hintModal) return;
+    if (!canShowBackAsPrompt) {
+      applyHintToSides(false, normalized);
+      return;
+    }
     setPendingHintDraft(normalized);
-    setHintModal(canShowBackAsPrompt ? "target" : "save");
-  }, [canShowBackAsPrompt, hintDraft, hintModal, selectedItem]);
+    setHintModal("target");
+  }, [
+    applyHintToSides,
+    canShowBackAsPrompt,
+    hintDraft,
+    hintModal,
+    selectedItem,
+  ]);
 
   const confirmHintModal = useCallback(() => {
     applyHintToSides(hintModal === "target");
@@ -1287,6 +1312,8 @@ export default function Card({
           onHintUpdate={onHintUpdate}
           inputRef={hintInputRef}
           onHintInputBlur={cancelHintEditing}
+          hintCoachmarkId={hintCoachmarkId}
+          shouldStartHintEditing={shouldStartHintEditing}
         />
       )}
       <CardFrame
@@ -1323,28 +1350,12 @@ export default function Card({
       */}
       <NudgeModal
         visible={hintModal !== null}
-        title={
-          hintModal === "target"
-            ? t("flashcards.card.hint.targetDialogTitle")
-            : t("flashcards.card.hint.saveDialogTitle")
-        }
-        description={
-          hintModal === "target"
-            ? t("flashcards.card.hint.targetDialogMessage")
-            : t("flashcards.card.hint.saveDialogMessage")
-        }
-        confirmLabel={
-          hintModal === "target"
-            ? t("flashcards.card.hint.bothSides")
-            : t("flashcards.card.hint.save")
-        }
+        title={t("flashcards.card.hint.targetDialogTitle")}
+        description={t("flashcards.card.hint.targetDialogMessage")}
+        confirmLabel={t("flashcards.card.hint.bothSides")}
         onConfirm={confirmHintModal}
         onClose={closeHintModal}
-        secondaryLabel={
-          hintModal === "target"
-            ? t("flashcards.card.hint.thisSideOnly")
-            : t("app.actions.cancel")
-        }
+        secondaryLabel={t("flashcards.card.hint.thisSideOnly")}
         onSecondaryPress={handleHintModalSecondaryPress}
       />
     </View>

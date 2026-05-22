@@ -154,6 +154,23 @@ const DebuggingSection: React.FC = () => {
     router.push("/flashcards");
   };
 
+  const handlePreviewHintTutorial = () => {
+    if (activeCustomCourseId == null) {
+      Alert.alert(
+        t("settings.debug.alerts.missingCourseTitle"),
+        t("settings.debug.alerts.missingCourseMessage")
+      );
+      return;
+    }
+
+    router.push({
+      pathname: "/flashcards",
+      params: {
+        hintTutorialRestartToken: Date.now().toString(),
+      },
+    });
+  };
+
   const handlePreviewLocalExportReminder = () => {
     triggerLocalExportReminderPreview();
   };
@@ -368,6 +385,24 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.previewActionsPositionNudge.button")}
           color="my_yellow"
           onPress={handlePreviewActionsPositionNudge}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewHintTutorial.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewHintTutorial.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.previewHintTutorial.button")}
+          color="my_yellow"
+          onPress={handlePreviewHintTutorial}
+          disabled={activeCustomCourseId == null}
           width={140}
         />
       </View>

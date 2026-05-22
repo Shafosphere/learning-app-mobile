@@ -15,6 +15,7 @@ import {
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import {
   FLASHCARDS_COACHMARK_STEPS,
+  HINT_COACHMARK_STEPS,
   type CoachmarkAdvanceEvent,
   type CoachmarkFlowStep,
 } from "@/src/constants/coachmarkFlows";
@@ -62,7 +63,7 @@ import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useIsFocused } from "@react-navigation/native";
-import { useRouter } from "expo-router";
+import { useLocalSearchParams, useRouter } from "expo-router";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import {
   type ReactNode,
@@ -114,6 +115,7 @@ const BOX_SPAM_THRESHOLD = 40;
 const BOX_SPAM_COOLDOWN_MS = 0;
 const HINT_FAIL_THRESHOLD = 3;
 const HINT_COOLDOWN_MS = 10 * 60 * 1000;
+const HINT_TUTORIAL_FAIL_THRESHOLD = 5;
 const TRUE_FALSE_POST_OK_COOLDOWN_MS = 1000;
 const UI_WARMUP_DELAY_MS = 250;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
@@ -145,6 +147,7 @@ const EMPTY_BOXES_STATE: BoxesState = {
 };
 
 type TutorialCompletionState = Partial<Record<CoachmarkAdvanceEvent, boolean>>;
+type HintTutorialTriggerSource = "manual" | "auto";
 
 function pickRandomBatch<T>(items: T[], size: number): T[] {
   const normalizedSize = Math.max(1, size);
@@ -188,6 +191,7 @@ function formatLearningTime(timeMs: number): string {
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
+  const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
@@ -216,6 +220,10 @@ export default function Flashcards() {
   const wrongStreakRef = useRef(0);
   const questionStartRef = useRef<number | null>(null);
   const perCardFailRef = useRef<Record<number, number>>({});
+  const hintTutorialWrongStreakRef = useRef<Record<number, number>>({});
+  const pendingHintTutorialCardIdRef = useRef<number | null>(null);
+  const hintTutorialSeenRef = useRef(false);
+  const selectedItemIdRef = useRef<number | null>(null);
   const handledDisplayResultEventRef = useRef<string | null>(null);
   const isCoachmarkActiveRef = useRef(false);
   const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
@@ -361,6 +369,11 @@ export default function Flashcards() {
   const [tutorialSuccessVariant, setTutorialSuccessVariant] = useState<
     "normal" | "assisted"
   >("normal");
+  const [hintTutorialRequestedCardId, setHintTutorialRequestedCardId] =
+    useState<number | null>(null);
+  const [hintTutorialTriggerSource, setHintTutorialTriggerSource] =
+    useState<HintTutorialTriggerSource>("manual");
+  const [hintEditRequestToken, setHintEditRequestToken] = useState(0);
   const [
     actionsPositionNudgeAnswerCount,
     setActionsPositionNudgeAnswerCount,
@@ -562,6 +575,11 @@ export default function Flashcards() {
   const correctionLocked =
     correction != null && correction.mode !== "intro";
   const selectedItemId = selectedItem?.id ?? null;
+  useEffect(() => {
+    selectedItemIdRef.current = selectedItemId;
+  }, [selectedItemId]);
+  const shouldHideHintsForActiveBox =
+    activeBox === "boxFour" || activeBox === "boxFive";
   const [displayResultState, setDisplayResultState] = useState<{
     cardId: number | null;
     result: boolean | null;
@@ -805,6 +823,7 @@ export default function Flashcards() {
 
       if (selectedItemId != null) {
         perCardFailRef.current[selectedItemId] = 0;
+        hintTutorialWrongStreakRef.current[selectedItemId] = 0;
       }
 
       if (!isCoachmarkActiveRef.current && correctStreakRef.current >= STREAK_TARGET) {
@@ -867,6 +886,20 @@ export default function Flashcards() {
           });
           perCardFailRef.current[cardId] = 0;
         }
+
+        const nextHintTutorialWrongStreak =
+          (hintTutorialWrongStreakRef.current[cardId] ?? 0) + 1;
+        hintTutorialWrongStreakRef.current[cardId] =
+          nextHintTutorialWrongStreak;
+        if (
+          !hintTutorialSeenRef.current &&
+          !shouldHideHintsForActiveBox &&
+          nextHintTutorialWrongStreak >= HINT_TUTORIAL_FAIL_THRESHOLD
+        ) {
+          pendingHintTutorialCardIdRef.current = cardId;
+          setHintTutorialTriggerSource("auto");
+          setHintTutorialRequestedCardId(cardId);
+        }
       }
 
       if (!isCoachmarkActiveRef.current) {
@@ -878,7 +911,7 @@ export default function Flashcards() {
         });
       }
     }
-  }, [displayResult, selectedItemId, triggerQuote]);
+  }, [displayResult, selectedItemId, shouldHideHintsForActiveBox, triggerQuote]);
 
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const peekCards = useMemo(
@@ -1602,16 +1635,84 @@ export default function Flashcards() {
     steps: FLASHCARDS_COACHMARK_STEPS,
     completionState: tutorialCompletionState,
   });
+  const canRequestHintTutorial =
+    isFocused &&
+    isUiReady &&
+    shouldShowBoxes &&
+    !shouldRenderLoadingOverlay &&
+    selectedItemId != null &&
+    !shouldHideHintsForActiveBox;
+  const handleHintTutorialComplete = useCallback(() => {
+    const pendingCardId = pendingHintTutorialCardIdRef.current;
+    pendingHintTutorialCardIdRef.current = null;
+    setHintTutorialRequestedCardId(null);
+    setHintTutorialTriggerSource("manual");
+    if (pendingCardId == null || pendingCardId !== selectedItemIdRef.current) {
+      return;
+    }
+    setHintEditRequestToken((prev) => prev + 1);
+  }, []);
+  const hintCoachmark = useCoachmarkFlow({
+    flowKey: "flashcards-hint-guided",
+    storageKey: "@flashcards_hint_tutorial_seen_v1",
+    shouldStart:
+      hintTutorialRequestedCardId != null &&
+      hintTutorialRequestedCardId === selectedItemId &&
+      canRequestHintTutorial &&
+      !coachmark.isActive &&
+      !coachmark.isPendingStart,
+    steps: HINT_COACHMARK_STEPS,
+    restartToken: params.hintTutorialRestartToken,
+    onComplete: handleHintTutorialComplete,
+  });
   useEffect(() => {
-    isCoachmarkActiveRef.current = coachmark.isActive;
-  }, [coachmark.isActive]);
+    hintTutorialSeenRef.current = hintCoachmark.isReady && hintCoachmark.hasSeen;
+  }, [hintCoachmark.hasSeen, hintCoachmark.isReady]);
+  useEffect(() => {
+    if (hintTutorialRequestedCardId == null) {
+      return;
+    }
+    if (
+      selectedItemId !== hintTutorialRequestedCardId ||
+      !canRequestHintTutorial
+    ) {
+      pendingHintTutorialCardIdRef.current = null;
+      setHintTutorialRequestedCardId(null);
+      setHintTutorialTriggerSource("manual");
+    }
+  }, [
+    canRequestHintTutorial,
+    hintTutorialRequestedCardId,
+    selectedItemId,
+  ]);
+  useEffect(() => {
+    if (!params.hintTutorialRestartToken || !canRequestHintTutorial) {
+      return;
+    }
+    if (selectedItemId == null) {
+      return;
+    }
+
+    pendingHintTutorialCardIdRef.current = selectedItemId;
+    setHintTutorialTriggerSource("manual");
+    setHintTutorialRequestedCardId(selectedItemId);
+  }, [
+    canRequestHintTutorial,
+    params.hintTutorialRestartToken,
+    selectedItemId,
+  ]);
+  useEffect(() => {
+    isCoachmarkActiveRef.current = coachmark.isActive || hintCoachmark.isActive;
+  }, [coachmark.isActive, hintCoachmark.isActive]);
   useFlashcardsAutoflow({
     enabled:
       autoflowEnabled &&
       isFocused &&
       (!shouldRunFlashcardsCoachmark || coachmark.hasSeen) &&
       !coachmark.isActive &&
-      !coachmark.isPendingStart,
+      !coachmark.isPendingStart &&
+      !hintCoachmark.isActive &&
+      !hintCoachmark.isPendingStart,
     boxes,
     activeBox,
     handleSelectBox: baseHandleSelectBox,
@@ -1634,7 +1735,25 @@ export default function Flashcards() {
   });
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =
-    coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9";
+    (coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9") ||
+    hintCoachmark.isActive;
+  const shouldStartHintEditing = useCallback(() => {
+    if (!hintCoachmark.isReady || hintCoachmark.hasSeen || !canRequestHintTutorial) {
+      return true;
+    }
+    if (selectedItemId == null) {
+      return true;
+    }
+    pendingHintTutorialCardIdRef.current = selectedItemId;
+    setHintTutorialTriggerSource("manual");
+    setHintTutorialRequestedCardId(selectedItemId);
+    return false;
+  }, [
+    canRequestHintTutorial,
+    hintCoachmark.hasSeen,
+    hintCoachmark.isReady,
+    selectedItemId,
+  ]);
   const tryOpenActionsPositionNudgePreview = useCallback(() => {
     if (!isFocused) return;
     if (!consumeActionsPositionNudgePreview()) return;
@@ -1664,7 +1783,12 @@ export default function Flashcards() {
     }
     if (actionButtonsPosition !== "top") return;
     if (!shouldShowBoxes || shouldRenderLoadingOverlay) return;
-    if (coachmark.isActive || coachmark.isPendingStart) return;
+    if (
+      coachmark.isActive ||
+      coachmark.isPendingStart ||
+      hintCoachmark.isActive ||
+      hintCoachmark.isPendingStart
+    ) return;
 
     setIsActionsPositionNudgeVisible(true);
     void setActionsPositionNudgeSeen(true);
@@ -1676,6 +1800,8 @@ export default function Flashcards() {
     actionsPositionNudgeSeen,
     coachmark.isActive,
     coachmark.isPendingStart,
+    hintCoachmark.isActive,
+    hintCoachmark.isPendingStart,
     isActionsPositionNudgeVisible,
     setActionsPositionNudgeSeen,
     shouldRenderLoadingOverlay,
@@ -1858,8 +1984,6 @@ export default function Flashcards() {
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
   } = useAutoScaleToFit({ minScale: isCarouselLayout ? carouselMinScale : 0.72 });
-  const shouldHideHintsForActiveBox =
-    activeBox === "boxFour" || activeBox === "boxFive";
   const bottomButtonsAnchorRef = useRef<View | null>(null);
   const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
@@ -2091,6 +2215,9 @@ export default function Flashcards() {
         setCorrectionRewers={setCorrectionRewers}
         introMode={introModeActive}
         onHintUpdate={handleHintUpdate}
+        hintCoachmarkId="flashcards-hint-section"
+        shouldStartHintEditing={shouldStartHintEditing}
+        hintEditRequestToken={hintEditRequestToken}
         isFocused={isCardFocusEnabled && !shouldDisableTutorialCardAutofocus}
         focusRequestToken={tutorialCardFocusToken}
         isBetweenCards={isBetweenCards}
@@ -2304,6 +2431,26 @@ export default function Flashcards() {
     return currentFlashcardsStep;
   }, [currentFlashcardsStep, selectedItem?.type, tutorialSuccessVariant]);
 
+  const guidedHintCoachmarkStep: CoachmarkFlowStep | null = useMemo(() => {
+    if (!hintCoachmark.currentStep) {
+      return null;
+    }
+    if (hintCoachmark.currentStep.id !== "flashcards-hint-step-1") {
+      return hintCoachmark.currentStep;
+    }
+    return {
+      ...hintCoachmark.currentStep,
+      titleKey:
+        hintTutorialTriggerSource === "auto"
+          ? "onboarding.hints.autoStep1.title"
+          : "onboarding.hints.manualStep1.title",
+      descriptionKey:
+        hintTutorialTriggerSource === "auto"
+          ? "onboarding.hints.autoStep1.description"
+          : "onboarding.hints.manualStep1.description",
+    };
+  }, [hintCoachmark.currentStep, hintTutorialTriggerSource]);
+
   const coachmarkLayer = useMemo(
     () =>
       coachmark.isActive
@@ -2316,6 +2463,16 @@ export default function Flashcards() {
             onBack: coachmark.goBack,
             onNext: coachmark.goNext,
           }
+        : hintCoachmark.isActive
+          ? {
+              currentStep: guidedHintCoachmarkStep,
+              currentIndex: hintCoachmark.currentIndex,
+              totalSteps: hintCoachmark.totalSteps,
+              canGoBack: hintCoachmark.canGoBack,
+              canGoNext: hintCoachmark.canGoNext,
+              onBack: hintCoachmark.goBack,
+              onNext: hintCoachmark.goNext,
+            }
         : null,
     [
       coachmark.canGoBack,
@@ -2326,6 +2483,14 @@ export default function Flashcards() {
       coachmark.isActive,
       coachmark.totalSteps,
       guidedCoachmarkStep,
+      guidedHintCoachmarkStep,
+      hintCoachmark.canGoBack,
+      hintCoachmark.canGoNext,
+      hintCoachmark.currentIndex,
+      hintCoachmark.goBack,
+      hintCoachmark.goNext,
+      hintCoachmark.isActive,
+      hintCoachmark.totalSteps,
     ],
   );
 

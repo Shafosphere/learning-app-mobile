@@ -13,6 +13,8 @@ import {
   getCourseCompletionRunStartedAt,
 } from "@/src/features/flashcards/courseCompletionRun";
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
+import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
+import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -172,8 +174,16 @@ jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
   useCoachmarkFlow: jest.fn(() => ({
     isActive: false,
     hasSeen: true,
+    isReady: true,
     isPendingStart: false,
     currentStep: null,
+    currentIndex: -1,
+    totalSteps: 0,
+    canGoBack: false,
+    canGoNext: false,
+    goBack: jest.fn(),
+    goNext: jest.fn(),
+    advanceByEvent: jest.fn(),
   })),
 }));
 
@@ -198,6 +208,7 @@ jest.mock("@react-navigation/native", () => ({
 }));
 
 jest.mock("expo-router", () => ({
+  useLocalSearchParams: jest.fn(() => ({})),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
@@ -285,6 +296,8 @@ jest.mock("@/src/components/flashcards/CourseFinishedPanel/CourseFinishedPanel",
 }));
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
+const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
 const mockedGetCustomReviewedFlashcardIds =
@@ -405,6 +418,21 @@ describe("FlashcardsScreen UI state regressions", () => {
     latestButtonsProps = null;
     latestBoxListProps = null;
     latestFinishedPanelProps = null;
+    mockedUseCoachmarkFlow.mockImplementation(() => ({
+      isActive: false,
+      hasSeen: true,
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    mockedUseFlashcardsAutoflow.mockClear();
     mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
     mockedGetCourseCompletionSummary.mockResolvedValue({
       totalAnswers: 10,
@@ -658,6 +686,285 @@ describe("FlashcardsScreen UI state regressions", () => {
     });
 
     expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
+  });
+
+  it("starts the hint tutorial instead of editing on the first manual hint tap", async () => {
+    const card = makeCard({
+      id: 71,
+      text: "lemur",
+      translations: ["lemur"],
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: false,
+      hasSeen: params.flowKey === "flashcards-guided",
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    let shouldEdit = true;
+    act(() => {
+      shouldEdit = latestCardProps?.shouldStartHintEditing?.() ?? true;
+    });
+
+    expect(shouldEdit).toBe(false);
+    await act(async () => {
+      await Promise.resolve();
+    });
+    const hintFlowParams = mockedUseCoachmarkFlow.mock.calls
+      .map(([params]) => params)
+      .filter((params) => params.flowKey === "flashcards-hint-guided")
+      .at(-1);
+    expect(hintFlowParams).toMatchObject({
+      shouldStart: true,
+      storageKey: "@flashcards_hint_tutorial_seen_v1",
+    });
+  });
+
+  it("does not block hint editing while the hint tutorial visibility is hydrating", async () => {
+    const card = makeCard({
+      id: 74,
+      text: "early",
+      translations: ["wczesnie"],
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: false,
+      hasSeen: true,
+      isReady: params.flowKey !== "flashcards-hint-guided",
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    let shouldEdit = false;
+    act(() => {
+      shouldEdit = latestCardProps?.shouldStartHintEditing?.() ?? false;
+    });
+
+    expect(shouldEdit).toBe(true);
+
+    const hintFlowParams = mockedUseCoachmarkFlow.mock.calls
+      .map(([params]) => params)
+      .filter((params) => params.flowKey === "flashcards-hint-guided")
+      .at(-1);
+    expect(hintFlowParams?.shouldStart).toBe(false);
+  });
+
+  it("requests the hint tutorial after five wrong answers on the same card", async () => {
+    const card = makeCard({
+      id: 72,
+      text: "capital",
+      translations: ["Antananarivo"],
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: false,
+      hasSeen: params.flowKey === "flashcards-guided",
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    const { rerenderWithState } = renderScreenWithState(
+      createInteractionState(card),
+      [card],
+    );
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await rerenderWithState(
+        createInteractionState(card, {
+          result: false,
+        }),
+      );
+      await rerenderWithState(createInteractionState(card));
+    }
+
+    const hintFlowParams = mockedUseCoachmarkFlow.mock.calls
+      .map(([params]) => params)
+      .filter((params) => params.flowKey === "flashcards-hint-guided")
+      .at(-1);
+    expect(hintFlowParams?.shouldStart).toBe(true);
+  });
+
+  it("does not request the hint tutorial when hints are hidden in late boxes", async () => {
+    const card = makeCard({
+      id: 73,
+      text: "late",
+      translations: ["box"],
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: false,
+      hasSeen: params.flowKey === "flashcards-guided",
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    const { rerenderWithState } = renderScreenWithState(
+      createInteractionState(card, { activeBox: "boxFour" }),
+      [card],
+    );
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    for (let attempt = 0; attempt < 5; attempt++) {
+      await rerenderWithState(
+        createInteractionState(card, {
+          activeBox: "boxFour",
+          result: false,
+        }),
+      );
+      await rerenderWithState(createInteractionState(card, { activeBox: "boxFour" }));
+    }
+
+    const hintFlowParams = mockedUseCoachmarkFlow.mock.calls
+      .map(([params]) => params)
+      .filter((params) => params.flowKey === "flashcards-hint-guided")
+      .at(-1);
+    expect(hintFlowParams?.shouldStart).toBe(false);
+  });
+
+  it("resets the hint tutorial wrong streak after a correct answer on the same card", async () => {
+    const card = makeCard({
+      id: 75,
+      text: "reset",
+      translations: ["streak"],
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: false,
+      hasSeen: params.flowKey === "flashcards-guided",
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+    const { rerenderWithState } = renderScreenWithState(
+      createInteractionState(card),
+      [card],
+    );
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    for (let attempt = 0; attempt < 4; attempt++) {
+      await rerenderWithState(
+        createInteractionState(card, {
+          result: false,
+        }),
+      );
+      await rerenderWithState(createInteractionState(card));
+    }
+    await rerenderWithState(
+      createInteractionState(card, {
+        result: true,
+      }),
+    );
+    await rerenderWithState(createInteractionState(card));
+    await rerenderWithState(
+      createInteractionState(card, {
+        result: false,
+      }),
+    );
+    await rerenderWithState(createInteractionState(card));
+
+    const hintFlowParams = mockedUseCoachmarkFlow.mock.calls
+      .map(([params]) => params)
+      .filter((params) => params.flowKey === "flashcards-hint-guided")
+      .at(-1);
+    expect(hintFlowParams?.shouldStart).toBe(false);
+  });
+
+  it("disables autoflow while the hint tutorial is active", async () => {
+    const card = makeCard({
+      id: 74,
+      text: "auto",
+      translations: ["flow"],
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: true,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "top",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    mockedUseCoachmarkFlow.mockImplementation((params) => ({
+      isActive: params.flowKey === "flashcards-hint-guided",
+      hasSeen: true,
+      isReady: true,
+      isPendingStart: false,
+      currentStep: null,
+      currentIndex: -1,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(),
+    }));
+
+    renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+
+    const autoflowParams = mockedUseFlashcardsAutoflow.mock.calls.at(-1)?.[0];
+    expect(autoflowParams).toMatchObject({
+      enabled: false,
+    });
   });
 
   it("shows the finished panel when the active course has an exhausted pool", async () => {

@@ -91,9 +91,6 @@ jest.mock("react-i18next", () => ({
         "app.actions.cancel": "Anuluj",
         "flashcards.card.hint.bothSides": "Obie strony fiszki",
         "flashcards.card.hint.save": "Zapisz",
-        "flashcards.card.hint.saveDialogMessage":
-          "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
-        "flashcards.card.hint.saveDialogTitle": "Zapisać podpowiedź?",
         "flashcards.card.hint.targetDialogMessage":
           "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
         "flashcards.card.hint.targetDialogTitle": "Gdzie zapisać podpowiedź?",
@@ -528,7 +525,7 @@ describe("Card logic props", () => {
     );
   });
 
-  it("uses a simple confirm modal for hints on cards that cannot be reversed", async () => {
+  it("saves hints directly on cards that cannot be reversed", async () => {
     const onHintUpdate = jest.fn();
 
     renderCard(
@@ -556,20 +553,48 @@ describe("Card logic props", () => {
     });
 
     await waitFor(() => {
-      expect(latestNudgeModalProps?.visible).toBe(true);
+      expect(onHintUpdate).toHaveBeenCalledWith(19, "hint", null);
     });
-    expect(latestNudgeModalProps?.title).toBe("Zapisać podpowiedź?");
-    expect(latestNudgeModalProps?.description).toBe(
-      "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
+
+    expect(latestNudgeModalProps?.visible).toBe(false);
+  });
+
+  it("passes hint tutorial controls to the hint component", () => {
+    const shouldStartHintEditing = jest.fn(() => false);
+
+    renderCard(
+      createProps({
+        hintCoachmarkId: "flashcards-hint-section",
+        shouldStartHintEditing,
+      }),
     );
-    expect(latestNudgeModalProps?.confirmLabel).toBe("Zapisz");
-    expect(latestNudgeModalProps?.secondaryLabel).toBe("Anuluj");
 
-    act(() => {
-      (latestNudgeModalProps?.onConfirm as () => void)();
+    expect(latestCardHintProps).toMatchObject({
+      hintCoachmarkId: "flashcards-hint-section",
+      shouldStartHintEditing,
     });
+  });
 
-    expect(onHintUpdate).toHaveBeenCalledWith(19, "hint", null);
+  it("opens hint editing when the external hint edit token changes", async () => {
+    const screen = renderCard(
+      createProps({
+        hintEditRequestToken: 0,
+      }),
+    );
+
+    expect(latestCardHintProps?.isEditingHint).toBe(false);
+
+    screen.rerender(
+      <Card
+        {...createProps({
+          hintEditRequestToken: 1,
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestCardHintProps?.isEditingHint).toBe(true);
+    });
   });
 
   it("uses a side-choice hint modal for normal cards that can be reversed", async () => {

@@ -16,6 +16,7 @@ type UseCoachmarkFlowParams = {
   steps: CoachmarkFlowStep[];
   completionState?: Partial<Record<CoachmarkAdvanceEvent, boolean>>;
   restartToken?: string | string[] | undefined;
+  onComplete?: () => void;
 };
 
 export function useCoachmarkFlow({
@@ -25,6 +26,7 @@ export function useCoachmarkFlow({
   steps,
   completionState,
   restartToken,
+  onComplete,
 }: UseCoachmarkFlowParams) {
   const { start, next, back, stop, state } = useCoachmarkContext();
   const [isReady, setIsReady] = useState(false);
@@ -32,12 +34,14 @@ export function useCoachmarkFlow({
   const startAttemptedRef = useRef(false);
   const autoAdvanceStepIdRef = useRef<string | null>(null);
   const autoAdvancedStepIdsRef = useRef<Set<string>>(new Set());
+  const finishFlowInProgressRef = useRef(false);
 
   useEffect(() => {
     if (restartToken == null || restartToken === "") return;
     startAttemptedRef.current = false;
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
+    finishFlowInProgressRef.current = false;
     setHasSeen(false);
     setIsReady(true);
   }, [restartToken]);
@@ -79,6 +83,7 @@ export function useCoachmarkFlow({
     startAttemptedRef.current = true;
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
+    finishFlowInProgressRef.current = false;
     let didStart = false;
     const timeout = setTimeout(() => {
       didStart = true;
@@ -132,12 +137,24 @@ export function useCoachmarkFlow({
   }, [completionState, currentStep, next]);
 
   const finishFlow = useCallback(async () => {
+    if (finishFlowInProgressRef.current) return;
+    finishFlowInProgressRef.current = true;
     await AsyncStorage.setItem(storageKey, "1");
     autoAdvanceStepIdRef.current = null;
     autoAdvancedStepIdsRef.current.clear();
     setHasSeen(true);
     await stop("completed");
-  }, [storageKey, stop]);
+    if (onComplete) {
+      const runOnComplete = () => {
+        onComplete();
+      };
+      if (typeof requestAnimationFrame === "function") {
+        requestAnimationFrame(runOnComplete);
+      } else {
+        setTimeout(runOnComplete, 0);
+      }
+    }
+  }, [onComplete, storageKey, stop]);
 
   const canAdvanceCurrentStep = Boolean(
     currentStep &&

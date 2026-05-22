@@ -46,6 +46,9 @@ export type CardProps = {
     hintFront: string | null,
     hintBack: string | null,
   ) => void;
+  hintCoachmarkId?: string;
+  shouldStartHintEditing?: () => boolean;
+  hintEditRequestToken?: number;
   isFocused?: boolean;
   backgroundColorOverride?: string;
   textColorOverride?: string;

@@ -463,6 +463,11 @@
           "subtitle": "Otwiera ekran fiszek i sztucznie pokazuje jednorazowe okno wyboru położenia przycisków.",
           "button": "Pokaż okno"
         },
+        "previewHintTutorial": {
+          "title": "Testuj onboarding hintów",
+          "subtitle": "Otwiera ekran fiszek i uruchamia poradnik dodawania podpowiedzi od początku.",
+          "button": "Pokaż hinty"
+        },
         "previewLocalExportReminder": {
           "title": "Podgląd przypomnienia o kopii",
           "subtitle": "Pokazuje okno przypominające o zrobieniu lokalnej kopii danych.",
@@ -892,6 +897,32 @@
         "confirm": "Zatwierdź"
       }
     },
+    "hints": {
+      "manualStep1": {
+        "title": "O, znalazłeś!",
+        "description": "To miejsce na własne wskazówki do fiszki. Pewnie zastanawiasz się, po co ono tu jest."
+      },
+      "autoStep1": {
+        "title": "Ta fiszka stawia opór",
+        "description": "Widzę, że ta jedna fiszka sprawia Ci problem. Może mała wskazówka trochę pomoże."
+      },
+      "step2": {
+        "title": "Po co to jest?",
+        "description": "Czasem jakaś informacja po prostu nie chce wejść do głowy. Wtedy warto dodać do niej mały hak pamięciowy."
+      },
+      "step3": {
+        "title": "Co wpisać?",
+        "description": "Możesz wpisać skojarzenie, pierwszą literę, zabawne hasło albo krótką notatkę."
+      },
+      "step4": {
+        "title": "Po co?",
+        "description": "Taka wskazówka ma pomóc Ci ruszyć z miejsca i łatwiej przypomnieć sobie tę konkretną fiszkę."
+      },
+      "step5": {
+        "title": "Tylko bez ściągania",
+        "description": "Teoretycznie możesz wpisać całą odpowiedź, ale wtedy oszukujesz tylko siebie. Nie rób tego :c"
+      }
+    },
     "coursePin": {
       "step1": {
         "title": "Hej, to ja",
@@ -1034,8 +1065,6 @@
       "hint": {
         "placeholder": "Wpisz podpowiedź…",
         "save": "Zapisz",
-        "saveDialogTitle": "Zapisać podpowiedź?",
-        "saveDialogMessage": "Ta fiszka pokazuje zawsze jedną stronę, więc podpowiedź będzie widoczna tutaj.",
         "targetDialogTitle": "Gdzie zapisać podpowiedź?",
         "targetDialogMessage": "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
         "thisSideOnly": "Tylko ta strona",

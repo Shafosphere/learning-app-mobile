@@ -1,6 +1,7 @@
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { Animated, Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "../card-styles";
@@ -20,6 +21,8 @@ type CardHintProps = {
     onHintUpdate: any;
     inputRef?: React.RefObject<TextInput | null>;
     onHintInputBlur: () => void;
+    hintCoachmarkId?: string;
+    shouldStartHintEditing?: () => boolean;
 };
 
 export function CardHint({
@@ -37,17 +40,26 @@ export function CardHint({
     onHintUpdate,
     inputRef,
     onHintInputBlur,
+    hintCoachmarkId,
+    shouldStartHintEditing,
 }: CardHintProps) {
     const styles = useStyles();
     const { colors } = useSettings();
     const { t } = useTranslation();
     const canDelete = Boolean(currentHint);
 
-    return (
+    const handleStartHintEditing = () => {
+        if (shouldStartHintEditing?.() === false) {
+            return;
+        }
+        startHintEditing();
+    };
+
+    const content = (
         <View style={styles.hintContainer}>
             {!isEditingHint ? (
                 <Pressable
-                    onPress={startHintEditing}
+                    onPress={handleStartHintEditing}
                     hitSlop={8}
                     disabled={!selectedItem || !onHintUpdate}
                 >
@@ -115,5 +127,15 @@ export function CardHint({
                 </View>
             )}
         </View>
+    );
+
+    if (!hintCoachmarkId) {
+        return content;
+    }
+
+    return (
+        <CoachmarkAnchor id={hintCoachmarkId} shape="rect" radius={14}>
+            {content}
+        </CoachmarkAnchor>
     );
 }

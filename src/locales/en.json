@@ -463,6 +463,11 @@
           "subtitle": "Opens the flashcards screen and artificially shows the one-time button position chooser.",
           "button": "Show window"
         },
+        "previewHintTutorial": {
+          "title": "Test hint onboarding",
+          "subtitle": "Opens the flashcards screen and restarts the guide for adding hints.",
+          "button": "Show hints"
+        },
         "previewLocalExportReminder": {
           "title": "Preview backup reminder",
           "subtitle": "Shows the window reminding the user to create a local data backup.",
@@ -892,6 +897,32 @@
         "confirm": "Confirm"
       }
     },
+    "hints": {
+      "manualStep1": {
+        "title": "Oh, you found it!",
+        "description": "This is a place for your own hints for the flashcard. You might be wondering why it is here."
+      },
+      "autoStep1": {
+        "title": "This flashcard is pushing back",
+        "description": "I can see this one flashcard is giving you trouble. Maybe a small hint will help a bit."
+      },
+      "step2": {
+        "title": "What is it for?",
+        "description": "Sometimes a piece of information just refuses to stick. That is when it helps to add a small memory hook."
+      },
+      "step3": {
+        "title": "What to write?",
+        "description": "You can write an association, the first letter, a funny phrase, or a short note."
+      },
+      "step4": {
+        "title": "Why?",
+        "description": "This hint is meant to help you get unstuck and remember this specific flashcard more easily."
+      },
+      "step5": {
+        "title": "No cheating",
+        "description": "Technically you can write the full answer, but then you are only cheating yourself. Please don't :c"
+      }
+    },
     "coursePin": {
       "step1": {
         "title": "Hey, it's me",
@@ -1034,8 +1065,6 @@
       "hint": {
         "placeholder": "Enter a hint…",
         "save": "Save",
-        "saveDialogTitle": "Save hint?",
-        "saveDialogMessage": "This flashcard always shows one side, so the hint will be visible here.",
         "targetDialogTitle": "Where to save the hint?",
         "targetDialogMessage": "It can be visible only on this side of the flashcard or on both sides.",
         "thisSideOnly": "This side only",

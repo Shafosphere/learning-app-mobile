@@ -173,8 +173,16 @@ jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
   useCoachmarkFlow: jest.fn(() => ({
     isActive: false,
     hasSeen: true,
+    isReady: true,
     isPendingStart: false,
     currentStep: null,
+    currentIndex: -1,
+    totalSteps: 0,
+    canGoBack: false,
+    canGoNext: false,
+    goBack: jest.fn(),
+    goNext: jest.fn(),
+    advanceByEvent: jest.fn(),
   })),
 }));
 
@@ -199,6 +207,7 @@ jest.mock("@react-navigation/native", () => ({
 }));
 
 jest.mock("expo-router", () => ({
+  useLocalSearchParams: jest.fn(() => ({})),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
   })),
