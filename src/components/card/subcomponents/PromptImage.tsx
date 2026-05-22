@@ -168,7 +168,22 @@ const inlineSvgClassStyles = (xml: string): string => {
     }
   );
 
-  return withInlineStyles.replace(/<style[^>]*>[\s\S]*?<\/style>/gi, "");
+  return withInlineStyles;
+};
+
+const decodeDataSvg = (uri: string): string => {
+  const commaIndex = uri.indexOf(",");
+  const metadata = commaIndex >= 0 ? uri.slice(0, commaIndex) : uri;
+  const raw = commaIndex >= 0 ? uri.slice(commaIndex + 1) : "";
+  if (/;base64(?:;|$)/i.test(metadata)) {
+    const binary = atob(decodeURIComponent(raw).replace(/\s/g, ""));
+    const encoded = Array.from(binary, (char) =>
+      `%${char.charCodeAt(0).toString(16).padStart(2, "0")}`
+    ).join("");
+    return decodeURIComponent(encoded);
+  }
+
+  return decodeURIComponent(raw);
 };
 
 const parseSvgViewBox = (xml: string): SvgViewBox | null => {
@@ -295,8 +310,7 @@ export function PromptImage({
         }
 
         if (uri.startsWith("data:image/svg+xml")) {
-          const raw = uri.split(",")[1] ?? "";
-          const decoded = decodeURIComponent(raw);
+          const decoded = decodeDataSvg(uri);
           const constellationMode = isLikelyConstellationOutlineSvg(decoded, uri);
           const mergedMode = isMergedConstellationSvg(decoded, uri);
           const normalized = inlineSvgClassStyles(decoded);
@@ -317,7 +331,7 @@ export function PromptImage({
             }
             setIsConstellationOutline(constellationMode);
             setIsConstellationMerged(mergedMode);
-            setSvgXml(constellationMode || mergedMode ? enhanced : null);
+            setSvgXml(enhanced);
             setHasResolvedDimensions(true);
           }
           return;
@@ -354,8 +368,7 @@ export function PromptImage({
           const xml = await FileSystem.readAsStringAsync(uri);
           const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
           const mergedMode = isMergedConstellationSvg(xml, uri);
-          const shouldInlineXml = constellationMode || mergedMode;
-          const normalizedXml = shouldInlineXml ? inlineSvgClassStyles(xml) : xml;
+          const normalizedXml = inlineSvgClassStyles(xml);
           const enhancedOutline = constellationMode
             ? boostConstellationOutlineContrast(normalizedXml)
             : normalizedXml;
@@ -374,7 +387,7 @@ export function PromptImage({
             if (looksLikeSvg) {
               const parsedViewBox = parseSvgViewBox(enhancedXml);
               setIsSvg(true);
-              setSvgXml(shouldInlineXml ? enhancedXml : null);
+              setSvgXml(enhancedXml);
               setIsConstellationOutline(constellationMode);
               setIsConstellationMerged(mergedMode);
               if (parsedViewBox) {
