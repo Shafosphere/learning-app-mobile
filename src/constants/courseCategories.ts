@@ -31,6 +31,12 @@ export const COURSE_CATEGORIES: Record<string, CourseCategory> = {
         descriptionKey: "constants.courseCategories.description.mityBogowieIBohaterowie",
         icon: "book-open",
     },
+    road_signs: {
+        id: "road_signs",
+        labelKey: "constants.courseCategories.label.roadSigns",
+        descriptionKey: "constants.courseCategories.description.znakiDrogowe",
+        icon: "road",
+    },
     programming: {
         id: "programming",
         labelKey: "constants.courseCategories.label.programming",

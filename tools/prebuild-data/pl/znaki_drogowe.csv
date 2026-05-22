@@ -1,0 +1,193 @@
+external_id,front_image,back_text
+0001,A/A-1.svg,zakręt w prawo
+0002,A/A-2.svg,zakręt w lewo
+0003,A/A-3.svg,seria zakrętów pierwszy w prawo
+0004,A/A-4.svg,seria zakrętów pierwszy w lewo
+0005,A/A-5.svg,skrzyżowanie równorzędne
+0006,A/A-6a.svg,droga podporządkowana z obu stron
+0007,A/A-6b.svg,droga podporządkowana z prawej
+0008,A/A-6c.svg,droga podporządkowana z lewej
+0009,A/A-6d.svg,wlot jednokierunkowej z prawej
+0010,A/A-6e.svg,wlot jednokierunkowej z lewej
+0011,A/A-7.svg,ustąp pierwszeństwa
+0012,A/A-8.svg,rondo
+0013,A/A-9.svg,przejazd kolejowy z zaporami
+0014,A/A-10.svg,przejazd kolejowy bez zapór
+0015,A/A-11.svg,nierówna droga
+0016,A/A-11a.svg,próg zwalniający
+0017,A/A-12a.svg,zwężenie z obu stron
+0018,A/A-12b.svg,zwężenie z prawej
+0019,A/A-12c.svg,zwężenie z lewej
+0020,A/A-13.svg,ruchomy most
+0021,A/A-14.svg,roboty drogowe
+0022,A/A-15.svg,śliska droga
+0023,A/A-16.svg,przejście dla pieszych
+0024,A/A-17.svg,uwaga dzieci
+0025,A/A-18a.svg,zwierzęta gospodarskie
+0026,A/A-18b.svg,dzikie zwierzęta
+0027,A/A-19.svg,boczny wiatr
+0028,A/A-20.svg,ruch dwukierunkowy
+0029,A/A-21.svg,tramwaj
+0030,A/A-22.svg,stromy zjazd
+0031,A/A-23.svg,stromy podjazd
+0032,A/A-24.svg,rowerzyści
+0033,A/A-25.svg,spadające kamienie
+0034,A/A-26.svg,lotnisko
+0035,A/A-27.svg,nabrzeże
+0036,A/A-28.svg,sypki żwir
+0037,A/A-29.svg,światła
+0038,A/A-30.svg,inne niebezpieczeństwo
+0039,A/A-31.svg,niebezpieczne pobocze
+0040,A/A-32.svg,ślisko przez mróz
+0041,A/A-33.svg,korek
+0042,A/A-34.svg,wypadek
+0043,B/B-1.svg,zakaz ruchu
+0044,B/B-2.svg,zakaz wjazdu
+0045,B/B-3.svg,zakaz aut
+0046,B/B-3-4.svg,zakaz aut i motocykli
+0047,B/B-3-4-10.svg,zakaz pojazdów silnikowych i motorowerów
+0048,B/B-3a.svg,zakaz autobusów
+0049,B/B-4.svg,zakaz motocykli
+0050,B/B-5.svg,zakaz ciężarówek
+0051,B/B-5-6t.svg,zakaz ciężarówek powyżej 6t
+0052,B/B-6.svg,zakaz traktorów
+0053,B/B-6-8.svg,zakaz traktorów i zaprzęgów
+0054,B/B-6-8-9.svg,zakaz pojazdów niesamochodowych
+0055,B/B-7.svg,zakaz pojazdów z przyczepą
+0056,B/B-8.svg,zakaz pojazdów zaprzęgowych
+0057,B/B-9.svg,zakaz rowerów
+0058,B/B-9-12.svg,zakaz rowerów i wózków ręcznych
+0059,B/B-10.svg,zakaz motorowerów
+0060,B/B-11.svg,zakaz wózków rowerowych
+0061,B/B-12.svg,zakaz wózków ręcznych
+0062,B/B-13.svg,zakaz materiałów wybuchowych
+0063,B/B-13-14.svg,zakaz materiałów niebezpiecznych i skażających wodę
+0064,B/B-13a.svg,zakaz materiałów niebezpiecznych
+0065,B/B-14.svg,zakaz materiałów skażających wodę
+0066,B/B-17-6m.svg,zakaz pojazdów dłuższych niż 6m
+0067,B/B-18-7t.svg,zakaz pojazdów cięższych niż 7t
+0068,B/B-19-10t.svg,zakaz nacisku osi powyżej 10t
+0069,B/B-20.svg,stop
+0070,B/B-21.svg,zakaz skrętu w lewo
+0071,B/B-22.svg,zakaz skrętu w prawo
+0072,B/B-23.svg,zakaz zawracania
+0073,B/B-24.svg,koniec zakazu zawracania
+0074,B/B-25.svg,zakaz wyprzedzania
+0075,B/B-26.svg,zakaz wyprzedzania ciężarówką
+0076,B/B-27.svg,koniec zakazu wyprzedzania
+0077,B/B-28.svg,koniec zakazu wyprzedzania ciężarówką
+0078,B/B-29.svg,zakaz trąbienia
+0079,B/B-30.svg,koniec zakazu trąbienia
+0080,B/B-31.svg,ustąp pojazdom z przeciwka
+0081,B/B-32.svg,kontrola celna
+0082,B/B-32a.svg,granica
+0083,B/B-32b.svg,rogatka uszkodzona
+0084,B/B-32c.svg,sygnalizacja uszkodzona
+0085,B/B-32d.svg,prom
+0086,B/B-32e.svg,kontrola drogowa
+0087,B/B-32f.svg,opłata
+0088,B/B-33-100.svg,ograniczenie do 100
+0089,B/B-34-50.svg,koniec ograniczenia do 50
+0090,B/B-35.svg,zakaz postoju
+0091,B/B-36.svg,zakaz zatrzymywania
+0092,B/B-37.svg,zakaz postoju w nieparzyste
+0093,B/B-38.svg,zakaz postoju w parzyste
+0094,B/B-40.svg,koniec strefy postoju
+0095,B/B-41.svg,zakaz pieszych
+0096,B/B-42.svg,koniec zakazów
+0097,B/B-43-10.svg,strefa 10
+0098,B/B-44-10.svg,koniec strefy 10
+0099,C/C-2.svg,nakaz w prawo za znakiem
+0100,C/C-4.svg,nakaz w lewo za znakiem
+0101,C/C-8.svg,w prawo lub w lewo
+0102,C/C-11.svg,omiń z prawej lub lewej
+0103,C/C-12.svg,rondo
+0104,C/C-13.svg,droga rowerowa
+0105,C/C-13-16.svg,droga pieszo-rowerowa
+0106,C/C-13-16a.svg,droga pieszo-rowerowa
+0107,C/C-13-16b.svg,droga pieszo-rowerowa
+0108,C/C-13a.svg,koniec drogi rowerowej
+0109,C/C-13a-16a.svg,koniec drogi pieszo rowerowej
+0110,C/C-13a-16aa.svg,koniec drogi pieszo rowerowej
+0111,C/C-13a-16ab.svg,koniec drogi pieszo rowerowej
+0112,C/C-14-30.svg,minimum 30 km/h
+0113,C/C-15-30.svg,koniec minimum 30 km/h
+0114,C/C-16.svg,droga dla pieszych
+0115,C/C-16a.svg,koniec drogi dla pieszych
+0116,D/D-1.svg,droga z pierwszeństwem
+0117,D/D-2.svg,koniec pierwszeństwa
+0118,D/D-3.svg,jednokierunkowa
+0119,D/D-4a.svg,ślepa droga
+0120,D/D-4b.svg,wjazd w ślepą drogę
+0121,D/D-4c.svg,wjazd w ślepą drogę
+0122,D/D-5.svg,pierwszeństwo na zwężeniu
+0123,D/D-6.svg,pasy
+0124,D/D-6a.svg,przejazd rowerowy
+0125,D/D-6b.svg,pasy i przejazd rowerowy
+0126,D/D-7.svg,ekspresówka
+0127,D/D-8.svg,koniec ekspresówki
+0128,D/D-9.svg,autostrada
+0129,D/D-10.svg,koniec autostrady
+0130,D/D-11.svg,początek buspasa
+0131,D/D-12.svg,buspas
+0132,D/D-13.svg,początek pasa powolnego
+0133,D/D-13a.svg,początek pasa
+0134,D/D-13b.svg,początek pasa
+0135,D/D-14.svg,koniec pasa
+0136,D/D-15.svg,przystanek autobusowy
+0137,D/D-16.svg,przystanek trolejbusowy
+0138,D/D-17.svg,przystanek tramwajowy
+0139,D/D-18.svg,parking
+0140,D/D-18a.svg,parking zastrzeżony
+0141,D/D-18b.svg,parking zadaszony
+0142,D/D-19.svg,postój taksówek
+0143,D/D-19a.svg,postój taksówek
+0144,D/D-20.svg,koniec postoju taksówek
+0145,D/D-20a.svg,koniec postoju taksówek
+0146,D/D-21.svg,szpital
+0147,D/D-21a.svg,policja
+0148,D/D-22.svg,punkt opatrunkowy
+0149,D/D-23.svg,stacja paliw
+0150,D/D-23a.svg,stacja LPG
+0151,D/D-23b.svg,stacja paliw z ładowarką
+0152,D/D-23c.svg,ładowarka aut elektrycznych
+0153,D/D-24.svg,telefon
+0154,D/D-25.svg,poczta
+0155,D/D-26a.svg,wulkanizacja
+0156,D/D-26b.svg,myjnia
+0157,D/D-26c.svg,toaleta
+0158,D/D-26d.svg,prysznic
+0159,D/D-27.svg,kawiarnia lub bufet
+0160,D/D-28.svg,restauracja
+0161,D/D-29.svg,hotel/motel
+0162,D/D-30.svg,kemping
+0163,D/D-31.svg,kemping z prądem
+0164,D/D-32.svg,pole biwakowe
+0165,D/D-33.svg,schronisko młodzieżowe
+0166,D/D-34.svg,informacja turystyczna
+0167,D/D-34a.svg,radio drogowe
+0168,D/D-34b.svg,zbiorcza tablica informacyjna
+0169,D/D-35.svg,przejście podziemne
+0170,D/D-35a.svg,schody ruchome w dół
+0171,D/D-36.svg,przejście nadziemne
+0172,D/D-36a.svg,schody ruchome w górę
+0173,D/D-37.svg,tunel
+0174,D/D-38.svg,koniec tunelu
+0175,D/D-39a.svg,opłaty drogowe
+0176,D/D-40.svg,strefa zamieszkania
+0177,D/D-41.svg,koniec strefy zamieszkania
+0178,D/D-42.svg,obszar zabudowany
+0179,D/D-43.svg,koniec obszaru zabudowanego
+0180,D/D-44.svg,strefa płatnego parkowania
+0181,D/D-45.svg,koniec płatnego parkowania
+0182,D/D-46.svg,droga wewnętrzna
+0183,D/D-47.svg,koniec drogi wewnętrznej
+0184,D/D-48.svg,zmiana pierwszeństwa
+0185,D/D-48a.svg,zmiana pierwszeństwa
+0186,D/D-49.svg,pobór opłat
+0187,D/D-50.svg,zatoka
+0188,D/D-51.svg,fotoradar
+0189,D/D-51aa.svg,odcinkowy pomiar prędkości
+0190,D/D-51b.svg,koniec odcinkowego pomiaru
+0191,D/D-52.svg,strefa ruchu
+0192,D/D-53.svg,koniec strefy ruchu

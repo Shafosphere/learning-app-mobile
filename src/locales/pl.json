@@ -1311,6 +1311,7 @@
         "kosmos": "Kosmos",
         "historia": "Historia",
         "mitologia": "Mitologia",
+        "roadSigns": "Znaki drogowe",
         "programming": "Programowanie",
         "science": "Nauka",
         "math": "Matura"
@@ -1320,6 +1321,7 @@
         "astronomiaGwiazdozbiory": "Astronomia, gwiazdozbiory",
         "historiaPolski": "Historia Polski",
         "mityBogowieIBohaterowie": "Mity, bogowie i bohaterowie",
+        "znakiDrogowe": "Polskie znaki drogowe",
         "javascript": "JavaScript",
         "matematyka": "Matematyka"
       }

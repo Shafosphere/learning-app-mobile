@@ -1311,6 +1311,7 @@
         "kosmos": "Space",
         "historia": "History",
         "mitologia": "Mythology",
+        "roadSigns": "Road signs",
         "programming": "Programming",
         "science": "Science",
         "math": "Final exam"
@@ -1320,6 +1321,7 @@
         "astronomiaGwiazdozbiory": "Astronomy, constellations",
         "historiaPolski": "History of Poland",
         "mityBogowieIBohaterowie": "Myths, gods, and heroes",
+        "znakiDrogowe": "Polish road signs",
         "javascript": "JavaScript",
         "matematyka": "Mathematics"
       }
