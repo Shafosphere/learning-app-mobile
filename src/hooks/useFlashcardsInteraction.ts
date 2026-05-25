@@ -147,11 +147,8 @@ export function useFlashcardsInteraction({
   const reversed = useMemo(() => {
     if (!activeBox || !selectedItem) return false;
     if (isAnswerOnlyCard(selectedItem)) return false;
-    const shouldFlip =
-      activeCustomCourseId == null ? true : selectedItem.flipped;
-    // Oficjalne kursy (brak activeCustomCourseId) zawsze się odwracają.
-    return shouldFlip ? reversedBoxes.includes(activeBox) : false;
-  }, [activeBox, activeCustomCourseId, reversedBoxes, selectedItem, isAnswerOnlyCard]);
+    return selectedItem.flipped ? reversedBoxes.includes(activeBox) : false;
+  }, [activeBox, reversedBoxes, selectedItem, isAnswerOnlyCard]);
 
   const shuffleList = useCallback((items: WordWithTranslations[]) => {
     const arr = [...items];

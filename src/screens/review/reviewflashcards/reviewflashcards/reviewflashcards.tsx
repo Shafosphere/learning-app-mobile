@@ -1330,7 +1330,6 @@ export default function ReviewFlashcardsPlaceholder() {
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}
-        activeCustomCourseId={courseId}
         activeCourseName={null}
         onClose={closePeek}
       />

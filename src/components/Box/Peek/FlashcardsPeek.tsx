@@ -18,7 +18,6 @@ type FlashcardsPeekOverlayProps = {
   visible: boolean;
   boxKey: keyof BoxesState | null;
   cards: WordWithTranslations[];
-  activeCustomCourseId: number | null;
   activeCourseName?: string | null;
   onClose: () => void;
 };
@@ -36,7 +35,6 @@ export default function FlashcardsPeekOverlay({
   visible,
   boxKey,
   cards,
-  activeCustomCourseId,
   activeCourseName,
   onClose,
 }: FlashcardsPeekOverlayProps) {
@@ -88,8 +86,7 @@ export default function FlashcardsPeekOverlay({
   }) => {
     const isBoxZero = boxKey === "boxZero";
     const boxIsReversed = boxKey === "boxTwo" || boxKey === "boxFour";
-    const shouldFlip =
-      activeCustomCourseId == null ? true : Boolean(item.flipped);
+    const shouldFlip = Boolean(item.flipped);
     const prompt =
       boxIsReversed && shouldFlip ? item.translations?.[0] ?? "" : item.text;
     const type = item.type ?? "text";

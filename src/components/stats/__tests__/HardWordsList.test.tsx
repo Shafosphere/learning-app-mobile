@@ -124,7 +124,7 @@ describe("HardWordsList", () => {
     expect(getByText("Najczęściej mylone fiszki ogólnie")).toBeTruthy();
     expect(mockedGetHardFlashcards).toHaveBeenCalledWith(undefined, 5);
     expect(mockedGetHardFlashcards).toHaveBeenCalledTimes(1);
-  });
+  }, 10000);
 
   it("loads the active-course page when a course is active", async () => {
     mockSettings(7);

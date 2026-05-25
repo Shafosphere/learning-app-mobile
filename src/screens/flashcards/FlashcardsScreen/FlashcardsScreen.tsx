@@ -2689,7 +2689,6 @@ export default function Flashcards() {
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}
-        activeCustomCourseId={activeCustomCourseId}
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
       />

@@ -21,6 +21,8 @@ jest.mock("@/src/db/sqlite/db", () => ({
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
 
+jest.setTimeout(120000);
+
 const checkSpelling = (input: string, expected: string) =>
   input.trim().toLowerCase() === expected.trim().toLowerCase();
 
@@ -153,10 +155,6 @@ function buildScenarioPair(index: number) {
 }
 
 describe("useFlashcardsInteraction mass correction regression", () => {
-  beforeAll(() => {
-    jest.setTimeout(120000);
-  });
-
   beforeEach(() => {
     jest.spyOn(Math, "random").mockReturnValue(0.999999);
     jest.spyOn(console, "log").mockImplementation(() => {});

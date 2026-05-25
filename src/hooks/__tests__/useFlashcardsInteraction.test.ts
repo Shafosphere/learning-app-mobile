@@ -234,6 +234,71 @@ describe("useFlashcardsInteraction", () => {
     return JSON.parse(raw ?? "[]");
   }
 
+  describe("flip direction", () => {
+    it.each([
+      { box: "boxTwo" as const, flipped: false, expected: false },
+      { box: "boxTwo" as const, flipped: true, expected: true },
+      { box: "boxFour" as const, flipped: false, expected: false },
+      { box: "boxFour" as const, flipped: true, expected: true },
+    ])(
+      "sets reversed to $expected for $box when flipped is $flipped",
+      async ({ box, flipped, expected }) => {
+        const card = makeWord({
+          id: 80,
+          text: "front",
+          translations: ["back"],
+          flipped,
+        });
+        const { result } = renderInteraction(
+          makeBoxesState({
+            [box]: [card],
+          })
+        );
+
+        act(() => {
+          result.current.interaction.handleSelectBox(box);
+        });
+
+        await waitFor(() => {
+          expect(result.current.interaction.selectedItem?.id).toBe(card.id);
+          expect(result.current.interaction.reversed).toBe(expected);
+        });
+      }
+    );
+
+    const nonReversibleCards: Array<[string, Partial<WordWithTranslations>]> = [
+      ["an image-only prompt", { text: "", imageFront: "front://flag" }],
+      ["an explicit answer-only card", { answerOnly: true }],
+      ["a true/false card", { type: "true_false" }],
+      ["a know/don't know card", { type: "know_dont_know" }],
+    ];
+
+    it.each(nonReversibleCards)(
+      "does not reverse %s even when flipped is true",
+      async (_description, overrides) => {
+        const card = makeWord({
+          id: 81,
+          flipped: true,
+          ...overrides,
+        });
+        const { result } = renderInteraction(
+          makeBoxesState({
+            boxTwo: [card],
+          })
+        );
+
+        act(() => {
+          result.current.interaction.handleSelectBox("boxTwo");
+        });
+
+        await waitFor(() => {
+          expect(result.current.interaction.selectedItem?.id).toBe(card.id);
+          expect(result.current.interaction.reversed).toBe(false);
+        });
+      }
+    );
+  });
+
   it("creates correction bound to the answered card after wrong answer", async () => {
     const cardA = makeWord({
       id: 101,
