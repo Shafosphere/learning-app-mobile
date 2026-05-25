@@ -1,0 +1,310 @@
+external_id,front_text,back_text
+fr_basic_0001,cześć,salut
+fr_basic_0002,dzień dobry,bonjour
+fr_basic_0003,dobry wieczór,bonsoir
+fr_basic_0004,dobranoc,bonne nuit
+fr_basic_0005,do widzenia,au revoir
+fr_basic_0006,do zobaczenia,à bientôt
+fr_basic_0007,na razie,à plus
+fr_basic_0008,proszę,s'il vous plaît
+fr_basic_0009,dziękuję,merci
+fr_basic_0010,przepraszam,pardon
+fr_basic_0011,nie ma za co,de rien
+fr_basic_0012,nic się nie stało,ce n'est pas grave
+fr_basic_0013,poproszę,je voudrais
+fr_basic_0014,czy mogę?,je peux ?
+fr_basic_0015,bardzo mi miło,enchanté
+fr_basic_0016,tak,oui
+fr_basic_0017,nie,non
+fr_basic_0018,może,peut-être
+fr_basic_0019,dobrze,bien
+fr_basic_0020,źle,mal
+fr_basic_0021,oczywiście,bien sûr
+fr_basic_0022,nie wiem,je ne sais pas
+fr_basic_0023,rozumiem,je comprends
+fr_basic_0024,nie rozumiem,je ne comprends pas
+fr_basic_0025,OK,d'accord
+fr_basic_0026,Mam na imię X,je m'appelle X
+fr_basic_0027,Jestem X,je suis X
+fr_basic_0028,Miło cię poznać,ravi de te rencontrer
+fr_basic_0029,Skąd jesteś?,tu viens d'où ?
+fr_basic_0030,Jestem z X,je viens de X
+fr_basic_0031,Ile masz lat?,quel âge as-tu ?
+fr_basic_0032,Mam X lat,j'ai X ans
+fr_basic_0033,kto?,qui ?
+fr_basic_0034,co?,quoi ?
+fr_basic_0035,gdzie?,où ?
+fr_basic_0036,kiedy?,quand ?
+fr_basic_0037,dlaczego?,pourquoi ?
+fr_basic_0038,jak?,comment ?
+fr_basic_0039,ile?,combien ?
+fr_basic_0040,który?,lequel ?
+fr_basic_0041,czy?,est-ce que ?
+fr_basic_0042,jaki?,quel ?
+fr_basic_0043,ja,je
+fr_basic_0044,ty,tu
+fr_basic_0045,on,il
+fr_basic_0046,ona,elle
+fr_basic_0047,ono,ça
+fr_basic_0048,my,nous
+fr_basic_0049,wy,vous
+fr_basic_0050,oni i one,ils et elles
+fr_basic_0051,mój,mon
+fr_basic_0052,twój,ton
+fr_basic_0053,jego,à lui
+fr_basic_0054,jej,à elle
+fr_basic_0055,nasz,notre
+fr_basic_0056,wasz,votre
+fr_basic_0057,być,être
+fr_basic_0058,mieć,avoir
+fr_basic_0059,robić,faire
+fr_basic_0060,iść,aller
+fr_basic_0061,przyjść,venir
+fr_basic_0062,jechać,aller en voiture
+fr_basic_0063,chcieć,vouloir
+fr_basic_0064,lubić,aimer
+fr_basic_0065,wiedzieć,savoir
+fr_basic_0066,znać,connaître
+fr_basic_0067,mówić,parler
+fr_basic_0068,rozumieć,comprendre
+fr_basic_0069,jeść,manger
+fr_basic_0070,pić,boire
+fr_basic_0071,spać,dormir
+fr_basic_0072,mieszkać,habiter
+fr_basic_0073,pracować,travailler
+fr_basic_0074,uczyć się,apprendre
+fr_basic_0075,kupić,acheter
+fr_basic_0076,dać,donner
+fr_basic_0077,widzieć,voir
+fr_basic_0078,słyszeć,entendre
+fr_basic_0079,otworzyć,ouvrir
+fr_basic_0080,zamknąć,fermer
+fr_basic_0081,zero,zéro
+fr_basic_0082,jeden,un
+fr_basic_0083,dwa,deux
+fr_basic_0084,trzy,trois
+fr_basic_0085,cztery,quatre
+fr_basic_0086,pięć,cinq
+fr_basic_0087,sześć,six
+fr_basic_0088,siedem,sept
+fr_basic_0089,osiem,huit
+fr_basic_0090,dziewięć,neuf
+fr_basic_0091,dziesięć,dix
+fr_basic_0092,jedenaście,onze
+fr_basic_0093,dwanaście,douze
+fr_basic_0094,dwadzieścia,vingt
+fr_basic_0095,trzydzieści,trente
+fr_basic_0096,sto,cent
+fr_basic_0097,tysiąc,mille
+fr_basic_0098,pierwszy,premier
+fr_basic_0099,drugi,deuxième
+fr_basic_0100,trzeci,troisième
+fr_basic_0101,połowa,la moitié
+fr_basic_0102,dużo,beaucoup
+fr_basic_0103,mało,peu
+fr_basic_0104,kilka,quelques
+fr_basic_0105,biały,blanc
+fr_basic_0106,czarny,noir
+fr_basic_0107,czerwony,rouge
+fr_basic_0108,niebieski,bleu
+fr_basic_0109,zielony,vert
+fr_basic_0110,żółty,jaune
+fr_basic_0111,pomarańczowy,orange
+fr_basic_0112,różowy,rose
+fr_basic_0113,fioletowy,violet
+fr_basic_0114,brązowy,marron
+fr_basic_0115,szary,gris
+fr_basic_0116,jasny,clair
+fr_basic_0117,ciemny,foncé
+fr_basic_0118,poniedziałek,lundi
+fr_basic_0119,wtorek,mardi
+fr_basic_0120,środa,mercredi
+fr_basic_0121,czwartek,jeudi
+fr_basic_0122,piątek,vendredi
+fr_basic_0123,sobota,samedi
+fr_basic_0124,niedziela,dimanche
+fr_basic_0125,dzisiaj,aujourd'hui
+fr_basic_0126,jutro,demain
+fr_basic_0127,wczoraj,hier
+fr_basic_0128,rano,le matin
+fr_basic_0129,wieczorem,le soir
+fr_basic_0130,teraz,maintenant
+fr_basic_0131,później,plus tard
+fr_basic_0132,wcześniej,plus tôt
+fr_basic_0133,godzina,l'heure
+fr_basic_0134,minuta,la minute
+fr_basic_0135,tydzień,la semaine
+fr_basic_0136,miesiąc,le mois
+fr_basic_0137,rok,l'année
+fr_basic_0138,dom,la maison
+fr_basic_0139,szkoła,l'école
+fr_basic_0140,praca,le travail
+fr_basic_0141,sklep,le magasin
+fr_basic_0142,restauracja,le restaurant
+fr_basic_0143,toaleta,les toilettes
+fr_basic_0144,hotel,l'hôtel
+fr_basic_0145,szpital,l'hôpital
+fr_basic_0146,apteka,la pharmacie
+fr_basic_0147,dworzec,la gare
+fr_basic_0148,lotnisko,l'aéroport
+fr_basic_0149,ulica,la rue
+fr_basic_0150,miasto,la ville
+fr_basic_0151,kraj,le pays
+fr_basic_0152,pokój,la pièce
+fr_basic_0153,kuchnia,la cuisine
+fr_basic_0154,łazienka,la salle de bain
+fr_basic_0155,człowiek,l'être humain
+fr_basic_0156,osoba,la personne
+fr_basic_0157,kobieta,la femme
+fr_basic_0158,mężczyzna,l'homme
+fr_basic_0159,dziecko,l'enfant
+fr_basic_0160,mama,maman
+fr_basic_0161,tata,papa
+fr_basic_0162,rodzice,les parents
+fr_basic_0163,brat,le frère
+fr_basic_0164,siostra,la sœur
+fr_basic_0165,przyjaciel,l'ami
+fr_basic_0166,kolega,le copain
+fr_basic_0167,dziewczyna,la petite amie
+fr_basic_0168,chłopak,le petit ami
+fr_basic_0169,mąż,le mari
+fr_basic_0170,żona,l'épouse
+fr_basic_0171,woda,l'eau
+fr_basic_0172,kawa,le café
+fr_basic_0173,herbata,le thé
+fr_basic_0174,mleko,le lait
+fr_basic_0175,chleb,le pain
+fr_basic_0176,ser,le fromage
+fr_basic_0177,mięso,la viande
+fr_basic_0178,ryba,le poisson
+fr_basic_0179,jajko,l'œuf
+fr_basic_0180,ryż,le riz
+fr_basic_0181,makaron,les pâtes
+fr_basic_0182,zupa,la soupe
+fr_basic_0183,owoc,le fruit
+fr_basic_0184,warzywo,le légume
+fr_basic_0185,jabłko,la pomme
+fr_basic_0186,banan,la banane
+fr_basic_0187,sól,le sel
+fr_basic_0188,cukier,le sucre
+fr_basic_0189,śniadanie,le petit déjeuner
+fr_basic_0190,obiad,le déjeuner
+fr_basic_0191,kolacja,le dîner
+fr_basic_0192,telefon,le téléphone
+fr_basic_0193,komputer,l'ordinateur
+fr_basic_0194,książka,le livre
+fr_basic_0195,klucz,la clé
+fr_basic_0196,drzwi,la porte
+fr_basic_0197,okno,la fenêtre
+fr_basic_0198,stół,la table
+fr_basic_0199,krzesło,la chaise
+fr_basic_0200,łóżko,le lit
+fr_basic_0201,torba,le sac
+fr_basic_0202,ubranie,le vêtement
+fr_basic_0203,buty,les chaussures
+fr_basic_0204,pieniądze,l'argent
+fr_basic_0205,karta,la carte
+fr_basic_0206,bilet,le billet
+fr_basic_0207,samochód,la voiture
+fr_basic_0208,rower,le vélo
+fr_basic_0209,głowa,la tête
+fr_basic_0210,twarz,le visage
+fr_basic_0211,oko,l'œil
+fr_basic_0212,ucho,l'oreille
+fr_basic_0213,nos,le nez
+fr_basic_0214,usta,la bouche
+fr_basic_0215,ręka,la main
+fr_basic_0216,noga,la jambe
+fr_basic_0217,stopa,le pied
+fr_basic_0218,brzuch,le ventre
+fr_basic_0219,plecy,le dos
+fr_basic_0220,serce,le cœur
+fr_basic_0221,ząb,la dent
+fr_basic_0222,włosy,les cheveux
+fr_basic_0223,dobry,bon
+fr_basic_0224,zły,mauvais
+fr_basic_0225,duży,grand
+fr_basic_0226,mały,petit
+fr_basic_0227,nowy,nouveau
+fr_basic_0228,stary,vieux
+fr_basic_0229,młody,jeune
+fr_basic_0230,ładny,joli
+fr_basic_0231,brzydki,laid
+fr_basic_0232,łatwy,facile
+fr_basic_0233,trudny,difficile
+fr_basic_0234,szybki,rapide
+fr_basic_0235,wolny,lent
+fr_basic_0236,gorący,chaud
+fr_basic_0237,zimny,froid
+fr_basic_0238,tani,bon marché
+fr_basic_0239,drogi,cher
+fr_basic_0240,ważny,important
+fr_basic_0241,zmęczony,fatigué
+fr_basic_0242,głodny,affamé
+fr_basic_0243,spragniony,assoiffé
+fr_basic_0244,tutaj,ici
+fr_basic_0245,tam,là-bas
+fr_basic_0246,blisko,près
+fr_basic_0247,daleko,loin
+fr_basic_0248,w,dans
+fr_basic_0249,na,sur
+fr_basic_0250,pod,sous
+fr_basic_0251,nad,au-dessus de
+fr_basic_0252,obok,à côté de
+fr_basic_0253,przed,devant
+fr_basic_0254,za,derrière
+fr_basic_0255,lewo,gauche
+fr_basic_0256,prawo,droite
+fr_basic_0257,prosto,tout droit
+fr_basic_0258,do góry,en haut
+fr_basic_0259,na dół,en bas
+fr_basic_0260,ile kosztuje?,combien ça coûte ?
+fr_basic_0261,cena,le prix
+fr_basic_0262,zapłacić,payer
+fr_basic_0263,gotówka,l'argent liquide
+fr_basic_0264,rachunek,l'addition
+fr_basic_0265,paragon,le ticket de caisse
+fr_basic_0266,otwarte,ouvert
+fr_basic_0267,zamknięte,fermé
+fr_basic_0268,chcę to,je veux ça
+fr_basic_0269,poproszę to,je voudrais ça
+fr_basic_0270,autobus,le bus
+fr_basic_0271,tramwaj,le tramway
+fr_basic_0272,pociąg,le train
+fr_basic_0273,taksówka,le taxi
+fr_basic_0274,samolot,l'avion
+fr_basic_0275,przystanek,l'arrêt
+fr_basic_0276,gdzie jest X?,où est X ?
+fr_basic_0277,jak dojść do X?,comment aller à X ?
+fr_basic_0278,jadę do X,je vais à X
+fr_basic_0279,wysiadam tutaj,je descends ici
+fr_basic_0280,pomocy,au secours
+fr_basic_0281,lekarz,le médecin
+fr_basic_0282,boli mnie X,j'ai mal à X
+fr_basic_0283,źle się czuję,je me sens mal
+fr_basic_0284,jestem chory,je suis malade
+fr_basic_0285,wypadek,l'accident
+fr_basic_0286,policja,la police
+fr_basic_0287,ogień,le feu
+fr_basic_0288,niebezpieczne,dangereux
+fr_basic_0289,potrzebuję pomocy,j'ai besoin d'aide
+fr_basic_0290,pogoda,le temps
+fr_basic_0291,słońce,le soleil
+fr_basic_0292,deszcz,la pluie
+fr_basic_0293,śnieg,la neige
+fr_basic_0294,wiatr,le vent
+fr_basic_0295,ciepło,il fait doux
+fr_basic_0296,zimno,il fait froid
+fr_basic_0297,gorąco,il fait chaud
+fr_basic_0298,pada,il pleut
+fr_basic_0299,jest pochmurno,c'est nuageux
+fr_basic_0300,jest ładna pogoda,il fait beau
+fr_basic_0301,szczęśliwy,heureux
+fr_basic_0302,smutny,triste
+fr_basic_0303,rozgniewany,en colère
+fr_basic_0304,spokojny,calme
+fr_basic_0305,zdenerwowany,nerveux
+fr_basic_0306,chory,malade
+fr_basic_0307,boję się,j'ai peur
+fr_basic_0308,lubię,j'aime
+fr_basic_0309,nie lubię,je n'aime pas

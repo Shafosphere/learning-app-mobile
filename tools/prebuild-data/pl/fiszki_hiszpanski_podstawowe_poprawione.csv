@@ -1,0 +1,311 @@
+external_id,front_text,back_text
+es_basic_0001_czesc,cześć,hola
+es_basic_0002_dzien_dobry,dzień dobry,buenos días
+es_basic_0003_dobry_wieczor,dobry wieczór,buenas tardes
+es_basic_0004_dobranoc,dobranoc,buenas noches
+es_basic_0005_do_widzenia,do widzenia,adiós
+es_basic_0006_do_zobaczenia,do zobaczenia,hasta luego
+es_basic_0007_na_razie,na razie,hasta luego
+es_basic_0008_witam,witam,bienvenido
+es_basic_0009_prosze,proszę,por favor
+es_basic_0010_dziekuje,dziękuję,gracias
+es_basic_0011_przepraszam,przepraszam,perdón
+es_basic_0012_nie_ma_za_co,nie ma za co,de nada
+es_basic_0013_nic_sie_nie_stao,nic się nie stało,no pasa nada
+es_basic_0014_poprosze,poproszę,quisiera
+es_basic_0015_czy_moge,czy mogę?,¿puedo?
+es_basic_0016_bardzo_mi_mio,bardzo mi miło,mucho gusto
+es_basic_0017_tak,tak,sí
+es_basic_0018_nie,nie,no
+es_basic_0019_moze,może,quizás
+es_basic_0020_dobrze,dobrze,bien
+es_basic_0021_zle,źle,mal
+es_basic_0022_oczywiscie,oczywiście,por supuesto
+es_basic_0023_nie_wiem,nie wiem,no sé
+es_basic_0024_rozumiem,rozumiem,entiendo
+es_basic_0025_nie_rozumiem,nie rozumiem,no entiendo
+es_basic_0026_ok,OK,vale
+es_basic_0027_mam_na_imie,Mam na imię,me llamo
+es_basic_0028_jestem,Jestem,soy
+es_basic_0029_nazywam_sie,Nazywam się,me llamo
+es_basic_0030_mio_cie_poznac,Miło cię poznać,encantado de conocerte
+es_basic_0031_skad_jestes,Skąd jesteś?,¿de dónde eres?
+es_basic_0032_jestem_z,Jestem z,soy de
+es_basic_0033_ile_masz_lat,Ile masz lat?,¿cuántos años tienes?
+es_basic_0034_mam_lat,Mam lat,tengo años
+es_basic_0035_kto,kto?,¿quién?
+es_basic_0036_co,co?,¿qué?
+es_basic_0037_gdzie,gdzie?,¿dónde?
+es_basic_0038_kiedy,kiedy?,¿cuándo?
+es_basic_0039_dlaczego,dlaczego?,¿por qué?
+es_basic_0040_jak,jak?,¿cómo?
+es_basic_0041_ile,ile?,¿cuánto?
+es_basic_0042_ktory,który?,¿cuál?
+es_basic_0043_czy,czy?,¿sí?
+es_basic_0044_jaki,jaki?,¿qué tipo de?
+es_basic_0045_ja,ja,yo
+es_basic_0046_ty,ty,tú
+es_basic_0047_on,on,él
+es_basic_0048_ona,ona,ella
+es_basic_0049_ono,ono,ello
+es_basic_0050_my,my,nosotros
+es_basic_0051_wy,wy,vosotros
+es_basic_0052_oni,oni,ellos
+es_basic_0053_one,one,ellas
+es_basic_0053_moj,mój,mi
+es_basic_0054_twoj,twój,tu
+es_basic_0055_jego_lub_jej,jego lub jej,su
+es_basic_0057_nasz,nasz,nuestro
+es_basic_0058_wasz,wasz,vuestro
+es_basic_0059_byc,być,ser
+es_basic_0060_miec,mieć,tener
+es_basic_0061_robic,robić,hacer
+es_basic_0062_isc,iść,ir
+es_basic_0063_przyjsc,przyjść,venir
+es_basic_0064_jechac,jechać,ir
+es_basic_0065_chciec,chcieć,querer
+es_basic_0066_lubic,lubić,gustar
+es_basic_0067_wiedziec,wiedzieć,saber
+es_basic_0068_znac,znać,conocer
+es_basic_0069_mowic,mówić,hablar
+es_basic_0070_rozumiec,rozumieć,entender
+es_basic_0071_jesc,jeść,comer
+es_basic_0072_pic,pić,beber
+es_basic_0073_spac,spać,dormir
+es_basic_0074_mieszkac,mieszkać,vivir
+es_basic_0075_pracowac,pracować,trabajar
+es_basic_0076_uczyc_sie,uczyć się,aprender
+es_basic_0077_kupic,kupić,comprar
+es_basic_0078_dac,dać,dar
+es_basic_0079_widziec,widzieć,ver
+es_basic_0080_syszec,słyszeć,oír
+es_basic_0081_otworzyc,otworzyć,abrir
+es_basic_0082_zamknac,zamknąć,cerrar
+es_basic_0083_zero,zero,cero
+es_basic_0084_jeden,jeden,uno
+es_basic_0085_dwa,dwa,dos
+es_basic_0086_trzy,trzy,tres
+es_basic_0087_cztery,cztery,cuatro
+es_basic_0088_piec,pięć,cinco
+es_basic_0089_szesc,sześć,seis
+es_basic_0090_siedem,siedem,siete
+es_basic_0091_osiem,osiem,ocho
+es_basic_0092_dziewiec,dziewięć,nueve
+es_basic_0093_dziesiec,dziesięć,diez
+es_basic_0094_jedenascie,jedenaście,once
+es_basic_0095_dwanascie,dwanaście,doce
+es_basic_0096_dwadziescia,dwadzieścia,veinte
+es_basic_0097_trzydziesci,trzydzieści,treinta
+es_basic_0098_sto,sto,cien
+es_basic_0099_tysiac,tysiąc,mil
+es_basic_0100_pierwszy,pierwszy,primero
+es_basic_0101_drugi,drugi,segundo
+es_basic_0102_trzeci,trzeci,tercero
+es_basic_0103_poowa,połowa,la mitad
+es_basic_0104_duzo,dużo,mucho
+es_basic_0105_mao,mało,poco
+es_basic_0106_kilka,kilka,unos cuantos
+es_basic_0107_biay,biały,blanco
+es_basic_0108_czarny,czarny,negro
+es_basic_0109_czerwony,czerwony,rojo
+es_basic_0110_niebieski,niebieski,azul
+es_basic_0111_zielony,zielony,verde
+es_basic_0112_zoty,żółty,amarillo
+es_basic_0113_pomaranczowy,pomarańczowy,naranja
+es_basic_0114_rozowy,różowy,rosa
+es_basic_0115_fioletowy,fioletowy,morado
+es_basic_0116_brazowy,brązowy,marrón
+es_basic_0117_szary,szary,gris
+es_basic_0118_jasny,jasny,claro
+es_basic_0119_ciemny,ciemny,oscuro
+es_basic_0120_poniedziaek,poniedziałek,lunes
+es_basic_0121_wtorek,wtorek,martes
+es_basic_0122_sroda,środa,miércoles
+es_basic_0123_czwartek,czwartek,jueves
+es_basic_0124_piatek,piątek,viernes
+es_basic_0125_sobota,sobota,sábado
+es_basic_0126_niedziela,niedziela,domingo
+es_basic_0127_dzisiaj,dzisiaj,hoy
+es_basic_0128_jutro,jutro,mañana
+es_basic_0129_wczoraj,wczoraj,ayer
+es_basic_0130_rano,rano,por la mañana
+es_basic_0131_wieczorem,wieczorem,por la noche
+es_basic_0132_teraz,teraz,ahora
+es_basic_0133_pozniej,później,más tarde
+es_basic_0134_wczesniej,wcześniej,antes
+es_basic_0135_godzina,godzina,hora
+es_basic_0136_minuta,minuta,minuto
+es_basic_0137_tydzien,tydzień,semana
+es_basic_0138_miesiac,miesiąc,mes
+es_basic_0139_rok,rok,año
+es_basic_0140_dom,dom,casa
+es_basic_0141_szkoa,szkoła,escuela
+es_basic_0142_praca,praca,trabajo
+es_basic_0143_sklep,sklep,tienda
+es_basic_0144_restauracja,restauracja,restaurante
+es_basic_0145_toaleta,toaleta,baño
+es_basic_0146_hotel,hotel,hotel
+es_basic_0147_szpital,szpital,hospital
+es_basic_0148_apteka,apteka,farmacia
+es_basic_0149_dworzec,dworzec,estación
+es_basic_0150_lotnisko,lotnisko,aeropuerto
+es_basic_0151_ulica,ulica,calle
+es_basic_0152_miasto,miasto,ciudad
+es_basic_0153_kraj,kraj,país
+es_basic_0154_pokoj,pokój,habitación
+es_basic_0155_kuchnia,kuchnia,cocina
+es_basic_0156_azienka,łazienka,baño
+es_basic_0157_czowiek,człowiek,persona
+es_basic_0158_osoba,osoba,persona
+es_basic_0159_kobieta,kobieta,mujer
+es_basic_0160_mezczyzna,mężczyzna,hombre
+es_basic_0161_dziecko,dziecko,niño
+es_basic_0162_mama,mama,mamá
+es_basic_0163_tata,tata,papá
+es_basic_0164_rodzice,rodzice,padres
+es_basic_0165_brat,brat,hermano
+es_basic_0166_siostra,siostra,hermana
+es_basic_0167_przyjaciel,przyjaciel,amigo
+es_basic_0168_kolega,kolega,compañero
+es_basic_0169_dziewczyna,dziewczyna,novia
+es_basic_0170_chopak,chłopak,novio
+es_basic_0171_maz,mąż,marido
+es_basic_0172_zona,żona,esposa
+es_basic_0173_woda,woda,agua
+es_basic_0174_kawa,kawa,café
+es_basic_0175_herbata,herbata,té
+es_basic_0176_mleko,mleko,leche
+es_basic_0177_chleb,chleb,pan
+es_basic_0178_ser,ser,queso
+es_basic_0179_mieso,mięso,carne
+es_basic_0180_ryba,ryba,pescado
+es_basic_0181_jajko,jajko,huevo
+es_basic_0182_ryz,ryż,arroz
+es_basic_0183_makaron,makaron,pasta
+es_basic_0184_zupa,zupa,sopa
+es_basic_0185_owoc,owoc,fruta
+es_basic_0186_warzywo,warzywo,verdura
+es_basic_0187_jabko,jabłko,manzana
+es_basic_0188_banan,banan,plátano
+es_basic_0189_sol,sól,sal
+es_basic_0190_cukier,cukier,azúcar
+es_basic_0191_sniadanie,śniadanie,desayuno
+es_basic_0192_obiad,obiad,almuerzo
+es_basic_0193_kolacja,kolacja,cena
+es_basic_0194_telefon,telefon,teléfono
+es_basic_0195_komputer,komputer,ordenador
+es_basic_0196_ksiazka,książka,libro
+es_basic_0197_klucz,klucz,llave
+es_basic_0198_drzwi,drzwi,puerta
+es_basic_0199_okno,okno,ventana
+es_basic_0200_sto,stół,mesa
+es_basic_0201_krzeso,krzesło,silla
+es_basic_0202_ozko,łóżko,cama
+es_basic_0203_torba,torba,bolsa
+es_basic_0204_ubranie,ubranie,ropa
+es_basic_0205_buty,buty,zapatos
+es_basic_0206_pieniadze,pieniądze,dinero
+es_basic_0207_karta,karta,tarjeta
+es_basic_0208_bilet,bilet,billete
+es_basic_0209_samochod,samochód,coche
+es_basic_0210_rower,rower,bicicleta
+es_basic_0211_gowa,głowa,cabeza
+es_basic_0212_twarz,twarz,cara
+es_basic_0213_oko,oko,ojo
+es_basic_0214_ucho,ucho,oreja
+es_basic_0215_nos,nos,nariz
+es_basic_0216_usta,usta,boca
+es_basic_0217_reka,ręka,mano
+es_basic_0218_noga,noga,pierna
+es_basic_0219_stopa,stopa,pie
+es_basic_0220_brzuch,brzuch,vientre
+es_basic_0221_plecy,plecy,espalda
+es_basic_0222_serce,serce,corazón
+es_basic_0223_zab,ząb,diente
+es_basic_0224_wosy,włosy,pelo
+es_basic_0225_dobry,dobry,bueno
+es_basic_0226_zy,zły,malo
+es_basic_0227_duzy,duży,grande
+es_basic_0228_may,mały,pequeño
+es_basic_0229_nowy,nowy,nuevo
+es_basic_0230_stary,stary,viejo
+es_basic_0231_mody,młody,joven
+es_basic_0232_adny,ładny,bonito
+es_basic_0233_brzydki,brzydki,feo
+es_basic_0234_atwy,łatwy,fácil
+es_basic_0235_trudny,trudny,difícil
+es_basic_0236_szybki,szybki,rápido
+es_basic_0237_wolny,wolny,lento
+es_basic_0238_goracy,gorący,caliente
+es_basic_0239_zimny,zimny,frío
+es_basic_0240_tani,tani,barato
+es_basic_0241_drogi,drogi,caro
+es_basic_0242_wazny,ważny,importante
+es_basic_0243_zmeczony,zmęczony,cansado
+es_basic_0244_godny,głodny,hambriento
+es_basic_0245_spragniony,spragniony,sediento
+es_basic_0246_tutaj,tutaj,aquí
+es_basic_0247_tam,tam,allí
+es_basic_0248_blisko,blisko,cerca
+es_basic_0249_daleko,daleko,lejos
+es_basic_0250_w,w,en
+es_basic_0251_na,na,en
+es_basic_0252_pod,pod,debajo de
+es_basic_0253_nad,nad,encima de
+es_basic_0254_obok,obok,al lado de
+es_basic_0255_przed,przed,delante de
+es_basic_0256_za,za,detrás de
+es_basic_0257_lewo,lewo,izquierda
+es_basic_0258_prawo,prawo,derecha
+es_basic_0259_prosto,prosto,recto
+es_basic_0260_do_gory,do góry,arriba
+es_basic_0261_na_do,na dół,abajo
+es_basic_0262_ile_kosztuje,ile kosztuje?,¿cuánto cuesta?
+es_basic_0263_cena,cena,precio
+es_basic_0267_zapacic,zapłacić,pagar
+es_basic_0268_gotowka,gotówka,efectivo
+es_basic_0270_rachunek,rachunek,cuenta
+es_basic_0271_paragon,paragon,recibo
+es_basic_0273_otwarte,otwarte,abierto
+es_basic_0274_zamkniete,zamknięte,cerrado
+es_basic_0275_chce_to,chcę to,quiero esto
+es_basic_0276_poprosze_to,poproszę to,quisiera esto
+es_basic_0277_autobus,autobus,autobús
+es_basic_0278_tramwaj,tramwaj,tranvía
+es_basic_0279_pociag,pociąg,tren
+es_basic_0281_taksowka,taksówka,taxi
+es_basic_0282_samolot,samolot,avión
+es_basic_0284_przystanek,przystanek,parada
+es_basic_0287_gdzie_jest,gdzie jest?,¿dónde está?
+es_basic_0288_jak_dojsc_do,jak dojść do?,¿cómo se llega a?
+es_basic_0289_jade_do,jadę do,voy a
+es_basic_0290_wysiadam_tutaj,wysiadam tutaj,me bajo aquí
+es_basic_0291_pomocy,pomocy,ayuda
+es_basic_0292_lekarz,lekarz,médico
+es_basic_0295_boli_mnie,boli mnie,me duele
+es_basic_0296_zle_sie_czuje,źle się czuję,me siento mal
+es_basic_0297_jestem_chory,jestem chory,estoy enfermo
+es_basic_0298_wypadek,wypadek,accidente
+es_basic_0299_policja,policja,policía
+es_basic_0300_ogien,ogień,fuego
+es_basic_0301_niebezpieczne,niebezpieczne,peligroso
+es_basic_0302_potrzebuje_pomocy,potrzebuję pomocy,necesito ayuda
+es_basic_0303_pogoda,pogoda,tiempo
+es_basic_0304_sonce,słońce,sol
+es_basic_0305_deszcz,deszcz,lluvia
+es_basic_0306_snieg,śnieg,nieve
+es_basic_0307_wiatr,wiatr,viento
+es_basic_0308_ciepo,ciepło,calor
+es_basic_0309_zimno,zimno,frío
+es_basic_0310_goraco,gorąco,hace calor
+es_basic_0311_pada,pada,llueve
+es_basic_0312_jest_pochmurno,jest pochmurno,está nublado
+es_basic_0313_jest_adna_pogoda,jest ładna pogoda,hace buen tiempo
+es_basic_0314_szczesliwy,szczęśliwy,feliz
+es_basic_0315_smutny,smutny,triste
+es_basic_0317_spokojny,spokojny,tranquilo
+es_basic_0318_zdenerwowany,zdenerwowany,nervioso
+es_basic_0320_chory,chory,enfermo
+es_basic_0323_boje_sie,boję się,tengo miedo
+es_basic_0324_lubie,lubię,me gusta
+es_basic_0325_nie_lubie,nie lubię,no me gusta

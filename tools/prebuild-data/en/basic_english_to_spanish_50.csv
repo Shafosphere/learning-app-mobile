@@ -1,51 +1,311 @@
-﻿external_id,type,front_text,back_text
-0001,traditional,hello,hola
-0002,traditional,hi,hola
-0003,traditional,good morning,buenos días
-0004,traditional,good afternoon,buenas tardes
-0005,traditional,good night,buenas noches
-0006,traditional,goodbye,adiós
-0007,traditional,bye,chao
-0008,traditional,please,por favor
-0009,traditional,thank you,gracias
-0010,traditional,you're welcome,de nada
-0011,traditional,sorry,lo siento
-0012,traditional,excuse me,permiso
-0013,traditional,yes,sí
-0014,traditional,no,no
-0015,traditional,how are you?,¿cómo estás?
-0016,traditional,good,bien
-0017,traditional,bad,mal
-0018,traditional,what?,¿qué?
-0019,traditional,where?,¿dónde?
-0020,traditional,when?,¿cuándo?
-0021,traditional,who?,¿quién?
-0022,traditional,why?,¿por qué?
-0023,traditional,how?,¿cómo?
-0024,traditional,one,uno
-0025,traditional,two,dos
-0026,traditional,three,tres
-0027,traditional,four,cuatro
-0028,traditional,five,cinco
-0029,traditional,six,seis
-0030,traditional,seven,siete
-0031,traditional,eight,ocho
-0032,traditional,nine,nueve
-0033,traditional,ten,diez
-0034,traditional,red,rojo
-0035,traditional,blue,azul
-0036,traditional,green,verde
-0037,traditional,yellow,amarillo
-0038,traditional,black,negro
-0039,traditional,white,blanco
-0040,traditional,orange,naranja
-0041,traditional,pink,rosa
-0042,traditional,purple,morado
-0043,traditional,brown,marrón
-0044,traditional,water,agua
-0045,traditional,food,comida
-0046,traditional,bread,pan
-0047,traditional,house,casa
-0048,traditional,school,escuela
-0049,traditional,friend,amigo
-0050,traditional,bathroom,baño
+﻿external_id,front_text,back_text
+es_basic_0001_czesc,hello,hola
+es_basic_0002_dzien_dobry,good morning,buenos días
+es_basic_0003_dobry_wieczor,good afternoon,buenas tardes
+es_basic_0004_dobranoc,good night,buenas noches
+es_basic_0005_do_widzenia,goodbye,adiós
+es_basic_0006_do_zobaczenia,see you later,hasta luego
+es_basic_0007_na_razie,see you,nos vemos
+es_basic_0008_witam,welcome,bienvenido
+es_basic_0009_prosze,please,por favor
+es_basic_0010_dziekuje,thank you,gracias
+es_basic_0011_przepraszam,sorry,perdón
+es_basic_0012_nie_ma_za_co,you're welcome,de nada
+es_basic_0013_nic_sie_nie_stao,it's okay,no pasa nada
+es_basic_0014_poprosze,I would like,quisiera
+es_basic_0015_czy_moge,can I?,¿puedo?
+es_basic_0016_bardzo_mi_mio,nice to meet you,mucho gusto
+es_basic_0017_tak,yes,sí
+es_basic_0018_nie,no,no
+es_basic_0019_moze,maybe,quizás
+es_basic_0020_dobrze,well,bien
+es_basic_0021_zle,badly,mal
+es_basic_0022_oczywiscie,of course,por supuesto
+es_basic_0023_nie_wiem,I don't know,no sé
+es_basic_0024_rozumiem,I understand,entiendo
+es_basic_0025_nie_rozumiem,I don't understand,no entiendo
+es_basic_0026_ok,OK,vale
+es_basic_0027_mam_na_imie,My name is,me llamo
+es_basic_0028_jestem,I am,soy
+es_basic_0029_nazywam_sie,I am called,me llamo
+es_basic_0030_mio_cie_poznac,Nice to meet you,encantado de conocerte
+es_basic_0031_skad_jestes,Where are you from?,¿de dónde eres?
+es_basic_0032_jestem_z,I am from,soy de
+es_basic_0033_ile_masz_lat,How old are you?,¿cuántos años tienes?
+es_basic_0034_mam_lat,I am X years old,tengo X años
+es_basic_0035_kto,who?,¿quién?
+es_basic_0036_co,what?,¿qué?
+es_basic_0037_gdzie,where?,¿dónde?
+es_basic_0038_kiedy,when?,¿cuándo?
+es_basic_0039_dlaczego,why?,¿por qué?
+es_basic_0040_jak,how?,¿cómo?
+es_basic_0041_ile,how much?,¿cuánto?
+es_basic_0042_ktory,which?,¿cuál?
+es_basic_0043_czy,if,si
+es_basic_0044_jaki,what kind of?,¿qué tipo de?
+es_basic_0045_ja,I,yo
+es_basic_0046_ty,you,tú
+es_basic_0047_on,he,él
+es_basic_0048_ona,she,ella
+es_basic_0049_ono,that,eso
+es_basic_0050_my,we,nosotros
+es_basic_0051_wy,you plural informal,vosotros
+es_basic_0052_oni,they masculine group,ellos
+es_basic_0053_one,they feminine group,ellas
+es_basic_0054_moj,my,mi
+es_basic_0055_twoj,your,tu
+es_basic_0056_jego_lub_jej,his or her,su
+es_basic_0057_nasz,our,nuestro
+es_basic_0058_wasz,your plural,vuestro
+es_basic_0059_byc,to be,ser
+es_basic_0060_miec,to have,tener
+es_basic_0061_robic,to do,hacer
+es_basic_0062_isc,to go,ir
+es_basic_0063_przyjsc,to come,venir
+es_basic_0064_jechac,to travel,viajar
+es_basic_0065_chciec,to want,querer
+es_basic_0066_lubic,to like,gustar
+es_basic_0067_wiedziec,to know facts,saber
+es_basic_0068_znac,know,conocer
+es_basic_0069_mowic,to speak,hablar
+es_basic_0070_rozumiec,to understand,entender
+es_basic_0071_jesc,to eat,comer
+es_basic_0072_pic,to drink,beber
+es_basic_0073_spac,to sleep,dormir
+es_basic_0074_mieszkac,to live,vivir
+es_basic_0075_pracowac,to work,trabajar
+es_basic_0076_uczyc_sie,to learn,aprender
+es_basic_0077_kupic,to buy,comprar
+es_basic_0078_dac,to give,dar
+es_basic_0079_widziec,to see,ver
+es_basic_0080_syszec,to hear,oír
+es_basic_0081_otworzyc,to open,abrir
+es_basic_0082_zamknac,to close,cerrar
+es_basic_0083_zero,zero,cero
+es_basic_0084_jeden,one,uno
+es_basic_0085_dwa,two,dos
+es_basic_0086_trzy,three,tres
+es_basic_0087_cztery,four,cuatro
+es_basic_0088_piec,five,cinco
+es_basic_0089_szesc,six,seis
+es_basic_0090_siedem,seven,siete
+es_basic_0091_osiem,eight,ocho
+es_basic_0092_dziewiec,nine,nueve
+es_basic_0093_dziesiec,ten,diez
+es_basic_0094_jedenascie,eleven,once
+es_basic_0095_dwanascie,twelve,doce
+es_basic_0096_dwadziescia,twenty,veinte
+es_basic_0097_trzydziesci,thirty,treinta
+es_basic_0098_sto,one hundred,cien
+es_basic_0099_tysiac,one thousand,mil
+es_basic_0100_pierwszy,first,primero
+es_basic_0101_drugi,second,segundo
+es_basic_0102_trzeci,third,tercero
+es_basic_0103_poowa,half,la mitad
+es_basic_0104_duzo,a lot,mucho
+es_basic_0105_mao,little,poco
+es_basic_0106_kilka,a few,unos cuantos
+es_basic_0107_biay,white,blanco
+es_basic_0108_czarny,black,negro
+es_basic_0109_czerwony,red,rojo
+es_basic_0110_niebieski,blue,azul
+es_basic_0111_zielony,green,verde
+es_basic_0112_zoty,yellow,amarillo
+es_basic_0113_pomaranczowy,orange,naranja
+es_basic_0114_rozowy,pink,rosa
+es_basic_0115_fioletowy,purple,morado
+es_basic_0116_brazowy,brown,marrón
+es_basic_0117_szary,gray,gris
+es_basic_0118_jasny,light,claro
+es_basic_0119_ciemny,dark,oscuro
+es_basic_0120_poniedziaek,Monday,lunes
+es_basic_0121_wtorek,Tuesday,martes
+es_basic_0122_sroda,Wednesday,miércoles
+es_basic_0123_czwartek,Thursday,jueves
+es_basic_0124_piatek,Friday,viernes
+es_basic_0125_sobota,Saturday,sábado
+es_basic_0126_niedziela,Sunday,domingo
+es_basic_0127_dzisiaj,today,hoy
+es_basic_0128_jutro,tomorrow,mañana
+es_basic_0129_wczoraj,yesterday,ayer
+es_basic_0130_rano,in the morning,por la mañana
+es_basic_0131_wieczorem,at night,por la noche
+es_basic_0132_teraz,now,ahora
+es_basic_0133_pozniej,later,más tarde
+es_basic_0134_wczesniej,earlier,antes
+es_basic_0135_godzina,hour,hora
+es_basic_0136_minuta,minute,minuto
+es_basic_0137_tydzien,week,semana
+es_basic_0138_miesiac,month,mes
+es_basic_0139_rok,year,año
+es_basic_0140_dom,house,casa
+es_basic_0141_szkoa,school,escuela
+es_basic_0142_praca,work,trabajo
+es_basic_0143_sklep,store,tienda
+es_basic_0144_restauracja,restaurant,restaurante
+es_basic_0145_toaleta,toilet,baño
+es_basic_0146_hotel,hotel,hotel
+es_basic_0147_szpital,hospital,hospital
+es_basic_0148_apteka,pharmacy,farmacia
+es_basic_0149_dworzec,station,estación
+es_basic_0150_lotnisko,airport,aeropuerto
+es_basic_0151_ulica,street,calle
+es_basic_0152_miasto,city,ciudad
+es_basic_0153_kraj,country,país
+es_basic_0154_pokoj,room,habitación
+es_basic_0155_kuchnia,kitchen,cocina
+es_basic_0156_azienka,bathroom,baño
+es_basic_0157_czowiek,human being,ser humano
+es_basic_0158_osoba,person,persona
+es_basic_0159_kobieta,woman,mujer
+es_basic_0160_mezczyzna,man,hombre
+es_basic_0161_dziecko,child,niño
+es_basic_0162_mama,mom,mamá
+es_basic_0163_tata,dad,papá
+es_basic_0164_rodzice,parents,padres
+es_basic_0165_brat,brother,hermano
+es_basic_0166_siostra,sister,hermana
+es_basic_0167_przyjaciel,friend,amigo
+es_basic_0168_kolega,classmate,compañero de clase
+es_basic_0169_dziewczyna,girlfriend,novia
+es_basic_0170_chopak,boyfriend,novio
+es_basic_0171_maz,husband,marido
+es_basic_0172_zona,wife,esposa
+es_basic_0173_woda,water,agua
+es_basic_0174_kawa,coffee,café
+es_basic_0175_herbata,tea,té
+es_basic_0176_mleko,milk,leche
+es_basic_0177_chleb,bread,pan
+es_basic_0178_ser,cheese,queso
+es_basic_0179_mieso,meat,carne
+es_basic_0180_ryba,fish,pez
+es_basic_0181_jajko,egg,huevo
+es_basic_0182_ryz,rice,arroz
+es_basic_0183_makaron,pasta,pasta
+es_basic_0184_zupa,soup,sopa
+es_basic_0185_owoc,fruit,fruta
+es_basic_0186_warzywo,vegetable,verdura
+es_basic_0187_jabko,apple,manzana
+es_basic_0188_banan,banana,plátano
+es_basic_0189_sol,salt,sal
+es_basic_0190_cukier,sugar,azúcar
+es_basic_0191_sniadanie,breakfast,desayuno
+es_basic_0192_obiad,lunch,almuerzo
+es_basic_0193_kolacja,dinner,cena
+es_basic_0194_telefon,phone,teléfono
+es_basic_0195_komputer,computer,ordenador
+es_basic_0196_ksiazka,book,libro
+es_basic_0197_klucz,key,llave
+es_basic_0198_drzwi,door,puerta
+es_basic_0199_okno,window,ventana
+es_basic_0200_sto,table,mesa
+es_basic_0201_krzeso,chair,silla
+es_basic_0202_ozko,bed,cama
+es_basic_0203_torba,bag,bolsa
+es_basic_0204_ubranie,clothing,ropa
+es_basic_0205_buty,shoes,zapatos
+es_basic_0206_pieniadze,money,dinero
+es_basic_0207_karta,card,tarjeta
+es_basic_0208_bilet,ticket,billete
+es_basic_0209_samochod,car,coche
+es_basic_0210_rower,bicycle,bicicleta
+es_basic_0211_gowa,head,cabeza
+es_basic_0212_twarz,face,cara
+es_basic_0213_oko,eye,ojo
+es_basic_0214_ucho,ear,oreja
+es_basic_0215_nos,nose,nariz
+es_basic_0216_usta,mouth,boca
+es_basic_0217_reka,hand,mano
+es_basic_0218_noga,leg,pierna
+es_basic_0219_stopa,foot,pie
+es_basic_0220_brzuch,belly,barriga
+es_basic_0221_plecy,back,espalda
+es_basic_0222_serce,heart,corazón
+es_basic_0223_zab,tooth,diente
+es_basic_0224_wosy,hair,pelo
+es_basic_0225_dobry,good,bueno
+es_basic_0226_zy,bad,malo
+es_basic_0227_duzy,big,grande
+es_basic_0228_may,small,pequeño
+es_basic_0229_nowy,new,nuevo
+es_basic_0230_stary,old,viejo
+es_basic_0231_mody,young,joven
+es_basic_0232_adny,pretty,bonito
+es_basic_0233_brzydki,ugly,feo
+es_basic_0234_atwy,easy,fácil
+es_basic_0235_trudny,difficult,difícil
+es_basic_0236_szybki,fast,rápido
+es_basic_0237_wolny,slow,lento
+es_basic_0238_goracy,hot,caliente
+es_basic_0239_zimny,cold,frío
+es_basic_0240_tani,cheap,barato
+es_basic_0241_drogi,expensive,caro
+es_basic_0242_wazny,important,importante
+es_basic_0243_zmeczony,tired,cansado
+es_basic_0244_godny,hungry,hambriento
+es_basic_0245_spragniony,thirsty,sediento
+es_basic_0246_tutaj,here,aquí
+es_basic_0247_tam,there,allí
+es_basic_0248_blisko,near,cerca
+es_basic_0249_daleko,far,lejos
+es_basic_0250_w,in,en
+es_basic_0251_na,on,sobre
+es_basic_0252_pod,under,debajo de
+es_basic_0253_nad,above,encima de
+es_basic_0254_obok,next to,al lado de
+es_basic_0255_przed,in front of,delante de
+es_basic_0256_za,behind,detrás de
+es_basic_0257_lewo,left,izquierda
+es_basic_0258_prawo,right,derecha
+es_basic_0259_prosto,straight ahead,recto
+es_basic_0260_do_gory,up,arriba
+es_basic_0261_na_do,down,abajo
+es_basic_0262_ile_kosztuje,how much does it cost?,¿cuánto cuesta?
+es_basic_0263_cena,price,precio
+es_basic_0267_zapacic,to pay,pagar
+es_basic_0268_gotowka,cash,efectivo
+es_basic_0270_rachunek,bill,cuenta
+es_basic_0271_paragon,receipt,recibo
+es_basic_0273_otwarte,open,abierto
+es_basic_0274_zamkniete,closed,cerrado
+es_basic_0275_chce_to,I want this,quiero esto
+es_basic_0276_poprosze_to,I would like this,quisiera esto
+es_basic_0277_autobus,bus,autobús
+es_basic_0278_tramwaj,tram,tranvía
+es_basic_0279_pociag,train,tren
+es_basic_0281_taksowka,taxi,taxi
+es_basic_0282_samolot,airplane,avión
+es_basic_0284_przystanek,stop,parada
+es_basic_0287_gdzie_jest,where is?,¿dónde está?
+es_basic_0288_jak_dojsc_do,how do I get to?,¿cómo se llega a?
+es_basic_0289_jade_do,I am going to,voy a
+es_basic_0290_wysiadam_tutaj,I am getting off here,me bajo aquí
+es_basic_0291_pomocy,help,ayuda
+es_basic_0292_lekarz,doctor,médico
+es_basic_0295_boli_mnie,it hurts,me duele
+es_basic_0296_zle_sie_czuje,I feel unwell,me siento mal
+es_basic_0297_jestem_chory,I am sick,estoy enfermo
+es_basic_0298_wypadek,accident,accidente
+es_basic_0299_policja,police,policía
+es_basic_0300_ogien,fire,fuego
+es_basic_0301_niebezpieczne,dangerous,peligroso
+es_basic_0302_potrzebuje_pomocy,I need help,necesito ayuda
+es_basic_0303_pogoda,weather,tiempo
+es_basic_0304_sonce,sun,sol
+es_basic_0305_deszcz,rain,lluvia
+es_basic_0306_snieg,snow,nieve
+es_basic_0307_wiatr,wind,viento
+es_basic_0308_ciepo,heat,calor
+es_basic_0309_zimno,it's cold,hace frío
+es_basic_0310_goraco,it's hot,hace calor
+es_basic_0311_pada,it's raining,llueve
+es_basic_0312_jest_pochmurno,it's cloudy,está nublado
+es_basic_0313_jest_adna_pogoda,the weather is nice,hace buen tiempo
+es_basic_0314_szczesliwy,happy,feliz
+es_basic_0315_smutny,sad,triste
+es_basic_0317_spokojny,calm,tranquilo
+es_basic_0318_zdenerwowany,nervous,nervioso
+es_basic_0320_chory,sick,enfermo
+es_basic_0323_boje_sie,I'm afraid,tengo miedo
+es_basic_0324_lubie,I like,me gusta
+es_basic_0325_nie_lubie,I don't like,no me gusta
