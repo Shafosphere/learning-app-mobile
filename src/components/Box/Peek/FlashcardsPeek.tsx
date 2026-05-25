@@ -1,7 +1,8 @@
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { usePeekStyles } from "./Peek-styles";
 import Octicons from "@expo/vector-icons/Octicons";
-import React, { useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Animated,
   FlatList,
@@ -20,6 +21,7 @@ type FlashcardsPeekOverlayProps = {
   cards: WordWithTranslations[];
   activeCourseName?: string | null;
   onClose: () => void;
+  onReturnToUnknown: (cardId: number) => Promise<void>;
 };
 
 const BOX_LABELS: Record<keyof BoxesState, string> = {
@@ -37,6 +39,7 @@ export default function FlashcardsPeekOverlay({
   cards,
   activeCourseName,
   onClose,
+  onReturnToUnknown,
 }: FlashcardsPeekOverlayProps) {
   const { t } = useTranslation();
   const styles = usePeekStyles();
@@ -44,6 +47,10 @@ export default function FlashcardsPeekOverlay({
   const opacityAnim = useRef(new Animated.Value(0)).current;
   const listRef = useRef<FlatList<WordWithTranslations>>(null);
   const { width, height } = useWindowDimensions();
+  const [cardPendingReset, setCardPendingReset] =
+    useState<WordWithTranslations | null>(null);
+  const [isResettingCard, setIsResettingCard] = useState(false);
+  const [resetErrorVisible, setResetErrorVisible] = useState(false);
 
   const sheetWidth = Math.min(width - 32, 480);
   const boxLabel = boxKey ? BOX_LABELS[boxKey] ?? "?" : "?";
@@ -76,6 +83,47 @@ export default function FlashcardsPeekOverlay({
       // Exit Animation (optional, usually overlay unmounts, but if controlled externally)
     }
   }, [visible, boxKey, cards.length, opacityAnim, scaleAnim]);
+
+  useEffect(() => {
+    if (!visible) {
+      setCardPendingReset(null);
+      setIsResettingCard(false);
+      setResetErrorVisible(false);
+    }
+  }, [visible]);
+
+  const closeOverlay = () => {
+    if (isResettingCard) return;
+    setCardPendingReset(null);
+    setResetErrorVisible(false);
+    onClose();
+  };
+
+  const openResetConfirmation = (card: WordWithTranslations) => {
+    setCardPendingReset(card);
+    setResetErrorVisible(false);
+  };
+
+  const closeResetConfirmation = () => {
+    if (isResettingCard) return;
+    setCardPendingReset(null);
+    setResetErrorVisible(false);
+  };
+
+  const confirmReturnToUnknown = async () => {
+    if (!cardPendingReset || isResettingCard) return;
+    setIsResettingCard(true);
+    setResetErrorVisible(false);
+    try {
+      await onReturnToUnknown(cardPendingReset.id);
+      setCardPendingReset(null);
+    } catch (error) {
+      console.warn("[FlashcardsPeek] Failed to return card to unknown pool", error);
+      setResetErrorVisible(true);
+    } finally {
+      setIsResettingCard(false);
+    }
+  };
 
   const renderItem = ({
     item,
@@ -275,6 +323,19 @@ export default function FlashcardsPeekOverlay({
             ) : null}
           </View>
         )}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("flashcards.card.peek.returnToUnknownA11y")}
+          testID={`flashcards-peek-return-unknown-${item.id}`}
+          onPress={() => openResetConfirmation(item)}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            pressed ? styles.deleteButtonPressed : undefined,
+          ]}
+        >
+          <Octicons name="trash" size={18} color={styles.deleteIcon.color} />
+        </Pressable>
       </View>
     );
   };
@@ -291,25 +352,26 @@ export default function FlashcardsPeekOverlay({
   const courseLabel = activeCourseName?.trim() || t("flashcards.card.peek.previewCourse");
 
   return (
-    <Modal
-      transparent
-      visible={visible}
-      animationType="fade"
-      onRequestClose={onClose}
-      statusBarTranslucent
-    >
-      <View style={styles.backdrop}>
-        <Animated.View
-          style={[
-            styles.dialog,
-            {
-              width: sheetWidth,
-              maxHeight: Math.max(300, height * 0.75),
-              opacity: opacityAnim,
-              transform: [{ scale: scaleAnim }],
-            },
-          ]}
-        >
+    <>
+      <Modal
+        transparent
+        visible={visible}
+        animationType="fade"
+        onRequestClose={closeOverlay}
+        statusBarTranslucent
+      >
+        <View style={styles.backdrop}>
+          <Animated.View
+            style={[
+              styles.dialog,
+              {
+                width: sheetWidth,
+                maxHeight: Math.max(300, height * 0.75),
+                opacity: opacityAnim,
+                transform: [{ scale: scaleAnim }],
+              },
+            ]}
+          >
           {/* Header */}
           <View style={styles.sectionHeader}>
             <View style={styles.header}>
@@ -320,7 +382,7 @@ export default function FlashcardsPeekOverlay({
                 ) : null}
               </View>
               <Pressable
-                onPress={onClose}
+                onPress={closeOverlay}
                 accessibilityRole="button"
                 accessibilityLabel={t("flashcards.card.peek.close")}
                 hitSlop={12}
@@ -380,8 +442,26 @@ export default function FlashcardsPeekOverlay({
               </>
             )}
           </View>
-        </Animated.View>
-      </View>
-    </Modal>
+          </Animated.View>
+        </View>
+      </Modal>
+      <NudgeModal
+        visible={cardPendingReset != null}
+        title={t("flashcards.card.peek.returnToUnknownTitle")}
+        description={t("flashcards.card.peek.returnToUnknownDescription")}
+        confirmLabel={t("flashcards.card.peek.returnToUnknownConfirm")}
+        confirmDisabled={isResettingCard}
+        secondaryLabel={t("app.actions.cancel")}
+        onSecondaryPress={closeResetConfirmation}
+        onConfirm={() => void confirmReturnToUnknown()}
+        onClose={closeResetConfirmation}
+      >
+        {resetErrorVisible ? (
+          <Text style={styles.resetError}>
+            {t("flashcards.card.peek.returnToUnknownError")}
+          </Text>
+        ) : null}
+      </NudgeModal>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import {
   addRandomCustomReviews,
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  removeCustomReview,
   scheduleCustomReview,
 } from "@/src/db/sqlite/repositories/reviews";
 
@@ -30,6 +31,20 @@ describe("custom review repository", () => {
 
     expect(result.stage).toBe(0);
     expect(runAsync).toHaveBeenCalled();
+  });
+
+  it("removes only the selected card review entry", async () => {
+    const runAsync = jest.fn().mockResolvedValue({ changes: 1 });
+    mockGetDB.mockResolvedValue({ runAsync });
+
+    const result = await removeCustomReview(15, 77);
+
+    expect(result).toBe(1);
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining("DELETE FROM custom_reviews WHERE flashcard_id = ? AND course_id = ?"),
+      15,
+      77
+    );
   });
 
   it("clamps promotions at stage five", async () => {

@@ -1060,7 +1060,12 @@
         "previewCourse": "preview",
         "close": "Close",
         "emptyBoxTitle": "The box is empty",
-        "emptyBoxDescription": "Flashcards will go here when you reach the right learning level."
+        "emptyBoxDescription": "Flashcards will go here when you reach the right learning level.",
+        "returnToUnknownA11y": "Return flashcard to the unknown pool",
+        "returnToUnknownTitle": "Return flashcard to unknown?",
+        "returnToUnknownDescription": "This flashcard will be removed from boxes and reviews and returned to the unknown pool. Existing statistics will be kept.",
+        "returnToUnknownConfirm": "RETURN CARD",
+        "returnToUnknownError": "Could not return this flashcard. Please try again."
       },
       "hint": {
         "placeholder": "Enter a hint…",

@@ -130,6 +130,7 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     borderRadius: 18,
     backgroundColor: colors.secondBackground,
     padding: 12,
+    paddingBottom: 48,
     overflow: "hidden",
     shadowColor: colors.darkbg,
     shadowOpacity: 0.12,
@@ -307,6 +308,30 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
   cardEmptyValue: {
     color: colors.paragraph,
     opacity: 0.8,
+  },
+  deleteButton: {
+    position: "absolute",
+    right: 10,
+    bottom: 10,
+    width: 30,
+    height: 30,
+    borderRadius: 8,
+    backgroundColor: colors.my_red,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  deleteButtonPressed: {
+    opacity: 0.78,
+  },
+  deleteIcon: {
+    color: colors.lightbg,
+  },
+  resetError: {
+    marginTop: 10,
+    color: colors.my_red,
+    fontSize: 13,
+    lineHeight: 18,
+    fontWeight: "600",
   },
   imageOnlyWrapper: {
     width: "100%",

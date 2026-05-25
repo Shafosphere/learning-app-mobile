@@ -30,6 +30,7 @@ import {
   appendDebugEvent,
   summarizeBoxes,
 } from "@/src/services/debugEvents";
+import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
@@ -184,6 +185,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const reviewMutationQueueRef = useRef(new Map<number, Promise<unknown>>());
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
     boxZero: [],
@@ -331,6 +333,21 @@ export default function ReviewFlashcardsPlaceholder() {
       return nextState;
     });
   }, [courseId]);
+
+  const enqueueReviewMutation = useCallback(
+    <T,>(cardId: number, operation: () => Promise<T>): Promise<T> => {
+      const prior = reviewMutationQueueRef.current.get(cardId) ?? Promise.resolve();
+      const queued = prior.catch(() => undefined).then(operation);
+      reviewMutationQueueRef.current.set(cardId, queued);
+      void queued.finally(() => {
+        if (reviewMutationQueueRef.current.get(cardId) === queued) {
+          reviewMutationQueueRef.current.delete(cardId);
+        }
+      }).catch(() => undefined);
+      return queued;
+    },
+    [],
+  );
 
   const reloadSession = useCallback(async () => {
     clearTransitionTimer();
@@ -525,6 +542,27 @@ export default function ReviewFlashcardsPlaceholder() {
     setPeekCards([]);
   };
 
+  const handleReturnPeekCardToUnknown = useCallback(
+    async (cardId: number) => {
+      if (courseId == null || peekBox == null) {
+        throw new Error("No review course or source box selected.");
+      }
+      const sourceBox = peekBox;
+      await enqueueReviewMutation(cardId, () =>
+        returnFlashcardToUnknown({ courseId, flashcardId: cardId })
+      );
+      removeCardFromSession(cardId, sourceBox);
+      setPeekCards((current) => {
+        const nextCards = current.filter((card) => card.id !== cardId);
+        if (nextCards.length === 0) {
+          setPeekBox(null);
+        }
+        return nextCards;
+      });
+    },
+    [courseId, enqueueReviewMutation, peekBox, removeCardFromSession],
+  );
+
   const reversed = selectedItem?.flipped ?? false;
   const answerOnly =
     (selectedItem?.answerOnly ?? false) ||
@@ -581,10 +619,8 @@ export default function ReviewFlashcardsPlaceholder() {
           cardId: correction.cardId,
           fromBox: activeBox,
         });
-        await scheduleCustomReview(
-          correction.cardId!,
-          courseId,
-          0,
+        await enqueueReviewMutation(correction.cardId!, () =>
+          scheduleCustomReview(correction.cardId!, courseId, 0)
         );
       } catch (error) {
         console.error("Failed to demote after correction", error);
@@ -603,6 +639,7 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     courseId,
     checkSpelling,
+    enqueueReviewMutation,
     explanationOnlyOnWrong,
     pendingExplanationMove,
     selectedItem,
@@ -698,9 +735,8 @@ export default function ReviewFlashcardsPlaceholder() {
               cardId: currentCardId,
               fromBox: activeBox,
             });
-            await advanceCustomReview(
-              currentCardId,
-              courseId,
+            await enqueueReviewMutation(currentCardId, () =>
+              advanceCustomReview(currentCardId, courseId)
             );
           } else {
             void appendDebugEvent("review", "review.demote", {
@@ -709,10 +745,8 @@ export default function ReviewFlashcardsPlaceholder() {
               cardId: currentCardId,
               fromBox: activeBox,
             });
-            await scheduleCustomReview(
-              currentCardId,
-              courseId,
-              0,
+            await enqueueReviewMutation(currentCardId, () =>
+              scheduleCustomReview(currentCardId, courseId, 0)
             );
           }
         } catch (error) {
@@ -793,10 +827,8 @@ export default function ReviewFlashcardsPlaceholder() {
               cardId: selectedItem.id,
               fromBox: activeBox,
             });
-            await scheduleCustomReview(
-              selectedItem.id,
-              courseId,
-              0,
+            await enqueueReviewMutation(selectedItem.id, () =>
+              scheduleCustomReview(selectedItem.id, courseId, 0)
             );
           } catch (error) {
             console.error("Failed to demote after know/dont know", error);
@@ -906,9 +938,8 @@ export default function ReviewFlashcardsPlaceholder() {
           cardId: selectedItem.id,
           fromBox: activeBox,
         });
-        await advanceCustomReview(
-          selectedItem.id,
-          courseId,
+        await enqueueReviewMutation(selectedItem.id, () =>
+          advanceCustomReview(selectedItem.id, courseId)
         );
       } catch (error) {
         console.error("Failed to advance custom review", error);
@@ -941,6 +972,7 @@ export default function ReviewFlashcardsPlaceholder() {
     checkSpelling,
     courseId,
     effectiveReversed,
+    enqueueReviewMutation,
     explanationOnlyOnWrong,
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
@@ -1332,6 +1364,7 @@ export default function ReviewFlashcardsPlaceholder() {
         cards={peekCards}
         activeCourseName={null}
         onClose={closePeek}
+        onReturnToUnknown={handleReturnPeekCardToUnknown}
       />
     </View>
   );

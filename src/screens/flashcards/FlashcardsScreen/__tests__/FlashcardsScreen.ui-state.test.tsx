@@ -13,6 +13,10 @@ import {
   getCourseCompletionRunStartedAt,
 } from "@/src/features/flashcards/courseCompletionRun";
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
+import {
+  returnFlashcardToUnknown,
+  subscribeFlashcardReturnedToUnknown,
+} from "@/src/services/returnFlashcardToUnknown";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
@@ -75,6 +79,11 @@ jest.mock("@/src/services/streakProtection", () => ({
   ),
 }));
 
+jest.mock("@/src/services/returnFlashcardToUnknown", () => ({
+  returnFlashcardToUnknown: jest.fn(() => Promise.resolve()),
+  subscribeFlashcardReturnedToUnknown: jest.fn(() => jest.fn()),
+}));
+
 jest.mock("@/src/features/flashcards/courseCompletionRun", () => ({
   ensureCourseCompletionRunStarted: jest.fn(() => Promise.resolve(0)),
   getCourseCompletionRunStartedAt: jest.fn(() => Promise.resolve(null)),
@@ -93,6 +102,7 @@ function createEmptyBoxes(): BoxesState {
 
 let mockCurrentBoxes: BoxesState = createEmptyBoxes();
 let mockCurrentUsedWordIds: number[] = [];
+let mockCurrentRelearningWordIds: number[] = [];
 
 function mockCloneBoxes(boxes: BoxesState): BoxesState {
   return {
@@ -125,6 +135,17 @@ jest.mock("@/src/hooks/useBoxesPersistenceSnapshot", () => ({
       const idsToRemove = new Set(Array.isArray(ids) ? ids : [ids]);
       mockCurrentUsedWordIds = mockCurrentUsedWordIds.filter(
         (id) => !idsToRemove.has(id)
+      );
+    }),
+    relearningWordIds: [...mockCurrentRelearningWordIds],
+    markWordForRelearning: jest.fn((id: number) => {
+      mockCurrentRelearningWordIds = Array.from(
+        new Set([...mockCurrentRelearningWordIds, id])
+      );
+    }),
+    clearWordForRelearning: jest.fn((id: number) => {
+      mockCurrentRelearningWordIds = mockCurrentRelearningWordIds.filter(
+        (value) => value !== id
       );
     }),
     setBatchIndex: jest.fn(),
@@ -245,6 +266,12 @@ let latestButtonsProps: ButtonsProps | null = null;
 let latestBoxListProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
 } | null = null;
+let latestPeekProps: {
+  onReturnToUnknown?: (cardId: number) => Promise<void>;
+} | null = null;
+let latestReturnToUnknownListener:
+  | ((event: { courseId: number; flashcardId: number }) => void)
+  | null = null;
 
 jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
   FlashcardsButtons: (props: ButtonsProps) => {
@@ -270,7 +297,10 @@ jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
 });
 
 jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
-  return function PeekMock() {
+  return function PeekMock(props: {
+    onReturnToUnknown?: (cardId: number) => Promise<void>;
+  }) {
+    latestPeekProps = props;
     return null;
   };
 });
@@ -308,6 +338,9 @@ const mockedGetCustomCourseMasteryProgress =
   getCustomCourseMasteryProgress as jest.Mock;
 const mockedGetCourseCompletionRunStartedAt =
   getCourseCompletionRunStartedAt as jest.Mock;
+const mockedReturnFlashcardToUnknown = returnFlashcardToUnknown as jest.Mock;
+const mockedSubscribeFlashcardReturnedToUnknown =
+  subscribeFlashcardReturnedToUnknown as jest.Mock;
 
 type InteractionState = ReturnType<typeof createInteractionState>;
 
@@ -414,9 +447,12 @@ describe("FlashcardsScreen UI state regressions", () => {
     jest.spyOn(console, "log").mockImplementation(() => {});
     mockCurrentBoxes = createEmptyBoxes();
     mockCurrentUsedWordIds = [];
+    mockCurrentRelearningWordIds = [];
     latestCardProps = null;
     latestButtonsProps = null;
     latestBoxListProps = null;
+    latestPeekProps = null;
+    latestReturnToUnknownListener = null;
     latestFinishedPanelProps = null;
     mockedUseCoachmarkFlow.mockImplementation(() => ({
       isActive: false,
@@ -445,6 +481,12 @@ describe("FlashcardsScreen UI state regressions", () => {
       completedCardsCount: 0,
     });
     mockedGetCourseCompletionRunStartedAt.mockResolvedValue(null);
+    mockedSubscribeFlashcardReturnedToUnknown.mockImplementation(
+      (listener: (event: { courseId: number; flashcardId: number }) => void) => {
+        latestReturnToUnknownListener = listener;
+        return jest.fn();
+      },
+    );
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
       setActiveCustomCourseId: jest.fn(),
@@ -989,6 +1031,39 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
   });
 
+  it("delegates returning a peek card to the shared reset operation", async () => {
+    const card = makeCard({ id: 91 });
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(card.id);
+    });
+
+    expect(mockedReturnFlashcardToUnknown).toHaveBeenCalledWith({
+      courseId: 7,
+      flashcardId: card.id,
+    });
+  });
+
+  it("drops a returned card from live flashcards state", async () => {
+    const card = makeCard({ id: 92 });
+    const resetInteractionState = jest.fn();
+    mockCurrentBoxes.boxOne = [card];
+    mockCurrentUsedWordIds = [card.id];
+    renderScreenWithState(
+      createInteractionState(card, { resetInteractionState }),
+      [card],
+    );
+
+    act(() => {
+      latestReturnToUnknownListener?.({ courseId: 7, flashcardId: card.id });
+    });
+
+    expect(mockCurrentBoxes.boxOne).toEqual([]);
+    expect(mockCurrentUsedWordIds).toEqual([]);
+    expect(resetInteractionState).toHaveBeenCalled();
+  });
+
   it("prepares the finished panel under the loading overlay before fade-out completes", async () => {
     const cardA = makeCard({
       id: 511,
@@ -1052,6 +1127,27 @@ describe("FlashcardsScreen UI state regressions", () => {
 
     expect(screen.getByTestId("course-finished-panel")).toBeTruthy();
     expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
+  });
+
+  it("does not hide a manually reset card behind historical mastery", async () => {
+    const cardA = makeCard({
+      id: 54,
+      text: "again",
+      translations: ["ponownie"],
+    });
+    mockCurrentRelearningWordIds = [cardA.id];
+    mockedGetCustomCourseMasteryProgress.mockResolvedValueOnce({
+      cardsCount: 1,
+      completedCardsCount: 1,
+    });
+
+    const screen = renderScreenWithState(createInteractionState(null), [cardA]);
+
+    await flushScreenState();
+    await flushScreenState();
+    await flushScreenState();
+
+    expect(screen.queryByTestId("course-finished-panel")).toBeNull();
   });
 
   it("does not show the finished panel when there are still new flashcards to distribute", async () => {

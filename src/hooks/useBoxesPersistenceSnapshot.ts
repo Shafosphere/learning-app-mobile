@@ -36,6 +36,7 @@ export type SavedBoxesV2 = {
   batchIndex: number;
   flashcards: BoxesState; // full snapshot of boxes state
   usedWordIds?: number[]; // ids already used in session/history
+  relearningWordIds?: number[]; // manually reset cards that must pass boxes again
   lastWriteMs?: number;
   payloadBytes?: number;
 };
@@ -123,6 +124,71 @@ const normalizeBoxes = (source?: BoxesState | null): BoxesState => {
   };
 };
 
+export async function removePersistedFlashcardFromBoxes(
+  storageKey: string,
+  flashcardId: number,
+  courseId?: number
+): Promise<void> {
+  const saved = await loadFromStorageSnapshot(storageKey);
+  const previousPayload: SavedBoxesV2 | null =
+    saved?.parsed ??
+    (courseId
+      ? {
+          v: 2,
+          updatedAt: Date.now(),
+          courseId: makeScopeId(courseId, courseId, `custom-${courseId}`),
+          sourceLangId: courseId,
+          targetLangId: courseId,
+          level: `custom-${courseId}`,
+          batchIndex: 0,
+          flashcards: createEmptyBoxes(),
+          usedWordIds: [],
+          relearningWordIds: [],
+        }
+      : null);
+  if (!previousPayload) return;
+
+  const previousBoxes = normalizeBoxes(previousPayload.flashcards);
+  const nextBoxes = boxOrder.reduce((acc, box) => {
+    acc[box] = previousBoxes[box].filter((card) => card.id !== flashcardId);
+    return acc;
+  }, {} as BoxesState);
+  const previousUsedWordIds = previousPayload.usedWordIds ?? [];
+  const nextUsedWordIds = previousUsedWordIds.filter((id) => id !== flashcardId);
+  const previousRelearningWordIds = previousPayload.relearningWordIds ?? [];
+  const nextRelearningWordIds = Array.from(
+    new Set([...previousRelearningWordIds, flashcardId])
+  );
+  const changed =
+    !saved ||
+    boxOrder.some((box) => nextBoxes[box].length !== previousBoxes[box].length) ||
+    nextUsedWordIds.length !== previousUsedWordIds.length ||
+    nextRelearningWordIds.length !== previousRelearningWordIds.length;
+
+  if (!changed) {
+    return;
+  }
+
+  const nextPayload: SavedBoxesV2 = {
+    ...previousPayload,
+    updatedAt: Date.now(),
+    flashcards: nextBoxes,
+    usedWordIds: nextUsedWordIds,
+    relearningWordIds: nextRelearningWordIds,
+    lastWriteMs: Date.now(),
+  };
+
+  await AsyncStorage.setItem(storageKey, JSON.stringify(nextPayload));
+  void appendDebugEvent("boxes", "snapshot.card.returnToUnknown", {
+    storageKey,
+    courseId: previousPayload.courseId,
+    cardId: flashcardId,
+    beforeCounts: summarizeBoxes(previousBoxes),
+    afterCounts: summarizeBoxes(nextBoxes),
+    usedWordIdsCount: nextUsedWordIds.length,
+  });
+}
+
 export function useBoxesPersistenceSnapshot(params: {
   sourceLangId: number;
   targetLangId: number;
@@ -156,12 +222,14 @@ export function useBoxesPersistenceSnapshot(params: {
   const [batchIndex, setBatchIndex] = useState(0);
   const [isReady, setIsReady] = useState(false);
   const [usedWordIds, setUsedWordIds] = useState<number[]>([]);
+  const [relearningWordIds, setRelearningWordIds] = useState<number[]>([]);
   const [progress, setProgress] = useState(0);
   const [totalWordsForLevel] = useState<number>(0);
   const savingTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isRestoringRef = useRef(true);
   const boxesRef = useRef<BoxesState>(boxes);
   const usedWordIdsRef = useRef<number[]>(usedWordIds);
+  const relearningWordIdsRef = useRef<number[]>(relearningWordIds);
   const batchIndexRef = useRef<number>(batchIndex);
   const isReadyRef = useRef(false);
   const writeInFlightRef = useRef(false);
@@ -267,6 +335,7 @@ export function useBoxesPersistenceSnapshot(params: {
       batchIndex: batchIndexRef.current,
       flashcards: boxesRef.current,
       usedWordIds: usedWordIdsRef.current,
+      relearningWordIds: relearningWordIdsRef.current,
       lastWriteMs: Date.now(),
     };
 
@@ -283,6 +352,10 @@ export function useBoxesPersistenceSnapshot(params: {
   useEffect(() => {
     usedWordIdsRef.current = usedWordIds;
   }, [usedWordIds]);
+
+  useEffect(() => {
+    relearningWordIdsRef.current = relearningWordIds;
+  }, [relearningWordIds]);
 
   useEffect(() => {
     batchIndexRef.current = batchIndex;
@@ -345,6 +418,7 @@ export function useBoxesPersistenceSnapshot(params: {
             setBoxes(normalized);
             setBatchIndex(saved.parsed.batchIndex ?? 0);
             setUsedWordIds(saved.parsed.usedWordIds ?? []);
+            setRelearningWordIds(saved.parsed.relearningWordIds ?? []);
             void appendDebugEvent("boxes", "snapshot.load", {
               storageKey,
               courseId: saved.parsed.courseId,
@@ -361,6 +435,7 @@ export function useBoxesPersistenceSnapshot(params: {
           });
           setBatchIndex(0);
           setUsedWordIds(initialWords.map((w) => w.id));
+          setRelearningWordIds([]);
           void appendDebugEvent("boxes", "snapshot.initialWords", {
             storageKey,
             counts: {
@@ -374,6 +449,7 @@ export function useBoxesPersistenceSnapshot(params: {
           setBoxes(createEmptyBoxes());
           setBatchIndex(0);
           setUsedWordIds([]);
+          setRelearningWordIds([]);
           void appendDebugEvent("boxes", "snapshot.empty", {
             storageKey,
             counts: summarizeBoxes(createEmptyBoxes()),
@@ -425,6 +501,7 @@ export function useBoxesPersistenceSnapshot(params: {
     sourceLangId,
     targetLangId,
     usedWordIds,
+    relearningWordIds,
   ]);
 
   const resetSave = useCallback(async () => {
@@ -521,6 +598,16 @@ export function useBoxesPersistenceSnapshot(params: {
     });
   }, [level, sourceLangId, storageKey, targetLangId]);
 
+  const markWordForRelearning = useCallback((id: number) => {
+    setRelearningWordIds((prev) =>
+      prev.includes(id) ? prev : [...prev, id]
+    );
+  }, []);
+
+  const clearWordForRelearning = useCallback((id: number) => {
+    setRelearningWordIds((prev) => prev.filter((value) => value !== id));
+  }, []);
+
   return {
     boxes,
     setBoxes: setLoggedBoxes,
@@ -535,6 +622,9 @@ export function useBoxesPersistenceSnapshot(params: {
     usedWordIds,
     addUsedWordIds,
     removeUsedWordIds,
+    relearningWordIds,
+    markWordForRelearning,
+    clearWordForRelearning,
     progress,
     totalWordsForLevel,
   } as const;

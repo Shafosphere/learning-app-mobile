@@ -16,6 +16,7 @@ import {
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
+import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -92,6 +93,10 @@ jest.mock("@/src/services/streakProtection", () => ({
   ),
 }));
 
+jest.mock("@/src/services/returnFlashcardToUnknown", () => ({
+  returnFlashcardToUnknown: jest.fn(() => Promise.resolve()),
+}));
+
 jest.mock("@/src/hooks/useAutoScaleToFit", () => ({
   useAutoScaleToFit: jest.fn(() => ({
     scale: 1,
@@ -149,8 +154,17 @@ jest.mock("@/src/components/confetti/Confetti", () => {
   };
 });
 
+let latestPeekProps: {
+  visible?: boolean;
+  onReturnToUnknown?: (cardId: number) => Promise<void>;
+} | null = null;
+
 jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
-  return function FlashcardsPeekMock() {
+  return function FlashcardsPeekMock(props: {
+    visible?: boolean;
+    onReturnToUnknown?: (cardId: number) => Promise<void>;
+  }) {
+    latestPeekProps = props;
     return null;
   };
 });
@@ -232,9 +246,11 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxListMock({
     boxes,
     handleSelectBox,
+    onBoxLongPress,
   }: {
     boxes: Record<string, Array<{ id: number }>>;
     handleSelectBox: (box: any) => void;
+    onBoxLongPress?: (box: any) => void;
   }) {
     const React = require("react");
     const { Pressable, Text, View } = require("react-native");
@@ -245,6 +261,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
             <Pressable
               testID={`box-button-${boxName}`}
               onPress={() => handleSelectBox(boxName)}
+              onLongPress={() => onBoxLongPress?.(boxName)}
             >
               <Text>{`${boxName}:${cards.length}`}</Text>
             </Pressable>
@@ -368,6 +385,7 @@ const mockedRegisterProtectedDailyActivity =
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
 const mockedAdvanceCustomReview = advanceCustomReview as jest.Mock;
 const mockedScheduleCustomReview = scheduleCustomReview as jest.Mock;
+const mockedReturnFlashcardToUnknown = returnFlashcardToUnknown as jest.Mock;
 const CHOOSE_BOX_TEXT = "flashcards.card.emptyScene.chooseBox";
 
 function makeReviewCard(
@@ -451,6 +469,7 @@ describe("reviewflashcards correction desync regression", () => {
   let getStatsSnapshotMock: jest.Mock;
 
   beforeEach(() => {
+    latestPeekProps = null;
     applyStatBurstMock = jest.fn();
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
@@ -669,6 +688,89 @@ describe("reviewflashcards correction desync regression", () => {
 
     expect(mockedGetDueCustomReviewFlashcards).toHaveBeenCalledWith(77);
     expect(screen.getByText("boxOne:0")).not.toBeNull();
+  });
+
+  it("returns a peeked card to unknown without scheduling it at stage zero", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 603,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:1")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(603);
+    });
+
+    expect(mockedReturnFlashcardToUnknown).toHaveBeenCalledWith({
+      courseId: 77,
+      flashcardId: 603,
+    });
+    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    expect(screen.getByText("boxOne:0")).toBeTruthy();
+    expect(latestPeekProps?.visible).toBe(false);
+  });
+
+  it("waits for a pending review advancement before returning a peeked card to unknown", async () => {
+    let resolveAdvance!: (value: { stage: number; nextReview: number }) => void;
+    mockedAdvanceCustomReview.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveAdvance = resolve;
+        }),
+    );
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 604,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(604, 77);
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+
+    let resetPromise: Promise<void> | undefined;
+    act(() => {
+      resetPromise = latestPeekProps?.onReturnToUnknown?.(604);
+    });
+    await act(async () => {
+      await Promise.resolve();
+    });
+    expect(mockedReturnFlashcardToUnknown).not.toHaveBeenCalled();
+
+    await act(async () => {
+      resolveAdvance({ stage: 2, nextReview: Date.now() });
+      await resetPromise;
+    });
+
+    expect(mockedReturnFlashcardToUnknown).toHaveBeenCalledWith({
+      courseId: 77,
+      flashcardId: 604,
+    });
+    expect(mockedAdvanceCustomReview.mock.invocationCallOrder[0]).toBeLessThan(
+      mockedReturnFlashcardToUnknown.mock.invocationCallOrder[0],
+    );
   });
 
   it("starts the review onboarding only when opened from review courses and cards are available", async () => {

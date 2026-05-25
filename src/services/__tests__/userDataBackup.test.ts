@@ -163,6 +163,24 @@ function makeSnapshot(
   };
 }
 
+function makeRelearningSnapshot(
+  courseId: number,
+  wordId: number,
+  front = "front",
+  back = "back"
+): SavedBoxesV2 {
+  const snapshot = makeSnapshot(courseId, wordId, front, back);
+  return {
+    ...snapshot,
+    flashcards: {
+      ...snapshot.flashcards,
+      boxOne: [],
+    },
+    usedWordIds: [],
+    relearningWordIds: [wordId],
+  };
+}
+
 function createMockDb(): MockDb {
   let nextCustomCourseId = 501;
   let nextFlashcardId = 601;
@@ -406,7 +424,7 @@ describe("userDataBackup", () => {
       ["officialPinnedCourseIds", JSON.stringify([11])],
       ["activeCustomCourseId", JSON.stringify(11)],
       ["boxes:1-2-A1", JSON.stringify(makeSnapshot(1, 10, "hello", "czesc"))],
-      ["customBoxes:11-11-custom-11", JSON.stringify(makeSnapshot(11, 1101, "official-front", "official-back"))],
+      ["customBoxes:11-11-custom-11", JSON.stringify(makeRelearningSnapshot(11, 1101, "official-front", "official-back"))],
       ["customBoxes:22-22-custom-22", JSON.stringify(makeSnapshot(22, 2201, "custom-front", "custom-back"))],
     ]);
 
@@ -445,6 +463,15 @@ describe("userDataBackup", () => {
     expect(payload.officialCourseState.lastActiveOfficialCourseSlug).toBe(
       "official-slug"
     );
+    expect(payload.officialCourseState.courses[0]?.relearningCards).toEqual([
+      {
+        externalId: "official-card-1",
+        position: 0,
+        frontText: "official-front",
+        backText: "official-back",
+        snapshotFlashcardId: 1101,
+      },
+    ]);
     expect(payload.customCourses).toEqual([
       expect.objectContaining({
         backupCourseKey: "custom-course:22",
@@ -723,7 +750,12 @@ describe("userDataBackup", () => {
         "boxes:1-2-A1": makeSnapshot(1, 10, "hello", "czesc"),
       },
       customCourseBoxSnapshots: {
-        "custom-course:22": makeSnapshot(22, 2201, "custom-front", "custom-back"),
+        "custom-course:22": makeRelearningSnapshot(
+          22,
+          2201,
+          "custom-front",
+          "custom-back"
+        ),
       },
       customCourses: [
         {
@@ -789,7 +821,7 @@ describe("userDataBackup", () => {
         pinnedOfficialCourseSlugs: ["official-slug"],
         lastActiveOfficialCourseSlug: "official-slug",
         boxSnapshots: {
-          "official-slug": makeSnapshot(
+          "official-slug": makeRelearningSnapshot(
             11,
             1101,
             "official-front",
@@ -823,6 +855,15 @@ describe("userDataBackup", () => {
               },
             ],
             hints: [],
+            relearningCards: [
+              {
+                externalId: "official-card-1",
+                position: 0,
+                frontText: "official-front",
+                backText: "official-back",
+                snapshotFlashcardId: 1101,
+              },
+            ],
           },
         ],
       },
@@ -898,8 +939,11 @@ describe("userDataBackup", () => {
         targetLangId: 501,
         level: "custom-501",
         courseId: "501-501-custom-501",
+        usedWordIds: [],
+        relearningWordIds: [601],
       })
     );
+    expect(remappedCustomSnapshot.flashcards.boxOne).toEqual([]);
 
     const remappedOfficialSnapshot = JSON.parse(
       (await AsyncStorage.getItem("customBoxes:700-700-custom-700")) ?? "null"
@@ -912,13 +956,8 @@ describe("userDataBackup", () => {
         courseId: "700-700-custom-700",
       })
     );
-    expect(remappedOfficialSnapshot.flashcards.boxOne[0]).toEqual(
-      expect.objectContaining({
-        id: 777,
-        text: "official-front",
-        translations: ["official-back"],
-      })
-    );
+    expect(remappedOfficialSnapshot.flashcards.boxOne).toEqual([]);
+    expect(remappedOfficialSnapshot.relearningWordIds).toEqual([777]);
 
     const customReviewInsert = db.runAsync.mock.calls.find(([sql]) =>
       sql.includes("INSERT OR REPLACE INTO custom_reviews")

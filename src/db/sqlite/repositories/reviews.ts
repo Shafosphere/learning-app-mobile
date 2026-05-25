@@ -139,6 +139,20 @@ export async function clearCustomReviewsForCourse(
   await clearCustomReviewsForCourseWithDb(db, courseId);
 }
 
+export async function removeCustomReview(
+  flashcardId: number,
+  courseId: number
+): Promise<number> {
+  if (!flashcardId || !courseId) return 0;
+  const db = await getDB();
+  const result = await db.runAsync(
+    `DELETE FROM custom_reviews WHERE flashcard_id = ? AND course_id = ?;`,
+    flashcardId,
+    courseId
+  );
+  return Number(result?.changes ?? 0);
+}
+
 export async function countDueCustomReviews(
   courseId: number,
   nowMs: number = Date.now()

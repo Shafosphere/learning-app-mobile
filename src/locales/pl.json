@@ -1060,7 +1060,12 @@
         "previewCourse": "podgląd",
         "close": "Zamknij",
         "emptyBoxTitle": "Pudełko jest puste",
-        "emptyBoxDescription": "Fiszki trafią tutaj, gdy osiągniesz odpowiedni poziom nauki."
+        "emptyBoxDescription": "Fiszki trafią tutaj, gdy osiągniesz odpowiedni poziom nauki.",
+        "returnToUnknownA11y": "Cofnij fiszkę do puli nieznanych",
+        "returnToUnknownTitle": "Cofnąć fiszkę do nieznanych?",
+        "returnToUnknownDescription": "Fiszka zostanie usunięta z pudełek i powtórek oraz wróci do puli nieznanych. Dotychczasowe statystyki pozostaną zapisane.",
+        "returnToUnknownConfirm": "COFNIJ FISZKĘ",
+        "returnToUnknownError": "Nie udało się cofnąć fiszki. Spróbuj ponownie."
       },
       "hint": {
         "placeholder": "Wpisz podpowiedź…",

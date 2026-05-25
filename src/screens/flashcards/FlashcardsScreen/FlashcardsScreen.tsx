@@ -101,6 +101,10 @@ import {
   subscribeCourseFinishedPreview,
 } from "@/src/services/courseFinishedPreview";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import {
+  returnFlashcardToUnknown,
+  subscribeFlashcardReturnedToUnknown,
+} from "@/src/services/returnFlashcardToUnknown";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { useTranslation } from "react-i18next";
 
@@ -321,6 +325,9 @@ export default function Flashcards() {
     usedWordIds,
     addUsedWordIds,
     removeUsedWordIds,
+    relearningWordIds = [],
+    markWordForRelearning = () => undefined,
+    clearWordForRelearning = () => undefined,
     setBatchIndex,
     storageKey,
   } = useBoxesPersistenceSnapshot({
@@ -540,6 +547,14 @@ export default function Flashcards() {
       storageKey,
     },
   });
+  useEffect(() => {
+    if (relearningWordIds.length === 0 || learned.length === 0) return;
+    const learnedIds = new Set(learned.map((word) => word.id));
+    relearningWordIds
+      .filter((id) => learnedIds.has(id))
+      .forEach((id) => clearWordForRelearning(id));
+  }, [clearWordForRelearning, learned, relearningWordIds]);
+
   useEffect(() => {
     if (!isFocused) return;
 
@@ -930,6 +945,49 @@ export default function Flashcards() {
 
   const closePeek = useCallback(() => setPeekBox(null), []);
 
+  const handleReturnPeekCardToUnknown = useCallback(
+    async (cardId: number) => {
+      if (activeCustomCourseId == null) {
+        throw new Error("No active course selected.");
+      }
+      await returnFlashcardToUnknown({
+        courseId: activeCustomCourseId,
+        flashcardId: cardId,
+      });
+    },
+    [activeCustomCourseId],
+  );
+
+  useEffect(() => {
+    return subscribeFlashcardReturnedToUnknown(({ courseId, flashcardId }) => {
+      if (activeCustomCourseId !== courseId) return;
+
+      setBoxes((prev) => ({
+        boxZero: prev.boxZero.filter((card) => card.id !== flashcardId),
+        boxOne: prev.boxOne.filter((card) => card.id !== flashcardId),
+        boxTwo: prev.boxTwo.filter((card) => card.id !== flashcardId),
+        boxThree: prev.boxThree.filter((card) => card.id !== flashcardId),
+        boxFour: prev.boxFour.filter((card) => card.id !== flashcardId),
+        boxFive: prev.boxFive.filter((card) => card.id !== flashcardId),
+      }));
+      setLearned((prev) => prev.filter((card) => card.id !== flashcardId));
+      removeUsedWordIds(flashcardId);
+      markWordForRelearning(flashcardId);
+      setReviewedCardIds((prev) => prev.filter((id) => id !== flashcardId));
+
+      if (selectedItemIdRef.current === flashcardId) {
+        resetInteractionState();
+      }
+    });
+  }, [
+    activeCustomCourseId,
+    markWordForRelearning,
+    removeUsedWordIds,
+    resetInteractionState,
+    setBoxes,
+    setLearned,
+  ]);
+
   useEffect(() => {
     if (!peekBox) return;
     const hasCards = (boxes[peekBox] ?? []).length > 0;
@@ -963,6 +1021,9 @@ export default function Flashcards() {
   }, [customCards, trackedIds]);
   const allCardsDistributed =
     totalCards > 0 && distributedCurrentCourseCount >= totalCards;
+  const hasCardsReturnedToUnknown = relearningWordIds.some((id) =>
+    currentCourseCardIds.has(id)
+  );
   const totalCardsInBoxes = useMemo(() => {
     return (
       boxes.boxZero.length +
@@ -1535,6 +1596,7 @@ export default function Flashcards() {
         selectedItem == null
       ) ||
       (
+        !hasCardsReturnedToUnknown &&
         courseMasteryProgress.cardsCount > 0 &&
         courseMasteryProgress.completedCardsCount >= courseMasteryProgress.cardsCount
       )
@@ -2691,6 +2753,7 @@ export default function Flashcards() {
         cards={peekCards}
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
+        onReturnToUnknown={handleReturnPeekCardToUnknown}
       />
       <NudgeModal
         visible={isActionsPositionNudgeVisible}

@@ -89,11 +89,17 @@ export type OfficialCourseHintExportRow = OfficialFlashcardIdentityExport & {
   hintBack: string | null;
 };
 
+export type OfficialCourseRelearningExportRow =
+  OfficialFlashcardIdentityExport & {
+    snapshotFlashcardId: number;
+  };
+
 export type OfficialCourseSnapshotExport = {
   slug: string;
   reviews: OfficialCourseReviewExportRow[];
   learningEvents: OfficialCourseLearningEventExportRow[];
   hints: OfficialCourseHintExportRow[];
+  relearningCards?: OfficialCourseRelearningExportRow[];
 };
 
 export type OfficialCourseStateExport = {
@@ -209,6 +215,7 @@ type RestoredCourseStats = {
   reviewsRestored: number;
   learningEventsRestored: number;
   hintsUpdated: number;
+  flashcardIdsByBackupId: Map<number, number>;
 };
 
 type LegacyUserAchievementExportRow = {
@@ -470,14 +477,34 @@ function parseCustomCourseIdFromSnapshot(
 
 function remapSnapshotToCourseId(
   snapshot: SavedBoxesV2,
-  courseId: number
+  courseId: number,
+  flashcardIdsByBackupId?: Map<number, number>
 ): SavedBoxesV2 {
+  const remapId = (id: number) => flashcardIdsByBackupId?.get(id) ?? id;
+  const remapBox = (items: SavedBoxesV2["flashcards"]["boxZero"]) =>
+    items.map((item) => ({
+      ...item,
+      id: remapId(item.id),
+    }));
+
   return {
     ...snapshot,
     courseId: `${courseId}-${courseId}-custom-${courseId}`,
     sourceLangId: courseId,
     targetLangId: courseId,
     level: `custom-${courseId}`,
+    flashcards: flashcardIdsByBackupId
+      ? {
+          boxZero: remapBox(snapshot.flashcards.boxZero),
+          boxOne: remapBox(snapshot.flashcards.boxOne),
+          boxTwo: remapBox(snapshot.flashcards.boxTwo),
+          boxThree: remapBox(snapshot.flashcards.boxThree),
+          boxFour: remapBox(snapshot.flashcards.boxFour),
+          boxFive: remapBox(snapshot.flashcards.boxFive),
+        }
+      : snapshot.flashcards,
+    usedWordIds: snapshot.usedWordIds?.map(remapId),
+    relearningWordIds: snapshot.relearningWordIds?.map(remapId),
   };
 }
 
@@ -509,13 +536,30 @@ function buildWordIdentityKey(
 
 async function rehydrateOfficialSnapshot(
   courseId: number,
-  snapshot: SavedBoxesV2
+  snapshot: SavedBoxesV2,
+  relearningCards: OfficialCourseRelearningExportRow[] = []
 ): Promise<SavedBoxesV2> {
   const currentCards = await getCustomFlashcards(courseId);
   const currentWords = currentCards.map(mapCustomCardToWord);
   const currentByIdentity = new Map(
     currentCards.map((card, index) => [
       buildWordIdentityKey(card),
+      currentWords[index],
+    ])
+  );
+  const currentByExternalId = new Map(
+    currentCards.flatMap((card, index) =>
+      card.externalId ? [[card.externalId, currentWords[index]] as const] : []
+    )
+  );
+  const currentByPosition = new Map(
+    currentCards.flatMap((card, index) =>
+      card.position != null ? [[card.position, currentWords[index]] as const] : []
+    )
+  );
+  const currentByFrontBack = new Map(
+    currentCards.map((card, index) => [
+      `${card.frontText}|||${card.backText}`,
       currentWords[index],
     ])
   );
@@ -547,6 +591,15 @@ async function rehydrateOfficialSnapshot(
         type: current.type ?? "text",
       };
     });
+  const currentIdByRelearningSnapshotId = new Map(
+    relearningCards.flatMap((card) => {
+      const current =
+        (card.externalId ? currentByExternalId.get(card.externalId) : undefined) ??
+        (card.position != null ? currentByPosition.get(card.position) : undefined) ??
+        currentByFrontBack.get(`${card.frontText}|||${card.backText}`);
+      return current ? [[card.snapshotFlashcardId, current.id] as const] : [];
+    })
+  );
 
   console.log("[userDataBackup] rehydrate official snapshot", {
     courseId,
@@ -571,6 +624,9 @@ async function rehydrateOfficialSnapshot(
       boxFour: remapBox(snapshot.flashcards.boxFour),
       boxFive: remapBox(snapshot.flashcards.boxFive),
     },
+    relearningWordIds: snapshot.relearningWordIds?.map(
+      (id) => currentIdByRelearningSnapshotId.get(id) ?? id
+    ),
   };
 }
 
@@ -632,7 +688,8 @@ async function buildCourseExport(
 }
 
 function buildOfficialCourseStateExport(
-  courseExport: CustomCourseExport
+  courseExport: CustomCourseExport,
+  snapshot?: SavedBoxesV2
 ): OfficialCourseSnapshotExport | null {
   const slug = courseExport.course.slug?.trim();
   if (!slug) {
@@ -651,6 +708,13 @@ function buildOfficialCourseStateExport(
       });
     }
   }
+  const relearningIds = new Set(snapshot?.relearningWordIds ?? []);
+  const relearningCards = courseExport.flashcards
+    .filter((card) => relearningIds.has(card.id))
+    .map((card) => ({
+      ...toOfficialFlashcardIdentity(card),
+      snapshotFlashcardId: card.id,
+    }));
 
   const reviews = courseExport.reviews
     .map<OfficialCourseReviewExportRow | null>((review) => {
@@ -686,6 +750,7 @@ function buildOfficialCourseStateExport(
     reviews,
     learningEvents,
     hints,
+    ...(relearningCards.length > 0 ? { relearningCards } : {}),
   };
 }
 
@@ -790,7 +855,14 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     lastActiveOfficialCourseSlug,
     boxSnapshots: officialBoxSnapshots,
     courses: officialCoursesExport
-      .map((courseExport) => buildOfficialCourseStateExport(courseExport))
+      .map((courseExport) =>
+        buildOfficialCourseStateExport(
+          courseExport,
+          courseExport.course.slug
+            ? officialBoxSnapshots[courseExport.course.slug]
+            : undefined
+        )
+      )
       .filter((entry): entry is OfficialCourseSnapshotExport => entry != null),
   };
 
@@ -1308,6 +1380,7 @@ async function restoreCustomCourse(
     reviewsRestored,
     learningEventsRestored,
     hintsUpdated: 0,
+    flashcardIdsByBackupId: oldToNewFlashcardId,
   };
 }
 
@@ -1596,6 +1669,10 @@ export async function restoreUserData(
     const skippedOfficialCourseSlugs = new Set<string>();
     let learningEventsRestored = 0;
     const restoredCustomCourseIdsByBackupKey = new Map<string, number>();
+    const restoredCustomFlashcardIdsByBackupKey = new Map<
+      string,
+      Map<number, number>
+    >();
 
     await db.execAsync("BEGIN TRANSACTION;");
     try {
@@ -1621,6 +1698,10 @@ export async function restoreUserData(
         const stats = await restoreCustomCourse(db, courseExport);
         coursesCreated++;
         restoredCustomCourseIdsByBackupKey.set(stats.backupCourseKey, stats.courseId);
+        restoredCustomFlashcardIdsByBackupKey.set(
+          stats.backupCourseKey,
+          stats.flashcardIdsByBackupId
+        );
         flashcardsCreatedTotal += stats.flashcardsCreated;
         reviewsRestoredTotal += stats.reviewsRestored;
         learningEventsRestored += stats.learningEventsRestored;
@@ -1680,7 +1761,13 @@ export async function restoreUserData(
       }
       pairs.push([
         buildCustomRuntimeSnapshotKey(restoredCourseId),
-        JSON.stringify(remapSnapshotToCourseId(value, restoredCourseId)),
+        JSON.stringify(
+          remapSnapshotToCourseId(
+            value,
+            restoredCourseId,
+            restoredCustomFlashcardIdsByBackupKey.get(backupCourseKey)
+          )
+        ),
       ]);
       boxSnapshotsRestored++;
     }
@@ -1695,7 +1782,10 @@ export async function restoreUserData(
       }
       const rehydratedSnapshot = await rehydrateOfficialSnapshot(
         restoredCourseId,
-        value
+        value,
+        normalized.officialCourseState.courses.find(
+          (course) => course.slug === slug
+        )?.relearningCards
       );
       pairs.push([
         buildCustomRuntimeSnapshotKey(restoredCourseId),
