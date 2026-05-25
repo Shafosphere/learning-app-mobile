@@ -208,6 +208,32 @@ const parseSvgViewBox = (xml: string): SvgViewBox | null => {
   return null;
 };
 
+const ensureSvgViewBox = (xml: string): string => {
+  const svgTagMatch = xml.match(/<svg\b[^>]*>/i);
+  if (!svgTagMatch || /\bviewBox\s*=/i.test(svgTagMatch[0])) {
+    return xml;
+  }
+
+  const svgTag = svgTagMatch[0];
+  const widthMatch = svgTag.match(/\bwidth\s*=\s*["']([\d.]+)(?:px)?["']/i);
+  const heightMatch = svgTag.match(/\bheight\s*=\s*["']([\d.]+)(?:px)?["']/i);
+  if (!widthMatch || !heightMatch) {
+    return xml;
+  }
+
+  const width = Number(widthMatch[1]);
+  const height = Number(heightMatch[1]);
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return xml;
+  }
+
+  const normalizedSvgTag = svgTag.replace(
+    /<svg\b/i,
+    `<svg viewBox="0 0 ${width} ${height}"`
+  );
+  return xml.replace(svgTag, normalizedSvgTag);
+};
+
 const resolveTargetHeight = (style: ImageStyle): number => {
   if (typeof style.height === "number") return style.height;
   if (typeof style.maxHeight === "number") return style.maxHeight;
@@ -264,7 +290,7 @@ export function PromptImage({
     const applySvgXml = (xml: string) => {
       const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
       const mergedMode = isMergedConstellationSvg(xml, uri);
-      const normalized = inlineSvgClassStyles(xml);
+      const normalized = ensureSvgViewBox(inlineSvgClassStyles(xml));
       const enhancedOutline = constellationMode
         ? boostConstellationOutlineContrast(normalized)
         : normalized;
@@ -313,7 +339,7 @@ export function PromptImage({
           const decoded = decodeDataSvg(uri);
           const constellationMode = isLikelyConstellationOutlineSvg(decoded, uri);
           const mergedMode = isMergedConstellationSvg(decoded, uri);
-          const normalized = inlineSvgClassStyles(decoded);
+          const normalized = ensureSvgViewBox(inlineSvgClassStyles(decoded));
           const enhancedOutline = constellationMode
             ? boostConstellationOutlineContrast(normalized)
             : normalized;
@@ -368,7 +394,7 @@ export function PromptImage({
           const xml = await FileSystem.readAsStringAsync(uri);
           const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
           const mergedMode = isMergedConstellationSvg(xml, uri);
-          const normalizedXml = inlineSvgClassStyles(xml);
+          const normalizedXml = ensureSvgViewBox(inlineSvgClassStyles(xml));
           const enhancedOutline = constellationMode
             ? boostConstellationOutlineContrast(normalizedXml)
             : normalizedXml;

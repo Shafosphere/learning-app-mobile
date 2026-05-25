@@ -102,6 +102,26 @@ describe("PromptImage SVG rendering", () => {
     expect(renderedXml).toContain(".flag path{stroke-width:2}");
   });
 
+  it("adds a viewBox for fixed-size SVGs that omit it", async () => {
+    mockedFileSystem.readAsStringAsync.mockResolvedValue(
+      '<svg width="800" height="800"><circle cx="400" cy="400" r="400"/></svg>'
+    );
+
+    render(
+      <PromptImage
+        uri="file://images/B-1.svg"
+        imageStyle={{ width: 120, height: 120 }}
+      />
+    );
+
+    await waitFor(() => {
+      expect(mockSvgXml).toHaveBeenCalled();
+    });
+
+    const renderedXml = mockSvgXml.mock.calls.at(-1)?.[0]?.xml as string;
+    expect(renderedXml).toContain('viewBox="0 0 800 800"');
+  });
+
   it("decodes base64 data SVGs before rendering as XML", async () => {
     const xml = '<svg viewBox="0 0 20 10"><path fill="#d40000" d="M0 0h20v10H0z"/></svg>';
     const uri = `data:image/svg+xml;base64,${btoa(xml)}`;
