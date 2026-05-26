@@ -652,7 +652,8 @@ export default function CustomCourseEditor({
       (acc, card) => {
       const frontText = card.front.trim();
       const answers = normalizeAnswers(card.answers);
-      if (!frontText && answers.length === 0) {
+      const hasFrontImage = Boolean(card.imageFront);
+      if (!frontText && answers.length === 0 && !hasFrontImage) {
         return acc;
       }
       const backText = answers[0] ?? "";

@@ -6,6 +6,7 @@ import {
   createEmptyManualCard,
   normalizeAnswers,
   useManualCardsForm,
+  type ManualCard,
   type ManualCardType,
 } from "@/src/hooks/useManualCardsForm";
 import {
@@ -29,7 +30,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import * as DocumentPicker from "expo-document-picker";
 import * as FileSystem from "expo-file-system/legacy";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import * as Sharing from "expo-sharing";
 import {
@@ -52,6 +53,14 @@ import {
 import { useStyles } from "./ImportFlashcardsScreen-styles";
 
 type CsvStep = "idle" | "analyzing" | "preview" | "importing";
+
+const getNonEmptyManualCards = (cards: ManualCard[]): ManualCard[] =>
+  cards.filter((card) => {
+    const hasFrontText = card.front.trim().length > 0;
+    const hasAnswers = normalizeAnswers(card.answers).length > 0;
+    const hasFrontImage = Boolean(card.imageFront);
+    return hasFrontText || hasAnswers || hasFrontImage;
+  });
 
 export default function CustomCourseContentScreen() {
   const styles = useStyles();
@@ -135,8 +144,11 @@ export default function CustomCourseContentScreen() {
   const [downloadingTemplateKey, setDownloadingTemplateKey] =
     useState<CsvTemplateKey | null>(null);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
+  const importActionInFlightRef = useRef(false);
+  const isScreenMountedRef = useRef(true);
 
   const shouldShowManualToolbar = addMode === "manual";
+  const isImportBusy = csvStep === "analyzing" || csvStep === "importing";
 
   const draftScopeKey = useMemo(
     () =>
@@ -149,6 +161,13 @@ export default function CustomCourseContentScreen() {
       }),
     [courseName, colorId, iconColor, iconId, reviewsEnabled]
   );
+
+  useEffect(() => {
+    isScreenMountedRef.current = true;
+    return () => {
+      isScreenMountedRef.current = false;
+    };
+  }, []);
 
   useEffect(() => {
     let isMounted = true;
@@ -220,6 +239,7 @@ export default function CustomCourseContentScreen() {
       const asset = picked.assets[0];
       const fileName = asset.name ?? t("courseCreator.import.defaultFileName");
       setCsvFileName(fileName);
+      setCsvAnalysis(null);
       setCsvStep("analyzing");
 
       const parsed = await parseImportFile({
@@ -272,18 +292,16 @@ export default function CustomCourseContentScreen() {
     }
   };
 
-  const handlePickCsvFile = async () => {
+  const handlePickFile = async () => {
+    if (isImportBusy || importActionInFlightRef.current) {
+      return;
+    }
+
     await handlePickImportFile([
       "text/csv",
+      "text/plain",
       "application/zip",
       "application/x-zip-compressed",
-      "*/*",
-    ]);
-  };
-
-  const handlePickTxtFile = async () => {
-    await handlePickImportFile([
-      "text/plain",
       "*/*",
     ]);
   };
@@ -418,24 +436,55 @@ export default function CustomCourseContentScreen() {
     }
   };
 
-  const handleImportAnalyzedRows = async () => {
-    if (!csvAnalysis) return;
+  const mapCsvAnalysisOrPopup = async (
+    analysis: CsvAnalysisResult
+  ): Promise<ManualCard[] | null> => {
     try {
-      setCsvStep("importing");
-      const cards = await mapAnalysisToManualCards(csvAnalysis);
-
+      const cards = await mapAnalysisToManualCards(analysis);
       if (!cards.length) {
-        setPopup({
-          message: t("courseCreator.import.popups.noCardsToImport"),
-          color: "angry",
-          duration: 3500,
-        });
-        setCsvStep("preview");
-        return;
+        if (isScreenMountedRef.current) {
+          setPopup({
+            message: t("courseCreator.import.popups.noCardsToImport"),
+            color: "angry",
+            duration: 3500,
+          });
+        }
+        return null;
       }
+      return cards;
+    } catch (error) {
+      console.error("CSV import error", error);
+      if (isScreenMountedRef.current) {
+        setPopup({
+          message: t("courseCreator.import.popups.importError"),
+          color: "angry",
+          duration: 4000,
+        });
+      }
+      return null;
+    }
+  };
+
+  const handleImportAnalyzedRows = async () => {
+    if (
+      !csvAnalysis ||
+      csvStep === "analyzing" ||
+      csvStep === "importing" ||
+      importActionInFlightRef.current
+    ) {
+      return;
+    }
+    importActionInFlightRef.current = true;
+    setCsvStep("importing");
+
+    try {
+      const cards = await mapCsvAnalysisOrPopup(csvAnalysis);
+      if (!cards || !isScreenMountedRef.current) return;
 
       replaceManualCards(cards);
       setAddMode("manual");
+      setCsvAnalysis(null);
+      setCsvStep("idle");
 
       const skipped = csvAnalysis.invalidRowsCount;
       const warningCount = csvAnalysis.issues.filter(
@@ -460,15 +509,11 @@ export default function CustomCourseContentScreen() {
         color: skipped > 0 ? "disoriented" : "calm",
         duration: 4000,
       });
-      setCsvStep("preview");
-    } catch (error) {
-      console.error("CSV import error", error);
-      setPopup({
-        message: t("courseCreator.import.popups.importError"),
-        color: "angry",
-        duration: 4000,
-      });
-      setCsvStep("preview");
+    } finally {
+      importActionInFlightRef.current = false;
+      if (isScreenMountedRef.current) {
+        setCsvStep((current) => (current === "idle" ? current : "preview"));
+      }
     }
   };
 
@@ -478,99 +523,83 @@ export default function CustomCourseContentScreen() {
   };
 
   const handleNavigateToSettings = async () => {
-    const cleanName = courseName.trim();
-    if (!cleanName) {
-      setPopup({
-        message: t("courseCreator.import.popups.missingCourseName"),
-        color: "angry",
-        duration: 3000,
-      });
-      router.back();
+    if (
+      csvStep === "analyzing" ||
+      csvStep === "importing" ||
+      importActionInFlightRef.current
+    ) {
       return;
     }
-    if (!iconId) {
-      setPopup({
-        message: t("courseCreator.import.popups.missingCourseIcon"),
-        color: "angry",
-        duration: 3000,
-      });
-      router.back();
-      return;
-    }
+    importActionInFlightRef.current = true;
+    let importingPendingAnalysis = false;
 
-    const trimmedCards = manualCards.reduce<
-      {
-        frontText: string;
-        backText: string;
-        answers: string[];
-        position: number;
-        flipped: boolean;
-        hintFront?: string | null;
-        hintBack?: string | null;
-        answerOnly?: boolean;
-        imageFront?: string | null;
-        imageBack?: string | null;
-        explanation?: string | null;
-        type?: "text" | "true_false" | "know_dont_know";
-      }[]
-    >((acc, card) => {
-      const frontText = card.front.trim();
-      const answers = normalizeAnswers(card.answers);
-      const hasFrontImage = (card.imageFront ?? "").toString().length > 0;
-      if (!frontText && answers.length === 0 && !hasFrontImage) {
-        return acc;
-      }
-      const backText = answers[0] ?? "";
-      const cardTypeToSave = (card.type ?? "text") as ManualCardType;
-      acc.push({
-        frontText,
-        backText,
-        answers,
-        position: acc.length,
-        flipped: card.flipped,
-        hintFront: card.hintFront ?? "",
-        hintBack: card.hintBack ?? "",
-        answerOnly: card.answerOnly ?? false,
-        imageFront: card.imageFront ?? null,
-        imageBack: card.imageBack ?? null,
-        explanation: card.explanation ?? null,
-        type: cardTypeToSave,
-      });
-      return acc;
-    }, []);
-
-    if (trimmedCards.length === 0) {
-      setPopup({
-        message: t("courseCreator.import.popups.addAtLeastOne"),
-        color: "angry",
-        duration: 3000,
-      });
-      return;
-    }
-
-    const paramsToPass: Record<string, string> = {
-      name: cleanName,
-      iconId,
-      iconColor,
-      reviewsEnabled: reviewsEnabled ? "1" : "0",
-    };
-    if (colorId) {
-      paramsToPass.colorId = colorId;
-    }
-
-    const latestDraftPayload: ContentDraftPayload = {
-      scopeKey: draftScopeKey,
-      addMode,
-      newCardType,
-      csvFileName,
-      manualCards,
-    };
     try {
+      const cleanName = courseName.trim();
+      if (!cleanName) {
+        setPopup({
+          message: t("courseCreator.import.popups.missingCourseName"),
+          color: "angry",
+          duration: 3000,
+        });
+        router.back();
+        return;
+      }
+      if (!iconId) {
+        setPopup({
+          message: t("courseCreator.import.popups.missingCourseIcon"),
+          color: "angry",
+          duration: 3000,
+        });
+        router.back();
+        return;
+      }
+
+      let cardsForDraft = manualCards;
+      let addModeForDraft = addMode;
+      if (addMode === "csv" && csvAnalysis?.validRows.length) {
+        importingPendingAnalysis = true;
+        setCsvStep("importing");
+        const importedCards = await mapCsvAnalysisOrPopup(csvAnalysis);
+        if (!importedCards || !isScreenMountedRef.current) return;
+        cardsForDraft = importedCards;
+        addModeForDraft = "manual";
+        replaceManualCards(importedCards);
+        setAddMode("manual");
+        setCsvAnalysis(null);
+        setCsvStep("idle");
+      }
+
+      if (getNonEmptyManualCards(cardsForDraft).length === 0) {
+        setPopup({
+          message: t("courseCreator.import.popups.addAtLeastOne"),
+          color: "angry",
+          duration: 3000,
+        });
+        return;
+      }
+
+      const paramsToPass: Record<string, string> = {
+        name: cleanName,
+        iconId,
+        iconColor,
+        reviewsEnabled: reviewsEnabled ? "1" : "0",
+      };
+      if (colorId) {
+        paramsToPass.colorId = colorId;
+      }
+
+      const latestDraftPayload: ContentDraftPayload = {
+        scopeKey: draftScopeKey,
+        addMode: addModeForDraft,
+        newCardType,
+        csvFileName,
+        manualCards: cardsForDraft,
+      };
       if (__DEV__) {
         console.log("[ContentStep] Flushing draft before navigation", {
           scopeKey: draftScopeKey,
-          cards: manualCards.length,
-          addMode,
+          cards: cardsForDraft.length,
+          addMode: addModeForDraft,
           newCardType,
           csvFileName,
         });
@@ -579,17 +608,29 @@ export default function CustomCourseContentScreen() {
         CONTENT_DRAFT_STORAGE_KEY,
         JSON.stringify(latestDraftPayload)
       );
+      if (!isScreenMountedRef.current) return;
+
+      const settingsPath = pathname.startsWith("/custom_profile")
+        ? "/custom_profile/settings"
+        : "/custom_course/settings";
+      router.push({ pathname: settingsPath, params: paramsToPass });
     } catch (error) {
       console.warn("Failed to persist content draft before navigation", error);
+    } finally {
+      importActionInFlightRef.current = false;
+      if (importingPendingAnalysis && isScreenMountedRef.current) {
+        setCsvStep((current) => (current === "idle" ? current : "preview"));
+      }
     }
+  };
 
-    const settingsPath = pathname.startsWith("/custom_profile")
-      ? "/custom_profile/settings"
-      : "/custom_course/settings";
-    router.push({ pathname: settingsPath, params: paramsToPass });
+  const handleAddModeChange = (nextMode: AddMode) => {
+    if (isImportBusy || importActionInFlightRef.current) return;
+    setAddMode(nextMode);
   };
 
   const handleGoBack = () => {
+    if (isImportBusy || importActionInFlightRef.current) return;
     router.back();
   };
 
@@ -613,7 +654,7 @@ export default function CustomCourseContentScreen() {
           <SegmentedTabs
             options={segmentOptions}
             value={addMode}
-            onChange={setAddMode}
+            onChange={handleAddModeChange}
             accessibilityLabel={t("courseCreator.import.addModeA11y")}
             containerStyle={styles.addModeTabs}
           />
@@ -621,12 +662,11 @@ export default function CustomCourseContentScreen() {
           {addMode === "csv" ? (
             <View style={styles.modeContainer}>
               <CsvImportGuide
-                onPickCsvFile={handlePickCsvFile}
-                onPickTxtFile={handlePickTxtFile}
+                onPickFile={handlePickFile}
                 onDownloadTemplate={handleDownloadTemplate}
                 downloadingTemplateKey={downloadingTemplateKey}
                 selectedFileName={csvFileName}
-                isAnalyzing={csvStep === "analyzing"}
+                isAnalyzing={isImportBusy}
               />
 
               {csvAnalysis ? (
@@ -769,7 +809,7 @@ export default function CustomCourseContentScreen() {
           <MyButton
             color="my_yellow"
             onPress={handleGoBack}
-            disabled={false}
+            disabled={isImportBusy}
             width={60}
             accessibilityLabel={t("courseCreator.import.backA11y")}
           >
@@ -780,6 +820,7 @@ export default function CustomCourseContentScreen() {
             text={t("app.actions.next")}
             color="my_green"
             onPress={handleNavigateToSettings}
+            disabled={isImportBusy}
             accessibilityLabel={t("courseCreator.import.nextA11y")}
           />
         </View>

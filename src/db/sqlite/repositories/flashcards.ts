@@ -223,8 +223,10 @@ async function replaceCustomFlashcardsWithDbTransaction(
         normalizedAnswers.length > 0
           ? normalizedAnswers
           : splitBackTextIntoAnswers(backSource);
+      const imageFront = card.imageFront ?? null;
+      const imageBack = card.imageBack ?? null;
 
-      if (!front && derivedAnswers.length === 0) {
+      if (!front && derivedAnswers.length === 0 && !imageFront) {
         continue; // ignore completely empty cards
       }
 
@@ -239,8 +241,6 @@ async function replaceCustomFlashcardsWithDbTransaction(
         card.answerOnly == null ? 0 : card.answerOnly ? 1 : 0;
       const typeValue = card.type || "text";
 
-      const imageFront = card.imageFront ?? null;
-      const imageBack = card.imageBack ?? null;
       if (imageFront) newImages.add(imageFront);
       if (imageBack) newImages.add(imageBack);
 

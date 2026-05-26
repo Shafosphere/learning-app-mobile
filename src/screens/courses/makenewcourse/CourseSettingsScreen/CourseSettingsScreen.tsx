@@ -239,8 +239,8 @@ export default function CourseSettingsScreen() {
         const validCards = restoredCards.filter((card) => {
           const hasFront = card.front.trim().length > 0;
           const hasAnswers = normalizeAnswers(card.answers).length > 0;
-          const hasImage = Boolean(card.imageFront || card.imageBack);
-          return hasFront || hasAnswers || hasImage;
+          const hasFrontImage = Boolean(card.imageFront);
+          return hasFront || hasAnswers || hasFrontImage;
         });
         if (__DEV__) {
           console.log("[CourseSettingsScreen] Restored cards", {

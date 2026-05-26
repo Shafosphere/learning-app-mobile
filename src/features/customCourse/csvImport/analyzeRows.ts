@@ -118,7 +118,7 @@ export const analyzeRows = (
     const frontImageName = asTrimmedString(row.raw.front_image) || null;
     const backImageName = asTrimmedString(row.raw.back_image) || null;
     const hasAnyFrontContent =
-      frontText.length > 0 || Boolean(frontImageName) || Boolean(backImageName);
+      frontText.length > 0 || Boolean(frontImageName);
 
     if (!hasAnyFrontContent) {
       rowIssues.push({
@@ -127,8 +127,8 @@ export const analyzeRows = (
         severity: "error",
         code: "missing_front_text",
         message: isPolish
-          ? "Ten wiersz nie ma ani awersu, ani obrazka, więc karta nie może powstać."
-          : "This row has neither front text nor image, so the card cannot be created.",
+          ? "Ten wiersz nie ma ani tekstu awersu, ani obrazka awersu, więc karta nie może powstać."
+          : "This row has neither front text nor a front image, so the card cannot be created.",
       });
     }
 

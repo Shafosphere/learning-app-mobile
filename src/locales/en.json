@@ -1427,14 +1427,13 @@
       "downloading": "Preparing…",
       "downloadTemplate": "Download template",
       "importTitle": "Import",
-      "step1": "1. Prepare a CSV or TXT file with column headers.",
-      "step2": "2. Choose the file format below and import it.",
-      "pickCsv": "Choose CSV",
-      "pickTxt": "Choose TXT",
+      "step1": "1. Prepare a CSV or TXT file. If your flashcards contain images, prepare a ZIP file with a CSV file and an images folder.",
+      "step2": "2. Choose a file and review the import preview.",
+      "pickFile": "Choose file",
       "analyzing": "Analyzing…",
       "cardTypes": "Flashcard types",
       "imagesTitle": "How to add images",
-      "imagesDescription": "Next to the CSV or TXT file with flashcards, create an images folder. Add images to it, and in the file rows enter file names, e.g. dog.png. Supported formats: .png, .jpg, .jpeg, .svg.",
+      "imagesDescription": "To import images, create a ZIP file containing a CSV file and an images folder with graphics. In the front_image or back_image columns, enter the image path, for example images/dog.png. Supported formats: .png, .jpg, .jpeg, .svg.",
       "sections": {
         "selfAssess": {
           "title": "1) Self-assessment",

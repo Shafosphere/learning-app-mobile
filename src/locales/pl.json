@@ -1427,14 +1427,13 @@
       "downloading": "Przygotowuję…",
       "downloadTemplate": "Pobierz wzór",
       "importTitle": "Import",
-      "step1": "1. Przygotuj plik CSV albo TXT z nagłówkami kolumn.",
-      "step2": "2. Wybierz poniżej format pliku i importuj.",
-      "pickCsv": "Wybierz CSV",
-      "pickTxt": "Wybierz TXT",
+      "step1": "1. Przygotuj plik CSV lub TXT. Jeśli fiszki zawierają obrazy, przygotuj plik ZIP z plikiem CSV i folderem images.",
+      "step2": "2. Wybierz plik i sprawdź podgląd importu.",
+      "pickFile": "Wybierz plik",
       "analyzing": "Analizuję…",
       "cardTypes": "Typy fiszek",
       "imagesTitle": "Jak dodawać obrazy",
-      "imagesDescription": "Obok pliku CSV lub TXT z fiszkami utwórz folder images. Dodaj do niego obrazy, a w wierszach pliku wpisuj nazwy plików, np. dog.png. Obsługiwane formaty: .png, .jpg, .jpeg, .svg.",
+      "imagesDescription": "Aby importować obrazy, utwórz plik ZIP zawierający plik CSV oraz folder images z grafikami. W kolumnach obraz_awers lub obraz_rewers wpisz ścieżkę do obrazu, np. images/dog.png. Obsługiwane formaty: .png, .jpg, .jpeg, .svg.",
       "sections": {
         "selfAssess": {
           "title": "1) Samoocena",

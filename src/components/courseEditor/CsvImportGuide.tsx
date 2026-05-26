@@ -8,8 +8,7 @@ import { useTranslation } from "react-i18next";
 import { Platform, Pressable, Text, View } from "react-native";
 
 interface CsvImportGuideProps {
-  onPickCsvFile: () => void;
-  onPickTxtFile: () => void;
+  onPickFile: () => void;
   onDownloadTemplate: (templateKey: CsvTemplateKey) => void;
   downloadingTemplateKey?: CsvTemplateKey | null;
   selectedFileName: string | null;
@@ -366,8 +365,7 @@ function GuideAccordionSection({
 }
 
 export function CsvImportGuide({
-  onPickCsvFile,
-  onPickTxtFile,
+  onPickFile,
   onDownloadTemplate,
   downloadingTemplateKey = null,
   selectedFileName,
@@ -472,18 +470,12 @@ export function CsvImportGuide({
 
       <View style={styles.actionsRow}>
         <MyButton
-          text={t("courseCreator.csvGuide.pickCsv")}
-          onPress={isAnalyzing ? undefined : onPickCsvFile}
-          disabled={isAnalyzing}
-          width={140}
-        />
-        <MyButton
           text={
             isAnalyzing
               ? t("courseCreator.csvGuide.analyzing")
-              : t("courseCreator.csvGuide.pickTxt")
+              : t("courseCreator.csvGuide.pickFile")
           }
-          onPress={isAnalyzing ? undefined : onPickTxtFile}
+          onPress={isAnalyzing ? undefined : onPickFile}
           disabled={isAnalyzing}
           width={140}
         />

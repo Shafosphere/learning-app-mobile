@@ -150,8 +150,7 @@ function CardTypePreview({
 function CsvImportGuidePreview() {
   return (
     <CsvImportGuide
-      onPickCsvFile={noop}
-      onPickTxtFile={noop}
+      onPickFile={noop}
       onDownloadTemplate={noop}
       selectedFileName="francuski-podroze.csv"
       isAnalyzing={false}

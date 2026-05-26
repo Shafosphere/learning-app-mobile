@@ -114,6 +114,32 @@ describe("custom course CSV import", () => {
     ]);
   });
 
+  it("rejects a row whose only prompt-side content is a back image", () => {
+    const result = analyzeRows(
+      makeParsedInput(
+        [
+          {
+            rowNumber: 2,
+            raw: { back_image: "images/answer.svg" },
+          },
+        ],
+        ["back_image"]
+      ),
+      { locale: "pl" }
+    );
+
+    expect(result.validRows).toHaveLength(0);
+    expect(result.issues).toEqual(
+      expect.arrayContaining([
+        expect.objectContaining({
+          row: 2,
+          code: "missing_front_text",
+          severity: "error",
+        }),
+      ])
+    );
+  });
+
   it("infers empty back_text rows as self-assessment even when the header exists", () => {
     const result = analyzeRows(
       makeParsedInput(
