@@ -20,6 +20,7 @@ import {
 } from "@/src/features/customCourse/csvImport/analyzeRows";
 import { mapAnalysisToManualCards } from "@/src/features/customCourse/csvImport/mapToManualCards";
 import { parseImportFile } from "@/src/features/customCourse/csvImport/parseFile";
+import { deleteImage } from "@/src/services/imageService";
 import {
   getCsvTemplate,
   type CsvTemplateKey,
@@ -52,7 +53,35 @@ import {
 } from "@/src/features/customCourse/contentDraft";
 import { useStyles } from "./ImportFlashcardsScreen-styles";
 
-type CsvStep = "idle" | "analyzing" | "preview" | "importing";
+type CsvStep = "idle" | "analyzing" | "importing";
+
+type LastSuccessfulImport = {
+  previousCards: ManualCard[];
+  previousFileName: string | null;
+  previousImport: LastSuccessfulImport | null;
+  createdImageUris: string[];
+  cardsCount: number;
+  errorCount: number;
+};
+
+type PendingImport = {
+  analysis: CsvAnalysisResult;
+  fileName: string;
+  errorCount: number;
+  warningCount: number;
+};
+
+const cloneManualCards = (cards: ManualCard[]): ManualCard[] =>
+  cards.map((card) => ({ ...card, answers: [...card.answers] }));
+
+const getCardImageUris = (cards: ManualCard[]): Set<string> => {
+  const uris = new Set<string>();
+  for (const card of cards) {
+    if (card.imageFront) uris.add(card.imageFront);
+    if (card.imageBack) uris.add(card.imageBack);
+  }
+  return uris;
+};
 
 const getNonEmptyManualCards = (cards: ManualCard[]): ManualCard[] =>
   cards.filter((card) => {
@@ -140,7 +169,9 @@ export default function CustomCourseContentScreen() {
   const [newCardType, setNewCardType] = useState<ManualCardType>("text");
   const [csvFileName, setCsvFileName] = useState<string | null>(null);
   const [csvStep, setCsvStep] = useState<CsvStep>("idle");
-  const [csvAnalysis, setCsvAnalysis] = useState<CsvAnalysisResult | null>(null);
+  const [lastSuccessfulImport, setLastSuccessfulImport] =
+    useState<LastSuccessfulImport | null>(null);
+  const [pendingImport, setPendingImport] = useState<PendingImport | null>(null);
   const [downloadingTemplateKey, setDownloadingTemplateKey] =
     useState<CsvTemplateKey | null>(null);
   const [isDraftHydrated, setIsDraftHydrated] = useState(false);
@@ -238,8 +269,7 @@ export default function CustomCourseContentScreen() {
 
       const asset = picked.assets[0];
       const fileName = asset.name ?? t("courseCreator.import.defaultFileName");
-      setCsvFileName(fileName);
-      setCsvAnalysis(null);
+      setPendingImport(null);
       setCsvStep("analyzing");
 
       const parsed = await parseImportFile({
@@ -248,13 +278,14 @@ export default function CustomCourseContentScreen() {
         locale,
       });
       const analysis = analyzeRows(parsed, { locale });
-      setCsvAnalysis(analysis);
-      setCsvStep("preview");
-
       const errorCount = analysis.issues.filter((issue) => issue.severity === "error").length;
-      const warningCount = analysis.issues.filter((issue) => issue.severity === "warning").length;
+      const warningCount = analysis.issues.filter(
+        (issue) => issue.severity === "warning"
+      ).length;
 
       if (analysis.validRows.length === 0) {
+        setPendingImport(null);
+        setCsvStep("idle");
         setPopup({
           message: t("courseCreator.import.popups.noRows"),
           color: "angry",
@@ -263,24 +294,27 @@ export default function CustomCourseContentScreen() {
         return;
       }
 
-      setPopup({
-        message:
-          errorCount > 0
-            ? t("courseCreator.import.popups.analyzedWithErrors", {
-                validRows: analysis.validRows.length,
-                errorCount,
-              })
-            : warningCount > 0
-              ? t("courseCreator.import.popups.analyzedWithWarnings", {
+      if (errorCount > 0 || warningCount > 0) {
+        setPendingImport({ analysis, fileName, errorCount, warningCount });
+        setCsvStep("idle");
+        setPopup({
+          message:
+            errorCount > 0
+              ? t("courseCreator.import.popups.analyzedWithErrors", {
+                  validRows: analysis.validRows.length,
+                  errorCount,
+                })
+              : t("courseCreator.import.popups.analyzedWithWarnings", {
                   validRows: analysis.validRows.length,
                   warningCount,
-                })
-              : t("courseCreator.import.popups.analyzedSuccess", {
-                  validRows: analysis.validRows.length,
                 }),
-        color: warningCount > 0 || errorCount > 0 ? "disoriented" : "calm",
-        duration: 3500,
-      });
+          color: "disoriented",
+          duration: 3500,
+        });
+        return;
+      }
+
+      await applyImportAnalysis({ analysis, fileName, errorCount, warningCount });
     } catch (error) {
       console.error("File parse/analyze error", error);
       setCsvStep("idle");
@@ -289,6 +323,10 @@ export default function CustomCourseContentScreen() {
         color: "angry",
         duration: 4000,
       });
+    } finally {
+      if (isScreenMountedRef.current) {
+        setCsvStep("idle");
+      }
     }
   };
 
@@ -465,60 +503,115 @@ export default function CustomCourseContentScreen() {
     }
   };
 
-  const handleImportAnalyzedRows = async () => {
-    if (
-      !csvAnalysis ||
-      csvStep === "analyzing" ||
-      csvStep === "importing" ||
-      importActionInFlightRef.current
-    ) {
+  const applyImportAnalysis = async ({
+    analysis,
+    fileName,
+    errorCount,
+  }: PendingImport): Promise<boolean> => {
+    setCsvStep("importing");
+    const cards = await mapCsvAnalysisOrPopup(analysis);
+    if (!cards || !isScreenMountedRef.current) {
+      return false;
+    }
+
+    const warningCount = analysis.issues.filter(
+      (issue) => issue.severity === "warning"
+    ).length;
+    setLastSuccessfulImport({
+      previousCards: cloneManualCards(manualCards),
+      previousFileName: csvFileName,
+      previousImport: lastSuccessfulImport,
+      createdImageUris: analysis.getCreatedImageUris?.() ?? [],
+      cardsCount: cards.length,
+      errorCount,
+    });
+    setPendingImport(null);
+    replaceManualCards(cards);
+    setCsvFileName(fileName);
+    setAddMode("manual");
+    setCsvStep("idle");
+
+    setPopup({
+      message:
+        analysis.invalidRowsCount > 0
+          ? t("courseCreator.import.popups.importedWithSkipped", {
+              cardsCount: cards.length,
+              skipped: analysis.invalidRowsCount,
+            })
+          : warningCount > 0
+            ? t("courseCreator.import.popups.importedWithWarnings", {
+                cardsCount: cards.length,
+                warningCount,
+              })
+            : t("courseCreator.import.popups.importedSuccess", {
+                cardsCount: cards.length,
+              }),
+      color: analysis.invalidRowsCount > 0 ? "disoriented" : "calm",
+      duration: 4000,
+    });
+    return true;
+  };
+
+  const handleImportPendingRows = async () => {
+    if (!pendingImport || isImportBusy || importActionInFlightRef.current) {
       return;
     }
+
     importActionInFlightRef.current = true;
-    setCsvStep("importing");
-
     try {
-      const cards = await mapCsvAnalysisOrPopup(csvAnalysis);
-      if (!cards || !isScreenMountedRef.current) return;
-
-      replaceManualCards(cards);
-      setAddMode("manual");
-      setCsvAnalysis(null);
-      setCsvStep("idle");
-
-      const skipped = csvAnalysis.invalidRowsCount;
-      const warningCount = csvAnalysis.issues.filter(
-        (issue) => issue.severity === "warning"
-      ).length;
-
-      setPopup({
-        message:
-          skipped > 0
-            ? t("courseCreator.import.popups.importedWithSkipped", {
-                cardsCount: cards.length,
-                skipped,
-              })
-            : warningCount > 0
-              ? t("courseCreator.import.popups.importedWithWarnings", {
-                  cardsCount: cards.length,
-                  warningCount,
-                })
-              : t("courseCreator.import.popups.importedSuccess", {
-                  cardsCount: cards.length,
-                }),
-        color: skipped > 0 ? "disoriented" : "calm",
-        duration: 4000,
-      });
+      await applyImportAnalysis(pendingImport);
     } finally {
       importActionInFlightRef.current = false;
       if (isScreenMountedRef.current) {
-        setCsvStep((current) => (current === "idle" ? current : "preview"));
+        setCsvStep("idle");
       }
     }
   };
 
-  const handleResetCsvPreview = () => {
-    setCsvAnalysis(null);
+  const handleUndoImport = async () => {
+    if (!lastSuccessfulImport || isImportBusy || importActionInFlightRef.current) {
+      return;
+    }
+
+    importActionInFlightRef.current = true;
+    const importToUndo = lastSuccessfulImport;
+    const retainedImageUris = getCardImageUris(importToUndo.previousCards);
+
+    replaceManualCards(importToUndo.previousCards);
+    setLastSuccessfulImport(importToUndo.previousImport);
+    setCsvFileName(importToUndo.previousFileName);
+    setCsvStep("idle");
+    setAddMode("manual");
+
+    try {
+      await Promise.all(
+        importToUndo.createdImageUris
+          .filter((uri) => !retainedImageUris.has(uri))
+          .map((uri) => deleteImage(uri))
+      );
+    } finally {
+      importActionInFlightRef.current = false;
+    }
+  };
+
+  const handleManagedImageCreated = (uri: string) => {
+    setLastSuccessfulImport((current) => {
+      if (!current || current.createdImageUris.includes(uri)) {
+        return current;
+      }
+      return {
+        ...current,
+        createdImageUris: [...current.createdImageUris, uri],
+      };
+    });
+  };
+
+  const handleDiscardPendingImport = () => {
+    if (!pendingImport || isImportBusy || importActionInFlightRef.current) {
+      return;
+    }
+
+    setPendingImport(null);
     setCsvStep("idle");
   };
 
@@ -530,8 +623,15 @@ export default function CustomCourseContentScreen() {
     ) {
       return;
     }
+    if (pendingImport) {
+      setPopup({
+        message: t("courseCreator.import.popups.confirmPendingImport"),
+        color: "disoriented",
+        duration: 3500,
+      });
+      return;
+    }
     importActionInFlightRef.current = true;
-    let importingPendingAnalysis = false;
 
     try {
       const cleanName = courseName.trim();
@@ -554,22 +654,7 @@ export default function CustomCourseContentScreen() {
         return;
       }
 
-      let cardsForDraft = manualCards;
-      let addModeForDraft = addMode;
-      if (addMode === "csv" && csvAnalysis?.validRows.length) {
-        importingPendingAnalysis = true;
-        setCsvStep("importing");
-        const importedCards = await mapCsvAnalysisOrPopup(csvAnalysis);
-        if (!importedCards || !isScreenMountedRef.current) return;
-        cardsForDraft = importedCards;
-        addModeForDraft = "manual";
-        replaceManualCards(importedCards);
-        setAddMode("manual");
-        setCsvAnalysis(null);
-        setCsvStep("idle");
-      }
-
-      if (getNonEmptyManualCards(cardsForDraft).length === 0) {
+      if (getNonEmptyManualCards(manualCards).length === 0) {
         setPopup({
           message: t("courseCreator.import.popups.addAtLeastOne"),
           color: "angry",
@@ -590,16 +675,16 @@ export default function CustomCourseContentScreen() {
 
       const latestDraftPayload: ContentDraftPayload = {
         scopeKey: draftScopeKey,
-        addMode: addModeForDraft,
+        addMode,
         newCardType,
         csvFileName,
-        manualCards: cardsForDraft,
+        manualCards,
       };
       if (__DEV__) {
         console.log("[ContentStep] Flushing draft before navigation", {
           scopeKey: draftScopeKey,
-          cards: cardsForDraft.length,
-          addMode: addModeForDraft,
+          cards: manualCards.length,
+          addMode,
           newCardType,
           csvFileName,
         });
@@ -618,9 +703,6 @@ export default function CustomCourseContentScreen() {
       console.warn("Failed to persist content draft before navigation", error);
     } finally {
       importActionInFlightRef.current = false;
-      if (importingPendingAnalysis && isScreenMountedRef.current) {
-        setCsvStep((current) => (current === "idle" ? current : "preview"));
-      }
     }
   };
 
@@ -634,12 +716,91 @@ export default function CustomCourseContentScreen() {
     router.back();
   };
 
-  const csvErrorCount = csvAnalysis
-    ? csvAnalysis.issues.filter((issue) => issue.severity === "error").length
-    : 0;
-  const csvWarningCount = csvAnalysis
-    ? csvAnalysis.issues.filter((issue) => issue.severity === "warning").length
-    : 0;
+  const importPreview = lastSuccessfulImport ? (
+    <View style={styles.csvPreviewCard}>
+      <Text style={styles.csvPreviewTitle}>{t("courseCreator.import.previewTitle")}</Text>
+
+      <View style={styles.csvStatsGrid}>
+        <View style={styles.csvStatBox}>
+          <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.flashcards")}</Text>
+          <Text style={styles.csvStatValue}>{lastSuccessfulImport.cardsCount}</Text>
+        </View>
+        <View style={styles.csvStatBox}>
+          <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.errors")}</Text>
+          <Text style={styles.csvStatValue}>{lastSuccessfulImport.errorCount}</Text>
+        </View>
+      </View>
+
+      <View style={styles.csvActionRow}>
+        <MyButton
+          text={t("courseCreator.import.undoImport")}
+          color="my_red"
+          width={138}
+          disabled={isImportBusy}
+          onPress={handleUndoImport}
+        />
+      </View>
+    </View>
+  ) : null;
+
+  const pendingIssues = pendingImport?.analysis.issues ?? [];
+
+  const pendingImportPreview = pendingImport ? (
+    <View style={styles.csvPreviewCard}>
+      <Text style={styles.csvPreviewTitle}>{t("courseCreator.import.previewTitle")}</Text>
+
+      <View style={styles.csvStatsGrid}>
+        <View style={styles.csvStatBox}>
+          <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.flashcards")}</Text>
+          <Text style={styles.csvStatValue}>{pendingImport.analysis.validRows.length}</Text>
+        </View>
+        <View style={styles.csvStatBox}>
+          <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.errors")}</Text>
+          <Text style={styles.csvStatValue}>{pendingImport.errorCount}</Text>
+        </View>
+      </View>
+
+      <View style={styles.csvErrorsBox}>
+        <Text style={styles.csvErrorsTitle}>{t("courseCreator.import.issuesToReview")}</Text>
+        {pendingIssues.slice(0, 3).map((issue, index) => {
+          const location = issue.row
+            ? t("courseCreator.import.errorRow", { row: issue.row })
+            : t("courseCreator.import.fileError");
+          const locationWithField = issue.field
+            ? `${location} - ${getCsvFieldLabel(issue.field, locale)}`
+            : location;
+
+          return (
+            <View key={`${issue.code}-${issue.row ?? "file"}-${index}`} style={styles.csvErrorRow}>
+              <Text style={styles.csvErrorLocation}>{locationWithField}</Text>
+            </View>
+          );
+        })}
+        {pendingIssues.length > 3 ? (
+          <Text style={styles.csvErrorsMore}>
+            {t("courseCreator.import.moreIssuesCompact", { count: pendingIssues.length - 3 })}
+          </Text>
+        ) : null}
+      </View>
+
+      <View style={styles.csvActionRow}>
+        <MyButton
+          text={t("courseCreator.import.importFlashcards")}
+          color="my_green"
+          width={148}
+          disabled={isImportBusy}
+          onPress={handleImportPendingRows}
+        />
+        <MyButton
+          text={t("courseCreator.import.discardImport")}
+          color="my_red"
+          width={128}
+          disabled={isImportBusy}
+          onPress={handleDiscardPendingImport}
+        />
+      </View>
+    </View>
+  ) : null;
 
   return (
     <View style={styles.container}>
@@ -665,94 +826,14 @@ export default function CustomCourseContentScreen() {
                 onPickFile={handlePickFile}
                 onDownloadTemplate={handleDownloadTemplate}
                 downloadingTemplateKey={downloadingTemplateKey}
-                selectedFileName={csvFileName}
+                selectedFileName={pendingImport?.fileName ?? csvFileName}
                 isAnalyzing={isImportBusy}
               />
-
-              {csvAnalysis ? (
-                <View style={styles.csvPreviewCard}>
-                  <Text style={styles.csvPreviewTitle}>{t("courseCreator.import.previewTitle")}</Text>
-
-                  <View style={styles.csvStatsGrid}>
-                    <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.rows")}</Text>
-                      <Text style={styles.csvStatValue}>{csvAnalysis.totalRows}</Text>
-                    </View>
-                    <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.importable")}</Text>
-                      <Text style={styles.csvStatValue}>{csvAnalysis.validRows.length}</Text>
-                    </View>
-                    <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.errors")}</Text>
-                      <Text style={styles.csvStatValue}>{csvErrorCount}</Text>
-                    </View>
-                    <View style={styles.csvStatBox}>
-                      <Text style={styles.csvStatLabel}>{t("courseCreator.import.stats.warnings")}</Text>
-                      <Text style={styles.csvStatValue}>{csvWarningCount}</Text>
-                    </View>
-                  </View>
-
-                  <View style={styles.csvTypeStatsRow}>
-                    <Text style={styles.csvTypePill}>
-                      {t("courseCreator.import.cardTypes.text")}: {csvAnalysis.statsByType.traditional}
-                    </Text>
-                    <Text style={styles.csvTypePill}>
-                      {t("courseCreator.import.cardTypes.trueFalse")}: {csvAnalysis.statsByType.true_false}
-                    </Text>
-                    <Text style={styles.csvTypePill}>
-                      {t("repeats.cardTypes.knowDontKnow")}: {csvAnalysis.statsByType.self_assess}
-                    </Text>
-                  </View>
-
-                  {csvAnalysis.issues.length > 0 ? (
-                    <View style={styles.csvIssuesBox}>
-                      {csvAnalysis.issues.slice(0, 12).map((issue, index) => (
-                        <Text
-                          key={`${issue.code}-${issue.row ?? "x"}-${index}`}
-                          style={styles.csvIssueText}
-                        >
-                          [{issue.severity.toUpperCase()}]
-                          {issue.row
-                            ? t("courseCreator.import.issueRow", { row: issue.row })
-                            : ""}
-                          {issue.field
-                            ? ` (${getCsvFieldLabel(issue.field, locale)})`
-                            : ""}: {issue.message}
-                        </Text>
-                      ))}
-                      {csvAnalysis.issues.length > 12 ? (
-                        <Text style={styles.csvIssueTextMuted}>
-                          {t("courseCreator.import.moreIssues", {
-                            count: csvAnalysis.issues.length - 12,
-                          })}
-                        </Text>
-                      ) : null}
-                    </View>
-                  ) : null}
-
-                  <View style={styles.csvActionRow}>
-                    <MyButton
-                      text={csvStep === "importing"
-                        ? t("courseCreator.import.importing")
-                        : t("courseCreator.import.importValid")}
-                      color="my_green"
-                      width={190}
-                      disabled={csvStep === "importing" || csvAnalysis.validRows.length === 0}
-                      onPress={handleImportAnalyzedRows}
-                    />
-                    <MyButton
-                      text={t("courseCreator.import.clearReport")}
-                      color="my_yellow"
-                      width={150}
-                      disabled={csvStep === "importing"}
-                      onPress={handleResetCsvPreview}
-                    />
-                  </View>
-                </View>
-              ) : null}
+              {pendingImportPreview ?? importPreview}
             </View>
           ) : (
             <View style={styles.modeContainer}>
+              {importPreview}
               <Text style={styles.miniSectionHeader}>{t("courseCreator.import.flashcardsHeader")}</Text>
               <ManualCardsEditor
                 manualCards={manualCards}
@@ -766,6 +847,7 @@ export default function CustomCourseContentScreen() {
                 onRemoveCard={handleRemoveCard}
                 onToggleFlipped={handleToggleFlipped}
                 onCardImageChange={handleManualCardImageChange}
+                onManagedImageCreated={handleManagedImageCreated}
                 onCardExplanationChange={handleManualCardExplanationChange}
                 showDefaultBottomAddButton={false}
               />

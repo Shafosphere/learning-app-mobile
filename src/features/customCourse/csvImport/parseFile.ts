@@ -138,6 +138,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
       isTxt ? { delimitersToGuess: [",", ";", "\t"] } : undefined
     );
     const imageCache = new Map<string, string | null>();
+    const createdImageUris = new Set<string>();
 
     const resolveImage = async (name: string | null): Promise<string | null> => {
       if (!name) return null;
@@ -148,6 +149,9 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
         try {
           const saved = await saveImage(name);
           imageCache.set(name, saved);
+          if (saved !== name) {
+            createdImageUris.add(saved);
+          }
           return saved;
         } catch {
           imageCache.set(name, null);
@@ -165,6 +169,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
       headers: parsed.headers,
       parseIssues: parsed.parseIssues,
       resolveImage,
+      getCreatedImageUris: () => [...createdImageUris],
     };
   }
 
@@ -193,6 +198,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
         },
       ],
       resolveImage: async () => null,
+      getCreatedImageUris: () => [],
       hasZipImage: () => false,
     };
   }
@@ -201,6 +207,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
   const parsed = parseCsvText(csvText);
   const zipImageLookup = buildZipImageLookup(zip);
   const imageCache = new Map<string, string | null>();
+  const createdImageUris = new Set<string>();
 
   const resolveImage = async (name: string | null): Promise<string | null> => {
     if (!name) return null;
@@ -217,6 +224,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
       const base64 = await entry.async("base64");
       const saved = await importImageFromZip(base64, normalizeImageName(name));
       imageCache.set(name, saved);
+      createdImageUris.add(saved);
       return saved;
     } catch {
       imageCache.set(name, null);
@@ -236,6 +244,7 @@ export const parseImportFile = async (asset: FileAsset): Promise<ParsedCsvInput>
     headers: parsed.headers,
     parseIssues: parsed.parseIssues,
     resolveImage,
+    getCreatedImageUris: () => [...createdImageUris],
     hasZipImage,
   };
 };

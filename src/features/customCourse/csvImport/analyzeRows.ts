@@ -221,5 +221,6 @@ export const analyzeRows = (
     inferredTypeCount,
     missingImageCount,
     resolveImage: input.resolveImage,
+    getCreatedImageUris: input.getCreatedImageUris,
   };
 };

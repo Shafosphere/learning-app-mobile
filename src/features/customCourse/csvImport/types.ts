@@ -37,6 +37,7 @@ export type ParsedCsvInput = {
   headers: string[];
   parseIssues: CsvIssue[];
   resolveImage: (name: string | null) => Promise<string | null>;
+  getCreatedImageUris?: () => string[];
   hasZipImage?: (name: string) => boolean;
 };
 
@@ -65,4 +66,5 @@ export type CsvAnalysisResult = {
   inferredTypeCount: number;
   missingImageCount: number;
   resolveImage: (name: string | null) => Promise<string | null>;
+  getCreatedImageUris?: () => string[];
 };

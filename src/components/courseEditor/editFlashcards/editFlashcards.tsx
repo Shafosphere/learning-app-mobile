@@ -1,5 +1,7 @@
 import { ManualCard, ManualCardType } from "@/src/hooks/useManualCardsForm";
 import { saveImage } from "@/src/services/imageService";
+import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
+import { isSvgImageUri } from "@/src/features/flashcards/flashcardImagePreload";
 import * as ImagePicker from "expo-image-picker";
 import Feather from "@expo/vector-icons/Feather";
 import FontAwesome from "@expo/vector-icons/FontAwesome";
@@ -8,6 +10,7 @@ import { ReactNode, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   Image,
+  ImageStyle,
   Pressable,
   Text,
   TextInput,
@@ -49,7 +52,7 @@ export interface ManualCardsEditorStyles {
   imagePreviewContainer?: ViewStyle;
   imagePreview: ViewStyle;
   imagePlaceholder: TextStyle;
-  imageThumb: ViewStyle;
+  imageThumb: ImageStyle;
   imageButtonsRow: ViewStyle;
   imageButton: ViewStyle;
   imageOverlayClearButton?: ViewStyle;
@@ -102,6 +105,7 @@ interface ManualCardsEditorProps {
     side: "front" | "back",
     uri: string | null
   ) => void;
+  onManagedImageCreated?: (uri: string) => void;
   onCardExplanationChange?: (cardId: string, value: string) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
   showDefaultBottomAddButton?: boolean;
@@ -130,6 +134,7 @@ export const ManualCardsEditor = ({
   onRemoveCard,
   onToggleFlipped,
   onCardImageChange,
+  onManagedImageCreated,
   onCardExplanationChange,
   actionButtons,
   showDefaultBottomAddButton = true,
@@ -202,7 +207,11 @@ export const ManualCardsEditor = ({
       return;
     }
     try {
-      const saved = await saveImage(result.assets[0].uri);
+      const pickedUri = result.assets[0].uri;
+      const saved = await saveImage(pickedUri);
+      if (saved !== pickedUri) {
+        onManagedImageCreated?.(saved);
+      }
       handleCardImageChange(cardId, side, saved);
     } catch (error) {
       console.warn("[ManualCardsEditor] Failed to save picked image", error);
@@ -248,6 +257,7 @@ export const ManualCardsEditor = ({
         const hasFrontImage = Boolean(card.imageFront);
         const hasLegacyBackImage = Boolean(card.imageBack);
         const hasAnyImage = hasFrontImage || hasLegacyBackImage;
+        const imageUri = card.imageFront ?? card.imageBack ?? null;
         const imageSideToClear: "front" | "back" = hasFrontImage ? "front" : "back";
         const shouldShowImagesRow =
           hasAnyImage || openImageSlots[card.id];
@@ -367,12 +377,19 @@ export const ManualCardsEditor = ({
                             : null,
                         ]}
                       >
-                        {card.imageFront || card.imageBack ? (
-                          <Image
-                            source={{ uri: (card.imageFront ?? card.imageBack) as string }}
-                            style={styles.imageThumb}
-                            resizeMode="cover"
-                          />
+                        {imageUri ? (
+                          isSvgImageUri(imageUri) ? (
+                            <PromptImage
+                              uri={imageUri}
+                              imageStyle={styles.imageThumb}
+                            />
+                          ) : (
+                            <Image
+                              source={{ uri: imageUri }}
+                              style={styles.imageThumb}
+                              resizeMode="cover"
+                            />
+                          )
                         ) : (
                           <Text style={styles.imagePlaceholder}>
                             {canEditImages
