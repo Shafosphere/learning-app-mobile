@@ -32,6 +32,13 @@ describe("resolveStartupRoute", () => {
     await expect(resolveStartupRoute()).resolves.toBe("/createprofile");
   });
 
+  it("returns to welcome onboarding after restart", async () => {
+    await AsyncStorage.setItem("activeCourseIdx", JSON.stringify(0));
+    await setOnboardingCheckpoint("welcome_required");
+
+    await expect(resolveStartupRoute()).resolves.toBe("/createprofile");
+  });
+
   it("keeps legacy installs with active course on home when no checkpoint exists", async () => {
     await AsyncStorage.setItem("activeCourseIdx", JSON.stringify(0));
 

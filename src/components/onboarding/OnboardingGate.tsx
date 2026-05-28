@@ -72,7 +72,8 @@ export function OnboardingGate() {
 
     if (
       checkpoint === "language_required" ||
-      checkpoint === "native_language_required"
+      checkpoint === "native_language_required" ||
+      checkpoint === "welcome_required"
     ) {
       return checkpoint;
     }
@@ -123,11 +124,13 @@ export function OnboardingGate() {
         ? LANGUAGE_ROUTE
         : resolvedCheckpoint === "native_language_required"
           ? LANGUAGE_ROUTE
-        : resolvedCheckpoint === "pin_required"
-          ? PIN_ROUTE
-          : resolvedCheckpoint === "activate_required"
-            ? ACTIVATE_ROUTE
-            : COURSE_ENTRY_SETTINGS_ROUTE;
+          : resolvedCheckpoint === "welcome_required"
+            ? LANGUAGE_ROUTE
+            : resolvedCheckpoint === "pin_required"
+              ? PIN_ROUTE
+              : resolvedCheckpoint === "activate_required"
+                ? ACTIVATE_ROUTE
+                : COURSE_ENTRY_SETTINGS_ROUTE;
 
     // W trybie aktywacji pozwalamy zostać na ekranie przypinania,
     // żeby użytkownik sam przeszedł dalej.

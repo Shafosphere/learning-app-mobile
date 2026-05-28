@@ -10,7 +10,13 @@ import {
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useRouter } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
-import { Image, Pressable, Text, View } from "react-native";
+import {
+  Image,
+  Pressable,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./LanguageIntroScreen-styles";
 
@@ -20,7 +26,7 @@ type LanguageOption = {
   titleKey: "repeats.labels.polish" | "repeats.labels.english";
   subtitle: string;
 };
-type LanguageIntroMode = "app" | "native";
+type LanguageIntroMode = "app" | "native" | "welcome";
 
 const languageOptions: LanguageOption[] = [
   {
@@ -36,6 +42,8 @@ const languageOptions: LanguageOption[] = [
     subtitle: "Interface in English",
   },
 ];
+
+const WELCOME_LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 
 export default function LanguageIntroScreen() {
   const styles = useStyles();
@@ -61,6 +69,10 @@ export default function LanguageIntroScreen() {
         confirm: "Dalej",
         hintDefault: "Wybierz język, żeby aktywować przycisk.",
         hintSelected: "Wybrano: {{language}}",
+        welcomeTitle: "Witaj w Memicard!",
+        welcomeDescription:
+          "Dzięki, że jesteś tutaj na wczesnym etapie rozwoju aplikacji.\n\nMemicard nadal rośnie, więc mogą pojawić się drobne błędy, niedopracowane miejsca albo funkcje, które jeszcze wymagają poprawy.\n\nJeżeli coś nie działa, coś Ci przeszkadza albo masz pomysł na ulepszenie, zgłoś to proszę — bardzo mi to pomoże.",
+        welcomeNext: "Zaczynajmy",
       }
     : {
         appTitle: "Choose app language",
@@ -68,6 +80,10 @@ export default function LanguageIntroScreen() {
         confirm: "Next",
         hintDefault: "Choose a language to enable the button.",
         hintSelected: "Selected: {{language}}",
+        welcomeTitle: "Welcome to Memicard!",
+        welcomeDescription:
+          "Thank you for being here at this early stage of the app's development.\n\nMemicard is still growing, so you may come across small bugs, unfinished areas, or features that still need improvement.\n\nIf something does not work, bothers you, or you have an idea for an improvement, please report it - it would help me a lot.",
+        welcomeNext: "Let's start",
       };
 
   const tr = useCallback(
@@ -77,7 +93,10 @@ export default function LanguageIntroScreen() {
         | "onboarding.languageIntro.nativeTitle"
         | "app.actions.next"
         | "onboarding.languageIntro.hintDefault"
-        | "onboarding.languageIntro.hintSelected",
+        | "onboarding.languageIntro.hintSelected"
+        | "onboarding.welcome.title"
+        | "onboarding.welcome.description"
+        | "onboarding.welcome.next",
       options?: Record<string, unknown>
     ) => t(key, { lng: screenLanguage, ...options }),
     [screenLanguage, t]
@@ -88,7 +107,11 @@ export default function LanguageIntroScreen() {
     getOnboardingCheckpoint().then((checkpoint) => {
       if (!mounted) return;
       const nextMode =
-        checkpoint === "native_language_required" ? "native" : "app";
+        checkpoint === "welcome_required"
+          ? "welcome"
+          : checkpoint === "native_language_required"
+            ? "native"
+            : "app";
       setMode(nextMode);
       setSelectedLanguage(nextMode === "native" ? nativeLanguage : uiLanguage);
     });
@@ -128,12 +151,70 @@ export default function LanguageIntroScreen() {
         return;
       }
       await setNativeLanguage(selectedLanguage as NativeLanguage);
+      await setOnboardingCheckpoint("welcome_required");
+      setMode("welcome");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const onWelcomeConfirm = async () => {
+    if (isSaving) return;
+    setIsSaving(true);
+    try {
       await setOnboardingCheckpoint("pin_required");
       router.replace("/createcourse");
     } finally {
       setIsSaving(false);
     }
   };
+
+  if (mode === "welcome") {
+    return (
+      <View style={styles.welcomeContainer}>
+        <ScrollView
+          style={styles.welcomeScroll}
+          contentContainerStyle={styles.welcomeContent}
+          showsVerticalScrollIndicator={false}
+        >
+          <View style={styles.welcomeCard}>
+            <View style={styles.welcomeLogoWrap}>
+              <Image
+                source={WELCOME_LOGO_SOURCE}
+                style={styles.welcomeLogo}
+                resizeMode="contain"
+              />
+            </View>
+            <Text style={styles.welcomeTitle} allowFontScaling>
+              {tr("onboarding.welcome.title", {
+                defaultValue: fallback.welcomeTitle,
+              })}
+            </Text>
+            <View style={styles.welcomeMessage}>
+              <Text style={styles.welcomeDescription} allowFontScaling>
+                {tr("onboarding.welcome.description", {
+                  defaultValue: fallback.welcomeDescription,
+                })}
+              </Text>
+            </View>
+            <View style={styles.welcomeActions}>
+              <MyButton
+                text={tr("onboarding.welcome.next", {
+                  defaultValue: fallback.welcomeNext,
+                })}
+                onPress={onWelcomeConfirm}
+                disabled={isSaving}
+                color="my_green"
+                width="100%"
+                textStyle={styles.welcomeButtonText}
+                style={styles.welcomeButton}
+              />
+            </View>
+          </View>
+        </ScrollView>
+      </View>
+    );
+  }
 
   return (
     <View style={styles.container}>

@@ -111,7 +111,7 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("moves from native language selection to course pinning", async () => {
+  it("moves from native language selection to welcome screen", async () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("native_language_required");
 
     const screen = render(<LanguageIntroScreen />);
@@ -123,8 +123,57 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     await waitFor(() => {
       expect(setNativeLanguage).toHaveBeenCalledWith("pl");
+      expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("welcome_required");
+      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("moves from welcome screen to course pinning", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+
+    const screen = render(<LanguageIntroScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+    });
+    fireEvent.press(screen.getByText("Zaczynajmy"));
+
+    await waitFor(() => {
       expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("pin_required");
       expect(mockReplace).toHaveBeenCalledWith("/createcourse");
+    });
+  });
+
+  it("does not render support action on welcome screen", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+
+    const screen = render(<LanguageIntroScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+    });
+
+    expect(screen.queryByText("Zgłoś problem lub pomysł")).toBeNull();
+  });
+
+  it("shows English welcome copy for English UI", async () => {
+    mockedUseSettings.mockReturnValue({
+      uiLanguage: "en",
+      nativeLanguage: "pl",
+      setUiLanguage,
+      setNativeLanguage,
+      colors: {
+        headline: "#111",
+      },
+    });
+    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+
+    const screen = render(<LanguageIntroScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Welcome to Memicard!")).toBeTruthy();
+      expect(screen.getByText("Let's start")).toBeTruthy();
     });
   });
 });

@@ -53,6 +53,10 @@ export async function resolveStartupRoute(): Promise<StartupRoute> {
     return "/createprofile";
   }
 
+  if (checkpoint === "welcome_required") {
+    return "/createprofile";
+  }
+
   if (
     checkpoint === "course_entry_settings_required" &&
     activeCustomCourseId != null

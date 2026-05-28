@@ -298,6 +298,7 @@ const DebuggingSection: React.FC = () => {
     checkpoint:
       | "language_required"
       | "native_language_required"
+      | "welcome_required"
       | "pin_required"
       | "activate_required"
       | "course_entry_settings_required"
@@ -315,6 +316,11 @@ const DebuggingSection: React.FC = () => {
         t("settings.debug.alerts.checkpointSetError")
       );
     }
+  };
+
+  const handleOpenWelcomeIntro = async () => {
+    await setOnboardingCheckpoint("welcome_required");
+    router.push("/createprofile");
   };
 
   const handleOpenDbErrorScreen = async () => {
@@ -762,6 +768,23 @@ const DebuggingSection: React.FC = () => {
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.openWelcomeIntro.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.openWelcomeIntro.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.openWelcomeIntro.button")}
+          color="my_green"
+          onPress={handleOpenWelcomeIntro}
+          width={170}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
             {t("settings.debug.rows.resetReviewCoursesIntro.title")}
           </Text>
           <Text style={styles.rowSubtitle}>
@@ -799,6 +822,14 @@ const DebuggingSection: React.FC = () => {
             color="my_yellow"
             onPress={() => handleSetOnboarding("native_language_required")}
             width={220}
+          />
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text={t("settings.debug.onboardingCheckpoints.welcomeRequired")}
+            color="my_yellow"
+            onPress={() => handleSetOnboarding("welcome_required")}
+            width={180}
           />
         </View>
         <View style={styles.keyboardButtonWrapper}>

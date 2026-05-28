@@ -73,10 +73,9 @@ export default function SupportScreen() {
   const [attachBasicData, setAttachBasicData] = useState(true);
   const [attachDiagnostics, setAttachDiagnostics] = useState(false);
   const diagnosticEntries = useMemo(() => buildDiagnosticEntries(t), [t]);
-  const selectedDiagnosticEntries = attachBasicData ? diagnosticEntries : [];
   const emailBody = useMemo(
-    () => formatBody(selectedDiagnosticEntries, t),
-    [selectedDiagnosticEntries, t]
+    () => formatBody(attachBasicData ? diagnosticEntries : [], t),
+    [attachBasicData, diagnosticEntries, t]
   );
 
   const openMailto = useCallback(

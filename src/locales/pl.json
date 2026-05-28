@@ -447,6 +447,7 @@
         "languageRequired": "language_required",
         "pinRequired": "pin_required",
         "nativeLanguageRequired": "native_language_required",
+        "welcomeRequired": "welcome_required",
         "activateRequired": "activate_required",
         "courseEntrySettingsRequired": "course_entry_settings_required",
         "done": "done"
@@ -559,6 +560,11 @@
           "title": "Przejdź do wyboru języka",
           "subtitle": "Otwórz pierwszy ekran samouczka z flagami PL i EN.",
           "button": "Ekran języka"
+        },
+        "openWelcomeIntro": {
+          "title": "Podgląd ekranu powitania",
+          "subtitle": "Ustawia krok powitania i otwiera ekran z wiadomością dla wczesnych użytkowników.",
+          "button": "Powitanie"
         },
         "resetReviewCoursesIntro": {
           "title": "Reset onboardingu powtórek",
@@ -742,6 +748,11 @@
       "nativeTitle": "Twój język ojczysty",
       "hintDefault": "Wybierz język, aby aktywować przycisk.",
       "hintSelected": "Wybrano: {{language}}"
+    },
+    "welcome": {
+      "title": "Witaj w Memicard :3",
+      "description": "Dzięki, że jesteś tutaj na wczesnym etapie rozwoju aplikacji.\n\nMemicard nadal rośnie, więc mogą pojawić się drobne błędy, niedopracowane miejsca albo funkcje, które jeszcze wymagają poprawy.\n\nJeżeli coś nie działa, coś Ci przeszkadza albo masz pomysł na ulepszenie, zgłoś to proszę - bardzo mi to pomoże.",
+      "next": "Zaczynajmy"
     },
     "courseActivate": {
       "step1": {
