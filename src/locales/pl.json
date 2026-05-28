@@ -1081,10 +1081,18 @@
       "hint": {
         "placeholder": "Wpisz podpowiedź…",
         "save": "Zapisz",
+        "addA11y": "Dodaj podpowiedź",
+        "editA11yValue": "Edytuj podpowiedź: {{hint}}",
         "targetDialogTitle": "Gdzie zapisać podpowiedź?",
         "targetDialogMessage": "Może być widoczna tylko przy tej stronie fiszki albo przy obu stronach.",
         "thisSideOnly": "Tylko ta strona",
         "bothSides": "Obie strony fiszki"
+      },
+      "box": {
+        "accessibilityLabel": "Pudełko {{box}}, liczba fiszek: {{count}}"
+      },
+      "accessibilityLabel": {
+        "przelaczStroneFiszki": "Przełącz stronę fiszki"
       },
       "emptyScene": {
         "chooseBox": "Wybierz pudełko z fiszkami"
@@ -1133,9 +1141,15 @@
         "accessibilityLabel": {
           "przejdzDoStronyGlownej": "Przejdź do strony głównej",
           "przejdzDoPowtorek": "Przejdź do powtórek",
+          "przejdzDoPowtorekValue": "Przejdź do powtórek. Liczba powtórek: {{count}}",
           "przejdzDoMenuGlownego": "Przejdź do menu głównego",
           "przejdzDoGryFiszek": "Przejdź do gry fiszek",
-          "przejdzDoUstawien": "Przejdź do ustawień"
+          "przejdzDoUstawien": "Przejdź do ustawień",
+          "przelaczMotyw": "Przełącz motyw",
+          "kursValueOtworzPanelKursow": "Kurs {{course}}. Otwórz panel kursów.",
+          "kursValueDoValueOtworzPanelKursow": "Kurs {{sourceLang}} do {{targetLang}}. Otwórz panel kursów.",
+          "kursValueDoValuePoziomValueOtworzPanelKursow": "Kurs {{sourceLang}} do {{targetLang}}, poziom {{level}}. Otwórz panel kursów.",
+          "wybierzKursJezykowy": "Wybierz kurs językowy"
         }
       },
       "navbarStatsRotator": {

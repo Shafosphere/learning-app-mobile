@@ -56,6 +56,10 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   const noopAsync = React.useCallback(async () => undefined, []);
   const noop = React.useCallback(() => undefined, []);
   const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };
+  const hiddenAccessibilityProps = {
+    accessibilityElementsHidden: true,
+    importantForAccessibility: "no-hide-descendants" as const,
+  };
 
   const content = (
     <View collapsable={false}>
@@ -64,6 +68,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
           style={!showTrueFalseActions ? hiddenStyle : undefined}
           pointerEvents={showTrueFalseActions ? "auto" : "none"}
           collapsable={false}
+          {...(!showTrueFalseActions ? hiddenAccessibilityProps : undefined)}
         >
           <TrueFalseActionsAnimated
             visible={showTrueFalseActions}
@@ -84,6 +89,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
           ]}
           pointerEvents={showTrueFalseActions ? "auto" : "none"}
           collapsable={false}
+          {...(!showTrueFalseActions ? hiddenAccessibilityProps : undefined)}
         >
           <TrueFalseActions
             disabled={trueFalseActionsDisabled}
@@ -101,6 +107,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
         style={!showCardActions ? hiddenStyle : undefined}
         pointerEvents={showCardActions ? "auto" : "none"}
         collapsable={false}
+        {...(!showCardActions ? hiddenAccessibilityProps : undefined)}
       >
         <CardActions
           handleConfirm={onCardActionsConfirm ?? noop}

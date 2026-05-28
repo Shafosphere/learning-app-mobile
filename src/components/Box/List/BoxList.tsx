@@ -2,9 +2,19 @@ import { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import React, { useRef, useState } from "react";
 import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
+import { useTranslation } from "react-i18next";
 import BoxSkin from "../Skin/BoxSkin";
 import { resolveBoxFace, type BoxFacesByBox } from "../Skin/boxFaces";
 import { useBoxListStyles } from "./BoxList.styles";
+
+const BOX_NUMBERS: Record<keyof BoxesState, number> = {
+    boxZero: 0,
+    boxOne: 1,
+    boxTwo: 2,
+    boxThree: 3,
+    boxFour: 4,
+    boxFive: 5,
+};
 
 interface BoxesProps {
     boxes: BoxesState;
@@ -30,6 +40,7 @@ export default function BoxList({
     faces,
 }: BoxesProps) {
     const styles = useBoxListStyles();
+    const { t } = useTranslation();
     const longPressTriggeredRef = useRef(false);
     const [measuredBoxes, setMeasuredBoxes] = useState<
         Partial<Record<"boxOne" | "boxTwo", { x: number; y: number; width: number; height: number }>>
@@ -173,6 +184,11 @@ export default function BoxList({
                         resolveBoxFace({
                             isActive,
                         });
+                    const boxNumber = BOX_NUMBERS[boxName];
+                    const accessibilityLabel = t("flashcards.card.box.accessibilityLabel", {
+                        box: boxNumber,
+                        count: wordCount,
+                    });
 
                     return (
                         <View
@@ -196,6 +212,13 @@ export default function BoxList({
                                     onBoxLongPress?.(boxName);
                                 }}
                                 delayLongPress={400}
+                                accessible
+                                accessibilityRole="button"
+                                accessibilityLabel={accessibilityLabel}
+                                accessibilityState={{
+                                    selected: isActive,
+                                    disabled,
+                                }}
                                 onPress={() => {
                                     if (disabled) {
                                         return;

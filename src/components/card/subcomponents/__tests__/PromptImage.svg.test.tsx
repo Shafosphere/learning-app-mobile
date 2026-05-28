@@ -27,8 +27,8 @@ jest.mock("@/src/features/flashcards/flashcardImagePreload", () => ({
   getPreloadedImage: jest.fn(() => null),
 }));
 
-const mockSvgXml = jest.fn(() => null);
-const mockSvgUri = jest.fn(() => null);
+const mockSvgXml = jest.fn((props: Record<string, unknown>) => null);
+const mockSvgUri = jest.fn((props: Record<string, unknown>) => null);
 
 jest.mock("react-native-svg", () => ({
   SvgXml: (props: Record<string, unknown>) => mockSvgXml(props),

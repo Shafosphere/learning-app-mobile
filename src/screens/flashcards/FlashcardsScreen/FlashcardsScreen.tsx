@@ -2623,6 +2623,8 @@ export default function Flashcards() {
                 accessibilityLabel={t(
                   "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"
                 )}
+                accessibilityRole="button"
+                accessibilityState={{ disabled: addButtonDisabled }}
               >
                 <Ionicons name="add" size={26} color="#0F172A" />
               </Pressable>

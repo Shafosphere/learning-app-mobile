@@ -89,6 +89,7 @@ jest.mock("@edwardloopez/react-native-coachmark", () => ({
 jest.mock("@/src/services/onboardingCheckpoint", () => ({
   getOnboardingCheckpoint: jest.fn(() => Promise.resolve("done")),
   setOnboardingCheckpoint: jest.fn(() => Promise.resolve()),
+  subscribeOnboardingCheckpoint: jest.fn(() => jest.fn()),
 }));
 
 jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen-styles", () => ({

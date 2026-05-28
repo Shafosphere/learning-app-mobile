@@ -53,6 +53,19 @@ export function normalizeUiLanguage(
   return resolveSystemLanguage();
 }
 
+function parseStoredUiLanguage(value: string | null): string | null {
+  if (value == null) {
+    return null;
+  }
+
+  try {
+    const parsed = JSON.parse(value);
+    return typeof parsed === "string" ? parsed : value;
+  } catch {
+    return value;
+  }
+}
+
 export function normalizeNativeLanguage(
   value: string | null | undefined,
   fallback: NativeLanguage
@@ -70,7 +83,7 @@ export function resolveLanguage(uiLanguage: UiLanguage): SupportedLanguage {
 async function resolveInitialLanguage(): Promise<SupportedLanguage> {
   try {
     const saved = await AsyncStorage.getItem(UI_LANGUAGE_STORAGE_KEY);
-    return normalizeUiLanguage(saved);
+    return normalizeUiLanguage(parseStoredUiLanguage(saved));
   } catch {
     return resolveSystemLanguage();
   }

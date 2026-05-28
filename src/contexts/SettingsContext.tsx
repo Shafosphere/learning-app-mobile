@@ -632,10 +632,11 @@ export const SettingsProvider: React.FC<{
   children: ReactNode;
   initialTheme?: Theme;
 }> = ({ children, initialTheme = "light" }) => {
-  const [uiLanguageRaw, setUiLanguageState] = usePersistedState<string>(
-    "uiLanguage",
-    resolveSystemLanguage()
-  );
+  const [uiLanguageRaw, setUiLanguageState, uiLanguageHydrated] =
+    useHydratedPersistedState<string>(
+      "uiLanguage",
+      resolveSystemLanguage()
+    );
   const uiLanguage = useMemo<UiLanguage>(
     () => normalizeUiLanguage(uiLanguageRaw),
     [uiLanguageRaw]
@@ -868,15 +869,21 @@ export const SettingsProvider: React.FC<{
   }, [rawMemoryBoardSize, setRawMemoryBoardSize]);
 
   useEffect(() => {
+    if (!uiLanguageHydrated) {
+      return;
+    }
     void i18n.changeLanguage(resolvedLanguage);
-  }, [resolvedLanguage]);
+  }, [resolvedLanguage, uiLanguageHydrated]);
 
   useEffect(() => {
+    if (!uiLanguageHydrated) {
+      return;
+    }
     const normalized = normalizeUiLanguage(uiLanguageRaw);
     if (uiLanguageRaw !== normalized) {
       void setUiLanguageState(normalized);
     }
-  }, [uiLanguageRaw, setUiLanguageState]);
+  }, [uiLanguageHydrated, uiLanguageRaw, setUiLanguageState]);
   useEffect(() => {
     const normalized = normalizeNativeLanguage(nativeLanguageRaw, uiLanguage);
     if (nativeLanguageRaw != null && nativeLanguageRaw !== normalized) {

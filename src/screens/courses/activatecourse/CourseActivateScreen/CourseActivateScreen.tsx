@@ -17,7 +17,9 @@ import {
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
-  setOnboardingCheckpoint
+  type OnboardingCheckpoint,
+  setOnboardingCheckpoint,
+  subscribeOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
@@ -61,12 +63,23 @@ export default function CourseActivateScreen() {
 
   useEffect(() => {
     let mounted = true;
+    const applyCheckpoint = (checkpoint: OnboardingCheckpoint | null) => {
+      setStartedInOnboarding(checkpoint === "activate_required");
+    };
+
     getOnboardingCheckpoint().then((checkpoint) => {
       if (!mounted) return;
-      setStartedInOnboarding(checkpoint !== "done");
+      applyCheckpoint(checkpoint);
     });
+
+    const unsubscribe = subscribeOnboardingCheckpoint((checkpoint) => {
+      if (!mounted) return;
+      applyCheckpoint(checkpoint);
+    });
+
     return () => {
       mounted = false;
+      unsubscribe();
     };
   }, []);
 
@@ -485,26 +498,21 @@ export default function CourseActivateScreen() {
                 )}
                 disabled={!hasActiveCourse}
                 onPress={() => {
-                  if (coachmark.isActive) {
-                    void coachmark.advanceByEvent("press_next").then((allowed) => {
+                  void (async () => {
+                    if (coachmark.isActive) {
+                      const allowed = await coachmark.advanceByEvent("press_next");
                       if (!allowed) return;
-                      if (activeCustomCourseId != null) {
-                        void setOnboardingCheckpoint("course_entry_settings_required");
-                        router.replace("/course-entry-settings");
-                      } else {
-                        void setOnboardingCheckpoint("done");
-                        router.replace("/flashcards");
-                      }
-                    });
-                    return;
-                  }
-                  if (activeCustomCourseId != null) {
-                    void setOnboardingCheckpoint("course_entry_settings_required");
-                    router.replace("/course-entry-settings");
-                  } else {
-                    void setOnboardingCheckpoint("done");
-                    router.replace("/flashcards");
-                  }
+                    }
+                    if (activeCustomCourseId != null) {
+                      await setOnboardingCheckpoint(
+                        "course_entry_settings_required"
+                      );
+                      router.replace("/course-entry-settings");
+                    } else {
+                      await setOnboardingCheckpoint("done");
+                      router.replace("/flashcards");
+                    }
+                  })();
                 }}
                 color="my_green"
                 width={90}

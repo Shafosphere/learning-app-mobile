@@ -188,18 +188,45 @@ export default function Navbar({ children }: NavbarProps) {
 
   const courseAccessibilityLabel = useMemo(() => {
     if (displayedCustomCourse) {
-      return `Kurs ${displayedCustomCourse.name}. Otwórz panel kursów.`;
+      return t(
+        "components.navbar.navbar.accessibilityLabel.kursValueOtworzPanelKursow",
+        {
+          course: displayedCustomCourse.name,
+        },
+      );
     }
 
     if (
       displayedBuiltinCourse?.sourceLang &&
       displayedBuiltinCourse?.targetLang
     ) {
-      return `Kurs ${displayedBuiltinCourse.sourceLang.toUpperCase()} do ${displayedBuiltinCourse.targetLang.toUpperCase()}.Otwórz panel kursów.`;
+      const sourceLang = displayedBuiltinCourse.sourceLang.toUpperCase();
+      const targetLang = displayedBuiltinCourse.targetLang.toUpperCase();
+
+      if (selectedLevel) {
+        return t(
+          "components.navbar.navbar.accessibilityLabel.kursValueDoValuePoziomValueOtworzPanelKursow",
+          {
+            sourceLang,
+            targetLang,
+            level: selectedLevel,
+          },
+        );
+      }
+
+      return t(
+        "components.navbar.navbar.accessibilityLabel.kursValueDoValueOtworzPanelKursow",
+        {
+          sourceLang,
+          targetLang,
+        },
+      );
     }
 
-    return "Wybierz kurs językowy";
-  }, [displayedBuiltinCourse, displayedCustomCourse]);
+    return t(
+      "components.navbar.navbar.accessibilityLabel.wybierzKursJezykowy",
+    );
+  }, [displayedBuiltinCourse, displayedCustomCourse, selectedLevel, t]);
 
   const courseIconProps = useMemo(() => {
     if (!displayedCustomCourse) return null;
@@ -337,6 +364,12 @@ export default function Navbar({ children }: NavbarProps) {
     dueReviewCount > 0 ? colors.lightbg : colors.darkbg;
   const formattedReviewCount =
     dueReviewCount > 999 ? "999+" : String(dueReviewCount);
+  const reviewAccessibilityLabel = t(
+    "components.navbar.navbar.accessibilityLabel.przejdzDoPowtorekValue",
+    {
+      count: dueReviewCount,
+    },
+  );
   const shouldHideBottomBar = useMemo(() => {
     if (!pathname) {
       return false;
@@ -399,6 +432,10 @@ export default function Navbar({ children }: NavbarProps) {
                   pressed && styles.iconButtonPressed,
                 ]}
                 onPress={toggleTheme}
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  "components.navbar.navbar.accessibilityLabel.przelaczMotyw"
+                )}
               >
                 <MaterialIcons
                   style={styles.icon}
@@ -426,9 +463,7 @@ export default function Navbar({ children }: NavbarProps) {
               ]}
               onPress={handleReviewPress}
               accessibilityRole="button"
-              accessibilityLabel={t(
-                "components.navbar.navbar.accessibilityLabel.przejdzDoPowtorek"
-              )}
+              accessibilityLabel={reviewAccessibilityLabel}
             >
               <CoachmarkAnchor
                 id="flashcards-review-button"

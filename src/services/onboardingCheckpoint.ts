@@ -70,10 +70,11 @@ export async function getOnboardingCheckpoint(): Promise<
 export async function setOnboardingCheckpoint(
   checkpoint: OnboardingCheckpoint
 ): Promise<void> {
-  notifyListeners(checkpoint);
   try {
     await AsyncStorage.setItem(STORAGE_KEY, checkpoint);
   } catch (error) {
     console.warn("[OnboardingCheckpoint] Failed to write", error);
+  } finally {
+    notifyListeners(checkpoint);
   }
 }

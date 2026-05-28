@@ -8,6 +8,7 @@ import type { FocusTarget } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import { useTranslation } from "react-i18next";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -80,6 +81,7 @@ export function CardInput({
   textColorOverride,
 }: CardInputProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -305,7 +307,15 @@ export function CardInput({
             <View style={styles.promptRow}>
               {promptTextBlock}
               {canToggleTranslations ? (
-                <Pressable style={styles.cardIconWrapper} onPress={next} hitSlop={8}>
+                <Pressable
+                  style={styles.cardIconWrapper}
+                  onPress={next}
+                  hitSlop={8}
+                  accessibilityRole="button"
+                  accessibilityLabel={t(
+                    "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
+                  )}
+                >
                   <Octicons
                     name="discussion-duplicate"
                     size={24}

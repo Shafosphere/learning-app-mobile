@@ -17,6 +17,7 @@ import TextTicker from "react-native-text-ticker";
 import { PROMPT_IMAGE_MAX_HEIGHT, useStyles } from "../card-styles";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
+import { useTranslation } from "react-i18next";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -124,6 +125,7 @@ export function CardCorrection({
   textColorOverride,
 }: CardCorrectionProps) {
   const styles = useStyles();
+  const { t } = useTranslation();
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -253,6 +255,10 @@ export function CardCorrection({
               style={styles.cardIconWrapper}
               onPress={next}
               hitSlop={8}
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
+              )}
             >
               <Octicons
                 name="discussion-duplicate"
@@ -444,6 +450,10 @@ export function CardCorrection({
           style={[styles.cardIconWrapper, styles.introToggle]}
           onPress={next}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
+          )}
         >
           <Octicons
             name="discussion-duplicate"

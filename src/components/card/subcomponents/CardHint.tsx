@@ -62,6 +62,15 @@ export function CardHint({
                     onPress={handleStartHintEditing}
                     hitSlop={8}
                     disabled={!selectedItem || !onHintUpdate}
+                    accessibilityRole="button"
+                    accessibilityLabel={
+                        currentHint
+                            ? t("flashcards.card.hint.editA11yValue", {
+                                hint: currentHint,
+                            })
+                            : t("flashcards.card.hint.addA11y")
+                    }
+                    accessibilityState={{ disabled: !selectedItem || !onHintUpdate }}
                 >
                     {currentHint ? (
                         shouldMarqueeHint ? (

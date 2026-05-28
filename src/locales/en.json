@@ -1081,10 +1081,18 @@
       "hint": {
         "placeholder": "Enter a hint…",
         "save": "Save",
+        "addA11y": "Add a hint",
+        "editA11yValue": "Edit hint: {{hint}}",
         "targetDialogTitle": "Where to save the hint?",
         "targetDialogMessage": "It can be visible only on this side of the flashcard or on both sides.",
         "thisSideOnly": "This side only",
         "bothSides": "Both sides of the flashcard"
+      },
+      "box": {
+        "accessibilityLabel": "Box {{box}}, flashcard count: {{count}}"
+      },
+      "accessibilityLabel": {
+        "przelaczStroneFiszki": "Switch flashcard side"
       },
       "emptyScene": {
         "chooseBox": "Choose a box with flashcards"
@@ -1133,9 +1141,15 @@
         "accessibilityLabel": {
           "przejdzDoStronyGlownej": "Go to the home screen",
           "przejdzDoPowtorek": "Go to reviews",
+          "przejdzDoPowtorekValue": "Go to reviews. Review count: {{count}}",
           "przejdzDoMenuGlownego": "Go to the main menu",
           "przejdzDoGryFiszek": "Go to the flashcard game",
-          "przejdzDoUstawien": "Go to settings"
+          "przejdzDoUstawien": "Go to settings",
+          "przelaczMotyw": "Switch theme",
+          "kursValueOtworzPanelKursow": "Course {{course}}. Open the course panel.",
+          "kursValueDoValueOtworzPanelKursow": "Course {{sourceLang}} to {{targetLang}}. Open the course panel.",
+          "kursValueDoValuePoziomValueOtworzPanelKursow": "Course {{sourceLang}} to {{targetLang}}, level {{level}}. Open the course panel.",
+          "wybierzKursJezykowy": "Choose a language course"
         }
       },
       "navbarStatsRotator": {

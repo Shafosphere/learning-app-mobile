@@ -27,11 +27,15 @@ export const renderHomeTile =
         return <View style={[styles.tile, styles.placeholderTile]} />;
       }
 
+      const accessibilityLabel = [item.title, item.subtitle]
+        .filter(Boolean)
+        .join(", ");
+
       return (
         <Pressable
           onPress={item.action}
           accessibilityRole="button"
-          accessibilityLabel={item.title}
+          accessibilityLabel={accessibilityLabel}
           style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
         >
           <View style={styles.tileVisualArea}>

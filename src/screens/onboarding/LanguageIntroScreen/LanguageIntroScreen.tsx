@@ -15,6 +15,7 @@ import {
   Pressable,
   ScrollView,
   Text,
+  useWindowDimensions,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -49,6 +50,7 @@ export default function LanguageIntroScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const router = useRouter();
+  const { height: screenHeight, width: screenWidth } = useWindowDimensions();
   const {
     uiLanguage,
     nativeLanguage,
@@ -170,6 +172,8 @@ export default function LanguageIntroScreen() {
   };
 
   if (mode === "welcome") {
+    const isCompactWelcome = screenHeight < 720 || screenWidth < 360;
+
     return (
       <View style={styles.welcomeContainer}>
         <ScrollView
@@ -181,17 +185,40 @@ export default function LanguageIntroScreen() {
             <View style={styles.welcomeLogoWrap}>
               <Image
                 source={WELCOME_LOGO_SOURCE}
-                style={styles.welcomeLogo}
+                style={[
+                  styles.welcomeLogo,
+                  isCompactWelcome && styles.welcomeLogoCompact,
+                ]}
                 resizeMode="contain"
               />
             </View>
-            <Text style={styles.welcomeTitle} allowFontScaling>
+            <Text
+              style={[
+                styles.welcomeTitle,
+                isCompactWelcome && styles.welcomeTitleCompact,
+              ]}
+              allowFontScaling
+              numberOfLines={2}
+              adjustsFontSizeToFit
+              minimumFontScale={0.78}
+            >
               {tr("onboarding.welcome.title", {
                 defaultValue: fallback.welcomeTitle,
               })}
             </Text>
-            <View style={styles.welcomeMessage}>
-              <Text style={styles.welcomeDescription} allowFontScaling>
+            <View
+              style={[
+                styles.welcomeMessage,
+                isCompactWelcome && styles.welcomeMessageCompact,
+              ]}
+            >
+              <Text
+                style={[
+                  styles.welcomeDescription,
+                  isCompactWelcome && styles.welcomeDescriptionCompact,
+                ]}
+                allowFontScaling
+              >
                 {tr("onboarding.welcome.description", {
                   defaultValue: fallback.welcomeDescription,
                 })}

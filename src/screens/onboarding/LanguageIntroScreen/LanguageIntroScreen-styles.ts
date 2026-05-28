@@ -46,6 +46,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: 128,
     height: 135,
   },
+  welcomeLogoCompact: {
+    width: 108,
+    height: 114,
+  },
   welcomeTitle: {
     fontSize: 28,
     lineHeight: 34,
@@ -55,6 +59,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     letterSpacing: -0.3,
     marginBottom: 20,
   },
+  welcomeTitleCompact: {
+    fontSize: 24,
+    lineHeight: 29,
+    marginBottom: 14,
+  },
   welcomeMessage: {
     width: "100%",
     borderRadius: 20,
@@ -62,12 +71,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingHorizontal: 20,
     paddingVertical: 22,
   },
+  welcomeMessageCompact: {
+    borderRadius: 18,
+    paddingHorizontal: 16,
+    paddingVertical: 18,
+  },
   welcomeDescription: {
     fontSize: 17,
     lineHeight: 26,
     fontWeight: "700",
     color: colors.paragraph,
     letterSpacing: 0.1,
+  },
+  welcomeDescriptionCompact: {
+    fontSize: 15,
+    lineHeight: 23,
   },
   welcomeActions: {
     width: "100%",

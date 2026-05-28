@@ -11,7 +11,9 @@ import {
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
+  type OnboardingCheckpoint,
   setOnboardingCheckpoint,
+  subscribeOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useRouter } from "expo-router";
@@ -53,12 +55,23 @@ export default function CourseEntrySettingsScreen() {
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
   useEffect(() => {
     let mounted = true;
+    const applyCheckpoint = (checkpoint: OnboardingCheckpoint | null) => {
+      setStartedInOnboarding(checkpoint === "course_entry_settings_required");
+    };
+
     getOnboardingCheckpoint().then((checkpoint) => {
       if (!mounted) return;
-      setStartedInOnboarding(checkpoint === "course_entry_settings_required");
+      applyCheckpoint(checkpoint);
     });
+
+    const unsubscribe = subscribeOnboardingCheckpoint((checkpoint) => {
+      if (!mounted) return;
+      applyCheckpoint(checkpoint);
+    });
+
     return () => {
       mounted = false;
+      unsubscribe();
     };
   }, []);
 
