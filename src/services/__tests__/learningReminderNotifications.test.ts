@@ -1,16 +1,24 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
+  __setLearningReminderAttachmentUrlForTests,
   __setLearningReminderNotificationsModuleForTests,
+  LEARNING_REMINDER_CHANNEL_ID,
+  cancelLearningReminderNotification,
   scheduleLearningReminderNotifications,
+  triggerLearningReminderNotificationPreview,
 } from "@/src/services/learningReminderNotifications";
 
 const mockScheduleNotificationAsync = jest.fn();
 const mockGetAllScheduledNotificationsAsync = jest.fn();
 const mockCancelScheduledNotificationAsync = jest.fn();
+const mockGetPresentedNotificationsAsync = jest.fn();
+const mockDismissNotificationAsync = jest.fn();
 const mockNotificationsModule = {
   cancelScheduledNotificationAsync: mockCancelScheduledNotificationAsync,
+  dismissNotificationAsync: mockDismissNotificationAsync,
   getAllScheduledNotificationsAsync: mockGetAllScheduledNotificationsAsync,
+  getPresentedNotificationsAsync: mockGetPresentedNotificationsAsync,
   getPermissionsAsync: jest.fn(async () => ({ status: "granted" })),
   requestPermissionsAsync: jest.fn(async () => ({ status: "granted" })),
   scheduleNotificationAsync: mockScheduleNotificationAsync,
@@ -24,8 +32,11 @@ describe("learning reminder notifications", () => {
     jest.clearAllMocks();
     await AsyncStorage.clear();
     mockGetAllScheduledNotificationsAsync.mockResolvedValue([]);
+    mockGetPresentedNotificationsAsync.mockResolvedValue([]);
+    mockDismissNotificationAsync.mockResolvedValue(undefined);
     mockScheduleNotificationAsync.mockImplementation(async () => "notification-id");
     __setLearningReminderNotificationsModuleForTests(mockNotificationsModule);
+    __setLearningReminderAttachmentUrlForTests(null);
   });
 
   it("passes a distinct body for each scheduled reminder request", async () => {
@@ -68,5 +79,117 @@ describe("learning reminder notifications", () => {
         date: "2099-01-01T19:00:00.000Z",
       },
     ]);
+  });
+
+  it("triggers a learning reminder preview notification", async () => {
+    mockNotificationsModule.getPermissionsAsync.mockResolvedValueOnce({
+      status: "undetermined",
+    });
+    mockNotificationsModule.requestPermissionsAsync.mockResolvedValueOnce({
+      status: "granted",
+    });
+
+    const result = await triggerLearningReminderNotificationPreview(
+      {
+        title: "Czas na fiszki",
+        body: "To teraz! Wróć do fiszek na chwilkę",
+      },
+      new Date("2099-01-01T18:00:00.000Z")
+    );
+
+    expect(mockNotificationsModule.requestPermissionsAsync).toHaveBeenCalledTimes(1);
+    expect(result).toEqual({
+      permissionState: "granted",
+      notificationId: "notification-id",
+    });
+    expect(mockScheduleNotificationAsync).toHaveBeenCalledWith({
+      content: {
+        title: "Czas na fiszki",
+        body: "To teraz! Wróć do fiszek na chwilkę",
+        sound: "default",
+        data: {
+          kind: "learning_reminder",
+          scheduledAt: "2099-01-01T18:00:00.000Z",
+        },
+      },
+      trigger: {
+        type: "date",
+        date: new Date("2099-01-01T18:00:01.000Z"),
+        channelId: LEARNING_REMINDER_CHANNEL_ID,
+      },
+    });
+  });
+
+  it("adds the learning reminder logo attachment when available", async () => {
+    __setLearningReminderAttachmentUrlForTests("file:///notification-logo.png");
+
+    await scheduleLearningReminderNotifications([
+      {
+        when: new Date("2099-01-01T18:00:00.000Z"),
+        content: {
+          title: "Czas na fiszki",
+          body: "To teraz! Wróć do fiszek na chwilkę",
+        },
+      },
+    ]);
+
+    expect(mockScheduleNotificationAsync).toHaveBeenCalledWith(
+      expect.objectContaining({
+        content: expect.objectContaining({
+          attachments: [
+            {
+              identifier: "learning-reminder-logo",
+              url: "file:///notification-logo.png",
+              type: "image/png",
+            },
+          ],
+        }),
+      })
+    );
+  });
+
+  it("dismisses already presented learning reminder notifications when cancelling all", async () => {
+    mockGetAllScheduledNotificationsAsync.mockResolvedValue([
+      {
+        identifier: "scheduled-reminder-id",
+        content: {
+          data: {
+            kind: "learning_reminder",
+            scheduledAt: "2099-01-01T18:00:00.000Z",
+          },
+        },
+      },
+    ]);
+    mockGetPresentedNotificationsAsync.mockResolvedValue([
+      {
+        request: {
+          identifier: "presented-reminder-id",
+          content: {
+            data: {
+              kind: "learning_reminder",
+              scheduledAt: "2099-01-01T18:00:00.000Z",
+            },
+          },
+        },
+      },
+      {
+        request: {
+          identifier: "other-notification-id",
+          content: {
+            data: {
+              kind: "other",
+            },
+          },
+        },
+      },
+    ]);
+
+    await cancelLearningReminderNotification();
+
+    expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      "scheduled-reminder-id"
+    );
+    expect(mockDismissNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(mockDismissNotificationAsync).toHaveBeenCalledWith("presented-reminder-id");
   });
 });

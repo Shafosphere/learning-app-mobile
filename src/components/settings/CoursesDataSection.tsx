@@ -6,6 +6,11 @@ import { useUserDataExportAction } from "@/src/hooks/useUserDataExportAction";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { importUserData } from "@/src/services/importUserData";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
+import {
+  getLearningReminderNotificationTitle,
+  selectLearningReminderNotificationBody,
+} from "@/src/services/learningReminderMessages";
+import { triggerLearningReminderNotificationPreview } from "@/src/services/learningReminderNotifications";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -59,6 +64,8 @@ const CoursesDataSection: React.FC = () => {
   const [resettingLearning, setResettingLearning] = useState(false);
   const [resettingIntro, setResettingIntro] = useState(false);
   const [importingData, setImportingData] = useState(false);
+  const [triggeringLearningReminderPreview, setTriggeringLearningReminderPreview] =
+    useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
   const [expandedSnapshotIds, setExpandedSnapshotIds] = useState<string[]>([]);
   const {
@@ -428,6 +435,45 @@ const CoursesDataSection: React.FC = () => {
     }
   };
 
+  const handleTriggerLearningReminderPreview = async () => {
+    setTriggeringLearningReminderPreview(true);
+    try {
+      const now = new Date();
+      const result = await triggerLearningReminderNotificationPreview(
+        {
+          title: getLearningReminderNotificationTitle(i18n.language),
+          body: selectLearningReminderNotificationBody({
+            language: i18n.language,
+            profile: "unknown",
+            slot: "due",
+            scheduledAt: now,
+          }),
+        },
+        now
+      );
+
+      if (result.permissionState !== "granted") {
+        Alert.alert(
+          t("app.status.error"),
+          t("settings.coursesData.alerts.learningReminderPreviewPermissionDenied")
+        );
+        return;
+      }
+
+      Alert.alert(
+        t("app.status.done"),
+        t("settings.coursesData.alerts.learningReminderPreviewTriggered")
+      );
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.coursesData.alerts.learningReminderPreviewError")
+      );
+    } finally {
+      setTriggeringLearningReminderPreview(false);
+    }
+  };
+
   const handleResetLearningSettings = () => {
     Alert.alert(
       t("settings.coursesData.resetLearningConfirm.title"),
@@ -536,6 +582,36 @@ const CoursesDataSection: React.FC = () => {
                   color="my_green"
                   onPress={handleExportUserData}
                   disabled={exportingData}
+                  width={130}
+                />
+              </View>
+            </View>
+
+            <View style={styles.appearanceGroupDivider} />
+
+            <View style={styles.actionCardSection}>
+              <View style={styles.actionCardHeader}>
+                <Text style={styles.actionCardTitle}>
+                  {t("settings.coursesData.rows.learningReminderPreview.title")}
+                </Text>
+                <Text style={styles.actionCardDescription}>
+                  {preventWidowsPl(
+                    t("settings.coursesData.rows.learningReminderPreview.subtitle")
+                  )}
+                </Text>
+              </View>
+              <View style={styles.actionCardButtonRow}>
+                <MyButton
+                  text={
+                    triggeringLearningReminderPreview
+                      ? t(
+                          "settings.coursesData.rows.learningReminderPreview.buttonLoading"
+                        )
+                      : t("settings.coursesData.rows.learningReminderPreview.button")
+                  }
+                  color="my_yellow"
+                  onPress={() => void handleTriggerLearningReminderPreview()}
+                  disabled={triggeringLearningReminderPreview}
                   width={130}
                 />
               </View>

@@ -1,12 +1,28 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Asset } from "expo-asset";
+import { Platform } from "react-native";
+import learningReminderAttachmentAsset from "@/assets/app/icons/notification-icon.png";
 
 const REMINDER_NOTIFICATION_IDS_KEY = "learningReminder.notificationIds";
 const REMINDER_KIND = "learning_reminder";
+const REMINDER_ATTACHMENT_ID = "learning-reminder-logo";
 export const LEARNING_REMINDER_CHANNEL_ID = "learning_reminders";
 
 type ReminderNotificationData = {
   kind: string;
   scheduledAt: string;
+};
+type ReminderNotificationAttachment = {
+  identifier: string;
+  url: string;
+  type: string;
+};
+type ReminderNotificationContentInput = {
+  title: string;
+  body: string;
+  sound: "default";
+  data: ReminderNotificationData;
+  attachments?: ReminderNotificationAttachment[];
 };
 
 export type ReminderPermissionState = "granted" | "denied" | "undetermined";
@@ -17,23 +33,31 @@ export type LearningReminderNotificationRequest = {
     body: string;
   };
 };
+export type LearningReminderNotificationPreviewResult = {
+  permissionState: ReminderPermissionState;
+  notificationId: string | null;
+};
 type NotificationsModule = {
   getPermissionsAsync: () => Promise<{ status: string }>;
   requestPermissionsAsync: () => Promise<{ status: string }>;
   cancelScheduledNotificationAsync: (id: string) => Promise<void>;
+  dismissNotificationAsync?: (id: string) => Promise<void>;
   getAllScheduledNotificationsAsync: () => Promise<
     {
       identifier: string;
       content: { data?: Record<string, unknown> };
     }[]
   >;
+  getPresentedNotificationsAsync?: () => Promise<
+    {
+      request: {
+        identifier: string;
+        content: { data?: Record<string, unknown> };
+      };
+    }[]
+  >;
   scheduleNotificationAsync: (input: {
-    content: {
-      title: string;
-      body: string;
-      sound: "default";
-      data: ReminderNotificationData;
-    };
+    content: ReminderNotificationContentInput;
     trigger: {
       type: string;
       date: Date;
@@ -48,6 +72,7 @@ type NotificationsModule = {
 let cachedNotificationsModule: NotificationsModule | null | undefined;
 let notificationsModulePromise: Promise<NotificationsModule | null> | null = null;
 let reminderScheduleOperation: Promise<void> = Promise.resolve();
+let learningReminderAttachmentUrlForTests: string | null | undefined;
 
 export function __setLearningReminderNotificationsModuleForTests(
   notifications: unknown
@@ -55,6 +80,13 @@ export function __setLearningReminderNotificationsModuleForTests(
   cachedNotificationsModule = notifications as NotificationsModule | null | undefined;
   notificationsModulePromise = null;
   reminderScheduleOperation = Promise.resolve();
+  learningReminderAttachmentUrlForTests = undefined;
+}
+
+export function __setLearningReminderAttachmentUrlForTests(
+  url: string | null | undefined
+): void {
+  learningReminderAttachmentUrlForTests = url;
 }
 
 async function getNotificationsModule(): Promise<NotificationsModule | null> {
@@ -144,6 +176,54 @@ function asReminderData(
   };
 }
 
+function makeReminderData(scheduledAt: Date): ReminderNotificationData {
+  return {
+    kind: REMINDER_KIND,
+    scheduledAt: scheduledAt.toISOString(),
+  };
+}
+
+async function getLearningReminderAttachmentUrl(): Promise<string | null> {
+  if (learningReminderAttachmentUrlForTests !== undefined) {
+    return learningReminderAttachmentUrlForTests;
+  }
+  if (Platform.OS !== "ios") {
+    return null;
+  }
+
+  try {
+    const asset = Asset.fromModule(learningReminderAttachmentAsset);
+    await asset.downloadAsync();
+    return asset.localUri ?? asset.uri ?? null;
+  } catch {
+    return null;
+  }
+}
+
+async function buildLearningReminderNotificationContent(
+  content: LearningReminderNotificationRequest["content"],
+  scheduledAt: Date
+): Promise<ReminderNotificationContentInput> {
+  const attachmentUrl = await getLearningReminderAttachmentUrl();
+  return {
+    title: content.title,
+    body: content.body,
+    sound: "default",
+    data: makeReminderData(scheduledAt),
+    ...(attachmentUrl
+      ? {
+          attachments: [
+            {
+              identifier: REMINDER_ATTACHMENT_ID,
+              url: attachmentUrl,
+              type: "image/png",
+            },
+          ],
+        }
+      : null),
+  };
+}
+
 function toLocalDateKey(value: Date): string {
   const year = value.getFullYear();
   const month = String(value.getMonth() + 1).padStart(2, "0");
@@ -195,7 +275,8 @@ async function cancelNotificationIds(
 }
 
 async function cancelLearningReminderNotificationInternal(
-  notifications: NotificationsModule
+  notifications: NotificationsModule,
+  options: { dismissPresented?: boolean } = {}
 ): Promise<void> {
   const storedIds = await getStoredNotificationIds();
   const scheduledEntries = await listScheduledReminderEntries(notifications);
@@ -203,7 +284,29 @@ async function cancelLearningReminderNotificationInternal(
     new Set([...storedIds, ...scheduledEntries.map((entry) => entry.identifier)])
   );
   await cancelNotificationIds(notifications, idsToCancel);
+  if (options.dismissPresented) {
+    await dismissPresentedLearningReminderNotifications(notifications);
+  }
   await setStoredNotificationIds([]);
+}
+
+async function dismissPresentedLearningReminderNotifications(
+  notifications: NotificationsModule
+): Promise<void> {
+  if (!notifications.getPresentedNotificationsAsync || !notifications.dismissNotificationAsync) {
+    return;
+  }
+
+  try {
+    const presented = await notifications.getPresentedNotificationsAsync();
+    await Promise.all(
+      presented
+        .filter((item) => asReminderData(item.request.content.data) != null)
+        .map((item) => notifications.dismissNotificationAsync?.(item.request.identifier))
+    );
+  } catch {
+    // Ignored: presentation APIs are not available on every platform/version.
+  }
 }
 
 async function cancelLearningReminderNotificationsForDateInternal(
@@ -236,7 +339,9 @@ export async function cancelLearningReminderNotification(): Promise<void> {
       return;
     }
 
-    await cancelLearningReminderNotificationInternal(notifications);
+    await cancelLearningReminderNotificationInternal(notifications, {
+      dismissPresented: true,
+    });
   });
 }
 
@@ -273,15 +378,10 @@ export async function scheduleLearningReminderNotifications(
     try {
       for (const request of upcomingRequests) {
         const notificationId = await notifications.scheduleNotificationAsync({
-          content: {
-            title: request.content.title,
-            body: request.content.body,
-            sound: "default",
-            data: {
-              kind: REMINDER_KIND,
-              scheduledAt: request.when.toISOString(),
-            },
-          },
+          content: await buildLearningReminderNotificationContent(
+            request.content,
+            request.when
+          ),
           trigger: {
             type: notifications.SchedulableTriggerInputTypes.DATE,
             date: request.when,
@@ -299,6 +399,42 @@ export async function scheduleLearningReminderNotifications(
     await setStoredNotificationIds(notificationIds);
     return notificationIds;
   });
+}
+
+export async function triggerLearningReminderNotificationPreview(
+  content: LearningReminderNotificationRequest["content"],
+  now: Date = new Date()
+): Promise<LearningReminderNotificationPreviewResult> {
+  const notifications = await getNotificationsModule();
+  if (!notifications) {
+    return {
+      permissionState: "denied",
+      notificationId: null,
+    };
+  }
+
+  const permissionState = await requestReminderPermissions();
+  if (permissionState !== "granted") {
+    return {
+      permissionState,
+      notificationId: null,
+    };
+  }
+
+  const triggerDate = new Date(now.getTime() + 1000);
+  const notificationId = await notifications.scheduleNotificationAsync({
+    content: await buildLearningReminderNotificationContent(content, now),
+    trigger: {
+      type: notifications.SchedulableTriggerInputTypes.DATE,
+      date: triggerDate,
+      channelId: LEARNING_REMINDER_CHANNEL_ID,
+    },
+  });
+
+  return {
+    permissionState,
+    notificationId,
+  };
 }
 
 export async function getScheduledLearningReminderDates(): Promise<Date[]> {

@@ -1,0 +1,124 @@
+diff --git a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt
+index 38f6fba..029a677 100644
+--- a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt
++++ b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt
+@@ -35,6 +35,8 @@ open class ExpoPresentationDelegate(
+ 
+   companion object {
+     protected const val ANDROID_NOTIFICATION_ID = 0
++    protected const val LEARNING_REMINDER_KIND = "learning_reminder"
++    protected const val LEARNING_REMINDER_PRESENTATION_TAG = "learning_reminder"
+ 
+     protected const val INTERNAL_IDENTIFIER_SCHEME = "expo-notifications"
+     protected const val INTERNAL_IDENTIFIER_AUTHORITY = "foreign_notifications"
+@@ -106,7 +108,7 @@ open class ExpoPresentationDelegate(
+       val androidNotification = createNotification(notification, behavior)
+ 
+       NotificationManagerCompat.from(context).notify(
+-        notification.notificationRequest.identifier,
++        getNotifyTag(notification.notificationRequest),
+         getNotifyId(notification.notificationRequest),
+         androidNotification
+       )
+@@ -128,6 +130,14 @@ open class ExpoPresentationDelegate(
+     return ANDROID_NOTIFICATION_ID
+   }
+ 
++  protected open fun getNotifyTag(request: NotificationRequest?): String? {
++    return if (request?.content?.body?.optString("kind") == LEARNING_REMINDER_KIND) {
++      LEARNING_REMINDER_PRESENTATION_TAG
++    } else {
++      request?.identifier
++    }
++  }
++
+   /**
+    * Callback called to fetch a collection of currently displayed notifications.
+    *
+@@ -149,7 +159,10 @@ open class ExpoPresentationDelegate(
+       } else {
+         // If the notification exists, let's assume it's ours, we have no reason to believe otherwise
+         val existingNotification = this.getAllPresentedNotifications().find { it.notificationRequest.identifier == identifier }
+-        NotificationManagerCompat.from(context).cancel(identifier, getNotifyId(existingNotification?.notificationRequest))
++        NotificationManagerCompat.from(context).cancel(
++          getNotifyTag(existingNotification?.notificationRequest) ?: identifier,
++          getNotifyId(existingNotification?.notificationRequest)
++        )
+       }
+     }
+   }
+diff --git a/node_modules/expo-notifications/build/DevicePushTokenAutoRegistration.fx.js b/node_modules/expo-notifications/build/DevicePushTokenAutoRegistration.fx.js
+index a3017d6..a0152b4 100644
+--- a/node_modules/expo-notifications/build/DevicePushTokenAutoRegistration.fx.js
++++ b/node_modules/expo-notifications/build/DevicePushTokenAutoRegistration.fx.js
+@@ -1,10 +1,12 @@
+ import 'abort-controller/polyfill';
+-import { UnavailabilityError } from 'expo-modules-core';
++import { isRunningInExpoGo } from 'expo';
++import { Platform, UnavailabilityError } from 'expo-modules-core';
+ import ServerRegistrationModule from './ServerRegistrationModule';
+ import { addPushTokenListener } from './TokenEmitter';
+ import getDevicePushTokenAsync from './getDevicePushTokenAsync';
+ import { updateDevicePushTokenAsync as updateDevicePushTokenAsyncWithSignal, hasDeviceTokenChangedAsync, } from './utils/updateDevicePushTokenAsync';
+ let lastAbortController = null;
++const shouldSkipAutoServerRegistration = Platform.OS === 'android' && isRunningInExpoGo();
+ async function updatePushTokenAsync(token) {
+     const changed = await hasDeviceTokenChangedAsync(token);
+     if (!changed) {
+@@ -73,7 +75,7 @@ export async function __handlePersistedRegistrationInfoAsync(registrationInfo) {
+         console.warn('[expo-notifications] Error encountered while updating server registration with latest device push token.', e);
+     }
+ }
+-if (ServerRegistrationModule.getRegistrationInfoAsync) {
++if (!shouldSkipAutoServerRegistration && ServerRegistrationModule.getRegistrationInfoAsync) {
+     // A global scope (to get all the updates) device push token
+     // subscription, never cleared.
+     addPushTokenListener(async (token) => {
+@@ -107,7 +109,7 @@ if (ServerRegistrationModule.getRegistrationInfoAsync) {
+     ServerRegistrationModule.getRegistrationInfoAsync().then(__handlePersistedRegistrationInfoAsync, (e) => {
+         console.error('[expo-notifications] Error reading persisted server registration info: ', e);
+     });
+-}
+-else {
++} else if (!shouldSkipAutoServerRegistration) {
+     console.warn(`[expo-notifications] Error encountered while fetching auto-registration state, new tokens will not be automatically registered on server.`, new UnavailabilityError('ServerRegistrationModule', 'getRegistrationInfoAsync'));
+ }
+ //# sourceMappingURL=DevicePushTokenAutoRegistration.fx.js.map
+diff --git a/node_modules/expo-notifications/src/DevicePushTokenAutoRegistration.fx.ts b/node_modules/expo-notifications/src/DevicePushTokenAutoRegistration.fx.ts
+index 839a01b..e8e8fe5 100644
+--- a/node_modules/expo-notifications/src/DevicePushTokenAutoRegistration.fx.ts
++++ b/node_modules/expo-notifications/src/DevicePushTokenAutoRegistration.fx.ts
+@@ -1,5 +1,6 @@
+ import 'abort-controller/polyfill';
+-import { UnavailabilityError } from 'expo-modules-core';
++import { isRunningInExpoGo } from 'expo';
++import { Platform, UnavailabilityError } from 'expo-modules-core';
+ 
+ import ServerRegistrationModule from './ServerRegistrationModule';
+ import { addPushTokenListener } from './TokenEmitter';
+@@ -11,6 +12,7 @@ import {
+ } from './utils/updateDevicePushTokenAsync';
+ 
+ let lastAbortController: AbortController | null = null;
++const shouldSkipAutoServerRegistration = Platform.OS === 'android' && isRunningInExpoGo();
+ async function updatePushTokenAsync(token: DevicePushToken) {
+   const changed = await hasDeviceTokenChangedAsync(token);
+   if (!changed) {
+@@ -98,7 +100,7 @@ export async function __handlePersistedRegistrationInfoAsync(
+   }
+ }
+ 
+-if (ServerRegistrationModule.getRegistrationInfoAsync) {
++if (!shouldSkipAutoServerRegistration && ServerRegistrationModule.getRegistrationInfoAsync) {
+   // A global scope (to get all the updates) device push token
+   // subscription, never cleared.
+   addPushTokenListener(async (token) => {
+@@ -133,7 +135,7 @@ if (ServerRegistrationModule.getRegistrationInfoAsync) {
+       console.error('[expo-notifications] Error reading persisted server registration info: ', e);
+     }
+   );
+-} else {
++} else if (!shouldSkipAutoServerRegistration) {
+   console.warn(
+     `[expo-notifications] Error encountered while fetching auto-registration state, new tokens will not be automatically registered on server.`,
+     new UnavailabilityError('ServerRegistrationModule', 'getRegistrationInfoAsync')

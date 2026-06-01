@@ -31,7 +31,6 @@ import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
-import Constants, { ExecutionEnvironment } from "expo-constants";
 import * as NavigationBar from "expo-navigation-bar";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
 import { Stack } from "expo-router";
@@ -76,15 +75,7 @@ type LayoutNotificationsModule = {
   ) => Promise<void>;
 };
 
-function isExpoGo(): boolean {
-  return Constants.executionEnvironment === ExecutionEnvironment.StoreClient;
-}
-
 async function getLayoutNotificationsModule(): Promise<LayoutNotificationsModule | null> {
-  if (isExpoGo()) {
-    return null;
-  }
-
   try {
     const module = await import("expo-notifications");
     return module as unknown as LayoutNotificationsModule;
@@ -94,7 +85,7 @@ async function getLayoutNotificationsModule(): Promise<LayoutNotificationsModule
   }
 }
 
-const STARTUP_ICON = require("@/assets/app/icons/generated/ios/AppIcon~ios-marketing.png");
+const STARTUP_ICON = require("@/assets/app/icons/notification-icon.png");
 
 type RootStatus = "loading" | "ready" | "error" | "importing" | "resetting";
 

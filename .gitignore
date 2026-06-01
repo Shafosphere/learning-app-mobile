@@ -46,13 +46,16 @@ app-example
 sounds/
 images/
 .github/
-android/
+/android/
+assets/**/android/
 .idea/
 .legacy/
 assets/images/*
 !assets/images/.gitkeep
 *.png
 !assets/app/icons/notification-icon.png
+*.jpg
+*.jpeg
 *.svg
 *.svgx
 
