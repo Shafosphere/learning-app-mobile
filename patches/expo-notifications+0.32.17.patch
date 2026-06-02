@@ -2,16 +2,18 @@ diff --git a/node_modules/expo-notifications/android/src/main/java/expo/modules/
 index 38f6fba..029a677 100644
 --- a/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt
 +++ b/node_modules/expo-notifications/android/src/main/java/expo/modules/notifications/service/delegates/ExpoPresentationDelegate.kt
-@@ -35,6 +35,8 @@ open class ExpoPresentationDelegate(
+@@ -35,6 +35,10 @@ open class ExpoPresentationDelegate(
  
    companion object {
      protected const val ANDROID_NOTIFICATION_ID = 0
 +    protected const val LEARNING_REMINDER_KIND = "learning_reminder"
++    protected const val REVIEW_REMINDER_KIND = "review_reminder"
 +    protected const val LEARNING_REMINDER_PRESENTATION_TAG = "learning_reminder"
++    protected const val REVIEW_REMINDER_PRESENTATION_TAG = "review_reminder"
  
      protected const val INTERNAL_IDENTIFIER_SCHEME = "expo-notifications"
      protected const val INTERNAL_IDENTIFIER_AUTHORITY = "foreign_notifications"
-@@ -106,7 +108,7 @@ open class ExpoPresentationDelegate(
+@@ -106,7 +110,7 @@ open class ExpoPresentationDelegate(
        val androidNotification = createNotification(notification, behavior)
  
        NotificationManagerCompat.from(context).notify(
@@ -20,22 +22,22 @@ index 38f6fba..029a677 100644
          getNotifyId(notification.notificationRequest),
          androidNotification
        )
-@@ -128,6 +130,14 @@ open class ExpoPresentationDelegate(
+@@ -128,6 +132,14 @@ open class ExpoPresentationDelegate(
      return ANDROID_NOTIFICATION_ID
    }
  
 +  protected open fun getNotifyTag(request: NotificationRequest?): String? {
-+    return if (request?.content?.body?.optString("kind") == LEARNING_REMINDER_KIND) {
-+      LEARNING_REMINDER_PRESENTATION_TAG
-+    } else {
-+      request?.identifier
++    return when (request?.content?.body?.optString("kind")) {
++      LEARNING_REMINDER_KIND -> LEARNING_REMINDER_PRESENTATION_TAG
++      REVIEW_REMINDER_KIND -> REVIEW_REMINDER_PRESENTATION_TAG
++      else -> request?.identifier
 +    }
 +  }
 +
    /**
     * Callback called to fetch a collection of currently displayed notifications.
     *
-@@ -149,7 +159,10 @@ open class ExpoPresentationDelegate(
+@@ -149,7 +161,10 @@ open class ExpoPresentationDelegate(
        } else {
          // If the notification exists, let's assume it's ours, we have no reason to believe otherwise
          val existingNotification = this.getAllPresentedNotifications().find { it.notificationRequest.identifier == identifier }

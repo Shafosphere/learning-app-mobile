@@ -1,12 +1,16 @@
 import {
   getLearningReminderNotificationTitle,
+  getReviewReminderNotificationTitle,
   selectLearningReminderNotificationBody,
+  selectReviewReminderNotificationBody,
 } from "@/src/services/learningReminderMessages";
 
 describe("learning reminder messages", () => {
   it("uses the localized fixed notification title", () => {
     expect(getLearningReminderNotificationTitle("pl")).toBe("Czas na fiszki");
     expect(getLearningReminderNotificationTitle("en")).toBe("Flashcard time");
+    expect(getReviewReminderNotificationTitle("pl")).toBe("Powtórki czekają");
+    expect(getReviewReminderNotificationTitle("en")).toBe("Reviews are waiting");
   });
 
   it("mixes profile-specific and universal messages for known profiles", () => {
@@ -78,5 +82,41 @@ describe("learning reminder messages", () => {
 
     expect(secondDay).not.toBe(firstDay);
   });
-});
 
+  it("formats Polish review reminder bodies with correct flashcard inflection", () => {
+    const cases = [
+      [1, "Hej, masz 1 fiszkę do powtórki. Wchodzisz?"],
+      [2, "Hej, masz 2 fiszki do powtórki. Wchodzisz?"],
+      [3, "Hej, masz 3 fiszki do powtórki. Wchodzisz?"],
+      [4, "Hej, masz 4 fiszki do powtórki. Wchodzisz?"],
+      [5, "Hej, masz 5 fiszek do powtórki. Wchodzisz?"],
+      [10, "Hej, masz 10 fiszek do powtórki. Wchodzisz?"],
+      [12, "Hej, masz 12 fiszek do powtórki. Wchodzisz?"],
+      [21, "Hej, masz 21 fiszek do powtórki. Wchodzisz?"],
+      [22, "Hej, masz 22 fiszki do powtórki. Wchodzisz?"],
+      [23, "Hej, masz 23 fiszki do powtórki. Wchodzisz?"],
+      [24, "Hej, masz 24 fiszki do powtórki. Wchodzisz?"],
+      [25, "Hej, masz 25 fiszek do powtórki. Wchodzisz?"],
+      [112, "Hej, masz 112 fiszek do powtórki. Wchodzisz?"],
+      [123, "Hej, masz 123 fiszki do powtórki. Wchodzisz?"],
+    ] as const;
+
+    for (const [dueReviewCount, expected] of cases) {
+      expect(
+        selectReviewReminderNotificationBody({
+          language: "pl",
+          dueReviewCount,
+        })
+      ).toBe(expected);
+    }
+  });
+
+  it("formats English review reminder bodies with the due count", () => {
+    expect(
+      selectReviewReminderNotificationBody({
+        language: "en",
+        dueReviewCount: 23,
+      })
+    ).toBe("Hey, you have 23 flashcards to review. Jump in?");
+  });
+});

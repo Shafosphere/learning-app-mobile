@@ -5,6 +5,7 @@ import {
   __setLearningReminderNotificationsModuleForTests,
   LEARNING_REMINDER_CHANNEL_ID,
   cancelLearningReminderNotification,
+  cancelLearningReminderNotificationsForDate,
   scheduleLearningReminderNotifications,
   triggerLearningReminderNotificationPreview,
 } from "@/src/services/learningReminderNotifications";
@@ -120,6 +121,42 @@ describe("learning reminder notifications", () => {
     });
   });
 
+  it("schedules review reminder notifications with count and route data", async () => {
+    await scheduleLearningReminderNotifications([
+      {
+        kind: "review_reminder",
+        when: new Date("2099-01-01T14:00:00.000Z"),
+        content: {
+          title: "Powtórki czekają",
+          body: "Hej, masz 23 fiszki do powtórki. Wchodzisz?",
+        },
+        data: {
+          dueReviewCount: 23,
+          route: "/review",
+        },
+      },
+    ]);
+
+    expect(mockScheduleNotificationAsync).toHaveBeenCalledWith({
+      content: {
+        title: "Powtórki czekają",
+        body: "Hej, masz 23 fiszki do powtórki. Wchodzisz?",
+        sound: "default",
+        data: {
+          kind: "review_reminder",
+          scheduledAt: "2099-01-01T14:00:00.000Z",
+          dueReviewCount: 23,
+          route: "/review",
+        },
+      },
+      trigger: {
+        type: "date",
+        date: new Date("2099-01-01T14:00:00.000Z"),
+        channelId: LEARNING_REMINDER_CHANNEL_ID,
+      },
+    });
+  });
+
   it("adds the learning reminder logo attachment when available", async () => {
     __setLearningReminderAttachmentUrlForTests("file:///notification-logo.png");
 
@@ -148,7 +185,7 @@ describe("learning reminder notifications", () => {
     );
   });
 
-  it("dismisses already presented learning reminder notifications when cancelling all", async () => {
+  it("dismisses already presented managed reminder notifications when cancelling all", async () => {
     mockGetAllScheduledNotificationsAsync.mockResolvedValue([
       {
         identifier: "scheduled-reminder-id",
@@ -156,6 +193,15 @@ describe("learning reminder notifications", () => {
           data: {
             kind: "learning_reminder",
             scheduledAt: "2099-01-01T18:00:00.000Z",
+          },
+        },
+      },
+      {
+        identifier: "scheduled-review-reminder-id",
+        content: {
+          data: {
+            kind: "review_reminder",
+            scheduledAt: "2099-01-01T14:00:00.000Z",
           },
         },
       },
@@ -189,7 +235,55 @@ describe("learning reminder notifications", () => {
     expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledWith(
       "scheduled-reminder-id"
     );
+    expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      "scheduled-review-reminder-id"
+    );
+    expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledTimes(2);
     expect(mockDismissNotificationAsync).toHaveBeenCalledTimes(1);
     expect(mockDismissNotificationAsync).toHaveBeenCalledWith("presented-reminder-id");
+  });
+
+  it("cancels only learning reminders for a date", async () => {
+    mockGetAllScheduledNotificationsAsync.mockResolvedValue([
+      {
+        identifier: "learning-today-id",
+        content: {
+          data: {
+            kind: "learning_reminder",
+            scheduledAt: "2099-01-01T18:00:00.000Z",
+          },
+        },
+      },
+      {
+        identifier: "review-today-id",
+        content: {
+          data: {
+            kind: "review_reminder",
+            scheduledAt: "2099-01-01T14:00:00.000Z",
+          },
+        },
+      },
+      {
+        identifier: "learning-tomorrow-id",
+        content: {
+          data: {
+            kind: "learning_reminder",
+            scheduledAt: "2099-01-02T18:00:00.000Z",
+          },
+        },
+      },
+    ]);
+
+    const remainingLearningDates = await cancelLearningReminderNotificationsForDate(
+      new Date("2099-01-01T12:00:00.000Z")
+    );
+
+    expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledTimes(1);
+    expect(mockCancelScheduledNotificationAsync).toHaveBeenCalledWith(
+      "learning-today-id"
+    );
+    expect(remainingLearningDates.map((date) => date.toISOString())).toEqual([
+      "2099-01-02T18:00:00.000Z",
+    ]);
   });
 });

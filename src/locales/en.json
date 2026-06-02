@@ -249,11 +249,6 @@
         "resetLearning": "Could not restore learning settings.",
         "resetIntro": "Could not reset the introduction."
       },
-      "alerts": {
-        "learningReminderPreviewTriggered": "The test learning notification has been scheduled.",
-        "learningReminderPreviewPermissionDenied": "No notification permission. Enable permissions in system settings.",
-        "learningReminderPreviewError": "Could not trigger the test notification."
-      },
       "exportFile": {
         "successTitle": "Copy saved",
         "successMessage": "A local copy of your data has been saved. File size: {{sizeKb}} kB.",
@@ -392,12 +387,6 @@
           "subtitle": "Load progress and courses from a JSON file.",
           "button": "Import",
           "buttonLoading": "Importing…"
-        },
-        "learningReminderPreview": {
-          "title": "Test learning notification",
-          "subtitle": "Displays one test reminder with the icon and logo.",
-          "button": "Show",
-          "buttonLoading": "Showing…"
         },
         "resetLearning": {
           "title": "Restore learning settings",

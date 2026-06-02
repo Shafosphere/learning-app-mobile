@@ -45,6 +45,8 @@ import {
 } from "../db/sqlite/db";
 import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
 import {
+  REVIEW_REMINDER_KIND,
+  type LearningReminderNotificationRequest,
   type ReminderPermissionState,
   cancelLearningReminderNotification,
   cancelLearningReminderNotificationsForDate,
@@ -54,13 +56,17 @@ import {
 } from "@/src/services/learningReminderNotifications";
 import {
   getLearningReminderNotificationTitle,
+  getReviewReminderNotificationTitle,
   selectLearningReminderNotificationBody,
+  selectReviewReminderNotificationBody,
 } from "@/src/services/learningReminderMessages";
 import {
   buildReminderSeriesEntries,
+  buildReviewReminderEntries,
   computeSmartReminderPlan,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
+import { countDueReviewsAt } from "@/src/services/dueReviewCount";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import type { ImportResult } from "@/src/services/importUserData";
 import {
@@ -2122,12 +2128,12 @@ export const SettingsProvider: React.FC<{
     });
     const reminderDates = reminderEntries.map((entry) => new Date(entry.scheduledAt));
     const notificationTitle = getLearningReminderNotificationTitle(i18n.language);
-
-    await scheduleLearningReminderNotifications(
+    const learningRequests: LearningReminderNotificationRequest[] =
       reminderEntries.map((entry) => {
         const scheduledAt = new Date(entry.scheduledAt);
         return {
           when: scheduledAt,
+          kind: "learning_reminder",
           content: {
             title: notificationTitle,
             body: selectLearningReminderNotificationBody({
@@ -2138,8 +2144,41 @@ export const SettingsProvider: React.FC<{
             }),
           },
         };
-      })
+      });
+    const reviewNotificationTitle = getReviewReminderNotificationTitle(i18n.language);
+    const reviewEntries = await buildReviewReminderEntries({
+      now: nowDate,
+      targetMinutes: plan.targetMinutes,
+      horizonDays: 7,
+      countDueReviewsAt: (scheduledAt) =>
+        countDueReviewsAt(pinnedOfficialCourseIds, scheduledAt),
+    });
+    const reviewRequests: LearningReminderNotificationRequest[] = reviewEntries.map(
+      (entry) => {
+        const scheduledAt = new Date(entry.scheduledAt);
+        const dueReviewCount = entry.dueReviewCount;
+        return {
+          when: scheduledAt,
+          kind: REVIEW_REMINDER_KIND,
+          content: {
+            title: reviewNotificationTitle,
+            body: selectReviewReminderNotificationBody({
+              language: i18n.language,
+              dueReviewCount,
+            }),
+          },
+          data: {
+            dueReviewCount,
+            route: "/review" as const,
+          },
+        };
+      }
     );
+
+    await scheduleLearningReminderNotifications([
+      ...learningRequests,
+      ...reviewRequests,
+    ]);
 
     await Promise.all([
       setLearningReminderNextAtState(
@@ -2151,6 +2190,7 @@ export const SettingsProvider: React.FC<{
     setLearningReminderNextAtState,
     setLearningReminderPermissionState,
     setLearningReminderProfileState,
+    pinnedOfficialCourseIds,
   ]);
 
   const cancelTodayLearningReminderSchedule = useCallback(async () => {

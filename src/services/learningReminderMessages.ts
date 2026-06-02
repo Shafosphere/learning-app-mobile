@@ -205,6 +205,42 @@ export function getLearningReminderNotificationTitle(
     : "Czas na fiszki";
 }
 
+export function getReviewReminderNotificationTitle(
+  language: string | null | undefined
+): string {
+  return normalizeReminderMessageLanguage(language) === "en"
+    ? "Reviews are waiting"
+    : "Powtórki czekają";
+}
+
+function getPolishFlashcardCountLabel(count: number): string {
+  const absCount = Math.abs(Math.trunc(count));
+  const lastDigit = absCount % 10;
+  const lastTwoDigits = absCount % 100;
+
+  if (absCount === 1) {
+    return "fiszkę";
+  }
+  if (lastDigit >= 2 && lastDigit <= 4 && !(lastTwoDigits >= 12 && lastTwoDigits <= 14)) {
+    return "fiszki";
+  }
+  return "fiszek";
+}
+
+export function selectReviewReminderNotificationBody(input: {
+  language: string | null | undefined;
+  dueReviewCount: number;
+}): string {
+  const count = Math.max(0, Math.trunc(input.dueReviewCount));
+  if (normalizeReminderMessageLanguage(input.language) === "en") {
+    return `Hey, you have ${count} flashcards to review. Jump in?`;
+  }
+
+  return `Hej, masz ${count} ${getPolishFlashcardCountLabel(
+    count
+  )} do powtórki. Wchodzisz?`;
+}
+
 export function selectLearningReminderNotificationBody(input: {
   language: string | null | undefined;
   profile: SmartReminderProfile;
@@ -221,4 +257,3 @@ export function selectLearningReminderNotificationBody(input: {
 
   return pool[index];
 }
-

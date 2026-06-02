@@ -33,7 +33,7 @@ import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
-import { Stack } from "expo-router";
+import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
 import * as SystemUI from "expo-system-ui";
@@ -50,8 +50,20 @@ import {
 import { useTranslation } from "react-i18next";
 import { SafeAreaProvider } from "react-native-safe-area-context";
 import { LEARNING_REMINDER_CHANNEL_ID } from "@/src/services/learningReminderNotifications";
+import { getNotificationResponseRoute } from "@/src/services/notificationResponseRouting";
 
 SplashScreen.preventAutoHideAsync();
+
+type LayoutNotificationResponse = {
+  notification: {
+    request: {
+      identifier?: string;
+      content: {
+        data?: Record<string, unknown>;
+      };
+    };
+  };
+};
 
 type LayoutNotificationsModule = {
   AndroidImportance: {
@@ -73,6 +85,10 @@ type LayoutNotificationsModule = {
       sound: "default";
     }
   ) => Promise<void>;
+  addNotificationResponseReceivedListener?: (
+    listener: (response: LayoutNotificationResponse) => void
+  ) => { remove: () => void };
+  getLastNotificationResponseAsync?: () => Promise<LayoutNotificationResponse | null>;
 };
 
 async function getLayoutNotificationsModule(): Promise<LayoutNotificationsModule | null> {
@@ -105,6 +121,7 @@ export default function RootLayout() {
   const splashHiddenRef = useRef(false);
   const previewTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const rootViewLaidOutRef = useRef(false);
+  const handledNotificationResponsesRef = useRef<Set<string>>(new Set());
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {
@@ -361,6 +378,72 @@ export default function RootLayout() {
   const shouldRenderApp = isStartupReady && status === "ready";
   const shouldRenderBlockingState =
     status === "error" || status === "importing" || status === "resetting";
+
+  const handleNotificationResponse = useCallback(
+    (response: LayoutNotificationResponse | null | undefined) => {
+      const route = getNotificationResponseRoute(response);
+      if (!route) {
+        return;
+      }
+
+      const identifier = response?.notification.request.identifier;
+      const handledKey =
+        identifier ??
+        `${route}:${String(
+          response?.notification.request.content.data?.scheduledAt ?? ""
+        )}`;
+      if (handledNotificationResponsesRef.current.has(handledKey)) {
+        return;
+      }
+      handledNotificationResponsesRef.current.add(handledKey);
+
+      setTimeout(() => {
+        router.push(route);
+      }, 0);
+    },
+    []
+  );
+
+  useEffect(() => {
+    if (!shouldRenderApp) {
+      return;
+    }
+
+    let cancelled = false;
+    let subscription: { remove: () => void } | null = null;
+
+    void getLayoutNotificationsModule()
+      .then((notifications) => {
+        if (cancelled || !notifications) {
+          return;
+        }
+
+        subscription =
+          notifications.addNotificationResponseReceivedListener?.(
+            handleNotificationResponse
+          ) ?? null;
+
+        void notifications
+          .getLastNotificationResponseAsync?.()
+          .then((response) => {
+            if (!cancelled) {
+              handleNotificationResponse(response);
+            }
+          })
+          .catch((error) => {
+            console.warn("[Notifications] Failed to read last response", error);
+          });
+      })
+      .catch((error) => {
+        console.warn("[Notifications] Failed to initialize response routing", error);
+      });
+
+    return () => {
+      cancelled = true;
+      subscription?.remove();
+    };
+  }, [handleNotificationResponse, shouldRenderApp]);
+
   const shouldHideSplash =
     isStartupReady &&
     rootViewLaidOutRef.current &&

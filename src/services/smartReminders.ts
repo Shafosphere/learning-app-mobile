@@ -14,6 +14,14 @@ export type ReminderSeriesEntry = {
   slot: ReminderSeriesSlot;
 };
 
+export type ReviewReminderCandidate = {
+  scheduledAt: number;
+};
+
+export type ReviewReminderEntry = ReviewReminderCandidate & {
+  dueReviewCount: number;
+};
+
 export type SmartReminderPlan = {
   profile: SmartReminderProfile;
   targetMinutes: number;
@@ -28,8 +36,10 @@ export type SmartReminderInput = {
 const MIN_EVENTS_FOR_MODEL = 12;
 const MIN_ACTIVE_DAYS_FOR_MODEL = 4;
 const DEFAULT_TARGET_MINUTES = 19 * 60;
-export const REMINDER_SERIES_START_LEAD_MINUTES = 60;
-export const REMINDER_SERIES_TOTAL_DURATION_MINUTES = 120;
+export const REMINDER_SERIES_FIRST_LEAD_MINUTES = 240;
+export const REMINDER_SERIES_SECOND_LEAD_MINUTES = 120;
+export const REVIEW_REMINDER_LEAD_MINUTES = 300;
+export const REVIEW_REMINDER_THRESHOLD = 10;
 
 function clampHourArray(values: number[]): number[] {
   const next = Array.from({ length: 24 }, (_, idx) => values[idx] ?? 0);
@@ -119,12 +129,9 @@ export function buildReminderSeriesEntries(input: {
   const anchorHour = Math.floor(input.targetMinutes / 60);
   const anchorMinute = input.targetMinutes % 60;
   const offsets: { minutes: number; slot: ReminderSeriesSlot }[] = [
-    { minutes: -REMINDER_SERIES_START_LEAD_MINUTES, slot: "lead" },
+    { minutes: -REMINDER_SERIES_FIRST_LEAD_MINUTES, slot: "lead" },
+    { minutes: -REMINDER_SERIES_SECOND_LEAD_MINUTES, slot: "lead" },
     { minutes: 0, slot: "due" },
-    {
-      minutes: REMINDER_SERIES_TOTAL_DURATION_MINUTES - REMINDER_SERIES_START_LEAD_MINUTES,
-      slot: "followUp",
-    },
   ];
 
   const scheduled = new Map<number, ReminderSeriesSlot>();
@@ -149,4 +156,58 @@ export function buildReminderSeriesEntries(input: {
   return Array.from(scheduled, ([scheduledAt, slot]) => ({ scheduledAt, slot })).sort(
     (a, b) => a.scheduledAt - b.scheduledAt
   );
+}
+
+export function buildReviewReminderCandidates(input: {
+  targetMinutes: number;
+  now?: Date;
+  horizonDays?: number;
+}): ReviewReminderCandidate[] {
+  const now = input.now ?? new Date();
+  const horizonDays = Math.max(1, input.horizonDays ?? 7);
+  const anchorHour = Math.floor(input.targetMinutes / 60);
+  const anchorMinute = input.targetMinutes % 60;
+  const scheduled = new Set<number>();
+
+  for (let dayOffset = 0; dayOffset < horizonDays; dayOffset += 1) {
+    const anchor = new Date(now.getTime());
+    anchor.setSeconds(0, 0);
+    anchor.setDate(anchor.getDate() + dayOffset);
+    anchor.setHours(anchorHour, anchorMinute, 0, 0);
+
+    const candidate = new Date(anchor.getTime());
+    candidate.setMinutes(candidate.getMinutes() - REVIEW_REMINDER_LEAD_MINUTES);
+    if (candidate.getTime() > now.getTime()) {
+      scheduled.add(candidate.getTime());
+    }
+  }
+
+  return Array.from(scheduled, (scheduledAt) => ({ scheduledAt })).sort(
+    (a, b) => a.scheduledAt - b.scheduledAt
+  );
+}
+
+export async function buildReviewReminderEntries(input: {
+  targetMinutes: number;
+  now?: Date;
+  horizonDays?: number;
+  threshold?: number;
+  countDueReviewsAt: (scheduledAt: number) => number | Promise<number>;
+}): Promise<ReviewReminderEntry[]> {
+  const threshold = input.threshold ?? REVIEW_REMINDER_THRESHOLD;
+  const candidates = buildReviewReminderCandidates(input);
+  const entries = await Promise.all(
+    candidates.map(async (candidate) => {
+      const dueReviewCount = await input.countDueReviewsAt(candidate.scheduledAt);
+      if (dueReviewCount < threshold) {
+        return null;
+      }
+      return {
+        scheduledAt: candidate.scheduledAt,
+        dueReviewCount,
+      };
+    })
+  );
+
+  return entries.filter((entry): entry is ReviewReminderEntry => entry != null);
 }

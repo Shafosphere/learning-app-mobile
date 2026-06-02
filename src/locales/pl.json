@@ -249,11 +249,6 @@
         "resetLearning": "Nie udało się przywrócić ustawień nauki.",
         "resetIntro": "Nie udało się zresetować wprowadzenia."
       },
-      "alerts": {
-        "learningReminderPreviewTriggered": "Testowe powiadomienie o nauce zostało zaplanowane.",
-        "learningReminderPreviewPermissionDenied": "Brak uprawnień do powiadomień. Włącz je w ustawieniach systemu.",
-        "learningReminderPreviewError": "Nie udało się wywołać testowego powiadomienia."
-      },
       "exportFile": {
         "successTitle": "Kopia zapisana",
         "successMessage": "Lokalna kopia danych została zapisana. Rozmiar pliku: {{sizeKb}} kB.",
@@ -392,12 +387,6 @@
           "subtitle": "Wczytaj postępy i kursy z pliku JSON.",
           "button": "Importuj",
           "buttonLoading": "Importuję…"
-        },
-        "learningReminderPreview": {
-          "title": "Test powiadomienia o nauce",
-          "subtitle": "Wyświetla jedno testowe przypomnienie z ikoną i logo.",
-          "button": "Pokaż",
-          "buttonLoading": "Pokazuję…"
         },
         "resetLearning": {
           "title": "Przywróć ustawienia nauki",

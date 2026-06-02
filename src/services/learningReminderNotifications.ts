@@ -4,13 +4,20 @@ import { Platform } from "react-native";
 import learningReminderAttachmentAsset from "@/assets/app/icons/notification-icon.png";
 
 const REMINDER_NOTIFICATION_IDS_KEY = "learningReminder.notificationIds";
-const REMINDER_KIND = "learning_reminder";
+export const LEARNING_REMINDER_KIND = "learning_reminder";
+export const REVIEW_REMINDER_KIND = "review_reminder";
 const REMINDER_ATTACHMENT_ID = "learning-reminder-logo";
 export const LEARNING_REMINDER_CHANNEL_ID = "learning_reminders";
 
+export type ReminderNotificationKind =
+  | typeof LEARNING_REMINDER_KIND
+  | typeof REVIEW_REMINDER_KIND;
+
 type ReminderNotificationData = {
-  kind: string;
+  kind: ReminderNotificationKind;
   scheduledAt: string;
+  dueReviewCount?: number;
+  route?: "/review";
 };
 type ReminderNotificationAttachment = {
   identifier: string;
@@ -28,9 +35,14 @@ type ReminderNotificationContentInput = {
 export type ReminderPermissionState = "granted" | "denied" | "undetermined";
 export type LearningReminderNotificationRequest = {
   when: Date;
+  kind?: ReminderNotificationKind;
   content: {
     title: string;
     body: string;
+  };
+  data?: {
+    dueReviewCount?: number;
+    route?: "/review";
   };
 };
 export type LearningReminderNotificationPreviewResult = {
@@ -167,19 +179,33 @@ async function setStoredNotificationIds(notificationIds: string[]): Promise<void
 function asReminderData(
   data: Record<string, unknown> | undefined
 ): ReminderNotificationData | null {
-  if (!data || data.kind !== REMINDER_KIND || typeof data.scheduledAt !== "string") {
+  if (
+    !data ||
+    (data.kind !== LEARNING_REMINDER_KIND && data.kind !== REVIEW_REMINDER_KIND) ||
+    typeof data.scheduledAt !== "string"
+  ) {
     return null;
   }
   return {
-    kind: REMINDER_KIND,
+    kind: data.kind,
     scheduledAt: data.scheduledAt,
+    ...(typeof data.dueReviewCount === "number"
+      ? { dueReviewCount: data.dueReviewCount }
+      : null),
+    ...(data.route === "/review" ? { route: data.route } : null),
   };
 }
 
-function makeReminderData(scheduledAt: Date): ReminderNotificationData {
+function makeReminderData(
+  request: LearningReminderNotificationRequest
+): ReminderNotificationData {
   return {
-    kind: REMINDER_KIND,
-    scheduledAt: scheduledAt.toISOString(),
+    kind: request.kind ?? LEARNING_REMINDER_KIND,
+    scheduledAt: request.when.toISOString(),
+    ...(typeof request.data?.dueReviewCount === "number"
+      ? { dueReviewCount: request.data.dueReviewCount }
+      : null),
+    ...(request.data?.route === "/review" ? { route: request.data.route } : null),
   };
 }
 
@@ -201,15 +227,14 @@ async function getLearningReminderAttachmentUrl(): Promise<string | null> {
 }
 
 async function buildLearningReminderNotificationContent(
-  content: LearningReminderNotificationRequest["content"],
-  scheduledAt: Date
+  request: LearningReminderNotificationRequest
 ): Promise<ReminderNotificationContentInput> {
   const attachmentUrl = await getLearningReminderAttachmentUrl();
   return {
-    title: content.title,
-    body: content.body,
+    title: request.content.title,
+    body: request.content.body,
     sound: "default",
-    data: makeReminderData(scheduledAt),
+    data: makeReminderData(request),
     ...(attachmentUrl
       ? {
           attachments: [
@@ -242,7 +267,9 @@ function enqueueReminderOperation<T>(operation: () => Promise<T>): Promise<T> {
 
 async function listScheduledReminderEntries(
   notifications: NotificationsModule
-): Promise<{ identifier: string; scheduledAt: Date }[]> {
+): Promise<
+  { identifier: string; kind: ReminderNotificationKind; scheduledAt: Date }[]
+> {
   const scheduled = await notifications.getAllScheduledNotificationsAsync();
   return scheduled
     .map((item) => {
@@ -252,10 +279,19 @@ async function listScheduledReminderEntries(
       }
       return {
         identifier: item.identifier,
+        kind: data.kind,
         scheduledAt: new Date(data.scheduledAt),
       };
     })
-    .filter((item): item is { identifier: string; scheduledAt: Date } => item != null)
+    .filter(
+      (
+        item
+      ): item is {
+        identifier: string;
+        kind: ReminderNotificationKind;
+        scheduledAt: Date;
+      } => item != null
+    )
     .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
 }
 
@@ -316,7 +352,11 @@ async function cancelLearningReminderNotificationsForDateInternal(
   const targetKey = toLocalDateKey(date);
   const scheduledEntries = await listScheduledReminderEntries(notifications);
   const idsToCancel = scheduledEntries
-    .filter((entry) => toLocalDateKey(entry.scheduledAt) === targetKey)
+    .filter(
+      (entry) =>
+        entry.kind === LEARNING_REMINDER_KIND &&
+        toLocalDateKey(entry.scheduledAt) === targetKey
+    )
     .map((entry) => entry.identifier);
   await cancelNotificationIds(notifications, idsToCancel);
 
@@ -328,6 +368,7 @@ async function cancelLearningReminderNotificationsForDateInternal(
 
   return scheduledEntries
     .filter((entry) => !idsToCancel.includes(entry.identifier))
+    .filter((entry) => entry.kind === LEARNING_REMINDER_KIND)
     .map((entry) => entry.scheduledAt);
 }
 
@@ -378,10 +419,7 @@ export async function scheduleLearningReminderNotifications(
     try {
       for (const request of upcomingRequests) {
         const notificationId = await notifications.scheduleNotificationAsync({
-          content: await buildLearningReminderNotificationContent(
-            request.content,
-            request.when
-          ),
+          content: await buildLearningReminderNotificationContent(request),
           trigger: {
             type: notifications.SchedulableTriggerInputTypes.DATE,
             date: request.when,
@@ -423,7 +461,11 @@ export async function triggerLearningReminderNotificationPreview(
 
   const triggerDate = new Date(now.getTime() + 1000);
   const notificationId = await notifications.scheduleNotificationAsync({
-    content: await buildLearningReminderNotificationContent(content, now),
+    content: await buildLearningReminderNotificationContent({
+      kind: LEARNING_REMINDER_KIND,
+      when: now,
+      content,
+    }),
     trigger: {
       type: notifications.SchedulableTriggerInputTypes.DATE,
       date: triggerDate,
@@ -445,5 +487,7 @@ export async function getScheduledLearningReminderDates(): Promise<Date[]> {
   }
 
   const scheduledEntries = await listScheduledReminderEntries(notifications);
-  return scheduledEntries.map((entry) => entry.scheduledAt);
+  return scheduledEntries
+    .filter((entry) => entry.kind === LEARNING_REMINDER_KIND)
+    .map((entry) => entry.scheduledAt);
 }
