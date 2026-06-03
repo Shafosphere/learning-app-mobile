@@ -490,7 +490,7 @@ const defaultValue: SettingsContextValue = {
   toggleTheme: async () => {},
   boxesLayout: "classic",
   setBoxesLayout: async () => {},
-  actionButtonsPosition: "top",
+  actionButtonsPosition: "bottom",
   setActionButtonsPosition: async () => {},
   courses: [],
   addCourse: async () => {},
@@ -664,7 +664,7 @@ export const SettingsProvider: React.FC<{
   const [actionButtonsPositionState, _setActionButtonsPosition] =
     usePersistedState<"top" | "bottom">(
       "flashcards.actionsPosition",
-      "top"
+      "bottom"
     );
   const [courses, setCourses] = usePersistedState<LanguageCourse[]>(
     "courses",
@@ -2556,7 +2556,7 @@ export const SettingsProvider: React.FC<{
       setIgnoreDiacriticsInSpellcheck(false),
       setShowBoxFaces(true),
       _setBoxesLayout("classic"),
-      _setActionButtonsPosition("top"),
+      _setActionButtonsPosition("bottom"),
       setFlashcardsBatchSize(DEFAULT_FLASHCARDS_BATCH_SIZE),
       setFlashcardsSuggestionsEnabled(false),
       setFlashcardsCardSizeDefault("large"),
