@@ -14,6 +14,7 @@ const mockPush = jest.fn();
 const mockPinOfficialCourse = jest.fn(() => Promise.resolve());
 const mockUnpinOfficialCourse = jest.fn(() => Promise.resolve());
 const mockSkipFlow = jest.fn(() => Promise.resolve());
+let mockPinnedOfficialCourseIds: number[] = [];
 
 const mockColors = {
   background: "#ffffff",
@@ -58,7 +59,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
     colors: mockColors,
     highContrastEnabled: false,
     nativeLanguage: "pl",
-    pinnedOfficialCourseIds: [],
+    pinnedOfficialCourseIds: mockPinnedOfficialCourseIds,
     pinOfficialCourse: mockPinOfficialCourse,
     unpinOfficialCourse: mockUnpinOfficialCourse,
   }),
@@ -150,6 +151,7 @@ function getLatestCoachmarkLayer() {
 describe("CoursePinScreen skip onboarding", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockPinnedOfficialCourseIds = [];
     mockedGetOnboardingCheckpoint.mockResolvedValue("pin_required");
   });
 
@@ -231,6 +233,87 @@ describe("CoursePinScreen skip onboarding", () => {
 
     await waitFor(() => {
       expect(getLatestCoachmarkLayer()?.showSkipButton).toBe(false);
+    });
+  });
+
+  it("switches to the knowledge tab after the categories onboarding step", async () => {
+    const mockGoNext = jest.fn(() => Promise.resolve());
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: true,
+      isPendingStart: false,
+      hasSeen: false,
+      isReady: true,
+      currentStep: {
+        id: "course-pin-step-6",
+        targetId: "course-pin-tab-switcher",
+        titleKey: "onboarding.coursePin.step6.title",
+        descriptionKey: "onboarding.coursePin.step6.description",
+        kind: "info",
+        advanceOn: "manual",
+      },
+      currentIndex: 5,
+      totalSteps: 9,
+      canGoBack: true,
+      canGoNext: true,
+      goBack: jest.fn(),
+      goNext: mockGoNext,
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+      skipFlow: mockSkipFlow,
+    });
+
+    render(<CoursePinScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Języki" })).toHaveAccessibilityState({
+        selected: true,
+      });
+    });
+
+    const layer = getLatestCoachmarkLayer();
+    await act(async () => {
+      await layer!.onNext();
+    });
+
+    expect(mockGoNext).toHaveBeenCalledTimes(1);
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Wiedza" })).toHaveAccessibilityState({
+        selected: true,
+      });
+    });
+  });
+
+  it("keeps language tab selected for first-card onboarding targets", async () => {
+    mockPinnedOfficialCourseIds = [1];
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: true,
+      isPendingStart: false,
+      hasSeen: false,
+      isReady: true,
+      currentStep: {
+        id: "course-pin-step-3",
+        targetId: "course-pin-first-card",
+        titleKey: "onboarding.coursePin.step3.title",
+        descriptionKey: "onboarding.coursePin.step3.description",
+        kind: "info",
+        advanceOn: "manual",
+      },
+      currentIndex: 2,
+      totalSteps: 9,
+      canGoBack: true,
+      canGoNext: true,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+      skipFlow: mockSkipFlow,
+    });
+
+    render(<CoursePinScreen />);
+    fireEvent.press(screen.getByText("Wiedza"));
+
+    await waitFor(() => {
+      expect(screen.getByRole("tab", { name: "Języki" })).toHaveAccessibilityState({
+        selected: true,
+      });
     });
   });
 });

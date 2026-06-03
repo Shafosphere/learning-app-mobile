@@ -28,4 +28,15 @@ describe("coachmark flow definitions", () => {
 
     expect(manualStepsWithoutBlockOutside).toEqual([]);
   });
+
+  it("only lets the guided flashcards action steps pass through their intended targets", () => {
+    expect(
+      FLASHCARDS_COACHMARK_STEPS.find((step) => step.id === "flashcards-step-8")
+        ?.passThroughTargetId,
+    ).toBe("flashcards-box-one");
+    expect(
+      FLASHCARDS_COACHMARK_STEPS.find((step) => step.id === "flashcards-step-9")
+        ?.passThroughTargetIds,
+    ).toEqual(["flashcards-card-section", "flashcards-confirm-button"]);
+  });
 });

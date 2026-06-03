@@ -9,6 +9,15 @@ import MyButton from "@/src/components/button/button";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import type { CoachmarkFlowStep } from "@/src/constants/coachmarkFlows";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import {
+  BUBBLE_EDGE_PADDING,
+  BUBBLE_KEYBOARD_GAP,
+  clamp,
+  computeBubbleFrame,
+  computeMultiPassThroughBlockerRects,
+  getEstimatedBubbleHeight,
+  type Rect,
+} from "./coachmarkPositioning";
 import { useTranslation } from "react-i18next";
 import React, {
   useEffect,
@@ -35,16 +44,6 @@ import Animated, {
 } from "react-native-reanimated";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
-type Rect = { x: number; y: number; width: number; height: number };
-type BubblePlacement = "top" | "bottom";
-
-type BubbleFrame = {
-  left: number;
-  top: number;
-  maxWidth: number;
-  placement: BubblePlacement;
-};
-
 export type GuidedCoachmarkLayerProps = {
   currentStep: CoachmarkFlowStep | null;
   currentIndex: number;
@@ -57,73 +56,6 @@ export type GuidedCoachmarkLayerProps = {
   showSkipButton?: boolean;
   onSkipPress?: () => void;
 };
-
-const BUBBLE_KEYBOARD_GAP = 12;
-const BUBBLE_EDGE_PADDING = 12;
-const BUBBLE_CENTERED_PADDING = 18;
-const DEFAULT_BUBBLE_HEIGHT = 132;
-const CENTERED_INTRO_BUBBLE_HEIGHT = 160;
-const BUBBLE_MIN_WIDTH = 240;
-const BUBBLE_MAX_WIDTH = 380;
-const CENTERED_INTRO_MIN_WIDTH = 280;
-const CENTERED_INTRO_MAX_WIDTH = 420;
-const BUBBLE_TARGET_GAP = 12;
-const BUBBLE_AVOID_GAP = 12;
-
-function clamp(value: number, min: number, max: number): number {
-  if (max <= min) {
-    return min;
-  }
-
-  return Math.min(Math.max(value, min), max);
-}
-
-function computeOverflow(
-  top: number,
-  height: number,
-  minTop: number,
-  maxBottom: number,
-): number {
-  return Math.max(0, minTop - top) + Math.max(0, top + height - maxBottom);
-}
-
-function rangesOverlap(
-  startA: number,
-  endA: number,
-  startB: number,
-  endB: number,
-): boolean {
-  return startA < endB && endA > startB;
-}
-
-function rectsOverlap(rectA: Rect, rectB: Rect): boolean {
-  return (
-    rangesOverlap(rectA.x, rectA.x + rectA.width, rectB.x, rectB.x + rectB.width) &&
-    rangesOverlap(rectA.y, rectA.y + rectA.height, rectB.y, rectB.y + rectB.height)
-  );
-}
-
-function getOverlapArea(rectA: Rect, rectB: Rect): number {
-  const overlapWidth = Math.max(
-    0,
-    Math.min(rectA.x + rectA.width, rectB.x + rectB.width) - Math.max(rectA.x, rectB.x),
-  );
-  const overlapHeight = Math.max(
-    0,
-    Math.min(rectA.y + rectA.height, rectB.y + rectB.height) - Math.max(rectA.y, rectB.y),
-  );
-
-  return overlapWidth * overlapHeight;
-}
-
-function expandRect(rect: Rect, gap: number): Rect {
-  return {
-    x: rect.x - gap,
-    y: rect.y - gap,
-    width: rect.width + gap * 2,
-    height: rect.height + gap * 2,
-  };
-}
 
 function measureInWindow(ref: any): Promise<Rect> {
   return new Promise((resolve, reject) => {
@@ -146,213 +78,6 @@ function measureInWindow(ref: any): Promise<Rect> {
   });
 }
 
-function computeBubbleFrame({
-  rootLayout,
-  bubbleHeight,
-  localTargetRect,
-  localAvoidRects,
-  isSpotlightStep,
-  layout,
-  minTop,
-  maxBottom,
-}: {
-  rootLayout: { width: number; height: number };
-  bubbleHeight: number;
-  localTargetRect: Rect | null;
-  localAvoidRects: Rect[];
-  isSpotlightStep: boolean;
-  layout?: CoachmarkFlowStep["layout"];
-  minTop: number;
-  maxBottom: number;
-}): BubbleFrame {
-  if (layout === "centered_intro") {
-    const maxWidth = Math.max(
-      CENTERED_INTRO_MIN_WIDTH,
-      Math.min(rootLayout.width - BUBBLE_CENTERED_PADDING * 2, CENTERED_INTRO_MAX_WIDTH),
-    );
-
-    return {
-      left: Math.max(BUBBLE_CENTERED_PADDING, (rootLayout.width - maxWidth) / 2),
-      top: Math.max(
-        BUBBLE_CENTERED_PADDING,
-        (rootLayout.height - CENTERED_INTRO_BUBBLE_HEIGHT) / 2,
-      ),
-      maxWidth,
-      placement: "bottom",
-    };
-  }
-
-  const maxWidth = Math.max(
-    BUBBLE_MIN_WIDTH,
-    Math.min(rootLayout.width - BUBBLE_EDGE_PADDING * 2, BUBBLE_MAX_WIDTH),
-  );
-  const bubbleWidth = maxWidth;
-  const maxLeft = Math.max(BUBBLE_EDGE_PADDING, rootLayout.width - bubbleWidth - BUBBLE_EDGE_PADDING);
-  const maxTop = Math.max(minTop, maxBottom - bubbleHeight);
-  const defaultLeft = clamp(
-    (rootLayout.width - maxWidth) / 2,
-    BUBBLE_EDGE_PADDING,
-    maxLeft,
-  );
-  const defaultBottomOffset = Math.max(72, rootLayout.height * 0.2);
-  const defaultTop = clamp(
-    rootLayout.height - defaultBottomOffset - bubbleHeight,
-    minTop,
-    maxTop,
-  );
-  const makeBubbleRect = (top: number): Rect => ({
-    x: defaultLeft,
-    y: top,
-    width: bubbleWidth,
-    height: bubbleHeight,
-  });
-  const expandedAvoidRects = localAvoidRects.map((rect) => expandRect(rect, BUBBLE_AVOID_GAP));
-  const targetAvoidRect =
-    isSpotlightStep && localTargetRect
-      ? expandRect(localTargetRect, BUBBLE_TARGET_GAP)
-      : null;
-  const scoreCandidate = ({
-    rawTop,
-    top,
-  }: {
-    rawTop: number;
-    top: number;
-  }) => {
-    const bubbleRect = makeBubbleRect(top);
-
-    return {
-      targetOverlap: targetAvoidRect ? getOverlapArea(bubbleRect, targetAvoidRect) : 0,
-      avoidOverlap: expandedAvoidRects.reduce(
-        (total, avoidRect) => total + getOverlapArea(bubbleRect, avoidRect),
-        0,
-      ),
-      overflow: computeOverflow(rawTop, bubbleHeight, minTop, maxBottom),
-      distanceFromDefault: Math.abs(rawTop - defaultTop),
-    };
-  };
-  const resolveCandidate = (
-    candidates: {
-      placement: BubblePlacement;
-      rawTop: number;
-      top: number;
-    }[],
-  ) => {
-    return candidates
-      .map((candidate) => ({
-        ...candidate,
-        score: scoreCandidate(candidate),
-      }))
-      .sort((a, b) => {
-        if (a.score.targetOverlap !== b.score.targetOverlap) {
-          return a.score.targetOverlap - b.score.targetOverlap;
-        }
-        if (a.score.avoidOverlap !== b.score.avoidOverlap) {
-          return a.score.avoidOverlap - b.score.avoidOverlap;
-        }
-        if (a.score.overflow !== b.score.overflow) {
-          return a.score.overflow - b.score.overflow;
-        }
-
-        return a.score.distanceFromDefault - b.score.distanceFromDefault;
-      })[0];
-  };
-  const defaultAndAvoidCandidates = [
-    {
-      placement: "bottom" as const,
-      rawTop: defaultTop,
-      top: clamp(defaultTop, minTop, maxTop),
-    },
-    {
-      placement: "top" as const,
-      rawTop: minTop,
-      top: minTop,
-    },
-    {
-      placement: "bottom" as const,
-      rawTop: maxTop,
-      top: maxTop,
-    },
-    ...expandedAvoidRects.flatMap((avoidRect) => [
-      {
-        placement: "top" as const,
-        rawTop: avoidRect.y - bubbleHeight - BUBBLE_AVOID_GAP,
-        top: clamp(avoidRect.y - bubbleHeight - BUBBLE_AVOID_GAP, minTop, maxTop),
-      },
-      {
-        placement: "bottom" as const,
-        rawTop: avoidRect.y + avoidRect.height + BUBBLE_AVOID_GAP,
-        top: clamp(avoidRect.y + avoidRect.height + BUBBLE_AVOID_GAP, minTop, maxTop),
-      },
-    ]),
-  ];
-
-  if (isSpotlightStep && localTargetRect) {
-    const targetZoneTop = localTargetRect.y - BUBBLE_TARGET_GAP;
-    const targetZoneBottom =
-      localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP;
-    const defaultOverlapsTarget =
-      rectsOverlap(makeBubbleRect(defaultTop), {
-        x: localTargetRect.x,
-        y: targetZoneTop,
-        width: localTargetRect.width,
-        height: targetZoneBottom - targetZoneTop,
-      });
-
-    if (
-      !defaultOverlapsTarget &&
-      expandedAvoidRects.every((avoidRect) => !rectsOverlap(makeBubbleRect(defaultTop), avoidRect))
-    ) {
-      return {
-        left: defaultLeft,
-        top: defaultTop,
-        maxWidth,
-        placement: "bottom",
-      };
-    }
-
-    const targetCandidates = defaultOverlapsTarget
-      ? [
-          {
-            placement: "bottom" as const,
-            rawTop: localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP,
-            top: clamp(
-              localTargetRect.y + localTargetRect.height + BUBBLE_TARGET_GAP,
-              minTop,
-              maxTop,
-            ),
-          },
-          {
-            placement: "top" as const,
-            rawTop: localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP,
-            top: clamp(
-              localTargetRect.y - bubbleHeight - BUBBLE_TARGET_GAP,
-              minTop,
-              maxTop,
-            ),
-          },
-        ]
-      : [];
-    const candidates = [...defaultAndAvoidCandidates, ...targetCandidates];
-    const resolvedCandidate = resolveCandidate(candidates);
-
-    return {
-      left: defaultLeft,
-      top: resolvedCandidate.top,
-      maxWidth,
-      placement: resolvedCandidate.placement,
-    };
-  }
-
-  const resolvedCandidate = resolveCandidate(defaultAndAvoidCandidates);
-
-  return {
-    left: defaultLeft,
-    top: resolvedCandidate.top,
-    maxWidth,
-    placement: resolvedCandidate.placement,
-  };
-}
-
 function isLikelyInvalidSpotlightRect(rect: Rect | null): boolean {
   if (!rect) {
     return false;
@@ -362,16 +87,6 @@ function isLikelyInvalidSpotlightRect(rect: Rect | null): boolean {
   const isNearOrigin = rect.x < 0 || rect.y < 0;
 
   return isTiny && isNearOrigin;
-}
-
-function getEstimatedBubbleHeight(
-  layout: CoachmarkFlowStep["layout"] | undefined,
-): number {
-  if (layout === "centered_intro") {
-    return CENTERED_INTRO_BUBBLE_HEIGHT;
-  }
-
-  return DEFAULT_BUBBLE_HEIGHT;
 }
 
 export function GuidedCoachmarkLayer({
@@ -401,6 +116,7 @@ export function GuidedCoachmarkLayer({
   const localHoleHeight = useSharedValue(1);
   const [rootWindowRect, setRootWindowRect] = useState<Rect | null>(null);
   const [localAvoidRects, setLocalAvoidRects] = useState<Rect[]>([]);
+  const [localPassThroughRects, setLocalPassThroughRects] = useState<Rect[]>([]);
   const [rootLayout, setRootLayout] = useState({ width: 0, height: 0 });
   const [renderSpotlightLayer, setRenderSpotlightLayer] = useState(false);
   const [isBubbleReady, setIsBubbleReady] = useState(false);
@@ -458,6 +174,13 @@ export function GuidedCoachmarkLayer({
     };
   }, [rootWindowRect, targetRect]);
   const avoidTargetIdsKey = currentStep?.avoidTargetIds?.join("|") ?? "";
+  const passThroughTargetIds = useMemo(() => {
+    if (currentStep?.passThroughTargetIds) {
+      return currentStep.passThroughTargetIds;
+    }
+    return currentStep?.passThroughTargetId ? [currentStep.passThroughTargetId] : [];
+  }, [currentStep?.passThroughTargetId, currentStep?.passThroughTargetIds]);
+  const passThroughTargetIdsKey = passThroughTargetIds.join("|");
 
   useEffect(() => {
     const avoidTargetIds = currentStep?.avoidTargetIds ?? [];
@@ -513,6 +236,59 @@ export function GuidedCoachmarkLayer({
     rootWindowRect,
   ]);
 
+  useEffect(() => {
+    if (!rootWindowRect || passThroughTargetIds.length === 0) {
+      setLocalPassThroughRects([]);
+      return;
+    }
+
+    let mounted = true;
+    const measurePassThroughTargets = () => {
+      void Promise.all(
+        passThroughTargetIds.map(async (targetId) => {
+          const anchor = getAnchor(targetId);
+          const ref = anchor?.getRef();
+          if (!ref) return null;
+
+          try {
+            const rect = await measureInWindow(ref);
+            if (rect.width <= 0 || rect.height <= 0) return null;
+
+            return {
+              x: rect.x - rootWindowRect.x,
+              y: rect.y - rootWindowRect.y,
+              width: rect.width,
+              height: rect.height,
+            };
+          } catch {
+            return null;
+          }
+        }),
+      ).then((rects) => {
+        if (!mounted) return;
+        setLocalPassThroughRects(rects.filter((rect): rect is Rect => rect != null));
+      });
+    };
+    const frame = requestAnimationFrame(measurePassThroughTargets);
+    const timers = [120, 280, 520].map((delay) =>
+      setTimeout(measurePassThroughTargets, delay),
+    );
+
+    return () => {
+      mounted = false;
+      cancelAnimationFrame(frame);
+      timers.forEach((timer) => clearTimeout(timer));
+    };
+  }, [
+    currentIndex,
+    getAnchor,
+    passThroughTargetIds,
+    passThroughTargetIdsKey,
+    rootLayout.height,
+    rootLayout.width,
+    rootWindowRect,
+  ]);
+
   const topBoundary = useMemo(() => {
     if (!rootWindowRect) {
       return BUBBLE_EDGE_PADDING;
@@ -529,19 +305,23 @@ export function GuidedCoachmarkLayer({
     () => getEstimatedBubbleHeight(currentStep?.layout),
     [currentStep?.layout],
   );
-  const nonSpotlightDefaultTop = useMemo(() => {
+  const keyboardEstimatedBubbleHeight = useMemo(
+    () => getEstimatedBubbleHeight(currentStep?.layout, { includeNavigation: false }),
+    [currentStep?.layout],
+  );
+  const keyboardTargetDefaultTop = useMemo(() => {
     const defaultBottomOffset = Math.max(72, rootLayout.height * 0.2);
     const maxTop = Math.max(
       topBoundary,
-      rootLayout.height - estimatedBubbleHeight - BUBBLE_EDGE_PADDING,
+      rootLayout.height - keyboardEstimatedBubbleHeight - BUBBLE_EDGE_PADDING,
     );
 
     return clamp(
-      rootLayout.height - defaultBottomOffset - estimatedBubbleHeight,
+      rootLayout.height - defaultBottomOffset - keyboardEstimatedBubbleHeight,
       topBoundary,
       maxTop,
     );
-  }, [estimatedBubbleHeight, rootLayout.height, topBoundary]);
+  }, [keyboardEstimatedBubbleHeight, rootLayout.height, topBoundary]);
   const {
     keyboardVisible,
     keyboardTopInWindow,
@@ -552,10 +332,13 @@ export function GuidedCoachmarkLayer({
       currentStep?.spotlight || rootWindowRect == null
         ? null
         : rootWindowRect.y +
-          nonSpotlightDefaultTop +
-          estimatedBubbleHeight,
+          keyboardTargetDefaultTop +
+          keyboardEstimatedBubbleHeight,
     keyboardTopCorrection: 44,
   });
+  const activeBubbleHeight = keyboardVisible
+    ? keyboardEstimatedBubbleHeight
+    : estimatedBubbleHeight;
   const bottomBoundary = useMemo(() => {
     const safeBottomLimit = Math.max(
       BUBBLE_EDGE_PADDING,
@@ -583,7 +366,7 @@ export function GuidedCoachmarkLayer({
   const bubbleFrame = useMemo(() => {
     return computeBubbleFrame({
       rootLayout,
-      bubbleHeight: estimatedBubbleHeight,
+      bubbleHeight: activeBubbleHeight,
       localTargetRect,
       localAvoidRects,
       isSpotlightStep: Boolean(currentStep?.spotlight),
@@ -592,10 +375,10 @@ export function GuidedCoachmarkLayer({
       maxBottom: bottomBoundary,
     });
   }, [
+    activeBubbleHeight,
     bottomBoundary,
     currentStep?.layout,
     currentStep?.spotlight,
-    estimatedBubbleHeight,
     localAvoidRects,
     localTargetRect,
     rootLayout,
@@ -786,7 +569,22 @@ export function GuidedCoachmarkLayer({
     Boolean(currentStep?.blockOutside) ||
     (currentStep?.advanceOn !== "manual" && shouldShowSpotlight);
   const shouldBlockSpotlight = Boolean(currentStep?.blockSpotlight && shouldShowSpotlight);
-  const shouldRenderFullscreenBlocker = shouldBlockOutside && !shouldShowSpotlight;
+  const shouldUsePassThroughBlockers =
+    passThroughTargetIds.length > 0 && !shouldShowSpotlight;
+  const passThroughBlockerRects = useMemo(() => {
+    if (!shouldUsePassThroughBlockers || localPassThroughRects.length === 0) {
+      return [];
+    }
+
+    return computeMultiPassThroughBlockerRects({
+      rootLayout,
+      passThroughRects: localPassThroughRects,
+    });
+  }, [localPassThroughRects, rootLayout, shouldUsePassThroughBlockers]);
+  const shouldRenderPassThroughBlockers = passThroughBlockerRects.length > 0;
+  const shouldRenderFullscreenBlocker =
+    (shouldBlockOutside && !shouldShowSpotlight && !shouldUsePassThroughBlockers) ||
+    (shouldUsePassThroughBlockers && localPassThroughRects.length === 0);
   const shouldRenderSkipButton = showSkipButton && skipLabel != null && onSkipPress != null;
   const skipButtonBottom = Math.max(insets.bottom + 72, 72);
 
@@ -839,6 +637,15 @@ export function GuidedCoachmarkLayer({
             onPress={triggerBubbleShake}
           />
         ) : null}
+        {shouldRenderPassThroughBlockers
+          ? passThroughBlockerRects.map((rect, index) => (
+              <Pressable
+                key={`pass-through-blocker-${index}`}
+                style={[styles.blocker, rect]}
+                onPress={triggerBubbleShake}
+              />
+            ))
+          : null}
         {shouldRenderSkipButton ? (
           <View
             pointerEvents="box-none"

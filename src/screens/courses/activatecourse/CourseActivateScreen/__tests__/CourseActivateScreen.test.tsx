@@ -98,9 +98,29 @@ jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActiv
 
 jest.mock("@/src/components/button/button", () => {
   const React = require("react");
-  const { Text } = require("react-native");
-  function MockButton({ text, onPress }: { text: string; onPress?: () => void }) {
-    return <Text onPress={onPress}>{text}</Text>;
+  const { Pressable, Text } = require("react-native");
+  function MockButton({
+    text,
+    onPress,
+    disabled = false,
+    accessibilityLabel,
+  }: {
+    text: string;
+    onPress?: () => void;
+    disabled?: boolean;
+    accessibilityLabel?: string;
+  }) {
+    return (
+      <Pressable
+        accessibilityRole="button"
+        accessibilityLabel={accessibilityLabel ?? text}
+        accessibilityState={{ disabled }}
+        disabled={disabled}
+        onPress={onPress}
+      >
+        <Text>{text}</Text>
+      </Pressable>
+    );
   }
   return MockButton;
 });
@@ -403,5 +423,27 @@ describe("CourseActivateScreen loading state", () => {
       expect(setActiveCustomCourseId).toHaveBeenCalledWith(11);
     });
     expect(advanceByEvent).toHaveBeenCalledWith("activate_course");
+  });
+
+  it("shows enabled onboarding next after restart with an active custom course", async () => {
+    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 11,
+      setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
+      colors: {
+        paragraph: "#222",
+        headline: "#111",
+      },
+      pinnedOfficialCourseIds: [],
+    });
+
+    const screen = render(<CourseActivateScreen />);
+
+    const nextButton = await screen.findByLabelText(
+      "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.przejdzDalej"
+    );
+
+    expect(nextButton.props.accessibilityState).toEqual({ disabled: false });
+    expect(screen.getByText("app.actions.next")).toBeTruthy();
   });
 });

@@ -64,15 +64,15 @@ export async function resolveStartupRoute(): Promise<StartupRoute> {
     return "/course-entry-settings";
   }
 
+  if (checkpoint === "activate_required") {
+    return "/coursepanel";
+  }
+
   if (hasActiveCourse) {
     return "/";
   }
 
   if (hasPinnedCourses) {
-    return "/coursepanel";
-  }
-
-  if (checkpoint === "activate_required") {
     return "/coursepanel";
   }
 

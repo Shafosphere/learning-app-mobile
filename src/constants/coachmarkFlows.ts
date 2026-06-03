@@ -33,6 +33,8 @@ export type CoachmarkFlowStep = {
   autoAdvanceDelayMs?: number;
   floatingIndicator?: "arrow_u_down_right";
   avoidTargetIds?: string[];
+  passThroughTargetId?: string;
+  passThroughTargetIds?: string[];
 };
 
 export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
@@ -513,6 +515,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
     kind: "action",
     advanceOn: "box_selected",
     expectedBox: "boxOne",
+    passThroughTargetId: "flashcards-box-one",
   },
   {
     id: "flashcards-step-9",
@@ -523,6 +526,10 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
     advanceOn: "answer_submitted",
     forceCorrectOnSubmit: true,
     dismissKeyboardOnAdvance: true,
+    passThroughTargetIds: [
+      "flashcards-card-section",
+      "flashcards-confirm-button",
+    ],
   },
   {
     id: "flashcards-step-10",

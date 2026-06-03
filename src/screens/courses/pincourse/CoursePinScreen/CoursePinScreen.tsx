@@ -325,6 +325,16 @@ export default function CoursePinScreen() {
     introActive &&
     coachmark.isActive &&
     coachmark.currentStep?.id === "course-pin-step-1";
+  const currentCoachmarkStepId = coachmark.currentStep?.id;
+  const goToNextCoachmark = coachmark.goNext;
+
+  const handleCoachmarkNext = useCallback(async () => {
+    const shouldSwitchToGeneral = currentCoachmarkStepId === "course-pin-step-6";
+    await goToNextCoachmark();
+    if (shouldSwitchToGeneral) {
+      setViewMode("general");
+    }
+  }, [currentCoachmarkStepId, goToNextCoachmark]);
 
   const coachmarkLayer = useMemo(
     () =>
@@ -336,7 +346,7 @@ export default function CoursePinScreen() {
             canGoBack: coachmark.canGoBack,
             canGoNext: coachmark.canGoNext,
             onBack: coachmark.goBack,
-            onNext: coachmark.goNext,
+            onNext: handleCoachmarkNext,
             showSkipButton: shouldShowSkipOnboardingButton,
             skipLabel: t("onboarding.skip.label"),
             onSkipPress: () => setIsSkipOnboardingModalVisible(true),
@@ -348,7 +358,7 @@ export default function CoursePinScreen() {
       coachmark.currentIndex,
       coachmark.currentStep,
       coachmark.goBack,
-      coachmark.goNext,
+      handleCoachmarkNext,
       coachmark.isActive,
       coachmark.totalSteps,
       shouldShowSkipOnboardingButton,

@@ -82,6 +82,9 @@ export function OnboardingGate() {
         ? "course_entry_settings_required"
         : "done";
     }
+    if (checkpoint === "activate_required") {
+      return "activate_required";
+    }
     if (hasActive) return "done";
     if (requiresCourseEntrySettings) {
       return "done";
