@@ -742,6 +742,13 @@
   "onboarding": {
     "previousMessage": "Previous message",
     "nextMessage": "Next message",
+    "skip": {
+      "label": "Skip",
+      "title": "Skip the tutorial?",
+      "description": "Are you sure you want to skip the tutorial?",
+      "confirm": "Skip",
+      "cancel": "Stay"
+    },
     "languageIntro": {
       "title": "Choose language",
       "appTitle": "Choose app language",

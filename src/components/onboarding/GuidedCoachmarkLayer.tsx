@@ -5,6 +5,7 @@ import {
 } from "@edwardloopez/react-native-coachmark";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
+import MyButton from "@/src/components/button/button";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import type { CoachmarkFlowStep } from "@/src/constants/coachmarkFlows";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -52,6 +53,9 @@ export type GuidedCoachmarkLayerProps = {
   canGoNext: boolean;
   onBack: () => void;
   onNext: () => void | Promise<void>;
+  skipLabel?: string;
+  showSkipButton?: boolean;
+  onSkipPress?: () => void;
 };
 
 const BUBBLE_KEYBOARD_GAP = 12;
@@ -378,6 +382,9 @@ export function GuidedCoachmarkLayer({
   canGoNext,
   onBack,
   onNext,
+  skipLabel,
+  showSkipButton = false,
+  onSkipPress,
 }: GuidedCoachmarkLayerProps) {
   const { state, getAnchor, setMeasured, next, theme } = useCoachmarkContext();
   const { colors } = useSettings();
@@ -780,6 +787,8 @@ export function GuidedCoachmarkLayer({
     (currentStep?.advanceOn !== "manual" && shouldShowSpotlight);
   const shouldBlockSpotlight = Boolean(currentStep?.blockSpotlight && shouldShowSpotlight);
   const shouldRenderFullscreenBlocker = shouldBlockOutside && !shouldShowSpotlight;
+  const shouldRenderSkipButton = showSkipButton && skipLabel != null && onSkipPress != null;
+  const skipButtonBottom = Math.max(insets.bottom + 72, 72);
 
   useEffect(() => {
     const duration = 280;
@@ -829,6 +838,25 @@ export function GuidedCoachmarkLayer({
             style={[StyleSheet.absoluteFill, styles.blocker]}
             onPress={triggerBubbleShake}
           />
+        ) : null}
+        {shouldRenderSkipButton ? (
+          <View
+            pointerEvents="box-none"
+            style={[
+              styles.skipButtonHost,
+              {
+                bottom: skipButtonBottom,
+              },
+            ]}
+          >
+            <MyButton
+              text={skipLabel}
+              accessibilityLabel={skipLabel}
+              color="my_red"
+              width={90}
+              onPress={onSkipPress}
+            />
+          </View>
         ) : null}
         {renderSpotlightLayer && localTargetRect ? (
           <Animated.View
@@ -987,6 +1015,12 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
     zIndex: 10,
     elevation: 10,
+  },
+  skipButtonHost: {
+    position: "absolute",
+    left: "10%",
+    zIndex: 90,
+    elevation: 90,
   },
   bubbleHost: {
     ...StyleSheet.absoluteFillObject,

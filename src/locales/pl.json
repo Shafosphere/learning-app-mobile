@@ -742,6 +742,13 @@
   "onboarding": {
     "previousMessage": "Poprzedni komunikat",
     "nextMessage": "Następny komunikat",
+    "skip": {
+      "label": "Pomiń",
+      "title": "Pominąć samouczek?",
+      "description": "Czy na pewno chcesz pominąć samouczek?",
+      "confirm": "Pomiń",
+      "cancel": "Zostań"
+    },
     "languageIntro": {
       "title": "Wybierz język",
       "appTitle": "Wybierz język aplikacji",

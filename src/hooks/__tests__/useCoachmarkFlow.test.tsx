@@ -78,4 +78,29 @@ describe("useCoachmarkFlow", () => {
     expect(AsyncStorage.setItem).toHaveBeenCalledTimes(1);
     expect(mockStop).toHaveBeenCalledTimes(1);
   });
+
+  it("marks the flow seen and stops it when skipped", async () => {
+    const onComplete = jest.fn();
+    const { result } = renderHook(() =>
+      useCoachmarkFlow({
+        flowKey: "test-flow",
+        storageKey: "@test_flow_seen",
+        shouldStart: true,
+        steps,
+        onComplete,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isReady).toBe(true);
+    });
+
+    await act(async () => {
+      await result.current.skipFlow();
+    });
+
+    expect(AsyncStorage.setItem).toHaveBeenCalledWith("@test_flow_seen", "1");
+    expect(mockStop).toHaveBeenCalledWith("completed");
+    expect(onComplete).not.toHaveBeenCalled();
+  });
 });

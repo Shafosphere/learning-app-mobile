@@ -1,6 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_PIN_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
@@ -91,6 +92,10 @@ export default function CoursePinScreen() {
     null
   );
   const [coachmarkTargetsReady, setCoachmarkTargetsReady] = useState(false);
+  const [
+    isSkipOnboardingModalVisible,
+    setIsSkipOnboardingModalVisible,
+  ] = useState(false);
 
   const persistCheckpointIfNeeded = useCallback(
     (next: OnboardingCheckpoint) => {
@@ -316,6 +321,10 @@ export default function CoursePinScreen() {
     },
     restartToken: params.replayIntro,
   });
+  const shouldShowSkipOnboardingButton =
+    introActive &&
+    coachmark.isActive &&
+    coachmark.currentStep?.id === "course-pin-step-1";
 
   const coachmarkLayer = useMemo(
     () =>
@@ -328,6 +337,9 @@ export default function CoursePinScreen() {
             canGoNext: coachmark.canGoNext,
             onBack: coachmark.goBack,
             onNext: coachmark.goNext,
+            showSkipButton: shouldShowSkipOnboardingButton,
+            skipLabel: t("onboarding.skip.label"),
+            onSkipPress: () => setIsSkipOnboardingModalVisible(true),
           }
         : null,
     [
@@ -339,6 +351,8 @@ export default function CoursePinScreen() {
       coachmark.goNext,
       coachmark.isActive,
       coachmark.totalSteps,
+      shouldShowSkipOnboardingButton,
+      t,
     ],
   );
 
@@ -403,6 +417,13 @@ export default function CoursePinScreen() {
       unpinOfficialCourse,
     ]
   );
+
+  const handleConfirmSkipOnboarding = useCallback(async () => {
+    setIsSkipOnboardingModalVisible(false);
+    await coachmark.skipFlow();
+    setCheckpoint("done");
+    await setOnboardingCheckpoint("done");
+  }, [coachmark]);
 
   const renderOfficialPackCard = useCallback(
     (pack: OfficialCourseListItem) => {
@@ -721,6 +742,18 @@ export default function CoursePinScreen() {
               />
             </CoachmarkAnchor>
           </View>
+          <NudgeModal
+            visible={isSkipOnboardingModalVisible}
+            title={t("onboarding.skip.title")}
+            description={t("onboarding.skip.description")}
+            confirmLabel={t("onboarding.skip.confirm")}
+            onConfirm={() => {
+              void handleConfirmSkipOnboarding();
+            }}
+            onClose={() => setIsSkipOnboardingModalVisible(false)}
+            secondaryLabel={t("onboarding.skip.cancel")}
+            onSecondaryPress={() => setIsSkipOnboardingModalVisible(false)}
+          />
         </View>
       ) : (
         <View style={styles.buttonscontainer}>

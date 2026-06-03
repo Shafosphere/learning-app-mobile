@@ -156,6 +156,16 @@ export function useCoachmarkFlow({
     }
   }, [onComplete, storageKey, stop]);
 
+  const skipFlow = useCallback(async () => {
+    if (finishFlowInProgressRef.current) return;
+    finishFlowInProgressRef.current = true;
+    await AsyncStorage.setItem(storageKey, "1");
+    autoAdvanceStepIdRef.current = null;
+    autoAdvancedStepIdsRef.current.clear();
+    setHasSeen(true);
+    await stop("completed");
+  }, [storageKey, stop]);
+
   const canAdvanceCurrentStep = Boolean(
     currentStep &&
       (
@@ -207,6 +217,7 @@ export function useCoachmarkFlow({
       goBack,
       goNext,
       advanceByEvent,
+      skipFlow,
     }),
     [
       advanceByEvent,
@@ -218,6 +229,7 @@ export function useCoachmarkFlow({
       isActive,
       isPendingStart,
       isReady,
+      skipFlow,
       state.index,
       steps.length,
     ]
