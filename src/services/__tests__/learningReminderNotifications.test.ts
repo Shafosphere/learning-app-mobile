@@ -63,6 +63,7 @@ describe("learning reminder notifications", () => {
       mockScheduleNotificationAsync.mock.calls.map(([input]) => ({
         title: input.content.title,
         body: input.content.body,
+        kind: input.content.data.kind,
         scheduledAt: input.content.data.scheduledAt,
         date: input.trigger.date.toISOString(),
       }))
@@ -70,12 +71,14 @@ describe("learning reminder notifications", () => {
       {
         title: "Czas na fiszki",
         body: "Za chwilkę Twoja pora na fiszki",
+        kind: "learning_reminder",
         scheduledAt: "2099-01-01T18:00:00.000Z",
         date: "2099-01-01T18:00:00.000Z",
       },
       {
         title: "Czas na fiszki",
         body: "To teraz! Wróć do fiszek na chwilkę",
+        kind: "learning_reminder",
         scheduledAt: "2099-01-01T19:00:00.000Z",
         date: "2099-01-01T19:00:00.000Z",
       },
