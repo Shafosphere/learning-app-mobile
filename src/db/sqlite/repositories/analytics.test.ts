@@ -8,6 +8,7 @@ jest.mock("@/src/db/sqlite/core", () => ({
 import {
   clearCustomLearningEventsForCourse,
   getCourseCompletionSummary,
+  getCustomFlashcardConsecutiveWrongCount,
   getGlobalDailyStreakDays,
   getHardFlashcards,
 } from "@/src/db/sqlite/repositories/analytics";
@@ -103,6 +104,57 @@ describe("analytics repository", () => {
       "DELETE FROM custom_learning_events WHERE course_id = ?;",
       41
     );
+    expect(result).toBe(6);
+  });
+
+  it("returns zero consecutive wrong answers when a flashcard has no events", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue(null);
+
+    mockGetDB.mockResolvedValue({
+      getFirstAsync,
+    });
+
+    const result = await getCustomFlashcardConsecutiveWrongCount(12, 77);
+
+    expect(getFirstAsync).toHaveBeenCalledWith(
+      expect.stringContaining("COUNT(*) AS wrongCount"),
+      12,
+      77,
+      77,
+      12,
+      77,
+      77
+    );
+    expect(result).toBe(0);
+  });
+
+  it("counts wrong answers after the latest ok answer", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue({ wrongCount: 3 });
+
+    mockGetDB.mockResolvedValue({
+      getFirstAsync,
+    });
+
+    const result = await getCustomFlashcardConsecutiveWrongCount(33, 44);
+    const [sql] = getFirstAsync.mock.calls[0];
+
+    expect(sql).toContain("SELECT MAX(created_at)");
+    expect(sql).toContain("result = 'ok'");
+    expect(sql).toContain("result = 'wrong'");
+    expect(result).toBe(3);
+  });
+
+  it("scopes consecutive wrong answers by course id", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue({ wrongCount: 6 });
+
+    mockGetDB.mockResolvedValue({
+      getFirstAsync,
+    });
+
+    const result = await getCustomFlashcardConsecutiveWrongCount(19, 81);
+    const args = getFirstAsync.mock.calls[0].slice(1);
+
+    expect(args).toEqual([19, 81, 81, 19, 81, 81]);
     expect(result).toBe(6);
   });
 

@@ -469,6 +469,11 @@
           "subtitle": "Opens the flashcards screen and restarts the guide for adding hints.",
           "button": "Show hints"
         },
+        "previewReviewMistakeNudge": {
+          "title": "Preview mistake nudge",
+          "subtitle": "Opens the review screen and shows the window for a sample flashcard with a wrong-answer streak.",
+          "button": "Show nudge"
+        },
         "previewLocalExportReminder": {
           "title": "Preview backup reminder",
           "subtitle": "Shows the window reminding the user to create a local data backup.",
@@ -1084,6 +1089,22 @@
         "returnToUnknownDescription": "This flashcard will be removed from boxes and reviews and returned to the unknown pool. Existing statistics will be kept.",
         "returnToUnknownConfirm": "RETURN CARD",
         "returnToUnknownError": "Could not return this flashcard. Please try again."
+      },
+      "reviewMistakeNudge": {
+        "title": "This flashcard is giving you trouble",
+        "description": "You missed this flashcard {{count}} times in a row. Want to move it back to Unknown and learn it again from scratch?",
+        "front": "Front",
+        "back": "Back",
+        "preview": {
+          "front": "warning road sign",
+          "back": "triangular sign with a red border"
+        },
+        "imageFront": "Image on the front",
+        "imageBack": "Image on the back",
+        "confirm": "MOVE TO UNKNOWN",
+        "returning": "MOVING...",
+        "keep": "KEEP REVIEWING",
+        "error": "Could not move this flashcard. Please try again."
       },
       "hint": {
         "placeholder": "Enter a hint…",

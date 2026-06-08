@@ -171,6 +171,15 @@ const DebuggingSection: React.FC = () => {
     });
   };
 
+  const handlePreviewReviewMistakeNudge = () => {
+    router.push({
+      pathname: "/review/reviewflashcards",
+      params: {
+        mistakeNudgePreviewToken: Date.now().toString(),
+      },
+    });
+  };
+
   const handlePreviewLocalExportReminder = () => {
     triggerLocalExportReminderPreview();
   };
@@ -409,6 +418,23 @@ const DebuggingSection: React.FC = () => {
           color="my_yellow"
           onPress={handlePreviewHintTutorial}
           disabled={activeCustomCourseId == null}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewReviewMistakeNudge.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewReviewMistakeNudge.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.previewReviewMistakeNudge.button")}
+          color="my_yellow"
+          onPress={handlePreviewReviewMistakeNudge}
           width={140}
         />
       </View>

@@ -469,6 +469,11 @@
           "subtitle": "Otwiera ekran fiszek i uruchamia poradnik dodawania podpowiedzi od początku.",
           "button": "Pokaż hinty"
         },
+        "previewReviewMistakeNudge": {
+          "title": "Podgląd nudge po błędach",
+          "subtitle": "Otwiera ekran powtórek i pokazuje okno dla przykładowej fiszki z serią błędów.",
+          "button": "Pokaż nudge"
+        },
         "previewLocalExportReminder": {
           "title": "Podgląd przypomnienia o kopii",
           "subtitle": "Pokazuje okno przypominające o zrobieniu lokalnej kopii danych.",
@@ -1084,6 +1089,22 @@
         "returnToUnknownDescription": "Fiszka zostanie usunięta z pudełek i powtórek oraz wróci do puli nieznanych. Dotychczasowe statystyki pozostaną zapisane.",
         "returnToUnknownConfirm": "COFNIJ FISZKĘ",
         "returnToUnknownError": "Nie udało się cofnąć fiszki. Spróbuj ponownie."
+      },
+      "reviewMistakeNudge": {
+        "title": "Ta fiszka sprawia Ci problemy",
+        "description": "Ta fiszka sprawiła Ci trudność {{count}} razy z rzędu. Chcesz przenieść ją do Nieznanych i nauczyć się jej jeszcze raz od nowa?",
+        "front": "Awers",
+        "back": "Rewers",
+        "preview": {
+          "front": "znak ostrzegawczy",
+          "back": "trójkątny znak z czerwoną obwódką"
+        },
+        "imageFront": "Obrazek na awersie",
+        "imageBack": "Obrazek na rewersie",
+        "confirm": "PRZENIEŚ DO NIEZNANYCH",
+        "returning": "PRZENOSZENIE...",
+        "keep": "ĆWICZ DALEJ",
+        "error": "Nie udało się przenieść fiszki. Spróbuj ponownie."
       },
       "hint": {
         "placeholder": "Wpisz podpowiedź…",

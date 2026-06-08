@@ -3,16 +3,19 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import Card from "@/src/components/card/card";
 import type { CardCorrectionType } from "@/src/components/card/card-types";
+import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  getCustomFlashcardConsecutiveWrongCount,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
@@ -42,7 +45,7 @@ import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import { Animated, ScrollView, View } from "react-native";
+import { Animated, ScrollView, Text, View } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./reviewflashcards-styles";
@@ -54,6 +57,15 @@ const ACTION_POST_ANSWER_COOLDOWN_MS = 1000;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
+const REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE =
+  "data:image/svg+xml," +
+  encodeURIComponent(
+    `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 160 140">
+      <path d="M80 8 154 132H6Z" fill="#fff7ed" stroke="#dc2626" stroke-width="12" stroke-linejoin="round"/>
+      <path d="M80 42v42" stroke="#111827" stroke-width="12" stroke-linecap="round"/>
+      <circle cx="80" cy="108" r="7" fill="#111827"/>
+    </svg>`
+  );
 
 const NON_INTRO_BOXES: readonly (keyof BoxesState)[] = [
   "boxZero",
@@ -102,20 +114,36 @@ const findFirstActiveBox = (boxes: BoxesState): keyof BoxesState | null => {
   return null;
 };
 
+type ReviewMistakeNudgeCandidate = {
+  card: WordWithTranslations;
+  box: keyof BoxesState;
+  wrongStreak: number;
+};
+
+type ReviewMistakeNudgeState = ReviewMistakeNudgeCandidate & {
+  confirming: boolean;
+  error: boolean;
+  preview?: boolean;
+};
+
 // Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
 export default function ReviewFlashcardsPlaceholder() {
   const params = useLocalSearchParams<{
     courseId?: string;
     onboarding?: string;
+    mistakeNudgePreviewToken?: string;
   }>();
   const styles = useStyles();
   const { t } = useTranslation();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
+  const settings = useSettings();
   const {
     actionButtonsPosition,
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
-  } = useSettings();
+  } = settings;
+  const mistakeNudgeTextColor = settings.colors?.paragraph ?? "#1f2937";
+  const mistakeNudgeTitleColor = settings.colors?.headline ?? "#111827";
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -131,6 +159,12 @@ export default function ReviewFlashcardsPlaceholder() {
     return Number.isFinite(num) ? num : null;
   }, [params?.courseId]);
   const shouldStartReviewCoachmark = params?.onboarding === "review-flashcards";
+  const mistakeNudgePreviewToken =
+    typeof params?.mistakeNudgePreviewToken === "string"
+      ? params.mistakeNudgePreviewToken
+      : Array.isArray(params?.mistakeNudgePreviewToken)
+        ? params.mistakeNudgePreviewToken[0]
+        : undefined;
   useEffect(() => {
     void appendDebugEvent("review", "review.enter", {
       screen: "review",
@@ -143,6 +177,30 @@ export default function ReviewFlashcardsPlaceholder() {
       });
     };
   }, [courseId]);
+
+  useEffect(() => {
+    if (!__DEV__ || !mistakeNudgePreviewToken) return;
+
+    const timer = setTimeout(() => {
+      setMistakeNudge({
+        card: {
+          id: -1,
+          text: "",
+          translations: [t("flashcards.card.reviewMistakeNudge.preview.back")],
+          flipped: false,
+          stage: 2,
+          imageFront: REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE,
+        },
+        box: "boxTwo",
+        wrongStreak: 3,
+        confirming: false,
+        error: false,
+        preview: true,
+      });
+    }, 120);
+
+    return () => clearTimeout(timer);
+  }, [mistakeNudgePreviewToken, t]);
 
   const showExplanationEnabled = useMemo(
     () =>
@@ -175,6 +233,8 @@ export default function ReviewFlashcardsPlaceholder() {
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<boolean | null>(null);
   const [correction, setCorrection] = useState<CardCorrectionType | null>(null);
+  const [mistakeNudge, setMistakeNudge] =
+    useState<ReviewMistakeNudgeState | null>(null);
   const [pendingExplanationMove, setPendingExplanationMove] = useState<{
     cardId: number;
     promote: boolean;
@@ -186,6 +246,9 @@ export default function ReviewFlashcardsPlaceholder() {
     null,
   );
   const reviewMutationQueueRef = useRef(new Map<number, Promise<unknown>>());
+  const pendingMistakeNudgeRef = useRef(
+    new Map<number, Promise<ReviewMistakeNudgeCandidate | null>>()
+  );
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const queuesRef = useRef<Record<keyof BoxesState, WordWithTranslations[]>>({
     boxZero: [],
@@ -285,6 +348,8 @@ export default function ReviewFlashcardsPlaceholder() {
     setAnswer("");
     setResult(null);
     setCorrection(null);
+    setMistakeNudge(null);
+    pendingMistakeNudgeRef.current.clear();
     setPendingExplanationMove(null);
     setIsActionCooldownActive(false);
     lastActionCooldownCardIdRef.current = null;
@@ -348,6 +413,137 @@ export default function ReviewFlashcardsPlaceholder() {
     },
     [],
   );
+
+  const queueMistakeNudgeCheck = useCallback(
+    (
+      card: WordWithTranslations,
+      box: keyof BoxesState,
+      logCompleted: Promise<boolean>,
+    ) => {
+      if (!courseId) return;
+      const candidatePromise = logCompleted
+        .then(async (logged) => {
+          if (!logged) return null;
+          const wrongStreak = await getCustomFlashcardConsecutiveWrongCount(
+            card.id,
+            courseId
+          );
+          if (wrongStreak > 0 && wrongStreak % 3 === 0) {
+            return { card, box, wrongStreak };
+          }
+          return null;
+        })
+        .catch((error) => {
+          console.warn("[Review] Failed to check wrong answer streak", error);
+          return null;
+        });
+      pendingMistakeNudgeRef.current.set(card.id, candidatePromise);
+    },
+    [courseId]
+  );
+
+  const consumeMistakeNudgeCandidate = useCallback(
+    async (cardId: number) => {
+      const candidatePromise = pendingMistakeNudgeRef.current.get(cardId);
+      if (!candidatePromise) return null;
+      try {
+        return await candidatePromise;
+      } finally {
+        if (pendingMistakeNudgeRef.current.get(cardId) === candidatePromise) {
+          pendingMistakeNudgeRef.current.delete(cardId);
+        }
+      }
+    },
+    []
+  );
+
+  const demoteAndRemoveReviewCard = useCallback(
+    (card: WordWithTranslations, box: keyof BoxesState) => {
+      if (!courseId) return;
+      void (async () => {
+        try {
+          void appendDebugEvent("review", "review.demote", {
+            screen: "review",
+            courseId,
+            cardId: card.id,
+            fromBox: box,
+          });
+          await enqueueReviewMutation(card.id, () =>
+            scheduleCustomReview(card.id, courseId, 0)
+          );
+        } catch (error) {
+          console.error("Failed to demote review card", error);
+        }
+      })();
+
+      removeCardFromSession(card.id, box);
+      setPendingExplanationMove(null);
+      setAnswer("");
+      setResult(null);
+      setQueueNext(true);
+      setIsBetweenCards(true);
+      setTimeout(() => setIsBetweenCards(false), 300);
+    },
+    [courseId, enqueueReviewMutation, removeCardFromSession]
+  );
+
+  const finalizeWrongReviewCard = useCallback(
+    async (card: WordWithTranslations, box: keyof BoxesState) => {
+      const candidate = await consumeMistakeNudgeCandidate(card.id);
+      if (candidate) {
+        setMistakeNudge({ ...candidate, confirming: false, error: false });
+        setPendingExplanationMove(null);
+        setAnswer("");
+        setResult(false);
+        setIsBetweenCards(false);
+        return;
+      }
+      demoteAndRemoveReviewCard(card, box);
+    },
+    [consumeMistakeNudgeCandidate, demoteAndRemoveReviewCard]
+  );
+
+  const handleKeepReviewingAfterMistakeNudge = useCallback(() => {
+    if (!mistakeNudge || mistakeNudge.confirming) return;
+    const { card, box } = mistakeNudge;
+    setMistakeNudge(null);
+    demoteAndRemoveReviewCard(card, box);
+  }, [demoteAndRemoveReviewCard, mistakeNudge]);
+
+  const handleReturnMistakeNudgeToUnknown = useCallback(async () => {
+    if (!mistakeNudge) return;
+    if (mistakeNudge.preview || !courseId) {
+      setMistakeNudge(null);
+      return;
+    }
+    const { card, box } = mistakeNudge;
+    setMistakeNudge((current) =>
+      current ? { ...current, confirming: true, error: false } : current
+    );
+    try {
+      await enqueueReviewMutation(card.id, () =>
+        returnFlashcardToUnknown({ courseId, flashcardId: card.id })
+      );
+      removeCardFromSession(card.id, box);
+      setMistakeNudge(null);
+      setPendingExplanationMove(null);
+      setAnswer("");
+      setResult(null);
+      setQueueNext(true);
+      setIsBetweenCards(true);
+      setTimeout(() => setIsBetweenCards(false), 300);
+    } catch (error) {
+      console.warn("[Review] Failed to return mistake nudge card to unknown", error);
+      setMistakeNudge((current) =>
+        current ? { ...current, confirming: false, error: true } : current
+      );
+    }
+  }, [
+    courseId,
+    enqueueReviewMutation,
+    mistakeNudge,
+    removeCardFromSession,
+  ]);
 
   const reloadSession = useCallback(async () => {
     clearTransitionTimer();
@@ -492,7 +688,7 @@ export default function ReviewFlashcardsPlaceholder() {
   );
 
   const handleSelectBox = (box: keyof BoxesState) => {
-    if (isLoading || correction) {
+    if (isLoading || correction || mistakeNudge) {
       handleBlockedBoxInteraction(box);
       return;
     }
@@ -611,39 +807,22 @@ export default function ReviewFlashcardsPlaceholder() {
       setAnswer("");
       return;
     }
-    void (async () => {
-      try {
-        void appendDebugEvent("review", "review.demote", {
-          screen: "review",
-          courseId,
-          cardId: correction.cardId,
-          fromBox: activeBox,
-        });
-        await enqueueReviewMutation(correction.cardId!, () =>
-          scheduleCustomReview(correction.cardId!, courseId, 0)
-        );
-      } catch (error) {
-        console.error("Failed to demote after correction", error);
-      }
-    })();
-
-    removeCardFromSession(correction.cardId, activeBox);
     setCorrection(null);
     setResult(null);
     setAnswer("");
     setPendingExplanationMove(null);
-    setQueueNext(true);
+    const resolvedCard = card ?? correction.word ?? selectedItem;
+    if (!resolvedCard) return;
+    void finalizeWrongReviewCard(resolvedCard, activeBox);
   }, [
     activeBox,
     boxes,
     correction,
     courseId,
     checkSpelling,
-    enqueueReviewMutation,
     explanationOnlyOnWrong,
-    pendingExplanationMove,
+    finalizeWrongReviewCard,
     selectedItem,
-    removeCardFromSession,
     showExplanationEnabled,
   ]);
 
@@ -715,7 +894,7 @@ export default function ReviewFlashcardsPlaceholder() {
     _selectedTranslation?: string,
     answerOverride?: string,
   ) => {
-    if (!selectedItem || !activeBox || !courseId) return;
+    if (!selectedItem || !activeBox || !courseId || mistakeNudge) return;
     if (transitionTimerRef.current) {
       clearTimeout(transitionTimerRef.current);
       transitionTimerRef.current = null;
@@ -726,9 +905,9 @@ export default function ReviewFlashcardsPlaceholder() {
       result !== null
     ) {
       const currentCardId = selectedItem.id;
-      void (async () => {
-        try {
-          if (pendingExplanationMove.promote) {
+      if (pendingExplanationMove.promote) {
+        void (async () => {
+          try {
             void appendDebugEvent("review", "review.advance", {
               screen: "review",
               courseId,
@@ -738,28 +917,20 @@ export default function ReviewFlashcardsPlaceholder() {
             await enqueueReviewMutation(currentCardId, () =>
               advanceCustomReview(currentCardId, courseId)
             );
-          } else {
-            void appendDebugEvent("review", "review.demote", {
-              screen: "review",
-              courseId,
-              cardId: currentCardId,
-              fromBox: activeBox,
-            });
-            await enqueueReviewMutation(currentCardId, () =>
-              scheduleCustomReview(currentCardId, courseId, 0)
-            );
+          } catch (error) {
+            console.error("Failed to finalize explanation move", error);
           }
-        } catch (error) {
-          console.error("Failed to finalize explanation move", error);
-        }
-      })();
-      removeCardFromSession(currentCardId, activeBox);
-      setPendingExplanationMove(null);
-      setAnswer("");
-      setResult(null);
-      setQueueNext(true);
-      setIsBetweenCards(true);
-      setTimeout(() => setIsBetweenCards(false), 300);
+        })();
+        removeCardFromSession(currentCardId, activeBox);
+        setPendingExplanationMove(null);
+        setAnswer("");
+        setResult(null);
+        setQueueNext(true);
+        setIsBetweenCards(true);
+        setTimeout(() => setIsBetweenCards(false), 300);
+      } else {
+        void finalizeWrongReviewCard(selectedItem, activeBox);
+      }
       return;
     }
     const userAnswer = (answerOverride ?? answer).trim();
@@ -790,11 +961,16 @@ export default function ReviewFlashcardsPlaceholder() {
         box: currentBox,
         result: resultValue,
         durationMs,
-      }).catch((error) => {
-        console.warn("[Review] Failed to log learning event", error);
       });
 
     if (!ok) {
+      const wrongLogPromise = logAttemptEvent("wrong")
+        .then(() => true)
+        .catch((error) => {
+          console.warn("[Review] Failed to log learning event", error);
+          return false;
+        });
+      queueMistakeNudgeCheck(selectedItem, currentBox, wrongLogPromise);
       void appendDebugEvent("review", "review.answer.wrong", {
         screen: "review",
         courseId,
@@ -803,14 +979,14 @@ export default function ReviewFlashcardsPlaceholder() {
         durationMs: durationMs ?? 0,
       });
       handleBoxFaceWrongAnswer(activeBox);
-      void logAttemptEvent("wrong");
+      void wrongLogPromise;
       const wrongExplanationState = getExplanationState({
         selectedItem,
         result: false,
         showExplanationEnabled,
         explanationOnlyOnWrong,
       });
-      if (isKnowDontKnow) {
+      if (isKnowDontKnow || selectedItem.type === "true_false") {
         if (wrongExplanationState.isExplanationPending) {
           setPendingExplanationMove({
             cardId: selectedItem.id,
@@ -819,48 +995,13 @@ export default function ReviewFlashcardsPlaceholder() {
           return;
         }
         const delayMs = wrongExplanationState.hasExplanation ? 3500 : 1500;
-        void (async () => {
-          try {
-            void appendDebugEvent("review", "review.demote", {
-              screen: "review",
-              courseId,
-              cardId: selectedItem.id,
-              fromBox: activeBox,
-            });
-            await enqueueReviewMutation(selectedItem.id, () =>
-              scheduleCustomReview(selectedItem.id, courseId, 0)
-            );
-          } catch (error) {
-            console.error("Failed to demote after know/dont know", error);
-            setBoxes((prev) => {
-              const current = prev[activeBox] ?? [];
-              if (current.some((item) => item.id === selectedItem.id)) {
-                return prev;
-              }
-              return {
-                ...prev,
-                [activeBox]: [selectedItem, ...current],
-              };
-            });
-            setActiveBox((current) => current ?? activeBox);
-          }
-        })();
-
         transitionTimerRef.current = setTimeout(() => {
-          removeCardFromSession(selectedItem.id, activeBox);
+          void finalizeWrongReviewCard(selectedItem, activeBox);
           reset();
           transitionTimerRef.current = null;
-          setQueueNext(true);
           setIsBetweenCards(true);
           setTimeout(() => setIsBetweenCards(false), 300);
         }, delayMs);
-        return;
-      }
-      if (selectedItem.type === "true_false" && wrongExplanationState.isExplanationPending) {
-        setPendingExplanationMove({
-          cardId: selectedItem.id,
-          promote: false,
-        });
         return;
       }
       setCorrection({
@@ -883,7 +1024,9 @@ export default function ReviewFlashcardsPlaceholder() {
       return;
     }
 
-    const logLearningEventPromise = logAttemptEvent("ok");
+    const logLearningEventPromise = logAttemptEvent("ok").catch((error) => {
+      console.warn("[Review] Failed to log learning event", error);
+    });
     void appendDebugEvent("review", "review.answer.correct", {
       screen: "review",
       courseId,
@@ -977,8 +1120,11 @@ export default function ReviewFlashcardsPlaceholder() {
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
     handleStatsBurst,
+    finalizeWrongReviewCard,
+    mistakeNudge,
     pendingExplanationMove,
     questionShownAt,
+    queueMistakeNudgeCheck,
     removeCardFromSession,
     result,
     selectedItem,
@@ -994,9 +1140,9 @@ export default function ReviewFlashcardsPlaceholder() {
     [handleConfirm, setAnswer],
   );
   const handleTrueFalseOk = useCallback(() => {
-    if (isLoading || isActionCooldownActive) return;
+    if (isLoading || isActionCooldownActive || mistakeNudge) return;
     handleConfirm();
-  }, [handleConfirm, isActionCooldownActive, isLoading]);
+  }, [handleConfirm, isActionCooldownActive, isLoading, mistakeNudge]);
 
   const shouldShowTrueFalseActions =
     (selectedItem?.type === "true_false" ||
@@ -1016,11 +1162,15 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItemId != null &&
     lastActionCooldownCardIdRef.current !== selectedItemId;
   const trueFalseActionsDisabled = isExplanationPending
-    ? isLoading || isActionCooldownActive || isImmediateActionLockActive
+    ? isLoading ||
+      isActionCooldownActive ||
+      isImmediateActionLockActive ||
+      mistakeNudge != null
     : result !== null ||
       isLoading ||
       isActionCooldownActive ||
-      isImmediateActionLockActive;
+      isImmediateActionLockActive ||
+      mistakeNudge != null;
   const showCardActions = !(
     shouldShowTrueFalseActions ||
     selectedItem?.type === "true_false" ||
@@ -1056,7 +1206,9 @@ export default function ReviewFlashcardsPlaceholder() {
   );
   const cardActionsDownloadDisabled = true;
   const cardActionsConfirmDisabled =
-    isActionCooldownActive || isImmediateActionLockActive;
+    isActionCooldownActive ||
+    isImmediateActionLockActive ||
+    mistakeNudge != null;
   const cardActionsConfirmLabel = isExplanationVisible
     ? t("flashcards.card.actions.ok")
     : t("flashcards.card.actions.confirm");
@@ -1106,6 +1258,62 @@ export default function ReviewFlashcardsPlaceholder() {
     };
   }, [areButtonsOnTop, keyboardVisible, measureBottomButtons, selectedItem?.id]);
 
+  const mistakeNudgeFrontText = mistakeNudge
+    ? mistakeNudge.card.text.trim() ||
+      (!mistakeNudge.card.imageFront
+        ? t("flashcards.card.peek.emptyContent")
+        : "")
+    : "";
+  const mistakeNudgeBackText = mistakeNudge
+    ? mistakeNudge.card.translations[0]?.trim() ||
+      (!mistakeNudge.card.imageBack
+        ? t("flashcards.card.peek.emptyTranslation")
+        : "")
+    : "";
+  const renderMistakeNudgeSide = (
+    label: string,
+    value: string,
+    imageUri?: string | null
+  ) => (
+    <View>
+      <Text
+        style={{
+          color: mistakeNudgeTextColor,
+          fontSize: 12,
+          fontWeight: "800",
+          opacity: 0.7,
+        }}
+      >
+        {label}
+      </Text>
+      {imageUri ? (
+        <View style={{ alignItems: "flex-start", marginTop: 6, marginBottom: 6 }}>
+          <PromptImage
+            uri={imageUri}
+            imageStyle={{
+              width: 96,
+              height: 84,
+              maxWidth: 120,
+              maxHeight: 96,
+              borderRadius: 8,
+            }}
+          />
+        </View>
+      ) : null}
+      {value ? (
+        <Text
+          style={{
+            color: mistakeNudgeTitleColor,
+            fontSize: 16,
+            fontWeight: "800",
+          }}
+        >
+          {value}
+        </Text>
+      ) : null}
+    </View>
+  );
+
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
       position={position}
@@ -1137,7 +1345,7 @@ export default function ReviewFlashcardsPlaceholder() {
         handleSelectBox={handleSelectBox}
         onBoxLongPress={handleBoxLongPress}
         countsCoachmarkId="review-flashcards-box-counts"
-        disabled={isBetweenCards || isLoading || correction != null}
+        disabled={isBetweenCards || isLoading || correction != null || mistakeNudge != null}
         faces={boxFaces}
       />
     ) : (
@@ -1146,7 +1354,7 @@ export default function ReviewFlashcardsPlaceholder() {
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
         onBoxLongPress={handleBoxLongPress}
-        disabled={isBetweenCards || isLoading || correction != null}
+        disabled={isBetweenCards || isLoading || correction != null || mistakeNudge != null}
         faces={boxFaces}
       />
     );
@@ -1366,6 +1574,47 @@ export default function ReviewFlashcardsPlaceholder() {
         onClose={closePeek}
         onReturnToUnknown={handleReturnPeekCardToUnknown}
       />
+      <NudgeModal
+        visible={mistakeNudge != null}
+        title={t("flashcards.card.reviewMistakeNudge.title")}
+        description={t("flashcards.card.reviewMistakeNudge.description", {
+          count: mistakeNudge?.wrongStreak ?? 3,
+        })}
+        confirmLabel={
+          mistakeNudge?.confirming
+            ? t("flashcards.card.reviewMistakeNudge.returning")
+            : t("flashcards.card.reviewMistakeNudge.confirm")
+        }
+        confirmDisabled={mistakeNudge?.confirming}
+        secondaryLabel={t("flashcards.card.reviewMistakeNudge.keep")}
+        onSecondaryPress={handleKeepReviewingAfterMistakeNudge}
+        onConfirm={() => void handleReturnMistakeNudgeToUnknown()}
+        onClose={handleKeepReviewingAfterMistakeNudge}
+      >
+        <View style={{ gap: 8, marginTop: 12 }}>
+          {renderMistakeNudgeSide(
+            t("flashcards.card.reviewMistakeNudge.front"),
+            mistakeNudgeFrontText,
+            mistakeNudge?.card.imageFront
+          )}
+          {renderMistakeNudgeSide(
+            t("flashcards.card.reviewMistakeNudge.back"),
+            mistakeNudgeBackText,
+            mistakeNudge?.card.imageBack
+          )}
+          {mistakeNudge?.error ? (
+            <Text
+              style={{
+                color: mistakeNudgeTextColor,
+                fontSize: 13,
+                fontWeight: "700",
+              }}
+            >
+              {t("flashcards.card.reviewMistakeNudge.error")}
+            </Text>
+          ) : null}
+        </View>
+      </NudgeModal>
     </View>
   );
 }

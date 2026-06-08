@@ -563,7 +563,7 @@ export function PromptImage({
               height="100%"
               preserveAspectRatio="xMidYMid meet"
             />
-          ) : (
+          ) : uri.startsWith("data:image/svg+xml") ? null : (
             <SvgUri
               uri={uri}
               width="100%"

@@ -138,6 +138,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "znaki_drogowe",
+    packVersion: 2,
     name: "Znaki Drogowe",
     iconId: "car",
     iconColor: "#DC2626",

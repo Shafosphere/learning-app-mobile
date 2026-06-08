@@ -209,7 +209,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "znaki_drogowe",
-    packVersion: 1,
+    packVersion: 2,
     name: "Znaki Drogowe",
     iconId: "car",
     iconColor: "#DC2626",

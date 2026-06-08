@@ -62,6 +62,38 @@ export async function logCustomLearningEvent(params: {
   );
 }
 
+export async function getCustomFlashcardConsecutiveWrongCount(
+  flashcardId: number,
+  courseId?: number | null
+): Promise<number> {
+  if (!flashcardId) return 0;
+  const db = await getDB();
+  const row = await db.getFirstAsync<{ wrongCount: number }>(
+    `SELECT COUNT(*) AS wrongCount
+     FROM custom_learning_events
+     WHERE flashcard_id = ?
+       AND (? IS NULL OR course_id = ?)
+       AND result = 'wrong'
+       AND created_at > COALESCE(
+         (
+           SELECT MAX(created_at)
+           FROM custom_learning_events
+           WHERE flashcard_id = ?
+             AND (? IS NULL OR course_id = ?)
+             AND result = 'ok'
+         ),
+         -1
+       );`,
+    flashcardId,
+    courseId ?? null,
+    courseId ?? null,
+    flashcardId,
+    courseId ?? null,
+    courseId ?? null
+  );
+  return Number(row?.wrongCount ?? 0);
+}
+
 export async function clearCustomLearningEventsForCourseWithDb(
   db: SQLite.SQLiteDatabase,
   courseId: number

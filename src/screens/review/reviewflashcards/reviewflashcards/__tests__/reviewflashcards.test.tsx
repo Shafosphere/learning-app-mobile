@@ -11,6 +11,7 @@ import { TextInput } from "react-native";
 import ReviewFlashcardsPlaceholder from "@/src/screens/review/reviewflashcards/reviewflashcards/reviewflashcards";
 import {
   advanceCustomReview,
+  getCustomFlashcardConsecutiveWrongCount,
   getDueCustomReviewFlashcards,
   logCustomLearningEvent,
   scheduleCustomReview,
@@ -72,14 +73,23 @@ jest.mock("@/src/components/onboarding/CoachmarkLayerPortal", () => ({
   useCoachmarkLayerPortal: jest.fn(),
 }));
 
+let latestNudgeModalProps: Record<string, any> | null = null;
+
 jest.mock("@/src/components/nudge/NudgeModal", () => ({
-  NudgeModal: () => null,
+  NudgeModal: (props: Record<string, any>) => {
+    latestNudgeModalProps = props;
+    if (!props.visible) return null;
+    const React = require("react");
+    const { View } = require("react-native");
+    return <View testID="review-mistake-nudge">{props.children}</View>;
+  },
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({
   advanceCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 2, nextReview: Date.now() })
   ),
+  getCustomFlashcardConsecutiveWrongCount: jest.fn(() => Promise.resolve(0)),
   getDueCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
   scheduleCustomReview: jest.fn(() =>
@@ -380,6 +390,8 @@ const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
+const mockedGetCustomFlashcardConsecutiveWrongCount =
+  getCustomFlashcardConsecutiveWrongCount as jest.Mock;
 const mockedRegisterProtectedDailyActivity =
   registerProtectedDailyActivity as jest.Mock;
 const mockedLogCustomLearningEvent = logCustomLearningEvent as jest.Mock;
@@ -470,6 +482,7 @@ describe("reviewflashcards correction desync regression", () => {
 
   beforeEach(() => {
     latestPeekProps = null;
+    latestNudgeModalProps = null;
     applyStatBurstMock = jest.fn();
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
@@ -511,6 +524,7 @@ describe("reviewflashcards correction desync regression", () => {
       goNext: jest.fn(),
       advanceByEvent: jest.fn(() => Promise.resolve(true)),
     });
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValue(0);
   });
 
   afterEach(() => {
@@ -1024,6 +1038,191 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     expect(screen.getByText("boxZero:0")).not.toBeNull();
+  });
+
+  it("shows the mistake nudge only after typed correction is completed and can return the card to unknown", async () => {
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValueOnce(3);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 721,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(screen.queryByText("cat")).not.toBeNull();
+      expect(screen.queryByText("kot")).not.toBeNull();
+    });
+    expect(latestNudgeModalProps?.visible).not.toBe(true);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
+    });
+
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+      expect(screen.getByTestId("review-mistake-nudge")).toBeTruthy();
+      expect(screen.queryAllByText("cat").length).toBeGreaterThan(0);
+      expect(screen.queryAllByText("kot").length).toBeGreaterThan(0);
+    });
+
+    await act(async () => {
+      await latestNudgeModalProps?.onConfirm?.();
+    });
+
+    await waitFor(() => {
+      expect(mockedReturnFlashcardToUnknown).toHaveBeenCalledWith({
+        courseId: 77,
+        flashcardId: 721,
+      });
+    });
+    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+  });
+
+  it("keeps reviewing from the mistake nudge by scheduling the normal stage-zero demotion", async () => {
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValueOnce(3);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 722,
+        frontText: "dog",
+        backText: "pies",
+        answers: ["pies"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "pies");
+    });
+
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+
+    act(() => {
+      latestNudgeModalProps?.onSecondaryPress?.();
+    });
+
+    await waitFor(() => {
+      expect(mockedScheduleCustomReview).toHaveBeenCalledWith(722, 77, 0);
+    });
+    expect(mockedReturnFlashcardToUnknown).not.toHaveBeenCalled();
+  });
+
+  it("does not show the mistake nudge on the second consecutive wrong answer", async () => {
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValueOnce(2);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 723,
+        frontText: "bird",
+        backText: "ptak",
+        answers: ["ptak"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "ptak");
+    });
+
+    await waitFor(() => {
+      expect(mockedScheduleCustomReview).toHaveBeenCalledWith(723, 77, 0);
+    });
+    expect(latestNudgeModalProps?.visible).not.toBe(true);
+  });
+
+  it("shows the mistake nudge again on the sixth consecutive wrong answer", async () => {
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValueOnce(6);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 724,
+        frontText: "fish",
+        backText: "ryba",
+        answers: ["ryba"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "ryba");
+    });
+
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+  });
+
+  it("shows the mistake nudge for true-false cards only after the feedback delay", async () => {
+    jest.useFakeTimers();
+    mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValueOnce(3);
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 725,
+        frontText: "Sun rises in the east",
+        backText: "true",
+        answers: ["true"],
+        type: "true_false",
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    fireEvent.press(screen.getByTestId("false-answer-button"));
+    expect(latestNudgeModalProps?.visible).not.toBe(true);
+    expect(getVisibleTextInputs(screen)).toHaveLength(0);
+
+    await act(async () => {
+      jest.advanceTimersByTime(1500);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latestNudgeModalProps?.visible).toBe(true);
+    });
+    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    jest.useRealTimers();
   });
 
   it("never schedules a long timeout for a far-future review interval", async () => {
