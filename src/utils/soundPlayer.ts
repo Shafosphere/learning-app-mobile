@@ -10,6 +10,7 @@ let audioModeConfigured = false;
 let feedbackVolume = 1;
 
 const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
+const isFeedbackMuted = () => feedbackVolume <= 0;
 
 const configureAudioMode = async () => {
   if (audioModeConfigured) {
@@ -59,6 +60,10 @@ const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> =>
   loadSoundByKey(soundId, SOUNDS[soundId]);
 
 const playSound = async (soundId: SoundId) => {
+  if (isFeedbackMuted()) {
+    return;
+  }
+
   await configureAudioMode();
   const sound = await loadSound(soundId);
   if (!sound) {
@@ -78,6 +83,10 @@ const playSound = async (soundId: SoundId) => {
 };
 
 export const playSoundAsset = async (cacheKey: string, source: SoundAsset) => {
+  if (isFeedbackMuted()) {
+    return;
+  }
+
   await configureAudioMode();
   const sound = await loadSoundByKey(cacheKey, source);
   if (!sound) {
@@ -105,5 +114,8 @@ export const setFeedbackVolume = (value: number) => {
   Object.values(loadedSounds).forEach((sound) => {
     if (!sound) return;
     sound.volume = feedbackVolume;
+    if (isFeedbackMuted() && sound.playing) {
+      sound.pause();
+    }
   });
 };
