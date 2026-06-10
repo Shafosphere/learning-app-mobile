@@ -1,4 +1,5 @@
 import {
+  FLASHCARDS_NOTIFICATION_ROUTE,
   REVIEW_NOTIFICATION_ROUTE,
   getNotificationResponseRoute,
 } from "@/src/services/notificationResponseRouting";
@@ -18,6 +19,44 @@ describe("notification response routing", () => {
         },
       })
     ).toBe(REVIEW_NOTIFICATION_ROUTE);
+  });
+
+  it("returns the review route for a NotifyKit notification", () => {
+    expect(
+      getNotificationResponseRoute({
+        notification: {
+          data: {
+            route: REVIEW_NOTIFICATION_ROUTE,
+          },
+        },
+      })
+    ).toBe(REVIEW_NOTIFICATION_ROUTE);
+  });
+
+  it("returns the review route for a NotifyKit foreground event", () => {
+    expect(
+      getNotificationResponseRoute({
+        detail: {
+          notification: {
+            data: {
+              route: REVIEW_NOTIFICATION_ROUTE,
+            },
+          },
+        },
+      })
+    ).toBe(REVIEW_NOTIFICATION_ROUTE);
+  });
+
+  it("returns the flashcards route for a NotifyKit notification", () => {
+    expect(
+      getNotificationResponseRoute({
+        notification: {
+          data: {
+            route: FLASHCARDS_NOTIFICATION_ROUTE,
+          },
+        },
+      })
+    ).toBe(FLASHCARDS_NOTIFICATION_ROUTE);
   });
 
   it("ignores missing or unsupported routes", () => {

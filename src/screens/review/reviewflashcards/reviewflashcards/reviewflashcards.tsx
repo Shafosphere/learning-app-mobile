@@ -139,8 +139,10 @@ export default function ReviewFlashcardsPlaceholder() {
   const settings = useSettings();
   const {
     actionButtonsPosition,
+    cancelTodayLearningReminderSchedule,
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
+    learningRemindersEnabled,
   } = settings;
   const mistakeNudgeTextColor = settings.colors?.paragraph ?? "#1f2937";
   const mistakeNudgeTitleColor = settings.colors?.headline ?? "#111827";
@@ -1027,6 +1029,9 @@ export default function ReviewFlashcardsPlaceholder() {
     const logLearningEventPromise = logAttemptEvent("ok").catch((error) => {
       console.warn("[Review] Failed to log learning event", error);
     });
+    if (learningRemindersEnabled) {
+      void logLearningEventPromise.then(() => cancelTodayLearningReminderSchedule());
+    }
     void appendDebugEvent("review", "review.answer.correct", {
       screen: "review",
       courseId,
@@ -1120,7 +1125,9 @@ export default function ReviewFlashcardsPlaceholder() {
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
     handleStatsBurst,
+    cancelTodayLearningReminderSchedule,
     finalizeWrongReviewCard,
+    learningRemindersEnabled,
     mistakeNudge,
     pendingExplanationMove,
     questionShownAt,

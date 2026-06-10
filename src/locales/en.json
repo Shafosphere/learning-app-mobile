@@ -238,6 +238,7 @@
       "section": "Other",
       "groups": {
         "localBackup": "Local backup",
+        "notificationTests": "Notification tests",
         "googleDrive": "Google Drive",
         "reset": "RESET"
       },
@@ -368,6 +369,11 @@
       "resetIntroDone": {
         "message": "Introduction reset. The tutorial will start from language selection."
       },
+      "notificationPreview": {
+        "scheduled": "NotifyKit notification scheduled. ID: {{notificationId}}",
+        "denied": "Notification permission is denied or the native module is unavailable.",
+        "error": "Could not schedule NotifyKit notification."
+      },
       "rows": {
         "exportUserData": {
           "title": "Export user data",
@@ -441,7 +447,10 @@
         "dbErrorScreenOpened": "SQLite test error screen enabled. Close it using “Try again”.",
         "dbErrorScreenOpenError": "Could not enable the test error screen.",
         "yesterdayShielded": "Yesterday has been marked as protected by a shield. Open stats to check the heatmap.",
-        "yesterdayShieldError": "Could not mark yesterday as shield-protected."
+        "yesterdayShieldError": "Could not mark yesterday as shield-protected.",
+        "learningReminderPreviewScheduled": "NotifyKit reminder scheduled. ID: {{notificationId}}",
+        "learningReminderPreviewDenied": "Notification permission is denied or unavailable.",
+        "learningReminderPreviewError": "Could not schedule NotifyKit reminder."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -478,6 +487,21 @@
           "title": "Preview backup reminder",
           "subtitle": "Shows the window reminding the user to create a local data backup.",
           "button": "Show window"
+        },
+        "previewReviewReminderNotification": {
+          "title": "Preview review notification",
+          "subtitle": "Uses a random review count and schedules a notification that opens reviews.",
+          "button": "Reviews"
+        },
+        "previewLearningReminderNotification": {
+          "title": "Preview learning reminder",
+          "subtitle": "Schedules a learning notification one second from now.",
+          "button": "Learning"
+        },
+        "previewEndOfDayReminderNotification": {
+          "title": "Preview end-of-day reminder",
+          "subtitle": "Schedules the notification used when the daily streak is not done yet.",
+          "button": "End of day"
         },
         "courseFinishedPanelPreview": {
           "title": "Preview course completion panel",

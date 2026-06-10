@@ -11,6 +11,7 @@ import {
   getCustomFlashcardConsecutiveWrongCount,
   getGlobalDailyStreakDays,
   getHardFlashcards,
+  hasDailyStreakProgressOnDate,
 } from "@/src/db/sqlite/repositories/analytics";
 
 describe("analytics repository", () => {
@@ -190,6 +191,35 @@ describe("analytics repository", () => {
 
     expect(sql).toContain("result = 'ok'");
     expect(result).toBe(1);
+  });
+
+  it("detects daily streak progress using active boxes through boxFive", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue({ cnt: 1 });
+
+    mockGetDB.mockResolvedValue({
+      getFirstAsync,
+    });
+
+    await expect(
+      hasDailyStreakProgressOnDate(new Date(2026, 4, 2, 12))
+    ).resolves.toBe(true);
+    const [sql] = getFirstAsync.mock.calls[0];
+
+    expect(sql).toContain("'boxZero'");
+    expect(sql).toContain("'boxFive'");
+    expect(sql).toContain("result = 'ok'");
+  });
+
+  it("does not detect daily streak progress without a correct active-box event", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue({ cnt: 0 });
+
+    mockGetDB.mockResolvedValue({
+      getFirstAsync,
+    });
+
+    await expect(
+      hasDailyStreakProgressOnDate(new Date(2026, 4, 2, 12))
+    ).resolves.toBe(false);
   });
 
   it("counts consecutive active days with one event per day", async () => {

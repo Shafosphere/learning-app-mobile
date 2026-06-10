@@ -568,8 +568,6 @@ const CoursesDataSection: React.FC = () => {
         </View>
       </View>
 
-      <View style={styles.settingsDivider} />
-
       <View style={styles.settingsGroup}>
         <Text style={styles.appearanceGroupLabel}>
           {t("settings.coursesData.groups.googleDrive")}

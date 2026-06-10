@@ -22,6 +22,19 @@ import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { triggerActionsPositionNudgePreview } from "@/src/services/actionsPositionNudgePreview";
 import { triggerLocalExportReminderPreview } from "@/src/services/localExportReminderPreview";
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
+import {
+  getEndOfDayReminderNotificationTitle,
+  getLearningReminderNotificationTitle,
+  getReviewReminderNotificationTitle,
+  selectEndOfDayReminderNotificationBody,
+  selectLearningReminderNotificationBody,
+  selectReviewReminderNotificationBody,
+} from "@/src/services/learningReminderMessages";
+import {
+  END_OF_DAY_REMINDER_KIND,
+  triggerLearningReminderNotificationRequestPreview,
+  triggerLearningReminderNotificationPreview,
+} from "@/src/services/learningReminderNotifications";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { markYesterdayAsShieldUsedForDebug } from "@/src/services/streakProtection";
@@ -89,7 +102,7 @@ const DEBUG_AUDIO_SAMPLES = [
 
 const DebuggingSection: React.FC = () => {
   const styles = useStyles();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const router = useRouter();
   const {
     activeCustomCourseId,
@@ -182,6 +195,109 @@ const DebuggingSection: React.FC = () => {
 
   const handlePreviewLocalExportReminder = () => {
     triggerLocalExportReminderPreview();
+  };
+
+  const showNotificationPreviewResult = (
+    result: Awaited<ReturnType<typeof triggerLearningReminderNotificationRequestPreview>>
+  ) => {
+    if (result.permissionState !== "granted") {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.learningReminderPreviewDenied")
+      );
+      return;
+    }
+
+    Alert.alert(
+      t("app.status.done"),
+      t("settings.debug.alerts.learningReminderPreviewScheduled", {
+        notificationId: result.notificationId ?? "-",
+      })
+    );
+  };
+
+  const handlePreviewReviewReminderNotification = async () => {
+    const now = new Date();
+    const dueReviewCount = Math.floor(Math.random() * 90) + 10;
+    try {
+      const result = await triggerLearningReminderNotificationRequestPreview(
+        {
+          kind: "review_reminder",
+          content: {
+            title: getReviewReminderNotificationTitle(i18n.language),
+            body: selectReviewReminderNotificationBody({
+              language: i18n.language,
+              dueReviewCount,
+            }),
+          },
+          data: {
+            dueReviewCount,
+            route: "/review",
+          },
+        },
+        now
+      );
+      showNotificationPreviewResult(result);
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.learningReminderPreviewError")
+      );
+    }
+  };
+
+  const handlePreviewLearningReminderNotification = async () => {
+    const now = new Date();
+    try {
+      const result = await triggerLearningReminderNotificationPreview(
+        {
+          title: getLearningReminderNotificationTitle(i18n.language),
+          body: selectLearningReminderNotificationBody({
+            language: i18n.language,
+            profile: "unknown",
+            slot: "due",
+            scheduledAt: now,
+          }),
+        },
+        now
+      );
+      showNotificationPreviewResult(result);
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.learningReminderPreviewError")
+      );
+    }
+  };
+
+  const handlePreviewEndOfDayReminderNotification = async () => {
+    const now = new Date();
+    const scheduledAt = new Date(now.getTime());
+    scheduledAt.setHours(23, 0, 0, 0);
+    try {
+      const result = await triggerLearningReminderNotificationRequestPreview(
+        {
+          kind: END_OF_DAY_REMINDER_KIND,
+          content: {
+            title: getEndOfDayReminderNotificationTitle(i18n.language),
+            body: selectEndOfDayReminderNotificationBody({
+              language: i18n.language,
+              scheduledAt,
+            }),
+          },
+          data: {
+            route: "/flashcards",
+          },
+        },
+        now
+      );
+      showNotificationPreviewResult(result);
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.learningReminderPreviewError")
+      );
+    }
   };
 
   const handleOpenCourseFinishedPanelPreview = () => {
@@ -385,6 +501,25 @@ const DebuggingSection: React.FC = () => {
           onPress={handleTestPopup}
           width={140}
         />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewReviewReminderNotification.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewReviewReminderNotification.subtitle")}
+          </Text>
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text={t("settings.debug.rows.previewReviewReminderNotification.button")}
+            color="my_yellow"
+            onPress={() => void handlePreviewReviewReminderNotification()}
+            width={150}
+          />
+        </View>
       </View>
 
       <View style={styles.row}>
@@ -902,6 +1037,44 @@ const DebuggingSection: React.FC = () => {
             value={learningRemindersEnabled}
             onPress={() => void toggleLearningRemindersEnabled()}
             accessibilityLabel={t("settings.debug.rows.flags.learningReminders.title")}
+          />
+        </View>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewEndOfDayReminderNotification.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewEndOfDayReminderNotification.subtitle")}
+          </Text>
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text={t("settings.debug.rows.previewEndOfDayReminderNotification.button")}
+            color="my_yellow"
+            onPress={() => void handlePreviewEndOfDayReminderNotification()}
+            width={150}
+          />
+        </View>
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewLearningReminderNotification.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewLearningReminderNotification.subtitle")}
+          </Text>
+        </View>
+        <View style={styles.keyboardButtonWrapper}>
+          <MyButton
+            text={t("settings.debug.rows.previewLearningReminderNotification.button")}
+            color="my_yellow"
+            onPress={() => void handlePreviewLearningReminderNotification()}
+            width={150}
           />
         </View>
       </View>

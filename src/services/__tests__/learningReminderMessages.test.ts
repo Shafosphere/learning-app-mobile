@@ -1,6 +1,8 @@
 import {
+  getEndOfDayReminderNotificationTitle,
   getLearningReminderNotificationTitle,
   getReviewReminderNotificationTitle,
+  selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
 } from "@/src/services/learningReminderMessages";
@@ -11,6 +13,8 @@ describe("learning reminder messages", () => {
     expect(getLearningReminderNotificationTitle("en")).toBe("Flashcard time");
     expect(getReviewReminderNotificationTitle("pl")).toBe("Powtórki czekają");
     expect(getReviewReminderNotificationTitle("en")).toBe("Reviews are waiting");
+    expect(getEndOfDayReminderNotificationTitle("pl")).toBe("Jeszcze jest czas");
+    expect(getEndOfDayReminderNotificationTitle("en")).toBe("Still time today");
   });
 
   it("mixes profile-specific and universal messages for known profiles", () => {
@@ -118,5 +122,39 @@ describe("learning reminder messages", () => {
         dueReviewCount: 23,
       })
     ).toBe("Hey, you have 23 flashcards to review. Jump in?");
+  });
+
+  it("selects deterministic end-of-day reminder bodies from localized pools", () => {
+    const date = new Date(2026, 0, 10, 23, 0, 0, 0);
+    const polishPool = [
+      "Dzień powoli się kończy, ale na krótką rundkę jeszcze jest czas",
+      "Jeszcze zdążysz zrobić mały postęp przed końcem dnia",
+      "Końcówka dnia — kilka fiszek nadal się liczy",
+      "Krótka powtórka na koniec dnia?",
+    ];
+    const englishPool = [
+      "The day is winding down, but there is still time for a quick round",
+      "You can still make a little progress before the day ends",
+      "End of day — a good moment for a calm review",
+      "A quick review to end the day?",
+    ];
+
+    const polish = selectEndOfDayReminderNotificationBody({
+      language: "pl",
+      scheduledAt: date,
+    });
+    const english = selectEndOfDayReminderNotificationBody({
+      language: "en",
+      scheduledAt: date,
+    });
+
+    expect(polishPool).toContain(polish);
+    expect(englishPool).toContain(english);
+    expect(
+      selectEndOfDayReminderNotificationBody({
+        language: "pl",
+        scheduledAt: date,
+      })
+    ).toBe(polish);
   });
 });

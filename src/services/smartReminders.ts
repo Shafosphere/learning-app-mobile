@@ -22,6 +22,10 @@ export type ReviewReminderEntry = ReviewReminderCandidate & {
   dueReviewCount: number;
 };
 
+export type EndOfDayReminderEntry = {
+  scheduledAt: number;
+};
+
 export type SmartReminderPlan = {
   profile: SmartReminderProfile;
   targetMinutes: number;
@@ -40,6 +44,7 @@ export const REMINDER_SERIES_FIRST_LEAD_MINUTES = 240;
 export const REMINDER_SERIES_SECOND_LEAD_MINUTES = 120;
 export const REVIEW_REMINDER_LEAD_MINUTES = 300;
 export const REVIEW_REMINDER_THRESHOLD = 10;
+export const END_OF_DAY_REMINDER_HOUR = 23;
 
 function clampHourArray(values: number[]): number[] {
   const next = Array.from({ length: 24 }, (_, idx) => values[idx] ?? 0);
@@ -154,6 +159,71 @@ export function buildReminderSeriesEntries(input: {
   }
 
   return Array.from(scheduled, ([scheduledAt, slot]) => ({ scheduledAt, slot })).sort(
+    (a, b) => a.scheduledAt - b.scheduledAt
+  );
+}
+
+export function buildDueReminderSeriesEntries(input: {
+  targetMinutes: number;
+  now?: Date;
+  horizonDays?: number;
+  skipDateKeys?: string[];
+}): ReminderSeriesEntry[] {
+  const now = input.now ?? new Date();
+  const horizonDays = Math.max(1, input.horizonDays ?? 7);
+  const skipDateKeys = new Set(input.skipDateKeys ?? []);
+  const anchorHour = Math.floor(input.targetMinutes / 60);
+  const anchorMinute = input.targetMinutes % 60;
+  const scheduled = new Set<number>();
+
+  for (let dayOffset = 0; dayOffset < horizonDays; dayOffset += 1) {
+    const candidate = new Date(now.getTime());
+    candidate.setSeconds(0, 0);
+    candidate.setDate(candidate.getDate() + dayOffset);
+    candidate.setHours(anchorHour, anchorMinute, 0, 0);
+
+    if (
+      candidate.getTime() > now.getTime() &&
+      !skipDateKeys.has(makeDateKey(candidate))
+    ) {
+      scheduled.add(candidate.getTime());
+    }
+  }
+
+  return Array.from(scheduled, (scheduledAt) => ({
+    scheduledAt,
+    slot: "due" as const,
+  })).sort((a, b) => a.scheduledAt - b.scheduledAt);
+}
+
+export function buildEndOfDayReminderEntries(input: {
+  now?: Date;
+  horizonDays?: number;
+  skipDateKeys?: string[];
+  skipScheduledAt?: number[];
+}): EndOfDayReminderEntry[] {
+  const now = input.now ?? new Date();
+  const horizonDays = Math.max(1, input.horizonDays ?? 7);
+  const skipDateKeys = new Set(input.skipDateKeys ?? []);
+  const skipScheduledAt = new Set(input.skipScheduledAt ?? []);
+  const scheduled = new Set<number>();
+
+  for (let dayOffset = 0; dayOffset < horizonDays; dayOffset += 1) {
+    const candidate = new Date(now.getTime());
+    candidate.setSeconds(0, 0);
+    candidate.setDate(candidate.getDate() + dayOffset);
+    candidate.setHours(END_OF_DAY_REMINDER_HOUR, 0, 0, 0);
+
+    if (
+      candidate.getTime() > now.getTime() &&
+      !skipDateKeys.has(makeDateKey(candidate)) &&
+      !skipScheduledAt.has(candidate.getTime())
+    ) {
+      scheduled.add(candidate.getTime());
+    }
+  }
+
+  return Array.from(scheduled, (scheduledAt) => ({ scheduledAt })).sort(
     (a, b) => a.scheduledAt - b.scheduledAt
   );
 }

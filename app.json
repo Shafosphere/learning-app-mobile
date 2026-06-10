@@ -59,13 +59,6 @@
       "expo-asset",
       "expo-audio",
       "expo-font",
-      [
-        "expo-notifications",
-        {
-          "icon": "./assets/app/icons/notification-icon.png",
-          "color": "#001534"
-        }
-      ],
       "expo-mail-composer"
     ],
     "extra": {

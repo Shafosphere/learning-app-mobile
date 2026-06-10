@@ -1,6 +1,6 @@
 {
   "name": "memicard",
-  "main": "expo-router/entry",
+  "main": "index.js",
   "version": "1.0.0",
   "scripts": {
     "start": "expo start",
@@ -44,7 +44,6 @@
     "expo-localization": "^17.0.8",
     "expo-mail-composer": "~15.0.8",
     "expo-navigation-bar": "~5.0.10",
-    "expo-notifications": "^0.32.17",
     "expo-router": "~6.0.23",
     "expo-sharing": "~14.0.8",
     "expo-splash-screen": "~31.0.13",
@@ -61,6 +60,7 @@
     "react-native": "0.81.5",
     "react-native-gesture-handler": "~2.28.0",
     "react-native-mathjax-html-to-svg": "^1.1.0",
+    "react-native-notify-kit": "^10.4.4",
     "react-native-reanimated": "~4.1.1",
     "react-native-safe-area-context": "~5.6.0",
     "react-native-screens": "~4.16.0",

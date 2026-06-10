@@ -38,13 +38,14 @@ import {
 import { LanguageCourse } from "../types/course";
 import type { CEFRLevel } from "../types/language";
 import {
-  hasLearningProgressOnDate,
+  hasDailyStreakProgressOnDate,
   resetCustomReviewsForCourse,
   getLearningEventsHourlyDistribution,
   getLearningEventsSummary,
 } from "../db/sqlite/db";
 import { setFeedbackVolume as setSoundPlayerVolume } from "../utils/soundPlayer";
 import {
+  END_OF_DAY_REMINDER_KIND,
   REVIEW_REMINDER_KIND,
   type LearningReminderNotificationRequest,
   type ReminderPermissionState,
@@ -55,13 +56,16 @@ import {
   scheduleLearningReminderNotifications,
 } from "@/src/services/learningReminderNotifications";
 import {
+  getEndOfDayReminderNotificationTitle,
   getLearningReminderNotificationTitle,
   getReviewReminderNotificationTitle,
+  selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
 } from "@/src/services/learningReminderMessages";
 import {
-  buildReminderSeriesEntries,
+  buildDueReminderSeriesEntries,
+  buildEndOfDayReminderEntries,
   buildReviewReminderEntries,
   computeSmartReminderPlan,
   type SmartReminderProfile,
@@ -2113,20 +2117,17 @@ export const SettingsProvider: React.FC<{
     });
 
     const nowDate = new Date();
-    const skipDateKeys = (await hasLearningProgressOnDate(nowDate))
-      ? [
-          `${nowDate.getFullYear()}-${String(nowDate.getMonth() + 1).padStart(2, "0")}-${String(
-            nowDate.getDate()
-          ).padStart(2, "0")}`,
-        ]
-      : [];
-    const reminderEntries = buildReminderSeriesEntries({
+    const todayKey = `${nowDate.getFullYear()}-${String(
+      nowDate.getMonth() + 1
+    ).padStart(2, "0")}-${String(nowDate.getDate()).padStart(2, "0")}`;
+    const hasDailyStreakProgress = await hasDailyStreakProgressOnDate(nowDate);
+    const skipDateKeys = hasDailyStreakProgress ? [todayKey] : [];
+    const reminderEntries = buildDueReminderSeriesEntries({
       now: nowDate,
       targetMinutes: plan.targetMinutes,
       horizonDays: 7,
       skipDateKeys,
     });
-    const reminderDates = reminderEntries.map((entry) => new Date(entry.scheduledAt));
     const notificationTitle = getLearningReminderNotificationTitle(i18n.language);
     const learningRequests: LearningReminderNotificationRequest[] =
       reminderEntries.map((entry) => {
@@ -2174,15 +2175,51 @@ export const SettingsProvider: React.FC<{
         };
       }
     );
+    const endOfDayNotificationTitle = getEndOfDayReminderNotificationTitle(
+      i18n.language
+    );
+    const endOfDayEntries = buildEndOfDayReminderEntries({
+      now: nowDate,
+      horizonDays: 7,
+      skipDateKeys,
+      skipScheduledAt: [
+        ...reminderEntries.map((entry) => entry.scheduledAt),
+        ...reviewEntries.map((entry) => entry.scheduledAt),
+      ],
+    });
+    const endOfDayRequests: LearningReminderNotificationRequest[] =
+      endOfDayEntries.map((entry) => {
+        const scheduledAt = new Date(entry.scheduledAt);
+        return {
+          when: scheduledAt,
+          kind: END_OF_DAY_REMINDER_KIND,
+          content: {
+            title: endOfDayNotificationTitle,
+            body: selectEndOfDayReminderNotificationBody({
+              language: i18n.language,
+              scheduledAt,
+            }),
+          },
+          data: {
+            route: "/flashcards" as const,
+          },
+        };
+      });
 
-    await scheduleLearningReminderNotifications([
+    const scheduledRequests = [
       ...learningRequests,
       ...reviewRequests,
-    ]);
+      ...endOfDayRequests,
+    ];
+    const scheduledDates = scheduledRequests
+      .map((request) => request.when)
+      .sort((left, right) => left.getTime() - right.getTime());
+
+    await scheduleLearningReminderNotifications(scheduledRequests);
 
     await Promise.all([
       setLearningReminderNextAtState(
-        resolveNextScheduledReminderAt(reminderDates, nowDate.getTime())
+        resolveNextScheduledReminderAt(scheduledDates, nowDate.getTime())
       ),
       setLearningReminderProfileState(plan.profile),
     ]);

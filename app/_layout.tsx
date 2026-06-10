@@ -33,6 +33,7 @@ import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
+import Constants from "expo-constants";
 import { Stack, router } from "expo-router";
 import * as SplashScreen from "expo-splash-screen";
 import { StatusBar } from "expo-status-bar";
@@ -40,6 +41,7 @@ import * as SystemUI from "expo-system-ui";
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import {
   Alert,
+  AppState,
   Image,
   Platform,
   Pressable,
@@ -49,54 +51,48 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { LEARNING_REMINDER_CHANNEL_ID } from "@/src/services/learningReminderNotifications";
+import { ensureLearningReminderNotificationChannel } from "@/src/services/learningReminderNotifications";
 import { getNotificationResponseRoute } from "@/src/services/notificationResponseRouting";
+import { consumePendingNotificationResponse } from "@/src/services/pendingNotificationResponse";
 
 SplashScreen.preventAutoHideAsync();
 
-type LayoutNotificationResponse = {
-  notification: {
-    request: {
-      identifier?: string;
-      content: {
-        data?: Record<string, unknown>;
-      };
-    };
+type LayoutNotifyKitNotification = {
+  id?: string;
+  data?: Record<string, unknown>;
+};
+
+type LayoutNotifyKitEvent = {
+  type: number | string;
+  detail: {
+    notification?: LayoutNotifyKitNotification;
   };
 };
 
-type LayoutNotificationsModule = {
-  AndroidImportance: {
-    DEFAULT: number;
-  };
-  setNotificationHandler: (handler: {
-    handleNotification: () => Promise<{
-      shouldShowBanner: boolean;
-      shouldShowList: boolean;
-      shouldPlaySound: boolean;
-      shouldSetBadge: boolean;
-    }>;
-  }) => void;
-  setNotificationChannelAsync: (
-    channelId: string,
-    options: {
-      name: string;
-      importance: number;
-      sound: "default";
-    }
-  ) => Promise<void>;
-  addNotificationResponseReceivedListener?: (
-    listener: (response: LayoutNotificationResponse) => void
-  ) => { remove: () => void };
-  getLastNotificationResponseAsync?: () => Promise<LayoutNotificationResponse | null>;
+type LayoutNotifyKitInitialNotification = {
+  notification: LayoutNotifyKitNotification;
 };
 
-async function getLayoutNotificationsModule(): Promise<LayoutNotificationsModule | null> {
+type LayoutNotifyKitModule = {
+  EventType: {
+    PRESS: number | string;
+  };
+  onForegroundEvent: (listener: (event: LayoutNotifyKitEvent) => void) => () => void;
+  getInitialNotification?: () => Promise<LayoutNotifyKitInitialNotification | null>;
+};
+
+async function getLayoutNotifyKitModule(): Promise<LayoutNotifyKitModule | null> {
+  if (Constants.executionEnvironment === "storeClient") {
+    return null;
+  }
   try {
-    const module = await import("expo-notifications");
-    return module as unknown as LayoutNotificationsModule;
+    const module = await import("react-native-notify-kit");
+    return {
+      ...(module.default as unknown as LayoutNotifyKitModule),
+      EventType: module.EventType as LayoutNotifyKitModule["EventType"],
+    };
   } catch (error) {
-    console.warn("[Notifications] Native notifications module unavailable", error);
+    console.warn("[NotifyKit] Native notifications module unavailable", error);
     return null;
   }
 }
@@ -338,36 +334,14 @@ export default function RootLayout() {
   useEffect(() => {
     let cancelled = false;
 
-    void getLayoutNotificationsModule()
-      .then((notifications) => {
-        if (cancelled || !notifications) {
+    void ensureLearningReminderNotificationChannel()
+      .then(() => {
+        if (cancelled) {
           return;
         }
-
-        notifications.setNotificationHandler({
-          handleNotification: async () => ({
-            shouldShowBanner: true,
-            shouldShowList: true,
-            shouldPlaySound: true,
-            shouldSetBadge: false,
-          }),
-        });
-
-        if (Platform.OS !== "android") {
-          return;
-        }
-
-        return notifications.setNotificationChannelAsync(
-          LEARNING_REMINDER_CHANNEL_ID,
-          {
-            name: i18n.t("settings.learning.reminders.title"),
-            importance: notifications.AndroidImportance.DEFAULT,
-            sound: "default",
-          }
-        );
       })
       .catch((error) => {
-        console.warn("[Notifications] Failed to initialize notifications", error);
+        console.warn("[NotifyKit] Failed to initialize notifications", error);
       });
 
     return () => {
@@ -380,17 +354,28 @@ export default function RootLayout() {
     status === "error" || status === "importing" || status === "resetting";
 
   const handleNotificationResponse = useCallback(
-    (response: LayoutNotificationResponse | null | undefined) => {
+    (
+      response:
+        | LayoutNotifyKitEvent
+        | LayoutNotifyKitInitialNotification
+        | null
+        | undefined
+    ) => {
       const route = getNotificationResponseRoute(response);
       if (!route) {
         return;
       }
 
-      const identifier = response?.notification.request.identifier;
+      const notification =
+        "detail" in (response ?? {})
+          ? (response as LayoutNotifyKitEvent).detail.notification
+          : (response as LayoutNotifyKitInitialNotification | null | undefined)
+              ?.notification;
+      const identifier = notification?.id;
       const handledKey =
         identifier ??
         `${route}:${String(
-          response?.notification.request.content.data?.scheduledAt ?? ""
+          notification?.data?.scheduledAt ?? ""
         )}`;
       if (handledNotificationResponsesRef.current.has(handledKey)) {
         return;
@@ -410,37 +395,83 @@ export default function RootLayout() {
     }
 
     let cancelled = false;
-    let subscription: { remove: () => void } | null = null;
+    let unsubscribe: (() => void) | null = null;
+    let appStateSubscription: { remove: () => void } | null = null;
+    let pendingResponseTimers: ReturnType<typeof setTimeout>[] = [];
 
-    void getLayoutNotificationsModule()
+    const consumePendingResponse = () => {
+      void consumePendingNotificationResponse()
+        .then((response) => {
+          if (!cancelled) {
+            handleNotificationResponse(response);
+          }
+        })
+        .catch((error) => {
+          if (!cancelled) {
+            console.warn("[NotifyKit] Failed to read pending notification", error);
+          }
+        });
+    };
+
+    const schedulePendingResponseConsumption = (delayMs: number) => {
+      if (delayMs <= 0) {
+        consumePendingResponse();
+        return;
+      }
+
+      const timer = setTimeout(() => {
+        pendingResponseTimers = pendingResponseTimers.filter(
+          (pendingTimer) => pendingTimer !== timer
+        );
+        consumePendingResponse();
+      }, delayMs);
+      pendingResponseTimers.push(timer);
+    };
+
+    schedulePendingResponseConsumption(0);
+    appStateSubscription = AppState.addEventListener("change", (nextState) => {
+      if (nextState !== "active") {
+        return;
+      }
+
+      schedulePendingResponseConsumption(0);
+      schedulePendingResponseConsumption(250);
+      schedulePendingResponseConsumption(1000);
+    });
+
+    void getLayoutNotifyKitModule()
       .then((notifications) => {
         if (cancelled || !notifications) {
           return;
         }
 
-        subscription =
-          notifications.addNotificationResponseReceivedListener?.(
-            handleNotificationResponse
-          ) ?? null;
+        unsubscribe = notifications.onForegroundEvent((event) => {
+          if (event.type === notifications.EventType.PRESS) {
+            handleNotificationResponse(event);
+          }
+        });
 
         void notifications
-          .getLastNotificationResponseAsync?.()
+          .getInitialNotification?.()
           .then((response) => {
             if (!cancelled) {
               handleNotificationResponse(response);
             }
           })
           .catch((error) => {
-            console.warn("[Notifications] Failed to read last response", error);
+            console.warn("[NotifyKit] Failed to read initial notification", error);
           });
       })
       .catch((error) => {
-        console.warn("[Notifications] Failed to initialize response routing", error);
+        console.warn("[NotifyKit] Failed to initialize response routing", error);
       });
 
     return () => {
       cancelled = true;
-      subscription?.remove();
+      pendingResponseTimers.forEach((timer) => clearTimeout(timer));
+      pendingResponseTimers = [];
+      appStateSubscription?.remove();
+      unsubscribe?.();
     };
   }, [handleNotificationResponse, shouldRenderApp]);
 

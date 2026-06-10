@@ -1,4 +1,6 @@
 import {
+  buildDueReminderSeriesEntries,
+  buildEndOfDayReminderEntries,
   buildReminderSeriesEntries,
   buildReminderSeriesSchedule,
   buildReviewReminderCandidates,
@@ -50,6 +52,98 @@ describe("smart reminders", () => {
       { hour: 17, minute: 0, slot: "lead" },
       { hour: 19, minute: 0, slot: "due" },
     ]);
+  });
+
+  it("builds due-only learning reminder entries at the target time", () => {
+    const now = new Date(2026, 0, 10, 14, 30, 0, 0);
+
+    const entries = buildDueReminderSeriesEntries({
+      targetMinutes: 19 * 60,
+      now,
+      horizonDays: 1,
+    });
+
+    expect(
+      entries.map((entry) => ({
+        hour: new Date(entry.scheduledAt).getHours(),
+        minute: new Date(entry.scheduledAt).getMinutes(),
+        slot: entry.slot,
+      }))
+    ).toEqual([{ hour: 19, minute: 0, slot: "due" }]);
+  });
+
+  it("skips due-only learning reminder entries for excluded dates", () => {
+    const now = new Date(2026, 0, 10, 14, 30, 0, 0);
+
+    const entries = buildDueReminderSeriesEntries({
+      targetMinutes: 19 * 60,
+      now,
+      horizonDays: 2,
+      skipDateKeys: ["2026-01-10"],
+    });
+
+    expect(
+      entries.map((entry) => ({
+        day: new Date(entry.scheduledAt).getDate(),
+        hour: new Date(entry.scheduledAt).getHours(),
+      }))
+    ).toEqual([{ day: 11, hour: 19 }]);
+  });
+
+  it("builds end-of-day reminder entries at 23:00", () => {
+    const now = new Date(2026, 0, 10, 14, 30, 0, 0);
+
+    const entries = buildEndOfDayReminderEntries({
+      now,
+      horizonDays: 2,
+    });
+
+    expect(
+      entries.map((entry) => ({
+        day: new Date(entry.scheduledAt).getDate(),
+        hour: new Date(entry.scheduledAt).getHours(),
+        minute: new Date(entry.scheduledAt).getMinutes(),
+      }))
+    ).toEqual([
+      { day: 10, hour: 23, minute: 0 },
+      { day: 11, hour: 23, minute: 0 },
+    ]);
+  });
+
+  it("skips end-of-day entries that overlap already scheduled reminders", () => {
+    const now = new Date(2026, 0, 10, 14, 30, 0, 0);
+    const overlappingReminder = new Date(2026, 0, 10, 23, 0, 0, 0);
+
+    const entries = buildEndOfDayReminderEntries({
+      now,
+      horizonDays: 2,
+      skipScheduledAt: [overlappingReminder.getTime()],
+    });
+
+    expect(
+      entries.map((entry) => ({
+        day: new Date(entry.scheduledAt).getDate(),
+        hour: new Date(entry.scheduledAt).getHours(),
+        minute: new Date(entry.scheduledAt).getMinutes(),
+      }))
+    ).toEqual([{ day: 11, hour: 23, minute: 0 }]);
+  });
+
+  it("skips past and excluded end-of-day reminder entries", () => {
+    const now = new Date(2026, 0, 10, 23, 30, 0, 0);
+
+    const entries = buildEndOfDayReminderEntries({
+      now,
+      horizonDays: 3,
+      skipDateKeys: ["2026-01-11"],
+    });
+
+    expect(
+      entries.map((entry) => ({
+        day: new Date(entry.scheduledAt).getDate(),
+        hour: new Date(entry.scheduledAt).getHours(),
+      }))
+    ).toEqual([{ day: 12, hour: 23 }]);
   });
 
   it("skips today's series when today's date key is excluded", () => {

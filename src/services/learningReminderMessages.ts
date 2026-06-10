@@ -18,6 +18,20 @@ const PROFILE_ORDER: SmartReminderProfile[] = [
   "unknown",
 ];
 const SLOT_ORDER: ReminderSeriesSlot[] = ["lead", "due", "followUp"];
+const END_OF_DAY_BODIES: Record<ReminderMessageLanguage, string[]> = {
+  pl: [
+    "Dzień powoli się kończy, ale na krótką rundkę jeszcze jest czas",
+    "Jeszcze zdążysz zrobić mały postęp przed końcem dnia",
+    "Końcówka dnia — kilka fiszek nadal się liczy",
+    "Krótka powtórka na koniec dnia?",
+  ],
+  en: [
+    "The day is winding down, but there is still time for a quick round",
+    "You can still make a little progress before the day ends",
+    "End of day — a good moment for a calm review",
+    "A quick review to end the day?",
+  ],
+};
 
 const CATALOGS: Record<ReminderMessageLanguage, ReminderMessageCatalog> = {
   pl: {
@@ -213,6 +227,14 @@ export function getReviewReminderNotificationTitle(
     : "Powtórki czekają";
 }
 
+export function getEndOfDayReminderNotificationTitle(
+  language: string | null | undefined
+): string {
+  return normalizeReminderMessageLanguage(language) === "en"
+    ? "Still time today"
+    : "Jeszcze jest czas";
+}
+
 function getPolishFlashcardCountLabel(count: number): string {
   const absCount = Math.abs(Math.trunc(count));
   const lastDigit = absCount % 10;
@@ -255,5 +277,15 @@ export function selectLearningReminderNotificationBody(input: {
     (toLocalDayOrdinal(input.scheduledAt) + profileIndex * 7 + slotIndex * 13) %
     pool.length;
 
+  return pool[index];
+}
+
+export function selectEndOfDayReminderNotificationBody(input: {
+  language: string | null | undefined;
+  scheduledAt: Date;
+}): string {
+  const language = normalizeReminderMessageLanguage(input.language);
+  const pool = END_OF_DAY_BODIES[language];
+  const index = toLocalDayOrdinal(input.scheduledAt) % pool.length;
   return pool[index];
 }

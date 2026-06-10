@@ -238,6 +238,7 @@
       "section": "Inne",
       "groups": {
         "localBackup": "Kopia lokalna",
+        "notificationTests": "Test powiadomień",
         "googleDrive": "Google Drive",
         "reset": "RESET"
       },
@@ -368,6 +369,11 @@
       "resetIntroDone": {
         "message": "Wprowadzenie zresetowane. Samouczek zacznie się od wyboru języka."
       },
+      "notificationPreview": {
+        "scheduled": "Zaplanowano powiadomienie NotifyKit. ID: {{notificationId}}",
+        "denied": "Brak zgody na powiadomienia albo moduł jest niedostępny.",
+        "error": "Nie udało się zaplanować powiadomienia NotifyKit."
+      },
       "rows": {
         "exportUserData": {
           "title": "Eksportuj dane użytkownika",
@@ -441,7 +447,10 @@
         "dbErrorScreenOpened": "Włączono testowy ekran błędu SQLite. Zamknij go przez „Spróbuj ponownie”.",
         "dbErrorScreenOpenError": "Nie udało się włączyć testowego ekranu błędu.",
         "yesterdayShielded": "Wczorajszy dzień został oznaczony jako ochroniony tarczą. Otwórz statystyki, żeby sprawdzić heatmapę.",
-        "yesterdayShieldError": "Nie udało się oznaczyć wczorajszego dnia tarczą."
+        "yesterdayShieldError": "Nie udało się oznaczyć wczorajszego dnia tarczą.",
+        "learningReminderPreviewScheduled": "Zaplanowano przypomnienie NotifyKit. ID: {{notificationId}}",
+        "learningReminderPreviewDenied": "Brak zgody na powiadomienia albo moduł jest niedostępny.",
+        "learningReminderPreviewError": "Nie udało się zaplanować przypomnienia NotifyKit."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -478,6 +487,21 @@
           "title": "Podgląd przypomnienia o kopii",
           "subtitle": "Pokazuje okno przypominające o zrobieniu lokalnej kopii danych.",
           "button": "Pokaż okno"
+        },
+        "previewReviewReminderNotification": {
+          "title": "Podgląd powiadomienia o powtórkach",
+          "subtitle": "Losuje liczbę powtórek i planuje powiadomienie z przejściem do ekranu powtórek.",
+          "button": "Powtórki"
+        },
+        "previewLearningReminderNotification": {
+          "title": "Podgląd przypomnienia o nauce",
+          "subtitle": "Planuje powiadomienie o nauce za jedną sekundę.",
+          "button": "Nauka"
+        },
+        "previewEndOfDayReminderNotification": {
+          "title": "Podgląd przypomnienia na koniec dnia",
+          "subtitle": "Planuje powiadomienie używane, gdy daily streak nie jest jeszcze nabity.",
+          "button": "Koniec dnia"
         },
         "courseFinishedPanelPreview": {
           "title": "Podgląd panelu ukończenia kursu",
