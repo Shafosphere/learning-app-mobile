@@ -68,6 +68,9 @@ import {
   buildEndOfDayReminderEntries,
   buildReviewReminderEntries,
   computeSmartReminderPlan,
+  DEFAULT_MANUAL_REMINDER_HOUR,
+  inferSmartReminderProfileForTargetMinutes,
+  normalizeManualReminderHour,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
 import { countDueReviewsAt } from "@/src/services/dueReviewCount";
@@ -408,6 +411,10 @@ interface SettingsContextValue {
   learningRemindersEnabled: boolean;
   setLearningRemindersEnabled: (value: boolean) => Promise<void>;
   toggleLearningRemindersEnabled: () => Promise<void>;
+  learningReminderAutomaticEnabled: boolean;
+  setLearningReminderAutomaticEnabled: (value: boolean) => Promise<void>;
+  learningReminderManualHour: number;
+  setLearningReminderManualHour: (hour: number) => Promise<void>;
   learningReminderNextAt: number | null;
   learningReminderProfile: SmartReminderProfile;
   learningReminderPermissionState: ReminderPermissionState;
@@ -571,6 +578,10 @@ const defaultValue: SettingsContextValue = {
   learningRemindersEnabled: false,
   setLearningRemindersEnabled: async () => {},
   toggleLearningRemindersEnabled: async () => {},
+  learningReminderAutomaticEnabled: true,
+  setLearningReminderAutomaticEnabled: async () => {},
+  learningReminderManualHour: DEFAULT_MANUAL_REMINDER_HOUR,
+  setLearningReminderManualHour: async () => {},
   learningReminderNextAt: null,
   learningReminderProfile: "unknown",
   learningReminderPermissionState: "undetermined",
@@ -801,6 +812,15 @@ export const SettingsProvider: React.FC<{
     usePersistedState<number>("feedbackVolume", 1);
   const [learningRemindersEnabledState, _setLearningRemindersEnabled] =
     usePersistedState<boolean>("learningRemindersEnabled", false);
+  const [
+    learningReminderAutomaticEnabledState,
+    _setLearningReminderAutomaticEnabled,
+  ] = usePersistedState<boolean>("learningReminder.automaticEnabled", true);
+  const [learningReminderManualHourState, _setLearningReminderManualHour] =
+    usePersistedState<number>(
+      "learningReminder.manualHour",
+      DEFAULT_MANUAL_REMINDER_HOUR
+    );
   const [learningReminderNextAtState, setLearningReminderNextAtState] =
     usePersistedState<number | null>("learningReminder.nextAt", null);
   const [learningReminderProfileState, setLearningReminderProfileState] =
@@ -824,6 +844,12 @@ export const SettingsProvider: React.FC<{
   const [googleDriveBackupError, setGoogleDriveBackupError] =
     usePersistedState<string | null>("googleDriveBackup.lastBackupError", null);
   const learningRemindersEnabledRef = useRef(learningRemindersEnabledState);
+  const learningReminderAutomaticEnabledRef = useRef(
+    learningReminderAutomaticEnabledState
+  );
+  const learningReminderManualHourRef = useRef(
+    normalizeManualReminderHour(learningReminderManualHourState)
+  );
   const googleDriveBackupInFlightRef = useRef(false);
   const googleDriveRestoreInFlightRef = useRef(false);
   const googleDriveSnapshotsRefreshInFlightRef = useRef<Promise<void> | null>(null);
@@ -870,6 +896,17 @@ export const SettingsProvider: React.FC<{
   useEffect(() => {
     learningRemindersEnabledRef.current = learningRemindersEnabledState;
   }, [learningRemindersEnabledState]);
+
+  useEffect(() => {
+    learningReminderAutomaticEnabledRef.current =
+      learningReminderAutomaticEnabledState;
+  }, [learningReminderAutomaticEnabledState]);
+
+  useEffect(() => {
+    learningReminderManualHourRef.current = normalizeManualReminderHour(
+      learningReminderManualHourState
+    );
+  }, [learningReminderManualHourState]);
 
   useEffect(() => {
     const normalized = sanitizeMemoryBoardSize(rawMemoryBoardSize);
@@ -2115,6 +2152,12 @@ export const SettingsProvider: React.FC<{
       hourlyDistribution,
       summary,
     });
+    const learningTargetMinutes = learningReminderAutomaticEnabledRef.current
+      ? plan.targetMinutes
+      : learningReminderManualHourRef.current * 60;
+    const learningReminderProfile = learningReminderAutomaticEnabledRef.current
+      ? plan.profile
+      : inferSmartReminderProfileForTargetMinutes(learningTargetMinutes);
 
     const nowDate = new Date();
     const todayKey = `${nowDate.getFullYear()}-${String(
@@ -2124,7 +2167,7 @@ export const SettingsProvider: React.FC<{
     const skipDateKeys = hasDailyStreakProgress ? [todayKey] : [];
     const reminderEntries = buildDueReminderSeriesEntries({
       now: nowDate,
-      targetMinutes: plan.targetMinutes,
+      targetMinutes: learningTargetMinutes,
       horizonDays: 7,
       skipDateKeys,
     });
@@ -2139,7 +2182,7 @@ export const SettingsProvider: React.FC<{
             title: notificationTitle,
             body: selectLearningReminderNotificationBody({
               language: i18n.language,
-              profile: plan.profile,
+              profile: learningReminderProfile,
               slot: entry.slot,
               scheduledAt,
             }),
@@ -2221,7 +2264,7 @@ export const SettingsProvider: React.FC<{
       setLearningReminderNextAtState(
         resolveNextScheduledReminderAt(scheduledDates, nowDate.getTime())
       ),
-      setLearningReminderProfileState(plan.profile),
+      setLearningReminderProfileState(learningReminderProfile),
     ]);
   }, [
     setLearningReminderNextAtState,
@@ -2244,6 +2287,38 @@ export const SettingsProvider: React.FC<{
     }
     await computeAndScheduleLearningReminder();
   }, [computeAndScheduleLearningReminder]);
+
+  const setLearningReminderAutomaticEnabled = useCallback(
+    async (value: boolean) => {
+      if (value === learningReminderAutomaticEnabledRef.current) {
+        return;
+      }
+      learningReminderAutomaticEnabledRef.current = value;
+      await _setLearningReminderAutomaticEnabled(value);
+      if (learningRemindersEnabledRef.current) {
+        await computeAndScheduleLearningReminder();
+      }
+    },
+    [_setLearningReminderAutomaticEnabled, computeAndScheduleLearningReminder]
+  );
+
+  const setLearningReminderManualHour = useCallback(
+    async (hour: number) => {
+      const normalized = normalizeManualReminderHour(hour);
+      if (normalized === learningReminderManualHourRef.current) {
+        return;
+      }
+      learningReminderManualHourRef.current = normalized;
+      await _setLearningReminderManualHour(normalized);
+      if (
+        learningRemindersEnabledRef.current &&
+        !learningReminderAutomaticEnabledRef.current
+      ) {
+        await computeAndScheduleLearningReminder();
+      }
+    },
+    [_setLearningReminderManualHour, computeAndScheduleLearningReminder]
+  );
 
   const setLearningRemindersEnabled = useCallback(
     async (value: boolean) => {
@@ -2588,6 +2663,8 @@ export const SettingsProvider: React.FC<{
   );
 
   const resetLearningSettings = useCallback(async () => {
+    learningReminderAutomaticEnabledRef.current = true;
+    learningReminderManualHourRef.current = DEFAULT_MANUAL_REMINDER_HOUR;
     await Promise.all([
       setSpellChecking(true),
       setIgnoreDiacriticsInSpellcheck(false),
@@ -2600,12 +2677,16 @@ export const SettingsProvider: React.FC<{
       setFlashcardsImageSizeDefault("dynamic"),
       setFlashcardsImageFrameDefaultEnabled(true),
       setLearningRemindersEnabled(false),
+      _setLearningReminderAutomaticEnabled(true),
+      _setLearningReminderManualHour(DEFAULT_MANUAL_REMINDER_HOUR),
       _setFeedbackVolume(1),
     ]);
   }, [
     _setBoxesLayout,
     _setActionButtonsPosition,
     _setFeedbackVolume,
+    _setLearningReminderAutomaticEnabled,
+    _setLearningReminderManualHour,
     setLearningRemindersEnabled,
     setFlashcardsBatchSize,
     setFlashcardsCardSizeDefault,
@@ -2752,6 +2833,12 @@ export const SettingsProvider: React.FC<{
         learningRemindersEnabled: learningRemindersEnabledState,
         setLearningRemindersEnabled,
         toggleLearningRemindersEnabled,
+        learningReminderAutomaticEnabled: learningReminderAutomaticEnabledState,
+        setLearningReminderAutomaticEnabled,
+        learningReminderManualHour: normalizeManualReminderHour(
+          learningReminderManualHourState
+        ),
+        setLearningReminderManualHour,
         learningReminderNextAt: learningReminderNextAtState,
         learningReminderProfile: learningReminderProfileState,
         learningReminderPermissionState,

@@ -6,6 +6,8 @@ import {
   buildReviewReminderCandidates,
   buildReviewReminderEntries,
   computeSmartReminderPlan,
+  inferSmartReminderProfileForTargetMinutes,
+  normalizeManualReminderHour,
 } from "@/src/services/smartReminders";
 
 describe("smart reminders", () => {
@@ -70,6 +72,23 @@ describe("smart reminders", () => {
         slot: entry.slot,
       }))
     ).toEqual([{ hour: 19, minute: 0, slot: "due" }]);
+  });
+
+  it("normalizes manual reminder hours to whole hours in a day", () => {
+    expect(normalizeManualReminderHour(8.4)).toBe(8);
+    expect(normalizeManualReminderHour(8.5)).toBe(9);
+    expect(normalizeManualReminderHour(-2)).toBe(0);
+    expect(normalizeManualReminderHour(27)).toBe(23);
+    expect(normalizeManualReminderHour(Number.NaN)).toBe(19);
+  });
+
+  it("infers reminder profile from a manual target hour", () => {
+    expect(inferSmartReminderProfileForTargetMinutes(8 * 60)).toBe("morning");
+    expect(inferSmartReminderProfileForTargetMinutes(14 * 60)).toBe(
+      "afternoon"
+    );
+    expect(inferSmartReminderProfileForTargetMinutes(19 * 60)).toBe("evening");
+    expect(inferSmartReminderProfileForTargetMinutes(23 * 60)).toBe("night");
   });
 
   it("skips due-only learning reminder entries for excluded dates", () => {

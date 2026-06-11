@@ -220,6 +220,13 @@
           "title": "Flashcard time",
           "body": "Got a moment? A short flashcard session will keep your rhythm going."
         },
+        "automatic": {
+          "title": "Automatic reminders",
+          "subtitle": "Picks the time from your learning rhythm."
+        },
+        "manualTime": {
+          "subtitle": "Choose the reminder time."
+        },
         "status": {
           "permissionDenied": "No notification permission. Enable permissions in system settings.",
           "allDays": "every day"

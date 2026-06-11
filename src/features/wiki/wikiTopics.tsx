@@ -248,7 +248,7 @@ function CardPreview({
   const handleHintUpdate = React.useCallback(() => {}, []);
 
   return (
-    <View style={{ alignItems: "center" }}>
+    <View style={{ alignItems: "center" }} pointerEvents="none">
       <Card
         selectedItem={SAMPLE_WORD}
         setAnswer={setAnswer}
@@ -262,7 +262,7 @@ function CardPreview({
         setCorrectionRewers={setCorrectionRewers}
         introMode={false}
         onHintUpdate={handleHintUpdate}
-        isFocused
+        isFocused={false}
         backgroundColorOverride={backgroundColorOverride}
         textColorOverride={textColorOverride}
       />

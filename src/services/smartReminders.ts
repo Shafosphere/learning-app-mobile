@@ -40,6 +40,7 @@ export type SmartReminderInput = {
 const MIN_EVENTS_FOR_MODEL = 12;
 const MIN_ACTIVE_DAYS_FOR_MODEL = 4;
 const DEFAULT_TARGET_MINUTES = 19 * 60;
+export const DEFAULT_MANUAL_REMINDER_HOUR = 19;
 export const REMINDER_SERIES_FIRST_LEAD_MINUTES = 240;
 export const REMINDER_SERIES_SECOND_LEAD_MINUTES = 120;
 export const REVIEW_REMINDER_LEAD_MINUTES = 300;
@@ -84,6 +85,20 @@ function inferProfile(targetHour: number): SmartReminderProfile {
     return "night";
   }
   return "unknown";
+}
+
+export function normalizeManualReminderHour(value: number): number {
+  if (!Number.isFinite(value)) {
+    return DEFAULT_MANUAL_REMINDER_HOUR;
+  }
+  return Math.min(23, Math.max(0, Math.round(value)));
+}
+
+export function inferSmartReminderProfileForTargetMinutes(
+  targetMinutes: number
+): SmartReminderProfile {
+  const targetHour = normalizeManualReminderHour(Math.floor(targetMinutes / 60));
+  return inferProfile(targetHour);
 }
 
 export function computeSmartReminderPlan(input: SmartReminderInput): SmartReminderPlan {

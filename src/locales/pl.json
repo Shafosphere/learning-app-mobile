@@ -220,6 +220,13 @@
           "title": "Czas na fiszki",
           "body": "Masz chwilę? Krótka sesja fiszek utrzyma rytm."
         },
+        "automatic": {
+          "title": "Przypomnienia automatyczne",
+          "subtitle": "Dobiera godzinę na podstawie Twojego rytmu nauki."
+        },
+        "manualTime": {
+          "subtitle": "Wybierz godzinę przypomnienia."
+        },
         "status": {
           "permissionDenied": "Brak zgody na powiadomienia. Włącz uprawnienia w ustawieniach systemu.",
           "allDays": "codziennie"

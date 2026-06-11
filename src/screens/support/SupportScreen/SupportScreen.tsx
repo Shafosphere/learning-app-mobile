@@ -70,7 +70,7 @@ export default function SupportScreen() {
   const { t } = useTranslation();
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
-  const [attachBasicData, setAttachBasicData] = useState(true);
+  const [attachBasicData, setAttachBasicData] = useState(false);
   const [attachDiagnostics, setAttachDiagnostics] = useState(false);
   const diagnosticEntries = useMemo(() => buildDiagnosticEntries(t), [t]);
   const emailBody = useMemo(
