@@ -13,6 +13,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   pressed: {
     transform: [{ scale: 1.02 }],
   },
+  autoWidthButton: {
+    paddingHorizontal: 18,
+  },
   text: {
     color: colors.headline,
     fontSize: 16,

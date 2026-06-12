@@ -39,6 +39,8 @@ jest.mock("react-i18next", () => ({
         "onboarding.skip.confirm": "Pomiń",
         "onboarding.skip.cancel": "Zostań",
         "app.actions.next": "Dalej",
+        "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki": "Języki",
+        "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza": "Wiedza",
         "repeats.format.flashcardsValue": `${options?.value ?? 0} fiszek`,
       };
       return copy[key] ?? key;

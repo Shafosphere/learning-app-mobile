@@ -1918,6 +1918,8 @@
           "coursePin": {
             "textChild": {
               "czegoSieUczymy": "Czego się uczymy?",
+              "jezyki": "Języki",
+              "wiedza": "Wiedza",
               "brakKursowJezykowych": "Brak kursów językowych",
               "miniKursy": "Mini kursy",
               "brakKursowWiedzyOgolnej": "Brak kursów wiedzy ogólnej",

@@ -535,7 +535,7 @@ export default function CourseActivateScreen() {
                 color="my_green"
                 onPress={() => router.push("/completed-courses")}
                 disabled={false}
-                width={104}
+                autoWidth
               />
             ) : null}
             <MyButton
@@ -549,7 +549,7 @@ export default function CourseActivateScreen() {
               color="my_yellow"
               onPress={() => router.push("/createcourse")}
               disabled={false}
-              width={96}
+              autoWidth
             />
           </View>
         </View>

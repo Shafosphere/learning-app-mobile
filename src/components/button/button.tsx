@@ -17,6 +17,7 @@ interface MyButtonBaseProps {
   color?: ThemeColorKey;
   disabled?: boolean;
   width?: DimensionValue;
+  autoWidth?: boolean;
   textLines?: number;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
@@ -36,6 +37,7 @@ export default function MyButton({
   color = "my_green",
   disabled = false,
   width = 130,
+  autoWidth = false,
   textLines = 2,
   accessibilityLabel,
   style,
@@ -93,7 +95,9 @@ export default function MyButton({
       accessibilityState={{ disabled }}
       style={({ pressed }) => [
         styles.button,
-        { width, backgroundColor },
+        { backgroundColor },
+        autoWidth && styles.autoWidthButton,
+        !autoWidth && { width },
         disabledHighContrast && {
           borderColor: colors.border,
           borderWidth: 2,

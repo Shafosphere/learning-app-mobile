@@ -584,8 +584,18 @@ export default function CoursePinScreen() {
               >
                 <SegmentedTabs
                   options={[
-                    { key: "languages", label: "Języki" },
-                    { key: "general", label: "Wiedza" },
+                    {
+                      key: "languages",
+                      label: t(
+                        "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki"
+                      ),
+                    },
+                    {
+                      key: "general",
+                      label: t(
+                        "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza"
+                      ),
+                    },
                   ]}
                   value={viewMode}
                   onChange={setViewMode}
