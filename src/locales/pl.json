@@ -1719,9 +1719,9 @@
       "emptyResults": "Brak wyników",
       "chooseColor": "Wybierz kolor",
       "closeColorPickerA11y": "Zamknij wybór koloru",
-      "hue": "HUE",
-      "saturation": "SATURATION",
-      "value": "VALUE",
+      "hue": "ODCIEŃ",
+      "saturation": "NASYCENIE",
+      "value": "JASNOŚĆ",
       "preview": "PODGLĄD",
       "confirm": "zatwierdź",
       "confirmColorA11y": "Zatwierdź wybrany kolor"

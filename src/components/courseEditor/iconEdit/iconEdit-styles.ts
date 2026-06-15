@@ -230,6 +230,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.secondBackground,
     overflow: "hidden" as const,
   },
+  compactColorSheet: {
+    maxHeight: "94%",
+  },
   sheetGrabber: {
     alignSelf: "center" as const,
     marginTop: 8,
@@ -366,6 +369,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 18,
     gap: 14,
   },
+  compactColorScrollContent: {
+    paddingHorizontal: 12,
+    paddingTop: 12,
+    gap: 10,
+  },
   colorActionRow: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -426,6 +434,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderWidth: 1,
     borderColor: colors.border,
     backgroundColor: colors.background,
+  },
+  compactSvPlaneWrap: {
+    aspectRatio: 2.25,
   },
   svSvg: {
     width: "100%",

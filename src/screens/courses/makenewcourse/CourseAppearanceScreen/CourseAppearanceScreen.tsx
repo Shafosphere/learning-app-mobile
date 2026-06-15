@@ -138,7 +138,6 @@ export default function CustomCourseScreen() {
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
-        scrollEnabled={false}
         bounces={false}
       >
         <View style={styles.section}>

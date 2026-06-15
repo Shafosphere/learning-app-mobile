@@ -5,6 +5,7 @@ import {
 } from "@/src/constants/customCourse";
 import MyButton from "@/src/components/button/button";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { TrackSlider } from "@/src/components/slider/TrackSlider";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -184,6 +185,7 @@ function CourseIconColorSelectorComponent({
   const { t } = useTranslation();
   const componentStyles = useStyles();
   const { colors } = useSettings();
+  const deviceLayout = useDeviceLayout();
   const insets = useSafeAreaInsets();
   const [isIconSheetOpen, setIsIconSheetOpen] = useState(false);
   const [isColorSheetOpen, setIsColorSheetOpen] = useState(false);
@@ -240,6 +242,7 @@ function CourseIconColorSelectorComponent({
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
   const colorSheetBottomInset = Math.max(insets.bottom, 18);
   const isNameEditable = Boolean(onCourseNameChange) && nameEditable && !disabled;
+  const isCompactLayout = deviceLayout.isCompact;
 
   useEffect(() => {
     const justOpened = isColorSheetOpen && !wasColorSheetOpenRef.current;
@@ -641,7 +644,13 @@ function CourseIconColorSelectorComponent({
           style={componentStyles.modalBackdrop}
           onPress={() => setIsColorSheetOpen(false)}
         >
-          <Pressable style={componentStyles.sheet} onPress={() => undefined}>
+          <Pressable
+            style={[
+              componentStyles.sheet,
+              isCompactLayout && componentStyles.compactColorSheet,
+            ]}
+            onPress={() => undefined}
+          >
             <View style={componentStyles.sheetGrabber} />
             <View style={componentStyles.sheetHeader}>
               <Text style={componentStyles.sheetTitle}>
@@ -668,13 +677,17 @@ function CourseIconColorSelectorComponent({
               style={componentStyles.colorScroll}
               contentContainerStyle={[
                 componentStyles.colorScrollContent,
+                isCompactLayout && componentStyles.compactColorScrollContent,
                 { paddingBottom: colorSheetBottomInset + 16 },
               ]}
               keyboardShouldPersistTaps="handled"
               scrollEnabled={!isSvDragging}
             >
               <View
-                style={componentStyles.svPlaneWrap}
+                style={[
+                  componentStyles.svPlaneWrap,
+                  isCompactLayout && componentStyles.compactSvPlaneWrap,
+                ]}
                 onLayout={(event) => {
                   const { width, height } = event.nativeEvent.layout;
                   setSvPlaneSize({ width, height });
