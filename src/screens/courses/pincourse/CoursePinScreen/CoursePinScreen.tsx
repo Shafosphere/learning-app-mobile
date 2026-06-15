@@ -16,8 +16,9 @@ import { filterCoursesForNativeLanguage } from "@/src/features/courses/courseVis
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
+  markAllOnboardingCoachmarksSeen,
   OnboardingCheckpoint,
-  setOnboardingCheckpoint
+  setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -431,6 +432,7 @@ export default function CoursePinScreen() {
   const handleConfirmSkipOnboarding = useCallback(async () => {
     setIsSkipOnboardingModalVisible(false);
     await coachmark.skipFlow();
+    await markAllOnboardingCoachmarksSeen();
     setCheckpoint("done");
     await setOnboardingCheckpoint("done");
   }, [coachmark]);

@@ -28,6 +28,7 @@ import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import {
   appendDebugEvent,
@@ -57,6 +58,7 @@ const ACTION_POST_ANSWER_COOLDOWN_MS = 1000;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
+const COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 20;
 const REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE =
   "data:image/svg+xml," +
   encodeURIComponent(
@@ -134,6 +136,7 @@ export default function ReviewFlashcardsPlaceholder() {
     mistakeNudgePreviewToken?: string;
   }>();
   const styles = useStyles();
+  const { isCompact } = useDeviceLayout();
   const { t } = useTranslation();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const settings = useSettings();
@@ -1223,7 +1226,8 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem?.type === "know_dont_know" || selectedItem?.answerOnly
       ? "know_dont_know"
       : "true_false";
-  const isCarouselLayout = layout !== "classic";
+  const effectiveLayout = layout;
+  const isCarouselLayout = effectiveLayout !== "classic";
   const carouselMinScale = 0.42;
   const {
     scale: boxesScale,
@@ -1345,7 +1349,7 @@ export default function ReviewFlashcardsPlaceholder() {
   );
 
   const boxesContent =
-    layout === "classic" ? (
+    effectiveLayout === "classic" ? (
       <Boxes
         boxes={boxes}
         activeBox={activeBox}
@@ -1354,6 +1358,7 @@ export default function ReviewFlashcardsPlaceholder() {
         countsCoachmarkId="review-flashcards-box-counts"
         disabled={isBetweenCards || isLoading || correction != null || mistakeNudge != null}
         faces={boxFaces}
+        horizontalScroll={isCompact}
       />
     ) : (
       <BoxesCarousel
@@ -1367,9 +1372,12 @@ export default function ReviewFlashcardsPlaceholder() {
     );
   const boxesScaleOffsetY = scaleOffsetY;
   const shouldRenderBottomButtons = !areButtonsOnTop;
+  const bottomButtonsDockBottomOffset = isCompact
+    ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+    : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
   const bottomButtonsReservedSpace = shouldRenderBottomButtons
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
-      BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+      bottomButtonsDockBottomOffset
     : 0;
   const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
   const coachmark = useCoachmarkFlow({
@@ -1479,7 +1487,7 @@ export default function ReviewFlashcardsPlaceholder() {
             <View collapsable={false}>
               {boxesNeedScrollFallback ? (
                 <ScrollView
-                  style={styles.boxesViewport}
+                  style={styles.boxesScrollViewport}
                   contentContainerStyle={styles.boxesViewportScrollContent}
                   onLayout={onBoxesViewportLayout}
                   showsVerticalScrollIndicator={false}
@@ -1533,7 +1541,7 @@ export default function ReviewFlashcardsPlaceholder() {
           <View
             style={[
               styles.bottomButtonsDock,
-              { bottom: BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET },
+              { bottom: bottomButtonsDockBottomOffset },
             ]}
             pointerEvents="box-none"
           >

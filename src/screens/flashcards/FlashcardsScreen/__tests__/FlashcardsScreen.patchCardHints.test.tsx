@@ -7,6 +7,7 @@ import {
   getCustomFlashcards,
   updateCustomFlashcardHints,
 } from "@/src/db/sqlite/db";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import type { CardProps } from "@/src/components/card/card-types";
@@ -14,6 +15,10 @@ import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
+}));
+
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: jest.fn(),
 }));
 
 jest.mock("@/src/contexts/LearningStatsContext", () => ({
@@ -272,6 +277,7 @@ jest.mock("@/src/components/confetti/Confetti", () => {
 });
 
 const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
 const mockedUpdateCustomFlashcardHints = updateCustomFlashcardHints as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
@@ -308,6 +314,7 @@ describe("FlashcardsScreen patchCardHints integration", () => {
     mockSetBatchIndex.mockClear();
     mockCurrentUsedWordIds = [];
     mockCurrentResult = null;
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
 
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,

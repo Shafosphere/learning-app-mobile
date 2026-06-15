@@ -1,11 +1,25 @@
 import { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import React, { useRef, useState } from "react";
-import { Pressable, Text, View, type LayoutChangeEvent } from "react-native";
+import {
+    Pressable,
+    ScrollView,
+    Text,
+    View,
+    useWindowDimensions,
+    type LayoutChangeEvent,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import BoxSkin from "../Skin/BoxSkin";
 import { resolveBoxFace, type BoxFacesByBox } from "../Skin/boxFaces";
 import { useBoxListStyles } from "./BoxList.styles";
+
+const BOX_SKIN_WIDTH = 115;
+const BOX_SKIN_HEIGHT = 122;
+const HORIZONTAL_BOX_SCALE = 1.2;
+const BOX_ITEM_WIDTH = 164;
+const BOX_ITEM_HEIGHT = 210;
+const HORIZONTAL_VIEWPORT_SCREEN_INSET = 24;
 
 const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxZero: 0,
@@ -26,6 +40,7 @@ interface BoxesProps {
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
     countsCoachmarkId?: string;
     faces?: BoxFacesByBox;
+    horizontalScroll?: boolean;
 }
 
 export default function BoxList({
@@ -38,12 +53,14 @@ export default function BoxList({
     countOverrides,
     countsCoachmarkId,
     faces,
+    horizontalScroll = false,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     const { t } = useTranslation();
+    const { width: windowWidth } = useWindowDimensions();
     const longPressTriggeredRef = useRef(false);
-    const [measuredBoxes, setMeasuredBoxes] = useState<
-        Partial<Record<"boxOne" | "boxTwo", { x: number; y: number; width: number; height: number }>>
+    const [measuredBoxItems, setMeasuredBoxItems] = useState<
+        Partial<Record<keyof BoxesState, { x: number; y: number; width: number; height: number }>>
     >({});
     const [containerLayout, setContainerLayout] = useState<{
         width: number;
@@ -63,8 +80,15 @@ export default function BoxList({
     const displayedEntries = hideBoxZero
         ? entries.filter(([boxName]) => boxName !== "boxZero")
         : entries;
-    const boxOneLayout = measuredBoxes.boxOne;
-    const boxTwoLayout = measuredBoxes.boxTwo;
+    const effectiveHorizontalViewportWidth = Math.max(
+        BOX_ITEM_WIDTH,
+        windowWidth - HORIZONTAL_VIEWPORT_SCREEN_INSET
+    );
+    const horizontalSidePadding = horizontalScroll
+        ? Math.max(0, (effectiveHorizontalViewportWidth - BOX_ITEM_WIDTH) / 2)
+        : 0;
+    const boxOneLayout = measuredBoxItems.boxOne;
+    const boxTwoLayout = measuredBoxItems.boxTwo;
     const shouldRenderPromotionAnchor = boxOneLayout != null && boxTwoLayout != null;
     const promotionArrowLeft = shouldRenderPromotionAnchor
         ? boxOneLayout.x +
@@ -76,10 +100,10 @@ export default function BoxList({
         ? Math.min(boxOneLayout.y, boxTwoLayout.y) - 10
         : 0;
 
-    const handleMeasuredBoxLayout =
-        (boxName: "boxOne" | "boxTwo") => (event: LayoutChangeEvent) => {
+    const handleMeasuredBoxItemLayout =
+        (boxName: keyof BoxesState) => (event: LayoutChangeEvent) => {
             const { x, y, width, height } = event.nativeEvent.layout;
-            setMeasuredBoxes((prev) => {
+            setMeasuredBoxItems((prev) => {
                 const current = prev[boxName];
                 if (
                     current &&
@@ -134,15 +158,16 @@ export default function BoxList({
 
     const countRects = displayedEntries
         .map(([boxName]) => {
+            const itemLayout = measuredBoxItems[boxName];
             const countLayout = measuredCounts[boxName];
             const pressableLayout = measuredPressables[boxName];
-            if (!countLayout || !pressableLayout) {
+            if (!itemLayout || !countLayout || !pressableLayout) {
                 return null;
             }
 
             return {
-                x: pressableLayout.x + countLayout.x,
-                y: pressableLayout.y + countLayout.y,
+                x: itemLayout.x + pressableLayout.x + countLayout.x,
+                y: itemLayout.y + pressableLayout.y + countLayout.y,
                 width: countLayout.width,
                 height: countLayout.height,
             };
@@ -158,175 +183,241 @@ export default function BoxList({
             }
             : null;
 
-    return (
-        <View style={styles.container}>
+    const renderBoxItem = ([boxName, words]: [
+        keyof BoxesState,
+        BoxesState[keyof BoxesState]
+    ]) => {
+        const wordCount = countOverrides?.[boxName] ?? words.length;
+        const isActive = activeBox === boxName;
+        const currentFace =
+            faces?.[boxName] ??
+            resolveBoxFace({
+                isActive,
+            });
+        const boxNumber = BOX_NUMBERS[boxName];
+        const accessibilityLabel = t("flashcards.card.box.accessibilityLabel", {
+            box: boxNumber,
+            count: wordCount,
+        });
+        const boxSkin = (
+            <BoxSkin
+                wordCount={wordCount}
+                face={currentFace}
+                isActive={activeBox === boxName}
+                isCaro={false}
+            />
+        );
+        const scaledBoxSkin = horizontalScroll ? (
             <View
-                style={styles.containerTop}
-                onLayout={(event) => {
-                    const { width, height } = event.nativeEvent.layout;
-                    setContainerLayout((current) => {
-                        if (
-                            current &&
-                            current.width === width &&
-                            current.height === height
-                        ) {
-                            return current;
-                        }
-                        return { width, height };
-                    });
+                style={{
+                    width: BOX_SKIN_WIDTH * HORIZONTAL_BOX_SCALE,
+                    height: BOX_SKIN_HEIGHT * HORIZONTAL_BOX_SCALE,
+                    alignItems: "center",
+                    justifyContent: "center",
                 }}
             >
-                {displayedEntries.map(([boxName, words]) => {
-                    const wordCount = countOverrides?.[boxName] ?? words.length;
-                    const isActive = activeBox === boxName;
-                    const currentFace =
-                        faces?.[boxName] ??
-                        resolveBoxFace({
-                            isActive,
-                        });
-                    const boxNumber = BOX_NUMBERS[boxName];
-                    const accessibilityLabel = t("flashcards.card.box.accessibilityLabel", {
-                        box: boxNumber,
-                        count: wordCount,
-                    });
-
-                    return (
-                        <View
-                            key={boxName}
-                            onLayout={
-                                boxName === "boxOne" || boxName === "boxTwo"
-                                    ? handleMeasuredBoxLayout(boxName)
-                                    : undefined
-                            }
-                        >
-                            <Pressable
-                                disabled={disabled}
-                                onLayout={handleMeasuredPressableLayout(boxName)}
-                                onPressIn={() => {
-                                    if (disabled) return;
-                                    longPressTriggeredRef.current = false;
-                                }}
-                                onLongPress={() => {
-                                    if (disabled) return;
-                                    longPressTriggeredRef.current = true;
-                                    onBoxLongPress?.(boxName);
-                                }}
-                                delayLongPress={400}
-                                accessible
-                                accessibilityRole="button"
-                                accessibilityLabel={accessibilityLabel}
-                                accessibilityState={{
-                                    selected: isActive,
-                                    disabled,
-                                }}
-                                onPress={() => {
-                                    if (disabled) {
-                                        return;
-                                    }
-                                    if (longPressTriggeredRef.current) {
-                                        longPressTriggeredRef.current = false;
-                                        return;
-                                    }
-                                    handleSelectBox(boxName);
-                                }}
-                            >
-                                {boxName === "boxOne" || boxName === "boxTwo" ? (
-                                    <CoachmarkAnchor
-                                        id={
-                                            boxName === "boxOne"
-                                                ? "flashcards-box-one"
-                                                : "flashcards-box-two"
-                                        }
-                                        shape="rect"
-                                        radius={24}
-                                    >
-                                        <View collapsable={false}>
-                                            <BoxSkin
-                                                wordCount={wordCount}
-                                                face={currentFace}
-                                                isActive={activeBox === boxName}
-                                                isCaro={false}
-                                            />
-                                        </View>
-                                    </CoachmarkAnchor>
-                                ) : (
-                                    <BoxSkin
-                                        wordCount={wordCount}
-                                        face={currentFace}
-                                        isActive={activeBox === boxName}
-                                        isCaro={false}
-                                    />
-                                )}
-                                {boxName === "boxOne" ? (
-                                    <CoachmarkAnchor
-                                        id="flashcards-box-one-count"
-                                        shape="rect"
-                                        radius={12}
-                                    >
-                                        <Text
-                                            style={styles.boxWords}
-                                            onLayout={handleMeasuredCountLayout(boxName)}
-                                        >
-                                            {wordCount}
-                                        </Text>
-                                    </CoachmarkAnchor>
-                                ) : (
-                                    <Text
-                                        style={styles.boxWords}
-                                        onLayout={handleMeasuredCountLayout(boxName)}
-                                    >
-                                        {wordCount}
-                                    </Text>
-                                )}
-                            </Pressable>
-                        </View>
-                    );
-                })}
-                {shouldRenderPromotionAnchor ? (
-                    <CoachmarkAnchor
-                        id="flashcards-promotion-arrow-anchor"
-                        shape="rect"
-                        radius={12}
-                        pointerEvents="none"
-                        style={[
-                            styles.hiddenPromotionAnchor,
-                            {
-                                left: promotionArrowLeft,
-                                top: promotionArrowTop,
-                                width: 1,
-                                height: 1,
-                            },
-                        ]}
-                    >
-                        <View pointerEvents="none" />
-                    </CoachmarkAnchor>
-                ) : null}
-                {countsCoachmarkId && countsAnchorFrame && containerLayout ? (
-                    <CoachmarkAnchor
-                        id={countsCoachmarkId}
-                        shape="rect"
-                        radius={12}
-                        pointerEvents="none"
-                        style={[
-                            styles.hiddenCountsAnchor,
-                            {
-                                left: Math.max(0, countsAnchorFrame.left),
-                                top: Math.max(0, countsAnchorFrame.top),
-                                width: Math.min(
-                                    containerLayout.width,
-                                    countsAnchorFrame.right - countsAnchorFrame.left
-                                ),
-                                height: Math.min(
-                                    containerLayout.height,
-                                    countsAnchorFrame.bottom - countsAnchorFrame.top
-                                ),
-                            },
-                        ]}
-                    >
-                        <View pointerEvents="none" />
-                    </CoachmarkAnchor>
-                ) : null}
+                <View style={{ transform: [{ scale: HORIZONTAL_BOX_SCALE }] }}>
+                    {boxSkin}
+                </View>
             </View>
+        ) : (
+            boxSkin
+        );
+
+        return (
+            <View
+                key={boxName}
+                testID={`box-list-item-${boxName}`}
+                style={horizontalScroll ? styles.horizontalBoxItem : undefined}
+                onLayout={handleMeasuredBoxItemLayout(boxName)}
+            >
+                <Pressable
+                    disabled={disabled}
+                    onLayout={handleMeasuredPressableLayout(boxName)}
+                    onPressIn={() => {
+                        if (disabled) return;
+                        longPressTriggeredRef.current = false;
+                    }}
+                    onLongPress={() => {
+                        if (disabled) return;
+                        longPressTriggeredRef.current = true;
+                        onBoxLongPress?.(boxName);
+                    }}
+                    delayLongPress={400}
+                    accessible
+                    accessibilityRole="button"
+                    accessibilityLabel={accessibilityLabel}
+                    accessibilityState={{
+                        selected: isActive,
+                        disabled,
+                    }}
+                    onPress={() => {
+                        if (disabled) {
+                            return;
+                        }
+                        if (longPressTriggeredRef.current) {
+                            longPressTriggeredRef.current = false;
+                            return;
+                        }
+                        handleSelectBox(boxName);
+                    }}
+                >
+                    {boxName === "boxOne" || boxName === "boxTwo" ? (
+                        <CoachmarkAnchor
+                            id={
+                                boxName === "boxOne"
+                                    ? "flashcards-box-one"
+                                    : "flashcards-box-two"
+                            }
+                            shape="rect"
+                            radius={24}
+                        >
+                            <View collapsable={false}>
+                                {scaledBoxSkin}
+                            </View>
+                        </CoachmarkAnchor>
+                    ) : (
+                        scaledBoxSkin
+                    )}
+                    {boxName === "boxOne" ? (
+                        <CoachmarkAnchor
+                            id="flashcards-box-one-count"
+                            shape="rect"
+                            radius={12}
+                        >
+                            <Text
+                                style={styles.boxWords}
+                                onLayout={handleMeasuredCountLayout(boxName)}
+                            >
+                                {wordCount}
+                            </Text>
+                        </CoachmarkAnchor>
+                    ) : (
+                        <Text
+                            style={styles.boxWords}
+                            onLayout={handleMeasuredCountLayout(boxName)}
+                        >
+                            {wordCount}
+                        </Text>
+                    )}
+                </Pressable>
+            </View>
+        );
+    };
+
+    const handleContainerLayout = (event: LayoutChangeEvent) => {
+        const { width, height } = event.nativeEvent.layout;
+        setContainerLayout((current) => {
+            if (
+                current &&
+                current.width === width &&
+                current.height === height
+            ) {
+                return current;
+            }
+            return { width, height };
+        });
+    };
+
+    const coachmarkAnchors = (
+        <>
+            {shouldRenderPromotionAnchor ? (
+                <CoachmarkAnchor
+                    id="flashcards-promotion-arrow-anchor"
+                    shape="rect"
+                    radius={12}
+                    pointerEvents="none"
+                    style={[
+                        styles.hiddenPromotionAnchor,
+                        {
+                            left: promotionArrowLeft,
+                            top: promotionArrowTop,
+                            width: 1,
+                            height: 1,
+                        },
+                    ]}
+                >
+                    <View pointerEvents="none" />
+                </CoachmarkAnchor>
+            ) : null}
+            {countsCoachmarkId && countsAnchorFrame && containerLayout ? (
+                <CoachmarkAnchor
+                    id={countsCoachmarkId}
+                    shape="rect"
+                    radius={12}
+                    pointerEvents="none"
+                    style={[
+                        styles.hiddenCountsAnchor,
+                        {
+                            left: Math.max(0, countsAnchorFrame.left),
+                            top: Math.max(0, countsAnchorFrame.top),
+                            width: Math.min(
+                                containerLayout.width,
+                                countsAnchorFrame.right - countsAnchorFrame.left
+                            ),
+                            height: Math.min(
+                                containerLayout.height,
+                                countsAnchorFrame.bottom - countsAnchorFrame.top
+                            ),
+                        },
+                    ]}
+                >
+                    <View pointerEvents="none" />
+                </CoachmarkAnchor>
+            ) : null}
+        </>
+    );
+
+    const boxesRow = (
+        <View
+            style={styles.containerTop}
+            onLayout={handleContainerLayout}
+        >
+            {displayedEntries.map(renderBoxItem)}
+            {coachmarkAnchors}
+        </View>
+    );
+
+    return (
+        <View style={styles.container}>
+            {horizontalScroll ? (
+                <View
+                    style={[
+                        styles.containerTopHorizontal,
+                        { width: effectiveHorizontalViewportWidth },
+                    ]}
+                    onLayout={handleContainerLayout}
+                >
+                    <ScrollView
+                        horizontal
+                        style={styles.horizontalScrollViewport}
+                        showsHorizontalScrollIndicator={false}
+                        bounces={false}
+                        scrollEnabled={!disabled}
+                        nestedScrollEnabled
+                        keyboardShouldPersistTaps="handled"
+                    >
+                        <View style={styles.horizontalScrollContent}>
+                            <View
+                                style={[
+                                    styles.horizontalDebugHeader,
+                                    { width: horizontalSidePadding, height: BOX_ITEM_HEIGHT },
+                                ]}
+                            />
+                            {displayedEntries.map(renderBoxItem)}
+                            <View
+                                style={[
+                                    styles.horizontalDebugFooter,
+                                    { width: horizontalSidePadding, height: BOX_ITEM_HEIGHT },
+                                ]}
+                            />
+                            {coachmarkAnchors}
+                        </View>
+                    </ScrollView>
+                </View>
+            ) : (
+                boxesRow
+            )}
         </View>
     );
 }

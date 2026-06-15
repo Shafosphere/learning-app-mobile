@@ -18,6 +18,7 @@ import {
   subscribeFlashcardReturnedToUnknown,
 } from "@/src/services/returnFlashcardToUnknown";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
@@ -25,6 +26,10 @@ import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
+}));
+
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: jest.fn(),
 }));
 
 jest.mock("@/src/contexts/LearningStatsContext", () => ({
@@ -265,6 +270,10 @@ type ButtonsProps = React.ComponentProps<
 let latestButtonsProps: ButtonsProps | null = null;
 let latestBoxListProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
+  horizontalScroll?: boolean;
+} | null = null;
+let latestBoxCarouselProps: {
+  faces?: Partial<Record<keyof BoxesState, string>>;
 } | null = null;
 let latestPeekProps: {
   onReturnToUnknown?: (cardId: number) => Promise<void>;
@@ -284,6 +293,7 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxesMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
+    horizontalScroll?: boolean;
   }) {
     latestBoxListProps = props;
     return null;
@@ -291,7 +301,10 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
 });
 
 jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
-  return function BoxCarouselMock() {
+  return function BoxCarouselMock(props: {
+    faces?: Partial<Record<keyof BoxesState, string>>;
+  }) {
+    latestBoxCarouselProps = props;
     return null;
   };
 });
@@ -327,6 +340,7 @@ jest.mock("@/src/components/flashcards/CourseFinishedPanel/CourseFinishedPanel",
 
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
+const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
@@ -451,6 +465,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     latestCardProps = null;
     latestButtonsProps = null;
     latestBoxListProps = null;
+    latestBoxCarouselProps = null;
     latestPeekProps = null;
     latestReturnToUnknownListener = null;
     latestFinishedPanelProps = null;
@@ -468,6 +483,7 @@ describe("FlashcardsScreen UI state regressions", () => {
       goNext: jest.fn(),
       advanceByEvent: jest.fn(),
     }));
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
     mockedUseFlashcardsAutoflow.mockClear();
     mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
     mockedGetCourseCompletionSummary.mockResolvedValue({
@@ -728,6 +744,73 @@ describe("FlashcardsScreen UI state regressions", () => {
     });
 
     expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
+  });
+
+  it("keeps the classic boxes layout and hint visibility on non-compact screens", async () => {
+    const card = makeCard({
+      id: 51,
+      text: "wide",
+      translations: ["szeroki"],
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    expect(latestBoxListProps).not.toBeNull();
+    expect(latestBoxCarouselProps).toBeNull();
+    expect(latestCardProps?.hideHints).toBe(false);
+  });
+
+  it("keeps classic boxes horizontally scrollable and hides hints on compact screens", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+    const card = makeCard({
+      id: 52,
+      text: "small",
+      translations: ["maly"],
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    expect(latestBoxListProps).not.toBeNull();
+    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+    expect(latestBoxCarouselProps).toBeNull();
+    expect(latestCardProps?.hideHints).toBe(true);
+  });
+
+  it("keeps carousel boxes on compact screens when carousel is selected", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "carousel",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "top",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 53,
+      text: "small carousel",
+      translations: ["mala karuzela"],
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    expect(latestBoxListProps).toBeNull();
+    expect(latestBoxCarouselProps).not.toBeNull();
+    expect(latestCardProps?.hideHints).toBe(true);
   });
 
   it("starts the hint tutorial instead of editing on the first manual hint tap", async () => {

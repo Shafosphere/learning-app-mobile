@@ -575,6 +575,12 @@ describe("Card logic props", () => {
     });
   });
 
+  it("does not render the hint slot when hints are hidden", () => {
+    renderCard(createProps({ hideHints: true }));
+
+    expect(latestCardHintProps).toBeNull();
+  });
+
   it("opens hint editing when the external hint edit token changes", async () => {
     const screen = renderCard(
       createProps({

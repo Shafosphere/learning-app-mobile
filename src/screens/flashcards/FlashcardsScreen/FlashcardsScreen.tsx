@@ -56,6 +56,7 @@ import {
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getExplanationState } from "@/src/utils/explanationState";
@@ -125,6 +126,7 @@ const UI_WARMUP_DELAY_MS = 250;
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
 const BOTTOM_BUTTONS_MIN_HEIGHT = 50;
 const BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 56;
+const COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET = 20;
 const BOTTOM_BUTTONS_KEYBOARD_DURATION_MS = 320;
 const ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS = 7;
 const ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS = false;
@@ -197,6 +199,7 @@ export default function Flashcards() {
   const router = useRouter();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
+  const { isCompact } = useDeviceLayout();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
@@ -594,7 +597,7 @@ export default function Flashcards() {
     selectedItemIdRef.current = selectedItemId;
   }, [selectedItemId]);
   const shouldHideHintsForActiveBox =
-    activeBox === "boxFour" || activeBox === "boxFive";
+    isCompact || activeBox === "boxFour" || activeBox === "boxFive";
   const [displayResultState, setDisplayResultState] = useState<{
     cardId: number | null;
     result: boolean | null;
@@ -2036,7 +2039,8 @@ export default function Flashcards() {
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
-  const isCarouselLayout = boxesLayout !== "classic";
+  const effectiveBoxesLayout = boxesLayout;
+  const isCarouselLayout = effectiveBoxesLayout !== "classic";
   const carouselMinScale = 0.42;
   const {
     scale: boxesScale,
@@ -2320,7 +2324,7 @@ export default function Flashcards() {
   );
 
   const boxesContent =
-    boxesLayout === "classic" ? (
+    effectiveBoxesLayout === "classic" ? (
       <Boxes
         boxes={boxes}
         activeBox={activeBox}
@@ -2330,6 +2334,7 @@ export default function Flashcards() {
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
+        horizontalScroll={isCompact}
       />
     ) : (
       <BoxesCarousel
@@ -2350,9 +2355,12 @@ export default function Flashcards() {
     ? SCREEN_LAYOUT_TRANSITION
     : undefined;
   const shouldRenderBottomButtons = !areButtonsOnTop && shouldShowBoxes;
+  const bottomButtonsDockBottomOffset = isCompact
+    ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+    : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
   const bottomButtonsReservedSpace = shouldRenderBottomButtons
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
-      BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+      bottomButtonsDockBottomOffset
     : 0;
   const handleActionButtonsNudgeConfirm = useCallback(async () => {
     if (actionsPositionNudgePreview !== actionButtonsPosition) {
@@ -2699,7 +2707,7 @@ export default function Flashcards() {
           <View
             style={[
               styles.bottomButtonsDock,
-              { bottom: BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET },
+              { bottom: bottomButtonsDockBottomOffset },
             ]}
             pointerEvents="box-none"
           >

@@ -21,6 +21,7 @@ import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknow
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 type ReviewFlashcardsRouteParams = {
   courseId?: string;
@@ -67,6 +68,10 @@ jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
     goNext: jest.fn(),
     advanceByEvent: jest.fn(() => Promise.resolve(true)),
   })),
+}));
+
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: jest.fn(),
 }));
 
 jest.mock("@/src/components/onboarding/CoachmarkLayerPortal", () => ({
@@ -168,6 +173,8 @@ let latestPeekProps: {
   visible?: boolean;
   onReturnToUnknown?: (cardId: number) => Promise<void>;
 } | null = null;
+let latestBoxCarouselProps: Record<string, unknown> | null = null;
+let latestBoxListProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
   return function FlashcardsPeekMock(props: {
@@ -180,7 +187,8 @@ jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
 });
 
 jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
-  return function BoxCarouselMock() {
+  return function BoxCarouselMock(props: Record<string, unknown>) {
+    latestBoxCarouselProps = props;
     return null;
   };
 });
@@ -257,11 +265,14 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
     boxes,
     handleSelectBox,
     onBoxLongPress,
+    horizontalScroll,
   }: {
     boxes: Record<string, Array<{ id: number }>>;
     handleSelectBox: (box: any) => void;
     onBoxLongPress?: (box: any) => void;
+    horizontalScroll?: boolean;
   }) {
+    latestBoxListProps = { boxes, handleSelectBox, onBoxLongPress, horizontalScroll };
     const React = require("react");
     const { Pressable, Text, View } = require("react-native");
     return (
@@ -388,6 +399,7 @@ type ReviewCardRow = {
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
+const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
 const mockedGetCustomFlashcardConsecutiveWrongCount =
@@ -483,6 +495,8 @@ describe("reviewflashcards correction desync regression", () => {
   beforeEach(() => {
     latestPeekProps = null;
     latestNudgeModalProps = null;
+    latestBoxCarouselProps = null;
+    latestBoxListProps = null;
     applyStatBurstMock = jest.fn();
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
@@ -499,6 +513,7 @@ describe("reviewflashcards correction desync regression", () => {
       shieldCount: 0,
     });
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -702,6 +717,28 @@ describe("reviewflashcards correction desync regression", () => {
 
     expect(mockedGetDueCustomReviewFlashcards).toHaveBeenCalledWith(77);
     expect(screen.getByText("boxOne:0")).not.toBeNull();
+  });
+
+  it("keeps classic boxes horizontally scrollable on compact screens", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 605,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+    expect(latestBoxCarouselProps).toBeNull();
   });
 
   it("returns a peeked card to unknown without scheduling it at stage zero", async () => {

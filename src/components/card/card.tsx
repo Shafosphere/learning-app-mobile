@@ -1294,7 +1294,7 @@ export default function Card({
         onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
         onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
       />
-      {hideHints || isBetweenCards ? (
+      {hideHints ? null : isBetweenCards ? (
         <View style={styles.hintContainer} />
       ) : (
         <CardHint

@@ -6,6 +6,7 @@ import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLa
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import {
   getOnboardingCheckpoint,
+  markAllOnboardingCoachmarksSeen,
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 
@@ -138,12 +139,15 @@ jest.mock("@/src/components/course/CourseListCard", () => ({
 
 jest.mock("@/src/services/onboardingCheckpoint", () => ({
   getOnboardingCheckpoint: jest.fn(() => Promise.resolve("pin_required")),
+  markAllOnboardingCoachmarksSeen: jest.fn(() => Promise.resolve()),
   setOnboardingCheckpoint: jest.fn(() => Promise.resolve()),
 }));
 
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseCoachmarkLayerPortal = useCoachmarkLayerPortal as jest.Mock;
 const mockedGetOnboardingCheckpoint = getOnboardingCheckpoint as jest.Mock;
+const mockedMarkAllOnboardingCoachmarksSeen =
+  markAllOnboardingCoachmarksSeen as jest.Mock;
 const mockedSetOnboardingCheckpoint = setOnboardingCheckpoint as jest.Mock;
 
 function getLatestCoachmarkLayer() {
@@ -204,6 +208,7 @@ describe("CoursePinScreen skip onboarding", () => {
     await waitFor(() => {
       expect(mockSkipFlow).toHaveBeenCalledTimes(1);
     });
+    expect(mockedMarkAllOnboardingCoachmarksSeen).toHaveBeenCalledTimes(1);
     expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("done");
   });
 

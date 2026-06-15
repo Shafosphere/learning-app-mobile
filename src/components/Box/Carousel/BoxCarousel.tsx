@@ -1,4 +1,5 @@
 // BoxCarousel.tsx
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import React, { useEffect, useMemo, useRef, useState } from "react";
@@ -38,10 +39,20 @@ export default function BoxCarousel({
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
+  const { isCompact } = useDeviceLayout();
   const BOX_SKIN_HEIGHT = 122;
-  const ACTIVE_BOX_SCALE = 2.05;
-  const ACTIVE_BOX_LIFT = 12;
-  const BOX_STAGE_VERTICAL_PADDING = 40;
+  const ACTIVE_BOX_SCALE = isCompact ? 1.3 : 2.05;
+  const INACTIVE_BOX_SCALE = isCompact ? 0.72 : 0.9;
+  const ACTIVE_BOX_LIFT = isCompact ? 2 : 12;
+  const INACTIVE_BOX_LIFT = isCompact ? 4 : 14;
+  const BOX_STAGE_VERTICAL_PADDING = isCompact ? 6 : 40;
+  const LIST_VERTICAL_PADDING = isCompact ? 4 : 14;
+  const ACTIVE_COUNTER_WRAP_STYLE = isCompact
+    ? { minHeight: 30, marginTop: -12 }
+    : null;
+  const ACTIVE_COUNTER_NUMBER_STYLE = isCompact
+    ? { fontSize: 30, lineHeight: 34 }
+    : null;
   const BOX_STAGE_HEIGHT = Math.ceil(
     BOX_SKIN_HEIGHT * ACTIVE_BOX_SCALE +
       ACTIVE_BOX_LIFT * 2 +
@@ -57,7 +68,9 @@ export default function BoxCarousel({
         }));
     }, [boxes, countOverrides, hideBoxZero]);
 
-    const baseSize = Math.min(150, Math.max(120, width * 0.34));
+    const baseSize = isCompact
+        ? Math.min(118, Math.max(92, width * 0.3))
+        : Math.min(150, Math.max(120, width * 0.34));
     const itemGap = baseSize * 0.5;
     const itemWidth = baseSize + itemGap;
     const spacerWidth = Math.max((width - itemWidth) / 2, 0);
@@ -194,7 +207,7 @@ export default function BoxCarousel({
                     initialScrollIndex={initialIndex}
                     contentContainerStyle={{
                         paddingHorizontal: spacerWidth,
-                        paddingVertical: 14,
+                        paddingVertical: LIST_VERTICAL_PADDING,
                         alignItems: "center",
                     }}
                     renderItem={({ item, index }) => {
@@ -205,12 +218,20 @@ export default function BoxCarousel({
                         ];
                         const scale = scrollX.interpolate({
                             inputRange,
-                            outputRange: [0.9, 2.05, 0.9],
+                            outputRange: [
+                                INACTIVE_BOX_SCALE,
+                                ACTIVE_BOX_SCALE,
+                                INACTIVE_BOX_SCALE,
+                            ],
                             extrapolate: "clamp",
                         });
                         const translateY = scrollX.interpolate({
                             inputRange,
-                            outputRange: [14, -12, 14],
+                            outputRange: [
+                                INACTIVE_BOX_LIFT,
+                                -ACTIVE_BOX_LIFT,
+                                INACTIVE_BOX_LIFT,
+                            ],
                             extrapolate: "clamp",
                         });
                         const isActive = index === activeIndex;
@@ -323,19 +344,31 @@ export default function BoxCarousel({
                     </CoachmarkAnchor>
                 ) : null}
             </View>
-            <View style={styles.activeCounterWrap}>
+            <View style={[styles.activeCounterWrap, ACTIVE_COUNTER_WRAP_STYLE]}>
                 {items[activeIndex]?.key === "boxOne" ? (
                     <CoachmarkAnchor
                         id="flashcards-box-one-count"
                         shape="rect"
                         radius={12}
                     >
-                        <Text style={[styles.number, styles.numberUpdate]}>
+                        <Text
+                            style={[
+                                styles.number,
+                                styles.numberUpdate,
+                                ACTIVE_COUNTER_NUMBER_STYLE,
+                            ]}
+                        >
                             {activeCount}
                         </Text>
                     </CoachmarkAnchor>
                 ) : (
-                    <Text style={[styles.number, styles.numberUpdate]}>
+                    <Text
+                        style={[
+                            styles.number,
+                            styles.numberUpdate,
+                            ACTIVE_COUNTER_NUMBER_STYLE,
+                        ]}
+                    >
                         {activeCount}
                     </Text>
                 )}
