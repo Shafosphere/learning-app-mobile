@@ -12,6 +12,14 @@ export type OnboardingCheckpoint =
 type OnboardingCheckpointListener = (checkpoint: OnboardingCheckpoint) => void;
 
 const STORAGE_KEY = "@onboarding_checkpoint_v1";
+const ONBOARDING_COACHMARK_STORAGE_KEYS = [
+  "@course_pin_intro_seen_v1",
+  "@course_activate_intro_seen_v1",
+  "@course_entry_settings_intro_seen_v1",
+  "@review_courses_intro_seen_v1",
+  "@review_flashcards_intro_seen_v1",
+  "@flashcards_intro_seen_v1",
+] as const;
 const listeners = new Set<OnboardingCheckpointListener>();
 
 function notifyListeners(checkpoint: OnboardingCheckpoint): void {
@@ -76,5 +84,15 @@ export async function setOnboardingCheckpoint(
     console.warn("[OnboardingCheckpoint] Failed to write", error);
   } finally {
     notifyListeners(checkpoint);
+  }
+}
+
+export async function markAllOnboardingCoachmarksSeen(): Promise<void> {
+  try {
+    await AsyncStorage.multiSet(
+      ONBOARDING_COACHMARK_STORAGE_KEYS.map((key) => [key, "1"])
+    );
+  } catch (error) {
+    console.warn("[OnboardingCheckpoint] Failed to mark coachmarks seen", error);
   }
 }
