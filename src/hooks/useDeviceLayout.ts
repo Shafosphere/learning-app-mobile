@@ -11,21 +11,38 @@ export interface DeviceLayout {
   orientation: "portrait" | "landscape";
   widthClass: WidthClass;
   heightClass: HeightClass;
-  isCompact: boolean;
-  isMedium: boolean;
-  isExpanded: boolean;
+  isCompactWidth: boolean;
+  isMediumWidth: boolean;
+  isExpandedWidth: boolean;
+  isCompactHeight: boolean;
+  isMediumHeight: boolean;
+  isExpandedHeight: boolean;
+  isSmallPhoneLayout: boolean;
   isTabletLayout: boolean;
 }
 
+const WIDTH_BREAKPOINTS = {
+  medium: 600,
+  expanded: 840,
+} as const;
+
+const HEIGHT_BREAKPOINTS = {
+  medium: 480,
+  expanded: 900,
+} as const;
+
+const SMALL_PHONE_MAX_SHORT_SIDE = 380;
+const TABLET_LAYOUT_MIN_SHORT_SIDE = 600;
+
 function getWidthClass(width: number): WidthClass {
-  if (width >= 840) return "expanded";
-  if (width >= 600) return "medium";
+  if (width >= WIDTH_BREAKPOINTS.expanded) return "expanded";
+  if (width >= WIDTH_BREAKPOINTS.medium) return "medium";
   return "compact";
 }
 
 function getHeightClass(height: number): HeightClass {
-  if (height >= 900) return "expanded";
-  if (height >= 480) return "medium";
+  if (height >= HEIGHT_BREAKPOINTS.expanded) return "expanded";
+  if (height >= HEIGHT_BREAKPOINTS.medium) return "medium";
   return "compact";
 }
 
@@ -34,6 +51,7 @@ export function getDeviceLayout(width: number, height: number): DeviceLayout {
   const longestSide = Math.max(width, height);
   const widthClass = getWidthClass(width);
   const heightClass = getHeightClass(height);
+  const isSmallPhoneLayout = shortestSide <= SMALL_PHONE_MAX_SHORT_SIDE;
 
   return {
     width,
@@ -43,10 +61,14 @@ export function getDeviceLayout(width: number, height: number): DeviceLayout {
     orientation: width >= height ? "landscape" : "portrait",
     widthClass,
     heightClass,
-    isCompact: widthClass === "compact",
-    isMedium: widthClass === "medium",
-    isExpanded: widthClass === "expanded",
-    isTabletLayout: shortestSide >= 600,
+    isCompactWidth: widthClass === "compact",
+    isMediumWidth: widthClass === "medium",
+    isExpandedWidth: widthClass === "expanded",
+    isCompactHeight: heightClass === "compact",
+    isMediumHeight: heightClass === "medium",
+    isExpandedHeight: heightClass === "expanded",
+    isSmallPhoneLayout,
+    isTabletLayout: shortestSide >= TABLET_LAYOUT_MIN_SHORT_SIDE,
   };
 }
 

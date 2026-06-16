@@ -199,7 +199,7 @@ export default function Flashcards() {
   const router = useRouter();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
-  const { isCompact } = useDeviceLayout();
+  const { isSmallPhoneLayout } = useDeviceLayout();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
@@ -597,7 +597,7 @@ export default function Flashcards() {
     selectedItemIdRef.current = selectedItemId;
   }, [selectedItemId]);
   const shouldHideHintsForActiveBox =
-    isCompact || activeBox === "boxFour" || activeBox === "boxFive";
+    isSmallPhoneLayout || activeBox === "boxFour" || activeBox === "boxFive";
   const [displayResultState, setDisplayResultState] = useState<{
     cardId: number | null;
     result: boolean | null;
@@ -2334,7 +2334,7 @@ export default function Flashcards() {
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
-        horizontalScroll={isCompact}
+        horizontalScroll={isSmallPhoneLayout}
       />
     ) : (
       <BoxesCarousel
@@ -2355,7 +2355,7 @@ export default function Flashcards() {
     ? SCREEN_LAYOUT_TRANSITION
     : undefined;
   const shouldRenderBottomButtons = !areButtonsOnTop && shouldShowBoxes;
-  const bottomButtonsDockBottomOffset = isCompact
+  const bottomButtonsDockBottomOffset = isSmallPhoneLayout
     ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
   const bottomButtonsReservedSpace = shouldRenderBottomButtons

@@ -242,7 +242,7 @@ function CourseIconColorSelectorComponent({
   const hueColorHex = useMemo(() => hsvToHex({ h: hsv.h, s: 1, v: 1 }), [hsv.h]);
   const colorSheetBottomInset = Math.max(insets.bottom, 18);
   const isNameEditable = Boolean(onCourseNameChange) && nameEditable && !disabled;
-  const isCompactLayout = deviceLayout.isCompact;
+  const isCompactLayout = deviceLayout.isCompactWidth;
 
   useEffect(() => {
     const justOpened = isColorSheetOpen && !wasColorSheetOpenRef.current;

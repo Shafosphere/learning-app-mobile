@@ -513,7 +513,7 @@ describe("reviewflashcards correction desync regression", () => {
       shieldCount: 0,
     });
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -719,8 +719,8 @@ describe("reviewflashcards correction desync regression", () => {
     expect(screen.getByText("boxOne:0")).not.toBeNull();
   });
 
-  it("keeps classic boxes horizontally scrollable on compact screens", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+  it("keeps classic boxes horizontally scrollable on small-phone layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
         id: 605,

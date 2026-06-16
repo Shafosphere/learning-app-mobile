@@ -483,7 +483,7 @@ describe("FlashcardsScreen UI state regressions", () => {
       goNext: jest.fn(),
       advanceByEvent: jest.fn(),
     }));
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
     mockedUseFlashcardsAutoflow.mockClear();
     mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
     mockedGetCourseCompletionSummary.mockResolvedValue({
@@ -746,7 +746,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
   });
 
-  it("keeps the classic boxes layout and hint visibility on non-compact screens", async () => {
+  it("keeps the classic boxes layout and hint visibility off the small-phone layout", async () => {
     const card = makeCard({
       id: 51,
       text: "wide",
@@ -762,8 +762,8 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.hideHints).toBe(false);
   });
 
-  it("keeps classic boxes horizontally scrollable and hides hints on compact screens", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+  it("keeps classic boxes horizontally scrollable and hides hints on small-phone layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     const card = makeCard({
       id: 52,
       text: "small",
@@ -780,8 +780,8 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.hideHints).toBe(true);
   });
 
-  it("keeps carousel boxes on compact screens when carousel is selected", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: true });
+  it("keeps carousel boxes on small-phone layouts when carousel is selected", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
       setActiveCustomCourseId: jest.fn(),

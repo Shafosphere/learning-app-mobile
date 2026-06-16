@@ -2,14 +2,26 @@ import { getDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 describe("getDeviceLayout", () => {
   it.each([
-    [390, 844, "compact", "medium", false, "portrait"],
-    [844, 390, "expanded", "compact", false, "landscape"],
-    [768, 1024, "medium", "expanded", true, "portrait"],
-    [1024, 768, "expanded", "medium", true, "landscape"],
-    [600, 960, "medium", "expanded", true, "portrait"],
+    [360, 640, "compact", "medium", true, false, "portrait"],
+    [412, 924, "compact", "expanded", false, false, "portrait"],
+    [390, 844, "compact", "medium", false, false, "portrait"],
+    [844, 390, "expanded", "compact", false, false, "landscape"],
+    [768, 1024, "medium", "expanded", false, true, "portrait"],
+    [1024, 768, "expanded", "medium", false, true, "landscape"],
+    [600, 960, "medium", "expanded", false, true, "portrait"],
+    [960, 600, "expanded", "medium", false, true, "landscape"],
+    [852, 883, "expanded", "medium", false, true, "portrait"],
   ] as const)(
     "classifies %i x %i",
-    (width, height, widthClass, heightClass, isTabletLayout, orientation) => {
+    (
+      width,
+      height,
+      widthClass,
+      heightClass,
+      isSmallPhoneLayout,
+      isTabletLayout,
+      orientation,
+    ) => {
       expect(getDeviceLayout(width, height)).toEqual({
         width,
         height,
@@ -18,9 +30,13 @@ describe("getDeviceLayout", () => {
         orientation,
         widthClass,
         heightClass,
-        isCompact: widthClass === "compact",
-        isMedium: widthClass === "medium",
-        isExpanded: widthClass === "expanded",
+        isCompactWidth: widthClass === "compact",
+        isMediumWidth: widthClass === "medium",
+        isExpandedWidth: widthClass === "expanded",
+        isCompactHeight: heightClass === "compact",
+        isMediumHeight: heightClass === "medium",
+        isExpandedHeight: heightClass === "expanded",
+        isSmallPhoneLayout,
         isTabletLayout,
       });
     },

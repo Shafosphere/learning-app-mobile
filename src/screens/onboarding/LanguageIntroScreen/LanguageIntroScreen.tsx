@@ -247,7 +247,13 @@ export default function LanguageIntroScreen() {
     <View style={styles.container}>
       <View style={styles.content}>
         <View style={styles.card}>
-          <Text style={styles.title} allowFontScaling>
+          <Text
+            style={styles.title}
+            allowFontScaling
+            numberOfLines={1}
+            adjustsFontSizeToFit
+            minimumFontScale={0.72}
+          >
             {tr(
               mode === "app"
                 ? "onboarding.languageIntro.appTitle"

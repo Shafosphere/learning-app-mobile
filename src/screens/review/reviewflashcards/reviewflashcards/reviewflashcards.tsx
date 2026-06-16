@@ -136,7 +136,7 @@ export default function ReviewFlashcardsPlaceholder() {
     mistakeNudgePreviewToken?: string;
   }>();
   const styles = useStyles();
-  const { isCompact } = useDeviceLayout();
+  const { isSmallPhoneLayout } = useDeviceLayout();
   const { t } = useTranslation();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const settings = useSettings();
@@ -1358,7 +1358,7 @@ export default function ReviewFlashcardsPlaceholder() {
         countsCoachmarkId="review-flashcards-box-counts"
         disabled={isBetweenCards || isLoading || correction != null || mistakeNudge != null}
         faces={boxFaces}
-        horizontalScroll={isCompact}
+        horizontalScroll={isSmallPhoneLayout}
       />
     ) : (
       <BoxesCarousel
@@ -1372,7 +1372,7 @@ export default function ReviewFlashcardsPlaceholder() {
     );
   const boxesScaleOffsetY = scaleOffsetY;
   const shouldRenderBottomButtons = !areButtonsOnTop;
-  const bottomButtonsDockBottomOffset = isCompact
+  const bottomButtonsDockBottomOffset = isSmallPhoneLayout
     ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
   const bottomButtonsReservedSpace = shouldRenderBottomButtons

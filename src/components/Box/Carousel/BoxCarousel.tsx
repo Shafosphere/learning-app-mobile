@@ -39,18 +39,18 @@ export default function BoxCarousel({
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
-  const { isCompact } = useDeviceLayout();
+  const { isCompactWidth } = useDeviceLayout();
   const BOX_SKIN_HEIGHT = 122;
-  const ACTIVE_BOX_SCALE = isCompact ? 1.3 : 2.05;
-  const INACTIVE_BOX_SCALE = isCompact ? 0.72 : 0.9;
-  const ACTIVE_BOX_LIFT = isCompact ? 2 : 12;
-  const INACTIVE_BOX_LIFT = isCompact ? 4 : 14;
-  const BOX_STAGE_VERTICAL_PADDING = isCompact ? 6 : 40;
-  const LIST_VERTICAL_PADDING = isCompact ? 4 : 14;
-  const ACTIVE_COUNTER_WRAP_STYLE = isCompact
+  const ACTIVE_BOX_SCALE = isCompactWidth ? 1.3 : 2.05;
+  const INACTIVE_BOX_SCALE = isCompactWidth ? 0.72 : 0.9;
+  const ACTIVE_BOX_LIFT = isCompactWidth ? 2 : 12;
+  const INACTIVE_BOX_LIFT = isCompactWidth ? 4 : 14;
+  const BOX_STAGE_VERTICAL_PADDING = isCompactWidth ? 6 : 40;
+  const LIST_VERTICAL_PADDING = isCompactWidth ? 4 : 14;
+  const ACTIVE_COUNTER_WRAP_STYLE = isCompactWidth
     ? { minHeight: 30, marginTop: -12 }
     : null;
-  const ACTIVE_COUNTER_NUMBER_STYLE = isCompact
+  const ACTIVE_COUNTER_NUMBER_STYLE = isCompactWidth
     ? { fontSize: 30, lineHeight: 34 }
     : null;
   const BOX_STAGE_HEIGHT = Math.ceil(
@@ -68,7 +68,7 @@ export default function BoxCarousel({
         }));
     }, [boxes, countOverrides, hideBoxZero]);
 
-    const baseSize = isCompact
+    const baseSize = isCompactWidth
         ? Math.min(118, Math.max(92, width * 0.3))
         : Math.min(150, Math.max(120, width * 0.34));
     const itemGap = baseSize * 0.5;

@@ -314,7 +314,7 @@ describe("FlashcardsScreen patchCardHints integration", () => {
     mockSetBatchIndex.mockClear();
     mockCurrentUsedWordIds = [];
     mockCurrentResult = null;
-    mockedUseDeviceLayout.mockReturnValue({ isCompact: false });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
 
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
