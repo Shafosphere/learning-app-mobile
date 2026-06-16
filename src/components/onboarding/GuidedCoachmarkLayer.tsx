@@ -22,6 +22,7 @@ import { useTranslation } from "react-i18next";
 import React, {
   useEffect,
   useLayoutEffect,
+  useCallback,
   useMemo,
   useRef,
   useState,
@@ -78,6 +79,30 @@ function measureInWindow(ref: any): Promise<Rect> {
   });
 }
 
+function measureRawInWindow(ref: any): Promise<Rect> {
+  return new Promise((resolve, reject) => {
+    if (!ref?.measureInWindow) {
+      reject(new Error("Invalid ref or measureInWindow not available"));
+      return;
+    }
+
+    ref.measureInWindow((x: number, y: number, width: number, height: number) => {
+      resolve({ x, y, width, height });
+    });
+  });
+}
+
+function getStatusBarHeight(): number {
+  return Platform.OS === "android" ? Math.ceil(StatusBar.currentHeight || 0) : 0;
+}
+
+function getOverlayRootY(rawY: number): number {
+  const statusBarHeight = getStatusBarHeight();
+  const correctedY = rawY + statusBarHeight;
+
+  return correctedY < 0 ? correctedY : 0;
+}
+
 function isLikelyInvalidSpotlightRect(rect: Rect | null): boolean {
   if (!rect) {
     return false;
@@ -126,6 +151,8 @@ export function GuidedCoachmarkLayer({
   const hasPresentedSpotlightRef = useRef(false);
   const hasPositionedIndicatorRef = useRef(false);
   const spotlightRemeasureAttemptsRef = useRef(0);
+  const isMountedRef = useRef(true);
+  const rootMeasureRequestIdRef = useRef(0);
   const bubbleLeft = useSharedValue(12);
   const bubbleTop = useSharedValue(12);
   const bubbleWidth = useSharedValue(320);
@@ -153,16 +180,86 @@ export function GuidedCoachmarkLayer({
   });
 
   useEffect(() => {
-    if (!currentStep) {
+    isMountedRef.current = true;
+
+    return () => {
+      isMountedRef.current = false;
+      rootMeasureRequestIdRef.current += 1;
+    };
+  }, []);
+
+  const updateRootWindowRect = useCallback(() => {
+    if (!isMountedRef.current) {
       return;
     }
-    setRootWindowRect({
+
+    const requestId = rootMeasureRequestIdRef.current + 1;
+    rootMeasureRequestIdRef.current = requestId;
+    const fallbackRect = {
       x: 0,
       y: 0,
       width: rootLayout.width || windowWidth,
       height: rootLayout.height || windowHeight,
-    });
-  }, [currentIndex, currentStep, rootLayout.height, rootLayout.width, windowHeight, windowWidth]);
+    };
+    const overlayRoot = overlayRootRef.current;
+    if (!overlayRoot) {
+      if (isMountedRef.current && rootMeasureRequestIdRef.current === requestId) {
+        setRootWindowRect(fallbackRect);
+      }
+      return;
+    }
+
+    void measureRawInWindow(overlayRoot)
+      .then((rect) => {
+        if (!isMountedRef.current || rootMeasureRequestIdRef.current !== requestId) {
+          return;
+        }
+
+        if (rect.width <= 0 || rect.height <= 0) {
+          setRootWindowRect(fallbackRect);
+          return;
+        }
+
+        const nextRect = {
+          x: rect.x,
+          y: getOverlayRootY(rect.y),
+          width: rect.width,
+          height: rect.height,
+        };
+
+        setRootWindowRect((current) => {
+          if (
+            current?.x === nextRect.x &&
+            current.y === nextRect.y &&
+            current.width === nextRect.width &&
+            current.height === nextRect.height
+          ) {
+            return current;
+          }
+
+          return nextRect;
+        });
+      })
+      .catch(() => {
+        if (isMountedRef.current && rootMeasureRequestIdRef.current === requestId) {
+          setRootWindowRect(fallbackRect);
+        }
+      });
+  }, [rootLayout.height, rootLayout.width, windowHeight, windowWidth]);
+
+  useEffect(() => {
+    if (!currentStep) {
+      return;
+    }
+
+    const frame = requestAnimationFrame(updateRootWindowRect);
+    const timer = setTimeout(updateRootWindowRect, 120);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      clearTimeout(timer);
+    };
+  }, [currentIndex, currentStep, updateRootWindowRect]);
 
   const localTargetRect = useMemo(() => {
     if (!targetRect || !rootWindowRect) return null;
@@ -618,7 +715,7 @@ export function GuidedCoachmarkLayer({
         if (width !== rootLayout.width || height !== rootLayout.height) {
           setRootLayout({ width, height });
         }
-        setRootWindowRect({ x: 0, y: 0, width, height });
+        requestAnimationFrame(updateRootWindowRect);
       }}
     >
         {isCenteredIntro ? (
