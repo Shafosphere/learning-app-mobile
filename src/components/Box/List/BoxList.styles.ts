@@ -36,6 +36,12 @@ export const useBoxListStyles = createThemeStylesHook((colors) => ({
         alignItems: "center",
         justifyContent: "flex-start",
     },
+    gridBoxItem: {
+        width: 150,
+        minHeight: 175,
+        alignItems: "center",
+        justifyContent: "flex-start",
+    },
     horizontalDebugHeader: {
         minHeight: 210,
     },

@@ -54,6 +54,9 @@ jest.mock("../BoxList.styles", () => ({
             position: "relative",
         },
         horizontalBoxItem: {},
+        gridBoxItem: {
+            width: 150,
+        },
         horizontalDebugHeader: {},
         horizontalDebugFooter: {},
         boxWords: {},
@@ -76,6 +79,32 @@ const boxes = {
 };
 
 describe("BoxList", () => {
+    it("caps classic layout to requested columns", () => {
+        const screen = render(
+            <BoxList
+                boxes={boxes}
+                activeBox="boxOne"
+                handleSelectBox={jest.fn()}
+                hideBoxZero
+                maxColumns={3}
+            />
+        );
+
+        const row = screen.UNSAFE_getAllByType(View).find(
+            (node) =>
+                Array.isArray(node.props.style) &&
+                node.props.style.some(
+                    (style: { maxWidth?: number } | undefined) =>
+                        style?.maxWidth === 450
+                )
+        );
+        expect(row).toBeTruthy();
+
+        expect(screen.getByTestId("box-list-item-boxOne").props.style).toEqual(
+            expect.arrayContaining([expect.objectContaining({ width: 150 })])
+        );
+    });
+
     it("keeps hidden coachmark anchors aligned in horizontal layout coordinates", async () => {
         const screen = render(
             <BoxList

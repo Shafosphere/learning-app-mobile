@@ -199,7 +199,7 @@ export default function Flashcards() {
   const router = useRouter();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
-  const { isSmallPhoneLayout } = useDeviceLayout();
+  const { isSmallPhoneLayout, isTabletLayout } = useDeviceLayout();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
@@ -2335,6 +2335,7 @@ export default function Flashcards() {
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
         horizontalScroll={isSmallPhoneLayout}
+        maxColumns={isTabletLayout ? 3 : undefined}
       />
     ) : (
       <BoxesCarousel

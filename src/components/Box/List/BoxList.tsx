@@ -17,7 +17,9 @@ import { useBoxListStyles } from "./BoxList.styles";
 const BOX_SKIN_WIDTH = 115;
 const BOX_SKIN_HEIGHT = 122;
 const HORIZONTAL_BOX_SCALE = 1.2;
+const GRID_BOX_SCALE = 1.2;
 const BOX_ITEM_WIDTH = 164;
+const GRID_BOX_ITEM_WIDTH = 150;
 const BOX_ITEM_HEIGHT = 210;
 const HORIZONTAL_VIEWPORT_SCREEN_INSET = 24;
 
@@ -41,6 +43,7 @@ interface BoxesProps {
     countsCoachmarkId?: string;
     faces?: BoxFacesByBox;
     horizontalScroll?: boolean;
+    maxColumns?: number;
 }
 
 export default function BoxList({
@@ -54,6 +57,7 @@ export default function BoxList({
     countsCoachmarkId,
     faces,
     horizontalScroll = false,
+    maxColumns,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     const { t } = useTranslation();
@@ -87,6 +91,11 @@ export default function BoxList({
     const horizontalSidePadding = horizontalScroll
         ? Math.max(0, (effectiveHorizontalViewportWidth - BOX_ITEM_WIDTH) / 2)
         : 0;
+    const gridColumns =
+        !horizontalScroll && maxColumns != null
+            ? Math.max(1, Math.floor(maxColumns))
+            : null;
+    const gridWidth = gridColumns ? GRID_BOX_ITEM_WIDTH * gridColumns : undefined;
     const boxOneLayout = measuredBoxItems.boxOne;
     const boxTwoLayout = measuredBoxItems.boxTwo;
     const shouldRenderPromotionAnchor = boxOneLayout != null && boxTwoLayout != null;
@@ -207,16 +216,21 @@ export default function BoxList({
                 isCaro={false}
             />
         );
-        const scaledBoxSkin = horizontalScroll ? (
+        const boxScale = horizontalScroll
+            ? HORIZONTAL_BOX_SCALE
+            : gridColumns
+              ? GRID_BOX_SCALE
+              : 1;
+        const scaledBoxSkin = boxScale !== 1 ? (
             <View
                 style={{
-                    width: BOX_SKIN_WIDTH * HORIZONTAL_BOX_SCALE,
-                    height: BOX_SKIN_HEIGHT * HORIZONTAL_BOX_SCALE,
+                    width: BOX_SKIN_WIDTH * boxScale,
+                    height: BOX_SKIN_HEIGHT * boxScale,
                     alignItems: "center",
                     justifyContent: "center",
                 }}
             >
-                <View style={{ transform: [{ scale: HORIZONTAL_BOX_SCALE }] }}>
+                <View style={{ transform: [{ scale: boxScale }] }}>
                     {boxSkin}
                 </View>
             </View>
@@ -228,7 +242,10 @@ export default function BoxList({
             <View
                 key={boxName}
                 testID={`box-list-item-${boxName}`}
-                style={horizontalScroll ? styles.horizontalBoxItem : undefined}
+                style={[
+                    horizontalScroll ? styles.horizontalBoxItem : null,
+                    gridColumns ? styles.gridBoxItem : null,
+                ]}
                 onLayout={handleMeasuredBoxItemLayout(boxName)}
             >
                 <Pressable
@@ -370,7 +387,7 @@ export default function BoxList({
 
     const boxesRow = (
         <View
-            style={styles.containerTop}
+            style={[styles.containerTop, gridWidth ? { maxWidth: gridWidth } : null]}
             onLayout={handleContainerLayout}
         >
             {displayedEntries.map(renderBoxItem)}
