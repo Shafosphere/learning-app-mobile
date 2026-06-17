@@ -1,9 +1,10 @@
 // index.tsx
 import { useRouter } from "expo-router";
 import type React from "react";
-import { FlatList, View, Text, useWindowDimensions } from "react-native";
+import { FlatList, View, Text } from "react-native";
 import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useStyles } from "./HomeScreen-styles";
 import {
   HOME_QUOTES_TRANSLATION_KEY,
@@ -14,13 +15,30 @@ export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const styles = useStyles();
-  const { height: screenHeight } = useWindowDimensions();
+  const { width: screenWidth, height: screenHeight, isTabletLayout } =
+    useDeviceLayout();
   const logo = require("../../../../assets/illustrations/mascot-box/branding/logo.png");
   const statsImage = require("../../../../assets/images/home/stats.png");
   const customImage = require("../../../../assets/images/home/customize.png");
   const tutorialImage = require("../../../../assets/images/home/tutorial.png");
   const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
+  const tabletHorizontalPadding = 72;
+  const tabletColumnGap = 10;
+  const tabletColumnWidth =
+    (screenWidth - tabletHorizontalPadding * 2 - tabletColumnGap) / 2;
+  const tabletAvailableTileHeight = Math.floor(
+    (screenHeight - 30 - 110 - 16 - 20) / 3
+  );
+  const tabletTileHeight = isTabletLayout
+    ? Math.max(
+        150,
+        Math.min(188, tabletColumnWidth, tabletAvailableTileHeight)
+      )
+    : undefined;
+  const tabletIconSize = tabletTileHeight
+    ? Math.max(96, Math.min(112, Math.floor(tabletTileHeight * 0.62)))
+    : undefined;
 
   const quotes = normalizeHomeQuotes(
     t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true })
@@ -103,10 +121,14 @@ export default function HomeScreen() {
           },
         ];
 
-  const renderTile = renderHomeTile(styles);
+  const renderTile = renderHomeTile(styles, {
+    tabletIconSize,
+    isTabletLayout,
+    tabletTileHeight,
+  });
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isTabletLayout && styles.containerTablet]}>
       <View style={[styles.header, isCompactHeight && styles.headerCompact]}>
         <Text
           style={[styles.quote, isCompactHeight && styles.quoteCompact]}
@@ -137,10 +159,14 @@ export default function HomeScreen() {
         bounces={false}
         alwaysBounceVertical={false}
         showsVerticalScrollIndicator={false}
-        columnWrapperStyle={styles.gridRow}
+        columnWrapperStyle={[
+          styles.gridRow,
+          isTabletLayout && styles.gridRowTablet,
+        ]}
         contentContainerStyle={[
           styles.gridContent,
           isCompactHeight && styles.gridContentCompact,
+          isTabletLayout && styles.gridContentTablet,
         ]}
       />
     </View>

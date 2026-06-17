@@ -18,13 +18,36 @@ export type HomeTile = {
   isPlaceholder?: boolean;
 };
 
+type RenderHomeTileOptions = {
+  isTabletLayout?: boolean;
+  tabletIconSize?: number;
+  tabletTileHeight?: number;
+};
+
 export const renderHomeTile =
-  (styles: HomeScreenStyles): ListRenderItem<HomeTile> => {
+  (
+    styles: HomeScreenStyles,
+    options: RenderHomeTileOptions = {},
+  ): ListRenderItem<HomeTile> => {
+    const {
+      isTabletLayout = false,
+      tabletIconSize,
+      tabletTileHeight,
+    } = options;
+    const tabletTileStyle = isTabletLayout
+      ? [styles.tileTablet, { height: tabletTileHeight }]
+      : null;
+    const tabletIconStyle = isTabletLayout
+      ? { width: tabletIconSize, height: tabletIconSize }
+      : null;
+
     const HomeTileItem: ListRenderItem<HomeTile> & { displayName?: string } = ({
       item,
     }) => {
       if (item.isPlaceholder) {
-        return <View style={[styles.tile, styles.placeholderTile]} />;
+        return (
+          <View style={[styles.tile, tabletTileStyle, styles.placeholderTile]} />
+        );
       }
 
       const accessibilityLabel = [item.title, item.subtitle]
@@ -36,10 +59,25 @@ export const renderHomeTile =
           onPress={item.action}
           accessibilityRole="button"
           accessibilityLabel={accessibilityLabel}
-          style={({ pressed }) => [styles.tile, pressed && styles.tilePressed]}
+          style={({ pressed }) => [
+            styles.tile,
+            tabletTileStyle,
+            pressed && styles.tilePressed,
+          ]}
         >
-          <View style={styles.tileVisualArea}>
-            <View style={styles.iconBox}>
+          <View
+            style={[
+              styles.tileVisualArea,
+              isTabletLayout && styles.tileVisualAreaTablet,
+            ]}
+          >
+            <View
+              style={[
+                styles.iconBox,
+                isTabletLayout && styles.iconBoxTablet,
+                tabletIconStyle,
+              ]}
+            >
               {item.icon ? (
                 item.icon
               ) : item.image ? (
@@ -47,9 +85,11 @@ export const renderHomeTile =
               ) : null}
             </View>
           </View>
-          <View style={styles.tileText}>
+          <View
+            style={[styles.tileText, isTabletLayout && styles.tileTextTablet]}
+          >
             <Text
-              style={styles.tileTitle}
+              style={[styles.tileTitle, isTabletLayout && styles.tileTitleTablet]}
               numberOfLines={1}
               adjustsFontSizeToFit
               minimumFontScale={0.85}
@@ -59,6 +99,7 @@ export const renderHomeTile =
             <Text
               style={[
                 styles.tileSubtitle,
+                isTabletLayout && styles.tileSubtitleTablet,
                 !item.subtitle && styles.tileSubtitleHidden,
               ]}
               numberOfLines={2}

@@ -7,6 +7,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 30,
     backgroundColor: colors.background,
   },
+  containerTablet: {
+    paddingHorizontal: 72,
+  },
   grid: {
     flex: 1,
   },
@@ -51,8 +54,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
   gridContentCompact: {
     paddingBottom: 72,
   },
+  gridContentTablet: {
+    paddingBottom: 8,
+    gap: 8,
+  },
   gridRow: {
     gap: 14,
+  },
+  gridRowTablet: {
+    gap: 10,
   },
   tile: {
     flex: 1,
@@ -63,6 +73,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
+  },
+  tileTablet: {
+    aspectRatio: undefined,
   },
   tilePressed: {
     transform: [{ scale: 0.98 }],
@@ -76,6 +89,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
   },
+  tileVisualAreaTablet: {
+    top: 6,
+    bottom: 48,
+  },
   iconBox: {
     width: 90,
     height: 90,
@@ -84,6 +101,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     backgroundColor: colors.secondBackground,
     transform: [{ rotate: "5deg" }],
+  },
+  iconBoxTablet: {
+    borderRadius: 18,
   },
   iconFlipped: {
     transform: [{ scaleX: -1 }],
@@ -102,11 +122,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "flex-end",
     minHeight: 54,
   },
+  tileTextTablet: {
+    bottom: 6,
+    minHeight: 40,
+  },
   tileTitle: {
     fontSize: 24,
     fontWeight: "800",
     color: colors.headline,
     textAlign: "center",
+  },
+  tileTitleTablet: {
+    fontSize: 22,
   },
   tileSubtitle: {
     fontSize: 12,
@@ -114,6 +141,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textAlign: "center",
     lineHeight: 16,
     minHeight: 16,
+  },
+  tileSubtitleTablet: {
+    lineHeight: 15,
   },
   tileSubtitleHidden: {
     opacity: 0,
