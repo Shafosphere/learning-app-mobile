@@ -2,6 +2,7 @@ import MyButton from "@/src/components/button/button";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { getCustomCourseNameCandidates } from "@/src/db/sqlite/db";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import {
   findCourseNameConflict,
   type CourseNameCandidate,
@@ -17,6 +18,8 @@ export default function CustomCourseScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
   const router = useRouter();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const {
     courseName,
     setCourseName,
@@ -134,7 +137,10 @@ export default function CustomCourseScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
-        style={styles.scrollView}
+        style={[
+          styles.scrollView,
+          useCenteredTabletLayout && styles.scrollViewTablet,
+        ]}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
         showsVerticalScrollIndicator={false}
@@ -177,7 +183,12 @@ export default function CustomCourseScreen() {
       </ScrollView>
 
       <View style={styles.footer}>
-        <View style={styles.buttonsRow}>
+        <View
+          style={[
+            styles.buttonsRow,
+            useCenteredTabletLayout && styles.buttonsRowTablet,
+          ]}
+        >
           <MyButton
             color="my_yellow"
             onPress={handleGoBack}

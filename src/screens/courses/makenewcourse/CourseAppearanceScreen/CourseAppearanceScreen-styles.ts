@@ -1,5 +1,7 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const COURSE_APPEARANCE_TABLET_MAX_WIDTH = 500;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
@@ -10,6 +12,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   scrollView: {
     flex: 1,
+    width: "100%",
+    alignSelf: "center" as const,
+  },
+  scrollViewTablet: {
+    maxWidth: COURSE_APPEARANCE_TABLET_MAX_WIDTH,
   },
   scrollContent: {
     flexGrow: 1,
@@ -94,5 +101,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row" as const,
     justifyContent: "flex-end" as const,
     gap: 10,
+  },
+  buttonsRowTablet: {
+    maxWidth: COURSE_APPEARANCE_TABLET_MAX_WIDTH,
+    alignSelf: "center" as const,
   },
 }));

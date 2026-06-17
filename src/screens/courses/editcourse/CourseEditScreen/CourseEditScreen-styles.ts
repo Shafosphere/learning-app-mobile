@@ -1,9 +1,18 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const COURSE_SETTINGS_TABLET_MAX_WIDTH = 500;
+
 export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    width: "100%",
+    alignSelf: "center" as const,
+  },
+  scrollViewTablet: {
+    maxWidth: COURSE_SETTINGS_TABLET_MAX_WIDTH,
   },
   scrollContent: {
     paddingHorizontal: 18,
@@ -342,5 +351,9 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 10,
+  },
+  buttonsRowTablet: {
+    maxWidth: COURSE_SETTINGS_TABLET_MAX_WIDTH,
+    alignSelf: "center" as const,
   },
 }));

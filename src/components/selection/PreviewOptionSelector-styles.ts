@@ -66,6 +66,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   previewHero: {
     width: "100%",
+    alignSelf: "center",
     overflow: "hidden",
     borderWidth: 10,
     borderColor: colors.secondBackground,

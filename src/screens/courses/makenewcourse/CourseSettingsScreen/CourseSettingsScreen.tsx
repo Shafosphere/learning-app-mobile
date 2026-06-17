@@ -15,6 +15,7 @@ import {
   useSettings,
   type FlashcardsImageSize,
 } from "@/src/contexts/SettingsContext";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { normalizeAnswers, type ManualCard } from "@/src/hooks/useManualCardsForm";
 import { CourseSettingsPanel } from "@/src/components/courseEditor/CourseSettingsPanel";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -52,6 +53,8 @@ export default function CourseSettingsScreen() {
   const pathname = usePathname();
   const setPopup = usePopup();
   const params = useLocalSearchParams<LocalSearchParams>();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
     getCustomCourseBoxZeroEnabled,
@@ -567,6 +570,10 @@ export default function CourseSettingsScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
+        style={[
+          styles.scrollView,
+          useCenteredTabletLayout && styles.scrollViewTablet,
+        ]}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
@@ -614,7 +621,12 @@ export default function CourseSettingsScreen() {
       </ScrollView>
 
       <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
+        <View
+          style={[
+            styles.buttonsRow,
+            useCenteredTabletLayout && styles.buttonsRowTablet,
+          ]}
+        >
           <MyButton
             color="my_yellow"
             width={60}

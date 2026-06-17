@@ -23,11 +23,14 @@ import { useTranslation } from "react-i18next";
 import type { NativeLanguage, UiLanguage } from "@/src/i18n";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
 const classicPreview = require("@/assets/images/settings/layout-classic.png");
 const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
 const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
 const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
+const SETTINGS_TABLET_PREVIEW_MAX_WIDTH = 360;
+const SETTINGS_TABLET_LAYOUT_PREVIEW_SCALE = 1.14;
 
 const uiLanguageOptions: {
   key: UiLanguage;
@@ -47,6 +50,11 @@ const nativeLanguageOptions: {
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
+  const tabletPreviewMaxWidth = useCenteredTabletLayout
+    ? SETTINGS_TABLET_PREVIEW_MAX_WIDTH
+    : undefined;
   const {
     colors,
     uiLanguage,
@@ -404,6 +412,10 @@ const AppearanceSection: React.FC = () => {
         onChange={(key) => void handleLayoutSelect(key)}
         description={preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
         previewAspectRatio={1.18}
+        previewImageScale={
+          useCenteredTabletLayout ? SETTINGS_TABLET_LAYOUT_PREVIEW_SCALE : 1
+        }
+        previewMaxWidth={tabletPreviewMaxWidth}
         imageFit="contain"
         testIDPrefix="settings-layout-selector"
       />
@@ -414,6 +426,7 @@ const AppearanceSection: React.FC = () => {
         onChange={(key) => void handleActionButtonsPosition(key)}
         description={preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
         previewAspectRatio={1.02}
+        previewMaxWidth={tabletPreviewMaxWidth}
         imageFit="cover"
         testIDPrefix="settings-actions-selector"
       />

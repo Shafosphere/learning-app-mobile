@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useStyles } from "./StatsScreen-styles";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import ActivityHeatmap, { type ActivityDay } from "@/src/components/stats/ActivityHeatmap";
 import BigKnownWordsCard from "@/src/components/stats/BigKnownWordsCard";
 // import MedalsShowcase from "@/src/components/stats/bookshelf";
@@ -23,6 +24,8 @@ export default function StatsScreen() {
   const { t } = useTranslation();
   const { statsBookshelfEnabled, colors } = useSettings();
   const { stats } = useNavbarStats();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
   const [shieldedDates, setShieldedDates] = useState<string[]>([]);
   const [learningTime, setLearningTime] = useState({
@@ -123,71 +126,74 @@ export default function StatsScreen() {
   }, []);
 
   return (
-    <ScrollView
-      contentContainerStyle={styles.container}
-      scrollEnabled={!isBookshelfEditing}
-    >
-      <BigKnownWordsCard />
+    <View style={styles.container}>
+      <ScrollView
+        style={[styles.content, useCenteredTabletLayout && styles.contentTablet]}
+        contentContainerStyle={styles.scrollContent}
+        scrollEnabled={!isBookshelfEditing}
+      >
+        <BigKnownWordsCard />
 
-      <View style={styles.miniStatsRow}>
-        <View style={styles.miniStatItem}>
-          <View style={styles.miniStatCard}>
-            {stats.shieldCount > 0 && (
-              <View style={styles.miniStatShieldStack}>
-                {Array.from({ length: stats.shieldCount }).map((_, index) => (
-                  <Ionicons
-                    key={index}
-                    testID={`streak-shield-${index}`}
-                    name="shield-checkmark"
-                    size={15}
-                    color={colors.my_green}
-                  />
-                ))}
-              </View>
-            )}
-            <Text style={styles.miniStatValue}>{stats.streakDays}</Text>
-            <MaterialIcons
-              style={styles.miniStatCornerIcon}
-              name="local-fire-department"
-              size={18}
-              color={colors.my_red}
-            />
+        <View style={styles.miniStatsRow}>
+          <View style={styles.miniStatItem}>
+            <View style={styles.miniStatCard}>
+              {stats.shieldCount > 0 && (
+                <View style={styles.miniStatShieldStack}>
+                  {Array.from({ length: stats.shieldCount }).map((_, index) => (
+                    <Ionicons
+                      key={index}
+                      testID={`streak-shield-${index}`}
+                      name="shield-checkmark"
+                      size={15}
+                      color={colors.my_green}
+                    />
+                  ))}
+                </View>
+              )}
+              <Text style={styles.miniStatValue}>{stats.streakDays}</Text>
+              <MaterialIcons
+                style={styles.miniStatCornerIcon}
+                name="local-fire-department"
+                size={18}
+                color={colors.my_red}
+              />
+            </View>
+            <Text style={styles.miniStatLabel}>
+              {t("screens.stats.stats.stats.textChild.codziennaPassa")}
+            </Text>
           </View>
-          <Text style={styles.miniStatLabel}>
-            {t("screens.stats.stats.stats.textChild.codziennaPassa")}
-          </Text>
-        </View>
-        <View style={styles.miniStatItem}>
-          <View style={styles.miniStatCard}>
-            <Text style={styles.miniStatValue}>{stats.promotionsCount}</Text>
-            <Ionicons
-              style={styles.miniStatCornerIcon}
-              name="trending-up-outline"
-              size={16}
-              color={colors.my_green}
-            />
+          <View style={styles.miniStatItem}>
+            <View style={styles.miniStatCard}>
+              <Text style={styles.miniStatValue}>{stats.promotionsCount}</Text>
+              <Ionicons
+                style={styles.miniStatCornerIcon}
+                name="trending-up-outline"
+                size={16}
+                color={colors.my_green}
+              />
+            </View>
+            <Text style={styles.miniStatLabel}>
+              {t("repeats.labels.jumps")}
+            </Text>
           </View>
-          <Text style={styles.miniStatLabel}>
-            {t("repeats.labels.jumps")}
-          </Text>
         </View>
-      </View>
 
-      {/* {statsBookshelfEnabled && (
+        {/* {statsBookshelfEnabled && (
         <MedalsShowcase onEditModeChange={setIsBookshelfEditing} />
       )} */}
 
-      <PinnedCoursesProgress />
+        <PinnedCoursesProgress />
 
-      <ActivityHeatmap
-        data={heatmapData}
-        months={12}
-        shieldedDates={shieldedDates}
-      />
+        <ActivityHeatmap
+          data={heatmapData}
+          months={12}
+          shieldedDates={shieldedDates}
+        />
 
-      <HardWordsList />
+        <HardWordsList />
 
-      <LearningTimeCard timeMs={learningTime} />
-    </ScrollView>
+        <LearningTimeCard timeMs={learningTime} />
+      </ScrollView>
+    </View>
   );
 };

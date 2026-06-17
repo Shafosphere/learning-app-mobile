@@ -14,6 +14,7 @@ import type {
   FlashcardsImageSize,
   TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useState } from "react";
@@ -129,6 +130,8 @@ function BuiltinCourseEditor({
   const styles = useCourseEditStyles();
   const router = useRouter();
   const { t } = useTranslation();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
     courses,
@@ -560,6 +563,10 @@ function BuiltinCourseEditor({
   return (
     <View style={styles.container}>
       <ScrollView
+        style={[
+          styles.scrollView,
+          useCenteredTabletLayout && styles.scrollViewTablet,
+        ]}
         contentContainerStyle={styles.scrollContent}
         keyboardShouldPersistTaps="handled"
       >
@@ -673,7 +680,12 @@ function BuiltinCourseEditor({
       </ScrollView>
 
       <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
+        <View
+          style={[
+            styles.buttonsRow,
+            useCenteredTabletLayout && styles.buttonsRowTablet,
+          ]}
+        >
           <MyButton
             color="my_yellow"
             width={60}

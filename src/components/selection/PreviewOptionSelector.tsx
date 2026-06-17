@@ -22,6 +22,8 @@ type PreviewOptionSelectorProps<TKey extends string = string> = {
   variant?: "card" | "modal";
   imageFit?: "contain" | "cover";
   previewAspectRatio?: number;
+  previewImageScale?: number;
+  previewMaxWidth?: number;
   testIDPrefix?: string;
 };
 
@@ -33,6 +35,8 @@ export function PreviewOptionSelector<TKey extends string = string>({
   variant = "card",
   imageFit = "contain",
   previewAspectRatio = 1.02,
+  previewImageScale = 1,
+  previewMaxWidth,
   testIDPrefix,
 }: PreviewOptionSelectorProps<TKey>) {
   const styles = useStyles();
@@ -92,6 +96,7 @@ export function PreviewOptionSelector<TKey extends string = string>({
             styles.previewHero,
             variant === "card" ? styles.previewHeroCard : styles.previewHeroModal,
             { aspectRatio: previewAspectRatio },
+            previewMaxWidth ? { maxWidth: previewMaxWidth } : null,
           ]}
         >
           <View
@@ -102,7 +107,12 @@ export function PreviewOptionSelector<TKey extends string = string>({
           >
             <Image
               source={selectedOption.preview}
-              style={styles.previewImage}
+              style={[
+                styles.previewImage,
+                previewImageScale !== 1
+                  ? { transform: [{ scale: previewImageScale }] }
+                  : null,
+              ]}
               contentFit={imageFit}
               cachePolicy="memory-disk"
               transition={180}

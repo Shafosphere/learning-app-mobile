@@ -1,5 +1,7 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const SETTINGS_TABLET_MAX_WIDTH = 500;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
@@ -9,6 +11,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     paddingHorizontal: 18,
     paddingTop: 32,
+  },
+  contentWrapperTablet: {
+    alignItems: "center",
   },
   tabBar: {
     flexDirection: "row",
@@ -20,6 +25,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingTop: 8,
     paddingBottom: 14,
   },
+  tabBarTablet: {
+    justifyContent: "center",
+  },
   tabBarInner: {
     flexDirection: "row",
     width: "100%",
@@ -27,6 +35,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     borderRadius: 8,
     position: "relative",
     overflow: "hidden",
+  },
+  tabBarInnerTablet: {
+    maxWidth: SETTINGS_TABLET_MAX_WIDTH,
+    alignSelf: "center",
   },
   tabBarThumb: {
     position: "absolute",
@@ -71,6 +83,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   content: {
     flex: 1,
     width: "100%",
+  },
+  contentTablet: {
+    maxWidth: SETTINGS_TABLET_MAX_WIDTH,
   },
   scrollContent: {
     paddingBottom: 28,

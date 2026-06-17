@@ -1,9 +1,18 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH = 500;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    width: "100%",
+    alignSelf: "center" as const,
+  },
+  scrollViewTablet: {
+    maxWidth: CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH,
   },
   scrollContent: {
     paddingHorizontal: 18,
@@ -290,6 +299,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // borderTopWidth: 1,
     borderTopColor: colors.border,
   },
+  manualToolbarWrapTablet: {
+    width: "100%",
+    maxWidth: CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH,
+    alignSelf: "center" as const,
+  },
   manualToolbar: {
     flexDirection: "row" as const,
     alignItems: "center" as const,
@@ -378,6 +392,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // klucz: rozciągamy środek, więc nie potrzebujemy już flex-end
     justifyContent: "flex-start",
     gap: 10,
+  },
+  buttonsRowTablet: {
+    maxWidth: CUSTOM_COURSE_EDITOR_TABLET_MAX_WIDTH,
+    alignSelf: "center" as const,
   },
   spacer: {
     flex: 1, // zajmuje całe wolne miejsce

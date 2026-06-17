@@ -1,7 +1,20 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const STATS_TABLET_MAX_WIDTH = 500;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
+    flex: 1,
+    backgroundColor: colors.background,
+  },
+  content: {
+    width: "100%",
+    alignSelf: "center",
+  },
+  contentTablet: {
+    maxWidth: STATS_TABLET_MAX_WIDTH,
+  },
+  scrollContent: {
     padding: 20,
     gap: 16,
     backgroundColor: colors.background,

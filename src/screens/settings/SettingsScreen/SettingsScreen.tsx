@@ -3,6 +3,7 @@ import AppearanceSection from "@/src/components/settings/AppearanceSection";
 import CoursesDataSection from "@/src/components/settings/CoursesDataSection";
 import DebuggingSection from "@/src/components/settings/DebuggingSection";
 import LearningSection from "@/src/components/settings/LearningSection";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import React, { useEffect, useState } from "react";
 import { Animated, LayoutChangeEvent, ScrollView, TouchableOpacity, View } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
@@ -40,6 +41,8 @@ const TAB_CONFIG: readonly {
 export default function SettingsScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const [activeTab, setActiveTab] = useState<TabKey>(TAB_CONFIG[0].key);
   const [tabBarWidth, setTabBarWidth] = useState(0);
   const tabThumbX = useState(() => new Animated.Value(0))[0];
@@ -61,9 +64,14 @@ export default function SettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <View style={styles.contentWrapper}>
+      <View
+        style={[
+          styles.contentWrapper,
+          useCenteredTabletLayout && styles.contentWrapperTablet,
+        ]}
+      >
         <ScrollView
-          style={styles.content}
+          style={[styles.content, useCenteredTabletLayout && styles.contentTablet]}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator={false}
         >
@@ -75,8 +83,14 @@ export default function SettingsScreen() {
         </ScrollView>
       </View>
 
-      <View style={styles.tabBar}>
-        <View style={styles.tabBarInner} onLayout={handleTabBarLayout}>
+      <View style={[styles.tabBar, useCenteredTabletLayout && styles.tabBarTablet]}>
+        <View
+          style={[
+            styles.tabBarInner,
+            useCenteredTabletLayout && styles.tabBarInnerTablet,
+          ]}
+          onLayout={handleTabBarLayout}
+        >
           {tabThumbWidth > 0 ? (
             <Animated.View
               pointerEvents="none"

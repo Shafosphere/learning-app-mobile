@@ -40,6 +40,7 @@ import {
   makeScopeId,
 } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useCustomCourseDraft } from "@/src/hooks/useCustomCourseDraft";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import {
   createEmptyManualCard,
   ensureCardsNormalized,
@@ -80,6 +81,8 @@ export default function CustomCourseEditor({
   const styles = useStyles();
   const router = useRouter();
   const setPopup = usePopup();
+  const { isTabletLayout } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout;
   const {
     activeCustomCourseId,
     setActiveCustomCourseId,
@@ -719,6 +722,10 @@ export default function CustomCourseEditor({
   return (
     <View style={styles.container}>
       <ScrollView
+        style={[
+          styles.scrollView,
+          useCenteredTabletLayout && styles.scrollViewTablet,
+        ]}
         contentContainerStyle={[
           styles.scrollContent,
           shouldShowManualToolbar && styles.scrollContentWithManualToolbar,
@@ -911,7 +918,10 @@ export default function CustomCourseEditor({
 
       {shouldShowManualToolbar ? (
         <Animated.View
-          style={styles.manualToolbarWrap}
+          style={[
+            styles.manualToolbarWrap,
+            useCenteredTabletLayout && styles.manualToolbarWrapTablet,
+          ]}
         >
           <View style={styles.manualToolbar}>
             <CardTypeSelector
@@ -938,7 +948,12 @@ export default function CustomCourseEditor({
       ) : null}
 
       <View style={styles.buttonscontainer}>
-        <View style={styles.buttonsRow}>
+        <View
+          style={[
+            styles.buttonsRow,
+            useCenteredTabletLayout && styles.buttonsRowTablet,
+          ]}
+        >
           {!isOfficialCourse ? (
             <MyButton
               text={t("courseCreator.customEditor.deleteButton")}
