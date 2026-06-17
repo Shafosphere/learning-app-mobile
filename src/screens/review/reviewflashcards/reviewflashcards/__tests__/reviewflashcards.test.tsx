@@ -22,6 +22,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import useSpellchecking from "@/src/hooks/useSpellchecking";
 
 type ReviewFlashcardsRouteParams = {
   courseId?: string;
@@ -175,6 +176,7 @@ let latestPeekProps: {
 } | null = null;
 let latestBoxCarouselProps: Record<string, unknown> | null = null;
 let latestBoxListProps: Record<string, unknown> | null = null;
+let latestCardHintProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
   return function FlashcardsPeekMock(props: {
@@ -316,6 +318,15 @@ jest.mock("@/src/components/card/useFocusExecutor", () => ({
   useFocusExecutor: jest.fn(),
 }));
 
+jest.mock("@/src/components/card/subcomponents/CardHint", () => ({
+  CardHint: (props: Record<string, unknown>) => {
+    latestCardHintProps = props;
+    const React = require("react");
+    const { View } = require("react-native");
+    return <View testID="card-hint-section" />;
+  },
+}));
+
 jest.mock("@expo/vector-icons/Octicons", () => {
   return function OcticonsMock() {
     return null;
@@ -400,6 +411,7 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
+const mockedUseSpellchecking = useSpellchecking as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
 const mockedGetCustomFlashcardConsecutiveWrongCount =
@@ -497,6 +509,7 @@ describe("reviewflashcards correction desync regression", () => {
     latestNudgeModalProps = null;
     latestBoxCarouselProps = null;
     latestBoxListProps = null;
+    latestCardHintProps = null;
     applyStatBurstMock = jest.fn();
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
@@ -514,6 +527,9 @@ describe("reviewflashcards correction desync regression", () => {
     });
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
+    mockedUseSpellchecking.mockReturnValue((input: string, expected: string) =>
+      input.trim().toLowerCase() === expected.trim().toLowerCase()
+    );
     mockedUseSettings.mockReturnValue({
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -739,6 +755,46 @@ describe("reviewflashcards correction desync regression", () => {
 
     expect(latestBoxListProps?.horizontalScroll).toBe(true);
     expect(latestBoxCarouselProps).toBeNull();
+  });
+
+  it("shows the hint section on normal-phone review layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 606,
+        frontText: "dog",
+        backText: "pies",
+        answers: ["pies"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestCardHintProps).not.toBeNull();
+    });
+    expect(latestCardHintProps?.onHintUpdate).toBeUndefined();
+  });
+
+  it("hides the hint section on small-phone review layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 607,
+        frontText: "bird",
+        backText: "ptak",
+        answers: ["ptak"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+    expect(latestCardHintProps).toBeNull();
   });
 
   it("returns a peeked card to unknown without scheduling it at stage zero", async () => {
@@ -1075,6 +1131,58 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     expect(screen.getByText("boxZero:0")).not.toBeNull();
+  });
+
+  it("keeps correction open for a fuzzy second-to-last-letter match", async () => {
+    mockedUseSpellchecking.mockReturnValue((input: string, expected: string) => {
+      const normalizedInput = input.trim().toLowerCase();
+      const normalizedExpected = expected.trim().toLowerCase();
+      if (normalizedInput === normalizedExpected) return true;
+      return (
+        normalizedExpected.startsWith(normalizedInput) &&
+        normalizedExpected.length - normalizedInput.length === 1
+      );
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 402,
+        frontText: "cat",
+        backText: "kot",
+        answers: ["kot"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 1);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(screen.queryByText("cat")).not.toBeNull();
+      expect(screen.queryByText("kot")).not.toBeNull();
+    });
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "ko");
+    });
+
+    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    expect(getVisibleTextInputs(screen)[0].props.value).toBe("ko");
+    expect(screen.queryByText("cat")).not.toBeNull();
+    expect(screen.queryByText(CHOOSE_BOX_TEXT)).toBeNull();
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "kot");
+    });
+
+    await waitFor(() => {
+      expect(mockedScheduleCustomReview).toHaveBeenCalledWith(402, 77, 0);
+    });
   });
 
   it("shows the mistake nudge only after typed correction is completed and can return the card to unknown", async () => {

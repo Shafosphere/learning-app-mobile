@@ -40,13 +40,14 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
+import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { mapReviewCardToWord } from "@/src/utils/flashcardsMapper";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import { makeTrueFalseHandler } from "@/src/utils/trueFalseAnswer";
 import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import { Animated, ScrollView, Text, View } from "react-native";
+import { Animated, ScrollView, Text, TextInput, View } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./reviewflashcards-styles";
@@ -138,6 +139,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const styles = useStyles();
   const { isSmallPhoneLayout } = useDeviceLayout();
   const { t } = useTranslation();
+  const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const settings = useSettings();
   const {
@@ -145,6 +147,7 @@ export default function ReviewFlashcardsPlaceholder() {
     cancelTodayLearningReminderSchedule,
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
+    ignoreDiacriticsInSpellcheck,
     learningRemindersEnabled,
   } = settings;
   const mistakeNudgeTextColor = settings.colors?.paragraph ?? "#1f2937";
@@ -660,6 +663,12 @@ export default function ReviewFlashcardsPlaceholder() {
   }, [clearTransitionTimer]);
 
   const selectedItemId = selectedItem?.id ?? null;
+  const matchesCorrectionField = useCallback(
+    (input: string, expected: string) =>
+      normalizeAnswerText(input, ignoreDiacriticsInSpellcheck) ===
+      normalizeAnswerText(expected, ignoreDiacriticsInSpellcheck),
+    [ignoreDiacriticsInSpellcheck],
+  );
 
   useLayoutEffect(() => {
     if (selectedItemId == null) {
@@ -784,14 +793,16 @@ export default function ReviewFlashcardsPlaceholder() {
     const expectsAwersInput = correctionFieldRequirements.awers;
     const expectsRewersInput = correctionFieldRequirements.rewers;
     const awersOk =
-      !expectsAwersInput || checkSpelling(correction.input1, correction.awers);
+      !expectsAwersInput ||
+      matchesCorrectionField(correction.input1, correction.awers);
     const rewersOk =
       !expectsRewersInput ||
-      checkSpelling(correction.input2 ?? "", correction.rewers);
+      matchesCorrectionField(correction.input2 ?? "", correction.rewers);
 
     if (!(awersOk && rewersOk)) return;
     if (!correction.cardId) return;
 
+    keyboardBridgeInputRef.current?.focus();
     const card =
       correction.word ??
       Object.values(boxes)
@@ -826,9 +837,9 @@ export default function ReviewFlashcardsPlaceholder() {
     boxes,
     correction,
     courseId,
-    checkSpelling,
     explanationOnlyOnWrong,
     finalizeWrongReviewCard,
+    matchesCorrectionField,
     selectedItem,
     showExplanationEnabled,
   ]);
@@ -1418,6 +1429,17 @@ export default function ReviewFlashcardsPlaceholder() {
 
   return (
     <View style={styles.container}>
+      <TextInput
+        ref={keyboardBridgeInputRef}
+        style={styles.keyboardBridgeInput}
+        value=""
+        caretHidden
+        autoCorrect={false}
+        spellCheck={false}
+        autoCapitalize="none"
+        importantForAutofill="no"
+        textContentType="none"
+      />
       <CoachmarkAnchor
         id="review-flashcards-bubble-anchor"
         shape="rect"
@@ -1452,8 +1474,7 @@ export default function ReviewFlashcardsPlaceholder() {
                 wrongInputChange={wrongInputChange}
                 setCorrectionRewers={setCorrectionRewers}
                 introMode={false}
-                onHintUpdate={() => undefined}
-                hideHints
+                hideHints={isSmallPhoneLayout}
                 isFocused={!isLoading}
                 isBetweenCards={isBetweenCards || isActionCooldownActive}
                 showExplanationEnabled={showExplanationEnabled}
