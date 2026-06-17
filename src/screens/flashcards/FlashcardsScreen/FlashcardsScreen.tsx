@@ -788,12 +788,15 @@ export default function Flashcards() {
         setTutorialEventCompleted("box_selected");
       }
 
+      handleBoxFaceSelection(boxName);
+      previousFaceActiveBoxRef.current = boxName;
       baseHandleSelectBox(boxName);
     },
     [
       baseHandleSelectBox,
       boxSelectionLocked,
       handleBlockedBoxInteraction,
+      handleBoxFaceSelection,
       setTutorialEventCompleted,
       triggerQuote,
     ],

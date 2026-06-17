@@ -721,6 +721,8 @@ export default function ReviewFlashcardsPlaceholder() {
       box,
       counts: summarizeBoxes(boxes),
     });
+    handleBoxFaceSelection(box);
+    previousFaceActiveBoxRef.current = box;
     setActiveBox(box);
     selectNextWord(box);
   };
