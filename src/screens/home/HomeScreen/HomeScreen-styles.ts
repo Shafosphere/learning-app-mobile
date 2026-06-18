@@ -10,6 +10,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
   containerTablet: {
     paddingHorizontal: 72,
   },
+  gridWrapper: {
+    flex: 1,
+    width: "100%",
+    alignSelf: "center",
+  },
+  gridWrapperTablet: {
+    maxWidth: 500,
+  },
   grid: {
     flex: 1,
   },
@@ -56,13 +64,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   gridContentTablet: {
     paddingBottom: 8,
-    gap: 8,
   },
   gridRow: {
     gap: 14,
-  },
-  gridRowTablet: {
-    gap: 10,
   },
   tile: {
     flex: 1,
@@ -75,7 +79,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
   },
   tileTablet: {
-    aspectRatio: undefined,
+    aspectRatio: 1,
   },
   tilePressed: {
     transform: [{ scale: 0.98 }],

@@ -1,5 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { SUPPORT_EMAIL } from "@/src/constants/support";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useStyles } from "@/src/screens/support/SupportScreen/SupportScreen-styles";
 import { createSupportDiagnosticsAttachment } from "@/src/services/supportDiagnostics";
 import Constants from "expo-constants";
@@ -68,6 +69,8 @@ function formatBody(selectedDiagnostics: DiagnosticEntry[], t: TFunction) {
 export default function SupportScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { isTabletLayout, shortestSide } = useDeviceLayout();
+  const useCenteredTabletLayout = isTabletLayout || shortestSide >= 560;
   const [status, setStatus] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [attachBasicData, setAttachBasicData] = useState(false);
@@ -199,6 +202,10 @@ export default function SupportScreen() {
   return (
     <View style={styles.container}>
       <ScrollView
+        style={[
+          styles.scrollView,
+          useCenteredTabletLayout && styles.scrollViewTablet,
+        ]}
         contentContainerStyle={styles.content}
         showsVerticalScrollIndicator={false}
       >

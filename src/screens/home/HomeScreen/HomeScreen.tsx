@@ -11,34 +11,47 @@ import {
   normalizeHomeQuotes,
 } from "@/src/constants/homeQuotes";
 
+const TABLET_GRID_MAX_WIDTH = 500;
+const TABLET_HORIZONTAL_PADDING = 72;
+const HOME_GRID_GAP_RATIO = 0.054;
+const TABLET_GRID_MIN_GAP = 20;
+const TABLET_GRID_MAX_GAP = 28;
+const HOME_ICON_TILE_RATIO = 0.54;
+const TABLET_ICON_MIN_SIZE = 104;
+const TABLET_ICON_MAX_SIZE = 132;
+
 export default function HomeScreen() {
   const router = useRouter();
   const { t } = useTranslation();
   const styles = useStyles();
-  const { width: screenWidth, height: screenHeight, isTabletLayout } =
-    useDeviceLayout();
+  const {
+    width: screenWidth,
+    height: screenHeight,
+    isTabletLayout,
+  } = useDeviceLayout();
   const logo = require("../../../../assets/illustrations/mascot-box/branding/logo.png");
   const statsImage = require("../../../../assets/images/home/stats.png");
   const customImage = require("../../../../assets/images/home/customize.png");
   const tutorialImage = require("../../../../assets/images/home/tutorial.png");
   const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
-  const tabletHorizontalPadding = 72;
-  const tabletColumnGap = 10;
-  const tabletColumnWidth =
-    (screenWidth - tabletHorizontalPadding * 2 - tabletColumnGap) / 2;
-  const tabletAvailableTileHeight = Math.floor(
-    (screenHeight - 30 - 110 - 16 - 20) / 3
+  const tabletGridWidth = Math.min(
+    screenWidth - TABLET_HORIZONTAL_PADDING * 2,
+    TABLET_GRID_MAX_WIDTH
   );
-  const tabletTileHeight = isTabletLayout
-    ? Math.max(
-        150,
-        Math.min(188, tabletColumnWidth, tabletAvailableTileHeight)
-      )
-    : undefined;
-  const tabletIconSize = tabletTileHeight
-    ? Math.max(96, Math.min(112, Math.floor(tabletTileHeight * 0.62)))
-    : undefined;
+  const tabletGridGap = Math.round(
+    Math.min(
+      TABLET_GRID_MAX_GAP,
+      Math.max(TABLET_GRID_MIN_GAP, tabletGridWidth * HOME_GRID_GAP_RATIO)
+    )
+  );
+  const tabletTileSize = (tabletGridWidth - tabletGridGap) / 2;
+  const tabletIconSize = Math.round(
+    Math.min(
+      TABLET_ICON_MAX_SIZE,
+      Math.max(TABLET_ICON_MIN_SIZE, tabletTileSize * HOME_ICON_TILE_RATIO)
+    )
+  );
 
   const quotes = normalizeHomeQuotes(
     t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true })
@@ -122,9 +135,8 @@ export default function HomeScreen() {
         ];
 
   const renderTile = renderHomeTile(styles, {
-    tabletIconSize,
     isTabletLayout,
-    tabletTileHeight,
+    tabletIconSize,
   });
 
   return (
@@ -149,26 +161,34 @@ export default function HomeScreen() {
         </Text>
       </View>
 
-      <FlatList
-        style={styles.grid}
-        data={listData}
-        keyExtractor={(item) => item.key}
-        renderItem={renderTile}
-        numColumns={2}
-        scrollEnabled
-        bounces={false}
-        alwaysBounceVertical={false}
-        showsVerticalScrollIndicator={false}
-        columnWrapperStyle={[
-          styles.gridRow,
-          isTabletLayout && styles.gridRowTablet,
+      <View
+        style={[
+          styles.gridWrapper,
+          isTabletLayout && styles.gridWrapperTablet,
         ]}
-        contentContainerStyle={[
-          styles.gridContent,
-          isCompactHeight && styles.gridContentCompact,
-          isTabletLayout && styles.gridContentTablet,
-        ]}
-      />
+      >
+        <FlatList
+          style={styles.grid}
+          data={listData}
+          keyExtractor={(item) => item.key}
+          renderItem={renderTile}
+          numColumns={2}
+          scrollEnabled
+          bounces={false}
+          alwaysBounceVertical={false}
+          showsVerticalScrollIndicator={false}
+          columnWrapperStyle={[
+            styles.gridRow,
+            isTabletLayout && { gap: tabletGridGap },
+          ]}
+          contentContainerStyle={[
+            styles.gridContent,
+            isCompactHeight && styles.gridContentCompact,
+            isTabletLayout && styles.gridContentTablet,
+            isTabletLayout && { gap: tabletGridGap },
+          ]}
+        />
+      </View>
     </View>
   );
 }

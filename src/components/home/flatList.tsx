@@ -21,7 +21,6 @@ export type HomeTile = {
 type RenderHomeTileOptions = {
   isTabletLayout?: boolean;
   tabletIconSize?: number;
-  tabletTileHeight?: number;
 };
 
 export const renderHomeTile =
@@ -29,14 +28,8 @@ export const renderHomeTile =
     styles: HomeScreenStyles,
     options: RenderHomeTileOptions = {},
   ): ListRenderItem<HomeTile> => {
-    const {
-      isTabletLayout = false,
-      tabletIconSize,
-      tabletTileHeight,
-    } = options;
-    const tabletTileStyle = isTabletLayout
-      ? [styles.tileTablet, { height: tabletTileHeight }]
-      : null;
+    const { isTabletLayout = false, tabletIconSize } = options;
+    const tabletTileStyle = isTabletLayout ? styles.tileTablet : null;
     const tabletIconStyle = isTabletLayout
       ? { width: tabletIconSize, height: tabletIconSize }
       : null;

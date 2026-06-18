@@ -1,9 +1,18 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
+const LEGAL_TABLET_MAX_WIDTH = 500;
+
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     backgroundColor: colors.background,
+  },
+  scrollView: {
+    width: "100%",
+    alignSelf: "center" as const,
+  },
+  scrollViewTablet: {
+    maxWidth: LEGAL_TABLET_MAX_WIDTH,
   },
   content: {
     paddingHorizontal: 16,
