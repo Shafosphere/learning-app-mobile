@@ -1,7 +1,9 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
+import * as ReactNative from "react-native";
 import { Text, View } from "react-native";
+import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import BoxList from "../BoxList";
 
 jest.mock("react-i18next", () => ({
@@ -69,17 +71,35 @@ jest.mock("../BoxList.styles", () => ({
     }),
 }));
 
-const boxes = {
+const makeWord = (id: number, text: string): WordWithTranslations => ({
+    id,
+    text,
+    translations: [text],
+    flipped: false,
+});
+
+const boxes: BoxesState = {
     boxZero: [],
-    boxOne: ["one"],
-    boxTwo: ["two"],
+    boxOne: [makeWord(1, "one")],
+    boxTwo: [makeWord(2, "two")],
     boxThree: [],
     boxFour: [],
     boxFive: [],
 };
 
 describe("BoxList", () => {
-    it("caps classic layout to requested columns", () => {
+    afterEach(() => {
+        jest.restoreAllMocks();
+    });
+
+    it("scales classic grid items responsively within requested columns", () => {
+        jest.spyOn(ReactNative, "useWindowDimensions").mockReturnValue({
+            width: 768,
+            height: 1024,
+            scale: 1,
+            fontScale: 1,
+        });
+
         const screen = render(
             <BoxList
                 boxes={boxes}
@@ -95,13 +115,15 @@ describe("BoxList", () => {
                 Array.isArray(node.props.style) &&
                 node.props.style.some(
                     (style: { maxWidth?: number } | undefined) =>
-                        style?.maxWidth === 450
+                        style?.maxWidth === 630
                 )
         );
         expect(row).toBeTruthy();
 
         expect(screen.getByTestId("box-list-item-boxOne").props.style).toEqual(
-            expect.arrayContaining([expect.objectContaining({ width: 150 })])
+            expect.arrayContaining([
+                expect.objectContaining({ width: 210, minHeight: 234 }),
+            ])
         );
     });
 

@@ -24,6 +24,7 @@ import {
   TextInput,
   View,
   Platform,
+  useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./card-styles";
@@ -32,6 +33,7 @@ import { CardContentResolver } from "./subcomponents/CardContentResolver";
 import CardFrame from "./subcomponents/CardFrame";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
+import { getResponsiveFlashcardMetrics } from "./responsiveCardWidth";
 import { useCardFocusController } from "./useCardFocusController";
 import { useFocusExecutor } from "./useFocusExecutor";
 
@@ -169,6 +171,8 @@ export default function Card({
 }: CardProps) {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { width: windowWidth } = useWindowDimensions();
+  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
   const checkSpelling = useSpellchecking();
   const {
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
@@ -978,13 +982,34 @@ export default function Card({
       const displayChar = char === " " ? "\u00A0" : char;
       const charStyle = [
         styles.overlayCharText,
+        {
+          fontSize: cardMetrics.fontSize,
+          lineHeight: cardMetrics.lineHeight,
+        },
         mismatch ? styles.overlayCharError : styles.overlayCharNeutral,
       ];
       if (mismatch && correctionErrorMarkersEnabled) {
         return (
-          <View key={`overlay-${idx}`} style={styles.overlayCharBox}>
+          <View
+            key={`overlay-${idx}`}
+            style={[
+              styles.overlayCharBox,
+              { height: cardMetrics.textInputHeight },
+            ]}
+          >
             <Text style={charStyle}>{displayChar}</Text>
-            <Text style={styles.overlayErrorMarker}>*</Text>
+            <Text
+              style={[
+                styles.overlayErrorMarker,
+                {
+                  top: cardMetrics.inputLineHeight - 3,
+                  fontSize: 11 * cardMetrics.visualScale,
+                  lineHeight: 12 * cardMetrics.visualScale,
+                },
+              ]}
+            >
+              *
+            </Text>
           </View>
         );
       }
@@ -1003,7 +1028,14 @@ export default function Card({
       ...typedChars,
       <Text
         key="overlay-expected-suffix"
-        style={[styles.overlayCharText, styles.overlayExpectedSuffix]}
+        style={[
+          styles.overlayCharText,
+          {
+            fontSize: cardMetrics.fontSize,
+            lineHeight: cardMetrics.lineHeight,
+          },
+          styles.overlayExpectedSuffix,
+        ]}
       >
         {expectedSuffix.replace(/ /g, "\u00A0")}
       </Text>,
@@ -1274,6 +1306,7 @@ export default function Card({
     handleConfirm,
     typoDiff,
     textColorOverride,
+    cardMetrics,
   };
 
   const cardStateStyle = isIntroMode ? styles.cardIntro : statusStyle;
@@ -1295,7 +1328,7 @@ export default function Card({
         onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
       />
       {hideHints ? null : isBetweenCards ? (
-        <View style={styles.hintContainer} />
+        <View style={[styles.hintContainer, { width: cardMetrics.width }]} />
       ) : (
         <CardHint
           currentHint={currentHint}
@@ -1314,6 +1347,7 @@ export default function Card({
           onHintInputBlur={cancelHintEditing}
           hintCoachmarkId={hintCoachmarkId}
           shouldStartHintEditing={shouldStartHintEditing}
+          cardWidth={cardMetrics.width}
         />
       )}
       <CardFrame
@@ -1321,6 +1355,8 @@ export default function Card({
         compact={!useLargeLayout}
         animateLayout={!disableLayoutAnimation && isLayoutAnimationArmed}
         cardStateStyle={cardStateStyle}
+        cardWidth={cardMetrics.width}
+        minHeight={cardMetrics.minHeight}
         backgroundColorOverride={backgroundColorOverride}
       >
         <CardContentResolver {...resolverProps} />

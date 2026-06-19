@@ -25,6 +25,7 @@ interface BoxesProps {
     disabled?: boolean;
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
     faces?: BoxFacesByBox;
+    layoutWidth?: number;
 }
 
 export default function BoxCarousel({
@@ -36,21 +37,23 @@ export default function BoxCarousel({
     disabled = false,
     countOverrides,
     faces,
+    layoutWidth,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
-  const { isCompactWidth } = useDeviceLayout();
+  const { isSmallPhoneLayout } = useDeviceLayout();
+  const effectiveLayoutWidth = layoutWidth ?? width;
   const BOX_SKIN_HEIGHT = 122;
-  const ACTIVE_BOX_SCALE = isCompactWidth ? 1.3 : 2.05;
-  const INACTIVE_BOX_SCALE = isCompactWidth ? 0.72 : 0.9;
-  const ACTIVE_BOX_LIFT = isCompactWidth ? 2 : 12;
-  const INACTIVE_BOX_LIFT = isCompactWidth ? 4 : 14;
-  const BOX_STAGE_VERTICAL_PADDING = isCompactWidth ? 6 : 40;
-  const LIST_VERTICAL_PADDING = isCompactWidth ? 4 : 14;
-  const ACTIVE_COUNTER_WRAP_STYLE = isCompactWidth
+  const ACTIVE_BOX_SCALE = isSmallPhoneLayout ? 1.3 : 2.05;
+  const INACTIVE_BOX_SCALE = isSmallPhoneLayout ? 0.72 : 0.9;
+  const ACTIVE_BOX_LIFT = isSmallPhoneLayout ? 2 : 12;
+  const INACTIVE_BOX_LIFT = isSmallPhoneLayout ? 4 : 14;
+  const BOX_STAGE_VERTICAL_PADDING = isSmallPhoneLayout ? 6 : 40;
+  const LIST_VERTICAL_PADDING = isSmallPhoneLayout ? 4 : 14;
+  const ACTIVE_COUNTER_WRAP_STYLE = isSmallPhoneLayout
     ? { minHeight: 30, marginTop: -12 }
     : null;
-  const ACTIVE_COUNTER_NUMBER_STYLE = isCompactWidth
+  const ACTIVE_COUNTER_NUMBER_STYLE = isSmallPhoneLayout
     ? { fontSize: 30, lineHeight: 34 }
     : null;
   const BOX_STAGE_HEIGHT = Math.ceil(
@@ -68,12 +71,12 @@ export default function BoxCarousel({
         }));
     }, [boxes, countOverrides, hideBoxZero]);
 
-    const baseSize = isCompactWidth
-        ? Math.min(118, Math.max(92, width * 0.3))
-        : Math.min(150, Math.max(120, width * 0.34));
+    const baseSize = isSmallPhoneLayout
+        ? Math.min(118, Math.max(92, effectiveLayoutWidth * 0.3))
+        : Math.min(150, Math.max(120, effectiveLayoutWidth * 0.34));
     const itemGap = baseSize * 0.5;
     const itemWidth = baseSize + itemGap;
-    const spacerWidth = Math.max((width - itemWidth) / 2, 0);
+    const spacerWidth = Math.max((effectiveLayoutWidth - itemWidth) / 2, 0);
     const defaultIndex = useMemo(() => {
         if (!items.length) return 0;
         const boxOneIdx = items.findIndex((item) => item.key === "boxOne");

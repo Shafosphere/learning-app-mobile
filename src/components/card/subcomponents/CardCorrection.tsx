@@ -15,6 +15,7 @@ import {
 } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { PROMPT_IMAGE_MAX_HEIGHT, useStyles } from "../card-styles";
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import { useTranslation } from "react-i18next";
@@ -80,6 +81,7 @@ type CardCorrectionProps = {
   input2LayoutWidth: number;
   imageSizeMode: FlashcardsImageSize;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardCorrection({
@@ -123,6 +125,7 @@ export function CardCorrection({
   input2LayoutWidth,
   imageSizeMode,
   textColorOverride,
+  cardMetrics,
 }: CardCorrectionProps) {
   const styles = useStyles();
   const { t } = useTranslation();
@@ -132,10 +135,14 @@ export function CardCorrection({
   const promptTextStyle = useMemo(
     () => [
       styles.cardFont,
+      {
+        fontSize: cardMetrics.fontSize,
+        lineHeight: cardMetrics.lineHeight,
+      },
       styles.promptMarqueeText,
       textColorOverride ? { color: textColorOverride } : null,
     ],
-    [styles, textColorOverride],
+    [cardMetrics.fontSize, cardMetrics.lineHeight, styles, textColorOverride],
   );
   const flattenedPromptTextStyle = useMemo(
     () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
@@ -165,6 +172,29 @@ export function CardCorrection({
     () => buildPromptImageStyle(imageSizeMode),
     [imageSizeMode],
   );
+  const cardFontResponsiveStyle = useMemo(
+    () => ({
+      fontSize: cardMetrics.fontSize,
+      lineHeight: cardMetrics.lineHeight,
+    }),
+    [cardMetrics.fontSize, cardMetrics.lineHeight],
+  );
+  const inputFrameResponsiveStyle = useMemo(
+    () => ({ height: cardMetrics.inputHeight }),
+    [cardMetrics.inputHeight],
+  );
+  const textInputResponsiveStyle = useMemo(
+    () => ({
+      height: cardMetrics.textInputHeight,
+      fontSize: cardMetrics.fontSize,
+      lineHeight: cardMetrics.inputLineHeight,
+    }),
+    [
+      cardMetrics.fontSize,
+      cardMetrics.inputLineHeight,
+      cardMetrics.textInputHeight,
+    ],
+  );
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
     const chars = value.split("");
@@ -191,6 +221,7 @@ export function CardCorrection({
       text={promptText}
       textStyle={[
         styles.cardFont,
+        cardFontResponsiveStyle,
         styles.promptText,
         allowMultilinePrompt && styles.promptTextMultiline,
         textColorOverride ? { color: textColorOverride } : null,
@@ -216,6 +247,7 @@ export function CardCorrection({
     <Text
       style={[
         styles.cardFont,
+        cardFontResponsiveStyle,
         styles.promptText,
         allowMultilinePrompt && styles.promptTextMultiline,
         textColorOverride ? { color: textColorOverride } : null,
@@ -292,17 +324,25 @@ export function CardCorrection({
         horizontal
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
-        style={styles.inputScroll}
+        style={[styles.inputScroll, inputFrameResponsiveStyle]}
         contentContainerStyle={[
           styles.inputScrollContent,
+          inputFrameResponsiveStyle,
           { width: input1ContentWidth },
         ]}
       >
-        <View style={[styles.inputRow, { width: input1ContentWidth }]}>
+        <View
+          style={[
+            styles.inputRow,
+            inputFrameResponsiveStyle,
+            { width: input1ContentWidth },
+          ]}
+        >
           {!correction.input1 ? (
             <Text
               style={[
                 styles.myplaceholder,
+                textInputResponsiveStyle,
                 textColorOverride ? { color: textColorOverride } : null,
               ]}
               numberOfLines={1}
@@ -320,6 +360,7 @@ export function CardCorrection({
             }
             style={[
               styles.myinput,
+              textInputResponsiveStyle,
               textColorOverride ? { color: textColorOverride } : null,
             ]}
             ref={input1Ref}
@@ -342,7 +383,7 @@ export function CardCorrection({
             onBlur={() => onCorrectionInputBlur?.("correction1")}
           />
           {correction.input1 ? (
-            <View style={styles.inputOverlay}>
+            <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
               {renderOverlayText(correction.input1, correctionAwers)}
             </View>
           ) : null}
@@ -373,17 +414,25 @@ export function CardCorrection({
         horizontal
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
-        style={styles.inputScroll}
+        style={[styles.inputScroll, inputFrameResponsiveStyle]}
         contentContainerStyle={[
           styles.inputScrollContent,
+          inputFrameResponsiveStyle,
           { width: input2ContentWidth },
         ]}
       >
-        <View style={[styles.inputRow, { width: input2ContentWidth }]}>
+        <View
+          style={[
+            styles.inputRow,
+            inputFrameResponsiveStyle,
+            { width: input2ContentWidth },
+          ]}
+        >
           {!correction.input2 ? (
             <Text
               style={[
                 styles.myplaceholder,
+                textInputResponsiveStyle,
                 textColorOverride ? { color: textColorOverride } : null,
               ]}
               numberOfLines={1}
@@ -410,6 +459,7 @@ export function CardCorrection({
             }}
             style={[
               styles.myinput,
+              textInputResponsiveStyle,
               textColorOverride ? { color: textColorOverride } : null,
             ]}
             ref={input2Ref}
@@ -439,7 +489,7 @@ export function CardCorrection({
             }}
           />
           {correction.input2 ? (
-            <View style={styles.inputOverlay}>
+            <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
               {renderOverlayText(correction.input2 ?? "", correctionRewers)}
             </View>
           ) : null}

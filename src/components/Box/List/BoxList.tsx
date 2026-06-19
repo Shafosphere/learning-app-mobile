@@ -22,6 +22,10 @@ const BOX_ITEM_WIDTH = 164;
 const GRID_BOX_ITEM_WIDTH = 150;
 const BOX_ITEM_HEIGHT = 210;
 const HORIZONTAL_VIEWPORT_SCREEN_INSET = 24;
+const GRID_VIEWPORT_HORIZONTAL_INSET = 48;
+const MAX_GRID_BOX_ITEM_WIDTH = 210;
+const MAX_GRID_BOX_SCALE = 1.55;
+const GRID_BOX_VERTICAL_EXTRA = 44;
 
 const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxZero: 0,
@@ -31,6 +35,10 @@ const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxFour: 4,
     boxFive: 5,
 };
+
+function clamp(value: number, min: number, max: number): number {
+    return Math.min(max, Math.max(min, value));
+}
 
 interface BoxesProps {
     boxes: BoxesState;
@@ -44,6 +52,7 @@ interface BoxesProps {
     faces?: BoxFacesByBox;
     horizontalScroll?: boolean;
     maxColumns?: number;
+    layoutWidth?: number;
 }
 
 export default function BoxList({
@@ -58,10 +67,12 @@ export default function BoxList({
     faces,
     horizontalScroll = false,
     maxColumns,
+    layoutWidth,
 }: BoxesProps) {
     const styles = useBoxListStyles();
     const { t } = useTranslation();
     const { width: windowWidth } = useWindowDimensions();
+    const effectiveLayoutWidth = layoutWidth ?? windowWidth;
     const longPressTriggeredRef = useRef(false);
     const [measuredBoxItems, setMeasuredBoxItems] = useState<
         Partial<Record<keyof BoxesState, { x: number; y: number; width: number; height: number }>>
@@ -86,7 +97,7 @@ export default function BoxList({
         : entries;
     const effectiveHorizontalViewportWidth = Math.max(
         BOX_ITEM_WIDTH,
-        windowWidth - HORIZONTAL_VIEWPORT_SCREEN_INSET
+        effectiveLayoutWidth - HORIZONTAL_VIEWPORT_SCREEN_INSET
     );
     const horizontalSidePadding = horizontalScroll
         ? Math.max(0, (effectiveHorizontalViewportWidth - BOX_ITEM_WIDTH) / 2)
@@ -95,7 +106,27 @@ export default function BoxList({
         !horizontalScroll && maxColumns != null
             ? Math.max(1, Math.floor(maxColumns))
             : null;
-    const gridWidth = gridColumns ? GRID_BOX_ITEM_WIDTH * gridColumns : undefined;
+    const availableGridWidth = Math.max(
+        0,
+        effectiveLayoutWidth - GRID_VIEWPORT_HORIZONTAL_INSET
+    );
+    const gridItemWidth = gridColumns
+        ? clamp(
+            availableGridWidth / gridColumns,
+            GRID_BOX_ITEM_WIDTH,
+            MAX_GRID_BOX_ITEM_WIDTH
+        )
+        : GRID_BOX_ITEM_WIDTH;
+    const gridBoxScale = gridColumns
+        ? clamp(
+            (gridItemWidth / GRID_BOX_ITEM_WIDTH) * GRID_BOX_SCALE,
+            GRID_BOX_SCALE,
+            MAX_GRID_BOX_SCALE
+        )
+        : GRID_BOX_SCALE;
+    const gridItemMinHeight =
+        Math.ceil(BOX_SKIN_HEIGHT * gridBoxScale) + GRID_BOX_VERTICAL_EXTRA;
+    const gridWidth = gridColumns ? gridItemWidth * gridColumns : undefined;
     const boxOneLayout = measuredBoxItems.boxOne;
     const boxTwoLayout = measuredBoxItems.boxTwo;
     const shouldRenderPromotionAnchor = boxOneLayout != null && boxTwoLayout != null;
@@ -219,7 +250,7 @@ export default function BoxList({
         const boxScale = horizontalScroll
             ? HORIZONTAL_BOX_SCALE
             : gridColumns
-              ? GRID_BOX_SCALE
+              ? gridBoxScale
               : 1;
         const scaledBoxSkin = boxScale !== 1 ? (
             <View
@@ -245,6 +276,12 @@ export default function BoxList({
                 style={[
                     horizontalScroll ? styles.horizontalBoxItem : null,
                     gridColumns ? styles.gridBoxItem : null,
+                    gridColumns
+                        ? {
+                            width: gridItemWidth,
+                            minHeight: gridItemMinHeight,
+                        }
+                        : null,
                 ]}
                 onLayout={handleMeasuredBoxItemLayout(boxName)}
             >

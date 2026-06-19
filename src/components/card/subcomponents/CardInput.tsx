@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { FocusTarget } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
@@ -56,6 +57,7 @@ type CardInputProps = {
   } | null;
   imageSizeMode: FlashcardsImageSize;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardInput({
@@ -79,6 +81,7 @@ export function CardInput({
   typoDiff,
   imageSizeMode,
   textColorOverride,
+  cardMetrics,
 }: CardInputProps) {
   const styles = useStyles();
   const { t } = useTranslation();
@@ -88,10 +91,14 @@ export function CardInput({
   const promptTextStyle = useMemo(
     () => [
       styles.cardFont,
+      {
+        fontSize: cardMetrics.fontSize,
+        lineHeight: cardMetrics.lineHeight,
+      },
       styles.promptMarqueeText,
       textColorOverride ? { color: textColorOverride } : null,
     ],
-    [styles, textColorOverride]
+    [cardMetrics.fontSize, cardMetrics.lineHeight, styles, textColorOverride]
   );
   const flattenedPromptTextStyle = useMemo(
     () => (StyleSheet.flatten(promptTextStyle) || {}) as any,
@@ -128,7 +135,17 @@ export function CardInput({
       const remainingMask = mask.slice(typedPrefix.length);
 
       return (
-        <Text style={styles.dateInputMask} numberOfLines={1}>
+        <Text
+          style={[
+            styles.dateInputMask,
+            {
+              height: cardMetrics.inputHeight,
+              fontSize: cardMetrics.fontSize,
+              lineHeight: cardMetrics.inputHeight,
+            },
+          ]}
+          numberOfLines={1}
+        >
           {typedPrefix.length > 0 ? (
             <Text style={{ color: "transparent" }}>{typedPrefix}</Text>
           ) : null}
@@ -136,10 +153,22 @@ export function CardInput({
         </Text>
       );
     },
-    [styles.dateInputMask],
+    [
+      cardMetrics.fontSize,
+      cardMetrics.inputHeight,
+      styles.dateInputMask,
+    ],
   );
 
   const renderedInput = useMemo(() => {
+    const inputFrameStyle = {
+      height: cardMetrics.inputHeight,
+    };
+    const textInputStyle = {
+      height: cardMetrics.textInputHeight,
+      fontSize: cardMetrics.fontSize,
+      lineHeight: cardMetrics.inputLineHeight,
+    };
     if (!typoDiff) {
       return (
         <View style={{ width: "100%", position: "relative" }}>
@@ -148,6 +177,8 @@ export function CardInput({
             style={[
               styles.cardInput,
               styles.cardFont,
+              inputFrameStyle,
+              textInputStyle,
               textColorOverride ? { color: textColorOverride } : null,
             ]}
             value={answer}
@@ -208,10 +239,24 @@ export function CardInput({
     }
 
     return (
-      <View style={[styles.cardInput, { width: "100%", flexDirection: "row", alignItems: "center" }]}>
+      <View
+        style={[
+          styles.cardInput,
+          inputFrameStyle,
+          {
+            width: "100%",
+            flexDirection: "row",
+            alignItems: "center",
+          },
+        ]}
+      >
         <Text
           style={[
             styles.cardFont,
+            {
+              fontSize: cardMetrics.fontSize,
+              lineHeight: cardMetrics.lineHeight,
+            },
             textColorOverride ? { color: textColorOverride } : null,
           ]}
         >
@@ -238,6 +283,11 @@ export function CardInput({
     styles,
     textColorOverride,
     typoDiff,
+    cardMetrics.fontSize,
+    cardMetrics.inputHeight,
+    cardMetrics.inputLineHeight,
+    cardMetrics.lineHeight,
+    cardMetrics.textInputHeight,
   ]);
 
   const imageBlock = promptImageUri ? (
@@ -254,6 +304,10 @@ export function CardInput({
       text={promptText}
       textStyle={[
         styles.cardFont,
+        {
+          fontSize: cardMetrics.fontSize,
+          lineHeight: cardMetrics.lineHeight,
+        },
         styles.promptText,
         allowMultilinePrompt && styles.promptTextMultiline,
         textColorOverride ? { color: textColorOverride } : null,
@@ -279,6 +333,10 @@ export function CardInput({
     <Text
       style={[
         styles.cardFont,
+        {
+          fontSize: cardMetrics.fontSize,
+          lineHeight: cardMetrics.lineHeight,
+        },
         styles.promptText,
         allowMultilinePrompt && styles.promptTextMultiline,
         textColorOverride ? { color: textColorOverride } : null,

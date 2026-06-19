@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import { PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 
 type CardTrueFalseProps = {
     promptText: string;
@@ -14,6 +15,7 @@ type CardTrueFalseProps = {
     allowMultilinePrompt?: boolean;
     showButtons?: boolean;
     imageSizeMode?: FlashcardsImageSize;
+    cardMetrics: ResponsiveFlashcardMetrics;
 };
 const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
     dynamic: 1,
@@ -30,6 +32,7 @@ export function CardTrueFalse({
     allowMultilinePrompt,
     showButtons = true,
     imageSizeMode = "dynamic",
+    cardMetrics,
 }: CardTrueFalseProps) {
     const { colors } = useSettings();
     const { t } = useTranslation();
@@ -44,6 +47,13 @@ export function CardTrueFalse({
         const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
         return { height: target, maxHeight: target };
     }, [imageSizeMode]);
+    const promptTextStyle = useMemo(
+        () => ({
+            fontSize: cardMetrics.fontSize,
+            lineHeight: cardMetrics.lineHeight,
+        }),
+        [cardMetrics.fontSize, cardMetrics.lineHeight],
+    );
 
     return (
         <View
@@ -72,11 +82,11 @@ export function CardTrueFalse({
                         hasMath ? (
                             <CardMathText
                                 text={promptText}
-                                textStyle={styles.promptTextMulti}
+                                textStyle={[styles.promptTextMulti, promptTextStyle]}
                             />
                         ) : (
                             <Text
-                                style={styles.promptTextMulti}
+                                style={[styles.promptTextMulti, promptTextStyle]}
                             >
                                 {promptText}
                             </Text>
@@ -84,11 +94,11 @@ export function CardTrueFalse({
                     ) : hasMath ? (
                         <CardMathText
                             text={promptText}
-                            textStyle={styles.promptText}
+                            textStyle={[styles.promptText, promptTextStyle]}
                         />
                     ) : (
                         <Text
-                            style={styles.promptText}
+                            style={[styles.promptText, promptTextStyle]}
                             numberOfLines={2}
                             adjustsFontSizeToFit
                         >

@@ -1,6 +1,7 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { CardDisplayMode, CardProps, FocusTarget } from "../card-types";
 import { CardSceneCorrection } from "./CardSceneCorrection";
 import { CardSceneEmpty } from "./CardSceneEmpty";
@@ -62,6 +63,7 @@ interface CardContentResolverProps {
   handleConfirm: () => void;
   typoDiff: any;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 }
 
 export const CardContentResolver = (props: CardContentResolverProps) => {
@@ -118,6 +120,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     handleConfirm,
     typoDiff,
     textColorOverride,
+    cardMetrics,
   } = props;
 
   switch (displayMode) {
@@ -164,6 +167,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           input2LayoutWidth={input2LayoutWidth}
           imageSizeMode={promptImageSizeMode === "dynamic" ? "dynamic" : promptImageSizeMode}
           textColorOverride={textColorOverride}
+          cardMetrics={cardMetrics}
         />
       ) : null;
     case "explanation":
@@ -171,6 +175,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
         <CardSceneExplanation
           explanation={explanationText}
           textColorOverride={textColorOverride}
+          cardMetrics={cardMetrics}
         />
       );
     case "true_false":
@@ -180,6 +185,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           promptImageUri={promptImageUri}
           allowMultilinePrompt={useLargeLayout}
           imageSizeMode={promptImageSizeMode}
+          cardMetrics={cardMetrics}
         />
       );
     case "question":
@@ -205,6 +211,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           next={next}
           typoDiff={typoDiff}
           textColorOverride={textColorOverride}
+          cardMetrics={cardMetrics}
         />
       );
     case "empty":

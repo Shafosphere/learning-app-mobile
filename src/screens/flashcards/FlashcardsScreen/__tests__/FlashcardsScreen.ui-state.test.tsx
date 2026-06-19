@@ -1,5 +1,6 @@
 import React from "react";
 import { act, render } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -19,6 +20,7 @@ import {
 } from "@/src/services/returnFlashcardToUnknown";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
@@ -250,8 +252,38 @@ jest.mock("react-i18next", () => ({
   })),
 }));
 
+const mockFlashcardsScreenStyles = {
+  content: { flex: 1 },
+  studyStack: { width: "100%" },
+  tabletCenteredStudyStack: {
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+  },
+  cardSectionWrapper: { marginBottom: 10 },
+  finishedCardSectionWrapper: { flex: 1, minHeight: 0 },
+  topButtonsWrapper: { marginBottom: 10 },
+  boxesWrapper: { flex: 1, width: "100%" },
+  boxesWrapperWithBottomButtons: { marginTop: 8 },
+  tabletCompactBoxesWrapper: { flex: 0 },
+  boxesViewport: { flex: 1 },
+  tabletCompactBoxesViewport: { flex: 0 },
+  boxesScrollViewport: { flex: 1 },
+  tabletCompactBoxesScrollViewport: { flex: 0 },
+  boxesScaledContent: { width: "100%" },
+  bottomButtonsDock: { position: "absolute" },
+  bottomButtonsWrapper: { marginTop: 4 },
+};
+
 jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", () => ({
-  useStyles: jest.fn(() => new Proxy({}, { get: () => ({}) })),
+  useStyles: jest.fn(() =>
+    new Proxy(mockFlashcardsScreenStyles, {
+      get: (target, prop) =>
+        typeof prop === "string"
+          ? target[prop as keyof typeof target] ?? {}
+          : {},
+    }),
+  ),
 }));
 
 let latestCardProps: CardProps | null = null;
@@ -271,9 +303,11 @@ let latestButtonsProps: ButtonsProps | null = null;
 let latestBoxListProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
   horizontalScroll?: boolean;
+  layoutWidth?: number;
 } | null = null;
 let latestBoxCarouselProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
+  layoutWidth?: number;
 } | null = null;
 let latestPeekProps: {
   onReturnToUnknown?: (cardId: number) => Promise<void>;
@@ -294,6 +328,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxesMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
     horizontalScroll?: boolean;
+    layoutWidth?: number;
   }) {
     latestBoxListProps = props;
     return null;
@@ -303,6 +338,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
 jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
   return function BoxCarouselMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
+    layoutWidth?: number;
   }) {
     latestBoxCarouselProps = props;
     return null;
@@ -341,6 +377,7 @@ jest.mock("@/src/components/flashcards/CourseFinishedPanel/CourseFinishedPanel",
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
+const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
@@ -810,7 +847,155 @@ describe("FlashcardsScreen UI state regressions", () => {
 
     expect(latestBoxListProps).toBeNull();
     expect(latestBoxCarouselProps).not.toBeNull();
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.3 });
     expect(latestCardProps?.hideHints).toBe(true);
+  });
+
+  it("keeps phone layout direct and reserves bottom button space", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: false,
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "bottom",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 54,
+      text: "phone",
+      translations: ["phone"],
+    });
+
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    const contentStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-content").props.style,
+    );
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(screen.queryByTestId("flashcards-study-stack")).toBeNull();
+    expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
+    expect(boxesWrapperStyle.flex).toBe(1);
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.648 });
+    expect(latestButtonsProps?.contentWidth).toBeUndefined();
+    expect(latestBoxListProps?.layoutWidth).toBeUndefined();
+  });
+
+  it("centers tablet top-button study content with compact boxes", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "top",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 55,
+      text: "tablet",
+      translations: ["tablet"],
+    });
+
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    const contentStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-content").props.style,
+    );
+    const studyStackStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-study-stack").props.style,
+    );
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(contentStyle.paddingBottom).toBeUndefined();
+    expect(studyStackStyle).toMatchObject({
+      flex: 1,
+      justifyContent: "center",
+    });
+    expect(boxesWrapperStyle.flex).toBe(0);
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
+  });
+
+  it("reserves bottom button space on tablets to avoid overlap", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "bottom",
+      setActionButtonsPosition: jest.fn(),
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 56,
+      text: "bottom tablet",
+      translations: ["bottom tablet"],
+    });
+
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    const contentStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-content").props.style,
+    );
+    const studyStackStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-study-stack").props.style,
+    );
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
+    expect(studyStackStyle).toMatchObject({
+      flex: 1,
+      justifyContent: "center",
+    });
+    expect(boxesWrapperStyle.flex).toBe(1);
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54 });
   });
 
   it("starts the hint tutorial instead of editing on the first manual hint tap", async () => {

@@ -3,6 +3,7 @@ import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
 import type { TextInput } from "react-native";
 
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { FocusTarget } from "../card-types";
 import { CardInput } from "./CardInput";
 
@@ -27,6 +28,7 @@ type CardSceneQuestionProps = {
   next: () => void;
   typoDiff: any;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardSceneQuestion(props: CardSceneQuestionProps) {
@@ -52,6 +54,7 @@ export function CardSceneQuestion(props: CardSceneQuestionProps) {
       next={props.next}
       typoDiff={props.typoDiff}
       textColorOverride={props.textColorOverride}
+      cardMetrics={props.cardMetrics}
     />
   );
 }

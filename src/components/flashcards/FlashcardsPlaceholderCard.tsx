@@ -1,4 +1,5 @@
-import { StyleSheet, Text, View } from "react-native";
+import { StyleSheet, Text, View, useWindowDimensions } from "react-native";
+import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 
 type FlashcardsPlaceholderCardProps = {
   title: string;
@@ -39,8 +40,20 @@ export function FlashcardsPlaceholderCard({
   title,
   description,
 }: FlashcardsPlaceholderCardProps) {
+  const { width: windowWidth } = useWindowDimensions();
+  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
+
   return (
-    <View style={styles.card}>
+    <View
+      testID="flashcards-placeholder-card"
+      style={[
+        styles.card,
+        {
+          width: cardMetrics.width,
+          minHeight: cardMetrics.minHeight,
+        },
+      ]}
+    >
       <View style={styles.content}>
         <Text style={styles.title}>{title}</Text>
         {description ? <Text style={styles.description}>{description}</Text> : null}

@@ -10,6 +10,7 @@ import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/components/fla
 type FlashcardsButtonsProps = {
   position: "top" | "bottom";
   coachmarkId?: string;
+  contentWidth?: number;
 
   // True/False Actions
   showTrueFalseActions: boolean;
@@ -35,6 +36,7 @@ type FlashcardsButtonsProps = {
 export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   position,
   coachmarkId,
+  contentWidth,
   showTrueFalseActions,
   trueFalseActionsDisabled,
   onTrueFalseAnswer,
@@ -56,13 +58,20 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   const noopAsync = React.useCallback(async () => undefined, []);
   const noop = React.useCallback(() => undefined, []);
   const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };
+  const contentWidthStyle =
+    contentWidth != null
+      ? { width: contentWidth, maxWidth: "100%" as const }
+      : null;
   const hiddenAccessibilityProps = {
     accessibilityElementsHidden: true,
     importantForAccessibility: "no-hide-descendants" as const,
   };
 
   const content = (
-    <View collapsable={false}>
+    <View
+      collapsable={false}
+      style={[{ alignSelf: "center" }, contentWidthStyle]}
+    >
       {position === "bottom" ? (
         <View
           style={!showTrueFalseActions ? hiddenStyle : undefined}
@@ -134,7 +143,10 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
       radius={24}
       style={{ alignSelf: "center" }}
     >
-      <View collapsable={false} style={{ alignSelf: "center" }}>
+      <View
+        collapsable={false}
+        style={[{ alignSelf: "center" }, contentWidthStyle]}
+      >
         {content}
       </View>
     </CoachmarkAnchor>

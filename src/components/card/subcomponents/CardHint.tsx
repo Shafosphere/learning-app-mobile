@@ -23,6 +23,7 @@ type CardHintProps = {
     onHintInputBlur: () => void;
     hintCoachmarkId?: string;
     shouldStartHintEditing?: () => boolean;
+    cardWidth?: number;
 };
 
 export function CardHint({
@@ -42,11 +43,13 @@ export function CardHint({
     onHintInputBlur,
     hintCoachmarkId,
     shouldStartHintEditing,
+    cardWidth,
 }: CardHintProps) {
     const styles = useStyles();
     const { colors } = useSettings();
     const { t } = useTranslation();
     const canDelete = Boolean(currentHint);
+    const widthStyle = cardWidth != null ? { width: cardWidth } : null;
 
     const handleStartHintEditing = () => {
         if (shouldStartHintEditing?.() === false) {
@@ -56,7 +59,7 @@ export function CardHint({
     };
 
     const content = (
-        <View style={styles.hintContainer}>
+        <View style={[styles.hintContainer, widthStyle]}>
             {!isEditingHint ? (
                 <Pressable
                     onPress={handleStartHintEditing}
@@ -76,18 +79,18 @@ export function CardHint({
                         shouldMarqueeHint ? (
                             <CourseTitleMarquee
                                 text={currentHint}
-                                textStyle={styles.hint}
-                                containerStyle={styles.hintMarquee}
+                                textStyle={[styles.hint, widthStyle]}
+                                containerStyle={[styles.hintMarquee, widthStyle]}
                             />
                         ) : (
-                            <Text style={styles.hint}>{currentHint}</Text>
+                            <Text style={[styles.hint, widthStyle]}>{currentHint}</Text>
                         )
                     ) : (
-                        <Text style={styles.dots}>...</Text>
+                        <Text style={[styles.dots, widthStyle]}>...</Text>
                     )}
                 </Pressable>
             ) : (
-                <View style={styles.hintRow}>
+                <View style={[styles.hintRow, widthStyle]}>
                     <TextInput
                         ref={inputRef}
                         value={hintDraft}

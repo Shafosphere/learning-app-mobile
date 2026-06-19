@@ -1,5 +1,6 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import { CardTrueFalse } from "./CardTrueFalse";
 
 type CardSceneTrueFalseProps = {
@@ -7,6 +8,7 @@ type CardSceneTrueFalseProps = {
   promptImageUri: string | null;
   allowMultilinePrompt: boolean;
   imageSizeMode: FlashcardsImageSize | "dynamic";
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardSceneTrueFalse(props: CardSceneTrueFalseProps) {
@@ -22,6 +24,7 @@ export function CardSceneTrueFalse(props: CardSceneTrueFalseProps) {
           ? "dynamic"
           : (props.imageSizeMode as FlashcardsImageSize)
       }
+      cardMetrics={props.cardMetrics}
     />
   );
 }

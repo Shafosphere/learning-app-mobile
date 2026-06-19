@@ -1,8 +1,10 @@
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import { CardExplanation } from "./CardExplanation";
 
 type CardSceneExplanationProps = {
   explanation: string;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardSceneExplanation(props: CardSceneExplanationProps) {
@@ -10,6 +12,7 @@ export function CardSceneExplanation(props: CardSceneExplanationProps) {
     <CardExplanation
       explanation={props.explanation}
       textColorOverride={props.textColorOverride}
+      cardMetrics={props.cardMetrics}
     />
   );
 }

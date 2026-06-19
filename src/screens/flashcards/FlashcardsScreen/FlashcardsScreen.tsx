@@ -8,6 +8,7 @@ import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons
 import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/FlashcardsPlaceholderCard";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
+import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 import {
   PreviewOptionSelector,
   type PreviewOptionSelectorOption,
@@ -29,7 +30,7 @@ import {
 } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type {
-  CourseCompletionSummary,
+  CourseCompletionSummary, 
   CustomCourseMasteryProgress,
   CustomCourseRecord,
 } from "@/src/db/sqlite/db";
@@ -82,6 +83,7 @@ import {
   Pressable,
   ScrollView,
   TextInput,
+  useWindowDimensions,
   View,
 } from "react-native";
 import Reanimated, { LinearTransition } from "react-native-reanimated";
@@ -199,7 +201,10 @@ export default function Flashcards() {
   const router = useRouter();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
+  const { width: windowWidth } = useWindowDimensions();
+  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
   const { isSmallPhoneLayout, isTabletLayout } = useDeviceLayout();
+  const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
@@ -2044,7 +2049,14 @@ export default function Flashcards() {
       isKnowDontKnow);
   const effectiveBoxesLayout = boxesLayout;
   const isCarouselLayout = effectiveBoxesLayout !== "classic";
-  const carouselMinScale = 0.42;
+  const areButtonsOnTop = actionButtonsPosition === "top";
+  const carouselMinScale = 0.3;
+  const classicBoxesMinScale =
+    isTabletLayout
+      ? areButtonsOnTop
+        ? 0.72
+        : 0.54
+      : 0.648;
   const {
     scale: boxesScale,
     scaledHeight: boxesScaledHeight,
@@ -2052,7 +2064,9 @@ export default function Flashcards() {
     onViewportLayout: onBoxesViewportLayout,
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({ minScale: isCarouselLayout ? carouselMinScale : 0.72 });
+  } = useAutoScaleToFit({
+    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
+  });
   const bottomButtonsAnchorRef = useRef<View | null>(null);
   const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
@@ -2073,7 +2087,6 @@ export default function Flashcards() {
     isKnowDontKnow || selectedItem?.answerOnly || courseHasOnlyKnowDontKnow
       ? "know_dont_know"
       : "true_false";
-  const areButtonsOnTop = actionButtonsPosition === "top";
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
       enabled: !areButtonsOnTop,
@@ -2304,6 +2317,7 @@ export default function Flashcards() {
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
       position={position}
+      contentWidth={flashcardsContentWidth}
       coachmarkId="flashcards-buttons-section"
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
@@ -2339,6 +2353,7 @@ export default function Flashcards() {
         faces={boxFaces}
         horizontalScroll={isSmallPhoneLayout}
         maxColumns={isTabletLayout ? 3 : undefined}
+        layoutWidth={flashcardsContentWidth}
       />
     ) : (
       <BoxesCarousel
@@ -2350,6 +2365,7 @@ export default function Flashcards() {
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
+        layoutWidth={flashcardsContentWidth}
       />
     );
   const boxesScaleOffsetY = scaleOffsetY;
@@ -2359,6 +2375,10 @@ export default function Flashcards() {
     ? SCREEN_LAYOUT_TRANSITION
     : undefined;
   const shouldRenderBottomButtons = !areButtonsOnTop && shouldShowBoxes;
+  const isTabletCenteredStudyLayout = isTabletLayout && shouldShowBoxes;
+  const isTabletCompactBoxesLayout =
+    isTabletCenteredStudyLayout && areButtonsOnTop;
+  const shouldReserveBottomButtonsSpace = shouldRenderBottomButtons;
   const bottomButtonsDockBottomOffset = isSmallPhoneLayout
     ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
     : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
@@ -2570,6 +2590,133 @@ export default function Flashcards() {
 
   useCoachmarkLayerPortal("flashcards-screen", coachmarkLayer);
 
+  const studyContent = (
+    <>
+      <Reanimated.View
+        layout={screenSectionLayout}
+        style={[
+          styles.cardSectionWrapper,
+          isCourseFinishedVisible && styles.finishedCardSectionWrapper,
+        ]}
+      >
+        {cardSection}
+      </Reanimated.View>
+
+      {areButtonsOnTop && shouldShowBoxes ? (
+        <Reanimated.View
+          layout={screenSectionLayout}
+          style={styles.topButtonsWrapper}
+        >
+          {renderButtons("top")}
+        </Reanimated.View>
+      ) : null}
+
+      {shouldShowBoxes && (
+        <Reanimated.View
+          testID="flashcards-boxes-wrapper"
+          layout={screenSectionLayout}
+          style={[
+            styles.boxesWrapper,
+            !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+            isTabletCompactBoxesLayout && styles.tabletCompactBoxesWrapper,
+            flashcardsContentWidth != null
+              ? { width: flashcardsContentWidth, alignSelf: "center" }
+              : null,
+          ]}
+        >
+          {shouldShowFloatingAdd && (
+            <Pressable
+              style={styles.addButton}
+              onPress={handleManualAddFlashcards}
+              disabled={addButtonDisabled}
+              accessibilityLabel={t(
+                "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"
+              )}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: addButtonDisabled }}
+            >
+              <Ionicons name="add" size={26} color="#0F172A" />
+            </Pressable>
+          )}
+
+          {boxesNeedScrollFallback ? (
+            <ScrollView
+              style={[
+                styles.boxesScrollViewport,
+                isTabletCompactBoxesLayout &&
+                  styles.tabletCompactBoxesScrollViewport,
+              ]}
+              contentContainerStyle={styles.boxesViewportScrollContent}
+              onLayout={onBoxesViewportLayout}
+              showsVerticalScrollIndicator={false}
+            >
+              <View
+                style={[
+                  styles.boxesScaledContent,
+                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                ]}
+              >
+                <CoachmarkAnchor
+                  id="flashcards-boxes-section"
+                  shape="rect"
+                  radius={28}
+                >
+                  <View
+                    collapsable={false}
+                    style={{
+                      transform: [
+                        { translateY: -boxesScaleOffsetY },
+                        { scale: boxesScale },
+                      ],
+                    }}
+                    onLayout={onBoxesContentLayout}
+                  >
+                    {boxesContent}
+                  </View>
+                </CoachmarkAnchor>
+              </View>
+            </ScrollView>
+          ) : (
+            <View
+              style={[
+                styles.boxesViewport,
+                isTabletCompactBoxesLayout &&
+                  styles.tabletCompactBoxesViewport,
+              ]}
+              onLayout={onBoxesViewportLayout}
+            >
+              <View
+                style={[
+                  styles.boxesScaledContent,
+                  boxesScaledHeight ? { height: boxesScaledHeight } : null,
+                ]}
+              >
+                <CoachmarkAnchor
+                  id="flashcards-boxes-section"
+                  shape="rect"
+                  radius={28}
+                >
+                  <View
+                    collapsable={false}
+                    style={{
+                      transform: [
+                        { translateY: -boxesScaleOffsetY },
+                        { scale: boxesScale },
+                      ],
+                    }}
+                    onLayout={onBoxesContentLayout}
+                  >
+                    {boxesContent}
+                  </View>
+                </CoachmarkAnchor>
+              </View>
+            </View>
+          )}
+        </Reanimated.View>
+      )}
+    </>
+  );
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -2592,119 +2739,24 @@ export default function Flashcards() {
       />
 
       <View
+        testID="flashcards-content"
         style={[
           styles.content,
-          shouldRenderBottomButtons
+          shouldReserveBottomButtonsSpace
             ? { paddingBottom: bottomButtonsReservedSpace }
             : null,
         ]}
         pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
       >
-        <Reanimated.View
-          layout={screenSectionLayout}
-          style={[
-            styles.cardSectionWrapper,
-            isCourseFinishedVisible && styles.finishedCardSectionWrapper,
-          ]}
-        >
-          {cardSection}
-        </Reanimated.View>
-
-        {areButtonsOnTop && shouldShowBoxes ? (
-          <Reanimated.View
-            layout={screenSectionLayout}
-            style={styles.topButtonsWrapper}
+        {isTabletCenteredStudyLayout ? (
+          <View
+            testID="flashcards-study-stack"
+            style={[styles.studyStack, styles.tabletCenteredStudyStack]}
           >
-            {renderButtons("top")}
-          </Reanimated.View>
-        ) : null}
-
-        {shouldShowBoxes && (
-          <Reanimated.View
-            layout={screenSectionLayout}
-            style={[
-              styles.boxesWrapper,
-              !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
-            ]}
-          >
-            {shouldShowFloatingAdd && (
-              <Pressable
-                style={styles.addButton}
-                onPress={handleManualAddFlashcards}
-                disabled={addButtonDisabled}
-                accessibilityLabel={t(
-                  "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"
-                )}
-                accessibilityRole="button"
-                accessibilityState={{ disabled: addButtonDisabled }}
-              >
-                <Ionicons name="add" size={26} color="#0F172A" />
-              </Pressable>
-            )}
-
-            {boxesNeedScrollFallback ? (
-              <ScrollView
-                style={styles.boxesScrollViewport}
-                contentContainerStyle={styles.boxesViewportScrollContent}
-                onLayout={onBoxesViewportLayout}
-                showsVerticalScrollIndicator={false}
-              >
-                <View
-                  style={[
-                    styles.boxesScaledContent,
-                    boxesScaledHeight ? { height: boxesScaledHeight } : null,
-                  ]}
-                >
-                  <CoachmarkAnchor
-                    id="flashcards-boxes-section"
-                    shape="rect"
-                    radius={28}
-                  >
-                    <View
-                      collapsable={false}
-                      style={{
-                        transform: [
-                          { translateY: -boxesScaleOffsetY },
-                          { scale: boxesScale },
-                        ],
-                      }}
-                      onLayout={onBoxesContentLayout}
-                    >
-                      {boxesContent}
-                    </View>
-                  </CoachmarkAnchor>
-                </View>
-              </ScrollView>
-            ) : (
-              <View style={styles.boxesViewport} onLayout={onBoxesViewportLayout}>
-                <View
-                  style={[
-                    styles.boxesScaledContent,
-                    boxesScaledHeight ? { height: boxesScaledHeight } : null,
-                  ]}
-                >
-                  <CoachmarkAnchor
-                    id="flashcards-boxes-section"
-                    shape="rect"
-                    radius={28}
-                  >
-                    <View
-                      collapsable={false}
-                      style={{
-                        transform: [
-                          { translateY: -boxesScaleOffsetY },
-                          { scale: boxesScale },
-                        ],
-                      }}
-                      onLayout={onBoxesContentLayout}
-                    >
-                      {boxesContent}
-                    </View>
-                  </CoachmarkAnchor>
-                </View>
-              </View>
-            )}
-          </Reanimated.View>
+            {studyContent}
+          </View>
+        ) : (
+          studyContent
         )}
 
         {shouldRenderBottomButtons ? (

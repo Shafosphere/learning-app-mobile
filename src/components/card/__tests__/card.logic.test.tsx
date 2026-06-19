@@ -10,6 +10,12 @@ import type { WordWithTranslations } from "@/src/types/boxes";
 
 let mockTextInputFocus = jest.fn();
 let mockTextInputBlur = jest.fn();
+let mockWindowDimensions = {
+  width: 360,
+  height: 740,
+  scale: 1,
+  fontScale: 1,
+};
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
@@ -33,6 +39,7 @@ jest.mock("react-native", () => {
   return new Proxy(RN, {
     get(target: Record<string, unknown>, prop: string | symbol) {
       if (prop === "TextInput") return TextInput;
+      if (prop === "useWindowDimensions") return () => mockWindowDimensions;
       return target[prop as keyof typeof target];
     },
   });
@@ -51,6 +58,7 @@ jest.mock("@/src/components/card/card-styles", () => ({
 
 let latestCardHintProps: Record<string, unknown> | null = null;
 let latestNudgeModalProps: Record<string, unknown> | null = null;
+let latestCardFrameProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/card/subcomponents/CardHint", () => ({
   CardHint: (props: Record<string, unknown>) => {
@@ -67,11 +75,11 @@ jest.mock("@/src/components/nudge/NudgeModal", () => ({
 }));
 
 jest.mock("@/src/components/card/subcomponents/CardFrame", () => {
-  return function CardFrameMock({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
+  return function CardFrameMock(
+    props: Record<string, unknown> & { children: React.ReactNode },
+  ) {
+    latestCardFrameProps = props;
+    const { children } = props;
     return children;
   };
 });
@@ -179,6 +187,13 @@ describe("Card logic props", () => {
     latestResolverProps = null;
     latestCardHintProps = null;
     latestNudgeModalProps = null;
+    latestCardFrameProps = null;
+    mockWindowDimensions = {
+      width: 360,
+      height: 740,
+      scale: 1,
+      fontScale: 1,
+    };
     mockRequestFocus = jest.fn();
     mockedUseCardFocusController.mockReturnValue({
       focusTarget: "none",
@@ -230,6 +245,73 @@ describe("Card logic props", () => {
       shouldCorrectAwers: false,
       shouldCorrectRewers: true,
     });
+  });
+
+  it("passes responsive tablet card metrics to frame, hint, and content", async () => {
+    mockWindowDimensions = {
+      width: 768,
+      height: 1024,
+      scale: 1,
+      fontScale: 1,
+    };
+
+    renderCard(createProps());
+
+    await waitFor(() => {
+      expect(latestCardFrameProps?.cardWidth).toBe(630);
+    });
+    expect(latestCardFrameProps?.minHeight).toBeCloseTo(218.68, 1);
+    expect(latestCardHintProps?.cardWidth).toBe(630);
+    expect((latestResolverProps?.cardMetrics as any)?.width).toBe(630);
+    expect((latestResolverProps?.cardMetrics as any)?.minHeight).toBeCloseTo(
+      218.68,
+      1,
+    );
+    expect((latestResolverProps?.cardMetrics as any)?.fontSize).toBeCloseTo(
+      29.28,
+    );
+  });
+
+  it("keeps phone card metrics at base size", async () => {
+    mockWindowDimensions = {
+      width: 360,
+      height: 740,
+      scale: 1,
+      fontScale: 1,
+    };
+
+    renderCard(createProps());
+
+    await waitFor(() => {
+      expect(latestCardFrameProps?.cardWidth).toBe(325);
+    });
+    expect(latestCardFrameProps?.minHeight).toBe(120);
+    expect(latestCardHintProps?.cardWidth).toBe(325);
+    expect(latestResolverProps?.cardMetrics).toMatchObject({
+      width: 325,
+      minHeight: 120,
+      fontSize: 24,
+    });
+  });
+
+  it("caps card metrics on large tablet screens", async () => {
+    mockWindowDimensions = {
+      width: 1200,
+      height: 900,
+      scale: 1,
+      fontScale: 1,
+    };
+
+    renderCard(createProps());
+
+    await waitFor(() => {
+      expect(latestCardFrameProps?.cardWidth).toBe(630);
+    });
+    expect(latestCardFrameProps?.minHeight).toBeCloseTo(218.68, 1);
+    expect(latestCardHintProps?.cardWidth).toBe(630);
+    expect((latestResolverProps?.cardMetrics as any)?.fontSize).toBeCloseTo(
+      29.28,
+    );
   });
 
   it("keeps prompt on awers for explicit answerOnly cards even when reversed is requested", async () => {

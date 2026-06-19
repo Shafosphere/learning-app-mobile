@@ -3,6 +3,7 @@ import type { DatePattern } from "@/src/utils/dateInput";
 import type { MutableRefObject } from "react";
 import type { ScrollView, TextInput } from "react-native";
 
+import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { CardCorrectionType, FocusTarget } from "../card-types";
 import { CardCorrection } from "./CardCorrection";
 
@@ -47,6 +48,7 @@ type CardSceneCorrectionProps = {
   input2LayoutWidth: number;
   imageSizeMode: FlashcardsImageSize;
   textColorOverride?: string;
+  cardMetrics: ResponsiveFlashcardMetrics;
 };
 
 export function CardSceneCorrection(props: CardSceneCorrectionProps) {
@@ -92,6 +94,7 @@ export function CardSceneCorrection(props: CardSceneCorrectionProps) {
       input2LayoutWidth={props.input2LayoutWidth}
       imageSizeMode={props.imageSizeMode}
       textColorOverride={props.textColorOverride}
+      cardMetrics={props.cardMetrics}
     />
   );
 }

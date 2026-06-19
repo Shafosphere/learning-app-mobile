@@ -36,6 +36,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
   content: {
     flex: 1,
   },
+  studyStack: {
+    width: "100%",
+  },
+  tabletCenteredStudyStack: {
+    flex: 1,
+    justifyContent: "center",
+    width: "100%",
+  },
   cardSectionWrapper: {
     marginBottom: 10,
   },
@@ -62,16 +70,25 @@ export const useStyles = createThemeStylesHook((colors) => ({
   boxesWrapperWithBottomButtons: {
     marginTop: 8,
   },
+  tabletCompactBoxesWrapper: {
+    flex: 0,
+  },
   boxesViewport: {
     flex: 1,
     minHeight: 0,
     width: "100%",
     alignItems: "center",
   },
+  tabletCompactBoxesViewport: {
+    flex: 0,
+  },
   boxesScrollViewport: {
     flex: 1,
     minHeight: 0,
     width: "100%",
+  },
+  tabletCompactBoxesScrollViewport: {
+    flex: 0,
   },
   boxesViewportScrollContent: {
     width: "100%",

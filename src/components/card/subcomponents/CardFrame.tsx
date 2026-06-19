@@ -9,6 +9,8 @@ type CardFrameProps = {
   compact?: boolean;
   animateLayout?: boolean;
   cardStateStyle?: object;
+  cardWidth?: number;
+  minHeight?: number;
   backgroundColorOverride?: string;
   children: ReactNode;
 };
@@ -20,6 +22,8 @@ export default function CardFrame({
   compact = false,
   animateLayout = true,
   cardStateStyle,
+  cardWidth,
+  minHeight,
   backgroundColorOverride,
   children,
 }: CardFrameProps) {
@@ -32,6 +36,8 @@ export default function CardFrame({
         styles.card,
         styles.cardFrame,
         compact ? styles.cardSmall : styles.cardLarge,
+        cardWidth != null ? { width: cardWidth } : null,
+        minHeight != null ? { minHeight } : null,
         cardStateStyle,
         backgroundColorOverride ? { backgroundColor: backgroundColorOverride } : null,
       ]}
