@@ -54,15 +54,13 @@ import {
   getReminderPermissionState,
   requestReminderPermissions,
   scheduleLearningReminderNotifications,
-} from "@/src/services/learningReminderNotifications";
-import {
   getEndOfDayReminderNotificationTitle,
   getLearningReminderNotificationTitle,
   getReviewReminderNotificationTitle,
   selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
-} from "@/src/services/learningReminderMessages";
+} from "@/src/features/notifications";
 import {
   buildDueReminderSeriesEntries,
   buildEndOfDayReminderEntries,

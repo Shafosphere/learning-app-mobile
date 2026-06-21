@@ -7,7 +7,7 @@ if (Constants.executionEnvironment !== "storeClient") {
     const notifee = notifyKit.default;
     const {
       persistPendingNotificationResponse,
-    } = require("./src/services/pendingNotificationResponse");
+    } = require("./src/features/notifications/pendingNotificationResponse");
 
     notifee.onBackgroundEvent(async (event) => {
       if (event?.type === notifyKit.EventType?.PRESS) {

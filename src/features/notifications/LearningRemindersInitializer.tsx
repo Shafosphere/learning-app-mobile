@@ -1,6 +1,6 @@
-import { useSettings } from "@/src/contexts/SettingsContext";
 import { useEffect } from "react";
 import { AppState } from "react-native";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
 export default function LearningRemindersInitializer() {
   const { learningRemindersEnabled, refreshLearningReminderSchedule } = useSettings();

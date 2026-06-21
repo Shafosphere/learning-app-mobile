@@ -2,7 +2,7 @@ import {
   FLASHCARDS_NOTIFICATION_ROUTE,
   REVIEW_NOTIFICATION_ROUTE,
   getNotificationResponseRoute,
-} from "@/src/services/notificationResponseRouting";
+} from "@/src/features/notifications";
 
 describe("notification response routing", () => {
   it("returns the review route for a managed review notification response", () => {

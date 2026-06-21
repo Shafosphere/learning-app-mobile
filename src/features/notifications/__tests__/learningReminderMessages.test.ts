@@ -5,7 +5,7 @@ import {
   selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
-} from "@/src/services/learningReminderMessages";
+} from "@/src/features/notifications";
 
 describe("learning reminder messages", () => {
   it("uses the localized fixed notification title", () => {

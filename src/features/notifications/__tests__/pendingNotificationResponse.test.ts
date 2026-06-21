@@ -3,7 +3,7 @@ import {
   consumePendingNotificationResponse,
   persistPendingNotificationResponse,
   serializeNotificationResponse,
-} from "@/src/services/pendingNotificationResponse";
+} from "@/src/features/notifications";
 
 describe("pending notification response", () => {
   beforeEach(async () => {

@@ -10,7 +10,7 @@ import {
   scheduleLearningReminderNotifications,
   triggerLearningReminderNotificationRequestPreview,
   triggerLearningReminderNotificationPreview,
-} from "@/src/services/learningReminderNotifications";
+} from "@/src/features/notifications";
 
 type MockNotifyKitNotification = {
   id?: string;

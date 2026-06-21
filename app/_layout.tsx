@@ -5,7 +5,6 @@ import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/Coachm
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
-import LearningRemindersInitializer from "@/src/components/reminders/LearningRemindersInitializer";
 import GoogleDriveBackupInitializer from "@/src/components/reminders/GoogleDriveBackupInitializer";
 import LocalExportReminder from "@/src/components/reminders/LocalExportReminder";
 import { DueReviewsProvider } from "@/src/contexts/DueReviewsContext";
@@ -51,9 +50,12 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { SafeAreaProvider } from "react-native-safe-area-context";
-import { ensureLearningReminderNotificationChannel } from "@/src/services/learningReminderNotifications";
-import { getNotificationResponseRoute } from "@/src/services/notificationResponseRouting";
-import { consumePendingNotificationResponse } from "@/src/services/pendingNotificationResponse";
+import LearningRemindersInitializer from "@/src/features/notifications/LearningRemindersInitializer";
+import {
+  consumePendingNotificationResponse,
+  ensureLearningReminderNotificationChannel,
+  getNotificationResponseRoute,
+} from "@/src/features/notifications";
 
 SplashScreen.preventAutoHideAsync();
 

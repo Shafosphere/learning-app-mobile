@@ -29,12 +29,10 @@ import {
   selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
-} from "@/src/services/learningReminderMessages";
-import {
   END_OF_DAY_REMINDER_KIND,
   triggerLearningReminderNotificationRequestPreview,
   triggerLearningReminderNotificationPreview,
-} from "@/src/services/learningReminderNotifications";
+} from "@/src/features/notifications";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { triggerStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { markYesterdayAsShieldUsedForDebug } from "@/src/services/streakProtection";
