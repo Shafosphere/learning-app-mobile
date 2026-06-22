@@ -69,6 +69,7 @@ function createMockSettings() {
     explanationOnlyOnWrong: false,
     ignoreDiacriticsInSpellcheck: false,
     learningRemindersEnabled: false,
+    cancelTodayLearningReminderSchedule: jest.fn(),
     refreshLearningReminderSchedule: jest.fn(),
     showExplanationEnabled: false,
   };
@@ -826,6 +827,69 @@ describe("useFlashcardsInteraction", () => {
     expect(getBoxIds(hook.getLatestBoxes(), "boxZero")).toEqual([]);
     expect(hook.getLatestSelectedItemId()).toBeNull();
     expect(hook.setBoxesSpy).toHaveBeenCalledTimes(setBoxesCallsBeforeReset);
+  });
+
+  it("does not refresh learning reminders as completed after a wrong answer", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(0);
+
+    const refreshLearningReminderSchedule = jest.fn();
+    const cardA = makeWord({ id: 713, text: "red", translations: ["czerwony"] });
+    const hook = renderInteraction(
+      makeBoxesState({
+        boxOne: [cardA],
+      }),
+      {
+        settingsOverride: {
+          learningRemindersEnabled: true,
+          refreshLearningReminderSchedule,
+        },
+      }
+    );
+
+    act(() => {
+      hook.result.current.interaction.handleSelectBox("boxOne");
+    });
+
+    act(() => {
+      hook.result.current.interaction.confirm(undefined, "__wrong__");
+    });
+
+    advance(90 * 1000);
+
+    expect(refreshLearningReminderSchedule).not.toHaveBeenCalled();
+  });
+
+  it("refreshes learning reminders as completed after a correct answer", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(0);
+
+    const refreshLearningReminderSchedule = jest.fn();
+    const cardA = makeWord({ id: 714, text: "blue", translations: ["niebieski"] });
+    const hook = renderInteraction(
+      makeBoxesState({
+        boxOne: [cardA],
+      }),
+      {
+        settingsOverride: {
+          learningRemindersEnabled: true,
+          refreshLearningReminderSchedule,
+        },
+      }
+    );
+
+    act(() => {
+      hook.result.current.interaction.handleSelectBox("boxOne");
+    });
+
+    act(() => {
+      hook.result.current.interaction.confirm(undefined, cardA.translations[0]);
+    });
+
+    advance(90 * 1000);
+
+    expect(refreshLearningReminderSchedule).toHaveBeenCalledTimes(1);
+    expect(refreshLearningReminderSchedule).toHaveBeenCalledWith("learning_completed");
   });
 
   it("does not mutate boxes after unmount when a correct-answer timer was pending", async () => {

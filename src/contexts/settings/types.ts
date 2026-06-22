@@ -1,4 +1,7 @@
-import type { ReminderPermissionState } from "@/src/features/notifications";
+import type {
+  ReminderPermissionState,
+  ReminderReconcileReason,
+} from "@/src/features/notifications";
 import type { GoogleDriveBackupSnapshot } from "@/src/services/googleDriveBackup";
 import type { ImportResult } from "@/src/services/importUserData";
 import type { SmartReminderProfile } from "@/src/services/smartReminders";
@@ -242,8 +245,12 @@ export interface SettingsContextValue {
   learningReminderNextAt: number | null;
   learningReminderProfile: SmartReminderProfile;
   learningReminderPermissionState: ReminderPermissionState;
-  refreshLearningReminderSchedule: () => Promise<void>;
-  cancelTodayLearningReminderSchedule: () => Promise<void>;
+  refreshLearningReminderSchedule: (
+    reason?: ReminderReconcileReason
+  ) => Promise<void>;
+  cancelTodayLearningReminderSchedule: (
+    reason?: ReminderReconcileReason
+  ) => Promise<void>;
   googleDriveConfigured: boolean;
   googleDriveConfigurationError: string | null;
   googleDriveConnected: boolean;

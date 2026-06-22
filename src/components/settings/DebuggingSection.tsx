@@ -29,7 +29,8 @@ import {
   selectEndOfDayReminderNotificationBody,
   selectLearningReminderNotificationBody,
   selectReviewReminderNotificationBody,
-  END_OF_DAY_REMINDER_KIND,
+  REVIEW_DUE_REMINDER_KIND,
+  STREAK_WARNING_REMINDER_KIND,
   triggerLearningReminderNotificationRequestPreview,
   triggerLearningReminderNotificationPreview,
 } from "@/src/features/notifications";
@@ -220,7 +221,7 @@ const DebuggingSection: React.FC = () => {
     try {
       const result = await triggerLearningReminderNotificationRequestPreview(
         {
-          kind: "review_reminder",
+          kind: REVIEW_DUE_REMINDER_KIND,
           content: {
             title: getReviewReminderNotificationTitle(i18n.language),
             body: selectReviewReminderNotificationBody({
@@ -271,11 +272,11 @@ const DebuggingSection: React.FC = () => {
   const handlePreviewEndOfDayReminderNotification = async () => {
     const now = new Date();
     const scheduledAt = new Date(now.getTime());
-    scheduledAt.setHours(23, 0, 0, 0);
+    scheduledAt.setHours(22, 0, 0, 0);
     try {
       const result = await triggerLearningReminderNotificationRequestPreview(
         {
-          kind: END_OF_DAY_REMINDER_KIND,
+          kind: STREAK_WARNING_REMINDER_KIND,
           content: {
             title: getEndOfDayReminderNotificationTitle(i18n.language),
             body: selectEndOfDayReminderNotificationBody({

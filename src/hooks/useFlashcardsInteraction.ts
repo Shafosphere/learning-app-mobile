@@ -366,7 +366,7 @@ export function useFlashcardsInteraction({
       });
 
       if (promote && learningRemindersEnabled) {
-        void cancelTodayLearningReminderSchedule();
+        void cancelTodayLearningReminderSchedule("learning_completed");
       }
 
     },
@@ -454,12 +454,12 @@ export function useFlashcardsInteraction({
       }).catch((error) => {
         console.warn("[Flashcards] Failed to log learning event", error);
       });
-      if (learningRemindersEnabled) {
+      if (ok && learningRemindersEnabled) {
         if (reminderRefreshTimerRef.current != null) {
           clearTimeout(reminderRefreshTimerRef.current);
         }
         reminderRefreshTimerRef.current = setTimeout(() => {
-          void refreshLearningReminderSchedule();
+          void refreshLearningReminderSchedule("learning_completed");
         }, 90 * 1000);
       }
       if (ok) {

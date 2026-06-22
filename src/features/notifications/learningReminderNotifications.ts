@@ -4,28 +4,37 @@ import Constants from "expo-constants";
 import { Platform } from "react-native";
 import learningReminderAttachmentAsset from "@/assets/app/icons/notification-icon.png";
 import learningReminderLargeIconAsset from "@/assets/app/icons/generated/android/play_store_512.png";
+import {
+  LEGACY_END_OF_DAY_REMINDER_KIND,
+  LEGACY_LEARNING_REMINDER_KIND,
+  LEGACY_REVIEW_REMINDER_KIND,
+  REVIEW_DUE_REMINDER_KIND,
+  STREAK_WARNING_REMINDER_KIND,
+  STUDY_REMINDER_KIND,
+  type ReminderKind,
+  type ReminderPlanEntry,
+  type ReminderRoute,
+} from "./reminderTypes";
 
 const REMINDER_NOTIFICATION_IDS_KEY = "learningReminder.notificationIds";
-export const LEARNING_REMINDER_KIND = "learning_reminder";
-export const REVIEW_REMINDER_KIND = "review_reminder";
-export const END_OF_DAY_REMINDER_KIND = "end_of_day_reminder";
+const REMINDER_NOTIFICATION_REGISTRY_KEY = "learningReminder.notificationRegistry";
+export const LEARNING_REMINDER_KIND = STUDY_REMINDER_KIND;
+export const REVIEW_REMINDER_KIND = REVIEW_DUE_REMINDER_KIND;
+export const END_OF_DAY_REMINDER_KIND = STREAK_WARNING_REMINDER_KIND;
+export const LEARNING_REMINDER_CHANNEL_ID = "learning_reminders_study";
+export const REVIEW_REMINDER_CHANNEL_ID = "learning_reminders_reviews";
+export const STREAK_WARNING_REMINDER_CHANNEL_ID = "learning_reminders_streak";
 const REMINDER_ATTACHMENT_ID = "learning-reminder-logo";
-export const LEARNING_REMINDER_CHANNEL_ID = "learning_reminders";
 const DEFAULT_PRESS_ACTION_ID = "default";
 const ANDROID_NOTIFICATION_SMALL_ICON = "notification_icon";
 const ANDROID_NOTIFICATION_COLOR = "#001534";
 
-export type ReminderNotificationKind =
-  | typeof LEARNING_REMINDER_KIND
-  | typeof REVIEW_REMINDER_KIND
-  | typeof END_OF_DAY_REMINDER_KIND;
-type ReminderNotificationRoute = "/review" | "/flashcards";
-
 type ReminderNotificationData = {
-  kind: ReminderNotificationKind;
+  kind: ReminderKind;
   scheduledAt: string;
+  dedupeKey: string;
   dueReviewCount?: number;
-  route?: ReminderNotificationRoute;
+  route: ReminderRoute;
 };
 type ReminderNotificationAttachment = {
   id: string;
@@ -50,30 +59,46 @@ type NotifyKitNotificationInput = {
   };
   ios?: {
     sound?: "default";
+    threadId?: string;
     attachments?: ReminderNotificationAttachment[];
   };
 };
 type NotifyKitTriggerInput = {
   type: number | string;
   timestamp: number;
+  alarmManager?: {
+    type?: number;
+  };
 };
 
 export type ReminderPermissionState = "granted" | "denied" | "undetermined";
 export type LearningReminderNotificationRequest = {
   when: Date;
-  kind?: ReminderNotificationKind;
+  kind?: ReminderKind | typeof LEGACY_LEARNING_REMINDER_KIND | typeof LEGACY_REVIEW_REMINDER_KIND | typeof LEGACY_END_OF_DAY_REMINDER_KIND;
   content: {
     title: string;
     body: string;
   };
   data?: {
     dueReviewCount?: number;
-    route?: ReminderNotificationRoute;
+    route?: ReminderRoute;
   };
 };
 export type LearningReminderNotificationPreviewResult = {
   permissionState: ReminderPermissionState;
   notificationId: string | null;
+};
+export type ReminderSchedulingDiagnostics = {
+  exactAlarmSetting: "enabled" | "disabled" | "not_supported" | "unknown";
+  powerManagerActivity: string | null;
+};
+type ReminderNotificationRegistryEntry = {
+  id: string;
+  kind: ReminderKind;
+  scheduledAt: string;
+  dedupeKey: string;
+  route: ReminderRoute;
+  dueReviewCount?: number;
 };
 type NotifyKitNotification = {
   id?: string;
@@ -89,6 +114,9 @@ type NotifyKitDisplayedNotification = {
 };
 type NotifyKitNotificationSettings = {
   authorizationStatus: number | string;
+  android?: {
+    alarm?: number;
+  };
 };
 type NotifyKitModule = {
   AuthorizationStatus: {
@@ -100,6 +128,14 @@ type NotifyKitModule = {
   };
   AndroidImportance: {
     DEFAULT: number;
+  };
+  AndroidNotificationSetting?: {
+    NOT_SUPPORTED: number;
+    DISABLED: number;
+    ENABLED: number;
+  };
+  AlarmType?: {
+    SET_EXACT_AND_ALLOW_WHILE_IDLE: number;
   };
   TriggerType: {
     TIMESTAMP: number | string;
@@ -120,6 +156,9 @@ type NotifyKitModule = {
   getDisplayedNotifications?: () => Promise<NotifyKitDisplayedNotification[]>;
   cancelNotification: (id: string) => Promise<void>;
   cancelDisplayedNotification?: (id: string) => Promise<void>;
+  getPowerManagerInfo?: () => Promise<{ activity?: string | null }>;
+  openAlarmPermissionSettings?: () => Promise<void>;
+  openPowerManagerSettings?: () => Promise<void>;
 };
 
 let cachedNotifyKitModule: NotifyKitModule | null | undefined;
@@ -154,8 +193,11 @@ async function getNotifyKitModule(): Promise<NotifyKitModule | null> {
       const notifyKit = module.default as unknown as NotifyKitModule;
       cachedNotifyKitModule = {
         ...notifyKit,
-        AuthorizationStatus: module.AuthorizationStatus as NotifyKitModule["AuthorizationStatus"],
+        AlarmType: module.AlarmType as NotifyKitModule["AlarmType"],
+        AndroidNotificationSetting:
+          module.AndroidNotificationSetting as NotifyKitModule["AndroidNotificationSetting"],
         AndroidImportance: module.AndroidImportance as NotifyKitModule["AndroidImportance"],
+        AuthorizationStatus: module.AuthorizationStatus as NotifyKitModule["AuthorizationStatus"],
         TriggerType: module.TriggerType as NotifyKitModule["TriggerType"],
       };
       return cachedNotifyKitModule;
@@ -207,18 +249,43 @@ export async function requestReminderPermissions(): Promise<ReminderPermissionSt
   return mapPermissionStatus(notifications, requested.authorizationStatus);
 }
 
+function getChannelId(kind: ReminderKind): string {
+  if (kind === REVIEW_DUE_REMINDER_KIND) {
+    return REVIEW_REMINDER_CHANNEL_ID;
+  }
+  if (kind === STREAK_WARNING_REMINDER_KIND) {
+    return STREAK_WARNING_REMINDER_CHANNEL_ID;
+  }
+  return LEARNING_REMINDER_CHANNEL_ID;
+}
+
+function getChannelName(kind: ReminderKind): string {
+  if (kind === REVIEW_DUE_REMINDER_KIND) {
+    return "Review reminders";
+  }
+  if (kind === STREAK_WARNING_REMINDER_KIND) {
+    return "Streak reminders";
+  }
+  return "Study reminders";
+}
+
 export async function ensureLearningReminderNotificationChannel(): Promise<void> {
   const notifications = await getNotifyKitModule();
   if (!notifications) {
     return;
   }
 
-  await notifications.createChannel({
-    id: LEARNING_REMINDER_CHANNEL_ID,
-    name: "Learning reminders",
-    importance: notifications.AndroidImportance.DEFAULT,
-    sound: "default",
-  });
+  await Promise.all(
+    ([STUDY_REMINDER_KIND, REVIEW_DUE_REMINDER_KIND, STREAK_WARNING_REMINDER_KIND] as ReminderKind[]).map(
+      (kind) =>
+        notifications.createChannel({
+          id: getChannelId(kind),
+          name: getChannelName(kind),
+          importance: notifications.AndroidImportance.DEFAULT,
+          sound: "default",
+        })
+    )
+  );
 }
 
 async function getStoredNotificationIds(): Promise<string[]> {
@@ -247,51 +314,133 @@ async function setStoredNotificationIds(notificationIds: string[]): Promise<void
   );
 }
 
+async function getReminderRegistry(): Promise<ReminderNotificationRegistryEntry[]> {
+  const raw = await AsyncStorage.getItem(REMINDER_NOTIFICATION_REGISTRY_KEY);
+  if (!raw) {
+    return [];
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (!Array.isArray(parsed)) {
+      return [];
+    }
+    return parsed.filter(
+      (entry): entry is ReminderNotificationRegistryEntry =>
+        typeof entry?.id === "string" &&
+        isReminderKind(entry.kind) &&
+        typeof entry.scheduledAt === "string" &&
+        typeof entry.dedupeKey === "string" &&
+        (entry.route === "/review" || entry.route === "/flashcards")
+    );
+  } catch {
+    return [];
+  }
+}
+
+async function setReminderRegistry(
+  entries: ReminderNotificationRegistryEntry[]
+): Promise<void> {
+  if (entries.length === 0) {
+    await AsyncStorage.removeItem(REMINDER_NOTIFICATION_REGISTRY_KEY);
+    await setStoredNotificationIds([]);
+    return;
+  }
+  await AsyncStorage.setItem(
+    REMINDER_NOTIFICATION_REGISTRY_KEY,
+    JSON.stringify(entries)
+  );
+  await setStoredNotificationIds(entries.map((entry) => entry.id));
+}
+
+function isReminderKind(value: unknown): value is ReminderKind {
+  return (
+    value === STUDY_REMINDER_KIND ||
+    value === REVIEW_DUE_REMINDER_KIND ||
+    value === STREAK_WARNING_REMINDER_KIND
+  );
+}
+
+function normalizeReminderKind(value: unknown): ReminderKind | null {
+  if (isReminderKind(value)) {
+    return value;
+  }
+  if (value === LEGACY_LEARNING_REMINDER_KIND) {
+    return STUDY_REMINDER_KIND;
+  }
+  if (value === LEGACY_REVIEW_REMINDER_KIND) {
+    return REVIEW_DUE_REMINDER_KIND;
+  }
+  if (value === LEGACY_END_OF_DAY_REMINDER_KIND) {
+    return STREAK_WARNING_REMINDER_KIND;
+  }
+  return null;
+}
+
 function asReminderData(
   data: Record<string, unknown> | undefined
 ): ReminderNotificationData | null {
-  if (
-    !data ||
-    (data.kind !== LEARNING_REMINDER_KIND &&
-      data.kind !== REVIEW_REMINDER_KIND &&
-      data.kind !== END_OF_DAY_REMINDER_KIND) ||
-    typeof data.scheduledAt !== "string"
-  ) {
+  const kind = normalizeReminderKind(data?.kind);
+  if (!data || !kind || typeof data.scheduledAt !== "string") {
     return null;
   }
+  const route =
+    data.route === "/review" || data.route === "/flashcards"
+      ? data.route
+      : kind === REVIEW_DUE_REMINDER_KIND
+        ? "/review"
+        : "/flashcards";
   return {
-    kind: data.kind,
+    kind,
     scheduledAt: data.scheduledAt,
+    dedupeKey:
+      typeof data.dedupeKey === "string"
+        ? data.dedupeKey
+        : `${kind}:${data.scheduledAt.slice(0, 10)}`,
+    route,
     ...(typeof data.dueReviewCount === "number"
       ? { dueReviewCount: data.dueReviewCount }
       : null),
-    ...(data.route === "/review" || data.route === "/flashcards"
-      ? { route: data.route }
+  };
+}
+
+function makeReminderData(entry: ReminderPlanEntry): ReminderNotificationData {
+  return {
+    kind: entry.kind,
+    scheduledAt: entry.scheduledAt.toISOString(),
+    dedupeKey: entry.dedupeKey,
+    route: entry.route,
+    ...(typeof entry.dueReviewCount === "number"
+      ? { dueReviewCount: entry.dueReviewCount }
       : null),
   };
 }
 
-function makeReminderData(
-  request: LearningReminderNotificationRequest
-): ReminderNotificationData {
+function makeNotificationId(entry: ReminderPlanEntry): string {
+  return `memicard-${entry.dedupeKey}-${entry.scheduledAt.getTime()}`;
+}
+
+function requestToPlanEntry(
+  request: LearningReminderNotificationRequest,
+  now: Date
+): ReminderPlanEntry {
+  const kind = normalizeReminderKind(request.kind) ?? STUDY_REMINDER_KIND;
+  const scheduledAt = request.when;
+  const dateKey = `${scheduledAt.getFullYear()}-${String(
+    scheduledAt.getMonth() + 1
+  ).padStart(2, "0")}-${String(scheduledAt.getDate()).padStart(2, "0")}`;
   return {
-    kind: request.kind ?? LEARNING_REMINDER_KIND,
-    scheduledAt: request.when.toISOString(),
+    kind,
+    scheduledAt,
+    title: request.content.title,
+    body: request.content.body,
+    route:
+      request.data?.route ??
+      (kind === REVIEW_DUE_REMINDER_KIND ? "/review" : "/flashcards"),
     ...(typeof request.data?.dueReviewCount === "number"
       ? { dueReviewCount: request.data.dueReviewCount }
       : null),
-    ...(request.data?.route === "/review" || request.data?.route === "/flashcards"
-      ? { route: request.data.route }
-      : null),
+    dedupeKey: `${kind}:${dateKey}`,
   };
-}
-
-function makeNotificationId(
-  request: LearningReminderNotificationRequest,
-  index: number
-): string {
-  const kind = request.kind ?? LEARNING_REMINDER_KIND;
-  return `memicard-${kind}-${request.when.getTime()}-${index}`;
 }
 
 async function getLearningReminderAttachmentUrl(): Promise<string | null> {
@@ -311,19 +460,18 @@ async function getLearningReminderAttachmentUrl(): Promise<string | null> {
   }
 }
 
-async function buildLearningReminderNotificationContent(
-  request: LearningReminderNotificationRequest,
-  notificationId: string,
-  notifications: NotifyKitModule
+async function buildReminderNotificationContent(
+  entry: ReminderPlanEntry,
+  notificationId: string
 ): Promise<NotifyKitNotificationInput> {
   const attachmentUrl = await getLearningReminderAttachmentUrl();
   return {
     id: notificationId,
-    title: request.content.title,
-    body: request.content.body,
-    data: makeReminderData(request),
+    title: entry.title,
+    body: entry.body,
+    data: makeReminderData(entry),
     android: {
-      channelId: LEARNING_REMINDER_CHANNEL_ID,
+      channelId: getChannelId(entry.kind),
       smallIcon: ANDROID_NOTIFICATION_SMALL_ICON,
       color: ANDROID_NOTIFICATION_COLOR,
       largeIcon: learningReminderLargeIconAsset,
@@ -335,6 +483,7 @@ async function buildLearningReminderNotificationContent(
     },
     ios: {
       sound: "default",
+      threadId: entry.kind,
       ...(attachmentUrl
         ? {
             attachments: [
@@ -350,13 +499,6 @@ async function buildLearningReminderNotificationContent(
   };
 }
 
-function toLocalDateKey(value: Date): string {
-  const year = value.getFullYear();
-  const month = String(value.getMonth() + 1).padStart(2, "0");
-  const day = String(value.getDate()).padStart(2, "0");
-  return `${year}-${month}-${day}`;
-}
-
 function enqueueReminderOperation<T>(operation: () => Promise<T>): Promise<T> {
   const nextOperation = reminderScheduleOperation.then(operation, operation);
   reminderScheduleOperation = nextOperation.then(
@@ -369,7 +511,7 @@ function enqueueReminderOperation<T>(operation: () => Promise<T>): Promise<T> {
 async function listScheduledReminderEntries(
   notifications: NotifyKitModule
 ): Promise<
-  { identifier: string; kind: ReminderNotificationKind; scheduledAt: Date }[]
+  { identifier: string; kind: ReminderKind; scheduledAt: Date; dedupeKey: string }[]
 > {
   const scheduled = await notifications.getTriggerNotifications();
   return scheduled
@@ -382,6 +524,7 @@ async function listScheduledReminderEntries(
         identifier: item.notification.id,
         kind: data.kind,
         scheduledAt: new Date(data.scheduledAt),
+        dedupeKey: data.dedupeKey,
       };
     })
     .filter(
@@ -389,8 +532,9 @@ async function listScheduledReminderEntries(
         item
       ): item is {
         identifier: string;
-        kind: ReminderNotificationKind;
+        kind: ReminderKind;
         scheduledAt: Date;
+        dedupeKey: string;
       } => item != null
     )
     .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
@@ -411,24 +555,9 @@ async function cancelNotificationIds(
   );
 }
 
-async function cancelLearningReminderNotificationInternal(
-  notifications: NotifyKitModule,
-  options: { dismissPresented?: boolean } = {}
-): Promise<void> {
-  const storedIds = await getStoredNotificationIds();
-  const scheduledEntries = await listScheduledReminderEntries(notifications);
-  const idsToCancel = Array.from(
-    new Set([...storedIds, ...scheduledEntries.map((entry) => entry.identifier)])
-  );
-  await cancelNotificationIds(notifications, idsToCancel);
-  if (options.dismissPresented) {
-    await dismissPresentedLearningReminderNotifications(notifications);
-  }
-  await setStoredNotificationIds([]);
-}
-
 async function dismissPresentedLearningReminderNotifications(
-  notifications: NotifyKitModule
+  notifications: NotifyKitModule,
+  shouldDismiss: (data: ReminderNotificationData) => boolean = () => true
 ): Promise<void> {
   if (!notifications.getDisplayedNotifications || !notifications.cancelDisplayedNotification) {
     return;
@@ -438,7 +567,10 @@ async function dismissPresentedLearningReminderNotifications(
     const presented = await notifications.getDisplayedNotifications();
     await Promise.all(
       presented
-        .filter((item) => asReminderData(item.notification.data) != null)
+        .filter((item) => {
+          const data = asReminderData(item.notification.data);
+          return data != null && shouldDismiss(data);
+        })
         .map((item) => item.id ?? item.notification.id)
         .filter((id): id is string => typeof id === "string")
         .map((id) => notifications.cancelDisplayedNotification?.(id))
@@ -448,47 +580,127 @@ async function dismissPresentedLearningReminderNotifications(
   }
 }
 
-async function cancelLearningReminderNotificationsForDateInternal(
+async function cancelManagedReminderScheduleInternal(
   notifications: NotifyKitModule,
-  date: Date
-): Promise<Date[]> {
-  const targetKey = toLocalDateKey(date);
-  const scheduledEntries = await listScheduledReminderEntries(notifications);
-  const idsToCancel = scheduledEntries
-    .filter(
-      (entry) =>
-        (entry.kind === LEARNING_REMINDER_KIND ||
-          entry.kind === END_OF_DAY_REMINDER_KIND) &&
-        toLocalDateKey(entry.scheduledAt) === targetKey
-    )
-    .map((entry) => entry.identifier);
+  options: { dismissPresented?: boolean } = {}
+): Promise<void> {
+  const [storedIds, registry, scheduledEntries] = await Promise.all([
+    getStoredNotificationIds(),
+    getReminderRegistry(),
+    listScheduledReminderEntries(notifications),
+  ]);
+  const idsToCancel = Array.from(
+    new Set([
+      ...storedIds,
+      ...registry.map((entry) => entry.id),
+      ...scheduledEntries.map((entry) => entry.identifier),
+    ])
+  );
   await cancelNotificationIds(notifications, idsToCancel);
-
-  const storedIds = await getStoredNotificationIds();
-  if (storedIds.length > 0) {
-    const remainingIds = storedIds.filter((id) => !idsToCancel.includes(id));
-    await setStoredNotificationIds(remainingIds);
+  if (options.dismissPresented) {
+    await dismissPresentedLearningReminderNotifications(notifications);
   }
+  await setReminderRegistry([]);
+}
 
-  return scheduledEntries
-    .filter((entry) => !idsToCancel.includes(entry.identifier))
-    .filter(
-      (entry) =>
-        entry.kind === LEARNING_REMINDER_KIND ||
-        entry.kind === END_OF_DAY_REMINDER_KIND
-    )
-    .map((entry) => entry.scheduledAt);
+function isSameLocalDate(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
+function isReminderDataForDate(
+  data: Pick<ReminderNotificationData, "scheduledAt">,
+  date: Date
+): boolean {
+  const scheduledAt = new Date(data.scheduledAt);
+  return (
+    Number.isFinite(scheduledAt.getTime()) && isSameLocalDate(scheduledAt, date)
+  );
+}
+
+function buildTimestampTrigger(
+  notifications: NotifyKitModule,
+  timestamp: number
+): NotifyKitTriggerInput {
+  return {
+    type: notifications.TriggerType.TIMESTAMP,
+    timestamp,
+    ...(notifications.AlarmType
+      ? {
+          alarmManager: {
+            type: notifications.AlarmType.SET_EXACT_AND_ALLOW_WHILE_IDLE,
+          },
+        }
+      : {
+          alarmManager: {},
+        }),
+  };
+}
+
+export async function replaceManagedReminderSchedule(
+  plan: ReminderPlanEntry[]
+): Promise<string[]> {
+  return enqueueReminderOperation(async () => {
+    const notifications = await getNotifyKitModule();
+    if (!notifications) {
+      await setReminderRegistry([]);
+      return [];
+    }
+
+    await ensureLearningReminderNotificationChannel();
+    await cancelManagedReminderScheduleInternal(notifications, {
+      dismissPresented: true,
+    });
+
+    const upcomingPlan = plan
+      .filter((entry) => entry.scheduledAt.getTime() > Date.now())
+      .sort((a, b) => a.scheduledAt.getTime() - b.scheduledAt.getTime());
+
+    const registryEntries: ReminderNotificationRegistryEntry[] = [];
+    try {
+      for (const entry of upcomingPlan) {
+        const notificationId = makeNotificationId(entry);
+        await notifications.createTriggerNotification(
+          await buildReminderNotificationContent(entry, notificationId),
+          buildTimestampTrigger(notifications, entry.scheduledAt.getTime())
+        );
+        registryEntries.push({
+          id: notificationId,
+          kind: entry.kind,
+          scheduledAt: entry.scheduledAt.toISOString(),
+          dedupeKey: entry.dedupeKey,
+          route: entry.route,
+          ...(typeof entry.dueReviewCount === "number"
+            ? { dueReviewCount: entry.dueReviewCount }
+            : null),
+        });
+      }
+    } catch (error) {
+      await cancelNotificationIds(
+        notifications,
+        registryEntries.map((entry) => entry.id)
+      );
+      await setReminderRegistry([]);
+      throw error;
+    }
+
+    await setReminderRegistry(registryEntries);
+    return registryEntries.map((entry) => entry.id);
+  });
 }
 
 export async function cancelLearningReminderNotification(): Promise<void> {
   return enqueueReminderOperation(async () => {
     const notifications = await getNotifyKitModule();
     if (!notifications) {
-      await setStoredNotificationIds([]);
+      await setReminderRegistry([]);
       return;
     }
 
-    await cancelLearningReminderNotificationInternal(notifications, {
+    await cancelManagedReminderScheduleInternal(notifications, {
       dismissPresented: true,
     });
   });
@@ -503,53 +715,58 @@ export async function cancelLearningReminderNotificationsForDate(
       return [];
     }
 
-    return cancelLearningReminderNotificationsForDateInternal(notifications, date);
+    const [registry, scheduledEntries] = await Promise.all([
+      getReminderRegistry(),
+      listScheduledReminderEntries(notifications),
+    ]);
+    const registryEntriesToCancel = registry.filter((entry) =>
+      isReminderDataForDate(entry, date)
+    );
+    const scheduledEntriesToCancel = scheduledEntries.filter((entry) =>
+      isSameLocalDate(entry.scheduledAt, date)
+    );
+    const idsToCancel = Array.from(
+      new Set([
+        ...registryEntriesToCancel.map((entry) => entry.id),
+        ...scheduledEntriesToCancel.map((entry) => entry.identifier),
+      ])
+    );
+
+    await cancelNotificationIds(notifications, idsToCancel);
+    await dismissPresentedLearningReminderNotifications(notifications, (data) =>
+      isReminderDataForDate(data, date)
+    );
+
+    const remainingRegistry = registry.filter(
+      (entry) => !isReminderDataForDate(entry, date)
+    );
+    await setReminderRegistry(remainingRegistry);
+
+    const remainingDatesByMs = new Map<number, Date>();
+    for (const entry of scheduledEntries.filter(
+      (entry) => !isSameLocalDate(entry.scheduledAt, date)
+    )) {
+      remainingDatesByMs.set(entry.scheduledAt.getTime(), entry.scheduledAt);
+    }
+    for (const entry of remainingRegistry) {
+      const scheduledAt = new Date(entry.scheduledAt);
+      if (Number.isFinite(scheduledAt.getTime())) {
+        remainingDatesByMs.set(scheduledAt.getTime(), scheduledAt);
+      }
+    }
+
+    return Array.from(remainingDatesByMs.values())
+      .sort((left, right) => left.getTime() - right.getTime());
   });
 }
 
 export async function scheduleLearningReminderNotifications(
   requests: LearningReminderNotificationRequest[]
 ): Promise<string[]> {
-  return enqueueReminderOperation(async () => {
-    const notifications = await getNotifyKitModule();
-    if (!notifications) {
-      await setStoredNotificationIds([]);
-      return [];
-    }
-
-    await ensureLearningReminderNotificationChannel();
-    await cancelLearningReminderNotificationInternal(notifications);
-
-    const upcomingRequests = requests
-      .filter((request) => request.when.getTime() > Date.now())
-      .sort((a, b) => a.when.getTime() - b.when.getTime());
-
-    const notificationIds: string[] = [];
-    try {
-      for (const [index, request] of upcomingRequests.entries()) {
-        const notificationId = makeNotificationId(request, index);
-        await notifications.createTriggerNotification(
-          await buildLearningReminderNotificationContent(
-            request,
-            notificationId,
-            notifications
-          ),
-          {
-            type: notifications.TriggerType.TIMESTAMP,
-            timestamp: request.when.getTime(),
-          }
-        );
-        notificationIds.push(notificationId);
-      }
-    } catch (error) {
-      await cancelNotificationIds(notifications, notificationIds);
-      await setStoredNotificationIds([]);
-      throw error;
-    }
-
-    await setStoredNotificationIds(notificationIds);
-    return notificationIds;
-  });
+  const now = new Date();
+  return replaceManagedReminderSchedule(
+    requests.map((request) => requestToPlanEntry(request, now))
+  );
 }
 
 export async function triggerLearningReminderNotificationRequestPreview(
@@ -575,26 +792,20 @@ export async function triggerLearningReminderNotificationRequestPreview(
   await ensureLearningReminderNotificationChannel();
 
   const triggerDate = new Date(now.getTime() + 1000);
-  const notificationId = makeNotificationId(
+  const entry = requestToPlanEntry(
     {
       ...request,
-      when: triggerDate,
+      when: now,
     },
-    0
+    now
   );
+  const notificationId = makeNotificationId({
+    ...entry,
+    scheduledAt: triggerDate,
+  });
   await notifications.createTriggerNotification(
-    await buildLearningReminderNotificationContent(
-      {
-        ...request,
-        when: now,
-      },
-      notificationId,
-      notifications
-    ),
-    {
-      type: notifications.TriggerType.TIMESTAMP,
-      timestamp: triggerDate.getTime(),
-    }
+    await buildReminderNotificationContent(entry, notificationId),
+    buildTimestampTrigger(notifications, triggerDate.getTime())
   );
 
   return {
@@ -609,8 +820,11 @@ export async function triggerLearningReminderNotificationPreview(
 ): Promise<LearningReminderNotificationPreviewResult> {
   return triggerLearningReminderNotificationRequestPreview(
     {
-      kind: LEARNING_REMINDER_KIND,
+      kind: STUDY_REMINDER_KIND,
       content,
+      data: {
+        route: "/flashcards",
+      },
     },
     now
   );
@@ -624,7 +838,50 @@ export async function getScheduledLearningReminderDates(): Promise<Date[]> {
   }
 
   const scheduledEntries = await listScheduledReminderEntries(notifications);
-  return scheduledEntries
-    .filter((entry) => entry.kind === LEARNING_REMINDER_KIND)
-    .map((entry) => entry.scheduledAt);
+  return scheduledEntries.map((entry) => entry.scheduledAt);
+}
+
+export async function getManagedReminderRegistry(): Promise<
+  ReminderNotificationRegistryEntry[]
+> {
+  return getReminderRegistry();
+}
+
+export async function getReminderSchedulingDiagnostics(): Promise<ReminderSchedulingDiagnostics> {
+  const notifications = await getNotifyKitModule();
+  if (!notifications) {
+    return {
+      exactAlarmSetting: "unknown",
+      powerManagerActivity: null,
+    };
+  }
+
+  const [settings, powerManagerInfo] = await Promise.all([
+    notifications.getNotificationSettings().catch(() => null),
+    notifications.getPowerManagerInfo?.().catch(() => null) ?? Promise.resolve(null),
+  ]);
+  const alarm = settings?.android?.alarm;
+  const exactAlarmSetting =
+    alarm === notifications.AndroidNotificationSetting?.ENABLED
+      ? "enabled"
+      : alarm === notifications.AndroidNotificationSetting?.DISABLED
+        ? "disabled"
+        : alarm === notifications.AndroidNotificationSetting?.NOT_SUPPORTED
+          ? "not_supported"
+          : "unknown";
+
+  return {
+    exactAlarmSetting,
+    powerManagerActivity: powerManagerInfo?.activity ?? null,
+  };
+}
+
+export async function openReminderExactAlarmSettings(): Promise<void> {
+  const notifications = await getNotifyKitModule();
+  await notifications?.openAlarmPermissionSettings?.();
+}
+
+export async function openReminderPowerManagerSettings(): Promise<void> {
+  const notifications = await getNotifyKitModule();
+  await notifications?.openPowerManagerSettings?.();
 }

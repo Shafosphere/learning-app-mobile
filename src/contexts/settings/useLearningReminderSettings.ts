@@ -1,51 +1,18 @@
 import { useCallback, useEffect, useRef } from "react";
 
 import {
-  hasDailyStreakProgressOnDate,
-  getLearningEventsHourlyDistribution,
-  getLearningEventsSummary,
-} from "@/src/db/sqlite/db";
-import {
-  END_OF_DAY_REMINDER_KIND,
-  REVIEW_REMINDER_KIND,
-  type LearningReminderNotificationRequest,
-  type ReminderPermissionState,
   cancelLearningReminderNotification,
-  cancelLearningReminderNotificationsForDate,
-  getEndOfDayReminderNotificationTitle,
-  getLearningReminderNotificationTitle,
-  getReminderPermissionState,
-  getReviewReminderNotificationTitle,
+  type ReminderPermissionState,
+  reconcileReminders,
   requestReminderPermissions,
-  scheduleLearningReminderNotifications,
-  selectEndOfDayReminderNotificationBody,
-  selectLearningReminderNotificationBody,
-  selectReviewReminderNotificationBody,
+  type ReminderReconcileReason,
 } from "@/src/features/notifications";
 import { usePersistedState } from "@/src/hooks/usePersistedState";
-import i18n from "@/src/i18n";
-import { countDueReviewsAt } from "@/src/services/dueReviewCount";
+import { STUDY_REMINDER_HOUR } from "@/src/features/notifications/reminderPlanner";
 import {
-  buildDueReminderSeriesEntries,
-  buildEndOfDayReminderEntries,
-  buildReviewReminderEntries,
-  computeSmartReminderPlan,
-  inferSmartReminderProfileForTargetMinutes,
   normalizeManualReminderHour,
   type SmartReminderProfile,
 } from "@/src/services/smartReminders";
-
-import { defaultValue } from "./defaults";
-
-const REMINDER_ANALYTICS_WINDOW_MS = 28 * 24 * 60 * 60 * 1000;
-
-function resolveNextScheduledReminderAt(
-  dates: Date[],
-  nowMs: number = Date.now()
-): number | null {
-  const next = dates.find((date) => date.getTime() > nowMs);
-  return next?.getTime() ?? null;
-}
 
 export function useLearningReminderSettings({
   pinnedOfficialCourseIds,
@@ -59,10 +26,7 @@ export function useLearningReminderSettings({
     _setLearningReminderAutomaticEnabled,
   ] = usePersistedState<boolean>("learningReminder.automaticEnabled", true);
   const [learningReminderManualHourState, _setLearningReminderManualHour] =
-    usePersistedState<number>(
-      "learningReminder.manualHour",
-      defaultValue.learningReminderManualHour
-    );
+    usePersistedState<number>("learningReminder.manualHour", STUDY_REMINDER_HOUR);
   const [learningReminderNextAtState, setLearningReminderNextAtState] =
     usePersistedState<number | null>("learningReminder.nextAt", null);
   const [learningReminderProfileState, setLearningReminderProfileState] =
@@ -79,6 +43,7 @@ export function useLearningReminderSettings({
   const learningReminderManualHourRef = useRef(
     normalizeManualReminderHour(learningReminderManualHourState)
   );
+  const pinnedOfficialCourseIdsRef = useRef(pinnedOfficialCourseIds);
 
   useEffect(() => {
     learningRemindersEnabledRef.current = learningRemindersEnabledState;
@@ -95,161 +60,50 @@ export function useLearningReminderSettings({
     );
   }, [learningReminderManualHourState]);
 
-  const computeAndScheduleLearningReminder = useCallback(async () => {
-    const permissionState = await getReminderPermissionState();
-    await setLearningReminderPermissionState(permissionState);
-    if (permissionState !== "granted") {
-      await cancelLearningReminderNotification();
-      await setLearningReminderNextAtState(null);
-      return;
-    }
+  useEffect(() => {
+    pinnedOfficialCourseIdsRef.current = pinnedOfficialCourseIds;
+  }, [pinnedOfficialCourseIds]);
 
-    const now = Date.now();
-    const fromMs = now - REMINDER_ANALYTICS_WINDOW_MS;
-    const [hourlyDistribution, summary] = await Promise.all([
-      getLearningEventsHourlyDistribution(fromMs, now),
-      getLearningEventsSummary(fromMs, now),
-    ]);
-
-    const plan = computeSmartReminderPlan({
-      hourlyDistribution,
-      summary,
-    });
-    const learningTargetMinutes = learningReminderAutomaticEnabledRef.current
-      ? plan.targetMinutes
-      : learningReminderManualHourRef.current * 60;
-    const learningReminderProfile = learningReminderAutomaticEnabledRef.current
-      ? plan.profile
-      : inferSmartReminderProfileForTargetMinutes(learningTargetMinutes);
-
-    const nowDate = new Date();
-    const todayKey = `${nowDate.getFullYear()}-${String(
-      nowDate.getMonth() + 1
-    ).padStart(2, "0")}-${String(nowDate.getDate()).padStart(2, "0")}`;
-    const hasDailyStreakProgress = await hasDailyStreakProgressOnDate(nowDate);
-    const skipDateKeys = hasDailyStreakProgress ? [todayKey] : [];
-    const reminderEntries = buildDueReminderSeriesEntries({
-      now: nowDate,
-      targetMinutes: learningTargetMinutes,
-      horizonDays: 7,
-      skipDateKeys,
-    });
-    const notificationTitle = getLearningReminderNotificationTitle(i18n.language);
-    const learningRequests: LearningReminderNotificationRequest[] =
-      reminderEntries.map((entry) => {
-        const scheduledAt = new Date(entry.scheduledAt);
-        return {
-          when: scheduledAt,
-          kind: "learning_reminder",
-          content: {
-            title: notificationTitle,
-            body: selectLearningReminderNotificationBody({
-              language: i18n.language,
-              profile: learningReminderProfile,
-              slot: entry.slot,
-              scheduledAt,
-            }),
-          },
-        };
+  const runReminderReconciliation = useCallback(
+    async (reason: ReminderReconcileReason) => {
+      const result = await reconcileReminders(reason, {
+        enabled: learningRemindersEnabledRef.current,
+        pinnedOfficialCourseIds: pinnedOfficialCourseIdsRef.current,
+        automaticEnabled: learningReminderAutomaticEnabledRef.current,
+        manualHour: learningReminderManualHourRef.current,
       });
-    const reviewNotificationTitle = getReviewReminderNotificationTitle(i18n.language);
-    const reviewEntries = await buildReviewReminderEntries({
-      now: nowDate,
-      targetMinutes: plan.targetMinutes,
-      horizonDays: 7,
-      countDueReviewsAt: (scheduledAt) =>
-        countDueReviewsAt(pinnedOfficialCourseIds, scheduledAt),
-    });
-    const reviewRequests: LearningReminderNotificationRequest[] = reviewEntries.map(
-      (entry) => {
-        const scheduledAt = new Date(entry.scheduledAt);
-        const dueReviewCount = entry.dueReviewCount;
-        return {
-          when: scheduledAt,
-          kind: REVIEW_REMINDER_KIND,
-          content: {
-            title: reviewNotificationTitle,
-            body: selectReviewReminderNotificationBody({
-              language: i18n.language,
-              dueReviewCount,
-            }),
-          },
-          data: {
-            dueReviewCount,
-            route: "/review" as const,
-          },
-        };
+      await Promise.all([
+        setLearningReminderPermissionState(result.permissionState),
+        setLearningReminderNextAtState(result.nextAt),
+        setLearningReminderProfileState(result.profile),
+      ]);
+    },
+    [
+      setLearningReminderNextAtState,
+      setLearningReminderPermissionState,
+      setLearningReminderProfileState,
+    ]
+  );
+
+  const refreshLearningReminderSchedule = useCallback(
+    async (reason: ReminderReconcileReason = "app_foreground") => {
+      if (!learningRemindersEnabledRef.current) {
+        return;
       }
-    );
-    const endOfDayNotificationTitle = getEndOfDayReminderNotificationTitle(
-      i18n.language
-    );
-    const endOfDayEntries = buildEndOfDayReminderEntries({
-      now: nowDate,
-      horizonDays: 7,
-      skipDateKeys,
-      skipScheduledAt: [
-        ...reminderEntries.map((entry) => entry.scheduledAt),
-        ...reviewEntries.map((entry) => entry.scheduledAt),
-      ],
-    });
-    const endOfDayRequests: LearningReminderNotificationRequest[] =
-      endOfDayEntries.map((entry) => {
-        const scheduledAt = new Date(entry.scheduledAt);
-        return {
-          when: scheduledAt,
-          kind: END_OF_DAY_REMINDER_KIND,
-          content: {
-            title: endOfDayNotificationTitle,
-            body: selectEndOfDayReminderNotificationBody({
-              language: i18n.language,
-              scheduledAt,
-            }),
-          },
-          data: {
-            route: "/flashcards" as const,
-          },
-        };
-      });
+      await runReminderReconciliation(reason);
+    },
+    [runReminderReconciliation]
+  );
 
-    const scheduledRequests = [
-      ...learningRequests,
-      ...reviewRequests,
-      ...endOfDayRequests,
-    ];
-    const scheduledDates = scheduledRequests
-      .map((request) => request.when)
-      .sort((left, right) => left.getTime() - right.getTime());
-
-    await scheduleLearningReminderNotifications(scheduledRequests);
-
-    await Promise.all([
-      setLearningReminderNextAtState(
-        resolveNextScheduledReminderAt(scheduledDates, nowDate.getTime())
-      ),
-      setLearningReminderProfileState(learningReminderProfile),
-    ]);
-  }, [
-    setLearningReminderNextAtState,
-    setLearningReminderPermissionState,
-    setLearningReminderProfileState,
-    pinnedOfficialCourseIds,
-  ]);
-
-  const cancelTodayLearningReminderSchedule = useCallback(async () => {
-    const today = new Date();
-    const remainingDates = await cancelLearningReminderNotificationsForDate(today);
-    await setLearningReminderNextAtState(
-      resolveNextScheduledReminderAt(remainingDates, Date.now())
-    );
-  }, [setLearningReminderNextAtState]);
-
-  const refreshLearningReminderSchedule = useCallback(async () => {
-    if (!learningRemindersEnabledRef.current) {
-      return;
-    }
-    await computeAndScheduleLearningReminder();
-  }, [computeAndScheduleLearningReminder]);
+  const cancelTodayLearningReminderSchedule = useCallback(
+    async (reason: ReminderReconcileReason = "learning_completed") => {
+      if (!learningRemindersEnabledRef.current) {
+        return;
+      }
+      await runReminderReconciliation(reason);
+    },
+    [runReminderReconciliation]
+  );
 
   const setLearningReminderAutomaticEnabled = useCallback(
     async (value: boolean) => {
@@ -259,10 +113,10 @@ export function useLearningReminderSettings({
       learningReminderAutomaticEnabledRef.current = value;
       await _setLearningReminderAutomaticEnabled(value);
       if (learningRemindersEnabledRef.current) {
-        await computeAndScheduleLearningReminder();
+        await runReminderReconciliation("settings_changed");
       }
     },
-    [_setLearningReminderAutomaticEnabled, computeAndScheduleLearningReminder]
+    [_setLearningReminderAutomaticEnabled, runReminderReconciliation]
   );
 
   const setLearningReminderManualHour = useCallback(
@@ -273,14 +127,11 @@ export function useLearningReminderSettings({
       }
       learningReminderManualHourRef.current = normalized;
       await _setLearningReminderManualHour(normalized);
-      if (
-        learningRemindersEnabledRef.current &&
-        !learningReminderAutomaticEnabledRef.current
-      ) {
-        await computeAndScheduleLearningReminder();
+      if (learningRemindersEnabledRef.current) {
+        await runReminderReconciliation("settings_changed");
       }
     },
-    [_setLearningReminderManualHour, computeAndScheduleLearningReminder]
+    [_setLearningReminderManualHour, runReminderReconciliation]
   );
 
   const setLearningRemindersEnabled = useCallback(
@@ -303,16 +154,17 @@ export function useLearningReminderSettings({
         await _setLearningRemindersEnabled(false);
         await cancelLearningReminderNotification();
         await setLearningReminderNextAtState(null);
+        await setLearningReminderProfileState("unknown");
         return;
       }
 
       learningRemindersEnabledRef.current = true;
       await _setLearningRemindersEnabled(true);
-      await computeAndScheduleLearningReminder();
+      await runReminderReconciliation("settings_changed");
     },
     [
       _setLearningRemindersEnabled,
-      computeAndScheduleLearningReminder,
+      runReminderReconciliation,
       setLearningReminderNextAtState,
       setLearningReminderPermissionState,
       setLearningReminderProfileState,
@@ -336,7 +188,6 @@ export function useLearningReminderSettings({
     learningReminderNextAt: learningReminderNextAtState,
     learningReminderProfile: learningReminderProfileState,
     learningReminderPermissionState,
-    computeAndScheduleLearningReminder,
     refreshLearningReminderSchedule,
     cancelTodayLearningReminderSchedule,
   };

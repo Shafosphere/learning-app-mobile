@@ -3,13 +3,17 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   __setLearningReminderAttachmentUrlForTests,
   __setLearningReminderNotificationsModuleForTests,
-  END_OF_DAY_REMINDER_KIND,
   LEARNING_REMINDER_CHANNEL_ID,
+  REVIEW_DUE_REMINDER_KIND,
+  REVIEW_REMINDER_CHANNEL_ID,
+  STREAK_WARNING_REMINDER_CHANNEL_ID,
+  STREAK_WARNING_REMINDER_KIND,
+  STUDY_REMINDER_KIND,
   cancelLearningReminderNotification,
   cancelLearningReminderNotificationsForDate,
-  scheduleLearningReminderNotifications,
+  getManagedReminderRegistry,
+  replaceManagedReminderSchedule,
   triggerLearningReminderNotificationRequestPreview,
-  triggerLearningReminderNotificationPreview,
 } from "@/src/features/notifications";
 
 type MockNotifyKitNotification = {
@@ -27,11 +31,18 @@ type MockNotifyKitNotification = {
       id: string;
     };
   };
-  ios?: unknown;
+  ios?: {
+    sound?: string;
+    threadId?: string;
+    attachments?: unknown[];
+  };
 };
 type MockNotifyKitTrigger = {
   type: number | string;
   timestamp: number;
+  alarmManager?: {
+    type?: number;
+  };
 };
 
 const mockCreateTriggerNotification: jest.Mock<
@@ -53,8 +64,16 @@ const AUTHORIZATION_STATUS = {
   PROVISIONAL: 2,
 };
 const mockNotifyKitModule = {
+  AlarmType: {
+    SET_EXACT_AND_ALLOW_WHILE_IDLE: 3,
+  },
   AndroidImportance: {
     DEFAULT: 3,
+  },
+  AndroidNotificationSetting: {
+    NOT_SUPPORTED: -1,
+    DISABLED: 0,
+    ENABLED: 1,
   },
   AuthorizationStatus: AUTHORIZATION_STATUS,
   TriggerType: {
@@ -67,26 +86,16 @@ const mockNotifyKitModule = {
   getDisplayedNotifications: mockGetDisplayedNotifications,
   getNotificationSettings: jest.fn(async () => ({
     authorizationStatus: AUTHORIZATION_STATUS.AUTHORIZED,
+    android: {
+      alarm: 1,
+    },
   })),
+  getPowerManagerInfo: jest.fn(async () => ({ activity: null })),
   getTriggerNotifications: mockGetTriggerNotifications,
   requestPermission: jest.fn(async () => ({
     authorizationStatus: AUTHORIZATION_STATUS.AUTHORIZED,
   })),
 };
-
-function expectAndroidReminderBranding(
-  android: MockNotifyKitNotification["android"]
-): void {
-  expect(android).toEqual(
-    expect.objectContaining({
-      smallIcon: "notification_icon",
-      color: "#001534",
-      largeIcon: expect.anything(),
-      circularLargeIcon: false,
-    })
-  );
-  expect(android).not.toHaveProperty("style");
-}
 
 describe("learning reminder notifications", () => {
   beforeEach(async () => {
@@ -100,331 +109,141 @@ describe("learning reminder notifications", () => {
     __setLearningReminderAttachmentUrlForTests(null);
   });
 
-  it("passes a distinct body for each scheduled reminder request", async () => {
-    await scheduleLearningReminderNotifications([
+  it("creates separate channels and per-kind notification metadata", async () => {
+    await replaceManagedReminderSchedule([
       {
-        when: new Date("2099-01-01T18:00:00.000Z"),
-        content: {
-          title: "Czas na fiszki",
-          body: "Za chwilke Twoja pora na fiszki",
-        },
+        kind: STUDY_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T19:00:00.000Z"),
+        title: "Flashcard time",
+        body: "Study now",
+        route: "/flashcards",
+        dedupeKey: "study_reminder:2099-01-01",
       },
       {
-        when: new Date("2099-01-01T19:00:00.000Z"),
-        content: {
-          title: "Czas na fiszki",
-          body: "To teraz! Wroc do fiszek na chwilke",
-        },
+        kind: REVIEW_DUE_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T18:00:00.000Z"),
+        title: "Reviews are waiting",
+        body: "You have 23 cards",
+        route: "/review",
+        dueReviewCount: 23,
+        dedupeKey: "review_due:2099-01-01",
+      },
+      {
+        kind: STREAK_WARNING_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T22:00:00.000Z"),
+        title: "Still time today",
+        body: "Protect your streak",
+        route: "/flashcards",
+        dedupeKey: "streak_warning:2099-01-01",
       },
     ]);
 
     expect(mockCreateChannel).toHaveBeenCalledWith({
       id: LEARNING_REMINDER_CHANNEL_ID,
-      name: "Learning reminders",
+      name: "Study reminders",
       importance: 3,
       sound: "default",
     });
-    expect(mockCreateTriggerNotification).toHaveBeenCalledTimes(2);
+    expect(mockCreateChannel).toHaveBeenCalledWith({
+      id: REVIEW_REMINDER_CHANNEL_ID,
+      name: "Review reminders",
+      importance: 3,
+      sound: "default",
+    });
+    expect(mockCreateChannel).toHaveBeenCalledWith({
+      id: STREAK_WARNING_REMINDER_CHANNEL_ID,
+      name: "Streak reminders",
+      importance: 3,
+      sound: "default",
+    });
+    expect(mockCreateTriggerNotification).toHaveBeenCalledTimes(3);
     expect(
       mockCreateTriggerNotification.mock.calls.map(([notification, trigger]) => ({
-        title: notification.title,
-        body: notification.body,
-        kind: notification.data.kind,
-        scheduledAt: notification.data.scheduledAt,
-        timestamp: trigger.timestamp,
-        triggerType: trigger.type,
         channelId: notification.android.channelId,
-        pressActionId: notification.android.pressAction.id,
+        kind: notification.data.kind,
+        route: notification.data.route,
+        dueReviewCount: notification.data.dueReviewCount,
+        threadId: notification.ios?.threadId,
+        alarmType: trigger.alarmManager?.type,
       }))
     ).toEqual([
       {
-        title: "Czas na fiszki",
-        body: "Za chwilke Twoja pora na fiszki",
-        kind: "learning_reminder",
-        scheduledAt: "2099-01-01T18:00:00.000Z",
-        timestamp: new Date("2099-01-01T18:00:00.000Z").getTime(),
-        triggerType: 0,
+        channelId: REVIEW_REMINDER_CHANNEL_ID,
+        kind: REVIEW_DUE_REMINDER_KIND,
+        route: "/review",
+        dueReviewCount: 23,
+        threadId: REVIEW_DUE_REMINDER_KIND,
+        alarmType: 3,
+      },
+      {
         channelId: LEARNING_REMINDER_CHANNEL_ID,
-        pressActionId: "default",
+        kind: STUDY_REMINDER_KIND,
+        route: "/flashcards",
+        dueReviewCount: undefined,
+        threadId: STUDY_REMINDER_KIND,
+        alarmType: 3,
       },
       {
-        title: "Czas na fiszki",
-        body: "To teraz! Wroc do fiszek na chwilke",
-        kind: "learning_reminder",
-        scheduledAt: "2099-01-01T19:00:00.000Z",
-        timestamp: new Date("2099-01-01T19:00:00.000Z").getTime(),
-        triggerType: 0,
-        channelId: LEARNING_REMINDER_CHANNEL_ID,
-        pressActionId: "default",
-      },
-    ]);
-  });
-
-  it("triggers a learning reminder preview notification", async () => {
-    mockNotifyKitModule.getNotificationSettings.mockResolvedValueOnce({
-      authorizationStatus: AUTHORIZATION_STATUS.NOT_DETERMINED,
-    });
-    mockNotifyKitModule.requestPermission.mockResolvedValueOnce({
-      authorizationStatus: AUTHORIZATION_STATUS.AUTHORIZED,
-    });
-
-    const result = await triggerLearningReminderNotificationPreview(
-      {
-        title: "Czas na fiszki",
-        body: "To teraz! Wroc do fiszek na chwilke",
-      },
-      new Date("2099-01-01T18:00:00.000Z")
-    );
-
-    expect(mockNotifyKitModule.requestPermission).toHaveBeenCalledTimes(1);
-    expect(result).toEqual({
-      permissionState: "granted",
-      notificationId: "memicard-learning_reminder-4070973601000-0",
-    });
-    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
-      {
-        id: "memicard-learning_reminder-4070973601000-0",
-        title: "Czas na fiszki",
-        body: "To teraz! Wroc do fiszek na chwilke",
-        data: {
-          kind: "learning_reminder",
-          scheduledAt: "2099-01-01T18:00:00.000Z",
-        },
-        android: {
-          channelId: LEARNING_REMINDER_CHANNEL_ID,
-          smallIcon: "notification_icon",
-          color: "#001534",
-          largeIcon: expect.anything(),
-          circularLargeIcon: false,
-          pressAction: {
-            id: "default",
-          },
-          sound: "default",
-        },
-        ios: {
-          sound: "default",
-        },
-      },
-      {
-        type: 0,
-        timestamp: new Date("2099-01-01T18:00:01.000Z").getTime(),
-      }
-    );
-    const previewAndroid = mockCreateTriggerNotification.mock.calls[0][0].android;
-    expectAndroidReminderBranding(previewAndroid);
-  });
-
-  it("uses the same Android reminder branding for scheduled and preview notifications", async () => {
-    await scheduleLearningReminderNotifications([
-      {
-        when: new Date("2099-01-01T18:00:00.000Z"),
-        content: {
-          title: "Czas na fiszki",
-          body: "To teraz! Wroc do fiszek na chwilke",
-        },
+        channelId: STREAK_WARNING_REMINDER_CHANNEL_ID,
+        kind: STREAK_WARNING_REMINDER_KIND,
+        route: "/flashcards",
+        dueReviewCount: undefined,
+        threadId: STREAK_WARNING_REMINDER_KIND,
+        alarmType: 3,
       },
     ]);
-    const scheduledAndroid = mockCreateTriggerNotification.mock.calls[0][0].android;
-
-    mockCreateTriggerNotification.mockClear();
-
-    await triggerLearningReminderNotificationPreview(
-      {
-        title: "Czas na fiszki",
-        body: "To teraz! Wroc do fiszek na chwilke",
-      },
-      new Date("2099-01-01T18:00:00.000Z")
-    );
-    const previewAndroid = mockCreateTriggerNotification.mock.calls[0][0].android;
-
-    expectAndroidReminderBranding(scheduledAndroid);
-    expectAndroidReminderBranding(previewAndroid);
-    expect(previewAndroid.largeIcon).toBe(scheduledAndroid.largeIcon);
   });
 
-  it("schedules review reminder notifications with count and route data", async () => {
-    await scheduleLearningReminderNotifications([
-      {
-        kind: "review_reminder",
-        when: new Date("2099-01-01T14:00:00.000Z"),
-        content: {
-          title: "Powtorki czekaja",
-          body: "Hej, masz 23 fiszki do powtorki. Wchodzisz?",
-        },
-        data: {
-          dueReviewCount: 23,
-          route: "/review",
-        },
-      },
-    ]);
-
-    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Powtorki czekaja",
-        body: "Hej, masz 23 fiszki do powtorki. Wchodzisz?",
-        data: {
-          kind: "review_reminder",
-          scheduledAt: "2099-01-01T14:00:00.000Z",
-          dueReviewCount: 23,
-          route: "/review",
-        },
-        android: expect.objectContaining({
-          channelId: LEARNING_REMINDER_CHANNEL_ID,
-          pressAction: {
-            id: "default",
-          },
-        }),
-      }),
-      {
-        type: 0,
-        timestamp: new Date("2099-01-01T14:00:00.000Z").getTime(),
-      }
-    );
-  });
-
-  it("triggers a review reminder preview notification with count and route data", async () => {
-    const result = await triggerLearningReminderNotificationRequestPreview(
-      {
-        kind: "review_reminder",
-        content: {
-          title: "Powtorki czekaja",
-          body: "Hej, masz 42 fiszki do powtorki. Wchodzisz?",
-        },
-        data: {
-          dueReviewCount: 42,
-          route: "/review",
-        },
-      },
-      new Date("2099-01-01T18:00:00.000Z")
-    );
-
-    expect(result).toEqual({
-      permissionState: "granted",
-      notificationId: "memicard-review_reminder-4070973601000-0",
-    });
-    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        id: "memicard-review_reminder-4070973601000-0",
-        title: "Powtorki czekaja",
-        body: "Hej, masz 42 fiszki do powtorki. Wchodzisz?",
-        data: {
-          kind: "review_reminder",
-          scheduledAt: "2099-01-01T18:00:00.000Z",
-          dueReviewCount: 42,
-          route: "/review",
-        },
-        android: expect.objectContaining({
-          channelId: LEARNING_REMINDER_CHANNEL_ID,
-          pressAction: {
-            id: "default",
-          },
-        }),
-      }),
-      {
-        type: 0,
-        timestamp: new Date("2099-01-01T18:00:01.000Z").getTime(),
-      }
-    );
-  });
-
-  it("schedules end-of-day reminder notifications with flashcards route data", async () => {
-    await scheduleLearningReminderNotifications([
-      {
-        kind: END_OF_DAY_REMINDER_KIND,
-        when: new Date("2099-01-01T23:00:00.000Z"),
-        content: {
-          title: "Jeszcze jest czas",
-          body: "Krótka powtórka na koniec dnia?",
-        },
-        data: {
-          route: "/flashcards",
-        },
-      },
-    ]);
-
-    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        title: "Jeszcze jest czas",
-        body: "Krótka powtórka na koniec dnia?",
-        data: {
-          kind: "end_of_day_reminder",
-          scheduledAt: "2099-01-01T23:00:00.000Z",
-          route: "/flashcards",
-        },
-        android: expect.objectContaining({
-          channelId: LEARNING_REMINDER_CHANNEL_ID,
-          pressAction: {
-            id: "default",
-          },
-        }),
-      }),
-      {
-        type: 0,
-        timestamp: new Date("2099-01-01T23:00:00.000Z").getTime(),
-      }
-    );
-  });
-
-  it("adds the learning reminder logo attachment when available", async () => {
-    __setLearningReminderAttachmentUrlForTests("file:///notification-logo.png");
-
-    await scheduleLearningReminderNotifications([
-      {
-        when: new Date("2099-01-01T18:00:00.000Z"),
-        content: {
-          title: "Czas na fiszki",
-          body: "To teraz! Wroc do fiszek na chwilke",
-        },
-      },
-    ]);
-
-    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
-      expect.objectContaining({
-        ios: {
-          sound: "default",
-          attachments: [
-            {
-              id: "learning-reminder-logo",
-              url: "file:///notification-logo.png",
-              typeHint: "public.png",
-            },
-          ],
-        },
-      }),
-      expect.anything()
-    );
-  });
-
-  it("dismisses already presented managed reminder notifications when cancelling all", async () => {
+  it("replaces old managed triggers and stores registry metadata", async () => {
     mockGetTriggerNotifications.mockResolvedValue([
       {
         notification: {
-          id: "scheduled-reminder-id",
+          id: "old-study-id",
           data: {
-            kind: "learning_reminder",
-            scheduledAt: "2099-01-01T18:00:00.000Z",
-          },
-        },
-        trigger: {},
-      },
-      {
-        notification: {
-          id: "scheduled-review-reminder-id",
-          data: {
-            kind: "review_reminder",
-            scheduledAt: "2099-01-01T14:00:00.000Z",
+            kind: STUDY_REMINDER_KIND,
+            scheduledAt: "2099-01-01T19:00:00.000Z",
+            dedupeKey: "study_reminder:2099-01-01",
+            route: "/flashcards",
           },
         },
         trigger: {},
       },
     ]);
+
+    await replaceManagedReminderSchedule([
+      {
+        kind: REVIEW_DUE_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T18:00:00.000Z"),
+        title: "Reviews are waiting",
+        body: "You have 23 cards",
+        route: "/review",
+        dueReviewCount: 23,
+        dedupeKey: "review_due:2099-01-01",
+      },
+    ]);
+
+    expect(mockCancelNotification).toHaveBeenCalledWith("old-study-id");
+    expect(await getManagedReminderRegistry()).toEqual([
+      expect.objectContaining({
+        kind: REVIEW_DUE_REMINDER_KIND,
+        scheduledAt: "2099-01-01T18:00:00.000Z",
+        dedupeKey: "review_due:2099-01-01",
+        route: "/review",
+        dueReviewCount: 23,
+      }),
+    ]);
+  });
+
+  it("dismisses displayed managed reminders when cancelling all", async () => {
     mockGetDisplayedNotifications.mockResolvedValue([
       {
         id: "presented-reminder-id",
         notification: {
           data: {
-            kind: "learning_reminder",
-            scheduledAt: "2099-01-01T18:00:00.000Z",
+            kind: STREAK_WARNING_REMINDER_KIND,
+            scheduledAt: "2099-01-01T22:00:00.000Z",
+            dedupeKey: "streak_warning:2099-01-01",
+            route: "/flashcards",
           },
         },
       },
@@ -440,85 +259,123 @@ describe("learning reminder notifications", () => {
 
     await cancelLearningReminderNotification();
 
-    expect(mockCancelNotification).toHaveBeenCalledWith("scheduled-reminder-id");
-    expect(mockCancelNotification).toHaveBeenCalledWith(
-      "scheduled-review-reminder-id"
-    );
-    expect(mockCancelNotification).toHaveBeenCalledTimes(2);
     expect(mockCancelDisplayedNotification).toHaveBeenCalledTimes(1);
     expect(mockCancelDisplayedNotification).toHaveBeenCalledWith(
       "presented-reminder-id"
     );
   });
 
-  it("cancels only learning and end-of-day reminders for a date", async () => {
-    mockGetTriggerNotifications.mockResolvedValue([
+  it("cancels managed reminders for one local date and keeps remaining schedule", async () => {
+    await replaceManagedReminderSchedule([
       {
-        notification: {
-          id: "learning-today-id",
-          data: {
-            kind: "learning_reminder",
-            scheduledAt: "2099-01-01T18:00:00.000Z",
-          },
-        },
-        trigger: {},
+        kind: STUDY_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T19:00:00.000Z"),
+        title: "Flashcard time",
+        body: "Study now",
+        route: "/flashcards",
+        dedupeKey: "study_reminder:2099-01-01",
       },
       {
-        notification: {
-          id: "end-of-day-today-id",
-          data: {
-            kind: "end_of_day_reminder",
-            scheduledAt: "2099-01-01T22:00:00.000Z",
-            route: "/flashcards",
-          },
-        },
-        trigger: {},
-      },
-      {
-        notification: {
-          id: "review-today-id",
-          data: {
-            kind: "review_reminder",
-            scheduledAt: "2099-01-01T14:00:00.000Z",
-          },
-        },
-        trigger: {},
-      },
-      {
-        notification: {
-          id: "end-of-day-tomorrow-id",
-          data: {
-            kind: "end_of_day_reminder",
-            scheduledAt: "2099-01-02T22:00:00.000Z",
-            route: "/flashcards",
-          },
-        },
-        trigger: {},
-      },
-      {
-        notification: {
-          id: "learning-tomorrow-id",
-          data: {
-            kind: "learning_reminder",
-            scheduledAt: "2099-01-02T18:00:00.000Z",
-          },
-        },
-        trigger: {},
+        kind: STUDY_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-02T19:00:00.000Z"),
+        title: "Flashcard time",
+        body: "Study tomorrow",
+        route: "/flashcards",
+        dedupeKey: "study_reminder:2099-01-02",
       },
     ]);
+    mockCancelNotification.mockClear();
 
-    const remainingLearningDates = await cancelLearningReminderNotificationsForDate(
+    const remainingDates = await cancelLearningReminderNotificationsForDate(
       new Date("2099-01-01T12:00:00.000Z")
     );
 
-    expect(mockCancelNotification).toHaveBeenCalledTimes(2);
-    expect(mockCancelNotification).toHaveBeenCalledWith("learning-today-id");
-    expect(mockCancelNotification).toHaveBeenCalledWith("end-of-day-today-id");
-    expect(mockCancelNotification).not.toHaveBeenCalledWith("review-today-id");
-    expect(remainingLearningDates.map((date) => date.toISOString())).toEqual([
-      "2099-01-02T18:00:00.000Z",
-      "2099-01-02T22:00:00.000Z",
+    expect(mockCancelNotification).toHaveBeenCalledTimes(1);
+    expect(mockCancelNotification.mock.calls[0][0]).toContain(
+      "study_reminder:2099-01-01"
+    );
+    expect(await getManagedReminderRegistry()).toEqual([
+      expect.objectContaining({
+        scheduledAt: "2099-01-02T19:00:00.000Z",
+        dedupeKey: "study_reminder:2099-01-02",
+      }),
+    ]);
+    expect(remainingDates.map((date) => date.toISOString())).toEqual([
+      "2099-01-02T19:00:00.000Z",
     ]);
   });
 
+  it("triggers a preview using new kind metadata and iOS thread id", async () => {
+    const result = await triggerLearningReminderNotificationRequestPreview(
+      {
+        kind: REVIEW_DUE_REMINDER_KIND,
+        content: {
+          title: "Reviews are waiting",
+          body: "You have 42 cards",
+        },
+        data: {
+          dueReviewCount: 42,
+          route: "/review",
+        },
+      },
+      new Date("2099-01-01T18:00:00.000Z")
+    );
+
+    expect(result.permissionState).toBe("granted");
+    expect(result.notificationId).toContain("memicard-review_due:2099-01-01");
+    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        data: {
+          kind: REVIEW_DUE_REMINDER_KIND,
+          scheduledAt: "2099-01-01T18:00:00.000Z",
+          dedupeKey: "review_due:2099-01-01",
+          dueReviewCount: 42,
+          route: "/review",
+        },
+        android: expect.objectContaining({
+          channelId: REVIEW_REMINDER_CHANNEL_ID,
+        }),
+        ios: expect.objectContaining({
+          threadId: REVIEW_DUE_REMINDER_KIND,
+        }),
+      }),
+      expect.objectContaining({
+        alarmManager: {
+          type: 3,
+        },
+      })
+    );
+  });
+
+  it("adds the learning reminder logo attachment when available", async () => {
+    __setLearningReminderAttachmentUrlForTests("file:///notification-logo.png");
+
+    await replaceManagedReminderSchedule([
+      {
+        kind: STUDY_REMINDER_KIND,
+        scheduledAt: new Date("2099-01-01T19:00:00.000Z"),
+        title: "Flashcard time",
+        body: "Study now",
+        route: "/flashcards",
+        dedupeKey: "study_reminder:2099-01-01",
+      },
+    ]);
+
+    expect(mockCreateTriggerNotification).toHaveBeenCalledWith(
+      expect.objectContaining({
+        ios: expect.objectContaining({
+          sound: "default",
+          threadId: STUDY_REMINDER_KIND,
+          attachments: [
+            {
+              id: "learning-reminder-logo",
+              url: "file:///notification-logo.png",
+              typeHint: "public.png",
+            },
+          ],
+        }),
+      }),
+      expect.anything()
+    );
+  });
 });

@@ -1046,7 +1046,9 @@ export default function ReviewFlashcardsPlaceholder() {
       console.warn("[Review] Failed to log learning event", error);
     });
     if (learningRemindersEnabled) {
-      void logLearningEventPromise.then(() => cancelTodayLearningReminderSchedule());
+      void logLearningEventPromise.then(() =>
+        cancelTodayLearningReminderSchedule("review_completed")
+      );
     }
     void appendDebugEvent("review", "review.answer.correct", {
       screen: "review",
