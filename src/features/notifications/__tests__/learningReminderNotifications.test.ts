@@ -4,6 +4,9 @@ import {
   __setLearningReminderAttachmentUrlForTests,
   __setLearningReminderNotificationsModuleForTests,
   LEARNING_REMINDER_CHANNEL_ID,
+  REMINDER_CLEAR_BEFORE_NEXT_MS,
+  REMINDER_MIN_TIMEOUT_MS,
+  REMINDER_TIMEOUT_DEFAULT_MS,
   REVIEW_DUE_REMINDER_KIND,
   REVIEW_REMINDER_CHANNEL_ID,
   STREAK_WARNING_REMINDER_CHANNEL_ID,
@@ -14,6 +17,8 @@ import {
   getManagedReminderRegistry,
   replaceManagedReminderSchedule,
   triggerLearningReminderNotificationRequestPreview,
+  type ReminderKind,
+  type ReminderPlanEntry,
 } from "@/src/features/notifications";
 
 type MockNotifyKitNotification = {
@@ -30,6 +35,7 @@ type MockNotifyKitNotification = {
     pressAction: {
       id: string;
     };
+    timeoutAfter?: number;
   };
   ios?: {
     sound?: string;
@@ -96,6 +102,103 @@ const mockNotifyKitModule = {
     authorizationStatus: AUTHORIZATION_STATUS.AUTHORIZED,
   })),
 };
+
+function makeReminderEntry(
+  kind: ReminderKind,
+  scheduledAt: Date
+): ReminderPlanEntry {
+  const dayKey = [
+    scheduledAt.getFullYear(),
+    String(scheduledAt.getMonth() + 1).padStart(2, "0"),
+    String(scheduledAt.getDate()).padStart(2, "0"),
+  ].join("-");
+  return {
+    kind,
+    scheduledAt,
+    title: `${kind} title`,
+    body: `${kind} body`,
+    route: kind === REVIEW_DUE_REMINDER_KIND ? "/review" : "/flashcards",
+    ...(kind === REVIEW_DUE_REMINDER_KIND ? { dueReviewCount: 23 } : null),
+    dedupeKey: `${kind}:${dayKey}`,
+  };
+}
+
+function makeLocalDate(hour: number, minute = 0, day = 1): Date {
+  return new Date(2099, 0, day, hour, minute, 0, 0);
+}
+
+function isSameLocalDate(left: Date, right: Date): boolean {
+  return (
+    left.getFullYear() === right.getFullYear() &&
+    left.getMonth() === right.getMonth() &&
+    left.getDate() === right.getDate()
+  );
+}
+
+function getExpectedTimeout(
+  entry: ReminderPlanEntry,
+  sortedEntries: ReminderPlanEntry[]
+): number {
+  if (entry.kind === STREAK_WARNING_REMINDER_KIND) {
+    return REMINDER_TIMEOUT_DEFAULT_MS;
+  }
+
+  const nextSameDayEntry = sortedEntries.find(
+    (candidate) =>
+      candidate.scheduledAt.getTime() > entry.scheduledAt.getTime() &&
+      isSameLocalDate(candidate.scheduledAt, entry.scheduledAt)
+  );
+
+  if (!nextSameDayEntry) {
+    return REMINDER_TIMEOUT_DEFAULT_MS;
+  }
+
+  return Math.max(
+    REMINDER_MIN_TIMEOUT_MS,
+    nextSameDayEntry.scheduledAt.getTime() -
+      entry.scheduledAt.getTime() -
+      REMINDER_CLEAR_BEFORE_NEXT_MS
+  );
+}
+
+function getScheduledTimeouts(): {
+  kind: ReminderKind;
+  scheduledAt: string;
+  timeoutAfter: number | undefined;
+}[] {
+  return mockCreateTriggerNotification.mock.calls
+    .map(([notification]) => ({
+      kind: notification.data.kind as ReminderKind,
+      scheduledAt: notification.data.scheduledAt as string,
+      timeoutAfter: notification.android.timeoutAfter,
+    }))
+    .sort((left, right) => left.scheduledAt.localeCompare(right.scheduledAt));
+}
+
+function getExpectedScheduledTimeouts(
+  entries: ReminderPlanEntry[],
+  timeoutAfterByIndex: number[]
+): {
+  kind: ReminderKind;
+  scheduledAt: string;
+  timeoutAfter: number;
+}[] {
+  return entries
+    .map((entry, index) => ({
+      kind: entry.kind,
+      scheduledAt: entry.scheduledAt.toISOString(),
+      timeoutAfter: timeoutAfterByIndex[index],
+    }))
+    .sort((left, right) => left.scheduledAt.localeCompare(right.scheduledAt));
+}
+
+function makeSeededRandom(seed: number): () => number {
+  let value = seed;
+  return () => {
+    value = (value * 1664525 + 1013904223) >>> 0;
+    return value / 2 ** 32;
+  };
+}
 
 describe("learning reminder notifications", () => {
   beforeEach(async () => {
@@ -377,5 +480,147 @@ describe("learning reminder notifications", () => {
       }),
       expect.anything()
     );
+  });
+
+  it.each([
+    {
+      name: "review, study and streak in default order",
+      entries: [
+        makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(18)),
+        makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(19)),
+        makeReminderEntry(STREAK_WARNING_REMINDER_KIND, makeLocalDate(22)),
+      ],
+      expected: [
+        50 * 60 * 1000,
+        170 * 60 * 1000,
+        REMINDER_TIMEOUT_DEFAULT_MS,
+      ],
+    },
+    {
+      name: "study clears before later review",
+      entries: [
+        makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(17)),
+        makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(18)),
+        makeReminderEntry(STREAK_WARNING_REMINDER_KIND, makeLocalDate(22)),
+      ],
+      expected: [
+        50 * 60 * 1000,
+        230 * 60 * 1000,
+        REMINDER_TIMEOUT_DEFAULT_MS,
+      ],
+    },
+    {
+      name: "review clears before streak when study is absent",
+      entries: [
+        makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(18)),
+        makeReminderEntry(STREAK_WARNING_REMINDER_KIND, makeLocalDate(22)),
+      ],
+      expected: [230 * 60 * 1000, REMINDER_TIMEOUT_DEFAULT_MS],
+    },
+    {
+      name: "study clears before streak when review is absent",
+      entries: [
+        makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(19)),
+        makeReminderEntry(STREAK_WARNING_REMINDER_KIND, makeLocalDate(22)),
+      ],
+      expected: [170 * 60 * 1000, REMINDER_TIMEOUT_DEFAULT_MS],
+    },
+    {
+      name: "close reminders keep minimum timeout",
+      entries: [
+        makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(20, 30)),
+        makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(20, 35)),
+        makeReminderEntry(STREAK_WARNING_REMINDER_KIND, makeLocalDate(22)),
+      ],
+      expected: [
+        REMINDER_MIN_TIMEOUT_MS,
+        75 * 60 * 1000,
+        REMINDER_TIMEOUT_DEFAULT_MS,
+      ],
+    },
+    {
+      name: "review-only reminder uses default timeout",
+      entries: [makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(18))],
+      expected: [REMINDER_TIMEOUT_DEFAULT_MS],
+    },
+    {
+      name: "study-only reminder uses default timeout",
+      entries: [makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(19))],
+      expected: [REMINDER_TIMEOUT_DEFAULT_MS],
+    },
+  ])("sets Android timeoutAfter for $name", async ({ entries, expected }) => {
+    await replaceManagedReminderSchedule(entries);
+
+    expect(getScheduledTimeouts()).toEqual(
+      getExpectedScheduledTimeouts(entries, expected)
+    );
+  });
+
+  it("does not use tomorrow's reminder to shorten today's timeout", async () => {
+    const entries = [
+      makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(23, 30, 1)),
+      makeReminderEntry(REVIEW_DUE_REMINDER_KIND, makeLocalDate(0, 30, 2)),
+    ];
+    await replaceManagedReminderSchedule(entries);
+
+    expect(getScheduledTimeouts()).toEqual(
+      getExpectedScheduledTimeouts(entries, [
+        REMINDER_TIMEOUT_DEFAULT_MS,
+        REMINDER_TIMEOUT_DEFAULT_MS,
+      ])
+    );
+  });
+
+  it("keeps duplicate reminder kinds on different days distinct", async () => {
+    const entries = [
+      makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(18, 0, 1)),
+      makeReminderEntry(STUDY_REMINDER_KIND, makeLocalDate(19, 0, 2)),
+    ];
+    await replaceManagedReminderSchedule(entries);
+
+    expect(getScheduledTimeouts()).toEqual(
+      getExpectedScheduledTimeouts(entries, [
+        REMINDER_TIMEOUT_DEFAULT_MS,
+        REMINDER_TIMEOUT_DEFAULT_MS,
+      ])
+    );
+  });
+
+  it("sets valid Android timeoutAfter values across seeded reminder combinations", async () => {
+    const random = makeSeededRandom(20260623);
+    const kinds = [
+      REVIEW_DUE_REMINDER_KIND,
+      STUDY_REMINDER_KIND,
+      STREAK_WARNING_REMINDER_KIND,
+    ];
+
+    for (let iteration = 0; iteration < 50; iteration += 1) {
+      mockCreateTriggerNotification.mockClear();
+      const entries = kinds
+        .map((kind) => {
+          const minuteOfDay = Math.floor(random() * 24 * 60);
+          return makeReminderEntry(
+            kind,
+            makeLocalDate(Math.floor(minuteOfDay / 60), minuteOfDay % 60)
+          );
+        })
+        .sort((left, right) => left.scheduledAt.getTime() - right.scheduledAt.getTime());
+
+      await replaceManagedReminderSchedule(entries);
+
+      expect(mockCreateTriggerNotification).toHaveBeenCalledTimes(entries.length);
+      for (const [notification] of mockCreateTriggerNotification.mock.calls) {
+        const timeoutAfter = notification.android.timeoutAfter;
+        expect(typeof timeoutAfter).toBe("number");
+        expect(Number.isFinite(timeoutAfter)).toBe(true);
+        expect(timeoutAfter).toBeGreaterThan(0);
+
+        const entry = entries.find(
+          (candidate) => candidate.kind === notification.data.kind
+        );
+        expect(entry).toBeDefined();
+        expect(timeoutAfter).toBe(getExpectedTimeout(entry!, entries));
+      }
+    }
   });
 });

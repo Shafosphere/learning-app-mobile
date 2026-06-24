@@ -24,6 +24,9 @@ export const END_OF_DAY_REMINDER_KIND = STREAK_WARNING_REMINDER_KIND;
 export const LEARNING_REMINDER_CHANNEL_ID = "learning_reminders_study";
 export const REVIEW_REMINDER_CHANNEL_ID = "learning_reminders_reviews";
 export const STREAK_WARNING_REMINDER_CHANNEL_ID = "learning_reminders_streak";
+export const REMINDER_TIMEOUT_DEFAULT_MS = 2 * 60 * 60 * 1000;
+export const REMINDER_CLEAR_BEFORE_NEXT_MS = 10 * 60 * 1000;
+export const REMINDER_MIN_TIMEOUT_MS = 60 * 1000;
 const REMINDER_ATTACHMENT_ID = "learning-reminder-logo";
 const DEFAULT_PRESS_ACTION_ID = "default";
 const ANDROID_NOTIFICATION_SMALL_ICON = "notification_icon";
@@ -56,6 +59,7 @@ type NotifyKitNotificationInput = {
       id: string;
     };
     sound?: "default";
+    timeoutAfter?: number;
   };
   ios?: {
     sound?: "default";
@@ -462,7 +466,8 @@ async function getLearningReminderAttachmentUrl(): Promise<string | null> {
 
 async function buildReminderNotificationContent(
   entry: ReminderPlanEntry,
-  notificationId: string
+  notificationId: string,
+  timeoutAfter: number
 ): Promise<NotifyKitNotificationInput> {
   const attachmentUrl = await getLearningReminderAttachmentUrl();
   return {
@@ -480,6 +485,7 @@ async function buildReminderNotificationContent(
         id: DEFAULT_PRESS_ACTION_ID,
       },
       sound: "default",
+      timeoutAfter,
     },
     ios: {
       sound: "default",
@@ -497,6 +503,32 @@ async function buildReminderNotificationContent(
         : null),
     },
   };
+}
+
+function getReminderTimeoutAfter(
+  entry: ReminderPlanEntry,
+  upcomingPlan: ReminderPlanEntry[]
+): number {
+  if (entry.kind === STREAK_WARNING_REMINDER_KIND) {
+    return REMINDER_TIMEOUT_DEFAULT_MS;
+  }
+
+  const nextSameDayEntry = upcomingPlan.find(
+    (candidate) =>
+      candidate.scheduledAt.getTime() > entry.scheduledAt.getTime() &&
+      isSameLocalDate(candidate.scheduledAt, entry.scheduledAt)
+  );
+
+  if (!nextSameDayEntry) {
+    return REMINDER_TIMEOUT_DEFAULT_MS;
+  }
+
+  return Math.max(
+    REMINDER_MIN_TIMEOUT_MS,
+    nextSameDayEntry.scheduledAt.getTime() -
+      entry.scheduledAt.getTime() -
+      REMINDER_CLEAR_BEFORE_NEXT_MS
+  );
 }
 
 function enqueueReminderOperation<T>(operation: () => Promise<T>): Promise<T> {
@@ -664,7 +696,11 @@ export async function replaceManagedReminderSchedule(
       for (const entry of upcomingPlan) {
         const notificationId = makeNotificationId(entry);
         await notifications.createTriggerNotification(
-          await buildReminderNotificationContent(entry, notificationId),
+          await buildReminderNotificationContent(
+            entry,
+            notificationId,
+            getReminderTimeoutAfter(entry, upcomingPlan)
+          ),
           buildTimestampTrigger(notifications, entry.scheduledAt.getTime())
         );
         registryEntries.push({
@@ -804,7 +840,11 @@ export async function triggerLearningReminderNotificationRequestPreview(
     scheduledAt: triggerDate,
   });
   await notifications.createTriggerNotification(
-    await buildReminderNotificationContent(entry, notificationId),
+    await buildReminderNotificationContent(
+      entry,
+      notificationId,
+      REMINDER_TIMEOUT_DEFAULT_MS
+    ),
     buildTimestampTrigger(notifications, triggerDate.getTime())
   );
 
