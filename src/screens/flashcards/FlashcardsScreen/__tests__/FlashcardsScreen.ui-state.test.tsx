@@ -6,9 +6,11 @@ import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScre
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   getCourseCompletionSummary,
+  getCustomCourseById,
   getCustomCourseMasteryProgress,
   getCustomFlashcards,
   getCustomReviewedFlashcardIds,
+  scheduleCustomReview,
 } from "@/src/db/sqlite/db";
 import {
   getCourseCompletionRunStartedAt,
@@ -380,6 +382,7 @@ const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
+const mockedGetCustomCourseById = getCustomCourseById as jest.Mock;
 const mockedGetCustomFlashcards = getCustomFlashcards as jest.Mock;
 const mockedGetCustomReviewedFlashcardIds =
   getCustomReviewedFlashcardIds as jest.Mock;
@@ -392,6 +395,7 @@ const mockedGetCourseCompletionRunStartedAt =
 const mockedReturnFlashcardToUnknown = returnFlashcardToUnknown as jest.Mock;
 const mockedSubscribeFlashcardReturnedToUnknown =
   subscribeFlashcardReturnedToUnknown as jest.Mock;
+const mockedScheduleCustomReview = scheduleCustomReview as jest.Mock;
 
 type InteractionState = ReturnType<typeof createInteractionState>;
 
@@ -585,6 +589,9 @@ describe("FlashcardsScreen UI state regressions", () => {
     await act(async () => {
       await Promise.resolve();
     });
+    act(() => {
+      jest.advanceTimersByTime(1000);
+    });
 
     expect(latestButtonsProps?.selectedTrueFalseAnswer).toBeNull();
 
@@ -741,6 +748,9 @@ describe("FlashcardsScreen UI state regressions", () => {
 
     await act(async () => {
       await Promise.resolve();
+    });
+    act(() => {
+      jest.advanceTimersByTime(1000);
     });
 
     expect(latestButtonsProps?.trueFalseButtonsVariant).toBe("know_dont_know");
@@ -1311,6 +1321,29 @@ describe("FlashcardsScreen UI state regressions", () => {
       courseId: 7,
       flashcardId: card.id,
     });
+  });
+
+  it("schedules custom review from normal study when a review-enabled course promotes a word out", async () => {
+    const card = makeCard({ id: 93 });
+    mockedGetCustomCourseById.mockResolvedValueOnce({
+      id: 7,
+      name: "Ang A2",
+      reviewsEnabled: true,
+      slug: "eng_to_pl_a2",
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+    await flushScreenState();
+
+    const interactionParams = mockedUseFlashcardsInteraction.mock.calls.at(-1)?.[0];
+
+    act(() => {
+      interactionParams?.onWordPromotedOut?.(card);
+    });
+
+    expect(mockedScheduleCustomReview).toHaveBeenCalledWith(card.id, 7, 0);
   });
 
   it("drops a returned card from live flashcards state", async () => {

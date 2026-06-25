@@ -23,6 +23,7 @@ import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { TRUE_FALSE_POST_OK_COOLDOWN_MS } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
 
 type ReviewFlashcardsRouteParams = {
   courseId?: string;
@@ -37,6 +38,7 @@ jest.mock("expo-router", () => ({
 }));
 
 jest.mock("@react-navigation/native", () => ({
+  useIsFocused: () => true,
   useFocusEffect: (effect: () => void | (() => void)) => {
     const React = require("react");
     React.useEffect(effect, [effect]);
@@ -460,6 +462,13 @@ function getVisibleTextInputs(screen: ReturnType<typeof render>) {
     .filter((input) => input.props.caretHidden !== true);
 }
 
+function isUsingFakeTimers() {
+  return (
+    jest.isMockFunction(setTimeout) ||
+    Object.prototype.hasOwnProperty.call(setTimeout, "clock")
+  );
+}
+
 async function startReviewFromStage(
   screen: ReturnType<typeof render>,
   stage: number
@@ -470,6 +479,11 @@ async function startReviewFromStage(
     expect(screen.getByText(new RegExp(`^${boxName}:[1-9]\\d*$`))).not.toBeNull();
   });
 
+  const startedWithFakeTimers = isUsingFakeTimers();
+  if (!startedWithFakeTimers) {
+    jest.useFakeTimers();
+  }
+
   fireEvent.press(screen.getByTestId(`box-button-${boxName}`));
 
   await waitFor(() => {
@@ -478,6 +492,15 @@ async function startReviewFromStage(
         screen.queryByTestId("true-answer-button") != null
     ).toBe(true);
   });
+
+  await act(async () => {
+    jest.advanceTimersByTime(TRUE_FALSE_POST_OK_COOLDOWN_MS);
+    await Promise.resolve();
+  });
+
+  if (!startedWithFakeTimers) {
+    jest.useRealTimers();
+  }
 }
 
 async function renderAndForceCorrectionSwitch(
@@ -735,6 +758,47 @@ describe("reviewflashcards correction desync regression", () => {
     expect(screen.getByText("boxOne:0")).not.toBeNull();
   });
 
+  it("distributes due review cards into exact boxes by review stage", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 810,
+        frontText: "stage-zero",
+        stage: 0,
+      }),
+      makeReviewCard({
+        id: 811,
+        frontText: "stage-one",
+        stage: 1,
+      }),
+      makeReviewCard({
+        id: 812,
+        frontText: "stage-two",
+        stage: 2,
+      }),
+      makeReviewCard({
+        id: 815,
+        frontText: "stage-five",
+        stage: 5,
+      }),
+      makeReviewCard({
+        id: 819,
+        frontText: "stage-overflow",
+        stage: 9,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxZero:1")).not.toBeNull();
+      expect(screen.getByText("boxOne:1")).not.toBeNull();
+      expect(screen.getByText("boxTwo:1")).not.toBeNull();
+      expect(screen.getByText("boxThree:0")).not.toBeNull();
+      expect(screen.getByText("boxFour:0")).not.toBeNull();
+      expect(screen.getByText("boxFive:2")).not.toBeNull();
+    });
+  });
+
   it("keeps classic boxes horizontally scrollable on small-phone layouts", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
@@ -977,6 +1041,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.getByTestId("review-flashcards-bubble-anchor")).toBeTruthy();
       expect(screen.getByTestId("review-flashcards-card-section")).toBeTruthy();
       expect(screen.getByTestId("review-flashcards-buttons-section")).toBeTruthy();
+      expect(screen.getByTestId("review-flashcards-boxes-wrapper")).toBeTruthy();
       expect(screen.getByTestId("review-flashcards-boxes-section")).toBeTruthy();
     });
   });
@@ -1087,6 +1152,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(301, 77);
     expect(screen.getByText("boxFour:0")).not.toBeNull();
+    expect(screen.getByText("boxFive:0")).not.toBeNull();
     jest.useRealTimers();
   });
 
@@ -1130,6 +1196,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
     });
 
+    expect(screen.getByText("boxOne:0")).not.toBeNull();
     expect(screen.getByText("boxZero:0")).not.toBeNull();
   });
 
@@ -1234,6 +1301,7 @@ describe("reviewflashcards correction desync regression", () => {
       });
     });
     expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    expect(screen.getByText("boxOne:0")).not.toBeNull();
   });
 
   it("keeps reviewing from the mistake nudge by scheduling the normal stage-zero demotion", async () => {
@@ -1273,6 +1341,8 @@ describe("reviewflashcards correction desync regression", () => {
       expect(mockedScheduleCustomReview).toHaveBeenCalledWith(722, 77, 0);
     });
     expect(mockedReturnFlashcardToUnknown).not.toHaveBeenCalled();
+    expect(screen.getByText("boxOne:0")).not.toBeNull();
+    expect(screen.getByText("boxZero:0")).not.toBeNull();
   });
 
   it("does not show the mistake nudge on the second consecutive wrong answer", async () => {

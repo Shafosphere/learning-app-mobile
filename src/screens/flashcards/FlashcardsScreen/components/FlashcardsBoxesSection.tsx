@@ -16,6 +16,9 @@ import Reanimated from "react-native-reanimated";
 import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
 
 type FlashcardsBoxesSectionProps = {
+  coachmarkId?: string;
+  countsCoachmarkId?: string;
+  testID?: string;
   styles: ReturnType<typeof useStyles>;
   screenSectionLayout: ComponentProps<typeof Reanimated.View>["layout"];
   boxes: BoxesState;
@@ -33,6 +36,7 @@ type FlashcardsBoxesSectionProps = {
   isSmallPhoneLayout: boolean;
   isTabletLayout: boolean;
   isTabletCompactBoxesLayout: boolean;
+  maxColumns?: number;
   areButtonsOnTop: boolean;
   flashcardsContentWidth: number | undefined;
   boxesScale: number;
@@ -45,6 +49,9 @@ type FlashcardsBoxesSectionProps = {
 };
 
 export function FlashcardsBoxesSection({
+  coachmarkId,
+  countsCoachmarkId,
+  testID,
   styles,
   screenSectionLayout,
   boxes,
@@ -62,6 +69,7 @@ export function FlashcardsBoxesSection({
   isSmallPhoneLayout,
   isTabletLayout,
   isTabletCompactBoxesLayout,
+  maxColumns,
   areButtonsOnTop,
   flashcardsContentWidth,
   boxesScale,
@@ -83,8 +91,9 @@ export function FlashcardsBoxesSection({
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
+        countsCoachmarkId={countsCoachmarkId}
         horizontalScroll={isSmallPhoneLayout}
-        maxColumns={isTabletLayout ? 3 : undefined}
+        maxColumns={maxColumns ?? (isTabletLayout ? 3 : undefined)}
         layoutWidth={flashcardsContentWidth}
       />
     ) : (
@@ -108,7 +117,11 @@ export function FlashcardsBoxesSection({
         boxesScaledHeight ? { height: boxesScaledHeight } : null,
       ]}
     >
-      <CoachmarkAnchor id="flashcards-boxes-section" shape="rect" radius={28}>
+      <CoachmarkAnchor
+        id={coachmarkId ?? "flashcards-boxes-section"}
+        shape="rect"
+        radius={28}
+      >
         <View
           collapsable={false}
           style={{
@@ -127,7 +140,7 @@ export function FlashcardsBoxesSection({
 
   return (
     <Reanimated.View
-      testID="flashcards-boxes-wrapper"
+      testID={testID ?? "flashcards-boxes-wrapper"}
       layout={screenSectionLayout}
       style={[
         styles.boxesWrapper,

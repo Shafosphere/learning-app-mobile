@@ -348,7 +348,7 @@ export default function Navbar({ children }: NavbarProps) {
   }, [pathname, refreshDueReviewCount]);
 
   const handleReviewPress = () => {
-    router.push("/review");
+    router.dismissTo("/review");
   };
 
   const handleHomePress = () => {

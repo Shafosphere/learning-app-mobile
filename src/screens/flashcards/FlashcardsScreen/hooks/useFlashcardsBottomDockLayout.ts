@@ -1,7 +1,6 @@
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import type { BoxesState } from "@/src/types/boxes";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
-import type { CorrectionState } from "@/src/hooks/useFlashcardsInteraction";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { Keyboard, View } from "react-native";
 import {
@@ -12,6 +11,11 @@ import {
   ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
 } from "../model/FlashcardsScreen.constants";
 
+type KeyboardDebugCorrectionState = {
+  cardId?: number;
+  mode?: string | null;
+};
+
 type UseFlashcardsBottomDockLayoutParams = {
   areButtonsOnTop: boolean;
   shouldShowBoxes: boolean;
@@ -20,11 +24,13 @@ type UseFlashcardsBottomDockLayoutParams = {
   shouldShowTrueFalseActions: boolean;
   isSmallPhoneLayout: boolean;
   isFocused: boolean;
-  activeCustomCourseId: number | null;
-  storageKey: string;
+  debugScreen: "flashcards" | "review";
+  debugCategory?: "flashcards" | "review";
+  courseId: number | null;
+  storageKey?: string | null;
   displayResult: boolean | null;
   activeBox: keyof BoxesState | null;
-  correction: CorrectionState | null;
+  correction: KeyboardDebugCorrectionState | null;
   previousKeyboardVisibleRef: React.MutableRefObject<boolean | null>;
 };
 
@@ -36,7 +42,9 @@ export function useFlashcardsBottomDockLayout({
   shouldShowTrueFalseActions,
   isSmallPhoneLayout,
   isFocused,
-  activeCustomCourseId,
+  debugScreen,
+  debugCategory = debugScreen,
+  courseId,
   storageKey,
   displayResult,
   activeBox,
@@ -76,9 +84,9 @@ export function useFlashcardsBottomDockLayout({
     previousKeyboardVisibleRef.current = keyboardVisible;
 
     const payload = {
-      screen: "flashcards",
-      courseId: activeCustomCourseId,
-      storageKey,
+      screen: debugScreen,
+      courseId,
+      storageKey: storageKey ?? null,
       keyboardVisible,
       selectedItemId,
       result: displayResult,
@@ -91,11 +99,13 @@ export function useFlashcardsBottomDockLayout({
     if (ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
       console.log("[keyboard-debug] screen.keyboard.visibility", payload);
     }
-    void appendDebugEvent("flashcards", "keyboard.visibility", payload);
+    void appendDebugEvent(debugCategory, "keyboard.visibility", payload);
   }, [
     activeBox,
-    activeCustomCourseId,
     correction,
+    courseId,
+    debugCategory,
+    debugScreen,
     displayResult,
     isFocused,
     keyboardVisible,
@@ -116,9 +126,9 @@ export function useFlashcardsBottomDockLayout({
     const subscriptions = eventNames.map((keyboardEventName) =>
       Keyboard.addListener(keyboardEventName, (event) => {
         const payload = {
-          screen: "flashcards",
-          courseId: activeCustomCourseId,
-          storageKey,
+          screen: debugScreen,
+          courseId,
+          storageKey: storageKey ?? null,
           selectedItemId,
           result: displayResult,
           activeBox,
@@ -138,7 +148,7 @@ export function useFlashcardsBottomDockLayout({
           );
         }
         void appendDebugEvent(
-          "flashcards",
+          debugCategory,
           `keyboard.raw.${keyboardEventName}`,
           payload,
         );
@@ -150,8 +160,10 @@ export function useFlashcardsBottomDockLayout({
     };
   }, [
     activeBox,
-    activeCustomCourseId,
     correction,
+    courseId,
+    debugCategory,
+    debugScreen,
     displayResult,
     isFocused,
     selectedItemId,

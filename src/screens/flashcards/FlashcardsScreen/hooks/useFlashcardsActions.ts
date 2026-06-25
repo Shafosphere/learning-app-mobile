@@ -14,31 +14,32 @@ type LastTrueFalseTap = {
   answer: boolean | null;
 };
 
-type UseFlashcardsActionsParams = {
+type UseFlashcardActionBarStateParams = {
   selectedItem: WordWithTranslations | null;
   selectedItemId: number | null;
   displayResult: boolean | null;
   isBetweenCards: boolean;
-  correction: CorrectionState | null;
+  correction: CorrectionState | null | unknown;
   courseHasOnlyTrueFalse: boolean;
   courseHasOnlyKnowDontKnow: boolean;
   isKnowDontKnow: boolean;
-  downloadDisabled: boolean;
+  downloadDisabled?: boolean;
+  externalActionLocked?: boolean;
   shouldShowBoxes: boolean;
   isExplanationVisible: boolean;
   isExplanationPending: boolean;
   setAnswer: (answer: string) => void;
-  confirmWithTutorial: (
+  onConfirm: (
     selectedTranslation?: string,
     answerOverride?: string,
   ) => void;
-  acknowledgeExplanation: () => void;
-  lastTrueFalseTapRef: MutableRefObject<LastTrueFalseTap | null>;
-  lastActionCooldownCardIdRef: MutableRefObject<number | null>;
+  onOk: () => void;
+  lastTrueFalseTapRef?: MutableRefObject<LastTrueFalseTap | null>;
+  lastActionCooldownCardIdRef?: MutableRefObject<number | null>;
   t: TFunction;
 };
 
-export function useFlashcardsActions({
+export function useFlashcardActionBarState({
   selectedItem,
   selectedItemId,
   displayResult,
@@ -47,17 +48,18 @@ export function useFlashcardsActions({
   courseHasOnlyTrueFalse,
   courseHasOnlyKnowDontKnow,
   isKnowDontKnow,
-  downloadDisabled,
+  downloadDisabled = false,
+  externalActionLocked = false,
   shouldShowBoxes,
   isExplanationVisible,
   isExplanationPending,
   setAnswer,
-  confirmWithTutorial,
-  acknowledgeExplanation,
-  lastTrueFalseTapRef,
-  lastActionCooldownCardIdRef,
+  onConfirm,
+  onOk,
+  lastTrueFalseTapRef: providedLastTrueFalseTapRef,
+  lastActionCooldownCardIdRef: providedLastActionCooldownCardIdRef,
   t,
-}: UseFlashcardsActionsParams) {
+}: UseFlashcardActionBarStateParams) {
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
   const [selectedTrueFalseUiState, setSelectedTrueFalseUiState] = useState<{
     cardId: number | null;
@@ -69,6 +71,12 @@ export function useFlashcardsActions({
   const actionCooldownTimerRef = useRef<ReturnType<typeof setTimeout> | null>(
     null,
   );
+  const internalLastTrueFalseTapRef = useRef<LastTrueFalseTap | null>(null);
+  const internalLastActionCooldownCardIdRef = useRef<number | null>(null);
+  const lastTrueFalseTapRef =
+    providedLastTrueFalseTapRef ?? internalLastTrueFalseTapRef;
+  const lastActionCooldownCardIdRef =
+    providedLastActionCooldownCardIdRef ?? internalLastActionCooldownCardIdRef;
 
   const selectedTrueFalseAnswer =
     selectedTrueFalseUiState.cardId === selectedItemId
@@ -76,7 +84,15 @@ export function useFlashcardsActions({
       : null;
 
   useLayoutEffect(() => {
-    if (selectedItemId == null) return;
+    if (selectedItemId == null) {
+      lastActionCooldownCardIdRef.current = null;
+      setIsActionCooldownActive(false);
+      if (actionCooldownTimerRef.current) {
+        clearTimeout(actionCooldownTimerRef.current);
+        actionCooldownTimerRef.current = null;
+      }
+      return;
+    }
     if (lastActionCooldownCardIdRef.current === selectedItemId) return;
     lastActionCooldownCardIdRef.current = selectedItemId;
     setIsActionCooldownActive((prev) => (prev ? prev : true));
@@ -109,8 +125,20 @@ export function useFlashcardsActions({
     };
   }, []);
 
+  const isImmediateActionLockActive =
+    selectedItemId != null &&
+    lastActionCooldownCardIdRef.current !== selectedItemId;
+
   const handleTrueFalseAnswer = useCallback(
     (value: boolean) => {
+      const locked =
+        isExplanationPending ||
+        displayResult !== null ||
+        isBetweenCards ||
+        isActionCooldownActive ||
+        isImmediateActionLockActive ||
+        externalActionLocked;
+      if (locked) return;
       const tapTs = Date.now();
       lastTrueFalseTapRef.current = {
         cardId: selectedItemId,
@@ -133,23 +161,39 @@ export function useFlashcardsActions({
         answer: value,
       });
       setAnswer(choice);
-      confirmWithTutorial(choice, choice);
+      onConfirm(choice, choice);
     },
     [
-      confirmWithTutorial,
       displayResult,
+      externalActionLocked,
       isActionCooldownActive,
       isBetweenCards,
+      isExplanationPending,
+      isImmediateActionLockActive,
       lastTrueFalseTapRef,
+      onConfirm,
       selectedItemId,
       setAnswer,
     ],
   );
 
   const handleTrueFalseOk = useCallback(() => {
-    if (isActionCooldownActive) return;
-    acknowledgeExplanation();
-  }, [acknowledgeExplanation, isActionCooldownActive]);
+    if (
+      isBetweenCards ||
+      isActionCooldownActive ||
+      isImmediateActionLockActive ||
+      externalActionLocked
+    ) {
+      return;
+    }
+    onOk();
+  }, [
+    externalActionLocked,
+    isActionCooldownActive,
+    isBetweenCards,
+    isImmediateActionLockActive,
+    onOk,
+  ]);
 
   const shouldUseTrueFalseActionBar =
     courseHasOnlyTrueFalse ||
@@ -159,15 +203,16 @@ export function useFlashcardsActions({
     shouldUseTrueFalseActionBar && shouldShowBoxes && !correction;
   const trueFalseActionsMode: "answer" | "ok" =
     isExplanationPending && shouldUseTrueFalseActionBar ? "ok" : "answer";
-  const isImmediateActionLockActive =
-    selectedItemId != null &&
-    lastActionCooldownCardIdRef.current !== selectedItemId;
   const trueFalseActionsDisabled = isExplanationPending
-    ? isBetweenCards || isActionCooldownActive || isImmediateActionLockActive
+    ? isBetweenCards ||
+      isActionCooldownActive ||
+      isImmediateActionLockActive ||
+      externalActionLocked
     : displayResult !== null ||
       isBetweenCards ||
       isActionCooldownActive ||
-      isImmediateActionLockActive;
+      isImmediateActionLockActive ||
+      externalActionLocked;
   const showCardActions = !(
     courseHasOnlyTrueFalse ||
     shouldShowTrueFalseActions ||
@@ -176,29 +221,43 @@ export function useFlashcardsActions({
   );
 
   const handleCardActionsConfirm = useCallback(() => {
+    if (
+      isActionCooldownActive ||
+      isImmediateActionLockActive ||
+      externalActionLocked
+    ) {
+      return;
+    }
     if (isExplanationVisible) {
       handleTrueFalseOk();
       return;
     }
-    if (isActionCooldownActive || isImmediateActionLockActive) return;
-    confirmWithTutorial();
+    onConfirm();
   }, [
-    confirmWithTutorial,
+    externalActionLocked,
     handleTrueFalseOk,
     isActionCooldownActive,
     isExplanationVisible,
     isImmediateActionLockActive,
+    onConfirm,
   ]);
 
   const handleCardConfirm = useCallback(
     (selectedTranslation?: string, answerOverride?: string) => {
-      if (isActionCooldownActive || isImmediateActionLockActive) return;
-      confirmWithTutorial(selectedTranslation, answerOverride);
+      if (
+        isActionCooldownActive ||
+        isImmediateActionLockActive ||
+        externalActionLocked
+      ) {
+        return;
+      }
+      onConfirm(selectedTranslation, answerOverride);
     },
     [
-      confirmWithTutorial,
+      externalActionLocked,
       isActionCooldownActive,
       isImmediateActionLockActive,
+      onConfirm,
     ],
   );
 
@@ -206,9 +265,10 @@ export function useFlashcardsActions({
     downloadDisabled ||
     isExplanationVisible ||
     isActionCooldownActive ||
-    isImmediateActionLockActive;
+    isImmediateActionLockActive ||
+    externalActionLocked;
   const cardActionsConfirmDisabled =
-    isActionCooldownActive || isImmediateActionLockActive;
+    isActionCooldownActive || isImmediateActionLockActive || externalActionLocked;
   const cardActionsConfirmLabel = isExplanationVisible
     ? t("flashcards.card.actions.ok")
     : t("flashcards.card.actions.confirm");
@@ -235,3 +295,5 @@ export function useFlashcardsActions({
     effectiveTrueFalseButtonsVariant,
   };
 }
+
+export const useFlashcardsActions = useFlashcardActionBarState;
