@@ -26,6 +26,7 @@ interface BoxesProps {
     countOverrides?: Partial<Record<keyof BoxesState, number>>;
     faces?: BoxFacesByBox;
     layoutWidth?: number;
+    bottomClearance?: number;
 }
 
 export default function BoxCarousel({
@@ -38,6 +39,7 @@ export default function BoxCarousel({
     countOverrides,
     faces,
     layoutWidth,
+    bottomClearance = 0,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
@@ -51,7 +53,7 @@ export default function BoxCarousel({
   const BOX_STAGE_VERTICAL_PADDING = isSmallPhoneLayout ? 6 : 40;
   const LIST_VERTICAL_PADDING = isSmallPhoneLayout ? 4 : 14;
   const ACTIVE_COUNTER_WRAP_STYLE = isSmallPhoneLayout
-    ? { minHeight: 30, marginTop: -12 }
+    ? { minHeight: 36, marginTop: -4 }
     : null;
   const ACTIVE_COUNTER_NUMBER_STYLE = isSmallPhoneLayout
     ? { fontSize: 30, lineHeight: 34 }
@@ -177,7 +179,12 @@ export default function BoxCarousel({
             : 0;
 
     return (
-        <View style={styles.container}>
+        <View
+            style={[
+                styles.container,
+                bottomClearance > 0 ? { paddingBottom: bottomClearance } : null,
+            ]}
+        >
             <View style={styles.listContainer}>
                 <Animated.FlatList
                     ref={flatListRef}
@@ -244,61 +251,18 @@ export default function BoxCarousel({
                                 isActive,
                             });
 
-                        return (
-                            <View
-                                style={[styles.itemContainer, { width: itemWidth }]}
-                            >
-                                <Animated.View
-                                    style={[
-                                        styles.boxStage,
-                                        {
-                                            height: BOX_STAGE_HEIGHT,
-                                            transform: [{ scale }, { translateY }],
-                                        },
-                                    ]}
+                        const boxContent =
+                            item.key === "boxOne" || item.key === "boxTwo" ? (
+                                <CoachmarkAnchor
+                                    id={
+                                        item.key === "boxOne"
+                                            ? "flashcards-box-one"
+                                            : "flashcards-box-two"
+                                    }
+                                    shape="rect"
+                                    radius={24}
                                 >
-                                    {item.key === "boxOne" || item.key === "boxTwo" ? (
-                                        <CoachmarkAnchor
-                                            id={
-                                                item.key === "boxOne"
-                                                    ? "flashcards-box-one"
-                                                    : "flashcards-box-two"
-                                            }
-                                            shape="rect"
-                                            radius={24}
-                                        >
-                                            <View collapsable={false}>
-                                                <TouchableOpacity
-                                                    activeOpacity={1}
-                                                    disabled={disabled}
-                                                    onPressIn={() => {
-                                                        if (disabled) return;
-                                                        longPressTriggeredRef.current = false;
-                                                    }}
-                                                    onLongPress={() => {
-                                                        if (disabled) return;
-                                                        longPressTriggeredRef.current = true;
-                                                        onBoxLongPress?.(item.key);
-                                                    }}
-                                                    delayLongPress={400}
-                                                    onPress={() => {
-                                                        if (longPressTriggeredRef.current) {
-                                                            longPressTriggeredRef.current = false;
-                                                            return;
-                                                        }
-                                                        scrollToIndex(index);
-                                                    }}
-                                                >
-                                                    <BoxSkin
-                                                        wordCount={item.count}
-                                                        face={face}
-                                                        isActive={isActive}
-                                                        isCaro={false}
-                                                    />
-                                                </TouchableOpacity>
-                                            </View>
-                                        </CoachmarkAnchor>
-                                    ) : (
+                                    <View collapsable={false}>
                                         <TouchableOpacity
                                             activeOpacity={1}
                                             disabled={disabled}
@@ -327,8 +291,55 @@ export default function BoxCarousel({
                                                 isCaro={false}
                                             />
                                         </TouchableOpacity>
-                                    )}
-                                </Animated.View>
+                                    </View>
+                                </CoachmarkAnchor>
+                            ) : (
+                                <TouchableOpacity
+                                    activeOpacity={1}
+                                    disabled={disabled}
+                                    onPressIn={() => {
+                                        if (disabled) return;
+                                        longPressTriggeredRef.current = false;
+                                    }}
+                                    onLongPress={() => {
+                                        if (disabled) return;
+                                        longPressTriggeredRef.current = true;
+                                        onBoxLongPress?.(item.key);
+                                    }}
+                                    delayLongPress={400}
+                                    onPress={() => {
+                                        if (longPressTriggeredRef.current) {
+                                            longPressTriggeredRef.current = false;
+                                            return;
+                                        }
+                                        scrollToIndex(index);
+                                    }}
+                                >
+                                    <BoxSkin
+                                        wordCount={item.count}
+                                        face={face}
+                                        isActive={isActive}
+                                        isCaro={false}
+                                    />
+                                </TouchableOpacity>
+                            );
+
+                        return (
+                            <View style={[styles.itemContainer, { width: itemWidth }]}>
+                                <View
+                                    style={[
+                                        styles.boxStage,
+                                        { height: BOX_STAGE_HEIGHT },
+                                    ]}
+                                >
+                                    <Animated.View
+                                        style={{
+                                            transform: [{ scale }, { translateY }],
+                                        }}
+                                    >
+                                        {boxContent}
+                                    </Animated.View>
+                                </View>
                             </View>
                         );
                     }}

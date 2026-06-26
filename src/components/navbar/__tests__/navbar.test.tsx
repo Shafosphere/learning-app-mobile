@@ -19,35 +19,65 @@ jest.mock("expo-navigation-bar", () => ({
 }));
 
 jest.mock("expo-image", () => {
-  const React = require("react");
-  const { View } = require("react-native");
+  const { View } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
+  function MockImage(props: Record<string, unknown>) {
+    return <View {...props} />;
+  }
+
   return {
-    Image: (props: Record<string, unknown>) => <View {...props} />,
+    Image: MockImage,
   };
 });
 
 jest.mock("@expo/vector-icons/FontAwesome5", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return (props: { name: string }) => <Text>{props.name}</Text>;
+  const { Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
+  function MockFontAwesome5(props: { name: string }) {
+    return <Text>{props.name}</Text>;
+  }
+
+  return MockFontAwesome5;
 });
 
 jest.mock("@expo/vector-icons/Foundation", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return (props: { name: string }) => <Text>{props.name}</Text>;
+  const { Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
+  function MockFoundation(props: { name: string }) {
+    return <Text>{props.name}</Text>;
+  }
+
+  return MockFoundation;
 });
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return (props: { name: string }) => <Text>{props.name}</Text>;
+  const { Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
+  function MockIonicons(props: { name: string }) {
+    return <Text>{props.name}</Text>;
+  }
+
+  return MockIonicons;
 });
 
 jest.mock("@expo/vector-icons/MaterialIcons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  return (props: { name: string }) => <Text>{props.name}</Text>;
+  const { Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
+  function MockMaterialIcons(props: { name: string }) {
+    return <Text>{props.name}</Text>;
+  }
+
+  return MockMaterialIcons;
 });
 
 jest.mock("@edwardloopez/react-native-coachmark", () => ({
@@ -69,8 +99,10 @@ jest.mock("@/src/components/navbar/navbar-styles", () => ({
 }));
 
 jest.mock("@/src/components/navbar/NavbarStatsRotator", () => {
-  const React = require("react");
-  const { Pressable, Text } = require("react-native");
+  const { Pressable, Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
   return function NavbarStatsRotatorMock({ onPress }: { onPress: () => void }) {
     return (
       <Pressable onPress={onPress}>
@@ -81,9 +113,15 @@ jest.mock("@/src/components/navbar/NavbarStatsRotator", () => {
 });
 
 jest.mock("@/src/components/course/CourseTitleMarquee", () => ({
-  CourseTitleMarquee: ({ text }: { text: string }) => {
-    const React = require("react");
-    const { Text } = require("react-native");
+  CourseTitleMarquee: function CourseTitleMarqueeMock({
+    text,
+  }: {
+    text: string;
+  }) {
+    const { Text } = jest.requireActual<typeof import("react-native")>(
+      "react-native"
+    );
+
     return <Text>{text}</Text>;
   },
 }));

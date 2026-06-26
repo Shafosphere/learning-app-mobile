@@ -7,6 +7,7 @@ import {
   resolveThemeColors,
   Theme,
 } from "@/src/theme/theme";
+import type { DominantHand } from "./types";
 
 type TextWithDefaultProps = typeof Text & {
   defaultProps?: TextProps & {
@@ -62,6 +63,10 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
   );
   const [correctionErrorMarkersEnabled, setCorrectionErrorMarkersEnabled] =
     usePersistedState<boolean>("accessibility.correctionErrorMarkers", true);
+  const [dominantHand, setDominantHandState] = usePersistedState<DominantHand>(
+    "accessibility.dominantHand",
+    "center"
+  );
 
   const toggleTheme = useCallback(async () => {
     const newTheme: Theme = theme === "light" ? "dark" : "light";
@@ -111,6 +116,13 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
     await setCorrectionErrorMarkersEnabled(!correctionErrorMarkersEnabled);
   }, [correctionErrorMarkersEnabled, setCorrectionErrorMarkersEnabled]);
 
+  const setDominantHand = useCallback(
+    async (hand: DominantHand) => {
+      await setDominantHandState(hand);
+    },
+    [setDominantHandState]
+  );
+
   const fontScaleMultiplier = largeFontEnabled ? 1.15 : 1;
   const accessibilityPreferences = useMemo(
     () => ({
@@ -118,10 +130,12 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
       colorBlindMode,
       largeFontEnabled,
       correctionErrorMarkersEnabled,
+      dominantHand,
     }),
     [
       colorBlindMode,
       correctionErrorMarkersEnabled,
+      dominantHand,
       highContrastEnabled,
       largeFontEnabled,
     ]
@@ -140,6 +154,8 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
     toggleLargeFont,
     correctionErrorMarkersEnabled,
     toggleCorrectionErrorMarkers,
+    dominantHand,
+    setDominantHand,
     fontScaleMultiplier,
     accessibilityPreferences,
   };

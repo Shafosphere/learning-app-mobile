@@ -1,11 +1,4 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-
-const mockGetDB = jest.fn();
-
-jest.mock("@/src/db/sqlite/db", () => ({
-  getDB: () => mockGetDB(),
-}));
-
 import {
   getProtectedDailyStreakSnapshot,
   getProtectedDailyStreakState,
@@ -14,6 +7,12 @@ import {
   STREAK_PROTECTION_STORAGE_KEY,
   type StreakProtectionState,
 } from "@/src/services/streakProtection";
+
+const mockGetDB = jest.fn();
+
+jest.mock("@/src/db/sqlite/db", () => ({
+  getDB: () => mockGetDB(),
+}));
 
 const dateMs = (year: number, month: number, day: number) =>
   new Date(year, month - 1, day, 12).getTime();

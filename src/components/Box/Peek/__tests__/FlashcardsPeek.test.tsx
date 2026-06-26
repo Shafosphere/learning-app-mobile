@@ -16,9 +16,14 @@ jest.mock("react-i18next", () => ({
 
 jest.mock("expo-image", () => ({
   Image: ({ source }: { source: { uri: string } }) => {
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View testID={`image-${source.uri}`} />;
+    const ReactActual = jest.requireActual<typeof import("react")>("react");
+    const { View } = jest.requireActual<typeof import("react-native")>(
+      "react-native"
+    );
+
+    return ReactActual.createElement(View, {
+      testID: `image-${source.uri}`,
+    });
   },
 }));
 

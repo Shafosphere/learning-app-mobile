@@ -100,6 +100,7 @@ export default function Flashcards() {
     skipCorrectionEnabled,
     actionButtonsPosition,
     setActionButtonsPosition,
+    dominantHand,
     colors,
   } = useSettings();
   const { registerKnownWord } = useLearningStats();
@@ -1083,6 +1084,10 @@ export default function Flashcards() {
     correction,
     previousKeyboardVisibleRef,
   });
+  const carouselBottomClearance =
+    isCarouselLayout && !areButtonsOnTop
+      ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
+      : 0;
 
   useEffect(() => {
     resetInteractionState();
@@ -1139,6 +1144,15 @@ export default function Flashcards() {
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
       position={position}
+      align={
+        position === "bottom" && isTabletLayout
+          ? dominantHand === "left"
+            ? "left"
+            : dominantHand === "center"
+              ? "center"
+            : "right"
+          : "center"
+      }
       contentWidth={flashcardsContentWidth}
       coachmarkId="flashcards-buttons-section"
       showTrueFalseActions={shouldShowTrueFalseActions}
@@ -1257,6 +1271,7 @@ export default function Flashcards() {
       boxesScaledHeight={boxesScaledHeight}
       boxesScaleOffsetY={boxesScaleOffsetY}
       boxesNeedScrollFallback={boxesNeedScrollFallback}
+      carouselBottomClearance={carouselBottomClearance}
       onBoxesViewportLayout={onBoxesViewportLayout}
       onBoxesContentLayout={onBoxesContentLayout}
       t={t}
@@ -1338,10 +1353,11 @@ export default function Flashcards() {
               style={styles.bottomButtonsWrapper}
             >
               <Animated.View
-                style={{
-                  transform: [
-                    {
-                      translateY: Animated.multiply(bottomButtonsOffset, -1),
+              style={{
+                width: "100%",
+                transform: [
+                  {
+                    translateY: Animated.multiply(bottomButtonsOffset, -1),
                     },
                   ],
                 }}

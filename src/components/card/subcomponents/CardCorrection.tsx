@@ -4,7 +4,6 @@ import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import type { CardCorrectionType, FocusTarget } from "../card-types";
 import {
-  ImageStyle,
   Platform,
   Pressable,
   ScrollView,
@@ -14,8 +13,9 @@ import {
   View,
 } from "react-native";
 import TextTicker from "react-native-text-ticker";
-import { PROMPT_IMAGE_MAX_HEIGHT, useStyles } from "../card-styles";
+import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
+import { buildPromptImageStyle } from "../promptImageSizing";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import { useTranslation } from "react-i18next";
@@ -25,20 +25,6 @@ const MARQUEE_SPEED_PER_PIXEL_MS = 20;
 const MIN_DURATION_MS = 4000;
 const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
-
-const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
-  dynamic: 1,
-  small: 0.4,
-  medium: 0.6,
-  large: 1,
-  very_large: 1.7,
-};
-
-const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
-  const fraction = IMAGE_SIZE_MULTIPLIER[mode] ?? 1;
-  const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
-  return { height: target, maxHeight: target };
-};
 
 type CardCorrectionProps = {
   correction: CardCorrectionType;
@@ -169,8 +155,8 @@ export function CardCorrection({
     [estimatedPromptWidth],
   );
   const promptImageStyle = useMemo(
-    () => buildPromptImageStyle(imageSizeMode),
-    [imageSizeMode],
+    () => buildPromptImageStyle(imageSizeMode, cardMetrics),
+    [cardMetrics, imageSizeMode],
   );
   const cardFontResponsiveStyle = useMemo(
     () => ({

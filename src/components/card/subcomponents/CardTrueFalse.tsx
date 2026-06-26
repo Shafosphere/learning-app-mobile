@@ -1,11 +1,11 @@
 import MyButton from "@/src/components/button/button";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useMemo } from "react";
-import { StyleSheet, Text, View, type ImageStyle } from "react-native";
+import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
-import { PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import { buildPromptImageStyle } from "../promptImageSizing";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 
 type CardTrueFalseProps = {
@@ -17,14 +17,6 @@ type CardTrueFalseProps = {
     imageSizeMode?: FlashcardsImageSize;
     cardMetrics: ResponsiveFlashcardMetrics;
 };
-const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
-    dynamic: 1,
-    small: 0.4,
-    medium: 0.6,
-    large: 1,
-    very_large: 1.7,
-};
-
 export function CardTrueFalse({
     promptText,
     promptImageUri,
@@ -42,11 +34,10 @@ export function CardTrueFalse({
     const hasText = useMemo(() => promptText.trim().length > 0, [promptText]);
     const hasImage = Boolean(promptImageUri);
 
-    const promptImageStyle: ImageStyle = useMemo(() => {
-        const fraction = IMAGE_SIZE_MULTIPLIER[imageSizeMode] ?? 1;
-        const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
-        return { height: target, maxHeight: target };
-    }, [imageSizeMode]);
+    const promptImageStyle = useMemo(
+        () => buildPromptImageStyle(imageSizeMode, cardMetrics),
+        [cardMetrics, imageSizeMode],
+    );
     const promptTextStyle = useMemo(
         () => ({
             fontSize: cardMetrics.fontSize,

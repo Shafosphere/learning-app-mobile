@@ -31,7 +31,7 @@ const mockedGetCustomCoursesWithCardCounts =
   >;
 
 describe("DueReviewsContext", () => {
-  const appStateListeners: Array<(state: AppStateStatus) => void> = [];
+  const appStateListeners: ((state: AppStateStatus) => void)[] = [];
   let pinnedOfficialCourseIds: number[];
 
   beforeEach(() => {

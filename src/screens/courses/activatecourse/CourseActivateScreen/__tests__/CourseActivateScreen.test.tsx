@@ -9,6 +9,7 @@ import {
   getCustomCoursesWithCardCounts,
   getOfficialCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
+import { getOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 
 const EMPTY_TEXT = "Nic tu nie ma :(, czas wybrać kurs!";
 
@@ -24,7 +25,7 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
-    const React = require("react");
+    const React = jest.requireActual<typeof import("react")>("react");
     React.useEffect(effect, [effect]);
   },
 }));
@@ -97,8 +98,9 @@ jest.mock("@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActiv
 }));
 
 jest.mock("@/src/components/button/button", () => {
-  const React = require("react");
-  const { Pressable, Text } = require("react-native");
+  const React = jest.requireActual<typeof import("react")>("react");
+  const { Pressable, Text } =
+    jest.requireActual<typeof import("react-native")>("react-native");
   function MockButton({
     text,
     onPress,
@@ -126,8 +128,9 @@ jest.mock("@/src/components/button/button", () => {
 });
 
 jest.mock("@/src/components/course/CourseListCard", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
+  const React = jest.requireActual<typeof import("react")>("react");
+  const { Text } =
+    jest.requireActual<typeof import("react-native")>("react-native");
   function MockCourseListCard({ title, onPress }: { title: string; onPress?: () => void }) {
     return <Text onPress={onPress}>{title}</Text>;
   }
@@ -138,7 +141,7 @@ jest.mock("@/src/components/course/CourseListCard", () => {
 
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
-const { getOnboardingCheckpoint } = require("@/src/services/onboardingCheckpoint");
+const mockedGetOnboardingCheckpoint = getOnboardingCheckpoint as jest.Mock;
 const mockedGetCustomCoursesWithCardCounts =
   getCustomCoursesWithCardCounts as jest.Mock;
 const mockedGetOfficialCustomCoursesWithCardCounts =
@@ -149,7 +152,7 @@ const mockedGetCompletedCustomCoursesWithCardCounts =
 describe("CourseActivateScreen loading state", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    getOnboardingCheckpoint.mockResolvedValue("done");
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
     mockedUseCoachmarkFlow.mockReturnValue({
       isActive: false,
       currentStep: null,

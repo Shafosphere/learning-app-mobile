@@ -99,6 +99,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
   },
   bottomButtonsWrapper: {
+    width: "100%",
     marginTop: 4,
     marginBottom: 2,
   },

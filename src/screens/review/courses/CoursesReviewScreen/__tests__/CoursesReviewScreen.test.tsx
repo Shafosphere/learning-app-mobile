@@ -20,7 +20,7 @@ jest.mock("expo-router", () => ({
 
 jest.mock("@react-navigation/native", () => ({
   useFocusEffect: (effect: () => void | (() => void)) => {
-    const React = require("react");
+    const React = jest.requireActual<typeof import("react")>("react");
     React.useEffect(effect, [effect]);
   },
 }));
@@ -66,8 +66,9 @@ jest.mock("@/src/screens/review/courses/CoursesReviewScreen/CoursesScreen-styles
 
 jest.mock("@/src/components/course/CourseTitleMarquee", () => ({
   CourseTitleMarquee: ({ text }: { text: string }) => {
-    const React = require("react");
-    const { Text } = require("react-native");
+    const React = jest.requireActual<typeof import("react")>("react");
+    const { Text } =
+      jest.requireActual<typeof import("react-native")>("react-native");
     return <Text>{text}</Text>;
   },
 }));

@@ -1,4 +1,4 @@
-import React from "react";
+import * as MockReact from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   act,
@@ -6,7 +6,13 @@ import {
   render,
   waitFor,
 } from "@testing-library/react-native";
-import { TextInput } from "react-native";
+import {
+  Pressable as MockPressable,
+  StyleSheet,
+  Text as MockText,
+  TextInput,
+  View as MockView,
+} from "react-native";
 
 import ReviewFlashcardsPlaceholder from "@/src/screens/review/reviewflashcards/reviewflashcards/reviewflashcards";
 import {
@@ -22,6 +28,7 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { TRUE_FALSE_POST_OK_COOLDOWN_MS } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
 
@@ -40,8 +47,7 @@ jest.mock("expo-router", () => ({
 jest.mock("@react-navigation/native", () => ({
   useIsFocused: () => true,
   useFocusEffect: (effect: () => void | (() => void)) => {
-    const React = require("react");
-    React.useEffect(effect, [effect]);
+    MockReact.useEffect(effect, [effect]);
   },
 }));
 
@@ -87,9 +93,7 @@ jest.mock("@/src/components/nudge/NudgeModal", () => ({
   NudgeModal: (props: Record<string, any>) => {
     latestNudgeModalProps = props;
     if (!props.visible) return null;
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View testID="review-mistake-nudge">{props.children}</View>;
+    return <MockView testID="review-mistake-nudge">{props.children}</MockView>;
   },
 }));
 
@@ -179,6 +183,7 @@ let latestPeekProps: {
 let latestBoxCarouselProps: Record<string, unknown> | null = null;
 let latestBoxListProps: Record<string, unknown> | null = null;
 let latestCardHintProps: Record<string, unknown> | null = null;
+let latestButtonsProps: Record<string, unknown> | null = null;
 
 jest.mock("@/src/components/Box/Peek/FlashcardsPeek", () => {
   return function FlashcardsPeekMock(props: {
@@ -198,16 +203,7 @@ jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
 });
 
 jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
-  FlashcardsButtons: ({
-    onCardActionsConfirm,
-    showCardActions,
-    onDownload,
-    downloadDisabled,
-    showTrueFalseActions,
-    onTrueFalseAnswer,
-    onTrueFalseOk,
-    trueFalseActionsMode,
-  }: {
+  FlashcardsButtons: (props: {
     onCardActionsConfirm: () => void;
     showCardActions: boolean;
     onDownload?: () => Promise<void>;
@@ -216,50 +212,63 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
     onTrueFalseAnswer?: (value: boolean) => void;
     onTrueFalseOk?: () => void;
     trueFalseActionsMode?: "answer" | "ok";
+    contentWidth?: number;
+    align?: "left" | "center" | "right";
   }) => {
-    const React = require("react");
-    const { Pressable, Text, View } = require("react-native");
+    latestButtonsProps = props;
+    const {
+      onCardActionsConfirm,
+      showCardActions,
+      onDownload,
+      downloadDisabled,
+      showTrueFalseActions,
+      onTrueFalseAnswer,
+      onTrueFalseOk,
+      trueFalseActionsMode,
+    } = props;
     return (
-      <View>
+      <MockView>
         {showTrueFalseActions ? (
           <>
             {trueFalseActionsMode === "ok" ? (
-              <Pressable testID="true-false-ok-button" onPress={onTrueFalseOk}>
-                <Text>TrueFalse OK</Text>
-              </Pressable>
+              <MockPressable testID="true-false-ok-button" onPress={onTrueFalseOk}>
+                <MockText>TrueFalse OK</MockText>
+              </MockPressable>
             ) : (
               <>
-                <Pressable
+                <MockPressable
                   testID="true-answer-button"
                   onPress={() => onTrueFalseAnswer?.(true)}
                 >
-                  <Text>True</Text>
-                </Pressable>
-                <Pressable
+                  <MockText>True</MockText>
+                </MockPressable>
+                <MockPressable
                   testID="false-answer-button"
                   onPress={() => onTrueFalseAnswer?.(false)}
                 >
-                  <Text>False</Text>
-                </Pressable>
+                  <MockText>False</MockText>
+                </MockPressable>
               </>
             )}
           </>
         ) : null}
         {showCardActions ? (
-          <Pressable
+          <MockPressable
             testID="download-button"
             onPress={() => onDownload?.()}
             disabled={downloadDisabled}
           >
-            <Text>{downloadDisabled ? "Download disabled" : "Download enabled"}</Text>
-          </Pressable>
+            <MockText>
+              {downloadDisabled ? "Download disabled" : "Download enabled"}
+            </MockText>
+          </MockPressable>
         ) : null}
         {showCardActions ? (
-          <Pressable testID="confirm-button" onPress={onCardActionsConfirm}>
-            <Text>Confirm</Text>
-          </Pressable>
+          <MockPressable testID="confirm-button" onPress={onCardActionsConfirm}>
+            <MockText>Confirm</MockText>
+          </MockPressable>
         ) : null}
-      </View>
+      </MockView>
     );
   },
 }));
@@ -270,35 +279,67 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
     handleSelectBox,
     onBoxLongPress,
     horizontalScroll,
+    maxColumns,
+    layoutWidth,
   }: {
-    boxes: Record<string, Array<{ id: number }>>;
+    boxes: Record<string, { id: number }[]>;
     handleSelectBox: (box: any) => void;
     onBoxLongPress?: (box: any) => void;
     horizontalScroll?: boolean;
+    maxColumns?: number;
+    layoutWidth?: number;
   }) {
-    latestBoxListProps = { boxes, handleSelectBox, onBoxLongPress, horizontalScroll };
-    const React = require("react");
-    const { Pressable, Text, View } = require("react-native");
+    latestBoxListProps = {
+      boxes,
+      handleSelectBox,
+      onBoxLongPress,
+      horizontalScroll,
+      maxColumns,
+      layoutWidth,
+    };
     return (
-      <View>
+      <MockView>
         {Object.entries(boxes).map(([boxName, cards]) => (
-          <View key={boxName}>
-            <Pressable
+          <MockView key={boxName}>
+            <MockPressable
               testID={`box-button-${boxName}`}
               onPress={() => handleSelectBox(boxName)}
               onLongPress={() => onBoxLongPress?.(boxName)}
             >
-              <Text>{`${boxName}:${cards.length}`}</Text>
-            </Pressable>
-          </View>
+              <MockText>{`${boxName}:${cards.length}`}</MockText>
+            </MockPressable>
+          </MockView>
         ))}
-      </View>
+      </MockView>
     );
   };
 });
 
 jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", () => ({
-  useStyles: jest.fn(() => new Proxy({}, { get: () => ({}) })),
+  useStyles: jest.fn(() => ({
+    container: {},
+    content: {},
+    keyboardBridgeInput: {},
+    studyStack: { width: "100%" },
+    tabletCenteredStudyStack: {
+      flex: 1,
+      justifyContent: "center",
+      width: "100%",
+    },
+    cardSectionWrapper: {},
+    topButtonsWrapper: {},
+    boxesWrapper: { flex: 1, width: "100%" },
+    boxesWrapperWithBottomButtons: { marginTop: 8 },
+    tabletCompactBoxesWrapper: { flex: 0 },
+    boxesScaledContent: { width: "100%" },
+    boxesViewport: { flex: 1, width: "100%" },
+    tabletCompactBoxesViewport: { flex: 0 },
+    boxesScrollViewport: { flex: 1, width: "100%" },
+    tabletCompactBoxesScrollViewport: { flex: 0 },
+    boxesViewportScrollContent: { width: "100%" },
+    bottomButtonsDock: {},
+    bottomButtonsWrapper: {},
+  })),
 }));
 
 jest.mock("@/src/components/card/card-styles", () => ({
@@ -323,9 +364,7 @@ jest.mock("@/src/components/card/useFocusExecutor", () => ({
 jest.mock("@/src/components/card/subcomponents/CardHint", () => ({
   CardHint: (props: Record<string, unknown>) => {
     latestCardHintProps = props;
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View testID="card-hint-section" />;
+    return <MockView testID="card-hint-section" />;
   },
 }));
 
@@ -340,12 +379,10 @@ jest.mock("@edwardloopez/react-native-coachmark", () => ({
     children,
     id,
   }: {
-    children: React.ReactNode;
+    children: MockReact.ReactNode;
     id?: string;
   }) => {
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View testID={id}>{children}</View>;
+    return <MockView testID={id}>{children}</MockView>;
   },
 }));
 
@@ -353,11 +390,9 @@ jest.mock("react-native-text-ticker", () => {
   return function TextTickerMock({
     children,
   }: {
-    children: React.ReactNode;
+    children: MockReact.ReactNode;
   }) {
-    const React = require("react");
-    const { Text } = require("react-native");
-    return <Text>{children}</Text>;
+    return <MockText>{children}</MockText>;
   };
 });
 
@@ -369,9 +404,7 @@ jest.mock("@/src/components/card/subcomponents/CardMathText", () => ({
     text: string;
     textStyle?: any;
   }) => {
-    const React = require("react");
-    const { Text } = require("react-native");
-    return <Text style={textStyle}>{text}</Text>;
+    return <MockText style={textStyle}>{text}</MockText>;
   },
   hasMathSegments: jest.fn(() => false),
 }));
@@ -386,9 +419,7 @@ jest.mock("@/src/components/card/subcomponents/CardSceneTrueFalse", () => ({
 
 jest.mock("@/src/components/card/subcomponents/PromptImage", () => ({
   PromptImage: ({ uri }: { uri: string }) => {
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View testID={`prompt-image-${uri}`} />;
+    return <MockView testID={`prompt-image-${uri}`} />;
   },
 }));
 
@@ -413,6 +444,7 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseNavbarStats = useNavbarStats as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
+const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
 const mockedUseSpellchecking = useSpellchecking as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
@@ -533,6 +565,7 @@ describe("reviewflashcards correction desync regression", () => {
     latestBoxCarouselProps = null;
     latestBoxListProps = null;
     latestCardHintProps = null;
+    latestButtonsProps = null;
     applyStatBurstMock = jest.fn();
     getStatsSnapshotMock = jest.fn(() => ({
       masteredCount: 0,
@@ -549,7 +582,10 @@ describe("reviewflashcards correction desync regression", () => {
       shieldCount: 0,
     });
     mockedUseLocalSearchParams.mockReturnValue({ courseId: "77" });
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: false,
+    });
     mockedUseSpellchecking.mockReturnValue((input: string, expected: string) =>
       input.trim().toLowerCase() === expected.trim().toLowerCase()
     );
@@ -563,6 +599,7 @@ describe("reviewflashcards correction desync regression", () => {
       flashcardsSuggestionsEnabled: false,
       flashcardsCardSize: "normal",
       flashcardsImageSize: "dynamic",
+      dominantHand: "right",
     });
     mockedUseCoachmarkFlow.mockReturnValue({
       isActive: false,
@@ -859,6 +896,209 @@ describe("reviewflashcards correction desync regression", () => {
       expect(latestBoxListProps).not.toBeNull();
     });
     expect(latestCardHintProps).toBeNull();
+  });
+
+  it("keeps review content unconstrained on phone layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: false,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 608,
+        frontText: "phone",
+        backText: "telefon",
+        answers: ["telefon"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(screen.queryByTestId("review-flashcards-study-stack")).toBeNull();
+    expect(boxesWrapperStyle.flex).toBe(1);
+    expect(latestButtonsProps?.contentWidth).toBeUndefined();
+    expect(latestButtonsProps?.align).toBe("center");
+    expect(latestBoxListProps?.layoutWidth).toBeUndefined();
+    expect(latestBoxListProps?.maxColumns).toBeUndefined();
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.72 });
+  });
+
+  it("centers review content and compacts boxes on tablet top-button layouts", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 609,
+        frontText: "tablet",
+        backText: "tablet",
+        answers: ["tablet"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    const studyStackStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-study-stack").props.style,
+    );
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(studyStackStyle).toMatchObject({
+      flex: 1,
+      justifyContent: "center",
+    });
+    expect(boxesWrapperStyle.flex).toBe(0);
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("center");
+    expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
+    expect(latestBoxListProps?.maxColumns).toBe(3);
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.72 });
+  });
+
+  it("keeps bottom-button review tablet boxes flexible and reserves dock space", async () => {
+    mockedUseSettings.mockReturnValue({
+      actionButtonsPosition: "bottom",
+      getCustomCourseShowExplanationEnabled: jest.fn(() => false),
+      getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      ignoreDiacriticsInSpellcheck: false,
+      flashcardsSuggestionsEnabled: false,
+      flashcardsCardSize: "normal",
+      flashcardsImageSize: "dynamic",
+      dominantHand: "right",
+    });
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 610,
+        frontText: "bottom tablet",
+        backText: "dolny tablet",
+        answers: ["dolny tablet"],
+        stage: 1,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    const contentStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-content").props.style,
+    );
+    const studyStackStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-study-stack").props.style,
+    );
+    const boxesWrapperStyle = StyleSheet.flatten(
+      screen.getByTestId("review-flashcards-boxes-wrapper").props.style,
+    );
+
+    expect(studyStackStyle).toMatchObject({
+      flex: 1,
+      justifyContent: "center",
+    });
+    expect(boxesWrapperStyle.flex).toBe(1);
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("right");
+    expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54 });
+    expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
+  });
+
+  it("left-aligns bottom review buttons on tablets for left-hand users", async () => {
+    mockedUseSettings.mockReturnValue({
+      actionButtonsPosition: "bottom",
+      dominantHand: "left",
+      getCustomCourseShowExplanationEnabled: jest.fn(() => false),
+      getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      ignoreDiacriticsInSpellcheck: false,
+      flashcardsSuggestionsEnabled: false,
+      flashcardsCardSize: "normal",
+      flashcardsImageSize: "dynamic",
+    });
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 611,
+        frontText: "left hand tablet",
+        backText: "lewy tablet",
+        answers: ["lewy tablet"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("left");
+  });
+
+  it("centers bottom review buttons on tablets when center preference is selected", async () => {
+    mockedUseSettings.mockReturnValue({
+      actionButtonsPosition: "bottom",
+      dominantHand: "center",
+      getCustomCourseShowExplanationEnabled: jest.fn(() => false),
+      getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      ignoreDiacriticsInSpellcheck: false,
+      flashcardsSuggestionsEnabled: false,
+      flashcardsCardSize: "normal",
+      flashcardsImageSize: "dynamic",
+    });
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 612,
+        frontText: "center tablet",
+        backText: "srodkowy tablet",
+        answers: ["srodkowy tablet"],
+        stage: 1,
+      }),
+    ]);
+
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("center");
   });
 
   it("returns a peeked card to unknown without scheduling it at stage zero", async () => {

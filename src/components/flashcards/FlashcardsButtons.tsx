@@ -9,6 +9,7 @@ import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/components/fla
 
 type FlashcardsButtonsProps = {
   position: "top" | "bottom";
+  align?: "left" | "center" | "right";
   coachmarkId?: string;
   contentWidth?: number;
 
@@ -35,6 +36,7 @@ type FlashcardsButtonsProps = {
 
 export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   position,
+  align = "center",
   coachmarkId,
   contentWidth,
   showTrueFalseActions,
@@ -62,16 +64,23 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
     contentWidth != null
       ? { width: contentWidth, maxWidth: "100%" as const }
       : null;
+  const alignItems: "flex-start" | "center" | "flex-end" =
+    align === "left" ? "flex-start" : align === "right" ? "flex-end" : "center";
+  const outerAlignStyle = {
+    width: "100%" as const,
+    alignItems,
+    ...(position === "bottom" && align !== "center"
+      ? { paddingHorizontal: 16 }
+      : null),
+  };
+  const innerAlignStyle = { alignItems };
   const hiddenAccessibilityProps = {
     accessibilityElementsHidden: true,
     importantForAccessibility: "no-hide-descendants" as const,
   };
 
-  const content = (
-    <View
-      collapsable={false}
-      style={[{ alignSelf: "center" }, contentWidthStyle]}
-    >
+  const contentBody = (
+    <>
       {position === "bottom" ? (
         <View
           style={!showTrueFalseActions ? hiddenStyle : undefined}
@@ -129,26 +138,31 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
           confirmLabel={confirmLabel}
         />
       </View>
-    </View>
+    </>
   );
 
   if (!coachmarkId) {
-    return content;
+    return (
+      <View style={outerAlignStyle}>
+        <View collapsable={false} style={[contentWidthStyle, innerAlignStyle]}>
+          {contentBody}
+        </View>
+      </View>
+    );
   }
 
   return (
-    <CoachmarkAnchor
-      id={coachmarkId}
-      shape="rect"
-      radius={24}
-      style={{ alignSelf: "center" }}
-    >
-      <View
-        collapsable={false}
-        style={[{ alignSelf: "center" }, contentWidthStyle]}
+    <View style={outerAlignStyle}>
+      <CoachmarkAnchor
+        id={coachmarkId}
+        shape="rect"
+        radius={24}
+        style={contentWidthStyle ?? undefined}
       >
-        {content}
-      </View>
-    </CoachmarkAnchor>
+        <View collapsable={false} style={[contentWidthStyle, innerAlignStyle]}>
+          {contentBody}
+        </View>
+      </CoachmarkAnchor>
+    </View>
   );
 };

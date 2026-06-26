@@ -50,6 +50,7 @@ export type FlashcardsImageSize =
   | "large"
   | "very_large";
 export type TrueFalseButtonsVariant = "true_false" | "know_dont_know";
+export type DominantHand = "left" | "center" | "right";
 
 export type CourseCardSizeOverrides =
   CourseOverrideState<FlashcardsCardSize>;
@@ -286,6 +287,8 @@ export interface SettingsContextValue {
   toggleLargeFont: () => Promise<void>;
   correctionErrorMarkersEnabled: boolean;
   toggleCorrectionErrorMarkers: () => Promise<void>;
+  dominantHand: DominantHand;
+  setDominantHand: (hand: DominantHand) => Promise<void>;
   fontScaleMultiplier: number;
   memoryBoardSize: MemoryBoardSize;
   setMemoryBoardSize: (size: MemoryBoardSize) => Promise<void>;
@@ -294,5 +297,6 @@ export interface SettingsContextValue {
     colorBlindMode: ColorBlindMode;
     largeFontEnabled: boolean;
     correctionErrorMarkersEnabled: boolean;
+    dominantHand: DominantHand;
   };
 }

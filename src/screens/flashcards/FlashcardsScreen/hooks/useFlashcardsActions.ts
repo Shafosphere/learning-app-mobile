@@ -1,6 +1,6 @@
 import type { TFunction } from "i18next";
 import type { MutableRefObject } from "react";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type { CorrectionState } from "@/src/hooks/useFlashcardsInteraction";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import {
@@ -83,10 +83,10 @@ export function useFlashcardActionBarState({
       ? selectedTrueFalseUiState.answer
       : null;
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (selectedItemId == null) {
       lastActionCooldownCardIdRef.current = null;
-      setIsActionCooldownActive(false);
+      setIsActionCooldownActive((prev) => (prev ? false : prev));
       if (actionCooldownTimerRef.current) {
         clearTimeout(actionCooldownTimerRef.current);
         actionCooldownTimerRef.current = null;

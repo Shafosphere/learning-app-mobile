@@ -189,6 +189,15 @@
       "correctionErrorMarkers": {
         "title": "Gwiazdki przy literówkach",
         "subtitle": "Pokazuje małą gwiazdkę pod błędną literą w trybie poprawki fiszek."
+      },
+      "dominantHand": {
+        "title": "Preferowana ręka",
+        "subtitle": "Przesuwa dolne przyciski fiszek na tablecie bliżej silniejszej ręki.",
+        "options": {
+          "left": "Lewa",
+          "center": "Środek",
+          "right": "Prawa"
+        }
       }
     },
     "learning": {

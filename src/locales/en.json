@@ -189,6 +189,15 @@
       "correctionErrorMarkers": {
         "title": "Typo star markers",
         "subtitle": "Shows a small star under the wrong letter in flashcard correction mode."
+      },
+      "dominantHand": {
+        "title": "Preferred hand",
+        "subtitle": "Moves tablet bottom flashcard buttons toward your stronger hand.",
+        "options": {
+          "left": "Left",
+          "center": "Center",
+          "right": "Right"
+        }
       }
     },
     "learning": {

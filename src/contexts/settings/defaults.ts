@@ -209,6 +209,8 @@ export const defaultValue: SettingsContextValue = {
   toggleLargeFont: async () => {},
   correctionErrorMarkersEnabled: true,
   toggleCorrectionErrorMarkers: async () => {},
+  dominantHand: "center",
+  setDominantHand: async () => {},
   fontScaleMultiplier: 1,
   memoryBoardSize: "twoByThree",
   setMemoryBoardSize: async () => {},
@@ -217,5 +219,6 @@ export const defaultValue: SettingsContextValue = {
     colorBlindMode: "none",
     largeFontEnabled: false,
     correctionErrorMarkersEnabled: true,
+    dominantHand: "center",
   },
 };

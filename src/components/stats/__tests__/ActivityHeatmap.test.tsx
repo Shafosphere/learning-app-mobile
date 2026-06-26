@@ -6,8 +6,10 @@ import ActivityHeatmap, {
 } from "@/src/components/stats/ActivityHeatmap";
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
+  const { Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
+
   function MockIonicons({ testID }: { testID?: string }) {
     return <Text testID={testID}>shield</Text>;
   }

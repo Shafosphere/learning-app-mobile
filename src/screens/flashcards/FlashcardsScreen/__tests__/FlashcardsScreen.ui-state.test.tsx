@@ -320,7 +320,8 @@ let latestReturnToUnknownListener:
 
 jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
   FlashcardsButtons: (props: ButtonsProps) => {
-    const { Text: MockText } = require("react-native");
+    const { Text: MockText } =
+      jest.requireActual<typeof import("react-native")>("react-native");
     latestButtonsProps = props;
     return <MockText testID="flashcards-buttons">Flashcards buttons</MockText>;
   },
@@ -370,7 +371,8 @@ let latestFinishedPanelProps: CourseFinishedPanelProps | null = null;
 
 jest.mock("@/src/components/flashcards/CourseFinishedPanel/CourseFinishedPanel", () => ({
   CourseFinishedPanel: (props: CourseFinishedPanelProps) => {
-    const { Text: MockText } = require("react-native");
+    const { Text: MockText } =
+      jest.requireActual<typeof import("react-native")>("react-native");
     latestFinishedPanelProps = props;
     return <MockText testID="course-finished-panel">Course finished</MockText>;
   },
@@ -556,6 +558,7 @@ describe("FlashcardsScreen UI state regressions", () => {
       skipCorrectionEnabled: false,
       actionButtonsPosition: "top",
       setActionButtonsPosition: jest.fn(),
+      dominantHand: "right",
       colors: {
         background: "#fff",
       },
@@ -904,6 +907,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(boxesWrapperStyle.flex).toBe(1);
     expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.648 });
     expect(latestButtonsProps?.contentWidth).toBeUndefined();
+    expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toBeUndefined();
   });
 
@@ -955,6 +959,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     });
     expect(boxesWrapperStyle.flex).toBe(0);
     expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
   });
 
@@ -975,6 +980,7 @@ describe("FlashcardsScreen UI state regressions", () => {
       skipCorrectionEnabled: false,
       actionButtonsPosition: "bottom",
       setActionButtonsPosition: jest.fn(),
+      dominantHand: "right",
       colors: {
         background: "#fff",
       },
@@ -1005,7 +1011,80 @@ describe("FlashcardsScreen UI state regressions", () => {
       justifyContent: "center",
     });
     expect(boxesWrapperStyle.flex).toBe(1);
+    expect(latestButtonsProps?.align).toBe("right");
     expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54 });
+  });
+
+  it("left-aligns bottom buttons on tablets for left-hand users", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "bottom",
+      setActionButtonsPosition: jest.fn(),
+      dominantHand: "left",
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 57,
+      text: "left hand tablet",
+      translations: ["left hand tablet"],
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("left");
+  });
+
+  it("centers bottom buttons on tablets when center preference is selected", async () => {
+    mockedUseDeviceLayout.mockReturnValue({
+      isSmallPhoneLayout: false,
+      isTabletLayout: true,
+    });
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 7,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: false,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "bottom",
+      setActionButtonsPosition: jest.fn(),
+      dominantHand: "center",
+      colors: {
+        background: "#fff",
+      },
+    });
+    const card = makeCard({
+      id: 58,
+      text: "center tablet",
+      translations: ["center tablet"],
+    });
+
+    renderScreenWithState(createInteractionState(card), [card]);
+
+    await flushScreenState();
+
+    expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
+    expect(latestButtonsProps?.align).toBe("center");
   });
 
   it("starts the hint tutorial instead of editing on the first manual hint tap", async () => {

@@ -1,5 +1,6 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
+import { Text as MockText } from "react-native";
 
 import StatsScreen from "@/src/screens/stats/StatsScreen/StatsScreen";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
@@ -7,17 +8,15 @@ import { getDailyActivitySummariesCustom } from "@/src/db/sqlite/db";
 import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
-  const { Text } = require("react-native");
   function MockIonicons({ testID }: { testID?: string }) {
-    return <Text testID={testID}>icon</Text>;
+    return <MockText testID={testID}>icon</MockText>;
   }
   return MockIonicons;
 });
 
 jest.mock("@expo/vector-icons/MaterialIcons", () => {
-  const { Text } = require("react-native");
   function MockMaterialIcons({ testID }: { testID?: string }) {
-    return <Text testID={testID}>icon</Text>;
+    return <MockText testID={testID}>icon</MockText>;
   }
   return MockMaterialIcons;
 });
@@ -48,14 +47,12 @@ jest.mock("@/src/contexts/NavbarStatsContext", () => ({
 }));
 
 jest.mock("@/src/components/stats/BigKnownWordsCard", () => {
-  const { Text } = require("react-native");
   function MockBigKnownWordsCard() {
-    return <Text>known</Text>;
+    return <MockText>known</MockText>;
   }
   return MockBigKnownWordsCard;
 });
 jest.mock("@/src/components/stats/ActivityHeatmap", () => {
-  const { Text } = require("react-native");
   function MockActivityHeatmap({
     data,
     shieldedDates,
@@ -64,31 +61,28 @@ jest.mock("@/src/components/stats/ActivityHeatmap", () => {
     shieldedDates?: string[];
   }) {
     return (
-      <Text testID="activity-heatmap-props">
+      <MockText testID="activity-heatmap-props">
         {JSON.stringify({ data, shieldedDates })}
-      </Text>
+      </MockText>
     );
   }
   return MockActivityHeatmap;
 });
 jest.mock("@/src/components/stats/HardWordsList", () => {
-  const { Text } = require("react-native");
   function MockHardWordsList() {
-    return <Text>hard</Text>;
+    return <MockText>hard</MockText>;
   }
   return MockHardWordsList;
 });
 jest.mock("@/src/components/stats/HourlyActivityChart", () => {
-  const { Text } = require("react-native");
   function MockHourlyActivityChart() {
-    return <Text>time</Text>;
+    return <MockText>time</MockText>;
   }
   return MockHourlyActivityChart;
 });
 jest.mock("@/src/components/stats/PinnedCoursesProgress", () => {
-  const { Text } = require("react-native");
   function MockPinnedCoursesProgress() {
-    return <Text>courses</Text>;
+    return <MockText>courses</MockText>;
   }
   return MockPinnedCoursesProgress;
 });

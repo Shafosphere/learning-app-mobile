@@ -114,7 +114,8 @@ jest.mock("@/src/components/onboarding/CoachmarkLayerPortal", () => ({
 
 jest.mock("@edwardloopez/react-native-coachmark", () => ({
   CoachmarkAnchor: ({ children }: { children?: ReactNode }) => {
-    const { View } = require("react-native");
+    const { View } =
+      jest.requireActual<typeof import("react-native")>("react-native");
     return <View>{children}</View>;
   },
 }));
@@ -127,7 +128,8 @@ jest.mock("@/src/components/course/CourseListCard", () => ({
     title: string;
     rightAccessory?: ReactNode;
   }) => {
-    const { Text, View } = require("react-native");
+    const { Text, View } =
+      jest.requireActual<typeof import("react-native")>("react-native");
     return (
       <View>
         <Text>{title}</Text>

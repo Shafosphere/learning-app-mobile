@@ -2,6 +2,7 @@ import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
 import Card from "@/src/components/card/card";
+import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
@@ -30,7 +31,13 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState } from "@/src/types/boxes";
 import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import { Animated, Text, TextInput, View } from "react-native";
+import {
+  Animated,
+  Text,
+  TextInput,
+  useWindowDimensions,
+  View,
+} from "react-native";
 import { LinearTransition } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import {
@@ -52,7 +59,10 @@ export default function ReviewFlashcardsPlaceholder() {
     mistakeNudgePreviewToken?: string;
   }>();
   const styles = useStyles();
-  const { isSmallPhoneLayout } = useDeviceLayout();
+  const { width: windowWidth } = useWindowDimensions();
+  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
+  const { isSmallPhoneLayout, isTabletLayout } = useDeviceLayout();
+  const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const isFocused = useIsFocused();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
@@ -60,6 +70,7 @@ export default function ReviewFlashcardsPlaceholder() {
   const settings = useSettings();
   const {
     actionButtonsPosition,
+    dominantHand,
     cancelTodayLearningReminderSchedule,
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
@@ -458,7 +469,13 @@ export default function ReviewFlashcardsPlaceholder() {
   });
   const effectiveLayout = layout;
   const isCarouselLayout = effectiveLayout !== "classic";
-  const carouselMinScale = 0.42;
+  const carouselMinScale = 0.3;
+  const areButtonsOnTop = actionButtonsPosition === "top";
+  const classicBoxesMinScale = isTabletLayout
+    ? areButtonsOnTop
+      ? 0.72
+      : 0.54
+    : 0.72;
   const {
     scale: boxesScale,
     scaledHeight: boxesScaledHeight,
@@ -466,8 +483,9 @@ export default function ReviewFlashcardsPlaceholder() {
     onViewportLayout: onBoxesViewportLayout,
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({ minScale: isCarouselLayout ? carouselMinScale : 0.72 });
-  const areButtonsOnTop = actionButtonsPosition === "top";
+  } = useAutoScaleToFit({
+    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
+  });
   const {
     bottomButtonsAnchorRef,
     setBottomButtonsHeight,
@@ -493,6 +511,10 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     previousKeyboardVisibleRef,
   });
+  const carouselBottomClearance =
+    isCarouselLayout && !areButtonsOnTop
+      ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
+      : 0;
 
   const mistakeNudgeFrontText = mistakeNudge
     ? mistakeNudge.card.text.trim() ||
@@ -553,6 +575,16 @@ export default function ReviewFlashcardsPlaceholder() {
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
       position={position}
+      align={
+        position === "bottom" && isTabletLayout
+          ? dominantHand === "left"
+            ? "left"
+            : dominantHand === "center"
+              ? "center"
+            : "right"
+          : "center"
+      }
+      contentWidth={flashcardsContentWidth}
       showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled}
       onTrueFalseAnswer={handleTrueFalseAnswer}
@@ -572,6 +604,9 @@ export default function ReviewFlashcardsPlaceholder() {
   );
 
   const boxesScaleOffsetY = scaleOffsetY;
+  const isTabletCenteredStudyLayout = isTabletLayout;
+  const isTabletCompactBoxesLayout =
+    isTabletCenteredStudyLayout && areButtonsOnTop;
   const cardSection = (
     <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
       <View collapsable={false}>
@@ -627,14 +662,15 @@ export default function ReviewFlashcardsPlaceholder() {
       shouldShowFloatingAdd={false}
       addButtonDisabled={true}
       isSmallPhoneLayout={isSmallPhoneLayout}
-      isTabletLayout={false}
-      isTabletCompactBoxesLayout={false}
+      isTabletLayout={isTabletLayout}
+      isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
       areButtonsOnTop={areButtonsOnTop}
-      flashcardsContentWidth={undefined}
+      flashcardsContentWidth={flashcardsContentWidth}
       boxesScale={boxesScale}
       boxesScaledHeight={boxesScaledHeight}
       boxesScaleOffsetY={boxesScaleOffsetY}
       boxesNeedScrollFallback={boxesNeedScrollFallback}
+      carouselBottomClearance={carouselBottomClearance}
       onBoxesViewportLayout={onBoxesViewportLayout}
       onBoxesContentLayout={onBoxesContentLayout}
       t={t}
@@ -696,6 +732,7 @@ export default function ReviewFlashcardsPlaceholder() {
       <Confetti generateConfetti={shouldCelebrate} />
 
       <View
+        testID="review-flashcards-content"
         style={[
           styles.content,
           shouldRenderBottomButtons
@@ -703,15 +740,32 @@ export default function ReviewFlashcardsPlaceholder() {
             : null,
         ]}
       >
-        <FlashcardsStudyContent
-          styles={styles}
-          screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
-          cardSection={cardSection}
-          topButtons={topButtons}
-          boxesSection={boxesSection}
-          isCourseFinishedVisible={false}
-          showTopButtons={areButtonsOnTop}
-        />
+        {isTabletCenteredStudyLayout ? (
+          <View
+            testID="review-flashcards-study-stack"
+            style={[styles.studyStack, styles.tabletCenteredStudyStack]}
+          >
+            <FlashcardsStudyContent
+              styles={styles}
+              screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
+              cardSection={cardSection}
+              topButtons={topButtons}
+              boxesSection={boxesSection}
+              isCourseFinishedVisible={false}
+              showTopButtons={areButtonsOnTop}
+            />
+          </View>
+        ) : (
+          <FlashcardsStudyContent
+            styles={styles}
+            screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
+            cardSection={cardSection}
+            topButtons={topButtons}
+            boxesSection={boxesSection}
+            isCourseFinishedVisible={false}
+            showTopButtons={areButtonsOnTop}
+          />
+        )}
 
         {shouldRenderBottomButtons ? (
           <View
@@ -741,6 +795,7 @@ export default function ReviewFlashcardsPlaceholder() {
                 <View collapsable={false}>
                   <Animated.View
                     style={{
+                      width: "100%",
                       transform: [
                         {
                           translateY: Animated.multiply(bottomButtonsOffset, -1),

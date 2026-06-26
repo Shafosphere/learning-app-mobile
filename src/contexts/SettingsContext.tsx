@@ -69,6 +69,7 @@ import { useThemeAccessibilitySettings } from "./settings/useThemeAccessibilityS
 export type {
   CEFR,
   CourseBoxZeroKeyParams,
+  DominantHand,
   FlashcardsCardSize,
   FlashcardsImageSize,
   SettingsContextValue,

@@ -32,8 +32,10 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("@/src/components/button/button", () => {
-  const React = require("react");
-  const { Pressable, Text } = require("react-native");
+  const ReactActual = jest.requireActual<typeof import("react")>("react");
+  const { Pressable, Text } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
 
   return function MyButtonMock({
     text,
@@ -44,24 +46,26 @@ jest.mock("@/src/components/button/button", () => {
     onPress?: () => void;
     accessibilityLabel?: string;
   }) {
-    return (
-      <Pressable
-        accessibilityRole="button"
-        accessibilityLabel={accessibilityLabel ?? text}
-        onPress={onPress}
-      >
-        <Text>{text}</Text>
-      </Pressable>
+    return ReactActual.createElement(
+      Pressable,
+      {
+        accessibilityRole: "button",
+        accessibilityLabel: accessibilityLabel ?? text,
+        onPress,
+      },
+      ReactActual.createElement(Text, null, text)
     );
   };
 });
 
 jest.mock("@/src/components/Box/Skin/BoxSkin", () => {
-  const React = require("react");
-  const { View } = require("react-native");
+  const ReactActual = jest.requireActual<typeof import("react")>("react");
+  const { View } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
 
   return function BoxSkinMock() {
-    return <View />;
+    return ReactActual.createElement(View);
   };
 });
 
@@ -73,9 +77,12 @@ jest.mock("@/src/components/confetti/Confetti", () => {
 
 jest.mock("expo-image", () => ({
   Image: (props: object) => {
-    const React = require("react");
-    const { View } = require("react-native");
-    return <View {...props} />;
+    const ReactActual = jest.requireActual<typeof import("react")>("react");
+    const { View } = jest.requireActual<typeof import("react-native")>(
+      "react-native"
+    );
+
+    return ReactActual.createElement(View, props);
   },
 }));
 
@@ -88,8 +95,10 @@ jest.mock(
 jest.mock("@expo/vector-icons/Octicons", () => "Octicons");
 
 jest.mock("react-native-reanimated", () => {
-  const React = require("react");
-  const { Text, View } = require("react-native");
+  const ReactActual = jest.requireActual<typeof import("react")>("react");
+  const { Text, View } = jest.requireActual<typeof import("react-native")>(
+    "react-native"
+  );
 
   const chain = {
     delay: () => chain,
@@ -105,10 +114,10 @@ jest.mock("react-native-reanimated", () => {
     __esModule: true,
     default: {
       View: ({ children, ...props }: React.PropsWithChildren<object>) => (
-        <View {...props}>{children}</View>
+        ReactActual.createElement(View, props, children)
       ),
       Text: ({ children, ...props }: React.PropsWithChildren<object>) => (
-        <Text {...props}>{children}</Text>
+        ReactActual.createElement(Text, props, children)
       ),
     },
     Easing: {

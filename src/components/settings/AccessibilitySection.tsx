@@ -1,7 +1,7 @@
 import React, { useCallback, useState } from "react";
 import { View, Text, TouchableOpacity, Modal } from "react-native";
 import * as Haptics from "expo-haptics";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useSettings, type DominantHand } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import SettingsItemCard from "@/src/components/settings/SettingsItemCard";
 import { useTranslation } from "react-i18next";
@@ -35,6 +35,28 @@ const colorBlindModeOptions: {
   },
 ];
 
+const dominantHandOptions: {
+  key: DominantHand;
+  labelKey: string;
+  defaultLabel: string;
+}[] = [
+  {
+    key: "left",
+    labelKey: "settings.accessibility.dominantHand.options.left",
+    defaultLabel: "Left",
+  },
+  {
+    key: "center",
+    labelKey: "settings.accessibility.dominantHand.options.center",
+    defaultLabel: "Center",
+  },
+  {
+    key: "right",
+    labelKey: "settings.accessibility.dominantHand.options.right",
+    defaultLabel: "Right",
+  },
+];
+
 const AccessibilitySection: React.FC = () => {
   const styles = useStyles();
   const { t } = useTranslation();
@@ -48,6 +70,8 @@ const AccessibilitySection: React.FC = () => {
     toggleLargeFont,
     correctionErrorMarkersEnabled,
     toggleCorrectionErrorMarkers,
+    dominantHand,
+    setDominantHand,
   } = useSettings();
   const [colorBlindMenuOpen, setColorBlindMenuOpen] = useState(false);
 
@@ -106,6 +130,13 @@ const AccessibilitySection: React.FC = () => {
   const handleCorrectionErrorMarkersToggle = async (value: boolean) => {
     if (value !== correctionErrorMarkersEnabled) {
       await toggleCorrectionErrorMarkers();
+      await triggerHaptics();
+    }
+  };
+
+  const handleDominantHandSelect = async (hand: DominantHand) => {
+    if (hand !== dominantHand) {
+      await setDominantHand(hand);
       await triggerHaptics();
     }
   };
@@ -196,6 +227,45 @@ const AccessibilitySection: React.FC = () => {
             </View>
           )}
         />
+
+        <SettingsItemCard
+          title={t("settings.accessibility.dominantHand.title", {
+            defaultValue: "Preferred hand",
+          })}
+          description={t("settings.accessibility.dominantHand.subtitle", {
+            defaultValue:
+              "Moves tablet bottom flashcard buttons toward your stronger hand.",
+          })}
+        >
+          <View style={styles.dominantHandSegment}>
+            {dominantHandOptions.map((option) => {
+              const isActive = dominantHand === option.key;
+              return (
+                <TouchableOpacity
+                  key={option.key}
+                  activeOpacity={0.8}
+                  accessibilityRole="button"
+                  accessibilityState={{ selected: isActive }}
+                  onPress={() => void handleDominantHandSelect(option.key)}
+                  style={[
+                    styles.dominantHandOption,
+                    isActive && styles.dominantHandOptionActive,
+                  ]}
+                >
+                  <Text
+                    style={[
+                      styles.dominantHandOptionText,
+                      isActive && styles.dominantHandOptionTextActive,
+                    ]}
+                    allowFontScaling
+                  >
+                    {t(option.labelKey, { defaultValue: option.defaultLabel })}
+                  </Text>
+                </TouchableOpacity>
+              );
+            })}
+          </View>
+        </SettingsItemCard>
       </View>
 
       <Modal

@@ -267,7 +267,7 @@ describe("useFlashcardsInteraction", () => {
       }
     );
 
-    const nonReversibleCards: Array<[string, Partial<WordWithTranslations>]> = [
+    const nonReversibleCards: [string, Partial<WordWithTranslations>][] = [
       ["an image-only prompt", { text: "", imageFront: "front://flag" }],
       ["an explicit answer-only card", { answerOnly: true }],
       ["a true/false card", { type: "true_false" }],

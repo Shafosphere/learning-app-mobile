@@ -43,6 +43,7 @@ type FlashcardsBoxesSectionProps = {
   boxesScaledHeight: number | undefined;
   boxesScaleOffsetY: number;
   boxesNeedScrollFallback: boolean;
+  carouselBottomClearance?: number;
   onBoxesViewportLayout: (event: LayoutChangeEvent) => void;
   onBoxesContentLayout: (event: LayoutChangeEvent) => void;
   t: TFunction;
@@ -76,6 +77,7 @@ export function FlashcardsBoxesSection({
   boxesScaledHeight,
   boxesScaleOffsetY,
   boxesNeedScrollFallback,
+  carouselBottomClearance = 0,
   onBoxesViewportLayout,
   onBoxesContentLayout,
   t,
@@ -107,6 +109,7 @@ export function FlashcardsBoxesSection({
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
         layoutWidth={flashcardsContentWidth}
+        bottomClearance={carouselBottomClearance}
       />
     );
 

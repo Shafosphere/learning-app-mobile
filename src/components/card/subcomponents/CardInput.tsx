@@ -1,35 +1,22 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { getDateInputPlaceholder, type DatePattern } from "@/src/utils/dateInput";
 import { useCallback, useMemo } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View, ImageStyle } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
-import { useStyles, PROMPT_IMAGE_MAX_HEIGHT } from "../card-styles";
+import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { FocusTarget } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
+import { buildPromptImageStyle } from "../promptImageSizing";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
 const MIN_DURATION_MS = 4000;
 const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
-
-const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
-  dynamic: 1,
-  small: 0.4,
-  medium: 0.6,
-  large: 1,
-  very_large: 1.7,
-};
-
-const buildPromptImageStyle = (mode: FlashcardsImageSize): ImageStyle => {
-  const fraction = IMAGE_SIZE_MULTIPLIER[mode] ?? 1;
-  const target = PROMPT_IMAGE_MAX_HEIGHT * fraction;
-  return { height: target, maxHeight: target };
-};
 
 type CardInputProps = {
   promptText: string;
@@ -122,8 +109,8 @@ export function CardInput({
     [estimatedPromptWidth]
   );
   const promptImageStyle = useMemo(
-    () => buildPromptImageStyle(imageSizeMode),
-    [imageSizeMode]
+    () => buildPromptImageStyle(imageSizeMode, cardMetrics),
+    [cardMetrics, imageSizeMode]
   );
   const datePlaceholder = useMemo(
     () => getDateInputPlaceholder(mainDatePattern),

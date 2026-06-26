@@ -600,6 +600,34 @@ export const useStyles = createThemeStylesHook((colors) => ({
   switch: {
     transform: [{ scaleX: 1.04 }, { scaleY: 1.04 }],
   },
+  dominantHandSegment: {
+    flexDirection: "row",
+    gap: 8,
+    marginTop: 2,
+  },
+  dominantHandOption: {
+    flex: 1,
+    minHeight: 44,
+    borderRadius: 12,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+    alignItems: "center",
+    justifyContent: "center",
+    paddingHorizontal: 12,
+  },
+  dominantHandOptionActive: {
+    borderColor: colors.my_green,
+    backgroundColor: colors.my_green,
+  },
+  dominantHandOptionText: {
+    fontSize: 15,
+    fontWeight: "800",
+    color: colors.headline,
+  },
+  dominantHandOptionTextActive: {
+    color: colors.background,
+  },
   languageSegment: {
     flexDirection: "column",
     alignItems: "stretch",
