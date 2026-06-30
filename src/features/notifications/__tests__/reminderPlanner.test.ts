@@ -74,6 +74,24 @@ describe("reminder planner", () => {
         route: "/flashcards",
         dedupeKey: "streak_warning:2026-06-23",
       },
+      {
+        kind: REVIEW_DUE_REMINDER_KIND,
+        hour: 18,
+        route: "/review",
+        dedupeKey: "review_due:2026-06-24",
+      },
+      {
+        kind: STUDY_REMINDER_KIND,
+        hour: 19,
+        route: "/flashcards",
+        dedupeKey: "study_reminder:2026-06-24",
+      },
+      {
+        kind: STREAK_WARNING_REMINDER_KIND,
+        hour: 22,
+        route: "/flashcards",
+        dedupeKey: "streak_warning:2026-06-24",
+      },
     ]);
   });
 
@@ -97,6 +115,9 @@ describe("reminder planner", () => {
       "streak_warning:2026-06-23",
       "review_due:2026-06-24",
       "study_reminder:2026-06-24",
+      "streak_warning:2026-06-24",
+      "review_due:2026-06-25",
+      "study_reminder:2026-06-25",
     ]);
   });
 
@@ -109,6 +130,8 @@ describe("reminder planner", () => {
     });
 
     expect(plan.map((entry) => entry.kind)).toEqual([
+      STUDY_REMINDER_KIND,
+      STREAK_WARNING_REMINDER_KIND,
       STUDY_REMINDER_KIND,
       STREAK_WARNING_REMINDER_KIND,
       STUDY_REMINDER_KIND,
@@ -130,6 +153,7 @@ describe("reminder planner", () => {
     expect(plan.map((entry) => entry.dedupeKey)).toEqual([
       "streak_warning:2026-06-22",
       "streak_warning:2026-06-23",
+      "streak_warning:2026-06-24",
     ]);
   });
 
@@ -147,7 +171,7 @@ describe("reminder planner", () => {
     );
   });
 
-  it("excludes entries after the 48 hour horizon", () => {
+  it("excludes entries after the 72 hour horizon", () => {
     const now = new Date(2026, 5, 22, 20, 0, 0, 0);
     const plan = buildReminderPlan({
       now,
@@ -156,10 +180,10 @@ describe("reminder planner", () => {
     });
 
     expect(plan.map((entry) => entry.dedupeKey)).toContain(
-      "study_reminder:2026-06-24"
+      "study_reminder:2026-06-25"
     );
     expect(plan.map((entry) => entry.dedupeKey)).not.toContain(
-      "streak_warning:2026-06-24"
+      "streak_warning:2026-06-25"
     );
   });
 
@@ -181,6 +205,9 @@ describe("reminder planner", () => {
       "review_due:2026-06-23",
       "study_reminder:2026-06-23",
       "streak_warning:2026-06-23",
+      "review_due:2026-06-24",
+      "study_reminder:2026-06-24",
+      "streak_warning:2026-06-24",
     ]);
   });
 

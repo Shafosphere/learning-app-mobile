@@ -19,7 +19,7 @@ export const REVIEW_DUE_REMINDER_HOUR = 18;
 export const STUDY_REMINDER_HOUR = 19;
 export const STREAK_WARNING_REMINDER_HOUR = 22;
 export const REVIEW_DUE_REMINDER_THRESHOLD = 10;
-export const REMINDER_PLAN_HORIZON_MS = 48 * 60 * 60 * 1000;
+export const REMINDER_PLAN_HORIZON_MS = 72 * 60 * 60 * 1000;
 const DECONFLICT_WINDOW_MS = 60 * 60 * 1000;
 
 type ReminderCandidate = Omit<ReminderPlanEntry, "dedupeKey"> & {
