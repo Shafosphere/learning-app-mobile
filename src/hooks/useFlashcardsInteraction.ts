@@ -9,6 +9,7 @@ import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
+import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
@@ -135,20 +136,11 @@ export function useFlashcardsInteraction({
     []
   );
 
-  const isAnswerOnlyCard = useCallback((card: WordWithTranslations | null) => {
-    if (!card) return false;
-    if (card.type === "true_false" || card.type === "know_dont_know") return true;
-    if (card.answerOnly) return true;
-    const hasTextPrompt = Boolean(card.text?.trim());
-    const hasImagePrompt = Boolean(card.imageFront || card.imageBack);
-    return !hasTextPrompt && hasImagePrompt;
-  }, []);
-
   const reversed = useMemo(() => {
     if (!activeBox || !selectedItem) return false;
     if (isAnswerOnlyCard(selectedItem)) return false;
     return selectedItem.flipped ? reversedBoxes.includes(activeBox) : false;
-  }, [activeBox, reversedBoxes, selectedItem, isAnswerOnlyCard]);
+  }, [activeBox, reversedBoxes, selectedItem]);
 
   const shuffleList = useCallback((items: WordWithTranslations[]) => {
     const arr = [...items];
@@ -698,7 +690,6 @@ export function useFlashcardsInteraction({
       selectedItem,
       setBoxes,
       moveTranslationToFront,
-      isAnswerOnlyCard,
       setPendingExplanationMove,
       explanationOnlyOnWrong,
       showExplanationEnabled,
@@ -982,7 +973,6 @@ export function useFlashcardsInteraction({
     selectedItem,
     setAnswer,
     setResult,
-    isAnswerOnlyCard,
   ]);
 
   return {

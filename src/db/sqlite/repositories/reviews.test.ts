@@ -10,6 +10,7 @@ import {
   addRandomCustomReviews,
   advanceCustomReview,
   getDueCustomReviewFlashcards,
+  getUpcomingCustomReviewFlashcards,
   removeCustomReview,
   scheduleCustomReview,
 } from "@/src/db/sqlite/repositories/reviews";
@@ -128,6 +129,73 @@ describe("custom review repository", () => {
     expect(getAllAsync.mock.calls[0][0]).not.toContain("LIMIT ?");
     expect(result).toHaveLength(2);
     expect(result.map((card) => card.stage)).toEqual([0, 5]);
+  });
+
+  it("loads future review cards ordered by next review", async () => {
+    const getAllAsync = jest
+      .fn()
+      .mockResolvedValueOnce([
+        { id: 2, stage: 3, nextReview: 20_000 },
+        { id: 1, stage: 1, nextReview: 30_000 },
+      ])
+      .mockResolvedValueOnce([
+        {
+          id: 1,
+          courseId: 77,
+          frontText: "later",
+          backText: "później",
+          hintFront: null,
+          hintBack: null,
+          imageFront: null,
+          imageBack: null,
+          explanation: null,
+          position: 0,
+          flipped: 0,
+          answerOnly: 0,
+          externalId: null,
+          isOfficial: 0,
+          resetProgressOnUpdate: 0,
+          createdAt: 1,
+          updatedAt: 1,
+          answerText: "później",
+          type: "text",
+        },
+        {
+          id: 2,
+          courseId: 77,
+          frontText: "soon",
+          backText: "wkrótce",
+          hintFront: null,
+          hintBack: null,
+          imageFront: null,
+          imageBack: null,
+          explanation: null,
+          position: 1,
+          flipped: 0,
+          answerOnly: 0,
+          externalId: null,
+          isOfficial: 0,
+          resetProgressOnUpdate: 0,
+          createdAt: 2,
+          updatedAt: 2,
+          answerText: "wkrótce",
+          type: "text",
+        },
+      ]);
+    mockGetDB.mockResolvedValue({ getAllAsync });
+
+    const result = await getUpcomingCustomReviewFlashcards(77, 10_000);
+
+    expect(getAllAsync).toHaveBeenNthCalledWith(
+      1,
+      expect.stringMatching(
+        /cr\.next_review > \?[\s\S]*cr\.next_review ASC/
+      ),
+      77,
+      10_000
+    );
+    expect(result.map((card) => card.id)).toEqual([2, 1]);
+    expect(result.map((card) => card.nextReview)).toEqual([20_000, 30_000]);
   });
 
   it("seeds random custom reviews as due now and preserves existing stages", async () => {

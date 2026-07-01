@@ -171,6 +171,27 @@ export async function getDueCustomReviewFlashcards(
   limit?: number | null,
   nowMs: number = Date.now()
 ): Promise<CustomReviewFlashcard[]> {
+  return getCustomReviewFlashcardsBySchedule(
+    courseId,
+    "due",
+    nowMs,
+    limit
+  );
+}
+
+export async function getUpcomingCustomReviewFlashcards(
+  courseId: number,
+  nowMs: number = Date.now()
+): Promise<CustomReviewFlashcard[]> {
+  return getCustomReviewFlashcardsBySchedule(courseId, "upcoming", nowMs);
+}
+
+async function getCustomReviewFlashcardsBySchedule(
+  courseId: number,
+  schedule: "due" | "upcoming",
+  nowMs: number,
+  limit?: number | null
+): Promise<CustomReviewFlashcard[]> {
   if (!courseId) {
     return [];
   }
@@ -191,8 +212,8 @@ export async function getDueCustomReviewFlashcards(
        cr.next_review  AS nextReview
      FROM custom_reviews cr
      WHERE cr.course_id = ?
-       AND cr.next_review <= ?
-     ORDER BY RANDOM()
+       AND cr.next_review ${schedule === "due" ? "<=" : ">"} ?
+     ORDER BY ${schedule === "due" ? "RANDOM()" : "cr.next_review ASC, cr.flashcard_id ASC"}
      ${normalizedLimit == null ? "" : "LIMIT ?"};`,
     ...(normalizedLimit == null ? [courseId, nowMs] : [courseId, nowMs, normalizedLimit])
   );

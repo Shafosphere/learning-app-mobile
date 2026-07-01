@@ -1,7 +1,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { Dispatch, SetStateAction } from "react";
 
-import { getDueCustomReviewFlashcards } from "@/src/db/sqlite/db";
+import {
+  getDueCustomReviewFlashcards,
+  getUpcomingCustomReviewFlashcards,
+} from "@/src/db/sqlite/db";
 import {
   appendDebugEvent,
   summarizeBoxes,
@@ -62,6 +65,13 @@ export const useReviewFlashcardsSession = ({
   const [queueNext, setQueueNext] = useState(false);
   const [peekBox, setPeekBox] = useState<keyof BoxesState | null>(null);
   const [peekCards, setPeekCards] = useState<WordWithTranslations[]>([]);
+  const [upcomingPeekCards, setUpcomingPeekCards] = useState<
+    WordWithTranslations[]
+  >([]);
+  const [isUpcomingPeekLoading, setIsUpcomingPeekLoading] = useState(false);
+  const [upcomingPeekError, setUpcomingPeekError] = useState(false);
+  const peekRequestRef = useRef(0);
+  const closeAfterUpcomingLoadRef = useRef(false);
   const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{
     box: keyof BoxesState | null;
@@ -84,6 +94,11 @@ export const useReviewFlashcardsSession = ({
     setQueueNext(false);
     setPeekBox(null);
     setPeekCards([]);
+    setUpcomingPeekCards([]);
+    setIsUpcomingPeekLoading(false);
+    setUpcomingPeekError(false);
+    peekRequestRef.current += 1;
+    closeAfterUpcomingLoadRef.current = false;
     onSessionReset();
   }, [onSessionReset]);
 
@@ -310,24 +325,86 @@ export const useReviewFlashcardsSession = ({
       const cards = boxes[box] ?? [];
       setPeekBox(box);
       setPeekCards(cards);
+      setUpcomingPeekCards([]);
+      setUpcomingPeekError(false);
+      closeAfterUpcomingLoadRef.current = false;
+
+      if (!courseId) {
+        setIsUpcomingPeekLoading(false);
+        return;
+      }
+
+      const requestId = ++peekRequestRef.current;
+      setIsUpcomingPeekLoading(true);
+      void getUpcomingCustomReviewFlashcards(courseId)
+        .then((upcoming) => {
+          if (peekRequestRef.current !== requestId) return;
+          const upcomingBoxes = distributeByStage(
+            upcoming.map(mapReviewCardToWord)
+          );
+          setUpcomingPeekCards(upcomingBoxes[box] ?? []);
+        })
+        .catch((error) => {
+          if (peekRequestRef.current !== requestId) return;
+          console.warn("Failed to load upcoming review flashcards", error);
+          setUpcomingPeekError(true);
+        })
+        .finally(() => {
+          if (peekRequestRef.current === requestId) {
+            setIsUpcomingPeekLoading(false);
+          }
+        });
     },
-    [boxes]
+    [boxes, courseId]
   );
 
   const closePeek = useCallback(() => {
+    peekRequestRef.current += 1;
     setPeekBox(null);
     setPeekCards([]);
+    setUpcomingPeekCards([]);
+    setIsUpcomingPeekLoading(false);
+    setUpcomingPeekError(false);
+    closeAfterUpcomingLoadRef.current = false;
   }, []);
 
-  const removePeekCard = useCallback((cardId: number) => {
-    setPeekCards((current) => {
-      const nextCards = current.filter((card) => card.id !== cardId);
-      if (nextCards.length === 0) {
-        setPeekBox(null);
-      }
-      return nextCards;
-    });
-  }, []);
+  const removePeekCard = useCallback(
+    (cardId: number) => {
+      setPeekCards((current) => {
+        const nextCards = current.filter((card) => card.id !== cardId);
+        if (
+          nextCards.length === 0 &&
+          upcomingPeekCards.length === 0
+        ) {
+          if (isUpcomingPeekLoading) {
+            closeAfterUpcomingLoadRef.current = true;
+          } else {
+            setPeekBox(null);
+          }
+        }
+        return nextCards;
+      });
+    },
+    [isUpcomingPeekLoading, upcomingPeekCards.length]
+  );
+
+  useEffect(() => {
+    if (isUpcomingPeekLoading || !closeAfterUpcomingLoadRef.current) return;
+
+    closeAfterUpcomingLoadRef.current = false;
+    if (
+      !upcomingPeekError &&
+      peekCards.length === 0 &&
+      upcomingPeekCards.length === 0
+    ) {
+      setPeekBox(null);
+    }
+  }, [
+    isUpcomingPeekLoading,
+    peekCards.length,
+    upcomingPeekCards.length,
+    upcomingPeekError,
+  ]);
 
   const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
 
@@ -343,6 +420,9 @@ export const useReviewFlashcardsSession = ({
     setQueueNext,
     peekBox,
     peekCards,
+    upcomingPeekCards,
+    isUpcomingPeekLoading,
+    upcomingPeekError,
     hasCardsInSession,
     reloadSession,
     resetSessionState,

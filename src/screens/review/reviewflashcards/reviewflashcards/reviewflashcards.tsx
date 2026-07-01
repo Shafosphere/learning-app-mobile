@@ -238,6 +238,9 @@ export default function ReviewFlashcardsPlaceholder() {
     setQueueNext,
     peekBox,
     peekCards,
+    upcomingPeekCards,
+    isUpcomingPeekLoading,
+    upcomingPeekError,
     hasCardsInSession,
     reloadSession,
     removeCardFromSession,
@@ -816,6 +819,10 @@ export default function ReviewFlashcardsPlaceholder() {
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}
+        cardLayout="uniform"
+        upcomingCards={upcomingPeekCards}
+        upcomingLoading={isUpcomingPeekLoading}
+        upcomingError={upcomingPeekError}
         activeCourseName={null}
         onClose={closePeek}
         onReturnToUnknown={handleReturnPeekCardToUnknown}

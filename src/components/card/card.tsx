@@ -5,6 +5,7 @@ import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
+import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
 import type { DatePattern } from "@/src/utils/dateInput";
 import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
@@ -238,14 +239,8 @@ export default function Card({
   const rewers = selectedItem?.translations?.[activeTranslationIndex] ?? "";
   const promptImageFront = selectedItem?.imageFront ?? null;
   const promptImageBack = selectedItem?.imageBack ?? null;
-  const hasTextPrompt = Boolean(awers.trim());
   const hasImagePrompt = Boolean(promptImageFront || promptImageBack);
-  const type = selectedItem?.type ?? "text";
-  const answerOnly =
-    (selectedItem?.answerOnly ?? false) ||
-    (!hasTextPrompt && hasImagePrompt) ||
-    type === "true_false" ||
-    type === "know_dont_know";
+  const answerOnly = isAnswerOnlyCard(selectedItem);
   const canShowBackAsPrompt = !answerOnly;
   const showCorrectionInputs = Boolean(
     correction && (result === false || isIntroMode),

@@ -19,6 +19,7 @@ import {
   advanceCustomReview,
   getCustomFlashcardConsecutiveWrongCount,
   getDueCustomReviewFlashcards,
+  getUpcomingCustomReviewFlashcards,
   logCustomLearningEvent,
   scheduleCustomReview,
 } from "@/src/db/sqlite/db";
@@ -103,6 +104,7 @@ jest.mock("@/src/db/sqlite/db", () => ({
   ),
   getCustomFlashcardConsecutiveWrongCount: jest.fn(() => Promise.resolve(0)),
   getDueCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
+  getUpcomingCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
   scheduleCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 1, nextReview: Date.now() })
@@ -178,6 +180,11 @@ jest.mock("@/src/components/confetti/Confetti", () => {
 
 let latestPeekProps: {
   visible?: boolean;
+  cardLayout?: "box-aware" | "uniform";
+  cards?: { id: number; stage?: number }[];
+  upcomingCards?: { id: number; stage?: number }[];
+  upcomingLoading?: boolean;
+  upcomingError?: boolean;
   onReturnToUnknown?: (cardId: number) => Promise<void>;
 } | null = null;
 let latestBoxCarouselProps: Record<string, unknown> | null = null;
@@ -448,6 +455,8 @@ const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
 const mockedUseSpellchecking = useSpellchecking as jest.Mock;
 const mockedGetDueCustomReviewFlashcards =
   getDueCustomReviewFlashcards as jest.Mock;
+const mockedGetUpcomingCustomReviewFlashcards =
+  getUpcomingCustomReviewFlashcards as jest.Mock;
 const mockedGetCustomFlashcardConsecutiveWrongCount =
   getCustomFlashcardConsecutiveWrongCount as jest.Mock;
 const mockedRegisterProtectedDailyActivity =
@@ -616,6 +625,7 @@ describe("reviewflashcards correction desync regression", () => {
       advanceByEvent: jest.fn(() => Promise.resolve(true)),
     });
     mockedGetCustomFlashcardConsecutiveWrongCount.mockResolvedValue(0);
+    mockedGetUpcomingCustomReviewFlashcards.mockResolvedValue([]);
   });
 
   afterEach(() => {
@@ -1117,6 +1127,9 @@ describe("reviewflashcards correction desync regression", () => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
     });
     fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(false);
+    });
 
     await act(async () => {
       await latestPeekProps?.onReturnToUnknown?.(603);
@@ -1129,6 +1142,230 @@ describe("reviewflashcards correction desync regression", () => {
     expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
     expect(screen.getByText("boxOne:0")).toBeTruthy();
     expect(latestPeekProps?.visible).toBe(false);
+  });
+
+  it("keeps peek open after removing the last due card when upcoming cards remain", async () => {
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 605,
+        frontText: "ready cat",
+        stage: 1,
+      }),
+    ]);
+    mockedGetUpcomingCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 705,
+        frontText: "later cat",
+        stage: 1,
+        nextReview: Date.now() + 60_000,
+      }),
+    ]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:1")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingCards?.map((card) => card.id)).toEqual([
+        705,
+      ]);
+    });
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(605);
+    });
+
+    expect(screen.getByText("boxOne:0")).toBeTruthy();
+    expect(latestPeekProps?.cards).toEqual([]);
+    expect(latestPeekProps?.visible).toBe(true);
+  });
+
+  it("keeps peek open while upcoming cards load after removing the last due card", async () => {
+    let resolveUpcoming!: (cards: ReviewCardRow[]) => void;
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 606,
+        frontText: "ready dog",
+        stage: 1,
+      }),
+    ]);
+    mockedGetUpcomingCustomReviewFlashcards.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveUpcoming = resolve;
+        }),
+    );
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:1")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(true);
+    });
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(606);
+    });
+
+    expect(latestPeekProps?.cards).toEqual([]);
+    expect(latestPeekProps?.visible).toBe(true);
+
+    await act(async () => {
+      resolveUpcoming([
+        makeReviewCard({
+          id: 706,
+          frontText: "later dog",
+          stage: 1,
+          nextReview: Date.now() + 60_000,
+        }),
+      ]);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingCards?.map((card) => card.id)).toEqual([
+        706,
+      ]);
+      expect(latestPeekProps?.upcomingLoading).toBe(false);
+    });
+    expect(latestPeekProps?.visible).toBe(true);
+  });
+
+  it("closes peek when a pending upcoming-card load returns empty", async () => {
+    let resolveUpcoming!: (cards: ReviewCardRow[]) => void;
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 607,
+        frontText: "ready bird",
+        stage: 1,
+      }),
+    ]);
+    mockedGetUpcomingCustomReviewFlashcards.mockImplementationOnce(
+      () =>
+        new Promise((resolve) => {
+          resolveUpcoming = resolve;
+        }),
+    );
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:1")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(true);
+    });
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(607);
+    });
+
+    expect(latestPeekProps?.visible).toBe(true);
+
+    await act(async () => {
+      resolveUpcoming([]);
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(false);
+      expect(latestPeekProps?.visible).toBe(false);
+    });
+  });
+
+  it("keeps a normally opened empty box visible", async () => {
+    mockedGetUpcomingCustomReviewFlashcards.mockResolvedValueOnce([]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:0")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(false);
+      expect(latestPeekProps?.visible).toBe(true);
+    });
+  });
+
+  it("keeps peek open when pending upcoming-card load fails", async () => {
+    let rejectUpcoming!: (error: Error) => void;
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 608,
+        frontText: "ready fish",
+        stage: 1,
+      }),
+    ]);
+    mockedGetUpcomingCustomReviewFlashcards.mockImplementationOnce(
+      () =>
+        new Promise((_, reject) => {
+          rejectUpcoming = reject;
+        }),
+    );
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(screen.getByText("boxOne:1")).toBeTruthy();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(true);
+    });
+
+    await act(async () => {
+      await latestPeekProps?.onReturnToUnknown?.(608);
+    });
+    await act(async () => {
+      rejectUpcoming(new Error("upcoming failed"));
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingLoading).toBe(false);
+      expect(latestPeekProps?.upcomingError).toBe(true);
+      expect(latestPeekProps?.visible).toBe(true);
+    });
+  });
+
+  it("shows only upcoming cards assigned to the peeked box stage", async () => {
+    mockedGetUpcomingCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 701,
+        frontText: "box one soon",
+        stage: 1,
+        nextReview: Date.now() + 60_000,
+      }),
+      makeReviewCard({
+        id: 702,
+        frontText: "box four soon",
+        stage: 4,
+        nextReview: Date.now() + 120_000,
+      }),
+    ]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestBoxListProps).not.toBeNull();
+    });
+    fireEvent(screen.getByTestId("box-button-boxOne"), "longPress");
+
+    await waitFor(() => {
+      expect(latestPeekProps?.upcomingCards?.map((card) => card.id)).toEqual([
+        701,
+      ]);
+    });
+  });
+
+  it("uses uniform card layout in review peek", async () => {
+    render(<ReviewFlashcardsPlaceholder />);
+
+    await waitFor(() => {
+      expect(latestPeekProps?.cardLayout).toBe("uniform");
+    });
   });
 
   it("waits for a pending review advancement before returning a peeked card to unknown", async () => {
