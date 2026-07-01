@@ -86,6 +86,7 @@ describe("reminder reconciler", () => {
       [[101, 202], new Date(2026, 5, 22, 18, 0, 0, 0).getTime()],
       [[101, 202], new Date(2026, 5, 23, 18, 0, 0, 0).getTime()],
       [[101, 202], new Date(2026, 5, 24, 18, 0, 0, 0).getTime()],
+      [[101, 202], new Date(2026, 5, 25, 18, 0, 0, 0).getTime()],
     ]);
     expect(mockedReplaceManagedReminderSchedule).toHaveBeenCalledWith(
       expect.arrayContaining([
@@ -114,6 +115,9 @@ describe("reminder reconciler", () => {
       "review_due:2026-06-23",
       "study_reminder:2026-06-23",
       "streak_warning:2026-06-23",
+      "review_due:2026-06-24",
+      "study_reminder:2026-06-24",
+      "streak_warning:2026-06-24",
     ]);
   });
 
