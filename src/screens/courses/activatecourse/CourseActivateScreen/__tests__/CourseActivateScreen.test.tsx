@@ -449,4 +449,31 @@ describe("CourseActivateScreen loading state", () => {
     expect(nextButton.props.accessibilityState).toEqual({ disabled: false });
     expect(screen.getByText("app.actions.next")).toBeTruthy();
   });
+
+  it("shows normal footer and no onboarding next after skip", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 12,
+        name: "Completed course",
+        iconId: "star",
+        iconColor: "#111",
+        cardsCount: 8,
+        completedCardsCount: 8,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CourseActivateScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Dodaj kurs")).toBeTruthy();
+      expect(screen.getByText("completed")).toBeTruthy();
+    });
+    expect(screen.queryByText("app.actions.next")).toBeNull();
+    expect(mockedUseCoachmarkFlow).toHaveBeenCalledWith(
+      expect.objectContaining({ shouldStart: false }),
+    );
+  });
 });

@@ -103,4 +103,29 @@ describe("useCoachmarkFlow", () => {
     expect(mockStop).toHaveBeenCalledWith("completed");
     expect(onComplete).not.toHaveBeenCalled();
   });
+
+  it("does not start a main flow already marked seen by global skip", async () => {
+    mockCoachmarkState = {
+      isActive: false,
+      activeTour: { key: "other-flow" },
+      index: 0,
+    };
+    (AsyncStorage.getItem as jest.Mock).mockResolvedValueOnce("1");
+
+    const { result } = renderHook(() =>
+      useCoachmarkFlow({
+        flowKey: "flashcards-guided",
+        storageKey: "@flashcards_intro_seen_v1",
+        shouldStart: true,
+        steps,
+      }),
+    );
+
+    await waitFor(() => {
+      expect(result.current.isReady).toBe(true);
+      expect(result.current.hasSeen).toBe(true);
+    });
+    expect(result.current.isPendingStart).toBe(false);
+    expect(mockStart).not.toHaveBeenCalled();
+  });
 });

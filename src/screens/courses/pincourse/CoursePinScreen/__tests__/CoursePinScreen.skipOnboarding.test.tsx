@@ -14,7 +14,10 @@ const mockReplace = jest.fn();
 const mockPush = jest.fn();
 const mockPinOfficialCourse = jest.fn(() => Promise.resolve());
 const mockUnpinOfficialCourse = jest.fn(() => Promise.resolve());
-const mockSkipFlow = jest.fn(() => Promise.resolve());
+let mockCoachmarkActive = true;
+const mockSkipFlow = jest.fn(async () => {
+  mockCoachmarkActive = false;
+});
 let mockPinnedOfficialCourseIds: number[] = [];
 
 const mockColors = {
@@ -40,6 +43,8 @@ jest.mock("react-i18next", () => ({
         "onboarding.skip.confirm": "Pomiń",
         "onboarding.skip.cancel": "Zostań",
         "app.actions.next": "Dalej",
+        "screens.courses.pincourse.coursePin.coursePin.text.zrobWlasny":
+          "zrób własny",
         "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki": "Języki",
         "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza": "Wiedza",
         "repeats.format.flashcardsValue": `${options?.value ?? 0} fiszek`,
@@ -85,7 +90,7 @@ jest.mock("@/src/db/sqlite/db", () => ({
 
 jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
   useCoachmarkFlow: jest.fn(() => ({
-    isActive: true,
+    isActive: mockCoachmarkActive,
     isPendingStart: false,
     hasSeen: false,
     isReady: true,
@@ -159,6 +164,7 @@ function getLatestCoachmarkLayer() {
 describe("CoursePinScreen skip onboarding", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockCoachmarkActive = true;
     mockPinnedOfficialCourseIds = [];
     mockedGetOnboardingCheckpoint.mockResolvedValue("pin_required");
   });
@@ -212,6 +218,12 @@ describe("CoursePinScreen skip onboarding", () => {
     });
     expect(mockedMarkAllOnboardingCoachmarksSeen).toHaveBeenCalledTimes(1);
     expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("done");
+    await waitFor(() => {
+      expect(screen.queryByText("Pominąć samouczek?")).toBeNull();
+      expect(screen.queryByText("Dalej")).toBeNull();
+      expect(screen.getByText("zrób własny")).toBeTruthy();
+      expect(getLatestCoachmarkLayer()).toBeNull();
+    });
   });
 
   it("does not show skip after the first onboarding step", async () => {

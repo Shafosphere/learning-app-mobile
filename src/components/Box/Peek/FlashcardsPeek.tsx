@@ -440,21 +440,19 @@ export default function FlashcardsPeekOverlay({
             ) : null}
           </View>
         )}
-        {!isUpcoming ? (
-          <Pressable
-            accessibilityRole="button"
-            accessibilityLabel={t("flashcards.card.peek.returnToUnknownA11y")}
-            testID={`flashcards-peek-return-unknown-${item.id}`}
-            onPress={() => openResetConfirmation(item)}
-            hitSlop={8}
-            style={({ pressed }) => [
-              styles.deleteButton,
-              pressed ? styles.deleteButtonPressed : undefined,
-            ]}
-          >
-            <Octicons name="trash" size={18} color={styles.deleteIcon.color} />
-          </Pressable>
-        ) : null}
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t("flashcards.card.peek.returnToUnknownA11y")}
+          testID={`flashcards-peek-return-unknown-${item.id}`}
+          onPress={() => openResetConfirmation(item)}
+          hitSlop={8}
+          style={({ pressed }) => [
+            styles.deleteButton,
+            pressed ? styles.deleteButtonPressed : undefined,
+          ]}
+        >
+          <Octicons name="trash" size={18} color={styles.deleteIcon.color} />
+        </Pressable>
       </View>
     );
   };

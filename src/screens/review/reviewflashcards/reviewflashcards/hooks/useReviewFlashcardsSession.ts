@@ -370,22 +370,23 @@ export const useReviewFlashcardsSession = ({
 
   const removePeekCard = useCallback(
     (cardId: number) => {
-      setPeekCards((current) => {
-        const nextCards = current.filter((card) => card.id !== cardId);
-        if (
-          nextCards.length === 0 &&
-          upcomingPeekCards.length === 0
-        ) {
-          if (isUpcomingPeekLoading) {
-            closeAfterUpcomingLoadRef.current = true;
-          } else {
-            setPeekBox(null);
-          }
+      const nextCards = peekCards.filter((card) => card.id !== cardId);
+      const nextUpcomingCards = upcomingPeekCards.filter(
+        (card) => card.id !== cardId
+      );
+
+      setPeekCards(nextCards);
+      setUpcomingPeekCards(nextUpcomingCards);
+
+      if (nextCards.length === 0 && nextUpcomingCards.length === 0) {
+        if (isUpcomingPeekLoading) {
+          closeAfterUpcomingLoadRef.current = true;
+        } else {
+          setPeekBox(null);
         }
-        return nextCards;
-      });
+      }
     },
-    [isUpcomingPeekLoading, upcomingPeekCards.length]
+    [isUpcomingPeekLoading, peekCards, upcomingPeekCards]
   );
 
   useEffect(() => {

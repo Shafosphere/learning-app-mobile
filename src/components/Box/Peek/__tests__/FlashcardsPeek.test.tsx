@@ -323,7 +323,7 @@ describe("FlashcardsPeekOverlay flip behavior", () => {
     expect(screen.getByText("flashcards.card.peek.returnToUnknownError")).toBeTruthy();
   });
 
-  it("shows ready and upcoming sections with a read-only countdown", () => {
+  it("shows ready and upcoming sections with reset actions", () => {
     jest.spyOn(Date, "now").mockReturnValue(1_000_000);
     const screen = render(
       <FlashcardsPeekOverlay
@@ -347,7 +347,37 @@ describe("FlashcardsPeekOverlay flip behavior", () => {
     expect(screen.getByText("flashcards.card.peek.soon")).toBeTruthy();
     expect(screen.getByText("flashcards.card.peek.soonInHoursMinutes")).toBeTruthy();
     expect(screen.getByTestId("flashcards-peek-return-unknown-1")).toBeTruthy();
-    expect(screen.queryByTestId("flashcards-peek-return-unknown-2")).toBeNull();
+    expect(screen.getByTestId("flashcards-peek-return-unknown-2")).toBeTruthy();
+  });
+
+  it("confirms returning an upcoming card to unknown", async () => {
+    const onReturnToUnknown = jest.fn(() => Promise.resolve());
+    const screen = render(
+      <FlashcardsPeekOverlay
+        visible
+        boxKey="boxTwo"
+        cards={[]}
+        upcomingCards={[
+          makeCard({
+            id: 9,
+            text: "upcoming-card",
+            nextReview: Date.now() + 60_000,
+          }),
+        ]}
+        onClose={jest.fn()}
+        onReturnToUnknown={onReturnToUnknown}
+      />
+    );
+
+    fireEvent.press(screen.getByTestId("flashcards-peek-return-unknown-9"));
+    expect(latestNudgeModalProps?.visible).toBe(true);
+
+    await act(async () => {
+      await (latestNudgeModalProps?.onConfirm as () => Promise<void>)();
+    });
+
+    expect(onReturnToUnknown).toHaveBeenCalledWith(9);
+    expect(latestNudgeModalProps?.visible).toBe(false);
   });
 
   it("shows upcoming cards without empty state when none are ready", () => {

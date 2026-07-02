@@ -97,4 +97,35 @@ describe("OnboardingGate welcome routing", () => {
     });
     expect(mockedSetCheckpoint).not.toHaveBeenCalledWith("done");
   });
+
+  it("does not force an onboarding redirect after skip marks it done", async () => {
+    mockedGetCheckpoint.mockResolvedValue("done");
+    mockPathname = "/support";
+
+    render(<OnboardingGate />);
+
+    await waitFor(() => {
+      expect(mockedSetCheckpoint).toHaveBeenCalledWith("done");
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("keeps done with pinned and active course state", async () => {
+    mockedGetCheckpoint.mockResolvedValue("done");
+    mockPathname = "/";
+    mockSettings = {
+      courses: [{}],
+      pinnedOfficialCourseIds: [11],
+      activeCourse: { id: 11 },
+      activeCustomCourseId: 11,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    };
+
+    render(<OnboardingGate />);
+
+    await waitFor(() => {
+      expect(mockedSetCheckpoint).toHaveBeenCalledWith("done");
+    });
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
 });
