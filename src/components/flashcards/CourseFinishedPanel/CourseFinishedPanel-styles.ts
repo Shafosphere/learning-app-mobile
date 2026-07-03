@@ -9,9 +9,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexGrow: 1,
     width: "100%",
     paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 24,
     alignItems: "center",
+  },
+  titleBlock: {
+    width: "100%",
+    alignItems: "center",
+    justifyContent: "center",
   },
   heading: {
     fontSize: 34,
@@ -27,9 +30,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textAlign: "center",
   },
   courseBadge: {
-    marginTop: 18,
     width: "100%",
-    minHeight: 40,
     paddingHorizontal: 4,
     paddingVertical: 0,
     flexDirection: "row",
@@ -76,9 +77,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     textAlign: "center",
   },
   logoWrap: {
-    marginTop: 20,
-    width: 220,
-    height: 220,
+    width: "100%",
     alignItems: "center",
     justifyContent: "center",
   },
@@ -96,8 +95,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     opacity: 0.1,
   },
   statsHeading: {
-    marginTop: 24,
-    marginBottom: 8,
     fontSize: 18,
     fontWeight: "600",
     color: colors.headline,
@@ -107,14 +104,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     flexDirection: "row",
     justifyContent: "space-between",
+    alignItems: "stretch",
     gap: 10,
-  },
-  statsRowStacked: {
-    flexDirection: "column",
   },
   statsCard: {
     flex: 1,
-    minHeight: 132,
     borderRadius: 20,
     borderWidth: 1,
     borderColor: colors.border,
@@ -153,8 +147,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   actions: {
     width: "100%",
-    marginTop: 28,
-    gap: 12,
     alignItems: "center",
+    justifyContent: "center",
   },
 }));

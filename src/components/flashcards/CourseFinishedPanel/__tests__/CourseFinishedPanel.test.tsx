@@ -1,5 +1,6 @@
 import React from "react";
 import { fireEvent, render } from "@testing-library/react-native";
+import { StyleSheet } from "react-native";
 
 import { CourseFinishedPanel } from "../CourseFinishedPanel";
 
@@ -152,5 +153,53 @@ describe("CourseFinishedPanel", () => {
     );
 
     expect(onBackToCourses).toHaveBeenCalledTimes(1);
+  });
+
+  it("keeps vertical regions proportional to the measured viewport", () => {
+    const { getByTestId } = render(
+      <CourseFinishedPanel
+        courseName="Angielski A2"
+        cardsCountLabel="15"
+        accuracyLabel="87%"
+        learningTimeLabel="12 min"
+        onBackToCourses={jest.fn()}
+      />
+    );
+
+    fireEvent(getByTestId("course-finished-panel"), "layout", {
+      nativeEvent: {
+        layout: { width: 800, height: 1200, x: 0, y: 0 },
+      },
+    });
+
+    const titleStyle = StyleSheet.flatten(
+      getByTestId("course-finished-title-region").props.style,
+    );
+    const headingStyle = StyleSheet.flatten(
+      getByTestId("course-finished-heading").props.style,
+    );
+    const illustrationStyle = StyleSheet.flatten(
+      getByTestId("course-finished-illustration-region").props.style,
+    );
+    const statsStyle = StyleSheet.flatten(
+      getByTestId("course-finished-stats-region").props.style,
+    );
+    const actionStyle = StyleSheet.flatten(
+      getByTestId("course-finished-action-region").props.style,
+    );
+
+    expect(titleStyle.height ?? titleStyle.minHeight).toBeCloseTo(
+      1200 * 0.9 * 0.083,
+    );
+    expect(headingStyle.fontSize).toBeCloseTo(34 * ((1200 * 0.9) / 632));
+    expect(
+      illustrationStyle.height ?? illustrationStyle.minHeight,
+    ).toBeCloseTo(1200 * 0.9 * 0.345);
+    expect(statsStyle.height ?? statsStyle.minHeight).toBeCloseTo(
+      1200 * 0.9 * 0.213,
+    );
+    expect(actionStyle.height ?? actionStyle.minHeight).toBeCloseTo(
+      1200 * 0.9 * 0.079,
+    );
   });
 });
