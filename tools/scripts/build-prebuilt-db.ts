@@ -518,6 +518,10 @@ function sqlValue(value) {
 function readCardsFromCsv(pack) {
   const csvPath = resolveCsvPath(pack);
   const rawCsv = fs.readFileSync(csvPath, "utf8");
+  return parseCardsFromCsv(pack, rawCsv, pack.csvFile);
+}
+
+function parseCardsFromCsv(pack, rawCsv, sourceName = pack.csvFile) {
   const normalizedCsv = rawCsv.replace(/\r\n/g, "\n").replace(/\r/g, "\n");
   const parsed = Papa.parse(normalizedCsv, {
     header: true,
@@ -608,7 +612,7 @@ function readCardsFromCsv(pack) {
 
     if (!normalizedExternalId) {
       throw new Error(
-        `Missing external_id in official pack CSV "${pack.csvFile}" at row ${idx + 2}. ` +
+        `Missing external_id in official pack CSV "${sourceName}" at row ${idx + 2}. ` +
           `Official cards must use stable external_id values.`
       );
     }
@@ -812,4 +816,16 @@ function main() {
   console.log(`Generated prebuilt database: ${OUTPUT_DB_PATH} (${sizeMb} MB)`);
 }
 
-main();
+if (require.main === module) {
+  main();
+}
+
+module.exports = {
+  OFFICIAL_PACKS,
+  parseBooleanValue,
+  parseCardType,
+  splitBackTextIntoAnswers,
+  resolveCsvPath,
+  parseCardsFromCsv,
+  readCardsFromCsv,
+};
