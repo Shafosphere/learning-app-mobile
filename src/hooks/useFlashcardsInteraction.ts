@@ -10,6 +10,7 @@ import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
+import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
 
@@ -22,6 +23,7 @@ type CorrectionMode = "demote" | "intro";
 export type CorrectionState = {
   cardId: number;
   awers: string;
+  awersAlternatives?: string[];
   rewers: string;
   input1: string;
   input2: string;
@@ -422,7 +424,9 @@ export function useFlashcardsInteraction({
       const ok = isKnowDontKnow
         ? answerToUse.trim().toLowerCase() === "true"
         : reversed
-          ? checkSpelling(answerToUse, wordForCheck.text)
+          ? splitFrontTextIntoAnswers(wordForCheck.text).some((frontAnswer) =>
+              checkSpelling(answerToUse, frontAnswer)
+            )
           : wordForCheck.translations.some((t) => checkSpelling(answerToUse, t));
       if (__DEV__ && ENABLE_FLASHCARDS_CONSOLE_LOGS) {
         console.log("[Flashcards][confirm] evaluated", {
@@ -526,7 +530,9 @@ export function useFlashcardsInteraction({
         let isPerfect = false;
 
         if (reversed) {
-          isPerfect = userAnswer === normalize(wordForCheck.text);
+          isPerfect = splitFrontTextIntoAnswers(wordForCheck.text).some(
+            (frontAnswer) => userAnswer === normalize(frontAnswer)
+          );
         } else {
           isPerfect = wordForCheck.translations.some(
             (t) => userAnswer === normalize(t)
@@ -651,9 +657,13 @@ export function useFlashcardsInteraction({
           answerLength: answerToUse.length,
           promptImageSide: reversed ? "back" : "front",
         });
+        const frontAnswers = splitFrontTextIntoAnswers(wordForCheck.text);
+        const primaryFrontAnswer = frontAnswers[0] ?? wordForCheck.text;
+
         setCorrection({
           cardId: wordForCheck.id,
-          awers: wordForCheck.text,
+          awers: primaryFrontAnswer,
+          awersAlternatives: frontAnswers,
           rewers: wordForCheck.translations[0] ?? "",
           input1: "",
           input2: "",
@@ -661,7 +671,7 @@ export function useFlashcardsInteraction({
           mode: "demote",
           promptText: reversed
             ? wordForCheck.translations[0] ?? ""
-            : wordForCheck.text,
+            : primaryFrontAnswer,
           promptImageUri: reversed
             ? wordForCheck.imageBack ?? null
             : wordForCheck.imageFront ?? null,
@@ -769,6 +779,12 @@ export function useFlashcardsInteraction({
     [normalizeExpected, normalizeUserInput]
   );
 
+  const matchesAnyCorrectionField = useCallback(
+    (input: string, expectedValues: readonly string[]) =>
+      expectedValues.some((expected) => matchesCorrectionField(input, expected)),
+    [matchesCorrectionField]
+  );
+
   useEffect(() => {
     demotionCorrectionLockRef.current =
       correction?.mode === "demote" ? correction.cardId : null;
@@ -784,7 +800,12 @@ export function useFlashcardsInteraction({
     const expectsRewersInput = correctionFieldRequirements.rewers;
     const awersOk =
       !expectsAwersInput ||
-      matchesCorrectionField(correction.input1, correction.awers);
+      matchesAnyCorrectionField(
+        correction.input1,
+        correction.awersAlternatives?.length
+          ? correction.awersAlternatives
+          : [correction.awers]
+      );
     const rewersOk =
       !expectsRewersInput ||
       matchesCorrectionField(correction.input2, correction.rewers);
@@ -816,6 +837,7 @@ export function useFlashcardsInteraction({
     }
   }, [
     correction,
+    matchesAnyCorrectionField,
     matchesCorrectionField,
     moveElement,
   ]);
@@ -940,6 +962,8 @@ export function useFlashcardsInteraction({
     }
 
     const firstTranslation = selectedItem.translations[0] ?? "";
+    const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
+    const primaryFrontAnswer = frontAnswers[0] ?? selectedItem.text;
     const answerOnly = isAnswerOnlyCard(selectedItem);
 
     setCorrection((prev) => {
@@ -952,13 +976,14 @@ export function useFlashcardsInteraction({
 
       return {
         cardId: selectedItem.id,
-        awers: selectedItem.text,
+        awers: primaryFrontAnswer,
+        awersAlternatives: frontAnswers,
         rewers: nextRewers,
         input1: isSameIntroCard ? prev.input1 : "",
         input2: isSameIntroCard ? prev.input2 : "",
         answerOnly,
         mode: "intro",
-        promptText: selectedItem.text,
+        promptText: primaryFrontAnswer,
         promptImageUri: selectedItem.imageFront ?? null,
         reversed: false,
         word: selectedItem,

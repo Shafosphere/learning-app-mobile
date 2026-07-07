@@ -1,0 +1,596 @@
+external_id,front_text,back_text
+0003,est,is
+0011,a,has
+0013,plus,more
+0019,c',this
+0020,était; étais; fut; fût; fus,was
+0021,lui,him
+0023,sa,her
+0025,avait; avaient; avais; eu; eue; eut; eus; eurent; aviez; avoit,had
+0026,ses,his
+0027,tout,everything
+0029,sont; es; sommes; êtes,are
+0030,même; mêmes,same
+0032,être; soient; sois; soyez,be
+0035,bien,good
+0037,leur; leurs,their
+0038,fait; fais; fasse; faisons; fassent,do
+0040,avoir; ai; ont; avons; avez; ait; aient; aies; ayez,have
+0041,deux,of them
+0042,peut; puisse; puissent,may
+0043,faire,to do
+0045,aussi,too
+0047,été,summer
+0049,dit; dite; disait; dirent,said
+0050,moi,me
+0051,autre,other
+0052,non,Nope
+0053,tous; toute; toutes,all
+0054,temps,time
+0056,encore,again
+0057,très,very
+0058,après,after
+0059,alors,then
+0060,autres,others
+0061,là,the
+0062,ma; mes,my
+0064,quand,when
+0065,peu,little
+0067,ça; çà; ca,that
+0068,vie,life
+0071,ainsi,thus
+0072,fois,time
+0073,avant,before
+0074,cela,that
+0075,rien,nothing
+0076,vers,towards
+0077,homme,man
+0078,toujours,still
+0079,puis,then
+0080,suis,am
+0081,dire; dis; dites; disent; dise; dits,say
+0084,moins,less
+0085,monde,world
+0086,jamais,never
+0087,quelque; quelques,some
+0088,notre; nos,our
+0089,voir; vois; voyez; voient,see
+0090,étaient; furent; étions; étiez; fussent,were
+0092,depuis,from
+0094,votre; vos,your
+0095,contre,versus
+0096,soit,that is
+0097,grand; grande; grands,big
+0098,jusqu',up
+0099,yeux,eyes
+0100,celui,the one
+0105,tête,head
+0106,cas,case
+0108,jour,day
+0109,trois,three
+0110,an; ans,year
+0111,faut; faudrait,should
+0112,ici,here
+0113,chose,thing
+0114,point,point
+0115,trop,too
+0116,celle,that
+0117,déjà,already
+0119,femme; femmes,women
+0120,petit,little
+0121,ni,neither
+0122,aller; va; vais; vas; alla; allé; aille,go
+0123,père,dad
+0124,moment,moment
+0125,droit; droite,right
+0126,main,hand
+0128,devant,before
+0129,place,square
+0130,état,state
+0131,pays,country
+0133,comment,"how, what"
+0134,travail,work
+0135,personne,nobody
+0137,chaque,each
+0138,ceux; celles,those
+0139,pendant,during
+0140,dois; doit; doivent; devez,must
+0141,eux,them
+0142,partie,part
+0144,corps,body
+0145,bon,well
+0146,mère,mother
+0147,sens,meaning
+0148,part,go
+0149,porte,gate
+0150,aurait; aurais; auraient; aurions; auriez; eût; eussent,would have
+0151,histoire,story
+0152,premier; première; premiers,first
+0153,parce,by
+0155,France,France
+0156,hommes,men
+0158,pourquoi,why
+0159,beaucoup,a lot
+0160,dieu,God
+0161,effet,effect
+0162,toi,you
+0163,tant,so much
+0164,souvent,often
+0165,années,years
+0166,ci,this
+0167,nouveau; nouvel; nouveaux; nouvelles,new
+0168,jours,days
+0169,thé; the,tea
+0170,jeune,young
+0171,oui,yes
+0173,pouvoir,power
+0174,question,question
+0175,plusieurs,various
+0176,prendre; prend; prends; prenez; prenne; prenons,take
+0177,as,ace
+0178,mort; morte; morts; mortes,dead
+0179,côté,side
+0180,mal,wrong
+0181,fin,end
+0182,enfants,children
+0183,maison,home
+0184,serait; seraient; serais; serions; seriez,would be
+0185,seul; seule,only
+0186,nom,name
+0187,lieu,venue
+0188,politique,politics
+0189,voix,voice
+0190,compte,account
+0191,également,also
+0192,selon,according
+0193,enfin,finally
+0194,ville,town
+0195,seulement,only
+0196,cœur; coeur,heart
+0197,mieux,better
+0198,air,air
+0200,sais; savez; savent; sache; sachez,know
+0201,exemple,example
+0203,regard,glance
+0204,enfant,child
+0205,petits; petite; petites,small
+0206,reste,rest
+0207,savoir,to know
+0208,sera; serai; seras; serons; serez; seront,will be
+0209,raison,raison
+0210,fit,fit
+0211,lorsque; lorsqu',when
+0212,maintenant,now
+0214,coup,cut
+0215,dès,of the
+0216,eau,water
+0217,ailleurs,somewhere else
+0218,façon,way
+0219,près,close
+0220,terre,earth
+0221,esprit,spirit
+0222,nouvelle,news
+0223,pu; pouvais; pouvait; pouvaient; pouvions; pourrais; pourrait; pourraient; pourrions; pourriez; pourrai; purent; pût,could
+0224,nuit,night
+0225,besoin,need
+0226,ensemble,together
+0227,partir; pars; partent; parte,leave
+0228,art,art
+0229,certains; certaines,some
+0230,forme,form
+0233,famille,family
+0234,autant,as much
+0235,fille,daughter
+0236,saint; sainte; saintes,holy
+0237,hui,today
+0238,bras,arms
+0239,heures,hours
+0240,loin,far
+0241,aujourd',today
+0242,cours,classes
+0244,surtout,above all
+0245,vu; vue; vus,seen
+0246,guerre,war
+0247,société,society
+0248,bons; bonne; bonnes,good
+0249,face,face
+0250,peux; peuvent; pouvez; pouvons; pouvant; pourrez; pourras,can
+0251,idée,idea
+0253,manière,way
+0255,choses,things
+0256,quatre,four
+0258,doute; douter,doubt
+0259,assez,enough
+0260,mois,month
+0261,personnes,people
+0262,amour,love
+0263,siècle,century
+0264,français; française; françaises,French
+0266,mettre; met; mets; mettent; mettez; mette; mis; mit,put
+0267,nombre,number
+0268,juste,just
+0269,parler; parlent,talk
+0270,fils,son
+0271,possible; possibles,possible
+0272,autour,around
+0273,tard,late
+0274,gens,people
+0275,lors,during
+0276,aucun; aucune,none
+0277,passé; passée; passés; passées,past
+0278,mains,hands
+0279,veux; voulez; veulent,want
+0280,vraiment,really
+0281,nature,nature
+0282,heure,hour
+0283,demande,request
+0284,loi,law
+0285,lequel; laquelle; lesquels; lesquelles,which
+0286,pris; prises,taken
+0287,rapport,report
+0288,pourtant,yet
+0289,général; générale; générales,general
+0290,chambre,bedroom
+0291,suite,after
+0292,visage,face
+0294,presque,almost
+0297,situation,situation
+0299,soir,evening
+0300,cependant,however
+0301,parfois,sometimes
+0302,afin,in order to
+0303,trouve; trouvent; trouvez; trouvons,find
+0304,fort; forte; forts; fortes,strong
+0305,ordre,order
+0306,dernier; dernière; derniers,last
+0307,plutôt,instead
+0308,long; longue; longs; longues,long
+0309,faisait; faisais,was doing
+0310,passer; passe; passent; passez,pass
+0311,quel; quelle; quels; quelles,what
+0312,donner; donnent; donnez,give
+0313,peine,sadness
+0314,cause,cause
+0315,œuvre; oeuvre,work
+0316,roi; roy,king
+0317,or,gold
+0318,force,strength
+0319,dessus,above
+0320,sujet,topic
+0321,propre,own
+0322,agit,acts
+0323,tour,round
+0324,pierre,Pierre
+0325,derrière,behind
+0326,bas,down
+0327,mise,bet
+0328,vrai; vraie; vrais; vraies,true
+0329,sûr; sûrs,sure
+0330,abord,on board
+0331,mots,words
+0333,rue,street
+0334,mot,word
+0335,année,year
+0336,haut; haute,high
+0337,article,article
+0338,système,system
+0340,trouver,to find
+0341,semble; semblé,seems
+0342,ensuite,afterwards
+0343,ayant,having
+0344,action,stock
+0345,service,service
+0346,longtemps,long time
+0347,cinq,five
+0348,groupe,band
+0349,livre,book
+0351,prix,price
+0353,plan,plan
+0354,tel,phone
+0355,milieu,environment
+0356,mesure,measure
+0358,permettre; permet; permettent; permettez,allow
+0359,objet,object
+0360,étant,being
+0362,notamment,notably
+0363,travers,through
+0364,telle; tels; telles,such
+0365,instant,instant
+0366,niveau,level
+0367,devait; devais; dut; devions,had to
+0368,monsieur,sir
+0369,ta; tes,your
+0370,début,beginning
+0371,développement,development
+0372,sorte,kind
+0373,grâce; grace,grace
+0375,veut,wanna
+0376,dix,ten
+0377,retour,return
+0378,font,make
+0380,donne; donné; donnés,given
+0381,simple; simples,simple
+0382,fond,bottom
+0383,demanda; demandait; demandai,asked
+0384,présent,here
+0386,sourire,smile
+0387,bout,end
+0388,chacun; chacune,each
+0389,malgré,despite
+0390,tandis,while
+0391,rendre,to return
+0392,époque,era
+0393,peur,fear
+0394,parents,parents
+0395,table,table
+0396,public,audience
+0398,beau; belle; beaux; belles; bel,beautiful
+0399,chapitre,chapter
+0400,recherche; recherches,research
+0401,entreprise,company
+0402,parmi,among
+0403,vite,quick
+0404,rôle,role
+0405,matin,morning
+0407,venir; vient; viens; venue; venues; vienne; venez,come
+0409,allait,was going to
+0410,centre,center
+0412,comprendre,to understand
+0413,espace,space
+0414,voilà,so
+0415,présence,presence
+0416,répondu; répondit; répondait,answered
+0417,conseil,advice
+0418,réalité,reality
+0419,choix,choice
+0420,valeur,value
+0421,jeunes,youth
+0422,moyen; moyennes,medium
+0423,type,kind
+0424,sait,knows
+0427,fonction,function
+0429,crois; croyez; croient; croyons,believe
+0431,chef,chief
+0432,laisser; laissez; laissaient,let
+0433,intérieur; intérieure; intérieures,interior
+0434,lit,bed
+0435,mouvement,movement
+0437,âge,age
+0438,dû,from
+0439,sang,blood
+0440,route,road
+0441,lumière,light
+0443,états,states
+0444,projet,project
+0445,figure,face
+0446,cour,court
+0447,attention,warning
+0448,salle,hall
+0450,aide,assistance
+0452,image,image
+0453,envie,urge
+0454,quelqu',someone
+0455,argent,silver
+0456,texte,text
+0457,bois,wood
+0458,chemin,path
+0459,problème,problem
+0460,titre,title
+0461,vivre; vivent; vives; vivons,live
+0462,cadre,frame
+0463,langue,language
+0464,intérêt,interest
+0465,droits,rights
+0466,conditions,terms
+0467,silence,silence
+0468,école,school
+0469,entrée,hall
+0470,feu,fire
+0471,terme,term
+0472,voulait,wanted to
+0473,questions,questions
+0474,conscience,awareness
+0475,direction; dir,direction
+0476,vieux; vieil; vieille; vieilles,old
+0477,marché,market
+0478,œil,eye
+0479,social; sociale; sociaux; sociales,social
+0480,prise,socket
+0481,pensée,thought
+0482,frère,brother
+0483,liberté,freedom
+0484,nord,north
+0485,genre,gender
+0486,lettre,letter
+0487,vingt; vingts,twenty
+0490,pièce,room
+0491,vérité,truth
+0492,accord,OK
+0493,ami; amie,friend
+0494,membres,members
+0495,ciel,sky
+0496,ouvrir; ouvert; ouverts; ouvertes; ouvre; ouvrent,open
+0497,maître,master
+0498,nombreux; nombreuse,numerous
+0499,compris; comprit; comprenais,understood
+0500,plaisir,pleasure
+0501,politiques,policies
+0502,origine,origin
+0503,penser; pense; pensé; pensez; penses; pensent; pensons,think
+0504,soleil,sun
+0505,train,train
+0506,pied,foot
+0507,soi,self
+0508,aime; aiment; aimes; aimez,love
+0509,écrit; écrivant,writing
+0510,amis; amies,friends
+0511,minutes,minutes
+0512,expérience,experience
+0513,sud,south
+0514,église,church
+0515,principe,principle
+0516,existence,existence
+0517,activité,activity
+0518,quant,as to
+0519,existe; existent; existé,exist
+0520,sol,floor
+0521,particulier; particulière; particulières,particular
+0522,auteur,author
+0523,bouche,stuffy
+0524,président,president
+0525,voiture,car
+0526,gouvernement,government
+0528,réponse,answer
+0529,propos,about
+0530,matière,matter
+0531,pratique; pratiques,practice
+0532,certain; certaine,certain
+0533,âme,soul
+0534,base,base
+0535,risque,risk
+0536,affaires,business
+0537,affaire,affair
+0538,savait; savais; savaient; sut,knew
+0539,grandes,large
+0540,gauche,left
+0542,qualité,quality
+0544,cheveux,hair
+0545,processus,process
+0546,second; seconde,second
+0547,simplement,merely
+0548,parle; parlé; parlez; parles,speak
+0549,noir; noire; noirs; noires,black
+0550,contraire,opposite
+0551,venu; venait; venais; vint; vinrent,came
+0552,relation,relationship
+0553,scène,stage
+0555,peuple,people
+0556,mars,march
+0557,garde; gardez,keep
+0558,expression,expression
+0559,juin,June
+0560,économique; économiques,economic
+0561,différent; différente; différents; différentes,different
+0562,sein,breast
+0563,semblait; sembla; semblaient,seemed
+0564,produits,products
+0565,parti; partit,left
+0566,pieds,feet
+0567,mai,may
+0568,mer,sea
+0570,difficile,hard
+0571,santé,health
+0572,services,services
+0573,nécessaire,necessary
+0574,plein; pleine; pleins; pleines,full
+0575,arrive; arriva; arrivais; arrivés; arrivèrent,arrived
+0576,fallait; fallu; fallut,had to
+0577,organisation,organization
+0578,bureau,desk
+0579,éléments,elements
+0580,Europe,Europe
+0581,culture,culture
+0582,laisse; laissé,leave alone
+0583,puisque; puisqu',since
+0584,prit; prirent,took
+0586,entendu,understood
+0587,demander; demandez; demandent,ask
+0589,analyse,to analyse
+0590,sécurité,security
+0591,journée,daytime
+0592,plupart,mostly
+0593,faisant,doing
+0595,caractère,temper
+0596,voit,sees
+0598,important; importante; importants; importantes,important
+0599,six,six
+0600,désormais,from now on
+0601,discours,speech
+0602,formation; formations,training
+0603,dos,back
+0604,sortir,go out
+0605,passage,passage
+0606,rouge; rouges,red
+0607,relations,relationships
+0608,entendre,to hear
+0609,période,period
+0610,parole,speech
+0611,chercher; cherche; cherché,look for
+0613,présente; présents; présentes,present
+0614,produit,product
+0615,croire,to believe
+0616,note,note
+0617,contrôle,control
+0618,rester; restent; restez,stay
+0619,impression,impression
+0620,endroit,place
+0621,but,aim
+0622,décision,decision
+0623,ligne,line
+0624,jeu,game
+0625,connaissance; connaissances,knowledge
+0626,départ,departure
+0627,rire,laugh
+0629,ah,ah
+0630,durant,during
+0631,deuxième,second
+0632,signe,sign
+0633,position,position
+0634,auprès,with
+0635,lèvres,lips
+0636,hors,except
+0637,blanc; blanche; blancs; blanches,white
+0638,production,production
+0639,oh,oh
+0640,madame,madam
+0641,ancien; ancienne,ancient
+0642,toutefois,nevertheless
+0643,aura; aurai; auras; aurez; aurons; auront,will have
+0644,vit,lives
+0645,mille,thousand
+0646,donnée; données,data
+0647,volonté,will
+0648,occasion,opportunity
+0649,midi,midday
+0650,véritable,true
+0651,devient,bECOMES
+0652,faite; faites,done
+0653,libre; libres,free
+0654,confiance,trust
+0655,justice,justice
+0656,région,region
+0657,appelle; appelez,call
+0658,domaine,domain
+0659,mémoire,memory
+0660,bord,edge
+0661,désir,desire
+0663,étude,study
+0664,études,studies
+0665,gros; grosse,big
+0666,cuisine,kitchen
+0667,acte,deed
+0668,moyens,means
+0669,juillet; juill,July
+0670,devenir; devenue; devenus; devenues; deviennent,become
+0671,armée,army
+0673,voyage,travel
+0674,village,town
+0675,modèle,model
+0677,particulièrement,particularly
+0678,voie,way
+0679,activités,activities
+0682,répondre; réponds; répondent,answer
+0683,rapidement,rapidly
+0684,musique,music
+0685,sœur,sister
+0686,vis,screw
+0687,arrière,back
+0688,cit,quote
+0689,importance,importance
+0690,charge,charge
+0693,mari,husband
+0694,sentiment,feeling
+0695,importe,imported
+0698,vont,are going
+0699,tellement,so much
+0700,création,creation

@@ -7,6 +7,7 @@ import {
   advanceCustomReview,
   logCustomLearningEvent,
 } from "@/src/db/sqlite/db";
+import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
@@ -133,6 +134,12 @@ export const useReviewFlashcardsAnswerFlow = ({
     [ignoreDiacriticsInSpellcheck],
   );
 
+  const matchesAnyCorrectionField = useCallback(
+    (input: string, expectedValues: readonly string[]) =>
+      expectedValues.some((expected) => matchesCorrectionField(input, expected)),
+    [matchesCorrectionField],
+  );
+
   const completeSuccessfulReview = useCallback(
     (card: WordWithTranslations, box: keyof BoxesState) => {
       if (!courseId) return;
@@ -228,7 +235,12 @@ export const useReviewFlashcardsAnswerFlow = ({
     const expectsRewersInput = correctionFieldRequirements.rewers;
     const awersOk =
       !expectsAwersInput ||
-      matchesCorrectionField(correction.input1, correction.awers);
+      matchesAnyCorrectionField(
+        correction.input1,
+        correction.awersAlternatives?.length
+          ? correction.awersAlternatives
+          : [correction.awers],
+      );
     const rewersOk =
       !expectsRewersInput ||
       matchesCorrectionField(correction.input2 ?? "", correction.rewers);
@@ -274,6 +286,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     explanationOnlyOnWrong,
     finalizeWrongReviewCard,
     keyboardBridgeInputRef,
+    matchesAnyCorrectionField,
     matchesCorrectionField,
     selectedItem,
     showExplanationEnabled,
@@ -342,7 +355,9 @@ export const useReviewFlashcardsAnswerFlow = ({
       ? userAnswer.toLowerCase() === "true"
       : userAnswer.length > 0 &&
         (effectiveReversed
-          ? checkSpelling(userAnswer, selectedItem.text)
+          ? splitFrontTextIntoAnswers(selectedItem.text).some((frontAnswer) =>
+              checkSpelling(userAnswer, frontAnswer),
+            )
           : (selectedItem.translations ?? []).some((translation) =>
               checkSpelling(userAnswer, translation),
             ));
@@ -407,9 +422,13 @@ export const useReviewFlashcardsAnswerFlow = ({
         }, delayMs);
         return;
       }
+      const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
+      const primaryFrontAnswer = frontAnswers[0] ?? selectedItem.text;
+
       setCorrection({
         cardId: selectedItem.id,
-        awers: selectedItem.text,
+        awers: primaryFrontAnswer,
+        awersAlternatives: frontAnswers,
         rewers: selectedItem.translations[0] ?? "",
         input1: "",
         input2: "",
@@ -417,7 +436,7 @@ export const useReviewFlashcardsAnswerFlow = ({
         mode: "demote",
         promptText: effectiveReversed
           ? selectedItem.translations[0] ?? ""
-          : selectedItem.text,
+          : primaryFrontAnswer,
         promptImageUri: effectiveReversed
           ? selectedItem.imageBack ?? null
           : selectedItem.imageFront ?? null,
@@ -452,7 +471,9 @@ export const useReviewFlashcardsAnswerFlow = ({
         stripDiacritics(value.trim().toLowerCase());
       const normalizedUser = normalizeStrict(answer);
       if (effectiveReversed) {
-        return normalizedUser === normalizeStrict(selectedItem.text);
+        return splitFrontTextIntoAnswers(selectedItem.text).some(
+          (frontAnswer) => normalizedUser === normalizeStrict(frontAnswer),
+        );
       }
       return (selectedItem.translations ?? []).some(
         (translation) => normalizedUser === normalizeStrict(translation),

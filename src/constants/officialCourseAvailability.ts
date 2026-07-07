@@ -12,6 +12,10 @@ const POLISH_LANGUAGE_COURSE_SLUGS = [
 
 const ENGLISH_LANGUAGE_COURSE_SLUGS = [
   "basic_english_to_spanish_50",
+  "french_a1",
+  "french_a2",
+  "french_b1",
+  "french_b2",
 ] as const;
 
 const POLISH_GENERAL_COURSE_SLUGS = [

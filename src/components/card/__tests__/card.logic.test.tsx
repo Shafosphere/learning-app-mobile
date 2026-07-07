@@ -367,6 +367,39 @@ describe("Card logic props", () => {
     });
   });
 
+  it("shows split front_text values one at a time with prompt toggle", async () => {
+    render(
+      <Card
+        {...createProps({
+          selectedItem: makeCard({
+            id: 13,
+            text: "hello; hi",
+            translations: ["cześć"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.promptText).toBe("hello");
+    });
+
+    expect(latestResolverProps).toMatchObject({
+      canToggleTranslations: true,
+      promptText: "hello",
+      shouldCorrectAwers: false,
+      shouldCorrectRewers: true,
+    });
+
+    act(() => {
+      (latestResolverProps?.next as () => void)();
+    });
+
+    await waitFor(() => {
+      expect(latestResolverProps?.promptText).toBe("hi");
+    });
+  });
+
   it("switches correction prompt source to correction payload", async () => {
     render(
       <Card

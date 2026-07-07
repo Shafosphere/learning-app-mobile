@@ -1,6 +1,7 @@
 import { REVIEW_INTERVAL_RANGES_MS } from "@/src/config/appConfig";
 
 const ANSWER_SPLIT_REGEX = /[;,\n]/;
+const FRONT_TEXT_ANSWER_SPLIT_REGEX = /[;\n]/;
 
 export function dedupeOrdered(values: string[]): string[] {
   const seen = new Set<string>();
@@ -24,6 +25,23 @@ export function splitBackTextIntoAnswers(
 
   const tentative = trimmed
     .split(ANSWER_SPLIT_REGEX)
+    .map((entry) => entry.trim())
+    .filter((entry) => entry.length > 0);
+
+  const candidates = tentative.length > 0 ? tentative : [trimmed];
+  return dedupeOrdered(candidates);
+}
+
+export function splitFrontTextIntoAnswers(
+  raw: string | null | undefined
+): string[] {
+  const trimmed = (raw ?? "").trim();
+  if (!trimmed) {
+    return [];
+  }
+
+  const tentative = trimmed
+    .split(FRONT_TEXT_ANSWER_SPLIT_REGEX)
     .map((entry) => entry.trim())
     .filter((entry) => entry.length > 0);
 

@@ -2,6 +2,7 @@ import { WordWithTranslations } from "@/src/types/boxes";
 
 export type CardCorrectionType = {
   awers: string;
+  awersAlternatives?: string[];
   rewers: string;
   input1: string;
   input2?: string;

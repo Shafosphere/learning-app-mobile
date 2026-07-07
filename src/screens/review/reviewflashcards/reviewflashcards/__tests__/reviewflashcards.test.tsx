@@ -1735,6 +1735,87 @@ describe("reviewflashcards correction desync regression", () => {
     jest.useRealTimers();
   });
 
+  it("accepts split front_text answers for flipped review cards", async () => {
+    jest.useFakeTimers();
+    mockedAdvanceCustomReview.mockResolvedValueOnce({
+      stage: 5,
+      nextReview: Date.now() + 60 * 24 * 60 * 60 * 1000,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 302,
+        frontText: "hello; hi",
+        backText: "cześć",
+        answers: ["cześć"],
+        flipped: true,
+        stage: 4,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 4);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "hi");
+    });
+
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await act(async () => {
+      jest.runAllTimers();
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
+    });
+
+    expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(302, 77);
+    jest.useRealTimers();
+  });
+
+  it("accepts split front_text alternatives during flipped correction", async () => {
+    mockedScheduleCustomReview.mockResolvedValueOnce({
+      stage: 0,
+      nextReview: Date.now() + 2 * 24 * 60 * 60 * 1000,
+    });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({
+        id: 303,
+        frontText: "hello; hi",
+        backText: "cześć",
+        answers: ["cześć"],
+        flipped: true,
+        stage: 4,
+      }),
+    ]);
+
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+
+    await startReviewFromStage(screen, 4);
+
+    await act(async () => {
+      fireEvent.changeText(getVisibleTextInputs(screen)[0], "__wrong_answer__");
+    });
+
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    await waitFor(() => {
+      expect(screen.queryByText("hello")).not.toBeNull();
+      expect(screen.queryByText("cześć")).not.toBeNull();
+    });
+
+    const correctionInputs = getVisibleTextInputs(screen);
+    await act(async () => {
+      fireEvent.changeText(correctionInputs[0], "hi");
+    });
+
+    await waitFor(() => {
+      expect(mockedScheduleCustomReview).toHaveBeenCalledWith(303, 77, 0);
+      expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
+    });
+  });
+
   it("demotes a corrected wrong answer in DB and does not requeue it into the current session", async () => {
     mockedScheduleCustomReview.mockResolvedValueOnce({
       stage: 0,

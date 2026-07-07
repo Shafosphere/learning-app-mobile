@@ -298,6 +298,147 @@ describe("useFlashcardsInteraction", () => {
         });
       }
     );
+
+    it.each(["hello", "hi"])(
+      "accepts split front_text answer %s when reversed",
+      async (answer) => {
+        const card = makeWord({
+          id: 82,
+          text: "hello; hi",
+          translations: ["cześć", "hej"],
+          flipped: true,
+        });
+        const { result } = renderInteraction(
+          makeBoxesState({
+            boxTwo: [card],
+          })
+        );
+
+        act(() => {
+          result.current.interaction.handleSelectBox("boxTwo");
+        });
+
+        await waitFor(() => {
+          expect(result.current.interaction.reversed).toBe(true);
+        });
+
+        act(() => {
+          result.current.interaction.confirm(undefined, answer);
+        });
+
+        await waitFor(() => {
+          expect(result.current.interaction.result).toBe(true);
+        });
+      }
+    );
+
+    it("rejects non-matching split front_text answer when reversed", async () => {
+      const card = makeWord({
+        id: 83,
+        text: "hello; hi",
+        translations: ["cześć", "hej"],
+        flipped: true,
+      });
+      const { result } = renderInteraction(
+        makeBoxesState({
+          boxTwo: [card],
+        }),
+        { skipDemotionCorrection: true }
+      );
+
+      act(() => {
+        result.current.interaction.handleSelectBox("boxTwo");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.reversed).toBe(true);
+      });
+
+      act(() => {
+        result.current.interaction.confirm(undefined, "bonjour");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.result).toBe(false);
+      });
+    });
+
+    it("accepts split front_text alternatives during reversed demotion correction", async () => {
+      const card = makeWord({
+        id: 84,
+        text: "hello; hi",
+        translations: ["cześć", "hej"],
+        flipped: true,
+      });
+      const { result } = renderInteraction(
+        makeBoxesState({
+          boxTwo: [card],
+        })
+      );
+
+      act(() => {
+        result.current.interaction.handleSelectBox("boxTwo");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.reversed).toBe(true);
+      });
+
+      act(() => {
+        result.current.interaction.confirm(undefined, "__wrong_answer__");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.correction).toMatchObject({
+          cardId: card.id,
+          awers: "hello",
+          awersAlternatives: ["hello", "hi"],
+          reversed: true,
+        });
+      });
+
+      act(() => {
+        result.current.interaction.wrongInputChange(1, "hi");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.correction).toBeNull();
+        expect(result.current.boxes.boxZero.map((item) => item.id)).toEqual([
+          card.id,
+        ]);
+      });
+    });
+
+    it("does not use split front_text answers in normal direction", async () => {
+      const card = makeWord({
+        id: 84,
+        text: "hello; hi",
+        translations: ["cześć", "hej"],
+        flipped: false,
+      });
+      const { result } = renderInteraction(
+        makeBoxesState({
+          boxOne: [card],
+        }),
+        { skipDemotionCorrection: true }
+      );
+
+      act(() => {
+        result.current.interaction.handleSelectBox("boxOne");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.reversed).toBe(false);
+      });
+
+      act(() => {
+        result.current.interaction.confirm(undefined, "hello");
+      });
+
+      await waitFor(() => {
+        expect(result.current.interaction.result).toBe(false);
+      });
+    });
   });
 
   it("creates correction bound to the answered card after wrong answer", async () => {

@@ -1,4 +1,5 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
@@ -210,6 +211,7 @@ export default function Card({
     return value.replace(/ +$/, "");
   }, []);
   const [translations, setTranslations] = useState<number>(0);
+  const [frontAnswersIndex, setFrontAnswersIndex] = useState<number>(0);
   const mainInputRef = useRef<TextInput | null>(null);
   const correctionInput1Ref = useRef<TextInput | null>(null);
   const correctionInput2Ref = useRef<TextInput | null>(null);
@@ -218,6 +220,7 @@ export default function Card({
   const initialLayoutCardIdRef = useRef<number | null>(null);
   const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
   const lastTranslationItemId = useRef<number | null>(null);
+  const lastFrontAnswerItemId = useRef<number | null>(null);
   const previousCorrectionInput2 = useRef<string>("");
   const [input1LayoutWidth, setInput1LayoutWidth] = useState(0);
   const [input2LayoutWidth, setInput2LayoutWidth] = useState(0);
@@ -228,6 +231,14 @@ export default function Card({
   const input1ScrollRef = useRef<ScrollView | null>(null);
   const input2ScrollRef = useRef<ScrollView | null>(null);
   const selectedItemId = selectedItem?.id ?? null;
+  const frontAnswers = useMemo(
+    () => splitFrontTextIntoAnswers(selectedItem?.text),
+    [selectedItem?.text],
+  );
+  const activeFrontAnswerIndex =
+    lastFrontAnswerItemId.current === selectedItemId
+      ? Math.min(frontAnswersIndex, Math.max(frontAnswers.length - 1, 0))
+      : 0;
   const activeTranslationIndex =
     lastTranslationItemId.current === selectedItemId ? translations : 0;
   const correctionWord = correction?.word ?? null;
@@ -235,7 +246,7 @@ export default function Card({
   const correctionPromptImageUri = correction?.promptImageUri ?? null;
   const correctionReversed = correction?.reversed ?? false;
 
-  const awers = selectedItem?.text ?? "";
+  const awers = frontAnswers[activeFrontAnswerIndex] ?? selectedItem?.text ?? "";
   const rewers = selectedItem?.translations?.[activeTranslationIndex] ?? "";
   const promptImageFront = selectedItem?.imageFront ?? null;
   const promptImageBack = selectedItem?.imageBack ?? null;
@@ -280,8 +291,7 @@ export default function Card({
   const mainExpectedAnswers = useMemo(() => {
     if (!selectedItem) return [];
     if (effectiveReversed) {
-      const awersValue = (selectedItem.text ?? "").trim();
-      return awersValue ? [awersValue] : [];
+      return splitFrontTextIntoAnswers(selectedItem.text);
     }
     return (selectedItem.translations ?? [])
       .map((entry) => entry.trim())
@@ -663,9 +673,18 @@ export default function Card({
 
   const translationSource = showCorrectionInputs ? correctionWord : selectedItem;
   const len = translationSource?.translations?.length ?? 0;
+  const frontLen = frontAnswers.length;
   const isShowingTranslation = isIntroMode || promptText === rewers;
   const canToggleTranslations = !showCorrectionInputs && isShowingTranslation && len > 1;
+  const isShowingFrontAnswer =
+    !showCorrectionInputs && !effectiveReversed && promptText === awers;
+  const canToggleFrontAnswers = isShowingFrontAnswer && frontLen > 1;
+  const canTogglePromptText = canToggleTranslations || canToggleFrontAnswers;
   const next = () => {
+    if (canToggleFrontAnswers) {
+      setFrontAnswersIndex((i) => (i + 1) % frontLen);
+      return;
+    }
     if (!len) return;
     setTranslations((i) => (i + 1) % len);
   };
@@ -681,6 +700,19 @@ export default function Card({
 
     lastTranslationItemId.current = currentId;
     setTranslations((prev) => (prev === 0 ? prev : 0));
+  }, [isFocused, selectedItemId]);
+
+  useLayoutEffect(() => {
+    const currentId = selectedItemId;
+    if (!isFocused) {
+      return;
+    }
+    if (currentId === lastFrontAnswerItemId.current) {
+      return;
+    }
+
+    lastFrontAnswerItemId.current = currentId;
+    setFrontAnswersIndex((prev) => (prev === 0 ? prev : 0));
   }, [isFocused, selectedItemId]);
 
   useEffect(() => {
@@ -742,7 +774,9 @@ export default function Card({
 
     const answerToUse = answer.replace(/ +$/, "");
     const isCorrect = reversed
-      ? checkSpelling(answerToUse, selectedItem.text)
+      ? splitFrontTextIntoAnswers(selectedItem.text).some((frontAnswer) =>
+          checkSpelling(answerToUse, frontAnswer),
+        )
       : selectedItem.translations.some((entry) =>
           checkSpelling(answerToUse, entry),
         );
@@ -1191,9 +1225,13 @@ export default function Card({
 
     if (effectiveReversed) {
       // Answer should match 'awers' (text)
-      const target = selectedItem.text;
-      if (norm(target) === userAnswer) return null; // Perfect match
-      bestMatch = target;
+      const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
+      const perfect = frontAnswers.some((target) => norm(target) === userAnswer);
+      if (perfect) return null;
+      bestMatch =
+        frontAnswers.find((target) => calculateTypoDiff(userAnswer, norm(target)) !== null) ??
+        frontAnswers[0] ??
+        selectedItem.text;
     } else {
       // Answer should match one of translations
       // If perfectly matches any, returns null
@@ -1291,7 +1329,7 @@ export default function Card({
     onCorrectionInputBlur: handleCorrectionInputBlur,
     onCorrection1Completed,
     previousCorrectionInput2,
-    canToggleTranslations,
+    canToggleTranslations: canTogglePromptText,
     next,
     input1LayoutWidth,
     input2LayoutWidth,

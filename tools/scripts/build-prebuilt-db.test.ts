@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 // Production script is CommonJS so Node can execute it directly during prebuild.
+const fs = require("node:fs");
+const path = require("node:path");
 const {
   OFFICIAL_PACKS,
   parseCardsFromCsv,
@@ -16,6 +18,10 @@ const EXPECTED_CARD_COUNTS: Record<string, number> = {
   fiszki_hiszpanski_podstawowe_poprawione: 310,
   fiszki_francuski_podstawowe_poprawione: 309,
   basic_english_to_spanish_50: 310,
+  french_a1: 595,
+  french_a2: 1157,
+  french_b1: 2544,
+  french_b2: 3931,
   astronomia: 107,
   polska_historia: 144,
   math: 258,
@@ -46,6 +52,12 @@ const EXPECTED_CARD_COUNTS: Record<string, number> = {
   panstwa_i_stolice_oceanii_en: 16,
   panstwa_i_stolice_swiata_en: 197,
 };
+
+const OFFICIAL_PACK_CASES: Array<[string, Record<string, unknown>]> =
+  OFFICIAL_PACKS.map((pack: Record<string, unknown> & { slug: string }) => [
+    pack.slug,
+    pack,
+  ]);
 
 describe("prebuilt CSV parser", () => {
   it("keeps front_text intact while splitting back_text answers", () => {
@@ -153,12 +165,35 @@ describe("prebuilt CSV parser", () => {
       "three",
     ]);
   });
+
+  it("parses test fixture with multiple front_text and back_text values", () => {
+    const fixturePath = path.join(__dirname, "__fixtures__", "multi-front-back.csv");
+    const rawCsv = fs.readFileSync(fixturePath, "utf8");
+    const cards = parseCardsFromCsv(
+      {
+        csvFile: "multi-front-back.csv",
+        defaultType: "traditional",
+        defaultFlip: true,
+      },
+      rawCsv
+    );
+
+    expect(cards).toHaveLength(1);
+    expect(cards[0]).toEqual(
+      expect.objectContaining({
+        externalId: "001",
+        frontText: "hello; hi",
+        backText: "cześć; hej; siema",
+        answers: ["cześć", "hej", "siema"],
+      })
+    );
+  });
 });
 
 describe("registered prebuilt CSV packs", () => {
   it("keeps registered pack inventory and card counts stable", () => {
-    expect(OFFICIAL_PACKS).toHaveLength(37);
-    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(37);
+    expect(OFFICIAL_PACKS).toHaveLength(41);
+    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(41);
 
     const actualCounts = Object.fromEntries(
       OFFICIAL_PACKS.map((pack: { slug: string }) => [
@@ -173,10 +208,10 @@ describe("registered prebuilt CSV packs", () => {
         (total: number, count) => total + (count as number),
         0
       )
-    ).toBe(9908);
+    ).toBe(18135);
   });
 
-  it.each(OFFICIAL_PACKS.map((pack: { slug: string }) => [pack.slug, pack]))(
+  it.each(OFFICIAL_PACK_CASES)(
     "%s has unique stable IDs and usable card content",
     (_slug: string, pack: Record<string, unknown>) => {
       const cards = readCardsFromCsv(pack);
