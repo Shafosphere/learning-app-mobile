@@ -11,6 +11,7 @@ type CardFrameProps = {
   cardStateStyle?: object;
   cardWidth?: number;
   minHeight?: number;
+  contentScale?: number;
   backgroundColorOverride?: string;
   children: ReactNode;
 };
@@ -24,6 +25,7 @@ export default function CardFrame({
   cardStateStyle,
   cardWidth,
   minHeight,
+  contentScale = 1,
   backgroundColorOverride,
   children,
 }: CardFrameProps) {
@@ -45,7 +47,13 @@ export default function CardFrame({
       {compact ? (
         <Animated.View
           layout={animateLayout ? CARD_LAYOUT_TRANSITION : undefined}
-          style={styles.cardSmallContent}
+          style={[
+            styles.cardSmallContent,
+            {
+              paddingVertical: 10 * contentScale,
+              gap: 10 * contentScale,
+            },
+          ]}
         >
           {children}
         </Animated.View>

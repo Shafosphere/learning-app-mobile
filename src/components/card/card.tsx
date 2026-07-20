@@ -1,6 +1,7 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { splitGraphemes } from "@/src/utils/graphemes";
@@ -175,7 +176,10 @@ export default function Card({
   const styles = useStyles();
   const { t } = useTranslation();
   const { width: windowWidth } = useWindowDimensions();
-  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
+  const { isTabletLayout } = useDeviceLayout();
+  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth, {
+    isTabletLayout,
+  });
   const checkSpelling = useSpellchecking();
   const {
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
@@ -1067,9 +1071,9 @@ export default function Card({
               style={[
                 styles.overlayErrorMarker,
                 {
-                  top: cardMetrics.inputLineHeight - 3,
-                  fontSize: 11 * cardMetrics.visualScale,
-                  lineHeight: 12 * cardMetrics.visualScale,
+                  top: cardMetrics.inputLineHeight - 3 * cardMetrics.contentScale,
+                  fontSize: (11 * cardMetrics.fontSize) / 24,
+                  lineHeight: (12 * cardMetrics.fontSize) / 24,
                 },
               ]}
             >
@@ -1406,6 +1410,7 @@ export default function Card({
         cardStateStyle={cardStateStyle}
         cardWidth={cardMetrics.width}
         minHeight={cardMetrics.minHeight}
+        contentScale={cardMetrics.contentScale}
         backgroundColorOverride={backgroundColorOverride}
       >
         <CardContentResolver {...resolverProps} />

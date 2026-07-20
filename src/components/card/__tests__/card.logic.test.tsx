@@ -267,8 +267,13 @@ describe("Card logic props", () => {
       218.68,
       1,
     );
+    expect((latestResolverProps?.cardMetrics as any)?.contentScale).toBeCloseTo(
+      218.68 / 126,
+      2,
+    );
     expect((latestResolverProps?.cardMetrics as any)?.fontSize).toBeCloseTo(
-      29.28,
+      24 * (218.68 / 126),
+      2,
     );
   });
 
@@ -309,8 +314,13 @@ describe("Card logic props", () => {
     });
     expect(latestCardFrameProps?.minHeight).toBeCloseTo(218.68, 1);
     expect(latestCardHintProps?.cardWidth).toBe(630);
+    expect((latestResolverProps?.cardMetrics as any)?.contentScale).toBeCloseTo(
+      218.68 / 126,
+      2,
+    );
     expect((latestResolverProps?.cardMetrics as any)?.fontSize).toBeCloseTo(
-      29.28,
+      24 * (218.68 / 126),
+      2,
     );
   });
 

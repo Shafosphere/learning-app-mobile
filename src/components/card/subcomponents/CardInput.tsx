@@ -72,6 +72,7 @@ export function CardInput({
 }: CardInputProps) {
   const styles = useStyles();
   const { t } = useTranslation();
+  const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -155,6 +156,7 @@ export function CardInput({
       height: cardMetrics.textInputHeight,
       fontSize: cardMetrics.fontSize,
       lineHeight: cardMetrics.inputLineHeight,
+      borderBottomWidth: 3 * contentScale,
     };
     if (!typoDiff) {
       return (
@@ -270,6 +272,7 @@ export function CardInput({
     styles,
     textColorOverride,
     typoDiff,
+    contentScale,
     cardMetrics.fontSize,
     cardMetrics.inputHeight,
     cardMetrics.inputLineHeight,
@@ -344,16 +347,14 @@ export function CardInput({
           promptImageUri && allowMultilinePrompt && { justifyContent: "center" },
         ]}
       >
-        <View
-          style={{ width: "100%", gap: 8 }}
-        >
+        <View style={{ width: "100%", gap: 8 * contentScale }}>
           {promptImageUri ? imageBlock : null}
           {hasPromptText ? (
             <View style={styles.promptRow}>
               {promptTextBlock}
               {canToggleTranslations ? (
                 <Pressable
-                  style={styles.cardIconWrapper}
+                  style={[styles.cardIconWrapper, { width: 32 * contentScale }]}
                   onPress={next}
                   hitSlop={8}
                   accessibilityRole="button"
@@ -363,7 +364,7 @@ export function CardInput({
                 >
                   <Octicons
                     name="discussion-duplicate"
-                    size={24}
+                    size={24 * contentScale}
                     color={
                       textColorOverride ?? (styles.cardFont as any).color
                     }
@@ -386,7 +387,19 @@ export function CardInput({
   );
 
   if (allowMultilinePrompt) {
-    return <View style={styles.cardContentLarge}>{content}</View>;
+    return (
+      <View
+        style={[
+          styles.cardContentLarge,
+          {
+            paddingVertical: 10 * contentScale,
+            gap: 10 * contentScale,
+          },
+        ]}
+      >
+        {content}
+      </View>
+    );
   }
 
   return content;

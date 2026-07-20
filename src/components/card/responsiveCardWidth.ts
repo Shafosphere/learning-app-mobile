@@ -5,6 +5,7 @@ const BASE_FLASHCARD_FONT_SIZE = 24;
 const BASE_FLASHCARD_INPUT_HEIGHT = 52;
 const BASE_FLASHCARD_TEXT_INPUT_HEIGHT = 44;
 const BASE_FLASHCARD_LINE_HEIGHT = 28;
+const PHONE_REFERENCE_CARD_HEIGHT = 126;
 const FLASHCARD_HORIZONTAL_INSET = 48;
 export const MAX_TABLET_FLASHCARD_WIDTH = 630;
 const MAX_VISUAL_SCALE_DELTA = 0.22;
@@ -13,6 +14,8 @@ export type ResponsiveFlashcardMetrics = {
   width: number;
   minHeight: number;
   visualScale: number;
+  /** Scales the card's text/input layout on tablets; phones always use 1. */
+  contentScale: number;
   fontSize: number;
   lineHeight: number;
   inputHeight: number;
@@ -35,6 +38,7 @@ export function getResponsiveFlashcardWidth(windowWidth: number): number {
 
 export function getResponsiveFlashcardMetrics(
   windowWidth: number,
+  options: { isTabletLayout?: boolean } = {},
 ): ResponsiveFlashcardMetrics {
   const width = getResponsiveFlashcardWidth(windowWidth);
   const progress = clamp(
@@ -44,18 +48,24 @@ export function getResponsiveFlashcardMetrics(
     1,
   );
   const visualScale = 1 + progress * MAX_VISUAL_SCALE_DELTA;
+  const minHeight = Math.max(
+    BASE_FLASHCARD_MIN_HEIGHT,
+    width / TARGET_FLASHCARD_ASPECT_RATIO,
+  );
+  const contentScale = options.isTabletLayout
+    ? minHeight / PHONE_REFERENCE_CARD_HEIGHT
+    : 1;
+  const textScale = options.isTabletLayout ? contentScale : visualScale;
 
   return {
     width,
-    minHeight: Math.max(
-      BASE_FLASHCARD_MIN_HEIGHT,
-      width / TARGET_FLASHCARD_ASPECT_RATIO,
-    ),
+    minHeight,
     visualScale,
-    fontSize: BASE_FLASHCARD_FONT_SIZE * visualScale,
-    lineHeight: BASE_FLASHCARD_LINE_HEIGHT * visualScale,
-    inputHeight: BASE_FLASHCARD_INPUT_HEIGHT * visualScale,
-    textInputHeight: BASE_FLASHCARD_TEXT_INPUT_HEIGHT * visualScale,
-    inputLineHeight: BASE_FLASHCARD_LINE_HEIGHT * visualScale,
+    contentScale,
+    fontSize: BASE_FLASHCARD_FONT_SIZE * textScale,
+    lineHeight: BASE_FLASHCARD_LINE_HEIGHT * textScale,
+    inputHeight: BASE_FLASHCARD_INPUT_HEIGHT * textScale,
+    textInputHeight: BASE_FLASHCARD_TEXT_INPUT_HEIGHT * textScale,
+    inputLineHeight: BASE_FLASHCARD_LINE_HEIGHT * textScale,
   };
 }

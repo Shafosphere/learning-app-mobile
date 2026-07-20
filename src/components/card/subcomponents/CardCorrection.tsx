@@ -118,6 +118,7 @@ export function CardCorrection({
 }: CardCorrectionProps) {
   const styles = useStyles();
   const { t } = useTranslation();
+  const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
     !hasMath && !allowMultilinePrompt && promptText.length > 18;
@@ -273,7 +274,7 @@ export function CardCorrection({
           {promptContent}
           {canToggleTranslations && !isIntroMode ? (
             <Pressable
-              style={styles.cardIconWrapper}
+              style={[styles.cardIconWrapper, { width: 32 * contentScale }]}
               onPress={next}
               hitSlop={8}
               accessibilityRole="button"
@@ -283,7 +284,7 @@ export function CardCorrection({
             >
               <Octicons
                 name="discussion-duplicate"
-                size={24}
+                size={24 * contentScale}
                 color={textColorOverride ?? (styles.cardFont as any).color}
               />
             </Pressable>
@@ -300,6 +301,7 @@ export function CardCorrection({
           ? styles.containerInputLarge
           : styles.containerInput,
         styles.containerInputFirst,
+        { paddingTop: 8 * contentScale },
       ]}
       onLayout={({ nativeEvent }) => {
         const nextWidth = nativeEvent.layout.width;
@@ -466,7 +468,11 @@ export function CardCorrection({
       </ScrollView>
       {isIntroMode && canToggleTranslations ? (
         <Pressable
-          style={[styles.cardIconWrapper, styles.introToggle]}
+          style={[
+            styles.cardIconWrapper,
+            styles.introToggle,
+            { width: 32 * contentScale },
+          ]}
           onPress={next}
           hitSlop={8}
           accessibilityRole="button"
@@ -476,7 +482,7 @@ export function CardCorrection({
         >
           <Octicons
             name="discussion-duplicate"
-            size={24}
+            size={24 * contentScale}
             color={textColorOverride ?? (styles.cardFont as any).color}
           />
         </Pressable>
@@ -487,13 +493,21 @@ export function CardCorrection({
   if (allowMultilinePrompt) {
     return (
       <View
-        style={[styles.cardContentLarge, styles.cardContentLargeCorrection]}
+        style={[
+          styles.cardContentLarge,
+          styles.cardContentLargeCorrection,
+          {
+            paddingVertical: 14 * contentScale,
+            gap: 10 * contentScale,
+          },
+        ]}
       >
         {promptBlock}
         <View
           style={[
             styles.inputContainerLarge,
             styles.inputContainerLargeCorrection,
+            { paddingBottom: 14 * contentScale },
           ]}
         >
           {showAwersInput ? input1Block : null}
