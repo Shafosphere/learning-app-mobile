@@ -229,17 +229,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "relative",
     height: 52,
   },
-  myplaceholder: {
-    position: "absolute",
-    top: 8,
-    left: 8,
-    height: 44, // stała wysokość inputa
-    lineHeight: 28, // stała wysokość
-    opacity: 0.5,
-    fontSize: 24,
-    fontWeight: 800,
-    color: colors.headline,
-  },
   dateInputMask: {
     position: "absolute",
     top: 0,
@@ -259,19 +248,21 @@ export const useStyles = createThemeStylesHook((colors) => ({
     height: 44, // stała wysokość inputa
     lineHeight: 28, // stała wysokość
     width: "100%",
-    padding: 8,
+    paddingHorizontal: 8,
+    paddingVertical: 0,
+    textAlignVertical: "center",
     fontSize: 24,
     fontWeight: 800,
     color: colors.headline,
   },
   inputOverlay: {
     position: "absolute",
-    top: 8,
+    top: 0,
     left: 8,
     height: 44, // stała wysokość inputa
     width: "100%",
     flexDirection: "row",
-    alignItems: "flex-start",
+    alignItems: "center",
     pointerEvents: "none",
     // color: "tra"
   },
@@ -284,6 +275,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     position: "relative",
     height: 44,
     alignItems: "center",
+    justifyContent: "center",
   },
   overlayCharError: {
     color: colors.my_yellow,
@@ -320,6 +312,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingVertical: 10,
     gap: 10,
     justifyContent: "center",
+  },
+  cardContentLargeCorrection: {
+    paddingVertical: 14,
   },
   topContainerLarge: {
     alignItems: "center",

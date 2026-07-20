@@ -440,6 +440,100 @@ describe("Card logic props", () => {
     });
   });
 
+  it("keeps full ghost correction text visible after typing a prefix", async () => {
+    render(
+      <Card
+        {...createProps({
+          result: false,
+          correction: {
+            cardId: 131,
+            awers: "poproszę to",
+            rewers: "je voudrais ça",
+            input1: "",
+            input2: "j",
+            mode: "demote",
+            promptText: "poproszę to",
+            reversed: false,
+          },
+          selectedItem: makeCard({
+            id: 131,
+            text: "poproszę to",
+            translations: ["je voudrais ça"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.displayMode).toBe("correction");
+    });
+
+    const renderCorrectionGhostText = latestResolverProps?.renderCorrectionGhostText as (
+      value: string,
+      expected: string,
+    ) => React.ReactNode;
+    const segments = React.Children.toArray(
+      renderCorrectionGhostText("j", "je voudrais ça"),
+    ) as React.ReactElement<Record<string, any>>[];
+
+    expect(segments.map((segment) => segment.props.children).join(""))
+      .toBe("je\u00A0voudrais\u00A0ça");
+    expect(segments[0].props.style).toContainEqual({ opacity: 0 });
+    expect(segments[1].props.style).not.toContainEqual({ opacity: 0 });
+
+    const renderCorrectionErrorText = latestResolverProps?.renderCorrectionErrorText as (
+      value: string,
+      expected: string,
+    ) => React.ReactNode;
+    expect(renderCorrectionErrorText("j", "je voudrais ça")).toBeNull();
+    expect(renderCorrectionErrorText("x", "je voudrais ça")).not.toBeNull();
+  });
+
+  it("keeps emoji intact and uses the overridden text color in ghost correction text", async () => {
+    render(
+      <Card
+        {...createProps({
+          textColorOverride: "#123456",
+          result: false,
+          correction: {
+            cardId: 132,
+            awers: "👋 hello",
+            rewers: "cześć",
+            input1: "",
+            input2: "",
+            mode: "demote",
+            promptText: "👋 hello",
+            reversed: false,
+          },
+          selectedItem: makeCard({
+            id: 132,
+            text: "👋 hello",
+            translations: ["cześć"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.displayMode).toBe("correction");
+    });
+
+    const renderCorrectionGhostText = latestResolverProps?.renderCorrectionGhostText as (
+      value: string,
+      expected: string,
+    ) => React.ReactNode;
+    const segments = React.Children.toArray(
+      renderCorrectionGhostText("👋", "👋 hello"),
+    ) as React.ReactElement<Record<string, any>>[];
+
+    expect(segments[0].props.children).toBe("👋");
+    expect(segments[0].props.style).toContainEqual({ opacity: 0 });
+    expect(segments[1].props.style).toContainEqual({
+      color: "#123456",
+      opacity: 0.38,
+    });
+  });
+
   it("shows both correction sides when correction answerOnly forces front-only mode", async () => {
     render(
       <Card

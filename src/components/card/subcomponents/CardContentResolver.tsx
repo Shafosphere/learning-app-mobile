@@ -39,7 +39,8 @@ interface CardContentResolverProps {
   handleCorrectionInput1Change: (t: string) => void;
   wrongInputChange: CardProps["wrongInputChange"];
   suggestionProps: any;
-  renderOverlayText: (value: string, expected: string) => React.ReactNode;
+  renderCorrectionGhostText: (value: string, expected: string) => React.ReactNode;
+  renderCorrectionErrorText: (value: string, expected: string) => React.ReactNode;
   input1ContentWidth: number;
   input2ContentWidth: number;
   setInput1LayoutWidth: any;
@@ -97,7 +98,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     handleCorrectionInput1Change,
     wrongInputChange,
     suggestionProps,
-    renderOverlayText,
+    renderCorrectionGhostText,
+    renderCorrectionErrorText,
     input1ContentWidth,
     input2ContentWidth,
     setInput1LayoutWidth,
@@ -144,7 +146,8 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           wrongInputChange={wrongInputChange}
           suggestionProps={suggestionProps}
           isIntroMode={isIntroMode}
-          renderOverlayText={renderOverlayText}
+          renderCorrectionGhostText={renderCorrectionGhostText}
+          renderCorrectionErrorText={renderCorrectionErrorText}
           input1ContentWidth={input1ContentWidth}
           input2ContentWidth={input2ContentWidth}
           setInput1LayoutWidth={setInput1LayoutWidth}

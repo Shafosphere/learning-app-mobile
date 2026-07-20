@@ -3,6 +3,7 @@ import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { splitGraphemes } from "@/src/utils/graphemes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
@@ -993,22 +994,56 @@ export default function Card({
   }
 
   function isCharMismatchAt(
-    value: string,
-    expected: string,
+    valueChars: string[],
+    expectedChars: string[],
     index: number,
   ): boolean {
-    const inputChar = value[index];
+    const inputChar = valueChars[index];
     if (!inputChar) return false;
-    const expectedChar = expected?.[index];
+    const expectedChar = expectedChars[index];
     if (!expectedChar) return true;
     return normalizeChar(inputChar) !== normalizeChar(expectedChar);
   }
 
-  function renderOverlayText(value: string, expected: string) {
-    if (!value) return null;
-    const typedChars = value.split("").map((char, idx) => {
-      const mismatch = isCharMismatchAt(value, expected, idx);
-      const displayChar = char === " " ? "\u00A0" : char;
+  function renderCorrectionGhostText(value: string, expected: string) {
+    const valueChars = splitGraphemes(value);
+    const expectedChars = splitGraphemes(expected);
+    return expectedChars.map((expectedChar, idx) => (
+      <Text
+        key={`ghost-${idx}`}
+        style={[
+          styles.overlayCharText,
+          {
+            fontSize: cardMetrics.fontSize,
+            lineHeight: cardMetrics.lineHeight,
+          },
+          styles.overlayExpectedSuffix,
+          textColorOverride
+            ? { color: textColorOverride, opacity: 0.38 }
+            : null,
+          idx < valueChars.length ? { opacity: 0 } : null,
+        ]}
+      >
+        {expectedChar === " " ? "\u00A0" : expectedChar}
+      </Text>
+    ));
+  }
+
+  function renderCorrectionErrorText(value: string, expected: string) {
+    const typedChars = splitGraphemes(value);
+    const expectedChars = splitGraphemes(expected);
+    if (
+      !typedChars.some((_, idx) =>
+        isCharMismatchAt(typedChars, expectedChars, idx),
+      )
+    ) {
+      return null;
+    }
+
+    return typedChars.map((typedChar, idx) => {
+
+      const mismatch = isCharMismatchAt(typedChars, expectedChars, idx);
+      const displayChar = typedChar === " " ? "\u00A0" : typedChar;
       const charStyle = [
         styles.overlayCharText,
         {
@@ -1016,6 +1051,7 @@ export default function Card({
           lineHeight: cardMetrics.lineHeight,
         },
         mismatch ? styles.overlayCharError : styles.overlayCharNeutral,
+        !mismatch ? { opacity: 0 } : null,
       ];
       if (mismatch && correctionErrorMarkersEnabled) {
         return (
@@ -1043,32 +1079,11 @@ export default function Card({
         );
       }
       return (
-        <Text key={`overlay-${idx}`} style={charStyle}>
+        <Text key={`error-overlay-${idx}`} style={charStyle}>
           {displayChar}
         </Text>
       );
     });
-    const expectedSuffix =
-      value.length < expected.length ? expected.slice(value.length) : "";
-    if (!expectedSuffix) {
-      return typedChars;
-    }
-    return [
-      ...typedChars,
-      <Text
-        key="overlay-expected-suffix"
-        style={[
-          styles.overlayCharText,
-          {
-            fontSize: cardMetrics.fontSize,
-            lineHeight: cardMetrics.lineHeight,
-          },
-          styles.overlayExpectedSuffix,
-        ]}
-      >
-        {expectedSuffix.replace(/ /g, "\u00A0")}
-      </Text>,
-    ];
   }
 
   const startHintEditing = useCallback(() => {
@@ -1316,7 +1331,8 @@ export default function Card({
     handleCorrectionInput1Change,
     wrongInputChange: handleWrongInputChange,
     suggestionProps,
-    renderOverlayText,
+    renderCorrectionGhostText,
+    renderCorrectionErrorText,
     input1ContentWidth,
     input2ContentWidth,
     setInput1LayoutWidth,

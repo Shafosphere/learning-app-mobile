@@ -1,5 +1,6 @@
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
+import { splitGraphemes } from "@/src/utils/graphemes";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import type { CardCorrectionType, FocusTarget } from "../card-types";
@@ -44,7 +45,8 @@ type CardCorrectionProps = {
   wrongInputChange: (which: 1 | 2, value: string) => void;
   suggestionProps: any;
   isIntroMode: boolean;
-  renderOverlayText: (value: string, expected: string) => React.ReactNode;
+  renderCorrectionGhostText: (value: string, expected: string) => React.ReactNode;
+  renderCorrectionErrorText: (value: string, expected: string) => React.ReactNode;
   input1ContentWidth: number;
   input2ContentWidth: number;
   setInput1LayoutWidth: (width: number) => void;
@@ -88,7 +90,8 @@ export function CardCorrection({
   wrongInputChange,
   suggestionProps,
   isIntroMode,
-  renderOverlayText,
+  renderCorrectionGhostText,
+  renderCorrectionErrorText,
   input1ContentWidth,
   input2ContentWidth,
   setInput1LayoutWidth,
@@ -183,8 +186,8 @@ export function CardCorrection({
   );
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
-    const chars = value.split("");
-    const expectedChars = expected.split("");
+    const chars = splitGraphemes(value);
+    const expectedChars = splitGraphemes(expected);
     const len = Math.min(chars.length, expectedChars.length);
     for (let i = 0; i < len; i++) {
       const current = chars[i];
@@ -324,19 +327,9 @@ export function CardCorrection({
             { width: input1ContentWidth },
           ]}
         >
-          {!correction.input1 ? (
-            <Text
-              style={[
-                styles.myplaceholder,
-                textInputResponsiveStyle,
-                textColorOverride ? { color: textColorOverride } : null,
-              ]}
-              numberOfLines={1}
-              ellipsizeMode="clip"
-            >
-              {correctionAwers}
-            </Text>
-          ) : null}
+          <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
+            {renderCorrectionGhostText(correction.input1, correctionAwers)}
+          </View>
           <TextInput
             value={correction.input1}
             onChangeText={(text) =>
@@ -368,11 +361,11 @@ export function CardCorrection({
             }}
             onBlur={() => onCorrectionInputBlur?.("correction1")}
           />
-          {correction.input1 ? (
-            <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
-              {renderOverlayText(correction.input1, correctionAwers)}
-            </View>
-          ) : null}
+          <View
+            style={[styles.inputOverlay, textInputResponsiveStyle]}
+          >
+            {renderCorrectionErrorText(correction.input1, correctionAwers)}
+          </View>
         </View>
       </ScrollView>
     </View>
@@ -414,19 +407,9 @@ export function CardCorrection({
             { width: input2ContentWidth },
           ]}
         >
-          {!correction.input2 ? (
-            <Text
-              style={[
-                styles.myplaceholder,
-                textInputResponsiveStyle,
-                textColorOverride ? { color: textColorOverride } : null,
-              ]}
-              numberOfLines={1}
-              ellipsizeMode="clip"
-            >
-              {correctionRewers}
-            </Text>
-          ) : null}
+          <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
+            {renderCorrectionGhostText(correction.input2 ?? "", correctionRewers)}
+          </View>
           <TextInput
             value={correction.input2 ?? ""}
             onChangeText={(t) => {
@@ -474,11 +457,11 @@ export function CardCorrection({
               }
             }}
           />
-          {correction.input2 ? (
-            <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
-              {renderOverlayText(correction.input2 ?? "", correctionRewers)}
-            </View>
-          ) : null}
+          <View
+            style={[styles.inputOverlay, textInputResponsiveStyle]}
+          >
+            {renderCorrectionErrorText(correction.input2 ?? "", correctionRewers)}
+          </View>
         </View>
       </ScrollView>
       {isIntroMode && canToggleTranslations ? (
@@ -503,7 +486,9 @@ export function CardCorrection({
 
   if (allowMultilinePrompt) {
     return (
-      <View style={styles.cardContentLarge}>
+      <View
+        style={[styles.cardContentLarge, styles.cardContentLargeCorrection]}
+      >
         {promptBlock}
         <View
           style={[
