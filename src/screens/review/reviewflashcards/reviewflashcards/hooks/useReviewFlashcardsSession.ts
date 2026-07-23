@@ -409,6 +409,11 @@ export const useReviewFlashcardsSession = ({
 
   const hasCardsInSession = Object.values(boxes).some((box) => box.length > 0);
 
+  const getQueueForBox = useCallback(
+    (box: keyof BoxesState) => queuesRef.current[box] ?? [],
+    []
+  );
+
   return {
     boxes,
     setBoxes,
@@ -430,6 +435,7 @@ export const useReviewFlashcardsSession = ({
     removeCardFromSession,
     syncQueueWithBox,
     ensureQueueHasItems,
+    getQueueForBox,
     handleSelectBox,
     handleBoxLongPress,
     closePeek,

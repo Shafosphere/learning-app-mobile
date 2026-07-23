@@ -24,6 +24,7 @@ import { FlashcardsBoxesSection } from "@/src/screens/flashcards/FlashcardsScree
 import { FlashcardsStudyContent } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsStudyContent";
 import { useFlashcardActionBarState } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsActions";
 import { useFlashcardsBottomDockLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsBottomDockLayout";
+import { useFlashcardImagePreload } from "@/src/features/flashcards/useFlashcardImagePreload";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
@@ -236,6 +237,7 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItem,
     selectedItemId,
     setQueueNext,
+    getQueueForBox,
     peekBox,
     peekCards,
     upcomingPeekCards,
@@ -398,6 +400,14 @@ export default function ReviewFlashcardsPlaceholder() {
     handleStatsBurst,
     setShouldCelebrate,
     keyboardBridgeInputRef,
+  });
+
+  useFlashcardImagePreload({
+    isFocused,
+    selectedItem,
+    correction,
+    activeBox,
+    getQueueForBox,
   });
 
   useLayoutEffect(() => {

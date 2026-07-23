@@ -18,8 +18,7 @@ import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { scheduleCustomReview } from "@/src/db/sqlite/db";
 import { ensureCourseCompletionRunStarted } from "@/src/features/flashcards/courseCompletionRun";
-import { preloadFlashcardImageUris } from "@/src/features/flashcards/flashcardImagePreload";
-import { buildFlashcardImagePreloadPlan } from "@/src/features/flashcards/flashcardImagePreloadPlan";
+import { useFlashcardImagePreload } from "@/src/features/flashcards/useFlashcardImagePreload";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
@@ -427,17 +426,13 @@ export default function Flashcards() {
       .forEach((id) => clearWordForRelearning(id));
   }, [clearWordForRelearning, learned, relearningWordIds]);
 
-  useEffect(() => {
-    if (!isFocused) return;
-
-    const uris = buildFlashcardImagePreloadPlan({
-      selectedItem,
-      correction,
-      activeBox,
-      getQueueForBox,
-    });
-    preloadFlashcardImageUris(uris);
-  }, [activeBox, correction, getQueueForBox, isFocused, selectedItem]);
+  useFlashcardImagePreload({
+    isFocused,
+    selectedItem,
+    correction,
+    activeBox,
+    getQueueForBox,
+  });
 
   const {
     faces: boxFaces,

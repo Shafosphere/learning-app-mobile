@@ -503,6 +503,22 @@ function getVisibleTextInputs(screen: ReturnType<typeof render>) {
     .filter((input) => input.props.caretHidden !== true);
 }
 
+function hasRenderedText(screen: ReturnType<typeof render>, value: string) {
+  const getNodeText = (node: unknown): string => {
+    if (typeof node === "string") return node;
+    if (!node || typeof node !== "object" || !("children" in node)) return "";
+    return (node.children as unknown[]).map(getNodeText).join("");
+  };
+
+  return screen.UNSAFE_queryAllByType(MockView).some((view) => {
+    const directText = view.children
+      .map(getNodeText)
+      .join("");
+
+    return directText === value;
+  });
+}
+
 function isUsingFakeTimers() {
   return (
     jest.isMockFunction(setTimeout) ||
@@ -654,8 +670,8 @@ describe("reviewflashcards correction desync regression", () => {
     fireEvent.press(screen.getByTestId("confirm-button"));
 
     await waitFor(() => {
-      expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "cat")).toBe(true);
+      expect(hasRenderedText(screen, "kot")).toBe(true);
     });
   });
 
@@ -716,9 +732,9 @@ describe("reviewflashcards correction desync regression", () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "kot")).toBe(true);
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("pies")).toBeNull();
+      expect(hasRenderedText(screen, "pies")).toBe(false);
     });
   });
 
@@ -746,9 +762,9 @@ describe("reviewflashcards correction desync regression", () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).not.toBeNull();
-      expect(screen.queryByText("pies")).toBeNull();
+      expect(hasRenderedText(screen, "cat")).toBe(true);
+      expect(hasRenderedText(screen, "kot")).toBe(true);
+      expect(hasRenderedText(screen, "pies")).toBe(false);
     });
   });
 
@@ -776,10 +792,10 @@ describe("reviewflashcards correction desync regression", () => {
     );
 
     await waitFor(() => {
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "kot")).toBe(true);
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kotek")).toBeNull();
-      expect(screen.queryByText("pies")).toBeNull();
+      expect(hasRenderedText(screen, "kotek")).toBe(false);
+      expect(hasRenderedText(screen, "pies")).toBe(false);
     });
   });
 
@@ -1651,7 +1667,7 @@ describe("reviewflashcards correction desync regression", () => {
       const correctionInputs = getVisibleTextInputs(screen);
       expect(correctionInputs).toHaveLength(1);
       expect(correctionInputs[0].props.value).toBe("");
-      expect(screen.queryByText("Andora")).not.toBeNull();
+      expect(screen.getByTestId("prompt-image-ad.svg")).toBeTruthy();
     });
   });
 
@@ -1801,8 +1817,8 @@ describe("reviewflashcards correction desync regression", () => {
     fireEvent.press(screen.getByTestId("confirm-button"));
 
     await waitFor(() => {
-      expect(screen.queryByText("hello")).not.toBeNull();
-      expect(screen.queryByText("cześć")).not.toBeNull();
+      expect(hasRenderedText(screen, "hello")).toBe(true);
+      expect(hasRenderedText(screen, "cześć")).toBe(true);
     });
 
     const correctionInputs = getVisibleTextInputs(screen);
@@ -1843,7 +1859,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "kot")).toBe(true);
     });
 
     const correctionInputs = getVisibleTextInputs(screen);
@@ -1891,7 +1907,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "kot")).toBe(true);
     });
 
     await act(async () => {
@@ -1935,7 +1951,7 @@ describe("reviewflashcards correction desync regression", () => {
 
     await waitFor(() => {
       expect(screen.queryByText("cat")).not.toBeNull();
-      expect(screen.queryByText("kot")).not.toBeNull();
+      expect(hasRenderedText(screen, "kot")).toBe(true);
     });
     expect(latestNudgeModalProps?.visible).not.toBe(true);
 

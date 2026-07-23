@@ -1,5 +1,4 @@
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import type { CorrectionState } from "@/src/hooks/useFlashcardsInteraction";
 
 const PRELOAD_URI_LIMIT = 8;
 const BOX_ORDER: (keyof BoxesState)[] = [
@@ -13,9 +12,15 @@ const BOX_ORDER: (keyof BoxesState)[] = [
 
 type BuildFlashcardImagePreloadPlanParams = {
   selectedItem: WordWithTranslations | null;
-  correction: CorrectionState | null;
+  correction: FlashcardImagePreloadCorrection | null;
   activeBox: keyof BoxesState | null;
   getQueueForBox: (box: keyof BoxesState) => WordWithTranslations[];
+};
+
+export type FlashcardImagePreloadCorrection = {
+  promptImageUri?: string | null;
+  word?: WordWithTranslations;
+  [key: string]: unknown;
 };
 
 const addUri = (uris: string[], seen: Set<string>, uri?: string | null) => {
