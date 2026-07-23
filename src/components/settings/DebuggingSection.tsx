@@ -20,6 +20,7 @@ import {
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
 import { triggerActionsPositionNudgePreview } from "@/src/services/actionsPositionNudgePreview";
+import { triggerNotificationNudgePreview } from "@/src/services/notificationNudgePreview";
 import { triggerLocalExportReminderPreview } from "@/src/services/localExportReminderPreview";
 import { triggerCourseFinishedPreview } from "@/src/services/courseFinishedPreview";
 import {
@@ -164,6 +165,10 @@ const DebuggingSection: React.FC = () => {
   const handlePreviewActionsPositionNudge = () => {
     triggerActionsPositionNudgePreview();
     router.push("/flashcards");
+  };
+
+  const handlePreviewNotificationNudge = () => {
+    triggerNotificationNudgePreview();
   };
 
   const handlePreviewHintTutorial = () => {
@@ -498,6 +503,23 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.testPopup.button")}
           color="my_yellow"
           onPress={handleTestPopup}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.previewNotificationNudge.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.previewNotificationNudge.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={t("settings.debug.rows.previewNotificationNudge.button")}
+          color="my_yellow"
+          onPress={handlePreviewNotificationNudge}
           width={140}
         />
       </View>

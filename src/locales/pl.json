@@ -108,6 +108,14 @@
     "confirmLoading": "Eksportuję…",
     "later": "Później"
   },
+  "notifications": {
+    "nudge": {
+      "title": "Utrzymaj rytm nauki",
+      "description": "Włącz przypomnienia o nauce, a damy Ci znać, kiedy warto zrobić krótką sesję fiszek.",
+      "confirm": "Włącz przypomnienia",
+      "secondary": "Nie teraz"
+    }
+  },
   "settings": {
     "tabs": {
       "ui": "Interfejs",
@@ -487,6 +495,11 @@
         "previewActionsPositionNudge": {
           "title": "Podgląd wyboru układu przycisków",
           "subtitle": "Otwiera ekran fiszek i sztucznie pokazuje jednorazowe okno wyboru położenia przycisków.",
+          "button": "Pokaż okno"
+        },
+        "previewNotificationNudge": {
+          "title": "Podgląd przypomnienia o powiadomieniach",
+          "subtitle": "Pokazuje okno z prośbą o włączenie przypomnień o nauce.",
           "button": "Pokaż okno"
         },
         "previewHintTutorial": {

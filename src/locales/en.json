@@ -108,6 +108,14 @@
     "confirmLoading": "Exporting…",
     "later": "Later"
   },
+  "notifications": {
+    "nudge": {
+      "title": "Keep your learning rhythm",
+      "description": "Turn on learning reminders and we’ll let you know when it’s a good time for a quick flashcard session.",
+      "confirm": "Enable reminders",
+      "secondary": "Not now"
+    }
+  },
   "settings": {
     "tabs": {
       "ui": "Interface",
@@ -487,6 +495,11 @@
         "previewActionsPositionNudge": {
           "title": "Preview button layout chooser",
           "subtitle": "Opens the flashcards screen and artificially shows the one-time button position chooser.",
+          "button": "Show window"
+        },
+        "previewNotificationNudge": {
+          "title": "Preview notification reminder",
+          "subtitle": "Shows the window asking the user to enable learning reminders.",
           "button": "Show window"
         },
         "previewHintTutorial": {

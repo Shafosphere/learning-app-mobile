@@ -1071,7 +1071,10 @@ export default function Card({
               style={[
                 styles.overlayErrorMarker,
                 {
-                  top: cardMetrics.inputLineHeight - 3 * cardMetrics.contentScale,
+                  // The correction overlays are vertically centered at top: 0.
+                  // Keep the marker at the same visual offset as before that
+                  // centering change, so it stays below the wrong character.
+                  top: cardMetrics.inputLineHeight + 9 * cardMetrics.contentScale,
                   fontSize: (11 * cardMetrics.fontSize) / 24,
                   lineHeight: (12 * cardMetrics.fontSize) / 24,
                 },

@@ -5,6 +5,7 @@ import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/Coachm
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
 import QuoteBubble from "@/src/components/quote/QuoteBubble";
 import QuoteSystemInitializer from "@/src/components/quote/QuoteSystemInitializer";
+import NotificationPermissionNudge from "@/src/components/nudge/NotificationPermissionNudge";
 import GoogleDriveBackupInitializer from "@/src/components/reminders/GoogleDriveBackupInitializer";
 import LocalExportReminder from "@/src/components/reminders/LocalExportReminder";
 import { DueReviewsProvider } from "@/src/contexts/DueReviewsContext";
@@ -645,6 +646,7 @@ export default function RootLayout() {
                 <QuoteProvider>
                   <QuoteSystemInitializer />
                   <LearningRemindersInitializer />
+                  <NotificationPermissionNudge />
                   <GoogleDriveBackupInitializer />
                   <LocalExportReminder />
                   <LearningStatsProvider>
