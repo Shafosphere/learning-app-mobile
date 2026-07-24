@@ -1,8 +1,10 @@
 import React from "react";
 import { render, waitFor } from "@testing-library/react-native";
+import { View } from "react-native";
 
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import * as FileSystem from "expo-file-system/legacy";
+import { getPreloadedImage } from "@/src/features/flashcards/flashcardImagePreload";
 
 jest.mock("expo-image", () => ({
   Image: () => null,
@@ -36,11 +38,76 @@ jest.mock("react-native-svg", () => ({
 }));
 
 const mockedFileSystem = FileSystem as jest.Mocked<typeof FileSystem>;
+const mockedGetPreloadedImage = getPreloadedImage as jest.Mock;
+
+const findFrameOpacity = (screen: ReturnType<typeof render>) =>
+  screen.UNSAFE_getAllByType(View).find((node) => {
+    const style = node.props.style as { opacity?: number } | undefined;
+    return typeof style?.opacity === "number";
+  })?.props.style.opacity;
 
 describe("PromptImage SVG rendering", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockedFileSystem.getInfoAsync.mockResolvedValue({ exists: true } as any);
+    mockedGetPreloadedImage.mockReturnValue(null);
+  });
+
+  it("renders a preloaded bitmap visibly on its first mount", () => {
+    mockedGetPreloadedImage.mockReturnValue({
+      kind: "bitmap",
+      uri: "file://images/cached.png",
+      ratio: 2,
+    });
+
+    const screen = render(
+      <PromptImage
+        uri="file://images/cached.png"
+        imageStyle={{ width: 120, height: 80 }}
+      />,
+    );
+
+    expect(findFrameOpacity(screen)).toBe(1);
+    expect(mockedFileSystem.getInfoAsync).not.toHaveBeenCalled();
+  });
+
+  it("uses preloaded SVG XML during the first render without reading the file", () => {
+    mockedGetPreloadedImage.mockReturnValue({
+      kind: "svg",
+      uri: "file://images/cached.svg",
+      xml: '<svg viewBox="0 0 20 10"><path fill="#d40000" d="M0 0h20v10H0z"/></svg>',
+      ratio: 2,
+    });
+
+    const screen = render(
+      <PromptImage
+        uri="file://images/cached.svg"
+        imageStyle={{ width: 120, height: 80 }}
+      />,
+    );
+
+    expect(mockSvgXml).toHaveBeenCalledTimes(1);
+    expect(findFrameOpacity(screen)).toBe(1);
+    expect(mockedFileSystem.getInfoAsync).not.toHaveBeenCalled();
+  });
+
+  it("keeps a cached bitmap visible after remounting the same URI", () => {
+    mockedGetPreloadedImage.mockReturnValue({
+      kind: "bitmap",
+      uri: "file://images/same.png",
+      ratio: 1,
+    });
+    const props = {
+      uri: "file://images/same.png",
+      imageStyle: { width: 80, height: 80 },
+    };
+
+    const first = render(<PromptImage {...props} />);
+    expect(findFrameOpacity(first)).toBe(1);
+    first.unmount();
+
+    const second = render(<PromptImage {...props} />);
+    expect(findFrameOpacity(second)).toBe(1);
   });
 
   it("inlines class styles for local SVGs before rendering", async () => {

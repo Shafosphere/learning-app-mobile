@@ -497,7 +497,7 @@ export function CardCorrection({
           styles.cardContentLarge,
           styles.cardContentLargeCorrection,
           {
-            paddingVertical: 14 * contentScale,
+            paddingVertical: (promptImageUri ? 10 : 14) * contentScale,
             gap: 10 * contentScale,
           },
         ]}

@@ -267,6 +267,38 @@ const computeImageRect = ({
   return { width, height };
 };
 
+type PreparedSvg = {
+  xml: string;
+  ratio: number;
+  isConstellationOutline: boolean;
+  isConstellationMerged: boolean;
+};
+
+const prepareSvg = (
+  xml: string,
+  uri: string,
+  headlineColor: string,
+  overlayColor: string,
+): PreparedSvg => {
+  const isConstellationOutline = isLikelyConstellationOutlineSvg(xml, uri);
+  const isConstellationMerged = isMergedConstellationSvg(xml, uri);
+  const normalized = ensureSvgViewBox(inlineSvgClassStyles(xml));
+  const enhancedOutline = isConstellationOutline
+    ? boostConstellationOutlineContrast(normalized)
+    : normalized;
+  const enhanced = isConstellationMerged
+    ? enhanceMergedConstellationSvg(enhancedOutline, headlineColor, overlayColor)
+    : enhancedOutline;
+  const viewBox = parseSvgViewBox(enhanced);
+
+  return {
+    xml: enhanced,
+    ratio: viewBox ? viewBox.width / viewBox.height : 1,
+    isConstellationOutline,
+    isConstellationMerged,
+  };
+};
+
 export function PromptImage({
   uri,
   imageStyle,
@@ -275,35 +307,48 @@ export function PromptImage({
 }: PromptImageProps) {
   const { colors, flashcardsImageFrameEnabled } = useSettings();
   const overlayColor = renderMode === "correction" ? "#FDE047" : "#FF5470";
+  // Read the preload cache during render so remounting the same URI never
+  // produces a transparent first frame before the effect can run.
+  const [initialImage] = useState(() => {
+    const preloaded = getPreloadedImage(uri);
+    const preparedSvg =
+      preloaded?.kind === "svg"
+        ? prepareSvg(preloaded.xml, uri, colors.headline, overlayColor)
+        : null;
+    return { preloaded, preparedSvg };
+  });
 
-  const [isSvg, setIsSvg] = useState(() => isSvgUri(uri));
-  const [svgXml, setSvgXml] = useState<string | null>(null);
-  const [contentRatio, setContentRatio] = useState<number>(1);
-  const [hasResolvedDimensions, setHasResolvedDimensions] = useState(false);
+  const [isSvg, setIsSvg] = useState(
+    () => initialImage.preparedSvg != null || isSvgUri(uri),
+  );
+  const [svgXml, setSvgXml] = useState<string | null>(
+    () => initialImage.preparedSvg?.xml ?? null,
+  );
+  const [contentRatio, setContentRatio] = useState<number>(
+    () => initialImage.preparedSvg?.ratio ?? initialImage.preloaded?.ratio ?? 1,
+  );
+  const [hasResolvedDimensions, setHasResolvedDimensions] = useState(
+    () => initialImage.preloaded != null,
+  );
   const [slotWidth, setSlotWidth] = useState<number | null>(null);
-  const [isConstellationOutline, setIsConstellationOutline] = useState(false);
-  const [isConstellationMerged, setIsConstellationMerged] = useState(false);
+  const [isConstellationOutline, setIsConstellationOutline] = useState(
+    () => initialImage.preparedSvg?.isConstellationOutline ?? false,
+  );
+  const [isConstellationMerged, setIsConstellationMerged] = useState(
+    () => initialImage.preparedSvg?.isConstellationMerged ?? false,
+  );
 
   useEffect(() => {
     let cancelled = false;
 
     const applySvgXml = (xml: string) => {
-      const constellationMode = isLikelyConstellationOutlineSvg(xml, uri);
-      const mergedMode = isMergedConstellationSvg(xml, uri);
-      const normalized = ensureSvgViewBox(inlineSvgClassStyles(xml));
-      const enhancedOutline = constellationMode
-        ? boostConstellationOutlineContrast(normalized)
-        : normalized;
-      const enhanced = mergedMode
-        ? enhanceMergedConstellationSvg(enhancedOutline, colors.headline, overlayColor)
-        : enhancedOutline;
-      const parsedViewBox = parseSvgViewBox(enhanced);
+      const prepared = prepareSvg(xml, uri, colors.headline, overlayColor);
 
       setIsSvg(true);
-      setSvgXml(enhanced);
-      setContentRatio(parsedViewBox ? parsedViewBox.width / parsedViewBox.height : 1);
-      setIsConstellationOutline(constellationMode);
-      setIsConstellationMerged(mergedMode);
+      setSvgXml(prepared.xml);
+      setContentRatio(prepared.ratio);
+      setIsConstellationOutline(prepared.isConstellationOutline);
+      setIsConstellationMerged(prepared.isConstellationMerged);
       setHasResolvedDimensions(true);
     };
 
