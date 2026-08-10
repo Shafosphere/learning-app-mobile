@@ -1107,7 +1107,16 @@
     }
   },
   "flashcards": {
+    "cardEditor": {
+      "title": "Edit flashcard",
+      "save": "SAVE",
+      "saving": "SAVING…",
+      "notFound": "This flashcard is unavailable.",
+      "missingContent": "Add text, an answer, or an image.",
+      "saveFailed": "Could not save flashcard. Try again."
+    },
     "card": {
+      "edit": "Edit flashcard",
       "actions": {
         "addFlashcards": "ADD FLASHCARDS",
         "confirm": "CONFIRM",

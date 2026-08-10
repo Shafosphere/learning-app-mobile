@@ -31,10 +31,11 @@ export const useStyles = createThemeStylesHook((colors) => {
       gap: 12,
     },
     cardinput: {
-      width: "90%",
+      flex: 1,
       fontSize: 16,
       fontWeight: 800,
       paddingVertical: 6,
+      lineHeight: 22,
       color: colors.headline,
     },
     cardInputPlaceholderState: {
@@ -71,6 +72,8 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontSize: 16,
       fontWeight: 700,
       paddingVertical: 6,
+      lineHeight: 22,
+      textAlignVertical: "top" as const,
       color: colors.headline,
     },
     answerInputPlaceholderState: {
@@ -298,6 +301,8 @@ export const useStyles = createThemeStylesHook((colors) => {
       fontWeight: "700",
       color: colors.headline,
       paddingVertical: 6,
+      lineHeight: 22,
+      textAlignVertical: "top" as const,
     },
     explanationInputPlaceholderState: {
       fontSize: 13,

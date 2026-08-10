@@ -124,6 +124,31 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // alignItems: "center",
     // justifyContent: "center",
   },
+  cardEditStack: {
+    position: "relative",
+  },
+  editTab: {
+    position: "absolute",
+    right: 14,
+    bottom: -24,
+    width: 28,
+    height: 64,
+    borderBottomLeftRadius: 12,
+    borderBottomRightRadius: 12,
+    backgroundColor: colors.secondBackground,
+    borderWidth: 1,
+    borderColor: colors.border,
+    alignItems: "center",
+    justifyContent: "flex-end",
+    paddingBottom: 4,
+    zIndex: 0,
+  },
+  editTabPressed: {
+    opacity: 0.72,
+  },
+  editTabIcon: {
+    color: colors.paragraph,
+  },
   cardFrame: {
     overflow: "hidden",
     minHeight: 120,

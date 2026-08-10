@@ -13,6 +13,7 @@ type CardFrameProps = {
   minHeight?: number;
   contentScale?: number;
   backgroundColorOverride?: string;
+  underlay?: ReactNode;
   children: ReactNode;
 };
 
@@ -27,6 +28,7 @@ export default function CardFrame({
   minHeight,
   contentScale = 1,
   backgroundColorOverride,
+  underlay,
   children,
 }: CardFrameProps) {
   const styles = useStyles();
@@ -63,13 +65,21 @@ export default function CardFrame({
     </Animated.View>
   );
 
-  if (!coachmarkId) {
-    return content;
-  }
+  const framedContent = underlay ? (
+    <Animated.View
+      layout={animateLayout ? CARD_LAYOUT_TRANSITION : undefined}
+      style={[styles.cardEditStack, { width: cardWidth }]}
+    >
+      {underlay}
+      {content}
+    </Animated.View>
+  ) : content;
+
+  if (!coachmarkId) return framedContent;
 
   return (
     <CoachmarkAnchor id={coachmarkId} shape="rect" radius={20}>
-      {content}
+      {framedContent}
     </CoachmarkAnchor>
   );
 }

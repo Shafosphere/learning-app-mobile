@@ -1107,7 +1107,16 @@
     }
   },
   "flashcards": {
+    "cardEditor": {
+      "title": "Edytuj fiszkę",
+      "save": "ZAPISZ",
+      "saving": "ZAPISYWANIE…",
+      "notFound": "Ta fiszka jest niedostępna.",
+      "missingContent": "Dodaj tekst, odpowiedź lub obrazek.",
+      "saveFailed": "Nie udało się zapisać fiszki. Spróbuj ponownie."
+    },
     "card": {
+      "edit": "Edytuj fiszkę",
       "actions": {
         "addFlashcards": "DODAJ FISZKI",
         "confirm": "ZATWIERDŹ",

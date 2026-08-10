@@ -19,6 +19,7 @@ type FlashcardsCardSectionProps = {
   courseFinishedAccuracyLabel: string;
   courseFinishedTimeLabel: string;
   onBackToCourses: () => void;
+  onEditCard: (cardId: number) => void;
   t: TFunction;
 } & Pick<
   CardProps,
@@ -60,6 +61,7 @@ export function FlashcardsCardSection({
   courseFinishedAccuracyLabel,
   courseFinishedTimeLabel,
   onBackToCourses,
+  onEditCard,
   t,
   selectedItem,
   setAnswer,
@@ -144,6 +146,7 @@ export function FlashcardsCardSection({
         hideHints={hideHints}
         showExplanationEnabled={showExplanationEnabled}
         explanationOnlyOnWrong={explanationOnlyOnWrong}
+        onEdit={selectedItem ? () => onEditCard(selectedItem.id) : undefined}
       />
     );
   }

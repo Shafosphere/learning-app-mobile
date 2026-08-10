@@ -1,4 +1,3 @@
-import Ionicons from "@expo/vector-icons/Ionicons";
 import BoxesCarousel from "@/src/components/Box/Carousel/BoxCarousel";
 import Boxes from "@/src/components/Box/List/BoxList";
 import type { BoxFacesByBox } from "@/src/components/Box/Skin/boxFaces";
@@ -7,7 +6,6 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { TFunction } from "i18next";
 import type { ComponentProps } from "react";
 import {
-  Pressable,
   ScrollView,
   View,
   type LayoutChangeEvent,
@@ -28,11 +26,8 @@ type FlashcardsBoxesSectionProps = {
   boxFaces: BoxFacesByBox;
   handleSelectBox: (boxName: keyof BoxesState) => void;
   handleBoxLongPress: (boxName: keyof BoxesState) => void;
-  handleManualAddFlashcards: () => void;
   effectiveBoxesLayout: string;
   boxSelectionLocked: boolean;
-  shouldShowFloatingAdd: boolean;
-  addButtonDisabled: boolean;
   isSmallPhoneLayout: boolean;
   isTabletLayout: boolean;
   isTabletCompactBoxesLayout: boolean;
@@ -62,11 +57,8 @@ export function FlashcardsBoxesSection({
   boxFaces,
   handleSelectBox,
   handleBoxLongPress,
-  handleManualAddFlashcards,
   effectiveBoxesLayout,
   boxSelectionLocked,
-  shouldShowFloatingAdd,
-  addButtonDisabled,
   isSmallPhoneLayout,
   isTabletLayout,
   isTabletCompactBoxesLayout,
@@ -154,21 +146,6 @@ export function FlashcardsBoxesSection({
           : null,
       ]}
     >
-      {shouldShowFloatingAdd && (
-        <Pressable
-          style={styles.addButton}
-          onPress={handleManualAddFlashcards}
-          disabled={addButtonDisabled}
-          accessibilityLabel={t(
-            "screens.flashcards.flashcards.flashcards.accessibilityLabel.dodajNoweFiszkiDoPudelek"
-          )}
-          accessibilityRole="button"
-          accessibilityState={{ disabled: addButtonDisabled }}
-        >
-          <Ionicons name="add" size={26} color="#0F172A" />
-        </Pressable>
-      )}
-
       {boxesNeedScrollFallback ? (
         <ScrollView
           style={[

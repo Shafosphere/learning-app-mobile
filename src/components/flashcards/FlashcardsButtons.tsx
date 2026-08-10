@@ -32,6 +32,9 @@ type FlashcardsButtonsProps = {
   confirmCoachmarkId?: string;
   confirmDisabled?: boolean;
   confirmLabel?: string;
+  showAddFlashcards?: boolean;
+  onAddFlashcards?: () => void;
+  addFlashcardsDisabled?: boolean;
 };
 
 export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
@@ -55,6 +58,9 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   confirmCoachmarkId,
   confirmDisabled = false,
   confirmLabel = "OK",
+  showAddFlashcards = false,
+  onAddFlashcards,
+  addFlashcardsDisabled = false,
 }) => {
   const styles = useStyles();
   const noopAsync = React.useCallback(async () => undefined, []);
@@ -97,6 +103,9 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
             dense
             variant={trueFalseButtonsVariant}
             selectedAnswer={selectedTrueFalseAnswer}
+            showAddFlashcards={showAddFlashcards}
+            onAddFlashcards={onAddFlashcards}
+            addFlashcardsDisabled={addFlashcardsDisabled}
           />
         </View>
       ) : (
@@ -117,6 +126,9 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
             dense
             variant={trueFalseButtonsVariant}
             selectedAnswer={selectedTrueFalseAnswer}
+            showAddFlashcards={showAddFlashcards}
+            onAddFlashcards={onAddFlashcards}
+            addFlashcardsDisabled={addFlashcardsDisabled}
           />
         </View>
       )}

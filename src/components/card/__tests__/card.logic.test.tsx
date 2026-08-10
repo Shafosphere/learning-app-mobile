@@ -1,5 +1,5 @@
 import React from "react";
-import { act, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import Card from "@/src/components/card/card";
 import { useCardFocusController } from "@/src/components/card/useCardFocusController";
@@ -76,11 +76,11 @@ jest.mock("@/src/components/nudge/NudgeModal", () => ({
 
 jest.mock("@/src/components/card/subcomponents/CardFrame", () => {
   return function CardFrameMock(
-    props: Record<string, unknown> & { children: React.ReactNode },
+    props: Record<string, unknown> & { children: React.ReactNode; underlay?: React.ReactNode },
   ) {
     latestCardFrameProps = props;
-    const { children } = props;
-    return children;
+    const { children, underlay } = props;
+    return <>{underlay}{children}</>;
   };
 });
 
@@ -792,6 +792,17 @@ describe("Card logic props", () => {
       hintCoachmarkId: "flashcards-hint-section",
       shouldStartHintEditing,
     });
+  });
+
+  it("renders edit tab only when caller provides edit action", () => {
+    const onEdit = jest.fn();
+    const screen = renderCard(createProps({ onEdit }));
+
+    fireEvent.press(screen.getByLabelText("flashcards.card.edit"));
+    expect(onEdit).toHaveBeenCalledTimes(1);
+
+    screen.rerender(<Card {...createProps()} />);
+    expect(screen.queryByLabelText("flashcards.card.edit")).toBeNull();
   });
 
   it("does not render the hint slot when hints are hidden", () => {

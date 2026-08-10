@@ -36,6 +36,7 @@ type OfficialFlashcardSeedRow = {
   externalId: string;
   isOfficial: number;
   resetProgressOnUpdate: number;
+  isUserEdited: number;
   type: string;
   createdAt: number;
   updatedAt: number;
@@ -297,7 +298,8 @@ async function getOfficialFlashcardsCount(
 
 async function getOfficialFlashcardSeedRecords(
   db: SQLite.SQLiteDatabase,
-  courseId: number
+  courseId: number,
+  includeUserEdits = false,
 ): Promise<OfficialFlashcardSeedRecord[]> {
   const rows = await db.getAllAsync<OfficialFlashcardSeedRow>(
     `SELECT
@@ -315,6 +317,7 @@ async function getOfficialFlashcardSeedRecords(
        cf.external_id AS externalId,
        cf.is_official AS isOfficial,
        cf.reset_progress_on_update AS resetProgressOnUpdate,
+       ${includeUserEdits ? "cf.is_user_edited" : "0"} AS isUserEdited,
        cf.type AS type,
        cf.created_at AS createdAt,
        cf.updated_at AS updatedAt,
@@ -352,6 +355,7 @@ async function getOfficialFlashcardSeedRecords(
         externalId: row.externalId,
         isOfficial: row.isOfficial,
         resetProgressOnUpdate: row.resetProgressOnUpdate,
+        isUserEdited: row.isUserEdited,
         type: row.type,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -397,7 +401,7 @@ async function syncOfficialCourseFlashcards(
 ): Promise<void> {
   const [bundledCards, localCards] = await Promise.all([
     getOfficialFlashcardSeedRecords(bundledDb, bundledCourseId),
-    getOfficialFlashcardSeedRecords(localDb, courseId),
+    getOfficialFlashcardSeedRecords(localDb, courseId, true),
   ]);
 
   const localByExternalId = new Map(
@@ -412,6 +416,9 @@ async function syncOfficialCourseFlashcards(
       const existing = localByExternalId.get(bundledCard.externalId);
 
       if (existing) {
+        if (existing.isUserEdited === 1) {
+          continue;
+        }
         const contentChanged = didOfficialCardContentChange(existing, bundledCard);
         await localDb.runAsync(
           `UPDATE custom_flashcards
@@ -509,7 +516,10 @@ async function syncOfficialCourseFlashcards(
     }
 
     const idsToDelete = localCards
-      .filter((card) => !bundledExternalIds.has(card.externalId))
+      .filter(
+        (card) =>
+          !bundledExternalIds.has(card.externalId) && card.isUserEdited !== 1,
+      )
       .map((card) => card.id);
 
     for (const flashcardId of idsToDelete) {

@@ -667,13 +667,10 @@ export default function ReviewFlashcardsPlaceholder() {
       boxFaces={boxFaces}
       handleSelectBox={handleSelectBox}
       handleBoxLongPress={handleBoxLongPress}
-      handleManualAddFlashcards={async () => undefined}
       effectiveBoxesLayout={effectiveLayout}
       boxSelectionLocked={
         isBetweenCards || isLoading || correction != null || mistakeNudge != null
       }
-      shouldShowFloatingAdd={false}
-      addButtonDisabled={true}
       isSmallPhoneLayout={isSmallPhoneLayout}
       isTabletLayout={isTabletLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}

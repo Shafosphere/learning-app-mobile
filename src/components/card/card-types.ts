@@ -62,4 +62,5 @@ export type CardProps = {
   explanationOnlyOnWrong?: boolean;
   isExplanationVisible?: boolean;
   isExplanationPending?: boolean;
+  onEdit?: () => void;
 };

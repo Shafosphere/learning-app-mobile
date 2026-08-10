@@ -170,6 +170,12 @@ export function useFlashcardsCourseData({
     [],
   );
 
+  const patchCustomCard = useCallback((card: WordWithTranslations) => {
+    setCustomCards((prev) =>
+      prev.map((item) => (item.id === card.id ? card : item)),
+    );
+  }, []);
+
   const handlePersistHintUpdate = useCallback(
     async (
       cardId: number,
@@ -195,6 +201,7 @@ export function useFlashcardsCourseData({
     setCourseCompletionSummary,
     setCourseCompletionRunStartedAt,
     patchCustomCardHints,
+    patchCustomCard,
     handlePersistHintUpdate,
   };
 }

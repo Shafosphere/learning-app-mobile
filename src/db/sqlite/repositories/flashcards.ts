@@ -25,6 +25,7 @@ export interface CustomFlashcardRow {
   externalId: string | null;
   isOfficial: number;
   resetProgressOnUpdate: number;
+  isUserEdited: number;
   type: string;
   createdAt: number;
   updatedAt: number;
@@ -33,12 +34,13 @@ export interface CustomFlashcardRow {
 export interface CustomFlashcardRecord
   extends Omit<
     CustomFlashcardRow,
-    "flipped" | "answerOnly" | "isOfficial" | "resetProgressOnUpdate"
+    | "flipped" | "answerOnly" | "isOfficial" | "resetProgressOnUpdate" | "isUserEdited"
   > {
   flipped: boolean;
   answerOnly: boolean;
   isOfficial: boolean;
   resetProgressOnUpdate: boolean;
+  isUserEdited?: boolean;
   type: string;
 }
 
@@ -60,6 +62,11 @@ export interface CustomFlashcardInput {
   type?: "text" | "true_false" | "know_dont_know";
 }
 
+export type UpdateCustomFlashcardInput = Pick<
+  CustomFlashcardInput,
+  "frontText" | "backText" | "answers" | "imageFront" | "imageBack" | "explanation" | "flipped"
+>;
+
 export async function getCustomFlashcards(
   courseId: number
 ): Promise<CustomFlashcardRecord[]> {
@@ -80,6 +87,7 @@ export async function getCustomFlashcards(
     externalId: string | null;
     isOfficial: number;
     resetProgressOnUpdate: number;
+    isUserEdited: number;
     type: string;
     createdAt: number;
     updatedAt: number;
@@ -101,6 +109,7 @@ export async function getCustomFlashcards(
        cf.external_id    AS externalId,
        cf.is_official    AS isOfficial,
        cf.reset_progress_on_update AS resetProgressOnUpdate,
+       cf.is_user_edited AS isUserEdited,
        cf.type           AS type,
        cf.created_at     AS createdAt,
        cf.updated_at     AS updatedAt,
@@ -138,6 +147,7 @@ export async function getCustomFlashcards(
         externalId: row.externalId,
         isOfficial: row.isOfficial,
         resetProgressOnUpdate: row.resetProgressOnUpdate,
+        isUserEdited: row.isUserEdited,
         type: row.type,
         createdAt: row.createdAt,
         updatedAt: row.updatedAt,
@@ -148,6 +158,7 @@ export async function getCustomFlashcards(
         answerOnly: rowData.answerOnly === 1,
         isOfficial: rowData.isOfficial === 1,
         resetProgressOnUpdate: rowData.resetProgressOnUpdate === 1,
+        isUserEdited: rowData.isUserEdited === 1,
       };
       byId.set(row.id, record);
       ordered.push(record);
@@ -165,6 +176,89 @@ export async function getCustomFlashcards(
   }
 
   return ordered;
+}
+
+export async function getCustomFlashcardById(
+  courseId: number,
+  flashcardId: number,
+): Promise<CustomFlashcardRecord | null> {
+  const cards = await getCustomFlashcards(courseId);
+  return cards.find((card) => card.id === flashcardId) ?? null;
+}
+
+export async function updateCustomFlashcard(
+  courseId: number,
+  flashcardId: number,
+  input: UpdateCustomFlashcardInput,
+): Promise<CustomFlashcardRecord> {
+  const db = await getDB();
+  const existing = await getCustomFlashcardById(courseId, flashcardId);
+  if (!existing) {
+    throw new Error("Flashcard not found in selected course.");
+  }
+
+  const frontText = (input.frontText ?? "").trim();
+  const answers = normalizeAnswersInput(input.answers);
+  const backText = answers.join("; ") || (input.backText ?? "").trim();
+  const imageFront = input.imageFront ?? null;
+  const imageBack = input.imageBack ?? null;
+  if (!frontText && answers.length === 0 && !imageFront) {
+    throw new Error("Flashcard must contain content.");
+  }
+
+  const now = Date.now();
+  await db.execAsync("BEGIN TRANSACTION;");
+  try {
+    await db.runAsync(
+      `UPDATE custom_flashcards
+         SET front_text = ?, back_text = ?, image_front = ?, image_back = ?,
+             explanation = ?, flipped = ?, is_user_edited = 1, updated_at = ?
+       WHERE id = ? AND course_id = ?;`,
+      frontText,
+      backText,
+      imageFront,
+      imageBack,
+      input.explanation ?? null,
+      input.flipped ? 1 : 0,
+      now,
+      flashcardId,
+      courseId,
+    );
+    await db.runAsync(
+      "DELETE FROM custom_flashcard_answers WHERE flashcard_id = ?;",
+      flashcardId,
+    );
+    for (const answer of answers) {
+      await db.runAsync(
+        `INSERT OR IGNORE INTO custom_flashcard_answers
+           (flashcard_id, answer_text, created_at) VALUES (?, ?, ?);`,
+        flashcardId,
+        answer,
+        now,
+      );
+    }
+    await db.execAsync("COMMIT;");
+  } catch (error) {
+    await db.execAsync("ROLLBACK;");
+    throw error;
+  }
+
+  const current = await getCustomFlashcardById(courseId, flashcardId);
+  if (!current) throw new Error("Flashcard disappeared after update.");
+
+  const oldImages = [existing.imageFront, existing.imageBack].filter(
+    (uri): uri is string => Boolean(uri) && uri !== imageFront && uri !== imageBack,
+  );
+  for (const uri of oldImages) {
+    const references = await db.getFirstAsync<{ count: number }>(
+      `SELECT COUNT(*) AS count FROM custom_flashcards
+       WHERE image_front = ? OR image_back = ?;`,
+      uri,
+      uri,
+    );
+    if ((references?.count ?? 0) === 0) await deleteImage(uri);
+  }
+  return current;
 }
 
 export async function replaceCustomFlashcardsWithDb(

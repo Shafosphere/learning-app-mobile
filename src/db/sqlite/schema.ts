@@ -109,6 +109,7 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
       external_id TEXT,
       is_official INTEGER NOT NULL DEFAULT 0,
       reset_progress_on_update INTEGER NOT NULL DEFAULT 0,
+      is_user_edited INTEGER NOT NULL DEFAULT 0,
       created_at  INTEGER NOT NULL,
       updated_at  INTEGER NOT NULL
     );
@@ -190,6 +191,12 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     db,
     "custom_flashcards",
     "reset_progress_on_update",
+    "INTEGER NOT NULL DEFAULT 0"
+  );
+  await ensureColumn(
+    db,
+    "custom_flashcards",
+    "is_user_edited",
     "INTEGER NOT NULL DEFAULT 0"
   );
   await db.execAsync(

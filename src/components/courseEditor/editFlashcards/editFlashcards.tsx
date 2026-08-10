@@ -109,6 +109,7 @@ interface ManualCardsEditorProps {
   onCardExplanationChange?: (cardId: string, value: string) => void;
   actionButtons?: ManualCardsEditorButtonConfig[];
   showDefaultBottomAddButton?: boolean;
+  hideRemoveCardAction?: boolean;
 }
 
 interface ManualCardsDisplayAction {
@@ -138,6 +139,7 @@ export const ManualCardsEditor = ({
   onCardExplanationChange,
   actionButtons,
   showDefaultBottomAddButton = true,
+  hideRemoveCardAction = false,
 }: ManualCardsEditorProps) => {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -354,6 +356,9 @@ export const ManualCardsEditor = ({
                         ]}
                         placeholder={t("courseCreator.manualEditor.frontPlaceholder")}
                         placeholderTextColor={styles.cardPlaceholder?.color}
+                        multiline
+                        scrollEnabled={false}
+                        textAlignVertical="top"
                         onChangeText={(value) =>
                           handleFrontChange(card.id, value)
                         }
@@ -508,6 +513,9 @@ export const ManualCardsEditor = ({
                             ]}
                             placeholder={placeholder}
                             placeholderTextColor={styles.cardPlaceholder?.color}
+                            multiline
+                            scrollEnabled={false}
+                            textAlignVertical="top"
                             onChangeText={(value) =>
                               handleAnswerChange(card.id, answerIndex, value)
                             }
@@ -553,6 +561,9 @@ export const ManualCardsEditor = ({
                       ]}
                       placeholder={t("courseCreator.manualEditor.optional")}
                       placeholderTextColor={styles.cardPlaceholder?.color}
+                      multiline
+                      scrollEnabled={false}
+                      textAlignVertical="top"
                       onChangeText={(value) =>
                         handleExplanationChange(card.id, value)
                       }
@@ -584,7 +595,7 @@ export const ManualCardsEditor = ({
                   </>
                 ) : (
                   <>
-                    <Pressable
+                    {!hideRemoveCardAction ? <Pressable
                       accessibilityRole="button"
                       accessibilityLabel={t("courseCreator.manualEditor.removeCard", {
                         index: index + 1,
@@ -602,7 +613,7 @@ export const ManualCardsEditor = ({
                         size={24}
                         color={styles.cardActionIcon?.color ?? "black"}
                       />
-                    </Pressable>
+                    </Pressable> : null}
                     {!isBooleanCardType && (
                       <Pressable
                         accessibilityRole="button"

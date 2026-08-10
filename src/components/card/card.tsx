@@ -12,6 +12,7 @@ import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
 import type { DatePattern } from "@/src/utils/dateInput";
 import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
+import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   useCallback,
   useEffect,
@@ -28,6 +29,7 @@ import {
   TextInput,
   View,
   Platform,
+  Pressable,
   useWindowDimensions,
 } from "react-native";
 import { useTranslation } from "react-i18next";
@@ -172,6 +174,7 @@ export default function Card({
   skipCorrectionEnabled = false,
   showExplanationEnabled: showExplanationEnabledProp,
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
+  onEdit,
 }: CardProps) {
   const styles = useStyles();
   const { t } = useTranslation();
@@ -180,6 +183,7 @@ export default function Card({
   const cardMetrics = getResponsiveFlashcardMetrics(windowWidth, {
     isTabletLayout,
   });
+  const editTabScale = cardMetrics.contentScale;
   const checkSpelling = useSpellchecking();
   const {
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
@@ -1415,6 +1419,35 @@ export default function Card({
         minHeight={cardMetrics.minHeight}
         contentScale={cardMetrics.contentScale}
         backgroundColorOverride={backgroundColorOverride}
+        underlay={
+          onEdit ? (
+            <Pressable
+              accessibilityRole="button"
+              accessibilityLabel={t("flashcards.card.edit")}
+              hitSlop={8}
+              onPress={onEdit}
+              style={({ pressed }) => [
+                styles.editTab,
+                {
+                  right: 14 * editTabScale,
+                  bottom: -24 * editTabScale,
+                  width: 28 * editTabScale,
+                  height: 64 * editTabScale,
+                  paddingBottom: 4 * editTabScale,
+                  borderBottomLeftRadius: 12 * editTabScale,
+                  borderBottomRightRadius: 12 * editTabScale,
+                },
+                pressed && styles.editTabPressed,
+              ]}
+            >
+              <Ionicons
+                name="pencil"
+                size={14 * editTabScale}
+                color={styles.editTabIcon.color}
+              />
+            </Pressable>
+          ) : undefined
+        }
       >
         <CardContentResolver {...resolverProps} />
       </CardFrame>

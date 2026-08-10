@@ -59,6 +59,7 @@ import {
   returnFlashcardToUnknown,
   subscribeFlashcardReturnedToUnknown,
 } from "@/src/services/returnFlashcardToUnknown";
+import { subscribeFlashcardUpdated } from "@/src/services/flashcardUpdated";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { getExplanationState } from "@/src/utils/explanationState";
@@ -241,6 +242,7 @@ export default function Flashcards() {
     setCourseCompletionSummary,
     setCourseCompletionRunStartedAt,
     patchCustomCardHints,
+    patchCustomCard,
     handlePersistHintUpdate,
   } = useFlashcardsCourseData({
     activeCustomCourseId,
@@ -348,6 +350,7 @@ export default function Flashcards() {
     setLearned,
     acknowledgeExplanation,
     resetInteractionState,
+    clearCardTransientState,
     clearSelection,
     updateSelectedItem,
     isBetweenCards,
@@ -591,6 +594,33 @@ export default function Flashcards() {
     setBoxes,
     setLearned,
     setReviewedCardIds,
+  ]);
+
+  useEffect(() => {
+    return subscribeFlashcardUpdated(({ courseId, card }) => {
+      if (activeCustomCourseId !== courseId) return;
+      const patcher = (item: WordWithTranslations) =>
+        item.id === card.id ? card : item;
+      patchCustomCard(card);
+      setBoxes((prev) => ({
+        boxZero: prev.boxZero.map(patcher),
+        boxOne: prev.boxOne.map(patcher),
+        boxTwo: prev.boxTwo.map(patcher),
+        boxThree: prev.boxThree.map(patcher),
+        boxFour: prev.boxFour.map(patcher),
+        boxFive: prev.boxFive.map(patcher),
+      }));
+      setLearned((prev) => prev.map(patcher));
+      updateSelectedItem((current) => (current ? patcher(current) : current));
+      clearCardTransientState();
+    });
+  }, [
+    activeCustomCourseId,
+    patchCustomCard,
+    clearCardTransientState,
+    setBoxes,
+    setLearned,
+    updateSelectedItem,
   ]);
 
   useEffect(() => {
@@ -1030,7 +1060,7 @@ export default function Flashcards() {
     t,
   });
   const addButtonDisabled = downloadDisabled;
-  const shouldShowFloatingAdd =
+  const shouldShowKnowDontKnowAdd =
     shouldShowBoxes &&
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
@@ -1108,6 +1138,13 @@ export default function Flashcards() {
       courseFinishedAccuracyLabel={courseFinishedAccuracyLabel}
       courseFinishedTimeLabel={courseFinishedTimeLabel}
       onBackToCourses={() => router.push("/coursepanel")}
+      onEditCard={(cardId) => {
+        if (activeCustomCourseId == null) return;
+        router.push({
+          pathname: "/editflashcard",
+          params: { courseId: String(activeCustomCourseId), flashcardId: String(cardId) },
+        });
+      }}
       t={t}
       selectedItem={selectedItem}
       setAnswer={setAnswer}
@@ -1163,6 +1200,9 @@ export default function Flashcards() {
         isExplanationVisible ? undefined : primeKeyboardBridgeForCorrection
       }
       onDownload={handleManualAddFlashcards}
+      showAddFlashcards={shouldShowKnowDontKnowAdd}
+      onAddFlashcards={() => void handleManualAddFlashcards()}
+      addFlashcardsDisabled={addButtonDisabled}
       downloadDisabled={cardActionsDownloadDisabled}
       downloadCoachmarkId="flashcards-add-button"
       confirmCoachmarkId="flashcards-confirm-button"
@@ -1252,11 +1292,8 @@ export default function Flashcards() {
       boxFaces={boxFaces}
       handleSelectBox={handleSelectBox}
       handleBoxLongPress={handleBoxLongPress}
-      handleManualAddFlashcards={handleManualAddFlashcards}
       effectiveBoxesLayout={effectiveBoxesLayout}
       boxSelectionLocked={boxSelectionLocked}
-      shouldShowFloatingAdd={shouldShowFloatingAdd}
-      addButtonDisabled={addButtonDisabled}
       isSmallPhoneLayout={isSmallPhoneLayout}
       isTabletLayout={isTabletLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}

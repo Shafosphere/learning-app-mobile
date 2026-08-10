@@ -904,6 +904,17 @@ export function useFlashcardsInteraction({
     lastServedIdRef.current = null;
   }, []);
 
+  const clearCardTransientState = useCallback(() => {
+    clearTransitionTimers();
+    demotionCorrectionLockRef.current = null;
+    setAnswer("");
+    setResult(null);
+    setCorrection(null);
+    setPendingExplanationMove(null);
+    setQueueNext(false);
+    setQuestionShownAt(null);
+  }, [clearTransitionTimers]);
+
   const updateSelectedItem = useCallback(
     (updater: (item: WordWithTranslations) => WordWithTranslations) => {
       setSelectedItem((prev) => {
@@ -1018,6 +1029,7 @@ export function useFlashcardsInteraction({
     moveElement,
     acknowledgeExplanation,
     resetInteractionState,
+    clearCardTransientState,
     clearSelection,
     updateSelectedItem,
     isBetweenCards: queueNext,
