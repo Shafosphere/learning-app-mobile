@@ -684,18 +684,32 @@ export default function Card({
   const len = translationSource?.translations?.length ?? 0;
   const frontLen = frontAnswers.length;
   const isShowingTranslation = isIntroMode || promptText === rewers;
-  const canToggleTranslations = !showCorrectionInputs && isShowingTranslation && len > 1;
+  const canToggleTranslations =
+    !showCorrectionInputs && isShowingTranslation && len > 1;
+  const canToggleCorrectionTranslations =
+    showCorrectionInputs && !isIntroMode && shouldCorrectRewers && len > 1;
   const isShowingFrontAnswer =
     !showCorrectionInputs && !effectiveReversed && promptText === awers;
   const canToggleFrontAnswers = isShowingFrontAnswer && frontLen > 1;
-  const canTogglePromptText = canToggleTranslations || canToggleFrontAnswers;
+  const canTogglePromptText =
+    canToggleTranslations ||
+    canToggleCorrectionTranslations ||
+    canToggleFrontAnswers;
   const next = () => {
     if (canToggleFrontAnswers) {
       setFrontAnswersIndex((i) => (i + 1) % frontLen);
       return;
     }
     if (!len) return;
-    setTranslations((i) => (i + 1) % len);
+    const nextTranslationIndex = (activeTranslationIndex + 1) % len;
+    setTranslations(nextTranslationIndex);
+
+    if (canToggleCorrectionTranslations) {
+      const nextTranslation =
+        translationSource?.translations?.[nextTranslationIndex] ?? "";
+      setCorrectionRewers?.(nextTranslation);
+      wrongInputChange(2, "");
+    }
   };
 
   useLayoutEffect(() => {
@@ -1418,6 +1432,7 @@ export default function Card({
         cardWidth={cardMetrics.width}
         minHeight={cardMetrics.minHeight}
         contentScale={cardMetrics.contentScale}
+        layoutDebugLabel={displayMode}
         backgroundColorOverride={backgroundColorOverride}
         underlay={
           onEdit ? (

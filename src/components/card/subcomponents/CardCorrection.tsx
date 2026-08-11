@@ -2,10 +2,11 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import Octicons from "@expo/vector-icons/Octicons";
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import type { CardCorrectionType, FocusTarget } from "../card-types";
 import {
   Platform,
+  type LayoutChangeEvent,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -185,6 +186,35 @@ export function CardCorrection({
       cardMetrics.textInputHeight,
     ],
   );
+  const logPartLayout = useCallback(
+    (part: "prompt" | "input1" | "input2") =>
+      ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+      if (!__DEV__) return;
+
+      console.log(`[card-layout] correction-${part}`, {
+        width: layout.width,
+        height: layout.height,
+        promptLength: promptText.length,
+        input1Length: correction.input1.length,
+        input2Length: (correction.input2 ?? "").length,
+        showAwersInput,
+        showRewersInput,
+        answerOnly,
+        allowMultilinePrompt,
+        inputHeight: cardMetrics.inputHeight,
+      });
+    },
+    [
+      allowMultilinePrompt,
+      answerOnly,
+      cardMetrics.inputHeight,
+      correction.input1.length,
+      correction.input2,
+      promptText.length,
+      showAwersInput,
+      showRewersInput,
+    ],
+  );
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
     const chars = splitGraphemes(value);
@@ -260,6 +290,7 @@ export function CardCorrection({
 
   const promptBlock = (
     <View
+      onLayout={logPartLayout("prompt")}
       style={[
         styles.topContainer,
         allowMultilinePrompt && styles.topContainerLarge,
@@ -308,6 +339,7 @@ export function CardCorrection({
         if (Math.abs(nextWidth - input1LayoutWidth) > 0.5) {
           setInput1LayoutWidth(nextWidth);
         }
+        logPartLayout("input1")({ nativeEvent } as LayoutChangeEvent);
       }}
     >
       <ScrollView
@@ -388,6 +420,7 @@ export function CardCorrection({
         if (Math.abs(nextWidth - input2LayoutWidth) > 0.5) {
           setInput2LayoutWidth(nextWidth);
         }
+        logPartLayout("input2")({ nativeEvent } as LayoutChangeEvent);
       }}
     >
       <ScrollView
@@ -517,11 +550,9 @@ export function CardCorrection({
     );
   }
 
-  return (
-    <>
-      {promptBlock}
-      {showAwersInput ? input1Block : null}
-      {showRewersInput ? input2Block : null}
-    </>
-  );
+  return <>
+    {promptBlock}
+    {showAwersInput ? input1Block : null}
+    {showRewersInput ? input2Block : null}
+  </>;
 }

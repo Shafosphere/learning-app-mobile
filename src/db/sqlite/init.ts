@@ -15,6 +15,15 @@ import { applySchema, configurePragmas } from "./schema";
 
 const BUNDLED_SYNC_DATABASE_NAME = "official-sync.db";
 
+async function getDatabaseUserVersion(
+  db: SQLite.SQLiteDatabase
+): Promise<number> {
+  const row = await db.getFirstAsync<{ user_version: number }>(
+    "PRAGMA user_version;"
+  );
+  return row?.user_version ?? 0;
+}
+
 type OfficialCourseSnapshot = {
   id: number;
   packVersion: number;
@@ -255,7 +264,11 @@ async function openBundledSyncDatabase(): Promise<SQLite.SQLiteDatabase> {
     assetId: prebuiltDatabaseAsset as number,
     forceOverwrite: true,
   });
-  return SQLite.openDatabaseAsync(BUNDLED_SYNC_DATABASE_NAME);
+  const bundledDb = await SQLite.openDatabaseAsync(BUNDLED_SYNC_DATABASE_NAME);
+  console.log(
+    `[DB] Bundled prebuilt database version: ${await getDatabaseUserVersion(bundledDb)}`
+  );
+  return bundledDb;
 }
 
 async function getBundledOfficialCourseSnapshot(
@@ -624,6 +637,9 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     const db = await openDatabase();
     await applySchema(db);
     await configurePragmas(db);
+    console.log(
+      `[DB] Active device database version: ${await getDatabaseUserVersion(db)}`
+    );
 
     try {
       await seedOfficialPacksWithDb(db);

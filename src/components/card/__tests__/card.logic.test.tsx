@@ -450,6 +450,139 @@ describe("Card logic props", () => {
     });
   });
 
+  it("cycles correction translation target and clears its input", async () => {
+    const CorrectionSwitchHarness = () => {
+      const [correction, setCorrection] = React.useState({
+        cardId: 132,
+        awers: "smart",
+        rewers: "szczypać",
+        input1: "smart",
+        input2: "szcz",
+        mode: "demote" as const,
+        promptText: "smart",
+        reversed: false,
+        word: makeCard({
+          id: 132,
+          text: "smart",
+          translations: ["szczypać", "boleć"],
+        }),
+      });
+
+      return (
+        <Card
+          {...createProps({
+            result: false,
+            correction,
+            selectedItem: makeCard({
+              id: 132,
+              text: "smart",
+              translations: ["szczypać", "boleć"],
+            }),
+            setCorrectionRewers: (rewers) =>
+              setCorrection((current) => ({ ...current, rewers })),
+            wrongInputChange: (which, value) =>
+              setCorrection((current) => ({
+                ...current,
+                [which === 1 ? "input1" : "input2"]: value,
+              })),
+          })}
+        />
+      );
+    };
+
+    render(<CorrectionSwitchHarness />);
+
+    await waitFor(() => {
+      expect(latestResolverProps).toMatchObject({
+        displayMode: "correction",
+        canToggleTranslations: true,
+        correctionRewers: "szczypać",
+      });
+    });
+
+    act(() => {
+      (latestResolverProps?.next as () => void)();
+    });
+
+    await waitFor(() => {
+      expect(latestResolverProps).toMatchObject({
+        correctionRewers: "boleć",
+        correction: expect.objectContaining({ input1: "smart", input2: "" }),
+      });
+    });
+
+    act(() => {
+      (latestResolverProps?.next as () => void)();
+    });
+
+    await waitFor(() => {
+      expect(latestResolverProps?.correctionRewers).toBe("szczypać");
+    });
+  });
+
+  it("hides correction translation toggle without a translation input or alternative", async () => {
+    const correction = {
+      cardId: 133,
+      awers: "smart",
+      rewers: "szczypać",
+      input1: "",
+      input2: "",
+      mode: "demote" as const,
+      promptText: "szczypać",
+      reversed: true,
+      word: makeCard({
+        id: 133,
+        text: "smart",
+        translations: ["szczypać", "boleć"],
+      }),
+    };
+
+    const { rerender } = render(
+      <Card
+        {...createProps({
+          result: false,
+          correction,
+          reversed: true,
+          selectedItem: makeCard({
+            id: 133,
+            text: "smart",
+            translations: ["szczypać", "boleć"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.canToggleTranslations).toBe(false);
+    });
+
+    rerender(
+      <Card
+        {...createProps({
+          result: false,
+          correction: {
+            ...correction,
+            reversed: false,
+            word: makeCard({
+              id: 133,
+              text: "smart",
+              translations: ["szczypać"],
+            }),
+          },
+          selectedItem: makeCard({
+            id: 133,
+            text: "smart",
+            translations: ["szczypać"],
+          }),
+        })}
+      />,
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.canToggleTranslations).toBe(false);
+    });
+  });
+
   it("keeps full ghost correction text visible after typing a prefix", async () => {
     render(
       <Card

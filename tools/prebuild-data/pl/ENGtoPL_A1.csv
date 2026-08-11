@@ -572,7 +572,7 @@ external_id,front_text,back_text
 0571,discuss,"dyskutować, omawiać, omówić"
 0572,writer,"pisarz, pisarka"
 0573,walk,"spacer, przechadzka, chodnik, ścieżka, chód, iść, spacerować, wyprowadzać"
-0574,grounds,"grunt, teren, powód, podstawa, tereny"
+0574,grounds,"grunt, teren, powód, podstawa, tereny, grunty, powody, podstawy"
 0575,twelve,"dwanaście, 12"
 0576,noise,"hałas, szum, odgłos"
 0577,finished,"ukończony, wykończony, skończony, zakończony"
@@ -601,7 +601,7 @@ external_id,front_text,back_text
 0600,seat,"miejsce, siedzenie, posada, mandat, siodełko, siedziba, tyłek, deska klozetowa, sadzać, sadzać się, posadzić"
 0601,joined,"połączyć, łączyć, dołączyć się, przyłączyć, połączony, dołączony, dołączył"
 0602,dog,"pies, suka, hot dog, tropić, natrętnie śledzić"
-0603,leaves,"liść, liście, urlop, zostawiać"
+0603,leaves,"liść, liście, urlop, urlopy, zostawiać"
 0604,meat,"mięso, miąższ"
 0605,magazine,"magazyn, czasopismo, skład, magazynek"
 0606,repeated,"ponowny, powtórny, powtarzać, powtarzający się"
@@ -634,7 +634,7 @@ external_id,front_text,back_text
 0633,dinner,"obiad, kolacja"
 0634,sweet,"słodki, uroczy, cukierek, słodycz, deser"
 0635,describes,"opisuje, opisywać"
-0636,thanks,"dzięki, podziękowanie, dziękować"
+0636,thanks,"dzięki, podziękowanie, podziękowania, dziękować"
 0637,snow,"śnieg, śnieżny, śnieżyca, śnieżnobiały, śnieżyć"
 0638,fishing,"łowienie ryb, połów ryb, wędkarstwo, rybołówstwo, rybacki, wędkarski"
 0639,eggs,jajka
@@ -782,7 +782,7 @@ external_id,front_text,back_text
 0781,ride,"jechać, jeździć, wozić, przewozić, przejażdżka, jazda"
 0782,shoes,"but, buty"
 0783,lessons,"lekcja, lekcje"
-0784,habits,"nawyk, nawyki, przyzwyczajenie, zwyczaj"
+0784,habits,"nawyk, nawyki, przyzwyczajenie, przyzwyczajenia, zwyczaj, zwyczaje"
 0785,lunch,"lunch, obiad"
 0786,shorter,krótszy
 0787,terrible,"okropny, straszny"
@@ -1031,7 +1031,7 @@ external_id,front_text,back_text
 1030,honorary,honorowy
 1031,eleventh,jedenasty
 1032,posture,"postawa, postura, poza, stanowisko, podejście, pozować, przybierać"
-1033,coatings,"powłoka, pokrycie, warstwa ochronna, powłoki"
+1033,coatings,"powłoka, pokrycie, warstwa ochronna, powłoki, pokrycia, warstwy ochronne"
 1034,problematic,problematyczny
 1035,headache,"ból głowy, problem, utrapienie, zmartwienie"
 1036,introduces,"przedstawia, wprowadza, zapoznaje, wdraża"

@@ -37,7 +37,7 @@ external_id,front_text,back_text
 0036,investment,"inwestycja, lokata, inwestycyjny"
 0037,payment,płatność
 0038,existing,istniejący
-0039,facilities,"pomieszczenie, obiekt, toaleta, obiekty"
+0039,facilities,"pomieszczenie, obiekt, toaleta, obiekty, pomieszczenia, toalety"
 0040,environment,"otoczenie, środowisko, medium, ośrodek, żywioł"
 0041,minister,"minister, poseł nadzwyczajny, minister pełnomocny"
 0042,actual,"rzeczywisty, realny, prawdziwy, faktyczny"
@@ -107,7 +107,7 @@ external_id,front_text,back_text
 0106,latter,"późniejszy, drugi , ten drugi,"
 0107,loan,"pożyczka, zapożyczenie, pożyczać, pożyczyć"
 0108,tons,tony
-0109,components,"komponent, składnik, element, część składowa, elementy"
+0109,components,"komponent, składnik, element, część składowa, elementy, komponenty, składniki, części składowe"
 0110,manufacturing,"produkcja, wytwarzanie, produkcyjny"
 0111,sector,"sektor, strefa, wycinek, obszar"
 0112,yield,"dać, dostarczyć, przynosić, ustąpić, ustępować, poddać się, odstąpić, plon, urobek, wydajność, zwrot, osiadanie gruntu"
@@ -194,7 +194,7 @@ external_id,front_text,back_text
 0193,prime,"najważniejszy, rozkwit, liczba pierwsza, prym, najlepszy"
 0194,substance,substancja
 0195,parliament,"parlament, stado gawronów"
-0196,recommendations,"zalecenie, rekomendacja, wskazówki, zalecenia"
+0196,recommendations,"zalecenie, rekomendacja, wskazówki, zalecenia, rekomendacje"
 0197,earnings,"zarobek, zarobki, dochód, zysk"
 0198,transition,"przejście, transformacja, zmiana, przechodzenie"
 0199,psychology,psychologia
@@ -315,7 +315,7 @@ external_id,front_text,back_text
 0314,deemed,"uznany, uważany za"
 0315,suffering,"cierpienie, ból"
 0316,restrictions,"ograniczenia, restrykcje"
-0317,dimensions,"wymiar, wymiary, rozmiar, zakres"
+0317,dimensions,"wymiar, wymiary, rozmiar, zakres, rozmiary, zakresy"
 0318,sufficiently,"wystarczająco, dostatecznie"
 0319,unlike,"w przeciwieństwie do, wbrew, niepodobny"
 0320,solar,słoneczny
@@ -329,7 +329,7 @@ external_id,front_text,back_text
 0328,availability,"dostępność, osiągalność, dyspozycyjność"
 0329,varied,"różnorodny, zróżnicowany"
 0330,correspondence,"zgodność, podobieństwo, korespondencja, odpowiedniość"
-0331,premises,"nieruchomość, posesja, siedziba, teren, lokal, pomieszczenie, obiekt, lokale"
+0331,premises,"nieruchomość, posesja, siedziba, teren, lokal, pomieszczenie, obiekt, lokale, nieruchomości, posesje, siedziby, tereny, pomieszczenia, obiekty"
 0332,dispute,"spór, kłótnia, dysputa, spierać się, kłócić się, dyskutować, kwestionować, zaprzeczać"
 0333,profile,"profil, zarys, charakterystyka, reputacja, profilować"
 0334,virtue,"cnota, zaleta, dobro, zaletność"
@@ -466,7 +466,7 @@ external_id,front_text,back_text
 0465,threatened,"zastraszać, grozić, zagrażać, zagrożony"
 0466,capability,"zdolność, możliwość"
 0467,worship,"cześć, kult, czcić, uwielbiać, ubóstwiać"
-0468,illustrations,"ilustracja, ilustracje, obrazek, rysunek"
+0468,illustrations,"ilustracja, ilustracje, obrazek, rysunek, obrazki, rysunki"
 0469,assured,"zapewnić, zagwarantować, upewnić, zapewniony, pewny siebie, pewny"
 0470,audit,audyt
 0471,label,"metka, etykieta, nalepka, etykietować, nalepiać, znakować, określać"
@@ -745,7 +745,7 @@ external_id,front_text,back_text
 0744,impulse,impuls
 0745,radar,radar
 0746,compatible,"kompatybilny, zgodny"
-0747,providers,"dostawca, usługodawca, dostawcy"
+0747,providers,"dostawca, usługodawca, dostawcy, usługodawcy"
 0748,broadly,"z grubsza, ogólnie, szeroko"
 0749,constituents,składniki
 0750,generalized,uogólniony
@@ -943,7 +943,7 @@ external_id,front_text,back_text
 0942,complainant,"powód, powódka, strona powodowa, skarżący"
 0943,triangle,trójkąt
 0944,aqueous,"wodny, wodnisty"
-0945,brooks,"strumyk, potok, strumyki"
+0945,brooks,"strumyk, potok, strumyki, potoki"
 0946,infectious,"zakaźny, zaraźliwy"
 0947,motivated,zmotywowany
 0948,efficiently,"skutecznie, efektywnie"
@@ -1087,7 +1087,7 @@ external_id,front_text,back_text
 1086,radioactive,"promieniotwórczy, radioaktywny"
 1087,retrieval,"odzyskiwanie, odczytywanie, pobieranie, wyszukiwanie"
 1088,nomination,"nominacja, nominowanie, wyznaczenie"
-1089,offenders,"przestępca, sprawca, wykroczeniowiec, przestępcy"
+1089,offenders,"przestępca, sprawca, wykroczeniowiec, przestępcy, sprawcy, wykroczeniowcy"
 1090,focal,ogniskowy
 1091,viable,"realny, wykonalny, zdolny do życia"
 1092,destiny,przeznaczenie
@@ -1147,7 +1147,7 @@ external_id,front_text,back_text
 1146,dramatically,dramatycznie
 1147,duplicate,"duplikować, kopiować, duplikat, wtórnik, podwójny"
 1148,abdominal,brzuszny
-1149,disciples,"uczeń, naśladowca, apostołowie, uczniowie"
+1149,disciples,"uczeń, naśladowca, apostołowie, uczniowie, naśladowcy"
 1150,stained,"poplamiony, zabarwiony, plamić, barwić"
 1151,foreman,"nadzorca, brygadzista, przewodniczący ławy przysięgłych"
 1152,obey,"słuchać się, być posłusznym, przestrzegać"
@@ -1353,7 +1353,7 @@ external_id,front_text,back_text
 1352,permeability,"przenikalność magnetyczna, przepuszczalność"
 1353,hostility,"wrogość, niechęć"
 1354,diversion,"objazd, urozmaicenie, odwracanie uwagi, rozpraszanie, dywersja"
-1355,odds,"szansa, prawdopodobieństwo, kurs, kursy,  przewaga, nierówność, różnica, resztki, sprzeczność"
+1355,odds,"szansa, prawdopodobieństwo, kurs, kursy, przewaga, nierówność, różnica, resztki, sprzeczność, szanse, przewagi, nierówności, różnice, sprzeczności"
 1356,complementary,"komplementarny, uzupełniający"
 1357,intercourse,"kontakt, stosunki, rozmowa, konwersacja, stosunek płciowy"
 1358,prototype,"prototyp, pierwowzór, wzorzec, model"

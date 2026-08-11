@@ -1,6 +1,7 @@
 import type { NativeLanguage } from "@/src/i18n";
 
 const POLISH_LANGUAGE_COURSE_SLUGS = [
+  "temporary_smart",
   "fiszki_podstawy_en_pl_slowa",
   "eng_to_pl_a1",
   "eng_to_pl_a2",

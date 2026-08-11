@@ -1,7 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { getDateInputPlaceholder, type DatePattern } from "@/src/utils/dateInput";
 import { useCallback, useMemo } from "react";
-import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { LayoutChangeEvent, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
@@ -116,6 +116,28 @@ export function CardInput({
   const datePlaceholder = useMemo(
     () => getDateInputPlaceholder(mainDatePattern),
     [mainDatePattern]
+  );
+  const logPromptLayout = useCallback(
+    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
+      if (!__DEV__) return;
+
+      console.log("[card-layout] question-prompt", {
+        width: layout.width,
+        height: layout.height,
+        promptLength: promptText.length,
+        answerLength: answer.length,
+        allowMultilinePrompt,
+        hasPromptImage: Boolean(promptImageUri),
+        inputHeight: cardMetrics.inputHeight,
+      });
+    },
+    [
+      allowMultilinePrompt,
+      answer.length,
+      cardMetrics.inputHeight,
+      promptImageUri,
+      promptText.length,
+    ],
   );
   const renderDateMask = useCallback(
     (value: string, mask: string) => {
@@ -341,6 +363,7 @@ export function CardInput({
   const content = (
     <>
       <View
+        onLayout={logPromptLayout}
         style={[
           styles.topContainer,
           allowMultilinePrompt && styles.topContainerLarge,
