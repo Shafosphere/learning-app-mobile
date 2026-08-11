@@ -1,7 +1,7 @@
 import Octicons from "@expo/vector-icons/Octicons";
 import { getDateInputPlaceholder, type DatePattern } from "@/src/utils/dateInput";
 import { useCallback, useMemo } from "react";
-import { LayoutChangeEvent, Pressable, StyleSheet, Text, TextInput, View } from "react-native";
+import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
@@ -117,28 +117,6 @@ export function CardInput({
     () => getDateInputPlaceholder(mainDatePattern),
     [mainDatePattern]
   );
-  const logPromptLayout = useCallback(
-    ({ nativeEvent: { layout } }: LayoutChangeEvent) => {
-      if (!__DEV__) return;
-
-      console.log("[card-layout] question-prompt", {
-        width: layout.width,
-        height: layout.height,
-        promptLength: promptText.length,
-        answerLength: answer.length,
-        allowMultilinePrompt,
-        hasPromptImage: Boolean(promptImageUri),
-        inputHeight: cardMetrics.inputHeight,
-      });
-    },
-    [
-      allowMultilinePrompt,
-      answer.length,
-      cardMetrics.inputHeight,
-      promptImageUri,
-      promptText.length,
-    ],
-  );
   const renderDateMask = useCallback(
     (value: string, mask: string) => {
       const typedPrefix = value.slice(0, mask.length);
@@ -149,9 +127,9 @@ export function CardInput({
           style={[
             styles.dateInputMask,
             {
-              height: cardMetrics.inputHeight,
+              height: cardMetrics.textInputHeight,
               fontSize: cardMetrics.fontSize,
-              lineHeight: cardMetrics.inputHeight,
+              lineHeight: cardMetrics.textInputHeight,
             },
           ]}
           numberOfLines={1}
@@ -165,14 +143,14 @@ export function CardInput({
     },
     [
       cardMetrics.fontSize,
-      cardMetrics.inputHeight,
+      cardMetrics.textInputHeight,
       styles.dateInputMask,
     ],
   );
 
   const renderedInput = useMemo(() => {
     const inputFrameStyle = {
-      height: cardMetrics.inputHeight,
+      height: cardMetrics.textInputHeight,
     };
     const textInputStyle = {
       height: cardMetrics.textInputHeight,
@@ -363,7 +341,6 @@ export function CardInput({
   const content = (
     <>
       <View
-        onLayout={logPromptLayout}
         style={[
           styles.topContainer,
           allowMultilinePrompt && styles.topContainerLarge,
@@ -400,7 +377,9 @@ export function CardInput({
       </View>
 
       {allowMultilinePrompt ? (
-        <View style={styles.inputContainerLarge}>
+        <View
+          style={styles.inputContainerLarge}
+        >
           {renderedInput}
         </View>
       ) : (

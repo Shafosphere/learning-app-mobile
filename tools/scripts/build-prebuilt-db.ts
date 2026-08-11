@@ -12,19 +12,9 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 1;
+const PREBUILT_DATABASE_VERSION = 2;
 
 const OFFICIAL_PACKS = [
-  {
-    slug: "temporary_smart",
-    name: "Temporary Smart Test",
-    iconId: "flag:en",
-    iconColor: "#14B8A6",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: true,
-    csvFile: "temporary_smart.csv",
-  },
   {
     slug: "eng_to_pl_a1",
     name: "Ang A1",

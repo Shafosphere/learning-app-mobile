@@ -45,20 +45,6 @@ const DEFAULT_PACK_VERSION = 1;
 // Add new entries here to ship additional packs.
 const OFFICIAL_PACKS_MANIFEST = ([
   {
-    slug: "temporary_smart",
-    name: "Temporary Smart Test",
-    position: 0,
-    iconId: "flag:en",
-    iconColor: "#14B8A6",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: true,
-    sourceLang: "en",
-    targetLang: "pl",
-    smallFlag: "pl",
-    isMini: false,
-  },
-  {
     slug: "fiszki_podstawy_en_pl_slowa",
     packVersion: 2,
     name: "Podstawowe słówka",

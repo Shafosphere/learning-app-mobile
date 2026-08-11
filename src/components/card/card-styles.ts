@@ -338,9 +338,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     gap: 10,
     justifyContent: "center",
   },
-  cardContentLargeCorrection: {
-    paddingVertical: 14,
-  },
   topContainerLarge: {
     alignItems: "center",
     justifyContent: "center",
@@ -357,9 +354,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   inputContainerLarge: {
     width: "100%",
-    paddingBottom: 14,
-  },
-  inputContainerLargeCorrection: {
     paddingBottom: 14,
   },
   containerInputLarge: {

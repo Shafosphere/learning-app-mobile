@@ -1432,7 +1432,6 @@ export default function Card({
         cardWidth={cardMetrics.width}
         minHeight={cardMetrics.minHeight}
         contentScale={cardMetrics.contentScale}
-        layoutDebugLabel={displayMode}
         backgroundColorOverride={backgroundColorOverride}
         underlay={
           onEdit ? (
