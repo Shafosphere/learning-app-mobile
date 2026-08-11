@@ -20,7 +20,6 @@ type WikiPeekProps = {
   subtitle?: string;
   onClose: () => void;
   onConfirm: () => void;
-  okEnabled?: boolean;
   content?: React.ReactNode;
 };
 
@@ -30,7 +29,6 @@ export function WikiPeek({
   subtitle,
   onClose,
   onConfirm,
-  okEnabled = true,
   content,
 }: WikiPeekProps) {
   const styles = useWikiPeekStyles();
@@ -118,9 +116,8 @@ export function WikiPeek({
             <View style={styles.footer}>
               <MyButton
                 text={t("components.wiki.wikiPeek.text.ok")}
-                onPress={okEnabled ? onConfirm : undefined}
+                onPress={onConfirm}
                 color="my_green"
-                disabled={!okEnabled}
               />
             </View>
           </View>

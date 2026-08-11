@@ -8,6 +8,7 @@ import NotificationPermissionNudge, {
   NOTIFICATION_NUDGE_USAGE_CHECKPOINT_INTERVAL_MS,
 } from "../NotificationPermissionNudge";
 import { triggerNotificationNudgePreview } from "@/src/services/notificationNudgePreview";
+import { getReminderPermissionState } from "@/src/features/notifications";
 
 const mockSettings = {
   learningRemindersEnabled: false,
@@ -17,6 +18,12 @@ const mockSettings = {
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: () => mockSettings,
 }));
+
+jest.mock("@/src/features/notifications", () => ({
+  getReminderPermissionState: jest.fn(),
+}));
+
+const mockedGetReminderPermissionState = jest.mocked(getReminderPermissionState);
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
@@ -62,6 +69,8 @@ jest.mock("@/src/components/nudge/NudgeModal", () => {
 async function flushPromises() {
   await Promise.resolve();
   await Promise.resolve();
+  await Promise.resolve();
+  await Promise.resolve();
 }
 
 describe("NotificationPermissionNudge", () => {
@@ -74,6 +83,8 @@ describe("NotificationPermissionNudge", () => {
     listeners.length = 0;
     mockSettings.learningRemindersEnabled = false;
     mockSettings.setLearningRemindersEnabled.mockReset();
+    mockedGetReminderPermissionState.mockReset();
+    mockedGetReminderPermissionState.mockResolvedValue("denied");
     jest.spyOn(AppState, "addEventListener").mockImplementation((_type, listener) => {
       listeners.push(listener);
       return { remove: jest.fn() };
@@ -261,7 +272,7 @@ describe("NotificationPermissionNudge", () => {
     expect(await AsyncStorage.getItem("notificationNudge.nextEligibleAt")).toBeNull();
   });
 
-  it("does not show when reminders already enabled and uses existing setting action", async () => {
+  it("does not show when reminders are already enabled", async () => {
     mockSettings.learningRemindersEnabled = true;
     const enabledScreen = render(<NotificationPermissionNudge />);
     await waitFor(() => expect(listeners).not.toHaveLength(0));
@@ -271,10 +282,11 @@ describe("NotificationPermissionNudge", () => {
       await flushPromises();
     });
     expect(enabledScreen.queryByTestId("notification-nudge")).toBeNull();
-    enabledScreen.unmount();
+  });
 
-    mockSettings.learningRemindersEnabled = false;
+  it("uses the existing setting action when enabled from the nudge", async () => {
     const screen = render(<NotificationPermissionNudge />);
+    await waitFor(() => expect(listeners).not.toHaveLength(0));
     await sendAppState("active");
     await act(async () => {
       jest.advanceTimersByTime(NOTIFICATION_NUDGE_FOREGROUND_THRESHOLD_MS);
@@ -287,6 +299,19 @@ describe("NotificationPermissionNudge", () => {
     await waitFor(() => {
       expect(screen.queryByTestId("notification-nudge")).toBeNull();
     });
+  });
+
+  it("does not show when notification permission is already granted", async () => {
+    mockedGetReminderPermissionState.mockResolvedValue("granted");
+    const screen = render(<NotificationPermissionNudge />);
+    await waitFor(() => expect(listeners).not.toHaveLength(0));
+    await sendAppState("active");
+    await act(async () => {
+      jest.advanceTimersByTime(NOTIFICATION_NUDGE_FOREGROUND_THRESHOLD_MS);
+      await flushPromises();
+    });
+
+    expect(screen.queryByTestId("notification-nudge")).toBeNull();
   });
 
   it("adds cooldown when enabling reminders is denied", async () => {

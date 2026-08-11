@@ -2,6 +2,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
   buildUserDataExport,
+  hasUserDataExportImages,
   restoreUserData,
   type UserDataExport,
 } from "@/src/services/userDataBackup";
@@ -693,6 +694,90 @@ describe("userDataBackup", () => {
         ],
       },
     ]);
+    expect(hasUserDataExportImages(payload)).toBe(false);
+  });
+
+  it("exports only user-edited official flashcards", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    mockedGetCustomCourses.mockResolvedValue([
+      {
+        id: 11,
+        name: "Official",
+        iconId: "star",
+        iconColor: "#fff",
+        colorId: null,
+        reviewsEnabled: true,
+        createdAt: 10,
+        updatedAt: 20,
+        isOfficial: true,
+        slug: "official-slug",
+        packVersion: 1,
+      },
+    ] as any);
+    mockedGetCustomFlashcards.mockResolvedValue([
+      {
+        id: 1101,
+        courseId: 11,
+        frontText: "edited front",
+        backText: "edited back",
+        answers: ["edited back", "alternate"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: "file://edited-front.jpg",
+        imageBack: "file://edited-back.jpg",
+        explanation: "edited note",
+        position: 0,
+        flipped: true,
+        answerOnly: false,
+        externalId: "official-card-1",
+        isOfficial: true,
+        isUserEdited: true,
+        resetProgressOnUpdate: false,
+        type: "text",
+        createdAt: 1,
+        updatedAt: 2,
+      },
+      {
+        id: 1102,
+        courseId: 11,
+        frontText: "untouched",
+        backText: "card",
+        answers: ["card"],
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        position: 1,
+        flipped: false,
+        answerOnly: false,
+        externalId: "official-card-2",
+        isOfficial: true,
+        isUserEdited: false,
+        resetProgressOnUpdate: false,
+        type: "text",
+        createdAt: 1,
+        updatedAt: 2,
+      },
+    ] as any);
+
+    const payload = await buildUserDataExport();
+
+    expect(payload.officialCourseState.courses[0]?.editedFlashcards).toEqual([
+      {
+        externalId: "official-card-1",
+        position: 0,
+        frontText: "edited front",
+        backText: "edited back",
+        answers: ["edited back", "alternate"],
+        imageFront: "file://edited-front.jpg",
+        imageBack: "file://edited-back.jpg",
+        explanation: "edited note",
+        flipped: true,
+      },
+    ]);
+    expect(hasUserDataExportImages(payload)).toBe(true);
   });
 
   it("restores stats state, remaps custom course ids and restores snapshots for custom and official courses", async () => {
@@ -855,6 +940,19 @@ describe("userDataBackup", () => {
               },
             ],
             hints: [],
+            editedFlashcards: [
+              {
+                externalId: "official-card-1",
+                position: 0,
+                frontText: "imported edited front",
+                backText: "imported edited back",
+                answers: ["imported edited back", "alternate answer"],
+                imageFront: null,
+                imageBack: null,
+                explanation: "imported explanation",
+                flipped: true,
+              },
+            ],
             relearningCards: [
               {
                 externalId: "official-card-1",
@@ -975,6 +1073,40 @@ describe("userDataBackup", () => {
       1500,
       555,
     ]);
+
+    const editedOfficialCardUpdate = db.runAsync.mock.calls.find(([sql]) =>
+      sql.includes("is_user_edited = 1")
+    );
+    expect(editedOfficialCardUpdate?.slice(1)).toEqual([
+      "imported edited front",
+      "imported edited back; alternate answer",
+      null,
+      null,
+      "imported explanation",
+      1,
+      1700000000000,
+      701,
+    ]);
+    expect(
+      db.runAsync.mock.calls.filter(([sql]) =>
+        sql.includes("INSERT OR IGNORE INTO custom_flashcard_answers")
+      )
+    ).toEqual(
+      expect.arrayContaining([
+        expect.arrayContaining([
+          expect.stringContaining("INSERT OR IGNORE INTO custom_flashcard_answers"),
+          701,
+          "imported edited back",
+          1700000000000,
+        ]),
+        expect.arrayContaining([
+          expect.stringContaining("INSERT OR IGNORE INTO custom_flashcard_answers"),
+          701,
+          "alternate answer",
+          1700000000000,
+        ]),
+      ])
+    );
   });
 
   it("restores old backups without statsState using default stats values", async () => {

@@ -253,7 +253,6 @@ export default function WikiScreen() {
         }
         onClose={closePeek}
         onConfirm={handleConfirm}
-        okEnabled={selectedIndex === currentIndex}
         content={
           selectedIndex != null ? (
             <View style={styles.peekContent}>

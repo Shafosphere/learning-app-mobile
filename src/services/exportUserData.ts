@@ -3,6 +3,8 @@ import * as Sharing from "expo-sharing";
 import { Platform } from "react-native";
 import {
   buildUserDataExport,
+  createBackupZip,
+  hasUserDataExportImages,
   type UserDataExport,
 } from "@/src/services/userDataBackup";
 
@@ -25,11 +27,6 @@ type UserDataExportFileResult = {
   payload: UserDataExport;
 };
 
-function buildExportFileName(): string {
-  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
-  return `learning-app-export-${timestamp}.json`;
-}
-
 function isShareCancelledError(error: unknown): boolean {
   if (typeof error === "string") {
     const lower = error.toLowerCase();
@@ -42,8 +39,14 @@ function isShareCancelledError(error: unknown): boolean {
   return false;
 }
 
-async function shareJsonFile(
+function buildJsonExportFileName(): string {
+  const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
+  return `learning-app-export-${timestamp}.json`;
+}
+
+async function shareBackupFile(
   fileUri: string,
+  isZip: boolean,
   dialogTitle: string
 ): Promise<ShareResult> {
   let sharingSupported = false;
@@ -63,8 +66,8 @@ async function shareJsonFile(
 
   try {
     await Sharing.shareAsync(fileUri, {
-      mimeType: "application/json",
-      UTI: "public.json",
+      mimeType: isZip ? "application/zip" : "application/json",
+      UTI: isZip ? "public.zip-archive" : "public.json",
       dialogTitle,
     });
 
@@ -92,33 +95,14 @@ async function shareJsonFile(
   }
 }
 
-async function writeExportToLocalFile(): Promise<UserDataExportFileResult> {
-  const payload = await buildUserDataExport();
-  const json = JSON.stringify(payload, null, 2);
-  const fileName = buildExportFileName();
-  const baseDir = FileSystem.documentDirectory ?? FileSystem.cacheDirectory;
-  if (!baseDir) {
-    throw new Error("Brak dostępu do katalogu dokumentów.");
-  }
-
-  const fileUri = `${baseDir}${fileName}`;
-  await FileSystem.writeAsStringAsync(fileUri, json, {
-    encoding: FileSystem.EncodingType.UTF8,
-  });
-  const info = await FileSystem.getInfoAsync(fileUri);
-
-  return {
-    fileUri,
-    fileName,
-    bytesWritten: info.exists ? info.size : json.length,
-    payload,
-  };
-}
-
 export async function exportUserDataToFile(): Promise<UserDataExportFileResult> {
   const payload = await buildUserDataExport();
-  const json = JSON.stringify(payload, null, 2);
-  const fileName = buildExportFileName();
+  const shouldCreateZip = hasUserDataExportImages(payload);
+  const archive = shouldCreateZip ? await createBackupZip(payload) : null;
+  const fileName = archive
+    ? archive.fileUri.split("/").pop() ?? "memicard-backup.zip"
+    : buildJsonExportFileName();
+  const json = archive ? null : JSON.stringify(payload, null, 2);
 
   if (Platform.OS === "android") {
     const permissions =
@@ -131,22 +115,52 @@ export async function exportUserDataToFile(): Promise<UserDataExportFileResult> 
     const uri = await FileSystem.StorageAccessFramework.createFileAsync(
       permissions.directoryUri,
       fileName,
-      "application/json"
+      archive ? "application/zip" : "application/json"
     );
 
-    await FileSystem.writeAsStringAsync(uri, json, {
-      encoding: FileSystem.EncodingType.UTF8,
-    });
+    if (archive) {
+      const archiveBase64 = await FileSystem.readAsStringAsync(archive.fileUri, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+      await FileSystem.writeAsStringAsync(uri, archiveBase64, {
+        encoding: FileSystem.EncodingType.Base64,
+      });
+    } else {
+      await FileSystem.writeAsStringAsync(uri, json ?? "", {
+        encoding: FileSystem.EncodingType.UTF8,
+      });
+    }
 
     return {
       fileUri: uri,
       fileName,
-      bytesWritten: json.length,
+      bytesWritten: archive?.bytesWritten ?? (json?.length ?? 0),
       payload,
     };
   }
 
-  return writeExportToLocalFile();
+  if (!archive) {
+    const baseDir = FileSystem.documentDirectory ?? FileSystem.cacheDirectory;
+    if (!baseDir) throw new Error("Brak dostępu do katalogu dokumentów.");
+    const fileUri = `${baseDir}${fileName}`;
+    await FileSystem.writeAsStringAsync(fileUri, json ?? "", {
+      encoding: FileSystem.EncodingType.UTF8,
+    });
+    const info = await FileSystem.getInfoAsync(fileUri);
+    return {
+      fileUri,
+      fileName,
+      bytesWritten: info.exists ? info.size : (json?.length ?? 0),
+      payload,
+    };
+  }
+
+  return {
+    fileUri: archive.fileUri,
+    fileName,
+    bytesWritten: archive.bytesWritten,
+    payload,
+  };
 }
 
 export async function exportAndShareUserData(): Promise<{
@@ -171,7 +185,11 @@ export async function exportAndShareUserData(): Promise<{
       };
     }
 
-    const shareResult = await shareJsonFile(result.fileUri, "Zapisz swój postęp");
+    const shareResult = await shareBackupFile(
+      result.fileUri,
+      result.fileName.endsWith(".zip"),
+      "Zapisz swój postęp"
+    );
 
     return {
       ...result,

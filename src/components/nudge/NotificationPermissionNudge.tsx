@@ -7,6 +7,7 @@ import {
   consumeNotificationNudgePreview,
   subscribeNotificationNudgePreview,
 } from "@/src/services/notificationNudgePreview";
+import { getReminderPermissionState } from "@/src/features/notifications";
 import { NudgeModal } from "./NudgeModal";
 
 export const NOTIFICATION_NUDGE_FOREGROUND_THRESHOLD_MS = 15 * 60 * 1000;
@@ -29,6 +30,8 @@ export default function NotificationPermissionNudge() {
   const [visible, setVisible] = useState(false);
   const [previewVisible, setPreviewVisible] = useState(false);
   const [enabling, setEnabling] = useState(false);
+  const [notificationPermissionGranted, setNotificationPermissionGranted] =
+    useState<boolean | null>(null);
   const usageRef = useRef(foregroundUsageMs);
   const activeSessionRef = useRef<number | null>(activeSessionStartedAt);
   const sessionVersionRef = useRef(0);
@@ -76,7 +79,11 @@ export default function NotificationPermissionNudge() {
   }, []);
 
   const evaluate = useCallback(() => {
-    if (!hydrated || learningRemindersEnabled) {
+    if (
+      !hydrated ||
+      learningRemindersEnabled ||
+      notificationPermissionGranted !== false
+    ) {
       setVisible(false);
       return;
     }
@@ -88,11 +95,22 @@ export default function NotificationPermissionNudge() {
     ) {
       setVisible(true);
     }
-  }, [getCurrentUsage, hydrated, learningRemindersEnabled, nextEligibleAt]);
+  }, [
+    getCurrentUsage,
+    hydrated,
+    learningRemindersEnabled,
+    nextEligibleAt,
+    notificationPermissionGranted,
+  ]);
 
   const scheduleEvaluation = useCallback(() => {
     clearTimer();
-    if (!hydrated || learningRemindersEnabled || activeSessionRef.current == null) {
+    if (
+      !hydrated ||
+      learningRemindersEnabled ||
+      notificationPermissionGranted !== false ||
+      activeSessionRef.current == null
+    ) {
       return;
     }
 
@@ -108,7 +126,20 @@ export default function NotificationPermissionNudge() {
       timerRef.current = null;
       evaluate();
     }, delay);
-  }, [clearTimer, evaluate, getCurrentUsage, hydrated, learningRemindersEnabled, nextEligibleAt]);
+  }, [
+    clearTimer,
+    evaluate,
+    getCurrentUsage,
+    hydrated,
+    learningRemindersEnabled,
+    nextEligibleAt,
+    notificationPermissionGranted,
+  ]);
+
+  const refreshNotificationPermission = useCallback(async () => {
+    const permissionState = await getReminderPermissionState();
+    setNotificationPermissionGranted(permissionState === "granted");
+  }, []);
 
   const finishActiveSession = useCallback(async () => {
     const startedAt = activeSessionRef.current;
@@ -185,11 +216,13 @@ export default function NotificationPermissionNudge() {
     }
 
     if (AppState.currentState === "active") {
+      void refreshNotificationPermission();
       void beginActiveSessionRef.current();
     }
 
     const subscription = AppState.addEventListener("change", (state: AppStateStatus) => {
       if (state === "active") {
+        void refreshNotificationPermission();
         void beginActiveSessionRef.current();
         return;
       }
@@ -209,6 +242,7 @@ export default function NotificationPermissionNudge() {
     clearUsageCheckpointTimer,
     enqueueSessionPersistence,
     hydrated,
+    refreshNotificationPermission,
     setActiveSessionStartedAt,
   ]);
 

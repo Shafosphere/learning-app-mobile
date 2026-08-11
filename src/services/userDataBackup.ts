@@ -89,6 +89,14 @@ export type OfficialCourseHintExportRow = OfficialFlashcardIdentityExport & {
   hintBack: string | null;
 };
 
+export type OfficialFlashcardEditExport = OfficialFlashcardIdentityExport & {
+  answers: string[];
+  imageFront: string | null;
+  imageBack: string | null;
+  explanation: string | null;
+  flipped: boolean;
+};
+
 export type OfficialCourseRelearningExportRow =
   OfficialFlashcardIdentityExport & {
     snapshotFlashcardId: number;
@@ -99,6 +107,7 @@ export type OfficialCourseSnapshotExport = {
   reviews: OfficialCourseReviewExportRow[];
   learningEvents: OfficialCourseLearningEventExportRow[];
   hints: OfficialCourseHintExportRow[];
+  editedFlashcards?: OfficialFlashcardEditExport[];
   relearningCards?: OfficialCourseRelearningExportRow[];
 };
 
@@ -149,6 +158,19 @@ export type UserDataExport = {
   officialCourseState: OfficialCourseStateExport;
   statsState: StatsStateExport;
 };
+
+export function hasUserDataExportImages(payload: UserDataExport): boolean {
+  return (
+    payload.customCourses.some((course) =>
+      course.flashcards.some((card) => Boolean(card.imageFront || card.imageBack))
+    ) ||
+    payload.officialCourseState.courses.some((course) =>
+      (course.editedFlashcards ?? []).some((card) =>
+        Boolean(card.imageFront || card.imageBack)
+      )
+    )
+  );
+}
 
 export type BackupContentSummary = {
   customCoursesCount: number;
@@ -698,6 +720,7 @@ function buildOfficialCourseStateExport(
 
   const flashcardsById = new Map<number, BackupFlashcardRecord>();
   const hints: OfficialCourseHintExportRow[] = [];
+  const editedFlashcards: OfficialFlashcardEditExport[] = [];
   for (const card of courseExport.flashcards) {
     flashcardsById.set(card.id, card);
     if (card.hintFront != null || card.hintBack != null) {
@@ -705,6 +728,16 @@ function buildOfficialCourseStateExport(
         ...toOfficialFlashcardIdentity(card),
         hintFront: card.hintFront ?? null,
         hintBack: card.hintBack ?? null,
+      });
+    }
+    if (card.isUserEdited) {
+      editedFlashcards.push({
+        ...toOfficialFlashcardIdentity(card),
+        answers: card.answers ?? [],
+        imageFront: card.imageFront ?? null,
+        imageBack: card.imageBack ?? null,
+        explanation: card.explanation ?? null,
+        flipped: card.flipped,
       });
     }
   }
@@ -750,6 +783,7 @@ function buildOfficialCourseStateExport(
     reviews,
     learningEvents,
     hints,
+    ...(editedFlashcards.length > 0 ? { editedFlashcards } : {}),
     ...(relearningCards.length > 0 ? { relearningCards } : {}),
   };
 }
@@ -1040,8 +1074,10 @@ async function addImageToArchive(
   return zipPath;
 }
 
-export async function createBackupZip(): Promise<BackupArchiveResult> {
-  const payload = await buildUserDataExport();
+export async function createBackupZip(
+  payload?: UserDataExport
+): Promise<BackupArchiveResult> {
+  const exportPayload = payload ?? await buildUserDataExport();
   const zip = new JSZip();
   const imageCache = new Map<string, string>();
 
@@ -1081,9 +1117,47 @@ export async function createBackupZip(): Promise<BackupArchiveResult> {
     return mapped;
   };
 
+  const mapOfficialCourseImages = async (
+    state: OfficialCourseStateExport
+  ): Promise<OfficialCourseStateExport> => ({
+    ...state,
+    courses: await Promise.all(
+      state.courses.map(async (course) => ({
+        ...course,
+        editedFlashcards: course.editedFlashcards
+          ? await Promise.all(
+              course.editedFlashcards.map(async (card, index) => {
+                const prefix = `images/official-${course.slug}/edited-card-${card.externalId ?? card.position ?? index}`;
+                return {
+                  ...card,
+                  imageFront: await addImageToArchive(
+                    zip,
+                    card.imageFront,
+                    prefix,
+                    "front",
+                    imageCache
+                  ),
+                  imageBack: await addImageToArchive(
+                    zip,
+                    card.imageBack,
+                    prefix,
+                    "back",
+                    imageCache
+                  ),
+                };
+              })
+            )
+          : undefined,
+      }))
+    ),
+  });
+
   const archivePayload: UserDataExport = {
-    ...payload,
-    customCourses: await mapCourseImages(payload.customCourses),
+    ...exportPayload,
+    customCourses: await mapCourseImages(exportPayload.customCourses),
+    officialCourseState: await mapOfficialCourseImages(
+      exportPayload.officialCourseState
+    ),
   };
   const manifest = buildBackupManifest(archivePayload);
 
@@ -1151,6 +1225,44 @@ async function materializeZipImages(
   return mapped;
 }
 
+async function materializeOfficialEditedFlashcardImages(
+  zip: JSZip,
+  state: OfficialCourseStateExport
+): Promise<OfficialCourseStateExport> {
+  const extracted = new Map<string, string>();
+  const materialize = async (zipPath: string | null): Promise<string | null> => {
+    if (!zipPath || !zipPath.startsWith("images/")) return zipPath;
+    if (extracted.has(zipPath)) return extracted.get(zipPath) ?? null;
+
+    const entry = zip.file(zipPath);
+    if (!entry) return null;
+    const localUri = await importImageFromZip(
+      await entry.async("base64"),
+      zipPath.split("/").pop() ?? "image.jpg"
+    );
+    extracted.set(zipPath, localUri);
+    return localUri;
+  };
+
+  return {
+    ...state,
+    courses: await Promise.all(
+      state.courses.map(async (course) => ({
+        ...course,
+        editedFlashcards: course.editedFlashcards
+          ? await Promise.all(
+              course.editedFlashcards.map(async (card) => ({
+                ...card,
+                imageFront: await materialize(card.imageFront),
+                imageBack: await materialize(card.imageBack),
+              }))
+            )
+          : undefined,
+      }))
+    ),
+  };
+}
+
 function normalizeImportedData(data: unknown): UserDataExport {
   if (typeof data !== "object" || data == null || !("version" in data)) {
     throw new Error("Backup ma nieprawidłowy format.");
@@ -1188,7 +1300,17 @@ function normalizeImportedData(data: unknown): UserDataExport {
       lastActiveOfficialCourseSlug:
         typed.officialCourseState?.lastActiveOfficialCourseSlug ?? null,
       boxSnapshots: typed.officialCourseState?.boxSnapshots ?? {},
-      courses: typed.officialCourseState?.courses ?? [],
+      courses: (typed.officialCourseState?.courses ?? []).map((course) => ({
+        ...course,
+        editedFlashcards: course.editedFlashcards?.map((card) => ({
+          ...card,
+          answers: card.answers ?? [],
+          imageFront: card.imageFront ?? null,
+          imageBack: card.imageBack ?? null,
+          explanation: card.explanation ?? null,
+          flipped: card.flipped === true,
+        })),
+      })),
     },
     statsState: normalizeStatsState(typed.statsState),
   };
@@ -1220,6 +1342,10 @@ export async function readBackupArchivePackage(
     payload: {
       ...normalized,
       customCourses: await materializeZipImages(zip, normalized.customCourses),
+      officialCourseState: await materializeOfficialEditedFlashcardImages(
+        zip,
+        normalized.officialCourseState
+      ),
     },
   };
 }
@@ -1506,6 +1632,50 @@ async function restoreOfficialCourseState(
     const list = frontBackMap.get(key);
     return list?.[0] ?? null;
   };
+
+  for (const editedCard of courseState.editedFlashcards ?? []) {
+    const existing = findExistingCard(editedCard);
+    if (!existing) continue;
+
+    const answers = editedCard.answers
+      .map((answer) => answer.trim())
+      .filter((answer) => answer.length > 0);
+    const backText = answers.join("; ") || editedCard.backText;
+    await db.runAsync(
+      `UPDATE custom_flashcards
+         SET front_text = ?,
+             back_text = ?,
+             image_front = ?,
+             image_back = ?,
+             explanation = ?,
+             flipped = ?,
+             is_user_edited = 1,
+             updated_at = ?
+       WHERE id = ?;`,
+      editedCard.frontText,
+      backText,
+      await persistImageIfAvailable(editedCard.imageFront),
+      await persistImageIfAvailable(editedCard.imageBack),
+      editedCard.explanation ?? null,
+      editedCard.flipped ? 1 : 0,
+      now,
+      existing.id
+    );
+    await db.runAsync(
+      "DELETE FROM custom_flashcard_answers WHERE flashcard_id = ?;",
+      existing.id
+    );
+    for (const answer of answers) {
+      await db.runAsync(
+        `INSERT OR IGNORE INTO custom_flashcard_answers
+           (flashcard_id, answer_text, created_at)
+         VALUES (?, ?, ?);`,
+        existing.id,
+        answer,
+        now
+      );
+    }
+  }
 
   for (const hint of courseState.hints) {
     const existing = findExistingCard(hint);
