@@ -106,11 +106,15 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 function formatDuration(ms: number) {
   if (!ms || ms <= 0) return { value: "0", unit: "min" };
-  const hours = ms / 3_600_000;
-  if (hours >= 10) return { value: `${Math.round(hours)}`, unit: "h" };
-  if (hours >= 1) return { value: hours.toFixed(1), unit: "h" };
-  const minutes = Math.max(1, Math.round(ms / 60_000));
-  return { value: `${minutes}`, unit: "min" };
+  const totalMinutes = Math.max(1, Math.round(ms / 60_000));
+  if (totalMinutes < 60) return { value: `${totalMinutes}`, unit: "min" };
+
+  const hours = Math.floor(totalMinutes / 60);
+  const minutes = totalMinutes % 60;
+  return {
+    value: `${hours} h`,
+    unit: minutes > 0 ? `${minutes} min` : "",
+  };
 }
 
 export default function LearningTimeCard({ timeMs }: Props) {
@@ -149,7 +153,9 @@ export default function LearningTimeCard({ timeMs }: Props) {
           <View key={row.label} style={styles.metricCard}>
             <Text style={styles.metricLabel}>{row.label}</Text>
             <Text style={styles.metricValue}>{row.value.value}</Text>
-            <Text style={styles.metricUnit}>{row.value.unit}</Text>
+            {row.value.unit ? (
+              <Text style={styles.metricUnit}>{row.value.unit}</Text>
+            ) : null}
           </View>
         ))}
       </View>
