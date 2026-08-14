@@ -168,6 +168,7 @@ export default function Card({
   isFocused = true,
   backgroundColorOverride,
   textColorOverride,
+  widthOverride,
   hideHints = false,
   isBetweenCards = false,
   disableLayoutAnimation = false,
@@ -183,7 +184,9 @@ export default function Card({
   const { isTabletLayout } = useDeviceLayout();
   const cardMetrics = getResponsiveFlashcardMetrics(windowWidth, {
     isTabletLayout,
+    widthOverride,
   });
+
   const editTabScale = cardMetrics.contentScale;
   const checkSpelling = useSpellchecking();
   const {

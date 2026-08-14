@@ -38,9 +38,16 @@ export function getResponsiveFlashcardWidth(windowWidth: number): number {
 
 export function getResponsiveFlashcardMetrics(
   windowWidth: number,
-  options: { isTabletLayout?: boolean } = {},
+  options: { isTabletLayout?: boolean; widthOverride?: number } = {},
 ): ResponsiveFlashcardMetrics {
-  const width = getResponsiveFlashcardWidth(windowWidth);
+  const width =
+    options.widthOverride == null
+      ? getResponsiveFlashcardWidth(windowWidth)
+      : clamp(
+          options.widthOverride,
+          0,
+          MAX_TABLET_FLASHCARD_WIDTH,
+        );
   const progress = clamp(
     (width - BASE_FLASHCARD_WIDTH) /
       (MAX_TABLET_FLASHCARD_WIDTH - BASE_FLASHCARD_WIDTH),

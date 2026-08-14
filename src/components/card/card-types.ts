@@ -54,6 +54,8 @@ export type CardProps = {
   isFocused?: boolean;
   backgroundColorOverride?: string;
   textColorOverride?: string;
+  /** Constrains the card to an embedded container, such as a modal preview. */
+  widthOverride?: number;
   hideHints?: boolean;
   isBetweenCards?: boolean;
   disableLayoutAnimation?: boolean;

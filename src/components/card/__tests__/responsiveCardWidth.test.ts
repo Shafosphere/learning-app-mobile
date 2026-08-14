@@ -1,4 +1,8 @@
-import { getResponsiveFlashcardMetrics } from "../responsiveCardWidth";
+import {
+  BASE_FLASHCARD_WIDTH,
+  getResponsiveFlashcardMetrics,
+  MAX_TABLET_FLASHCARD_WIDTH,
+} from "../responsiveCardWidth";
 
 describe("getResponsiveFlashcardMetrics", () => {
   it("keeps the phone card aspect ratio", () => {
@@ -33,5 +37,22 @@ describe("getResponsiveFlashcardMetrics", () => {
     expect(metrics.width).toBe(630);
     expect(metrics.minHeight).toBeCloseTo(218.68, 1);
     expect(metrics.contentScale).toBeCloseTo(218.68 / 126, 2);
+  });
+
+  it.each([
+    [BASE_FLASHCARD_WIDTH - 1, BASE_FLASHCARD_WIDTH - 1],
+    [0, 0],
+  ])("allows widthOverride %p and returns width %p", (widthOverride, expectedWidth) => {
+    const metrics = getResponsiveFlashcardMetrics(411, { widthOverride });
+
+    expect(metrics.width).toBe(expectedWidth);
+  });
+
+  it("clamps widthOverride above the tablet maximum", () => {
+    const metrics = getResponsiveFlashcardMetrics(411, {
+      widthOverride: MAX_TABLET_FLASHCARD_WIDTH + 1,
+    });
+
+    expect(metrics.width).toBe(MAX_TABLET_FLASHCARD_WIDTH);
   });
 });

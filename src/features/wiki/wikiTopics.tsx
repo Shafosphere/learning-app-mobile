@@ -1,5 +1,5 @@
 import React from "react";
-import { View, Text, Pressable } from "react-native";
+import { View, Text, Pressable, useWindowDimensions } from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import MyButton from "@/src/components/button/button";
@@ -209,6 +209,12 @@ function CardPreview({
   backgroundColorOverride?: string;
   textColorOverride?: string;
 }) {
+  const { width: windowWidth } = useWindowDimensions();
+  const [availableWidth, setAvailableWidth] = React.useState<number | null>(null);
+  // The modal's actual content width can differ from windowWidth on tablets.
+  // Measure the real preview parent instead of deriving it from the window.
+  const previewWidth = availableWidth ?? Math.min(windowWidth - 64, 325);
+
   const [answer, setAnswer] = React.useState("");
   const [result, setResult] = React.useState<boolean | null>(
     mode === "correction" ? false : null,
@@ -248,7 +254,16 @@ function CardPreview({
   const handleHintUpdate = React.useCallback(() => {}, []);
 
   return (
-    <View style={{ alignItems: "center" }} pointerEvents="none">
+    <View
+      style={{ width: "100%", alignItems: "center" }}
+      pointerEvents="none"
+      onLayout={(event) => {
+        const nextWidth = event.nativeEvent.layout.width;
+        if (nextWidth > 0 && nextWidth !== availableWidth) {
+          setAvailableWidth(nextWidth);
+        }
+      }}
+    >
       <Card
         selectedItem={SAMPLE_WORD}
         setAnswer={setAnswer}
@@ -265,6 +280,7 @@ function CardPreview({
         isFocused={false}
         backgroundColorOverride={backgroundColorOverride}
         textColorOverride={textColorOverride}
+        widthOverride={previewWidth}
       />
     </View>
   );

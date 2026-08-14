@@ -16,6 +16,59 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import React from "react";
 import { Pressable, ScrollView, View, Text } from "react-native";
+import type { ThemeColors } from "@/src/theme/theme";
+
+type WikiTopicBoxProps = {
+  isCurrent: boolean;
+  isDone: boolean;
+  isLeft: boolean;
+  onPress: () => void;
+  styles: ReturnType<typeof useStyles>;
+  colors: ThemeColors;
+  icon: React.ReactNode;
+};
+
+const WikiTopicBox = React.memo(function WikiTopicBox({
+  isCurrent,
+  isDone,
+  isLeft,
+  onPress,
+  styles,
+  colors,
+  icon,
+}: WikiTopicBoxProps) {
+  const [blinkOn, setBlinkOn] = React.useState(true);
+
+  React.useEffect(() => {
+    if (!isCurrent) {
+      setBlinkOn(true);
+      return;
+    }
+
+    const id = setInterval(() => setBlinkOn((previous) => !previous), 700);
+    return () => clearInterval(id);
+  }, [isCurrent]);
+
+  const borderColor = isDone
+    ? colors.my_green
+    : isCurrent && blinkOn
+      ? colors.my_yellow
+      : colors.border;
+
+  return (
+    <Pressable onPress={onPress} hitSlop={12}>
+      <View
+        style={[
+          styles.box,
+          isLeft ? styles.boxLeft : styles.boxRight,
+          { borderColor },
+        ]}
+      >
+        {icon}
+      </View>
+    </Pressable>
+  );
+});
 
 export default function WikiScreen() {
   const styles = useStyles();
@@ -25,7 +78,6 @@ export default function WikiScreen() {
     "wiki_current_index",
     0,
   );
-  const [blinkOn, setBlinkOn] = React.useState(true);
   const [peekVisible, setPeekVisible] = React.useState(false);
   const [selectedIndex, setSelectedIndex] = React.useState<number | null>(null);
   const iconProps = React.useMemo(
@@ -42,11 +94,6 @@ export default function WikiScreen() {
     const nextIndex = Math.min(currentIndex + 1, topics.length - 1);
     setCurrentIndex(nextIndex);
   }, [currentIndex, setCurrentIndex, topics.length]);
-
-  React.useEffect(() => {
-    const id = setInterval(() => setBlinkOn((prev) => !prev), 700);
-    return () => clearInterval(id);
-  }, []);
 
   React.useEffect(() => {
     const maxIndex = Math.max(0, topics.length - 1);
@@ -209,25 +256,17 @@ export default function WikiScreen() {
           const isLast = index === topics.length - 1;
           const isCurrent = index === currentIndex;
           const isDone = index < currentIndex;
-          const borderColor = isDone
-            ? colors.my_green
-            : isCurrent && blinkOn
-              ? colors.my_yellow
-              : colors.border;
-
           return (
             <React.Fragment key={index}>
-              <Pressable onPress={() => openPeek(index)} hitSlop={12}>
-                <View
-                  style={[
-                    styles.box,
-                    isLeft ? styles.boxLeft : styles.boxRight,
-                    { borderColor },
-                  ]}
-                >
-                  {renderBoxIcon(topic.title)}
-                </View>
-              </Pressable>
+              <WikiTopicBox
+                isCurrent={isCurrent}
+                isDone={isDone}
+                isLeft={isLeft}
+                onPress={() => openPeek(index)}
+                styles={styles}
+                colors={colors}
+                icon={renderBoxIcon(topic.title)}
+              />
               {!isLast && (
                 <View pointerEvents="none" style={styles.connectorArea}>
                   <ChevronStripe
