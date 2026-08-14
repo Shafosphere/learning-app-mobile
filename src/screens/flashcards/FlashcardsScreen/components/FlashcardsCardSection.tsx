@@ -26,6 +26,7 @@ type FlashcardsCardSectionProps = {
   | "selectedItem"
   | "setAnswer"
   | "answer"
+  | "emptyAnswerSubmitWarning"
   | "confirm"
   | "reversed"
   | "setResult"
@@ -66,6 +67,7 @@ export function FlashcardsCardSection({
   selectedItem,
   setAnswer,
   answer,
+  emptyAnswerSubmitWarning,
   displayResult,
   confirm,
   reversed,
@@ -124,6 +126,7 @@ export function FlashcardsCardSection({
         selectedItem={selectedItem}
         setAnswer={setAnswer}
         answer={answer}
+        emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
         result={displayResult}
         confirm={confirm}
         reversed={reversed}

@@ -4,6 +4,7 @@ import { useCallback, useMemo } from "react";
 import { Pressable, StyleSheet, Text, TextInput, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import type { FocusTarget } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
@@ -20,6 +21,7 @@ const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
 type CardInputProps = {
   promptText: string;
+  emptyAnswerSubmitWarning?: boolean;
   allowMultilinePrompt: boolean;
   promptImageUri?: string | null;
   answer: string;
@@ -49,6 +51,7 @@ type CardInputProps = {
 
 export function CardInput({
   promptText,
+  emptyAnswerSubmitWarning = false,
   allowMultilinePrompt,
   promptImageUri,
   answer,
@@ -71,6 +74,7 @@ export function CardInput({
   cardMetrics,
 }: CardInputProps) {
   const styles = useStyles();
+  const { colors } = useSettings();
   const { t } = useTranslation();
   const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
@@ -165,11 +169,16 @@ export function CardInput({
           <TextInput
             style={[
               styles.cardInput,
-              styles.cardFont,
-              inputFrameStyle,
-              textInputStyle,
-              textColorOverride ? { color: textColorOverride } : null,
-            ]}
+            styles.cardFont,
+            inputFrameStyle,
+            textInputStyle,
+            emptyAnswerSubmitWarning && {
+              borderColor: colors.my_yellow,
+              borderWidth: 2,
+              borderRadius: 6,
+            },
+            textColorOverride ? { color: textColorOverride } : null,
+          ]}
             value={answer}
             onChangeText={setAnswer}
             autoCapitalize="none"
@@ -258,8 +267,10 @@ export function CardInput({
     );
   }, [
     answer,
-    suggestionProps,
+    colors.my_yellow,
+    emptyAnswerSubmitWarning,
     handleConfirm,
+    suggestionProps,
     mainInputRef,
     onMainInputBlur,
     onMainInputFocus,
@@ -274,7 +285,6 @@ export function CardInput({
     typoDiff,
     contentScale,
     cardMetrics.fontSize,
-    cardMetrics.inputHeight,
     cardMetrics.inputLineHeight,
     cardMetrics.lineHeight,
     cardMetrics.textInputHeight,

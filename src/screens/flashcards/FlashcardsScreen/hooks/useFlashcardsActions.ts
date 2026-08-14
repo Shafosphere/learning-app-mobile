@@ -17,6 +17,7 @@ type LastTrueFalseTap = {
 type UseFlashcardActionBarStateParams = {
   selectedItem: WordWithTranslations | null;
   selectedItemId: number | null;
+  answer?: string;
   displayResult: boolean | null;
   isBetweenCards: boolean;
   correction: CorrectionState | null | unknown;
@@ -33,6 +34,7 @@ type UseFlashcardActionBarStateParams = {
     selectedTranslation?: string,
     answerOverride?: string,
   ) => void;
+  canConfirm?: () => boolean;
   onOk: () => void;
   lastTrueFalseTapRef?: MutableRefObject<LastTrueFalseTap | null>;
   lastActionCooldownCardIdRef?: MutableRefObject<number | null>;
@@ -42,6 +44,7 @@ type UseFlashcardActionBarStateParams = {
 export function useFlashcardActionBarState({
   selectedItem,
   selectedItemId,
+  answer = "",
   displayResult,
   isBetweenCards,
   correction,
@@ -55,12 +58,14 @@ export function useFlashcardActionBarState({
   isExplanationPending,
   setAnswer,
   onConfirm,
+  canConfirm = () => true,
   onOk,
   lastTrueFalseTapRef: providedLastTrueFalseTapRef,
   lastActionCooldownCardIdRef: providedLastActionCooldownCardIdRef,
   t,
 }: UseFlashcardActionBarStateParams) {
   const [isActionCooldownActive, setIsActionCooldownActive] = useState(false);
+  const [emptyAnswerSubmitWarning, setEmptyAnswerSubmitWarning] = useState(false);
   const [selectedTrueFalseUiState, setSelectedTrueFalseUiState] = useState<{
     cardId: number | null;
     answer: boolean | null;
@@ -82,6 +87,64 @@ export function useFlashcardActionBarState({
     selectedTrueFalseUiState.cardId === selectedItemId
       ? selectedTrueFalseUiState.answer
       : null;
+
+  useEffect(() => {
+    if (answer.trim().length > 0 && emptyAnswerSubmitWarning) {
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+        console.log("[Flashcards][Confirm] warning cleared by typing", {
+          cardId: selectedItemId,
+        });
+      }
+      setEmptyAnswerSubmitWarning(false);
+    }
+  }, [answer, emptyAnswerSubmitWarning, selectedItemId]);
+
+  useEffect(() => {
+    setEmptyAnswerSubmitWarning(false);
+    if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+      console.log("[Flashcards][Confirm] warning reset", {
+        cardId: selectedItemId,
+        correctionActive: Boolean(correction),
+      });
+    }
+  }, [correction, selectedItemId]);
+
+  const canSubmitAnswer = useCallback(
+    (answerOverride?: string) => {
+      const effectiveAnswer = answerOverride ?? answer;
+      const hasAnswer = effectiveAnswer.trim().length > 0;
+
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+        console.log("[Flashcards][Confirm] empty-answer check", {
+          cardId: selectedItemId,
+          answerLength: effectiveAnswer.length,
+          hasAnswer,
+          warningShown: emptyAnswerSubmitWarning,
+          answerOverridden: answerOverride != null,
+        });
+      }
+
+      if (hasAnswer) {
+        return true;
+      }
+      if (!emptyAnswerSubmitWarning) {
+        if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+          console.log("[Flashcards][Confirm] blocked: first empty submit", {
+            cardId: selectedItemId,
+          });
+        }
+        setEmptyAnswerSubmitWarning(true);
+        return false;
+      }
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+        console.log("[Flashcards][Confirm] allowed: second empty submit", {
+          cardId: selectedItemId,
+        });
+      }
+      return true;
+    },
+    [answer, emptyAnswerSubmitWarning, selectedItemId],
+  );
 
   useEffect(() => {
     if (selectedItemId == null) {
@@ -221,6 +284,15 @@ export function useFlashcardActionBarState({
   );
 
   const handleCardActionsConfirm = useCallback(() => {
+    if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+      console.log("[Flashcards][Confirm] card actions pressed", {
+        cardId: selectedItemId,
+        isExplanationVisible,
+        isActionCooldownActive,
+        isImmediateActionLockActive,
+        externalActionLocked,
+      });
+    }
     if (
       isActionCooldownActive ||
       isImmediateActionLockActive ||
@@ -232,18 +304,39 @@ export function useFlashcardActionBarState({
       handleTrueFalseOk();
       return;
     }
+    // Keep the bottom action button aligned with the card-input submit path:
+    // a transition-guarded tap must not consume the first empty submit.
+    if (!canConfirm()) return;
+    if (!canSubmitAnswer()) return;
+    if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+      console.log("[Flashcards][Confirm] calling onConfirm from card actions", {
+        cardId: selectedItemId,
+      });
+    }
     onConfirm();
   }, [
     externalActionLocked,
     handleTrueFalseOk,
     isActionCooldownActive,
+    canSubmitAnswer,
+    canConfirm,
     isExplanationVisible,
     isImmediateActionLockActive,
     onConfirm,
+    selectedItemId,
   ]);
 
   const handleCardConfirm = useCallback(
     (selectedTranslation?: string, answerOverride?: string) => {
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+        console.log("[Flashcards][Confirm] confirm pressed", {
+          cardId: selectedItemId,
+          isActionCooldownActive,
+          isImmediateActionLockActive,
+          externalActionLocked,
+          answerOverridden: answerOverride != null,
+        });
+      }
       if (
         isActionCooldownActive ||
         isImmediateActionLockActive ||
@@ -251,13 +344,27 @@ export function useFlashcardActionBarState({
       ) {
         return;
       }
+      // Do not consume the first empty submit while the interaction guard is
+      // still blocking confirmations after a card transition. Otherwise the
+      // next tap can be rejected by onConfirm and a third tap is required.
+      if (!canConfirm()) return;
+      if (!canSubmitAnswer(answerOverride)) return;
+      if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
+        console.log("[Flashcards][Confirm] calling onConfirm", {
+          cardId: selectedItemId,
+          answerOverridden: answerOverride != null,
+        });
+      }
       onConfirm(selectedTranslation, answerOverride);
     },
     [
       externalActionLocked,
+      canSubmitAnswer,
+      canConfirm,
       isActionCooldownActive,
       isImmediateActionLockActive,
       onConfirm,
+      selectedItemId,
     ],
   );
 
@@ -293,6 +400,7 @@ export function useFlashcardActionBarState({
     cardActionsConfirmDisabled,
     cardActionsConfirmLabel,
     effectiveTrueFalseButtonsVariant,
+    emptyAnswerSubmitWarning,
   };
 }
 

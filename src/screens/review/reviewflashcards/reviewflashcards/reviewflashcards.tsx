@@ -369,6 +369,7 @@ export default function ReviewFlashcardsPlaceholder() {
     isBetweenCards,
     setIsBetweenCards,
     reversed,
+    canConfirm,
     isExplanationVisible,
     isExplanationPending,
     setPendingExplanationMove,
@@ -448,6 +449,7 @@ export default function ReviewFlashcardsPlaceholder() {
     isBetweenCards;
   const {
     selectedTrueFalseAnswer,
+    emptyAnswerSubmitWarning,
     isActionCooldownActive,
     handleTrueFalseAnswer,
     handleTrueFalseOk,
@@ -464,6 +466,7 @@ export default function ReviewFlashcardsPlaceholder() {
   } = useFlashcardActionBarState({
     selectedItem,
     selectedItemId,
+    answer,
     displayResult,
     isBetweenCards,
     correction,
@@ -477,6 +480,7 @@ export default function ReviewFlashcardsPlaceholder() {
     isExplanationPending,
     setAnswer,
     onConfirm: handleConfirm,
+    canConfirm,
     onOk: acknowledgeExplanation,
     t,
   });
@@ -627,6 +631,7 @@ export default function ReviewFlashcardsPlaceholder() {
           selectedItem={selectedItem}
           setAnswer={setAnswer}
           answer={answer}
+          emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
           result={displayResult}
           confirm={handleCardConfirm}
           reversed={reversed}

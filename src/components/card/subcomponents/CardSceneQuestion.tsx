@@ -13,6 +13,7 @@ type CardSceneQuestionProps = {
   allowMultilinePrompt: boolean;
   imageSizeMode: FlashcardsImageSize;
   answer: string;
+  emptyAnswerSubmitWarning: boolean;
   handleAnswerChange: (val: string) => void;
   mainInputRef: React.MutableRefObject<TextInput | null>;
   suggestionProps: any;
@@ -35,6 +36,7 @@ export function CardSceneQuestion(props: CardSceneQuestionProps) {
   return (
     <CardInput
       promptText={props.promptText}
+      emptyAnswerSubmitWarning={props.emptyAnswerSubmitWarning}
       allowMultilinePrompt={props.allowMultilinePrompt}
       promptImageUri={props.promptImageUri}
       imageSizeMode={props.imageSizeMode}

@@ -9,6 +9,7 @@ import {
 } from "@/src/db/sqlite/db";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import { useConfirmGuard } from "@/src/hooks/useConfirmGuard";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
@@ -98,6 +99,11 @@ export const useReviewFlashcardsAnswerFlow = ({
   const [pendingExplanationMove, setPendingExplanationMove] =
     useState<ReviewPendingExplanationMove>(null);
   const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const canConfirm = useConfirmGuard(
+    selectedItem?.id ?? null,
+    correction != null,
+    "ReviewConfirmGuard",
+  );
 
   const clearTransitionTimer = useCallback(() => {
     if (transitionTimerRef.current) {
@@ -340,6 +346,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     answerOverride?: string,
   ) => {
     if (!selectedItem || !activeBox || !courseId || mistakeNudgeActive) return;
+    if (!canConfirm()) return;
     clearTransitionTimer();
     if (
       pendingExplanationMove &&
@@ -511,6 +518,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     activeBox,
     answer,
     answerOnly,
+    canConfirm,
     cancelTodayLearningReminderSchedule,
     checkSpelling,
     clearTransitionTimer,
@@ -557,6 +565,7 @@ export const useReviewFlashcardsAnswerFlow = ({
     isBetweenCards,
     setIsBetweenCards,
     reversed,
+    canConfirm,
     effectiveReversed,
     showExplanationEnabled,
     explanationOnlyOnWrong,

@@ -34,6 +34,7 @@ export type CardProps = {
   selectedItem: WordWithTranslations | null;
   reversed?: boolean;
   answer: string;
+  emptyAnswerSubmitWarning?: boolean;
   setAnswer: React.Dispatch<React.SetStateAction<string>>;
   setResult: React.Dispatch<React.SetStateAction<boolean | null>>;
   result: boolean | null;

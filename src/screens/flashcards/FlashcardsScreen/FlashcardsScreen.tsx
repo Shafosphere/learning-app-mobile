@@ -355,6 +355,7 @@ export default function Flashcards() {
     updateSelectedItem,
     isBetweenCards,
     getQueueForBox,
+    canConfirm,
   } = useFlashcardsInteraction({
     boxes,
     setBoxes,
@@ -1027,6 +1028,7 @@ export default function Flashcards() {
   });
   const {
     selectedTrueFalseAnswer,
+    emptyAnswerSubmitWarning,
     handleTrueFalseAnswer,
     handleTrueFalseOk,
     trueFalseActionsMode,
@@ -1042,6 +1044,7 @@ export default function Flashcards() {
   } = useFlashcardsActions({
     selectedItem,
     selectedItemId,
+    answer,
     displayResult,
     isBetweenCards,
     correction,
@@ -1054,6 +1057,7 @@ export default function Flashcards() {
     isExplanationPending,
     setAnswer,
     onConfirm: confirmWithTutorial,
+    canConfirm,
     onOk: acknowledgeExplanation,
     lastTrueFalseTapRef,
     lastActionCooldownCardIdRef,
@@ -1149,6 +1153,7 @@ export default function Flashcards() {
       selectedItem={selectedItem}
       setAnswer={setAnswer}
       answer={answer}
+      emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
       displayResult={displayResult}
       confirm={handleCardConfirm}
       reversed={reversed}

@@ -1,5 +1,6 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { logCustomLearningEvent } from "@/src/db/sqlite/db";
+import { useConfirmGuard } from "@/src/hooks/useConfirmGuard";
 import {
   appendDebugEvent,
   type DebugContext,
@@ -118,6 +119,11 @@ export function useFlashcardsInteraction({
   const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const transitionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
   const demotionCorrectionLockRef = useRef<number | null>(null);
+  const canConfirm = useConfirmGuard(
+    selectedItem?.id ?? null,
+    correction != null,
+    "FlashcardsConfirmGuard",
+  );
 
   const clearTransitionTimers = useCallback(() => {
     transitionTimersRef.current.forEach((timer) => {
@@ -395,6 +401,7 @@ export function useFlashcardsInteraction({
         return;
       }
       if (!selectedItem) return;
+      if (!canConfirm()) return;
       const answerToUse = (answerOverride ?? answer).replace(/ +$/, "");
       const isKnowDontKnow = selectedItem.type === "know_dont_know";
 
@@ -684,6 +691,7 @@ export function useFlashcardsInteraction({
       activeBox,
       activeCustomCourseId,
       answer,
+      canConfirm,
       checkSpelling,
       debugContext,
       skipDemotionCorrection,
@@ -1020,6 +1028,7 @@ export function useFlashcardsInteraction({
     result,
     setResult,
     confirm,
+    canConfirm,
     reversed,
     correction,
     wrongInputChange,

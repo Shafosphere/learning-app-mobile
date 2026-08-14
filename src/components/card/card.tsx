@@ -153,6 +153,7 @@ export default function Card({
   selectedItem,
   reversed = false,
   answer,
+  emptyAnswerSubmitWarning = false,
   setAnswer,
   result,
   confirm,
@@ -1328,6 +1329,7 @@ export default function Card({
 
   const resolverProps = {
     displayMode,
+    emptyAnswerSubmitWarning,
     correction,
     isIntroMode,
     explanationText,

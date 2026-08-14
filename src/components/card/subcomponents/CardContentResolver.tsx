@@ -59,6 +59,7 @@ interface CardContentResolverProps {
   input2LayoutWidth: number;
   noopTrueFalseAnswer?: (val: boolean) => void;
   answer: string;
+  emptyAnswerSubmitWarning: boolean;
   handleAnswerChange: (val: string) => void;
   mainInputRef: React.MutableRefObject<any>;
   handleConfirm: () => void;
@@ -117,6 +118,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     input1LayoutWidth,
     input2LayoutWidth,
     answer,
+    emptyAnswerSubmitWarning,
     handleAnswerChange,
     mainInputRef,
     handleConfirm,
@@ -195,6 +197,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
       return (
         <CardSceneQuestion
           promptText={promptText}
+          emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
           promptImageUri={promptImageUri}
           allowMultilinePrompt={useLargeLayout}
           imageSizeMode={promptImageSizeMode}
