@@ -1,142 +1,142 @@
 external_id,type,front_text,back_text
 0001,traditional,hey,hej
-0002,traditional,hi,cześć
+0002,traditional,hi,"cześć, hej"
 0003,traditional,hello,witaj
 0004,traditional,welcome,"witaj, proszę"
 0005,traditional,goodbye,do widzenia
 0006,traditional,bye,pa
-0007,traditional,morning,rano
+0007,traditional,morning,"rano, ranek, poranek, poranny"
 0008,traditional,evening,wieczór
-0009,traditional,night,noc
+0009,traditional,night,"noc, wieczór, zmrok, nocny"
 0010,traditional,greetings,pozdrowienia
 0011,traditional,cheers,na zdrowie
-0012,traditional,thanks,dzięki
+0012,traditional,thanks,"dzięki, podziękowanie, podziękowania, dziękować"
 0013,traditional,please,proszę
-0014,traditional,sorry,przepraszam
+0014,traditional,sorry,"przepraszam, przykro mi"
 0015,traditional,pardon,wybacz
 0017,traditional,thankyou,dziękuję
-0020,traditional,excuse,wymówka
-0022,traditional,sir,pan
+0020,traditional,excuse,"wymówka, usprawiedliwienie, wytłumaczenie, wybaczać, przepraszać"
+0022,traditional,sir,"pan, proszę pana"
 0023,traditional,madam,pani
-0024,traditional,miss,panno
-0026,traditional,kind,"życzliwy, miły"
+0024,traditional,miss,"panno, panna, tęsknić za, chybić, nie trafić, minąć się, przeoczyć, opuścić, spóźnić się"
+0026,traditional,kind,"życzliwy, miły, rodzaj, typ, uprzejmy"
 0027,traditional,polite,uprzejmy
 0028,traditional,respect,szacunek
-0029,traditional,help,pomoc
-0030,traditional,issue,problem
-0031,traditional,understand,rozumieć
+0029,traditional,help,"pomoc, pomocny, pomagać, pomóc"
+0030,traditional,issue,"problem, kwestia, wydanie, nakład, wydawać, publikować"
+0031,traditional,understand,"rozumieć, zrozumieć"
 0032,traditional,repeat,powtórzyć
-0033,traditional,again,ponownie
+0033,traditional,again,"ponownie, znowu, znów"
 0034,traditional,slower,wolniej
-0035,traditional,fast,szybko
+0035,traditional,fast,"szybko, szybki, post, pościć"
 0036,traditional,word,słowo
-0037,traditional,sentence,zdanie
-0038,traditional,meaning,znaczenie
-0039,traditional,explain,wyjaśnić
+0037,traditional,sentence,"zdanie, wyrok, kara, skazać"
+0038,traditional,meaning,"znaczenie, sens, oznaczać"
+0039,traditional,explain,"wyjaśnić, wyjaśniać, tłumaczyć"
 0040,traditional,translate,tłumaczyć
 0041,traditional,spell,literować
 0042,traditional,write,"napisać, pisać"
-0043,traditional,listen,słuchać
-0044,traditional,speak,mówić
+0043,traditional,listen,"słuchać, nasłuchiwać, słuchaj"
+0044,traditional,speak,"mówić, rozmawiać, konwersować, przemawiać, wygłaszać, wypowiadać, powiedzieć, wyrażać, świadczyć o, posługiwać się"
 0045,traditional,pronunciation,wymowa
-0046,traditional,what,co
-0047,traditional,where,gdzie
-0048,traditional,when,kiedy
-0049,traditional,who,kto
-0050,traditional,why,dlaczego
-0051,traditional,how,jak
-0052,traditional,which,który
-0053,traditional,whose,czyj
-0054,traditional,maybe,może
-0055,traditional,either,którykolwiek
-0056,traditional,many,wiele
-0057,traditional,much,dużo
-0058,traditional,few,kilka
+0046,traditional,what,"co, jaki, kto, dlaczego, to, cóż"
+0047,traditional,where,"gdzie, dokąd, podczas gdy"
+0048,traditional,when,"kiedy, wtedy, gdy, gdy tylko, czas"
+0049,traditional,who,"kto, który"
+0050,traditional,why,"dlaczego, powód"
+0051,traditional,how,"jak, ile, dlaczego"
+0052,traditional,which,"który, co"
+0053,traditional,whose,"czyj, czyja, czyje, którego"
+0054,traditional,maybe,"może, zapewne"
+0055,traditional,either,"którykolwiek, którykolwiek z dwóch, albo, lub, ani, też"
+0056,traditional,many,"wiele, dużo, liczna, wielu"
+0057,traditional,much,"dużo, wiele, bardzo, o wiele"
+0058,traditional,few,"kilka, mało, niewiele, kilku, niedużo"
 0059,traditional,every,każdy
-0060,traditional,some,trochę
-0061,traditional,name,imię
+0060,traditional,some,"trochę, kilka, niektóry, niektórzy"
+0061,traditional,name,"imię, nazwisko, nazwa, nazywać"
 0062,traditional,surname,nazwisko
-0063,traditional,age,wiek
-0064,traditional,country,kraj
-0065,traditional,city,miasto
-0066,traditional,language,język
-0067,traditional,job,praca
+0063,traditional,age,"wiek, epoka, era, starość, starzeć się, postarzać"
+0064,traditional,country,"kraj, państwo, wieś, kraina, region, wiejski"
+0065,traditional,city,"miasto, metropolia"
+0066,traditional,language,"język, mowa, styl, słownictwo"
+0067,traditional,job,"praca, zawód, zadanie, etat"
 0068,traditional,student,"student, uczeń"
-0069,traditional,from,z
-0070,traditional,live,mieszkać
-0071,traditional,work,"pracować, praca"
-0072,traditional,study,badanie
+0069,traditional,from,"z, od, powód, w, wynik, na, przed"
+0070,traditional,live,"mieszkać, żyć, prowadzić, żywy, na żywo"
+0071,traditional,work,"pracować, praca, funkcjonować, dzieło"
+0072,traditional,study,"badanie, nauka, czytelnia, studiować, uczyć się"
 0073,traditional,hobby,hobby
 0074,traditional,friend,przyjaciel
-0075,traditional,nice,"miły, sympatyczny"
-0076,traditional,zero,zero
-0077,traditional,one,jeden
-0078,traditional,two,dwa
-0079,traditional,three,trzy
-0080,traditional,four,cztery
-0081,traditional,five,pięć
-0082,traditional,six,sześć
-0083,traditional,seven,siedem
-0084,traditional,eight,osiem
-0085,traditional,nine,dziewięć
-0086,traditional,ten,dziesięć
-0087,traditional,eleven,jedenaście
-0088,traditional,twelve,dwanaście
-0089,traditional,thirteen,trzynaście
-0090,traditional,fourteen,czternaście
-0091,traditional,fifteen,piętnaście
-0092,traditional,sixteen,szesnaście
-0093,traditional,seventeen,siedemnaście
-0094,traditional,eighteen,osiemnaście
-0095,traditional,nineteen,dziewiętnaście
-0096,traditional,twenty,dwadzieścia
-0097,traditional,thirty,trzydzieści
-0098,traditional,forty,czterdzieści
-0099,traditional,fifty,pięćdziesiąt
-0100,traditional,sixty,sześćdziesiąt
-0101,traditional,seventy,siedemdziesiąt
-0102,traditional,eighty,osiemdziesiąt
-0103,traditional,ninety,dziewięćdziesiąt
-0104,traditional,hundred,sto
+0075,traditional,nice,"miły, sympatyczny, ładny, fajnie"
+0076,traditional,zero,"zero, zerowy, żaden, zerować"
+0077,traditional,one,"jeden, jedynka, banknot, jednodolarowy, pierścień, ktoś, lub, coś, dobrze pasować, wyjątkowy"
+0078,traditional,two,"dwa, dwójka, banknot, dwudolarowy, dwulatek"
+0079,traditional,three,"trzy, 3, trójka, troje, trzylatek, trzylatka"
+0080,traditional,four,"cztery, 4, czwórka, czterolatek, czterolatka"
+0081,traditional,five,"pięć, 5, piątka, pięciolatek"
+0082,traditional,six,"sześć, 6, szóstka"
+0083,traditional,seven,"siedem, siódemka, siedmiolatek, siedmiolatka, siódmy"
+0084,traditional,eight,"osiem, ósemka, ośmiolatek, ośmiolatka"
+0085,traditional,nine,"dziewięć, 9"
+0086,traditional,ten,"dziesięć, 10, dziesiątka"
+0087,traditional,eleven,"jedenaście, 11"
+0088,traditional,twelve,"dwanaście, 12"
+0089,traditional,thirteen,"trzynaście, 13, trzynastka"
+0090,traditional,fourteen,"czternaście, 14"
+0091,traditional,fifteen,"piętnaście, 15"
+0092,traditional,sixteen,"szesnaście, 16, szesnastka"
+0093,traditional,seventeen,"siedemnaście, 17, siedemnastka"
+0094,traditional,eighteen,"osiemnaście, 18"
+0095,traditional,nineteen,"dziewiętnaście, 19, dziewiętnastka"
+0096,traditional,twenty,"dwadzieścia, 20"
+0097,traditional,thirty,"trzydzieści, 30"
+0098,traditional,forty,"czterdzieści, 40"
+0099,traditional,fifty,"pięćdziesiąt, 50"
+0100,traditional,sixty,"sześćdziesiąt, 60"
+0101,traditional,seventy,"siedemdziesiąt, 70"
+0102,traditional,eighty,"osiemdziesiąt, 80"
+0103,traditional,ninety,"dziewięćdziesiąt, 90"
+0104,traditional,hundred,"sto, setka"
 0105,traditional,thousand,tysiąc
-0106,traditional,price,cena
-0107,traditional,cost,koszt
-0108,traditional,cheap,tani
-0109,traditional,expensive,drogi
+0106,traditional,price,"cena, kurs, koszt, wyznaczać, oceniać, wyceniać"
+0107,traditional,cost,"koszt, kosztować, szacować"
+0108,traditional,cheap,"tani, tandetny, kiczowaty"
+0109,traditional,expensive,"drogi, kosztowny"
 0110,traditional,discount,zniżka
 0111,traditional,sale,wyprzedaż
 0112,traditional,total,razem
-0113,traditional,change,reszta
+0113,traditional,change,"reszta, zmiana, drobne, zmieniać, rozmieniać"
 0114,traditional,receipt,paragon
-0115,traditional,cash,gotówka
-0116,traditional,card,karta
-0117,traditional,time,czas
+0115,traditional,cash,"gotówka, płatność gotówką, czek"
+0116,traditional,card,"karta, wizytówka, pocztówka, karton"
+0117,traditional,time,"czas, okres, moment, chwila, raz, takt, czasowy, mierzyć, trwanie"
 0118,traditional,hour,godzina
 0119,traditional,minute,minuta
-0120,traditional,second,sekunda
-0121,traditional,now,teraz
-0122,traditional,later,później
-0123,traditional,early,wcześnie
-0124,traditional,late,późno
-0125,traditional,today,dziś
+0120,traditional,second,"sekunda, drugi, chwila, po drugie"
+0121,traditional,now,"teraz, no, więc"
+0122,traditional,later,"później, późno, późny"
+0123,traditional,early,"wcześnie, wczesny, dawny"
+0124,traditional,late,"późno, późny, spóźniony, ostatni"
+0125,traditional,today,"dziś, dzisiaj"
 0126,traditional,tomorrow,jutro
 0127,traditional,yesterday,wczoraj
-0128,traditional,before,przed
-0129,traditional,after,po
-0130,traditional,soon,wkrótce
-0131,traditional,delay,opóźnienie
+0128,traditional,before,"przed, wcześniej, zanim, nim"
+0129,traditional,after,"po, za, potem, późno, późny, zanim, nim"
+0130,traditional,soon,"wkrótce, niedługo, prędzej"
+0131,traditional,delay,"opóźnienie, zwłoka, opóźniać, zwlekać"
 0132,traditional,monday,poniedziałek
 0133,traditional,tuesday,wtorek
 0134,traditional,wednesday,środa
 0135,traditional,thursday,czwartek
 0136,traditional,friday,piątek
 0137,traditional,saturday,sobota
-0138,traditional,sunday,niedziela
+0138,traditional,sunday,"niedziela, niedzielny"
 0139,traditional,january,styczeń
 0140,traditional,february,luty
-0141,traditional,march,marzec
+0141,traditional,march,"marzec, marsz, maszerować, demonstrować"
 0142,traditional,april,kwiecień
-0143,traditional,may,maj
+0143,traditional,may,"maj, może, móc, oby, niech, być w stanie"
 0144,traditional,june,czerwiec
 0145,traditional,july,lipiec
 0146,traditional,august,sierpień
@@ -144,332 +144,332 @@ external_id,type,front_text,back_text
 0148,traditional,october,październik
 0149,traditional,november,listopad
 0150,traditional,december,grudzień
-0151,traditional,date,data
+0151,traditional,date,"data, randka, termin, datować, datownik"
 0152,traditional,year,rok
 0153,traditional,month,miesiąc
 0154,traditional,week,tydzień
-0155,traditional,day,dzień
-0156,traditional,mother,mama
-0157,traditional,father,tata
+0155,traditional,day,"dzień, doba, dniówka, okres"
+0156,traditional,mother,"mama, matka, pramatka, źródło, troszczyć się, matkować, niańczyć"
+0157,traditional,father,"tata, ojciec, przodek, zrodzić, spłodzić, usynowić"
 0158,traditional,parents,rodzice
-0159,traditional,sister,siostra
+0159,traditional,sister,"siostra, zakonnica, siostrzany"
 0160,traditional,brother,brat
 0161,traditional,son,syn
 0162,traditional,daughter,córka
 0163,traditional,child,dziecko
-0164,traditional,husband,mąż
+0164,traditional,husband,"mąż, oszczędnie gospodarować"
 0165,traditional,wife,żona
-0166,traditional,partner,partner
-0168,traditional,cousin,kuzyn
-0169,traditional,aunt,ciocia
-0170,traditional,uncle,wujek
-0171,traditional,grandmother,babcia
+0166,traditional,partner,"partner, partnerka, wspólnik, partnerować"
+0168,traditional,cousin,"kuzyn, kuzynka"
+0169,traditional,aunt,"ciocia, ciotka"
+0170,traditional,uncle,"wujek, wuj, stryjek, stryj"
+0171,traditional,grandmother,"babcia, babunia"
 0172,traditional,grandfather,dziadek
 0173,traditional,family,rodzina
 0174,traditional,tall,wysoki
-0175,traditional,short,niski
+0175,traditional,short,"niski, krótki, krótkometrażowy, krótka sprzedaż, krótko, nagle"
 0176,traditional,young,młody
-0177,traditional,old,stary
-0178,traditional,hair,włosy
-0179,traditional,eyes,oczy
+0177,traditional,old,"stary, dawny, doświadczony, były, poprzedni"
+0178,traditional,hair,"włosy, włos"
+0179,traditional,eyes,"oczy, oko"
 0180,traditional,beard,broda
 0181,traditional,glasses,okulary
-0182,traditional,beautiful,piękny
-0183,traditional,ugly,brzydki
+0182,traditional,beautiful,"piękny, wspaniały, świetny"
+0183,traditional,ugly,"brzydki, brzydal"
 0184,traditional,slim,szczupły
-0185,traditional,fat,gruby
-0186,traditional,strong,silny
-0187,traditional,weak,słaby
+0185,traditional,fat,"gruby, tłuszcz, tłusty"
+0186,traditional,strong,"silny, mocny"
+0187,traditional,weak,"słaby, osłabiony, nieprzekonujący"
 0188,traditional,skin,skóra
-0189,traditional,face,twarz
-0192,traditional,funny,zabawny
+0189,traditional,face,"twarz, oblicze, mina, stawiać czoło"
+0192,traditional,funny,"zabawny, śmieszny, dziwny, osobliwy"
 0193,traditional,serious,poważny
 0194,traditional,shy,nieśmiały
 0195,traditional,brave,odważny
 0196,traditional,lazy,leniwy
 0197,traditional,hardworking,pracowity
-0198,traditional,smart,inteligentny
+0198,traditional,smart,"inteligentny, szczypać, boleć, odczuwać ból, bystry, zdolny, elegancki, szykowny"
 0199,traditional,honest,uczciwy
 0200,traditional,patient,cierpliwy
 0201,traditional,calm,spokojny
 0202,traditional,friendly,przyjazny
 0203,traditional,rude,niegrzeczny
-0205,traditional,red,czerwony
-0206,traditional,blue,niebieski
-0207,traditional,green,zielony
-0208,traditional,yellow,żółty
-0209,traditional,black,czarny
-0210,traditional,white,biały
-0211,traditional,gray,szary
-0212,traditional,brown,brązowy
-0213,traditional,pink,różowy
-0214,traditional,purple,fioletowy
-0215,traditional,orange,pomarańczowy
-0216,traditional,light,jasny
-0217,traditional,dark,ciemny
+0205,traditional,red,"czerwony, czerwień, komunistyczny"
+0206,traditional,blue,"niebieski, błękitny, błękit, smutny, sprośny, ubierać się na niebiesko, ufarbować na niebiesko"
+0207,traditional,green,"zielony, ekologiczny, przyjazny środowisku"
+0208,traditional,yellow,"żółty, tchórzliwy, zazdrosny, żółknąć"
+0209,traditional,black,"czarny, czerń, murzyński, czernieć"
+0210,traditional,white,"biały, biel, jasny, białko, jajo, wino"
+0211,traditional,gray,"szary, siwy"
+0212,traditional,brown,"brązowy, brąz, brunatny, kasztanowaty, opalony, przyrumienić, zbrązowieć, opalić się"
+0213,traditional,pink,"różowy, róż"
+0214,traditional,purple,"fioletowy, purpurowy, fiolet"
+0215,traditional,orange,"pomarańczowy, pomarańcza"
+0216,traditional,light,"jasny, światło, lampa, źródło światła, lekki, lekkostrawny, zapalać, rozpalać, oświetlać"
+0217,traditional,dark,"ciemny, mroczny"
 0218,traditional,big,duży
-0219,traditional,small,mały
+0219,traditional,small,"mały, niewielki"
 0220,traditional,new,nowy
-0221,traditional,good,dobry
-0222,traditional,bad,zły
-0223,traditional,shirt,koszula
+0221,traditional,good,"dobry, dobro, pożytek, właściwy, korzystny, uczciwy, grzeczny, smaczny, dobrze"
+0222,traditional,bad,"zły, niedobry"
+0223,traditional,shirt,"koszula, koszulka"
 0224,traditional,tshirt,koszulka
 0225,traditional,sweater,sweter
-0226,traditional,jacket,kurtka
-0227,traditional,coat,płaszcz
-0228,traditional,pants,spodnie
+0226,traditional,jacket,"kurtka, marynarka, obwoluta"
+0227,traditional,coat,"płaszcz, warstwa, fartuch, powlekać, pokrywać"
+0228,traditional,pants,"spodnie, majtki, slipy, kalesony"
 0229,traditional,jeans,dżinsy
-0230,traditional,dress,sukienka
+0230,traditional,dress,"sukienka, suknia, szata, ubranie, strój, ubierać, opatrywać"
 0231,traditional,skirt,spódnica
-0232,traditional,shoes,obuwie
+0232,traditional,shoes,"obuwie, but, buty"
 0233,traditional,socks,skarpetki
-0234,traditional,hat,czapka
+0234,traditional,hat,"czapka, kapelusz, daszek, cyrkumfleks, akcent cyrkumfleksowy"
 0235,traditional,scarf,szalik
 0236,traditional,gloves,rękawiczki
-0237,traditional,size,rozmiar
+0237,traditional,size,"rozmiar, wielkość"
 0239,traditional,medium,średni
-0240,traditional,large,duży
-0241,traditional,home,dom
-0242,traditional,apartment,mieszkanie
-0243,traditional,room,pokój
-0244,traditional,kitchen,kuchnia
-0245,traditional,bathroom,łazienka
+0240,traditional,large,"duży, ogromny, obszerny, liczny"
+0241,traditional,home,"dom, domowy, ojczyzna"
+0242,traditional,apartment,"mieszkanie, apartament"
+0243,traditional,room,"pokój, pomieszczenie, miejsce, przestrzeń, możliwość"
+0244,traditional,kitchen,"kuchnia, kuchenny"
+0245,traditional,bathroom,"łazienka, toaleta, ubikacja"
 0246,traditional,bedroom,sypialnia
 0247,traditional,livingroom,salon
 0248,traditional,hallway,korytarz
 0249,traditional,balcony,balkon
-0250,traditional,garden,ogród
+0250,traditional,garden,"ogród, ogrodzić"
 0251,traditional,basement,piwnica
 0252,traditional,attic,strych
 0253,traditional,stairs,schody
-0254,traditional,floor,piętro
+0254,traditional,floor,"piętro, podłoga"
 0255,traditional,door,drzwi
-0256,traditional,window,okno
-0257,traditional,bed,łóżko
-0258,traditional,table,"stół, stolik"
-0259,traditional,chair,krzesło
+0256,traditional,window,"okno, okienko, witryna, wystawa"
+0257,traditional,bed,"łóżko, posłanie, dno, złoże, pokład, warstwa, grządka, iść spać, iść do łóżka, uprawiać seks z kimś"
+0258,traditional,table,"stół, stolik, tabela, tabliczka, stołowy, towarzystwo"
+0259,traditional,chair,"krzesło, fotel, przewodniczący, przewodnicząca, katedra, przewodniczyć"
 0260,traditional,sofa,kanapa
 0261,traditional,wardrobe,szafa
-0262,traditional,desk,biurko
+0262,traditional,desk,"biurko, ławka szkolna"
 0263,traditional,lamp,lampa
 0264,traditional,fridge,lodówka
 0265,traditional,freezer,zamrażarka
-0266,traditional,oven,piekarnik
-0267,traditional,stove,kuchenka
+0266,traditional,oven,"piekarnik, piec"
+0267,traditional,stove,"kuchenka, piec, piecyk, płyta grzewcza"
 0268,traditional,microwave,mikrofalówka
 0269,traditional,kettle,czajnik
 0270,traditional,dishwasher,zmywarka
 0271,traditional,washingmachine,pralka
-0272,traditional,shower,"prysznic, myć się"
-0273,traditional,toilet,toaleta
+0272,traditional,shower,"prysznic, myć się, przelotny opad, brać prysznic"
+0273,traditional,toilet,"toaleta, sedes, muszla klozetowa, ubikacja, WC"
 0274,traditional,sink,umywalka
-0275,traditional,wake,budzić się
+0275,traditional,wake,"budzić się, budzić, czuwanie, kilwater, smuga kondensacyjna"
 0276,traditional,sleep,spać
-0277,traditional,eat,jeść
-0278,traditional,drink,pić
-0281,traditional,go,iść
-0282,traditional,come,przyjść
+0277,traditional,eat,"jeść, spożywać, pożerać, przeżerać"
+0278,traditional,drink,"pić, napój, drink, alkohol, wznosić toast, wypić, upijać się"
+0281,traditional,go,"iść, idź, wyjść, podróżować, poruszać się, umierać, pasować, działać, powodzić się, ruch, zgoda"
+0282,traditional,come,"przyjść, przychodzić, przybywać, pochodzić, pojawiać się, dochodzić, doświadczyć"
 0283,traditional,leave,wyjść
-0284,traditional,return,wrócić
-0285,traditional,read,czytać
+0284,traditional,return,"wrócić, wracać, zwracać, powrót, zwrot, przynosić, reportować"
+0285,traditional,read,"czytać, czytaj, odczytać, studiować, interpretować, brzmieć"
 0287,traditional,learn,uczyć się
-0288,traditional,play,grać
+0288,traditional,play,"grać, bawić się, sztuka, przedstawienie"
 0289,traditional,rest,odpoczywać
-0290,traditional,cook,gotować
-0291,traditional,clean,sprzątać
-0293,traditional,bread,chleb
-0294,traditional,milk,mleko
-0295,traditional,water,woda
-0296,traditional,coffee,kawa
-0297,traditional,tea,herbata
-0298,traditional,juice,sok
-0299,traditional,meat,mięso
-0300,traditional,fish,ryba
-0301,traditional,cheese,ser
+0290,traditional,cook,"gotować, kucharz, kucharka"
+0291,traditional,clean,"sprzątać, czysty, czyścić, wyczyścić"
+0293,traditional,bread,"chleb, pieczywo, kasa"
+0294,traditional,milk,"mleko, doić, wykorzystywać"
+0295,traditional,water,"woda, podlewać, polewać, wodny"
+0296,traditional,coffee,"kawa, kawowiec, kawowy, kolor kawowy, pić kawę"
+0297,traditional,tea,"herbata, herbatka, podwieczorek"
+0298,traditional,juice,"sok, likier, siła, moc, chęć do działania, esencja, doping, prąd, paliwo, fundusz, wyciskać, pić duże ilości alkoholu"
+0299,traditional,meat,"mięso, miąższ"
+0300,traditional,fish,"ryba, ryby, łowić"
+0301,traditional,cheese,"ser, pieniądz, gomółka"
 0302,traditional,eggs,jajka
-0303,traditional,butter,masło
-0304,traditional,salt,sól
+0303,traditional,butter,"masło, smarować"
+0304,traditional,salt,"sól, solić, zasolić, słony"
 0305,traditional,sugar,cukier
-0306,traditional,pepper,pieprz
-0307,traditional,oil,olej
+0306,traditional,pepper,"pieprz, papryka"
+0307,traditional,oil,"olej, oliwa, ropa naftowa, nafta, olejny, smarować, oliwić"
 0308,traditional,rice,ryż
 0309,traditional,pasta,makaron
-0310,traditional,apple,jabłko
+0310,traditional,apple,"jabłko, jabłkowy"
 0311,traditional,banana,banan
 0312,traditional,tomato,pomidor
 0313,traditional,potato,ziemniak
-0314,traditional,vegetables,warzywa
-0315,traditional,fruit,owoce
-0316,traditional,menu,menu
+0314,traditional,vegetables,"warzywa, warzywo"
+0315,traditional,fruit,"owoce, owoc, owocowy, owocować"
+0316,traditional,menu,"menu, karta dań"
 0317,traditional,waiter,kelner
-0319,traditional,order,zamówienie
-0320,traditional,bill,rachunek
-0321,traditional,tip,napiwek
+0319,traditional,order,"zamówienie, rozkaz, porządek, zakon, klasa, kolejność, zamawiać, rozkazywać, porządkować"
+0320,traditional,bill,"rachunek, banknot, projekt, ustawa, dziób, wystawiać"
+0321,traditional,tip,"napiwek, czubek, wskazówka, wysypisko śmieci, cynk, informacja, uzyskać, poufnie, wlewać, wylewać, przelewać, wysypywać, wyrzucać, przechylić, wychylić, przeważyć"
 0322,traditional,reservation,rezerwacja
 0323,traditional,dessert,deser
-0324,traditional,soup,zupa
+0324,traditional,soup,"zupa, karmić, zapewniać posiłek, zanurzać w utrwalaczu"
 0325,traditional,salad,sałatka
 0326,traditional,steak,stek
-0329,traditional,cup,kubek
-0330,traditional,plate,talerz
-0331,traditional,fork,widelec
-0332,traditional,knife,nóż
+0329,traditional,cup,"kubek, filiżanka, puchar, miseczka"
+0330,traditional,plate,"talerz, płyta, tablica, tabliczka, taca"
+0331,traditional,fork,"widelec, widły, widełki, rozwidlenie, rozgałęzienie, odnoga, rozwidlać się"
+0332,traditional,knife,"nóż, przeciąć, zaatakować nożem, dźgnąć, ugodzić nożem"
 0333,traditional,spoon,łyżka
-0334,traditional,store,zapas
-0335,traditional,market,rynek
+0334,traditional,store,"zapas, sklep, magazyn, przechowywać, gromadzić"
+0335,traditional,market,"rynek, targowisko, wprowadzać na rynek"
 0336,traditional,supermarket,supermarket
 0337,traditional,checkout,"kasa, wymeldowanie"
-0338,traditional,basket,koszyk
-0339,traditional,bag,torba
-0346,traditional,bank,bank
+0338,traditional,basket,"koszyk, kosz"
+0339,traditional,bag,"torba, worek"
+0346,traditional,bank,"bank, bankier, brzeg, skarpa, nasyp, ławica, wpłacać, bankowy"
 0347,traditional,atm,bankomat
 0349,traditional,refund,zwrot
-0350,traditional,exchange,wymiana
+0350,traditional,exchange,"wymiana, dewizowy, wymienny, giełdowy, walutowy, zamiana, kurs, giełda, centrala telefoniczna, wymieniać, zamieniać"
 0351,traditional,warranty,gwarancja
-0352,traditional,station,dworzec
-0353,traditional,airport,lotnisko
-0354,traditional,hotel,hotel
+0352,traditional,station,"dworzec, stacja, posterunek, stacjonować"
+0353,traditional,airport,"lotnisko, port lotniczy, lotniczy"
+0354,traditional,hotel,"hotel, hotelowy"
 0355,traditional,hospital,szpital
 0356,traditional,pharmacy,apteka
 0358,traditional,postoffice,poczta
-0359,traditional,police,policja
-0360,traditional,museum,muzeum
-0361,traditional,park,park
+0359,traditional,police,"policja, policyjny, patrolować"
+0360,traditional,museum,"muzeum, muzealny"
+0361,traditional,park,"park, parkować"
 0362,traditional,restaurant,restauracja
-0364,traditional,library,biblioteka
-0365,traditional,school,szkoła
-0366,traditional,office,biuro
-0367,traditional,church,kościół
-0368,traditional,cinema,kino
-0369,traditional,shop,sklep
-0370,traditional,left,lewo
-0371,traditional,right,prawo
-0372,traditional,straight,prosto
-0373,traditional,near,blisko
-0374,traditional,far,daleko
-0375,traditional,behind,za
-0376,traditional,front,przód
-0377,traditional,between,pomiędzy
-0378,traditional,next,następny
-0379,traditional,corner,róg
-0380,traditional,street,ulica
-0381,traditional,road,droga
-0382,traditional,map,mapa
-0383,traditional,address,adres
-0384,traditional,center,centrum
-0385,traditional,entrance,wejście
+0364,traditional,library,"biblioteka, biblioteczny"
+0365,traditional,school,"szkoła, ławica, więzienie, szkolić, trenować, dawać szkołę, kształcić, wykazywać wyższość"
+0366,traditional,office,"biuro, urząd"
+0367,traditional,church,"kościół, nabożeństwo"
+0368,traditional,cinema,"kino, kinematografia, film, przemysł filmowy"
+0369,traditional,shop,"sklep, warsztat, robić zakupy"
+0370,traditional,left,"lewo, lewy, lewicowy, w lewo"
+0371,traditional,right,"prawo, właściwy, poprawny, mieć rację, prawda"
+0372,traditional,straight,"prosto, prosty, bez zakrzywień, heteroseksualny, czysty, wprost, linia prosta"
+0373,traditional,near,"blisko, niedaleko, w pobliżu, zbliżać się"
+0374,traditional,far,"daleko, daleki, znacznie"
+0375,traditional,behind,"za, z tyłu, w tyle"
+0376,traditional,front,"przód, front, przedni, napotkać, skonfrontować"
+0377,traditional,between,"pomiędzy, między"
+0378,traditional,next,"następny, kolejny, bliski"
+0379,traditional,corner,"róg, naroże, kąt, rzut rożny, korner, narożny, zapędzić, narożnik"
+0380,traditional,street,"ulica, droga, uliczny"
+0381,traditional,road,"droga, ulica, szosa, jezdnia"
+0382,traditional,map,"mapa, kreślić"
+0383,traditional,address,"adres, zwracać się, przemawiać"
+0384,traditional,center,"centrum, środek, centrować"
+0385,traditional,entrance,"wejście, wstęp, dostęp, wchodzenie, zachwycać, wprawiać w trans"
 0386,traditional,exit,wyjście
-0387,traditional,ticket,bilet
-0388,traditional,bus,autobus
+0387,traditional,ticket,"bilet, mandat"
+0388,traditional,bus,"autobus, sprzątać naczynia, zbierać talerze, jechać autobusem"
 0389,traditional,tram,tramwaj
-0390,traditional,train,pociąg
+0390,traditional,train,"pociąg, trenować, szkolenie, ciąg"
 0391,traditional,subway,metro
 0392,traditional,taxi,taksówka
-0393,traditional,stop,"przystanek, stop"
+0393,traditional,stop,"przystanek, stop, przerwa, zatrzymaj, zatrzymanie, znak stop, zatrzymać, zatrzymać się, przerwać, zakończyć"
 0394,traditional,platform,peron
-0395,traditional,schedule,rozkład
+0395,traditional,schedule,"rozkład, harmonogram, plan, grafik, zaplanować"
 0396,traditional,departure,odjazd
 0397,traditional,arrival,przyjazd
-0398,traditional,seat,miejsce
+0398,traditional,seat,"miejsce, siedzenie, posada, mandat, siodełko, siedziba, tyłek, deska klozetowa, sadzać, sadzać się, posadzić"
 0399,traditional,luggage,bagaż
 0400,traditional,passport,paszport
 0401,traditional,border,granica
-0402,traditional,trip,podróż
-0403,traditional,travel,"podróżować, podróże"
-0405,traditional,key,klucz
+0402,traditional,trip,"podróż, wycieczka, potknięcie, pomyłka"
+0403,traditional,travel,"podróżować, podróże, podróż, przemieszczać się"
+0405,traditional,key,"klucz, klawisz, przycisk, legenda"
 0406,traditional,reception,recepcja
-0408,traditional,breakfast,śniadanie
+0408,traditional,breakfast,"śniadanie, spożywać"
 0409,traditional,elevator,winda
 0413,traditional,towel,ręcznik
 0414,traditional,pillow,poduszka
-0415,traditional,blanket,koc
+0415,traditional,blanket,"koc, pled, filc, warstwa, ogólny, bezwarunkowy, pokrywać, przykrywać, maskować"
 0416,traditional,wifi,wi-fi
 0417,traditional,password,hasło
 0418,traditional,lobby,hol
 0420,traditional,checkin,zameldowanie
-0421,traditional,head,głowa
+0421,traditional,head,"głowa, kierować, nagłówek"
 0422,traditional,eye,oko
-0423,traditional,ear,ucho
-0424,traditional,nose,nos
-0425,traditional,mouth,usta
+0423,traditional,ear,"ucho, kłos"
+0424,traditional,nose,"nos, dziób"
+0425,traditional,mouth,"usta, pysk, gęba, ujście, wylot"
 0426,traditional,tooth,ząb
-0427,traditional,neck,szyja
-0428,traditional,shoulder,ramię
+0427,traditional,neck,"szyja, kark, gryf"
+0428,traditional,shoulder,"ramię, bark, łopatka, pas awaryjny, pobocze, zarzucać, brać na siebie"
 0429,traditional,arm,ręka
-0430,traditional,hand,dłoń
+0430,traditional,hand,"dłoń, ręka, strona, wskaźnik, pomoc, wpływ, kontrola, rozdanie, wręczyć"
 0431,traditional,finger,palec
-0432,traditional,chest,klatka
-0433,traditional,back,plecy
-0434,traditional,stomach,brzuch
+0432,traditional,chest,"klatka, klatka piersiowa, skrzynia, obudowa"
+0433,traditional,back,"plecy, tył, grzbiet, obrońca, oparcie, zawracać, wspierać, tylny, z powrotem"
+0434,traditional,stomach,"brzuch, żołądek, apetyt, chęć, strawić, ścierpieć, znieść"
 0435,traditional,leg,noga
 0436,traditional,knee,kolano
 0437,traditional,foot,stopa
 0438,traditional,pain,ból
 0439,traditional,fever,gorączka
 0440,traditional,cough,kaszel
-0441,traditional,cold,"przeziębienie, zimno"
+0441,traditional,cold,"przeziębienie, zimno, zimny"
 0442,traditional,flu,grypa
 0443,traditional,allergy,alergia
-0444,traditional,medicine,lek
-0445,traditional,doctor,lekarz
-0446,traditional,nurse,pielęgniarka
-0447,traditional,appointment,wizyta
-0448,traditional,emergency,"nagły, awaria"
-0449,traditional,sick,chory
-0450,traditional,hurt,boleć
+0444,traditional,medicine,"lek, lekarstwo, medycyna"
+0445,traditional,doctor,"lekarz, lekarka, dr, doktor"
+0446,traditional,nurse,"pielęgniarka, pielęgniarz, niańka, pielęgnować, opiekować się"
+0447,traditional,appointment,"wizyta, umówione spotkanie, termin, mianowanie, powołanie, spotkanie"
+0448,traditional,emergency,"nagły, awaria, nagły wypadek, sytuacja awaryjna, awaryjny"
+0449,traditional,sick,"chory, mający mdłości, zwymiotować, wywoływać wstręt, niesmaczny"
+0450,traditional,hurt,"boleć, ranić, zranić, kaleczyć, sprawiać ból, krzywdzić, ból, uraza, zraniony, ranny, krzywda"
 0451,traditional,burn,oparzenie
-0452,traditional,cut,skaleczenie
+0452,traditional,cut,"skaleczenie, ciąć, wycinać, rąbać, kroić, krój, obcięcie, cięcie"
 0453,traditional,infection,infekcja
 0454,traditional,tablet,tabletka
 0455,traditional,syrup,syrop
 0456,traditional,sun,słońce
-0457,traditional,rain,deszcz
-0458,traditional,snow,śnieg
-0459,traditional,wind,wiatr
-0460,traditional,cloud,chmura
-0461,traditional,storm,burza
-0462,traditional,hot,gorąco
-0464,traditional,warm,ciepło
-0465,traditional,wet,mokro
-0466,traditional,dry,sucho
+0457,traditional,rain,"deszcz, opad, padać"
+0458,traditional,snow,"śnieg, śnieżny, śnieżyca, śnieżnobiały, śnieżyć"
+0459,traditional,wind,"wiatr, nawijać, wić się, nakręcać"
+0460,traditional,cloud,"chmura, obłok, chmara, zmętnienie, zamglić, zmącić, zaćmić"
+0461,traditional,storm,"burza, sztorm, szturm, szturmować"
+0462,traditional,hot,"gorąco, gorący, pikantny, atrakcyjny, seksualny"
+0464,traditional,warm,"ciepło, ciepły, ogrzać, podgrzać, ocieplić, serdeczny"
+0465,traditional,wet,"mokro, mokry, wilgotny, zwilżać"
+0466,traditional,dry,"sucho, suchy, wytrawny, suszyć"
 0467,traditional,umbrella,parasol
 0470,traditional,boots,buty
 0473,traditional,music,muzyka
-0474,traditional,movie,film
+0474,traditional,movie,"film, filmowy"
 0475,traditional,series,serial
-0476,traditional,game,gra
+0476,traditional,game,"gra, zabawa, zwierzyna"
 0477,traditional,sport,sport
-0478,traditional,reading,czytanie
+0478,traditional,reading,"czytanie, odczyt, interpretacja"
 0479,traditional,running,bieganie
 0480,traditional,swimming,pływanie
-0481,traditional,cooking,gotowanie
-0483,traditional,photography,fotografia
+0481,traditional,cooking,"gotowanie, kuchnia"
+0483,traditional,photography,"fotografia, fotografika"
 0484,traditional,walking,spacer
 0485,traditional,gym,siłownia
-0486,traditional,dance,taniec
+0486,traditional,dance,"taniec, tańczyć"
 0487,traditional,drawing,rysowanie
 0488,traditional,hiking,wędrówka
 0491,traditional,meeting,spotkanie
-0492,traditional,boss,szef
+0492,traditional,boss,"szef, szefowa, przełożony, boss"
 0493,traditional,colleague,kolega
 0494,traditional,project,projekt
-0495,traditional,task,zadanie
+0495,traditional,task,"zadanie, zajęcie, praca, dać komuś do wykonania, zlecać"
 0496,traditional,deadline,termin
 0497,traditional,salary,pensja
-0499,traditional,class,klasa
+0499,traditional,class,"klasa, lekcja, kurs, gromada"
 0500,traditional,lesson,lekcja
 0501,traditional,teacher,nauczyciel
 0503,traditional,homework,praca domowa
 0504,traditional,exam,egzamin
 0505,traditional,break,przerwa
-0507,traditional,lost,zgubiony
-0508,traditional,danger,niebezpieczeństwo
-0509,traditional,fire,pożar
+0507,traditional,lost,"zgubiony, zagubiony, zaginiony, stracony, przegrany"
+0508,traditional,danger,"niebezpieczeństwo, zagrożenie"
+0509,traditional,fire,"pożar, ogień, strzelać, zapalać"
 0511,traditional,ambulance,karetka
-0512,traditional,accident,wypadek
+0512,traditional,accident,"wypadek, przypadek, akcydens"
 0513,traditional,thief,złodziej
 0514,traditional,wallet,portfel
-0515,traditional,phone,telefon
+0515,traditional,phone,"telefon, dzwonić, telefonować"
 0516,traditional,call,dzwonić
-0518,traditional,quiet,cisza
-0519,traditional,panic,panika
+0518,traditional,quiet,"cisza, cichy, spokojny, spokój, uciszać, uspokajać, uspokoić"
+0519,traditional,panic,"panika, popłoch, panikować, wywoływać panikę"

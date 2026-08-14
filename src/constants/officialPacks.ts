@@ -46,7 +46,7 @@ const DEFAULT_PACK_VERSION = 1;
 const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "fiszki_podstawy_en_pl_slowa",
-    packVersion: 2,
+    packVersion: 3,
     name: "Podstawowe słówka",
     position: 1,
     iconId: "flag:en",
