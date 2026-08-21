@@ -17,6 +17,7 @@ const PREBUILT_DATABASE_VERSION = 2;
 const OFFICIAL_PACKS = [
   {
     slug: "eng_to_pl_a1",
+    packVersion: 2,
     name: "Ang A1",
     iconId: "flag:en",
     iconColor: "#10B981",
@@ -27,6 +28,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "eng_to_pl_a2",
+    packVersion: 2,
     name: "Ang A2",
     iconId: "flag:en",
     iconColor: "#FBBF24",
@@ -37,6 +39,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "eng_to_pl_b1",
+    packVersion: 2,
     name: "Ang B1",
     iconId: "flag:en",
     iconColor: "#6366F1",
@@ -47,6 +50,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "eng_to_pl_b2",
+    packVersion: 2,
     name: "Ang B2",
     iconId: "flag:en",
     iconColor: "#EC4899",
@@ -133,6 +137,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "french_b2",
+    packVersion: 2,
     name: "French B2",
     iconId: "flag:fr",
     iconColor: "#EC4899",
@@ -144,6 +149,7 @@ const OFFICIAL_PACKS = [
   },
   {
     slug: "astronomia",
+    packVersion: 2,
     name: "Astronomia",
     iconId: "planet",
     iconColor: "#8B5CF6",

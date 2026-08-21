@@ -211,6 +211,68 @@ describe("registered prebuilt CSV packs", () => {
     ).toBe(18135);
   });
 
+  it("capitalizes country names in built-in course cards", () => {
+    const expectedCountryCards: Array<{
+      slug: string;
+      externalId: string;
+      field: "frontText" | "backText";
+      value: string;
+    }> = [
+      {
+        slug: "eng_to_pl_a1",
+        externalId: "0309",
+        field: "frontText",
+        value: "England",
+      },
+      {
+        slug: "eng_to_pl_a1",
+        externalId: "0364",
+        field: "frontText",
+        value: "China",
+      },
+      {
+        slug: "eng_to_pl_a2",
+        externalId: "0449",
+        field: "frontText",
+        value: "Italy",
+      },
+      {
+        slug: "eng_to_pl_b1",
+        externalId: "0965",
+        field: "frontText",
+        value: "Poland",
+      },
+      {
+        slug: "eng_to_pl_b2",
+        externalId: "1016",
+        field: "frontText",
+        value: "Thailand",
+      },
+      {
+        slug: "french_b2",
+        externalId: "5082",
+        field: "backText",
+        value: "Turkey",
+      },
+    ];
+
+    for (const { slug, externalId, field, value } of expectedCountryCards) {
+      const pack = OFFICIAL_PACKS.find(
+        (candidate: { slug: string }) => candidate.slug === slug
+      );
+      expect(pack).toBeDefined();
+
+      const card = readCardsFromCsv(pack!).find(
+        (candidate: { externalId: string }) => candidate.externalId === externalId
+      );
+      expect(card).toEqual(
+        expect.objectContaining({
+          [field]: value,
+        })
+      );
+    }
+  });
+
   it.each(OFFICIAL_PACK_CASES)(
     "%s has unique stable IDs and usable card content",
     (_slug: string, pack: Record<string, unknown>) => {
