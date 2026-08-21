@@ -21,11 +21,13 @@ const GRID_BOX_SCALE = 1.2;
 const BOX_ITEM_WIDTH = 164;
 const GRID_BOX_ITEM_WIDTH = 150;
 const BOX_ITEM_HEIGHT = 210;
-const HORIZONTAL_VIEWPORT_SCREEN_INSET = 24;
 const GRID_VIEWPORT_HORIZONTAL_INSET = 48;
 const MAX_GRID_BOX_ITEM_WIDTH = 210;
 const MAX_GRID_BOX_SCALE = 1.55;
 const GRID_BOX_VERTICAL_EXTRA = 44;
+export const CLASSIC_BOX_WIDTH = BOX_SKIN_WIDTH;
+export const PREFERRED_CLASSIC_COLUMNS = 3;
+export const MIN_CLASSIC_SCALE = 0.75;
 
 const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxZero: 0,
@@ -38,6 +40,28 @@ const BOX_NUMBERS: Record<keyof BoxesState, number> = {
 
 function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
+}
+
+export type ClassicBoxLayout = {
+    columns: number;
+    horizontalScroll: boolean;
+    scale: number;
+    itemWidth: number;
+};
+
+export function getClassicBoxLayout(availableWidth: number): ClassicBoxLayout {
+    const requiredWidth = CLASSIC_BOX_WIDTH * PREFERRED_CLASSIC_COLUMNS;
+    const scale = Math.min(1, Math.max(0, availableWidth / requiredWidth));
+    const canFitPreferredColumns = scale >= MIN_CLASSIC_SCALE;
+
+    return {
+        columns: PREFERRED_CLASSIC_COLUMNS,
+        horizontalScroll: !canFitPreferredColumns,
+        scale: canFitPreferredColumns ? scale : 1,
+        itemWidth: canFitPreferredColumns
+            ? CLASSIC_BOX_WIDTH * scale
+            : CLASSIC_BOX_WIDTH,
+    };
 }
 
 interface BoxesProps {
@@ -72,7 +96,6 @@ export default function BoxList({
     const styles = useBoxListStyles();
     const { t } = useTranslation();
     const { width: windowWidth } = useWindowDimensions();
-    const effectiveLayoutWidth = layoutWidth ?? windowWidth;
     const longPressTriggeredRef = useRef(false);
     const [measuredBoxItems, setMeasuredBoxItems] = useState<
         Partial<Record<keyof BoxesState, { x: number; y: number; width: number; height: number }>>
@@ -95,34 +118,49 @@ export default function BoxList({
     const displayedEntries = hideBoxZero
         ? entries.filter(([boxName]) => boxName !== "boxZero")
         : entries;
+    const explicitGrid = maxColumns != null;
+    // Explicit tablet grids own their max width; responsive classic grids use
+    // the measured container width so phone insets are accounted for.
+    const effectiveLayoutWidth = explicitGrid
+        ? layoutWidth ?? containerLayout?.width ?? windowWidth
+        : containerLayout?.width ?? layoutWidth ?? windowWidth;
+    const classicLayout = getClassicBoxLayout(effectiveLayoutWidth);
+    const shouldUseHorizontalScroll =
+        horizontalScroll || (!explicitGrid && classicLayout.horizontalScroll);
     const effectiveHorizontalViewportWidth = Math.max(
         BOX_ITEM_WIDTH,
-        effectiveLayoutWidth - HORIZONTAL_VIEWPORT_SCREEN_INSET
+        effectiveLayoutWidth
     );
-    const horizontalSidePadding = horizontalScroll
+    const horizontalSidePadding = shouldUseHorizontalScroll
         ? Math.max(0, (effectiveHorizontalViewportWidth - BOX_ITEM_WIDTH) / 2)
         : 0;
     const gridColumns =
-        !horizontalScroll && maxColumns != null
-            ? Math.max(1, Math.floor(maxColumns))
+        !shouldUseHorizontalScroll
+            ? explicitGrid
+                ? Math.max(1, Math.floor(maxColumns))
+                : classicLayout.columns
             : null;
     const availableGridWidth = Math.max(
         0,
         effectiveLayoutWidth - GRID_VIEWPORT_HORIZONTAL_INSET
     );
     const gridItemWidth = gridColumns
-        ? clamp(
-            availableGridWidth / gridColumns,
-            GRID_BOX_ITEM_WIDTH,
-            MAX_GRID_BOX_ITEM_WIDTH
-        )
+        ? explicitGrid
+            ? clamp(
+                availableGridWidth / gridColumns,
+                GRID_BOX_ITEM_WIDTH,
+                MAX_GRID_BOX_ITEM_WIDTH
+            )
+            : classicLayout.itemWidth
         : GRID_BOX_ITEM_WIDTH;
     const gridBoxScale = gridColumns
-        ? clamp(
-            (gridItemWidth / GRID_BOX_ITEM_WIDTH) * GRID_BOX_SCALE,
-            GRID_BOX_SCALE,
-            MAX_GRID_BOX_SCALE
-        )
+        ? explicitGrid
+            ? clamp(
+                (gridItemWidth / GRID_BOX_ITEM_WIDTH) * GRID_BOX_SCALE,
+                GRID_BOX_SCALE,
+                MAX_GRID_BOX_SCALE
+            )
+            : classicLayout.scale
         : GRID_BOX_SCALE;
     const gridItemMinHeight =
         Math.ceil(BOX_SKIN_HEIGHT * gridBoxScale) + GRID_BOX_VERTICAL_EXTRA;
@@ -247,7 +285,7 @@ export default function BoxList({
                 isCaro={false}
             />
         );
-        const boxScale = horizontalScroll
+        const boxScale = shouldUseHorizontalScroll
             ? HORIZONTAL_BOX_SCALE
             : gridColumns
               ? gridBoxScale
@@ -274,7 +312,7 @@ export default function BoxList({
                 key={boxName}
                 testID={`box-list-item-${boxName}`}
                 style={[
-                    horizontalScroll ? styles.horizontalBoxItem : null,
+                    shouldUseHorizontalScroll ? styles.horizontalBoxItem : null,
                     gridColumns ? styles.gridBoxItem : null,
                     gridColumns
                         ? {
@@ -434,7 +472,7 @@ export default function BoxList({
 
     return (
         <View style={styles.container}>
-            {horizontalScroll ? (
+            {shouldUseHorizontalScroll ? (
                 <View
                     style={[
                         styles.containerTopHorizontal,

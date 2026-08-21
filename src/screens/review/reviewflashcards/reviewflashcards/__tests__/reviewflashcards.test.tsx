@@ -862,7 +862,7 @@ describe("reviewflashcards correction desync regression", () => {
     });
   });
 
-  it("keeps classic boxes horizontally scrollable on small-phone layouts", async () => {
+  it("keeps classic boxes responsive on small-phone layouts", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
@@ -880,7 +880,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(latestBoxListProps).not.toBeNull();
     });
 
-    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+    expect(latestBoxListProps?.horizontalScroll).toBeUndefined();
     expect(latestBoxCarouselProps).toBeNull();
   });
 

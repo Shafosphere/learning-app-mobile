@@ -1299,7 +1299,6 @@ export default function Flashcards() {
       handleBoxLongPress={handleBoxLongPress}
       effectiveBoxesLayout={effectiveBoxesLayout}
       boxSelectionLocked={boxSelectionLocked}
-      isSmallPhoneLayout={isSmallPhoneLayout}
       isTabletLayout={isTabletLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
       areButtonsOnTop={areButtonsOnTop}

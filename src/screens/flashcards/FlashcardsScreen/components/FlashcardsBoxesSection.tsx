@@ -28,7 +28,6 @@ type FlashcardsBoxesSectionProps = {
   handleBoxLongPress: (boxName: keyof BoxesState) => void;
   effectiveBoxesLayout: string;
   boxSelectionLocked: boolean;
-  isSmallPhoneLayout: boolean;
   isTabletLayout: boolean;
   isTabletCompactBoxesLayout: boolean;
   maxColumns?: number;
@@ -59,7 +58,6 @@ export function FlashcardsBoxesSection({
   handleBoxLongPress,
   effectiveBoxesLayout,
   boxSelectionLocked,
-  isSmallPhoneLayout,
   isTabletLayout,
   isTabletCompactBoxesLayout,
   maxColumns,
@@ -86,7 +84,6 @@ export function FlashcardsBoxesSection({
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
         countsCoachmarkId={countsCoachmarkId}
-        horizontalScroll={isSmallPhoneLayout}
         maxColumns={maxColumns ?? (isTabletLayout ? 3 : undefined)}
         layoutWidth={flashcardsContentWidth}
       />

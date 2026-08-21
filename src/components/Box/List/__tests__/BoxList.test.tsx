@@ -4,7 +4,10 @@ import React from "react";
 import * as ReactNative from "react-native";
 import { Text, View } from "react-native";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import BoxList from "../BoxList";
+import BoxList, {
+    getClassicBoxLayout,
+    MIN_CLASSIC_SCALE,
+} from "../BoxList";
 
 jest.mock("react-i18next", () => ({
     useTranslation: () => ({
@@ -90,6 +93,70 @@ const boxes: BoxesState = {
 describe("BoxList", () => {
     afterEach(() => {
         jest.restoreAllMocks();
+    });
+
+    it.each([
+        [336, 336 / 345],
+        [320, 320 / 345],
+        [300, 300 / 345],
+        [270, 270 / 345],
+    ])("keeps three classic columns at %s dp", (width, expectedScale) => {
+        const layout = getClassicBoxLayout(width);
+
+        expect(layout.horizontalScroll).toBe(false);
+        expect(layout.columns).toBe(3);
+        expect(layout.scale).toBeCloseTo(expectedScale as number);
+        expect(layout.scale).toBeGreaterThanOrEqual(MIN_CLASSIC_SCALE);
+    });
+
+    it("uses horizontal scroll only below the minimum classic scale", () => {
+        const layout = getClassicBoxLayout(250);
+
+        expect(layout.horizontalScroll).toBe(true);
+        expect(layout.columns).toBe(3);
+        expect(layout.scale).toBe(1);
+    });
+
+    it("uses measured container width for classic layout", () => {
+        const screen = render(
+            <BoxList
+                boxes={boxes}
+                activeBox="boxOne"
+                handleSelectBox={jest.fn()}
+            />
+        );
+
+        const classicContainer = screen.UNSAFE_getAllByType(View).find(
+            (node) =>
+                Array.isArray(node.props.style) &&
+                node.props.style.some(
+                    (style: { flexWrap?: string } | undefined) =>
+                        style?.flexWrap === "wrap"
+                )
+        );
+        expect(classicContainer).toBeTruthy();
+
+        fireEvent(classicContainer!, "layout", {
+            nativeEvent: { layout: { width: 336, height: 210 } },
+        });
+
+        expect(screen.getByTestId("box-list-item-boxOne").props.style).toEqual(
+            expect.arrayContaining([
+                expect.objectContaining({
+                    width: expect.closeTo(112, 5),
+                }),
+            ])
+        );
+        expect(
+            screen.UNSAFE_getAllByType(View).some(
+                (node) =>
+                    Array.isArray(node.props.style) &&
+                    node.props.style.some(
+                        (style: { flexWrap?: string } | undefined) =>
+                            style?.flexWrap === "nowrap"
+                    )
+            )
+        ).toBe(false);
     });
 
     it("scales classic grid items responsively within requested columns", () => {

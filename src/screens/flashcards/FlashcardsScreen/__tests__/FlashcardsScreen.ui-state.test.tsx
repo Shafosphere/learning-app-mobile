@@ -812,7 +812,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.hideHints).toBe(false);
   });
 
-  it("keeps classic boxes horizontally scrollable and hides hints on small-phone layouts", async () => {
+  it("keeps classic boxes responsive and hides hints on small-phone layouts", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     const card = makeCard({
       id: 52,
@@ -825,7 +825,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     await flushScreenState();
 
     expect(latestBoxListProps).not.toBeNull();
-    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+    expect(latestBoxListProps?.horizontalScroll).toBeUndefined();
     expect(latestBoxCarouselProps).toBeNull();
     expect(latestCardProps?.hideHints).toBe(true);
   });

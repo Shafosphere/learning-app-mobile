@@ -676,7 +676,6 @@ export default function ReviewFlashcardsPlaceholder() {
       boxSelectionLocked={
         isBetweenCards || isLoading || correction != null || mistakeNudge != null
       }
-      isSmallPhoneLayout={isSmallPhoneLayout}
       isTabletLayout={isTabletLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
       areButtonsOnTop={areButtonsOnTop}
