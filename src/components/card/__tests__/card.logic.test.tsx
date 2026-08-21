@@ -939,9 +939,22 @@ describe("Card logic props", () => {
   });
 
   it("does not render the hint slot when hints are hidden", () => {
-    renderCard(createProps({ hideHints: true }));
+    const screen = renderCard(createProps({ hideHints: true }));
 
     expect(latestCardHintProps).toBeNull();
+    expect(screen.queryByTestId("card-hint-placeholder")).toBeNull();
+  });
+
+  it("keeps hint space when hidden by caller", () => {
+    const screen = renderCard(
+      createProps({
+        hideHints: true,
+        reserveHintSpaceWhenHidden: true,
+      }),
+    );
+
+    expect(latestCardHintProps).toBeNull();
+    expect(screen.getByTestId("card-hint-placeholder")).toBeTruthy();
   });
 
   it("opens hint editing when the external hint edit token changes", async () => {

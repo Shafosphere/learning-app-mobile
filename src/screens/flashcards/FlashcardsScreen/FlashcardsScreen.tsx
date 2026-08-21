@@ -21,6 +21,7 @@ import { ensureCourseCompletionRunStarted } from "@/src/features/flashcards/cour
 import { useFlashcardImagePreload } from "@/src/features/flashcards/useFlashcardImagePreload";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
+import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
@@ -465,6 +466,8 @@ export default function Flashcards() {
   }, [selectedItemId]);
   const shouldHideHintsForActiveBox =
     isSmallPhoneLayout || activeBox === "boxFour" || activeBox === "boxFive";
+  const shouldReserveHintSpaceWhenHidden =
+    !isSmallPhoneLayout && (activeBox === "boxFour" || activeBox === "boxFive");
   const lastTrueFalseTapRef = useRef<{
     cardId: number | null;
     ts: number;
@@ -1079,16 +1082,6 @@ export default function Flashcards() {
       : 0.54
     : 0.648;
   const {
-    scale: boxesScale,
-    scaledHeight: boxesScaledHeight,
-    scaleOffsetY,
-    onViewportLayout: onBoxesViewportLayout,
-    onContentLayout: onBoxesContentLayout,
-    needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({
-    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
-  });
-  const {
     bottomButtonsAnchorRef,
     setBottomButtonsHeight,
     measureBottomButtons,
@@ -1117,6 +1110,24 @@ export default function Flashcards() {
     isCarouselLayout && !areButtonsOnTop
       ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
       : 0;
+  const {
+    scale: boxesScale,
+    scaledHeight: boxesScaledHeight,
+    scaleOffsetY,
+    onViewportLayout: onBoxesViewportLayout,
+    onContentLayout: onBoxesContentLayout,
+    needsScrollFallback: boxesNeedScrollFallback,
+  } = useAutoScaleToFit({
+    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
+    ...(isCarouselLayout
+      ? {
+          stableContentHeight: getBoxCarouselNaturalHeight({
+            isSmallPhoneLayout,
+            bottomClearance: carouselBottomClearance,
+          }),
+        }
+      : {}),
+  });
 
   useEffect(() => {
     resetInteractionState();
@@ -1173,6 +1184,7 @@ export default function Flashcards() {
       showLoadingOverlay={showLoadingOverlay}
       skipCorrectionEnabled={skipCorrection}
       hideHints={shouldHideHintsForActiveBox}
+      reserveHintSpaceWhenHidden={shouldReserveHintSpaceWhenHidden}
       showExplanationEnabled={showExplanationEnabled}
       explanationOnlyOnWrong={explanationOnlyOnWrong}
     />

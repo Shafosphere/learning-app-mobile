@@ -588,7 +588,7 @@ describe("learning reminder notifications", () => {
 
   it("sets valid Android timeoutAfter values across seeded reminder combinations", async () => {
     const random = makeSeededRandom(20260623);
-    const kinds = [
+    const kinds: ReminderKind[] = [
       REVIEW_DUE_REMINDER_KIND,
       STUDY_REMINDER_KIND,
       STREAK_WARNING_REMINDER_KIND,

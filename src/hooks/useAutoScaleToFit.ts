@@ -3,6 +3,7 @@ import type { LayoutChangeEvent } from "react-native";
 
 type UseAutoScaleToFitParams = {
   minScale?: number;
+  stableContentHeight?: number;
 };
 
 type UseAutoScaleToFitResult = {
@@ -20,6 +21,7 @@ const LAYOUT_JITTER_TOLERANCE_PX = 1;
 
 export function useAutoScaleToFit({
   minScale = DEFAULT_MIN_SCALE,
+  stableContentHeight,
 }: UseAutoScaleToFitParams = {}): UseAutoScaleToFitResult {
   const [viewportHeight, setViewportHeight] = useState(0);
   const [contentHeight, setContentHeight] = useState(0);
@@ -32,9 +34,10 @@ export function useAutoScaleToFit({
         ? prev
         : nextHeight;
     });
-  }, []);
+  }, [stableContentHeight]);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
+    if (stableContentHeight != null) return;
     // Measure the content container in its natural (unscaled) layout.
     const nextHeight = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
     setContentHeight((prev) => {
@@ -43,26 +46,31 @@ export function useAutoScaleToFit({
         ? prev
         : nextHeight;
     });
-  }, []);
+  }, [stableContentHeight]);
+
+  const measuredContentHeight = contentHeight;
+  const effectiveContentHeight = stableContentHeight ?? measuredContentHeight;
 
   const ratio =
-    viewportHeight > 0 && contentHeight > 0 ? viewportHeight / contentHeight : 1;
+    viewportHeight > 0 && effectiveContentHeight > 0
+      ? viewportHeight / effectiveContentHeight
+      : 1;
   const scale = useMemo(
     () => Math.min(1, Math.max(minScale, ratio)),
     [minScale, ratio],
   );
   const scaledHeight = useMemo(() => {
-    if (contentHeight <= 0) return undefined;
-    return Math.ceil(contentHeight * scale);
-  }, [contentHeight, scale]);
+    if (effectiveContentHeight <= 0) return undefined;
+    return Math.ceil(effectiveContentHeight * scale);
+  }, [effectiveContentHeight, scale]);
   const scaleOffsetY = useMemo(() => {
-    if (contentHeight <= 0) return 0;
-    return (contentHeight - contentHeight * scale) / 2;
-  }, [contentHeight, scale]);
+    if (effectiveContentHeight <= 0) return 0;
+    return (effectiveContentHeight - effectiveContentHeight * scale) / 2;
+  }, [effectiveContentHeight, scale]);
 
   const needsScrollFallback =
     viewportHeight > 0 &&
-    contentHeight > 0 &&
+    effectiveContentHeight > 0 &&
     ratio + EPSILON < minScale;
 
   return {

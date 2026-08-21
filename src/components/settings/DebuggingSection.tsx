@@ -1,14 +1,7 @@
 import MyButton from "@/src/components/button/button";
-import dingWav from "@/assets/audio/ui/ding.wav";
-import dongWav from "@/assets/audio/ui/dong.wav";
-import drop002Ogg from "@/assets/audio/ui/drop_002.ogg";
-import drop003Ogg from "@/assets/audio/ui/drop_003.ogg";
 import errorWav from "@/assets/audio/ui/error.wav";
-import error005Ogg from "@/assets/audio/ui/error_005.ogg";
-import pluck001Ogg from "@/assets/audio/ui/pluck_001.ogg";
-import pluck002Ogg from "@/assets/audio/ui/pluck_002.ogg";
 import popWav from "@/assets/audio/ui/pop.wav";
-import pupWav from "@/assets/audio/ui/pup.wav";
+import plumWav from "@/assets/audio/ui/plum.wav";
 import LogoMessage from "@/src/components/logoMessage/LogoMessage";
 import { useDueReviews } from "@/src/contexts/DueReviewsContext";
 import { usePopup } from "@/src/contexts/PopupContext";
@@ -49,54 +42,19 @@ import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 
 const DEBUG_AUDIO_SAMPLES = [
   {
-    key: "debug-audio-drop-002",
-    label: "drop_002.ogg",
-    asset: drop002Ogg,
-  },
-  {
-    key: "debug-audio-drop-003",
-    label: "drop_003.ogg",
-    asset: drop003Ogg,
-  },
-  {
-    key: "debug-audio-error-005",
-    label: "error_005.ogg",
-    asset: error005Ogg,
-  },
-  {
-    key: "debug-audio-pluck-001",
-    label: "pluck_001.ogg",
-    asset: pluck001Ogg,
-  },
-  {
-    key: "debug-audio-pluck-002",
-    label: "pluck_002.ogg",
-    asset: pluck002Ogg,
-  },
-  {
     key: "debug-audio-pop-wav",
     label: "pop.wav",
     asset: popWav,
   },
   {
-    key: "debug-audio-pup-wav",
-    label: "pup.wav",
-    asset: pupWav,
+    key: "debug-audio-plum-wav",
+    label: "plum.wav",
+    asset: plumWav,
   },
   {
     key: "debug-audio-error-wav",
     label: "error.wav",
     asset: errorWav,
-  },
-  {
-    key: "debug-audio-ding-wav",
-    label: "ding.wav",
-    asset: dingWav,
-  },
-  {
-    key: "debug-audio-dong-wav",
-    label: "dong.wav",
-    asset: dongWav,
   },
 ] as const;
 

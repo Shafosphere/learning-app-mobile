@@ -6,6 +6,7 @@ type SoundInstance = ReturnType<typeof createAudioPlayer>;
 type LoadedSounds = Partial<Record<string, SoundInstance>>;
 
 const loadedSounds: LoadedSounds = {};
+const playbackLocks = new Map<string, Promise<void>>();
 let audioModeConfigured = false;
 let feedbackVolume = 1;
 
@@ -59,27 +60,54 @@ const loadSoundByKey = async (
 const loadSound = async (soundId: SoundId): Promise<SoundInstance | null> =>
   loadSoundByKey(soundId, SOUNDS[soundId]);
 
+const playLoadedSound = async (
+  cacheKey: string,
+  load: () => Promise<SoundInstance | null>,
+  logContext: Record<string, string>,
+) => {
+  const previousPlayback = playbackLocks.get(cacheKey) ?? Promise.resolve();
+  const currentPlayback = previousPlayback
+    .catch(() => {})
+    .then(async () => {
+      if (isFeedbackMuted()) {
+        return;
+      }
+
+      await configureAudioMode();
+      const sound = await load();
+      if (!sound) {
+        return;
+      }
+      sound.volume = feedbackVolume;
+
+      // Stop an earlier playback before seeking. Without this, rapid taps can
+      // race seekTo(0) and play() on the same native player instance.
+      if (sound.playing) {
+        sound.pause();
+      }
+      await sound.seekTo(0);
+      sound.play();
+    })
+    .catch((error) => {
+      console.warn("[soundPlayer] Failed to play sound", {
+        ...logContext,
+        error,
+      });
+    });
+
+  playbackLocks.set(cacheKey, currentPlayback);
+  await currentPlayback;
+  if (playbackLocks.get(cacheKey) === currentPlayback) {
+    playbackLocks.delete(cacheKey);
+  }
+};
+
 const playSound = async (soundId: SoundId) => {
   if (isFeedbackMuted()) {
     return;
   }
 
-  await configureAudioMode();
-  const sound = await loadSound(soundId);
-  if (!sound) {
-    return;
-  }
-  sound.volume = feedbackVolume;
-
-  try {
-    await sound.seekTo(0);
-    sound.play();
-  } catch (error) {
-    console.warn("[soundPlayer] Failed to play sound", {
-      soundId,
-      error,
-    });
-  }
+  await playLoadedSound(soundId, () => loadSound(soundId), { soundId });
 };
 
 export const playSoundAsset = async (cacheKey: string, source: SoundAsset) => {
@@ -87,26 +115,13 @@ export const playSoundAsset = async (cacheKey: string, source: SoundAsset) => {
     return;
   }
 
-  await configureAudioMode();
-  const sound = await loadSoundByKey(cacheKey, source);
-  if (!sound) {
-    return;
-  }
-  sound.volume = feedbackVolume;
-
-  try {
-    await sound.seekTo(0);
-    sound.play();
-  } catch (error) {
-    console.warn("[soundPlayer] Failed to play sound asset", {
-      cacheKey,
-      error,
-    });
-  }
+  await playLoadedSound(cacheKey, () => loadSoundByKey(cacheKey, source), {
+    cacheKey,
+  });
 };
 
 export const playFeedbackSound = (isCorrect: boolean) => {
-  void playSound(isCorrect ? "pop" : "pup");
+  void playSound(isCorrect ? "pop" : "plum");
 };
 
 export const setFeedbackVolume = (value: number) => {

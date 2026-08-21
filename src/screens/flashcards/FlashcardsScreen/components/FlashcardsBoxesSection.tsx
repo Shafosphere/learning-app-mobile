@@ -4,13 +4,18 @@ import type { BoxFacesByBox } from "@/src/components/Box/Skin/boxFaces";
 import type { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { TFunction } from "i18next";
+import { useEffect } from "react";
 import type { ComponentProps } from "react";
 import {
   ScrollView,
   View,
   type LayoutChangeEvent,
 } from "react-native";
-import Reanimated from "react-native-reanimated";
+import Reanimated, {
+  useAnimatedStyle,
+  useSharedValue,
+  withTiming,
+} from "react-native-reanimated";
 import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
 
 type FlashcardsBoxesSectionProps = {
@@ -72,6 +77,36 @@ export function FlashcardsBoxesSection({
   onBoxesContentLayout,
   t,
 }: FlashcardsBoxesSectionProps) {
+  const animatedBoxesScale = useSharedValue(boxesScale);
+  const animatedBoxesScaleOffsetY = useSharedValue(boxesScaleOffsetY);
+
+  useEffect(() => {
+    animatedBoxesScale.value = withTiming(boxesScale, { duration: 420 });
+    animatedBoxesScaleOffsetY.value = withTiming(boxesScaleOffsetY, {
+      duration: 420,
+    });
+  }, [
+    animatedBoxesScale,
+    animatedBoxesScaleOffsetY,
+    boxesScale,
+    boxesScaleOffsetY,
+  ]);
+
+  const animatedScaleStyle = useAnimatedStyle(() => ({
+    transform: [
+      { translateY: -animatedBoxesScaleOffsetY.value },
+      { scale: animatedBoxesScale.value },
+    ],
+  }));
+
+  const handleViewportLayout = (event: LayoutChangeEvent) => {
+    onBoxesViewportLayout(event);
+  };
+
+  const handleContentLayout = (event: LayoutChangeEvent) => {
+    onBoxesContentLayout(event);
+  };
+
   const boxesContent =
     effectiveBoxesLayout === "classic" ? (
       <Boxes
@@ -114,18 +149,13 @@ export function FlashcardsBoxesSection({
         shape="rect"
         radius={28}
       >
-        <View
+        <Reanimated.View
           collapsable={false}
-          style={{
-            transform: [
-              { translateY: -boxesScaleOffsetY },
-              { scale: boxesScale },
-            ],
-          }}
-          onLayout={onBoxesContentLayout}
+          style={animatedScaleStyle}
+          onLayout={handleContentLayout}
         >
           {boxesContent}
-        </View>
+        </Reanimated.View>
       </CoachmarkAnchor>
     </View>
   );
@@ -151,7 +181,7 @@ export function FlashcardsBoxesSection({
               styles.tabletCompactBoxesScrollViewport,
           ]}
           contentContainerStyle={styles.boxesViewportScrollContent}
-          onLayout={onBoxesViewportLayout}
+          onLayout={handleViewportLayout}
           showsVerticalScrollIndicator={false}
         >
           {scaledContent}
@@ -162,7 +192,7 @@ export function FlashcardsBoxesSection({
             styles.boxesViewport,
             isTabletCompactBoxesLayout && styles.tabletCompactBoxesViewport,
           ]}
-          onLayout={onBoxesViewportLayout}
+          onLayout={handleViewportLayout}
         >
           {scaledContent}
         </View>

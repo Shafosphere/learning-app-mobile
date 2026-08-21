@@ -40,6 +40,7 @@ type FlashcardsCardSectionProps = {
   | "isBetweenCards"
   | "skipCorrectionEnabled"
   | "hideHints"
+  | "reserveHintSpaceWhenHidden"
   | "showExplanationEnabled"
   | "explanationOnlyOnWrong"
 > & {
@@ -87,6 +88,7 @@ export function FlashcardsCardSection({
   showLoadingOverlay,
   skipCorrectionEnabled,
   hideHints,
+  reserveHintSpaceWhenHidden,
   showExplanationEnabled,
   explanationOnlyOnWrong,
 }: FlashcardsCardSectionProps) {
@@ -147,6 +149,7 @@ export function FlashcardsCardSection({
         }
         skipCorrectionEnabled={skipCorrectionEnabled}
         hideHints={hideHints}
+        reserveHintSpaceWhenHidden={reserveHintSpaceWhenHidden}
         showExplanationEnabled={showExplanationEnabled}
         explanationOnlyOnWrong={explanationOnlyOnWrong}
         onEdit={selectedItem ? () => onEditCard(selectedItem.id) : undefined}

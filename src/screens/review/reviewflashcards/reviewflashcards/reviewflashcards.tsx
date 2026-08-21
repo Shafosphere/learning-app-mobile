@@ -16,6 +16,7 @@ import {
 } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
+import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -494,16 +495,6 @@ export default function ReviewFlashcardsPlaceholder() {
       : 0.54
     : 0.72;
   const {
-    scale: boxesScale,
-    scaledHeight: boxesScaledHeight,
-    scaleOffsetY,
-    onViewportLayout: onBoxesViewportLayout,
-    onContentLayout: onBoxesContentLayout,
-    needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({
-    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
-  });
-  const {
     bottomButtonsAnchorRef,
     setBottomButtonsHeight,
     measureBottomButtons,
@@ -532,6 +523,24 @@ export default function ReviewFlashcardsPlaceholder() {
     isCarouselLayout && !areButtonsOnTop
       ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
       : 0;
+  const {
+    scale: boxesScale,
+    scaledHeight: boxesScaledHeight,
+    scaleOffsetY,
+    onViewportLayout: onBoxesViewportLayout,
+    onContentLayout: onBoxesContentLayout,
+    needsScrollFallback: boxesNeedScrollFallback,
+  } = useAutoScaleToFit({
+    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
+    ...(isCarouselLayout
+      ? {
+          stableContentHeight: getBoxCarouselNaturalHeight({
+            isSmallPhoneLayout,
+            bottomClearance: carouselBottomClearance,
+          }),
+        }
+      : {}),
+  });
 
   const mistakeNudgeFrontText = mistakeNudge
     ? mistakeNudge.card.text.trim() ||

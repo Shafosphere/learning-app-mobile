@@ -1175,7 +1175,7 @@ export async function createBackupZip(
     fileUri,
     bytesWritten: info.exists ? info.size : Math.floor((zipBase64.length * 3) / 4),
     manifest,
-    payload,
+    payload: archivePayload,
   };
 }
 

@@ -10,7 +10,7 @@ jest.mock("expo-audio", () => ({
 jest.mock("@/src/constants/sounds", () => ({
   SOUNDS: {
     pop: 1,
-    pup: 2,
+    plum: 2,
   },
 }));
 

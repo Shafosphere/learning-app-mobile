@@ -828,6 +828,32 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestBoxListProps?.horizontalScroll).toBeUndefined();
     expect(latestBoxCarouselProps).toBeNull();
     expect(latestCardProps?.hideHints).toBe(true);
+    expect(latestCardProps?.reserveHintSpaceWhenHidden).toBe(false);
+  });
+
+  it("hides hints but reserves their space in late boxes", async () => {
+    const card = makeCard({
+      id: 54,
+      text: "late",
+      translations: ["późne"],
+    });
+
+    const { rerenderWithState } = renderScreenWithState(
+      createInteractionState(card, { activeBox: "boxFour" }),
+      [card],
+    );
+
+    await flushScreenState();
+
+    expect(latestCardProps?.hideHints).toBe(true);
+    expect(latestCardProps?.reserveHintSpaceWhenHidden).toBe(true);
+
+    await rerenderWithState(
+      createInteractionState(card, { activeBox: "boxFive" }),
+    );
+
+    expect(latestCardProps?.hideHints).toBe(true);
+    expect(latestCardProps?.reserveHintSpaceWhenHidden).toBe(true);
   });
 
   it("keeps carousel boxes on small-phone layouts when carousel is selected", async () => {
@@ -860,7 +886,10 @@ describe("FlashcardsScreen UI state regressions", () => {
 
     expect(latestBoxListProps).toBeNull();
     expect(latestBoxCarouselProps).not.toBeNull();
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.3 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({
+      minScale: 0.3,
+      stableContentHeight: 209,
+    });
     expect(latestCardProps?.hideHints).toBe(true);
   });
 

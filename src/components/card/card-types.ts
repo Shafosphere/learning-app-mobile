@@ -57,6 +57,7 @@ export type CardProps = {
   /** Constrains the card to an embedded container, such as a modal preview. */
   widthOverride?: number;
   hideHints?: boolean;
+  reserveHintSpaceWhenHidden?: boolean;
   isBetweenCards?: boolean;
   disableLayoutAnimation?: boolean;
   focusRequestToken?: number;

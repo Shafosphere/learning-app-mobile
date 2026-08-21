@@ -326,7 +326,7 @@ describe("CourseActivateScreen loading state", () => {
   it("blocks course activation during onboarding before the activation step is visible", async () => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     const advanceByEvent = jest.fn(() => Promise.resolve(true));
-    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
       setActiveCustomCourseId,
@@ -374,7 +374,7 @@ describe("CourseActivateScreen loading state", () => {
   it("allows course activation on the onboarding activation step", async () => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     const advanceByEvent = jest.fn(() => Promise.resolve(true));
-    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
       setActiveCustomCourseId,
@@ -429,7 +429,7 @@ describe("CourseActivateScreen loading state", () => {
   });
 
   it("shows enabled onboarding next after restart with an active custom course", async () => {
-    getOnboardingCheckpoint.mockResolvedValue("activate_required");
+    mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 11,
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),

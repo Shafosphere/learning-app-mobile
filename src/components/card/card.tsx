@@ -170,6 +170,7 @@ export default function Card({
   textColorOverride,
   widthOverride,
   hideHints = false,
+  reserveHintSpaceWhenHidden = false,
   isBetweenCards = false,
   disableLayoutAnimation = false,
   focusRequestToken = 0,
@@ -1406,7 +1407,14 @@ export default function Card({
         onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
         onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
       />
-      {hideHints ? null : isBetweenCards ? (
+      {hideHints ? (
+        reserveHintSpaceWhenHidden ? (
+          <View
+            testID="card-hint-placeholder"
+            style={[styles.hintContainer, { width: cardMetrics.width }]}
+          />
+        ) : null
+      ) : isBetweenCards ? (
         <View style={[styles.hintContainer, { width: cardMetrics.width }]} />
       ) : (
         <CardHint

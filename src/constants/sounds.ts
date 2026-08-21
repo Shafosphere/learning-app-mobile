@@ -1,11 +1,11 @@
 import popWav from "@/assets/audio/ui/pop.wav";
-import pupWav from "@/assets/audio/ui/pup.wav";
-import error005 from "@/assets/audio/ui/error_005.ogg";
+import plumWav from "@/assets/audio/ui/plum.wav";
+import errorWav from "@/assets/audio/ui/error.wav";
 
 export const SOUNDS = {
   pop: popWav,
-  pup: pupWav,
-  error: error005,
+  plum: plumWav,
+  error: errorWav,
 } as const;
 
 export type SoundId = keyof typeof SOUNDS;
