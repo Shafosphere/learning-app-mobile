@@ -71,6 +71,45 @@ export async function getCustomReviewedFlashcardIds(
   return rows.map((row) => row.flashcardId);
 }
 
+export async function seedCompletedCustomReviewsForCourseWithDb(
+  db: SQLite.SQLiteDatabase,
+  courseId: number,
+  nowMs: number = Date.now(),
+): Promise<number> {
+  if (!courseId) return 0;
+
+  const result = await db.runAsync(
+    `INSERT OR IGNORE INTO custom_reviews
+       (course_id, flashcard_id, learned_at, next_review, stage)
+     SELECT ?, cf.id, ?, ?, 0
+     FROM custom_flashcards cf
+     WHERE cf.course_id = ?
+       AND EXISTS (
+         SELECT 1
+         FROM custom_learning_events cle
+         WHERE cle.course_id = ?
+           AND cle.flashcard_id = cf.id
+           AND cle.result = 'ok'
+           AND cle.box = 'boxFive'
+       );`,
+    courseId,
+    nowMs,
+    nowMs,
+    courseId,
+    courseId,
+  );
+
+  return Number(result?.changes ?? 0);
+}
+
+export async function seedCompletedCustomReviewsForCourse(
+  courseId: number,
+  nowMs: number = Date.now(),
+): Promise<number> {
+  const db = await getDB();
+  return seedCompletedCustomReviewsForCourseWithDb(db, courseId, nowMs);
+}
+
 export async function scheduleCustomReview(
   flashcardId: number,
   courseId: number,

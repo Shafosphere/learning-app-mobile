@@ -13,6 +13,7 @@ jest.mock("@/src/db/sqlite/repositories/flashcards", () => ({
 
 jest.mock("@/src/db/sqlite/repositories/reviews", () => ({
   clearCustomReviewsForCourseWithDb: jest.fn(() => Promise.resolve()),
+  seedCompletedCustomReviewsForCourseWithDb: jest.fn(() => Promise.resolve(2)),
 }));
 
 jest.mock("@/src/db/sqlite/repositories/analytics", () => ({
@@ -27,10 +28,14 @@ import {
   getCustomCourseMasteryProgress,
   getCompletedCustomCoursesWithCardCounts,
   saveCustomCourseEdits,
+  updateCustomCourse,
 } from "@/src/db/sqlite/repositories/courses";
 import { clearCustomLearningEventsForCourseWithDb } from "@/src/db/sqlite/repositories/analytics";
 import { replaceCustomFlashcardsWithoutTransactionWithDb } from "@/src/db/sqlite/repositories/flashcards";
-import { clearCustomReviewsForCourseWithDb } from "@/src/db/sqlite/repositories/reviews";
+import {
+  clearCustomReviewsForCourseWithDb,
+  seedCompletedCustomReviewsForCourseWithDb,
+} from "@/src/db/sqlite/repositories/reviews";
 
 describe("courses repository", () => {
   afterEach(() => {
@@ -116,6 +121,25 @@ describe("courses repository", () => {
     expect(execAsync).toHaveBeenNthCalledWith(2, "ROLLBACK;");
     expect(clearCustomReviewsForCourseWithDb).not.toHaveBeenCalled();
     expect(clearCustomLearningEventsForCourseWithDb).not.toHaveBeenCalled();
+  });
+
+  it("seeds completed reviews when enabling them for the first time", async () => {
+    const getFirstAsync = jest.fn().mockResolvedValue({ reviewsEnabled: 0 });
+    const runAsync = jest.fn().mockResolvedValue(undefined);
+    const db = { getFirstAsync, runAsync };
+    mockGetDB.mockResolvedValue(db);
+
+    await updateCustomCourse(77, {
+      name: "Course",
+      iconId: "heart",
+      iconColor: "#fff",
+      reviewsEnabled: true,
+    });
+
+    expect(seedCompletedCustomReviewsForCourseWithDb).toHaveBeenCalledWith(
+      db,
+      77,
+    );
   });
 
   it("returns courses where every card has terminal success", async () => {

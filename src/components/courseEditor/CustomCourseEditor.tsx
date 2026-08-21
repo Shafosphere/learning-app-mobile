@@ -28,6 +28,7 @@ import {
   getCustomFlashcards,
   resetCustomReviewsForCourse,
   saveCustomCourseEdits,
+  updateCustomCourse,
 } from "@/src/db/sqlite/db";
 import type { CustomFlashcardInput } from "@/src/db/sqlite/repositories/flashcards";
 import type {
@@ -205,6 +206,7 @@ export default function CustomCourseEditor({
       getCustomCourseTrueFalseButtonsVariant(courseId)
     );
   const [activeTab, setActiveTab] = useState<CustomCourseEditTab>("options");
+  const [contentDirty, setContentDirty] = useState(false);
   const [loading, setLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
@@ -690,13 +692,19 @@ export default function CustomCourseEditor({
 
     setIsSaving(true);
     try {
-      await saveCustomCourseEdits(courseId, {
+      const courseInput = {
         name: cleanName,
         iconId: iconId ?? "heart",
         iconColor,
         colorId: colorId ?? undefined,
         reviewsEnabled,
-      }, trimmedCards);
+      };
+
+      if (contentDirty) {
+        await saveCustomCourseEdits(courseId, courseInput, trimmedCards);
+      } else {
+        await updateCustomCourse(courseId, courseInput);
+      }
       await clearCourseCompletionRun(courseId).catch((error) => {
         console.warn("Failed to clear course completion run", error);
       });
@@ -898,15 +906,42 @@ export default function CustomCourseEditor({
                     manualCards={manualCards}
                     cardType={newCardType}
                     styles={{} as ManualCardsEditorStyles}
-                    onCardFrontChange={handleManualCardFrontChange}
-                    onCardAnswerChange={handleManualCardAnswerChange}
-                    onAddAnswer={handleAddAnswer}
-                    onRemoveAnswer={handleRemoveAnswer}
-                    onAddCard={() => handleAddCard(newCardType)}
-                    onRemoveCard={handleRemoveCard}
-                    onToggleFlipped={handleToggleFlipped}
-                    onCardImageChange={handleManualCardImageChange}
-                    onCardExplanationChange={handleManualCardExplanationChange}
+                    onCardFrontChange={(id, value) => {
+                      setContentDirty(true);
+                      handleManualCardFrontChange(id, value);
+                    }}
+                    onCardAnswerChange={(id, answerIndex, value) => {
+                      setContentDirty(true);
+                      handleManualCardAnswerChange(id, answerIndex, value);
+                    }}
+                    onAddAnswer={(id) => {
+                      setContentDirty(true);
+                      handleAddAnswer(id);
+                    }}
+                    onRemoveAnswer={(id, answerIndex) => {
+                      setContentDirty(true);
+                      handleRemoveAnswer(id, answerIndex);
+                    }}
+                    onAddCard={() => {
+                      setContentDirty(true);
+                      handleAddCard(newCardType);
+                    }}
+                    onRemoveCard={(id) => {
+                      setContentDirty(true);
+                      handleRemoveCard(id);
+                    }}
+                    onToggleFlipped={(id) => {
+                      setContentDirty(true);
+                      handleToggleFlipped(id);
+                    }}
+                    onCardImageChange={(id, side, uri) => {
+                      setContentDirty(true);
+                      handleManualCardImageChange(id, side, uri);
+                    }}
+                    onCardExplanationChange={(id, value) => {
+                      setContentDirty(true);
+                      handleManualCardExplanationChange(id, value);
+                    }}
                     showDefaultBottomAddButton={false}
                   />
                 </View>
@@ -939,7 +974,10 @@ export default function CustomCourseEditor({
               accessibilityLabel={t("courseCreator.customEditor.addCardA11y")}
               style={styles.manualAddButton}
               hitSlop={8}
-              onPress={() => handleAddCard(newCardType)}
+              onPress={() => {
+                setContentDirty(true);
+                handleAddCard(newCardType);
+              }}
             >
               <Text style={styles.manualAddIcon}>+</Text>
             </Pressable>

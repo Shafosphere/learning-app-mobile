@@ -7,6 +7,7 @@ import { useCourseEditStyles } from "@/src/screens/courses/editcourse/CourseEdit
 import {
   getCustomCourseBySlug,
   resetCustomReviewsForCourse,
+  setCustomCourseReviewsEnabled,
 } from "@/src/db/sqlite/db";
 import type { CEFRLevel } from "@/src/types/language";
 import type {
@@ -17,7 +18,7 @@ import type {
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { Alert, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -228,18 +229,50 @@ function BuiltinCourseEditor({
   const [resettingReviews, setResettingReviews] = useState(false);
   const [resettingAll, setResettingAll] = useState(false);
 
-  const getMatchingCourse = () =>
-    courses.find((course) => {
-      const sameSource = normalizedSource
-        ? course.sourceLang?.toLowerCase() === normalizedSource
-        : true;
-      const sameTarget = normalizedTarget
-        ? course.targetLang?.toLowerCase() === normalizedTarget
-        : true;
-      const sameLevel =
-        normalizedLevel != null ? course.level === normalizedLevel : true;
-      return sameSource && sameTarget && sameLevel;
+  const getMatchingCourse = useCallback(
+    () =>
+      courses.find((course) => {
+        const sameSource = normalizedSource
+          ? course.sourceLang?.toLowerCase() === normalizedSource
+          : true;
+        const sameTarget = normalizedTarget
+          ? course.targetLang?.toLowerCase() === normalizedTarget
+          : true;
+        const sameLevel =
+          normalizedLevel != null ? course.level === normalizedLevel : true;
+        return sameSource && sameTarget && sameLevel;
+      }),
+    [courses, normalizedLevel, normalizedSource, normalizedTarget],
+  );
+
+  useEffect(() => {
+    const matchingCourse = getMatchingCourse();
+    const slug =
+      (matchingCourse as { slug?: string | null } | undefined)?.slug ??
+      OFFICIAL_PACKS.find((pack) => pack.name === courseName)?.slug ??
+      null;
+    if (!slug) return;
+
+    void getCustomCourseBySlug(slug).then((course) => {
+      if (course) setReviewsEnabled(course.reviewsEnabled);
     });
+  }, [courseName, getMatchingCourse]);
+
+  const handleReviewsToggle = (value: boolean) => {
+    setReviewsEnabled(value);
+    const matchingCourse = getMatchingCourse();
+    const slug =
+      (matchingCourse as { slug?: string | null } | undefined)?.slug ??
+      OFFICIAL_PACKS.find((pack) => pack.name === courseName)?.slug ??
+      null;
+    if (!slug) return;
+
+    void getCustomCourseBySlug(slug).then((course) => {
+      if (course) {
+        void setCustomCourseReviewsEnabled(course.id, value);
+      }
+    });
+  };
 
   const getBuiltinReviewResetScope = (): BuiltinReviewResetScope | null => {
     const matchingCourse = getMatchingCourse();
@@ -608,7 +641,7 @@ function BuiltinCourseEditor({
               autoflowEnabled,
               onToggleAutoflow: handleAutoflowToggle,
               reviewsEnabled,
-              onToggleReviews: setReviewsEnabled,
+              onToggleReviews: handleReviewsToggle,
               showExplanationEnabled,
               onToggleShowExplanation: handleShowExplanationToggle,
               explanationOnlyOnWrong,

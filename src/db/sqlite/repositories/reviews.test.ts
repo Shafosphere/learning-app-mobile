@@ -13,6 +13,7 @@ import {
   getUpcomingCustomReviewFlashcards,
   removeCustomReview,
   scheduleCustomReview,
+  seedCompletedCustomReviewsForCourse,
 } from "@/src/db/sqlite/repositories/reviews";
 
 describe("custom review repository", () => {
@@ -32,6 +33,24 @@ describe("custom review repository", () => {
 
     expect(result.stage).toBe(0);
     expect(runAsync).toHaveBeenCalled();
+  });
+
+  it("seeds completed cards as due reviews without duplicating them", async () => {
+    const runAsync = jest.fn().mockResolvedValue({ changes: 2 });
+    mockGetDB.mockResolvedValue({ runAsync });
+
+    const result = await seedCompletedCustomReviewsForCourse(77, 10_000);
+
+    expect(result).toBe(2);
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining("INSERT OR IGNORE INTO custom_reviews"),
+      77,
+      10_000,
+      10_000,
+      77,
+      77,
+    );
+    expect(runAsync.mock.calls[0][0]).toContain("cle.box = 'boxFive'");
   });
 
   it("removes only the selected card review entry", async () => {

@@ -7,7 +7,10 @@ import {
 } from "./analytics";
 import type { CustomFlashcardInput } from "./flashcards";
 import { replaceCustomFlashcardsWithoutTransactionWithDb } from "./flashcards";
-import { clearCustomReviewsForCourseWithDb } from "./reviews";
+import {
+  clearCustomReviewsForCourseWithDb,
+  seedCompletedCustomReviewsForCourseWithDb,
+} from "./reviews";
 
 export interface CustomCourseRecord {
   id: number;
@@ -351,7 +354,44 @@ export async function updateCustomCourse(
   course: CustomCourseInput
 ): Promise<void> {
   const db = await getDB();
+  const current = await db.getFirstAsync<{ reviewsEnabled: number }>(
+    `SELECT COALESCE(reviews_enabled, 0) AS reviewsEnabled
+     FROM custom_courses
+     WHERE id = ?
+     LIMIT 1;`,
+    id,
+  );
   await updateCustomCourseWithDb(db, id, course);
+  if (current?.reviewsEnabled !== 1 && course.reviewsEnabled === true) {
+    await seedCompletedCustomReviewsForCourseWithDb(db, id);
+  }
+}
+
+export async function setCustomCourseReviewsEnabled(
+  id: number,
+  enabled: boolean,
+): Promise<void> {
+  const db = await getDB();
+  const current = await db.getFirstAsync<{ reviewsEnabled: number }>(
+    `SELECT COALESCE(reviews_enabled, 0) AS reviewsEnabled
+     FROM custom_courses
+     WHERE id = ?
+     LIMIT 1;`,
+    id,
+  );
+
+  await db.runAsync(
+    `UPDATE custom_courses
+     SET reviews_enabled = ?, updated_at = ?
+     WHERE id = ?;`,
+    enabled ? 1 : 0,
+    Date.now(),
+    id,
+  );
+
+  if (current?.reviewsEnabled !== 1 && enabled) {
+    await seedCompletedCustomReviewsForCourseWithDb(db, id);
+  }
 }
 
 export async function saveCustomCourseEdits(
@@ -408,12 +448,11 @@ export async function ensureOfficialCourse(
     console.log("[DB] ensureOfficialCourse: update existing", existing.id);
     await db.runAsync(
       `UPDATE custom_courses
-       SET name = ?, icon_id = ?, icon_color = ?, reviews_enabled = ?, is_official = 1, updated_at = ?
+       SET name = ?, icon_id = ?, icon_color = ?, is_official = 1, updated_at = ?
        WHERE id = ?;`,
       name,
       iconId,
       iconColor,
-      reviewsEnabled ? 1 : 0,
       now,
       existing.id
     );
