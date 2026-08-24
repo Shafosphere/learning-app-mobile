@@ -4,6 +4,12 @@ export type DbInitializationEvent =
   | { type: "start" }
   | { type: "import-start" }
   | { type: "import-finish" }
+  | {
+      type: "progress";
+      completed: number;
+      total: number;
+      percent: number;
+    }
   | { type: "ready"; initialImport: boolean }
   | { type: "error"; error: unknown };
 

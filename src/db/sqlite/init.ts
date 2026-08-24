@@ -564,10 +564,30 @@ async function syncOfficialCourseFlashcards(
 }
 
 export async function seedOfficialPacksWithDb(
-  db: SQLite.SQLiteDatabase
+  db: SQLite.SQLiteDatabase,
+  options: { reportStartupProgress?: boolean } = {}
 ): Promise<void> {
   console.log("[DB] Syncing official packs metadata: start");
   let bundledDb: SQLite.SQLiteDatabase | null = null;
+  const totalCourses = OFFICIAL_PACKS.length;
+  let completedCourses = 0;
+  const reportStartupProgress = options.reportStartupProgress ?? true;
+
+  const notifyProgress = (completed: number, percent: number): void => {
+    if (!reportStartupProgress) {
+      return;
+    }
+
+    notifyDbInitializationListeners({
+      type: "progress",
+      completed,
+      total: totalCourses,
+      percent,
+    });
+  };
+
+  notifyProgress(0, 10);
+
   try {
     bundledDb = await openBundledSyncDatabase();
     for (const def of OFFICIAL_PACKS) {
@@ -613,30 +633,55 @@ export async function seedOfficialPacksWithDb(
         }
       } catch (error) {
         console.warn(`[DB] Failed to sync metadata for official pack ${def.slug}`, error);
+      } finally {
+        completedCourses += 1;
+        notifyProgress(
+          completedCourses,
+          10 + Math.round((completedCourses / totalCourses) * 80),
+        );
       }
     }
   } finally {
     await bundledDb?.closeAsync();
   }
   await hydrateBundledImagePaths(db);
+  notifyProgress(totalCourses, 95);
   console.log("[DB] Syncing official packs metadata: done");
 }
 
 export async function seedOfficialPacks(): Promise<void> {
   const db = await getDB();
-  await seedOfficialPacksWithDb(db);
+  await seedOfficialPacksWithDb(db, { reportStartupProgress: false });
 }
 
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
   try {
     notifyDbInitializationListeners({ type: "start" });
+    notifyDbInitializationListeners({
+      type: "progress",
+      completed: 0,
+      total: OFFICIAL_PACKS.length,
+      percent: 0,
+    });
     notifyDbInitializationListeners({ type: "import-start" });
     await ensurePrebuiltDatabaseImported();
+    notifyDbInitializationListeners({
+      type: "progress",
+      completed: 0,
+      total: OFFICIAL_PACKS.length,
+      percent: 5,
+    });
     notifyDbInitializationListeners({ type: "import-finish" });
 
     const db = await openDatabase();
     await applySchema(db);
     await configurePragmas(db);
+    notifyDbInitializationListeners({
+      type: "progress",
+      completed: 0,
+      total: OFFICIAL_PACKS.length,
+      percent: 10,
+    });
     console.log(
       `[DB] Active device database version: ${await getDatabaseUserVersion(db)}`
     );

@@ -109,6 +109,7 @@ export default function RootLayout() {
   const [startupTheme, setStartupTheme] = useState<Theme | null>(null);
   const [isStartupReady, setIsStartupReady] = useState(false);
   const [status, setStatus] = useState<RootStatus>("loading");
+  const [startupProgress, setStartupProgress] = useState(0);
   const [loadingMessageKey, setLoadingMessageKey] = useState(
     "app.loading.initializing"
   );
@@ -146,6 +147,7 @@ export default function RootLayout() {
     async (options?: { retry?: boolean; clearDebugOverride?: boolean }) => {
       const { retry = false, clearDebugOverride = false } = options ?? {};
       setStatus("loading");
+      setStartupProgress(0);
       setErrorMessage(null);
       setIsDebugErrorOverride(false);
 
@@ -273,7 +275,11 @@ export default function RootLayout() {
         case "import-finish":
           setLoadingMessageKey("app.loading.finishingSetup");
           break;
+        case "progress":
+          setStartupProgress(Math.max(0, Math.min(100, event.percent)));
+          break;
         case "ready":
+          setStartupProgress(100);
           setLoadingMessageKey("app.loading.launching");
           break;
         case "error":
@@ -354,7 +360,10 @@ export default function RootLayout() {
 
   const shouldRenderApp = isStartupReady && status === "ready";
   const shouldRenderBlockingState =
-    status === "error" || status === "importing" || status === "resetting";
+    status === "loading" ||
+    status === "error" ||
+    status === "importing" ||
+    status === "resetting";
 
   const handleNotificationResponse = useCallback(
     (
@@ -602,6 +611,13 @@ export default function RootLayout() {
               ? t("app.error.actions.resetting")
               : t(loadingMessageKey)}
         </Text>
+        {status === "loading" ? (
+          <Text
+            style={[styles.loadingProgress, { color: startupUi.primaryTextColor }]}
+          >
+            {startupProgress}%
+          </Text>
+        ) : null}
       </View>
     );
   };
@@ -627,6 +643,13 @@ export default function RootLayout() {
           <Text style={[styles.loadingText, { color: startupUi.primaryTextColor }]}>
             {t(previewLoadingMessageKey)}
           </Text>
+          {status === "loading" ? (
+            <Text
+              style={[styles.loadingProgress, { color: startupUi.primaryTextColor }]}
+            >
+              {startupProgress}%
+            </Text>
+          ) : null}
         </View>
       </View>
     );
@@ -779,6 +802,14 @@ const styles = StyleSheet.create({
     fontWeight: "600",
     textAlign: "center",
     maxWidth: 260,
+  },
+  loadingProgress: {
+    position: "absolute",
+    right: 24,
+    bottom: 28,
+    fontSize: 16,
+    lineHeight: 22,
+    fontWeight: "600",
   },
   errorTitle: {
     fontSize: 24,
