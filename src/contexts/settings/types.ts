@@ -188,6 +188,8 @@ export interface SettingsContextValue {
   setFlashcardsBatchSize: (n: number) => Promise<void>;
   flashcardsSuggestionsEnabled: boolean;
   toggleFlashcardsSuggestions: () => Promise<void>;
+  autoSubmitCorrectAnswer: boolean;
+  toggleAutoSubmitCorrectAnswer: () => Promise<void>;
   quotesEnabled: boolean;
   toggleQuotesEnabled: () => Promise<void>;
   flashcardsCardSize: FlashcardsCardSize;

@@ -24,6 +24,8 @@ const LearningSection: React.FC = () => {
     toggleIgnoreDiacriticsInSpellcheck,
     flashcardsSuggestionsEnabled,
     toggleFlashcardsSuggestions,
+    autoSubmitCorrectAnswer,
+    toggleAutoSubmitCorrectAnswer,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
     learningReminderAutomaticEnabled,
@@ -97,6 +99,13 @@ const LearningSection: React.FC = () => {
   const handleSuggestionsToggle = async (value: boolean) => {
     if (value !== flashcardsSuggestionsEnabled) {
       await toggleFlashcardsSuggestions();
+      await triggerHaptics();
+    }
+  };
+
+  const handleAutoSubmitToggle = async (value: boolean) => {
+    if (value !== autoSubmitCorrectAnswer) {
+      await toggleAutoSubmitCorrectAnswer();
       await triggerHaptics();
     }
   };
@@ -270,6 +279,28 @@ const LearningSection: React.FC = () => {
                 value={spellChecking}
                 onPress={() => void handleSpellCheckToggle(!spellChecking)}
                 accessibilityLabel={t("settings.learning.spellcheck.title")}
+              />
+            </View>
+          </View>
+
+          <View style={styles.appearanceGroupDivider} />
+
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.learning.autoSubmitCorrectAnswer.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(
+                  t("settings.learning.autoSubmitCorrectAnswer.subtitle")
+                )}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={autoSubmitCorrectAnswer}
+                onPress={() => void handleAutoSubmitToggle(!autoSubmitCorrectAnswer)}
+                accessibilityLabel={t("settings.learning.autoSubmitCorrectAnswer.title")}
               />
             </View>
           </View>

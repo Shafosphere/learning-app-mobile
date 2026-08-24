@@ -99,6 +99,7 @@ export default function Flashcards() {
     explanationOnlyOnWrong,
     showExplanationEnabled,
     skipCorrectionEnabled,
+    autoSubmitCorrectAnswer,
     actionButtonsPosition,
     setActionButtonsPosition,
     dominantHand,
@@ -1183,6 +1184,7 @@ export default function Flashcards() {
       shouldKeepLoadingOverlayVisible={shouldKeepLoadingOverlayVisible}
       showLoadingOverlay={showLoadingOverlay}
       skipCorrectionEnabled={skipCorrection}
+      autoSubmitCorrectAnswer={autoSubmitCorrectAnswer}
       hideHints={shouldHideHintsForActiveBox}
       reserveHintSpaceWhenHidden={shouldReserveHintSpaceWhenHidden}
       showExplanationEnabled={showExplanationEnabled}

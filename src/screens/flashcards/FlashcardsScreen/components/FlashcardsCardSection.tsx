@@ -39,6 +39,7 @@ type FlashcardsCardSectionProps = {
   | "focusRequestToken"
   | "isBetweenCards"
   | "skipCorrectionEnabled"
+  | "autoSubmitCorrectAnswer"
   | "hideHints"
   | "reserveHintSpaceWhenHidden"
   | "showExplanationEnabled"
@@ -87,6 +88,7 @@ export function FlashcardsCardSection({
   shouldKeepLoadingOverlayVisible,
   showLoadingOverlay,
   skipCorrectionEnabled,
+  autoSubmitCorrectAnswer,
   hideHints,
   reserveHintSpaceWhenHidden,
   showExplanationEnabled,
@@ -148,6 +150,7 @@ export function FlashcardsCardSection({
           shouldKeepLoadingOverlayVisible || showLoadingOverlay
         }
         skipCorrectionEnabled={skipCorrectionEnabled}
+        autoSubmitCorrectAnswer={autoSubmitCorrectAnswer}
         hideHints={hideHints}
         reserveHintSpaceWhenHidden={reserveHintSpaceWhenHidden}
         showExplanationEnabled={showExplanationEnabled}

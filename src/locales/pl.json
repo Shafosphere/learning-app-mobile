@@ -218,6 +218,10 @@
         "title": "Sugestie klawiatury",
         "subtitle": "Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach. Uwaga: część klawiatur (np. Samsung, Gboard) może nadal pokazywać pasek podpowiedzi."
       },
+      "autoSubmitCorrectAnswer": {
+        "title": "Automatycznie zatwierdzaj poprawne odpowiedzi",
+        "subtitle": "Po wpisaniu poprawnej odpowiedzi zatwierdź ją automatycznie po krótkiej chwili."
+      },
       "ignoreDiacritics": {
         "title": "Ignoruj znaki diakrytyczne",
         "subtitle": "Porównuj słowa bez ogonków, np. ą -> a."

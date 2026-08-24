@@ -342,13 +342,13 @@ export function useFlashcardActionBarState({
         isImmediateActionLockActive ||
         externalActionLocked
       ) {
-        return;
+        return false;
       }
       // Do not consume the first empty submit while the interaction guard is
       // still blocking confirmations after a card transition. Otherwise the
       // next tap can be rejected by onConfirm and a third tap is required.
-      if (!canConfirm()) return;
-      if (!canSubmitAnswer(answerOverride)) return;
+      if (!canConfirm()) return false;
+      if (!canSubmitAnswer(answerOverride)) return false;
       if (__DEV__ && ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS) {
         console.log("[Flashcards][Confirm] calling onConfirm", {
           cardId: selectedItemId,
@@ -356,6 +356,7 @@ export function useFlashcardActionBarState({
         });
       }
       onConfirm(selectedTranslation, answerOverride);
+      return true;
     },
     [
       externalActionLocked,

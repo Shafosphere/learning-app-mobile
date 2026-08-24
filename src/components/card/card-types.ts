@@ -42,7 +42,10 @@ export type CardProps = {
   wrongInputChange: (which: 1 | 2, value: string) => void;
   introMode?: boolean;
   setCorrectionRewers?: (value: string) => void;
-  confirm: (selectedTranslation?: string, answerOverride?: string) => void;
+  confirm: (
+    selectedTranslation?: string,
+    answerOverride?: string,
+  ) => void | boolean;
   onHintUpdate?: (
     cardId: number,
     hintFront: string | null,
@@ -62,6 +65,7 @@ export type CardProps = {
   disableLayoutAnimation?: boolean;
   focusRequestToken?: number;
   skipCorrectionEnabled?: boolean;
+  autoSubmitCorrectAnswer?: boolean;
   showExplanationEnabled?: boolean;
   explanationOnlyOnWrong?: boolean;
   isExplanationVisible?: boolean;

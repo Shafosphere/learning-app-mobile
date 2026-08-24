@@ -135,6 +135,8 @@ export const defaultValue: SettingsContextValue = {
   setFlashcardsBatchSize: async () => {},
   flashcardsSuggestionsEnabled: true,
   toggleFlashcardsSuggestions: async () => {},
+  autoSubmitCorrectAnswer: false,
+  toggleAutoSubmitCorrectAnswer: async () => {},
   quotesEnabled: true,
   toggleQuotesEnabled: async () => {},
   flashcardsCardSize: "large",

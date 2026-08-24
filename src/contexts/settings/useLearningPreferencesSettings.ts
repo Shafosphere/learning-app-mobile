@@ -39,6 +39,8 @@ export function useLearningPreferencesSettings() {
     );
   const [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled] =
     usePersistedState<boolean>("flashcards.inputSuggestionsEnabled", true);
+  const [autoSubmitCorrectAnswer, setAutoSubmitCorrectAnswer] =
+    usePersistedState<boolean>("flashcards.autoSubmitCorrectAnswer", false);
   const [quotesEnabled, setQuotesEnabled] = usePersistedState<boolean>(
     "quotes.enabled",
     true
@@ -96,6 +98,10 @@ export function useLearningPreferencesSettings() {
     await setFlashcardsSuggestionsEnabled(!flashcardsSuggestionsEnabled);
   }, [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled]);
 
+  const toggleAutoSubmitCorrectAnswer = useCallback(async () => {
+    await setAutoSubmitCorrectAnswer(!autoSubmitCorrectAnswer);
+  }, [autoSubmitCorrectAnswer, setAutoSubmitCorrectAnswer]);
+
   const toggleQuotesEnabled = useCallback(async () => {
     await setQuotesEnabled(!quotesEnabled);
   }, [quotesEnabled, setQuotesEnabled]);
@@ -116,12 +122,14 @@ export function useLearningPreferencesSettings() {
       setActionButtonsPositionState("bottom"),
       setFlashcardsBatchSize(defaultValue.flashcardsBatchSize),
       setFlashcardsSuggestionsEnabled(false),
+      setAutoSubmitCorrectAnswer(false),
     ]);
   }, [
     setActionButtonsPositionState,
     setBoxesLayoutState,
     setFlashcardsBatchSize,
     setFlashcardsSuggestionsEnabled,
+    setAutoSubmitCorrectAnswer,
     setIgnoreDiacriticsInSpellcheck,
     setShowBoxFaces,
     setSpellChecking,
@@ -144,6 +152,8 @@ export function useLearningPreferencesSettings() {
     setFlashcardsBatchSize,
     flashcardsSuggestionsEnabled,
     toggleFlashcardsSuggestions,
+    autoSubmitCorrectAnswer,
+    toggleAutoSubmitCorrectAnswer,
     quotesEnabled,
     toggleQuotesEnabled,
     dailyGoal,

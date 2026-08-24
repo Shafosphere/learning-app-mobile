@@ -832,6 +832,118 @@ describe("Card logic props", () => {
     );
   });
 
+  it("automatically confirms a correct main answer after 200 ms when enabled", async () => {
+    jest.useFakeTimers();
+    const confirm = jest.fn();
+
+    renderCard(
+      createProps({
+        autoSubmitCorrectAnswer: true,
+        confirm,
+        selectedItem: makeCard({ id: 19, translations: ["kot"] }),
+      }),
+    );
+
+    await waitFor(() => {
+      expect(latestResolverProps?.handleAnswerChange).toEqual(expect.any(Function));
+    });
+
+    act(() => {
+      (latestResolverProps?.handleAnswerChange as (value: string) => void)("kot");
+      jest.advanceTimersByTime(199);
+    });
+    expect(confirm).not.toHaveBeenCalled();
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(confirm).toHaveBeenCalledWith(undefined, "kot");
+    jest.useRealTimers();
+  });
+
+  it("does not automatically confirm when disabled, for wrong answers, or during correction", async () => {
+    jest.useFakeTimers();
+    const confirm = jest.fn();
+
+    renderCard(
+      createProps({
+        confirm,
+        selectedItem: makeCard({ id: 20, translations: ["kot"] }),
+      }),
+    );
+    await waitFor(() => {
+      expect(latestResolverProps?.handleAnswerChange).toEqual(expect.any(Function));
+    });
+
+    act(() => {
+      (latestResolverProps?.handleAnswerChange as (value: string) => void)("kot");
+      jest.advanceTimersByTime(300);
+    });
+    expect(confirm).not.toHaveBeenCalled();
+
+    renderCard(
+      createProps({
+        autoSubmitCorrectAnswer: true,
+        confirm,
+        result: false,
+        correction: {
+          cardId: 20,
+          awers: "cat",
+          rewers: "kot",
+          input1: "",
+          input2: "",
+          mode: "demote",
+          promptText: "cat",
+          promptImageUri: null,
+          reversed: false,
+        },
+        selectedItem: makeCard({ id: 20, translations: ["kot"] }),
+      }),
+    );
+    await waitFor(() => {
+      expect(latestResolverProps?.displayMode).toBe("correction");
+    });
+    act(() => {
+      (latestResolverProps?.handleAnswerChange as (value: string) => void)("kot");
+      jest.advanceTimersByTime(300);
+    });
+    expect(confirm).not.toHaveBeenCalled();
+    jest.useRealTimers();
+  });
+
+  it("retries automatic confirmation when the first attempt is blocked", async () => {
+    jest.useFakeTimers();
+    const confirm = jest.fn().mockReturnValueOnce(false).mockReturnValue(true);
+
+    renderCard(
+      createProps({
+        autoSubmitCorrectAnswer: true,
+        confirm,
+        selectedItem: makeCard({ id: 21, translations: ["kot"] }),
+      }),
+    );
+    await waitFor(() => {
+      expect(latestResolverProps?.handleAnswerChange).toEqual(expect.any(Function));
+    });
+
+    act(() => {
+      (latestResolverProps?.handleAnswerChange as (value: string) => void)("kot");
+      jest.advanceTimersByTime(200);
+    });
+    expect(confirm).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      jest.advanceTimersByTime(999);
+    });
+    expect(confirm).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      jest.advanceTimersByTime(1);
+    });
+    expect(confirm).toHaveBeenCalledTimes(2);
+    jest.useRealTimers();
+  });
+
   it("primes the keyboard bridge before completing correction input changes", async () => {
     const wrongInputChange = jest.fn();
     const textInputFocus = jest.fn();

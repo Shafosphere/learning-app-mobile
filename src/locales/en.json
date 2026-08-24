@@ -218,6 +218,10 @@
         "title": "Keyboard suggestions",
         "subtitle": "Enable or disable suggestions and autocorrect in flashcards. Note: some keyboards, such as Samsung Keyboard or Gboard, may still show the suggestion bar."
       },
+      "autoSubmitCorrectAnswer": {
+        "title": "Automatically submit correct answers",
+        "subtitle": "Automatically submit a correct answer shortly after it is entered."
+      },
       "ignoreDiacritics": {
         "title": "Ignore diacritics",
         "subtitle": "Compare words without accents, e.g. ą -> a."

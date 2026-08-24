@@ -175,6 +175,7 @@ export default function Card({
   disableLayoutAnimation = false,
   focusRequestToken = 0,
   skipCorrectionEnabled = false,
+  autoSubmitCorrectAnswer = false,
   showExplanationEnabled: showExplanationEnabledProp,
   explanationOnlyOnWrong: explanationOnlyOnWrongProp,
   onEdit,
@@ -231,6 +232,7 @@ export default function Card({
   const correctionInput2Ref = useRef<TextInput | null>(null);
   const hintInputRef = useRef<TextInput | null>(null);
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
+  const autoSubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initialLayoutCardIdRef = useRef<number | null>(null);
   const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
   const lastTranslationItemId = useRef<number | null>(null);
@@ -361,14 +363,70 @@ export default function Card({
   );
   const handleAnswerChange = useCallback(
     (value: string) => {
-      if (isMainAnswerDate && mainDatePattern) {
-        setAnswer(formatDateLikeInput(value, mainDatePattern, answer));
-        return;
+      const nextValue =
+        isMainAnswerDate && mainDatePattern
+          ? formatDateLikeInput(value, mainDatePattern, answer)
+          : value;
+
+      if (autoSubmitTimerRef.current != null) {
+        clearTimeout(autoSubmitTimerRef.current);
+        autoSubmitTimerRef.current = null;
       }
-      setAnswer(value);
+
+      if (isMainAnswerDate && mainDatePattern) {
+        setAnswer(nextValue);
+      } else {
+        setAnswer(value);
+      }
+
+      const canAutoSubmit =
+        autoSubmitCorrectAnswer &&
+        selectedItem != null &&
+        result === null &&
+        !showCorrectionInputs &&
+        selectedItem.type !== "true_false" &&
+        selectedItem.type !== "know_dont_know" &&
+        nextValue.trim().length > 0 &&
+        mainExpectedAnswers.some((expected) => checkSpelling(nextValue, expected));
+
+      if (canAutoSubmit) {
+        autoSubmitTimerRef.current = setTimeout(() => {
+          autoSubmitTimerRef.current = null;
+          const submitted = confirm(undefined, nextValue);
+          if (submitted === false) {
+            // Flashcards use a short action lock after a card appears. Retry
+            // once after it has had time to clear instead of losing the answer.
+            autoSubmitTimerRef.current = setTimeout(() => {
+              autoSubmitTimerRef.current = null;
+              confirm(undefined, nextValue);
+            }, 1000);
+          }
+        }, 200);
+      }
     },
-    [answer, isMainAnswerDate, mainDatePattern, setAnswer],
+    [
+      answer,
+      autoSubmitCorrectAnswer,
+      checkSpelling,
+      confirm,
+      isMainAnswerDate,
+      mainDatePattern,
+      mainExpectedAnswers,
+      result,
+      selectedItem,
+      setAnswer,
+      showCorrectionInputs,
+    ],
   );
+
+  useEffect(() => {
+    return () => {
+      if (autoSubmitTimerRef.current != null) {
+        clearTimeout(autoSubmitTimerRef.current);
+        autoSubmitTimerRef.current = null;
+      }
+    };
+  }, [correction, result, selectedItem?.id]);
 
   const [isEditingHint, setIsEditingHint] = useState(false);
   const [hintDraft, setHintDraft] = useState("");

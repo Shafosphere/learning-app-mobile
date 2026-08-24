@@ -78,6 +78,7 @@ export default function ReviewFlashcardsPlaceholder() {
     getCustomCourseExplanationOnlyOnWrong,
     ignoreDiacriticsInSpellcheck,
     learningRemindersEnabled,
+    autoSubmitCorrectAnswer,
   } = settings;
   const mistakeNudgeTextColor = settings.colors?.paragraph ?? "#1f2937";
   const mistakeNudgeTitleColor = settings.colors?.headline ?? "#111827";
@@ -652,6 +653,7 @@ export default function ReviewFlashcardsPlaceholder() {
           hideHints={isSmallPhoneLayout}
           isFocused={!isLoading}
           isBetweenCards={isBetweenCards || isActionCooldownActive}
+          autoSubmitCorrectAnswer={autoSubmitCorrectAnswer}
           showExplanationEnabled={showExplanationEnabled}
           explanationOnlyOnWrong={explanationOnlyOnWrong}
         />
