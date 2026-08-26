@@ -7,6 +7,8 @@ export type LearningHistoryEvent = {
   cardId: number;
   courseId: number | null;
   courseName: string | null;
+  iconId: string | null;
+  iconColor: string | null;
   promptText: string;
   expectedAnswerText: string;
   promptImageUri: string | null;
@@ -23,7 +25,7 @@ export type LearningHistoryEvent = {
 
 export type LearningHistoryEventInput = Omit<
   LearningHistoryEvent,
-  "id" | "createdAt"
+  "id" | "createdAt" | "iconId" | "iconColor"
 > & { createdAt?: number };
 
 const HISTORY_LIMIT = 100;
@@ -90,6 +92,8 @@ export async function getRecentLearningHistory(
     cardId: number;
     courseId: number | null;
     courseName: string | null;
+    iconId: string | null;
+    iconColor: string | null;
     promptText: string;
     expectedAnswerText: string;
     promptImageUri: string | null;
@@ -103,17 +107,19 @@ export async function getRecentLearningHistory(
     durationMs: number | null;
     createdAt: number;
   }>(
-    `SELECT id, source_type AS sourceType, mode, card_id AS cardId,
-            course_id AS courseId, course_name AS courseName,
-            prompt_text AS promptText,
-            expected_answer_text AS expectedAnswerText,
-            reversed, result, from_box AS fromBox,
-            to_box AS toBox, duration_ms AS durationMs, created_at AS createdAt,
-            prompt_image_uri AS promptImageUri,
-            expected_answer_image_uri AS expectedAnswerImageUri,
-            card_type AS cardType, user_answer AS userAnswer
-     FROM learning_history_events
-     ORDER BY created_at DESC, id DESC
+    `SELECT lhe.id, lhe.source_type AS sourceType, lhe.mode, lhe.card_id AS cardId,
+            lhe.course_id AS courseId, lhe.course_name AS courseName,
+            cc.icon_id AS iconId, cc.icon_color AS iconColor,
+            lhe.prompt_text AS promptText,
+            lhe.expected_answer_text AS expectedAnswerText,
+            lhe.reversed, lhe.result, lhe.from_box AS fromBox,
+            lhe.to_box AS toBox, lhe.duration_ms AS durationMs, lhe.created_at AS createdAt,
+            lhe.prompt_image_uri AS promptImageUri,
+            lhe.expected_answer_image_uri AS expectedAnswerImageUri,
+            lhe.card_type AS cardType, lhe.user_answer AS userAnswer
+     FROM learning_history_events lhe
+     LEFT JOIN custom_courses cc ON cc.id = lhe.course_id
+     ORDER BY lhe.created_at DESC, lhe.id DESC
      LIMIT ?;`,
     safeLimit,
   );

@@ -2007,7 +2007,7 @@
           "subtitle": {
             "przypieteKursy": "Pinned courses",
             "kreatorKursow": "Course creator",
-            "zobaczWyniki": "View results",
+            "zobaczWyniki": "& history",
             "instrukcjeIWskazowki": "Instructions and tips",
             "pomocIInformacje": "Help and information"
           },
@@ -2191,6 +2191,7 @@
             },
             "correct": "Correct",
             "wrong": "Wrong",
+            "today": "(Today)",
             "expected": "Expected: {{value}}",
             "seconds": "{{value}} s",
             "mode": {

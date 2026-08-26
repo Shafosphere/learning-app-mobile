@@ -16,6 +16,8 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   tabs: {
     width: "auto",
+    maxWidth: STATS_TABLET_MAX_WIDTH,
+    alignSelf: "center",
     marginHorizontal: 20,
     marginTop: 20,
     marginBottom: 0,

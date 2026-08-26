@@ -2007,7 +2007,7 @@
           "subtitle": {
             "przypieteKursy": "Przypięte kursy",
             "kreatorKursow": "Kreator kursów",
-            "zobaczWyniki": "Zobacz wyniki",
+            "zobaczWyniki": "i historia",
             "instrukcjeIWskazowki": "Instrukcje i wskazówki",
             "pomocIInformacje": "Pomoc i informacje"
           },
@@ -2191,6 +2191,7 @@
             },
             "correct": "Poprawna",
             "wrong": "Błędna",
+            "today": "(Dzisiaj)",
             "expected": "Oczekiwano: {{value}}",
             "seconds": "{{value}} s",
             "mode": {
