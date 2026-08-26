@@ -50,7 +50,7 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { SafeAreaProvider } from "react-native-safe-area-context";
+import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
 import LearningRemindersInitializer from "@/src/features/notifications/LearningRemindersInitializer";
 import {
   consumePendingNotificationResponse,
@@ -629,13 +629,14 @@ export default function RootLayout() {
     }
 
     return (
-      <View
-        style={[
-          styles.blockingContainer,
-          styles.loadingContainer,
-          { backgroundColor: startupUi.backgroundColor },
-        ]}
-      >
+      <SafeAreaView style={styles.startupSafeArea} edges={["top", "bottom"]}>
+        <View
+          style={[
+            styles.blockingContainer,
+            styles.loadingContainer,
+            { backgroundColor: startupUi.backgroundColor },
+          ]}
+        >
         <Image
           source={STARTUP_ICON}
           style={styles.loadingLogo}
@@ -657,7 +658,8 @@ export default function RootLayout() {
             {startupProgress}%
           </Text>
         ) : null}
-      </View>
+        </View>
+      </SafeAreaView>
     );
   };
 
@@ -668,13 +670,14 @@ export default function RootLayout() {
 
     return (
       <View style={styles.previewOverlay}>
-        <View
-          style={[
-            styles.blockingContainer,
-            styles.loadingContainer,
-            { backgroundColor: startupUi.backgroundColor },
-          ]}
-        >
+        <SafeAreaView style={styles.startupSafeArea} edges={["top", "bottom"]}>
+          <View
+            style={[
+              styles.blockingContainer,
+              styles.loadingContainer,
+              { backgroundColor: startupUi.backgroundColor },
+            ]}
+          >
           <Image
             source={STARTUP_ICON}
             style={styles.loadingLogo}
@@ -690,7 +693,8 @@ export default function RootLayout() {
               {startupProgress}%
             </Text>
           ) : null}
-        </View>
+          </View>
+        </SafeAreaView>
       </View>
     );
   };
@@ -817,6 +821,9 @@ const styles = StyleSheet.create({
   previewOverlay: {
     ...StyleSheet.absoluteFillObject,
     zIndex: 10,
+  },
+  startupSafeArea: {
+    flex: 1,
   },
   blockingContainer: {
     flex: 1,
