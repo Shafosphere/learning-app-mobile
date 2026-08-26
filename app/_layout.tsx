@@ -100,7 +100,27 @@ async function getLayoutNotifyKitModule(): Promise<LayoutNotifyKitModule | null>
   }
 }
 
-const STARTUP_ICON = require("@/assets/app/icons/notification-icon.png");
+// Reuse the real splash artwork so the native splash and the JS loading
+// screen transition seamlessly.
+const STARTUP_ICON = require("@/assets/app/splash/splash-icon-v2.png");
+const SIMULATE_STARTUP_PROGRESS =
+  process.env.EXPO_PUBLIC_SIMULATE_STARTUP_PROGRESS === "1";
+
+const wait = (durationMs: number): Promise<void> =>
+  new Promise((resolve) => setTimeout(resolve, durationMs));
+
+async function simulateStartupProgress(
+  onProgress: (percent: number) => void,
+  signal: AbortSignal
+): Promise<void> {
+  for (let percent = 0; percent <= 90; percent += 5) {
+    if (signal.aborted) {
+      return;
+    }
+    onProgress(percent);
+    await wait(350);
+  }
+}
 
 type RootStatus = "loading" | "ready" | "error" | "importing" | "resetting";
 
@@ -108,6 +128,7 @@ export default function RootLayout() {
   const { t } = useTranslation();
   const [startupTheme, setStartupTheme] = useState<Theme | null>(null);
   const [isStartupReady, setIsStartupReady] = useState(false);
+  const [isRootViewLaidOut, setIsRootViewLaidOut] = useState(false);
   const [status, setStatus] = useState<RootStatus>("loading");
   const [startupProgress, setStartupProgress] = useState(0);
   const [loadingMessageKey, setLoadingMessageKey] = useState(
@@ -120,8 +141,8 @@ export default function RootLayout() {
   const [isDebugErrorOverride, setIsDebugErrorOverride] = useState(false);
   const splashHiddenRef = useRef(false);
   const previewTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const rootViewLaidOutRef = useRef(false);
   const handledNotificationResponsesRef = useRef<Set<string>>(new Set());
+  const startupSimulationAbortRef = useRef<AbortController | null>(null);
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {
@@ -132,16 +153,8 @@ export default function RootLayout() {
   }, []);
 
   const onLayoutRootView = useCallback(() => {
-    rootViewLaidOutRef.current = true;
-    const shouldHideSplash =
-      isStartupReady && (status === "ready" || status === "error");
-    if (!shouldHideSplash) {
-      return;
-    }
-    hideSplashOnce().catch((error) => {
-      console.warn("[App] Splash hide failed", error);
-    });
-  }, [hideSplashOnce, isStartupReady, status]);
+    setIsRootViewLaidOut(true);
+  }, []);
 
   const prepareApp = useCallback(
     async (options?: { retry?: boolean; clearDebugOverride?: boolean }) => {
@@ -150,13 +163,35 @@ export default function RootLayout() {
       setStartupProgress(0);
       setErrorMessage(null);
       setIsDebugErrorOverride(false);
+      startupSimulationAbortRef.current?.abort();
+
+      const simulationController = SIMULATE_STARTUP_PROGRESS
+        ? new AbortController()
+        : null;
+      startupSimulationAbortRef.current = simulationController;
 
       try {
         if (clearDebugOverride) {
           await clearDbInitDebugOverride();
         }
 
-        await (retry ? retryDbInitialization() : getDB());
+        const databasePromise = retry ? retryDbInitialization() : getDB();
+        if (SIMULATE_STARTUP_PROGRESS) {
+          await Promise.all([
+            databasePromise,
+            simulateStartupProgress(
+              setStartupProgress,
+              simulationController?.signal ?? new AbortController().signal,
+            ),
+          ]);
+        } else {
+          await databasePromise;
+        }
+
+        simulationController?.abort();
+        if (startupSimulationAbortRef.current === simulationController) {
+          startupSimulationAbortRef.current = null;
+        }
 
         const debugOverrideEnabled = await isDbInitDebugOverrideEnabled();
         if (debugOverrideEnabled) {
@@ -168,6 +203,10 @@ export default function RootLayout() {
 
         setStatus("ready");
       } catch (error) {
+        simulationController?.abort();
+        if (startupSimulationAbortRef.current === simulationController) {
+          startupSimulationAbortRef.current = null;
+        }
         console.error("Błąd podczas inicjalizacji bazy danych:", error);
         setErrorMessage(
           error instanceof Error
@@ -276,7 +315,9 @@ export default function RootLayout() {
           setLoadingMessageKey("app.loading.finishingSetup");
           break;
         case "progress":
-          setStartupProgress(Math.max(0, Math.min(100, event.percent)));
+          if (!SIMULATE_STARTUP_PROGRESS) {
+            setStartupProgress(Math.max(0, Math.min(100, event.percent)));
+          }
           break;
         case "ready":
           setStartupProgress(100);
@@ -487,23 +528,20 @@ export default function RootLayout() {
     };
   }, [handleNotificationResponse, shouldRenderApp]);
 
-  const shouldHideSplash =
-    isStartupReady &&
-    rootViewLaidOutRef.current &&
-    (status === "ready" || status === "error");
+  const effectiveStartupTheme = startupTheme ?? "light";
+  const startupUi = getStartupThemeUi(effectiveStartupTheme);
 
   useEffect(() => {
-    if (!shouldHideSplash) {
+    // Wait for the stored theme before revealing the JS loading screen. This
+    // prevents a light fallback frame when the app was last used in dark mode.
+    if (!isStartupReady || !isRootViewLaidOut) {
       return;
     }
 
     hideSplashOnce().catch((error) => {
       console.warn("[App] Splash hide failed", error);
     });
-  }, [hideSplashOnce, shouldHideSplash]);
-
-  const effectiveStartupTheme = startupTheme ?? "light";
-  const startupUi = getStartupThemeUi(effectiveStartupTheme);
+  }, [hideSplashOnce, isRootViewLaidOut, isStartupReady]);
 
   useEffect(() => {
     if (!isStartupReady) {
@@ -594,12 +632,13 @@ export default function RootLayout() {
       <View
         style={[
           styles.blockingContainer,
+          styles.loadingContainer,
           { backgroundColor: startupUi.backgroundColor },
         ]}
       >
         <Image
           source={STARTUP_ICON}
-          style={[styles.loadingLogo, { shadowColor: startupUi.shadowColor }]}
+          style={styles.loadingLogo}
           resizeMode="contain"
         />
         <Text style={[styles.loadingText, { color: startupUi.primaryTextColor }]}>
@@ -632,12 +671,13 @@ export default function RootLayout() {
         <View
           style={[
             styles.blockingContainer,
+            styles.loadingContainer,
             { backgroundColor: startupUi.backgroundColor },
           ]}
         >
           <Image
             source={STARTUP_ICON}
-            style={[styles.loadingLogo, { shadowColor: startupUi.shadowColor }]}
+            style={styles.loadingLogo}
             resizeMode="contain"
           />
           <Text style={[styles.loadingText, { color: startupUi.primaryTextColor }]}>
@@ -785,16 +825,19 @@ const styles = StyleSheet.create({
     padding: 24,
     gap: 22,
   },
+  loadingContainer: {
+    gap: 10,
+  },
   loadingLogo: {
-    width: 176,
-    height: 176,
-    borderRadius: 34,
-    shadowColor: "#0f172a",
-    shadowOffset: { width: 0, height: 10 },
-    shadowOpacity: 0.14,
-    shadowRadius: 18,
-    elevation: 8,
-    marginBottom: 2,
+    // Expo's Android plugin composes the 200dp image onto a 288dp canvas
+    // before Android renders the splash icon. Match that canvas here so the
+    // visible logo has the same size as the native splash screen.
+    width: Platform.OS === "android" ? 288 : 200,
+    height: Platform.OS === "android" ? 288 : 200,
+    // The PNG has 172px of transparent padding below the 680px logo on a
+    // 1024px canvas. Offset that padding so the text sits under the visible
+    // logo, like it does on the native Expo splash screen.
+    marginBottom: Platform.OS === "android" ? -48 : -32,
   },
   loadingText: {
     fontSize: 18,
