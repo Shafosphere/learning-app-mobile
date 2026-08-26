@@ -4,7 +4,7 @@ import { Text as MockText } from "react-native";
 
 import StatsScreen from "@/src/screens/stats/StatsScreen/StatsScreen";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
-import { getDailyActivitySummariesCustom } from "@/src/db/sqlite/db";
+import { getDailyActivitySummariesCustom, getRecentLearningHistory } from "@/src/db/sqlite/db";
 import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
@@ -26,6 +26,14 @@ jest.mock("react-i18next", () => ({
     t: (key: string) => key,
   }),
 }));
+
+jest.mock("@react-navigation/native", () => {
+  const mockReact = require("react");
+  return {
+    useFocusEffect: (effect: () => void | (() => void)) =>
+      mockReact.useEffect(effect, [effect]),
+  };
+});
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: () => ({
@@ -90,6 +98,7 @@ jest.mock("@/src/components/stats/PinnedCoursesProgress", () => {
 jest.mock("@/src/db/sqlite/db", () => ({
   getDailyActivitySummariesCustom: jest.fn(() => new Promise(() => {})),
   getTotalLearningTimeMs: jest.fn(() => new Promise(() => {})),
+  getRecentLearningHistory: jest.fn(() => Promise.resolve([])),
 }));
 
 jest.mock("@/src/services/streakProtection", () => ({

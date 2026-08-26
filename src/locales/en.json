@@ -2182,6 +2182,43 @@
         "stats": {
           "textChild": {
             "codziennaPassa": "Daily streak"
+          },
+          "history": {
+            "tabs": {
+              "stats": "Stats",
+              "history": "History",
+              "accessibilityLabel": "Stats view"
+            },
+            "correct": "Correct",
+            "wrong": "Wrong",
+            "expected": "Expected: {{value}}",
+            "seconds": "{{value}} s",
+            "mode": {
+              "flashcards": "Flashcards",
+              "review": "Review"
+            },
+            "box": {
+              "zero": "Start",
+              "one": "Box 1",
+              "two": "Box 2",
+              "three": "Box 3",
+              "four": "Box 4",
+              "five": "Box 5",
+              "unknown": "Unknown"
+            },
+            "cardType": {
+              "text": "Text",
+              "true_false": "True / False",
+              "know_dont_know": "Know / Don't know"
+            },
+            "answer": {
+              "true": "True",
+              "false": "False",
+              "know": "Know",
+              "dontKnow": "Don't know"
+            },
+            "emptyTitle": "No history yet",
+            "emptyText": "Your answers will appear here after you start learning."
           }
         }
       }

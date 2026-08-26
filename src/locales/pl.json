@@ -2182,6 +2182,43 @@
         "stats": {
           "textChild": {
             "codziennaPassa": "Codzienna passa"
+          },
+          "history": {
+            "tabs": {
+              "stats": "Statystyki",
+              "history": "Historia",
+              "accessibilityLabel": "Widok statystyk"
+            },
+            "correct": "Poprawna",
+            "wrong": "Błędna",
+            "expected": "Oczekiwano: {{value}}",
+            "seconds": "{{value}} s",
+            "mode": {
+              "flashcards": "Fiszki",
+              "review": "Powtórka"
+            },
+            "box": {
+              "zero": "Start",
+              "one": "Pudełko 1",
+              "two": "Pudełko 2",
+              "three": "Pudełko 3",
+              "four": "Pudełko 4",
+              "five": "Pudełko 5",
+              "unknown": "Nieznane"
+            },
+            "cardType": {
+              "text": "Tekstowa",
+              "true_false": "Prawda / Fałsz",
+              "know_dont_know": "Umiem / Nie umiem"
+            },
+            "answer": {
+              "true": "Prawda",
+              "false": "Fałsz",
+              "know": "Umiem",
+              "dontKnow": "Nie umiem"
+            },
+            "emptyTitle": "Brak historii",
+            "emptyText": "Odpowiedzi pojawią się tutaj po rozpoczęciu nauki."
           }
         }
       }

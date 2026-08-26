@@ -16,6 +16,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
 
 jest.mock("@/src/db/sqlite/db", () => ({
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
+  logLearningHistoryEvent: jest.fn(() => Promise.resolve()),
 }));
 
 const mockedUseSettings = useSettings as jest.Mock;

@@ -14,6 +14,17 @@ export const useStyles = createThemeStylesHook((colors) => ({
   contentTablet: {
     maxWidth: STATS_TABLET_MAX_WIDTH,
   },
+  tabs: {
+    width: "auto",
+    marginHorizontal: 20,
+    marginTop: 20,
+    marginBottom: 0,
+  },
+  historyContent: {
+    flex: 1,
+    width: "100%",
+    alignSelf: "center",
+  },
   scrollContent: {
     padding: 20,
     gap: 16,

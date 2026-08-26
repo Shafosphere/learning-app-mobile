@@ -13,4 +13,5 @@ export * from "./repositories/analytics";
 export * from "./repositories/courses";
 export * from "./repositories/flashcards";
 export * from "./repositories/reviews";
+export * from "./repositories/learningHistory";
 export * from "./utils";

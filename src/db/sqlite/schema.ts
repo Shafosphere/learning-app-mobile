@@ -144,9 +144,42 @@ export async function applySchema(db: SQLite.SQLiteDatabase): Promise<void> {
     );
     CREATE INDEX IF NOT EXISTS idx_custom_learning_events_card ON custom_learning_events(flashcard_id);
     CREATE INDEX IF NOT EXISTS idx_custom_learning_events_time ON custom_learning_events(created_at);
+    CREATE TABLE IF NOT EXISTS learning_history_events (
+      id                    INTEGER PRIMARY KEY AUTOINCREMENT,
+      source_type           TEXT NOT NULL,
+      mode                  TEXT NOT NULL,
+      card_id               INTEGER NOT NULL,
+      course_id             INTEGER,
+      course_name           TEXT,
+      prompt_text           TEXT NOT NULL,
+      expected_answer_text  TEXT NOT NULL,
+      reversed              INTEGER NOT NULL DEFAULT 0,
+      result                TEXT NOT NULL,
+      from_box              TEXT,
+      to_box                TEXT,
+      duration_ms           INTEGER,
+      created_at            INTEGER NOT NULL,
+      prompt_image_uri     TEXT,
+      expected_answer_image_uri TEXT,
+      card_type            TEXT NOT NULL DEFAULT 'text',
+      user_answer          TEXT NOT NULL DEFAULT ''
+    );
+    CREATE INDEX IF NOT EXISTS idx_learning_history_events_time
+      ON learning_history_events(created_at);
   `;
 
   await db.execAsync(customSchema);
+
+  await ensureColumn(db, "learning_history_events", "to_box", "TEXT");
+  await ensureColumn(db, "learning_history_events", "prompt_image_uri", "TEXT");
+  await ensureColumn(
+    db,
+    "learning_history_events",
+    "expected_answer_image_uri",
+    "TEXT",
+  );
+  await ensureColumn(db, "learning_history_events", "card_type", "TEXT NOT NULL DEFAULT 'text'");
+  await ensureColumn(db, "learning_history_events", "user_answer", "TEXT NOT NULL DEFAULT ''");
 
   await ensureColumn(db, "reviews", "stage", "INTEGER NOT NULL DEFAULT 0");
   await ensureColumn(db, "reviews", "learned_at", "INTEGER NOT NULL DEFAULT 0");

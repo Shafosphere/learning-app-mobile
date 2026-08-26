@@ -106,6 +106,7 @@ jest.mock("@/src/db/sqlite/db", () => ({
   getDueCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
   getUpcomingCustomReviewFlashcards: jest.fn(() => Promise.resolve([])),
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
+  logLearningHistoryEvent: jest.fn(() => Promise.resolve()),
   scheduleCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 1, nextReview: Date.now() })
   ),

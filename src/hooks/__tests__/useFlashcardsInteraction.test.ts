@@ -15,6 +15,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
 
 jest.mock("@/src/db/sqlite/db", () => ({
   logCustomLearningEvent: jest.fn(() => Promise.resolve()),
+  logLearningHistoryEvent: jest.fn(() => Promise.resolve()),
 }));
 
 const mockedUseSettings = useSettings as jest.Mock;
@@ -115,6 +116,25 @@ function expectBoxCardInvariants(boxes: BoxesState, expectedIds: number[]) {
   for (const expectedId of expectedIds) {
     expect(counts.get(expectedId)).toBe(1);
   }
+}
+
+function expectSelectedCardBelongsToActiveBox(
+  interaction: {
+    activeBox: keyof BoxesState | null;
+    selectedItem: WordWithTranslations | null;
+  },
+  boxes: BoxesState,
+) {
+  if (interaction.activeBox == null || interaction.selectedItem == null) {
+    expect(interaction.activeBox == null).toBe(interaction.selectedItem == null);
+    return;
+  }
+
+  expect(boxes[interaction.activeBox]).toEqual(
+    expect.arrayContaining([
+      expect.objectContaining({ id: interaction.selectedItem.id }),
+    ]),
+  );
 }
 
 function renderInteraction(
@@ -1253,6 +1273,89 @@ describe("useFlashcardsInteraction", () => {
     });
 
     expect(hook.result.current.interaction.selectedItem?.id).toBe(cardC.id);
+  });
+
+  it("keeps the selected card inside the currently active box during rapid switches", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(0);
+
+    const cards = {
+      boxOne: makeWord({ id: 771 }),
+      boxTwo: makeWord({ id: 772 }),
+      boxThree: makeWord({ id: 773 }),
+    };
+    const hook = renderInteraction(
+      makeBoxesState({
+        boxOne: [cards.boxOne],
+        boxTwo: [cards.boxTwo],
+        boxThree: [cards.boxThree],
+      }),
+    );
+
+    for (const box of ["boxOne", "boxTwo", "boxThree", "boxOne"] as const) {
+      act(() => {
+        hook.result.current.interaction.handleSelectBox(box);
+      });
+      expectSelectedCardBelongsToActiveBox(
+        hook.result.current.interaction,
+        hook.result.current.boxes,
+      );
+      act(() => {
+        jest.advanceTimersByTime(80);
+      });
+    }
+  });
+
+  it("does not keep a removed active card selected after the box changes", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(0);
+
+    const cardA = makeWord({ id: 781 });
+    const cardB = makeWord({ id: 782 });
+    const hook = renderInteraction(
+      makeBoxesState({ boxOne: [cardA, cardB] }),
+    );
+
+    act(() => {
+      hook.result.current.interaction.handleSelectBox("boxOne");
+    });
+    expectSelectedCardBelongsToActiveBox(
+      hook.result.current.interaction,
+      hook.result.current.boxes,
+    );
+
+    act(() => {
+      hook.updateBoxes((prev) => ({
+        ...prev,
+        boxOne: prev.boxOne.filter((card) => card.id !== cardA.id),
+      }));
+    });
+
+    expectSelectedCardBelongsToActiveBox(
+      hook.result.current.interaction,
+      hook.result.current.boxes,
+    );
+    expect(hook.result.current.interaction.selectedItem?.id).not.toBe(cardA.id);
+  });
+
+  it("does not leak a card from the previous box into a newly selected box queue", () => {
+    const cardA = makeWord({ id: 791 });
+    const cardB = makeWord({ id: 792 });
+    const hook = renderInteraction(
+      makeBoxesState({ boxOne: [cardA], boxTwo: [cardB] }),
+    );
+
+    act(() => {
+      hook.result.current.interaction.handleSelectBox("boxOne");
+      hook.result.current.interaction.handleSelectBox("boxTwo");
+    });
+
+    expect(hook.result.current.interaction.activeBox).toBe("boxTwo");
+    expect(hook.result.current.interaction.selectedItem?.id).toBe(cardB.id);
+    expectSelectedCardBelongsToActiveBox(
+      hook.result.current.interaction,
+      hook.result.current.boxes,
+    );
   });
 
   describe("queue consistency after external box changes", () => {

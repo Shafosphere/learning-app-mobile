@@ -42,6 +42,7 @@ jest.mock("@/src/contexts/QuoteContext", () => ({
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({
+  logLearningHistoryEvent: jest.fn(() => Promise.resolve()),
   getCustomCourseById: jest.fn(() =>
     Promise.resolve({ id: 7, reviewsEnabled: false })
   ),
@@ -247,6 +248,15 @@ const mockedUseBoxesPersistenceSnapshot =
   useBoxesPersistenceSnapshot as jest.Mock;
 const mockedUseIsFocused = useIsFocused as jest.Mock;
 
+function deferred<T>() {
+  let resolve!: (value: T) => void;
+  const promise = new Promise<T>((res) => {
+    resolve = res;
+  });
+
+  return { promise, resolve };
+}
+
 describe("FlashcardsScreen autoflow guard", () => {
   beforeEach(async () => {
     await AsyncStorage.clear();
@@ -372,6 +382,151 @@ describe("FlashcardsScreen autoflow guard", () => {
       incomingBatchSize: 20,
       remainingNewFlashcardsCount: 0,
     });
+  });
+
+  it("routes an autoflow box switch through the interaction handler", async () => {
+    const handleSelectBox = jest.fn();
+    mockedUseFlashcardsInteraction.mockReturnValue({
+      activeBox: "boxOne",
+      handleSelectBox,
+      selectedItem: {
+        id: 1,
+        text: "cat",
+        translations: ["kot"],
+        flipped: false,
+        answerOnly: false,
+        hintFront: null,
+        hintBack: null,
+        imageFront: null,
+        imageBack: null,
+        explanation: null,
+        type: "text",
+      },
+      answer: "",
+      setAnswer: jest.fn(),
+      result: null,
+      setResult: jest.fn(),
+      confirm: jest.fn(),
+      reversed: false,
+      correction: null,
+      wrongInputChange: jest.fn(),
+      setCorrectionRewers: jest.fn(),
+      learned: [],
+      setLearned: jest.fn(),
+      acknowledgeExplanation: jest.fn(),
+      resetInteractionState: jest.fn(),
+      clearSelection: jest.fn(),
+      updateSelectedItem: jest.fn(),
+      isBetweenCards: false,
+      getQueueForBox: jest.fn(() => []),
+    });
+
+    render(<Flashcards />);
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+
+    act(() => {
+      lastCall.handleSelectBox("boxTwo");
+    });
+
+    expect(handleSelectBox).toHaveBeenCalledWith("boxTwo");
+  });
+
+  it("ignores a late response from the previous course", async () => {
+    const courseACards = deferred<
+      Array<Record<string, unknown>>
+    >();
+    const courseBCards = deferred<
+      Array<Record<string, unknown>>
+    >();
+    const cardA = {
+      id: 101,
+      text: "course-a",
+      translations: ["kurs-a"],
+      hintFront: null,
+      hintBack: null,
+      imageFront: null,
+      imageBack: null,
+      explanation: null,
+      type: "text",
+    };
+    const cardB = {
+      id: 202,
+      text: "course-b",
+      translations: ["kurs-b"],
+      hintFront: null,
+      hintBack: null,
+      imageFront: null,
+      imageBack: null,
+      explanation: null,
+      type: "text",
+    };
+
+    mockedGetCustomCourseById.mockImplementation((courseId: number) =>
+      Promise.resolve({ id: courseId, reviewsEnabled: false }),
+    );
+    mockedGetCustomFlashcards
+      .mockImplementationOnce(() => courseACards.promise)
+      .mockImplementationOnce(() => courseBCards.promise);
+
+    let activeCourseId = 7;
+    const settings = {
+      activeCustomCourseId: activeCourseId,
+      setActiveCustomCourseId: jest.fn(),
+      boxesLayout: "classic",
+      flashcardsBatchSize: 20,
+      boxZeroEnabled: false,
+      autoflowEnabled: true,
+      explanationOnlyOnWrong: false,
+      showExplanationEnabled: false,
+      skipCorrectionEnabled: false,
+      actionButtonsPosition: "top",
+      setActionButtonsPosition: jest.fn(),
+      colors: { background: "#fff" },
+    };
+    mockedUseSettings.mockReturnValue(settings);
+
+    const { rerender } = render(<Flashcards />);
+
+    activeCourseId = 8;
+    settings.activeCustomCourseId = activeCourseId;
+    mockedUseSettings.mockReturnValue(settings);
+    rerender(<Flashcards />);
+
+    await act(async () => {
+      courseBCards.resolve([cardB]);
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    await waitFor(() => {
+      const lastCall =
+        mockedUseFlashcardsAutoflow.mock.calls[
+          mockedUseFlashcardsAutoflow.mock.calls.length - 1
+        ]?.[0];
+      expect(lastCall.totalFlashcardsInCourse).toBe(1);
+    });
+
+    await act(async () => {
+      courseACards.resolve([cardA]);
+      await Promise.resolve();
+      await Promise.resolve();
+      await Promise.resolve();
+    });
+
+    const lastCall =
+      mockedUseFlashcardsAutoflow.mock.calls[
+        mockedUseFlashcardsAutoflow.mock.calls.length - 1
+      ]?.[0];
+    expect(lastCall.totalFlashcardsInCourse).toBe(1);
+    expect(mockedGetCustomFlashcards).toHaveBeenCalledTimes(2);
   });
 
   it("exposes autoflow diagnostics callbacks", async () => {

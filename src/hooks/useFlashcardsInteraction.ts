@@ -1,5 +1,8 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { logCustomLearningEvent } from "@/src/db/sqlite/db";
+import {
+  logCustomLearningEvent,
+  logLearningHistoryEvent,
+} from "@/src/db/sqlite/db";
 import { useConfirmGuard } from "@/src/hooks/useConfirmGuard";
 import {
   appendDebugEvent,
@@ -70,6 +73,8 @@ type UseFlashcardsInteractionParams = {
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
   debugContext?: DebugContext;
+  courseName?: string | null;
+  sourceType?: "builtin" | "custom";
 };
 
 export function useFlashcardsInteraction({
@@ -85,6 +90,8 @@ export function useFlashcardsInteraction({
   boxZeroEnabled = true,
   skipDemotionCorrection = false,
   debugContext,
+  courseName,
+  sourceType = "builtin",
 }: UseFlashcardsInteractionParams) {
   const [activeBox, setActiveBox] = useState<keyof BoxesState | null>(null);
   const [selectedItem, setSelectedItem] = useState<WordWithTranslations | null>(null);
@@ -457,6 +464,47 @@ export function useFlashcardsInteraction({
       }).catch((error) => {
         console.warn("[Flashcards] Failed to log learning event", error);
       });
+      const promptText = reversed
+        ? wordForCheck.translations[0] ?? wordForCheck.text
+        : wordForCheck.text;
+      const expectedAnswerText = reversed
+        ? wordForCheck.text
+        : wordForCheck.translations.join(", ");
+      const toBox = ok
+        ? activeBox === "boxFive"
+          ? null
+          : activeBox
+            ? boxOrder[boxOrder.indexOf(activeBox) + 1] ?? null
+            : null
+        : boxZeroEnabled
+          ? "boxZero"
+          : "boxOne";
+      const promptImageUri = reversed
+        ? wordForCheck.imageBack ?? null
+        : wordForCheck.imageFront ?? null;
+      const expectedAnswerImageUri = reversed
+        ? wordForCheck.imageFront ?? null
+        : wordForCheck.imageBack ?? null;
+      void logLearningHistoryEvent({
+        sourceType,
+        mode: "flashcards",
+        cardId: wordForCheck.id,
+        courseId: activeCustomCourseId ?? null,
+        courseName: courseName ?? null,
+        promptText,
+        expectedAnswerText,
+        promptImageUri,
+        expectedAnswerImageUri,
+        cardType: wordForCheck.type ?? "text",
+        userAnswer: answerToUse.trim(),
+        reversed,
+        result: ok ? "ok" : "wrong",
+        fromBox: activeBox,
+        toBox,
+        durationMs: duration,
+      }).catch((error) => {
+        console.warn("[Flashcards] Failed to log history event", error);
+      });
       if (ok && learningRemindersEnabled) {
         if (reminderRefreshTimerRef.current != null) {
           clearTimeout(reminderRefreshTimerRef.current);
@@ -690,6 +738,8 @@ export function useFlashcardsInteraction({
     [
       activeBox,
       activeCustomCourseId,
+      boxZeroEnabled,
+      courseName,
       answer,
       canConfirm,
       checkSpelling,
@@ -711,6 +761,7 @@ export function useFlashcardsInteraction({
       setPendingExplanationMove,
       explanationOnlyOnWrong,
       showExplanationEnabled,
+      sourceType,
     ]
   );
 

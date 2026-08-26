@@ -91,6 +91,7 @@ export default function Flashcards() {
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
   const {
     activeCustomCourseId,
+    activeCourse,
     setActiveCustomCourseId,
     boxesLayout,
     flashcardsBatchSize,
@@ -392,6 +393,12 @@ export default function Flashcards() {
       courseId: activeCustomCourseId,
       storageKey,
     },
+    courseName:
+      customCourse?.name ??
+      (activeCourse
+        ? `${activeCourse.sourceLang} → ${activeCourse.targetLang}`
+        : null),
+    sourceType: activeCustomCourseId != null ? "custom" : "builtin",
   });
   const {
     remainingNewFlashcardsCount,

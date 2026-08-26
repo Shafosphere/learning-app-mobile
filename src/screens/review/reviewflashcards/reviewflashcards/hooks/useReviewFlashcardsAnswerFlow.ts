@@ -6,6 +6,7 @@ import type { CardCorrectionType } from "@/src/components/card/card-types";
 import {
   advanceCustomReview,
   logCustomLearningEvent,
+  logLearningHistoryEvent,
 } from "@/src/db/sqlite/db";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { appendDebugEvent } from "@/src/services/debugEvents";
@@ -384,10 +385,47 @@ export const useReviewFlashcardsAnswerFlow = ({
         courseId,
         box: currentBox,
         result: resultValue,
-        durationMs,
+        durationMs: durationMs ?? null,
+      });
+    const promptText = effectiveReversed
+      ? selectedItem.translations?.[0] ?? selectedItem.text
+      : selectedItem.text;
+    const expectedAnswerText = effectiveReversed
+      ? selectedItem.text
+      : (selectedItem.translations ?? []).join(", ");
+    const toBox = ok
+      ? stageToBox(Math.min(5, (selectedItem.stage ?? 0) + 1))
+      : "boxZero";
+    const promptImageUri = effectiveReversed
+      ? selectedItem.imageBack ?? null
+      : selectedItem.imageFront ?? null;
+    const expectedAnswerImageUri = effectiveReversed
+      ? selectedItem.imageFront ?? null
+      : selectedItem.imageBack ?? null;
+    const logHistoryEvent = (resultValue: "ok" | "wrong") =>
+      logLearningHistoryEvent({
+        sourceType: "custom",
+        mode: "review",
+        cardId: selectedItem.id,
+        courseId,
+        courseName: null,
+        promptText,
+        expectedAnswerText,
+        promptImageUri,
+        expectedAnswerImageUri,
+        cardType: selectedItem.type ?? "text",
+        userAnswer,
+        reversed: effectiveReversed,
+        result: resultValue,
+        fromBox: currentBox,
+        toBox,
+        durationMs: durationMs ?? null,
+      }).catch((error) => {
+        console.warn("[Review] Failed to log history event", error);
       });
 
     if (!ok) {
+      void logHistoryEvent("wrong");
       const wrongLogPromise = logAttemptEvent("wrong")
         .then(() => true)
         .catch((error) => {
@@ -452,6 +490,8 @@ export const useReviewFlashcardsAnswerFlow = ({
       });
       return;
     }
+
+    void logHistoryEvent("ok");
 
     const logLearningEventPromise = logAttemptEvent("ok").catch((error) => {
       console.warn("[Review] Failed to log learning event", error);

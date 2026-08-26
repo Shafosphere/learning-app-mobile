@@ -1,8 +1,9 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useFocusEffect } from "@react-navigation/native";
 import { useStyles } from "./StatsScreen-styles";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -18,6 +19,9 @@ import {
   getTotalLearningTimeMs,
 } from "@/src/db/sqlite/db";
 import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
+import { getRecentLearningHistory, type LearningHistoryEvent } from "@/src/db/sqlite/db";
+import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
+import LearningHistoryList from "@/src/components/stats/LearningHistoryList";
 
 export default function StatsScreen() {
   const styles = useStyles();
@@ -34,6 +38,33 @@ export default function StatsScreen() {
     year: 0,
   });
   const [isBookshelfEditing, setIsBookshelfEditing] = useState(false);
+  const [activeTab, setActiveTab] = useState<"stats" | "history">("stats");
+  const [history, setHistory] = useState<LearningHistoryEvent[]>([]);
+  const historyRequestId = useRef(0);
+
+  const loadHistory = useCallback(async () => {
+    const requestId = ++historyRequestId.current;
+
+    try {
+      const nextHistory = await getRecentLearningHistory();
+      if (requestId !== historyRequestId.current) return;
+      setHistory(nextHistory);
+    } catch {
+      if (requestId !== historyRequestId.current) return;
+      setHistory([]);
+    }
+  }, []);
+
+  useFocusEffect(
+    useCallback(() => {
+      if (activeTab !== "history") return;
+
+      void loadHistory();
+      return () => {
+        historyRequestId.current += 1;
+      };
+    }, [activeTab, loadHistory]),
+  );
 
   useEffect(() => {
     if (!statsBookshelfEnabled) setIsBookshelfEditing(false);
@@ -127,7 +158,17 @@ export default function StatsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
+      <SegmentedTabs
+        options={[
+          { key: "stats", label: t("screens.stats.stats.stats.history.tabs.stats") },
+          { key: "history", label: t("screens.stats.stats.stats.history.tabs.history") },
+        ]}
+        value={activeTab}
+        onChange={setActiveTab}
+        accessibilityLabel={t("screens.stats.stats.stats.history.tabs.accessibilityLabel")}
+        containerStyle={styles.tabs}
+      />
+      {activeTab === "stats" ? <ScrollView
         style={[styles.content, useCenteredTabletLayout && styles.contentTablet]}
         contentContainerStyle={styles.scrollContent}
         scrollEnabled={!isBookshelfEditing}
@@ -193,7 +234,9 @@ export default function StatsScreen() {
         <HardWordsList />
 
         <LearningTimeCard timeMs={learningTime} />
-      </ScrollView>
+      </ScrollView> : <View style={[styles.historyContent, useCenteredTabletLayout && styles.contentTablet]}>
+        <LearningHistoryList events={history} />
+      </View>}
     </View>
   );
 };
