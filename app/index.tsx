@@ -53,7 +53,7 @@ export async function resolveStartupRoute(): Promise<StartupRoute> {
     return "/createprofile";
   }
 
-  if (checkpoint === "welcome_required") {
+  if (checkpoint === "beta_required" || checkpoint === "leitner_required") {
     return "/createprofile";
   }
 

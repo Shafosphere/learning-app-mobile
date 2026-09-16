@@ -484,7 +484,7 @@
         "languageRequired": "language_required",
         "pinRequired": "pin_required",
         "nativeLanguageRequired": "native_language_required",
-        "welcomeRequired": "welcome_required",
+        "leitnerRequired": "leitner_required",
         "activateRequired": "activate_required",
         "courseEntrySettingsRequired": "course_entry_settings_required",
         "done": "done"
@@ -821,6 +821,17 @@
     "welcome": {
       "title": "Witaj w Memicard :3",
       "description": "Dzięki, że jesteś tutaj na wczesnym etapie rozwoju aplikacji.\n\nMemicard nadal rośnie, więc mogą pojawić się drobne błędy, niedopracowane miejsca albo funkcje, które jeszcze wymagają poprawy.\n\nJeżeli coś nie działa, coś Ci przeszkadza albo masz pomysł na ulepszenie, zgłoś to proszę - bardzo mi to pomoże.",
+      "next": "Zaczynajmy"
+    },
+    "beta": {
+      "title": "Tworzysz Memicard razem ze mną",
+      "description": "Aplikacja jest na początku swojej drogi. Możesz trafić na niedopracowane miejsca — jeśli coś nie działa albo masz pomysł, koniecznie daj znać.",
+      "thanks": "Dziękuję",
+      "next": "Dalej"
+    },
+    "leitner": {
+      "title": "Zapamiętuj więcej",
+      "description": "Memicard oparty jest na systemie Leitnera. Trudne fiszki wracają częściej. Te, które znasz — coraz rzadziej. Wszystko dzięki prostemu systemowi pudełek.",
       "next": "Zaczynajmy"
     },
     "courseActivate": {

@@ -58,6 +58,8 @@ assets/images/*
 *.jpeg
 *.svg
 *.svgx
+!assets/illustrations/leitner.svg
+!assets/illustrations/leitner.png
 
 # Mobile signing / release credentials
 *.keystore

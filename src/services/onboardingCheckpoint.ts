@@ -3,7 +3,8 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 export type OnboardingCheckpoint =
   | "language_required"
   | "native_language_required"
-  | "welcome_required"
+  | "beta_required"
+  | "leitner_required"
   | "pin_required"
   | "activate_required"
   | "course_entry_settings_required"
@@ -60,13 +61,18 @@ export async function getOnboardingCheckpoint(): Promise<
     if (
       value === "language_required" ||
       value === "native_language_required" ||
-      value === "welcome_required" ||
+      value === "beta_required" ||
+      value === "leitner_required" ||
       value === "pin_required" ||
       value === "activate_required" ||
       value === "course_entry_settings_required" ||
       value === "done"
     ) {
       return value;
+    }
+    // The former single welcome screen is now the permanent Leitner intro.
+    if (value === "welcome_required") {
+      return "leitner_required";
     }
     return null;
   } catch (error) {

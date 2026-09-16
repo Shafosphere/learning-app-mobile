@@ -37,7 +37,7 @@ jest.mock("@/src/services/onboardingCheckpoint", () => ({
 const mockedGetCheckpoint = getOnboardingCheckpoint as jest.Mock;
 const mockedSetCheckpoint = setOnboardingCheckpoint as jest.Mock;
 
-describe("OnboardingGate welcome routing", () => {
+describe("OnboardingGate leitner routing", () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockPathname = "/support";
@@ -48,10 +48,10 @@ describe("OnboardingGate welcome routing", () => {
       activeCustomCourseId: null,
       hasSeenCustomCourseEntrySettings: jest.fn(() => false),
     };
-    mockedGetCheckpoint.mockResolvedValue("welcome_required");
+    mockedGetCheckpoint.mockResolvedValue("leitner_required");
   });
 
-  it("redirects support back to welcome while the step is active", async () => {
+  it("redirects support back to the Leitner intro while the step is active", async () => {
     render(<OnboardingGate />);
 
     await waitFor(() => {
@@ -59,7 +59,7 @@ describe("OnboardingGate welcome routing", () => {
     });
   });
 
-  it("redirects other routes back to welcome while the step is active", async () => {
+  it("redirects other routes back to the Leitner intro while the step is active", async () => {
     mockPathname = "/coursepanel";
 
     render(<OnboardingGate />);
@@ -69,7 +69,7 @@ describe("OnboardingGate welcome routing", () => {
     });
   });
 
-  it("does not allow support after welcome is completed", async () => {
+  it("does not allow support after the Leitner intro is completed", async () => {
     mockedGetCheckpoint.mockResolvedValue("pin_required");
 
     render(<OnboardingGate />);

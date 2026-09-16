@@ -34,7 +34,7 @@ export function useAutoScaleToFit({
         ? prev
         : nextHeight;
     });
-  }, [stableContentHeight]);
+  }, []);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
     if (stableContentHeight != null) return;

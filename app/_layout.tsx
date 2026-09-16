@@ -50,7 +50,11 @@ import {
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
-import { SafeAreaProvider, SafeAreaView } from "react-native-safe-area-context";
+import {
+  initialWindowMetrics,
+  SafeAreaProvider,
+  SafeAreaView,
+} from "react-native-safe-area-context";
 import LearningRemindersInitializer from "@/src/features/notifications/LearningRemindersInitializer";
 import {
   consumePendingNotificationResponse,
@@ -700,7 +704,7 @@ export default function RootLayout() {
   };
 
   return (
-    <SafeAreaProvider>
+    <SafeAreaProvider initialMetrics={initialWindowMetrics}>
       <View
         style={[styles.root, { backgroundColor: startupUi.backgroundColor }]}
         onLayout={onLayoutRootView}

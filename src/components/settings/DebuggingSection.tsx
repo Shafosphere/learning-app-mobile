@@ -385,7 +385,8 @@ const DebuggingSection: React.FC = () => {
     checkpoint:
       | "language_required"
       | "native_language_required"
-      | "welcome_required"
+      | "beta_required"
+      | "leitner_required"
       | "pin_required"
       | "activate_required"
       | "course_entry_settings_required"
@@ -406,7 +407,7 @@ const DebuggingSection: React.FC = () => {
   };
 
   const handleOpenWelcomeIntro = async () => {
-    await setOnboardingCheckpoint("welcome_required");
+    await setOnboardingCheckpoint("leitner_required");
     router.push("/createprofile");
   };
 
@@ -966,9 +967,9 @@ const DebuggingSection: React.FC = () => {
         </View>
         <View style={styles.keyboardButtonWrapper}>
           <MyButton
-            text={t("settings.debug.onboardingCheckpoints.welcomeRequired")}
+            text={t("settings.debug.onboardingCheckpoints.leitnerRequired")}
             color="my_yellow"
-            onPress={() => handleSetOnboarding("welcome_required")}
+            onPress={() => handleSetOnboarding("leitner_required")}
             width={180}
           />
         </View>

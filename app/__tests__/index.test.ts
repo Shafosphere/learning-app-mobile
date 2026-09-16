@@ -32,9 +32,9 @@ describe("resolveStartupRoute", () => {
     await expect(resolveStartupRoute()).resolves.toBe("/createprofile");
   });
 
-  it("returns to welcome onboarding after restart", async () => {
+  it("returns to Leitner onboarding after restart", async () => {
     await AsyncStorage.setItem("activeCourseIdx", JSON.stringify(0));
-    await setOnboardingCheckpoint("welcome_required");
+    await setOnboardingCheckpoint("leitner_required");
 
     await expect(resolveStartupRoute()).resolves.toBe("/createprofile");
   });

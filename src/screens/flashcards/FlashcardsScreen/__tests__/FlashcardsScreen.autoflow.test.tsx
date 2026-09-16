@@ -439,12 +439,8 @@ describe("FlashcardsScreen autoflow guard", () => {
   });
 
   it("ignores a late response from the previous course", async () => {
-    const courseACards = deferred<
-      Array<Record<string, unknown>>
-    >();
-    const courseBCards = deferred<
-      Array<Record<string, unknown>>
-    >();
+    const courseACards = deferred<Record<string, unknown>[]>();
+    const courseBCards = deferred<Record<string, unknown>[]>();
     const cardA = {
       id: 101,
       text: "course-a",

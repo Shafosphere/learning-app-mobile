@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import LanguageIntroScreen from "../LanguageIntroScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -81,8 +81,15 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedGetOnboardingCheckpoint = getOnboardingCheckpoint as jest.Mock;
 const mockedSetOnboardingCheckpoint = setOnboardingCheckpoint as jest.Mock;
 
+function revealIntroContent() {
+  act(() => {
+    jest.advanceTimersByTime(50);
+  });
+}
+
 describe("LanguageIntroScreen onboarding checkpoints", () => {
   beforeEach(() => {
+    jest.useFakeTimers();
     jest.clearAllMocks();
     mockedUseSettings.mockReturnValue({
       uiLanguage: "pl",
@@ -91,8 +98,13 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
       setNativeLanguage,
       colors: {
         headline: "#111",
+        my_green: "#00EBC7",
       },
     });
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
   });
 
   it("moves from app language selection to native language selection", async () => {
@@ -111,7 +123,7 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("moves from native language selection to welcome screen", async () => {
+  it("moves from native language selection to Leitner screen", async () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("native_language_required");
 
     const screen = render(<LanguageIntroScreen />);
@@ -123,20 +135,45 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     await waitFor(() => {
       expect(setNativeLanguage).toHaveBeenCalledWith("pl");
-      expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("welcome_required");
-      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+      expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("leitner_required");
+      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
     });
+    revealIntroContent();
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
-  it("moves from welcome screen to course pinning", async () => {
-    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+  it("renders the combined Leitner illustration", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("leitner_required");
 
     const screen = render(<LanguageIntroScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+      expect(screen.getByTestId("leitner-diagram")).toBeTruthy();
     });
+    revealIntroContent();
+  });
+
+  it("does not render arrow diagram on beta screen", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("beta_required");
+
+    const screen = render(<LanguageIntroScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Tworzysz Memicard razem ze mną")).toBeTruthy();
+    });
+    revealIntroContent();
+    expect(screen.queryByTestId("leitner-diagram")).toBeNull();
+  });
+
+  it("moves from Leitner screen to course pinning", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("leitner_required");
+
+    const screen = render(<LanguageIntroScreen />);
+
+    await waitFor(() => {
+      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
+    });
+    revealIntroContent();
     fireEvent.press(screen.getByText("Zaczynajmy"));
 
     await waitFor(() => {
@@ -145,19 +182,25 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
     });
   });
 
-  it("does not render support action on welcome screen", async () => {
-    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+  it("renders Leitner copy together under the title", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("leitner_required");
 
     const screen = render(<LanguageIntroScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Witaj w Memicard!")).toBeTruthy();
+      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
     });
+    revealIntroContent();
 
-    expect(screen.queryByText("Zgłoś problem lub pomysł")).toBeNull();
+    expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
+      /Memicard oparty jest na systemie Leitnera\./
+    );
+    expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
+      /Trudne fiszki wracają częściej\. Te, które znasz — coraz rzadziej\. Wszystko dzięki prostemu systemowi pudełek\./
+    );
   });
 
-  it("shows English welcome copy for English UI", async () => {
+  it("shows English Leitner copy for English UI", async () => {
     mockedUseSettings.mockReturnValue({
       uiLanguage: "en",
       nativeLanguage: "pl",
@@ -165,15 +208,20 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
       setNativeLanguage,
       colors: {
         headline: "#111",
+        my_green: "#00EBC7",
       },
     });
-    mockedGetOnboardingCheckpoint.mockResolvedValue("welcome_required");
+    mockedGetOnboardingCheckpoint.mockResolvedValue("leitner_required");
 
     const screen = render(<LanguageIntroScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Welcome to Memicard!")).toBeTruthy();
+      expect(screen.getByText("Remember more")).toBeTruthy();
+      expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
+        /Memicard is based on the Leitner system\./
+      );
       expect(screen.getByText("Let's start")).toBeTruthy();
     });
+    revealIntroContent();
   });
 });
