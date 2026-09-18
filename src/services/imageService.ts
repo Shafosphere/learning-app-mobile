@@ -12,7 +12,7 @@ const getBaseDir = (): string => {
 
 const getImagesDir = (): string => `${getBaseDir()}images/`;
 
-const ensureImagesDir = async (): Promise<string> => {
+export const prepareImagesDirectory = async (): Promise<string> => {
   const dir = getImagesDir();
   const info = await FileSystem.getInfoAsync(dir);
   if (!info.exists) {
@@ -56,8 +56,9 @@ export const isManagedImageUri = (uri?: string | null): boolean => {
   return uri.startsWith(getImagesDir());
 };
 
-export async function saveImage(
+export async function saveImageInDirectory(
   uri: string,
+  directory: string,
   preferredExtension?: string | null
 ): Promise<string> {
   if (!uri) {
@@ -67,16 +68,22 @@ export async function saveImage(
     return uri;
   }
 
-  const dir = await ensureImagesDir();
   const info = await FileSystem.getInfoAsync(uri);
   if (info.exists && typeof info.size === "number") {
     assertBelowSizeLimit(info.size, "Obraz");
   }
 
   const filename = buildFileName(preferredExtension ?? uri);
-  const target = `${dir}${filename}`;
+  const target = `${directory}${filename}`;
   await FileSystem.copyAsync({ from: uri, to: target });
   return target;
+}
+
+export async function saveImage(
+  uri: string,
+  preferredExtension?: string | null
+): Promise<string> {
+  return saveImageInDirectory(uri, await prepareImagesDirectory(), preferredExtension);
 }
 
 export async function deleteImage(uri?: string | null): Promise<void> {
@@ -95,7 +102,7 @@ export async function importImageFromZip(
   base64Content: string,
   filename: string
 ): Promise<string> {
-  const dir = await ensureImagesDir();
+  const dir = await prepareImagesDirectory();
   const bytes = Math.floor((base64Content.length * 3) / 4);
   assertBelowSizeLimit(bytes, filename);
   const target = `${dir}${buildFileName(filename)}`;

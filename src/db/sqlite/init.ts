@@ -1,9 +1,22 @@
 import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
 import prebuiltDatabaseAsset from "@/assets/data/sqlite/prebuilt.db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { saveImage } from "@/src/services/imageService";
+import {
+  deleteImage,
+  prepareImagesDirectory,
+  saveImageInDirectory,
+} from "@/src/services/imageService";
+import { runWithConcurrency } from "@/src/utils/runWithConcurrency";
 import { Asset } from "expo-asset";
+import * as FileSystem from "expo-file-system/legacy";
 import * as SQLite from "expo-sqlite";
+import {
+  StartupTimer,
+  errorMessage,
+  isInitialDatabaseImport,
+  logStartupTiming,
+  toFileSystemUri,
+} from "@/src/services/startupTiming";
 import {
   DATABASE_NAME,
   getDB,
@@ -14,6 +27,30 @@ import { ensureOfficialCourse } from "./repositories/courses";
 import { applySchema, configurePragmas } from "./schema";
 
 const BUNDLED_SYNC_DATABASE_NAME = "official-sync.db";
+
+type ImageHydrationTiming = {
+  imageReferences: number;
+  hydratedImages: number;
+  updatedRows: number;
+  assetResolutionWorkerMs: number;
+  fileCopyWorkerMs: number;
+  databaseUpdateWorkerMs: number;
+};
+
+const createImageHydrationTiming = (): ImageHydrationTiming => ({
+  imageReferences: 0,
+  hydratedImages: 0,
+  updatedRows: 0,
+  assetResolutionWorkerMs: 0,
+  fileCopyWorkerMs: 0,
+  databaseUpdateWorkerMs: 0,
+});
+
+const IMAGE_COPY_WORKERS = 4;
+const IMAGE_HYDRATION_BATCH_SIZE = 32;
+
+const elapsedMs = (startedAt: number): number =>
+  Math.max(0, Math.round(performance.now() - startedAt));
 
 async function getDatabaseUserVersion(
   db: SQLite.SQLiteDatabase
@@ -176,30 +213,48 @@ const buildImageLookup = (): Map<string, any> => {
   return lookup;
 };
 
-const resolveImageFromMap = async (
-  imageName: string,
-  imageLookup: Map<string, any>
-): Promise<string | null> => {
-  const imageModule = imageLookup.get(imageName);
-  if (!imageModule) return null;
-  const asset = Asset.fromModule(imageModule);
-  await asset.downloadAsync();
-  const uri = asset.localUri ?? asset.uri;
-  if (!uri) return null;
-  return saveImage(uri, asset.type);
+type ResolvedBundledImage = {
+  uri: string;
+  type: string | undefined;
 };
 
-async function hydrateBundledImagePaths(db: SQLite.SQLiteDatabase): Promise<void> {
+type ImageHydrationRow = {
+  id: number;
+  imageFront: string | null;
+  imageBack: string | null;
+};
+
+type HydratedImageRow = ImageHydrationRow & {
+  nextFront: string | null;
+  nextBack: string | null;
+};
+
+const resolveBundledImageSource = async (
+  imageName: string,
+  imageLookup: Map<string, any>,
+  timing: ImageHydrationTiming,
+): Promise<ResolvedBundledImage | null> => {
+  const imageModule = imageLookup.get(imageName);
+  if (!imageModule) return null;
+  const assetStartedAt = performance.now();
+  const asset = Asset.fromModule(imageModule);
+  await asset.downloadAsync();
+  timing.assetResolutionWorkerMs += elapsedMs(assetStartedAt);
+  const uri = asset.localUri ?? asset.uri;
+  if (!uri) return null;
+  return { uri, type: asset.type };
+};
+
+export async function hydrateBundledImagePaths(
+  db: SQLite.SQLiteDatabase
+): Promise<ImageHydrationTiming> {
+  const timing = createImageHydrationTiming();
   const imageLookup = buildImageLookup();
   if (imageLookup.size === 0) {
-    return;
+    return timing;
   }
 
-  const rows = await db.getAllAsync<{
-    id: number;
-    imageFront: string | null;
-    imageBack: string | null;
-  }>(
+  const rows = await db.getAllAsync<ImageHydrationRow>(
     `SELECT
        id,
        image_front AS imageFront,
@@ -208,63 +263,140 @@ async function hydrateBundledImagePaths(db: SQLite.SQLiteDatabase): Promise<void
      WHERE image_front IS NOT NULL OR image_back IS NOT NULL;`
   );
 
-  let updatedRows = 0;
-  for (const row of rows) {
+  const rowsToHydrate = rows.filter((row) => {
     const frontNeedsHydration = isUnresolvedBundledImageRef(row.imageFront);
     const backNeedsHydration = isUnresolvedBundledImageRef(row.imageBack);
-    if (!frontNeedsHydration && !backNeedsHydration) {
-      continue;
+    timing.imageReferences += Number(frontNeedsHydration) + Number(backNeedsHydration);
+    return frontNeedsHydration || backNeedsHydration;
+  });
+  if (rowsToHydrate.length === 0) {
+    return timing;
+  }
+
+  const imageDirectory = await prepareImagesDirectory();
+  const sourceCache = new Map<string, Promise<ResolvedBundledImage | null>>();
+  const getSource = (imageName: string) => {
+    let source = sourceCache.get(imageName);
+    if (!source) {
+      source = resolveBundledImageSource(imageName, imageLookup, timing);
+      sourceCache.set(imageName, source);
     }
-
-    const resolvedFront = frontNeedsHydration
-      ? await resolveImageFromMap(row.imageFront!, imageLookup)
-      : row.imageFront;
-    const resolvedBack = backNeedsHydration
-      ? await resolveImageFromMap(row.imageBack!, imageLookup)
-      : row.imageBack;
-
-    const nextFront = resolvedFront ?? row.imageFront;
-    const nextBack = resolvedBack ?? row.imageBack;
-
-    if (nextFront === row.imageFront && nextBack === row.imageBack) {
-      continue;
-    }
-
-    await db.runAsync(
-      `UPDATE custom_flashcards
-         SET image_front = ?, image_back = ?, updated_at = ?
-       WHERE id = ?;`,
-      nextFront,
-      nextBack,
-      Date.now(),
-      row.id
+    return source;
+  };
+  const copyImage = async (imageName: string): Promise<string | null> => {
+    const source = await getSource(imageName);
+    if (!source) return null;
+    const copyStartedAt = performance.now();
+    const savedUri = await saveImageInDirectory(
+      source.uri,
+      imageDirectory,
+      source.type
     );
-    updatedRows += 1;
+    timing.fileCopyWorkerMs += elapsedMs(copyStartedAt);
+    timing.hydratedImages += 1;
+    return savedUri;
+  };
+
+  for (let start = 0; start < rowsToHydrate.length; start += IMAGE_HYDRATION_BATCH_SIZE) {
+    const batch = rowsToHydrate.slice(start, start + IMAGE_HYDRATION_BATCH_SIZE);
+    const batchCreatedUris: string[] = [];
+    try {
+      const hydratedRows = await runWithConcurrency(
+        batch,
+        IMAGE_COPY_WORKERS,
+        async (row): Promise<HydratedImageRow> => {
+          const copyForBatch = async (imageName: string) => {
+            const savedUri = await copyImage(imageName);
+            if (savedUri) batchCreatedUris.push(savedUri);
+            return savedUri;
+          };
+          return {
+            ...row,
+            nextFront: isUnresolvedBundledImageRef(row.imageFront)
+              ? (await copyForBatch(row.imageFront)) ?? row.imageFront
+              : row.imageFront,
+            nextBack: isUnresolvedBundledImageRef(row.imageBack)
+              ? (await copyForBatch(row.imageBack)) ?? row.imageBack
+              : row.imageBack,
+          };
+        }
+      );
+      const rowsToUpdate = hydratedRows.filter(
+        (row) => row.nextFront !== row.imageFront || row.nextBack !== row.imageBack
+      );
+      if (rowsToUpdate.length === 0) continue;
+
+      const updateStartedAt = performance.now();
+      await db.execAsync("BEGIN TRANSACTION;");
+      try {
+        const now = Date.now();
+        for (const row of rowsToUpdate) {
+          await db.runAsync(
+            `UPDATE custom_flashcards
+             SET image_front = ?, image_back = ?, updated_at = ?
+           WHERE id = ?;`,
+            row.nextFront,
+            row.nextBack,
+            now,
+            row.id
+          );
+        }
+        await db.execAsync("COMMIT;");
+      } catch (error) {
+        await db.execAsync("ROLLBACK;");
+        throw error;
+      }
+      timing.databaseUpdateWorkerMs += elapsedMs(updateStartedAt);
+      timing.updatedRows += rowsToUpdate.length;
+    } catch (error) {
+      await Promise.allSettled(batchCreatedUris.map((uri) => deleteImage(uri)));
+      throw error;
+    }
   }
 
-  if (updatedRows > 0) {
-    console.log(`[DB] Hydrated bundled image paths for ${updatedRows} flashcards`);
+  if (timing.updatedRows > 0) {
+    console.log(`[DB] Hydrated bundled image paths for ${timing.updatedRows} flashcards`);
   }
+  return timing;
+}
+
+async function doesDeviceDatabaseExist(): Promise<boolean> {
+  const directory = SQLite.defaultDatabaseDirectory as string | undefined;
+  if (!directory) {
+    return false;
+  }
+  const separator = directory.endsWith("/") ? "" : "/";
+  const info = await FileSystem.getInfoAsync(
+    toFileSystemUri(`${directory}${separator}${DATABASE_NAME}`)
+  );
+  return info.exists;
 }
 
 async function ensurePrebuiltDatabaseImported(): Promise<void> {
-  try {
-    await SQLite.importDatabaseFromAssetAsync(DATABASE_NAME, {
-      assetId: prebuiltDatabaseAsset as number,
-      forceOverwrite: false,
-    });
-    console.log("[DB] prebuilt database asset import checked");
-  } catch (error) {
-    console.warn("[DB] prebuilt database import failed; continuing with regular init", error);
-  }
+  await SQLite.importDatabaseFromAssetAsync(DATABASE_NAME, {
+    assetId: prebuiltDatabaseAsset as number,
+    forceOverwrite: false,
+  });
+  console.log("[DB] prebuilt database asset import checked");
 }
 
-async function openBundledSyncDatabase(): Promise<SQLite.SQLiteDatabase> {
-  await SQLite.importDatabaseFromAssetAsync(BUNDLED_SYNC_DATABASE_NAME, {
-    assetId: prebuiltDatabaseAsset as number,
-    forceOverwrite: true,
-  });
-  const bundledDb = await SQLite.openDatabaseAsync(BUNDLED_SYNC_DATABASE_NAME);
+async function openBundledSyncDatabase(
+  timer?: StartupTimer
+): Promise<SQLite.SQLiteDatabase> {
+  const importBundledDatabase = () =>
+    SQLite.importDatabaseFromAssetAsync(BUNDLED_SYNC_DATABASE_NAME, {
+      assetId: prebuiltDatabaseAsset as number,
+      forceOverwrite: true,
+    });
+  if (timer) {
+    await timer.measure("officialSyncDatabaseImport", importBundledDatabase);
+  } else {
+    await importBundledDatabase();
+  }
+  const openBundledDatabase = () => SQLite.openDatabaseAsync(BUNDLED_SYNC_DATABASE_NAME);
+  const bundledDb = timer
+    ? await timer.measure("officialSyncDatabaseOpen", openBundledDatabase)
+    : await openBundledDatabase();
   console.log(
     `[DB] Bundled prebuilt database version: ${await getDatabaseUserVersion(bundledDb)}`
   );
@@ -565,13 +697,14 @@ async function syncOfficialCourseFlashcards(
 
 export async function seedOfficialPacksWithDb(
   db: SQLite.SQLiteDatabase,
-  options: { reportStartupProgress?: boolean } = {}
-): Promise<void> {
+  options: { reportStartupProgress?: boolean; timer?: StartupTimer } = {}
+): Promise<ImageHydrationTiming> {
   console.log("[DB] Syncing official packs metadata: start");
   let bundledDb: SQLite.SQLiteDatabase | null = null;
   const totalCourses = OFFICIAL_PACKS.length;
   let completedCourses = 0;
   const reportStartupProgress = options.reportStartupProgress ?? true;
+  const timer = options.timer;
 
   const notifyProgress = (completed: number, percent: number): void => {
     if (!reportStartupProgress) {
@@ -589,47 +722,60 @@ export async function seedOfficialPacksWithDb(
   notifyProgress(0, 10);
 
   try {
-    bundledDb = await openBundledSyncDatabase();
+    bundledDb = await openBundledSyncDatabase(timer);
     for (const def of OFFICIAL_PACKS) {
       try {
-        const localCourse = await ensureOfficialCourse(
-          db,
-          def.slug,
-          def.name,
-          def.iconId,
-          def.iconColor,
-          def.reviewsEnabled ?? true
-        );
-        const bundledCourse = await getBundledOfficialCourseSnapshot(
-          bundledDb,
-          def.slug
-        );
-
-        if (bundledCourse) {
-          const localFlashcardsCount = await getOfficialFlashcardsCount(
+        const synchronizeCourse = async () => {
+          const localCourse = await ensureOfficialCourse(
             db,
-            localCourse.id
+            def.slug,
+            def.name,
+            def.iconId,
+            def.iconColor,
+            def.reviewsEnabled ?? true
           );
-          const shouldSyncFlashcards =
-            (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1) ||
-            localFlashcardsCount !== bundledCourse.flashcardsCount;
+          const bundledCourse = await getBundledOfficialCourseSnapshot(
+            bundledDb!,
+            def.slug
+          );
 
-          if (shouldSyncFlashcards) {
-            console.log(
-              `[DB] Syncing official pack ${def.slug}: local version=${localCourse.packVersion ?? 0}, bundled version=${bundledCourse.packVersion}; local cards=${localFlashcardsCount}, bundled cards=${bundledCourse.flashcardsCount}`
-            );
-            await syncOfficialCourseFlashcards(
+          if (bundledCourse) {
+            const localFlashcardsCount = await getOfficialFlashcardsCount(
               db,
-              bundledDb,
-              localCourse.id,
-              bundledCourse.id,
-              bundledCourse.packVersion
+              localCourse.id
             );
-          }
-        }
+            const shouldSyncFlashcards =
+              (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1) ||
+              localFlashcardsCount !== bundledCourse.flashcardsCount;
 
-        if (def.settings) {
-          await applyOfficialCourseSettings(localCourse.id, def.settings);
+            if (shouldSyncFlashcards) {
+              console.log(
+                `[DB] Syncing official pack ${def.slug}: local version=${localCourse.packVersion ?? 0}, bundled version=${bundledCourse.packVersion}; local cards=${localFlashcardsCount}, bundled cards=${bundledCourse.flashcardsCount}`
+              );
+              await syncOfficialCourseFlashcards(
+                db,
+                bundledDb!,
+                localCourse.id,
+                bundledCourse.id,
+                bundledCourse.packVersion
+              );
+            }
+          }
+
+          if (def.settings) {
+            const applySettings = () =>
+              applyOfficialCourseSettings(localCourse.id, def.settings!);
+            if (timer) {
+              await timer.measure("officialCourseSettings", applySettings);
+            } else {
+              await applySettings();
+            }
+          }
+        };
+        if (timer) {
+          await timer.measure("officialCourseSync", synchronizeCourse);
+        } else {
+          await synchronizeCourse();
         }
       } catch (error) {
         console.warn(`[DB] Failed to sync metadata for official pack ${def.slug}`, error);
@@ -644,9 +790,12 @@ export async function seedOfficialPacksWithDb(
   } finally {
     await bundledDb?.closeAsync();
   }
-  await hydrateBundledImagePaths(db);
+  const imageHydration = timer
+    ? await timer.measure("imageHydration", () => hydrateBundledImagePaths(db))
+    : await hydrateBundledImagePaths(db);
   notifyProgress(totalCourses, 95);
   console.log("[DB] Syncing official packs metadata: done");
+  return imageHydration;
 }
 
 export async function seedOfficialPacks(): Promise<void> {
@@ -655,7 +804,21 @@ export async function seedOfficialPacks(): Promise<void> {
 }
 
 export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
+  const timer = new StartupTimer();
+  let initialImport = false;
+  let failedStage: string | undefined;
+
   try {
+    try {
+      const databaseExists = await timer.measure(
+        "databaseExistenceCheck",
+        doesDeviceDatabaseExist
+      );
+      initialImport = isInitialDatabaseImport(databaseExists);
+    } catch (error) {
+      failedStage = "databaseExistenceCheck";
+      console.warn("[DB] Could not check whether device database exists", error);
+    }
     notifyDbInitializationListeners({ type: "start" });
     notifyDbInitializationListeners({
       type: "progress",
@@ -664,7 +827,12 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
       percent: 0,
     });
     notifyDbInitializationListeners({ type: "import-start" });
-    await ensurePrebuiltDatabaseImported();
+    try {
+      await timer.measure("bundledDatabaseImport", ensurePrebuiltDatabaseImported);
+    } catch (error) {
+      failedStage ??= "bundledDatabaseImport";
+      console.warn("[DB] prebuilt database import failed; continuing with regular init", error);
+    }
     notifyDbInitializationListeners({
       type: "progress",
       completed: 0,
@@ -673,9 +841,9 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     });
     notifyDbInitializationListeners({ type: "import-finish" });
 
-    const db = await openDatabase();
-    await applySchema(db);
-    await configurePragmas(db);
+    const db = await timer.measure("databaseOpen", openDatabase);
+    await timer.measure("schema", () => applySchema(db));
+    await timer.measure("pragmas", () => configurePragmas(db));
     notifyDbInitializationListeners({
       type: "progress",
       completed: 0,
@@ -686,18 +854,48 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
       `[DB] Active device database version: ${await getDatabaseUserVersion(db)}`
     );
 
+    let imageHydration: ImageHydrationTiming | undefined;
     try {
-      await seedOfficialPacksWithDb(db);
+      imageHydration = await timer.measure("officialPackSync", () =>
+        seedOfficialPacksWithDb(db, { timer })
+      );
     } catch (error) {
+      failedStage ??= "officialPackSync";
       console.warn("[DB] Failed during official metadata sync", error);
     }
 
+    const durationMs = timer.elapsedMs();
+    const stages = timer.snapshot();
+    const reportedFailedStage =
+      failedStage ??
+      Object.entries(stages).find(([, stage]) => stage.failed)?.[0];
+    logStartupTiming({
+      event: "db-initialization",
+      initialImport,
+      totalMs: durationMs,
+      ...(reportedFailedStage ? { failedStage: reportedFailedStage } : {}),
+      stages,
+      ...(imageHydration ? { imageHydration } : {}),
+    });
     notifyDbInitializationListeners({
       type: "ready",
-      initialImport: false,
+      initialImport,
+      durationMs,
     });
     return db;
   } catch (error) {
+    const stages = timer.snapshot();
+    const failedStageName =
+      failedStage ??
+      Object.entries(stages).find(([, stage]) => stage.failed)?.[0];
+    logStartupTiming({
+      event: "db-initialization",
+      initialImport,
+      totalMs: timer.elapsedMs(),
+      ...(failedStageName ? { failedStage: failedStageName } : {}),
+      error: errorMessage(error),
+      stages,
+    });
     notifyDbInitializationListeners({ type: "error", error });
     throw error;
   }

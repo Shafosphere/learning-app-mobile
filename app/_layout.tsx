@@ -30,6 +30,7 @@ import { importUserData } from "@/src/services/importUserData";
 import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
+import { logStartupTiming } from "@/src/services/startupTiming";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
@@ -63,6 +64,13 @@ import {
 } from "@/src/features/notifications";
 
 SplashScreen.preventAutoHideAsync();
+
+const JS_ENTRY_STARTED_AT =
+  (
+    globalThis as typeof globalThis & {
+      __MEMICARD_JS_ENTRY_STARTED_AT?: number;
+    }
+  ).__MEMICARD_JS_ENTRY_STARTED_AT ?? performance.now();
 
 type LayoutNotifyKitNotification = {
   id?: string;
@@ -147,6 +155,7 @@ export default function RootLayout() {
   const previewTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const handledNotificationResponsesRef = useRef<Set<string>>(new Set());
   const startupSimulationAbortRef = useRef<AbortController | null>(null);
+  const appShellTimingLoggedRef = useRef(false);
 
   const hideSplashOnce = useCallback(async () => {
     if (splashHiddenRef.current) {
@@ -409,6 +418,17 @@ export default function RootLayout() {
     status === "error" ||
     status === "importing" ||
     status === "resetting";
+
+  useEffect(() => {
+    if (!shouldRenderApp || appShellTimingLoggedRef.current) {
+      return;
+    }
+    appShellTimingLoggedRef.current = true;
+    logStartupTiming({
+      event: "app-shell-ready",
+      totalMs: Math.max(0, Math.round(performance.now() - JS_ENTRY_STARTED_AT)),
+    });
+  }, [shouldRenderApp]);
 
   const handleNotificationResponse = useCallback(
     (

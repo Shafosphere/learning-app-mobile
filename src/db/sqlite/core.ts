@@ -10,7 +10,7 @@ export type DbInitializationEvent =
       total: number;
       percent: number;
     }
-  | { type: "ready"; initialImport: boolean }
+  | { type: "ready"; initialImport: boolean; durationMs?: number }
   | { type: "error"; error: unknown };
 
 export type DbInitializationListener = (event: DbInitializationEvent) => void;
