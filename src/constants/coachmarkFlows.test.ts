@@ -37,6 +37,10 @@ describe("coachmark flow definitions", () => {
     expect(
       FLASHCARDS_COACHMARK_STEPS.find((step) => step.id === "flashcards-step-9")
         ?.passThroughTargetIds,
-    ).toEqual(["flashcards-card-section", "flashcards-confirm-button"]);
+    ).toEqual([
+      "flashcards-card-section",
+      "flashcards-buttons-section",
+      "flashcards-confirm-button",
+    ]);
   });
 });

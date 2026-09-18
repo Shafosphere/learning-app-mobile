@@ -528,6 +528,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
     dismissKeyboardOnAdvance: true,
     passThroughTargetIds: [
       "flashcards-card-section",
+      "flashcards-buttons-section",
       "flashcards-confirm-button",
     ],
   },
