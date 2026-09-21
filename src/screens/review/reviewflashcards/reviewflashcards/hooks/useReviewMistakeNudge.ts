@@ -138,47 +138,57 @@ export const useReviewMistakeNudge = ({
     async (card: WordWithTranslations, box: keyof BoxesState) => {
       const candidate = await consumeMistakeNudgeCandidate(card.id);
       if (candidate) {
-        setMistakeNudge({ ...candidate, confirming: false, error: false });
-        setPendingExplanationMove(null);
-        setAnswer("");
-        setResult(false);
-        setIsBetweenCards(false);
-        return;
+        setMistakeNudge((current) => {
+          const cards = current?.cards ?? [];
+          if (cards.some((item) => item.card.id === candidate.card.id)) {
+            return current;
+          }
+          return {
+            cards: [...cards, candidate],
+            confirming: false,
+            error: false,
+          };
+        });
       }
       demoteAndRemoveReviewCard(card, box);
     },
     [
       consumeMistakeNudgeCandidate,
       demoteAndRemoveReviewCard,
-      setAnswer,
-      setIsBetweenCards,
-      setPendingExplanationMove,
-      setResult,
     ]
   );
 
   const handleKeepReviewingAfterMistakeNudge = useCallback(() => {
     if (!mistakeNudge || mistakeNudge.confirming) return;
-    const { card, box } = mistakeNudge;
     setMistakeNudge(null);
-    demoteAndRemoveReviewCard(card, box);
-  }, [demoteAndRemoveReviewCard, mistakeNudge]);
+  }, [mistakeNudge]);
 
-  const handleReturnMistakeNudgeToUnknown = useCallback(async () => {
+  const handleReturnMistakeNudgeToUnknown = useCallback(async (selectedCardIds?: readonly number[]) => {
     if (!mistakeNudge) return;
     if (mistakeNudge.preview || !courseId) {
       setMistakeNudge(null);
       return;
     }
-    const { card, box } = mistakeNudge;
+    const selectedIds = selectedCardIds ? new Set(selectedCardIds) : null;
+    const cards = selectedIds
+      ? mistakeNudge.cards.filter(({ card }) => selectedIds.has(card.id))
+      : mistakeNudge.cards;
+    if (cards.length === 0) return;
     setMistakeNudge((current) =>
       current ? { ...current, confirming: true, error: false } : current
     );
-    try {
-      await enqueueReviewMutation(card.id, () =>
-        returnFlashcardToUnknown({ courseId, flashcardId: card.id })
-      );
-      removeCardFromSession(card.id, box);
+    const results = await Promise.allSettled(
+      cards.map(async ({ card }) =>
+        enqueueReviewMutation(card.id, () =>
+          returnFlashcardToUnknown({ courseId, flashcardId: card.id })
+        )
+      )
+    );
+    const failedCards = cards.filter(
+      (_, index) => results[index].status === "rejected"
+    );
+
+    if (failedCards.length === 0) {
       setMistakeNudge(null);
       setPendingExplanationMove(null);
       setAnswer("");
@@ -186,17 +196,24 @@ export const useReviewMistakeNudge = ({
       setQueueNext(true);
       setIsBetweenCards(true);
       setTimeout(() => setIsBetweenCards(false), 300);
-    } catch (error) {
-      console.warn("[Review] Failed to return mistake nudge card to unknown", error);
-      setMistakeNudge((current) =>
-        current ? { ...current, confirming: false, error: true } : current
-      );
+      return;
     }
+
+    console.warn(
+      "[Review] Failed to return mistake nudge cards to unknown",
+      results
+        .filter((result): result is PromiseRejectedResult => result.status === "rejected")
+        .map((result) => result.reason)
+    );
+    setMistakeNudge((current) =>
+      current
+        ? { ...current, cards: failedCards, confirming: false, error: true }
+        : current
+    );
   }, [
     courseId,
     enqueueReviewMutation,
     mistakeNudge,
-    removeCardFromSession,
     setAnswer,
     setIsBetweenCards,
     setPendingExplanationMove,

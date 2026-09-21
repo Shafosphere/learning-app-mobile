@@ -512,9 +512,9 @@
           "button": "Pokaż hinty"
         },
         "previewReviewMistakeNudge": {
-          "title": "Podgląd nudge po błędach",
-          "subtitle": "Otwiera ekran powtórek i pokazuje okno dla przykładowej fiszki z serią błędów.",
-          "button": "Pokaż nudge"
+          "title": "Podgląd listy fiszek po błędach",
+          "subtitle": "Otwiera ekran powtórek i pokazuje zbiorcze okno z przykładowymi fiszkami.",
+          "button": "Pokaż listę"
         },
         "previewLocalExportReminder": {
           "title": "Podgląd przypomnienia o kopii",
@@ -1179,8 +1179,8 @@
         "returnToUnknownError": "Nie udało się cofnąć fiszki. Spróbuj ponownie."
       },
       "reviewMistakeNudge": {
-        "title": "Ta fiszka sprawia Ci problemy",
-        "description": "Ta fiszka sprawiła Ci trudność {{count}} razy z rzędu. Chcesz przenieść ją do Nieznanych i nauczyć się jej jeszcze raz od nowa?",
+        "title": "Fiszki sprawiają Ci problemy",
+        "description": "{{count}} fiszek wielokrotnie sprawiło Ci trudność. Przenieść je do Nieznanych i nauczyć się ich od nowa?",
         "front": "Awers",
         "back": "Rewers",
         "preview": {
@@ -1189,9 +1189,14 @@
         },
         "imageFront": "Obrazek na awersie",
         "imageBack": "Obrazek na rewersie",
-        "confirm": "PRZENIEŚ DO NIEZNANYCH",
+        "confirm": "PRZENIEŚ WSZYSTKIE",
+        "confirmSelected": "PRZENIEŚ ZAZNACZONE ({{count}})",
         "returning": "PRZENOSZENIE...",
-        "keep": "ĆWICZ DALEJ",
+        "keep": "ZOSTAW W POWTÓRKACH",
+        "selectAll": "Zaznacz wszystkie",
+        "deselectAll": "Odznacz wszystkie",
+        "selectCard": "Zaznacz fiszkę",
+        "deselectCard": "Odznacz fiszkę",
         "error": "Nie udało się przenieść fiszki. Spróbuj ponownie."
       },
       "hint": {

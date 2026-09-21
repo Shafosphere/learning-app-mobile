@@ -27,7 +27,6 @@ const MAX_GRID_BOX_SCALE = 1.55;
 const GRID_BOX_VERTICAL_EXTRA = 44;
 export const CLASSIC_BOX_WIDTH = BOX_SKIN_WIDTH;
 export const PREFERRED_CLASSIC_COLUMNS = 3;
-export const MIN_CLASSIC_SCALE = 0.75;
 
 const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxZero: 0,
@@ -44,7 +43,6 @@ function clamp(value: number, min: number, max: number): number {
 
 export type ClassicBoxLayout = {
     columns: number;
-    horizontalScroll: boolean;
     scale: number;
     itemWidth: number;
 };
@@ -52,15 +50,11 @@ export type ClassicBoxLayout = {
 export function getClassicBoxLayout(availableWidth: number): ClassicBoxLayout {
     const requiredWidth = CLASSIC_BOX_WIDTH * PREFERRED_CLASSIC_COLUMNS;
     const scale = Math.min(1, Math.max(0, availableWidth / requiredWidth));
-    const canFitPreferredColumns = scale >= MIN_CLASSIC_SCALE;
 
     return {
         columns: PREFERRED_CLASSIC_COLUMNS,
-        horizontalScroll: !canFitPreferredColumns,
-        scale: canFitPreferredColumns ? scale : 1,
-        itemWidth: canFitPreferredColumns
-            ? CLASSIC_BOX_WIDTH * scale
-            : CLASSIC_BOX_WIDTH,
+        scale,
+        itemWidth: CLASSIC_BOX_WIDTH * scale,
     };
 }
 
@@ -97,6 +91,8 @@ export default function BoxList({
     const { t } = useTranslation();
     const { width: windowWidth } = useWindowDimensions();
     const longPressTriggeredRef = useRef(false);
+    const [viewportWidth, setViewportWidth] = useState<number | null>(null);
+    const [rowOffsets, setRowOffsets] = useState<Record<number, { x: number; y: number }>>({});
     const [measuredBoxItems, setMeasuredBoxItems] = useState<
         Partial<Record<keyof BoxesState, { x: number; y: number; width: number; height: number }>>
     >({});
@@ -120,13 +116,13 @@ export default function BoxList({
         : entries;
     const explicitGrid = maxColumns != null;
     // Explicit tablet grids own their max width; responsive classic grids use
-    // the measured container width so phone insets are accounted for.
+    // the outer viewport width so phone insets are accounted for without
+    // feeding the grid's own maxWidth back into its sizing.
     const effectiveLayoutWidth = explicitGrid
-        ? layoutWidth ?? containerLayout?.width ?? windowWidth
-        : containerLayout?.width ?? layoutWidth ?? windowWidth;
+        ? layoutWidth ?? viewportWidth ?? windowWidth
+        : viewportWidth ?? layoutWidth ?? windowWidth;
     const classicLayout = getClassicBoxLayout(effectiveLayoutWidth);
-    const shouldUseHorizontalScroll =
-        horizontalScroll || (!explicitGrid && classicLayout.horizontalScroll);
+    const shouldUseHorizontalScroll = horizontalScroll;
     const effectiveHorizontalViewportWidth = Math.max(
         BOX_ITEM_WIDTH,
         effectiveLayoutWidth
@@ -165,8 +161,24 @@ export default function BoxList({
     const gridItemMinHeight =
         Math.ceil(BOX_SKIN_HEIGHT * gridBoxScale) + GRID_BOX_VERTICAL_EXTRA;
     const gridWidth = gridColumns ? gridItemWidth * gridColumns : undefined;
-    const boxOneLayout = measuredBoxItems.boxOne;
-    const boxTwoLayout = measuredBoxItems.boxTwo;
+    const gridRows = [];
+    if (gridColumns) {
+        for (let i = 0; i < displayedEntries.length; i += gridColumns) {
+            gridRows.push(displayedEntries.slice(i, i + gridColumns));
+        }
+    }
+    // Item onLayout coordinates are relative to their explicit row. Tutorial
+    // anchors need coordinates relative to the entire grid, including row two.
+    const getItemLayout = (boxName: keyof BoxesState) => {
+        const item = measuredBoxItems[boxName];
+        if (!item || !gridColumns) return item;
+        const index = displayedEntries.findIndex(([name]) => name === boxName);
+        const offset = rowOffsets[Math.floor(index / gridColumns)];
+        if (!offset) return undefined;
+        return { ...item, x: item.x + offset.x, y: item.y + offset.y };
+    };
+    const boxOneLayout = getItemLayout("boxOne");
+    const boxTwoLayout = getItemLayout("boxTwo");
     const shouldRenderPromotionAnchor = boxOneLayout != null && boxTwoLayout != null;
     const promotionArrowLeft = shouldRenderPromotionAnchor
         ? boxOneLayout.x +
@@ -236,7 +248,7 @@ export default function BoxList({
 
     const countRects = displayedEntries
         .map(([boxName]) => {
-            const itemLayout = measuredBoxItems[boxName];
+            const itemLayout = getItemLayout(boxName);
             const countLayout = measuredCounts[boxName];
             const pressableLayout = measuredPressables[boxName];
             if (!itemLayout || !countLayout || !pressableLayout) {
@@ -462,16 +474,36 @@ export default function BoxList({
 
     const boxesRow = (
         <View
+            testID="box-list-grid"
             style={[styles.containerTop, gridWidth ? { maxWidth: gridWidth } : null]}
             onLayout={handleContainerLayout}
         >
-            {displayedEntries.map(renderBoxItem)}
+            {gridRows.map((row, index) => (
+                <View
+                    key={row[0][0]}
+                    testID={`box-list-row-${index}`}
+                    style={styles.gridRow}
+                    onLayout={({ nativeEvent: { layout: { x, y } } }) => {
+                        setRowOffsets((prev) =>
+                            prev[index]?.x === x && prev[index]?.y === y
+                                ? prev
+                                : { ...prev, [index]: { x, y } }
+                        );
+                    }}
+                >
+                    {row.map(renderBoxItem)}
+                </View>
+            ))}
             {coachmarkAnchors}
         </View>
     );
 
     return (
-        <View style={styles.container}>
+        <View
+            testID="box-list-viewport"
+            style={styles.container}
+            onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
+        >
             {shouldUseHorizontalScroll ? (
                 <View
                     style={[

@@ -512,9 +512,9 @@
           "button": "Show hints"
         },
         "previewReviewMistakeNudge": {
-          "title": "Preview mistake nudge",
-          "subtitle": "Opens the review screen and shows the window for a sample flashcard with a wrong-answer streak.",
-          "button": "Show nudge"
+          "title": "Preview mistake flashcard list",
+          "subtitle": "Opens the review screen and shows the batch window with sample flashcards.",
+          "button": "Show list"
         },
         "previewLocalExportReminder": {
           "title": "Preview backup reminder",
@@ -1179,8 +1179,8 @@
         "returnToUnknownError": "Could not return this flashcard. Please try again."
       },
       "reviewMistakeNudge": {
-        "title": "This flashcard is giving you trouble",
-        "description": "You missed this flashcard {{count}} times in a row. Want to move it back to Unknown and learn it again from scratch?",
+        "title": "These flashcards are giving you trouble",
+        "description": "{{count}} flashcards repeatedly gave you trouble. Move them back to Unknown and learn them again from scratch?",
         "front": "Front",
         "back": "Back",
         "preview": {
@@ -1189,9 +1189,14 @@
         },
         "imageFront": "Image on the front",
         "imageBack": "Image on the back",
-        "confirm": "MOVE TO UNKNOWN",
+        "confirm": "MOVE ALL TO UNKNOWN",
+        "confirmSelected": "MOVE SELECTED ({{count}})",
         "returning": "MOVING...",
-        "keep": "KEEP REVIEWING",
+        "keep": "KEEP IN REVIEWS",
+        "selectAll": "Select all",
+        "deselectAll": "Deselect all",
+        "selectCard": "Select flashcard",
+        "deselectCard": "Deselect flashcard",
         "error": "Could not move this flashcard. Please try again."
       },
       "hint": {

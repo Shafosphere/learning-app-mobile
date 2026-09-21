@@ -1,12 +1,11 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native";
 import React from "react";
 import * as ReactNative from "react-native";
-import { Text, View } from "react-native";
+import { ScrollView, Text, View } from "react-native";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import BoxList, {
     getClassicBoxLayout,
-    MIN_CLASSIC_SCALE,
 } from "../BoxList";
 
 jest.mock("react-i18next", () => ({
@@ -44,10 +43,10 @@ jest.mock("../BoxList.styles", () => ({
     useBoxListStyles: () => ({
         container: {},
         containerTop: {
-            flexDirection: "row",
-            flexWrap: "wrap",
+            flexDirection: "column",
             position: "relative",
         },
+        gridRow: { flexDirection: "row", flexWrap: "nowrap", justifyContent: "center" },
         containerTopHorizontal: {
             flexDirection: "row",
             flexWrap: "nowrap",
@@ -100,21 +99,14 @@ describe("BoxList", () => {
         [320, 320 / 345],
         [300, 300 / 345],
         [270, 270 / 345],
+        [250, 250 / 345],
+        [344.92, 344.92 / 345],
     ])("keeps three classic columns at %s dp", (width, expectedScale) => {
         const layout = getClassicBoxLayout(width);
 
-        expect(layout.horizontalScroll).toBe(false);
         expect(layout.columns).toBe(3);
         expect(layout.scale).toBeCloseTo(expectedScale as number);
-        expect(layout.scale).toBeGreaterThanOrEqual(MIN_CLASSIC_SCALE);
-    });
-
-    it("uses horizontal scroll only below the minimum classic scale", () => {
-        const layout = getClassicBoxLayout(250);
-
-        expect(layout.horizontalScroll).toBe(true);
-        expect(layout.columns).toBe(3);
-        expect(layout.scale).toBe(1);
+        expect(layout.itemWidth * 3).toBeCloseTo(width);
     });
 
     it("uses measured container width for classic layout", () => {
@@ -126,17 +118,7 @@ describe("BoxList", () => {
             />
         );
 
-        const classicContainer = screen.UNSAFE_getAllByType(View).find(
-            (node) =>
-                Array.isArray(node.props.style) &&
-                node.props.style.some(
-                    (style: { flexWrap?: string } | undefined) =>
-                        style?.flexWrap === "wrap"
-                )
-        );
-        expect(classicContainer).toBeTruthy();
-
-        fireEvent(classicContainer!, "layout", {
+        fireEvent(screen.getByTestId("box-list-viewport"), "layout", {
             nativeEvent: { layout: { width: 336, height: 210 } },
         });
 
@@ -147,16 +129,57 @@ describe("BoxList", () => {
                 }),
             ])
         );
-        expect(
-            screen.UNSAFE_getAllByType(View).some(
-                (node) =>
-                    Array.isArray(node.props.style) &&
-                    node.props.style.some(
-                        (style: { flexWrap?: string } | undefined) =>
-                            style?.flexWrap === "nowrap"
-                    )
-            )
-        ).toBe(false);
+        expect(screen.UNSAFE_queryAllByType(ScrollView)).toHaveLength(0);
+    });
+
+    it.each([250, 320, 344.92, 393])("keeps explicit 3 + 2 rows at %s dp", (width) => {
+        const screen = render(
+            <BoxList boxes={boxes} activeBox="boxOne" handleSelectBox={jest.fn()} hideBoxZero />
+        );
+        fireEvent(screen.getByTestId("box-list-viewport"), "layout", {
+            nativeEvent: { layout: { width, height: 400 } },
+        });
+        const rows = screen.getAllByTestId(/^box-list-row-/);
+        expect(rows).toHaveLength(2);
+        expect(rows.map(row => within(row).getAllByTestId(/^box-list-item-/).map(node => node.props.testID))).toEqual([
+            ["box-list-item-boxOne", "box-list-item-boxTwo", "box-list-item-boxThree"],
+            ["box-list-item-boxFour", "box-list-item-boxFive"],
+        ]);
+        expect(screen.UNSAFE_queryAllByType(ScrollView)).toHaveLength(0);
+
+        screen.rerender(
+            <BoxList boxes={boxes} activeBox="boxOne" handleSelectBox={jest.fn()} />
+        );
+        expect(screen.getAllByTestId(/^box-list-row-/).map(row =>
+            within(row).getAllByTestId(/^box-list-item-/).length
+        )).toEqual([3, 3]);
+    });
+
+    it("includes second-row offsets in the counts tutorial anchor", () => {
+        const screen = render(
+            <BoxList boxes={boxes} activeBox="boxOne" handleSelectBox={jest.fn()}
+                hideBoxZero countsCoachmarkId="counts" />
+        );
+        fireEvent(screen.getByTestId("box-list-grid"), "layout", {
+            nativeEvent: { layout: { width: 345, height: 332 } },
+        });
+        fireEvent(screen.getByTestId("box-list-row-1"), "layout", {
+            nativeEvent: { layout: { x: 0, y: 166, width: 345, height: 166 } },
+        });
+        fireEvent(screen.getByTestId("box-list-item-boxFive"), "layout", {
+            nativeEvent: { layout: { x: 172.5, y: 0, width: 115, height: 166 } },
+        });
+        fireEvent(screen.getAllByRole("button")[4], "layout", {
+            nativeEvent: { layout: { x: 0, y: 0, width: 115, height: 150 } },
+        });
+        fireEvent(screen.UNSAFE_getAllByType(Text).filter(node =>
+            typeof node.props.children === "number"
+        )[4], "layout", {
+            nativeEvent: { layout: { x: 45, y: 126, width: 20, height: 24 } },
+        });
+        expect(screen.getByTestId("counts").props.style).toEqual(expect.arrayContaining([
+            expect.objectContaining({ left: 213.5, top: 288, width: 28, height: 32 }),
+        ]));
     });
 
     it("scales classic grid items responsively within requested columns", () => {

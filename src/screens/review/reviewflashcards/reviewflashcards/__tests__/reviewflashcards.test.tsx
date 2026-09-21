@@ -98,6 +98,26 @@ jest.mock("@/src/components/nudge/NudgeModal", () => ({
   },
 }));
 
+jest.mock("../components/ReviewMistakeBatchModal", () => ({
+  ReviewMistakeBatchModal: (props: Record<string, any>) => {
+    latestNudgeModalProps = {
+      ...props,
+      onSecondaryPress: props.onKeepReviewing,
+    };
+    if (!props.visible) return null;
+    return (
+      <MockView testID="review-mistake-nudge">
+        {(props.cards ?? []).map((item: { card: { id: number; text: string; translations: string[] } }) => (
+          <MockReact.Fragment key={item.card.id}>
+            <MockText>{item.card.text}</MockText>
+            <MockText>{item.card.translations[0]}</MockText>
+          </MockReact.Fragment>
+        ))}
+      </MockView>
+    );
+  },
+}));
+
 jest.mock("@/src/db/sqlite/db", () => ({
   advanceCustomReview: jest.fn(() =>
     Promise.resolve({ stage: 2, nextReview: Date.now() })
@@ -626,6 +646,7 @@ describe("reviewflashcards correction desync regression", () => {
       flashcardsCardSize: "normal",
       flashcardsImageSize: "dynamic",
       dominantHand: "right",
+      colors: { my_yellow: "#facc15" },
     });
     mockedUseCoachmarkFlow.mockReturnValue({
       isActive: false,
@@ -1977,7 +1998,7 @@ describe("reviewflashcards correction desync regression", () => {
         flashcardId: 721,
       });
     });
-    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    expect(mockedScheduleCustomReview).toHaveBeenCalledWith(721, 77, 0);
     expect(screen.getByText("boxOne:0")).not.toBeNull();
   });
 
@@ -2113,7 +2134,7 @@ describe("reviewflashcards correction desync regression", () => {
     await waitFor(() => {
       expect(latestNudgeModalProps?.visible).toBe(true);
     });
-    expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+    expect(mockedScheduleCustomReview).toHaveBeenCalledWith(725, 77, 0);
     jest.useRealTimers();
   });
 

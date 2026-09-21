@@ -3,11 +3,9 @@ import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } fr
 
 import Card from "@/src/components/card/card";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
-import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
 import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
-import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
 import {
@@ -35,13 +33,14 @@ import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import {
   Animated,
-  Text,
+  Image as RNImage,
   TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
 import { LinearTransition } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
+import { imageMaps } from "@/src/constants/imageMaps";
 import {
   REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE,
 } from "./model/reviewFlashcards.constants";
@@ -49,6 +48,7 @@ import { useReviewFlashcardsAnswerFlow } from "./hooks/useReviewFlashcardsAnswer
 import { useReviewFlashcardsSession } from "./hooks/useReviewFlashcardsSession";
 import { useReviewMistakeNudge } from "./hooks/useReviewMistakeNudge";
 import { useReviewMutationQueue } from "./hooks/useReviewMutationQueue";
+import { ReviewMistakeBatchModal } from "./components/ReviewMistakeBatchModal";
 import { useStyles } from "./reviewflashcards-styles";
 
 const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
@@ -80,8 +80,6 @@ export default function ReviewFlashcardsPlaceholder() {
     learningRemindersEnabled,
     autoSubmitCorrectAnswer,
   } = settings;
-  const mistakeNudgeTextColor = settings.colors?.paragraph ?? "#1f2937";
-  const mistakeNudgeTitleColor = settings.colors?.headline ?? "#111827";
   const checkSpelling = useSpellchecking();
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
@@ -207,17 +205,44 @@ export default function ReviewFlashcardsPlaceholder() {
     if (!__DEV__ || !mistakeNudgePreviewToken) return;
 
     const timer = setTimeout(() => {
+      const previewFlagUris = [
+        imageMaps.europeFlags["pl.svg"],
+        imageMaps.europeFlags["de.svg"],
+        imageMaps.europeFlags["fr.svg"],
+        imageMaps.europeFlags["it.svg"],
+      ].map((source) => RNImage.resolveAssetSource(source).uri);
+      const previewPairs = [
+        ["warning road sign", t("flashcards.card.reviewMistakeNudge.preview.back")],
+        ["pedestrian crossing", "przejście dla pieszych"],
+        ["speed limit", "ograniczenie prędkości"],
+        ["$\\frac{3}{4} + \\frac{1}{8}$", "$\\frac{7}{8}$"],
+        ["Rozwiąż równanie $2x^2 - 5x - 3 = 0$", "$x = 3$ lub $x = -\\frac{1}{2}$"],
+        ["$\\sqrt{144} + \\sqrt{81}$", "$21$"],
+        ["Prawdopodobieństwo zdarzenia przeciwnego", "$P(A') = 1 - P(A)$"],
+        ["Długi tekst awersu sprawdzający obcięcie zawartości w bardzo wąskim kafelku", "Długi rewers również nie może rozepchnąć widoku ani przycisków"],
+      ] as const;
       setMistakeNudge({
-        card: {
-          id: -1,
-          text: "",
-          translations: [t("flashcards.card.reviewMistakeNudge.preview.back")],
-          flipped: false,
-          stage: 2,
-          imageFront: REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE,
-        },
-        box: "boxTwo",
-        wrongStreak: 3,
+        cards: Array.from({ length: 18 }, (_, index) => {
+          const [text, translation] = previewPairs[index % previewPairs.length];
+          return {
+            card: {
+              id: -index - 1,
+              text,
+              translations: [translation],
+              flipped: false,
+              stage: index % 5,
+              ...(index % 3 === 0
+                ? { imageFront: previewFlagUris[index % previewFlagUris.length] }
+                : index % 5 === 0
+                  ? { imageBack: previewFlagUris[index % previewFlagUris.length] }
+                  : index % 7 === 0
+                    ? { imageFront: REVIEW_MISTAKE_NUDGE_PREVIEW_FRONT_IMAGE }
+                  : {}),
+            },
+            box: "boxTwo",
+            wrongStreak: index % 2 === 0 ? 3 : 6,
+          };
+        }),
         confirming: false,
         error: false,
         preview: true,
@@ -257,7 +282,7 @@ export default function ReviewFlashcardsPlaceholder() {
     isLoading,
     setIsLoading,
     correctionActive: getCorrectionActive,
-    mistakeNudgeActive: mistakeNudge != null,
+    mistakeNudgeActive: false,
     isBetweenCards: getIsBetweenCards,
     handleBlockedBoxInteraction: handleBlockedBoxInteractionBridge,
     handleBoxFaceSelection: handleBoxFaceSelectionBridge,
@@ -397,7 +422,7 @@ export default function ReviewFlashcardsPlaceholder() {
     cancelTodayLearningReminderSchedule,
     queueMistakeNudgeCheck,
     finalizeWrongReviewCard,
-    mistakeNudgeActive: mistakeNudge != null,
+    mistakeNudgeActive: false,
     handleBoxFaceCorrectAnswer,
     handleBoxFaceWrongAnswer,
     handleStatsBurst,
@@ -446,7 +471,7 @@ export default function ReviewFlashcardsPlaceholder() {
     selectedItemId != null && hasPendingMutation(selectedItemId);
   const externalActionLocked =
     isLoading ||
-    mistakeNudge != null ||
+    (mistakeNudge != null && !hasCardsInSession) ||
     pendingDbMutationForSelectedCard ||
     isBetweenCards;
   const {
@@ -543,61 +568,7 @@ export default function ReviewFlashcardsPlaceholder() {
       : {}),
   });
 
-  const mistakeNudgeFrontText = mistakeNudge
-    ? mistakeNudge.card.text.trim() ||
-      (!mistakeNudge.card.imageFront
-        ? t("flashcards.card.peek.emptyContent")
-        : "")
-    : "";
-  const mistakeNudgeBackText = mistakeNudge
-    ? mistakeNudge.card.translations[0]?.trim() ||
-      (!mistakeNudge.card.imageBack
-        ? t("flashcards.card.peek.emptyTranslation")
-        : "")
-    : "";
-  const renderMistakeNudgeSide = (
-    label: string,
-    value: string,
-    imageUri?: string | null
-  ) => (
-    <View>
-      <Text
-        style={{
-          color: mistakeNudgeTextColor,
-          fontSize: 12,
-          fontWeight: "800",
-          opacity: 0.7,
-        }}
-      >
-        {label}
-      </Text>
-      {imageUri ? (
-        <View style={{ alignItems: "flex-start", marginTop: 6, marginBottom: 6 }}>
-          <PromptImage
-            uri={imageUri}
-            imageStyle={{
-              width: 96,
-              height: 84,
-              maxWidth: 120,
-              maxHeight: 96,
-              borderRadius: 8,
-            }}
-          />
-        </View>
-      ) : null}
-      {value ? (
-        <Text
-          style={{
-            color: mistakeNudgeTitleColor,
-            fontSize: 16,
-            fontWeight: "800",
-          }}
-        >
-          {value}
-        </Text>
-      ) : null}
-    </View>
-  );
+  const mistakeNudgeCards = mistakeNudge?.cards ?? [];
 
   const renderButtons = (position: "top" | "bottom") => (
     <FlashcardsButtons
@@ -685,7 +656,8 @@ export default function ReviewFlashcardsPlaceholder() {
       handleBoxLongPress={handleBoxLongPress}
       effectiveBoxesLayout={effectiveLayout}
       boxSelectionLocked={
-        isBetweenCards || isLoading || correction != null || mistakeNudge != null
+        isBetweenCards || isLoading || correction != null ||
+        (mistakeNudge != null && !hasCardsInSession)
       }
       isTabletLayout={isTabletLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
@@ -849,47 +821,16 @@ export default function ReviewFlashcardsPlaceholder() {
         onClose={closePeek}
         onReturnToUnknown={handleReturnPeekCardToUnknown}
       />
-      <NudgeModal
-        visible={mistakeNudge != null}
-        title={t("flashcards.card.reviewMistakeNudge.title")}
-        description={t("flashcards.card.reviewMistakeNudge.description", {
-          count: mistakeNudge?.wrongStreak ?? 3,
-        })}
-        confirmLabel={
-          mistakeNudge?.confirming
-            ? t("flashcards.card.reviewMistakeNudge.returning")
-            : t("flashcards.card.reviewMistakeNudge.confirm")
+      <ReviewMistakeBatchModal
+        visible={mistakeNudge != null && !hasCardsInSession}
+        cards={mistakeNudgeCards}
+        confirming={mistakeNudge?.confirming ?? false}
+        error={mistakeNudge?.error ?? false}
+        onKeepReviewing={handleKeepReviewingAfterMistakeNudge}
+        onConfirm={(selectedCardIds) =>
+          void handleReturnMistakeNudgeToUnknown(selectedCardIds)
         }
-        confirmDisabled={mistakeNudge?.confirming}
-        secondaryLabel={t("flashcards.card.reviewMistakeNudge.keep")}
-        onSecondaryPress={handleKeepReviewingAfterMistakeNudge}
-        onConfirm={() => void handleReturnMistakeNudgeToUnknown()}
-        onClose={handleKeepReviewingAfterMistakeNudge}
-      >
-        <View style={{ gap: 8, marginTop: 12 }}>
-          {renderMistakeNudgeSide(
-            t("flashcards.card.reviewMistakeNudge.front"),
-            mistakeNudgeFrontText,
-            mistakeNudge?.card.imageFront
-          )}
-          {renderMistakeNudgeSide(
-            t("flashcards.card.reviewMistakeNudge.back"),
-            mistakeNudgeBackText,
-            mistakeNudge?.card.imageBack
-          )}
-          {mistakeNudge?.error ? (
-            <Text
-              style={{
-                color: mistakeNudgeTextColor,
-                fontSize: 13,
-                fontWeight: "700",
-              }}
-            >
-              {t("flashcards.card.reviewMistakeNudge.error")}
-            </Text>
-          ) : null}
-        </View>
-      </NudgeModal>
+      />
     </View>
   );
 }

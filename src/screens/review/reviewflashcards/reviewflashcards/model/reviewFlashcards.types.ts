@@ -6,7 +6,8 @@ export type ReviewMistakeNudgeCandidate = {
   wrongStreak: number;
 };
 
-export type ReviewMistakeNudgeState = ReviewMistakeNudgeCandidate & {
+export type ReviewMistakeNudgeState = {
+  cards: ReviewMistakeNudgeCandidate[];
   confirming: boolean;
   error: boolean;
   preview?: boolean;

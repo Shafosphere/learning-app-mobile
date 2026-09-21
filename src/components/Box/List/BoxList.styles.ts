@@ -10,10 +10,14 @@ export const useBoxListStyles = createThemeStylesHook((colors) => ({
     containerTop: {
         width: "100%",
         display: "flex",
-        flexDirection: "row",
-        flexWrap: "wrap",
-        justifyContent: "center",
+        flexDirection: "column",
         position: "relative",
+    },
+    gridRow: {
+        width: "100%",
+        flexDirection: "row",
+        flexWrap: "nowrap",
+        justifyContent: "center",
     },
     containerTopHorizontal: {
         display: "flex",

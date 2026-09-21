@@ -146,6 +146,7 @@ export function FlashcardsBoxesSection({
     >
       <CoachmarkAnchor
         id={coachmarkId ?? "flashcards-boxes-section"}
+        style={{ width: "100%" }}
         shape="rect"
         radius={28}
       >
