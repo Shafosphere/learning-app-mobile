@@ -14,6 +14,11 @@ interface BoxSkinProps {
   isActive?: boolean;
   isCaro?: boolean;
   showHat?: boolean;
+  cardVariant?: "default" | "logo";
+  /** Overrides learning-box preference; navbar mascot must always show face. */
+  showFace?: boolean;
+  accessible?: boolean;
+  accessibilityLabel?: string;
 }
 
 const BoxSkin: React.FC<BoxSkinProps> = ({
@@ -22,13 +27,18 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
   isActive,
   isCaro,
   showHat = false,
+  cardVariant = "default",
+  showFace,
+  accessible = true,
+  accessibilityLabel: accessibilityLabelOverride,
 }) => {
   const styles = useBoxSkinStyles();
   const { showBoxFaces } = useSettings();
   const faceSource = BOX_FACE_ASSETS[face];
 
-  const accessibilityLabel = `Pudełko z ${wordCount} słowami${
-    showBoxFaces ? `, nastrój: ${face}` : ""
+  const shouldShowFace = showFace ?? showBoxFaces;
+  const accessibilityLabel = accessibilityLabelOverride ?? `Pudełko z ${wordCount} słowami${
+    shouldShowFace ? `, nastrój: ${face}` : ""
   }`;
 
   return (
@@ -38,10 +48,10 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
         isActive && styles.activeBox,
         isCaro && styles.caroPosition,
       ]}
-      accessible
-      accessibilityRole="image"
-      accessibilityLabel={accessibilityLabel}
-      accessibilityState={{ selected: !!isActive }}
+      accessible={accessible}
+      accessibilityRole={accessible ? "image" : undefined}
+      accessibilityLabel={accessible ? accessibilityLabel : undefined}
+      accessibilityState={accessible ? { selected: !!isActive } : undefined}
     >
       {showHat ? (
         <Image
@@ -52,8 +62,8 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
         />
       ) : null}
       <Image source={BoxTop} style={styles.skin} />
-      <BoxCardsRow wordCount={wordCount} styles={styles} />
-      {showBoxFaces && (
+      <BoxCardsRow wordCount={wordCount} styles={styles} variant={cardVariant} />
+      {shouldShowFace && (
         <Image
           source={faceSource}
           style={styles.face}

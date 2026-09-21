@@ -3,30 +3,34 @@ import {
   ReactNode,
   useCallback,
   useContext,
+  useRef,
   useState,
 } from "react";
 import Popup, { PopupColor } from "@/src/components/popup/popup";
 
-interface PopupConfig {
+export interface PopupConfig {
   message: string;
   color: PopupColor;
   duration: number;
 }
 
-type PopupState = (PopupConfig & { id: number }) | null;
+export type ActivePopup = (PopupConfig & { id: number }) | null;
 type PopupSetter = (cfg: PopupConfig) => void;
 type PopupAnchorSetter = (x: number | null) => void;
 
 const PopupContext = createContext<PopupSetter>(() => {});
+const ActivePopupContext = createContext<ActivePopup>(null);
 const PopupAnchorXContext = createContext<number | null>(null);
 const PopupAnchorSetterContext = createContext<PopupAnchorSetter>(() => {});
 
 export const PopupProvider = ({ children }: { children: ReactNode }) => {
-  const [popup, setPopupState] = useState<PopupState>(null);
+  const [popup, setPopupState] = useState<ActivePopup>(null);
+  const popupIdRef = useRef(0);
   const [popupAnchorX, setPopupAnchorXState] = useState<number | null>(null);
 
   const setPopup = useCallback((cfg: PopupConfig) => {
-    setPopupState({ ...cfg, id: Date.now() });
+    popupIdRef.current += 1;
+    setPopupState({ ...cfg, id: popupIdRef.current });
   }, []);
   const setPopupAnchorX = useCallback<PopupAnchorSetter>((x) => {
     setPopupAnchorXState((current) => {
@@ -48,6 +52,7 @@ export const PopupProvider = ({ children }: { children: ReactNode }) => {
   return (
     <PopupAnchorSetterContext.Provider value={setPopupAnchorX}>
       <PopupAnchorXContext.Provider value={popupAnchorX}>
+        <ActivePopupContext.Provider value={popup}>
         <PopupContext.Provider value={setPopup}>
           {children}
           {popup && (
@@ -61,11 +66,13 @@ export const PopupProvider = ({ children }: { children: ReactNode }) => {
             />
           )}
         </PopupContext.Provider>
+        </ActivePopupContext.Provider>
       </PopupAnchorXContext.Provider>
     </PopupAnchorSetterContext.Provider>
   );
 };
 
 export const usePopup = () => useContext(PopupContext);
+export const useActivePopup = () => useContext(ActivePopupContext);
 export const usePopupAnchorX = () => useContext(PopupAnchorXContext);
 export const usePopupAnchorSetter = () => useContext(PopupAnchorSetterContext);

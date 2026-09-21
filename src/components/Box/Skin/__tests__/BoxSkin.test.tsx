@@ -52,6 +52,16 @@ describe("BoxSkin", () => {
 
     expect(queryByTestId("box-skin-face")).toBeNull();
   });
+
+  it("can force face visibility for the navbar mascot", () => {
+    mockUseSettings.mockReturnValue({ showBoxFaces: false });
+
+    const { getByTestId } = render(
+      <BoxSkin wordCount={40} face="nice" showFace accessible={false} />
+    );
+
+    expect(getByTestId("box-skin-face")).toBeTruthy();
+  });
 });
 
 describe("boxFaces helpers", () => {

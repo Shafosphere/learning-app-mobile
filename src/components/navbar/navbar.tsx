@@ -32,14 +32,13 @@ import {
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useTranslation } from "react-i18next";
 import NavbarStatsRotator from "./NavbarStatsRotator";
+import NavbarMascot from "./NavbarMascot";
 import { useStyles } from "./navbar-styles";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Foundation from "@expo/vector-icons/Foundation";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-
-const logo = require("@/assets/illustrations/navbar/logo.png");
 
 type NavbarProps = {
   children?: ReactNode;
@@ -82,6 +81,7 @@ export default function Navbar({ children }: NavbarProps) {
   const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
     null,
   );
+  const [mascotTapReaction, setMascotTapReaction] = useState({ id: 0, rage: false });
 
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
@@ -242,7 +242,10 @@ export default function Navbar({ children }: NavbarProps) {
     logoTapRef.current.ts = now;
     logoTapRef.current.count = withinWindow ? logoTapRef.current.count + 1 : 1;
 
-    if (logoTapRef.current.count >= 7) {
+    const rage = logoTapRef.current.count >= 7;
+    setMascotTapReaction((current) => ({ id: current.id + 1, rage }));
+
+    if (rage) {
       triggerQuote({
         trigger: "quote_logo_rage",
         category: "easter",
@@ -395,7 +398,7 @@ export default function Navbar({ children }: NavbarProps) {
                 "components.navbar.navbar.accessibilityLabel.przejdzDoStronyGlownej"
               )}
             >
-              <Image source={logo} style={styles.logo} contentFit="contain" />
+              <NavbarMascot tapReaction={mascotTapReaction} />
             </TouchableOpacity>
             <CoachmarkAnchor id="flashcards-course-button" shape="rect" radius={18}>
               <TouchableOpacity

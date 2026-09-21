@@ -112,6 +112,11 @@ jest.mock("@/src/components/navbar/NavbarStatsRotator", () => {
   };
 });
 
+jest.mock("@/src/components/navbar/NavbarMascot", () => {
+  const { View } = jest.requireActual<typeof import("react-native")>("react-native");
+  return function NavbarMascotMock() { return <View testID="navbar-mascot" />; };
+});
+
 jest.mock("@/src/components/course/CourseTitleMarquee", () => ({
   CourseTitleMarquee: function CourseTitleMarqueeMock({
     text,
@@ -147,6 +152,7 @@ jest.mock("@/src/contexts/DueReviewsContext", () => ({
 
 jest.mock("@/src/contexts/PopupContext", () => ({
   usePopupAnchorSetter: jest.fn(() => jest.fn()),
+  useActivePopup: jest.fn(() => null),
 }));
 
 jest.mock("@/src/contexts/QuoteContext", () => ({
