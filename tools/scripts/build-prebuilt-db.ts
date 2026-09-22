@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 2;
+const PREBUILT_DATABASE_VERSION = 3;
 
 const OFFICIAL_PACKS = [
   {
@@ -198,6 +198,17 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvFile: "znaki_drogowe.csv",
+  },
+  {
+    slug: "ptaki",
+    packVersion: 1,
+    name: "Ptaki Polski i Europy Środkowej",
+    iconId: "bird",
+    iconColor: "#16A34A",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    csvFile: "patki.csv",
   },
   {
     slug: "flagi_europy",

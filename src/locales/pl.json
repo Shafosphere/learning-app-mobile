@@ -1505,6 +1505,16 @@
         "javascript": "JavaScript",
         "matematyka": "Matematyka"
       }
+    },
+    "knowledgeCourseGroups": {
+      "label": {
+        "capitals": "Stolice",
+        "flags": "Flagi"
+      },
+      "description": {
+        "capitals": "Stolice państw świata",
+        "flags": "Flagi państw świata"
+      }
     }
   },
   "contexts": {

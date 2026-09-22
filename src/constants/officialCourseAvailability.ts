@@ -24,6 +24,7 @@ const POLISH_GENERAL_COURSE_SLUGS = [
   "math",
   "grecka_mitologia_prawda_falsz_50",
   "znaki_drogowe",
+  "ptaki",
   "flagi_europy",
   "flagi_afryki",
   "flagi_azji",

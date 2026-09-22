@@ -195,6 +195,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "column",
     gap: 12,
   },
+  looseKnowledgeCoursesList: {
+    display: "flex",
+    flexDirection: "column",
+    gap: 12,
+    marginTop: 12,
+  },
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",

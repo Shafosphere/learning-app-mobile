@@ -1505,6 +1505,16 @@
         "javascript": "JavaScript",
         "matematyka": "Mathematics"
       }
+    },
+    "knowledgeCourseGroups": {
+      "label": {
+        "capitals": "Capitals",
+        "flags": "Flags"
+      },
+      "description": {
+        "capitals": "Capitals of the world",
+        "flags": "Flags of the world"
+      }
     }
   },
   "contexts": {

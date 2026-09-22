@@ -19,6 +19,25 @@ const mockSkipFlow = jest.fn(async () => {
   mockCoachmarkActive = false;
 });
 let mockPinnedOfficialCourseIds: number[] = [];
+type MockOfficialCourseRow = {
+  id: number;
+  name: string;
+  iconId: string;
+  iconColor: string;
+  slug: string | null;
+  cardsCount: number;
+};
+
+let mockOfficialCourseRows: MockOfficialCourseRow[] = [
+  {
+    id: 1,
+    name: "Test course",
+    iconId: "book",
+    iconColor: "#00aa66",
+    slug: null,
+    cardsCount: 12,
+  },
+];
 
 const mockColors = {
   background: "#ffffff",
@@ -35,7 +54,7 @@ const mockColors = {
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string, options?: { value?: number }) => {
+    t: (key: string, options?: Record<string, string | number>) => {
       const copy: Record<string, string> = {
         "onboarding.skip.label": "Pomiń",
         "onboarding.skip.title": "Pominąć samouczek?",
@@ -47,7 +66,12 @@ jest.mock("react-i18next", () => ({
           "zrób własny",
         "screens.courses.pincourse.coursePin.coursePin.textChild.jezyki": "Języki",
         "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza": "Wiedza",
+        "constants.knowledgeCourseGroups.label.capitals": "Stolice",
+        "constants.knowledgeCourseGroups.label.flags": "Flagi",
+        "constants.knowledgeCourseGroups.description.capitals": "Stolice państw świata",
+        "constants.knowledgeCourseGroups.description.flags": "Flagi państw świata",
         "repeats.format.flashcardsValue": `${options?.value ?? 0} fiszek`,
+        "courses.groups.categoryA11y": `Kategoria ${options?.title}, ${options?.count} kursów`,
       };
       return copy[key] ?? key;
     },
@@ -75,16 +99,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getOfficialCustomCoursesWithCardCounts: jest.fn(() =>
-    Promise.resolve([
-      {
-        id: 1,
-        name: "Test course",
-        iconId: "book",
-        iconColor: "#00aa66",
-        slug: null,
-        cardsCount: 12,
-      },
-    ]),
+    Promise.resolve(mockOfficialCourseRows),
   ),
 }));
 
@@ -166,6 +181,16 @@ describe("CoursePinScreen skip onboarding", () => {
     jest.clearAllMocks();
     mockCoachmarkActive = true;
     mockPinnedOfficialCourseIds = [];
+    mockOfficialCourseRows = [
+      {
+        id: 1,
+        name: "Test course",
+        iconId: "book",
+        iconColor: "#00aa66",
+        slug: null,
+        cardsCount: 12,
+      },
+    ];
     mockedGetOnboardingCheckpoint.mockResolvedValue("pin_required");
   });
 
@@ -336,5 +361,73 @@ describe("CoursePinScreen skip onboarding", () => {
         selected: true,
       });
     });
+  });
+
+  it("groups only capitals and flags in the knowledge tab", async () => {
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      isPendingStart: false,
+      hasSeen: true,
+      isReady: true,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 0,
+      canGoBack: false,
+      canGoNext: false,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+      skipFlow: mockSkipFlow,
+    });
+    mockOfficialCourseRows = [
+      {
+        id: 11,
+        name: "Stolice Europy",
+        iconId: "city",
+        iconColor: "#2563EB",
+        slug: "panstwa_i_stolice_europy",
+        cardsCount: 44,
+      },
+      {
+        id: 12,
+        name: "Flagi Europy",
+        iconId: "flag",
+        iconColor: "#2563EB",
+        slug: "flagi_europy",
+        cardsCount: 44,
+      },
+      {
+        id: 13,
+        name: "Astronomia",
+        iconId: "planet",
+        iconColor: "#8B5CF6",
+        slug: "astronomia",
+        cardsCount: 30,
+      },
+      {
+        id: 14,
+        name: "Ang A1",
+        iconId: "flag:en",
+        iconColor: "#10B981",
+        slug: "eng_to_pl_a1",
+        cardsCount: 100,
+      },
+    ];
+
+    render(<CoursePinScreen />);
+    fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
+
+    await waitFor(() => {
+      expect(screen.getByLabelText("Kategoria Stolice, 1 kursów")).toBeTruthy();
+      expect(screen.getByLabelText("Kategoria Flagi, 1 kursów")).toBeTruthy();
+      expect(screen.getByText("Astronomia")).toBeTruthy();
+    });
+    expect(screen.queryByText("Stolice Europy")).toBeNull();
+    expect(screen.queryByText("Flagi Europy")).toBeNull();
+    expect(screen.queryByText("Ang A1")).toBeNull();
+
+    fireEvent.press(screen.getByLabelText("Kategoria Stolice, 1 kursów"));
+    expect(screen.getByText("Stolice Europy")).toBeTruthy();
+    expect(screen.queryByText("Flagi Europy")).toBeNull();
   });
 });

@@ -9,7 +9,10 @@ import {
   CourseCategory,
 } from "@/src/constants/courseCategories";
 import { getFlagSource } from "@/src/constants/languageFlags";
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import {
+  OFFICIAL_PACKS,
+  type KnowledgeCourseGroupId,
+} from "@/src/constants/officialPacks";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getOfficialCustomCoursesWithCardCounts } from "@/src/db/sqlite/db";
 import { filterCoursesForNativeLanguage } from "@/src/features/courses/courseVisibility";
@@ -51,6 +54,7 @@ type OfficialCourseListItem = {
   smallFlag: string | null;
   isMini: boolean;
   categoryId?: string;
+  knowledgeGroupId?: KnowledgeCourseGroupId;
   position?: number;
 };
 
@@ -69,6 +73,26 @@ type CourseViewMode = "languages" | "general";
 const COURSE_PIN_WAIT_FOR_PIN_STEP_INDEX = COURSE_PIN_COACHMARK_STEPS.findIndex(
   (step) => step.id === "course-pin-step-7"
 );
+
+const KNOWLEDGE_ACCORDION_GROUPS: {
+  id: KnowledgeCourseGroupId;
+  titleKey: string;
+  descriptionKey: string;
+  icon: "city" | "flag";
+}[] = [
+  {
+    id: "capitals",
+    titleKey: "constants.knowledgeCourseGroups.label.capitals",
+    descriptionKey: "constants.knowledgeCourseGroups.description.capitals",
+    icon: "city",
+  },
+  {
+    id: "flags",
+    titleKey: "constants.knowledgeCourseGroups.label.flags",
+    descriptionKey: "constants.knowledgeCourseGroups.description.flags",
+    icon: "flag",
+  },
+];
 
 export default function CoursePinScreen() {
   const styles = useStyles();
@@ -131,6 +155,7 @@ export default function CoursePinScreen() {
             smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
             isMini: manifest?.isMini ?? true,
             categoryId: manifest?.categoryId,
+            knowledgeGroupId: manifest?.knowledgeGroupId,
             position: manifest?.position,
           };
         });
@@ -145,13 +170,23 @@ export default function CoursePinScreen() {
     };
   }, []);
 
+  const visibleOfficialCourses = useMemo(
+    () =>
+      filterCoursesForNativeLanguage(
+        officialCourses,
+        nativeLanguage,
+        pinnedOfficialCourseIds
+      ),
+    [nativeLanguage, officialCourses, pinnedOfficialCourseIds]
+  );
+
+  const visibleKnowledgeCourses = useMemo(
+    () => visibleOfficialCourses.filter((pack) => Boolean(pack.categoryId)),
+    [visibleOfficialCourses]
+  );
+
   const groupedCourses = useMemo(() => {
     const map = new Map<string, CourseGroup>();
-    const visibleOfficialCourses = filterCoursesForNativeLanguage(
-      officialCourses,
-      nativeLanguage,
-      pinnedOfficialCourseIds
-    );
 
     const ensureGroup = (
       sourceLang: string | null,
@@ -230,7 +265,7 @@ export default function CoursePinScreen() {
     });
 
     return sortedGroups;
-  }, [nativeLanguage, officialCourses, pinnedOfficialCourseIds, t]);
+  }, [t, visibleOfficialCourses]);
 
   const hasAnyPinned = useMemo(() => {
     return pinnedOfficialCourseIds.length > 0;
@@ -247,68 +282,64 @@ export default function CoursePinScreen() {
     };
   }, []);
 
-  const categorizedCourses = useMemo(
-    () => groupedCourses.filter((group) => Boolean(group.category)),
-    [groupedCourses]
-  );
   const languageCourses = useMemo(
     () => groupedCourses.filter((group) => !group.category),
     [groupedCourses]
   );
 
   const accordionGroups = useMemo<AccordionGroupItem[]>(() => {
-    const nextGroups: AccordionGroupItem[] = [];
-
-    categorizedCourses.forEach((group) => {
-      const regularItems = group.officialPacks.filter(
+    return KNOWLEDGE_ACCORDION_GROUPS.map((knowledgeGroup) => {
+      const items = visibleKnowledgeCourses
+        .filter((pack) => pack.knowledgeGroupId === knowledgeGroup.id)
+        .sort((a, b) => {
+          const aPosition = a.position ?? Number.POSITIVE_INFINITY;
+          const bPosition = b.position ?? Number.POSITIVE_INFINITY;
+          if (aPosition !== bPosition) return aPosition - bPosition;
+          return a.name.localeCompare(b.name);
+        });
+      const regularItems = items.filter(
         (pack) => pack.isMini === false
       );
-      const miniItems = group.officialPacks.filter(
+      const miniItems = items.filter(
         (pack) => pack.isMini !== false
       );
-      const count = regularItems.length + miniItems.length;
-      if (count === 0) {
-        return;
-      }
-
-      const targetCode = group.targetLang ? group.targetLang.toUpperCase() : "?";
-      const sourceCode = group.sourceLang ? group.sourceLang.toUpperCase() : "?";
-      const title = group.category
-        ? t(group.category.labelKey)
-        : group.sourceLang
-          ? `${targetCode} / ${sourceCode}`
-          : targetCode;
-
-      const icon: AccordionGroupItem["icon"] = group.category?.icon
-        ? { kind: "fa6", name: group.category.icon }
-        : undefined;
-
-      nextGroups.push({
-        key: group.key,
-        title,
-        subtitle: group.category?.descriptionKey
-          ? t(group.category.descriptionKey)
-          : "",
-        count,
+      return {
+        key: `knowledge:${knowledgeGroup.id}`,
+        title: t(knowledgeGroup.titleKey),
+        subtitle: t(knowledgeGroup.descriptionKey),
+        count: items.length,
         regularItems,
         miniItems,
-        icon,
-      });
+        icon: { kind: "fa6", name: knowledgeGroup.icon },
+      };
     });
+  }, [t, visibleKnowledgeCourses]);
 
-    return nextGroups;
-  }, [categorizedCourses, t]);
+  const looseKnowledgeCourses = useMemo(
+    () =>
+      visibleKnowledgeCourses
+        .filter((pack) => !pack.knowledgeGroupId)
+        .sort((a, b) => {
+          const aPosition = a.position ?? Number.POSITIVE_INFINITY;
+          const bPosition = b.position ?? Number.POSITIVE_INFINITY;
+          if (aPosition !== bPosition) return aPosition - bPosition;
+          return a.name.localeCompare(b.name);
+        }),
+    [visibleKnowledgeCourses]
+  );
 
   const firstVisiblePackId = useMemo(() => {
     const firstLanguagePack = languageCourses[0]?.officialPacks[0]?.id ?? null;
+    const firstKnowledgeGroup = accordionGroups.find((group) => group.count > 0);
     const firstGeneralPack =
-      accordionGroups[0]?.regularItems[0]?.id ??
-      accordionGroups[0]?.miniItems[0]?.id ??
+      firstKnowledgeGroup?.regularItems[0]?.id ??
+      firstKnowledgeGroup?.miniItems[0]?.id ??
+      looseKnowledgeCourses[0]?.id ??
       null;
     return viewMode === "languages"
       ? firstLanguagePack ?? firstGeneralPack
       : firstGeneralPack ?? firstLanguagePack;
-  }, [accordionGroups, languageCourses, viewMode]);
+  }, [accordionGroups, languageCourses, looseKnowledgeCourses, viewMode]);
 
   const introActive = checkpoint !== "done";
   const coachmark = useCoachmarkFlow({
@@ -707,7 +738,8 @@ export default function CoursePinScreen() {
             </>
           ) : (
             <>
-              {accordionGroups.length === 0 ? (
+              {accordionGroups.every((group) => group.count === 0) &&
+              looseKnowledgeCourses.length === 0 ? (
                 <Text style={styles.emptyStateText}>
                   {t(
                     "screens.courses.pincourse.coursePin.coursePin.textChild.brakKursowWiedzyOgolnej"
@@ -718,6 +750,11 @@ export default function CoursePinScreen() {
                 groups={accordionGroups}
                 renderCourseCard={renderOfficialPackCard}
               />
+              {looseKnowledgeCourses.length > 0 ? (
+                <View style={styles.looseKnowledgeCoursesList}>
+                  {looseKnowledgeCourses.map(renderOfficialPackCard)}
+                </View>
+              ) : null}
             </>
           )}
 

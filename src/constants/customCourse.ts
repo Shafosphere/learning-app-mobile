@@ -97,6 +97,7 @@ export const COURSE_ICONS: CourseIconDefinition[] = [
   { id: "cloud", Component: AntDesign, name: "cloud", category: "general" },
   { id: "eye", Component: AntDesign, name: "eye", category: "general" },
   { id: "leaf", Component: Ionicons, name: "leaf", category: "science" },
+  { id: "bird", Component: MaterialCommunityIcons, name: "bird", category: "science" },
   { id: "book", Component: MaterialCommunityIcons, name: "book-open-variant", category: "science" },
   { id: "music", Component: Ionicons, name: "musical-notes", category: "lifestyle" },
   { id: "camera", Component: Entypo, name: "camera", category: "lifestyle" },

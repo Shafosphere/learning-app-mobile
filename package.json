@@ -17,6 +17,8 @@
     "db:prebuild": "node --experimental-strip-types ./tools/scripts/build-prebuilt-db.ts",
     "csv:external-ids": "node --experimental-strip-types ./tools/scripts/add-external-ids.ts",
     "language:export": "tsx ./tools/scripts/export-language-review.ts",
+    "assets:birds": "node --experimental-strip-types ./tools/scripts/download-bird-images.ts",
+    "assets:birds:optimize": "bash ./tools/scripts/optimize-bird-images.sh",
     "assets:check-paths": "bash ./scripts/check-legacy-asset-paths.sh",
     "i18n:scan": "node ./tools/scripts/scan-hardcoded-i18n-text.js"
   },

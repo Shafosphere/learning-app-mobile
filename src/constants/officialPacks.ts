@@ -15,6 +15,8 @@ export type OfficialPackCourseSettings = {
   imageFrameEnabled?: boolean;
 };
 
+export type KnowledgeCourseGroupId = "capitals" | "flags";
+
 type OfficialPackDef = {
   slug: string;
   packVersion: number;
@@ -35,6 +37,8 @@ type OfficialPackDef = {
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
   categoryId?: string;
+  // Grouping used only by the Knowledge tab on the course pin screen.
+  knowledgeGroupId?: KnowledgeCourseGroupId;
   // Opcjonalne ustawienia domyślne aplikowane przy seedowaniu oficjalnego kursu
   settings?: OfficialPackCourseSettings;
 };
@@ -285,6 +289,25 @@ const OFFICIAL_PACKS_MANIFEST = ([
     imageMap: imageMaps.roadSigns,
   },
   {
+    slug: "ptaki",
+    packVersion: 1,
+    name: "Ptaki Polski i Europy Środkowej",
+    iconId: "bird",
+    iconColor: "#16A34A",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "science",
+    settings: {
+      imageSize: "large",
+    },
+    imageMap: imageMaps.birds,
+  },
+  {
     slug: "flagi_europy",
     packVersion: 4,
     name: "Flagi Europy",
@@ -298,6 +321,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -317,6 +341,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -336,6 +361,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -355,6 +381,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -374,6 +401,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -393,6 +421,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -418,6 +447,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_afryki",
@@ -433,6 +463,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_azji",
@@ -448,6 +479,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_ameryki",
@@ -463,6 +495,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_oceanii",
@@ -478,6 +511,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_swiata",
@@ -493,6 +527,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "flagi_europy_en",
@@ -507,6 +542,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -525,6 +561,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -543,6 +580,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -561,6 +599,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -579,6 +618,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -597,6 +637,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "flags",
     settings: {
       imageSize: "medium",
     },
@@ -621,6 +662,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_afryki_en",
@@ -635,6 +677,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_azji_en",
@@ -649,6 +692,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_ameryki_en",
@@ -663,6 +707,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_oceanii_en",
@@ -677,6 +722,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
   {
     slug: "panstwa_i_stolice_swiata_en",
@@ -691,6 +737,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "en",
     isMini: true,
     categoryId: "geography",
+    knowledgeGroupId: "capitals",
   },
 ]) satisfies (Omit<OfficialPackDef, "packVersion"> & {
   packVersion?: number;
