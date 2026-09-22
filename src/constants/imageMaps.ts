@@ -487,7 +487,7 @@ export const imageMaps = {
     "29_Parus_palustris02.webp": require("@/assets/images/birds/29_Parus_palustris02.webp"),
     "30_Aegithalos_caudatus_front-on_2.webp": require("@/assets/images/birds/30_Aegithalos_caudatus_front-on_2.webp"),
     "31_Sitta_europaea_wildlife_3.webp": require("@/assets/images/birds/31_Sitta_europaea_wildlife_3.webp"),
-    "32_Baumla_ufer_senkrecht.webp": require("@/assets/images/birds/32_Baumla_ufer_senkrecht.webp"),
+    "32_Short-toed_Treecreeper_Certhia_brachydactyla_cropped_version.webp": require("@/assets/images/birds/32_Short-toed_Treecreeper_Certhia_brachydactyla_cropped_version.webp"),
     "33_Eurasian_wren.webp": require("@/assets/images/birds/33_Eurasian_wren.webp"),
     "34_Blackbird_female.webp": require("@/assets/images/birds/34_Blackbird_female.webp"),
     "35_Song_Thrush_Turdus_philomelos.webp": require("@/assets/images/birds/35_Song_Thrush_Turdus_philomelos.webp"),

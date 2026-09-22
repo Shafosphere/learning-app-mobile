@@ -45,9 +45,9 @@ jest.mock("react-i18next", () => ({
         "screens.courses.activatecourse.courseActivate.courseActivate.textChild.nicTuNieMaCzas":
           "Nic tu nie ma :(, czas wybrać kurs!",
         "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs":
-          "Dodaj kurs",
+          "Przypnij kurs",
         "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs":
-          "Dodaj kurs",
+          "Przypnij kurs",
         "screens.courses.activatecourse.courseActivate.courseActivate.text.ukonczone":
           "completed",
         "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.ukonczone":
@@ -468,7 +468,7 @@ describe("CourseActivateScreen loading state", () => {
     const screen = render(<CourseActivateScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("Dodaj kurs")).toBeTruthy();
+      expect(screen.getByText("Przypnij kurs")).toBeTruthy();
       expect(screen.getByText("completed")).toBeTruthy();
     });
     expect(screen.queryByText("app.actions.next")).toBeNull();

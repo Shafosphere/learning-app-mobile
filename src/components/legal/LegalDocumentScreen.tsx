@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useStyles } from "@/src/components/legal/LegalScreen-styles";
-import React from "react";
+import React, { type ReactNode } from "react";
 import { Linking, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -19,6 +19,7 @@ type LegalDocumentScreenProps = {
   heroKey: string;
   sectionKeys: string[];
   emphasizedSectionKeys?: string[];
+  children?: ReactNode;
 };
 
 function toBulletList(value: unknown): string[] {
@@ -75,6 +76,7 @@ export default function LegalDocumentScreen({
   heroKey,
   sectionKeys,
   emphasizedSectionKeys,
+  children,
 }: LegalDocumentScreenProps) {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -160,6 +162,7 @@ export default function LegalDocumentScreen({
 
           </View>
         ))}
+        {children}
       </ScrollView>
     </View>
   );

@@ -23,6 +23,8 @@ const POLISH_GENERAL_COURSE_SLUGS = [
   "polska_historia",
   "math",
   "grecka_mitologia_prawda_falsz_50",
+  "znaki_drogowe_najwazniejsze",
+  "znaki_drogowe_rozszerzone",
   "znaki_drogowe",
   "ptaki",
   "flagi_europy",

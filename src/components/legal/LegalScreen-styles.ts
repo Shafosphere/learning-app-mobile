@@ -97,6 +97,28 @@ export const useStyles = createThemeStylesHook((colors) => ({
     shadowOffset: { width: 0, height: 4 },
     elevation: 2,
   },
+  courseCard: {
+    backgroundColor: colors.secondBackground,
+    borderRadius: 20,
+    padding: 18,
+    borderWidth: 1,
+    borderColor: colors.border,
+    gap: 12,
+  },
+  courseCardTitle: {
+    fontSize: 20,
+    lineHeight: 25,
+    fontWeight: "900",
+    color: colors.headline,
+  },
+  courseCardBody: {
+    fontSize: 14,
+    lineHeight: 21,
+    color: colors.paragraph,
+  },
+  courseCardButton: {
+    alignSelf: "flex-end",
+  },
   sectionTitle: {
     fontSize: 20,
     lineHeight: 25,

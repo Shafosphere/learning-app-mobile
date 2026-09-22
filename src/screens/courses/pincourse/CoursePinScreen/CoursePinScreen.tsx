@@ -78,7 +78,7 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
   id: KnowledgeCourseGroupId;
   titleKey: string;
   descriptionKey: string;
-  icon: "city" | "flag";
+  icon: "city" | "flag" | "road";
 }[] = [
   {
     id: "capitals",
@@ -91,6 +91,12 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
     titleKey: "constants.knowledgeCourseGroups.label.flags",
     descriptionKey: "constants.knowledgeCourseGroups.description.flags",
     icon: "flag",
+  },
+  {
+    id: "roadSigns",
+    titleKey: "constants.knowledgeCourseGroups.label.roadSigns",
+    descriptionKey: "constants.knowledgeCourseGroups.description.roadSigns",
+    icon: "road",
   },
 ];
 

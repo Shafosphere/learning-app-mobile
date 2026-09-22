@@ -26,7 +26,10 @@ const EXPECTED_CARD_COUNTS: Record<string, number> = {
   polska_historia: 144,
   math: 258,
   grecka_mitologia_prawda_falsz_50: 50,
+  znaki_drogowe_najwazniejsze: 80,
+  znaki_drogowe_rozszerzone: 132,
   znaki_drogowe: 165,
+  ptaki: 50,
   flagi_europy: 52,
   flagi_afryki: 55,
   flagi_azji: 50,
@@ -192,8 +195,8 @@ describe("prebuilt CSV parser", () => {
 
 describe("registered prebuilt CSV packs", () => {
   it("keeps registered pack inventory and card counts stable", () => {
-    expect(OFFICIAL_PACKS).toHaveLength(41);
-    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(41);
+    expect(OFFICIAL_PACKS).toHaveLength(44);
+    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(44);
 
     const actualCounts = Object.fromEntries(
       OFFICIAL_PACKS.map((pack: { slug: string }) => [
@@ -208,7 +211,7 @@ describe("registered prebuilt CSV packs", () => {
         (total: number, count) => total + (count as number),
         0
       )
-    ).toBe(18135);
+    ).toBe(18397);
   });
 
   it("capitalizes country names in built-in course cards", () => {

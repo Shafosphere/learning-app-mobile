@@ -798,6 +798,24 @@
             "detailed terms for selected sources may be available through external links"
           ]
         }
+      },
+      "courses": {
+        "body": "Sources, creators, and license terms for images used in this course.",
+        "button": "Credits"
+      },
+      "attributions": {
+        "intro": "Full details for images used in this course.",
+        "count_one": "{{count}} image",
+        "count_other": "{{count}} images",
+        "labels": { "title": "Title", "author": "Creator", "changes": "Changes" },
+        "columns": { "bird": "Bird", "title": "Image title", "author": "Creator", "license": "License", "changes": "Changes", "links": "Links" },
+        "sourceButton": "Source page",
+        "licenseButton": "License",
+        "publicDomain": "Public domain",
+        "showDetails": "Show details",
+        "linkError": "Could not open link. Try again later.",
+        "notFoundTitle": "Attributions not found",
+        "notFoundBody": "This attribution set is not available in app."
       }
     }
   },
@@ -1509,11 +1527,13 @@
     "knowledgeCourseGroups": {
       "label": {
         "capitals": "Capitals",
-        "flags": "Flags"
+        "flags": "Flags",
+        "roadSigns": "Road signs"
       },
       "description": {
         "capitals": "Capitals of the world",
-        "flags": "Flags of the world"
+        "flags": "Flags of the world",
+        "roadSigns": "Polish road signs"
       }
     }
   },
@@ -1876,11 +1896,11 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edit course {{value}}",
               "przejdzDalej": "Continue",
-              "dodajKurs": "Add course",
+              "dodajKurs": "Pin course",
               "ukonczone": "Show completed courses"
             },
             "text": {
-              "dodajKurs": "add\ncourse",
+              "dodajKurs": "pin\ncourse",
               "ukonczone": "completed"
             }
           }

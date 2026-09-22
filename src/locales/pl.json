@@ -798,6 +798,26 @@
             "szczegółowe warunki dla wybranych źródeł mogą być dostępne pod linkami zewnętrznymi"
           ]
         }
+      },
+      "courses": {
+        "body": "Źródła, autorzy i warunki licencji obrazów użytych w kursie.",
+        "button": "Autorzy"
+      },
+      "attributions": {
+        "intro": "Pełne informacje o obrazach wykorzystanych w tym kursie.",
+        "count_one": "{{count}} obraz",
+        "count_few": "{{count}} obrazy",
+        "count_many": "{{count}} obrazów",
+        "count_other": "{{count}} obrazów",
+        "labels": { "title": "Tytuł", "author": "Autor", "changes": "Zmiany" },
+        "columns": { "bird": "Ptak", "title": "Tytuł obrazu", "author": "Autor", "license": "Licencja", "changes": "Zmiany", "links": "Linki" },
+        "sourceButton": "Strona źródłowa",
+        "licenseButton": "Licencja",
+        "publicDomain": "Domena publiczna",
+        "showDetails": "Pokaż szczegóły",
+        "linkError": "Nie udało się otworzyć linku. Spróbuj ponownie później.",
+        "notFoundTitle": "Nie znaleziono adnotacji",
+        "notFoundBody": "Ten zestaw adnotacji nie jest dostępny w aplikacji."
       }
     }
   },
@@ -1509,11 +1529,13 @@
     "knowledgeCourseGroups": {
       "label": {
         "capitals": "Stolice",
-        "flags": "Flagi"
+        "flags": "Flagi",
+        "roadSigns": "Znaki drogowe"
       },
       "description": {
         "capitals": "Stolice państw świata",
-        "flags": "Flagi państw świata"
+        "flags": "Flagi państw świata",
+        "roadSigns": "Polskie znaki drogowe"
       }
     }
   },
@@ -1876,11 +1898,11 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edytuj kurs {{value}}",
               "przejdzDalej": "Przejdź dalej",
-              "dodajKurs": "Dodaj kurs",
+              "dodajKurs": "Przypnij kurs",
               "ukonczone": "Pokaż ukończone kursy"
             },
             "text": {
-              "dodajKurs": "dodaj\nkurs",
+              "dodajKurs": "przypnij\nkurs",
               "ukonczone": "ukończone"
             }
           }

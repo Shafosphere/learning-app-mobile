@@ -15,7 +15,7 @@ export type OfficialPackCourseSettings = {
   imageFrameEnabled?: boolean;
 };
 
-export type KnowledgeCourseGroupId = "capitals" | "flags";
+export type KnowledgeCourseGroupId = "capitals" | "flags" | "roadSigns";
 
 type OfficialPackDef = {
   slug: string;
@@ -270,9 +270,10 @@ const OFFICIAL_PACKS_MANIFEST = ([
     categoryId: "mitologia",
   },
   {
-    slug: "znaki_drogowe",
-    packVersion: 2,
-    name: "Znaki Drogowe",
+    slug: "znaki_drogowe_najwazniejsze",
+    packVersion: 1,
+    name: "Podstawowe znaki",
+    position: 1,
     iconId: "car",
     iconColor: "#DC2626",
     reviewsEnabled: true,
@@ -283,6 +284,49 @@ const OFFICIAL_PACKS_MANIFEST = ([
     smallFlag: "pl",
     isMini: true,
     categoryId: "road_signs",
+    knowledgeGroupId: "roadSigns",
+    settings: {
+      imageSize: "medium",
+    },
+    imageMap: imageMaps.roadSigns,
+  },
+  {
+    slug: "znaki_drogowe_rozszerzone",
+    packVersion: 1,
+    name: "Rozszerzone znaki",
+    position: 2,
+    iconId: "car",
+    iconColor: "#DC2626",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "road_signs",
+    knowledgeGroupId: "roadSigns",
+    settings: {
+      imageSize: "medium",
+    },
+    imageMap: imageMaps.roadSigns,
+  },
+  {
+    slug: "znaki_drogowe",
+    packVersion: 4,
+    name: "Wszystkie znaki",
+    position: 3,
+    iconId: "car",
+    iconColor: "#DC2626",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: false,
+    sourceLang: "pl",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: true,
+    categoryId: "road_signs",
+    knowledgeGroupId: "roadSigns",
     settings: {
       imageSize: "medium",
     },
@@ -290,7 +334,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "ptaki",
-    packVersion: 1,
+    packVersion: 2,
     name: "Ptaki Polski i Europy Środkowej",
     iconId: "bird",
     iconColor: "#16A34A",
@@ -303,7 +347,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: true,
     categoryId: "science",
     settings: {
-      imageSize: "large",
+      imageSize: "very_large",
     },
     imageMap: imageMaps.birds,
   },
