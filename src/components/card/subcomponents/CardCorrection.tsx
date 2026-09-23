@@ -89,7 +89,6 @@ export function CardCorrection({
   handleCorrectionInput1Change,
   wrongInputChange,
   suggestionProps,
-  isIntroMode,
   renderCorrectionGhostText,
   renderCorrectionErrorText,
   input1ContentWidth,
@@ -276,23 +275,6 @@ export function CardCorrection({
       ) : (
         <View style={styles.promptRow}>
           {promptContent}
-          {canToggleTranslations && !isIntroMode ? (
-            <Pressable
-              style={[styles.cardIconWrapper, { width: 32 * contentScale }]}
-              onPress={next}
-              hitSlop={8}
-              accessibilityRole="button"
-              accessibilityLabel={t(
-                "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
-              )}
-            >
-              <Octicons
-                name="discussion-duplicate"
-                size={24 * contentScale}
-                color={textColorOverride ?? (styles.cardFont as any).color}
-              />
-            </Pressable>
-          ) : null}
         </View>
       )}
     </View>
@@ -386,20 +368,25 @@ export function CardCorrection({
         !allowMultilinePrompt &&
           (answerOnly || !showAwersInput) &&
           styles.containerInputFirst,
+        { flexDirection: "row" },
       ]}
-      onLayout={({ nativeEvent }) => {
-        const nextWidth = nativeEvent.layout.width;
-        if (Math.abs(nextWidth - input2LayoutWidth) > 0.5) {
-          setInput2LayoutWidth(nextWidth);
-        }
-      }}
     >
       <ScrollView
         ref={input2ScrollRef}
         horizontal
         scrollEnabled={false}
         showsHorizontalScrollIndicator={false}
-        style={[styles.inputScroll, inputFrameResponsiveStyle]}
+        style={[
+          styles.inputScroll,
+          inputFrameResponsiveStyle,
+          canToggleTranslations && { width: undefined, flex: 1 },
+        ]}
+        onLayout={({ nativeEvent }) => {
+          const nextWidth = nativeEvent.layout.width;
+          if (Math.abs(nextWidth - input2LayoutWidth) > 0.5) {
+            setInput2LayoutWidth(nextWidth);
+          }
+        }}
         contentContainerStyle={[
           styles.inputScrollContent,
           inputFrameResponsiveStyle,
@@ -470,12 +457,11 @@ export function CardCorrection({
           </View>
         </View>
       </ScrollView>
-      {isIntroMode && canToggleTranslations ? (
+      {canToggleTranslations ? (
         <Pressable
           style={[
             styles.cardIconWrapper,
-            styles.introToggle,
-            { width: 32 * contentScale },
+            { width: 32 * contentScale, height: cardMetrics.textInputHeight },
           ]}
           onPress={next}
           hitSlop={8}

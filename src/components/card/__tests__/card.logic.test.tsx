@@ -460,11 +460,13 @@ describe("Card logic props", () => {
         input2: "szcz",
         mode: "demote" as const,
         promptText: "smart",
+        promptImageUri: "front://image",
         reversed: false,
         word: makeCard({
           id: 132,
           text: "smart",
           translations: ["szczypać", "boleć"],
+          imageFront: "front://image",
         }),
       });
 
@@ -477,6 +479,7 @@ describe("Card logic props", () => {
               id: 132,
               text: "smart",
               translations: ["szczypać", "boleć"],
+              imageFront: "front://image",
             }),
             setCorrectionRewers: (rewers) =>
               setCorrection((current) => ({ ...current, rewers })),
@@ -497,6 +500,7 @@ describe("Card logic props", () => {
         displayMode: "correction",
         canToggleTranslations: true,
         correctionRewers: "szczypać",
+        promptImageUri: "front://image",
       });
     });
 
