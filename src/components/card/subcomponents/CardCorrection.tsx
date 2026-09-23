@@ -16,7 +16,7 @@ import {
 import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import { buildPromptImageStyle } from "../promptImageSizing";
+import { buildPromptImageStyle, getInitialPromptImageSlotWidth } from "../promptImageSizing";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import { useTranslation } from "react-i18next";
@@ -257,6 +257,7 @@ export function CardCorrection({
       key={promptImageUri}
       uri={promptImageUri}
       imageStyle={[styles.promptImage, promptImageStyle]}
+      initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
       renderMode="correction"
     />
   ) : null;

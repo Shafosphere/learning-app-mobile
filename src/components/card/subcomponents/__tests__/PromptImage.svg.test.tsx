@@ -1,5 +1,5 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import { View } from "react-native";
 
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
@@ -46,6 +46,12 @@ const findFrameOpacity = (screen: ReturnType<typeof render>) =>
     return typeof style?.opacity === "number";
   })?.props.style.opacity;
 
+const findFrameStyle = (screen: ReturnType<typeof render>) =>
+  screen.UNSAFE_getAllByType(View).find((node) => {
+    const style = node.props.style as { opacity?: number } | undefined;
+    return typeof style?.opacity === "number";
+  })?.props.style as { width: number; height: number } | undefined;
+
 describe("PromptImage SVG rendering", () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -69,6 +75,31 @@ describe("PromptImage SVG rendering", () => {
 
     expect(findFrameOpacity(screen)).toBe(1);
     expect(mockedFileSystem.getInfoAsync).not.toHaveBeenCalled();
+  });
+
+  it("limits a preloaded wide image before the first layout measurement", () => {
+    mockedGetPreloadedImage.mockReturnValue({
+      kind: "bitmap",
+      uri: "file://images/bird.webp",
+      ratio: 1.8,
+    });
+
+    const screen = render(
+      <PromptImage
+        uri="file://images/bird.webp"
+        imageStyle={{ width: "90%", height: 238 }}
+        initialSlotWidth={295}
+      />,
+    );
+
+    expect(findFrameStyle(screen)?.width).toBe(295);
+    expect(findFrameStyle(screen)?.height).toBeCloseTo(295 / 1.8);
+
+    fireEvent(screen.UNSAFE_getAllByType(View)[0], "layout", {
+      nativeEvent: { layout: { width: 280 } },
+    });
+
+    expect(findFrameStyle(screen)?.width).toBe(280);
   });
 
   it("uses preloaded SVG XML during the first render without reading the file", () => {

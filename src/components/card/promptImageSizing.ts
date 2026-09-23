@@ -8,6 +8,19 @@ import {
 } from "./responsiveCardWidth";
 
 export const PROMPT_IMAGE_TARGET_HEIGHT = 140;
+const CARD_HORIZONTAL_PADDING = 10;
+const IMAGE_SLOT_WIDTH_FRACTION = 0.9;
+
+export function getInitialPromptImageSlotWidth(
+  cardWidth: number,
+  promptHorizontalPadding: number,
+): number {
+  return Math.max(
+    1,
+    (cardWidth - 2 * CARD_HORIZONTAL_PADDING - 2 * promptHorizontalPadding) *
+      IMAGE_SLOT_WIDTH_FRACTION,
+  );
+}
 
 const IMAGE_SIZE_MULTIPLIER: Record<FlashcardsImageSize, number> = {
   dynamic: 1,

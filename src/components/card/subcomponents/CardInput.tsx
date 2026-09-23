@@ -11,7 +11,7 @@ import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
-import { buildPromptImageStyle } from "../promptImageSizing";
+import { buildPromptImageStyle, getInitialPromptImageSlotWidth } from "../promptImageSizing";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -295,6 +295,7 @@ export function CardInput({
       key={promptImageUri}
       uri={promptImageUri}
       imageStyle={[styles.promptImage, promptImageStyle]}
+      initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
     />
   ) : null;
   const hasPromptText = promptText.trim().length > 0;

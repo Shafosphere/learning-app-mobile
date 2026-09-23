@@ -5,7 +5,7 @@ import { StyleSheet, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
-import { buildPromptImageStyle } from "../promptImageSizing";
+import { buildPromptImageStyle, getInitialPromptImageSlotWidth } from "../promptImageSizing";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 
 type CardTrueFalseProps = {
@@ -66,6 +66,7 @@ export function CardTrueFalse({
                         key={promptImageUri}
                         uri={promptImageUri}
                         imageStyle={[styles.promptImage, promptImageStyle]}
+                        initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 16)}
                     />
                 ) : null}
                 {hasText ? (

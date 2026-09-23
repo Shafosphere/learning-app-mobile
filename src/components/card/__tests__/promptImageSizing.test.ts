@@ -2,6 +2,7 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 
 import {
   buildPromptImageStyle,
+  getInitialPromptImageSlotWidth,
   getPromptImageSizeMultiplier,
 } from "../promptImageSizing";
 
@@ -10,6 +11,11 @@ const midMetrics = { width: 477.5 };
 const maxTabletMetrics = { width: 630 };
 
 describe("prompt image sizing", () => {
+  it("accounts for card, prompt and image padding before first layout", () => {
+    expect(getInitialPromptImageSlotWidth(325, 8)).toBeCloseTo(260.1);
+    expect(getInitialPromptImageSlotWidth(325, 16)).toBeCloseTo(245.7);
+  });
+
   it("keeps medium at current phone size", () => {
     expect(getPromptImageSizeMultiplier("medium", baseMetrics)).toBe(0.6);
     expect(buildPromptImageStyle("medium", baseMetrics)).toEqual({

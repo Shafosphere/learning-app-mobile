@@ -16,6 +16,7 @@ import { getPreloadedImage } from "@/src/features/flashcards/flashcardImagePrelo
 type PromptImageProps = {
   uri: string;
   imageStyle: StyleProp<ImageStyle>;
+  initialSlotWidth?: number;
   onHeightChange?: (height: number) => void;
   renderMode?: "default" | "correction";
 };
@@ -302,6 +303,7 @@ const prepareSvg = (
 export function PromptImage({
   uri,
   imageStyle,
+  initialSlotWidth,
   onHeightChange,
   renderMode = "default",
 }: PromptImageProps) {
@@ -330,7 +332,14 @@ export function PromptImage({
   const [hasResolvedDimensions, setHasResolvedDimensions] = useState(
     () => initialImage.preloaded != null,
   );
-  const [slotWidth, setSlotWidth] = useState<number | null>(null);
+  const [slotMeasurement, setSlotMeasurement] = useState<{
+    width: number;
+    initialSlotWidth: number | null;
+  } | null>(null);
+  const slotWidth =
+    slotMeasurement?.initialSlotWidth === (initialSlotWidth ?? null)
+      ? slotMeasurement.width
+      : initialSlotWidth ?? null;
   const [isConstellationOutline, setIsConstellationOutline] = useState(
     () => initialImage.preparedSvg?.isConstellationOutline ?? false,
   );
@@ -593,7 +602,10 @@ export function PromptImage({
     <View
       style={slotStyle}
       onLayout={({ nativeEvent }) => {
-        setSlotWidth(nativeEvent.layout.width);
+        setSlotMeasurement({
+          width: nativeEvent.layout.width,
+          initialSlotWidth: initialSlotWidth ?? null,
+        });
       }}
     >
       <View
