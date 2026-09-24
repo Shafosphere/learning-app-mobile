@@ -2,6 +2,7 @@ import React from "react";
 import { fireEvent, render } from "@testing-library/react-native";
 
 import Navbar from "@/src/components/navbar/navbar";
+import { useSettings } from "@/src/contexts/SettingsContext";
 
 const mockDismissTo = jest.fn();
 const mockPush = jest.fn();
@@ -80,9 +81,14 @@ jest.mock("@expo/vector-icons/MaterialIcons", () => {
   return MockMaterialIcons;
 });
 
-jest.mock("@edwardloopez/react-native-coachmark", () => ({
-  CoachmarkAnchor: ({ children }: { children: React.ReactNode }) => children,
-}));
+jest.mock("@edwardloopez/react-native-coachmark", () => {
+  const { View } = jest.requireActual<typeof import("react-native")>("react-native");
+  return {
+    CoachmarkAnchor: ({ children, id }: { children: React.ReactNode; id: string }) => (
+      <View testID={"coachmark-" + id}>{children}</View>
+    ),
+  };
+});
 
 jest.mock("react-native-safe-area-context", () => ({
   useSafeAreaInsets: jest.fn(() => ({ top: 0, right: 0, bottom: 0, left: 0 })),
@@ -166,6 +172,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
     theme: "light",
     toggleTheme: jest.fn(),
     activeCustomCourseId: null,
+    activeCustomCourseIdHydrated: true,
     customCourseEntrySettingsSeenHydrated: true,
     hasSeenCustomCourseEntrySettings: jest.fn(() => true),
     selectedLevel: null,
@@ -192,6 +199,52 @@ jest.mock("@/src/db/sqlite/db", () => ({
 describe("Navbar review routing", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it("shows five bottom buttons with flashcards centered and opens completed courses", () => {
+    const screen = render(<Navbar />);
+    const bottomButtons = screen.getAllByRole("button").slice(-5);
+
+    expect(bottomButtons.map((button) => button.props.accessibilityLabel)).toEqual([
+      "components.navbar.navbar.accessibilityLabel.przejdzDoPowtorekValue",
+      "components.navbar.navbar.accessibilityLabel.przejdzDoMenuGlownego",
+      "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek",
+      "components.navbar.navbar.accessibilityLabel.przejdzDoUkonczonychKursow",
+      "components.navbar.navbar.accessibilityLabel.przejdzDoUstawien",
+    ]);
+    expect(screen.getByText("trophy")).toBeTruthy();
+    expect(screen.getByTestId("coachmark-flashcards-completed-courses-button")).toBeTruthy();
+
+    fireEvent.press(bottomButtons[3]);
+    expect(mockPush).toHaveBeenCalledWith("/completed-courses");
+  });
+
+  it("waits for settings before starting the active custom course", () => {
+    const mockedUseSettings = useSettings as jest.Mock;
+    const baseSettings = mockedUseSettings.getMockImplementation()?.();
+    mockedUseSettings.mockReturnValue({
+      ...baseSettings,
+      activeCustomCourseId: 11,
+      customCourseEntrySettingsSeenHydrated: false,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    });
+
+    const screen = render(<Navbar />);
+    const gamepad = screen.getByLabelText(
+      "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"
+    );
+    fireEvent.press(gamepad);
+    expect(mockPush).not.toHaveBeenCalled();
+
+    mockedUseSettings.mockReturnValue({
+      ...baseSettings,
+      activeCustomCourseId: 11,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    });
+    screen.rerender(<Navbar />);
+    fireEvent.press(gamepad);
+    expect(mockPush).toHaveBeenCalledWith("/course-entry-settings");
   });
 
   it("dismisses to the review course selection screen from stale review child routes", () => {

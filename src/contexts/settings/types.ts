@@ -178,6 +178,7 @@ export interface SettingsContextValue {
   activeCourse: LanguageCourse | null;
   activeCustomCourseId: number | null;
   setActiveCustomCourseId: (id: number | null) => Promise<void>;
+  activeCustomCourseIdHydrated: boolean;
   customCourseEntrySettingsSeenHydrated: boolean;
   hasSeenCustomCourseEntrySettings: (courseId: number) => boolean;
   markCustomCourseEntrySettingsSeen: (courseId: number) => Promise<void>;

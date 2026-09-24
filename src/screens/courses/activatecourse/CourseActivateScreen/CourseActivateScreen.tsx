@@ -37,6 +37,7 @@ import {
 import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseGroupList } from "@/src/components/course/CourseGroupList";
 import { CourseGroup, OfficialCourseListItem } from "@/src/features/customCourse/courseActivationTypes";
+import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 
 
 
@@ -44,9 +45,12 @@ export default function CourseActivateScreen() {
   const { t } = useTranslation();
   const {
     activeCustomCourseId,
+    activeCustomCourseIdHydrated,
     setActiveCustomCourseId,
     colors,
     pinnedOfficialCourseIds,
+    customCourseEntrySettingsSeenHydrated,
+    hasSeenCustomCourseEntrySettings,
   } = useSettings();
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
   const [officialCourses, setOfficialCourses] = useState<
@@ -307,7 +311,6 @@ export default function CourseActivateScreen() {
 
   const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
-  const hasCompletedCourses = completedCourses.length > 0;
   const firstPinnedOfficialCourseId = pinnedOfficialCourses[0]?.id ?? null;
   const coachmark = useCoachmarkFlow({
     flowKey: "course-activate-guided",
@@ -359,7 +362,7 @@ export default function CourseActivateScreen() {
 
   const handleCustomCoursePress = useCallback(
     async (id: number) => {
-      if (isActivationBlockedByOnboarding) {
+      if (!activeCustomCourseIdHydrated || isActivationBlockedByOnboarding) {
         return;
       }
       if (activeCustomCourseId === id) {
@@ -372,6 +375,7 @@ export default function CourseActivateScreen() {
     },
     [
       activeCustomCourseId,
+      activeCustomCourseIdHydrated,
       canActivate,
       coachmark,
       isActivationBlockedByOnboarding,
@@ -523,18 +527,24 @@ export default function CourseActivateScreen() {
       ) : (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
-            {hasCompletedCourses ? (
+            {hasActiveCourse ? (
               <MyButton
                 text={t(
-                  "screens.courses.activatecourse.courseActivate.courseActivate.text.ukonczone"
+                  "screens.courses.activatecourse.courseActivate.courseActivate.text.graj"
                 )}
-                textLines={2}
                 accessibilityLabel={t(
-                  "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.ukonczone"
+                  "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.graj"
                 )}
                 color="my_green"
-                onPress={() => router.push("/completed-courses")}
-                disabled={false}
+                onPress={() => {
+                  const route = getCoursePlayRoute(
+                    activeCustomCourseId,
+                    customCourseEntrySettingsSeenHydrated,
+                    hasSeenCustomCourseEntrySettings,
+                  );
+                  if (route) router.push(route);
+                }}
+                disabled={!activeCustomCourseIdHydrated || !customCourseEntrySettingsSeenHydrated}
                 autoWidth
               />
             ) : null}

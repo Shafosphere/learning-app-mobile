@@ -897,6 +897,10 @@
       }
     },
     "flashcards": {
+      "completedCourses": {
+        "title": "Completed courses",
+        "description": "This button opens courses you have completed."
+      },
       "step1": {
         "title": "Here are flashcards",
         "description": "This is the main learning screen. This is where all the magic happens."
@@ -1284,6 +1288,7 @@
           "przejdzDoMenuGlownego": "Go to the main menu",
           "przejdzDoGryFiszek": "Go to the flashcard game",
           "przejdzDoUstawien": "Go to settings",
+          "przejdzDoUkonczonychKursow": "Go to completed courses",
           "przelaczMotyw": "Switch theme",
           "kursValueOtworzPanelKursow": "Course {{course}}. Open the course panel.",
           "kursValueDoValueOtworzPanelKursow": "Course {{sourceLang}} to {{targetLang}}. Open the course panel.",
@@ -1896,19 +1901,19 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edit course {{value}}",
               "przejdzDalej": "Continue",
-              "dodajKurs": "Pin course",
-              "ukonczone": "Show completed courses"
+              "graj": "Play active course",
+              "dodajKurs": "Pin course"
             },
             "text": {
-              "dodajKurs": "pin\ncourse",
-              "ukonczone": "completed"
+              "graj": "play",
+              "dodajKurs": "pin\ncourse"
             }
           }
         }
       },
       "completedCourses": {
         "title": "Completed courses",
-        "empty": "No completed courses yet.",
+        "empty": "Courses you complete will appear here.",
         "editA11y": "Edit completed course {{value}}"
       },
       "courseentrysettings": {

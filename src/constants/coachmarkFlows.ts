@@ -686,6 +686,17 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
     blockSpotlight: true,
   },
   {
+    id: "flashcards-completed-courses",
+    targetId: "flashcards-completed-courses-button",
+    titleKey: "onboarding.flashcards.completedCourses.title",
+    descriptionKey: "onboarding.flashcards.completedCourses.description",
+    kind: "info",
+    advanceOn: "manual",
+    blockOutside: true,
+    spotlight: true,
+    blockSpotlight: true,
+  },
+  {
     id: "flashcards-step-23",
     targetId: "flashcards-settings-button",
     titleKey: "onboarding.flashcards.step23.title",

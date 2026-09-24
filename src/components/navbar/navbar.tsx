@@ -3,6 +3,7 @@ import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -48,7 +49,6 @@ const REVIEW_MINIGAME_PREFIX = "/review/minigames";
 const REVIEW_SESSION_PATHS = new Set(["/review/brain", "/review/table"]);
 const FLASHCARDS_PATHS = new Set([
   "/flashcards",
-  "/flashcards_custom",
   "/course-entry-settings",
 ]);
 
@@ -62,6 +62,7 @@ export default function Navbar({ children }: NavbarProps) {
     theme,
     toggleTheme,
     activeCustomCourseId,
+    activeCustomCourseIdHydrated,
     customCourseEntrySettingsSeenHydrated,
     hasSeenCustomCourseEntrySettings,
     selectedLevel,
@@ -297,35 +298,30 @@ export default function Navbar({ children }: NavbarProps) {
   );
 
   const handlePadPress = async () => {
-    if (FLASHCARDS_PATHS.has(pathname)) {
+    if (FLASHCARDS_PATHS.has(pathname) || !activeCustomCourseIdHydrated) {
       return;
     }
 
     if (activeCustomCourseId != null) {
-      if (
-        customCourseEntrySettingsSeenHydrated &&
-        !hasSeenCustomCourseEntrySettings(activeCustomCourseId)
-      ) {
-        router.push("/course-entry-settings");
-        return;
-      }
-
-      router.push("/flashcards_custom");
+      const route = getCoursePlayRoute(
+        activeCustomCourseId,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+      );
+      if (route) router.push(route);
       return;
     }
 
     if (pinnedOfficialCourseIds.length > 0) {
+      if (!customCourseEntrySettingsSeenHydrated) return;
       const firstPinned = pinnedOfficialCourseIds[0];
       await setActiveCustomCourseId(firstPinned);
-      if (
-        customCourseEntrySettingsSeenHydrated &&
-        !hasSeenCustomCourseEntrySettings(firstPinned)
-      ) {
-        router.push("/course-entry-settings");
-        return;
-      }
-
-      router.push("/flashcards_custom");
+      const route = getCoursePlayRoute(
+        firstPinned,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+      );
+      if (route) router.push(route);
       return;
     }
 
@@ -360,6 +356,9 @@ export default function Navbar({ children }: NavbarProps) {
 
   const handleSettingsPress = () => {
     router.push("/settings");
+  };
+  const handleCompletedCoursesPress = () => {
+    router.push("/completed-courses");
   };
   const reviewBadgeBackground =
     dueReviewCount > 0 ? colors.my_red : colors.my_green;
@@ -543,6 +542,28 @@ export default function Navbar({ children }: NavbarProps) {
                 <View collapsable={false} style={styles.bottomCoachmarkTarget} />
               </CoachmarkAnchor>
               <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
+            </Pressable>
+
+            <Pressable
+              style={({ pressed }) => [
+                styles.bottomIconButton,
+                pressed && styles.bottomIconButtonPressed,
+              ]}
+              onPress={handleCompletedCoursesPress}
+              accessibilityRole="button"
+              accessibilityLabel={t(
+                "components.navbar.navbar.accessibilityLabel.przejdzDoUkonczonychKursow"
+              )}
+            >
+              <CoachmarkAnchor
+                id="flashcards-completed-courses-button"
+                shape="rect"
+                radius={18}
+                style={styles.bottomCoachmarkOverlay}
+              >
+                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+              </CoachmarkAnchor>
+              <Ionicons name="trophy" size={26} color={colors.headline} />
             </Pressable>
 
             <Pressable

@@ -36,7 +36,7 @@ jest.mock("react-i18next", () => ({
     t: (key: string) => {
       const translations: Record<string, string> = {
         "screens.courses.completedCourses.title": "Completed courses",
-        "screens.courses.completedCourses.empty": "No completed courses yet.",
+        "screens.courses.completedCourses.empty": "Courses you complete will appear here.",
         "screens.courses.completedCourses.editA11y": "Edit completed course",
         "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezCiebie":
           "Created by you",
@@ -108,6 +108,9 @@ describe("CompletedCoursesScreen", () => {
     jest.clearAllMocks();
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
       pinOfficialCourse: jest.fn(() => Promise.resolve()),
       pinnedOfficialCourseIds: [],
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
@@ -123,6 +126,9 @@ describe("CompletedCoursesScreen", () => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
       pinOfficialCourse: jest.fn(() => Promise.resolve()),
       pinnedOfficialCourseIds: [],
       setActiveCustomCourseId,
@@ -148,6 +154,8 @@ describe("CompletedCoursesScreen", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Mastered course")).toBeTruthy();
+      expect(screen.getByTestId("completed-courses-trophy")).toBeTruthy();
+      expect(screen.getByText("Completed courses")).toBeTruthy();
     });
 
     fireEvent.press(screen.getByText("Mastered course"));
@@ -163,6 +171,9 @@ describe("CompletedCoursesScreen", () => {
     const pinOfficialCourse = jest.fn(() => Promise.resolve());
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
       pinOfficialCourse,
       pinnedOfficialCourseIds: [],
       setActiveCustomCourseId,
@@ -200,12 +211,79 @@ describe("CompletedCoursesScreen", () => {
     });
   });
 
+  it("opens required settings for an unconfigured completed course", async () => {
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+      pinOfficialCourse: jest.fn(() => Promise.resolve()),
+      pinnedOfficialCourseIds: [],
+      setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
+      colors: { paragraph: "#222", headline: "#111" },
+    });
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 44,
+        name: "Unconfigured course",
+        iconId: "book",
+        iconColor: "#123",
+        cardsCount: 4,
+        completedCardsCount: 4,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CompletedCoursesScreen />);
+    fireEvent.press(await screen.findByText("Unconfigured course"));
+
+    await waitFor(() => {
+      expect(mockPush).toHaveBeenCalledWith("/course-entry-settings");
+    });
+    expect(mockPush).not.toHaveBeenCalledWith("/flashcards");
+  });
+
+  it("does not enter a completed course before settings hydrate", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: false,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+      pinOfficialCourse: jest.fn(() => Promise.resolve()),
+      pinnedOfficialCourseIds: [],
+      setActiveCustomCourseId,
+      colors: { paragraph: "#222", headline: "#111" },
+    });
+    mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 44,
+        name: "Unconfigured course",
+        iconId: "book",
+        iconColor: "#123",
+        cardsCount: 4,
+        completedCardsCount: 4,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+
+    const screen = render(<CompletedCoursesScreen />);
+    fireEvent.press(await screen.findByText("Unconfigured course"));
+
+    expect(setActiveCustomCourseId).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it("shows an empty state when there are no completed courses", async () => {
     const screen = render(<CompletedCoursesScreen />);
 
     await waitFor(() => {
       expect(screen.queryByTestId("completed-courses-loading")).toBeNull();
-      expect(screen.getByText("No completed courses yet.")).toBeTruthy();
+      expect(screen.getByTestId("completed-courses-trophy")).toBeTruthy();
+      expect(screen.getByText("Completed courses")).toBeTruthy();
+      expect(screen.getByText("Courses you complete will appear here.")).toBeTruthy();
     });
   });
 });

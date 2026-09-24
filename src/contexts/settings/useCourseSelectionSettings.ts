@@ -25,8 +25,11 @@ export function useCourseSelectionSettings() {
   const [activeCourseIdx, setActiveCourseIdxState] = usePersistedState<
     number | null
   >("activeCourseIdx", null);
-  const [activeCustomCourseId, setActiveCustomCourseIdState] =
-    usePersistedState<number | null>("activeCustomCourseId", null);
+  const [
+    activeCustomCourseId,
+    setActiveCustomCourseIdState,
+    activeCustomCourseIdHydrated,
+  ] = useHydratedPersistedState<number | null>("activeCustomCourseId", null);
   const [
     customCourseEntrySettingsSeen,
     setCustomCourseEntrySettingsSeen,
@@ -288,6 +291,7 @@ export function useCourseSelectionSettings() {
     activeCourse,
     activeCustomCourseId,
     setActiveCustomCourseId,
+    activeCustomCourseIdHydrated,
     customCourseEntrySettingsSeenHydrated,
     hasSeenCustomCourseEntrySettings,
     markCustomCourseEntrySettingsSeen,

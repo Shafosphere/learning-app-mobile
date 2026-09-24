@@ -43,4 +43,28 @@ describe("coachmark flow definitions", () => {
       "flashcards-confirm-button",
     ]);
   });
+
+  it("introduces completed courses between the game and settings buttons", () => {
+    const gameIndex = FLASHCARDS_COACHMARK_STEPS.findIndex(
+      (step) => step.id === "flashcards-step-22",
+    );
+    const completedCoursesIndex = FLASHCARDS_COACHMARK_STEPS.findIndex(
+      (step) => step.id === "flashcards-completed-courses",
+    );
+    const settingsIndex = FLASHCARDS_COACHMARK_STEPS.findIndex(
+      (step) => step.id === "flashcards-step-23",
+    );
+    const completedCoursesStep = FLASHCARDS_COACHMARK_STEPS[completedCoursesIndex];
+
+    expect(gameIndex).toBeLessThan(completedCoursesIndex);
+    expect(completedCoursesIndex).toBeLessThan(settingsIndex);
+    expect(completedCoursesStep).toMatchObject({
+      targetId: "flashcards-completed-courses-button",
+      titleKey: "onboarding.flashcards.completedCourses.title",
+      descriptionKey: "onboarding.flashcards.completedCourses.description",
+      advanceOn: "manual",
+      spotlight: true,
+      blockSpotlight: true,
+    });
+  });
 });

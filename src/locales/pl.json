@@ -899,6 +899,10 @@
       }
     },
     "flashcards": {
+      "completedCourses": {
+        "title": "Ukończone kursy",
+        "description": "Ten przycisk otwiera ukończone przez Ciebie kursy."
+      },
       "step1": {
         "title": "Tu są fiszki",
         "description": "To główny ekran nauki. Tutaj dzieje się cała magia."
@@ -1286,6 +1290,7 @@
           "przejdzDoMenuGlownego": "Przejdź do menu głównego",
           "przejdzDoGryFiszek": "Przejdź do gry fiszek",
           "przejdzDoUstawien": "Przejdź do ustawień",
+          "przejdzDoUkonczonychKursow": "Przejdź do ukończonych kursów",
           "przelaczMotyw": "Przełącz motyw",
           "kursValueOtworzPanelKursow": "Kurs {{course}}. Otwórz panel kursów.",
           "kursValueDoValueOtworzPanelKursow": "Kurs {{sourceLang}} do {{targetLang}}. Otwórz panel kursów.",
@@ -1898,19 +1903,19 @@
             "accessibilityLabel": {
               "edytujKursValue": "Edytuj kurs {{value}}",
               "przejdzDalej": "Przejdź dalej",
-              "dodajKurs": "Przypnij kurs",
-              "ukonczone": "Pokaż ukończone kursy"
+              "graj": "Graj w aktywny kurs",
+              "dodajKurs": "Przypnij kurs"
             },
             "text": {
-              "dodajKurs": "przypnij\nkurs",
-              "ukonczone": "ukończone"
+              "graj": "graj",
+              "dodajKurs": "przypnij\nkurs"
             }
           }
         }
       },
       "completedCourses": {
         "title": "Ukończone kursy",
-        "empty": "Nie masz jeszcze ukończonych kursów.",
+        "empty": "Tutaj pojawią się kursy, które ukończysz.",
         "editA11y": "Edytuj ukończony kurs {{value}}"
       },
       "courseentrysettings": {

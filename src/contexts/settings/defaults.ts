@@ -125,6 +125,7 @@ export const defaultValue: SettingsContextValue = {
   activeCourse: null,
   activeCustomCourseId: null,
   setActiveCustomCourseId: async () => {},
+  activeCustomCourseIdHydrated: false,
   customCourseEntrySettingsSeenHydrated: false,
   hasSeenCustomCourseEntrySettings: () => false,
   markCustomCourseEntrySettingsSeen: async () => {},

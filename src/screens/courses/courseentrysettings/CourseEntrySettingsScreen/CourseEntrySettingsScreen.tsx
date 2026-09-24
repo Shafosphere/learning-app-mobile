@@ -39,6 +39,8 @@ export default function CourseEntrySettingsScreen() {
   const {
     colors,
     activeCustomCourseId,
+    activeCustomCourseIdHydrated,
+    customCourseEntrySettingsSeenHydrated,
     getCustomCourseAutoflowEnabled,
     setCustomCourseAutoflowEnabled,
     getCustomCourseShowExplanationEnabled,
@@ -79,13 +81,16 @@ export default function CourseEntrySettingsScreen() {
     let isMounted = true;
 
     const load = async () => {
+      if (!activeCustomCourseIdHydrated || !customCourseEntrySettingsSeenHydrated) {
+        return;
+      }
       if (activeCustomCourseId == null) {
         router.replace("/coursepanel");
         return;
       }
 
       if (hasSeenCustomCourseEntrySettings(activeCustomCourseId)) {
-        router.replace("/flashcards_custom");
+        router.replace("/flashcards");
         return;
       }
 
@@ -144,6 +149,8 @@ export default function CourseEntrySettingsScreen() {
     };
   }, [
     activeCustomCourseId,
+    activeCustomCourseIdHydrated,
+    customCourseEntrySettingsSeenHydrated,
     getCustomCourseAutoflowEnabled,
     getCustomCourseShowExplanationEnabled,
     hasSeenCustomCourseEntrySettings,
@@ -211,7 +218,7 @@ export default function CourseEntrySettingsScreen() {
       if (startedInOnboarding) {
         await setOnboardingCheckpoint("done");
       }
-      router.replace("/flashcards_custom");
+      router.replace("/flashcards");
     } catch (error) {
       console.error("Failed to save course entry settings", error);
       setPopup({

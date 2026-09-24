@@ -13,6 +13,7 @@ import {
   type CourseGroup,
   type OfficialCourseListItem,
 } from "@/src/features/customCourse/courseActivationTypes";
+import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
@@ -20,12 +21,38 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
+  Image,
   Pressable,
   ScrollView,
+  StyleSheet,
   Text,
   View,
 } from "react-native";
 import { useStyles } from "../../activatecourse/CourseActivateScreen/CourseActivateScreen-styles";
+
+const completedStyles = StyleSheet.create({
+  emptyScrollContent: {
+    flexGrow: 1,
+    justifyContent: "center",
+  },
+  hero: {
+    alignItems: "center",
+    marginTop: 24,
+    marginBottom: 12,
+  },
+  trophy: {
+    width: 160,
+    height: 160,
+    resizeMode: "contain",
+  },
+  emptyContainer: {
+    minHeight: 0,
+  },
+  emptyText: {
+    fontSize: 18,
+    fontWeight: "600",
+  },
+});
 
 function mapOfficialCourse(
   row: CompletedCustomCourseSummary
@@ -117,7 +144,10 @@ export default function CompletedCoursesScreen() {
   const { t } = useTranslation();
   const {
     activeCustomCourseId,
+    activeCustomCourseIdHydrated,
     colors,
+    customCourseEntrySettingsSeenHydrated,
+    hasSeenCustomCourseEntrySettings,
     pinOfficialCourse,
     pinnedOfficialCourseIds,
     setActiveCustomCourseId,
@@ -175,6 +205,13 @@ export default function CompletedCoursesScreen() {
 
   const handleCoursePress = useCallback(
     async (id: number) => {
+      if (!activeCustomCourseIdHydrated) return;
+      const route = getCoursePlayRoute(
+        id,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+      );
+      if (!route) return;
       const course = completedCourses.find((item) => item.id === id);
       if (
         course?.isOfficial &&
@@ -183,10 +220,13 @@ export default function CompletedCoursesScreen() {
         await pinOfficialCourse(id);
       }
       await setActiveCustomCourseId(id);
-      router.push("/flashcards");
+      router.push(route);
     },
     [
+      activeCustomCourseIdHydrated,
       completedCourses,
+      customCourseEntrySettingsSeenHydrated,
+      hasSeenCustomCourseEntrySettings,
       pinOfficialCourse,
       pinnedOfficialCourseIds,
       router,
@@ -211,17 +251,28 @@ export default function CompletedCoursesScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[
+          styles.scrollContent,
+          !isLoadingCourses && isEmptyState && completedStyles.emptyScrollContent,
+        ]}
         keyboardShouldPersistTaps="handled"
       >
         <View style={styles.minicontainer}>
-          <Text style={styles.title}>
-            {t("screens.courses.completedCourses.title")}
-          </Text>
+          <View style={completedStyles.hero}>
+            <Image
+              source={require("@/assets/illustrations/puchar.png")}
+              style={completedStyles.trophy}
+              accessible={false}
+              testID="completed-courses-trophy"
+            />
+            <Text style={styles.title}>
+              {t("screens.courses.completedCourses.title")}
+            </Text>
+          </View>
 
           {!isLoadingCourses && isEmptyState ? (
-            <View style={styles.emptyContainer}>
-              <Text style={styles.emptyState}>
+            <View style={[styles.emptyContainer, completedStyles.emptyContainer]}>
+              <Text style={[styles.emptyState, completedStyles.emptyText]}>
                 {t("screens.courses.completedCourses.empty")}
               </Text>
             </View>

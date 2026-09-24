@@ -686,6 +686,12 @@ export function useFlashcardsInteraction({
           return;
         }
         if (skipDemotionCorrection) {
+          // Keep the wrong result visible, but replace the submitted text with
+          // the expected answer before advancing to the next card.
+          const correctAnswer = reversed
+            ? splitFrontTextIntoAnswers(wordForCheck.text)[0] ?? wordForCheck.text
+            : wordForCheck.translations[0] ?? "";
+          setAnswer(correctAnswer);
           if (isExplanationPending) {
             setPendingExplanationMove({
               cardId: wordForCheck.id,

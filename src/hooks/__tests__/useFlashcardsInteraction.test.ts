@@ -990,6 +990,47 @@ describe("useFlashcardsInteraction", () => {
     expect(hook.setBoxesSpy).toHaveBeenCalledTimes(setBoxesCallsBeforeReset);
   });
 
+  it.each([
+    { box: "boxOne" as const, flipped: false, expected: "czerwony" },
+    { box: "boxTwo" as const, flipped: true, expected: "red" },
+  ])(
+    "shows the correct answer before advancing after a wrong answer in $box",
+    ({ box, flipped, expected }) => {
+      jest.useFakeTimers();
+      jest.setSystemTime(0);
+
+      const card = makeWord({
+        id: 713,
+        text: "red; scarlet",
+        translations: ["czerwony", "szkarłatny"],
+        flipped,
+      });
+      const hook = renderInteraction(
+        makeBoxesState({ [box]: [card] }),
+        { skipDemotionCorrection: true }
+      );
+
+      act(() => {
+        hook.result.current.interaction.handleSelectBox(box);
+      });
+      act(() => {
+        hook.result.current.interaction.confirm(undefined, "__wrong__");
+      });
+
+      expect(hook.result.current.interaction.result).toBe(false);
+      expect(hook.result.current.interaction.answer).toBe(expected);
+      expect(hook.result.current.interaction.correction).toBeNull();
+
+      advance(1499);
+      expect(hook.result.current.interaction.answer).toBe(expected);
+      expect(getBoxIds(hook.getLatestBoxes(), box)).toEqual([card.id]);
+
+      advance(1);
+      expect(hook.result.current.interaction.answer).toBe("");
+      expect(getBoxIds(hook.getLatestBoxes(), "boxZero")).toEqual([card.id]);
+    }
+  );
+
   it("does not refresh learning reminders as completed after a wrong answer", () => {
     jest.useFakeTimers();
     jest.setSystemTime(0);

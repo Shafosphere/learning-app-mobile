@@ -48,6 +48,10 @@ jest.mock("react-i18next", () => ({
           "Przypnij kurs",
         "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs":
           "Przypnij kurs",
+        "screens.courses.activatecourse.courseActivate.courseActivate.text.graj":
+          "Graj",
+        "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.graj":
+          "Graj w aktywny kurs",
         "screens.courses.activatecourse.courseActivate.courseActivate.text.ukonczone":
           "completed",
         "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.ukonczone":
@@ -167,12 +171,15 @@ describe("CourseActivateScreen loading state", () => {
     });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
       colors: {
         paragraph: "#222",
         headline: "#111",
       },
       pinnedOfficialCourseIds: [],
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
     });
     mockedGetCustomCoursesWithCardCounts.mockResolvedValue([]);
     mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([]);
@@ -261,11 +268,11 @@ describe("CourseActivateScreen loading state", () => {
     await waitFor(() => {
       expect(screen.getByText("Visible course")).toBeTruthy();
       expect(screen.queryByText("Completed course")).toBeNull();
-      expect(screen.getByText("completed")).toBeTruthy();
+      expect(screen.queryByText("completed")).toBeNull();
     });
   });
 
-  it("opens completed courses from the footer button", async () => {
+  it("does not show a completed courses footer button", async () => {
     mockedGetCompletedCustomCoursesWithCardCounts.mockResolvedValue([
       {
         id: 12,
@@ -282,12 +289,74 @@ describe("CourseActivateScreen loading state", () => {
     const screen = render(<CourseActivateScreen />);
 
     await waitFor(() => {
-      expect(screen.getByText("completed")).toBeTruthy();
+      expect(screen.queryByTestId("course-activate-loading")).toBeNull();
+      expect(screen.queryByLabelText("Show completed courses")).toBeNull();
     });
 
-    fireEvent.press(screen.getByText("completed"));
+    expect(mockPush).not.toHaveBeenCalledWith("/completed-courses");
+  });
 
-    expect(mockPush).toHaveBeenCalledWith("/completed-courses");
+  it("shows play for an active course after onboarding and opens the course", async () => {
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 11,
+      activeCustomCourseIdHydrated: true,
+      setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
+      colors: {
+        paragraph: "#222",
+        headline: "#111",
+      },
+      pinnedOfficialCourseIds: [],
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
+    });
+
+    const screen = render(<CourseActivateScreen />);
+
+    const playButton = await screen.findByText("Graj");
+    fireEvent.press(playButton);
+
+    expect(mockPush).toHaveBeenCalledWith("/flashcards");
+  });
+
+  it("keeps Play disabled until entry settings hydrate", async () => {
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 11,
+      activeCustomCourseIdHydrated: true,
+      setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
+      colors: { paragraph: "#222", headline: "#111" },
+      pinnedOfficialCourseIds: [],
+      customCourseEntrySettingsSeenHydrated: false,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    });
+
+    const screen = render(<CourseActivateScreen />);
+    const playButton = await screen.findByRole("button", { name: "Graj w aktywny kurs" });
+
+    expect(playButton.props.accessibilityState).toEqual({ disabled: true });
+    fireEvent.press(playButton);
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("opens required entry settings before playing an unconfigured course", async () => {
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 11,
+      activeCustomCourseIdHydrated: true,
+      setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
+      colors: {
+        paragraph: "#222",
+        headline: "#111",
+      },
+      pinnedOfficialCourseIds: [],
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    });
+
+    const screen = render(<CourseActivateScreen />);
+
+    fireEvent.press(await screen.findByText("Graj"));
+
+    expect(mockPush).toHaveBeenCalledWith("/course-entry-settings");
+    expect(mockPush).not.toHaveBeenCalledWith("/flashcards");
   });
 
   it("keeps custom courses visible when official courses fail to load", async () => {
@@ -329,6 +398,7 @@ describe("CourseActivateScreen loading state", () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
       setActiveCustomCourseId,
       colors: {
         paragraph: "#222",
@@ -377,6 +447,7 @@ describe("CourseActivateScreen loading state", () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: null,
+      activeCustomCourseIdHydrated: true,
       setActiveCustomCourseId,
       colors: {
         paragraph: "#222",
@@ -432,6 +503,7 @@ describe("CourseActivateScreen loading state", () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("activate_required");
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 11,
+      activeCustomCourseIdHydrated: true,
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
       colors: {
         paragraph: "#222",
@@ -448,6 +520,7 @@ describe("CourseActivateScreen loading state", () => {
 
     expect(nextButton.props.accessibilityState).toEqual({ disabled: false });
     expect(screen.getByText("app.actions.next")).toBeTruthy();
+    expect(screen.queryByText("Graj")).toBeNull();
   });
 
   it("shows normal footer and no onboarding next after skip", async () => {
@@ -469,7 +542,7 @@ describe("CourseActivateScreen loading state", () => {
 
     await waitFor(() => {
       expect(screen.getByText("Przypnij kurs")).toBeTruthy();
-      expect(screen.getByText("completed")).toBeTruthy();
+      expect(screen.queryByLabelText("Show completed courses")).toBeNull();
     });
     expect(screen.queryByText("app.actions.next")).toBeNull();
     expect(mockedUseCoachmarkFlow).toHaveBeenCalledWith(
