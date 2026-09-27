@@ -399,7 +399,12 @@ export default function Navbar({ children }: NavbarProps) {
             >
               <NavbarMascot tapReaction={mascotTapReaction} />
             </TouchableOpacity>
-            <CoachmarkAnchor id="flashcards-course-button" shape="rect" radius={18}>
+            <CoachmarkAnchor
+              id="flashcards-course-button"
+              shape="rect"
+              radius={18}
+              style={styles.courseAnchor}
+            >
               <TouchableOpacity
                 onPress={() => router.push("/coursepanel")}
                 style={styles.courseButton}

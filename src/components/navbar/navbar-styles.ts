@@ -29,11 +29,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     minWidth: 0,
     paddingRight: 8,
   },
+  courseAnchor: {
+    flexShrink: 1,
+    minWidth: 0,
+  },
   rightGroup: {
     flexDirection: "row",
     justifyContent: "flex-end",
     alignItems: "center",
-    flex: 1,
     flexShrink: 0,
     marginLeft: 8,
   },
@@ -270,7 +273,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   courseName: {
     marginLeft: 8,
     flexShrink: 1,
-    maxWidth: 150,
+    minWidth: 0,
     overflow: "hidden",
     // backgroundColor: colors.my_red,
   },
