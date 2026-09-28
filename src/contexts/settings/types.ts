@@ -142,6 +142,8 @@ export interface SettingsContextValue {
     enabled: boolean
   ) => Promise<void>;
   skipCorrectionEnabled: boolean;
+  skipCorrectionDefaultEnabled: boolean;
+  setSkipCorrectionDefaultEnabled: (enabled: boolean) => Promise<void>;
   getBuiltinCourseSkipCorrectionEnabled: (
     params: CourseBoxZeroKeyParams
   ) => boolean;

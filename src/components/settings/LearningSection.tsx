@@ -26,6 +26,8 @@ const LearningSection: React.FC = () => {
     toggleFlashcardsSuggestions,
     autoSubmitCorrectAnswer,
     toggleAutoSubmitCorrectAnswer,
+    skipCorrectionDefaultEnabled,
+    setSkipCorrectionDefaultEnabled,
     learningRemindersEnabled,
     toggleLearningRemindersEnabled,
     learningReminderAutomaticEnabled,
@@ -106,6 +108,13 @@ const LearningSection: React.FC = () => {
   const handleAutoSubmitToggle = async (value: boolean) => {
     if (value !== autoSubmitCorrectAnswer) {
       await toggleAutoSubmitCorrectAnswer();
+      await triggerHaptics();
+    }
+  };
+
+  const handleSkipCorrectionToggle = async (value: boolean) => {
+    if (value !== skipCorrectionDefaultEnabled) {
+      await setSkipCorrectionDefaultEnabled(value);
       await triggerHaptics();
     }
   };
@@ -341,6 +350,33 @@ const LearningSection: React.FC = () => {
                 value={ignoreDiacriticsInSpellcheck}
                 onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
                 accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
+              />
+            </View>
+          </View>
+        </View>
+      </View>
+
+      <Text style={styles.appearanceGroupLabel}>
+        {t("settings.learning.groups.answers")}
+      </Text>
+      <View style={styles.appearanceGroupCard}>
+        <View style={styles.appearanceGroupRows}>
+          <View style={styles.appearanceGroupRow}>
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {t("settings.learning.skipCorrection.title")}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.skipCorrection.subtitle"))}
+              </Text>
+            </View>
+            <View style={styles.switch}>
+              <ToggleSwitch
+                value={skipCorrectionDefaultEnabled}
+                onPress={() =>
+                  void handleSkipCorrectionToggle(!skipCorrectionDefaultEnabled)
+                }
+                accessibilityLabel={t("settings.learning.skipCorrection.title")}
               />
             </View>
           </View>

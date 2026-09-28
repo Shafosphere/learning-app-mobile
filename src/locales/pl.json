@@ -222,6 +222,10 @@
         "title": "Automatycznie zatwierdzaj poprawne odpowiedzi",
         "subtitle": "Po wpisaniu poprawnej odpowiedzi zatwierdź ją automatycznie po krótkiej chwili."
       },
+      "skipCorrection": {
+        "title": "Pomiń poprawkę po błędzie",
+        "subtitle": "Po złej odpowiedzi od razu pokaż następną fiszkę. Dotyczy fiszek z odpowiedzią tekstową."
+      },
       "ignoreDiacritics": {
         "title": "Ignoruj znaki diakrytyczne",
         "subtitle": "Porównuj słowa bez ogonków, np. ą -> a."
@@ -259,7 +263,8 @@
         "placeholder": "np. 10"
       },
       "groups": {
-        "writing": "PISANIE"
+        "writing": "PISANIE",
+        "answers": "ODPOWIEDZI"
       }
     },
     "coursesData": {

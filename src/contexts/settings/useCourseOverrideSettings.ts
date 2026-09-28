@@ -205,7 +205,7 @@ export function useCourseOverrideSettings({
     setOverrides: setExplanationOnlyOnWrongOverrides,
   });
 
-  const [skipCorrectionDefaultEnabled] = usePersistedState<boolean>(
+  const [skipCorrectionDefaultEnabled, setSkipCorrectionDefaultEnabled] = usePersistedState<boolean>(
     "flashcards.skipCorrectionEnabled",
     false
   );
@@ -222,7 +222,6 @@ export function useCourseOverrideSettings({
     overrides: skipCorrectionOverrides,
     setOverrides: setSkipCorrectionOverrides,
   });
-
   const [trueFalseButtonsVariantDefault] =
     usePersistedState<TrueFalseButtonsVariant>(
       "flashcards.trueFalseButtonsVariant",
@@ -314,6 +313,8 @@ export function useCourseOverrideSettings({
     getCustomCourseExplanationOnlyOnWrong: explanationOnlyOnWrong.getCustom,
     setCustomCourseExplanationOnlyOnWrong: explanationOnlyOnWrong.setCustom,
     skipCorrectionEnabled: skipCorrection.activeValue,
+    skipCorrectionDefaultEnabled,
+    setSkipCorrectionDefaultEnabled,
     getBuiltinCourseSkipCorrectionEnabled: skipCorrection.getBuiltin,
     setBuiltinCourseSkipCorrectionEnabled: skipCorrection.setBuiltin,
     getCustomCourseSkipCorrectionEnabled: skipCorrection.getCustom,

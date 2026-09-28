@@ -106,6 +106,7 @@ export const SettingsProvider: React.FC<{
     setFlashcardsCardSizeDefault,
     setFlashcardsImageSizeDefault,
     setFlashcardsImageFrameDefaultEnabled,
+    setSkipCorrectionDefaultEnabled,
   } = courseOverrides;
   const reminders = useLearningReminderSettings({
     pinnedOfficialCourseIds,
@@ -129,6 +130,7 @@ export const SettingsProvider: React.FC<{
       setFlashcardsCardSizeDefault("large"),
       setFlashcardsImageSizeDefault("dynamic"),
       setFlashcardsImageFrameDefaultEnabled(true),
+      setSkipCorrectionDefaultEnabled(false),
       setLearningReminderAutomaticEnabled(true),
       setLearningReminderManualHour(defaultValue.learningReminderManualHour),
       resetAudioFeedbackSettings(),
@@ -142,6 +144,7 @@ export const SettingsProvider: React.FC<{
     setFlashcardsCardSizeDefault,
     setFlashcardsImageSizeDefault,
     setFlashcardsImageFrameDefaultEnabled,
+    setSkipCorrectionDefaultEnabled,
   ]);
 
   const resetActiveCourseReviews = useCallback(async () => {

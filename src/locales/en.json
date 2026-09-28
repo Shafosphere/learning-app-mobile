@@ -222,6 +222,10 @@
         "title": "Automatically submit correct answers",
         "subtitle": "Automatically submit a correct answer shortly after it is entered."
       },
+      "skipCorrection": {
+        "title": "Skip correction after mistake",
+        "subtitle": "Show the next flashcard immediately after a wrong answer. Applies to flashcards with text answers."
+      },
       "ignoreDiacritics": {
         "title": "Ignore diacritics",
         "subtitle": "Compare words without accents, e.g. ą -> a."
@@ -259,7 +263,8 @@
         "placeholder": "e.g. 10"
       },
       "groups": {
-        "writing": "WRITING"
+        "writing": "WRITING",
+        "answers": "ANSWERS"
       }
     },
     "coursesData": {

@@ -107,6 +107,8 @@ export const defaultValue: SettingsContextValue = {
   getCustomCourseExplanationOnlyOnWrong: () => false,
   setCustomCourseExplanationOnlyOnWrong: async () => {},
   skipCorrectionEnabled: false,
+  skipCorrectionDefaultEnabled: false,
+  setSkipCorrectionDefaultEnabled: async () => {},
   getBuiltinCourseSkipCorrectionEnabled: () => false,
   setBuiltinCourseSkipCorrectionEnabled: async () => {},
   getCustomCourseSkipCorrectionEnabled: () => false,
