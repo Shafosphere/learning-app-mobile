@@ -124,7 +124,7 @@ export default function ImageAttributionsScreen() {
 
       <View style={styles.footer}>
         <View style={styles.footerRow}>
-          <MyButton color="my_yellow" width={60} textLines={1} accessibilityLabel={t("app.actions.back")} onPress={() => router.back()}>
+          <MyButton color="my_yellow" width={60} accessibilityLabel={t("app.actions.back")} onPress={() => router.back()}>
             <Ionicons name="arrow-back" size={28} color={colors.headline} />
           </MyButton>
         </View>

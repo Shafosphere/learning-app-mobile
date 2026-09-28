@@ -25,7 +25,6 @@ export default function LicensesScreen() {
             <MyButton
               text={t("legal.licenses.courses.button")}
               autoWidth
-              textLines={1}
               style={styles.courseCardButton}
             />
           </Link>

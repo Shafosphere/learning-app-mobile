@@ -71,6 +71,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     fontSize: 18,
     color: colors.paragraph,
   },
+  inputAccessibilityError: {
+    color: colors.my_red,
+    fontSize: 14,
+    marginTop: 4,
+    marginLeft: 8,
+  },
   hintActions: {
     flexDirection: "row",
     alignItems: "center",
@@ -230,6 +236,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     gap: 20,
+  },
+  containerButtonStacked: {
+    alignItems: "stretch",
+    flexDirection: "column",
   },
   cardActionButtonText: {
     lineHeight: 18,

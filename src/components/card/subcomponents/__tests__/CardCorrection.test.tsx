@@ -16,7 +16,11 @@ jest.mock("react-i18next", () => ({
 
 const toggleLabel = "flashcards.card.accessibilityLabel.przelaczStroneFiszki";
 
-function renderCorrection(canToggleTranslations: boolean) {
+function renderCorrection(
+  canToggleTranslations: boolean,
+  input1 = "",
+  input2 = "",
+) {
   const next = jest.fn();
   const screen = render(
     <CardCorrection
@@ -24,8 +28,8 @@ function renderCorrection(canToggleTranslations: boolean) {
         cardId: 48,
         awers: "bird",
         rewers: "Jastrząb zwyczajny",
-        input1: "",
-        input2: "",
+        input1,
+        input2,
         mode: "demote",
       }}
       promptText="bird"
@@ -33,7 +37,7 @@ function renderCorrection(canToggleTranslations: boolean) {
       correctionAwers="bird"
       correctionRewers="Jastrząb zwyczajny"
       answerOnly={false}
-      showAwersInput={false}
+      showAwersInput={input1.length > 0}
       showRewersInput
       allowMultilinePrompt
       input1Ref={React.createRef<TextInput>()}
@@ -46,6 +50,7 @@ function renderCorrection(canToggleTranslations: boolean) {
       isIntroMode={false}
       renderCorrectionGhostText={() => null}
       renderCorrectionErrorText={() => null}
+      hasCorrectionMismatch={(value, expected) => value.length > 0 && value !== expected}
       input1ContentWidth={300}
       input2ContentWidth={300}
       setInput1LayoutWidth={jest.fn()}
@@ -80,5 +85,37 @@ describe("CardCorrection translation toggle", () => {
   it("hides the switch when there is no alternative answer", () => {
     const { screen } = renderCorrection(false);
     expect(screen.queryByRole("button", { name: toggleLabel })).toBeNull();
+  });
+});
+
+describe("CardCorrection accessibility", () => {
+  it("names correction fields without exposing answers", () => {
+    const { screen } = renderCorrection(true, "b", "J");
+    const inputs = screen.UNSAFE_getAllByType(TextInput);
+
+    expect(inputs[0].props.accessibilityLabel).toBe(
+      "flashcards.card.input.frontCorrectionLabel",
+    );
+    expect(inputs[1].props.accessibilityLabel).toBe(
+      "flashcards.card.input.backCorrectionLabel",
+    );
+    expect(inputs[0].props.accessibilityHint).toBe(
+      "flashcards.card.input.correctionErrorHint",
+    );
+    expect(inputs[1].props.accessibilityHint).toBe(
+      "flashcards.card.input.correctionErrorHint",
+    );
+  });
+
+  it("clears correction status when no characters mismatch", () => {
+    const { screen } = renderCorrection(true, "bird", "Jastrząb zwyczajny");
+    const inputs = screen.UNSAFE_getAllByType(TextInput);
+
+    expect(inputs[0].props.accessibilityHint).toBe(
+      "flashcards.card.input.correctionHint",
+    );
+    expect(inputs[1].props.accessibilityHint).toBe(
+      "flashcards.card.input.correctionHint",
+    );
   });
 });

@@ -552,7 +552,6 @@ export default function CourseActivateScreen() {
               text={t(
                 "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"
               )}
-              textLines={2}
               accessibilityLabel={t(
                 "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs"
               )}

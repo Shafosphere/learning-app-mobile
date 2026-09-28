@@ -1174,6 +1174,14 @@ export default function Card({
     });
   }
 
+  function hasCorrectionMismatch(value: string, expected: string) {
+    const typedChars = splitGraphemes(value);
+    const expectedChars = splitGraphemes(expected);
+    return typedChars.some((_, idx) =>
+      isCharMismatchAt(typedChars, expectedChars, idx),
+    );
+  }
+
   const startHintEditing = useCallback(() => {
     if (!selectedItem || !onHintUpdate) return;
     setHintDraft(currentHint ?? "");
@@ -1422,6 +1430,7 @@ export default function Card({
     suggestionProps,
     renderCorrectionGhostText,
     renderCorrectionErrorText,
+    hasCorrectionMismatch,
     input1ContentWidth,
     input2ContentWidth,
     setInput1LayoutWidth,

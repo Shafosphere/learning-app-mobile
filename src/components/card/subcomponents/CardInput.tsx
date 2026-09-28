@@ -180,6 +180,12 @@ export function CardInput({
             textColorOverride ? { color: textColorOverride } : null,
           ]}
             value={answer}
+            accessibilityLabel={t("flashcards.card.input.answerLabel")}
+            accessibilityHint={t(
+              emptyAnswerSubmitWarning
+                ? "flashcards.card.input.emptyAnswerHint"
+                : "flashcards.card.input.answerHint",
+            )}
             onChangeText={setAnswer}
             autoCapitalize="none"
             {...suggestionProps}
@@ -200,6 +206,11 @@ export function CardInput({
             }}
             onBlur={onMainInputBlur}
           />
+          {emptyAnswerSubmitWarning ? (
+            <Text testID="card-answer-error" style={styles.inputAccessibilityError}>
+              {t("flashcards.card.input.emptyAnswerError")}
+            </Text>
+          ) : null}
         </View>
       );
     }
@@ -288,6 +299,7 @@ export function CardInput({
     cardMetrics.inputLineHeight,
     cardMetrics.lineHeight,
     cardMetrics.textInputHeight,
+    t,
   ]);
 
   const imageBlock = promptImageUri ? (

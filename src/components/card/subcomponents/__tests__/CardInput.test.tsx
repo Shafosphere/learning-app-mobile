@@ -9,42 +9,58 @@ import { CardInput } from "@/src/components/card/subcomponents/CardInput";
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
 }));
-jest.mock("@/src/components/card/card-styles", () => ({ useStyles: () => ({}) }));
+const mockStyles = {};
+jest.mock("@/src/components/card/card-styles", () => ({
+  useStyles: () => mockStyles,
+}));
+let mockTranslate = (key: string) => key;
+let mockT = (key: string) => mockTranslate(key);
+
 jest.mock("react-i18next", () => ({
-  useTranslation: () => ({ t: (key: string) => key }),
+  useTranslation: () => ({ t: mockT }),
 }));
 
 const mockedUseSettings = useSettings as jest.Mock;
 const cardMetrics = getResponsiveFlashcardMetrics(390);
 
 function renderInput(emptyAnswerSubmitWarning: boolean) {
-  return render(
+  return render(renderCardInput(emptyAnswerSubmitWarning));
+}
+
+const stableInputProps = {
+  promptText: "question",
+  allowMultilinePrompt: false,
+  promptImageUri: null,
+  answer: "",
+  setAnswer: jest.fn(),
+  mainInputRef: React.createRef<TextInput>(),
+  suggestionProps: {},
+  handleConfirm: jest.fn(),
+  isMainAnswerNumeric: false,
+  isMainAnswerDate: false,
+  focusTarget: "main" as const,
+  requestFocus: jest.fn(),
+  canToggleTranslations: false,
+  next: jest.fn(),
+  typoDiff: null,
+  imageSizeMode: "dynamic" as const,
+  cardMetrics,
+};
+
+function renderCardInput(emptyAnswerSubmitWarning: boolean) {
+  return (
     <CardInput
       emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
-      promptText="question"
-      allowMultilinePrompt={false}
-      promptImageUri={null}
-      answer=""
-      setAnswer={jest.fn()}
-      mainInputRef={React.createRef<TextInput>()}
-      suggestionProps={{}}
-      handleConfirm={jest.fn()}
-      isMainAnswerNumeric={false}
-      isMainAnswerDate={false}
-      focusTarget="main"
-      requestFocus={jest.fn()}
-      canToggleTranslations={false}
-      next={jest.fn()}
-      typoDiff={null}
-      imageSizeMode="dynamic"
-      cardMetrics={cardMetrics}
-    />,
+      {...stableInputProps}
+    />
   );
 }
 
 describe("CardInput empty submit warning", () => {
   beforeEach(() => {
     mockedUseSettings.mockReturnValue({ colors: { my_yellow: "#fde24f" } });
+    mockTranslate = (key) => key;
+    mockT = (key) => mockTranslate(key);
   });
 
   it("renders my_yellow border when warning is active", () => {
@@ -55,6 +71,15 @@ describe("CardInput empty submit warning", () => {
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#fde24f" }),
       ]),
+    );
+    expect(input.props.accessibilityLabel).toBe(
+      "flashcards.card.input.answerLabel",
+    );
+    expect(input.props.accessibilityHint).toBe(
+      "flashcards.card.input.emptyAnswerHint",
+    );
+    expect(screen.getByTestId("card-answer-error").props.children).toBe(
+      "flashcards.card.input.emptyAnswerError",
     );
   });
 
@@ -67,6 +92,30 @@ describe("CardInput empty submit warning", () => {
       expect.arrayContaining([
         expect.objectContaining({ borderColor: "#fde24f" }),
       ]),
+    );
+    expect(input.props.accessibilityHint).toBe(
+      "flashcards.card.input.answerHint",
+    );
+    expect(screen.queryByTestId("card-answer-error")).toBeNull();
+  });
+
+  it("updates the input label and hint after a language change", () => {
+    mockTranslate = (key) => `pl:${key}`;
+    const screen = renderInput(false);
+    const input = screen.UNSAFE_getByType(TextInput);
+    expect(input.props.accessibilityLabel).toBe(
+      "pl:flashcards.card.input.answerLabel",
+    );
+
+    mockTranslate = (key) => `en:${key}`;
+    mockT = (key) => mockTranslate(key);
+    screen.rerender(renderCardInput(false));
+
+    expect(screen.UNSAFE_getByType(TextInput).props.accessibilityLabel).toBe(
+      "en:flashcards.card.input.answerLabel",
+    );
+    expect(screen.UNSAFE_getByType(TextInput).props.accessibilityHint).toBe(
+      "en:flashcards.card.input.answerHint",
     );
   });
 });

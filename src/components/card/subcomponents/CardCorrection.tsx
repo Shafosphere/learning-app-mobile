@@ -47,6 +47,7 @@ type CardCorrectionProps = {
   isIntroMode: boolean;
   renderCorrectionGhostText: (value: string, expected: string) => React.ReactNode;
   renderCorrectionErrorText: (value: string, expected: string) => React.ReactNode;
+  hasCorrectionMismatch: (value: string, expected: string) => boolean;
   input1ContentWidth: number;
   input2ContentWidth: number;
   setInput1LayoutWidth: (width: number) => void;
@@ -91,6 +92,7 @@ export function CardCorrection({
   suggestionProps,
   renderCorrectionGhostText,
   renderCorrectionErrorText,
+  hasCorrectionMismatch,
   input1ContentWidth,
   input2ContentWidth,
   setInput1LayoutWidth,
@@ -187,6 +189,14 @@ export function CardCorrection({
   const correctionInputCount =
     Number(showAwersInput) + Number(showRewersInput);
   const usesQuestionSpacing = correctionInputCount <= 1;
+  const input1HasMismatch = hasCorrectionMismatch(
+    correction.input1,
+    correctionAwers,
+  );
+  const input2HasMismatch = hasCorrectionMismatch(
+    correction.input2 ?? "",
+    correctionRewers,
+  );
   function applyPlaceholderCasing(value: string, expected: string): string {
     if (!expected) return value;
     const chars = splitGraphemes(value);
@@ -315,11 +325,20 @@ export function CardCorrection({
             { width: input1ContentWidth },
           ]}
         >
-          <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
+          <View
+            importantForAccessibility="no-hide-descendants"
+            style={[styles.inputOverlay, textInputResponsiveStyle]}
+          >
             {renderCorrectionGhostText(correction.input1, correctionAwers)}
           </View>
           <TextInput
             value={correction.input1}
+            accessibilityLabel={t("flashcards.card.input.frontCorrectionLabel")}
+            accessibilityHint={t(
+              input1HasMismatch
+                ? "flashcards.card.input.correctionErrorHint"
+                : "flashcards.card.input.correctionHint",
+            )}
             onChangeText={(text) =>
               handleCorrectionInput1Change(
                 applyPlaceholderCasing(text, correctionAwers),
@@ -350,6 +369,7 @@ export function CardCorrection({
             onBlur={() => onCorrectionInputBlur?.("correction1")}
           />
           <View
+            importantForAccessibility="no-hide-descendants"
             style={[styles.inputOverlay, textInputResponsiveStyle]}
           >
             {renderCorrectionErrorText(correction.input1, correctionAwers)}
@@ -368,10 +388,10 @@ export function CardCorrection({
         !allowMultilinePrompt &&
           (answerOnly || !showAwersInput) &&
           styles.containerInputFirst,
-        { flexDirection: "row" },
       ]}
     >
-      <ScrollView
+      <View style={{ flexDirection: "row", width: "100%" }}>
+        <ScrollView
         ref={input2ScrollRef}
         horizontal
         scrollEnabled={false}
@@ -400,11 +420,20 @@ export function CardCorrection({
             { width: input2ContentWidth },
           ]}
         >
-          <View style={[styles.inputOverlay, textInputResponsiveStyle]}>
+          <View
+            importantForAccessibility="no-hide-descendants"
+            style={[styles.inputOverlay, textInputResponsiveStyle]}
+          >
             {renderCorrectionGhostText(correction.input2 ?? "", correctionRewers)}
           </View>
           <TextInput
             value={correction.input2 ?? ""}
+            accessibilityLabel={t("flashcards.card.input.backCorrectionLabel")}
+            accessibilityHint={t(
+              input2HasMismatch
+                ? "flashcards.card.input.correctionErrorHint"
+                : "flashcards.card.input.correctionHint",
+            )}
             onChangeText={(t) => {
               const adjusted = applyPlaceholderCasing(t, correctionRewers);
               const previousValue = previousCorrectionInput2.current;
@@ -451,14 +480,15 @@ export function CardCorrection({
             }}
           />
           <View
+            importantForAccessibility="no-hide-descendants"
             style={[styles.inputOverlay, textInputResponsiveStyle]}
           >
             {renderCorrectionErrorText(correction.input2 ?? "", correctionRewers)}
           </View>
         </View>
-      </ScrollView>
-      {canToggleTranslations ? (
-        <Pressable
+        </ScrollView>
+        {canToggleTranslations ? (
+          <Pressable
           style={[
             styles.cardIconWrapper,
             { width: 32 * contentScale, height: cardMetrics.textInputHeight },
@@ -475,8 +505,9 @@ export function CardCorrection({
             size={24 * contentScale}
             color={textColorOverride ?? (styles.cardFont as any).color}
           />
-        </Pressable>
-      ) : null}
+          </Pressable>
+        ) : null}
+      </View>
     </View>
   );
 

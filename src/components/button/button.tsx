@@ -18,7 +18,6 @@ interface MyButtonBaseProps {
   disabled?: boolean;
   width?: DimensionValue;
   autoWidth?: boolean;
-  textLines?: number;
   accessibilityLabel?: string;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
@@ -38,7 +37,6 @@ export default function MyButton({
   disabled = false,
   width = 130,
   autoWidth = false,
-  textLines = 2,
   accessibilityLabel,
   style,
   textStyle,
@@ -75,10 +73,7 @@ export default function MyButton({
           textStyle,
           disabledHighContrast && { color: textColor },
         ]}
-        allowFontScaling={false}
-        numberOfLines={textLines}
-        adjustsFontSizeToFit
-        minimumFontScale={0.85}
+        allowFontScaling
       >
         {text}
       </Text>

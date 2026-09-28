@@ -1,7 +1,8 @@
 import MyButton from "@/src/components/button/button";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import { View } from "react-native";
+import { useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "../card-styles";
 
 type CardActionsProps = {
@@ -29,6 +30,11 @@ export function CardActions({
 }: CardActionsProps) {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { fontScale, width } = useWindowDimensions();
+  const { accessibilityPreferences } = useSettings();
+  const stacked =
+    width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled;
+  const buttonWidth = stacked ? "100%" : 140;
 
   if (hidden) {
     return null;
@@ -38,16 +44,18 @@ export function CardActions({
     <MyButton
       text={t("flashcards.card.actions.addFlashcards")}
       color="my_yellow"
-      width={140}
+      width={buttonWidth}
       onPress={onDownload}
       disabled={downloadDisabled}
-      textLines={2}
       textStyle={styles.cardActionButtonText}
     />
   );
 
   return (
-    <View style={styles.containerButton} collapsable={false}>
+    <View
+      style={[styles.containerButton, stacked && styles.containerButtonStacked]}
+      collapsable={false}
+    >
       {downloadCoachmarkId ? (
         <CoachmarkAnchor id={downloadCoachmarkId} shape="rect" radius={18}>
           <View collapsable={false}>{downloadButton}</View>
@@ -59,7 +67,7 @@ export function CardActions({
         <CoachmarkAnchor id={confirmCoachmarkId} shape="rect" radius={18}>
           <View collapsable={false}>
             <MyButton
-              width={140}
+              width={buttonWidth}
               text={confirmLabel}
               color="my_green"
               disabled={confirmDisabled}
@@ -70,7 +78,7 @@ export function CardActions({
         </CoachmarkAnchor>
       ) : (
         <MyButton
-          width={140}
+          width={buttonWidth}
           text={confirmLabel}
           color="my_green"
           disabled={confirmDisabled}

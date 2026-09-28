@@ -98,6 +98,8 @@ export function CardHint({
                         onSubmitEditing={finishHintEditing}
                         onBlur={onHintInputBlur}
                         placeholder={t("flashcards.card.hint.placeholder")}
+                        accessibilityLabel={t("flashcards.card.hint.inputLabel")}
+                        accessibilityHint={t("flashcards.card.hint.inputHint")}
                         placeholderTextColor={colors.paragraph}
                         style={styles.hintInput}
                         returnKeyType="done"

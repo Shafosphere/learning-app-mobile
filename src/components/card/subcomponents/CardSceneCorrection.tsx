@@ -27,6 +27,7 @@ type CardSceneCorrectionProps = {
   isIntroMode: boolean;
   renderCorrectionGhostText: (value: string, expected: string) => React.ReactNode;
   renderCorrectionErrorText: (value: string, expected: string) => React.ReactNode;
+  hasCorrectionMismatch: (value: string, expected: string) => boolean;
   input1ContentWidth: number;
   input2ContentWidth: number;
   setInput1LayoutWidth: (width: number) => void;
@@ -74,6 +75,7 @@ export function CardSceneCorrection(props: CardSceneCorrectionProps) {
       isIntroMode={props.isIntroMode}
       renderCorrectionGhostText={props.renderCorrectionGhostText}
       renderCorrectionErrorText={props.renderCorrectionErrorText}
+      hasCorrectionMismatch={props.hasCorrectionMismatch}
       input1ContentWidth={props.input1ContentWidth}
       input2ContentWidth={props.input2ContentWidth}
       setInput1LayoutWidth={props.setInput1LayoutWidth}

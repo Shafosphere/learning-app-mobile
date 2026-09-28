@@ -1237,6 +1237,8 @@
       },
       "hint": {
         "placeholder": "Wpisz podpowiedź…",
+        "inputLabel": "Podpowiedź",
+        "inputHint": "Wpisz podpowiedź. Zapis będzie dostępny po wpisaniu tekstu.",
         "save": "Zapisz",
         "addA11y": "Dodaj podpowiedź",
         "editA11yValue": "Edytuj podpowiedź: {{hint}}",
@@ -1250,6 +1252,17 @@
       },
       "accessibilityLabel": {
         "przelaczStroneFiszki": "Przełącz stronę fiszki"
+      },
+      "input": {
+        "answerLabel": "Twoja odpowiedź",
+        "answerHint": "Wpisz odpowiedź. Możesz wysłać pustą odpowiedź, zatwierdzając ją dwa razy.",
+        "emptyAnswerError": "Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",
+        "emptyAnswerHint": "Nieprawidłowe. Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",
+        "frontCorrectionLabel": "Popraw awers",
+        "backCorrectionLabel": "Popraw rewers",
+        "correctionHint": "Wpisz poprawkę. Nieprawidłowe znaki są wyróżnione.",
+        "correctionError": "Nieprawidłowy znak.",
+        "correctionErrorHint": "Nieprawidłowe. Nieprawidłowy znak."
       },
       "emptyScene": {
         "chooseBox": "Wybierz pudełko z fiszkami"

@@ -5,7 +5,7 @@ import {
   type TrueFalseButtonsVariant,
 } from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo, useRef } from "react";
-import { Animated, Pressable, StyleSheet, View } from "react-native";
+import { Animated, Pressable, StyleSheet, useWindowDimensions, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 type TrueFalseActionsProps = {
@@ -36,8 +36,15 @@ export function TrueFalseActions({
   addFlashcardsDisabled = false,
 }: TrueFalseActionsProps) {
   const { t } = useTranslation();
-  const { colors } = useSettings();
-  const styles = useMemo(() => makeStyles(colors, dense), [colors, dense]);
+  const { colors, accessibilityPreferences } = useSettings();
+  const { fontScale, width } = useWindowDimensions();
+  const stacked =
+    width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled;
+  const styles = useMemo(
+    () => makeStyles(colors, dense, stacked),
+    [colors, dense, stacked]
+  );
+  const buttonWidth = stacked ? "100%" : 140;
   const labels =
     variant === "know_dont_know"
       ? {
@@ -66,7 +73,7 @@ export function TrueFalseActions({
           text={labels.falseLabel}
           color="my_red"
           onPress={() => undefined}
-          width={140}
+          width={buttonWidth}
           disabled
           accessibilityLabel={getMarkLabel(labels.falseLabel)}
         />
@@ -75,7 +82,7 @@ export function TrueFalseActions({
           text={okLabel}
           color="my_yellow"
           onPress={onOk}
-          width={140}
+          width={buttonWidth}
           disabled={disabled}
           accessibilityLabel={t(
             "components.flashcards.trueFalseActions.accessibilityLabel.potwierdzIPrzejdzDalej"
@@ -94,7 +101,7 @@ export function TrueFalseActions({
         text={labels.falseLabel}
         color="my_red"
         onPress={() => onAnswer(false)}
-        width={140}
+        width={buttonWidth}
         disabled={disabled}
         accessibilityLabel={getMarkLabel(labels.falseLabel)}
       />
@@ -116,7 +123,7 @@ export function TrueFalseActions({
           text={labels.trueLabel}
           color="my_green"
           onPress={() => onAnswer(true)}
-          width={140}
+          width={buttonWidth}
           disabled={disabled}
           accessibilityLabel={getMarkLabel(labels.trueLabel)}
         />
@@ -210,12 +217,12 @@ export function TrueFalseActionsAnimated({
   );
 }
 
-const makeStyles = (colors: any, dense: boolean) =>
+const makeStyles = (colors: any, dense: boolean, stacked: boolean) =>
   StyleSheet.create({
     container: {
-      flexDirection: "row",
+      flexDirection: stacked ? "column" : "row",
       justifyContent: "center",
-      alignItems: "center",
+      alignItems: stacked ? "stretch" : "center",
       paddingHorizontal: dense ? 0 : 16,
       paddingTop: dense ? 0 : 12,
       paddingBottom: dense ? 0 : 4,
@@ -224,18 +231,22 @@ const makeStyles = (colors: any, dense: boolean) =>
     disabled: {
       opacity: 0.55,
     },
-    spacer: {
+    spacer: stacked ? {
+      height: 12,
+    } : {
       width: 20,
     },
     knowAction: {
       position: "relative",
-      width: 140,
+      width: stacked ? "100%" : 140,
       alignItems: "center",
     },
     addFlashcardsButton: {
-      position: "absolute",
-      top: -40,
-      right: 0,
+      position: stacked ? "relative" : "absolute",
+      top: stacked ? undefined : -40,
+      right: stacked ? undefined : 0,
+      alignSelf: stacked ? "flex-end" : undefined,
+      marginBottom: stacked ? 6 : undefined,
       width: 34,
       height: 34,
       borderRadius: 10,

@@ -117,7 +117,6 @@ export default function LegalDocumentScreen({
                 text={onlineButton ?? onlineUrl}
                 color="my_yellow"
                 width={116}
-                textLines={1}
                 accessibilityLabel={onlineButton ?? onlineUrl}
                 style={styles.onlineButton}
                 onPress={() => {

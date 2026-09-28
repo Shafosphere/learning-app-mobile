@@ -1235,6 +1235,8 @@
       },
       "hint": {
         "placeholder": "Enter a hint…",
+        "inputLabel": "Hint",
+        "inputHint": "Enter a hint. Save is available after you enter text.",
         "save": "Save",
         "addA11y": "Add a hint",
         "editA11yValue": "Edit hint: {{hint}}",
@@ -1248,6 +1250,17 @@
       },
       "accessibilityLabel": {
         "przelaczStroneFiszki": "Switch flashcard side"
+      },
+      "input": {
+        "answerLabel": "Your answer",
+        "answerHint": "Enter your answer. You can submit an empty answer by confirming twice.",
+        "emptyAnswerError": "Enter an answer, or confirm again to submit without one.",
+        "emptyAnswerHint": "Invalid. Enter an answer, or confirm again to submit without one.",
+        "frontCorrectionLabel": "Correct the front",
+        "backCorrectionLabel": "Correct the back",
+        "correctionHint": "Type the correction. Incorrect characters are highlighted.",
+        "correctionError": "Incorrect character.",
+        "correctionErrorHint": "Invalid. Incorrect character."
       },
       "emptyScene": {
         "chooseBox": "Choose a box with flashcards"

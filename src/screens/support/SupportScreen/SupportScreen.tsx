@@ -337,7 +337,6 @@ export default function SupportScreen() {
                 text={t("legal.entry.licensesButton")}
                 color="my_green"
                 width={160}
-                textLines={2}
                 textStyle={styles.legalButtonText}
               />
             </Link>
