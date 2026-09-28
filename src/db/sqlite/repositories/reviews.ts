@@ -110,6 +110,37 @@ export async function seedCompletedCustomReviewsForCourse(
   return seedCompletedCustomReviewsForCourseWithDb(db, courseId, nowMs);
 }
 
+/** Developer-only helper used to preview completed-course UI with real course data. */
+export async function simulateCompletedCustomCourseForDebug(
+  courseId: number,
+  nowMs: number = Date.now(),
+): Promise<number> {
+  if (!courseId) return 0;
+
+  const db = await getDB();
+  const result = await db.runAsync(
+    `INSERT INTO custom_learning_events
+       (flashcard_id, course_id, box, result, duration_ms, created_at)
+     SELECT cf.id, ?, 'boxFive', 'ok', 0, ?
+     FROM custom_flashcards cf
+     WHERE cf.course_id = ?
+       AND NOT EXISTS (
+         SELECT 1
+         FROM custom_learning_events cle
+         WHERE cle.course_id = ?
+           AND cle.flashcard_id = cf.id
+           AND cle.result = 'ok'
+           AND cle.box = 'boxFive'
+       );`,
+    courseId,
+    nowMs,
+    courseId,
+    courseId,
+  );
+
+  return Number(result?.changes ?? 0);
+}
+
 export async function scheduleCustomReview(
   flashcardId: number,
   courseId: number,

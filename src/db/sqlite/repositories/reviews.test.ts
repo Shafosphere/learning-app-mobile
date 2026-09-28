@@ -14,6 +14,7 @@ import {
   removeCustomReview,
   scheduleCustomReview,
   seedCompletedCustomReviewsForCourse,
+  simulateCompletedCustomCourseForDebug,
 } from "@/src/db/sqlite/repositories/reviews";
 
 describe("custom review repository", () => {
@@ -46,6 +47,23 @@ describe("custom review repository", () => {
       expect.stringContaining("INSERT OR IGNORE INTO custom_reviews"),
       77,
       10_000,
+      10_000,
+      77,
+      77,
+    );
+    expect(runAsync.mock.calls[0][0]).toContain("cle.box = 'boxFive'");
+  });
+
+  it("marks every unmastered card as completed for debug preview", async () => {
+    const runAsync = jest.fn().mockResolvedValue({ changes: 3 });
+    mockGetDB.mockResolvedValue({ runAsync });
+
+    const result = await simulateCompletedCustomCourseForDebug(77, 10_000);
+
+    expect(result).toBe(3);
+    expect(runAsync).toHaveBeenCalledWith(
+      expect.stringContaining("INSERT INTO custom_learning_events"),
+      77,
       10_000,
       77,
       77,

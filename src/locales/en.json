@@ -478,7 +478,8 @@
         "yesterdayShieldError": "Could not mark yesterday as shield-protected.",
         "learningReminderPreviewScheduled": "NotifyKit reminder scheduled. ID: {{notificationId}}",
         "learningReminderPreviewDenied": "Notification permission is denied or unavailable.",
-        "learningReminderPreviewError": "Could not schedule NotifyKit reminder."
+        "learningReminderPreviewError": "Could not schedule NotifyKit reminder.",
+        "completeCourseSimulationError": "Could not simulate course completion."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -545,6 +546,12 @@
           "title": "Simulate completed course",
           "subtitle": "Opens the real flashcards screen and forces the completion view for the active course.",
           "button": "Simulate"
+        },
+        "completedCoursesScreenSimulation": {
+          "title": "Add course to completed list",
+          "subtitle": "Marks every active-course flashcard as mastered and opens Completed Courses. This changes local progress.",
+          "button": "Complete course",
+          "buttonLoading": "Completing…"
         },
         "testDbErrorScreen": {
           "title": "Test database error screen",

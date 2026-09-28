@@ -478,7 +478,8 @@
         "yesterdayShieldError": "Nie udało się oznaczyć wczorajszego dnia tarczą.",
         "learningReminderPreviewScheduled": "Zaplanowano przypomnienie NotifyKit. ID: {{notificationId}}",
         "learningReminderPreviewDenied": "Brak zgody na powiadomienia albo moduł jest niedostępny.",
-        "learningReminderPreviewError": "Nie udało się zaplanować przypomnienia NotifyKit."
+        "learningReminderPreviewError": "Nie udało się zaplanować przypomnienia NotifyKit.",
+        "completeCourseSimulationError": "Nie udało się zasymulować ukończenia kursu."
       },
       "onboardingCheckpoints": {
         "languageRequired": "language_required",
@@ -545,6 +546,12 @@
           "title": "Symuluj ukończony kurs",
           "subtitle": "Otwiera prawdziwy ekran fiszek i wymusza widok ukończenia aktywnego kursu.",
           "button": "Symuluj"
+        },
+        "completedCoursesScreenSimulation": {
+          "title": "Dodaj kurs do ukończonych",
+          "subtitle": "Oznacza wszystkie fiszki aktywnego kursu jako opanowane i otwiera Ukończone kursy. Zmienia lokalny postęp.",
+          "button": "Ukończ kurs",
+          "buttonLoading": "Kończenie…"
         },
         "testDbErrorScreen": {
           "title": "Test ekranu błędu bazy",

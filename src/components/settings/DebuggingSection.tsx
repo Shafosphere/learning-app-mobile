@@ -9,6 +9,7 @@ import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   addRandomCustomReviews,
+  simulateCompletedCustomCourseForDebug,
 } from "@/src/db/sqlite/db";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { enableDbInitDebugOverride } from "@/src/services/dbInitDebugOverride";
@@ -82,6 +83,7 @@ const DebuggingSection: React.FC = () => {
   const [openingDbErrorScreen, setOpeningDbErrorScreen] = useState(false);
   const [resettingDb, setResettingDb] = useState(false);
   const [markingShieldDay, setMarkingShieldDay] = useState(false);
+  const [simulatingCompletedCourse, setSimulatingCompletedCourse] = useState(false);
 
   const handleAddRandomCustom = async () => {
     if (activeCustomCourseId == null) {
@@ -279,6 +281,29 @@ const DebuggingSection: React.FC = () => {
     router.push("/flashcards");
   };
 
+  const handleSimulateCompletedCourseList = async () => {
+    if (activeCustomCourseId == null) {
+      Alert.alert(
+        t("settings.debug.alerts.missingCourseTitle"),
+        t("settings.debug.alerts.missingCourseMessage")
+      );
+      return;
+    }
+
+    setSimulatingCompletedCourse(true);
+    try {
+      await simulateCompletedCustomCourseForDebug(activeCustomCourseId);
+      router.push("/completed-courses");
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.debug.alerts.completeCourseSimulationError")
+      );
+    } finally {
+      setSimulatingCompletedCourse(false);
+    }
+  };
+
   const handleResetReviewCoursesIntro = async () => {
     try {
       await Promise.all([
@@ -462,6 +487,28 @@ const DebuggingSection: React.FC = () => {
           text={t("settings.debug.rows.testPopup.button")}
           color="my_yellow"
           onPress={handleTestPopup}
+          width={140}
+        />
+      </View>
+
+      <View style={styles.row}>
+        <View style={styles.rowTextWrapper}>
+          <Text style={styles.rowTitle}>
+            {t("settings.debug.rows.completedCoursesScreenSimulation.title")}
+          </Text>
+          <Text style={styles.rowSubtitle}>
+            {t("settings.debug.rows.completedCoursesScreenSimulation.subtitle")}
+          </Text>
+        </View>
+        <MyButton
+          text={
+            simulatingCompletedCourse
+              ? t("settings.debug.rows.completedCoursesScreenSimulation.buttonLoading")
+              : t("settings.debug.rows.completedCoursesScreenSimulation.button")
+          }
+          color="my_yellow"
+          onPress={handleSimulateCompletedCourseList}
+          disabled={activeCustomCourseId == null || simulatingCompletedCourse}
           width={140}
         />
       </View>
