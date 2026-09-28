@@ -502,7 +502,10 @@ export default function BoxList({
         <View
             testID="box-list-viewport"
             style={styles.container}
-            onLayout={(event) => setViewportWidth(event.nativeEvent.layout.width)}
+            onLayout={(event) => {
+                const { width } = event.nativeEvent.layout;
+                setViewportWidth(width);
+            }}
         >
             {shouldUseHorizontalScroll ? (
                 <View

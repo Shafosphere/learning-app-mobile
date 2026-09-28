@@ -4,7 +4,7 @@ import type { BoxFacesByBox } from "@/src/components/Box/Skin/boxFaces";
 import type { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { TFunction } from "i18next";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import type { ComponentProps } from "react";
 import {
   ScrollView,
@@ -79,6 +79,7 @@ export function FlashcardsBoxesSection({
 }: FlashcardsBoxesSectionProps) {
   const animatedBoxesScale = useSharedValue(boxesScale);
   const animatedBoxesScaleOffsetY = useSharedValue(boxesScaleOffsetY);
+  const [measuredViewportWidth, setMeasuredViewportWidth] = useState<number | null>(null);
 
   useEffect(() => {
     animatedBoxesScale.value = withTiming(boxesScale, { duration: 420 });
@@ -100,6 +101,10 @@ export function FlashcardsBoxesSection({
   }));
 
   const handleViewportLayout = (event: LayoutChangeEvent) => {
+    const { width } = event.nativeEvent.layout;
+    if (width > 0) {
+      setMeasuredViewportWidth((previous) => previous === width ? previous : width);
+    }
     onBoxesViewportLayout(event);
   };
 
@@ -120,7 +125,7 @@ export function FlashcardsBoxesSection({
         faces={boxFaces}
         countsCoachmarkId={countsCoachmarkId}
         maxColumns={maxColumns ?? (isTabletLayout ? 3 : undefined)}
-        layoutWidth={flashcardsContentWidth}
+        layoutWidth={flashcardsContentWidth ?? measuredViewportWidth ?? undefined}
       />
     ) : (
       <BoxesCarousel
@@ -176,6 +181,7 @@ export function FlashcardsBoxesSection({
     >
       {boxesNeedScrollFallback ? (
         <ScrollView
+          testID="flashcards-boxes-viewport"
           style={[
             styles.boxesScrollViewport,
             isTabletCompactBoxesLayout &&
@@ -189,6 +195,7 @@ export function FlashcardsBoxesSection({
         </ScrollView>
       ) : (
         <View
+          testID="flashcards-boxes-viewport"
           style={[
             styles.boxesViewport,
             isTabletCompactBoxesLayout && styles.tabletCompactBoxesViewport,

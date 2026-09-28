@@ -103,7 +103,6 @@ export default function BoxCarousel({
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const [scrollOffset, setScrollOffset] = useState(initialIndex * itemWidth);
     const longPressTriggeredRef = useRef(false);
-
     useEffect(() => {
         const widthChanged = prevItemWidthRef.current !== itemWidth;
         prevItemWidthRef.current = itemWidth;

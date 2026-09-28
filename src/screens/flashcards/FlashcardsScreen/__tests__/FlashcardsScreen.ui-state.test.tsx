@@ -938,6 +938,13 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestButtonsProps?.contentWidth).toBeUndefined();
     expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toBeUndefined();
+
+    act(() => {
+      screen.getByTestId("flashcards-boxes-viewport").props.onLayout({
+        nativeEvent: { layout: { x: 0, y: 0, width: 336, height: 213 } },
+      });
+    });
+    expect(latestBoxListProps?.layoutWidth).toBe(336);
   });
 
   it("centers tablet top-button study content with compact boxes", async () => {
