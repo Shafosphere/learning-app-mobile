@@ -15,6 +15,7 @@ import React, {
 } from "react";
 import {
   Modal,
+  Pressable,
   Text,
   TouchableOpacity,
   View,
@@ -289,7 +290,13 @@ const AppearanceSection: React.FC = () => {
       </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
-          <View style={styles.appearanceGroupRow}>
+          <Pressable
+            style={styles.appearanceGroupRow}
+            onPress={() => void handleThemeToggle(theme !== "dark")}
+            accessibilityRole="switch"
+            accessibilityLabel={t("settings.appearance.darkTheme.title")}
+            accessibilityState={{ checked: theme === "dark" }}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
                 {t("settings.appearance.darkTheme.title")}
@@ -301,15 +308,20 @@ const AppearanceSection: React.FC = () => {
             <View style={styles.switch}>
               <ToggleSwitch
                 value={theme === "dark"}
-                onPress={() => void handleThemeToggle(theme !== "dark")}
-                accessibilityLabel={t("settings.appearance.darkTheme.title")}
+                decorative
               />
             </View>
-          </View>
+          </Pressable>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <Pressable
+            style={styles.appearanceGroupRow}
+            onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
+            accessibilityRole="switch"
+            accessibilityLabel={t("settings.appearance.vibrations.title")}
+            accessibilityState={{ checked: feedbackEnabled }}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
                 {t("settings.appearance.vibrations.title")}
@@ -321,15 +333,20 @@ const AppearanceSection: React.FC = () => {
             <View style={styles.switch}>
               <ToggleSwitch
                 value={feedbackEnabled}
-                onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
-                accessibilityLabel={t("settings.appearance.vibrations.title")}
+                decorative
               />
             </View>
-          </View>
+          </Pressable>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <Pressable
+            style={styles.appearanceGroupRow}
+            onPress={() => void handleQuotesToggle(quotesEnabled)}
+            accessibilityRole="switch"
+            accessibilityLabel={t("settings.appearance.disableReactions.title")}
+            accessibilityState={{ checked: !quotesEnabled }}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
                 {t("settings.appearance.disableReactions.title")}
@@ -341,15 +358,20 @@ const AppearanceSection: React.FC = () => {
             <View style={styles.switch}>
               <ToggleSwitch
                 value={!quotesEnabled}
-                onPress={() => void handleQuotesToggle(quotesEnabled)}
-                accessibilityLabel={t("settings.appearance.disableReactions.title")}
+                decorative
               />
             </View>
-          </View>
+          </Pressable>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <Pressable
+            style={styles.appearanceGroupRow}
+            onPress={() => void handleFacesToggle(!showBoxFaces)}
+            accessibilityRole="switch"
+            accessibilityLabel={t("settings.appearance.boxFaces.title")}
+            accessibilityState={{ checked: showBoxFaces }}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
                 {t("settings.appearance.boxFaces.title")}
@@ -361,11 +383,10 @@ const AppearanceSection: React.FC = () => {
             <View style={styles.switch}>
               <ToggleSwitch
                 value={showBoxFaces}
-                onPress={() => void handleFacesToggle(!showBoxFaces)}
-                accessibilityLabel={t("settings.appearance.boxFaces.title")}
+                decorative
               />
             </View>
-          </View>
+          </Pressable>
         </View>
       </View>
 
