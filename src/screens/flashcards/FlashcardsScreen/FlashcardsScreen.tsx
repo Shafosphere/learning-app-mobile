@@ -91,6 +91,7 @@ import {
 // import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
+  const isFocused = useIsFocused();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
   const {
@@ -132,6 +133,7 @@ export default function Flashcards() {
     isTabletLayout,
     boxesLayout,
     areButtonsOnTop: actionButtonsPosition === "top",
+    isFocused,
   });
   const { isCompactStudyLayout, setActionsHidden } = studyLayout;
   const layoutTransition = useNavbarLayoutTransition();
@@ -140,7 +142,6 @@ export default function Flashcards() {
   const { registerKnownWord } = useLearningStats();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const { triggerQuote } = useQuote();
-  const isFocused = useIsFocused();
   const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
   useEffect(() => {
     setNavbarCompactLayout(isFocused && isCompactStudyLayout);
@@ -584,9 +585,6 @@ export default function Flashcards() {
       const serialized = JSON.stringify(payload);
       if (lastLayoutDiagnosticsRef.current === serialized) return;
       lastLayoutDiagnosticsRef.current = serialized;
-      if (__DEV__ && process.env.NODE_ENV !== "test") {
-        console.log("[study-layout] screen", serialized);
-      }
       void appendDebugEvent("flashcards", "screen.layout.diagnostics", payload);
     }, 300);
     return () => clearTimeout(timer);

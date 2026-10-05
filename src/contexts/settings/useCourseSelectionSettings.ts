@@ -263,25 +263,6 @@ export function useCourseSelectionSettings() {
   const activeCourse =
     activeCourseIdx != null ? courses[activeCourseIdx] ?? null : null;
 
-  useEffect(() => {
-    if (!__DEV__) {
-      return;
-    }
-    if (activeCustomCourseId != null) {
-      console.log("[ActiveCourse] custom", { id: activeCustomCourseId });
-      return;
-    }
-    if (activeCourse) {
-      console.log("[ActiveCourse] builtin", {
-        sourceLang: activeCourse.sourceLang,
-        targetLang: activeCourse.targetLang,
-        level: activeCourse.level ?? null,
-      });
-      return;
-    }
-    console.log("[ActiveCourse] none");
-  }, [activeCourse, activeCustomCourseId]);
-
   return {
     courses,
     addCourse,

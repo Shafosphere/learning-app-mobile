@@ -129,7 +129,6 @@ export function FlashcardsBoxesSection({
         });
         if (snapshot === lastSizesLogRef.current) return;
         lastSizesLogRef.current = snapshot;
-        console.log("[study-layout] boxes", snapshot);
       }, 300);
     }
   }, [debugSizes, debugCourseId, layoutTransition]);

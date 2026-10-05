@@ -58,16 +58,13 @@ export function useKeyboardBottomOffset({
   );
   const bottomOffset = useRef(new Animated.Value(0)).current;
   const lastKeyboardTopRef = useRef<number | null>(null);
-  const hideTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const clearPendingHide = useCallback(() => {
-    if (!hideTimerRef.current) return;
-    clearTimeout(hideTimerRef.current);
-    hideTimerRef.current = null;
-  }, []);
+  const targetOffsetRef = useRef(0);
 
   const animateTo = useCallback(
     (value: number, duration: number) => {
+      // A visibility render or a repeated native event must not restart the lift.
+      if (targetOffsetRef.current === value) return;
+      targetOffsetRef.current = value;
       if (debug) {
         console.log("[kbd-offset] animateTo", { value, duration });
       }
@@ -100,9 +97,11 @@ export function useKeyboardBottomOffset({
 
       const keyboardTopFromEvent = coords?.screenY;
       const fallbackKeyboardTop = windowHeight - keyboardHeight;
+      // adjustResize may already have removed the keyboard from windowHeight.
+      // Subtracting it again would lift the dock above the reported screenY.
       const keyboardTopRaw =
         typeof keyboardTopFromEvent === "number" && keyboardTopFromEvent > 0
-          ? Math.min(keyboardTopFromEvent, fallbackKeyboardTop)
+          ? keyboardTopFromEvent
           : fallbackKeyboardTop;
 
       if (debug) {
@@ -202,10 +201,10 @@ export function useKeyboardBottomOffset({
 
   useEffect(() => {
     if (!enabled) {
-      clearPendingHide();
       setKeyboardVisible(false);
       setKeyboardTopInWindow(null);
       lastKeyboardTopRef.current = null;
+      targetOffsetRef.current = 0;
       bottomOffset.stopAnimation();
       bottomOffset.setValue(0);
       return;
@@ -225,7 +224,6 @@ export function useKeyboardBottomOffset({
       const keyboardTop = Math.max(0, keyboardTopRaw - keyboardTopCorrection);
       if (keyboardTop <= 0) return;
 
-      clearPendingHide();
       lastKeyboardTopRef.current = keyboardTopRaw;
       setKeyboardVisible(true);
       setKeyboardTopInWindow(keyboardTopRaw);
@@ -240,18 +238,11 @@ export function useKeyboardBottomOffset({
         });
       }
 
-      clearPendingHide();
       const hideDuration = getDuration(event);
       setKeyboardVisible(false);
       setKeyboardTopInWindow(null);
       lastKeyboardTopRef.current = null;
       animateTo(0, hideDuration);
-      hideTimerRef.current = setTimeout(() => {
-        hideTimerRef.current = null;
-        if (syncFromLiveKeyboard(120)) {
-          return;
-        }
-      }, 110);
     };
 
     const showEvent =
@@ -263,31 +254,30 @@ export function useKeyboardBottomOffset({
     const hideSub = Keyboard.addListener(hideEvent, handleHide);
 
     return () => {
-      clearPendingHide();
       showSub.remove();
       hideSub.remove();
     };
   }, [
     animateTo,
     bottomOffset,
-    clearPendingHide,
     computeTargetOffset,
     debug,
     enabled,
     getDuration,
     getKeyboardTopFromCoordinates,
     keyboardTopCorrection,
-    syncFromLiveKeyboard,
   ]);
+
+  // Read live metrics only when activating the hook. During hide they can still
+  // describe the departing keyboard; native events own visibility thereafter.
+  const syncFromLiveKeyboardRef = useRef(syncFromLiveKeyboard);
+  syncFromLiveKeyboardRef.current = syncFromLiveKeyboard;
+  useEffect(() => {
+    if (enabled) syncFromLiveKeyboardRef.current(180);
+  }, [enabled]);
 
   useEffect(() => {
     if (!enabled) return;
-
-    if (syncFromLiveKeyboard(180)) {
-      return;
-    }
-
-    if (!keyboardVisible) return;
     if (lastKeyboardTopRef.current == null) return;
 
     if (debug) {
@@ -302,9 +292,9 @@ export function useKeyboardBottomOffset({
     computeTargetOffset,
     debug,
     enabled,
-    keyboardVisible,
-    syncFromLiveKeyboard,
   ]);
+
+  useEffect(() => () => bottomOffset.stopAnimation(), [bottomOffset]);
 
   return { keyboardVisible, keyboardTopInWindow, bottomOffset };
 }

@@ -29,6 +29,7 @@ type Params = {
   isTabletLayout: boolean;
   boxesLayout: string;
   areButtonsOnTop: boolean;
+  isFocused?: boolean;
 };
 
 function measuredHeight(event: LayoutChangeEvent) {
@@ -39,6 +40,7 @@ export function useFlashcardsStudyLayout({
   isTabletLayout,
   boxesLayout,
   areButtonsOnTop,
+  isFocused = true,
 }: Params) {
   const [isCompactStudyLayout, setIsCompactStudyLayout] = useState(false);
   const [availableStudyHeight, setAvailableStudyHeight] = useState(0);
@@ -49,7 +51,7 @@ export function useFlashcardsStudyLayout({
   const [cardMeasurement, setCardMeasurement] = useState({ height: 0, hintSpace: 0 });
   const [topButtonsHeight, setTopButtonsHeight] = useState(0);
   const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
-  const { keyboardVisible, keyboardTopInWindow } = useKeyboardVisibility();
+  const { keyboardVisible, keyboardTopInWindow } = useKeyboardVisibility(isFocused);
   const [actionsHidden, setActionsHidden] = useState(false);
   const [visibleCardHeight, setVisibleCardHeight] = useState(0);
   const layoutTransition = useNavbarLayoutTransition();

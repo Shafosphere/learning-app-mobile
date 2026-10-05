@@ -2,12 +2,15 @@ import { useEffect, useState } from "react";
 import { Keyboard, type KeyboardEvent } from "react-native";
 
 // Visibility is independent of whether a screen animates a bottom dock.
-export function useKeyboardVisibility() {
+export function useKeyboardVisibility(enabled = true) {
   const [keyboardVisible, setKeyboardVisible] = useState(() => Keyboard.isVisible());
   const [keyboardTopInWindow, setKeyboardTopInWindow] = useState<number | null>(
     () => Keyboard.metrics?.()?.screenY ?? null,
   );
   useEffect(() => {
+    if (!enabled) return;
+    setKeyboardVisible(Keyboard.isVisible());
+    setKeyboardTopInWindow(Keyboard.metrics?.()?.screenY ?? null);
     const show = (event: KeyboardEvent) => {
       setKeyboardVisible(true);
       setKeyboardTopInWindow(event.endCoordinates?.screenY ?? null);
@@ -22,6 +25,6 @@ export function useKeyboardVisibility() {
       }),
     ];
     return () => subscriptions.forEach((subscription) => subscription.remove());
-  }, []);
+  }, [enabled]);
   return { keyboardVisible, keyboardTopInWindow };
 }
