@@ -3,7 +3,6 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
-import { Image, StyleSheet, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 const LEITNER_SOURCE = require("@/assets/illustrations/leitner.png");
@@ -44,24 +43,11 @@ export default function LeitnerIntroScreen() {
       onContinue={onContinue}
       isSaving={isSaving}
       descriptionTestID="leitner-intro-description"
-      debugLabel="leitner"
-    >
-      <View style={styles.diagram} testID="leitner-diagram">
-        <Image source={LEITNER_SOURCE} style={styles.image} resizeMode="contain" />
-      </View>
-    </OnboardingIntroLayout>
+      illustration={{
+        source: LEITNER_SOURCE,
+        aspectRatio: 1179 / 879,
+        testID: "leitner-diagram",
+      }}
+    />
   );
 }
-
-const styles = StyleSheet.create({
-  diagram: {
-    width: "80%",
-    aspectRatio: 393 / 293,
-    alignSelf: "center",
-    marginTop: 18,
-  },
-  image: {
-    width: "100%",
-    height: "100%",
-  },
-});

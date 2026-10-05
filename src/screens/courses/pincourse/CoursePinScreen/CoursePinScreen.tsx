@@ -24,7 +24,6 @@ import {
   setOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useTranslation } from "react-i18next";
@@ -824,24 +823,20 @@ export default function CoursePinScreen() {
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
             <MyButton
-              color="my_yellow"
-              onPress={() => router.push("/coursepanel")}
-              disabled={false}
-              width={60}
-              accessibilityLabel={t(
-                "repeats.a11y.backToCoursesPanel"
-              )}
-            >
-              <Ionicons name="arrow-back" size={28} color={colors.headline} />
-            </MyButton>
-            <MyButton
               text={t(
                 "screens.courses.pincourse.coursePin.coursePin.text.zrobWlasny"
-              )}
-              color="my_green"
+              ).replace(/\s+/, "\n")}
+              color="my_yellow"
               onPress={() => router.push("/custom_course")}
               disabled={false}
-              width={140}
+              autoWidth
+            />
+            <MyButton
+              text={t("components.logoMessage.logoMessage.title.aktywujKurs")}
+              color="my_green"
+              onPress={() => router.push("/coursepanel")}
+              disabled={false}
+              style={{ flex: 1 }}
             />
           </View>
         </View>

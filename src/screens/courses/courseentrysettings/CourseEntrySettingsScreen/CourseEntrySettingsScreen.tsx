@@ -16,8 +16,9 @@ import {
   subscribeOnboardingCheckpoint,
 } from "@/src/services/onboardingCheckpoint";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ActivityIndicator, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./CourseEntrySettingsScreen-styles";
@@ -33,6 +34,7 @@ type CourseState = {
 
 export default function CourseEntrySettingsScreen() {
   const router = useRouter();
+  const isFocused = useIsFocused();
   const styles = useStyles();
   const { t } = useTranslation();
   const setPopup = usePopup();
@@ -49,6 +51,7 @@ export default function CourseEntrySettingsScreen() {
     markCustomCourseEntrySettingsSeen,
   } = useSettings();
   const [course, setCourse] = useState<CourseState | null>(null);
+  const initializedCourseId = useRef<number | null>(null);
   const [autoflowEnabled, setAutoflowEnabledState] = useState(true);
   const [reviewsEnabled, setReviewsEnabled] = useState(true);
   const [showExplanationEnabled, setShowExplanationEnabledState] = useState(true);
@@ -78,6 +81,9 @@ export default function CourseEntrySettingsScreen() {
   }, []);
 
   useEffect(() => {
+    // A screen retained in the stack must not navigate when another screen
+    // changes the active course.
+    if (!isFocused) return;
     let isMounted = true;
 
     const load = async () => {
@@ -94,6 +100,10 @@ export default function CourseEntrySettingsScreen() {
         return;
       }
 
+      // Returning from Settings should keep this course's unsaved choices.
+      if (initializedCourseId.current === activeCustomCourseId) return;
+
+      setIsLoading(true);
       try {
         const courseRow = await getCustomCourseById(activeCustomCourseId);
         if (!isMounted) {
@@ -124,7 +134,9 @@ export default function CourseEntrySettingsScreen() {
         setShowExplanationEnabledState(
           getCustomCourseShowExplanationEnabled(courseRow.id)
         );
+        initializedCourseId.current = courseRow.id;
       } catch (error) {
+        if (!isMounted) return;
         console.error("Failed to load course entry settings", error);
         setPopup({
           message: t(
@@ -148,6 +160,7 @@ export default function CourseEntrySettingsScreen() {
       isMounted = false;
     };
   }, [
+    isFocused,
     activeCustomCourseId,
     activeCustomCourseIdHydrated,
     customCourseEntrySettingsSeenHydrated,

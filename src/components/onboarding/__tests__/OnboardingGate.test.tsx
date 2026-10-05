@@ -128,4 +128,24 @@ describe("OnboardingGate leitner routing", () => {
     });
     expect(mockReplace).not.toHaveBeenCalled();
   });
+
+  it("does not restart skipped onboarding when courses are pinned before activation", async () => {
+    mockedGetCheckpoint.mockResolvedValue("done");
+    mockPathname = "/createcourse";
+    const screen = render(<OnboardingGate />);
+    await waitFor(() => {
+      expect(mockedSetCheckpoint).toHaveBeenCalledWith("done");
+    });
+
+    mockSettings = { ...mockSettings, pinnedOfficialCourseIds: [11] };
+    screen.rerender(<OnboardingGate />);
+    expect(mockedSetCheckpoint).not.toHaveBeenCalledWith("activate_required");
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    mockPathname = "/coursepanel";
+    mockSettings = { ...mockSettings, activeCustomCourseId: 11 };
+    screen.rerender(<OnboardingGate />);
+    expect(mockedSetCheckpoint).not.toHaveBeenCalledWith("activate_required");
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
 });

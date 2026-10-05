@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {
+  getOnboardingCheckpoint,
   markAllOnboardingCoachmarksSeen,
   setOnboardingCheckpoint,
   subscribeOnboardingCheckpoint,
@@ -10,6 +11,21 @@ describe("onboardingCheckpoint", () => {
   beforeEach(async () => {
     jest.clearAllMocks();
     await AsyncStorage.clear();
+  });
+
+  it.each(["beta_required", "welcome_required"])(
+    "resumes retired %s at the Leitner intro",
+    async (checkpoint) => {
+      await AsyncStorage.setItem("@onboarding_checkpoint_v1", checkpoint);
+
+      expect(await getOnboardingCheckpoint()).toBe("leitner_required");
+    },
+  );
+
+  it("preserves completed onboarding", async () => {
+    await AsyncStorage.setItem("@onboarding_checkpoint_v1", "done");
+
+    expect(await getOnboardingCheckpoint()).toBe("done");
   });
 
   it("marks every main onboarding coachmark as seen", async () => {

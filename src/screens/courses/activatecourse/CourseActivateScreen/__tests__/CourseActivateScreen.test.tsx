@@ -549,4 +549,38 @@ describe("CourseActivateScreen loading state", () => {
       expect.objectContaining({ shouldStart: false }),
     );
   });
+
+  it("only activates a tile after skip and waits for Play before navigating", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    const settings = {
+      ...mockedUseSettings(),
+      setActiveCustomCourseId,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
+    };
+    mockedUseSettings.mockReturnValue(settings);
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      {
+        id: 11,
+        name: "Custom course",
+        iconId: "book-outline",
+        iconColor: "#000",
+        cardsCount: 12,
+        reviewsEnabled: true,
+        isOfficial: false,
+      },
+    ]);
+    const screen = render(<CourseActivateScreen />);
+    fireEvent.press(await screen.findByText("Custom course"));
+    await waitFor(() => {
+      expect(setActiveCustomCourseId).toHaveBeenCalledWith(11);
+    });
+
+    mockedUseSettings.mockReturnValue({ ...settings, activeCustomCourseId: 11 });
+    screen.rerender(<CourseActivateScreen />);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    fireEvent.press(await screen.findByText("Graj"));
+    expect(mockPush).toHaveBeenCalledWith("/flashcards");
+  });
 });

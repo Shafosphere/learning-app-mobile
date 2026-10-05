@@ -70,10 +70,12 @@ export function OnboardingGate() {
       activeCustomCourseId != null &&
       !hasSeenCustomCourseEntrySettings(activeCustomCourseId);
 
+    // Skipping/completing onboarding must survive later course selection changes.
+    if (checkpoint === "done") return "done";
+
     if (
       checkpoint === "language_required" ||
       checkpoint === "native_language_required" ||
-      checkpoint === "beta_required" ||
       checkpoint === "leitner_required"
     ) {
       return checkpoint;
@@ -128,9 +130,7 @@ export function OnboardingGate() {
         ? LANGUAGE_ROUTE
         : resolvedCheckpoint === "native_language_required"
           ? LANGUAGE_ROUTE
-          : resolvedCheckpoint === "beta_required"
-            ? LANGUAGE_ROUTE
-            : resolvedCheckpoint === "leitner_required"
+          : resolvedCheckpoint === "leitner_required"
             ? LANGUAGE_ROUTE
             : resolvedCheckpoint === "pin_required"
               ? PIN_ROUTE

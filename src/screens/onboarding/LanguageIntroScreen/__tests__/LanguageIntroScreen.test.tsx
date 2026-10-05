@@ -153,18 +153,6 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
     revealIntroContent();
   });
 
-  it("does not render arrow diagram on beta screen", async () => {
-    mockedGetOnboardingCheckpoint.mockResolvedValue("beta_required");
-
-    const screen = render(<LanguageIntroScreen />);
-
-    await waitFor(() => {
-      expect(screen.getByText("Tworzysz Memicard razem ze mną")).toBeTruthy();
-    });
-    revealIntroContent();
-    expect(screen.queryByTestId("leitner-diagram")).toBeNull();
-  });
-
   it("moves from Leitner screen to course pinning", async () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("leitner_required");
 

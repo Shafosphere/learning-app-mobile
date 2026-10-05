@@ -410,7 +410,6 @@ const DebuggingSection: React.FC = () => {
     checkpoint:
       | "language_required"
       | "native_language_required"
-      | "beta_required"
       | "leitner_required"
       | "pin_required"
       | "activate_required"

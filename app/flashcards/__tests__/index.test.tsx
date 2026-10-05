@@ -5,6 +5,11 @@ import FlashcardsRoute from "@/app/flashcards";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
 const mockReplace = jest.fn();
+let mockIsFocused = true;
+
+jest.mock("@react-navigation/native", () => ({
+  useIsFocused: () => mockIsFocused,
+}));
 
 jest.mock("expo-router", () => ({
   useRouter: jest.fn(() => ({ replace: mockReplace })),
@@ -27,6 +32,30 @@ const mockedUseSettings = useSettings as jest.Mock;
 describe("FlashcardsRoute", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockIsFocused = true;
+  });
+
+  it("does not redirect from a background screen when the active course changes", () => {
+    mockIsFocused = false;
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 11,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
+    });
+    const screen = render(<FlashcardsRoute />);
+    mockedUseSettings.mockReturnValue({
+      activeCustomCourseId: 12,
+      activeCustomCourseIdHydrated: true,
+      customCourseEntrySettingsSeenHydrated: true,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => false),
+    });
+    screen.rerender(<FlashcardsRoute />);
+    expect(mockReplace).not.toHaveBeenCalled();
+
+    mockIsFocused = true;
+    screen.rerender(<FlashcardsRoute />);
+    expect(mockReplace).toHaveBeenCalledWith("/course-entry-settings");
   });
 
   it("waits for settings hydration, then redirects an unconfigured course", async () => {

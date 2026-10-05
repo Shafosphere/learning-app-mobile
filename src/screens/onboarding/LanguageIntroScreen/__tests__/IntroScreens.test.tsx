@@ -1,6 +1,5 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
-import BetaIntroScreen, { balanceTitleIntoTwoLines } from "../BetaIntroScreen";
 import LeitnerIntroScreen from "../LeitnerIntroScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
@@ -60,36 +59,6 @@ describe("onboarding intro screens", () => {
 
   afterEach(() => {
     jest.useRealTimers();
-  });
-
-  it("automatically balances the beta title over two lines", () => {
-    expect(balanceTitleIntoTwoLines("Tworzysz Memicard razem ze mną")).toBe(
-      "Tworzysz Memicard\nrazem ze mną"
-    );
-    expect(balanceTitleIntoTwoLines("You are building Memicard with me")).toBe(
-      "You are building\nMemicard with me"
-    );
-  });
-
-  it("uses the shared message card and fixed footer on beta", () => {
-    const screen = renderIntro(<BetaIntroScreen onComplete={jest.fn()} />);
-
-    expect(screen.getByTestId("onboarding-intro-message")).toBeTruthy();
-    expect(screen.getByTestId("onboarding-intro-footer")).toBeTruthy();
-    expect(screen.getByTestId("beta-description")).toHaveTextContent(/Aplikacja jest na początku swojej drogi/);
-    expect(screen.getByText("Dziękuję")).toBeTruthy();
-    expect(screen.queryByTestId("leitner-diagram")).toBeNull();
-  });
-
-  it("moves beta forward to Leitner", async () => {
-    const onComplete = jest.fn();
-    const screen = renderIntro(<BetaIntroScreen onComplete={onComplete} />);
-    fireEvent.press(screen.getByText("Zaczynajmy"));
-
-    await waitFor(() => {
-      expect(mockedSetCheckpoint).toHaveBeenCalledWith("leitner_required");
-      expect(onComplete).toHaveBeenCalledTimes(1);
-    });
   });
 
   it("uses the shared card, footer and illustration on Leitner", () => {

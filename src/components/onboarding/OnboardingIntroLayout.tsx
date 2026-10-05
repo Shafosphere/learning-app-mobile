@@ -1,18 +1,18 @@
 import MyButton from "@/src/components/button/button";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import React, { useCallback, useEffect, useRef, useState, type ReactNode } from "react";
+import React, { useState, type ReactNode } from "react";
 import {
   Image,
-  Platform,
   ScrollView,
-  StyleSheet,
   Text,
-  type LayoutChangeEvent,
+  type ImageSourcePropType,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { getIntroIllustrationWidth, getIntroSpacing } from "./introLayoutSizing";
 
 const WELCOME_LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
+const SCROLL_BOTTOM_PADDING = 12;
 
 type OnboardingIntroLayoutProps = {
   title: string;
@@ -23,7 +23,11 @@ type OnboardingIntroLayoutProps = {
   descriptionTestID?: string;
   descriptionEndNote?: string;
   children?: ReactNode;
-  debugLabel?: string;
+  illustration?: {
+    source: ImageSourcePropType;
+    aspectRatio: number;
+    testID?: string;
+  };
 };
 
 export function OnboardingIntroLayout({
@@ -35,69 +39,66 @@ export function OnboardingIntroLayout({
   descriptionTestID,
   descriptionEndNote,
   children,
-  debugLabel = "intro",
+  illustration,
 }: OnboardingIntroLayoutProps) {
   const styles = useStyles();
-  const mountedAt = useRef(Date.now());
-  const [isContentVisible, setIsContentVisible] = useState(Platform.OS === "web");
-
-  useEffect(() => {
-    if (Platform.OS === "web") return;
-    const timeout = setTimeout(() => setIsContentVisible(true), 50);
-    return () => clearTimeout(timeout);
-  }, []);
-
-  const log = useCallback(
-    (event: string, details?: object) => {
-      if (!__DEV__) return;
-      console.log(`[OnboardingIntroLayout:${debugLabel}] +${Date.now() - mountedAt.current}ms ${event}`, details ?? "");
-    },
-    [debugLabel]
-  );
-
-  const logLayout = useCallback(
-    (name: string) => (event: LayoutChangeEvent) => {
-      log(`${name} layout`, event.nativeEvent.layout);
-    },
-    [log]
-  );
-
-  useEffect(() => {
-    log("mounted", {
-      container: StyleSheet.flatten(styles.container),
-      content: StyleSheet.flatten(styles.content),
-    });
-  }, [log, styles.container, styles.content]);
+  const [contentHeight, setContentHeight] = useState(0);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const [bodyHeight, setBodyHeight] = useState<number | null>(null);
+  const spacing = getIntroSpacing(contentHeight);
+  const illustrationWidth = illustration && viewport.width > 0 && bodyHeight !== null
+    ? getIntroIllustrationWidth({
+        contentWidth: viewport.width,
+        availableHeight: viewport.height - bodyHeight - spacing.illustrationGap - SCROLL_BOTTOM_PADDING,
+        aspectRatio: illustration.aspectRatio,
+      })
+    : undefined;
 
   return (
-    <SafeAreaView
-      style={styles.container}
-      edges={["top", "bottom"]}
-      onLayout={logLayout("container")}
-    >
+    <SafeAreaView style={styles.container} edges={["top", "bottom", "left", "right"]}>
       <View
-        style={[styles.content, !isContentVisible && styles.contentHidden]}
-        onLayout={logLayout("content")}
+        style={styles.content}
+        testID="onboarding-intro-content"
+        onLayout={({ nativeEvent }) => setContentHeight(nativeEvent.layout.height)}
       >
-          <View style={styles.header} onLayout={logLayout("header")}>
-            <Image source={WELCOME_LOGO_SOURCE} style={styles.logo} resizeMode="contain" />
-            <Text
-              style={styles.title}
-              allowFontScaling
-              numberOfLines={2}
-              adjustsFontSizeToFit
-              minimumFontScale={0.78}
-            >
-              {title}
-            </Text>
-          </View>
-
-          <ScrollView
-            style={styles.scroll}
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
+        <ScrollView
+          testID="onboarding-intro-scroll"
+          style={styles.scroll}
+          contentContainerStyle={styles.scrollContent}
+          showsVerticalScrollIndicator
+          onLayout={({ nativeEvent }) => {
+            const { width, height } = nativeEvent.layout;
+            setViewport((previous) => previous.width === width && previous.height === height
+              ? previous
+              : { width, height });
+          }}
+        >
+          {/* This measurement excludes the illustration, avoiding a sizing feedback loop. */}
+          <View
+            testID="onboarding-intro-body"
+            style={styles.body}
+            onLayout={({ nativeEvent }) => setBodyHeight(nativeEvent.layout.height)}
           >
-            <View style={styles.message} testID="onboarding-intro-message">
+            <View style={[styles.header, { paddingBottom: spacing.headerGap }]}>
+              <Image
+                source={WELCOME_LOGO_SOURCE}
+                testID="onboarding-intro-logo"
+                style={{
+                  width: spacing.logoWidth,
+                  height: spacing.logoWidth * 555 / 523,
+                  marginBottom: spacing.logoGap,
+                }}
+                resizeMode="contain"
+                accessible={false}
+              />
+              <Text style={styles.title} allowFontScaling accessibilityRole="header">
+                {title}
+              </Text>
+            </View>
+            <View
+              style={[styles.message, { paddingVertical: spacing.cardPadding }]}
+              testID="onboarding-intro-message"
+            >
               <Text testID={descriptionTestID} style={styles.description} allowFontScaling>
                 {description}
               </Text>
@@ -108,23 +109,34 @@ export function OnboardingIntroLayout({
               ) : null}
             </View>
             {children}
-          </ScrollView>
-
-          <View
-            style={styles.footer}
-            testID="onboarding-intro-footer"
-            onLayout={logLayout("footer")}
-          >
-            <MyButton
-              text={buttonText}
-              onPress={onContinue}
-              disabled={isSaving}
-              color="my_green"
-              width="100%"
-              textStyle={styles.buttonText}
-              style={styles.button}
-            />
           </View>
+          {illustration ? (
+            <View
+              testID={illustration.testID}
+              style={[
+                styles.illustration,
+                {
+                  width: illustrationWidth ?? "80%",
+                  aspectRatio: illustration.aspectRatio,
+                  marginTop: spacing.illustrationGap,
+                },
+              ]}
+            >
+              <Image source={illustration.source} style={styles.image} resizeMode="contain" accessible={false} />
+            </View>
+          ) : null}
+        </ScrollView>
+        <View style={styles.footer} testID="onboarding-intro-footer">
+          <MyButton
+            text={buttonText}
+            onPress={onContinue}
+            disabled={isSaving}
+            color="my_green"
+            width="100%"
+            textStyle={styles.buttonText}
+            style={styles.button}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );
@@ -142,19 +154,13 @@ const useStyles = createThemeStylesHook((colors) => ({
     alignSelf: "center",
     paddingHorizontal: 18,
   },
-  contentHidden: {
-    opacity: 0,
+  body: {
+    flexShrink: 0,
   },
   header: {
     width: "100%",
     alignItems: "center",
     paddingTop: 4,
-    paddingBottom: 16,
-  },
-  logo: {
-    width: 108,
-    height: 114,
-    marginBottom: 12,
   },
   title: {
     width: "100%",
@@ -170,14 +176,13 @@ const useStyles = createThemeStylesHook((colors) => ({
     minHeight: 0,
   },
   scrollContent: {
-    paddingBottom: 12,
+    paddingBottom: SCROLL_BOTTOM_PADDING,
   },
   message: {
     width: "100%",
     borderRadius: 20,
     backgroundColor: colors.secondBackground,
     paddingHorizontal: 20,
-    paddingVertical: 22,
   },
   description: {
     fontSize: 17,
@@ -194,13 +199,22 @@ const useStyles = createThemeStylesHook((colors) => ({
     color: colors.paragraph,
     textAlign: "right",
   },
+  illustration: {
+    alignSelf: "center",
+    flexShrink: 0,
+  },
+  image: {
+    width: "100%",
+    height: "100%",
+  },
   footer: {
     width: "100%",
+    flexShrink: 0,
     paddingTop: 12,
     paddingBottom: 8,
   },
   button: {
-    height: 56,
+    minHeight: 56,
     borderRadius: 16,
   },
   buttonText: {

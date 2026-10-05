@@ -17,7 +17,6 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./LanguageIntroScreen-styles";
-import BetaIntroScreen from "./BetaIntroScreen";
 import LeitnerIntroScreen from "./LeitnerIntroScreen";
 
 type LanguageOption = {
@@ -26,7 +25,7 @@ type LanguageOption = {
   titleKey: "repeats.labels.polish" | "repeats.labels.english";
   subtitle: string;
 };
-type LanguageIntroMode = "app" | "native" | "beta" | "leitner";
+type LanguageIntroMode = "app" | "native" | "leitner";
 
 const languageOptions: LanguageOption[] = [
   {
@@ -42,8 +41,6 @@ const languageOptions: LanguageOption[] = [
     subtitle: "Interface in English",
   },
 ];
-
-const IS_BETA_BUILD = process.env.EXPO_PUBLIC_APP_BETA === "1";
 
 export default function LanguageIntroScreen() {
   const styles = useStyles();
@@ -95,10 +92,8 @@ export default function LanguageIntroScreen() {
     getOnboardingCheckpoint().then((checkpoint) => {
       if (!mounted) return;
       const nextMode =
-        checkpoint === "beta_required"
-          ? "beta"
-          : checkpoint === "leitner_required"
-            ? "leitner"
+        checkpoint === "leitner_required"
+          ? "leitner"
           : checkpoint === "native_language_required"
             ? "native"
             : "app";
@@ -141,15 +136,13 @@ export default function LanguageIntroScreen() {
         return;
       }
       await setNativeLanguage(selectedLanguage as NativeLanguage);
-      const nextCheckpoint = IS_BETA_BUILD ? "beta_required" : "leitner_required";
-      await setOnboardingCheckpoint(nextCheckpoint);
-      setMode(IS_BETA_BUILD ? "beta" : "leitner");
+      await setOnboardingCheckpoint("leitner_required");
+      setMode("leitner");
     } finally {
       setIsSaving(false);
     }
   };
 
-  if (mode === "beta") return <BetaIntroScreen onComplete={() => setMode("leitner")} />;
   if (mode === "leitner") return <LeitnerIntroScreen />;
 
   return (

@@ -527,6 +527,18 @@ export default function CourseActivateScreen() {
       ) : (
         <View style={styles.buttonscontainer}>
           <View style={styles.buttonsRow}>
+            <MyButton
+              text={t(
+                "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"
+              )}
+              accessibilityLabel={t(
+                "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs"
+              )}
+              color="my_yellow"
+              onPress={() => router.push("/createcourse")}
+              disabled={false}
+              autoWidth
+            />
             {hasActiveCourse ? (
               <MyButton
                 text={t(
@@ -545,21 +557,9 @@ export default function CourseActivateScreen() {
                   if (route) router.push(route);
                 }}
                 disabled={!activeCustomCourseIdHydrated || !customCourseEntrySettingsSeenHydrated}
-                autoWidth
+                style={{ flex: 1 }}
               />
             ) : null}
-            <MyButton
-              text={t(
-                "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"
-              )}
-              accessibilityLabel={t(
-                "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs"
-              )}
-              color="my_yellow"
-              onPress={() => router.push("/createcourse")}
-              disabled={false}
-              autoWidth
-            />
           </View>
         </View>
       )}

@@ -1,12 +1,14 @@
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 import FlashcardsScreen from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
+import { useIsFocused } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import { ActivityIndicator } from "react-native";
 
 export default function FlashcardsRoute() {
   const router = useRouter();
+  const isFocused = useIsFocused();
   const {
     activeCustomCourseId,
     activeCustomCourseIdHydrated,
@@ -22,10 +24,10 @@ export default function FlashcardsRoute() {
     : null;
 
   useEffect(() => {
-    if (route === "/course-entry-settings") {
+    if (isFocused && route === "/course-entry-settings") {
       router.replace(route);
     }
-  }, [route, router]);
+  }, [isFocused, route, router]);
 
   if (route !== "/flashcards") {
     return <ActivityIndicator testID="flashcards-route-loading" />;
