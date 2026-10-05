@@ -2,7 +2,7 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import type { CardDisplayMode, CardProps, FocusTarget } from "../card-types";
+import type { CardDisplayMode, CardProps, FocusTarget, InlineCardAction } from "../card-types";
 import { CardSceneCorrection } from "./CardSceneCorrection";
 import { CardSceneEmpty } from "./CardSceneEmpty";
 import { CardSceneExplanation } from "./CardSceneExplanation";
@@ -10,6 +10,7 @@ import { CardSceneQuestion } from "./CardSceneQuestion";
 import { CardSceneTrueFalse } from "./CardSceneTrueFalse";
 
 interface CardContentResolverProps {
+  inlineAction?: InlineCardAction;
   displayMode: CardDisplayMode;
   correction: CardProps["correction"];
   isIntroMode: boolean;
@@ -71,6 +72,7 @@ interface CardContentResolverProps {
 
 export const CardContentResolver = (props: CardContentResolverProps) => {
   const {
+    inlineAction,
     displayMode,
     correction,
     isIntroMode,
@@ -133,6 +135,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     case "correction":
       return correction ? (
         <CardSceneCorrection
+          inlineAction={inlineAction}
           correction={correction}
           promptText={promptText}
           promptImageUri={promptImageUri}
@@ -199,6 +202,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     case "question":
       return (
         <CardSceneQuestion
+          inlineAction={inlineAction}
           promptText={promptText}
           emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
           promptImageUri={promptImageUri}

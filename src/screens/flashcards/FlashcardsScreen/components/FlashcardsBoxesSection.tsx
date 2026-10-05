@@ -4,7 +4,10 @@ import type { BoxFacesByBox } from "@/src/components/Box/Skin/boxFaces";
 import type { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { TFunction } from "i18next";
-import { useEffect, useState } from "react";
+import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { StudyViewportContext } from "@/src/components/flashcards/StudyViewportContext";
+import { SINGLE_ROW_BOX_MIN_HEIGHT } from "@/src/components/Box/List/BoxList.metrics";
+import { useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import type { ComponentProps } from "react";
 import {
   ScrollView,
@@ -19,6 +22,8 @@ import Reanimated, {
 import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
 
 type FlashcardsBoxesSectionProps = {
+  debugSizes?: boolean;
+  debugCourseId?: number | null;
   coachmarkId?: string;
   countsCoachmarkId?: string;
   testID?: string;
@@ -34,12 +39,16 @@ type FlashcardsBoxesSectionProps = {
   effectiveBoxesLayout: string;
   boxSelectionLocked: boolean;
   isTabletLayout: boolean;
+  isCompactStudyLayout?: boolean;
   isTabletCompactBoxesLayout: boolean;
   maxColumns?: number;
+  hideActions?: boolean;
   areButtonsOnTop: boolean;
   flashcardsContentWidth: number | undefined;
   boxesScale: number;
   boxesScaledHeight: number | undefined;
+  classicBoxesNaturalHeight?: number;
+  horizontalRowHeight?: number;
   boxesScaleOffsetY: number;
   boxesNeedScrollFallback: boolean;
   carouselBottomClearance?: number;
@@ -49,6 +58,8 @@ type FlashcardsBoxesSectionProps = {
 };
 
 export function FlashcardsBoxesSection({
+  debugSizes = false,
+  debugCourseId,
   coachmarkId,
   countsCoachmarkId,
   testID,
@@ -64,12 +75,16 @@ export function FlashcardsBoxesSection({
   effectiveBoxesLayout,
   boxSelectionLocked,
   isTabletLayout,
+  isCompactStudyLayout,
   isTabletCompactBoxesLayout,
   maxColumns,
+  hideActions = false,
   areButtonsOnTop,
   flashcardsContentWidth,
   boxesScale,
   boxesScaledHeight,
+  classicBoxesNaturalHeight,
+  horizontalRowHeight,
   boxesScaleOffsetY,
   boxesNeedScrollFallback,
   carouselBottomClearance = 0,
@@ -80,6 +95,76 @@ export function FlashcardsBoxesSection({
   const animatedBoxesScale = useSharedValue(boxesScale);
   const animatedBoxesScaleOffsetY = useSharedValue(boxesScaleOffsetY);
   const [measuredViewportWidth, setMeasuredViewportWidth] = useState<number | null>(null);
+  const studyViewportHeight = useContext(StudyViewportContext);
+  const [boxesTop, setBoxesTop] = useState<number | null>(null);
+  const layoutTransition = useNavbarLayoutTransition();
+  const boundedBoxesHeight = !isTabletCompactBoxesLayout && horizontalRowHeight == null
+    && studyViewportHeight != null && boxesTop != null
+    // A tall card must leave a usable inner scroll viewport. The outer study
+    // scroll handles the resulting overflow instead of collapsing the boxes.
+    ? Math.max(Math.min(SINGLE_ROW_BOX_MIN_HEIGHT, studyViewportHeight), studyViewportHeight - boxesTop)
+    : undefined;
+  // Constrain the measured inner viewport as well as its wrapper. In scroll
+  // content, flex alone can leave the child at its natural height, so scaling
+  // keeps using that larger height even after the wrapper has shrunk.
+  const boxesViewportHeight = horizontalRowHeight ?? boundedBoxesHeight;
+  const boundedViewportStyle = boxesViewportHeight != null
+    ? { flex: 0, height: boxesViewportHeight }
+    : null;
+  const previousSizes = useRef<Record<string, Record<string, unknown>>>({});
+  const sizesLogTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastSizesLogRef = useRef<string | null>(null);
+  const logSizeChange = useCallback((source: string, next: Record<string, unknown>) => {
+    if (!debugSizes) return;
+    const previous = previousSizes.current[source] ?? null;
+    if (JSON.stringify(previous) === JSON.stringify(next)) return;
+    previousSizes.current[source] = next;
+    if (process.env.NODE_ENV !== "test") {
+      if (sizesLogTimerRef.current != null) clearTimeout(sizesLogTimerRef.current);
+      sizesLogTimerRef.current = setTimeout(() => {
+        const snapshot = JSON.stringify({
+          courseId: debugCourseId ?? null,
+          transitionRunning: layoutTransition.isRunning(),
+          ...previousSizes.current,
+        });
+        if (snapshot === lastSizesLogRef.current) return;
+        lastSizesLogRef.current = snapshot;
+        console.log("[study-layout] boxes", snapshot);
+      }, 300);
+    }
+  }, [debugSizes, debugCourseId, layoutTransition]);
+
+  useEffect(() => () => {
+    if (sizesLogTimerRef.current != null) clearTimeout(sizesLogTimerRef.current);
+  }, [debugSizes, debugCourseId]);
+
+  useEffect(() => {
+    logSizeChange("budget", {
+      studyViewportHeight,
+      boxesTop,
+      boundedBoxesHeight: boundedBoxesHeight ?? null,
+      rowHeight: horizontalRowHeight ?? null,
+      isTabletCompactBoxesLayout,
+      hideActions,
+      areButtonsOnTop,
+    });
+  }, [logSizeChange, studyViewportHeight, boxesTop, boundedBoxesHeight,
+    horizontalRowHeight, isTabletCompactBoxesLayout, hideActions, areButtonsOnTop]);
+
+  useEffect(() => {
+    logSizeChange("sizing", {
+      layout: effectiveBoxesLayout,
+      compact: isCompactStudyLayout,
+      scale: boxesScale,
+      height: boxesScaledHeight ?? null,
+      naturalHeight: classicBoxesNaturalHeight ?? null,
+      rowHeight: horizontalRowHeight ?? null,
+      offsetY: boxesScaleOffsetY,
+      scrollFallback: boxesNeedScrollFallback,
+    });
+  }, [logSizeChange, effectiveBoxesLayout, isCompactStudyLayout, boxesScale,
+    boxesScaledHeight, classicBoxesNaturalHeight, horizontalRowHeight,
+    boxesScaleOffsetY, boxesNeedScrollFallback]);
 
   useEffect(() => {
     animatedBoxesScale.value = withTiming(boxesScale, { duration: 420 });
@@ -101,6 +186,8 @@ export function FlashcardsBoxesSection({
   }));
 
   const handleViewportLayout = (event: LayoutChangeEvent) => {
+    const { width: viewportWidth, height } = event.nativeEvent.layout;
+    logSizeChange("viewport", { width: viewportWidth, height });
     const { width } = event.nativeEvent.layout;
     if (width > 0) {
       setMeasuredViewportWidth((previous) => previous === width ? previous : width);
@@ -109,12 +196,16 @@ export function FlashcardsBoxesSection({
   };
 
   const handleContentLayout = (event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    logSizeChange("content", { width, height });
     onBoxesContentLayout(event);
   };
 
   const boxesContent =
     effectiveBoxesLayout === "classic" ? (
       <Boxes
+        horizontalScroll={horizontalRowHeight != null}
+        horizontalRowHeight={horizontalRowHeight}
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
@@ -129,6 +220,7 @@ export function FlashcardsBoxesSection({
       />
     ) : (
       <BoxesCarousel
+        compactLayout={isCompactStudyLayout}
         boxes={boxes}
         activeBox={activeBox}
         handleSelectBox={handleSelectBox}
@@ -156,8 +248,14 @@ export function FlashcardsBoxesSection({
         radius={28}
       >
         <Reanimated.View
+          testID="flashcards-boxes-content"
           collapsable={false}
-          style={animatedScaleStyle}
+          style={[
+            animatedScaleStyle,
+            classicBoxesNaturalHeight != null
+              ? { minHeight: classicBoxesNaturalHeight, flexShrink: 0 }
+              : null,
+          ]}
           onLayout={handleContentLayout}
         >
           {boxesContent}
@@ -169,10 +267,17 @@ export function FlashcardsBoxesSection({
   return (
     <Reanimated.View
       testID={testID ?? "flashcards-boxes-wrapper"}
+      onLayout={(event) => {
+        const { x, y, width, height } = event.nativeEvent.layout;
+        logSizeChange("wrapper", { x, y, width, height });
+        setBoxesTop((previous) => previous === y ? previous : y);
+      }}
       layout={screenSectionLayout}
       style={[
         styles.boxesWrapper,
-        !areButtonsOnTop && styles.boxesWrapperWithBottomButtons,
+        boundedBoxesHeight != null ? { flex: 0, height: boundedBoxesHeight } : null,
+        horizontalRowHeight != null ? { flex: 0, height: horizontalRowHeight } : null,
+        !areButtonsOnTop && !hideActions && styles.boxesWrapperWithBottomButtons,
         isTabletCompactBoxesLayout && styles.tabletCompactBoxesWrapper,
         flashcardsContentWidth != null
           ? { width: flashcardsContentWidth, alignSelf: "center" }
@@ -182,10 +287,12 @@ export function FlashcardsBoxesSection({
       {boxesNeedScrollFallback ? (
         <ScrollView
           testID="flashcards-boxes-viewport"
+          nestedScrollEnabled
           style={[
             styles.boxesScrollViewport,
             isTabletCompactBoxesLayout &&
               styles.tabletCompactBoxesScrollViewport,
+            boundedViewportStyle,
           ]}
           contentContainerStyle={styles.boxesViewportScrollContent}
           onLayout={handleViewportLayout}
@@ -199,6 +306,7 @@ export function FlashcardsBoxesSection({
           style={[
             styles.boxesViewport,
             isTabletCompactBoxesLayout && styles.tabletCompactBoxesViewport,
+            boundedViewportStyle,
           ]}
           onLayout={handleViewportLayout}
         >

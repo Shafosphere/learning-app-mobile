@@ -4,10 +4,11 @@ import React from "react";
 import type { TextInput } from "react-native";
 
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import type { FocusTarget } from "../card-types";
+import type { FocusTarget, InlineCardAction } from "../card-types";
 import { CardInput } from "./CardInput";
 
 type CardSceneQuestionProps = {
+  inlineAction?: InlineCardAction;
   promptText: string;
   promptImageUri: string | null;
   allowMultilinePrompt: boolean;
@@ -35,6 +36,7 @@ type CardSceneQuestionProps = {
 export function CardSceneQuestion(props: CardSceneQuestionProps) {
   return (
     <CardInput
+      inlineAction={props.inlineAction}
       promptText={props.promptText}
       emptyAnswerSubmitWarning={props.emptyAnswerSubmitWarning}
       allowMultilinePrompt={props.allowMultilinePrompt}

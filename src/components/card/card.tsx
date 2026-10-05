@@ -150,6 +150,7 @@ const formatDateLikeInput = (
 
 export default function Card({
   coachmarkId,
+  inlineAction,
   selectedItem,
   reversed = false,
   answer,
@@ -1398,6 +1399,7 @@ export default function Card({
   }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
 
   const resolverProps = {
+    inlineAction,
     displayMode,
     emptyAnswerSubmitWarning,
     correction,
@@ -1474,7 +1476,7 @@ export default function Card({
         onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
         onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
       />
-      {hideHints ? (
+      {hideHints && !isEditingHint ? (
         reserveHintSpaceWhenHidden ? (
           <View
             testID="card-hint-placeholder"

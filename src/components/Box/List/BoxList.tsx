@@ -13,9 +13,17 @@ import { useTranslation } from "react-i18next";
 import BoxSkin from "../Skin/BoxSkin";
 import { resolveBoxFace, type BoxFacesByBox } from "../Skin/boxFaces";
 import { useBoxListStyles } from "./BoxList.styles";
+import {
+    CLASSIC_BOX_WIDTH as BOX_SKIN_WIDTH,
+    CLASSIC_BOX_SKIN_HEIGHT as BOX_SKIN_HEIGHT,
+    CLASSIC_BOX_VERTICAL_EXTRA as GRID_BOX_VERTICAL_EXTRA,
+    getClassicBoxLayout,
+    getClassicBoxRowHeight,
+    getSingleRowBoxLayout,
+} from "./BoxList.metrics";
+export { CLASSIC_BOX_WIDTH, PREFERRED_CLASSIC_COLUMNS, getClassicBoxLayout } from "./BoxList.metrics";
+export type { ClassicBoxLayout } from "./BoxList.metrics";
 
-const BOX_SKIN_WIDTH = 115;
-const BOX_SKIN_HEIGHT = 122;
 const HORIZONTAL_BOX_SCALE = 1.2;
 const GRID_BOX_SCALE = 1.2;
 const BOX_ITEM_WIDTH = 164;
@@ -24,9 +32,6 @@ const BOX_ITEM_HEIGHT = 210;
 const GRID_VIEWPORT_HORIZONTAL_INSET = 48;
 const MAX_GRID_BOX_ITEM_WIDTH = 210;
 const MAX_GRID_BOX_SCALE = 1.55;
-const GRID_BOX_VERTICAL_EXTRA = 44;
-export const CLASSIC_BOX_WIDTH = BOX_SKIN_WIDTH;
-export const PREFERRED_CLASSIC_COLUMNS = 3;
 
 const BOX_NUMBERS: Record<keyof BoxesState, number> = {
     boxZero: 0,
@@ -41,24 +46,8 @@ function clamp(value: number, min: number, max: number): number {
     return Math.min(max, Math.max(min, value));
 }
 
-export type ClassicBoxLayout = {
-    columns: number;
-    scale: number;
-    itemWidth: number;
-};
-
-export function getClassicBoxLayout(availableWidth: number): ClassicBoxLayout {
-    const requiredWidth = CLASSIC_BOX_WIDTH * PREFERRED_CLASSIC_COLUMNS;
-    const scale = Math.min(1, Math.max(0, availableWidth / requiredWidth));
-
-    return {
-        columns: PREFERRED_CLASSIC_COLUMNS,
-        scale,
-        itemWidth: CLASSIC_BOX_WIDTH * scale,
-    };
-}
-
 interface BoxesProps {
+    onBoxSizeChange?: (source: string, size: Record<string, unknown>) => void;
     boxes: BoxesState;
     activeBox: keyof BoxesState | null;
     handleSelectBox: (name: keyof BoxesState) => void;
@@ -69,11 +58,13 @@ interface BoxesProps {
     countsCoachmarkId?: string;
     faces?: BoxFacesByBox;
     horizontalScroll?: boolean;
+    horizontalRowHeight?: number;
     maxColumns?: number;
     layoutWidth?: number;
 }
 
 export default function BoxList({
+    onBoxSizeChange,
     boxes,
     activeBox,
     handleSelectBox,
@@ -84,6 +75,7 @@ export default function BoxList({
     countsCoachmarkId,
     faces,
     horizontalScroll = false,
+    horizontalRowHeight,
     maxColumns,
     layoutWidth,
 }: BoxesProps) {
@@ -123,11 +115,13 @@ export default function BoxList({
         : viewportWidth ?? layoutWidth ?? windowWidth;
     const classicLayout = getClassicBoxLayout(effectiveLayoutWidth);
     const shouldUseHorizontalScroll = horizontalScroll;
+    const singleRow = horizontalScroll && horizontalRowHeight != null
+        ? getSingleRowBoxLayout(horizontalRowHeight) : null;
     const effectiveHorizontalViewportWidth = Math.max(
         BOX_ITEM_WIDTH,
         effectiveLayoutWidth
     );
-    const horizontalSidePadding = shouldUseHorizontalScroll
+    const horizontalSidePadding = singleRow ? 0 : shouldUseHorizontalScroll
         ? Math.max(0, (effectiveHorizontalViewportWidth - BOX_ITEM_WIDTH) / 2)
         : 0;
     const gridColumns =
@@ -159,7 +153,9 @@ export default function BoxList({
             : classicLayout.scale
         : GRID_BOX_SCALE;
     const gridItemMinHeight =
-        Math.ceil(BOX_SKIN_HEIGHT * gridBoxScale) + GRID_BOX_VERTICAL_EXTRA;
+        explicitGrid
+            ? Math.ceil(BOX_SKIN_HEIGHT * gridBoxScale) + GRID_BOX_VERTICAL_EXTRA
+            : getClassicBoxRowHeight(effectiveLayoutWidth);
     const gridWidth = gridColumns ? gridItemWidth * gridColumns : undefined;
     const gridRows = [];
     if (gridColumns) {
@@ -193,6 +189,11 @@ export default function BoxList({
     const handleMeasuredBoxItemLayout =
         (boxName: keyof BoxesState) => (event: LayoutChangeEvent) => {
             const { x, y, width, height } = event.nativeEvent.layout;
+            onBoxSizeChange?.(boxName, {
+                width, height,
+                skinScale: singleRow?.scale ?? (gridColumns ? gridBoxScale : 1),
+                presentation: shouldUseHorizontalScroll ? "single_row" : "grid",
+            });
             setMeasuredBoxItems((prev) => {
                 const current = prev[boxName];
                 if (
@@ -298,7 +299,7 @@ export default function BoxList({
             />
         );
         const boxScale = shouldUseHorizontalScroll
-            ? HORIZONTAL_BOX_SCALE
+            ? singleRow?.scale ?? HORIZONTAL_BOX_SCALE
             : gridColumns
               ? gridBoxScale
               : 1;
@@ -326,6 +327,7 @@ export default function BoxList({
                 style={[
                     shouldUseHorizontalScroll ? styles.horizontalBoxItem : null,
                     gridColumns ? styles.gridBoxItem : null,
+                    singleRow ? { width: singleRow.itemWidth, height: singleRow.rowHeight, minHeight: singleRow.rowHeight, paddingVertical: 2 } : null,
                     gridColumns
                         ? {
                             width: gridItemWidth,
@@ -337,6 +339,7 @@ export default function BoxList({
             >
                 <Pressable
                     disabled={disabled}
+                    style={singleRow ? { minWidth: 44, alignItems: "center" } : undefined}
                     onLayout={handleMeasuredPressableLayout(boxName)}
                     onPressIn={() => {
                         if (disabled) return;
@@ -390,7 +393,7 @@ export default function BoxList({
                             radius={12}
                         >
                             <Text
-                                style={styles.boxWords}
+                                style={[styles.boxWords, singleRow ? { lineHeight: 24 } : null]}
                                 onLayout={handleMeasuredCountLayout(boxName)}
                             >
                                 {wordCount}
@@ -398,7 +401,7 @@ export default function BoxList({
                         </CoachmarkAnchor>
                     ) : (
                         <Text
-                            style={styles.boxWords}
+                            style={[styles.boxWords, singleRow ? { lineHeight: 24 } : null]}
                             onLayout={handleMeasuredCountLayout(boxName)}
                         >
                             {wordCount}
@@ -524,18 +527,18 @@ export default function BoxList({
                         nestedScrollEnabled
                         keyboardShouldPersistTaps="handled"
                     >
-                        <View style={styles.horizontalScrollContent}>
+                        <View style={[styles.horizontalScrollContent, singleRow ? { justifyContent: displayedEntries.length * singleRow.itemWidth <= effectiveLayoutWidth ? "center" : "flex-start" } : null]}>
                             <View
                                 style={[
                                     styles.horizontalDebugHeader,
-                                    { width: horizontalSidePadding, height: BOX_ITEM_HEIGHT },
+                                    { width: horizontalSidePadding, height: singleRow?.rowHeight ?? BOX_ITEM_HEIGHT, minHeight: singleRow?.rowHeight ?? BOX_ITEM_HEIGHT },
                                 ]}
                             />
                             {displayedEntries.map(renderBoxItem)}
                             <View
                                 style={[
                                     styles.horizontalDebugFooter,
-                                    { width: horizontalSidePadding, height: BOX_ITEM_HEIGHT },
+                                    { width: horizontalSidePadding, height: singleRow?.rowHeight ?? BOX_ITEM_HEIGHT, minHeight: singleRow?.rowHeight ?? BOX_ITEM_HEIGHT },
                                 ]}
                             />
                             {coachmarkAnchors}

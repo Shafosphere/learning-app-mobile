@@ -29,7 +29,14 @@ export type FocusTarget =
   | "correction2"
   | "hint";
 
+export type InlineCardAction = {
+  disabled: boolean;
+  label: string;
+  onCorrectionConfirm: () => void;
+};
+
 export type CardProps = {
+  inlineAction?: InlineCardAction;
   coachmarkId?: string;
   selectedItem: WordWithTranslations | null;
   reversed?: boolean;

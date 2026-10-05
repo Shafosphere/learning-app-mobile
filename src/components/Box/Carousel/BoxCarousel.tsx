@@ -27,6 +27,7 @@ interface BoxesProps {
     faces?: BoxFacesByBox;
     layoutWidth?: number;
     bottomClearance?: number;
+    compactLayout?: boolean;
 }
 
 export default function BoxCarousel({
@@ -40,10 +41,12 @@ export default function BoxCarousel({
     faces,
     layoutWidth,
     bottomClearance = 0,
+    compactLayout,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
-  const { isSmallPhoneLayout } = useDeviceLayout();
+  const deviceLayout = useDeviceLayout();
+  const isSmallPhoneLayout = compactLayout ?? deviceLayout.isSmallPhoneLayout;
   const effectiveLayoutWidth = layoutWidth ?? width;
   const BOX_SKIN_HEIGHT = 122;
   const ACTIVE_BOX_SCALE = isSmallPhoneLayout ? 1.3 : 2.05;

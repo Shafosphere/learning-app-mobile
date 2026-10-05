@@ -77,6 +77,27 @@ describe("PromptImage SVG rendering", () => {
     expect(mockedFileSystem.getInfoAsync).not.toHaveBeenCalled();
   });
 
+  it("preserves the configured height of a portrait bird image", () => {
+    mockedGetPreloadedImage.mockReturnValue({
+      kind: "bitmap",
+      uri: "file://images/bird.webp",
+      ratio: 0.65,
+    });
+    const screen = render(
+      <PromptImage
+        uri="file://images/bird.webp"
+        imageStyle={{ width: "90%", height: 238 }}
+        initialSlotWidth={295}
+      />,
+    );
+    const slot = screen.UNSAFE_getAllByType(View)[0];
+    expect(slot.props.style.height).toBe(238);
+    expect(findFrameStyle(screen)?.height).toBeCloseTo(238);
+    fireEvent(slot, "layout", {
+      nativeEvent: { layout: { width: 295, height: 238 } },
+    });
+  });
+
   it("limits a preloaded wide image before the first layout measurement", () => {
     mockedGetPreloadedImage.mockReturnValue({
       kind: "bitmap",

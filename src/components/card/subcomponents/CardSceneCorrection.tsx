@@ -4,10 +4,11 @@ import type { MutableRefObject } from "react";
 import type { ScrollView, TextInput } from "react-native";
 
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import type { CardCorrectionType, FocusTarget } from "../card-types";
+import type { CardCorrectionType, FocusTarget, InlineCardAction } from "../card-types";
 import { CardCorrection } from "./CardCorrection";
 
 type CardSceneCorrectionProps = {
+  inlineAction?: InlineCardAction;
   correction: CardCorrectionType;
   promptText: string;
   promptImageUri?: string | null;
@@ -56,6 +57,7 @@ type CardSceneCorrectionProps = {
 export function CardSceneCorrection(props: CardSceneCorrectionProps) {
   return (
     <CardCorrection
+      inlineAction={props.inlineAction}
       correction={{ ...props.correction, input2: props.correction.input2 ?? "" }}
       promptText={props.promptText}
       promptImageUri={props.promptImageUri}

@@ -9,6 +9,7 @@ import {
 import {
   Pressable as MockPressable,
   StyleSheet,
+  Keyboard,
   Text as MockText,
   TextInput,
   View as MockView,
@@ -350,7 +351,7 @@ jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", (
     keyboardBridgeInput: {},
     studyStack: { width: "100%" },
     tabletCenteredStudyStack: {
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
       width: "100%",
     },
@@ -884,6 +885,74 @@ describe("reviewflashcards correction desync regression", () => {
     });
   });
 
+  it("preserves the active answer input across keyboard-driven small-phone layout changes", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({ id: 962, frontText: "cat", backText: "kot", answers: ["kot"], stage: 1 }),
+    ]);
+    const screen = render(<ReviewFlashcardsPlaceholder />);
+    await startReviewFromStage(screen, 1);
+    const input = getVisibleTextInputs(screen)[0];
+    expect(input).toBeTruthy();
+    fireEvent.changeText(input, "unfinished answer");
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
+
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+    screen.rerender(<ReviewFlashcardsPlaceholder />);
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(true);
+    expect(getVisibleTextInputs(screen)[0]).toBe(input);
+    expect(input.props.value).toBe("unfinished answer");
+
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
+    screen.rerender(<ReviewFlashcardsPlaceholder />);
+    expect(getVisibleTextInputs(screen)[0]).toBe(input);
+    expect(input.props.value).toBe("unfinished answer");
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
+  });
+
+  it.each(["top", "bottom"])("replaces %s review actions while compact keyboard is open", async (position) => {
+    const keyboard = jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    const listeners = jest.spyOn(Keyboard, "addListener");
+    try {
+      mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+      mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: position });
+      mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 960, frontText: "cat", backText: "kot", answers: ["kot"], stage: 1 })]);
+      const screen = render(<ReviewFlashcardsPlaceholder />);
+      await startReviewFromStage(screen, 1);
+      await waitFor(() => expect(screen.getByTestId("card-inline-confirm")).toBeTruthy());
+      expect(screen.queryByTestId("confirm-button")).toBeNull();
+      expect(screen.queryByTestId("flashcards-top-buttons")).toBeNull();
+      expect(StyleSheet.flatten(screen.getByTestId("review-flashcards-content").props.style).paddingBottom).toBeUndefined();
+      expect(screen.getByTestId("review-flashcards-study-scroll").props.keyboardShouldPersistTaps).toBe("handled");
+      act(() => {
+        listeners.mock.calls.filter(([name]) => name === "keyboardDidHide").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 650, height: 0, width: 375, screenX: 0 } }));
+      });
+      expect(screen.queryByTestId("card-inline-confirm")).toBeNull();
+      expect(screen.getByTestId("confirm-button")).toBeTruthy();
+    } finally {
+      keyboard.mockRestore();
+      listeners.mockRestore();
+    }
+  });
+
+  it.each([
+    { small: false, tablet: false, type: "text" },
+    { small: true, tablet: true, type: "text" },
+    { small: true, tablet: false, type: "true_false" },
+    { small: true, tablet: false, type: "know_dont_know" },
+  ] as const)("retains review controls for $type, small=$small, tablet=$tablet", async ({ small, tablet, type }) => {
+    const keyboard = jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    try {
+      mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: small, isTabletLayout: tablet });
+      mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 961, frontText: "cat", type, stage: 1 })]);
+      const screen = render(<ReviewFlashcardsPlaceholder />);
+      await startReviewFromStage(screen, 1);
+      expect(screen.queryByTestId("card-inline-confirm")).toBeNull();
+    } finally {
+      keyboard.mockRestore();
+    }
+  });
+
   it("keeps classic boxes responsive on small-phone layouts", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
@@ -902,7 +971,7 @@ describe("reviewflashcards correction desync regression", () => {
       expect(latestBoxListProps).not.toBeNull();
     });
 
-    expect(latestBoxListProps?.horizontalScroll).toBeUndefined();
+    expect(latestBoxListProps?.horizontalScroll).toBe(false);
     expect(latestBoxCarouselProps).toBeNull();
   });
 
@@ -1002,14 +1071,15 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     const studyStackStyle = StyleSheet.flatten(
-      screen.getByTestId("review-flashcards-study-stack").props.style,
+      screen.getByTestId("review-flashcards-study-stack").props.contentContainerStyle,
     );
     const boxesWrapperStyle = StyleSheet.flatten(
       screen.getByTestId("review-flashcards-boxes-wrapper").props.style,
     );
 
+    expect(studyStackStyle.flex).toBeUndefined();
     expect(studyStackStyle).toMatchObject({
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
     });
     expect(boxesWrapperStyle.flex).toBe(0);
@@ -1057,14 +1127,15 @@ describe("reviewflashcards correction desync regression", () => {
       screen.getByTestId("review-flashcards-content").props.style,
     );
     const studyStackStyle = StyleSheet.flatten(
-      screen.getByTestId("review-flashcards-study-stack").props.style,
+      screen.getByTestId("review-flashcards-study-stack").props.contentContainerStyle,
     );
     const boxesWrapperStyle = StyleSheet.flatten(
       screen.getByTestId("review-flashcards-boxes-wrapper").props.style,
     );
 
+    expect(studyStackStyle.flex).toBeUndefined();
     expect(studyStackStyle).toMatchObject({
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
     });
     expect(boxesWrapperStyle.flex).toBe(1);

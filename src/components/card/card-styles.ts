@@ -1,4 +1,5 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { CARD_CONTENT_GAP, CARD_HINT_HEIGHT } from "./cardLayout.constants";
 
 export const PROMPT_IMAGE_MAX_HEIGHT = 140;
 
@@ -24,7 +25,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     // width: "100%",
     alignItems: "center",
     // backgroundColor: colors.my_yellow,
-    gap: 15,
+    gap: CARD_CONTENT_GAP,
     // marginTop: 5,
   },
   keyboardBridgeInput: {
@@ -38,7 +39,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   hintContainer: {
     width: 325,
     // backgroundColor: colors.my_yellow,
-    height: 40,
+    height: CARD_HINT_HEIGHT,
   },
   hintRow: {
     width: 325,

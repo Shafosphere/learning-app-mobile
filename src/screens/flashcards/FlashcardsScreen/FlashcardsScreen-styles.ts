@@ -1,4 +1,10 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import {
+  BOXES_BOTTOM_ACTIONS_TOP_GAP,
+  BOXES_HORIZONTAL_PADDING,
+  CARD_SECTION_BOTTOM_GAP,
+  TOP_BUTTONS_BOTTOM_GAP,
+} from "./model/FlashcardsScreen.constants";
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
@@ -40,19 +46,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
   },
   tabletCenteredStudyStack: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     width: "100%",
   },
   cardSectionWrapper: {
-    marginBottom: 10,
+    marginBottom: CARD_SECTION_BOTTOM_GAP,
   },
   finishedCardSectionWrapper: {
     flex: 1,
     minHeight: 0,
   },
   topButtonsWrapper: {
-    marginBottom: 10,
+    marginBottom: TOP_BUTTONS_BOTTOM_GAP,
   },
   topActionsWrapper: {
     paddingHorizontal: 16,
@@ -64,11 +70,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     position: "relative",
     alignItems: "center",
-    paddingHorizontal: 12,
+    paddingHorizontal: BOXES_HORIZONTAL_PADDING,
     marginTop: 0,
   },
   boxesWrapperWithBottomButtons: {
-    marginTop: 8,
+    marginTop: BOXES_BOTTOM_ACTIONS_TOP_GAP,
   },
   tabletCompactBoxesWrapper: {
     flex: 0,

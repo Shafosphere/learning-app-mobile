@@ -94,6 +94,28 @@ describe("BoxList", () => {
         jest.restoreAllMocks();
     });
 
+    it("fits five boxes in one small-phone row with readable counters and working selection", () => {
+        const selectBox = jest.fn();
+        const screen = render(
+            <BoxList boxes={boxes} activeBox="boxOne" handleSelectBox={selectBox}
+                hideBoxZero horizontalScroll horizontalRowHeight={83} layoutWidth={336} />
+        );
+        expect(screen.queryByTestId("box-list-row-0")).toBeNull();
+        const items = screen.getAllByTestId(/^box-list-item-/);
+        expect(items).toHaveLength(5);
+        for (const item of items) {
+            const style = ReactNative.StyleSheet.flatten(item.props.style);
+            expect(style).toMatchObject({ width: 64, height: 83, minHeight: 83 });
+            const count = within(item).UNSAFE_getByType(Text);
+            expect(ReactNative.StyleSheet.flatten(count.props.style).lineHeight).toBe(24);
+        }
+        const scroll = screen.UNSAFE_getByType(ScrollView);
+        expect(scroll.props.horizontal).toBe(true);
+        expect(scroll.props.keyboardShouldPersistTaps).toBe("handled");
+        fireEvent.press(screen.getByRole("button", { name: "box 3 count 0" }));
+        expect(selectBox).toHaveBeenCalledWith("boxThree");
+    });
+
     it.each([
         [336, 336 / 345],
         [320, 320 / 345],

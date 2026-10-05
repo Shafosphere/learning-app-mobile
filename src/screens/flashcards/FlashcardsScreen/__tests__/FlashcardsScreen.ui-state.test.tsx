@@ -1,6 +1,6 @@
 import React from "react";
-import { act, render } from "@testing-library/react-native";
-import { StyleSheet } from "react-native";
+import { act, fireEvent, render } from "@testing-library/react-native";
+import { Keyboard, StyleSheet } from "react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -200,6 +200,10 @@ jest.mock("@/src/hooks/useAutoScaleToFit", () => ({
   })),
 }));
 
+jest.mock("@/src/features/flashcards/useFlashcardImagePreload", () => ({
+  useFlashcardImagePreload: jest.fn(),
+}));
+
 jest.mock("@/src/hooks/useCoachmarkFlow", () => ({
   useCoachmarkFlow: jest.fn(() => ({
     isActive: false,
@@ -258,7 +262,7 @@ const mockFlashcardsScreenStyles = {
   content: { flex: 1 },
   studyStack: { width: "100%" },
   tabletCenteredStudyStack: {
-    flex: 1,
+    flexGrow: 1,
     justifyContent: "center",
     width: "100%",
   },
@@ -289,9 +293,16 @@ jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", (
 }));
 
 let latestCardProps: CardProps | null = null;
+const mockCardMount = jest.fn();
+const mockCardUnmount = jest.fn();
 
 jest.mock("@/src/components/card/card", () => {
+  const React = jest.requireActual("react");
   return function CardMock(props: CardProps) {
+    React.useEffect(() => {
+      mockCardMount();
+      return mockCardUnmount;
+    }, []);
     latestCardProps = props;
     return null;
   };
@@ -305,6 +316,7 @@ let latestButtonsProps: ButtonsProps | null = null;
 let latestBoxListProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
   horizontalScroll?: boolean;
+  horizontalRowHeight?: number;
   layoutWidth?: number;
 } | null = null;
 let latestBoxCarouselProps: {
@@ -331,6 +343,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxesMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
     horizontalScroll?: boolean;
+    horizontalRowHeight?: number;
     layoutWidth?: number;
   }) {
     latestBoxListProps = props;
@@ -382,6 +395,10 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
+const expectedLayoutTransition = expect.objectContaining({
+  isRunning: expect.any(Function),
+  subscribe: expect.any(Function),
+});
 const mockedUseFlashcardsAutoflow = useFlashcardsAutoflow as jest.Mock;
 const mockedUseFlashcardsInteraction = useFlashcardsInteraction as jest.Mock;
 const mockedGetCustomCourseById = getCustomCourseById as jest.Mock;
@@ -812,7 +829,115 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.hideHints).toBe(false);
   });
 
-  it("keeps classic boxes responsive and hides hints on small-phone layouts", async () => {
+  it.each(["top", "bottom"])("replaces %s actions only while compact keyboard is open", async (position) => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: position });
+    const keyboard = jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
+    const listeners = jest.spyOn(Keyboard, "addListener");
+    const card = makeCard({ id: 952, text: "bird", imageFront: "file://bird.webp" });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 300, width: 375 } } });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", { nativeEvent: { layout: { height: 250, width: 375 } } });
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.hideHints).toBe(true);
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    act(() => {
+      listeners.mock.calls.filter(([name]) => name === "keyboardDidShow").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 350, height: 300, width: 375, screenX: 0 } }));
+    });
+    expect(latestCardProps?.inlineAction?.label).toBe("flashcards.card.actions.confirm");
+    expect(screen.queryByTestId("flashcards-top-buttons")).toBeNull();
+    expect(StyleSheet.flatten(screen.getByTestId("flashcards-content").props.style).paddingBottom).toBeUndefined();
+    const containers = screen.queryAllByTestId("flashcards-buttons");
+    expect(containers).toHaveLength(0);
+    act(() => {
+      listeners.mock.calls.filter(([name]) => name === "keyboardDidHide").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 650, height: 0, width: 375, screenX: 0 } }));
+    });
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    if (position === "top") expect(screen.getByTestId("flashcards-top-buttons")).toBeTruthy();
+    else expect(StyleSheet.flatten(screen.getByTestId("flashcards-content").props.style).paddingBottom).toBeGreaterThan(0);
+    keyboard.mockRestore();
+  });
+
+  it("keeps normal-phone actions with keyboard open", async () => {
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    const card = makeCard({ id: 954 });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 800, width: 375 } } });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", { nativeEvent: { layout: { height: 250, width: 375 } } });
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.hideHints).toBe(false);
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    expect(screen.getByTestId("flashcards-top-buttons")).toBeTruthy();
+  });
+
+  it.each(["top", "bottom"])("replaces %s flag-card actions when one row is needed but the hint still fits", async (position) => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: position });
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
+    const listeners = jest.spyOn(Keyboard, "addListener");
+    const card = makeCard({ id: 956, text: "flag", imageFront: "file://flag.svg" });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 480, width: 360 } } });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", { nativeEvent: { layout: { height: 300, width: 360 } } });
+    if (position === "top") {
+      fireEvent(screen.getByTestId("flashcards-top-buttons"), "layout", { nativeEvent: { layout: { height: 50, width: 360 } } });
+    }
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.hideHints).toBe(false);
+    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    const rowHeight = latestBoxListProps?.horizontalRowHeight;
+
+    act(() => {
+      listeners.mock.calls.filter(([name]) => name === "keyboardDidShow").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 350, height: 300, width: 360, screenX: 0 } }));
+    });
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 240, width: 360 } } });
+    expect(latestCardProps?.hideHints).toBe(false);
+    expect(latestCardProps?.inlineAction?.label).toBe("flashcards.card.actions.confirm");
+    expect(screen.queryAllByTestId("flashcards-buttons")).toHaveLength(0);
+    expect(screen.queryByTestId("flashcards-top-buttons")).toBeNull();
+    expect(StyleSheet.flatten(screen.getByTestId("flashcards-content").props.style).paddingBottom).toBeUndefined();
+    expect(latestBoxListProps?.horizontalRowHeight).toBe(rowHeight);
+
+    act(() => {
+      listeners.mock.calls.filter(([name]) => name === "keyboardDidHide").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 650, height: 0, width: 360, screenX: 0 } }));
+    });
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 480, width: 360 } } });
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    expect(screen.queryAllByTestId("flashcards-buttons")).toHaveLength(1);
+    expect(latestBoxListProps?.horizontalRowHeight).toBe(rowHeight);
+  });
+
+  it("keeps explanation acknowledgement visible in compact keyboard mode", async () => {
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), showExplanationEnabled: true });
+    const card = makeCard({ id: 955, explanation: "Bird explanation" });
+    const screen = renderScreenWithState(createInteractionState(card, { result: true }), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 300, width: 375 } } });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", { nativeEvent: { layout: { height: 250, width: 375 } } });
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    expect(screen.getByTestId("flashcards-top-buttons")).toBeTruthy();
+    expect(latestButtonsProps?.confirmLabel).toBe("flashcards.card.actions.ok");
+  });
+
+  it.each(["true_false", "know_dont_know"] as const)("retains controls for compact %s cards", async (type) => {
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    const card = makeCard({ id: 953, type });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", { nativeEvent: { layout: { height: 300, width: 375 } } });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", { nativeEvent: { layout: { height: 250, width: 375 } } });
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.hideHints).toBe(true);
+    expect(latestCardProps?.inlineAction).toBeUndefined();
+    expect(screen.getByTestId("flashcards-top-buttons")).toBeTruthy();
+  });
+
+  it("keeps classic boxes responsive and hides hints when study height is insufficient", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     const card = makeCard({
       id: 52,
@@ -820,15 +945,110 @@ describe("FlashcardsScreen UI state regressions", () => {
       translations: ["maly"],
     });
 
-    renderScreenWithState(createInteractionState(card), [card]);
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
 
     await flushScreenState();
 
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+      nativeEvent: { layout: { height: 300, width: 375 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+      nativeEvent: { layout: { height: 250, width: 375 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-boxes-content"), "layout", {
+      nativeEvent: { layout: { height: 330, width: 351 } },
+    });
+    act(() => jest.advanceTimersByTime(80));
+
     expect(latestBoxListProps).not.toBeNull();
-    expect(latestBoxListProps?.horizontalScroll).toBeUndefined();
+    expect(latestBoxListProps?.horizontalScroll).toBe(true);
     expect(latestBoxCarouselProps).toBeNull();
     expect(latestCardProps?.hideHints).toBe(true);
     expect(latestCardProps?.reserveHintSpaceWhenHidden).toBe(false);
+  });
+
+  it("shows hints on Redmi-sized phones when the measured full study layout fits", async () => {
+    const { getDeviceLayout } = jest.requireActual<typeof import("@/src/hooks/useDeviceLayout")>(
+      "@/src/hooks/useDeviceLayout",
+    );
+    mockedUseDeviceLayout.mockReturnValue(getDeviceLayout(375.38, 834.46));
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: "bottom" });
+    const card = makeCard({ id: 55, text: "Redmi", imageFront: "file://bird.webp" });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+      nativeEvent: { layout: { height: 628.923, width: 375.38 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+      nativeEvent: { layout: { height: 381, width: 375.38 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-boxes-content"), "layout", {
+      nativeEvent: { layout: { height: 332, width: 351.38 } },
+    });
+    act(() => jest.advanceTimersByTime(80));
+
+    expect(latestCardProps?.hideHints).toBe(false);
+    expect(latestBoxListProps?.horizontalRowHeight).toBe(166);
+    expect(latestBoxListProps?.horizontalScroll).toBe(true);
+  });
+
+  it("retains scaled classic rows when reducing dock spacing makes a large image fit", async () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: "bottom" });
+    const card = makeCard({ id: 57, text: "bird", imageFront: "file://bird.webp" });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+      nativeEvent: { layout: { height: 700, width: 411.4286 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+      nativeEvent: { layout: { height: 381, width: 411.4286 } },
+    });
+    act(() => jest.advanceTimersByTime(80));
+    expect(latestCardProps?.hideHints).toBe(false);
+    expect(latestBoxListProps?.horizontalScroll).toBe(false);
+    expect(latestBoxListProps?.horizontalRowHeight).toBeUndefined();
+    expect(mockedUseAutoScaleToFit).toHaveBeenLastCalledWith({ minScale: 0.648, stableContentHeight: 332, layoutTransition: expectedLayoutTransition });
+  });
+
+  it("keeps compact bird-card boxes fixed when keyboard opening recovers navbar space", async () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: "bottom" });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+    const logger = jest.spyOn(console, "info").mockImplementation(() => {});
+    const keyboard = jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    try {
+      const card = makeCard({ id: 56, text: "bird", imageFront: "file://bird.webp" });
+      const screen = renderScreenWithState(createInteractionState(card), [card]);
+      await flushScreenStateWithoutTimers();
+      fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+        nativeEvent: { layout: { height: 473, width: 360 } },
+      });
+      fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+        nativeEvent: { layout: { height: 120, width: 360 } },
+      });
+      fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+        nativeEvent: { layout: { height: 381, width: 360 } },
+      });
+      act(() => jest.advanceTimersByTime(80));
+      expect(latestCardProps?.hideHints).toBe(true);
+      expect(latestBoxListProps?.horizontalRowHeight).toBe(80);
+      expect(latestBoxListProps?.horizontalScroll).toBe(true);
+      expect(mockedUseAutoScaleToFit).toHaveBeenLastCalledWith({ minScale: 1, stableContentHeight: 80, layoutTransition: expectedLayoutTransition });
+
+      expect(logger).not.toHaveBeenCalled();
+      act(() => jest.advanceTimersByTime(300));
+      expect(logger).not.toHaveBeenCalled();
+      for (const height of [475, 483, 499, 515, 523]) {
+        fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+          nativeEvent: { layout: { height, width: 360 } },
+        });
+        expect(latestBoxListProps?.horizontalRowHeight).toBe(80);
+        expect(mockedUseAutoScaleToFit).toHaveBeenLastCalledWith({ minScale: 1, stableContentHeight: 80, layoutTransition: expectedLayoutTransition });
+      }
+    } finally {
+      logger.mockRestore();
+      keyboard.mockRestore();
+    }
   });
 
   it("hides hints but reserves their space in late boxes", async () => {
@@ -856,7 +1076,7 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestCardProps?.reserveHintSpaceWhenHidden).toBe(true);
   });
 
-  it("keeps carousel boxes on small-phone layouts when carousel is selected", async () => {
+  it("keeps carousel boxes and uses compact metrics when study height is insufficient", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 7,
@@ -880,20 +1100,29 @@ describe("FlashcardsScreen UI state regressions", () => {
       translations: ["mala karuzela"],
     });
 
-    renderScreenWithState(createInteractionState(card), [card]);
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
 
     await flushScreenState();
 
+    fireEvent(screen.getByTestId("flashcards-content"), "layout", {
+      nativeEvent: { layout: { height: 300, width: 375 } },
+    });
+    fireEvent(screen.getByTestId("flashcards-card-section"), "layout", {
+      nativeEvent: { layout: { height: 250, width: 375 } },
+    });
+
+    act(() => jest.advanceTimersByTime(80));
     expect(latestBoxListProps).toBeNull();
     expect(latestBoxCarouselProps).not.toBeNull();
     expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({
       minScale: 0.3,
       stableContentHeight: 209,
+      layoutTransition: expectedLayoutTransition,
     });
     expect(latestCardProps?.hideHints).toBe(true);
   });
 
-  it("keeps phone layout direct and reserves bottom button space", async () => {
+  it("keeps phone scrolling disabled when content fits and reserves bottom button space", async () => {
     mockedUseDeviceLayout.mockReturnValue({
       isSmallPhoneLayout: false,
       isTabletLayout: false,
@@ -932,9 +1161,10 @@ describe("FlashcardsScreen UI state regressions", () => {
     );
 
     expect(screen.queryByTestId("flashcards-study-stack")).toBeNull();
+    expect(screen.getByTestId("flashcards-study-scroll").props.scrollEnabled).toBe(false);
     expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
     expect(boxesWrapperStyle.flex).toBe(1);
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.648 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.648, layoutTransition: expectedLayoutTransition });
     expect(latestButtonsProps?.contentWidth).toBeUndefined();
     expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toBeUndefined();
@@ -945,6 +1175,39 @@ describe("FlashcardsScreen UI state regressions", () => {
       });
     });
     expect(latestBoxListProps?.layoutWidth).toBe(336);
+  });
+
+  it("keeps the active card mounted through content growth, shrinkage, and tablet resizing", async () => {
+    const card = makeCard({ id: 57, text: "draft", translations: ["draft"] });
+    const screen = renderScreenWithState(createInteractionState(card), [card]);
+    await flushScreenState();
+    const measure = (testID: string, height: number) => {
+      fireEvent(screen.getByTestId(testID), "layout", {
+        nativeEvent: { layout: { x: 0, y: 0, width: 375, height } },
+      });
+    };
+    act(() => {
+      measure("flashcards-content", 600);
+      measure("flashcards-card-section", 250);
+      jest.advanceTimersByTime(80);
+    });
+    expect(screen.getByTestId("flashcards-study-scroll").props.scrollEnabled).toBe(false);
+    const mounts = mockCardMount.mock.calls.length;
+    const unmounts = mockCardUnmount.mock.calls.length;
+
+    act(() => measure("flashcards-card-section", 600));
+    act(() => jest.advanceTimersByTime(80));
+    expect(screen.getByTestId("flashcards-study-scroll").props.scrollEnabled).toBe(true);
+
+    act(() => measure("flashcards-card-section", 195));
+    act(() => jest.advanceTimersByTime(80));
+    expect(screen.getByTestId("flashcards-study-scroll").props.scrollEnabled).toBe(false);
+
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: true });
+    screen.rerender(<Flashcards />);
+    expect(screen.getByTestId("flashcards-study-stack")).toBeTruthy();
+    expect(mockCardMount).toHaveBeenCalledTimes(mounts);
+    expect(mockCardUnmount).toHaveBeenCalledTimes(unmounts);
   });
 
   it("centers tablet top-button study content with compact boxes", async () => {
@@ -982,15 +1245,16 @@ describe("FlashcardsScreen UI state regressions", () => {
       screen.getByTestId("flashcards-content").props.style,
     );
     const studyStackStyle = StyleSheet.flatten(
-      screen.getByTestId("flashcards-study-stack").props.style,
+      screen.getByTestId("flashcards-study-stack").props.contentContainerStyle,
     );
     const boxesWrapperStyle = StyleSheet.flatten(
       screen.getByTestId("flashcards-boxes-wrapper").props.style,
     );
 
     expect(contentStyle.paddingBottom).toBeUndefined();
+    expect(studyStackStyle.flex).toBeUndefined();
     expect(studyStackStyle).toMatchObject({
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
     });
     expect(boxesWrapperStyle.flex).toBe(0);
@@ -1035,20 +1299,21 @@ describe("FlashcardsScreen UI state regressions", () => {
       screen.getByTestId("flashcards-content").props.style,
     );
     const studyStackStyle = StyleSheet.flatten(
-      screen.getByTestId("flashcards-study-stack").props.style,
+      screen.getByTestId("flashcards-study-stack").props.contentContainerStyle,
     );
     const boxesWrapperStyle = StyleSheet.flatten(
       screen.getByTestId("flashcards-boxes-wrapper").props.style,
     );
 
     expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
+    expect(studyStackStyle.flex).toBeUndefined();
     expect(studyStackStyle).toMatchObject({
-      flex: 1,
+      flexGrow: 1,
       justifyContent: "center",
     });
     expect(boxesWrapperStyle.flex).toBe(1);
     expect(latestButtonsProps?.align).toBe("right");
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54, layoutTransition: expectedLayoutTransition });
   });
 
   it("left-aligns bottom buttons on tablets for left-hand users", async () => {

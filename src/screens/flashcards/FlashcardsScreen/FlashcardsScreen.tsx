@@ -1,3 +1,4 @@
+import { KeyboardStudyScroll } from "@/src/components/flashcards/KeyboardStudyScroll";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 import Confetti from "@/src/components/confetti/Confetti";
@@ -10,6 +11,7 @@ import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
+import { useNavbarCompactLayoutSetter, useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import {
   type StatBurst,
   useNavbarStats,
@@ -24,7 +26,11 @@ import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
-import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import {
+  SMALL_PHONE_MAX_SHORT_SIDE,
+  TABLET_LAYOUT_MIN_SHORT_SIDE,
+  useDeviceLayout,
+} from "@/src/hooks/useDeviceLayout";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import {
   type CorrectAnswerMeta,
@@ -43,12 +49,15 @@ import {
   BOX_SPAM_COOLDOWN_MS,
   BOX_SPAM_THRESHOLD,
   BOX_SPAM_WINDOW_MS,
+  CAROUSEL_BOXES_MIN_SCALE,
+  CLASSIC_PHONE_BOXES_MIN_SCALE,
   EMPTY_BOXES_STATE,
   SCREEN_LAYOUT_TRANSITION,
   UI_WARMUP_DELAY_MS,
 } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
 import { useFlashcardsActions } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsActions";
 import { useFlashcardsBottomDockLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsBottomDockLayout";
+import { useFlashcardsStudyLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsStudyLayout";
 import { useFlashcardsTutorials } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsTutorials";
 import { formatLearningTime } from "@/src/screens/flashcards/FlashcardsScreen/utils/FlashcardsScreen.utils";
 import {
@@ -72,6 +81,7 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
+  Dimensions,
   Keyboard,
   TextInput,
   useWindowDimensions,
@@ -83,9 +93,21 @@ export default function Flashcards() {
   const router = useRouter();
   const params = useLocalSearchParams<{ hintTutorialRestartToken?: string }>();
   const styles = useStyles();
-  const { width: windowWidth } = useWindowDimensions();
+  const {
+    width: windowWidth,
+    height: windowHeight,
+    scale: windowScale,
+    fontScale,
+  } = useWindowDimensions();
   const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
-  const { isSmallPhoneLayout, isTabletLayout } = useDeviceLayout();
+  const {
+    isSmallPhoneLayout: deviceIsSmallPhoneLayout,
+    isTabletLayout,
+    shortestSide,
+    orientation,
+    widthClass,
+    heightClass,
+  } = useDeviceLayout();
   const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
@@ -106,10 +128,24 @@ export default function Flashcards() {
     dominantHand,
     colors,
   } = useSettings();
+  const studyLayout = useFlashcardsStudyLayout({
+    isTabletLayout,
+    boxesLayout,
+    areButtonsOnTop: actionButtonsPosition === "top",
+  });
+  const { isCompactStudyLayout, setActionsHidden } = studyLayout;
+  const layoutTransition = useNavbarLayoutTransition();
+
+  const lastLayoutDiagnosticsRef = useRef<string | null>(null);
   const { registerKnownWord } = useLearningStats();
   const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
   const { triggerQuote } = useQuote();
   const isFocused = useIsFocused();
+  const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
+  useEffect(() => {
+    setNavbarCompactLayout(isFocused && isCompactStudyLayout);
+    return () => setNavbarCompactLayout(false);
+  }, [isFocused, isCompactStudyLayout, setNavbarCompactLayout]);
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
   useAutoResetFlag(shouldCelebrate, resetCelebrate);
@@ -473,9 +509,122 @@ export default function Flashcards() {
     selectedItemIdRef.current = selectedItemId;
   }, [selectedItemId]);
   const shouldHideHintsForActiveBox =
-    isSmallPhoneLayout || activeBox === "boxFour" || activeBox === "boxFive";
+    isCompactStudyLayout || activeBox === "boxFour" || activeBox === "boxFive";
   const shouldReserveHintSpaceWhenHidden =
-    !isSmallPhoneLayout && (activeBox === "boxFour" || activeBox === "boxFive");
+    !isCompactStudyLayout && (activeBox === "boxFour" || activeBox === "boxFive");
+  useEffect(() => {
+    if (!isFocused) {
+      lastLayoutDiagnosticsRef.current = null;
+      return;
+    }
+
+    const screen = Dimensions.get("screen");
+    const payload = {
+      courseId: activeCustomCourseId,
+      cardId: selectedItemId,
+      windowDp: { width: windowWidth, height: windowHeight },
+      screenDp: { width: screen.width, height: screen.height },
+      screenPixels: {
+        width: Math.round(screen.width * screen.scale),
+        height: Math.round(screen.height * screen.scale),
+      },
+      pixelRatio: windowScale,
+      fontScale,
+      shortestSide,
+      orientation,
+      widthClass,
+      heightClass,
+      thresholdsDp: {
+        smallPhoneMaxShortSide: SMALL_PHONE_MAX_SHORT_SIDE,
+        tabletMinShortSide: TABLET_LAYOUT_MIN_SHORT_SIDE,
+      },
+      selectedLayout: isTabletLayout
+        ? "tablet"
+        : isCompactStudyLayout
+          ? "compact"
+          : "normal",
+      deviceIsSmallPhoneLayout,
+      isCompactStudyLayout,
+      studySpace: {
+        measured: studyLayout.hasMeasurements,
+        availableHeight: studyLayout.availableStudyHeight,
+        visibleHeight: studyLayout.visibleStudyHeight,
+        minimumFullHeight: studyLayout.minimumFullStudyHeight,
+        fullCardHeight: studyLayout.fullCardSectionHeight,
+        visibleCardHeight: studyLayout.visibleCardHeight,
+        minimumFullBoxesHeight: studyLayout.minimumFullBoxesHeight,
+        classicBoxesNaturalHeight: studyLayout.classicBoxesNaturalHeight,
+        boxesPresentation: boxesLayout !== "classic"
+          ? "carousel"
+          : studyLayout.horizontalRowHeight != null ? "single_row" : "grid",
+        horizontalRowHeight: studyLayout.horizontalRowHeight ?? null,
+        studyScroll: studyLayout.needsStudyScroll,
+        minimumGridHeight: studyLayout.minimumGridStudyHeight,
+        minimumTightGridHeight: studyLayout.tightGridStudyHeight,
+        minimumGridBoxesHeight: studyLayout.minimumGridBoxesHeight,
+        keyboardVisible: studyLayout.keyboardVisible,
+      },
+      isTabletLayout,
+      activeBox,
+      hideHints: shouldHideHintsForActiveBox,
+      hintHiddenReasons: [
+        ...(isCompactStudyLayout ? ["insufficient_study_height"] : []),
+        ...(activeBox === "boxFour" || activeBox === "boxFive"
+          ? ["late_box"]
+          : []),
+      ],
+      reserveHintSpaceWhenHidden: shouldReserveHintSpaceWhenHidden,
+      boxesLayout,
+      actionButtonsPosition,
+    };
+
+    // Layout arrives in several passes (data, images, native measurements).
+    // Emit the settled snapshot rather than logging every intermediate state.
+    const timer = setTimeout(() => {
+      const serialized = JSON.stringify(payload);
+      if (lastLayoutDiagnosticsRef.current === serialized) return;
+      lastLayoutDiagnosticsRef.current = serialized;
+      if (__DEV__ && process.env.NODE_ENV !== "test") {
+        console.log("[study-layout] screen", serialized);
+      }
+      void appendDebugEvent("flashcards", "screen.layout.diagnostics", payload);
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [
+    isFocused,
+    activeCustomCourseId,
+    selectedItemId,
+    windowWidth,
+    windowHeight,
+    windowScale,
+    fontScale,
+    shortestSide,
+    orientation,
+    widthClass,
+    heightClass,
+    deviceIsSmallPhoneLayout,
+    isCompactStudyLayout,
+    studyLayout.hasMeasurements,
+    studyLayout.availableStudyHeight,
+    studyLayout.visibleStudyHeight,
+    studyLayout.minimumFullStudyHeight,
+    studyLayout.fullCardSectionHeight,
+    studyLayout.visibleCardHeight,
+    studyLayout.minimumFullBoxesHeight,
+    studyLayout.classicBoxesNaturalHeight,
+    studyLayout.horizontalRowHeight,
+    studyLayout.minimumGridStudyHeight,
+    studyLayout.tightGridStudyHeight,
+    studyLayout.minimumGridBoxesHeight,
+    studyLayout.needsStudyScroll,
+    studyLayout.keyboardVisible,
+    isTabletLayout,
+    activeBox,
+    shouldHideHintsForActiveBox,
+    shouldReserveHintSpaceWhenHidden,
+    boxesLayout,
+    actionButtonsPosition,
+  ]);
   const lastTrueFalseTapRef = useRef<{
     cardId: number | null;
     ts: number;
@@ -1083,12 +1232,19 @@ export default function Flashcards() {
   const effectiveBoxesLayout = boxesLayout;
   const isCarouselLayout = effectiveBoxesLayout !== "classic";
   const areButtonsOnTop = actionButtonsPosition === "top";
-  const carouselMinScale = 0.3;
+  const carouselMinScale = CAROUSEL_BOXES_MIN_SCALE;
   const classicBoxesMinScale = isTabletLayout
     ? areButtonsOnTop
       ? 0.72
       : 0.54
-    : 0.648;
+    : CLASSIC_PHONE_BOXES_MIN_SCALE;
+  // A single row can be necessary even while the card's hint still fits.
+  const canUseInlineCardAction = (isCompactStudyLayout || studyLayout.horizontalRowHeight != null)
+    && showCardActions && selectedItem != null && !isExplanationVisible
+    && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know";
+  const useInlineCardAction = canUseInlineCardAction && studyLayout.keyboardVisible;
+  useEffect(() => setActionsHidden(useInlineCardAction), [useInlineCardAction, setActionsHidden]);
+
   const {
     bottomButtonsAnchorRef,
     setBottomButtonsHeight,
@@ -1099,12 +1255,15 @@ export default function Flashcards() {
     bottomButtonsDockBottomOffset,
     bottomButtonsReservedSpace,
   } = useFlashcardsBottomDockLayout({
+    hideActions: useInlineCardAction,
+    keepActionsAtBottom: canUseInlineCardAction,
     areButtonsOnTop,
     shouldShowBoxes,
     selectedItemId,
     showCardActions,
     shouldShowTrueFalseActions,
-    isSmallPhoneLayout,
+    isSmallPhoneLayout: isCompactStudyLayout,
+    bottomDockOffsetOverride: studyLayout.bottomDockOffset,
     isFocused,
     debugScreen: "flashcards",
     courseId: activeCustomCourseId,
@@ -1115,7 +1274,7 @@ export default function Flashcards() {
     previousKeyboardVisibleRef,
   });
   const carouselBottomClearance =
-    isCarouselLayout && !areButtonsOnTop
+    isCarouselLayout && !areButtonsOnTop && !useInlineCardAction
       ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
       : 0;
   const {
@@ -1126,16 +1285,20 @@ export default function Flashcards() {
     onContentLayout: onBoxesContentLayout,
     needsScrollFallback: boxesNeedScrollFallback,
   } = useAutoScaleToFit({
-    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
-    ...(isCarouselLayout
+    layoutTransition,
+    minScale: studyLayout.horizontalRowHeight != null ? 1 : isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
+    ...(!isTabletLayout && !isCarouselLayout && studyLayout.classicBoxesNaturalHeight > 0
+      ? { stableContentHeight: studyLayout.horizontalRowHeight ?? studyLayout.classicBoxesNaturalHeight }
+      : isCarouselLayout
       ? {
           stableContentHeight: getBoxCarouselNaturalHeight({
-            isSmallPhoneLayout,
+            isSmallPhoneLayout: isCompactStudyLayout,
             bottomClearance: carouselBottomClearance,
           }),
         }
       : {}),
   });
+
 
   useEffect(() => {
     resetInteractionState();
@@ -1151,6 +1314,11 @@ export default function Flashcards() {
 
   const cardSection = (
     <FlashcardsCardSection
+      inlineAction={useInlineCardAction ? {
+        disabled: cardActionsConfirmDisabled,
+        label: cardActionsConfirmLabel,
+        onCorrectionConfirm: handleCardActionsConfirm,
+      } : undefined}
       activeCustomCourseId={activeCustomCourseId}
       loadError={loadError}
       customCards={customCards}
@@ -1309,6 +1477,9 @@ export default function Flashcards() {
 
   const boxesSection = shouldShowBoxes ? (
     <FlashcardsBoxesSection
+      hideActions={useInlineCardAction}
+      debugSizes={__DEV__ && isFocused}
+      debugCourseId={activeCustomCourseId}
       styles={styles}
       screenSectionLayout={screenSectionLayout}
       boxes={boxes}
@@ -1321,29 +1492,46 @@ export default function Flashcards() {
       effectiveBoxesLayout={effectiveBoxesLayout}
       boxSelectionLocked={boxSelectionLocked}
       isTabletLayout={isTabletLayout}
+      isCompactStudyLayout={isCompactStudyLayout}
       isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
       areButtonsOnTop={areButtonsOnTop}
       flashcardsContentWidth={flashcardsContentWidth}
-      boxesScale={boxesScale}
-      boxesScaledHeight={boxesScaledHeight}
-      boxesScaleOffsetY={boxesScaleOffsetY}
-      boxesNeedScrollFallback={boxesNeedScrollFallback}
+      horizontalRowHeight={studyLayout.horizontalRowHeight}
+      boxesScale={studyLayout.horizontalRowHeight != null ? 1 : boxesScale}
+      boxesScaledHeight={studyLayout.horizontalRowHeight ?? boxesScaledHeight}
+      classicBoxesNaturalHeight={
+        !isTabletLayout && !isCarouselLayout
+          ? studyLayout.horizontalRowHeight ?? studyLayout.classicBoxesNaturalHeight
+          : undefined
+      }
+      boxesScaleOffsetY={studyLayout.horizontalRowHeight != null ? 0 : boxesScaleOffsetY}
+      boxesNeedScrollFallback={studyLayout.horizontalRowHeight == null && boxesNeedScrollFallback}
       carouselBottomClearance={carouselBottomClearance}
       onBoxesViewportLayout={onBoxesViewportLayout}
-      onBoxesContentLayout={onBoxesContentLayout}
+      onBoxesContentLayout={(event) => {
+        onBoxesContentLayout(event);
+        studyLayout.onBoxesNaturalLayout(event);
+      }}
       t={t}
     />
   ) : null;
 
   const studyContent = (
     <FlashcardsStudyContent
+      cardBottomGap={studyLayout.cardBottomGap}
       styles={styles}
       screenSectionLayout={screenSectionLayout}
       cardSection={cardSection}
       topButtons={topButtons}
       boxesSection={boxesSection}
       isCourseFinishedVisible={isCourseFinishedVisible}
-      showTopButtons={areButtonsOnTop && shouldShowBoxes}
+      showTopButtons={areButtonsOnTop && shouldShowBoxes && !useInlineCardAction}
+      onCardSectionLayout={
+        selectedItem != null || isBetweenCards
+          ? studyLayout.onCardSectionLayout
+          : undefined
+      }
+      onTopButtonsLayout={studyLayout.onTopButtonsLayout}
     />
   );
 
@@ -1370,6 +1558,7 @@ export default function Flashcards() {
 
       <View
         testID="flashcards-content"
+        onLayout={studyLayout.onStudyLayout}
         style={[
           styles.content,
           shouldReserveBottomButtonsSpace
@@ -1378,16 +1567,18 @@ export default function Flashcards() {
         ]}
         pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
       >
-        {isTabletCenteredStudyLayout ? (
-          <View
-            testID="flashcards-study-stack"
-            style={[styles.studyStack, styles.tabletCenteredStudyStack]}
-          >
-            {studyContent}
-          </View>
-        ) : (
-          studyContent
-        )}
+        <KeyboardStudyScroll
+          testID={isTabletCenteredStudyLayout ? "flashcards-study-stack" : "flashcards-study-scroll"}
+          enabled={isCompactStudyLayout || studyLayout.needsStudyScroll || studyLayout.keyboardVisible}
+          keyboardVisible={studyLayout.keyboardVisible}
+          keyboardTopInWindow={studyLayout.keyboardTopInWindow}
+          cardHeight={studyLayout.visibleCardHeight}
+          contentContainerStyle={isTabletCenteredStudyLayout
+            ? [styles.studyStack, styles.tabletCenteredStudyStack]
+            : undefined}
+        >
+          {studyContent}
+        </KeyboardStudyScroll>
 
         {shouldRenderBottomButtons ? (
           <View
@@ -1400,6 +1591,7 @@ export default function Flashcards() {
             <View
               ref={bottomButtonsAnchorRef}
               onLayout={(event) => {
+                studyLayout.onBottomButtonsLayout(event);
                 const nextHeight = event.nativeEvent.layout.height;
                 setBottomButtonsHeight((prev) =>
                   Math.abs(prev - nextHeight) < 1 ? prev : nextHeight,

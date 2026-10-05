@@ -2,7 +2,7 @@ import { appendDebugEvent } from "@/src/services/debugEvents";
 import type { BoxesState } from "@/src/types/boxes";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Keyboard, View } from "react-native";
+import { Animated, Keyboard, View } from "react-native";
 import {
   BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET,
   BOTTOM_BUTTONS_KEYBOARD_DURATION_MS,
@@ -17,12 +17,15 @@ type KeyboardDebugCorrectionState = {
 };
 
 type UseFlashcardsBottomDockLayoutParams = {
+  hideActions?: boolean;
+  keepActionsAtBottom?: boolean;
   areButtonsOnTop: boolean;
   shouldShowBoxes: boolean;
   selectedItemId: number | null;
   showCardActions: boolean;
   shouldShowTrueFalseActions: boolean;
   isSmallPhoneLayout: boolean;
+  bottomDockOffsetOverride?: number;
   isFocused: boolean;
   debugScreen: "flashcards" | "review";
   debugCategory?: "flashcards" | "review";
@@ -35,12 +38,15 @@ type UseFlashcardsBottomDockLayoutParams = {
 };
 
 export function useFlashcardsBottomDockLayout({
+  hideActions = false,
+  keepActionsAtBottom = false,
   areButtonsOnTop,
   shouldShowBoxes,
   selectedItemId,
   showCardActions,
   shouldShowTrueFalseActions,
   isSmallPhoneLayout,
+  bottomDockOffsetOverride,
   isFocused,
   debugScreen,
   debugCategory = debugScreen,
@@ -51,6 +57,8 @@ export function useFlashcardsBottomDockLayout({
   correction,
   previousKeyboardVisibleRef,
 }: UseFlashcardsBottomDockLayoutParams) {
+  const stationaryBottomOffset = useRef(new Animated.Value(0)).current;
+  const shouldLiftDock = !areButtonsOnTop && !hideActions && !keepActionsAtBottom;
   const bottomButtonsAnchorRef = useRef<View | null>(null);
   const [bottomButtonsHeight, setBottomButtonsHeight] = useState(0);
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
@@ -71,7 +79,7 @@ export function useFlashcardsBottomDockLayout({
 
   const { keyboardVisible, bottomOffset: bottomButtonsOffset } =
     useKeyboardBottomOffset({
-      enabled: !areButtonsOnTop,
+      enabled: shouldLiftDock,
       gap: 8,
       targetBottomInWindow: bottomButtonsBottomInWindow,
       keyboardTopCorrection: 44,
@@ -200,11 +208,13 @@ export function useFlashcardsBottomDockLayout({
     shouldShowBoxes,
   ]);
 
-  const shouldRenderBottomButtons = !areButtonsOnTop && shouldShowBoxes;
+  const shouldRenderBottomButtons = !hideActions && !areButtonsOnTop && shouldShowBoxes;
   const shouldReserveBottomButtonsSpace = shouldRenderBottomButtons;
-  const bottomButtonsDockBottomOffset = isSmallPhoneLayout
-    ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
-    : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET;
+  const bottomButtonsDockBottomOffset = bottomDockOffsetOverride ?? (
+    isSmallPhoneLayout
+      ? COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+      : BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET
+  );
   const bottomButtonsReservedSpace = shouldRenderBottomButtons
     ? Math.max(bottomButtonsHeight, BOTTOM_BUTTONS_MIN_HEIGHT) +
       bottomButtonsDockBottomOffset
@@ -216,7 +226,7 @@ export function useFlashcardsBottomDockLayout({
     setBottomButtonsHeight,
     measureBottomButtons,
     keyboardVisible,
-    bottomButtonsOffset,
+    bottomButtonsOffset: shouldLiftDock ? bottomButtonsOffset : stationaryBottomOffset,
     shouldRenderBottomButtons,
     shouldReserveBottomButtonsSpace,
     bottomButtonsDockBottomOffset,

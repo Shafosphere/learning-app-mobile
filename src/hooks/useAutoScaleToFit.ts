@@ -1,9 +1,13 @@
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { LayoutChangeEvent } from "react-native";
 
 type UseAutoScaleToFitParams = {
   minScale?: number;
   stableContentHeight?: number;
+  layoutTransition?: {
+    isRunning: () => boolean;
+    subscribe: (listener: () => void) => () => void;
+  };
 };
 
 type UseAutoScaleToFitResult = {
@@ -22,19 +26,29 @@ const LAYOUT_JITTER_TOLERANCE_PX = 1;
 export function useAutoScaleToFit({
   minScale = DEFAULT_MIN_SCALE,
   stableContentHeight,
+  layoutTransition,
 }: UseAutoScaleToFitParams = {}): UseAutoScaleToFitResult {
-  const [viewportHeight, setViewportHeight] = useState(0);
+  const [viewportHeight, setViewportHeight] = useState<number | null>(null);
   const [contentHeight, setContentHeight] = useState(0);
+  const pendingViewportHeightRef = useRef<number | null>(null);
 
-  const onViewportLayout = useCallback((event: LayoutChangeEvent) => {
-    const nextHeight = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
+  const commitViewportHeight = useCallback(() => {
+    const nextHeight = pendingViewportHeightRef.current;
+    if (nextHeight === null) return;
     setViewportHeight((prev) => {
-      if (prev === 0) return nextHeight;
+      if (prev === null) return nextHeight;
       return Math.abs(prev - nextHeight) <= LAYOUT_JITTER_TOLERANCE_PX
         ? prev
         : nextHeight;
     });
   }, []);
+
+  const onViewportLayout = useCallback((event: LayoutChangeEvent) => {
+    pendingViewportHeightRef.current = Math.max(0, Math.ceil(event.nativeEvent.layout.height));
+    if (!layoutTransition?.isRunning()) commitViewportHeight();
+  }, [layoutTransition, commitViewportHeight]);
+
+  useEffect(() => layoutTransition?.subscribe(commitViewportHeight), [layoutTransition, commitViewportHeight]);
 
   const onContentLayout = useCallback((event: LayoutChangeEvent) => {
     if (stableContentHeight != null) return;
@@ -52,7 +66,7 @@ export function useAutoScaleToFit({
   const effectiveContentHeight = stableContentHeight ?? measuredContentHeight;
 
   const ratio =
-    viewportHeight > 0 && effectiveContentHeight > 0
+    viewportHeight !== null && effectiveContentHeight > 0
       ? viewportHeight / effectiveContentHeight
       : 1;
   const scale = useMemo(
@@ -69,7 +83,7 @@ export function useAutoScaleToFit({
   }, [effectiveContentHeight, scale]);
 
   const needsScrollFallback =
-    viewportHeight > 0 &&
+    viewportHeight !== null &&
     effectiveContentHeight > 0 &&
     ratio + EPSILON < minScale;
 

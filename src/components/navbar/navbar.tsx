@@ -1,4 +1,5 @@
 import { useDueReviews } from "@/src/contexts/DueReviewsContext";
+import { createNavbarLayoutTransition, NavbarLayoutContext, NavbarLayoutTransitionContext } from "@/src/contexts/NavbarLayoutContext";
 import { CourseTitleMarquee } from "@/src/components/course/CourseTitleMarquee";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
@@ -16,12 +17,16 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import {
   useCallback,
   useEffect,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
   type ReactNode,
 } from "react";
 import {
+  Animated,
+  Easing,
+  Keyboard,
   Platform,
   Pressable,
   StatusBar,
@@ -86,6 +91,53 @@ export default function Navbar({ children }: NavbarProps) {
 
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
+  const [compactStudyLayout, setCompactStudyLayout] = useState(false);
+  const [keyboardVisible, setKeyboardVisible] = useState(() => Keyboard.isVisible());
+  const keyboardDurationRef = useRef(250);
+  const topBarVisibility = useRef(new Animated.Value(1)).current;
+  const layoutTransition = useMemo(createNavbarLayoutTransition, []);
+  const settledTopBarVisibilityRef = useRef(1);
+  const collapseTopBar = pathname === "/flashcards" && compactStudyLayout && keyboardVisible;
+
+  useEffect(() => {
+    const subscriptions = [
+      Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillShow" : "keyboardDidShow", (event) => {
+        keyboardDurationRef.current = event.duration > 0 ? event.duration : 250;
+        setKeyboardVisible(true);
+      }),
+      Keyboard.addListener(Platform.OS === "ios" ? "keyboardWillHide" : "keyboardDidHide", (event) => {
+        keyboardDurationRef.current = event.duration > 0 ? event.duration : 250;
+        setKeyboardVisible(false);
+      }),
+    ];
+    return () => subscriptions.forEach((subscription) => subscription.remove());
+  }, []);
+
+  useLayoutEffect(() => {
+    const target = collapseTopBar ? 0 : 1;
+    if (!layoutTransition.isRunning() && settledTopBarVisibilityRef.current === target) return;
+    layoutTransition.start();
+    let completionFrame: number | undefined;
+    const animation = Animated.timing(topBarVisibility, {
+      toValue: target,
+      duration: keyboardDurationRef.current,
+      easing: Easing.inOut(Easing.ease),
+      // Height must participate in layout so the content moves with the bar.
+      useNativeDriver: false,
+    });
+    animation.start(({ finished }) => {
+      if (!finished) return;
+      // Let the final native layout arrive before consumers commit measurements.
+      completionFrame = requestAnimationFrame(() => {
+        settledTopBarVisibilityRef.current = target;
+        layoutTransition.finish();
+      });
+    });
+    return () => {
+      animation.stop();
+      if (completionFrame !== undefined) cancelAnimationFrame(completionFrame);
+    };
+  }, [collapseTopBar, layoutTransition, topBarVisibility]);
 
   const displayedCustomCourse =
     activeCustomCourseId != null ? customCourse : null;
@@ -383,8 +435,21 @@ export default function Navbar({ children }: NavbarProps) {
   }, [pathname]);
 
   return (
+    <NavbarLayoutContext.Provider value={setCompactStudyLayout}>
+    <NavbarLayoutTransitionContext.Provider value={layoutTransition}>
     <View style={styles.layout}>
       <View style={[styles.topBarContainer, { paddingTop: topPad }]}>
+        <Animated.View
+          testID="navbar-top-bar-collapse"
+          pointerEvents={collapseTopBar ? "none" : "auto"}
+          accessibilityElementsHidden={collapseTopBar}
+          importantForAccessibility={collapseTopBar ? "no-hide-descendants" : "auto"}
+          style={{
+            height: topBarVisibility.interpolate({ inputRange: [0, 1], outputRange: [0, 50] }),
+            opacity: topBarVisibility,
+            overflow: collapseTopBar ? "hidden" : "visible",
+          }}
+        >
         <View style={styles.topBar} onLayout={updatePopupAnchor}>
           <View style={styles.leftGroup}>
             <TouchableOpacity
@@ -454,6 +519,7 @@ export default function Navbar({ children }: NavbarProps) {
             </CoachmarkAnchor>
           </View>
         </View>
+        </Animated.View>
       </View>
 
       <View style={styles.content}>
@@ -601,5 +667,7 @@ export default function Navbar({ children }: NavbarProps) {
         </View>
       )}
     </View>
+    </NavbarLayoutTransitionContext.Provider>
+    </NavbarLayoutContext.Provider>
   );
 }

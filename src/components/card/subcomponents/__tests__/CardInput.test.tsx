@@ -1,6 +1,6 @@
 import React from "react";
-import { act, render } from "@testing-library/react-native";
-import { TextInput } from "react-native";
+import { act, fireEvent, render } from "@testing-library/react-native";
+import { StyleSheet, TextInput } from "react-native";
 
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
@@ -19,6 +19,8 @@ let mockT = (key: string) => mockTranslate(key);
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: mockT }),
 }));
+
+jest.mock("@expo/vector-icons/Octicons", () => () => null);
 
 const mockedUseSettings = useSettings as jest.Mock;
 const cardMetrics = getResponsiveFlashcardMetrics(390);
@@ -117,5 +119,45 @@ describe("CardInput empty submit warning", () => {
     expect(screen.UNSAFE_getByType(TextInput).props.accessibilityHint).toBe(
       "en:flashcards.card.input.answerHint",
     );
+  });
+});
+
+
+describe("CardInput inline confirm", () => {
+  beforeEach(() => {
+    mockedUseSettings.mockReturnValue({ colors: { my_green: "#00ebc7", font: "#00214d" } });
+    jest.clearAllMocks();
+  });
+
+  it("submits through the main handler and exposes a localized accessible name", () => {
+    const correctionConfirm = jest.fn();
+    const screen = render(<CardInput {...stableInputProps} inlineAction={{ disabled: false, label: "Confirm", onCorrectionConfirm: correctionConfirm }} />);
+    fireEvent.press(screen.getByRole("button", { name: "Confirm" }));
+    expect(stableInputProps.handleConfirm).toHaveBeenCalledTimes(1);
+    expect(correctionConfirm).not.toHaveBeenCalled();
+  });
+
+  it.each([320, 360, 375, 390, 430])("keeps the inline button within the existing input height on a %sdp phone", (width) => {
+    const metrics = getResponsiveFlashcardMetrics(width);
+    const screen = render(<CardInput {...stableInputProps} cardMetrics={metrics} />);
+    const input = screen.UNSAFE_getByType(TextInput);
+    const inputHeight = StyleSheet.flatten(input.props.style).height;
+    screen.rerender(<CardInput {...stableInputProps} cardMetrics={metrics} inlineAction={{ disabled: false, label: "Confirm", onCorrectionConfirm: jest.fn() }} />);
+    const buttonStyle = StyleSheet.flatten(screen.getByTestId("card-inline-confirm").props.style);
+    expect(buttonStyle.height).toBeLessThanOrEqual(inputHeight);
+    expect(StyleSheet.flatten(screen.UNSAFE_getByType(TextInput).props.style).height).toBe(inputHeight);
+    expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
+  });
+
+  it("blocks disabled taps and preserves the input when the action disappears", () => {
+    const inlineAction = { disabled: true, label: "Confirm", onCorrectionConfirm: jest.fn() };
+    const screen = render(<CardInput {...stableInputProps} inlineAction={inlineAction} />);
+    const input = screen.UNSAFE_getByType(TextInput);
+    fireEvent.press(screen.getByRole("button", { name: "Confirm" }));
+    expect(stableInputProps.handleConfirm).not.toHaveBeenCalled();
+    expect(screen.getByTestId("card-inline-confirm").props.accessibilityState).toEqual({ disabled: true });
+    screen.rerender(<CardInput {...stableInputProps} />);
+    expect(screen.queryByTestId("card-inline-confirm")).toBeNull();
+    expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
   });
 });

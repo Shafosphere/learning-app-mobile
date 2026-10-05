@@ -1,9 +1,11 @@
+import { InlineConfirmButton } from "./InlineConfirmButton";
+import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import type { CardCorrectionType, FocusTarget } from "../card-types";
+import type { CardCorrectionType, FocusTarget, InlineCardAction } from "../card-types";
 import {
   Platform,
   Pressable,
@@ -28,6 +30,7 @@ const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
 type CardCorrectionProps = {
+  inlineAction?: InlineCardAction;
   correction: CardCorrectionType;
   promptText: string;
   promptImageUri?: string | null;
@@ -74,6 +77,7 @@ type CardCorrectionProps = {
 };
 
 export function CardCorrection({
+  inlineAction,
   correction,
   promptText,
   promptImageUri,
@@ -118,6 +122,8 @@ export function CardCorrection({
   cardMetrics,
 }: CardCorrectionProps) {
   const styles = useStyles();
+  const input1Reveal = useStudyInputReveal();
+  const input2Reveal = useStudyInputReveal();
   const { t } = useTranslation();
   const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
@@ -290,6 +296,15 @@ export function CardCorrection({
     </View>
   );
 
+  const confirmButton = inlineAction ? (
+    <InlineConfirmButton
+      disabled={inlineAction.disabled}
+      label={inlineAction.label}
+      onPress={inlineAction.onCorrectionConfirm}
+    />
+  ) : null;
+  const input1HasAction = Boolean(inlineAction && !showRewersInput);
+
   const input1Block = (
     <View
       style={[
@@ -299,83 +314,88 @@ export function CardCorrection({
         styles.containerInputFirst,
         { paddingTop: 8 * contentScale },
       ]}
-      onLayout={({ nativeEvent }) => {
-        const nextWidth = nativeEvent.layout.width;
-        if (Math.abs(nextWidth - input1LayoutWidth) > 0.5) {
-          setInput1LayoutWidth(nextWidth);
-        }
-      }}
     >
-      <ScrollView
-        ref={input1ScrollRef}
-        horizontal
-        scrollEnabled={false}
-        showsHorizontalScrollIndicator={false}
-        style={[styles.inputScroll, inputFrameResponsiveStyle]}
-        contentContainerStyle={[
-          styles.inputScrollContent,
-          inputFrameResponsiveStyle,
-          { width: input1ContentWidth },
-        ]}
-      >
-        <View
-          style={[
-            styles.inputRow,
+      <View ref={input1Reveal.ref} onLayout={input1Reveal.onLayout} collapsable={false} style={{ flexDirection: "row", alignItems: "center", gap: input1HasAction ? 8 : 0, width: "100%" }}>
+        <ScrollView
+          onLayout={({ nativeEvent }) => {
+            const width = nativeEvent.layout.width;
+            if (Math.abs(width - input1LayoutWidth) > 0.5) setInput1LayoutWidth(width);
+          }}
+          ref={input1ScrollRef}
+          horizontal
+          scrollEnabled={false}
+          showsHorizontalScrollIndicator={false}
+          style={[styles.inputScroll, inputFrameResponsiveStyle, input1HasAction && { width: undefined, flex: 1, minWidth: 0 }]}
+          contentContainerStyle={[
+            styles.inputScrollContent,
             inputFrameResponsiveStyle,
             { width: input1ContentWidth },
           ]}
         >
           <View
-            importantForAccessibility="no-hide-descendants"
-            style={[styles.inputOverlay, textInputResponsiveStyle]}
-          >
-            {renderCorrectionGhostText(correction.input1, correctionAwers)}
-          </View>
-          <TextInput
-            value={correction.input1}
-            accessibilityLabel={t("flashcards.card.input.frontCorrectionLabel")}
-            accessibilityHint={t(
-              input1HasMismatch
-                ? "flashcards.card.input.correctionErrorHint"
-                : "flashcards.card.input.correctionHint",
-            )}
-            onChangeText={(text) =>
-              handleCorrectionInput1Change(
-                applyPlaceholderCasing(text, correctionAwers),
-              )
-            }
             style={[
-              styles.myinput,
-              textInputResponsiveStyle,
-              textColorOverride ? { color: textColorOverride } : null,
+              styles.inputRow,
+              inputFrameResponsiveStyle,
+              { width: input1ContentWidth },
             ]}
-            ref={input1Ref}
-            returnKeyType="next"
-            blurOnSubmit={false}
-            onSubmitEditing={onCorrection1Completed}
-            autoCapitalize="none"
-            {...suggestionProps}
-            keyboardType={
-              isCorrectionInput1Date
-                ? "number-pad"
-                : isCorrectionInput1Numeric
-                  ? "decimal-pad"
-                  : suggestionProps?.keyboardType
-            }
-            onFocus={() => {
-              onCorrectionInputFocus?.("correction1");
-              requestFocus("correction1");
-            }}
-            onBlur={() => onCorrectionInputBlur?.("correction1")}
-          />
-          <View
-            importantForAccessibility="no-hide-descendants"
-            style={[styles.inputOverlay, textInputResponsiveStyle]}
           >
-            {renderCorrectionErrorText(correction.input1, correctionAwers)}
+            <View
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.inputOverlay, textInputResponsiveStyle]}
+            >
+              {renderCorrectionGhostText(correction.input1, correctionAwers)}
+            </View>
+            <TextInput
+              value={correction.input1}
+              accessibilityLabel={t("flashcards.card.input.frontCorrectionLabel")}
+              accessibilityHint={t(
+                input1HasMismatch
+                  ? "flashcards.card.input.correctionErrorHint"
+                  : "flashcards.card.input.correctionHint",
+              )}
+              onChangeText={(text) =>
+                handleCorrectionInput1Change(
+                  applyPlaceholderCasing(text, correctionAwers),
+                )
+              }
+              style={[
+                styles.myinput,
+                textInputResponsiveStyle,
+                textColorOverride ? { color: textColorOverride } : null,
+              ]}
+              ref={input1Ref}
+              returnKeyType="next"
+              blurOnSubmit={false}
+              onSubmitEditing={onCorrection1Completed}
+              autoCapitalize="none"
+              {...suggestionProps}
+              keyboardType={
+                isCorrectionInput1Date
+                  ? "number-pad"
+                  : isCorrectionInput1Numeric
+                    ? "decimal-pad"
+                    : suggestionProps?.keyboardType
+              }
+              onFocus={() => {
+                input1Reveal.onFocus();
+                onCorrectionInputFocus?.("correction1");
+                requestFocus("correction1");
+              }}
+              onBlur={() => {
+                input1Reveal.onBlur();
+                onCorrectionInputBlur?.("correction1");
+              }}
+            />
+            <View
+              importantForAccessibility="no-hide-descendants"
+              style={[styles.inputOverlay, textInputResponsiveStyle]}
+            >
+              {renderCorrectionErrorText(correction.input1, correctionAwers)}
+            </View>
           </View>
-        </View>
-      </ScrollView>
+        </ScrollView>
+        {input1HasAction ? confirmButton : null}
+      </View>
     </View>
   );
 
@@ -390,7 +410,7 @@ export function CardCorrection({
           styles.containerInputFirst,
       ]}
     >
-      <View style={{ flexDirection: "row", width: "100%" }}>
+      <View ref={input2Reveal.ref} onLayout={input2Reveal.onLayout} collapsable={false} style={{ flexDirection: "row", alignItems: "center", gap: inlineAction ? 8 : 0, width: "100%" }}>
         <ScrollView
         ref={input2ScrollRef}
         horizontal
@@ -399,7 +419,7 @@ export function CardCorrection({
         style={[
           styles.inputScroll,
           inputFrameResponsiveStyle,
-          canToggleTranslations && { width: undefined, flex: 1 },
+          (canToggleTranslations || inlineAction) && { width: undefined, flex: 1, minWidth: 0 },
         ]}
         onLayout={({ nativeEvent }) => {
           const nextWidth = nativeEvent.layout.width;
@@ -465,10 +485,14 @@ export function CardCorrection({
                   : suggestionProps?.keyboardType
             }
             onFocus={() => {
+              input2Reveal.onFocus();
               onCorrectionInputFocus?.("correction2");
               requestFocus("correction2");
             }}
-            onBlur={() => onCorrectionInputBlur?.("correction2")}
+            onBlur={() => {
+              input2Reveal.onBlur();
+              onCorrectionInputBlur?.("correction2");
+            }}
             onKeyPress={({ nativeEvent }) => {
               if (
                 !answerOnly &&
@@ -491,10 +515,12 @@ export function CardCorrection({
           <Pressable
           style={[
             styles.cardIconWrapper,
-            { width: 32 * contentScale, height: cardMetrics.textInputHeight },
+            inlineAction
+              ? { width: 48, height: Math.max(48, cardMetrics.textInputHeight) }
+              : { width: 32 * contentScale, height: cardMetrics.textInputHeight },
           ]}
           onPress={next}
-          hitSlop={8}
+          hitSlop={inlineAction ? 0 : 8}
           accessibilityRole="button"
           accessibilityLabel={t(
             "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
@@ -507,6 +533,7 @@ export function CardCorrection({
           />
           </Pressable>
         ) : null}
+        {confirmButton}
       </View>
     </View>
   );

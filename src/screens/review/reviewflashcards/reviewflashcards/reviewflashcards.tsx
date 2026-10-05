@@ -1,3 +1,5 @@
+import { KeyboardStudyScroll } from "@/src/components/flashcards/KeyboardStudyScroll";
+import { useKeyboardVisibility } from "@/src/hooks/useKeyboardVisibility";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -515,6 +517,12 @@ export default function ReviewFlashcardsPlaceholder() {
   const isCarouselLayout = effectiveLayout !== "classic";
   const carouselMinScale = 0.3;
   const areButtonsOnTop = actionButtonsPosition === "top";
+  const { keyboardVisible, keyboardTopInWindow } = useKeyboardVisibility();
+  const [visibleCardHeight, setVisibleCardHeight] = useState(0);
+  const canUseInlineCardAction = isSmallPhoneLayout && !isTabletLayout
+    && showCardActions && selectedItem != null && !isExplanationVisible
+    && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know";
+  const useInlineCardAction = canUseInlineCardAction && keyboardVisible;
   const classicBoxesMinScale = isTabletLayout
     ? areButtonsOnTop
       ? 0.72
@@ -529,6 +537,8 @@ export default function ReviewFlashcardsPlaceholder() {
     bottomButtonsDockBottomOffset,
     bottomButtonsReservedSpace,
   } = useFlashcardsBottomDockLayout({
+    hideActions: useInlineCardAction,
+    keepActionsAtBottom: canUseInlineCardAction,
     areButtonsOnTop,
     shouldShowBoxes: true,
     selectedItemId,
@@ -546,7 +556,7 @@ export default function ReviewFlashcardsPlaceholder() {
     previousKeyboardVisibleRef,
   });
   const carouselBottomClearance =
-    isCarouselLayout && !areButtonsOnTop
+    isCarouselLayout && !areButtonsOnTop && !useInlineCardAction
       ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
       : 0;
   const {
@@ -609,6 +619,11 @@ export default function ReviewFlashcardsPlaceholder() {
     <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
       <View collapsable={false}>
         <Card
+          inlineAction={useInlineCardAction ? {
+            disabled: cardActionsConfirmDisabled,
+            label: cardActionsConfirmLabel,
+            onCorrectionConfirm: handleCardActionsConfirm,
+          } : undefined}
           selectedItem={selectedItem}
           setAnswer={setAnswer}
           answer={answer}
@@ -642,6 +657,7 @@ export default function ReviewFlashcardsPlaceholder() {
   );
   const boxesSection = (
     <FlashcardsBoxesSection
+      hideActions={useInlineCardAction}
       coachmarkId="review-flashcards-boxes-section"
       countsCoachmarkId="review-flashcards-box-counts"
       testID="review-flashcards-boxes-wrapper"
@@ -707,6 +723,19 @@ export default function ReviewFlashcardsPlaceholder() {
 
   useCoachmarkLayerPortal("review-flashcards-screen", coachmarkLayer);
 
+  const studyContent = (
+    <FlashcardsStudyContent
+      onCardSectionLayout={(event) => setVisibleCardHeight(event.nativeEvent.layout.height)}
+      styles={styles}
+      screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
+      cardSection={cardSection}
+      topButtons={topButtons}
+      boxesSection={boxesSection}
+      isCourseFinishedVisible={false}
+      showTopButtons={areButtonsOnTop && !useInlineCardAction}
+    />
+  );
+
   return (
     <View style={styles.container}>
       <TextInput
@@ -737,32 +766,18 @@ export default function ReviewFlashcardsPlaceholder() {
             : null,
         ]}
       >
-        {isTabletCenteredStudyLayout ? (
-          <View
-            testID="review-flashcards-study-stack"
-            style={[styles.studyStack, styles.tabletCenteredStudyStack]}
-          >
-            <FlashcardsStudyContent
-              styles={styles}
-              screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
-              cardSection={cardSection}
-              topButtons={topButtons}
-              boxesSection={boxesSection}
-              isCourseFinishedVisible={false}
-              showTopButtons={areButtonsOnTop}
-            />
-          </View>
-        ) : (
-          <FlashcardsStudyContent
-            styles={styles}
-            screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
-            cardSection={cardSection}
-            topButtons={topButtons}
-            boxesSection={boxesSection}
-            isCourseFinishedVisible={false}
-            showTopButtons={areButtonsOnTop}
-          />
-        )}
+        <KeyboardStudyScroll
+          testID={isTabletCenteredStudyLayout ? "review-flashcards-study-stack" : "review-flashcards-study-scroll"}
+          enabled={(isSmallPhoneLayout && !isTabletLayout) || keyboardVisible}
+          keyboardVisible={keyboardVisible}
+          keyboardTopInWindow={keyboardTopInWindow}
+          cardHeight={visibleCardHeight}
+          contentContainerStyle={isTabletCenteredStudyLayout
+            ? [styles.studyStack, styles.tabletCenteredStudyStack]
+            : undefined}
+        >
+          {studyContent}
+        </KeyboardStudyScroll>
 
         {shouldRenderBottomButtons ? (
           <View

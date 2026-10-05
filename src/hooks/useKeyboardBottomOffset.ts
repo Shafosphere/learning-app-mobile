@@ -206,7 +206,8 @@ export function useKeyboardBottomOffset({
       setKeyboardVisible(false);
       setKeyboardTopInWindow(null);
       lastKeyboardTopRef.current = null;
-      animateTo(0, 120);
+      bottomOffset.stopAnimation();
+      bottomOffset.setValue(0);
       return;
     }
 
@@ -268,6 +269,7 @@ export function useKeyboardBottomOffset({
     };
   }, [
     animateTo,
+    bottomOffset,
     clearPendingHide,
     computeTargetOffset,
     debug,

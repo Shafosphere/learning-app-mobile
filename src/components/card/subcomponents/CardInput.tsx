@@ -1,3 +1,5 @@
+import { InlineConfirmButton } from "./InlineConfirmButton";
+import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
 import Octicons from "@expo/vector-icons/Octicons";
 import { getDateInputPlaceholder, type DatePattern } from "@/src/utils/dateInput";
 import { useCallback, useMemo } from "react";
@@ -6,7 +8,7 @@ import TextTicker from "react-native-text-ticker";
 import { useStyles } from "../card-styles";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import type { FocusTarget } from "../card-types";
+import type { FocusTarget, InlineCardAction } from "../card-types";
 import { CardMathText, hasMathSegments } from "./CardMathText";
 import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
@@ -20,6 +22,7 @@ const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
 type CardInputProps = {
+  inlineAction?: InlineCardAction;
   promptText: string;
   emptyAnswerSubmitWarning?: boolean;
   allowMultilinePrompt: boolean;
@@ -50,6 +53,7 @@ type CardInputProps = {
 };
 
 export function CardInput({
+  inlineAction,
   promptText,
   emptyAnswerSubmitWarning = false,
   allowMultilinePrompt,
@@ -74,6 +78,7 @@ export function CardInput({
   cardMetrics,
 }: CardInputProps) {
   const styles = useStyles();
+  const { ref: inputRowRef, onFocus: revealOnFocus, onBlur: revealOnBlur, onLayout: revealOnLayout } = useStudyInputReveal();
   const { colors } = useSettings();
   const { t } = useTranslation();
   const contentScale = cardMetrics.contentScale;
@@ -201,10 +206,14 @@ export function CardInput({
             blurOnSubmit={false}
             onSubmitEditing={handleConfirm}
             onFocus={() => {
+              revealOnFocus();
               onMainInputFocus?.();
               requestFocus("main");
             }}
-            onBlur={onMainInputBlur}
+            onBlur={() => {
+              revealOnBlur();
+              onMainInputBlur?.();
+            }}
           />
           {emptyAnswerSubmitWarning ? (
             <Text testID="card-answer-error" style={styles.inputAccessibilityError}>
@@ -285,6 +294,8 @@ export function CardInput({
     mainInputRef,
     onMainInputBlur,
     onMainInputFocus,
+    revealOnFocus,
+    revealOnBlur,
     requestFocus,
     setAnswer,
     isMainAnswerDate,
@@ -361,6 +372,19 @@ export function CardInput({
     </Text>
   );
 
+  const inputWithAction = (
+    <View ref={inputRowRef} onLayout={revealOnLayout} collapsable={false} style={{ flexDirection: "row", alignItems: "center", gap: inlineAction ? 8 : 0, width: "100%" }}>
+      <View style={{ flex: 1, minWidth: 0 }}>{renderedInput}</View>
+      {inlineAction ? (
+        <InlineConfirmButton
+          disabled={inlineAction.disabled}
+          label={inlineAction.label}
+          onPress={handleConfirm}
+        />
+      ) : null}
+    </View>
+  );
+
   const content = (
     <>
       <View
@@ -403,10 +427,10 @@ export function CardInput({
         <View
           style={styles.inputContainerLarge}
         >
-          {renderedInput}
+          {inputWithAction}
         </View>
       ) : (
-        renderedInput
+        inputWithAction
       )}
     </>
   );

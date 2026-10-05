@@ -23,6 +23,7 @@ type FlashcardsCardSectionProps = {
   t: TFunction;
 } & Pick<
   CardProps,
+  | "inlineAction"
   | "selectedItem"
   | "setAnswer"
   | "answer"
@@ -66,6 +67,7 @@ export function FlashcardsCardSection({
   onBackToCourses,
   onEditCard,
   t,
+  inlineAction,
   selectedItem,
   setAnswer,
   answer,
@@ -126,6 +128,7 @@ export function FlashcardsCardSection({
   } else {
     return (
       <Card
+        inlineAction={inlineAction}
         coachmarkId="flashcards-card-section"
         selectedItem={selectedItem}
         setAnswer={setAnswer}

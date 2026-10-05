@@ -31,8 +31,8 @@ const HEIGHT_BREAKPOINTS = {
   expanded: 900,
 } as const;
 
-const SMALL_PHONE_MAX_SHORT_SIDE = 380;
-const TABLET_LAYOUT_MIN_SHORT_SIDE = 600;
+export const SMALL_PHONE_MAX_SHORT_SIDE = 380;
+export const TABLET_LAYOUT_MIN_SHORT_SIDE = 600;
 
 function getWidthClass(width: number): WidthClass {
   if (width >= WIDTH_BREAKPOINTS.expanded) return "expanded";

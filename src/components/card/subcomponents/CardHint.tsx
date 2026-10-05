@@ -5,6 +5,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { Animated, Pressable, Text, TextInput, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "../card-styles";
+import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
 
 type CardHintProps = {
     currentHint: string | null;
@@ -46,6 +47,7 @@ export function CardHint({
     cardWidth,
 }: CardHintProps) {
     const styles = useStyles();
+    const inputReveal = useStudyInputReveal();
     const { colors } = useSettings();
     const { t } = useTranslation();
     const canDelete = Boolean(currentHint);
@@ -90,13 +92,17 @@ export function CardHint({
                     )}
                 </Pressable>
             ) : (
-                <View style={[styles.hintRow, widthStyle]}>
+                <View ref={inputReveal.ref} onLayout={inputReveal.onLayout} collapsable={false} style={[styles.hintRow, widthStyle]}>
                     <TextInput
                         ref={inputRef}
                         value={hintDraft}
                         onChangeText={setHintDraft}
                         onSubmitEditing={finishHintEditing}
-                        onBlur={onHintInputBlur}
+                        onFocus={inputReveal.onFocus}
+                        onBlur={() => {
+                            inputReveal.onBlur();
+                            onHintInputBlur();
+                        }}
                         placeholder={t("flashcards.card.hint.placeholder")}
                         accessibilityLabel={t("flashcards.card.hint.inputLabel")}
                         accessibilityHint={t("flashcards.card.hint.inputHint")}

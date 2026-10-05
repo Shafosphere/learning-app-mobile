@@ -1,5 +1,8 @@
 import React from "react";
-import { fireEvent, render } from "@testing-library/react-native";
+import { act, fireEvent, render } from "@testing-library/react-native";
+import { Keyboard, type KeyboardEvent } from "react-native";
+import { usePathname } from "expo-router";
+import { useNavbarCompactLayoutSetter } from "@/src/contexts/NavbarLayoutContext";
 
 import Navbar from "@/src/components/navbar/navbar";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -199,6 +202,47 @@ jest.mock("@/src/db/sqlite/db", () => ({
 describe("Navbar review routing", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    (usePathname as jest.Mock).mockReturnValue("/review/reviewflashcards");
+  });
+
+  it("collapses only compact flashcards during keyboard entry and restores on hide or navigation", () => {
+    const listeners = new Map<string, (event: KeyboardEvent) => void>();
+    const originalSubscribe = Keyboard.addListener.bind(Keyboard);
+    const subscribe = jest.spyOn(Keyboard, "addListener").mockImplementation((name, listener) => {
+      listeners.set(name, listener);
+      return originalSubscribe(name, listener);
+    });
+    function CompactScreen({ compact }: { compact: boolean }) {
+      const setCompact = useNavbarCompactLayoutSetter();
+      React.useEffect(() => {
+        setCompact(compact);
+        return () => setCompact(false);
+      }, [compact, setCompact]);
+      return null;
+    }
+    (usePathname as jest.Mock).mockReturnValue("/flashcards");
+    const screen = render(<Navbar><CompactScreen compact={false} /></Navbar>);
+    const emit = (suffix: "Show" | "Hide") => act(() => {
+      for (const [name, listener] of listeners) {
+        if (name.endsWith(suffix)) listener({ duration: 250 } as KeyboardEvent);
+      }
+    });
+    try {
+      emit("Show");
+      expect(screen.getByTestId("navbar-top-bar-collapse").props.pointerEvents).toBe("auto");
+      screen.rerender(<Navbar><CompactScreen compact /></Navbar>);
+      expect(screen.getByTestId("navbar-top-bar-collapse", { includeHiddenElements: true }).props.pointerEvents).toBe("none");
+      expect(screen.getByTestId("navbar-top-bar-collapse", { includeHiddenElements: true }).props.accessibilityElementsHidden).toBe(true);
+      emit("Hide");
+      expect(screen.getByTestId("navbar-top-bar-collapse").props.pointerEvents).toBe("auto");
+      emit("Show");
+      (usePathname as jest.Mock).mockReturnValue("/settings");
+      screen.rerender(<Navbar><CompactScreen compact /></Navbar>);
+      expect(screen.getByTestId("navbar-top-bar-collapse").props.pointerEvents).toBe("auto");
+    } finally {
+      screen.unmount();
+      subscribe.mockRestore();
+    }
   });
 
   it("shows five bottom buttons with flashcards centered and opens completed courses", () => {

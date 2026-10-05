@@ -1027,6 +1027,26 @@ describe("Card logic props", () => {
     expect(latestNudgeModalProps?.visible).toBe(false);
   });
 
+  it("keeps an open hint editor and its draft when a smaller layout hides hints", () => {
+    const props = createProps();
+    const screen = renderCard(props);
+    act(() => {
+      (latestCardHintProps?.startHintEditing as () => void)();
+    });
+    act(() => {
+      (latestCardHintProps?.setHintDraft as (value: string) => void)("unfinished hint");
+    });
+    latestCardHintProps = null;
+    screen.rerender(<Card {...props} hideHints />);
+    expect(latestCardHintProps).toMatchObject({ isEditingHint: true, hintDraft: "unfinished hint" });
+    act(() => {
+      (latestCardHintProps?.cancelHintEditing as () => void)();
+    });
+    latestCardHintProps = null;
+    screen.rerender(<Card {...props} hideHints />);
+    expect(latestCardHintProps).toBeNull();
+  });
+
   it("passes hint tutorial controls to the hint component", () => {
     const shouldStartHintEditing = jest.fn(() => false);
 
