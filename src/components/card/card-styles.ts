@@ -316,6 +316,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   overlayCharError: {
     color: colors.my_yellow,
   },
+  overlayIntroError: {
+    color: colors.my_red,
+  },
   overlayErrorMarker: {
     position: "absolute",
     top: 25,

@@ -1,65 +1,73 @@
-// index.tsx
 import { useRouter } from "expo-router";
-import type React from "react";
-import { FlatList, View, Text } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
+import { useCallback, useState } from "react";
+import {
+  FlatList,
+  View,
+  Text,
+  useWindowDimensions,
+  type LayoutChangeEvent,
+} from "react-native";
 import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./HomeScreen-styles";
+import { getHomeGridMetrics } from "./homeGridLayout";
 import {
   HOME_QUOTES_TRANSLATION_KEY,
   normalizeHomeQuotes,
 } from "@/src/constants/homeQuotes";
 
-const TABLET_GRID_MAX_WIDTH = 500;
-const TABLET_HORIZONTAL_PADDING = 72;
-const HOME_GRID_GAP_RATIO = 0.054;
-const TABLET_GRID_MIN_GAP = 20;
-const TABLET_GRID_MAX_GAP = 28;
-const HOME_ICON_TILE_RATIO = 0.54;
-const TABLET_ICON_MIN_SIZE = 104;
-const TABLET_ICON_MAX_SIZE = 132;
-
 export default function HomeScreen() {
   const router = useRouter();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const styles = useStyles();
-  const {
-    width: screenWidth,
-    height: screenHeight,
-    isTabletLayout,
-  } = useDeviceLayout();
+  const { height: screenHeight, isTabletLayout } = useDeviceLayout();
+  const { fontScale } = useWindowDimensions();
+  const { fontScaleMultiplier } = useSettings();
+  const [viewport, setViewport] = useState<{
+    width: number;
+    height: number;
+  } | null>(null);
+  const [randomQuote, setRandomQuote] = useState({ text: "", author: "" });
+  const language = i18n.resolvedLanguage ?? i18n.language;
+
+  useFocusEffect(
+    useCallback(() => {
+      const quotes = normalizeHomeQuotes(
+        t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true, lng: language }),
+      );
+      setRandomQuote(
+        quotes[Math.floor(Math.random() * quotes.length)] ?? {
+          text: "",
+          author: "",
+        },
+      );
+    }, [t, language]),
+  );
+
+  const onGridLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setViewport((previous) =>
+      previous?.width === width && previous.height === height
+        ? previous
+        : { width, height },
+    );
+  }, []);
+  const gridMetrics = viewport
+    ? getHomeGridMetrics({
+        ...viewport,
+        fontScale: fontScale * fontScaleMultiplier,
+      })
+    : null;
+
   const logo = require("../../../../assets/illustrations/mascot-box/branding/logo.png");
   const statsImage = require("../../../../assets/images/home/stats.png");
   const customImage = require("../../../../assets/images/home/customize.png");
   const tutorialImage = require("../../../../assets/images/home/tutorial.png");
   const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
-  const tabletGridWidth = Math.min(
-    screenWidth - TABLET_HORIZONTAL_PADDING * 2,
-    TABLET_GRID_MAX_WIDTH
-  );
-  const tabletGridGap = Math.round(
-    Math.min(
-      TABLET_GRID_MAX_GAP,
-      Math.max(TABLET_GRID_MIN_GAP, tabletGridWidth * HOME_GRID_GAP_RATIO)
-    )
-  );
-  const tabletTileSize = (tabletGridWidth - tabletGridGap) / 2;
-  const tabletIconSize = Math.round(
-    Math.min(
-      TABLET_ICON_MAX_SIZE,
-      Math.max(TABLET_ICON_MIN_SIZE, tabletTileSize * HOME_ICON_TILE_RATIO)
-    )
-  );
-
-  const quotes = normalizeHomeQuotes(
-    t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true })
-  );
-  const randomQuote = quotes[Math.floor(Math.random() * quotes.length)] ?? {
-    text: "",
-    author: "",
-  };
 
   const goToCoursePanel = () => {
     router.push("/coursepanel");
@@ -136,7 +144,7 @@ export default function HomeScreen() {
 
   const renderTile = renderHomeTile(styles, {
     isTabletLayout,
-    tabletIconSize,
+    tileSize: gridMetrics?.tileSize ?? 0,
   });
 
   return (
@@ -162,32 +170,29 @@ export default function HomeScreen() {
       </View>
 
       <View
-        style={[
-          styles.gridWrapper,
-          isTabletLayout && styles.gridWrapperTablet,
-        ]}
+        style={styles.gridWrapper}
+        onLayout={onGridLayout}
+        testID="home-grid-viewport"
       >
-        <FlatList
-          style={styles.grid}
-          data={listData}
-          keyExtractor={(item) => item.key}
-          renderItem={renderTile}
-          numColumns={2}
-          scrollEnabled
-          bounces={false}
-          alwaysBounceVertical={false}
-          showsVerticalScrollIndicator={false}
-          columnWrapperStyle={[
-            styles.gridRow,
-            isTabletLayout && { gap: tabletGridGap },
-          ]}
-          contentContainerStyle={[
-            styles.gridContent,
-            isCompactHeight && styles.gridContentCompact,
-            isTabletLayout && styles.gridContentTablet,
-            isTabletLayout && { gap: tabletGridGap },
-          ]}
-        />
+        {gridMetrics && gridMetrics.tileSize > 0 && (
+          <FlatList
+            testID="home-grid"
+            style={[styles.grid, { width: gridMetrics.gridWidth }]}
+            data={listData}
+            keyExtractor={(item) => item.key}
+            renderItem={renderTile}
+            numColumns={2}
+            scrollEnabled={gridMetrics.scrollEnabled}
+            bounces={false}
+            alwaysBounceVertical={false}
+            showsVerticalScrollIndicator={false}
+            columnWrapperStyle={{ gap: gridMetrics.gap }}
+            contentContainerStyle={[
+              styles.gridContent,
+              { gap: gridMetrics.gap },
+            ]}
+          />
+        )}
       </View>
     </View>
   );

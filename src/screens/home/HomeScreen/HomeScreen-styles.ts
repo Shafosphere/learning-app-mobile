@@ -1,4 +1,5 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { HOME_GRID_BOTTOM_PADDING, HOME_GRID_MAX_WIDTH } from "./homeGridLayout";
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
@@ -15,15 +16,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
     width: "100%",
     alignSelf: "center",
   },
-  gridWrapperTablet: {
-    maxWidth: 500,
-  },
   grid: {
     flex: 1,
+    alignSelf: "center",
   },
   header: {
     gap: 8,
     width: "100%",
+    maxWidth: HOME_GRID_MAX_WIDTH,
+    alignSelf: "center",
     minHeight: 110,
     justifyContent: "center",
   },
@@ -56,30 +57,15 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingRight: 18,
   },
   gridContent: {
-    paddingBottom: 40,
-    gap: 14,
-  },
-  gridContentCompact: {
-    paddingBottom: 72,
-  },
-  gridContentTablet: {
-    paddingBottom: 8,
-  },
-  gridRow: {
-    gap: 14,
+    paddingBottom: HOME_GRID_BOTTOM_PADDING,
   },
   tile: {
-    flex: 1,
-    aspectRatio: 1,
     backgroundColor: colors.secondBackground,
     borderRadius: 16,
     padding: 14,
     position: "relative",
     alignItems: "center",
     justifyContent: "center",
-  },
-  tileTablet: {
-    aspectRatio: 1,
   },
   tilePressed: {
     transform: [{ scale: 0.98 }],
@@ -98,8 +84,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     bottom: 48,
   },
   iconBox: {
-    width: 90,
-    height: 90,
     borderRadius: 16,
     alignItems: "center",
     justifyContent: "center",

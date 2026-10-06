@@ -7,7 +7,7 @@ import {
 } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Pressable, Text, View } from "react-native";
+import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import Animated, {
@@ -24,6 +24,7 @@ import Animated, {
   withTiming,
 } from "react-native-reanimated";
 import { useStyles } from "./navbar-styles";
+import { formatNavbarStatValue } from "./formatNavbarStatValue";
 
 type NavbarStatsRotatorProps = {
   onPress: () => void;
@@ -87,9 +88,11 @@ const renderStatIcon = (
 export default function NavbarStatsRotator({
   onPress,
 }: NavbarStatsRotatorProps) {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const styles = useStyles();
   const { colors } = useSettings();
+  const { width: screenWidth } = useWindowDimensions();
+  const buttonWidth = screenWidth < 375 ? 60 : 72;
   const {
     stats,
     activeStatKey,
@@ -99,6 +102,11 @@ export default function NavbarStatsRotator({
   const reduceMotion = useReducedMotion();
   const [sparkleVisible, setSparkleVisible] = useState(false);
   const currentValue = getCountFor(activeStatKey, stats);
+  const displayedValue = formatNavbarStatValue(
+    currentValue,
+    i18n.resolvedLanguage ?? i18n.language,
+    buttonWidth === 60 ? 4 : 5,
+  );
   const popScale = useSharedValue(1);
   const glowOpacity = useSharedValue(0);
   const glowScale = useSharedValue(0.94);
@@ -244,9 +252,11 @@ export default function NavbarStatsRotator({
       style={({ pressed }) => [
         styles.iconButton,
         styles.counterButton,
+        { width: buttonWidth },
         pressed && styles.iconButtonPressed,
       ]}
       onPress={onPress}
+      hitSlop={{ top: 4, bottom: 4 }}
       accessibilityRole="button"
       accessibilityLabel={t(
         "components.navbar.navbarStatsRotator.accessibilityLabel.valueValuePrzejdzDoStatystyk",
@@ -267,32 +277,36 @@ export default function NavbarStatsRotator({
         ]}
       />
 
-      <View style={styles.counterContentWrap}>
-        <View style={styles.counterAnimatedSlot}>
-          <Animated.View
-            key={activeStatKey}
-            entering={
-              reduceMotion
-                ? FadeIn.duration(140)
-                : FadeInDown.duration(220).easing(Easing.out(Easing.cubic))
-            }
-            exiting={
-              reduceMotion
-                ? FadeOut.duration(100)
-                : FadeOutUp.duration(180).easing(Easing.inOut(Easing.cubic))
-            }
-            style={styles.counterAnimatedInner}
-          >
-            <Animated.View style={[styles.counterNumberWrap, popStyle]}>
-              <Text style={styles.counterValueText} allowFontScaling>
-                {currentValue}
-              </Text>
-            </Animated.View>
-            <View style={styles.counterIconWrap}>
-              {renderStatIcon(activeStatKey, getStatAccent(activeStatKey, colors), 14)}
-            </View>
+      <View style={styles.counterAnimatedSlot}>
+        <Animated.View
+          key={activeStatKey}
+          entering={
+            reduceMotion
+              ? FadeIn.duration(140)
+              : FadeInDown.duration(220).easing(Easing.out(Easing.cubic))
+          }
+          exiting={
+            reduceMotion
+              ? FadeOut.duration(100)
+              : FadeOutUp.duration(180).easing(Easing.inOut(Easing.cubic))
+          }
+          style={styles.counterAnimatedInner}
+        >
+          <Animated.View style={[styles.counterNumberWrap, popStyle]}>
+            <Text
+              style={styles.counterValueText}
+              allowFontScaling
+              numberOfLines={1}
+              adjustsFontSizeToFit
+              minimumFontScale={0.5}
+            >
+              {displayedValue}
+            </Text>
           </Animated.View>
-        </View>
+          <View style={styles.counterIconWrap}>
+            {renderStatIcon(activeStatKey, getStatAccent(activeStatKey, colors), 14)}
+          </View>
+        </Animated.View>
       </View>
 
       <View pointerEvents="none" style={styles.counterBurstViewport}>

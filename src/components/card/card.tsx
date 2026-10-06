@@ -1137,6 +1137,7 @@ export default function Card({
           lineHeight: cardMetrics.lineHeight,
         },
         mismatch ? styles.overlayCharError : styles.overlayCharNeutral,
+        mismatch && isIntroMode ? styles.overlayIntroError : null,
         !mismatch ? { opacity: 0 } : null,
       ];
       if (mismatch && correctionErrorMarkersEnabled) {
@@ -1152,6 +1153,7 @@ export default function Card({
             <Text
               style={[
                 styles.overlayErrorMarker,
+                isIntroMode ? styles.overlayIntroError : null,
                 {
                   // The correction overlays are vertically centered at top: 0.
                   // Keep the marker at the same visual offset as before that

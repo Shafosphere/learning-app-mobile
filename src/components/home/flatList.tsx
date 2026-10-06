@@ -19,27 +19,33 @@ export type HomeTile = {
 };
 
 type RenderHomeTileOptions = {
+  tileSize: number;
   isTabletLayout?: boolean;
-  tabletIconSize?: number;
 };
 
 export const renderHomeTile =
   (
     styles: HomeScreenStyles,
-    options: RenderHomeTileOptions = {},
+    options: RenderHomeTileOptions,
   ): ListRenderItem<HomeTile> => {
-    const { isTabletLayout = false, tabletIconSize } = options;
-    const tabletTileStyle = isTabletLayout ? styles.tileTablet : null;
-    const tabletIconStyle = isTabletLayout
-      ? { width: tabletIconSize, height: tabletIconSize }
-      : null;
+    const { isTabletLayout = false, tileSize } = options;
+    const tileSizeStyle = { width: tileSize, height: tileSize };
+    const iconSize = Math.min(isTabletLayout ? 132 : 90, tileSize * 0.54);
+    const iconSizeStyle = { width: iconSize, height: iconSize };
 
     const HomeTileItem: ListRenderItem<HomeTile> & { displayName?: string } = ({
       item,
     }) => {
       if (item.isPlaceholder) {
         return (
-          <View style={[styles.tile, tabletTileStyle, styles.placeholderTile]} />
+          <View
+            testID="home-tile-placeholder"
+            style={[styles.tile, tileSizeStyle, styles.placeholderTile]}
+            pointerEvents="none"
+            accessible={false}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          />
         );
       }
 
@@ -54,7 +60,7 @@ export const renderHomeTile =
           accessibilityLabel={accessibilityLabel}
           style={({ pressed }) => [
             styles.tile,
-            tabletTileStyle,
+            tileSizeStyle,
             pressed && styles.tilePressed,
           ]}
         >
@@ -68,7 +74,7 @@ export const renderHomeTile =
               style={[
                 styles.iconBox,
                 isTabletLayout && styles.iconBoxTablet,
-                tabletIconStyle,
+                iconSizeStyle,
               ]}
             >
               {item.icon ? (
