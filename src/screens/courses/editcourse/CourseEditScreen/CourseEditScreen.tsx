@@ -136,6 +136,8 @@ function BuiltinCourseEditor({
   const {
     colors,
     courses,
+    getBuiltinCourseBoxZeroAnswerSide,
+    setBuiltinCourseBoxZeroAnswerSide,
     getBuiltinCourseBoxZeroEnabled,
     setBuiltinCourseBoxZeroEnabled,
     getBuiltinCourseAutoflowEnabled,
@@ -160,6 +162,13 @@ function BuiltinCourseEditor({
   const normalizedTarget = targetLang ? targetLang.toLowerCase() : null;
   const normalizedLevel = level ? (level.toUpperCase() as CEFRLevel) : null;
 
+  const [boxZeroAnswerSide, setBoxZeroAnswerSide] = useState(() =>
+    getBuiltinCourseBoxZeroAnswerSide({
+      sourceLang: normalizedSource,
+      targetLang: normalizedTarget,
+      level: normalizedLevel,
+    })
+  );
   const [boxZeroEnabled, setBoxZeroEnabled] = useState(() =>
     getBuiltinCourseBoxZeroEnabled({
       sourceLang: normalizedSource,
@@ -636,6 +645,18 @@ function BuiltinCourseEditor({
                 trackTrue: colors.my_green,
               },
               colors,
+              boxZeroAnswerSide,
+              onSelectBoxZeroAnswerSide: async (side) => {
+                setBoxZeroAnswerSide(side);
+                await setBuiltinCourseBoxZeroAnswerSide(
+                  {
+                    sourceLang: normalizedSource,
+                    targetLang: normalizedTarget,
+                    level: normalizedLevel,
+                  },
+                  side
+                );
+              },
               boxZeroEnabled,
               onToggleBoxZero: handleBoxZeroToggle,
               autoflowEnabled,

@@ -1,3 +1,4 @@
+import type { BoxZeroAnswerSide } from "@/src/contexts/SettingsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   logCustomLearningEvent,
@@ -71,6 +72,7 @@ type UseFlashcardsInteractionParams = {
   onCorrectAnswer?: (box: keyof BoxesState, meta: CorrectAnswerMeta) => void;
   onWrongAnswer?: (box: keyof BoxesState, meta: WrongAnswerMeta) => void;
   boxZeroEnabled?: boolean;
+  boxZeroAnswerSide?: BoxZeroAnswerSide;
   skipDemotionCorrection?: boolean;
   debugContext?: DebugContext;
   courseName?: string | null;
@@ -88,6 +90,7 @@ export function useFlashcardsInteraction({
   onCorrectAnswer,
   onWrongAnswer,
   boxZeroEnabled = true,
+  boxZeroAnswerSide = "back",
   skipDemotionCorrection = false,
   debugContext,
   courseName,
@@ -1041,10 +1044,16 @@ export function useFlashcardsInteraction({
     const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
     const primaryFrontAnswer = frontAnswers[0] ?? selectedItem.text;
     const answerOnly = isAnswerOnlyCard(selectedItem);
+    const introReversed =
+      boxZeroAnswerSide === "front" &&
+      !answerOnly &&
+      Boolean(selectedItem.text?.trim());
 
     setCorrection((prev) => {
       const isSameIntroCard =
-        prev?.mode === "intro" && prev.cardId === selectedItem.id;
+        prev?.mode === "intro" &&
+        prev.cardId === selectedItem.id &&
+        prev.reversed === introReversed;
       const preferredRewers = isSameIntroCard ? prev.rewers : firstTranslation;
       const nextRewers = selectedItem.translations.includes(preferredRewers)
         ? preferredRewers
@@ -1059,9 +1068,10 @@ export function useFlashcardsInteraction({
         input2: isSameIntroCard ? prev.input2 : "",
         answerOnly,
         mode: "intro",
+        // Intro always presents the front; the chosen side only selects the copy input.
         promptText: primaryFrontAnswer,
         promptImageUri: selectedItem.imageFront ?? null,
-        reversed: false,
+        reversed: introReversed,
         word: selectedItem,
       };
     });
@@ -1069,6 +1079,7 @@ export function useFlashcardsInteraction({
     activeBox,
     answer,
     boxZeroEnabled,
+    boxZeroAnswerSide,
     correction?.mode,
     result,
     selectedItem,

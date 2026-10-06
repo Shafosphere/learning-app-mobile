@@ -88,6 +88,8 @@ export default function CustomCourseEditor({
     activeCustomCourseId,
     setActiveCustomCourseId,
     colors,
+    getCustomCourseBoxZeroAnswerSide,
+    setCustomCourseBoxZeroAnswerSide,
     getCustomCourseBoxZeroEnabled,
     setCustomCourseBoxZeroEnabled,
     getCustomCourseAutoflowEnabled,
@@ -143,6 +145,14 @@ export default function CustomCourseEditor({
     historyLimit: 50,
   });
   const [newCardType, setNewCardType] = useState<ManualCardType>("text");
+
+  const initialBoxZeroAnswerSide = useMemo(
+    () => getCustomCourseBoxZeroAnswerSide(courseId),
+    [courseId, getCustomCourseBoxZeroAnswerSide]
+  );
+  const [courseBoxZeroAnswerSide, setCourseBoxZeroAnswerSide] = useState(
+    initialBoxZeroAnswerSide
+  );
 
   const initialBoxZeroEnabled = useMemo(
     () => getCustomCourseBoxZeroEnabled(courseId),
@@ -276,6 +286,34 @@ export default function CustomCourseEditor({
     return null;
   }, [nameConflict]);
 
+  // Settings overrides can change getter identities. Sync their values separately
+  // so updating an option never reloads the content draft or clears undo history.
+  const initialTrueFalseButtonsVariant = getCustomCourseTrueFalseButtonsVariant(courseId);
+  useEffect(() => {
+    setCourseBoxZeroAnswerSide(initialBoxZeroAnswerSide);
+    setCourseBoxZeroEnabled(initialBoxZeroEnabled);
+    setCourseAutoflowEnabled(initialAutoflowEnabled);
+    setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
+    setCourseShowExplanationEnabled(initialShowExplanationEnabled);
+    setCourseExplanationOnlyOnWrong(initialExplanationOnlyOnWrong);
+    setCourseCardSize(initialCardSize);
+    setCourseImageSize(initialImageSize);
+    setCourseImageFrameEnabled(initialImageFrameEnabled);
+    setCourseTrueFalseButtonsVariant(initialTrueFalseButtonsVariant);
+  }, [
+    courseId,
+    initialBoxZeroAnswerSide,
+    initialBoxZeroEnabled,
+    initialAutoflowEnabled,
+    initialSkipCorrectionEnabled,
+    initialShowExplanationEnabled,
+    initialExplanationOnlyOnWrong,
+    initialCardSize,
+    initialImageSize,
+    initialImageFrameEnabled,
+    initialTrueFalseButtonsVariant,
+  ]);
+
   const hydrateFromDb = useCallback(async () => {
     setLoading(true);
     setLoadError(null);
@@ -290,13 +328,6 @@ export default function CustomCourseEditor({
         setLoadError("Kurs nie istnieje.");
         replaceManualCards([createEmptyManualCard("card-0")]);
         setIsOfficialCourse(lockAppearance);
-        setCourseBoxZeroEnabled(initialBoxZeroEnabled);
-        setCourseAutoflowEnabled(initialAutoflowEnabled);
-        setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
-        setCourseShowExplanationEnabled(initialShowExplanationEnabled);
-        setCourseExplanationOnlyOnWrong(initialExplanationOnlyOnWrong);
-        setCourseCardSize(initialCardSize);
-        setCourseImageFrameEnabled(initialImageFrameEnabled);
         setLoading(false);
         return;
       }
@@ -310,21 +341,6 @@ export default function CustomCourseEditor({
         reviewsEnabled: courseRow.reviewsEnabled,
       });
       setIsOfficialCourse(courseRow.isOfficial === true);
-      setCourseBoxZeroEnabled(getCustomCourseBoxZeroEnabled(courseRow.id));
-      setCourseAutoflowEnabled(getCustomCourseAutoflowEnabled(courseRow.id));
-      setCourseShowExplanationEnabled(getCustomCourseShowExplanationEnabled(courseRow.id));
-      setCourseExplanationOnlyOnWrong(
-        getCustomCourseExplanationOnlyOnWrong(courseRow.id)
-      );
-      setCourseSkipCorrectionEnabled(
-        getCustomCourseSkipCorrectionEnabled(courseRow.id)
-      );
-      setCourseCardSize(getCustomCourseCardSize(courseRow.id));
-      setCourseImageSize(getCustomCourseImageSize(courseRow.id));
-      setCourseImageFrameEnabled(getCustomCourseImageFrameEnabled(courseRow.id));
-      setCourseTrueFalseButtonsVariant(
-        getCustomCourseTrueFalseButtonsVariant(courseRow.id)
-      );
 
       const incomingCards = flashcardRows.map((card, index) => {
         const answersSource =
@@ -354,38 +370,12 @@ export default function CustomCourseEditor({
       console.error("Failed to load custom course for edit", error);
       setLoadError(t("courseCreator.customEditor.popups.loadFailed"));
       setIsOfficialCourse(lockAppearance);
-      setCourseBoxZeroEnabled(initialBoxZeroEnabled);
-      setCourseAutoflowEnabled(initialAutoflowEnabled);
-      setCourseSkipCorrectionEnabled(initialSkipCorrectionEnabled);
-      setCourseShowExplanationEnabled(initialShowExplanationEnabled);
-      setCourseExplanationOnlyOnWrong(initialExplanationOnlyOnWrong);
-      setCourseCardSize(initialCardSize);
-      setCourseImageFrameEnabled(initialImageFrameEnabled);
-      setCourseTrueFalseButtonsVariant(
-        getCustomCourseTrueFalseButtonsVariant(courseId)
-      );
     } finally {
       setLoading(false);
     }
   }, [
     courseId,
-    getCustomCourseAutoflowEnabled,
-    getCustomCourseBoxZeroEnabled,
-    getCustomCourseCardSize,
-    getCustomCourseExplanationOnlyOnWrong,
-    getCustomCourseImageSize,
-    getCustomCourseImageFrameEnabled,
-    getCustomCourseShowExplanationEnabled,
-    getCustomCourseSkipCorrectionEnabled,
-    getCustomCourseTrueFalseButtonsVariant,
     hydrateDraft,
-    initialAutoflowEnabled,
-    initialBoxZeroEnabled,
-    initialCardSize,
-    initialExplanationOnlyOnWrong,
-    initialImageFrameEnabled,
-    initialShowExplanationEnabled,
-    initialSkipCorrectionEnabled,
     lockAppearance,
     replaceManualCards,
     t,
@@ -779,6 +769,11 @@ export default function CustomCourseEditor({
                     trackTrue: colors.my_green,
                   },
                   colors,
+                  boxZeroAnswerSide: courseBoxZeroAnswerSide,
+                  onSelectBoxZeroAnswerSide: async (side) => {
+                    setCourseBoxZeroAnswerSide(side);
+                    await setCustomCourseBoxZeroAnswerSide(courseId, side);
+                  },
                   boxZeroEnabled: courseBoxZeroEnabled,
                   onToggleBoxZero: handleCourseBoxZeroToggle,
                   autoflowEnabled: courseAutoflowEnabled,

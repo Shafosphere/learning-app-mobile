@@ -1,3 +1,5 @@
+import type { BoxZeroAnswerSide } from "@/src/contexts/settings/types";
+import type { LanguageCourseGroupId } from "./languageCourseGroups";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
@@ -6,6 +8,7 @@ export type OfficialPackCourseSettings = {
   // aliasy dla wygody
   Autoflow?: boolean;
   autoflow?: boolean;
+  boxZeroAnswerSide?: BoxZeroAnswerSide;
   boxZeroEnabled?: boolean;
   boxZero?: boolean;
   skipCorrectionEnabled?: boolean;
@@ -19,6 +22,8 @@ export type KnowledgeCourseGroupId = "capitals" | "flags" | "roadSigns";
 
 type OfficialPackDef = {
   slug: string;
+  // Keep metadata for existing owners, but never seed this pack for new users.
+  retired?: boolean;
   packVersion: number;
   name: string;
   // Optional global order (lower value appears first).
@@ -37,6 +42,7 @@ type OfficialPackDef = {
   // Marks whether the pack should be displayed as a mini course in UI groupings
   isMini?: boolean;
   categoryId?: string;
+  languageGroupId?: LanguageCourseGroupId;
   // Grouping used only by the Knowledge tab on the course pin screen.
   knowledgeGroupId?: KnowledgeCourseGroupId;
   // Opcjonalne ustawienia domyślne aplikowane przy seedowaniu oficjalnego kursu
@@ -50,9 +56,9 @@ const DEFAULT_PACK_VERSION = 1;
 const OFFICIAL_PACKS_MANIFEST = ([
   {
     slug: "fiszki_podstawy_en_pl_slowa",
+    retired: true,
     packVersion: 3,
     name: "Podstawowe słówka",
-    position: 1,
     iconId: "flag:en",
     iconColor: "#14B8A6",
     reviewsEnabled: true,
@@ -64,9 +70,80 @@ const OFFICIAL_PACKS_MANIFEST = ([
     isMini: false,
   },
   {
-    slug: "eng_to_pl_a1",
+    slug: "eng_to_pl_first_50",
     packVersion: 2,
+    name: "Pierwsze 50 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    position: 1,
+    languageGroupId: "englishFromZero",
+    sourceLang: "en",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: false,
+    imageMap: imageMaps.englishA1,
+    settings: {
+      boxZeroEnabled: true,
+      boxZeroAnswerSide: "front",
+    },
+  },
+  {
+    slug: "eng_to_pl_first_100",
+    packVersion: 1,
+    name: "100 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    position: 2,
+    languageGroupId: "englishFromZero",
+    sourceLang: "en",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: false,
+  },
+  {
+    slug: "eng_to_pl_first_250",
+    packVersion: 1,
+    name: "250 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    position: 3,
+    languageGroupId: "englishFromZero",
+    sourceLang: "en",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: false,
+  },
+  {
+    slug: "eng_to_pl_first_500",
+    packVersion: 1,
+    name: "500 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    position: 4,
+    languageGroupId: "englishFromZero",
+    sourceLang: "en",
+    targetLang: "pl",
+    smallFlag: "pl",
+    isMini: false,
+  },
+  {
+    slug: "eng_to_pl_a1",
+    packVersion: 3,
     name: "Ang A1",
+    position: 5,
+    languageGroupId: "englishFromZero",
     iconId: "flag:en",
     iconColor: "#10B981",
     reviewsEnabled: true,
@@ -79,6 +156,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "eng_to_pl_a2",
+    position: 6,
     packVersion: 2,
     name: "Ang A2",
     iconId: "flag:en",
@@ -93,6 +171,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "eng_to_pl_b1",
+    position: 7,
     packVersion: 2,
     name: "Ang B1",
     iconId: "flag:en",
@@ -107,6 +186,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "eng_to_pl_b2",
+    position: 8,
     packVersion: 2,
     name: "Ang B2",
     iconId: "flag:en",

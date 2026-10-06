@@ -30,6 +30,8 @@ export type CourseOverrideState<T> = {
   custom: Record<string, T>;
 };
 
+export type BoxZeroAnswerSide = "front" | "back";
+
 export type CourseBoxZeroOverrides = CourseOverrideState<boolean>;
 
 export type CourseAutoflowOverrides = CourseOverrideState<boolean>;
@@ -89,6 +91,11 @@ export interface SettingsContextValue {
   toggleIgnoreDiacriticsInSpellcheck: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
+  boxZeroAnswerSide: BoxZeroAnswerSide;
+  getBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams) => BoxZeroAnswerSide;
+  setBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams, side: BoxZeroAnswerSide) => Promise<void>;
+  getCustomCourseBoxZeroAnswerSide: (courseId: number) => BoxZeroAnswerSide;
+  setCustomCourseBoxZeroAnswerSide: (courseId: number, side: BoxZeroAnswerSide) => Promise<void>;
   boxZeroEnabled: boolean;
   getBuiltinCourseBoxZeroEnabled: (
     params: CourseBoxZeroKeyParams

@@ -57,6 +57,8 @@ export default function CourseSettingsScreen() {
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
+    getCustomCourseBoxZeroAnswerSide,
+    setCustomCourseBoxZeroAnswerSide,
     getCustomCourseBoxZeroEnabled,
     setCustomCourseBoxZeroEnabled,
     getCustomCourseAutoflowEnabled,
@@ -133,6 +135,9 @@ export default function CourseSettingsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const restoredScopeRef = useRef<string | null>(null);
 
+  const [boxZeroAnswerSide, setBoxZeroAnswerSide] = useState(() =>
+    getCustomCourseBoxZeroAnswerSide(-1)
+  );
   const [boxZeroEnabled, setBoxZeroEnabled] = useState(
     getCustomCourseBoxZeroEnabled(-1)
   );
@@ -277,6 +282,12 @@ export default function CourseSettingsScreen() {
           if (__DEV__) {
             console.log("[CourseSettingsScreen] Restoring settings draft");
           }
+          if (
+            parsedSettingsDraft.boxZeroAnswerSide === "front" ||
+            parsedSettingsDraft.boxZeroAnswerSide === "back"
+          ) {
+            setBoxZeroAnswerSide(parsedSettingsDraft.boxZeroAnswerSide);
+          }
           if (typeof parsedSettingsDraft.boxZeroEnabled === "boolean") {
             setBoxZeroEnabled(parsedSettingsDraft.boxZeroEnabled);
           }
@@ -367,6 +378,7 @@ export default function CourseSettingsScreen() {
       const payload: SettingsDraftPayload = {
         scopeKey: draftScopeKey,
         boxZeroEnabled,
+        boxZeroAnswerSide,
         autoflowEnabled,
         reviewsEnabled,
         showExplanationEnabled,
@@ -384,6 +396,7 @@ export default function CourseSettingsScreen() {
   }, [
     autoflowEnabled,
     boxZeroEnabled,
+    boxZeroAnswerSide,
     cardSize,
     draftScopeKey,
     hydrating,
@@ -517,6 +530,7 @@ export default function CourseSettingsScreen() {
 
       await replaceCustomFlashcards(courseId, trimmedCards);
       await setCustomCourseBoxZeroEnabled(courseId, boxZeroEnabled);
+      await setCustomCourseBoxZeroAnswerSide(courseId, boxZeroAnswerSide);
       await setCustomCourseAutoflowEnabled(courseId, autoflowEnabled);
       await setCustomCourseShowExplanationEnabled(courseId, showExplanationEnabled);
       await setCustomCourseExplanationOnlyOnWrong(
@@ -589,7 +603,9 @@ export default function CourseSettingsScreen() {
               },
               colors,
               boxZeroEnabled,
+              boxZeroAnswerSide,
               onToggleBoxZero: setBoxZeroEnabled,
+              onSelectBoxZeroAnswerSide: setBoxZeroAnswerSide,
               autoflowEnabled,
               onToggleAutoflow: setAutoflowEnabled,
               reviewsEnabled,

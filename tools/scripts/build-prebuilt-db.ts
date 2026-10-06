@@ -12,12 +12,56 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 3;
+const PREBUILT_DATABASE_VERSION = 5;
 
 const OFFICIAL_PACKS = [
   {
-    slug: "eng_to_pl_a1",
+    slug: "eng_to_pl_first_50",
     packVersion: 2,
+    name: "Pierwsze 50 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvFile: "fiszki_50.csv",
+  },
+  {
+    slug: "eng_to_pl_first_100",
+    packVersion: 1,
+    name: "100 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvFile: "fiszki_100.csv",
+  },
+  {
+    slug: "eng_to_pl_first_250",
+    packVersion: 1,
+    name: "250 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvFile: "fiszki_250.csv",
+  },
+  {
+    slug: "eng_to_pl_first_500",
+    packVersion: 1,
+    name: "500 słów",
+    iconId: "flag:en",
+    iconColor: "#10B981",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvFile: "fiszki_500.csv",
+  },
+  {
+    slug: "eng_to_pl_a1",
+    packVersion: 3,
     name: "Ang A1",
     iconId: "flag:en",
     iconColor: "#10B981",
@@ -58,17 +102,6 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvFile: "ENGtoPL_B2.csv",
-  },
-  {
-    slug: "fiszki_podstawy_en_pl_slowa",
-    name: "Ang Podstawy",
-    iconId: "flag:en",
-    iconColor: "#14B8A6",
-    reviewsEnabled: true,
-    defaultType: "traditional",
-    defaultFlip: true,
-    packVersion: 3,
-    csvFile: "fiszki_podstawy_EN-PL_slowa.csv",
   },
   {
     slug: "fiszki_hiszpanski_podstawowe_poprawione",

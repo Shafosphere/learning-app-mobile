@@ -4,6 +4,7 @@ import { Pressable, Text, View } from "react-native";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type {
+  BoxZeroAnswerSide,
   FlashcardsCardSize,
   FlashcardsImageSize,
   TrueFalseButtonsVariant,
@@ -20,6 +21,8 @@ export type CourseSettingsSectionProps = {
   styles: Record<string, unknown>;
   switchColors: SwitchColors;
   colors: ThemeColors;
+  boxZeroAnswerSide?: BoxZeroAnswerSide;
+  onSelectBoxZeroAnswerSide?: (side: BoxZeroAnswerSide) => void;
   boxZeroEnabled: boolean;
   onToggleBoxZero: (value: boolean) => void;
   autoflowEnabled: boolean;
@@ -243,6 +246,8 @@ function SettingsChoiceBlock<T extends string>({
               ]}
               onPress={disabled || !onSelect ? undefined : () => onSelect(option.key)}
               disabled={disabled || !onSelect}
+              accessibilityRole="button"
+              accessibilityState={{ disabled: disabled || !onSelect, selected: isActive }}
             >
               <Text style={styles.settingsChoiceOptionTitle}>{option.title}</Text>
               <Text style={styles.settingsChoiceOptionDescription}>
@@ -260,6 +265,8 @@ export function CourseSettingsSection({
   styles,
   colors,
   boxZeroEnabled,
+  boxZeroAnswerSide = "back",
+  onSelectBoxZeroAnswerSide,
   onToggleBoxZero,
   autoflowEnabled,
   onToggleAutoflow,
@@ -326,6 +333,38 @@ export function CourseSettingsSection({
               "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania"
             )}
           />
+          <View
+            style={[
+              sharedStyles.settingsDependentRow,
+              !boxZeroEnabled && sharedStyles.settingsDependentRowDisabled,
+            ]}
+          >
+            <SettingsChoiceBlock<BoxZeroAnswerSide>
+              styles={sharedStyles}
+              title={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.title")}
+              description={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.description")}
+              hint={
+                !boxZeroEnabled
+                  ? t("components.courseEditor.settingsCourse.boxZeroAnswerSide.disabledHint")
+                  : undefined
+              }
+              options={[
+                {
+                  key: "front",
+                  title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.front"),
+                  subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.frontDescription"),
+                },
+                {
+                  key: "back",
+                  title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.back"),
+                  subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.backDescription"),
+                },
+              ]}
+              value={boxZeroAnswerSide}
+              onSelect={onSelectBoxZeroAnswerSide}
+              disabled={!boxZeroEnabled}
+            />
+          </View>
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}

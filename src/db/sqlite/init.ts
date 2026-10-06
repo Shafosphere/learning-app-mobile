@@ -133,6 +133,15 @@ async function applyOfficialCourseSettings(
     settings.skipCorrectionEnabled ?? (settings as any).skipCorrection;
 
   const tasks: Promise<void>[] = [];
+  if (settings.boxZeroAnswerSide !== undefined) {
+    tasks.push(
+      upsertCourseOverride(
+        "flashcards.courseBoxZeroAnswerSideOverrides",
+        courseId,
+        settings.boxZeroAnswerSide
+      )
+    );
+  }
   if (autoflow !== undefined) {
     tasks.push(
       upsertCourseOverride<boolean>(
@@ -724,6 +733,10 @@ export async function seedOfficialPacksWithDb(
   try {
     bundledDb = await openBundledSyncDatabase(timer);
     for (const def of OFFICIAL_PACKS) {
+      if (def.retired) {
+        completedCourses += 1;
+        continue;
+      }
       try {
         const synchronizeCourse = async () => {
           const localCourse = await ensureOfficialCourse(

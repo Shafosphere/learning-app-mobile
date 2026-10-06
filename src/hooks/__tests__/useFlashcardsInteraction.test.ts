@@ -58,6 +58,7 @@ function makeBoxesState(
 }
 
 type RenderInteractionOptions = {
+  boxZeroAnswerSide?: "front" | "back";
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
   settingsOverride?: Partial<ReturnType<typeof createMockSettings>>;
@@ -155,6 +156,7 @@ function renderInteraction(
   let latestBoxes = initialBoxes;
   let latestSelectedItemId: number | null = null;
   let latestActiveBox: keyof BoxesState | null = null;
+  let currentBoxZeroAnswerSide = options.boxZeroAnswerSide ?? "back";
   let currentBoxZeroEnabled = options.boxZeroEnabled ?? true;
   let currentSkipDemotionCorrection = options.skipDemotionCorrection ?? false;
   let currentSettings = {
@@ -186,6 +188,7 @@ function renderInteraction(
       onCorrectAnswer,
       onWordPromotedOut,
       boxZeroEnabled: currentBoxZeroEnabled,
+      boxZeroAnswerSide: currentBoxZeroAnswerSide,
       skipDemotionCorrection: currentSkipDemotionCorrection,
       debugContext: options.debugContext,
     });
@@ -222,6 +225,10 @@ function renderInteraction(
         ...overrides,
       };
       mockedUseSettings.mockReturnValue(currentSettings);
+      hook.rerender(undefined);
+    },
+    setBoxZeroAnswerSide: (side: "front" | "back") => {
+      currentBoxZeroAnswerSide = side;
       hook.rerender(undefined);
     },
     setBoxZeroEnabled: (value: boolean) => {
@@ -1624,6 +1631,56 @@ describe("useFlashcardsInteraction", () => {
   });
 
   describe("boxZero intro mode lifecycle", () => {
+    it("copies front alternatives with the front text and image as prompt and promotes to boxOne", async () => {
+      const card = makeWord({ id: 899, text: "water; aqua", translations: ["woda", "podlewac"], imageFront: "front.webp", imageBack: "back.webp" });
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), { boxZeroAnswerSide: "front" });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toMatchObject({
+        reversed: true, awers: "water", awersAlternatives: ["water", "aqua"], promptText: "water", promptImageUri: "front.webp",
+      }));
+      act(() => hook.result.current.interaction.setCorrectionRewers("podlewac"));
+      expect(hook.result.current.interaction.correction?.promptText).toBe("water");
+      act(() => hook.result.current.interaction.wrongInputChange(1, "aqua"));
+      await waitFor(() => {
+        expect(hook.result.current.boxes.boxZero).toHaveLength(0);
+        expect(hook.result.current.boxes.boxOne.map(item => item.id)).toContain(card.id);
+      });
+    });
+
+    it("clears partial inputs when intro direction changes", async () => {
+      const card = makeWord({ id: 898, text: "water", translations: ["woda"], imageFront: "front.webp" });
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }));
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction?.reversed).toBe(false));
+      act(() => hook.result.current.interaction.wrongInputChange(2, "wo"));
+      act(() => hook.setBoxZeroAnswerSide("front"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toMatchObject({ reversed: true, input1: "", input2: "", promptText: "water", promptImageUri: "front.webp" }));
+      act(() => hook.result.current.interaction.wrongInputChange(1, "wa"));
+      act(() => hook.setBoxZeroAnswerSide("back"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toMatchObject({ reversed: false, input1: "", input2: "", promptText: "water", promptImageUri: "front.webp" }));
+    });
+
+    it.each([
+      { text: "", imageFront: "front.webp" },
+      { text: "question", type: "true_false" as const },
+      { text: "question", type: "know_dont_know" as const },
+      { text: "", imageFront: undefined },
+    ])("keeps existing intro behavior for special cards: %j", async (overrides) => {
+      const card = makeWord({ id: 897, translations: ["answer"], ...overrides });
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), { boxZeroAnswerSide: "front" });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction?.reversed).toBe(false));
+    });
+
+    it("does not change the direction of later boxes", async () => {
+      const card = makeWord({ id: 896, text: "water", translations: ["woda"], flipped: true });
+      const hook = renderInteraction(makeBoxesState({ boxOne: [card] }), { boxZeroAnswerSide: "front" });
+      act(() => hook.result.current.interaction.handleSelectBox("boxOne"));
+      await waitFor(() => expect(hook.result.current.interaction.selectedItem?.id).toBe(card.id));
+      expect(hook.result.current.interaction.reversed).toBe(false);
+      expect(hook.result.current.interaction.correction).toBeNull();
+    });
+
     it("enters intro correction mode when boxZero becomes active", async () => {
       const cardA = makeWord({ id: 901, text: "hello", translations: ["czesc"] });
       const hook = renderInteraction(

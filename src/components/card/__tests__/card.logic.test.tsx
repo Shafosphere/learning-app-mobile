@@ -410,6 +410,26 @@ describe("Card logic props", () => {
     });
   });
 
+  it.each([false, true])("renders intro input and ghost answer for direction reversed=%s", async (reversed) => {
+    const selectedItem = makeCard({ id: 12, text: "water", translations: ["woda"], imageFront: "front://image", imageBack: "back://image" });
+    render(<Card {...createProps({
+      selectedItem,
+      introMode: true,
+      correction: {
+        cardId: selectedItem.id, awers: "water", rewers: "woda", input1: "", input2: "",
+        mode: "intro", promptText: "water",
+        promptImageUri: "front://image", reversed, word: selectedItem,
+      },
+    })} />);
+    await waitFor(() => expect(latestResolverProps?.displayMode).toBe("correction"));
+    expect(latestResolverProps).toMatchObject({
+      promptText: "water",
+      promptImageUri: "front://image",
+      correctionAwers: "water", correctionRewers: "woda",
+      shouldCorrectAwers: reversed, shouldCorrectRewers: !reversed,
+    });
+  });
+
   it("switches correction prompt source to correction payload", async () => {
     render(
       <Card

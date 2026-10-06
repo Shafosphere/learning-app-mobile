@@ -102,14 +102,14 @@ function loadWordsFromCsv(): WordWithTranslations[] {
     process.cwd(),
     "tools",
     "prebuild-data",
-    "fiszki_podstawy_EN-PL_slowa.csv"
+    "ENGtoPL_A1.csv"
   );
   const nestedCsvPath = path.join(
     process.cwd(),
     "tools",
     "prebuild-data",
     "pl",
-    "fiszki_podstawy_EN-PL_slowa.csv"
+    "ENGtoPL_A1.csv"
   );
   const csvPath = fs.existsSync(rootCsvPath) ? rootCsvPath : nestedCsvPath;
   const csvText = fs.readFileSync(csvPath, "utf8");

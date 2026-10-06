@@ -10,7 +10,7 @@ import {
   getCustomCourseNameCandidates,
   replaceCustomFlashcards,
 } from "@/src/db/sqlite/db";
-import { CONTENT_DRAFT_STORAGE_KEY } from "@/src/features/customCourse/contentDraft";
+import { CONTENT_DRAFT_STORAGE_KEY, SETTINGS_DRAFT_STORAGE_KEY } from "@/src/features/customCourse/contentDraft";
 
 const mockReplace = jest.fn();
 const mockBack = jest.fn();
@@ -116,6 +116,8 @@ describe("CourseSettingsScreen image-only cards", () => {
         my_green: "#0a0",
         headline: "#111",
       },
+      getCustomCourseBoxZeroAnswerSide: () => "back",
+      setCustomCourseBoxZeroAnswerSide: jest.fn(),
       getCustomCourseBoxZeroEnabled: () => false,
       setCustomCourseBoxZeroEnabled: jest.fn(),
       getCustomCourseAutoflowEnabled: () => false,
@@ -178,6 +180,16 @@ describe("CourseSettingsScreen image-only cards", () => {
         ]
       );
     });
+  });
+
+  it("restores answer side from draft and saves it for the new course", async () => {
+    await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
+      scopeKey: "Flags|flag|#123456||1", boxZeroAnswerSide: "front", boxZeroEnabled: true,
+    }));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockedUseSettings().setCustomCourseBoxZeroAnswerSide).toHaveBeenCalledWith(42, "front"));
   });
 
   it("rejects a draft flashcard whose only content is a back image", async () => {

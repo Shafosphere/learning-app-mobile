@@ -10,11 +10,14 @@ const {
 } = require("./build-prebuilt-db");
 
 const EXPECTED_CARD_COUNTS: Record<string, number> = {
-  eng_to_pl_a1: 1061,
+  eng_to_pl_first_50: 50,
+  eng_to_pl_first_100: 100,
+  eng_to_pl_first_250: 250,
+  eng_to_pl_first_500: 500,
+  eng_to_pl_a1: 1267,
   eng_to_pl_a2: 1230,
   eng_to_pl_b1: 2020,
   eng_to_pl_b2: 1736,
-  fiszki_podstawy_en_pl_slowa: 474,
   fiszki_hiszpanski_podstawowe_poprawione: 310,
   fiszki_francuski_podstawowe_poprawione: 309,
   basic_english_to_spanish_50: 310,
@@ -195,8 +198,8 @@ describe("prebuilt CSV parser", () => {
 
 describe("registered prebuilt CSV packs", () => {
   it("keeps registered pack inventory and card counts stable", () => {
-    expect(OFFICIAL_PACKS).toHaveLength(44);
-    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(44);
+    expect(OFFICIAL_PACKS).toHaveLength(47);
+    expect(Object.keys(EXPECTED_CARD_COUNTS)).toHaveLength(47);
 
     const actualCounts = Object.fromEntries(
       OFFICIAL_PACKS.map((pack: { slug: string }) => [
@@ -211,7 +214,7 @@ describe("registered prebuilt CSV packs", () => {
         (total: number, count) => total + (count as number),
         0
       )
-    ).toBe(18397);
+    ).toBe(19029);
   });
 
   it("capitalizes country names in built-in course cards", () => {
@@ -301,4 +304,34 @@ describe("registered prebuilt CSV packs", () => {
       }
     }
   );
+});
+
+describe("English from scratch series", () => {
+  const slugs = [50, 100, 250, 500].map((count) => `eng_to_pl_first_${count}`).concat("eng_to_pl_a1");
+
+  it("contains each earlier stage with matching stable IDs and word content", () => {
+    let previous: { externalId: string; frontText: string; backText: string }[] = [];
+    for (const slug of slugs) {
+      const cards = readCardsFromCsv(OFFICIAL_PACKS.find((pack: { slug: string }) => pack.slug === slug));
+      const byId = new Map(cards.map((card: { externalId: string }) => [card.externalId, card]));
+      for (const card of previous) {
+        expect(byId.get(card.externalId)).toEqual(expect.objectContaining({
+          frontText: card.frontText,
+          backText: card.backText,
+        }));
+      }
+      previous = cards;
+    }
+  });
+
+  it("bundles images only for the first 50 words", () => {
+    for (const slug of slugs) {
+      const cards = readCardsFromCsv(OFFICIAL_PACKS.find((pack: { slug: string }) => pack.slug === slug));
+      const images = cards.flatMap((card: { imageFront: string | null; imageBack: string | null }) => [card.imageFront, card.imageBack]).filter(Boolean);
+      expect(images).toHaveLength(slug === slugs[0] ? 50 : 0);
+      for (const name of images) {
+        expect(fs.existsSync(path.resolve(__dirname, "../../assets/images/A1", name))).toBe(true);
+      }
+    }
+  });
 });

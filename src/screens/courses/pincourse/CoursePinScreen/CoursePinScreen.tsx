@@ -1,3 +1,4 @@
+import { LANGUAGE_COURSE_GROUPS, type LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
@@ -53,6 +54,7 @@ type OfficialCourseListItem = {
   smallFlag: string | null;
   isMini: boolean;
   categoryId?: string;
+  languageGroupId?: LanguageCourseGroupId;
   knowledgeGroupId?: KnowledgeCourseGroupId;
   position?: number;
 };
@@ -60,6 +62,7 @@ type OfficialCourseListItem = {
 type CourseGroup = {
   key: string;
   category?: CourseCategory;
+  languageGroupId?: LanguageCourseGroupId;
   sourceLang: string | null;
   targetLang: string | null;
   sourceFlag?: ReturnType<typeof getFlagSource>;
@@ -160,6 +163,7 @@ export default function CoursePinScreen() {
             smallFlag: manifest?.smallFlag ?? manifest?.sourceLang ?? null,
             isMini: manifest?.isMini ?? true,
             categoryId: manifest?.categoryId,
+            languageGroupId: manifest?.languageGroupId,
             knowledgeGroupId: manifest?.knowledgeGroupId,
             position: manifest?.position,
           };
@@ -196,7 +200,8 @@ export default function CoursePinScreen() {
     const ensureGroup = (
       sourceLang: string | null,
       targetLang: string | null,
-      categoryId?: string
+      categoryId?: string,
+      languageGroupId?: LanguageCourseGroupId
     ): CourseGroup => {
       let key: string;
       let category: CourseCategory | undefined;
@@ -204,6 +209,8 @@ export default function CoursePinScreen() {
       if (categoryId && COURSE_CATEGORIES[categoryId]) {
         category = COURSE_CATEGORIES[categoryId];
         key = `cat:${categoryId}`;
+      } else if (languageGroupId) {
+        key = `series:${languageGroupId}`;
       } else {
         key = `lang:${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
       }
@@ -213,6 +220,7 @@ export default function CoursePinScreen() {
         group = {
           key,
           category,
+          languageGroupId,
           sourceLang: sourceLang ?? null,
           targetLang: targetLang ?? null,
           sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
@@ -228,7 +236,8 @@ export default function CoursePinScreen() {
       ensureGroup(
         pack.sourceLang,
         pack.targetLang,
-        pack.categoryId
+        pack.categoryId,
+        pack.languageGroupId
       ).officialPacks.push(pack);
     });
 
@@ -262,7 +271,8 @@ export default function CoursePinScreen() {
       if (categoryDiff !== 0) return categoryDiff;
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
       if (targetDiff !== 0) return targetDiff;
-      return compareLangs(a.sourceLang, b.sourceLang);
+      return compareLangs(a.sourceLang, b.sourceLang) ||
+        Number(!a.languageGroupId) - Number(!b.languageGroupId);
     });
 
     sortedGroups.forEach((group) => {
@@ -677,6 +687,44 @@ export default function CoursePinScreen() {
                   ? group.sourceLang.toUpperCase()
                   : "?";
 
+                if (group.languageGroupId) {
+                  const definition = LANGUAGE_COURSE_GROUPS[group.languageGroupId];
+                  return (
+                    <CoursePinAccordion
+                      key={group.key}
+                      revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
+                      groups={[{
+                        key: group.key,
+                        title: t(definition.labelKey),
+                        subtitle: t(definition.descriptionKey),
+                        count: group.officialPacks.length,
+                        regularItems: regularOfficialPacks,
+                        miniItems: miniOfficialPacks,
+                        icon: {
+                          kind: "flagPair",
+                          target: group.targetFlag,
+                          source: group.sourceFlag,
+                          targetCode: nativeCode,
+                          sourceCode: learningCode,
+                        },
+                      }]}
+                      renderCourseCard={renderOfficialPackCard}
+                    />
+                  );
+                }
+
+                const continuesLanguageSeries = languageCourses.some((other) =>
+                  other.languageGroupId && other.sourceLang === group.sourceLang &&
+                  other.targetLang === group.targetLang
+                );
+                if (continuesLanguageSeries) {
+                  return (
+                    <View key={group.key} style={styles.looseKnowledgeCoursesList}>
+                      {group.officialPacks.map(renderOfficialPackCard)}
+                    </View>
+                  );
+                }
+
                 return (
                   <View key={`group-${group.key}`} style={styles.groupSection}>
                     <View style={styles.groupHeader}>
@@ -753,6 +801,7 @@ export default function CoursePinScreen() {
               ) : null}
               <CoursePinAccordion
                 groups={accordionGroups}
+                revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
                 renderCourseCard={renderOfficialPackCard}
               />
               {looseKnowledgeCourses.length > 0 ? (

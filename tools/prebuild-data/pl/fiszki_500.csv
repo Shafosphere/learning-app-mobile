@@ -1,0 +1,501 @@
+external_id,front_text,back_text
+0055,see,"widzieć, zobaczyć, ujrzeć, zobacz, zauważyć, spostrzec, rozumieć, odwiedzać"
+0067,work,"pracować, funkcjonować, dzieło, praca"
+0075,like,"jak, podobny, lubić, chciać, na przykład"
+0082,people,ludzie
+0092,water,"woda, podlewać, polewać, wodny"
+0096,man,"mężczyzna, człowiek, osoba, pionek, kumpel"
+0097,order,"zamówienie, rozkaz, porządek, zakon, klasa, kolejność, zamawiać, rozkazywać, porządkować"
+0098,world,świat
+0105,know,"wiedzieć, znać, pamiętać, rozumieć, doświadczać, wiedza"
+0107,back,"plecy, tył, grzbiet, obrońca, oparcie, zawracać, wspierać, tylny, z powrotem"
+0108,school,"szkoła, ławica, więzienie, szkolić, trenować, dawać szkołę, kształcić, wykazywać wyższość"
+0110,take,"wziąć, chwycić, łapać, zabrać, przyjąć, użyć, spożywać, przejąć, odjąć"
+0114,house,"dom, budynek, izba, firma, ród, muzyka house"
+0115,city,"miasto, metropolia"
+0118,men,"mężczyźni, ludzie"
+0119,get,"dostać, otrzymać, stać się, rozumieć, zdobyć, zarobić, dotrzeć, odebrać, przynieść"
+0127,children,dzieci
+0129,think,"myśleć, pomyśleć, zastanawiać się, sądzić, uważać, przypuszczać, wyobrażać sobie, mieć na myśli, zamierzać"
+0131,table,"stół, tabela, tabliczka, stołowy, towarzystwo, stolik"
+0132,come,"przyjść ,przychodzić, przybywać, pochodzić, pojawiać się, dochodzić, doświadczyć"
+0134,go,"iść, idź, wyjść, podróżować, poruszać się, umierać, pasować, działać, powodzić się, ruch, zgoda"
+0136,office,"biuro, urząd"
+0138,end,"koniec, zakończenie, kres, granica, skończyć, zakończyć się"
+0142,board,"tablica, deska, płyta, rada, pokład, wikt"
+0149,home,"dom, domowy, ojczyzna"
+0150,hand,"ręka, dłoń, strona, wskaźnik, pomoc, wpływ, kontrola, rozdanie, wręczyć"
+0154,change,"zmiana, reszta, drobne, zmieniać, rozmieniać"
+0155,women,kobiety
+0156,person,"osoba, człowiek"
+0158,family,rodzina
+0172,field,"pole, teren, boisko, odpowiadać"
+0173,book,"książka, rezerwować, księgować, meldować się"
+0178,head,"głowa, kierować, nagłówek"
+0179,put,"kłaść, wkładać, umieszczać, formułować, umieścić"
+0181,body,"ciało, organizm, grupa, kadłub"
+0183,white,"biały, biel, jasny, białko, jajo, wino"
+0185,let,"niech, pozwalać, wpuszczać, wypuszczać, przepuszczać"
+0187,become,"stać się, zostać, nadchodzić"
+0193,want,"chcieć, pragnąć, pożądać, potrzeba"
+0201,money,"pieniądz, pieniądze"
+0204,open,"otwierać, otwarty, jawny, publiczny, otwarcie"
+0208,paper,"papier, gazeta, dokument, referat, egzamin pisemny, papierowy, pakować"
+0209,building,budynek
+0213,room,"pokój, pomieszczenie, miejsce, przestrzeń, możliwość"
+0214,look,"patrzeć, spojrzeć, spoglądać, wyglądać, wydawać się, spojrzenie, wygląd"
+0218,bank,"bank, bankier, brzeg, skarpa, nasyp, ławica, wpłacać, bankowy"
+0219,students,"studenci, uczniowie"
+0221,food,"jedzenie, żywność, pożywienie, żywnościowy"
+0223,street,"ulica, droga, uliczny"
+0228,black,"czarny, czerń, murzyński, czernieć"
+0232,pay,"zapłacić, płacić, zwracać, opłacać się, ponosić, płaca, wynagrodzenie, pensja, płatny"
+0233,read,"czytać, czytaj, odczytać, studiować, interpretować, brzmieć"
+0236,river,rzeka
+0238,church,"Kościół, kościół, nabożeństwo"
+0247,love,"miłość, kochać, uwielbiać, lubić"
+0248,father,"ojciec, tata, przodek, zrodzić, spłodzić, usynowić"
+0255,eyes,"oko, oczy"
+0263,ground,"ziemia, grunt, teren, podstawa"
+0266,face,"twarz, oblicze, mina, stawiać czoło"
+0270,believe,"wierzyć, myśleć, przypuszczać"
+0271,mother,"matka, mama,pramatka, źródło, troszczyć się, matkować, niańczyć"
+0272,close,"zamknąć, zakończyć, bliski, podobny, zażyły, zamknięty"
+0273,keep,"trzymać, mieć, posiadać, utrzymywać, opiekować się, zachowywać, zachowaćpowstrzymywać się"
+0276,workers,pracownicy
+0277,help,"pomoc, pomocny, pomagać, pomóc"
+0280,king,"król, dama, koronować, królować, promować"
+0286,library,"biblioteka, biblioteczny"
+0289,letter,"list, litera, pismo, dokument"
+0290,heart,"serce, sedno, centrum, otucha"
+0297,town,"miasto, miasteczko"
+0299,fire,"ogień, pożar, strzelać, zapalać"
+0302,sir,"pan, proszę pana"
+0312,turn,"zakręt, obrót, zmiana, kolejka, kręcić, obracać się, zmieniać się, zwrot"
+0317,answer,"odpowiedź, rozwiązanie, odpowiadać"
+0322,son,syn
+0323,run,"biec, prowadzić, uciekać, bieg, przebieg, biegać"
+0324,sea,morze
+0326,meet,"spotkać, spełniać, spotkanie, spotkać się"
+0339,play,"grać, bawić się, sztuka, przedstawienie"
+0340,wife,żona
+0342,officer,"oficer, urzędnik, funkcjonariusz, dowódca"
+0343,door,drzwi
+0346,hospital,szpital
+0348,box,"pudełko, skrzynka, futerał, boks, loża, kabina, budka, ramka, obudowa, komputer, ochraniacz, uderzenie, pięść, bukszpan, pole karne, zapakować, boksować"
+0350,car,"samochód, samochód osobowy, wagon"
+0352,music,muzyka
+0356,station,"stacja, posterunek, stacjonować, dworzec"
+0360,key,"klucz, klawisz, przycisk, legenda"
+0361,farm,"farma, gospodarstwo, uprawiać, gospodarować"
+0362,computer,"komputer, rachmistrz, komputerowy"
+0368,wall,"ściana, mur"
+0376,teachers,nauczyciele
+0378,island,wyspa
+0382,start,"początek, start, rozpoczęcie, zaczynać, uruchamiać, ruszać"
+0383,friends,przyjaciele
+0384,machine,"maszyna, mechanizm"
+0385,live,"żyć, mieszkać, prowadzić, żywy, na żywo"
+0391,parents,rodzice
+0393,red,"czerwony, czerwień, komunistyczny"
+0401,park,"park, parkować"
+0402,fish,"ryba, ryby, łowić"
+0406,floor,"podłoga, piętro"
+0410,color,"kolor, barwa, kolorować"
+0413,hall,"hala, sala, aula, przedpokój, hol"
+0415,animals,zwierzęta
+0417,bed,"łóżko, posłanie, dno, złoże, pokład, warstwa, grządka, iść spać, iść do łóżka, uprawiać seks z kimś"
+0420,blue,"niebieski, błękitny, błękit, smutny, sprośny, ubierać się na niebiesko, ufarbować na niebiesko"
+0422,glass,"szkło, szklanka, kieliszek, szyba"
+0426,cut,"ciąć, skaleczenie, wycinać, rąbać, kroić, krój, obcięcie, cięcie"
+0427,stop,"przerwa, stop, zatrzymaj, przystanek, zatrzymanie, znak stop, zatrzymać, zatrzymać się, przerwać, zakończyć"
+0429,miss,"panna, tęsknić za, chybić, nie trafić, minąć się, przeoczyć, opuścić, spóźnić się, panno"
+0431,picture,"obraz, obrazek, zdjęcie, uosobienie, przykład, przedstawiać"
+0433,remember,"pamiętać, zapamiętać, nie zapominać, pamiętaj"
+0437,trees,drzewa
+0438,bar,"belka, pręt, drążek, listwa, sztacheta, sztabka, przeszkoda, bariera, szlaban, krata, ruszt, batonik, baton, adwokatura, bar, pub, lada, takt, bar, kostka mydła, zaryglować, tarasować, blokować, uniemożliwiać, zabronić"
+0439,hill,"wzgórze, pagórek"
+0442,sun,słońce
+0443,speak,"mówić, rozmawiać, konwersować, przemawiać, wygłaszać, wypowiadać, powiedzieć, wyrażać, świadczyć o, posługiwać się"
+0445,telephone,"telefon, telefonować, dzwonić"
+0446,girl,"dziewczyna, dziewczynka, panna"
+0448,milk,"mleko, doić, wykorzystywać"
+0451,boy,"chłopiec, chłopak"
+0452,husband,"mąż, oszczędnie gospodarować"
+0460,game,"gra, zabawa, zwierzyna"
+0461,stone,"kamień, kamyk, kostka, pestka, ukamienować"
+0462,brother,brat
+0465,radio,"radio, stacja radiowa, medium radiowe, radiowy, nadawać, odbierać, komunikować się"
+0471,hair,"włos, włosy"
+0479,medicine,"lekarstwo, lek, medycyna"
+0483,mouth,"usta, pysk, gęba, ujście, wylot"
+0484,ship,"statek, wysyłać"
+0485,visit,"wizyta, odwiedziny, pobyt, odwiedzać, wizytować, składać wizytę"
+0493,thank,"dziękować, podziękować, podziękowanie, dziękuję"
+0497,daughter,córka
+0502,phone,"telefon, dzwonić, telefonować"
+0505,mail,"poczta, korespondencja, wysyłać"
+0507,map,"mapa, kreślić"
+0508,bridge,"most, wiadukt, mostek, brydż, łączyć"
+0509,brain,"mózg, umysł"
+0512,window,"okno, okienko, witryna, wystawa"
+0513,lady,"dama, pani, kobieta"
+0514,green,"zielony, ekologiczny, przyjazny środowisku"
+0516,talk,"rozmowa, pogadanka, wykład, rozmawiać, mówić"
+0522,ice,lód
+0523,farmers,rolnicy
+0524,sugar,cukier
+0525,hope,"nadzieja, mieć nadzieję, spodziewać się"
+0530,wind,"wiatr, nawijać, wić się, nakręcać"
+0532,band,"taśma, opaska, bandaż, banda, zespół muzyczny, pasmo, bandażować, zespół"
+0533,fruit,"owoc, owocowy, owocować, owoce"
+0534,doctor,"lekarz, lekarka, dr, doktor"
+0535,buy,"kupować, nabywać, przekupywać, kupić"
+0537,stay,"pobyt, zatrzymać, pozostać"
+0538,horse,"koń, kozioł"
+0539,block,"blok, kloc, blokować, przeszkoda"
+0540,save,"ratować, oszczędzać, zapisywać, z wyjątkiem, zapisać"
+0541,mountain,"góra, górski, na zewnątrz, w górę"
+0543,tools,"narzędzia, przyrządy"
+0545,yellow,"żółty, tchórzliwy, zazdrosny, żółknąć"
+0546,engineers,"inżynierowie, konstruktorzy, inżynierowie"
+0548,plane,"samolot, hebel, płaszczyzna, płaski"
+0550,hotel,"hotel, hotelowy"
+0551,garden,"ogród, ogrodzić"
+0554,chair,"krzesło, fotel, przewodniczący, przewodnicząca, katedra, przewodniczyć"
+0559,tube,"rura, rurka, tuba, tubka, metro"
+0560,television,"telewizja, telewizyjny"
+0563,store,"sklep, magazyn, przechowywać, gromadzić, zapas"
+0567,card,"karta, wizytówka, pocztówka, karton"
+0568,describe,"opisywać, opisać"
+0569,camp,"obóz, obozowisko, obozować, rozbić obóz"
+0570,sister,"siostra, zakonnica, siostrzany"
+0571,discuss,"dyskutować, omawiać, omówić"
+0573,walk,"spacer, przechadzka, chodnik, ścieżka, chód, iść, spacerować, wyprowadzać"
+0579,train,"pociąg, trenować, szkolenie, ciąg"
+0582,corner,"róg, naroże, kąt, rzut rożny, korner, narożny, zapędzić, narożnik"
+0583,watch,"zegarek, pilnowanie, stróżowanie, dozór, straż, wachta, obserwować, oglądać, czuwać"
+0587,gray,"szary, siwy"
+0588,birds,ptaki
+0593,drive,"prowadzić, kierować, napędzać, przejażdżka, jazda, napęd"
+0594,shop,"sklep, warsztat, robić zakupy"
+0596,baby,"niemowlę, dziecko, kochanie"
+0598,bone,"kość, ość, usuwać ości"
+0600,seat,"miejsce, siedzenie, posada, mandat, siodełko, siedziba, tyłek, deska klozetowa, sadzać, sadzać się, posadzić"
+0602,dog,"pies, suka, hot dog, tropić, natrętnie śledzić"
+0603,leaves,"liść, liście, urlop, urlopy, zostawiać"
+0604,meat,"mięso, miąższ"
+0605,magazine,"magazyn, czasopismo, skład, magazynek"
+0607,star,"gwiazda, gwiazdka, grać, oznaczać"
+0608,corn,"kukurydza, zboże, odcisk, modzel"
+0609,prince,"książę, królewicz"
+0610,ball,"piłka, kula, gałka, bal"
+0611,eat,"jeść, spożywać, pożerać, przeżerać"
+0612,flowers,kwiaty
+0613,rice,ryż
+0616,boat,"łódź, łódka"
+0620,beach,plaża
+0621,song,"piosenka, pieśń"
+0622,gift,"prezent, dar, talent"
+0624,factory,fabryka
+0625,neck,"szyja, kark, gryf"
+0626,bell,"dzwon, dzwonek"
+0627,spot,"miejsce, plama, plamka, punkt, pryszcz, spot reklamowy, zauważyć, dostrzec, rozpoznać"
+0629,newspaper,"gazeta, gazetowy"
+0630,trip,"wycieczka, podróż, potknięcie, pomyłka"
+0633,dinner,"obiad, kolacja"
+0637,snow,"śnieg, śnieżny, śnieżyca, śnieżnobiały, śnieżyć"
+0638,fishing,"łowienie ryb, połów ryb, wędkarstwo, rybołówstwo, rybacki, wędkarski"
+0639,eggs,jajka
+0640,coffee,"kawa, kawowiec, kawowy, kolor kawowy, pić kawę"
+0641,legs,nogi
+0643,hole,"dziura, otwór, jama"
+0644,temple,"świątynia, skroń"
+0645,teeth,zęby
+0647,rain,"deszcz, opad, padać"
+0650,cup,"kubek, filiżanka, puchar, miseczka"
+0651,truck,"ciężarówka, samochód ciężarowy"
+0652,partner,"partner, partnerka, wspólnik, partnerować"
+0654,drink,"napój, drink, alkohol, pić, wznosić toast, wypić, upijać się"
+0655,grass,"trawa, marihuana, informator (policyjny), kret"
+0657,wear,"nosić, odzież, zużycie, zużywać się"
+0658,dance,"taniec, tańczyć"
+0659,tv,"telewizja, TV"
+0660,kitchen,"kuchnia, kuchenny"
+0661,enjoy,"podobać się, lubić, cieszyć się, dobrze się bawić"
+0663,colour,"kolor, barwa, farba, barwnik, koloryt, rumieniec, kolorowy, kolorować, pokolorować, barwić, zabarwić"
+0664,shoulder,"bark, ramię, łopatka, pas awaryjny, pobocze, zarzucać, brać na siebie"
+0665,row,"rząd, szereg, łódź, przejażdżka łodzią, awantura, wiosłować, kłócić się"
+0666,sky,"niebo, chmury"
+0667,cook,"gotować, kucharz, kucharka"
+0669,smile,"uśmiech, uśmiechać się, uśmiechnąć się"
+0670,bus,"autobus, sprzątać naczynia, zbierać talerze, jechać autobusem"
+0673,internet,"internet, sieć"
+0674,theatre,teatr
+0675,driver,"kierowca, operator, sterownik, napęd, program sterujący"
+0678,clothes,"ubrania, odzież"
+0679,painting,"obraz, malarstwo"
+0682,imagine,"wyobrażać sobie, wyobrazić sobie, wyobraź sobie"
+0686,tea,"herbata, herbatka, podwieczorek,"
+0688,ear,"ucho, kłos"
+0689,wheel,"koło, kierownica, toczyć się, obracać, popychać, prowadzić"
+0690,scientists,naukowcy
+0691,pool,"staw, basen, kałuża, pula, zasób, bilard, fundusz, mobilizować, komasować"
+0692,moon,"księżyc, satelita ziemski, odsłaniać"
+0695,listen,"słuchać, nasłuchiwać, słuchaj"
+0697,forget,"zapominać, zapomnieć"
+0700,sheep,"owca, owce"
+0704,orange,"pomarańcza, pomarańczowy"
+0709,bread,"chleb, pieczywo, kasa"
+0710,cloth,"tkanina, materiał, sukno, ścierka, obrus, chustka"
+0712,nurse,"pielęgniarz, pielęgniarka, niańka, pielęgnować, opiekować się"
+0714,guy,"facet, gość, koleś"
+0715,fly,"mucha, lot, klapa, rozporek, latać, fruwać, wylecieć, wystrzelić, przemknąć, powiewać, uciekać, puszczać w powietrze, przewozić samolotem, cwany, sprytny"
+0717,meal,"posiłek, danie, jedzenie"
+0718,bag,"torba, worek"
+0719,yards,"jardy, ogrody, dziedzińce"
+0720,touch,"dotyk, dotykać, dotykowy"
+0721,cat,"kot, kotka, złośliwy, kobieta, facet, prostytutka"
+0724,camera,"aparat fotograficzny, kamera"
+0725,photo,"zdjęcie, fotografia, fotografować"
+0726,cream,"krem, śmietana, śmietanka, kremowy, śmietankowy"
+0727,tower,"wieża, sterczeć, górować"
+0728,nose,"nos, dziób"
+0731,solve,"rozwiązać, rozwiązywać, rozstrzygać"
+0734,dress,"sukienka, suknia, szata, ubranie, strój, ubierać, opatrywać"
+0735,cap,"czapka, beret, kaszkiet, kapelusz, kaptur, wieko, pokrywa, kapsel, nasadka, czepek, limit, nakładać, przewyższać, kłamać"
+0737,paint,"farba, malować, pomalować"
+0738,desk,"biurko, ławka szkolna"
+0740,grey,"szary, siwy, szary, szarzeć, poszarzeć, siwieć, osiwieć"
+0741,pocket,"kieszeń, kieszonkowy"
+0742,cape,"peleryna, przylądek"
+0745,uncle,"wujek, wuj, stryjek, stryj"
+0750,airport,"lotnisko, port lotniczy, lotniczy"
+0751,butter,"masło, smarować"
+0752,classroom,"klasa, sala lekcyjna"
+0756,pick,"elita, kilof, wybór, wykałaczka, plektron, kostka gitarowa, wyciągać, zbierać, wybierać, dziobać"
+0757,turkey,"indyk, idiota, porażka"
+0760,rats,"szczur, szczury"
+0764,dad,"tata, tato"
+0766,bath,"wanna, łazienka, kąpiel, kąpać się"
+0768,hat,"kapelusz, czapka, daszek, cyrkumfleks, akcent cyrkumfleksowy"
+0769,hurt,"ranić, zranić, kaleczyć, boleć, sprawiać ból, krzywdzić, ból, uraza, zraniony, ranny, krzywda"
+0770,coat,"płaszcz, warstwa, fartuch, powlekać, pokrywać"
+0773,guess,"przypuszczenie, domysł, zgadnąć, zgadywać, odgadywać, odgadnąć, domyślać się, przypuszczać, myśleć, zgaduję"
+0775,cloud,"chmura, obłok, chmara, zmętnienie, zamglić, zmącić, zaćmić"
+0777,smoke,"dym, dymek, papieros, palić, dymić się, wędzić, parować"
+0778,players,"gracz, gracze"
+0779,palace,pałac
+0780,bottle,"butelka, butelkować"
+0781,ride,"jechać, jeździć, wozić, przewozić, przejażdżka, jazda"
+0782,shoes,"but, buty, obuwie"
+0783,lessons,"lekcja, lekcje"
+0785,lunch,"lunch, obiad"
+0789,restaurant,restauracja
+0790,vegetables,"warzywo, warzywa"
+0792,wash,"myć, prać, mycie, pranie"
+0794,mice,myszy
+0796,pen,"długopis, pióro, zagroda, wybieg dla zwierząt"
+0798,apple,"jabłko, jabłkowy"
+0801,button,"guzik, przycisk, zapinać"
+0802,flag,flaga
+0808,breakfast,"śniadanie, spożywać"
+0809,cheese,"ser, pieniądz, gomółka"
+0811,clock,"zegar, zegarek, tarcza zegara, stoper"
+0812,actors,"aktorzy, aktorki"
+0815,mom,mama
+0819,theater,"teatr, kino"
+0833,knife,"nóż, przeciąć, zaatakować nożem, dźgnąć, ugodzić nożem"
+0834,jet,"odrzutowiec, dysza, struga, strumień, odrzutowy, gagat, pędzić"
+0836,pray,"modlić się, błagać"
+0837,beef,"wołowina, kłócić się, narzekać"
+0840,brush,"pędzel, szczotka, szczotkować"
+0842,shirt,"koszula, koszulka"
+0843,aunt,"ciocia, ciotka"
+0844,riding,"jazda, jazda konna, jeździć"
+0847,potatoes,"ziemniaki, kartofle"
+0848,chicken,"kurczak, tchórz, tchórzliwy"
+0849,bowl,"miska, misa, czasza, kula, kręgielny, gra w kręgle, toczyć, rzucać"
+0850,piano,"pianino, fortepian"
+0854,dictionary,słownik
+0859,fan,"wentylator, zwolennik, miłośnik, wachlarz"
+0860,cow,krowa
+0869,juice,"sok, likier, siła, moc, chęć do działania, esencja, doping, prąd, paliwo, fundusz, wyciskać, pić duże ilości alkoholu"
+0871,knees,kolana
+0874,shopping,"zakupy, robienie zakupów"
+0875,bedroom,sypialnia
+0876,pink,"różowy, róż"
+0877,pig,"świnia, glina"
+0883,shelf,"półka, szelf, mielizna"
+0884,football,"piłka nożna, futbol amerykański, futbol kanadyjski, futbolówka, gra w piłkę nożną, piłkarski"
+0893,coach,"autokar, trener, trenerka, korepetytor, korepetytorka, wagon, powóz, kareta, klasa ekonomiczna, instruować, trenować, udzielać korepetycji, dawać wskazówki"
+0905,beans,"fasola, fasolka"
+0906,swimming,pływanie
+0908,grandfather,dziadek
+0911,tooth,ząb
+0912,princess,księżniczka
+0914,coke,"koks, kokaina, cola, kola, wytwarzać"
+0916,drum,bęben
+0917,ticket,"bilet, mandat"
+0919,cousin,"kuzyn, kuzynka"
+0920,pet,"zwierzę domowe, pupil, miś, skarb, ulubieniec, pieścić, zwierzak"
+0923,lion,lew
+0926,cake,"ciasto, ciastko, pokryć cienką warstwą, warstwa, pył, zbrylić się"
+0937,inlet,"zatoka, wlot, ujście, wpust, wlewnik"
+0940,jacket,"kurtka, marynarka, obwoluta"
+0941,ghost,"duch, widmo, upiór, zjawa, nawiedzać"
+0942,pasture,"pastwisko, wypas, wypasać, paść się"
+0943,rabbit,królik
+0945,smell,"czuć, zapach, wąchać, pachnieć, wonieć, śmierdzieć, węch"
+0952,grandmother,"babcia, babunia"
+0953,dish,"talerz, potrawa, danie, naczynie"
+0954,singer,"piosenkarz, piosenkarka, śpiewak, śpiewaczka"
+0956,email,"e-mail, email, mail, elektroniczny,"
+0961,excuse,"usprawiedliwienie, wytłumaczenie, wymówka, wybaczać, przepraszać"
+0962,chocolate,"czekolada, czekoladowy, kolor"
+0963,snake,wąż
+0967,ruler,"linijka, władca"
+0968,bee,pszczoła
+0976,bathroom,"łazienka, toaleta, ubikacja"
+0977,airplane,samolot
+0979,pencil,ołówek
+0985,cinema,"kino, kinematografia, film, przemysł filmowy"
+0990,musicians,"muzyk, muzycy"
+0994,shower,"prysznic, przelotny opad, brać prysznic, myć się"
+1000,wake,"budzić, budzić się, czuwanie, kilwater, smuga kondensacyjna"
+1003,soup,"zupa, karmić, zapewniać posiłek, zanurzać w utrwalaczu"
+1014,sunshine,"światło słoneczne, promienie słoneczne, słońce, słoneczko, nasłoneczniony, wesołość, pogoda ducha"
+1021,toilet,"sedes, muszla klozetowa, toaleta, ubikacja, WC"
+1025,breathe,"oddychać, wdychać, wydychać"
+1029,roses,"róża, róże"
+1040,toys,"zabawka, zabawki"
+1043,couch,"kanapa, sofa, kozetka, leżanka"
+1044,daddy,"tatuś, tatusiu, tatko"
+1045,manor,"dwór, rezydencja, majątek ziemski, folwark"
+1048,lily,lilia
+1050,sailors,"marynarze, żeglarze"
+1051,jump,"skok, skakać, wyskakiwać, przeskakiwać,"
+1052,tomato,pomidor
+1055,pants,"majtki, slipy, kalesony, spodnie"
+1056,fairy,"wróżka, czarodziejka, skrzydlaty, duszek, homoseksualista"
+1057,candy,"cukierek, słodycze, łakocie, kandyzować, cukierki"
+1061,kick,"kop, kopnięcie, kopniak, kopać"
+1073,madam,pani
+1077,understand,"rozumieć, zrozumieć"
+1078,repeat,powtórzyć
+1082,explain,"wyjaśnić, wyjaśniać, tłumaczyć"
+1083,translate,tłumaczyć
+1084,spell,literować
+1085,write,"napisać, pisać"
+1090,country,"kraj, państwo, wieś, kraina, region, wiejski"
+1091,student,"student, uczeń"
+1092,study,"badanie, nauka, czytelnia, studiować, uczyć się"
+1094,friend,przyjaciel
+1103,receipt,paragon
+1104,cash,"gotówka, płatność gotówką, czek"
+1111,child,dziecko
+1112,beard,broda
+1113,glasses,okulary
+1116,skin,skóra
+1127,brown,"brązowy, brąz, brunatny, kasztanowaty, opalony, przyrumienić, zbrązowieć, opalić się"
+1128,purple,"fioletowy, purpurowy, fiolet"
+1129,tshirt,koszulka
+1130,sweater,sweter
+1131,jeans,dżinsy
+1132,skirt,spódnica
+1133,socks,skarpetki
+1134,scarf,szalik
+1135,gloves,rękawiczki
+1137,apartment,"mieszkanie, apartament"
+1138,livingroom,salon
+1139,hallway,korytarz
+1140,balcony,balkon
+1141,basement,piwnica
+1142,attic,strych
+1143,stairs,schody
+1144,sofa,kanapa
+1145,wardrobe,szafa
+1146,lamp,lampa
+1147,fridge,lodówka
+1148,freezer,zamrażarka
+1149,oven,"piekarnik, piec"
+1150,stove,"kuchenka, piec, piecyk, płyta grzewcza"
+1151,microwave,mikrofalówka
+1152,kettle,czajnik
+1153,dishwasher,zmywarka
+1154,washingmachine,pralka
+1155,sink,umywalka
+1156,sleep,spać
+1157,leave,wyjść
+1158,return,"wrócić, wracać, zwracać, powrót, zwrot, przynosić, reportować"
+1159,learn,uczyć się
+1160,rest,odpoczywać
+1161,salt,"sól, solić, zasolić, słony"
+1162,pepper,"pieprz, papryka"
+1163,oil,"olej, oliwa, ropa naftowa, nafta, olejny, smarować, oliwić"
+1164,pasta,makaron
+1165,banana,banan
+1166,potato,ziemniak
+1167,menu,"menu, karta dań"
+1168,waiter,kelner
+1169,bill,"rachunek, banknot, projekt, ustawa, dziób, wystawiać"
+1172,dessert,deser
+1173,salad,sałatka
+1174,steak,stek
+1175,plate,"talerz, płyta, tablica, tabliczka, taca"
+1176,fork,"widelec, widły, widełki, rozwidlenie, rozgałęzienie, odnoga, rozwidlać się"
+1177,spoon,łyżka
+1178,market,"rynek, targowisko, wprowadzać na rynek"
+1179,supermarket,supermarket
+1180,checkout,"kasa, wymeldowanie"
+1181,basket,"koszyk, kosz"
+1182,atm,bankomat
+1186,pharmacy,apteka
+1187,postoffice,poczta
+1188,police,"policja, policyjny, patrolować"
+1189,museum,"muzeum, muzealny"
+1194,road,"droga, ulica, szosa, jezdnia"
+1196,entrance,"wejście, wstęp, dostęp, wchodzenie, zachwycać, wprawiać w trans"
+1197,exit,wyjście
+1198,tram,tramwaj
+1199,subway,metro
+1200,taxi,taksówka
+1201,platform,peron
+1205,luggage,bagaż
+1206,passport,paszport
+1208,travel,"podróżować, podróże, podróż, przemieszczać się"
+1209,reception,recepcja
+1210,elevator,winda
+1211,towel,ręcznik
+1212,pillow,poduszka
+1213,blanket,"koc, pled, filc, warstwa, ogólny, bezwarunkowy, pokrywać, przykrywać, maskować"
+1214,wifi,wi-fi
+1215,password,hasło
+1216,lobby,hol
+1218,eye,oko
+1219,arm,ręka
+1220,finger,palec
+1221,chest,"klatka, klatka piersiowa, skrzynia, obudowa"
+1222,stomach,"brzuch, żołądek, apetyt, chęć, strawić, ścierpieć, znieść"
+1223,leg,noga
+1224,knee,kolano
+1225,foot,stopa
+1227,cough,kaszel
+1230,appointment,"wizyta, umówione spotkanie, termin, mianowanie, powołanie, spotkanie"
+1232,burn,oparzenie
+1234,tablet,tabletka
+1235,syrup,syrop
+1236,storm,"burza, sztorm, szturm, szturmować"
+1238,umbrella,parasol
+1239,boots,buty
+1242,running,bieganie
+1245,walking,spacer
+1246,gym,siłownia
+1247,drawing,rysowanie
+1249,boss,"szef, szefowa, przełożony, boss"
+1250,colleague,kolega
+1256,teacher,nauczyciel
+1262,ambulance,karetka
+1264,thief,złodziej
+1265,wallet,portfel
+1266,call,dzwonić

@@ -51,6 +51,7 @@ export type AccordionGroupItem = {
 
 type CoursePinAccordionProps = {
   groups: AccordionGroupItem[];
+  revealCourseId?: number | null;
   renderCourseCard: (pack: OfficialCourseListItem) => ReactNode;
 };
 
@@ -79,7 +80,6 @@ function GroupHeaderIcon({ icon }: { icon?: AccordionIcon }) {
       </View>
       {icon.sourceCode ? (
         <View style={styles.headerFlagRow}>
-          <Text style={styles.headerIconSeparator}>/</Text>
           <Text style={styles.headerIconCode}>{icon.sourceCode}</Text>
           {icon.source ? (
             <Image source={icon.source} style={styles.headerIconFlag} />
@@ -93,6 +93,7 @@ function GroupHeaderIcon({ icon }: { icon?: AccordionIcon }) {
 export function CoursePinAccordion({
   groups,
   renderCourseCard,
+  revealCourseId,
 }: CoursePinAccordionProps) {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -106,7 +107,9 @@ export function CoursePinAccordion({
   return (
     <View style={styles.accordionList}>
       {visibleGroups.map((group) => {
-        const expanded = expandedGroupKey === group.key;
+        const expanded = expandedGroupKey === group.key ||
+          (revealCourseId != null &&
+            [...group.regularItems, ...group.miniItems].some((course) => course.id === revealCourseId));
         const hasRegular = group.regularItems.length > 0;
         const hasMini = group.miniItems.length > 0;
 
@@ -159,9 +162,6 @@ export function CoursePinAccordion({
                 <View pointerEvents="none" style={styles.accordionBodySideMaskRight} />
                 {hasRegular ? (
                   <>
-                    <Text style={styles.accordionSectionTitle}>
-                      {t("repeats.labels.courses")}
-                    </Text>
                     <View style={styles.accordionCardsList}>
                       {group.regularItems.map(renderCourseCard)}
                     </View>

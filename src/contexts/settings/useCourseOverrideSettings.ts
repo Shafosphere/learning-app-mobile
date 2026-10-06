@@ -22,6 +22,7 @@ import {
   setCustomOverride,
 } from "./courseOverrideHelpers";
 import type {
+  BoxZeroAnswerSide,
   CourseAutoflowOverrides,
   CourseBoxZeroKeyParams,
   CourseBoxZeroOverrides,
@@ -45,6 +46,7 @@ type UseCourseOverrideAccessorsParams<T> = {
   defaultValue: T;
   overrides: CourseOverrideState<T>;
   setOverrides: (value: CourseOverrideState<T>) => Promise<void>;
+  persistDefault?: boolean;
 };
 
 function useCourseOverrideAccessors<T>({
@@ -54,6 +56,7 @@ function useCourseOverrideAccessors<T>({
   defaultValue,
   overrides,
   setOverrides,
+  persistDefault = false,
 }: UseCourseOverrideAccessorsParams<T>) {
   const getBuiltin = useCallback(
     (params: CourseBoxZeroKeyParams) =>
@@ -69,9 +72,10 @@ function useCourseOverrideAccessors<T>({
         defaultValue,
         overrides,
         setOverrides,
+        persistDefault,
       });
     },
-    [defaultValue, overrides, setOverrides]
+    [defaultValue, overrides, setOverrides, persistDefault]
   );
 
   const getCustom = useCallback(
@@ -88,9 +92,10 @@ function useCourseOverrideAccessors<T>({
         defaultValue,
         overrides,
         setOverrides,
+        persistDefault,
       });
     },
-    [defaultValue, overrides, setOverrides]
+    [defaultValue, overrides, setOverrides, persistDefault]
   );
 
   const activeValue = useMemo(
@@ -147,6 +152,21 @@ export function useCourseOverrideSettings({
     defaultValue: boxZeroDefaultEnabled,
     overrides: boxZeroOverrides,
     setOverrides: setBoxZeroOverrides,
+  });
+
+  const [boxZeroAnswerSideOverrides, setBoxZeroAnswerSideOverrides] =
+    usePersistedState<CourseOverrideState<BoxZeroAnswerSide>>(
+      "flashcards.courseBoxZeroAnswerSideOverrides",
+      { builtin: {}, custom: {} }
+    );
+  const boxZeroAnswerSide = useCourseOverrideAccessors<BoxZeroAnswerSide>({
+    courses,
+    activeCourseIdx,
+    activeCustomCourseId,
+    defaultValue: "back",
+    overrides: boxZeroAnswerSideOverrides,
+    setOverrides: setBoxZeroAnswerSideOverrides,
+    persistDefault: true,
   });
 
   const [autoflowDefaultEnabled] = usePersistedState<boolean>(
@@ -292,6 +312,11 @@ export function useCourseOverrideSettings({
   });
 
   return {
+    boxZeroAnswerSide: boxZeroAnswerSide.activeValue,
+    getBuiltinCourseBoxZeroAnswerSide: boxZeroAnswerSide.getBuiltin,
+    setBuiltinCourseBoxZeroAnswerSide: boxZeroAnswerSide.setBuiltin,
+    getCustomCourseBoxZeroAnswerSide: boxZeroAnswerSide.getCustom,
+    setCustomCourseBoxZeroAnswerSide: boxZeroAnswerSide.setCustom,
     boxZeroEnabled: boxZero.activeValue,
     getBuiltinCourseBoxZeroEnabled: boxZero.getBuiltin,
     setBuiltinCourseBoxZeroEnabled: boxZero.setBuiltin,

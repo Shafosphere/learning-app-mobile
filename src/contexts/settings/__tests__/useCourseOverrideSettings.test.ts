@@ -21,6 +21,24 @@ describe("useCourseOverrideSettings", () => {
     jest.restoreAllMocks();
   });
 
+  it("persists both answer sides explicitly and keeps courses independent after remount", async () => {
+    const params = { courses: [course], activeCourseIdx: null, activeCustomCourseId: 7 };
+    const hook = renderHook(() => useCourseOverrideSettings(params));
+    await waitFor(() => expect(hook.result.current.boxZeroAnswerSide).toBe("back"));
+    await act(async () => { await hook.result.current.setCustomCourseBoxZeroAnswerSide(7, "front"); });
+    await act(async () => { await hook.result.current.setCustomCourseBoxZeroAnswerSide(7, "back"); });
+    await act(async () => { await hook.result.current.setCustomCourseBoxZeroAnswerSide(8, "front"); });
+    await act(async () => { await hook.result.current.setBuiltinCourseBoxZeroAnswerSide(course, "back"); });
+    expect(JSON.parse((await AsyncStorage.getItem("flashcards.courseBoxZeroAnswerSideOverrides"))!)).toEqual({
+      builtin: { "en|pl|A1": "back" }, custom: { "7": "back", "8": "front" },
+    });
+    hook.unmount();
+    const restored = renderHook(() => useCourseOverrideSettings({ ...params, activeCustomCourseId: 8 }));
+    await waitFor(() => expect(restored.result.current.boxZeroAnswerSide).toBe("front"));
+    expect(restored.result.current.getCustomCourseBoxZeroAnswerSide(7)).toBe("back");
+    expect(restored.result.current.getCustomCourseBoxZeroAnswerSide(9)).toBe("back");
+  });
+
   it("sets the global skip-correction value while preserving course overrides", async () => {
     await AsyncStorage.multiSet([
       ["flashcards.skipCorrectionEnabled", JSON.stringify(false)],

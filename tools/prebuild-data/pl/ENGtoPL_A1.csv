@@ -30,7 +30,7 @@ external_id,front_text,back_text
 0029,if,"jeśli, gdyby, nawet, czy, choć, chociaż, warunek, wątpliwość, niepewność"
 0030,would,"byłby ,by, chcieć, woleć"
 0031,her,"jej, swój, ona, ją"
-0032,may,"może ,móc, oby, niech, być w stanie"
+0032,may,"może ,móc, oby, niech, być w stanie, maj"
 0033,when,"kiedy, wtedy, gdy, gdy tylko, czas"
 0034,no,"nie, ani trochę, żadną miarą, żaden, zakaz, brak, odmowa, głos"
 0035,these,"ci, te, te"
@@ -129,7 +129,7 @@ external_id,front_text,back_text
 0128,long,"długi, długo, długoterminowy"
 0129,think,"myśleć, pomyśleć, zastanawiać się, sądzić, uważać, przypuszczać, wyobrażać sobie, mieć na myśli, zamierzać"
 0130,important,"ważny, istotny"
-0131,table,"stół, tabela, tabliczka, stołowy, towarzystwo"
+0131,table,"stół, tabela, tabliczka, stołowy, towarzystwo, stolik"
 0132,come,"przyjść ,przychodzić, przybywać, pochodzić, pojawiać się, dochodzić, doświadczyć"
 0133,period,"okres, epoka, lekcja, miesiączka, kropka"
 0134,go,"iść, idź, wyjść, podróżować, poruszać się, umierać, pasować, działać, powodzić się, ruch, zgoda"
@@ -152,7 +152,7 @@ external_id,front_text,back_text
 0151,called,zwany
 0152,course,"kurs, przebieg, tor, danie"
 0153,line,"linia, kolejka, rząd, przewód, tor, trasa"
-0154,change,"zmiana, drobne, zmieniać, rozmieniać"
+0154,change,"zmiana, reszta, drobne, zmieniać, rozmieniać"
 0155,women,kobiety
 0156,person,"osoba, człowiek"
 0157,question,"pytanie, kwestia, wątpliwość, kwestionować, pytać"
@@ -167,7 +167,7 @@ external_id,front_text,back_text
 0166,held,"trzymać, odbyć się, trzymany"
 0167,set,"zestaw, zbiór, ustawić"
 0168,side,"strona, bok, drużyna, angażować się"
-0169,left,"lewy, lewicowy, w lewo"
+0169,left,"lewy, lewicowy, w lewo, lewo"
 0170,always,"zawsze, stale"
 0171,five,"pięć, 5, piątka, pięciolatek"
 0172,field,"pole, teren, boisko, odpowiadać"
@@ -246,7 +246,7 @@ external_id,front_text,back_text
 0245,size,"rozmiar, wielkość"
 0246,six,"sześć, 6, szóstka"
 0247,love,"miłość, kochać, uwielbiać, lubić"
-0248,father,"ojciec, przodek, zrodzić, spłodzić, usynowić"
+0248,father,"ojciec, tata, przodek, zrodzić, spłodzić, usynowić"
 0249,kind,"rodzaj, typ, uprzejmy, miły, życzliwy"
 0250,british,"brytyjski, Brytyjczyk, Brytyjka"
 0251,told,"powiedział, powiedziany"
@@ -269,7 +269,7 @@ external_id,front_text,back_text
 0268,brought,"przywieziony ,przyniósł, przywiózł"
 0269,review,"omówienie, przegląd, recenzja, inspekcja, sprawdzenie, rewizja, omawiać, recenzować, rewidować, przetrząsać, sprawdzać"
 0270,believe,"wierzyć, myśleć, przypuszczać"
-0271,mother,"matka, pramatka, źródło, troszczyć się, matkować, niańczyć"
+0271,mother,"matka, mama,pramatka, źródło, troszczyć się, matkować, niańczyć"
 0272,close,"zamknąć, zakończyć, bliski, podobny, zażyły, zamknięty"
 0273,keep,"trzymać, mieć, posiadać, utrzymywać, opiekować się, zachowywać, zachowaćpowstrzymywać się"
 0274,april,kwiecień
@@ -354,7 +354,7 @@ external_id,front_text,back_text
 0353,culture,"kultura, uprawa, hodowla, produkcja, kultura bakterii"
 0354,earlier,"wcześniej, wcześniejszy"
 0355,february,luty
-0356,station,"stacja, posterunek, stacjonować"
+0356,station,"stacja, posterunek, stacjonować, dworzec"
 0357,alone,"sam, samotny, w pojedynkę, wyłącznie, tylko"
 0358,europe,Europa
 0359,future,"przyszłość, przyszły"
@@ -424,10 +424,10 @@ external_id,front_text,back_text
 0423,successful,"udany, skuteczny, efektywny, powodzenie, odnosić sukces"
 0424,top,"szczyt, wierzchołek, góra, powierzchnia, bąk, kwark, górny, szczytowy, przykrywać, pobić rekord, przewyższyć, popełnić samobójstwo"
 0425,dollars,dolary
-0426,cut,"ciąć, wycinać, rąbać, kroić, krój, obcięcie, cięcie"
-0427,stop,"przerwa, zatrzymaj, przystanek, zatrzymanie, znak stop, zatrzymać, zatrzymać się, przerwać, zakończyć"
+0426,cut,"ciąć, skaleczenie, wycinać, rąbać, kroić, krój, obcięcie, cięcie"
+0427,stop,"przerwa, stop, zatrzymaj, przystanek, zatrzymanie, znak stop, zatrzymać, zatrzymać się, przerwać, zakończyć"
 0428,sold,"sprzedany, sprzedał, sprzedane"
-0429,miss,"panna, tęsknić za, chybić, nie trafić, minąć się, przeoczyć, opuścić, spóźnić się"
+0429,miss,"panna, tęsknić za, chybić, nie trafić, minąć się, przeoczyć, opuścić, spóźnić się, panno"
 0430,introduced,"przedstawiony, wprowadzony, zaprezentowany"
 0431,picture,"obraz, obrazek, zdjęcie, uosobienie, przykład, przedstawiać"
 0432,standing,"pozycja, reputacja, znaczenie, okres trwania, stojący"
@@ -454,7 +454,7 @@ external_id,front_text,back_text
 0453,german,"niemiecki, Niemiec, Niemka"
 0454,copy,"kopia, egzemplarz, kopiować, powielać, rozumieć, naśladować"
 0455,speech,"przemówienie, przemowa, mowa, zdolność mówienia"
-0456,dry,"suchy, wytrawny, suszyć"
+0456,dry,"suchy, sucho, wytrawny, suszyć"
 0457,quickly,szybko
 0458,hot,"gorący, pikantny, atrakcyjny, seksualny, gorąco"
 0459,winter,"zima, zimowy, zimować, przezimować"
@@ -477,7 +477,7 @@ external_id,front_text,back_text
 0476,bottom,"dno, spód, dół, podnóże, sedno, pupa"
 0477,attorney,"adwokat, radca prawny"
 0478,hence,"stąd, w związku z tym, z tego powodu"
-0479,medicine,"lekarstwo, medycyna"
+0479,medicine,"lekarstwo, lek, medycyna"
 0480,drawn,narysowany
 0481,marriage,"małżeństwo, ślub"
 0482,indian,"Indianin, Indianka, indyjski"
@@ -531,7 +531,7 @@ external_id,front_text,back_text
 0530,wind,"wiatr, nawijać, wić się, nakręcać"
 0531,birth,"narodziny, poród"
 0532,band,"taśma, opaska, bandaż, banda, zespół muzyczny, pasmo, bandażować, zespół"
-0533,fruit,"owoc, owocowy, owocować"
+0533,fruit,"owoc, owocowy, owocować, owoce"
 0534,doctor,"lekarz, lekarka, dr, doktor"
 0535,buy,"kupować, nabywać, przekupywać, kupić"
 0536,carefully,"starannie, dokładnie, uważnie, ostrożnie"
@@ -560,8 +560,8 @@ external_id,front_text,back_text
 0559,tube,"rura, rurka, tuba, tubka, metro"
 0560,television,"telewizja, telewizyjny"
 0561,fifty,"pięćdziesiąt, 50"
-0562,clean,"czysty, czyścić, wyczyścić"
-0563,store,"sklep, magazyn, przechowywać, gromadzić"
+0562,clean,"czysty, sprzątać,czyścić, wyczyścić"
+0563,store,"sklep, magazyn, przechowywać, gromadzić, zapas"
 0564,reader,"czytelnik, czytnik"
 0565,chosen,"wybrany, wybierać"
 0566,carrier,"roznosiciel, przewoźnik, statek, transporter, nośnik, nosiciel"
@@ -613,7 +613,7 @@ external_id,front_text,back_text
 0612,flowers,kwiaty
 0613,rice,ryż
 0614,feelings,"uczucia, emocje, wrażenia"
-0615,warm,"ciepły, ogrzać, podgrzać, ocieplić, serdeczny"
+0615,warm,"ciepły, ciepło, ogrzać, podgrzać, ocieplić, serdeczny"
 0616,boat,"łódź, łódka"
 0617,strange,"dziwny, obcy, nieznany"
 0618,conversation,"rozmowa, konwersacja"
@@ -780,7 +780,7 @@ external_id,front_text,back_text
 0779,palace,pałac
 0780,bottle,"butelka, butelkować"
 0781,ride,"jechać, jeździć, wozić, przewozić, przejażdżka, jazda"
-0782,shoes,"but, buty"
+0782,shoes,"but, buty, obuwie"
 0783,lessons,"lekcja, lekcje"
 0784,habits,"nawyk, nawyki, przyzwyczajenie, przyzwyczajenia, zwyczaj, zwyczaje"
 0785,lunch,"lunch, obiad"
@@ -992,7 +992,7 @@ external_id,front_text,back_text
 0991,clever,"bystry, sprytny, lotny, sprawny, zdolny, błyskotliwy, pomysłowy, zmyślny"
 0992,awake,"budzić, budzić się, przebudzony, przytomny, czujny, świadomy"
 0993,sits,"siada, siedzi"
-0994,shower,"prysznic, przelotny opad, brać prysznic"
+0994,shower,"prysznic, przelotny opad, brać prysznic, myć się"
 0995,notation,"notacja, zapis, notatka"
 0996,eyed,"przypatrywać się, obdarzać wzrokiem, patrzeć na, wpatrzony"
 0997,subparagraph,podpunkt
@@ -1060,3 +1060,209 @@ external_id,front_text,back_text
 1059,thirteenth,trzynasty
 1060,upheld,"podtrzymać, utrzymać, podtrzymany"
 1061,kick,"kop, kopnięcie, kopniak, kopać"
+1062,hey,hej
+1063,hello,witaj
+1064,welcome,"witaj, proszę"
+1065,goodbye,do widzenia
+1066,bye,pa
+1067,evening,wieczór
+1068,greetings,pozdrowienia
+1069,cheers,na zdrowie
+1070,please,proszę
+1071,pardon,wybacz
+1072,thankyou,dziękuję
+1073,madam,pani
+1074,polite,uprzejmy
+1075,respect,szacunek
+1076,issue,"problem, kwestia, wydanie, nakład, wydawać, publikować"
+1077,understand,"rozumieć, zrozumieć"
+1078,repeat,powtórzyć
+1079,slower,wolniej
+1080,word,słowo
+1081,meaning,"znaczenie, sens, oznaczać"
+1082,explain,"wyjaśnić, wyjaśniać, tłumaczyć"
+1083,translate,tłumaczyć
+1084,spell,literować
+1085,write,"napisać, pisać"
+1086,pronunciation,wymowa
+1087,either,"którykolwiek, którykolwiek z dwóch, albo, lub, ani, też"
+1088,few,"kilka, mało, niewiele, kilku, niedużo"
+1089,surname,nazwisko
+1090,country,"kraj, państwo, wieś, kraina, region, wiejski"
+1091,student,"student, uczeń"
+1092,study,"badanie, nauka, czytelnia, studiować, uczyć się"
+1093,hobby,hobby
+1094,friend,przyjaciel
+1095,zero,"zero, zerowy, żaden, zerować"
+1096,hundred,"sto, setka"
+1097,thousand,tysiąc
+1098,cost,"koszt, kosztować, szacować"
+1099,cheap,"tani, tandetny, kiczowaty"
+1100,discount,zniżka
+1101,sale,wyprzedaż
+1102,total,razem
+1103,receipt,paragon
+1104,cash,"gotówka, płatność gotówką, czek"
+1105,hour,godzina
+1106,minute,minuta
+1107,early,"wcześnie, wczesny, dawny"
+1108,delay,"opóźnienie, zwłoka, opóźniać, zwlekać"
+1109,march,"marzec, marsz, maszerować, demonstrować"
+1110,month,miesiąc
+1111,child,dziecko
+1112,beard,broda
+1113,glasses,okulary
+1114,slim,szczupły
+1115,weak,"słaby, osłabiony, nieprzekonujący"
+1116,skin,skóra
+1117,serious,poważny
+1118,shy,nieśmiały
+1119,brave,odważny
+1120,lazy,leniwy
+1121,hardworking,pracowity
+1122,honest,uczciwy
+1123,patient,cierpliwy
+1124,calm,spokojny
+1125,friendly,przyjazny
+1126,rude,niegrzeczny
+1127,brown,"brązowy, brąz, brunatny, kasztanowaty, opalony, przyrumienić, zbrązowieć, opalić się"
+1128,purple,"fioletowy, purpurowy, fiolet"
+1129,tshirt,koszulka
+1130,sweater,sweter
+1131,jeans,dżinsy
+1132,skirt,spódnica
+1133,socks,skarpetki
+1134,scarf,szalik
+1135,gloves,rękawiczki
+1136,medium,średni
+1137,apartment,"mieszkanie, apartament"
+1138,livingroom,salon
+1139,hallway,korytarz
+1140,balcony,balkon
+1141,basement,piwnica
+1142,attic,strych
+1143,stairs,schody
+1144,sofa,kanapa
+1145,wardrobe,szafa
+1146,lamp,lampa
+1147,fridge,lodówka
+1148,freezer,zamrażarka
+1149,oven,"piekarnik, piec"
+1150,stove,"kuchenka, piec, piecyk, płyta grzewcza"
+1151,microwave,mikrofalówka
+1152,kettle,czajnik
+1153,dishwasher,zmywarka
+1154,washingmachine,pralka
+1155,sink,umywalka
+1156,sleep,spać
+1157,leave,wyjść
+1158,return,"wrócić, wracać, zwracać, powrót, zwrot, przynosić, reportować"
+1159,learn,uczyć się
+1160,rest,odpoczywać
+1161,salt,"sól, solić, zasolić, słony"
+1162,pepper,"pieprz, papryka"
+1163,oil,"olej, oliwa, ropa naftowa, nafta, olejny, smarować, oliwić"
+1164,pasta,makaron
+1165,banana,banan
+1166,potato,ziemniak
+1167,menu,"menu, karta dań"
+1168,waiter,kelner
+1169,bill,"rachunek, banknot, projekt, ustawa, dziób, wystawiać"
+1170,tip,"napiwek, czubek, wskazówka, wysypisko śmieci, cynk, informacja, uzyskać, poufnie, wlewać, wylewać, przelewać, wysypywać, wyrzucać, przechylić, wychylić, przeważyć"
+1171,reservation,rezerwacja
+1172,dessert,deser
+1173,salad,sałatka
+1174,steak,stek
+1175,plate,"talerz, płyta, tablica, tabliczka, taca"
+1176,fork,"widelec, widły, widełki, rozwidlenie, rozgałęzienie, odnoga, rozwidlać się"
+1177,spoon,łyżka
+1178,market,"rynek, targowisko, wprowadzać na rynek"
+1179,supermarket,supermarket
+1180,checkout,"kasa, wymeldowanie"
+1181,basket,"koszyk, kosz"
+1182,atm,bankomat
+1183,refund,zwrot
+1184,exchange,"wymiana, dewizowy, wymienny, giełdowy, walutowy, zamiana, kurs, giełda, centrala telefoniczna, wymieniać, zamieniać"
+1185,warranty,gwarancja
+1186,pharmacy,apteka
+1187,postoffice,poczta
+1188,police,"policja, policyjny, patrolować"
+1189,museum,"muzeum, muzealny"
+1190,straight,"prosto, prosty, bez zakrzywień, heteroseksualny, czysty, wprost, linia prosta"
+1191,far,"daleko, daleki, znacznie"
+1192,front,"przód, front, przedni, napotkać, skonfrontować"
+1193,next,"następny, kolejny, bliski"
+1194,road,"droga, ulica, szosa, jezdnia"
+1195,center,"centrum, środek, centrować"
+1196,entrance,"wejście, wstęp, dostęp, wchodzenie, zachwycać, wprawiać w trans"
+1197,exit,wyjście
+1198,tram,tramwaj
+1199,subway,metro
+1200,taxi,taksówka
+1201,platform,peron
+1202,schedule,"rozkład, harmonogram, plan, grafik, zaplanować"
+1203,departure,odjazd
+1204,arrival,przyjazd
+1205,luggage,bagaż
+1206,passport,paszport
+1207,border,granica
+1208,travel,"podróżować, podróże, podróż, przemieszczać się"
+1209,reception,recepcja
+1210,elevator,winda
+1211,towel,ręcznik
+1212,pillow,poduszka
+1213,blanket,"koc, pled, filc, warstwa, ogólny, bezwarunkowy, pokrywać, przykrywać, maskować"
+1214,wifi,wi-fi
+1215,password,hasło
+1216,lobby,hol
+1217,checkin,zameldowanie
+1218,eye,oko
+1219,arm,ręka
+1220,finger,palec
+1221,chest,"klatka, klatka piersiowa, skrzynia, obudowa"
+1222,stomach,"brzuch, żołądek, apetyt, chęć, strawić, ścierpieć, znieść"
+1223,leg,noga
+1224,knee,kolano
+1225,foot,stopa
+1226,pain,ból
+1227,cough,kaszel
+1228,flu,grypa
+1229,allergy,alergia
+1230,appointment,"wizyta, umówione spotkanie, termin, mianowanie, powołanie, spotkanie"
+1231,emergency,"nagły, awaria, nagły wypadek, sytuacja awaryjna, awaryjny"
+1232,burn,oparzenie
+1233,infection,infekcja
+1234,tablet,tabletka
+1235,syrup,syrop
+1236,storm,"burza, sztorm, szturm, szturmować"
+1237,wet,"mokro, mokry, wilgotny, zwilżać"
+1238,umbrella,parasol
+1239,boots,buty
+1240,series,serial
+1241,sport,sport
+1242,running,bieganie
+1243,cooking,"gotowanie, kuchnia"
+1244,photography,"fotografia, fotografika"
+1245,walking,spacer
+1246,gym,siłownia
+1247,drawing,rysowanie
+1248,hiking,wędrówka
+1249,boss,"szef, szefowa, przełożony, boss"
+1250,colleague,kolega
+1251,project,projekt
+1252,task,"zadanie, zajęcie, praca, dać komuś do wykonania, zlecać"
+1253,deadline,termin
+1254,salary,pensja
+1255,lesson,lekcja
+1256,teacher,nauczyciel
+1257,homework,praca domowa
+1258,exam,egzamin
+1259,break,przerwa
+1260,lost,"zgubiony, zagubiony, zaginiony, stracony, przegrany"
+1261,danger,"niebezpieczeństwo, zagrożenie"
+1262,ambulance,karetka
+1263,accident,"wypadek, przypadek, akcydens"
+1264,thief,złodziej
+1265,wallet,portfel
+1266,call,dzwonić
+1267,panic,"panika, popłoch, panikować, wywoływać panikę"

@@ -119,6 +119,7 @@ export default function Flashcards() {
     boxesLayout,
     flashcardsBatchSize,
     boxZeroEnabled,
+    boxZeroAnswerSide,
     autoflowEnabled,
     explanationOnlyOnWrong,
     showExplanationEnabled,
@@ -424,6 +425,7 @@ export default function Flashcards() {
       boxFacesControllerRef.current.handleWrongAnswer(boxKey);
     },
     boxZeroEnabled,
+    boxZeroAnswerSide,
     skipDemotionCorrection: skipCorrection,
     debugContext: {
       screen: "flashcards",

@@ -6,6 +6,7 @@ import {
   type CustomFlashcardRecord,
 } from "@/src/db/sqlite/db";
 import { getCustomCourses } from "@/src/db/sqlite/repositories/courses";
+import { restoreRetiredOfficialCourseWithDb } from "@/src/db/sqlite/retiredOfficialCourses";
 import { getCustomFlashcards } from "@/src/db/sqlite/repositories/flashcards";
 import { mapCustomCardToWord } from "@/src/utils/flashcardsMapper";
 import i18n from "@/src/i18n";
@@ -1772,6 +1773,7 @@ async function resetReplaceableStorageState(): Promise<void> {
   const customOverrideResets: [string, string][] = [];
   const overrideKeys = [
     "flashcards.courseBoxZeroOverrides",
+    "flashcards.courseBoxZeroAnswerSideOverrides",
     "flashcards.courseAutoflowOverrides",
     "flashcards.courseCardSizeOverrides",
     "flashcards.courseImageSizeOverrides",
@@ -1900,6 +1902,21 @@ export async function restoreUserData(
         officialCourseIdsBySlug.set(slug, row.id);
       }
     });
+
+    // A retired pack is installed only when the backup says this user owned it.
+    const backedUpOfficialSlugs = new Set([
+      ...normalized.officialCourseState.courses.map((course) => course.slug),
+      ...normalized.officialCourseState.pinnedOfficialCourseSlugs,
+      ...Object.keys(normalized.officialCourseState.boxSnapshots),
+      ...(normalized.officialCourseState.lastActiveOfficialCourseSlug
+        ? [normalized.officialCourseState.lastActiveOfficialCourseSlug]
+        : []),
+    ]);
+    for (const slug of backedUpOfficialSlugs) {
+      if (officialCourseIdsBySlug.has(slug)) continue;
+      const restoredId = await restoreRetiredOfficialCourseWithDb(officialDb, slug);
+      if (restoredId != null) officialCourseIdsBySlug.set(slug, restoredId);
+    }
 
     for (const courseState of normalized.officialCourseState.courses ?? []) {
       const targetCourseId = officialCourseIdsBySlug.get(courseState.slug);

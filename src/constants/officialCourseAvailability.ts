@@ -2,6 +2,10 @@ import type { NativeLanguage } from "@/src/i18n";
 
 const POLISH_LANGUAGE_COURSE_SLUGS = [
   "fiszki_podstawy_en_pl_slowa",
+  "eng_to_pl_first_50",
+  "eng_to_pl_first_100",
+  "eng_to_pl_first_250",
+  "eng_to_pl_first_500",
   "eng_to_pl_a1",
   "eng_to_pl_a2",
   "eng_to_pl_b1",

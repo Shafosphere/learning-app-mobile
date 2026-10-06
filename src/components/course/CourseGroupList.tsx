@@ -1,3 +1,4 @@
+import { LANGUAGE_COURSE_GROUPS } from "@/src/constants/languageCourseGroups";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import React from "react";
 import { Image, Text, View } from "react-native";
@@ -45,6 +46,10 @@ export const CourseGroupList = ({
                     return null;
                 }
 
+                const continuesLanguageSeries = !group.languageGroupId && !group.category && groups.some((other) =>
+                    other.languageGroupId && other.sourceLang === group.sourceLang && other.targetLang === group.targetLang
+                );
+
                 const targetCode = group.targetLang
                     ? group.targetLang.toUpperCase()
                     : "?";
@@ -57,10 +62,14 @@ export const CourseGroupList = ({
                         key={`builtin-group-${group.key}`}
                         style={styles.groupSection}
                     >
-                        <View style={styles.groupHeader}>
+                        {!continuesLanguageSeries ? <View style={styles.groupHeader}>
                             <View style={styles.groupHeaderLine} />
                             <View style={styles.groupHeaderBadge}>
-                                {group.category ? (
+                                {group.languageGroupId ? (
+                                    <Text style={styles.groupHeaderCode}>
+                                        {t(LANGUAGE_COURSE_GROUPS[group.languageGroupId].labelKey)}
+                                    </Text>
+                                ) : group.category ? (
                                     <View style={styles.groupHeaderLanguage}>
                                         {group.category?.icon ? (
                                             <FontAwesome6
@@ -108,14 +117,15 @@ export const CourseGroupList = ({
                                     </>
                                 )}
                             </View>
-                        </View>
+                        </View> : null}
 
                         {hasOfficial ? (
                             <>
                                 <OfficialCourseSection
                                     title={t("repeats.labels.courses")}
                                     list={regularOfficial}
-                                    showTitle={showRegular}
+                                    showTitle={showRegular && !continuesLanguageSeries}
+                                    isContinuation={continuesLanguageSeries}
                                     activeCourseId={activeCourseId}
                                     colors={colors}
                                     onPress={onPress}
@@ -126,7 +136,8 @@ export const CourseGroupList = ({
                                 <OfficialCourseSection
                                     title={t("courses.groups.mini")}
                                     list={miniOfficial}
-                                    showTitle={showRegular && showMini}
+                                    showTitle={showRegular && showMini && !continuesLanguageSeries}
+                                    isContinuation={continuesLanguageSeries && !showRegular}
                                     activeCourseId={activeCourseId}
                                     colors={colors}
                                     onPress={onPress}

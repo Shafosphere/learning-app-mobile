@@ -11,6 +11,7 @@ interface OfficialCourseSectionProps {
     title: string;
     list: OfficialCourseListItem[];
     showTitle?: boolean;
+    isContinuation?: boolean;
     activeCourseId: number | null;
     colors: { headline: string };
     onPress: (id: number) => void;
@@ -23,6 +24,7 @@ export const OfficialCourseSection = ({
     title,
     list,
     showTitle = true,
+    isContinuation = false,
     activeCourseId,
     colors,
     onPress,
@@ -36,7 +38,7 @@ export const OfficialCourseSection = ({
     if (!list.length) return null;
 
     return (
-        <View style={styles.groupCourses}>
+        <View style={[styles.groupCourses, isContinuation && styles.groupCoursesContinuation]}>
             {showTitle ? <Text style={styles.groupSubtitle}>{title}</Text> : null}
             {list.map((course) => {
                 const isHighlighted = activeCourseId === course.id;

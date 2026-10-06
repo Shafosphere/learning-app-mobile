@@ -1414,15 +1414,22 @@ describe("userDataBackup", () => {
     ).toBe(false);
   });
 
-  it("restores full officialCourseState including hints and identity fallback by position/front-back", async () => {
+  it.each([
+    ["official-slug", false],
+    ["fiszki_podstawy_en_pl_slowa", false],
+    ["fiszki_podstawy_en_pl_slowa", true],
+  ])("restores official state for %s (missing locally: %s)", async (slug, missingLocally) => {
     const db = createMockDb();
+    if (missingLocally) {
+      db.runAsync.mockResolvedValue({ lastInsertRowId: 700 });
+    }
 
     db.getAllAsync.mockImplementation(async (sql: string, ...params: any[]) => {
       if (
         sql.includes("FROM custom_courses") &&
         sql.includes("COALESCE(is_official, 0) = 1")
       ) {
-        return [{ id: 700, slug: "official-slug" }];
+        return missingLocally ? [] : [{ id: 700, slug }];
       }
 
       if (
@@ -1580,10 +1587,10 @@ describe("userDataBackup", () => {
       customCourseBoxSnapshots: {},
       customCourses: [],
       officialCourseState: {
-        pinnedOfficialCourseSlugs: ["official-slug"],
-        lastActiveOfficialCourseSlug: "official-slug",
+        pinnedOfficialCourseSlugs: [slug],
+        lastActiveOfficialCourseSlug: slug,
         boxSnapshots: {
-          "official-slug": makeSnapshot(
+          [slug]: makeSnapshot(
             11,
             111,
             "match-by-front-back",
@@ -1592,7 +1599,13 @@ describe("userDataBackup", () => {
         },
         courses: [
           {
-            slug: "official-slug",
+            slug,
+            editedFlashcards: [{
+              externalId: "card-a", position: 0,
+              frontText: "edited front", backText: "edited answer",
+              answers: ["edited answer"], imageFront: null, imageBack: null,
+              explanation: "user explanation", flipped: true,
+            }],
             reviews: [
               {
                 externalId: "card-a",
@@ -1665,6 +1678,8 @@ describe("userDataBackup", () => {
     expect(result.success).toBe(true);
     expect(result.stats).toEqual(
       expect.objectContaining({
+        officialPinnedCoursesRestored: 1,
+        officialActiveCourseRestored: 1,
         officialReviewsRestored: 2,
         learningEventsRestored: 1,
         boxSnapshotsRestored: 1,
@@ -1672,8 +1687,17 @@ describe("userDataBackup", () => {
       })
     );
 
+    expect(db.runAsync.mock.calls.filter(([sql]) => sql.includes("INSERT INTO custom_courses")))
+      .toHaveLength(missingLocally ? 1 : 0);
+
+    expect(db.runAsync).toHaveBeenCalledWith(
+      expect.stringContaining("is_user_edited = 1"),
+      "edited front", "edited answer", null, null, "user explanation", 1,
+      1700000000000, 701
+    );
+
     const hintUpdates = db.runAsync.mock.calls.filter(([sql]) =>
-      sql.includes("UPDATE custom_flashcards")
+      sql.includes("UPDATE custom_flashcards") && sql.includes("hint_front")
     );
     expect(hintUpdates).toHaveLength(2);
     expect(hintUpdates[0]?.slice(1, 5)).toEqual([

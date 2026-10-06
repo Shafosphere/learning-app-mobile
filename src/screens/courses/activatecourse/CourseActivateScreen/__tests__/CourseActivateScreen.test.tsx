@@ -583,4 +583,24 @@ describe("CourseActivateScreen loading state", () => {
     fireEvent.press(await screen.findByText("Graj"));
     expect(mockPush).toHaveBeenCalledWith("/flashcards");
   });
+  it("shows the pinned English series under its own heading and activates a stage", async () => {
+    const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
+    mockedUseSettings.mockReturnValue({
+      ...mockedUseSettings(), pinnedOfficialCourseIds: [51, 55], setActiveCustomCourseId,
+      hasSeenCustomCourseEntrySettings: jest.fn(() => true),
+    });
+    mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([
+      { id: 55, name: "Ang A1", slug: "eng_to_pl_a1", iconId: "flag:en",
+        iconColor: "#10B981", cardsCount: 1267, isOfficial: true },
+      { id: 51, name: "Pierwsze 50 słów", slug: "eng_to_pl_first_50", iconId: "flag:en",
+        iconColor: "#10B981", cardsCount: 50, isOfficial: true },
+    ]);
+    const screen = render(<CourseActivateScreen />);
+    await screen.findByText("constants.languageCourseGroups.label.englishFromZero");
+    expect(screen.getAllByText(/^(Pierwsze 50 słów|Ang A1)$/).map((node) => node.props.children))
+      .toEqual(["Pierwsze 50 słów", "Ang A1"]);
+    fireEvent.press(screen.getByText("Pierwsze 50 słów"));
+    await waitFor(() => expect(setActiveCustomCourseId).toHaveBeenCalledWith(51));
+  });
+
 });

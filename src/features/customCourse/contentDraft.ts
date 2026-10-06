@@ -1,3 +1,4 @@
+import type { BoxZeroAnswerSide } from "@/src/contexts/settings/types";
 import type { ManualCard, ManualCardType } from "@/src/hooks/useManualCardsForm";
 
 export type AddMode = "csv" | "manual";
@@ -16,6 +17,7 @@ export type ContentDraftPayload = {
 export type SettingsDraftPayload = {
   scopeKey: string;
   boxZeroEnabled: boolean;
+  boxZeroAnswerSide?: BoxZeroAnswerSide;
   autoflowEnabled: boolean;
   reviewsEnabled: boolean;
   showExplanationEnabled: boolean;

@@ -819,8 +819,19 @@
         "intro": "Full details for images used in this course.",
         "count_one": "{{count}} image",
         "count_other": "{{count}} images",
-        "labels": { "title": "Title", "author": "Creator", "changes": "Changes" },
-        "columns": { "bird": "Bird", "title": "Image title", "author": "Creator", "license": "License", "changes": "Changes", "links": "Links" },
+        "labels": {
+          "title": "Title",
+          "author": "Creator",
+          "changes": "Changes"
+        },
+        "columns": {
+          "bird": "Bird",
+          "title": "Image title",
+          "author": "Creator",
+          "license": "License",
+          "changes": "Changes",
+          "links": "Links"
+        },
         "sourceButton": "Source page",
         "licenseButton": "License",
         "publicDomain": "Public domain",
@@ -1435,6 +1446,15 @@
         }
       },
       "settingsCourse": {
+        "boxZeroAnswerSide": {
+          "title": "What should you copy in box 0?",
+          "description": "Choose which side of the flashcard to copy with a hint.",
+          "disabledHint": "Enable box 0 to change this",
+          "front": "Front",
+          "back": "Back",
+          "frontDescription": "Copy the text on the front of the flashcard.",
+          "backDescription": "Copy the text on the back of the flashcard."
+        },
         "title": {
           "stwierdzenie": "Statement",
           "opanowanie": "Mastery",
@@ -1527,6 +1547,14 @@
     }
   },
   "constants": {
+    "languageCourseGroups": {
+      "label": {
+        "englishFromZero": "English A1"
+      },
+      "description": {
+        "englishFromZero": "From 50 words to 1300"
+      }
+    },
     "courseCategories": {
       "label": {
         "geography": "Geography",

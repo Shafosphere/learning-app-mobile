@@ -1,3 +1,4 @@
+import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
@@ -116,7 +117,8 @@ export default function CourseActivateScreen() {
     const ensureGroup = (
       sourceLang: string | null,
       targetLang: string | null,
-      categoryId?: string
+      categoryId?: string,
+      languageGroupId?: LanguageCourseGroupId
     ): CourseGroup => {
       let key: string;
       let category: CourseCategory | undefined;
@@ -124,6 +126,8 @@ export default function CourseActivateScreen() {
       if (categoryId && COURSE_CATEGORIES[categoryId]) {
         category = COURSE_CATEGORIES[categoryId];
         key = `cat:${categoryId}`;
+      } else if (languageGroupId) {
+        key = `series:${languageGroupId}`;
       } else {
         key = `lang:${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
       }
@@ -133,6 +137,7 @@ export default function CourseActivateScreen() {
         group = {
           key,
           category,
+          languageGroupId,
           sourceLang: sourceLang ?? null,
           targetLang: targetLang ?? null,
           sourceFlag: sourceLang ? getFlagSource(sourceLang) : undefined,
@@ -148,7 +153,8 @@ export default function CourseActivateScreen() {
       ensureGroup(
         course.sourceLang,
         course.targetLang,
-        course.categoryId
+        course.categoryId,
+        course.languageGroupId
       ).official.push(course);
     });
 
@@ -178,7 +184,8 @@ export default function CourseActivateScreen() {
     const sortedGroups = Array.from(map.values()).sort((a, b) => {
       const targetDiff = compareLangs(a.targetLang, b.targetLang);
       if (targetDiff !== 0) return targetDiff;
-      return compareLangs(a.sourceLang, b.sourceLang);
+      return compareLangs(a.sourceLang, b.sourceLang) ||
+        Number(!a.languageGroupId) - Number(!b.languageGroupId);
     });
 
     sortedGroups.forEach((group) => {
@@ -229,6 +236,7 @@ export default function CourseActivateScreen() {
                     manifest?.smallFlag ?? manifest?.sourceLang ?? null,
                   isMini: manifest?.isMini ?? true,
                   categoryId: manifest?.categoryId,
+                  languageGroupId: manifest?.languageGroupId,
                   position: manifest?.position,
                 };
               });

@@ -67,6 +67,7 @@ import { useStatsDisplaySettings } from "./settings/useStatsDisplaySettings";
 import { useThemeAccessibilitySettings } from "./settings/useThemeAccessibilitySettings";
 
 export type {
+  BoxZeroAnswerSide,
   CEFR,
   CourseBoxZeroKeyParams,
   DominantHand,

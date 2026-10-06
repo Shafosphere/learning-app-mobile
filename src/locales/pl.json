@@ -821,8 +821,19 @@
         "count_few": "{{count}} obrazy",
         "count_many": "{{count}} obrazów",
         "count_other": "{{count}} obrazów",
-        "labels": { "title": "Tytuł", "author": "Autor", "changes": "Zmiany" },
-        "columns": { "bird": "Ptak", "title": "Tytuł obrazu", "author": "Autor", "license": "Licencja", "changes": "Zmiany", "links": "Linki" },
+        "labels": {
+          "title": "Tytuł",
+          "author": "Autor",
+          "changes": "Zmiany"
+        },
+        "columns": {
+          "bird": "Ptak",
+          "title": "Tytuł obrazu",
+          "author": "Autor",
+          "license": "Licencja",
+          "changes": "Zmiany",
+          "links": "Linki"
+        },
         "sourceButton": "Strona źródłowa",
         "licenseButton": "Licencja",
         "publicDomain": "Domena publiczna",
@@ -1437,6 +1448,15 @@
         }
       },
       "settingsCourse": {
+        "boxZeroAnswerSide": {
+          "title": "Co przepisywać w pudełku 0?",
+          "description": "Wybierz stronę fiszki do przepisania z podpowiedzią.",
+          "disabledHint": "Włącz pudełko 0, aby zmienić",
+          "front": "Przód",
+          "back": "Tył",
+          "frontDescription": "Przepisuj tekst z przodu fiszki.",
+          "backDescription": "Przepisuj tekst z tyłu fiszki."
+        },
         "title": {
           "stwierdzenie": "Stwierdzenie",
           "opanowanie": "Opanowanie",
@@ -1529,6 +1549,14 @@
     }
   },
   "constants": {
+    "languageCourseGroups": {
+      "label": {
+        "englishFromZero": "A1 Angielski"
+      },
+      "description": {
+        "englishFromZero": "Od 50 słów do 1300"
+      }
+    },
     "courseCategories": {
       "label": {
         "geography": "Geografia",

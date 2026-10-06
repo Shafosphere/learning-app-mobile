@@ -93,6 +93,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     height: 66 / 3,
     borderRadius: 5,
   },
+  groupCoursesContinuation: {
+    marginTop: 0,
+  },
   groupCourses: {
     marginTop: 12,
     display: "flex",

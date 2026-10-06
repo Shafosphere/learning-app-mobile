@@ -430,4 +430,51 @@ describe("CoursePinScreen skip onboarding", () => {
     expect(screen.getByText("Stolice Europy")).toBeTruthy();
     expect(screen.queryByText("Flagi Europy")).toBeNull();
   });
+  const series = [
+    { id: 51, name: "Pierwsze 50 słów", slug: "eng_to_pl_first_50", cardsCount: 50 },
+    { id: 52, name: "100 słów", slug: "eng_to_pl_first_100", cardsCount: 100 },
+    { id: 53, name: "250 słów", slug: "eng_to_pl_first_250", cardsCount: 250 },
+    { id: 54, name: "500 słów", slug: "eng_to_pl_first_500", cardsCount: 500 },
+    { id: 55, name: "Ang A1", slug: "eng_to_pl_a1", cardsCount: 1267 },
+    { id: 56, name: "Ang A2", slug: "eng_to_pl_a2", cardsCount: 1230 },
+    { id: 57, name: "Ang B1", slug: "eng_to_pl_b1", cardsCount: 2020 },
+    { id: 58, name: "Ang B2", slug: "eng_to_pl_b2", cardsCount: 1736 },
+  ];
+
+  it("keeps the ordered English series in Languages and outside Knowledge", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockOfficialCourseRows = [...series].reverse().map((row) => ({
+      ...row, iconId: "flag:en", iconColor: "#10B981",
+    }));
+    render(<CoursePinScreen />);
+    const label = "Kategoria constants.languageCourseGroups.label.englishFromZero, 5 kursów";
+    await waitFor(() => expect(screen.getByLabelText(label)).toBeTruthy());
+    expect(screen.queryByText("Pierwsze 50 słów")).toBeNull();
+    expect(screen.getByText("Ang A2")).toBeTruthy();
+    expect(screen.getByText("Ang B1")).toBeTruthy();
+    expect(screen.getByText("Ang B2")).toBeTruthy();
+    expect(screen.getAllByText("PL")).toHaveLength(1);
+    expect(screen.getAllByText("EN")).toHaveLength(1);
+    fireEvent.press(screen.getByLabelText(label));
+    expect(screen.getAllByText(/^(Pierwsze 50 słów|100 słów|250 słów|500 słów|Ang A1|Ang A2|Ang B1|Ang B2)$/).map((node) => node.props.children))
+      .toEqual(series.map((row) => row.name));
+    fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
+    expect(screen.queryByLabelText(label)).toBeNull();
+    expect(screen.queryByText("Pierwsze 50 słów")).toBeNull();
+  });
+
+  it("reveals the first series card before onboarding starts", async () => {
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false, isPendingStart: true, hasSeen: false, isReady: true,
+      currentStep: null, currentIndex: 0, totalSteps: 9,
+      canGoBack: false, canGoNext: false, goBack: jest.fn(), goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)), skipFlow: mockSkipFlow,
+    });
+    mockOfficialCourseRows = series.map((row) => ({
+      ...row, iconId: "flag:en", iconColor: "#10B981",
+    }));
+    render(<CoursePinScreen />);
+    await waitFor(() => expect(screen.getByText("Pierwsze 50 słów")).toBeTruthy());
+  });
+
 });

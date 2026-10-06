@@ -33,7 +33,30 @@ Regenerate merged files:
 python3 tools/scripts/merge_constellation_svg.py --all
 ```
 
+## A1 images workflow
+
+`assets/images/A1` contains only optimized WebP files. To regenerate them from
+an external backup of the original PNG files, run:
+
+```bash
+npm run assets:a1:optimize -- /path/to/original-pngs
+```
+
+Like the bird images, these use a maximum of 800 px on either side (without
+upscaling), quality 70, WebP method 6, and no metadata. Aspect ratio and
+transparency are preserved. Before resizing, white background connected to the
+image edges is removed using flood fill with 5% color tolerance. Enclosed white
+details are preserved; white objects without a separating outline may need
+manual correction. The external source files remain unchanged.
+`imageMaps.englishA1` keeps the `.png` lookup keys
+used by existing CSV files and databases, but requires only the `.webp` assets.
+
 ## Integrity check
+
+`assets/data/sqlite/retired-basic-english.json` preserves the 474 cards from the
+previously shipped `fiszki_podstawy_en_pl_slowa` pack (version 3). It is used only
+to restore backups that reference this retired course. Keep its external IDs,
+positions, and answers unchanged; it is excluded from the fresh-install database.
 
 Run path validation to ensure no code references legacy asset locations:
 

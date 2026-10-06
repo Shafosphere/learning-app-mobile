@@ -32,16 +32,18 @@ export async function setBuiltinOverride<T>({
   defaultValue,
   overrides,
   setOverrides,
+  persistDefault = false,
 }: {
   params: CourseBoxZeroKeyParams;
   value: T;
   defaultValue: T;
   overrides: CourseOverrideState<T>;
   setOverrides: SetOverrides<T>;
+  persistDefault?: boolean;
 }): Promise<void> {
   const key = makeBuiltinCourseKey(params);
   const current = overrides.builtin[key];
-  const shouldRemove = value === defaultValue;
+  const shouldRemove = !persistDefault && value === defaultValue;
   if (shouldRemove && current === undefined) {
     return;
   }
@@ -66,16 +68,18 @@ export async function setCustomOverride<T>({
   defaultValue,
   overrides,
   setOverrides,
+  persistDefault = false,
 }: {
   courseId: number;
   value: T;
   defaultValue: T;
   overrides: CourseOverrideState<T>;
   setOverrides: SetOverrides<T>;
+  persistDefault?: boolean;
 }): Promise<void> {
   const key = courseId.toString();
   const current = overrides.custom[key];
-  const shouldRemove = value === defaultValue;
+  const shouldRemove = !persistDefault && value === defaultValue;
   if (shouldRemove && current === undefined) {
     return;
   }
