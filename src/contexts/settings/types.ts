@@ -96,6 +96,7 @@ export interface SettingsContextValue {
   setBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams, side: BoxZeroAnswerSide) => Promise<void>;
   getCustomCourseBoxZeroAnswerSide: (courseId: number) => BoxZeroAnswerSide;
   setCustomCourseBoxZeroAnswerSide: (courseId: number, side: BoxZeroAnswerSide) => Promise<void>;
+  boxZeroSettingsHydrated: boolean;
   boxZeroEnabled: boolean;
   getBuiltinCourseBoxZeroEnabled: (
     params: CourseBoxZeroKeyParams

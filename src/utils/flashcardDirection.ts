@@ -1,4 +1,4 @@
-import type { WordWithTranslations } from "@/src/types/boxes";
+import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
 type DirectionalCard = Pick<
   WordWithTranslations,
@@ -17,4 +17,16 @@ export function isAnswerOnlyCard(
   const hasTextPrompt = Boolean(card.text?.trim());
   const hasImagePrompt = Boolean(card.imageFront || card.imageBack);
   return !hasTextPrompt && hasImagePrompt;
+}
+
+// Preserve the original recall order without box zero. With intro, box one recalls the front.
+export function isStudyCardReversed(
+  card: WordWithTranslations | null | undefined,
+  box: keyof BoxesState | null,
+  boxZeroEnabled: boolean,
+): boolean {
+  if (!card?.flipped || !box || isAnswerOnlyCard(card)) return false;
+  return boxZeroEnabled
+    ? box === "boxOne" || box === "boxThree" || box === "boxFive"
+    : box === "boxTwo" || box === "boxFour";
 }

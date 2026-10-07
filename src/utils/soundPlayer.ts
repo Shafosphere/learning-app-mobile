@@ -8,7 +8,7 @@ type LoadedSounds = Partial<Record<string, SoundInstance>>;
 const loadedSounds: LoadedSounds = {};
 const playbackLocks = new Map<string, Promise<void>>();
 let audioModeConfigured = false;
-let feedbackVolume = 1;
+let feedbackVolume = 0.5;
 
 const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 const isFeedbackMuted = () => feedbackVolume <= 0;

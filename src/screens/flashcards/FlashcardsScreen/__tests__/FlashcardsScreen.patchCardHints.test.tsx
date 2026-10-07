@@ -321,6 +321,7 @@ describe("FlashcardsScreen patchCardHints integration", () => {
       setActiveCustomCourseId: jest.fn(),
       boxesLayout: "classic",
       flashcardsBatchSize: 20,
+      boxZeroSettingsHydrated: true,
       boxZeroEnabled: false,
       autoflowEnabled: false,
       explanationOnlyOnWrong: false,

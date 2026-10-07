@@ -1455,7 +1455,7 @@
       "settingsCourse": {
         "boxZeroAnswerSide": {
           "title": "What should you copy in box 0?",
-          "description": "Choose which side of the flashcard to copy with a hint.",
+          "description": "Changing the default value is not recommended.",
           "disabledHint": "Enable box 0 to change this",
           "front": "Front",
           "back": "Back",

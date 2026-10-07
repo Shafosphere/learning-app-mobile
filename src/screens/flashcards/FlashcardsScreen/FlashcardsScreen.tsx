@@ -119,6 +119,7 @@ export default function Flashcards() {
     setActiveCustomCourseId,
     boxesLayout,
     flashcardsBatchSize,
+    boxZeroSettingsHydrated,
     boxZeroEnabled,
     boxZeroAnswerSide,
     autoflowEnabled,
@@ -468,6 +469,7 @@ export default function Flashcards() {
     learned,
     setLearned,
     updateSelectedItem,
+    boxZeroSettingsHydrated,
     boxZeroEnabled,
     flashcardsBatchSize,
   });
@@ -813,6 +815,7 @@ export default function Flashcards() {
     if (!isFocused) return;
     if (activeCustomCourseId == null) return;
     if (loadedCourseId !== activeCustomCourseId) return;
+    if (!boxZeroSettingsHydrated) return;
     if (boxZeroEnabled) return;
     if (!boxes.boxZero.length) return;
 
@@ -824,6 +827,7 @@ export default function Flashcards() {
     removeUsedWordIds(wordsToReset.map((word) => word.id));
   }, [
     activeCustomCourseId,
+    boxZeroSettingsHydrated,
     boxZeroEnabled,
     boxes.boxZero,
     isFocused,
@@ -901,7 +905,8 @@ export default function Flashcards() {
   const shouldKeepLoadingOverlayVisible =
     activeCustomCourseId != null &&
     !loadError &&
-    (isLoadingData ||
+    (!boxZeroSettingsHydrated ||
+      isLoadingData ||
       isReviewedIdsSeedLoading ||
       (customCards.length > 0 && !isReviewedIdsSeedResolved) ||
       loadedCourseId !== activeCustomCourseId ||
@@ -1081,6 +1086,7 @@ export default function Flashcards() {
 
   const autoflow = useFlashcardsAutoflow({
     enabled:
+      boxZeroSettingsHydrated &&
       autoflowEnabled &&
       isFocused &&
       (!shouldRunFlashcardsCoachmark || coachmark.hasSeen) &&
@@ -1697,6 +1703,7 @@ export default function Flashcards() {
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}
+        boxZeroEnabled={boxZeroEnabled}
         activeCourseName={customCourse?.name ?? null}
         onClose={closePeek}
         onReturnToUnknown={handleReturnPeekCardToUnknown}

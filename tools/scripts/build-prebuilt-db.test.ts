@@ -70,6 +70,17 @@ const OFFICIAL_PACK_CASES: Array<[string, Record<string, unknown>]> =
   ]);
 
 describe("prebuilt CSV parser", () => {
+  it.each([
+    "es_to_pl_first_50", "es_to_pl_first_150", "es_to_pl_first_327",
+    "fr_to_pl_first_50", "fr_to_pl_first_150", "fr_to_pl_first_332",
+  ])("enables both translation directions in %s and upgrades existing courses", (slug) => {
+    const pack = OFFICIAL_PACKS.find((entry: { slug: string }) => entry.slug === slug);
+    expect(pack.packVersion).toBe(2);
+    const cards = readCardsFromCsv(pack);
+    expect(cards.length).toBe(EXPECTED_CARD_COUNTS[slug]);
+    expect(cards.every((card: { flipped: boolean }) => card.flipped)).toBe(true);
+  });
+
   it("keeps front_text intact while splitting back_text answers", () => {
     const [card] = parseCardsFromCsv(
       {

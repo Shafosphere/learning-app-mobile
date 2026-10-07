@@ -1,6 +1,9 @@
 import { useCallback, useMemo } from "react";
 
-import { usePersistedState } from "@/src/hooks/usePersistedState";
+import {
+  useHydratedPersistedState,
+  usePersistedState,
+} from "@/src/hooks/usePersistedState";
 import type { LanguageCourse } from "@/src/types/course";
 
 import {
@@ -136,12 +139,10 @@ export function useCourseOverrideSettings({
   activeCourseIdx: number | null;
   activeCustomCourseId: number | null;
 }) {
-  const [boxZeroDefaultEnabled] = usePersistedState<boolean>(
-    "flashcards.boxZeroEnabled",
-    false
-  );
-  const [boxZeroOverrides, setBoxZeroOverrides] =
-    usePersistedState<CourseBoxZeroOverrides>(
+  const [boxZeroDefaultEnabled, , boxZeroDefaultHydrated] =
+    useHydratedPersistedState<boolean>("flashcards.boxZeroEnabled", false);
+  const [boxZeroOverrides, setBoxZeroOverrides, boxZeroOverridesHydrated] =
+    useHydratedPersistedState<CourseBoxZeroOverrides>(
       "flashcards.courseBoxZeroOverrides",
       DEFAULT_COURSE_BOX_ZERO_OVERRIDES
     );
@@ -154,11 +155,14 @@ export function useCourseOverrideSettings({
     setOverrides: setBoxZeroOverrides,
   });
 
-  const [boxZeroAnswerSideOverrides, setBoxZeroAnswerSideOverrides] =
-    usePersistedState<CourseOverrideState<BoxZeroAnswerSide>>(
-      "flashcards.courseBoxZeroAnswerSideOverrides",
-      { builtin: {}, custom: {} }
-    );
+  const [
+    boxZeroAnswerSideOverrides,
+    setBoxZeroAnswerSideOverrides,
+    boxZeroAnswerSideHydrated,
+  ] = useHydratedPersistedState<CourseOverrideState<BoxZeroAnswerSide>>(
+    "flashcards.courseBoxZeroAnswerSideOverrides",
+    { builtin: {}, custom: {} }
+  );
   const boxZeroAnswerSide = useCourseOverrideAccessors<BoxZeroAnswerSide>({
     courses,
     activeCourseIdx,
@@ -317,6 +321,8 @@ export function useCourseOverrideSettings({
     setBuiltinCourseBoxZeroAnswerSide: boxZeroAnswerSide.setBuiltin,
     getCustomCourseBoxZeroAnswerSide: boxZeroAnswerSide.getCustom,
     setCustomCourseBoxZeroAnswerSide: boxZeroAnswerSide.setCustom,
+    boxZeroSettingsHydrated:
+      boxZeroDefaultHydrated && boxZeroOverridesHydrated && boxZeroAnswerSideHydrated,
     boxZeroEnabled: boxZero.activeValue,
     getBuiltinCourseBoxZeroEnabled: boxZero.getBuiltin,
     setBuiltinCourseBoxZeroEnabled: boxZero.setBuiltin,

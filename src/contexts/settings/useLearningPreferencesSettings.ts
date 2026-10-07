@@ -27,7 +27,10 @@ export function useLearningPreferencesSettings() {
     true
   );
   const [ignoreDiacriticsInSpellcheck, setIgnoreDiacriticsInSpellcheck] =
-    usePersistedState<boolean>("spellCheckingIgnoreDiacritics", false);
+    usePersistedState<boolean>(
+      "spellCheckingIgnoreDiacritics",
+      defaultValue.ignoreDiacriticsInSpellcheck
+    );
   const [showBoxFaces, setShowBoxFaces] = usePersistedState<boolean>(
     "showBoxFaces",
     true
@@ -116,7 +119,7 @@ export function useLearningPreferencesSettings() {
   const resetLearningPreferencesSettings = useCallback(async () => {
     await Promise.all([
       setSpellChecking(true),
-      setIgnoreDiacriticsInSpellcheck(false),
+      setIgnoreDiacriticsInSpellcheck(defaultValue.ignoreDiacriticsInSpellcheck),
       setShowBoxFaces(true),
       setBoxesLayoutState("classic"),
       setActionButtonsPositionState("bottom"),

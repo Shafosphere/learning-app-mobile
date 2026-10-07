@@ -1457,7 +1457,7 @@
       "settingsCourse": {
         "boxZeroAnswerSide": {
           "title": "Co przepisywać w pudełku 0?",
-          "description": "Wybierz stronę fiszki do przepisania z podpowiedzią.",
+          "description": "Nie zaleca się zmieniać domyślnej wartości.",
           "disabledHint": "Włącz pudełko 0, aby zmienić",
           "front": "Przód",
           "back": "Tył",

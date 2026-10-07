@@ -14,7 +14,10 @@ import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
-import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
+import {
+  isAnswerOnlyCard,
+  isStudyCardReversed,
+} from "@/src/utils/flashcardDirection";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { boxOrder } from "./useBoxesPersistenceSnapshot";
@@ -48,24 +51,29 @@ function buildIntroCorrection(
   const frontAnswers = splitFrontTextIntoAnswers(word.text);
   const primaryFrontAnswer = frontAnswers[0] ?? word.text;
   const answerOnly = isAnswerOnlyCard(word);
-  const reversed = answerSide === "front" && !answerOnly && Boolean(word.text?.trim());
+  const reversed =
+    answerSide === "front" &&
+    !answerOnly &&
+    Boolean(word.text?.trim());
   const isSameCard = previous?.mode === "intro"
     && previous.cardId === word.id && previous.reversed === reversed;
   const preferredTranslation = isSameCard ? previous.rewers : word.translations[0] ?? "";
+  const rewers = word.translations.includes(preferredTranslation)
+    ? preferredTranslation : word.translations[0] ?? "";
+  // Without a front image, show the meaning above the front text being copied.
+  const showBackPrompt = reversed && !word.imageFront;
 
   return {
     cardId: word.id,
     awers: primaryFrontAnswer,
     awersAlternatives: frontAnswers,
-    rewers: word.translations.includes(preferredTranslation)
-      ? preferredTranslation : word.translations[0] ?? "",
+    rewers,
     input1: isSameCard ? previous.input1 : "",
     input2: isSameCard ? previous.input2 : "",
     answerOnly,
     mode: "intro",
-    // Intro always presents the front; the chosen side selects the copy input.
-    promptText: primaryFrontAnswer,
-    promptImageUri: word.imageFront ?? null,
+    promptText: showBackPrompt ? rewers : primaryFrontAnswer,
+    promptImageUri: (showBackPrompt ? word.imageBack : word.imageFront) ?? null,
     reversed,
     word,
   };
@@ -98,7 +106,6 @@ type UseFlashcardsInteractionParams = {
   checkSpelling: SpellcheckFn;
   addUsedWordIds: (ids: number[] | number) => void;
   registerKnownWord: (wordId: number) => RegisterKnownWordResult;
-  reversedBoxes?: readonly (keyof BoxesState)[];
   onWordPromotedOut?: (word: WordWithTranslations) => void;
   onCorrectAnswer?: (box: keyof BoxesState, meta: CorrectAnswerMeta) => void;
   onWrongAnswer?: (box: keyof BoxesState, meta: WrongAnswerMeta) => void;
@@ -116,7 +123,6 @@ export function useFlashcardsInteraction({
   checkSpelling,
   addUsedWordIds,
   registerKnownWord,
-  reversedBoxes = ["boxTwo", "boxFour"],
   onWordPromotedOut,
   onCorrectAnswer,
   onWrongAnswer,
@@ -185,11 +191,10 @@ export function useFlashcardsInteraction({
     []
   );
 
-  const reversed = useMemo(() => {
-    if (!activeBox || !selectedItem) return false;
-    if (isAnswerOnlyCard(selectedItem)) return false;
-    return selectedItem.flipped ? reversedBoxes.includes(activeBox) : false;
-  }, [activeBox, reversedBoxes, selectedItem]);
+  const reversed = useMemo(
+    () => isStudyCardReversed(selectedItem, activeBox, boxZeroEnabled),
+    [activeBox, boxZeroEnabled, selectedItem],
+  );
 
   const shuffleList = useCallback((items: WordWithTranslations[]) => {
     const arr = [...items];

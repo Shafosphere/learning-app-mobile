@@ -2,7 +2,7 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 import { Text } from "react-native";
 
-import type { WordWithTranslations } from "@/src/types/boxes";
+import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import FlashcardsPeekOverlay from "../FlashcardsPeek";
 
 jest.mock("../Peek-styles", () => ({
@@ -52,9 +52,10 @@ function makeCard(overrides: Partial<WordWithTranslations>): WordWithTranslation
 
 function renderPeek(
   card: WordWithTranslations,
-  boxKey: "boxZero" | "boxTwo" | "boxFour" = "boxTwo",
+  boxKey: keyof BoxesState = "boxOne",
   onReturnToUnknown = jest.fn(() => Promise.resolve()),
   cardLayout?: "box-aware" | "uniform",
+  boxZeroEnabled = true,
 ) {
   return render(
     <FlashcardsPeekOverlay
@@ -62,6 +63,7 @@ function renderPeek(
       boxKey={boxKey}
       cards={[card]}
       cardLayout={cardLayout}
+      boxZeroEnabled={boxZeroEnabled}
       activeCourseName="Test course"
       onClose={jest.fn()}
       onReturnToUnknown={onReturnToUnknown}
@@ -70,6 +72,21 @@ function renderPeek(
 }
 
 describe("FlashcardsPeekOverlay flip behavior", () => {
+  it.each(
+    [true, false].flatMap((boxZeroEnabled) =>
+      (["boxOne", "boxTwo", "boxThree", "boxFour", "boxFive"] as const).map((box) => ({
+        box, boxZeroEnabled,
+        reversed: boxZeroEnabled
+          ? box === "boxOne" || box === "boxThree" || box === "boxFive"
+          : box === "boxTwo" || box === "boxFour",
+      }))
+    )
+  )("shows the study prompt in $box (box zero: $boxZeroEnabled)", ({ box, boxZeroEnabled, reversed }) => {
+    const screen = renderPeek(makeCard({ flipped: true }), box, undefined, undefined, boxZeroEnabled);
+    expect(screen.getByText(reversed ? "hidden-answer" : "front-question")).toBeTruthy();
+    expect(screen.queryByText(reversed ? "front-question" : "hidden-answer")).toBeNull();
+  });
+
   beforeEach(() => {
     latestNudgeModalProps = null;
   });
@@ -231,9 +248,9 @@ describe("FlashcardsPeekOverlay flip behavior", () => {
   ];
 
   it.each(realCourseCases)(
-    "uses correct peek direction for $course in box two and box four",
+    "uses correct peek direction for $course in odd recall boxes",
     ({ card, expectedPrompt, hiddenAnswer, expectedImage, hiddenImage }) => {
-      for (const boxKey of ["boxTwo", "boxFour"] as const) {
+      for (const boxKey of ["boxOne", "boxThree", "boxFive"] as const) {
         for (const cardLayout of ["box-aware", "uniform"] as const) {
           const screen = renderPeek(
             card,

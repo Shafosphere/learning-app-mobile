@@ -265,11 +265,47 @@ describe("useFlashcardsInteraction", () => {
   }
 
   describe("flip direction", () => {
+    it.each(
+      [true, false].flatMap((boxZeroEnabled) =>
+        (["front", "back"] as const).flatMap((boxZeroAnswerSide) =>
+          (["boxOne", "boxTwo", "boxThree", "boxFour", "boxFive"] as const).map((box) => ({
+            box, boxZeroEnabled, boxZeroAnswerSide,
+            expected: boxZeroEnabled
+              ? box === "boxOne" || box === "boxThree" || box === "boxFive"
+              : box === "boxTwo" || box === "boxFour",
+          }))
+        )
+      )
+    )("accepts the correct language in $box (box zero: $boxZeroEnabled, copy setting: $boxZeroAnswerSide)", async ({ box, boxZeroEnabled, boxZeroAnswerSide, expected }) => {
+      const card = makeWord({ id: 80, text: "agua", translations: ["woda"], flipped: true });
+      const { result } = renderInteraction(makeBoxesState({ [box]: [card] }), {
+        boxZeroEnabled, boxZeroAnswerSide,
+      });
+      act(() => result.current.interaction.handleSelectBox(box));
+      await waitFor(() => {
+        expect(result.current.interaction.selectedItem?.id).toBe(card.id);
+        expect(result.current.interaction.reversed).toBe(expected);
+      });
+      act(() => result.current.interaction.confirm(undefined, expected ? "agua" : "woda"));
+      await waitFor(() => expect(result.current.interaction.result).toBe(true));
+    });
+
+    it("uses the appropriate recall language when box zero is toggled during study", async () => {
+      const card = makeWord({ id: 81, text: "agua", translations: ["woda"], flipped: true });
+      const hook = renderInteraction(makeBoxesState({ boxOne: [card] }), { boxZeroEnabled: false });
+      act(() => hook.result.current.interaction.handleSelectBox("boxOne"));
+      await waitFor(() => expect(hook.result.current.interaction.reversed).toBe(false));
+      act(() => hook.setBoxZeroEnabled(true));
+      expect(hook.result.current.interaction.reversed).toBe(true);
+      act(() => hook.setBoxZeroEnabled(false));
+      expect(hook.result.current.interaction.reversed).toBe(false);
+    });
+
     it.each([
-      { box: "boxTwo" as const, flipped: false, expected: false },
-      { box: "boxTwo" as const, flipped: true, expected: true },
-      { box: "boxFour" as const, flipped: false, expected: false },
-      { box: "boxFour" as const, flipped: true, expected: true },
+      { box: "boxOne" as const, flipped: false, expected: false },
+      { box: "boxOne" as const, flipped: true, expected: true },
+      { box: "boxThree" as const, flipped: false, expected: false },
+      { box: "boxThree" as const, flipped: true, expected: true },
     ])(
       "sets reversed to $expected for $box when flipped is $flipped",
       async ({ box, flipped, expected }) => {
@@ -339,12 +375,12 @@ describe("useFlashcardsInteraction", () => {
         });
         const { result } = renderInteraction(
           makeBoxesState({
-            boxTwo: [card],
+            boxThree: [card],
           })
         );
 
         act(() => {
-          result.current.interaction.handleSelectBox("boxTwo");
+          result.current.interaction.handleSelectBox("boxThree");
         });
 
         await waitFor(() => {
@@ -370,13 +406,13 @@ describe("useFlashcardsInteraction", () => {
       });
       const { result } = renderInteraction(
         makeBoxesState({
-          boxTwo: [card],
+          boxThree: [card],
         }),
         { skipDemotionCorrection: true }
       );
 
       act(() => {
-        result.current.interaction.handleSelectBox("boxTwo");
+        result.current.interaction.handleSelectBox("boxThree");
       });
 
       await waitFor(() => {
@@ -401,12 +437,12 @@ describe("useFlashcardsInteraction", () => {
       });
       const { result } = renderInteraction(
         makeBoxesState({
-          boxTwo: [card],
+          boxThree: [card],
         })
       );
 
       act(() => {
-        result.current.interaction.handleSelectBox("boxTwo");
+        result.current.interaction.handleSelectBox("boxThree");
       });
 
       await waitFor(() => {
@@ -1001,7 +1037,7 @@ describe("useFlashcardsInteraction", () => {
 
   it.each([
     { box: "boxOne" as const, flipped: false, expected: "czerwony" },
-    { box: "boxTwo" as const, flipped: true, expected: "red" },
+    { box: "boxThree" as const, flipped: true, expected: "red" },
   ])(
     "shows the correct answer before advancing after a wrong answer in $box",
     ({ box, flipped, expected }) => {
@@ -1633,6 +1669,57 @@ describe("useFlashcardsInteraction", () => {
   });
 
   describe("boxZero intro mode lifecycle", () => {
+    it.each(["front", "back"] as const)("copies the selected side in box zero for two-way cards (setting=%s)", async (boxZeroAnswerSide) => {
+      const card = makeWord({ id: 940, text: "agua", translations: ["woda"], flipped: true });
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), { boxZeroAnswerSide });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toMatchObject({
+        reversed: boxZeroAnswerSide === "front", awers: "agua", rewers: "woda", mode: "intro",
+        promptText: boxZeroAnswerSide === "front" ? "woda" : "agua", promptImageUri: null,
+      }));
+      const input = boxZeroAnswerSide === "front" ? 1 : 2;
+      const expected = boxZeroAnswerSide === "front" ? "agua" : "woda";
+      const otherSide = boxZeroAnswerSide === "front" ? "woda" : "agua";
+      act(() => hook.result.current.interaction.wrongInputChange(input, otherSide));
+      expect(hook.result.current.boxes.boxZero.map((item) => item.id)).toContain(card.id);
+      expect(hook.result.current.boxes.boxOne).toHaveLength(0);
+      act(() => hook.result.current.interaction.wrongInputChange(input, expected));
+      await waitFor(() => expect(hook.result.current.boxes.boxOne.map((item) => item.id)).toContain(card.id));
+      expect(hook.result.current.boxes.boxZero).toHaveLength(0);
+    });
+
+    it("shows the Polish meaning while copying the English B1 word without an image", async () => {
+      const card = makeWord({
+        id: 943, text: "contamination", translations: ["zanieczyszczenie", "skażenie"], flipped: true,
+      });
+      const frames: { cardId: number; prompt?: string; awers?: string }[] = [];
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), {
+        boxZeroAnswerSide: "front",
+        onRender: ({ activeBox, selectedItem, correction }) => {
+          if (activeBox === "boxZero" && selectedItem) frames.push({
+            cardId: selectedItem.id, prompt: correction?.promptText, awers: correction?.awers,
+          });
+        },
+      });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toMatchObject({
+        promptText: "zanieczyszczenie", awers: "contamination", reversed: true,
+      }));
+      expect(frames.length).toBeGreaterThan(0);
+      for (const frame of frames) {
+        expect(frame).toEqual({ cardId: card.id, prompt: "zanieczyszczenie", awers: "contamination" });
+      }
+      act(() => hook.result.current.interaction.wrongInputChange(1, "zanieczyszczenie"));
+      expect(hook.result.current.boxes.boxZero.map((item) => item.id)).toContain(card.id);
+      act(() => hook.result.current.interaction.setCorrectionRewers("skażenie"));
+      expect(hook.result.current.interaction.correction).toMatchObject({
+        promptText: "skażenie", awers: "contamination", input1: "zanieczyszczenie",
+      });
+      act(() => hook.result.current.interaction.wrongInputChange(1, "contamination"));
+      await waitFor(() => expect(hook.result.current.boxes.boxOne.map((item) => item.id)).toContain(card.id));
+      expect(hook.result.current.boxes.boxZero).toHaveLength(0);
+    });
+
     it.each(["front", "back"] as const)("keeps the current image and copy layout in every render between intro cards (answer side=%s)", async (boxZeroAnswerSide) => {
       const cards = [
         makeWord({ id: 941, text: "cat", translations: ["kot"], imageFront: "file://cat.png", flipped: true }),
@@ -1688,7 +1775,7 @@ describe("useFlashcardsInteraction", () => {
     });
 
     it("clears partial inputs when intro direction changes", async () => {
-      const card = makeWord({ id: 898, text: "water", translations: ["woda"], imageFront: "front.webp" });
+      const card = makeWord({ id: 898, text: "water", translations: ["woda"], imageFront: "front.webp", flipped: true });
       const hook = renderInteraction(makeBoxesState({ boxZero: [card] }));
       act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
       await waitFor(() => expect(hook.result.current.interaction.correction?.reversed).toBe(false));
@@ -1717,7 +1804,7 @@ describe("useFlashcardsInteraction", () => {
       const hook = renderInteraction(makeBoxesState({ boxOne: [card] }), { boxZeroAnswerSide: "front" });
       act(() => hook.result.current.interaction.handleSelectBox("boxOne"));
       await waitFor(() => expect(hook.result.current.interaction.selectedItem?.id).toBe(card.id));
-      expect(hook.result.current.interaction.reversed).toBe(false);
+      expect(hook.result.current.interaction.reversed).toBe(true);
       expect(hook.result.current.interaction.correction).toBeNull();
     });
 

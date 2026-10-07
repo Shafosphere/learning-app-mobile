@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 7;
+const PREBUILT_DATABASE_VERSION = 8;
 
 const OFFICIAL_PACKS = [
   {
@@ -105,24 +105,24 @@ const OFFICIAL_PACKS = [
   },
   ...[50, 150, 327].map((count) => ({
     slug: `es_to_pl_first_${count}`,
-    packVersion: 1,
+    packVersion: 2,
     name: count === 50 ? "Pierwsze 50 słów" : `${count} słów`,
     iconId: "flag:es",
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     csvFile: `jezyki/hiszpanski/fiszki_${count}.csv`,
   })),
   ...[50, 150, 332].map((count) => ({
     slug: `fr_to_pl_first_${count}`,
-    packVersion: 1,
+    packVersion: 2,
     name: count === 50 ? "Pierwsze 50 słów" : `${count} słów`,
     iconId: "flag:fr",
     iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     csvFile: `jezyki/francuski/fiszki_${count}.csv`,
   })),
   {

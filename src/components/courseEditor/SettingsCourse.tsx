@@ -309,8 +309,6 @@ export function CourseSettingsSection({
     key,
     ...imageSizeLabels[key],
   }));
-  const shouldShowAnswersSection =
-    !hideSkipCorrectionOption || showTrueFalseButtonsVariant;
 
   return (
     <View style={sharedStyles.sectionGroup}>
@@ -319,6 +317,44 @@ export function CourseSettingsSection({
       </Text>
       <View style={sharedStyles.settingsGroupCard}>
         <View style={sharedStyles.settingsGroupRows}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title={t("components.courseEditor.settingsCourse.title.automatFiszek")}
+            description={t(
+              "components.courseEditor.settingsCourse.description.automatyczniePrzelaczaj"
+            )}
+            value={autoflowEnabled}
+            onPress={() => onToggleAutoflow(!autoflowEnabled)}
+            accessibilityLabel={t(
+              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczAutomatFiszek"
+            )}
+          />
+          {!hideSkipCorrectionOption ? (
+            <>
+              <View style={sharedStyles.settingsGroupDivider} />
+              <SettingsToggleRow
+                styles={sharedStyles}
+                title={t(
+                  "components.courseEditor.settingsCourse.title.pominPoprawkePoBledzie"
+                )}
+                description={t(
+                  "components.courseEditor.settingsCourse.description.poZlejOdpowiedzi"
+                )}
+                value={skipCorrectionLocked ? true : skipCorrectionEnabled}
+                onPress={() => {
+                  if (!skipCorrectionLocked) {
+                    onToggleSkipCorrection(!skipCorrectionEnabled);
+                  }
+                }}
+                accessibilityLabel={t(
+                  "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPomijaniePoprawkiPoBledzie"
+                )}
+                disabled={skipCorrectionLocked}
+                dimmed={skipCorrectionLocked}
+              />
+            </>
+          ) : null}
+          <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
             title={t(
@@ -333,51 +369,29 @@ export function CourseSettingsSection({
               "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania"
             )}
           />
-          <View
-            style={[
-              sharedStyles.settingsDependentRow,
-              !boxZeroEnabled && sharedStyles.settingsDependentRowDisabled,
-            ]}
-          >
-            <SettingsChoiceBlock<BoxZeroAnswerSide>
-              styles={sharedStyles}
-              title={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.title")}
-              description={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.description")}
-              hint={
-                !boxZeroEnabled
-                  ? t("components.courseEditor.settingsCourse.boxZeroAnswerSide.disabledHint")
-                  : undefined
-              }
-              options={[
-                {
-                  key: "front",
-                  title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.front"),
-                  subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.frontDescription"),
-                },
-                {
-                  key: "back",
-                  title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.back"),
-                  subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.backDescription"),
-                },
-              ]}
-              value={boxZeroAnswerSide}
-              onSelect={onSelectBoxZeroAnswerSide}
-              disabled={!boxZeroEnabled}
-            />
-          </View>
-          <View style={sharedStyles.settingsGroupDivider} />
-          <SettingsToggleRow
-            styles={sharedStyles}
-            title={t("components.courseEditor.settingsCourse.title.automatFiszek")}
-            description={t(
-              "components.courseEditor.settingsCourse.description.automatyczniePrzelaczaj"
-            )}
-            value={autoflowEnabled}
-            onPress={() => onToggleAutoflow(!autoflowEnabled)}
-            accessibilityLabel={t(
-              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczAutomatFiszek"
-            )}
-          />
+          {boxZeroEnabled ? (
+            <View style={sharedStyles.settingsDependentRow}>
+              <SettingsChoiceBlock<BoxZeroAnswerSide>
+                styles={sharedStyles}
+                title={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.title")}
+                description={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.description")}
+                options={[
+                  {
+                    key: "front",
+                    title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.front"),
+                    subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.frontDescription"),
+                  },
+                  {
+                    key: "back",
+                    title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.back"),
+                    subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.backDescription"),
+                  },
+                ]}
+                value={boxZeroAnswerSide}
+                onSelect={onSelectBoxZeroAnswerSide}
+              />
+            </View>
+          ) : null}
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
@@ -391,14 +405,7 @@ export function CourseSettingsSection({
               "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki"
             )}
           />
-        </View>
-      </View>
-
-      <Text style={sharedStyles.settingsGroupLabel}>
-        {t("components.courseEditor.settingsCourse.textChild.wyjasnienia")}
-      </Text>
-      <View style={sharedStyles.settingsGroupCard}>
-        <View style={sharedStyles.settingsGroupRows}>
+          <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
             title={t(
@@ -413,79 +420,42 @@ export function CourseSettingsSection({
               "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyswietlanieWyjasnien"
             )}
           />
-          <View style={sharedStyles.settingsGroupDivider} />
-          <SettingsToggleRow
-            styles={sharedStyles}
-            title={t(
-              "components.courseEditor.settingsCourse.title.tylkoPoBlednejOdpowiedzi"
-            )}
-            description={t(
-              "components.courseEditor.settingsCourse.description.gdyWylaczone"
-            )}
-            value={showExplanationEnabled ? explanationOnlyOnWrong : false}
-            onPress={() =>
-              onToggleExplanationOnlyOnWrong(
-                !(showExplanationEnabled ? explanationOnlyOnWrong : false)
-              )
-            }
-            accessibilityLabel={t(
-              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyjasnienieTylkoPoBlednej"
-            )}
-            disabled={!showExplanationEnabled}
-            dependent
-            dimmed={!showExplanationEnabled}
-          />
-        </View>
-      </View>
-
-      {shouldShowAnswersSection ? (
-        <>
-          <Text style={sharedStyles.settingsGroupLabel}>
-            {t("components.courseEditor.settingsCourse.textChild.odpowiedzi")}
-          </Text>
-          {!hideSkipCorrectionOption ? (
-            <View style={sharedStyles.settingsGroupCard}>
-              <SettingsToggleRow
-                styles={sharedStyles}
-                title={t(
-                  "components.courseEditor.settingsCourse.title.pominPoprawkePoBledzie"
-                )}
-                description={t(
-                  "components.courseEditor.settingsCourse.description.poZlejOdpowiedzi"
-                )}
-                value={skipCorrectionLocked ? true : skipCorrectionEnabled}
-                onPress={() =>
-                  skipCorrectionLocked
-                    ? undefined
-                    : onToggleSkipCorrection(
-                        !(skipCorrectionLocked ? true : skipCorrectionEnabled)
-                      )
-                }
-                accessibilityLabel={t(
-                  "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPomijaniePoprawkiPoBledzie"
-                )}
-                disabled={skipCorrectionLocked}
-                dimmed={skipCorrectionLocked}
-              />
-            </View>
-          ) : null}
-
-          {showTrueFalseButtonsVariant ? (
-            <SettingsChoiceBlock
+          {showExplanationEnabled ? (
+            <SettingsToggleRow
               styles={sharedStyles}
               title={t(
-                "components.courseEditor.settingsCourse.title.rodzajPrzyciskowWPrawdaFalsz"
+                "components.courseEditor.settingsCourse.title.tylkoPoBlednejOdpowiedzi"
               )}
               description={t(
-                "components.courseEditor.settingsCourse.description.wybierzNapisyPrzyciskow"
+                "components.courseEditor.settingsCourse.description.gdyWylaczone"
               )}
-              options={trueFalseOptions}
-              value={trueFalseButtonsVariant}
-              onSelect={onSelectTrueFalseButtonsVariant}
+              value={explanationOnlyOnWrong}
+              onPress={() => onToggleExplanationOnlyOnWrong(!explanationOnlyOnWrong)}
+              accessibilityLabel={t(
+                "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyjasnienieTylkoPoBlednej"
+              )}
+              dependent
             />
           ) : null}
-        </>
-      ) : null}
+          {showTrueFalseButtonsVariant ? (
+            <>
+              <View style={sharedStyles.settingsGroupDivider} />
+              <SettingsChoiceBlock
+                styles={sharedStyles}
+                title={t(
+                  "components.courseEditor.settingsCourse.title.rodzajPrzyciskowWPrawdaFalsz"
+                )}
+                description={t(
+                  "components.courseEditor.settingsCourse.description.wybierzNapisyPrzyciskow"
+                )}
+                options={trueFalseOptions}
+                value={trueFalseButtonsVariant}
+                onSelect={onSelectTrueFalseButtonsVariant}
+              />
+            </>
+          ) : null}
+        </View>
+      </View>
 
       <SettingsChoiceBlock
         styles={sharedStyles}

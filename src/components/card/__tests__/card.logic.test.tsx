@@ -8,6 +8,7 @@ import { useFocusExecutor } from "@/src/components/card/useFocusExecutor";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { WordWithTranslations } from "@/src/types/boxes";
+import { isStudyCardReversed } from "@/src/utils/flashcardDirection";
 
 let mockTextInputFocus = jest.fn();
 let mockTextInputBlur = jest.fn();
@@ -350,6 +351,50 @@ describe("Card logic props", () => {
       shouldCorrectAwers: false,
       shouldCorrectRewers: true,
     });
+  });
+
+  it.each([
+    { box: "boxOne" as const, prompt: "woda", frontAnswer: true, image: null },
+    { box: "boxTwo" as const, prompt: "eau", frontAnswer: false, image: "front://water" },
+    { box: "boxThree" as const, prompt: "woda", frontAnswer: true, image: null },
+    { box: "boxFour" as const, prompt: "eau", frontAnswer: false, image: "front://water" },
+    { box: "boxFive" as const, prompt: "woda", frontAnswer: true, image: null },
+  ])("shows the French-course prompt and input language in $box", async ({ box, prompt, frontAnswer, image }) => {
+    const card = makeCard({
+      id: 15, text: "eau", translations: ["woda"], flipped: true,
+      imageFront: "front://water",
+    });
+    render(<Card {...createProps({
+      selectedItem: card, activeBox: box, reversed: isStudyCardReversed(card, box, true),
+    })} />);
+    await waitFor(() => expect(latestResolverProps).toMatchObject({
+      promptText: prompt,
+      promptImageUri: image,
+      shouldCorrectAwers: frontAnswer,
+      shouldCorrectRewers: !frontAnswer,
+    }));
+  });
+
+  it.each([
+    { box: "boxOne" as const, prompt: "water", frontAnswer: false, image: "front://water" },
+    { box: "boxTwo" as const, prompt: "woda", frontAnswer: true, image: null },
+    { box: "boxThree" as const, prompt: "water", frontAnswer: false, image: "front://water" },
+    { box: "boxFour" as const, prompt: "woda", frontAnswer: true, image: null },
+    { box: "boxFive" as const, prompt: "water", frontAnswer: false, image: "front://water" },
+  ])("preserves the English A1 prompt and input language without box zero in $box", async ({ box, prompt, frontAnswer, image }) => {
+    const card = makeCard({
+      id: 16, text: "water", translations: ["woda"], flipped: true,
+      imageFront: "front://water",
+    });
+    render(<Card {...createProps({
+      selectedItem: card, activeBox: box, reversed: isStudyCardReversed(card, box, false),
+    })} />);
+    await waitFor(() => expect(latestResolverProps).toMatchObject({
+      promptText: prompt,
+      promptImageUri: image,
+      shouldCorrectAwers: frontAnswer,
+      shouldCorrectRewers: !frontAnswer,
+    }));
   });
 
   it("uses the reversed translation as prompt for normal reversed cards", async () => {

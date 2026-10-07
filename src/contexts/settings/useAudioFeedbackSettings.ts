@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 
 import { usePersistedState } from "@/src/hooks/usePersistedState";
 import { setFeedbackVolume as setSoundPlayerVolume } from "@/src/utils/soundPlayer";
+import { defaultValue } from "./defaults";
 
 const clampVolume = (value: number) => Math.min(1, Math.max(0, value));
 
@@ -9,7 +10,7 @@ export function useAudioFeedbackSettings() {
   const [feedbackEnabled, setFeedbackEnabledState] =
     usePersistedState<boolean>("feedbackEnabled", true);
   const [feedbackVolume, setFeedbackVolumeState] =
-    usePersistedState<number>("feedbackVolume", 1);
+    usePersistedState<number>("feedbackVolume", defaultValue.feedbackVolume);
 
   const setFeedbackEnabled = useCallback(
     async (value: boolean) => {
@@ -36,7 +37,7 @@ export function useAudioFeedbackSettings() {
   }, [feedbackVolume]);
 
   const resetAudioFeedbackSettings = useCallback(async () => {
-    await setFeedbackVolume(1);
+    await setFeedbackVolume(defaultValue.feedbackVolume);
   }, [setFeedbackVolume]);
 
   return {

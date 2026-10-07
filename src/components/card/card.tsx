@@ -55,25 +55,6 @@ const ENABLE_KEYBOARD_CONSOLE_LOGS = false;
 
 type HintModalMode = "target";
 
-type ContentDebugSnapshot = {
-  source: CardProps["contentDebugSource"] | null;
-  activeBox: CardProps["activeBox"];
-  cardId: number | null;
-  displayedCardId: number | null;
-  displayMode: CardDisplayMode;
-  correctionCardId: number | null;
-  correctionMode: string | null;
-  correctionMatchesSelectedItem: boolean | null;
-  isBetweenCards: boolean;
-  isContentHeld: boolean;
-  introMode: boolean;
-  result: boolean | null;
-  reversed: boolean;
-  text: string;
-  imageUri: string | null;
-  explanation: string | null;
-};
-
 type KeyboardMetricsSnapshot = {
   screenY?: number;
   height?: number;
@@ -273,10 +254,10 @@ export default function Card({
   const input1ScrollRef = useRef<ScrollView | null>(null);
   const input2ScrollRef = useRef<ScrollView | null>(null);
   const selectedItemId = selectedItem?.id ?? null;
-  const lastContentDebugRef = useRef<{
-    loggedAt: number;
-    sequence: number;
-    snapshot: ContentDebugSnapshot;
+  const lastFlashcardsStateRef = useRef<{
+    activeBox: CardProps["activeBox"];
+    displayedCardId: number | null;
+    expectedAnswers: string[];
   } | null>(null);
   const frontAnswers = useMemo(
     () => splitFrontTextIntoAnswers(selectedItem?.text),
@@ -1440,64 +1421,43 @@ export default function Card({
   }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
 
   useEffect(() => {
-    if (!__DEV__ || !isFocused || process.env.NODE_ENV === "test") return;
-    const appearedAt = new Date();
-    const loggedAt = appearedAt.getTime();
-    const time = `${String(appearedAt.getHours()).padStart(2, "0")}:${String(appearedAt.getMinutes()).padStart(2, "0")}:${String(appearedAt.getSeconds()).padStart(2, "0")}.${String(appearedAt.getMilliseconds()).padStart(3, "0")}`;
-    const snapshot: ContentDebugSnapshot = {
-      source: contentDebugSource ?? null,
-      activeBox,
-      cardId: selectedItemId,
-      displayedCardId: showCorrectionInputs
-        ? correction?.cardId ?? correction?.word?.id ?? null
-        : selectedItemId,
-      displayMode,
-      correctionCardId: correction?.cardId ?? null,
-      correctionMode: correction?.mode ?? null,
-      correctionMatchesSelectedItem: correction
-        ? (correction.cardId ?? correction.word?.id ?? null) === selectedItemId
-        : null,
-      isBetweenCards,
-      isContentHeld,
-      introMode,
-      result,
-      reversed: effectiveReversed,
-      text: promptText,
-      imageUri: promptImageUri,
-      explanation: displayMode === "explanation" ? explanationText : null,
-    };
-    const previous = lastContentDebugRef.current;
-    const changedFields = (Object.keys(snapshot) as (keyof ContentDebugSnapshot)[])
-      .filter((key) => !previous || snapshot[key] !== previous.snapshot[key]);
-    // Object replacement alone does not indicate a content transition.
-    if (changedFields.length === 0) return;
-    const sequence = (previous?.sequence ?? 0) + 1;
-    const { text, imageUri, explanation, ...state } = snapshot;
-    console.log("[flashcard-content]", {
-      time,
-      timestampMs: loggedAt,
-      sequence,
-      elapsedMs: previous ? loggedAt - previous.loggedAt : null,
-      changedFields,
-      ...state,
-      content: { text, imageUri, explanation },
-      previous: previous?.snapshot ?? null,
+    if (!__DEV__ || contentDebugSource !== "flashcards" || !isFocused || process.env.NODE_ENV === "test") return;
+    const displayedCardId = showCorrectionInputs
+      ? correction?.cardId ?? correction?.word?.id ?? null
+      : selectedItemId;
+    const expectedAnswers = showCorrectionInputs
+      ? [
+          ...(shouldCorrectAwers ? [correctionAwers] : []),
+          ...(shouldCorrectRewers ? [correctionRewers] : []),
+        ].filter(Boolean)
+      : mainExpectedAnswers;
+    const previous = lastFlashcardsStateRef.current;
+    if (
+      previous?.activeBox === activeBox &&
+      previous.displayedCardId === displayedCardId &&
+      (previous.expectedAnswers ?? []).join("\u0000") === expectedAnswers.join("\u0000")
+    ) return;
+
+    console.log("[flashcards-state]", {
+      activeBox: activeBox ?? null,
+      displayedCardId,
+      displayedCard: showCorrectionInputs
+        ? correction?.word?.text ?? correction?.promptText ?? null
+        : selectedItem?.text ?? null,
+      expectedAnswers,
     });
-    lastContentDebugRef.current = { loggedAt, sequence, snapshot };
+    lastFlashcardsStateRef.current = { activeBox, displayedCardId, expectedAnswers };
   }, [
     activeBox,
     contentDebugSource,
     correction,
-    displayMode,
-    effectiveReversed,
-    explanationText,
-    introMode,
-    isBetweenCards,
-    isContentHeld,
     isFocused,
-    promptImageUri,
-    promptText,
-    result,
+    correctionAwers,
+    correctionRewers,
+    mainExpectedAnswers,
+    shouldCorrectAwers,
+    shouldCorrectRewers,
+    selectedItem?.text,
     selectedItemId,
     showCorrectionInputs,
   ]);

@@ -42,6 +42,7 @@ type UseFlashcardsDistributionParams = {
   updateSelectedItem: (
     updater: (current: WordWithTranslations) => WordWithTranslations,
   ) => void;
+  boxZeroSettingsHydrated: boolean;
   boxZeroEnabled: boolean;
   flashcardsBatchSize: number | null | undefined;
 };
@@ -65,6 +66,7 @@ export function useFlashcardsDistribution({
   learned,
   setLearned,
   updateSelectedItem,
+  boxZeroSettingsHydrated,
   boxZeroEnabled,
   flashcardsBatchSize,
 }: UseFlashcardsDistributionParams) {
@@ -230,6 +232,7 @@ export function useFlashcardsDistribution({
   ]);
 
   const downloadData = useCallback(async (): Promise<void> => {
+    if (!boxZeroSettingsHydrated) return;
     if (!isFocused) return;
     if (activeCustomCourseId == null) return;
     if (loadedCourseId !== activeCustomCourseId) return;
@@ -272,6 +275,7 @@ export function useFlashcardsDistribution({
   }, [
     activeCustomCourseId,
     addUsedWordIds,
+    boxZeroSettingsHydrated,
     boxZeroEnabled,
     customCards,
     flashcardsBatchSize,

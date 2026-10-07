@@ -1,5 +1,5 @@
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
+import { isStudyCardReversed } from "@/src/utils/flashcardDirection";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { usePeekStyles } from "./Peek-styles";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -21,6 +21,7 @@ type FlashcardsPeekOverlayProps = {
   boxKey: keyof BoxesState | null;
   cards: WordWithTranslations[];
   cardLayout?: "box-aware" | "uniform";
+  boxZeroEnabled?: boolean;
   upcomingCards?: WordWithTranslations[];
   upcomingLoading?: boolean;
   upcomingError?: boolean;
@@ -43,6 +44,7 @@ export default function FlashcardsPeekOverlay({
   boxKey,
   cards,
   cardLayout = "box-aware",
+  boxZeroEnabled = false,
   upcomingCards,
   upcomingLoading = false,
   upcomingError = false,
@@ -214,14 +216,12 @@ export default function FlashcardsPeekOverlay({
     const isBoxZero = boxKey === "boxZero";
     const useBoxZeroSideLayout =
       isBoxZero && cardLayout === "box-aware";
-    const boxIsReversed = boxKey === "boxTwo" || boxKey === "boxFour";
-    const shouldFlip =
-      Boolean(item.flipped) && !isAnswerOnlyCard(item);
+    const reversed = isStudyCardReversed(item, boxKey, boxZeroEnabled);
     const prompt =
-      boxIsReversed && shouldFlip ? item.translations?.[0] ?? "" : item.text;
+      reversed ? item.translations?.[0] ?? "" : item.text;
     const type = item.type ?? "text";
-    const promptImage = boxIsReversed && shouldFlip ? item.imageBack : item.imageFront;
-    const answerImage = boxIsReversed && shouldFlip ? item.imageFront : item.imageBack;
+    const promptImage = reversed ? item.imageBack : item.imageFront;
+    const answerImage = reversed ? item.imageFront : item.imageBack;
     const hasPromptImage = Boolean(promptImage);
     const hasAnswerImage = Boolean(answerImage);
     const displayPrompt =
