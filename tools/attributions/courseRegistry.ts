@@ -8,7 +8,7 @@ export type AttributionCourseRegistryEntry = {
 export const ATTRIBUTION_COURSES: AttributionCourseRegistryEntry[] = [
   {
     id: "birds",
-    sourcePath: "tools/prebuild-data/pl/Ptaki_Polski_i_Europy_Srodkowej(1).tsv",
+    sourcePath: "tools/prebuild-data/pl/przyroda/ptaki/Ptaki_Polski_i_Europy_Srodkowej(1).tsv",
     title: {
       pl: "Ptaki Polski i Europy Środkowej",
       en: "Birds of Poland and Central Europe",

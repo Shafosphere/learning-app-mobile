@@ -1,0 +1,5892 @@
+[
+  {
+    "front_text": "cześć",
+    "back_text": "hola",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 0,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0001_czesc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hola"
+    ]
+  },
+  {
+    "front_text": "dzień dobry",
+    "back_text": "buenos días",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 1,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0002_dzien_dobry",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "buenos días"
+    ]
+  },
+  {
+    "front_text": "dobry wieczór",
+    "back_text": "buenas tardes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 2,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0003_dobry_wieczor",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "buenas tardes"
+    ]
+  },
+  {
+    "front_text": "dobranoc",
+    "back_text": "buenas noches",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 3,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0004_dobranoc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "buenas noches"
+    ]
+  },
+  {
+    "front_text": "do widzenia",
+    "back_text": "adiós",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 4,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0005_do_widzenia",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "adiós"
+    ]
+  },
+  {
+    "front_text": "do zobaczenia",
+    "back_text": "hasta luego",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 5,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0006_do_zobaczenia",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hasta luego"
+    ]
+  },
+  {
+    "front_text": "na razie",
+    "back_text": "hasta luego",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 6,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0007_na_razie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hasta luego"
+    ]
+  },
+  {
+    "front_text": "witam",
+    "back_text": "bienvenido",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 7,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0008_witam",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bienvenido"
+    ]
+  },
+  {
+    "front_text": "proszę",
+    "back_text": "por favor",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 8,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0009_prosze",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "por favor"
+    ]
+  },
+  {
+    "front_text": "dziękuję",
+    "back_text": "gracias",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 9,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0010_dziekuje",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "gracias"
+    ]
+  },
+  {
+    "front_text": "przepraszam",
+    "back_text": "perdón",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 10,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0011_przepraszam",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "perdón"
+    ]
+  },
+  {
+    "front_text": "nie ma za co",
+    "back_text": "de nada",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 11,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0012_nie_ma_za_co",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "de nada"
+    ]
+  },
+  {
+    "front_text": "nic się nie stało",
+    "back_text": "no pasa nada",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 12,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0013_nic_sie_nie_stao",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "no pasa nada"
+    ]
+  },
+  {
+    "front_text": "poproszę",
+    "back_text": "quisiera",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 13,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0014_poprosze",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "quisiera"
+    ]
+  },
+  {
+    "front_text": "czy mogę?",
+    "back_text": "¿puedo?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 14,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0015_czy_moge",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿puedo?"
+    ]
+  },
+  {
+    "front_text": "bardzo mi miło",
+    "back_text": "mucho gusto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 15,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0016_bardzo_mi_mio",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mucho gusto"
+    ]
+  },
+  {
+    "front_text": "tak",
+    "back_text": "sí",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 16,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0017_tak",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sí"
+    ]
+  },
+  {
+    "front_text": "nie",
+    "back_text": "no",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 17,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0018_nie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "no"
+    ]
+  },
+  {
+    "front_text": "może",
+    "back_text": "quizás",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 18,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0019_moze",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "quizás"
+    ]
+  },
+  {
+    "front_text": "dobrze",
+    "back_text": "bien",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 19,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0020_dobrze",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bien"
+    ]
+  },
+  {
+    "front_text": "źle",
+    "back_text": "mal",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 20,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0021_zle",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mal"
+    ]
+  },
+  {
+    "front_text": "oczywiście",
+    "back_text": "por supuesto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 21,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0022_oczywiscie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "por supuesto"
+    ]
+  },
+  {
+    "front_text": "nie wiem",
+    "back_text": "no sé",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 22,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0023_nie_wiem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "no sé"
+    ]
+  },
+  {
+    "front_text": "rozumiem",
+    "back_text": "entiendo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 23,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0024_rozumiem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "entiendo"
+    ]
+  },
+  {
+    "front_text": "nie rozumiem",
+    "back_text": "no entiendo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 24,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0025_nie_rozumiem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "no entiendo"
+    ]
+  },
+  {
+    "front_text": "OK",
+    "back_text": "vale",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 25,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0026_ok",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "vale"
+    ]
+  },
+  {
+    "front_text": "Mam na imię",
+    "back_text": "me llamo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 26,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0027_mam_na_imie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me llamo"
+    ]
+  },
+  {
+    "front_text": "Jestem",
+    "back_text": "soy",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 27,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0028_jestem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "soy"
+    ]
+  },
+  {
+    "front_text": "Nazywam się",
+    "back_text": "me llamo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 28,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0029_nazywam_sie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me llamo"
+    ]
+  },
+  {
+    "front_text": "Miło cię poznać",
+    "back_text": "encantado de conocerte",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 29,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0030_mio_cie_poznac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "encantado de conocerte"
+    ]
+  },
+  {
+    "front_text": "Skąd jesteś?",
+    "back_text": "¿de dónde eres?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 30,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0031_skad_jestes",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿de dónde eres?"
+    ]
+  },
+  {
+    "front_text": "Jestem z",
+    "back_text": "soy de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 31,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0032_jestem_z",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "soy de"
+    ]
+  },
+  {
+    "front_text": "Ile masz lat?",
+    "back_text": "¿cuántos años tienes?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 32,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0033_ile_masz_lat",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cuántos años tienes?"
+    ]
+  },
+  {
+    "front_text": "Mam lat",
+    "back_text": "tengo años",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 33,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0034_mam_lat",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tengo años"
+    ]
+  },
+  {
+    "front_text": "kto?",
+    "back_text": "¿quién?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 34,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0035_kto",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿quién?"
+    ]
+  },
+  {
+    "front_text": "co?",
+    "back_text": "¿qué?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 35,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0036_co",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿qué?"
+    ]
+  },
+  {
+    "front_text": "gdzie?",
+    "back_text": "¿dónde?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 36,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0037_gdzie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿dónde?"
+    ]
+  },
+  {
+    "front_text": "kiedy?",
+    "back_text": "¿cuándo?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 37,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0038_kiedy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cuándo?"
+    ]
+  },
+  {
+    "front_text": "dlaczego?",
+    "back_text": "¿por qué?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 38,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0039_dlaczego",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿por qué?"
+    ]
+  },
+  {
+    "front_text": "jak?",
+    "back_text": "¿cómo?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 39,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0040_jak",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cómo?"
+    ]
+  },
+  {
+    "front_text": "ile?",
+    "back_text": "¿cuánto?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 40,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0041_ile",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cuánto?"
+    ]
+  },
+  {
+    "front_text": "który?",
+    "back_text": "¿cuál?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 41,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0042_ktory",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cuál?"
+    ]
+  },
+  {
+    "front_text": "czy?",
+    "back_text": "¿sí?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 42,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0043_czy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿sí?"
+    ]
+  },
+  {
+    "front_text": "jaki?",
+    "back_text": "¿qué tipo de?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 43,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0044_jaki",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿qué tipo de?"
+    ]
+  },
+  {
+    "front_text": "ja",
+    "back_text": "yo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 44,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0045_ja",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "yo"
+    ]
+  },
+  {
+    "front_text": "ty",
+    "back_text": "tú",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 45,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0046_ty",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tú"
+    ]
+  },
+  {
+    "front_text": "on",
+    "back_text": "él",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 46,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0047_on",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "él"
+    ]
+  },
+  {
+    "front_text": "ona",
+    "back_text": "ella",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 47,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0048_ona",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ella"
+    ]
+  },
+  {
+    "front_text": "ono",
+    "back_text": "ello",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 48,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0049_ono",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ello"
+    ]
+  },
+  {
+    "front_text": "my",
+    "back_text": "nosotros",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 49,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0050_my",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nosotros"
+    ]
+  },
+  {
+    "front_text": "wy",
+    "back_text": "vosotros",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 50,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0051_wy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "vosotros"
+    ]
+  },
+  {
+    "front_text": "oni",
+    "back_text": "ellos",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 51,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0052_oni",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ellos"
+    ]
+  },
+  {
+    "front_text": "one",
+    "back_text": "ellas",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 52,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0053_one",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ellas"
+    ]
+  },
+  {
+    "front_text": "mój",
+    "back_text": "mi",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 53,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0053_moj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mi"
+    ]
+  },
+  {
+    "front_text": "twój",
+    "back_text": "tu",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 54,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0054_twoj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tu"
+    ]
+  },
+  {
+    "front_text": "jego lub jej",
+    "back_text": "su",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 55,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0055_jego_lub_jej",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "su"
+    ]
+  },
+  {
+    "front_text": "nasz",
+    "back_text": "nuestro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 56,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0057_nasz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nuestro"
+    ]
+  },
+  {
+    "front_text": "wasz",
+    "back_text": "vuestro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 57,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0058_wasz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "vuestro"
+    ]
+  },
+  {
+    "front_text": "być",
+    "back_text": "ser",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 58,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0059_byc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ser"
+    ]
+  },
+  {
+    "front_text": "mieć",
+    "back_text": "tener",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 59,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0060_miec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tener"
+    ]
+  },
+  {
+    "front_text": "robić",
+    "back_text": "hacer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 60,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0061_robic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hacer"
+    ]
+  },
+  {
+    "front_text": "iść",
+    "back_text": "ir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 61,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0062_isc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ir"
+    ]
+  },
+  {
+    "front_text": "przyjść",
+    "back_text": "venir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 62,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0063_przyjsc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "venir"
+    ]
+  },
+  {
+    "front_text": "jechać",
+    "back_text": "ir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 63,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0064_jechac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ir"
+    ]
+  },
+  {
+    "front_text": "chcieć",
+    "back_text": "querer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 64,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0065_chciec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "querer"
+    ]
+  },
+  {
+    "front_text": "lubić",
+    "back_text": "gustar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 65,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0066_lubic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "gustar"
+    ]
+  },
+  {
+    "front_text": "wiedzieć",
+    "back_text": "saber",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 66,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0067_wiedziec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "saber"
+    ]
+  },
+  {
+    "front_text": "znać",
+    "back_text": "conocer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 67,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0068_znac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "conocer"
+    ]
+  },
+  {
+    "front_text": "mówić",
+    "back_text": "hablar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 68,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0069_mowic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hablar"
+    ]
+  },
+  {
+    "front_text": "rozumieć",
+    "back_text": "entender",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 69,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0070_rozumiec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "entender"
+    ]
+  },
+  {
+    "front_text": "jeść",
+    "back_text": "comer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 70,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0071_jesc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "comer"
+    ]
+  },
+  {
+    "front_text": "pić",
+    "back_text": "beber",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 71,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0072_pic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "beber"
+    ]
+  },
+  {
+    "front_text": "spać",
+    "back_text": "dormir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 72,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0073_spac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "dormir"
+    ]
+  },
+  {
+    "front_text": "mieszkać",
+    "back_text": "vivir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 73,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0074_mieszkac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "vivir"
+    ]
+  },
+  {
+    "front_text": "pracować",
+    "back_text": "trabajar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 74,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0075_pracowac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "trabajar"
+    ]
+  },
+  {
+    "front_text": "uczyć się",
+    "back_text": "aprender",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 75,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0076_uczyc_sie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "aprender"
+    ]
+  },
+  {
+    "front_text": "kupić",
+    "back_text": "comprar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 76,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0077_kupic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "comprar"
+    ]
+  },
+  {
+    "front_text": "dać",
+    "back_text": "dar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 77,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0078_dac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "dar"
+    ]
+  },
+  {
+    "front_text": "widzieć",
+    "back_text": "ver",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 78,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0079_widziec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ver"
+    ]
+  },
+  {
+    "front_text": "słyszeć",
+    "back_text": "oír",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 79,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0080_syszec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "oír"
+    ]
+  },
+  {
+    "front_text": "otworzyć",
+    "back_text": "abrir",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 80,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0081_otworzyc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "abrir"
+    ]
+  },
+  {
+    "front_text": "zamknąć",
+    "back_text": "cerrar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 81,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0082_zamknac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cerrar"
+    ]
+  },
+  {
+    "front_text": "zero",
+    "back_text": "cero",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 82,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0083_zero",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cero"
+    ]
+  },
+  {
+    "front_text": "jeden",
+    "back_text": "uno",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 83,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0084_jeden",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "uno"
+    ]
+  },
+  {
+    "front_text": "dwa",
+    "back_text": "dos",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 84,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0085_dwa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "dos"
+    ]
+  },
+  {
+    "front_text": "trzy",
+    "back_text": "tres",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 85,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0086_trzy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tres"
+    ]
+  },
+  {
+    "front_text": "cztery",
+    "back_text": "cuatro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 86,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0087_cztery",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cuatro"
+    ]
+  },
+  {
+    "front_text": "pięć",
+    "back_text": "cinco",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 87,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0088_piec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cinco"
+    ]
+  },
+  {
+    "front_text": "sześć",
+    "back_text": "seis",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 88,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0089_szesc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "seis"
+    ]
+  },
+  {
+    "front_text": "siedem",
+    "back_text": "siete",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 89,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0090_siedem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "siete"
+    ]
+  },
+  {
+    "front_text": "osiem",
+    "back_text": "ocho",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 90,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0091_osiem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ocho"
+    ]
+  },
+  {
+    "front_text": "dziewięć",
+    "back_text": "nueve",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 91,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0092_dziewiec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nueve"
+    ]
+  },
+  {
+    "front_text": "dziesięć",
+    "back_text": "diez",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 92,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0093_dziesiec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "diez"
+    ]
+  },
+  {
+    "front_text": "jedenaście",
+    "back_text": "once",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 93,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0094_jedenascie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "once"
+    ]
+  },
+  {
+    "front_text": "dwanaście",
+    "back_text": "doce",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 94,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0095_dwanascie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "doce"
+    ]
+  },
+  {
+    "front_text": "dwadzieścia",
+    "back_text": "veinte",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 95,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0096_dwadziescia",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "veinte"
+    ]
+  },
+  {
+    "front_text": "trzydzieści",
+    "back_text": "treinta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 96,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0097_trzydziesci",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "treinta"
+    ]
+  },
+  {
+    "front_text": "sto",
+    "back_text": "cien",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 97,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0098_sto",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cien"
+    ]
+  },
+  {
+    "front_text": "tysiąc",
+    "back_text": "mil",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 98,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0099_tysiac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mil"
+    ]
+  },
+  {
+    "front_text": "pierwszy",
+    "back_text": "primero",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 99,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0100_pierwszy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "primero"
+    ]
+  },
+  {
+    "front_text": "drugi",
+    "back_text": "segundo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 100,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0101_drugi",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "segundo"
+    ]
+  },
+  {
+    "front_text": "trzeci",
+    "back_text": "tercero",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 101,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0102_trzeci",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tercero"
+    ]
+  },
+  {
+    "front_text": "połowa",
+    "back_text": "la mitad",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 102,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0103_poowa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "la mitad"
+    ]
+  },
+  {
+    "front_text": "dużo",
+    "back_text": "mucho",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 103,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0104_duzo",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mucho"
+    ]
+  },
+  {
+    "front_text": "mało",
+    "back_text": "poco",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 104,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0105_mao",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "poco"
+    ]
+  },
+  {
+    "front_text": "kilka",
+    "back_text": "unos cuantos",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 105,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0106_kilka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "unos cuantos"
+    ]
+  },
+  {
+    "front_text": "biały",
+    "back_text": "blanco",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 106,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0107_biay",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "blanco"
+    ]
+  },
+  {
+    "front_text": "czarny",
+    "back_text": "negro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 107,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0108_czarny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "negro"
+    ]
+  },
+  {
+    "front_text": "czerwony",
+    "back_text": "rojo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 108,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0109_czerwony",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "rojo"
+    ]
+  },
+  {
+    "front_text": "niebieski",
+    "back_text": "azul",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 109,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0110_niebieski",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "azul"
+    ]
+  },
+  {
+    "front_text": "zielony",
+    "back_text": "verde",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 110,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0111_zielony",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "verde"
+    ]
+  },
+  {
+    "front_text": "żółty",
+    "back_text": "amarillo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 111,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0112_zoty",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "amarillo"
+    ]
+  },
+  {
+    "front_text": "pomarańczowy",
+    "back_text": "naranja",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 112,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0113_pomaranczowy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "naranja"
+    ]
+  },
+  {
+    "front_text": "różowy",
+    "back_text": "rosa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 113,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0114_rozowy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "rosa"
+    ]
+  },
+  {
+    "front_text": "fioletowy",
+    "back_text": "morado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 114,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0115_fioletowy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "morado"
+    ]
+  },
+  {
+    "front_text": "brązowy",
+    "back_text": "marrón",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 115,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0116_brazowy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "marrón"
+    ]
+  },
+  {
+    "front_text": "szary",
+    "back_text": "gris",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 116,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0117_szary",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "gris"
+    ]
+  },
+  {
+    "front_text": "jasny",
+    "back_text": "claro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 117,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0118_jasny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "claro"
+    ]
+  },
+  {
+    "front_text": "ciemny",
+    "back_text": "oscuro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 118,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0119_ciemny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "oscuro"
+    ]
+  },
+  {
+    "front_text": "poniedziałek",
+    "back_text": "lunes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 119,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0120_poniedziaek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "lunes"
+    ]
+  },
+  {
+    "front_text": "wtorek",
+    "back_text": "martes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 120,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0121_wtorek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "martes"
+    ]
+  },
+  {
+    "front_text": "środa",
+    "back_text": "miércoles",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 121,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0122_sroda",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "miércoles"
+    ]
+  },
+  {
+    "front_text": "czwartek",
+    "back_text": "jueves",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 122,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0123_czwartek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "jueves"
+    ]
+  },
+  {
+    "front_text": "piątek",
+    "back_text": "viernes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 123,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0124_piatek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "viernes"
+    ]
+  },
+  {
+    "front_text": "sobota",
+    "back_text": "sábado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 124,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0125_sobota",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sábado"
+    ]
+  },
+  {
+    "front_text": "niedziela",
+    "back_text": "domingo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 125,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0126_niedziela",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "domingo"
+    ]
+  },
+  {
+    "front_text": "dzisiaj",
+    "back_text": "hoy",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 126,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0127_dzisiaj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hoy"
+    ]
+  },
+  {
+    "front_text": "jutro",
+    "back_text": "mañana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 127,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0128_jutro",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mañana"
+    ]
+  },
+  {
+    "front_text": "wczoraj",
+    "back_text": "ayer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 128,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0129_wczoraj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ayer"
+    ]
+  },
+  {
+    "front_text": "rano",
+    "back_text": "por la mañana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 129,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0130_rano",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "por la mañana"
+    ]
+  },
+  {
+    "front_text": "wieczorem",
+    "back_text": "por la noche",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 130,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0131_wieczorem",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "por la noche"
+    ]
+  },
+  {
+    "front_text": "teraz",
+    "back_text": "ahora",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 131,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0132_teraz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ahora"
+    ]
+  },
+  {
+    "front_text": "później",
+    "back_text": "más tarde",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 132,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0133_pozniej",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "más tarde"
+    ]
+  },
+  {
+    "front_text": "wcześniej",
+    "back_text": "antes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 133,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0134_wczesniej",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "antes"
+    ]
+  },
+  {
+    "front_text": "godzina",
+    "back_text": "hora",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 134,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0135_godzina",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hora"
+    ]
+  },
+  {
+    "front_text": "minuta",
+    "back_text": "minuto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 135,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0136_minuta",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "minuto"
+    ]
+  },
+  {
+    "front_text": "tydzień",
+    "back_text": "semana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 136,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0137_tydzien",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "semana"
+    ]
+  },
+  {
+    "front_text": "miesiąc",
+    "back_text": "mes",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 137,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0138_miesiac",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mes"
+    ]
+  },
+  {
+    "front_text": "rok",
+    "back_text": "año",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 138,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0139_rok",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "año"
+    ]
+  },
+  {
+    "front_text": "dom",
+    "back_text": "casa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 139,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0140_dom",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "casa"
+    ]
+  },
+  {
+    "front_text": "szkoła",
+    "back_text": "escuela",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 140,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0141_szkoa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "escuela"
+    ]
+  },
+  {
+    "front_text": "praca",
+    "back_text": "trabajo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 141,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0142_praca",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "trabajo"
+    ]
+  },
+  {
+    "front_text": "sklep",
+    "back_text": "tienda",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 142,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0143_sklep",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tienda"
+    ]
+  },
+  {
+    "front_text": "restauracja",
+    "back_text": "restaurante",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 143,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0144_restauracja",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "restaurante"
+    ]
+  },
+  {
+    "front_text": "toaleta",
+    "back_text": "baño",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 144,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0145_toaleta",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "baño"
+    ]
+  },
+  {
+    "front_text": "hotel",
+    "back_text": "hotel",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 145,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0146_hotel",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hotel"
+    ]
+  },
+  {
+    "front_text": "szpital",
+    "back_text": "hospital",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 146,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0147_szpital",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hospital"
+    ]
+  },
+  {
+    "front_text": "apteka",
+    "back_text": "farmacia",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 147,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0148_apteka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "farmacia"
+    ]
+  },
+  {
+    "front_text": "dworzec",
+    "back_text": "estación",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 148,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0149_dworzec",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "estación"
+    ]
+  },
+  {
+    "front_text": "lotnisko",
+    "back_text": "aeropuerto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 149,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0150_lotnisko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "aeropuerto"
+    ]
+  },
+  {
+    "front_text": "ulica",
+    "back_text": "calle",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 150,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0151_ulica",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "calle"
+    ]
+  },
+  {
+    "front_text": "miasto",
+    "back_text": "ciudad",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 151,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0152_miasto",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ciudad"
+    ]
+  },
+  {
+    "front_text": "kraj",
+    "back_text": "país",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 152,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0153_kraj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "país"
+    ]
+  },
+  {
+    "front_text": "pokój",
+    "back_text": "habitación",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 153,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0154_pokoj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "habitación"
+    ]
+  },
+  {
+    "front_text": "kuchnia",
+    "back_text": "cocina",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 154,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0155_kuchnia",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cocina"
+    ]
+  },
+  {
+    "front_text": "łazienka",
+    "back_text": "baño",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 155,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0156_azienka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "baño"
+    ]
+  },
+  {
+    "front_text": "człowiek",
+    "back_text": "persona",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 156,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0157_czowiek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "persona"
+    ]
+  },
+  {
+    "front_text": "osoba",
+    "back_text": "persona",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 157,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0158_osoba",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "persona"
+    ]
+  },
+  {
+    "front_text": "kobieta",
+    "back_text": "mujer",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 158,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0159_kobieta",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mujer"
+    ]
+  },
+  {
+    "front_text": "mężczyzna",
+    "back_text": "hombre",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 159,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0160_mezczyzna",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hombre"
+    ]
+  },
+  {
+    "front_text": "dziecko",
+    "back_text": "niño",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 160,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0161_dziecko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "niño"
+    ]
+  },
+  {
+    "front_text": "mama",
+    "back_text": "mamá",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 161,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0162_mama",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mamá"
+    ]
+  },
+  {
+    "front_text": "tata",
+    "back_text": "papá",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 162,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0163_tata",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "papá"
+    ]
+  },
+  {
+    "front_text": "rodzice",
+    "back_text": "padres",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 163,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0164_rodzice",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "padres"
+    ]
+  },
+  {
+    "front_text": "brat",
+    "back_text": "hermano",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 164,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0165_brat",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hermano"
+    ]
+  },
+  {
+    "front_text": "siostra",
+    "back_text": "hermana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 165,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0166_siostra",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hermana"
+    ]
+  },
+  {
+    "front_text": "przyjaciel",
+    "back_text": "amigo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 166,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0167_przyjaciel",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "amigo"
+    ]
+  },
+  {
+    "front_text": "kolega",
+    "back_text": "compañero",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 167,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0168_kolega",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "compañero"
+    ]
+  },
+  {
+    "front_text": "dziewczyna",
+    "back_text": "novia",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 168,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0169_dziewczyna",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "novia"
+    ]
+  },
+  {
+    "front_text": "chłopak",
+    "back_text": "novio",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 169,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0170_chopak",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "novio"
+    ]
+  },
+  {
+    "front_text": "mąż",
+    "back_text": "marido",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 170,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0171_maz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "marido"
+    ]
+  },
+  {
+    "front_text": "żona",
+    "back_text": "esposa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 171,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0172_zona",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "esposa"
+    ]
+  },
+  {
+    "front_text": "woda",
+    "back_text": "agua",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 172,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0173_woda",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "agua"
+    ]
+  },
+  {
+    "front_text": "kawa",
+    "back_text": "café",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 173,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0174_kawa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "café"
+    ]
+  },
+  {
+    "front_text": "herbata",
+    "back_text": "té",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 174,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0175_herbata",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "té"
+    ]
+  },
+  {
+    "front_text": "mleko",
+    "back_text": "leche",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 175,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0176_mleko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "leche"
+    ]
+  },
+  {
+    "front_text": "chleb",
+    "back_text": "pan",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 176,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0177_chleb",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pan"
+    ]
+  },
+  {
+    "front_text": "ser",
+    "back_text": "queso",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 177,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0178_ser",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "queso"
+    ]
+  },
+  {
+    "front_text": "mięso",
+    "back_text": "carne",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 178,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0179_mieso",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "carne"
+    ]
+  },
+  {
+    "front_text": "ryba",
+    "back_text": "pescado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 179,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0180_ryba",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pescado"
+    ]
+  },
+  {
+    "front_text": "jajko",
+    "back_text": "huevo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 180,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0181_jajko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "huevo"
+    ]
+  },
+  {
+    "front_text": "ryż",
+    "back_text": "arroz",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 181,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0182_ryz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "arroz"
+    ]
+  },
+  {
+    "front_text": "makaron",
+    "back_text": "pasta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 182,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0183_makaron",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pasta"
+    ]
+  },
+  {
+    "front_text": "zupa",
+    "back_text": "sopa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 183,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0184_zupa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sopa"
+    ]
+  },
+  {
+    "front_text": "owoc",
+    "back_text": "fruta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 184,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0185_owoc",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "fruta"
+    ]
+  },
+  {
+    "front_text": "warzywo",
+    "back_text": "verdura",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 185,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0186_warzywo",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "verdura"
+    ]
+  },
+  {
+    "front_text": "jabłko",
+    "back_text": "manzana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 186,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0187_jabko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "manzana"
+    ]
+  },
+  {
+    "front_text": "banan",
+    "back_text": "plátano",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 187,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0188_banan",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "plátano"
+    ]
+  },
+  {
+    "front_text": "sól",
+    "back_text": "sal",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 188,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0189_sol",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sal"
+    ]
+  },
+  {
+    "front_text": "cukier",
+    "back_text": "azúcar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 189,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0190_cukier",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "azúcar"
+    ]
+  },
+  {
+    "front_text": "śniadanie",
+    "back_text": "desayuno",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 190,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0191_sniadanie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "desayuno"
+    ]
+  },
+  {
+    "front_text": "obiad",
+    "back_text": "almuerzo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 191,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0192_obiad",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "almuerzo"
+    ]
+  },
+  {
+    "front_text": "kolacja",
+    "back_text": "cena",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 192,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0193_kolacja",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cena"
+    ]
+  },
+  {
+    "front_text": "telefon",
+    "back_text": "teléfono",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 193,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0194_telefon",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "teléfono"
+    ]
+  },
+  {
+    "front_text": "komputer",
+    "back_text": "ordenador",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 194,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0195_komputer",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ordenador"
+    ]
+  },
+  {
+    "front_text": "książka",
+    "back_text": "libro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 195,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0196_ksiazka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "libro"
+    ]
+  },
+  {
+    "front_text": "klucz",
+    "back_text": "llave",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 196,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0197_klucz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "llave"
+    ]
+  },
+  {
+    "front_text": "drzwi",
+    "back_text": "puerta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 197,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0198_drzwi",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "puerta"
+    ]
+  },
+  {
+    "front_text": "okno",
+    "back_text": "ventana",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 198,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0199_okno",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ventana"
+    ]
+  },
+  {
+    "front_text": "stół",
+    "back_text": "mesa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 199,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0200_sto",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mesa"
+    ]
+  },
+  {
+    "front_text": "krzesło",
+    "back_text": "silla",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 200,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0201_krzeso",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "silla"
+    ]
+  },
+  {
+    "front_text": "łóżko",
+    "back_text": "cama",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 201,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0202_ozko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cama"
+    ]
+  },
+  {
+    "front_text": "torba",
+    "back_text": "bolsa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 202,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0203_torba",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bolsa"
+    ]
+  },
+  {
+    "front_text": "ubranie",
+    "back_text": "ropa",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 203,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0204_ubranie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ropa"
+    ]
+  },
+  {
+    "front_text": "buty",
+    "back_text": "zapatos",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 204,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0205_buty",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "zapatos"
+    ]
+  },
+  {
+    "front_text": "pieniądze",
+    "back_text": "dinero",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 205,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0206_pieniadze",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "dinero"
+    ]
+  },
+  {
+    "front_text": "karta",
+    "back_text": "tarjeta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 206,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0207_karta",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tarjeta"
+    ]
+  },
+  {
+    "front_text": "bilet",
+    "back_text": "billete",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 207,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0208_bilet",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "billete"
+    ]
+  },
+  {
+    "front_text": "samochód",
+    "back_text": "coche",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 208,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0209_samochod",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "coche"
+    ]
+  },
+  {
+    "front_text": "rower",
+    "back_text": "bicicleta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 209,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0210_rower",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bicicleta"
+    ]
+  },
+  {
+    "front_text": "głowa",
+    "back_text": "cabeza",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 210,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0211_gowa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cabeza"
+    ]
+  },
+  {
+    "front_text": "twarz",
+    "back_text": "cara",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 211,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0212_twarz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cara"
+    ]
+  },
+  {
+    "front_text": "oko",
+    "back_text": "ojo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 212,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0213_oko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ojo"
+    ]
+  },
+  {
+    "front_text": "ucho",
+    "back_text": "oreja",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 213,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0214_ucho",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "oreja"
+    ]
+  },
+  {
+    "front_text": "nos",
+    "back_text": "nariz",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 214,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0215_nos",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nariz"
+    ]
+  },
+  {
+    "front_text": "usta",
+    "back_text": "boca",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 215,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0216_usta",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "boca"
+    ]
+  },
+  {
+    "front_text": "ręka",
+    "back_text": "mano",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 216,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0217_reka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "mano"
+    ]
+  },
+  {
+    "front_text": "noga",
+    "back_text": "pierna",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 217,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0218_noga",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pierna"
+    ]
+  },
+  {
+    "front_text": "stopa",
+    "back_text": "pie",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 218,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0219_stopa",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pie"
+    ]
+  },
+  {
+    "front_text": "brzuch",
+    "back_text": "vientre",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 219,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0220_brzuch",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "vientre"
+    ]
+  },
+  {
+    "front_text": "plecy",
+    "back_text": "espalda",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 220,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0221_plecy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "espalda"
+    ]
+  },
+  {
+    "front_text": "serce",
+    "back_text": "corazón",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 221,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0222_serce",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "corazón"
+    ]
+  },
+  {
+    "front_text": "ząb",
+    "back_text": "diente",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 222,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0223_zab",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "diente"
+    ]
+  },
+  {
+    "front_text": "włosy",
+    "back_text": "pelo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 223,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0224_wosy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pelo"
+    ]
+  },
+  {
+    "front_text": "dobry",
+    "back_text": "bueno",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 224,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0225_dobry",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bueno"
+    ]
+  },
+  {
+    "front_text": "zły",
+    "back_text": "malo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 225,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0226_zy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "malo"
+    ]
+  },
+  {
+    "front_text": "duży",
+    "back_text": "grande",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 226,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0227_duzy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "grande"
+    ]
+  },
+  {
+    "front_text": "mały",
+    "back_text": "pequeño",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 227,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0228_may",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pequeño"
+    ]
+  },
+  {
+    "front_text": "nowy",
+    "back_text": "nuevo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 228,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0229_nowy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nuevo"
+    ]
+  },
+  {
+    "front_text": "stary",
+    "back_text": "viejo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 229,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0230_stary",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "viejo"
+    ]
+  },
+  {
+    "front_text": "młody",
+    "back_text": "joven",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 230,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0231_mody",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "joven"
+    ]
+  },
+  {
+    "front_text": "ładny",
+    "back_text": "bonito",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 231,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0232_adny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "bonito"
+    ]
+  },
+  {
+    "front_text": "brzydki",
+    "back_text": "feo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 232,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0233_brzydki",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "feo"
+    ]
+  },
+  {
+    "front_text": "łatwy",
+    "back_text": "fácil",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 233,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0234_atwy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "fácil"
+    ]
+  },
+  {
+    "front_text": "trudny",
+    "back_text": "difícil",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 234,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0235_trudny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "difícil"
+    ]
+  },
+  {
+    "front_text": "szybki",
+    "back_text": "rápido",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 235,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0236_szybki",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "rápido"
+    ]
+  },
+  {
+    "front_text": "wolny",
+    "back_text": "lento",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 236,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0237_wolny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "lento"
+    ]
+  },
+  {
+    "front_text": "gorący",
+    "back_text": "caliente",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 237,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0238_goracy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "caliente"
+    ]
+  },
+  {
+    "front_text": "zimny",
+    "back_text": "frío",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 238,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0239_zimny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "frío"
+    ]
+  },
+  {
+    "front_text": "tani",
+    "back_text": "barato",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 239,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0240_tani",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "barato"
+    ]
+  },
+  {
+    "front_text": "drogi",
+    "back_text": "caro",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 240,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0241_drogi",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "caro"
+    ]
+  },
+  {
+    "front_text": "ważny",
+    "back_text": "importante",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 241,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0242_wazny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "importante"
+    ]
+  },
+  {
+    "front_text": "zmęczony",
+    "back_text": "cansado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 242,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0243_zmeczony",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cansado"
+    ]
+  },
+  {
+    "front_text": "głodny",
+    "back_text": "hambriento",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 243,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0244_godny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hambriento"
+    ]
+  },
+  {
+    "front_text": "spragniony",
+    "back_text": "sediento",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 244,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0245_spragniony",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sediento"
+    ]
+  },
+  {
+    "front_text": "tutaj",
+    "back_text": "aquí",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 245,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0246_tutaj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "aquí"
+    ]
+  },
+  {
+    "front_text": "tam",
+    "back_text": "allí",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 246,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0247_tam",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "allí"
+    ]
+  },
+  {
+    "front_text": "blisko",
+    "back_text": "cerca",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 247,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0248_blisko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cerca"
+    ]
+  },
+  {
+    "front_text": "daleko",
+    "back_text": "lejos",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 248,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0249_daleko",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "lejos"
+    ]
+  },
+  {
+    "front_text": "w",
+    "back_text": "en",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 249,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0250_w",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "en"
+    ]
+  },
+  {
+    "front_text": "na",
+    "back_text": "en",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 250,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0251_na",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "en"
+    ]
+  },
+  {
+    "front_text": "pod",
+    "back_text": "debajo de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 251,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0252_pod",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "debajo de"
+    ]
+  },
+  {
+    "front_text": "nad",
+    "back_text": "encima de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 252,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0253_nad",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "encima de"
+    ]
+  },
+  {
+    "front_text": "obok",
+    "back_text": "al lado de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 253,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0254_obok",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "al lado de"
+    ]
+  },
+  {
+    "front_text": "przed",
+    "back_text": "delante de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 254,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0255_przed",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "delante de"
+    ]
+  },
+  {
+    "front_text": "za",
+    "back_text": "detrás de",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 255,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0256_za",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "detrás de"
+    ]
+  },
+  {
+    "front_text": "lewo",
+    "back_text": "izquierda",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 256,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0257_lewo",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "izquierda"
+    ]
+  },
+  {
+    "front_text": "prawo",
+    "back_text": "derecha",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 257,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0258_prawo",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "derecha"
+    ]
+  },
+  {
+    "front_text": "prosto",
+    "back_text": "recto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 258,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0259_prosto",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "recto"
+    ]
+  },
+  {
+    "front_text": "do góry",
+    "back_text": "arriba",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 259,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0260_do_gory",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "arriba"
+    ]
+  },
+  {
+    "front_text": "na dół",
+    "back_text": "abajo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 260,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0261_na_do",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "abajo"
+    ]
+  },
+  {
+    "front_text": "ile kosztuje?",
+    "back_text": "¿cuánto cuesta?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 261,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0262_ile_kosztuje",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cuánto cuesta?"
+    ]
+  },
+  {
+    "front_text": "cena",
+    "back_text": "precio",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 262,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0263_cena",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "precio"
+    ]
+  },
+  {
+    "front_text": "zapłacić",
+    "back_text": "pagar",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 263,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0267_zapacic",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "pagar"
+    ]
+  },
+  {
+    "front_text": "gotówka",
+    "back_text": "efectivo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 264,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0268_gotowka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "efectivo"
+    ]
+  },
+  {
+    "front_text": "rachunek",
+    "back_text": "cuenta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 265,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0270_rachunek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cuenta"
+    ]
+  },
+  {
+    "front_text": "paragon",
+    "back_text": "recibo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 266,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0271_paragon",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "recibo"
+    ]
+  },
+  {
+    "front_text": "otwarte",
+    "back_text": "abierto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 267,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0273_otwarte",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "abierto"
+    ]
+  },
+  {
+    "front_text": "zamknięte",
+    "back_text": "cerrado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 268,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0274_zamkniete",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "cerrado"
+    ]
+  },
+  {
+    "front_text": "chcę to",
+    "back_text": "quiero esto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 269,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0275_chce_to",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "quiero esto"
+    ]
+  },
+  {
+    "front_text": "poproszę to",
+    "back_text": "quisiera esto",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 270,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0276_poprosze_to",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "quisiera esto"
+    ]
+  },
+  {
+    "front_text": "autobus",
+    "back_text": "autobús",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 271,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0277_autobus",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "autobús"
+    ]
+  },
+  {
+    "front_text": "tramwaj",
+    "back_text": "tranvía",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 272,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0278_tramwaj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tranvía"
+    ]
+  },
+  {
+    "front_text": "pociąg",
+    "back_text": "tren",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 273,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0279_pociag",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tren"
+    ]
+  },
+  {
+    "front_text": "taksówka",
+    "back_text": "taxi",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 274,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0281_taksowka",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "taxi"
+    ]
+  },
+  {
+    "front_text": "samolot",
+    "back_text": "avión",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 275,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0282_samolot",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "avión"
+    ]
+  },
+  {
+    "front_text": "przystanek",
+    "back_text": "parada",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 276,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0284_przystanek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "parada"
+    ]
+  },
+  {
+    "front_text": "gdzie jest?",
+    "back_text": "¿dónde está?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 277,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0287_gdzie_jest",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿dónde está?"
+    ]
+  },
+  {
+    "front_text": "jak dojść do?",
+    "back_text": "¿cómo se llega a?",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 278,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0288_jak_dojsc_do",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "¿cómo se llega a?"
+    ]
+  },
+  {
+    "front_text": "jadę do",
+    "back_text": "voy a",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 279,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0289_jade_do",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "voy a"
+    ]
+  },
+  {
+    "front_text": "wysiadam tutaj",
+    "back_text": "me bajo aquí",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 280,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0290_wysiadam_tutaj",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me bajo aquí"
+    ]
+  },
+  {
+    "front_text": "pomocy",
+    "back_text": "ayuda",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 281,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0291_pomocy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "ayuda"
+    ]
+  },
+  {
+    "front_text": "lekarz",
+    "back_text": "médico",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 282,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0292_lekarz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "médico"
+    ]
+  },
+  {
+    "front_text": "boli mnie",
+    "back_text": "me duele",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 283,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0295_boli_mnie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me duele"
+    ]
+  },
+  {
+    "front_text": "źle się czuję",
+    "back_text": "me siento mal",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 284,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0296_zle_sie_czuje",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me siento mal"
+    ]
+  },
+  {
+    "front_text": "jestem chory",
+    "back_text": "estoy enfermo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 285,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0297_jestem_chory",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "estoy enfermo"
+    ]
+  },
+  {
+    "front_text": "wypadek",
+    "back_text": "accidente",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 286,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0298_wypadek",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "accidente"
+    ]
+  },
+  {
+    "front_text": "policja",
+    "back_text": "policía",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 287,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0299_policja",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "policía"
+    ]
+  },
+  {
+    "front_text": "ogień",
+    "back_text": "fuego",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 288,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0300_ogien",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "fuego"
+    ]
+  },
+  {
+    "front_text": "niebezpieczne",
+    "back_text": "peligroso",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 289,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0301_niebezpieczne",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "peligroso"
+    ]
+  },
+  {
+    "front_text": "potrzebuję pomocy",
+    "back_text": "necesito ayuda",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 290,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0302_potrzebuje_pomocy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "necesito ayuda"
+    ]
+  },
+  {
+    "front_text": "pogoda",
+    "back_text": "tiempo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 291,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0303_pogoda",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tiempo"
+    ]
+  },
+  {
+    "front_text": "słońce",
+    "back_text": "sol",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 292,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0304_sonce",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "sol"
+    ]
+  },
+  {
+    "front_text": "deszcz",
+    "back_text": "lluvia",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 293,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0305_deszcz",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "lluvia"
+    ]
+  },
+  {
+    "front_text": "śnieg",
+    "back_text": "nieve",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 294,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0306_snieg",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nieve"
+    ]
+  },
+  {
+    "front_text": "wiatr",
+    "back_text": "viento",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 295,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0307_wiatr",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "viento"
+    ]
+  },
+  {
+    "front_text": "ciepło",
+    "back_text": "calor",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 296,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0308_ciepo",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "calor"
+    ]
+  },
+  {
+    "front_text": "zimno",
+    "back_text": "frío",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 297,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0309_zimno",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "frío"
+    ]
+  },
+  {
+    "front_text": "gorąco",
+    "back_text": "hace calor",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 298,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0310_goraco",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hace calor"
+    ]
+  },
+  {
+    "front_text": "pada",
+    "back_text": "llueve",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 299,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0311_pada",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "llueve"
+    ]
+  },
+  {
+    "front_text": "jest pochmurno",
+    "back_text": "está nublado",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 300,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0312_jest_pochmurno",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "está nublado"
+    ]
+  },
+  {
+    "front_text": "jest ładna pogoda",
+    "back_text": "hace buen tiempo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 301,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0313_jest_adna_pogoda",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "hace buen tiempo"
+    ]
+  },
+  {
+    "front_text": "szczęśliwy",
+    "back_text": "feliz",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 302,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0314_szczesliwy",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "feliz"
+    ]
+  },
+  {
+    "front_text": "smutny",
+    "back_text": "triste",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 303,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0315_smutny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "triste"
+    ]
+  },
+  {
+    "front_text": "spokojny",
+    "back_text": "tranquilo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 304,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0317_spokojny",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tranquilo"
+    ]
+  },
+  {
+    "front_text": "zdenerwowany",
+    "back_text": "nervioso",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 305,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0318_zdenerwowany",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "nervioso"
+    ]
+  },
+  {
+    "front_text": "chory",
+    "back_text": "enfermo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 306,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0320_chory",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "enfermo"
+    ]
+  },
+  {
+    "front_text": "boję się",
+    "back_text": "tengo miedo",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 307,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0323_boje_sie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "tengo miedo"
+    ]
+  },
+  {
+    "front_text": "lubię",
+    "back_text": "me gusta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 308,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0324_lubie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "me gusta"
+    ]
+  },
+  {
+    "front_text": "nie lubię",
+    "back_text": "no me gusta",
+    "hint_front": null,
+    "hint_back": null,
+    "image_front": null,
+    "image_back": null,
+    "explanation": null,
+    "position": 309,
+    "flipped": 0,
+    "answer_only": 0,
+    "type": "text",
+    "external_id": "es_basic_0325_nie_lubie",
+    "is_official": 1,
+    "reset_progress_on_update": 0,
+    "answers": [
+      "no me gusta"
+    ]
+  }
+]

@@ -5,7 +5,7 @@ import { buildImageAttributions, parseAttributionCourse } from "./build-image-at
 import type { AttributionCourseRegistryEntry } from "../attributions/courseRegistry.ts";
 
 const birds: AttributionCourseRegistryEntry = {
-  id: "birds", sourcePath: "tools/prebuild-data/pl/Ptaki_Polski_i_Europy_Srodkowej(1).tsv",
+  id: "birds", sourcePath: "tools/prebuild-data/pl/przyroda/ptaki/Ptaki_Polski_i_Europy_Srodkowej(1).tsv",
   title: { pl: "Ptaki", en: "Birds" }, defaultChanges: { pl: "Zmniejszono.", en: "Resized." },
 };
 const header = "nr\tnazwa_polska\tnazwa_lacinska\tnazwa_pliku\tlink_do_obrazu_i_strony_licencji\tlicencja\tautor_do_atrybucji\tlink_do_tekstu_licencji\ttytul_do_atrybucji\topis_zmian";

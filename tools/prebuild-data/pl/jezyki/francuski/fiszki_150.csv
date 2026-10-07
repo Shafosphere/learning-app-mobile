@@ -1,0 +1,151 @@
+external_id,front_text,back_text
+0001,eau,woda
+0002,livre,książka
+0003,tête,głowa
+0004,porte,drzwi
+0005,voiture,"samochód, samochód osobowy, wagon"
+0006,poisson,ryba
+0007,lit,łóżko
+0008,soleil,słońce
+0009,lait,mleko
+0010,bouche,"usta, pysk, gęba, ujście, wylot"
+0011,fenêtre,"okno, okienko"
+0012,sucre,cukier
+0013,cheval,koń
+0014,chaise,krzesło
+0015,train,pociąg
+0016,chien,pies
+0017,ballon,"piłka, balon"
+0018,neige,śnieg
+0019,œufs,jajka
+0020,pluie,"deszcz, opad deszczu"
+0021,tasse,"kubek, filiżanka"
+0022,bus,autobus
+0023,oreille,ucho
+0024,mouton,owca
+0025,pain,"chleb, pieczywo"
+0026,chat,kot
+0027,nez,nos
+0028,bureau,"biurko, biuro"
+0029,pomme,jabłko
+0030,fromage,ser
+0031,couteau,nóż
+0032,vache,krowa
+0033,jus,sok
+0034,cochon,świnia
+0035,lapin,królik
+0036,crayon,ołówek
+0037,tomate,pomidor
+0038,canapé,kanapa
+0039,lampe,lampa
+0040,réfrigérateur,lodówka
+0041,sel,sól
+0042,banane,banan
+0043,pomme de terre,ziemniak
+0044,assiette,talerz
+0045,fourchette,"widelec, widełki, przedział"
+0046,cuillère,łyżka
+0047,oreiller,poduszka
+0048,couverture,"koc, przykrycie, pokrycie"
+0049,œil,oko
+0050,pied,stopa
+0106,être,być
+0107,avoir,mieć
+0108,faire,"robić, wykonywać, tworzyć"
+0109,aller,"iść, jechać"
+0110,venir,"przychodzić, przyjeżdżać"
+0111,aller en voiture,jechać samochodem
+0112,vouloir,chcieć
+0113,aimer,"lubić, kochać"
+0114,savoir,"wiedzieć, umieć"
+0115,connaître,znać
+0116,parler,"mówić, rozmawiać"
+0117,comprendre,rozumieć
+0118,manger,jeść
+0119,boire,pić
+0120,dormir,spać
+0121,habiter,mieszkać
+0122,travailler,pracować
+0123,apprendre,"uczyć się, nauczyć się, uczyć kogoś, przekazywać komuś informację"
+0124,acheter,kupić
+0125,donner,dać
+0126,voir,"widzieć, zobaczyć"
+0127,entendre,"słyszeć, usłyszeć"
+0128,ouvrir,otworzyć
+0187,la maison,"dom, miejsce zamieszkania"
+0188,l'école,szkoła
+0189,le travail,"praca, zajęcie"
+0190,le magasin,sklep
+0191,le restaurant,restauracja
+0192,les toilettes,toaleta
+0193,l'hôtel,hotel
+0194,l'hôpital,szpital
+0195,la pharmacie,apteka
+0196,la gare,dworzec
+0197,l'aéroport,lotnisko
+0198,la rue,ulica
+0199,la ville,miasto
+0200,le pays,kraj
+0201,la pièce,"pokój, kawałek, sztuka, moneta"
+0202,la cuisine,"kuchnia, gotowanie, kuchnia jako styl kulinarny"
+0203,la salle de bain,łazienka
+0204,l'être humain,człowiek
+0205,la personne,osoba
+0206,la femme,"kobieta, żona"
+0207,l'homme,mężczyzna
+0208,l'enfant,dziecko
+0209,maman,mama
+0210,papa,tata
+0211,les parents,rodzice
+0212,le frère,brat
+0213,la sœur,siostra
+0214,l'ami,przyjaciel
+0215,le copain,"kolega, kumpel, chłopak, partner"
+0216,la petite amie,dziewczyna
+0217,le petit ami,chłopak
+0218,le mari,mąż
+0219,l'épouse,żona
+0220,le café,"kawa, kawiarnia"
+0221,le thé,herbata
+0222,la viande,mięso
+0223,l'œuf,jajko
+0224,le riz,ryż
+0225,les pâtes,makaron
+0226,la soupe,zupa
+0227,le fruit,owoc
+0228,le légume,warzywo
+0229,le petit déjeuner,śniadanie
+0230,le déjeuner,obiad
+0231,le dîner,kolacja
+0232,le téléphone,telefon
+0233,l'ordinateur,komputer
+0234,la clé,klucz
+0235,la table,stół
+0236,le sac,torba
+0237,le vêtement,ubranie
+0238,les chaussures,buty
+0239,l'argent,"pieniądze, srebro"
+0240,la carte,"karta, mapa, menu"
+0241,le billet,"bilet, banknot"
+0242,le vélo,rower
+0243,le visage,twarz
+0244,la main,dłoń
+0245,la jambe,noga
+0246,le ventre,brzuch
+0247,le dos,"plecy, tył, odwrotna strona"
+0248,le cœur,serce
+0249,la dent,ząb
+0250,les cheveux,włosy
+0291,l'argent liquide,gotówka
+0292,l'addition,rachunek
+0293,le ticket de caisse,paragon
+0298,le tramway,tramwaj
+0299,le taxi,taksówka
+0300,l'avion,samolot
+0301,l'arrêt,"przystanek, zatrzymanie, postój"
+0307,le médecin,lekarz
+0311,l'accident,wypadek
+0312,la police,policja
+0313,le feu,"ogień, światło sygnalizacji"
+0316,le temps,"pogoda, czas"
+0317,le vent,wiatr

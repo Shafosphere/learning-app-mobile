@@ -1,4 +1,6 @@
 import cards from "@/assets/data/sqlite/retired-basic-english.json";
+import spanishCards from "@/assets/data/sqlite/retired-basic-spanish.json";
+import frenchCards from "@/assets/data/sqlite/retired-basic-french.json";
 import { restoreRetiredOfficialCourseWithDb } from "./retiredOfficialCourses";
 
 const slug = "fiszki_podstawy_en_pl_slowa";
@@ -8,11 +10,15 @@ const makeDb = () => ({
   runAsync: jest.fn().mockResolvedValue({ lastInsertRowId: 700 }),
 });
 
-it("recreates all 474 legacy cards with stable identities and answers", async () => {
+it.each([
+  [slug, cards, 474],
+  ["fiszki_francuski_podstawowe_poprawione", frenchCards, 309],
+  ["fiszki_hiszpanski_podstawowe_poprawione", spanishCards, 310],
+] as const)("recreates %s with stable identities and answers", async (courseSlug, cards, count) => {
   const db = makeDb();
-  expect(await restoreRetiredOfficialCourseWithDb(db as never, slug)).toBe(700);
+  expect(await restoreRetiredOfficialCourseWithDb(db as never, courseSlug)).toBe(700);
   const inserts = db.runAsync.mock.calls.filter(([sql]) => sql.includes("INSERT INTO custom_flashcards"));
-  expect(cards).toHaveLength(474);
+  expect(cards).toHaveLength(count);
   expect(inserts).toHaveLength(cards.length);
   for (const [index, card] of cards.entries()) {
     expect(inserts[index].slice(1, 14)).toEqual([

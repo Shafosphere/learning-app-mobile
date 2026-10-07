@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 5;
+const PREBUILT_DATABASE_VERSION = 7;
 
 const OFFICIAL_PACKS = [
   {
@@ -24,7 +24,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "fiszki_50.csv",
+    csvFile: "jezyki/angielski/fiszki_50.csv",
   },
   {
     slug: "eng_to_pl_first_100",
@@ -35,7 +35,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "fiszki_100.csv",
+    csvFile: "jezyki/angielski/fiszki_100.csv",
   },
   {
     slug: "eng_to_pl_first_250",
@@ -46,7 +46,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "fiszki_250.csv",
+    csvFile: "jezyki/angielski/fiszki_250.csv",
   },
   {
     slug: "eng_to_pl_first_500",
@@ -57,7 +57,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "fiszki_500.csv",
+    csvFile: "jezyki/angielski/fiszki_500.csv",
   },
   {
     slug: "eng_to_pl_a1",
@@ -68,7 +68,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "ENGtoPL_A1.csv",
+    csvFile: "jezyki/angielski/ENGtoPL_A1.csv",
   },
   {
     slug: "eng_to_pl_a2",
@@ -79,7 +79,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "ENGtoPL_A2.csv",
+    csvFile: "jezyki/angielski/ENGtoPL_A2.csv",
   },
   {
     slug: "eng_to_pl_b1",
@@ -90,7 +90,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "ENGtoPL_B1.csv",
+    csvFile: "jezyki/angielski/ENGtoPL_B1.csv",
   },
   {
     slug: "eng_to_pl_b2",
@@ -101,28 +101,30 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: true,
-    csvFile: "ENGtoPL_B2.csv",
+    csvFile: "jezyki/angielski/ENGtoPL_B2.csv",
   },
-  {
-    slug: "fiszki_hiszpanski_podstawowe_poprawione",
-    name: "Hiszpański - podstawy",
+  ...[50, 150, 327].map((count) => ({
+    slug: `es_to_pl_first_${count}`,
+    packVersion: 1,
+    name: count === 50 ? "Pierwsze 50 słów" : `${count} słów`,
     iconId: "flag:es",
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "fiszki_hiszpanski_podstawowe_poprawione.csv",
-  },
-  {
-    slug: "fiszki_francuski_podstawowe_poprawione",
-    name: "Francuski - podstawy",
+    csvFile: `jezyki/hiszpanski/fiszki_${count}.csv`,
+  })),
+  ...[50, 150, 332].map((count) => ({
+    slug: `fr_to_pl_first_${count}`,
+    packVersion: 1,
+    name: count === 50 ? "Pierwsze 50 słów" : `${count} słów`,
     iconId: "flag:fr",
     iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "fiszki_francuski_podstawowe_poprawione.csv",
-  },
+    csvFile: `jezyki/francuski/fiszki_${count}.csv`,
+  })),
   {
     slug: "basic_english_to_spanish_50",
     name: "Basic Spanish",
@@ -189,7 +191,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "astronomia.csv",
+    csvFile: "przyroda/astronomia/astronomia.csv",
   },
   {
     slug: "polska_historia",
@@ -199,7 +201,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "polska_historia.csv",
+    csvFile: "historia/polska_historia.csv",
   },
   {
     slug: "math",
@@ -209,7 +211,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "self_assess",
     defaultFlip: false,
-    csvFile: "math.csv",
+    csvFile: "matematyka/math.csv",
   },
   {
     slug: "grecka_mitologia_prawda_falsz_50",
@@ -219,7 +221,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "true_false",
     defaultFlip: false,
-    csvFile: "grecka_mitologia_prawda_falsz_50.csv",
+    csvFile: "historia/grecka_mitologia_prawda_falsz_50.csv",
   },
   {
     slug: "znaki_drogowe_najwazniejsze",
@@ -230,7 +232,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "znaki_drogowe_najwazniejsze.csv",
+    csvFile: "znaki_drogowe/znaki_drogowe_najwazniejsze.csv",
   },
   {
     slug: "znaki_drogowe_rozszerzone",
@@ -241,7 +243,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "znaki_drogowe_rozszerzone.csv",
+    csvFile: "znaki_drogowe/znaki_drogowe_rozszerzone.csv",
   },
   {
     slug: "znaki_drogowe",
@@ -252,7 +254,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "znaki_drogowe.csv",
+    csvFile: "znaki_drogowe/znaki_drogowe.csv",
   },
   {
     slug: "ptaki",
@@ -263,7 +265,7 @@ const OFFICIAL_PACKS = [
     reviewsEnabled: true,
     defaultType: "traditional",
     defaultFlip: false,
-    csvFile: "patki.csv",
+    csvFile: "przyroda/ptaki/patki.csv",
   },
   {
     slug: "flagi_europy",
@@ -274,7 +276,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 4,
-    csvFile: "flagi_europy.csv",
+    csvFile: "geografia/flagi/flagi_europy.csv",
   },
   {
     slug: "flagi_afryki",
@@ -285,7 +287,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 3,
-    csvFile: "flagi_afryki.csv",
+    csvFile: "geografia/flagi/flagi_afryki.csv",
   },
   {
     slug: "flagi_azji",
@@ -296,7 +298,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "flagi_azji.csv",
+    csvFile: "geografia/flagi/flagi_azji.csv",
   },
   {
     slug: "flagi_ameryki",
@@ -307,7 +309,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 4,
-    csvFile: "flagi_ameryki.csv",
+    csvFile: "geografia/flagi/flagi_ameryki.csv",
   },
   {
     slug: "flagi_oceanii",
@@ -318,7 +320,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 3,
-    csvFile: "flagi_oceanii.csv",
+    csvFile: "geografia/flagi/flagi_oceanii.csv",
   },
   {
     slug: "flagi_swiata",
@@ -329,7 +331,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 5,
-    csvFile: "flagi_swiata.csv",
+    csvFile: "geografia/flagi/flagi_swiata.csv",
   },
   {
     slug: "panstwa_i_stolice_europy",
@@ -340,7 +342,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_europy.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_europy.csv",
   },
   {
     slug: "panstwa_i_stolice_afryki",
@@ -351,7 +353,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_afryki.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_afryki.csv",
   },
   {
     slug: "panstwa_i_stolice_azji",
@@ -362,7 +364,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_azji.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_azji.csv",
   },
   {
     slug: "panstwa_i_stolice_ameryki",
@@ -373,7 +375,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_ameryki.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_ameryki.csv",
   },
   {
     slug: "panstwa_i_stolice_oceanii",
@@ -384,7 +386,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_oceanii.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_oceanii.csv",
   },
   {
     slug: "panstwa_i_stolice_swiata",
@@ -395,7 +397,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     packVersion: 2,
-    csvFile: "panstwa_i_stolice_swiata.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_swiata.csv",
   },
   {
     slug: "flagi_europy_en",

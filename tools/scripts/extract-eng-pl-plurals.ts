@@ -4,7 +4,7 @@ import Papa from "papaparse";
 
 type CsvRow = { external_id: string; front_text: string };
 
-const dataDir = path.resolve("tools/prebuild-data/pl");
+const dataDir = path.resolve("tools/prebuild-data/pl/jezyki/angielski");
 const outputDir = path.join(dataDir, "plural");
 
 // Reviewed English forms that have a plural-noun sense. This deliberately does

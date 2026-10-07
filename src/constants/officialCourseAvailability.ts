@@ -11,7 +11,13 @@ const POLISH_LANGUAGE_COURSE_SLUGS = [
   "eng_to_pl_b1",
   "eng_to_pl_b2",
   "fiszki_hiszpanski_podstawowe_poprawione",
+  "es_to_pl_first_50",
+  "es_to_pl_first_150",
+  "es_to_pl_first_327",
   "fiszki_francuski_podstawowe_poprawione",
+  "fr_to_pl_first_50",
+  "fr_to_pl_first_150",
+  "fr_to_pl_first_332",
 ] as const;
 
 const ENGLISH_LANGUAGE_COURSE_SLUGS = [

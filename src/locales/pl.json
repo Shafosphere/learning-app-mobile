@@ -1281,6 +1281,13 @@
     }
   },
   "courses": {
+    "progressive": {
+      "infoLabel": "Informacja o kursie progresywnym",
+      "title": "Jak działa kurs progresywny?",
+      "description": "Każdy kolejny zestaw zawiera słowa z poprzedniego i dodaje nowe. Możesz zacząć od 50 słów albo od razu wybrać największy zestaw.",
+      "confirm": "Rozumiem",
+      "close": "Zamknij informację o kursie progresywnym"
+    },
     "groups": {
       "mini": "Minikursy",
       "categoryA11y": "Kategoria {{title}}, {{count}} kursów"
@@ -1551,10 +1558,14 @@
   "constants": {
     "languageCourseGroups": {
       "label": {
-        "englishFromZero": "A1 Angielski"
+        "englishFromZero": "A1 Angielski",
+        "frenchFromZero": "Francuski od podstaw",
+        "spanishFromZero": "Hiszpański od podstaw"
       },
       "description": {
-        "englishFromZero": "Od 50 słów do 1300"
+        "englishFromZero": "Od 50 słów do 1300",
+        "frenchFromZero": "Od 50 do 332 słów",
+        "spanishFromZero": "Od 50 do 327 słów"
       }
     },
     "courseCategories": {

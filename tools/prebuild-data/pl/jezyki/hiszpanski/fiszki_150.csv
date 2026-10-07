@@ -1,0 +1,151 @@
+external_id,front_text,back_text
+0001,agua,woda
+0002,libro,książka
+0003,cabeza,głowa
+0004,puerta,drzwi
+0005,coche,"samochód, samochód osobowy, wagon"
+0006,pez,żywa ryba
+0007,cama,"łóżko, posłanie"
+0008,sol,słońce
+0009,leche,mleko
+0010,boca,"usta, pysk, gęba, ujście, wylot"
+0011,ventana,"okno, okienko"
+0012,azúcar,cukier
+0013,caballo,koń
+0014,silla,krzesło
+0015,tren,pociąg
+0016,perro,pies
+0017,pelota,piłka
+0018,nieve,śnieg
+0019,huevos,jajka
+0020,lluvia,"deszcz, opad"
+0021,taza,"kubek, filiżanka"
+0022,autobús,autobus
+0023,oreja,ucho
+0024,oveja,owca
+0025,pan,"chleb, pieczywo"
+0026,gato,kot
+0027,nariz,nos
+0028,escritorio,biurko
+0029,manzana,jabłko
+0030,queso,ser
+0031,cuchillo,nóż
+0032,vaca,krowa
+0033,zumo,sok
+0034,cerdo,świnia
+0035,conejo,królik
+0036,lápiz,ołówek
+0037,tomate,pomidor
+0038,sofá,kanapa
+0039,lámpara,lampa
+0040,nevera,lodówka
+0041,sal,sól
+0042,plátano,banan
+0043,patata,ziemniak
+0044,plato,"talerz, danie"
+0045,tenedor,widelec
+0046,cuchara,łyżka
+0047,almohada,poduszka
+0048,manta,"koc, pled"
+0049,ojo,oko
+0050,pie,stopa
+0107,ser,być
+0108,tener,mieć
+0109,hacer,robić
+0110,ir,"iść, jechać"
+0111,venir,"przyjść, przyjechać"
+0112,querer,chcieć
+0113,gustar,"lubić, podobać się"
+0114,saber,wiedzieć
+0115,conocer,znać
+0116,hablar,mówić
+0117,entender,rozumieć
+0118,comer,jeść
+0119,beber,pić
+0120,dormir,spać
+0121,vivir,mieszkać
+0122,trabajar,pracować
+0123,aprender,uczyć się
+0124,comprar,kupić
+0125,dar,dać
+0126,ver,widzieć
+0127,oír,słyszeć
+0128,abrir,otworzyć
+0187,casa,dom
+0188,escuela,szkoła
+0189,trabajo,praca
+0190,tienda,sklep
+0191,restaurante,restauracja
+0192,baño,"toaleta, łazienka"
+0193,hotel,hotel
+0194,hospital,szpital
+0195,farmacia,apteka
+0196,estación,"stacja, dworzec"
+0197,aeropuerto,lotnisko
+0198,calle,ulica
+0199,ciudad,miasto
+0200,país,kraj
+0201,habitación,pokój
+0202,cocina,kuchnia
+0203,persona,"człowiek, osoba"
+0204,mujer,kobieta
+0205,hombre,mężczyzna
+0206,niño,dziecko
+0207,mamá,mama
+0208,papá,tata
+0209,padres,rodzice
+0210,hermano,brat
+0211,hermana,siostra
+0212,amigo,przyjaciel
+0213,compañero,kolega
+0214,novia,dziewczyna
+0215,novio,chłopak
+0216,marido,mąż
+0217,esposa,żona
+0218,café,kawa
+0219,té,herbata
+0220,carne,mięso
+0221,pescado,ryba
+0222,huevo,jajko
+0223,arroz,ryż
+0224,pasta,makaron
+0225,sopa,zupa
+0226,fruta,owoc
+0227,verdura,warzywo
+0228,desayuno,śniadanie
+0229,almuerzo,obiad
+0230,cena,kolacja
+0231,teléfono,telefon
+0232,ordenador,komputer
+0233,llave,klucz
+0234,mesa,stół
+0235,bolsa,torba
+0236,ropa,ubranie
+0237,zapatos,buty
+0238,dinero,pieniądze
+0239,tarjeta,karta
+0240,billete,"bilet,banknot"
+0241,bicicleta,rower
+0242,cara,twarz
+0243,mano,dłoń
+0244,pierna,noga
+0245,vientre,brzuch
+0246,espalda,plecy
+0247,corazón,serce
+0248,diente,ząb
+0249,pelo,włosy
+0287,precio,cena
+0289,efectivo,gotówka
+0290,cuenta,"rachunek, konto"
+0291,recibo,paragon
+0296,tranvía,tramwaj
+0297,taxi,taksówka
+0298,avión,samolot
+0299,parada,przystanek
+0305,médico,lekarz
+0309,accidente,wypadek
+0310,policía,policja
+0311,fuego,ogień
+0314,tiempo,"czas, pogoda"
+0315,viento,wiatr
+0316,calor,ciepło

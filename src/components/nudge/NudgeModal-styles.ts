@@ -40,6 +40,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.my_red,
     zIndex: 1,
   },
+  scrollableCard: {
+    maxHeight: "100%",
+  },
+  scrollableBody: {
+    flexShrink: 1,
+    flexGrow: 0,
+  },
+  scrollableActions: {
+    flexShrink: 0,
+  },
   title: {
     fontSize: 18,
     lineHeight: 24,

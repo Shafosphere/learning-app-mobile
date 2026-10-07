@@ -56,6 +56,31 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
     overflow: "hidden",
   },
+  progressiveGroupWrapper: {
+    position: "relative",
+    paddingTop: 22,
+  },
+  progressiveInfoButton: {
+    position: "absolute",
+    top: 5,
+    left: 12,
+    width: 44,
+    height: 44,
+    zIndex: 2,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressiveInfoBadge: {
+    width: 30,
+    height: 30,
+    borderRadius: 15,
+    backgroundColor: colors.background,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  progressiveInfoIcon: {
+    color: colors.headline,
+  },
   accordionHeader: {
     minHeight: 92,
     paddingHorizontal: "7%",
@@ -187,6 +212,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 16,
     marginBottom: 12,
   },
+  languageSections: {
+    width: "100%",
+    gap: 28,
+  },
   groupSection: {
     width: "100%",
   },
@@ -204,7 +233,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   groupHeader: {
     flexDirection: "row",
     alignItems: "center",
-    marginTop: 16,
     marginBottom: 12,
   },
   groupHeaderLine: {

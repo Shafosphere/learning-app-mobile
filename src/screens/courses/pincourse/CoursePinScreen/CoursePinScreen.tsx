@@ -302,6 +302,17 @@ export default function CoursePinScreen() {
     [groupedCourses]
   );
 
+  const languageSections = useMemo(() => {
+    const sections = new Map<string, CourseGroup[]>();
+    languageCourses.forEach((group) => {
+      const key = `${group.targetLang ?? "unknown"}-${group.sourceLang ?? "unknown"}`;
+      const groups = sections.get(key) ?? [];
+      groups.push(group);
+      sections.set(key, groups);
+    });
+    return Array.from(sections, ([key, groups]) => ({ key, groups }));
+  }, [languageCourses]);
+
   const accordionGroups = useMemo<AccordionGroupItem[]>(() => {
     return KNOWLEDGE_ACCORDION_GROUPS.map((knowledgeGroup) => {
       const items = visibleKnowledgeCourses
@@ -665,129 +676,137 @@ export default function CoursePinScreen() {
                   )}
                 </Text>
               ) : null}
-              {languageCourses.map((group) => {
-                const regularOfficialPacks = group.officialPacks.filter(
-                  (pack) => pack.isMini === false
-                );
-                const miniOfficialPacks = group.officialPacks.filter(
-                  (pack) => pack.isMini !== false
-                );
-                const showRegular = regularOfficialPacks.length > 0;
-                const showMini = miniOfficialPacks.length > 0;
-                const hasOfficial =
-                  showRegular || showMini;
-                if (!hasOfficial) {
-                  return null;
-                }
+              <View style={styles.languageSections}>
+                {languageSections.map(({ key, groups }) => {
+                  const group = groups[0];
+                  const nativeCode = group.targetLang
+                    ? group.targetLang.toUpperCase()
+                    : "?";
+                  const learningCode = group.sourceLang
+                    ? group.sourceLang.toUpperCase()
+                    : "?";
 
-                const nativeCode = group.targetLang
-                  ? group.targetLang.toUpperCase()
-                  : "?";
-                const learningCode = group.sourceLang
-                  ? group.sourceLang.toUpperCase()
-                  : "?";
-
-                if (group.languageGroupId) {
-                  const definition = LANGUAGE_COURSE_GROUPS[group.languageGroupId];
                   return (
-                    <CoursePinAccordion
-                      key={group.key}
-                      revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
-                      groups={[{
-                        key: group.key,
-                        title: t(definition.labelKey),
-                        subtitle: t(definition.descriptionKey),
-                        count: group.officialPacks.length,
-                        regularItems: regularOfficialPacks,
-                        miniItems: miniOfficialPacks,
-                        icon: {
-                          kind: "flagPair",
-                          target: group.targetFlag,
-                          source: group.sourceFlag,
-                          targetCode: nativeCode,
-                          sourceCode: learningCode,
-                        },
-                      }]}
-                      renderCourseCard={renderOfficialPackCard}
-                    />
-                  );
-                }
-
-                const continuesLanguageSeries = languageCourses.some((other) =>
-                  other.languageGroupId && other.sourceLang === group.sourceLang &&
-                  other.targetLang === group.targetLang
-                );
-                if (continuesLanguageSeries) {
-                  return (
-                    <View key={group.key} style={styles.looseKnowledgeCoursesList}>
-                      {group.officialPacks.map(renderOfficialPackCard)}
-                    </View>
-                  );
-                }
-
-                return (
-                  <View key={`group-${group.key}`} style={styles.groupSection}>
-                    <View style={styles.groupHeader}>
-                      <View style={styles.groupHeaderLine} />
-                      <View style={styles.groupHeaderBadge}>
-                        <View style={styles.groupHeaderLanguage}>
-                          <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
-                          {group.targetFlag ? (
-                            <Image
-                              style={styles.groupHeaderFlag}
-                              source={group.targetFlag}
-                            />
+                    <View key={key} style={styles.groupSection}>
+                      <View style={styles.groupHeader}>
+                        <View style={styles.groupHeaderLine} />
+                        <View style={styles.groupHeaderBadge}>
+                          <View style={styles.groupHeaderLanguage}>
+                            <Text style={styles.groupHeaderCode}>{nativeCode}</Text>
+                            {group.targetFlag ? (
+                              <Image
+                                style={styles.groupHeaderFlag}
+                                source={group.targetFlag}
+                              />
+                            ) : null}
+                          </View>
+                          {group.sourceLang ? (
+                            <>
+                              <Text style={styles.groupHeaderSeparator}>/</Text>
+                              <View style={styles.groupHeaderLanguage}>
+                                <Text style={styles.groupHeaderCode}>
+                                  {learningCode}
+                                </Text>
+                                {group.sourceFlag ? (
+                                  <Image
+                                    style={styles.groupHeaderFlag}
+                                    source={group.sourceFlag}
+                                  />
+                                ) : null}
+                              </View>
+                            </>
                           ) : null}
                         </View>
-                        {group.sourceLang ? (
-                          <>
-                            <Text style={styles.groupHeaderSeparator}>/</Text>
-                            <View style={styles.groupHeaderLanguage}>
-                              <Text style={styles.groupHeaderCode}>
-                                {learningCode}
-                              </Text>
-                              {group.sourceFlag ? (
-                                <Image
-                                  style={styles.groupHeaderFlag}
-                                  source={group.sourceFlag}
-                                />
-                              ) : null}
-                            </View>
-                          </>
-                        ) : null}
                       </View>
+                      {groups.map((group) => {
+                        const regularOfficialPacks = group.officialPacks.filter(
+                          (pack) => pack.isMini === false
+                        );
+                        const miniOfficialPacks = group.officialPacks.filter(
+                          (pack) => pack.isMini !== false
+                        );
+                        const showRegular = regularOfficialPacks.length > 0;
+                        const showMini = miniOfficialPacks.length > 0;
+                        const hasOfficial =
+                          showRegular || showMini;
+                        if (!hasOfficial) {
+                          return null;
+                        }
+
+                        if (group.languageGroupId) {
+                          const definition = LANGUAGE_COURSE_GROUPS[group.languageGroupId];
+                          return (
+                            <CoursePinAccordion
+                              key={group.key}
+                              revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
+                              groups={[{
+                                key: group.key,
+                                languageGroupId: group.languageGroupId,
+                                title: t(definition.labelKey),
+                                subtitle: t(definition.descriptionKey),
+                                count: group.officialPacks.length,
+                                regularItems: regularOfficialPacks,
+                                miniItems: miniOfficialPacks,
+                                icon: {
+                                  kind: "flagPair",
+                                  target: group.targetFlag,
+                                  source: group.sourceFlag,
+                                  targetCode: nativeCode,
+                                  sourceCode: learningCode,
+                                },
+                              }]}
+                              renderCourseCard={renderOfficialPackCard}
+                            />
+                          );
+                        }
+
+                        const continuesLanguageSeries = groups.some(
+                          (other) => Boolean(other.languageGroupId)
+                        );
+                        if (continuesLanguageSeries) {
+                          return (
+                            <View key={group.key} style={styles.looseKnowledgeCoursesList}>
+                              {group.officialPacks.map(renderOfficialPackCard)}
+                            </View>
+                          );
+                        }
+
+                        return (
+                          <View key={`group-${group.key}`} style={styles.groupSection}>
+                            {showRegular ? (
+                              <>
+                                <Text style={styles.subTitle}>
+                                  {t(
+                                    "repeats.labels.courses"
+                                  )}
+                                </Text>
+                                <View style={styles.cardsList}>
+                                  {regularOfficialPacks.map(renderOfficialPackCard)}
+                                </View>
+                              </>
+                            ) : null}
+
+                            {showMini ? (
+                              <>
+                                {showRegular ? (
+                                  <Text style={styles.subTitle}>
+                                    {t(
+                                      "screens.courses.pincourse.coursePin.coursePin.textChild.miniKursy"
+                                    )}
+                                  </Text>
+                                ) : null}
+                                <View style={styles.cardsList}>
+                                  {miniOfficialPacks.map(renderOfficialPackCard)}
+                                </View>
+                              </>
+                            ) : null}
+                          </View>
+                        );
+                      })}
                     </View>
-
-                    {showRegular ? (
-                      <>
-                        <Text style={styles.subTitle}>
-                          {t(
-                            "repeats.labels.courses"
-                          )}
-                        </Text>
-                        <View style={styles.cardsList}>
-                          {regularOfficialPacks.map(renderOfficialPackCard)}
-                        </View>
-                      </>
-                    ) : null}
-
-                    {showMini ? (
-                      <>
-                        {showRegular ? (
-                          <Text style={styles.subTitle}>
-                            {t(
-                              "screens.courses.pincourse.coursePin.coursePin.textChild.miniKursy"
-                            )}
-                          </Text>
-                        ) : null}
-                        <View style={styles.cardsList}>
-                          {miniOfficialPacks.map(renderOfficialPackCard)}
-                        </View>
-                      </>
-                    ) : null}
-                  </View>
-                );
-              })}
+                  );
+                })}
+              </View>
             </>
           ) : (
             <>

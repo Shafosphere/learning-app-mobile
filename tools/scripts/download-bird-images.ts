@@ -10,7 +10,7 @@ import { pipeline } from "node:stream/promises";
 import { Readable } from "node:stream";
 import type { ReadableStream as NodeReadableStream } from "node:stream/web";
 
-const sourcePath = "tools/prebuild-data/pl/Ptaki_Polski_i_Europy_Srodkowej(1).tsv";
+const sourcePath = "tools/prebuild-data/pl/przyroda/ptaki/Ptaki_Polski_i_Europy_Srodkowej(1).tsv";
 const outputDir = "assets/images/birds";
 const width = Number(process.argv.find((arg) => arg.startsWith("--width="))?.split("=")[1] ?? 1400);
 const force = process.argv.includes("--force");

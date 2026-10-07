@@ -98,20 +98,15 @@ function renderInteraction(initialBoxes: BoxesState) {
 }
 
 function loadWordsFromCsv(): WordWithTranslations[] {
-  const rootCsvPath = path.join(
-    process.cwd(),
-    "tools",
-    "prebuild-data",
-    "ENGtoPL_A1.csv"
-  );
-  const nestedCsvPath = path.join(
+  const csvPath = path.join(
     process.cwd(),
     "tools",
     "prebuild-data",
     "pl",
+    "jezyki",
+    "angielski",
     "ENGtoPL_A1.csv"
   );
-  const csvPath = fs.existsSync(rootCsvPath) ? rootCsvPath : nestedCsvPath;
   const csvText = fs.readFileSync(csvPath, "utf8");
   const parsed = Papa.parse<CsvRow>(csvText, {
     header: true,

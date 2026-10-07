@@ -1,0 +1,328 @@
+external_id,front_text,back_text
+0001,agua,woda
+0002,libro,książka
+0003,cabeza,głowa
+0004,puerta,drzwi
+0005,coche,"samochód, samochód osobowy, wagon"
+0006,pez,żywa ryba
+0007,cama,"łóżko, posłanie"
+0008,sol,słońce
+0009,leche,mleko
+0010,boca,"usta, pysk, gęba, ujście, wylot"
+0011,ventana,"okno, okienko"
+0012,azúcar,cukier
+0013,caballo,koń
+0014,silla,krzesło
+0015,tren,pociąg
+0016,perro,pies
+0017,pelota,piłka
+0018,nieve,śnieg
+0019,huevos,jajka
+0020,lluvia,"deszcz, opad"
+0021,taza,"kubek, filiżanka"
+0022,autobús,autobus
+0023,oreja,ucho
+0024,oveja,owca
+0025,pan,"chleb, pieczywo"
+0026,gato,kot
+0027,nariz,nos
+0028,escritorio,biurko
+0029,manzana,jabłko
+0030,queso,ser
+0031,cuchillo,nóż
+0032,vaca,krowa
+0033,zumo,sok
+0034,cerdo,świnia
+0035,conejo,królik
+0036,lápiz,ołówek
+0037,tomate,pomidor
+0038,sofá,kanapa
+0039,lámpara,lampa
+0040,nevera,lodówka
+0041,sal,sól
+0042,plátano,banan
+0043,patata,ziemniak
+0044,plato,"talerz, danie"
+0045,tenedor,widelec
+0046,cuchara,łyżka
+0047,almohada,poduszka
+0048,manta,"koc, pled"
+0049,ojo,oko
+0050,pie,stopa
+0051,hola,cześć
+0052,buenos días,dzień dobry
+0053,buenas tardes,"dzień dobry, dobry wieczór"
+0054,buenas noches,"dobry wieczór, dobranoc"
+0055,adiós,do widzenia
+0056,hasta luego,"do zobaczenia, na razie"
+0057,bienvenido,"witaj, witamy"
+0058,por favor,proszę
+0059,gracias,dziękuję
+0060,perdón,przepraszam
+0061,de nada,nie ma za co
+0062,no pasa nada,nic się nie stało
+0063,quisiera,poproszę
+0064,¿puedo?,czy mogę
+0065,mucho gusto,bardzo mi miło
+0066,sí,tak
+0067,no,nie
+0068,quizás,może
+0069,bien,dobrze
+0070,mal,źle
+0071,por supuesto,oczywiście
+0072,no sé,nie wiem
+0073,entiendo,rozumiem
+0074,no entiendo,nie rozumiem
+0075,vale,OK
+0076,me llamo,"Mam na imię, Nazywam się"
+0077,soy,Jestem
+0078,encantado de conocerte,Miło cię poznać
+0079,¿de dónde eres?,Skąd jesteś
+0080,soy de,Jestem z
+0081,¿cuántos años tienes?,Ile masz lat
+0082,tengo 20 años,mam 20 lat
+0083,¿quién?,kto?
+0084,¿qué?,co?
+0085,¿dónde?,gdzie?
+0086,¿cuándo?,kiedy?
+0087,¿por qué?,dlaczego?
+0088,¿cómo?,jak?
+0089,¿cuánto?,ile?
+0090,¿cuál?,który?
+0091,¿sí?,"tak?, słucham?"
+0092,¿qué tipo de?,"jaki rodzaj?, jakiego rodzaju?"
+0093,yo,ja
+0094,tú,ty
+0095,él,on
+0096,ella,ona
+0098,nosotros,my
+0099,vosotros,wy
+0100,ellos,oni
+0101,ellas,one
+0102,mi,mój
+0103,tu,twój
+0104,su,"jego, jej, ich, Pana, Pani, Państwa"
+0105,nuestro,nasz
+0106,vuestro,wasz
+0107,ser,być
+0108,tener,mieć
+0109,hacer,robić
+0110,ir,"iść, jechać"
+0111,venir,"przyjść, przyjechać"
+0112,querer,chcieć
+0113,gustar,"lubić, podobać się"
+0114,saber,wiedzieć
+0115,conocer,znać
+0116,hablar,mówić
+0117,entender,rozumieć
+0118,comer,jeść
+0119,beber,pić
+0120,dormir,spać
+0121,vivir,mieszkać
+0122,trabajar,pracować
+0123,aprender,uczyć się
+0124,comprar,kupić
+0125,dar,dać
+0126,ver,widzieć
+0127,oír,słyszeć
+0128,abrir,otworzyć
+0129,cerrar,zamknąć
+0130,cero,zero
+0131,uno,jeden
+0132,dos,dwa
+0133,tres,trzy
+0134,cuatro,cztery
+0135,cinco,pięć
+0136,seis,sześć
+0137,siete,siedem
+0138,ocho,osiem
+0139,nueve,dziewięć
+0140,diez,dziesięć
+0141,once,jedenaście
+0142,doce,dwanaście
+0143,veinte,dwadzieścia
+0144,treinta,trzydzieści
+0145,cien,sto
+0146,mil,tysiąc
+0147,primero,pierwszy
+0148,segundo,drugi
+0149,tercero,trzeci
+0150,la mitad,połowa
+0151,mucho,dużo
+0152,poco,mało
+0153,unos cuantos,kilka
+0154,blanco,biały
+0155,negro,czarny
+0156,rojo,czerwony
+0157,azul,niebieski
+0158,verde,zielony
+0159,amarillo,żółty
+0160,naranja,pomarańczowy
+0161,rosa,różowy
+0162,morado,fioletowy
+0163,marrón,brązowy
+0164,gris,szary
+0165,claro,jasny
+0166,oscuro,ciemny
+0167,lunes,poniedziałek
+0168,martes,wtorek
+0169,miércoles,środa
+0170,jueves,czwartek
+0171,viernes,piątek
+0172,sábado,sobota
+0173,domingo,niedziela
+0174,hoy,dzisiaj
+0175,mañana,jutro
+0176,ayer,wczoraj
+0177,por la mañana,rano
+0178,por la noche,"wieczorem, w nocy"
+0179,ahora,teraz
+0180,más tarde,później
+0181,antes,wcześniej
+0182,hora,godzina
+0183,minuto,minuta
+0184,semana,tydzień
+0185,mes,miesiąc
+0186,año,rok
+0187,casa,dom
+0188,escuela,szkoła
+0189,trabajo,praca
+0190,tienda,sklep
+0191,restaurante,restauracja
+0192,baño,"toaleta, łazienka"
+0193,hotel,hotel
+0194,hospital,szpital
+0195,farmacia,apteka
+0196,estación,"stacja, dworzec"
+0197,aeropuerto,lotnisko
+0198,calle,ulica
+0199,ciudad,miasto
+0200,país,kraj
+0201,habitación,pokój
+0202,cocina,kuchnia
+0203,persona,"człowiek, osoba"
+0204,mujer,kobieta
+0205,hombre,mężczyzna
+0206,niño,dziecko
+0207,mamá,mama
+0208,papá,tata
+0209,padres,rodzice
+0210,hermano,brat
+0211,hermana,siostra
+0212,amigo,przyjaciel
+0213,compañero,kolega
+0214,novia,dziewczyna
+0215,novio,chłopak
+0216,marido,mąż
+0217,esposa,żona
+0218,café,kawa
+0219,té,herbata
+0220,carne,mięso
+0221,pescado,ryba
+0222,huevo,jajko
+0223,arroz,ryż
+0224,pasta,makaron
+0225,sopa,zupa
+0226,fruta,owoc
+0227,verdura,warzywo
+0228,desayuno,śniadanie
+0229,almuerzo,obiad
+0230,cena,kolacja
+0231,teléfono,telefon
+0232,ordenador,komputer
+0233,llave,klucz
+0234,mesa,stół
+0235,bolsa,torba
+0236,ropa,ubranie
+0237,zapatos,buty
+0238,dinero,pieniądze
+0239,tarjeta,karta
+0240,billete,"bilet,banknot"
+0241,bicicleta,rower
+0242,cara,twarz
+0243,mano,dłoń
+0244,pierna,noga
+0245,vientre,brzuch
+0246,espalda,plecy
+0247,corazón,serce
+0248,diente,ząb
+0249,pelo,włosy
+0250,bueno,dobry
+0251,malo,zły
+0252,grande,duży
+0253,pequeño,mały
+0254,nuevo,nowy
+0255,viejo,stary
+0256,joven,młody
+0257,bonito,ładny
+0258,feo,brzydki
+0259,fácil,łatwy
+0260,difícil,trudny
+0261,rápido,szybki
+0262,lento,wolny
+0263,caliente,"gorący, ciepły"
+0264,frío,"zimny, zimno"
+0265,barato,tani
+0266,caro,drogi
+0267,importante,ważny
+0268,cansado,zmęczony
+0269,hambriento,"bardzo głodny, wygłodniały"
+0270,sediento,spragniony
+0271,aquí,tutaj
+0272,allí,tam
+0273,cerca,blisko
+0274,lejos,daleko
+0275,en,"w, na"
+0276,debajo de,pod
+0277,encima de,"na, nad"
+0278,al lado de,obok
+0279,delante de,przed
+0280,detrás de,za
+0281,izquierda,lewo
+0282,derecha,prawo
+0283,recto,prosto
+0284,arriba,do góry
+0285,abajo,na dół
+0286,¿cuánto cuesta?,ile kosztuje?
+0287,precio,cena
+0288,pagar,zapłacić
+0289,efectivo,gotówka
+0290,cuenta,"rachunek, konto"
+0291,recibo,paragon
+0292,abierto,otwarte
+0293,cerrado,zamknięte
+0294,quiero esto,chcę to
+0295,quisiera esto,poproszę to
+0296,tranvía,tramwaj
+0297,taxi,taksówka
+0298,avión,samolot
+0299,parada,przystanek
+0300,¿dónde está?,gdzie jest?
+0301,¿cómo se llega a?,jak dotrzeć do?
+0302,voy a,"idę do, jadę do"
+0303,me bajo aquí,wysiadam tutaj
+0304,ayuda,pomoc
+0305,médico,lekarz
+0306,me duele,boli mnie
+0307,me siento mal,źle się czuję
+0308,estoy enfermo,jestem chory
+0309,accidente,wypadek
+0310,policía,policja
+0311,fuego,ogień
+0312,peligroso,niebezpieczny
+0313,necesito ayuda,potrzebuję pomocy
+0314,tiempo,"czas, pogoda"
+0315,viento,wiatr
+0316,calor,ciepło
+0317,hace calor,gorąco
+0318,llueve,pada deszcz
+0319,está nublado,jest pochmurno
+0320,hace buen tiempo,jest ładna pogoda
+0321,feliz,szczęśliwy
+0322,triste,smutny
+0323,tranquilo,spokojny
+0324,nervioso,zdenerwowany
+0325,enfermo,chory
+0326,tengo miedo,boję się
+0327,me gusta,lubię
+0328,no me gusta,nie lubię

@@ -72,6 +72,9 @@ jest.mock("react-i18next", () => ({
         "constants.knowledgeCourseGroups.description.flags": "Flagi państw świata",
         "repeats.format.flashcardsValue": `${options?.value ?? 0} fiszek`,
         "courses.groups.categoryA11y": `Kategoria ${options?.title}, ${options?.count} kursów`,
+        "courses.progressive.infoLabel": "Informacja o kursie progresywnym",
+        "courses.progressive.title": "Jak działa kurs progresywny?",
+        "courses.progressive.confirm": "Rozumiem",
       };
       return copy[key] ?? key;
     },
@@ -453,8 +456,10 @@ describe("CoursePinScreen skip onboarding", () => {
     expect(screen.getByText("Ang A2")).toBeTruthy();
     expect(screen.getByText("Ang B1")).toBeTruthy();
     expect(screen.getByText("Ang B2")).toBeTruthy();
-    expect(screen.getAllByText("PL")).toHaveLength(1);
-    expect(screen.getAllByText("EN")).toHaveLength(1);
+    // Language labels appear in the section separator and the accordion icon.
+    expect(screen.getAllByText("PL")).toHaveLength(2);
+    expect(screen.getAllByText("EN")).toHaveLength(2);
+    expect(screen.getAllByText("/")).toHaveLength(1);
     fireEvent.press(screen.getByLabelText(label));
     expect(screen.getAllByText(/^(Pierwsze 50 słów|100 słów|250 słów|500 słów|Ang A1|Ang A2|Ang B1|Ang B2)$/).map((node) => node.props.children))
       .toEqual(series.map((row) => row.name));
@@ -475,6 +480,26 @@ describe("CoursePinScreen skip onboarding", () => {
     }));
     render(<CoursePinScreen />);
     await waitFor(() => expect(screen.getByText("Pierwsze 50 słów")).toBeTruthy());
+  });
+
+  it("shows info only for progressive language series and leaves pins unchanged", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockOfficialCourseRows = [
+      { id: 51, name: "Angielski 50", slug: "eng_to_pl_first_50", cardsCount: 50, iconId: "flag:en", iconColor: "#10B981" },
+      { id: 61, name: "Francuski 50", slug: "fr_to_pl_first_50", cardsCount: 50, iconId: "flag:fr", iconColor: "#2563EB" },
+      { id: 71, name: "Hiszpański 50", slug: "es_to_pl_first_50", cardsCount: 50, iconId: "flag:es", iconColor: "#F97316" },
+      { id: 81, name: "Flagi Europy", slug: "flagi_europy", cardsCount: 52, iconId: "flag", iconColor: "#10B981" },
+    ];
+    render(<CoursePinScreen />);
+    await waitFor(() => expect(screen.getAllByLabelText("Informacja o kursie progresywnym")).toHaveLength(3));
+    fireEvent.press(screen.getAllByLabelText("Informacja o kursie progresywnym")[0]);
+    expect(screen.getByText("Jak działa kurs progresywny?")).toBeTruthy();
+    fireEvent.press(screen.getByText("Rozumiem"));
+    expect(mockPinOfficialCourse).not.toHaveBeenCalled();
+    expect(mockUnpinOfficialCourse).not.toHaveBeenCalled();
+    fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
+    expect(screen.getByLabelText("Kategoria Flagi, 1 kursów")).toBeTruthy();
+    expect(screen.queryByLabelText("Informacja o kursie progresywnym")).toBeNull();
   });
 
 });

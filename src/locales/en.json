@@ -1279,6 +1279,13 @@
     }
   },
   "courses": {
+    "progressive": {
+      "infoLabel": "About progressive courses",
+      "title": "How does a progressive course work?",
+      "description": "Each larger set includes the words from the previous set and adds new ones. You can start with 50 words or choose the largest set right away.",
+      "confirm": "Got it",
+      "close": "Close progressive course information"
+    },
     "groups": {
       "mini": "Mini-courses",
       "categoryA11y": "Category {{title}}, {{count}} courses"
@@ -1549,10 +1556,14 @@
   "constants": {
     "languageCourseGroups": {
       "label": {
-        "englishFromZero": "English A1"
+        "englishFromZero": "English A1",
+        "frenchFromZero": "French from scratch",
+        "spanishFromZero": "Spanish from scratch"
       },
       "description": {
-        "englishFromZero": "From 50 words to 1300"
+        "englishFromZero": "From 50 words to 1300",
+        "frenchFromZero": "From 50 to 332 words",
+        "spanishFromZero": "From 50 to 327 words"
       }
     },
     "courseCategories": {

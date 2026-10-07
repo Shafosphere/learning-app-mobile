@@ -1,0 +1,51 @@
+external_id,front_image,front_text,back_text
+0001,water.webp,eau,woda
+0002,book.webp,livre,książka
+0003,face.webp,tête,głowa
+0004,door.webp,porte,drzwi
+0005,car.webp,voiture,"samochód, samochód osobowy, wagon"
+0006,fish.webp,poisson,ryba
+0007,bed.webp,lit,łóżko
+0008,sun.webp,soleil,słońce
+0009,milk.webp,lait,mleko
+0010,mouth.webp,bouche,"usta, pysk, gęba, ujście, wylot"
+0011,window.webp,fenêtre,"okno, okienko"
+0012,sugar.webp,sucre,cukier
+0013,horse.webp,cheval,koń
+0014,chair.webp,chaise,krzesło
+0015,train.webp,train,pociąg
+0016,dog.webp,chien,pies
+0017,ball.webp,ballon,"piłka, balon"
+0018,snow.webp,neige,śnieg
+0019,eggs.webp,œufs,jajka
+0020,rain.webp,pluie,"deszcz, opad deszczu"
+0021,cup.webp,tasse,"kubek, filiżanka"
+0022,bus.webp,bus,autobus
+0023,ear.webp,oreille,ucho
+0024,sheep.webp,mouton,owca
+0025,bread.webp,pain,"chleb, pieczywo"
+0026,cat.webp,chat,kot
+0027,nose.webp,nez,nos
+0028,desk.webp,bureau,"biurko, biuro"
+0029,apple.webp,pomme,jabłko
+0030,cheese.webp,fromage,ser
+0031,knife.webp,couteau,nóż
+0032,cow.webp,vache,krowa
+0033,juice.webp,jus,sok
+0034,pig.webp,cochon,świnia
+0035,rabbit.webp,lapin,królik
+0036,pencil.webp,crayon,ołówek
+0037,tomato.webp,tomate,pomidor
+0038,sofa.webp,canapé,kanapa
+0039,lamp.webp,lampe,lampa
+0040,fridge.webp,réfrigérateur,lodówka
+0041,salt.webp,sel,sól
+0042,banana.webp,banane,banan
+0043,potato.webp,pomme de terre,ziemniak
+0044,plate.webp,assiette,talerz
+0045,fork.webp,fourchette,"widelec, widełki, przedział"
+0046,spoon.webp,cuillère,łyżka
+0047,pillow.webp,oreiller,poduszka
+0048,blanket.webp,couverture,"koc, przykrycie, pokrycie"
+0049,eye.webp,œil,oko
+0050,feet.webp,pied,stopa

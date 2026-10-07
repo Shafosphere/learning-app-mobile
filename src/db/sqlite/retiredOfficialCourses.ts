@@ -1,11 +1,15 @@
 import type { SQLiteDatabase } from "expo-sqlite";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import basicEnglishCards from "@/assets/data/sqlite/retired-basic-english.json";
+import basicSpanishCards from "@/assets/data/sqlite/retired-basic-spanish.json";
+import basicFrenchCards from "@/assets/data/sqlite/retired-basic-french.json";
 
-// Frozen pack v3 from the previously shipped database. Its external IDs and
+// Frozen packs from the previously shipped database. Their external IDs and
 // positions must stay unchanged so old backups can match their saved state.
 const RETIRED_COURSE_CARDS = {
   fiszki_podstawy_en_pl_slowa: basicEnglishCards,
+  fiszki_francuski_podstawowe_poprawione: basicFrenchCards,
+  fiszki_hiszpanski_podstawowe_poprawione: basicSpanishCards,
 };
 
 export async function restoreRetiredOfficialCourseWithDb(

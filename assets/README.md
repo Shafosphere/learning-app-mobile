@@ -58,6 +58,16 @@ previously shipped `fiszki_podstawy_en_pl_slowa` pack (version 3). It is used on
 to restore backups that reference this retired course. Keep its external IDs,
 positions, and answers unchanged; it is excluded from the fresh-install database.
 
+`assets/data/sqlite/retired-basic-french.json` likewise preserves the 309 cards
+from `fiszki_francuski_podstawowe_poprawione` (version 1) for backup restoration.
+Keep its external IDs, positions, and answers unchanged. New installations use
+the French 50, 150, and 332 word packs instead.
+
+`assets/data/sqlite/retired-basic-spanish.json` preserves the 310 cards from
+`fiszki_hiszpanski_podstawowe_poprawione` (version 1) for backup restoration.
+Keep its external IDs, positions, and answers unchanged. New installations use
+the Spanish 50, 150, and 327 word packs instead.
+
 Run path validation to ensure no code references legacy asset locations:
 
 ```bash
