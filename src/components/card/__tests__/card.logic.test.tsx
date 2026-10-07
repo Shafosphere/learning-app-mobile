@@ -1,5 +1,6 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
+import type { TextInput } from "react-native";
 
 import Card from "@/src/components/card/card";
 import { useCardFocusController } from "@/src/components/card/useCardFocusController";
@@ -966,6 +967,37 @@ describe("Card logic props", () => {
     });
     expect(confirm).toHaveBeenCalledTimes(2);
     jest.useRealTimers();
+  });
+
+  it.each([false, true])("completes box-zero input using the screen bridge without focusing the scrolled card (reversed=%s)", async (reversed) => {
+    const wrongInputChange = jest.fn();
+    const cardInputFocus = jest.fn();
+    const screenBridgeFocus = jest.fn();
+    const keyboardBridgeInputRef = {
+      current: { focus: screenBridgeFocus } as unknown as TextInput,
+    };
+    renderCard(createProps({
+      keyboardBridgeInputRef,
+      introMode: true,
+      selectedItem: makeCard({ id: 18, text: "cat", translations: ["kot"] }),
+      correction: {
+        cardId: 18, awers: "cat", rewers: "kot", input1: "", input2: "",
+        mode: "intro", promptText: "cat", reversed,
+      },
+      wrongInputChange,
+    }), { textInputFocus: cardInputFocus });
+
+    await waitFor(() => expect(latestResolverProps?.displayMode).toBe("correction"));
+    const which = reversed ? 1 : 2;
+    const value = reversed ? "cat" : "kot";
+    act(() => {
+      (latestResolverProps?.wrongInputChange as (which: 1 | 2, value: string) => void)(which, value);
+    });
+
+    expect(screenBridgeFocus).toHaveBeenCalledTimes(1);
+    expect(cardInputFocus).not.toHaveBeenCalled();
+    expect(wrongInputChange).toHaveBeenCalledWith(which, value);
+    expect(screenBridgeFocus.mock.invocationCallOrder[0]).toBeLessThan(wrongInputChange.mock.invocationCallOrder[0]);
   });
 
   it("primes the keyboard bridge before completing correction input changes", async () => {

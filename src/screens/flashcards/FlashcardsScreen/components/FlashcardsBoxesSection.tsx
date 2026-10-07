@@ -15,11 +15,17 @@ import {
   type LayoutChangeEvent,
 } from "react-native";
 import Reanimated, {
+  FadeIn,
+  FadeOut,
   useAnimatedStyle,
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
 import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
+
+const BOXES_FADE_OUT_DURATION_MS = 140;
+const BOXES_FADE_OUT = FadeOut.duration(BOXES_FADE_OUT_DURATION_MS);
+const BOXES_FADE_IN = FadeIn.delay(BOXES_FADE_OUT_DURATION_MS).duration(180);
 
 type FlashcardsBoxesSectionProps = {
   debugSizes?: boolean;
@@ -92,6 +98,15 @@ export function FlashcardsBoxesSection({
   onBoxesContentLayout,
   t,
 }: FlashcardsBoxesSectionProps) {
+  const hasMountedRef = useRef(false);
+  const boxesPresentation = effectiveBoxesLayout === "classic"
+    ? horizontalRowHeight != null ? "classic-row" : "classic-grid"
+    : effectiveBoxesLayout;
+
+  useEffect(() => {
+    hasMountedRef.current = true;
+  }, []);
+
   const animatedBoxesScale = useSharedValue(boxesScale);
   const animatedBoxesScaleOffsetY = useSharedValue(boxesScaleOffsetY);
   const [measuredViewportWidth, setMeasuredViewportWidth] = useState<number | null>(null);
@@ -265,7 +280,12 @@ export function FlashcardsBoxesSection({
 
   return (
     <Reanimated.View
+      // Keep the old arrangement visible during fade-out; the new one enters
+      // after it disappears. Size/count changes within one layout stay smooth.
+      key={boxesPresentation}
       testID={testID ?? "flashcards-boxes-wrapper"}
+      entering={hasMountedRef.current ? BOXES_FADE_IN : undefined}
+      exiting={BOXES_FADE_OUT}
       onLayout={(event) => {
         const { x, y, width, height } = event.nativeEvent.layout;
         logSizeChange("wrapper", { x, y, width, height });

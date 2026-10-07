@@ -1,4 +1,5 @@
 import { useKeyboardVisibility } from "@/src/hooks/useKeyboardVisibility";
+import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
 import { useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import {
@@ -61,6 +62,7 @@ export function useFlashcardsStudyLayout({
     const measurement = pendingStudyLayoutRef.current;
     if (!measurement) return;
     const { height, width } = measurement;
+    logFlashcardsScrollDebug("study.layout.commit", { height, width, keyboardVisible, availableStudyWidth });
     // Keep stable box geometry, but use the resized viewport for scrolling.
     setVisibleStudyHeight(height);
     setAvailableStudyWidth(width);
@@ -72,13 +74,19 @@ export function useFlashcardsStudyLayout({
   const onStudyLayout = useCallback((event: LayoutChangeEvent) => {
     const width = event.nativeEvent.layout.width;
     pendingStudyLayoutRef.current = { height: measuredHeight(event), width };
+    logFlashcardsScrollDebug("study.layout.native", {
+      layout: event.nativeEvent.layout,
+      deferred: layoutTransition.isRunning() && width === availableStudyWidth,
+      keyboardVisible,
+    });
     // Rotation and initial measurement still take effect immediately.
     if (!layoutTransition.isRunning() || width !== availableStudyWidth) commitStudyLayout();
-  }, [layoutTransition, availableStudyWidth, commitStudyLayout]);
+  }, [layoutTransition, availableStudyWidth, commitStudyLayout, keyboardVisible]);
 
   useEffect(() => layoutTransition.subscribe(commitStudyLayout), [layoutTransition, commitStudyLayout]);
 
   const onCardSectionLayout = useCallback((event: LayoutChangeEvent) => {
+    logFlashcardsScrollDebug("card.section.layout", { layout: event.nativeEvent.layout, actionsHidden, isCompactStudyLayout });
     setVisibleCardHeight(measuredHeight(event));
     if (actionsHidden) return;
     // Reconstruct the full layout even while the hint is absent. Otherwise
@@ -112,10 +120,12 @@ export function useFlashcardsStudyLayout({
   }, [cardMeasurement]);
 
   const onTopButtonsLayout = useCallback((event: LayoutChangeEvent) => {
+    logFlashcardsScrollDebug("buttons.top.layout", { layout: event.nativeEvent.layout });
     setTopButtonsHeight(measuredHeight(event));
   }, []);
 
   const onBottomButtonsLayout = useCallback((event: LayoutChangeEvent) => {
+    logFlashcardsScrollDebug("buttons.bottom.layout", { layout: event.nativeEvent.layout });
     setBottomButtonsHeight(measuredHeight(event));
   }, []);
 

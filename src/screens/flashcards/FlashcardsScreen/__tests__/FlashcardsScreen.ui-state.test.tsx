@@ -544,7 +544,8 @@ describe("FlashcardsScreen UI state regressions", () => {
       advanceByEvent: jest.fn(),
     }));
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
-    mockedUseFlashcardsAutoflow.mockClear();
+    mockedUseFlashcardsAutoflow.mockReset();
+    mockedUseFlashcardsAutoflow.mockReturnValue({ isSwitchPending: false });
     mockedGetCustomReviewedFlashcardIds.mockResolvedValue([]);
     mockedGetCourseCompletionSummary.mockResolvedValue({
       totalAnswers: 10,
@@ -586,6 +587,53 @@ describe("FlashcardsScreen UI state regressions", () => {
     jest.useRealTimers();
     jest.restoreAllMocks();
     jest.clearAllMocks();
+  });
+
+  it("retains dog while autoflow replaces the intermediate apple with a boxTwo card", async () => {
+    const dog = makeCard({ id: 16, text: "dog", imageFront: "file:///dog.webp" });
+    const apple = makeCard({ id: 29, text: "apple", imageFront: "file:///apple.webp" });
+    const nose = makeCard({ id: 27, text: "nose", translations: ["nos"], flipped: true });
+    const { rerenderWithState } = renderScreenWithState(
+      createInteractionState(dog, { result: true }), [dog, apple, nose],
+    );
+    await flushScreenState();
+    expect(latestCardProps?.selectedItem?.id).toBe(dog.id);
+    expect(latestCardProps?.result).toBe(true);
+
+    await rerenderWithState(createInteractionState(dog, { result: true, isBetweenCards: true }));
+    expect(latestCardProps?.isContentHeld).toBe(true);
+
+    mockedUseFlashcardsAutoflow.mockReturnValue({ isSwitchPending: true });
+    const intermediate = createInteractionState(apple);
+    await rerenderWithState(intermediate);
+    expect(latestCardProps?.selectedItem?.id).toBe(dog.id);
+    expect(latestCardProps?.result).toBe(true);
+    expect(latestCardProps?.isContentHeld).toBe(true);
+    expect(latestCardProps?.autoSubmitCorrectAnswer).toBe(false);
+    expect(latestButtonsProps?.confirmDisabled).toBe(true);
+    act(() => {
+      latestCardProps?.confirm();
+      latestCardProps?.setAnswer("stale answer");
+      latestCardProps?.wrongInputChange(2, "stale correction");
+    });
+    expect(intermediate.confirm).not.toHaveBeenCalled();
+    expect(intermediate.setAnswer).not.toHaveBeenCalled();
+    expect(intermediate.wrongInputChange).not.toHaveBeenCalled();
+
+    mockedUseFlashcardsAutoflow.mockReturnValue({ isSwitchPending: false });
+    const settled = createInteractionState(nose, { activeBox: "boxTwo", reversed: true });
+    await rerenderWithState(settled);
+    expect(latestCardProps?.selectedItem?.id).toBe(nose.id);
+    expect(latestCardProps?.activeBox).toBe("boxTwo");
+    expect(latestCardProps?.reversed).toBe(true);
+    expect(latestCardProps?.result).toBeNull();
+    expect(latestCardProps?.isContentHeld).toBe(false);
+    act(() => {
+      latestCardProps?.setAnswer("nose");
+    });
+    expect(settled.setAnswer).toHaveBeenCalledWith("nose");
+    expect(mockCardMount).toHaveBeenCalledTimes(1);
+    expect(mockCardUnmount).not.toHaveBeenCalled();
   });
 
   it("clears selected true false answer after switching to another true_false card", async () => {
@@ -1175,6 +1223,46 @@ describe("FlashcardsScreen UI state regressions", () => {
       });
     });
     expect(latestBoxListProps?.layoutWidth).toBe(336);
+  });
+
+  it("lowers bottom buttons to fit both box rows on the small-phone selection screen", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: "bottom" });
+    const originalScaleImplementation = mockedUseAutoScaleToFit.getMockImplementation();
+    mockedUseAutoScaleToFit.mockImplementation(
+      jest.requireActual("@/src/hooks/useAutoScaleToFit").useAutoScaleToFit,
+    );
+    try {
+      const screen = renderScreenWithState(createInteractionState(null, { activeBox: null }), [makeCard({ id: 58 })]);
+      await flushScreenState();
+      const measure = (testID: string, height: number, y = 0) => {
+        fireEvent(screen.getByTestId(testID), "layout", {
+          nativeEvent: { layout: { x: 0, y, width: 360, height } },
+        });
+      };
+      act(() => {
+        measure("flashcards-content", 473.5);
+        measure("flashcards-card-section", 175);
+        measure("flashcards-bottom-buttons", 50);
+      });
+      act(() => jest.advanceTimersByTime(80));
+
+      const contentStyle = StyleSheet.flatten(screen.getByTestId("flashcards-content").props.style);
+      const cardStyle = StyleSheet.flatten(screen.getByTestId("flashcards-card-section").props.style);
+      const boxesTop = 175 + cardStyle.marginBottom + 8;
+      const boxesHeight = 473.5 - contentStyle.paddingBottom - boxesTop;
+      expect(contentStyle.paddingBottom).toBeLessThan(106);
+      expect(boxesHeight).toBeGreaterThanOrEqual(326 * 0.648);
+      act(() => {
+        measure("flashcards-boxes-wrapper", boxesHeight, boxesTop);
+        measure("flashcards-boxes-viewport", boxesHeight);
+      });
+      expect(screen.getByTestId("flashcards-boxes-viewport").props.nestedScrollEnabled).toBeUndefined();
+      expect(screen.getByTestId("flashcards-study-scroll").props.scrollEnabled).toBe(false);
+      expect(latestBoxListProps?.horizontalScroll).toBe(false);
+    } finally {
+      mockedUseAutoScaleToFit.mockImplementation(originalScaleImplementation!);
+    }
   });
 
   it("keeps the active card mounted through content growth, shrinkage, and tablet resizing", async () => {

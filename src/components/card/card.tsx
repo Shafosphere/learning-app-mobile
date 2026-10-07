@@ -3,6 +3,7 @@ import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
@@ -53,6 +54,25 @@ const INPUT_SCROLL_TRAILING_BUFFER = 120;
 const ENABLE_KEYBOARD_CONSOLE_LOGS = false;
 
 type HintModalMode = "target";
+
+type ContentDebugSnapshot = {
+  source: CardProps["contentDebugSource"] | null;
+  activeBox: CardProps["activeBox"];
+  cardId: number | null;
+  displayedCardId: number | null;
+  displayMode: CardDisplayMode;
+  correctionCardId: number | null;
+  correctionMode: string | null;
+  correctionMatchesSelectedItem: boolean | null;
+  isBetweenCards: boolean;
+  isContentHeld: boolean;
+  introMode: boolean;
+  result: boolean | null;
+  reversed: boolean;
+  text: string;
+  imageUri: string | null;
+  explanation: string | null;
+};
 
 type KeyboardMetricsSnapshot = {
   screenY?: number;
@@ -149,6 +169,10 @@ const formatDateLikeInput = (
 };
 
 export default function Card({
+  activeBox = null,
+  contentDebugSource,
+  isContentHeld = false,
+  keyboardBridgeInputRef: screenKeyboardBridgeInputRef,
   coachmarkId,
   inlineAction,
   selectedItem,
@@ -233,6 +257,7 @@ export default function Card({
   const correctionInput2Ref = useRef<TextInput | null>(null);
   const hintInputRef = useRef<TextInput | null>(null);
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
+  const activeKeyboardBridgeInputRef = screenKeyboardBridgeInputRef ?? keyboardBridgeInputRef;
   const autoSubmitTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const initialLayoutCardIdRef = useRef<number | null>(null);
   const [isLayoutAnimationArmed, setIsLayoutAnimationArmed] = useState(false);
@@ -248,6 +273,11 @@ export default function Card({
   const input1ScrollRef = useRef<ScrollView | null>(null);
   const input2ScrollRef = useRef<ScrollView | null>(null);
   const selectedItemId = selectedItem?.id ?? null;
+  const lastContentDebugRef = useRef<{
+    loggedAt: number;
+    sequence: number;
+    snapshot: ContentDebugSnapshot;
+  } | null>(null);
   const frontAnswers = useMemo(
     () => splitFrontTextIntoAnswers(selectedItem?.text),
     [selectedItem?.text],
@@ -492,6 +522,7 @@ export default function Card({
     (event: string, extra: Record<string, unknown> = {}) => {
       if (process.env.NODE_ENV === "test") return;
       const payload = buildFocusDiagnosticsPayload(extra);
+      logFlashcardsScrollDebug(event, payload);
       if (ENABLE_KEYBOARD_CONSOLE_LOGS) {
         console.log(`[keyboard-debug] ${event}`, payload);
       }
@@ -501,8 +532,13 @@ export default function Card({
   );
   const primeKeyboardBridge = useCallback(
     (reason: string) => {
-      const hasBridgeRef = keyboardBridgeInputRef.current != null;
-      keyboardBridgeInputRef.current?.focus();
+      const hasBridgeRef = activeKeyboardBridgeInputRef.current != null;
+      logFlashcardsScrollDebug("card.focus.keyboard_bridge", buildFocusDiagnosticsPayload({
+        reason,
+        hasBridgeRef,
+        bridgeLocation: screenKeyboardBridgeInputRef ? "screen" : "card",
+      }));
+      activeKeyboardBridgeInputRef.current?.focus();
       if (process.env.NODE_ENV === "test") {
         return;
       }
@@ -524,7 +560,7 @@ export default function Card({
         }),
       );
     },
-    [buildFocusDiagnosticsPayload],
+    [activeKeyboardBridgeInputRef, buildFocusDiagnosticsPayload, screenKeyboardBridgeInputRef],
   );
   useEffect(() => {
     if (!isFocused || selectedItemId == null) {
@@ -657,6 +693,7 @@ export default function Card({
     focusRequestId,
     refs: focusRefs,
     onFocusAttempt: (event) => {
+      logFlashcardsScrollDebug("card.focus.native_attempt", buildFocusDiagnosticsPayload(event));
       if (
         process.env.NODE_ENV === "test" ||
         !shouldLogFocusDiagnostics
@@ -974,6 +1011,7 @@ export default function Card({
   );
 
   const handleConfirm = useCallback(() => {
+    logKeyboardDebug("card.answer.submit");
     if (selectedItem?.translations && selectedItem.translations.length > 1) {
       setTranslations(0);
     }
@@ -983,6 +1021,7 @@ export default function Card({
     confirm(rewers);
   }, [
     confirm,
+    logKeyboardDebug,
     primeKeyboardBridge,
     rewers,
     selectedItem?.translations,
@@ -1400,6 +1439,69 @@ export default function Card({
     return "empty";
   }, [isExplanationVisible, selectedItem, showCorrectionInputs]);
 
+  useEffect(() => {
+    if (!__DEV__ || !isFocused || process.env.NODE_ENV === "test") return;
+    const appearedAt = new Date();
+    const loggedAt = appearedAt.getTime();
+    const time = `${String(appearedAt.getHours()).padStart(2, "0")}:${String(appearedAt.getMinutes()).padStart(2, "0")}:${String(appearedAt.getSeconds()).padStart(2, "0")}.${String(appearedAt.getMilliseconds()).padStart(3, "0")}`;
+    const snapshot: ContentDebugSnapshot = {
+      source: contentDebugSource ?? null,
+      activeBox,
+      cardId: selectedItemId,
+      displayedCardId: showCorrectionInputs
+        ? correction?.cardId ?? correction?.word?.id ?? null
+        : selectedItemId,
+      displayMode,
+      correctionCardId: correction?.cardId ?? null,
+      correctionMode: correction?.mode ?? null,
+      correctionMatchesSelectedItem: correction
+        ? (correction.cardId ?? correction.word?.id ?? null) === selectedItemId
+        : null,
+      isBetweenCards,
+      isContentHeld,
+      introMode,
+      result,
+      reversed: effectiveReversed,
+      text: promptText,
+      imageUri: promptImageUri,
+      explanation: displayMode === "explanation" ? explanationText : null,
+    };
+    const previous = lastContentDebugRef.current;
+    const changedFields = (Object.keys(snapshot) as (keyof ContentDebugSnapshot)[])
+      .filter((key) => !previous || snapshot[key] !== previous.snapshot[key]);
+    // Object replacement alone does not indicate a content transition.
+    if (changedFields.length === 0) return;
+    const sequence = (previous?.sequence ?? 0) + 1;
+    const { text, imageUri, explanation, ...state } = snapshot;
+    console.log("[flashcard-content]", {
+      time,
+      timestampMs: loggedAt,
+      sequence,
+      elapsedMs: previous ? loggedAt - previous.loggedAt : null,
+      changedFields,
+      ...state,
+      content: { text, imageUri, explanation },
+      previous: previous?.snapshot ?? null,
+    });
+    lastContentDebugRef.current = { loggedAt, sequence, snapshot };
+  }, [
+    activeBox,
+    contentDebugSource,
+    correction,
+    displayMode,
+    effectiveReversed,
+    explanationText,
+    introMode,
+    isBetweenCards,
+    isContentHeld,
+    isFocused,
+    promptImageUri,
+    promptText,
+    result,
+    selectedItemId,
+    showCorrectionInputs,
+  ]);
+
   const resolverProps = {
     inlineAction,
     displayMode,
@@ -1464,20 +1566,23 @@ export default function Card({
 
   return (
     <View style={styles.container}>
-      {/* Keeps the native keyboard attached while the visible input is swapped. */}
-      <TextInput
-        ref={keyboardBridgeInputRef}
-        style={styles.keyboardBridgeInput}
-        value=""
-        caretHidden
-        autoCorrect={false}
-        spellCheck={false}
-        autoCapitalize="none"
-        importantForAutofill="no"
-        textContentType="none"
-        onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
-        onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
-      />
+      {/* Scrollable study screens provide their bridge outside the ScrollView.
+          Focusing a bridge at the card's top would make Android scroll to it. */}
+      {!screenKeyboardBridgeInputRef ? (
+        <TextInput
+          ref={keyboardBridgeInputRef}
+          style={styles.keyboardBridgeInput}
+          value=""
+          caretHidden
+          autoCorrect={false}
+          spellCheck={false}
+          autoCapitalize="none"
+          importantForAutofill="no"
+          textContentType="none"
+          onFocus={() => logKeyboardDebug("card.keyboard_bridge.focus")}
+          onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
+        />
+      ) : null}
       {hideHints && !isEditingHint ? (
         reserveHintSpaceWhenHidden ? (
           <View

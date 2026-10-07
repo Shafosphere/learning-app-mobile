@@ -5,10 +5,15 @@ import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/Flashcard
 import type { WordWithTranslations } from "@/src/types/boxes";
 import type { TFunction } from "i18next";
 import type { ComponentProps } from "react";
+import { View } from "react-native";
+import { useStableFlashcardPresentation } from "../hooks/useStableFlashcardPresentation";
+
+const ignoreHeldCardAction = () => {};
 
 type CourseFinishedPanelProps = ComponentProps<typeof CourseFinishedPanel>;
 
 type FlashcardsCardSectionProps = {
+  holdContent?: boolean;
   activeCustomCourseId: number | null;
   loadError: string | null;
   customCards: WordWithTranslations[];
@@ -23,7 +28,9 @@ type FlashcardsCardSectionProps = {
   t: TFunction;
 } & Pick<
   CardProps,
+  | "activeBox"
   | "inlineAction"
+  | "keyboardBridgeInputRef"
   | "selectedItem"
   | "setAnswer"
   | "answer"
@@ -55,6 +62,7 @@ type FlashcardsCardSectionProps = {
 };
 
 export function FlashcardsCardSection({
+  holdContent = false,
   activeCustomCourseId,
   loadError,
   customCards,
@@ -67,7 +75,9 @@ export function FlashcardsCardSection({
   onBackToCourses,
   onEditCard,
   t,
+  activeBox,
   inlineAction,
+  keyboardBridgeInputRef,
   selectedItem,
   setAnswer,
   answer,
@@ -96,6 +106,41 @@ export function FlashcardsCardSection({
   showExplanationEnabled,
   explanationOnlyOnWrong,
 }: FlashcardsCardSectionProps) {
+  const { cardProps, isHeld } = useStableFlashcardPresentation({
+    activeBox,
+    contentDebugSource: "flashcards",
+    keyboardBridgeInputRef,
+    inlineAction,
+    coachmarkId: "flashcards-card-section",
+    selectedItem,
+    setAnswer,
+    answer,
+    emptyAnswerSubmitWarning,
+    result: displayResult,
+    confirm,
+    reversed,
+    setResult,
+    correction,
+    wrongInputChange,
+    setCorrectionRewers,
+    introMode: introModeActive,
+    onHintUpdate,
+    hintCoachmarkId: "flashcards-hint-section",
+    shouldStartHintEditing,
+    hintEditRequestToken,
+    isFocused: isCardFocusEnabled && !shouldDisableTutorialCardAutofocus,
+    focusRequestToken,
+    isBetweenCards,
+    disableLayoutAnimation: shouldKeepLoadingOverlayVisible || showLoadingOverlay,
+    skipCorrectionEnabled,
+    autoSubmitCorrectAnswer,
+    hideHints,
+    reserveHintSpaceWhenHidden,
+    showExplanationEnabled,
+    explanationOnlyOnWrong,
+    onEdit: selectedItem ? () => onEditCard(selectedItem.id) : undefined,
+  }, holdContent, activeCustomCourseId);
+
   if (activeCustomCourseId == null) {
     return (
       <FlashcardsPlaceholderCard
@@ -127,39 +172,31 @@ export function FlashcardsCardSection({
     );
   } else {
     return (
-      <Card
-        inlineAction={inlineAction}
-        coachmarkId="flashcards-card-section"
-        selectedItem={selectedItem}
-        setAnswer={setAnswer}
-        answer={answer}
-        emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}
-        result={displayResult}
-        confirm={confirm}
-        reversed={reversed}
-        setResult={setResult}
-        correction={correction}
-        wrongInputChange={wrongInputChange}
-        setCorrectionRewers={setCorrectionRewers}
-        introMode={introModeActive}
-        onHintUpdate={onHintUpdate}
-        hintCoachmarkId="flashcards-hint-section"
-        shouldStartHintEditing={shouldStartHintEditing}
-        hintEditRequestToken={hintEditRequestToken}
-        isFocused={isCardFocusEnabled && !shouldDisableTutorialCardAutofocus}
-        focusRequestToken={focusRequestToken}
-        isBetweenCards={isBetweenCards}
-        disableLayoutAnimation={
-          shouldKeepLoadingOverlayVisible || showLoadingOverlay
-        }
-        skipCorrectionEnabled={skipCorrectionEnabled}
-        autoSubmitCorrectAnswer={autoSubmitCorrectAnswer}
-        hideHints={hideHints}
-        reserveHintSpaceWhenHidden={reserveHintSpaceWhenHidden}
-        showExplanationEnabled={showExplanationEnabled}
-        explanationOnlyOnWrong={explanationOnlyOnWrong}
-        onEdit={selectedItem ? () => onEditCard(selectedItem.id) : undefined}
-      />
+      <View pointerEvents={isHeld ? "none" : "auto"}>
+        <Card
+          {...cardProps}
+          isContentHeld={isHeld}
+          isFocused={isCardFocusEnabled && !shouldDisableTutorialCardAutofocus}
+          disableLayoutAnimation={isHeld || shouldKeepLoadingOverlayVisible || showLoadingOverlay}
+          // Keep the mounted input and keyboard, but reject stale input events.
+          {...(isHeld ? {
+            setAnswer: ignoreHeldCardAction,
+            setResult: ignoreHeldCardAction,
+            confirm: ignoreHeldCardAction,
+            wrongInputChange: ignoreHeldCardAction,
+            setCorrectionRewers: ignoreHeldCardAction,
+            onHintUpdate: cardProps.onHintUpdate ? ignoreHeldCardAction : undefined,
+            onEdit: cardProps.onEdit ? ignoreHeldCardAction : undefined,
+            shouldStartHintEditing: () => false,
+            autoSubmitCorrectAnswer: false,
+            inlineAction: cardProps.inlineAction ? {
+              ...cardProps.inlineAction,
+              disabled: true,
+              onCorrectionConfirm: ignoreHeldCardAction,
+            } : undefined,
+          } : {})}
+        />
+      </View>
     );
   }
 }

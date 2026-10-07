@@ -58,6 +58,7 @@ function makeBoxesState(
 }
 
 type RenderInteractionOptions = {
+  onRender?: (interaction: ReturnType<typeof useFlashcardsInteraction>) => void;
   boxZeroAnswerSide?: "front" | "back";
   boxZeroEnabled?: boolean;
   skipDemotionCorrection?: boolean;
@@ -196,6 +197,7 @@ function renderInteraction(
     latestBoxes = boxes;
     latestSelectedItemId = interaction.selectedItem?.id ?? null;
     latestActiveBox = interaction.activeBox;
+    options.onRender?.(interaction);
 
     return {
       interaction,
@@ -1631,6 +1633,44 @@ describe("useFlashcardsInteraction", () => {
   });
 
   describe("boxZero intro mode lifecycle", () => {
+    it.each(["front", "back"] as const)("keeps the current image and copy layout in every render between intro cards (answer side=%s)", async (boxZeroAnswerSide) => {
+      const cards = [
+        makeWord({ id: 941, text: "cat", translations: ["kot"], imageFront: "file://cat.png", flipped: true }),
+        makeWord({ id: 942, text: "dog", translations: ["pies"], imageFront: "file://dog.png", flipped: true }),
+      ];
+      const frames: { cardId: number; correctionCardId?: number; mode?: string; image?: string | null }[] = [];
+      const hook = renderInteraction(makeBoxesState({ boxZero: cards }), {
+        boxZeroAnswerSide,
+        onRender: ({ activeBox, selectedItem, correction }) => {
+          if (activeBox === "boxZero" && selectedItem) frames.push({
+            cardId: selectedItem.id,
+            correctionCardId: correction?.cardId,
+            mode: correction?.mode,
+            image: correction?.promptImageUri,
+          });
+        },
+      });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      const firstId = hook.result.current.interaction.selectedItem!.id;
+      const firstCorrection = hook.result.current.interaction.correction!;
+      frames.length = 0;
+      act(() => hook.result.current.interaction.wrongInputChange(
+        boxZeroAnswerSide === "front" ? 1 : 2,
+        boxZeroAnswerSide === "front" ? firstCorrection.awers : firstCorrection.rewers,
+      ));
+      await waitFor(() => expect(hook.result.current.interaction.selectedItem?.id).not.toBe(firstId));
+
+      expect(frames.length).toBeGreaterThan(0);
+      for (const frame of frames) {
+        expect(frame).toEqual({
+          cardId: frame.cardId,
+          correctionCardId: frame.cardId,
+          mode: "intro",
+          image: cards.find((card) => card.id === frame.cardId)!.imageFront,
+        });
+      }
+    });
+
     it("copies front alternatives with the front text and image as prompt and promotes to boxOne", async () => {
       const card = makeWord({ id: 899, text: "water; aqua", translations: ["woda", "podlewac"], imageFront: "front.webp", imageBack: "back.webp" });
       const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), { boxZeroAnswerSide: "front" });

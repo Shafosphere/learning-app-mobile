@@ -105,6 +105,69 @@ describe("KeyboardStudyScroll", () => {
     Object.keys(mockRegions).forEach((key) => delete mockRegions[key]);
   });
 
+  it("preserves manual scrolling through answer layout changes and keyboard hide", () => {
+    const transition = createNavbarLayoutTransition();
+    const compactScene = (visible: boolean, cardHeight = 350) => (
+      <NavbarLayoutTransitionContext.Provider value={transition}>
+        {scene(visible, cardHeight)}
+      </NavbarLayoutTransitionContext.Provider>
+    );
+    const screen = render(compactScene(false));
+    fireEvent(screen.getByTestId("study-scroll"), "scrollBeginDrag");
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 24 } } });
+    mockScrollTo.mockClear();
+    fireEvent(screen.getByTestId("study-scroll"), "contentSizeChange", 360, 650);
+    screen.rerender(compactScene(false, 380));
+    expect(mockScrollTo).not.toHaveBeenCalled();
+
+    screen.rerender(compactScene(true, 380));
+    fireEvent(screen.getByTestId("study-scroll"), "scrollBeginDrag");
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 48 } } });
+    mockScrollTo.mockClear();
+    transition.start();
+    screen.rerender(compactScene(false, 380));
+    fireEvent(screen.getByTestId("study-scroll"), "contentSizeChange", 360, 650);
+    act(() => transition.finish());
+    expect(mockScrollTo).not.toHaveBeenCalled();
+  });
+
+  it("does not fall back to the card bottom between answer blur and correction focus", () => {
+    mockRegions["answer-row"] = { y: 180, height: 60 };
+    mockRegions["correction-row"] = { y: 520, height: 60 };
+    const screen = render(
+      <KeyboardStudyScroll testID="study-scroll" keyboardVisible keyboardTopInWindow={340} cardHeight={520}>
+        <Editor name="answer" />
+        <Editor name="correction" />
+      </KeyboardStudyScroll>,
+    );
+    fireEvent(screen.getByTestId("answer"), "focus");
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 24 } } });
+    fireEvent(screen.getByTestId("answer"), "blur");
+    mockScrollTo.mockClear();
+    fireEvent(screen.getByTestId("study-scroll"), "contentSizeChange", 360, 650);
+    expect(mockScrollTo).not.toHaveBeenCalled();
+
+    fireEvent(screen.getByTestId("correction"), "focus");
+    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 272, animated: false });
+  });
+
+  it("keeps the user's position when a focused answer row is laid out again", () => {
+    mockRegions["answer-row"] = { y: 180, height: 60 };
+    const screen = render(
+      <KeyboardStudyScroll testID="study-scroll" keyboardVisible keyboardTopInWindow={340} cardHeight={350}>
+        <Editor name="answer" />
+      </KeyboardStudyScroll>,
+    );
+    fireEvent(screen.getByTestId("answer"), "focus");
+    fireEvent(screen.getByTestId("study-scroll"), "scrollBeginDrag");
+    fireEvent(screen.getByTestId("study-scroll"), "scroll", { nativeEvent: { contentOffset: { y: 112 } } });
+    mockRegions["answer-row"] = { y: 68, height: 60 };
+    mockScrollTo.mockClear();
+    fireEvent(screen.getByTestId("answer-row"), "layout");
+    fireEvent(screen.getByTestId("study-scroll"), "contentSizeChange", 360, 650);
+    expect(mockScrollTo).not.toHaveBeenCalled();
+  });
+
   it("keeps the focused hint and Save row visible on a tall card and switches to the answer without reopening the keyboard", () => {
     mockRegions["hint-row"] = { y: 100, height: 60 };
     mockRegions["answer-row"] = { y: 520, height: 60 };
@@ -161,8 +224,9 @@ describe("KeyboardStudyScroll", () => {
     mockRegions["hint-row"] = { y: 272, height: 60 };
     act(() => transition.finish());
     expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 28, animated: false });
+    mockScrollTo.mockClear();
     screen.rerender(editingScene(false));
-    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 0, animated: false });
+    expect(mockScrollTo).not.toHaveBeenCalled();
   });
   afterEach(() => {
     jest.clearAllTimers();
@@ -393,7 +457,7 @@ describe("KeyboardStudyScroll", () => {
     const screen = render(draftScene(false));
     fireEvent.changeText(screen.getByTestId("draft"), "unfinished hint");
     expect(bottomPadding(screen)).toBe(0);
-    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 0, animated: false });
+    expect(mockScrollTo).not.toHaveBeenCalled();
     screen.rerender(draftScene(true));
     expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 98, animated: false });
     screen.rerender(draftScene(false));
@@ -410,8 +474,9 @@ describe("KeyboardStudyScroll", () => {
     expect(screen.getByTestId("study-scroll").props.keyboardShouldPersistTaps).toBe("handled");
     screen.rerender(scene(true, 420));
     expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 168, animated: false });
+    mockScrollTo.mockClear();
     screen.rerender(scene(false, 420));
-    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 0, animated: false });
+    expect(mockScrollTo).not.toHaveBeenCalled();
     expect(bottomPadding(screen)).toBe(8);
   });
 
@@ -449,12 +514,12 @@ describe("KeyboardStudyScroll", () => {
     mockScrollTo.mockClear();
     transition.start();
     screen.rerender(wrappedScene(false));
-    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 0, animated: false });
+    expect(mockScrollTo).not.toHaveBeenCalled();
     mockScrollTo.mockClear();
     mockViewport = { y: 80, height: 560 };
     expect(mockScrollTo).not.toHaveBeenCalled();
     act(() => transition.finish());
-    expect(mockScrollTo).toHaveBeenLastCalledWith({ y: 0, animated: false });
+    expect(mockScrollTo).not.toHaveBeenCalled();
     expect(bottomPadding(screen)).toBe(8);
   });
 });

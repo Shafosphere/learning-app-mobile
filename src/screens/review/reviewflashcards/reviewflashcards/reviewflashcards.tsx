@@ -619,6 +619,9 @@ export default function ReviewFlashcardsPlaceholder() {
     <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
       <View collapsable={false}>
         <Card
+          activeBox={activeBox}
+          contentDebugSource="review"
+          keyboardBridgeInputRef={keyboardBridgeInputRef}
           inlineAction={useInlineCardAction ? {
             disabled: cardActionsConfirmDisabled,
             label: cardActionsConfirmLabel,

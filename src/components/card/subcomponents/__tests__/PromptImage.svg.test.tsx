@@ -1,5 +1,5 @@
 import React from "react";
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import { View } from "react-native";
 
 import { PromptImage } from "@/src/components/card/subcomponents/PromptImage";
@@ -75,6 +75,24 @@ describe("PromptImage SVG rendering", () => {
 
     expect(findFrameOpacity(screen)).toBe(1);
     expect(mockedFileSystem.getInfoAsync).not.toHaveBeenCalled();
+  });
+
+  it("reserves a transparent image slot at its final height while an SVG loads", async () => {
+    let finishLoading!: (xml: string) => void;
+    mockedFileSystem.readAsStringAsync.mockReturnValue(new Promise<string>((resolve) => {
+      finishLoading = resolve;
+    }));
+    const screen = render(
+      <PromptImage uri="file://images/slow.svg" imageStyle={{ width: "90%", height: 140, maxHeight: 140 }} initialSlotWidth={260} />,
+    );
+    const slotHeight = () => screen.UNSAFE_getAllByType(View)[0].props.style.height;
+    expect(slotHeight()).toBe(140);
+    expect(findFrameOpacity(screen)).toBe(0);
+    await waitFor(() => expect(mockedFileSystem.readAsStringAsync).toHaveBeenCalled());
+
+    await act(async () => finishLoading('<svg viewBox="0 0 400 100"><path d="M0 0h400v100H0z"/></svg>'));
+    expect(findFrameOpacity(screen)).toBe(1);
+    expect(slotHeight()).toBe(140);
   });
 
   it("preserves the configured height of a portrait bird image", () => {

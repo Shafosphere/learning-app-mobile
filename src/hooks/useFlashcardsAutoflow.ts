@@ -253,6 +253,23 @@ export function pickAutoflowDecision(
   return pickEarlyGameAutoflowDecision(params);
 }
 
+function resolveAvailableTargetBox(
+  boxes: BoxesState,
+  activeBox: keyof BoxesState | null,
+  preferredBox: keyof BoxesState | null,
+  boxZeroEnabled: boolean,
+): keyof BoxesState | null {
+  const count = (box: keyof BoxesState) => boxes[box]?.length ?? 0;
+  if (preferredBox && count(preferredBox) > 0) return preferredBox;
+  if (activeBox && count(activeBox) > 0) return activeBox;
+  const fallbackOrder: (keyof BoxesState)[] = [
+    ...(boxZeroEnabled ? (["boxZero"] as const) : []),
+    "boxOne",
+    ...CLEANUP_BOXES,
+  ];
+  return fallbackOrder.find((box) => count(box) > 0) ?? null;
+}
+
 export function useFlashcardsAutoflow({
   enabled,
   boxes,
@@ -282,45 +299,47 @@ export function useFlashcardsAutoflow({
     )
   );
 
+  // Resolve the same plan for rendering and execution, so the screen can keep
+  // its previous card visible before the passive effect switches boxes.
+  const now = Date.now();
+  const canDownloadMore =
+    isReady && !introBoxLimitReached && !fetchInFlight.current;
+  const phase = resolveAutoflowPhase({ remainingNewFlashcardsCount });
+  let nextDrainTarget = endGameDrainTargetRef.current;
+  if (phase !== "endGame") {
+    nextDrainTarget = null;
+  } else if (!boxZeroEnabled || (boxes.boxZero?.length ?? 0) === 0) {
+    nextDrainTarget = resolveLockedEndGameDrainTarget(boxes, nextDrainTarget);
+    if (!nextDrainTarget && shouldStartEndGameDrainSequence(boxes)) {
+      nextDrainTarget = pickInitialEndGameDrainTarget(boxes);
+    }
+  }
+
+  const decision = pickAutoflowDecision({
+    boxes,
+    activeBox,
+    boxZeroEnabled,
+    canDownloadMore,
+    flushThreshold,
+    remainingNewFlashcardsCount,
+    lockedEndGameDrainTarget: nextDrainTarget,
+  });
+  const decisionTargetBox = decision.targetBox;
+  const shouldDownloadNew = decision.shouldDownloadNew;
+  const targetBox = resolveAvailableTargetBox(boxes, activeBox, decisionTargetBox, boxZeroEnabled);
+  const isSwitchPending = Boolean(
+    enabled && canSwitch && now >= switchLockedUntil.current
+    && targetBox && targetBox !== activeBox,
+  );
+
   useEffect(() => {
     if (!enabled) return;
-    const now = Date.now();
-    const canDownloadMore =
-      isReady && !introBoxLimitReached && !fetchInFlight.current;
-    const phase = resolveAutoflowPhase({ remainingNewFlashcardsCount });
-
-    if (phase !== "endGame") {
-      endGameDrainTargetRef.current = null;
-    } else if (!boxZeroEnabled || (boxes.boxZero?.length ?? 0) === 0) {
-      const lockedTarget = resolveLockedEndGameDrainTarget(
-        boxes,
-        endGameDrainTargetRef.current
-      );
-
-      if (lockedTarget) {
-        endGameDrainTargetRef.current = lockedTarget;
-      } else if (shouldStartEndGameDrainSequence(boxes)) {
-        endGameDrainTargetRef.current = pickInitialEndGameDrainTarget(boxes);
-      } else {
-        endGameDrainTargetRef.current = null;
-      }
-    }
-
-    const decision = pickAutoflowDecision({
-      boxes,
-      activeBox,
-      boxZeroEnabled,
-      canDownloadMore,
-      flushThreshold,
-      remainingNewFlashcardsCount,
-      lockedEndGameDrainTarget: endGameDrainTargetRef.current,
-    });
-
-    if (decision.shouldDownloadNew && canDownloadMore) {
+    endGameDrainTargetRef.current = nextDrainTarget;
+    if (shouldDownloadNew && canDownloadMore) {
       onDebugEvent?.("flashcards", "autoflow.decision", {
         phase,
         activeBox,
-        targetBox: decision.targetBox,
+        targetBox: decisionTargetBox,
         shouldDownloadNew: true,
         flushThreshold,
         remainingNewFlashcardsCount: remainingNewFlashcardsCount ?? null,
@@ -328,7 +347,7 @@ export function useFlashcardsAutoflow({
       onDebugEvent?.("flashcards", "autoflow.download", {
         phase,
         activeBox,
-        targetBox: decision.targetBox,
+        targetBox: decisionTargetBox,
         incomingBatchSize: incomingBatchSize ?? null,
         remainingNewFlashcardsCount: remainingNewFlashcardsCount ?? null,
       });
@@ -338,34 +357,7 @@ export function useFlashcardsAutoflow({
       });
     }
 
-    const count = (box: keyof BoxesState) => boxes[box]?.length ?? 0;
-    const resolveTargetBox = (): keyof BoxesState | null => {
-      // Keep the preferred target if it actually has cards.
-      if (decision.targetBox && count(decision.targetBox) > 0) {
-        return decision.targetBox;
-      }
-
-      // If we're already on a box with cards, don't jump to an empty one.
-      if (activeBox && count(activeBox) > 0) {
-        return activeBox;
-      }
-
-      // Otherwise pick the first non-empty box in priority order.
-      const fallbackOrder: (keyof BoxesState)[] = [
-        ...(boxZeroEnabled ? (["boxZero"] as const) : []),
-        "boxOne",
-        ...CLEANUP_BOXES,
-      ];
-
-      return fallbackOrder.find((box) => count(box) > 0) ?? null;
-    };
-
-    const targetBox = resolveTargetBox();
-
-    if (!canSwitch) return;
-    if (now < switchLockedUntil.current) return;
-    if (!targetBox) return;
-    if (targetBox === activeBox) return;
+    if (!isSwitchPending || !targetBox) return;
 
     onDebugEvent?.("flashcards", "autoflow.decision", {
       phase,
@@ -382,12 +374,19 @@ export function useFlashcardsAutoflow({
       flushThreshold,
     });
     handleSelectBox(targetBox);
-    switchLockedUntil.current = now + SWITCH_STICKY_MS;
+    switchLockedUntil.current = Date.now() + SWITCH_STICKY_MS;
   }, [
     activeBox,
     boxes,
     boxZeroEnabled,
     canSwitch,
+    canDownloadMore,
+    decisionTargetBox,
+    isSwitchPending,
+    nextDrainTarget,
+    phase,
+    shouldDownloadNew,
+    targetBox,
     downloadMore,
     enabled,
     handleSelectBox,
@@ -399,4 +398,6 @@ export function useFlashcardsAutoflow({
     remainingNewFlashcardsCount,
     totalFlashcardsInCourse,
   ]);
+
+  return { isSwitchPending };
 }

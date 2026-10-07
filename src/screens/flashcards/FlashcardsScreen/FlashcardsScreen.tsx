@@ -65,6 +65,7 @@ import {
   subscribeCourseFinishedPreview,
 } from "@/src/services/courseFinishedPreview";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
 import {
   returnFlashcardToUnknown,
   subscribeFlashcardReturnedToUnknown,
@@ -1078,7 +1079,7 @@ export default function Flashcards() {
     requestHintTutorialRef,
   });
 
-  useFlashcardsAutoflow({
+  const autoflow = useFlashcardsAutoflow({
     enabled:
       autoflowEnabled &&
       isFocused &&
@@ -1099,6 +1100,14 @@ export default function Flashcards() {
     totalFlashcardsInCourse: totalCards,
     remainingNewFlashcardsCount,
     onDebugEvent: (_area, event, payload) => {
+      if (__DEV__ && process.env.NODE_ENV !== "test" && event === "autoflow.switch_box") {
+        console.log("[flashcard-flow]", {
+          timestampMs: Date.now(),
+          event,
+          cardId: selectedItemId,
+          ...payload,
+        });
+      }
       void appendDebugEvent("flashcards", event, {
         screen: "flashcards",
         courseId: activeCustomCourseId,
@@ -1107,6 +1116,7 @@ export default function Flashcards() {
       });
     },
   });
+  const holdCardContent = isBetweenCards || Boolean(autoflow?.isSwitchPending);
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =
     (coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9") ||
@@ -1314,6 +1324,9 @@ export default function Flashcards() {
 
   const cardSection = (
     <FlashcardsCardSection
+      holdContent={holdCardContent}
+      activeBox={activeBox}
+      keyboardBridgeInputRef={keyboardBridgeInputRef}
       inlineAction={useInlineCardAction ? {
         disabled: cardActionsConfirmDisabled,
         label: cardActionsConfirmLabel,
@@ -1382,7 +1395,7 @@ export default function Flashcards() {
       contentWidth={flashcardsContentWidth}
       coachmarkId="flashcards-buttons-section"
       showTrueFalseActions={shouldShowTrueFalseActions}
-      trueFalseActionsDisabled={trueFalseActionsDisabled}
+      trueFalseActionsDisabled={trueFalseActionsDisabled || holdCardContent}
       onTrueFalseAnswer={handleTrueFalseAnswer}
       trueFalseActionsMode={trueFalseActionsMode}
       onTrueFalseOk={handleTrueFalseOk}
@@ -1396,11 +1409,11 @@ export default function Flashcards() {
       onDownload={handleManualAddFlashcards}
       showAddFlashcards={shouldShowKnowDontKnowAdd}
       onAddFlashcards={() => void handleManualAddFlashcards()}
-      addFlashcardsDisabled={addButtonDisabled}
-      downloadDisabled={cardActionsDownloadDisabled}
+      addFlashcardsDisabled={addButtonDisabled || holdCardContent}
+      downloadDisabled={cardActionsDownloadDisabled || holdCardContent}
       downloadCoachmarkId="flashcards-add-button"
       confirmCoachmarkId="flashcards-confirm-button"
-      confirmDisabled={cardActionsConfirmDisabled}
+      confirmDisabled={cardActionsConfirmDisabled || holdCardContent}
       confirmLabel={cardActionsConfirmLabel}
     />
   );
@@ -1411,6 +1424,47 @@ export default function Flashcards() {
   const screenSectionLayout = shouldAnimateScreenLayout
     ? SCREEN_LAYOUT_TRANSITION
     : undefined;
+  useEffect(() => {
+    if (!isFocused) return;
+    // Capture every state change immediately; the settled diagnostics omit
+    // intermediate frames that matter when investigating a jumping viewport.
+    logFlashcardsScrollDebug("screen.state", {
+      cardId: selectedItemId,
+      answerLength: answer.length,
+      result: displayResult,
+      resultPending,
+      correctionMode: correction?.mode ?? null,
+      isBetweenCards,
+      isCompactStudyLayout,
+      useInlineCardAction,
+      keyboardVisible: studyLayout.keyboardVisible,
+      keyboardTopInWindow: studyLayout.keyboardTopInWindow,
+      availableStudyHeight: studyLayout.availableStudyHeight,
+      visibleStudyHeight: studyLayout.visibleStudyHeight,
+      fullCardHeight: studyLayout.fullCardSectionHeight,
+      visibleCardHeight: studyLayout.visibleCardHeight,
+      minimumFullStudyHeight: studyLayout.minimumFullStudyHeight,
+      horizontalRowHeight: studyLayout.horizontalRowHeight ?? null,
+      needsStudyScroll: studyLayout.needsStudyScroll,
+      bottomButtonsReservedSpace,
+      bottomButtonsDockBottomOffset,
+      shouldReserveBottomButtonsSpace,
+      areButtonsOnTop,
+      shouldAnimateScreenLayout,
+      windowWidth,
+      windowHeight,
+    });
+  }, [
+    isFocused, selectedItemId, answer.length, displayResult, resultPending,
+    correction?.mode, isBetweenCards, isCompactStudyLayout, useInlineCardAction,
+    studyLayout.keyboardVisible, studyLayout.keyboardTopInWindow,
+    studyLayout.availableStudyHeight, studyLayout.visibleStudyHeight,
+    studyLayout.fullCardSectionHeight, studyLayout.visibleCardHeight,
+    studyLayout.minimumFullStudyHeight, studyLayout.horizontalRowHeight,
+    studyLayout.needsStudyScroll, bottomButtonsReservedSpace,
+    bottomButtonsDockBottomOffset, shouldReserveBottomButtonsSpace,
+    areButtonsOnTop, shouldAnimateScreenLayout, windowWidth, windowHeight,
+  ]);
   const isTabletCenteredStudyLayout = isTabletLayout && shouldShowBoxes;
   const isTabletCompactBoxesLayout =
     isTabletCenteredStudyLayout && areButtonsOnTop;
@@ -1527,7 +1581,7 @@ export default function Flashcards() {
       isCourseFinishedVisible={isCourseFinishedVisible}
       showTopButtons={areButtonsOnTop && shouldShowBoxes && !useInlineCardAction}
       onCardSectionLayout={
-        selectedItem != null || isBetweenCards
+        !isCourseFinishedVisible
           ? studyLayout.onCardSectionLayout
           : undefined
       }
@@ -1547,6 +1601,8 @@ export default function Flashcards() {
         autoCapitalize="none"
         importantForAutofill="no"
         textContentType="none"
+        onFocus={() => logFlashcardsScrollDebug("screen.keyboard_bridge.focus", { selectedItemId: selectedItemIdRef.current })}
+        onBlur={() => logFlashcardsScrollDebug("screen.keyboard_bridge.blur", { selectedItemId: selectedItemIdRef.current })}
       />
       <Confetti generateConfetti={shouldCelebrate} />
       <CoachmarkAnchor
@@ -1589,6 +1645,7 @@ export default function Flashcards() {
             pointerEvents="box-none"
           >
             <View
+              testID="flashcards-bottom-buttons"
               ref={bottomButtonsAnchorRef}
               onLayout={(event) => {
                 studyLayout.onBottomButtonsLayout(event);

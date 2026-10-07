@@ -1,4 +1,6 @@
-import { WordWithTranslations } from "@/src/types/boxes";
+import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import type { RefObject } from "react";
+import type { TextInput } from "react-native";
 
 export type CardCorrectionType = {
   awers: string;
@@ -36,6 +38,12 @@ export type InlineCardAction = {
 };
 
 export type CardProps = {
+  /** Context for content transition diagnostics. */
+  activeBox?: keyof BoxesState | null;
+  contentDebugSource?: "flashcards" | "review";
+  isContentHeld?: boolean;
+  /** A keyboard keeper outside the study ScrollView, avoiding native focus scrolling. */
+  keyboardBridgeInputRef?: RefObject<TextInput | null>;
   inlineAction?: InlineCardAction;
   coachmarkId?: string;
   selectedItem: WordWithTranslations | null;

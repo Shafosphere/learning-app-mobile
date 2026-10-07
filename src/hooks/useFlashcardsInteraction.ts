@@ -40,6 +40,37 @@ export type CorrectionState = {
   word: WordWithTranslations;
 };
 
+function buildIntroCorrection(
+  word: WordWithTranslations,
+  answerSide: BoxZeroAnswerSide,
+  previous: CorrectionState | null,
+): CorrectionState {
+  const frontAnswers = splitFrontTextIntoAnswers(word.text);
+  const primaryFrontAnswer = frontAnswers[0] ?? word.text;
+  const answerOnly = isAnswerOnlyCard(word);
+  const reversed = answerSide === "front" && !answerOnly && Boolean(word.text?.trim());
+  const isSameCard = previous?.mode === "intro"
+    && previous.cardId === word.id && previous.reversed === reversed;
+  const preferredTranslation = isSameCard ? previous.rewers : word.translations[0] ?? "";
+
+  return {
+    cardId: word.id,
+    awers: primaryFrontAnswer,
+    awersAlternatives: frontAnswers,
+    rewers: word.translations.includes(preferredTranslation)
+      ? preferredTranslation : word.translations[0] ?? "",
+    input1: isSameCard ? previous.input1 : "",
+    input2: isSameCard ? previous.input2 : "",
+    answerOnly,
+    mode: "intro",
+    // Intro always presents the front; the chosen side selects the copy input.
+    promptText: primaryFrontAnswer,
+    promptImageUri: word.imageFront ?? null,
+    reversed,
+    word,
+  };
+}
+
 type RegisterKnownWordResult = {
   wasNewMastered: boolean;
   nextKnownWordsCount: number;
@@ -1040,41 +1071,7 @@ export function useFlashcardsInteraction({
       setResult(null);
     }
 
-    const firstTranslation = selectedItem.translations[0] ?? "";
-    const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
-    const primaryFrontAnswer = frontAnswers[0] ?? selectedItem.text;
-    const answerOnly = isAnswerOnlyCard(selectedItem);
-    const introReversed =
-      boxZeroAnswerSide === "front" &&
-      !answerOnly &&
-      Boolean(selectedItem.text?.trim());
-
-    setCorrection((prev) => {
-      const isSameIntroCard =
-        prev?.mode === "intro" &&
-        prev.cardId === selectedItem.id &&
-        prev.reversed === introReversed;
-      const preferredRewers = isSameIntroCard ? prev.rewers : firstTranslation;
-      const nextRewers = selectedItem.translations.includes(preferredRewers)
-        ? preferredRewers
-        : firstTranslation;
-
-      return {
-        cardId: selectedItem.id,
-        awers: primaryFrontAnswer,
-        awersAlternatives: frontAnswers,
-        rewers: nextRewers,
-        input1: isSameIntroCard ? prev.input1 : "",
-        input2: isSameIntroCard ? prev.input2 : "",
-        answerOnly,
-        mode: "intro",
-        // Intro always presents the front; the chosen side only selects the copy input.
-        promptText: primaryFrontAnswer,
-        promptImageUri: selectedItem.imageFront ?? null,
-        reversed: introReversed,
-        word: selectedItem,
-      };
-    });
+    setCorrection((previous) => buildIntroCorrection(selectedItem, boxZeroAnswerSide, previous));
   }, [
     activeBox,
     answer,
@@ -1087,6 +1084,16 @@ export function useFlashcardsInteraction({
     setResult,
   ]);
 
+  // The next intro state is stored by an effect, after the screen has rendered.
+  // Supply matching display data immediately so box zero never briefly renders
+  // the normal question scene (possibly without its front image). PromptImage
+  // can then keep its transparent image slot mounted throughout loading.
+  const visibleCorrection = useMemo(() =>
+    boxZeroEnabled && activeBox === "boxZero" && selectedItem
+      ? buildIntroCorrection(selectedItem, boxZeroAnswerSide, correction)
+      : correction,
+  [activeBox, boxZeroEnabled, boxZeroAnswerSide, selectedItem, correction]);
+
   return {
     activeBox,
     handleSelectBox,
@@ -1098,7 +1105,7 @@ export function useFlashcardsInteraction({
     confirm,
     canConfirm,
     reversed,
-    correction,
+    correction: visibleCorrection,
     wrongInputChange,
     setCorrectionRewers,
     learned,
