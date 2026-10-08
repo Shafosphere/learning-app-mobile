@@ -1,3 +1,7 @@
+import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
+import { BoxZeroSettingsSection } from "./BoxZeroSettingsSection";
+import { LetterHintControls } from "./LetterHintControls";
+import { SizeSettingsChoiceBlock } from "./SizeSettingsChoiceBlock";
 import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { Pressable, Text, View } from "react-native";
@@ -5,6 +9,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type {
   BoxZeroAnswerSide,
+  LetterHintSettings,
   FlashcardsCardSize,
   FlashcardsImageSize,
   TrueFalseButtonsVariant,
@@ -23,6 +28,9 @@ export type CourseSettingsSectionProps = {
   colors: ThemeColors;
   boxZeroAnswerSide?: BoxZeroAnswerSide;
   onSelectBoxZeroAnswerSide?: (side: BoxZeroAnswerSide) => void;
+  letterHintSettings?: LetterHintSettings;
+  onChangeLetterHintSettings?: (value: LetterHintSettings) => void;
+  letterHintSettingsDisabled?: boolean;
   boxZeroEnabled: boolean;
   onToggleBoxZero: (value: boolean) => void;
   autoflowEnabled: boolean;
@@ -186,7 +194,14 @@ function SettingsToggleRow({
   dimmed = false,
 }: ToggleRowProps) {
   return (
-    <View
+    <Pressable
+      onPress={onPress}
+      disabled={disabled}
+      accessible
+      accessibilityRole="switch"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityHint={description}
+      accessibilityState={{ checked: value, disabled }}
       style={[
         styles.settingsGroupRow,
         dependent && styles.settingsDependentRow,
@@ -199,15 +214,14 @@ function SettingsToggleRow({
           {preventWidowsPl(description)}
         </Text>
       </View>
-      <View style={styles.switch}>
+      <View style={styles.switch} pointerEvents="none">
         <ToggleSwitch
           value={value}
-          onPress={onPress}
-          accessibilityLabel={accessibilityLabel}
+          decorative
           disabled={disabled}
         />
       </View>
-    </View>
+    </Pressable>
   );
 }
 
@@ -264,6 +278,9 @@ function SettingsChoiceBlock<T extends string>({
 export function CourseSettingsSection({
   styles,
   colors,
+  letterHintSettings = DEFAULT_LETTER_HINT_SETTINGS,
+  onChangeLetterHintSettings,
+  letterHintSettingsDisabled = false,
   boxZeroEnabled,
   boxZeroAnswerSide = "back",
   onSelectBoxZeroAnswerSide,
@@ -299,6 +316,7 @@ export function CourseSettingsSection({
   const trueFalseOptions = buildTrueFalseOptions(t);
   const cardSizeOptions = buildCardSizeOptions(t);
   const imageSizeLabels = buildImageSizeLabels(t);
+  const showLetterHintControls = Boolean(onChangeLetterHintSettings && letterHintSettings.enabled);
 
   const imageOptions = (imageSizeOptions ?? [
     "dynamic",
@@ -357,42 +375,51 @@ export function CourseSettingsSection({
           <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
-            title={t(
-              "components.courseEditor.settingsCourse.title.fazaZapoznaniaPudelko0"
-            )}
-            description={t(
-              "components.courseEditor.settingsCourse.description.dodatkowePudelko"
-            )}
+            title={t("components.courseEditor.settingsCourse.title.fazaZapoznaniaPudelko0")}
+            description={t("components.courseEditor.settingsCourse.description.dodatkowePudelko")}
             value={boxZeroEnabled}
             onPress={() => onToggleBoxZero(!boxZeroEnabled)}
-            accessibilityLabel={t(
-              "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania"
-            )}
+            accessibilityLabel={t("components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania")}
           />
-          {boxZeroEnabled ? (
-            <View style={sharedStyles.settingsDependentRow}>
-              <SettingsChoiceBlock<BoxZeroAnswerSide>
-                styles={sharedStyles}
-                title={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.title")}
-                description={t("components.courseEditor.settingsCourse.boxZeroAnswerSide.description")}
-                options={[
-                  {
-                    key: "front",
-                    title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.front"),
-                    subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.frontDescription"),
-                  },
-                  {
-                    key: "back",
-                    title: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.back"),
-                    subtitle: t("components.courseEditor.settingsCourse.boxZeroAnswerSide.backDescription"),
-                  },
-                ]}
-                value={boxZeroAnswerSide}
-                onSelect={onSelectBoxZeroAnswerSide}
-              />
-            </View>
-          ) : null}
-          <View style={sharedStyles.settingsGroupDivider} />
+        </View>
+      </View>
+
+      <BoxZeroSettingsSection
+        boxZeroEnabled={boxZeroEnabled}
+        boxZeroAnswerSide={boxZeroAnswerSide}
+        onSelectBoxZeroAnswerSide={onSelectBoxZeroAnswerSide}
+      />
+
+      <View style={!showLetterHintControls && sharedStyles.settingsGroupCard}>
+        {onChangeLetterHintSettings ? (
+          <View style={[
+            sharedStyles.settingsGroupRows,
+            showLetterHintControls && sharedStyles.settingsGroupCard,
+          ]}>
+            <SettingsToggleRow
+              styles={sharedStyles}
+              title={t("courseLetterHints.title")}
+              description={t("courseLetterHints.description")}
+              value={letterHintSettings.enabled}
+              onPress={() => onChangeLetterHintSettings({ ...letterHintSettings, enabled: !letterHintSettings.enabled })}
+              accessibilityLabel={t("courseLetterHints.toggleLabel")}
+              disabled={letterHintSettingsDisabled}
+            />
+            {!showLetterHintControls ? <View style={sharedStyles.settingsGroupDivider} /> : null}
+          </View>
+        ) : null}
+        {onChangeLetterHintSettings && letterHintSettings.enabled ? (
+          <LetterHintControls
+            settings={letterHintSettings}
+            onChange={onChangeLetterHintSettings}
+            colors={colors}
+            disabled={letterHintSettingsDisabled}
+          />
+        ) : null}
+        <View style={[
+          sharedStyles.settingsGroupRows,
+          showLetterHintControls && sharedStyles.settingsGroupCard,
+        ]}>
           <SettingsToggleRow
             styles={sharedStyles}
             title={t("components.courseEditor.settingsCourse.title.wlaczPowtorki")}
@@ -457,10 +484,9 @@ export function CourseSettingsSection({
         </View>
       </View>
 
-      <SettingsChoiceBlock
-        styles={sharedStyles}
+      <SizeSettingsChoiceBlock
+        kind="flashcard"
         title={t("components.courseEditor.settingsCourse.title.rozmiarFiszki")}
-        titleStyle={sharedStyles.settingsGroupLabel}
         description={t(
           "components.courseEditor.settingsCourse.description.zmienWielkoscKarty"
         )}
@@ -470,10 +496,11 @@ export function CourseSettingsSection({
       />
 
       {showImageSizeOptions ? (
-        <SettingsChoiceBlock
-          styles={sharedStyles}
+        <SizeSettingsChoiceBlock
+          kind="image"
+          fullWidthOption="very_large"
+          separated
           title={t("components.courseEditor.settingsCourse.title.rozmiarObrazu")}
-          titleStyle={sharedStyles.settingsGroupLabel}
           description={t(
             "components.courseEditor.settingsCourse.description.dopasujWysokosc"
           )}

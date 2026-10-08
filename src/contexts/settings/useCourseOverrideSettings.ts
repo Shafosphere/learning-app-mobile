@@ -1,4 +1,5 @@
 import { useCallback, useMemo } from "react";
+import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
 
 import {
   useHydratedPersistedState,
@@ -39,6 +40,7 @@ import type {
   CourseTrueFalseButtonsOverrides,
   FlashcardsCardSize,
   FlashcardsImageSize,
+  LetterHintSettings,
   TrueFalseButtonsVariant,
 } from "./types";
 
@@ -139,6 +141,51 @@ export function useCourseOverrideSettings({
   activeCourseIdx: number | null;
   activeCustomCourseId: number | null;
 }) {
+  const [letterHintOverrides, setLetterHintOverrides, letterHintSettingsHydrated] =
+    useHydratedPersistedState<CourseOverrideState<LetterHintSettings>>(
+      "flashcards.courseLetterHintOverrides",
+      { builtin: {}, custom: {} },
+    );
+  const letterHints = useCourseOverrideAccessors({
+    courses,
+    activeCourseIdx,
+    activeCustomCourseId,
+    defaultValue: DEFAULT_LETTER_HINT_SETTINGS,
+    overrides: letterHintOverrides,
+    setOverrides: setLetterHintOverrides,
+    persistDefault: true,
+  });
+  const {
+    getBuiltin: getBuiltinLetterHints,
+    getCustom: getCustomLetterHints,
+    setBuiltin: setBuiltinLetterHints,
+    setCustom: setCustomLetterHints,
+    activeValue: activeLetterHints,
+  } = letterHints;
+  const getBuiltinCourseLetterHintSettings = useCallback(
+    (params: CourseBoxZeroKeyParams) => normalizeLetterHintSettings(getBuiltinLetterHints(params)),
+    [getBuiltinLetterHints],
+  );
+  const getCustomCourseLetterHintSettings = useCallback(
+    (courseId: number) => normalizeLetterHintSettings(getCustomLetterHints(courseId)),
+    [getCustomLetterHints],
+  );
+  const setBuiltinCourseLetterHintSettings = useCallback(
+    (params: CourseBoxZeroKeyParams, value: LetterHintSettings) =>
+      setBuiltinLetterHints(params, normalizeLetterHintSettings(value)),
+    [setBuiltinLetterHints],
+  );
+  const setCustomCourseLetterHintSettings = useCallback(
+    (courseId: number, value: LetterHintSettings) =>
+      setCustomLetterHints(courseId, normalizeLetterHintSettings(value)),
+    [setCustomLetterHints],
+  );
+
+  const letterHintSettings = useMemo(
+    () => normalizeLetterHintSettings(activeLetterHints),
+    [activeLetterHints],
+  );
+
   const [boxZeroDefaultEnabled, , boxZeroDefaultHydrated] =
     useHydratedPersistedState<boolean>("flashcards.boxZeroEnabled", false);
   const [boxZeroOverrides, setBoxZeroOverrides, boxZeroOverridesHydrated] =
@@ -316,6 +363,12 @@ export function useCourseOverrideSettings({
   });
 
   return {
+    letterHintSettings,
+    letterHintSettingsHydrated,
+    getBuiltinCourseLetterHintSettings,
+    setBuiltinCourseLetterHintSettings,
+    getCustomCourseLetterHintSettings,
+    setCustomCourseLetterHintSettings,
     boxZeroAnswerSide: boxZeroAnswerSide.activeValue,
     getBuiltinCourseBoxZeroAnswerSide: boxZeroAnswerSide.getBuiltin,
     setBuiltinCourseBoxZeroAnswerSide: boxZeroAnswerSide.setBuiltin,

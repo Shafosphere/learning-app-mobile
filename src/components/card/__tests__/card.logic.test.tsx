@@ -1,6 +1,7 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
-import type { TextInput } from "react-native";
+import { Text, type TextInput } from "react-native";
+import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 
 import Card from "@/src/components/card/card";
 import { useCardFocusController } from "@/src/components/card/useCardFocusController";
@@ -218,6 +219,57 @@ describe("Card logic props", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+  });
+
+  it("uses the correct side and first alternative without inserting hints into the answer", () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), letterHintSettingsHydrated: true,
+      letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true } });
+    const props = createProps({ contentDebugSource: "flashcards", activeBox: "boxOne",
+      selectedItem: makeCard({ id: 99, text: "apple; fruit", translations: ["planet", "world"] }) });
+    const screen = render(<Card {...props} />);
+    expect(latestResolverProps).toMatchObject({ letterHintPrefix: "pl", answer: "" });
+    screen.rerender(<Card {...props} answer="world" />);
+    expect(latestResolverProps).toMatchObject({ letterHintPrefix: "pl", answer: "world" });
+    screen.rerender(<Card {...props} activeBox="boxTwo" reversed />);
+    expect(latestResolverProps?.letterHintPrefix).toBe("a");
+    screen.rerender(<Card {...props} selectedItem={makeCard({ id: 100, translations: ["kot"] })} />);
+    expect(latestResolverProps?.letterHintPrefix).toBe("k");
+    const before = (props.setAnswer as jest.Mock).mock.calls.length;
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), letterHintSettings: DEFAULT_LETTER_HINT_SETTINGS });
+    screen.rerender(<Card {...props} answer="unfinished" />);
+    expect(latestResolverProps).toMatchObject({ letterHintPrefix: "", answer: "unfinished" });
+    expect((props.setAnswer as jest.Mock).mock.calls.length).toBe(before);
+  });
+
+  it.each([
+    { activeBox: "boxZero" }, { activeBox: "boxThree" }, { activeBox: "boxFour" }, { activeBox: "boxFive" },
+    { contentDebugSource: "review" }, { result: true }, { result: false }, { introMode: true },
+    { isBetweenCards: true }, { isContentHeld: true },
+    { selectedItem: makeCard({ id: 99, type: "true_false", translations: ["planet"] }) },
+    { selectedItem: makeCard({ id: 99, type: "know_dont_know", translations: ["planet"] }) },
+  ] as Partial<CardProps>[])("limits hints to unanswered text cards in the study flow: %j", (overrides) => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), letterHintSettingsHydrated: true,
+      letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true } });
+    render(<Card {...createProps({ contentDebugSource: "flashcards", activeBox: "boxOne",
+      selectedItem: makeCard({ id: 99, translations: ["planet"] }), ...overrides })} />);
+    expect(latestResolverProps?.letterHintPrefix).toBe("");
+  });
+
+  it("waits for settings hydration and never auto-submits a displayed hint", () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), letterHintSettingsHydrated: false,
+      letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true } });
+    const props = createProps({ contentDebugSource: "flashcards", activeBox: "boxOne", autoSubmitCorrectAnswer: true,
+      selectedItem: makeCard({ id: 99, translations: ["planet"] }) });
+    const screen = render(<Card {...props} />);
+    expect(latestResolverProps?.letterHintPrefix).toBe("");
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), letterHintSettingsHydrated: true });
+    screen.rerender(<Card {...props} />);
+    expect(latestResolverProps).toMatchObject({ letterHintPrefix: "pl", answer: "" });
+    expect(props.confirm).not.toHaveBeenCalled();
+    act(() => (latestResolverProps?.handleConfirm as () => void)());
+    // The first argument chooses the translation; no answer override is supplied.
+    expect(props.confirm).toHaveBeenCalledWith("planet");
+    expect(latestResolverProps?.answer).toBe("");
   });
 
   it.each([
@@ -698,9 +750,8 @@ describe("Card logic props", () => {
       value: string,
       expected: string,
     ) => React.ReactNode;
-    const segments = React.Children.toArray(
-      renderCorrectionGhostText("j", "je voudrais ça"),
-    ) as React.ReactElement<Record<string, any>>[];
+    const ghosts = render(<>{renderCorrectionGhostText("j", "je voudrais ça")}</>);
+    const segments = ghosts.UNSAFE_getAllByType(Text);
 
     expect(segments.map((segment) => segment.props.children).join(""))
       .toBe("je\u00A0voudrais\u00A0ça");
@@ -748,9 +799,8 @@ describe("Card logic props", () => {
       value: string,
       expected: string,
     ) => React.ReactNode;
-    const segments = React.Children.toArray(
-      renderCorrectionGhostText("👋", "👋 hello"),
-    ) as React.ReactElement<Record<string, any>>[];
+    const ghosts = render(<>{renderCorrectionGhostText("👋", "👋 hello")}</>);
+    const segments = ghosts.UNSAFE_getAllByType(Text);
 
     expect(segments[0].props.children).toBe("👋");
     expect(segments[0].props.style).toContainEqual({ opacity: 0 });

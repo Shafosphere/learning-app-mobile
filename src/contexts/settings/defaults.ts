@@ -1,3 +1,4 @@
+import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { resolveThemeColors } from "@/src/theme/theme";
 import { DEFAULT_MANUAL_REMINDER_HOUR } from "@/src/services/smartReminders";
@@ -91,6 +92,12 @@ export const defaultValue: SettingsContextValue = {
   setBuiltinCourseBoxZeroAnswerSide: async () => {},
   getCustomCourseBoxZeroAnswerSide: () => "back",
   setCustomCourseBoxZeroAnswerSide: async () => {},
+  letterHintSettings: DEFAULT_LETTER_HINT_SETTINGS,
+  letterHintSettingsHydrated: false,
+  getBuiltinCourseLetterHintSettings: () => DEFAULT_LETTER_HINT_SETTINGS,
+  setBuiltinCourseLetterHintSettings: async () => {},
+  getCustomCourseLetterHintSettings: () => DEFAULT_LETTER_HINT_SETTINGS,
+  setCustomCourseLetterHintSettings: async () => {},
   boxZeroSettingsHydrated: false,
   boxZeroEnabled: false,
   getBuiltinCourseBoxZeroEnabled: () => false,

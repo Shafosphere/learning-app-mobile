@@ -1,3 +1,4 @@
+import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
 import MyButton from "@/src/components/button/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
@@ -69,6 +70,7 @@ export default function CourseSettingsScreen() {
     setCustomCourseExplanationOnlyOnWrong,
     getCustomCourseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
+    setCustomCourseLetterHintSettings,
     getCustomCourseCardSize,
     setCustomCourseCardSize,
     getCustomCourseImageSize,
@@ -157,6 +159,7 @@ export default function CourseSettingsScreen() {
   const [trueFalseButtonsVariant, setTrueFalseButtonsVariant] = useState(
     getCustomCourseTrueFalseButtonsVariant(-1)
   );
+  const [letterHintSettings, setLetterHintSettings] = useState(DEFAULT_LETTER_HINT_SETTINGS);
   const [cardSize, setCardSize] = useState(getCustomCourseCardSize(-1));
   const [imageSize, setImageSize] = useState(getCustomCourseImageSize(-1));
   const [imageFrameEnabled, setImageFrameEnabled] = useState(
@@ -327,6 +330,9 @@ export default function CourseSettingsScreen() {
           ) {
             setImageSize(parsedSettingsDraft.imageSize);
           }
+          if (parsedSettingsDraft.letterHintSettings) {
+            setLetterHintSettings(normalizeLetterHintSettings(parsedSettingsDraft.letterHintSettings));
+          }
           if (typeof parsedSettingsDraft.imageFrameEnabled === "boolean") {
             setImageFrameEnabled(parsedSettingsDraft.imageFrameEnabled);
           }
@@ -385,6 +391,7 @@ export default function CourseSettingsScreen() {
         explanationOnlyOnWrong,
         skipCorrectionEnabled,
         trueFalseButtonsVariant,
+        letterHintSettings,
         cardSize,
         imageSize,
         imageFrameEnabled,
@@ -397,6 +404,7 @@ export default function CourseSettingsScreen() {
     autoflowEnabled,
     boxZeroEnabled,
     boxZeroAnswerSide,
+    letterHintSettings,
     cardSize,
     draftScopeKey,
     hydrating,
@@ -542,6 +550,7 @@ export default function CourseSettingsScreen() {
         courseId,
         trueFalseButtonsVariant
       );
+      await setCustomCourseLetterHintSettings(courseId, letterHintSettings);
       await setCustomCourseCardSize(courseId, cardSize);
       await setCustomCourseImageSize(courseId, imageSize);
       await setCustomCourseImageFrameEnabled(courseId, imageFrameEnabled);
@@ -602,6 +611,8 @@ export default function CourseSettingsScreen() {
                 trackTrue: colors.my_green,
               },
               colors,
+              letterHintSettings,
+              onChangeLetterHintSettings: setLetterHintSettings,
               boxZeroEnabled,
               boxZeroAnswerSide,
               onToggleBoxZero: setBoxZeroEnabled,

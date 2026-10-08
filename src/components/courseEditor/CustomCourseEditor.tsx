@@ -100,6 +100,9 @@ export default function CustomCourseEditor({
     setCustomCourseExplanationOnlyOnWrong,
     getCustomCourseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
+    getCustomCourseLetterHintSettings,
+    setCustomCourseLetterHintSettings,
+    letterHintSettingsHydrated,
     getCustomCourseCardSize,
     setCustomCourseCardSize,
     getCustomCourseImageSize,
@@ -769,6 +772,9 @@ export default function CustomCourseEditor({
                     trackTrue: colors.my_green,
                   },
                   colors,
+                  letterHintSettings: getCustomCourseLetterHintSettings(courseId),
+                  letterHintSettingsDisabled: !letterHintSettingsHydrated,
+                  onChangeLetterHintSettings: (value) => { void setCustomCourseLetterHintSettings(courseId, value); },
                   boxZeroAnswerSide: courseBoxZeroAnswerSide,
                   onSelectBoxZeroAnswerSide: async (side) => {
                     setCourseBoxZeroAnswerSide(side);

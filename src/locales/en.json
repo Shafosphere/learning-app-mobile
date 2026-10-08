@@ -1,4 +1,26 @@
 {
+  "courseLetterHints": {
+    "title": "Letter hints",
+    "description": "Show the start of an answer in boxes 1 and 2. Type the whole word from its first letter.",
+    "toggleLabel": "Toggle letter hints",
+    "limitsNote": "Values are the maximum number of revealed letters.",
+    "zeroNote": "0 means no hint.",
+    "limitLabel": "Box {{box}}. Letter limit: {{count}}.",
+    "profileSubtitle": "Choose how many letters a hint can reveal.",
+    "profileTitle": "Hint strength",
+    "safetyDescription": "Short words reveal fewer letters. Numbers, dates and formulas receive no hints.",
+    "profiles": {
+      "gentle": "Gentle",
+      "standard": "Standard",
+      "stronger": "Stronger",
+      "custom": "Custom"
+    },
+    "customDescription": "Customize each box separately.",
+    "customBoxLabel": "Box {{box}} — letter limit",
+    "summaryNoHint": "Box {{box}}: no hints",
+    "summaryLimit_one": "Box {{box}}: up to {{count}} letter",
+    "summaryLimit_other": "Box {{box}}: up to {{count}} letters"
+  },
   "quotes": {
     "reactions": {
       "startup_morning_0": "Good morning! Had coffee yet?",
@@ -1258,6 +1280,7 @@
       },
       "input": {
         "answerLabel": "Your answer",
+        "letterHint": "Answer starts with {{prefix}}. Type the entire answer from its first letter.",
         "answerHint": "Enter your answer. You can submit an empty answer by confirming twice.",
         "emptyAnswerError": "Enter an answer, or confirm again to submit without one.",
         "emptyAnswerHint": "Invalid. Enter an answer, or confirm again to submit without one.",

@@ -130,6 +130,7 @@ describe("CourseSettingsScreen image-only cards", () => {
       setCustomCourseSkipCorrectionEnabled: jest.fn(),
       getCustomCourseCardSize: () => "large",
       setCustomCourseCardSize: jest.fn(),
+      setCustomCourseLetterHintSettings: jest.fn(),
       getCustomCourseImageSize: () => "dynamic",
       setCustomCourseImageSize: jest.fn(),
       getCustomCourseImageFrameEnabled: () => false,
@@ -190,6 +191,18 @@ describe("CourseSettingsScreen image-only cards", () => {
     await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
     fireEvent.press(screen.getByLabelText("Create course"));
     await waitFor(() => expect(mockedUseSettings().setCustomCourseBoxZeroAnswerSide).toHaveBeenCalledWith(42, "front"));
+  });
+
+  it("restores letter hint personalization from draft and saves it for the new course", async () => {
+    const letterHintSettings = { enabled: true, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 };
+    await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
+      scopeKey: "Flags|flag|#123456||1", letterHintSettings,
+    }));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    await waitFor(async () => expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_DRAFT_STORAGE_KEY))!).letterHintSettings).toEqual(letterHintSettings));
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockedUseSettings().setCustomCourseLetterHintSettings).toHaveBeenCalledWith(42, letterHintSettings));
   });
 
   it("rejects a draft flashcard whose only content is a back image", async () => {

@@ -326,6 +326,28 @@ describe("userDataBackup", () => {
     jest.restoreAllMocks();
   });
 
+  it("clears custom letter hint overrides when replacing backup data and keeps builtin settings", async () => {
+    const db = createMockDb();
+    const settings = { enabled: true, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 };
+    await AsyncStorage.setItem("flashcards.courseLetterHintOverrides", JSON.stringify({
+      builtin: { "en|pl|A1": settings }, custom: { "7": settings },
+    }));
+    const result = await restoreUserData({
+      version: 3, generatedAt: 123, builtinReviews: [], boxesSnapshots: {},
+      customCourseBoxSnapshots: {}, customCourses: [],
+      officialCourseState: { pinnedOfficialCourseSlugs: [], lastActiveOfficialCourseSlug: null, boxSnapshots: {}, courses: [] },
+      statsState: {
+        knownWords: { ids: [], lastLearnedDate: "" }, dailyProgress: { date: "", count: 0 },
+        streakProtection: { streakDays: 0, shieldCount: 0, lastActiveDate: "", coveredThroughDate: "", shieldUsedDates: [] },
+        statsUi: { fireEffectEnabled: false, bookshelfEnabled: false },
+      },
+    }, { targetDb: db as never, replaceExistingData: true });
+    expect(result.success).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem("flashcards.courseLetterHintOverrides"))!)).toEqual({
+      builtin: { "en|pl|A1": settings }, custom: {},
+    });
+  });
+
   it("exports stats state, custom course state and splits box snapshots by course type", async () => {
     const db = createMockDb();
     mockedGetDb.mockResolvedValue(db as never);

@@ -19,6 +19,7 @@ type CardSceneQuestionProps = {
   mainInputRef: React.MutableRefObject<TextInput | null>;
   suggestionProps: any;
   handleConfirm: () => void;
+  letterHintPrefix?: string;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
@@ -47,6 +48,7 @@ export function CardSceneQuestion(props: CardSceneQuestionProps) {
       mainInputRef={props.mainInputRef}
       suggestionProps={props.suggestionProps}
       handleConfirm={props.handleConfirm}
+      letterHintPrefix={props.letterHintPrefix}
       isMainAnswerNumeric={props.isMainAnswerNumeric}
       isMainAnswerDate={props.isMainAnswerDate}
       mainDatePattern={props.mainDatePattern}

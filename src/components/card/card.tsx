@@ -5,6 +5,9 @@ import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
 import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { resolveInputKind } from "@/src/utils/answerInputKind";
+import { DEFAULT_LETTER_HINT_SETTINGS, resolveLetterHint } from "@/src/utils/letterHints";
+import { GhostAnswerText } from "./subcomponents/GhostAnswerText";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
 import { stripDiacritics } from "@/src/utils/diacritics";
@@ -44,9 +47,6 @@ import { getResponsiveFlashcardMetrics } from "./responsiveCardWidth";
 import { useCardFocusController } from "./useCardFocusController";
 import { useFocusExecutor } from "./useFocusExecutor";
 
-const NUMBER_ANSWER_REGEX = /^\d+(?:[.,]\d+)?$/;
-const YEAR_ANSWER_REGEX = /^\d{3,4}$/;
-const DATE_ANSWER_REGEX = /^\d{3,4}-\d{2}(?:-\d{2})?$/;
 const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
 const MAX_INPUT_SCROLL_AHEAD = 180;
@@ -76,30 +76,6 @@ const readKeyboardSnapshot = () => {
         }
       : null,
   };
-};
-
-type AnswerInputKind = "text" | "number" | "year" | "date";
-const detectInputKind = (value: string): AnswerInputKind => {
-  const trimmed = value.trim();
-  if (!trimmed) return "text";
-  if (DATE_ANSWER_REGEX.test(trimmed)) return "date";
-  if (YEAR_ANSWER_REGEX.test(trimmed)) return "year";
-  if (NUMBER_ANSWER_REGEX.test(trimmed)) return "number";
-  return "text";
-};
-
-const resolveInputKind = (values: string[]): AnswerInputKind => {
-  const normalizedKinds = values
-    .filter((entry) => entry.trim().length > 0)
-    .map((entry) => detectInputKind(entry));
-
-  if (normalizedKinds.length === 0) return "text";
-  if (normalizedKinds.every((kind) => kind === "date")) return "date";
-  if (normalizedKinds.every((kind) => kind === "year")) return "year";
-  if (normalizedKinds.every((kind) => kind === "number" || kind === "year")) {
-    return "number";
-  }
-  return "text";
 };
 
 const detectDatePattern = (value: string): DatePattern | null => {
@@ -207,6 +183,8 @@ export default function Card({
     flashcardsCardSize,
     flashcardsImageSize,
     correctionErrorMarkersEnabled,
+    letterHintSettings = DEFAULT_LETTER_HINT_SETTINGS,
+    letterHintSettingsHydrated = false,
   } = useSettings();
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
@@ -327,6 +305,13 @@ export default function Card({
       .map((entry) => entry.trim())
       .filter((entry) => entry.length > 0);
   }, [effectiveReversed, selectedItem]);
+  const letterHintPrefix = useMemo(() => {
+    if (!letterHintSettingsHydrated || contentDebugSource !== "flashcards" ||
+        result !== null || showCorrectionInputs || introMode || isBetweenCards || isContentHeld ||
+        !selectedItem || (selectedItem.type && selectedItem.type !== "text")) return "";
+    return resolveLetterHint({ settings: letterHintSettings, answers: mainExpectedAnswers, activeBox });
+  }, [letterHintSettingsHydrated, contentDebugSource, result, showCorrectionInputs,
+      introMode, isBetweenCards, isContentHeld, selectedItem, letterHintSettings, mainExpectedAnswers, activeBox]);
   const mainAnswerKind = useMemo(
     () => resolveInputKind(mainExpectedAnswers),
     [mainExpectedAnswers],
@@ -1114,27 +1099,7 @@ export default function Card({
   }
 
   function renderCorrectionGhostText(value: string, expected: string) {
-    const valueChars = splitGraphemes(value);
-    const expectedChars = splitGraphemes(expected);
-    return expectedChars.map((expectedChar, idx) => (
-      <Text
-        key={`ghost-${idx}`}
-        style={[
-          styles.overlayCharText,
-          {
-            fontSize: cardMetrics.fontSize,
-            lineHeight: cardMetrics.lineHeight,
-          },
-          styles.overlayExpectedSuffix,
-          textColorOverride
-            ? { color: textColorOverride, opacity: 0.38 }
-            : null,
-          idx < valueChars.length ? { opacity: 0 } : null,
-        ]}
-      >
-        {expectedChar === " " ? "\u00A0" : expectedChar}
-      </Text>
-    ));
+    return <GhostAnswerText value={value} expected={expected} cardMetrics={cardMetrics} textColorOverride={textColorOverride} />;
   }
 
   function renderCorrectionErrorText(value: string, expected: string) {
@@ -1479,6 +1444,7 @@ export default function Card({
     answerOnly,
     shouldCorrectAwers,
     shouldCorrectRewers,
+    letterHintPrefix,
     isMainAnswerNumeric,
     isMainAnswerDate,
     mainDatePattern,

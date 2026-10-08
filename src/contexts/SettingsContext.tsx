@@ -36,7 +36,7 @@
  *
  * - settings/useCourseOverrideSettings.ts
  *   Per-course flashcard settings: box zero, autoflow, explanations,
- *   skip correction, true/false buttons, card size, image size, and image frame.
+ *   skip correction, letter hints, true/false buttons, card size, image size, and image frame.
  *
  * - settings/useLearningReminderSettings.ts
  *   Reminder permission state, automatic/manual reminder settings,
@@ -73,6 +73,8 @@ export type {
   DominantHand,
   FlashcardsCardSize,
   FlashcardsImageSize,
+  LetterHintProfile,
+  LetterHintSettings,
   SettingsContextValue,
   TrueFalseButtonsVariant,
 } from "./settings/types";

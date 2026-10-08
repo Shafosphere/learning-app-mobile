@@ -148,6 +148,9 @@ function BuiltinCourseEditor({
     setBuiltinCourseExplanationOnlyOnWrong,
     getBuiltinCourseSkipCorrectionEnabled,
     setBuiltinCourseSkipCorrectionEnabled,
+    getBuiltinCourseLetterHintSettings,
+    setBuiltinCourseLetterHintSettings,
+    letterHintSettingsHydrated,
     getBuiltinCourseCardSize,
     setBuiltinCourseCardSize,
     getBuiltinCourseImageSize,
@@ -645,6 +648,9 @@ function BuiltinCourseEditor({
                 trackTrue: colors.my_green,
               },
               colors,
+              letterHintSettings: getBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
+              letterHintSettingsDisabled: !letterHintSettingsHydrated,
+              onChangeLetterHintSettings: (value) => { void setBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },
               boxZeroAnswerSide,
               onSelectBoxZeroAnswerSide: async (side) => {
                 setBoxZeroAnswerSide(side);

@@ -1,4 +1,28 @@
 {
+  "courseLetterHints": {
+    "title": "Podpowiedzi literowe",
+    "description": "Pokazuj początek odpowiedzi w pudełkach 1 i 2. Wpisuj całe słowo od pierwszej litery.",
+    "toggleLabel": "Przełącz podpowiedzi literowe",
+    "limitsNote": "Podane wartości to maksymalna liczba odsłoniętych liter.",
+    "zeroNote": "0 oznacza brak podpowiedzi.",
+    "limitLabel": "Pudełko {{box}}. Limit liter: {{count}}.",
+    "profileSubtitle": "Określ, ile liter może odsłonić podpowiedź.",
+    "profileTitle": "Siła podpowiedzi",
+    "safetyDescription": "Krótkie słowa odsłaniamy mniej. Liczby, daty i wzory pozostają bez podpowiedzi.",
+    "profiles": {
+      "gentle": "Delikatny",
+      "standard": "Standardowy",
+      "stronger": "Mocniejszy",
+      "custom": "Własny"
+    },
+    "customDescription": "Dostosuj każde pudełko osobno.",
+    "customBoxLabel": "Pudełko {{box}} — limit liter",
+    "summaryNoHint": "Pudełko {{box}}: bez podpowiedzi",
+    "summaryLimit_one": "Pudełko {{box}}: do {{count}} litery",
+    "summaryLimit_few": "Pudełko {{box}}: do {{count}} liter",
+    "summaryLimit_many": "Pudełko {{box}}: do {{count}} liter",
+    "summaryLimit_other": "Pudełko {{box}}: do {{count}} liter"
+  },
   "quotes": {
     "reactions": {
       "startup_morning_0": "Dzień dobry! Kawa już była?",
@@ -1260,6 +1284,7 @@
       },
       "input": {
         "answerLabel": "Twoja odpowiedź",
+        "letterHint": "Podpowiedź początku: {{prefix}}. Wpisz całą odpowiedź od pierwszej litery.",
         "answerHint": "Wpisz odpowiedź. Możesz wysłać pustą odpowiedź, zatwierdzając ją dwa razy.",
         "emptyAnswerError": "Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",
         "emptyAnswerHint": "Nieprawidłowe. Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",

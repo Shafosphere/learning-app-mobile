@@ -1,3 +1,4 @@
+import { GhostAnswerText } from "./GhostAnswerText";
 import { InlineConfirmButton } from "./InlineConfirmButton";
 import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
 import Octicons from "@expo/vector-icons/Octicons";
@@ -32,6 +33,7 @@ type CardInputProps = {
   mainInputRef: React.RefObject<TextInput | null>;
   suggestionProps: any;
   handleConfirm: () => void;
+  letterHintPrefix?: string;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
@@ -63,6 +65,7 @@ export function CardInput({
   mainInputRef,
   suggestionProps,
   handleConfirm,
+  letterHintPrefix = "",
   isMainAnswerNumeric,
   isMainAnswerDate,
   mainDatePattern,
@@ -171,6 +174,21 @@ export function CardInput({
       return (
         <View style={{ width: "100%", position: "relative" }}>
           {datePlaceholder ? renderDateMask(answer, datePlaceholder) : null}
+          {letterHintPrefix ? (
+            <View
+              testID="card-letter-hint"
+              pointerEvents="none"
+              accessible={false}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+              style={[
+                styles.inputOverlay,
+                { height: cardMetrics.textInputHeight - 3 * contentScale },
+              ]}
+            >
+              <GhostAnswerText value={answer} expected={letterHintPrefix} cardMetrics={cardMetrics} textColorOverride={textColorOverride} />
+            </View>
+          ) : null}
           <TextInput
             style={[
               styles.cardInput,
@@ -189,7 +207,10 @@ export function CardInput({
             accessibilityHint={t(
               emptyAnswerSubmitWarning
                 ? "flashcards.card.input.emptyAnswerHint"
-                : "flashcards.card.input.answerHint",
+                : letterHintPrefix
+                  ? "flashcards.card.input.letterHint"
+                  : "flashcards.card.input.answerHint",
+              { prefix: letterHintPrefix },
             )}
             onChangeText={setAnswer}
             autoCapitalize="none"
@@ -298,6 +319,7 @@ export function CardInput({
     revealOnBlur,
     requestFocus,
     setAnswer,
+    letterHintPrefix,
     isMainAnswerDate,
     isMainAnswerNumeric,
     datePlaceholder,
@@ -306,10 +328,7 @@ export function CardInput({
     textColorOverride,
     typoDiff,
     contentScale,
-    cardMetrics.fontSize,
-    cardMetrics.inputLineHeight,
-    cardMetrics.lineHeight,
-    cardMetrics.textInputHeight,
+    cardMetrics,
     t,
   ]);
 

@@ -1,6 +1,7 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, renderHook, waitFor } from "@testing-library/react-native";
 
+import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import type { LanguageCourse } from "@/src/types/course";
 
 import { useCourseOverrideSettings } from "../useCourseOverrideSettings";
@@ -37,6 +38,32 @@ describe("useCourseOverrideSettings", () => {
     await waitFor(() => expect(restored.result.current.boxZeroAnswerSide).toBe("front"));
     expect(restored.result.current.getCustomCourseBoxZeroAnswerSide(7)).toBe("back");
     expect(restored.result.current.getCustomCourseBoxZeroAnswerSide(9)).toBe("back");
+  });
+
+  it("persists personalized letter hints and resolves the active course after remount", async () => {
+    const initialProps = { activeCourseIdx: null as number | null, activeCustomCourseId: 7 as number | null };
+    const hook = renderHook<ReturnType<typeof useCourseOverrideSettings>, typeof initialProps>(({ activeCourseIdx, activeCustomCourseId }) => useCourseOverrideSettings({
+      courses: [course], activeCourseIdx, activeCustomCourseId,
+    }), { initialProps });
+    await waitFor(() => expect(hook.result.current.letterHintSettingsHydrated).toBe(true));
+    expect(hook.result.current.letterHintSettings).toEqual(DEFAULT_LETTER_HINT_SETTINGS);
+    const custom = { enabled: true, profile: "custom" as const, boxOneLimit: 3, boxTwoLimit: 0 };
+    const disabled = { ...custom, enabled: false };
+    await act(async () => { await hook.result.current.setCustomCourseLetterHintSettings(7, custom); });
+    await act(async () => { await hook.result.current.setCustomCourseLetterHintSettings(8, disabled); });
+    await act(async () => { await hook.result.current.setBuiltinCourseLetterHintSettings(course, { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true }); });
+    expect(hook.result.current.letterHintSettings).toEqual(custom);
+    hook.rerender({ activeCourseIdx: 0, activeCustomCourseId: null });
+    expect(hook.result.current.letterHintSettings).toEqual({ ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true });
+    expect(hook.result.current.getCustomCourseLetterHintSettings(9)).toEqual(DEFAULT_LETTER_HINT_SETTINGS);
+    expect(JSON.parse((await AsyncStorage.getItem("flashcards.courseLetterHintOverrides"))!)).toEqual({
+      builtin: { "en|pl|A1": { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true } }, custom: { "7": custom, "8": disabled },
+    });
+    hook.unmount();
+    const restored = renderHook(() => useCourseOverrideSettings({ courses: [course], activeCourseIdx: null, activeCustomCourseId: 8 }));
+    await waitFor(() => expect(restored.result.current.letterHintSettingsHydrated).toBe(true));
+    expect(restored.result.current.letterHintSettings).toEqual(disabled);
+    expect(restored.result.current.getCustomCourseLetterHintSettings(7)).toEqual(custom);
   });
 
   it("sets the global skip-correction value while preserving course overrides", async () => {

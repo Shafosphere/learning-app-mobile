@@ -1,6 +1,6 @@
 import React from "react";
 import { act, fireEvent, render } from "@testing-library/react-native";
-import { StyleSheet, TextInput } from "react-native";
+import { StyleSheet, Text, TextInput } from "react-native";
 
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
@@ -159,5 +159,63 @@ describe("CardInput inline confirm", () => {
     screen.rerender(<CardInput {...stableInputProps} />);
     expect(screen.queryByTestId("card-inline-confirm")).toBeNull();
     expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
+  });
+});
+
+
+describe("CardInput letter hints", () => {
+  beforeEach(() => {
+    mockedUseSettings.mockReturnValue({ colors: { my_yellow: "#fde24f" } });
+    mockTranslate = (key) => key;
+    mockT = (key) => mockTranslate(key);
+    jest.clearAllMocks();
+  });
+
+  it("overwrites letters position by position, restores them on deletion and keeps the actual answer empty initially", () => {
+    function Answer() {
+      const [answer, setAnswer] = React.useState("");
+      return <CardInput {...stableInputProps} answer={answer} setAnswer={setAnswer} letterHintPrefix="pl" />;
+    }
+    const screen = render(<Answer />);
+    const input = screen.UNSAFE_getByType(TextInput);
+    const ghosts = () => screen.UNSAFE_getAllByType(Text).filter((node) => ["p", "l"].includes(node.props.children));
+    expect(input.props.value).toBe("");
+    expect(ghosts().map((node) => StyleSheet.flatten(node.props.style).opacity)).toEqual([undefined, undefined]);
+    fireEvent.changeText(input, "p");
+    expect(input.props.value).toBe("p");
+    expect(ghosts().map((node) => StyleSheet.flatten(node.props.style).opacity)).toEqual([0, undefined]);
+    fireEvent.changeText(input, "world");
+    expect(input.props.value).toBe("world");
+    expect(ghosts().map((node) => StyleSheet.flatten(node.props.style).opacity)).toEqual([0, 0]);
+    fireEvent.changeText(input, "");
+    expect(ghosts().map((node) => StyleSheet.flatten(node.props.style).opacity)).toEqual([undefined, undefined]);
+    expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
+    fireEvent(input, "submitEditing");
+    expect(stableInputProps.handleConfirm).toHaveBeenCalledTimes(1);
+    expect(input.props.value).toBe("");
+  });
+
+  it("does not reset typed text or remount the keyboard input when hint changes", () => {
+    const screen = render(<CardInput {...stableInputProps} answer="unfinished" letterHintPrefix="pl" />);
+    const input = screen.UNSAFE_getByType(TextInput);
+    screen.rerender(<CardInput {...stableInputProps} answer="unfinished" letterHintPrefix="a" />);
+    expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
+    expect(input.props.value).toBe("unfinished");
+    expect(stableInputProps.setAnswer).not.toHaveBeenCalled();
+    screen.rerender(<CardInput {...stableInputProps} answer="unfinished" />);
+    expect(screen.queryByTestId("card-letter-hint", { includeHiddenElements: true })).toBeNull();
+    expect(screen.UNSAFE_getByType(TextInput)).toBe(input);
+  });
+
+  it.each([320, 390, 768])("keeps hint within the answer area at %sdp and exposes only its prefix to accessibility", (width) => {
+    const metrics = getResponsiveFlashcardMetrics(width);
+    const screen = render(<CardInput {...stableInputProps} cardMetrics={metrics} letterHintPrefix="pl" />);
+    const overlay = screen.getByTestId("card-letter-hint", { includeHiddenElements: true });
+    const input = screen.UNSAFE_getByType(TextInput);
+    expect(StyleSheet.flatten(overlay.props.style).height).toBeLessThan(StyleSheet.flatten(input.props.style).height);
+    expect(overlay.props.pointerEvents).toBe("none");
+    expect(overlay.props.importantForAccessibility).toBe("no-hide-descendants");
+    expect(input.props.accessibilityHint).toBe("flashcards.card.input.letterHint");
+    expect(screen.queryByText("planet")).toBeNull();
   });
 });

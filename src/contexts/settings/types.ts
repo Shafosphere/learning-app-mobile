@@ -30,6 +30,14 @@ export type CourseOverrideState<T> = {
   custom: Record<string, T>;
 };
 
+export type LetterHintProfile = "gentle" | "standard" | "stronger" | "custom";
+export type LetterHintSettings = {
+  enabled: boolean;
+  profile: LetterHintProfile;
+  boxOneLimit: number;
+  boxTwoLimit: number;
+};
+
 export type BoxZeroAnswerSide = "front" | "back";
 
 export type CourseBoxZeroOverrides = CourseOverrideState<boolean>;
@@ -96,6 +104,12 @@ export interface SettingsContextValue {
   setBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams, side: BoxZeroAnswerSide) => Promise<void>;
   getCustomCourseBoxZeroAnswerSide: (courseId: number) => BoxZeroAnswerSide;
   setCustomCourseBoxZeroAnswerSide: (courseId: number, side: BoxZeroAnswerSide) => Promise<void>;
+  letterHintSettings: LetterHintSettings;
+  letterHintSettingsHydrated: boolean;
+  getBuiltinCourseLetterHintSettings: (params: CourseBoxZeroKeyParams) => LetterHintSettings;
+  setBuiltinCourseLetterHintSettings: (params: CourseBoxZeroKeyParams, value: LetterHintSettings) => Promise<void>;
+  getCustomCourseLetterHintSettings: (courseId: number) => LetterHintSettings;
+  setCustomCourseLetterHintSettings: (courseId: number, value: LetterHintSettings) => Promise<void>;
   boxZeroSettingsHydrated: boolean;
   boxZeroEnabled: boolean;
   getBuiltinCourseBoxZeroEnabled: (

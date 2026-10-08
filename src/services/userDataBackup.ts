@@ -1772,6 +1772,7 @@ async function resetReplaceableStorageState(): Promise<void> {
 
   const customOverrideResets: [string, string][] = [];
   const overrideKeys = [
+    "flashcards.courseLetterHintOverrides",
     "flashcards.courseBoxZeroOverrides",
     "flashcards.courseBoxZeroAnswerSideOverrides",
     "flashcards.courseAutoflowOverrides",

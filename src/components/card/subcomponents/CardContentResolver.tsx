@@ -23,6 +23,7 @@ interface CardContentResolverProps {
   answerOnly: boolean;
   shouldCorrectAwers: boolean;
   shouldCorrectRewers: boolean;
+  letterHintPrefix?: string;
   isMainAnswerNumeric: boolean;
   isMainAnswerDate: boolean;
   mainDatePattern?: DatePattern | null;
@@ -85,6 +86,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     answerOnly,
     shouldCorrectAwers,
     shouldCorrectRewers,
+    letterHintPrefix,
     isMainAnswerNumeric,
     isMainAnswerDate,
     mainDatePattern,
@@ -213,6 +215,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
           mainInputRef={mainInputRef}
           suggestionProps={suggestionProps}
           handleConfirm={handleConfirm}
+          letterHintPrefix={letterHintPrefix}
           isMainAnswerNumeric={isMainAnswerNumeric}
           isMainAnswerDate={isMainAnswerDate}
           mainDatePattern={mainDatePattern}
