@@ -2,7 +2,9 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
 import { AppState, type AppStateStatus } from "react-native";
-import LocalExportReminder from "@/src/components/reminders/LocalExportReminder";
+import LocalExportReminder, {
+  LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS,
+} from "@/src/components/reminders/LocalExportReminder";
 import { exportAndShareUserData } from "@/src/services/exportUserData";
 import {
   ensureLocalExportReminderFirstSeenAt,
@@ -146,16 +148,26 @@ describe("LocalExportReminder", () => {
     });
   });
 
-  it("re-evaluates when the app returns to active state", async () => {
+  it("waits a minute after returning from background before showing a due reminder", async () => {
     await updateCheckpoint("done");
     await ensureLocalExportReminderFirstSeenAt(1_000);
     const screen = render(<LocalExportReminder />);
 
     expect(screen.queryByTestId(REMINDER_TEST_ID)).toBeNull();
 
+    await act(async () => {
+      appStateListeners.forEach((listener) => listener("background"));
+      await flushPromises();
+    });
     jest.setSystemTime(1_000 + LOCAL_EXPORT_REMINDER_INTERVAL_MS);
     await act(async () => {
       appStateListeners.forEach((listener) => listener("active"));
+      await flushPromises();
+    });
+
+    expect(screen.queryByTestId(REMINDER_TEST_ID)).toBeNull();
+    await act(async () => {
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
       await flushPromises();
     });
 
@@ -164,11 +176,52 @@ describe("LocalExportReminder", () => {
     });
   });
 
+  it("delays an overdue reminder at startup and cancels the delay in background", async () => {
+    await updateCheckpoint("done");
+    await ensureLocalExportReminderFirstSeenAt(1_000);
+    jest.setSystemTime(1_000 + LOCAL_EXPORT_REMINDER_INTERVAL_MS);
+    const screen = render(<LocalExportReminder />);
+
+    await act(async () => {
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS - 1);
+      await flushPromises();
+    });
+    expect(screen.queryByTestId(REMINDER_TEST_ID)).toBeNull();
+
+    await act(async () => {
+      appStateListeners.forEach((listener) => listener("background"));
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
+      await flushPromises();
+    });
+    expect(screen.queryByTestId(REMINDER_TEST_ID)).toBeNull();
+
+    await act(async () => {
+      appStateListeners.forEach((listener) => listener("active"));
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS - 1);
+      await flushPromises();
+    });
+    expect(screen.queryByTestId(REMINDER_TEST_ID)).toBeNull();
+
+    await act(async () => {
+      jest.advanceTimersByTime(1);
+      await flushPromises();
+    });
+    expect(screen.getByTestId(REMINDER_TEST_ID)).toBeTruthy();
+  });
+
   it("does not hide an already visible modal when a later evaluation returns false", async () => {
     await updateCheckpoint("done");
     await ensureLocalExportReminderFirstSeenAt(1_000);
     jest.setSystemTime(1_000 + LOCAL_EXPORT_REMINDER_INTERVAL_MS);
     const screen = render(<LocalExportReminder />);
+
+    await act(async () => {
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
+      await flushPromises();
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId(REMINDER_TEST_ID)).toBeTruthy();
@@ -188,6 +241,12 @@ describe("LocalExportReminder", () => {
     await ensureLocalExportReminderFirstSeenAt(1_000);
     jest.setSystemTime(1_000 + LOCAL_EXPORT_REMINDER_INTERVAL_MS);
     const screen = render(<LocalExportReminder />);
+
+    await act(async () => {
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
+      await flushPromises();
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId(REMINDER_TEST_ID)).toBeTruthy();
@@ -211,6 +270,12 @@ describe("LocalExportReminder", () => {
     await ensureLocalExportReminderFirstSeenAt(1_000);
     jest.setSystemTime(1_000 + LOCAL_EXPORT_REMINDER_INTERVAL_MS);
     const screen = render(<LocalExportReminder />);
+
+    await act(async () => {
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
+      await flushPromises();
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId(REMINDER_TEST_ID)).toBeTruthy();
@@ -253,6 +318,12 @@ describe("LocalExportReminder", () => {
       shared: true,
     });
     const screen = render(<LocalExportReminder />);
+
+    await act(async () => {
+      await flushPromises();
+      jest.advanceTimersByTime(LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS);
+      await flushPromises();
+    });
 
     await waitFor(() => {
       expect(screen.getByTestId(REMINDER_TEST_ID)).toBeTruthy();

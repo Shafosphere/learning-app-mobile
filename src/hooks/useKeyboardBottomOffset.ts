@@ -72,7 +72,9 @@ export function useKeyboardBottomOffset({
         toValue: value,
         duration,
         easing: Easing.out(Easing.ease),
-        useNativeDriver: false,
+        // Consumers apply this value to translateY, so keyboard movement can
+        // continue on the UI thread while the study screen renders on JS.
+        useNativeDriver: true,
       }).start();
     },
     [bottomOffset, debug],

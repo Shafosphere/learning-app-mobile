@@ -4,7 +4,7 @@ import type { BoxFacesByBox } from "@/src/components/Box/Skin/boxFaces";
 import type { BoxesState } from "@/src/types/boxes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { TFunction } from "i18next";
-import { useCallback, useContext, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useContext, useEffect, useRef, useState } from "react";
 import { StudyViewportContext } from "@/src/components/flashcards/StudyViewportContext";
 import { SINGLE_ROW_BOX_MIN_HEIGHT } from "@/src/components/Box/List/BoxList.metrics";
 import { useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
@@ -75,7 +75,7 @@ type FlashcardsBoxesSectionProps = {
   t: TFunction;
 };
 
-export function FlashcardsBoxesSection({
+export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
   debugSizes = false,
   debugCourseId,
   coachmarkId,
@@ -346,4 +346,4 @@ export function FlashcardsBoxesSection({
       )}
     </Reanimated.View>
   );
-}
+});

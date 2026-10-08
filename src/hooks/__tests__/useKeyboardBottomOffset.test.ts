@@ -49,7 +49,7 @@ describe("keyboard dock animation", () => {
     const { timing, show } = setup();
     show();
     expect(timing).toHaveBeenCalledTimes(1);
-    expect(timing.mock.calls[0][1]).toMatchObject({ toValue: 186, duration: 320 });
+    expect(timing.mock.calls[0][1]).toMatchObject({ toValue: 186, duration: 320, useNativeDriver: true });
     show();
     expect(timing).toHaveBeenCalledTimes(1);
   });

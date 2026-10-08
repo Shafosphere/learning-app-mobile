@@ -31,7 +31,19 @@ jest.mock("../BoxSkin.styles", () => ({
 
 describe("BoxSkin", () => {
   beforeEach(() => {
+    mockUseSettings.mockClear();
     mockUseSettings.mockReturnValue({ showBoxFaces: true });
+  });
+
+  it("skips unchanged artwork during parent updates and refreshes face and count changes", () => {
+    const screen = render(<BoxSkin wordCount={18} face="nice" />);
+    mockUseSettings.mockClear();
+    screen.rerender(<BoxSkin wordCount={18} face="nice" />);
+    expect(mockUseSettings).not.toHaveBeenCalled();
+
+    screen.rerender(<BoxSkin wordCount={21} face="love" />);
+    expect(screen.getByTestId("box-skin-face")).toHaveProp("source", BOX_FACE_ASSETS.love);
+    expect(screen.getByLabelText("Pudełko z 21 słowami, nastrój: love")).toBeTruthy();
   });
 
   it.each(Object.entries(BOX_FACE_ASSETS) as [Face, number][])(

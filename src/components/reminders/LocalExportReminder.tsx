@@ -19,6 +19,7 @@ import {
 import { subscribeLocalExportReminderPreview } from "@/src/services/localExportReminderPreview";
 
 const MAX_REMINDER_TIMER_DELAY_MS = 2_147_483_647;
+export const LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS = 60_000;
 
 export default function LocalExportReminder() {
   const { t } = useTranslation();
@@ -28,6 +29,12 @@ export default function LocalExportReminder() {
   const [previewVisible, setPreviewVisible] = useState(false);
   const [dismissing, setDismissing] = useState(false);
   const mountedRef = useRef(true);
+  const appActiveRef = useRef(
+    AppState.currentState !== "background" && AppState.currentState !== "inactive"
+  );
+  const reminderReadyAtRef = useRef(
+    Date.now() + LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS
+  );
   const reminderTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const evaluateReminderRef = useRef<() => Promise<void>>(async () => {});
 
@@ -62,6 +69,11 @@ export default function LocalExportReminder() {
   );
 
   const evaluateReminder = useCallback(async () => {
+    if (!appActiveRef.current) {
+      clearReminderTimer();
+      return;
+    }
+
     if (onboardingCheckpoint !== "done") {
       clearReminderTimer();
       if (mountedRef.current) {
@@ -72,11 +84,15 @@ export default function LocalExportReminder() {
 
     await ensureLocalExportReminderFirstSeenAt();
     const state = await getLocalExportReminderState();
-    if (!mountedRef.current) {
+    if (!mountedRef.current || !appActiveRef.current) {
       return;
     }
 
     if (shouldShowLocalExportReminder(state)) {
+      if (Date.now() < reminderReadyAtRef.current) {
+        scheduleReminderTimer(reminderReadyAtRef.current);
+        return;
+      }
       clearReminderTimer();
       setVisible(true);
       return;
@@ -105,6 +121,7 @@ export default function LocalExportReminder() {
     });
 
   useEffect(() => {
+    mountedRef.current = true;
     return () => {
       mountedRef.current = false;
       clearReminderTimer();
@@ -138,8 +155,16 @@ export default function LocalExportReminder() {
   useEffect(() => {
     const subscription = AppState.addEventListener("change", (nextState) => {
       if (nextState !== "active") {
+        appActiveRef.current = false;
+        clearReminderTimer();
         return;
       }
+
+      if (!appActiveRef.current) {
+        reminderReadyAtRef.current =
+          Date.now() + LOCAL_EXPORT_REMINDER_STARTUP_DELAY_MS;
+      }
+      appActiveRef.current = true;
 
       void evaluateReminderRef.current().catch((error) => {
         console.warn("[LocalExportReminder] Failed to evaluate reminder", error);
@@ -149,7 +174,7 @@ export default function LocalExportReminder() {
     return () => {
       subscription.remove();
     };
-  }, []);
+  }, [clearReminderTimer]);
 
   useEffect(() => {
     return subscribeLocalExportReminderPreview(() => {

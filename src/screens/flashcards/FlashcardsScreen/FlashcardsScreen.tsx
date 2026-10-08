@@ -947,16 +947,26 @@ export default function Flashcards() {
     };
   }, []);
 
+  const handleBackToCourses = useCallback(() => router.push("/coursepanel"), [router]);
+  const handleEditCard = useCallback((cardId: number) => {
+    if (activeCustomCourseId == null) return;
+    router.push({
+      pathname: "/editflashcard",
+      params: { courseId: String(activeCustomCourseId), flashcardId: String(cardId) },
+    });
+  }, [activeCustomCourseId, router]);
+  const inlineCardAction = useMemo(() => useInlineCardAction ? {
+    disabled: cardActionsConfirmDisabled,
+    label: cardActionsConfirmLabel,
+    onCorrectionConfirm: handleCardActionsConfirm,
+  } : undefined, [useInlineCardAction, cardActionsConfirmDisabled, cardActionsConfirmLabel, handleCardActionsConfirm]);
+
   const cardSection = (
     <FlashcardsCardSection
       holdContent={holdCardContent}
       activeBox={activeBox}
       keyboardBridgeInputRef={keyboardBridgeInputRef}
-      inlineAction={useInlineCardAction ? {
-        disabled: cardActionsConfirmDisabled,
-        label: cardActionsConfirmLabel,
-        onCorrectionConfirm: handleCardActionsConfirm,
-      } : undefined}
+      inlineAction={inlineCardAction}
       activeCustomCourseId={activeCustomCourseId}
       loadError={loadError}
       customCards={customCards}
@@ -966,14 +976,8 @@ export default function Flashcards() {
       courseFinishedIconProps={courseFinishedIconProps}
       courseFinishedAccuracyLabel={courseFinishedAccuracyLabel}
       courseFinishedTimeLabel={courseFinishedTimeLabel}
-      onBackToCourses={() => router.push("/coursepanel")}
-      onEditCard={(cardId) => {
-        if (activeCustomCourseId == null) return;
-        router.push({
-          pathname: "/editflashcard",
-          params: { courseId: String(activeCustomCourseId), flashcardId: String(cardId) },
-        });
-      }}
+      onBackToCourses={handleBackToCourses}
+      onEditCard={handleEditCard}
       t={t}
       selectedItem={selectedItem}
       setAnswer={setAnswer}

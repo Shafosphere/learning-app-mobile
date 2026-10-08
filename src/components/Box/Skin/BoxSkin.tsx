@@ -76,4 +76,4 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
   );
 };
 
-export default BoxSkin;
+export default React.memo(BoxSkin);

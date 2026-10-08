@@ -4,6 +4,7 @@ import React from "react";
 import * as ReactNative from "react-native";
 import { ScrollView, Text, View } from "react-native";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import BoxSkin from "../../Skin/BoxSkin";
 import BoxList, {
     getClassicBoxLayout,
 } from "../BoxList";
@@ -32,11 +33,11 @@ jest.mock("@edwardloopez/react-native-coachmark", () => ({
 }));
 
 jest.mock("../../Skin/BoxSkin", () => {
-    return function BoxSkinMock() {
+    return jest.fn(function BoxSkinMock() {
         const React = require("react");
         const { View } = require("react-native");
         return <View testID="box-skin" />;
-    };
+    });
 });
 
 jest.mock("../BoxList.styles", () => ({
@@ -92,6 +93,25 @@ const boxes: BoxesState = {
 describe("BoxList", () => {
     afterEach(() => {
         jest.restoreAllMocks();
+    });
+
+    it("keeps box artwork unchanged on a parent update but refreshes counts and selection", () => {
+        const handleSelectBox = jest.fn();
+        const props = { boxes, activeBox: "boxOne" as const, handleSelectBox };
+        const screen = render(<BoxList {...props} />);
+        jest.mocked(BoxSkin).mockClear();
+
+        // A keyboard visibility render does not change the list's inputs.
+        screen.rerender(<BoxList {...props} />);
+        expect(BoxSkin).not.toHaveBeenCalled();
+
+        const nextBoxes = { ...boxes, boxTwo: [...boxes.boxTwo, makeWord(3, "three")] };
+        screen.rerender(<BoxList {...props} boxes={nextBoxes} activeBox="boxTwo" />);
+        const selected = screen.getByRole("button", { name: "box 2 count 2" });
+        expect(selected.props.accessibilityState.selected).toBe(true);
+        fireEvent.press(selected);
+        expect(handleSelectBox).toHaveBeenCalledWith("boxTwo");
+        expect(BoxSkin).toHaveBeenCalled();
     });
 
     it("fits five boxes in one small-phone row with readable counters and working selection", () => {

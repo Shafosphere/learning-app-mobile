@@ -1,5 +1,6 @@
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import type { Dispatch, ReactNode, Ref, SetStateAction } from "react";
+import { useMemo } from "react";
 import { Animated, View } from "react-native";
 import type { LayoutChangeEvent, StyleProp, ViewStyle } from "react-native";
 
@@ -23,11 +24,12 @@ export function FlashcardsBottomDock({
   bottomOffset, keyboardOffset, anchorRef, setHeight, measure,
   styles, onLayout, testID, coachmarkId, children,
 }: FlashcardsBottomDockProps) {
+  const translateY = useMemo(() => Animated.multiply(keyboardOffset, -1), [keyboardOffset]);
   const content = (
     <Animated.View
       style={{
         width: "100%",
-        transform: [{ translateY: Animated.multiply(keyboardOffset, -1) }],
+        transform: [{ translateY }],
       }}
     >
       {children}

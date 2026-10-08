@@ -5,6 +5,7 @@ import { FlashcardsPlaceholderCard } from "@/src/components/flashcards/Flashcard
 import type { WordWithTranslations } from "@/src/types/boxes";
 import type { TFunction } from "i18next";
 import type { ComponentProps } from "react";
+import { memo } from "react";
 import { View } from "react-native";
 import { useStableFlashcardPresentation } from "../hooks/useStableFlashcardPresentation";
 
@@ -61,7 +62,7 @@ type FlashcardsCardSectionProps = {
   showLoadingOverlay: boolean;
 };
 
-export function FlashcardsCardSection({
+export const FlashcardsCardSection = memo(function FlashcardsCardSection({
   holdContent = false,
   activeCustomCourseId,
   loadError,
@@ -199,4 +200,4 @@ export function FlashcardsCardSection({
       </View>
     );
   }
-}
+});

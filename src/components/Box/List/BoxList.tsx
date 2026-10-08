@@ -63,7 +63,7 @@ interface BoxesProps {
     layoutWidth?: number;
 }
 
-export default function BoxList({
+function BoxList({
     onBoxSizeChange,
     boxes,
     activeBox,
@@ -551,3 +551,5 @@ export default function BoxList({
         </View>
     );
 }
+
+export default React.memo(BoxList);
