@@ -90,13 +90,15 @@ const detectInputKind = (value: string): AnswerInputKind => {
 
 const resolveInputKind = (values: string[]): AnswerInputKind => {
   const normalizedKinds = values
-    .map((entry) => detectInputKind(entry))
-    .filter((kind) => kind !== "text");
+    .filter((entry) => entry.trim().length > 0)
+    .map((entry) => detectInputKind(entry));
 
   if (normalizedKinds.length === 0) return "text";
   if (normalizedKinds.every((kind) => kind === "date")) return "date";
   if (normalizedKinds.every((kind) => kind === "year")) return "year";
-  if (normalizedKinds.every((kind) => kind === "number")) return "number";
+  if (normalizedKinds.every((kind) => kind === "number" || kind === "year")) {
+    return "number";
+  }
   return "text";
 };
 

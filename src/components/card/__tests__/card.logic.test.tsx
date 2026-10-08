@@ -220,6 +220,19 @@ describe("Card logic props", () => {
     jest.clearAllMocks();
   });
 
+  it.each([
+    [["70", "seventy"], false, false],
+    [["seventy", "70"], false, false],
+    [["70", "80"], true, false],
+    [["70", "2024"], true, false],
+    [["2024", "last year"], false, false],
+    [["2024-01-01", "January first"], false, false],
+    [["2024-01-01"], false, true],
+  ])("chooses keyboard from all accepted answers: %j", (translations, numeric, date) => {
+    render(<Card {...createProps({ selectedItem: makeCard({ id: 70, translations: translations as string[] }) })} />);
+    expect(latestResolverProps).toMatchObject({ isMainAnswerNumeric: numeric, isMainAnswerDate: date });
+  });
+
   it("forces answerOnly semantics for image-only cards", async () => {
     render(
       <Card
