@@ -1,17 +1,19 @@
 import type { QuoteTriggerRequest } from "@/src/contexts/QuoteContext";
 import type { HintTutorialTriggerSource } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.types";
 import {
-    COMEBACK_COOLDOWN_MS,
-    ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
-    HINT_COOLDOWN_MS,
-    HINT_FAIL_THRESHOLD,
-    HINT_TUTORIAL_FAIL_THRESHOLD,
-    LONG_THINK_COOLDOWN_MS,
-    LONG_THINK_MS,
-    LOSS_QUOTE_COOLDOWN_MS,
-    STREAK_COOLDOWN_MS,
-    STREAK_TARGET,
+  COMEBACK_COOLDOWN_MS,
+  HINT_COOLDOWN_MS,
+  HINT_FAIL_THRESHOLD,
+  HINT_TUTORIAL_FAIL_THRESHOLD,
+  LONG_THINK_COOLDOWN_MS,
+  LONG_THINK_MS,
+  LOSS_QUOTE_COOLDOWN_MS,
+  STREAK_COOLDOWN_MS,
+  STREAK_TARGET,
 } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
+import {
+  ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
+} from "@/src/features/flashcards/study/study.constants";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 import type { MutableRefObject } from "react";
 import { useCallback, useEffect, useRef, useState } from "react";

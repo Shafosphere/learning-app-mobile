@@ -1,5 +1,5 @@
-import { renderHook } from "@testing-library/react-native";
-import { Animated } from "react-native";
+import { act, renderHook } from "@testing-library/react-native";
+import { Animated, Keyboard } from "react-native";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
 import { useFlashcardsBottomDockLayout } from "../useFlashcardsBottomDockLayout";
 
@@ -59,4 +59,28 @@ describe("useFlashcardsBottomDockLayout inline-action transitions", () => {
     expect(useKeyboardBottomOffset).toHaveBeenLastCalledWith(expect.objectContaining({ enabled: true }));
     expect(result.current.bottomButtonsOffset).toBe(raisedOffset);
   });
+
+  it("cancels queued measurements and removes keyboard diagnostics on unmount", () => {
+    const removals: jest.SpyInstance[] = [];
+    const subscribe = Keyboard.addListener.bind(Keyboard);
+    jest.spyOn(Keyboard, "addListener").mockImplementation((name, listener) => {
+      const subscription = subscribe(name, listener);
+      removals.push(jest.spyOn(subscription, "remove"));
+      return subscription;
+    });
+    const requestFrame = jest.spyOn(global, "requestAnimationFrame").mockReturnValue(42);
+    const cancelFrame = jest.spyOn(global, "cancelAnimationFrame");
+    const { result, unmount } = renderHook(() => useFlashcardsBottomDockLayout({
+      ...params, isFocused: true,
+    }));
+    act(() => result.current.measureBottomButtons());
+    expect(requestFrame).toHaveBeenCalled();
+    cancelFrame.mockClear();
+    unmount();
+    expect(cancelFrame).toHaveBeenCalledWith(42);
+    expect(removals).toHaveLength(4);
+    removals.forEach(remove => expect(remove).toHaveBeenCalledTimes(1));
+    jest.restoreAllMocks();
+  });
+
 });

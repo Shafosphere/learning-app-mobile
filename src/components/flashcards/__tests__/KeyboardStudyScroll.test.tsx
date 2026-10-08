@@ -4,7 +4,7 @@ import { StyleSheet, Text, TextInput, View } from "react-native";
 import { KeyboardStudyScroll } from "../KeyboardStudyScroll";
 import { useStudyInputReveal } from "../StudyInputRevealContext";
 import { createNavbarLayoutTransition, NavbarLayoutTransitionContext } from "@/src/contexts/NavbarLayoutContext";
-import { FlashcardsBoxesSection } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsBoxesSection";
+import { FlashcardsBoxesSection } from "@/src/features/flashcards/study/components/FlashcardsBoxesSection";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 
 jest.mock("@/src/components/Box/List/BoxList", () => function MockBoxes() { return null; });
@@ -71,7 +71,10 @@ function BudgetBoxes({ onScale, tablet = false, rowHeight, buttonsOnTop = true, 
       styles={{
         boxesWrapper: { flex: 1 }, boxesViewport: { flex: 1 },
         boxesScrollViewport: { flex: 1 }, boxesScaledContent: { width: "100%" },
-      } as Props["styles"]}
+        boxesViewportScrollContent: {}, boxesWrapperWithBottomButtons: {},
+        tabletCompactBoxesScrollViewport: {}, tabletCompactBoxesViewport: {},
+        tabletCompactBoxesWrapper: {},
+      }}
       screenSectionLayout={undefined}
       boxes={{ boxZero: [], boxOne: [], boxTwo: [], boxThree: [], boxFour: [], boxFive: [] }}
       activeBox="boxOne"

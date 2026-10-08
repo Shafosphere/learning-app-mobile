@@ -7,6 +7,8 @@ import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScre
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import {
   getCustomCourseById,
   getCustomFlashcards,
@@ -360,6 +362,42 @@ describe("FlashcardsScreen autoflow guard", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+  });
+
+  it.each([
+    ["boxFour", true, 1, 1],
+    ["boxFour", false, 0, 1],
+    ["boxFive", true, 1, 0],
+    ["boxFive", false, 0, 0],
+    ["boxZero", false, 0, 0],
+  ] as const)("preserves study increments for %s, new mastery %s", async (box, wasNewMastered, masteredDelta, promotionsDelta) => {
+    const write = deferred<void>();
+    render(<Flashcards />);
+    await act(async () => { await Promise.resolve(); });
+    const options = mockedUseFlashcardsInteraction.mock.calls.at(-1)?.[0];
+    const { applyStatBurst } = jest.mocked(useNavbarStats).mock.results.at(-1)!.value;
+    await act(async () => {
+      options.onCorrectAnswer(box, {
+        word: options.boxes.boxOne[0],
+        wasNewMastered,
+        logLearningEventPromise: write.promise,
+        isPromotion: promotionsDelta === 1,
+        isTerminalSuccess: box === "boxFive",
+        fromBox: box,
+        durationMs: 1000,
+      });
+    });
+    expect(registerProtectedDailyActivity).not.toHaveBeenCalled();
+    expect(applyStatBurst).not.toHaveBeenCalled();
+    await act(async () => write.resolve());
+    expect(registerProtectedDailyActivity).toHaveBeenCalledTimes(1);
+    if (masteredDelta || promotionsDelta) {
+      expect(applyStatBurst).toHaveBeenCalledWith({
+        masteredDelta, promotionsDelta, streakDelta: 0,
+      });
+    } else {
+      expect(applyStatBurst).not.toHaveBeenCalled();
+    }
   });
 
   it("disables autoflow switching while a wrong-result correction is active", async () => {

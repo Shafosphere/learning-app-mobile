@@ -1,30 +1,8 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import {
-  BOXES_BOTTOM_ACTIONS_TOP_GAP,
-  BOXES_HORIZONTAL_PADDING,
-  CARD_SECTION_BOTTOM_GAP,
-  TOP_BUTTONS_BOTTOM_GAP,
-} from "./model/FlashcardsScreen.constants";
+import { createFlashcardsStudyStyles } from "@/src/features/flashcards/study/study.styles";
 
 export const useStyles = createThemeStylesHook((colors) => ({
-  container: {
-    flex: 1,
-    // justifyContent: "center",
-    // alignItems: "center",
-    backgroundColor: colors.background,
-    // marginTop: 20,
-    paddingTop: 15,
-    position: "relative",
-    display: "flex",
-  },
-  keyboardBridgeInput: {
-    position: "absolute",
-    width: 1,
-    height: 1,
-    opacity: 0.01,
-    top: 0,
-    left: 0,
-  },
+  ...createFlashcardsStudyStyles(colors),
   loadingOverlay: {
     position: "absolute",
     top: 0,
@@ -38,104 +16,5 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
-  },
-  content: {
-    flex: 1,
-  },
-  studyStack: {
-    width: "100%",
-  },
-  tabletCenteredStudyStack: {
-    flexGrow: 1,
-    justifyContent: "center",
-    width: "100%",
-  },
-  cardSectionWrapper: {
-    marginBottom: CARD_SECTION_BOTTOM_GAP,
-  },
-  finishedCardSectionWrapper: {
-    flex: 1,
-    minHeight: 0,
-  },
-  topButtonsWrapper: {
-    marginBottom: TOP_BUTTONS_BOTTOM_GAP,
-  },
-  topActionsWrapper: {
-    paddingHorizontal: 16,
-    alignItems: "center",
-  },
-  boxesWrapper: {
-    flex: 1,
-    minHeight: 0,
-    width: "100%",
-    position: "relative",
-    alignItems: "center",
-    paddingHorizontal: BOXES_HORIZONTAL_PADDING,
-    marginTop: 0,
-  },
-  boxesWrapperWithBottomButtons: {
-    marginTop: BOXES_BOTTOM_ACTIONS_TOP_GAP,
-  },
-  tabletCompactBoxesWrapper: {
-    flex: 0,
-  },
-  boxesViewport: {
-    flex: 1,
-    minHeight: 0,
-    width: "100%",
-    alignItems: "center",
-  },
-  tabletCompactBoxesViewport: {
-    flex: 0,
-  },
-  boxesScrollViewport: {
-    flex: 1,
-    minHeight: 0,
-    width: "100%",
-  },
-  tabletCompactBoxesScrollViewport: {
-    flex: 0,
-  },
-  boxesViewportScrollContent: {
-    width: "100%",
-    alignItems: "center",
-  },
-  boxesScaledContent: {
-    width: "100%",
-    alignItems: "center",
-  },
-  bottomButtonsWrapper: {
-    width: "100%",
-    marginTop: 4,
-    marginBottom: 2,
-  },
-  bottomButtonsDock: {
-    position: "absolute",
-    left: 0,
-    right: 0,
-    zIndex: 10,
-  },
-  addButton: {
-    position: "absolute",
-    top: -6,
-    right: 42,
-    width: 36,
-    height: 36,
-    borderRadius: 10,
-    backgroundColor: colors.my_yellow,
-    justifyContent: "center",
-    alignItems: "center",
-    shadowRadius: 1.4,
-    zIndex: 1000,
-  },
-  introOverlay: {
-    position: "absolute",
-    bottom: "30%",
-    left: 0,
-    right: 0,
-    zIndex: 30,
-    elevation: 6,
-    paddingHorizontal: 4,
-    paddingTop: 8,
   },
 }));

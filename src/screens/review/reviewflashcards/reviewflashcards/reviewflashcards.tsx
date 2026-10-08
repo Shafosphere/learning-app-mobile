@@ -1,5 +1,6 @@
-import { KeyboardStudyScroll } from "@/src/components/flashcards/KeyboardStudyScroll";
-import { useKeyboardVisibility } from "@/src/hooks/useKeyboardVisibility";
+import { FlashcardsStudyLayout } from "@/src/features/flashcards/study/components/FlashcardsStudyLayout";
+import { useFlashcardsStudyLayout } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyLayout";
+import { useFlashcardsStudyCoordinator } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyCoordinator";
 import { useFocusEffect, useIsFocused } from "@react-navigation/native";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 
@@ -7,40 +8,30 @@ import Card from "@/src/components/card/card";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import Confetti from "@/src/components/confetti/Confetti";
-import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { FlashcardsStudyButtons } from "@/src/features/flashcards/study/components/FlashcardsStudyButtons";
+import { KeyboardBridgeInput } from "@/src/features/flashcards/study/components/KeyboardBridgeInput";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { REVIEW_FLASHCARDS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
-import {
-  type StatBurst,
-  useNavbarStats,
-} from "@/src/contexts/NavbarStatsContext";
+import { useFlashcardsStatsBurst } from "@/src/features/flashcards/study/hooks/useFlashcardsStatsBurst";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
-import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
-import { FlashcardsBoxesSection } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsBoxesSection";
-import { FlashcardsStudyContent } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsStudyContent";
-import { useFlashcardActionBarState } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsActions";
-import { useFlashcardsBottomDockLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsBottomDockLayout";
+import { useFlashcardActionBarState } from "@/src/features/flashcards/study/hooks/useFlashcardActionBarState";
 import { useFlashcardImagePreload } from "@/src/features/flashcards/useFlashcardImagePreload";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
-import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { BoxesState } from "@/src/types/boxes";
 import { useLocalSearchParams } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import {
-  Animated,
   Image as RNImage,
   TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
-import { LinearTransition } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
 import { imageMaps } from "@/src/constants/imageMaps";
 import {
@@ -51,12 +42,10 @@ import { useReviewFlashcardsSession } from "./hooks/useReviewFlashcardsSession";
 import { useReviewMistakeNudge } from "./hooks/useReviewMistakeNudge";
 import { useReviewMutationQueue } from "./hooks/useReviewMutationQueue";
 import { ReviewMistakeBatchModal } from "./components/ReviewMistakeBatchModal";
-import { useStyles } from "./reviewflashcards-styles";
+import { useStyles } from "@/src/features/flashcards/study/study.styles";
 
-const SCREEN_LAYOUT_TRANSITION = LinearTransition.duration(420);
-
-// Lightweight placeholder: keeps UI pieces but no data fetching or persistence.
-export default function ReviewFlashcardsPlaceholder() {
+// Review session loads due cards and persists answers through review-specific hooks.
+export default function ReviewFlashcardsScreen() {
   const params = useLocalSearchParams<{
     courseId?: string;
     onboarding?: string;
@@ -65,12 +54,14 @@ export default function ReviewFlashcardsPlaceholder() {
   const styles = useStyles();
   const { width: windowWidth } = useWindowDimensions();
   const cardMetrics = getResponsiveFlashcardMetrics(windowWidth);
-  const { isSmallPhoneLayout, isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout } = useDeviceLayout();
   const flashcardsContentWidth = isTabletLayout ? cardMetrics.width : undefined;
   const isFocused = useIsFocused();
   const { t } = useTranslation();
   const keyboardBridgeInputRef = useRef<TextInput | null>(null);
-  const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
+  const emitStatsBurst = useFlashcardsStatsBurst(
+    "[Review] Failed to refresh streak after answer",
+  );
   const settings = useSettings();
   const {
     actionButtonsPosition,
@@ -127,7 +118,6 @@ export default function ReviewFlashcardsPlaceholder() {
       courseId != null ? getCustomCourseExplanationOnlyOnWrong(courseId) : false,
     [courseId, getCustomCourseExplanationOnlyOnWrong]
   );
-  const [layout] = useState<"classic" | "carousel">("classic");
   const [isLoading, setIsLoading] = useState(false);
   const reviewMutationQueueRef = useRef(new Map<number, Promise<unknown>>());
   const removeCardFromSessionRef = useRef<
@@ -316,60 +306,21 @@ export default function ReviewFlashcardsPlaceholder() {
 
   const handleStatsBurst = useCallback(
     (boxKey: keyof BoxesState, logLearningEventPromise: Promise<void>) => {
-      const baseBurst: StatBurst = {
-        masteredDelta: 0,
-        streakDelta: 0,
-        promotionsDelta:
-          boxKey === "boxOne" ||
-          boxKey === "boxTwo" ||
-          boxKey === "boxThree" ||
-          boxKey === "boxFour"
-            ? 1
-            : 0,
-      };
-
-      const hasBaseDelta = baseBurst.promotionsDelta > 0;
-
-      void (async () => {
-        await logLearningEventPromise;
-
-        let streakDelta: 0 | 1 = 0;
-        let streakDaysOverride: number | undefined;
-        let shieldCountOverride: 0 | 1 | 2 | undefined;
-        try {
-          const nextStreak = await registerProtectedDailyActivity();
-          const currentStats = getStatsSnapshot();
-          if (nextStreak.streakDays !== currentStats.streakDays) {
-            if (nextStreak.streakDays > currentStats.streakDays) {
-              streakDelta = 1;
-            }
-            streakDaysOverride = nextStreak.streakDays;
-          }
-          if (nextStreak.shieldCount !== currentStats.shieldCount) {
-            shieldCountOverride = nextStreak.shieldCount;
-          }
-        } catch (error) {
-          console.warn("[Review] Failed to refresh streak after answer", error);
-        }
-
-        if (
-          !hasBaseDelta &&
-          streakDelta === 0 &&
-          streakDaysOverride == null &&
-          shieldCountOverride == null
-        ) {
-          return;
-        }
-
-        applyStatBurst({
-          ...baseBurst,
-          streakDelta,
-          ...(streakDaysOverride == null ? {} : { streakDaysOverride }),
-          ...(shieldCountOverride == null ? {} : { shieldCountOverride }),
-        });
-      })();
+      void emitStatsBurst({
+        logLearningEventPromise,
+        deltas: {
+          masteredDelta: 0,
+          promotionsDelta:
+            boxKey === "boxOne" ||
+            boxKey === "boxTwo" ||
+            boxKey === "boxThree" ||
+            boxKey === "boxFour"
+              ? 1
+              : 0,
+        },
+      });
     },
-    [applyStatBurst, getStatsSnapshot],
+    [emitStatsBurst],
   );
 
   const handleReturnPeekCardToUnknown = useCallback(
@@ -476,23 +427,7 @@ export default function ReviewFlashcardsPlaceholder() {
     (mistakeNudge != null && !hasCardsInSession) ||
     pendingDbMutationForSelectedCard ||
     isBetweenCards;
-  const {
-    selectedTrueFalseAnswer,
-    emptyAnswerSubmitWarning,
-    isActionCooldownActive,
-    handleTrueFalseAnswer,
-    handleTrueFalseOk,
-    trueFalseActionsMode,
-    trueFalseActionsDisabled,
-    shouldShowTrueFalseActions,
-    showCardActions,
-    handleCardActionsConfirm,
-    handleCardConfirm,
-    cardActionsDownloadDisabled,
-    cardActionsConfirmDisabled,
-    cardActionsConfirmLabel,
-    effectiveTrueFalseButtonsVariant,
-  } = useFlashcardActionBarState({
+  const actionState = useFlashcardActionBarState({
     selectedItem,
     selectedItemId,
     answer,
@@ -513,38 +448,35 @@ export default function ReviewFlashcardsPlaceholder() {
     onOk: acknowledgeExplanation,
     t,
   });
-  const effectiveLayout = layout;
-  const isCarouselLayout = effectiveLayout !== "classic";
-  const carouselMinScale = 0.3;
-  const areButtonsOnTop = actionButtonsPosition === "top";
-  const { keyboardVisible, keyboardTopInWindow } = useKeyboardVisibility();
-  const [visibleCardHeight, setVisibleCardHeight] = useState(0);
-  const canUseInlineCardAction = isSmallPhoneLayout && !isTabletLayout
-    && showCardActions && selectedItem != null && !isExplanationVisible
-    && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know";
-  const useInlineCardAction = canUseInlineCardAction && keyboardVisible;
-  const classicBoxesMinScale = isTabletLayout
-    ? areButtonsOnTop
-      ? 0.72
-      : 0.54
-    : 0.72;
   const {
-    bottomButtonsAnchorRef,
-    setBottomButtonsHeight,
-    measureBottomButtons,
-    bottomButtonsOffset,
-    shouldRenderBottomButtons,
-    bottomButtonsDockBottomOffset,
-    bottomButtonsReservedSpace,
-  } = useFlashcardsBottomDockLayout({
-    hideActions: useInlineCardAction,
-    keepActionsAtBottom: canUseInlineCardAction,
+    emptyAnswerSubmitWarning,
+    isActionCooldownActive,
+    shouldShowTrueFalseActions,
+    showCardActions,
+    handleCardActionsConfirm,
+    handleCardConfirm,
+    cardActionsConfirmDisabled,
+    cardActionsConfirmLabel,
+  } = actionState;
+  const areButtonsOnTop = actionButtonsPosition === "top";
+  const studyLayout = useFlashcardsStudyLayout({
+    isTabletLayout,
+    boxesLayout: "classic",
+    areButtonsOnTop,
+    isFocused,
+  });
+  const studyPresentation = useFlashcardsStudyCoordinator({
+    studyLayout,
+    isTabletLayout,
+    boxesLayout: "classic",
     areButtonsOnTop,
     shouldShowBoxes: true,
     selectedItemId,
     showCardActions,
     shouldShowTrueFalseActions,
-    isSmallPhoneLayout,
+    inlineCardActionEligible: showCardActions && selectedItem != null && !isExplanationVisible
+      && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know",
+    shouldAnimateScreenLayout: true,
     isFocused,
     debugScreen: "review",
     debugCategory: "review",
@@ -555,66 +487,23 @@ export default function ReviewFlashcardsPlaceholder() {
     correction,
     previousKeyboardVisibleRef,
   });
-  const carouselBottomClearance =
-    isCarouselLayout && !areButtonsOnTop && !useInlineCardAction
-      ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
-      : 0;
-  const {
-    scale: boxesScale,
-    scaledHeight: boxesScaledHeight,
-    scaleOffsetY,
-    onViewportLayout: onBoxesViewportLayout,
-    onContentLayout: onBoxesContentLayout,
-    needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({
-    minScale: isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
-    ...(isCarouselLayout
-      ? {
-          stableContentHeight: getBoxCarouselNaturalHeight({
-            isSmallPhoneLayout,
-            bottomClearance: carouselBottomClearance,
-          }),
-        }
-      : {}),
-  });
+  const { useInlineCardAction } = studyPresentation;
 
   const mistakeNudgeCards = mistakeNudge?.cards ?? [];
 
   const renderButtons = (position: "top" | "bottom") => (
-    <FlashcardsButtons
+    <FlashcardsStudyButtons
       position={position}
-      align={
-        position === "bottom" && isTabletLayout
-          ? dominantHand === "left"
-            ? "left"
-            : dominantHand === "center"
-              ? "center"
-            : "right"
-          : "center"
-      }
+      isTabletLayout={isTabletLayout}
+      dominantHand={dominantHand}
+      actionState={actionState}
       contentWidth={flashcardsContentWidth}
-      showTrueFalseActions={shouldShowTrueFalseActions}
-      trueFalseActionsDisabled={trueFalseActionsDisabled}
-      onTrueFalseAnswer={handleTrueFalseAnswer}
-      trueFalseActionsMode={trueFalseActionsMode}
-      onTrueFalseOk={handleTrueFalseOk}
-      trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-      selectedTrueFalseAnswer={selectedTrueFalseAnswer}
-      showCardActions={showCardActions}
-      onCardActionsConfirm={handleCardActionsConfirm}
       onDownload={async () => undefined}
-      downloadDisabled={cardActionsDownloadDisabled}
       downloadCoachmarkId="review-flashcards-add-button"
       confirmCoachmarkId="review-flashcards-confirm-button"
-      confirmDisabled={cardActionsConfirmDisabled}
-      confirmLabel={cardActionsConfirmLabel}
     />
   );
 
-  const boxesScaleOffsetY = scaleOffsetY;
-  const isTabletCenteredStudyLayout = isTabletLayout;
-  const isTabletCompactBoxesLayout =
-    isTabletCenteredStudyLayout && areButtonsOnTop;
   const cardSection = (
     <CoachmarkAnchor id="review-flashcards-card-section" shape="rect" radius={20}>
       <View collapsable={false}>
@@ -639,8 +528,8 @@ export default function ReviewFlashcardsPlaceholder() {
           wrongInputChange={wrongInputChange}
           setCorrectionRewers={setCorrectionReversed}
           introMode={false}
-          hideHints={isSmallPhoneLayout}
-          isFocused={!isLoading}
+          hideHints={studyLayout.isCompactStudyLayout}
+          isFocused={isFocused && !isLoading}
           isBetweenCards={isBetweenCards || isActionCooldownActive}
           autoSubmitCorrectAnswer={autoSubmitCorrectAnswer}
           showExplanationEnabled={showExplanationEnabled}
@@ -657,40 +546,6 @@ export default function ReviewFlashcardsPlaceholder() {
     >
       <View collapsable={false}>{renderButtons("top")}</View>
     </CoachmarkAnchor>
-  );
-  const boxesSection = (
-    <FlashcardsBoxesSection
-      hideActions={useInlineCardAction}
-      coachmarkId="review-flashcards-boxes-section"
-      countsCoachmarkId="review-flashcards-box-counts"
-      testID="review-flashcards-boxes-wrapper"
-      styles={styles}
-      screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
-      boxes={boxes}
-      activeBox={activeBox}
-      boxZeroEnabled={true}
-      tutorialBoxCountOverrides={undefined}
-      boxFaces={boxFaces}
-      handleSelectBox={handleSelectBox}
-      handleBoxLongPress={handleBoxLongPress}
-      effectiveBoxesLayout={effectiveLayout}
-      boxSelectionLocked={
-        isBetweenCards || isLoading || correction != null ||
-        (mistakeNudge != null && !hasCardsInSession)
-      }
-      isTabletLayout={isTabletLayout}
-      isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
-      areButtonsOnTop={areButtonsOnTop}
-      flashcardsContentWidth={flashcardsContentWidth}
-      boxesScale={boxesScale}
-      boxesScaledHeight={boxesScaledHeight}
-      boxesScaleOffsetY={boxesScaleOffsetY}
-      boxesNeedScrollFallback={boxesNeedScrollFallback}
-      carouselBottomClearance={carouselBottomClearance}
-      onBoxesViewportLayout={onBoxesViewportLayout}
-      onBoxesContentLayout={onBoxesContentLayout}
-      t={t}
-    />
   );
   const coachmark = useCoachmarkFlow({
     flowKey: "review-flashcards-guided",
@@ -726,31 +581,10 @@ export default function ReviewFlashcardsPlaceholder() {
 
   useCoachmarkLayerPortal("review-flashcards-screen", coachmarkLayer);
 
-  const studyContent = (
-    <FlashcardsStudyContent
-      onCardSectionLayout={(event) => setVisibleCardHeight(event.nativeEvent.layout.height)}
-      styles={styles}
-      screenSectionLayout={SCREEN_LAYOUT_TRANSITION}
-      cardSection={cardSection}
-      topButtons={topButtons}
-      boxesSection={boxesSection}
-      isCourseFinishedVisible={false}
-      showTopButtons={areButtonsOnTop && !useInlineCardAction}
-    />
-  );
-
   return (
     <View style={styles.container}>
-      <TextInput
+      <KeyboardBridgeInput
         ref={keyboardBridgeInputRef}
-        style={styles.keyboardBridgeInput}
-        value=""
-        caretHidden
-        autoCorrect={false}
-        spellCheck={false}
-        autoCapitalize="none"
-        importantForAutofill="no"
-        textContentType="none"
       />
       <CoachmarkAnchor
         id="review-flashcards-bubble-anchor"
@@ -760,72 +594,32 @@ export default function ReviewFlashcardsPlaceholder() {
       />
       <Confetti generateConfetti={shouldCelebrate} />
 
-      <View
-        testID="review-flashcards-content"
-        style={[
-          styles.content,
-          shouldRenderBottomButtons
-            ? { paddingBottom: bottomButtonsReservedSpace }
-            : null,
-        ]}
-      >
-        <KeyboardStudyScroll
-          testID={isTabletCenteredStudyLayout ? "review-flashcards-study-stack" : "review-flashcards-study-scroll"}
-          enabled={(isSmallPhoneLayout && !isTabletLayout) || keyboardVisible}
-          keyboardVisible={keyboardVisible}
-          keyboardTopInWindow={keyboardTopInWindow}
-          cardHeight={visibleCardHeight}
-          contentContainerStyle={isTabletCenteredStudyLayout
-            ? [styles.studyStack, styles.tabletCenteredStudyStack]
-            : undefined}
-        >
-          {studyContent}
-        </KeyboardStudyScroll>
-
-        {shouldRenderBottomButtons ? (
-          <View
-            style={[
-              styles.bottomButtonsDock,
-              { bottom: bottomButtonsDockBottomOffset },
-            ]}
-            pointerEvents="box-none"
-          >
-            <View
-              ref={bottomButtonsAnchorRef}
-              onLayout={(event) => {
-                const nextHeight = event.nativeEvent.layout.height;
-                setBottomButtonsHeight((prev) =>
-                  Math.abs(prev - nextHeight) < 1 ? prev : nextHeight,
-                );
-                measureBottomButtons();
-              }}
-              collapsable={false}
-              style={styles.bottomButtonsWrapper}
-            >
-              <CoachmarkAnchor
-                id="review-flashcards-buttons-section"
-                shape="rect"
-                radius={24}
-              >
-                <View collapsable={false}>
-                  <Animated.View
-                    style={{
-                      width: "100%",
-                      transform: [
-                        {
-                          translateY: Animated.multiply(bottomButtonsOffset, -1),
-                        },
-                      ],
-                    }}
-                  >
-                    {renderButtons("bottom")}
-                  </Animated.View>
-                </View>
-              </CoachmarkAnchor>
-            </View>
-          </View>
-        ) : null}
-      </View>
+      <FlashcardsStudyLayout
+        layout={studyPresentation}
+        styles={styles}
+        testIDPrefix="review-flashcards"
+        bottomButtonsCoachmarkId="review-flashcards-buttons-section"
+        cardSection={cardSection}
+        topButtons={topButtons}
+        bottomButtons={renderButtons("bottom")}
+        isCourseFinishedVisible={false}
+        interactionBlocked={false}
+        boxes={{
+          coachmarkId: "review-flashcards-boxes-section",
+          countsCoachmarkId: "review-flashcards-box-counts",
+          testID: "review-flashcards-boxes-wrapper",
+          boxes,
+          activeBox,
+          boxZeroEnabled: true,
+          boxFaces,
+          handleSelectBox,
+          handleBoxLongPress,
+          boxSelectionLocked: isBetweenCards || isLoading || correction != null
+            || (mistakeNudge != null && !hasCardsInSession),
+          flashcardsContentWidth,
+          t,
+        }}
+      />
 
       <FlashcardsPeekOverlay
         visible={peekBox !== null}

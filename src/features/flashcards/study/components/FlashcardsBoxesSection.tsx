@@ -13,6 +13,8 @@ import {
   ScrollView,
   View,
   type LayoutChangeEvent,
+  type StyleProp,
+  type ViewStyle,
 } from "react-native";
 import Reanimated, {
   FadeIn,
@@ -21,7 +23,17 @@ import Reanimated, {
   useSharedValue,
   withTiming,
 } from "react-native-reanimated";
-import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
+export type FlashcardsBoxesSectionStyles = {
+  boxesScaledContent: StyleProp<ViewStyle>;
+  boxesScrollViewport: StyleProp<ViewStyle>;
+  boxesViewport: StyleProp<ViewStyle>;
+  boxesViewportScrollContent: StyleProp<ViewStyle>;
+  boxesWrapper: StyleProp<ViewStyle>;
+  boxesWrapperWithBottomButtons: StyleProp<ViewStyle>;
+  tabletCompactBoxesScrollViewport: StyleProp<ViewStyle>;
+  tabletCompactBoxesViewport: StyleProp<ViewStyle>;
+  tabletCompactBoxesWrapper: StyleProp<ViewStyle>;
+};
 
 const BOXES_FADE_OUT_DURATION_MS = 140;
 const BOXES_FADE_OUT = FadeOut.duration(BOXES_FADE_OUT_DURATION_MS);
@@ -33,7 +45,7 @@ type FlashcardsBoxesSectionProps = {
   coachmarkId?: string;
   countsCoachmarkId?: string;
   testID?: string;
-  styles: ReturnType<typeof useStyles>;
+  styles: FlashcardsBoxesSectionStyles;
   screenSectionLayout: ComponentProps<typeof Reanimated.View>["layout"];
   boxes: BoxesState;
   activeBox: keyof BoxesState | null;

@@ -21,7 +21,7 @@ import {
   CLASSIC_PHONE_BOXES_MIN_SCALE,
   COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET,
   TOP_BUTTONS_BOTTOM_GAP,
-} from "../model/FlashcardsScreen.constants";
+} from "../study.constants";
 
 const LAYOUT_TOLERANCE = 1;
 const NORMAL_LAYOUT_RECOVERY_SPACE = 8;

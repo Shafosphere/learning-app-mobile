@@ -15,7 +15,15 @@ import {
   View as MockView,
 } from "react-native";
 
-import ReviewFlashcardsPlaceholder from "@/src/screens/review/reviewflashcards/reviewflashcards/reviewflashcards";
+import {
+  createNavbarLayoutTransition,
+  NavbarLayoutContext,
+  NavbarLayoutTransitionContext,
+} from "@/src/contexts/NavbarLayoutContext";
+import { FlashcardsStudyLayout } from "@/src/features/flashcards/study/components/FlashcardsStudyLayout";
+import { FlashcardsBottomDock } from "@/src/features/flashcards/study/components/FlashcardsBottomDock";
+import Card from "@/src/components/card/card";
+import ReviewFlashcardsScreen from "@/src/screens/review/reviewflashcards/reviewflashcards/reviewflashcards";
 import {
   advanceCustomReview,
   getCustomFlashcardConsecutiveWrongCount,
@@ -32,7 +40,9 @@ import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import { TRUE_FALSE_POST_OK_COOLDOWN_MS } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
+import {
+  TRUE_FALSE_POST_OK_COOLDOWN_MS,
+} from "@/src/features/flashcards/study/study.constants";
 
 type ReviewFlashcardsRouteParams = {
   courseId?: string;
@@ -46,8 +56,10 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: () => mockedUseLocalSearchParams(),
 }));
 
+let mockIsFocused = true;
+
 jest.mock("@react-navigation/native", () => ({
-  useIsFocused: () => true,
+  useIsFocused: () => mockIsFocused,
   useFocusEffect: (effect: () => void | (() => void)) => {
     MockReact.useEffect(effect, [effect]);
   },
@@ -344,7 +356,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
   };
 });
 
-jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", () => ({
+jest.mock("@/src/features/flashcards/study/study.styles", () => ({
   useStyles: jest.fn(() => ({
     container: {},
     content: {},
@@ -587,7 +599,7 @@ async function renderAndForceCorrectionSwitch(
   switchedBox: "boxOne" | "boxTwo" | "boxThree" | "boxFour" | "boxFive"
 ) {
   mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce(cards);
-  const screen = render(<ReviewFlashcardsPlaceholder />);
+  const screen = render(<ReviewFlashcardsScreen />);
 
   await startReviewFromStage(screen, cards[0]?.stage ?? 1);
 
@@ -602,11 +614,24 @@ async function renderAndForceCorrectionSwitch(
   return screen;
 }
 
+function measureReviewLayout(screen: ReturnType<typeof render>, height: number, cardHeight = 250) {
+  const event = (measuredHeight: number) => ({
+    nativeEvent: { layout: { height: measuredHeight, width: 375, x: 0, y: 0 } },
+  });
+  fireEvent(screen.getByTestId("review-flashcards-content"), "layout", event(height));
+  fireEvent(screen.getByTestId("flashcards-card-section"), "layout", event(cardHeight));
+  fireEvent(screen.getByTestId("flashcards-boxes-content"), "layout", event(330));
+  const buttons = screen.queryByTestId("flashcards-top-buttons")
+    ?? screen.queryByTestId("review-flashcards-bottom-buttons");
+  if (buttons) fireEvent(buttons, "layout", event(50));
+}
+
 describe("reviewflashcards correction desync regression", () => {
   let applyStatBurstMock: jest.Mock;
   let getStatsSnapshotMock: jest.Mock;
 
   beforeEach(() => {
+    mockIsFocused = true;
     latestPeekProps = null;
     latestNudgeModalProps = null;
     latestBoxCarouselProps = null;
@@ -682,7 +707,7 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([sourceCard]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, sourceCard.stage);
 
@@ -709,7 +734,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -834,7 +859,7 @@ describe("reviewflashcards correction desync regression", () => {
     );
 
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce(cards);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxZero:30")).not.toBeNull();
@@ -873,7 +898,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxZero:1")).not.toBeNull();
@@ -885,26 +910,25 @@ describe("reviewflashcards correction desync regression", () => {
     });
   });
 
-  it("preserves the active answer input across keyboard-driven small-phone layout changes", async () => {
+  it("preserves the active answer input when measured space shrinks and recovers", async () => {
     mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({ id: 962, frontText: "cat", backText: "kot", answers: ["kot"], stage: 1 }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
     await startReviewFromStage(screen, 1);
     const input = getVisibleTextInputs(screen)[0];
     expect(input).toBeTruthy();
     fireEvent.changeText(input, "unfinished answer");
     expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
 
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
-    screen.rerender(<ReviewFlashcardsPlaceholder />);
-    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(true);
+    measureReviewLayout(screen, 340);
+    await waitFor(() => expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(true));
     expect(getVisibleTextInputs(screen)[0]).toBe(input);
     expect(input.props.value).toBe("unfinished answer");
 
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
-    screen.rerender(<ReviewFlashcardsPlaceholder />);
+    measureReviewLayout(screen, 800);
+    await waitFor(() => expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false));
     expect(getVisibleTextInputs(screen)[0]).toBe(input);
     expect(input.props.value).toBe("unfinished answer");
     expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
@@ -914,16 +938,23 @@ describe("reviewflashcards correction desync regression", () => {
     const keyboard = jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
     const listeners = jest.spyOn(Keyboard, "addListener");
     try {
-      mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+      mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
       mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: position });
       mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 960, frontText: "cat", backText: "kot", answers: ["kot"], stage: 1 })]);
-      const screen = render(<ReviewFlashcardsPlaceholder />);
+      const screen = render(<ReviewFlashcardsScreen />);
       await startReviewFromStage(screen, 1);
+      measureReviewLayout(screen, 340);
       await waitFor(() => expect(screen.getByTestId("card-inline-confirm")).toBeTruthy());
       expect(screen.queryByTestId("confirm-button")).toBeNull();
       expect(screen.queryByTestId("flashcards-top-buttons")).toBeNull();
       expect(StyleSheet.flatten(screen.getByTestId("review-flashcards-content").props.style).paddingBottom).toBeUndefined();
       expect(screen.getByTestId("review-flashcards-study-scroll").props.keyboardShouldPersistTaps).toBe("handled");
+      fireEvent(screen.getByTestId("review-flashcards-content"), "layout", {
+        nativeEvent: { layout: { height: 180, width: 375, x: 0, y: 0 } },
+      });
+      expect(latestBoxListProps?.horizontalScroll).toBe(true);
+      expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(true);
+      expect(screen.getByTestId("card-inline-confirm")).toBeTruthy();
       act(() => {
         listeners.mock.calls.filter(([name]) => name === "keyboardDidHide").forEach(([, listener]) => listener({ duration: 0, easing: "keyboard", endCoordinates: { screenY: 650, height: 0, width: 375, screenX: 0 } }));
       });
@@ -945,16 +976,93 @@ describe("reviewflashcards correction desync regression", () => {
     try {
       mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: small, isTabletLayout: tablet });
       mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 961, frontText: "cat", type, stage: 1 })]);
-      const screen = render(<ReviewFlashcardsPlaceholder />);
+      const screen = render(<ReviewFlashcardsScreen />);
       await startReviewFromStage(screen, 1);
+      measureReviewLayout(screen, small ? 300 : 800);
+      if (!tablet) await waitFor(() => expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith(
+        expect.objectContaining({ stableContentHeight: small ? 80 : 332 }),
+      ));
       expect(screen.queryByTestId("card-inline-confirm")).toBeNull();
     } finally {
       keyboard.mockRestore();
     }
   });
 
+  it.each(["top", "bottom"])("reduces spacing, uses one row and restores %s layout from measurements", async (position) => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), actionButtonsPosition: position });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({ id: 963, frontText: "cat", backText: "kot", answers: ["kot"], stage: 5 }),
+    ]);
+    const screen = render(<ReviewFlashcardsScreen />);
+    await startReviewFromStage(screen, 5);
+    measureReviewLayout(screen, 800);
+    await waitFor(() => expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith(
+      expect.objectContaining({ stableContentHeight: 332 }),
+    ));
+    expect(latestBoxListProps?.horizontalScroll).toBe(false);
+    expect(screen.getByTestId("card-hint-section")).toBeTruthy();
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
+
+    // A single row fits before removing the hint, even on a wide phone.
+    measureReviewLayout(screen, position === "top" ? 460 : 490);
+    await waitFor(() => expect(latestBoxListProps?.horizontalScroll).toBe(true));
+    expect(screen.getByTestId("card-hint-section")).toBeTruthy();
+    expect(StyleSheet.flatten(screen.getByTestId("flashcards-card-section").props.style).marginBottom).toBe(6);
+    if (position === "bottom") {
+      expect(screen.UNSAFE_getByType(FlashcardsBottomDock).props.bottomOffset).toBe(0);
+    }
+
+    measureReviewLayout(screen, 300);
+    await waitFor(() => expect(screen.queryByTestId("card-hint-section")).toBeNull());
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(true);
+    expect(screen.getByTestId("confirm-button")).toBeTruthy();
+
+    measureReviewLayout(screen, 800);
+    await waitFor(() => expect(latestBoxListProps?.horizontalScroll).toBe(false));
+    expect(screen.getByTestId("card-hint-section")).toBeTruthy();
+    expect(screen.getByTestId("review-flashcards-study-scroll").props.scrollEnabled).toBe(false);
+    expect(Boolean(screen.queryByTestId("flashcards-top-buttons"))).toBe(position === "top");
+    expect(Boolean(screen.queryByTestId("review-flashcards-bottom-buttons"))).toBe(position === "bottom");
+  });
+
+  it("defers navbar transition measurements and clears compact navbar on blur and unmount", async () => {
+    const transition = createNavbarLayoutTransition();
+    const setCompact = jest.fn();
+    const Wrapper = ({ children }: MockReact.PropsWithChildren) => (
+      <NavbarLayoutContext.Provider value={setCompact}>
+        <NavbarLayoutTransitionContext.Provider value={transition}>
+          {children}
+        </NavbarLayoutTransitionContext.Provider>
+      </NavbarLayoutContext.Provider>
+    );
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 964, frontText: "cat", stage: 1 })]);
+    const screen = render(<ReviewFlashcardsScreen />, { wrapper: Wrapper });
+    await startReviewFromStage(screen, 1);
+    measureReviewLayout(screen, 300);
+    await waitFor(() => expect(setCompact).toHaveBeenLastCalledWith(true));
+    act(() => transition.start());
+    measureReviewLayout(screen, 800);
+    expect(screen.queryByTestId("card-hint-section")).toBeNull();
+    act(() => transition.finish());
+    await waitFor(() => expect(screen.getByTestId("card-hint-section")).toBeTruthy());
+    measureReviewLayout(screen, 300);
+    await waitFor(() => expect(setCompact).toHaveBeenLastCalledWith(true));
+    expect(screen.UNSAFE_getByType(Card).props.isFocused).toBe(true);
+    mockIsFocused = false;
+    screen.rerender(<ReviewFlashcardsScreen />);
+    expect(screen.UNSAFE_getByType(Card).props.isFocused).toBe(false);
+    expect(setCompact).toHaveBeenLastCalledWith(false);
+    mockIsFocused = true;
+    screen.rerender(<ReviewFlashcardsScreen />);
+    expect(screen.UNSAFE_getByType(Card).props.isFocused).toBe(true);
+    expect(setCompact).toHaveBeenLastCalledWith(true);
+    screen.unmount();
+    expect(setCompact).toHaveBeenLastCalledWith(false);
+  });
+
   it("keeps classic boxes responsive on small-phone layouts", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
         id: 605,
@@ -965,7 +1073,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -976,7 +1084,7 @@ describe("reviewflashcards correction desync regression", () => {
   });
 
   it("shows the hint section on normal-phone review layouts", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false });
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: false, isTabletLayout: false });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
         id: 606,
@@ -987,7 +1095,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestCardHintProps).not.toBeNull();
@@ -995,8 +1103,8 @@ describe("reviewflashcards correction desync regression", () => {
     expect(latestCardHintProps?.onHintUpdate).toBeUndefined();
   });
 
-  it("hides the hint section on small-phone review layouts", async () => {
-    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true });
+  it("hides the hint section when measured review space is insufficient", async () => {
+    mockedUseDeviceLayout.mockReturnValue({ isSmallPhoneLayout: true, isTabletLayout: false });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
       makeReviewCard({
         id: 607,
@@ -1007,12 +1115,15 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
     });
-    expect(latestCardHintProps).toBeNull();
+    await startReviewFromStage(screen, 1);
+    measureReviewLayout(screen, 300);
+    await waitFor(() => expect(screen.UNSAFE_getByType(FlashcardsStudyLayout).props.layout.studyLayout.isCompactStudyLayout).toBe(true));
+    expect(screen.queryByTestId("card-hint-section")).toBeNull();
   });
 
   it("keeps review content unconstrained on phone layouts", async () => {
@@ -1030,7 +1141,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1046,7 +1157,7 @@ describe("reviewflashcards correction desync regression", () => {
     expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toBeUndefined();
     expect(latestBoxListProps?.maxColumns).toBeUndefined();
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.72 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith(expect.objectContaining({ minScale: 0.648 }));
   });
 
   it("centers review content and compacts boxes on tablet top-button layouts", async () => {
@@ -1064,7 +1175,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1087,7 +1198,7 @@ describe("reviewflashcards correction desync regression", () => {
     expect(latestButtonsProps?.align).toBe("center");
     expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
     expect(latestBoxListProps?.maxColumns).toBe(3);
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.72 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith(expect.objectContaining({ minScale: 0.72 }));
   });
 
   it("keeps bottom-button review tablet boxes flexible and reserves dock space", async () => {
@@ -1117,7 +1228,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1142,7 +1253,7 @@ describe("reviewflashcards correction desync regression", () => {
     expect(latestButtonsProps?.contentWidth).toEqual(expect.any(Number));
     expect(latestButtonsProps?.align).toBe("right");
     expect(latestBoxListProps?.layoutWidth).toEqual(expect.any(Number));
-    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith({ minScale: 0.54 });
+    expect(mockedUseAutoScaleToFit).toHaveBeenCalledWith(expect.objectContaining({ minScale: 0.54 }));
     expect(contentStyle.paddingBottom).toBeGreaterThanOrEqual(50);
   });
 
@@ -1173,7 +1284,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1210,7 +1321,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1230,7 +1341,7 @@ describe("reviewflashcards correction desync regression", () => {
         stage: 1,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
@@ -1269,7 +1380,7 @@ describe("reviewflashcards correction desync regression", () => {
         nextReview: Date.now() + 60_000,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
@@ -1299,7 +1410,7 @@ describe("reviewflashcards correction desync regression", () => {
         nextReview: Date.now() + 60_000,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1338,7 +1449,7 @@ describe("reviewflashcards correction desync regression", () => {
         nextReview: Date.now() + 120_000,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1370,7 +1481,7 @@ describe("reviewflashcards correction desync regression", () => {
     mockedReturnFlashcardToUnknown.mockRejectedValueOnce(
       new Error("reset failed")
     );
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1407,7 +1518,7 @@ describe("reviewflashcards correction desync regression", () => {
           resolveUpcoming = resolve;
         }),
     );
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
@@ -1460,7 +1571,7 @@ describe("reviewflashcards correction desync regression", () => {
           resolveUpcoming = resolve;
         }),
     );
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
@@ -1489,7 +1600,7 @@ describe("reviewflashcards correction desync regression", () => {
 
   it("keeps a normally opened empty box visible", async () => {
     mockedGetUpcomingCustomReviewFlashcards.mockResolvedValueOnce([]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:0")).toBeTruthy();
@@ -1517,7 +1628,7 @@ describe("reviewflashcards correction desync regression", () => {
           rejectUpcoming = reject;
         }),
     );
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText("boxOne:1")).toBeTruthy();
@@ -1557,7 +1668,7 @@ describe("reviewflashcards correction desync regression", () => {
         nextReview: Date.now() + 120_000,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestBoxListProps).not.toBeNull();
@@ -1572,7 +1683,7 @@ describe("reviewflashcards correction desync regression", () => {
   });
 
   it("uses uniform card layout in review peek", async () => {
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(latestPeekProps?.cardLayout).toBe("uniform");
@@ -1596,7 +1707,7 @@ describe("reviewflashcards correction desync regression", () => {
         stage: 1,
       }),
     ]);
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
     await act(async () => {
@@ -1647,7 +1758,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
@@ -1661,7 +1772,7 @@ describe("reviewflashcards correction desync regression", () => {
   it("does not start the review onboarding without the handoff param or when there are no due cards", async () => {
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
@@ -1702,7 +1813,7 @@ describe("reviewflashcards correction desync regression", () => {
     });
     mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([]);
 
-    render(<ReviewFlashcardsPlaceholder />);
+    render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(mockedUseCoachmarkFlow).toHaveBeenCalled();
@@ -1723,7 +1834,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByTestId("review-flashcards-bubble-anchor")).toBeTruthy();
@@ -1747,7 +1858,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 2);
 
@@ -1775,7 +1886,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull();
@@ -1795,7 +1906,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await waitFor(() => {
       expect(screen.getByTestId("download-button")).not.toBeNull();
@@ -1820,7 +1931,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -1861,7 +1972,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -1899,7 +2010,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -1940,7 +2051,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -1989,7 +2100,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2033,7 +2144,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2085,7 +2196,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2126,7 +2237,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2157,7 +2268,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2189,7 +2300,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2226,7 +2337,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -2259,7 +2370,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -2310,7 +2421,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 4);
 
@@ -2343,7 +2454,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 5);
 
@@ -2379,7 +2490,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 1);
 
@@ -2439,7 +2550,7 @@ describe("reviewflashcards correction desync regression", () => {
       }),
     ]);
 
-    const screen = render(<ReviewFlashcardsPlaceholder />);
+    const screen = render(<ReviewFlashcardsScreen />);
 
     await startReviewFromStage(screen, 2);
 

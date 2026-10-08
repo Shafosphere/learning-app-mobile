@@ -1,5 +1,5 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { useFlashcardActionBarState } from "../useFlashcardsActions";
+import { useFlashcardActionBarState } from "../useFlashcardActionBarState";
 import type { WordWithTranslations } from "@/src/types/boxes";
 
 const makeCard = (id: number): WordWithTranslations =>

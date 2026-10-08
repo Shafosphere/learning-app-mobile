@@ -9,7 +9,7 @@ import {
   BOTTOM_BUTTONS_MIN_HEIGHT,
   COMPACT_BOTTOM_BUTTONS_DOCK_BOTTOM_OFFSET,
   ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
-} from "../model/FlashcardsScreen.constants";
+} from "../study.constants";
 
 type KeyboardDebugCorrectionState = {
   cardId?: number;
@@ -64,10 +64,26 @@ export function useFlashcardsBottomDockLayout({
   const [bottomButtonsBottomInWindow, setBottomButtonsBottomInWindow] =
     useState<number | null>(null);
 
+  const measurementFrameRef = useRef<number | null>(null);
+  const isMountedRef = useRef(true);
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      if (measurementFrameRef.current != null) {
+        cancelAnimationFrame(measurementFrameRef.current);
+      }
+    };
+  }, []);
+
   const measureBottomButtons = useCallback(() => {
-    requestAnimationFrame(() => {
+    if (measurementFrameRef.current != null) {
+      cancelAnimationFrame(measurementFrameRef.current);
+    }
+    measurementFrameRef.current = requestAnimationFrame(() => {
+      measurementFrameRef.current = null;
       bottomButtonsAnchorRef.current?.measureInWindow((_x, y, _w, h) => {
-        if (h <= 0) return;
+        if (!isMountedRef.current || h <= 0) return;
         const nextBottom = y + h;
         setBottomButtonsBottomInWindow((prev) => {
           if (prev !== null && Math.abs(prev - nextBottom) < 1) return prev;

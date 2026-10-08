@@ -6,7 +6,7 @@ import type { WordWithTranslations } from "@/src/types/boxes";
 import {
   ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
   TRUE_FALSE_POST_OK_COOLDOWN_MS,
-} from "../model/FlashcardsScreen.constants";
+} from "../study.constants";
 
 type LastTrueFalseTap = {
   cardId: number | null;
@@ -405,4 +405,3 @@ export function useFlashcardActionBarState({
   };
 }
 
-export const useFlashcardsActions = useFlashcardActionBarState;

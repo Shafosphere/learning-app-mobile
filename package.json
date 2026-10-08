@@ -1,7 +1,7 @@
 {
   "name": "memicard",
   "main": "index.js",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "scripts": {
     "start": "expo start",
     "postinstall": "patch-package",

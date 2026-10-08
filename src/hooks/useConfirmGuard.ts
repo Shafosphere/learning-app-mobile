@@ -1,5 +1,7 @@
 import { useCallback, useEffect, useRef } from "react";
-import { ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
+import {
+  ENABLE_FLASHCARDS_SCREEN_CONSOLE_LOGS,
+} from "@/src/features/flashcards/study/study.constants";
 
 export const CONFIRM_GUARD_MS = 2000;
 

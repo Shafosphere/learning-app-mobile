@@ -1,45 +1,38 @@
-import { KeyboardStudyScroll } from "@/src/components/flashcards/KeyboardStudyScroll";
+import { useFlashcardsScrollDiagnostics } from "./hooks/useFlashcardsScrollDiagnostics";
+import { useFlashcardsLayoutDiagnostics } from "./hooks/useFlashcardsLayoutDiagnostics";
+import { useFlashcardsCompletionCelebration } from "./hooks/useFlashcardsCompletionCelebration";
+import { useFlashcardsCompletionPanel } from "./hooks/useFlashcardsCompletionPanel";
+import { useFlashcardsCompletionPreview } from "./hooks/useFlashcardsCompletionPreview";
+import { useFlashcardsSelectionValidity } from "./hooks/useFlashcardsSelectionValidity";
+import { useFlashcardsRelearningCleanup } from "./hooks/useFlashcardsRelearningCleanup";
+import { useFlashcardsCardSynchronization } from "./hooks/useFlashcardsCardSynchronization";
+import { useFlashcardsCompletionRun } from "./hooks/useFlashcardsCompletionRun";
 import FlashcardsPeekOverlay from "@/src/components/Box/Peek/FlashcardsPeek";
 import { getResponsiveFlashcardMetrics } from "@/src/components/card/responsiveCardWidth";
 import Confetti from "@/src/components/confetti/Confetti";
-import { FlashcardsButtons } from "@/src/components/flashcards/FlashcardsButtons";
+import { FlashcardsStudyButtons } from "@/src/features/flashcards/study/components/FlashcardsStudyButtons";
+import { KeyboardBridgeInput } from "@/src/features/flashcards/study/components/KeyboardBridgeInput";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { PreviewOptionSelector } from "@/src/components/selection/PreviewOptionSelector";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
-import { resolveCourseIconProps } from "@/src/constants/customCourse";
-import { getFlagSource } from "@/src/constants/languageFlags";
-import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
-import { useNavbarCompactLayoutSetter, useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
-import {
-  type StatBurst,
-  useNavbarStats,
-} from "@/src/contexts/NavbarStatsContext";
+import { useFlashcardsStatsBurst } from "@/src/features/flashcards/study/hooks/useFlashcardsStatsBurst";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { scheduleCustomReview } from "@/src/db/sqlite/db";
-import { ensureCourseCompletionRunStarted } from "@/src/features/flashcards/courseCompletionRun";
 import { useFlashcardImagePreload } from "@/src/features/flashcards/useFlashcardImagePreload";
 import { useAutoResetFlag } from "@/src/hooks/useAutoResetFlag";
-import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
-import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { useBoxFacesController } from "@/src/hooks/useBoxFacesController";
-import {
-  SMALL_PHONE_MAX_SHORT_SIDE,
-  TABLET_LAYOUT_MIN_SHORT_SIDE,
-  useDeviceLayout,
-} from "@/src/hooks/useDeviceLayout";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import {
   type CorrectAnswerMeta,
   useFlashcardsInteraction,
 } from "@/src/hooks/useFlashcardsInteraction";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
-import { FlashcardsBoxesSection } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsBoxesSection";
 import { FlashcardsCardSection } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsCardSection";
-import { FlashcardsStudyContent } from "@/src/screens/flashcards/FlashcardsScreen/components/FlashcardsStudyContent";
 import { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
 import { useActionsPositionNudge } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useActionsPositionNudge";
 import { useFlashcardsCourseData } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsCourseData";
@@ -49,30 +42,17 @@ import {
   BOX_SPAM_COOLDOWN_MS,
   BOX_SPAM_THRESHOLD,
   BOX_SPAM_WINDOW_MS,
-  CAROUSEL_BOXES_MIN_SCALE,
-  CLASSIC_PHONE_BOXES_MIN_SCALE,
-  EMPTY_BOXES_STATE,
-  SCREEN_LAYOUT_TRANSITION,
   UI_WARMUP_DELAY_MS,
 } from "@/src/screens/flashcards/FlashcardsScreen/model/FlashcardsScreen.constants";
-import { useFlashcardsActions } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsActions";
-import { useFlashcardsBottomDockLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsBottomDockLayout";
-import { useFlashcardsStudyLayout } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsStudyLayout";
+import { FlashcardsStudyLayout } from "@/src/features/flashcards/study/components/FlashcardsStudyLayout";
+import { useFlashcardsStudyCoordinator } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyCoordinator";
+import { useFlashcardActionBarState } from "@/src/features/flashcards/study/hooks/useFlashcardActionBarState";
+import { useFlashcardsStudyLayout } from "@/src/features/flashcards/study/hooks/useFlashcardsStudyLayout";
 import { useFlashcardsTutorials } from "@/src/screens/flashcards/FlashcardsScreen/hooks/useFlashcardsTutorials";
-import { formatLearningTime } from "@/src/screens/flashcards/FlashcardsScreen/utils/FlashcardsScreen.utils";
-import {
-  consumeCourseFinishedPreview,
-  subscribeCourseFinishedPreview,
-} from "@/src/services/courseFinishedPreview";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
-import {
-  returnFlashcardToUnknown,
-  subscribeFlashcardReturnedToUnknown,
-} from "@/src/services/returnFlashcardToUnknown";
-import { subscribeFlashcardUpdated } from "@/src/services/flashcardUpdated";
-import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
-import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
+import { BoxesState } from "@/src/types/boxes";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import { useIsFocused } from "@react-navigation/native";
@@ -82,14 +62,12 @@ import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
   Animated,
-  Dimensions,
   Keyboard,
   TextInput,
   useWindowDimensions,
   View,
 } from "react-native";
 
-// import MediumBoxes from "@/src/components/box/mediumboxes";
 export default function Flashcards() {
   const router = useRouter();
   const isFocused = useIsFocused();
@@ -138,18 +116,13 @@ export default function Flashcards() {
     areButtonsOnTop: actionButtonsPosition === "top",
     isFocused,
   });
-  const { isCompactStudyLayout, setActionsHidden } = studyLayout;
-  const layoutTransition = useNavbarLayoutTransition();
+  const { isCompactStudyLayout } = studyLayout;
 
-  const lastLayoutDiagnosticsRef = useRef<string | null>(null);
   const { registerKnownWord } = useLearningStats();
-  const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
+  const emitStatsBurst = useFlashcardsStatsBurst(
+    "[Flashcards] Failed to refresh streak after answer",
+  );
   const { triggerQuote } = useQuote();
-  const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
-  useEffect(() => {
-    setNavbarCompactLayout(isFocused && isCompactStudyLayout);
-    return () => setNavbarCompactLayout(false);
-  }, [isFocused, isCompactStudyLayout, setNavbarCompactLayout]);
   const [shouldCelebrate, setShouldCelebrate] = useState(false);
   const resetCelebrate = useCallback(() => setShouldCelebrate(false), []);
   useAutoResetFlag(shouldCelebrate, resetCelebrate);
@@ -191,64 +164,21 @@ export default function Flashcards() {
         });
       }
 
-      const baseBurst: StatBurst = {
-        masteredDelta: meta.wasNewMastered ? 1 : 0,
-        streakDelta: 0,
-        promotionsDelta:
-          boxKey === "boxOne" ||
-          boxKey === "boxTwo" ||
-          boxKey === "boxThree" ||
-          boxKey === "boxFour"
-            ? 1
-            : 0,
-      };
-
-      const hasBaseDelta =
-        baseBurst.masteredDelta > 0 || baseBurst.promotionsDelta > 0;
-
-      void (async () => {
-        await meta.logLearningEventPromise;
-
-        let streakDelta: 0 | 1 = 0;
-        let streakDaysOverride: number | undefined;
-        let shieldCountOverride: 0 | 1 | 2 | undefined;
-        try {
-          const nextStreak = await registerProtectedDailyActivity();
-          const currentStats = getStatsSnapshot();
-          if (nextStreak.streakDays !== currentStats.streakDays) {
-            if (nextStreak.streakDays > currentStats.streakDays) {
-              streakDelta = 1;
-            }
-            streakDaysOverride = nextStreak.streakDays;
-          }
-          if (nextStreak.shieldCount !== currentStats.shieldCount) {
-            shieldCountOverride = nextStreak.shieldCount;
-          }
-        } catch (error) {
-          console.warn(
-            "[Flashcards] Failed to refresh streak after answer",
-            error,
-          );
-        }
-
-        if (
-          !hasBaseDelta &&
-          streakDelta === 0 &&
-          streakDaysOverride == null &&
-          shieldCountOverride == null
-        ) {
-          return;
-        }
-
-        applyStatBurst({
-          ...baseBurst,
-          streakDelta,
-          ...(streakDaysOverride == null ? {} : { streakDaysOverride }),
-          ...(shieldCountOverride == null ? {} : { shieldCountOverride }),
-        });
-      })();
+      void emitStatsBurst({
+        logLearningEventPromise: meta.logLearningEventPromise,
+        deltas: {
+          masteredDelta: meta.wasNewMastered ? 1 : 0,
+          promotionsDelta:
+            boxKey === "boxOne" ||
+            boxKey === "boxTwo" ||
+            boxKey === "boxThree" ||
+            boxKey === "boxFour"
+              ? 1
+              : 0,
+        },
+      });
     },
-    [applyStatBurst, getStatsSnapshot, triggerQuote],
+    [emitStatsBurst, triggerQuote],
   );
 
   const {
@@ -295,11 +225,8 @@ export default function Flashcards() {
   });
   const [showLoadingOverlay, setShowLoadingOverlay] = useState(false);
   const [hintEditRequestToken, setHintEditRequestToken] = useState(0);
-  const [isCourseFinishedPreviewVisible, setIsCourseFinishedPreviewVisible] =
-    useState(false);
   const uiWarmupTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const loadingOverlayOpacity = useRef(new Animated.Value(1)).current;
-  const courseCompletionRunStartedAtRef = useRef<number | null>(null);
   const lastActionCooldownCardIdRef = useRef<number | null>(null);
   const previousKeyboardVisibleRef = useRef<boolean | null>(null);
   const actionsPositionNudgeAnsweredRef = useRef<(() => void) | null>(null);
@@ -335,45 +262,13 @@ export default function Flashcards() {
       customCards.every((card) => card.type === "know_dont_know"),
     [customCards],
   );
-  const applyCompletionSummaryAnswer = useCallback(
-    (answerResult: "ok" | "wrong", durationMs: number) => {
-      setCourseCompletionSummary((prev) => ({
-        totalAnswers: prev.totalAnswers + 1,
-        correctCount: prev.correctCount + (answerResult === "ok" ? 1 : 0),
-        wrongCount: prev.wrongCount + (answerResult === "wrong" ? 1 : 0),
-        timeMs: prev.timeMs + Math.max(0, durationMs),
-      }));
-    },
-    [setCourseCompletionSummary],
-  );
-  useEffect(() => {
-    courseCompletionRunStartedAtRef.current = courseCompletionRunStartedAt;
-  }, [courseCompletionRunStartedAt]);
+  const { applyCompletionSummaryAnswer, ensureCompletionRunStarted } = useFlashcardsCompletionRun({
+    activeCustomCourseId,
+    courseCompletionRunStartedAt,
+    setCourseCompletionRunStartedAt,
+    setCourseCompletionSummary,
+  });
 
-  const ensureCompletionRunStarted = useCallback(
-    (fallbackNowMs?: number) => {
-      if (activeCustomCourseId == null) {
-        return;
-      }
-      if (courseCompletionRunStartedAtRef.current != null) {
-        return;
-      }
-
-      const startedAt = Math.max(0, fallbackNowMs ?? Date.now());
-      courseCompletionRunStartedAtRef.current = startedAt;
-      setCourseCompletionRunStartedAt(startedAt);
-      void ensureCourseCompletionRunStarted(
-        activeCustomCourseId,
-        startedAt,
-      ).catch((error) => {
-        console.warn(
-          "[Flashcards] Failed to persist completion run start",
-          error,
-        );
-      });
-    },
-    [activeCustomCourseId, setCourseCompletionRunStartedAt],
-  );
   const skipCorrection = courseHasOnlyTrueFalse || skipCorrectionEnabled;
   const checkSpelling = useSpellchecking();
   const {
@@ -473,13 +368,11 @@ export default function Flashcards() {
     boxZeroEnabled,
     flashcardsBatchSize,
   });
-  useEffect(() => {
-    if (relearningWordIds.length === 0 || learned.length === 0) return;
-    const learnedIds = new Set(learned.map((word) => word.id));
-    relearningWordIds
-      .filter((id) => learnedIds.has(id))
-      .forEach((id) => clearWordForRelearning(id));
-  }, [clearWordForRelearning, learned, relearningWordIds]);
+  useFlashcardsRelearningCleanup({
+    relearningWordIds,
+    learned,
+    clearWordForRelearning,
+  });
 
   useFlashcardImagePreload({
     isFocused,
@@ -518,82 +411,7 @@ export default function Flashcards() {
     isCompactStudyLayout || activeBox === "boxFour" || activeBox === "boxFive";
   const shouldReserveHintSpaceWhenHidden =
     !isCompactStudyLayout && (activeBox === "boxFour" || activeBox === "boxFive");
-  useEffect(() => {
-    if (!isFocused) {
-      lastLayoutDiagnosticsRef.current = null;
-      return;
-    }
-
-    const screen = Dimensions.get("screen");
-    const payload = {
-      courseId: activeCustomCourseId,
-      cardId: selectedItemId,
-      windowDp: { width: windowWidth, height: windowHeight },
-      screenDp: { width: screen.width, height: screen.height },
-      screenPixels: {
-        width: Math.round(screen.width * screen.scale),
-        height: Math.round(screen.height * screen.scale),
-      },
-      pixelRatio: windowScale,
-      fontScale,
-      shortestSide,
-      orientation,
-      widthClass,
-      heightClass,
-      thresholdsDp: {
-        smallPhoneMaxShortSide: SMALL_PHONE_MAX_SHORT_SIDE,
-        tabletMinShortSide: TABLET_LAYOUT_MIN_SHORT_SIDE,
-      },
-      selectedLayout: isTabletLayout
-        ? "tablet"
-        : isCompactStudyLayout
-          ? "compact"
-          : "normal",
-      deviceIsSmallPhoneLayout,
-      isCompactStudyLayout,
-      studySpace: {
-        measured: studyLayout.hasMeasurements,
-        availableHeight: studyLayout.availableStudyHeight,
-        visibleHeight: studyLayout.visibleStudyHeight,
-        minimumFullHeight: studyLayout.minimumFullStudyHeight,
-        fullCardHeight: studyLayout.fullCardSectionHeight,
-        visibleCardHeight: studyLayout.visibleCardHeight,
-        minimumFullBoxesHeight: studyLayout.minimumFullBoxesHeight,
-        classicBoxesNaturalHeight: studyLayout.classicBoxesNaturalHeight,
-        boxesPresentation: boxesLayout !== "classic"
-          ? "carousel"
-          : studyLayout.horizontalRowHeight != null ? "single_row" : "grid",
-        horizontalRowHeight: studyLayout.horizontalRowHeight ?? null,
-        studyScroll: studyLayout.needsStudyScroll,
-        minimumGridHeight: studyLayout.minimumGridStudyHeight,
-        minimumTightGridHeight: studyLayout.tightGridStudyHeight,
-        minimumGridBoxesHeight: studyLayout.minimumGridBoxesHeight,
-        keyboardVisible: studyLayout.keyboardVisible,
-      },
-      isTabletLayout,
-      activeBox,
-      hideHints: shouldHideHintsForActiveBox,
-      hintHiddenReasons: [
-        ...(isCompactStudyLayout ? ["insufficient_study_height"] : []),
-        ...(activeBox === "boxFour" || activeBox === "boxFive"
-          ? ["late_box"]
-          : []),
-      ],
-      reserveHintSpaceWhenHidden: shouldReserveHintSpaceWhenHidden,
-      boxesLayout,
-      actionButtonsPosition,
-    };
-
-    // Layout arrives in several passes (data, images, native measurements).
-    // Emit the settled snapshot rather than logging every intermediate state.
-    const timer = setTimeout(() => {
-      const serialized = JSON.stringify(payload);
-      if (lastLayoutDiagnosticsRef.current === serialized) return;
-      lastLayoutDiagnosticsRef.current = serialized;
-      void appendDebugEvent("flashcards", "screen.layout.diagnostics", payload);
-    }, 300);
-    return () => clearTimeout(timer);
-  }, [
+  useFlashcardsLayoutDiagnostics({
     isFocused,
     activeCustomCourseId,
     selectedItemId,
@@ -607,27 +425,15 @@ export default function Flashcards() {
     heightClass,
     deviceIsSmallPhoneLayout,
     isCompactStudyLayout,
-    studyLayout.hasMeasurements,
-    studyLayout.availableStudyHeight,
-    studyLayout.visibleStudyHeight,
-    studyLayout.minimumFullStudyHeight,
-    studyLayout.fullCardSectionHeight,
-    studyLayout.visibleCardHeight,
-    studyLayout.minimumFullBoxesHeight,
-    studyLayout.classicBoxesNaturalHeight,
-    studyLayout.horizontalRowHeight,
-    studyLayout.minimumGridStudyHeight,
-    studyLayout.tightGridStudyHeight,
-    studyLayout.minimumGridBoxesHeight,
-    studyLayout.needsStudyScroll,
-    studyLayout.keyboardVisible,
+    studyLayout,
     isTabletLayout,
     activeBox,
     shouldHideHintsForActiveBox,
     shouldReserveHintSpaceWhenHidden,
     boxesLayout,
     actionButtonsPosition,
-  ]);
+  });
+
   const lastTrueFalseTapRef = useRef<{
     cardId: number | null;
     ts: number;
@@ -729,63 +535,21 @@ export default function Flashcards() {
     [activeCustomCourseId],
   );
 
-  useEffect(() => {
-    return subscribeFlashcardReturnedToUnknown(({ courseId, flashcardId }) => {
-      if (activeCustomCourseId !== courseId) return;
-
-      setBoxes((prev) => ({
-        boxZero: prev.boxZero.filter((card) => card.id !== flashcardId),
-        boxOne: prev.boxOne.filter((card) => card.id !== flashcardId),
-        boxTwo: prev.boxTwo.filter((card) => card.id !== flashcardId),
-        boxThree: prev.boxThree.filter((card) => card.id !== flashcardId),
-        boxFour: prev.boxFour.filter((card) => card.id !== flashcardId),
-        boxFive: prev.boxFive.filter((card) => card.id !== flashcardId),
-      }));
-      setLearned((prev) => prev.filter((card) => card.id !== flashcardId));
-      removeUsedWordIds(flashcardId);
-      markWordForRelearning(flashcardId);
-      setReviewedCardIds((prev) => prev.filter((id) => id !== flashcardId));
-
-      if (selectedItemIdRef.current === flashcardId) {
-        resetInteractionState();
-      }
-    });
-  }, [
+  const { handleHintUpdate } = useFlashcardsCardSynchronization({
     activeCustomCourseId,
-    markWordForRelearning,
+    selectedItemIdRef,
+    setBoxes,
+    setLearned,
     removeUsedWordIds,
-    resetInteractionState,
-    setBoxes,
-    setLearned,
+    markWordForRelearning,
     setReviewedCardIds,
-  ]);
-
-  useEffect(() => {
-    return subscribeFlashcardUpdated(({ courseId, card }) => {
-      if (activeCustomCourseId !== courseId) return;
-      const patcher = (item: WordWithTranslations) =>
-        item.id === card.id ? card : item;
-      patchCustomCard(card);
-      setBoxes((prev) => ({
-        boxZero: prev.boxZero.map(patcher),
-        boxOne: prev.boxOne.map(patcher),
-        boxTwo: prev.boxTwo.map(patcher),
-        boxThree: prev.boxThree.map(patcher),
-        boxFour: prev.boxFour.map(patcher),
-        boxFive: prev.boxFive.map(patcher),
-      }));
-      setLearned((prev) => prev.map(patcher));
-      updateSelectedItem((current) => (current ? patcher(current) : current));
-      clearCardTransientState();
-    });
-  }, [
-    activeCustomCourseId,
+    resetInteractionState,
     patchCustomCard,
-    clearCardTransientState,
-    setBoxes,
-    setLearned,
     updateSelectedItem,
-  ]);
+    clearCardTransientState,
+    patchCustomCardHints,
+    handlePersistHintUpdate,
+  });
 
   useEffect(() => {
     if (!peekBox) return;
@@ -836,51 +600,11 @@ export default function Flashcards() {
     setBoxes,
   ]);
 
-  useEffect(() => {
-    if (
-      selectedItem &&
-      !customCards.some((card) => card.id === selectedItem.id)
-    ) {
-      clearSelection();
-    }
-  }, [clearSelection, customCards, selectedItem]);
-
-  const patchCardEverywhere = useCallback(
-    (cardId: number, hintFront: string | null, hintBack: string | null) => {
-      const patcher = (item: WordWithTranslations) =>
-        item.id === cardId ? { ...item, hintFront, hintBack } : item;
-
-      patchCustomCardHints(cardId, hintFront, hintBack);
-      setBoxes((prev) => ({
-        boxZero: prev.boxZero.map(patcher),
-        boxOne: prev.boxOne.map(patcher),
-        boxTwo: prev.boxTwo.map(patcher),
-        boxThree: prev.boxThree.map(patcher),
-        boxFour: prev.boxFour.map(patcher),
-        boxFive: prev.boxFive.map(patcher),
-      }));
-      setLearned((prev) => prev.map(patcher));
-      updateSelectedItem((current) => (current ? patcher(current) : current));
-    },
-    [patchCustomCardHints, setBoxes, setLearned, updateSelectedItem],
-  );
-
-  const handleHintUpdate = useCallback(
-    async (
-      cardId: number,
-      hintFront: string | null,
-      hintBack: string | null,
-    ) => {
-      if (activeCustomCourseId == null) return;
-      patchCardEverywhere(cardId, hintFront, hintBack);
-      try {
-        await handlePersistHintUpdate(cardId, hintFront, hintBack);
-      } catch (error) {
-        console.error("Failed to update flashcard hint", { cardId, error });
-      }
-    },
-    [activeCustomCourseId, handlePersistHintUpdate, patchCardEverywhere],
-  );
+  useFlashcardsSelectionValidity({
+    selectedItem,
+    customCards,
+    clearSelection,
+  });
 
   useEffect(() => {
     if (uiWarmupTimerRef.current) {
@@ -957,99 +681,38 @@ export default function Flashcards() {
     loadedCourseId === activeCustomCourseId &&
     isReviewedIdsSeedResolved &&
     customCards.length > 0;
-  const baseShouldShowBoxes = isCourseDisplayReady;
-  const isCourseFinishedActuallyVisible =
-    baseShouldShowBoxes &&
-    ((remainingNewFlashcardsCount === 0 &&
-      totalCardsInBoxes === 0 &&
-      selectedItem == null) ||
-      (!hasCardsReturnedToUnknown &&
-        courseMasteryProgress.cardsCount > 0 &&
-        courseMasteryProgress.completedCardsCount >=
-          courseMasteryProgress.cardsCount));
-  const isCourseFinishedPreviewEligible = __DEV__ && baseShouldShowBoxes;
-  const isCourseFinishedVisible =
-    isCourseFinishedActuallyVisible ||
-    (isCourseFinishedPreviewVisible && isCourseFinishedPreviewEligible);
-  const shouldShowBoxes = baseShouldShowBoxes && !isCourseFinishedVisible;
-
-  const tryOpenCourseFinishedPreview = useCallback(() => {
-    if (!isFocused) return;
-    if (!isCourseFinishedPreviewEligible) return;
-    if (!consumeCourseFinishedPreview()) return;
-
-    resetInteractionState();
-    clearSelection();
-    setBoxes(EMPTY_BOXES_STATE);
-    addUsedWordIds(customCards.map((card) => card.id));
-    setIsCourseFinishedPreviewVisible(true);
-  }, [
-    addUsedWordIds,
-    clearSelection,
-    customCards,
-    isCourseFinishedPreviewEligible,
+  const isCourseFinishedPreviewEligible = __DEV__ && isCourseDisplayReady;
+  const isCourseFinishedPreviewVisible = useFlashcardsCompletionPreview({
     isFocused,
+    isCourseFinishedPreviewEligible,
     resetInteractionState,
+    clearSelection,
     setBoxes,
-  ]);
+    addUsedWordIds,
+    customCards,
+  });
 
-  useEffect(() => {
-    const unsubscribe = subscribeCourseFinishedPreview(() => {
-      tryOpenCourseFinishedPreview();
-    });
-
-    return unsubscribe;
-  }, [tryOpenCourseFinishedPreview]);
-
-  useEffect(() => {
-    tryOpenCourseFinishedPreview();
-  }, [tryOpenCourseFinishedPreview]);
-
-  useEffect(() => {
-    if (!isCourseFinishedPreviewVisible) {
-      return;
-    }
-    if (!isFocused || !isCourseFinishedPreviewEligible) {
-      setIsCourseFinishedPreviewVisible(false);
-    }
-  }, [
-    isCourseFinishedPreviewEligible,
+  const {
+    isCourseFinishedVisible,
+    shouldShowBoxes,
+    courseFinishedAccuracyLabel,
+    courseFinishedTimeLabel,
+    courseFinishedFlagSource,
+    courseFinishedIconProps,
+  } = useFlashcardsCompletionPanel({
+    isCourseDisplayReady,
+    remainingNewFlashcardsCount,
+    totalCardsInBoxes,
+    selectedItem,
+    hasCardsReturnedToUnknown,
+    courseMasteryProgress,
     isCourseFinishedPreviewVisible,
-    isFocused,
-  ]);
+    isCourseFinishedPreviewEligible,
+    courseCompletionSummary,
+    customCourse,
+    headlineColor: colors.headline,
+  });
 
-  const courseFinishedAccuracyLabel =
-    courseCompletionSummary.totalAnswers > 0
-      ? `${Math.round(
-          (courseCompletionSummary.correctCount /
-            courseCompletionSummary.totalAnswers) *
-            100,
-        )}%`
-      : "0%";
-  const courseFinishedTimeLabel = formatLearningTime(
-    courseCompletionSummary.timeMs,
-  );
-  const courseFinishedFlagSource = useMemo(() => {
-    if (!customCourse?.slug) {
-      return undefined;
-    }
-
-    const manifest = OFFICIAL_PACKS.find(
-      (pack) => pack.slug === customCourse.slug,
-    );
-    const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
-    return flagLang ? getFlagSource(flagLang) : undefined;
-  }, [customCourse?.slug]);
-  const courseFinishedIconProps = useMemo(() => {
-    if (!customCourse) {
-      return null;
-    }
-
-    return resolveCourseIconProps(
-      customCourse.iconId,
-      customCourse.iconColor ?? colors.headline,
-    );
-  }, [customCourse, colors.headline]);
   const shouldRunFlashcardsCoachmark = !boxZeroEnabled;
   const {
     coachmark,
@@ -1202,22 +865,7 @@ export default function Flashcards() {
     showExplanationEnabled,
     explanationOnlyOnWrong,
   });
-  const {
-    selectedTrueFalseAnswer,
-    emptyAnswerSubmitWarning,
-    handleTrueFalseAnswer,
-    handleTrueFalseOk,
-    trueFalseActionsMode,
-    trueFalseActionsDisabled,
-    shouldShowTrueFalseActions,
-    showCardActions,
-    handleCardActionsConfirm,
-    handleCardConfirm,
-    cardActionsDownloadDisabled,
-    cardActionsConfirmDisabled,
-    cardActionsConfirmLabel,
-    effectiveTrueFalseButtonsVariant,
-  } = useFlashcardsActions({
+  const actionState = useFlashcardActionBarState({
     selectedItem,
     selectedItemId,
     answer,
@@ -1239,47 +887,37 @@ export default function Flashcards() {
     lastActionCooldownCardIdRef,
     t,
   });
-  const addButtonDisabled = downloadDisabled;
+  const {
+    emptyAnswerSubmitWarning,
+    trueFalseActionsDisabled,
+    shouldShowTrueFalseActions,
+    showCardActions,
+    handleCardActionsConfirm,
+    handleCardConfirm,
+    cardActionsDownloadDisabled,
+    cardActionsConfirmDisabled,
+    cardActionsConfirmLabel,
+  } = actionState;
   const shouldShowKnowDontKnowAdd =
     shouldShowBoxes &&
     (courseHasOnlyTrueFalse ||
       selectedItem?.type === "true_false" ||
       isKnowDontKnow);
-  const effectiveBoxesLayout = boxesLayout;
-  const isCarouselLayout = effectiveBoxesLayout !== "classic";
   const areButtonsOnTop = actionButtonsPosition === "top";
-  const carouselMinScale = CAROUSEL_BOXES_MIN_SCALE;
-  const classicBoxesMinScale = isTabletLayout
-    ? areButtonsOnTop
-      ? 0.72
-      : 0.54
-    : CLASSIC_PHONE_BOXES_MIN_SCALE;
-  // A single row can be necessary even while the card's hint still fits.
-  const canUseInlineCardAction = (isCompactStudyLayout || studyLayout.horizontalRowHeight != null)
-    && showCardActions && selectedItem != null && !isExplanationVisible
-    && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know";
-  const useInlineCardAction = canUseInlineCardAction && studyLayout.keyboardVisible;
-  useEffect(() => setActionsHidden(useInlineCardAction), [useInlineCardAction, setActionsHidden]);
-
-  const {
-    bottomButtonsAnchorRef,
-    setBottomButtonsHeight,
-    measureBottomButtons,
-    bottomButtonsOffset,
-    shouldRenderBottomButtons,
-    shouldReserveBottomButtonsSpace,
-    bottomButtonsDockBottomOffset,
-    bottomButtonsReservedSpace,
-  } = useFlashcardsBottomDockLayout({
-    hideActions: useInlineCardAction,
-    keepActionsAtBottom: canUseInlineCardAction,
+  const shouldAnimateScreenLayout =
+    !shouldKeepLoadingOverlayVisible && !showLoadingOverlay;
+  const studyPresentation = useFlashcardsStudyCoordinator({
+    studyLayout,
+    isTabletLayout,
+    boxesLayout,
     areButtonsOnTop,
     shouldShowBoxes,
     selectedItemId,
     showCardActions,
     shouldShowTrueFalseActions,
-    isSmallPhoneLayout: isCompactStudyLayout,
-    bottomDockOffsetOverride: studyLayout.bottomDockOffset,
+    inlineCardActionEligible: showCardActions && selectedItem != null && !isExplanationVisible
+      && selectedItem.type !== "true_false" && selectedItem.type !== "know_dont_know",
+    shouldAnimateScreenLayout,
     isFocused,
     debugScreen: "flashcards",
     courseId: activeCustomCourseId,
@@ -1289,31 +927,12 @@ export default function Flashcards() {
     correction,
     previousKeyboardVisibleRef,
   });
-  const carouselBottomClearance =
-    isCarouselLayout && !areButtonsOnTop && !useInlineCardAction
-      ? Math.max(56, Math.min(96, bottomButtonsReservedSpace))
-      : 0;
+  const { useInlineCardAction } = studyPresentation;
   const {
-    scale: boxesScale,
-    scaledHeight: boxesScaledHeight,
-    scaleOffsetY,
-    onViewportLayout: onBoxesViewportLayout,
-    onContentLayout: onBoxesContentLayout,
-    needsScrollFallback: boxesNeedScrollFallback,
-  } = useAutoScaleToFit({
-    layoutTransition,
-    minScale: studyLayout.horizontalRowHeight != null ? 1 : isCarouselLayout ? carouselMinScale : classicBoxesMinScale,
-    ...(!isTabletLayout && !isCarouselLayout && studyLayout.classicBoxesNaturalHeight > 0
-      ? { stableContentHeight: studyLayout.horizontalRowHeight ?? studyLayout.classicBoxesNaturalHeight }
-      : isCarouselLayout
-      ? {
-          stableContentHeight: getBoxCarouselNaturalHeight({
-            isSmallPhoneLayout: isCompactStudyLayout,
-            bottomClearance: carouselBottomClearance,
-          }),
-        }
-      : {}),
-  });
+    shouldReserveBottomButtonsSpace,
+    bottomButtonsDockBottomOffset,
+    bottomButtonsReservedSpace,
+  } = studyPresentation.dock;
 
 
   useEffect(() => {
@@ -1387,106 +1006,52 @@ export default function Flashcards() {
   );
 
   const renderButtons = (position: "top" | "bottom") => (
-    <FlashcardsButtons
+    <FlashcardsStudyButtons
       position={position}
-      align={
-        position === "bottom" && isTabletLayout
-          ? dominantHand === "left"
-            ? "left"
-            : dominantHand === "center"
-              ? "center"
-            : "right"
-          : "center"
-      }
+      isTabletLayout={isTabletLayout}
+      dominantHand={dominantHand}
+      actionState={actionState}
       contentWidth={flashcardsContentWidth}
       coachmarkId="flashcards-buttons-section"
-      showTrueFalseActions={shouldShowTrueFalseActions}
       trueFalseActionsDisabled={trueFalseActionsDisabled || holdCardContent}
-      onTrueFalseAnswer={handleTrueFalseAnswer}
-      trueFalseActionsMode={trueFalseActionsMode}
-      onTrueFalseOk={handleTrueFalseOk}
-      trueFalseButtonsVariant={effectiveTrueFalseButtonsVariant}
-      selectedTrueFalseAnswer={selectedTrueFalseAnswer}
-      showCardActions={showCardActions}
-      onCardActionsConfirm={handleCardActionsConfirm}
       onCardActionsConfirmPressIn={
         isExplanationVisible ? undefined : primeKeyboardBridgeForCorrection
       }
       onDownload={handleManualAddFlashcards}
       showAddFlashcards={shouldShowKnowDontKnowAdd}
       onAddFlashcards={() => void handleManualAddFlashcards()}
-      addFlashcardsDisabled={addButtonDisabled || holdCardContent}
+      addFlashcardsDisabled={downloadDisabled || holdCardContent}
       downloadDisabled={cardActionsDownloadDisabled || holdCardContent}
       downloadCoachmarkId="flashcards-add-button"
       confirmCoachmarkId="flashcards-confirm-button"
       confirmDisabled={cardActionsConfirmDisabled || holdCardContent}
-      confirmLabel={cardActionsConfirmLabel}
     />
   );
 
-  const boxesScaleOffsetY = scaleOffsetY;
-  const shouldAnimateScreenLayout =
-    !shouldKeepLoadingOverlayVisible && !showLoadingOverlay;
-  const screenSectionLayout = shouldAnimateScreenLayout
-    ? SCREEN_LAYOUT_TRANSITION
-    : undefined;
-  useEffect(() => {
-    if (!isFocused) return;
-    // Capture every state change immediately; the settled diagnostics omit
-    // intermediate frames that matter when investigating a jumping viewport.
-    logFlashcardsScrollDebug("screen.state", {
-      cardId: selectedItemId,
-      answerLength: answer.length,
-      result: displayResult,
-      resultPending,
-      correctionMode: correction?.mode ?? null,
-      isBetweenCards,
-      isCompactStudyLayout,
-      useInlineCardAction,
-      keyboardVisible: studyLayout.keyboardVisible,
-      keyboardTopInWindow: studyLayout.keyboardTopInWindow,
-      availableStudyHeight: studyLayout.availableStudyHeight,
-      visibleStudyHeight: studyLayout.visibleStudyHeight,
-      fullCardHeight: studyLayout.fullCardSectionHeight,
-      visibleCardHeight: studyLayout.visibleCardHeight,
-      minimumFullStudyHeight: studyLayout.minimumFullStudyHeight,
-      horizontalRowHeight: studyLayout.horizontalRowHeight ?? null,
-      needsStudyScroll: studyLayout.needsStudyScroll,
-      bottomButtonsReservedSpace,
-      bottomButtonsDockBottomOffset,
-      shouldReserveBottomButtonsSpace,
-      areButtonsOnTop,
-      shouldAnimateScreenLayout,
-      windowWidth,
-      windowHeight,
-    });
-  }, [
-    isFocused, selectedItemId, answer.length, displayResult, resultPending,
-    correction?.mode, isBetweenCards, isCompactStudyLayout, useInlineCardAction,
-    studyLayout.keyboardVisible, studyLayout.keyboardTopInWindow,
-    studyLayout.availableStudyHeight, studyLayout.visibleStudyHeight,
-    studyLayout.fullCardSectionHeight, studyLayout.visibleCardHeight,
-    studyLayout.minimumFullStudyHeight, studyLayout.horizontalRowHeight,
-    studyLayout.needsStudyScroll, bottomButtonsReservedSpace,
-    bottomButtonsDockBottomOffset, shouldReserveBottomButtonsSpace,
-    areButtonsOnTop, shouldAnimateScreenLayout, windowWidth, windowHeight,
-  ]);
-  const isTabletCenteredStudyLayout = isTabletLayout && shouldShowBoxes;
-  const isTabletCompactBoxesLayout =
-    isTabletCenteredStudyLayout && areButtonsOnTop;
+  useFlashcardsScrollDiagnostics({
+    isFocused,
+    selectedItemId,
+    answerLength: answer.length,
+    displayResult,
+    resultPending,
+    correctionMode: correction?.mode ?? null,
+    isBetweenCards,
+    isCompactStudyLayout,
+    useInlineCardAction,
+    studyLayout,
+    bottomButtonsReservedSpace,
+    bottomButtonsDockBottomOffset,
+    shouldReserveBottomButtonsSpace,
+    areButtonsOnTop,
+    shouldAnimateScreenLayout,
+    windowWidth,
+    windowHeight,
+  });
 
-  const wasCourseFinishedVisibleRef = useRef(false);
-
-  useEffect(() => {
-    if (isCourseFinishedVisible && !wasCourseFinishedVisibleRef.current) {
-      setShouldCelebrate(false);
-      requestAnimationFrame(() => {
-        setShouldCelebrate(true);
-      });
-    }
-
-    wasCourseFinishedVisibleRef.current = isCourseFinishedVisible;
-  }, [isCourseFinishedVisible]);
+  useFlashcardsCompletionCelebration({
+    isCourseFinishedVisible,
+    setShouldCelebrate,
+  });
 
   const coachmarkLayer = useMemo(
     () =>
@@ -1533,80 +1098,10 @@ export default function Flashcards() {
 
   useCoachmarkLayerPortal("flashcards-screen", coachmarkLayer);
 
-  const topButtons = renderButtons("top");
-
-  const boxesSection = shouldShowBoxes ? (
-    <FlashcardsBoxesSection
-      hideActions={useInlineCardAction}
-      debugSizes={__DEV__ && isFocused}
-      debugCourseId={activeCustomCourseId}
-      styles={styles}
-      screenSectionLayout={screenSectionLayout}
-      boxes={boxes}
-      activeBox={activeBox}
-      boxZeroEnabled={boxZeroEnabled}
-      tutorialBoxCountOverrides={tutorialBoxCountOverrides}
-      boxFaces={boxFaces}
-      handleSelectBox={handleSelectBox}
-      handleBoxLongPress={handleBoxLongPress}
-      effectiveBoxesLayout={effectiveBoxesLayout}
-      boxSelectionLocked={boxSelectionLocked}
-      isTabletLayout={isTabletLayout}
-      isCompactStudyLayout={isCompactStudyLayout}
-      isTabletCompactBoxesLayout={isTabletCompactBoxesLayout}
-      areButtonsOnTop={areButtonsOnTop}
-      flashcardsContentWidth={flashcardsContentWidth}
-      horizontalRowHeight={studyLayout.horizontalRowHeight}
-      boxesScale={studyLayout.horizontalRowHeight != null ? 1 : boxesScale}
-      boxesScaledHeight={studyLayout.horizontalRowHeight ?? boxesScaledHeight}
-      classicBoxesNaturalHeight={
-        !isTabletLayout && !isCarouselLayout
-          ? studyLayout.horizontalRowHeight ?? studyLayout.classicBoxesNaturalHeight
-          : undefined
-      }
-      boxesScaleOffsetY={studyLayout.horizontalRowHeight != null ? 0 : boxesScaleOffsetY}
-      boxesNeedScrollFallback={studyLayout.horizontalRowHeight == null && boxesNeedScrollFallback}
-      carouselBottomClearance={carouselBottomClearance}
-      onBoxesViewportLayout={onBoxesViewportLayout}
-      onBoxesContentLayout={(event) => {
-        onBoxesContentLayout(event);
-        studyLayout.onBoxesNaturalLayout(event);
-      }}
-      t={t}
-    />
-  ) : null;
-
-  const studyContent = (
-    <FlashcardsStudyContent
-      cardBottomGap={studyLayout.cardBottomGap}
-      styles={styles}
-      screenSectionLayout={screenSectionLayout}
-      cardSection={cardSection}
-      topButtons={topButtons}
-      boxesSection={boxesSection}
-      isCourseFinishedVisible={isCourseFinishedVisible}
-      showTopButtons={areButtonsOnTop && shouldShowBoxes && !useInlineCardAction}
-      onCardSectionLayout={
-        !isCourseFinishedVisible
-          ? studyLayout.onCardSectionLayout
-          : undefined
-      }
-      onTopButtonsLayout={studyLayout.onTopButtonsLayout}
-    />
-  );
-
   return (
     <View style={styles.container}>
-      <TextInput
+      <KeyboardBridgeInput
         ref={keyboardBridgeInputRef}
-        style={styles.keyboardBridgeInput}
-        value=""
-        caretHidden
-        autoCorrect={false}
-        spellCheck={false}
-        autoCapitalize="none"
-        importantForAutofill="no"
-        textContentType="none"
         onFocus={() => logFlashcardsScrollDebug("screen.keyboard_bridge.focus", { selectedItemId: selectedItemIdRef.current })}
         onBlur={() => logFlashcardsScrollDebug("screen.keyboard_bridge.blur", { selectedItemId: selectedItemIdRef.current })}
       />
@@ -1618,68 +1113,29 @@ export default function Flashcards() {
         style={{ position: "absolute", top: 1, left: 1, width: 1, height: 1 }}
       />
 
-      <View
-        testID="flashcards-content"
-        onLayout={studyLayout.onStudyLayout}
-        style={[
-          styles.content,
-          shouldReserveBottomButtonsSpace
-            ? { paddingBottom: bottomButtonsReservedSpace }
-            : null,
-        ]}
-        pointerEvents={shouldRenderLoadingOverlay ? "none" : "auto"}
-      >
-        <KeyboardStudyScroll
-          testID={isTabletCenteredStudyLayout ? "flashcards-study-stack" : "flashcards-study-scroll"}
-          enabled={isCompactStudyLayout || studyLayout.needsStudyScroll || studyLayout.keyboardVisible}
-          keyboardVisible={studyLayout.keyboardVisible}
-          keyboardTopInWindow={studyLayout.keyboardTopInWindow}
-          cardHeight={studyLayout.visibleCardHeight}
-          contentContainerStyle={isTabletCenteredStudyLayout
-            ? [styles.studyStack, styles.tabletCenteredStudyStack]
-            : undefined}
-        >
-          {studyContent}
-        </KeyboardStudyScroll>
-
-        {shouldRenderBottomButtons ? (
-          <View
-            style={[
-              styles.bottomButtonsDock,
-              { bottom: bottomButtonsDockBottomOffset },
-            ]}
-            pointerEvents="box-none"
-          >
-            <View
-              testID="flashcards-bottom-buttons"
-              ref={bottomButtonsAnchorRef}
-              onLayout={(event) => {
-                studyLayout.onBottomButtonsLayout(event);
-                const nextHeight = event.nativeEvent.layout.height;
-                setBottomButtonsHeight((prev) =>
-                  Math.abs(prev - nextHeight) < 1 ? prev : nextHeight,
-                );
-                measureBottomButtons();
-              }}
-              collapsable={false}
-              style={styles.bottomButtonsWrapper}
-            >
-              <Animated.View
-              style={{
-                width: "100%",
-                transform: [
-                  {
-                    translateY: Animated.multiply(bottomButtonsOffset, -1),
-                    },
-                  ],
-                }}
-              >
-                {renderButtons("bottom")}
-              </Animated.View>
-            </View>
-          </View>
-        ) : null}
-      </View>
+      <FlashcardsStudyLayout
+        layout={studyPresentation}
+        styles={styles}
+        cardSection={cardSection}
+        topButtons={renderButtons("top")}
+        bottomButtons={renderButtons("bottom")}
+        isCourseFinishedVisible={isCourseFinishedVisible}
+        interactionBlocked={shouldRenderLoadingOverlay}
+        boxes={shouldShowBoxes ? {
+          debugSizes: __DEV__ && isFocused,
+          debugCourseId: activeCustomCourseId,
+          boxes,
+          activeBox,
+          boxZeroEnabled,
+          tutorialBoxCountOverrides,
+          boxFaces,
+          handleSelectBox,
+          handleBoxLongPress,
+          boxSelectionLocked,
+          flashcardsContentWidth,
+          t,
+        } : null}
+      />
 
       {shouldRenderLoadingOverlay ? (
         <Animated.View

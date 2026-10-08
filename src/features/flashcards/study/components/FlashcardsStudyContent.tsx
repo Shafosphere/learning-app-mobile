@@ -1,11 +1,15 @@
 import type { ComponentProps, ReactNode } from "react";
-import type { LayoutChangeEvent } from "react-native";
+import type { LayoutChangeEvent, StyleProp, ViewStyle } from "react-native";
 import Reanimated from "react-native-reanimated";
-import type { useStyles } from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles";
+export type FlashcardsStudyContentStyles = {
+  cardSectionWrapper: StyleProp<ViewStyle>;
+  finishedCardSectionWrapper: StyleProp<ViewStyle>;
+  topButtonsWrapper: StyleProp<ViewStyle>;
+};
 
 type FlashcardsStudyContentProps = {
   cardBottomGap?: number;
-  styles: ReturnType<typeof useStyles>;
+  styles: FlashcardsStudyContentStyles;
   screenSectionLayout: ComponentProps<typeof Reanimated.View>["layout"];
   cardSection: ReactNode;
   topButtons: ReactNode | null;
