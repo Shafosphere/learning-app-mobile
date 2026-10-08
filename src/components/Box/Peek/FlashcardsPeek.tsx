@@ -264,22 +264,18 @@ export default function FlashcardsPeekOverlay({
         ) : null}
         {useBoxZeroSideLayout ? (
           <View style={[styles.cardContent, styles.cardContentBoxZero]}>
-            <View style={styles.cardSide}>
+            <View style={[styles.cardMetaRow, styles.cardMetaRowBoxZero]}>
               <Text style={styles.cardSideLabel}>{t("flashcards.card.peek.flashcard")}</Text>
-              <Text style={styles.cardSideIndex}>#{index + 1}</Text>
-            </View>
-
-            <View style={styles.cardMain}>
-              <View style={styles.cardMetaRow}>
-                <View style={styles.typePill}>
-                  <Text style={styles.typePillText}>{typeLabel}</Text>
-                </View>
-                {hasPromptImage ? (
-                  <View style={styles.typePill}>
-                    <Text style={styles.typePillText}>{t("flashcards.card.peek.image")}</Text>
-                  </View>
-                ) : null}
+              <View style={styles.typePill}>
+                <Text style={styles.typePillText}>{typeLabel}</Text>
               </View>
+              {hasPromptImage ? (
+                <View style={styles.typePill}>
+                  <Text style={styles.typePillText}>{t("flashcards.card.peek.image")}</Text>
+                </View>
+              ) : null}
+            </View>
+            <View style={styles.cardMain}>
               {showPromptImageOnly ? (
                 <View style={styles.imageOnlyWrapper}>
                   <Image
@@ -288,10 +284,24 @@ export default function FlashcardsPeekOverlay({
                     contentFit="contain"
                   />
                 </View>
+              ) : hasPromptImage ? (
+                <View style={styles.cardPromptBlock}>
+                  <View style={styles.cardLine}>
+                    <Text style={styles.cardTag}>{t("flashcards.card.peek.front")}:</Text>
+                    <Text style={[styles.cardPrimary, styles.cardPromptText]} numberOfLines={3} ellipsizeMode="tail">
+                      {displayPrompt}
+                    </Text>
+                  </View>
+                  <Image
+                    source={{ uri: promptImage as string }}
+                    style={[styles.cardImage, styles.cardPromptImage]}
+                    contentFit="contain"
+                  />
+                </View>
               ) : (
-                <View style={styles.cardLine}>
+                <View style={[styles.cardLine, hasPromptImage && styles.cardImageLine]}>
                   <Text style={styles.cardTag}>{t("flashcards.card.peek.front")}</Text>
-                  <View style={styles.cardValue}>
+                  <View style={[styles.cardValue, hasPromptImage && styles.cardImageValue]}>
                     {hasPromptImage ? (
                       <Image
                         source={{ uri: promptImage as string }}
@@ -301,7 +311,7 @@ export default function FlashcardsPeekOverlay({
                     ) : null}
                     {displayPrompt ? (
                       <Text
-                        style={styles.cardPrimary}
+                        style={[styles.cardPrimary, hasPromptImage && styles.cardImageText]}
                         numberOfLines={hasPromptImage ? 3 : 2}
                         ellipsizeMode="tail"
                       >
@@ -314,9 +324,9 @@ export default function FlashcardsPeekOverlay({
                   </View>
                 </View>
               )}
-              <View style={styles.cardLine}>
+              <View style={[styles.cardLine, hasAnswerImage && styles.cardImageLine]}>
                 <Text style={[styles.cardTag]}>{t("flashcards.card.peek.back")}</Text>
-                <View style={styles.cardValue}>
+                <View style={[styles.cardValue, hasAnswerImage && styles.cardImageValue]}>
                   {hasAnswerImage ? (
                     <Image
                       source={{ uri: answerImage as string }}
@@ -328,6 +338,7 @@ export default function FlashcardsPeekOverlay({
                       style={[
                         styles.cardSecondary,
                         styles.rewers,
+                        hasAnswerImage && styles.cardImageText,
                         isBooleanType ? styles.cardTrueFalse : undefined,
                       ]}
                       numberOfLines={hasAnswerImage ? 3 : 2}
@@ -367,7 +378,7 @@ export default function FlashcardsPeekOverlay({
                 ) : null}
               </View>
             </View>
-            <View style={styles.cardLine}>
+            <View style={[styles.cardLine, hasPromptImage && styles.cardImageLine]}>
               {showPromptImageOnly ? (
                 <View style={styles.imageOnlyWrapper}>
                   <Image
@@ -376,10 +387,24 @@ export default function FlashcardsPeekOverlay({
                     contentFit="contain"
                   />
                 </View>
+              ) : hasPromptImage ? (
+                <View style={styles.cardPromptBlock}>
+                  <View style={styles.cardLine}>
+                    <Text style={styles.cardTag}>{t("flashcards.card.peek.question")}</Text>
+                    <Text style={[styles.cardPrimary, styles.cardPromptText]} numberOfLines={3} ellipsizeMode="tail">
+                      {displayPrompt}
+                    </Text>
+                  </View>
+                  <Image
+                    source={{ uri: promptImage as string }}
+                    style={[styles.cardImageSmall, styles.cardPromptImage]}
+                    contentFit="contain"
+                  />
+                </View>
               ) : (
                 <>
                   <Text style={styles.cardTag}>{t("flashcards.card.peek.question")}</Text>
-                  <View style={styles.cardValue}>
+                  <View style={[styles.cardValue, hasPromptImage && styles.cardImageValue]}>
                     {hasPromptImage ? (
                       <Image
                         source={{ uri: promptImage as string }}
@@ -389,7 +414,7 @@ export default function FlashcardsPeekOverlay({
                     ) : null}
                     {displayPrompt ? (
                       <Text
-                        style={styles.cardPrimary}
+                        style={[styles.cardPrimary, hasPromptImage && styles.cardImageText]}
                         numberOfLines={hasPromptImage ? 3 : 2}
                         ellipsizeMode="tail"
                       >
@@ -405,9 +430,9 @@ export default function FlashcardsPeekOverlay({
             </View>
             {showBoxZeroAnswer ? (
               <>
-                <View style={styles.cardLine}>
+                <View style={[styles.cardLine, hasAnswerImage && styles.cardImageLine]}>
                   <Text style={styles.cardTag}>{t("flashcards.card.peek.answer")}</Text>
-                  <View style={styles.cardValue}>
+                  <View style={[styles.cardValue, hasAnswerImage && styles.cardImageValue]}>
                     {hasAnswerImage ? (
                       <Image
                         source={{ uri: answerImage as string }}
@@ -419,6 +444,7 @@ export default function FlashcardsPeekOverlay({
                       style={[
                         styles.cardSecondary,
                         styles.rewers,
+                        hasAnswerImage && styles.cardImageText,
                         isBooleanType ? styles.cardTrueFalse : undefined,
                       ]}
                       numberOfLines={hasAnswerImage ? 3 : 2}
@@ -440,6 +466,9 @@ export default function FlashcardsPeekOverlay({
             ) : null}
           </View>
         )}
+        {useBoxZeroSideLayout ? (
+          <Text style={styles.cardSideIndex}>#{index + 1}</Text>
+        ) : null}
         <Pressable
           accessibilityRole="button"
           accessibilityLabel={t("flashcards.card.peek.returnToUnknownA11y")}

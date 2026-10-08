@@ -186,18 +186,11 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     gap: 6,
   },
   cardContentBoxZero: {
+    flexDirection: "column",
     gap: 10,
   },
-  cardSide: {
-    width: 64,
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    // paddingVertical: 2,
-    // backgroundColor: colors.my_red,
-
-    // gap: 6,
-  },
   cardSideLabel: {
+    flexShrink: 1,
     fontSize: 14,
     letterSpacing: 1,
     textTransform: "uppercase",
@@ -207,14 +200,15 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     paddingTop: 3,
   },
   cardSideIndex: {
+    position: "absolute",
+    left: 12,
+    bottom: 16,
     fontSize: 13,
     fontWeight: "700",
     color: colors.headline,
   },
   cardMain: {
-    // backgroundColor: colors.my_red,
-    flex: 1,
-    gap: 6,
+    gap: 12,
   },
   cardLine: {
     flexDirection: "row",
@@ -223,6 +217,32 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     minHeight: 24,
     display: "flex",
     alignItems: "flex-start",
+  },
+  cardImageLine: {
+    flexDirection: "column",
+    alignItems: "center",
+    gap: 8,
+  },
+  cardPromptBlock: {
+    width: "100%",
+    alignItems: "flex-start",
+    gap: 8,
+  },
+  cardPromptText: {
+    flexShrink: 1,
+  },
+  cardPromptImage: {
+    alignSelf: "center",
+  },
+  cardImageValue: {
+    flex: 0,
+    width: "100%",
+    alignItems: "center",
+    gap: 8,
+  },
+  cardImageText: {
+    width: "100%",
+    textAlign: "center",
   },
   cardSimpleIndex: {
     fontSize: 12,
@@ -316,6 +336,8 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     gap: 6,
   },
   typePill: {
+    maxWidth: "100%",
+    flexShrink: 1,
     paddingVertical: 4,
     paddingHorizontal: 10,
     borderRadius: 999,
@@ -331,6 +353,9 @@ export const usePeekStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     marginBottom: 6,
     gap: 8,
+  },
+  cardMetaRowBoxZero: {
+    flexWrap: "wrap",
   },
   cardMetaTags: {
     flexDirection: "row",
