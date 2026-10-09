@@ -5,7 +5,8 @@ import { ensureOfficialCourse } from "./repositories/courses";
 
 jest.mock("@/src/constants/officialPacks", () => ({
   OFFICIAL_PACKS: [{ slug: "eng_to_pl_first_50", name: "Pierwsze 50 słów", packVersion: 2,
-    iconId: "flag:en", iconColor: "#10B981", settings: { boxZeroEnabled: true, boxZeroAnswerSide: "front" } }],
+    iconId: "flag:en", iconColor: "#10B981", settings: { boxZeroEnabled: true, boxZeroAnswerSide: "front",
+      letterHintSettings: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 } } }],
 }));
 jest.mock("@/assets/data/sqlite/prebuilt.db", () => 1);
 jest.mock("expo-sqlite", () => ({ importDatabaseFromAssetAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
@@ -16,6 +17,7 @@ jest.mock("@/src/services/imageService", () => ({ deleteImage: jest.fn(), prepar
 
 const key = "flashcards.courseBoxZeroAnswerSideOverrides";
 const enabledKey = "flashcards.courseBoxZeroOverrides";
+const hintKey = "flashcards.courseLetterHintOverrides";
 
 beforeEach(async () => {
   await AsyncStorage.clear();
@@ -33,9 +35,18 @@ it.each([7, 42])("sets front for 50-word course %s, preserves manual back", asyn
   await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
   expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: {}, custom: { [courseId]: "front" } });
   expect(JSON.parse((await AsyncStorage.getItem(enabledKey))!)).toEqual({ builtin: {}, custom: { [courseId]: true } });
+  expect(JSON.parse((await AsyncStorage.getItem(hintKey))!)).toEqual({ builtin: {}, custom: {
+    [courseId]: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 },
+  } });
+  const hints = { builtin: {}, custom: {
+    [courseId]: { enabled: false, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 },
+    "8": { enabled: true, profile: "gentle", boxOneLimit: 1, boxTwoLimit: 0 },
+  } };
+  await AsyncStorage.setItem(hintKey, JSON.stringify(hints));
   await AsyncStorage.setItem(enabledKey, JSON.stringify({ builtin: {}, custom: { [courseId]: false } }));
   await AsyncStorage.setItem(key, JSON.stringify({ builtin: {}, custom: { [courseId]: "back", "8": "front" } }));
   await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
   expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: {}, custom: { [courseId]: "back", "8": "front" } });
   expect(JSON.parse((await AsyncStorage.getItem(enabledKey))!)).toEqual({ builtin: {}, custom: { [courseId]: false } });
+  expect(JSON.parse((await AsyncStorage.getItem(hintKey))!)).toEqual(hints);
 });

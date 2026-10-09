@@ -3,6 +3,8 @@ import { Animated, Keyboard, type KeyboardEvent, type LayoutChangeEvent } from "
 import { useFlashcardsStudyLayout } from "../useFlashcardsStudyLayout";
 import { useFlashcardsStudyCoordinator } from "../useFlashcardsStudyCoordinator";
 import { useKeyboardBottomOffset } from "@/src/hooks/useKeyboardBottomOffset";
+import React from "react";
+import { QuoteSuppressionContext } from "@/src/contexts/QuoteSuppressionContext";
 
 jest.mock("@/src/hooks/useKeyboardBottomOffset", () => ({ useKeyboardBottomOffset: jest.fn() }));
 jest.mock("@/src/services/debugEvents", () => ({ appendDebugEvent: jest.fn() }));
@@ -11,8 +13,11 @@ function layout(height: number): LayoutChangeEvent {
   return { nativeEvent: { layout: { height, width: 375, x: 0, y: 0 } } } as LayoutChangeEvent;
 }
 
-function renderStudy() {
-  return renderHook(({ eligible }: { eligible: boolean }) => {
+function renderStudy(suppressQuotes = () => () => {}) {
+  const wrapper = ({ children }: React.PropsWithChildren) => React.createElement(
+    QuoteSuppressionContext.Provider, { value: suppressQuotes }, children,
+  );
+  return renderHook(({ eligible, focused = true }: { eligible: boolean; focused?: boolean }) => {
     const studyLayout = useFlashcardsStudyLayout({
       isTabletLayout: false, boxesLayout: "classic", areButtonsOnTop: false,
     });
@@ -27,7 +32,7 @@ function renderStudy() {
       shouldShowTrueFalseActions: false,
       inlineCardActionEligible: eligible,
       shouldAnimateScreenLayout: true,
-      isFocused: true,
+      isFocused: focused,
       debugScreen: "flashcards",
       courseId: 1,
       displayResult: null,
@@ -35,7 +40,7 @@ function renderStudy() {
       correction: null,
       previousKeyboardVisibleRef: { current: null },
     });
-  }, { initialProps: { eligible: true } });
+  }, { wrapper, initialProps: { eligible: true, focused: true } });
 }
 
 function measure(result: ReturnType<typeof renderStudy>["result"], height: number) {
@@ -59,6 +64,31 @@ describe("shared study coordination", () => {
     jest.restoreAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  it("suppresses reactions only for a focused compact screen and releases on recovery, blur and unmount", () => {
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
+    const release = jest.fn();
+    const suppressQuotes = jest.fn(() => release);
+    const { result, rerender, unmount } = renderStudy(suppressQuotes);
+    measure(result, 800);
+    expect(suppressQuotes).not.toHaveBeenCalled();
+
+    measure(result, 380);
+    expect(result.current.studyLayout.isCompactStudyLayout).toBe(true);
+    expect(suppressQuotes).toHaveBeenCalledTimes(1);
+    rerender({ eligible: true, focused: false });
+    expect(release).toHaveBeenCalledTimes(1);
+    rerender({ eligible: true, focused: true });
+    expect(suppressQuotes).toHaveBeenCalledTimes(2);
+
+    measure(result, 800);
+    expect(result.current.studyLayout.isCompactStudyLayout).toBe(false);
+    expect(release).toHaveBeenCalledTimes(2);
+    measure(result, 380);
+    expect(suppressQuotes).toHaveBeenCalledTimes(3);
+    unmount();
+    expect(release).toHaveBeenCalledTimes(3);
   });
 
   it("keeps compact requirements and row geometry when actions move into and out of the card", () => {

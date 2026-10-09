@@ -1,7 +1,7 @@
 import React from "react";
 import { createInstance } from "i18next";
 import { View } from "react-native";
-import { fireEvent, render } from "@testing-library/react-native";
+import { fireEvent, render, within } from "@testing-library/react-native";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { resolveThemeColors } from "@/src/theme/theme";
@@ -132,6 +132,34 @@ it("blocks changes before course settings have loaded", () => {
   expect(toggle).toBeDisabled();
   fireEvent.press(toggle);
   expect(onChange).not.toHaveBeenCalled();
+});
+
+it.each([false, true])("keeps the flow switches in one card while hints expand and collapse (box zero: %s)", (boxZeroEnabled) => {
+  const cardStyle = { borderWidth: 1, borderRadius: 14, padding: 14 };
+  const props = {
+    ...makeProps(),
+    boxZeroEnabled,
+    styles: { settingsGroupCard: cardStyle },
+    onChangeLetterHintSettings: jest.fn(),
+  };
+  const screen = render(<CourseSettingsSection {...props} />);
+
+  for (const enabled of [false, true, false, true]) {
+    screen.rerender(
+      <CourseSettingsSection {...props} letterHintSettings={{ ...DEFAULT_LETTER_HINT_SETTINGS, enabled }} />,
+    );
+    const card = screen.getByTestId("course-flow-settings");
+    expect(card).toHaveStyle(cardStyle);
+    const group = within(card);
+    expect(group.getByRole("switch", {
+      name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania",
+    })).toBeTruthy();
+    expect(group.getByRole("switch", { name: "courseLetterHints.toggleLabel", checked: enabled })).toBeTruthy();
+    expect(group.getByRole("switch", {
+      name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki",
+    })).toBeTruthy();
+    expect(Boolean(group.queryByRole("header", { name: "courseLetterHints.profileTitle" }))).toBe(enabled);
+  }
 });
 
 describe("size settings", () => {

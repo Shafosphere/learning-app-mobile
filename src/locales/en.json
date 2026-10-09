@@ -794,7 +794,7 @@
         },
         "googleDrive": {
           "title": "Google Drive backup",
-          "body": "In the current state, the Google Drive backup feature is visible in the app, but connecting a Google account is temporarily inactive for the user. Until the user can enable it, the app does not save data backups to Google Drive.",
+          "body": "The Google Drive backup feature is currently hidden in settings and unavailable to users. Until the user can enable it, the app does not save data backups to Google Drive.",
           "bullets": [
             "after activation, the feature will work only after voluntary Google account authorization by the user",
             "the backup may be stored in the app's private folder on Google Drive",

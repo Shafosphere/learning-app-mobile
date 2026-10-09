@@ -1,5 +1,6 @@
 import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useNavbarCompactLayoutSetter, useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
+import { useQuoteSuppression } from "@/src/contexts/QuoteSuppressionContext";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import { useCallback, useEffect } from "react";
 import type { LayoutChangeEvent } from "react-native";
@@ -28,6 +29,7 @@ export function useFlashcardsStudyCoordinator({
 }: Params) {
   const { isCompactStudyLayout, horizontalRowHeight, setActionsHidden } = studyLayout;
   const { areButtonsOnTop, shouldShowBoxes, isFocused } = dockParams;
+  useQuoteSuppression(isFocused && isCompactStudyLayout);
   const layoutTransition = useNavbarLayoutTransition();
   const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
   useEffect(() => {

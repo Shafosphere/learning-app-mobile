@@ -133,6 +133,15 @@ async function applyOfficialCourseSettings(
     settings.skipCorrectionEnabled ?? (settings as any).skipCorrection;
 
   const tasks: Promise<void>[] = [];
+  if (settings.letterHintSettings !== undefined) {
+    tasks.push(
+      upsertCourseOverride(
+        "flashcards.courseLetterHintOverrides",
+        courseId,
+        settings.letterHintSettings
+      )
+    );
+  }
   if (settings.boxZeroAnswerSide !== undefined) {
     tasks.push(
       upsertCourseOverride(

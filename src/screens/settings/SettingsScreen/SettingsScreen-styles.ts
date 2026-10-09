@@ -285,6 +285,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
   settingItemCardCompact: {
     gap: 8,
   },
+  settingItemRow: {
+    backgroundColor: "transparent",
+    borderWidth: 0,
+    borderRadius: 0,
+    paddingHorizontal: 0,
+    paddingVertical: 12,
+  },
   settingItemInline: {
     flexDirection: "row",
     alignItems: "flex-start",

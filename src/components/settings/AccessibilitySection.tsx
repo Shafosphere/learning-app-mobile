@@ -153,8 +153,9 @@ const AccessibilitySection: React.FC = () => {
       >
         {t("settings.accessibility.section")}
       </Text>
-      <View style={styles.settingsList}>
+      <View style={[styles.appearanceGroupCard, styles.appearanceGroupRows]}>
         <SettingsItemCard
+          grouped
           title={t("settings.accessibility.highContrast.title")}
           description={t("settings.accessibility.highContrast.subtitle")}
           control={(
@@ -168,7 +169,9 @@ const AccessibilitySection: React.FC = () => {
           )}
         />
 
+        <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard
+          grouped
           title={t("settings.accessibility.colorBlind.title", {
             defaultValue: "Color blind mode",
           })}
@@ -194,7 +197,9 @@ const AccessibilitySection: React.FC = () => {
           </View>
         </SettingsItemCard>
 
+        <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard
+          grouped
           title={t("settings.accessibility.largeFont.title")}
           description={t("settings.accessibility.largeFont.subtitle")}
           control={(
@@ -208,7 +213,9 @@ const AccessibilitySection: React.FC = () => {
           )}
         />
 
+        <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard
+          grouped
           title={t("settings.accessibility.correctionErrorMarkers.title")}
           description={t("settings.accessibility.correctionErrorMarkers.subtitle")}
           control={(
@@ -228,7 +235,9 @@ const AccessibilitySection: React.FC = () => {
           )}
         />
 
+        <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard
+          grouped
           title={t("settings.accessibility.dominantHand.title", {
             defaultValue: "Preferred hand",
           })}

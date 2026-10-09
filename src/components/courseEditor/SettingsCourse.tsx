@@ -333,7 +333,7 @@ export function CourseSettingsSection({
       <Text style={sharedStyles.settingsGroupLabel}>
         {t("components.courseEditor.settingsCourse.textChild.przeplyw")}
       </Text>
-      <View style={sharedStyles.settingsGroupCard}>
+      <View testID="course-flow-settings" style={sharedStyles.settingsGroupCard}>
         <View style={sharedStyles.settingsGroupRows}>
           <SettingsToggleRow
             styles={sharedStyles}
@@ -381,45 +381,33 @@ export function CourseSettingsSection({
             onPress={() => onToggleBoxZero(!boxZeroEnabled)}
             accessibilityLabel={t("components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania")}
           />
-        </View>
-      </View>
-
-      <BoxZeroSettingsSection
-        boxZeroEnabled={boxZeroEnabled}
-        boxZeroAnswerSide={boxZeroAnswerSide}
-        onSelectBoxZeroAnswerSide={onSelectBoxZeroAnswerSide}
-      />
-
-      <View style={!showLetterHintControls && sharedStyles.settingsGroupCard}>
-        {onChangeLetterHintSettings ? (
-          <View style={[
-            sharedStyles.settingsGroupRows,
-            showLetterHintControls && sharedStyles.settingsGroupCard,
-          ]}>
-            <SettingsToggleRow
-              styles={sharedStyles}
-              title={t("courseLetterHints.title")}
-              description={t("courseLetterHints.description")}
-              value={letterHintSettings.enabled}
-              onPress={() => onChangeLetterHintSettings({ ...letterHintSettings, enabled: !letterHintSettings.enabled })}
-              accessibilityLabel={t("courseLetterHints.toggleLabel")}
-              disabled={letterHintSettingsDisabled}
-            />
-            {!showLetterHintControls ? <View style={sharedStyles.settingsGroupDivider} /> : null}
-          </View>
-        ) : null}
-        {onChangeLetterHintSettings && letterHintSettings.enabled ? (
-          <LetterHintControls
-            settings={letterHintSettings}
-            onChange={onChangeLetterHintSettings}
-            colors={colors}
-            disabled={letterHintSettingsDisabled}
+          <BoxZeroSettingsSection
+            boxZeroEnabled={boxZeroEnabled}
+            boxZeroAnswerSide={boxZeroAnswerSide}
+            onSelectBoxZeroAnswerSide={onSelectBoxZeroAnswerSide}
           />
-        ) : null}
-        <View style={[
-          sharedStyles.settingsGroupRows,
-          showLetterHintControls && sharedStyles.settingsGroupCard,
-        ]}>
+          {onChangeLetterHintSettings ? (
+            <>
+              <View style={sharedStyles.settingsGroupDivider} />
+              <SettingsToggleRow
+                styles={sharedStyles}
+                title={t("courseLetterHints.title")}
+                description={t("courseLetterHints.description")}
+                value={letterHintSettings.enabled}
+                onPress={() => onChangeLetterHintSettings({ ...letterHintSettings, enabled: !letterHintSettings.enabled })}
+                accessibilityLabel={t("courseLetterHints.toggleLabel")}
+                disabled={letterHintSettingsDisabled}
+              />
+              <LetterHintControls
+                expanded={showLetterHintControls}
+                settings={letterHintSettings}
+                onChange={onChangeLetterHintSettings}
+                colors={colors}
+                disabled={letterHintSettingsDisabled}
+              />
+            </>
+          ) : null}
+          <View style={sharedStyles.settingsGroupDivider} />
           <SettingsToggleRow
             styles={sharedStyles}
             title={t("components.courseEditor.settingsCourse.title.wlaczPowtorki")}

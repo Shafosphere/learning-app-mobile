@@ -10,6 +10,7 @@ import {
 } from "react";
 import { useSettings } from "./SettingsContext";
 import { useTranslation } from "react-i18next";
+import { QuoteSuppressionContext } from "./QuoteSuppressionContext";
 
 export interface QuoteTriggerRequest {
   trigger: string;
@@ -51,6 +52,13 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const { t } = useTranslation();
   const [quote, setQuote] = useState<Quote | null>(null);
   const [isVisible, setIsVisible] = useState(false);
+  const suppressionTokensRef = useRef(new Set<symbol>());
+  const suppressQuotes = useCallback(() => {
+    const token = Symbol();
+    suppressionTokensRef.current.add(token);
+    setIsVisible(false);
+    return () => { suppressionTokensRef.current.delete(token); };
+  }, []);
   const lastQuoteTimestampRef = useRef<number>(0);
   const triggerTimestampsRef = useRef<Record<string, number>>({});
 
@@ -61,6 +69,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
     useRef<Partial<Record<QuoteCategory, Quote | null>>>({});
 
   const showQuote = useCallback((category: QuoteCategory, excludeQuoteTexts: string[] = [], excludeQuoteIds: string[] = []) => {
+    if (!quotesEnabled || suppressionTokensRef.current.size > 0) return;
     const excludedTexts = new Set(excludeQuoteTexts);
     const excludedIds = new Set(excludeQuoteIds);
     const localizedQuotes: Quote[] = QUOTES.map((q) => ({
@@ -139,12 +148,12 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
     logQuote("show", { category, text: candidate.text });
     setQuote(candidate);
     setIsVisible(true);
-  }, [t]);
+  }, [quotesEnabled, t]);
 
   const triggerQuote = useCallback(
     (request: QuoteTriggerRequest) => {
-      if (!quotesEnabled) {
-        logQuote("skip: quotes disabled", { trigger: request.trigger, category: request.category });
+      if (!quotesEnabled || suppressionTokensRef.current.size > 0) {
+        logQuote("skip: quotes disabled or suppressed", { trigger: request.trigger, category: request.category });
         return;
       }
 
@@ -220,7 +229,9 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
     <QuoteContext.Provider
       value={{ quote, isVisible, showQuote, triggerQuote, hideQuote }}
     >
-      {children}
+      <QuoteSuppressionContext.Provider value={suppressQuotes}>
+        {children}
+      </QuoteSuppressionContext.Provider>
     </QuoteContext.Provider>
   );
 };

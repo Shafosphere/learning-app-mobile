@@ -796,7 +796,7 @@
         },
         "googleDrive": {
           "title": "Kopia zapasowa Google Drive",
-          "body": "W aktualnym stanie funkcja kopii zapasowej Google Drive jest widoczna w aplikacji, ale połączenie konta Google jest czasowo nieaktywne dla użytkownika. Dopóki użytkownik nie może jej włączyć, aplikacja nie zapisuje kopii danych na Dysku Google.",
+          "body": "Funkcja kopii zapasowej Google Drive jest obecnie ukryta w ustawieniach i niedostępna dla użytkownika. Dopóki użytkownik nie może jej włączyć, aplikacja nie zapisuje kopii danych na Dysku Google.",
           "bullets": [
             "po aktywacji funkcja będzie działać tylko po dobrowolnej autoryzacji konta Google przez użytkownika",
             "kopia może być zapisywana w prywatnym folderze aplikacji na Google Drive",

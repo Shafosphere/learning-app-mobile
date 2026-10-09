@@ -11,6 +11,7 @@ type SettingsItemCardProps = {
   children?: ReactNode;
   compact?: boolean;
   active?: boolean;
+  grouped?: boolean;
 };
 
 export default function SettingsItemCard({
@@ -22,6 +23,7 @@ export default function SettingsItemCard({
   children,
   compact = false,
   active = false,
+  grouped = false,
 }: SettingsItemCardProps) {
   const styles = useStyles();
 
@@ -31,6 +33,7 @@ export default function SettingsItemCard({
         styles.settingItemCard,
         compact && styles.settingItemCardCompact,
         active && styles.settingItemCardActive,
+        grouped && styles.settingItemRow,
       ]}
     >
       <View style={styles.settingItemInline}>

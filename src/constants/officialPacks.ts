@@ -1,4 +1,5 @@
-import type { BoxZeroAnswerSide } from "@/src/contexts/settings/types";
+import type { BoxZeroAnswerSide, LetterHintSettings } from "@/src/contexts/settings/types";
+import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import type { LanguageCourseGroupId } from "./languageCourseGroups";
 import { imageMaps } from "./imageMaps";
 
@@ -16,6 +17,7 @@ export type OfficialPackCourseSettings = {
   cardSize?: "large" | "small";
   imageSize?: "dynamic" | "small" | "medium" | "large" | "very_large";
   imageFrameEnabled?: boolean;
+  letterHintSettings?: LetterHintSettings;
 };
 
 export type KnowledgeCourseGroupId = "capitals" | "flags" | "roadSigns";
@@ -915,7 +917,15 @@ const OFFICIAL_PACKS_MANIFEST = ([
   packVersion?: number;
 })[];
 
-export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack) => ({
-  packVersion: pack.packVersion ?? DEFAULT_PACK_VERSION,
+export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack: Omit<OfficialPackDef, "packVersion"> & { packVersion?: number }) => ({
   ...pack,
+  packVersion: pack.packVersion ?? DEFAULT_PACK_VERSION,
+  ...(["en", "es", "fr"].includes(pack.sourceLang ?? "") && pack.targetLang != null && pack.sourceLang !== pack.targetLang
+    ? {
+        settings: {
+          letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true },
+          ...pack.settings,
+        },
+      }
+    : {}),
 }));
