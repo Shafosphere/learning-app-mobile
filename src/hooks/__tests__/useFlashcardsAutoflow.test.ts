@@ -4,6 +4,7 @@ import {
   pickEndGameAutoflowDecision,
   useFlashcardsAutoflow,
   SWITCH_STICKY_MS,
+  INTRO_BOX_SWITCH_FEEDBACK_MS,
 } from "@/src/hooks/useFlashcardsAutoflow";
 import type { BoxesState } from "@/src/types/boxes";
 
@@ -44,6 +45,70 @@ describe("useFlashcardsAutoflow transition plan", () => {
 
   beforeEach(() => jest.useFakeTimers());
   afterEach(() => jest.useRealTimers());
+
+  it.each([
+    [makeBoxes({ boxOne: makeCards(1) }), "boxOne"],
+    [makeBoxes({ boxZero: makeCards(2), boxOne: makeCards(6) }), "boxOne"],
+    [makeBoxes({ boxZero: makeCards(2), boxTwo: makeCards(12) }), "boxTwo"],
+  ] as const)("holds intro success for one second before switching boxes (%s)", (boxes, targetBox) => {
+    const input = params({
+      activeBox: "boxZero", boxZeroEnabled: true, boxes, lastIntroAnswerAt: Date.now(),
+    });
+    const { result, rerender } = renderHook((current: Params) => useFlashcardsAutoflow(current), {
+      initialProps: input,
+    });
+    expect(result.current.isSwitchPending).toBe(true);
+    expect(result.current.isIntroSwitchFeedbackPending).toBe(true);
+    expect(input.handleSelectBox).not.toHaveBeenCalled();
+
+    act(() => jest.advanceTimersByTime(600));
+    rerender({ ...input, boxes: { ...boxes } });
+    act(() => jest.advanceTimersByTime(INTRO_BOX_SWITCH_FEEDBACK_MS - 601));
+    expect(input.handleSelectBox).not.toHaveBeenCalled();
+    expect(result.current.isIntroSwitchFeedbackPending).toBe(true);
+
+    act(() => jest.advanceTimersByTime(1));
+    expect(input.handleSelectBox).toHaveBeenCalledTimes(1);
+    expect(input.handleSelectBox).toHaveBeenCalledWith(targetBox);
+    expect(result.current.isIntroSwitchFeedbackPending).toBe(false);
+  });
+
+  it("continues immediately within box zero after an intro answer", () => {
+    const input = params({
+      activeBox: "boxZero", boxZeroEnabled: true,
+      boxes: makeBoxes({ boxZero: makeCards(2), boxOne: makeCards(5) }),
+      lastIntroAnswerAt: Date.now(),
+    });
+    const { result } = renderHook(() => useFlashcardsAutoflow(input));
+    expect(result.current.isSwitchPending).toBe(false);
+    expect(result.current.isIntroSwitchFeedbackPending).toBe(false);
+    expect(jest.getTimerCount()).toBe(0);
+    expect(input.handleSelectBox).not.toHaveBeenCalled();
+  });
+
+  it("does not delay a switch out of box zero without a completed intro answer", () => {
+    const input = params({
+      activeBox: "boxZero", boxZeroEnabled: true, boxes: makeBoxes({ boxOne: makeCards(6) }),
+    });
+    const { result } = renderHook(() => useFlashcardsAutoflow(input));
+    expect(result.current.isIntroSwitchFeedbackPending).toBe(false);
+    expect(input.handleSelectBox).toHaveBeenCalledWith("boxOne");
+  });
+
+  it.each(["disabled", "unmounted"])("cancels the delayed intro switch when %s", (reason) => {
+    const input = params({
+      activeBox: "boxZero", boxZeroEnabled: true,
+      boxes: makeBoxes({ boxOne: makeCards(6) }), lastIntroAnswerAt: Date.now(),
+    });
+    const { rerender, unmount } = renderHook((current: Params) => useFlashcardsAutoflow(current), {
+      initialProps: input,
+    });
+    if (reason === "disabled") rerender({ ...input, enabled: false });
+    else unmount();
+    act(() => jest.advanceTimersByTime(INTRO_BOX_SWITCH_FEEDBACK_MS));
+    expect(input.handleSelectBox).not.toHaveBeenCalled();
+    expect(jest.getTimerCount()).toBe(0);
+  });
 
   it.each(["enabled", "canSwitch"] as const)("does not hold or switch when %s is false", (flag) => {
     const input = params({ [flag]: false });

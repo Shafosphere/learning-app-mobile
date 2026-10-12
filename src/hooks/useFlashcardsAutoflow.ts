@@ -1,5 +1,5 @@
 import type { BoxesState } from "@/src/types/boxes";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type AutoflowParams = {
   enabled: boolean;
@@ -14,6 +14,7 @@ type AutoflowParams = {
   incomingBatchSize?: number;
   remainingNewFlashcardsCount?: number;
   totalFlashcardsInCourse?: number | null;
+  lastIntroAnswerAt?: number | null;
   onDebugEvent?: (
     area: string,
     event: string,
@@ -25,6 +26,7 @@ export const FLASHCARDS_AUTOFLOW_VERSION = "2026-04-22v3";
 
 export const SWITCH_STICKY_MS = 1500;
 // Minimum time (ms) to stay on a box before allowing another auto-switch.
+export const INTRO_BOX_SWITCH_FEEDBACK_MS = 1000;
 const BASE_STACK_TARGET = 5;
 // Desired number of cards to keep in the main engine stack (boxOne).
 const FLUSH_THRESHOLD_DEFAULT = 20;
@@ -283,8 +285,10 @@ export function useFlashcardsAutoflow({
   incomingBatchSize,
   remainingNewFlashcardsCount,
   totalFlashcardsInCourse,
+  lastIntroAnswerAt,
   onDebugEvent,
 }: AutoflowParams) {
+  const [, refreshTransition] = useState(0);
   const switchLockedUntil = useRef(0);
   const fetchInFlight = useRef(false);
   const endGameDrainTargetRef = useRef<keyof BoxesState | null>(null);
@@ -327,10 +331,27 @@ export function useFlashcardsAutoflow({
   const decisionTargetBox = decision.targetBox;
   const shouldDownloadNew = decision.shouldDownloadNew;
   const targetBox = resolveAvailableTargetBox(boxes, activeBox, decisionTargetBox, boxZeroEnabled);
+  // Keep the completed intro card visible through both success feedback and
+  // any remaining minimum stay in the current box.
+  const introFeedbackUntil = lastIntroAnswerAt == null
+    ? 0
+    : Math.max(lastIntroAnswerAt + INTRO_BOX_SWITCH_FEEDBACK_MS, switchLockedUntil.current);
+  const isIntroSwitchFeedbackPending = Boolean(
+    enabled && canSwitch && activeBox === "boxZero" && boxZeroEnabled
+    && targetBox && targetBox !== activeBox && now < introFeedbackUntil,
+  );
   const isSwitchPending = Boolean(
-    enabled && canSwitch && now >= switchLockedUntil.current
+    enabled && canSwitch && (now >= switchLockedUntil.current || isIntroSwitchFeedbackPending)
     && targetBox && targetBox !== activeBox,
   );
+
+  useEffect(() => {
+    if (!isIntroSwitchFeedbackPending) return;
+    const timer = setTimeout(() => {
+      refreshTransition((value) => value + 1);
+    }, Math.max(0, introFeedbackUntil - Date.now()));
+    return () => clearTimeout(timer);
+  }, [introFeedbackUntil, isIntroSwitchFeedbackPending]);
 
   useEffect(() => {
     if (!enabled) return;
@@ -357,7 +378,7 @@ export function useFlashcardsAutoflow({
       });
     }
 
-    if (!isSwitchPending || !targetBox) return;
+    if (!isSwitchPending || isIntroSwitchFeedbackPending || !targetBox) return;
 
     onDebugEvent?.("flashcards", "autoflow.decision", {
       phase,
@@ -383,6 +404,7 @@ export function useFlashcardsAutoflow({
     canDownloadMore,
     decisionTargetBox,
     isSwitchPending,
+    isIntroSwitchFeedbackPending,
     nextDrainTarget,
     phase,
     shouldDownloadNew,
@@ -399,5 +421,5 @@ export function useFlashcardsAutoflow({
     totalFlashcardsInCourse,
   ]);
 
-  return { isSwitchPending };
+  return { isSwitchPending, isIntroSwitchFeedbackPending };
 }

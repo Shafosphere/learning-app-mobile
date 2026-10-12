@@ -15,6 +15,7 @@ type CourseFinishedPanelProps = ComponentProps<typeof CourseFinishedPanel>;
 
 type FlashcardsCardSectionProps = {
   holdContent?: boolean;
+  heldBackgroundColor?: string;
   activeCustomCourseId: number | null;
   loadError: string | null;
   customCards: WordWithTranslations[];
@@ -64,6 +65,7 @@ type FlashcardsCardSectionProps = {
 
 export const FlashcardsCardSection = memo(function FlashcardsCardSection({
   holdContent = false,
+  heldBackgroundColor,
   activeCustomCourseId,
   loadError,
   customCards,
@@ -177,6 +179,7 @@ export const FlashcardsCardSection = memo(function FlashcardsCardSection({
         <Card
           {...cardProps}
           isContentHeld={isHeld}
+          backgroundColorOverride={isHeld ? heldBackgroundColor : undefined}
           isFocused={isCardFocusEnabled && !shouldDisableTutorialCardAutofocus}
           disableLayoutAnimation={isHeld || shouldKeepLoadingOverlayVisible || showLoadingOverlay}
           // Keep the mounted input and keyboard, but reject stale input events.

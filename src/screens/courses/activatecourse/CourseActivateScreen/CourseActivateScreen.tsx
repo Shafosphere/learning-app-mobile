@@ -127,7 +127,7 @@ export default function CourseActivateScreen() {
         category = COURSE_CATEGORIES[categoryId];
         key = `cat:${categoryId}`;
       } else if (languageGroupId) {
-        key = `series:${languageGroupId}`;
+        key = `series:${languageGroupId}:${sourceLang ?? "unknown"}:${targetLang ?? "unknown"}`;
       } else {
         key = `lang:${targetLang ?? "unknown"}-${sourceLang ?? "unknown"}`;
       }

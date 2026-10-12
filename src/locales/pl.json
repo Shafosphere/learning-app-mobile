@@ -88,6 +88,8 @@
       "initializing": "Przygotowuję bazę danych…",
       "importingCsv": "Importuję dane…",
       "finishingSetup": "Kończę konfigurację…",
+      "newVersion": "Nowa wersja",
+      "updatingFlashcards": "Aktualizuję fiszki…",
       "launching": "Uruchamiam aplikację…",
       "dbError": "Nie udało się przygotować bazy danych. Sprawdź logi."
     },

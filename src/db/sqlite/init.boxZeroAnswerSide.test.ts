@@ -3,10 +3,12 @@ import * as SQLite from "expo-sqlite";
 import { seedOfficialPacksWithDb } from "./init";
 import { ensureOfficialCourse } from "./repositories/courses";
 
+let mockPackSlug = "eng_to_pl_first_50";
 jest.mock("@/src/constants/officialPacks", () => ({
-  OFFICIAL_PACKS: [{ slug: "eng_to_pl_first_50", name: "Pierwsze 50 słów", packVersion: 2,
-    iconId: "flag:en", iconColor: "#10B981", settings: { boxZeroEnabled: true, boxZeroAnswerSide: "front",
-      letterHintSettings: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 } } }],
+  get OFFICIAL_PACKS() {
+    return jest.requireActual("@/src/constants/officialPacks").OFFICIAL_PACKS
+      .filter((pack: { slug: string }) => pack.slug === mockPackSlug);
+  },
 }));
 jest.mock("@/assets/data/sqlite/prebuilt.db", () => 1);
 jest.mock("expo-sqlite", () => ({ importDatabaseFromAssetAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
@@ -24,8 +26,16 @@ beforeEach(async () => {
   jest.clearAllMocks();
 });
 
-it.each([7, 42])("sets front for 50-word course %s, preserves manual back", async (courseId) => {
-  const local = { getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: 50 }) };
+it.each([
+  "eng_to_pl_first_50", "fr_to_en_first_50", "fr_to_en_first_150", "fr_to_en_first_332",
+  "french_a1", "es_to_en_first_50", "es_to_en_first_150", "es_to_en_first_327",
+])("applies %s defaults and preserves manual settings", async (slug) => {
+  mockPackSlug = slug;
+  const courseId = 42;
+  const local = {
+    getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: 50 }),
+    getAllAsync: jest.fn().mockResolvedValue([]),
+  };
   const bundled = {
     getFirstAsync: jest.fn().mockResolvedValue({ id: 1, packVersion: 2, flashcardsCount: 50 }),
     closeAsync: jest.fn().mockResolvedValue(undefined),

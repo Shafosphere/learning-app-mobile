@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 8;
+const PREBUILT_DATABASE_VERSION = 10;
 
 const OFFICIAL_PACKS = [
   {
@@ -105,7 +105,7 @@ const OFFICIAL_PACKS = [
   },
   ...[50, 150, 327].map((count) => ({
     slug: `es_to_pl_first_${count}`,
-    packVersion: 2,
+    packVersion: 3,
     name: count === 50 ? "Pierwsze 50 słów" : `${count} słów`,
     iconId: "flag:es",
     iconColor: "#F97316",
@@ -125,28 +125,41 @@ const OFFICIAL_PACKS = [
     defaultFlip: true,
     csvFile: `jezyki/francuski/fiszki_${count}.csv`,
   })),
-  {
-    slug: "basic_english_to_spanish_50",
-    name: "Basic Spanish",
+  ...[50, 150, 327].map((count) => ({
+    slug: `es_to_en_first_${count}`,
+    packVersion: 1,
+    name: count === 50 ? "First 50 words" : `${count} words`,
     iconId: "flag:es",
     iconColor: "#F97316",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
-    packVersion: 2,
+    defaultFlip: true,
     csvLocale: "en",
-    csvFile: "basic_english_to_spanish_50.csv",
-  },
+    csvFile: `jezyki/hiszpanski/fiszki_${count}.csv`,
+  })),
+  ...[50, 150, 332].map((count) => ({
+    slug: `fr_to_en_first_${count}`,
+    packVersion: 1,
+    name: count === 50 ? "First 50 words" : `${count} words`,
+    iconId: "flag:fr",
+    iconColor: "#2563EB",
+    reviewsEnabled: true,
+    defaultType: "traditional",
+    defaultFlip: true,
+    csvLocale: "en",
+    csvFile: `jezyki/francuski/FR_fiszki_${count}.csv`,
+  })),
   {
     slug: "french_a1",
+    packVersion: 2,
     name: "French A1",
     iconId: "flag:fr",
     iconColor: "#2563EB",
     reviewsEnabled: true,
     defaultType: "traditional",
-    defaultFlip: false,
+    defaultFlip: true,
     csvLocale: "en",
-    csvFile: "French_A1.csv",
+    csvFile: "jezyki/francuski/French_A1.csv",
   },
   {
     slug: "french_a2",
@@ -157,7 +170,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvLocale: "en",
-    csvFile: "French_A2.csv",
+    csvFile: "jezyki/francuski/French_A2.csv",
   },
   {
     slug: "french_b1",
@@ -168,7 +181,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvLocale: "en",
-    csvFile: "French_B1.csv",
+    csvFile: "jezyki/francuski/French_B1.csv",
   },
   {
     slug: "french_b2",
@@ -180,7 +193,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvLocale: "en",
-    csvFile: "French_B2.csv",
+    csvFile: "jezyki/francuski/French_B2.csv",
   },
   {
     slug: "astronomia",
@@ -408,7 +421,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_europy_en.csv",
+    csvFile: "geografia/flagi/flagi_europy_en.csv",
   },
   {
     slug: "flagi_afryki_en",
@@ -419,7 +432,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_afryki_en.csv",
+    csvFile: "geografia/flagi/flagi_afryki_en.csv",
   },
   {
     slug: "flagi_azji_en",
@@ -430,7 +443,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_azji_en.csv",
+    csvFile: "geografia/flagi/flagi_azji_en.csv",
   },
   {
     slug: "flagi_ameryki_en",
@@ -441,7 +454,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_ameryki_en.csv",
+    csvFile: "geografia/flagi/flagi_ameryki_en.csv",
   },
   {
     slug: "flagi_oceanii_en",
@@ -452,7 +465,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_oceanii_en.csv",
+    csvFile: "geografia/flagi/flagi_oceanii_en.csv",
   },
   {
     slug: "flagi_swiata_en",
@@ -463,7 +476,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "flagi_swiata_en.csv",
+    csvFile: "geografia/flagi/flagi_swiata_en.csv",
   },
   {
     slug: "panstwa_i_stolice_europy_en",
@@ -474,7 +487,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_europy_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_europy_en.csv",
   },
   {
     slug: "panstwa_i_stolice_afryki_en",
@@ -485,7 +498,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_afryki_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_afryki_en.csv",
   },
   {
     slug: "panstwa_i_stolice_azji_en",
@@ -496,7 +509,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_azji_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_azji_en.csv",
   },
   {
     slug: "panstwa_i_stolice_ameryki_en",
@@ -507,7 +520,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_ameryki_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_ameryki_en.csv",
   },
   {
     slug: "panstwa_i_stolice_oceanii_en",
@@ -518,7 +531,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_oceanii_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_oceanii_en.csv",
   },
   {
     slug: "panstwa_i_stolice_swiata_en",
@@ -529,7 +542,7 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: true,
     csvLocale: "en",
-    csvFile: "panstwa_i_stolice_swiata_en.csv",
+    csvFile: "geografia/panstwa_i_stolice/panstwa_i_stolice_swiata_en.csv",
   },
 ].map((pack) => ({
   packVersion: 1,

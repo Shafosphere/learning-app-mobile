@@ -2,7 +2,7 @@
   "expo": {
     "name": "Memicard",
     "slug": "memicard",
-    "version": "1.0.13",
+    "version": "1.0.15",
     "orientation": "portrait",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",
@@ -29,7 +29,7 @@
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.memicard.app",
-      "versionCode": 14
+      "versionCode": 16
     },
     "splash": {
       "image": "./assets/app/splash/splash-icon-v2.png",
@@ -60,7 +60,17 @@
       "expo-asset",
       "expo-audio",
       "expo-font",
-      "expo-mail-composer"
+      "expo-mail-composer",
+      [
+        "expo-build-properties",
+        {
+          "android": {
+            "enableMinifyInReleaseBuilds": true,
+            "enableShrinkResourcesInReleaseBuilds": true,
+            "extraProguardRules": "# Expo SQLite options are read through Kotlin reflection.\n-keep class expo.modules.sqlite.** { *; }\n-keep class expo.modules.kotlin.records.** { *; }\n-keep class expo.modules.kotlin.allocators.** { *; }"
+          }
+        }
+      ]
     ],
     "extra": {
       "googleDriveBackup": {

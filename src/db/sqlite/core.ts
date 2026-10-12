@@ -4,6 +4,7 @@ export type DbInitializationEvent =
   | { type: "start" }
   | { type: "import-start" }
   | { type: "import-finish" }
+  | { type: "content-update-detected" }
   | {
       type: "progress";
       completed: number;

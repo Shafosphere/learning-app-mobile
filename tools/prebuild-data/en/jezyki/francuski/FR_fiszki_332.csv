@@ -1,0 +1,333 @@
+external_id,front_text,back_text
+0001,eau,water
+0002,livre,book
+0003,tête,head
+0004,porte,door
+0005,voiture,car
+0006,poisson,fish
+0007,lit,bed
+0008,soleil,sun
+0009,lait,milk
+0010,bouche,"mouth, opening"
+0011,fenêtre,window
+0012,sucre,sugar
+0013,cheval,horse
+0014,chaise,chair
+0015,train,train
+0016,chien,dog
+0017,ballon,"ball, balloon"
+0018,neige,snow
+0019,œufs,eggs
+0020,pluie,rain
+0021,tasse,"cup, mug"
+0022,bus,bus
+0023,oreille,ear
+0024,mouton,sheep
+0025,pain,bread
+0026,chat,cat
+0027,nez,nose
+0028,bureau,"desk, office"
+0029,pomme,apple
+0030,fromage,cheese
+0031,couteau,knife
+0032,vache,cow
+0033,jus,juice
+0034,cochon,pig
+0035,lapin,rabbit
+0036,crayon,pencil
+0037,tomate,tomato
+0038,canapé,"sofa, couch"
+0039,lampe,lamp
+0040,réfrigérateur,"fridge, refrigerator"
+0041,sel,salt
+0042,banane,banana
+0043,pomme de terre,potato
+0044,assiette,plate
+0045,fourchette,fork
+0046,cuillère,spoon
+0047,oreiller,pillow
+0048,couverture,"blanket, cover"
+0049,œil,eye
+0050,pied,foot
+0051,salut,"hi, hello, bye"
+0052,bonjour,"hello, good morning, good afternoon"
+0053,bonsoir,good evening
+0054,bonne nuit,good night
+0055,au revoir,"goodbye, bye"
+0056,à bientôt,see you soon
+0057,à plus,"see you later, bye"
+0058,s'il vous plaît,please
+0059,merci,"thank you, thanks"
+0060,pardon,"sorry, excuse me, pardon"
+0061,de rien,"you are welcome, no problem"
+0062,ce n'est pas grave,"no problem, it is okay"
+0063,je voudrais,I would like
+0064,je peux ?,"can I, may I"
+0065,enchanté,nice to meet you
+0066,oui,yes
+0067,non,no
+0068,peut-être,"maybe, perhaps"
+0069,bien,"well, good"
+0070,mal,"badly, poorly"
+0071,bien sûr,"of course, certainly"
+0072,je ne sais pas,I do not know
+0073,je comprends,I understand
+0074,je ne comprends pas,I do not understand
+0075,d'accord,"okay, agreed"
+0076,je m'appelle,my name is
+0077,je suis,I am
+0078,ravi de te rencontrer,nice to meet you
+0079,tu viens d'où ?,where are you from
+0080,je viens,"I come, I am coming"
+0081,quel âge as-tu ?,how old are you
+0082,l'âge,age
+0083,qui ?,who
+0084,quoi ?,what
+0085,où ?,where
+0086,quand ?,when
+0087,pourquoi ?,why
+0088,comment ?,how
+0089,combien ?,"how much, how many"
+0090,lequel ?,which one
+0091,est-ce que ?,"do, does, is"
+0092,quel ?,"which, what"
+0093,je,I
+0094,tu,you
+0095,il,he
+0096,elle,she
+0097,ça,"this, that, it"
+0098,nous,we
+0099,vous,you
+0100,ils et elles,they
+0101,mon,my
+0102,ton,your
+0103,"son, sa, ses","his, her, its"
+0104,notre,our
+0105,votre,your
+0106,être,be
+0107,avoir,have
+0108,faire,"do, make"
+0109,aller,go
+0110,venir,come
+0111,aller en voiture,"go by car, drive"
+0112,vouloir,want
+0113,aimer,"like, love"
+0114,savoir,know
+0115,connaître,know
+0116,parler,"speak, talk"
+0117,comprendre,understand
+0118,manger,eat
+0119,boire,drink
+0120,dormir,sleep
+0121,habiter,"live, reside"
+0122,travailler,work
+0123,apprendre,"learn, teach"
+0124,acheter,"buy, purchase"
+0125,donner,give
+0126,voir,see
+0127,entendre,hear
+0128,ouvrir,open
+0129,fermer,"close, shut"
+0130,zéro,zero
+0131,un,one
+0132,deux,two
+0133,trois,three
+0134,quatre,four
+0135,cinq,five
+0136,six,six
+0137,sept,seven
+0138,huit,eight
+0139,neuf,"nine, new"
+0140,dix,ten
+0141,onze,eleven
+0142,douze,twelve
+0143,vingt,twenty
+0144,trente,thirty
+0145,cent,hundred
+0146,mille,thousand
+0147,premier,first
+0148,deuxième,second
+0149,troisième,third
+0150,la moitié,half
+0151,beaucoup,"a lot, much, many"
+0152,peu,"little, few"
+0153,quelques,"some, a few"
+0154,blanc,white
+0155,noir,black
+0156,rouge,red
+0157,bleu,blue
+0158,vert,green
+0159,jaune,yellow
+0160,orange,orange
+0161,rose,"pink, rose"
+0162,violet,"purple, violet"
+0163,marron,"brown, chestnut"
+0164,gris,"grey, gray"
+0165,clair,"light, clear"
+0166,foncé,dark
+0167,lundi,Monday
+0168,mardi,Tuesday
+0169,mercredi,Wednesday
+0170,jeudi,Thursday
+0171,vendredi,Friday
+0172,samedi,Saturday
+0173,dimanche,Sunday
+0174,aujourd'hui,today
+0175,demain,tomorrow
+0176,hier,yesterday
+0177,le matin,"morning, in the morning"
+0178,le soir,"evening, in the evening"
+0179,maintenant,now
+0180,plus tard,later
+0181,plus tôt,earlier
+0182,l'heure,"hour, time"
+0183,la minute,minute
+0184,la semaine,week
+0185,le mois,month
+0186,l'année,year
+0187,la maison,"house, home"
+0188,l'école,school
+0189,le travail,"work, job"
+0190,le magasin,"shop, store"
+0191,le restaurant,restaurant
+0192,les toilettes,"toilet, restroom, bathroom"
+0193,l'hôtel,hotel
+0194,l'hôpital,hospital
+0195,la pharmacie,"pharmacy, chemist"
+0196,la gare,"train station, railway station"
+0197,l'aéroport,airport
+0198,la rue,"street, road"
+0199,la ville,"city, town"
+0200,le pays,country
+0201,la pièce,"room, piece, coin"
+0202,la cuisine,"kitchen, cooking, cuisine"
+0203,la salle de bain,bathroom
+0204,l'être humain,"human, human being"
+0205,la personne,person
+0206,la femme,"woman, wife"
+0207,l'homme,man
+0208,l'enfant,"child, kid"
+0209,maman,"mom, mum, mommy"
+0210,papa,"dad, daddy"
+0211,les parents,parents
+0212,le frère,brother
+0213,la sœur,sister
+0214,l'ami,friend
+0215,le copain,"friend, buddy, boyfriend"
+0216,la petite amie,girlfriend
+0217,le petit ami,boyfriend
+0218,le mari,husband
+0219,l'épouse,wife
+0220,le café,"coffee, cafe"
+0221,le thé,tea
+0222,la viande,meat
+0223,l'œuf,egg
+0224,le riz,rice
+0225,les pâtes,pasta
+0226,la soupe,soup
+0227,le fruit,fruit
+0228,le légume,vegetable
+0229,le petit déjeuner,breakfast
+0230,le déjeuner,lunch
+0231,le dîner,"dinner, supper"
+0232,le téléphone,"phone, telephone"
+0233,l'ordinateur,computer
+0234,la clé,key
+0235,la table,table
+0236,le sac,bag
+0237,le vêtement,"clothing, clothes"
+0238,les chaussures,shoes
+0239,l'argent,"money, silver"
+0240,la carte,"card, map, menu"
+0241,le billet,"ticket, banknote, bill"
+0242,le vélo,"bike, bicycle"
+0243,le visage,face
+0244,la main,hand
+0245,la jambe,leg
+0246,le ventre,"belly, stomach"
+0247,le dos,"back, reverse"
+0248,le cœur,heart
+0249,la dent,tooth
+0250,les cheveux,hair
+0251,bon,"good, nice"
+0252,mauvais,"bad, poor"
+0253,grand,"big, large, tall"
+0254,petit,"small, little, short"
+0255,nouveau,new
+0256,vieux,old
+0257,jeune,young
+0258,joli,"pretty, beautiful"
+0259,laid,ugly
+0260,facile,"easy, simple"
+0261,difficile,"difficult, hard"
+0262,rapide,"fast, quick"
+0263,lent,slow
+0264,chaud,"hot, warm"
+0265,froid,cold
+0266,bon marché,"cheap, inexpensive"
+0267,cher,"expensive, dear"
+0268,important,important
+0269,fatigué,tired
+0270,affamé,"starving, hungry"
+0271,assoiffé,thirsty
+0272,ici,here
+0273,là-bas,"there, over there"
+0274,près,"near, close"
+0275,loin,"far, far away"
+0276,dans,"in, inside"
+0277,sur,on
+0278,sous,"under, below"
+0279,au-dessus de,"above, over"
+0280,à côté de,"next to, beside"
+0281,devant,"in front of, before"
+0282,derrière,behind
+0283,à gauche,"on the left, to the left"
+0284,à droite,"on the right, to the right"
+0285,tout droit,"straight ahead, straight on"
+0286,en haut,"upstairs, at the top"
+0287,en bas,"downstairs, at the bottom"
+0288,combien ça coûte ?,"how much is it, how much does it cost"
+0289,le prix,price
+0290,payer,pay
+0291,l'argent liquide,cash
+0292,l'addition,"bill, check"
+0293,le ticket de caisse,receipt
+0294,ouvert,open
+0295,fermé,"closed, shut"
+0296,je veux ça,I want that
+0297,je voudrais ça,I would like that
+0298,le tramway,"tram, streetcar"
+0299,le taxi,"taxi, cab"
+0300,l'avion,"plane, airplane"
+0301,l'arrêt,stop
+0302,où est-ce ?,where is it
+0303,comment aller ?,how to get there
+0304,je vais,"I am going, I go"
+0305,je descends ici,I get off here
+0306,au secours,help
+0307,le médecin,"doctor, physician"
+0308,j'ai mal,"it hurts, I am in pain"
+0309,je me sens mal,"I feel bad, I feel sick"
+0310,je suis malade,"I am sick, I am ill"
+0311,l'accident,accident
+0312,la police,police
+0313,le feu,"fire, traffic light"
+0314,dangereux,"dangerous, unsafe"
+0315,j'ai besoin d'aide,I need help
+0316,le temps,"weather, time"
+0317,le vent,wind
+0318,il fait doux,"it is mild, it is warm"
+0319,il fait froid,it is cold
+0320,il fait chaud,it is hot
+0321,il pleut,"it is raining, it rains"
+0322,c'est nuageux,it is cloudy
+0323,il fait beau,the weather is nice
+0324,heureux,"happy, joyful"
+0325,triste,"sad, unhappy"
+0326,en colère,"angry, mad"
+0327,calme,"calm, quiet"
+0328,nerveux,"nervous, anxious"
+0329,malade,"sick, ill"
+0330,j'ai peur,"I am afraid, I am scared"
+0331,j'aime,"I like, I love"
+0332,je n'aime pas,"I do not like, I dislike"

@@ -1,0 +1,151 @@
+external_id,front_text,back_text
+0001,eau,water
+0002,livre,book
+0003,tête,head
+0004,porte,door
+0005,voiture,car
+0006,poisson,fish
+0007,lit,bed
+0008,soleil,sun
+0009,lait,milk
+0010,bouche,"mouth, opening"
+0011,fenêtre,window
+0012,sucre,sugar
+0013,cheval,horse
+0014,chaise,chair
+0015,train,train
+0016,chien,dog
+0017,ballon,"ball, balloon"
+0018,neige,snow
+0019,œufs,eggs
+0020,pluie,rain
+0021,tasse,"cup, mug"
+0022,bus,bus
+0023,oreille,ear
+0024,mouton,sheep
+0025,pain,bread
+0026,chat,cat
+0027,nez,nose
+0028,bureau,"desk, office"
+0029,pomme,apple
+0030,fromage,cheese
+0031,couteau,knife
+0032,vache,cow
+0033,jus,juice
+0034,cochon,pig
+0035,lapin,rabbit
+0036,crayon,pencil
+0037,tomate,tomato
+0038,canapé,"sofa, couch"
+0039,lampe,lamp
+0040,réfrigérateur,"fridge, refrigerator"
+0041,sel,salt
+0042,banane,banana
+0043,pomme de terre,potato
+0044,assiette,plate
+0045,fourchette,fork
+0046,cuillère,spoon
+0047,oreiller,pillow
+0048,couverture,"blanket, cover"
+0049,œil,eye
+0050,pied,foot
+0106,être,be
+0107,avoir,have
+0108,faire,"do, make"
+0109,aller,go
+0110,venir,come
+0111,aller en voiture,"go by car, drive"
+0112,vouloir,want
+0113,aimer,"like, love"
+0114,savoir,know
+0115,connaître,know
+0116,parler,"speak, talk"
+0117,comprendre,understand
+0118,manger,eat
+0119,boire,drink
+0120,dormir,sleep
+0121,habiter,"live, reside"
+0122,travailler,work
+0123,apprendre,"learn, teach"
+0124,acheter,"buy, purchase"
+0125,donner,give
+0126,voir,see
+0127,entendre,hear
+0128,ouvrir,open
+0187,la maison,"house, home"
+0188,l'école,school
+0189,le travail,"work, job"
+0190,le magasin,"shop, store"
+0191,le restaurant,restaurant
+0192,les toilettes,"toilet, restroom, bathroom"
+0193,l'hôtel,hotel
+0194,l'hôpital,hospital
+0195,la pharmacie,"pharmacy, chemist"
+0196,la gare,"train station, railway station"
+0197,l'aéroport,airport
+0198,la rue,"street, road"
+0199,la ville,"city, town"
+0200,le pays,country
+0201,la pièce,"room, piece, coin"
+0202,la cuisine,"kitchen, cooking, cuisine"
+0203,la salle de bain,bathroom
+0204,l'être humain,"human, human being"
+0205,la personne,person
+0206,la femme,"woman, wife"
+0207,l'homme,man
+0208,l'enfant,"child, kid"
+0209,maman,"mom, mum, mommy"
+0210,papa,"dad, daddy"
+0211,les parents,parents
+0212,le frère,brother
+0213,la sœur,sister
+0214,l'ami,friend
+0215,le copain,"friend, buddy, boyfriend"
+0216,la petite amie,girlfriend
+0217,le petit ami,boyfriend
+0218,le mari,husband
+0219,l'épouse,wife
+0220,le café,"coffee, cafe"
+0221,le thé,tea
+0222,la viande,meat
+0223,l'œuf,egg
+0224,le riz,rice
+0225,les pâtes,pasta
+0226,la soupe,soup
+0227,le fruit,fruit
+0228,le légume,vegetable
+0229,le petit déjeuner,breakfast
+0230,le déjeuner,lunch
+0231,le dîner,"dinner, supper"
+0232,le téléphone,"phone, telephone"
+0233,l'ordinateur,computer
+0234,la clé,key
+0235,la table,table
+0236,le sac,bag
+0237,le vêtement,"clothing, clothes"
+0238,les chaussures,shoes
+0239,l'argent,"money, silver"
+0240,la carte,"card, map, menu"
+0241,le billet,"ticket, banknote, bill"
+0242,le vélo,"bike, bicycle"
+0243,le visage,face
+0244,la main,hand
+0245,la jambe,leg
+0246,le ventre,"belly, stomach"
+0247,le dos,"back, reverse"
+0248,le cœur,heart
+0249,la dent,tooth
+0250,les cheveux,hair
+0291,l'argent liquide,cash
+0292,l'addition,"bill, check"
+0293,le ticket de caisse,receipt
+0298,le tramway,"tram, streetcar"
+0299,le taxi,"taxi, cab"
+0300,l'avion,"plane, airplane"
+0301,l'arrêt,stop
+0307,le médecin,"doctor, physician"
+0311,l'accident,accident
+0312,la police,police
+0313,le feu,"fire, traffic light"
+0316,le temps,"weather, time"
+0317,le vent,wind

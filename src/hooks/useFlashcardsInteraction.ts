@@ -138,6 +138,7 @@ export function useFlashcardsInteraction({
   const [queueNext, setQueueNext] = useState(false);
   const [answer, setAnswer] = useState("");
   const [result, setResult] = useState<boolean | null>(null);
+  const [lastIntroAnswerAt, setLastIntroAnswerAt] = useState<number | null>(null);
   const [correction, setCorrection] = useState<CorrectionState | null>(null);
   const [learned, setLearned] = useState<WordWithTranslations[]>([]);
   const [questionShownAt, setQuestionShownAt] = useState<number | null>(null);
@@ -930,6 +931,7 @@ export function useFlashcardsInteraction({
           return;
         }
         const promote = correction.mode === "intro";
+        if (promote) setLastIntroAnswerAt(Date.now());
         moveElement(correction.cardId, promote, promote ? "correct" : "wrong");
       }
       // Wyczyść poprzednią odpowiedź zanim pokażemy kolejną fiszkę.
@@ -992,6 +994,7 @@ export function useFlashcardsInteraction({
     setSelectedItem(null);
     setAnswer("");
     setResult(null);
+    setLastIntroAnswerAt(null);
     setCorrection(null);
     setPendingExplanationMove(null);
     setQueueNext(false);
@@ -1013,6 +1016,7 @@ export function useFlashcardsInteraction({
     demotionCorrectionLockRef.current = null;
     setAnswer("");
     setResult(null);
+    setLastIntroAnswerAt(null);
     setCorrection(null);
     setPendingExplanationMove(null);
     setQueueNext(false);
@@ -1106,6 +1110,7 @@ export function useFlashcardsInteraction({
     answer,
     setAnswer,
     result,
+    lastIntroAnswerAt,
     setResult,
     confirm,
     canConfirm,

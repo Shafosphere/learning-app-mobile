@@ -1681,11 +1681,15 @@ describe("useFlashcardsInteraction", () => {
       const expected = boxZeroAnswerSide === "front" ? "agua" : "woda";
       const otherSide = boxZeroAnswerSide === "front" ? "woda" : "agua";
       act(() => hook.result.current.interaction.wrongInputChange(input, otherSide));
+      expect(hook.result.current.interaction.lastIntroAnswerAt).toBeNull();
       expect(hook.result.current.boxes.boxZero.map((item) => item.id)).toContain(card.id);
       expect(hook.result.current.boxes.boxOne).toHaveLength(0);
+      const answerStartedAt = Date.now();
       act(() => hook.result.current.interaction.wrongInputChange(input, expected));
       await waitFor(() => expect(hook.result.current.boxes.boxOne.map((item) => item.id)).toContain(card.id));
       expect(hook.result.current.boxes.boxZero).toHaveLength(0);
+      expect(hook.result.current.interaction.lastIntroAnswerAt).toBeGreaterThanOrEqual(answerStartedAt);
+      expect(hook.result.current.interaction.lastIntroAnswerAt).toBeLessThanOrEqual(Date.now());
     });
 
     it("shows the Polish meaning while copying the English B1 word without an image", async () => {

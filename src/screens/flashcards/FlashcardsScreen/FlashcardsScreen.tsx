@@ -278,6 +278,7 @@ export default function Flashcards() {
     answer,
     setAnswer,
     result,
+    lastIntroAnswerAt,
     setResult,
     confirm,
     reversed,
@@ -767,6 +768,7 @@ export default function Flashcards() {
     introBoxLimitReached,
     incomingBatchSize,
     totalFlashcardsInCourse: totalCards,
+    lastIntroAnswerAt,
     remainingNewFlashcardsCount,
     onDebugEvent: (_area, event, payload) => {
       if (__DEV__ && process.env.NODE_ENV !== "test" && event === "autoflow.switch_box") {
@@ -786,6 +788,7 @@ export default function Flashcards() {
     },
   });
   const holdCardContent = isBetweenCards || Boolean(autoflow?.isSwitchPending);
+  const isIntroSwitchFeedbackPending = Boolean(autoflow?.isIntroSwitchFeedbackPending);
   const currentFlashcardsStep = coachmark.currentStep;
   const shouldDisableTutorialCardAutofocus =
     (coachmark.isActive && currentFlashcardsStep?.id !== "flashcards-step-9") ||
@@ -793,7 +796,7 @@ export default function Flashcards() {
 
   const handleSelectBox = useCallback(
     (boxName: keyof BoxesState) => {
-      if (boxSelectionLocked) {
+      if (boxSelectionLocked || isIntroSwitchFeedbackPending) {
         handleBlockedBoxInteraction(boxName);
         return;
       }
@@ -831,6 +834,7 @@ export default function Flashcards() {
     [
       baseHandleSelectBox,
       boxSelectionLocked,
+      isIntroSwitchFeedbackPending,
       handleBlockedBoxInteraction,
       handleBoxFaceSelection,
       setTutorialEventCompleted,
@@ -964,6 +968,7 @@ export default function Flashcards() {
   const cardSection = (
     <FlashcardsCardSection
       holdContent={holdCardContent}
+      heldBackgroundColor={isIntroSwitchFeedbackPending ? colors.my_green : undefined}
       activeBox={activeBox}
       keyboardBridgeInputRef={keyboardBridgeInputRef}
       inlineAction={inlineCardAction}
@@ -1135,7 +1140,7 @@ export default function Flashcards() {
           boxFaces,
           handleSelectBox,
           handleBoxLongPress,
-          boxSelectionLocked,
+          boxSelectionLocked: boxSelectionLocked || isIntroSwitchFeedbackPending,
           flashcardsContentWidth,
           t,
         } : null}

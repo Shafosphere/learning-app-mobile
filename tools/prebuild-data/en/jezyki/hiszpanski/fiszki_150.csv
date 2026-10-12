@@ -1,0 +1,151 @@
+external_id,front_text,back_text
+0001,agua,water
+0002,libro,book
+0003,cabeza,head
+0004,puerta,door
+0005,coche,"car, automobile"
+0006,pez,fish
+0007,cama,bed
+0008,sol,sun
+0009,leche,milk
+0010,boca,"mouth, opening"
+0011,ventana,window
+0012,azúcar,sugar
+0013,caballo,horse
+0014,silla,chair
+0015,tren,train
+0016,perro,dog
+0017,pelota,ball
+0018,nieve,snow
+0019,huevos,eggs
+0020,lluvia,"rain, rainfall"
+0021,taza,"cup, mug"
+0022,autobús,bus
+0023,oreja,ear
+0024,oveja,sheep
+0025,pan,bread
+0026,gato,cat
+0027,nariz,nose
+0028,escritorio,desk
+0029,manzana,apple
+0030,queso,cheese
+0031,cuchillo,knife
+0032,vaca,cow
+0033,zumo,juice
+0034,cerdo,pig
+0035,conejo,rabbit
+0036,lápiz,pencil
+0037,tomate,tomato
+0038,sofá,"sofa, couch"
+0039,lámpara,lamp
+0040,nevera,"fridge, refrigerator"
+0041,sal,salt
+0042,plátano,banana
+0043,patata,potato
+0044,plato,"plate, dish"
+0045,tenedor,fork
+0046,cuchara,spoon
+0047,almohada,pillow
+0048,manta,blanket
+0049,ojo,eye
+0050,pie,foot
+0107,ser,to be
+0108,tener,to have
+0109,hacer,"to do, to make"
+0110,ir,to go
+0111,venir,to come
+0112,querer,to want
+0113,gustar,"to like, to please"
+0114,saber,to know
+0115,conocer,to know
+0116,hablar,"to speak, to talk"
+0117,entender,to understand
+0118,comer,to eat
+0119,beber,to drink
+0120,dormir,to sleep
+0121,vivir,"to live, to reside"
+0122,trabajar,to work
+0123,aprender,to learn
+0124,comprar,"to buy, to purchase"
+0125,dar,to give
+0126,ver,"to see, to watch"
+0127,oír,to hear
+0128,abrir,to open
+0187,casa,"house, home"
+0188,escuela,school
+0189,trabajo,"work, job"
+0190,tienda,"shop, store"
+0191,restaurante,restaurant
+0192,baño,"bathroom, toilet, restroom"
+0193,hotel,hotel
+0194,hospital,hospital
+0195,farmacia,"pharmacy, drugstore"
+0196,estación,station
+0197,aeropuerto,airport
+0198,calle,street
+0199,ciudad,city
+0200,país,"country, nation"
+0201,habitación,"room, bedroom"
+0202,cocina,kitchen
+0203,persona,"person, individual"
+0204,mujer,woman
+0205,hombre,man
+0206,niño,"child, boy"
+0207,mamá,"mom, mum"
+0208,papá,"dad, daddy"
+0209,padres,parents
+0210,hermano,brother
+0211,hermana,sister
+0212,amigo,"friend, buddy"
+0213,compañero,"colleague, classmate, companion"
+0214,novia,"girlfriend, bride, fiancee"
+0215,novio,"boyfriend, groom, fiance"
+0216,marido,husband
+0217,esposa,wife
+0218,café,coffee
+0219,té,tea
+0220,carne,meat
+0221,pescado,fish
+0222,huevo,egg
+0223,arroz,rice
+0224,pasta,pasta
+0225,sopa,soup
+0226,fruta,fruit
+0227,verdura,vegetable
+0228,desayuno,breakfast
+0229,almuerzo,lunch
+0230,cena,"dinner, supper"
+0231,teléfono,"phone, telephone"
+0232,ordenador,"computer, PC"
+0233,llave,key
+0234,mesa,table
+0235,bolsa,"bag, sack"
+0236,ropa,"clothes, clothing"
+0237,zapatos,shoes
+0238,dinero,"money, cash"
+0239,tarjeta,card
+0240,billete,"ticket, banknote, bill"
+0241,bicicleta,"bicycle, bike"
+0242,cara,face
+0243,mano,hand
+0244,pierna,leg
+0245,vientre,"belly, abdomen, stomach"
+0246,espalda,back
+0247,corazón,heart
+0248,diente,tooth
+0249,pelo,"hair, fur"
+0287,precio,price
+0289,efectivo,cash
+0290,cuenta,"bill, account, check"
+0291,recibo,receipt
+0296,tranvía,"tram, streetcar"
+0297,taxi,taxi
+0298,avión,"airplane, plane, aeroplane"
+0299,parada,"stop, bus stop"
+0305,médico,"doctor, physician"
+0309,accidente,accident
+0310,policía,police
+0311,fuego,fire
+0314,tiempo,"time, weather"
+0315,viento,wind
+0316,calor,"heat, warmth"

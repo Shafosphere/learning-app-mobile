@@ -86,6 +86,8 @@
       "initializing": "Preparing the database…",
       "importingCsv": "Importing data…",
       "finishingSetup": "Finishing setup…",
+      "newVersion": "New version",
+      "updatingFlashcards": "Updating flashcards…",
       "launching": "Launching the app…",
       "dbError": "Could not prepare the database. Check the logs."
     },

@@ -19,6 +19,7 @@ const mockSkipFlow = jest.fn(async () => {
   mockCoachmarkActive = false;
 });
 let mockPinnedOfficialCourseIds: number[] = [];
+let mockNativeLanguage = "pl";
 type MockOfficialCourseRow = {
   id: number;
   name: string;
@@ -93,7 +94,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: () => ({
     colors: mockColors,
     highContrastEnabled: false,
-    nativeLanguage: "pl",
+    nativeLanguage: mockNativeLanguage,
     pinnedOfficialCourseIds: mockPinnedOfficialCourseIds,
     pinOfficialCourse: mockPinOfficialCourse,
     unpinOfficialCourse: mockUnpinOfficialCourse,
@@ -184,6 +185,7 @@ describe("CoursePinScreen skip onboarding", () => {
     jest.clearAllMocks();
     mockCoachmarkActive = true;
     mockPinnedOfficialCourseIds = [];
+    mockNativeLanguage = "pl";
     mockOfficialCourseRows = [
       {
         id: 1,
@@ -466,6 +468,41 @@ describe("CoursePinScreen skip onboarding", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
     expect(screen.queryByLabelText(label)).toBeNull();
     expect(screen.queryByText("Pierwsze 50 słów")).toBeNull();
+  });
+
+  it("groups English-target French and Spanish stages separately from pinned Polish stages", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockNativeLanguage = "en";
+    mockPinnedOfficialCourseIds = [90];
+    mockOfficialCourseRows = [
+      { id: 61, name: "French first 50", slug: "fr_to_en_first_50", cardsCount: 50, iconId: "flag:fr", iconColor: "#2563EB" },
+      { id: 62, name: "French 150", slug: "fr_to_en_first_150", cardsCount: 150, iconId: "flag:fr", iconColor: "#2563EB" },
+      { id: 63, name: "French 332", slug: "fr_to_en_first_332", cardsCount: 332, iconId: "flag:fr", iconColor: "#2563EB" },
+      { id: 64, name: "French A1", slug: "french_a1", cardsCount: 865, iconId: "flag:fr", iconColor: "#2563EB" },
+      { id: 71, name: "Spanish first 50", slug: "es_to_en_first_50", cardsCount: 50, iconId: "flag:es", iconColor: "#F97316" },
+      { id: 72, name: "Spanish 150", slug: "es_to_en_first_150", cardsCount: 150, iconId: "flag:es", iconColor: "#F97316" },
+      { id: 73, name: "Spanish 327", slug: "es_to_en_first_327", cardsCount: 327, iconId: "flag:es", iconColor: "#F97316" },
+      { id: 90, name: "Polish French starter", slug: "fr_to_pl_first_50", cardsCount: 50, iconId: "flag:fr", iconColor: "#2563EB" },
+    ].reverse();
+    render(<CoursePinScreen />);
+    const french = "Kategoria constants.languageCourseGroups.label.frenchFromZero, 4 kursów";
+    const spanish = "Kategoria constants.languageCourseGroups.label.spanishFromZero, 3 kursów";
+    const polish = "Kategoria constants.languageCourseGroups.label.frenchFromZero, 1 kursów";
+    await waitFor(() => {
+      expect(screen.getByLabelText(french)).toBeTruthy();
+      expect(screen.getByLabelText(spanish)).toBeTruthy();
+      expect(screen.getByLabelText(polish)).toBeTruthy();
+    });
+    fireEvent.press(screen.getByLabelText(french));
+    fireEvent.press(screen.getByLabelText(spanish));
+    expect(screen.getAllByText(/^French (first 50|150|332|A1)$/).map((node) => node.props.children))
+      .toEqual(["French first 50", "French 150", "French 332", "French A1"]);
+    expect(screen.getAllByText(/^Spanish (first 50|150|327)$/).map((node) => node.props.children))
+      .toEqual(["Spanish first 50", "Spanish 150", "Spanish 327"]);
+    expect(screen.queryByText("Polish French starter")).toBeNull();
+    fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
+    expect(screen.queryByLabelText(french)).toBeNull();
+    expect(screen.queryByLabelText(spanish)).toBeNull();
   });
 
   it("reveals the first series card before onboarding starts", async () => {

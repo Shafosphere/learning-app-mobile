@@ -9,7 +9,7 @@ import en from "@/src/locales/en.json";
 const { OFFICIAL_PACKS: buildPacks, readCardsFromCsv } = require("../../../tools/scripts/build-prebuilt-db");
 
 describe("French from scratch catalog", () => {
-  const series = OFFICIAL_PACKS.filter((pack) => pack.languageGroupId === "frenchFromZero");
+  const series = OFFICIAL_PACKS.filter((pack) => pack.languageGroupId === "frenchFromZero" && pack.targetLang === "pl");
 
   it("retires the legacy course while retaining metadata for owners and backups", () => {
     const slug = "fiszki_francuski_podstawowe_poprawione";

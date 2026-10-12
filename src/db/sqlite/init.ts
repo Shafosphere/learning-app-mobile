@@ -715,7 +715,11 @@ async function syncOfficialCourseFlashcards(
 
 export async function seedOfficialPacksWithDb(
   db: SQLite.SQLiteDatabase,
-  options: { reportStartupProgress?: boolean; timer?: StartupTimer } = {}
+  options: {
+    reportStartupProgress?: boolean;
+    initialImport?: boolean;
+    timer?: StartupTimer;
+  } = {}
 ): Promise<ImageHydrationTiming> {
   console.log("[DB] Syncing official packs metadata: start");
   let bundledDb: SQLite.SQLiteDatabase | null = null;
@@ -723,6 +727,7 @@ export async function seedOfficialPacksWithDb(
   let completedCourses = 0;
   const reportStartupProgress = options.reportStartupProgress ?? true;
   const timer = options.timer;
+  let contentUpdateReported = false;
 
   const notifyProgress = (completed: number, percent: number): void => {
     if (!reportStartupProgress) {
@@ -766,11 +771,22 @@ export async function seedOfficialPacksWithDb(
               db,
               localCourse.id
             );
+            const hasNewerPack =
+              (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1);
             const shouldSyncFlashcards =
-              (localCourse.packVersion ?? 0) < (bundledCourse.packVersion ?? 1) ||
+              hasNewerPack ||
               localFlashcardsCount !== bundledCourse.flashcardsCount;
 
             if (shouldSyncFlashcards) {
+              if (
+                hasNewerPack &&
+                reportStartupProgress &&
+                !options.initialImport &&
+                !contentUpdateReported
+              ) {
+                contentUpdateReported = true;
+                notifyDbInitializationListeners({ type: "content-update-detected" });
+              }
               console.log(
                 `[DB] Syncing official pack ${def.slug}: local version=${localCourse.packVersion ?? 0}, bundled version=${bundledCourse.packVersion}; local cards=${localFlashcardsCount}, bundled cards=${bundledCourse.flashcardsCount}`
               );
@@ -879,7 +895,7 @@ export async function initializeDatabase(): Promise<SQLite.SQLiteDatabase> {
     let imageHydration: ImageHydrationTiming | undefined;
     try {
       imageHydration = await timer.measure("officialPackSync", () =>
-        seedOfficialPacksWithDb(db, { timer })
+        seedOfficialPacksWithDb(db, { timer, initialImport })
       );
     } catch (error) {
       failedStage ??= "officialPackSync";

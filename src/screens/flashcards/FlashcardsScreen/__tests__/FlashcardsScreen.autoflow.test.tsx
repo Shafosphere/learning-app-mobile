@@ -4,6 +4,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { act, render, waitFor } from "@testing-library/react-native";
 
 import Flashcards from "@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen";
+import Card from "@/src/components/card/card";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -206,9 +207,7 @@ jest.mock("@/src/screens/flashcards/FlashcardsScreen/FlashcardsScreen-styles", (
 }));
 
 jest.mock("@/src/components/card/card", () => {
-  return function CardMock() {
-    return null;
-  };
+  return jest.fn(() => null);
 });
 
 jest.mock("@/src/components/Box/List/BoxList", () => {
@@ -362,6 +361,57 @@ describe("FlashcardsScreen autoflow guard", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+  });
+
+  it("keeps the completed intro card green while autoflow waits, then releases the next box card", async () => {
+    const initialInteraction = mockedUseFlashcardsInteraction();
+    const card = initialInteraction.selectedItem;
+    const introInteraction = {
+      ...initialInteraction, activeBox: "boxZero", result: null, answer: "",
+      correction: {
+        cardId: card.id, awers: card.text, rewers: card.translations[0],
+        input1: "", input2: card.translations[0], mode: "intro", word: card,
+      },
+    };
+    const settings = mockedUseSettings();
+    mockedUseSettings.mockReturnValue({
+      ...settings, boxZeroEnabled: true, colors: { ...settings.colors, my_green: "#00cc88" },
+    });
+    mockedGetCustomFlashcards.mockResolvedValue([card]);
+    mockedUseFlashcardsInteraction.mockReturnValue(introInteraction);
+    mockedUseFlashcardsAutoflow.mockReturnValue({
+      isSwitchPending: false, isIntroSwitchFeedbackPending: false,
+    });
+    const view = render(<Flashcards />);
+    await waitFor(() => expect(Card).toHaveBeenCalled());
+
+    mockedUseFlashcardsInteraction.mockReturnValue({
+      ...introInteraction, selectedItem: null, correction: null, lastIntroAnswerAt: 1234,
+    });
+    mockedUseFlashcardsAutoflow.mockReturnValue({
+      isSwitchPending: true, isIntroSwitchFeedbackPending: true,
+    });
+    view.rerender(<Flashcards />);
+    const heldCard = (Card as jest.Mock).mock.calls.at(-1)?.[0];
+    expect(heldCard.selectedItem.id).toBe(card.id);
+    expect(heldCard.backgroundColorOverride).toBe("#00cc88");
+    expect(heldCard.isContentHeld).toBe(true);
+    heldCard.wrongInputChange(2, "stale keyboard input");
+    expect(introInteraction.wrongInputChange).not.toHaveBeenCalled();
+    expect(mockedUseFlashcardsAutoflow.mock.calls.at(-1)?.[0].lastIntroAnswerAt).toBe(1234);
+
+    mockedUseFlashcardsInteraction.mockReturnValue({
+      ...initialInteraction, activeBox: "boxOne", result: null, correction: null,
+    });
+    mockedUseFlashcardsAutoflow.mockReturnValue({
+      isSwitchPending: false, isIntroSwitchFeedbackPending: false,
+    });
+    view.rerender(<Flashcards />);
+    const nextCard = (Card as jest.Mock).mock.calls.at(-1)?.[0];
+    expect(nextCard.activeBox).toBe("boxOne");
+    expect(nextCard.backgroundColorOverride).toBeUndefined();
+    expect(nextCard.isContentHeld).toBe(false);
+    view.unmount();
   });
 
   it.each([

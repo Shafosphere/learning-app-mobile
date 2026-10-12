@@ -31,6 +31,7 @@ import { initializeGoogleDriveBackup } from "@/src/services/googleDriveBackup";
 import { subscribeStartupScreenPreview } from "@/src/services/startupScreenPreview";
 import { getStartupThemeUi, loadStartupTheme } from "@/src/theme/startupTheme";
 import { logStartupTiming } from "@/src/services/startupTiming";
+import { useStartupLoadingMessage } from "@/src/hooks/useStartupLoadingMessage";
 import type { Theme } from "@/src/theme/theme";
 import * as NavigationBar from "expo-navigation-bar";
 import { CoachmarkProvider } from "@edwardloopez/react-native-coachmark";
@@ -143,9 +144,12 @@ export default function RootLayout() {
   const [isRootViewLaidOut, setIsRootViewLaidOut] = useState(false);
   const [status, setStatus] = useState<RootStatus>("loading");
   const [startupProgress, setStartupProgress] = useState(0);
-  const [loadingMessageKey, setLoadingMessageKey] = useState(
-    "app.loading.initializing"
-  );
+  const {
+    loadingMessageKey,
+    handleStartupMessageEvent,
+    resetStartupMessage,
+    stopStartupMessageRotation,
+  } = useStartupLoadingMessage();
   const [previewLoadingMessageKey, setPreviewLoadingMessageKey] = useState<string | null>(
     null
   );
@@ -172,6 +176,7 @@ export default function RootLayout() {
   const prepareApp = useCallback(
     async (options?: { retry?: boolean; clearDebugOverride?: boolean }) => {
       const { retry = false, clearDebugOverride = false } = options ?? {};
+      resetStartupMessage();
       setStatus("loading");
       setStartupProgress(0);
       setErrorMessage(null);
@@ -216,6 +221,7 @@ export default function RootLayout() {
 
         setStatus("ready");
       } catch (error) {
+        stopStartupMessageRotation();
         simulationController?.abort();
         if (startupSimulationAbortRef.current === simulationController) {
           startupSimulationAbortRef.current = null;
@@ -229,7 +235,7 @@ export default function RootLayout() {
         setStatus("error");
       }
     },
-    []
+    [resetStartupMessage, stopStartupMessageRotation]
   );
 
   const handleRetry = useCallback(async () => {
@@ -317,16 +323,8 @@ export default function RootLayout() {
     initializeGoogleDriveBackup();
 
     const handleDbEvent = (event: DbInitializationEvent) => {
+      handleStartupMessageEvent(event);
       switch (event.type) {
-        case "start":
-          setLoadingMessageKey("app.loading.initializing");
-          break;
-        case "import-start":
-          setLoadingMessageKey("app.loading.importingCsv");
-          break;
-        case "import-finish":
-          setLoadingMessageKey("app.loading.finishingSetup");
-          break;
         case "progress":
           if (!SIMULATE_STARTUP_PROGRESS) {
             setStartupProgress(Math.max(0, Math.min(100, event.percent)));
@@ -334,10 +332,6 @@ export default function RootLayout() {
           break;
         case "ready":
           setStartupProgress(100);
-          setLoadingMessageKey("app.loading.launching");
-          break;
-        case "error":
-          setLoadingMessageKey("app.loading.dbError");
           break;
       }
     };
@@ -392,7 +386,13 @@ export default function RootLayout() {
         clearTimeout(previewTimeoutRef.current);
       }
     };
-  }, [prepareApp]);
+  }, [prepareApp, handleStartupMessageEvent]);
+
+  useEffect(() => {
+    if (status !== "loading") {
+      stopStartupMessageRotation();
+    }
+  }, [status, stopStartupMessageRotation]);
 
   useEffect(() => {
     let cancelled = false;

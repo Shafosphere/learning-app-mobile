@@ -9,12 +9,19 @@ import en from "@/src/locales/en.json";
 const { OFFICIAL_PACKS: buildPacks, readCardsFromCsv } = require("../../../tools/scripts/build-prebuilt-db");
 
 describe("Spanish from scratch catalog", () => {
-  const series = OFFICIAL_PACKS.filter((pack) => pack.languageGroupId === "spanishFromZero");
+  const series = OFFICIAL_PACKS.filter((pack) => pack.languageGroupId === "spanishFromZero" && pack.targetLang === "pl");
 
   it("retires the legacy course while retaining metadata for owners and backups", () => {
     const slug = "fiszki_hiszpanski_podstawowe_poprawione";
     expect(OFFICIAL_PACKS.find((pack) => pack.slug === slug)).toMatchObject({ retired: true, packVersion: 1 });
     expect(OFFICIAL_COURSE_AVAILABILITY.pl).toContain(slug);
+    expect(buildPacks.some((pack: { slug: string }) => pack.slug === slug)).toBe(false);
+  });
+
+  it("retires Basic Spanish for English speakers and excludes it from new installations", () => {
+    const slug = "basic_english_to_spanish_50";
+    expect(OFFICIAL_PACKS.find((pack) => pack.slug === slug)).toMatchObject({ retired: true, packVersion: 2 });
+    expect(OFFICIAL_COURSE_AVAILABILITY.en).toContain(slug);
     expect(buildPacks.some((pack: { slug: string }) => pack.slug === slug)).toBe(false);
   });
 
@@ -48,6 +55,19 @@ describe("Spanish from scratch catalog", () => {
         }));
       }
       previous = cards;
+    }
+  });
+
+  it("versions the pez correction for existing installations in every Polish stage", () => {
+    for (const pack of series) {
+      expect(pack.packVersion).toBeGreaterThan(2);
+      const buildPack = buildPacks.find((candidate: { slug: string }) => candidate.slug === pack.slug);
+      expect(buildPack.packVersion).toBe(pack.packVersion);
+      const cards = readCardsFromCsv(buildPack);
+      expect(cards.find((card: { externalId: string }) => card.externalId === "0006")).toMatchObject({
+        frontText: "pez",
+        backText: "ryba; żywa ryba",
+      });
     }
   });
 

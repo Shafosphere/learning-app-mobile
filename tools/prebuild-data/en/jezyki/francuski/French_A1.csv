@@ -594,3 +594,273 @@ external_id,front_text,back_text
 0698,vont,are going
 0699,tellement,so much
 0700,création,creation
+0701,poisson,fish
+0702,lait,milk
+0703,fenêtre,window
+0704,sucre,sugar
+0705,cheval,horse
+0706,chaise,chair
+0707,chien,dog
+0708,ballon,"ball, balloon"
+0709,neige,snow
+0710,œufs,eggs
+0711,pluie,rain
+0712,tasse,"cup, mug"
+0713,bus,bus
+0714,oreille,ear
+0715,mouton,sheep
+0716,pain,bread
+0717,chat,cat
+0718,nez,nose
+0719,pomme,apple
+0720,fromage,cheese
+0721,couteau,knife
+0722,vache,cow
+0723,jus,juice
+0724,cochon,pig
+0725,lapin,rabbit
+0726,crayon,pencil
+0727,tomate,tomato
+0728,canapé,"sofa, couch"
+0729,lampe,lamp
+0730,réfrigérateur,"fridge, refrigerator"
+0731,sel,salt
+0732,banane,banana
+0733,pomme de terre,potato
+0734,assiette,plate
+0735,fourchette,fork
+0736,cuillère,spoon
+0737,oreiller,pillow
+0738,couverture,"blanket, cover"
+0739,salut,"hi, hello, bye"
+0740,bonjour,"hello, good morning, good afternoon"
+0741,bonsoir,good evening
+0742,bonne nuit,good night
+0743,au revoir,"goodbye, bye"
+0744,à bientôt,see you soon
+0745,à plus,"see you later, bye"
+0746,s'il vous plaît,please
+0747,merci,"thank you, thanks"
+0748,pardon,"sorry, excuse me, pardon"
+0749,de rien,"you are welcome, no problem"
+0750,ce n'est pas grave,"no problem, it is okay"
+0751,je voudrais,I would like
+0752,je peux ?,"can I, may I"
+0753,enchanté,nice to meet you
+0754,peut-être,"maybe, perhaps"
+0755,bien sûr,"of course, certainly"
+0756,je ne sais pas,I do not know
+0757,je comprends,I understand
+0758,je ne comprends pas,I do not understand
+0759,d'accord,"okay, agreed"
+0760,je m'appelle,my name is
+0761,je suis,I am
+0762,ravi de te rencontrer,nice to meet you
+0763,tu viens d'où ?,where are you from
+0764,je viens,"I come, I am coming"
+0765,quel âge as-tu ?,how old are you
+0766,l'âge,age
+0767,qui ?,who
+0768,quoi ?,what
+0769,où ?,where
+0770,quand ?,when
+0771,pourquoi ?,why
+0772,comment ?,how
+0773,combien ?,"how much, how many"
+0774,lequel ?,which one
+0775,est-ce que ?,"do, does, is"
+0776,quel ?,"which, what"
+0777,je,I
+0778,tu,you
+0779,il,he
+0780,elle,she
+0781,nous,we
+0782,vous,you
+0783,ils et elles,they
+0784,mon,my
+0785,ton,your
+0786,"son, sa, ses","his, her, its"
+0787,aller en voiture,"go by car, drive"
+0788,vouloir,want
+0789,aimer,"like, love"
+0790,connaître,know
+0791,manger,eat
+0792,boire,drink
+0793,dormir,sleep
+0794,habiter,"live, reside"
+0795,travailler,work
+0796,apprendre,"learn, teach"
+0797,acheter,"buy, purchase"
+0798,fermer,"close, shut"
+0799,zéro,zero
+0800,un,one
+0801,sept,seven
+0802,huit,eight
+0803,neuf,"nine, new"
+0804,onze,eleven
+0805,douze,twelve
+0806,trente,thirty
+0807,cent,hundred
+0808,troisième,third
+0809,la moitié,half
+0810,bleu,blue
+0811,vert,green
+0812,jaune,yellow
+0813,orange,orange
+0814,rose,"pink, rose"
+0815,violet,"purple, violet"
+0816,marron,"brown, chestnut"
+0817,gris,"grey, gray"
+0818,clair,"light, clear"
+0819,foncé,dark
+0820,lundi,Monday
+0821,mardi,Tuesday
+0822,mercredi,Wednesday
+0823,jeudi,Thursday
+0824,vendredi,Friday
+0825,samedi,Saturday
+0826,dimanche,Sunday
+0827,aujourd'hui,today
+0828,demain,tomorrow
+0829,hier,yesterday
+0830,le matin,"morning, in the morning"
+0831,le soir,"evening, in the evening"
+0832,plus tard,later
+0833,plus tôt,earlier
+0834,l'heure,"hour, time"
+0835,la minute,minute
+0836,la semaine,week
+0837,le mois,month
+0838,l'année,year
+0839,la maison,"house, home"
+0840,l'école,school
+0841,le travail,"work, job"
+0842,le magasin,"shop, store"
+0843,le restaurant,restaurant
+0844,les toilettes,"toilet, restroom, bathroom"
+0845,l'hôtel,hotel
+0846,l'hôpital,hospital
+0847,la pharmacie,"pharmacy, chemist"
+0848,la gare,"train station, railway station"
+0849,l'aéroport,airport
+0850,la rue,"street, road"
+0851,la ville,"city, town"
+0852,le pays,country
+0853,la pièce,"room, piece, coin"
+0854,la cuisine,"kitchen, cooking, cuisine"
+0855,la salle de bain,bathroom
+0856,l'être humain,"human, human being"
+0857,la personne,person
+0858,la femme,"woman, wife"
+0859,l'homme,man
+0860,l'enfant,"child, kid"
+0861,maman,"mom, mum, mommy"
+0862,papa,"dad, daddy"
+0863,les parents,parents
+0864,le frère,brother
+0865,la sœur,sister
+0866,l'ami,friend
+0867,le copain,"friend, buddy, boyfriend"
+0868,la petite amie,girlfriend
+0869,le petit ami,boyfriend
+0870,le mari,husband
+0871,l'épouse,wife
+0872,le café,"coffee, cafe"
+0873,le thé,tea
+0874,la viande,meat
+0875,l'œuf,egg
+0876,le riz,rice
+0877,les pâtes,pasta
+0878,la soupe,soup
+0879,le fruit,fruit
+0880,le légume,vegetable
+0881,le petit déjeuner,breakfast
+0882,le déjeuner,lunch
+0883,le dîner,"dinner, supper"
+0884,le téléphone,"phone, telephone"
+0885,l'ordinateur,computer
+0886,la clé,key
+0887,la table,table
+0888,le sac,bag
+0889,le vêtement,"clothing, clothes"
+0890,les chaussures,shoes
+0891,l'argent,"money, silver"
+0892,la carte,"card, map, menu"
+0893,le billet,"ticket, banknote, bill"
+0894,le vélo,"bike, bicycle"
+0895,le visage,face
+0896,la main,hand
+0897,la jambe,leg
+0898,le ventre,"belly, stomach"
+0899,le dos,"back, reverse"
+0900,le cœur,heart
+0901,la dent,tooth
+0902,les cheveux,hair
+0903,mauvais,"bad, poor"
+0904,joli,"pretty, beautiful"
+0905,laid,ugly
+0906,facile,"easy, simple"
+0907,rapide,"fast, quick"
+0908,lent,slow
+0909,chaud,"hot, warm"
+0910,froid,cold
+0911,bon marché,"cheap, inexpensive"
+0912,cher,"expensive, dear"
+0913,fatigué,tired
+0914,affamé,"starving, hungry"
+0915,assoiffé,thirsty
+0916,là-bas,"there, over there"
+0917,dans,"in, inside"
+0918,sur,on
+0919,sous,"under, below"
+0920,au-dessus de,"above, over"
+0921,à côté de,"next to, beside"
+0922,à gauche,"on the left, to the left"
+0923,à droite,"on the right, to the right"
+0924,tout droit,"straight ahead, straight on"
+0925,en haut,"upstairs, at the top"
+0926,en bas,"downstairs, at the bottom"
+0927,combien ça coûte ?,"how much is it, how much does it cost"
+0928,le prix,price
+0929,payer,pay
+0930,l'argent liquide,cash
+0931,l'addition,"bill, check"
+0932,le ticket de caisse,receipt
+0933,fermé,"closed, shut"
+0934,je veux ça,I want that
+0935,je voudrais ça,I would like that
+0936,le tramway,"tram, streetcar"
+0937,le taxi,"taxi, cab"
+0938,l'avion,"plane, airplane"
+0939,l'arrêt,stop
+0940,où est-ce ?,where is it
+0941,comment aller ?,how to get there
+0942,je vais,"I am going, I go"
+0943,je descends ici,I get off here
+0944,au secours,help
+0945,le médecin,"doctor, physician"
+0946,j'ai mal,"it hurts, I am in pain"
+0947,je me sens mal,"I feel bad, I feel sick"
+0948,je suis malade,"I am sick, I am ill"
+0949,l'accident,accident
+0950,la police,police
+0951,le feu,"fire, traffic light"
+0952,dangereux,"dangerous, unsafe"
+0953,j'ai besoin d'aide,I need help
+0954,le temps,"weather, time"
+0955,le vent,wind
+0956,il fait doux,"it is mild, it is warm"
+0957,il fait froid,it is cold
+0958,il fait chaud,it is hot
+0959,il pleut,"it is raining, it rains"
+0960,c'est nuageux,it is cloudy
+0961,il fait beau,the weather is nice
+0962,heureux,"happy, joyful"
+0963,triste,"sad, unhappy"
+0964,en colère,"angry, mad"
+0965,calme,"calm, quiet"
+0966,nerveux,"nervous, anxious"
+0967,malade,"sick, ill"
+0968,j'ai peur,"I am afraid, I am scared"
+0969,j'aime,"I like, I love"
+0970,je n'aime pas,"I do not like, I dislike"
