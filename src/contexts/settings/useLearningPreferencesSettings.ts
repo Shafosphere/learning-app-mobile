@@ -35,6 +35,10 @@ export function useLearningPreferencesSettings() {
     "showBoxFaces",
     true
   );
+  const [autoConvertSpanishPunctuation, setAutoConvertSpanishPunctuation] =
+    usePersistedState<boolean>("flashcards.autoConvertSpanishPunctuation", defaultValue.autoConvertSpanishPunctuation);
+  const [ignoreBoundaryPunctuation, setIgnoreBoundaryPunctuation] =
+    usePersistedState<boolean>("flashcards.ignoreBoundaryPunctuation", defaultValue.ignoreBoundaryPunctuation);
   const [flashcardsBatchSize, setFlashcardsBatchSize] =
     usePersistedState<number>(
       "flashcardsBatchSize",
@@ -97,6 +101,14 @@ export function useLearningPreferencesSettings() {
     await setShowBoxFaces(!showBoxFaces);
   }, [setShowBoxFaces, showBoxFaces]);
 
+  const toggleAutoConvertSpanishPunctuation = useCallback(async () => {
+    await setAutoConvertSpanishPunctuation(!autoConvertSpanishPunctuation);
+  }, [autoConvertSpanishPunctuation, setAutoConvertSpanishPunctuation]);
+
+  const toggleIgnoreBoundaryPunctuation = useCallback(async () => {
+    await setIgnoreBoundaryPunctuation(!ignoreBoundaryPunctuation);
+  }, [ignoreBoundaryPunctuation, setIgnoreBoundaryPunctuation]);
+
   const toggleFlashcardsSuggestions = useCallback(async () => {
     await setFlashcardsSuggestionsEnabled(!flashcardsSuggestionsEnabled);
   }, [flashcardsSuggestionsEnabled, setFlashcardsSuggestionsEnabled]);
@@ -120,6 +132,8 @@ export function useLearningPreferencesSettings() {
     await Promise.all([
       setSpellChecking(true),
       setIgnoreDiacriticsInSpellcheck(defaultValue.ignoreDiacriticsInSpellcheck),
+      setAutoConvertSpanishPunctuation(defaultValue.autoConvertSpanishPunctuation),
+      setIgnoreBoundaryPunctuation(defaultValue.ignoreBoundaryPunctuation),
       setShowBoxFaces(true),
       setBoxesLayoutState("classic"),
       setActionButtonsPositionState("bottom"),
@@ -134,6 +148,8 @@ export function useLearningPreferencesSettings() {
     setFlashcardsSuggestionsEnabled,
     setAutoSubmitCorrectAnswer,
     setIgnoreDiacriticsInSpellcheck,
+    setAutoConvertSpanishPunctuation,
+    setIgnoreBoundaryPunctuation,
     setShowBoxFaces,
     setSpellChecking,
   ]);
@@ -149,6 +165,10 @@ export function useLearningPreferencesSettings() {
     toggleSpellChecking,
     ignoreDiacriticsInSpellcheck,
     toggleIgnoreDiacriticsInSpellcheck,
+    autoConvertSpanishPunctuation,
+    toggleAutoConvertSpanishPunctuation,
+    ignoreBoundaryPunctuation,
+    toggleIgnoreBoundaryPunctuation,
     showBoxFaces,
     toggleShowBoxFaces,
     flashcardsBatchSize,

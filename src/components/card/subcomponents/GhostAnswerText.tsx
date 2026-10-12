@@ -1,4 +1,5 @@
 import { Text } from "react-native";
+import { getAnswerGhostSuffix } from "@/src/utils/answerComparison";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import { useStyles } from "../card-styles";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
@@ -9,6 +10,8 @@ type GhostAnswerTextProps = {
   expected: string;
   cardMetrics: ResponsiveFlashcardMetrics;
   textColorOverride?: string;
+  ignoreDiacritics?: boolean;
+  ignoreBoundaryPunctuation?: boolean;
 };
 
 export function GhostAnswerText({
@@ -16,12 +19,18 @@ export function GhostAnswerText({
   expected,
   cardMetrics,
   textColorOverride,
+  ignoreDiacritics = false,
+  ignoreBoundaryPunctuation = false,
 }: GhostAnswerTextProps) {
   const styles = useStyles();
-  const typedLength = splitGraphemes(value).length;
+  const typedChars = splitGraphemes(value);
+  const suffix = getAnswerGhostSuffix(value, expected, { ignoreDiacritics, ignoreBoundaryPunctuation });
+  const displayedChars = ignoreBoundaryPunctuation
+    ? [...typedChars, ...splitGraphemes(suffix)]
+    : splitGraphemes(expected);
   return (
     <>
-      {splitGraphemes(expected).map((char, index) => (
+      {displayedChars.map((char, index) => (
         <Text
           key={`ghost-${index}`}
           style={[
@@ -29,7 +38,7 @@ export function GhostAnswerText({
             { fontSize: cardMetrics.fontSize, lineHeight: cardMetrics.lineHeight },
             styles.overlayExpectedSuffix,
             textColorOverride ? { color: textColorOverride, opacity: 0.38 } : null,
-            index < typedLength ? { opacity: 0 } : null,
+            index < typedChars.length ? { opacity: 0 } : null,
           ]}
         >
           {char === " " ? "\u00A0" : char}

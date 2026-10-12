@@ -49,8 +49,9 @@ jest.mock("@/src/components/button/button", () => {
   };
 });
 jest.mock("@/src/components/toggle/ToggleSwitch", () => {
-  const { Pressable } = jest.requireActual("react-native");
-  return function MockToggle({ value, ...props }: { value: boolean }) {
+  const { Pressable, View } = jest.requireActual("react-native");
+  return function MockToggle({ value, decorative, ...props }: { value: boolean; decorative?: boolean }) {
+    if (decorative) return <View accessible={false} />;
     return <Pressable {...props} accessibilityRole="switch" accessibilityState={{ checked: value }} />;
   };
 });

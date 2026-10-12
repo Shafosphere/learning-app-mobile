@@ -4,7 +4,7 @@ import * as Haptics from "expo-haptics";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
 import { useTranslation } from "react-i18next";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { TrackSlider } from "@/src/components/slider/TrackSlider";
 
@@ -22,6 +22,10 @@ const LearningSection: React.FC = () => {
     toggleSpellChecking,
     ignoreDiacriticsInSpellcheck,
     toggleIgnoreDiacriticsInSpellcheck,
+    autoConvertSpanishPunctuation,
+    toggleAutoConvertSpanishPunctuation,
+    ignoreBoundaryPunctuation,
+    toggleIgnoreBoundaryPunctuation,
     flashcardsSuggestionsEnabled,
     toggleFlashcardsSuggestions,
     autoSubmitCorrectAnswer,
@@ -155,10 +159,16 @@ const LearningSection: React.FC = () => {
       </Text>
 
       <View style={styles.learningHeroCard}>
-        <View style={styles.appearanceGroupRow}>
+        <ToggleRow
+          style={styles.appearanceGroupRow}
+          value={learningRemindersEnabled}
+          onPress={() => void handleRemindersToggle(!learningRemindersEnabled)}
+          accessibilityLabel={t("settings.learning.reminders.title")}
+          controlStyle={styles.switch}
+        >
           <View style={styles.appearanceRowText}>
             <Text style={styles.appearanceBlockTitle}>
-              {t("settings.learning.reminders.title")}
+              {preventWidowsPl(t("settings.learning.reminders.title"))}
             </Text>
             <Text style={styles.appearanceBlockDescription}>
               {preventWidowsPl(t("settings.learning.reminders.shortSubtitle"))}
@@ -172,26 +182,30 @@ const LearningSection: React.FC = () => {
               </Text>
             ))}
           </View>
-          <View style={styles.switch}>
-            <ToggleSwitch
-              value={learningRemindersEnabled}
-              onPress={() => void handleRemindersToggle(!learningRemindersEnabled)}
-              accessibilityLabel={t("settings.learning.reminders.title")}
-            />
-          </View>
-        </View>
+        </ToggleRow>
 
         <View style={styles.appearanceGroupDivider} />
 
-        <View
+        <ToggleRow
           style={[
             styles.appearanceGroupRow,
             !learningRemindersEnabled ? styles.sliderDisabled : null,
           ]}
+          value={learningReminderAutomaticEnabled}
+          disabled={!learningRemindersEnabled}
+          onPress={() =>
+            void handleAutomaticRemindersToggle(
+              !learningReminderAutomaticEnabled
+            )
+          }
+          accessibilityLabel={t(
+            "settings.learning.reminders.automatic.title"
+          )}
+          controlStyle={styles.switch}
         >
           <View style={styles.appearanceRowText}>
             <Text style={styles.appearanceBlockTitle}>
-              {t("settings.learning.reminders.automatic.title")}
+              {preventWidowsPl(t("settings.learning.reminders.automatic.title"))}
             </Text>
             <Text style={styles.appearanceBlockDescription}>
               {preventWidowsPl(
@@ -199,21 +213,7 @@ const LearningSection: React.FC = () => {
               )}
             </Text>
           </View>
-          <View style={styles.switch}>
-            <ToggleSwitch
-              value={learningReminderAutomaticEnabled}
-              disabled={!learningRemindersEnabled}
-              onPress={() =>
-                void handleAutomaticRemindersToggle(
-                  !learningReminderAutomaticEnabled
-                )
-              }
-              accessibilityLabel={t(
-                "settings.learning.reminders.automatic.title"
-              )}
-            />
-          </View>
-        </View>
+        </ToggleRow>
 
         {manualTimeMounted ? (
           <Animated.View
@@ -274,30 +274,35 @@ const LearningSection: React.FC = () => {
       </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
-          <View style={styles.appearanceGroupRow}>
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={spellChecking}
+            onPress={() => void handleSpellCheckToggle(!spellChecking)}
+            accessibilityLabel={t("settings.learning.spellcheck.title")}
+            controlStyle={styles.switch}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
-                {t("settings.learning.spellcheck.title")}
+                {preventWidowsPl(t("settings.learning.spellcheck.title"))}
               </Text>
               <Text style={styles.appearanceBlockDescription}>
                 {preventWidowsPl(t("settings.learning.spellcheck.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={spellChecking}
-                onPress={() => void handleSpellCheckToggle(!spellChecking)}
-                accessibilityLabel={t("settings.learning.spellcheck.title")}
-              />
-            </View>
-          </View>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={autoSubmitCorrectAnswer}
+            onPress={() => void handleAutoSubmitToggle(!autoSubmitCorrectAnswer)}
+            accessibilityLabel={t("settings.learning.autoSubmitCorrectAnswer.title")}
+            controlStyle={styles.switch}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
-                {t("settings.learning.autoSubmitCorrectAnswer.title")}
+                {preventWidowsPl(t("settings.learning.autoSubmitCorrectAnswer.title"))}
               </Text>
               <Text style={styles.appearanceBlockDescription}>
                 {preventWidowsPl(
@@ -305,54 +310,87 @@ const LearningSection: React.FC = () => {
                 )}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={autoSubmitCorrectAnswer}
-                onPress={() => void handleAutoSubmitToggle(!autoSubmitCorrectAnswer)}
-                accessibilityLabel={t("settings.learning.autoSubmitCorrectAnswer.title")}
-              />
-            </View>
-          </View>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={flashcardsSuggestionsEnabled}
+            onPress={() => void handleSuggestionsToggle(!flashcardsSuggestionsEnabled)}
+            accessibilityLabel={t("settings.learning.keyboardSuggestions.title")}
+            controlStyle={styles.switch}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
-                {t("settings.learning.keyboardSuggestions.title")}
+                {preventWidowsPl(t("settings.learning.keyboardSuggestions.title"))}
               </Text>
               <Text style={styles.appearanceBlockDescription}>
                 {preventWidowsPl(t("settings.learning.keyboardSuggestions.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={flashcardsSuggestionsEnabled}
-                onPress={() => void handleSuggestionsToggle(!flashcardsSuggestionsEnabled)}
-                accessibilityLabel={t("settings.learning.keyboardSuggestions.title")}
-              />
-            </View>
-          </View>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <View style={styles.appearanceGroupRow}>
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={ignoreDiacriticsInSpellcheck}
+            onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
+            accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
+            controlStyle={styles.switch}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
-                {t("settings.learning.ignoreDiacritics.title")}
+                {preventWidowsPl(t("settings.learning.ignoreDiacritics.title"))}
               </Text>
               <Text style={styles.appearanceBlockDescription}>
                 {preventWidowsPl(t("settings.learning.ignoreDiacritics.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={ignoreDiacriticsInSpellcheck}
-                onPress={() => void handleDiacriticsToggle(!ignoreDiacriticsInSpellcheck)}
-                accessibilityLabel={t("settings.learning.ignoreDiacritics.title")}
-              />
+          </ToggleRow>
+
+          <View style={styles.appearanceGroupDivider} />
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={ignoreBoundaryPunctuation}
+            onPress={() => void (async () => {
+              await toggleIgnoreBoundaryPunctuation();
+              await triggerHaptics();
+            })()}
+            accessibilityLabel={t("settings.learning.ignoreBoundaryPunctuation.title")}
+            controlStyle={styles.switch}
+          >
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {preventWidowsPl(t("settings.learning.ignoreBoundaryPunctuation.title"))}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.ignoreBoundaryPunctuation.subtitle"))}
+              </Text>
             </View>
-          </View>
+          </ToggleRow>
+
+          <View style={styles.appearanceGroupDivider} />
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={autoConvertSpanishPunctuation}
+            onPress={() => void (async () => {
+              await toggleAutoConvertSpanishPunctuation();
+              await triggerHaptics();
+            })()}
+            accessibilityLabel={t("settings.learning.autoConvertSpanishPunctuation.title")}
+            controlStyle={styles.switch}
+          >
+            <View style={styles.appearanceRowText}>
+              <Text style={styles.appearanceBlockTitle}>
+                {preventWidowsPl(t("settings.learning.autoConvertSpanishPunctuation.title"))}
+              </Text>
+              <Text style={styles.appearanceBlockDescription}>
+                {preventWidowsPl(t("settings.learning.autoConvertSpanishPunctuation.subtitle"))}
+              </Text>
+            </View>
+          </ToggleRow>
         </View>
       </View>
 
@@ -361,25 +399,24 @@ const LearningSection: React.FC = () => {
       </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
-          <View style={styles.appearanceGroupRow}>
+          <ToggleRow
+            style={styles.appearanceGroupRow}
+            value={skipCorrectionDefaultEnabled}
+            onPress={() =>
+              void handleSkipCorrectionToggle(!skipCorrectionDefaultEnabled)
+            }
+            accessibilityLabel={t("settings.learning.skipCorrection.title")}
+            controlStyle={styles.switch}
+          >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
-                {t("settings.learning.skipCorrection.title")}
+                {preventWidowsPl(t("settings.learning.skipCorrection.title"))}
               </Text>
               <Text style={styles.appearanceBlockDescription}>
                 {preventWidowsPl(t("settings.learning.skipCorrection.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={skipCorrectionDefaultEnabled}
-                onPress={() =>
-                  void handleSkipCorrectionToggle(!skipCorrectionDefaultEnabled)
-                }
-                accessibilityLabel={t("settings.learning.skipCorrection.title")}
-              />
-            </View>
-          </View>
+          </ToggleRow>
         </View>
       </View>
     </View>

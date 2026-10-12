@@ -965,6 +965,66 @@ describe("Card logic props", () => {
     );
   });
 
+  it.each([
+    [true, true, "¿Hola?", true],
+    [true, false, "¿Hola?", true],
+    [false, true, "?Hola?", true],
+    [false, false, "?Hola?", false],
+  ])("keeps conversion=%s and tolerance=%s independent", (conversion, tolerance, stored, accepted) => {
+    jest.useFakeTimers();
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), spellChecking: false,
+      autoConvertSpanishPunctuation: conversion, ignoreBoundaryPunctuation: tolerance });
+    const props = createProps({ autoSubmitCorrectAnswer: true,
+      selectedItem: makeCard({ id: 71, translations: ["¿Hola?"] }) });
+    renderCard(props);
+    act(() => {
+      (latestResolverProps?.handleAnswerChange as (value: string) => void)("?Hola?");
+      jest.advanceTimersByTime(200);
+    });
+    expect(props.setAnswer).toHaveBeenCalledWith(stored);
+    expect(props.confirm).toHaveBeenCalledTimes(accepted ? 1 : 0);
+    if (accepted) expect(props.confirm).toHaveBeenCalledWith(undefined, stored);
+    jest.useRealTimers();
+  });
+
+  it("converts against the front alternatives for reversed cards", () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), autoConvertSpanishPunctuation: true });
+    const props = createProps({ reversed: true,
+      selectedItem: makeCard({ id: 72, text: "¿Hola?; ¿Qué tal?", translations: ["hello"] }) });
+    renderCard(props);
+    act(() => (latestResolverProps?.handleAnswerChange as (value: string) => void)("?"));
+    expect(props.setAnswer).toHaveBeenCalledWith("¿");
+  });
+
+  it("converts both correction fields before saving and advances without omitted marks", () => {
+    const completed = jest.fn();
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), autoConvertSpanishPunctuation: true,
+      ignoreBoundaryPunctuation: true });
+    mockedUseCardFocusController.mockReturnValue({ focusTarget: "correction1", focusRequestId: 0,
+      requestFocus: mockRequestFocus, onCorrection1Completed: completed, onHintEditStarted: jest.fn() });
+    const props = createProps({ correction: { cardId: 73, awers: "¿Hola?", rewers: "¡Hello!",
+      input1: "", input2: "", mode: "intro" }, introMode: true,
+      selectedItem: makeCard({ id: 73, text: "¿Hola?", translations: ["¡Hello!"] }) });
+    renderCard(props);
+    act(() => {
+      (latestResolverProps?.handleCorrectionInput1Change as (value: string) => void)("?Hola?");
+      (latestResolverProps?.wrongInputChange as (which: number, value: string) => void)(2, "!Hello!");
+    });
+    expect(props.wrongInputChange).toHaveBeenCalledWith(1, "¿Hola?");
+    expect(props.wrongInputChange).toHaveBeenCalledWith(2, "¡Hello!");
+    expect(completed).toHaveBeenCalledTimes(1);
+    act(() => (latestResolverProps?.handleCorrectionInput1Change as (value: string) => void)("Hola"));
+    expect(completed).toHaveBeenCalledTimes(2);
+    expect((latestResolverProps?.hasCorrectionMismatch as (value: string, expected: string) => boolean)("Hola", "¿Hola?")).toBe(false);
+  });
+
+  it("shows only the real typo at the original input offset", () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), ignoreBoundaryPunctuation: true });
+    renderCard(createProps({ result: true, answer: "?Holo?",
+      selectedItem: makeCard({ id: 74, translations: ["¿Hola?"] }) }));
+    expect(latestResolverProps?.typoDiff).toMatchObject({ index: 4, inputChar: "o", expectedChar: "a" });
+  });
+
   it("automatically confirms a correct main answer after 200 ms when enabled", async () => {
     jest.useFakeTimers();
     const confirm = jest.fn();

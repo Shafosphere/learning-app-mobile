@@ -236,15 +236,15 @@
       "section": "Learning",
       "spellcheck": {
         "title": "Spell checking",
-        "subtitle": "Allows 1 mistake during checking."
+        "subtitle": "Allows one typo in an answer."
       },
       "keyboardSuggestions": {
         "title": "Keyboard suggestions",
-        "subtitle": "Enable or disable suggestions and autocorrect in flashcards. Note: some keyboards, such as Samsung Keyboard or Gboard, may still show the suggestion bar."
+        "subtitle": "Suggestions and autocorrect in flashcards. Some keyboards (e.g. Samsung and Gboard) may still show suggestions."
       },
       "autoSubmitCorrectAnswer": {
-        "title": "Automatically submit correct answers",
-        "subtitle": "Automatically submit a correct answer shortly after it is entered."
+        "title": "Automatic submission",
+        "subtitle": "Submits a correct answer after a short delay."
       },
       "skipCorrection": {
         "title": "Skip correction after mistake",
@@ -252,7 +252,15 @@
       },
       "ignoreDiacritics": {
         "title": "Ignore diacritics",
-        "subtitle": "Compare words without accents, e.g. ą -> a."
+        "subtitle": "Ignores accents and diacritics (e.g. ą\u00a0→\u00a0a)."
+      },
+      "autoConvertSpanishPunctuation": {
+        "title": "Invert punctuation",
+        "subtitle": "Replaces ?\u00a0with\u00a0¿ and !\u00a0with\u00a0¡ to match the expected answer."
+      },
+      "ignoreBoundaryPunctuation": {
+        "title": "Ignore ?\u00a0and\u00a0!",
+        "subtitle": "Ignores question and exclamation marks at the start and end of an answer."
       },
       "reminders": {
         "title": "Learning reminders",

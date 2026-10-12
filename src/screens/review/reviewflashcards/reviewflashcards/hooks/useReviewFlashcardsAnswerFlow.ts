@@ -12,9 +12,8 @@ import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { useConfirmGuard } from "@/src/hooks/useConfirmGuard";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { answersMatch } from "@/src/utils/answerComparison";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
-import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { playFeedbackSound } from "@/src/utils/soundPlayer";
 
@@ -39,6 +38,7 @@ type UseReviewFlashcardsAnswerFlowParams = {
   enqueueReviewMutation: EnqueueReviewMutation;
   checkSpelling: (input: string, expected: string) => boolean;
   ignoreDiacriticsInSpellcheck: boolean;
+  ignoreBoundaryPunctuation: boolean;
   showExplanationEnabled: boolean;
   explanationOnlyOnWrong: boolean;
   learningRemindersEnabled: boolean;
@@ -78,6 +78,7 @@ export const useReviewFlashcardsAnswerFlow = ({
   enqueueReviewMutation,
   checkSpelling,
   ignoreDiacriticsInSpellcheck,
+  ignoreBoundaryPunctuation,
   showExplanationEnabled,
   explanationOnlyOnWrong,
   learningRemindersEnabled,
@@ -136,9 +137,11 @@ export const useReviewFlashcardsAnswerFlow = ({
 
   const matchesCorrectionField = useCallback(
     (input: string, expected: string) =>
-      normalizeAnswerText(input, ignoreDiacriticsInSpellcheck) ===
-      normalizeAnswerText(expected, ignoreDiacriticsInSpellcheck),
-    [ignoreDiacriticsInSpellcheck],
+      answersMatch(input, expected, {
+        ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+        ignoreBoundaryPunctuation,
+      }),
+    [ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation],
   );
 
   const matchesAnyCorrectionField = useCallback(
@@ -513,19 +516,10 @@ export const useReviewFlashcardsAnswerFlow = ({
     handleBoxFaceCorrectAnswer(activeBox, {
       preferLove: activeBox === "boxFour" || activeBox === "boxFive",
     });
-    const isPerfect = (() => {
-      const normalizeStrict = (value: string) =>
-        stripDiacritics(value.trim().toLowerCase());
-      const normalizedUser = normalizeStrict(answer);
-      if (effectiveReversed) {
-        return splitFrontTextIntoAnswers(selectedItem.text).some(
-          (frontAnswer) => normalizedUser === normalizeStrict(frontAnswer),
-        );
-      }
-      return (selectedItem.translations ?? []).some(
-        (translation) => normalizedUser === normalizeStrict(translation),
-      );
-    })();
+    const isPerfect = (effectiveReversed
+      ? splitFrontTextIntoAnswers(selectedItem.text)
+      : selectedItem.translations ?? []
+    ).some((expected) => matchesCorrectionField(answer, expected));
     const correctExplanationState = getExplanationState({
       selectedItem,
       result: true,
@@ -554,6 +548,7 @@ export const useReviewFlashcardsAnswerFlow = ({
       removeCardFromSession(selectedItem.id, activeBox);
     });
   }, [
+    matchesCorrectionField,
     acknowledgeExplanation,
     activeBox,
     answer,

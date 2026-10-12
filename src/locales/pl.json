@@ -238,15 +238,15 @@
       "section": "Nauka",
       "spellcheck": {
         "title": "Sprawdzanie pisowni",
-        "subtitle": "Tolerancja 1 błędu przy sprawdzaniu."
+        "subtitle": "Dopuszcza jedną literówkę w odpowiedzi."
       },
       "keyboardSuggestions": {
         "title": "Sugestie klawiatury",
-        "subtitle": "Włącz lub wyłącz podpowiedzi i autokorektę w fiszkach. Uwaga: część klawiatur (np. Samsung, Gboard) może nadal pokazywać pasek podpowiedzi."
+        "subtitle": "Podpowiedzi i autokorekta w fiszkach. Niektóre klawiatury (np. Samsung i Gboard) mogą nadal wyświetlać podpowiedzi."
       },
       "autoSubmitCorrectAnswer": {
-        "title": "Automatycznie zatwierdzaj poprawne odpowiedzi",
-        "subtitle": "Po wpisaniu poprawnej odpowiedzi zatwierdź ją automatycznie po krótkiej chwili."
+        "title": "Automatyczne zatwierdzanie",
+        "subtitle": "Zatwierdza poprawną odpowiedź po krótkiej chwili."
       },
       "skipCorrection": {
         "title": "Pomiń poprawkę po błędzie",
@@ -254,7 +254,15 @@
       },
       "ignoreDiacritics": {
         "title": "Ignoruj znaki diakrytyczne",
-        "subtitle": "Porównuj słowa bez ogonków, np. ą -> a."
+        "subtitle": "Pomija ogonki i akcenty (np. ą\u00a0→\u00a0a)."
+      },
+      "autoConvertSpanishPunctuation": {
+        "title": "Odwracanie znaków",
+        "subtitle": "Zamienia ?\u00a0na\u00a0¿ oraz !\u00a0na\u00a0¡ zgodnie ze wzorcową odpowiedzią."
+      },
+      "ignoreBoundaryPunctuation": {
+        "title": "Ignoruj znaki ?\u00a0i\u00a0!",
+        "subtitle": "Pomija pytajniki i wykrzykniki na początku i końcu odpowiedzi."
       },
       "reminders": {
         "title": "Przypomnienia o nauce",

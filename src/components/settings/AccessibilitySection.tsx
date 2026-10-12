@@ -6,7 +6,7 @@ import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-
 import SettingsItemCard from "@/src/components/settings/SettingsItemCard";
 import { useTranslation } from "react-i18next";
 import type { ColorBlindMode } from "@/src/theme/theme";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 
 const colorBlindModeOptions: {
   key: ColorBlindMode;
@@ -154,20 +154,26 @@ const AccessibilitySection: React.FC = () => {
         {t("settings.accessibility.section")}
       </Text>
       <View style={[styles.appearanceGroupCard, styles.appearanceGroupRows]}>
-        <SettingsItemCard
-          grouped
-          title={t("settings.accessibility.highContrast.title")}
-          description={t("settings.accessibility.highContrast.subtitle")}
-          control={(
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={highContrastEnabled}
-                onPress={() => void handleHighContrastToggle(!highContrastEnabled)}
-                accessibilityLabel={t("settings.accessibility.highContrast.title")}
-              />
-            </View>
-          )}
-        />
+        <ToggleRow
+          style={[
+            styles.settingItemCard,
+            styles.settingItemRow,
+            styles.settingItemInline,
+          ]}
+          value={highContrastEnabled}
+          onPress={() => void handleHighContrastToggle(!highContrastEnabled)}
+          accessibilityLabel={t("settings.accessibility.highContrast.title")}
+          controlStyle={[styles.settingControlInline, styles.switch]}
+        >
+          <View style={styles.settingHeaderBlock}>
+            <Text style={styles.settingTitle}>
+              {t("settings.accessibility.highContrast.title")}
+            </Text>
+            <Text style={styles.settingDescription}>
+              {t("settings.accessibility.highContrast.subtitle")}
+            </Text>
+          </View>
+        </ToggleRow>
 
         <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard
@@ -198,42 +204,54 @@ const AccessibilitySection: React.FC = () => {
         </SettingsItemCard>
 
         <View style={styles.appearanceGroupDivider} />
-        <SettingsItemCard
-          grouped
-          title={t("settings.accessibility.largeFont.title")}
-          description={t("settings.accessibility.largeFont.subtitle")}
-          control={(
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={largeFontEnabled}
-                onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
-                accessibilityLabel={t("settings.accessibility.largeFont.title")}
-              />
-            </View>
-          )}
-        />
+        <ToggleRow
+          style={[
+            styles.settingItemCard,
+            styles.settingItemRow,
+            styles.settingItemInline,
+          ]}
+          value={largeFontEnabled}
+          onPress={() => void handleLargeFontToggle(!largeFontEnabled)}
+          accessibilityLabel={t("settings.accessibility.largeFont.title")}
+          controlStyle={[styles.settingControlInline, styles.switch]}
+        >
+          <View style={styles.settingHeaderBlock}>
+            <Text style={styles.settingTitle}>
+              {t("settings.accessibility.largeFont.title")}
+            </Text>
+            <Text style={styles.settingDescription}>
+              {t("settings.accessibility.largeFont.subtitle")}
+            </Text>
+          </View>
+        </ToggleRow>
 
         <View style={styles.appearanceGroupDivider} />
-        <SettingsItemCard
-          grouped
-          title={t("settings.accessibility.correctionErrorMarkers.title")}
-          description={t("settings.accessibility.correctionErrorMarkers.subtitle")}
-          control={(
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={correctionErrorMarkersEnabled}
-                onPress={() =>
-                  void handleCorrectionErrorMarkersToggle(
-                    !correctionErrorMarkersEnabled,
-                  )
-                }
-                accessibilityLabel={t(
-                  "settings.accessibility.correctionErrorMarkers.title",
-                )}
-              />
-            </View>
+        <ToggleRow
+          style={[
+            styles.settingItemCard,
+            styles.settingItemRow,
+            styles.settingItemInline,
+          ]}
+          value={correctionErrorMarkersEnabled}
+          onPress={() =>
+            void handleCorrectionErrorMarkersToggle(
+              !correctionErrorMarkersEnabled,
+            )
+          }
+          accessibilityLabel={t(
+            "settings.accessibility.correctionErrorMarkers.title",
           )}
-        />
+          controlStyle={[styles.settingControlInline, styles.switch]}
+        >
+          <View style={styles.settingHeaderBlock}>
+            <Text style={styles.settingTitle}>
+              {t("settings.accessibility.correctionErrorMarkers.title")}
+            </Text>
+            <Text style={styles.settingDescription}>
+              {t("settings.accessibility.correctionErrorMarkers.subtitle")}
+            </Text>
+          </View>
+        </ToggleRow>
 
         <View style={styles.appearanceGroupDivider} />
         <SettingsItemCard

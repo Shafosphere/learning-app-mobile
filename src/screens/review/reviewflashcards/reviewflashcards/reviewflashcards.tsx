@@ -70,6 +70,7 @@ export default function ReviewFlashcardsScreen() {
     getCustomCourseShowExplanationEnabled,
     getCustomCourseExplanationOnlyOnWrong,
     ignoreDiacriticsInSpellcheck,
+    ignoreBoundaryPunctuation,
     learningRemindersEnabled,
     autoSubmitCorrectAnswer,
   } = settings;
@@ -369,6 +370,7 @@ export default function ReviewFlashcardsScreen() {
     enqueueReviewMutation,
     checkSpelling,
     ignoreDiacriticsInSpellcheck,
+    ignoreBoundaryPunctuation,
     showExplanationEnabled,
     explanationOnlyOnWrong,
     learningRemindersEnabled,

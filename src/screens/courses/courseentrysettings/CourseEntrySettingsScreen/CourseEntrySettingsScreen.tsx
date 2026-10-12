@@ -1,7 +1,7 @@
 import MyButton from "@/src/components/button/button";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_ENTRY_SETTINGS_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
@@ -292,7 +292,15 @@ export default function CourseEntrySettingsScreen() {
             radius={24}
           >
             <View style={styles.options}>
-              <View style={styles.option}>
+              <ToggleRow
+                style={styles.option}
+                value={autoflowEnabled}
+                onPress={() => setAutoflowEnabledState((prev) => !prev)}
+                accessibilityLabel={t(
+                  "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczAutomatFiszek"
+                )}
+                controlStyle={styles.switchWrap}
+              >
                 <View style={styles.optionMain}>
                   <View style={styles.iconWrap}>
                     <Text style={styles.iconText}>⚡</Text>
@@ -310,18 +318,17 @@ export default function CourseEntrySettingsScreen() {
                     </Text>
                   </View>
                 </View>
-                <View style={styles.switchWrap}>
-                  <ToggleSwitch
-                    value={autoflowEnabled}
-                    onPress={() => setAutoflowEnabledState((prev) => !prev)}
-                    accessibilityLabel={t(
-                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczAutomatFiszek"
-                    )}
-                  />
-                </View>
-              </View>
+              </ToggleRow>
 
-              <View style={styles.option}>
+              <ToggleRow
+                style={styles.option}
+                value={reviewsEnabled}
+                onPress={() => setReviewsEnabled((prev) => !prev)}
+                accessibilityLabel={t(
+                  "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczCodziennePowtorki"
+                )}
+                controlStyle={styles.switchWrap}
+              >
                 <View style={styles.optionMain}>
                   <View style={styles.iconWrap}>
                     <Text style={styles.iconText}>🗓️</Text>
@@ -339,18 +346,17 @@ export default function CourseEntrySettingsScreen() {
                     </Text>
                   </View>
                 </View>
-                <View style={styles.switchWrap}>
-                  <ToggleSwitch
-                    value={reviewsEnabled}
-                    onPress={() => setReviewsEnabled((prev) => !prev)}
-                    accessibilityLabel={t(
-                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczCodziennePowtorki"
-                    )}
-                  />
-                </View>
-              </View>
+              </ToggleRow>
 
-              <View style={styles.option}>
+              <ToggleRow
+                style={styles.option}
+                value={showExplanationEnabled}
+                onPress={() => setShowExplanationEnabledState((prev) => !prev)}
+                accessibilityLabel={t(
+                  "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczPokazywanieWyjasnien"
+                )}
+                controlStyle={styles.switchWrap}
+              >
                 <View style={styles.optionMain}>
                   <View style={styles.iconWrap}>
                     <Text style={styles.iconText}>💡</Text>
@@ -368,16 +374,7 @@ export default function CourseEntrySettingsScreen() {
                     </Text>
                   </View>
                 </View>
-                <View style={styles.switchWrap}>
-                  <ToggleSwitch
-                    value={showExplanationEnabled}
-                    onPress={() => setShowExplanationEnabledState((prev) => !prev)}
-                    accessibilityLabel={t(
-                      "screens.courses.courseentrysettings.courseEntrySettings.courseEntrySettings.accessibilityLabel.przelaczPokazywanieWyjasnien"
-                    )}
-                  />
-                </View>
-              </View>
+              </ToggleRow>
             </View>
           </CoachmarkAnchor>
         </View>

@@ -1,11 +1,7 @@
 import { useSettings } from "../contexts/SettingsContext";
-import { normalizeAnswerText } from "../utils/answerNormalization";
+import { normalizeAnswerPair } from "../utils/answerComparison";
 export default function useSpellchecking() {
-  const { spellChecking, ignoreDiacriticsInSpellcheck } = useSettings();
-
-  function prepareWord(rawValue: string): string {
-    return normalizeAnswerText(rawValue, ignoreDiacriticsInSpellcheck);
-  }
+  const { spellChecking, ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation } = useSettings();
 
   function containsDigit(value: string): boolean {
     return /\d/.test(value);
@@ -39,8 +35,11 @@ export default function useSpellchecking() {
   function checkSpelling(userForm: string, correctForm: string): boolean {
     if (!userForm || !correctForm) return false;
 
-    const userWord = prepareWord(userForm);
-    const correctWord = prepareWord(correctForm);
+    const { input: userWord, expected: correctWord } = normalizeAnswerPair(userForm, correctForm, {
+      ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
+    });
+    if (!userWord || !correctWord) return false;
     // Avoid forgiving typos when numbers are involved (years, quantities, etc.).
     // Numeric answers should match exactly so "1994" !== "1995".
     if (containsDigit(userWord) || containsDigit(correctWord)) {

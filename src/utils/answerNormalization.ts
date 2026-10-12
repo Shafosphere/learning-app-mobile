@@ -3,6 +3,7 @@ import { stripDiacritics } from "./diacritics";
 export function normalizeAnswerText(
   rawValue: string,
   ignoreDiacritics: boolean,
+  ignoreBoundaryPunctuation = false,
 ): string {
   let normalized = rawValue
     .normalize("NFKC")
@@ -13,6 +14,10 @@ export function normalizeAnswerText(
 
   if (ignoreDiacritics) {
     normalized = stripDiacritics(normalized);
+  }
+
+  if (ignoreBoundaryPunctuation) {
+    normalized = normalized.replace(/^[?¿!¡]+|[?¿!¡]+$/g, "").trim();
   }
 
   return normalized;

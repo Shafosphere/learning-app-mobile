@@ -40,6 +40,7 @@ import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
+import { answersMatch } from "@/src/utils/answerComparison";
 import {
   TRUE_FALSE_POST_OK_COOLDOWN_MS,
 } from "@/src/features/flashcards/study/study.constants";
@@ -1913,6 +1914,26 @@ describe("reviewflashcards correction desync regression", () => {
     });
 
     expect(screen.getByText("Download disabled")).not.toBeNull();
+  });
+
+  it("treats omitted boundary marks as a perfect review answer", async () => {
+    jest.useFakeTimers();
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), ignoreBoundaryPunctuation: true });
+    mockedUseSpellchecking.mockReturnValue((input: string, expected: string) => answersMatch(input, expected, {
+      ignoreDiacritics: false, ignoreBoundaryPunctuation: true,
+    }));
+    mockedAdvanceCustomReview.mockResolvedValueOnce({ stage: 5, nextReview: Date.now() + 100000 });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([
+      makeReviewCard({ id: 300, frontText: "hello", backText: "¿Hola?", answers: ["¿Hola?"], stage: 4 }),
+    ]);
+    const screen = render(<ReviewFlashcardsScreen />);
+    await startReviewFromStage(screen, 4);
+    await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], "Hola"));
+    fireEvent.press(screen.getByTestId("confirm-button"));
+    await act(async () => { jest.advanceTimersByTime(1500); });
+    await waitFor(() => expect(screen.getByText(CHOOSE_BOX_TEXT)).not.toBeNull());
+    expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(300, 77);
+    jest.useRealTimers();
   });
 
   it("removes a correctly answered card from the session and shows the empty state", async () => {

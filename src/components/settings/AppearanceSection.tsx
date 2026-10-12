@@ -15,14 +15,13 @@ import React, {
 } from "react";
 import {
   Modal,
-  Pressable,
   Text,
   TouchableOpacity,
   View,
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { NativeLanguage, UiLanguage } from "@/src/i18n";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
@@ -290,12 +289,12 @@ const AppearanceSection: React.FC = () => {
       </Text>
       <View style={styles.appearanceGroupCard}>
         <View style={styles.appearanceGroupRows}>
-          <Pressable
+          <ToggleRow
             style={styles.appearanceGroupRow}
+            value={theme === "dark"}
+            controlStyle={styles.switch}
             onPress={() => void handleThemeToggle(theme !== "dark")}
-            accessibilityRole="switch"
             accessibilityLabel={t("settings.appearance.darkTheme.title")}
-            accessibilityState={{ checked: theme === "dark" }}
           >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
@@ -305,22 +304,16 @@ const AppearanceSection: React.FC = () => {
                 {preventWidowsPl(t("settings.appearance.darkTheme.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={theme === "dark"}
-                decorative
-              />
-            </View>
-          </Pressable>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <Pressable
+          <ToggleRow
             style={styles.appearanceGroupRow}
+            value={feedbackEnabled}
+            controlStyle={styles.switch}
             onPress={() => void handleFeedbackToggle(!feedbackEnabled)}
-            accessibilityRole="switch"
             accessibilityLabel={t("settings.appearance.vibrations.title")}
-            accessibilityState={{ checked: feedbackEnabled }}
           >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
@@ -330,22 +323,16 @@ const AppearanceSection: React.FC = () => {
                 {preventWidowsPl(t("settings.appearance.vibrations.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={feedbackEnabled}
-                decorative
-              />
-            </View>
-          </Pressable>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <Pressable
+          <ToggleRow
             style={styles.appearanceGroupRow}
+            value={!quotesEnabled}
+            controlStyle={styles.switch}
             onPress={() => void handleQuotesToggle(quotesEnabled)}
-            accessibilityRole="switch"
             accessibilityLabel={t("settings.appearance.disableReactions.title")}
-            accessibilityState={{ checked: !quotesEnabled }}
           >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
@@ -355,22 +342,16 @@ const AppearanceSection: React.FC = () => {
                 {preventWidowsPl(t("settings.appearance.disableReactions.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={!quotesEnabled}
-                decorative
-              />
-            </View>
-          </Pressable>
+          </ToggleRow>
 
           <View style={styles.appearanceGroupDivider} />
 
-          <Pressable
+          <ToggleRow
             style={styles.appearanceGroupRow}
+            value={showBoxFaces}
+            controlStyle={styles.switch}
             onPress={() => void handleFacesToggle(!showBoxFaces)}
-            accessibilityRole="switch"
             accessibilityLabel={t("settings.appearance.boxFaces.title")}
-            accessibilityState={{ checked: showBoxFaces }}
           >
             <View style={styles.appearanceRowText}>
               <Text style={styles.appearanceBlockTitle}>
@@ -380,13 +361,7 @@ const AppearanceSection: React.FC = () => {
                 {preventWidowsPl(t("settings.appearance.boxFaces.subtitle"))}
               </Text>
             </View>
-            <View style={styles.switch}>
-              <ToggleSwitch
-                value={showBoxFaces}
-                decorative
-              />
-            </View>
-          </Pressable>
+          </ToggleRow>
         </View>
       </View>
 

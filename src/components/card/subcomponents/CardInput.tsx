@@ -48,6 +48,7 @@ type CardInputProps = {
     index: number;
     expectedChar: string;
     inputChar: string;
+    inputLength?: number;
   } | null;
   imageSizeMode: FlashcardsImageSize;
   textColorOverride?: string;
@@ -82,7 +83,7 @@ export function CardInput({
 }: CardInputProps) {
   const styles = useStyles();
   const { ref: inputRowRef, onFocus: revealOnFocus, onBlur: revealOnBlur, onLayout: revealOnLayout } = useStudyInputReveal();
-  const { colors } = useSettings();
+  const { colors, ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation } = useSettings();
   const { t } = useTranslation();
   const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
@@ -186,7 +187,8 @@ export function CardInput({
                 { height: cardMetrics.textInputHeight - 3 * contentScale },
               ]}
             >
-              <GhostAnswerText value={answer} expected={letterHintPrefix} cardMetrics={cardMetrics} textColorOverride={textColorOverride} />
+              <GhostAnswerText value={answer} expected={letterHintPrefix} cardMetrics={cardMetrics} textColorOverride={textColorOverride}
+                ignoreDiacritics={ignoreDiacriticsInSpellcheck} ignoreBoundaryPunctuation={ignoreBoundaryPunctuation} />
             </View>
           ) : null}
           <TextInput
@@ -252,7 +254,7 @@ export function CardInput({
     // Default: substitution behavior
     let errorPart: React.ReactNode = null;
     let correctionPart: React.ReactNode = null;
-    let afterCursor = answer.slice(index + 1);
+    let afterCursor = answer.slice(index + (typoDiff.inputLength ?? 1));
 
     if (type === "substitution") {
       errorPart = <Text style={styles.typoError}>{inputChar}</Text>;
@@ -320,6 +322,8 @@ export function CardInput({
     requestFocus,
     setAnswer,
     letterHintPrefix,
+    ignoreDiacriticsInSpellcheck,
+    ignoreBoundaryPunctuation,
     isMainAnswerDate,
     isMainAnswerNumeric,
     datePlaceholder,

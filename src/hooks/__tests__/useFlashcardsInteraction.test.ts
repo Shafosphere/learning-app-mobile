@@ -71,6 +71,7 @@ function createMockSettings() {
     activeCustomCourseId: null,
     explanationOnlyOnWrong: false,
     ignoreDiacriticsInSpellcheck: false,
+    ignoreBoundaryPunctuation: false,
     learningRemindersEnabled: false,
     cancelTodayLearningReminderSchedule: jest.fn(),
     refreshLearningReminderSchedule: jest.fn(),
@@ -1835,6 +1836,20 @@ describe("useFlashcardsInteraction", () => {
           reversed: false,
         });
       });
+    });
+
+    it("finishes introductory copying without boundary marks for both sides", async () => {
+      const card = makeWord({ id: 910, text: "¿Hola?", translations: ["¡Cześć!"] });
+      const hook = renderInteraction(makeBoxesState({ boxZero: [card] }), {
+        settingsOverride: { ignoreBoundaryPunctuation: true },
+      });
+      act(() => hook.result.current.interaction.handleSelectBox("boxZero"));
+      await waitFor(() => expect(hook.result.current.interaction.correction?.cardId).toBe(card.id));
+      act(() => hook.result.current.interaction.wrongInputChange(1, "Hola"));
+      expect(hook.result.current.interaction.correction).not.toBeNull();
+      act(() => hook.result.current.interaction.wrongInputChange(2, "Cześć"));
+      await waitFor(() => expect(hook.result.current.interaction.correction).toBeNull());
+      expect(hook.result.current.boxes.boxOne.some((word) => word.id === card.id)).toBe(true);
     });
 
     it("preserves intro inputs for the same active card", async () => {

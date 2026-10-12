@@ -4,17 +4,16 @@ import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { appendDebugEvent } from "@/src/services/debugEvents";
 import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
-import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { answersMatch, getAnswerMismatchFlags, getAnswerTypoDiff } from "@/src/utils/answerComparison";
+import { convertSpanishPunctuation } from "@/src/utils/spanishPunctuationInput";
 import { resolveInputKind } from "@/src/utils/answerInputKind";
 import { DEFAULT_LETTER_HINT_SETTINGS, resolveLetterHint } from "@/src/utils/letterHints";
 import { GhostAnswerText } from "./subcomponents/GhostAnswerText";
 import { splitGraphemes } from "@/src/utils/graphemes";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
-import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
 import type { DatePattern } from "@/src/utils/dateInput";
-import { calculateTypoDiff } from "@/src/utils/typoDiff";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
@@ -179,6 +178,8 @@ export default function Card({
     explanationOnlyOnWrong: explanationOnlyOnWrongSetting,
     showExplanationEnabled: showExplanationEnabledSetting,
     ignoreDiacriticsInSpellcheck,
+    ignoreBoundaryPunctuation,
+    autoConvertSpanishPunctuation,
     flashcardsSuggestionsEnabled,
     flashcardsCardSize,
     flashcardsImageSize,
@@ -362,9 +363,10 @@ export default function Card({
   );
   const handleAnswerChange = useCallback(
     (value: string) => {
-      const nextValue =
-        isMainAnswerDate && mainDatePattern
-          ? formatDateLikeInput(value, mainDatePattern, answer)
+      const nextValue = isMainAnswerDate && mainDatePattern
+        ? formatDateLikeInput(value, mainDatePattern, answer)
+        : autoConvertSpanishPunctuation
+          ? convertSpanishPunctuation(answer, value, mainExpectedAnswers, ignoreDiacriticsInSpellcheck)
           : value;
 
       if (autoSubmitTimerRef.current != null) {
@@ -372,11 +374,7 @@ export default function Card({
         autoSubmitTimerRef.current = null;
       }
 
-      if (isMainAnswerDate && mainDatePattern) {
-        setAnswer(nextValue);
-      } else {
-        setAnswer(value);
-      }
+      setAnswer(nextValue);
 
       const canAutoSubmit =
         autoSubmitCorrectAnswer &&
@@ -405,6 +403,8 @@ export default function Card({
     },
     [
       answer,
+      autoConvertSpanishPunctuation,
+      ignoreDiacriticsInSpellcheck,
       autoSubmitCorrectAnswer,
       checkSpelling,
       confirm,
@@ -821,9 +821,11 @@ export default function Card({
 
   const matchesCorrectionText = useCallback(
     (value: string, expected: string) =>
-      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck) ===
-      normalizeAnswerText(expected, ignoreDiacriticsInSpellcheck),
-    [ignoreDiacriticsInSpellcheck],
+      answersMatch(value, expected, {
+        ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+        ignoreBoundaryPunctuation,
+      }),
+    [ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation],
   );
 
   const willCompleteCorrection = useCallback(
@@ -835,7 +837,10 @@ export default function Card({
       const nextInput2 = which === 2 ? value : (correction.input2 ?? "");
       const awersOk =
         !shouldCorrectAwers ||
-        matchesCorrectionText(nextInput1, correctionAwers);
+        (correction.awersAlternatives?.length
+          ? correction.awersAlternatives
+          : [correctionAwers]
+        ).some((expected) => matchesCorrectionText(nextInput1, expected));
       const rewersOk =
         !shouldCorrectRewers ||
         matchesCorrectionText(nextInput2, correctionRewers);
@@ -878,48 +883,33 @@ export default function Card({
 
   const handleWrongInputChange = useCallback(
     (which: 1 | 2, value: string) => {
-      if (which === 1 && isCorrectionInput1Date && correctionInput1DatePattern) {
-        const nextValue = formatDateLikeInput(
-          value,
-          correctionInput1DatePattern,
-          correction?.input1,
-        );
-        if (willCompleteCorrection(1, nextValue)) {
-          primeKeyboardBridge("correction_will_complete");
-        }
-        wrongInputChange(
-          1,
-          nextValue,
-        );
-        return;
-      }
-      if (which === 2 && isCorrectionInput2Date && correctionInput2DatePattern) {
-        const nextValue = formatDateLikeInput(
-          value,
-          correctionInput2DatePattern,
-          correction?.input2 ?? "",
-        );
-        if (willCompleteCorrection(2, nextValue)) {
-          primeKeyboardBridge("correction_will_complete");
-        }
-        wrongInputChange(
-          2,
-          nextValue,
-        );
-        return;
-      }
-      if (willCompleteCorrection(which, value)) {
+      const previous = which === 1 ? correction?.input1 ?? "" : correction?.input2 ?? "";
+      const datePattern = which === 1 ? correctionInput1DatePattern : correctionInput2DatePattern;
+      const isDate = which === 1 ? isCorrectionInput1Date : isCorrectionInput2Date;
+      const expectedAnswers = which === 1
+        ? correction?.awersAlternatives?.length ? correction.awersAlternatives : [correctionAwers]
+        : [correctionRewers];
+      const nextValue = isDate && datePattern
+        ? formatDateLikeInput(value, datePattern, previous)
+        : autoConvertSpanishPunctuation
+          ? convertSpanishPunctuation(previous, value, expectedAnswers, ignoreDiacriticsInSpellcheck)
+          : value;
+      if (willCompleteCorrection(which, nextValue)) {
         primeKeyboardBridge("correction_will_complete");
       }
-      wrongInputChange(which, value);
+      wrongInputChange(which, nextValue);
+      return nextValue;
     },
     [
-      correction?.input1,
-      correction?.input2,
+      correction,
+      correctionAwers,
+      correctionRewers,
       correctionInput1DatePattern,
       correctionInput2DatePattern,
       isCorrectionInput1Date,
       isCorrectionInput2Date,
+      autoConvertSpanishPunctuation,
+      ignoreDiacriticsInSpellcheck,
       primeKeyboardBridge,
       willCompleteCorrection,
       wrongInputChange,
@@ -927,32 +917,15 @@ export default function Card({
   );
 
   const handleCorrectionInput1Change = useCallback(
-    (t: string) => {
-      handleWrongInputChange(1, t);
-      if (correction?.awers) {
-        const normalizeString = (value: string) => {
-          let base = value.toLowerCase();
-          if (ignoreDiacriticsInSpellcheck) {
-            base = stripDiacritics(base);
-          }
-          return base;
-        };
-        const matches =
-          normalizeString(trimTrailingSpaces(t)) ===
-            normalizeString(correction.awers) &&
-          trimTrailingSpaces(t).length === correction.awers.length;
-        if (matches) {
-          onCorrection1Completed();
-        }
+    (value: string) => {
+      const nextValue = handleWrongInputChange(1, value);
+      const expectedAnswers = correction?.awersAlternatives?.length
+        ? correction.awersAlternatives : [correctionAwers];
+      if (expectedAnswers.some((expected) => matchesCorrectionText(nextValue, expected))) {
+        onCorrection1Completed();
       }
     },
-    [
-      correction?.awers,
-      handleWrongInputChange,
-      ignoreDiacriticsInSpellcheck,
-      onCorrection1Completed,
-      trimTrailingSpaces,
-    ],
+    [correction?.awersAlternatives, correctionAwers, handleWrongInputChange, matchesCorrectionText, onCorrection1Completed],
   );
 
   const syncInputScroll = useCallback(
@@ -1077,45 +1050,24 @@ export default function Card({
     setPendingHintDraft(null);
   }, [currentHint, effectiveReversed, selectedItem?.id]);
 
-  function normalizeChar(char: string | undefined): string {
-    if (!char) return "";
-    let normalized = char.toLowerCase();
-    if (ignoreDiacriticsInSpellcheck) {
-      normalized = stripDiacritics(normalized);
-    }
-    return normalized;
-  }
-
-  function isCharMismatchAt(
-    valueChars: string[],
-    expectedChars: string[],
-    index: number,
-  ): boolean {
-    const inputChar = valueChars[index];
-    if (!inputChar) return false;
-    const expectedChar = expectedChars[index];
-    if (!expectedChar) return true;
-    return normalizeChar(inputChar) !== normalizeChar(expectedChar);
-  }
-
   function renderCorrectionGhostText(value: string, expected: string) {
-    return <GhostAnswerText value={value} expected={expected} cardMetrics={cardMetrics} textColorOverride={textColorOverride} />;
+    return <GhostAnswerText value={value} expected={expected} cardMetrics={cardMetrics} textColorOverride={textColorOverride}
+      ignoreDiacritics={ignoreDiacriticsInSpellcheck} ignoreBoundaryPunctuation={ignoreBoundaryPunctuation} />;
   }
 
   function renderCorrectionErrorText(value: string, expected: string) {
     const typedChars = splitGraphemes(value);
-    const expectedChars = splitGraphemes(expected);
-    if (
-      !typedChars.some((_, idx) =>
-        isCharMismatchAt(typedChars, expectedChars, idx),
-      )
-    ) {
+    const mismatchFlags = getAnswerMismatchFlags(value, expected, {
+      ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
+    });
+    if (!mismatchFlags.some(Boolean)) {
       return null;
     }
 
     return typedChars.map((typedChar, idx) => {
 
-      const mismatch = isCharMismatchAt(typedChars, expectedChars, idx);
+      const mismatch = mismatchFlags[idx];
       const displayChar = typedChar === " " ? "\u00A0" : typedChar;
       const charStyle = [
         styles.overlayCharText,
@@ -1165,11 +1117,10 @@ export default function Card({
   }
 
   function hasCorrectionMismatch(value: string, expected: string) {
-    const typedChars = splitGraphemes(value);
-    const expectedChars = splitGraphemes(expected);
-    return typedChars.some((_, idx) =>
-      isCharMismatchAt(typedChars, expectedChars, idx),
-    );
+    return getAnswerMismatchFlags(value, expected, {
+      ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
+    }).some(Boolean);
   }
 
   const startHintEditing = useCallback(() => {
@@ -1307,75 +1258,17 @@ export default function Card({
 
   const typoDiff = useMemo(() => {
     if (result !== true || !selectedItem) return null;
-
-    // Check if it's a "perfect" match or a typo match
-    // We need to compare answer vs target (handling multiple translations)
-    // Find the translation that matched (closest) to generate the diff against it.
-
-    // Helper to normalize for comparison
-    const norm = (s: string) => {
-      let v = s.toLowerCase().trim();
-      if (ignoreDiacriticsInSpellcheck) v = stripDiacritics(v);
-      return v;
-    };
-
-    const userAnswer = norm(answer);
-
-    // Find best match among translations (or front text if reversed)
-    let bestMatch: string | null = null;
-
-    if (effectiveReversed) {
-      // Answer should match 'awers' (text)
-      const frontAnswers = splitFrontTextIntoAnswers(selectedItem.text);
-      const perfect = frontAnswers.some((target) => norm(target) === userAnswer);
-      if (perfect) return null;
-      bestMatch =
-        frontAnswers.find((target) => calculateTypoDiff(userAnswer, norm(target)) !== null) ??
-        frontAnswers[0] ??
-        selectedItem.text;
-    } else {
-      // Answer should match one of translations
-      // If perfectly matches any, returns null
-      const perfect = selectedItem.translations.some(
-        (t) => norm(t) === userAnswer,
-      );
-      if (perfect) return null;
-
-      // Otherwise find the one with diff
-      bestMatch =
-        selectedItem.translations.find((t) => {
-          // We assume validation logic already passed, so one of them MUST be close enough.
-          // But validation logic inside hook is complex.
-          // Simplest is to find the one with minimal edit distance or just calculateDiff returns non-null
-          return calculateTypoDiff(userAnswer, norm(t)) !== null;
-        }) ?? selectedItem.translations[0]; // Fallback
+    const expectedAnswers = effectiveReversed
+      ? splitFrontTextIntoAnswers(selectedItem.text)
+      : selectedItem.translations;
+    const options = { ignoreDiacritics: ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation };
+    if (expectedAnswers.some((expected) => answersMatch(answer, expected, options))) return null;
+    for (const expected of expectedAnswers) {
+      const diff = getAnswerTypoDiff(answer, expected, options);
+      if (diff) return diff;
     }
-
-    if (!bestMatch) return null;
-
-    // Calculate diff against the raw target string (but normalized for comparison?
-    // Wait, visual diff should probably respect user's casing vs target casing?
-    // User requested: "Greaja" vs "Grecja" -> "Gre <a> c ja"
-    // So we should probably use the target string as the source of truth for the 'correction' char.
-
-    // Issue: If we normalize everything, we lose case information for display?
-    // User input "Greaja", Target "Grecja".
-    // transform input to display.
-
-    // Let's rely on the utility. But the utility compares character by character.
-    // If we pass raw strings, "Grecja" vs "grecja" might be 1 diff (case).
-    // If ignoreCase is on, we should probably lowercase both before diffing OR handle case diffs as 'valid'?
-    // The requirement says "literowka". Usually implies actual char error.
-
-    // Let's use normalization for finding the diff.
-    return calculateTypoDiff(userAnswer, norm(bestMatch));
-  }, [
-    result,
-    selectedItem,
-    answer,
-    effectiveReversed,
-    ignoreDiacriticsInSpellcheck,
-  ]);
+    return null;
+  }, [result, selectedItem, answer, effectiveReversed, ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation]);
 
   const displayMode = useMemo<CardDisplayMode>(() => {
     if (showCorrectionInputs) return "correction";

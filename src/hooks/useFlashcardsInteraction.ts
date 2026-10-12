@@ -10,9 +10,8 @@ import {
   type DebugContext,
 } from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
-import { normalizeAnswerText } from "@/src/utils/answerNormalization";
+import { answersMatch } from "@/src/utils/answerComparison";
 import { getCorrectionFieldRequirements } from "@/src/utils/correctionFields";
-import { stripDiacritics } from "@/src/utils/diacritics";
 import { getExplanationState } from "@/src/utils/explanationState";
 import {
   isAnswerOnlyCard,
@@ -160,6 +159,7 @@ export function useFlashcardsInteraction({
     cancelTodayLearningReminderSchedule,
     explanationOnlyOnWrong,
     ignoreDiacriticsInSpellcheck,
+    ignoreBoundaryPunctuation,
     learningRemindersEnabled,
     refreshLearningReminderSchedule,
     showExplanationEnabled,
@@ -613,26 +613,13 @@ export function useFlashcardsInteraction({
             durationMs: duration ?? 0,
           });
         }
-        const normalize = (s: string) => {
-          let v = s.trim().toLowerCase();
-          if (ignoreDiacriticsInSpellcheck) {
-            v = stripDiacritics(v);
-          }
-          return v;
-        };
-
-        const userAnswer = normalize(answerToUse);
-        let isPerfect = false;
-
-        if (reversed) {
-          isPerfect = splitFrontTextIntoAnswers(wordForCheck.text).some(
-            (frontAnswer) => userAnswer === normalize(frontAnswer)
-          );
-        } else {
-          isPerfect = wordForCheck.translations.some(
-            (t) => userAnswer === normalize(t)
-          );
-        }
+        const isPerfect = (reversed
+          ? splitFrontTextIntoAnswers(wordForCheck.text)
+          : wordForCheck.translations
+        ).some((expected) => answersMatch(answerToUse, expected, {
+          ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+          ignoreBoundaryPunctuation,
+        }));
 
         const delay = isKnowDontKnow ? 1500 : isPerfect ? 1500 : 3000;
 
@@ -792,6 +779,7 @@ export function useFlashcardsInteraction({
       debugContext,
       skipDemotionCorrection,
       ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
       moveElement,
       onCorrectAnswer,
       onWrongAnswer,
@@ -866,22 +854,12 @@ export function useFlashcardsInteraction({
     );
   }, []);
 
-  const normalizeUserInput = useCallback(
-    (value: string) =>
-      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck),
-    [ignoreDiacriticsInSpellcheck]
-  );
-
-  const normalizeExpected = useCallback(
-    (value: string) =>
-      normalizeAnswerText(value, ignoreDiacriticsInSpellcheck),
-    [ignoreDiacriticsInSpellcheck]
-  );
-
   const matchesCorrectionField = useCallback(
-    (input: string, expected: string) =>
-      normalizeUserInput(input) === normalizeExpected(expected),
-    [normalizeExpected, normalizeUserInput]
+    (input: string, expected: string) => answersMatch(input, expected, {
+      ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
+    }),
+    [ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation]
   );
 
   const matchesAnyCorrectionField = useCallback(

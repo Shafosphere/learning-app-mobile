@@ -39,7 +39,7 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 
 const DEBUG_AUDIO_SAMPLES = [
   {
@@ -1049,7 +1049,13 @@ const DebuggingSection: React.FC = () => {
 
       <Text style={styles.sectionHeader}>{t("settings.debug.section.flags")}</Text>
 
-      <View style={styles.row}>
+      <ToggleRow
+        style={styles.row}
+        value={learningRemindersEnabled}
+        onPress={() => void toggleLearningRemindersEnabled()}
+        accessibilityLabel={t("settings.debug.rows.flags.learningReminders.title")}
+        controlStyle={styles.switch}
+      >
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>
             {t("settings.debug.rows.flags.learningReminders.title")}
@@ -1058,14 +1064,7 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.learningReminders.subtitle")}
           </Text>
         </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={learningRemindersEnabled}
-            onPress={() => void toggleLearningRemindersEnabled()}
-            accessibilityLabel={t("settings.debug.rows.flags.learningReminders.title")}
-          />
-        </View>
-      </View>
+      </ToggleRow>
 
       <View style={styles.row}>
         <View style={styles.rowTextWrapper}>
@@ -1105,7 +1104,13 @@ const DebuggingSection: React.FC = () => {
         </View>
       </View>
 
-      <View style={styles.row}>
+      <ToggleRow
+        style={styles.row}
+        value={statsFireEffectEnabled}
+        onPress={() => void toggleStatsFireEffectEnabled()}
+        accessibilityLabel={t("settings.debug.rows.flags.statsFire.title")}
+        controlStyle={styles.switch}
+      >
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>
             {t("settings.debug.rows.flags.statsFire.title")}
@@ -1114,16 +1119,15 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.statsFire.subtitle")}
           </Text>
         </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={statsFireEffectEnabled}
-            onPress={() => void toggleStatsFireEffectEnabled()}
-            accessibilityLabel={t("settings.debug.rows.flags.statsFire.title")}
-          />
-        </View>
-      </View>
+      </ToggleRow>
 
-      <View style={styles.row}>
+      <ToggleRow
+        style={styles.row}
+        value={statsBookshelfEnabled}
+        onPress={() => void toggleStatsBookshelfEnabled()}
+        accessibilityLabel={t("settings.debug.rows.flags.statsBookshelf.title")}
+        controlStyle={styles.switch}
+      >
         <View style={styles.rowTextWrapper}>
           <Text style={styles.rowTitle}>
             {t("settings.debug.rows.flags.statsBookshelf.title")}
@@ -1132,14 +1136,7 @@ const DebuggingSection: React.FC = () => {
             {t("settings.debug.rows.flags.statsBookshelf.subtitle")}
           </Text>
         </View>
-        <View style={styles.switch}>
-          <ToggleSwitch
-            value={statsBookshelfEnabled}
-            onPress={() => void toggleStatsBookshelfEnabled()}
-            accessibilityLabel={t("settings.debug.rows.flags.statsBookshelf.title")}
-          />
-        </View>
-      </View>
+      </ToggleRow>
     </View>
   );
 };

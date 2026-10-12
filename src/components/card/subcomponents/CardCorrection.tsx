@@ -1,8 +1,8 @@
 import { InlineConfirmButton } from "./InlineConfirmButton";
 import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
-import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
+import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
-import { splitGraphemes } from "@/src/utils/graphemes";
+import { applyAnswerCasing } from "@/src/utils/answerComparison";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
 import type { CardCorrectionType, FocusTarget, InlineCardAction } from "../card-types";
@@ -125,6 +125,7 @@ export function CardCorrection({
   const input1Reveal = useStudyInputReveal();
   const input2Reveal = useStudyInputReveal();
   const { t } = useTranslation();
+  const { ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation } = useSettings();
   const contentScale = cardMetrics.contentScale;
   const hasMath = useMemo(() => hasMathSegments(promptText), [promptText]);
   const shouldMarqueePrompt =
@@ -204,24 +205,10 @@ export function CardCorrection({
     correctionRewers,
   );
   function applyPlaceholderCasing(value: string, expected: string): string {
-    if (!expected) return value;
-    const chars = splitGraphemes(value);
-    const expectedChars = splitGraphemes(expected);
-    const len = Math.min(chars.length, expectedChars.length);
-    for (let i = 0; i < len; i++) {
-      const current = chars[i];
-      const target = expectedChars[i];
-      if (!current) continue;
-      if (current.toLowerCase() !== target.toLowerCase()) continue;
-      const shouldUpper = target === target.toUpperCase();
-      const shouldLower = target === target.toLowerCase();
-      if (shouldUpper && current !== current.toUpperCase()) {
-        chars[i] = current.toUpperCase();
-      } else if (shouldLower && current !== current.toLowerCase()) {
-        chars[i] = current.toLowerCase();
-      }
-    }
-    return chars.join("");
+    return applyAnswerCasing(value, expected, {
+      ignoreDiacritics: ignoreDiacriticsInSpellcheck,
+      ignoreBoundaryPunctuation,
+    });
   }
 
   const promptContent = hasMath ? (

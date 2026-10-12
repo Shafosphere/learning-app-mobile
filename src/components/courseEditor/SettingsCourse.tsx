@@ -2,7 +2,7 @@ import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import { BoxZeroSettingsSection } from "./BoxZeroSettingsSection";
 import { LetterHintControls } from "./LetterHintControls";
 import { SizeSettingsChoiceBlock } from "./SizeSettingsChoiceBlock";
-import ToggleSwitch from "@/src/components/toggle/ToggleSwitch";
+import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { Pressable, Text, View } from "react-native";
 import type { TFunction } from "i18next";
@@ -194,19 +194,18 @@ function SettingsToggleRow({
   dimmed = false,
 }: ToggleRowProps) {
   return (
-    <Pressable
+    <ToggleRow
       onPress={onPress}
       disabled={disabled}
-      accessible
-      accessibilityRole="switch"
       accessibilityLabel={accessibilityLabel}
       accessibilityHint={description}
-      accessibilityState={{ checked: value, disabled }}
       style={[
         styles.settingsGroupRow,
         dependent && styles.settingsDependentRow,
         dimmed && styles.settingsDependentRowDisabled,
       ]}
+      value={value}
+      controlStyle={styles.switch}
     >
       <View style={styles.settingsRowText}>
         <Text style={styles.settingsRowTitle}>{title}</Text>
@@ -214,14 +213,7 @@ function SettingsToggleRow({
           {preventWidowsPl(description)}
         </Text>
       </View>
-      <View style={styles.switch} pointerEvents="none">
-        <ToggleSwitch
-          value={value}
-          decorative
-          disabled={disabled}
-        />
-      </View>
-    </Pressable>
+    </ToggleRow>
   );
 }
 

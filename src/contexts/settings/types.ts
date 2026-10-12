@@ -97,6 +97,10 @@ export interface SettingsContextValue {
   toggleSpellChecking: () => Promise<void>;
   ignoreDiacriticsInSpellcheck: boolean;
   toggleIgnoreDiacriticsInSpellcheck: () => Promise<void>;
+  autoConvertSpanishPunctuation: boolean;
+  toggleAutoConvertSpanishPunctuation: () => Promise<void>;
+  ignoreBoundaryPunctuation: boolean;
+  toggleIgnoreBoundaryPunctuation: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
   boxZeroAnswerSide: BoxZeroAnswerSide;
