@@ -2389,5 +2389,28 @@
     "format": {
       "flashcardsValue": "flashcards: {{value}}"
     }
+  },
+  "audioDownload": {
+    "title": "Audio",
+    "downloaded": "Downloaded",
+    "checking": "Checking…",
+    "unavailable": "Downloads unavailable",
+    "pending": "Preparing…",
+    "downloading": "Downloading · {{percent}}%",
+    "transferring": "Preparing…",
+    "ready": "✓ Audio offline",
+    "cancelled": "Download cancelled",
+    "failed": "Could not download recordings.",
+    "networkError": "Check your internet connection and try again.",
+    "noSpace": "Not enough storage. Free up space and try again.",
+    "download": "Download",
+    "cancel": "Cancel",
+    "retry": "Try again",
+    "confirm": "Confirm in Google Play",
+    "size": "{{value}} MB",
+    "waitingForWifi": "Waiting for Wi-Fi",
+    "playConfirmation": "Google Play requires confirmation. It may open the store.",
+    "confirmTransfer": "Allow download",
+    "courseAction": "{{action}} — {{course}}"
   }
 }

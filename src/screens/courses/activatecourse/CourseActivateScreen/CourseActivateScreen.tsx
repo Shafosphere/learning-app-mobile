@@ -1,3 +1,4 @@
+import { CourseAudioDownloadRow } from "@/Audio/runtime/CourseAudioDownloadRow";
 import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
@@ -432,6 +433,9 @@ export default function CourseActivateScreen() {
                         onEdit={handleEditCustomCourse}
                         firstCoachmarkCourseId={firstPinnedOfficialCourseId}
                         scrollRef={scrollRef}
+                        renderCourseFooter={(course) => (
+                          <CourseAudioDownloadRow slug={course.slug} courseName={course.name} expanded={activeCustomCourseId === course.id} />
+                        )}
                       />
                 </>
               ) : null}

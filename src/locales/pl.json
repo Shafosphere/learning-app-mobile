@@ -2393,5 +2393,28 @@
     "format": {
       "flashcardsValue": "fiszki: {{value}}"
     }
+  },
+  "audioDownload": {
+    "title": "Audio",
+    "downloaded": "Pobrano",
+    "checking": "Sprawdzanie…",
+    "unavailable": "Pobieranie niedostępne",
+    "pending": "Przygotowanie…",
+    "downloading": "Pobieranie · {{percent}}%",
+    "transferring": "Przygotowanie…",
+    "ready": "✓ Audio offline",
+    "cancelled": "Pobieranie anulowane",
+    "failed": "Nie udało się pobrać nagrań.",
+    "networkError": "Sprawdź połączenie z internetem i spróbuj ponownie.",
+    "noSpace": "Brak miejsca na nagrania. Zwolnij miejsce i spróbuj ponownie.",
+    "download": "Pobierz",
+    "cancel": "Anuluj",
+    "retry": "Spróbuj ponownie",
+    "confirm": "Potwierdź w Google Play",
+    "size": "{{value}} MB",
+    "waitingForWifi": "Oczekiwanie na Wi-Fi",
+    "playConfirmation": "Google Play wymaga potwierdzenia. Może otworzyć sklep.",
+    "confirmTransfer": "Zezwól na transfer",
+    "courseAction": "{{action}} — {{course}}"
   }
 }

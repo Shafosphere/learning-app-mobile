@@ -15,6 +15,7 @@ interface CourseGroupListProps {
     onEdit: (course: OfficialCourseListItem) => void;
     firstCoachmarkCourseId: number | null;
     scrollRef: React.RefObject<any>;
+    renderCourseFooter?: (course: OfficialCourseListItem) => React.ReactNode;
 }
 
 export const CourseGroupList = ({
@@ -25,6 +26,7 @@ export const CourseGroupList = ({
     onEdit,
     firstCoachmarkCourseId,
     scrollRef,
+    renderCourseFooter,
 }: CourseGroupListProps) => {
     const { t } = useTranslation();
     const styles = useStyles();
@@ -132,6 +134,7 @@ export const CourseGroupList = ({
                                     onEdit={onEdit}
                                     firstCoachmarkCourseId={firstCoachmarkCourseId}
                                     scrollRef={scrollRef}
+                                    renderCourseFooter={renderCourseFooter}
                                 />
                                 <OfficialCourseSection
                                     title={t("courses.groups.mini")}
@@ -144,6 +147,7 @@ export const CourseGroupList = ({
                                     onEdit={onEdit}
                                     firstCoachmarkCourseId={firstCoachmarkCourseId}
                                     scrollRef={scrollRef}
+                                    renderCourseFooter={renderCourseFooter}
                                 />
                             </>
                         ) : null}

@@ -18,6 +18,7 @@ interface OfficialCourseSectionProps {
     onEdit: (course: OfficialCourseListItem) => void;
     firstCoachmarkCourseId: number | null;
     scrollRef: React.RefObject<any>;
+    renderCourseFooter?: (course: OfficialCourseListItem) => React.ReactNode;
 }
 
 export const OfficialCourseSection = ({
@@ -31,6 +32,7 @@ export const OfficialCourseSection = ({
     onEdit,
     firstCoachmarkCourseId,
     scrollRef,
+    renderCourseFooter,
 }: OfficialCourseSectionProps) => {
     const { t } = useTranslation();
     const styles = useStyles();
@@ -80,8 +82,7 @@ export const OfficialCourseSection = ({
                     />
                 );
 
-                if (isCoachmarkTarget) {
-                    return (
+                const anchoredCard = isCoachmarkTarget ? (
                         <CoachmarkAnchor
                             key={`coachmark-official-${course.id}`}
                             id="course-activate-first-card"
@@ -93,10 +94,14 @@ export const OfficialCourseSection = ({
                         >
                             {card}
                         </CoachmarkAnchor>
-                    );
-                }
+                    ) : card;
 
-                return card;
+                return (
+                    <View key={`official-row-${course.id}`} testID={`official-course-row-${course.id}`}>
+                        <View style={{ zIndex: 1 }}>{anchoredCard}</View>
+                        {renderCourseFooter?.(course)}
+                    </View>
+                );
             })}
         </View>
     );
