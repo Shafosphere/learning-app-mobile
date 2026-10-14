@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "f14f9b14bed487447ef88d3d6b67a085417e9fd21e88c8d9dc2f7a3d2af8b38b": {
+      "text": "cansado",
+      "bytes": 5184,
+      "fileSha256": "21247c88fb8d418946229cd2837987c460c85eed1cf792a1da7a48da4218e120"
+    },
+    "f1cbbdb18961a030af61782e800ecb71920fe7834858c227ca91f2d4821aa12f": {
+      "text": "segundo",
+      "bytes": 4896,
+      "fileSha256": "e4165920091b5eff64431bc592279b618b8ea521df93a583a870f8f555a1c3ce"
+    },
+    "f1ddb6ff536db0457eebb3ce98ae0997624d9341a385d90c4287231529e1ed30": {
+      "text": "gracias",
+      "bytes": 6144,
+      "fileSha256": "6a3692ec1f0684d1874c656377511ae7a5f6e95b05ee5c7f3eb31b6f8df40ca1"
+    },
+    "f43dd81c8658d3685c61555f154562ee57da056480c1847ed33a85edb8bc716c": {
+      "text": "vivir",
+      "bytes": 4416,
+      "fileSha256": "29e1656e04abd620a0be0bd06aff6dcbc7e6432cb2046f66522b020403bfd2de"
+    },
+    "f440caa6577c26039e1fc9895272b82c79e5f6223666d13682b684bf0c03694a": {
+      "text": "adiós",
+      "bytes": 4032,
+      "fileSha256": "2b7e5ae888be79028cd1e1f0778b2208638f363c722e2d479d20b03eabea93d8"
+    },
+    "f5d32ae804cc13d659436c0ade607860a8ab83d3d8d37154c43c20a452d4be3d": {
+      "text": "agua",
+      "bytes": 5184,
+      "fileSha256": "4c4a849c477373da40826638c85d37a11b7248fd3bf8008586c6fda9dc3237ed"
+    },
+    "f5e310d05a909351d7922986b7701e868721bfb340b261fa14a48201679ed17a": {
+      "text": "treinta",
+      "bytes": 4224,
+      "fileSha256": "165d169eb5faec116fb5c93c3645129213f066fe1f62b0aec3696188e5640d76"
+    },
+    "f60b58daa27de2c5ec94754f1c9aead5fe485ee2f612776b90254421ad124362": {
+      "text": "triste",
+      "bytes": 2784,
+      "fileSha256": "2acdd59cf10af276d6fa1daae4d8be964337e9a936e91aaa324e720cd7f37a23"
+    },
+    "f61b7cdf1ad842b8c9bc085a917e864cfbb345203c8663845d7621cd68542244": {
+      "text": "huevos",
+      "bytes": 5856,
+      "fileSha256": "4b6ef5d8981b9677d02fbcea6ecea65bd04b85a01277c6c465d371d33b255439"
+    },
+    "f68693e037c4de4331f86499e4baa9a1071a1ac3915ba81d1b42ffd30ccad8df": {
+      "text": "encima de",
+      "bytes": 5952,
+      "fileSha256": "3e6a8f59d0b2150ffd48fec6300418c19e8f8663617a3636186b6c4a15e6e96c"
+    },
+    "f6cd7f99fc744d5de5f8d20f599c2e8e3f4a90e0f842221348833f9f3dd4e270": {
+      "text": "pelo",
+      "bytes": 4032,
+      "fileSha256": "53d61c01cab1b720d9ba6cf1b37cb6f2c429e32a43a939fb4ed1bad60d055014"
+    },
+    "f7334c0bedbb5e534f8b2253cbd436394e079f2b9e82fe76dbac561a07176641": {
+      "text": "tengo 20 años",
+      "bytes": 6912,
+      "fileSha256": "5cb75f7bd1732566912ae2e1ca068868508f35ef8187706f81f5f4b02f77ccd7"
+    },
+    "f7c6fe2bcd60c325750ffc5ac088d2ef81d93ac83810d876e5626db296a12c58": {
+      "text": "farmacia",
+      "bytes": 5856,
+      "fileSha256": "80f11d00bff4c83d27dd684b190c3b032fa294820ca0523aa8508fc3479c2bef"
+    },
+    "f85d028e5a3ac1b62fa4baa6c89e14a679efb2e3da6d3f070929e954d181826b": {
+      "text": "mucho",
+      "bytes": 4032,
+      "fileSha256": "4ce5e1673544a16a65861e48930186cd24b3aa639e1d95b13c8e9cba78e350b7"
+    },
+    "f85e85084fc0869b37a1c0e34c93b2621dcdb5cc00ac47db9b30e670c231d795": {
+      "text": "hospital",
+      "bytes": 4704,
+      "fileSha256": "fb521c2748372ae21ccf534e69f519418814544111b39a2105aaa41c07d10008"
+    },
+    "f89a039cba22fad44bc4b4ebf3ee1b0f8f00416789905f84854403138e850421": {
+      "text": "abajo",
+      "bytes": 4416,
+      "fileSha256": "9217511e48b3436c454971f8a53c2e63bedebaa983cd9050ef1686c213443087"
+    },
+    "f8a1ccdd5f7dffdb3f0142205373e8ce9a44e30884becece689bb61c31f4ec1e": {
+      "text": "pie",
+      "bytes": 4032,
+      "fileSha256": "e541a077e1edbc4e547f945a5ef44cf285297acc376c29fdb6407b713c65bb8d"
+    },
+    "fadcc3f7be99de3ac64145dea8bf4ac81d5682609caec1e84d6dd650ddaf44f9": {
+      "text": "ella",
+      "bytes": 4416,
+      "fileSha256": "64505e166cdab841276dbedfa8d680e687e116a83e2252bd9612a3b8c541b493"
+    },
+    "fae75cfbcb78472435b3c5b3242b856da774629cf814ece262a51b0b670409c1": {
+      "text": "me llamo",
+      "bytes": 5376,
+      "fileSha256": "cc8bd80d6772749cc6b2a42b84b960179404f65960e587487b7b91a0755219c4"
+    },
+    "fd6a8b34acaa02c593426110f903e01b41b4c041ffbd16b4c426759f11f352e6": {
+      "text": "hotel",
+      "bytes": 5376,
+      "fileSha256": "e3c75bb241ed60a5f93f90126326f670f390f7864663fde3c62dd31445408af2"
+    },
+    "fe0da04890ea34bc04b77e4705bb16dab9251b5bee65707128fec8f5c815fc2b": {
+      "text": "¿cómo se llega a?",
+      "bytes": 7392,
+      "fileSha256": "da567b431a1cd54f91af408a2f9150ca973d30e7eaa26424a77e405de37a0af7"
+    },
+    "fe2595c08478a2b898f9fdfa1629305985653757ab4e55e8194d06c39aed5e23": {
+      "text": "rojo",
+      "bytes": 5184,
+      "fileSha256": "8ad726badc3d8ed252061971e1f6477ef0fe3c50882b30040181056234b90dbd"
+    },
+    "ff428a22801ab4ce39b738e975a580ad87bb9c59d56ae0a4ba31bb2620b5efb1": {
+      "text": "almuerzo",
+      "bytes": 4896,
+      "fileSha256": "75e6817ecf32642e16eeced67dfb400dcb548f63d0ce502d711d72b4cbe6ed75"
+    }
+  }
+}

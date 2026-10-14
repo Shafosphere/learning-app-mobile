@@ -1,0 +1,14 @@
+{
+  "csv": "tools/prebuild-data/en/jezyki/francuski/French_B1.csv",
+  "column": "front_text",
+  "language": "fr-FR",
+  "voice": "fr-FR-Chirp3-HD-Aoede",
+  "limit": 50,
+  "requestsPerMinute": 150,
+  "project": "",
+  "budget": {
+    "totalRequests": 6500,
+    "totalCharacters": 50000
+  },
+  "textMode": "variants"
+}

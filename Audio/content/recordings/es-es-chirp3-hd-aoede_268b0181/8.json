@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "8059a2114cb1652398d3834e5111d2b279e669c4ec3647c93880145251040940": {
+      "text": "huevo",
+      "bytes": 4224,
+      "fileSha256": "e495aae9971f0d9cad0b3e4aca404cdfc7f3cfd9e240be976366488ddeb8da72"
+    },
+    "806fb92240b6eca4e996afbdb2c26bae1063a9061ab0aa047db0041b8632e4e7": {
+      "text": "queso",
+      "bytes": 5184,
+      "fileSha256": "8f61be61b4a024892e1b86e25fe535caba89f8addf7c364f1afa670ba4b8e89f"
+    },
+    "808a14f1f031f96a9b6a8742dec597ee8f8a29b21abd8a062a963901aba93893": {
+      "text": "autobús",
+      "bytes": 5952,
+      "fileSha256": "70c14c9cd12af859d9a2ab4dd066c7694c0eeb7b569373729d971193415b7df8"
+    },
+    "8150cf7065c64f29b1ad0b47b6348b6998f31d363849402d02630d9fa5f178eb": {
+      "text": "amarillo",
+      "bytes": 5856,
+      "fileSha256": "dda8769b4756d1d80956c6a1a6460a0760f0a005448555f59717d95696e69901"
+    },
+    "835c89e8e0da3052fcf7e58dad00bb4e0d9d82c906277309b6e17ea5b6b9fd81": {
+      "text": "escritorio",
+      "bytes": 5856,
+      "fileSha256": "74372c06a2f52ee466ba90de5b5a011442e7a5caba37c17d74f861993b51aa79"
+    },
+    "83ddf790acd4218f99aeb3a66f5a70b8364356d898fdd57d6f26c77eea16b1be": {
+      "text": "manzana",
+      "bytes": 5184,
+      "fileSha256": "ff8030f8690d9d5cc431a877831bb250f6b03da07a04d325105fb348b6094684"
+    },
+    "845aef5fb580e37689458b8198c52ca1c072a9bb85119ab0e296477b6e575c15": {
+      "text": "hombre",
+      "bytes": 5184,
+      "fileSha256": "40f14f3d13133fbc2977f747c67ebb3d9a3bc58aa898d95ad13519020c348965"
+    },
+    "859ca31f49236cd8d1dfdf1d81924446e8986b4f04b78cc32fececdb2ff90d01": {
+      "text": "blanco",
+      "bytes": 5376,
+      "fileSha256": "2e75dd3dfda6288befca97b45125c6149e9d7c031e41c48a4c1a32a35df23f3b"
+    },
+    "85a173dddfa9b967410acefb95bf378bf002134c09fdbf6ce74af802c8516f84": {
+      "text": "fuego",
+      "bytes": 4416,
+      "fileSha256": "35d804e0e747683c5e97bebc1465ec7f94b6d27e1d2f978cb2084d7fd48960e1"
+    },
+    "868f42b02c1b9545a5ce90098b3f842b210a49e0901f63408b63391ce96e6043": {
+      "text": "teléfono",
+      "bytes": 4032,
+      "fileSha256": "0c27ac965c1c0344eb184347620c3390c762cb8120c52af85b0df853db6cff5c"
+    },
+    "877f43283fa21a606fecb1b3f70576083b7c88e17bd2f1687856aaacd7e47c8e": {
+      "text": "mujer",
+      "bytes": 3552,
+      "fileSha256": "0dafeb8094085c705947be659bd36342e570eb52c8be7919e08359bef9331eb2"
+    },
+    "8814f751ba0866ef3a265a4b83fdc5d24efe8275bd2608e6e236060377bae4a5": {
+      "text": "verde",
+      "bytes": 4224,
+      "fileSha256": "2e38b28ca66a1d773cdca406be06acf274951a3c9522ff818ad2bfd317657fac"
+    },
+    "88b447dff122fad28d0ec03cec9b957992988240182e7f6a460059be42f163da": {
+      "text": "verdura",
+      "bytes": 4704,
+      "fileSha256": "9ef7208dd3d592c2275d5696a19f811b8f907c16688cd32f0e41d848e1cbf305"
+    },
+    "890caa633cf0654751f59aa592db15cb6fc559d492ede11a2d4b269a38e09ef0": {
+      "text": "vale",
+      "bytes": 2976,
+      "fileSha256": "acd7999662b2b92e08fabe648df1d679e5953f79e9f9259ab9a075322c956b5f"
+    },
+    "8ac71bb4545aff0db98e1b86e1c73627f6b8adb3df197bc1b627c990f9a2892d": {
+      "text": "tengo miedo",
+      "bytes": 6144,
+      "fileSha256": "5c49868f310b11b501f3f8b89506d6d11e0be965b2a423e1a8a85f996fb914f2"
+    },
+    "8b50d79d0084bd95f221a47f31a1c2dff1e2c752195a5a3879a2869492148d27": {
+      "text": "importante",
+      "bytes": 6624,
+      "fileSha256": "6c5962d956b31a2152bfce25e5647e809cce9e2d948ed7c0bb881fa67ae2375b"
+    },
+    "8c5dddf9079eb6c8d5b96c278c8393ba4cbf4c63c5e2552d3dff2b6d5600b216": {
+      "text": "quizás",
+      "bytes": 5472,
+      "fileSha256": "9fd3e38c3ee71c9414340cc1f419d306332442fbe8f44e7559598b6395422aaa"
+    },
+    "8d0495498f66836e3055d641055400bb4f2321299ee874f39846f6a860fb64ee": {
+      "text": "hace buen tiempo",
+      "bytes": 6336,
+      "fileSha256": "3d7ac307c7f2139270920327876a33dcce2f6309662f686ea6fa9af98eb48e22"
+    },
+    "8d075aa7aeba98e6c2f3aa6a26c0b6bffe5700e8ea67da57342ea3140254a161": {
+      "text": "seis",
+      "bytes": 5184,
+      "fileSha256": "79a5b51a5742eec8b2909c4eb9666e4063f98819ce98f94de00f44d8d7e7757b"
+    },
+    "8ea62b32dfacb43888ebe436ec808df049845a4fb4fe2dcf1d15e265a73320ee": {
+      "text": "de nada",
+      "bytes": 4032,
+      "fileSha256": "0763c8f66dbbc0fa765666b3351df9a41cbc4387c4f2becca997247450b8a33b"
+    },
+    "8f785302bddb3606e3e905c6999423faf072b73971ff243222f814962e99e02e": {
+      "text": "bonito",
+      "bytes": 4032,
+      "fileSha256": "d41f40806313e3c8477e98be3542179694faedf084d0d87ffd2f27403dd527d9"
+    }
+  }
+}

@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "6016d683b74a74afb3178fbfab22c42ac7e473b4f283db952d6bf64f40b260ff": {
+      "text": "ayer",
+      "bytes": 4512,
+      "fileSha256": "7434a811ebc0ad8de0c264d498d219344e9ea14ccb7d4a439193f9e0020517fe"
+    },
+    "60202ed4c82ea00c2aa70f3ffa9593d340da418c8e6c247b695e23e1a37e8f28": {
+      "text": "yo",
+      "bytes": 3456,
+      "fileSha256": "a1dc9f59c18fecc67939dc5f47b4b0c9ceb00a2db562612f4af2ec68310eef1a"
+    },
+    "60227f34757af631a15725e1c9617229f009d4e7ff5ee237963af8bb05191548": {
+      "text": "caliente",
+      "bytes": 7392,
+      "fileSha256": "9e1f0ab790faaed73470881eb26b29a553c6967216b863f546cde0a100938969"
+    },
+    "617edcca424b52e0fca32de9f3d0cc168cf3c4c35367686ef799ffcd59a3b672": {
+      "text": "tren",
+      "bytes": 4032,
+      "fileSha256": "e62ca200f4a86bf58d8cd71dcefc92fbbceefcca468e6fae580fb52834735e31"
+    },
+    "61e8d845d981866ed05dbce4a0b3742fd9facb828e697f7fcabb9eb0c5a84fb5": {
+      "text": "jueves",
+      "bytes": 4896,
+      "fileSha256": "d67ff4073aafef55f4861960916caa7ac902bee90b8a858021563653cfc9e6af"
+    },
+    "620c80f5b00e58cf8ef7e18a2f88df3dfb983e117c072442a13e17a6ed95c88c": {
+      "text": "país",
+      "bytes": 1344,
+      "fileSha256": "48e0076348c97e951f656822da4a0c0df19e19ccf2a4bb81cd6c1e3664a36dae"
+    },
+    "6472b56de08406ce9f8dfefe0d1dcd8221ee7b43e863d23051c25b4387eef8bc": {
+      "text": "domingo",
+      "bytes": 4224,
+      "fileSha256": "9b788a0f7eaab634fa7ab73d588106ac9a1f5226864056250e26ee917b822a7c"
+    },
+    "64edd51ce31433eb4396e6b84342da3b505d5f2f1b4653cb0a1be3d21c561ae1": {
+      "text": "semana",
+      "bytes": 4032,
+      "fileSha256": "5d6914ad3b20aff9bf562f33f4ec4be51296af5e912f0806dbb757ed650be441"
+    },
+    "657bb03d07544cdf05bc24e6d4b4a14b83f85c45a6e776f62620afe9ba864c0d": {
+      "text": "no me gusta",
+      "bytes": 4992,
+      "fileSha256": "e67f95591fe18aaa49ba0bbec2509f368cc61d94394bbed8434e017350b70641"
+    },
+    "65dab63dec88ed4f1f1034b0b6bc499a9596db1dbac70782f523f814af5e9402": {
+      "text": "¿por qué?",
+      "bytes": 4224,
+      "fileSha256": "abe4a94c5e8572fb12c71f4c223fb9e2dc7278977acaa54334795c3ed59b08ec"
+    },
+    "6713b2a35bd831fa5bb70543868e890a2d34b8510bcaefc1ada78e6081e58504": {
+      "text": "mal",
+      "bytes": 2976,
+      "fileSha256": "fc0f878185b086bc8b91f8ee308cc2d2ba3cb25233efa8459625ba549fab3c16"
+    },
+    "6733d049256e17f18166ff214eec8ff2c860ba6073c843a9bdd47439dddea561": {
+      "text": "café",
+      "bytes": 3936,
+      "fileSha256": "e48f768478fb4a2f48920f9bf505c06b8da86f372e22924b1e84231078b77ed5"
+    },
+    "6868cd93174b4cd651f15a73369ed9d7e6bc3a63e29d9ae64b6b2f85dbdd16d1": {
+      "text": "lejos",
+      "bytes": 6336,
+      "fileSha256": "4c349ac4ad674b28e85208b0cffb4a8724a47053f8434554b9f05cd9973884a5"
+    },
+    "68b2da62ca98c30cf494418e45449a57430f43ae73cf221adac757f0189d6827": {
+      "text": "la mitad",
+      "bytes": 4704,
+      "fileSha256": "ac703329a5d508f46f132da1cfb8b92433df16d1f778d76c3bf40c3f3171dc09"
+    },
+    "696079866e1336ca816894446e4feb7ef5d102a49412739f75596922d6683155": {
+      "text": "veinte",
+      "bytes": 4896,
+      "fileSha256": "fe4522df63ffa9de370597d392e15ccdf48231dd46d041ae67d8e46275514536"
+    },
+    "6a396cbafdc915ebe14fb09a6fe47ca8e85df08e7cf0112a7d0d9c7e995d8bb0": {
+      "text": "me siento mal",
+      "bytes": 4896,
+      "fileSha256": "96b80ff2d519abfaba2bcadfd27c07b706ce5801cee5d9b9d7426d691f8198b3"
+    },
+    "6a4166287c7527004c135762a7ad7e21d172142f912fbd49cf8da86d95dd6ca5": {
+      "text": "policía",
+      "bytes": 5856,
+      "fileSha256": "b30888672f16221cc468d55278289746d9deac5875e0218ed784815e8006705e"
+    },
+    "6b9a8df99d7373bc471d5614304f8f76700960cca0d0da33b84ece72a10e03e8": {
+      "text": "hasta luego",
+      "bytes": 4512,
+      "fileSha256": "57f82aa3938e78ab7020df76647d6907fff9afeb850215811cefba2a21c87432"
+    },
+    "6c60e34451a09104d4267d08de731f539197eb498fa52d493b84708035f9c6ad": {
+      "text": "persona",
+      "bytes": 5472,
+      "fileSha256": "4c0e4c0a782639e73c59daf989ca54f12d87b556ee6a2057b7083e959a5ae785"
+    },
+    "6d5928b060fa076fd64ecf2de4a3195d79e9cfaa01794555f52cfa355d9cf93a": {
+      "text": "precio",
+      "bytes": 2784,
+      "fileSha256": "5f655546ace68c35af1ed00e628f4f51c9e7649ba241672fb6f7cc4d4d0b2ada"
+    },
+    "6d7ae45c434c3de48c3d64f30fbcfac8ed772235be918e306f5065ff19c86e79": {
+      "text": "azul",
+      "bytes": 4512,
+      "fileSha256": "0b6d7167d58ec85b3ff431fd1a2db2396311cc790efcc53753a09cbb19f28896"
+    },
+    "6ecabde086ef87dda77371262d311fff7dc0336e3049d18397c6d090b7cdfb66": {
+      "text": "accidente",
+      "bytes": 4512,
+      "fileSha256": "4a01d05fdf03cb9da909ea0c4f0912ff906d429aa5527565bf7ce789a017f5a7"
+    }
+  }
+}

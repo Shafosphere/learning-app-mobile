@@ -1,0 +1,126 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "0115890423d722f715b636b2c48872a566ce34e069f011705bf41c49b87ea880": {
+      "text": "ahora",
+      "bytes": 3552,
+      "fileSha256": "4c34ee3b93c9061c62d683322f5360f13e12ed414cc46c972dc0aa43b600949b"
+    },
+    "0183db95ee1fe491f1d2a0d4e6fb4e0bd687a17a73853c3039a69956b70ed9b5": {
+      "text": "nosotros",
+      "bytes": 4032,
+      "fileSha256": "2785f655b83f4169af70fffb6e3ba96d1c64b38dfc98890593c3fc4f2ea9c739"
+    },
+    "0185ab7ad2a647a1aaf2bec93a94b502ed5eab1314d06a2aa10ff81fc8101ad7": {
+      "text": "papá",
+      "bytes": 3744,
+      "fileSha256": "23a4496c568b26e52c5ff571e0390d3d4041506625702a68c47d50cb41932631"
+    },
+    "027b59df97d0d30f1cf6911518c3be36ebfe261500b8f84c610e22fb5b3d0895": {
+      "text": "ayuda",
+      "bytes": 4416,
+      "fileSha256": "4c011598758af69dd9efb15b2ba94580bf41aa6944b2c133757cf083a16467e2"
+    },
+    "030c55e8ef547b3375c2bf490aef20391e80d8a83dd8904af5b540102b0a4ec7": {
+      "text": "gato",
+      "bytes": 5376,
+      "fileSha256": "85ae31f281cdf234853edecaef470f9d5d61b3037ec41553fcd123a57b80e694"
+    },
+    "036185ad820263f2dc391c86b26904380a87fc41cbf90913ec6dd37eadcd0a2a": {
+      "text": "pelota",
+      "bytes": 4224,
+      "fileSha256": "241473c8b804d556caa71e6850ad0e7e61b214c9baa9c435291f1fe9d65c5a1d"
+    },
+    "03e14c42e223b3888667d3fd3d013b04ecdd619c953ff56dfc9e66e2c674e09d": {
+      "text": "cabeza",
+      "bytes": 5856,
+      "fileSha256": "1ea71e2a5aeebd6b96c4b8b0e15209a2d6f58e943b7df8113b8fc80579c847f4"
+    },
+    "050d315bdf60020e183288068d84ec2d5d6c680a4bb80541005e5101d4d210db": {
+      "text": "¿cuál?",
+      "bytes": 3744,
+      "fileSha256": "15291d21efc949347b289798d10bd7f52233dfd24abf420e3d82a00d42d3a432"
+    },
+    "0578813bdc550b532e28cee2041e6ec83960599aaec187fdd6e5dadfbd3af7bc": {
+      "text": "sí",
+      "bytes": 3456,
+      "fileSha256": "d877e8a6d8fa6342b3eae4f3f352c1b406335212e84b94ac87de63ae7719013c"
+    },
+    "0697d52203b3f8a7d9e5d08a90b6de8bfb69d5cc11d620c377e1656c2e400dae": {
+      "text": "trabajar",
+      "bytes": 4032,
+      "fileSha256": "0ab14dcd1bf7d3398930dfe9d2519c52e41b45387ebb6a7ef065725b3818ffd6"
+    },
+    "069b393b3252c583b8647ef7374ce124543ab4eef247be6f79aec470262a6808": {
+      "text": "¿cuánto cuesta?",
+      "bytes": 5856,
+      "fileSha256": "f65a2b20f123bacce075db96667375a841b3d9fb96ac8e3eab4cbcaf6066e1cc"
+    },
+    "07915e740f5ec75b21028e3510743721bf07d9d06b13f836276c762b8ceb866b": {
+      "text": "¿cuántos años tienes?",
+      "bytes": 6816,
+      "fileSha256": "6a324562cc75a75c2a5760a6205b8a6018d592efeb8592cdf9184e43825acccd"
+    },
+    "084a7041aa5bff16dc27b98ad41343fb205849c8ca6359e2ae31a6bedf3abde1": {
+      "text": "quisiera esto",
+      "bytes": 5184,
+      "fileSha256": "9587535ae7e29e7083e6d3e7f58a09b55c5d0fac8d06d8810f8757e367326f7f"
+    },
+    "08be90ccb02565dbdd294d0809933fb638c8be10e51f5a7dc14079baed0a416f": {
+      "text": "¿cuánto?",
+      "bytes": 4416,
+      "fileSha256": "36a532f6a661ee71b45222dc72a423c6ee1864b7be5b98bdd3fba941846f4b11"
+    },
+    "08e0649a7269807bcc1795b48fa5688e9373d92adf8f74c41547ba1c55ef789e": {
+      "text": "lento",
+      "bytes": 6144,
+      "fileSha256": "a8da73c2e590c9e4786055ee31f4198ec07f5fe944443554e44570f0cb31594c"
+    },
+    "0b404e2fb161029ccdcd4d70678b853168af5e7fd15e9f1e1a1847753977e843": {
+      "text": "pequeño",
+      "bytes": 4032,
+      "fileSha256": "a9f499387706e81b4bd3bcf037af5d9b4f0646363149e9bcd9787eb01aa0124b"
+    },
+    "0b8ba737aa9755ceef8e9562609f0b44bb576713c3912b538a1beee9c27aa474": {
+      "text": "poco",
+      "bytes": 4416,
+      "fileSha256": "077bafd43f0fa133c05b2106ae2ae1cd8e09de9c901591f6c9e0eea128eb7445"
+    },
+    "0bb26243d6e55611cd2a24efc0728bf6a894c06aee04334eda8635d93b36837b": {
+      "text": "recto",
+      "bytes": 4896,
+      "fileSha256": "6a26e9efd1425f3b1c19cc19f08eae72a4d0345bee0dbb1caa6ae137ad01dc16"
+    },
+    "0c14d69c04a8e2819659e8143e6cb142b7ff6a6fe6ccb39c042b2cfdc6de0b4f": {
+      "text": "lápiz",
+      "bytes": 5472,
+      "fileSha256": "cbd3980b25454757c27680662f39b23b8cb853eff4dd15f799fd40a5dbf1087f"
+    },
+    "0c621d2dc44b31cd1228b4131a04c04118958319f543354a29e4fc7fb2087ec0": {
+      "text": "almohada",
+      "bytes": 4992,
+      "fileSha256": "01adf8416000351b36ba0748bed936495f2530ddc7742793a5d4c3f6b6ca7108"
+    },
+    "0ccef52b830f95f3c9e73306078de67af1eb38345bf92f391a3aa89c268c6cab": {
+      "text": "padres",
+      "bytes": 4704,
+      "fileSha256": "6fc826593c8841c703d2225b16c0650890c73df5c84da81f5dde74c34fe40dd3"
+    },
+    "0deb461adba1af56a741812eac7d9bf64417a7cf94ff501517192f08a84cc8b4": {
+      "text": "cama",
+      "bytes": 3552,
+      "fileSha256": "3fbaf0c132c84418868a1f7439ba049d6be02014f32ee6373f5aed7f7cb3bcd2"
+    },
+    "0f26644d312db740e7aa3e03c475d49b3cfccfc814cd5697272e4d36dbaf8c6b": {
+      "text": "buenas tardes",
+      "bytes": 7104,
+      "fileSha256": "1f0c4e620ad5fac90ed219aa1fc19c645abd503ec84295fb751116afccf65a07"
+    },
+    "0f425d5d51d29d7c91044697cc627858d9560d91d35db649de3021756d786d9f": {
+      "text": "mesa",
+      "bytes": 3552,
+      "fileSha256": "471c3cd71c30cbed76a2cdcab29175533979db6e8816817ef0f3b6fa2b78dda4"
+    }
+  }
+}

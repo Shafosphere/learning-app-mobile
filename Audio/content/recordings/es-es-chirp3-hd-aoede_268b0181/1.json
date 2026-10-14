@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "11bc2ba93039a4422d0af65ba8671796eef249e7c69497406b272db043b4f700": {
+      "text": "nariz",
+      "bytes": 4224,
+      "fileSha256": "f9f5a13083b79efd4ae15fd80c4d397c1e0835c466336bc89396ad2404e2fe45"
+    },
+    "141c6000944a84b503d3b9fda5c800319591098d6e36e3aa9247bdcdf4941ea0": {
+      "text": "niño",
+      "bytes": 4224,
+      "fileSha256": "113d18d2fc50a4c1f7149e99c1f9797cb43a967a9a6c33f516cd84b1560aab0b"
+    },
+    "1520939ee5d5cdc2ec85f94ebad8c0ccbe82ee19eef6d41952d40e8a6dce290d": {
+      "text": "sediento",
+      "bytes": 3552,
+      "fileSha256": "2631b54f38a156f9611c1322cceb5cdfafddec17b9a6464986918b17fc85b02b"
+    },
+    "152e93c36e283488786ee661fd47bf20ca4884e21048cbfcbad87d709a272bfe": {
+      "text": "me gusta",
+      "bytes": 4512,
+      "fileSha256": "bbaf2fbc75ba03a4a25b4223f58b54c51281bca53efc45e6932078a5313f2dc0"
+    },
+    "154203c6f278cae809bd5ac808617197ddb2650ef03040bd40a35029fbd82ea4": {
+      "text": "abierto",
+      "bytes": 4704,
+      "fileSha256": "020d8460ebc699b9987de82200c693c2fbf5e272b975c927eb9ee3c80e491cd2"
+    },
+    "15712a89802c2831a19d510bc6b545e0f12fa48f03a9be825130f8b4e1d1a71a": {
+      "text": "ocho",
+      "bytes": 4416,
+      "fileSha256": "5d281e1598bc99d6e1e3e7625ad31af797d1dbdb11a0fb4cc7954ea6b9ceb7eb"
+    },
+    "16dc8526d1ced9f8d687b3c756ab46f90b25cebc7087ff8f9ba0f6466f84e79c": {
+      "text": "libro",
+      "bytes": 4704,
+      "fileSha256": "46f00a8bce6305a5b14eba0bfab05929de2c977b90daf43d61be5113c99c6cb7"
+    },
+    "16ed2581eea98eb1e656fea3dea01dd7fb12779600034a433b88eae41ed2958e": {
+      "text": "caballo",
+      "bytes": 4512,
+      "fileSha256": "c798e319dbd048b135ca34d70d951d3310dd537ed91a24de16c9ad40acf0cf6e"
+    },
+    "16f237112126eefbb20e9b20fb12be1a9244c5822cb3d8873e72fea60915fd3e": {
+      "text": "antes",
+      "bytes": 4512,
+      "fileSha256": "dd0d6bb81c1eb9d5138cdb3da5f29f9fec3850986534be740b6fa99a8948600d"
+    },
+    "17cc02de246c72d13e8479be45c9590b21257ed6e25b918339b85af478117568": {
+      "text": "abrir",
+      "bytes": 4512,
+      "fileSha256": "a90c9ed71282d13784fe642766dfcd428b816d3bb6b03589d0568eb5d4059a7a"
+    },
+    "18c517ec3280d2cc000fa678b324f874b9b969e04977878fc4efee9f9cc8abe2": {
+      "text": "leche",
+      "bytes": 4704,
+      "fileSha256": "534891c294434c2a02b8db7c6dbed39d402bcc146b2e79ae73265bb46fa75901"
+    },
+    "18ed705ab180decce413db5825689e01965549a20a0964329c048a149bb79f6c": {
+      "text": "al lado de",
+      "bytes": 4416,
+      "fileSha256": "a82f9051dbb7a58e3a08413d7a88f3f5d28f799de14ca77d7a45e6b31eecef72"
+    },
+    "1a5ff374a2df3fdf2048b37a6854a6d18c164c7270e6759c7b6d619efad6654d": {
+      "text": "cuatro",
+      "bytes": 2304,
+      "fileSha256": "b1e3a15dd042020f79f6c3f7e1b8105d62f12c49e3fdde9d65ae81e5e67db658"
+    },
+    "1bca094c30c132f4166fc857fd792d5d3bdd1a627b9469e21ed55d645554dea0": {
+      "text": "ventana",
+      "bytes": 4032,
+      "fileSha256": "12b3efa26a409773079da46b04181f10055e03605c08fdf57ec4342c536e1cfc"
+    },
+    "1c191243f2537758c1fa0141ddc9a426582b3cbe45326d04469284c3b023c452": {
+      "text": "desayuno",
+      "bytes": 5472,
+      "fileSha256": "b135859aa614846d1245f63567992ea359844741a772d62eb7f05667003a63f4"
+    },
+    "1c46cdb1d2f26db6fcd6217edc2b6a73871a9df949dded6cbe83de3d295c2e6c": {
+      "text": "plato",
+      "bytes": 4032,
+      "fileSha256": "0abb8a703ae7042b3ac3f9cc49a2a79acc337244fa0b56e2752fd6501bc80237"
+    },
+    "1e6090c404320e377e0a4f996707101983b826d743c98939e1f9bcbe37c74eba": {
+      "text": "pez",
+      "bytes": 3456,
+      "fileSha256": "5f29be67d431e7c55b7cc043dea96b746ac917016204cd0fe4aedd59ac58dd77"
+    }
+  }
+}

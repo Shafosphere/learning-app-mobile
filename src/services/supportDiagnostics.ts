@@ -3,6 +3,7 @@ import * as FileSystem from "expo-file-system/legacy";
 import {
   DEBUG_EVENTS_STORAGE_KEY,
   MAX_DEBUG_EVENTS,
+  flushDebugEvents,
 } from "@/src/services/debugEvents";
 
 type DiagnosticEntry = {
@@ -80,6 +81,7 @@ async function collectBoxSnapshotSummaries(): Promise<BoxSnapshotSummary[]> {
 }
 
 async function collectDebugEvents(): Promise<unknown[]> {
+  await flushDebugEvents();
   const raw = await AsyncStorage.getItem(DEBUG_EVENTS_STORAGE_KEY);
   if (!raw) return [];
 

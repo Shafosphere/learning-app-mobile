@@ -1,0 +1,121 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "c03a56b9c1c6157c73561ad874b446603a6f72f9bd84e5821abb1157388834f1": {
+      "text": "hoy",
+      "bytes": 3456,
+      "fileSha256": "5d8d9d0cb865b27c7b09024a986f3c611545e74901870170e3d711be4ed593ac"
+    },
+    "c0ae91eab9c6ab6fa78522d9d1b2a41592f810d900e239b206b2f711b7372ca9": {
+      "text": "viernes",
+      "bytes": 4416,
+      "fileSha256": "ab42371261a4c43bd160b12c7915306e224c20bb93debffa2c00e77f7a99f9b0"
+    },
+    "c1c6df362bad2993e6ab031d8411ff0cce680ee9a4429ca0f67045ee211faef4": {
+      "text": "hacer",
+      "bytes": 3456,
+      "fileSha256": "90a9187fd0edbb1816421c8e301cb680baf35deccd720e356bbace6e98f2848e"
+    },
+    "c4473ceec0d2ad2fe5ad73aca4dc1377a1072b1959802a57288c87da0bb03287": {
+      "text": "tienda",
+      "bytes": 5184,
+      "fileSha256": "8ccb6aefc02d38a989cc0e26181ed14c92784d2115eb1e5ae94a6147528fadd5"
+    },
+    "c4be4a01c5dfb1af2376a1426e7f30102f8b3b9403f6ef2a5e61594656caa92f": {
+      "text": "hermano",
+      "bytes": 4032,
+      "fileSha256": "189b59f3b4337313ccf5265e25da7837f6b74423cef1eae8450557a5a5d36f2a"
+    },
+    "c513de003812fba99a7337af3189818b6da8698ce98307368c120b65ad665a0e": {
+      "text": "caro",
+      "bytes": 4512,
+      "fileSha256": "9f351feebc7f662d2865ad18fc77b8f376cc107e45917cc82f4bd8346e5104aa"
+    },
+    "c610308f7268802a9742f5103d6cab24b25b79effe3270899f0bb7527e1d9cdf": {
+      "text": "¿quién?",
+      "bytes": 3552,
+      "fileSha256": "87335e2d353a1fbb0ca61bc982cddf32a6179a8c6f70975d0df02075ea96528a"
+    },
+    "c6747fdc479f5ca3491a8f0cf9778aa3283a035f6304ee06a8347be05cd7c03f": {
+      "text": "perro",
+      "bytes": 4224,
+      "fileSha256": "006f24b6c808193f9d668442eabd0c2ca408a7874bc5f707ad556f87517b51fc"
+    },
+    "c6efc471992472cc51f2abf24a3f7c90e57c3e631fcfafd7bb6c4b118f94f985": {
+      "text": "año",
+      "bytes": 2976,
+      "fileSha256": "6a51b1eff015e7797ebb9abc5091d0301193b29ca305e4afd8982a1c15329f27"
+    },
+    "c7e1fbbc521614837e0e6e9479c5b4480f3ddeb544041b82a919893d7bb264a1": {
+      "text": "por la noche",
+      "bytes": 4416,
+      "fileSha256": "9720620e9ab2586c7badd33481bdfcbe59d1b6df1f081a31c67545887a9c0109"
+    },
+    "c83a5e94b0956aaef2666718426f070fb79cfe3f697f08714f64edc7a8333f47": {
+      "text": "voy a",
+      "bytes": 4512,
+      "fileSha256": "6fd98e3a1cc6d110e1204e5b43dce339cac23826156283d83f9d1566f7645c25"
+    },
+    "c893cfe673ed6ea4cf714e9b5ca3e159f954cf65e2c88a1b664739a9b81a39c9": {
+      "text": "delante de",
+      "bytes": 5184,
+      "fileSha256": "616d119f59c452d5763bedd3a7743c9ca9a3e6f2108603722eb8fd8b9309125c"
+    },
+    "cb864aeef01f12ccf54c5e7f2d0fa9adb4d87360ad718cf0ac97116ec832a99f": {
+      "text": "patata",
+      "bytes": 5376,
+      "fileSha256": "ecfbf40ae459e7ea80c9177006a87f01b3eb263669d33a7bcd151195019a4ae8"
+    },
+    "cc7d255583eaa15201d1db7e0d1a06bc0dcb77a7447e63c34704b4025997dc5b": {
+      "text": "beber",
+      "bytes": 4512,
+      "fileSha256": "ab93ed73ea4b10893fdfbf9583f27d61ca6b37dae8b3353791cac62428a72013"
+    },
+    "cc7f49f525981b231c2b52cd93fdb23455a63b83c7720e838f89881a7c0eb129": {
+      "text": "¿cómo?",
+      "bytes": 3936,
+      "fileSha256": "72701ed9a25b2d70bda2099e01fc59e328ff59b11d7886ddaf1c95ed1abac3ae"
+    },
+    "cce34cbcacaa8edce2860c3101c6c93dec820acf937baf2c289db288df66ace0": {
+      "text": "casa",
+      "bytes": 5184,
+      "fileSha256": "abec501715d37a7f563439597f0f45615b5eb4763153e7068cdd22a314978e80"
+    },
+    "cd217c8018a48584bb5a522e7584d841afbd051ad85408bd795cff28ab698c34": {
+      "text": "calle",
+      "bytes": 4224,
+      "fileSha256": "305d55658da02d7cdf0551e262c89fccf59a3b6acc06bf2111cb73588470dcef"
+    },
+    "cd9799b6bc79e3f7ef5abb8f817511f78329a0b45c582ae187f4303d58042c1a": {
+      "text": "espalda",
+      "bytes": 5184,
+      "fileSha256": "ae4e6dfa32c8dda33b529fb16810d2b4e809fb53abbb48c9a802f58519da032b"
+    },
+    "cdd04e88baf69a567285d380fde784219089a13ac4baa4627d31443382e76a19": {
+      "text": "baño",
+      "bytes": 4224,
+      "fileSha256": "6b47daa9006c7ca27ab60fab61dbff7b31842138fc1170397552f22b5f3e8f82"
+    },
+    "ce4d4d1d2ae6268bd7182014c07a18de426f9382da2b131babacc351039a97a2": {
+      "text": "taza",
+      "bytes": 3264,
+      "fileSha256": "706f04b95ee0263260e3cb75d44d1ed00a8eec19b11f696450d18020929089bc"
+    },
+    "cf0cbb20270de7a8be97be9089e0ffab3860f5ba9c42d51fa19d96849a6f6a96": {
+      "text": "bien",
+      "bytes": 3936,
+      "fileSha256": "9eef1d5db0d4458e44e5c670accae3da2130d43a7334860803aa8dd47cba311b"
+    },
+    "cf73dd19211cf5be5251b05a1d411c4de891cc54af7cba6bcf23f5829340a2ca": {
+      "text": "quisiera",
+      "bytes": 4512,
+      "fileSha256": "939d29fab103fe91328512e9fe9862c780279d6dd8a2cfdf8c816b41beeeeb30"
+    },
+    "cf969fbb67ca86c3fdf6ffc34f49d9296621718485a41af9bce2775aae099a82": {
+      "text": "mucho gusto",
+      "bytes": 7392,
+      "fileSha256": "c29327635f09d4410dcd18e68ce6cb9da231445f502b617c4431eaa73b1aef22"
+    }
+  }
+}

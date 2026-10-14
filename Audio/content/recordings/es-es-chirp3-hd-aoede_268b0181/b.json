@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "b0bab25b7515c2ebee359caeadfca8b19a174448248a46073a99a05881dd692b": {
+      "text": "comer",
+      "bytes": 3264,
+      "fileSha256": "d1077466a0ede776268b609fd59616da172610769dd8deb18d3f01c1123deb87"
+    },
+    "b0c8d936aee301a03690e1102f45f925150558abe6c6ce986c6ed50e18b3dcac": {
+      "text": "llave",
+      "bytes": 4032,
+      "fileSha256": "168e324588132f68bd05cb876999d7df7d0ce7dcba2d265bc7ec878d9f78daef"
+    },
+    "b27ba6e4d60e451518f73efb73f309c83d7f57a103ea52b23ed61dfa884c156b": {
+      "text": "médico",
+      "bytes": 5184,
+      "fileSha256": "fa735b760081c7f2c7a24e424415021c757d1ed457f40470d9610272167875ad"
+    },
+    "b344f5a821eb720c104dbf615398bcdf98a8bfc353c298d0cabb7da6e66d33dc": {
+      "text": "tarjeta",
+      "bytes": 4032,
+      "fileSha256": "6e8e1a8fa64616e8ad6edcfebbb4eea737b19c8578f57339fbd6bdcaf54586cc"
+    },
+    "b3aea9324cc0918b7c8ebac0e40582cea86f267f6f6db682a0e026cdacf0ecc5": {
+      "text": "sábado",
+      "bytes": 2592,
+      "fileSha256": "12733fbe9a159424263a87f09202bdd1952e2c2314821b502a56c8aae0c6da64"
+    },
+    "b491337227333d0b0761697ed136f7837d0dfd309f024ae2ff1224ef7e529d71": {
+      "text": "azúcar",
+      "bytes": 4032,
+      "fileSha256": "935dc160db09f86901dab08642ab261d20ddf2b5d921f0b41eaa93c87693b6b9"
+    },
+    "b4dbefc5c3f9695d1d183ca5caa929a1c3b67284f953c133659087278c6e93f4": {
+      "text": "malo",
+      "bytes": 4032,
+      "fileSha256": "b2ae66f9337167516ca9d3d09c12b8b7a55bf617d606528b3d29764d624d43a3"
+    },
+    "b511327cd84544178eb1c00f15130c85b2f3db0ab573943d60e947c141e75c39": {
+      "text": "difícil",
+      "bytes": 4224,
+      "fileSha256": "3d49bca23daadac18dc6ba0debf5c62da62914b9ff3268f7f8f07a9ddcc74afd"
+    },
+    "b6ad65689122db0d0afb94f2b6a51a32039e659a391d32068544cfdaefd7dc60": {
+      "text": "claro",
+      "bytes": 3936,
+      "fileSha256": "61bc61197c6b3dfd802739525f9fca3eead15a55a08d19c15a49a5b938f43f71"
+    },
+    "b84b9a261f44b5265e66823ffbb01371ed5d596a96672777aef0f8fcbd350e9f": {
+      "text": "minuto",
+      "bytes": 6144,
+      "fileSha256": "91432ca2b188ef8c2bf4ccdd29e5f98b23b4f608c800b3f2887dcbc9dea3a1a9"
+    },
+    "b9f78860ba3874a3266aa93b62e5bee07ffecf77ac516df04ec2e1640aae494b": {
+      "text": "novio",
+      "bytes": 4224,
+      "fileSha256": "2e97d766c6e86ed0d7fc92fcd4eceff04d024201eaa69ecb65a7c129f1b9ffad"
+    },
+    "bb73f95bdea834b75dc108182ad45eb5026fc49a98cc18dd8c339b4594a9d95f": {
+      "text": "me bajo aquí",
+      "bytes": 6624,
+      "fileSha256": "49c67a998f7d1fac2d20574fb96099c138bba124ed7e6a6dfb794cef0278c2f4"
+    },
+    "bb81b51008e05d0938deb021aee30a4088ed47e022f5c4b111880cc6c6e92c77": {
+      "text": "bolsa",
+      "bytes": 5184,
+      "fileSha256": "31de43ce9268380efd4bd8a1b84f251c4e741a0924d59a0e3911100ba2c2cdb6"
+    },
+    "bbc2b75bc734c64e39518a0b287021db7825ef4581a1eab9af31ad8d35ccf848": {
+      "text": "cuchillo",
+      "bytes": 5184,
+      "fileSha256": "05bc999ef485bf02459f7a1221acecc2cb7bd8d22f28dabe5cba790bff4994b4"
+    },
+    "bbf4c45e7f1d079529f0e3a6e6e67c2d17091e24ffd7f64c309063b1fa2f400b": {
+      "text": "viento",
+      "bytes": 5184,
+      "fileSha256": "095c9a44e36fd95261f6f1948bda707dc6000a1e3fc0237db84f3fb808a4536f"
+    },
+    "bbf683175afdfb7ac2512ed66b0a57c70e836790087a0a98560abd25ede91c34": {
+      "text": "tenedor",
+      "bytes": 4032,
+      "fileSha256": "7081fccc7cd4bc434e6a5a27a6dafb05c7015639bf61aa323f0bd3cfef4909d0"
+    },
+    "bc34e6d7f6f4a8c1788843be6cb121151ea3ac5b6531fa0d6a822fba0ab61066": {
+      "text": "puerta",
+      "bytes": 4032,
+      "fileSha256": "b3d8a1aeed9a1c819b411b7a63f750fe612ea5bd57bbd94a1aef44ac7c4ba9b7"
+    },
+    "bc4aa85873d39343cc5204a9365802683e722ebe43aae83dc39bd8baa9eee584": {
+      "text": "avión",
+      "bytes": 5376,
+      "fileSha256": "dc50a54cdf69f561f36b14df46b9ee87f0c328e9984cd372ecf9a364fd1a9789"
+    },
+    "bee3f8e7093f22a010b6c31efa551b220df9343a10358a55943b2e05440cb011": {
+      "text": "bienvenido",
+      "bytes": 4704,
+      "fileSha256": "808e4587bbbfaae9ede5ae366bd76c79917571b2122b3d75a74d208d3b54284f"
+    },
+    "bfc43654da76908da1f1e9f18c0c3bef4cf1a351134ce3a9c13713127f380195": {
+      "text": "grande",
+      "bytes": 2784,
+      "fileSha256": "312f6f2096ab2634519a59c396582ed081b191700c7d26d2df97b2c768358c05"
+    }
+  }
+}

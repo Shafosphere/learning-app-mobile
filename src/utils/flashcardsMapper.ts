@@ -32,6 +32,7 @@ const normalizeTranslations = (
 const mapBaseCard = (
   card: Pick<
     CustomFlashcardRecord,
+    | "externalId"
     | "id"
     | "frontText"
     | "backText"
@@ -49,6 +50,7 @@ const mapBaseCard = (
   const translations = normalizeTranslations(card.backText, card.answers);
   return {
     id: card.id,
+    externalId: card.externalId,
     text: card.frontText?.trim() ?? "",
     translations,
     flipped: card.flipped,

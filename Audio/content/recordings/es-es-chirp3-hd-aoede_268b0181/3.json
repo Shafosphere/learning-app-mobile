@@ -1,0 +1,101 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "3077a0fdab9bf67258f29e89ec46f370c4a9e9bcd15e8f01c8bdeee91a299aa5": {
+      "text": "parada",
+      "bytes": 4224,
+      "fileSha256": "9be81fc128834edb222ba185145436fa35c937937b01e35280593a7a5c39ec56"
+    },
+    "329a1596d045111d3d96179fcdacd2bb1f414f7b5f64fc34ad58b0b393b75e2d": {
+      "text": "no sé",
+      "bytes": 3552,
+      "fileSha256": "554e3a7a18cc6e3b35d1a6540322f5eff293a2a02523c3754014e36e8483c51c"
+    },
+    "342b1f06fcfdd23ba4be0736a7ae9e670ede8162b859be6c63ec038b507ab56a": {
+      "text": "efectivo",
+      "bytes": 5664,
+      "fileSha256": "f1f549cd3186f2b0a5ec813ae945105f00bec3b8fdf8720f4440c78fa9b9b608"
+    },
+    "36484ef5539cb26a2401d10388afbc4e0af40723855f9f957a5d403655185e5a": {
+      "text": "arriba",
+      "bytes": 4032,
+      "fileSha256": "dbb4f5179be6a8c577ed1fbd76a5260603bdc19fa4c9cebee9a7bea73ccd3588"
+    },
+    "36e88f30f6e0bda6f31c9958e557514766146122fb36b2af03db831dbe6228b2": {
+      "text": "cinco",
+      "bytes": 5856,
+      "fileSha256": "81a1e9e40e97b87a31a5d72b50842c1ab6c803772376a07a6bbbda888948a8ce"
+    },
+    "37482669923a94e56996abc6126b70d2194631be1aeb451468d323ae946d987f": {
+      "text": "él",
+      "bytes": 4032,
+      "fileSha256": "d5aa35b3deeb27c2a577ecbad7ca6115dcf288badbde3bb94457560beb133249"
+    },
+    "383a7e1ae27a146a9bb68f52f7f551733b100c660cb420cb244b9aed40bf4382": {
+      "text": "esposa",
+      "bytes": 4896,
+      "fileSha256": "ad67a57e764beb6a512bbbfac61ce3ec8caf01d9ada13f8b4b4eafd177aa1d7c"
+    },
+    "386a7975c09bd3dff9d47c6ea006ed6e49033cfc90d1406e105db8f02770e8cf": {
+      "text": "comprar",
+      "bytes": 4224,
+      "fileSha256": "a43af93311afaf3e7169d175e2ef66c82c72c6343b74802a8493728911033aa8"
+    },
+    "390f824667c141405b724562ecbd58d6f77cc9d200bed2a23d835d113a664657": {
+      "text": "zapatos",
+      "bytes": 5856,
+      "fileSha256": "9ab3f9d582e754709120de96c841bfc6f297a3785bcf82327cbc4ba6817e30ac"
+    },
+    "3a4180964622d40778fd3401a1c4af3baf101efd4f2e0556ff63fb36da24544c": {
+      "text": "restaurante",
+      "bytes": 6144,
+      "fileSha256": "4fa618c546a1211ac1473d2cad2304a54d06fe7db3df01582ffec938f42149e0"
+    },
+    "3a4d6b9df8f9fba015f0af6eaa8606b5a04ce896027b7e76d778f9a59442458a": {
+      "text": "tener",
+      "bytes": 3264,
+      "fileSha256": "74cd473355ac1f1839893359e1d1f28efd16887d0cca28b43694339d2f152a12"
+    },
+    "3a7215c3e548ccee0c160bdf75ee8bbc977187a7bf777050f7207c49e92a580f": {
+      "text": "sofá",
+      "bytes": 4032,
+      "fileSha256": "9b7461a8c1370885731af65b7c8afc4d1fa642f00b5adf4a5881a94ab6a3642b"
+    },
+    "3af5a1e9db9fe0382132d9bf9fce9f045baa2e4998b5621dd443f346a84a169f": {
+      "text": "nueve",
+      "bytes": 5184,
+      "fileSha256": "49e431796152a89bbe0f77ce587a4676d70f7a903929a85df75846126b87ac76"
+    },
+    "3b43a3af52db151330f0ed51d7fd3b5b424e4348e03b14321c1d168527bd8284": {
+      "text": "cerrar",
+      "bytes": 4416,
+      "fileSha256": "c514480f1264f2cb2449e4f0fbec1f5c2e0fd26802f4f756dc8b571871853d70"
+    },
+    "3b67e74e367af0cc4fd85bb0f8995f7aa4bcdf64c6672db772b3dd8a2c9d75ea": {
+      "text": "sal",
+      "bytes": 3552,
+      "fileSha256": "405df4aa13c9ba1f60d15eb6592712727f67a520f361914e415079dfc96427cb"
+    },
+    "3d77b7e7748c74a1b64abbc9f504273fb0a67df828b1afde84b843c1c370f032": {
+      "text": "gustar",
+      "bytes": 4032,
+      "fileSha256": "32d7b434b78cb8f9ba3fba5046079c6b1a4278fb745c68ebe3dd911f82bf335c"
+    },
+    "3d96d0a899a26035d8a203012b8c9caeb43f7713cf146036b8ef3d6ec2301e5e": {
+      "text": "¿dónde está?",
+      "bytes": 4704,
+      "fileSha256": "f989e8a8e8c4092787b6723f238ff0bfd79bfde8690668a384371e32fa0f0946"
+    },
+    "3eee3baddafa668e23ea9df4a2275b9a1f9e10a0f91dc6e17bf6ca9c3a4f8c11": {
+      "text": "perdón",
+      "bytes": 3936,
+      "fileSha256": "c19303770f699ef04a1ea85560e53e76554441c0940ea940ef939923275ae976"
+    },
+    "3fd7aa180b3e6c258ac1c204754271671790659131075c49acf0829a0a1607fb": {
+      "text": "aquí",
+      "bytes": 3936,
+      "fileSha256": "667bcbfb8a5c99c694859bf330a49e1260973f986529a4cb34cd2830c096f0b8"
+    }
+  }
+}

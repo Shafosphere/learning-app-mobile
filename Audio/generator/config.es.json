@@ -1,0 +1,12 @@
+{
+  "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_327.csv",
+  "column": "front_text",
+  "language": "es-ES",
+  "voice": "es-ES-Chirp3-HD-Aoede",
+  "limit": 50,
+  "project": "",
+  "budget": {
+    "totalRequests": 500,
+    "totalCharacters": 10000
+  }
+}

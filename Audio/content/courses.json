@@ -1,0 +1,127 @@
+{
+  "schemaVersion": 2,
+  "courses": {
+    "es_to_pl_first_50": {
+      "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_50.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "pl-PL",
+      "packGroup": "es_50",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "es_to_en_first_50": {
+      "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_50.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "en-US",
+      "packGroup": "es_50",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "es_to_pl_first_150": {
+      "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_150.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "pl-PL",
+      "packGroup": "es_150",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "es_to_pl_first_327": {
+      "csv": "tools/prebuild-data/pl/jezyki/hiszpanski/fiszki_327.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "pl-PL",
+      "packGroup": "es_327",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "es_to_en_first_150": {
+      "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_150.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "en-US",
+      "packGroup": "es_150",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "es_to_en_first_327": {
+      "csv": "tools/prebuild-data/en/jezyki/hiszpanski/fiszki_327.csv",
+      "frontLanguage": "es-ES",
+      "backLanguage": "en-US",
+      "packGroup": "es_327",
+      "frontRecipe": "es-es-chirp3-hd-aoede_268b0181"
+    },
+    "fr_to_pl_first_50": {
+      "csv": "tools/prebuild-data/pl/jezyki/francuski/fiszki_50.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_50",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "fr_to_pl_first_150": {
+      "csv": "tools/prebuild-data/pl/jezyki/francuski/fiszki_150.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_150",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "fr_to_pl_first_332": {
+      "csv": "tools/prebuild-data/pl/jezyki/francuski/fiszki_332.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_332",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "fr_to_en_first_50": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/FR_fiszki_50.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_50",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "fr_to_en_first_150": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/FR_fiszki_150.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_150",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "fr_to_en_first_332": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/FR_fiszki_332.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_332",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "french_a1": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/French_A1.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_a1",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "french_a2": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/French_A2.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_a2",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "french_b1": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/French_B1.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_b1",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "french_b2": {
+      "csv": "tools/prebuild-data/en/jezyki/francuski/French_B2.csv",
+      "frontLanguage": "fr-FR",
+      "backLanguage": "en-US",
+      "frontAudioMode": "variants",
+      "packGroup": "fr_b2",
+      "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    }
+  }
+}

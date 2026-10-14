@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "2023573a75f8b53566605874baddcc89db6f9d533da43e33ec8b3f6055de70db": {
+      "text": "¿qué tipo de?",
+      "bytes": 6144,
+      "fileSha256": "564fff27c74856cb63c3eee2cbbf3db57f4e990d5b2a665d828059c344a164b5"
+    },
+    "207561468c017bcb97ea3ab54b5de00c7496bd544b5f1972dbf51cbc7f898017": {
+      "text": "diente",
+      "bytes": 4032,
+      "fileSha256": "a82aaa62ac9c759384a07d2627a24f6c828f1d4db21f06852691edd7d6235a9e"
+    },
+    "214b1571c5a1f646dee4c3b9c5f96746ad985555b9cbe396a243b5177ea68a47": {
+      "text": "rápido",
+      "bytes": 6144,
+      "fileSha256": "18810bcf0d7ea3ee8e8ba2657720caa4a387922ef956113f5d08b5f81ed72c27"
+    },
+    "2251a4d613c6cf53dabcb4a8ae372edd22e9e7e340e4915f54ae0137a657b6a3": {
+      "text": "ordenador",
+      "bytes": 4704,
+      "fileSha256": "d8d6570afac567a6426d8bd1167b9393017cec9b079a7fb7912f5286cb3db906"
+    },
+    "2447d561c4bc99dadc9f7a9323fb39e658dc4b93d9f879de49ec01e7a7c3566e": {
+      "text": "tercero",
+      "bytes": 4032,
+      "fileSha256": "1766d88ef2bbe57dabc203a720210cd9e029209f115fb8a840f960c94c110a17"
+    },
+    "259c4fc13dbe977543ad2d83ebf27c76417a53f6cf8ceb4efbeb600b9c210eb0": {
+      "text": "fruta",
+      "bytes": 5184,
+      "fileSha256": "add91788f75a0fc2095cda4b45c1553b767ddf8e3608e1859fbb29d2625240b5"
+    },
+    "2657b78998ad1fe429b48f0407c2eea940a9851ab4dfe43cb72beb70d348e421": {
+      "text": "cero",
+      "bytes": 5184,
+      "fileSha256": "92353f502968c4e1dbf336e2326f91ce39b1ad7621c2cee84cfdf0c1f330b734"
+    },
+    "2856e0ae47ba9c4b9c04ff69521626197959acad8f4b05c4214aee9f028199e1": {
+      "text": "buenos días",
+      "bytes": 7392,
+      "fileSha256": "667c42607c0b5f06df82ead91a9611a73dd726d98954d49298420ac606d12c5d"
+    },
+    "28e27e297da5cf1aa59dafc32ca5003ac65088ecb0985e6ec91ec137e4fc6557": {
+      "text": "lámpara",
+      "bytes": 4896,
+      "fileSha256": "696bc9a46e2b4b72c2fdb6ffd439cef84750452576cca085c6ba0940e37cb9a4"
+    },
+    "28f06f4fd508dac4ca415cb0c33ec7c375ac6320e5362bd5396c101069421d65": {
+      "text": "peligroso",
+      "bytes": 6144,
+      "fileSha256": "4d3131a6e0286fd8e4929b7a6eba0b842f5cae6907126a79117c8ed861b9b575"
+    },
+    "29698ccf5106e597867c82a656ef53b8ab333da627ef0fc794ae534c052833aa": {
+      "text": "té",
+      "bytes": 3456,
+      "fileSha256": "82b85f291aad2f963e824dcf6f698a7dfe58d5c700b5359d5b2164257f46c011"
+    },
+    "2b50460e60b40213e9b64aae48f32d9502ec2d2c918ba2d14b2179d4e1f365c8": {
+      "text": "recibo",
+      "bytes": 4896,
+      "fileSha256": "9695f2836638aacb97925cc54f60dde7ea2bc198a895b5731432bf378fdce16d"
+    },
+    "2c694bd2a05adf17b5f391a4c7aab1d81badd38cf5330a2ede071b2bae7a46c2": {
+      "text": "marrón",
+      "bytes": 2592,
+      "fileSha256": "0adba8e39b9660f7e38cda3692f05d21f4b89c9734afb1066934bacffc676309"
+    },
+    "2dc7cad52b8793a82ec944a8ae1568d95a1ab210e0adabb265c3e654733e6290": {
+      "text": "llueve",
+      "bytes": 4896,
+      "fileSha256": "84436a383baa05a6685605f719f1349238b372c5c06683e06e843c478e95aa11"
+    },
+    "2e43f7290829b3d1226a28bf42852186cee9944be3109cac07969e0b3afe879c": {
+      "text": "joven",
+      "bytes": 3744,
+      "fileSha256": "2ef1c06b035400907e0ca3413e0f338b838a5b38e7eb4340bf6b3f6729c8d6f7"
+    },
+    "2ee4fd0f408833c797ca84becc768c8c9b5404fef312cef902df6a091127a053": {
+      "text": "novia",
+      "bytes": 4416,
+      "fileSha256": "ba8f112dd294f503a59d17a03ef6c9ea54e1fdba16a5dadecadc659b10529f70"
+    },
+    "2f4c2a4ff4f1c2a9d7b192004700a007d420f5b22b840f5d669e105bf9266354": {
+      "text": "ciudad",
+      "bytes": 4032,
+      "fileSha256": "182bfcc7409f10f8e64fc8e1a886d683ae0fb6a59f6a51761e2230231755c5f6"
+    }
+  }
+}

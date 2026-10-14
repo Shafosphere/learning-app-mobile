@@ -1,0 +1,106 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "e0766c519dd961cfb87674888d1b4a0af0e4bbfc82027bc82b676c3e0b93f5c3": {
+      "text": "nevera",
+      "bytes": 4224,
+      "fileSha256": "a963f484662eb6c1819b2d0c438abea432ea64d893fba91c33dd32e304d6b8ef"
+    },
+    "e26819f36e87a62b54207fbad4f607bb0c1c07d29993b5dd3015a2205818bc7f": {
+      "text": "morado",
+      "bytes": 4896,
+      "fileSha256": "c4a52268fee83c38a526b1012fc9ea3f4f4c3f7f45090c90577e4227576b3bbb"
+    },
+    "e2bb5db24b3d1809f7a32be67cf34fc8ae0bc0b2d3b5cfdffc35c84c6134dbca": {
+      "text": "oír",
+      "bytes": 3072,
+      "fileSha256": "884c5e7b133f51340437f39f556a26ab583c44c92ad68b3561f03d02dfedb997"
+    },
+    "e68744926a4713935546b786b1e3fa3723562b88a4f4e2f409f4e873d02071cb": {
+      "text": "carne",
+      "bytes": 3552,
+      "fileSha256": "89f184d1a4665d9e5ee133957413cff223286bd084af0ceaa42e2589ac2a3b23"
+    },
+    "e6d55759515dc8cdf4029380c1a4f625526c5a90ce4824e9a28980c6ad2fcad2": {
+      "text": "entiendo",
+      "bytes": 5472,
+      "fileSha256": "8b5fcfb08d5b5c9d4ef5efc9249e70f60338006372beaf25b9711bcd8c51187a"
+    },
+    "e78d0b3bd0c76c988251ec3f686d4a0ff91934592b1bf8669f3b5d06a644c06e": {
+      "text": "cocina",
+      "bytes": 4032,
+      "fileSha256": "0330e886c5aafa85478fca17a8515f768cf6413d41b05aabac03f6e2cb63b7dd"
+    },
+    "e8ad7e974107ee1a1d856258d8b26f00457be96cba0336a687f8cd02e96c4417": {
+      "text": "nuestro",
+      "bytes": 4224,
+      "fileSha256": "deb2a622a358ab9b21a543567a3f6604d3dfbf1ec0527dff7398e8642b88a67f"
+    },
+    "e8e7b08eada19b7e2c2a1de4f6eb5fbc6dabab460850f8f33e230fc523daa018": {
+      "text": "izquierda",
+      "bytes": 5184,
+      "fileSha256": "db628640209c4553f48bc277bc2b42d14cba3767c3561f0ac9e23df68f28f3b4"
+    },
+    "e8f8b85d53bb36b57d53f53c1ed468d2d34ec0f7faea5f73e5b99b9dc5df77cb": {
+      "text": "mano",
+      "bytes": 3264,
+      "fileSha256": "3e61a582a46d45faa01db1cd92f800815ec9f63f286182ba6671fc34acdac12e"
+    },
+    "e91daf6331fdd39c43edb7ad6a29631c3f32145200bc2d8278221cac5f5ac59b": {
+      "text": "mañana",
+      "bytes": 4416,
+      "fileSha256": "a620dc41393d0140c6ab8d3179e6e3a0b0e3835b132b401528327e37a9e9d037"
+    },
+    "e9ccd238ccb6831fcff4fb9541f7d6c4cea6929e22d7b31c6519dfbd8d427d51": {
+      "text": "mil",
+      "bytes": 3456,
+      "fileSha256": "f05578032f5eb131aba2b0fdfea68bd957152cdec79ed9aff76ea19fdebf32ec"
+    },
+    "eab3577fb5f9a8a9fec7b407c5fafe34d5aa75073d7dd51f5121b9804df82573": {
+      "text": "soy",
+      "bytes": 5472,
+      "fileSha256": "6fd8247a4530ad2c64611ff6f4cac6f92e266d825bc647ab1c0a11cb6798e7a0"
+    },
+    "eac743beb76b5b3e66ccc10ae06e8b1b21644cc99433722dd5d234dadca36274": {
+      "text": "vientre",
+      "bytes": 4224,
+      "fileSha256": "dad4e5be25dd5e9d887e99ba8657ece91bbe9ad45db01cdb5b83b4d9ced0e433"
+    },
+    "eb24959a644955610f15c7f58023d84cae774e1c3f4b86911db41f26c0dd62d8": {
+      "text": "necesito ayuda",
+      "bytes": 5952,
+      "fileSha256": "5d1c2c677b0543e739418c499bb92183964ad19b7e4ccfc17ea547ce99c9128a"
+    },
+    "eb3fd6bd6fb5ff5d1e5c988c7dc4b2f08eec2041041aa81a51a1f13e93f5432e": {
+      "text": "martes",
+      "bytes": 4896,
+      "fileSha256": "b99ebc51fcbd1039c27ad6250a728b12231d08c0c5f9bcde8dee42b0f4378935"
+    },
+    "ec2a5d6aa0f55d2b5a5125140f808c4f0e2d3f27f4d1ed308b43ce62ef5b8296": {
+      "text": "viejo",
+      "bytes": 4992,
+      "fileSha256": "346bb264e30d021201bbad13614c0fb96244bee2ff9cfa3f4da03d8ab32d06db"
+    },
+    "ece46cb9536d37a452af84469e510fbc4828c9a181c1ce123225f01c84448b90": {
+      "text": "uno",
+      "bytes": 4416,
+      "fileSha256": "8da8b779eaec640ee5ad414f322c43df12bd72ae4fff171d67e503cec922f87c"
+    },
+    "ef64f3b882562dce20694a249668c6137f73e727262e72ba89c72aef7ce90e80": {
+      "text": "dormir",
+      "bytes": 4032,
+      "fileSha256": "d142b96ccf3fb7c12a66745fb2a0c7f2fe98a0c82f69be269e28aa178da46d7b"
+    },
+    "efb7a4cc8705880502bfce40bc8eb893e721304596a58513d71cda3d4de0b39d": {
+      "text": "derecha",
+      "bytes": 4032,
+      "fileSha256": "6a914cfd02a804f5fdc2a536a0d0ccaf3eedc5850261f11fdb04ac0483ba4a5f"
+    },
+    "effd132931ce2aa9af658de68ce2dc06719089224687a270b99b166053ca3300": {
+      "text": "lluvia",
+      "bytes": 4512,
+      "fileSha256": "fd166b32bb09198e4459623c73654eb192aa0c6bafacdb3169e3bcd396bc1816"
+    }
+  }
+}

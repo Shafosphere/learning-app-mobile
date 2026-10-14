@@ -36,6 +36,11 @@ export type BoxCardIds = Record<keyof BoxesState, number[]>;
 
 let debugEventWriteQueue: Promise<void> = Promise.resolve();
 
+/** Include events already queued when a diagnostic report is requested. */
+export function flushDebugEvents(): Promise<void> {
+  return debugEventWriteQueue;
+}
+
 export function summarizeBoxes(boxes: BoxesState): BoxesSummary {
   const summary = {
     boxZero: boxes.boxZero?.length ?? 0,

@@ -70,7 +70,8 @@
             "extraProguardRules": "# Expo SQLite options are read through Kotlin reflection.\n-keep class expo.modules.sqlite.** { *; }\n-keep class expo.modules.kotlin.records.** { *; }\n-keep class expo.modules.kotlin.allocators.** { *; }"
           }
         }
-      ]
+      ],
+      "./Audio/plugins/withPlayAssetDelivery.cjs"
     ],
     "extra": {
       "googleDriveBackup": {

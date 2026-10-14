@@ -1,0 +1,91 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "90005ac87971eea646998c512732166ac7307fc28e0857901e43049b95a4dabf": {
+      "text": "tres",
+      "bytes": 4032,
+      "fileSha256": "3c1b5755f14d7f21b7f9fccff28575470a2117fe268d35beb4fdb88e31a01366"
+    },
+    "90cad5170d5d9921f941070d5e57d0891dea01ce3df5b33885c0b3ec58c3f6cf": {
+      "text": "oscuro",
+      "bytes": 5664,
+      "fileSha256": "a77bce2da1bdc88be2dc7cf5733392684395f40c65fa533aed4e896ef4895d5b"
+    },
+    "934dc61a3a483ef80aa1219ec46e23747fe05b4ca1133b9546b918fc3525b41f": {
+      "text": "zumo",
+      "bytes": 1824,
+      "fileSha256": "8a363b87e0072d2b8a58a806cc234b8e4b29b179ef6c4b7cda958b30e6ec2e7d"
+    },
+    "95fca9b4c031a89f16cb794828a6b6280f081bdc494d1051872c378eb7fca606": {
+      "text": "trabajo",
+      "bytes": 4896,
+      "fileSha256": "7f7a9ae2ffcbef47ad1594bbee1327a85db3da725a38323b920a2fc217aeca83"
+    },
+    "9649f868ae688a1b23871530dd3d127146f257806a693d17e531863b143d3052": {
+      "text": "calor",
+      "bytes": 3072,
+      "fileSha256": "b794b84907065b46fd71a5cbd7a6fb1ed1d8820b3eb5d65fbdbfb240d62f7ffd"
+    },
+    "96dccbf0ee971938381a5a6eb63f8ea3edfbb252b562e8fee2703680b650f82d": {
+      "text": "rosa",
+      "bytes": 5952,
+      "fileSha256": "1cf4bd9e330f6969bc362562c54aaff8cde17a39a573ecebd2c2fe077c229ab1"
+    },
+    "96f6a14dcffb70e592f42d80866fb2c2b7edfab4f0fe40bda1d1cf746d46ff59": {
+      "text": "ir",
+      "bytes": 3264,
+      "fileSha256": "19091c1df7abe83851e5a0719f60e30f919c0efbc6bbbc65cee3cc45a60d9629"
+    },
+    "976f2e565ff449b5ab79715478c53faacee4ab5dfbc4d955e538229a2e9de586": {
+      "text": "por favor",
+      "bytes": 4032,
+      "fileSha256": "8e28d8d03aa7408d2e0a828b68ad12d84d39c989855365e30feded950171d8a0"
+    },
+    "9851361913e559464b395983453513721523dbd36fcb1bd54416d81167bc64e9": {
+      "text": "cerrado",
+      "bytes": 4224,
+      "fileSha256": "3d990e9268629c948f9e0abd3d6f9b9cc9ad8d77e6c7e0dbbc3b5d5ad5b609ee"
+    },
+    "98644bdc09b646b816abc0c8dc14e9411f69e97b28f7a20e255a863608f60b58": {
+      "text": "me duele",
+      "bytes": 4512,
+      "fileSha256": "9a72a9ddcccf72aefb404976708f6a51269ff1d94f9d2d6aad35425377ed828f"
+    },
+    "999f886efbcf2185076ef37c1ed1155f8b179e42ccaa27e33b06456e58671640": {
+      "text": "sol",
+      "bytes": 5376,
+      "fileSha256": "c38720470875e3d105e3bc65685bb81b318e802089b4aa86b8157c5ef81b95c9"
+    },
+    "9d3c6a5749e1d9f4eaced9bcf00720fe13d9ddde0fc7c3ecccae687882fa2622": {
+      "text": "querer",
+      "bytes": 4704,
+      "fileSha256": "9344c68534c5d64f934d9f75ac78f44d28d708e4ae231b2097b79accd7428888"
+    },
+    "9d883a9977cbb20fbf379a470211ca290c4945b07cdcf3e7fcfd800fc7aafc87": {
+      "text": "oreja",
+      "bytes": 4032,
+      "fileSha256": "8bba7c718d2b74f6ec00f0ec627716887bdc7b79056584b9926c1269dbad3801"
+    },
+    "9e3fc61c5678b791a710139e2209c1912cbe43755e058e81fe5b33db2f3e6950": {
+      "text": "pierna",
+      "bytes": 4416,
+      "fileSha256": "e7f029e33a377c9c543dc5d36920a484b0e6347757d1fd7e13af69350416269a"
+    },
+    "9f1ec91cf86671c5f9db28fd3b45c812be3d80aeb6d49675b895052fa44183c2": {
+      "text": "buenas noches",
+      "bytes": 7104,
+      "fileSha256": "e2a3151b47171e443cf3282f18fcff57f0a758dfe29fb10d5ba9c46837ed2c6a"
+    },
+    "9f782e9d385a9b65ac8301ca0afdf1ef9d6776d2e48ad3d5b88974e7f8eda72e": {
+      "text": "cara",
+      "bytes": 5376,
+      "fileSha256": "f245f2967c279e9f6b5049bf98be7989e08713df047b95b47838ee395058b29c"
+    },
+    "9fadb153dc5673341779e888df60c8cf92f43a951782959458f730a6d284ce62": {
+      "text": "por supuesto",
+      "bytes": 4896,
+      "fileSha256": "cd95b4496ddd1918c144e53c93a025065d676a3860f20260a5e2aaf2d60212a2"
+    }
+  }
+}

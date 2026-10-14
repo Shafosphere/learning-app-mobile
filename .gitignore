@@ -60,6 +60,7 @@ assets/images/*
 *.svgx
 !assets/illustrations/leitner.svg
 !assets/illustrations/leitner.png
+*.mp3
 
 # Mobile signing / release credentials
 *.keystore
@@ -81,3 +82,13 @@ tools/autoflow-sim/
 language-review/
 Ptaki_Polski_i_Europy_Srodkowej(1).tsv
 profiling-data.03-10-2026.19-39-11.json
+
+# Generated Google TTS previews
+*.mp3
+/Audio/generator/output/
+/Audio/generator/state/
+
+# Generated local Expo module build artifacts
+/Audio/modules/**/android/build/
+/Audio/modules/**/android/.gradle/
+/Audio/modules/**/android/.cxx/

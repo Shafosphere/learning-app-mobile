@@ -1,0 +1,111 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "5008df0d99a645d8d9349199f3ecc014f8edb342f034d632f22fb9cb641aaa2b": {
+      "text": "conejo",
+      "bytes": 4512,
+      "fileSha256": "56c64e4e3d2c21c1c214582a4d38977b37e4f939955a9e9c38d2b337472cec50"
+    },
+    "5066ef320d19f887c8900a146a662e8105bdb3333f5c897d61d876bedb459d75": {
+      "text": "fácil",
+      "bytes": 4032,
+      "fileSha256": "3347a6ae9c368b83d3514042092ee12dbd0f90d4481412e22247d21fc72d449e"
+    },
+    "518c2eb37776551a36ae02a5a5293be55bec0b128fb47265bb3d7b146a0d51c4": {
+      "text": "allí",
+      "bytes": 4224,
+      "fileSha256": "00c936f89581b17af6f2827612144cc9e2b3f2886e0f42a2f43771cb69c3d7ad"
+    },
+    "534a5b82560f1c2f0925601aaa43618adcadf584810e8ea9e411b47dec095969": {
+      "text": "cuenta",
+      "bytes": 5856,
+      "fileSha256": "91dad27d34d29a4b7433e97021c3486ab52762e94695a819c3432eca8144570e"
+    },
+    "54289e1304a351aed5c8b7e9e4db79880e035904d2ab4bd43b6ca2072ff250c7": {
+      "text": "ser",
+      "bytes": 3264,
+      "fileSha256": "b5d2f3112d63a4919ee0fcd17e4a653dccf0a944750744ea3f40c26083353f89"
+    },
+    "54592d1854aa5f3a5e40759ed0b03beef12e075bb7f6bf1a4e67761058fc10a0": {
+      "text": "nieve",
+      "bytes": 4224,
+      "fileSha256": "bd4f3f039d8f6837a6370c63bbcbaf3228bd7cc17b32b6eac1ca35b94832273f"
+    },
+    "55d04f5d75fba5079f2536d6ca6eca658fe8f3679469c4856260db884f712948": {
+      "text": "debajo de",
+      "bytes": 4512,
+      "fileSha256": "535ded048bc3e3b089d0e0b5dd97f0c1cd0297e5a6cb5171f084827da6fe74ad"
+    },
+    "5626c9dfb7a575d4b23c9102f005bafd1a1bdd4e5fe370c56791ce17b0a22f8b": {
+      "text": "¿puedo?",
+      "bytes": 3552,
+      "fileSha256": "04d3396e09ab230b77dbefabbde84a9c4b5cb87711b39bdcf05ce0e2a1f2ed33"
+    },
+    "562f78cb1f0f4e4d606de0e7b976c5f2cf626f9804d307089daaad1c8e4bbba0": {
+      "text": "barato",
+      "bytes": 5472,
+      "fileSha256": "01900396e417ab7bbc104c9f69a0baf0f94d91d19f0a3309cd636dd9700d9956"
+    },
+    "56abca66ad57d67fa6041b532347af110efe67c4437fbd13c7a71285fe54d5df": {
+      "text": "ver",
+      "bytes": 3936,
+      "fileSha256": "d30265a286d99130c3a3ab57ed27d7fa8857fbcfcab0e13a644159592c434e60"
+    },
+    "56ef28f18bb66912b947c07c635f247fdd9acfbbaeaf9cb8a525e75e9db7ec7d": {
+      "text": "miércoles",
+      "bytes": 7104,
+      "fileSha256": "a74b0d172f0a44cf6115f6c36d7b4189956bb4c61f8e1395ebfc3c7f0e77e2e3"
+    },
+    "56f81ef3ff7f023d17a01e5f4fac6e8ea500b503f395b76934e7f864b2e7e9d8": {
+      "text": "tu",
+      "bytes": 3264,
+      "fileSha256": "d50f9d0acd2b3c08cdb580bfba2c8893e8787b67310be89ffa4d0175eed8d7be"
+    },
+    "5751205c01530bdb1e9af6833038893613121de8ed4a3d46b3084a957732926a": {
+      "text": "soy de",
+      "bytes": 5184,
+      "fileSha256": "5c2736059b8a7032434514f14d5515db0bf5662c9cb86b31e839d48d029ad344"
+    },
+    "593ec4e0eedec2c261fc657a2195d7bc13eb423c8b2f67052e4cac0e99450ec1": {
+      "text": "más tarde",
+      "bytes": 5856,
+      "fileSha256": "1a8148570332b11f572826c259614246d20026c19eeb13b805d7e8e71cb430ba"
+    },
+    "59e4341c0363ada7c51a18521db9719cb103ecfe517e2e482b8ce893ab72044c": {
+      "text": "bicicleta",
+      "bytes": 6816,
+      "fileSha256": "e7bb753840eb2bffaaf6e4da8c05ee789056ab5c127c89698402f74b5731f1be"
+    },
+    "5b1ea6dcd9a4f2d69f0425f77f4fc62bb42ac340724ed4e118d205083d2bb3b6": {
+      "text": "boca",
+      "bytes": 4032,
+      "fileSha256": "fad0d6d093c91f8b1ddbe625a50405e748bbc72438a4f79501e5b75a33c7f1b5"
+    },
+    "5b7ce97d7b3dfe31f1f09642849a6ddc03b67c9ca0582ff87f1bc22942e32497": {
+      "text": "mes",
+      "bytes": 5184,
+      "fileSha256": "c61ea136e8c6ef3c012bd3bfbab325ecfd35f38431a7f3c8343065a7858ad2d1"
+    },
+    "5b89adb66569ff0009df44d8bfab0dda9b6be21ac4e72d60921acbc1938bb63d": {
+      "text": "enfermo",
+      "bytes": 5376,
+      "fileSha256": "e239d05e017a071ebb01cfba60088391d10e70f35feea69d4718d6a502fe3abe"
+    },
+    "5bd035968bc554934fec622258f39eb83f369b564aa06f36ef118ee635542e10": {
+      "text": "tiempo",
+      "bytes": 4224,
+      "fileSha256": "2da0c11217af960b4e40bb65db74b7b0424020f2a63651395ae68b700a1ca037"
+    },
+    "5eb350f021c4df6b0f808568a48fe94130a1f9f6890fa75eb4dc7e215648a88c": {
+      "text": "cuchara",
+      "bytes": 4032,
+      "fileSha256": "513acbf956738985ea3187f6b783cc9ff4fcf82a616e22f27493f71b37079a5d"
+    },
+    "5facc0132f73b91a95350f3b608602500475a151cc6b74dabad2b0231b25d0a8": {
+      "text": "corazón",
+      "bytes": 7584,
+      "fileSha256": "d79f3926bf402e54e551036114cb7b73fd868f463e871bc942e998e2698a19af"
+    }
+  }
+}

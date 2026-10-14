@@ -1,0 +1,116 @@
+{
+  "schemaVersion": 2,
+  "recipe": "es-es-chirp3-hd-aoede_268b0181",
+  "recordings": {
+    "d23cb66495eca8377ba3c369e037bcad06d2aa9ced4ad68088b1757264a5e220": {
+      "text": "oveja",
+      "bytes": 5664,
+      "fileSha256": "41b12e492063f094333f14ca903375be08e1eba87c17b3b7e8e4b0eb67cfc46d"
+    },
+    "d2e806f9dc99c36d2e1dd68e826e8ed363d4a9c511ce1606ca8a4feb453a4976": {
+      "text": "nervioso",
+      "bytes": 6432,
+      "fileSha256": "483cce24df93fabae04cf470415dc10566d638af8b1b439c607aaa5d99ece4c0"
+    },
+    "d3e24a2f1353c7080b4581761e353122c49fbc9ce00539b176cdb4545e4bc417": {
+      "text": "por la mañana",
+      "bytes": 4512,
+      "fileSha256": "ee18a1778eef7ffb6bd1f813496fbafeb8df84aeca960cdb1e04a5af76e66f27"
+    },
+    "d5cb862ec656d74d0a2f010e118c9949bdb86ee68efa53fed434ad085c478e75": {
+      "text": "hace calor",
+      "bytes": 4992,
+      "fileSha256": "5e3579f0521caaee8d8f60c3cda418eba6cc1bf01c0a4cba4210cb3551b68964"
+    },
+    "d5fb874e0746cc4a8e44ed0d6bda56d4f1b8cce3458b97aa6409e84a4077c20e": {
+      "text": "frío",
+      "bytes": 4416,
+      "fileSha256": "74f97f18c73a5ff856cab44ee07fc10c4dab6d329d89245611362c506f226b6a"
+    },
+    "d65c36d81a369b4e447bdee04b6f4b28a999b54e7a23571b0267e88cc45dfbc4": {
+      "text": "no entiendo",
+      "bytes": 6432,
+      "fileSha256": "ce911c2f333ab4374489c4aa17c3dfdad6b5f18ac03c09a2961803c8f5309666"
+    },
+    "d7353eeb6f49839a8132cd401841ce09021893d747057a21af8347c75e6134d5": {
+      "text": "negro",
+      "bytes": 3552,
+      "fileSha256": "873fd5f20169b7014f2a08336709a08bbea0ca04a43e98c63ba2adbf4a66ebcb"
+    },
+    "d79e640dadcf0e0221de4dfdb39e71580597752103e070a68433a7e53d716019": {
+      "text": "feo",
+      "bytes": 4896,
+      "fileSha256": "a9faade97b3e9d71e74b920663f4475e948417764ef11e30f75eabaf8eae68ad"
+    },
+    "d7d7399022a99d4ee6c8878174d61e661c1abfb16f0e31b9aeddfaf95f4f1269": {
+      "text": "vuestro",
+      "bytes": 4992,
+      "fileSha256": "954d0eacff92e3bfc28119e03db91d4cab9abf12e0538cab002e7ce5287d1f6d"
+    },
+    "d84cddac92d75516476ea8a47b1677c0137129454723c8d0b07f1919c5ba87fa": {
+      "text": "sopa",
+      "bytes": 4416,
+      "fileSha256": "8da155c6c0f1b3b7901ce33696516a7b031f55c88b3e983bf3da584488907e7f"
+    },
+    "d858a1efd8ccfc2a802a98da83d6a64c5b9fc150c31a3d6f48676e383475c042": {
+      "text": "aeropuerto",
+      "bytes": 4704,
+      "fileSha256": "6267fd1e1b3c75caa94727d34c0ebc9c603b10c333a269ca8d28e3c8c2f64db4"
+    },
+    "d8e3b704042f80d180a5bde166f1d5ebae66d16dbe4f66b52c55e815d0973ab5": {
+      "text": "detrás de",
+      "bytes": 5472,
+      "fileSha256": "6df9362a4153adb026c6f8f67a9a21deedf715d41cb90d618d97014586e5873e"
+    },
+    "db5cd491d60833ac2baf07e026d4ae4db507b8c1a3e35ab6de09fa8d26973fe6": {
+      "text": "quiero esto",
+      "bytes": 7104,
+      "fileSha256": "b256a185f70be7d60172ffd837ccb7aaa2a77eafe2ee350cbeb9f5b6788e364d"
+    },
+    "dbd1ae7a5a9c6474cd7a492ec6bba863a1d3c1bcfd1a8abb7143d0b427eb7f3d": {
+      "text": "cien",
+      "bytes": 3552,
+      "fileSha256": "98d021f41aeb4f860850d31650db9a0fd6a5c7bae8426c57ee856ee06e79b2a6"
+    },
+    "dc1445f2ffe55b37de699a8bcdca6b65fb2505c8d3c74a424e0da7b578cf994c": {
+      "text": "dar",
+      "bytes": 3744,
+      "fileSha256": "cc046a60984c947ee33e9987e16b3a7efe131172e920b4772a7ec946bdcbccc6"
+    },
+    "dc3ec3cf1c074dfb26aed22caa79c36f7b2e97623cff9d172d36bf35530f14e2": {
+      "text": "cerca",
+      "bytes": 4416,
+      "fileSha256": "a5f5e06d1e72a7f25f32008ce5192c34351398de63a6872fa1d1e5165addfdd7"
+    },
+    "dcf4025a94ade417cd07451c8f5e70551c36119cb0c3d68d77e96c17038b4614": {
+      "text": "encantado de conocerte",
+      "bytes": 8832,
+      "fileSha256": "397641ebf4381957f1eb2a009638a37a048a50387ecda648214e0e72061a9177"
+    },
+    "dd12a07ebe2d964f3c8909f51f66510d9a9851f381cc83e3d4a42b5ed79d14b4": {
+      "text": "hola",
+      "bytes": 3744,
+      "fileSha256": "934c81c94144b14737bb1ea790e54a126662bdfd7b61b477bdc8cd12798bd394"
+    },
+    "de08c35be528cf4d435618780ce4b13b0d24a9e70d99e1f6868661c8c0a45f38": {
+      "text": "está nublado",
+      "bytes": 4704,
+      "fileSha256": "299d3ae75fb39a3ccb556778e4b6df751d64fd586d6c34c54f4baf81dcec4cad"
+    },
+    "de2f446f6023dee263abe48b44eb9b920f498ae7af0d7f3e858ee43a020bc065": {
+      "text": "gris",
+      "bytes": 4416,
+      "fileSha256": "0e3a380d696b0567687cd75c8ee514397b0a1b2eadc40cec915b7a3dbfc85b00"
+    },
+    "dea5a7282be275b1ecec34f6ab6bfba7cd140557b617613afd14e033319ca456": {
+      "text": "¿de dónde eres?",
+      "bytes": 6144,
+      "fileSha256": "63d5a9ad6759e3b5f0ad81bc89113fd6a6ddbe4fb2fa0ac901e1f35e50d587b6"
+    },
+    "dfd94ecfad4f99a15d068fdee65cd53017f363fcb055bccf0a4be7c798682ed8": {
+      "text": "pan",
+      "bytes": 4032,
+      "fileSha256": "024177043b7c631eac82f53c38c6bb39e0d9c3e6378fdcbc7ed13a07485aef5d"
+    }
+  }
+}

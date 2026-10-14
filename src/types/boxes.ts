@@ -1,5 +1,6 @@
 export interface WordWithTranslations {
   id: number;
+  externalId?: string | null;
   text: string;
   translations: string[];
   flipped: boolean;

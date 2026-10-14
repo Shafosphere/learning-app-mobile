@@ -1,0 +1,29 @@
+{
+  "schemaVersion": 2,
+  "families": {
+    "es": {
+      "groups": [
+        "es_50",
+        "es_150",
+        "es_327"
+      ]
+    },
+    "fr": {
+      "groups": [
+        "fr_50",
+        "fr_150",
+        "fr_332",
+        "fr_a1",
+        "fr_a2",
+        "fr_b1",
+        "fr_b2"
+      ],
+      "sharedGroups": [
+        "fr_a1",
+        "fr_a2",
+        "fr_b1",
+        "fr_b2"
+      ]
+    }
+  }
+}
