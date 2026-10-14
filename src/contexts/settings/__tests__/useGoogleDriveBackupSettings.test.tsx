@@ -105,12 +105,14 @@ function renderSettingsHook() {
   const setStatsFireEffectEnabled = jest.fn(async () => {});
   const setStatsBookshelfEnabled = jest.fn(async () => {});
   const markOnboardingDone = jest.fn(async () => {});
+  const reloadCourseAudioSettings = jest.fn(async () => {});
   const hook = renderHook(() =>
     useGoogleDriveBackupSettings({
       applyCourseSelectionState,
       setStatsFireEffectEnabled,
       setStatsBookshelfEnabled,
       markOnboardingDone,
+      reloadCourseAudioSettings,
     })
   );
 
@@ -120,6 +122,7 @@ function renderSettingsHook() {
     setStatsFireEffectEnabled,
     setStatsBookshelfEnabled,
     markOnboardingDone,
+    reloadCourseAudioSettings,
   };
 }
 
@@ -283,6 +286,7 @@ describe("useGoogleDriveBackupSettings", () => {
       setStatsFireEffectEnabled,
       setStatsBookshelfEnabled,
       markOnboardingDone,
+      reloadCourseAudioSettings,
     } = renderSettingsHook();
 
     await act(async () => {
@@ -308,6 +312,7 @@ describe("useGoogleDriveBackupSettings", () => {
     expect(setStatsFireEffectEnabled).toHaveBeenCalledWith(true);
     expect(setStatsBookshelfEnabled).toHaveBeenCalledWith(false);
     expect(markOnboardingDone).toHaveBeenCalledTimes(1);
+    expect(reloadCourseAudioSettings).toHaveBeenCalledTimes(1);
   });
 
   it("skips app state dependencies when restored flags are false", async () => {
@@ -317,6 +322,7 @@ describe("useGoogleDriveBackupSettings", () => {
       setStatsFireEffectEnabled,
       setStatsBookshelfEnabled,
       markOnboardingDone,
+      reloadCourseAudioSettings,
     } = renderSettingsHook();
 
     await act(async () => {
@@ -338,5 +344,6 @@ describe("useGoogleDriveBackupSettings", () => {
     expect(setStatsFireEffectEnabled).not.toHaveBeenCalled();
     expect(setStatsBookshelfEnabled).not.toHaveBeenCalled();
     expect(markOnboardingDone).not.toHaveBeenCalled();
+    expect(reloadCourseAudioSettings).toHaveBeenCalledTimes(1);
   });
 });

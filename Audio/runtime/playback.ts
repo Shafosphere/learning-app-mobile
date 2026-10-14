@@ -9,6 +9,7 @@ type ReadRequest = { text: string; language: string; recording: Recording | null
 
 export function createFlashcardAudioPlayer(deps: Dependencies) {
   let generation = 0;
+  let volume = 1;
   let player: Player | null = null;
   let subscription: { remove: () => void } | null = null;
   let loadTimer: ReturnType<typeof setTimeout> | null = null;
@@ -34,12 +35,17 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
     clearPlayer();
     return stopSpeech();
   };
+  const setVolume = (value: number) => {
+    volume = Number.isFinite(value) ? Math.min(1, Math.max(0, value)) : 0;
+    if (volume === 0) void stop();
+    else if (player) player.volume = volume;
+  };
   const play = async (request: ReadRequest) => {
     const token = ++generation;
     const current = () => token === generation;
     clearPlayer();
     await stopSpeech();
-    if (!current() || !request.text.trim()) return;
+    if (!current() || volume === 0 || !request.text.trim()) return;
     let fallbackStarted = false;
     const fallback = async () => {
       if (!current() || fallbackStarted) return;
@@ -55,7 +61,7 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
           ?? voices.find((entry) => entry.language.toLowerCase().split(/[-_]/)[0] === language.split("-")[0]);
         if (!voice) throw new Error("No voice for flashcard language");
         module.speak(request.text.slice(0, module.maxSpeechInputLength), {
-          language: request.language, voice: voice.identifier, rate: 1, pitch: 1,
+          language: request.language, voice: voice.identifier, rate: 1, pitch: 1, volume,
           onError: () => { if (current()) request.onError(); },
         });
       } catch { if (current()) request.onError(); }
@@ -69,6 +75,7 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
       if (!current()) return;
       const next = module.createAudioPlayer({ uri });
       player = next;
+      next.volume = volume;
       // expo-audio does not expose an Android playback-error event. A local file
       // must load promptly; otherwise release it and use device speech.
       loadTimer = setTimeout(() => { void fallback(); }, 8000);
@@ -81,7 +88,7 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
       next.play();
     } catch { await fallback(); }
   };
-  return { play, stop };
+  return { play, stop, setVolume };
 }
 
 export const flashcardAudioPlayer = createFlashcardAudioPlayer({

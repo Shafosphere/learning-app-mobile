@@ -1,3 +1,4 @@
+import { COURSE_AUDIO_STORAGE_KEY, DEFAULT_COURSE_AUDIO_SETTINGS } from "@/src/contexts/settings/courseAudioSettings";
 import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
 import prebuiltDatabaseAsset from "@/assets/data/sqlite/prebuilt.db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -133,6 +134,11 @@ async function applyOfficialCourseSettings(
     settings.skipCorrectionEnabled ?? (settings as any).skipCorrection;
 
   const tasks: Promise<void>[] = [];
+  if (settings.audioEnabled !== undefined) {
+    tasks.push(upsertCourseOverride(COURSE_AUDIO_STORAGE_KEY, courseId, {
+      ...DEFAULT_COURSE_AUDIO_SETTINGS, enabled: settings.audioEnabled,
+    }));
+  }
   if (settings.letterHintSettings !== undefined) {
     tasks.push(
       upsertCourseOverride(

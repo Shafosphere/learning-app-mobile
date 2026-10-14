@@ -1,3 +1,4 @@
+import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
 import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
 import MyButton from "@/src/components/button/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -58,6 +59,7 @@ export default function CourseSettingsScreen() {
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
+    setCustomCourseAudioSettings,
     getCustomCourseBoxZeroAnswerSide,
     setCustomCourseBoxZeroAnswerSide,
     getCustomCourseBoxZeroEnabled,
@@ -137,6 +139,7 @@ export default function CourseSettingsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const restoredScopeRef = useRef<string | null>(null);
 
+  const [audioSettings, setAudioSettings] = useState(DEFAULT_COURSE_AUDIO_SETTINGS);
   const [boxZeroAnswerSide, setBoxZeroAnswerSide] = useState(() =>
     getCustomCourseBoxZeroAnswerSide(-1)
   );
@@ -282,6 +285,7 @@ export default function CourseSettingsScreen() {
           ? (JSON.parse(rawSettingsDraft) as Partial<SettingsDraftPayload>)
           : null;
         if (parsedSettingsDraft?.scopeKey === draftScopeKey) {
+          setAudioSettings(normalizeCourseAudioSettings(parsedSettingsDraft.audioSettings));
           if (__DEV__) {
             console.log("[CourseSettingsScreen] Restoring settings draft");
           }
@@ -382,6 +386,7 @@ export default function CourseSettingsScreen() {
     if (hydrating) return;
     const timeoutId = setTimeout(() => {
       const payload: SettingsDraftPayload = {
+        audioSettings,
         scopeKey: draftScopeKey,
         boxZeroEnabled,
         boxZeroAnswerSide,
@@ -401,6 +406,7 @@ export default function CourseSettingsScreen() {
 
     return () => clearTimeout(timeoutId);
   }, [
+    audioSettings,
     autoflowEnabled,
     boxZeroEnabled,
     boxZeroAnswerSide,
@@ -537,6 +543,7 @@ export default function CourseSettingsScreen() {
       });
 
       await replaceCustomFlashcards(courseId, trimmedCards);
+      await setCustomCourseAudioSettings(courseId, audioSettings);
       await setCustomCourseBoxZeroEnabled(courseId, boxZeroEnabled);
       await setCustomCourseBoxZeroAnswerSide(courseId, boxZeroAnswerSide);
       await setCustomCourseAutoflowEnabled(courseId, autoflowEnabled);
@@ -611,6 +618,9 @@ export default function CourseSettingsScreen() {
                 trackTrue: colors.my_green,
               },
               colors,
+              audioSettings,
+              onChangeAudioSettings: setAudioSettings,
+              showAudioLanguages: true,
               letterHintSettings,
               onChangeLetterHintSettings: setLetterHintSettings,
               boxZeroEnabled,

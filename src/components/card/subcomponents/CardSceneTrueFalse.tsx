@@ -4,6 +4,7 @@ import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 import { CardTrueFalse } from "./CardTrueFalse";
 
 type CardSceneTrueFalseProps = {
+  onReadPrompt?: () => void;
   promptText: string;
   promptImageUri: string | null;
   allowMultilinePrompt: boolean;
@@ -14,6 +15,7 @@ type CardSceneTrueFalseProps = {
 export function CardSceneTrueFalse(props: CardSceneTrueFalseProps) {
   return (
     <CardTrueFalse
+      onReadPrompt={props.onReadPrompt}
       promptText={props.promptText}
       promptImageUri={props.promptImageUri}
       allowMultilinePrompt={props.allowMultilinePrompt}

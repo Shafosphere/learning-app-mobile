@@ -39,6 +39,7 @@ import { useTranslation } from "react-i18next";
 import { useStyles } from "./card-styles";
 import type { CardDisplayMode, CardProps } from "./card-types";
 import { CardContentResolver } from "./subcomponents/CardContentResolver";
+import { useFlashcardAudio } from "@/Audio/runtime/useFlashcardAudio";
 import CardFrame from "./subcomponents/CardFrame";
 import { CardHint } from "./subcomponents/CardHint";
 import { CardMeasure } from "./subcomponents/CardMeasure";
@@ -128,6 +129,7 @@ const formatDateLikeInput = (
 
 export default function Card({
   activeBox = null,
+  audioCourseId,
   contentDebugSource,
   isContentHeld = false,
   keyboardBridgeInputRef: screenKeyboardBridgeInputRef,
@@ -1322,7 +1324,25 @@ export default function Card({
     showCorrectionInputs,
   ]);
 
+  const displayedAudioWord = showCorrectionInputs ? correctionWord ?? selectedItem : selectedItem;
+  const audioEnabled = isFocused && !isBetweenCards && !isContentHeld &&
+    (contentDebugSource === "flashcards" || contentDebugSource === "review") && displayMode !== "empty";
+  const promptSide = isIntroMode
+    ? (correctionReversed && !displayedAudioWord?.imageFront ? "back" : "front")
+    : effectiveReversed ? "back" : "front";
+  const audio = useFlashcardAudio(audioCourseId, displayedAudioWord?.externalId,
+    `${displayedAudioWord?.id}:${activeBox}:${displayMode}:${effectiveReversed}:${promptText}`,
+    audioEnabled, {
+      side: promptSide,
+      text: displayMode === "explanation" ? "" : promptText,
+      cardKey: `${displayedAudioWord?.id}`,
+    });
+  const canReadInput = audio.available && activeBox === "boxZero" && isIntroMode;
   const resolverProps = {
+    onReadPrompt: audio.available && displayMode !== "explanation" && promptText.trim()
+      ? () => audio.read(promptSide, promptText) : undefined,
+    onReadFrontInput: canReadInput ? () => audio.read("front", correctionAwers) : undefined,
+    onReadBackInput: canReadInput ? () => audio.read("back", correctionRewers) : undefined,
     inlineAction,
     displayMode,
     emptyAnswerSubmitWarning,
@@ -1475,7 +1495,6 @@ export default function Card({
       >
         <CardContentResolver {...resolverProps} />
       </CardFrame>
-
       {showCorrectionInputs && correction && process.env.NODE_ENV !== "test" ? (
         <CardMeasure
           correctionAwers={correctionAwers}

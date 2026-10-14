@@ -65,6 +65,9 @@ jest.mock("@/src/components/courseEditor/CourseSettingsPanel", () => {
 
 it("preserves unsaved cards, course name and undo history when the answer-side getter changes", async () => {
   const settings: Record<string, any> = {
+    getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+    setCustomCourseAudioSettings: jest.fn(),
+    courseAudioSettingsHydrated: true,
     colors: { background: "#fff", border: "#ccc", headline: "#000", my_green: "#0f0" },
     getCustomCourseBoxZeroAnswerSide: jest.fn(() => "front"),
     getCustomCourseTrueFalseButtonsVariant: jest.fn(() => "true_false"),

@@ -663,6 +663,8 @@ describe("reviewflashcards correction desync regression", () => {
       input.trim().toLowerCase() === expected.trim().toLowerCase()
     );
     mockedUseSettings.mockReturnValue({
+      getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+      courseAudioSettingsHydrated: true,
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
       getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
@@ -1204,6 +1206,8 @@ describe("reviewflashcards correction desync regression", () => {
 
   it("keeps bottom-button review tablet boxes flexible and reserves dock space", async () => {
     mockedUseSettings.mockReturnValue({
+      getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+      courseAudioSettingsHydrated: true,
       actionButtonsPosition: "bottom",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
       getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),
@@ -1260,6 +1264,8 @@ describe("reviewflashcards correction desync regression", () => {
 
   it("left-aligns bottom review buttons on tablets for left-hand users", async () => {
     mockedUseSettings.mockReturnValue({
+      getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+      courseAudioSettingsHydrated: true,
       actionButtonsPosition: "bottom",
       dominantHand: "left",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -1297,6 +1303,8 @@ describe("reviewflashcards correction desync regression", () => {
 
   it("centers bottom review buttons on tablets when center preference is selected", async () => {
     mockedUseSettings.mockReturnValue({
+      getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+      courseAudioSettingsHydrated: true,
       actionButtonsPosition: "bottom",
       dominantHand: "center",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
@@ -1788,6 +1796,8 @@ describe("reviewflashcards correction desync regression", () => {
       onboarding: "review-flashcards",
     });
     mockedUseSettings.mockReturnValue({
+      getCustomCourseAudioSettings: jest.fn(() => ({ enabled: false, frontLanguage: null, backLanguage: null })),
+      courseAudioSettingsHydrated: true,
       actionButtonsPosition: "top",
       getCustomCourseShowExplanationEnabled: jest.fn(() => false),
       getCustomCourseExplanationOnlyOnWrong: jest.fn(() => false),

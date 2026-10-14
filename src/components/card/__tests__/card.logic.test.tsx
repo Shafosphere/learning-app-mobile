@@ -20,6 +20,15 @@ let mockWindowDimensions = {
   fontScale: 1,
 };
 
+jest.mock("@/src/db/sqlite/repositories/courses", () => ({
+  getCustomCourseById: jest.fn(async () => ({ id: 42, slug: "fr_to_en_first_50" })),
+}));
+
+const mockRead = jest.fn();
+jest.mock("@/Audio/runtime/useFlashcardAudio", () => ({
+  useFlashcardAudio: jest.fn((_course, _externalId, _context, enabled) => ({ available: enabled, read: mockRead })),
+}));
+
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
 }));
@@ -219,6 +228,35 @@ describe("Card logic props", () => {
   afterEach(() => {
     jest.restoreAllMocks();
     jest.clearAllMocks();
+  });
+
+  it.each([false, true])("reads only the visible prompt (reversed: %s)", (reversed) => {
+    renderCard(createProps({ contentDebugSource: "flashcards", reversed,
+      selectedItem: { id: 91, externalId: "0001", text: "agua", translations: ["water"], flipped: true } }));
+    (latestResolverProps!.onReadPrompt as () => void)();
+    expect(mockRead).toHaveBeenCalledWith(reversed ? "back" : "front", reversed ? "water" : "agua");
+    expect(latestResolverProps!.onReadFrontInput).toBeUndefined();
+    expect(latestResolverProps!.onReadBackInput).toBeUndefined();
+  });
+
+  it.each([true, false])("reads the complete copied word in box0 (front: %s)", (reversed) => {
+    const word = { id: 91, externalId: "0001", text: "agua", translations: ["water"], flipped: true, imageFront: "file://water.webp" };
+    renderCard(createProps({ contentDebugSource: "flashcards", audioCourseId: 42, activeBox: "boxZero", introMode: true,
+      selectedItem: word,
+      correction: { cardId: 91, awers: "agua", rewers: "water", input1: "ag", input2: "wa", mode: "intro",
+        promptText: "agua", reversed, word, promptImageUri: word.imageFront },
+    }));
+    expect(mockRead).not.toHaveBeenCalled();
+    (latestResolverProps![reversed ? "onReadFrontInput" : "onReadBackInput"] as () => void)();
+    expect(mockRead).toHaveBeenCalledWith(reversed ? "front" : "back", reversed ? "agua" : "water");
+  });
+
+  it("disables audio gestures when the card loses focus", () => {
+    const props = createProps({ contentDebugSource: "flashcards" });
+    const screen = renderCard(props);
+    expect(latestResolverProps!.onReadPrompt).toBeDefined();
+    screen.rerender(<Card {...props} isFocused={false} />);
+    expect(latestResolverProps!.onReadPrompt).toBeUndefined();
   });
 
   it("uses the correct side and first alternative without inserting hints into the answer", () => {

@@ -2,14 +2,14 @@ import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import type { DatePattern } from "@/src/utils/dateInput";
 import React from "react";
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
-import type { CardDisplayMode, CardProps, FocusTarget, InlineCardAction } from "../card-types";
+import type { CardAudioActions, CardDisplayMode, CardProps, FocusTarget, InlineCardAction } from "../card-types";
 import { CardSceneCorrection } from "./CardSceneCorrection";
 import { CardSceneEmpty } from "./CardSceneEmpty";
 import { CardSceneExplanation } from "./CardSceneExplanation";
 import { CardSceneQuestion } from "./CardSceneQuestion";
 import { CardSceneTrueFalse } from "./CardSceneTrueFalse";
 
-interface CardContentResolverProps {
+interface CardContentResolverProps extends CardAudioActions {
   inlineAction?: InlineCardAction;
   displayMode: CardDisplayMode;
   correction: CardProps["correction"];
@@ -138,6 +138,9 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
       return correction ? (
         <CardSceneCorrection
           inlineAction={inlineAction}
+          onReadPrompt={props.onReadPrompt}
+          onReadFrontInput={props.onReadFrontInput}
+          onReadBackInput={props.onReadBackInput}
           correction={correction}
           promptText={promptText}
           promptImageUri={promptImageUri}
@@ -194,6 +197,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     case "true_false":
       return (
         <CardSceneTrueFalse
+          onReadPrompt={props.onReadPrompt}
           promptText={promptText}
           promptImageUri={promptImageUri}
           allowMultilinePrompt={useLargeLayout}
@@ -204,6 +208,7 @@ export const CardContentResolver = (props: CardContentResolverProps) => {
     case "question":
       return (
         <CardSceneQuestion
+          onReadPrompt={props.onReadPrompt}
           inlineAction={inlineAction}
           promptText={promptText}
           emptyAnswerSubmitWarning={emptyAnswerSubmitWarning}

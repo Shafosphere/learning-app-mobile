@@ -1,7 +1,7 @@
 {
   "name": "memicard",
   "main": "index.js",
-  "version": "1.0.15",
+  "version": "1.0.17",
   "scripts": {
     "start": "expo start",
     "postinstall": "patch-package",
@@ -109,7 +109,10 @@
   "private": true,
   "expo": {
     "autolinking": {
-      "nativeModulesDir": "./Audio/modules"
+      "nativeModulesDir": "./Audio/modules",
+      "android": {
+        "buildFromSource": ["expo-speech"]
+      }
     }
   }
 }

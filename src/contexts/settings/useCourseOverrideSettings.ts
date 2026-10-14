@@ -1,3 +1,5 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings, COURSE_AUDIO_STORAGE_KEY } from "./courseAudioSettings";
 import { useCallback, useMemo } from "react";
 import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
 
@@ -26,6 +28,7 @@ import {
   setCustomOverride,
 } from "./courseOverrideHelpers";
 import type {
+  CourseAudioSettings,
   BoxZeroAnswerSide,
   CourseAutoflowOverrides,
   CourseBoxZeroKeyParams,
@@ -184,6 +187,29 @@ export function useCourseOverrideSettings({
   const letterHintSettings = useMemo(
     () => normalizeLetterHintSettings(activeLetterHints),
     [activeLetterHints],
+  );
+
+  const [audioOverrides, setAudioOverrides, courseAudioSettingsHydrated] =
+    useHydratedPersistedState<CourseOverrideState<CourseAudioSettings>>(
+      COURSE_AUDIO_STORAGE_KEY, { builtin: {}, custom: {} }
+    );
+  const audioSettings = useCourseOverrideAccessors({
+    courses, activeCourseIdx, activeCustomCourseId,
+    defaultValue: DEFAULT_COURSE_AUDIO_SETTINGS,
+    overrides: audioOverrides, setOverrides: setAudioOverrides, persistDefault: true,
+  });
+  const reloadCourseAudioSettings = useCallback(async () => {
+    const raw = await AsyncStorage.getItem(COURSE_AUDIO_STORAGE_KEY);
+    await setAudioOverrides(raw ? JSON.parse(raw) : { builtin: {}, custom: {} });
+  }, [setAudioOverrides]);
+  const { getCustom: getCustomAudio, getBuiltin: getBuiltinAudio } = audioSettings;
+  const getCustomCourseAudioSettings = useCallback(
+    (id: number) => normalizeCourseAudioSettings(getCustomAudio(id)),
+    [getCustomAudio]
+  );
+  const getBuiltinCourseAudioSettings = useCallback(
+    (params: CourseBoxZeroKeyParams) => normalizeCourseAudioSettings(getBuiltinAudio(params)),
+    [getBuiltinAudio]
   );
 
   const [boxZeroDefaultEnabled, , boxZeroDefaultHydrated] =
@@ -363,6 +389,12 @@ export function useCourseOverrideSettings({
   });
 
   return {
+    courseAudioSettingsHydrated,
+    reloadCourseAudioSettings,
+    getCustomCourseAudioSettings,
+    setCustomCourseAudioSettings: audioSettings.setCustom,
+    getBuiltinCourseAudioSettings,
+    setBuiltinCourseAudioSettings: audioSettings.setBuiltin,
     letterHintSettings,
     letterHintSettingsHydrated,
     getBuiltinCourseLetterHintSettings,

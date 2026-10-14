@@ -51,6 +51,13 @@ export type CourseExplanationOnlyOnWrongOverrides =
 
 export type CustomCourseEntrySettingsSeenMap = Record<string, true>;
 
+export type AudioLanguage = "pl-PL" | "en-US" | "es-ES" | "fr-FR";
+export type CourseAudioSettings = {
+  enabled: boolean;
+  frontLanguage: AudioLanguage | null;
+  backLanguage: AudioLanguage | null;
+};
+
 export type CEFR = "A1" | "A2" | "B1" | "B2" | "C1" | "C2";
 export type FlashcardsCardSize = "large" | "small";
 export type FlashcardsImageSize =
@@ -103,6 +110,11 @@ export interface SettingsContextValue {
   toggleIgnoreBoundaryPunctuation: () => Promise<void>;
   showBoxFaces: boolean;
   toggleShowBoxFaces: () => Promise<void>;
+  courseAudioSettingsHydrated: boolean;
+  getCustomCourseAudioSettings: (courseId: number) => CourseAudioSettings;
+  setCustomCourseAudioSettings: (courseId: number, settings: CourseAudioSettings) => Promise<void>;
+  getBuiltinCourseAudioSettings: (params: CourseBoxZeroKeyParams) => CourseAudioSettings;
+  setBuiltinCourseAudioSettings: (params: CourseBoxZeroKeyParams, settings: CourseAudioSettings) => Promise<void>;
   boxZeroAnswerSide: BoxZeroAnswerSide;
   getBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams) => BoxZeroAnswerSide;
   setBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams, side: BoxZeroAnswerSide) => Promise<void>;
@@ -265,6 +277,9 @@ export interface SettingsContextValue {
   feedbackEnabled: boolean;
   setFeedbackEnabled: (value: boolean) => Promise<void>;
   toggleFeedbackEnabled: () => Promise<void>;
+  flashcardAudioVolume: number;
+  setFlashcardAudioVolume: (value: number) => Promise<void>;
+  flashcardAudioVolumeHydrated: boolean;
   feedbackVolume: number;
   setFeedbackVolume: (value: number) => Promise<void>;
   learningRemindersEnabled: boolean;

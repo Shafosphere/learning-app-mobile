@@ -67,6 +67,8 @@ import { useStatsDisplaySettings } from "./settings/useStatsDisplaySettings";
 import { useThemeAccessibilitySettings } from "./settings/useThemeAccessibilitySettings";
 
 export type {
+  AudioLanguage,
+  CourseAudioSettings,
   BoxZeroAnswerSide,
   CEFR,
   CourseBoxZeroKeyParams,
@@ -100,7 +102,7 @@ export const SettingsProvider: React.FC<{
     activeCustomCourseId,
     pinnedOfficialCourseIds,
   } = courseSelection;
-  const courseOverrides = useCourseOverrideSettings({
+  const { reloadCourseAudioSettings, ...courseOverrides } = useCourseOverrideSettings({
     courses,
     activeCourseIdx,
     activeCustomCourseId,
@@ -121,6 +123,7 @@ export const SettingsProvider: React.FC<{
   } = reminders;
   const stats = useStatsDisplaySettings();
   const backup = useGoogleDriveBackupSettings({
+    reloadCourseAudioSettings,
     applyCourseSelectionState,
     setStatsFireEffectEnabled: stats.setStatsFireEffectEnabled,
     setStatsBookshelfEnabled: stats.setStatsBookshelfEnabled,

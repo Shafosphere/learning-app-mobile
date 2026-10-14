@@ -1,3 +1,4 @@
+import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import { InlineConfirmButton } from "./InlineConfirmButton";
 import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
@@ -5,7 +6,7 @@ import type { DatePattern } from "@/src/utils/dateInput";
 import { applyAnswerCasing } from "@/src/utils/answerComparison";
 import Octicons from "@expo/vector-icons/Octicons";
 import { useMemo } from "react";
-import type { CardCorrectionType, FocusTarget, InlineCardAction } from "../card-types";
+import type { CardAudioActions, CardCorrectionType, FocusTarget, InlineCardAction } from "../card-types";
 import {
   Platform,
   Pressable,
@@ -29,7 +30,7 @@ const MIN_DURATION_MS = 4000;
 const REPEAT_SPACER_PX = 14;
 const AVG_CHAR_WIDTH_FACTOR = 0.65;
 
-type CardCorrectionProps = {
+type CardCorrectionProps = CardAudioActions & {
   inlineAction?: InlineCardAction;
   correction: CardCorrectionType;
   promptText: string;
@@ -77,6 +78,9 @@ type CardCorrectionProps = {
 };
 
 export function CardCorrection({
+  onReadPrompt,
+  onReadFrontInput,
+  onReadBackInput,
   inlineAction,
   correction,
   promptText,
@@ -277,7 +281,7 @@ export function CardCorrection({
         promptImage
       ) : (
         <View style={styles.promptRow}>
-          {promptContent}
+          <ReadablePrompt text={promptText} onRead={onReadPrompt}>{promptContent}</ReadablePrompt>
         </View>
       )}
     </View>
@@ -333,13 +337,13 @@ export function CardCorrection({
               {renderCorrectionGhostText(correction.input1, correctionAwers)}
             </View>
             <TextInput
+              onPressIn={onReadFrontInput}
               value={correction.input1}
               accessibilityLabel={t("flashcards.card.input.frontCorrectionLabel")}
-              accessibilityHint={t(
-                input1HasMismatch
-                  ? "flashcards.card.input.correctionErrorHint"
-                  : "flashcards.card.input.correctionHint",
-              )}
+              accessibilityHint={[
+                t(input1HasMismatch ? "flashcards.card.input.correctionErrorHint" : "flashcards.card.input.correctionHint"),
+                onReadFrontInput ? t("flashcards.card.readInputHint") : null,
+              ].filter(Boolean).join(" ")}
               onChangeText={(text) =>
                 handleCorrectionInput1Change(
                   applyPlaceholderCasing(text, correctionAwers),
@@ -434,13 +438,13 @@ export function CardCorrection({
             {renderCorrectionGhostText(correction.input2 ?? "", correctionRewers)}
           </View>
           <TextInput
+            onPressIn={onReadBackInput}
             value={correction.input2 ?? ""}
             accessibilityLabel={t("flashcards.card.input.backCorrectionLabel")}
-            accessibilityHint={t(
-              input2HasMismatch
-                ? "flashcards.card.input.correctionErrorHint"
-                : "flashcards.card.input.correctionHint",
-            )}
+            accessibilityHint={[
+              t(input2HasMismatch ? "flashcards.card.input.correctionErrorHint" : "flashcards.card.input.correctionHint"),
+              onReadBackInput ? t("flashcards.card.readInputHint") : null,
+            ].filter(Boolean).join(" ")}
             onChangeText={(t) => {
               const adjusted = applyPlaceholderCasing(t, correctionRewers);
               const previousValue = previousCorrectionInput2.current;

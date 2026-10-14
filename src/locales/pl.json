@@ -179,7 +179,11 @@
       },
       "effectsVolume": {
         "title": "Głośność efektów",
-        "subtitle": "Regulacja głośności dźwięków w aplikacji."
+        "subtitle": "Dźwięki poprawnej i błędnej odpowiedzi."
+      },
+      "flashcardAudioVolume": {
+        "title": "Audio fiszek",
+        "subtitle": "Głośność nagrań i głosu telefonu. 0% wycisza odczyt we wszystkich kursach."
       },
       "boxFaces": {
         "title": "Miny pudełek",
@@ -254,14 +258,14 @@
       },
       "ignoreDiacritics": {
         "title": "Ignoruj znaki diakrytyczne",
-        "subtitle": "Pomija ogonki i akcenty (np. ą\u00a0→\u00a0a)."
+        "subtitle": "Pomija ogonki i akcenty (np. ą → a)."
       },
       "autoConvertSpanishPunctuation": {
         "title": "Odwracanie znaków",
-        "subtitle": "Zamienia ?\u00a0na\u00a0¿ oraz !\u00a0na\u00a0¡ zgodnie ze wzorcową odpowiedzią."
+        "subtitle": "Zamienia ? na ¿ oraz ! na ¡ zgodnie ze wzorcową odpowiedzią."
       },
       "ignoreBoundaryPunctuation": {
-        "title": "Ignoruj znaki ?\u00a0i\u00a0!",
+        "title": "Ignoruj znaki ? i !",
         "subtitle": "Pomija pytajniki i wykrzykniki na początku i końcu odpowiedzi."
       },
       "reminders": {
@@ -1206,6 +1210,7 @@
       "saveFailed": "Nie udało się zapisać fiszki. Spróbuj ponownie."
     },
     "card": {
+      "speechError": "Nie udało się odczytać tekstu. Sprawdź, czy urządzenie ma głos dla tego języka.",
       "edit": "Edytuj fiszkę",
       "actions": {
         "addFlashcards": "DODAJ FISZKI",
@@ -1312,7 +1317,10 @@
         "false": "FAŁSZ",
         "markTrue": "Oznacz jako Prawda",
         "markFalse": "Oznacz jako Fałsz"
-      }
+      },
+      "readText": "Odczytaj: {{text}}",
+      "readTextHint": "Dotknij, aby posłuchać wymowy.",
+      "readInputHint": "Dotknięcie odczytuje pełne słowo do przepisania."
     }
   },
   "courses": {
@@ -2416,5 +2424,19 @@
     "playConfirmation": "Google Play wymaga potwierdzenia. Może otworzyć sklep.",
     "confirmTransfer": "Zezwól na transfer",
     "courseAction": "{{action}} — {{course}}"
+  },
+  "courseAudio": {
+    "title": "Audio fiszek",
+    "description": "Odczyt po 500 ms od pokazania fiszki. Naciśnij tekst, aby posłuchać ponownie.",
+    "toggleLabel": "Przełącz audio fiszek",
+    "chooseLanguages": "Wybierz języki obu stron, aby uruchomić audio.",
+    "frontLanguage": "Język awersu",
+    "backLanguage": "Język rewersu",
+    "languages": {
+      "pl-PL": "Polski",
+      "en-US": "Angielski",
+      "es-ES": "Hiszpański",
+      "fr-FR": "Francuski"
+    }
   }
 }

@@ -326,6 +326,41 @@ describe("userDataBackup", () => {
     jest.restoreAllMocks();
   });
 
+  it("exports audio by course and restores it using new custom ids and official slugs", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    const custom = { id: 22, name: "Custom", iconId: "book", iconColor: "#000", colorId: null, reviewsEnabled: false, createdAt: 1, updatedAt: 1, isOfficial: false };
+    const official = { ...custom, id: 70, slug: "official-slug", isOfficial: true };
+    mockedGetCustomCourses.mockResolvedValue([custom, official]);
+    mockedGetCustomFlashcards.mockResolvedValue([]);
+    const enabled = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL" };
+    const disabled = { ...enabled, enabled: false };
+    const key = "flashcards.courseAudioOverrides";
+    await AsyncStorage.setItem(key, JSON.stringify({ builtin: { "en|pl|A1": disabled }, custom: { 22: enabled, 70: disabled } }));
+    const exported = await buildUserDataExport();
+    expect(exported.customCourses[0].audioSettings).toEqual(enabled);
+    expect(exported.officialCourseState.courses[0].audioSettings).toEqual(disabled);
+    await AsyncStorage.removeItem(key);
+    const result = await restoreUserData(exported, { targetDb: createMockDb() as never });
+    expect(result.success).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({
+      builtin: { "en|pl|A1": disabled }, custom: { 501: enabled, 700: disabled },
+    });
+  });
+
+  it("clears custom audio on replacement and accepts older backups without audio", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    mockedGetCustomCourses.mockResolvedValue([]);
+    const key = "flashcards.courseAudioOverrides";
+    const disabled = { enabled: false, frontLanguage: null, backLanguage: null };
+    await AsyncStorage.setItem(key, JSON.stringify({ builtin: { "en|pl|A1": disabled }, custom: { 7: disabled } }));
+    const exported = await buildUserDataExport();
+    delete exported.builtinAudioSettings;
+    await restoreUserData(exported, { targetDb: db as never, replaceExistingData: true });
+    expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: { "en|pl|A1": disabled }, custom: {} });
+  });
+
   it("clears custom letter hint overrides when replacing backup data and keeps builtin settings", async () => {
     const db = createMockDb();
     const settings = { enabled: true, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 };

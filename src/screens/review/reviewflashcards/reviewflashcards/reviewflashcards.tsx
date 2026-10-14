@@ -512,6 +512,7 @@ export default function ReviewFlashcardsScreen() {
         <Card
           activeBox={activeBox}
           contentDebugSource="review"
+          audioCourseId={courseId}
           keyboardBridgeInputRef={keyboardBridgeInputRef}
           inlineAction={useInlineCardAction ? {
             disabled: cardActionsConfirmDisabled,

@@ -60,6 +60,7 @@ assets/images/*
 *.svgx
 !assets/illustrations/leitner.svg
 !assets/illustrations/leitner.png
+S
 *.mp3
 
 # Mobile signing / release credentials

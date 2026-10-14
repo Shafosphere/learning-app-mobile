@@ -10,6 +10,7 @@ import { CardInput } from "./CardInput";
 type CardSceneQuestionProps = {
   inlineAction?: InlineCardAction;
   promptText: string;
+  onReadPrompt?: () => void;
   promptImageUri: string | null;
   allowMultilinePrompt: boolean;
   imageSizeMode: FlashcardsImageSize;
@@ -37,6 +38,7 @@ type CardSceneQuestionProps = {
 export function CardSceneQuestion(props: CardSceneQuestionProps) {
   return (
     <CardInput
+      onReadPrompt={props.onReadPrompt}
       inlineAction={props.inlineAction}
       promptText={props.promptText}
       emptyAnswerSubmitWarning={props.emptyAnswerSubmitWarning}

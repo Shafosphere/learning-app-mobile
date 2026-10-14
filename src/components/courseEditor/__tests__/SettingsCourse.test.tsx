@@ -426,3 +426,19 @@ describe("box zero settings cards", () => {
     expect(description.props.allowFontScaling).not.toBe(false);
   });
 });
+
+
+it("switches all audio off without discarding languages and hides official language controls", () => {
+  const audioSettings = { enabled: true, frontLanguage: "es-ES" as const, backLanguage: "pl-PL" as const };
+  const onChangeAudioSettings = jest.fn();
+  const props = { ...makeProps(), audioSettings, onChangeAudioSettings, showAudioLanguages: true };
+  const screen = render(<CourseSettingsSection {...props} />);
+  fireEvent.press(screen.getByRole("switch", { name: "courseAudio.toggleLabel" }));
+  expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, enabled: false });
+  fireEvent.press(screen.getAllByText("courseAudio.languages.fr-FR")[0]);
+  expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, frontLanguage: "fr-FR" });
+  screen.rerender(<CourseSettingsSection {...props} showAudioLanguages={false} />);
+  expect(screen.queryByText("courseAudio.frontLanguage")).toBeNull();
+  screen.rerender(<CourseSettingsSection {...props} audioSettingsDisabled />);
+  expect(screen.getByRole("switch", { name: "courseAudio.toggleLabel" })).toBeDisabled();
+});

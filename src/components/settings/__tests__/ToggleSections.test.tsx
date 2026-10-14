@@ -25,6 +25,9 @@ afterEach(() => {
 function settings(overrides: object = {}) {
   const value = {
     colors: {}, feedbackEnabled: false, feedbackVolume: 0.5,
+    setFeedbackVolume: jest.fn().mockResolvedValue(undefined),
+    flashcardAudioVolume: 1, flashcardAudioVolumeHydrated: true,
+    setFlashcardAudioVolume: jest.fn().mockResolvedValue(undefined),
     theme: "light", quotesEnabled: true, learningRemindersEnabled: false,
     learningReminderAutomaticEnabled: true, learningReminderManualHour: 12,
     toggleQuotesEnabled: jest.fn().mockResolvedValue(undefined),
@@ -71,4 +74,23 @@ it("commits the manual hour without toggling either reminder switch", async () =
   await waitFor(() => expect(value.setLearningReminderManualHour).toHaveBeenCalledWith(17));
   expect(value.toggleLearningRemindersEnabled).not.toHaveBeenCalled();
   expect(value.setLearningReminderAutomaticEnabled).not.toHaveBeenCalled();
+});
+
+
+it("keeps effects and flashcard volume independent and cancels an older debounced value on commit", async () => {
+  const value = settings();
+  const screen = render(<AppearanceSection />);
+  expect(screen.getByTestId("effects-volume-slider").props.value).toBe(0.5);
+  expect(screen.getByTestId("flashcard-audio-volume-slider").props.value).toBe(1);
+  fireEvent(screen.getByTestId("effects-volume-slider"), "valueChange", 0.2);
+  await act(async () => { jest.advanceTimersByTime(180); });
+  expect(value.setFeedbackVolume).toHaveBeenLastCalledWith(0.2);
+  expect(value.setFlashcardAudioVolume).not.toHaveBeenCalled();
+  fireEvent(screen.getByTestId("flashcard-audio-volume-slider"), "valueChange", 0.7);
+  fireEvent(screen.getByTestId("flashcard-audio-volume-slider"), "slidingComplete", 0);
+  await act(async () => { jest.advanceTimersByTime(180); });
+  expect(value.setFlashcardAudioVolume).toHaveBeenCalledTimes(1);
+  expect(value.setFlashcardAudioVolume).toHaveBeenLastCalledWith(0);
+  expect(value.setFeedbackVolume).toHaveBeenCalledTimes(1);
+  expect(screen.getByTestId("flashcard-audio-volume-slider").props.accessibilityValueText).toBe("0%");
 });

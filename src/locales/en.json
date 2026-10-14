@@ -177,7 +177,11 @@
       },
       "effectsVolume": {
         "title": "Effects volume",
-        "subtitle": "Adjust the volume of sounds in the app."
+        "subtitle": "Sounds for correct and incorrect answers."
+      },
+      "flashcardAudioVolume": {
+        "title": "Flashcard audio",
+        "subtitle": "Volume of recordings and device speech. 0% mutes reading in every course."
       },
       "boxFaces": {
         "title": "Box faces",
@@ -252,14 +256,14 @@
       },
       "ignoreDiacritics": {
         "title": "Ignore diacritics",
-        "subtitle": "Ignores accents and diacritics (e.g. ą\u00a0→\u00a0a)."
+        "subtitle": "Ignores accents and diacritics (e.g. ą → a)."
       },
       "autoConvertSpanishPunctuation": {
         "title": "Invert punctuation",
-        "subtitle": "Replaces ?\u00a0with\u00a0¿ and !\u00a0with\u00a0¡ to match the expected answer."
+        "subtitle": "Replaces ? with ¿ and ! with ¡ to match the expected answer."
       },
       "ignoreBoundaryPunctuation": {
-        "title": "Ignore ?\u00a0and\u00a0!",
+        "title": "Ignore ? and !",
         "subtitle": "Ignores question and exclamation marks at the start and end of an answer."
       },
       "reminders": {
@@ -1202,6 +1206,7 @@
       "saveFailed": "Could not save flashcard. Try again."
     },
     "card": {
+      "speechError": "Could not read the text. Check that your device has a voice for this language.",
       "edit": "Edit flashcard",
       "actions": {
         "addFlashcards": "ADD FLASHCARDS",
@@ -1308,7 +1313,10 @@
         "false": "FALSE",
         "markTrue": "Mark as True",
         "markFalse": "Mark as False"
-      }
+      },
+      "readText": "Read aloud: {{text}}",
+      "readTextHint": "Tap to hear the pronunciation.",
+      "readInputHint": "Touch to hear the complete word to copy."
     }
   },
   "courses": {
@@ -2412,5 +2420,19 @@
     "playConfirmation": "Google Play requires confirmation. It may open the store.",
     "confirmTransfer": "Allow download",
     "courseAction": "{{action}} — {{course}}"
+  },
+  "courseAudio": {
+    "title": "Flashcard audio",
+    "description": "Read aloud 500 ms after the flashcard appears. Tap the text to listen again.",
+    "toggleLabel": "Toggle flashcard audio",
+    "chooseLanguages": "Choose both side languages to enable playback.",
+    "frontLanguage": "Front language",
+    "backLanguage": "Back language",
+    "languages": {
+      "pl-PL": "Polish",
+      "en-US": "English",
+      "es-ES": "Spanish",
+      "fr-FR": "French"
+    }
   }
 }

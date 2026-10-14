@@ -112,6 +112,7 @@ export const FlashcardsCardSection = memo(function FlashcardsCardSection({
   const { cardProps, isHeld } = useStableFlashcardPresentation({
     activeBox,
     contentDebugSource: "flashcards",
+    audioCourseId: activeCustomCourseId,
     keyboardBridgeInputRef,
     inlineAction,
     coachmarkId: "flashcards-card-section",

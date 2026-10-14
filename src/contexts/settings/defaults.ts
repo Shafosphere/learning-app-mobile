@@ -1,3 +1,4 @@
+import { DEFAULT_COURSE_AUDIO_SETTINGS } from "./courseAudioSettings";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import { DEFAULT_FLASHCARDS_BATCH_SIZE } from "@/src/config/appConfig";
 import { resolveThemeColors } from "@/src/theme/theme";
@@ -91,6 +92,11 @@ export const defaultValue: SettingsContextValue = {
   toggleIgnoreBoundaryPunctuation: async () => {},
   showBoxFaces: true,
   toggleShowBoxFaces: async () => {},
+  courseAudioSettingsHydrated: false,
+  getCustomCourseAudioSettings: () => DEFAULT_COURSE_AUDIO_SETTINGS,
+  setCustomCourseAudioSettings: async () => {},
+  getBuiltinCourseAudioSettings: () => DEFAULT_COURSE_AUDIO_SETTINGS,
+  setBuiltinCourseAudioSettings: async () => {},
   boxZeroAnswerSide: "back",
   getBuiltinCourseBoxZeroAnswerSide: () => "back",
   setBuiltinCourseBoxZeroAnswerSide: async () => {},
@@ -167,6 +173,9 @@ export const defaultValue: SettingsContextValue = {
   feedbackEnabled: true,
   setFeedbackEnabled: async () => {},
   toggleFeedbackEnabled: async () => {},
+  flashcardAudioVolume: 1,
+  setFlashcardAudioVolume: async () => {},
+  flashcardAudioVolumeHydrated: false,
   feedbackVolume: 0.5,
   setFeedbackVolume: async () => {},
   learningRemindersEnabled: false,

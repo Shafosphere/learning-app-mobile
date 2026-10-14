@@ -1,3 +1,4 @@
+import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import MyButton from "@/src/components/button/button";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useMemo } from "react";
@@ -9,6 +10,7 @@ import { buildPromptImageStyle, getInitialPromptImageSlotWidth } from "../prompt
 import type { ResponsiveFlashcardMetrics } from "../responsiveCardWidth";
 
 type CardTrueFalseProps = {
+    onReadPrompt?: () => void;
     promptText: string;
     promptImageUri: string | null;
     onAnswer: (value: boolean) => void;
@@ -18,6 +20,7 @@ type CardTrueFalseProps = {
     cardMetrics: ResponsiveFlashcardMetrics;
 };
 export function CardTrueFalse({
+    onReadPrompt,
     promptText,
     promptImageUri,
     onAnswer,
@@ -54,51 +57,54 @@ export function CardTrueFalse({
                 hasImage ? styles.containerTop : styles.containerCentered,
             ]}
         >
-            <View
-                style={[
-                    styles.promptContainer,
-                    hasImage ? styles.promptContainerTop : styles.promptContainerCentered,
-                    hasImage && hasText ? styles.promptContainerStacked : null,
-                ]}
-            >
-                {promptImageUri ? (
-                    <PromptImage
-                        key={promptImageUri}
-                        uri={promptImageUri}
-                        imageStyle={[styles.promptImage, promptImageStyle]}
-                        initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 16)}
-                    />
-                ) : null}
-                {hasText ? (
-                    allowMultilinePrompt ? (
-                        hasMath ? (
+            <ReadablePrompt text={promptText} onRead={onReadPrompt} style={{ flex: 0, width: "100%" }}>
+                <View
+                    style={[
+                        styles.promptContainer,
+                        hasImage ? styles.promptContainerTop : styles.promptContainerCentered,
+                        hasImage && hasText ? styles.promptContainerStacked : null,
+                    ]}
+                >
+                    {promptImageUri ? (
+                        <PromptImage
+                            key={promptImageUri}
+                            uri={promptImageUri}
+                            imageStyle={[styles.promptImage, promptImageStyle]}
+                            initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 16)}
+                        />
+                    ) : null}
+                    {hasText ? (
+                        allowMultilinePrompt ? (
+                            hasMath ? (
+                                <CardMathText
+                                    text={promptText}
+                                    textStyle={[styles.promptTextMulti, promptTextStyle]}
+                                />
+                            ) : (
+                                <Text
+                                    style={[styles.promptTextMulti, promptTextStyle]}
+                                >
+                                    {promptText}
+                                </Text>
+                            )
+                        ) : hasMath ? (
                             <CardMathText
                                 text={promptText}
-                                textStyle={[styles.promptTextMulti, promptTextStyle]}
+                                textStyle={[styles.promptText, promptTextStyle]}
                             />
                         ) : (
                             <Text
-                                style={[styles.promptTextMulti, promptTextStyle]}
+                                style={[styles.promptText, promptTextStyle]}
+                                numberOfLines={2}
+                                adjustsFontSizeToFit
                             >
                                 {promptText}
                             </Text>
                         )
-                    ) : hasMath ? (
-                        <CardMathText
-                            text={promptText}
-                            textStyle={[styles.promptText, promptTextStyle]}
-                        />
-                    ) : (
-                        <Text
-                            style={[styles.promptText, promptTextStyle]}
-                            numberOfLines={2}
-                            adjustsFontSizeToFit
-                        >
-                            {promptText}
-                        </Text>
-                    )
-                ) : null}
-            </View>
+                    ) : null}
+                </View>
+
+            </ReadablePrompt>
 
             {showButtons ? (
                 <View style={styles.buttonsRow}>

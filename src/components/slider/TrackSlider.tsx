@@ -33,6 +33,8 @@ type TrackSliderProps = {
   rainbowStops?: TrackSliderRainbowStop[];
   style?: StyleProp<ViewStyle>;
   testID?: string;
+  accessibilityLabel?: string;
+  accessibilityValueText?: string;
 };
 
 const DEFAULT_RAINBOW_STOPS: TrackSliderRainbowStop[] = [
@@ -68,6 +70,8 @@ function TrackSliderComponent({
   rainbowStops = DEFAULT_RAINBOW_STOPS,
   style,
   testID,
+  accessibilityLabel,
+  accessibilityValueText,
 }: TrackSliderProps) {
   const trackRef = useRef<View | null>(null);
   const [trackLayout, setTrackLayout] = useState<{
@@ -162,11 +166,25 @@ function TrackSliderComponent({
       onLayout={handleLayout}
       style={[styles.wrapper, { height: wrapperHeight }, disabled && styles.disabled, style]}
       {...panResponder.panHandlers}
+      accessible
       accessibilityRole="adjustable"
+      accessibilityLabel={accessibilityLabel}
+      accessibilityState={{ disabled }}
+      accessibilityActions={[{ name: "increment" }, { name: "decrement" }]}
+      onAccessibilityAction={(event) => {
+        if (disabled) return;
+        const direction = event.nativeEvent.actionName === "increment" ? 1
+          : event.nativeEvent.actionName === "decrement" ? -1 : 0;
+        if (!direction) return;
+        const next = clampToStep(clampedValue + direction * (step || (maximumValue - minimumValue) / 100));
+        onValueChange(next);
+        onSlidingComplete?.(next);
+      }}
       accessibilityValue={{
         min: Math.round(minimumValue),
         max: Math.round(maximumValue),
         now: Math.round(clampedValue),
+        text: accessibilityValueText,
       }}
     >
       <View

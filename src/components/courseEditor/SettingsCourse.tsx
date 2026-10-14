@@ -1,3 +1,4 @@
+import { AUDIO_LANGUAGES } from "@/src/contexts/settings/courseAudioSettings";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import { BoxZeroSettingsSection } from "./BoxZeroSettingsSection";
 import { LetterHintControls } from "./LetterHintControls";
@@ -8,6 +9,7 @@ import { Pressable, Text, View } from "react-native";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type {
+  CourseAudioSettings,
   BoxZeroAnswerSide,
   LetterHintSettings,
   FlashcardsCardSize,
@@ -23,6 +25,10 @@ type SwitchColors = {
 };
 
 export type CourseSettingsSectionProps = {
+  audioSettings?: CourseAudioSettings;
+  onChangeAudioSettings?: (settings: CourseAudioSettings) => void;
+  audioSettingsDisabled?: boolean;
+  showAudioLanguages?: boolean;
   styles: Record<string, unknown>;
   switchColors: SwitchColors;
   colors: ThemeColors;
@@ -115,6 +121,7 @@ type ChoiceBlockProps<T extends string> = {
   onSelect?: (value: T) => void;
   disabled?: boolean;
   titleStyle?: object;
+  accessibilityLabelPrefix?: string;
 };
 
 const buildTrueFalseOptions = (
@@ -227,6 +234,7 @@ function SettingsChoiceBlock<T extends string>({
   onSelect,
   disabled = false,
   titleStyle,
+  accessibilityLabelPrefix,
 }: ChoiceBlockProps<T>) {
   return (
     <View style={styles.settingsChoiceBlock}>
@@ -253,6 +261,7 @@ function SettingsChoiceBlock<T extends string>({
               onPress={disabled || !onSelect ? undefined : () => onSelect(option.key)}
               disabled={disabled || !onSelect}
               accessibilityRole="button"
+              accessibilityLabel={accessibilityLabelPrefix ? `${accessibilityLabelPrefix}: ${option.title}` : undefined}
               accessibilityState={{ disabled: disabled || !onSelect, selected: isActive }}
             >
               <Text style={styles.settingsChoiceOptionTitle}>{option.title}</Text>
@@ -268,6 +277,10 @@ function SettingsChoiceBlock<T extends string>({
 }
 
 export function CourseSettingsSection({
+  audioSettings,
+  onChangeAudioSettings,
+  audioSettingsDisabled = false,
+  showAudioLanguages = false,
   styles,
   colors,
   letterHintSettings = DEFAULT_LETTER_HINT_SETTINGS,
@@ -322,6 +335,37 @@ export function CourseSettingsSection({
 
   return (
     <View style={sharedStyles.sectionGroup}>
+      {audioSettings && onChangeAudioSettings ? (
+        <View testID="course-audio-settings" style={sharedStyles.settingsGroupCard}>
+          <SettingsToggleRow
+            styles={sharedStyles}
+            title={t("courseAudio.title")}
+            description={t("courseAudio.description")}
+            value={audioSettings.enabled}
+            onPress={() => onChangeAudioSettings({ ...audioSettings, enabled: !audioSettings.enabled })}
+            accessibilityLabel={t("courseAudio.toggleLabel")}
+            disabled={audioSettingsDisabled}
+          />
+          {showAudioLanguages && audioSettings.enabled ? (
+            <>
+              <Text style={sharedStyles.settingsRowDescription}>{t("courseAudio.chooseLanguages")}</Text>
+              {(["frontLanguage", "backLanguage"] as const).map((side) => (
+                <SettingsChoiceBlock
+                  key={side}
+                  styles={sharedStyles}
+                  title={t(`courseAudio.${side}`)}
+                  accessibilityLabelPrefix={t(`courseAudio.${side}`)}
+                  description=""
+                  options={AUDIO_LANGUAGES.map((key) => ({ key, title: t(`courseAudio.languages.${key}`), subtitle: "" }))}
+                  value={audioSettings[side] ?? ""}
+                  onSelect={(language) => onChangeAudioSettings({ ...audioSettings, [side]: language })}
+                  disabled={audioSettingsDisabled}
+                />
+              ))}
+            </>
+          ) : null}
+        </View>
+      ) : null}
       <Text style={sharedStyles.settingsGroupLabel}>
         {t("components.courseEditor.settingsCourse.textChild.przeplyw")}
       </Text>

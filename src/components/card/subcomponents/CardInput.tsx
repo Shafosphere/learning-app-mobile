@@ -1,3 +1,4 @@
+import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import { GhostAnswerText } from "./GhostAnswerText";
 import { InlineConfirmButton } from "./InlineConfirmButton";
 import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
@@ -25,6 +26,7 @@ const AVG_CHAR_WIDTH_FACTOR = 0.65;
 type CardInputProps = {
   inlineAction?: InlineCardAction;
   promptText: string;
+  onReadPrompt?: () => void;
   emptyAnswerSubmitWarning?: boolean;
   allowMultilinePrompt: boolean;
   promptImageUri?: string | null;
@@ -56,6 +58,7 @@ type CardInputProps = {
 };
 
 export function CardInput({
+  onReadPrompt,
   inlineAction,
   promptText,
   emptyAnswerSubmitWarning = false,
@@ -421,7 +424,7 @@ export function CardInput({
           {promptImageUri ? imageBlock : null}
           {hasPromptText ? (
             <View style={styles.promptRow}>
-              {promptTextBlock}
+              <ReadablePrompt text={promptText} onRead={onReadPrompt}>{promptTextBlock}</ReadablePrompt>
               {canToggleTranslations ? (
                 <Pressable
                   style={[styles.cardIconWrapper, { width: 32 * contentScale }]}

@@ -26,11 +26,13 @@ function renderCorrection(
   input2 = "",
   inlineAction?: import("../../card-types").InlineCardAction,
   showRewersInput = true,
+  audioActions: import("../../card-types").CardAudioActions = {},
 ) {
   const next = jest.fn();
   const setInput2LayoutWidth = jest.fn();
   const screen = render(
     <CardCorrection
+      {...audioActions}
       inlineAction={inlineAction}
       correction={{
         cardId: 48,
@@ -156,5 +158,19 @@ describe("CardCorrection inline confirm", () => {
     fireEvent(viewport!, "layout", { nativeEvent: { layout: { width: 200, height: 52 } } });
     expect(setInput2LayoutWidth).toHaveBeenCalledWith(200);
     expect(viewport!.props.style).toEqual(expect.arrayContaining([expect.objectContaining({ flex: 1, minWidth: 0 })]));
+  });
+});
+
+describe("Box0 audio input gestures", () => {
+  it("reads on each touch without using focus/change events or blocking editing", () => {
+    const readFront = jest.fn(), readBack = jest.fn();
+    const { screen } = renderCorrection(false, "b", "J", undefined, true,
+      { onReadFrontInput: readFront, onReadBackInput: readBack });
+    const [front, back] = screen.UNSAFE_getAllByType(TextInput);
+    fireEvent(front, "focus"); fireEvent(front, "changeText", "bi");
+    expect(readFront).not.toHaveBeenCalled(); expect(readBack).not.toHaveBeenCalled();
+    fireEvent(front, "pressIn"); fireEvent(front, "pressIn"); fireEvent(back, "pressIn");
+    expect(readFront).toHaveBeenCalledTimes(2); expect(readBack).toHaveBeenCalledTimes(1);
+    expect(front.props.onFocus).toBeDefined(); expect(front.props.onChangeText).toBeDefined();
   });
 });

@@ -20,6 +20,7 @@ import i18n from "@/src/i18n";
 import type { CourseSelectionStateToApply } from "./useCourseSelectionSettings";
 
 type UseGoogleDriveBackupSettingsParams = {
+  reloadCourseAudioSettings?: () => Promise<void>;
   applyCourseSelectionState: (
     state: CourseSelectionStateToApply
   ) => Promise<void>;
@@ -30,6 +31,8 @@ type UseGoogleDriveBackupSettingsParams = {
 
 const GOOGLE_DRIVE_NOT_CONFIGURED_MESSAGE =
   "Google Drive backup nie jest skonfigurowany.";
+
+const defaultReloadCourseAudioSettings = async () => {};
 
 const defaultMarkOnboardingDone = () => setOnboardingCheckpoint("done");
 
@@ -44,6 +47,7 @@ function readBoolean(raw: string | null): boolean {
 }
 
 export function useGoogleDriveBackupSettings({
+  reloadCourseAudioSettings = defaultReloadCourseAudioSettings,
   applyCourseSelectionState,
   setStatsFireEffectEnabled,
   setStatsBookshelfEnabled,
@@ -170,6 +174,7 @@ export function useGoogleDriveBackupSettings({
       }
 
       console.log("[SettingsContext] applyImportedAppState", restoredState);
+      await reloadCourseAudioSettings();
 
       if (restoredState.shouldApplySelection) {
         await applyCourseSelectionState({
@@ -198,6 +203,7 @@ export function useGoogleDriveBackupSettings({
     },
     [
       applyCourseSelectionState,
+      reloadCourseAudioSettings,
       markOnboardingDone,
       setStatsBookshelfEnabled,
       setStatsFireEffectEnabled,

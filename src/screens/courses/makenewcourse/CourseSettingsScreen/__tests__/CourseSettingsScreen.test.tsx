@@ -110,6 +110,7 @@ describe("CourseSettingsScreen image-only cards", () => {
     mockedCreateCustomCourse.mockResolvedValue(42);
     mockedReplaceCustomFlashcards.mockResolvedValue(undefined);
     mockedUseSettings.mockReturnValue({
+      setCustomCourseAudioSettings: jest.fn(),
       colors: {
         background: "#fff",
         border: "#ddd",
@@ -181,6 +182,17 @@ describe("CourseSettingsScreen image-only cards", () => {
         ]
       );
     });
+  });
+
+  it("restores audio languages from the draft and saves them for the new course", async () => {
+    const audioSettings = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL" };
+    await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
+      scopeKey: "Flags|flag|#123456||1", audioSettings,
+    }));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockedUseSettings().setCustomCourseAudioSettings).toHaveBeenCalledWith(42, audioSettings));
   });
 
   it("restores answer side from draft and saves it for the new course", async () => {

@@ -1,6 +1,7 @@
 import { useCallback, useEffect } from "react";
 
-import { usePersistedState } from "@/src/hooks/usePersistedState";
+import { flashcardAudioPlayer } from "@/Audio/runtime/playback";
+import { useHydratedPersistedState, usePersistedState } from "@/src/hooks/usePersistedState";
 import { setFeedbackVolume as setSoundPlayerVolume } from "@/src/utils/soundPlayer";
 import { defaultValue } from "./defaults";
 
@@ -11,6 +12,19 @@ export function useAudioFeedbackSettings() {
     usePersistedState<boolean>("feedbackEnabled", true);
   const [feedbackVolume, setFeedbackVolumeState] =
     usePersistedState<number>("feedbackVolume", defaultValue.feedbackVolume);
+
+  const [flashcardAudioVolume, setFlashcardAudioVolumeState, flashcardAudioVolumeHydrated] =
+    useHydratedPersistedState<number>("flashcards.audioVolume", defaultValue.flashcardAudioVolume);
+
+  const setFlashcardAudioVolume = useCallback(async (value: number) => {
+    const clamped = Number.isFinite(value) ? clampVolume(value) : 0;
+    flashcardAudioPlayer.setVolume(clamped);
+    await setFlashcardAudioVolumeState(clamped);
+  }, [setFlashcardAudioVolumeState]);
+
+  useEffect(() => {
+    if (flashcardAudioVolumeHydrated) flashcardAudioPlayer.setVolume(flashcardAudioVolume);
+  }, [flashcardAudioVolume, flashcardAudioVolumeHydrated]);
 
   const setFeedbackEnabled = useCallback(
     async (value: boolean) => {
@@ -37,10 +51,16 @@ export function useAudioFeedbackSettings() {
   }, [feedbackVolume]);
 
   const resetAudioFeedbackSettings = useCallback(async () => {
-    await setFeedbackVolume(defaultValue.feedbackVolume);
-  }, [setFeedbackVolume]);
+    await Promise.all([
+      setFeedbackVolume(defaultValue.feedbackVolume),
+      setFlashcardAudioVolume(defaultValue.flashcardAudioVolume),
+    ]);
+  }, [setFeedbackVolume, setFlashcardAudioVolume]);
 
   return {
+    flashcardAudioVolume,
+    setFlashcardAudioVolume,
+    flashcardAudioVolumeHydrated,
     feedbackEnabled,
     setFeedbackEnabled,
     toggleFeedbackEnabled,

@@ -37,9 +37,16 @@ export type InlineCardAction = {
   onCorrectionConfirm: () => void;
 };
 
+export type CardAudioActions = {
+  onReadPrompt?: () => void;
+  onReadFrontInput?: () => void;
+  onReadBackInput?: () => void;
+};
+
 export type CardProps = {
   /** Context for content transition diagnostics. */
   activeBox?: keyof BoxesState | null;
+  audioCourseId?: number | null;
   contentDebugSource?: "flashcards" | "review";
   isContentHeld?: boolean;
   /** A keyboard keeper outside the study ScrollView, avoiding native focus scrolling. */

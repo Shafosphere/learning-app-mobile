@@ -1,4 +1,4 @@
-import type { BoxZeroAnswerSide, LetterHintSettings } from "@/src/contexts/settings/types";
+import type { CourseAudioSettings, BoxZeroAnswerSide, LetterHintSettings } from "@/src/contexts/settings/types";
 import type { ManualCard, ManualCardType } from "@/src/hooks/useManualCardsForm";
 
 export type AddMode = "csv" | "manual";
@@ -15,6 +15,7 @@ export type ContentDraftPayload = {
 };
 
 export type SettingsDraftPayload = {
+  audioSettings?: CourseAudioSettings;
   scopeKey: string;
   boxZeroEnabled: boolean;
   boxZeroAnswerSide?: BoxZeroAnswerSide;

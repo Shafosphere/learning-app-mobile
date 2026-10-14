@@ -4,13 +4,12 @@ import {
   type PreviewOptionSelectorOption,
 } from "@/src/components/selection/PreviewOptionSelector";
 import { useStyles } from "@/src/screens/settings/SettingsScreen/SettingsScreen-styles";
-import { TrackSlider } from "@/src/components/slider/TrackSlider";
+import { SoundVolumeControl } from "./SoundVolumeControl";
 import { Asset } from "expo-asset";
 import * as Haptics from "expo-haptics";
 import React, {
   useCallback,
   useEffect,
-  useRef,
   useState,
 } from "react";
 import {
@@ -56,7 +55,6 @@ const AppearanceSection: React.FC = () => {
     ? SETTINGS_TABLET_PREVIEW_MAX_WIDTH
     : undefined;
   const {
-    colors,
     uiLanguage,
     nativeLanguage,
     setUiLanguage,
@@ -67,6 +65,9 @@ const AppearanceSection: React.FC = () => {
     toggleFeedbackEnabled,
     feedbackVolume,
     setFeedbackVolume,
+    flashcardAudioVolume,
+    setFlashcardAudioVolume,
+    flashcardAudioVolumeHydrated,
     quotesEnabled,
     toggleQuotesEnabled,
     showBoxFaces,
@@ -77,11 +78,9 @@ const AppearanceSection: React.FC = () => {
     setActionButtonsPosition,
   } = useSettings();
 
-  const [volumePreview, setVolumePreview] = React.useState(feedbackVolume);
   const [languageMenuOpen, setLanguageMenuOpen] = useState<
     "ui" | "native" | null
   >(null);
-  const volumeDebounce = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const triggerHaptics = useCallback(async () => {
     if (!feedbackEnabled) return;
@@ -151,31 +150,6 @@ const AppearanceSection: React.FC = () => {
     setLanguageMenuOpen(null);
   };
 
-  const handleVolumePreviewChange = useCallback((value: number) => {
-    setVolumePreview(value);
-    if (volumeDebounce.current) {
-      clearTimeout(volumeDebounce.current);
-    }
-    volumeDebounce.current = setTimeout(() => {
-      void setFeedbackVolume(value);
-    }, 180);
-  }, [setFeedbackVolume]);
-
-  const handleVolumeCommit = useCallback(
-    (value: number) => {
-      setVolumePreview(value);
-      if (volumeDebounce.current) {
-        clearTimeout(volumeDebounce.current);
-      }
-      void setFeedbackVolume(value);
-    },
-    [setFeedbackVolume]
-  );
-
-  React.useEffect(() => {
-    setVolumePreview(feedbackVolume);
-  }, [feedbackVolume]);
-
   useEffect(() => {
     void Asset.loadAsync([
       classicPreview,
@@ -183,15 +157,6 @@ const AppearanceSection: React.FC = () => {
       topButtonsPreview,
       bottomButtonsPreview,
     ]);
-  }, []);
-
-  useEffect(() => {
-    return () => {
-      if (volumeDebounce.current) {
-        clearTimeout(volumeDebounce.current);
-        volumeDebounce.current = null;
-      }
-    };
   }, []);
 
   const layoutOptions: PreviewOptionSelectorOption<"classic" | "carousel">[] = [
@@ -368,39 +333,21 @@ const AppearanceSection: React.FC = () => {
       <Text style={styles.appearanceGroupLabel}>
         {t("settings.appearance.groups.sound")}
       </Text>
-      <View style={styles.appearancePlainBlock}>
-        <View style={styles.appearanceBlockHeader}>
-          <Text style={styles.appearanceBlockDescription}>
-            {preventWidowsPl(t("settings.appearance.effectsVolume.subtitle"))}
-          </Text>
-        </View>
-        <View style={styles.sliderSection}>
-          <View style={styles.sliderRow}>
-            <TrackSlider
-              testID="effects-volume-slider"
-              value={volumePreview}
-              onValueChange={handleVolumePreviewChange}
-              onSlidingComplete={handleVolumeCommit}
-              minimumValue={0}
-              maximumValue={1}
-              step={0.01}
-              mode="solid"
-              trackHeight={12}
-              thumbSize={28}
-              thumbBorderWidth={2}
-              trackColor={colors.border}
-              fillColor={colors.my_green}
-              thumbColor={colors.background}
-              thumbBorderColor={colors.my_green}
-              style={styles.sliderWrapper}
-            />
-
-            <Text style={styles.sliderValue}>
-              {Math.round(volumePreview * 100)}%
-            </Text>
-          </View>
-        </View>
-      </View>
+      <SoundVolumeControl
+        title={t("settings.appearance.effectsVolume.title")}
+        description={t("settings.appearance.effectsVolume.subtitle")}
+        value={feedbackVolume}
+        onChange={setFeedbackVolume}
+        testID="effects-volume-slider"
+      />
+      <SoundVolumeControl
+        title={t("settings.appearance.flashcardAudioVolume.title")}
+        description={t("settings.appearance.flashcardAudioVolume.subtitle")}
+        value={flashcardAudioVolume}
+        onChange={setFlashcardAudioVolume}
+        disabled={!flashcardAudioVolumeHydrated}
+        testID="flashcard-audio-volume-slider"
+      />
 
       <PreviewOptionSelector
         options={layoutOptions}

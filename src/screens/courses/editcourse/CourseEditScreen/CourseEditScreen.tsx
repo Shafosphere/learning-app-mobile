@@ -135,6 +135,9 @@ function BuiltinCourseEditor({
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
+    getBuiltinCourseAudioSettings,
+    setBuiltinCourseAudioSettings,
+    courseAudioSettingsHydrated,
     courses,
     getBuiltinCourseBoxZeroAnswerSide,
     setBuiltinCourseBoxZeroAnswerSide,
@@ -648,6 +651,9 @@ function BuiltinCourseEditor({
                 trackTrue: colors.my_green,
               },
               colors,
+              audioSettings: getBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
+              audioSettingsDisabled: !courseAudioSettingsHydrated,
+              onChangeAudioSettings: (value) => { void setBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },
               letterHintSettings: getBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
               letterHintSettingsDisabled: !letterHintSettingsHydrated,
               onChangeLetterHintSettings: (value) => { void setBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },

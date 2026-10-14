@@ -118,3 +118,24 @@ describe("useCourseOverrideSettings", () => {
     });
   });
 });
+
+
+it("hydrates course audio and persists explicit OFF and languages across remounts", async () => {
+  await AsyncStorage.clear();
+  const params = { courses: [course], activeCourseIdx: null, activeCustomCourseId: 7 };
+  const hook = renderHook(() => useCourseOverrideSettings(params));
+  await waitFor(() => expect(hook.result.current.courseAudioSettingsHydrated).toBe(true));
+  expect(hook.result.current.getCustomCourseAudioSettings(7)).toEqual({ enabled: false, frontLanguage: null, backLanguage: null });
+  const selected = { enabled: true, frontLanguage: "es-ES" as const, backLanguage: "pl-PL" as const };
+  await act(async () => { await hook.result.current.setCustomCourseAudioSettings(7, selected); });
+  await act(async () => { await hook.result.current.setCustomCourseAudioSettings(7, { ...selected, enabled: false }); });
+  await act(async () => { await hook.result.current.setCustomCourseAudioSettings(8, selected); });
+  await act(async () => { await hook.result.current.setBuiltinCourseAudioSettings(course, { ...selected, enabled: false }); });
+  hook.unmount();
+  const restored = renderHook(() => useCourseOverrideSettings(params));
+  await waitFor(() => expect(restored.result.current.courseAudioSettingsHydrated).toBe(true));
+  expect(restored.result.current.getCustomCourseAudioSettings(7)).toEqual({ ...selected, enabled: false });
+  expect(restored.result.current.getCustomCourseAudioSettings(8)).toEqual(selected);
+  expect(restored.result.current.getBuiltinCourseAudioSettings(course)).toEqual({ ...selected, enabled: false });
+  expect(JSON.parse((await AsyncStorage.getItem("flashcards.courseAudioOverrides"))!).custom[7].enabled).toBe(false);
+});

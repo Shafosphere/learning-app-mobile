@@ -4,6 +4,7 @@ import type { LanguageCourseGroupId } from "./languageCourseGroups";
 import { imageMaps } from "./imageMaps";
 
 export type OfficialPackCourseSettings = {
+  audioEnabled?: boolean;
   // Domyślne ustawienia kursu nadpisywane podczas pierwszego załadowania pakietu
   autoflowEnabled?: boolean;
   // aliasy dla wygody
@@ -967,6 +968,13 @@ const OFFICIAL_PACKS_MANIFEST = ([
   packVersion?: number;
 })[];
 
+// Opt-in defaults for the courses currently shipped with Google recordings.
+const AUDIO_ENABLED_PACK_SLUGS = new Set([
+  ...["es_to_pl", "es_to_en"].flatMap((prefix) => [50, 150, 327].map((count) => `${prefix}_first_${count}`)),
+  ...["fr_to_pl", "fr_to_en"].flatMap((prefix) => [50, 150, 332].map((count) => `${prefix}_first_${count}`)),
+  "french_a1", "french_a2", "french_b1", "french_b2",
+]);
+
 export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pack: Omit<OfficialPackDef, "packVersion"> & { packVersion?: number }) => ({
   ...pack,
   packVersion: pack.packVersion ?? DEFAULT_PACK_VERSION,
@@ -974,6 +982,7 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pa
     ? {
         settings: {
           letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true },
+          ...(AUDIO_ENABLED_PACK_SLUGS.has(pack.slug) ? { audioEnabled: true } : {}),
           ...pack.settings,
         },
       }

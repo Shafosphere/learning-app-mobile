@@ -1,0 +1,50 @@
+diff --git a/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechOptions.kt b/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechOptions.kt
+--- a/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechOptions.kt
++++ b/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechOptions.kt
+@@ -7,5 +7,6 @@
+   @Field val language: String?,
+   @Field val pitch: Float?,
+   @Field val rate: Float?,
++  @Field val volume: Float?,
+   @Field val voice: String?
+ ) : Record
+diff --git a/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechModule.kt b/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechModule.kt
+--- a/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechModule.kt
++++ b/node_modules/expo-speech/android/src/main/java/expo/modules/speech/SpeechModule.kt
+@@ -126,7 +126,9 @@
+     textToSpeech.speak(
+       text,
+       TextToSpeech.QUEUE_ADD,
+-      null,
++      Bundle().apply {
++        options.volume?.let { putFloat(TextToSpeech.Engine.KEY_PARAM_VOLUME, it.coerceIn(0f, 1f)) }
++      },
+       id
+     )
+   }
+diff --git a/node_modules/expo-speech/ios/SpeechOptions.swift b/node_modules/expo-speech/ios/SpeechOptions.swift
+--- a/node_modules/expo-speech/ios/SpeechOptions.swift
++++ b/node_modules/expo-speech/ios/SpeechOptions.swift
+@@ -9,6 +9,8 @@
+   var rate: Double?
+   @Field
+   var voice: String?
++  @Field
++  var volume: Double?
+   @Field
+   var useApplicationAudioSession: Bool?
+ }
+diff --git a/node_modules/expo-speech/ios/SpeechModule.swift b/node_modules/expo-speech/ios/SpeechModule.swift
+--- a/node_modules/expo-speech/ios/SpeechModule.swift
++++ b/node_modules/expo-speech/ios/SpeechModule.swift
+@@ -43,6 +43,10 @@
+ 
+       if let pitch = options.pitch {
+         utterance.pitchMultiplier = Float(pitch)
++      }
++
++      if let volume = options.volume {
++        utterance.volume = Float(min(1, max(0, volume)))
+       }
+ 
+       if let rate = options.rate {
