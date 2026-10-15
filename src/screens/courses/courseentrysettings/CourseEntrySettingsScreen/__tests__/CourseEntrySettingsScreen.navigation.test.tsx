@@ -4,8 +4,9 @@ import CourseEntrySettingsScreen from "../CourseEntrySettingsScreen";
 import { getCustomCourseById, updateCustomCourse } from "@/src/db/sqlite/db";
 
 const mockReplace = jest.fn();
+const mockDismissTo = jest.fn();
 const mockPopup = jest.fn();
-const mockRouter = { replace: mockReplace };
+const mockRouter = { replace: mockReplace, dismissTo: mockDismissTo };
 const mockTranslate = (key: string) => key;
 let mockIsFocused = true;
 let mockCourseId: number | null = 11;
@@ -80,6 +81,34 @@ describe("Course entry settings navigation", () => {
     });
   });
 
+  it("returns to the existing panel when no course is selected", async () => {
+    mockCourseId = null;
+    render(<CourseEntrySettingsScreen />);
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("returns to the existing panel if the selected course is missing", async () => {
+    mockHasSeen = false;
+    (getCustomCourseById as jest.Mock).mockResolvedValue(null);
+    render(<CourseEntrySettingsScreen />);
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(mockReplace).not.toHaveBeenCalled();
+  });
+
+  it("returns to the existing panel after a load error", async () => {
+    mockHasSeen = false;
+    (getCustomCourseById as jest.Mock).mockRejectedValue(new Error("load failed"));
+    const consoleError = jest.spyOn(console, "error").mockImplementation(() => {});
+    try {
+      render(<CourseEntrySettingsScreen />);
+      await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+      expect(mockReplace).not.toHaveBeenCalled();
+    } finally {
+      consoleError.mockRestore();
+    }
+  });
+
   it("does not navigate when a course is activated while this screen is in the background", async () => {
     mockIsFocused = false;
     mockCourseId = null;
@@ -87,6 +116,7 @@ describe("Course entry settings navigation", () => {
     mockCourseId = 11;
     await act(async () => { screen.rerender(<CourseEntrySettingsScreen />); });
     expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockDismissTo).not.toHaveBeenCalled();
     expect(getCustomCourseById).not.toHaveBeenCalled();
 
     mockIsFocused = true;
@@ -103,6 +133,7 @@ describe("Course entry settings navigation", () => {
     await act(async () => { screen.rerender(<CourseEntrySettingsScreen />); });
     await act(async () => { rejectLoad(new Error("load failed")); });
     expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockDismissTo).not.toHaveBeenCalled();
     expect(mockPopup).not.toHaveBeenCalled();
   });
 

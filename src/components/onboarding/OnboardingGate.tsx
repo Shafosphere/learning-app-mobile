@@ -158,7 +158,11 @@ export function OnboardingGate() {
     }
 
     lastRedirectRef.current = target;
-    router.replace(target);
+    if (target === ACTIVATE_ROUTE) {
+      router.dismissTo(target);
+    } else {
+      router.replace(target);
+    }
   }, [hydrated, pathname, resolvedCheckpoint, router]);
 
   return null;

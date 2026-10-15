@@ -746,9 +746,8 @@ export default function RootLayout() {
                         <CoachmarkLayerPortalProvider>
                           <Navbar>
                             <OnboardingGate />
-                            <Stack screenOptions={{ headerShown: false }}>
-                              <Stack.Screen name="flashcards/index" options={{ freezeOnBlur: true }} />
-                            </Stack>
+                            {/* Fabric keeps the immediately preceding screen unfrozen for transitions. */}
+                            <Stack screenOptions={{ headerShown: false, freezeOnBlur: true }} />
                           </Navbar>
                           <QuoteBubble />
                         </CoachmarkLayerPortalProvider>

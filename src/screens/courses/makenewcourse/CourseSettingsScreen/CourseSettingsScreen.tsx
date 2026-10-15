@@ -574,7 +574,7 @@ export default function CourseSettingsScreen() {
         color: "calm",
         duration: 3200,
       });
-      router.replace("/coursepanel");
+      router.dismissTo("/coursepanel");
     } catch (error) {
       console.error("Failed to create custom course", error);
       setPopup({

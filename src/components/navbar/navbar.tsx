@@ -5,6 +5,7 @@ import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
+import { useOpenCoursePanel } from "@/src/hooks/useOpenCoursePanel";
 import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
 import { useSettings, useThemeSettings } from "@/src/contexts/SettingsContext";
@@ -462,7 +463,7 @@ const NavbarFrame = memo(function NavbarFrame({
 
 const ActiveCourseButton = memo(function ActiveCourseButton() {
   const { t } = useTranslation();
-  const router = useRouter();
+  const openCoursePanel = useOpenCoursePanel();
   const pathname = usePathname();
   const { activeCustomCourseId, activeCourse, selectedLevel } = useSettings();
   const { colors } = useThemeSettings();
@@ -627,7 +628,7 @@ const ActiveCourseButton = memo(function ActiveCourseButton() {
       style={styles.courseAnchor}
     >
       <TouchableOpacity
-        onPress={() => router.push("/coursepanel")}
+        onPress={openCoursePanel}
         style={styles.courseButton}
         accessibilityRole="button"
         accessibilityLabel={courseAccessibilityLabel}
@@ -654,6 +655,7 @@ const CoursePlayButton = memo(function CoursePlayButton() {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const openCoursePanel = useOpenCoursePanel();
   const styles = useStyles();
   const { colors } = useThemeSettings();
   const {
@@ -702,7 +704,7 @@ const CoursePlayButton = memo(function CoursePlayButton() {
       return;
     }
 
-    router.push("/coursepanel");
+    openCoursePanel();
   };
 
   return (

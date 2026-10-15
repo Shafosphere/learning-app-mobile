@@ -28,6 +28,8 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
+const mockDismissTo = jest.fn();
+
 jest.mock("@/src/contexts/SettingsContext", () => {
   const useSettings = jest.fn();
   return { useSettings, useThemeSettings: useSettings };
@@ -246,6 +248,7 @@ jest.mock("expo-router", () => ({
   useLocalSearchParams: jest.fn(() => ({})),
   useRouter: jest.fn(() => ({
     push: jest.fn(),
+    dismissTo: mockDismissTo,
   })),
 }));
 
@@ -1783,6 +1786,8 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestFinishedPanelProps?.cardsCountLabel).toBe("1");
     expect(latestFinishedPanelProps?.accuracyLabel).toBe("80%");
     expect(latestFinishedPanelProps?.learningTimeLabel).toBe("12 min");
+    act(() => latestFinishedPanelProps!.onBackToCourses());
+    expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel");
     expect(screen.queryByTestId("flashcards-buttons")).toBeNull();
   });
 

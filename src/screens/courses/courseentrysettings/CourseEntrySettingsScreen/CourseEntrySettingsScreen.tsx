@@ -91,7 +91,7 @@ export default function CourseEntrySettingsScreen() {
         return;
       }
       if (activeCustomCourseId == null) {
-        router.replace("/coursepanel");
+        router.dismissTo("/coursepanel");
         return;
       }
 
@@ -117,7 +117,7 @@ export default function CourseEntrySettingsScreen() {
             color: "angry",
             duration: 3000,
           });
-          router.replace("/coursepanel");
+          router.dismissTo("/coursepanel");
           return;
         }
 
@@ -145,7 +145,7 @@ export default function CourseEntrySettingsScreen() {
           color: "angry",
           duration: 3500,
         });
-        router.replace("/coursepanel");
+        router.dismissTo("/coursepanel");
         return;
       } finally {
         if (isMounted) {

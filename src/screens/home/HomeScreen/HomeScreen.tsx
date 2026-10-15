@@ -11,6 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { useOpenCoursePanel } from "@/src/hooks/useOpenCoursePanel";
 import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./HomeScreen-styles";
 import { getHomeGridMetrics } from "./homeGridLayout";
@@ -21,6 +22,7 @@ import {
 
 export default function HomeScreen() {
   const router = useRouter();
+  const goToCoursePanel = useOpenCoursePanel();
   const { t, i18n } = useTranslation();
   const styles = useStyles();
   const { height: screenHeight, isTabletLayout } = useDeviceLayout();
@@ -68,10 +70,6 @@ export default function HomeScreen() {
   const tutorialImage = require("../../../../assets/images/home/tutorial.png");
   const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
-
-  const goToCoursePanel = () => {
-    router.push("/coursepanel");
-  };
 
   const goToStats = () => {
     router.push("/stats");

@@ -951,7 +951,7 @@ export default function Flashcards() {
     };
   }, []);
 
-  const handleBackToCourses = useCallback(() => router.push("/coursepanel"), [router]);
+  const handleBackToCourses = useCallback(() => router.dismissTo("/coursepanel"), [router]);
   const handleEditCard = useCallback((cardId: number) => {
     if (activeCustomCourseId == null) return;
     router.push({

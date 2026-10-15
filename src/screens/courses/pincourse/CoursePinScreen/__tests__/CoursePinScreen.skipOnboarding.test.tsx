@@ -12,6 +12,7 @@ import {
 
 const mockReplace = jest.fn();
 const mockPush = jest.fn();
+const mockDismissTo = jest.fn();
 const mockPinOfficialCourse = jest.fn(() => Promise.resolve());
 const mockUnpinOfficialCourse = jest.fn(() => Promise.resolve());
 let mockCoachmarkActive = true;
@@ -87,19 +88,21 @@ jest.mock("expo-router", () => ({
   useRouter: () => ({
     push: mockPush,
     replace: mockReplace,
+    dismissTo: mockDismissTo,
   }),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     colors: mockColors,
     highContrastEnabled: false,
     nativeLanguage: mockNativeLanguage,
     pinnedOfficialCourseIds: mockPinnedOfficialCourseIds,
     pinOfficialCourse: mockPinOfficialCourse,
     unpinOfficialCourse: mockUnpinOfficialCourse,
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getOfficialCustomCoursesWithCardCounts: jest.fn(() =>
@@ -537,6 +540,31 @@ describe("CoursePinScreen skip onboarding", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
     expect(screen.getByLabelText("Kategoria Flagi, 1 kursów")).toBeTruthy();
     expect(screen.queryByLabelText("Informacja o kursie progresywnym")).toBeNull();
+  });
+
+  it.each([true, false])("returns to activation during onboarding (coachmark active: %s)", async (isActive) => {
+    mockPinnedOfficialCourseIds = [1];
+    const advanceByEvent = jest.fn(() => Promise.resolve(true));
+    mockedUseCoachmarkFlow.mockReturnValue({ ...mockedUseCoachmarkFlow(), isActive, advanceByEvent });
+    render(<CoursePinScreen />);
+    const next = await screen.findByText("Dalej");
+    fireEvent.press(next);
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("activate_required");
+    expect(advanceByEvent).toHaveBeenCalledTimes(isActive ? 1 : 0);
+    expect(mockReplace).not.toHaveBeenCalled();
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("returns to activation outside onboarding and keeps custom creation as a push", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    mockedUseCoachmarkFlow.mockReturnValue({ ...mockedUseCoachmarkFlow(), isActive: false });
+    render(<CoursePinScreen />);
+    fireEvent.press(await screen.findByText("components.logoMessage.logoMessage.title.aktywujKurs"));
+    expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel");
+    expect(mockPush).not.toHaveBeenCalledWith("/coursepanel");
+    fireEvent.press(screen.getByText("zrób własny"));
+    expect(mockPush).toHaveBeenCalledWith("/custom_course");
   });
 
 });

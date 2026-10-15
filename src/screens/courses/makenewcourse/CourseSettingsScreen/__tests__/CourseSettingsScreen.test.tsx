@@ -13,11 +13,12 @@ import {
 import { CONTENT_DRAFT_STORAGE_KEY, SETTINGS_DRAFT_STORAGE_KEY } from "@/src/features/customCourse/contentDraft";
 
 const mockReplace = jest.fn();
+const mockDismissTo = jest.fn();
 const mockBack = jest.fn();
 const mockSetPopup = jest.fn();
 
 jest.mock("expo-router", () => ({
-  useRouter: () => ({ replace: mockReplace, back: mockBack }),
+  useRouter: () => ({ replace: mockReplace, back: mockBack, dismissTo: mockDismissTo }),
   usePathname: () => "/custom_course/settings",
   useLocalSearchParams: () => ({
     name: "Flags",
@@ -182,6 +183,8 @@ describe("CourseSettingsScreen image-only cards", () => {
         ]
       );
     });
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(mockReplace).not.toHaveBeenCalledWith("/coursepanel");
   });
 
   it("restores audio languages from the draft and saves them for the new course", async () => {

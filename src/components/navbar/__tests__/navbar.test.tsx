@@ -15,6 +15,7 @@ import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 
 const mockDismissTo = jest.fn();
 const mockPush = jest.fn();
+const mockOpenCoursePanel = jest.fn();
 const mockTriggerQuote = jest.fn();
 const mockRefreshDueReviews = jest.fn(() => Promise.resolve());
 const mockSetPopupAnchor = jest.fn();
@@ -29,6 +30,10 @@ const mockDueReviewsContext = React.createContext({ dueReviewCount: 3, refreshDu
 jest.mock("react-native-reanimated", () => ({
   ...jest.requireActual("react-native-reanimated/mock"),
   useReducedMotion: () => false,
+}));
+
+jest.mock("@/src/hooks/useOpenCoursePanel", () => ({
+  useOpenCoursePanel: () => mockOpenCoursePanel,
 }));
 
 jest.mock("expo-router", () => {
@@ -305,6 +310,14 @@ describe("Navbar review routing", () => {
     (getFlagSource as jest.Mock).mockReset().mockReturnValue(undefined);
   });
 
+  it("uses the shared panel navigation from the course button and the empty gamepad", () => {
+    const screen = render(<Navbar />);
+    fireEvent.press(within(screen.getByTestId("coachmark-flashcards-course-button")).getByRole("button"));
+    fireEvent.press(screen.getByLabelText("components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"));
+    expect(mockOpenCoursePanel).toHaveBeenCalledTimes(2);
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
   it("collapses only compact flashcards during keyboard entry and restores on hide or navigation", () => {
     const listeners = new Map<string, (event: KeyboardEvent) => void>();
     const originalSubscribe = Keyboard.addListener.bind(Keyboard);
@@ -535,7 +548,7 @@ describe("Navbar review routing", () => {
     const app = setupNavbar({ activeCustomCourseIdHydrated: false });
     const press = () => fireEvent.press(app.screen.getByLabelText("components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"));
     press();
-    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockOpenCoursePanel).not.toHaveBeenCalled();
     app.updateSettings({ activeCustomCourseIdHydrated: true, pinnedOfficialCourseIds: [42],
       customCourseEntrySettingsSeenHydrated: false, setActiveCustomCourseId: activate });
     press();

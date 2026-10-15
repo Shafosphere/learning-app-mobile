@@ -861,13 +861,13 @@ export default function CoursePinScreen() {
                       if (!allowed) return;
                       setCheckpoint("activate_required");
                       void setOnboardingCheckpoint("activate_required");
-                      router.replace("/coursepanel");
+                      router.dismissTo("/coursepanel");
                     });
                     return;
                   }
                   setCheckpoint("activate_required");
                   void setOnboardingCheckpoint("activate_required");
-                  router.replace("/coursepanel");
+                  router.dismissTo("/coursepanel");
                 }}
                 color="my_green"
                 width={90}
@@ -902,7 +902,7 @@ export default function CoursePinScreen() {
             <MyButton
               text={t("components.logoMessage.logoMessage.title.aktywujKurs")}
               color="my_green"
-              onPress={() => router.push("/coursepanel")}
+              onPress={() => router.dismissTo("/coursepanel")}
               disabled={false}
               style={{ flex: 1 }}
             />

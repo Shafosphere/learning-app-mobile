@@ -11,6 +11,11 @@ let mockQuotes = [
   { text: "Drugi cytat", author: "Autor drugi" },
 ];
 const mockPush = jest.fn();
+const mockOpenCoursePanel = jest.fn();
+
+jest.mock("@/src/hooks/useOpenCoursePanel", () => ({
+  useOpenCoursePanel: () => mockOpenCoursePanel,
+}));
 const mockTranslate = jest.fn((key: string, options?: { returnObjects?: boolean; lng?: string }) => {
   if (options?.returnObjects) {
     return mockQuotes.map((quote) => ({ ...quote, text: `${options.lng}: ${quote.text}` }));
@@ -84,6 +89,7 @@ describe("HomeScreen responsive grid", () => {
       { text: "Drugi cytat", author: "Autor drugi" },
     ];
     mockPush.mockClear();
+    mockOpenCoursePanel.mockClear();
     mockTranslate.mockClear();
     jest.spyOn(Math, "random").mockReturnValue(0);
   });
@@ -193,12 +199,16 @@ describe("HomeScreen responsive grid", () => {
     render(<HomeScreen />);
     measureGrid(372, 590);
     measureGrid(372, 540);
-    const routes = ["/coursepanel", "/custom_course", "/stats", "/wiki", "/support"];
+    const routes = ["/custom_course", "/stats", "/wiki", "/support"];
     const buttons = screen.getAllByRole("button");
     buttons.forEach((button, index) => {
       expect(button.props.accessibilityLabel.length).toBeGreaterThan(40);
       fireEvent.press(button);
-      expect(mockPush).toHaveBeenNthCalledWith(index + 1, routes[index]);
+      if (index === 0) {
+        expect(mockOpenCoursePanel).toHaveBeenCalledTimes(1);
+      } else {
+        expect(mockPush).toHaveBeenNthCalledWith(index, routes[index - 1]);
+      }
     });
   });
 });

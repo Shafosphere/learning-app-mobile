@@ -8,6 +8,7 @@ import {
 } from "@/src/services/onboardingCheckpoint";
 
 const mockReplace = jest.fn();
+const mockDismissTo = jest.fn();
 let mockPathname = "/support";
 let mockSettings = {
   courses: [] as unknown[],
@@ -20,6 +21,7 @@ let mockSettings = {
 jest.mock("expo-router", () => ({
   useRouter: () => ({
     replace: mockReplace,
+    dismissTo: mockDismissTo,
   }),
   usePathname: () => mockPathname,
 }));
@@ -93,8 +95,9 @@ describe("OnboardingGate leitner routing", () => {
     render(<OnboardingGate />);
 
     await waitFor(() => {
-      expect(mockReplace).toHaveBeenCalledWith("/coursepanel");
+      expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel");
     });
+    expect(mockReplace).not.toHaveBeenCalled();
     expect(mockedSetCheckpoint).not.toHaveBeenCalledWith("done");
   });
 
