@@ -1,6 +1,11 @@
 {
   "schemaVersion": 2,
   "recipes": {
+    "en-us-chirp3-hd-aoede_ce347da2": {
+      "language": "en-US",
+      "voice": "en-US-Chirp3-HD-Aoede",
+      "audioEncoding": "MP3"
+    },
     "es-es-chirp3-hd-aoede_268b0181": {
       "language": "es-ES",
       "voice": "es-ES-Chirp3-HD-Aoede",

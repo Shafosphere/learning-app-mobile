@@ -24,6 +24,24 @@
         "fr_b1",
         "fr_b2"
       ]
+    },
+    "en": {
+      "groups": [
+        "en_50",
+        "en_100",
+        "en_250",
+        "en_500",
+        "en_a1",
+        "en_a2",
+        "en_b1",
+        "en_b2"
+      ],
+      "sharedGroups": [
+        "en_a1",
+        "en_a2",
+        "en_b1",
+        "en_b2"
+      ]
     }
   }
 }

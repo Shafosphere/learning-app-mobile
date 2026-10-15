@@ -1,0 +1,14 @@
+{
+  "csv": "tools/prebuild-data/pl/jezyki/angielski/ENGtoPL_A2.csv",
+  "column": "front_text",
+  "language": "en-US",
+  "voice": "en-US-Chirp3-HD-Aoede",
+  "limit": 50,
+  "requestsPerMinute": 150,
+  "project": "",
+  "budget": {
+    "totalRequests": 13500,
+    "totalCharacters": 100000
+  },
+  "textMode": "variants"
+}

@@ -76,11 +76,9 @@ google-services.json
 .yarnrc.yml
 
 # User documentation
-docs/opis_aplikacji.md
-tools/prebuild-data/howToMake.md
-tools/prebuild-data/notatka.md
+/docs/
 tools/autoflow-sim/
-language-review/
+/language-review/
 Ptaki_Polski_i_Europy_Srodkowej(1).tsv
 profiling-data.03-10-2026.19-39-11.json
 
@@ -93,3 +91,4 @@ profiling-data.03-10-2026.19-39-11.json
 /Audio/modules/**/android/build/
 /Audio/modules/**/android/.gradle/
 /Audio/modules/**/android/.cxx/
+profiling-data.15-10-2026.10-06-54.json

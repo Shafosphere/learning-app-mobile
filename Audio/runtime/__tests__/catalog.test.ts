@@ -56,3 +56,15 @@ it.each([
 it("resolves recording index zero rather than treating it as missing", () => {
   expect(resolveRecording("french_b2", "7991", "front", "tactique")?.recording).toMatchObject({ text: "tactique", packName: "audio_fr_b2" });
 });
+it("shares English audio across A1 and the smaller courses and keeps Polish on device speech", () => {
+  const water = resolveRecording("eng_to_pl_a1", "0092", "front", "water");
+  expect(water?.recording).toMatchObject({ text: "water", language: "en-US" });
+  for (const count of [50, 100, 250, 500]) {
+    expect(resolveRecording(`eng_to_pl_first_${count}`, "0092", "front", "water")).toEqual(water);
+  }
+  expect(resolveRecording("eng_to_pl_first_50", "0092", "back", "woda")).toEqual({ language: "pl-PL", recording: null });
+});
+it.each([["eng_to_pl_a2", "will"], ["eng_to_pl_b2", "united"]])("plays generated English MP3 in %s", (slug, text) => {
+  expect(resolveRecording(slug, "0001", "front", text)?.recording).toMatchObject({ text, language: "en-US" });
+  expect(resolveRecording(slug, "0001", "front", "edited")?.recording).toBeNull();
+});

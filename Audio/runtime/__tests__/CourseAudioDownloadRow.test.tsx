@@ -102,3 +102,10 @@ it.each(["french_a1", "french_a2", "french_b1", "french_b2", "fr_to_pl_first_50"
   fireEvent.press(screen.getByText("audioDownload.download"));
   expect(downloadCourse).toHaveBeenCalledWith(slug);
 });
+it.each(["eng_to_pl_a1", "eng_to_pl_a2", "eng_to_pl_b1", "eng_to_pl_b2",
+  "eng_to_pl_first_50", "eng_to_pl_first_100", "eng_to_pl_first_250", "eng_to_pl_first_500"])("offers English course audio for %s", (slug) => {
+  const screen = render(<CourseAudioDownloadRow slug={slug} courseName="English" />);
+  expect(screen.getByTestId(`course-audio-row-${slug}`)).toBeTruthy();
+  fireEvent.press(screen.getByText("audioDownload.download"));
+  expect(downloadCourse).toHaveBeenCalledWith(slug);
+});

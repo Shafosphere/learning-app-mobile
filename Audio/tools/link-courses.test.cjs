@@ -19,6 +19,8 @@ test('matches complete text across course IDs and physical sides; missing forms 
     assert.equal(catalog.packs.audio_es_small.audioIds.length, 2);
     assert.ok(!existsSync(join(audioRoot, 'recordings.json')));
     assert.ok(existsSync(join(audioRoot, 'reports/spanish_pl.csv')));
+    assert.ok(existsSync(join(root, 'docs/audio/content/reports/README.md')));
+    assert.equal(existsSync(join(audioRoot, 'reports/README.md')), false);
     const first = readFileSync(join(root, 'Audio/runtime/generated/catalog.json'));
     linkCourses(root);
     assert.deepEqual(readFileSync(join(root, 'Audio/runtime/generated/catalog.json')), first);

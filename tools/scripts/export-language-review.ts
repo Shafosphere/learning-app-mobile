@@ -286,6 +286,7 @@ function writeCsv(rows, targetPath) {
 
 function writeReadme(targetPath) {
   const content = `# Korekta językowa\n\n1. Nie zmieniaj kolumny **Obecny tekst**.\n2. Poprawioną pełną wersję wpisuj w **Proponowany tekst**.\n3. Nie zmieniaj **ID** ani **Klucz JSON**.\n4. Nie usuwaj elementów z kolumny **Chronione elementy**.\n5. Ustaw odpowiedni **Status** po sprawdzeniu tekstu.\n\n## Ponowne wygenerowanie\n\nZ katalogu głównego projektu uruchom:\n\n\`\`\`bash\nnpm run language:export -- ./src/locales/pl.json\n\`\`\`\n\nPolecenie nadpisuje pliki w \`language-review/\` i nie modyfikuje źródłowego JSON-a.\n`;
+  fs.mkdirSync(path.dirname(targetPath), { recursive: true });
   fs.writeFileSync(targetPath, content, "utf8");
 }
 
@@ -301,7 +302,7 @@ async function main() {
 
   fs.mkdirSync(OUTPUT_DIR, { recursive: true });
   writeCsv(rows, path.join(OUTPUT_DIR, "pl-language-review.csv"));
-  writeReadme(path.join(OUTPUT_DIR, "README.md"));
+  writeReadme(path.join(ROOT_DIR, "docs/language-review/README.md"));
   await writeXlsx(rows, path.join(OUTPUT_DIR, "pl-language-review.xlsx"));
   console.log(`Wyeksportowano ${rows.length} tekstów do ${path.relative(ROOT_DIR, OUTPUT_DIR)}.`);
 }

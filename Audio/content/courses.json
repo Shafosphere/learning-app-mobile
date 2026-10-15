@@ -122,6 +122,70 @@
       "frontAudioMode": "variants",
       "packGroup": "fr_b2",
       "frontRecipe": "fr-fr-chirp3-hd-aoede_186b6502"
+    },
+    "eng_to_pl_first_50": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/fiszki_50.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_50",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_first_100": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/fiszki_100.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_100",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_first_250": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/fiszki_250.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_250",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_first_500": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/fiszki_500.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_500",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_a1": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/ENGtoPL_A1.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_a1",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_a2": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/ENGtoPL_A2.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_a2",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_b1": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/ENGtoPL_B1.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_b1",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
+    },
+    "eng_to_pl_b2": {
+      "csv": "tools/prebuild-data/pl/jezyki/angielski/ENGtoPL_B2.csv",
+      "frontLanguage": "en-US",
+      "backLanguage": "pl-PL",
+      "frontAudioMode": "variants",
+      "packGroup": "en_b2",
+      "frontRecipe": "en-us-chirp3-hd-aoede_ce347da2"
     }
   }
 }

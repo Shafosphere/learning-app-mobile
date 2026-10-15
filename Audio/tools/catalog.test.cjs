@@ -12,11 +12,12 @@ const canonical = (value) => Array.isArray(value) ? value.map(canonical) : value
   ? Object.fromEntries(Object.entries(value).sort(([a], [b]) => a.localeCompare(b)).map(([key, entry]) => [key, canonical(entry)])) : value;
 
 test('v1 migration preserves every recording and all 16 course mappings', () => {
-  const mappings = Object.fromEntries(Object.entries(catalog.courses).map(([slug, course]) => [slug, course.cards]));
+  const mappings = Object.fromEntries(Object.entries(catalog.courses).filter(([slug]) => !slug.startsWith('eng_to_pl_')).map(([slug, course]) => [slug, course.cards]));
   assert.equal(sha256(JSON.stringify(canonical(mappings))), '6bb430dcc66e0aebeb741775b5b8d2a1cace1549277151f918a56d88353e9450');
-  assert.equal(sha256(JSON.stringify(canonical(readRecordings(join(project, 'Audio/content'))))), '00decafe586e5e5c6d4e38bb11c4e8a6f135251205cd86e5308746f832f4c3b6');
-  assert.equal(Object.keys(catalog.recordings).length, 10436);
-  assert.equal(Object.keys(catalog.packs).length, 11);
+  const originalRecordings = Object.fromEntries(Object.entries(readRecordings(join(project, 'Audio/content'))).filter(([, record]) => record.language !== 'en-US'));
+  assert.equal(sha256(JSON.stringify(canonical(originalRecordings))), '00decafe586e5e5c6d4e38bb11c4e8a6f135251205cd86e5308746f832f4c3b6');
+  assert.equal(Object.values(catalog.recordings).filter((record) => record.language !== 'en-US').length, 10436);
+  assert.equal(Object.keys(catalog.packs).filter((name) => !name.startsWith('audio_en_')).length, 11);
   const members = Object.values(catalog.packs).flatMap((pack) => pack.audioIds);
   assert.equal(new Set(members).size, members.length);
 });
@@ -33,7 +34,7 @@ test('course dependencies cover every recording with the planned source sizes', 
     assert.equal(JSON.parse(pack.manifest).files.length, pack.audioIds.length);
   }
 });
-test('runtime indexes round trip every mapping; generated output is deterministic and below 2 MB', () => {
+test('runtime indexes round trip every mapping; generated output is deterministic and below 3 MB', () => {
   const runtime = runtimeCatalog(catalog);
   for (const [slug, course] of Object.entries(runtime.courses)) for (const [externalId, sides] of Object.entries(course.cards)) {
     for (const [side, ids] of Object.entries(sides)) {
@@ -41,7 +42,7 @@ test('runtime indexes round trip every mapping; generated output is deterministi
       assert.deepEqual(resolved, catalog.courses[slug].cards[externalId][side]);
     }
   }
-  assert.ok(Buffer.byteLength(JSON.stringify(runtime)) < 2000000);
+  assert.ok(Buffer.byteLength(JSON.stringify(runtime)) < 3000000);
   const root = mkdtempSync(join(tmpdir(), 'audio-outputs-'));
   try {
     writeOutputs(root, catalog);
@@ -50,6 +51,21 @@ test('runtime indexes round trip every mapping; generated output is deterministi
     assert.deepEqual(readFileSync(join(root, 'Audio/runtime/generated/catalog.json')), first);
     assert.deepEqual(first, readFileSync(join(project, 'Audio/runtime/generated/catalog.json')));
   } finally { rmSync(root, { recursive: true, force: true }); }
+});
+test('English courses reuse recordings and report missing B1 data without claiming complete coverage', () => {
+  for (const [slug, count] of [['eng_to_pl_first_50', 50], ['eng_to_pl_first_100', 100], ['eng_to_pl_first_250', 250], ['eng_to_pl_first_500', 500],
+    ['eng_to_pl_a1', 1267], ['eng_to_pl_a2', 1230], ['eng_to_pl_b2', 1736]]) {
+    const summary = catalog.summary.find((entry) => entry.slug === slug);
+    assert.equal(summary.totalCards, count);
+    assert.equal(summary.missing, 0);
+    assert.equal(Object.keys(catalog.courses[slug].cards).length, count);
+  }
+  assert.equal(catalog.courses.eng_to_pl_a1.cards['0092'].front, catalog.courses.eng_to_pl_first_50.cards['0092'].front);
+  const b1 = catalog.summary.find((entry) => entry.slug === 'eng_to_pl_b1');
+  assert.equal(b1.totalCards, 2020);
+  assert.equal(b1.matched + b1.missing, 2020);
+  assert.equal(Object.keys(catalog.courses.eng_to_pl_b1.cards).length, b1.matched);
+  assert.ok(b1.matched >= 28);
 });
 test('identity includes voice/configuration and preserves NFC', () => {
   const recipe = { text: 'agua', language: 'es-ES', voice: 'es-ES-Chirp3-HD-Aoede' };

@@ -26,6 +26,6 @@ function writeOutputs(root, catalog) {
   report.push('', '## Packs', '', '| Pack | Recordings | MP3 bytes |', '| --- | ---: | ---: |');
   for (const [name, pack] of Object.entries(sorted(catalog.packs))) report.push(`| ${name} | ${pack.audioIds.length} | ${pack.sourceBytes} |`);
   report.push('', 'MP3 sizes are uncompressed source bytes. Google Play reports actual transfer sizes.', '');
-  saveText(join(root, 'Audio/content/reports/README.md'), report.join('\n'));
+  saveText(join(root, 'docs/audio/content/reports/README.md'), report.join('\n'));
 }
 module.exports = { runtimeCatalog, writeOutputs };
