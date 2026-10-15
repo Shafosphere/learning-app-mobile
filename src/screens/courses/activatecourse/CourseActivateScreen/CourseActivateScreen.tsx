@@ -1,4 +1,5 @@
 import { CourseAudioDownloadRow } from "@/Audio/runtime/CourseAudioDownloadRow";
+import { CourseAudioRevealProvider } from "@/Audio/runtime/CourseAudioRevealCoordinator";
 import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import MyButton from "@/src/components/button/button";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
@@ -27,7 +28,7 @@ import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
@@ -38,10 +39,68 @@ import {
 } from "react-native";
 import { useStyles } from "./CourseActivateScreen-styles";
 import { CourseGroupList } from "@/src/components/course/CourseGroupList";
+import { profileCourseActivation } from "@/src/components/course/CourseActivationProfiler";
+import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 import { CourseGroup, OfficialCourseListItem } from "@/src/features/customCourse/courseActivationTypes";
 import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 
+type CustomCourseRowProps = {
+  course: CustomCourseSummary;
+  isHighlighted: boolean;
+  headlineColor: string;
+  onPress: (id: number, isAlreadyActive: boolean) => void;
+  onEdit: (course: CustomCourseSummary) => void;
+};
 
+const CustomCourseRow = memo(function CustomCourseRow({
+  course,
+  isHighlighted,
+  headlineColor,
+  onPress,
+  onEdit,
+}: CustomCourseRowProps) {
+  const { t } = useTranslation();
+  const styles = useStyles();
+
+  return (
+    <CourseListCard
+      title={course.name}
+      subtitle={t("repeats.format.flashcardsValue", { value: course.cardsCount })}
+      iconId={course.iconId}
+      iconColor={course.iconColor}
+      flagCode={null}
+      isHighlighted={isHighlighted}
+      onPress={() => onPress(course.id, isHighlighted)}
+      rightAccessory={
+        <Pressable
+          accessibilityRole="button"
+          accessibilityLabel={t(
+            "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.edytujKursValue",
+            { value: course.name }
+          )}
+          style={styles.customEditButton}
+          onPress={(event) => {
+            event.stopPropagation();
+            onEdit(course);
+          }}
+          hitSlop={8}
+        >
+          <FontAwesome6 name="edit" size={24} color={headlineColor} />
+        </Pressable>
+      }
+    />
+  );
+});
+
+function renderCourseAudioFooter(course: OfficialCourseListItem, isHighlighted: boolean) {
+  return (
+    <CourseAudioDownloadRow
+      slug={course.slug}
+      courseName={course.name}
+      expanded={isHighlighted}
+    />
+  );
+}
 
 export default function CourseActivateScreen() {
   const { t } = useTranslation();
@@ -66,6 +125,10 @@ export default function CourseActivateScreen() {
   const router = useRouter();
   const setPopup = usePopup();
   const [startedInOnboarding, setStartedInOnboarding] = useState(false);
+
+  useEffect(() => {
+    recordCourseActivationEvent("selection.commit", { courseId: activeCustomCourseId, hydrated: activeCustomCourseIdHydrated });
+  }, [activeCustomCourseId, activeCustomCourseIdHydrated]);
 
   useEffect(() => {
     let mounted = true;
@@ -206,6 +269,7 @@ export default function CourseActivateScreen() {
       let isMounted = true;
 
       const loadCourses = async () => {
+        recordCourseActivationEvent("courses.load.start");
         setIsLoadingCourses(true);
         try {
           const [customResult, officialResult, completedResult] =
@@ -267,6 +331,7 @@ export default function CourseActivateScreen() {
           setOfficialCourses([]);
           setCompletedCourses([]);
         } finally {
+          recordCourseActivationEvent("courses.load.end", { mounted: isMounted });
           if (isMounted) {
             setIsLoadingCourses(false);
           }
@@ -305,18 +370,14 @@ export default function CourseActivateScreen() {
     });
   }, [setPopup, t]);
 
-  const handleEditCustomCourse = (course: CustomCourseSummary) => {
+  const handleEditCustomCourse = useCallback((course: CustomCourseSummary) => {
     const encodedName = encodeURIComponent(course.name);
     const params = [`id=${course.id.toString()}`, `name=${encodedName}`];
     if (course.isOfficial) {
       params.push("lockAppearance=1");
     }
     router.push(`/editcourse?${params.join("&")}`);
-  };
-
-
-
-
+  }, [router]);
 
   const hasActiveCourse = activeCustomCourseId != null;
   const showOnboardingNext = startedInOnboarding;
@@ -369,31 +430,36 @@ export default function CourseActivateScreen() {
       coachmark.currentStep?.advanceOn !== "activate_course"
     );
 
+  const advanceByEvent = coachmark.advanceByEvent;
   const handleCustomCoursePress = useCallback(
-    async (id: number) => {
+    async (id: number, isAlreadyActive: boolean) => {
+      recordCourseActivationEvent("selection.request", { courseId: id, isAlreadyActive });
       if (!activeCustomCourseIdHydrated || isActivationBlockedByOnboarding) {
         return;
       }
-      if (activeCustomCourseId === id) {
+      if (isAlreadyActive) {
         return;
       }
       if (!canActivate()) return;
+      recordCourseActivationEvent("selection.accept", { courseId: id });
       await setActiveCustomCourseId(id);
-      void coachmark.advanceByEvent("activate_course");
+      recordCourseActivationEvent("selection.persisted", { courseId: id });
+      void advanceByEvent("activate_course");
       notifyActivated();
+      recordCourseActivationEvent("selection.effects", { courseId: id });
     },
     [
-      activeCustomCourseId,
       activeCustomCourseIdHydrated,
+      advanceByEvent,
       canActivate,
-      coachmark,
       isActivationBlockedByOnboarding,
       notifyActivated,
       setActiveCustomCourseId,
     ]
   );
 
-  return (
+  return profileCourseActivation("course-activation", (
+    <CourseAudioRevealProvider>
     <View style={styles.container}>
       <CoachmarkAnchor
         id="course-activate-bubble-anchor"
@@ -433,9 +499,7 @@ export default function CourseActivateScreen() {
                         onEdit={handleEditCustomCourse}
                         firstCoachmarkCourseId={firstPinnedOfficialCourseId}
                         scrollRef={scrollRef}
-                        renderCourseFooter={(course) => (
-                          <CourseAudioDownloadRow slug={course.slug} courseName={course.name} expanded={activeCustomCourseId === course.id} />
-                        )}
+                        renderCourseFooter={renderCourseAudioFooter}
                       />
                 </>
               ) : null}
@@ -448,45 +512,16 @@ export default function CourseActivateScreen() {
                     )}
                   </Text>
                   <View style={styles.customList}>
-                    {userCustomCourses.map((course) => {
-                      const isHighlighted = activeCustomCourseId === course.id;
-                      return (
-                        <CourseListCard
-                          key={course.id}
-                          title={course.name}
-                          subtitle={t(
-                            "repeats.format.flashcardsValue",
-                            { value: course.cardsCount }
-                          )}
-                          iconId={course.iconId}
-                          iconColor={course.iconColor}
-                          flagCode={null} // Custom courses typically don't have a flag logic derived here yet or use the icon itself
-                          isHighlighted={isHighlighted}
-                          onPress={() => handleCustomCoursePress(course.id)}
-                          rightAccessory={
-                            <Pressable
-                              accessibilityRole="button"
-                              accessibilityLabel={t(
-                                "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.edytujKursValue",
-                                { value: course.name }
-                              )}
-                              style={styles.customEditButton}
-                              onPress={(event) => {
-                                event.stopPropagation();
-                                handleEditCustomCourse(course);
-                              }}
-                              hitSlop={8}
-                            >
-                              <FontAwesome6
-                                name="edit"
-                                size={24}
-                                color={colors.headline}
-                              />
-                            </Pressable>
-                          }
-                        />
-                      );
-                    })}
+                    {userCustomCourses.map((course) => (
+                      <CustomCourseRow
+                        key={course.id}
+                        course={course}
+                        isHighlighted={activeCustomCourseId === course.id}
+                        headlineColor={colors.headline}
+                        onPress={handleCustomCoursePress}
+                        onEdit={handleEditCustomCourse}
+                      />
+                    ))}
                   </View>
                 </View>
               ) : null}
@@ -583,5 +618,6 @@ export default function CourseActivateScreen() {
         </View>
       ) : null}
     </View>
-  );
+    </CourseAudioRevealProvider>
+  ));
 }

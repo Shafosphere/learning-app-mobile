@@ -27,6 +27,10 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
 }));
 
+jest.mock("@edwardloopez/react-native-coachmark", () => ({
+  CoachmarkAnchor: ({ children }: { children?: React.ReactNode }) => children,
+}));
+
 jest.mock("@/src/db/sqlite/db", () => ({
   getCompletedCustomCoursesWithCardCounts: jest.fn(),
 }));
@@ -69,33 +73,6 @@ jest.mock("@/src/components/course/CourseListCard", () => {
   }
   return {
     CourseListCard: MockCourseListCard,
-  };
-});
-
-jest.mock("@/src/components/course/CourseGroupList", () => {
-  const React = require("react");
-  const { Text } = require("react-native");
-  function MockCourseGroupList({
-    groups,
-    onPress,
-  }: {
-    groups: { official: { id: number; name: string }[] }[];
-    onPress: (id: number) => void;
-  }) {
-    return (
-      <>
-        {groups.flatMap((group) =>
-          group.official.map((course) => (
-            <Text key={course.id} onPress={() => onPress(course.id)}>
-              {course.name}
-            </Text>
-          ))
-        )}
-      </>
-    );
-  }
-  return {
-    CourseGroupList: MockCourseGroupList,
   };
 });
 
@@ -166,11 +143,11 @@ describe("CompletedCoursesScreen", () => {
     });
   });
 
-  it("pins completed official courses when activating them from the archive", async () => {
+  it.each([null, 42])("opens completed official courses even when already active (active=%s)", async (activeCustomCourseId) => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     const pinOfficialCourse = jest.fn(() => Promise.resolve());
     mockedUseSettings.mockReturnValue({
-      activeCustomCourseId: null,
+      activeCustomCourseId,
       activeCustomCourseIdHydrated: true,
       customCourseEntrySettingsSeenHydrated: true,
       hasSeenCustomCourseEntrySettings: jest.fn(() => true),

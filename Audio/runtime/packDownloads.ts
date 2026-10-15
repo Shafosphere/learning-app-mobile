@@ -2,6 +2,7 @@ import { AppState } from "react-native";
 import { playAssetDelivery, type NativePackState } from "@/Audio/modules/play-asset-delivery";
 import { getAudioPack } from "./catalog";
 import { appendDebugEvent } from "@/src/services/debugEvents";
+import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 
 // Older development clients need a rebuild for the v2 readiness method.
 const nativeDelivery = typeof playAssetDelivery?.checkPackReady === "function" ? playAssetDelivery : null;
@@ -36,8 +37,14 @@ export function getPackDownload(name: string): PackDownload {
   return snapshots[name] ?? (snapshots[name] = missing(name));
 }
 function setState(name: string, patch: Partial<PackDownload>) {
-  snapshots[name] = { ...getPackDownload(name), ...patch };
-  if (patch.phase && patch.phase !== "confirmation") snapshots[name].confirmationReason = null;
+  const previous = getPackDownload(name);
+  const next = { ...previous, ...patch };
+  if (patch.phase && patch.phase !== "confirmation") next.confirmationReason = null;
+  // Native refreshes can repeat the same state. Preserve snapshot identity and
+  // avoid waking every course subscriber, including collapsed panels.
+  if ((Object.keys(next) as (keyof PackDownload)[]).every((key) => Object.is(previous[key], next[key]))) return;
+  snapshots[name] = next;
+  recordCourseActivationEvent("pack.state", { pack: name, phase: next.phase, downloadedBytes: next.downloadedBytes });
   emit();
 }
 function diagnostic(name: string, event: string, details: Record<string, unknown> = {}) {
@@ -98,9 +105,16 @@ export function refreshPack(name: string): Promise<void> {
   if (!nativeDelivery || !getAudioPack(name)) return Promise.resolve();
   start();
   const existing = refreshes.get(name);
-  if (existing) return existing;
+  if (existing) {
+    recordCourseActivationEvent("pack.refresh.join", { pack: name });
+    return existing;
+  }
   invalidateReadiness(name);
-  const pending = refreshCurrentPack(name).finally(() => { refreshes.delete(name); });
+  recordCourseActivationEvent("pack.refresh.start", { pack: name });
+  const pending = refreshCurrentPack(name).finally(() => {
+    refreshes.delete(name);
+    recordCourseActivationEvent("pack.refresh.end", { pack: name });
+  });
   refreshes.set(name, pending);
   return pending;
 }

@@ -86,3 +86,18 @@ it("aggregates confirmation without fetching or opening dialogs automatically", 
   expect(course.getCourseDownload(slug)).toMatchObject({ phase: "confirmation", confirmationReason: "play", confirmationPack: "audio_fr_shared" });
   expect(mockFetch).not.toHaveBeenCalled();
 });
+
+it("keeps course snapshots stable for repeated and unrelated pack events", async () => {
+  await course.refreshCourse(slug);
+  const snapshot = course.getCourseDownload(slug);
+  await course.refreshCourse(slug);
+  expect(course.getCourseDownload(slug)).toBe(snapshot);
+  mockListener(nativeState("audio_es_50", 2, 100)); await flush();
+  expect(course.getCourseDownload(slug)).toBe(snapshot);
+  mockListener(nativeState("audio_fr_shared", 2, 100)); await flush();
+  const changed = course.getCourseDownload(slug);
+  expect(changed).not.toBe(snapshot);
+  expect(course.getCourseDownload("fr_to_en_first_50").downloadedBytes).toBe(100);
+  mockListener(nativeState("audio_fr_shared", 2, 100)); await flush();
+  expect(course.getCourseDownload(slug)).toBe(changed);
+});

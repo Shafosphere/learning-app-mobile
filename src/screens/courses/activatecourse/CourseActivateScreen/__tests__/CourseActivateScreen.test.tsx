@@ -1,7 +1,7 @@
 import React from "react";
-import { fireEvent, render, waitFor, within } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor, within } from "@testing-library/react-native";
 
-import { downloadCourse } from "@/Audio/runtime/courseDownloads";
+import { downloadCourse, refreshCourse } from "@/Audio/runtime/courseDownloads";
 import CourseActivateScreen from "@/src/screens/courses/activatecourse/CourseActivateScreen/CourseActivateScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
@@ -16,12 +16,12 @@ const EMPTY_TEXT = "Nic tu nie ma :(, czas wybrać kurs!";
 
 const mockPush = jest.fn();
 const mockReplace = jest.fn();
+const mockRouter = { push: mockPush, replace: mockReplace };
+const mockPopup = jest.fn();
+const mockCardRender = jest.fn();
 
 jest.mock("expo-router", () => ({
-  useRouter: jest.fn(() => ({
-    push: mockPush,
-    replace: mockReplace,
-  })),
+  useRouter: jest.fn(() => mockRouter),
 }));
 
 jest.mock("@react-navigation/native", () => ({
@@ -42,16 +42,16 @@ jest.mock("@/Audio/runtime/courseDownloads", () => ({
 }));
 
 jest.mock("@/src/contexts/PopupContext", () => ({
-  usePopup: jest.fn(() => jest.fn()),
+  usePopup: jest.fn(() => mockPopup),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
-jest.mock("react-i18next", () => ({
-  useTranslation: () => ({
-    t: (key: string) => {
+jest.mock("react-i18next", () => {
+  const t = (key: string) => {
       const translations: Record<string, string> = {
         "audioDownload.download": "Pobierz",
         "audioDownload.size": "0.22 MB",
@@ -71,9 +71,9 @@ jest.mock("react-i18next", () => ({
           "Show completed courses",
       };
       return translations[key] ?? key;
-    },
-  }),
-}));
+  };
+  return { useTranslation: () => ({ t }) };
+});
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getCustomCoursesWithCardCounts: jest.fn(),
@@ -146,10 +146,14 @@ jest.mock("@/src/components/button/button", () => {
 
 jest.mock("@/src/components/course/CourseListCard", () => {
   const React = jest.requireActual<typeof import("react")>("react");
-  const { Text } =
+  const { Text, View } =
     jest.requireActual<typeof import("react-native")>("react-native");
-  function MockCourseListCard({ title, onPress }: { title: string; onPress?: () => void }) {
-    return <Text onPress={onPress}>{title}</Text>;
+  function MockCourseListCard(props: React.ComponentProps<typeof import("@/src/components/course/CourseListCard").CourseListCard>) {
+    mockCardRender(props);
+    return <View testID={`course-card-${props.title}`}>
+      <Text onPress={props.onPress}>{props.title}</Text>
+      {props.rightAccessory}
+    </View>;
   }
   return {
     CourseListCard: MockCourseListCard,
@@ -214,7 +218,7 @@ describe("CourseActivateScreen loading state", () => {
     const englishRow = within(screen.getByTestId("official-course-row-31"));
     expect(plRow.queryByTestId("course-audio-row-es_to_pl_first_50")).toBeNull();
     expect(enRow.queryByTestId("course-audio-row-es_to_en_first_50")).toBeNull();
-    expect(englishRow.queryByText("Pobierz")).toBeNull();
+    expect(englishRow.getByText("Pobierz")).toBeTruthy();
     expect(screen.queryByTestId("course-audio-panel")).toBeNull();
     fireEvent.press(screen.getByText("Spanish PL"));
     expect(mockedUseSettings().setActiveCustomCourseId).toHaveBeenCalledWith(21);
@@ -242,6 +246,91 @@ describe("CourseActivateScreen loading state", () => {
 
     expect(screen.getByTestId("course-activate-loading")).toBeTruthy();
     expect(screen.queryByText(EMPTY_TEXT)).toBeNull();
+  });
+
+  it("renders only the old and new cards across official and custom selections", async () => {
+    const official = [
+      { id: 21, name: "Spanish PL", slug: "es_to_pl_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
+      { id: 22, name: "Spanish EN", slug: "es_to_en_first_50", iconId: "flag:es", iconColor: "#000", cardsCount: 50, isOfficial: true },
+      { id: 31, name: "English PL", slug: "eng_to_pl_first_50", iconId: "flag:en", iconColor: "#000", cardsCount: 50, isOfficial: true },
+    ];
+    const custom = [
+      { id: 11, name: "Custom A", iconId: "book", iconColor: "#000", cardsCount: 12, isOfficial: false },
+      { id: 12, name: "Custom B", iconId: "star", iconColor: "#111", cardsCount: 8, isOfficial: false },
+    ];
+    mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue(official);
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue(custom);
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: 21, pinnedOfficialCourseIds: [21, 22, 31] });
+    const screen = render(<CourseActivateScreen />);
+    await screen.findByText("Custom B");
+    let previousName = "Spanish PL";
+    let now = Date.now();
+    const clock = jest.spyOn(Date, "now").mockImplementation(() => now);
+    try {
+      for (const [id, name] of [[22, "Spanish EN"], [11, "Custom A"], [12, "Custom B"]] as const) {
+        now += 100;
+        mockCardRender.mockClear();
+        await act(async () => { fireEvent.press(screen.getByText(name)); });
+        expect(mockedUseSettings().setActiveCustomCourseId).toHaveBeenLastCalledWith(id);
+        mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseId: id });
+        // Changing unrelated coachmark fields must not invalidate every row's callback.
+        mockedUseCoachmarkFlow.mockReturnValue({ ...mockedUseCoachmarkFlow(), canGoNext: false });
+        screen.rerender(<CourseActivateScreen />);
+        const rendered = mockCardRender.mock.calls.map(([props]) => [props.title, props.isHighlighted]);
+        expect(rendered).toHaveLength(2);
+        expect(rendered).toEqual(expect.arrayContaining([[previousName, false], [name, true]]));
+        previousName = name;
+
+        mockedUseSettings().setActiveCustomCourseId.mockClear();
+        mockPopup.mockClear();
+        await act(async () => { fireEvent.press(screen.getByText(name)); });
+        expect(mockedUseSettings().setActiveCustomCourseId).not.toHaveBeenCalled();
+        expect(mockPopup).not.toHaveBeenCalled();
+      }
+    } finally {
+      clock.mockRestore();
+    }
+    expect(refreshCourse).toHaveBeenCalledTimes(3);
+    expect(mockPush).not.toHaveBeenCalled();
+  });
+
+  it("uses updated hydration, setter and coachmark callback after a parent update", async () => {
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
+      { id: 11, name: "Custom", iconId: "book", iconColor: "#000", cardsCount: 12, isOfficial: false },
+    ]);
+    const originalSetter = mockedUseSettings().setActiveCustomCourseId;
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseIdHydrated: false });
+    const screen = render(<CourseActivateScreen />);
+    fireEvent.press(await screen.findByText("Custom"));
+    expect(originalSetter).not.toHaveBeenCalled();
+
+    const setter = jest.fn(async () => {});
+    const advanceByEvent = jest.fn(async () => true);
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), activeCustomCourseIdHydrated: true, setActiveCustomCourseId: setter });
+    mockedUseCoachmarkFlow.mockReturnValue({ ...mockedUseCoachmarkFlow(), advanceByEvent });
+    screen.rerender(<CourseActivateScreen />);
+    await act(async () => { fireEvent.press(screen.getByText("Custom")); });
+    expect(setter).toHaveBeenCalledWith(11);
+    expect(originalSetter).not.toHaveBeenCalled();
+    expect(advanceByEvent).toHaveBeenCalledWith("activate_course");
+    expect(mockPopup).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([false, true])("edits a course without activation (official=%s)", async (isOfficial) => {
+    const course = { id: 11, name: "Course & name", slug: "es_to_pl_first_50", iconId: "book", iconColor: "#000", cardsCount: 12, isOfficial };
+    if (isOfficial) {
+      mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([course]);
+      mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), pinnedOfficialCourseIds: [11] });
+    } else {
+      mockedGetCustomCoursesWithCardCounts.mockResolvedValue([course]);
+    }
+    const screen = render(<CourseActivateScreen />);
+    const card = within(await screen.findByTestId("course-card-Course & name"));
+    const stopPropagation = jest.fn();
+    fireEvent.press(card.getByRole("button"), { stopPropagation });
+    expect(stopPropagation).toHaveBeenCalledTimes(1);
+    expect(mockPush).toHaveBeenCalledWith(`/editcourse?id=11&name=Course%20%26%20name${isOfficial ? "&lockAppearance=1" : ""}`);
+    expect(mockedUseSettings().setActiveCustomCourseId).not.toHaveBeenCalled();
   });
 
   it("hides loading and shows courses when data resolves with courses", async () => {
@@ -567,6 +656,8 @@ describe("CourseActivateScreen loading state", () => {
     expect(nextButton.props.accessibilityState).toEqual({ disabled: false });
     expect(screen.getByText("app.actions.next")).toBeTruthy();
     expect(screen.queryByText("Graj")).toBeNull();
+    fireEvent.press(nextButton);
+    await waitFor(() => expect(mockReplace).toHaveBeenCalledWith("/course-entry-settings"));
   });
 
   it("shows normal footer and no onboarding next after skip", async () => {

@@ -76,7 +76,9 @@ google-services.json
 .yarnrc.yml
 
 # User documentation
-/docs/
+/profiler/*
+/docs/*
+!/docs/course-activation-performance.md
 tools/autoflow-sim/
 /language-review/
 Ptaki_Polski_i_Europy_Srodkowej(1).tsv

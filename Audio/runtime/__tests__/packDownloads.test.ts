@@ -177,3 +177,34 @@ it("requires a new explicit tap if transfer consent becomes Play installation co
   expect(getPackDownload(name)).toMatchObject({ phase: "confirmation", nativeStatus: 9, confirmationReason: "play", confirmationPending: false });
   expect(native.showConfirmationDialog).not.toHaveBeenCalled();
 });
+
+it("preserves snapshot identity and skips notifications for repeated native state and refresh results", async () => {
+  await refreshPack(name);
+  const snapshot = getPackDownload(name);
+  const listener = jest.fn();
+  const unsubscribe = subscribePackDownloads(listener);
+  try {
+    mockPackListener(state(8)); await flush();
+    await refreshPack(name);
+    expect(getPackDownload(name)).toBe(snapshot);
+    expect(listener).not.toHaveBeenCalled();
+    expect(native.checkPackReady).toHaveBeenCalledTimes(2); // Equality must not skip readiness checks.
+
+    mockPackListener({ ...state(2), downloadedBytes: 100 }); await flush();
+    expect(listener).toHaveBeenCalledTimes(1);
+    const progress = getPackDownload(name);
+    mockPackListener({ ...state(2), downloadedBytes: 100 }); await flush();
+    expect(getPackDownload(name)).toBe(progress);
+    expect(listener).toHaveBeenCalledTimes(1);
+    mockPackListener({ ...state(5), errorCode: -10 }); await flush();
+    expect(getPackDownload(name)).toMatchObject({ phase: "failed", errorCode: -10 });
+    expect(listener).toHaveBeenCalledTimes(2);
+    mockPackListener(state(7)); await flush();
+    expect(getPackDownload(name).confirmationReason).toBe("wifi");
+    mockPackListener(state(9)); await flush();
+    expect(getPackDownload(name).confirmationReason).toBe("play");
+    expect(listener).toHaveBeenCalledTimes(4);
+  } finally {
+    unsubscribe();
+  }
+});

@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useCallback, useId, useMemo, useState } from "react";
 import { Platform, StyleSheet, Text, View } from "react-native";
 import TextTicker from "react-native-text-ticker";
-import type { StyleProp, TextStyle, ViewStyle } from "react-native";
+import type { LayoutChangeEvent, StyleProp, TextLayoutEvent, TextStyle, ViewStyle } from "react-native";
+import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -28,11 +29,25 @@ export function CourseTitleMarquee({
   containerStyle,
   textStyle,
 }: CourseTitleMarqueeProps) {
+  const measurementId = useId();
   const [containerWidth, setContainerWidth] = useState(0);
   const [textMeasurement, setTextMeasurement] = useState<{
     text: string;
     width: number;
   } | null>(null);
+  const handleLayout = useCallback((event: LayoutChangeEvent) => {
+    const width = event.nativeEvent.layout.width;
+    recordCourseActivationEvent("marquee.layout", { measurementId, width });
+    setContainerWidth(width);
+  }, [measurementId]);
+  const handleTextLayout = useCallback((event: TextLayoutEvent) => {
+    const width = event.nativeEvent.lines[0]?.width;
+    recordCourseActivationEvent("marquee.textLayout", { measurementId, textLength: text.length, width });
+    if (width == null) return;
+    setTextMeasurement((previous) => previous?.text === text && previous.width === width
+      ? previous
+      : { text, width });
+  }, [measurementId, text]);
   const shouldAnimate =
     Platform.OS === "web" ||
     (containerWidth > 0 &&
@@ -60,21 +75,14 @@ export function CourseTitleMarquee({
     <View
       style={containerStyle}
       pointerEvents="none"
-      onLayout={(event) => {
-        const layout = event.nativeEvent.layout;
-        setContainerWidth(layout.width);
-      }}
+      onLayout={handleLayout}
     >
       {Platform.OS !== "web" ? (
         <Text
           style={[textStyle, styles.measurementText]}
           numberOfLines={1}
           accessible={false}
-          onTextLayout={(event) => {
-            const lines = event.nativeEvent.lines;
-            const width = lines[0]?.width;
-            if (width != null) setTextMeasurement({ text, width });
-          }}
+          onTextLayout={handleTextLayout}
         >
           {text}
         </Text>

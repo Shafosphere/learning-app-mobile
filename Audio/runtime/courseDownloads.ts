@@ -1,4 +1,5 @@
 import { getAudioCourse, getAudioPack } from "./catalog";
+import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 import { cancelPack, confirmPackDownload, downloadPack, getPackDownload, refreshPack, type PackDownload } from "./packDownloads";
 
 export type CourseDownload = PackDownload & { confirmationPack: string | null };
@@ -39,7 +40,12 @@ export function getCourseDownload(slug: string): CourseDownload {
   return snapshot;
 }
 export async function refreshCourse(slug: string) {
-  await Promise.all(required(slug).map(refreshPack));
+  recordCourseActivationEvent("course.refresh.start", { slug });
+  try {
+    await Promise.all(required(slug).map(refreshPack));
+  } finally {
+    recordCourseActivationEvent("course.refresh.end", { slug });
+  }
 }
 export function downloadCourse(slug: string): Promise<void> {
   const existing = requests.get(slug);
