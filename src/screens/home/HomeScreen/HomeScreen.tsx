@@ -11,7 +11,7 @@ import {
 import { useTranslation } from "react-i18next";
 import { renderHomeTile, type HomeTile } from "@/src/components/home/flatList";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./HomeScreen-styles";
 import { getHomeGridMetrics } from "./homeGridLayout";
 import {
@@ -25,7 +25,7 @@ export default function HomeScreen() {
   const styles = useStyles();
   const { height: screenHeight, isTabletLayout } = useDeviceLayout();
   const { fontScale } = useWindowDimensions();
-  const { fontScaleMultiplier } = useSettings();
+  const { fontScaleMultiplier } = useThemeSettings();
   const [viewport, setViewport] = useState<{
     width: number;
     height: number;

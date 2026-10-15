@@ -6,6 +6,8 @@
  * - create the React context
  * - compose domain-specific settings hooks
  * - expose the existing public API through useSettings()
+ * - expose theme/accessibility subscriptions through useThemeSettings()
+ * - expose pinned courses and selection actions independently of active selection
  *
  * Module map:
  * - settings/types.ts
@@ -51,7 +53,7 @@
  * - settings/useStatsDisplaySettings.ts
  *   Stats screen display preferences such as fire effect and bookshelf.
  */
-import { createContext, ReactNode, useCallback, useContext } from "react";
+import { createContext, ReactNode, useCallback, useContext, useMemo } from "react";
 import { Theme } from "../theme/theme";
 import { resetCustomReviewsForCourse } from "../db/sqlite/db";
 import { defaultValue } from "./settings/defaults";
@@ -82,6 +84,19 @@ export type {
 } from "./settings/types";
 
 const SettingsContext = createContext<SettingsContextValue>(defaultValue);
+export type ThemeSettingsContextValue = ReturnType<typeof useThemeAccessibilitySettings>;
+const ThemeSettingsContext = createContext<ThemeSettingsContextValue>(defaultValue);
+const PinnedOfficialCourseIdsContext = createContext<
+  SettingsContextValue["pinnedOfficialCourseIds"]
+>(defaultValue.pinnedOfficialCourseIds);
+export type CourseSelectionActionsContextValue = Pick<
+  SettingsContextValue,
+  "setActiveCustomCourseId"
+>;
+const CourseSelectionActionsContext = createContext<CourseSelectionActionsContextValue>({
+  setActiveCustomCourseId: defaultValue.setActiveCustomCourseId,
+});
+
 export const SettingsProvider: React.FC<{
   children: ReactNode;
   initialTheme?: Theme;
@@ -101,7 +116,12 @@ export const SettingsProvider: React.FC<{
     activeCourseIdx,
     activeCustomCourseId,
     pinnedOfficialCourseIds,
+    setActiveCustomCourseId,
   } = courseSelection;
+  const courseSelectionActions = useMemo<CourseSelectionActionsContextValue>(
+    () => ({ setActiveCustomCourseId }),
+    [setActiveCustomCourseId]
+  );
   const { reloadCourseAudioSettings, ...courseOverrides } = useCourseOverrideSettings({
     courses,
     activeCourseIdx,
@@ -186,9 +206,24 @@ export const SettingsProvider: React.FC<{
         resetOnboardingState,
       }}
     >
-      {children}
+      <ThemeSettingsContext.Provider value={theme}>
+        <PinnedOfficialCourseIdsContext.Provider value={pinnedOfficialCourseIds}>
+          <CourseSelectionActionsContext.Provider value={courseSelectionActions}>
+            {children}
+          </CourseSelectionActionsContext.Provider>
+        </PinnedOfficialCourseIdsContext.Provider>
+      </ThemeSettingsContext.Provider>
     </SettingsContext.Provider>
   );
 };
 
 export const useSettings = () => useContext(SettingsContext);
+
+/** Subscribe only to theme and accessibility, independent of course selection. */
+export const useThemeSettings = () => useContext(ThemeSettingsContext);
+
+/** Subscribe to pinned course IDs without observing the active course. */
+export const usePinnedOfficialCourseIds = () => useContext(PinnedOfficialCourseIdsContext);
+
+/** Selection actions stay stable across active-course and pinned-course updates. */
+export const useCourseSelectionActions = () => useContext(CourseSelectionActionsContext);

@@ -5,8 +5,8 @@ import {
   type NavbarStatKey,
   useNavbarStats,
 } from "@/src/contexts/NavbarStatsContext";
-import { useSettings } from "@/src/contexts/SettingsContext";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useThemeSettings } from "@/src/contexts/SettingsContext";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { Pressable, Text, useWindowDimensions, View } from "react-native";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
@@ -64,7 +64,7 @@ const getStatLabel = (statKey: NavbarStatKey, t: TFunction) => {
 
 const getStatAccent = (
   statKey: NavbarStatKey,
-  colors: ReturnType<typeof useSettings>["colors"],
+  colors: ReturnType<typeof useThemeSettings>["colors"],
 ) => {
   if (statKey === "mastered") return colors.my_yellow;
   if (statKey === "streak") return colors.my_red;
@@ -85,12 +85,12 @@ const renderStatIcon = (
   return <Ionicons name="trending-up-outline" size={size} color={color} />;
 };
 
-export default function NavbarStatsRotator({
+function NavbarStatsRotator({
   onPress,
 }: NavbarStatsRotatorProps) {
   const { t, i18n } = useTranslation();
   const styles = useStyles();
-  const { colors } = useSettings();
+  const { colors } = useThemeSettings();
   const { width: screenWidth } = useWindowDimensions();
   const buttonWidth = screenWidth < 375 ? 60 : 72;
   const {
@@ -370,3 +370,5 @@ export default function NavbarStatsRotator({
     </Pressable>
   );
 }
+
+export default memo(NavbarStatsRotator);

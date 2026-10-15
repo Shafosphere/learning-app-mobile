@@ -4,7 +4,10 @@ import { Image, ScrollView } from "react-native";
 import { OnboardingIntroLayout } from "../OnboardingIntroLayout";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
-jest.mock("@/src/contexts/SettingsContext", () => ({ useSettings: jest.fn() }));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 const mockedUseSettings = useSettings as jest.Mock;
 const aspectRatio = 1179 / 879;
 const props = {

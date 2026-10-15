@@ -1,4 +1,4 @@
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import React from "react";
 import { Text } from "react-native";
 import { useStyles } from "@/src/screens/review/courses/CoursesReviewScreen/CoursesScreen-styles";
@@ -9,7 +9,7 @@ interface DueCountBadgeProps {
 
 export const DueCountBadge = ({ count }: DueCountBadgeProps) => {
     const styles = useStyles();
-    const { colors } = useSettings();
+    const { colors } = useThemeSettings();
 
     return (
         <Text

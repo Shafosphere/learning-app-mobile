@@ -10,7 +10,10 @@ import { CourseSettingsSection, type CourseSettingsSectionProps } from "../Setti
 
 const mockT = jest.fn((key: string) => key);
 jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: mockT }) }));
-jest.mock("@/src/contexts/SettingsContext", () => ({ useSettings: jest.fn() }));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 
 beforeEach(() => {

@@ -141,7 +141,9 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
     ]
   );
 
-  return {
+  // Course selection and other settings share the provider, but must not
+  // change the theme context value when these preferences stay the same.
+  return useMemo(() => ({
     theme,
     colors,
     toggleTheme,
@@ -158,5 +160,22 @@ export function useThemeAccessibilitySettings(initialTheme: Theme) {
     setDominantHand,
     fontScaleMultiplier,
     accessibilityPreferences,
-  };
+  }), [
+    theme,
+    colors,
+    toggleTheme,
+    highContrastEnabled,
+    toggleHighContrast,
+    colorBlindMode,
+    setColorBlindMode,
+    toggleColorBlindMode,
+    largeFontEnabled,
+    toggleLargeFont,
+    correctionErrorMarkersEnabled,
+    toggleCorrectionErrorMarkers,
+    dominantHand,
+    setDominantHand,
+    fontScaleMultiplier,
+    accessibilityPreferences,
+  ]);
 }

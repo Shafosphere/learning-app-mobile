@@ -16,8 +16,8 @@ jest.mock("@expo/vector-icons/Ionicons", () => {
   return MockIonicons;
 });
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     theme: "light",
     colors: {
       background: "#f2f4f6",
@@ -40,8 +40,9 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
     },
     accessibilityPreferences: {},
     fontScaleMultiplier: 1,
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({

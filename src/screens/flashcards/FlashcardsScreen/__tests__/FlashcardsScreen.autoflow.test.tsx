@@ -18,9 +18,10 @@ import {
 import { useBoxesPersistenceSnapshot } from "@/src/hooks/useBoxesPersistenceSnapshot";
 import { DEBUG_EVENTS_STORAGE_KEY } from "@/src/services/debugEvents";
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/contexts/LearningStatsContext", () => ({
   useLearningStats: jest.fn(() => ({

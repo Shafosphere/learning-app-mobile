@@ -16,7 +16,10 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({ useSettings: jest.fn() }));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 jest.mock("@/src/services/onboardingCheckpoint", () => ({
   setOnboardingCheckpoint: jest.fn(() => Promise.resolve()),
 }));

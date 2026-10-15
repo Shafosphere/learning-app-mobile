@@ -7,7 +7,7 @@ import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute";
 import { usePopupAnchorSetter } from "@/src/contexts/PopupContext";
 import { useQuote } from "@/src/contexts/QuoteContext";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useSettings, useThemeSettings } from "@/src/contexts/SettingsContext";
 import { getCustomCourseById, type CustomCourseRecord } from "@/src/db/sqlite/db";
 import type { LanguageCourse } from "@/src/types/course";
 import { Image } from "expo-image";
@@ -15,6 +15,7 @@ import * as NavigationBar from "expo-navigation-bar";
 import { usePathname, useRouter } from "expo-router";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 import {
+  memo,
   useCallback,
   useEffect,
   useLayoutEffect,
@@ -57,26 +58,39 @@ const FLASHCARDS_PATHS = new Set([
   "/course-entry-settings",
 ]);
 
+// Broad provider updates may reach this connector. Only selected, stable values
+// reach the frame; course subscriptions and metadata state live in the buttons.
 export default function Navbar({ children }: NavbarProps) {
+  const { triggerQuote } = useQuote();
+  const { dueReviewCount, refreshDueReviewCount } = useDueReviews();
+  return (
+    <NavbarFrame
+      triggerQuote={triggerQuote}
+      dueReviewCount={dueReviewCount}
+      refreshDueReviewCount={refreshDueReviewCount}
+    >
+      {children}
+    </NavbarFrame>
+  );
+}
+
+type NavbarFrameProps = NavbarProps & {
+  triggerQuote: ReturnType<typeof useQuote>["triggerQuote"];
+  dueReviewCount: number;
+  refreshDueReviewCount: () => Promise<void>;
+};
+
+const NavbarFrame = memo(function NavbarFrame({
+  children,
+  triggerQuote,
+  dueReviewCount,
+  refreshDueReviewCount,
+}: NavbarFrameProps) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
-  const { triggerQuote } = useQuote();
   const setPopupAnchorX = usePopupAnchorSetter();
-  const {
-    theme,
-    toggleTheme,
-    activeCustomCourseId,
-    activeCustomCourseIdHydrated,
-    customCourseEntrySettingsSeenHydrated,
-    hasSeenCustomCourseEntrySettings,
-    selectedLevel,
-    activeCourse,
-    colors,
-    pinnedOfficialCourseIds,
-    setActiveCustomCourseId,
-  } = useSettings();
-  const { dueReviewCount, refreshDueReviewCount } = useDueReviews();
+  const { theme, toggleTheme, colors } = useThemeSettings();
   const styles = useStyles();
   const insets = useSafeAreaInsets();
   const statusBarHeight =
@@ -84,9 +98,6 @@ export default function Navbar({ children }: NavbarProps) {
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
   const { width: screenWidth } = useWindowDimensions();
-  const [customCourse, setCustomCourse] = useState<CustomCourseRecord | null>(
-    null,
-  );
   const [mascotTapReaction, setMascotTapReaction] = useState({ id: 0, rage: false });
 
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
@@ -139,11 +150,6 @@ export default function Navbar({ children }: NavbarProps) {
     };
   }, [collapseTopBar, layoutTransition, topBarVisibility]);
 
-  const displayedCustomCourse =
-    activeCustomCourseId != null ? customCourse : null;
-  const displayedBuiltinCourse =
-    activeCustomCourseId == null ? (activeCourse as LanguageCourse | null) : null;
-
   useEffect(() => {
     if (Platform.OS !== "android") {
       return;
@@ -187,108 +193,6 @@ export default function Navbar({ children }: NavbarProps) {
     };
   }, [setPopupAnchorX]);
 
-  useEffect(() => {
-    let isMounted = true;
-
-    if (activeCustomCourseId == null) {
-      setCustomCourse(null);
-      return () => {
-        isMounted = false;
-      };
-    }
-
-    getCustomCourseById(activeCustomCourseId)
-      .then((course) => {
-        if (isMounted) {
-          setCustomCourse(course);
-        }
-      })
-      .catch((error) => {
-        console.error("Failed to load active custom course", error);
-        if (isMounted) {
-          setCustomCourse(null);
-        }
-      });
-
-    return () => {
-      isMounted = false;
-    };
-  }, [activeCustomCourseId]);
-
-  const courseFlagSource = useMemo(() => {
-    if (!displayedBuiltinCourse?.sourceLang) {
-      return undefined;
-    }
-
-    return getFlagSource(displayedBuiltinCourse.sourceLang);
-  }, [displayedBuiltinCourse]);
-
-  const customCourseFlagSource = useMemo(() => {
-    if (!displayedCustomCourse?.slug) {
-      return undefined;
-    }
-
-    const manifest = OFFICIAL_PACKS.find(
-      (pack) => pack.slug === displayedCustomCourse.slug,
-    );
-    const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
-    if (!flagLang) {
-      return undefined;
-    }
-
-    return getFlagSource(flagLang);
-  }, [displayedCustomCourse]);
-
-  const courseAccessibilityLabel = useMemo(() => {
-    if (displayedCustomCourse) {
-      return t(
-        "components.navbar.navbar.accessibilityLabel.kursValueOtworzPanelKursow",
-        {
-          course: displayedCustomCourse.name,
-        },
-      );
-    }
-
-    if (
-      displayedBuiltinCourse?.sourceLang &&
-      displayedBuiltinCourse?.targetLang
-    ) {
-      const sourceLang = displayedBuiltinCourse.sourceLang.toUpperCase();
-      const targetLang = displayedBuiltinCourse.targetLang.toUpperCase();
-
-      if (selectedLevel) {
-        return t(
-          "components.navbar.navbar.accessibilityLabel.kursValueDoValuePoziomValueOtworzPanelKursow",
-          {
-            sourceLang,
-            targetLang,
-            level: selectedLevel,
-          },
-        );
-      }
-
-      return t(
-        "components.navbar.navbar.accessibilityLabel.kursValueDoValueOtworzPanelKursow",
-        {
-          sourceLang,
-          targetLang,
-        },
-      );
-    }
-
-    return t(
-      "components.navbar.navbar.accessibilityLabel.wybierzKursJezykowy",
-    );
-  }, [displayedBuiltinCourse, displayedCustomCourse, selectedLevel, t]);
-
-  const courseIconProps = useMemo(() => {
-    if (!displayedCustomCourse) return null;
-    return resolveCourseIconProps(
-      displayedCustomCourse.iconId,
-      displayedCustomCourse.iconColor ?? colors.headline,
-    );
-  }, [displayedCustomCourse, colors.headline]);
-
   const handleLogoPress = useCallback(() => {
     const now = Date.now();
     const withinWindow = now - logoTapRef.current.ts < 2000;
@@ -315,78 +219,6 @@ export default function Navbar({ children }: NavbarProps) {
     router.push("/");
   }, [pathname, router, triggerQuote]);
 
-  const courseGraphic = displayedCustomCourse ? (
-    <View style={styles.customCourseIconWrapper}>
-      {courseIconProps?.mainImageSource ? (
-        <Image
-          source={courseIconProps.mainImageSource}
-          style={styles.customCourseMainImage}
-          contentFit="contain"
-        />
-      ) : courseIconProps?.icon ? (
-        <courseIconProps.icon.Component
-          name={courseIconProps.icon.name as never}
-          size={30}
-          color={courseIconProps.icon.color}
-        />
-      ) : (
-        <Ionicons
-          name="person-circle-outline"
-          size={30}
-          color={colors.headline}
-        />
-      )}
-      {customCourseFlagSource ? (
-        <Image
-          source={customCourseFlagSource}
-          style={styles.customCourseFlag}
-        />
-      ) : null}
-    </View>
-  ) : courseFlagSource ? (
-    <Image source={courseFlagSource} style={styles.courseFlag} />
-  ) : (
-    <Ionicons name="person-circle-outline" size={24} color={colors.headline} />
-  );
-
-  const handlePadPress = async () => {
-    if (FLASHCARDS_PATHS.has(pathname) || !activeCustomCourseIdHydrated) {
-      return;
-    }
-
-    if (activeCustomCourseId != null) {
-      const route = getCoursePlayRoute(
-        activeCustomCourseId,
-        customCourseEntrySettingsSeenHydrated,
-        hasSeenCustomCourseEntrySettings,
-      );
-      if (route) router.push(route);
-      return;
-    }
-
-    if (pinnedOfficialCourseIds.length > 0) {
-      if (!customCourseEntrySettingsSeenHydrated) return;
-      const firstPinned = pinnedOfficialCourseIds[0];
-      await setActiveCustomCourseId(firstPinned);
-      const route = getCoursePlayRoute(
-        firstPinned,
-        customCourseEntrySettingsSeenHydrated,
-        hasSeenCustomCourseEntrySettings,
-      );
-      if (route) router.push(route);
-      return;
-    }
-
-    const hasCourse =
-      activeCourse?.sourceLangId != null && activeCourse?.targetLangId != null;
-
-    if (hasCourse && selectedLevel) {
-      router.push("/flashcards");
-      return;
-    }
-
-    router.push("/coursepanel");
-  };
   useEffect(() => {
     let cancelled = false;
     void (async () => {
@@ -397,6 +229,8 @@ export default function Navbar({ children }: NavbarProps) {
       cancelled = true;
     };
   }, [pathname, refreshDueReviewCount]);
+
+  const handleStatsPress = useCallback(() => router.push("/stats"), [router]);
 
   const handleReviewPress = () => {
     router.dismissTo("/review");
@@ -464,38 +298,12 @@ export default function Navbar({ children }: NavbarProps) {
             >
               <NavbarMascot tapReaction={mascotTapReaction} />
             </TouchableOpacity>
-            <CoachmarkAnchor
-              id="flashcards-course-button"
-              shape="rect"
-              radius={18}
-              style={styles.courseAnchor}
-            >
-              <TouchableOpacity
-                onPress={() => router.push("/coursepanel")}
-                style={styles.courseButton}
-                accessibilityRole="button"
-                accessibilityLabel={courseAccessibilityLabel}
-              >
-                {courseGraphic}
-                {displayedCustomCourse ? (
-                  <CourseTitleMarquee
-                    text={displayedCustomCourse.name}
-                    containerStyle={styles.courseName}
-                    textStyle={styles.courseNameText}
-                  />
-                ) : null}
-                {displayedBuiltinCourse && selectedLevel ? (
-                  <Text style={styles.courseLevel} allowFontScaling>
-                    {selectedLevel}
-                  </Text>
-                ) : null}
-              </TouchableOpacity>
-            </CoachmarkAnchor>
+            <ActiveCourseButton />
           </View>
 
           <View style={styles.rightGroup}>
             <CoachmarkAnchor id="flashcards-stats-button" shape="rect" radius={18}>
-              <NavbarStatsRotator onPress={() => router.push("/stats")} />
+              <NavbarStatsRotator onPress={handleStatsPress} />
             </CoachmarkAnchor>
             <CoachmarkAnchor id="flashcards-theme-button" shape="rect" radius={18}>
               <Pressable
@@ -593,27 +401,7 @@ export default function Navbar({ children }: NavbarProps) {
               <Foundation name="home" size={28} color={colors.headline} />
             </Pressable>
 
-            <Pressable
-              style={({ pressed }) => [
-                styles.bottomCenterButton,
-                pressed && styles.bottomIconButtonPressed,
-              ]}
-              onPress={handlePadPress}
-              accessibilityRole="button"
-              accessibilityLabel={t(
-                "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"
-              )}
-            >
-              <CoachmarkAnchor
-                id="flashcards-game-button"
-                shape="rect"
-                radius={24}
-                style={styles.bottomCoachmarkOverlay}
-              >
-                <View collapsable={false} style={styles.bottomCoachmarkTarget} />
-              </CoachmarkAnchor>
-              <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
-            </Pressable>
+            <CoursePlayButton />
 
             <Pressable
               style={({ pressed }) => [
@@ -670,4 +458,274 @@ export default function Navbar({ children }: NavbarProps) {
     </NavbarLayoutTransitionContext.Provider>
     </NavbarLayoutContext.Provider>
   );
-}
+});
+
+const ActiveCourseButton = memo(function ActiveCourseButton() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const { activeCustomCourseId, activeCourse, selectedLevel } = useSettings();
+  const { colors } = useThemeSettings();
+  const styles = useStyles();
+  const [loaded, setLoaded] = useState<{
+    courseId: number | null;
+    course: CustomCourseRecord | null;
+  }>({ courseId: activeCustomCourseId, course: null });
+  const [editRevision, setEditRevision] = useState(0);
+  const previousLocation = useRef({ pathname, courseId: activeCustomCourseId });
+
+  // Reset during selection render, so A -> B -> A cannot reuse A's old row
+  // while its new request is pending. This state belongs only to this button.
+  if (loaded.courseId !== activeCustomCourseId) {
+    setLoaded({ courseId: activeCustomCourseId, course: null });
+  }
+  const customCourse = loaded.courseId === activeCustomCourseId ? loaded.course : null;
+  const displayedCustomCourse =
+    activeCustomCourseId != null ? customCourse : null;
+  const displayedBuiltinCourse =
+    activeCustomCourseId == null ? (activeCourse as LanguageCourse | null) : null;
+
+  useEffect(() => {
+    const previous = previousLocation.current;
+    previousLocation.current = { pathname, courseId: activeCustomCourseId };
+    if (
+      previous.pathname === "/editcourse" && pathname !== "/editcourse" &&
+      previous.courseId === activeCustomCourseId && activeCustomCourseId != null
+    ) {
+      setEditRevision((revision) => revision + 1);
+    }
+  }, [pathname, activeCustomCourseId]);
+
+  useEffect(() => {
+    if (activeCustomCourseId == null) return;
+    let cancelled = false;
+    getCustomCourseById(activeCustomCourseId)
+      .then((course) => {
+        if (!cancelled) setLoaded({ courseId: activeCustomCourseId, course });
+      })
+      .catch((error) => {
+        if (cancelled) return;
+        console.error("Failed to load active custom course", error);
+        setLoaded({ courseId: activeCustomCourseId, course: null });
+      });
+    return () => { cancelled = true; };
+  }, [activeCustomCourseId, editRevision]);
+
+  const courseFlagSource = useMemo(() => {
+    if (!displayedBuiltinCourse?.sourceLang) {
+      return undefined;
+    }
+
+    return getFlagSource(displayedBuiltinCourse.sourceLang);
+  }, [displayedBuiltinCourse]);
+
+  const customCourseFlagSource = useMemo(() => {
+    if (!displayedCustomCourse?.slug) {
+      return undefined;
+    }
+
+    const manifest = OFFICIAL_PACKS.find(
+      (pack) => pack.slug === displayedCustomCourse.slug,
+    );
+    const flagLang = manifest?.smallFlag ?? manifest?.sourceLang;
+    if (!flagLang) {
+      return undefined;
+    }
+
+    return getFlagSource(flagLang);
+  }, [displayedCustomCourse]);
+
+  const courseAccessibilityLabel = useMemo(() => {
+    if (displayedCustomCourse) {
+      return t(
+        "components.navbar.navbar.accessibilityLabel.kursValueOtworzPanelKursow",
+        {
+          course: displayedCustomCourse.name,
+        },
+      );
+    }
+
+    if (
+      displayedBuiltinCourse?.sourceLang &&
+      displayedBuiltinCourse?.targetLang
+    ) {
+      const sourceLang = displayedBuiltinCourse.sourceLang.toUpperCase();
+      const targetLang = displayedBuiltinCourse.targetLang.toUpperCase();
+
+      if (selectedLevel) {
+        return t(
+          "components.navbar.navbar.accessibilityLabel.kursValueDoValuePoziomValueOtworzPanelKursow",
+          {
+            sourceLang,
+            targetLang,
+            level: selectedLevel,
+          },
+        );
+      }
+
+      return t(
+        "components.navbar.navbar.accessibilityLabel.kursValueDoValueOtworzPanelKursow",
+        {
+          sourceLang,
+          targetLang,
+        },
+      );
+    }
+
+    return t(
+      "components.navbar.navbar.accessibilityLabel.wybierzKursJezykowy",
+    );
+  }, [displayedBuiltinCourse, displayedCustomCourse, selectedLevel, t]);
+
+  const courseIconProps = useMemo(() => {
+    if (!displayedCustomCourse) return null;
+    return resolveCourseIconProps(
+      displayedCustomCourse.iconId,
+      displayedCustomCourse.iconColor ?? colors.headline,
+    );
+  }, [displayedCustomCourse, colors.headline]);
+
+  const courseGraphic = displayedCustomCourse ? (
+    <View style={styles.customCourseIconWrapper}>
+      {courseIconProps?.mainImageSource ? (
+        <Image
+          source={courseIconProps.mainImageSource}
+          style={styles.customCourseMainImage}
+          contentFit="contain"
+        />
+      ) : courseIconProps?.icon ? (
+        <courseIconProps.icon.Component
+          name={courseIconProps.icon.name as never}
+          size={30}
+          color={courseIconProps.icon.color}
+        />
+      ) : (
+        <Ionicons
+          name="person-circle-outline"
+          size={30}
+          color={colors.headline}
+        />
+      )}
+      {customCourseFlagSource ? (
+        <Image
+          source={customCourseFlagSource}
+          style={styles.customCourseFlag}
+        />
+      ) : null}
+    </View>
+  ) : courseFlagSource ? (
+    <Image source={courseFlagSource} style={styles.courseFlag} />
+  ) : (
+    <Ionicons name="person-circle-outline" size={24} color={colors.headline} />
+  );
+
+  return (
+    <CoachmarkAnchor
+      id="flashcards-course-button"
+      shape="rect"
+      radius={18}
+      style={styles.courseAnchor}
+    >
+      <TouchableOpacity
+        onPress={() => router.push("/coursepanel")}
+        style={styles.courseButton}
+        accessibilityRole="button"
+        accessibilityLabel={courseAccessibilityLabel}
+      >
+        {courseGraphic}
+        {displayedCustomCourse ? (
+          <CourseTitleMarquee
+            text={displayedCustomCourse.name}
+            containerStyle={styles.courseName}
+            textStyle={styles.courseNameText}
+          />
+        ) : null}
+        {displayedBuiltinCourse && selectedLevel ? (
+          <Text style={styles.courseLevel} allowFontScaling>
+            {selectedLevel}
+          </Text>
+        ) : null}
+      </TouchableOpacity>
+    </CoachmarkAnchor>
+  );
+});
+
+const CoursePlayButton = memo(function CoursePlayButton() {
+  const { t } = useTranslation();
+  const router = useRouter();
+  const pathname = usePathname();
+  const styles = useStyles();
+  const { colors } = useThemeSettings();
+  const {
+    activeCustomCourseId,
+    activeCustomCourseIdHydrated,
+    customCourseEntrySettingsSeenHydrated,
+    hasSeenCustomCourseEntrySettings,
+    selectedLevel,
+    activeCourse,
+    pinnedOfficialCourseIds,
+    setActiveCustomCourseId,
+  } = useSettings();
+  const handlePadPress = async () => {
+    if (FLASHCARDS_PATHS.has(pathname) || !activeCustomCourseIdHydrated) {
+      return;
+    }
+
+    if (activeCustomCourseId != null) {
+      const route = getCoursePlayRoute(
+        activeCustomCourseId,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+      );
+      if (route) router.push(route);
+      return;
+    }
+
+    if (pinnedOfficialCourseIds.length > 0) {
+      if (!customCourseEntrySettingsSeenHydrated) return;
+      const firstPinned = pinnedOfficialCourseIds[0];
+      await setActiveCustomCourseId(firstPinned);
+      const route = getCoursePlayRoute(
+        firstPinned,
+        customCourseEntrySettingsSeenHydrated,
+        hasSeenCustomCourseEntrySettings,
+      );
+      if (route) router.push(route);
+      return;
+    }
+
+    const hasCourse =
+      activeCourse?.sourceLangId != null && activeCourse?.targetLangId != null;
+
+    if (hasCourse && selectedLevel) {
+      router.push("/flashcards");
+      return;
+    }
+
+    router.push("/coursepanel");
+  };
+
+  return (
+    <Pressable
+      style={({ pressed }) => [
+        styles.bottomCenterButton,
+        pressed && styles.bottomIconButtonPressed,
+      ]}
+      onPress={handlePadPress}
+      accessibilityRole="button"
+      accessibilityLabel={t(
+        "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"
+      )}
+    >
+      <CoachmarkAnchor
+        id="flashcards-game-button"
+        shape="rect"
+        radius={24}
+        style={styles.bottomCoachmarkOverlay}
+      >
+        <View collapsable={false} style={styles.bottomCoachmarkTarget} />
+      </CoachmarkAnchor>
+      <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
+    </Pressable>
+  );
+});

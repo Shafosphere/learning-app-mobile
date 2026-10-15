@@ -35,8 +35,8 @@ jest.mock("@react-navigation/native", () => {
   };
 });
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     statsBookshelfEnabled: false,
     colors: {
       background: "#fff",
@@ -47,8 +47,9 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
       my_red: "#ff5470",
       my_yellow: "#fde24f",
     },
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
   useNavbarStats: jest.fn(),

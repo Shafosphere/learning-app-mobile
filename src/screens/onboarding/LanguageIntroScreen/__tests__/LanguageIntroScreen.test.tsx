@@ -50,9 +50,10 @@ jest.mock("@/src/constants/languageFlags", () => ({
   getFlagSource: jest.fn(() => ({ uri: "flag" })),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/services/onboardingCheckpoint", () => ({
   getOnboardingCheckpoint: jest.fn(),

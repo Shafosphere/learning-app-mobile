@@ -50,13 +50,14 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     colors: { background: "#eee", secondBackground: "#fff", headline: "#123", paragraph: "#456" },
     accessibilityPreferences: {},
     fontScaleMultiplier: mockFontScaleMultiplier,
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 function measureGrid(width: number, height: number) {
   fireEvent(screen.getByTestId("home-grid-viewport"), "layout", {

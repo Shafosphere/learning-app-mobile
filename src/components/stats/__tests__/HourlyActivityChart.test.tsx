@@ -11,8 +11,8 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     colors: {
       secondBackground: "#fff",
       headline: "#111",
@@ -21,8 +21,9 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
     },
     accessibilityPreferences: {},
     fontScaleMultiplier: 1,
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 describe("LearningTimeCard", () => {
   it("shows whole hours and remaining minutes without decimal values", () => {

@@ -10,9 +10,10 @@ import {
   getCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getCustomCourseMasteryProgress: jest.fn(),

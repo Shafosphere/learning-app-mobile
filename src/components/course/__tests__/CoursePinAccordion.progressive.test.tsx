@@ -6,7 +6,8 @@ import pl from "@/src/locales/pl.json";
 
 jest.mock("@/src/contexts/SettingsContext", () => {
   const { themeMap } = jest.requireActual<typeof import("@/src/theme/theme")>("@/src/theme/theme");
-  return { useSettings: () => ({ colors: themeMap.light, fontScaleMultiplier: 1.6, accessibilityPreferences: {} }) };
+  const useSettings = () => ({ colors: themeMap.light, fontScaleMultiplier: 1.6, accessibilityPreferences: {} });
+  return { useSettings, useThemeSettings: useSettings };
 });
 jest.mock("react-i18next", () => {
   const pl = jest.requireActual<typeof import("@/src/locales/pl.json")>("@/src/locales/pl.json");

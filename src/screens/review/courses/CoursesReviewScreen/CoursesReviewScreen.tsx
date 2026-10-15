@@ -13,7 +13,7 @@ import {
 } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useCourseSelectionActions, usePinnedOfficialCourseIds } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
   getCustomCoursesWithCardCounts,
@@ -38,10 +38,8 @@ export default function CoursesReviewScreen() {
   const autoScrollRevealTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const currentScrollYRef = useRef(0);
   const pendingScrollYRef = useRef<number | null>(null);
-  const {
-    setActiveCustomCourseId,
-    pinnedOfficialCourseIds,
-  } = useSettings();
+  const { setActiveCustomCourseId } = useCourseSelectionActions();
+  const pinnedOfficialCourseIds = usePinnedOfficialCourseIds();
   const [customCourses, setCustomCourses] = useState<CustomCourseSummary[]>([]);
   const [customCounts, setCustomCounts] = useState<Record<number, number>>({});
   const [officialCourses, setOfficialCourses] = useState<

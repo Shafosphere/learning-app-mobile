@@ -5,7 +5,7 @@ import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 
 jest.mock("@/src/screens/home/HomeScreen/HomeScreen", () => "HomeScreen");
 jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+  useThemeSettings: () => ({
     colors: {
       background: "#fff",
     },

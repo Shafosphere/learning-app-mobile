@@ -2,7 +2,7 @@ import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import CoursesReviewScreen from "@/src/screens/review/courses/CoursesReviewScreen/CoursesReviewScreen";
-import { useSettings } from "@/src/contexts/SettingsContext";
+import { useCourseSelectionActions, usePinnedOfficialCourseIds } from "@/src/contexts/SettingsContext";
 import {
   countDueCustomReviews,
   getCustomCoursesWithCardCounts,
@@ -26,7 +26,8 @@ jest.mock("@react-navigation/native", () => ({
 }));
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
+  useCourseSelectionActions: jest.fn(),
+  usePinnedOfficialCourseIds: jest.fn(() => []),
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -77,7 +78,8 @@ jest.mock("@/src/components/review/DueCountBadge", () => ({
   DueCountBadge: ({ count }: { count: number }) => `due:${count}`,
 }));
 
-const mockedUseSettings = useSettings as jest.Mock;
+const mockedUseCourseSelectionActions = useCourseSelectionActions as jest.Mock;
+const mockedUsePinnedOfficialCourseIds = usePinnedOfficialCourseIds as jest.Mock;
 const mockedCountDueCustomReviews = countDueCustomReviews as jest.Mock;
 const mockedGetCustomCoursesWithCardCounts = getCustomCoursesWithCardCounts as jest.Mock;
 const mockedGetOfficialCustomCoursesWithCardCounts =
@@ -87,9 +89,23 @@ const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 describe("CoursesReviewScreen onboarding", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockedUseSettings.mockReturnValue({
+    mockedUsePinnedOfficialCourseIds.mockReturnValue([]);
+    mockedUseCoachmarkFlow.mockReturnValue({
+      isActive: false,
+      isPendingStart: false,
+      hasSeen: false,
+      isReady: true,
+      currentStep: null,
+      currentIndex: 0,
+      totalSteps: 6,
+      canGoBack: false,
+      canGoNext: true,
+      goBack: jest.fn(),
+      goNext: jest.fn(),
+      advanceByEvent: jest.fn(() => Promise.resolve(true)),
+    });
+    mockedUseCourseSelectionActions.mockReturnValue({
       setActiveCustomCourseId: jest.fn(() => Promise.resolve()),
-      pinnedOfficialCourseIds: [],
     });
     mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
       {
@@ -132,9 +148,8 @@ describe("CoursesReviewScreen onboarding", () => {
   it("advances the last step only after clicking the first due course", async () => {
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     const advanceByEvent = jest.fn(() => Promise.resolve(true));
-    mockedUseSettings.mockReturnValue({
+    mockedUseCourseSelectionActions.mockReturnValue({
       setActiveCustomCourseId,
-      pinnedOfficialCourseIds: [],
     });
     mockedUseCoachmarkFlow.mockReturnValue({
       isActive: true,
@@ -177,11 +192,11 @@ describe("CoursesReviewScreen onboarding", () => {
   });
 
   it("continues onboarding when the first visible due course is official", async () => {
+    mockedUsePinnedOfficialCourseIds.mockReturnValue([21]);
     const setActiveCustomCourseId = jest.fn(() => Promise.resolve());
     const advanceByEvent = jest.fn(() => Promise.resolve(true));
-    mockedUseSettings.mockReturnValue({
+    mockedUseCourseSelectionActions.mockReturnValue({
       setActiveCustomCourseId,
-      pinnedOfficialCourseIds: [21],
     });
     mockedGetCustomCoursesWithCardCounts.mockResolvedValue([
       {
@@ -243,6 +258,37 @@ describe("CoursesReviewScreen onboarding", () => {
     expect(mockPush).toHaveBeenCalledWith({
       pathname: "/review/reviewflashcards",
       params: { courseId: 21, onboarding: "review-flashcards" },
+    });
+  });
+
+  it("uses the latest selection action and waits for activation before navigating", async () => {
+    const previousAction = jest.fn(() => Promise.resolve());
+    mockedUseCourseSelectionActions.mockReturnValue({
+      setActiveCustomCourseId: previousAction,
+    });
+    const screen = render(<CoursesReviewScreen />);
+    await waitFor(() => expect(screen.getByText("Custom review")).toBeTruthy());
+
+    let finishActivation!: () => void;
+    const latestAction = jest.fn(() => new Promise<void>((resolve) => {
+      finishActivation = resolve;
+    }));
+    mockedUseCourseSelectionActions.mockReturnValue({
+      setActiveCustomCourseId: latestAction,
+    });
+    screen.rerender(<CoursesReviewScreen />);
+
+    await act(async () => {
+      fireEvent.press(screen.getByText("Custom review"));
+    });
+    expect(previousAction).not.toHaveBeenCalled();
+    expect(latestAction).toHaveBeenCalledWith(11);
+    expect(mockPush).not.toHaveBeenCalled();
+
+    await act(async () => finishActivation());
+    expect(mockPush).toHaveBeenCalledWith({
+      pathname: "/review/reviewflashcards",
+      params: { courseId: 11 },
     });
   });
 });

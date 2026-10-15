@@ -27,8 +27,8 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: () => ({
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = () => ({
     colors: {
       background: "#f2f4f6",
       secondBackground: "#ffffff",
@@ -45,8 +45,9 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
     },
     accessibilityPreferences: {},
     fontScaleMultiplier: 1,
-  }),
-}));
+  });
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/components/card/subcomponents/CardMathText", () => ({
   CardMathText: ({ text }: { text: string }) => {

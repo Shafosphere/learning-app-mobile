@@ -28,9 +28,10 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import type { CardProps } from "@/src/components/card/card-types";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/hooks/useDeviceLayout", () => ({
   useDeviceLayout: jest.fn(),

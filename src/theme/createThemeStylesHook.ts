@@ -1,4 +1,4 @@
-// src/contexts/createThemeStylesHook.ts
+// src/theme/createThemeStylesHook.ts
 import { useMemo } from "react";
 import {
   StyleSheet,
@@ -6,13 +6,13 @@ import {
   type TextStyle,
   type ViewStyle,
 } from "react-native";
-import { useSettings } from "../contexts/SettingsContext";
+import { useThemeSettings } from "../contexts/SettingsContext";
 import type { ThemeColors } from "./theme";
 
 type NamedStyles<T> = { [P in keyof T]: ViewStyle | TextStyle | ImageStyle };
 
 type AccessibilityPreferences = ReturnType<
-  typeof useSettings
+  typeof useThemeSettings
 >["accessibilityPreferences"];
 
 type StylesMap<T> = (
@@ -52,7 +52,7 @@ export function createThemeStylesHook<
 >(stylesMap: StylesMap<T>) {
   return function useStyles() {
     const { colors, accessibilityPreferences, fontScaleMultiplier } =
-      useSettings();
+      useThemeSettings();
 
     return useMemo(
       () =>

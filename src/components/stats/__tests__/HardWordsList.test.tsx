@@ -10,9 +10,10 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 jest.mock("@expo/vector-icons/MaterialCommunityIcons", () => () => null);
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => {
+  const useSettings = jest.fn();
+  return { useSettings, useThemeSettings: useSettings };
+});
 
 jest.mock("@/src/db/sqlite/db", () => ({
   getHardFlashcards: jest.fn(),
