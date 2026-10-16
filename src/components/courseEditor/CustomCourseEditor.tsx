@@ -1,4 +1,12 @@
-import { useCallback, useEffect, useMemo, useState } from "react";
+import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
+import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
+import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
+import { useCourseResetActions } from "./courseSettings/useCourseResetActions";
+import { resolveCourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
+import { SettingsTabBar } from "@/src/components/settings/SettingsTabBar";
+import { useCourseSettingsTabs } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -27,6 +35,7 @@ import {
   getCustomCourseNameCandidates,
   getCustomFlashcards,
   resetCustomReviewsForCourse,
+  setCustomCourseReviewsEnabled,
   saveCustomCourseEdits,
   updateCustomCourse,
 } from "@/src/db/sqlite/db";
@@ -91,6 +100,8 @@ export default function CustomCourseEditor({
     getCustomCourseAudioSettings,
     setCustomCourseAudioSettings,
     courseAudioSettingsHydrated,
+    courseSettingsResetHydrated,
+    resetCustomCourseSettings,
     getCustomCourseBoxZeroAnswerSide,
     setCustomCourseBoxZeroAnswerSide,
     getCustomCourseBoxZeroEnabled,
@@ -232,9 +243,6 @@ export default function CustomCourseEditor({
   const [loadError, setLoadError] = useState<string | null>(null);
   const [existingCourses, setExistingCourses] = useState<CourseNameCandidate[]>([]);
   const [isOfficialCourse, setIsOfficialCourse] = useState(lockAppearance);
-  const [resettingBoxes, setResettingBoxes] = useState(false);
-  const [resettingReviews, setResettingReviews] = useState(false);
-  const [resettingAll, setResettingAll] = useState(false);
   const customBoxesStorageKey = useMemo(
     () =>
       `customBoxes:${makeScopeId(
@@ -271,13 +279,18 @@ export default function CustomCourseEditor({
   );
   const imageSizeOptionsEnabled =
     courseCardSize === "large" && courseHasImageCards;
-  const imageSizeOptions: FlashcardsImageSize[] = [
+  const imageSizeOptions: FlashcardsImageSize[] = useMemo(() => ([
     "dynamic",
     "small",
     "medium",
     "large",
     "very_large",
-  ];
+  ]), []);
+  const categoryTabs = useCourseSettingsTabs({
+    scopeKey: courseId,
+    hasAudio: true,
+    hasResetActions: true,
+  });
   const shouldShowTabSwitcher = !isOfficialCourse;
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError && activeTab === "content";
@@ -408,176 +421,100 @@ export default function CustomCourseEditor({
     });
   };
 
-  const handleCourseBoxZeroToggle = async (value: boolean) => {
-    setCourseBoxZeroEnabled(value);
-    await setCustomCourseBoxZeroEnabled(courseId, value);
-  };
+  const persistCourseSetting = useCallback(async (save: () => Promise<void>) => {
+    try {
+      await save();
+    } catch (error) {
+      console.error("Failed to save course setting", error);
+      setPopup({
+        message: t("courseCreator.customEditor.popups.saveFailed"),
+        color: "angry",
+        duration: 4000,
+      });
+    }
+  }, [setPopup, t]);
 
-  const handleCourseAutoflowToggle = async (value: boolean) => {
-    setCourseAutoflowEnabled(value);
-    await setCustomCourseAutoflowEnabled(courseId, value);
-  };
+  const handleCourseBoxZeroToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseBoxZeroEnabled(courseId, value));
+  }, [courseId, setCustomCourseBoxZeroEnabled, persistCourseSetting]);
 
-  const handleCourseSkipCorrectionToggle = async (value: boolean) => {
-    setCourseSkipCorrectionEnabled(value);
-    await setCustomCourseSkipCorrectionEnabled(courseId, value);
-  };
+  const handleCourseAutoflowToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseAutoflowEnabled(courseId, value));
+  }, [courseId, setCustomCourseAutoflowEnabled, persistCourseSetting]);
 
-  const handleCourseShowExplanationToggle = async (value: boolean) => {
-    setCourseShowExplanationEnabled(value);
-    await setCustomCourseShowExplanationEnabled(courseId, value);
-  };
+  const handleCourseSkipCorrectionToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseSkipCorrectionEnabled(courseId, value));
+  }, [courseId, setCustomCourseSkipCorrectionEnabled, persistCourseSetting]);
 
-  const handleCourseExplanationOnlyOnWrongToggle = async (value: boolean) => {
-    setCourseExplanationOnlyOnWrong(value);
-    await setCustomCourseExplanationOnlyOnWrong(courseId, value);
-  };
+  const handleCourseShowExplanationToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseShowExplanationEnabled(courseId, value));
+  }, [courseId, setCustomCourseShowExplanationEnabled, persistCourseSetting]);
 
-  const handleCourseCardSizeChange = async (value: FlashcardsCardSize) => {
-    setCourseCardSize(value);
-    await setCustomCourseCardSize(courseId, value);
-  };
+  const handleCourseExplanationOnlyOnWrongToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseExplanationOnlyOnWrong(courseId, value));
+  }, [courseId, setCustomCourseExplanationOnlyOnWrong, persistCourseSetting]);
 
-  const handleCourseImageSizeChange = async (value: FlashcardsImageSize) => {
-    setCourseImageSize(value);
-    await setCustomCourseImageSize(courseId, value);
-  };
+  const handleCourseCardSizeChange = useCallback(async (value: FlashcardsCardSize) => {
+    await persistCourseSetting(() => setCustomCourseCardSize(courseId, value));
+  }, [courseId, setCustomCourseCardSize, persistCourseSetting]);
 
-  const handleCourseImageFrameToggle = async (value: boolean) => {
-    setCourseImageFrameEnabled(value);
-    await setCustomCourseImageFrameEnabled(courseId, value);
-  };
+  const handleCourseImageSizeChange = useCallback(async (value: FlashcardsImageSize) => {
+    await persistCourseSetting(() => setCustomCourseImageSize(courseId, value));
+  }, [courseId, setCustomCourseImageSize, persistCourseSetting]);
 
-  const handleCourseTrueFalseButtonsVariantChange = async (
+  const handleCourseImageFrameToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setCustomCourseImageFrameEnabled(courseId, value));
+  }, [courseId, setCustomCourseImageFrameEnabled, persistCourseSetting]);
+
+  const handleCourseTrueFalseButtonsVariantChange = useCallback(async (
     value: TrueFalseButtonsVariant
   ) => {
-    setCourseTrueFalseButtonsVariant(value);
-    await setCustomCourseTrueFalseButtonsVariant(courseId, value);
-  };
+    await persistCourseSetting(() => setCustomCourseTrueFalseButtonsVariant(courseId, value));
+  }, [courseId, setCustomCourseTrueFalseButtonsVariant, persistCourseSetting]);
 
+  const skipCorrectionAttempt = useRef<number | null>(null);
   useEffect(() => {
-    if (courseIsTrueFalseOnly && !courseSkipCorrectionEnabled) {
+    if (!courseIsTrueFalseOnly) skipCorrectionAttempt.current = null;
+    if (courseIsTrueFalseOnly && !courseSkipCorrectionEnabled && skipCorrectionAttempt.current !== courseId) {
+      // Do not retry automatically on every rollback when storage is unavailable.
+      skipCorrectionAttempt.current = courseId;
       setCourseSkipCorrectionEnabled(true);
-      void setCustomCourseSkipCorrectionEnabled(courseId, true);
+      void persistCourseSetting(() => setCustomCourseSkipCorrectionEnabled(courseId, true));
     }
   }, [
     courseId,
     courseIsTrueFalseOnly,
     courseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
+    persistCourseSetting,
   ]);
 
-  const handleCourseReviewsToggle = (value: boolean) => {
+  const handleCourseReviewsToggle = useCallback((value: boolean) => {
     setReviewsEnabled(value);
-  };
+  }, [setReviewsEnabled]);
 
-  const performResetBoxes = async () => {
-    setResettingBoxes(true);
-    try {
-      await clearPersistedBoxesKeepProgress(customBoxesStorageKey);
-      Alert.alert(
-        t("courseCreator.customEditor.alerts.resetBoxesDoneTitle"),
-        t("courseCreator.customEditor.alerts.resetBoxesDoneMessage")
-      );
-    } catch {
-      Alert.alert(
-        t("app.status.error"),
-        t("courseCreator.customEditor.alerts.resetBoxesFailed")
-      );
-    } finally {
-      setResettingBoxes(false);
-    }
-  };
-
-  const handleResetBoxes = () => {
-    Alert.alert(
-      t("courseCreator.customEditor.alerts.resetBoxesConfirmTitle"),
-      t("courseCreator.customEditor.alerts.resetBoxesConfirmMessage"),
-      [
-        { text: t("app.actions.cancel"), style: "cancel" },
-        {
-          text: t("app.actions.clear"),
-          style: "destructive",
-          onPress: performResetBoxes,
-        },
-      ]
-    );
-  };
-
-  const performResetReviews = async () => {
-    setResettingReviews(true);
-    try {
-      const deleted = await resetCustomReviewsForCourse(courseId);
-      Alert.alert(
-        t("courseCreator.customEditor.alerts.resetReviewsDoneTitle"),
-        deleted > 0
-          ? t("courseCreator.customEditor.alerts.resetReviewsDoneMessage", {
-              count: deleted,
-            })
-          : t("courseCreator.customEditor.alerts.resetReviewsDoneEmpty")
-      );
-    } catch {
-      Alert.alert(
-        t("app.status.error"),
-        t("courseCreator.customEditor.alerts.resetReviewsFailed")
-      );
-    } finally {
-      setResettingReviews(false);
-    }
-  };
-
-  const handleResetReviews = () => {
-    Alert.alert(
-      t("courseCreator.customEditor.alerts.resetReviewsConfirmTitle"),
-      t("courseCreator.customEditor.alerts.resetReviewsConfirmMessage"),
-      [
-        { text: t("app.actions.cancel"), style: "cancel" },
-        {
-          text: t("app.actions.delete"),
-          style: "destructive",
-          onPress: performResetReviews,
-        },
-      ]
-    );
-  };
-
-  const performResetAll = async () => {
-    setResettingAll(true);
-    try {
+  const resetControls = useCourseResetActions({
+    scopeKey: courseId,
+    disabled: loading || isSaving || isDeleting || !courseSettingsResetHydrated,
+    onResetSettings: async () => {
+      const row = await getCustomCourseById(courseId);
+      if (!row) throw new Error("Course not found");
+      const pack = row.isOfficial ? OFFICIAL_PACKS.find((pack) => pack.slug === row.slug) : undefined;
+      if (row.isOfficial && !pack) throw new Error("Official course defaults not found");
+      const values = resolveCourseSettingsDefaults(pack, courseIsTrueFalseOnly);
+      await resetCustomCourseSettings(courseId, values);
+      await setCustomCourseReviewsEnabled(courseId, values.reviewsEnabled, { seedCompletedReviews: false });
+      setReviewsEnabled(values.reviewsEnabled);
+    },
+    onResetBoxes: () => clearPersistedBoxesKeepProgress(customBoxesStorageKey),
+    onResetReviews: () => resetCustomReviewsForCourse(courseId),
+    onResetAll: async () => {
       await AsyncStorage.removeItem(customBoxesStorageKey);
       await resetCustomReviewsForCourse(courseId);
       await clearCustomLearningEventsForCourse(courseId);
-      await clearCourseCompletionRun(courseId).catch((error) => {
-        console.warn("Failed to clear course completion run", error);
-      });
-      Alert.alert(
-        t("courseCreator.customEditor.alerts.resetAllDoneTitle"),
-        t("courseCreator.customEditor.alerts.resetAllDoneMessage")
-      );
-    } catch {
-      Alert.alert(
-        t("app.status.error"),
-        t("courseCreator.customEditor.alerts.resetAllFailed")
-      );
-    } finally {
-      setResettingAll(false);
-    }
-  };
-
-  const handleResetAll = () => {
-    Alert.alert(
-      t("courseCreator.customEditor.alerts.resetAllConfirmTitle"),
-      t("courseCreator.customEditor.alerts.resetAllConfirmMessage"),
-      [
-        { text: t("app.actions.cancel"), style: "cancel" },
-        {
-          text: t("app.actions.restore"),
-          style: "destructive",
-          onPress: performResetAll,
-        },
-      ]
-    );
-  };
+      await clearCourseCompletionRun(courseId);
+    },
+  });
 
   const handleDeleteCourse = () => {
     if (isOfficialCourse) {
@@ -726,244 +663,293 @@ export default function CustomCourseEditor({
     }
   };
 
-  return (
-    <View style={styles.container}>
-      <ScrollView
-        style={[
-          styles.scrollView,
-          useCenteredTabletLayout && styles.scrollViewTablet,
-        ]}
-        contentContainerStyle={[
-          styles.scrollContent,
-          shouldShowManualToolbar && styles.scrollContentWithManualToolbar,
-        ]}
-        keyboardShouldPersistTaps="handled"
-      >
-        {shouldShowTabSwitcher ? (
-          <View style={styles.topSection}>
-            <Text style={styles.topSectionTitle}>
-              {activeTab === "options"
-                ? t("courseCreator.customEditor.tabs.options")
-                : t("courseCreator.customEditor.tabs.content")}
-            </Text>
-            <SegmentedTabs
-              options={[
-                {
-                  key: "options",
-                  label: t("courseCreator.customEditor.tabs.optionsLabel"),
-                },
-                {
-                  key: "content",
-                  label: t("courseCreator.customEditor.tabs.contentLabel"),
-                },
-              ]}
-              value={activeTab}
-              onChange={setActiveTab}
-              accessibilityLabel={t("courseCreator.customEditor.tabs.a11y")}
-              containerStyle={styles.viewModeTabs}
+  const tabSwitcher = useMemo(() => (<>
+
+    {shouldShowTabSwitcher ? (
+      <View style={styles.topSection}>
+        <Text style={styles.topSectionTitle}>
+          {activeTab === "options"
+            ? t("courseCreator.customEditor.tabs.options")
+            : t("courseCreator.customEditor.tabs.content")}
+        </Text>
+        <SegmentedTabs
+          options={[
+            {
+              key: "options",
+              label: t("courseCreator.customEditor.tabs.optionsLabel"),
+            },
+            {
+              key: "content",
+              label: t("courseCreator.customEditor.tabs.contentLabel"),
+            },
+          ]}
+          value={activeTab}
+          onChange={(tab) => {
+            if (tab !== activeTab) {
+              setActiveTab(tab);
+              categoryTabs.pagerRef.current?.scrollToTop();
+            }
+          }}
+          accessibilityLabel={t("courseCreator.customEditor.tabs.a11y")}
+          containerStyle={styles.viewModeTabs}
+        />
+      </View>
+    ) : null}
+
+  </>), [
+    activeTab,
+    categoryTabs.pagerRef,
+    shouldShowTabSwitcher,
+    styles.topSection,
+    styles.topSectionTitle,
+    styles.viewModeTabs,
+    t,
+  ]);
+  const settingsScrollProps = useMemo(() => ({
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
+    contentContainerStyle: [styles.scrollContent, shouldShowManualToolbar && styles.scrollContentWithManualToolbar],
+    keyboardShouldPersistTaps: "handled" as const,
+  }), [
+    shouldShowManualToolbar,
+    styles.scrollContent,
+    styles.scrollContentWithManualToolbar,
+    styles.scrollView,
+    styles.scrollViewTablet,
+    useCenteredTabletLayout,
+  ]);
+  const courseSettingsProps = useMemo<CourseSettingsSectionProps>(() => ({
+    styles,
+    switchColors: {
+      thumb: colors.background,
+      trackFalse: colors.border,
+      trackTrue: colors.my_green,
+    },
+    colors,
+    audioSettings: getCustomCourseAudioSettings(courseId),
+    audioSettingsDisabled: !courseAudioSettingsHydrated,
+    showAudioLanguages: !isOfficialCourse,
+    onChangeAudioSettings: (value) => { void persistCourseSetting(() => setCustomCourseAudioSettings(courseId, value)); },
+    frontImageRole: getCustomCourseFrontImageRole(courseId),
+    frontImageRoleDisabled: !courseFrontImageRoleHydrated,
+    onChangeFrontImageRole: (value) => { void persistCourseSetting(() => setCustomCourseFrontImageRole(courseId, value)); },
+    letterHintSettings: getCustomCourseLetterHintSettings(courseId),
+    letterHintSettingsDisabled: !letterHintSettingsHydrated,
+    onChangeLetterHintSettings: (value) => { void persistCourseSetting(() => setCustomCourseLetterHintSettings(courseId, value)); },
+    boxZeroAnswerSide: courseBoxZeroAnswerSide,
+    onSelectBoxZeroAnswerSide: async (side) => {
+      await persistCourseSetting(() => setCustomCourseBoxZeroAnswerSide(courseId, side));
+    },
+    boxZeroEnabled: courseBoxZeroEnabled,
+    onToggleBoxZero: handleCourseBoxZeroToggle,
+    autoflowEnabled: courseAutoflowEnabled,
+    onToggleAutoflow: handleCourseAutoflowToggle,
+    reviewsEnabled,
+    onToggleReviews: handleCourseReviewsToggle,
+    showExplanationEnabled: courseShowExplanationEnabled,
+    onToggleShowExplanation: handleCourseShowExplanationToggle,
+    explanationOnlyOnWrong: courseExplanationOnlyOnWrong,
+    onToggleExplanationOnlyOnWrong:
+      handleCourseExplanationOnlyOnWrongToggle,
+    skipCorrectionEnabled: courseSkipCorrectionEnabled,
+    onToggleSkipCorrection: handleCourseSkipCorrectionToggle,
+    skipCorrectionLocked: courseIsTrueFalseOnly,
+    hideSkipCorrectionOption: courseIsTrueFalseOnly,
+    showTrueFalseButtonsVariant: false,
+    trueFalseButtonsVariant: courseTrueFalseButtonsVariant,
+    onSelectTrueFalseButtonsVariant:
+      handleCourseTrueFalseButtonsVariantChange,
+    cardSize: courseCardSize,
+    onSelectCardSize: handleCourseCardSizeChange,
+    showImageSizeOptions: courseHasImageCards,
+    imageSize: courseImageSize,
+    imageSizeOptions,
+    onSelectImageSize: handleCourseImageSizeChange,
+    imageSizeEnabled: imageSizeOptionsEnabled,
+    showImageFrameOption: courseHasImageCards,
+    imageFrameEnabled: courseImageFrameEnabled,
+    onToggleImageFrame: handleCourseImageFrameToggle,
+  }), [
+    colors,
+    courseAudioSettingsHydrated,
+    courseAutoflowEnabled,
+    courseBoxZeroAnswerSide,
+    courseBoxZeroEnabled,
+    courseCardSize,
+    courseExplanationOnlyOnWrong,
+    courseFrontImageRoleHydrated,
+    courseHasImageCards,
+    courseId,
+    courseImageFrameEnabled,
+    courseImageSize,
+    courseIsTrueFalseOnly,
+    courseShowExplanationEnabled,
+    courseSkipCorrectionEnabled,
+    courseTrueFalseButtonsVariant,
+    getCustomCourseAudioSettings,
+    getCustomCourseFrontImageRole,
+    getCustomCourseLetterHintSettings,
+    handleCourseAutoflowToggle,
+    handleCourseBoxZeroToggle,
+    handleCourseCardSizeChange,
+    handleCourseExplanationOnlyOnWrongToggle,
+    handleCourseImageFrameToggle,
+    handleCourseImageSizeChange,
+    handleCourseReviewsToggle,
+    handleCourseShowExplanationToggle,
+    handleCourseSkipCorrectionToggle,
+    handleCourseTrueFalseButtonsVariantChange,
+    imageSizeOptions,
+    imageSizeOptionsEnabled,
+    isOfficialCourse,
+    letterHintSettingsHydrated,
+    reviewsEnabled,
+    persistCourseSetting,
+    setCustomCourseAudioSettings,
+    setCustomCourseBoxZeroAnswerSide,
+    setCustomCourseFrontImageRole,
+    setCustomCourseLetterHintSettings,
+    styles,
+  ]);
+  const renderSettingsPage = useCallback((pageTab: CourseSettingsTabKey) => (
+    <>
+      {tabSwitcher}
+      {isOfficialCourse || activeTab === "options" ? (
+        <>
+          <View style={styles.sectionCard}>
+            <CourseSettingsPanel
+              activeTab={pageTab}
+              styles={styles}
+              settingsProps={courseSettingsProps}
+              resetActions={resetControls.resetActions}
             />
           </View>
-        ) : null}
 
-        {isOfficialCourse || activeTab === "options" ? (
-          <>
-            <View style={styles.sectionCard}>
-              <CourseSettingsPanel
-                styles={styles}
-                settingsProps={{
-                  styles,
-                  switchColors: {
-                    thumb: colors.background,
-                    trackFalse: colors.border,
-                    trackTrue: colors.my_green,
-                  },
-                  colors,
-                  audioSettings: getCustomCourseAudioSettings(courseId),
-                  audioSettingsDisabled: !courseAudioSettingsHydrated,
-                  showAudioLanguages: !isOfficialCourse,
-                  onChangeAudioSettings: (value) => { void setCustomCourseAudioSettings(courseId, value); },
-                  frontImageRole: getCustomCourseFrontImageRole(courseId),
-                  frontImageRoleDisabled: !courseFrontImageRoleHydrated,
-                  onChangeFrontImageRole: (value) => { void setCustomCourseFrontImageRole(courseId, value); },
-                  letterHintSettings: getCustomCourseLetterHintSettings(courseId),
-                  letterHintSettingsDisabled: !letterHintSettingsHydrated,
-                  onChangeLetterHintSettings: (value) => { void setCustomCourseLetterHintSettings(courseId, value); },
-                  boxZeroAnswerSide: courseBoxZeroAnswerSide,
-                  onSelectBoxZeroAnswerSide: async (side) => {
-                    setCourseBoxZeroAnswerSide(side);
-                    await setCustomCourseBoxZeroAnswerSide(courseId, side);
-                  },
-                  boxZeroEnabled: courseBoxZeroEnabled,
-                  onToggleBoxZero: handleCourseBoxZeroToggle,
-                  autoflowEnabled: courseAutoflowEnabled,
-                  onToggleAutoflow: handleCourseAutoflowToggle,
-                  reviewsEnabled,
-                  onToggleReviews: handleCourseReviewsToggle,
-                  showExplanationEnabled: courseShowExplanationEnabled,
-                  onToggleShowExplanation: handleCourseShowExplanationToggle,
-                  explanationOnlyOnWrong: courseExplanationOnlyOnWrong,
-                  onToggleExplanationOnlyOnWrong:
-                    handleCourseExplanationOnlyOnWrongToggle,
-                  skipCorrectionEnabled: courseSkipCorrectionEnabled,
-                  onToggleSkipCorrection: handleCourseSkipCorrectionToggle,
-                  skipCorrectionLocked: courseIsTrueFalseOnly,
-                  hideSkipCorrectionOption: courseIsTrueFalseOnly,
-                  showTrueFalseButtonsVariant: false,
-                  trueFalseButtonsVariant: courseTrueFalseButtonsVariant,
-                  onSelectTrueFalseButtonsVariant:
-                    handleCourseTrueFalseButtonsVariantChange,
-                  cardSize: courseCardSize,
-                  onSelectCardSize: handleCourseCardSizeChange,
-                  showImageSizeOptions: courseHasImageCards,
-                  imageSize: courseImageSize,
-                  imageSizeOptions,
-                  onSelectImageSize: handleCourseImageSizeChange,
-                  imageSizeEnabled: imageSizeOptionsEnabled,
-                  showImageFrameOption: courseHasImageCards,
-                  imageFrameEnabled: courseImageFrameEnabled,
-                  onToggleImageFrame: handleCourseImageFrameToggle,
-                }}
-                resetActions={[
-                  {
-                    key: "boxes",
-                    title: t("courseCreator.customEditor.resetActions.boxes.title"),
-                    subtitle: t("courseCreator.customEditor.resetActions.boxes.subtitle"),
-                    ctaText: t("app.actions.clear"),
-                    loadingText: t("courseCreator.customEditor.resetActions.boxes.loading"),
-                    loading: resettingBoxes,
-                    onPress: handleResetBoxes,
-                    disabled: resettingBoxes,
-                  },
-                  {
-                    key: "reviews",
-                    title: t("courseCreator.customEditor.resetActions.reviews.title"),
-                    subtitle: t("courseCreator.customEditor.resetActions.reviews.subtitle"),
-                    ctaText: t("app.actions.delete"),
-                    loadingText: t("courseCreator.customEditor.resetActions.reviews.loading"),
-                    loading: resettingReviews,
-                    onPress: handleResetReviews,
-                    disabled: resettingReviews,
-                  },
-                  {
-                    key: "all",
-                    title: t("courseCreator.customEditor.resetActions.all.title"),
-                    subtitle: t("courseCreator.customEditor.resetActions.all.subtitle"),
-                    ctaText: t("app.actions.restore"),
-                    loadingText: t("courseCreator.customEditor.resetActions.all.loading"),
-                    loading: resettingAll,
-                    onPress: handleResetAll,
-                    disabled: resettingAll,
-                  },
-                ]}
-              />
-            </View>
+        </>
+      ) : null}
 
-          </>
-        ) : null}
+    </>
+  ), [activeTab, courseSettingsProps, isOfficialCourse, resetControls.resetActions, styles, tabSwitcher]);
 
-        {!isOfficialCourse && activeTab === "content" ? (
-          <>
-            <View style={styles.sectionCard}>
-              <View style={styles.sectionGroup}>
-                <Text style={styles.settingsGroupLabel}>
-                  {t("courseCreator.customEditor.appearance.section")}
-                </Text>
-                <View style={styles.iconSelectorWrapper}>
-                  <CourseIconColorSelector
-                    courseName={courseName}
-                    onCourseNameChange={setCourseName}
-                    selectedIcon={iconId}
-                    selectedColor={iconColor}
-                    selectedColorId={colorId ?? undefined}
-                    onIconChange={(value) => setIconId(value)}
-                    onColorChange={handleColorChange}
-                    onColorHexChange={(hex) => {
-                      setIconColor(hex);
-                      setColorId(null);
-                    }}
-                    previewName={courseName}
-                    nameValidationState={nameConflict.kind}
-                    nameValidationMessage={nameValidationMessage}
-                    nameEditable={!isOfficialCourse}
-                    disabled={isSaving}
-                    styles={{
-                      container: styles.iconSection,
-                    }}
-                    iconSectionDescription={t(
-                      "courseCreator.customEditor.appearance.iconDescription"
-                    )}
-                    colorSectionDescription={t(
-                      "courseCreator.customEditor.appearance.colorDescription"
-                    )}
-                  />
-                </View>
-              </View>
-            </View>
-
-            <View style={styles.sectionCard}>
-              {loading ? (
-                <View style={{ alignItems: "center", paddingVertical: 32 }}>
-                  <ActivityIndicator size="large" />
-                </View>
-              ) : loadError ? (
-                <Text style={{ color: "#ff5470", fontSize: 16 }}>
-                  {loadError}
-                </Text>
-              ) : (
-                <View style={styles.sectionGroup}>
-                  <View style={styles.manualHeader}>
+  return (
+    <View style={styles.container}>
+      {isOfficialCourse || activeTab === "options" ? (
+      <SettingsTabPager
+        ref={categoryTabs.pagerRef}
+        options={categoryTabs.options}
+        value={categoryTabs.activeTab}
+        onChange={categoryTabs.onCommit}
+        scopeKey={categoryTabs.scopeKey}
+        scrollViewProps={settingsScrollProps}
+        renderPage={renderSettingsPage}
+      />
+      ) : (
+        <ScrollView {...settingsScrollProps}>
+          {tabSwitcher}
+            {!isOfficialCourse && activeTab === "content" ? (
+              <>
+                <View style={styles.sectionCard}>
+                  <View style={styles.sectionGroup}>
                     <Text style={styles.settingsGroupLabel}>
-                      {t("courseCreator.customEditor.flashcardsSection")}
+                      {t("courseCreator.customEditor.appearance.section")}
                     </Text>
+                    <View style={styles.iconSelectorWrapper}>
+                      <CourseIconColorSelector
+                        courseName={courseName}
+                        onCourseNameChange={setCourseName}
+                        selectedIcon={iconId}
+                        selectedColor={iconColor}
+                        selectedColorId={colorId ?? undefined}
+                        onIconChange={(value) => setIconId(value)}
+                        onColorChange={handleColorChange}
+                        onColorHexChange={(hex) => {
+                          setIconColor(hex);
+                          setColorId(null);
+                        }}
+                        previewName={courseName}
+                        nameValidationState={nameConflict.kind}
+                        nameValidationMessage={nameValidationMessage}
+                        nameEditable={!isOfficialCourse}
+                        disabled={isSaving}
+                        styles={{
+                          container: styles.iconSection,
+                        }}
+                        iconSectionDescription={t(
+                          "courseCreator.customEditor.appearance.iconDescription"
+                        )}
+                        colorSectionDescription={t(
+                          "courseCreator.customEditor.appearance.colorDescription"
+                        )}
+                      />
+                    </View>
                   </View>
-                  <ManualCardsEditor
-                    manualCards={manualCards}
-                    cardType={newCardType}
-                    styles={{} as ManualCardsEditorStyles}
-                    onCardFrontChange={(id, value) => {
-                      setContentDirty(true);
-                      handleManualCardFrontChange(id, value);
-                    }}
-                    onCardAnswerChange={(id, answerIndex, value) => {
-                      setContentDirty(true);
-                      handleManualCardAnswerChange(id, answerIndex, value);
-                    }}
-                    onAddAnswer={(id) => {
-                      setContentDirty(true);
-                      handleAddAnswer(id);
-                    }}
-                    onRemoveAnswer={(id, answerIndex) => {
-                      setContentDirty(true);
-                      handleRemoveAnswer(id, answerIndex);
-                    }}
-                    onAddCard={() => {
-                      setContentDirty(true);
-                      handleAddCard(newCardType);
-                    }}
-                    onRemoveCard={(id) => {
-                      setContentDirty(true);
-                      handleRemoveCard(id);
-                    }}
-                    onToggleFlipped={(id) => {
-                      setContentDirty(true);
-                      handleToggleFlipped(id);
-                    }}
-                    onCardImageChange={(id, side, uri) => {
-                      setContentDirty(true);
-                      handleManualCardImageChange(id, side, uri);
-                    }}
-                    onCardExplanationChange={(id, value) => {
-                      setContentDirty(true);
-                      handleManualCardExplanationChange(id, value);
-                    }}
-                    showDefaultBottomAddButton={false}
-                  />
                 </View>
-              )}
-            </View>
-          </>
-        ) : null}
-      </ScrollView>
+
+                <View style={styles.sectionCard}>
+                  {loading ? (
+                    <View style={{ alignItems: "center", paddingVertical: 32 }}>
+                      <ActivityIndicator size="large" />
+                    </View>
+                  ) : loadError ? (
+                    <Text style={{ color: "#ff5470", fontSize: 16 }}>
+                      {loadError}
+                    </Text>
+                  ) : (
+                    <View style={styles.sectionGroup}>
+                      <View style={styles.manualHeader}>
+                        <Text style={styles.settingsGroupLabel}>
+                          {t("courseCreator.customEditor.flashcardsSection")}
+                        </Text>
+                      </View>
+                      <ManualCardsEditor
+                        manualCards={manualCards}
+                        cardType={newCardType}
+                        styles={{} as ManualCardsEditorStyles}
+                        onCardFrontChange={(id, value) => {
+                          setContentDirty(true);
+                          handleManualCardFrontChange(id, value);
+                        }}
+                        onCardAnswerChange={(id, answerIndex, value) => {
+                          setContentDirty(true);
+                          handleManualCardAnswerChange(id, answerIndex, value);
+                        }}
+                        onAddAnswer={(id) => {
+                          setContentDirty(true);
+                          handleAddAnswer(id);
+                        }}
+                        onRemoveAnswer={(id, answerIndex) => {
+                          setContentDirty(true);
+                          handleRemoveAnswer(id, answerIndex);
+                        }}
+                        onAddCard={() => {
+                          setContentDirty(true);
+                          handleAddCard(newCardType);
+                        }}
+                        onRemoveCard={(id) => {
+                          setContentDirty(true);
+                          handleRemoveCard(id);
+                        }}
+                        onToggleFlipped={(id) => {
+                          setContentDirty(true);
+                          handleToggleFlipped(id);
+                        }}
+                        onCardImageChange={(id, side, uri) => {
+                          setContentDirty(true);
+                          handleManualCardImageChange(id, side, uri);
+                        }}
+                        onCardExplanationChange={(id, value) => {
+                          setContentDirty(true);
+                          handleManualCardExplanationChange(id, value);
+                        }}
+                        showDefaultBottomAddButton={false}
+                      />
+                    </View>
+                  )}
+                </View>
+              </>
+            ) : null}
+
+        </ScrollView>
+      )}
 
       {shouldShowManualToolbar ? (
         <Animated.View
@@ -999,10 +985,16 @@ export default function CustomCourseEditor({
         </Animated.View>
       ) : null}
 
-      <View style={styles.buttonscontainer}>
+      <View
+        style={[
+          styles.buttonscontainer,
+          (isOfficialCourse || activeTab === "options") && styles.settingsButtonsContainer,
+        ]}
+      >
         <View
           style={[
             styles.buttonsRow,
+            (isOfficialCourse || activeTab === "options") && styles.settingsButtonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
           ]}
         >
@@ -1054,6 +1046,14 @@ export default function CustomCourseEditor({
           </View>
         </View>
       </View>
+      {isOfficialCourse || activeTab === "options" ? (
+        <SettingsTabBar
+          options={categoryTabs.options}
+          value={categoryTabs.activeTab}
+          onChange={categoryTabs.onChange}
+        />
+      ) : null}
+      {resetControls.modal}
     </View>
   );
 }

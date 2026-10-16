@@ -1,3 +1,4 @@
+import { completePagerSelection } from "@/src/components/settings/testing/completePagerSelection";
 import React from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
@@ -45,9 +46,7 @@ jest.mock("@/src/contexts/PopupContext", () => ({
   usePopup: jest.fn(),
 }));
 
-jest.mock("@/src/contexts/SettingsContext", () => ({
-  useSettings: jest.fn(),
-}));
+jest.mock("@/src/contexts/SettingsContext", () => { const useSettings = jest.fn(); return { useSettings, useThemeSettings: useSettings }; });
 
 jest.mock("@/src/db/sqlite/db", () => ({
   createCustomCourse: jest.fn(),
@@ -169,6 +168,12 @@ describe("CourseSettingsScreen image-only cards", () => {
     await waitFor(() => {
       expect(screen.getByLabelText("Create course")).toBeTruthy();
     });
+    expect(screen.queryByRole("tab", { name: "courseSettingsGroups.progress.title" })).toBeNull();
+    for (const category of ["answers", "audio", "appearance", "learning"]) {
+      fireEvent.press(screen.getByRole("tab", { name: `courseSettingsGroups.${category}.title` }));
+      completePagerSelection(category);
+      expect(screen.getByLabelText("Create course")).toBeEnabled();
+    }
     fireEvent.press(screen.getByLabelText("Create course"));
 
     await waitFor(() => {
@@ -197,6 +202,30 @@ describe("CourseSettingsScreen image-only cards", () => {
     await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
     fireEvent.press(screen.getByLabelText("Create course"));
     await waitFor(() => expect(mockedUseSettings().setCustomCourseAudioSettings).toHaveBeenCalledWith(42, audioSettings));
+  });
+
+  it("restores all remaining settings from draft and persists them on course creation", async () => {
+    const settings = {
+      boxZeroEnabled: true, boxZeroAnswerSide: "front", autoflowEnabled: false,
+      reviewsEnabled: false, showExplanationEnabled: false, explanationOnlyOnWrong: false,
+      skipCorrectionEnabled: true, trueFalseButtonsVariant: "know_dont_know",
+      cardSize: "small", imageSize: "very_large", imageFrameEnabled: false,
+    };
+    await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
+      scopeKey: "Flags|flag|#123456||1", ...settings,
+    }));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    const saved = mockedUseSettings();
+    expect(mockedCreateCustomCourse).toHaveBeenCalledWith(expect.objectContaining({ reviewsEnabled: false }));
+    for (const [setting, value] of Object.entries(settings)) {
+      if (setting === "reviewsEnabled") continue;
+      const suffix = setting[0].toUpperCase() + setting.slice(1);
+      expect(saved[`setCustomCourse${suffix}`]).toHaveBeenCalledWith(42, value);
+    }
+    expect(await AsyncStorage.getItem(SETTINGS_DRAFT_STORAGE_KEY)).toBeNull();
   });
 
   it("restores answer side from draft and saves it for the new course", async () => {

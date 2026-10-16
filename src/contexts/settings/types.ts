@@ -1,3 +1,4 @@
+import type { CourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
 import type {
   ReminderPermissionState,
   ReminderReconcileReason,
@@ -87,6 +88,9 @@ export type CourseTrueFalseButtonsOverrides =
 export type CourseSkipCorrectionOverrides = CourseOverrideState<boolean>;
 
 export interface SettingsContextValue {
+  courseSettingsResetHydrated: boolean;
+  resetCustomCourseSettings: (id: number, values: CourseSettingsDefaults) => Promise<void>;
+  resetBuiltinCourseSettings: (params: CourseBoxZeroKeyParams, values: CourseSettingsDefaults) => Promise<void>;
   uiLanguage: UiLanguage;
   nativeLanguage: NativeLanguage;
   nativeLanguageHydrated: boolean;

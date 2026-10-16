@@ -73,19 +73,25 @@ it.each([
 });
 
 
-it("opts all 16 Google audio packs in, including existing courses, and preserves explicit OFF", async () => {
+it("opts every course with bundled Google recordings into audio by default", () => {
   const packs = jest.requireActual("@/src/constants/officialPacks").OFFICIAL_PACKS;
   const catalog = jest.requireActual("@/Audio/runtime/generated/catalog.json");
   expect(packs.filter((pack: any) => pack.settings?.audioEnabled).map((pack: any) => pack.slug).sort()).toEqual(Object.keys(catalog.courses).sort());
-  mockPackSlug = "es_to_pl_first_50";
-  const local = { getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: 50 }), getAllAsync: jest.fn().mockResolvedValue([]) };
-  const bundled = { getFirstAsync: jest.fn().mockResolvedValue({ id: 1, packVersion: 3, flashcardsCount: 50 }), closeAsync: jest.fn().mockResolvedValue(undefined) };
-  (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(bundled);
-  (ensureOfficialCourse as jest.Mock).mockResolvedValue({ id: 42, packVersion: 3 });
-  const key = "flashcards.courseAudioOverrides";
-  await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
-  expect(JSON.parse((await AsyncStorage.getItem(key))!).custom[42]).toEqual({ enabled: true, frontLanguage: null, backLanguage: null });
-  await AsyncStorage.setItem(key, JSON.stringify({ builtin: {}, custom: { 42: { enabled: false, frontLanguage: null, backLanguage: null } } }));
-  await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
-  expect(JSON.parse((await AsyncStorage.getItem(key))!).custom[42].enabled).toBe(false);
 });
+
+it.each(Object.keys(jest.requireActual("@/Audio/runtime/generated/catalog.json").courses))(
+  "enables audio for existing %s courses and preserves explicit OFF",
+  async (slug) => {
+    mockPackSlug = slug;
+    const local = { getFirstAsync: jest.fn().mockResolvedValue({ flashcardsCount: 50 }), getAllAsync: jest.fn().mockResolvedValue([]) };
+    const bundled = { getFirstAsync: jest.fn().mockResolvedValue({ id: 1, packVersion: 3, flashcardsCount: 50 }), closeAsync: jest.fn().mockResolvedValue(undefined) };
+    (SQLite.openDatabaseAsync as jest.Mock).mockResolvedValue(bundled);
+    (ensureOfficialCourse as jest.Mock).mockResolvedValue({ id: 42, packVersion: 3 });
+    const key = "flashcards.courseAudioOverrides";
+    await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
+    expect(JSON.parse((await AsyncStorage.getItem(key))!).custom[42]).toEqual({ enabled: true, frontLanguage: null, backLanguage: null });
+    await AsyncStorage.setItem(key, JSON.stringify({ builtin: {}, custom: { 42: { enabled: false, frontLanguage: null, backLanguage: null } } }));
+    await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
+    expect(JSON.parse((await AsyncStorage.getItem(key))!).custom[42].enabled).toBe(false);
+  },
+);

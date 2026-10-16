@@ -29,6 +29,7 @@ import {
   getCompletedCustomCoursesWithCardCounts,
   saveCustomCourseEdits,
   updateCustomCourse,
+  setCustomCourseReviewsEnabled,
 } from "@/src/db/sqlite/repositories/courses";
 import { clearCustomLearningEventsForCourseWithDb } from "@/src/db/sqlite/repositories/analytics";
 import { replaceCustomFlashcardsWithoutTransactionWithDb } from "@/src/db/sqlite/repositories/flashcards";
@@ -247,5 +248,29 @@ describe("courses repository", () => {
       cardsCount: 5,
       completedCardsCount: 4,
     });
+  });
+});
+
+
+describe("resetting the reviews setting", () => {
+  it("updates only the course flag and leaves saved reviews intact", async () => {
+    jest.clearAllMocks();
+    const runAsync = jest.fn().mockResolvedValue(undefined);
+    mockGetDB.mockResolvedValue({
+      getFirstAsync: jest.fn().mockResolvedValue({ reviewsEnabled: 0 }), runAsync,
+    });
+    await setCustomCourseReviewsEnabled(7, true, { seedCompletedReviews: false });
+    expect(runAsync).toHaveBeenCalledWith(expect.stringContaining("UPDATE custom_courses"), 1, expect.any(Number), 7);
+    expect(seedCompletedCustomReviewsForCourseWithDb).not.toHaveBeenCalled();
+    expect(clearCustomReviewsForCourseWithDb).not.toHaveBeenCalled();
+    expect(clearCustomLearningEventsForCourseWithDb).not.toHaveBeenCalled();
+  });
+
+  it("continues seeding completed reviews for existing callers", async () => {
+    jest.clearAllMocks();
+    const db = { getFirstAsync: jest.fn().mockResolvedValue({ reviewsEnabled: 0 }), runAsync: jest.fn().mockResolvedValue(undefined) };
+    mockGetDB.mockResolvedValue(db);
+    await setCustomCourseReviewsEnabled(7, true);
+    expect(seedCompletedCustomReviewsForCourseWithDb).toHaveBeenCalledWith(db, 7);
   });
 });

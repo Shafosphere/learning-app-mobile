@@ -1,3 +1,5 @@
+import { completePagerSelection } from "@/src/components/settings/testing/completePagerSelection";
+import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
 import React from "react";
 import { createInstance } from "i18next";
 import { View } from "react-native";
@@ -7,6 +9,9 @@ import { useSettings } from "@/src/contexts/SettingsContext";
 import { resolveThemeColors } from "@/src/theme/theme";
 import pl from "@/src/locales/pl.json";
 import { CourseSettingsSection, type CourseSettingsSectionProps } from "../SettingsCourse";
+import { CourseSettingsPanel } from "../CourseSettingsPanel";
+import { SettingsTabBar } from "@/src/components/settings/SettingsTabBar";
+import { useCourseSettingsTabs } from "../courseSettings/useCourseSettingsTabs";
 
 const mockT = jest.fn((key: string) => key);
 const mockWindowDimensions = jest.fn();
@@ -47,10 +52,148 @@ function makeProps(): CourseSettingsSectionProps {
   };
 }
 
+// Behavior tests exercise the real accordions before reaching their controls.
+function renderExpandedSettings(element: React.ReactElement) {
+  const screen = render(element);
+  for (const group of ["answers", "audio", "appearance"]) {
+    const header = screen.queryByRole("button", { name: mockT(`courseSettingsGroups.${group}.title`) });
+    if (header) fireEvent.press(header);
+  }
+  return screen;
+}
+
+describe("inline settings preview", () => {
+  it("starts with learning and keeps optional groups independently collapsed", () => {
+    const props = {
+      ...makeProps(),
+      onChangeLetterHintSettings: jest.fn(),
+      audioSettings: { enabled: true, frontLanguage: null, backLanguage: null },
+      onChangeAudioSettings: jest.fn(),
+    };
+    const screen = render(<CourseSettingsSection {...props} />);
+    const groups = ["answers", "audio", "appearance"];
+    expect(screen.getAllByRole("switch").map((row) => row.props.accessibilityLabel)).toEqual([
+      "components.courseEditor.settingsCourse.accessibilityLabel.przelaczAutomatFiszek",
+      "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki",
+      "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania",
+    ]);
+    expect(screen.getAllByRole("button").map((row) => row.props.accessibilityLabel)).toEqual(
+      groups.map((group) => `courseSettingsGroups.${group}.title`),
+    );
+    for (const group of groups) {
+      expect(screen.getByRole("button", { name: `courseSettingsGroups.${group}.title`, expanded: false })).toBeTruthy();
+    }
+    expect(screen.queryByTestId("course-answer-settings")).toBeNull();
+    expect(screen.queryByTestId("course-audio-settings")).toBeNull();
+    expect(screen.queryByTestId("course-appearance-settings")).toBeNull();
+    fireEvent.press(screen.getByRole("button", { name: "courseSettingsGroups.answers.title" }));
+    fireEvent.press(screen.getByRole("button", { name: "courseSettingsGroups.audio.title" }));
+    expect(screen.getByTestId("course-answer-settings")).toBeTruthy();
+    expect(screen.getByTestId("course-audio-settings")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: "courseSettingsGroups.answers.title" }));
+    expect(screen.queryByRole("switch", { name: "courseLetterHints.toggleLabel", includeHiddenElements: true })).toBeNull();
+    expect(screen.getByTestId("course-audio-settings")).toBeTruthy();
+    expect(props.onChangeAudioSettings).not.toHaveBeenCalled();
+    expect(props.onChangeLetterHintSettings).not.toHaveBeenCalled();
+    expect(props.onSelectCardSize).not.toHaveBeenCalled();
+  });
+
+  it("restores controlled choices when a category reopens", () => {
+    function SettingsHarness() {
+      const [cardSize, onSelectCardSize] = React.useState<"large" | "small">("large");
+      return <CourseSettingsSection {...makeProps()} cardSize={cardSize} onSelectCardSize={onSelectCardSize} />;
+    }
+    const screen = render(<SettingsHarness />);
+    const header = screen.getByRole("button", { name: "courseSettingsGroups.appearance.title" });
+    fireEvent.press(header);
+    const name = "components.courseEditor.settingsCourse.title.rozmiarFiszki, components.courseEditor.settingsCourse.title.mala, components.courseEditor.settingsCourse.subtitle.tekstZostaje";
+    fireEvent.press(screen.getByRole("button", { name }));
+    fireEvent.press(header);
+    expect(screen.queryByRole("button", { name, includeHiddenElements: true })).toBeNull();
+    fireEvent.press(header);
+    expect(screen.getByRole("button", { name, selected: true })).toBeTruthy();
+  });
+
+  it("shows reset actions only in the progress category and preserves loading/disabled behavior", () => {
+    const props = { styles: {}, settingsProps: makeProps() };
+    const onPress = jest.fn();
+    const resetActions = ["boxes", "reviews", "all"].map((key) => ({ key, title: key, subtitle: `Reset ${key}`, ctaText: `Run ${key}`, onPress }));
+    const screen = render(<CourseSettingsPanel {...props} activeTab="learning" resetActions={resetActions} />);
+    expect(screen.queryByText("Run boxes")).toBeNull();
+    screen.rerender(<CourseSettingsPanel {...props} activeTab="progress" resetActions={resetActions} />);
+    expect(screen.queryByTestId("course-learning-settings")).toBeNull();
+    expect(onPress).not.toHaveBeenCalled();
+    for (const key of ["boxes", "reviews", "all"]) fireEvent.press(screen.getByRole("button", { name: `Run ${key}` }));
+    expect(onPress).toHaveBeenCalledTimes(3);
+    screen.rerender(<CourseSettingsPanel {...props} activeTab="progress" resetActions={resetActions.map((action) => ({ ...action, loading: true, loadingText: `Busy ${action.key}`, disabled: true }))} />);
+    const button = screen.getByRole("button", { name: "Busy boxes" });
+    expect(button).toBeDisabled();
+    fireEvent.press(button);
+    expect(onPress).toHaveBeenCalledTimes(3);
+    screen.rerender(<CourseSettingsPanel {...props} activeTab="appearance" resetActions={resetActions} />);
+    expect(screen.queryByText("Busy boxes", { includeHiddenElements: true })).toBeNull();
+  });
+
+  it("preserves optional answer button choices, hidden correction and the image frame switch", () => {
+    const props = { ...makeProps(), showTrueFalseButtonsVariant: true, hideSkipCorrectionOption: true, showImageFrameOption: true, onToggleImageFrame: jest.fn() };
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
+    expect(screen.queryByRole("switch", { name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPomijaniePoprawkiPoBledzie" })).toBeNull();
+    fireEvent.press(screen.getByText("components.courseEditor.settingsCourse.title.opanowanie"));
+    expect(props.onSelectTrueFalseButtonsVariant).toHaveBeenCalledWith("know_dont_know");
+    fireEvent.press(screen.getByRole("switch", { name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczRamkeObrazu", checked: true }));
+    expect(props.onToggleImageFrame).toHaveBeenCalledWith(false);
+  });
+});
+
+describe("course category tabs", () => {
+  function CourseTabsHarness({ hasAudio = true, hasResetActions = true }) {
+    const tabs = useCourseSettingsTabs({ scopeKey: 7, hasAudio, hasResetActions });
+    const [cardSize, onSelectCardSize] = React.useState<"large" | "small">("large");
+    const props = { ...makeProps(), cardSize, onSelectCardSize, audioSettings: { enabled: true, frontLanguage: null, backLanguage: null }, onChangeAudioSettings: jest.fn() };
+    return <>
+      <SettingsTabPager ref={tabs.pagerRef} options={tabs.options} value={tabs.activeTab} scopeKey={tabs.scopeKey} onChange={tabs.onCommit} renderPage={(tab) => <CourseSettingsPanel styles={{}} settingsProps={props} activeTab={tab} resetActions={hasResetActions ? [{ key: "all", title: "Reset", subtitle: "Reset course", ctaText: "Run reset", onPress: jest.fn() }] : []} />} />
+      <SettingsTabBar options={tabs.options} value={tabs.activeTab} onChange={tabs.onChange} />
+    </>;
+  }
+
+  it("exposes only the selected category and retains choices across real tab switches", () => {
+    const screen = render(<CourseTabsHarness />);
+    const groups = ["learning", "answers", "audio", "appearance", "progress"];
+    expect(screen.getAllByRole("tab").map((tab) => tab.props.accessibilityLabel)).toEqual(groups.map((key) => `courseSettingsGroups.${key}.title`));
+    expect(screen.getByRole("tab", { name: "courseSettingsGroups.learning.title", selected: true })).toBeTruthy();
+    const ids = ["course-learning-settings", "course-answer-settings", "course-audio-settings", "course-appearance-settings"];
+    for (const [index, key] of groups.entries()) {
+      fireEvent.press(screen.getByRole("tab", { name: `courseSettingsGroups.${key}.title` }));
+      completePagerSelection(key);
+      expect(screen.getByRole("header", { name: `courseSettingsGroups.${key}.title` })).toBeTruthy();
+      expect(screen.queryAllByRole("button", { expanded: false })).toHaveLength(0);
+      for (const [groupIndex, id] of ids.entries()) expect(Boolean(screen.queryByTestId(id))).toBe(groupIndex === index);
+      expect(Boolean(screen.queryByText("Run reset"))).toBe(key === "progress");
+    }
+    fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title" }));
+    completePagerSelection("appearance");
+    const option = "components.courseEditor.settingsCourse.title.rozmiarFiszki, components.courseEditor.settingsCourse.title.mala, components.courseEditor.settingsCourse.subtitle.tekstZostaje";
+    fireEvent.press(screen.getByRole("button", { name: option }));
+    fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.learning.title" }));
+    completePagerSelection("learning");
+    expect(screen.queryByRole("button", { name: option, includeHiddenElements: true })).toBeNull();
+    fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title" }));
+    completePagerSelection("appearance");
+    expect(screen.getByRole("button", { name: option, selected: true })).toBeTruthy();
+  });
+
+  it("omits audio when unavailable and progress during new-course creation", () => {
+    const screen = render(<CourseTabsHarness hasAudio={false} hasResetActions={false} />);
+    expect(screen.getAllByRole("tab")).toHaveLength(3);
+    expect(screen.queryByRole("tab", { name: "courseSettingsGroups.audio.title" })).toBeNull();
+    expect(screen.queryByRole("tab", { name: "courseSettingsGroups.progress.title" })).toBeNull();
+  });
+});
+
 it("selects all image roles accessibly and disables changes during hydration", () => {
   const props = makeProps();
   const onChange = jest.fn();
-  const screen = render(<CourseSettingsSection {...props} frontImageRole="replace_back" onChangeFrontImageRole={onChange} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} frontImageRole="replace_back" onChangeFrontImageRole={onChange} />);
   for (const role of ["standard", "replace_front", "replace_back"]) {
     const button = screen.getByRole("button", { name: `courseFrontImageRole.title: courseFrontImageRole.${role}.title` });
     expect(button.props.accessibilityState.selected).toBe(role === "replace_back");
@@ -69,12 +212,11 @@ describe("image display cards", () => {
   it("preserves visibility, the default selection and controlled updates", () => {
     const props = makeProps();
     const onChange = jest.fn();
-    const screen = render(<CourseSettingsSection {...props} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
     expect(screen.queryByTestId("course-image-display-settings")).toBeNull();
     screen.rerender(<CourseSettingsSection {...props} onChangeFrontImageRole={onChange} />);
     const group = within(screen.getByTestId("course-image-display-settings"));
     expect(group.getByRole("header", { name: "courseFrontImageRole.title" })).toBeTruthy();
-    expect(group.getByText("courseFrontImageRole.answerNote")).toBeTruthy();
     expect(group.getAllByRole("button")).toHaveLength(3);
     for (const role of ["standard", "replace_front", "replace_back"] as const) {
       const name = `courseFrontImageRole.title: courseFrontImageRole.${role}.title`;
@@ -101,7 +243,7 @@ describe("image display cards", () => {
       accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" },
       fontScaleMultiplier: appScale,
     });
-    const screen = render(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} />);
     const section = screen.getByTestId("course-image-display-settings");
     fireEvent(section, "layout", { nativeEvent: { layout: { width: width - 32 } } });
     const firstRow = screen.getByTestId("course-image-display-first-row");
@@ -126,7 +268,7 @@ describe("image display cards", () => {
       accessibilityPreferences: { highContrastEnabled: highContrast, colorBlindMode },
       fontScaleMultiplier: 1.15,
     });
-    const screen = render(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} frontImageRole="replace_back" />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} frontImageRole="replace_back" />);
     const section = within(screen.getByTestId("course-image-display-settings"));
     const card = section.getByRole("button", { selected: true });
     expect(card).toHaveStyle({ borderWidth: 2, borderColor: highContrast || colorBlindMode !== "none" ? colors.my_green : "#009b83" });
@@ -141,7 +283,7 @@ describe("image display cards", () => {
 
 it("toggles from the row title and description and exposes one switch per row", () => {
   const props = makeProps();
-  const screen = render(<CourseSettingsSection {...props} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
   const label = "components.courseEditor.settingsCourse.accessibilityLabel.przelaczAutomatFiszek";
 
   fireEvent.press(screen.getByText("components.courseEditor.settingsCourse.title.automatFiszek"));
@@ -157,7 +299,7 @@ it("toggles from the row title and description and exposes one switch per row", 
 
 it("keeps the entire locked row disabled", () => {
   const props = makeProps();
-  const screen = render(<CourseSettingsSection {...props} skipCorrectionLocked />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} skipCorrectionLocked />);
 
   fireEvent.press(screen.getByText("components.courseEditor.settingsCourse.title.pominPoprawkePoBledzie"));
   expect(props.onToggleSkipCorrection).not.toHaveBeenCalled();
@@ -171,7 +313,7 @@ it("hides dependent options while disabled and preserves their selections across
   const onSelect = jest.fn();
   const props = makeProps();
   props.onSelectBoxZeroAnswerSide = onSelect;
-  const screen = render(<CourseSettingsSection {...props} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
   const label = "components.courseEditor.settingsCourse.boxZeroAnswerSide.";
   const explanationLabel = "components.courseEditor.settingsCourse.accessibilityLabel.przelaczWyjasnienieTylkoPoBlednej";
   expect(screen.queryByText(label + "title")).toBeNull();
@@ -200,7 +342,7 @@ it("hides dependent options while disabled and preserves their selections across
 it("changes profiles and custom limits while preserving choices when toggled off", () => {
   const onChange = jest.fn();
   const props = { ...makeProps(), onChangeLetterHintSettings: onChange };
-  const screen = render(<CourseSettingsSection {...props} letterHintSettings={DEFAULT_LETTER_HINT_SETTINGS} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} letterHintSettings={DEFAULT_LETTER_HINT_SETTINGS} />);
   expect(screen.queryByText("courseLetterHints.profileTitle")).toBeNull();
   fireEvent.press(screen.getByRole("switch", { name: "courseLetterHints.toggleLabel" }));
   const standard = { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true };
@@ -228,38 +370,24 @@ it("changes profiles and custom limits while preserving choices when toggled off
 
 it("blocks changes before course settings have loaded", () => {
   const onChange = jest.fn();
-  const screen = render(<CourseSettingsSection {...makeProps()} onChangeLetterHintSettings={onChange} letterHintSettingsDisabled />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...makeProps()} onChangeLetterHintSettings={onChange} letterHintSettingsDisabled />);
   const toggle = screen.getByRole("switch", { name: "courseLetterHints.toggleLabel" });
   expect(toggle).toBeDisabled();
   fireEvent.press(toggle);
   expect(onChange).not.toHaveBeenCalled();
 });
 
-it.each([false, true])("keeps the flow switches in one card while hints expand and collapse (box zero: %s)", (boxZeroEnabled) => {
-  const cardStyle = { borderWidth: 1, borderRadius: 14, padding: 14 };
-  const props = {
-    ...makeProps(),
-    boxZeroEnabled,
-    styles: { settingsGroupCard: cardStyle },
-    onChangeLetterHintSettings: jest.fn(),
-  };
-  const screen = render(<CourseSettingsSection {...props} />);
-
+it.each([false, true])("keeps learning separate while hints expand and collapse (box zero: %s)", (boxZeroEnabled) => {
+  const props = { ...makeProps(), boxZeroEnabled, onChangeLetterHintSettings: jest.fn() };
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
   for (const enabled of [false, true, false, true]) {
-    screen.rerender(
-      <CourseSettingsSection {...props} letterHintSettings={{ ...DEFAULT_LETTER_HINT_SETTINGS, enabled }} />,
-    );
-    const card = screen.getByTestId("course-flow-settings");
-    expect(card).toHaveStyle(cardStyle);
-    const group = within(card);
-    expect(group.getByRole("switch", {
-      name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczFazeZapoznania",
-    })).toBeTruthy();
-    expect(group.getByRole("switch", { name: "courseLetterHints.toggleLabel", checked: enabled })).toBeTruthy();
-    expect(group.getByRole("switch", {
-      name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki",
-    })).toBeTruthy();
-    expect(Boolean(group.queryByRole("header", { name: "courseLetterHints.profileTitle" }))).toBe(enabled);
+    screen.rerender(<CourseSettingsSection {...props} letterHintSettings={{ ...DEFAULT_LETTER_HINT_SETTINGS, enabled }} />);
+    const learning = within(screen.getByTestId("course-learning-settings"));
+    expect(learning.getByRole("switch", { name: "components.courseEditor.settingsCourse.accessibilityLabel.przelaczPowtorki" })).toBeTruthy();
+    expect(learning.queryByRole("switch", { name: "courseLetterHints.toggleLabel" })).toBeNull();
+    const answers = within(screen.getByTestId("course-answer-settings"));
+    expect(answers.getByRole("switch", { name: "courseLetterHints.toggleLabel", checked: enabled })).toBeTruthy();
+    expect(Boolean(answers.queryByRole("header", { name: "courseLetterHints.profileTitle" }))).toBe(enabled);
   }
 });
 
@@ -280,11 +408,36 @@ describe("size settings", () => {
   });
 
   it.each([
+    [320, 1, 1, false],
+    [320, 1.3, 1, true],
+    [390, 1, 1.4, true],
+    [768, 1.3, 1.4, false],
+  ])("adapts sizes and box-zero choices at %sdp, system scale %s, app scale %s", (width, fontScale, fontScaleMultiplier, stacked) => {
+    mockWindowDimensions.mockReturnValue({ width, height: 800, scale: 2, fontScale });
+    (useSettings as jest.Mock).mockReturnValue({
+      colors: resolveThemeColors("light"),
+      accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" },
+      fontScaleMultiplier,
+    });
+    const props = { ...makeProps(), boxZeroEnabled: true, showImageSizeOptions: true, imageSizeOptions: imageOptions };
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
+    for (const kind of ["flashcard-size", "image-size", "box-zero-answer"]) {
+      const section = screen.getByTestId(`course-${kind}-settings`);
+      fireEvent(section, "layout", { nativeEvent: { layout: { width: width - 32 } } });
+      const row = screen.getByTestId(`course-${kind}-first-row`);
+      expect(within(row).getAllByRole("button")).toHaveLength(2);
+      expect(row).toHaveStyle({ flexDirection: stacked ? "column" : "row" });
+      fireEvent(section, "layout", { nativeEvent: { layout: { width: 230 } } });
+      expect(row).toHaveStyle({ flexDirection: "column" });
+    }
+  });
+
+  it.each([
     ["large", copy.title.duza, copy.subtitle.kartaRozszerzaSie],
     ["small", copy.title.mala, copy.subtitle.tekstZostaje],
   ] as const)("keeps %s flashcards controlled and announces selection", (value, title, subtitle) => {
     const props = makeProps();
-    const screen = render(<CourseSettingsSection {...props} cardSize={value === "large" ? "small" : "large"} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} cardSize={value === "large" ? "small" : "large"} />);
     const name = `${copy.title.rozmiarFiszki}, ${title}, ${subtitle}`;
     fireEvent.press(screen.getByRole("button", { name, selected: false }));
     expect(props.onSelectCardSize).toHaveBeenCalledWith(value);
@@ -297,7 +450,7 @@ describe("size settings", () => {
   it.each(imageOptions)("selects and announces %s image size without changing card size", (value) => {
     const onSelectImageSize = jest.fn();
     const props = { ...makeProps(), showImageSizeOptions: true, imageSizeEnabled: true, imageSizeOptions: imageOptions, onSelectImageSize };
-    const screen = render(<CourseSettingsSection {...props} imageSize="dynamic" />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} imageSize="dynamic" />);
     const name = new RegExp(`${copy.title.rozmiarObrazu}, ${imageTitles[imageOptions.indexOf(value)]},`);
     fireEvent.press(screen.getByRole("button", { name }));
     expect(onSelectImageSize).toHaveBeenCalledWith(value);
@@ -310,7 +463,7 @@ describe("size settings", () => {
   it("preserves disabled image selection, hint and option availability", () => {
     const onSelectImageSize = jest.fn();
     const props = { ...makeProps(), showImageSizeOptions: true, imageSize: "medium" as const, imageSizeOptions: imageOptions, onSelectImageSize };
-    const screen = render(<CourseSettingsSection {...props} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
     const name = new RegExp(`${copy.title.rozmiarObrazu}, ${copy.title.sredni},`);
     expect(screen.getByText(copy.hint.dostepneTylkoDlaDuzych)).toBeTruthy();
     for (const option of screen.getAllByRole("button", { name: new RegExp(copy.title.rozmiarObrazu) })) {
@@ -330,7 +483,7 @@ describe("size settings", () => {
 
   it("keeps image settings hidden and respects supplied options and existing defaults", () => {
     const props = makeProps();
-    const screen = render(<CourseSettingsSection {...props} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
     expect(screen.queryByRole("header", { name: copy.title.rozmiarObrazu })).toBeNull();
     screen.rerender(<CourseSettingsSection {...props} showImageSizeOptions />);
     expect(screen.getAllByRole("button", { name: new RegExp(copy.title.rozmiarObrazu) })).toHaveLength(4);
@@ -355,7 +508,7 @@ describe("size settings", () => {
       accessibilityPreferences: { highContrastEnabled: highContrast, colorBlindMode },
       fontScaleMultiplier: 1.15,
     });
-    const screen = render(<CourseSettingsSection {...makeProps()} colors={colors} showImageSizeOptions imageSizeOptions={imageOptions} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...makeProps()} colors={colors} showImageSizeOptions imageSizeOptions={imageOptions} />);
     expect(screen.getByText(copy.title.rozmiarFiszki)).toHaveStyle({ color: colors.headline, fontSize: 16 * 1.15 });
     expect(screen.getByText(copy.title.bardzoDuzy)).toHaveStyle({ color: colors.headline, fontSize: 16 * 1.15 });
     const description = screen.getByText(copy.subtitle.stoSiedemdziesiatProcent);
@@ -383,7 +536,7 @@ describe("letter hint cards", () => {
     const onChange = jest.fn();
     const props = { ...makeProps(), onChangeLetterHintSettings: onChange };
     const settings = { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true };
-    const screen = render(<CourseSettingsSection {...props} letterHintSettings={settings} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} letterHintSettings={settings} />);
     expect(screen.getByRole("header", { name: "Siła podpowiedzi" })).toBeTruthy();
     expect(screen.getByText("Określ, ile liter może odsłonić podpowiedź.")).toBeTruthy();
     fireEvent.press(screen.getByRole("radio", { name: label }));
@@ -398,7 +551,7 @@ describe("letter hint cards", () => {
   it("announces explicit letter units and no-help limits and blocks disabled cards and custom controls", () => {
     const onChange = jest.fn();
     const props = { ...makeProps(), onChangeLetterHintSettings: onChange, letterHintSettingsDisabled: true };
-    const screen = render(<CourseSettingsSection {...props} letterHintSettings={{ enabled: true, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 }} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} letterHintSettings={{ enabled: true, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 }} />);
     expect(screen.getByRole("radio", { name: "Delikatny" }).props.accessibilityHint).toBe("Pudełko 1: do 1 litery. Pudełko 2: bez podpowiedzi");
     for (const card of screen.getAllByRole("radio")) {
       expect(card).toBeDisabled();
@@ -424,7 +577,7 @@ describe("letter hint cards", () => {
       accessibilityPreferences: { highContrastEnabled: highContrast, colorBlindMode },
       fontScaleMultiplier: 1.15,
     });
-    const screen = render(
+    const screen = renderExpandedSettings(
       <View style={{ width }}>
         <CourseSettingsSection {...makeProps()} colors={colors} onChangeLetterHintSettings={jest.fn()} letterHintSettings={{ ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true }} />
       </View>,
@@ -456,7 +609,7 @@ describe("box zero settings cards", () => {
 
   it("toggles the introduction without resetting the chosen side", () => {
     const props = makeProps();
-    const screen = render(<CourseSettingsSection {...props} boxZeroAnswerSide="front" />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} boxZeroAnswerSide="front" />);
     expect(screen.getByText(copy.title.fazaZapoznaniaPudelko0)).toBeTruthy();
     expect(screen.queryByRole("header", { name: copy.boxZeroAnswerSide.title })).toBeNull();
     fireEvent.press(screen.getByRole("switch", { name: switchLabel, checked: false }));
@@ -474,7 +627,7 @@ describe("box zero settings cards", () => {
 
   it("defaults to the back and keeps card selection controlled", () => {
     const props = makeProps();
-    const screen = render(<CourseSettingsSection {...props} boxZeroEnabled boxZeroAnswerSide={undefined} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} boxZeroEnabled boxZeroAnswerSide={undefined} />);
     expect(screen.getByRole("button", { name: backLabel, selected: true })).toBeEnabled();
     fireEvent.press(screen.getByRole("button", { name: frontLabel, selected: false }));
     expect(props.onSelectBoxZeroAnswerSide).toHaveBeenCalledWith("front");
@@ -489,7 +642,7 @@ describe("box zero settings cards", () => {
 
   it("disables both cards without a selection callback while preserving the switch", () => {
     const props = makeProps();
-    const screen = render(<CourseSettingsSection {...props} boxZeroEnabled onSelectBoxZeroAnswerSide={undefined} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} boxZeroEnabled onSelectBoxZeroAnswerSide={undefined} />);
     for (const label of [frontLabel, backLabel]) {
       const card = screen.getByRole("button", { name: label });
       expect(card).toBeDisabled();
@@ -514,7 +667,7 @@ describe("box zero settings cards", () => {
       accessibilityPreferences: { highContrastEnabled: highContrast, colorBlindMode },
       fontScaleMultiplier: 1.15,
     });
-    const screen = render(<View style={{ width }}><CourseSettingsSection {...makeProps()} colors={colors} boxZeroEnabled /></View>);
+    const screen = renderExpandedSettings(<View style={{ width }}><CourseSettingsSection {...makeProps()} colors={colors} boxZeroEnabled /></View>);
     const heading = screen.getByText(copy.title.fazaZapoznaniaPudelko0);
     expect(heading.props.numberOfLines).toBeUndefined();
     expect(heading.props.allowFontScaling).not.toBe(false);
@@ -533,7 +686,7 @@ it("switches all audio off without discarding languages and hides official langu
   const audioSettings = { enabled: true, frontLanguage: "es-ES" as const, backLanguage: "pl-PL" as const };
   const onChangeAudioSettings = jest.fn();
   const props = { ...makeProps(), audioSettings, onChangeAudioSettings, showAudioLanguages: true };
-  const screen = render(<CourseSettingsSection {...props} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
   fireEvent.press(screen.getByRole("switch", { name: "courseAudio.toggleLabel" }));
   expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, enabled: false });
   fireEvent.press(screen.getAllByText("courseAudio.languages.fr-FR")[0]);
@@ -548,7 +701,7 @@ it("defaults each course to non-native playback and preserves its selection when
   const audioSettings = { enabled: true, frontLanguage: "en-US" as const, backLanguage: "pl-PL" as const };
   const onChangeAudioSettings = jest.fn();
   const props = { ...makeProps(), audioSettings, onChangeAudioSettings };
-  const screen = render(<CourseSettingsSection {...props} />);
+  const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
   const defaultMode = screen.getByRole("button", { name: "audioAutoplay.title: audioAutoplay.modes.non_native.title" });
   expect(defaultMode).toHaveAccessibilityState({ selected: true });
   expect(screen.queryByText("audioAutoplay.inherit")).toBeNull();
@@ -560,7 +713,8 @@ it("defaults each course to non-native playback and preserves its selection when
   fireEvent.press(defaultMode);
   expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, autoplayMode: "non_native" });
   screen.rerender(<CourseSettingsSection {...props} audioSettings={{ ...audioSettings, enabled: false }} />);
-  expect(screen.queryByText("audioAutoplay.title")).toBeNull();
+  expect(screen.getByTestId("course-audio-autoplay-settings")).toBeTruthy();
+  expect(screen.getByRole("button", { name: "audioAutoplay.title: audioAutoplay.modes.non_native.title" })).toHaveAccessibilityState({ selected: true });
 });
 
 describe("audio autoplay cards", () => {
@@ -578,7 +732,7 @@ describe("audio autoplay cards", () => {
     const audioSettings = { enabled: true, frontLanguage: "es-ES" as const, backLanguage: "pl-PL" as const };
     const onChangeAudioSettings = jest.fn();
     const props = { ...makeProps(), audioSettings, onChangeAudioSettings };
-    const screen = render(<CourseSettingsSection {...props} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...props} />);
     expect(screen.getByLabelText(`Język ojczysty: ${nativeLanguage === "pl" ? "Polski" : "Angielski"}`)).toBeTruthy();
     expect(screen.getByText("Język ojczysty:")).toBeTruthy();
     expect(screen.getByText(nativeLanguage === "pl" ? "Polski" : "Angielski")).toBeTruthy();
@@ -613,7 +767,7 @@ describe("audio autoplay cards", () => {
       colors, nativeLanguage: "pl",
       accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" }, fontScaleMultiplier: 1.15,
     });
-    const screen = render(<CourseSettingsSection {...makeProps()} audioSettings={{ enabled: true, autoplayMode: "off", frontLanguage: null, backLanguage: null }} onChangeAudioSettings={jest.fn()} />);
+    const screen = renderExpandedSettings(<CourseSettingsSection {...makeProps()} audioSettings={{ enabled: true, autoplayMode: "off", frontLanguage: null, backLanguage: null }} onChangeAudioSettings={jest.fn()} />);
     expect(screen.getByTestId("course-audio-autoplay-first-row")).toHaveStyle({ flexDirection: stacked ? "column" : "row" });
     const description = screen.getByText(pl.audioAutoplay.modes.off.description);
     expect(description).toHaveStyle({ color: colors.paragraph, fontSize: 13 * 1.15 });

@@ -1,4 +1,5 @@
-import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSettingsPagerGestureLock } from "@/src/components/settings/SettingsPagerGestureContext";
 import {
   PanResponder,
   StyleProp,
@@ -73,6 +74,9 @@ function TrackSliderComponent({
   accessibilityLabel,
   accessibilityValueText,
 }: TrackSliderProps) {
+  const setPagerLock = useSettingsPagerGestureLock();
+  const lockToken = useRef({}).current;
+  useEffect(() => () => setPagerLock?.(lockToken, false), [setPagerLock, lockToken]);
   const trackRef = useRef<View | null>(null);
   const [trackLayout, setTrackLayout] = useState<{
     pageX: number;
@@ -164,6 +168,9 @@ function TrackSliderComponent({
       ref={trackRef}
       testID={testID}
       onLayout={handleLayout}
+      onTouchStart={() => setPagerLock?.(lockToken, true)}
+      onTouchEnd={(event) => setPagerLock?.(lockToken, event.nativeEvent.touches.length > 0)}
+      onTouchCancel={() => setPagerLock?.(lockToken, false)}
       style={[styles.wrapper, { height: wrapperHeight }, disabled && styles.disabled, style]}
       {...panResponder.panHandlers}
       accessible

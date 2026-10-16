@@ -1,3 +1,7 @@
+import {
+  SettingsChoiceGrid,
+  useSettingsChoiceLayout,
+} from "./SettingsChoiceLayout";
 import { Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import type { BoxZeroAnswerSide } from "@/src/contexts/settings/types";
@@ -20,11 +24,14 @@ export function BoxZeroSettingsSection({
 }: BoxZeroSettingsSectionProps) {
   const { t } = useTranslation();
   const shared = useStyles();
-
+  const { stacked, onLayout } = useSettingsChoiceLayout();
   if (!boxZeroEnabled) return null;
-
   return (
-    <View style={shared.section}>
+    <View
+      style={shared.section}
+      onLayout={onLayout}
+      testID="course-box-zero-answer-settings"
+    >
       <View style={shared.optionText}>
         <Text accessibilityRole="header" style={shared.optionTitle}>
           {t(`${COPY}.boxZeroAnswerSide.title`)}
@@ -33,8 +40,11 @@ export function BoxZeroSettingsSection({
           {preventWidowsPl(t(`${COPY}.boxZeroAnswerSide.description`))}
         </Text>
       </View>
-      <View style={shared.row}>
-        {(["front", "back"] as const).map((side) => {
+      <SettingsChoiceGrid
+        options={["front", "back"] as const}
+        stacked={stacked}
+        firstRowTestID="course-box-zero-answer-first-row"
+        renderOption={(side) => {
           const selected = boxZeroAnswerSide === side;
           const title = t(`${COPY}.boxZeroAnswerSide.${side}`);
           const description = t(`${COPY}.boxZeroAnswerSide.${side}Description`);
@@ -44,15 +54,21 @@ export function BoxZeroSettingsSection({
               title={title}
               description={description}
               accessibilityLabel={`${t(`${COPY}.boxZeroAnswerSide.title`)}, ${title}, ${description}`}
-              icon={side === "front" ? "document-text-outline" : "reader-outline"}
+              icon={
+                side === "front" ? "document-text-outline" : "reader-outline"
+              }
               accent="teal"
               selected={selected}
-              onPress={onSelectBoxZeroAnswerSide ? () => onSelectBoxZeroAnswerSide(side) : undefined}
+              onPress={
+                onSelectBoxZeroAnswerSide
+                  ? () => onSelectBoxZeroAnswerSide(side)
+                  : undefined
+              }
               emphasizeSelectedBorder
             />
           );
-        })}
-      </View>
+        }}
+      />
     </View>
   );
 }

@@ -1,3 +1,4 @@
+import type { ThemeColorKey } from "@/src/theme/theme";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ReactNode } from "react";
 import { Modal, Pressable, ScrollView, Text, View } from "react-native";
@@ -12,6 +13,7 @@ type NudgeModalProps = {
   children?: ReactNode;
   confirmLabel: string;
   confirmDisabled?: boolean;
+  confirmColor?: ThemeColorKey;
   onConfirm: () => void;
   onClose: () => void;
   secondaryLabel?: string;
@@ -27,6 +29,7 @@ export function NudgeModal({
   children,
   confirmLabel,
   confirmDisabled = false,
+  confirmColor = "my_green",
   onConfirm,
   onClose,
   secondaryLabel,
@@ -88,7 +91,7 @@ export function NudgeModal({
             ) : null}
             <MyButton
               text={confirmLabel}
-              color="my_green"
+              color={confirmColor}
               onPress={onConfirm}
               disabled={confirmDisabled}
               width={scrollableContent ? "100%" : 164}

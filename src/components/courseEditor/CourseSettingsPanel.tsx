@@ -7,6 +7,7 @@ import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import type { ThemeColorKey } from "@/src/theme/theme";
 import { Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
+import type { CourseSettingsTabKey } from "./courseSettings/useCourseSettingsTabs";
 
 type CourseSettingsResetAction = {
   key: string;
@@ -22,6 +23,7 @@ type CourseSettingsResetAction = {
 };
 
 type Props = {
+  activeTab: CourseSettingsTabKey;
   styles: Record<string, unknown>;
   settingsProps: CourseSettingsSectionProps;
   resetActions?: CourseSettingsResetAction[];
@@ -29,7 +31,7 @@ type Props = {
 
 type SharedStyles = {
   sectionGroup: object;
-  settingsGroupLabel: object;
+  settingsSectionHeader: object;
   settingsActionCard: object;
   settingsActionCardStandalone: object;
   settingsActionCardSections: object;
@@ -42,65 +44,66 @@ type SharedStyles = {
 };
 
 export function CourseSettingsPanel({
+  activeTab,
   styles,
   settingsProps,
   resetActions = [],
 }: Props) {
   const { t } = useTranslation();
   const sharedStyles = styles as SharedStyles;
-
   return (
     <View style={sharedStyles.sectionGroup}>
-      <CourseSettingsSection {...settingsProps} />
+      <Text
+        accessibilityRole="header"
+        style={sharedStyles.settingsSectionHeader}
+      >
+        {t(`courseSettingsGroups.${activeTab}.title`)}
+      </Text>
+      <CourseSettingsSection {...settingsProps} activeTab={activeTab} />
 
-      {resetActions.length > 0 ? (
-        <>
-          <Text style={sharedStyles.settingsGroupLabel}>
-            {t("components.courseEditor.courseSettingsPanel.textChild.reset")}
-          </Text>
-          <View
-            style={[
-              sharedStyles.settingsActionCard,
-              sharedStyles.settingsActionCardStandalone,
-            ]}
-          >
-            <View style={sharedStyles.settingsActionCardSections}>
-              {resetActions.map((action, index) => (
-                <View key={action.key}>
-                  {index > 0 ? (
-                    <View style={sharedStyles.settingsGroupDivider} />
-                  ) : null}
-                  <View style={sharedStyles.settingsActionCardSection}>
-                    <View style={sharedStyles.settingsActionCardHeader}>
-                      <Text style={sharedStyles.settingsActionCardTitle}>
-                        {action.title}
-                      </Text>
-                      <Text style={sharedStyles.settingsActionCardDescription}>
-                        {preventWidowsPl(action.subtitle)}
-                      </Text>
-                    </View>
-                    <View style={sharedStyles.settingsActionCardButtonRow}>
-                      <MyButton
-                        text={
-                          action.loading
-                            ? action.loadingText ??
-                              t(
-                                "components.courseEditor.courseSettingsPanel.loadingText.operationInProgress"
-                              )
-                            : action.ctaText
-                        }
-                        color={action.buttonColor ?? "my_red"}
-                        onPress={action.onPress}
-                        disabled={action.disabled ?? false}
-                        width={action.buttonWidth ?? 130}
-                      />
-                    </View>
+      {activeTab === "progress" && resetActions.length > 0 ? (
+        <View
+          style={[
+            sharedStyles.settingsActionCard,
+            sharedStyles.settingsActionCardStandalone,
+          ]}
+        >
+          <View style={sharedStyles.settingsActionCardSections}>
+            {resetActions.map((action, index) => (
+              <View key={action.key}>
+                {index > 0 ? (
+                  <View style={sharedStyles.settingsGroupDivider} />
+                ) : null}
+                <View style={sharedStyles.settingsActionCardSection}>
+                  <View style={sharedStyles.settingsActionCardHeader}>
+                    <Text style={sharedStyles.settingsActionCardTitle}>
+                      {action.title}
+                    </Text>
+                    <Text style={sharedStyles.settingsActionCardDescription}>
+                      {preventWidowsPl(action.subtitle)}
+                    </Text>
+                  </View>
+                  <View style={sharedStyles.settingsActionCardButtonRow}>
+                    <MyButton
+                      text={
+                        action.loading
+                          ? (action.loadingText ??
+                            t(
+                              "components.courseEditor.courseSettingsPanel.loadingText.operationInProgress",
+                            ))
+                          : action.ctaText
+                      }
+                      color={action.buttonColor ?? "my_red"}
+                      onPress={action.onPress}
+                      disabled={action.disabled ?? false}
+                      width={action.buttonWidth ?? 130}
+                    />
                   </View>
                 </View>
-              ))}
-            </View>
+              </View>
+            ))}
           </View>
-        </>
+        </View>
       ) : null}
     </View>
   );

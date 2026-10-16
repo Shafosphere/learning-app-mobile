@@ -22,6 +22,55 @@ describe("useCourseOverrideSettings", () => {
     jest.restoreAllMocks();
   });
 
+  it.each([
+    "BoxZeroEnabled", "AutoflowEnabled", "ShowExplanationEnabled",
+    "ExplanationOnlyOnWrong", "SkipCorrectionEnabled", "ImageFrameEnabled",
+  ] as const)("preserves %s for custom and built-in courses after remount", async (setting) => {
+    const params = { courses: [course], activeCourseIdx: null, activeCustomCourseId: 7 };
+    const hook = renderHook(() => useCourseOverrideSettings(params));
+    await waitFor(() => expect(hook.result.current.boxZeroSettingsHydrated).toBe(true));
+    const getCustom = `getCustomCourse${setting}` as const;
+    const setCustom = `setCustomCourse${setting}` as const;
+    const getBuiltin = `getBuiltinCourse${setting}` as const;
+    const setBuiltin = `setBuiltinCourse${setting}` as const;
+    const value = !hook.result.current[getCustom](7);
+    await act(async () => { await hook.result.current[setCustom](7, value); });
+    await act(async () => { await hook.result.current[setCustom](8, !value); });
+    await act(async () => { await hook.result.current[setBuiltin](course, value); });
+    hook.unmount();
+    const restored = renderHook(() => useCourseOverrideSettings(params));
+    await waitFor(() => {
+      expect(restored.result.current[getCustom](7)).toBe(value);
+      expect(restored.result.current[getCustom](8)).toBe(!value);
+      expect(restored.result.current[getBuiltin](course)).toBe(value);
+    });
+  });
+
+  it("preserves card size, image size and button labels independently after remount", async () => {
+    const params = { courses: [course], activeCourseIdx: null, activeCustomCourseId: 7 };
+    const hook = renderHook(() => useCourseOverrideSettings(params));
+    await waitFor(() => expect(hook.result.current.boxZeroSettingsHydrated).toBe(true));
+    await act(async () => { await hook.result.current.setCustomCourseCardSize(7, "small"); });
+    await act(async () => { await hook.result.current.setCustomCourseImageSize(7, "very_large"); });
+    await act(async () => { await hook.result.current.setCustomCourseTrueFalseButtonsVariant(7, "know_dont_know"); });
+    await act(async () => { await hook.result.current.setBuiltinCourseCardSize(course, "small"); });
+    await act(async () => { await hook.result.current.setBuiltinCourseImageSize(course, "medium"); });
+    await act(async () => { await hook.result.current.setBuiltinCourseTrueFalseButtonsVariant(course, "know_dont_know"); });
+    hook.unmount();
+    const restored = renderHook(() => useCourseOverrideSettings(params));
+    await waitFor(() => {
+      expect(restored.result.current.getCustomCourseCardSize(7)).toBe("small");
+      expect(restored.result.current.getCustomCourseImageSize(7)).toBe("very_large");
+      expect(restored.result.current.getCustomCourseTrueFalseButtonsVariant(7)).toBe("know_dont_know");
+      expect(restored.result.current.getBuiltinCourseCardSize(course)).toBe("small");
+      expect(restored.result.current.getBuiltinCourseImageSize(course)).toBe("medium");
+      expect(restored.result.current.getBuiltinCourseTrueFalseButtonsVariant(course)).toBe("know_dont_know");
+      expect(restored.result.current.getCustomCourseCardSize(8)).toBe("large");
+      expect(restored.result.current.getCustomCourseImageSize(8)).toBe("dynamic");
+      expect(restored.result.current.getCustomCourseTrueFalseButtonsVariant(8)).toBe("true_false");
+    });
+  });
+
   it("persists both answer sides explicitly and keeps courses independent after remount", async () => {
     const params = { courses: [course], activeCourseIdx: null, activeCustomCourseId: 7 };
     const hook = renderHook(() => useCourseOverrideSettings(params));

@@ -1,3 +1,5 @@
+import type { CourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
+import { makeBuiltinCourseKey } from "./courseKeys";
 import { COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, normalizeCourseFrontImageRole, normalizeFrontImageRoleOverrides } from "@/src/utils/frontImageRole";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings, COURSE_AUDIO_STORAGE_KEY } from "./courseAudioSettings";
@@ -149,6 +151,7 @@ export function useCourseOverrideSettings({
   const [frontImageRoleOverrides, setFrontImageRoleOverrides, courseFrontImageRoleHydrated] =
     useHydratedPersistedState<CourseOverrideState<CourseFrontImageRole>>(
       COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, { builtin: {}, custom: {} },
+      true,
     );
   const normalizedFrontImageRoleOverrides = useMemo(
     () => normalizeFrontImageRoleOverrides(frontImageRoleOverrides), [frontImageRoleOverrides],
@@ -178,6 +181,7 @@ export function useCourseOverrideSettings({
     useHydratedPersistedState<CourseOverrideState<LetterHintSettings>>(
       "flashcards.courseLetterHintOverrides",
       { builtin: {}, custom: {} },
+      true,
     );
   const letterHints = useCourseOverrideAccessors({
     courses,
@@ -221,7 +225,8 @@ export function useCourseOverrideSettings({
 
   const [audioOverrides, setAudioOverrides, courseAudioSettingsHydrated] =
     useHydratedPersistedState<CourseOverrideState<CourseAudioSettings>>(
-      COURSE_AUDIO_STORAGE_KEY, { builtin: {}, custom: {} }
+      COURSE_AUDIO_STORAGE_KEY, { builtin: {}, custom: {} },
+      true,
     );
   const audioSettings = useCourseOverrideAccessors({
     courses, activeCourseIdx, activeCustomCourseId,
@@ -247,7 +252,8 @@ export function useCourseOverrideSettings({
   const [boxZeroOverrides, setBoxZeroOverrides, boxZeroOverridesHydrated] =
     useHydratedPersistedState<CourseBoxZeroOverrides>(
       "flashcards.courseBoxZeroOverrides",
-      DEFAULT_COURSE_BOX_ZERO_OVERRIDES
+      DEFAULT_COURSE_BOX_ZERO_OVERRIDES,
+      true,
     );
   const boxZero = useCourseOverrideAccessors({
     courses,
@@ -258,14 +264,12 @@ export function useCourseOverrideSettings({
     setOverrides: setBoxZeroOverrides,
   });
 
-  const [
-    boxZeroAnswerSideOverrides,
-    setBoxZeroAnswerSideOverrides,
-    boxZeroAnswerSideHydrated,
-  ] = useHydratedPersistedState<CourseOverrideState<BoxZeroAnswerSide>>(
-    "flashcards.courseBoxZeroAnswerSideOverrides",
-    { builtin: {}, custom: {} }
-  );
+  const [boxZeroAnswerSideOverrides, setBoxZeroAnswerSideOverrides, boxZeroAnswerSideHydrated] =
+    useHydratedPersistedState<CourseOverrideState<BoxZeroAnswerSide>>(
+      "flashcards.courseBoxZeroAnswerSideOverrides",
+      { builtin: {}, custom: {} },
+      true,
+    );
   const boxZeroAnswerSide = useCourseOverrideAccessors<BoxZeroAnswerSide>({
     courses,
     activeCourseIdx,
@@ -280,10 +284,11 @@ export function useCourseOverrideSettings({
     "flashcards.autoflowEnabled",
     true
   );
-  const [autoflowOverrides, setAutoflowOverrides] =
-    usePersistedState<CourseAutoflowOverrides>(
+  const [autoflowOverrides, setAutoflowOverrides, autoflowOverridesHydrated] =
+    useHydratedPersistedState<CourseAutoflowOverrides>(
       "flashcards.courseAutoflowOverrides",
-      DEFAULT_COURSE_AUTOFLOW_OVERRIDES
+      DEFAULT_COURSE_AUTOFLOW_OVERRIDES,
+      true,
     );
   const autoflow = useCourseOverrideAccessors({
     courses,
@@ -298,10 +303,11 @@ export function useCourseOverrideSettings({
     "flashcards.showExplanationEnabled",
     true
   );
-  const [showExplanationOverrides, setShowExplanationOverrides] =
-    usePersistedState<CourseShowExplanationOverrides>(
+  const [showExplanationOverrides, setShowExplanationOverrides, showExplanationOverridesHydrated] =
+    useHydratedPersistedState<CourseShowExplanationOverrides>(
       "flashcards.courseShowExplanationOverrides",
-      DEFAULT_COURSE_SHOW_EXPLANATION_OVERRIDES
+      DEFAULT_COURSE_SHOW_EXPLANATION_OVERRIDES,
+      true,
     );
   const showExplanation = useCourseOverrideAccessors({
     courses,
@@ -316,13 +322,12 @@ export function useCourseOverrideSettings({
     "flashcards.explanationOnlyOnWrong",
     false
   );
-  const [
-    explanationOnlyOnWrongOverrides,
-    setExplanationOnlyOnWrongOverrides,
-  ] = usePersistedState<CourseExplanationOnlyOnWrongOverrides>(
-    "flashcards.courseExplanationOnlyOnWrongOverrides",
-    DEFAULT_COURSE_EXPLANATION_ONLY_ON_WRONG_OVERRIDES
-  );
+  const [explanationOnlyOnWrongOverrides, setExplanationOnlyOnWrongOverrides, explanationOnlyOnWrongOverridesHydrated] =
+    useHydratedPersistedState<CourseExplanationOnlyOnWrongOverrides>(
+      "flashcards.courseExplanationOnlyOnWrongOverrides",
+      DEFAULT_COURSE_EXPLANATION_ONLY_ON_WRONG_OVERRIDES,
+      true,
+    );
   const explanationOnlyOnWrong = useCourseOverrideAccessors({
     courses,
     activeCourseIdx,
@@ -336,10 +341,11 @@ export function useCourseOverrideSettings({
     "flashcards.skipCorrectionEnabled",
     false
   );
-  const [skipCorrectionOverrides, setSkipCorrectionOverrides] =
-    usePersistedState<CourseSkipCorrectionOverrides>(
+  const [skipCorrectionOverrides, setSkipCorrectionOverrides, skipCorrectionOverridesHydrated] =
+    useHydratedPersistedState<CourseSkipCorrectionOverrides>(
       "flashcards.courseSkipCorrectionOverrides",
-      DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES
+      DEFAULT_COURSE_SKIP_CORRECTION_OVERRIDES,
+      true,
     );
   const skipCorrection = useCourseOverrideAccessors({
     courses,
@@ -354,10 +360,11 @@ export function useCourseOverrideSettings({
       "flashcards.trueFalseButtonsVariant",
       "true_false"
     );
-  const [trueFalseButtonsOverrides, setTrueFalseButtonsOverrides] =
-    usePersistedState<CourseTrueFalseButtonsOverrides>(
+  const [trueFalseButtonsOverrides, setTrueFalseButtonsOverrides, trueFalseButtonsOverridesHydrated] =
+    useHydratedPersistedState<CourseTrueFalseButtonsOverrides>(
       "flashcards.courseTrueFalseButtonsOverrides",
-      DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES
+      DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES,
+      true,
     );
   const trueFalseButtons = useCourseOverrideAccessors({
     courses,
@@ -370,10 +377,11 @@ export function useCourseOverrideSettings({
 
   const [flashcardsCardSizeDefault, setFlashcardsCardSizeDefault] =
     usePersistedState<FlashcardsCardSize>("flashcards.cardSize", "large");
-  const [cardSizeOverrides, setCardSizeOverrides] =
-    usePersistedState<CourseCardSizeOverrides>(
+  const [cardSizeOverrides, setCardSizeOverrides, cardSizeOverridesHydrated] =
+    useHydratedPersistedState<CourseCardSizeOverrides>(
       "flashcards.courseCardSizeOverrides",
-      DEFAULT_COURSE_CARD_SIZE_OVERRIDES
+      DEFAULT_COURSE_CARD_SIZE_OVERRIDES,
+      true,
     );
   const cardSize = useCourseOverrideAccessors({
     courses,
@@ -386,10 +394,11 @@ export function useCourseOverrideSettings({
 
   const [flashcardsImageSizeDefault, setFlashcardsImageSizeDefault] =
     usePersistedState<FlashcardsImageSize>("flashcards.imageSize", "dynamic");
-  const [imageSizeOverrides, setImageSizeOverrides] =
-    usePersistedState<CourseImageSizeOverrides>(
+  const [imageSizeOverrides, setImageSizeOverrides, imageSizeOverridesHydrated] =
+    useHydratedPersistedState<CourseImageSizeOverrides>(
       "flashcards.courseImageSizeOverrides",
-      DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES
+      DEFAULT_COURSE_IMAGE_SIZE_OVERRIDES,
+      true,
     );
   const imageSize = useCourseOverrideAccessors({
     courses,
@@ -404,10 +413,11 @@ export function useCourseOverrideSettings({
     flashcardsImageFrameDefaultEnabled,
     setFlashcardsImageFrameDefaultEnabled,
   ] = usePersistedState<boolean>("flashcards.imageFrameEnabled", true);
-  const [imageFrameOverrides, setImageFrameOverrides] =
-    usePersistedState<CourseImageFrameOverrides>(
+  const [imageFrameOverrides, setImageFrameOverrides, imageFrameOverridesHydrated] =
+    useHydratedPersistedState<CourseImageFrameOverrides>(
       "flashcards.courseImageFrameOverrides",
-      DEFAULT_COURSE_IMAGE_FRAME_OVERRIDES
+      DEFAULT_COURSE_IMAGE_FRAME_OVERRIDES,
+      true,
     );
   const imageFrame = useCourseOverrideAccessors({
     courses,
@@ -418,7 +428,56 @@ export function useCourseOverrideSettings({
     setOverrides: setImageFrameOverrides,
   });
 
+  const courseSettingsResetHydrated =
+    courseFrontImageRoleHydrated &&
+    letterHintSettingsHydrated &&
+    courseAudioSettingsHydrated &&
+    boxZeroOverridesHydrated &&
+    boxZeroAnswerSideHydrated &&
+    autoflowOverridesHydrated &&
+    showExplanationOverridesHydrated &&
+    explanationOnlyOnWrongOverridesHydrated &&
+    skipCorrectionOverridesHydrated &&
+    trueFalseButtonsOverridesHydrated &&
+    cardSizeOverridesHydrated &&
+    imageSizeOverridesHydrated &&
+    imageFrameOverridesHydrated;
+
+  const resetCourseSettings = async (
+    kind: "builtin" | "custom", key: string, values: CourseSettingsDefaults,
+  ) => {
+    if (!courseSettingsResetHydrated) throw new Error("Course settings are still loading");
+    const writeOverride = <T,>(
+      overrides: CourseOverrideState<T>,
+      persist: (value: CourseOverrideState<T>) => Promise<void>,
+      value: T,
+    ) => persist({ ...overrides, [kind]: { ...overrides[kind], [key]: value } });
+    // Wait for every write before exposing success or failure to the caller.
+    const results = await Promise.allSettled([
+      writeOverride(frontImageRoleOverrides, setFrontImageRoleOverrides, values.frontImageRole),
+      writeOverride(letterHintOverrides, setLetterHintOverrides, values.letterHintSettings),
+      writeOverride(audioOverrides, setAudioOverrides, values.audioSettings),
+      writeOverride(boxZeroOverrides, setBoxZeroOverrides, values.boxZeroEnabled),
+      writeOverride(boxZeroAnswerSideOverrides, setBoxZeroAnswerSideOverrides, values.boxZeroAnswerSide),
+      writeOverride(autoflowOverrides, setAutoflowOverrides, values.autoflowEnabled),
+      writeOverride(showExplanationOverrides, setShowExplanationOverrides, values.showExplanationEnabled),
+      writeOverride(explanationOnlyOnWrongOverrides, setExplanationOnlyOnWrongOverrides, values.explanationOnlyOnWrong),
+      writeOverride(skipCorrectionOverrides, setSkipCorrectionOverrides, values.skipCorrectionEnabled),
+      writeOverride(trueFalseButtonsOverrides, setTrueFalseButtonsOverrides, values.trueFalseButtonsVariant),
+      writeOverride(cardSizeOverrides, setCardSizeOverrides, values.cardSize),
+      writeOverride(imageSizeOverrides, setImageSizeOverrides, values.imageSize),
+      writeOverride(imageFrameOverrides, setImageFrameOverrides, values.imageFrameEnabled),
+    ]);
+    const failure = results.find((result) => result.status === "rejected");
+    if (failure?.status === "rejected") throw failure.reason;
+  };
+
   return {
+    courseSettingsResetHydrated,
+    resetCustomCourseSettings: (id: number, values: CourseSettingsDefaults) =>
+      resetCourseSettings("custom", id.toString(), values),
+    resetBuiltinCourseSettings: (params: CourseBoxZeroKeyParams, values: CourseSettingsDefaults) =>
+      resetCourseSettings("builtin", makeBuiltinCourseKey(params), values),
     courseFrontImageRole: imageRole.activeValue,
     courseFrontImageRoleHydrated,
     reloadCourseFrontImageRoleSettings,

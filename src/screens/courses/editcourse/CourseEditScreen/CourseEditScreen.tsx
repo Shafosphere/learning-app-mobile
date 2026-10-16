@@ -1,4 +1,12 @@
+import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
+import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
+import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
+import { useCourseResetActions } from "@/src/components/courseEditor/courseSettings/useCourseResetActions";
+import { resolveCourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
+import { SettingsTabBar } from "@/src/components/settings/SettingsTabBar";
+import { useCourseSettingsTabs } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import MyButton from "@/src/components/button/button";
+import { usePopup } from "@/src/contexts/PopupContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import CustomCourseEditor from "@/src/components/courseEditor/CustomCourseEditor";
 import { CourseSettingsPanel } from "@/src/components/courseEditor/CourseSettingsPanel";
@@ -18,8 +26,8 @@ import type {
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { Alert, ScrollView, Text, View } from "react-native";
+import { useCallback, useMemo, useEffect, useState } from "react";
+import { Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -138,6 +146,8 @@ function BuiltinCourseEditor({
     getBuiltinCourseAudioSettings,
     setBuiltinCourseAudioSettings,
     courseAudioSettingsHydrated,
+    courseSettingsResetHydrated,
+    resetBuiltinCourseSettings,
     courses,
     getBuiltinCourseBoxZeroAnswerSide,
     setBuiltinCourseBoxZeroAnswerSide,
@@ -167,85 +177,28 @@ function BuiltinCourseEditor({
     setBuiltinCourseTrueFalseButtonsVariant,
   } = useSettings();
 
+  const setPopup = usePopup();
+
   const normalizedSource = sourceLang ? sourceLang.toLowerCase() : null;
   const normalizedTarget = targetLang ? targetLang.toLowerCase() : null;
   const normalizedLevel = level ? (level.toUpperCase() as CEFRLevel) : null;
 
-  const [boxZeroAnswerSide, setBoxZeroAnswerSide] = useState(() =>
-    getBuiltinCourseBoxZeroAnswerSide({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [boxZeroEnabled, setBoxZeroEnabled] = useState(() =>
-    getBuiltinCourseBoxZeroEnabled({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [autoflowEnabled, setAutoflowEnabled] = useState(() =>
-    getBuiltinCourseAutoflowEnabled({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [skipCorrectionEnabled, setSkipCorrectionEnabled] = useState(() =>
-    getBuiltinCourseSkipCorrectionEnabled({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [showExplanationEnabled, setShowExplanationEnabled] = useState(() =>
-    getBuiltinCourseShowExplanationEnabled({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [explanationOnlyOnWrong, setExplanationOnlyOnWrong] = useState(() =>
-    getBuiltinCourseExplanationOnlyOnWrong({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [cardSize, setCardSize] = useState<FlashcardsCardSize>(() =>
-    getBuiltinCourseCardSize({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [imageSize, setImageSize] = useState<FlashcardsImageSize>(() =>
-    getBuiltinCourseImageSize({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [imageFrameEnabled, setImageFrameEnabled] = useState<boolean>(() =>
-    getBuiltinCourseImageFrameEnabled({
-      sourceLang: normalizedSource,
-      targetLang: normalizedTarget,
-      level: normalizedLevel,
-    })
-  );
-  const [trueFalseButtonsVariant, setTrueFalseButtonsVariant] =
-    useState<TrueFalseButtonsVariant>(() =>
-      getBuiltinCourseTrueFalseButtonsVariant({
-        sourceLang: normalizedSource,
-        targetLang: normalizedTarget,
-        level: normalizedLevel,
-      })
-    );
+  const courseParams = {
+    sourceLang: normalizedSource,
+    targetLang: normalizedTarget,
+    level: normalizedLevel,
+  };
+  const boxZeroAnswerSide = getBuiltinCourseBoxZeroAnswerSide(courseParams);
+  const boxZeroEnabled = getBuiltinCourseBoxZeroEnabled(courseParams);
+  const autoflowEnabled = getBuiltinCourseAutoflowEnabled(courseParams);
+  const skipCorrectionEnabled = getBuiltinCourseSkipCorrectionEnabled(courseParams);
+  const showExplanationEnabled = getBuiltinCourseShowExplanationEnabled(courseParams);
+  const explanationOnlyOnWrong = getBuiltinCourseExplanationOnlyOnWrong(courseParams);
+  const cardSize = getBuiltinCourseCardSize(courseParams);
+  const imageSize = getBuiltinCourseImageSize(courseParams);
+  const imageFrameEnabled = getBuiltinCourseImageFrameEnabled(courseParams);
+  const trueFalseButtonsVariant = getBuiltinCourseTrueFalseButtonsVariant(courseParams);
   const [reviewsEnabled, setReviewsEnabled] = useState(true);
-  const [resettingBoxes, setResettingBoxes] = useState(false);
-  const [resettingReviews, setResettingReviews] = useState(false);
-  const [resettingAll, setResettingAll] = useState(false);
 
   const getMatchingCourse = useCallback(
     () =>
@@ -276,7 +229,7 @@ function BuiltinCourseEditor({
     });
   }, [courseName, getMatchingCourse]);
 
-  const handleReviewsToggle = (value: boolean) => {
+  const handleReviewsToggle = useCallback((value: boolean) => {
     setReviewsEnabled(value);
     const matchingCourse = getMatchingCourse();
     const slug =
@@ -290,7 +243,7 @@ function BuiltinCourseEditor({
         void setCustomCourseReviewsEnabled(course.id, value);
       }
     });
-  };
+  }, [courseName, getMatchingCourse]);
 
   const getBuiltinReviewResetScope = (): BuiltinReviewResetScope | null => {
     const matchingCourse = getMatchingCourse();
@@ -332,268 +285,119 @@ function BuiltinCourseEditor({
       };
     };
 
-  const handleBoxZeroToggle = async (value: boolean) => {
-    setBoxZeroEnabled(value);
-    await setBuiltinCourseBoxZeroEnabled(
+  const persistCourseSetting = useCallback(async (save: () => Promise<void>) => {
+    try {
+      await save();
+    } catch (error) {
+      console.error("Failed to save course setting", error);
+      setPopup({
+        message: t("courseCreator.customEditor.popups.saveFailed"),
+        color: "angry",
+        duration: 4000,
+      });
+    }
+  }, [setPopup, t]);
+
+  const handleBoxZeroToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseBoxZeroEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseBoxZeroEnabled, persistCourseSetting]);
 
-  const handleAutoflowToggle = async (value: boolean) => {
-    setAutoflowEnabled(value);
-    await setBuiltinCourseAutoflowEnabled(
+  const handleAutoflowToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseAutoflowEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseAutoflowEnabled, persistCourseSetting]);
 
-  const handleSkipCorrectionToggle = async (value: boolean) => {
-    setSkipCorrectionEnabled(value);
-    await setBuiltinCourseSkipCorrectionEnabled(
+  const handleSkipCorrectionToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseSkipCorrectionEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseSkipCorrectionEnabled, persistCourseSetting]);
 
-  const handleShowExplanationToggle = async (value: boolean) => {
-    setShowExplanationEnabled(value);
-    await setBuiltinCourseShowExplanationEnabled(
+  const handleShowExplanationToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseShowExplanationEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseShowExplanationEnabled, persistCourseSetting]);
 
-  const handleExplanationOnlyOnWrongToggle = async (value: boolean) => {
-    setExplanationOnlyOnWrong(value);
-    await setBuiltinCourseExplanationOnlyOnWrong(
+  const handleExplanationOnlyOnWrongToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseExplanationOnlyOnWrong(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseExplanationOnlyOnWrong, persistCourseSetting]);
 
-  const handleCardSizeChange = async (value: FlashcardsCardSize) => {
-    setCardSize(value);
-    await setBuiltinCourseCardSize(
+  const handleCardSizeChange = useCallback(async (value: FlashcardsCardSize) => {
+    await persistCourseSetting(() => setBuiltinCourseCardSize(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseCardSize, persistCourseSetting]);
 
-  const handleImageSizeChange = async (value: FlashcardsImageSize) => {
-    setImageSize(value);
-    await setBuiltinCourseImageSize(
+  const handleImageSizeChange = useCallback(async (value: FlashcardsImageSize) => {
+    await persistCourseSetting(() => setBuiltinCourseImageSize(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseImageSize, persistCourseSetting]);
 
-  const handleTrueFalseButtonsVariantChange = async (
+  const handleTrueFalseButtonsVariantChange = useCallback(async (
     value: TrueFalseButtonsVariant
   ) => {
-    setTrueFalseButtonsVariant(value);
-    await setBuiltinCourseTrueFalseButtonsVariant(
+    await persistCourseSetting(() => setBuiltinCourseTrueFalseButtonsVariant(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseTrueFalseButtonsVariant, persistCourseSetting]);
 
-  const handleImageFrameToggle = async (value: boolean) => {
-    setImageFrameEnabled(value);
-    await setBuiltinCourseImageFrameEnabled(
+  const handleImageFrameToggle = useCallback(async (value: boolean) => {
+    await persistCourseSetting(() => setBuiltinCourseImageFrameEnabled(
       {
         sourceLang: normalizedSource,
         targetLang: normalizedTarget,
         level: normalizedLevel,
       },
       value
-    );
-  };
-
-  const performResetBoxes = async () => {
-    setResettingBoxes(true);
-    const scope = await resolveBuiltinReviewResetScope();
-
-    if (!scope) {
-      setResettingBoxes(false);
-      Alert.alert(
-        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
-        t(
-          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
-        )
-      );
-      return;
-    }
-
-    try {
-      await clearPersistedBoxesKeepProgress(scope.boxesStorageKey);
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.resetBoxesDoneTitle"),
-        t("components.courseEditor.customEditor.alerts.resetBoxesDoneMessage")
-      );
-    } catch {
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.error"),
-        t("components.courseEditor.customEditor.alerts.resetBoxesFailed")
-      );
-    } finally {
-      setResettingBoxes(false);
-    }
-  };
-
-  const handleResetBoxes = () => {
-    Alert.alert(
-      t("components.courseEditor.customEditor.alerts.resetBoxesConfirmTitle"),
-      t("components.courseEditor.customEditor.alerts.resetBoxesConfirmMessage"),
-      [
-        {
-          text: t("components.courseEditor.customEditor.alerts.cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("components.courseEditor.customEditor.alerts.resetBoxesAction"),
-          style: "destructive",
-          onPress: performResetBoxes,
-        },
-      ]
-    );
-  };
-
-  const performResetReviews = async () => {
-    setResettingReviews(true);
-    const scope = await resolveBuiltinReviewResetScope();
-
-    if (!scope) {
-      setResettingReviews(false);
-      Alert.alert(
-        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
-        t(
-          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
-        )
-      );
-      return;
-    }
-
-    try {
-      const deleted = await resetCustomReviewsForCourse(scope.courseId);
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.resetReviewsDoneTitle"),
-        deleted > 0
-          ? t(
-              "screens.courses.editcourse.courseEdit.courseEdit.alert.usunietoValueZapisanychPowtorekTego",
-              { value: deleted }
-            )
-          : t("components.courseEditor.customEditor.alerts.resetReviewsDoneEmpty")
-      );
-    } catch {
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.error"),
-        t("components.courseEditor.customEditor.alerts.resetReviewsFailed")
-      );
-    } finally {
-      setResettingReviews(false);
-    }
-  };
-
-  const handleResetReviews = () => {
-    Alert.alert(
-      t("components.courseEditor.customEditor.alerts.resetReviewsConfirmTitle"),
-      t("components.courseEditor.customEditor.alerts.resetReviewsConfirmMessage"),
-      [
-        {
-          text: t("components.courseEditor.customEditor.alerts.cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("components.courseEditor.customEditor.alerts.resetReviewsAction"),
-          style: "destructive",
-          onPress: performResetReviews,
-        },
-      ]
-    );
-  };
-
-  const performResetAll = async () => {
-    setResettingAll(true);
-    const scope = await resolveBuiltinReviewResetScope();
-
-    if (!scope) {
-      setResettingAll(false);
-      Alert.alert(
-        t("screens.courses.editcourse.courseEdit.courseEdit.alert.brakDanychKursu"),
-        t(
-          "screens.courses.editcourse.courseEdit.courseEdit.alert.nieUdaloSieOdnalezcLokalnych"
-        )
-      );
-      return;
-    }
-
-    try {
-      await AsyncStorage.removeItem(scope.boxesStorageKey);
-      await resetCustomReviewsForCourse(scope.courseId);
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.resetAllDoneTitle"),
-        t("components.courseEditor.customEditor.alerts.resetAllDoneMessage")
-      );
-    } catch {
-      Alert.alert(
-        t("components.courseEditor.customEditor.alerts.error"),
-        t("components.courseEditor.customEditor.alerts.resetAllFailed")
-      );
-    } finally {
-      setResettingAll(false);
-    }
-  };
-
-  const handleResetAll = () => {
-    Alert.alert(
-      t("components.courseEditor.customEditor.alerts.resetAllConfirmTitle"),
-      t("components.courseEditor.customEditor.alerts.resetAllConfirmMessage"),
-      [
-        {
-          text: t("components.courseEditor.customEditor.alerts.cancel"),
-          style: "cancel",
-        },
-        {
-          text: t("components.courseEditor.customEditor.alerts.resetAllAction"),
-          style: "destructive",
-          onPress: performResetAll,
-        },
-      ]
-    );
-  };
+    ));
+  }, [normalizedLevel, normalizedSource, normalizedTarget, setBuiltinCourseImageFrameEnabled, persistCourseSetting]);
 
   const matchingCourse = getMatchingCourse();
   const courseSlug = (matchingCourse as { slug?: string } | undefined)?.slug ?? null;
@@ -601,155 +405,198 @@ function BuiltinCourseEditor({
     (pack) =>
       (courseSlug && pack.slug === courseSlug) || pack.name === courseName
   );
-  const imageSizeOptions: FlashcardsImageSize[] = [
+  const imageSizeOptions: FlashcardsImageSize[] = useMemo(() => ([
     "dynamic",
     "small",
     "medium",
     "large",
     "very_large",
-  ];
+  ]), []);
   const courseHasImages = Boolean(matchingManifest?.imageMap);
+  const categoryTabs = useCourseSettingsTabs({
+    scopeKey: `${normalizedSource}|${normalizedTarget}|${normalizedLevel}|${courseName}`,
+    hasAudio: true,
+    hasResetActions: true,
+  });
+  const resetControls = useCourseResetActions({
+    scopeKey: `${normalizedSource}|${normalizedTarget}|${normalizedLevel}|${courseName}`,
+    disabled: !courseSettingsResetHydrated,
+    onResetSettings: async () => {
+      if (!matchingManifest) throw new Error("Official course defaults not found");
+      const scope = await resolveBuiltinReviewResetScope();
+      if (!scope) throw new Error("Course not found");
+      const values = resolveCourseSettingsDefaults(matchingManifest, matchingManifest.defaultType === "true_false" || matchingManifest.defaultType === "self_assess");
+      await resetBuiltinCourseSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, values);
+      await setCustomCourseReviewsEnabled(scope.courseId, values.reviewsEnabled, { seedCompletedReviews: false });
+      setReviewsEnabled(values.reviewsEnabled);
+    },
+    onResetBoxes: async () => {
+      const scope = await resolveBuiltinReviewResetScope();
+      if (!scope) throw new Error("Course not found");
+      await clearPersistedBoxesKeepProgress(scope.boxesStorageKey);
+    },
+    onResetReviews: async () => {
+      const scope = await resolveBuiltinReviewResetScope();
+      if (!scope) throw new Error("Course not found");
+      return resetCustomReviewsForCourse(scope.courseId);
+    },
+    onResetAll: async () => {
+      const scope = await resolveBuiltinReviewResetScope();
+      if (!scope) throw new Error("Course not found");
+      await AsyncStorage.removeItem(scope.boxesStorageKey);
+      await resetCustomReviewsForCourse(scope.courseId);
+    },
+  });
   const imageSizeEnabled = cardSize === "large" && courseHasImages;
+
+  const settingsScrollProps = useMemo(() => ({
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
+    contentContainerStyle: styles.scrollContent,
+    keyboardShouldPersistTaps: "handled" as const,
+  }), [styles.scrollContent, styles.scrollView, styles.scrollViewTablet, useCenteredTabletLayout]);
+  const courseSettingsProps = useMemo<CourseSettingsSectionProps>(() => ({
+    styles,
+    switchColors: {
+      thumb: colors.background,
+      trackFalse: colors.border,
+      trackTrue: colors.my_green,
+    },
+    colors,
+    audioSettings: getBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
+    audioSettingsDisabled: !courseAudioSettingsHydrated,
+    onChangeAudioSettings: (value) => { void persistCourseSetting(() => setBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value)); },
+    frontImageRole: getBuiltinCourseFrontImageRole({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
+    frontImageRoleDisabled: !courseFrontImageRoleHydrated,
+    onChangeFrontImageRole: (value) => { void persistCourseSetting(() => setBuiltinCourseFrontImageRole({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value)); },
+    letterHintSettings: getBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
+    letterHintSettingsDisabled: !letterHintSettingsHydrated,
+    onChangeLetterHintSettings: (value) => { void persistCourseSetting(() => setBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value)); },
+    boxZeroAnswerSide,
+    onSelectBoxZeroAnswerSide: async (side) => {
+      await persistCourseSetting(() => setBuiltinCourseBoxZeroAnswerSide(
+        {
+          sourceLang: normalizedSource,
+          targetLang: normalizedTarget,
+          level: normalizedLevel,
+        },
+        side
+      ));
+    },
+    boxZeroEnabled,
+    onToggleBoxZero: handleBoxZeroToggle,
+    autoflowEnabled,
+    onToggleAutoflow: handleAutoflowToggle,
+    reviewsEnabled,
+    onToggleReviews: handleReviewsToggle,
+    showExplanationEnabled,
+    onToggleShowExplanation: handleShowExplanationToggle,
+    explanationOnlyOnWrong,
+    onToggleExplanationOnlyOnWrong:
+      handleExplanationOnlyOnWrongToggle,
+    skipCorrectionEnabled,
+    onToggleSkipCorrection: handleSkipCorrectionToggle,
+    hideSkipCorrectionOption: false,
+    showTrueFalseButtonsVariant: false,
+    trueFalseButtonsVariant,
+    onSelectTrueFalseButtonsVariant: handleTrueFalseButtonsVariantChange,
+    cardSize,
+    onSelectCardSize: handleCardSizeChange,
+    showImageSizeOptions: courseHasImages,
+    imageSize,
+    imageSizeOptions,
+    onSelectImageSize: handleImageSizeChange,
+    imageSizeEnabled,
+    showImageFrameOption: courseHasImages,
+    imageFrameEnabled,
+    onToggleImageFrame: handleImageFrameToggle,
+  }), [
+    autoflowEnabled,
+    boxZeroAnswerSide,
+    boxZeroEnabled,
+    cardSize,
+    colors,
+    courseAudioSettingsHydrated,
+    courseFrontImageRoleHydrated,
+    courseHasImages,
+    explanationOnlyOnWrong,
+    getBuiltinCourseAudioSettings,
+    getBuiltinCourseFrontImageRole,
+    getBuiltinCourseLetterHintSettings,
+    handleAutoflowToggle,
+    handleBoxZeroToggle,
+    handleCardSizeChange,
+    handleExplanationOnlyOnWrongToggle,
+    handleImageFrameToggle,
+    handleImageSizeChange,
+    handleReviewsToggle,
+    handleShowExplanationToggle,
+    handleSkipCorrectionToggle,
+    handleTrueFalseButtonsVariantChange,
+    imageFrameEnabled,
+    imageSize,
+    imageSizeEnabled,
+    imageSizeOptions,
+    letterHintSettingsHydrated,
+    normalizedLevel,
+    normalizedSource,
+    normalizedTarget,
+    reviewsEnabled,
+    persistCourseSetting,
+    setBuiltinCourseAudioSettings,
+    setBuiltinCourseBoxZeroAnswerSide,
+    setBuiltinCourseFrontImageRole,
+    setBuiltinCourseLetterHintSettings,
+    showExplanationEnabled,
+    skipCorrectionEnabled,
+    styles,
+    trueFalseButtonsVariant,
+  ]);
+  const renderSettingsPage = useCallback((pageTab: CourseSettingsTabKey) => (
+    <>
+      <View style={styles.sectionCard}>
+        <Text style={styles.sectionHeader}>
+          {t(
+            "screens.courses.editcourse.courseEdit.courseEdit.textChild.ustawieniaKursu"
+          )}
+        </Text>
+        {/* {languagePair ? (
+          <Text
+            style={styles.sectionDescription}
+          >{`Para języków: ${languagePair}`}</Text>
+        ) : null}
+        {level ? (
+          <Text style={styles.sectionDescription}>{`Poziom: ${level}`}</Text>
+        ) : null} */}
+        <CourseNameField
+          value={courseName}
+          onChange={() => {}}
+          editable={false}
+          disabled
+        />
+      </View>
+
+      <View style={styles.sectionCard}>
+        <CourseSettingsPanel
+          activeTab={pageTab}
+          styles={styles}
+          settingsProps={courseSettingsProps}
+          resetActions={resetControls.resetActions}
+        />
+      </View>
+    </>
+  ), [courseName, courseSettingsProps, resetControls.resetActions, styles, t]);
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={[
-          styles.scrollView,
-          useCenteredTabletLayout && styles.scrollViewTablet,
-        ]}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.sectionCard}>
-          <Text style={styles.sectionHeader}>
-            {t(
-              "screens.courses.editcourse.courseEdit.courseEdit.textChild.ustawieniaKursu"
-            )}
-          </Text>
-          {/* {languagePair ? (
-            <Text
-              style={styles.sectionDescription}
-            >{`Para języków: ${languagePair}`}</Text>
-          ) : null}
-          {level ? (
-            <Text style={styles.sectionDescription}>{`Poziom: ${level}`}</Text>
-          ) : null} */}
-          <CourseNameField
-            value={courseName}
-            onChange={() => {}}
-            editable={false}
-            disabled
-          />
-        </View>
-
-        <View style={styles.sectionCard}>
-          <CourseSettingsPanel
-            styles={styles}
-            settingsProps={{
-              styles,
-              switchColors: {
-                thumb: colors.background,
-                trackFalse: colors.border,
-                trackTrue: colors.my_green,
-              },
-              colors,
-              audioSettings: getBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
-              audioSettingsDisabled: !courseAudioSettingsHydrated,
-              onChangeAudioSettings: (value) => { void setBuiltinCourseAudioSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },
-              frontImageRole: getBuiltinCourseFrontImageRole({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
-              frontImageRoleDisabled: !courseFrontImageRoleHydrated,
-              onChangeFrontImageRole: (value) => { void setBuiltinCourseFrontImageRole({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },
-              letterHintSettings: getBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }),
-              letterHintSettingsDisabled: !letterHintSettingsHydrated,
-              onChangeLetterHintSettings: (value) => { void setBuiltinCourseLetterHintSettings({ sourceLang: normalizedSource, targetLang: normalizedTarget, level: normalizedLevel }, value); },
-              boxZeroAnswerSide,
-              onSelectBoxZeroAnswerSide: async (side) => {
-                setBoxZeroAnswerSide(side);
-                await setBuiltinCourseBoxZeroAnswerSide(
-                  {
-                    sourceLang: normalizedSource,
-                    targetLang: normalizedTarget,
-                    level: normalizedLevel,
-                  },
-                  side
-                );
-              },
-              boxZeroEnabled,
-              onToggleBoxZero: handleBoxZeroToggle,
-              autoflowEnabled,
-              onToggleAutoflow: handleAutoflowToggle,
-              reviewsEnabled,
-              onToggleReviews: handleReviewsToggle,
-              showExplanationEnabled,
-              onToggleShowExplanation: handleShowExplanationToggle,
-              explanationOnlyOnWrong,
-              onToggleExplanationOnlyOnWrong:
-                handleExplanationOnlyOnWrongToggle,
-              skipCorrectionEnabled,
-              onToggleSkipCorrection: handleSkipCorrectionToggle,
-              hideSkipCorrectionOption: false,
-              showTrueFalseButtonsVariant: false,
-              trueFalseButtonsVariant,
-              onSelectTrueFalseButtonsVariant: handleTrueFalseButtonsVariantChange,
-              cardSize,
-              onSelectCardSize: handleCardSizeChange,
-              showImageSizeOptions: courseHasImages,
-              imageSize,
-              imageSizeOptions,
-              onSelectImageSize: handleImageSizeChange,
-              imageSizeEnabled,
-              showImageFrameOption: courseHasImages,
-              imageFrameEnabled,
-              onToggleImageFrame: handleImageFrameToggle,
-            }}
-            resetActions={[
-              {
-                key: "boxes",
-                title: t("components.courseEditor.customEditor.resetActions.boxes.title"),
-                subtitle: t(
-                  "components.courseEditor.customEditor.resetActions.boxes.subtitle"
-                ),
-                ctaText: t("components.courseEditor.customEditor.alerts.resetBoxesAction"),
-                loadingText: t(
-                  "components.courseEditor.customEditor.resetActions.boxes.loading"
-                ),
-                loading: resettingBoxes,
-                onPress: handleResetBoxes,
-                disabled: resettingBoxes,
-              },
-              {
-                key: "reviews",
-                title: t("components.courseEditor.customEditor.resetActions.reviews.title"),
-                subtitle: t(
-                  "components.courseEditor.customEditor.resetActions.reviews.subtitle"
-                ),
-                ctaText: t("components.courseEditor.customEditor.alerts.resetReviewsAction"),
-                loadingText: t(
-                  "components.courseEditor.customEditor.resetActions.reviews.loading"
-                ),
-                loading: resettingReviews,
-                onPress: handleResetReviews,
-                disabled: resettingReviews,
-              },
-              {
-                key: "all",
-                title: t("components.courseEditor.customEditor.resetActions.all.title"),
-                subtitle: t(
-                  "components.courseEditor.customEditor.resetActions.all.subtitle"
-                ),
-                ctaText: t("components.courseEditor.customEditor.alerts.resetAllAction"),
-                loadingText: t(
-                  "components.courseEditor.customEditor.resetActions.all.loading"
-                ),
-                loading: resettingAll,
-                onPress: handleResetAll,
-                disabled: resettingAll,
-              },
-            ]}
-          />
-        </View>
-      </ScrollView>
+      <SettingsTabPager
+        ref={categoryTabs.pagerRef}
+        options={categoryTabs.options}
+        value={categoryTabs.activeTab}
+        onChange={categoryTabs.onCommit}
+        scopeKey={categoryTabs.scopeKey}
+        scrollViewProps={settingsScrollProps}
+        renderPage={renderSettingsPage}
+      />
 
       <View style={styles.buttonscontainer}>
         <View
@@ -770,6 +617,12 @@ function BuiltinCourseEditor({
           </MyButton>
         </View>
       </View>
+      <SettingsTabBar
+        options={categoryTabs.options}
+        value={categoryTabs.activeTab}
+        onChange={categoryTabs.onChange}
+      />
+      {resetControls.modal}
     </View>
   );
 }

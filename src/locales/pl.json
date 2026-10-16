@@ -1,18 +1,30 @@
 {
+  "courseSettingsReset": {
+    "ok": "OK",
+    "close": "Zamknij",
+    "title": "Przywróć domyślne ustawienia",
+    "subtitle": "Przywraca ustawienia kursu. Zachowuje postęp i zapisane powtórki.",
+    "loading": "Przywracam…",
+    "action": "Przywróć",
+    "confirmTitle": "Przywrócić domyślne ustawienia?",
+    "confirmMessage": "Ustawienia nauki, odpowiedzi, audio i wyglądu fiszek wrócą do wartości domyślnych tego kursu. Treść fiszek, postęp i zapisane powtórki pozostaną zachowane.",
+    "doneTitle": "Przywrócono ustawienia",
+    "doneMessage": "Kurs ma ponownie domyślne ustawienia. Postęp i zapisane powtórki zostały zachowane.",
+    "failed": "Nie udało się przywrócić wszystkich ustawień. Spróbuj ponownie."
+  },
   "courseFrontImageRole": {
     "title": "Jak wyświetlać obrazek?",
     "description": "Wybierz, czy obrazek ma być dodatkiem do fiszki, czy zastępować słowo podczas nauki.",
-    "answerNote": "Podczas wpisywania odpowiedzi obrazek zastępujący tę odpowiedź jest ukryty, aby jej nie podpowiadać.",
     "standard": {
       "title": "Standardowy",
       "description": "Obrazek wyświetla się na wybranej stronie fiszki, razem z tekstem."
     },
     "replace_front": {
-      "title": "Zamiast awersu",
+      "title": "Zamiast przodu fiszki",
       "description": "Obrazek zastępuje tekst przodu fiszki, gdy jest on pytaniem."
     },
     "replace_back": {
-      "title": "Zamiast rewersu",
+      "title": "Zamiast tyłu fiszki",
       "description": "Obrazek zastępuje tekst tyłu fiszki, gdy jest on pytaniem."
     }
   },
@@ -1529,13 +1541,13 @@
           "opanowanie": "Opanowanie",
           "duza": "Duża",
           "mala": "Mała",
-          "dynamiczny": "Dynamiczny",
+          "dynamiczny": "Dopasowany do obrazka",
           "maly": "Mały",
           "sredni": "Średni",
           "duzy": "Duży",
           "bardzoDuzy": "Bardzo duży",
-          "fazaZapoznaniaPudelko0": "Faza zapoznania (Pudełko 0)",
-          "automatFiszek": "Automat fiszek",
+          "fazaZapoznaniaPudelko0": "Zapoznanie z fiszkami (pudełko 0)",
+          "automatFiszek": "Automatyczne przełączanie pudełek",
           "wlaczPowtorki": "Włącz powtórki",
           "wyswietlajWyjasnienie": "Wyświetlaj wyjaśnienie",
           "tylkoPoBlednejOdpowiedzi": "Tylko po błędnej odpowiedzi",
@@ -1556,7 +1568,7 @@
         },
         "description": {
           "dodatkowePudelko": "To dodatkowe pudełko, które ułatwia szybkie zapoznanie się z fiszkami.",
-          "automatyczniePrzelaczaj": "Automatycznie przełączaj pudełka i pobieraj nowe słowa.",
+          "automatyczniePrzelaczaj": "Aplikacja przełącza pudełka i dobiera nowe fiszki.",
           "dodajFiszkiDoPowtorek": "Dodaj fiszki z tego kursu do codziennych powtórek.",
           "pokazujWyjasnienie": "Pokazuj wyjaśnienie po odpowiedzi, jeśli fiszka je posiada.",
           "gdyWylaczone": "Gdy wyłączone, wyjaśnienie pokaże się po poprawnej i błędnej odpowiedzi.",
@@ -1570,13 +1582,13 @@
           "dostepneTylkoDlaDuzych": "Dostępne tylko dla dużych kart z obrazkami."
         },
         "textChild": {
-          "przeplyw": "PRZEPŁYW",
+          "przeplyw": "NAUKA",
           "wyjasnienia": "WYJAŚNIENIA",
           "odpowiedzi": "ODPOWIEDZI"
         },
         "accessibilityLabel": {
-          "przelaczFazeZapoznania": "Przełącz fazę zapoznania",
-          "przelaczAutomatFiszek": "Przełącz automat fiszek",
+          "przelaczFazeZapoznania": "Przełącz zapoznanie z fiszkami w pudełku 0",
+          "przelaczAutomatFiszek": "Przełącz automatyczne przełączanie pudełek",
           "przelaczPowtorki": "Przełącz powtórki",
           "przelaczWyswietlanieWyjasnien": "Przełącz wyświetlanie wyjaśnień",
           "przelaczWyjasnienieTylkoPoBlednej": "Przełącz wyjaśnienie tylko po błędnej odpowiedzi",
@@ -2447,8 +2459,8 @@
     "description": "Automatyczny odczyt zgodnie z wybranym trybem. Naciśnij tekst, aby posłuchać.",
     "toggleLabel": "Przełącz audio fiszek",
     "chooseLanguages": "Wybierz języki obu stron, aby uruchomić audio.",
-    "frontLanguage": "Język awersu",
-    "backLanguage": "Język rewersu",
+    "frontLanguage": "Język przodu fiszki",
+    "backLanguage": "Język tyłu fiszki",
     "languages": {
       "pl-PL": "Polski",
       "en-US": "Angielski",
@@ -2477,6 +2489,27 @@
         "title": "Wyłączony",
         "description": "Nie czyta automatycznie. Dotknij tekstu, aby go odsłuchać."
       }
+    }
+  },
+  "courseSettingsGroups": {
+    "learning": {
+      "title": "Nauka"
+    },
+    "answers": {
+      "title": "Odpowiedzi",
+      "description": "Podpowiedzi literowe, poprawianie błędów i wyjaśnienia."
+    },
+    "audio": {
+      "title": "Dźwięk",
+      "description": "Czytanie na głos i języki fiszek."
+    },
+    "appearance": {
+      "title": "Wygląd",
+      "description": "Rozmiar fiszki i sposób wyświetlania obrazków."
+    },
+    "progress": {
+      "title": "Postęp",
+      "description": "Czyszczenie pudełek, usuwanie powtórek i restart kursu."
     }
   }
 }

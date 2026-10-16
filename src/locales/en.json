@@ -1,18 +1,30 @@
 {
+  "courseSettingsReset": {
+    "ok": "OK",
+    "close": "Close",
+    "title": "Restore default settings",
+    "subtitle": "Restores course settings. Keeps progress and saved reviews.",
+    "loading": "Restoring…",
+    "action": "Restore",
+    "confirmTitle": "Restore default settings?",
+    "confirmMessage": "Learning, answer, audio and flashcard appearance settings will return to this course’s defaults. Flashcard content, progress and saved reviews will be kept.",
+    "doneTitle": "Settings restored",
+    "doneMessage": "The course has its default settings again. Progress and saved reviews were kept.",
+    "failed": "Could not restore all settings. Please try again."
+  },
   "courseFrontImageRole": {
     "title": "How should the image appear?",
     "description": "Choose whether the image accompanies the flashcard or replaces a word during learning.",
-    "answerNote": "While you type an answer, any image that replaces that answer is hidden so it does not give it away.",
     "standard": {
       "title": "Standard",
       "description": "The image appears on the selected side of the flashcard, together with the text."
     },
     "replace_front": {
-      "title": "Instead of front",
+      "title": "Instead of the front text",
       "description": "The image replaces the text on the front of the flashcard when that side is the question."
     },
     "replace_back": {
-      "title": "Instead of back",
+      "title": "Instead of the back text",
       "description": "The image replaces the text on the back of the flashcard when that side is the question."
     }
   },
@@ -1525,13 +1537,13 @@
           "opanowanie": "Mastery",
           "duza": "Large",
           "mala": "Small",
-          "dynamiczny": "Dynamic",
+          "dynamiczny": "Fit to image",
           "maly": "Small",
           "sredni": "Medium",
           "duzy": "Large",
           "bardzoDuzy": "Very large",
-          "fazaZapoznaniaPudelko0": "Introduction phase (Box 0)",
-          "automatFiszek": "Flashcard auto-flow",
+          "fazaZapoznaniaPudelko0": "Get to know flashcards (box 0)",
+          "automatFiszek": "Automatic box switching",
           "wlaczPowtorki": "Enable reviews",
           "wyswietlajWyjasnienie": "Show explanation",
           "tylkoPoBlednejOdpowiedzi": "Only after an incorrect answer",
@@ -1552,7 +1564,7 @@
         },
         "description": {
           "dodatkowePudelko": "This is an extra box that makes it easier to quickly get familiar with flashcards.",
-          "automatyczniePrzelaczaj": "Automatically switch boxes and fetch new words.",
+          "automatyczniePrzelaczaj": "Automatically switches boxes and selects new flashcards.",
           "dodajFiszkiDoPowtorek": "Add flashcards from this course to daily reviews.",
           "pokazujWyjasnienie": "Show the explanation after answering, if the flashcard has one.",
           "gdyWylaczone": "When disabled, the explanation will be shown after both correct and incorrect answers.",
@@ -1566,13 +1578,13 @@
           "dostepneTylkoDlaDuzych": "Available only for large cards with images."
         },
         "textChild": {
-          "przeplyw": "FLOW",
+          "przeplyw": "LEARNING",
           "wyjasnienia": "EXPLANATIONS",
           "odpowiedzi": "ANSWERS"
         },
         "accessibilityLabel": {
-          "przelaczFazeZapoznania": "Toggle introduction phase",
-          "przelaczAutomatFiszek": "Toggle flashcard auto-flow",
+          "przelaczFazeZapoznania": "Toggle flashcard familiarization in box 0",
+          "przelaczAutomatFiszek": "Toggle automatic box switching",
           "przelaczPowtorki": "Toggle reviews",
           "przelaczWyswietlanieWyjasnien": "Toggle showing explanations",
           "przelaczWyjasnienieTylkoPoBlednej": "Toggle explanation only after incorrect answer",
@@ -2473,6 +2485,27 @@
         "title": "Off",
         "description": "Does not read automatically. Tap the text to listen."
       }
+    }
+  },
+  "courseSettingsGroups": {
+    "learning": {
+      "title": "Learning"
+    },
+    "answers": {
+      "title": "Answers",
+      "description": "Letter hints, error correction and explanations."
+    },
+    "audio": {
+      "title": "Audio",
+      "description": "Reading aloud and flashcard languages."
+    },
+    "appearance": {
+      "title": "Appearance",
+      "description": "Flashcard size and image display."
+    },
+    "progress": {
+      "title": "Progress",
+      "description": "Clear boxes, delete reviews and restart the course."
     }
   }
 }

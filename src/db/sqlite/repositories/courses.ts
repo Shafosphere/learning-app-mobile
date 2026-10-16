@@ -370,6 +370,7 @@ export async function updateCustomCourse(
 export async function setCustomCourseReviewsEnabled(
   id: number,
   enabled: boolean,
+  options: { seedCompletedReviews?: boolean } = {},
 ): Promise<void> {
   const db = await getDB();
   const current = await db.getFirstAsync<{ reviewsEnabled: number }>(
@@ -389,7 +390,7 @@ export async function setCustomCourseReviewsEnabled(
     id,
   );
 
-  if (current?.reviewsEnabled !== 1 && enabled) {
+  if (current?.reviewsEnabled !== 1 && enabled && options.seedCompletedReviews !== false) {
     await seedCompletedCustomReviewsForCourseWithDb(db, id);
   }
 }

@@ -984,6 +984,8 @@ const LETTER_HINT_ENABLED_PACK_SLUGS = new Set([
 
 // Opt-in defaults for the courses currently shipped with Google recordings.
 const AUDIO_ENABLED_PACK_SLUGS = new Set([
+  ...[50, 100, 250, 500].map((count) => `eng_to_pl_first_${count}`),
+  ...["a1", "a2", "b1", "b2"].map((level) => `eng_to_pl_${level}`),
   ...["es_to_pl", "es_to_en"].flatMap((prefix) => [50, 150, 327].map((count) => `${prefix}_first_${count}`)),
   ...["fr_to_pl", "fr_to_en"].flatMap((prefix) => [50, 150, 332].map((count) => `${prefix}_first_${count}`)),
   "french_a1", "french_a2", "french_b1", "french_b2",

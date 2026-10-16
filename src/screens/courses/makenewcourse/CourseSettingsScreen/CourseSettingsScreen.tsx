@@ -1,3 +1,8 @@
+import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
+import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
+import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
+import { SettingsTabBar } from "@/src/components/settings/SettingsTabBar";
+import { useCourseSettingsTabs } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import { normalizeCourseFrontImageRole } from "@/src/utils/frontImageRole";
 import type { CourseFrontImageRole } from "@/src/contexts/settings/types";
 import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
@@ -24,8 +29,8 @@ import { normalizeAnswers, type ManualCard } from "@/src/hooks/useManualCardsFor
 import { CourseSettingsPanel } from "@/src/components/courseEditor/CourseSettingsPanel";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useLocalSearchParams, usePathname, useRouter } from "expo-router";
-import { useEffect, useMemo, useRef, useState } from "react";
-import { ActivityIndicator, ScrollView, View } from "react-native";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { ActivityIndicator, View } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useCourseEditStyles } from "./CourseSettingsScreen-styles";
 import {
@@ -123,6 +128,11 @@ export default function CourseSettingsScreen() {
       }),
     [colorId, courseName, iconColor, iconId, initialReviewsEnabled]
   );
+  const categoryTabs = useCourseSettingsTabs({
+    scopeKey: draftScopeKey,
+    hasAudio: true,
+    hasResetActions: false,
+  });
   const contentRouteParams = useMemo(() => {
     const next: Record<string, string> = {
       name: courseName,
@@ -446,13 +456,13 @@ export default function CourseSettingsScreen() {
   );
 
   const imageSizeEnabled = cardSize === "large" && courseHasImageCards;
-  const imageSizeOptions: FlashcardsImageSize[] = [
+  const imageSizeOptions: FlashcardsImageSize[] = useMemo(() => [
     "dynamic",
     "small",
     "medium",
     "large",
     "very_large",
-  ];
+  ], []);
 
   const handleCreateCourse = async () => {
     if (nameConflict.kind === "duplicate") {
@@ -597,6 +607,89 @@ export default function CourseSettingsScreen() {
     }
   };
 
+  const settingsScrollProps = useMemo(() => ({
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
+    contentContainerStyle: styles.scrollContent,
+    keyboardShouldPersistTaps: "handled" as const,
+  }), [styles.scrollContent, styles.scrollView, styles.scrollViewTablet, useCenteredTabletLayout]);
+  const courseSettingsProps = useMemo<CourseSettingsSectionProps>(() => ({
+    styles,
+    switchColors: {
+      thumb: colors.background,
+      trackFalse: colors.border,
+      trackTrue: colors.my_green,
+    },
+    colors,
+    audioSettings,
+    onChangeAudioSettings: setAudioSettings,
+    showAudioLanguages: true,
+    frontImageRole,
+    onChangeFrontImageRole: setFrontImageRole,
+    letterHintSettings,
+    onChangeLetterHintSettings: setLetterHintSettings,
+    boxZeroEnabled,
+    boxZeroAnswerSide,
+    onToggleBoxZero: setBoxZeroEnabled,
+    onSelectBoxZeroAnswerSide: setBoxZeroAnswerSide,
+    autoflowEnabled,
+    onToggleAutoflow: setAutoflowEnabled,
+    reviewsEnabled,
+    onToggleReviews: setReviewsEnabled,
+    showExplanationEnabled,
+    onToggleShowExplanation: setShowExplanationEnabled,
+    explanationOnlyOnWrong,
+    onToggleExplanationOnlyOnWrong: setExplanationOnlyOnWrong,
+    skipCorrectionEnabled,
+    onToggleSkipCorrection: setSkipCorrectionEnabled,
+    skipCorrectionLocked: courseIsTrueFalseOnly,
+    hideSkipCorrectionOption: courseIsTrueFalseOnly,
+    showTrueFalseButtonsVariant: false,
+    trueFalseButtonsVariant,
+    onSelectTrueFalseButtonsVariant: setTrueFalseButtonsVariant,
+    cardSize,
+    onSelectCardSize: setCardSize,
+    showImageSizeOptions: courseHasImageCards,
+    imageSize,
+    imageSizeOptions,
+    onSelectImageSize: setImageSize,
+    imageSizeEnabled,
+    showImageFrameOption: courseHasImageCards,
+    imageFrameEnabled,
+    onToggleImageFrame: setImageFrameEnabled,
+  }), [
+    audioSettings,
+    autoflowEnabled,
+    boxZeroAnswerSide,
+    boxZeroEnabled,
+    cardSize,
+    colors,
+    courseHasImageCards,
+    courseIsTrueFalseOnly,
+    explanationOnlyOnWrong,
+    frontImageRole,
+    imageFrameEnabled,
+    imageSize,
+    imageSizeEnabled,
+    imageSizeOptions,
+    letterHintSettings,
+    reviewsEnabled,
+    showExplanationEnabled,
+    skipCorrectionEnabled,
+    styles,
+    trueFalseButtonsVariant,
+  ]);
+  const renderSettingsPage = useCallback((pageTab: CourseSettingsTabKey) => (
+    <>
+      <View style={styles.sectionCard}>
+        <CourseSettingsPanel
+          activeTab={pageTab}
+          styles={styles}
+          settingsProps={courseSettingsProps}
+        />
+      </View>
+    </>
+  ), [courseSettingsProps, styles]);
+
   if (hydrating) {
     return (
       <View style={[styles.container, { justifyContent: "center", alignItems: "center" }]}>
@@ -607,65 +700,15 @@ export default function CourseSettingsScreen() {
 
   return (
     <View style={styles.container}>
-      <ScrollView
-        style={[
-          styles.scrollView,
-          useCenteredTabletLayout && styles.scrollViewTablet,
-        ]}
-        contentContainerStyle={styles.scrollContent}
-        keyboardShouldPersistTaps="handled"
-      >
-        <View style={styles.sectionCard}>
-          <CourseSettingsPanel
-            styles={styles}
-            settingsProps={{
-              styles,
-              switchColors: {
-                thumb: colors.background,
-                trackFalse: colors.border,
-                trackTrue: colors.my_green,
-              },
-              colors,
-              audioSettings,
-              onChangeAudioSettings: setAudioSettings,
-              showAudioLanguages: true,
-              frontImageRole,
-              onChangeFrontImageRole: setFrontImageRole,
-              letterHintSettings,
-              onChangeLetterHintSettings: setLetterHintSettings,
-              boxZeroEnabled,
-              boxZeroAnswerSide,
-              onToggleBoxZero: setBoxZeroEnabled,
-              onSelectBoxZeroAnswerSide: setBoxZeroAnswerSide,
-              autoflowEnabled,
-              onToggleAutoflow: setAutoflowEnabled,
-              reviewsEnabled,
-              onToggleReviews: setReviewsEnabled,
-              showExplanationEnabled,
-              onToggleShowExplanation: setShowExplanationEnabled,
-              explanationOnlyOnWrong,
-              onToggleExplanationOnlyOnWrong: setExplanationOnlyOnWrong,
-              skipCorrectionEnabled,
-              onToggleSkipCorrection: setSkipCorrectionEnabled,
-              skipCorrectionLocked: courseIsTrueFalseOnly,
-              hideSkipCorrectionOption: courseIsTrueFalseOnly,
-              showTrueFalseButtonsVariant: false,
-              trueFalseButtonsVariant,
-              onSelectTrueFalseButtonsVariant: setTrueFalseButtonsVariant,
-              cardSize,
-              onSelectCardSize: setCardSize,
-              showImageSizeOptions: courseHasImageCards,
-              imageSize,
-              imageSizeOptions,
-              onSelectImageSize: setImageSize,
-              imageSizeEnabled,
-              showImageFrameOption: courseHasImageCards,
-              imageFrameEnabled,
-              onToggleImageFrame: setImageFrameEnabled,
-            }}
-          />
-        </View>
-      </ScrollView>
+      <SettingsTabPager
+        ref={categoryTabs.pagerRef}
+        options={categoryTabs.options}
+        value={categoryTabs.activeTab}
+        onChange={categoryTabs.onCommit}
+        scopeKey={categoryTabs.scopeKey}
+        scrollViewProps={settingsScrollProps}
+        renderPage={renderSettingsPage}
+      />
 
       <View style={styles.buttonscontainer}>
         <View
@@ -698,6 +741,11 @@ export default function CourseSettingsScreen() {
           />
         </View>
       </View>
+      <SettingsTabBar
+        options={categoryTabs.options}
+        value={categoryTabs.activeTab}
+        onChange={categoryTabs.onChange}
+      />
     </View>
   );
 }

@@ -15,13 +15,21 @@ const forms = (text: string) => text.split(";").map((form) => form.normalize("NF
 describe.each(stages)("$source courses for English speakers", ({ group, source, slugs, counts }) => {
   const series = OFFICIAL_PACKS.filter((pack) => pack.languageGroupId === group && pack.targetLang === "en");
 
-  it("registers ordered stages with starter settings and English CSV sources", () => {
+  it("registers ordered stages with stage-specific settings and English CSV sources", () => {
     expect(series.map((pack) => pack.slug)).toEqual(slugs);
     expect(series.map((pack) => pack.position)).toEqual(slugs.map((_, index) => index + 1));
-    const starter = OFFICIAL_PACKS.find((pack) => pack.slug === "eng_to_pl_first_50")!;
     for (const [index, pack] of series.entries()) {
       expect(pack).toMatchObject({ sourceLang: source, targetLang: "en", smallFlag: "en", isMini: false,
-        reviewsEnabled: true, defaultType: "traditional", defaultFlip: true, settings: starter.settings });
+        reviewsEnabled: true, defaultType: "traditional", defaultFlip: true });
+      expect(pack.settings).toEqual({
+        boxZeroEnabled: true,
+        boxZeroAnswerSide: "front",
+        audioEnabled: true,
+        ...(index === 0 ? { frontImageRole: "replace_back" } : {}),
+        ...(index < 2 ? {
+          letterHintSettings: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 },
+        } : {}),
+      });
       expect(OFFICIAL_COURSE_AVAILABILITY.en).toContain(pack.slug);
       expect(OFFICIAL_COURSE_AVAILABILITY.pl).not.toContain(pack.slug);
       const buildPack = buildPacks.find((candidate: { slug: string }) => candidate.slug === pack.slug);

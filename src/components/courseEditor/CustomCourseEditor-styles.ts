@@ -8,6 +8,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   scrollView: {
+    flex: 1,
     width: "100%",
     alignSelf: "center" as const,
   },
@@ -16,7 +17,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   scrollContent: {
     paddingHorizontal: 18,
-    paddingBottom: 120,
+    paddingBottom: 28,
     paddingTop: 32,
     gap: 0,
   },
@@ -375,6 +376,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexDirection: "row" as const,
     justifyContent: "flex-end" as const,
     gap: 10,
+  },
+  settingsButtonsContainer: { paddingBottom: 8, paddingHorizontal: 18 },
+  settingsButtonsRow: {
+    width: "100%",
+    borderTopWidth: 1,
+    paddingTop: 8,
+    flexWrap: "wrap",
   },
   buttonscontainer: {
     width: "100%",

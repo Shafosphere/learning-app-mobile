@@ -8,6 +8,7 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
     backgroundColor: colors.background,
   },
   scrollView: {
+    flex: 1,
     width: "100%",
     alignSelf: "center" as const,
   },
@@ -16,7 +17,7 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   },
   scrollContent: {
     paddingHorizontal: 18,
-    paddingBottom: 120,
+    paddingBottom: 28,
     paddingTop: 32,
     gap: 24,
   },
@@ -339,15 +340,16 @@ export const useCourseEditStyles = createThemeStylesHook((colors) => ({
   },
   buttonscontainer: {
     width: "100%",
-    paddingBottom: 24,
+    paddingBottom: 8,
+    paddingHorizontal: 18,
     backgroundColor: colors.background,
     alignItems: "center",
   },
   buttonsRow: {
     borderColor: colors.border,
-    borderTopWidth: 3,
-    paddingTop: 15,
-    width: "90%",
+    borderTopWidth: 1,
+    paddingTop: 8,
+    width: "100%",
     flexDirection: "row",
     justifyContent: "flex-end",
     gap: 10,

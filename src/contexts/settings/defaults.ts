@@ -65,6 +65,9 @@ export const DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES: CourseTrueFalseButtons
 };
 
 export const defaultValue: SettingsContextValue = {
+  courseSettingsResetHydrated: false,
+  resetCustomCourseSettings: async () => {},
+  resetBuiltinCourseSettings: async () => {},
   uiLanguage: "pl",
   nativeLanguage: "pl",
   nativeLanguageHydrated: false,
