@@ -9,6 +9,11 @@ import pl from "@/src/locales/pl.json";
 import { CourseSettingsSection, type CourseSettingsSectionProps } from "../SettingsCourse";
 
 const mockT = jest.fn((key: string) => key);
+const mockWindowDimensions = jest.fn();
+jest.mock("react-native/Libraries/Utilities/useWindowDimensions", () => ({
+  __esModule: true,
+  default: () => mockWindowDimensions(),
+}));
 jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: mockT }) }));
 jest.mock("@/src/contexts/SettingsContext", () => {
   const useSettings = jest.fn();
@@ -17,6 +22,7 @@ jest.mock("@/src/contexts/SettingsContext", () => {
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 
 beforeEach(() => {
+  mockWindowDimensions.mockReturnValue({ width: 390, height: 800, scale: 2, fontScale: 1 });
   mockT.mockImplementation((key: string) => key);
   (useSettings as jest.Mock).mockReturnValue({
     colors: resolveThemeColors("light"),
@@ -40,6 +46,98 @@ function makeProps(): CourseSettingsSectionProps {
     cardSize: "large", onSelectCardSize: jest.fn(),
   };
 }
+
+it("selects all image roles accessibly and disables changes during hydration", () => {
+  const props = makeProps();
+  const onChange = jest.fn();
+  const screen = render(<CourseSettingsSection {...props} frontImageRole="replace_back" onChangeFrontImageRole={onChange} />);
+  for (const role of ["standard", "replace_front", "replace_back"]) {
+    const button = screen.getByRole("button", { name: `courseFrontImageRole.title: courseFrontImageRole.${role}.title` });
+    expect(button.props.accessibilityState.selected).toBe(role === "replace_back");
+    fireEvent.press(button);
+    expect(onChange).toHaveBeenLastCalledWith(role);
+  }
+  onChange.mockClear();
+  screen.rerender(<CourseSettingsSection {...props} frontImageRole="standard" onChangeFrontImageRole={onChange} frontImageRoleDisabled />);
+  const button = screen.getByRole("button", { name: "courseFrontImageRole.title: courseFrontImageRole.replace_back.title" });
+  expect(button).toBeDisabled();
+  fireEvent.press(button);
+  expect(onChange).not.toHaveBeenCalled();
+});
+
+describe("image display cards", () => {
+  it("preserves visibility, the default selection and controlled updates", () => {
+    const props = makeProps();
+    const onChange = jest.fn();
+    const screen = render(<CourseSettingsSection {...props} />);
+    expect(screen.queryByTestId("course-image-display-settings")).toBeNull();
+    screen.rerender(<CourseSettingsSection {...props} onChangeFrontImageRole={onChange} />);
+    const group = within(screen.getByTestId("course-image-display-settings"));
+    expect(group.getByRole("header", { name: "courseFrontImageRole.title" })).toBeTruthy();
+    expect(group.getByText("courseFrontImageRole.answerNote")).toBeTruthy();
+    expect(group.getAllByRole("button")).toHaveLength(3);
+    for (const role of ["standard", "replace_front", "replace_back"] as const) {
+      const name = `courseFrontImageRole.title: courseFrontImageRole.${role}.title`;
+      const card = group.getByRole("button", { name });
+      expect(card.props.accessibilityHint).toBe(`courseFrontImageRole.${role}.description`);
+      fireEvent.press(card);
+      expect(onChange).toHaveBeenLastCalledWith(role);
+      screen.rerender(<CourseSettingsSection {...props} frontImageRole={role} onChangeFrontImageRole={onChange} />);
+      expect(group.getByRole("button", { name, selected: true })).toBeEnabled();
+      expect(group.getAllByRole("button", { selected: true })).toHaveLength(1);
+    }
+  });
+
+  it.each([
+    [320, 1, 1, false],
+    [390, 1, 1, false],
+    [320, 1.3, 1, true],
+    [390, 1, 1.4, true],
+    [768, 1.3, 1.4, false],
+  ])("adapts the cards at %sdp, system scale %s and app scale %s", (width, fontScale, appScale, stacked) => {
+    mockWindowDimensions.mockReturnValue({ width, height: 800, scale: 2, fontScale });
+    (useSettings as jest.Mock).mockReturnValue({
+      colors: resolveThemeColors("light"),
+      accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" },
+      fontScaleMultiplier: appScale,
+    });
+    const screen = render(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} />);
+    const section = screen.getByTestId("course-image-display-settings");
+    fireEvent(section, "layout", { nativeEvent: { layout: { width: width - 32 } } });
+    const firstRow = screen.getByTestId("course-image-display-first-row");
+    expect(within(firstRow).getAllByRole("button")).toHaveLength(2);
+    expect(within(firstRow).queryByText("courseFrontImageRole.replace_back.title")).toBeNull();
+    expect(firstRow).toHaveStyle({ flexDirection: stacked ? "column" : "row", alignItems: "stretch" });
+    // A narrower parent (e.g. split-screen) must override the window width.
+    fireEvent(section, "layout", { nativeEvent: { layout: { width: 240 } } });
+    expect(firstRow).toHaveStyle({ flexDirection: "column" });
+  });
+
+  it.each([
+    ["light", false, "none"],
+    ["dark", false, "none"],
+    ["light", true, "none"],
+    ["dark", true, "none"],
+    ["dark", false, "deuteranopia"],
+  ] as const)("preserves themed, scalable text in %s, high contrast %s, color mode %s", (theme, highContrast, colorBlindMode) => {
+    const colors = resolveThemeColors(theme, { highContrast, colorBlindMode });
+    (useSettings as jest.Mock).mockReturnValue({
+      colors,
+      accessibilityPreferences: { highContrastEnabled: highContrast, colorBlindMode },
+      fontScaleMultiplier: 1.15,
+    });
+    const screen = render(<CourseSettingsSection {...makeProps()} onChangeFrontImageRole={jest.fn()} frontImageRole="replace_back" />);
+    const section = within(screen.getByTestId("course-image-display-settings"));
+    const card = section.getByRole("button", { selected: true });
+    expect(card).toHaveStyle({ borderWidth: 2, borderColor: highContrast || colorBlindMode !== "none" ? colors.my_green : "#009b83" });
+    for (const role of ["standard", "replace_front", "replace_back"]) {
+      const description = section.getByText(`courseFrontImageRole.${role}.description`);
+      expect(description).toHaveStyle({ color: colors.paragraph, fontSize: 13 * 1.15 });
+      expect(description.props.allowFontScaling).not.toBe(false);
+      expect(description.props.numberOfLines).toBeUndefined();
+    }
+  });
+});
 
 it("toggles from the row title and description and exposes one switch per row", () => {
   const props = makeProps();
@@ -444,4 +542,82 @@ it("switches all audio off without discarding languages and hides official langu
   expect(screen.queryByText("courseAudio.frontLanguage")).toBeNull();
   screen.rerender(<CourseSettingsSection {...props} audioSettingsDisabled />);
   expect(screen.getByRole("switch", { name: "courseAudio.toggleLabel" })).toBeDisabled();
+});
+
+it("defaults each course to non-native playback and preserves its selection when audio is disabled", () => {
+  const audioSettings = { enabled: true, frontLanguage: "en-US" as const, backLanguage: "pl-PL" as const };
+  const onChangeAudioSettings = jest.fn();
+  const props = { ...makeProps(), audioSettings, onChangeAudioSettings };
+  const screen = render(<CourseSettingsSection {...props} />);
+  const defaultMode = screen.getByRole("button", { name: "audioAutoplay.title: audioAutoplay.modes.non_native.title" });
+  expect(defaultMode).toHaveAccessibilityState({ selected: true });
+  expect(screen.queryByText("audioAutoplay.inherit")).toBeNull();
+  fireEvent.press(screen.getByRole("button", { name: "audioAutoplay.title: audioAutoplay.modes.all.title" }));
+  expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, autoplayMode: "all" });
+  screen.rerender(<CourseSettingsSection {...props} audioSettings={{ ...audioSettings, autoplayMode: "all" }} />);
+  fireEvent.press(screen.getByRole("switch", { name: "courseAudio.toggleLabel" }));
+  expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, autoplayMode: "all", enabled: false });
+  fireEvent.press(defaultMode);
+  expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, autoplayMode: "non_native" });
+  screen.rerender(<CourseSettingsSection {...props} audioSettings={{ ...audioSettings, enabled: false }} />);
+  expect(screen.queryByText("audioAutoplay.title")).toBeNull();
+});
+
+describe("audio autoplay cards", () => {
+  beforeEach(() => {
+    const translations = createInstance();
+    void translations.init({ lng: "pl", resources: { pl: { translation: pl } }, initImmediate: false });
+    mockT.mockImplementation((key: string, options?: Record<string, unknown>) => translations.t(key, options));
+  });
+
+  it.each(["pl", "en"] as const)("uses the selected %s native language and preserves all audio fields", (nativeLanguage) => {
+    (useSettings as jest.Mock).mockReturnValue({
+      colors: resolveThemeColors("light"), nativeLanguage,
+      accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" }, fontScaleMultiplier: 1,
+    });
+    const audioSettings = { enabled: true, frontLanguage: "es-ES" as const, backLanguage: "pl-PL" as const };
+    const onChangeAudioSettings = jest.fn();
+    const props = { ...makeProps(), audioSettings, onChangeAudioSettings };
+    const screen = render(<CourseSettingsSection {...props} />);
+    expect(screen.getByLabelText(`Język ojczysty: ${nativeLanguage === "pl" ? "Polski" : "Angielski"}`)).toBeTruthy();
+    expect(screen.getByText("Język ojczysty:")).toBeTruthy();
+    expect(screen.getByText(nativeLanguage === "pl" ? "Polski" : "Angielski")).toBeTruthy();
+    const group = within(screen.getByTestId("course-audio-autoplay-settings"));
+    expect(group.getByRole("header", { name: pl.audioAutoplay.title })).toBeTruthy();
+    const titles = [nativeLanguage === "pl" ? "Bez polskiego" : "Bez angielskiego", "Wszystkie języki", "Wyłączony"];
+    for (const [index, mode] of (["non_native", "all", "off"] as const).entries()) {
+      const name = `${pl.audioAutoplay.title}: ${titles[index]}`;
+      fireEvent.press(group.getByRole("button", { name }));
+      expect(onChangeAudioSettings).toHaveBeenLastCalledWith({ ...audioSettings, autoplayMode: mode });
+      screen.rerender(<CourseSettingsSection {...props} audioSettings={{ ...audioSettings, autoplayMode: mode }} />);
+      expect(group.getByRole("button", { name, selected: true })).toBeEnabled();
+      expect(group.getAllByRole("button", { selected: true })).toHaveLength(1);
+    }
+    onChangeAudioSettings.mockClear();
+    screen.rerender(<CourseSettingsSection {...props} audioSettingsDisabled />);
+    for (const card of group.getAllByRole("button")) {
+      expect(card).toBeDisabled();
+      fireEvent.press(card);
+    }
+    expect(onChangeAudioSettings).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [320, "light", 1, false],
+    [390, "dark", 1, false],
+    [320, "dark", 1.5, true],
+  ] as const)("adapts at %sdp in %s mode with system font scale %s", (width, theme, fontScale, stacked) => {
+    const colors = resolveThemeColors(theme);
+    mockWindowDimensions.mockReturnValue({ width, height: 800, scale: 2, fontScale });
+    (useSettings as jest.Mock).mockReturnValue({
+      colors, nativeLanguage: "pl",
+      accessibilityPreferences: { highContrastEnabled: false, colorBlindMode: "none" }, fontScaleMultiplier: 1.15,
+    });
+    const screen = render(<CourseSettingsSection {...makeProps()} audioSettings={{ enabled: true, autoplayMode: "off", frontLanguage: null, backLanguage: null }} onChangeAudioSettings={jest.fn()} />);
+    expect(screen.getByTestId("course-audio-autoplay-first-row")).toHaveStyle({ flexDirection: stacked ? "column" : "row" });
+    const description = screen.getByText(pl.audioAutoplay.modes.off.description);
+    expect(description).toHaveStyle({ color: colors.paragraph, fontSize: 13 * 1.15 });
+    expect(description.props.numberOfLines).toBeUndefined();
+    expect(description.props.allowFontScaling).not.toBe(false);
+  });
 });

@@ -38,6 +38,8 @@ export type LetterHintSettings = {
   boxTwoLimit: number;
 };
 
+export type CourseFrontImageRole = "standard" | "replace_front" | "replace_back";
+
 export type BoxZeroAnswerSide = "front" | "back";
 
 export type CourseBoxZeroOverrides = CourseOverrideState<boolean>;
@@ -123,6 +125,12 @@ export interface SettingsContextValue {
   setBuiltinCourseBoxZeroAnswerSide: (params: CourseBoxZeroKeyParams, side: BoxZeroAnswerSide) => Promise<void>;
   getCustomCourseBoxZeroAnswerSide: (courseId: number) => BoxZeroAnswerSide;
   setCustomCourseBoxZeroAnswerSide: (courseId: number, side: BoxZeroAnswerSide) => Promise<void>;
+  courseFrontImageRole: CourseFrontImageRole;
+  courseFrontImageRoleHydrated: boolean;
+  getBuiltinCourseFrontImageRole: (params: CourseBoxZeroKeyParams) => CourseFrontImageRole;
+  setBuiltinCourseFrontImageRole: (params: CourseBoxZeroKeyParams, role: CourseFrontImageRole) => Promise<void>;
+  getCustomCourseFrontImageRole: (courseId: number) => CourseFrontImageRole;
+  setCustomCourseFrontImageRole: (courseId: number, role: CourseFrontImageRole) => Promise<void>;
   letterHintSettings: LetterHintSettings;
   letterHintSettingsHydrated: boolean;
   getBuiltinCourseLetterHintSettings: (params: CourseBoxZeroKeyParams) => LetterHintSettings;

@@ -8,6 +8,7 @@ type SettingsChoiceCardProps = {
   title: string;
   description: string;
   accessibilityLabel: string;
+  accessibilityHint?: string;
   icon: ComponentProps<typeof Ionicons>["name"];
   iconSize?: number;
   accent: "blue" | "teal";
@@ -22,6 +23,7 @@ export function SettingsChoiceCard({
   title,
   description,
   accessibilityLabel,
+  accessibilityHint,
   icon,
   iconSize = 26,
   accent,
@@ -68,6 +70,7 @@ export function SettingsChoiceCard({
       accessible
       accessibilityRole="button"
       accessibilityLabel={accessibilityLabel}
+      accessibilityHint={accessibilityHint}
       accessibilityState={{ selected, disabled: isDisabled }}
       disabled={isDisabled}
       onPress={isDisabled ? undefined : onPress}

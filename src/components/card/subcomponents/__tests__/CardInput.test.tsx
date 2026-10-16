@@ -65,6 +65,18 @@ describe("CardInput empty submit warning", () => {
     mockT = (key) => mockTranslate(key);
   });
 
+  it("renders an image question without hidden prompt text, answer labels or speech controls", () => {
+    const screen = render(<CardInput {...stableInputProps} promptText="" promptImageUri="file://spoon.webp" />);
+    expect(screen.queryByText("spoon")).toBeNull();
+    expect(screen.queryByText("łyżka")).toBeNull();
+    expect(screen.queryByLabelText(/spoon|łyżka/)).toBeNull();
+    expect(screen.queryAllByRole("button")).toHaveLength(0);
+    const input = screen.UNSAFE_getByType(TextInput);
+    expect(input.props.value).toBe("");
+    expect(input.props.accessibilityLabel).toBe("flashcards.card.input.answerLabel");
+    expect(input.props.accessibilityHint).toBe("flashcards.card.input.answerHint");
+  });
+
   it("renders my_yellow border when warning is active", () => {
     const screen = renderInput(true);
     const input = screen.UNSAFE_getByType(TextInput);

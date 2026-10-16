@@ -69,6 +69,7 @@ import { useStatsDisplaySettings } from "./settings/useStatsDisplaySettings";
 import { useThemeAccessibilitySettings } from "./settings/useThemeAccessibilitySettings";
 
 export type {
+  CourseFrontImageRole,
   AudioLanguage,
   FlashcardAutoplayMode,
   CourseAudioSettings,
@@ -123,7 +124,7 @@ export const SettingsProvider: React.FC<{
     () => ({ setActiveCustomCourseId }),
     [setActiveCustomCourseId]
   );
-  const { reloadCourseAudioSettings, ...courseOverrides } = useCourseOverrideSettings({
+  const { reloadCourseAudioSettings, reloadCourseFrontImageRoleSettings, ...courseOverrides } = useCourseOverrideSettings({
     courses,
     activeCourseIdx,
     activeCustomCourseId,
@@ -144,6 +145,7 @@ export const SettingsProvider: React.FC<{
   } = reminders;
   const stats = useStatsDisplaySettings();
   const backup = useGoogleDriveBackupSettings({
+    reloadCourseFrontImageRoleSettings,
     reloadCourseAudioSettings,
     applyCourseSelectionState,
     setStatsFireEffectEnabled: stats.setStatsFireEffectEnabled,

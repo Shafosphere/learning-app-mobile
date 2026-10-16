@@ -106,6 +106,7 @@ function renderSettingsHook() {
   const setStatsBookshelfEnabled = jest.fn(async () => {});
   const markOnboardingDone = jest.fn(async () => {});
   const reloadCourseAudioSettings = jest.fn(async () => {});
+  const reloadCourseFrontImageRoleSettings = jest.fn(async () => {});
   const hook = renderHook(() =>
     useGoogleDriveBackupSettings({
       applyCourseSelectionState,
@@ -113,6 +114,7 @@ function renderSettingsHook() {
       setStatsBookshelfEnabled,
       markOnboardingDone,
       reloadCourseAudioSettings,
+      reloadCourseFrontImageRoleSettings,
     })
   );
 
@@ -123,6 +125,7 @@ function renderSettingsHook() {
     setStatsBookshelfEnabled,
     markOnboardingDone,
     reloadCourseAudioSettings,
+    reloadCourseFrontImageRoleSettings,
   };
 }
 
@@ -287,6 +290,7 @@ describe("useGoogleDriveBackupSettings", () => {
       setStatsBookshelfEnabled,
       markOnboardingDone,
       reloadCourseAudioSettings,
+      reloadCourseFrontImageRoleSettings,
     } = renderSettingsHook();
 
     await act(async () => {
@@ -313,6 +317,7 @@ describe("useGoogleDriveBackupSettings", () => {
     expect(setStatsBookshelfEnabled).toHaveBeenCalledWith(false);
     expect(markOnboardingDone).toHaveBeenCalledTimes(1);
     expect(reloadCourseAudioSettings).toHaveBeenCalledTimes(1);
+    expect(reloadCourseFrontImageRoleSettings).toHaveBeenCalledTimes(1);
   });
 
   it("skips app state dependencies when restored flags are false", async () => {
@@ -323,6 +328,7 @@ describe("useGoogleDriveBackupSettings", () => {
       setStatsBookshelfEnabled,
       markOnboardingDone,
       reloadCourseAudioSettings,
+      reloadCourseFrontImageRoleSettings,
     } = renderSettingsHook();
 
     await act(async () => {
@@ -345,5 +351,6 @@ describe("useGoogleDriveBackupSettings", () => {
     expect(setStatsBookshelfEnabled).not.toHaveBeenCalled();
     expect(markOnboardingDone).not.toHaveBeenCalled();
     expect(reloadCourseAudioSettings).toHaveBeenCalledTimes(1);
+    expect(reloadCourseFrontImageRoleSettings).toHaveBeenCalledTimes(1);
   });
 });

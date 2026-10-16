@@ -625,6 +625,7 @@ export default function ReviewFlashcardsScreen() {
       />
 
       <FlashcardsPeekOverlay
+        courseId={courseId}
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}

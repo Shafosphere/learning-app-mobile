@@ -1165,6 +1165,7 @@ export default function Flashcards() {
       ) : null}
 
       <FlashcardsPeekOverlay
+        courseId={activeCustomCourseId}
         visible={peekBox !== null}
         boxKey={peekBox}
         cards={peekCards}

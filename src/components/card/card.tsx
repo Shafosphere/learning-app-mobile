@@ -1,3 +1,5 @@
+import { isFrontImageRoleApplicable, resolveCardPromptPresentation } from "@/src/utils/frontImageRole";
+import { useCourseFrontImageRole } from "@/src/hooks/useCourseFrontImageRole";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { splitFrontTextIntoAnswers } from "@/src/db/sqlite/utils";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
@@ -189,6 +191,7 @@ export default function Card({
     letterHintSettings = DEFAULT_LETTER_HINT_SETTINGS,
     letterHintSettingsHydrated = false,
   } = useSettings();
+  const { role: frontImageRole, hydrated: frontImageRoleHydrated } = useCourseFrontImageRole(audioCourseId);
   const isIntroMode = Boolean(introMode && correction?.mode === "intro");
   const statusStyle =
     !isIntroMode && result !== null
@@ -261,7 +264,6 @@ export default function Card({
   const rewers = selectedItem?.translations?.[activeTranslationIndex] ?? "";
   const promptImageFront = selectedItem?.imageFront ?? null;
   const promptImageBack = selectedItem?.imageBack ?? null;
-  const hasImagePrompt = Boolean(promptImageFront || promptImageBack);
   const answerOnly = isAnswerOnlyCard(selectedItem);
   const canShowBackAsPrompt = !answerOnly;
   const showCorrectionInputs = Boolean(
@@ -276,18 +278,33 @@ export default function Card({
     ? (effectiveAnswerOnly ? false : correctionReversed)
     : (answerOnly ? false : reversed);
 
-  const promptImageUri = showCorrectionInputs
+  const standardPromptImageUri = showCorrectionInputs
     ? correctionPromptImageUri
     : selectedItem
       ? effectiveReversed
         ? promptImageBack
         : promptImageFront
       : null;
-  const promptText = showCorrectionInputs
+  const standardPromptText = showCorrectionInputs
     ? correctionPromptText
     : effectiveReversed
       ? rewers
       : awers;
+  const promptWord = showCorrectionInputs ? correctionWord ?? selectedItem : selectedItem;
+  const standardPromptSide = isIntroMode
+    ? (correctionReversed && !promptWord?.imageFront ? "back" : "front")
+    : effectiveReversed ? "back" : "front";
+  const presentation = resolveCardPromptPresentation({
+    card: promptWord, role: frontImageRole, reversed: effectiveReversed,
+    stage: isIntroMode ? "intro" : showCorrectionInputs ? "correction" : "question",
+    standard: { text: standardPromptText, imageUri: standardPromptImageUri, audioSide: standardPromptSide },
+  });
+  // Avoid briefly revealing the legacy image/text while course settings hydrate.
+  const imageRolePending = !frontImageRoleHydrated && Boolean(promptWord?.imageFront);
+  const promptText = imageRolePending ? "" : presentation.text;
+  const promptImageUri = imageRolePending ? null : presentation.imageUri;
+  const hasImagePrompt = isFrontImageRoleApplicable(promptWord, frontImageRole)
+    ? Boolean(promptImageUri) : Boolean(promptImageFront || promptImageBack);
   const correctionAwers = correction?.awers ?? awers;
   const correctionRewers = isIntroMode ? rewers : (correction?.rewers ?? "");
   const correctionFieldRequirements = correction
@@ -309,11 +326,11 @@ export default function Card({
       .filter((entry) => entry.length > 0);
   }, [effectiveReversed, selectedItem]);
   const letterHintPrefix = useMemo(() => {
-    if (!letterHintSettingsHydrated || contentDebugSource !== "flashcards" ||
+    if (imageRolePending || !letterHintSettingsHydrated || contentDebugSource !== "flashcards" ||
         result !== null || showCorrectionInputs || introMode || isBetweenCards || isContentHeld ||
         !selectedItem || (selectedItem.type && selectedItem.type !== "text")) return "";
     return resolveLetterHint({ settings: letterHintSettings, answers: mainExpectedAnswers, activeBox });
-  }, [letterHintSettingsHydrated, contentDebugSource, result, showCorrectionInputs,
+  }, [imageRolePending, letterHintSettingsHydrated, contentDebugSource, result, showCorrectionInputs,
       introMode, isBetweenCards, isContentHeld, selectedItem, letterHintSettings, mainExpectedAnswers, activeBox]);
   const mainAnswerKind = useMemo(
     () => resolveInputKind(mainExpectedAnswers),
@@ -1327,19 +1344,29 @@ export default function Card({
   const displayedAudioWord = showCorrectionInputs ? correctionWord ?? selectedItem : selectedItem;
   const audioEnabled = isFocused && !isBetweenCards && !isContentHeld &&
     (contentDebugSource === "flashcards" || contentDebugSource === "review") && displayMode !== "empty";
-  const promptSide = isIntroMode
-    ? (correctionReversed && !displayedAudioWord?.imageFront ? "back" : "front")
-    : effectiveReversed ? "back" : "front";
+  const promptSide = presentation.audioSide;
+  const readAnswer = !isIntroMode && result !== null && Boolean(displayedAudioWord) &&
+    (!displayedAudioWord?.type || displayedAudioWord.type === "text");
+  const audioAnswers = effectiveReversed
+    ? splitFrontTextIntoAnswers(displayedAudioWord?.text ?? "")
+    : displayedAudioWord?.translations ?? [];
+  const comparisonOptions = { ignoreDiacritics: ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation };
+  const audioAnswer = (result === true
+    ? audioAnswers.find((expected) => answersMatch(answer, expected, comparisonOptions)) ??
+      audioAnswers.find((expected) => checkSpelling(answer, expected))
+    : undefined) ?? audioAnswers[0] ?? "";
   const audio = useFlashcardAudio(audioCourseId, displayedAudioWord?.externalId,
-    `${displayedAudioWord?.id}:${activeBox}:${displayMode}:${effectiveReversed}:${promptText}`,
-    audioEnabled, {
-      side: promptSide,
-      text: displayMode === "explanation" ? "" : promptText,
+    `${displayedAudioWord?.id}:${activeBox}:${readAnswer ? "answer" : displayMode}:${effectiveReversed}:${promptText}`,
+    audioEnabled && !imageRolePending && (readAnswer || promptSide !== null), {
+      side: readAnswer ? (effectiveReversed ? "front" : "back") : promptSide ?? standardPromptSide,
+      text: readAnswer ? audioAnswer : displayMode === "explanation" ? "" : promptText,
       cardKey: `${displayedAudioWord?.id}`,
+      phase: readAnswer ? "answer" : "question",
+      delayMs: readAnswer ? 0 : undefined,
     });
   const canReadInput = audio.available && activeBox === "boxZero" && isIntroMode;
   const resolverProps = {
-    onReadPrompt: audio.available && displayMode !== "explanation" && promptText.trim()
+    onReadPrompt: audio.available && promptSide !== null && !imageRolePending && displayMode !== "explanation" && promptText.trim()
       ? () => audio.read(promptSide, promptText) : undefined,
     onReadFrontInput: canReadInput ? () => audio.read("front", correctionAwers) : undefined,
     onReadBackInput: canReadInput ? () => audio.read("back", correctionRewers) : undefined,

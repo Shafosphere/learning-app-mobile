@@ -132,6 +132,7 @@ describe("CourseSettingsScreen image-only cards", () => {
       setCustomCourseSkipCorrectionEnabled: jest.fn(),
       getCustomCourseCardSize: () => "large",
       setCustomCourseCardSize: jest.fn(),
+      setCustomCourseFrontImageRole: jest.fn(),
       setCustomCourseLetterHintSettings: jest.fn(),
       getCustomCourseImageSize: () => "dynamic",
       setCustomCourseImageSize: jest.fn(),
@@ -187,8 +188,8 @@ describe("CourseSettingsScreen image-only cards", () => {
     expect(mockReplace).not.toHaveBeenCalledWith("/coursepanel");
   });
 
-  it("restores audio languages from the draft and saves them for the new course", async () => {
-    const audioSettings = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL" };
+  it("restores audio languages and autoplay mode from the draft and saves them for the new course", async () => {
+    const audioSettings = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL", autoplayMode: "off" };
     await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
       scopeKey: "Flags|flag|#123456||1", audioSettings,
     }));
@@ -206,6 +207,17 @@ describe("CourseSettingsScreen image-only cards", () => {
     await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
     fireEvent.press(screen.getByLabelText("Create course"));
     await waitFor(() => expect(mockedUseSettings().setCustomCourseBoxZeroAnswerSide).toHaveBeenCalledWith(42, "front"));
+  });
+
+  it("restores image role from draft, keeps it in the draft and saves it for the new id", async () => {
+    await AsyncStorage.setItem(SETTINGS_DRAFT_STORAGE_KEY, JSON.stringify({
+      scopeKey: "Flags|flag|#123456||1", frontImageRole: "replace_back",
+    }));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    await waitFor(async () => expect(JSON.parse((await AsyncStorage.getItem(SETTINGS_DRAFT_STORAGE_KEY))!).frontImageRole).toBe("replace_back"));
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockedUseSettings().setCustomCourseFrontImageRole).toHaveBeenCalledWith(42, "replace_back"));
   });
 
   it("restores letter hint personalization from draft and saves it for the new course", async () => {

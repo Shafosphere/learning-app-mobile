@@ -1,4 +1,21 @@
 {
+  "courseFrontImageRole": {
+    "title": "How should the image appear?",
+    "description": "Choose whether the image accompanies the flashcard or replaces a word during learning.",
+    "answerNote": "While you type an answer, any image that replaces that answer is hidden so it does not give it away.",
+    "standard": {
+      "title": "Standard",
+      "description": "The image appears on the selected side of the flashcard, together with the text."
+    },
+    "replace_front": {
+      "title": "Instead of front",
+      "description": "The image replaces the text on the front of the flashcard when that side is the question."
+    },
+    "replace_back": {
+      "title": "Instead of back",
+      "description": "The image replaces the text on the back of the flashcard when that side is the question."
+    }
+  },
   "courseLetterHints": {
     "title": "Letter hints",
     "description": "Show the start of an answer in boxes 1 and 2. Type the whole word from its first letter.",
@@ -154,7 +171,7 @@
     },
     "nativeLanguage": {
       "title": "Native language",
-      "subtitle": "Determines which official courses you will see when pinning courses."
+      "subtitle": "Determines available courses and the language skipped during automatic playback."
     },
     "appearance": {
       "section": "Appearance",
@@ -2423,7 +2440,7 @@
   },
   "courseAudio": {
     "title": "Flashcard audio",
-    "description": "Read aloud 500 ms after the flashcard appears. Tap the text to listen again.",
+    "description": "Automatic playback follows your selected mode. Tap the text to listen.",
     "toggleLabel": "Toggle flashcard audio",
     "chooseLanguages": "Choose both side languages to enable playback.",
     "frontLanguage": "Front language",
@@ -2433,6 +2450,29 @@
       "en-US": "English",
       "es-ES": "Spanish",
       "fr-FR": "French"
+    }
+  },
+  "audioAutoplay": {
+    "title": "Automatic reading aloud",
+    "courseDescription": "Choose which texts the app should automatically read aloud during study.",
+    "nativeLanguage": "Native language: {{language}}",
+    "modes": {
+      "non_native": {
+        "title": "Except native language",
+        "description": "Skips automatic playback of text in your native language.",
+        "title_pl": "Except Polish",
+        "description_pl": "Automatically reads texts in other languages, skipping Polish.",
+        "title_en": "Except English",
+        "description_en": "Automatically reads texts in other languages, skipping English."
+      },
+      "all": {
+        "title": "All languages",
+        "description": "Automatically reads questions and answers in all languages."
+      },
+      "off": {
+        "title": "Off",
+        "description": "Does not read automatically. Tap the text to listen."
+      }
     }
   }
 }

@@ -326,6 +326,39 @@ describe("userDataBackup", () => {
     jest.restoreAllMocks();
   });
 
+  it("exports image roles and restores explicit standard using new ids and official slugs", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    const custom = { id: 22, name: "Custom", iconId: "book", iconColor: "#000", colorId: null, reviewsEnabled: false, createdAt: 1, updatedAt: 1, isOfficial: false };
+    const official = { ...custom, id: 70, slug: "official-slug", isOfficial: true };
+    mockedGetCustomCourses.mockResolvedValue([custom, official]);
+    mockedGetCustomFlashcards.mockResolvedValue([]);
+    const key = "flashcards.courseFrontImageRoleOverrides";
+    await AsyncStorage.setItem(key, JSON.stringify({ builtin: { "en|pl|A1": "replace_front" }, custom: { 22: "replace_back", 70: "standard" } }));
+    const exported = await buildUserDataExport();
+    expect(exported.customCourses[0].frontImageRole).toBe("replace_back");
+    expect(exported.officialCourseState.courses[0].frontImageRole).toBe("standard");
+    await AsyncStorage.removeItem(key);
+    const result = await restoreUserData(exported, { targetDb: createMockDb() as never });
+    expect(result.success).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({
+      builtin: { "en|pl|A1": "replace_front" }, custom: { 501: "replace_back", 700: "standard" },
+    });
+  });
+
+  it("clears custom image roles on replacement and accepts backups without the field", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    mockedGetCustomCourses.mockResolvedValue([]);
+    const key = "flashcards.courseFrontImageRoleOverrides";
+    await AsyncStorage.setItem(key, JSON.stringify({ builtin: { "en|pl|A1": "standard" }, custom: { 7: "replace_back" } }));
+    const exported = await buildUserDataExport();
+    delete exported.builtinFrontImageRoles;
+    const result = await restoreUserData(exported, { targetDb: db as never, replaceExistingData: true });
+    expect(result.success).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: { "en|pl|A1": "standard" }, custom: {} });
+  });
+
   it("exports audio by course and restores it using new custom ids and official slugs", async () => {
     const db = createMockDb();
     mockedGetDb.mockResolvedValue(db as never);
@@ -333,8 +366,8 @@ describe("userDataBackup", () => {
     const official = { ...custom, id: 70, slug: "official-slug", isOfficial: true };
     mockedGetCustomCourses.mockResolvedValue([custom, official]);
     mockedGetCustomFlashcards.mockResolvedValue([]);
-    const enabled = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL" };
-    const disabled = { ...enabled, enabled: false };
+    const enabled = { enabled: true, frontLanguage: "fr-FR", backLanguage: "pl-PL", autoplayMode: "all" };
+    const disabled = { ...enabled, enabled: false, autoplayMode: "off" };
     const key = "flashcards.courseAudioOverrides";
     await AsyncStorage.setItem(key, JSON.stringify({ builtin: { "en|pl|A1": disabled }, custom: { 22: enabled, 70: disabled } }));
     const exported = await buildUserDataExport();
@@ -359,6 +392,18 @@ describe("userDataBackup", () => {
     delete exported.builtinAudioSettings;
     await restoreUserData(exported, { targetDb: db as never, replaceExistingData: true });
     expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: { "en|pl|A1": disabled }, custom: {} });
+  });
+
+  it("ignores the former global preference in storage and older backups", async () => {
+    const db = createMockDb();
+    mockedGetDb.mockResolvedValue(db as never);
+    mockedGetCustomCourses.mockResolvedValue([]);
+    await AsyncStorage.setItem("flashcards.audioAutoplayMode", JSON.stringify("off"));
+    const exported = await buildUserDataExport();
+    expect(exported).not.toHaveProperty("audioAutoplayMode");
+    const result = await restoreUserData({ ...exported, audioAutoplayMode: "all" } as typeof exported, { targetDb: db as never });
+    expect(result.success).toBe(true);
+    expect(JSON.parse((await AsyncStorage.getItem("flashcards.audioAutoplayMode"))!)).toBe("off");
   });
 
   it("clears custom letter hint overrides when replacing backup data and keeps builtin settings", async () => {

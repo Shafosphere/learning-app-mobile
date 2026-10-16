@@ -1,4 +1,4 @@
-import type { BoxZeroAnswerSide, LetterHintSettings } from "@/src/contexts/settings/types";
+import type { BoxZeroAnswerSide, CourseFrontImageRole, LetterHintSettings } from "@/src/contexts/settings/types";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 import type { LanguageCourseGroupId } from "./languageCourseGroups";
 import { imageMaps } from "./imageMaps";
@@ -18,6 +18,7 @@ export type OfficialPackCourseSettings = {
   cardSize?: "large" | "small";
   imageSize?: "dynamic" | "small" | "medium" | "large" | "very_large";
   imageFrameEnabled?: boolean;
+  frontImageRole?: CourseFrontImageRole;
   letterHintSettings?: LetterHintSettings;
 };
 
@@ -968,6 +969,19 @@ const OFFICIAL_PACKS_MANIFEST = ([
   packVersion?: number;
 })[];
 
+const IMAGE_REPLACES_BACK_PACK_SLUGS = new Set([
+  "eng_to_pl_first_50", "es_to_pl_first_50", "es_to_en_first_50",
+  "fr_to_pl_first_50", "fr_to_en_first_50",
+]);
+
+// Letter hints are enabled by default only for starter packs of 50–250 words.
+const LETTER_HINT_ENABLED_PACK_SLUGS = new Set([
+  ...[50, 100, 250].map((count) => `eng_to_pl_first_${count}`),
+  ...["es_to_pl", "es_to_en", "fr_to_pl", "fr_to_en"].flatMap((prefix) =>
+    [50, 150].map((count) => `${prefix}_first_${count}`)
+  ),
+]);
+
 // Opt-in defaults for the courses currently shipped with Google recordings.
 const AUDIO_ENABLED_PACK_SLUGS = new Set([
   ...["es_to_pl", "es_to_en"].flatMap((prefix) => [50, 150, 327].map((count) => `${prefix}_first_${count}`)),
@@ -981,7 +995,10 @@ export const OFFICIAL_PACKS: OfficialPackDef[] = OFFICIAL_PACKS_MANIFEST.map((pa
   ...(["en", "es", "fr"].includes(pack.sourceLang ?? "") && pack.targetLang != null && pack.sourceLang !== pack.targetLang
     ? {
         settings: {
-          letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true },
+          ...(IMAGE_REPLACES_BACK_PACK_SLUGS.has(pack.slug) ? { frontImageRole: "replace_back" as const } : {}),
+          ...(LETTER_HINT_ENABLED_PACK_SLUGS.has(pack.slug)
+            ? { letterHintSettings: { ...DEFAULT_LETTER_HINT_SETTINGS, enabled: true } }
+            : {}),
           ...(AUDIO_ENABLED_PACK_SLUGS.has(pack.slug) ? { audioEnabled: true } : {}),
           ...pack.settings,
         },

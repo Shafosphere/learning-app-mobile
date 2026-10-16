@@ -1,8 +1,11 @@
-import { AUDIO_LANGUAGES } from "@/src/contexts/settings/courseAudioSettings";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { AUDIO_LANGUAGES, normalizeFlashcardAutoplayMode } from "@/src/contexts/settings/courseAudioSettings";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
+import { AudioAutoplaySettingsSection } from "./AudioAutoplaySettingsSection";
 import { BoxZeroSettingsSection } from "./BoxZeroSettingsSection";
 import { LetterHintControls } from "./LetterHintControls";
 import { SizeSettingsChoiceBlock } from "./SizeSettingsChoiceBlock";
+import { ImageDisplaySettingsSection } from "./ImageDisplaySettingsSection";
 import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { Pressable, Text, View } from "react-native";
@@ -10,6 +13,7 @@ import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
 import type {
   CourseAudioSettings,
+  CourseFrontImageRole,
   BoxZeroAnswerSide,
   LetterHintSettings,
   FlashcardsCardSize,
@@ -25,6 +29,9 @@ type SwitchColors = {
 };
 
 export type CourseSettingsSectionProps = {
+  frontImageRole?: CourseFrontImageRole;
+  onChangeFrontImageRole?: (role: CourseFrontImageRole) => void;
+  frontImageRoleDisabled?: boolean;
   audioSettings?: CourseAudioSettings;
   onChangeAudioSettings?: (settings: CourseAudioSettings) => void;
   audioSettingsDisabled?: boolean;
@@ -116,6 +123,7 @@ type ChoiceBlockProps<T extends string> = {
   title: string;
   description: string;
   hint?: string;
+  footer?: string;
   options: ChoiceOption<T>[];
   value: T;
   onSelect?: (value: T) => void;
@@ -235,6 +243,7 @@ function SettingsChoiceBlock<T extends string>({
   disabled = false,
   titleStyle,
   accessibilityLabelPrefix,
+  footer,
 }: ChoiceBlockProps<T>) {
   return (
     <View style={styles.settingsChoiceBlock}>
@@ -262,6 +271,7 @@ function SettingsChoiceBlock<T extends string>({
               disabled={disabled || !onSelect}
               accessibilityRole="button"
               accessibilityLabel={accessibilityLabelPrefix ? `${accessibilityLabelPrefix}: ${option.title}` : undefined}
+              accessibilityHint={option.subtitle || undefined}
               accessibilityState={{ disabled: disabled || !onSelect, selected: isActive }}
             >
               <Text style={styles.settingsChoiceOptionTitle}>{option.title}</Text>
@@ -272,11 +282,17 @@ function SettingsChoiceBlock<T extends string>({
           );
         })}
       </View>
+      {footer ? (
+        <Text style={styles.settingsChoiceDescription}>{preventWidowsPl(footer)}</Text>
+      ) : null}
     </View>
   );
 }
 
 export function CourseSettingsSection({
+  frontImageRole = "standard",
+  onChangeFrontImageRole,
+  frontImageRoleDisabled = false,
   audioSettings,
   onChangeAudioSettings,
   audioSettingsDisabled = false,
@@ -317,6 +333,7 @@ export function CourseSettingsSection({
   onToggleImageFrame,
 }: CourseSettingsSectionProps) {
   const { t } = useTranslation();
+  const { nativeLanguage } = useSettings();
   const sharedStyles = styles as SharedStyles;
   const trueFalseOptions = buildTrueFalseOptions(t);
   const cardSizeOptions = buildCardSizeOptions(t);
@@ -336,16 +353,26 @@ export function CourseSettingsSection({
   return (
     <View style={sharedStyles.sectionGroup}>
       {audioSettings && onChangeAudioSettings ? (
-        <View testID="course-audio-settings" style={sharedStyles.settingsGroupCard}>
-          <SettingsToggleRow
-            styles={sharedStyles}
-            title={t("courseAudio.title")}
-            description={t("courseAudio.description")}
-            value={audioSettings.enabled}
-            onPress={() => onChangeAudioSettings({ ...audioSettings, enabled: !audioSettings.enabled })}
-            accessibilityLabel={t("courseAudio.toggleLabel")}
-            disabled={audioSettingsDisabled}
-          />
+        <View testID="course-audio-settings">
+          <View style={sharedStyles.settingsGroupCard}>
+            <SettingsToggleRow
+              styles={sharedStyles}
+              title={t("courseAudio.title")}
+              description={t("courseAudio.description")}
+              value={audioSettings.enabled}
+              onPress={() => onChangeAudioSettings({ ...audioSettings, enabled: !audioSettings.enabled })}
+              accessibilityLabel={t("courseAudio.toggleLabel")}
+              disabled={audioSettingsDisabled}
+            />
+          </View>
+          {audioSettings.enabled ? (
+            <AudioAutoplaySettingsSection
+              nativeLanguage={nativeLanguage}
+              value={normalizeFlashcardAutoplayMode(audioSettings.autoplayMode)}
+              onSelect={(autoplayMode) => onChangeAudioSettings({ ...audioSettings, autoplayMode })}
+              disabled={audioSettingsDisabled}
+            />
+          ) : null}
           {showAudioLanguages && audioSettings.enabled ? (
             <>
               <Text style={sharedStyles.settingsRowDescription}>{t("courseAudio.chooseLanguages")}</Text>
@@ -518,6 +545,14 @@ export function CourseSettingsSection({
         value={cardSize}
         onSelect={onSelectCardSize}
       />
+
+      {onChangeFrontImageRole ? (
+        <ImageDisplaySettingsSection
+          value={frontImageRole}
+          onSelect={onChangeFrontImageRole}
+          disabled={frontImageRoleDisabled}
+        />
+      ) : null}
 
       {showImageSizeOptions ? (
         <SizeSettingsChoiceBlock

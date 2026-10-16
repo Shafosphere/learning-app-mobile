@@ -36,6 +36,16 @@ export const useStyles = createThemeStylesHook((colors, accessibility) => {
     hint: { fontSize: 13, lineHeight: 19, color: colors.paragraph },
     grid: { gap: 12 },
     row: { flexDirection: "row", alignItems: "stretch", gap: 12 },
+    stackedRow: { flexDirection: "column" },
+    informationNote: {
+      flexDirection: "row",
+      alignItems: "flex-start",
+      gap: 10,
+      borderTopWidth: 1,
+      borderTopColor: colors.border,
+      paddingTop: 14,
+    },
+    informationText: { flex: 1, minWidth: 0 },
     card: {
       flex: 1,
       minWidth: 0,

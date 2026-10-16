@@ -1,3 +1,5 @@
+import { isFrontImageRoleApplicable, resolveCardPromptPresentation } from "@/src/utils/frontImageRole";
+import { useCourseFrontImageRole } from "@/src/hooks/useCourseFrontImageRole";
 import { BoxesState, WordWithTranslations } from "@/src/types/boxes";
 import { isStudyCardReversed } from "@/src/utils/flashcardDirection";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
@@ -17,6 +19,7 @@ import { Image } from "expo-image";
 import { useTranslation } from "react-i18next";
 
 type FlashcardsPeekOverlayProps = {
+  courseId?: number | null;
   visible: boolean;
   boxKey: keyof BoxesState | null;
   cards: WordWithTranslations[];
@@ -40,6 +43,7 @@ const BOX_LABELS: Record<keyof BoxesState, string> = {
 };
 
 export default function FlashcardsPeekOverlay({
+  courseId,
   visible,
   boxKey,
   cards,
@@ -53,6 +57,7 @@ export default function FlashcardsPeekOverlay({
   onReturnToUnknown,
 }: FlashcardsPeekOverlayProps) {
   const { t } = useTranslation();
+  const { role: frontImageRole, hydrated: frontImageRoleHydrated } = useCourseFrontImageRole(courseId);
   const styles = usePeekStyles();
   const scaleAnim = useRef(new Animated.Value(0.9)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
@@ -216,11 +221,23 @@ export default function FlashcardsPeekOverlay({
     const isBoxZero = boxKey === "boxZero";
     const useBoxZeroSideLayout =
       isBoxZero && cardLayout === "box-aware";
-    const reversed = isStudyCardReversed(item, boxKey, boxZeroEnabled);
-    const prompt =
-      reversed ? item.translations?.[0] ?? "" : item.text;
+    const appliesImageRole = isFrontImageRoleApplicable(item, frontImageRole);
+    const reversed = cardLayout === "uniform" && appliesImageRole
+      ? Boolean(item.flipped) : isStudyCardReversed(item, boxKey, boxZeroEnabled);
+    const standardPrompt = reversed ? item.translations?.[0] ?? "" : item.text;
+    const presentation = resolveCardPromptPresentation({
+      card: item, role: frontImageRole, reversed,
+      stage: useBoxZeroSideLayout ? "intro" : "question",
+      standard: {
+        text: standardPrompt,
+        imageUri: (reversed ? item.imageBack : item.imageFront) ?? null,
+        audioSide: reversed ? "back" : "front",
+      },
+    });
+    const pending = !frontImageRoleHydrated && Boolean(item.imageFront);
+    const prompt = pending ? "" : presentation.text;
     const type = item.type ?? "text";
-    const promptImage = reversed ? item.imageBack : item.imageFront;
+    const promptImage = pending ? null : presentation.imageUri;
     const answerImage = reversed ? item.imageFront : item.imageBack;
     const hasPromptImage = Boolean(promptImage);
     const hasAnswerImage = Boolean(answerImage);
@@ -228,11 +245,11 @@ export default function FlashcardsPeekOverlay({
       prompt?.trim() || (hasPromptImage ? "" : t("flashcards.card.peek.emptyContent"));
     const translations =
       item.translations?.map((t) => t?.trim()).filter(Boolean) ?? [];
-    const mainTranslation =
-      translations[0] ?? t("flashcards.card.peek.emptyTranslation");
+    const mainTranslation = appliesImageRole && reversed && !useBoxZeroSideLayout
+      ? item.text : translations[0] ?? t("flashcards.card.peek.emptyTranslation");
     const isBooleanType = type === "true_false" || type === "know_dont_know";
     const isKnowDontKnow = type === "know_dont_know";
-    const extraTranslations = isBooleanType ? [] : translations.slice(1);
+    const extraTranslations = isBooleanType || (appliesImageRole && reversed && !useBoxZeroSideLayout) ? [] : translations.slice(1);
     const normalizedTrueFalse = translations[0]?.toLowerCase() ?? "";
     const trueFalseAnswer =
       isKnowDontKnow

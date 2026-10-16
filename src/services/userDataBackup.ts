@@ -1,5 +1,6 @@
+import { COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, normalizeCourseFrontImageRole, normalizeFrontImageRoleOverrides } from "@/src/utils/frontImageRole";
 import { COURSE_AUDIO_STORAGE_KEY, normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
-import type { CourseAudioSettings, CourseOverrideState } from "@/src/contexts/settings/types";
+import type { CourseAudioSettings, CourseFrontImageRole, CourseOverrideState } from "@/src/contexts/settings/types";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   deleteAndReinitializeDB,
@@ -40,6 +41,12 @@ async function readAudioOverrides(): Promise<CourseOverrideState<CourseAudioSett
       custom: Object.fromEntries(Object.entries(parsed?.custom ?? {}).map(([key, value]) => [key, normalizeCourseAudioSettings(value as CourseAudioSettings)])),
     };
   } catch { return { builtin: {}, custom: {} }; }
+}
+
+async function readFrontImageRoleOverrides(): Promise<CourseOverrideState<CourseFrontImageRole>> {
+  const raw = await AsyncStorage.getItem(COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY);
+  try { return normalizeFrontImageRoleOverrides(raw ? JSON.parse(raw) : null); }
+  catch { return normalizeFrontImageRoleOverrides(null); }
 }
 
 export type BuiltinReviewExportRow = {
@@ -117,6 +124,7 @@ export type OfficialCourseRelearningExportRow =
   };
 
 export type OfficialCourseSnapshotExport = {
+  frontImageRole?: CourseFrontImageRole;
   audioSettings?: CourseAudioSettings;
   slug: string;
   reviews: OfficialCourseReviewExportRow[];
@@ -156,6 +164,7 @@ export type StatsStateExport = {
 };
 
 export type CustomCourseExport = {
+  frontImageRole?: CourseFrontImageRole;
   audioSettings?: CourseAudioSettings;
   backupCourseKey: string;
   course: CustomCourseRecord;
@@ -165,6 +174,7 @@ export type CustomCourseExport = {
 };
 
 export type UserDataExport = {
+  builtinFrontImageRoles?: Record<string, CourseFrontImageRole>;
   builtinAudioSettings?: Record<string, CourseAudioSettings>;
   version: 3;
   generatedAt: number;
@@ -682,7 +692,8 @@ function toOfficialFlashcardIdentity(
 
 async function buildCourseExport(
   course: CustomCourseRecord,
-  audioOverrides: CourseOverrideState<CourseAudioSettings>
+  audioOverrides: CourseOverrideState<CourseAudioSettings>,
+  imageRoleOverrides: CourseOverrideState<CourseFrontImageRole>,
 ): Promise<CustomCourseExport> {
   const db = await getDB();
   const [flashcards, reviews, learningEvents] = await Promise.all([
@@ -715,6 +726,7 @@ async function buildCourseExport(
   ]);
 
   return {
+    ...(imageRoleOverrides.custom[course.id] !== undefined ? { frontImageRole: imageRoleOverrides.custom[course.id] } : {}),
     ...(audioOverrides.custom[course.id] ? { audioSettings: audioOverrides.custom[course.id] } : {}),
     backupCourseKey: makeCustomCourseBackupKey(course.id),
     course,
@@ -798,6 +810,7 @@ function buildOfficialCourseStateExport(
     );
 
   return {
+    ...(courseExport.frontImageRole !== undefined ? { frontImageRole: courseExport.frontImageRole } : {}),
     ...(courseExport.audioSettings ? { audioSettings: courseExport.audioSettings } : {}),
     slug,
     reviews,
@@ -826,7 +839,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
       )
     : [];
 
-  const audioOverrides = await readAudioOverrides();
+  const [audioOverrides, imageRoleOverrides] = await Promise.all([readAudioOverrides(), readFrontImageRoleOverrides()]);
   const allCourses = await getCustomCourses();
   const customCourses = allCourses.filter((course) => !course.isOfficial);
   const officialCourses = allCourses.filter((course) => course.isOfficial);
@@ -840,8 +853,8 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
     activeCustomCourseIdRaw,
     statsState,
   ] = await Promise.all([
-    Promise.all(customCourses.map((course) => buildCourseExport(course, audioOverrides))),
-    Promise.all(officialCourses.map((course) => buildCourseExport(course, audioOverrides))),
+    Promise.all(customCourses.map((course) => buildCourseExport(course, audioOverrides, imageRoleOverrides))),
+    Promise.all(officialCourses.map((course) => buildCourseExport(course, audioOverrides, imageRoleOverrides))),
     collectBoxesSnapshots(["boxes:"]),
     collectBoxesSnapshots(["customBoxes:"]),
     AsyncStorage.getItem("officialPinnedCourseIds"),
@@ -924,6 +937,7 @@ export async function buildUserDataExport(): Promise<UserDataExport> {
   return {
     version: 3,
     generatedAt: Date.now(),
+    ...(Object.keys(imageRoleOverrides.builtin).length ? { builtinFrontImageRoles: imageRoleOverrides.builtin } : {}),
     ...(Object.keys(audioOverrides.builtin).length ? { builtinAudioSettings: audioOverrides.builtin } : {}),
     builtinReviews,
     boxesSnapshots,
@@ -1300,6 +1314,7 @@ function normalizeImportedData(data: unknown): UserDataExport {
   return {
     version: 3,
     generatedAt: typed.generatedAt,
+    builtinFrontImageRoles: typed.builtinFrontImageRoles,
     builtinAudioSettings: typed.builtinAudioSettings,
     builtinReviews: typed.builtinReviews ?? [],
     boxesSnapshots: typed.boxesSnapshots ?? {},
@@ -1308,6 +1323,7 @@ function normalizeImportedData(data: unknown): UserDataExport {
       backupCourseKey:
         courseExport.backupCourseKey ??
         makeCustomCourseBackupKey(courseExport.course.id),
+      ...(courseExport.frontImageRole !== undefined ? { frontImageRole: normalizeCourseFrontImageRole(courseExport.frontImageRole) } : {}),
       ...(courseExport.audioSettings ? { audioSettings: normalizeCourseAudioSettings(courseExport.audioSettings) } : {}),
       course: courseExport.course,
       flashcards: courseExport.flashcards.map((card) => ({
@@ -1796,6 +1812,7 @@ async function resetReplaceableStorageState(): Promise<void> {
   const customOverrideResets: [string, string][] = [];
   const overrideKeys = [
     COURSE_AUDIO_STORAGE_KEY,
+    COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY,
     "flashcards.courseLetterHintOverrides",
     "flashcards.courseBoxZeroOverrides",
     "flashcards.courseBoxZeroAnswerSideOverrides",
@@ -1959,10 +1976,15 @@ export async function restoreUserData(
     }
 
     const pairs: [string, string][] = [];
-    const audioOverrides = await readAudioOverrides();
+    const [audioOverrides, imageRoleOverrides] = await Promise.all([readAudioOverrides(), readFrontImageRoleOverrides()]);
+    let imageRoleChanged = false;
     let audioChanged = false;
     for (const courseExport of normalized.customCourses) {
       const id = restoredCustomCourseIdsByBackupKey.get(courseExport.backupCourseKey);
+      if (id != null && courseExport.frontImageRole !== undefined) {
+        imageRoleOverrides.custom[id] = normalizeCourseFrontImageRole(courseExport.frontImageRole);
+        imageRoleChanged = true;
+      }
       if (id != null && courseExport.audioSettings) {
         audioOverrides.custom[id] = normalizeCourseAudioSettings(courseExport.audioSettings);
         audioChanged = true;
@@ -1970,6 +1992,10 @@ export async function restoreUserData(
     }
     for (const courseState of normalized.officialCourseState.courses) {
       const id = officialCourseIdsBySlug.get(courseState.slug);
+      if (id != null && courseState.frontImageRole !== undefined) {
+        imageRoleOverrides.custom[id] = normalizeCourseFrontImageRole(courseState.frontImageRole);
+        imageRoleChanged = true;
+      }
       if (id != null && courseState.audioSettings) {
         audioOverrides.custom[id] = normalizeCourseAudioSettings(courseState.audioSettings);
         audioChanged = true;
@@ -1979,6 +2005,11 @@ export async function restoreUserData(
       audioOverrides.builtin[key] = normalizeCourseAudioSettings(value);
       audioChanged = true;
     }
+    for (const [key, role] of Object.entries(normalized.builtinFrontImageRoles ?? {})) {
+      imageRoleOverrides.builtin[key] = normalizeCourseFrontImageRole(role);
+      imageRoleChanged = true;
+    }
+    if (imageRoleChanged) pairs.push([COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, JSON.stringify(imageRoleOverrides)]);
     if (audioChanged) pairs.push([COURSE_AUDIO_STORAGE_KEY, JSON.stringify(audioOverrides)]);
     for (const [key, value] of Object.entries(normalized.boxesSnapshots ?? {})) {
       pairs.push([key, JSON.stringify(value)]);

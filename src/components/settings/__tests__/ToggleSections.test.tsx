@@ -26,6 +26,7 @@ function settings(overrides: object = {}) {
   const value = {
     colors: {}, feedbackEnabled: false, feedbackVolume: 0.5,
     setFeedbackVolume: jest.fn().mockResolvedValue(undefined),
+    nativeLanguage: "pl",
     flashcardAudioVolume: 1, flashcardAudioVolumeHydrated: true,
     setFlashcardAudioVolume: jest.fn().mockResolvedValue(undefined),
     theme: "light", quotesEnabled: true, learningRemindersEnabled: false,
@@ -93,4 +94,10 @@ it("keeps effects and flashcard volume independent and cancels an older debounce
   expect(value.setFlashcardAudioVolume).toHaveBeenLastCalledWith(0);
   expect(value.setFeedbackVolume).toHaveBeenCalledTimes(1);
   expect(screen.getByTestId("flashcard-audio-volume-slider").props.accessibilityValueText).toBe("0%");
+});
+
+it("keeps automatic playback out of global settings", () => {
+  settings();
+  const screen = render(<AppearanceSection />);
+  expect(screen.queryByText("audioAutoplay.title")).toBeNull();
 });

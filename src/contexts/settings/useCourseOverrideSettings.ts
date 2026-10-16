@@ -1,3 +1,4 @@
+import { COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, normalizeCourseFrontImageRole, normalizeFrontImageRoleOverrides } from "@/src/utils/frontImageRole";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings, COURSE_AUDIO_STORAGE_KEY } from "./courseAudioSettings";
 import { useCallback, useMemo } from "react";
@@ -29,6 +30,7 @@ import {
 } from "./courseOverrideHelpers";
 import type {
   CourseAudioSettings,
+  CourseFrontImageRole,
   BoxZeroAnswerSide,
   CourseAutoflowOverrides,
   CourseBoxZeroKeyParams,
@@ -144,6 +146,34 @@ export function useCourseOverrideSettings({
   activeCourseIdx: number | null;
   activeCustomCourseId: number | null;
 }) {
+  const [frontImageRoleOverrides, setFrontImageRoleOverrides, courseFrontImageRoleHydrated] =
+    useHydratedPersistedState<CourseOverrideState<CourseFrontImageRole>>(
+      COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, { builtin: {}, custom: {} },
+    );
+  const normalizedFrontImageRoleOverrides = useMemo(
+    () => normalizeFrontImageRoleOverrides(frontImageRoleOverrides), [frontImageRoleOverrides],
+  );
+  const imageRole = useCourseOverrideAccessors<CourseFrontImageRole>({
+    courses, activeCourseIdx, activeCustomCourseId, defaultValue: "standard",
+    overrides: normalizedFrontImageRoleOverrides, setOverrides: setFrontImageRoleOverrides,
+    persistDefault: true,
+  });
+  const { setBuiltin: setBuiltinImageRole, setCustom: setCustomImageRole } = imageRole;
+  const reloadCourseFrontImageRoleSettings = useCallback(async () => {
+    const raw = await AsyncStorage.getItem(COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY);
+    let parsed: unknown;
+    try { parsed = raw ? JSON.parse(raw) : null; } catch { parsed = null; }
+    await setFrontImageRoleOverrides(normalizeFrontImageRoleOverrides(parsed));
+  }, [setFrontImageRoleOverrides]);
+  const setBuiltinCourseFrontImageRole = useCallback(
+    (params: CourseBoxZeroKeyParams, role: CourseFrontImageRole) =>
+      setBuiltinImageRole(params, normalizeCourseFrontImageRole(role)), [setBuiltinImageRole],
+  );
+  const setCustomCourseFrontImageRole = useCallback(
+    (id: number, role: CourseFrontImageRole) =>
+      setCustomImageRole(id, normalizeCourseFrontImageRole(role)), [setCustomImageRole],
+  );
+
   const [letterHintOverrides, setLetterHintOverrides, letterHintSettingsHydrated] =
     useHydratedPersistedState<CourseOverrideState<LetterHintSettings>>(
       "flashcards.courseLetterHintOverrides",
@@ -389,6 +419,13 @@ export function useCourseOverrideSettings({
   });
 
   return {
+    courseFrontImageRole: imageRole.activeValue,
+    courseFrontImageRoleHydrated,
+    reloadCourseFrontImageRoleSettings,
+    getBuiltinCourseFrontImageRole: imageRole.getBuiltin,
+    getCustomCourseFrontImageRole: imageRole.getCustom,
+    setBuiltinCourseFrontImageRole,
+    setCustomCourseFrontImageRole,
     courseAudioSettingsHydrated,
     reloadCourseAudioSettings,
     getCustomCourseAudioSettings,

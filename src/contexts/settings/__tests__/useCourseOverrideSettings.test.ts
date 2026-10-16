@@ -40,6 +40,30 @@ describe("useCourseOverrideSettings", () => {
     expect(restored.result.current.getCustomCourseBoxZeroAnswerSide(9)).toBe("back");
   });
 
+  it("persists explicit image roles, switches courses and restores them after remount", async () => {
+    const props = { courses: [course], activeCourseIdx: null as number | null, activeCustomCourseId: 7 as number | null };
+    const hook = renderHook((params: typeof props) => useCourseOverrideSettings(params), { initialProps: props });
+    await waitFor(() => expect(hook.result.current.courseFrontImageRoleHydrated).toBe(true));
+    expect(hook.result.current.courseFrontImageRole).toBe("standard");
+    await act(async () => { await hook.result.current.setCustomCourseFrontImageRole(7, "replace_back"); });
+    await act(async () => { await hook.result.current.setCustomCourseFrontImageRole(8, "standard"); });
+    await act(async () => { await hook.result.current.setBuiltinCourseFrontImageRole(course, "replace_front"); });
+    expect(hook.result.current.courseFrontImageRole).toBe("replace_back");
+    hook.rerender({ ...props, activeCustomCourseId: 8 });
+    expect(hook.result.current.courseFrontImageRole).toBe("standard");
+    hook.rerender({ ...props, activeCustomCourseId: null, activeCourseIdx: 0 });
+    expect(hook.result.current.courseFrontImageRole).toBe("replace_front");
+    expect(JSON.parse((await AsyncStorage.getItem("flashcards.courseFrontImageRoleOverrides"))!)).toEqual({
+      builtin: { "en|pl|A1": "replace_front" }, custom: { 7: "replace_back", 8: "standard" },
+    });
+    hook.unmount();
+    const restored = renderHook(() => useCourseOverrideSettings(props));
+    await waitFor(() => expect(restored.result.current.courseFrontImageRole).toBe("replace_back"));
+    await AsyncStorage.setItem("flashcards.courseFrontImageRoleOverrides", JSON.stringify({ custom: { 7: "replace_front" } }));
+    await act(async () => { await restored.result.current.reloadCourseFrontImageRoleSettings(); });
+    expect(restored.result.current.courseFrontImageRole).toBe("replace_front");
+  });
+
   it("persists personalized letter hints and resolves the active course after remount", async () => {
     const initialProps = { activeCourseIdx: null as number | null, activeCustomCourseId: 7 as number | null };
     const hook = renderHook<ReturnType<typeof useCourseOverrideSettings>, typeof initialProps>(({ activeCourseIdx, activeCustomCourseId }) => useCourseOverrideSettings({

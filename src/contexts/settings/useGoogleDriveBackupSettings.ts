@@ -20,6 +20,7 @@ import i18n from "@/src/i18n";
 import type { CourseSelectionStateToApply } from "./useCourseSelectionSettings";
 
 type UseGoogleDriveBackupSettingsParams = {
+  reloadCourseFrontImageRoleSettings?: () => Promise<void>;
   reloadCourseAudioSettings?: () => Promise<void>;
   applyCourseSelectionState: (
     state: CourseSelectionStateToApply
@@ -47,6 +48,7 @@ function readBoolean(raw: string | null): boolean {
 }
 
 export function useGoogleDriveBackupSettings({
+  reloadCourseFrontImageRoleSettings = defaultReloadCourseAudioSettings,
   reloadCourseAudioSettings = defaultReloadCourseAudioSettings,
   applyCourseSelectionState,
   setStatsFireEffectEnabled,
@@ -175,6 +177,7 @@ export function useGoogleDriveBackupSettings({
 
       console.log("[SettingsContext] applyImportedAppState", restoredState);
       await reloadCourseAudioSettings();
+      await reloadCourseFrontImageRoleSettings();
 
       if (restoredState.shouldApplySelection) {
         await applyCourseSelectionState({
@@ -204,6 +207,7 @@ export function useGoogleDriveBackupSettings({
     [
       applyCourseSelectionState,
       reloadCourseAudioSettings,
+      reloadCourseFrontImageRoleSettings,
       markOnboardingDone,
       setStatsBookshelfEnabled,
       setStatsFireEffectEnabled,

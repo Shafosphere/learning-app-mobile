@@ -1,3 +1,5 @@
+import { normalizeCourseFrontImageRole } from "@/src/utils/frontImageRole";
+import type { CourseFrontImageRole } from "@/src/contexts/settings/types";
 import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
 import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
 import MyButton from "@/src/components/button/button";
@@ -72,6 +74,7 @@ export default function CourseSettingsScreen() {
     setCustomCourseExplanationOnlyOnWrong,
     getCustomCourseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
+    setCustomCourseFrontImageRole,
     setCustomCourseLetterHintSettings,
     getCustomCourseCardSize,
     setCustomCourseCardSize,
@@ -162,6 +165,7 @@ export default function CourseSettingsScreen() {
   const [trueFalseButtonsVariant, setTrueFalseButtonsVariant] = useState(
     getCustomCourseTrueFalseButtonsVariant(-1)
   );
+  const [frontImageRole, setFrontImageRole] = useState<CourseFrontImageRole>("standard");
   const [letterHintSettings, setLetterHintSettings] = useState(DEFAULT_LETTER_HINT_SETTINGS);
   const [cardSize, setCardSize] = useState(getCustomCourseCardSize(-1));
   const [imageSize, setImageSize] = useState(getCustomCourseImageSize(-1));
@@ -334,6 +338,7 @@ export default function CourseSettingsScreen() {
           ) {
             setImageSize(parsedSettingsDraft.imageSize);
           }
+          setFrontImageRole(normalizeCourseFrontImageRole(parsedSettingsDraft.frontImageRole));
           if (parsedSettingsDraft.letterHintSettings) {
             setLetterHintSettings(normalizeLetterHintSettings(parsedSettingsDraft.letterHintSettings));
           }
@@ -396,6 +401,7 @@ export default function CourseSettingsScreen() {
         explanationOnlyOnWrong,
         skipCorrectionEnabled,
         trueFalseButtonsVariant,
+        frontImageRole,
         letterHintSettings,
         cardSize,
         imageSize,
@@ -410,6 +416,7 @@ export default function CourseSettingsScreen() {
     autoflowEnabled,
     boxZeroEnabled,
     boxZeroAnswerSide,
+    frontImageRole,
     letterHintSettings,
     cardSize,
     draftScopeKey,
@@ -557,6 +564,7 @@ export default function CourseSettingsScreen() {
         courseId,
         trueFalseButtonsVariant
       );
+      await setCustomCourseFrontImageRole(courseId, frontImageRole);
       await setCustomCourseLetterHintSettings(courseId, letterHintSettings);
       await setCustomCourseCardSize(courseId, cardSize);
       await setCustomCourseImageSize(courseId, imageSize);
@@ -621,6 +629,8 @@ export default function CourseSettingsScreen() {
               audioSettings,
               onChangeAudioSettings: setAudioSettings,
               showAudioLanguages: true,
+              frontImageRole,
+              onChangeFrontImageRole: setFrontImageRole,
               letterHintSettings,
               onChangeLetterHintSettings: setLetterHintSettings,
               boxZeroEnabled,

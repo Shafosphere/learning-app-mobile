@@ -3,6 +3,7 @@ import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import { Text, type TextInput } from "react-native";
 import { DEFAULT_LETTER_HINT_SETTINGS } from "@/src/utils/letterHints";
 
+import { useFlashcardAudio } from "@/Audio/runtime/useFlashcardAudio";
 import Card from "@/src/components/card/card";
 import { useCardFocusController } from "@/src/components/card/useCardFocusController";
 import { useFocusExecutor } from "@/src/components/card/useFocusExecutor";
@@ -230,6 +231,50 @@ describe("Card logic props", () => {
     jest.clearAllMocks();
   });
 
+  it.each([
+    [false, true, "planet", "planet"],
+    [false, true, "WORLD", "world"],
+    [false, true, "worl", "world"],
+    [true, true, "fruit", "fruit"],
+    [true, true, "frui", "fruit"],
+    [false, false, "wrong", "planet"],
+    [true, false, "wrong", "apple"],
+  ])("selects canonical answer audio (reversed %s, result %s, input %s)", (reversed, result, answer, expected) => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), spellChecking: true });
+    renderCard(createProps({ contentDebugSource: "flashcards", reversed, result, answer,
+      selectedItem: makeCard({ id: 91, text: "apple; fruit", translations: ["planet", "world"], flipped: true, imageFront: "file://apple.webp" }),
+    }));
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(undefined, undefined, expect.any(String), true,
+      expect.objectContaining({ side: reversed ? "front" : "back", text: expected, phase: "answer", delayMs: 0 }));
+  });
+
+  it.each([false, true])("reads only the expected side during demotion correction (reversed %s)", (reversed) => {
+    const word = makeCard({ id: 91, text: "apple; fruit", translations: ["planet", "world"], flipped: true });
+    const props = createProps({ contentDebugSource: "review", selectedItem: word, reversed, result: false, answer: "wrong",
+      correction: { cardId: 91, awers: "apple", rewers: "planet", input1: "", input2: "", mode: "demote", reversed, word },
+    });
+    const screen = renderCard(props);
+    const expected = expect.objectContaining({ side: reversed ? "front" : "back", text: reversed ? "apple" : "planet", phase: "answer", delayMs: 0 });
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(undefined, undefined, expect.any(String), true, expected);
+    screen.rerender(<Card {...props} correction={{ ...props.correction!, input1: "ap" }} />);
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(undefined, undefined, expect.any(String), true, expected);
+  });
+
+  it("keeps answer playback context stable when showing an explanation", () => {
+    const props = createProps({ contentDebugSource: "flashcards", result: true, answer: "translation-1",
+      selectedItem: makeCard({ id: 1, explanation: "Explanation" }) });
+    const screen = renderCard(props);
+    const before = jest.mocked(useFlashcardAudio).mock.calls.at(-1)!;
+    screen.rerender(<Card {...props} showExplanationEnabled isExplanationVisible />);
+    expect(jest.mocked(useFlashcardAudio).mock.calls.at(-1)).toEqual(before);
+  });
+
+  it("reads the expected answer when correction is skipped", () => {
+    renderCard(createProps({ contentDebugSource: "flashcards", result: false, answer: "translation-1", skipCorrectionEnabled: true }));
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(undefined, undefined, expect.any(String), true,
+      expect.objectContaining({ text: "translation-1", phase: "answer", delayMs: 0 }));
+  });
+
   it.each([false, true])("reads only the visible prompt (reversed: %s)", (reversed) => {
     renderCard(createProps({ contentDebugSource: "flashcards", reversed,
       selectedItem: { id: 91, externalId: "0001", text: "agua", translations: ["water"], flipped: true } }));
@@ -249,6 +294,45 @@ describe("Card logic props", () => {
     expect(mockRead).not.toHaveBeenCalled();
     (latestResolverProps![reversed ? "onReadFrontInput" : "onReadBackInput"] as () => void)();
     expect(mockRead).toHaveBeenCalledWith(reversed ? "front" : "back", reversed ? "agua" : "water");
+  });
+
+  it.each(["flashcards", "review"] as const)("resolves image prompts by actual course, suppresses audio and still reads checked answers: %s", (source) => {
+    const getRole = jest.fn(() => "replace_back");
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), courseFrontImageRole: "replace_front",
+      courseFrontImageRoleHydrated: true, getCustomCourseFrontImageRole: getRole });
+    const props = createProps({ contentDebugSource: source, audioCourseId: 42, reversed: true,
+      selectedItem: makeCard({ id: 91, text: "spoon", translations: ["łyżka"], imageFront: "spoon.webp", flipped: true }) });
+    const screen = renderCard(props);
+    expect(getRole).toHaveBeenCalledWith(42);
+    expect(latestResolverProps).toMatchObject({ promptText: "", promptImageUri: "spoon.webp" });
+    expect(latestResolverProps!.onReadPrompt).toBeUndefined();
+    expect(jest.mocked(useFlashcardAudio).mock.calls.at(-1)?.[3]).toBe(false);
+    screen.rerender(<Card {...props} result={true} answer="spoon" />);
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(42, undefined, expect.any(String), true,
+      expect.objectContaining({ side: "front", text: "spoon", phase: "answer" }));
+    screen.rerender(<Card {...props} reversed={false} />);
+    expect(latestResolverProps).toMatchObject({ promptText: "spoon", promptImageUri: null });
+    expect(latestResolverProps!.onReadPrompt).toBeDefined();
+  });
+
+  it("holds image prompts and audio until course role hydration", () => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), courseFrontImageRoleHydrated: false });
+    renderCard(createProps({ contentDebugSource: "flashcards",
+      selectedItem: makeCard({ id: 91, imageFront: "spoon.webp" }) }));
+    expect(latestResolverProps).toMatchObject({ promptText: "", promptImageUri: null, letterHintPrefix: "" });
+    expect(latestResolverProps!.onReadPrompt).toBeUndefined();
+    expect(jest.mocked(useFlashcardAudio).mock.calls.at(-1)?.[3]).toBe(false);
+  });
+
+  it.each(["intro", "demote"] as const)("keeps images and copied text visible during %s", (mode) => {
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), courseFrontImageRole: "replace_back", courseFrontImageRoleHydrated: true });
+    const word = makeCard({ id: 91, text: "spoon", translations: ["łyżka"], imageFront: "spoon.webp", flipped: true });
+    renderCard(createProps({ contentDebugSource: "flashcards", activeBox: "boxZero", selectedItem: word,
+      introMode: mode === "intro", result: mode === "intro" ? null : false,
+      correction: { mode, cardId: 91, awers: "spoon", rewers: "łyżka", input1: "", reversed: true,
+        promptText: "łyżka", word },
+    }));
+    expect(latestResolverProps).toMatchObject({ promptText: "łyżka", promptImageUri: "spoon.webp" });
   });
 
   it("disables audio gestures when the card loses focus", () => {

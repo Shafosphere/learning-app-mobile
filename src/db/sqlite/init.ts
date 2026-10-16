@@ -1,3 +1,4 @@
+import { COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY } from "@/src/utils/frontImageRole";
 import { COURSE_AUDIO_STORAGE_KEY, DEFAULT_COURSE_AUDIO_SETTINGS } from "@/src/contexts/settings/courseAudioSettings";
 import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
 import prebuiltDatabaseAsset from "@/assets/data/sqlite/prebuilt.db";
@@ -138,6 +139,9 @@ async function applyOfficialCourseSettings(
     tasks.push(upsertCourseOverride(COURSE_AUDIO_STORAGE_KEY, courseId, {
       ...DEFAULT_COURSE_AUDIO_SETTINGS, enabled: settings.audioEnabled,
     }));
+  }
+  if (settings.frontImageRole !== undefined) {
+    tasks.push(upsertCourseOverride(COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, courseId, settings.frontImageRole));
   }
   if (settings.letterHintSettings !== undefined) {
     tasks.push(

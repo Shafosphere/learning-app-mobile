@@ -3,7 +3,14 @@ import React from "react";
 import { Text } from "react-native";
 
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { useSettings } from "@/src/contexts/SettingsContext";
 import FlashcardsPeekOverlay from "../FlashcardsPeek";
+
+jest.mock("@/src/contexts/SettingsContext", () => ({ useSettings: jest.fn() }));
+
+beforeEach(() => {
+  (useSettings as jest.Mock).mockReturnValue({ courseFrontImageRole: "standard", courseFrontImageRoleHydrated: true });
+});
 
 jest.mock("../Peek-styles", () => ({
   usePeekStyles: () => new Proxy({}, { get: () => ({}) }),
@@ -93,6 +100,30 @@ describe("FlashcardsPeekOverlay flip behavior", () => {
 
   afterEach(() => {
     jest.restoreAllMocks();
+  });
+
+  it("uses an image for recall and text for recognition", () => {
+    (useSettings as jest.Mock).mockReturnValue({ courseFrontImageRole: "replace_back", courseFrontImageRoleHydrated: true });
+    const word = makeCard({ text: "spoon", translations: ["łyżka"], flipped: true, imageFront: "spoon.webp" });
+    const screen = renderPeek(word);
+    expect(screen.getByTestId("image-spoon.webp")).toBeTruthy();
+    expect(screen.queryByText("spoon")).toBeNull();
+    expect(screen.queryByText("łyżka")).toBeNull();
+    screen.unmount();
+    const recognition = renderPeek(word, "boxTwo");
+    expect(recognition.getByText("spoon")).toBeTruthy();
+    expect(recognition.queryByTestId("image-spoon.webp")).toBeNull();
+  });
+
+  it("resolves review settings by course id and uses the review direction", () => {
+    const getRole = jest.fn(() => "replace_back");
+    (useSettings as jest.Mock).mockReturnValue({ courseFrontImageRole: "standard", getCustomCourseFrontImageRole: getRole, courseFrontImageRoleHydrated: true });
+    const screen = render(<FlashcardsPeekOverlay visible courseId={42} boxKey="boxTwo" cardLayout="uniform"
+      cards={[makeCard({ flipped: true, imageFront: "spoon.webp" })]}
+      onClose={jest.fn()} onReturnToUnknown={jest.fn()} />);
+    expect(getRole).toHaveBeenCalledWith(42);
+    expect(screen.getByTestId("image-spoon.webp")).toBeTruthy();
+    expect(screen.queryByText("hidden-answer")).toBeNull();
   });
 
   it("shows the front prompt for a non-flipped card in a reversed box", () => {

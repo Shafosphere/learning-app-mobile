@@ -19,6 +19,7 @@ jest.mock("@/src/services/imageService", () => ({ deleteImage: jest.fn(), prepar
 
 const key = "flashcards.courseBoxZeroAnswerSideOverrides";
 const enabledKey = "flashcards.courseBoxZeroOverrides";
+const imageRoleKey = "flashcards.courseFrontImageRoleOverrides";
 const hintKey = "flashcards.courseLetterHintOverrides";
 
 beforeEach(async () => {
@@ -27,7 +28,7 @@ beforeEach(async () => {
 });
 
 it.each([
-  "eng_to_pl_first_50", "fr_to_en_first_50", "fr_to_en_first_150", "fr_to_en_first_332",
+  "es_to_pl_first_50", "fr_to_pl_first_50", "eng_to_pl_first_50", "fr_to_en_first_50", "fr_to_en_first_150", "fr_to_en_first_332",
   "french_a1", "es_to_en_first_50", "es_to_en_first_150", "es_to_en_first_327",
 ])("applies %s defaults and preserves manual settings", async (slug) => {
   mockPackSlug = slug;
@@ -45,9 +46,18 @@ it.each([
   await seedOfficialPacksWithDb(local as any, { reportStartupProgress: false });
   expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: {}, custom: { [courseId]: "front" } });
   expect(JSON.parse((await AsyncStorage.getItem(enabledKey))!)).toEqual({ builtin: {}, custom: { [courseId]: true } });
-  expect(JSON.parse((await AsyncStorage.getItem(hintKey))!)).toEqual({ builtin: {}, custom: {
-    [courseId]: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 },
-  } });
+  const replacesBack = ["eng_to_pl_first_50", "es_to_pl_first_50", "es_to_en_first_50", "fr_to_pl_first_50", "fr_to_en_first_50"].includes(slug);
+  expect(await AsyncStorage.getItem(imageRoleKey)).toBe(replacesBack ? JSON.stringify({ builtin: {}, custom: { [courseId]: "replace_back" } }) : null);
+  await AsyncStorage.setItem(imageRoleKey, JSON.stringify({ builtin: {}, custom: { [courseId]: "standard", 8: "replace_front" } }));
+  const hintsEnabled = [
+    "es_to_pl_first_50", "fr_to_pl_first_50", "eng_to_pl_first_50", "fr_to_en_first_50", "fr_to_en_first_150",
+    "es_to_en_first_50", "es_to_en_first_150",
+  ].includes(slug);
+  expect(await AsyncStorage.getItem(hintKey)).toEqual(hintsEnabled ? JSON.stringify({
+    builtin: {}, custom: {
+      [courseId]: { enabled: true, profile: "standard", boxOneLimit: 2, boxTwoLimit: 1 },
+    },
+  }) : null);
   const hints = { builtin: {}, custom: {
     [courseId]: { enabled: false, profile: "custom", boxOneLimit: 3, boxTwoLimit: 0 },
     "8": { enabled: true, profile: "gentle", boxOneLimit: 1, boxTwoLimit: 0 },
@@ -59,6 +69,7 @@ it.each([
   expect(JSON.parse((await AsyncStorage.getItem(key))!)).toEqual({ builtin: {}, custom: { [courseId]: "back", "8": "front" } });
   expect(JSON.parse((await AsyncStorage.getItem(enabledKey))!)).toEqual({ builtin: {}, custom: { [courseId]: false } });
   expect(JSON.parse((await AsyncStorage.getItem(hintKey))!)).toEqual(hints);
+  expect(JSON.parse((await AsyncStorage.getItem(imageRoleKey))!)).toEqual({ builtin: {}, custom: { [courseId]: "standard", 8: "replace_front" } });
 });
 
 

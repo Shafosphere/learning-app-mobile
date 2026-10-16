@@ -1,4 +1,21 @@
 {
+  "courseFrontImageRole": {
+    "title": "Jak wyświetlać obrazek?",
+    "description": "Wybierz, czy obrazek ma być dodatkiem do fiszki, czy zastępować słowo podczas nauki.",
+    "answerNote": "Podczas wpisywania odpowiedzi obrazek zastępujący tę odpowiedź jest ukryty, aby jej nie podpowiadać.",
+    "standard": {
+      "title": "Standardowy",
+      "description": "Obrazek wyświetla się na wybranej stronie fiszki, razem z tekstem."
+    },
+    "replace_front": {
+      "title": "Zamiast awersu",
+      "description": "Obrazek zastępuje tekst przodu fiszki, gdy jest on pytaniem."
+    },
+    "replace_back": {
+      "title": "Zamiast rewersu",
+      "description": "Obrazek zastępuje tekst tyłu fiszki, gdy jest on pytaniem."
+    }
+  },
   "courseLetterHints": {
     "title": "Podpowiedzi literowe",
     "description": "Pokazuj początek odpowiedzi w pudełkach 1 i 2. Wpisuj całe słowo od pierwszej litery.",
@@ -156,7 +173,7 @@
     },
     "nativeLanguage": {
       "title": "Język ojczysty",
-      "subtitle": "Określa, które oficjalne kursy zobaczysz przy przypinaniu."
+      "subtitle": "Określa dostępne kursy oraz język pomijany przy automatycznym odczycie."
     },
     "appearance": {
       "section": "Wygląd",
@@ -2427,7 +2444,7 @@
   },
   "courseAudio": {
     "title": "Audio fiszek",
-    "description": "Odczyt po 500 ms od pokazania fiszki. Naciśnij tekst, aby posłuchać ponownie.",
+    "description": "Automatyczny odczyt zgodnie z wybranym trybem. Naciśnij tekst, aby posłuchać.",
     "toggleLabel": "Przełącz audio fiszek",
     "chooseLanguages": "Wybierz języki obu stron, aby uruchomić audio.",
     "frontLanguage": "Język awersu",
@@ -2437,6 +2454,29 @@
       "en-US": "Angielski",
       "es-ES": "Hiszpański",
       "fr-FR": "Francuski"
+    }
+  },
+  "audioAutoplay": {
+    "title": "Automatyczne czytanie na głos",
+    "courseDescription": "Wybierz, jakie teksty aplikacja ma automatycznie odczytywać podczas nauki.",
+    "nativeLanguage": "Język ojczysty: {{language}}",
+    "modes": {
+      "non_native": {
+        "title": "Bez języka ojczystego",
+        "description": "Pomija automatyczny odczyt tekstu w Twoim języku ojczystym.",
+        "title_pl": "Bez polskiego",
+        "description_pl": "Automatycznie czyta teksty w innych językach, pomijając polski.",
+        "title_en": "Bez angielskiego",
+        "description_en": "Automatycznie czyta teksty w innych językach, pomijając angielski."
+      },
+      "all": {
+        "title": "Wszystkie języki",
+        "description": "Automatycznie czyta pytania i odpowiedzi we wszystkich językach."
+      },
+      "off": {
+        "title": "Wyłączony",
+        "description": "Nie czyta automatycznie. Dotknij tekstu, aby go odsłuchać."
+      }
     }
   }
 }
