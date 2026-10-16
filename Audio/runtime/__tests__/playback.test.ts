@@ -1,4 +1,5 @@
-import { createFlashcardAudioPlayer } from "../playback";
+import { createFlashcardAudioPlayer, flashcardAudioPlayer } from "../playback";
+import { scheduleAudioTransition } from "../scheduleAudioTransition";
 import type { Recording } from "../catalog";
 
 jest.mock("@/Audio/modules/play-asset-delivery", () => ({ playAssetDelivery: null }));
@@ -25,7 +26,7 @@ function setup() {
   return { player, audioPlayer, request, speak, stop, voices, create, uri, remove, play, onError,
     status: (value: Parameters<NonNullable<typeof status>>[0]) => status?.(value) };
 }
-afterEach(() => { jest.useRealTimers(); });
+afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks(); });
 it("plays a local MP3, and a repeated tap releases the previous player", async () => {
   const s = setup();
   await s.player.play(s.request);
@@ -137,4 +138,86 @@ it("volume zero stops ongoing speech; a later read uses the new volume", async (
   await s.player.play({ ...s.request, recording: null });
   expect(s.speak).toHaveBeenLastCalledWith("agua", expect.objectContaining({ volume: 0.3 }));
   await s.player.stop();
+});
+
+describe("automatic advance waits for playback", () => {
+  function setupTransition() {
+    jest.useFakeTimers();
+    const s = setup();
+    jest.spyOn(flashcardAudioPlayer, "whenIdle").mockImplementation(s.player.whenIdle);
+    const advance = jest.fn();
+    return { ...s, advance };
+  }
+
+  it("keeps a long recording visible until it finishes", async () => {
+    const s = setupTransition();
+    scheduleAudioTransition(s.advance, 1500);
+    await s.player.play(s.request);
+    s.status({ isLoaded: true, didJustFinish: false, playbackState: "readyToPlay" });
+    await jest.advanceTimersByTimeAsync(4000);
+    expect(s.advance).not.toHaveBeenCalled();
+    s.status({ isLoaded: true, didJustFinish: true, playbackState: "readyToPlay" });
+    await Promise.resolve();
+    expect(s.advance).toHaveBeenCalledTimes(1);
+  });
+
+  it("retains the feedback delay for short recordings and disabled audio", async () => {
+    const s = setupTransition();
+    scheduleAudioTransition(s.advance, 1500);
+    await s.player.play(s.request);
+    s.status({ isLoaded: true, didJustFinish: true, playbackState: "readyToPlay" });
+    await jest.advanceTimersByTimeAsync(1499);
+    expect(s.advance).not.toHaveBeenCalled();
+    await jest.advanceTimersByTimeAsync(1);
+    expect(s.advance).toHaveBeenCalledTimes(1);
+    scheduleAudioTransition(s.advance, 1500);
+    await jest.advanceTimersByTimeAsync(1500);
+    expect(s.advance).toHaveBeenCalledTimes(2);
+  });
+
+  it.each(["onDone", "onError", "onStopped"])("waits for TTS %s after a missing recording", async (event) => {
+    const s = setupTransition();
+    s.uri.mockResolvedValue(null);
+    scheduleAudioTransition(s.advance, 1500);
+    await s.player.play(s.request);
+    await jest.advanceTimersByTimeAsync(4000);
+    expect(s.advance).not.toHaveBeenCalled();
+    s.speak.mock.calls[0][1][event]();
+    await Promise.resolve();
+    expect(s.advance).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits through recording load timeout and speech fallback", async () => {
+    const s = setupTransition();
+    scheduleAudioTransition(s.advance, 1500);
+    await s.player.play(s.request);
+    await jest.advanceTimersByTimeAsync(8000);
+    expect(s.speak).toHaveBeenCalledTimes(1);
+    expect(s.advance).not.toHaveBeenCalled();
+    s.speak.mock.calls[0][1].onDone();
+    await Promise.resolve();
+    expect(s.advance).toHaveBeenCalledTimes(1);
+  });
+
+  it("releases a pending advance when audio is muted", async () => {
+    const s = setupTransition();
+    scheduleAudioTransition(s.advance, 1500);
+    await s.player.play({ ...s.request, recording: null });
+    await jest.advanceTimersByTimeAsync(1500);
+    s.player.setVolume(0);
+    await Promise.resolve();
+    expect(s.advance).toHaveBeenCalledTimes(1);
+  });
+
+  it("cancels an audio wait on reset/navigation even when stop happens first", async () => {
+    const s = setupTransition();
+    const cancel = scheduleAudioTransition(s.advance, 1500);
+    await s.player.play({ ...s.request, recording: null });
+    await jest.advanceTimersByTimeAsync(1500);
+    void s.player.stop();
+    cancel();
+    s.speak.mock.calls[0][1].onDone();
+    await Promise.resolve();
+    expect(s.advance).not.toHaveBeenCalled();
+  });
 });

@@ -2,6 +2,7 @@ import { act, renderHook, waitFor } from "@testing-library/react-native";
 import { Alert, AppState, type AppStateStatus } from "react-native";
 import { getCustomCourseById } from "@/src/db/sqlite/repositories/courses";
 import { flashcardAudioPlayer } from "../playback";
+import type { FlashcardAutoplayMode } from "@/src/contexts/settings/types";
 import { useFlashcardAudio } from "../useFlashcardAudio";
 
 jest.mock("@/src/db/sqlite/repositories/courses", () => ({ getCustomCourseById: jest.fn() }));
@@ -12,9 +13,13 @@ const mockPopup = jest.fn();
 let mockHydrated = true;
 let mockVolume = 1;
 let mockVolumeHydrated = true;
-let mockAudioSettings = { enabled: true, frontLanguage: "en-US", backLanguage: "pl-PL" };
+let mockNativeLanguage = "pl";
+let mockNativeHydrated = true;
+let mockAudioSettings: { enabled: boolean; frontLanguage: string; backLanguage: string; autoplayMode?: FlashcardAutoplayMode } = { enabled: true, frontLanguage: "en-US", backLanguage: "pl-PL" };
 const mockGetAudioSettings = jest.fn((_id: number) => mockAudioSettings);
 jest.mock("@/src/contexts/SettingsContext", () => ({ useSettings: () => ({
+  nativeLanguage: mockNativeLanguage,
+  nativeLanguageHydrated: mockNativeHydrated,
   courseAudioSettingsHydrated: mockHydrated,
   flashcardAudioVolume: mockVolume,
   flashcardAudioVolumeHydrated: mockVolumeHydrated,
@@ -25,11 +30,13 @@ const getCourse = jest.mocked(getCustomCourseById);
 beforeEach(() => {
   jest.clearAllMocks();
   AppState.currentState = "active";
+  mockNativeLanguage = "pl";
+  mockNativeHydrated = true;
   mockHydrated = true;
   mockVolume = 1;
   mockVolumeHydrated = true;
   mockGetAudioSettings.mockImplementation(() => mockAudioSettings);
-  mockAudioSettings = { enabled: true, frontLanguage: "en-US", backLanguage: "pl-PL" };
+  mockAudioSettings = { enabled: true, frontLanguage: "en-US", backLanguage: "pl-PL", autoplayMode: "all" };
 });
 afterEach(() => { jest.useRealTimers(); jest.restoreAllMocks(); });
 it("uses the current course and physical side for study/box0/review read requests", async () => {
@@ -69,7 +76,7 @@ it("stops on card change, loss of focus, background and unmount; autofocus never
 
 
 describe("autoplay lifecycle", () => {
-  type Props = { context: string; ready: boolean; side: "front" | "back"; text: string; card: string; course: number };
+  type Props = { context: string; ready: boolean; side: "front" | "back"; text: string; card: string; course: number; phase?: "question" | "answer"; delayMs?: number };
   const defaults: Props = { context: "question", ready: true, side: "front", text: "agua", card: "1", course: 42 };
   let appState: (state: AppStateStatus) => void;
   beforeEach(() => {
@@ -83,7 +90,7 @@ describe("autoplay lifecycle", () => {
   async function mount(overrides: Partial<Props> = {}) {
     const hook = renderHook<ReturnType<typeof useFlashcardAudio>, Props>((props) => useFlashcardAudio(
       props.course, "0001", props.context, props.ready,
-      { side: props.side, text: props.text, cardKey: props.card },
+      { side: props.side, text: props.text, cardKey: props.card, phase: props.phase, delayMs: props.delayMs },
     ), { initialProps: { ...defaults, ...overrides } });
     await act(async () => {});
     return hook;
@@ -100,6 +107,32 @@ describe("autoplay lifecycle", () => {
     hook.rerender({ ...defaults });
     await advance(1000);
     expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+  it("reads an answer immediately, cancels the question and does not repeat on correction or explanation", async () => {
+    const hook = await mount();
+    await advance(200);
+    const answer: Props = { ...defaults, phase: "answer", delayMs: 0, side: "back", text: "woda", context: "answer" };
+    hook.rerender(answer);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+    expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ text: "woda", language: "pl-PL" }));
+    hook.rerender({ ...answer, context: "correction" });
+    hook.rerender({ ...answer, context: "explanation" });
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+  it("reads the answer even when its text and side equal the question", async () => {
+    const hook = await mount();
+    await advance(500);
+    hook.rerender({ ...defaults, phase: "answer", delayMs: 0 });
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(2);
+  });
+  it.each(["disabled", "muted", "unfocused"])("suppresses immediate answers when %s", async (reason) => {
+    if (reason === "disabled") mockAudioSettings.enabled = false;
+    if (reason === "muted") mockVolume = 0;
+    const hook = await mount({ phase: "answer", delayMs: 0, ready: reason !== "unfocused" });
+    await advance(1000);
+    expect(hook.result.current.available).toBe(false);
+    expect(flashcardAudioPlayer.play).not.toHaveBeenCalled();
   });
   it("a tap plays immediately and cancels pending autoplay", async () => {
     const hook = await mount();
@@ -197,7 +230,7 @@ describe("autoplay lifecycle", () => {
   });
   it("requires both languages for custom courses and uses their physical sides", async () => {
     getCourse.mockResolvedValue({ slug: null, isOfficial: false } as never);
-    mockAudioSettings = { enabled: true, frontLanguage: "", backLanguage: "pl-PL" };
+    mockAudioSettings = { enabled: true, frontLanguage: "", backLanguage: "pl-PL", autoplayMode: "all" };
     const hook = await mount({ text: "hello" });
     await advance(500);
     expect(hook.result.current.available).toBe(false);
@@ -234,4 +267,103 @@ describe("autoplay lifecycle", () => {
     act(() => jest.mocked(flashcardAudioPlayer.play).mock.calls.at(-1)![0].onError());
     expect(alert).toHaveBeenCalledTimes(1);
   });
+  it.each([
+    ["pl", "front", 1], ["pl", "back", 0],
+    ["en", "front", 0], ["en", "back", 1],
+  ] as const)("skips only native language %s on physical side %s", async (native, side, count) => {
+    getCourse.mockResolvedValue({ slug: null, isOfficial: false } as never);
+    mockAudioSettings.autoplayMode = "non_native";
+    mockNativeLanguage = native;
+    const hook = await mount({ side, text: side === "front" ? "cat" : "kot" });
+    await advance(500);
+    expect(hook.result.current.available).toBe(true);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(count);
+    hook.rerender({ ...defaults, side, text: "answer", phase: "answer", delayMs: 0 });
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(count * 2);
+  });
+
+  it.each([
+    ["all", 1], ["off", 0], ["non_native", 0], [undefined, 0],
+  ] as const)("uses course mode %s for native text", async (mode, count) => {
+    mockAudioSettings.autoplayMode = mode;
+    await mount({ side: "back", text: "woda" });
+    await advance(500);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(count);
+  });
+
+  it.each(["non_native", "off"] as const)("allows manual native audio when autoplay is %s", async (mode) => {
+    mockAudioSettings.autoplayMode = mode;
+    const hook = await mount({ side: "back", text: "woda" });
+    await advance(500);
+    expect(flashcardAudioPlayer.play).not.toHaveBeenCalled();
+    act(() => hook.result.current.read("back", "woda"));
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+    expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ language: "pl-PL" }));
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("waits for native language hydration before immediate answers", async () => {
+    mockNativeHydrated = false;
+    const props = { ...defaults, phase: "answer" as const, delayMs: 0 };
+    const hook = await mount(props);
+    expect(hook.result.current.available).toBe(true);
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).not.toHaveBeenCalled();
+    mockNativeHydrated = true;
+    hook.rerender(props);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+    hook.rerender(props);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+
+  it.each(["native", "course"])("cancels native prompt timer after changing %s", async (preference) => {
+    const props = { ...defaults, side: "back" as const, text: "woda" };
+    if (preference === "native") { mockAudioSettings.autoplayMode = "non_native"; mockNativeLanguage = "en"; }
+    const hook = await mount(props);
+    await advance(200);
+    if (preference === "native") mockNativeLanguage = "pl";
+    if (preference === "course") mockAudioSettings.autoplayMode = "off";
+    hook.rerender(props);
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).not.toHaveBeenCalled();
+  });
+
+  it("stops automatic native audio excluded by a new rule without replaying it", async () => {
+    const props = { ...defaults, side: "back" as const, text: "woda", phase: "answer" as const, delayMs: 0 };
+    const hook = await mount(props);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+    const stops = jest.mocked(flashcardAudioPlayer.stop).mock.calls.length;
+    mockAudioSettings.autoplayMode = "non_native";
+    hook.rerender(props);
+    expect(flashcardAudioPlayer.stop).toHaveBeenCalledTimes(stops + 1);
+    mockAudioSettings.autoplayMode = "all";
+    hook.rerender(props);
+    await advance(500);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+
+  it("does not stop manually requested native audio when automatic playback changes", async () => {
+    mockAudioSettings.autoplayMode = "off";
+    const hook = await mount();
+    act(() => hook.result.current.read("back", "woda"));
+    const stops = jest.mocked(flashcardAudioPlayer.stop).mock.calls.length;
+    mockAudioSettings.autoplayMode = "non_native";
+    hook.rerender({ ...defaults });
+    expect(flashcardAudioPlayer.stop).toHaveBeenCalledTimes(stops);
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+
+  it.each([ ["es-ES", "fr-FR", 2], ["pl-PL", "pl-PL", 0] ] as const)("handles two configured languages %s and %s", async (front, back, count) => {
+    getCourse.mockResolvedValue({ slug: null, isOfficial: false } as never);
+    mockAudioSettings.frontLanguage = front;
+    mockAudioSettings.backLanguage = back;
+    mockAudioSettings.autoplayMode = "non_native";
+    const hook = await mount();
+    await advance(500);
+    hook.rerender({ ...defaults, side: "back", text: "answer", phase: "answer", delayMs: 0 });
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(count);
+  });
+
 });

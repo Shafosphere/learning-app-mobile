@@ -52,7 +52,9 @@ export type CourseExplanationOnlyOnWrongOverrides =
 export type CustomCourseEntrySettingsSeenMap = Record<string, true>;
 
 export type AudioLanguage = "pl-PL" | "en-US" | "es-ES" | "fr-FR";
+export type FlashcardAutoplayMode = "non_native" | "all" | "off";
 export type CourseAudioSettings = {
+  autoplayMode?: FlashcardAutoplayMode;
   enabled: boolean;
   frontLanguage: AudioLanguage | null;
   backLanguage: AudioLanguage | null;
@@ -85,6 +87,7 @@ export type CourseSkipCorrectionOverrides = CourseOverrideState<boolean>;
 export interface SettingsContextValue {
   uiLanguage: UiLanguage;
   nativeLanguage: NativeLanguage;
+  nativeLanguageHydrated: boolean;
   resolvedLanguage: SupportedLanguage;
   setUiLanguage: (value: UiLanguage) => Promise<void>;
   setNativeLanguage: (value: NativeLanguage) => Promise<void>;

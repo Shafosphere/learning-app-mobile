@@ -67,6 +67,7 @@ export const DEFAULT_COURSE_TRUE_FALSE_BUTTONS_OVERRIDES: CourseTrueFalseButtons
 export const defaultValue: SettingsContextValue = {
   uiLanguage: "pl",
   nativeLanguage: "pl",
+  nativeLanguageHydrated: false,
   resolvedLanguage: "pl",
   setUiLanguage: async () => {},
   setNativeLanguage: async () => {},

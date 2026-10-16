@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { scheduleAudioTransition } from "@/Audio/runtime/scheduleAudioTransition";
 import type { Dispatch, RefObject, SetStateAction } from "react";
 import type { TextInput } from "react-native";
 
@@ -100,7 +101,7 @@ export const useReviewFlashcardsAnswerFlow = ({
   const [correction, setCorrection] = useState<CardCorrectionType | null>(null);
   const [pendingExplanationMove, setPendingExplanationMove] =
     useState<ReviewPendingExplanationMove>(null);
-  const transitionTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const transitionTimerRef = useRef<(() => void) | null>(null);
   const canConfirm = useConfirmGuard(
     selectedItem?.id ?? null,
     correction != null,
@@ -109,7 +110,7 @@ export const useReviewFlashcardsAnswerFlow = ({
 
   const clearTransitionTimer = useCallback(() => {
     if (transitionTimerRef.current) {
-      clearTimeout(transitionTimerRef.current);
+      transitionTimerRef.current();
       transitionTimerRef.current = null;
     }
   }, []);
@@ -185,7 +186,7 @@ export const useReviewFlashcardsAnswerFlow = ({
 
   const finishCardTransition = useCallback(
     (durationMs: number, finish: () => void) => {
-      transitionTimerRef.current = setTimeout(() => {
+      transitionTimerRef.current = scheduleAudioTransition(() => {
         finish();
         setAnswer("");
         setResult(null);
@@ -460,7 +461,7 @@ export const useReviewFlashcardsAnswerFlow = ({
           return;
         }
         const delayMs = wrongExplanationState.hasExplanation ? 3500 : 1500;
-        transitionTimerRef.current = setTimeout(() => {
+        transitionTimerRef.current = scheduleAudioTransition(() => {
           void finalizeWrongReviewCard(selectedItem, activeBox);
           setAnswer("");
           setResult(null);

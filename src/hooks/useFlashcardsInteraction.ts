@@ -1,4 +1,5 @@
 import type { BoxZeroAnswerSide } from "@/src/contexts/SettingsContext";
+import { scheduleAudioTransition } from "@/Audio/runtime/scheduleAudioTransition";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import {
   logCustomLearningEvent,
@@ -165,7 +166,7 @@ export function useFlashcardsInteraction({
     showExplanationEnabled,
   } = useSettings();
   const reminderRefreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const transitionTimersRef = useRef<Set<ReturnType<typeof setTimeout>>>(new Set());
+  const transitionTimersRef = useRef<Set<() => void>>(new Set());
   const demotionCorrectionLockRef = useRef<number | null>(null);
   const canConfirm = useConfirmGuard(
     selectedItem?.id ?? null,
@@ -174,20 +175,20 @@ export function useFlashcardsInteraction({
   );
 
   const clearTransitionTimers = useCallback(() => {
-    transitionTimersRef.current.forEach((timer) => {
-      clearTimeout(timer);
+    transitionTimersRef.current.forEach((cancel) => {
+      cancel();
     });
     transitionTimersRef.current.clear();
   }, []);
 
   const scheduleTransition = useCallback(
     (callback: () => void, delay: number) => {
-      const timer = setTimeout(() => {
-        transitionTimersRef.current.delete(timer);
+      const cancel = scheduleAudioTransition(() => {
+        transitionTimersRef.current.delete(cancel);
         callback();
       }, delay);
-      transitionTimersRef.current.add(timer);
-      return timer;
+      transitionTimersRef.current.add(cancel);
+      return cancel;
     },
     []
   );

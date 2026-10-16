@@ -15,6 +15,23 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
   let loadTimer: ReturnType<typeof setTimeout> | null = null;
   let speech: Speech | null = null;
   let stopQueue = Promise.resolve();
+  let busy = false;
+  const idleListeners = new Set<() => void>();
+  const finish = () => {
+    busy = false;
+    // Let navigation/reset cleanup cancel pending transitions before releasing them.
+    void Promise.resolve().then(() => {
+      if (busy) return;
+      const listeners = [...idleListeners];
+      idleListeners.clear();
+      listeners.forEach((listener) => listener());
+    });
+  };
+  const whenIdle = (callback: () => void) => {
+    if (!busy) callback();
+    else idleListeners.add(callback);
+    return () => { idleListeners.delete(callback); };
+  };
 
   const clearPlayer = () => {
     if (loadTimer) clearTimeout(loadTimer);
@@ -33,6 +50,7 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
   const stop = () => {
     generation += 1;
     clearPlayer();
+    finish();
     return stopSpeech();
   };
   const setVolume = (value: number) => {
@@ -42,10 +60,17 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
   };
   const play = async (request: ReadRequest) => {
     const token = ++generation;
+    busy = true;
     const current = () => token === generation;
     clearPlayer();
     await stopSpeech();
-    if (!current() || volume === 0 || !request.text.trim()) return;
+    if (!current()) return;
+    if (volume === 0 || !request.text.trim()) { finish(); return; }
+    const fail = () => {
+      if (!current()) return;
+      finish();
+      request.onError();
+    };
     let fallbackStarted = false;
     const fallback = async () => {
       if (!current() || fallbackStarted) return;
@@ -62,9 +87,11 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
         if (!voice) throw new Error("No voice for flashcard language");
         module.speak(request.text.slice(0, module.maxSpeechInputLength), {
           language: request.language, voice: voice.identifier, rate: 1, pitch: 1, volume,
-          onError: () => { if (current()) request.onError(); },
+          onDone: () => { if (current()) finish(); },
+          onStopped: () => { if (current()) finish(); },
+          onError: fail,
         });
-      } catch { if (current()) request.onError(); }
+      } catch { fail(); }
     };
     try {
       const uri = request.recording ? await deps.uri(request.recording) : null;
@@ -82,13 +109,13 @@ export function createFlashcardAudioPlayer(deps: Dependencies) {
       subscription = next.addListener("playbackStatusUpdate", (status) => {
         if (!current()) return;
         if (status.isLoaded && loadTimer) { clearTimeout(loadTimer); loadTimer = null; }
-        if (status.didJustFinish) clearPlayer();
+        if (status.didJustFinish) { clearPlayer(); finish(); }
         else if (status.playbackState === "error" || (status.isLoaded && status.playbackState === "idle")) void fallback();
       });
       next.play();
     } catch { await fallback(); }
   };
-  return { play, stop, setVolume };
+  return { play, stop, setVolume, whenIdle };
 }
 
 export const flashcardAudioPlayer = createFlashcardAudioPlayer({

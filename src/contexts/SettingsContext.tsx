@@ -70,6 +70,7 @@ import { useThemeAccessibilitySettings } from "./settings/useThemeAccessibilityS
 
 export type {
   AudioLanguage,
+  FlashcardAutoplayMode,
   CourseAudioSettings,
   BoxZeroAnswerSide,
   CEFR,

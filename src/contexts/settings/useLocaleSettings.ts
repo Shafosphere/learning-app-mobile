@@ -17,7 +17,7 @@ export function useLocaleSettings() {
     () => normalizeUiLanguage(uiLanguageRaw),
     [uiLanguageRaw]
   );
-  const [nativeLanguageRaw, setNativeLanguageState] =
+  const [nativeLanguageRaw, setNativeLanguageState, nativeLanguageHydrated] =
     useHydratedPersistedState<string | null>("nativeLanguage", null);
   const nativeLanguage = useMemo<NativeLanguage>(
     () => normalizeNativeLanguage(nativeLanguageRaw, uiLanguage),
@@ -69,6 +69,7 @@ export function useLocaleSettings() {
   return {
     uiLanguage,
     nativeLanguage,
+    nativeLanguageHydrated: nativeLanguageHydrated && uiLanguageHydrated,
     resolvedLanguage,
     setUiLanguage,
     setNativeLanguage,
