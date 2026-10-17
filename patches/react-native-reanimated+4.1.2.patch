@@ -1,0 +1,28 @@
+diff --git a/node_modules/react-native-reanimated/src/createAnimatedComponent/AnimatedComponent.tsx b/node_modules/react-native-reanimated/src/createAnimatedComponent/AnimatedComponent.tsx
+--- a/node_modules/react-native-reanimated/src/createAnimatedComponent/AnimatedComponent.tsx
++++ b/node_modules/react-native-reanimated/src/createAnimatedComponent/AnimatedComponent.tsx
+@@ -103,6 +103,10 @@
+       this._NativeEventsManager = new NativeEventsManager(this, this._options);
+     }
+     this._NativeEventsManager?.attachEvents();
++    // Suspense can replay mount on a retained instance after unmount detached
++    // its view descriptors. Reattach even when style identities are unchanged.
++    this._prevAnimatedStyles = [];
++    this._prevAnimatedProps = [];
+     this._updateAnimatedStylesAndProps();
+     this._InlinePropManager.attachInlineProps(this, this._getViewInfo());
+ 
+diff --git a/node_modules/react-native-reanimated/lib/module/createAnimatedComponent/AnimatedComponent.js b/node_modules/react-native-reanimated/lib/module/createAnimatedComponent/AnimatedComponent.js
+--- a/node_modules/react-native-reanimated/lib/module/createAnimatedComponent/AnimatedComponent.js
++++ b/node_modules/react-native-reanimated/lib/module/createAnimatedComponent/AnimatedComponent.js
+@@ -58,6 +58,10 @@
+       this._NativeEventsManager = new NativeEventsManager(this, this._options);
+     }
+     this._NativeEventsManager?.attachEvents();
++    // Suspense can replay mount on a retained instance after unmount detached
++    // its view descriptors. Reattach even when style identities are unchanged.
++    this._prevAnimatedStyles = [];
++    this._prevAnimatedProps = [];
+     this._updateAnimatedStylesAndProps();
+     this._InlinePropManager.attachInlineProps(this, this._getViewInfo());
+     if (this._options?.jsProps?.length) {

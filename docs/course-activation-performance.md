@@ -137,10 +137,10 @@ globalThis.__courseActivationDiagnostics.reset()
 JSON.stringify(globalThis.__courseActivationDiagnostics.read(), null, 2)
 ```
 
-The buffer holds the latest 500 events, with monotonic `performance.now()` timestamps
+The opt-in developer buffer holds the latest 500 events, with monotonic `performance.now()` timestamps
 and sequence numbers. `dropped` reports overwritten events. Reset and export each
 short scenario separately. No diagnostic console, AsyncStorage, per-frame callback,
-or UI-frame listener runs during a transition. Existing PAD logs are separate and
+or UI-frame listener is used by that developer buffer. Existing PAD logs are separate and
 still have their existing behavior.
 
 Event interpretation:
@@ -157,6 +157,7 @@ Event interpretation:
 | `marquee.layout` / `marquee.textLayout` | Measurement callback delivery, including unchanged results; stable `measurementId` distinguishes title instances |
 | `panel.layout` / `panel.target` | Intrinsic content height / scheduled animation target |
 | `panel.state` | Committed panel phase/expansion change |
+| `panel.restore` | Screen focus requested reapplying retained panel targets |
 | `course.refresh.start/end` | Course-level refresh boundaries |
 | `pack.refresh.start/join/end` | Native pack refresh / existing request reused / completion |
 | `pack.state` | Changed pack snapshot; identical writes omitted |
@@ -276,3 +277,62 @@ old/new panels begin moving together and keep their final state without clipping
 or scroll jumps. Repeat with different panel statuses, long translations, large
 fonts, width changes, and reduced motion. Jest establishes scheduling only;
 simultaneous visible motion and smoothness have not been validated on a device.
+
+The coordinator also retains the current target of each mounted panel and
+resubmits those targets in one batch on screen focus. Returning from flashcards
+can otherwise leave an interrupted native reveal unchanged when selection and
+intrinsic height are identical, since neither dependency reruns the target
+effect. Unmounted panels are removed from both retained and pending targets;
+new selection/height updates supersede pending focus restoration. Refocus does
+not remount rows or initiate downloads. Regression tests simulate interrupted
+heights and refocus without changing panel props.
+
+The support report `memicard-diagnostics-2026-10-16T23-20-00-279Z.json`
+contains the exit from course 9 but no activation panel measurements or native
+animation state. It cannot establish the cause of that device occurrence.
+Validate the fix on Android by playing Spanish first 50 (Polish translation),
+returning to the existing activation screen, switching courses, and repeating
+with both quick navigation and a settled reveal. Check that the selected audio
+panel opens, the previous one closes, and download state remains current.
+
+## Confirmed detached animated style on retained views
+
+On 2026-10-17 the Android emulator reproduced a hidden English first-100 panel
+while first-250 worked. The React profiling export showed both panels mounted
+and updating. Temporary support events showed the first-100 reveal completing
+at 75.0476 layout units, with `expanded: true` and download phase `missing`.
+Inspecting the live component found an empty Reanimated view-descriptor set;
+the native outer view measured height 0 while its content measured 75.0476.
+First-250 retained its native view descriptor. Reattaching the first-100 style
+immediately restored the visible download panel without changing audio data.
+
+Reanimated 4.1.2 detaches descriptors in `componentWillUnmount`, but its unchanged
+style fast path can skip attaching them when React replays `componentDidMount`
+on a retained instance after Suspense hides/reveals a tree. Navigation freezing
+uses Suspense in this project. The installed dependency's real lifecycle methods
+reproduce this failure for both animated styles and animated props. This does
+not establish which earlier hide or development refresh first detached the
+observed emulator panel, but establishes why subsequent selections stayed hidden.
+
+`patches/react-native-reanimated+4.1.2.patch` clears previous style/prop caches on
+mount, forcing reattachment after a retained-tree reveal. Ordinary updates keep
+the unchanged-style fast path. The patch covers Metro's TypeScript source and
+the compiled module entry and is installed by the existing `patch-package`
+postinstall script. Reload Metro clients after applying it to an already running
+session; Fast Refresh does not reliably replace an existing animated class.
+The lifecycle regression uses dependency source rather than Reanimated's Jest
+mock, which cannot reproduce detached native descriptors. The earlier focus
+target restoration remains useful for interrupted animations, but cannot alone
+repair a missing native view descriptor.
+
+After a full client reload with the patch, replaying the native animated
+component's hide/reveal lifecycle retained the first-100 descriptor. Screenshots
+also confirmed visible download controls for 100→250→100. The two lifecycle
+regressions failed before the patch and passed afterwards; the audio row and
+coordinator suites passed as well (52 tests total). TypeScript and targeted lint
+checks passed. This validates the observed missing-panel behavior, not animation
+frame performance or the unrecorded original phone occurrence.
+
+The temporary persistent audio-panel support log was removed after diagnosis.
+Support email attachments retain their standard diagnostics, flashcard events
+and box snapshots; audio panel profiling remains opt-in and in memory only.

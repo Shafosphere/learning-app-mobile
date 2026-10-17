@@ -10,6 +10,12 @@ import { downloadCourse, cancelCourse, confirmCourseDownload, refreshCourse } fr
 import type { PackDownload } from "../packDownloads";
 
 let mockState: PackDownload;
+jest.mock("@react-navigation/native", () => ({
+  useFocusEffect: (effect: () => void) => {
+    const React = jest.requireActual<typeof import("react")>("react");
+    React.useEffect(effect, [effect]);
+  },
+}));
 // Worklet closures capture imports at module load, before individual test spies.
 jest.mock("react-native-reanimated", () => {
   const mock = jest.requireActual("react-native-reanimated/mock");

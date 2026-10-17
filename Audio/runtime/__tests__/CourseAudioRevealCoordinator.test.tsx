@@ -4,6 +4,18 @@ import * as Reanimated from "react-native-reanimated";
 import type { SharedValue } from "react-native-reanimated";
 import { CourseAudioRevealProvider, useCourseAudioRevealTarget } from "../CourseAudioRevealCoordinator";
 
+const mockFocusCallbacks = new Set<() => void>();
+jest.mock("@react-navigation/native", () => ({
+  useFocusEffect: (effect: () => void) => {
+    const React = jest.requireActual<typeof import("react")>("react");
+    React.useEffect(() => {
+      mockFocusCallbacks.add(effect);
+      effect();
+      return () => { mockFocusCallbacks.delete(effect); };
+    }, [effect]);
+  },
+}));
+
 jest.mock("react-native-reanimated", () => {
   const mock = jest.requireActual("react-native-reanimated/mock");
   return { ...mock, withTiming: jest.fn(mock.withTiming), runOnUI: jest.fn(mock.runOnUI) };
@@ -136,5 +148,31 @@ describe("coordinated reveal scheduling", () => {
     flush();
     expect(dispatch).not.toHaveBeenCalled();
     expect(timing).not.toHaveBeenCalled();
+  });
+
+  it("restores interrupted native heights on refocus without changing selection or size", () => {
+    const { heights, tree, screen } = setup();
+    screen.rerender(tree(1));
+    flush();
+    // Simulate native animation interruption while another screen covers the panel.
+    heights[0].value = 45;
+    heights[1].value = 0;
+    timing.mockClear();
+    dispatch.mockClear();
+
+    act(() => { mockFocusCallbacks.forEach(effect => effect()); });
+    expect(dispatch).not.toHaveBeenCalled();
+    flush();
+    expect(dispatch).toHaveBeenCalledTimes(1);
+    expect(heights.map(value => value.value)).toEqual([0, 140, 0]);
+  });
+
+  it("restores only mounted panels and keeps the latest target before the focus batch runs", () => {
+    const { heights, tree, screen } = setup();
+    act(() => { mockFocusCallbacks.forEach(effect => effect()); });
+    screen.rerender(tree(2, [100, 140, 210], 0));
+    flush();
+    expect(heights.map(value => value.value)).toEqual([100, 0, 210]);
+    expect(timing.mock.calls.some(([target]) => target === 100)).toBe(false);
   });
 });

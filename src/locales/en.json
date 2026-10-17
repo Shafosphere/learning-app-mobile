@@ -730,6 +730,12 @@
   "support": {
     "report": {
       "title": "Report a problem",
+      "thankYou": {
+        "title": "Thank you!",
+        "description": "Thank you for helping improve Memicard. Your feedback matters to us.",
+        "confirm": "OK",
+        "close": "Close"
+      },
       "subtitle": "We will open your mail app with a ready subject and basic app data. Add a description of the problem and send the message.",
       "button": "Send email",
       "subject": "Bug report - Memicard",
@@ -776,6 +782,7 @@
       "reportSent": "Sent through the mail client. Thank you!",
       "suggestionSent": "Suggestion sent. Thank you for the idea!",
       "sendCancelled": "Sending cancelled. You can try again.",
+      "draftSaved": "Message saved as a draft.",
       "mailtoOpenedReport": "Email message opened. Add a description and send the message.",
       "mailtoOpenedReportNoAttachment": "Email message opened without the diagnostic attachment. The mailto client does not support attachments.",
       "mailtoOpenedSuggestion": "Email message opened. Describe your idea and send the message.",

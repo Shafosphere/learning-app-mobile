@@ -732,6 +732,12 @@
   "support": {
     "report": {
       "title": "Zgłoś problem",
+      "thankYou": {
+        "title": "Dziękujemy!",
+        "description": "Dziękujemy za pomoc w ulepszaniu Memicard. Twoje uwagi są dla nas ważne.",
+        "confirm": "OK",
+        "close": "Zamknij"
+      },
       "subtitle": "Otworzymy Twoją aplikację poczty z gotowym tematem i podstawowymi danymi o aplikacji. Dodaj opis problemu i wyślij wiadomość.",
       "button": "Wyślij e-mail",
       "subject": "Zgłoszenie błędu - Memicard",
@@ -778,6 +784,7 @@
       "reportSent": "Wysłane przez klienta poczty. Dziękujemy!",
       "suggestionSent": "Sugestia wysłana. Dziękujemy za pomysł!",
       "sendCancelled": "Wysyłka anulowana. Możesz spróbować ponownie.",
+      "draftSaved": "Wiadomość zapisana jako szkic.",
       "mailtoOpenedReport": "Otwarto wiadomość e-mail. Dopisz opis i wyślij wiadomość.",
       "mailtoOpenedReportNoAttachment": "Otwarto wiadomość e-mail, ale bez załącznika diagnostycznego. Klient mailto nie obsługuje załączników.",
       "mailtoOpenedSuggestion": "Otwarto wiadomość e-mail. Opisz swój pomysł i wyślij wiadomość.",

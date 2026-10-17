@@ -1,4 +1,5 @@
-import { createContext, useContext, useLayoutEffect, useState, type ReactNode } from "react";
+import { createContext, useCallback, useContext, useLayoutEffect, useState, type ReactNode } from "react";
+import { useFocusEffect } from "@react-navigation/native";
 import { Easing, runOnUI, withTiming, type SharedValue } from "react-native-reanimated";
 import { recordCourseActivationEvent } from "@/src/services/courseActivationDiagnostics";
 
@@ -21,23 +22,34 @@ function animateReveals(targets: RevealTarget[]) {
 }
 
 function createRevealQueue() {
+  const current = new Map<SharedValue<number>, RevealTarget>();
   const pending = new Map<SharedValue<number>, RevealTarget>();
   let scheduled = false;
 
+  function enqueue(height: SharedValue<number>, targetHeight: number) {
+    const target = { height, targetHeight };
+    current.set(height, target);
+    pending.set(height, target);
+    if (scheduled) return;
+    scheduled = true;
+    // All layout effects in this commit finish before this task runs.
+    queueMicrotask(() => {
+      scheduled = false;
+      const targets = Array.from(pending.values());
+      pending.clear();
+      if (targets.length) runOnUI(animateReveals)(targets);
+    });
+  }
+
   return {
-    enqueue(height: SharedValue<number>, targetHeight: number) {
-      pending.set(height, { height, targetHeight });
-      if (scheduled) return;
-      scheduled = true;
-      // All layout effects in this commit finish before this task runs.
-      queueMicrotask(() => {
-        scheduled = false;
-        const targets = Array.from(pending.values());
-        pending.clear();
-        if (targets.length) runOnUI(animateReveals)(targets);
-      });
+    enqueue,
+    restore() {
+      // Navigation can interrupt native animations without changing React props.
+      // Reapply retained targets when returning to the existing activation screen.
+      for (const { height, targetHeight } of current.values()) enqueue(height, targetHeight);
     },
     remove(height: SharedValue<number>) {
+      current.delete(height);
       pending.delete(height);
     },
   };
@@ -48,6 +60,10 @@ const RevealQueueContext = createContext<ReturnType<typeof createRevealQueue> | 
 /** One stable queue per activation screen; no selection/settings subscription. */
 export function CourseAudioRevealProvider({ children }: { children: ReactNode }) {
   const [queue] = useState(createRevealQueue);
+  useFocusEffect(useCallback(() => {
+    recordCourseActivationEvent("panel.restore");
+    queue.restore();
+  }, [queue]));
   return <RevealQueueContext.Provider value={queue}>{children}</RevealQueueContext.Provider>;
 }
 
