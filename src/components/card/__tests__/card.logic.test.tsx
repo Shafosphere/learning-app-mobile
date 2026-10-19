@@ -324,15 +324,59 @@ describe("Card logic props", () => {
     expect(jest.mocked(useFlashcardAudio).mock.calls.at(-1)?.[3]).toBe(false);
   });
 
-  it.each(["intro", "demote"] as const)("keeps images and copied text visible during %s", (mode) => {
+  it("keeps images and copied text visible during intro", () => {
     mockedUseSettings.mockReturnValue({ ...mockedUseSettings(), courseFrontImageRole: "replace_back", courseFrontImageRoleHydrated: true });
     const word = makeCard({ id: 91, text: "spoon", translations: ["łyżka"], imageFront: "spoon.webp", flipped: true });
     renderCard(createProps({ contentDebugSource: "flashcards", activeBox: "boxZero", selectedItem: word,
-      introMode: mode === "intro", result: mode === "intro" ? null : false,
-      correction: { mode, cardId: 91, awers: "spoon", rewers: "łyżka", input1: "", reversed: true,
+      introMode: true, result: null,
+      correction: { mode: "intro", cardId: 91, awers: "spoon", rewers: "łyżka", input1: "", reversed: true,
         promptText: "łyżka", word },
     }));
     expect(latestResolverProps).toMatchObject({ promptText: "łyżka", promptImageUri: "spoon.webp" });
+  });
+
+  it.each(
+    (["flashcards", "review"] as const).flatMap((source) =>
+      (["boxOne", "boxTwo"] as const).map((box) => ({ source, box })),
+    ),
+  )("preserves the Spanish prompt and correction language in $source/$box", ({ source, box }) => {
+    // The review course has a different image role from the active study course.
+    const getRole = jest.fn(() => "replace_back");
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(),
+      activeCustomCourseId: 99, courseFrontImageRole: "replace_front",
+      courseFrontImageRoleHydrated: true, getCustomCourseFrontImageRole: getRole,
+    });
+    const word = makeCard({ id: 91, text: "autobús", translations: ["autobus"],
+      imageFront: "bus.webp", flipped: true });
+    const reversed = isStudyCardReversed(word, box, true);
+    const expectedPrompt = { promptText: reversed ? "" : "autobús", promptImageUri: reversed ? "bus.webp" : null };
+    const props = createProps({ contentDebugSource: source, audioCourseId: 42,
+      activeBox: box, selectedItem: word, reversed });
+    const screen = renderCard(props);
+    expect(latestResolverProps).toMatchObject(expectedPrompt);
+
+    screen.rerender(<Card {...props} result={false} answer="wrong"
+      correction={{ mode: "demote", cardId: word.id, awers: "autobús", rewers: "autobus",
+        input1: "", input2: "", reversed, word,
+        promptText: reversed ? "autobus" : "autobús",
+        promptImageUri: reversed ? null : word.imageFront,
+      }} />);
+
+    expect(getRole).toHaveBeenCalledWith(42);
+    expect(latestResolverProps).toMatchObject({ ...expectedPrompt, displayMode: "correction",
+      shouldCorrectAwers: reversed, shouldCorrectRewers: !reversed,
+      correctionAwers: "autobús", correctionRewers: "autobus",
+    });
+    if (reversed) {
+      expect(latestResolverProps!.onReadPrompt).toBeUndefined();
+    } else {
+      (latestResolverProps!.onReadPrompt as () => void)();
+      expect(mockRead).toHaveBeenCalledWith("front", "autobús");
+    }
+    // Image-only prompts suppress prompt audio, while correction still reads the answer.
+    expect(jest.mocked(useFlashcardAudio)).toHaveBeenLastCalledWith(42, undefined, expect.any(String), true,
+      expect.objectContaining({ side: reversed ? "front" : "back",
+        text: reversed ? "autobús" : "autobus", phase: "answer" }));
   });
 
   it("disables audio gestures when the card loses focus", () => {

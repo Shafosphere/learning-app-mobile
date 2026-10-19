@@ -188,10 +188,15 @@ export default function NotificationPermissionNudge() {
     const startedAt = Date.now();
     sessionVersionRef.current += 1;
     activeSessionRef.current = startedAt;
-    await enqueueSessionPersistence(() => setActiveSessionStartedAt(startedAt));
+    const persistence = enqueueSessionPersistence(() =>
+      setActiveSessionStartedAt(startedAt)
+    );
+    // Schedule before awaiting storage: permission changes may install a newer
+    // timer while the write is pending, and this render's callbacks are stale.
     startUsageCheckpointTimer();
     evaluate();
     scheduleEvaluation();
+    await persistence;
   }, [
     evaluate,
     scheduleEvaluation,

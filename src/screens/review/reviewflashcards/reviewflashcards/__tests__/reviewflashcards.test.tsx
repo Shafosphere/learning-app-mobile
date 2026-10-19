@@ -2,6 +2,7 @@ import * as MockReact from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   act,
+  cleanup,
   fireEvent,
   render,
   waitFor,
@@ -10,6 +11,7 @@ import {
   Pressable as MockPressable,
   StyleSheet,
   Keyboard,
+  Image,
   Text as MockText,
   TextInput,
   View as MockView,
@@ -41,6 +43,8 @@ import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
 import useSpellchecking from "@/src/hooks/useSpellchecking";
 import { answersMatch } from "@/src/utils/answerComparison";
+import { LANGUAGE_COURSE_CONTRACTS, LANGUAGE_REVIEW_SCENARIOS, loadLanguageCourse } from "@/src/testSupport/cardLanguageScenarios";
+import { CONFIRM_GUARD_MS } from "@/src/hooks/useConfirmGuard";
 import {
   TRUE_FALSE_POST_OK_COOLDOWN_MS,
 } from "@/src/features/flashcards/study/study.constants";
@@ -630,6 +634,7 @@ function measureReviewLayout(screen: ReturnType<typeof render>, height: number, 
 describe("reviewflashcards correction desync regression", () => {
   let applyStatBurstMock: jest.Mock;
   let getStatsSnapshotMock: jest.Mock;
+  let imageGetSizeSpy: jest.SpyInstance | undefined;
 
   beforeEach(() => {
     mockIsFocused = true;
@@ -696,7 +701,102 @@ describe("reviewflashcards correction desync regression", () => {
   });
 
   afterEach(() => {
+    imageGetSizeSpy?.mockRestore();
+    imageGetSizeSpy = undefined;
     jest.clearAllMocks();
+  });
+
+  describe("explicit course language contracts", () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+      imageGetSizeSpy = jest.spyOn(Image, "getSize").mockImplementation((_uri, success) => {
+        success?.(320, 240);
+        return Promise.resolve({ width: 320, height: 240 });
+      });
+    });
+    afterEach(() => {
+      cleanup();
+      jest.clearAllTimers();
+      jest.useRealTimers();
+      mockedGetDueCustomReviewFlashcards.mockReset().mockResolvedValue([]);
+    });
+
+    function configureCourse(course: ReturnType<typeof loadLanguageCourse>) {
+      mockedUseLocalSearchParams.mockReturnValue({ courseId: String(course.courseId) });
+      const getRole = jest.fn((id: number) => id === course.courseId ? course.settings.frontImageRole : "standard");
+      mockedUseSettings.mockReturnValue({ ...mockedUseSettings(),
+        activeCustomCourseId: 9999, courseFrontImageRole: "replace_front",
+        courseFrontImageRoleHydrated: true, getCustomCourseFrontImageRole: getRole,
+      });
+      return getRole;
+    }
+
+    it.each(LANGUAGE_REVIEW_SCENARIOS.flatMap((scenario) => scenario.expected.answers.map((accepted) => ({ ...scenario, accepted }))))("$slug / review stage=$stage accepts $answerSide '$accepted' regardless of box parity", async ({ course, stage, flipped, expected, accepted }) => {
+      const getRole = configureCourse(course);
+      const card = makeReviewCard({ ...course.row, type: course.card.type, stage, flipped });
+      mockedGetDueCustomReviewFlashcards.mockResolvedValue([card]);
+      const screen = render(<ReviewFlashcardsScreen />);
+      await startReviewFromStage(screen, stage);
+      const prompt = expected.prompts.replace_back;
+      expect(Boolean(screen.queryByTestId("prompt-image-water.webp"))).toBe(Boolean(prompt.imageUri));
+      if (prompt.text) expect(hasRenderedText(screen, prompt.text)).toBe(true);
+      for (const answer of expected.answers) expect(hasRenderedText(screen, answer)).toBe(false);
+      await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], accepted));
+      await act(async () => fireEvent.press(screen.getByTestId("confirm-button")));
+      await waitFor(() => expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(card.id, course.courseId));
+      expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+      expect(getRole).toHaveBeenCalledWith(course.courseId);
+      await act(async () => jest.advanceTimersByTime(4000));
+    });
+
+    it.each(LANGUAGE_REVIEW_SCENARIOS)("$slug / review stage=$stage rejects opposite side and corrects $answerSide", async ({ course, stage, flipped, expected }) => {
+      configureCourse(course);
+      const card = makeReviewCard({ ...course.row, type: course.card.type, stage, flipped });
+      mockedGetDueCustomReviewFlashcards.mockResolvedValue([card]);
+      const screen = render(<ReviewFlashcardsScreen />);
+      await startReviewFromStage(screen, stage);
+      await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], expected.rejected[0]));
+      await act(async () => fireEvent.press(screen.getByTestId("confirm-button")));
+      const label = expected.correctionInput === 1
+        ? "flashcards.card.input.frontCorrectionLabel" : "flashcards.card.input.backCorrectionLabel";
+      expect(screen.getByLabelText(label)).toBeTruthy();
+      expect(getVisibleTextInputs(screen)).toHaveLength(1);
+      expect(mockedAdvanceCustomReview).not.toHaveBeenCalled();
+      expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+      for (const wrong of expected.rejected) {
+        await act(async () => fireEvent.changeText(screen.getByLabelText(label), wrong));
+        expect(screen.getByLabelText(label)).toBeTruthy();
+        expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+      }
+      await act(async () => fireEvent.changeText(screen.getByLabelText(label), expected.answers[0]));
+      await waitFor(() => expect(mockedScheduleCustomReview).toHaveBeenCalledWith(card.id, course.courseId, 0));
+      await act(async () => jest.advanceTimersByTime(4000));
+    });
+
+    it.each(["answer", "correction"] as const)("reloads the real review screen on course switch without stale %s", async (phase) => {
+      const previous = loadLanguageCourse(LANGUAGE_COURSE_CONTRACTS[1]);
+      const next = loadLanguageCourse(LANGUAGE_COURSE_CONTRACTS[3]);
+      configureCourse(previous);
+      mockedGetDueCustomReviewFlashcards.mockResolvedValue([makeReviewCard({ ...previous.row, type: previous.card.type, stage: 1 })]);
+      const screen = render(<ReviewFlashcardsScreen />);
+      await startReviewFromStage(screen, 1);
+      await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], "water"));
+      if (phase === "correction") await act(async () => fireEvent.press(screen.getByTestId("confirm-button")));
+      const getRole = configureCourse(next);
+      mockedGetDueCustomReviewFlashcards.mockResolvedValue([makeReviewCard({ ...next.row, type: next.card.type, stage: 1 })]);
+      await act(async () => screen.rerender(<ReviewFlashcardsScreen />));
+      await startReviewFromStage(screen, 1);
+      expect(screen.queryByLabelText("flashcards.card.input.frontCorrectionLabel")).toBeNull();
+      expect(getVisibleTextInputs(screen)[0].props.value).toBe("");
+      expect(hasRenderedText(screen, "eau")).toBe(false);
+      expect(getRole).toHaveBeenCalledWith(next.courseId);
+      await act(async () => jest.advanceTimersByTime(CONFIRM_GUARD_MS));
+      await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], "woda"));
+      await act(async () => fireEvent.press(screen.getByTestId("confirm-button")));
+      await waitFor(() => expect(mockedAdvanceCustomReview).toHaveBeenCalledWith(next.card.id, next.courseId));
+      expect(mockedScheduleCustomReview).not.toHaveBeenCalled();
+      await act(async () => jest.advanceTimersByTime(4000));
+    });
   });
 
   it("shows both prompt at the top and correction target at the bottom for a normal card in correction mode", async () => {
@@ -724,6 +824,41 @@ describe("reviewflashcards correction desync regression", () => {
       expect(hasRenderedText(screen, "cat")).toBe(true);
       expect(hasRenderedText(screen, "kot")).toBe(true);
     });
+  });
+
+  it.each([false, true])("preserves image-role prompts and accepted correction language in a different review course (reversed: %s)", async (flipped) => {
+    imageGetSizeSpy = jest.spyOn(Image, "getSize").mockImplementation((_uri, success) => {
+      success?.(320, 240);
+      return Promise.resolve({ width: 320, height: 240 });
+    });
+    const getRole = jest.fn(() => "replace_back");
+    mockedUseSettings.mockReturnValue({ ...mockedUseSettings(),
+      activeCustomCourseId: 99, courseFrontImageRole: "replace_front",
+      courseFrontImageRoleHydrated: true, getCustomCourseFrontImageRole: getRole,
+    });
+    const card = makeReviewCard({ id: 32, frontText: "autobús", backText: "autobus",
+      answers: ["autobus"], imageFront: "bus.webp", flipped, stage: 1 });
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([card]);
+    const screen = render(<ReviewFlashcardsScreen />);
+    await startReviewFromStage(screen, card.stage);
+
+    const expectPrompt = () => {
+      expect(Boolean(screen.queryByTestId("prompt-image-bus.webp"))).toBe(flipped);
+      if (!flipped) expect(hasRenderedText(screen, "autobús")).toBe(true);
+    };
+    expectPrompt();
+    await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], "wrong"));
+    fireEvent.press(screen.getByTestId("confirm-button"));
+
+    const label = flipped ? "flashcards.card.input.frontCorrectionLabel" : "flashcards.card.input.backCorrectionLabel";
+    await waitFor(() => {
+      expect(getVisibleTextInputs(screen)).toHaveLength(1);
+      expect(getVisibleTextInputs(screen)[0].props.accessibilityLabel).toBe(label);
+      expectPrompt();
+    });
+    expect(getRole).toHaveBeenCalledWith(77);
+    await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], flipped ? "autobús" : "autobus"));
+    await waitFor(() => expect(mockedScheduleCustomReview).toHaveBeenCalledWith(card.id, 77, 0));
   });
 
   it("does not write flashcards box snapshots while answering review cards", async () => {

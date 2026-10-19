@@ -1,4 +1,5 @@
 import type { CourseFrontImageRole } from "@/src/contexts/settings/types";
+import { LANGUAGE_STUDY_SCENARIOS } from "@/src/testSupport/cardLanguageScenarios";
 import type { WordWithTranslations } from "@/src/types/boxes";
 import { isStudyCardReversed } from "../flashcardDirection";
 import { normalizeCourseFrontImageRole, normalizeFrontImageRoleOverrides, resolveCardPromptPresentation } from "../frontImageRole";
@@ -21,6 +22,21 @@ function resolve(role: CourseFrontImageRole, reversed: boolean, overrides: Parti
 }
 
 describe("front image role", () => {
+  it.each(LANGUAGE_STUDY_SCENARIOS)("$slug / $box / zero=$boxZeroEnabled preserves $answerSide across image roles", ({ course, box, boxZeroEnabled, expected }) => {
+    const reversed = isStudyCardReversed(course.card, box, boxZeroEnabled);
+    const standard = {
+      text: reversed ? course.card.translations[0] : course.card.text,
+      imageUri: (reversed ? course.card.imageBack : course.card.imageFront) ?? null,
+      audioSide: reversed ? "back" as const : "front" as const,
+    };
+    for (const stage of ["question", "correction"] as const) {
+      for (const role of ["standard", "replace_front", "replace_back"] as const) {
+        expect(resolveCardPromptPresentation({ card: course.card, role, reversed, stage, standard }))
+          .toEqual(expected.prompts[role]);
+      }
+    }
+  });
+
   it.each([undefined, null, "bad", {}, false, 0])("normalizes invalid role %s to standard", (value) => {
     expect(normalizeCourseFrontImageRole(value)).toBe("standard");
   });
@@ -56,19 +72,30 @@ describe("front image role", () => {
   ])("retains legacy behavior for ineligible cards: %j", (overrides) => {
     for (const reversed of [false, true]) {
       for (const role of ["replace_front", "replace_back"] as const) {
-        expect(resolve(role, reversed, overrides)).toEqual(resolve("standard", reversed, overrides));
+        for (const stage of ["question", "intro", "correction"] as const) {
+          expect(resolve(role, reversed, overrides, stage)).toEqual(resolve("standard", reversed, overrides, stage));
+        }
       }
     }
   });
 
-  it.each(["intro", "correction"] as const)("keeps images and text together during %s", (stage) => {
+  it("keeps the intro presentation unchanged", () => {
     for (const role of ["replace_front", "replace_back"] as const) {
       for (const reversed of [false, true]) {
-        expect(resolve(role, reversed, {}, stage)).toEqual({
+        expect(resolve(role, reversed, {}, "intro")).toEqual({
           text: reversed ? "łyżka" : "spoon", imageUri: "spoon.webp",
           audioSide: reversed ? "back" : "front",
         });
-        expect(resolve("standard", reversed, {}, stage)).toEqual(resolve("standard", reversed));
+        expect(resolve("standard", reversed, {}, "intro")).toEqual(resolve("standard", reversed));
+      }
+    }
+  });
+
+  it.each(["standard", "replace_front", "replace_back"] as const)("preserves the question presentation during correction for %s", (role) => {
+    for (const reversed of [false, true]) {
+      for (const imageBack of [null, "back.webp"]) {
+        expect(resolve(role, reversed, { imageBack }, "correction"))
+          .toEqual(resolve(role, reversed, { imageBack }, "question"));
       }
     }
   });

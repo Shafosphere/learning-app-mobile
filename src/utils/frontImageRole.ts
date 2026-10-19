@@ -43,7 +43,7 @@ export function resolveCardPromptPresentation({
 }): CardPromptPresentation {
   if (!isFrontImageRoleApplicable(card, role)) return standard;
 
-  if (stage !== "question") return { ...standard, imageUri: card.imageFront ?? null };
+  if (stage === "intro") return { ...standard, imageUri: card.imageFront ?? null };
 
   const replacesPrompt = role === "replace_back" ? reversed : !reversed;
   if (replacesPrompt) return { text: "", imageUri: card.imageFront ?? null, audioSide: null };

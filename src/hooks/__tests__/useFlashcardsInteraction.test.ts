@@ -8,6 +8,7 @@ import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { DEBUG_EVENTS_STORAGE_KEY } from "@/src/services/debugEvents";
 import type { DebugContext } from "@/src/services/debugEvents";
 import type { BoxesState, WordWithTranslations } from "@/src/types/boxes";
+import { LANGUAGE_COURSE_CONTRACTS, LANGUAGE_STUDY_SCENARIOS, loadLanguageCourse } from "@/src/testSupport/cardLanguageScenarios";
 
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useSettings: jest.fn(),
@@ -266,6 +267,84 @@ describe("useFlashcardsInteraction", () => {
   }
 
   describe("flip direction", () => {
+    it.each(LANGUAGE_STUDY_SCENARIOS.flatMap((scenario) => scenario.expected.answers.map((accepted) => ({ ...scenario, accepted }))))(
+      "$slug / $box / zero=$boxZeroEnabled accepts $answerSide answer '$accepted'",
+      async ({ course, box, boxZeroEnabled, reversed, accepted }) => {
+        jest.useFakeTimers();
+        const { result } = renderInteraction(makeBoxesState({ [box]: [course.card] }), { boxZeroEnabled });
+        act(() => result.current.interaction.handleSelectBox(box));
+        expect(result.current.interaction.reversed).toBe(reversed);
+        act(() => result.current.interaction.confirm(undefined, accepted));
+        await waitFor(() => expect(result.current.interaction.result).toBe(true));
+      },
+    );
+
+    it.each(LANGUAGE_STUDY_SCENARIOS)(
+      "$slug / $box / zero=$boxZeroEnabled rejects the opposite side and corrects $answerSide",
+      async ({ course, box, boxZeroEnabled, reversed, expected }) => {
+        jest.useFakeTimers();
+        const { result } = renderInteraction(makeBoxesState({ [box]: [course.card] }), { boxZeroEnabled });
+        act(() => result.current.interaction.handleSelectBox(box));
+        act(() => result.current.interaction.confirm(undefined, expected.rejected[0]));
+        expect(result.current.interaction.result).toBe(false);
+        expect(result.current.interaction.correction).toMatchObject({
+          reversed, mode: "demote", cardId: course.card.id, awers: course.front, rewers: course.back[0],
+        });
+        for (const wrong of expected.rejected) {
+          act(() => result.current.interaction.wrongInputChange(expected.correctionInput, wrong));
+          expect(result.current.interaction.correction).not.toBeNull();
+          expect(getBoxIds(result.current.boxes, box)).toContain(course.card.id);
+        }
+        act(() => result.current.interaction.wrongInputChange(expected.correctionInput, expected.answers[0]));
+        await waitFor(() => expect(result.current.interaction.correction).toBeNull());
+        const destination = boxZeroEnabled ? "boxZero" : "boxOne";
+        expect(getBoxIds(result.current.boxes, destination)).toContain(course.card.id);
+        if (box !== destination) expect(getBoxIds(result.current.boxes, box)).not.toContain(course.card.id);
+      },
+    );
+
+    it.each(LANGUAGE_COURSE_CONTRACTS.flatMap((contract) => (["front", "back"] as const).map((answerSide) => ({
+      slug: contract.slug, course: loadLanguageCourse(contract), answerSide, expected: contract.expectations[answerSide],
+    }))))("$slug / boxZero copies $answerSide only", async ({ course, answerSide, expected }) => {
+      jest.useFakeTimers();
+      const { result } = renderInteraction(makeBoxesState({ boxZero: [course.card] }), { boxZeroAnswerSide: answerSide });
+      act(() => result.current.interaction.handleSelectBox("boxZero"));
+      expect(result.current.interaction.correction).toMatchObject({
+        mode: "intro", promptText: course.introPrompt, promptImageUri: "water.webp",
+      });
+      act(() => result.current.interaction.wrongInputChange(expected.correctionInput, expected.rejected[0]));
+      expect(getBoxIds(result.current.boxes, "boxZero")).toContain(course.card.id);
+      act(() => result.current.interaction.wrongInputChange(expected.correctionInput, expected.answers[0]));
+      await waitFor(() => expect(getBoxIds(result.current.boxes, "boxOne")).toContain(course.card.id));
+      expect(getBoxIds(result.current.boxes, "boxZero")).toEqual([]);
+    });
+
+    it.each(["boxOne", "boxTwo"] as const)("keeps the correction language and demotion for Spanish in %s with box zero enabled", async (box) => {
+      const card = makeWord({ id: 85, text: "autobús", translations: ["autobus"],
+        imageFront: "bus.webp", flipped: true });
+      const { result } = renderInteraction(makeBoxesState({ [box]: [card] }), { boxZeroEnabled: true });
+      act(() => result.current.interaction.handleSelectBox(box));
+      await waitFor(() => expect(result.current.interaction.selectedItem?.id).toBe(card.id));
+      act(() => result.current.interaction.confirm(undefined, "wrong"));
+
+      const reversed = box === "boxOne";
+      await waitFor(() => expect(result.current.interaction.correction).toMatchObject({
+        mode: "demote", reversed, awers: "autobús", rewers: "autobus",
+        promptText: reversed ? "autobus" : "autobús",
+      }));
+      const input = reversed ? 1 : 2;
+      act(() => result.current.interaction.wrongInputChange(input, reversed ? "autobus" : "autobús"));
+      expect(result.current.interaction.correction).not.toBeNull();
+      expect(getBoxIds(result.current.boxes, box)).toContain(card.id);
+
+      act(() => result.current.interaction.wrongInputChange(input, reversed ? "autobús" : "autobus"));
+      await waitFor(() => {
+        expect(result.current.interaction.correction).toBeNull();
+        expect(getBoxIds(result.current.boxes, "boxZero")).toEqual([card.id]);
+        expect(getBoxIds(result.current.boxes, box)).toEqual([]);
+      });
+    });
+
     it.each(
       [true, false].flatMap((boxZeroEnabled) =>
         (["front", "back"] as const).flatMap((boxZeroAnswerSide) =>

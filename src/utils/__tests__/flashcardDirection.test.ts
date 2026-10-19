@@ -1,5 +1,6 @@
 import type { WordWithTranslations } from "@/src/types/boxes";
-import { isAnswerOnlyCard } from "@/src/utils/flashcardDirection";
+import { isAnswerOnlyCard, isStudyCardReversed } from "@/src/utils/flashcardDirection";
+import { LANGUAGE_STUDY_SCENARIOS } from "@/src/testSupport/cardLanguageScenarios";
 
 const makeCard = (
   overrides: Partial<WordWithTranslations> = {}
@@ -10,6 +11,14 @@ const makeCard = (
   flipped: true,
   type: "text",
   ...overrides,
+});
+
+describe("study direction language contracts", () => {
+  it.each(LANGUAGE_STUDY_SCENARIOS)("$slug / $box / zero=$boxZeroEnabled requires $answerSide", ({ course, box, boxZeroEnabled, reversed }) => {
+    expect(isStudyCardReversed(course.card, box, boxZeroEnabled)).toBe(reversed);
+    expect(isStudyCardReversed({ ...course.card, flipped: false }, box, boxZeroEnabled)).toBe(false);
+    expect(isStudyCardReversed({ ...course.card, answerOnly: true }, box, boxZeroEnabled)).toBe(false);
+  });
 });
 
 describe("isAnswerOnlyCard", () => {
