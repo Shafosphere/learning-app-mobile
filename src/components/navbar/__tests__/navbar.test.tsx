@@ -11,6 +11,7 @@ import { getCustomCourseById, type CustomCourseRecord } from "@/src/db/sqlite/db
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
 import { getFlagSource } from "@/src/constants/languageFlags";
 import { Image } from "expo-image";
+import { ReduceMotion, withTiming } from "react-native-reanimated";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 
 const mockDismissTo = jest.fn();
@@ -30,6 +31,7 @@ const mockDueReviewsContext = React.createContext({ dueReviewCount: 3, refreshDu
 jest.mock("react-native-reanimated", () => ({
   ...jest.requireActual("react-native-reanimated/mock"),
   useReducedMotion: () => false,
+  withTiming: jest.fn((value) => value),
 }));
 
 jest.mock("@/src/hooks/useOpenCoursePanel", () => ({
@@ -132,10 +134,6 @@ jest.mock("react-i18next", () => ({
   }),
 }));
 
-jest.mock("@/src/components/navbar/navbar-styles", () => ({
-  useStyles: jest.fn(() => new Proxy({}, { get: () => ({}) })),
-}));
-
 jest.mock("@/src/components/navbar/NavbarStatsRotator", () => {
   const { Pressable, Text } = jest.requireActual<typeof import("react-native")>(
     "react-native"
@@ -212,6 +210,7 @@ jest.mock("@/src/contexts/SettingsContext", () => {
 
 const mockBaseSettings = {
   theme: "light",
+  fontScaleMultiplier: 1,
   toggleTheme: jest.fn(),
   activeCustomCourseId: null,
   activeCustomCourseIdHydrated: true,
@@ -274,6 +273,17 @@ function setupNavbar(overrides: Partial<ReturnType<typeof useSettings>> = {}, in
     </mockSettingsContext.Provider>
   );
   const screen = render(tree());
+  if (screen.queryByTestId("coachmark-flashcards-review-button")) {
+    const positions = [0, 72, 144, 224, 296];
+    act(() => {
+      screen.getAllByRole("button").slice(-5).forEach((button, index) => {
+        fireEvent(button, "layout", { nativeEvent: { layout: {
+          x: positions[index], y: index === 2 ? 0 : 2,
+          width: index === 2 ? 76 : 68, height: index === 2 ? 48 : 44,
+        } } });
+      });
+    });
+  }
   return {
     screen,
     updateSettings(patch: Partial<typeof settings>) { settings = { ...settings, ...patch }; screen.rerender(tree()); },
@@ -374,6 +384,163 @@ describe("Navbar review routing", () => {
 
     fireEvent.press(bottomButtons[3]);
     expect(mockPush).toHaveBeenCalledWith("/completed-courses");
+  });
+
+  it.each([
+    ["/", "home", 1, "home", require("@/assets/icons/navbar/colored/house_border_3x_outside.svg")],
+    ["/review", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
+    ["/review/levels", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
+    ["/review/reviewflashcards", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
+    ["/flashcards", "play", 2, "gamepad", require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg")],
+    ["/course-entry-settings", "play", 2, "gamepad", require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg")],
+    ["/completed-courses", "completed", 3, "trophy", require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg")],
+    ["/completed-courses/details", "completed", 3, "trophy", require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg")],
+    ["/settings", "settings", 4, "settings-sharp", require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg")],
+    ["/settings/details", "settings", 4, "settings-sharp", require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg")],
+  ])("selects only the matching section on direct entry to %s", (path, section, index, inactiveIcon, source) => {
+    const { screen } = setupNavbar({}, path);
+    const bottomButtons = screen.getAllByRole("button").slice(-5);
+    expect(bottomButtons.map(button => button.props.accessibilityState.selected))
+      .toEqual([0, 1, 2, 3, 4].map(buttonIndex => buttonIndex === index));
+    expect(screen.getAllByTestId(/^navbar-.*-active-icon$/)).toHaveLength(1);
+    expect(screen.getAllByTestId(/^navbar-.*-active-background$/, { includeHiddenElements: true })).toHaveLength(1);
+    expect(screen.getAllByTestId(/^navbar-.*-active-indicator$/, { includeHiddenElements: true })).toHaveLength(1);
+    expect(screen.getByTestId(`navbar-${section}-active-icon`)).toHaveProp("source", source);
+    expect(screen.getByText(inactiveIcon)).toBeVisible();
+    fireEvent(screen.getByTestId(`navbar-${section}-active-icon`), "display");
+    expect(screen.queryByText(inactiveIcon)).toBeNull();
+    expect(screen.getByText("3")).toBeTruthy();
+    expect(screen.getAllByTestId(/^coachmark-flashcards-(review|home|game|completed-courses|settings)-button$/))
+      .toHaveLength(5);
+  });
+
+  it("moves one highlight through measured frames, including the center button, and snaps on resize", () => {
+    const app = setupNavbar({}, "/");
+    jest.mocked(withTiming).mockClear();
+    app.navigate("/flashcards");
+    expect(withTiming).toHaveBeenCalledWith(144, expect.objectContaining({ duration: 220, reduceMotion: ReduceMotion.System }));
+    expect(withTiming).toHaveBeenCalledWith(76, expect.objectContaining({ duration: 220 }));
+    const indicator = app.screen.getByTestId("navbar-selection-indicator", { includeHiddenElements: true });
+    app.navigate("/settings");
+    expect(app.screen.getByTestId("navbar-selection-indicator", { includeHiddenElements: true })).toBe(indicator);
+    expect(withTiming).toHaveBeenCalledWith(296, expect.objectContaining({ duration: 220 }));
+    jest.mocked(withTiming).mockClear();
+    fireEvent(app.screen.getAllByRole("button").slice(-5)[4], "layout", {
+      nativeEvent: { layout: { x: 400, y: 2, width: 90, height: 44 } },
+    });
+    expect(withTiming).not.toHaveBeenCalled();
+    expect(app.screen.getByTestId("navbar-selection-indicator", { includeHiddenElements: true })).toHaveStyle({
+      width: 90, transform: [{ translateX: 400 }, { translateY: 2 }],
+    });
+    app.navigate("/stats");
+    expect(app.screen.queryByTestId("navbar-selection-indicator", { includeHiddenElements: true })).toBeNull();
+  });
+
+  it("keeps the original icon until SVG display and restores it if loading fails", () => {
+    const { screen } = setupNavbar({}, "/completed-courses");
+    const image = screen.getByTestId("navbar-completed-active-icon");
+    expect(screen.getByText("trophy")).toBeVisible();
+    // Loading alone does not guarantee that the native view has drawn the image.
+    fireEvent(image, "load");
+    expect(screen.getByText("trophy")).toBeVisible();
+    fireEvent(image, "display");
+    expect(image).toBeVisible();
+    expect(screen.queryByText("trophy")).toBeNull();
+    fireEvent(image, "error", { error: "SVG decoding failed" });
+    expect(screen.getByText("trophy")).toBeVisible();
+  });
+
+  it("preloads inactive SVGs and reuses their views when switching away and back", () => {
+    const app = setupNavbar({}, "/stats");
+    const image = app.screen.getByTestId("navbar-home-colored-icon");
+    expect(image).not.toBeVisible();
+    expect(app.screen.getByText("home")).toBeVisible();
+    fireEvent(image, "display");
+    expect(app.screen.getByText("home")).toBeVisible();
+    app.navigate("/");
+    expect(app.screen.getByTestId("navbar-home-active-icon")).toBe(image);
+    expect(image).toBeVisible();
+    expect(app.screen.queryByText("home")).toBeNull();
+    app.navigate("/settings");
+    expect(image).not.toBeVisible();
+    expect(app.screen.getByText("home")).toBeVisible();
+    expect(app.screen.getByText("settings-sharp")).toBeVisible();
+    app.navigate("/");
+    expect(app.screen.getByTestId("navbar-home-active-icon")).toBe(image);
+    expect(image).toBeVisible();
+    expect(app.screen.queryByText("home")).toBeNull();
+  });
+
+  it("does not let a late SVG display hide another section's pending icon", () => {
+    const app = setupNavbar({}, "/");
+    const home = app.screen.getByTestId("navbar-home-active-icon");
+    app.navigate("/settings");
+    fireEvent(home, "display");
+    expect(home).not.toBeVisible();
+    expect(app.screen.getByText("settings-sharp")).toBeVisible();
+    expect(app.screen.getByText("home")).toBeVisible();
+    fireEvent(app.screen.getByTestId("navbar-settings-active-icon"), "display");
+    expect(app.screen.queryByText("settings-sharp")).toBeNull();
+    expect(app.screen.getByText("home")).toBeVisible();
+  });
+
+  it("follows navigation and back without tying selection to the active course", async () => {
+    const app = setupNavbar({}, "/");
+    expect(app.screen.getByTestId("navbar-home-active-icon")).toBeTruthy();
+    app.navigate("/flashcards");
+    expect(app.screen.queryByTestId("navbar-home-active-icon")).toBeNull();
+    expect(app.screen.getByTestId("navbar-play-active-icon")).toBeTruthy();
+    app.updateSettings({ activeCustomCourseId: 11 });
+    await act(async () => {});
+    expect(app.screen.getByTestId("navbar-play-active-icon")).toBeTruthy();
+    app.navigate("/settings");
+    expect(app.screen.getByTestId("navbar-settings-active-icon")).toBeTruthy();
+    app.navigate("/flashcards");
+    expect(app.screen.getAllByTestId(/^navbar-.*-active-icon$/)).toHaveLength(1);
+    expect(app.screen.getByTestId("navbar-play-active-icon")).toBeTruthy();
+    app.navigate("/");
+    expect(app.screen.getByTestId("navbar-home-active-icon")).toBeTruthy();
+  });
+
+  it.each(["/stats", "/coursepanel", "/editcourse", "/settings-extra", "/review-extra", "/completed-courses-extra"])(
+    "leaves all sections inactive on %s",
+    path => {
+      const { screen } = setupNavbar({}, path);
+      expect(screen.getAllByRole("button").slice(-5).every(button => !button.props.accessibilityState.selected)).toBe(true);
+      expect(screen.queryAllByTestId(/^navbar-.*-active-(icon|background|indicator)$/)).toHaveLength(0);
+      for (const icon of ["hourglass-end", "home", "gamepad", "trophy", "settings-sharp"]) {
+        expect(screen.getByText(icon)).toBeTruthy();
+      }
+    },
+  );
+
+  it.each(["/review/brain", "/review/table", "/review/minigames/memory"])(
+    "keeps the bottom bar hidden on %s",
+    path => {
+      const { screen } = setupNavbar({}, path);
+      expect(screen.queryByTestId("coachmark-flashcards-review-button")).toBeNull();
+      expect(screen.queryAllByTestId(/^navbar-.*-active-icon$/)).toHaveLength(0);
+    },
+  );
+
+  it("updates the active highlight with the theme and keeps the review badge above the indicator", () => {
+    const app = setupNavbar({}, "/review");
+    const icon = app.screen.getByTestId("navbar-review-active-icon");
+    const source = icon.props.source;
+    expect(app.screen.getByTestId("navbar-review-active-background", { includeHiddenElements: true }))
+      .toHaveStyle({ backgroundColor: mockBaseSettings.colors.my_green, opacity: 0.08 });
+    app.updateTheme({ theme: "dark", colors: { ...mockBaseSettings.colors, my_green: "#00caacff", headline: "#fffffe" } });
+    expect(app.screen.getByTestId("navbar-review-active-background", { includeHiddenElements: true }))
+      .toHaveStyle({ backgroundColor: "#00caacff", opacity: 0.14 });
+    expect(app.screen.getByTestId("navbar-review-active-indicator", { includeHiddenElements: true }))
+      .toHaveStyle({ backgroundColor: "#00caacff", width: 20, height: 3 });
+    expect(app.screen.getByTestId("navbar-review-active-icon")).toHaveProp("source", source);
+    app.updateProviders(1001);
+    const reviewButton = app.screen.getAllByRole("button").slice(-5)[0];
+    expect(within(reviewButton).getByText("999+")).toBeTruthy();
+    expect(reviewButton).toHaveAccessibilityState({ selected: true });
+    fireEvent.press(reviewButton);
+    expect(mockDismissTo).toHaveBeenCalledWith("/review");
   });
 
   it("waits for settings before starting the active custom course", async () => {
@@ -611,7 +778,8 @@ describe("Navbar review routing", () => {
     await act(async () => {});
     expect(app.screen.queryByText("A2")).toBeNull();
     expect(app.screen.getByText("Official course")).toBeTruthy();
-    expect(app.screen.UNSAFE_getAllByType(Image).map(image => image.props.source)).toEqual([graphic, flag]);
+    expect(within(app.screen.getByTestId("coachmark-flashcards-course-button"))
+      .UNSAFE_getAllByType(Image).map(image => image.props.source)).toEqual([graphic, flag]);
     expect(app.screen.getByLabelText('components.navbar.navbar.accessibilityLabel.kursValueOtworzPanelKursow:{"course":"Official course"}')).toBeTruthy();
   });
 

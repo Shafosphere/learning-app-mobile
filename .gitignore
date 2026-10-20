@@ -57,6 +57,7 @@ assets/images/*
 *.jpg
 *.jpeg
 *.svg
+!assets/icons/navbar/colored/*.svg
 *.svgx
 !assets/illustrations/leitner.svg
 !assets/illustrations/leitner.png

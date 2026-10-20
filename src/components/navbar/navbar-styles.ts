@@ -95,27 +95,30 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginHorizontal: 2,
   },
   bottomCenterButton: {
-    flex: 1,
-    alignItems: "center",
-    justifyContent: "center",
-    minHeight: 44,
     paddingVertical: 10,
     borderRadius: 16,
     marginHorizontal: 4,
   },
-  bottomIconButtonPressed: {
-    backgroundColor: colors.my_green,
+  bottomIconContent: {
+    position: "relative",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  bottomIconImage: {
+    position: "absolute",
+    transform: [{ scale: 1.1 * 1.01 ** 3 * 1.03 * 1.02 ** 4 }],
+  },
+  bottomIconScale: {
+    transform: [{ scale: 1.1 }],
+  },
+  bottomInactiveIconHidden: {
+    opacity: 0,
   },
   bottomCoachmarkOverlay: {
     ...StyleSheet.absoluteFillObject,
   },
   bottomCoachmarkTarget: {
     flex: 1,
-  },
-  reviewIconWrapper: {
-    position: "relative",
-    alignItems: "center",
-    justifyContent: "center",
   },
   reviewBadge: {
     position: "absolute",

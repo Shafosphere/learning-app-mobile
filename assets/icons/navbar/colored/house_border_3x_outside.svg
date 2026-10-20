@@ -1,0 +1,32 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="-30 -30 413 448">
+  <defs>
+    <linearGradient id="fillMain" x1="20" y1="10" x2="300" y2="360" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#43F4E6"/>
+      <stop offset="55%" stop-color="#2ED8D8"/>
+      <stop offset="100%" stop-color="#27B7D7"/>
+    </linearGradient>
+    <linearGradient id="fillAccent" x1="90" y1="15" x2="175" y2="260" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#8CFFF5" stop-opacity="0.95"/>
+      <stop offset="35%" stop-color="#8CFFF5" stop-opacity="0.30"/>
+      <stop offset="100%" stop-color="#8CFFF5" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="edgeShade" x1="320" y1="50" x2="170" y2="330" gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#109FC3" stop-opacity="0.28"/>
+      <stop offset="100%" stop-color="#109FC3" stop-opacity="0"/>
+    </linearGradient>
+    <clipPath id="clipShape">
+      <path id="shapePath" d="M348 132.0Q353 135.0 353 142.0V375.0Q353 388.0 340 388.0H244Q232 388.0 232 375.0V232.0H121V375.0Q121 388.0 109 388.0H13Q0 388.0 0 375.0V142.0Q0 135.0 5 132.0L166 3.0Q174 -3.0 182 3.0Z"/>
+    </clipPath>
+  </defs>
+
+  <!-- visually outer 3x outline -->
+  <use href="#shapePath" fill="none" stroke="#117B90" stroke-width="60" stroke-linejoin="round" stroke-linecap="round"/>
+
+  <!-- original fill on top to preserve the inside -->
+  <use href="#shapePath" fill="url(#fillMain)"/>
+
+  <g clip-path="url(#clipShape)">
+    <path d="M84 30 C58 120, 60 230, 110 308 C130 340, 152 360, 172 370 C142 334, 124 283, 113 226 C103 171, 100 98, 116 22 Z" fill="url(#fillAccent)"/>
+    <ellipse cx="258" cy="146" rx="126" ry="198" fill="url(#edgeShade)"/>
+  </g>
+</svg>

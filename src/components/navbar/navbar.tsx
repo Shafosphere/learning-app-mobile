@@ -29,6 +29,7 @@ import {
   Animated,
   Easing,
   Keyboard,
+  type LayoutChangeEvent,
   Platform,
   Pressable,
   StatusBar,
@@ -42,6 +43,7 @@ import { useTranslation } from "react-i18next";
 import NavbarStatsRotator from "./NavbarStatsRotator";
 import NavbarMascot from "./NavbarMascot";
 import { useStyles } from "./navbar-styles";
+import { TabSelectionIndicator, useTabIndicatorLayout } from "@/src/components/navigation/TabSelectionIndicator";
 
 import FontAwesome5 from "@expo/vector-icons/FontAwesome5";
 import Foundation from "@expo/vector-icons/Foundation";
@@ -58,6 +60,82 @@ const FLASHCARDS_PATHS = new Set([
   "/flashcards",
   "/course-entry-settings",
 ]);
+
+const BOTTOM_NAV_ICONS = {
+  review: require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg"),
+  home: require("@/assets/icons/navbar/colored/house_border_3x_outside.svg"),
+  play: require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg"),
+  completed: require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg"),
+  settings: require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg"),
+};
+
+type BottomNavSection = keyof typeof BOTTOM_NAV_ICONS;
+const BOTTOM_NAV_ORDER: readonly BottomNavSection[] = ["review", "home", "play", "completed", "settings"];
+
+// Match the original glyph artwork at its existing font size (512 units per em).
+const BOTTOM_NAV_ICON_BOUNDS = {
+  review: { width: 18, height: 24 },
+  home: { width: (353 * 28) / 512, height: (388 * 28) / 512 },
+  play: { width: 33, height: 16.5 },
+  completed: { width: (448.615 * 26) / 512, height: (447.6 * 26) / 512 },
+  settings: { width: (447.81 * 24) / 512, height: (460 * 24) / 512 },
+};
+
+function getActiveBottomNavSection(pathname: string): BottomNavSection | null {
+  if (pathname === "/") return "home";
+  if (FLASHCARDS_PATHS.has(pathname)) return "play";
+  if (pathname === "/review" || pathname.startsWith("/review/")) return "review";
+  if (pathname === "/completed-courses" || pathname.startsWith("/completed-courses/")) return "completed";
+  if (pathname === "/settings" || pathname.startsWith("/settings/")) return "settings";
+  return null;
+}
+
+function BottomNavVisual({
+  section,
+  selected,
+  children,
+  badge,
+}: {
+  section: BottomNavSection;
+  selected: boolean;
+  children: ReactNode;
+  badge?: ReactNode;
+}) {
+  const styles = useStyles();
+  const [coloredIconDisplayed, setColoredIconDisplayed] = useState(false);
+  const showColoredIcon = selected && coloredIconDisplayed;
+
+  return (
+    <>
+      <View pointerEvents="none" style={styles.bottomIconContent}>
+        <View
+          accessibilityElementsHidden={showColoredIcon}
+          importantForAccessibility={showColoredIcon ? "no-hide-descendants" : "auto"}
+          style={[styles.bottomIconScale, showColoredIcon && styles.bottomInactiveIconHidden]}
+        >
+          {children}
+        </View>
+        {/* Keep SVGs mounted between selections; retain the glyph until native display confirms readiness. */}
+        <Image
+          testID={`navbar-${section}-${selected ? "active" : "colored"}-icon`}
+          source={BOTTOM_NAV_ICONS[section]}
+          contentFit="contain"
+          accessible={false}
+          cachePolicy="memory-disk"
+          transition={0}
+          onDisplay={() => setColoredIconDisplayed(true)}
+          onError={() => setColoredIconDisplayed(false)}
+          style={[
+            styles.bottomIconImage,
+            BOTTOM_NAV_ICON_BOUNDS[section],
+            !selected && styles.bottomInactiveIconHidden,
+          ]}
+        />
+        {badge}
+      </View>
+    </>
+  );
+}
 
 // Broad provider updates may reach this connector. Only selected, stable values
 // reach the frame; course subscriptions and metadata state live in the buttons.
@@ -90,6 +168,10 @@ const NavbarFrame = memo(function NavbarFrame({
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const activeBottomSection = getActiveBottomNavSection(pathname);
+  const bottomIndicator = useTabIndicatorLayout(BOTTOM_NAV_ORDER);
+  const { onTabLayout } = bottomIndicator;
+  const onPlayLayout = useCallback((event: LayoutChangeEvent) => onTabLayout("play", event), [onTabLayout]);
   const setPopupAnchorX = usePopupAnchorSetter();
   const { theme, toggleTheme, colors } = useThemeSettings();
   const styles = useStyles();
@@ -337,14 +419,23 @@ const NavbarFrame = memo(function NavbarFrame({
 
       {shouldHideBottomBar ? null : (
         <View style={[styles.bottomBarContainer, { paddingBottom: bottomPad }]}>
-          <View style={styles.bottomBar}>
+          <View style={styles.bottomBar} onLayout={bottomIndicator.onLayout}>
+            {activeBottomSection && bottomIndicator.frames[activeBottomSection] ? (
+              <TabSelectionIndicator
+                frame={bottomIndicator.frames[activeBottomSection]}
+                layoutKey={bottomIndicator.layoutKey}
+                selectionKey={activeBottomSection}
+                testID="navbar-selection-indicator"
+                backgroundTestID={`navbar-${activeBottomSection}-active-background`}
+                lineTestID={`navbar-${activeBottomSection}-active-indicator`}
+              />
+            ) : null}
             <Pressable
-              style={({ pressed }) => [
-                styles.bottomIconButton,
-                pressed && styles.bottomIconButtonPressed,
-              ]}
+              style={styles.bottomIconButton}
+              onLayout={(event) => onTabLayout("review", event)}
               onPress={handleReviewPress}
               accessibilityRole="button"
+              accessibilityState={{ selected: activeBottomSection === "review" }}
               accessibilityLabel={reviewAccessibilityLabel}
             >
               <CoachmarkAnchor
@@ -355,38 +446,42 @@ const NavbarFrame = memo(function NavbarFrame({
               >
                 <View collapsable={false} style={styles.bottomCoachmarkTarget} />
               </CoachmarkAnchor>
-              <View style={styles.reviewIconWrapper}>
+              <BottomNavVisual
+                section="review"
+                selected={activeBottomSection === "review"}
+                badge={
+                  <View
+                    style={[
+                      styles.reviewBadge,
+                      { backgroundColor: reviewBadgeBackground },
+                    ]}
+                  >
+                    <Text
+                      style={[
+                        styles.reviewBadgeText,
+                        { color: reviewBadgeTextColor },
+                      ]}
+                      allowFontScaling
+                    >
+                      {formattedReviewCount}
+                    </Text>
+                  </View>
+                }
+              >
                 <FontAwesome5
                   name="hourglass-end"
                   size={24}
                   color={colors.headline}
                 />
-                <View
-                  style={[
-                    styles.reviewBadge,
-                    { backgroundColor: reviewBadgeBackground },
-                  ]}
-                >
-                  <Text
-                    style={[
-                      styles.reviewBadgeText,
-                      { color: reviewBadgeTextColor },
-                    ]}
-                    allowFontScaling
-                  >
-                    {formattedReviewCount}
-                  </Text>
-                </View>
-              </View>
+              </BottomNavVisual>
             </Pressable>
 
             <Pressable
-              style={({ pressed }) => [
-                styles.bottomIconButton,
-                pressed && styles.bottomIconButtonPressed,
-              ]}
+              style={styles.bottomIconButton}
+              onLayout={(event) => onTabLayout("home", event)}
               onPress={handleHomePress}
               accessibilityRole="button"
+              accessibilityState={{ selected: activeBottomSection === "home" }}
               accessibilityLabel={t(
                 "components.navbar.navbar.accessibilityLabel.przejdzDoMenuGlownego"
               )}
@@ -399,18 +494,19 @@ const NavbarFrame = memo(function NavbarFrame({
               >
                 <View collapsable={false} style={styles.bottomCoachmarkTarget} />
               </CoachmarkAnchor>
-              <Foundation name="home" size={28} color={colors.headline} />
+              <BottomNavVisual section="home" selected={activeBottomSection === "home"}>
+                <Foundation name="home" size={28} color={colors.headline} />
+              </BottomNavVisual>
             </Pressable>
 
-            <CoursePlayButton />
+            <CoursePlayButton onLayout={onPlayLayout} />
 
             <Pressable
-              style={({ pressed }) => [
-                styles.bottomIconButton,
-                pressed && styles.bottomIconButtonPressed,
-              ]}
+              style={styles.bottomIconButton}
+              onLayout={(event) => onTabLayout("completed", event)}
               onPress={handleCompletedCoursesPress}
               accessibilityRole="button"
+              accessibilityState={{ selected: activeBottomSection === "completed" }}
               accessibilityLabel={t(
                 "components.navbar.navbar.accessibilityLabel.przejdzDoUkonczonychKursow"
               )}
@@ -423,16 +519,17 @@ const NavbarFrame = memo(function NavbarFrame({
               >
                 <View collapsable={false} style={styles.bottomCoachmarkTarget} />
               </CoachmarkAnchor>
-              <Ionicons name="trophy" size={26} color={colors.headline} />
+              <BottomNavVisual section="completed" selected={activeBottomSection === "completed"}>
+                <Ionicons name="trophy" size={26} color={colors.headline} />
+              </BottomNavVisual>
             </Pressable>
 
             <Pressable
-              style={({ pressed }) => [
-                styles.bottomIconButton,
-                pressed && styles.bottomIconButtonPressed,
-              ]}
+              style={styles.bottomIconButton}
+              onLayout={(event) => onTabLayout("settings", event)}
               onPress={handleSettingsPress}
               accessibilityRole="button"
+              accessibilityState={{ selected: activeBottomSection === "settings" }}
               accessibilityLabel={t(
                 "components.navbar.navbar.accessibilityLabel.przejdzDoUstawien"
               )}
@@ -445,12 +542,14 @@ const NavbarFrame = memo(function NavbarFrame({
               >
                 <View collapsable={false} style={styles.bottomCoachmarkTarget} />
               </CoachmarkAnchor>
-              <Ionicons
-                style={styles.icon}
-                name="settings-sharp"
-                size={24}
-                color={colors.headline}
-              />
+              <BottomNavVisual section="settings" selected={activeBottomSection === "settings"}>
+                <Ionicons
+                  style={styles.icon}
+                  name="settings-sharp"
+                  size={24}
+                  color={colors.headline}
+                />
+              </BottomNavVisual>
             </Pressable>
           </View>
         </View>
@@ -651,10 +750,11 @@ const ActiveCourseButton = memo(function ActiveCourseButton() {
   );
 });
 
-const CoursePlayButton = memo(function CoursePlayButton() {
+const CoursePlayButton = memo(function CoursePlayButton({ onLayout }: { onLayout: (event: LayoutChangeEvent) => void }) {
   const { t } = useTranslation();
   const router = useRouter();
   const pathname = usePathname();
+  const selected = getActiveBottomNavSection(pathname) === "play";
   const openCoursePanel = useOpenCoursePanel();
   const styles = useStyles();
   const { colors } = useThemeSettings();
@@ -709,12 +809,11 @@ const CoursePlayButton = memo(function CoursePlayButton() {
 
   return (
     <Pressable
-      style={({ pressed }) => [
-        styles.bottomCenterButton,
-        pressed && styles.bottomIconButtonPressed,
-      ]}
+      style={[styles.bottomIconButton, styles.bottomCenterButton]}
+      onLayout={onLayout}
       onPress={handlePadPress}
       accessibilityRole="button"
+      accessibilityState={{ selected }}
       accessibilityLabel={t(
         "components.navbar.navbar.accessibilityLabel.przejdzDoGryFiszek"
       )}
@@ -727,7 +826,9 @@ const CoursePlayButton = memo(function CoursePlayButton() {
       >
         <View collapsable={false} style={styles.bottomCoachmarkTarget} />
       </CoachmarkAnchor>
-      <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
+      <BottomNavVisual section="play" selected={selected}>
+        <FontAwesome5 name="gamepad" size={24} color={colors.headline} />
+      </BottomNavVisual>
     </Pressable>
   );
 });

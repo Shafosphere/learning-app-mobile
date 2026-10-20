@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useEffect, useRef, useState, type ComponentProps } from "react";
-import { Animated, TouchableOpacity, View } from "react-native";
+import type { ComponentProps } from "react";
+import { TouchableOpacity, View } from "react-native";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
+import { TabSelectionIndicator, useTabIndicatorLayout } from "../navigation/TabSelectionIndicator";
 import { useStyles } from "./SettingsTabBar-styles";
 import { useSettingsPagerAccessibility } from "./useSettingsPagerAccessibility";
 
@@ -25,25 +26,8 @@ export function SettingsTabBar<T extends string>({
   const styles = useStyles();
   const { reduceMotion } = useSettingsPagerAccessibility();
   const { isTabletLayout } = useDeviceLayout();
-  const [width, setWidth] = useState(0);
-  const thumbX = useRef(new Animated.Value(0)).current;
-  const index = options.findIndex((option) => option.key === value);
-  const tabWidth = options.length > 0 ? width / options.length : 0;
-
-  useEffect(() => {
-    if (tabWidth <= 0 || index < 0) return;
-    if (reduceMotion) {
-      thumbX.setValue(index * tabWidth);
-      return;
-    }
-    const animation = Animated.timing(thumbX, {
-      toValue: index * tabWidth,
-      duration: 220,
-      useNativeDriver: true,
-    });
-    animation.start();
-    return () => animation.stop();
-  }, [index, tabWidth, thumbX, reduceMotion]);
+  const indicator = useTabIndicatorLayout(options.map((option) => option.key));
+  const frame = indicator.frames[value];
 
   if (options.length === 0) return null;
 
@@ -51,20 +35,18 @@ export function SettingsTabBar<T extends string>({
     <View style={styles.bar}>
       <View
         style={[styles.inner, isTabletLayout && styles.innerTablet]}
-        onLayout={({ nativeEvent }) => setWidth(nativeEvent.layout.width)}
+        onLayout={indicator.onLayout}
         testID="settings-tab-bar"
       >
-        {tabWidth > 0 && index >= 0 ? (
-          <Animated.View
-            pointerEvents="none"
-            accessible={false}
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
+        {frame && frame.width > 0 && frame.height > 0 ? (
+          <TabSelectionIndicator
+            frame={frame}
+            layoutKey={indicator.layoutKey}
+            selectionKey={value}
+            reduceMotion={reduceMotion}
             testID="settings-tab-indicator"
-            style={[
-              styles.thumb,
-              { width: tabWidth, transform: [{ translateX: thumbX }] },
-            ]}
+            backgroundTestID="settings-tab-active-background"
+            lineTestID="settings-tab-active-line"
           />
         ) : null}
         {options.map((option) => {
@@ -77,6 +59,7 @@ export function SettingsTabBar<T extends string>({
                 if (!selected) onChange(option.key);
               }}
               style={styles.button}
+              onLayout={(event) => indicator.onTabLayout(option.key, event)}
               accessibilityRole="tab"
               accessibilityLabel={option.label}
               accessibilityState={{ selected }}
