@@ -68,7 +68,8 @@ function useCourseOverrideAccessors<T>({
   defaultValue,
   overrides,
   setOverrides,
-  persistDefault = false,
+  // A saved default is an explicit choice; removing it lets pack seeding undo it.
+  persistDefault = true,
 }: UseCourseOverrideAccessorsParams<T>) {
   const getBuiltin = useCallback(
     (params: CourseBoxZeroKeyParams) =>

@@ -55,7 +55,16 @@ jest.mock("@/src/db/sqlite/db", () => ({
 }));
 
 jest.mock("@/src/components/courseEditor/CourseSettingsPanel", () => ({
-  CourseSettingsPanel: () => null,
+  CourseSettingsPanel: ({ settingsProps }: { settingsProps: {
+    skipCorrectionEnabled: boolean;
+    onToggleSkipCorrection: (value: boolean) => void;
+    skipCorrectionLocked: boolean;
+  } }) => {
+    const React = jest.requireActual("react");
+    const { Switch } = jest.requireActual("react-native");
+    return <Switch testID="skip-correction" value={settingsProps.skipCorrectionEnabled}
+      onValueChange={settingsProps.onToggleSkipCorrection} disabled={settingsProps.skipCorrectionLocked} />;
+  },
 }));
 
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
@@ -110,6 +119,7 @@ describe("CourseSettingsScreen image-only cards", () => {
     mockedCreateCustomCourse.mockResolvedValue(42);
     mockedReplaceCustomFlashcards.mockResolvedValue(undefined);
     mockedUseSettings.mockReturnValue({
+      skipCorrectionDefaultEnabled: false,
       setCustomCourseAudioSettings: jest.fn(),
       colors: {
         background: "#fff",
@@ -191,6 +201,92 @@ describe("CourseSettingsScreen image-only cards", () => {
     });
     await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
     expect(mockReplace).not.toHaveBeenCalledWith("/coursepanel");
+  });
+
+  it("creates courses with reset defaults while leaving skip correction inherited", async () => {
+    const { resolveCourseSettingsDefaults } = jest.requireActual("@/src/contexts/settings/courseSettingsDefaults");
+    const defaults = resolveCourseSettingsDefaults();
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    const settings = mockedUseSettings();
+    for (const [setter, field] of [
+      ["setCustomCourseAudioSettings", "audioSettings"],
+      ["setCustomCourseBoxZeroEnabled", "boxZeroEnabled"],
+      ["setCustomCourseBoxZeroAnswerSide", "boxZeroAnswerSide"],
+      ["setCustomCourseAutoflowEnabled", "autoflowEnabled"],
+      ["setCustomCourseShowExplanationEnabled", "showExplanationEnabled"],
+      ["setCustomCourseExplanationOnlyOnWrong", "explanationOnlyOnWrong"],
+      ["setCustomCourseTrueFalseButtonsVariant", "trueFalseButtonsVariant"],
+      ["setCustomCourseFrontImageRole", "frontImageRole"],
+      ["setCustomCourseLetterHintSettings", "letterHintSettings"],
+      ["setCustomCourseCardSize", "cardSize"],
+      ["setCustomCourseImageSize", "imageSize"],
+      ["setCustomCourseImageFrameEnabled", "imageFrameEnabled"],
+    ]) {
+      expect(settings[setter]).toHaveBeenCalledWith(42, defaults[field]);
+    }
+    expect(settings.setCustomCourseSkipCorrectionEnabled).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])("inherits global skip correction %s through draft saving and reopening", async (value) => {
+    const settings = mockedUseSettings();
+    settings.skipCorrectionDefaultEnabled = value;
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    expect(screen.getAllByTestId("skip-correction")[0].props.value).toBe(value);
+    await waitFor(async () => {
+      const raw = await AsyncStorage.getItem(SETTINGS_DRAFT_STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      expect(JSON.parse(raw!)).not.toHaveProperty("skipCorrectionEnabled");
+    });
+    screen.unmount();
+
+    settings.skipCorrectionDefaultEnabled = !value;
+    const reopened = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(reopened.getByLabelText("Create course")).toBeEnabled());
+    expect(reopened.getAllByTestId("skip-correction")[0].props.value).toBe(!value);
+
+    settings.skipCorrectionDefaultEnabled = value;
+    reopened.rerender(<CourseSettingsScreen />);
+    expect(reopened.getAllByTestId("skip-correction")[0].props.value).toBe(value);
+    fireEvent.press(reopened.getByLabelText("Create course"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(settings.setCustomCourseSkipCorrectionEnabled).not.toHaveBeenCalled();
+  });
+
+  it.each([false, true])("keeps an explicit skip-correction choice %s equal to global through draft reopening", async (value) => {
+    const settings = mockedUseSettings();
+    settings.skipCorrectionDefaultEnabled = value;
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent(screen.getAllByTestId("skip-correction")[0], "valueChange", !value);
+    fireEvent(screen.getAllByTestId("skip-correction")[0], "valueChange", value);
+    await waitFor(async () => {
+      const raw = await AsyncStorage.getItem(SETTINGS_DRAFT_STORAGE_KEY);
+      expect(raw).not.toBeNull();
+      expect(JSON.parse(raw!).skipCorrectionEnabled).toBe(value);
+    });
+    screen.unmount();
+
+    settings.skipCorrectionDefaultEnabled = !value;
+    const reopened = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(reopened.getByLabelText("Create course")).toBeEnabled());
+    expect(reopened.getAllByTestId("skip-correction")[0].props.value).toBe(value);
+    fireEvent.press(reopened.getByLabelText("Create course"));
+    await waitFor(() => expect(mockDismissTo).toHaveBeenCalledWith("/coursepanel"));
+    expect(settings.setCustomCourseSkipCorrectionEnabled).toHaveBeenCalledWith(42, value);
+  });
+
+  it.each(["true_false", "know_dont_know"])("skips correction by default for a course containing only %s cards", async (type) => {
+    const draft = JSON.parse((await AsyncStorage.getItem(CONTENT_DRAFT_STORAGE_KEY))!);
+    draft.manualCards = [{ id: "1", front: "Question", answers: ["Answer"], flipped: false, type }];
+    await AsyncStorage.setItem(CONTENT_DRAFT_STORAGE_KEY, JSON.stringify(draft));
+    const screen = render(<CourseSettingsScreen />);
+    await waitFor(() => expect(screen.getByLabelText("Create course")).toBeEnabled());
+    fireEvent.press(screen.getByLabelText("Create course"));
+    await waitFor(() => expect(mockedUseSettings().setCustomCourseSkipCorrectionEnabled).toHaveBeenCalledWith(42, true));
   });
 
   it("restores audio languages and autoplay mode from the draft and saves them for the new course", async () => {

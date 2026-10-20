@@ -25,7 +25,8 @@ export type SettingsDraftPayload = {
   reviewsEnabled: boolean;
   showExplanationEnabled: boolean;
   explanationOnlyOnWrong: boolean;
-  skipCorrectionEnabled: boolean;
+  // Missing means the course inherits the global setting.
+  skipCorrectionEnabled?: boolean;
   trueFalseButtonsVariant: "true_false" | "know_dont_know";
   cardSize: "large" | "small";
   imageSize: "dynamic" | "small" | "medium" | "large" | "very_large";

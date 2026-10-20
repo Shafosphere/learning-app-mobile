@@ -1,6 +1,7 @@
+import { resolveCourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
 import { COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY } from "@/src/utils/frontImageRole";
-import { COURSE_AUDIO_STORAGE_KEY, DEFAULT_COURSE_AUDIO_SETTINGS } from "@/src/contexts/settings/courseAudioSettings";
-import { OFFICIAL_PACKS, type OfficialPackCourseSettings } from "@/src/constants/officialPacks";
+import { COURSE_AUDIO_STORAGE_KEY } from "@/src/contexts/settings/courseAudioSettings";
+import { OFFICIAL_PACKS } from "@/src/constants/officialPacks";
 import prebuiltDatabaseAsset from "@/assets/data/sqlite/prebuilt.db";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -124,98 +125,29 @@ async function upsertCourseOverride<T>(
 
 async function applyOfficialCourseSettings(
   courseId: number,
-  settings: OfficialPackCourseSettings
+  pack: (typeof OFFICIAL_PACKS)[number],
 ): Promise<void> {
-  const autoflow =
-    settings.autoflowEnabled ??
-    (settings as any).autoflow ??
-    (settings as any).Autoflow;
-  const boxZero = settings.boxZeroEnabled ?? (settings as any).boxZero;
-  const skipCorrection =
-    settings.skipCorrectionEnabled ?? (settings as any).skipCorrection;
-
-  const tasks: Promise<void>[] = [];
-  if (settings.audioEnabled !== undefined) {
-    tasks.push(upsertCourseOverride(COURSE_AUDIO_STORAGE_KEY, courseId, {
-      ...DEFAULT_COURSE_AUDIO_SETTINGS, enabled: settings.audioEnabled,
-    }));
-  }
-  if (settings.frontImageRole !== undefined) {
-    tasks.push(upsertCourseOverride(COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, courseId, settings.frontImageRole));
-  }
-  if (settings.letterHintSettings !== undefined) {
-    tasks.push(
-      upsertCourseOverride(
-        "flashcards.courseLetterHintOverrides",
-        courseId,
-        settings.letterHintSettings
-      )
-    );
-  }
-  if (settings.boxZeroAnswerSide !== undefined) {
-    tasks.push(
-      upsertCourseOverride(
-        "flashcards.courseBoxZeroAnswerSideOverrides",
-        courseId,
-        settings.boxZeroAnswerSide
-      )
-    );
-  }
-  if (autoflow !== undefined) {
-    tasks.push(
-      upsertCourseOverride<boolean>(
-        "flashcards.courseAutoflowOverrides",
-        courseId,
-        autoflow
-      )
-    );
-  }
-  if (boxZero !== undefined) {
-    tasks.push(
-      upsertCourseOverride<boolean>(
-        "flashcards.courseBoxZeroOverrides",
-        courseId,
-        boxZero
-      )
-    );
-  }
-  if (skipCorrection !== undefined) {
-    tasks.push(
-      upsertCourseOverride<boolean>(
-        "flashcards.courseSkipCorrectionOverrides",
-        courseId,
-        skipCorrection
-      )
-    );
-  }
-  if (settings.cardSize !== undefined) {
-    tasks.push(
-      upsertCourseOverride<string>(
-        "flashcards.courseCardSizeOverrides",
-        courseId,
-        settings.cardSize
-      )
-    );
-  }
-  if (settings.imageSize !== undefined) {
-    tasks.push(
-      upsertCourseOverride<string>(
-        "flashcards.courseImageSizeOverrides",
-        courseId,
-        settings.imageSize
-      )
-    );
-  }
-  if (settings.imageFrameEnabled !== undefined) {
-    tasks.push(
-      upsertCourseOverride<boolean>(
-        "flashcards.courseImageFrameOverrides",
-        courseId,
-        settings.imageFrameEnabled
-      )
-    );
-  }
-  await Promise.all(tasks);
+  const buttonOnly = pack.defaultType === "true_false" || pack.defaultType === "self_assess";
+  const values = resolveCourseSettingsDefaults(pack, buttonOnly);
+  // Seed only missing values, including options added after a course was installed.
+  // Skip correction inherits the global setting unless the pack defines a value or uses button-only cards.
+  await Promise.all([
+    upsertCourseOverride(COURSE_AUDIO_STORAGE_KEY, courseId, values.audioSettings),
+    upsertCourseOverride(COURSE_FRONT_IMAGE_ROLE_STORAGE_KEY, courseId, values.frontImageRole),
+    upsertCourseOverride("flashcards.courseLetterHintOverrides", courseId, values.letterHintSettings),
+    upsertCourseOverride("flashcards.courseBoxZeroAnswerSideOverrides", courseId, values.boxZeroAnswerSide),
+    upsertCourseOverride("flashcards.courseAutoflowOverrides", courseId, values.autoflowEnabled),
+    upsertCourseOverride("flashcards.courseBoxZeroOverrides", courseId, values.boxZeroEnabled),
+    upsertCourseOverride("flashcards.courseShowExplanationOverrides", courseId, values.showExplanationEnabled),
+    upsertCourseOverride("flashcards.courseExplanationOnlyOnWrongOverrides", courseId, values.explanationOnlyOnWrong),
+    ...(buttonOnly || (pack.settings?.skipCorrectionEnabled ?? pack.settings?.skipCorrection) !== undefined
+      ? [upsertCourseOverride("flashcards.courseSkipCorrectionOverrides", courseId, values.skipCorrectionEnabled)]
+      : []),
+    upsertCourseOverride("flashcards.courseTrueFalseButtonsOverrides", courseId, values.trueFalseButtonsVariant),
+    upsertCourseOverride("flashcards.courseCardSizeOverrides", courseId, values.cardSize),
+    upsertCourseOverride("flashcards.courseImageSizeOverrides", courseId, values.imageSize),
+    upsertCourseOverride("flashcards.courseImageFrameOverrides", courseId, values.imageFrameEnabled),
+  ]);
 }
 
 const isUnresolvedBundledImageRef = (value: string | null): value is string => {
@@ -810,14 +742,11 @@ export async function seedOfficialPacksWithDb(
             }
           }
 
-          if (def.settings) {
-            const applySettings = () =>
-              applyOfficialCourseSettings(localCourse.id, def.settings!);
-            if (timer) {
-              await timer.measure("officialCourseSettings", applySettings);
-            } else {
-              await applySettings();
-            }
+          const applySettings = () => applyOfficialCourseSettings(localCourse.id, def);
+          if (timer) {
+            await timer.measure("officialCourseSettings", applySettings);
+          } else {
+            await applySettings();
           }
         };
         if (timer) {

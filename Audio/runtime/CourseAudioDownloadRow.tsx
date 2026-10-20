@@ -99,7 +99,7 @@ function CourseRow({ slug, courseName, expanded }: { slug: string; courseName: s
         accessibilityState={{ disabled: checking }}
         disabled={checking}
         onPress={(event) => { event?.stopPropagation(); action(); }}
-        style={({ pressed }) => [styles.button, { backgroundColor: colors.my_green, opacity: checking ? 0.6 : pressed ? 0.8 : 1 }]}
+        style={({ pressed }) => [styles.button, { backgroundColor: colors.my_yellow, opacity: checking ? 0.6 : pressed ? 0.8 : 1 }]}
       >
         {checking ? <ActivityIndicator size="small" color={buttonTextColor} /> : button === "download" ? (
           <View accessible={false} accessibilityElementsHidden importantForAccessibility="no-hide-descendants">

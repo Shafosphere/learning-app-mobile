@@ -1,3 +1,4 @@
+import { resolveCourseSettingsDefaults } from "@/src/contexts/settings/courseSettingsDefaults";
 import type { CourseSettingsSectionProps } from "@/src/components/courseEditor/SettingsCourse";
 import type { CourseSettingsTabKey } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import { SettingsTabPager } from "@/src/components/settings/SettingsTabPager";
@@ -5,8 +6,8 @@ import { SettingsTabBar } from "@/src/components/settings/SettingsTabBar";
 import { useCourseSettingsTabs } from "@/src/components/courseEditor/courseSettings/useCourseSettingsTabs";
 import { normalizeCourseFrontImageRole } from "@/src/utils/frontImageRole";
 import type { CourseFrontImageRole } from "@/src/contexts/settings/types";
-import { DEFAULT_COURSE_AUDIO_SETTINGS, normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
-import { DEFAULT_LETTER_HINT_SETTINGS, normalizeLetterHintSettings } from "@/src/utils/letterHints";
+import { normalizeCourseAudioSettings } from "@/src/contexts/settings/courseAudioSettings";
+import { normalizeLetterHintSettings } from "@/src/utils/letterHints";
 import MyButton from "@/src/components/button/button";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DEFAULT_COURSE_COLOR } from "@/src/constants/customCourse";
@@ -55,6 +56,8 @@ const getFirstValue = (value: string | string[] | undefined): string => {
   return value ?? "";
 };
 
+const CREATOR_DEFAULTS = resolveCourseSettingsDefaults();
+
 export default function CourseSettingsScreen() {
   const styles = useCourseEditStyles();
   const { t } = useTranslation();
@@ -66,28 +69,19 @@ export default function CourseSettingsScreen() {
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
+    skipCorrectionDefaultEnabled,
     setCustomCourseAudioSettings,
-    getCustomCourseBoxZeroAnswerSide,
     setCustomCourseBoxZeroAnswerSide,
-    getCustomCourseBoxZeroEnabled,
     setCustomCourseBoxZeroEnabled,
-    getCustomCourseAutoflowEnabled,
     setCustomCourseAutoflowEnabled,
-    getCustomCourseShowExplanationEnabled,
     setCustomCourseShowExplanationEnabled,
-    getCustomCourseExplanationOnlyOnWrong,
     setCustomCourseExplanationOnlyOnWrong,
-    getCustomCourseSkipCorrectionEnabled,
     setCustomCourseSkipCorrectionEnabled,
     setCustomCourseFrontImageRole,
     setCustomCourseLetterHintSettings,
-    getCustomCourseCardSize,
     setCustomCourseCardSize,
-    getCustomCourseImageSize,
     setCustomCourseImageSize,
-    getCustomCourseImageFrameEnabled,
     setCustomCourseImageFrameEnabled,
-    getCustomCourseTrueFalseButtonsVariant,
     setCustomCourseTrueFalseButtonsVariant,
   } = useSettings();
 
@@ -152,35 +146,34 @@ export default function CourseSettingsScreen() {
   const [isSaving, setIsSaving] = useState(false);
   const restoredScopeRef = useRef<string | null>(null);
 
-  const [audioSettings, setAudioSettings] = useState(DEFAULT_COURSE_AUDIO_SETTINGS);
+  const [audioSettings, setAudioSettings] = useState(CREATOR_DEFAULTS.audioSettings);
   const [boxZeroAnswerSide, setBoxZeroAnswerSide] = useState(() =>
-    getCustomCourseBoxZeroAnswerSide(-1)
+    CREATOR_DEFAULTS.boxZeroAnswerSide
   );
   const [boxZeroEnabled, setBoxZeroEnabled] = useState(
-    getCustomCourseBoxZeroEnabled(-1)
+    CREATOR_DEFAULTS.boxZeroEnabled
   );
   const [autoflowEnabled, setAutoflowEnabled] = useState(
-    getCustomCourseAutoflowEnabled(-1)
+    CREATOR_DEFAULTS.autoflowEnabled
   );
   const [reviewsEnabled, setReviewsEnabled] = useState(initialReviewsEnabled);
   const [showExplanationEnabled, setShowExplanationEnabled] = useState(
-    getCustomCourseShowExplanationEnabled(-1)
+    CREATOR_DEFAULTS.showExplanationEnabled
   );
   const [explanationOnlyOnWrong, setExplanationOnlyOnWrong] = useState(
-    getCustomCourseExplanationOnlyOnWrong(-1)
+    CREATOR_DEFAULTS.explanationOnlyOnWrong
   );
-  const [skipCorrectionEnabled, setSkipCorrectionEnabled] = useState(
-    getCustomCourseSkipCorrectionEnabled(-1)
-  );
+  const [skipCorrectionOverride, setSkipCorrectionOverride] = useState<boolean>();
+  const skipCorrectionEnabled = skipCorrectionOverride ?? skipCorrectionDefaultEnabled;
   const [trueFalseButtonsVariant, setTrueFalseButtonsVariant] = useState(
-    getCustomCourseTrueFalseButtonsVariant(-1)
+    CREATOR_DEFAULTS.trueFalseButtonsVariant
   );
-  const [frontImageRole, setFrontImageRole] = useState<CourseFrontImageRole>("standard");
-  const [letterHintSettings, setLetterHintSettings] = useState(DEFAULT_LETTER_HINT_SETTINGS);
-  const [cardSize, setCardSize] = useState(getCustomCourseCardSize(-1));
-  const [imageSize, setImageSize] = useState(getCustomCourseImageSize(-1));
+  const [frontImageRole, setFrontImageRole] = useState<CourseFrontImageRole>(CREATOR_DEFAULTS.frontImageRole);
+  const [letterHintSettings, setLetterHintSettings] = useState(CREATOR_DEFAULTS.letterHintSettings);
+  const [cardSize, setCardSize] = useState(CREATOR_DEFAULTS.cardSize);
+  const [imageSize, setImageSize] = useState(CREATOR_DEFAULTS.imageSize);
   const [imageFrameEnabled, setImageFrameEnabled] = useState(
-    getCustomCourseImageFrameEnabled(-1)
+    CREATOR_DEFAULTS.imageFrameEnabled
   );
   const nameConflict = useMemo(
     () => findCourseNameConflict(courseName, existingCourses),
@@ -325,7 +318,7 @@ export default function CourseSettingsScreen() {
             setExplanationOnlyOnWrong(parsedSettingsDraft.explanationOnlyOnWrong);
           }
           if (typeof parsedSettingsDraft.skipCorrectionEnabled === "boolean") {
-            setSkipCorrectionEnabled(parsedSettingsDraft.skipCorrectionEnabled);
+            setSkipCorrectionOverride(parsedSettingsDraft.skipCorrectionEnabled);
           }
           if (
             parsedSettingsDraft.trueFalseButtonsVariant === "true_false" ||
@@ -409,7 +402,7 @@ export default function CourseSettingsScreen() {
         reviewsEnabled,
         showExplanationEnabled,
         explanationOnlyOnWrong,
-        skipCorrectionEnabled,
+        skipCorrectionEnabled: skipCorrectionOverride,
         trueFalseButtonsVariant,
         frontImageRole,
         letterHintSettings,
@@ -436,7 +429,7 @@ export default function CourseSettingsScreen() {
     reviewsEnabled,
     showExplanationEnabled,
     explanationOnlyOnWrong,
-    skipCorrectionEnabled,
+    skipCorrectionOverride,
     trueFalseButtonsVariant,
   ]);
 
@@ -569,7 +562,9 @@ export default function CourseSettingsScreen() {
         courseId,
         explanationOnlyOnWrong
       );
-      await setCustomCourseSkipCorrectionEnabled(courseId, skipCorrectionEnabled);
+      if (courseIsTrueFalseOnly || skipCorrectionOverride !== undefined) {
+        await setCustomCourseSkipCorrectionEnabled(courseId, courseIsTrueFalseOnly || skipCorrectionOverride === true);
+      }
       await setCustomCourseTrueFalseButtonsVariant(
         courseId,
         trueFalseButtonsVariant
@@ -640,7 +635,7 @@ export default function CourseSettingsScreen() {
     explanationOnlyOnWrong,
     onToggleExplanationOnlyOnWrong: setExplanationOnlyOnWrong,
     skipCorrectionEnabled,
-    onToggleSkipCorrection: setSkipCorrectionEnabled,
+    onToggleSkipCorrection: setSkipCorrectionOverride,
     skipCorrectionLocked: courseIsTrueFalseOnly,
     hideSkipCorrectionOption: courseIsTrueFalseOnly,
     showTrueFalseButtonsVariant: false,
