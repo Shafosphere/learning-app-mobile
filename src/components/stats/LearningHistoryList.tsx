@@ -1,3 +1,4 @@
+import { statsTileStyle } from "./statsTileStyle";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import React from "react";
 import { FlatList, Image, Text, View } from "react-native";
@@ -13,15 +14,10 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 const useStyles = createThemeStylesHook((colors) => ({
   list: { padding: 16, paddingTop: 4, gap: 10 },
   item: {
+    ...statsTileStyle,
     padding: 16,
-    borderRadius: 16,
     backgroundColor: colors.secondBackground,
     gap: 8,
-    shadowColor: "#000",
-    shadowOpacity: 0.07,
-    shadowRadius: 8,
-    shadowOffset: { width: 0, height: 2 },
-    elevation: 2,
   },
   statusRow: {
     flexDirection: "row" as const,

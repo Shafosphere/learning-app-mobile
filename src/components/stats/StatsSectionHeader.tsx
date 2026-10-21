@@ -1,82 +1,89 @@
 import React from "react";
-import { Text, View, type StyleProp, type ViewStyle } from "react-native";
+import { Text, View } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 type Props = {
-  icon: React.ReactNode;
   title: string;
   subtitle?: string;
-  iconBackgroundColor?: string;
-  iconShadowColor?: string;
-  style?: StyleProp<ViewStyle>;
+  metadata?: string;
+  /** Reserve the wider scope label so switching pages cannot reflow the row. */
+  metadataWidthReference?: string;
 };
 
 const useStyles = createThemeStylesHook((colors) => ({
   header: {
+    gap: 4,
+  },
+  row: {
     flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-  },
-  iconWrap: {
-    width: 54,
-    height: 54,
-    borderRadius: 16,
-    alignItems: "center",
-    justifyContent: "center",
-    shadowOpacity: 0.12,
-    shadowRadius: 10,
-    elevation: 2,
-  },
-  copy: {
-    flex: 1,
-    minWidth: 0,
+    flexWrap: "wrap",
+    alignItems: "baseline",
+    columnGap: 12,
+    rowGap: 4,
   },
   title: {
+    ...statsTypography.sectionTitle,
     color: colors.headline,
-    fontSize: 22,
-    fontWeight: "800",
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 180,
+    minWidth: 0,
+  },
+  metadataSlot: {
+    flexShrink: 1,
+    maxWidth: "100%",
+    marginLeft: "auto",
+  },
+  metadata: {
+    ...statsTypography.description,
+    color: colors.paragraph,
+    textAlign: "right",
+  },
+  metadataReference: {
+    opacity: 0,
+  },
+  metadataOverlay: {
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
   },
   subtitle: {
-    marginTop: 3,
+    ...statsTypography.description,
     color: colors.paragraph,
-    fontSize: 14,
-    lineHeight: 18,
-    minHeight: 36,
-    opacity: 0.78,
   },
 }));
 
-export default function StatsSectionHeader({
-  icon,
-  title,
-  subtitle,
-  iconBackgroundColor = "#EDE7FF",
-  iconShadowColor = "#6D4EDB",
-  style,
-}: Props) {
+export default function StatsSectionHeader({ title, subtitle, metadata, metadataWidthReference }: Props) {
   const styles = useStyles();
 
   return (
-    <View style={[styles.header, style]}>
-      <View
-        style={[
-          styles.iconWrap,
-          {
-            backgroundColor: iconBackgroundColor,
-            shadowColor: iconShadowColor,
-          },
-        ]}
-      >
-        {icon}
-      </View>
-      <View style={styles.copy}>
-        <Text style={styles.title}>{title}</Text>
-        {subtitle ? (
-          <Text style={styles.subtitle} numberOfLines={2}>
-            {subtitle}
-          </Text>
+    <View style={styles.header}>
+      <View style={styles.row}>
+        <Text accessibilityRole="header" style={styles.title}>{title}</Text>
+        {metadata ? (
+          <View style={styles.metadataSlot}>
+            {metadataWidthReference ? (
+              <Text
+                style={[styles.metadata, styles.metadataReference]}
+                numberOfLines={1}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                {metadataWidthReference}
+              </Text>
+            ) : null}
+            <Text
+              style={[styles.metadata, metadataWidthReference ? styles.metadataOverlay : null]}
+              numberOfLines={metadataWidthReference ? 1 : undefined}
+            >
+              {metadata}
+            </Text>
+          </View>
         ) : null}
       </View>
+      {subtitle ? <Text style={styles.subtitle}>{subtitle}</Text> : null}
     </View>
   );
 }

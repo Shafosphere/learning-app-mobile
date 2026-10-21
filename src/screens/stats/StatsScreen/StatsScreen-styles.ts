@@ -1,4 +1,6 @@
+import { statsTileStyle } from "@/src/components/stats/statsTileStyle";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
+import { statsMetricStyles, statsSectionStyles, statsTypography } from "./statsDesign";
 
 const STATS_TABLET_MAX_WIDTH = 500;
 
@@ -29,7 +31,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   scrollContent: {
     padding: 20,
-    gap: 16,
+    ...statsSectionStyles.list,
     backgroundColor: colors.background,
   },
   grid: {
@@ -42,52 +44,41 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flexGrow: 1,
   },
   miniStatsRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    gap: 12,
+    ...statsMetricStyles.list,
   },
   miniStatItem: {
-    flex: 1,
+    ...statsTileStyle,
+    backgroundColor: colors.secondBackground,
   },
   miniStatCard: {
-    minHeight: 86,
-    borderRadius: 16,
-    backgroundColor: colors.secondBackground,
-    paddingVertical: 16,
-    paddingHorizontal: 14,
-    position: "relative",
-    justifyContent: "center",
-    alignItems: "center",
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    ...statsMetricStyles.card,
+    overflow: "hidden",
+  },
+  miniStatCopy: {
+    ...statsMetricStyles.copy,
+  },
+  miniStatIconTile: {
+    ...statsMetricStyles.iconContainer,
   },
   miniStatValue: {
-    fontSize: 34,
-    fontWeight: "800",
+    ...statsTypography.metricValue,
+    fontVariant: ["tabular-nums"],
     color: colors.headline,
   },
-  miniStatCornerIcon: {
-    position: "absolute",
-    right: 12,
-    bottom: 12,
-    opacity: 0.95,
-  },
   miniStatShieldStack: {
-    position: "absolute",
-    left: 12,
-    bottom: 12,
-    flexDirection: "row",
-    gap: 2,
-    opacity: 0.95,
+    ...statsMetricStyles.trailingIndicator,
   },
   miniStatLabel: {
-    marginTop: 6,
-    fontSize: 12,
+    ...statsTypography.metricLabel,
     color: colors.paragraph,
-    opacity: 0.8,
-    textAlign: "center",
+  },
+  miniStatChart: {
+    ...statsMetricStyles.indicatorChart,
+  },
+  miniStatChartBar: {
+    ...statsMetricStyles.indicatorChartBar,
+    backgroundColor: colors.my_green,
+    opacity: 0.4,
   },
   emptyWrap: {
     flex: 1,

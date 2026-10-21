@@ -1,19 +1,30 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import { Image } from "expo-image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   FlatList,
   Pressable,
+  StyleSheet,
   Text,
   View,
   type NativeScrollEvent,
   type NativeSyntheticEvent,
   type StyleProp,
   type TextStyle,
+  type TextProps,
 } from "react-native";
+import StatsSectionHeader from "./StatsSectionHeader";
+import MyButton from "@/src/components/button/button";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import type { TFunction } from "i18next";
 import { useTranslation } from "react-i18next";
+import {
+  statsIconSizes,
+  statsMetricStyles,
+  statsSectionStyles,
+  statsTypography,
+} from "@/src/screens/stats/StatsScreen/statsDesign";
 
 export type ActivityDay = {
   date: string;
@@ -41,39 +52,42 @@ type Props = {
   onSelect?: (day: ActivityDay | null) => void;
 };
 
-type ScrambleTextProps = {
+type ScrambleTextProps = Pick<
+  TextProps,
+  "numberOfLines" | "adjustsFontSizeToFit" | "minimumFontScale" | "accessibilityRole"
+> & {
   text: string;
   animateKey: string;
   style?: StyleProp<TextStyle>;
   durationMs?: number;
+  preserveLayout?: boolean;
 };
 
 const SCRAMBLE_CHARSET = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const CALENDAR_SCALE = 1.5;
+const scrambleStyles = StyleSheet.create({
+  reference: { opacity: 0 },
+  overlay: { ...StyleSheet.absoluteFillObject, overflow: "hidden" },
+});
 
-const useStyles = createThemeStylesHook((colors) => ({
+const useStyles = createThemeStylesHook((colors, accessibility) => ({
   container: {
+    ...statsSectionStyles.list,
     alignSelf: "stretch",
   },
-  headerRow: {
-    flexDirection: "row",
-    alignItems: "flex-start",
-    justifyContent: "space-between",
-    gap: 12,
-    marginBottom: 12,
-  },
-  title: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.headline,
-  },
-  monthLabel: {
-    fontSize: 16,
-    fontWeight: "700",
-    color: colors.headline,
-    textAlign: "right",
+  section: {
+    ...statsSectionStyles.section,
   },
   pager: {
     alignSelf: "stretch",
+  },
+  monthNavigation: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  monthNavigationButton: {
+    flex: 1,
+    minWidth: 0,
   },
   monthPage: {
     alignSelf: "stretch",
@@ -88,85 +102,49 @@ const useStyles = createThemeStylesHook((colors) => ({
     justifyContent: "center",
     overflow: "hidden",
   },
-  selectedCell: {
-    shadowColor: "#000",
-    shadowOpacity: 0.08,
-    shadowRadius: 6,
-  },
   dayNumber: {
-    fontSize: 15,
+    fontSize: 15 * CALENDAR_SCALE,
     fontWeight: "700",
     includeFontPadding: false,
     zIndex: 1,
   },
   detailsWrap: {
-    overflow: "hidden",
+    alignSelf: "stretch",
   },
   detailsCard: {
-    marginTop: 14,
-    marginBottom: 16,
-    borderRadius: 18,
-    padding: 16,
-    backgroundColor: colors.secondBackground,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
+    ...statsSectionStyles.section,
   },
   detailsHeader: {
-    flexDirection: "row",
-    justifyContent: "space-between",
-    alignItems: "center",
-    gap: 12,
-  },
-  detailsHeaderTextBlock: {
-    flex: 1,
-    minWidth: 0,
-    flexShrink: 1,
+    gap: 4,
   },
   detailsTitle: {
-    fontSize: 16,
-    fontWeight: "700",
+    ...statsTypography.sectionTitle,
     color: colors.headline,
   },
-  detailsSubtitle: {
-    marginTop: 4,
-    fontSize: 13,
+  detailsDescription: {
+    ...statsTypography.description,
     color: colors.paragraph,
   },
-  detailsBadge: {
-    borderRadius: 999,
-    overflow: "hidden",
-    paddingVertical: 6,
-    paddingHorizontal: 10,
-    flexShrink: 0,
-  },
-  detailsBadgeText: {
-    fontSize: 13,
-    fontWeight: "700",
-  },
-  detailsStatsRow: {
-    flexDirection: "row",
-    flexWrap: "wrap",
-    gap: 10,
-    marginTop: 14,
+  detailsStatsGrid: {
+    ...statsMetricStyles.list,
   },
   detailsStat: {
-    minWidth: "47%",
-    flexGrow: 1,
-    borderRadius: 14,
-    paddingVertical: 12,
-    paddingHorizontal: 12,
-    borderWidth: 1,
+    ...statsMetricStyles.card,
+    borderWidth: accessibility.highContrastEnabled ? 1 : 0,
+    borderColor: colors.border,
+  },
+  detailsStatIcon: {
+    ...statsMetricStyles.iconContainer,
+  },
+  detailsStatCopy: {
+    ...statsMetricStyles.copy,
   },
   detailsStatValue: {
-    fontSize: 20,
-    fontWeight: "800",
+    ...statsTypography.metricValue,
     color: colors.headline,
   },
   detailsStatLabel: {
-    marginTop: 4,
-    fontSize: 12,
+    ...statsTypography.metricLabel,
     color: colors.paragraph,
   },
 }));
@@ -194,15 +172,6 @@ function formatMonthLabel(date: Date, t: TFunction) {
 function formatDayLabel(date: string, t: TFunction) {
   const parsed = parseLocalDate(date);
   return `${parsed.getDate()} ${getMonthName(parsed.getMonth(), t)} ${parsed.getFullYear()}`;
-}
-
-function formatDuration(ms: number) {
-  if (ms <= 0) return "0 min";
-  const totalMinutes = Math.round(ms / 60000);
-  if (totalMinutes < 60) return `${totalMinutes} min`;
-  const hours = Math.floor(totalMinutes / 60);
-  const minutes = totalMinutes % 60;
-  return minutes > 0 ? `${hours} h ${minutes} min` : `${hours} h`;
 }
 
 function withAlpha(color: string, alpha: string) {
@@ -290,6 +259,8 @@ function ScrambleText({
   animateKey,
   style,
   durationMs,
+  preserveLayout = false,
+  ...textProps
 }: ScrambleTextProps) {
   const [displayText, setDisplayText] = useState(text);
   const previousTextRef = useRef(text);
@@ -345,7 +316,30 @@ function ScrambleText({
     };
   }, [animateKey, durationMs, text]);
 
-  return <Text style={style}>{displayText}</Text>;
+  if (preserveLayout) {
+    return (
+      <View accessible accessibilityLabel={text} accessibilityRole={textProps.accessibilityRole}>
+        <Text
+          {...textProps}
+          style={[style, scrambleStyles.reference]}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          {text}
+        </Text>
+        <View
+          style={scrambleStyles.overlay}
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <Text {...textProps} style={style}>{displayText}</Text>
+        </View>
+      </View>
+    );
+  }
+
+  return <Text {...textProps} style={style}>{displayText}</Text>;
 }
 
 export default function ActivityHeatmap({
@@ -356,7 +350,11 @@ export default function ActivityHeatmap({
 }: Props) {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { colors, theme } = useSettings();
+  const {
+    colors,
+    theme,
+    accessibilityPreferences,
+  } = useSettings();
   const listRef = useRef<FlatList<ActivityMonth> | null>(null);
   const didInitScrollRef = useRef(false);
   const scale = useMemo(
@@ -368,6 +366,19 @@ export default function ActivityHeatmap({
     [shieldedDates]
   );
   const [containerWidth, setContainerWidth] = useState(0);
+  const highContrast = accessibilityPreferences.highContrastEnabled;
+  const useThemeAccents = theme === "dark" || highContrast ||
+    (accessibilityPreferences.colorBlindMode ?? "none") !== "none";
+  const useThemeText = theme === "dark" || highContrast;
+  const detailsColors = {
+    headline: useThemeText ? colors.headline : "#0B1757",
+    paragraph: useThemeText ? colors.paragraph : "#6379A6",
+    tile: useThemeText ? colors.secondBackground : "#FFFFFF",
+    turquoise: useThemeAccents ? colors.my_green : "#00CDB8",
+    pink: useThemeAccents ? colors.my_red : "#FF5470",
+    green: useThemeAccents ? colors.my_green : "#00C878",
+    red: useThemeAccents ? colors.my_red : "#FF3159",
+  };
   const [visibleMonthIndex, setVisibleMonthIndex] = useState(
     Math.max(0, months - 1)
   );
@@ -505,11 +516,19 @@ export default function ActivityHeatmap({
 
   const pagePadding = 2;
   const cellGap = 8;
-  const columns = 7;
   const pageWidth = Math.max(containerWidth, 1);
   const gridWidth = Math.max(pageWidth - pagePadding * 2, 1);
-  const rawCellSize = (gridWidth - cellGap * (columns - 1)) / columns;
-  const cellSize = Math.max(32, Math.min(46, Math.floor(rawCellSize)));
+  const rawCellSize = (gridWidth - cellGap * 6) / 7;
+  const baseCellSize = Math.max(32, Math.min(46, Math.floor(rawCellSize)));
+  const targetCellSize = baseCellSize * CALENDAR_SCALE;
+  const columns = Math.max(
+    1,
+    Math.round((gridWidth + cellGap) / (targetCellSize + cellGap))
+  );
+  // Distribute the available width across the row, rounding down to avoid wrapping.
+  const cellSize = Math.floor(
+    ((gridWidth - cellGap * (columns - 1)) / columns) * 100
+  ) / 100;
   const cellRadius = Math.max(8, Math.floor(cellSize / 3.2));
   const todayKey = formatLocalDateOnly(new Date());
 
@@ -529,6 +548,17 @@ export default function ActivityHeatmap({
     const nextIndex = Math.round(event.nativeEvent.contentOffset.x / pageWidth);
     const safeIndex = Math.max(0, Math.min(monthsData.length - 1, nextIndex));
     setVisibleMonthIndex(safeIndex);
+  };
+
+  const changeMonth = (direction: -1 | 1) => {
+    if (containerWidth <= 0) return;
+    const nextIndex = Math.max(
+      0,
+      Math.min(monthsData.length - 1, visibleMonthIndex + direction)
+    );
+    if (nextIndex === visibleMonthIndex) return;
+    listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: true });
+    setVisibleMonthIndex(nextIndex);
   };
 
   const animateKeyBase = displayedDay?.date ?? "details-empty";
@@ -563,7 +593,6 @@ export default function ActivityHeatmap({
               onPress={() => handleDayPress(day)}
               style={[
                 styles.cell,
-                isSelected && styles.selectedCell,
                 {
                   width: cellSize,
                   height: cellSize,
@@ -577,13 +606,14 @@ export default function ActivityHeatmap({
               ]}
               >
                 {isShielded ? (
-                  <Ionicons
+                  <Image
                     testID={`activity-heatmap-shield-${day.date}`}
-                    name="shield-checkmark"
-                    size={Math.round(cellSize * 0.82)}
-                    color={colors.my_green}
+                    source={require("@/assets/icons/tarcza.svg")}
+                    contentFit="contain"
                     style={{
                       position: "absolute",
+                      width: Math.round(cellSize * 0.82),
+                      height: Math.round(cellSize * 0.82),
                       opacity: theme === "dark" ? 0.34 : 0.28,
                     }}
                   />
@@ -608,32 +638,67 @@ export default function ActivityHeatmap({
 
   return (
     <View
+      testID="activity-heatmap"
       style={styles.container}
       onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
     >
-      <View style={styles.headerRow}>
-        <Text style={styles.title}>
-          {t("components.stats.activityHeatmap.textChild.ostatniaAktywnosc")}
-        </Text>
-        {visibleMonth ? (
-          <View>
-            <Text style={styles.monthLabel}>{visibleMonth.label}</Text>
-          </View>
-        ) : null}
-      </View>
+      <View style={styles.section}>
+        <StatsSectionHeader
+          title={t("components.stats.activityHeatmap.textChild.ostatniaAktywnosc")}
+          metadata={visibleMonth?.label}
+        />
 
-      <FlatList
-        ref={listRef}
-        data={monthsData}
-        horizontal
-        pagingEnabled
-        showsHorizontalScrollIndicator={false}
-        bounces={false}
-        keyExtractor={(item) => item.key}
-        renderItem={renderMonth}
-        onMomentumScrollEnd={handlePagerEnd}
-        style={styles.pager}
-      />
+        <FlatList
+          testID="activity-heatmap-pager"
+          ref={listRef}
+          data={monthsData}
+          horizontal
+          pagingEnabled
+          showsHorizontalScrollIndicator={false}
+          bounces={false}
+          keyExtractor={(item) => item.key}
+          getItemLayout={(_, index) => ({ length: pageWidth, offset: index * pageWidth, index })}
+          renderItem={renderMonth}
+          onMomentumScrollEnd={handlePagerEnd}
+          style={styles.pager}
+        />
+        <View style={styles.monthNavigation}>
+          <MyButton
+            accessibilityLabel={t("components.stats.activityHeatmap.navigation.previousMonth")}
+            color="my_yellow"
+            onPress={() => changeMonth(-1)}
+            disabled={containerWidth <= 0 || visibleMonthIndex <= 0}
+            autoWidth
+            style={styles.monthNavigationButton}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={colors.headline}
+              style={{ opacity: containerWidth <= 0 || visibleMonthIndex <= 0 ? 0.35 : 1 }}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
+          </MyButton>
+          <MyButton
+            accessibilityLabel={t("components.stats.activityHeatmap.navigation.nextMonth")}
+            color="my_yellow"
+            onPress={() => changeMonth(1)}
+            disabled={containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1}
+            autoWidth
+            style={styles.monthNavigationButton}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color={colors.headline}
+              style={{ opacity: containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1 ? 0.35 : 1 }}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
+          </MyButton>
+        </View>
+      </View>
 
       <View
         pointerEvents={displayedDay ? "auto" : "none"}
@@ -642,88 +707,96 @@ export default function ActivityHeatmap({
         {displayedDay ? (
           <View style={styles.detailsCard}>
             <View style={styles.detailsHeader}>
-              <View style={styles.detailsHeaderTextBlock}>
-                <ScrambleText
-                  text={formatDayLabel(displayedDay.date, t)}
-                  animateKey={`${animateKeyBase}-date`}
-                  style={styles.detailsTitle}
-                  durationMs={780}
-                />
-                <Text style={styles.detailsSubtitle}>
-                  {displayedDay.totalCount > 0
-                    ? t(
-                        "components.stats.activityHeatmap.details.selectedDayActivity"
-                      )
-                    : t(
-                        "components.stats.activityHeatmap.details.noActivityForDay"
-                      )}
-                </Text>
-              </View>
-              <View
-                style={[
-                  styles.detailsBadge,
-                  {
-                    backgroundColor:
-                      displayedDay.timeMs > 0
-                        ? withAlpha(colors.my_green, theme === "dark" ? "2E" : "22")
-                        : withAlpha(colors.my_red, "18"),
-                  },
-                ]}
-              >
-                <ScrambleText
-                  text={formatDuration(displayedDay.timeMs)}
-                  animateKey={`${animateKeyBase}-time`}
-                  style={[
-                    styles.detailsBadgeText,
-                    {
-                      color: displayedDay.timeMs > 0 ? colors.my_green : colors.my_red,
-                    },
-                  ]}
-                  durationMs={640}
-                />
-              </View>
+              <ScrambleText
+                text={formatDayLabel(displayedDay.date, t)}
+                animateKey={`${animateKeyBase}-title`}
+                style={styles.detailsTitle}
+                accessibilityRole="header"
+                preserveLayout
+              />
+              <ScrambleText
+                text={displayedDay.totalCount > 0
+                  ? t("components.stats.activityHeatmap.details.selectedDayActivity")
+                  : t("components.stats.activityHeatmap.details.noActivityForDay")}
+                animateKey={`${animateKeyBase}-subtitle`}
+                style={styles.detailsDescription}
+                preserveLayout
+              />
             </View>
 
-            <View style={styles.detailsStatsRow}>
+            <View
+              testID="activity-details-grid"
+              style={styles.detailsStatsGrid}
+            >
               {[
                 {
                   key: "promotions",
                   label: t("repeats.labels.jumps"),
                   value: String(displayedDay.promotionsCount),
+                  icon: "trending-up-outline" as const,
+                  color: detailsColors.turquoise,
                 },
                 {
                   key: "learned",
                   label: t("repeats.labels.knownFlashcards"),
                   value: String(displayedDay.learnedCount),
+                  icon: "flame" as const,
+                  color: detailsColors.pink,
                 },
                 {
                   key: "correct",
                   label: t("components.stats.activityHeatmap.stats.correct"),
                   value: String(displayedDay.correctCount),
+                  icon: "shield-checkmark" as const,
+                  color: detailsColors.green,
                 },
                 {
                   key: "wrong",
                   label: t("components.stats.activityHeatmap.stats.wrong"),
                   value: String(displayedDay.wrongCount),
+                  icon: "close" as const,
+                  color: detailsColors.red,
+                },
+                {
+                  key: "time",
+                  label: t("components.stats.activityHeatmap.stats.minutes"),
+                  value: String(Math.max(0, Math.round(displayedDay.timeMs / 60000))),
+                  icon: "stopwatch-outline" as const,
+                  color: detailsColors.turquoise,
                 },
               ].map((stat) => (
                 <View
                   key={stat.key}
+                  testID={`activity-details-stat-${stat.key}`}
                   style={[
                     styles.detailsStat,
-                    {
-                      backgroundColor: withAlpha(colors.background, "AA"),
-                      borderColor: withAlpha(colors.border, "CC"),
-                    },
+                    { backgroundColor: detailsColors.tile },
                   ]}
                 >
-                  <ScrambleText
-                    text={stat.value}
-                    animateKey={`${animateKeyBase}-${stat.key}`}
-                    style={styles.detailsStatValue}
-                    durationMs={560}
-                  />
-                  <Text style={styles.detailsStatLabel}>{stat.label}</Text>
+                  <View
+                    style={[
+                      styles.detailsStatIcon,
+                      { backgroundColor: withAlpha(stat.color, theme === "dark" ? "2E" : "18") },
+                    ]}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
+                  >
+                    <Ionicons name={stat.icon} size={statsIconSizes.metric} color={stat.color} />
+                  </View>
+                  <View style={styles.detailsStatCopy}>
+                    <ScrambleText
+                      text={stat.value}
+                      animateKey={`${animateKeyBase}-${stat.key}`}
+                      style={[styles.detailsStatValue, { color: detailsColors.headline }]}
+                      durationMs={560}
+                      numberOfLines={1}
+                      adjustsFontSizeToFit
+                      minimumFontScale={0.7}
+                    />
+                    <Text style={[styles.detailsStatLabel, { color: detailsColors.paragraph }]}>
+                      {stat.label}
+                    </Text>
+                  </View>
                 </View>
               ))}
             </View>

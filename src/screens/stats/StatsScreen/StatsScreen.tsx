@@ -1,10 +1,13 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialIcons from "@expo/vector-icons/MaterialIcons";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { ScrollView, Text, View } from "react-native";
+import { Image } from "expo-image";
+import React, { useCallback, useEffect, useId, useRef, useState } from "react";
+import { ScrollView, StyleSheet, Text, View } from "react-native";
+import Svg, { Defs, LinearGradient, Rect, Stop } from "react-native-svg";
 import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import { useStyles } from "./StatsScreen-styles";
+import { statsIconSizes } from "./statsDesign";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
@@ -18,15 +21,51 @@ import {
   getDailyActivitySummariesCustom,
   getTotalLearningTimeMs,
 } from "@/src/db/sqlite/db";
-import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
+import { getProtectedDailyStreakState, MAX_STREAK_SHIELDS } from "@/src/services/streakProtection";
 import { getRecentLearningHistory, type LearningHistoryEvent } from "@/src/db/sqlite/db";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import LearningHistoryList from "@/src/components/stats/LearningHistoryList";
 
+const SHIELD_SOURCE = require("@/assets/icons/tarcza.svg");
+const SHIELD_BORDER_SOURCE = require("@/assets/icons/tarcza_border.svg");
+
+function MiniStatGradient({ startColor, endColor }: { startColor: string; endColor: string }) {
+  const gradientId = `mini-stat-${useId().replace(/:/g, "")}`;
+  const [size, setSize] = useState({ width: 0, height: 0 });
+
+  return (
+    <View
+      style={StyleSheet.absoluteFill}
+      pointerEvents="none"
+      accessible={false}
+      accessibilityElementsHidden
+      importantForAccessibility="no-hide-descendants"
+      onLayout={({ nativeEvent: { layout } }) => {
+        setSize((current) =>
+          current.width === layout.width && current.height === layout.height
+            ? current
+            : { width: layout.width, height: layout.height }
+        );
+      }}
+    >
+      <Svg width={size.width} height={size.height}>
+        <Defs>
+          <LinearGradient id={gradientId} x1="0%" y1="0%" x2="100%" y2="100%">
+            <Stop offset="0%" stopColor={startColor} />
+            <Stop offset="100%" stopColor={endColor} />
+          </LinearGradient>
+        </Defs>
+        <Rect width="100%" height="100%" fill={`url(#${gradientId})`} />
+      </Svg>
+    </View>
+  );
+}
+
 export default function StatsScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { statsBookshelfEnabled, colors } = useSettings();
+  const { statsBookshelfEnabled, colors, theme } = useSettings();
+  const isDark = theme === "dark";
   const { stats } = useNavbarStats();
   const { isTabletLayout } = useDeviceLayout();
   const useCenteredTabletLayout = isTabletLayout;
@@ -176,46 +215,86 @@ export default function StatsScreen() {
         <BigKnownWordsCard />
 
         <View style={styles.miniStatsRow}>
-          <View style={styles.miniStatItem}>
+          <View testID="streak-card" style={styles.miniStatItem}>
             <View style={styles.miniStatCard}>
-              {stats.shieldCount > 0 && (
-                <View style={styles.miniStatShieldStack}>
-                  {Array.from({ length: stats.shieldCount }).map((_, index) => (
-                    <Ionicons
+              <MiniStatGradient
+                startColor={colors.secondBackground}
+                endColor={isDark ? "#352B40" : "#FFF0F5"}
+              />
+              <View
+                style={[
+                  styles.miniStatIconTile,
+                  { backgroundColor: isDark ? "#4A3046" : "#FFE5ED" },
+                ]}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <MaterialIcons name="local-fire-department" size={statsIconSizes.metric} color={colors.my_red} />
+              </View>
+              <View style={styles.miniStatCopy}>
+                <Text
+                  testID="streak-value"
+                  style={styles.miniStatValue}
+                >
+                  {stats.streakDays}
+                </Text>
+                <Text style={styles.miniStatLabel}>
+                  {t("screens.stats.stats.stats.textChild.codziennaPassa")}
+                </Text>
+              </View>
+              <View style={styles.miniStatShieldStack}>
+                {Array.from({ length: MAX_STREAK_SHIELDS }, (_, index) => {
+                  const owned = index < stats.shieldCount;
+                  return (
+                    <Image
                       key={index}
-                      testID={`streak-shield-${index}`}
-                      name="shield-checkmark"
-                      size={15}
-                      color={colors.my_green}
+                      testID={owned ? `streak-shield-${index}` : `streak-shield-empty-${index}`}
+                      source={owned ? SHIELD_SOURCE : SHIELD_BORDER_SOURCE}
+                      contentFit="contain"
+                      style={{ width: statsIconSizes.indicator, height: statsIconSizes.indicator }}
                     />
-                  ))}
-                </View>
-              )}
-              <Text style={styles.miniStatValue}>{stats.streakDays}</Text>
-              <MaterialIcons
-                style={styles.miniStatCornerIcon}
-                name="local-fire-department"
-                size={18}
-                color={colors.my_red}
-              />
+                  );
+                })}
+              </View>
             </View>
-            <Text style={styles.miniStatLabel}>
-              {t("screens.stats.stats.stats.textChild.codziennaPassa")}
-            </Text>
           </View>
-          <View style={styles.miniStatItem}>
+          <View testID="jumps-card" style={styles.miniStatItem}>
             <View style={styles.miniStatCard}>
-              <Text style={styles.miniStatValue}>{stats.promotionsCount}</Text>
-              <Ionicons
-                style={styles.miniStatCornerIcon}
-                name="trending-up-outline"
-                size={16}
-                color={colors.my_green}
+              <MiniStatGradient
+                startColor={colors.secondBackground}
+                endColor={isDark ? "#173D3E" : "#EAFBF7"}
               />
+              <View
+                style={[
+                  styles.miniStatIconTile,
+                  { backgroundColor: isDark ? "#184B49" : "#DDFBF5" },
+                ]}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                <Ionicons name="trending-up-outline" size={statsIconSizes.metric} color={colors.my_green} />
+              </View>
+              <View style={styles.miniStatCopy}>
+                <Text
+                  testID="jumps-value"
+                  style={styles.miniStatValue}
+                >
+                  {stats.promotionsCount}
+                </Text>
+                <Text style={styles.miniStatLabel}>
+                  {t("repeats.labels.jumps")}
+                </Text>
+              </View>
+              <View
+                style={styles.miniStatChart}
+                accessibilityElementsHidden
+                importantForAccessibility="no-hide-descendants"
+              >
+                {[0.3, 0.5, 0.75, 1].map((ratio) => (
+                  <View key={ratio} style={[styles.miniStatChartBar, { height: statsIconSizes.metric * ratio }]} />
+                ))}
+              </View>
             </View>
-            <Text style={styles.miniStatLabel}>
-              {t("repeats.labels.jumps")}
-            </Text>
           </View>
         </View>
 

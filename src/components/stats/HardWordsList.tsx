@@ -1,3 +1,7 @@
+import StatsProgressCard from "./StatsProgressCard";
+import StatsProgressList from "./StatsProgressList";
+import StatsProgressRow from "./StatsProgressRow";
+import MyButton from "@/src/components/button/button";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import MaterialCommunityIcons from "@expo/vector-icons/MaterialCommunityIcons";
 import { Image } from "expo-image";
@@ -15,115 +19,53 @@ import { getHardFlashcards, type HardFlashcard } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import StatsSectionHeader from "./StatsSectionHeader";
 import { useTranslation } from "react-i18next";
+import { statsIconBackgrounds, statsIconSizes, statsMetricStyles, statsSectionStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 const useStyles = createThemeStylesHook((colors) => ({
-  card: {
-    backgroundColor: colors.secondBackground,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
-    overflow: "hidden",
-  },
-  header: {
-    marginBottom: 18,
+  section: {
+    ...statsSectionStyles.section,
   },
   pager: {
     alignSelf: "stretch",
   },
-  pagerFrame: {
-    alignSelf: "stretch",
-    overflow: "hidden",
+  navigation: {
+    flexDirection: "row",
+    gap: 12,
+  },
+  navigationButton: {
+    flex: 1,
+    minWidth: 0,
   },
   page: {
     alignSelf: "stretch",
   },
-  item: {
-    flexDirection: "row",
-    alignItems: "center",
-    gap: 12,
-    paddingVertical: 9,
-  },
   thumbnailWrap: {
-    width: 46,
-    height: 46,
-    borderRadius: 23,
-    backgroundColor: colors.lightbg,
-    alignItems: "center",
-    justifyContent: "center",
+    ...statsMetricStyles.iconContainer,
     overflow: "hidden",
-    flexShrink: 0,
-    borderWidth: 1,
-    borderColor: `${colors.border}DD`,
   },
   thumbnailImage: {
-    width: 46,
-    height: 46,
+    width: statsIconSizes.metric,
+    height: statsIconSizes.metric,
   },
   placeholderIcon: {
-    width: 46,
-    height: 46,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  content: {
-    flex: 1,
-    minWidth: 0,
-    gap: 8,
-  },
-  word: {
-    color: colors.headline,
-    fontSize: 15,
-    fontWeight: "800",
-    flexShrink: 1,
-  },
-  track: {
-    height: 9,
-    borderRadius: 999,
-    backgroundColor: `${colors.my_red}18`,
-    overflow: "hidden",
-  },
-  fill: {
-    height: "100%",
-    borderRadius: 999,
-    backgroundColor: colors.my_red,
-  },
-  badge: {
-    minWidth: 68,
-    borderRadius: 999,
-    overflow: "hidden",
-    paddingVertical: 7,
-    paddingHorizontal: 8,
-    backgroundColor: `${colors.my_red}14`,
-    alignItems: "center",
-    justifyContent: "center",
-    flexShrink: 0,
-  },
-  badgeText: {
-    color: colors.my_red,
-    fontSize: 13,
-    fontWeight: "800",
+    ...statsMetricStyles.iconContainer,
   },
   empty: {
+    ...statsTypography.description,
     color: colors.paragraph,
-    fontSize: 13,
-    paddingVertical: 8,
+    padding: 16,
   },
   loading: {
+    ...statsTypography.description,
     color: colors.paragraph,
-    fontSize: 13,
     opacity: 0.7,
-    paddingVertical: 8,
+    padding: 16,
   },
 }));
 
 type HardWordsPage = {
   key: "active" | "global";
-  subtitle: string;
+  scope: string;
   items: HardFlashcard[];
 };
 
@@ -212,13 +154,13 @@ export default function HardWordsList() {
     if (activeCustomCourseId != null) {
       next.push({
         key: "active",
-        subtitle: t("components.stats.hardWordsList.subtitle.activeCourse"),
+        scope: t("components.stats.hardWordsList.scope.activeCourse"),
         items: activeItems,
       });
     }
     next.push({
       key: "global",
-      subtitle: t("components.stats.hardWordsList.subtitle.global"),
+      scope: t("components.stats.hardWordsList.scope.global"),
       items: globalItems,
     });
     return next;
@@ -245,15 +187,29 @@ export default function HardWordsList() {
     setVisiblePageIndex(safeIndex);
   };
 
-  const renderThumbnail = (item: HardFlashcard) => {
+  const canGoBack = pagerWidth > 0 && visiblePageIndex > 0;
+  const canGoForward = pagerWidth > 0 && visiblePageIndex < pages.length - 1;
+
+  const changePage = (direction: -1 | 1) => {
+    if (pagerWidth <= 0) return;
+    const nextIndex = Math.max(0, Math.min(pages.length - 1, visiblePageIndex + direction));
+    if (nextIndex === visiblePageIndex) return;
+    listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: true });
+    setVisiblePageIndex(nextIndex);
+  };
+
+  const renderThumbnail = (item: HardFlashcard, index: number) => {
     const imageUri = getFlashcardImage(item);
+    const background = {
+      backgroundColor: statsIconBackgrounds[index % statsIconBackgrounds.length],
+    };
     if (!imageUri) {
       return (
-        <View testID={`hard-word-placeholder-${item.id}`} style={styles.placeholderIcon}>
+        <View testID={`hard-word-placeholder-${item.id}`} style={[styles.placeholderIcon, background]}>
           <MaterialCommunityIcons
             name="cards"
-            size={30}
-            color={`${colors.paragraph}AA`}
+            size={statsIconSizes.metric}
+            color={colors.my_green}
           />
         </View>
       );
@@ -262,20 +218,20 @@ export default function HardWordsList() {
     if (isSvgUri(imageUri)) {
       const isDataSvg = imageUri.startsWith("data:image/svg+xml");
       return (
-        <View testID={`hard-word-image-${item.id}`} style={styles.thumbnailWrap}>
+        <View testID={`hard-word-image-${item.id}`} style={[styles.thumbnailWrap, background]}>
           {isDataSvg ? (
             <SvgXml
               xml={decodeDataSvgUri(imageUri)}
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid slice"
+              width={statsIconSizes.metric}
+              height={statsIconSizes.metric}
+              preserveAspectRatio="xMidYMid meet"
             />
           ) : (
             <SvgUri
               uri={imageUri}
-              width="100%"
-              height="100%"
-              preserveAspectRatio="xMidYMid slice"
+              width={statsIconSizes.metric}
+              height={statsIconSizes.metric}
+              preserveAspectRatio="xMidYMid meet"
             />
           )}
         </View>
@@ -283,44 +239,14 @@ export default function HardWordsList() {
     }
 
     return (
-      <View testID={`hard-word-image-${item.id}`} style={styles.thumbnailWrap}>
+      <View testID={`hard-word-image-${item.id}`} style={[styles.thumbnailWrap, background]}>
         <Image
           source={{ uri: imageUri }}
           recyclingKey={imageUri}
           style={styles.thumbnailImage}
-          contentFit="cover"
+          contentFit="contain"
           transition={0}
         />
-      </View>
-    );
-  };
-
-  const renderItem = (item: HardFlashcard, maxWrongCount: number) => {
-    const progress =
-      maxWrongCount > 0 ? Math.min(1, item.wrongCount / maxWrongCount) : 0;
-    const progressPercent = `${Math.round(progress * 100)}%` as `${number}%`;
-
-    return (
-      <View key={item.id} style={styles.item}>
-        {renderThumbnail(item)}
-        <View style={styles.content}>
-          <Text style={styles.word} numberOfLines={1} ellipsizeMode="tail">
-            {getFlashcardLabel(item)}
-          </Text>
-          <View style={styles.track}>
-            <View
-              testID={`hard-word-fill-${item.id}`}
-              accessibilityLabel={t(
-                "components.stats.hardWordsList.accessibilityLabel.wypelnienieBledowValue",
-                { value: progressPercent }
-              )}
-              style={[styles.fill, { width: progressPercent }]}
-            />
-          </View>
-        </View>
-        <View style={styles.badge}>
-          <Text style={styles.badgeText}>{formatWrongCount(item.wrongCount)}</Text>
-        </View>
       </View>
     );
   };
@@ -344,27 +270,47 @@ export default function HardWordsList() {
             )}
           </Text>
         ) : (
-          <View>{item.items.map((flashcard) => renderItem(flashcard, maxWrongCount))}</View>
+          <StatsProgressList
+            testID={`hard-words-list-${item.key}`}
+            items={item.items}
+            keyExtractor={(flashcard) => flashcard.id.toString()}
+            renderItem={(flashcard, index, layout) => {
+              const progress = maxWrongCount > 0 ? flashcard.wrongCount / maxWrongCount : 0;
+              const progressPercent = `${Math.round(progress * 100)}%`;
+              return (
+                <StatsProgressRow
+                  {...layout}
+                  icon={renderThumbnail(flashcard, index)}
+                  label={getFlashcardLabel(flashcard)}
+                  value={formatWrongCount(flashcard.wrongCount)}
+                  progress={progress}
+                  progressColor={colors.my_red}
+                  progressLabel={getFlashcardLabel(flashcard)}
+                  fillTestID={`hard-word-fill-${flashcard.id}`}
+                  fillAccessibilityLabel={t(
+                    "components.stats.hardWordsList.accessibilityLabel.wypelnienieBledowValue",
+                    { value: progressPercent },
+                  )}
+                />
+              );
+            }}
+          />
         )}
       </View>
     );
   };
 
   return (
-    <View style={styles.card}>
+    <View style={styles.section}>
       <StatsSectionHeader
-        style={styles.header}
-        icon={<Ionicons name="trophy-outline" size={30} color="#5B3FD6" />}
         title={t("components.stats.hardWordsList.title.trudneFiszki")}
-        subtitle={
-          visiblePage?.subtitle ??
-          t("components.stats.hardWordsList.subtitle.global")
-        }
+        subtitle={t("components.stats.hardWordsList.subtitle.description")}
+        metadata={visiblePage?.scope}
+        metadataWidthReference={t("components.stats.hardWordsList.scope.activeCourse")}
       />
 
-      <View
+      <StatsProgressCard
         testID="hard-words-pager-frame"
-        style={styles.pagerFrame}
         onLayout={(event) => setPagerWidth(event.nativeEvent.layout.width)}
       >
         {pagerWidth > 0 ? (
@@ -394,6 +340,42 @@ export default function HardWordsList() {
             style={styles.pager}
           />
         ) : null}
+      </StatsProgressCard>
+      <View style={styles.navigation}>
+        <MyButton
+          accessibilityLabel={t("components.stats.hardWordsList.navigation.previousPage")}
+          color="my_yellow"
+          onPress={() => changePage(-1)}
+          disabled={!canGoBack}
+          autoWidth
+          style={styles.navigationButton}
+        >
+          <Ionicons
+            name="chevron-back"
+            size={24}
+            color={colors.headline}
+            style={{ opacity: canGoBack ? 1 : 0.35 }}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          />
+        </MyButton>
+        <MyButton
+          accessibilityLabel={t("components.stats.hardWordsList.navigation.nextPage")}
+          color="my_yellow"
+          onPress={() => changePage(1)}
+          disabled={!canGoForward}
+          autoWidth
+          style={styles.navigationButton}
+        >
+          <Ionicons
+            name="chevron-forward"
+            size={24}
+            color={colors.headline}
+            style={{ opacity: canGoForward ? 1 : 0.35 }}
+            accessibilityElementsHidden
+            importantForAccessibility="no-hide-descendants"
+          />
+        </MyButton>
       </View>
     </View>
   );

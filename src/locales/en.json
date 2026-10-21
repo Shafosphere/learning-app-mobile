@@ -1424,6 +1424,10 @@
         "textChild": {
           "ostatniaAktywnosc": "Recent activity"
         },
+        "navigation": {
+          "previousMonth": "Previous month",
+          "nextMonth": "Next month"
+        },
         "months": {
           "0": "January",
           "1": "February",
@@ -1444,10 +1448,15 @@
         },
         "stats": {
           "correct": "Correct answers",
-          "wrong": "Mistakes"
+          "wrong": "Mistakes",
+          "minutes": "min"
         }
       },
       "hardWordsList": {
+        "navigation": {
+          "previousPage": "Previous page of hard flashcards",
+          "nextPage": "Next page of hard flashcards"
+        },
         "accessibilityLabel": {
           "wypelnienieBledowValue": "Mistake fill {{value}}"
         },
@@ -1459,8 +1468,11 @@
           "trudneFiszki": "Hard flashcards"
         },
         "subtitle": {
-          "activeCourse": "Most often missed flashcards from the active course",
-          "global": "Most often missed flashcards overall"
+          "description": "Most often missed flashcards"
+        },
+        "scope": {
+          "activeCourse": "Active course",
+          "global": "All"
         }
       },
       "hourlyActivityChart": {
@@ -1478,7 +1490,13 @@
           "thisWeek": "This week",
           "thisMonth": "This month",
           "thisYear": "This year"
-        }
+        },
+        "periodDescription": {
+          "week": "Since Monday",
+          "month": "Since the start of the month",
+          "year": "Since the start of the year"
+        },
+        "shareOfYear": "{{period}}: share of this year's learning time"
       },
       "pinnedCoursesProgress": {
         "title": {

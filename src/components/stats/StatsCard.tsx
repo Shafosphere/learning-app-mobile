@@ -1,3 +1,4 @@
+import { statsTileStyle } from "./statsTileStyle";
 import React from "react";
 import { View, Text, ViewProps } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
@@ -11,14 +12,10 @@ type Props = ViewProps & {
 
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
+    ...statsTileStyle,
     backgroundColor: colors.secondBackground,
-    borderRadius: 16,
     padding: 16,
     marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
   },
   header: {
     flexDirection: "row",

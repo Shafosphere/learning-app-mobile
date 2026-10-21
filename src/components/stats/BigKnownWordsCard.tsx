@@ -1,3 +1,4 @@
+import { statsTileStyle } from "./statsTileStyle";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -9,12 +10,8 @@ import { OrganicFireEffect } from "./OrganicFireEffect";
 
 const useStyles = createThemeStylesHook((colors) => ({
   container: {
+    ...statsTileStyle,
     backgroundColor: colors.secondBackground,
-    borderRadius: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
     height: 180,
     overflow: "hidden",
     position: "relative",

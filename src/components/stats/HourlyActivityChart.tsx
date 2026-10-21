@@ -1,9 +1,10 @@
+import { statsTileStyle } from "./statsTileStyle";
 import React from "react";
 import { View, Text } from "react-native";
-import Ionicons from "@expo/vector-icons/Ionicons";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import StatsSectionHeader from "./StatsSectionHeader";
 import { useTranslation } from "react-i18next";
+import { statsSectionStyles } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 type Props = {
   timeMs: {
@@ -12,8 +13,6 @@ type Props = {
     year: number;
   };
 };
-
-const CLOCK_COLOR = "#079A7F";
 
 function withAlpha(color: string, alpha: string) {
   if (/^#[0-9a-f]{8}$/i.test(color)) {
@@ -26,81 +25,78 @@ function withAlpha(color: string, alpha: string) {
 }
 
 const useStyles = createThemeStylesHook((colors) => ({
-  card: {
+  section: {
+    ...statsSectionStyles.section,
+  },
+  metricsList: { gap: 14 },
+  metricCard: {
+    ...statsTileStyle,
     backgroundColor: colors.secondBackground,
-    borderRadius: 16,
-    padding: 16,
-    marginBottom: 16,
-    shadowColor: "#000",
-    shadowOpacity: 0.05,
-    shadowRadius: 8,
-    elevation: 2,
     overflow: "hidden",
   },
-  header: {
-    marginBottom: 18,
+  metricTint: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
   },
-  metricsRow: {
-    flexDirection: "row",
-    gap: 12,
-  },
-  metricCard: {
+  metricContent: {
     flex: 1,
-    minHeight: 116,
-    borderWidth: 1,
-    borderColor: withAlpha(colors.my_green, "22"),
-    borderRadius: 14,
-    backgroundColor: withAlpha(colors.my_green, "08"),
+    gap: 8,
+    paddingHorizontal: 20,
+    paddingTop: 16,
+    paddingBottom: 12,
+  },
+  metricHeader: {
+    flexDirection: "row",
+    flexWrap: "wrap",
     alignItems: "center",
-    justifyContent: "center",
-    paddingHorizontal: 8,
-    paddingVertical: 14,
+    justifyContent: "space-between",
+    columnGap: 16,
+    rowGap: 8,
+  },
+  metricCopy: {
+    flexGrow: 1,
+    flexShrink: 1,
+    flexBasis: 120,
+    minWidth: 0,
+    gap: 3,
   },
   metricLabel: {
+    color: colors.headline,
+    fontSize: 20,
+    lineHeight: 26,
+    fontWeight: "700",
+  },
+  metricDescription: {
     color: colors.paragraph,
     fontSize: 14,
-    lineHeight: 18,
-    textAlign: "center",
-    opacity: 0.86,
+    lineHeight: 20,
+    opacity: 0.8,
+  },
+  progressTrack: {
+    height: 15,
+    borderRadius: 999,
+    overflow: "hidden",
+  },
+  progressFill: {
+    height: "100%",
+    borderRadius: 999,
   },
   metricValue: {
-    marginTop: 18,
+    flexShrink: 1,
+    minWidth: 0,
     color: colors.headline,
-    fontSize: 32,
-    lineHeight: 38,
+    fontSize: 36,
+    lineHeight: 44,
     fontWeight: "800",
-    textAlign: "center",
+    textAlign: "right",
+    fontVariant: ["tabular-nums"],
   },
   metricUnit: {
-    color: colors.headline,
-    fontSize: 16,
-    lineHeight: 20,
-    textAlign: "center",
-  },
-  infoBox: {
-    marginTop: 18,
-    borderRadius: 16,
-    backgroundColor: withAlpha(colors.my_green, "10"),
-    borderWidth: 1,
-    borderColor: withAlpha(colors.my_green, "20"),
-    paddingHorizontal: 16,
-    paddingVertical: 16,
-  },
-  infoCopy: {
-    minWidth: 0,
-  },
-  infoTitle: {
-    color: colors.headline,
-    fontSize: 15,
-    lineHeight: 19,
-    fontWeight: "800",
-  },
-  infoText: {
-    marginTop: 5,
-    color: colors.paragraph,
-    fontSize: 13,
-    lineHeight: 18,
-    opacity: 0.8,
+    fontSize: 24,
+    fontWeight: "700",
   },
 }));
 
@@ -122,55 +118,89 @@ export default function LearningTimeCard({ timeMs }: Props) {
   const { t } = useTranslation();
   const rows = [
     {
+      key: "week",
       label: t("components.stats.hourlyActivityChart.period.thisWeek"),
+      description: t("components.stats.hourlyActivityChart.periodDescription.week"),
+      time: timeMs.week,
       value: formatDuration(timeMs.week),
+      tint: "#54B7FF",
+      accent: "#00BFC6",
     },
     {
+      key: "month",
       label: t("components.stats.hourlyActivityChart.period.thisMonth"),
+      description: t("components.stats.hourlyActivityChart.periodDescription.month"),
+      time: timeMs.month,
       value: formatDuration(timeMs.month),
+      tint: "#FFC83D",
+      accent: "#F5B800",
     },
     {
+      key: "year",
       label: t("components.stats.hourlyActivityChart.period.thisYear"),
+      description: t("components.stats.hourlyActivityChart.periodDescription.year"),
+      time: timeMs.year,
       value: formatDuration(timeMs.year),
+      tint: "#9B78FF",
+      accent: "#9270F5",
     },
   ];
 
   return (
-    <View style={styles.card}>
+    <View style={styles.section}>
       <StatsSectionHeader
-        style={styles.header}
-        icon={<Ionicons name="time-outline" size={30} color={CLOCK_COLOR} />}
-        iconBackgroundColor="#DFF7EF"
-        iconShadowColor={CLOCK_COLOR}
         title={t("components.stats.hourlyActivityChart.title.czasWNauce")}
         subtitle={t(
           "components.stats.hourlyActivityChart.subtitle.sumaCzasuSpedzonegoNaKartach"
         )}
       />
 
-      <View style={styles.metricsRow}>
-        {rows.map((row) => (
-          <View key={row.label} style={styles.metricCard}>
-            <Text style={styles.metricLabel}>{row.label}</Text>
-            <Text style={styles.metricValue}>{row.value.value}</Text>
-            {row.value.unit ? (
-              <Text style={styles.metricUnit}>{row.value.unit}</Text>
-            ) : null}
-          </View>
-        ))}
-      </View>
+      <View style={styles.metricsList}>
+        {rows.map((row) => {
+          // The nested calendar periods are shown relative to the year's total.
+          const progress = timeMs.year > 0
+            ? Math.max(0, Math.min(1, row.time / timeMs.year))
+            : 0;
 
-      <View style={styles.infoBox}>
-        <View style={styles.infoCopy}>
-          <Text style={styles.infoTitle}>
-            {t("components.stats.hourlyActivityChart.textChild.jakLiczymyCzas")}
-          </Text>
-          <Text style={styles.infoText}>
-            {t(
-              "components.stats.hourlyActivityChart.textChild.czasLiczonyJestOdMomentu"
-            )}
-          </Text>
-        </View>
+          return (
+            <View key={row.key} style={styles.metricCard}>
+              <View
+                pointerEvents="none"
+                style={[styles.metricTint, { backgroundColor: withAlpha(row.tint, "18") }]}
+              />
+              <View style={styles.metricContent}>
+                <View style={styles.metricHeader}>
+                  <View style={styles.metricCopy}>
+                    <Text style={styles.metricLabel}>{row.label}</Text>
+                    <Text style={styles.metricDescription}>{row.description}</Text>
+                  </View>
+                  <Text style={styles.metricValue} numberOfLines={1} adjustsFontSizeToFit>
+                    {row.value.value}
+                    {row.value.unit ? (
+                      <Text style={styles.metricUnit}>{` ${row.value.unit}`}</Text>
+                    ) : null}
+                  </Text>
+                </View>
+                <View
+                  accessible
+                  accessibilityRole="progressbar"
+                  accessibilityLabel={t("components.stats.hourlyActivityChart.shareOfYear", { period: row.label })}
+                  accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
+                  style={[styles.progressTrack, { backgroundColor: withAlpha(row.accent, "26") }]}
+                >
+                  <View style={[
+                    styles.progressFill,
+                    {
+                      width: `${progress * 100}%`,
+                      minWidth: progress > 0 ? 15 : 0,
+                      backgroundColor: row.accent,
+                    },
+                  ]} />
+                </View>
+              </View>
+            </View>
+          );
+        })}
       </View>
     </View>
   );

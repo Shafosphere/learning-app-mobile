@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { StyleSheet } from "react-native";
+import { FlatList, StyleSheet } from "react-native";
 
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import { getHardFlashcards } from "@/src/db/sqlite/db";
@@ -29,10 +29,9 @@ jest.mock("react-i18next", () => ({
         "components.stats.hardWordsList.textChild.brakDanychSprobujPogracDluzej":
           "Brak danych – spróbuj pograć dłużej.",
         "components.stats.hardWordsList.title.trudneFiszki": "Trudne fiszki",
-        "components.stats.hardWordsList.subtitle.activeCourse":
-          "Najczęściej mylone fiszki z aktywnego kursu",
-        "components.stats.hardWordsList.subtitle.global":
-          "Najczęściej mylone fiszki ogólnie",
+        "components.stats.hardWordsList.subtitle.description": "Najczęściej mylone fiszki",
+        "components.stats.hardWordsList.scope.activeCourse": "Aktywny kurs",
+        "components.stats.hardWordsList.scope.global": "Wszystkie",
       };
       return translations[key] ?? key;
     },
@@ -102,6 +101,10 @@ describe("HardWordsList", () => {
     mockSettings(null);
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it("loads global hard flashcards by default", async () => {
     mockedGetHardFlashcards.mockResolvedValue([
       {
@@ -115,16 +118,23 @@ describe("HardWordsList", () => {
       },
     ]);
 
-    const { getByTestId, getByText } = render(<HardWordsList />);
+    const { getByTestId, getByText, getByRole } = render(<HardWordsList />);
     layoutPager(getByTestId);
 
     await waitFor(() => {
       expect(getByText("Sierra Leone")).toBeTruthy();
     });
 
-    expect(getByText("Najczęściej mylone fiszki ogólnie")).toBeTruthy();
+    expect(getByText("Najczęściej mylone fiszki")).toBeTruthy();
+    expect(getByText("Wszystkie")).toBeTruthy();
     expect(mockedGetHardFlashcards).toHaveBeenCalledWith(undefined, 5);
     expect(mockedGetHardFlashcards).toHaveBeenCalledTimes(1);
+    expect(getByRole("button", {
+      name: "components.stats.hardWordsList.navigation.previousPage",
+    })).toBeDisabled();
+    expect(getByRole("button", {
+      name: "components.stats.hardWordsList.navigation.nextPage",
+    })).toBeDisabled();
   }, 10000);
 
   it("loads the active-course page when a course is active", async () => {
@@ -157,16 +167,45 @@ describe("HardWordsList", () => {
       )
     );
 
-    const { getByTestId, getByText } = render(<HardWordsList />);
+    const scrollToOffset = jest.spyOn(FlatList.prototype, "scrollToOffset")
+      .mockImplementation(() => {});
+    const { getByTestId, getByText, getByRole, UNSAFE_getByType } = render(<HardWordsList />);
     layoutPager(getByTestId);
 
     await waitFor(() => {
       expect(getByText("Globalna fiszka")).toBeTruthy();
     });
 
-    expect(getByText("Najczęściej mylone fiszki ogólnie")).toBeTruthy();
+    expect(getByText("Najczęściej mylone fiszki")).toBeTruthy();
+    expect(getByText("Wszystkie")).toBeTruthy();
     expect(mockedGetHardFlashcards).toHaveBeenCalledWith(undefined, 5);
     expect(mockedGetHardFlashcards).toHaveBeenCalledWith(7, 5);
+    const previousButton = () => getByRole("button", {
+      name: "components.stats.hardWordsList.navigation.previousPage",
+    });
+    const nextButton = () => getByRole("button", {
+      name: "components.stats.hardWordsList.navigation.nextPage",
+    });
+    expect(nextButton()).toBeDisabled();
+    expect(previousButton()).toHaveStyle({ backgroundColor: colors.my_yellow });
+
+    fireEvent.press(previousButton());
+    expect(scrollToOffset).toHaveBeenLastCalledWith({ offset: 0, animated: true });
+    expect(getByText("Aktywny kurs")).toBeTruthy();
+    expect(previousButton()).toBeDisabled();
+
+    fireEvent.press(nextButton());
+    expect(scrollToOffset).toHaveBeenLastCalledWith({ offset: 320, animated: true });
+    expect(getByText("Wszystkie")).toBeTruthy();
+    expect(nextButton()).toBeDisabled();
+
+    fireEvent(UNSAFE_getByType(FlatList), "momentumScrollEnd", {
+      nativeEvent: { contentOffset: { x: 0 } },
+    });
+    expect(getByText("Aktywny kurs")).toBeTruthy();
+    expect(getByText("Najczęściej mylone fiszki")).toBeTruthy();
+    expect(previousButton()).toBeDisabled();
+    expect(nextButton()).toBeEnabled();
   });
 
   it("scales error bars against the hardest flashcard on the page", async () => {

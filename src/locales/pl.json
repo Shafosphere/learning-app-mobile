@@ -1428,6 +1428,10 @@
         "textChild": {
           "ostatniaAktywnosc": "Ostatnia aktywność"
         },
+        "navigation": {
+          "previousMonth": "Poprzedni miesiąc",
+          "nextMonth": "Następny miesiąc"
+        },
         "months": {
           "0": "styczeń",
           "1": "luty",
@@ -1448,10 +1452,15 @@
         },
         "stats": {
           "correct": "Dobre odpowiedzi",
-          "wrong": "Błędy"
+          "wrong": "Błędy",
+          "minutes": "min"
         }
       },
       "hardWordsList": {
+        "navigation": {
+          "previousPage": "Poprzednia strona trudnych fiszek",
+          "nextPage": "Następna strona trudnych fiszek"
+        },
         "accessibilityLabel": {
           "wypelnienieBledowValue": "Wypełnienie błędów {{value}}"
         },
@@ -1463,8 +1472,11 @@
           "trudneFiszki": "Trudne fiszki"
         },
         "subtitle": {
-          "activeCourse": "Najczęściej mylone fiszki z aktywnego kursu",
-          "global": "Najczęściej mylone fiszki ogólnie"
+          "description": "Najczęściej mylone fiszki"
+        },
+        "scope": {
+          "activeCourse": "Aktywny kurs",
+          "global": "Wszystkie"
         }
       },
       "hourlyActivityChart": {
@@ -1482,7 +1494,13 @@
           "thisWeek": "Ten tydzień",
           "thisMonth": "Ten miesiąc",
           "thisYear": "Ten rok"
-        }
+        },
+        "periodDescription": {
+          "week": "Od poniedziałku",
+          "month": "Od początku miesiąca",
+          "year": "Od początku roku"
+        },
+        "shareOfYear": "{{period}}: udział w tegorocznym czasie nauki"
       },
       "pinnedCoursesProgress": {
         "title": {

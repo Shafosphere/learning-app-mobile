@@ -1,15 +1,17 @@
 import React from "react";
-import { render, waitFor } from "@testing-library/react-native";
+import { render, waitFor, within } from "@testing-library/react-native";
 import { Text as MockText } from "react-native";
 
 import StatsScreen from "@/src/screens/stats/StatsScreen/StatsScreen";
 import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { themeMap } from "@/src/theme/theme";
 import { getDailyActivitySummariesCustom } from "@/src/db/sqlite/db";
 import { getProtectedDailyStreakState } from "@/src/services/streakProtection";
 
 jest.mock("@expo/vector-icons/Ionicons", () => {
-  function MockIonicons({ testID }: { testID?: string }) {
-    return <MockText testID={testID}>icon</MockText>;
+  function MockIonicons({ testID, name, color }: { testID?: string; name: string; color: string }) {
+    return <MockText testID={testID} style={{ color }}>{name}</MockText>;
   }
   return MockIonicons;
 });
@@ -23,7 +25,10 @@ jest.mock("@expo/vector-icons/MaterialIcons", () => {
 
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
-    t: (key: string) => key,
+    t: (key: string) => ({
+      "screens.stats.stats.stats.textChild.codziennaPassa": "Codzienna passa",
+      "repeats.labels.jumps": "Skoki",
+    }[key] ?? key),
   }),
 }));
 
@@ -36,18 +41,7 @@ jest.mock("@react-navigation/native", () => {
 });
 
 jest.mock("@/src/contexts/SettingsContext", () => {
-  const useSettings = () => ({
-    statsBookshelfEnabled: false,
-    colors: {
-      background: "#fff",
-      secondBackground: "#f4f4f4",
-      headline: "#111",
-      paragraph: "#333",
-      my_green: "#00ebc7",
-      my_red: "#ff5470",
-      my_yellow: "#fde24f",
-    },
-  });
+  const useSettings = jest.fn();
   return { useSettings, useThemeSettings: useSettings };
 });
 
@@ -103,12 +97,14 @@ jest.mock("@/src/db/sqlite/db", () => ({
 }));
 
 jest.mock("@/src/services/streakProtection", () => ({
+  MAX_STREAK_SHIELDS: 2,
   getProtectedDailyStreakState: jest.fn(() => new Promise(() => {})),
 }));
 
 const mockedUseNavbarStats = useNavbarStats as jest.MockedFunction<
   typeof useNavbarStats
 >;
+const mockedUseSettings = useSettings as jest.Mock;
 const mockedGetDailyActivitySummariesCustom =
   getDailyActivitySummariesCustom as jest.MockedFunction<
     typeof getDailyActivitySummariesCustom
@@ -118,13 +114,13 @@ const mockedGetProtectedDailyStreakState =
     typeof getProtectedDailyStreakState
   >;
 
-function mockStats(shieldCount: 0 | 1 | 2) {
+function mockStats(shieldCount: 0 | 1 | 2, streakDays = 12, promotionsCount = 4) {
   mockedUseNavbarStats.mockReturnValue({
     stats: {
       masteredCount: 0,
-      streakDays: 12,
+      streakDays,
       shieldCount,
-      promotionsCount: 4,
+      promotionsCount,
     },
     activeStatKey: "streak",
     currentBurst: null,
@@ -137,32 +133,50 @@ function mockStats(shieldCount: 0 | 1 | 2) {
 describe("StatsScreen streak shields", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockedUseSettings.mockReturnValue({
+      statsBookshelfEnabled: false,
+      theme: "light",
+      colors: themeMap.light,
+      fontScaleMultiplier: 1,
+    });
   });
 
-  it("does not render shield icons when the user has no shields", () => {
-    mockStats(0);
-
+  it.each([0, 1, 2] as const)("renders two shield slots with %i owned shields", (shieldCount) => {
+    mockStats(shieldCount);
     const screen = render(<StatsScreen />);
 
-    expect(screen.queryByTestId("streak-shield-0")).toBeNull();
+    for (let index = 0; index < 2; index += 1) {
+      const owned = index < shieldCount;
+      const ownedId = `streak-shield-${index}`;
+      const emptyId = `streak-shield-empty-${index}`;
+      const shield = screen.getByTestId(owned ? ownedId : emptyId);
+      expect(shield.props.source).toContainEqual(
+        owned
+          ? require("@/assets/icons/tarcza.svg")
+          : require("@/assets/icons/tarcza_border.svg")
+      );
+      expect(screen.queryByTestId(owned ? emptyId : ownedId)).toBeNull();
+    }
+    expect(screen.queryByTestId("streak-shield-empty-2")).toBeNull();
   });
 
-  it("renders one owned shield", () => {
-    mockStats(1);
-
+  it("keeps live counts and labels inside static cards", () => {
+    mockStats(1, 3, 1834);
     const screen = render(<StatsScreen />);
 
-    expect(screen.getByTestId("streak-shield-0")).toBeTruthy();
-    expect(screen.queryByTestId("streak-shield-1")).toBeNull();
-  });
+    const streak = within(screen.getByTestId("streak-card"));
+    const jumps = within(screen.getByTestId("jumps-card"));
+    expect(streak.getByText("3")).toBeTruthy();
+    expect(streak.getByText("Codzienna passa")).toBeTruthy();
+    expect(jumps.getByText("1834")).toBeTruthy();
+    expect(jumps.getByText("Skoki")).toBeTruthy();
+    expect(streak.queryByRole("button")).toBeNull();
+    expect(jumps.queryByRole("button")).toBeNull();
 
-  it("renders two owned shields", () => {
-    mockStats(2);
-
-    const screen = render(<StatsScreen />);
-
-    expect(screen.getByTestId("streak-shield-0")).toBeTruthy();
-    expect(screen.getByTestId("streak-shield-1")).toBeTruthy();
+    mockStats(0, 0, 0);
+    screen.rerender(<StatsScreen />);
+    expect(screen.getByTestId("streak-value")).toHaveTextContent("0");
+    expect(screen.getByTestId("jumps-value")).toHaveTextContent("0");
   });
 
   it("keeps heatmap activity when shield history fails to load", async () => {
