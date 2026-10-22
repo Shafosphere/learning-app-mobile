@@ -329,4 +329,4 @@ const BigKnownWordsCard: React.FC = () => {
   );
 };
 
-export default BigKnownWordsCard;
+export default React.memo(BigKnownWordsCard);

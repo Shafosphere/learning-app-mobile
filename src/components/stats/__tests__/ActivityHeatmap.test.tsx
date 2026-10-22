@@ -426,7 +426,6 @@ describe("ActivityHeatmap rendering boundaries", () => {
     const pager = screen.UNSAFE_getByType(FlatList);
     expect(pager.props.initialScrollIndex).toBe(11);
     expect(pager.props.initialNumToRender).toBe(1);
-    expect(pager.props.windowSize).toBe(5);
     expect(pager.props.getItemLayout(pager.props.data, 11)).toEqual({
       length: 350, offset: 3850, index: 11,
     });
@@ -534,6 +533,61 @@ describe("ActivityHeatmap rendering boundaries", () => {
     }));
     expect(scroll).toHaveBeenLastCalledWith({ offset: 1000, animated: true });
     expect(screen.getByLabelText("20 components.stats.activityHeatmap.months.9 2026")).toBeTruthy();
+  });
+
+  it("preserves selection through rapid navigation, resize, and month remounting", () => {
+    const scroll = jest.spyOn(FlatList.prototype, "scrollToOffset").mockImplementation(() => {});
+    const onSelect = jest.fn();
+    const selectedDay = activityDay("2026-10-20", { totalCount: 1 });
+    const screen = renderHeatmap(<ActivityHeatmap data={[selectedDay]} months={6} onSelect={onSelect} />);
+    const previousLabel = "components.stats.activityHeatmap.navigation.previousMonth";
+    const nextLabel = "components.stats.activityHeatmap.navigation.nextMonth";
+    const settlePager = (width: number, index: number) => {
+      const pager = screen.getByTestId("activity-heatmap-pager");
+      fireEvent(pager, "layout", {
+        nativeEvent: { layout: { width, height: 600, x: 0, y: 0 } },
+      });
+      fireEvent(pager, "contentSizeChange", width * 6, 600);
+      const event = {
+        nativeEvent: {
+          contentOffset: { x: width * index, y: 0 },
+          contentSize: { width: width * 6, height: 600 },
+          layoutMeasurement: { width, height: 600 },
+        },
+      };
+      fireEvent.scroll(pager, event);
+      fireEvent(pager, "momentumScrollEnd", event);
+      act(() => { jest.advanceTimersByTime(1000); });
+    };
+
+    settlePager(350, 5);
+    fireEvent.press(dayCell(screen, 20));
+    scroll.mockClear();
+
+    // Do not advance batching timers between button presses.
+    for (let index = 4; index >= 1; index -= 1) {
+      fireEvent.press(screen.getByRole("button", { name: previousLabel }));
+      expect(scroll).toHaveBeenLastCalledWith({ offset: index * 350, animated: true });
+    }
+    measure(screen, 500);
+    expect(scroll).toHaveBeenLastCalledWith({ offset: 500, animated: false });
+    settlePager(500, 1);
+    expect(screen.getByTestId("activity-heatmap-month-2026-06")).toBeTruthy();
+    expect(screen.queryByTestId("activity-heatmap-month-2026-10")).toBeNull();
+    expect(screen.getByText("components.stats.activityHeatmap.months.5 2026")).toBeTruthy();
+    expect(screen.getByLabelText("30 components.stats.activityHeatmap.months.5 2026")).toBeTruthy();
+
+    for (let index = 2; index <= 5; index += 1) {
+      fireEvent.press(screen.getByRole("button", { name: nextLabel }));
+      expect(scroll).toHaveBeenLastCalledWith({ offset: index * 500, animated: true });
+    }
+    settlePager(500, 5);
+    expect(dayCell(screen, 20)).toHaveStyle({ borderWidth: 2 });
+    expect(screen.getByText("components.stats.activityHeatmap.months.9 2026")).toBeTruthy();
+    expect(screen.getByLabelText("20 components.stats.activityHeatmap.months.9 2026")).toBeTruthy();
+    expect(screen.getByRole("button", { name: nextLabel })).toBeDisabled();
+    expect(onSelect).toHaveBeenCalledTimes(1);
+    expect(onSelect).toHaveBeenCalledWith(selectedDay);
   });
 
   it("refreshes cell colors, shields, and details when activity changes", () => {

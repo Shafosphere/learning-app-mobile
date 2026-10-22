@@ -1,9 +1,12 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { act, render } from "@testing-library/react-native";
 import { createInstance } from "i18next";
 import { useTranslation } from "react-i18next";
+import { Text, View } from "react-native";
 
 import LearningTimeCard from "@/src/components/stats/HourlyActivityChart";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { resolveThemeColors } from "@/src/theme/theme";
 import en from "@/src/locales/en.json";
 import pl from "@/src/locales/pl.json";
 
@@ -14,7 +17,7 @@ jest.mock("react-i18next", () => ({
 }));
 
 jest.mock("@/src/contexts/SettingsContext", () => {
-  const useSettings = () => ({
+  const useSettings = jest.fn(() => ({
     colors: {
       secondBackground: "#fff",
       headline: "#111",
@@ -23,7 +26,7 @@ jest.mock("@/src/contexts/SettingsContext", () => {
     },
     accessibilityPreferences: {},
     fontScaleMultiplier: 1,
-  });
+  }));
   return { useSettings, useThemeSettings: useSettings };
 });
 
@@ -93,4 +96,57 @@ describe("LearningTimeCard", () => {
     expect(screen.getAllByRole("progressbar").map((bar) => bar.props.accessibilityValue.now)).toEqual([0, 0, 0]);
   });
 
+  it("skips unrelated parent updates with the same learning totals", () => {
+    const timeMs = { week: 0, month: 45 * 60_000, year: 90 * 60_000 };
+    const Parent = ({ update }: { update: number }) => (
+      <View>
+        <Text>{update}</Text>
+        <LearningTimeCard timeMs={timeMs} />
+      </View>
+    );
+    const screen = render(<Parent update={1} />);
+    const calls = jest.mocked(useTranslation).mock.calls.length;
+    screen.rerender(<Parent update={2} />);
+    expect(screen.getByText("2")).toBeTruthy();
+    expect(jest.mocked(useTranslation).mock.calls).toHaveLength(calls);
+    expect(screen.getByText("1 h 30 min")).toBeTruthy();
+  });
+
+  it("receives language, theme, contrast, and font updates with unchanged props", async () => {
+    const { I18nextProvider, useTranslation: useRealTranslation } =
+      jest.requireActual<typeof import("react-i18next")>("react-i18next");
+    const settings = jest.mocked(useSettings)();
+    const SettingsContext = React.createContext(settings);
+    jest.mocked(useSettings).mockImplementation(function useMockSettings() {
+      return React.useContext(SettingsContext);
+    });
+    jest.mocked(useTranslation).mockImplementation(useRealTranslation);
+    const timeMs = { week: 0, month: 0, year: 0 };
+    const tree = (value: typeof settings) => (
+      <I18nextProvider i18n={i18n}>
+        <SettingsContext.Provider value={value}>
+          <LearningTimeCard timeMs={timeMs} />
+        </SettingsContext.Provider>
+      </I18nextProvider>
+    );
+
+    try {
+      const screen = render(tree(settings));
+      expect(screen.getByText("Since Monday")).toBeTruthy();
+      await act(async () => { await i18n.changeLanguage("pl"); });
+      expect(screen.getByText("Od poniedziałku")).toBeTruthy();
+      const colors = resolveThemeColors("dark", { highContrast: true });
+      screen.rerender(tree({
+        ...settings,
+        colors,
+        fontScaleMultiplier: 1.5,
+        accessibilityPreferences: { ...settings.accessibilityPreferences, highContrastEnabled: true },
+      }));
+      expect(screen.getByText(i18n.t("components.stats.hourlyActivityChart.period.thisWeek")))
+        .toHaveStyle({ color: colors.headline, fontSize: 24 });
+      expect(screen.getAllByRole("progressbar")[0]).toHaveStyle({ backgroundColor: colors.background });
+    } finally {
+      jest.mocked(useSettings).mockReturnValue(settings);
+    }
+  });
 });

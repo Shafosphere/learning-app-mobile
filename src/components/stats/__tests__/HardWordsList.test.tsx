@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
 import { fireEvent, render, waitFor, within } from "@testing-library/react-native";
 import React from "react";
-import { FlatList, StyleSheet } from "react-native";
+import { FlatList, StyleSheet, Text, View } from "react-native";
 
 import HardWordsList from "@/src/components/stats/HardWordsList";
 import { getHardFlashcards } from "@/src/db/sqlite/db";
@@ -137,6 +137,24 @@ describe("HardWordsList", () => {
     })).toBeDisabled();
   }, 10000);
 
+  it("skips unrelated parent updates after hard words load", async () => {
+    mockedGetHardFlashcards.mockResolvedValue([]);
+    const Parent = ({ update }: { update: number }) => (
+      <View>
+        <Text>{update}</Text>
+        <HardWordsList />
+      </View>
+    );
+    const screen = render(<Parent update={1} />);
+    layoutPager(screen.getByTestId);
+    await waitFor(() => expect(screen.getByText("Brak danych – spróbuj pograć dłużej.")).toBeTruthy());
+    const calls = mockedUseSettings.mock.calls.length;
+    screen.rerender(<Parent update={2} />);
+    expect(screen.getByText("2")).toBeTruthy();
+    expect(mockedUseSettings.mock.calls).toHaveLength(calls);
+    expect(mockedGetHardFlashcards).toHaveBeenCalledTimes(1);
+  });
+
   it("loads the active-course page when a course is active", async () => {
     mockSettings(7);
     mockedGetHardFlashcards.mockImplementation((courseId?: number | null) =>
@@ -248,23 +266,31 @@ describe("HardWordsList", () => {
 
   it("resets the scope label when the active course changes or is removed", async () => {
     mockSettings(7);
+    const initialSettings = mockedUseSettings();
+    const SettingsContext = React.createContext(initialSettings);
+    mockedUseSettings.mockImplementation(function useMockSettings() {
+      return React.useContext(SettingsContext);
+    });
+    const withCourse = (activeCustomCourseId: number | null) => (
+      <SettingsContext.Provider value={{ ...initialSettings, activeCustomCourseId }}>
+        <HardWordsList />
+      </SettingsContext.Provider>
+    );
     mockedGetHardFlashcards.mockResolvedValue([]);
     jest.spyOn(FlatList.prototype, "scrollToOffset").mockImplementation(() => {});
-    const screen = render(<HardWordsList />);
+    const screen = render(withCourse(7));
     layoutPager(screen.getByTestId);
     await waitFor(() => expect(mockedGetHardFlashcards).toHaveBeenCalledWith(7, 5));
     const previous = () => screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.previousPage" });
     const scope = () => screen.getByTestId("hard-words-scope-label");
     fireEvent.press(previous());
     expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
-    mockSettings(8);
-    screen.rerender(<HardWordsList />);
+    screen.rerender(withCourse(8));
     await waitFor(() => expect(mockedGetHardFlashcards).toHaveBeenCalledWith(8, 5));
     expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
     fireEvent.press(previous());
     expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
-    mockSettings(null);
-    screen.rerender(<HardWordsList />);
+    screen.rerender(withCourse(null));
     expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
     expect(previous()).toBeDisabled();
     expect(screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.nextPage" })).toBeDisabled();

@@ -856,9 +856,10 @@ function ActivityHeatmap({
               keyExtractor={monthKeyExtractor}
               getItemLayout={getItemLayout}
               initialScrollIndex={Math.max(0, monthsData.length - 1)}
-              // One month fills the viewport; retain neighbors for fast paging.
+              // Keep month batches small while buffering adjacent pages for swipes.
               initialNumToRender={1}
-              windowSize={5}
+              maxToRenderPerBatch={1}
+              windowSize={3}
               renderItem={renderMonth}
               onMomentumScrollEnd={handlePagerEnd}
               style={styles.pager}

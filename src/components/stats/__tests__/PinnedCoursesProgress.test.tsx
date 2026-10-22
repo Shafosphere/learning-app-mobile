@@ -1,7 +1,8 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
 import React from "react";
-import { Image, Text } from "react-native";
+import { Image, Text, View } from "react-native";
+import { useFocusEffect } from "@react-navigation/native";
 
 import PinnedCoursesProgress from "@/src/components/stats/PinnedCoursesProgress";
 import { resolveCourseIconProps } from "@/src/constants/customCourse";
@@ -23,10 +24,7 @@ jest.mock("@/src/db/sqlite/db", () => ({
 }));
 
 jest.mock("@react-navigation/native", () => ({
-  useFocusEffect: (effect: () => void | (() => void)) => {
-    const React = require("react");
-    React.useEffect(effect, [effect]);
-  },
+  useFocusEffect: jest.fn(),
 }));
 
 jest.mock("@/src/constants/customCourse", () => {
@@ -81,6 +79,9 @@ const mockCourseProgress = (progressByCourseId: Record<number, number>) => {
 describe("PinnedCoursesProgress", () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    jest.mocked(useFocusEffect).mockImplementation(function useMockFocusEffect(effect) {
+      React.useEffect(effect, [effect]);
+    });
     mockedUseSettings.mockReturnValue({
       activeCustomCourseId: 42,
       pinnedOfficialCourseIds: [],
@@ -247,5 +248,85 @@ describe("PinnedCoursesProgress", () => {
     const screen = render(<PinnedCoursesProgress />);
     await waitFor(() => expect(screen.getByText("Brak danych do wyświetlenia.")).toBeTruthy());
     expect(screen.queryByTestId("pinned-courses-progress-list")).toBeNull();
+  });
+
+  it("skips unrelated parent updates after course progress loads", async () => {
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue([]);
+    const Parent = ({ update }: { update: number }) => (
+      <View>
+        <Text>{update}</Text>
+        <PinnedCoursesProgress />
+      </View>
+    );
+    const screen = render(<Parent update={1} />);
+    await waitFor(() => expect(screen.getByText("Brak danych do wyświetlenia.")).toBeTruthy());
+    const calls = mockedUseSettings.mock.calls.length;
+    screen.rerender(<Parent update={2} />);
+    expect(screen.getByText("2")).toBeTruthy();
+    expect(mockedUseSettings.mock.calls).toHaveLength(calls);
+    expect(mockedGetCustomCoursesWithCardCounts).toHaveBeenCalledTimes(1);
+  });
+
+  it("reloads for course context changes and refocus, ignoring reads completed after blur", async () => {
+    const { NavigationContext, useFocusEffect: useRealFocusEffect } =
+      jest.requireActual<typeof import("@react-navigation/native")>("@react-navigation/native");
+    jest.mocked(useFocusEffect).mockImplementation(useRealFocusEffect);
+    const settings = mockedUseSettings();
+    const SettingsContext = React.createContext(settings);
+    mockedUseSettings.mockImplementation(function useMockSettings() {
+      return React.useContext(SettingsContext);
+    });
+    const listeners = new Map<string, () => void>();
+    let focused = true;
+    const navigation = {
+      isFocused: () => focused,
+      addListener: (event: string, listener: () => void) => {
+        listeners.set(event, listener);
+        return () => { listeners.delete(event); };
+      },
+    };
+    const focus = (next: boolean) => act(() => {
+      focused = next;
+      listeners.get(next ? "focus" : "blur")?.();
+    });
+    const courses = [42, 43, 44].map((id) => ({
+      id, name: `Course ${id}`, cardsCount: 10, reviewsEnabled: true, isOfficial: true,
+    }));
+    mockedGetCustomCoursesWithCardCounts.mockResolvedValue(courses);
+    mockCourseProgress({ 42: 1, 43: 2, 44: 3 });
+    const tree = (value: typeof settings) => (
+      <NavigationContext.Provider value={navigation as React.ContextType<typeof NavigationContext>}>
+        <SettingsContext.Provider value={value}>
+          <PinnedCoursesProgress />
+        </SettingsContext.Provider>
+      </NavigationContext.Provider>
+    );
+    const screen = render(tree(settings));
+    await waitFor(() => expect(screen.getByText("1/10")).toBeTruthy());
+
+    const changedCourse = { ...settings, activeCustomCourseId: 43 };
+    screen.rerender(tree(changedCourse));
+    await waitFor(() => expect(screen.getByText("2/10")).toBeTruthy());
+    expect(screen.queryByText("Course 42")).toBeNull();
+    const pinnedCourse = { ...changedCourse, pinnedOfficialCourseIds: [44] };
+    screen.rerender(tree(pinnedCourse));
+    await waitFor(() => expect(screen.getByText("3/10")).toBeTruthy());
+
+    // Start a refresh, then blur before the database read completes.
+    focus(false);
+    let finish!: (value: typeof courses) => void;
+    mockedGetCustomCoursesWithCardCounts.mockReturnValueOnce(new Promise((resolve) => { finish = resolve; }));
+    focus(true);
+    focus(false);
+    mockCourseProgress({ 43: 8, 44: 9 });
+    await act(async () => { finish(courses); });
+    expect(screen.queryByText("8/10")).toBeNull();
+
+    focus(true);
+    await waitFor(() => expect(screen.getByText("8/10")).toBeTruthy());
+    expect(screen.getByText("9/10")).toBeTruthy();
+    expect(mockedGetCustomCoursesWithCardCounts).toHaveBeenCalledTimes(5);
+    screen.unmount();
+    expect(listeners.size).toBe(0);
   });
 });

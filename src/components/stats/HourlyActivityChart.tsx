@@ -104,7 +104,7 @@ function LearningPeriodIcon({ days, color }: { days: number; color: string }) {
   );
 }
 
-export default function LearningTimeCard({ timeMs }: Props) {
+function LearningTimeCard({ timeMs }: Props) {
   const styles = useStyles();
   const { t } = useTranslation();
   const { colors } = useSettings();
@@ -182,3 +182,5 @@ export default function LearningTimeCard({ timeMs }: Props) {
     </View>
   );
 }
+
+export default React.memo(LearningTimeCard);

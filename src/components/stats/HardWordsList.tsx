@@ -120,7 +120,7 @@ function formatWrongCount(count: number) {
   return `${count} błędów`;
 }
 
-export default function HardWordsList() {
+function HardWordsList() {
   const styles = useStyles();
   const { t } = useTranslation();
   const { activeCustomCourseId, colors } = useSettings();
@@ -397,3 +397,5 @@ export default function HardWordsList() {
     </View>
   );
 }
+
+export default React.memo(HardWordsList);

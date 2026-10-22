@@ -46,7 +46,7 @@ const useStyles = createThemeStylesHook((colors) => ({
   },
 }));
 
-export default function PinnedCoursesProgress() {
+function PinnedCoursesProgress() {
   const styles = useStyles();
   const { t } = useTranslation();
   const { activeCustomCourseId, pinnedOfficialCourseIds, colors } = useSettings();
@@ -186,3 +186,5 @@ export default function PinnedCoursesProgress() {
     </View>
   );
 }
+
+export default React.memo(PinnedCoursesProgress);
