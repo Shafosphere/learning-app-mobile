@@ -32,7 +32,7 @@ jest.mock("@/src/contexts/LearningStatsContext", () => ({
 }));
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
-  useNavbarStats: jest.fn(() => ({
+  useNavbarStatsActions: jest.fn(() => ({
     applyStatBurst: jest.fn(),
     getStatsSnapshot: jest.fn(() => ({ streakDays: 0, shieldCount: 0 })),
   })),

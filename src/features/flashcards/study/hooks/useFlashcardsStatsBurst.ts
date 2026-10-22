@@ -1,5 +1,5 @@
 import { useCallback } from "react";
-import { type StatBurst, useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { type StatBurst, useNavbarStatsActions } from "@/src/contexts/NavbarStatsContext";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 
 type FlashcardsStatsBurstInput = {
@@ -8,7 +8,7 @@ type FlashcardsStatsBurstInput = {
 };
 
 export function useFlashcardsStatsBurst(refreshErrorMessage: string) {
-  const { applyStatBurst, getStatsSnapshot } = useNavbarStats();
+  const { applyStatBurst, getStatsSnapshot } = useNavbarStatsActions();
 
   return useCallback(
     async ({ logLearningEventPromise, deltas }: FlashcardsStatsBurstInput) => {

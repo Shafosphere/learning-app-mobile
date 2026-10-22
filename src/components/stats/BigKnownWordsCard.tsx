@@ -1,6 +1,6 @@
 import { statsTileStyle } from "./statsTileStyle";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsSnapshot } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import React from "react";
@@ -54,7 +54,7 @@ const BigKnownWordsCard: React.FC = () => {
   const styles = useStyles();
   const { t } = useTranslation();
   const { statsFireEffectEnabled, colors } = useSettings();
-  const { stats } = useNavbarStats();
+  const stats = useNavbarStatsSnapshot();
 
   return (
     <View style={styles.container}>

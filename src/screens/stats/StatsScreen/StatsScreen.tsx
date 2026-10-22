@@ -8,7 +8,7 @@ import { useTranslation } from "react-i18next";
 import { useFocusEffect } from "@react-navigation/native";
 import { useStyles } from "./StatsScreen-styles";
 import { statsIconSizes } from "./statsDesign";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsSnapshot } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import ActivityHeatmap, { type ActivityDay } from "@/src/components/stats/ActivityHeatmap";
@@ -66,7 +66,7 @@ export default function StatsScreen() {
   const { t } = useTranslation();
   const { statsBookshelfEnabled, colors, theme } = useSettings();
   const isDark = theme === "dark";
-  const { stats } = useNavbarStats();
+  const stats = useNavbarStatsSnapshot();
   const { isTabletLayout } = useDeviceLayout();
   const useCenteredTabletLayout = isTabletLayout;
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);

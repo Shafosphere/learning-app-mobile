@@ -1,10 +1,10 @@
 import { act, renderHook } from "@testing-library/react-native";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsActions } from "@/src/contexts/NavbarStatsContext";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { useFlashcardsStatsBurst } from "../useFlashcardsStatsBurst";
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
-  useNavbarStats: jest.fn(),
+  useNavbarStatsActions: jest.fn(),
 }));
 jest.mock("@/src/services/streakProtection", () => ({
   registerProtectedDailyActivity: jest.fn(),
@@ -28,12 +28,9 @@ function deferred<T>() {
 describe("useFlashcardsStatsBurst", () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    jest.mocked(useNavbarStats).mockReturnValue({
+    jest.mocked(useNavbarStatsActions).mockReturnValue({
       applyStatBurst,
       getStatsSnapshot,
-      stats: { masteredCount: 0, promotionsCount: 0, streakDays: 4, shieldCount: 1 },
-      activeStatKey: "mastered",
-      currentBurst: null,
       acknowledgeCurrentBurst: jest.fn(),
     });
     getStatsSnapshot.mockReturnValue({ streakDays: 4, shieldCount: 1 });

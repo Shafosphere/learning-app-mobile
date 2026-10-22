@@ -37,7 +37,7 @@ import {
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import { returnFlashcardToUnknown } from "@/src/services/returnFlashcardToUnknown";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsActions } from "@/src/contexts/NavbarStatsContext";
 import { useCoachmarkFlow } from "@/src/hooks/useCoachmarkFlow";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useAutoScaleToFit } from "@/src/hooks/useAutoScaleToFit";
@@ -75,7 +75,7 @@ jest.mock("@/src/contexts/SettingsContext", () => ({
 }));
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
-  useNavbarStats: jest.fn(() => ({
+  useNavbarStatsActions: jest.fn(() => ({
     applyStatBurst: jest.fn(),
     getStatsSnapshot: jest.fn(() => ({ streakDays: 0, shieldCount: 0 })),
   })),
@@ -487,7 +487,7 @@ type ReviewCardRow = {
 };
 
 const mockedUseSettings = useSettings as jest.Mock;
-const mockedUseNavbarStats = useNavbarStats as jest.Mock;
+const mockedUseNavbarStatsActions = useNavbarStatsActions as jest.Mock;
 const mockedUseCoachmarkFlow = useCoachmarkFlow as jest.Mock;
 const mockedUseDeviceLayout = useDeviceLayout as jest.Mock;
 const mockedUseAutoScaleToFit = useAutoScaleToFit as jest.Mock;
@@ -651,7 +651,7 @@ describe("reviewflashcards correction desync regression", () => {
       shieldCount: 0,
       promotionsCount: 0,
     }));
-    mockedUseNavbarStats.mockReturnValue({
+    mockedUseNavbarStatsActions.mockReturnValue({
       applyStatBurst: applyStatBurstMock,
       getStatsSnapshot: getStatsSnapshotMock,
     });

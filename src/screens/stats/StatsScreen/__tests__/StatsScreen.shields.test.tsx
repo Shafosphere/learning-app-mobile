@@ -3,7 +3,7 @@ import { render, waitFor, within } from "@testing-library/react-native";
 import { Text as MockText } from "react-native";
 
 import StatsScreen from "@/src/screens/stats/StatsScreen/StatsScreen";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsSnapshot } from "@/src/contexts/NavbarStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { themeMap } from "@/src/theme/theme";
 import { getDailyActivitySummariesCustom } from "@/src/db/sqlite/db";
@@ -46,7 +46,7 @@ jest.mock("@/src/contexts/SettingsContext", () => {
 });
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
-  useNavbarStats: jest.fn(),
+  useNavbarStatsSnapshot: jest.fn(),
 }));
 
 jest.mock("@/src/components/stats/BigKnownWordsCard", () => {
@@ -101,8 +101,8 @@ jest.mock("@/src/services/streakProtection", () => ({
   getProtectedDailyStreakState: jest.fn(() => new Promise(() => {})),
 }));
 
-const mockedUseNavbarStats = useNavbarStats as jest.MockedFunction<
-  typeof useNavbarStats
+const mockedUseNavbarStatsSnapshot = useNavbarStatsSnapshot as jest.MockedFunction<
+  typeof useNavbarStatsSnapshot
 >;
 const mockedUseSettings = useSettings as jest.Mock;
 const mockedGetDailyActivitySummariesCustom =
@@ -115,18 +115,11 @@ const mockedGetProtectedDailyStreakState =
   >;
 
 function mockStats(shieldCount: 0 | 1 | 2, streakDays = 12, promotionsCount = 4) {
-  mockedUseNavbarStats.mockReturnValue({
-    stats: {
-      masteredCount: 0,
-      streakDays,
-      shieldCount,
-      promotionsCount,
-    },
-    activeStatKey: "streak",
-    currentBurst: null,
-    applyStatBurst: jest.fn(),
-    acknowledgeCurrentBurst: jest.fn(),
-    getStatsSnapshot: jest.fn(),
+  mockedUseNavbarStatsSnapshot.mockReturnValue({
+    masteredCount: 0,
+    streakDays,
+    shieldCount,
+    promotionsCount,
   });
 }
 

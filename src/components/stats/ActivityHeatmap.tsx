@@ -1,7 +1,8 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import { Image } from "expo-image";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
+  AppState,
   FlatList,
   Pressable,
   StyleSheet,
@@ -342,10 +343,147 @@ function ScrambleText({
   return <Text {...textProps} style={style}>{displayText}</Text>;
 }
 
-export default function ActivityHeatmap({
+type CalendarDayProps = {
+  day: ActivityDay;
+  selected: boolean;
+  future: boolean;
+  active: boolean;
+  shielded: boolean;
+  backgroundColor: string;
+  headline: string;
+  paragraph: string;
+  accent: string;
+  dark: boolean;
+  size: number;
+  radius: number;
+  marginRight: number;
+  marginBottom: number;
+  styles: ReturnType<typeof useStyles>;
+  onSelect: (day: ActivityDay) => void;
+};
+
+const CalendarDay = memo(function CalendarDay({
+  day, selected, future, active, shielded, backgroundColor,
+  headline, paragraph, accent, dark, size, radius,
+  marginRight, marginBottom, styles, onSelect,
+}: CalendarDayProps) {
+  return (
+    <Pressable
+      testID={`activity-heatmap-day-${day.date}`}
+      disabled={future}
+      onPress={() => onSelect(day)}
+      style={[
+        styles.cell,
+        {
+          width: size,
+          height: size,
+          borderRadius: radius,
+          marginRight,
+          marginBottom,
+          backgroundColor,
+          borderWidth: selected ? 2 : 0,
+          borderColor: selected ? accent : "transparent",
+        },
+      ]}
+    >
+      {shielded ? (
+        <Image
+          testID={`activity-heatmap-shield-${day.date}`}
+          source={require("@/assets/icons/tarcza.svg")}
+          contentFit="contain"
+          style={{
+            position: "absolute",
+            width: Math.round(size * 0.82),
+            height: Math.round(size * 0.82),
+            opacity: dark ? 0.34 : 0.28,
+          }}
+        />
+      ) : null}
+      <Text
+        style={[
+          styles.dayNumber,
+          {
+            color: !future && (active || selected) ? headline : paragraph,
+            opacity: future ? 0.45 : active || selected ? 0.95 : 0.7,
+          },
+        ]}
+      >
+        {parseLocalDate(day.date).getDate()}
+      </Text>
+    </Pressable>
+  );
+});
+
+type CalendarMonthProps = {
+  month: ActivityMonth;
+  selectedDate: string | null;
+  todayKey: string;
+  shieldedDates: Set<string>;
+  scale: string[];
+  maxTimeMs: number;
+  pageWidth: number;
+  columns: number;
+  cellSize: number;
+  cellRadius: number;
+  colors: ReturnType<typeof useSettings>["colors"];
+  dark: boolean;
+  styles: ReturnType<typeof useStyles>;
+  onSelect: (day: ActivityDay) => void;
+};
+
+const PAGE_PADDING = 2;
+const CELL_GAP = 8;
+const monthKeyExtractor = (month: ActivityMonth) => month.key;
+
+const CalendarMonth = memo(function CalendarMonth({
+  month, selectedDate, todayKey, shieldedDates, scale, maxTimeMs,
+  pageWidth, columns, cellSize, cellRadius, colors, dark, styles, onSelect,
+}: CalendarMonthProps) {
+  const lastRowStart = Math.floor((month.days.length - 1) / columns) * columns;
+  return (
+    <View
+      testID={`activity-heatmap-month-${month.key}`}
+      style={[styles.monthPage, { width: pageWidth, paddingHorizontal: PAGE_PADDING }]}
+    >
+      <View style={styles.monthGrid}>
+        {month.days.map((day, index) => {
+          const future = day.date > todayKey;
+          const active = !future &&
+            (day.timeMs > 0 || day.learnedCount > 0 || day.totalCount > 0);
+          const colorIndex = day.timeMs <= 0
+            ? 0
+            : Math.min(4, Math.ceil((day.timeMs / maxTimeMs) * 4));
+          return (
+            <CalendarDay
+              key={day.date}
+              day={day}
+              selected={selectedDate === day.date}
+              future={future}
+              active={active}
+              shielded={shieldedDates.has(day.date) && !active && !future}
+              backgroundColor={future ? withAlpha(colors.border, "66") : scale[colorIndex]}
+              headline={colors.headline}
+              paragraph={colors.paragraph}
+              accent={colors.my_green}
+              dark={dark}
+              size={cellSize}
+              radius={cellRadius}
+              marginRight={(index + 1) % columns === 0 ? 0 : CELL_GAP}
+              marginBottom={index >= lastRowStart ? 0 : CELL_GAP}
+              styles={styles}
+              onSelect={onSelect}
+            />
+          );
+        })}
+      </View>
+    </View>
+  );
+});
+
+function ActivityHeatmap({
   data,
   months = 12,
-  shieldedDates = [],
+  shieldedDates,
   onSelect,
 }: Props) {
   const styles = useStyles();
@@ -356,7 +494,7 @@ export default function ActivityHeatmap({
     accessibilityPreferences,
   } = useSettings();
   const listRef = useRef<FlatList<ActivityMonth> | null>(null);
-  const didInitScrollRef = useRef(false);
+  const previousWidthRef = useRef(0);
   const scale = useMemo(
     () => getScale(colors.my_green, colors.border, theme === "dark"),
     [colors.border, colors.my_green, theme]
@@ -366,6 +504,31 @@ export default function ActivityHeatmap({
     [shieldedDates]
   );
   const [containerWidth, setContainerWidth] = useState(0);
+  const [todayKey, setTodayKey] = useState(() => formatLocalDateOnly(new Date()));
+
+  useEffect(() => {
+    let midnightTimeout: ReturnType<typeof setTimeout>;
+
+    const refreshDate = () => {
+      clearTimeout(midnightTimeout);
+      const now = new Date();
+      setTodayKey(formatLocalDateOnly(now));
+      const nextMidnight = new Date(now);
+      nextMidnight.setHours(24, 0, 0, 0);
+      midnightTimeout = setTimeout(refreshDate, nextMidnight.getTime() - now.getTime());
+    };
+
+    refreshDate();
+    const subscription = AppState.addEventListener("change", (state) => {
+      if (state === "active") refreshDate();
+    });
+
+    return () => {
+      clearTimeout(midnightTimeout);
+      subscription.remove();
+    };
+  }, []);
+
   const highContrast = accessibilityPreferences.highContrastEnabled;
   const useThemeAccents = theme === "dark" || highContrast ||
     (accessibilityPreferences.colorBlindMode ?? "none") !== "none";
@@ -407,7 +570,7 @@ export default function ActivityHeatmap({
 
   const monthsData = useMemo<ActivityMonth[]>(() => {
     const result: ActivityMonth[] = [];
-    const today = new Date();
+    const today = parseLocalDate(todayKey);
 
     for (let monthOffset = months - 1; monthOffset >= 0; monthOffset -= 1) {
       const monthDate = new Date(
@@ -450,7 +613,7 @@ export default function ActivityHeatmap({
     }
 
     return result;
-  }, [dataMap, months, t]);
+  }, [dataMap, months, t, todayKey]);
 
   const visibleMonth = monthsData[visibleMonthIndex] ?? monthsData[0] ?? null;
   const selectedDay = useMemo(() => {
@@ -504,44 +667,41 @@ export default function ActivityHeatmap({
   }, [monthsData, onSelect, selectedDate]);
 
   useEffect(() => {
-    if (containerWidth <= 0 || didInitScrollRef.current || monthsData.length <= 1) {
-      return;
+    // Initial positioning belongs to FlatList; only real resizes need correction.
+    if (previousWidthRef.current > 0 && previousWidthRef.current !== containerWidth) {
+      listRef.current?.scrollToOffset({
+        offset: visibleMonthIndex * containerWidth,
+        animated: false,
+      });
     }
+    previousWidthRef.current = containerWidth;
+  }, [containerWidth, visibleMonthIndex]);
 
-    requestAnimationFrame(() => {
-      listRef.current?.scrollToEnd({ animated: false });
-      didInitScrollRef.current = true;
-    });
-  }, [containerWidth, monthsData.length]);
-
-  const pagePadding = 2;
-  const cellGap = 8;
   const pageWidth = Math.max(containerWidth, 1);
-  const gridWidth = Math.max(pageWidth - pagePadding * 2, 1);
-  const rawCellSize = (gridWidth - cellGap * 6) / 7;
+  const gridWidth = Math.max(pageWidth - PAGE_PADDING * 2, 1);
+  const rawCellSize = (gridWidth - CELL_GAP * 6) / 7;
   const baseCellSize = Math.max(32, Math.min(46, Math.floor(rawCellSize)));
   const targetCellSize = baseCellSize * CALENDAR_SCALE;
   const columns = Math.max(
     1,
-    Math.round((gridWidth + cellGap) / (targetCellSize + cellGap))
+    Math.round((gridWidth + CELL_GAP) / (targetCellSize + CELL_GAP))
   );
   // Distribute the available width across the row, rounding down to avoid wrapping.
   const cellSize = Math.floor(
-    ((gridWidth - cellGap * (columns - 1)) / columns) * 100
+    ((gridWidth - CELL_GAP * (columns - 1)) / columns) * 100
   ) / 100;
   const cellRadius = Math.max(8, Math.floor(cellSize / 3.2));
-  const todayKey = formatLocalDateOnly(new Date());
 
-  const pickColor = (timeMs: number) => {
-    if (timeMs <= 0) return scale[0];
-    const index = Math.min(4, Math.ceil((timeMs / maxTimeMs) * 4));
-    return scale[index];
-  };
-
-  const handleDayPress = (day: ActivityDay) => {
+  const handleDayPress = useCallback((day: ActivityDay) => {
     setSelectedDate(day.date);
     onSelect?.(day);
-  };
+  }, [onSelect]);
+
+  const getItemLayout = useCallback((_: ArrayLike<ActivityMonth> | null | undefined, index: number) => ({
+    length: pageWidth,
+    offset: index * pageWidth,
+    index,
+  }), [pageWidth]);
 
   const handlePagerEnd = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     if (pageWidth <= 0) return;
@@ -563,84 +723,34 @@ export default function ActivityHeatmap({
 
   const animateKeyBase = displayedDay?.date ?? "details-empty";
 
-  const renderMonth = ({ item }: { item: ActivityMonth }) => (
-    <View style={[styles.monthPage, { width: pageWidth, paddingHorizontal: pagePadding }]}>
-      <View style={styles.monthGrid}>
-        {item.days.map((day, index) => {
-          const isFuture = day.date > todayKey;
-          const isSelected = selectedDate === day.date;
-          const isLastColumn = (index + 1) % columns === 0;
-          const lastRowStart = Math.floor((item.days.length - 1) / columns) * columns;
-          const isLastRow = index >= lastRowStart;
-          const isActive =
-            !isFuture &&
-            (day.timeMs > 0 || day.learnedCount > 0 || day.totalCount > 0);
-          const isShielded =
-            shieldedDateSet.has(day.date) && !isActive && !isFuture;
-          const backgroundColor = isFuture
-            ? withAlpha(colors.border, "66")
-            : pickColor(day.timeMs);
-          const textColor = isFuture
-            ? colors.paragraph
-            : isActive || isSelected
-              ? colors.headline
-              : colors.paragraph;
-
-          return (
-            <Pressable
-              key={day.date}
-              disabled={isFuture}
-              onPress={() => handleDayPress(day)}
-              style={[
-                styles.cell,
-                {
-                  width: cellSize,
-                  height: cellSize,
-                  borderRadius: cellRadius,
-                  marginRight: isLastColumn ? 0 : cellGap,
-                  marginBottom: isLastRow ? 0 : cellGap,
-                  backgroundColor,
-                  borderWidth: isSelected ? 2 : 0,
-                  borderColor: isSelected ? colors.my_green : "transparent",
-                },
-              ]}
-              >
-                {isShielded ? (
-                  <Image
-                    testID={`activity-heatmap-shield-${day.date}`}
-                    source={require("@/assets/icons/tarcza.svg")}
-                    contentFit="contain"
-                    style={{
-                      position: "absolute",
-                      width: Math.round(cellSize * 0.82),
-                      height: Math.round(cellSize * 0.82),
-                      opacity: theme === "dark" ? 0.34 : 0.28,
-                    }}
-                  />
-                ) : null}
-                <Text
-                  style={[
-                    styles.dayNumber,
-                    {
-                      color: textColor,
-                      opacity: isFuture ? 0.45 : isActive || isSelected ? 0.95 : 0.7,
-                    },
-                  ]}
-                >
-                {parseLocalDate(day.date).getDate()}
-              </Text>
-            </Pressable>
-          );
-        })}
-      </View>
-    </View>
-  );
+  const renderMonth = useCallback(({ item }: { item: ActivityMonth }) => (
+    <CalendarMonth
+      month={item}
+      selectedDate={selectedDate?.startsWith(`${item.key}-`) ? selectedDate : null}
+      todayKey={todayKey}
+      shieldedDates={shieldedDateSet}
+      scale={scale}
+      maxTimeMs={maxTimeMs}
+      pageWidth={pageWidth}
+      columns={columns}
+      cellSize={cellSize}
+      cellRadius={cellRadius}
+      colors={colors}
+      dark={theme === "dark"}
+      styles={styles}
+      onSelect={handleDayPress}
+    />
+  ), [selectedDate, todayKey, shieldedDateSet, scale, maxTimeMs, pageWidth,
+    columns, cellSize, cellRadius, colors, theme, styles, handleDayPress]);
 
   return (
     <View
       testID="activity-heatmap"
       style={styles.container}
-      onLayout={(event) => setContainerWidth(event.nativeEvent.layout.width)}
+      onLayout={(event) => {
+        const width = event.nativeEvent.layout.width;
+        if (width > 0) setContainerWidth(width);
+      }}
     >
       <View style={styles.section}>
         <StatsSectionHeader
@@ -648,7 +758,7 @@ export default function ActivityHeatmap({
           metadata={visibleMonth?.label}
         />
 
-        <FlatList
+        {containerWidth > 0 && <FlatList
           testID="activity-heatmap-pager"
           ref={listRef}
           data={monthsData}
@@ -656,12 +766,16 @@ export default function ActivityHeatmap({
           pagingEnabled
           showsHorizontalScrollIndicator={false}
           bounces={false}
-          keyExtractor={(item) => item.key}
-          getItemLayout={(_, index) => ({ length: pageWidth, offset: index * pageWidth, index })}
+          keyExtractor={monthKeyExtractor}
+          getItemLayout={getItemLayout}
+          initialScrollIndex={Math.max(0, monthsData.length - 1)}
+          // One month fills the viewport; retain neighbors for fast paging.
+          initialNumToRender={1}
+          windowSize={5}
           renderItem={renderMonth}
           onMomentumScrollEnd={handlePagerEnd}
           style={styles.pager}
-        />
+        />}
         <View style={styles.monthNavigation}>
           <MyButton
             accessibilityLabel={t("components.stats.activityHeatmap.navigation.previousMonth")}
@@ -806,3 +920,5 @@ export default function ActivityHeatmap({
     </View>
   );
 }
+
+export default memo(ActivityHeatmap);

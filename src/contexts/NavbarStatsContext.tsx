@@ -50,6 +50,11 @@ type NavbarStatsContextValue = {
   getStatsSnapshot: () => NavbarStatsSnapshot;
 };
 
+type NavbarStatsActions = Pick<
+  NavbarStatsContextValue,
+  "applyStatBurst" | "acknowledgeCurrentBurst" | "getStatsSnapshot"
+>;
+
 const ROTATION_ORDER: readonly NavbarStatKey[] = [
   "mastered",
   "streak",
@@ -76,6 +81,8 @@ const defaultValue: NavbarStatsContextValue = {
 
 const NavbarStatsContext =
   createContext<NavbarStatsContextValue>(defaultValue);
+const NavbarStatsSnapshotContext = createContext(defaultStats);
+const NavbarStatsActionsContext = createContext<NavbarStatsActions>(defaultValue);
 
 const getBurstKeys = (burst: StatBurst): NavbarStatKey[] =>
   ROTATION_ORDER.filter((key) => {
@@ -299,6 +306,11 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  const actions = useMemo(
+    () => ({ applyStatBurst, acknowledgeCurrentBurst, getStatsSnapshot }),
+    [applyStatBurst, acknowledgeCurrentBurst, getStatsSnapshot],
+  );
+
   const value = useMemo(
     () => ({
       stats,
@@ -319,12 +331,25 @@ export function NavbarStatsProvider({ children }: { children: ReactNode }) {
   );
 
   return (
-    <NavbarStatsContext.Provider value={value}>
-      {children}
-    </NavbarStatsContext.Provider>
+    <NavbarStatsSnapshotContext.Provider value={stats}>
+      <NavbarStatsActionsContext.Provider value={actions}>
+        <NavbarStatsContext.Provider value={value}>
+          {children}
+        </NavbarStatsContext.Provider>
+      </NavbarStatsActionsContext.Provider>
+    </NavbarStatsSnapshotContext.Provider>
   );
 }
 
+// Header consumers need statistics, rotation, and burst updates together.
 export function useNavbarStats() {
   return useContext(NavbarStatsContext);
+}
+
+export function useNavbarStatsSnapshot() {
+  return useContext(NavbarStatsSnapshotContext);
+}
+
+export function useNavbarStatsActions() {
+  return useContext(NavbarStatsActionsContext);
 }

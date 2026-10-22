@@ -8,7 +8,7 @@ import Card from "@/src/components/card/card";
 import { useFlashcardsAutoflow } from "@/src/hooks/useFlashcardsAutoflow";
 import { useFlashcardsInteraction } from "@/src/hooks/useFlashcardsInteraction";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import { useNavbarStats } from "@/src/contexts/NavbarStatsContext";
+import { useNavbarStatsActions } from "@/src/contexts/NavbarStatsContext";
 import { registerProtectedDailyActivity } from "@/src/services/streakProtection";
 import {
   getCustomCourseById,
@@ -33,7 +33,7 @@ jest.mock("@/src/contexts/LearningStatsContext", () => ({
 }));
 
 jest.mock("@/src/contexts/NavbarStatsContext", () => ({
-  useNavbarStats: jest.fn(() => ({
+  useNavbarStatsActions: jest.fn(() => ({
     applyStatBurst: jest.fn(),
     getStatsSnapshot: jest.fn(() => ({ streakDays: 0, shieldCount: 0 })),
   })),
@@ -426,7 +426,7 @@ describe("FlashcardsScreen autoflow guard", () => {
     render(<Flashcards />);
     await act(async () => { await Promise.resolve(); });
     const options = mockedUseFlashcardsInteraction.mock.calls.at(-1)?.[0];
-    const { applyStatBurst } = jest.mocked(useNavbarStats).mock.results.at(-1)!.value;
+    const { applyStatBurst } = jest.mocked(useNavbarStatsActions).mock.results.at(-1)!.value;
     await act(async () => {
       options.onCorrectAnswer(box, {
         word: options.boxes.boxOne[0],
