@@ -86,4 +86,11 @@ describe("LearningTimeCard", () => {
     expect(screen.getByText("125 h")).toBeTruthy();
     expect(screen.queryByText("min")).toBeNull();
   });
+  it("keeps period bars proportional to the real yearly total", () => {
+    const screen = render(<LearningTimeCard timeMs={{ week: 0, month: 45 * 60_000, year: 90 * 60_000 }} />);
+    expect(screen.getAllByRole("progressbar").map((bar) => bar.props.accessibilityValue.now)).toEqual([0, 50, 100]);
+    screen.rerender(<LearningTimeCard timeMs={{ week: 0, month: 0, year: 0 }} />);
+    expect(screen.getAllByRole("progressbar").map((bar) => bar.props.accessibilityValue.now)).toEqual([0, 0, 0]);
+  });
+
 });

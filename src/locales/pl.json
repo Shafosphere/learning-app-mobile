@@ -1447,6 +1447,9 @@
           "11": "grudzień"
         },
         "details": {
+          "emptyTitle": "Brak aktywności",
+          "emptyDescription": "Tego dnia nie było nauki",
+          "loading": "Ładowanie aktywności…",
           "selectedDayActivity": "Szczegóły aktywności z wybranego dnia.",
           "noActivityForDay": "Tego dnia nie zapisano jeszcze aktywności."
         },
@@ -1472,7 +1475,7 @@
           "trudneFiszki": "Trudne fiszki"
         },
         "subtitle": {
-          "description": "Najczęściej mylone fiszki"
+          "description": "Najczęściej mylone"
         },
         "scope": {
           "activeCourse": "Aktywny kurs",
@@ -1484,7 +1487,7 @@
           "czasWNauce": "Czas w nauce"
         },
         "subtitle": {
-          "sumaCzasuSpedzonegoNaKartach": "Suma czasu spędzonego na kartach"
+          "sumaCzasuSpedzonegoNaKartach": "Łączny czas nauki"
         },
         "textChild": {
           "jakLiczymyCzas": "Jak liczymy czas?",
@@ -2390,6 +2393,13 @@
         "stats": {
           "textChild": {
             "codziennaPassa": "Codzienna passa"
+          },
+          "sections": {
+            "achievements": "Twoje osiągnięcia",
+            "courses": "Twoje kursy",
+            "activity": "Twoja aktywność",
+            "analysis": "Analiza nauki",
+            "analysisSubtitle": "Zrozum swoje postępy"
           },
           "history": {
             "tabs": {

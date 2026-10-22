@@ -1,10 +1,12 @@
-import { statsTileStyle } from "./statsTileStyle";
 import React from "react";
+import Svg, { Circle, Path, Text as SvgText } from "react-native-svg";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import StatsProgressCard from "./StatsProgressCard";
+import StatsDataBar from "./StatsDataBar";
 import { View, Text } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import StatsSectionHeader from "./StatsSectionHeader";
 import { useTranslation } from "react-i18next";
-import { statsSectionStyles } from "@/src/screens/stats/StatsScreen/statsDesign";
+import { statsAccent, statsIconSizes, statsMetricStyles, statsProgressStyles, statsSectionStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 type Props = {
   timeMs: {
@@ -14,46 +16,19 @@ type Props = {
   };
 };
 
-function withAlpha(color: string, alpha: string) {
-  if (/^#[0-9a-f]{8}$/i.test(color)) {
-    return `${color.slice(0, 7)}${alpha}`;
-  }
-  if (/^#[0-9a-f]{6}$/i.test(color)) {
-    return `${color}${alpha}`;
-  }
-  return color;
-}
-
 const useStyles = createThemeStylesHook((colors) => ({
   section: {
     ...statsSectionStyles.section,
   },
-  metricsList: { gap: 14 },
-  metricCard: {
-    ...statsTileStyle,
-    backgroundColor: colors.secondBackground,
-    overflow: "hidden",
-  },
-  metricTint: {
-    position: "absolute",
-    top: 0,
-    right: 0,
-    bottom: 0,
-    left: 0,
-  },
-  metricContent: {
-    flex: 1,
-    gap: 8,
-    paddingHorizontal: 20,
-    paddingTop: 16,
-    paddingBottom: 12,
-  },
+  metricContent: { ...statsProgressStyles.row, borderBottomColor: colors.border },
+  lastRow: { ...statsProgressStyles.lastRow },
+  icon: { ...statsMetricStyles.iconContainer, backgroundColor: colors.background },
   metricHeader: {
     flexDirection: "row",
     flexWrap: "wrap",
     alignItems: "center",
     justifyContent: "space-between",
-    columnGap: 16,
+    columnGap: 12,
     rowGap: 8,
   },
   metricCopy: {
@@ -61,41 +36,30 @@ const useStyles = createThemeStylesHook((colors) => ({
     flexShrink: 1,
     flexBasis: 120,
     minWidth: 0,
-    gap: 3,
+    gap: 4,
   },
   metricLabel: {
     color: colors.headline,
-    fontSize: 20,
-    lineHeight: 26,
-    fontWeight: "700",
+    fontSize: 16,
+    fontWeight: "600",
   },
   metricDescription: {
     color: colors.paragraph,
-    fontSize: 14,
-    lineHeight: 20,
-    opacity: 0.8,
-  },
-  progressTrack: {
-    height: 15,
-    borderRadius: 999,
-    overflow: "hidden",
-  },
-  progressFill: {
-    height: "100%",
-    borderRadius: 999,
+    fontSize: 13,
+    lineHeight: 18,
   },
   metricValue: {
+    flexGrow: 1,
     flexShrink: 1,
     minWidth: 0,
     color: colors.headline,
-    fontSize: 36,
-    lineHeight: 44,
-    fontWeight: "800",
+    ...statsTypography.metricValue,
+    fontSize: 28,
+    lineHeight: 34,
     textAlign: "right",
-    fontVariant: ["tabular-nums"],
   },
   metricUnit: {
-    fontSize: 24,
+    ...statsTypography.metricLabel,
     fontWeight: "700",
   },
 }));
@@ -113,95 +77,108 @@ function formatDuration(ms: number) {
   };
 }
 
+function LearningPeriodIcon({ days, color }: { days: number; color: string }) {
+  return (
+    <Svg width={statsIconSizes.metric} height={statsIconSizes.metric} viewBox="0 0 48 48" accessible={false}>
+      <Circle cx={24} cy={28} r={17} fill="none" stroke={color} strokeWidth={4} />
+      <Path
+        d="M20 3h8M24 3v8M37 15l4-4"
+        fill="none"
+        stroke={color}
+        strokeWidth={4}
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+      <SvgText
+        x={24}
+        y={28}
+        fill={color}
+        fontSize={days === 365 ? 15 : 20}
+        fontWeight="900"
+        textAnchor="middle"
+        alignmentBaseline="central"
+      >
+        {days}
+      </SvgText>
+    </Svg>
+  );
+}
+
 export default function LearningTimeCard({ timeMs }: Props) {
   const styles = useStyles();
   const { t } = useTranslation();
+  const { colors } = useSettings();
+  const accents = statsAccent(colors);
   const rows = [
     {
       key: "week",
+      days: 7,
       label: t("components.stats.hourlyActivityChart.period.thisWeek"),
       description: t("components.stats.hourlyActivityChart.periodDescription.week"),
       time: timeMs.week,
       value: formatDuration(timeMs.week),
-      tint: "#54B7FF",
-      accent: "#00BFC6",
     },
     {
       key: "month",
+      days: 31,
       label: t("components.stats.hourlyActivityChart.period.thisMonth"),
       description: t("components.stats.hourlyActivityChart.periodDescription.month"),
       time: timeMs.month,
       value: formatDuration(timeMs.month),
-      tint: "#FFC83D",
-      accent: "#F5B800",
     },
     {
       key: "year",
+      days: 365,
       label: t("components.stats.hourlyActivityChart.period.thisYear"),
       description: t("components.stats.hourlyActivityChart.periodDescription.year"),
       time: timeMs.year,
       value: formatDuration(timeMs.year),
-      tint: "#9B78FF",
-      accent: "#9270F5",
     },
   ];
 
   return (
     <View style={styles.section}>
-      <StatsSectionHeader
+      <StatsProgressCard
         title={t("components.stats.hourlyActivityChart.title.czasWNauce")}
-        subtitle={t(
-          "components.stats.hourlyActivityChart.subtitle.sumaCzasuSpedzonegoNaKartach"
-        )}
-      />
-
-      <View style={styles.metricsList}>
-        {rows.map((row) => {
+        subtitle={t("components.stats.hourlyActivityChart.subtitle.sumaCzasuSpedzonegoNaKartach")}
+        headerDivider
+      >
+        {rows.map((row, index) => {
           // The nested calendar periods are shown relative to the year's total.
           const progress = timeMs.year > 0
             ? Math.max(0, Math.min(1, row.time / timeMs.year))
             : 0;
 
           return (
-            <View key={row.key} style={styles.metricCard}>
-              <View
-                pointerEvents="none"
-                style={[styles.metricTint, { backgroundColor: withAlpha(row.tint, "18") }]}
-              />
-              <View style={styles.metricContent}>
-                <View style={styles.metricHeader}>
-                  <View style={styles.metricCopy}>
-                    <Text style={styles.metricLabel}>{row.label}</Text>
-                    <Text style={styles.metricDescription}>{row.description}</Text>
-                  </View>
-                  <Text style={styles.metricValue} numberOfLines={1} adjustsFontSizeToFit>
-                    {row.value.value}
-                    {row.value.unit ? (
-                      <Text style={styles.metricUnit}>{` ${row.value.unit}`}</Text>
-                    ) : null}
-                  </Text>
-                </View>
+            <View key={row.key} style={[styles.metricContent, index === rows.length - 1 && styles.lastRow]}>
+              <View style={styles.metricHeader}>
                 <View
-                  accessible
-                  accessibilityRole="progressbar"
-                  accessibilityLabel={t("components.stats.hourlyActivityChart.shareOfYear", { period: row.label })}
-                  accessibilityValue={{ min: 0, max: 100, now: Math.round(progress * 100) }}
-                  style={[styles.progressTrack, { backgroundColor: withAlpha(row.accent, "26") }]}
+                  style={styles.icon}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
                 >
-                  <View style={[
-                    styles.progressFill,
-                    {
-                      width: `${progress * 100}%`,
-                      minWidth: progress > 0 ? 15 : 0,
-                      backgroundColor: row.accent,
-                    },
-                  ]} />
+                  <LearningPeriodIcon days={row.days} color={accents.time} />
                 </View>
+                <View style={styles.metricCopy}>
+                  <Text style={styles.metricLabel}>{row.label}</Text>
+                  <Text style={styles.metricDescription}>{row.description}</Text>
+                </View>
+                <Text style={styles.metricValue}>
+                  {row.value.value}
+                  {row.value.unit ? (
+                    <Text style={styles.metricUnit}>{` ${row.value.unit}`}</Text>
+                  ) : null}
+                </Text>
               </View>
+              <StatsDataBar
+                progress={progress}
+                color={accents.time}
+                label={t("components.stats.hourlyActivityChart.shareOfYear", { period: row.label })}
+              />
             </View>
           );
         })}
-      </View>
+      </StatsProgressCard>
     </View>
   );
 }

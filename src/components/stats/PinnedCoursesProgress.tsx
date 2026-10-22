@@ -13,7 +13,7 @@ import {
   getCustomCoursesWithCardCounts,
 } from "@/src/db/sqlite/db";
 import { useTranslation } from "react-i18next";
-import { statsIconBackgrounds, statsIconSizes, statsMetricStyles, statsProgressStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
+import { statsAccent, statsIconBackgrounds, statsIconSizes, statsMetricStyles, statsProgressStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 type Item = {
   key: string;
@@ -50,6 +50,7 @@ export default function PinnedCoursesProgress() {
   const styles = useStyles();
   const { t } = useTranslation();
   const { activeCustomCourseId, pinnedOfficialCourseIds, colors } = useSettings();
+  const accents = statsAccent(colors);
   const [items, setItems] = useState<Item[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   useFocusEffect(
@@ -110,7 +111,9 @@ export default function PinnedCoursesProgress() {
   return (
     <View style={styles.wrapper}>
       <StatsSectionHeader
-        title={t("components.stats.pinnedCoursesProgress.title.postepPrzypietychKursow")}
+        icon="book-open"
+        title={t("screens.stats.stats.stats.sections.courses")}
+        subtitle={t("components.stats.pinnedCoursesProgress.title.postepPrzypietychKursow")}
       />
       <StatsProgressCard>
         {isLoading ? (
@@ -150,7 +153,7 @@ export default function PinnedCoursesProgress() {
                   })}
                   value={t("components.stats.progressBar.textChildTemplate.value", { value: percent })}
                   progress={it.progress}
-                  progressColor={colors.my_green}
+                  progressColor={accents.progress}
                   progressLabel={it.label}
                   trackTestID={`pinned-course-progress-${it.key}`}
                   fillTestID={`pinned-course-fill-${it.key}`}

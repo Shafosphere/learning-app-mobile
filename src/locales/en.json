@@ -1443,6 +1443,9 @@
           "11": "December"
         },
         "details": {
+          "emptyTitle": "No activity recorded",
+          "emptyDescription": "You haven't studied on this day",
+          "loading": "Loading activity…",
           "selectedDayActivity": "Activity details for the selected day.",
           "noActivityForDay": "No activity has been saved for this day yet."
         },
@@ -1468,7 +1471,7 @@
           "trudneFiszki": "Hard flashcards"
         },
         "subtitle": {
-          "description": "Most often missed flashcards"
+          "description": "Most often missed"
         },
         "scope": {
           "activeCourse": "Active course",
@@ -1480,7 +1483,7 @@
           "czasWNauce": "Learning time"
         },
         "subtitle": {
-          "sumaCzasuSpedzonegoNaKartach": "Total time spent on cards"
+          "sumaCzasuSpedzonegoNaKartach": "Total time spent studying"
         },
         "textChild": {
           "jakLiczymyCzas": "How do we count time?",
@@ -2386,6 +2389,13 @@
         "stats": {
           "textChild": {
             "codziennaPassa": "Daily streak"
+          },
+          "sections": {
+            "achievements": "Your achievements",
+            "courses": "Your courses",
+            "activity": "Your activity",
+            "analysis": "Learning analysis",
+            "analysisSubtitle": "Understand your progress"
           },
           "history": {
             "tabs": {

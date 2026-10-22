@@ -34,6 +34,7 @@ export const useStyles = createThemeStylesHook((colors) => ({
     ...statsSectionStyles.list,
     backgroundColor: colors.background,
   },
+  section: { ...statsSectionStyles.section },
   grid: {
     flexDirection: "row",
     flexWrap: "wrap",
@@ -62,7 +63,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   miniStatValue: {
     ...statsTypography.metricValue,
-    fontVariant: ["tabular-nums"],
     color: colors.headline,
   },
   miniStatShieldStack: {
@@ -71,14 +71,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   miniStatLabel: {
     ...statsTypography.metricLabel,
     color: colors.paragraph,
-  },
-  miniStatChart: {
-    ...statsMetricStyles.indicatorChart,
-  },
-  miniStatChartBar: {
-    ...statsMetricStyles.indicatorChartBar,
-    backgroundColor: colors.my_green,
-    opacity: 0.4,
   },
   emptyWrap: {
     flex: 1,

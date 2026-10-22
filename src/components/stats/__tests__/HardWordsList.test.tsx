@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-require-imports */
-import { fireEvent, render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor, within } from "@testing-library/react-native";
 import React from "react";
 import { FlatList, StyleSheet } from "react-native";
 
@@ -206,6 +206,68 @@ describe("HardWordsList", () => {
     expect(getByText("Najczęściej mylone fiszki")).toBeTruthy();
     expect(previousButton()).toBeDisabled();
     expect(nextButton()).toBeEnabled();
+  });
+
+  it.each(["empty", "error"])("preserves loading and the %s fallback inside the analytical card", async (outcome) => {
+    let resolve!: (value: []) => void;
+    let reject!: (error: Error) => void;
+    mockedGetHardFlashcards.mockReturnValue(new Promise((done, fail) => { resolve = done; reject = fail; }));
+    const screen = render(<HardWordsList />);
+    layoutPager(screen.getByTestId);
+    expect(screen.getByText("Ładowanie…")).toBeTruthy();
+    if (outcome === "error") reject(new Error("read failed"));
+    else resolve([]);
+    await waitFor(() => expect(screen.getByText("Brak danych – spróbuj pograć dłużej.")).toBeTruthy());
+    expect(screen.queryByText("Ładowanie…")).toBeNull();
+    expect(within(screen.getByTestId("hard-words-scope-label")).getByText("Wszystkie")).toBeTruthy();
+  });
+
+  it("synchronizes the plain scope label with arrows and swipes without fetching again", async () => {
+    mockSettings(7);
+    mockedGetHardFlashcards.mockResolvedValue([]);
+    const scroll = jest.spyOn(FlatList.prototype, "scrollToOffset").mockImplementation(() => {});
+    const screen = render(<HardWordsList />);
+    layoutPager(screen.getByTestId);
+    await waitFor(() => expect(mockedGetHardFlashcards).toHaveBeenCalledTimes(2));
+    const scope = () => screen.getByTestId("hard-words-scope-label");
+    expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
+    expect(screen.queryByTestId("hard-words-scope-button")).toBeNull();
+    expect(screen.queryByRole("radio")).toBeNull();
+
+    fireEvent.press(screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.previousPage" }));
+    expect(scroll).toHaveBeenLastCalledWith({ offset: 0, animated: true });
+    expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
+
+    fireEvent.press(screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.nextPage" }));
+    expect(scroll).toHaveBeenLastCalledWith({ offset: 320, animated: true });
+    expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
+    fireEvent(screen.UNSAFE_getByType(FlatList), "momentumScrollEnd", { nativeEvent: { contentOffset: { x: 0 } } });
+    expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
+    expect(mockedGetHardFlashcards).toHaveBeenCalledTimes(2);
+  });
+
+  it("resets the scope label when the active course changes or is removed", async () => {
+    mockSettings(7);
+    mockedGetHardFlashcards.mockResolvedValue([]);
+    jest.spyOn(FlatList.prototype, "scrollToOffset").mockImplementation(() => {});
+    const screen = render(<HardWordsList />);
+    layoutPager(screen.getByTestId);
+    await waitFor(() => expect(mockedGetHardFlashcards).toHaveBeenCalledWith(7, 5));
+    const previous = () => screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.previousPage" });
+    const scope = () => screen.getByTestId("hard-words-scope-label");
+    fireEvent.press(previous());
+    expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
+    mockSettings(8);
+    screen.rerender(<HardWordsList />);
+    await waitFor(() => expect(mockedGetHardFlashcards).toHaveBeenCalledWith(8, 5));
+    expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
+    fireEvent.press(previous());
+    expect(within(scope()).getByText("Aktywny kurs")).toBeTruthy();
+    mockSettings(null);
+    screen.rerender(<HardWordsList />);
+    expect(within(scope()).getByText("Wszystkie")).toBeTruthy();
+    expect(previous()).toBeDisabled();
+    expect(screen.getByRole("button", { name: "components.stats.hardWordsList.navigation.nextPage" })).toBeDisabled();
   });
 
   it("scales error bars against the hardest flashcard on the page", async () => {

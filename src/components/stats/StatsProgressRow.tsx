@@ -1,4 +1,5 @@
 import React from "react";
+import StatsDataBar from "./StatsDataBar";
 import { Text, View, type ViewProps } from "react-native";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import {
@@ -31,14 +32,12 @@ const useStyles = createThemeStylesHook((colors) => ({
   lastRow: { ...statsProgressStyles.lastRow },
   header: { ...statsMetricStyles.contentRow },
   copy: { ...statsMetricStyles.copy },
-  title: { ...statsTypography.metricLabel, color: colors.headline },
+  title: { ...statsTypography.cardTitle, color: colors.headline },
   metaRow: { ...statsProgressStyles.metaRow },
   label: { ...statsTypography.metricLabel, color: colors.paragraph, flexShrink: 1 },
   labelWithoutTitle: { flex: 1, minWidth: 0 },
-  value: { ...statsTypography.metricLabel, color: colors.headline },
-  track: { ...statsMetricStyles.progressTrack, backgroundColor: colors.background },
-  fill: { height: "100%", borderRadius: 999 },
-  skeletonIcon: { ...statsMetricStyles.iconContainer },
+  value: { ...statsTypography.metricLabel, fontWeight: "700", fontVariant: ["tabular-nums"], color: colors.headline },
+  skeletonIcon: { ...statsMetricStyles.iconContainer, backgroundColor: colors.border },
   skeletonTitle: {
     width: "58%", height: 20, borderRadius: 999,
     backgroundColor: colors.border, opacity: 0.18,
@@ -74,28 +73,19 @@ export default function StatsProgressRow({
   trackTestID, fillTestID, fillAccessibilityLabel, ...frameProps
 }: Props) {
   const styles = useStyles();
-  const clampedProgress = Math.max(0, Math.min(1, progress));
 
   return (
     <RowFrame
       {...frameProps}
       track={(
-        <View
+        <StatsDataBar
+          progress={progress}
+          color={progressColor}
+          label={progressLabel}
           testID={trackTestID}
-          style={styles.track}
-          accessible
-          accessibilityRole="progressbar"
-          accessibilityLabel={progressLabel}
-          accessibilityValue={{ min: 0, max: 100, now: Math.round(clampedProgress * 100) }}
-        >
-          {clampedProgress > 0 ? (
-            <View
-              testID={fillTestID}
-              accessibilityLabel={fillAccessibilityLabel}
-              style={[styles.fill, { width: `${clampedProgress * 100}%`, backgroundColor: progressColor }]}
-            />
-          ) : null}
-        </View>
+          fillTestID={fillTestID}
+          fillAccessibilityLabel={fillAccessibilityLabel}
+        />
       )}
     >
       {title ? <Text style={styles.title}>{title}</Text> : null}

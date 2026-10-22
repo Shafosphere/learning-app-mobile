@@ -1,8 +1,9 @@
 import type { TextStyle, ViewStyle } from "react-native";
 import { statsTileStyle } from "@/src/components/stats/statsTileStyle";
+import type { ThemePalette } from "@/src/theme/theme";
 
 /**
- * Statistics screen defaults, taken from the ActivityHeatmap metric tiles.
+ * Shared hierarchy and spacing for every statistics section.
  * Spread typography into createThemeStylesHook so accessibility text scaling
  * still applies. Keep theme colors and component-specific margins local.
  */
@@ -13,8 +14,13 @@ export const statsTypography = {
     fontWeight: "800",
   },
   description: {
-    fontSize: 16,
-    lineHeight: 22,
+    fontSize: 14,
+    lineHeight: 20,
+  },
+  cardTitle: {
+    fontSize: 18,
+    lineHeight: 24,
+    fontWeight: "700",
   },
   badgeText: {
     fontSize: 14,
@@ -22,13 +28,14 @@ export const statsTypography = {
     fontWeight: "700",
   },
   metricValue: {
-    fontSize: 44,
-    lineHeight: 48,
+    fontSize: 32,
+    lineHeight: 38,
     fontWeight: "800",
+    fontVariant: ["tabular-nums"],
   },
   metricLabel: {
-    fontSize: 22,
-    lineHeight: 28,
+    fontSize: 16,
+    lineHeight: 22,
   },
 } satisfies Record<string, TextStyle>;
 
@@ -42,7 +49,7 @@ export const statsMetricStyles = {
   list: {
     flexDirection: "column",
     alignItems: "stretch",
-    gap: 16,
+    gap: 12,
   },
   card: {
     ...statsTileStyle,
@@ -51,9 +58,9 @@ export const statsMetricStyles = {
     minWidth: 0,
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
-    minHeight: 100,
-    padding: 12,
+    gap: 12,
+    minHeight: 88,
+    padding: 16,
   },
   iconContainer: {
     width: 68,
@@ -70,7 +77,7 @@ export const statsMetricStyles = {
   contentRow: {
     flexDirection: "row",
     alignItems: "center",
-    gap: 16,
+    gap: 12,
   },
   trailingIndicator: {
     alignSelf: "flex-end",
@@ -79,20 +86,8 @@ export const statsMetricStyles = {
     flexShrink: 0,
     gap: 4,
   },
-  indicatorChart: {
-    alignSelf: "flex-end",
-    height: statsIconSizes.metric,
-    flexDirection: "row",
-    alignItems: "flex-end",
-    flexShrink: 0,
-    gap: 4,
-  },
-  indicatorChartBar: {
-    width: 8,
-    borderRadius: 4,
-  },
   progressTrack: {
-    height: 15,
+    height: 8,
     borderRadius: 999,
     overflow: "hidden",
   },
@@ -130,4 +125,21 @@ export const statsProgressStyles = {
   },
 } satisfies Record<string, ViewStyle | TextStyle>;
 
+/** Repeating decorative backgrounds for course and flashcard thumbnails. */
 export const statsIconBackgrounds = ["#E8F0FF", "#E8FAED", "#EEE9FF", "#FFECEF"] as const;
+
+/** Green: progress, success, and learning time; red: streak and errors. */
+export function statsIconBackground(color: string) {
+  return /^#[0-9a-f]{6}([0-9a-f]{2})?$/i.test(color)
+    ? `${color.slice(0, 7)}26`
+    : color;
+}
+
+export function statsAccent(colors: ThemePalette) {
+  return {
+    progress: colors.my_green,
+    streak: colors.my_red,
+    difficulty: colors.my_red,
+    time: colors.my_green,
+  };
+}

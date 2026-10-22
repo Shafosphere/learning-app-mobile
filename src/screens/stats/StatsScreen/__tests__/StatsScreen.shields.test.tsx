@@ -59,13 +59,15 @@ jest.mock("@/src/components/stats/ActivityHeatmap", () => {
   function MockActivityHeatmap({
     data,
     shieldedDates,
+    isLoading,
   }: {
     data: unknown[];
     shieldedDates?: string[];
+    isLoading?: boolean;
   }) {
     return (
       <MockText testID="activity-heatmap-props">
-        {JSON.stringify({ data, shieldedDates })}
+        {JSON.stringify({ data, shieldedDates, isLoading })}
       </MockText>
     );
   }
@@ -170,6 +172,30 @@ describe("StatsScreen streak shields", () => {
     screen.rerender(<StatsScreen />);
     expect(screen.getByTestId("streak-value")).toHaveTextContent("0");
     expect(screen.getByTestId("jumps-value")).toHaveTextContent("0");
+  });
+
+  it("passes loading state until activity summaries have finished loading", async () => {
+    mockStats(0);
+    let finish!: (value: []) => void;
+    mockedGetDailyActivitySummariesCustom.mockReturnValue(new Promise((resolve) => { finish = resolve; }));
+    mockedGetProtectedDailyStreakState.mockRejectedValue(new Error("shield read failed"));
+    const screen = render(<StatsScreen />);
+    const props = () => JSON.parse(screen.getByTestId("activity-heatmap-props").props.children);
+    expect(props().isLoading).toBe(true);
+    finish([]);
+    await waitFor(() => expect(props().isLoading).toBe(false));
+  });
+
+  it("ends the loading state when activity summaries fail", async () => {
+    mockStats(0);
+    mockedGetDailyActivitySummariesCustom.mockRejectedValue(new Error("activity read failed"));
+    const screen = render(<StatsScreen />);
+    await waitFor(() => {
+      const props = JSON.parse(screen.getByTestId("activity-heatmap-props").props.children);
+      expect(props.isLoading).toBe(false);
+      expect(props.data).toEqual([]);
+    });
+    expect(mockedGetProtectedDailyStreakState).not.toHaveBeenCalled();
   });
 
   it("keeps heatmap activity when shield history fails to load", async () => {

@@ -2,6 +2,7 @@ import { act, fireEvent, render, within } from "@testing-library/react-native";
 import React from "react";
 import { AppState, FlatList, useWindowDimensions } from "react-native";
 
+import { resolveThemeColors } from "@/src/theme/theme";
 import { useSettings } from "@/src/contexts/SettingsContext";
 
 import ActivityHeatmap, {
@@ -79,7 +80,7 @@ function activityDay(date: string, overrides: Partial<ActivityDay> = {}): Activi
 }
 
 function measure(screen: ReturnType<typeof render>, width = 350) {
-  fireEvent(screen.getByTestId("activity-heatmap"), "layout", {
+  fireEvent(screen.getByTestId("activity-heatmap-calendar"), "layout", {
     nativeEvent: { layout: { width, height: 0, x: 0, y: 0 } },
   });
 }
@@ -145,7 +146,7 @@ describe("ActivityHeatmap month navigation", () => {
     const scrollToOffset = jest.spyOn(FlatList.prototype, "scrollToOffset")
       .mockImplementation(() => {});
     const screen = renderHeatmap(<ActivityHeatmap data={[]} months={2} />);
-    fireEvent(screen.getByTestId("activity-heatmap"), "layout", {
+    fireEvent(screen.getByTestId("activity-heatmap-calendar"), "layout", {
       nativeEvent: { layout: { width: 350, height: 0, x: 0, y: 0 } },
     });
     act(() => { jest.advanceTimersByTime(32); });
@@ -168,7 +169,7 @@ describe("ActivityHeatmap month navigation", () => {
     const scrollToOffset = jest.spyOn(FlatList.prototype, "scrollToOffset")
       .mockImplementation(() => {});
     const screen = renderHeatmap(<ActivityHeatmap data={[]} months={3} />);
-    fireEvent(screen.getByTestId("activity-heatmap"), "layout", {
+    fireEvent(screen.getByTestId("activity-heatmap-calendar"), "layout", {
       nativeEvent: { layout: { width: 350, height: 0, x: 0, y: 0 } },
     });
     act(() => { jest.advanceTimersByTime(32); });
@@ -184,7 +185,7 @@ describe("ActivityHeatmap month navigation", () => {
 
   it("disables both buttons when there is only one month", () => {
     const screen = renderHeatmap(<ActivityHeatmap data={[]} months={1} />);
-    fireEvent(screen.getByTestId("activity-heatmap"), "layout", {
+    fireEvent(screen.getByTestId("activity-heatmap-calendar"), "layout", {
       nativeEvent: { layout: { width: 350, height: 0, x: 0, y: 0 } },
     });
     expect(screen.getByRole("button", { name: previousLabel })).toBeDisabled();
@@ -202,7 +203,7 @@ describe("ActivityHeatmap day details", () => {
     jest.useRealTimers();
   });
 
-  it("animates the date and description when selecting another day", () => {
+  it("animates the date and switches empty content to real activity when selecting another day", () => {
     jest.useFakeTimers();
     jest.setSystemTime(new Date(2026, 9, 21, 12));
     const screen = renderHeatmap(
@@ -213,13 +214,14 @@ describe("ActivityHeatmap day details", () => {
     );
     const previousTitle = "21 components.stats.activityHeatmap.months.9 2026";
     const nextTitle = "20 components.stats.activityHeatmap.months.9 2026";
-    const previousDescription = "components.stats.activityHeatmap.details.noActivityForDay";
+    const previousDescription = "components.stats.activityHeatmap.details.emptyDescription";
     const nextDescription = "components.stats.activityHeatmap.details.selectedDayActivity";
     const includeAnimation = { includeHiddenElements: true };
 
+    expect(screen.getByText(previousDescription)).toBeTruthy();
     fireEvent.press(screen.getByText("20"));
     expect(screen.getByText(previousTitle, includeAnimation)).toBeTruthy();
-    expect(screen.getByText(previousDescription, includeAnimation)).toBeTruthy();
+    expect(screen.queryByTestId("activity-details-empty")).toBeNull();
     expect(screen.getByLabelText(nextTitle)).toBeTruthy();
     expect(screen.getByText(nextTitle, includeAnimation)).toHaveStyle({ opacity: 0 });
 
@@ -231,7 +233,45 @@ describe("ActivityHeatmap day details", () => {
 
     act(() => { jest.advanceTimersByTime(1000); });
     expect(screen.getAllByText(nextTitle, includeAnimation)).toHaveLength(2);
-    expect(screen.getAllByText(nextDescription, includeAnimation)).toHaveLength(2);
+    expect(screen.getAllByText(nextDescription, includeAnimation)).toHaveLength(1);
+  });
+
+  it("shows loading before the empty state and updates when real data arrives", () => {
+    const screen = renderHeatmap(<ActivityHeatmap data={[]} months={1} isLoading />);
+    expect(screen.getByTestId("activity-details-loading")).toBeTruthy();
+    expect(screen.queryByTestId("activity-details-empty")).toBeNull();
+    screen.rerender(<ActivityHeatmap data={[]} months={1} />);
+    expect(screen.getByTestId("activity-details-empty")).toBeTruthy();
+    expect(screen.queryByTestId("activity-details-grid")).toBeNull();
+    screen.rerender(<ActivityHeatmap data={[activityDay(todayKey, { timeMs: 60000 })]} months={1} />);
+    expect(screen.queryByTestId("activity-details-empty")).toBeNull();
+    expect(within(screen.getByTestId("activity-details-stat-time")).getByText("1")).toBeTruthy();
+  });
+
+  it.each(["timeMs", "learnedCount", "correctCount", "wrongCount", "promotionsCount", "totalCount"] as const)(
+    "treats a positive %s as activity even when other fields are zero",
+    (field) => {
+      const screen = renderHeatmap(<ActivityHeatmap data={[activityDay(todayKey, { [field]: 1 })]} months={1} />);
+      expect(screen.getByTestId("activity-details-grid")).toBeTruthy();
+      expect(screen.queryByTestId("activity-details-empty")).toBeNull();
+    },
+  );
+
+  it("keeps shield-only days empty and switches back after selecting a day without events", () => {
+    jest.useFakeTimers();
+    jest.setSystemTime(new Date(2026, 9, 21, 12));
+    const screen = renderHeatmap(<ActivityHeatmap
+      data={[activityDay("2026-10-20", { correctCount: 2 })]}
+      shieldedDates={["2026-10-21"]}
+      months={1}
+    />);
+    expect(screen.getByTestId("activity-details-empty")).toBeTruthy();
+    expect(screen.getByTestId("activity-heatmap-shield-2026-10-21")).toBeTruthy();
+    fireEvent.press(dayCell(screen, 20));
+    expect(screen.getByTestId("activity-details-grid")).toBeTruthy();
+    fireEvent.press(dayCell(screen, 21));
+    expect(screen.getByTestId("activity-details-empty")).toBeTruthy();
+    expect(screen.queryByTestId("activity-details-grid")).toBeNull();
   });
 
   it.each([
@@ -245,7 +285,7 @@ describe("ActivityHeatmap day details", () => {
     jest.mocked(useWindowDimensions).mockReturnValue({
       width: 375, height: 812, scale: 1, fontScale,
     });
-    const screen = renderHeatmap(<ActivityHeatmap data={[]} months={1} />);
+    const screen = renderHeatmap(<ActivityHeatmap data={[activityDay(todayKey, { totalCount: 1 })]} months={1} />);
 
     for (const gridWidth of [width, 500]) {
       fireEvent(screen.getByTestId("activity-details-grid"), "layout", {
@@ -264,7 +304,7 @@ describe("ActivityHeatmap day details", () => {
 
   it("resolves animated counts and total minutes after updating the day", () => {
     jest.useFakeTimers();
-    const screen = renderHeatmap(<ActivityHeatmap data={[]} months={1} />);
+    const screen = renderHeatmap(<ActivityHeatmap data={[activityDay(todayKey, { totalCount: 1 })]} months={1} />);
     expect(within(screen.getByTestId("activity-details-stat-time")).getByText("0")).toBeTruthy();
 
     screen.rerender(<ActivityHeatmap
@@ -511,6 +551,26 @@ describe("ActivityHeatmap rendering boundaries", () => {
     expect(within(screen.getByTestId("activity-details-stat-time")).getByText("1")).toBeTruthy();
   });
 
+  it.each(["light", "dark"] as const)("keeps both empty and active calendar days readable in %s high contrast", (theme) => {
+    const original = jest.mocked(useSettings)();
+    const colors = resolveThemeColors(theme, { highContrast: true });
+    jest.mocked(useSettings).mockReturnValue({
+      ...original, theme, colors,
+      accessibilityPreferences: { ...original.accessibilityPreferences, highContrastEnabled: true },
+    });
+    try {
+      const screen = renderHeatmap(<ActivityHeatmap data={[activityDay("2026-10-21", { timeMs: 60000 })]} months={1} />);
+      expect(dayCell(screen, 20)).toHaveStyle({ backgroundColor: colors.background });
+      expect(within(dayCell(screen, 20)).getByText("20")).toHaveStyle({ color: colors.headline, opacity: 1 });
+      expect(within(dayCell(screen, 21)).getByText("21")).toHaveStyle({
+        color: theme === "light" ? colors.lightbg : colors.darkbg,
+        opacity: 1,
+      });
+    } finally {
+      jest.mocked(useSettings).mockReturnValue(original);
+    }
+  });
+
   it("propagates theme, contrast, and font changes through memoized cells", () => {
     const settings = jest.mocked(useSettings)();
     const data: ActivityDay[] = [];
@@ -524,10 +584,10 @@ describe("ActivityHeatmap rendering boundaries", () => {
         fontScaleMultiplier: 1.5,
       });
       screen.rerender(<ActivityHeatmap data={data} months={1} shieldedDates={["2026-10-21"]} />);
-      expect(dayCell(screen, 21)).toHaveStyle({ backgroundColor: "#123456", borderColor: "#abcdef" });
-      expect(within(dayCell(screen, 21)).getByText("21")).toHaveStyle({ color: "#ffffff", fontSize: 33.75 });
+      expect(dayCell(screen, 21)).toHaveStyle({ backgroundColor: settings.colors.background, borderColor: "#abcdef" });
+      expect(within(dayCell(screen, 21)).getByText("21")).toHaveStyle({ color: settings.colors.darkbg, fontSize: 33.75 });
       expect(screen.getByTestId("activity-heatmap-shield-2026-10-21")).toHaveStyle({ opacity: 0.34 });
-      expect(screen.getByTestId("activity-details-stat-time")).toHaveStyle({ borderWidth: 1 });
+      expect(screen.getByTestId("activity-details-card")).toHaveStyle({ borderWidth: 1 });
     } finally {
       jest.mocked(useSettings).mockReturnValue(settings);
     }

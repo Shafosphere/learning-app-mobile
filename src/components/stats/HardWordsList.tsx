@@ -17,18 +17,29 @@ import { SvgUri, SvgXml } from "react-native-svg";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 import { getHardFlashcards, type HardFlashcard } from "@/src/db/sqlite/db";
 import { useSettings } from "@/src/contexts/SettingsContext";
-import StatsSectionHeader from "./StatsSectionHeader";
 import { useTranslation } from "react-i18next";
-import { statsIconBackgrounds, statsIconSizes, statsMetricStyles, statsSectionStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
+import { statsAccent, statsIconBackgrounds, statsIconSizes, statsMetricStyles, statsSectionStyles, statsTypography } from "@/src/screens/stats/StatsScreen/statsDesign";
 
 const useStyles = createThemeStylesHook((colors) => ({
   section: {
     ...statsSectionStyles.section,
   },
+  scopeContainer: {
+    maxWidth: "45%",
+    flexShrink: 0,
+    alignSelf: "flex-start",
+  },
+  scopeLabel: {
+    fontSize: 13,
+    color: colors.paragraph,
+    flexShrink: 1,
+    textAlign: "right",
+  },
   pager: {
     alignSelf: "stretch",
   },
   navigation: {
+    padding: 16,
     flexDirection: "row",
     gap: 12,
   },
@@ -113,6 +124,7 @@ export default function HardWordsList() {
   const styles = useStyles();
   const { t } = useTranslation();
   const { activeCustomCourseId, colors } = useSettings();
+  const accents = statsAccent(colors);
   const listRef = useRef<FlatList<HardWordsPage> | null>(null);
   const [globalItems, setGlobalItems] = useState<HardFlashcard[]>([]);
   const [activeItems, setActiveItems] = useState<HardFlashcard[]>([]);
@@ -190,13 +202,15 @@ export default function HardWordsList() {
   const canGoBack = pagerWidth > 0 && visiblePageIndex > 0;
   const canGoForward = pagerWidth > 0 && visiblePageIndex < pages.length - 1;
 
-  const changePage = (direction: -1 | 1) => {
+  const selectPage = (index: number) => {
     if (pagerWidth <= 0) return;
-    const nextIndex = Math.max(0, Math.min(pages.length - 1, visiblePageIndex + direction));
+    const nextIndex = Math.max(0, Math.min(pages.length - 1, index));
     if (nextIndex === visiblePageIndex) return;
     listRef.current?.scrollToOffset({ offset: nextIndex * pageWidth, animated: true });
     setVisiblePageIndex(nextIndex);
   };
+
+  const changePage = (direction: -1 | 1) => selectPage(visiblePageIndex + direction);
 
   const renderThumbnail = (item: HardFlashcard, index: number) => {
     const imageUri = getFlashcardImage(item);
@@ -209,7 +223,7 @@ export default function HardWordsList() {
           <MaterialCommunityIcons
             name="cards"
             size={statsIconSizes.metric}
-            color={colors.my_green}
+            color={accents.difficulty}
           />
         </View>
       );
@@ -284,7 +298,7 @@ export default function HardWordsList() {
                   label={getFlashcardLabel(flashcard)}
                   value={formatWrongCount(flashcard.wrongCount)}
                   progress={progress}
-                  progressColor={colors.my_red}
+                  progressColor={accents.difficulty}
                   progressLabel={getFlashcardLabel(flashcard)}
                   fillTestID={`hard-word-fill-${flashcard.id}`}
                   fillAccessibilityLabel={t(
@@ -302,14 +316,17 @@ export default function HardWordsList() {
 
   return (
     <View style={styles.section}>
-      <StatsSectionHeader
+      <StatsProgressCard
         title={t("components.stats.hardWordsList.title.trudneFiszki")}
         subtitle={t("components.stats.hardWordsList.subtitle.description")}
-        metadata={visiblePage?.scope}
-        metadataWidthReference={t("components.stats.hardWordsList.scope.activeCourse")}
-      />
-
-      <StatsProgressCard
+        headerDivider
+        action={(
+          <View style={styles.scopeContainer}>
+            <Text testID="hard-words-scope-label" style={styles.scopeLabel}>
+              {visiblePage?.scope}
+            </Text>
+          </View>
+        )}
         testID="hard-words-pager-frame"
         onLayout={(event) => setPagerWidth(event.nativeEvent.layout.width)}
       >
@@ -340,43 +357,43 @@ export default function HardWordsList() {
             style={styles.pager}
           />
         ) : null}
+        <View style={styles.navigation}>
+          <MyButton
+            accessibilityLabel={t("components.stats.hardWordsList.navigation.previousPage")}
+            color="my_yellow"
+            onPress={() => changePage(-1)}
+            disabled={!canGoBack}
+            autoWidth
+            style={styles.navigationButton}
+          >
+            <Ionicons
+              name="chevron-back"
+              size={24}
+              color={colors.headline}
+              style={{ opacity: canGoBack ? 1 : 0.35 }}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
+          </MyButton>
+          <MyButton
+            accessibilityLabel={t("components.stats.hardWordsList.navigation.nextPage")}
+            color="my_yellow"
+            onPress={() => changePage(1)}
+            disabled={!canGoForward}
+            autoWidth
+            style={styles.navigationButton}
+          >
+            <Ionicons
+              name="chevron-forward"
+              size={24}
+              color={colors.headline}
+              style={{ opacity: canGoForward ? 1 : 0.35 }}
+              accessibilityElementsHidden
+              importantForAccessibility="no-hide-descendants"
+            />
+          </MyButton>
+        </View>
       </StatsProgressCard>
-      <View style={styles.navigation}>
-        <MyButton
-          accessibilityLabel={t("components.stats.hardWordsList.navigation.previousPage")}
-          color="my_yellow"
-          onPress={() => changePage(-1)}
-          disabled={!canGoBack}
-          autoWidth
-          style={styles.navigationButton}
-        >
-          <Ionicons
-            name="chevron-back"
-            size={24}
-            color={colors.headline}
-            style={{ opacity: canGoBack ? 1 : 0.35 }}
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          />
-        </MyButton>
-        <MyButton
-          accessibilityLabel={t("components.stats.hardWordsList.navigation.nextPage")}
-          color="my_yellow"
-          onPress={() => changePage(1)}
-          disabled={!canGoForward}
-          autoWidth
-          style={styles.navigationButton}
-        >
-          <Ionicons
-            name="chevron-forward"
-            size={24}
-            color={colors.headline}
-            style={{ opacity: canGoForward ? 1 : 0.35 }}
-            accessibilityElementsHidden
-            importantForAccessibility="no-hide-descendants"
-          />
-        </MyButton>
-      </View>
     </View>
   );
 }
