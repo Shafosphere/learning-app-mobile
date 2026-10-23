@@ -1,10 +1,15 @@
 import { statsTileStyle } from "./statsTileStyle";
+import type { Face } from "@/src/components/Box/Skin/boxFaces";
+import { useIsFocused } from "@react-navigation/native";
+import { useTranslation } from "react-i18next";
 import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
 import { useNavbarStatsSnapshot } from "@/src/contexts/NavbarStatsContext";
 import { Image as ExpoImage } from "expo-image";
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { Animated, AppState, Easing, Image, ImageBackground, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
+import { Animated, AppState, Easing, Image, ImageBackground, Pressable, StyleSheet, Text, View, type LayoutRectangle } from "react-native";
 import { useReducedMotion } from "react-native-reanimated";
+
+const TAP_FACES: readonly Face[] = ["sparkle", "blink", "blushed", "xd", "ez", "love"];
 
 const STAR_SOURCE = require("@/assets/illustrations/streak/gwiazdka.svg");
 const STAR_SLOT_SIZE = 32;
@@ -126,6 +131,10 @@ const styles = StyleSheet.create({
     bottom: 3,
     transform: [{ rotate: "8deg" }, { scaleX: -1 }],
   },
+  mascotFace: {
+    // The parent is mirrored: increasing right moves the face right on screen.
+    right: 15,
+  },
   trophy: {
     position: "absolute",
     right: 110,
@@ -202,6 +211,10 @@ function FloatingStar({ star, animate }: { star: Star; animate: boolean }) {
 
 const BigKnownWordsCard: React.FC = () => {
   const stats = useNavbarStatsSnapshot();
+  const { t } = useTranslation();
+  const isFocused = useIsFocused();
+  const [reaction, setReaction] = useState<number | null>(null);
+  const tapIndex = useRef(0);
   const [frameWidth, setFrameWidth] = useState(CARD_WIDTH);
   const scale = frameWidth / CARD_WIDTH;
   const [stars, setStars] = useState<Star[] | null>(null);
@@ -236,10 +249,23 @@ const BigKnownWordsCard: React.FC = () => {
     return () => subscription.remove();
   }, []);
 
+  useEffect(() => {
+    if (reaction === null) return;
+    if (!appActive || !isFocused) {
+      setReaction(null);
+      return;
+    }
+    const timer = setTimeout(() => setReaction(null), 1500);
+    return () => clearTimeout(timer);
+  }, [appActive, isFocused, reaction]);
+
   return (
-    <View
+    <Pressable
       style={[styles.frame, { borderRadius: statsTileStyle.borderRadius * scale }]}
-      pointerEvents="none"
+      accessibilityRole="button"
+      accessibilityLabel={`${t("repeats.labels.knownFlashcards")}: ${stats.masteredCount}`}
+      accessibilityHint={t("screens.stats.stats.stats.mascotReactionHint")}
+      onPress={() => setReaction(tapIndex.current++)}
       onLayout={({ nativeEvent: { layout } }) => {
         if (layout.width > 0) setFrameWidth(layout.width);
       }}
@@ -282,7 +308,8 @@ const BigKnownWordsCard: React.FC = () => {
         <View style={styles.mascot} pointerEvents="none">
           <BoxSkin
             wordCount={40}
-            face="happy"
+            face={reaction === null ? "happy" : TAP_FACES[reaction % TAP_FACES.length]}
+            faceStyle={styles.mascotFace}
             showFace
             accessible={false}
             cardVariant="logo"
@@ -325,7 +352,7 @@ const BigKnownWordsCard: React.FC = () => {
           {stats.masteredCount}
         </Text>
       </ImageBackground>
-    </View>
+    </Pressable>
   );
 };
 

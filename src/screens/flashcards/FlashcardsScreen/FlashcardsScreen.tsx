@@ -133,7 +133,6 @@ export default function Flashcards() {
   >(null);
   const selectedItemIdRef = useRef<number | null>(null);
   const isCoachmarkActiveRef = useRef(false);
-  const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{
     box: keyof BoxesState | null;
     ts: number;
@@ -392,17 +391,14 @@ export default function Flashcards() {
   } = useBoxFacesController({
     boxes,
     activeBox,
+    isFocused,
+    isReady: isReady && !isLoadingData,
+    resetKey: storageKey,
   });
   boxFacesControllerRef.current = {
     handleCorrectAnswer: handleBoxFaceCorrectAnswer,
     handleWrongAnswer: handleBoxFaceWrongAnswer,
   };
-  useEffect(() => {
-    if (activeBox && previousFaceActiveBoxRef.current !== activeBox) {
-      handleBoxFaceSelection(activeBox);
-    }
-    previousFaceActiveBoxRef.current = activeBox;
-  }, [activeBox, handleBoxFaceSelection]);
   const correctionLocked = correction != null && correction.mode !== "intro";
   const selectedItemId = selectedItem?.id ?? null;
   useEffect(() => {
@@ -828,7 +824,6 @@ export default function Flashcards() {
       setTutorialEventCompleted("box_selected", boxName);
 
       handleBoxFaceSelection(boxName);
-      previousFaceActiveBoxRef.current = boxName;
       baseHandleSelectBox(boxName);
     },
     [

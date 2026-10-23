@@ -33,6 +33,7 @@ const logQuote = (...args: unknown[]) => {
 
 interface QuoteContextType {
   quote: Quote | null;
+  quoteEventId: number;
   isVisible: boolean;
   showQuote: (category: QuoteCategory) => void;
   triggerQuote: (request: QuoteTriggerRequest) => void;
@@ -41,6 +42,7 @@ interface QuoteContextType {
 
 const QuoteContext = createContext<QuoteContextType>({
   quote: null,
+  quoteEventId: 0,
   isVisible: false,
   showQuote: () => { },
   triggerQuote: () => { },
@@ -51,6 +53,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
   const { quotesEnabled } = useSettings();
   const { t } = useTranslation();
   const [quote, setQuote] = useState<Quote | null>(null);
+  const [quoteEventId, setQuoteEventId] = useState(0);
   const [isVisible, setIsVisible] = useState(false);
   const suppressionTokensRef = useRef(new Set<symbol>());
   const suppressQuotes = useCallback(() => {
@@ -146,6 +149,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
 
     lastCategoryQuoteRef.current[category] = candidate;
     logQuote("show", { category, text: candidate.text });
+    setQuoteEventId((current) => current + 1);
     setQuote(candidate);
     setIsVisible(true);
   }, [quotesEnabled, t]);
@@ -227,7 +231,7 @@ export const QuoteProvider = ({ children }: { children: ReactNode }) => {
 
   return (
     <QuoteContext.Provider
-      value={{ quote, isVisible, showQuote, triggerQuote, hideQuote }}
+      value={{ quote, quoteEventId, isVisible, showQuote, triggerQuote, hideQuote }}
     >
       <QuoteSuppressionContext.Provider value={suppressQuotes}>
         {children}

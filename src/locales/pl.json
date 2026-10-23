@@ -2401,6 +2401,7 @@
             "analysis": "Analiza nauki",
             "analysisSubtitle": "Zrozum swoje postępy"
           },
+          "mascotReactionHint": "Dotknij, aby zmienić minę maskotki",
           "history": {
             "tabs": {
               "stats": "Statystyki",

@@ -23,6 +23,7 @@ const mockSetPopupAnchor = jest.fn();
 const mockStaticIconRender = jest.fn();
 const mockStatsRender = jest.fn();
 const mockContentRender = jest.fn();
+const mockMascotRender = jest.fn();
 const mockRouter = { dismissTo: mockDismissTo, push: mockPush };
 const mockPathContext = React.createContext("/review/reviewflashcards");
 const mockQuoteContext = React.createContext({ triggerQuote: mockTriggerQuote });
@@ -151,7 +152,10 @@ jest.mock("@/src/components/navbar/NavbarStatsRotator", () => {
 
 jest.mock("@/src/components/navbar/NavbarMascot", () => {
   const { View } = jest.requireActual<typeof import("react-native")>("react-native");
-  return function NavbarMascotMock() { return <View testID="navbar-mascot" />; };
+  return function NavbarMascotMock(props: { tapReaction: { id: number; count: number; rage: boolean } }) {
+    mockMascotRender(props);
+    return <View testID="navbar-mascot" />;
+  };
 });
 
 jest.mock("@/src/components/course/CourseTitleMarquee", () => ({
@@ -790,6 +794,29 @@ describe("Navbar review routing", () => {
     const app = setupNavbar({ activeCustomCourseId: 11 });
     await act(async () => {});
     expect(app.screen.getByText("star:#123456")).toBeTruthy();
+  });
+
+  it("passes tap counts, resets after seven taps, and restarts after a 2s gap", () => {
+    const now = jest.spyOn(Date, "now").mockReturnValue(10000);
+    const app = setupNavbar();
+    const logo = app.screen.getByLabelText("components.navbar.navbar.accessibilityLabel.przejdzDoStronyGlownej");
+    for (let count = 1; count <= 7; count += 1) {
+      fireEvent.press(logo);
+      expect(mockMascotRender).toHaveBeenLastCalledWith(expect.objectContaining({
+        tapReaction: { id: count, count, rage: count === 7 },
+      }));
+    }
+    fireEvent.press(logo);
+    expect(mockMascotRender).toHaveBeenLastCalledWith(expect.objectContaining({
+      tapReaction: { id: 8, count: 1, rage: false },
+    }));
+    fireEvent.press(logo);
+    now.mockReturnValue(12000);
+    fireEvent.press(logo);
+    expect(mockMascotRender).toHaveBeenLastCalledWith(expect.objectContaining({
+      tapReaction: { id: 10, count: 1, rage: false },
+    }));
+    now.mockRestore();
   });
 
   it("keeps theme, due-review badge, stats navigation and logo reactions live across memo boundaries", () => {

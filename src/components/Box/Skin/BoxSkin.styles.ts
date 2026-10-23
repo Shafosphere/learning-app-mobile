@@ -43,6 +43,18 @@ export const useBoxSkinStyles = createThemeStylesHook((colors) => ({
     right: 12,
     zIndex: 1000,
   },
+  content: {
+    top: -24,
+    right: 4,
+  },
+  foreground: {
+    position: "absolute",
+    width: 115,
+    height: 122,
+    top: 0,
+    right: -14,
+    zIndex: 1001,
+  },
   card1: {
     position: "absolute",
     height: 120,

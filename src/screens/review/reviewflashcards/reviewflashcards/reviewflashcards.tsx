@@ -291,6 +291,9 @@ export default function ReviewFlashcardsScreen() {
   } = useBoxFacesController({
     boxes,
     activeBox,
+    isFocused,
+    isReady: !isLoading,
+    resetKey: courseId,
   });
 
   useEffect(() => {

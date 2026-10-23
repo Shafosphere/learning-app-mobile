@@ -181,7 +181,7 @@ const NavbarFrame = memo(function NavbarFrame({
   const topPad = Math.max(statusBarHeight, insets.top);
   const bottomPad = Math.max(insets.bottom, 12);
   const { width: screenWidth } = useWindowDimensions();
-  const [mascotTapReaction, setMascotTapReaction] = useState({ id: 0, rage: false });
+  const [mascotTapReaction, setMascotTapReaction] = useState({ id: 0, count: 0, rage: false });
 
   const logoTapRef = useRef<{ count: number; ts: number }>({ count: 0, ts: 0 });
   const logoButtonRef = useRef<View | null>(null);
@@ -283,7 +283,8 @@ const NavbarFrame = memo(function NavbarFrame({
     logoTapRef.current.count = withinWindow ? logoTapRef.current.count + 1 : 1;
 
     const rage = logoTapRef.current.count >= 7;
-    setMascotTapReaction((current) => ({ id: current.id + 1, rage }));
+    const count = logoTapRef.current.count;
+    setMascotTapReaction((current) => ({ id: current.id + 1, count, rage }));
 
     if (rage) {
       triggerQuote({

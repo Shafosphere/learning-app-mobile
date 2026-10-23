@@ -72,7 +72,6 @@ export const useReviewFlashcardsSession = ({
   const [upcomingPeekError, setUpcomingPeekError] = useState(false);
   const peekRequestRef = useRef(0);
   const closeAfterUpcomingLoadRef = useRef(false);
-  const previousFaceActiveBoxRef = useRef<keyof BoxesState | null>(null);
   const boxSpamRef = useRef<{
     box: keyof BoxesState | null;
     ts: number;
@@ -266,7 +265,6 @@ export const useReviewFlashcardsSession = ({
         counts: summarizeBoxes(boxes),
       });
       handleBoxFaceSelection(box);
-      previousFaceActiveBoxRef.current = box;
       setActiveBox(box);
       selectNextWord(box);
     },
@@ -282,13 +280,6 @@ export const useReviewFlashcardsSession = ({
       selectNextWord,
     ]
   );
-
-  useEffect(() => {
-    if (activeBox && previousFaceActiveBoxRef.current !== activeBox) {
-      handleBoxFaceSelection(activeBox);
-    }
-    previousFaceActiveBoxRef.current = activeBox;
-  }, [activeBox, handleBoxFaceSelection]);
 
   useEffect(() => {
     if (!activeBox) return;

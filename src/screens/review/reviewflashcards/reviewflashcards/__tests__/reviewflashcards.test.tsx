@@ -1,3 +1,4 @@
+import * as boxFaceHelpers from "@/src/components/Box/Skin/boxFaces";
 import * as MockReact from "react";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
@@ -321,6 +322,7 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 
 jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxListMock({
+    faces,
     boxes,
     handleSelectBox,
     onBoxLongPress,
@@ -328,6 +330,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
     maxColumns,
     layoutWidth,
   }: {
+    faces?: Partial<Record<string, string>>;
     boxes: Record<string, { id: number }[]>;
     handleSelectBox: (box: any) => void;
     onBoxLongPress?: (box: any) => void;
@@ -336,6 +339,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
     layoutWidth?: number;
   }) {
     latestBoxListProps = {
+      faces,
       boxes,
       handleSelectBox,
       onBoxLongPress,
@@ -859,6 +863,31 @@ describe("reviewflashcards correction desync regression", () => {
     expect(getRole).toHaveBeenCalledWith(77);
     await act(async () => fireEvent.changeText(getVisibleTextInputs(screen)[0], flipped ? "autobús" : "autobus"));
     await waitFor(() => expect(mockedScheduleCustomReview).toHaveBeenCalledWith(card.id, 77, 0));
+  });
+
+  it("loads a full final box without waking or drawing, then reacts once to a manual tap", async () => {
+    jest.useFakeTimers();
+    const draw = jest.spyOn(boxFaceHelpers, "pickBoxSelectionFace").mockReturnValue("surprised");
+    mockedGetDueCustomReviewFlashcards.mockResolvedValueOnce([makeReviewCard({ id: 9005, frontText: "sun", stage: 5 })]);
+    const app = render(<ReviewFlashcardsScreen />);
+    try {
+      const faces = () => latestBoxListProps?.faces as boxFaceHelpers.BoxFacesByBox | undefined;
+      await waitFor(() => expect(faces()?.boxFive).toBe("love"));
+      expect(faces()?.boxTwo).toBe("ez");
+      expect(draw).not.toHaveBeenCalled();
+      fireEvent.press(app.getByTestId("box-button-boxFive"));
+      expect(draw).toHaveBeenCalledTimes(1);
+      expect(faces()?.boxFive).toBe("surprised");
+      app.rerender(<ReviewFlashcardsScreen />);
+      expect(draw).toHaveBeenCalledTimes(1);
+      await act(async () => jest.advanceTimersByTime(800));
+      expect(faces()?.boxFive).toBe("love");
+    } finally {
+      app.unmount();
+      jest.clearAllTimers();
+      jest.useRealTimers();
+      draw.mockRestore();
+    }
   });
 
   it("does not write flashcards box snapshots while answering review cards", async () => {

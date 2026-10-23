@@ -88,18 +88,14 @@ export const useStyles = createThemeStylesHook((colors) => ({
     alignItems: "center",
     justifyContent: "center",
     backgroundColor: colors.secondBackground,
-    transform: [{ rotate: "5deg" }],
+    transform: [{ rotate: "-6deg" }],
   },
   iconBoxTablet: {
     borderRadius: 18,
   },
-  iconFlipped: {
-    transform: [{ scaleX: -1 }],
-  },
-  iconImage: {
-    width: "100%",
-    height: "100%",
-    resizeMode: "contain",
+  mascotFrame: {
+    width: 115,
+    height: 122,
   },
   tileText: {
     position: "absolute",

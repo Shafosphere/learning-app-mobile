@@ -961,7 +961,7 @@ function ActivityHeatmap({
                     key: "correct",
                     label: t("components.stats.activityHeatmap.stats.correct"),
                     value: String(displayedDay.correctCount),
-                    icon: "shield-checkmark" as const,
+                    icon: "checkmark-circle-outline" as const,
                     color: accents.progress,
                   },
                   {

@@ -64,11 +64,6 @@ export default function HomeScreen() {
       })
     : null;
 
-  const logo = require("../../../../assets/illustrations/mascot-box/branding/logo.png");
-  const statsImage = require("../../../../assets/images/home/stats.png");
-  const customImage = require("../../../../assets/images/home/customize.png");
-  const tutorialImage = require("../../../../assets/images/home/tutorial.png");
-  const supportImage = require("../../../../assets/images/home/support.png");
   const isCompactHeight = screenHeight < 760;
 
   const goToStats = () => {
@@ -92,35 +87,61 @@ export default function HomeScreen() {
       key: "courses",
       title: t("repeats.labels.courses"),
       subtitle: t("screens.home.home.home.subtitle.przypieteKursy"),
-      image: logo,
+      face: "nice",
+      pressedFace: "happy",
       action: goToCoursePanel,
     },
     {
       key: "custom",
       title: t("screens.home.home.home.title.stworz"),
       subtitle: t("screens.home.home.home.subtitle.kreatorKursow"),
-      image: customImage,
+      face: "sparkle",
+      pressedFace: "xd",
+      contentSource: require("@/assets/illustrations/mascot-box/content/nozyczki.png"),
       action: goToCustomCourse,
     },
     {
       key: "stats",
       title: t("screens.home.home.home.title.statystyki"),
       subtitle: t("screens.home.home.home.subtitle.zobaczWyniki"),
-      image: statsImage,
+      face: "ez",
+      pressedFace: "sparkle",
+      contentSource: require("@/assets/illustrations/mascot-box/content/staTS.png"),
+      contentStyle: {
+        top: -10,
+        right: -2,
+        transform: [{ rotate: "10deg" }, { scale: 1.2 }],
+      },
       action: goToStats,
     },
     {
       key: "wiki",
       title: t("screens.home.home.home.title.przewodnik"),
       subtitle: t("screens.home.home.home.subtitle.instrukcjeIWskazowki"),
-      image: tutorialImage,
+      face: "owo",
+      faceParts: { eyes: "sparkle" },
+      pressedFaceParts: { eyes: "happy", mouth: "owo" },
+      contentSource: require("@/assets/illustrations/mascot-box/content/rolka2.png"),
+      contentStyle: { top: -16 },
+      contentCopyStyles: [
+        { right: 4, transform: [{ rotate: "0deg" }, { scale: 1.15 }] },
+        { right: -12, transform: [{ rotate: "15deg" }, { scale: 1.15 }] },
+        { right: -28, transform: [{ rotate: "30deg" }, { scale: 1.15 }] },
+      ],
+      foregroundSource: require("@/assets/illustrations/mascot-box/content/lupa.png"),
+      foregroundStyle: {
+        right: -19,
+        transform: [{ rotate: "5deg" }],
+      },
       action: goToWiki,
     },
     {
       key: "support",
       title: t("screens.home.home.home.title.wsparcie"),
       subtitle: t("screens.home.home.home.subtitle.pomocIInformacje"),
-      image: supportImage,
+      face: "blushed",
+      faceParts: { eyes: "happy", mouth: "smile" },
+      pressedFace: "love",
       action: goToSupport,
     },
   ];

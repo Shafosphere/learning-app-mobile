@@ -2397,6 +2397,7 @@
             "analysis": "Learning analysis",
             "analysisSubtitle": "Understand your progress"
           },
+          "mascotReactionHint": "Tap to change the mascot’s expression",
           "history": {
             "tabs": {
               "stats": "Stats",

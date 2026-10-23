@@ -1,5 +1,6 @@
-import { fireEvent, render, screen } from "@testing-library/react-native";
-import { FlatList, Image, StyleSheet } from "react-native";
+import { BOX_EYE_ASSETS, BOX_MOUTH_ASSETS } from "@/src/components/Box/Skin/boxFaces";
+import { act, fireEvent, render, screen, within } from "@testing-library/react-native";
+import { FlatList, StyleSheet } from "react-native";
 import HomeScreen from "../HomeScreen";
 
 let mockWindowDimensions = { width: 412, height: 915, scale: 1, fontScale: 1 };
@@ -160,8 +161,8 @@ describe("HomeScreen responsive grid", () => {
     if (tablet) mockWindowDimensions = { width: 900, height: 1200, scale: 1, fontScale: 1 };
     render(<HomeScreen />);
     measureGrid(width, height);
-    const image = screen.UNSAFE_getAllByType(Image)[0];
-    const iconStyle = StyleSheet.flatten(image.parent!.props.style);
+    const mascot = screen.getByTestId("home-tile-mascot-courses");
+    const iconStyle = StyleSheet.flatten(mascot.props.style);
     expect(iconStyle.width).toBeCloseTo(iconSize);
     expect(iconStyle.height).toBeCloseTo(iconSize);
   });
@@ -211,4 +212,94 @@ describe("HomeScreen responsive grid", () => {
       }
     });
   });
+});
+
+
+describe("home mascot reactions", () => {
+  beforeEach(() => {
+    jest.useFakeTimers();
+    mockIsFocused = true;
+    mockOpenCoursePanel.mockClear();
+    mockPush.mockClear();
+  });
+
+  afterEach(() => {
+    jest.useRealTimers();
+  });
+
+  it.each([
+    [0, "courses", "normal", "smile", "happy", "happy"],
+    [1, "custom", "sparkle", "happy", "xd", "happy"],
+    [2, "stats", "ez", "ez", "sparkle", "happy"],
+    [3, "wiki", "sparkle", "owo", "happy", "owo"],
+    [4, "support", "happy", "smile", "heart", "happy"],
+  ] as const)("holds the %s mascot reaction for at least 400ms after a quick touch", (index, key, eyes, mouth, pressedEyes, pressedMouth) => {
+    render(<HomeScreen />);
+    measureGrid(372, 590);
+    const button = screen.getAllByRole("button")[index];
+    const mascot = () => within(screen.getByTestId(`home-tile-mascot-${key}`));
+    expect(mascot().getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS[eyes]);
+    expect(mascot().getByTestId("box-skin-face-mouth")).toHaveProp("source", BOX_MOUTH_ASSETS[mouth]);
+    fireEvent(button, "pressIn");
+    expect(mascot().getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS[pressedEyes]);
+    expect(mascot().getByTestId("box-skin-face-mouth")).toHaveProp("source", BOX_MOUTH_ASSETS[pressedMouth]);
+    if (key === "support") expect(mascot().queryByTestId("box-skin-face-blush")).toBeNull();
+    fireEvent(button, "pressOut");
+    act(() => jest.advanceTimersByTime(399));
+    expect(mascot().getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS[pressedEyes]);
+    act(() => jest.advanceTimersByTime(1));
+    expect(mascot().getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS[eyes]);
+    expect(mockPush).not.toHaveBeenCalled();
+    expect(mockOpenCoursePanel).not.toHaveBeenCalled();
+  });
+
+  it("preserves local pressed state across parent updates and navigates immediately", () => {
+    const app = render(<HomeScreen />);
+    measureGrid(372, 590);
+    fireEvent(screen.getAllByRole("button")[0], "pressIn");
+    app.rerender(<HomeScreen />);
+    const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.happy);
+    fireEvent.press(screen.getAllByRole("button")[0]);
+    expect(mockOpenCoursePanel).toHaveBeenCalledTimes(1);
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.happy);
+    act(() => jest.advanceTimersByTime(400));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.normal);
+  });
+
+  it("keeps a long-held reaction until release without adding another 400ms", () => {
+    render(<HomeScreen />);
+    measureGrid(372, 590);
+    const button = screen.getAllByRole("button")[0];
+    const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
+    fireEvent(button, "pressIn");
+    act(() => jest.advanceTimersByTime(1000));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.happy);
+    fireEvent(button, "pressOut");
+    fireEvent.press(button);
+    act(() => jest.advanceTimersByTime(0));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.normal);
+    expect(mockOpenCoursePanel).toHaveBeenCalledTimes(1);
+  });
+
+  it("restarts the minimum duration on another touch and cancels the timer on unmount", () => {
+    const app = render(<HomeScreen />);
+    measureGrid(372, 590);
+    const button = screen.getAllByRole("button")[0];
+    const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
+    fireEvent(button, "pressIn");
+    fireEvent(button, "pressOut");
+    act(() => jest.advanceTimersByTime(300));
+    fireEvent(button, "pressIn");
+    fireEvent(button, "pressOut");
+    act(() => jest.advanceTimersByTime(100));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.happy);
+    act(() => jest.advanceTimersByTime(300));
+    expect(mascot.getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS.normal);
+    fireEvent.press(button);
+    expect(jest.getTimerCount()).toBeGreaterThan(0);
+    app.unmount();
+    expect(jest.getTimerCount()).toBe(0);
+  });
+
 });

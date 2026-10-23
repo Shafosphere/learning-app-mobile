@@ -80,3 +80,58 @@ describe("quote suppression", () => {
     expect(result.current.isVisible).toBe(false);
   });
 });
+
+describe("quote occurrence identity", () => {
+  beforeEach(() => {
+    (useSettings as jest.Mock).mockReturnValue({ quotesEnabled: true });
+  });
+
+  it("increments for repeated accepted occurrences of the same text", () => {
+    const { result } = renderQuotes();
+    expect(result.current.quoteEventId).toBe(0);
+    act(() => result.current.showQuote("general"));
+    const quoteId = result.current.quote?.id;
+    expect(result.current.quoteEventId).toBe(1);
+    act(() => result.current.showQuote("general"));
+    expect(result.current.quote?.id).toBe(quoteId);
+    expect(result.current.quoteEventId).toBe(2);
+    act(() => result.current.hideQuote());
+    expect(result.current.quoteEventId).toBe(2);
+    act(() => result.current.showQuote("general"));
+    expect(result.current.quoteEventId).toBe(3);
+  });
+
+  it("increments for each batched accepted show", () => {
+    const { result } = renderQuotes();
+    act(() => {
+      result.current.showQuote("general");
+      result.current.showQuote("general");
+    });
+    expect(result.current.quoteEventId).toBe(2);
+  });
+
+  it("does not consume occurrence IDs for disabled or suppressed requests", () => {
+    const { result, rerender } = renderQuotes();
+    rerender({ compact: true, secondScreen: false });
+    act(() => result.current.showQuote("general"));
+    expect(result.current.quoteEventId).toBe(0);
+    rerender({ compact: false, secondScreen: false });
+    (useSettings as jest.Mock).mockReturnValue({ quotesEnabled: false });
+    rerender({ compact: false, secondScreen: false });
+    act(() => result.current.showQuote("general"));
+    expect(result.current.quoteEventId).toBe(0);
+  });
+
+  it("does not consume occurrence IDs for cooldown or probability rejection", () => {
+    const { result } = renderQuotes();
+    const request = { trigger: "repeat", category: "general" as const, respectGlobalCooldown: false, cooldownMs: 60000 };
+    act(() => result.current.triggerQuote(request));
+    expect(result.current.quoteEventId).toBe(1);
+    act(() => result.current.triggerQuote(request));
+    expect(result.current.quoteEventId).toBe(1);
+    const random = jest.spyOn(Math, "random").mockReturnValue(0.9);
+    act(() => result.current.triggerQuote({ ...request, trigger: "probability", probability: 0.1 }));
+    expect(result.current.quoteEventId).toBe(1);
+    random.mockRestore();
+  });
+});

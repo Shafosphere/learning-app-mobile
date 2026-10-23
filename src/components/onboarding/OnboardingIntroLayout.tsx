@@ -23,6 +23,7 @@ type OnboardingIntroLayoutProps = {
   descriptionTestID?: string;
   descriptionEndNote?: string;
   children?: ReactNode;
+  headerGraphic?: (width: number) => ReactNode;
   illustration?: {
     source: ImageSourcePropType;
     aspectRatio: number;
@@ -39,6 +40,7 @@ export function OnboardingIntroLayout({
   descriptionTestID,
   descriptionEndNote,
   children,
+  headerGraphic,
   illustration,
 }: OnboardingIntroLayoutProps) {
   const styles = useStyles();
@@ -80,7 +82,11 @@ export function OnboardingIntroLayout({
             onLayout={({ nativeEvent }) => setBodyHeight(nativeEvent.layout.height)}
           >
             <View style={[styles.header, { paddingBottom: spacing.headerGap }]}>
-              <Image
+              {headerGraphic ? (
+                <View style={{ marginBottom: spacing.logoGap }}>
+                  {headerGraphic(spacing.logoWidth)}
+                </View>
+              ) : <Image
                 source={WELCOME_LOGO_SOURCE}
                 testID="onboarding-intro-logo"
                 style={{
@@ -90,7 +96,7 @@ export function OnboardingIntroLayout({
                 }}
                 resizeMode="contain"
                 accessible={false}
-              />
+              />}
               <Text style={styles.title} allowFontScaling accessibilityRole="header">
                 {title}
               </Text>

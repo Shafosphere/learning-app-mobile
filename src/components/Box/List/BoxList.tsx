@@ -283,6 +283,8 @@ function BoxList({
         const currentFace =
             faces?.[boxName] ??
             resolveBoxFace({
+                box: boxName,
+                wordCount: words.length,
                 isActive,
             });
         const boxNumber = BOX_NUMBERS[boxName];

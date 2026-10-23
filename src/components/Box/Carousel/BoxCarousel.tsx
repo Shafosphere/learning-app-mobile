@@ -139,7 +139,7 @@ export default function BoxCarousel({
         const rawIndex = Math.round(offsetX / itemWidth);
         const clamped = Math.max(0, Math.min(rawIndex, items.length - 1));
         const item = items[clamped];
-        if (item && item.key !== activeBox) {
+        if (item && item.key !== activeBox && item.key !== lastSelectedRef.current) {
             lastSelectedRef.current = item.key;
             handleSelectBox(item.key);
         }
@@ -157,7 +157,7 @@ export default function BoxCarousel({
         });
         if (shouldNotify) {
             const item = items[clamped];
-            if (item && item.key !== activeBox) handleSelectBox(item.key);
+            if (item) handleSelectBox(item.key);
         }
         if (items[clamped]) {
             lastSelectedRef.current = items[clamped].key;
@@ -250,6 +250,8 @@ export default function BoxCarousel({
                         const face =
                             faces?.[item.key] ??
                             resolveBoxFace({
+                                box: item.key,
+                                wordCount: boxes[item.key]?.length ?? 0,
                                 isActive,
                             });
 

@@ -1,5 +1,6 @@
 import MyButton from "@/src/components/button/button";
 import { UserDataExportSuccessModal } from "@/src/components/export/UserDataExportSuccessModal";
+import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useLearningStats } from "@/src/contexts/LearningStatsContext";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import { useUserDataExportAction } from "@/src/hooks/useUserDataExportAction";
@@ -61,6 +62,7 @@ const CoursesDataSection: React.FC = () => {
   } = useSettings();
   const [resettingLearning, setResettingLearning] = useState(false);
   const [resettingIntro, setResettingIntro] = useState(false);
+  const [resetIntroConfirmVisible, setResetIntroConfirmVisible] = useState(false);
   const [importingData, setImportingData] = useState(false);
   const [driveAction, setDriveAction] = useState<DriveAction>(null);
   const [expandedSnapshotIds, setExpandedSnapshotIds] = useState<string[]>([]);
@@ -462,34 +464,23 @@ const CoursesDataSection: React.FC = () => {
     );
   };
 
-  const handleResetIntro = () => {
-    Alert.alert(
-      t("settings.coursesData.resetIntroConfirm.title"),
-      t("settings.coursesData.resetIntroConfirm.message"),
-      [
-        { text: t("app.actions.cancel"), style: "cancel" },
-        {
-          text: t("settings.coursesData.resetIntroConfirm.confirm"),
-          style: "destructive",
-          onPress: async () => {
-            setResettingIntro(true);
-            try {
-              await resetOnboardingState();
-              await AsyncStorage.multiRemove([...introStorageKeys]);
-              await setOnboardingCheckpoint("language_required");
-              router.replace("/createprofile");
-            } catch {
-              Alert.alert(
-                t("app.status.error"),
-                t("settings.coursesData.errors.resetIntro")
-              );
-            } finally {
-              setResettingIntro(false);
-            }
-          },
-        },
-      ]
-    );
+  const handleResetIntro = async () => {
+    if (resettingIntro) return;
+    setResetIntroConfirmVisible(false);
+    setResettingIntro(true);
+    try {
+      await resetOnboardingState();
+      await AsyncStorage.multiRemove([...introStorageKeys]);
+      await setOnboardingCheckpoint("language_required");
+      router.replace("/createprofile");
+    } catch {
+      Alert.alert(
+        t("app.status.error"),
+        t("settings.coursesData.errors.resetIntro")
+      );
+    } finally {
+      setResettingIntro(false);
+    }
   };
 
   const connectButtonText =
@@ -874,7 +865,7 @@ const CoursesDataSection: React.FC = () => {
                     : t("settings.coursesData.rows.resetIntro.button")
                 }
                 color="my_yellow"
-                onPress={handleResetIntro}
+                onPress={() => setResetIntroConfirmVisible(true)}
                 disabled={resettingIntro}
                 width={130}
               />
@@ -883,6 +874,19 @@ const CoursesDataSection: React.FC = () => {
         </View>
       </View>
       </View>
+      <NudgeModal
+        visible={resetIntroConfirmVisible}
+        title={t("settings.coursesData.resetIntroConfirm.title")}
+        description={t("settings.coursesData.resetIntroConfirm.message")}
+        confirmLabel={t("settings.coursesData.resetIntroConfirm.confirm")}
+        confirmColor="my_yellow"
+        confirmDisabled={resettingIntro}
+        onConfirm={handleResetIntro}
+        onClose={() => setResetIntroConfirmVisible(false)}
+        closeLabel={t("app.actions.cancel")}
+        secondaryLabel={t("app.actions.cancel")}
+        onSecondaryPress={() => setResetIntroConfirmVisible(false)}
+      />
       <UserDataExportSuccessModal
         visible={successSummary != null}
         sizeKb={successSummary?.sizeKb}

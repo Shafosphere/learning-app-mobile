@@ -4,6 +4,7 @@ import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
+import { View } from "react-native";
 
 const LEITNER_SOURCE = require("@/assets/illustrations/leitner.png");
 
@@ -26,6 +27,13 @@ export default function LeitnerIntroScreen() {
 
   return (
     <OnboardingIntroLayout
+      headerGraphic={(width) => (
+        <View style={{ width, height: width * 122 / 115, alignItems: "center", justifyContent: "center" }}>
+          <View style={{ transform: [{ scale: width / 115 }] }}>
+            <BoxSkin wordCount={0} face="happy" cardVariant="logo" showFace accessible={false} />
+          </View>
+        </View>
+      )}
       title={t("onboarding.leitner.title", {
         lng: uiLanguage,
         defaultValue: uiLanguage === "pl" ? "Zapamiętuj więcej" : "Remember more",
@@ -51,3 +59,4 @@ export default function LeitnerIntroScreen() {
     />
   );
 }
+import BoxSkin from "@/src/components/Box/Skin/BoxSkin";

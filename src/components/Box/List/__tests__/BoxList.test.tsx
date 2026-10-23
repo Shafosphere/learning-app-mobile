@@ -95,6 +95,27 @@ describe("BoxList", () => {
         jest.restoreAllMocks();
     });
 
+    it("uses per-box defaults without a face map, independent of selection", () => {
+        const screen = render(<BoxList boxes={boxes} activeBox="boxTwo" handleSelectBox={jest.fn()} />);
+        const face = (number: number, count = 0) => within(screen.getByRole("button", { name: `box ${number} count ${count}` }))
+            .UNSAFE_getByType(BoxSkin).props.face;
+        expect(face(0)).toBe("owo");
+        expect(face(1, 1)).toBe("nice");
+        expect(face(2, 1)).toBe("ez");
+        expect(face(3)).toBe("cheerful");
+        expect(face(4)).toBe("sparkle");
+        expect(face(5)).toBe("sleep");
+        screen.rerender(<BoxList boxes={{ ...boxes, boxFive: [makeWord(5, "five")] }} activeBox="boxFive" handleSelectBox={jest.fn()} />);
+        expect(face(5, 1)).toBe("love");
+    });
+
+    it("honors explicit reactions and actual contents when demo counts differ", () => {
+        const screen = render(<BoxList boxes={boxes} activeBox="boxFive" handleSelectBox={jest.fn()} countOverrides={{ boxFive: 10 }} />);
+        expect(within(screen.getByRole("button", { name: "box 5 count 10" })).UNSAFE_getByType(BoxSkin).props.face).toBe("sleep");
+        screen.rerender(<BoxList boxes={boxes} activeBox="boxTwo" handleSelectBox={jest.fn()} faces={{ boxTwo: "sad" }} />);
+        expect(within(screen.getByRole("button", { name: "box 2 count 1" })).UNSAFE_getByType(BoxSkin).props.face).toBe("sad");
+    });
+
     it("keeps box artwork unchanged on a parent update but refreshes counts and selection", () => {
         const handleSelectBox = jest.fn();
         const props = { boxes, activeBox: "boxOne" as const, handleSelectBox };

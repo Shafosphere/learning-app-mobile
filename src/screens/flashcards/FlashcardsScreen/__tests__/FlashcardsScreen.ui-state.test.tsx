@@ -1,3 +1,4 @@
+import * as boxFaceHelpers from "@/src/components/Box/Skin/boxFaces";
 import React from "react";
 import { act, fireEvent, render } from "@testing-library/react-native";
 import { Keyboard, StyleSheet } from "react-native";
@@ -319,12 +320,14 @@ type ButtonsProps = React.ComponentProps<
 let latestButtonsProps: ButtonsProps | null = null;
 let latestBoxListProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
+  handleSelectBox?: (box: keyof BoxesState) => void;
   horizontalScroll?: boolean;
   horizontalRowHeight?: number;
   layoutWidth?: number;
 } | null = null;
 let latestBoxCarouselProps: {
   faces?: Partial<Record<keyof BoxesState, string>>;
+  handleSelectBox?: (box: keyof BoxesState) => void;
   layoutWidth?: number;
 } | null = null;
 let latestPeekProps: {
@@ -346,6 +349,7 @@ jest.mock("@/src/components/flashcards/FlashcardsButtons", () => ({
 jest.mock("@/src/components/Box/List/BoxList", () => {
   return function BoxesMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
+  handleSelectBox?: (box: keyof BoxesState) => void;
     horizontalScroll?: boolean;
     horizontalRowHeight?: number;
     layoutWidth?: number;
@@ -358,6 +362,7 @@ jest.mock("@/src/components/Box/List/BoxList", () => {
 jest.mock("@/src/components/Box/Carousel/BoxCarousel", () => {
   return function BoxCarouselMock(props: {
     faces?: Partial<Record<keyof BoxesState, string>>;
+  handleSelectBox?: (box: keyof BoxesState) => void;
     layoutWidth?: number;
   }) {
     latestBoxCarouselProps = props;
@@ -850,20 +855,26 @@ describe("FlashcardsScreen UI state regressions", () => {
     expect(latestButtonsProps?.trueFalseButtonsVariant).toBe("know_dont_know");
   });
 
-  it("passes computed box faces down to the box renderer", async () => {
-    const cardA = makeCard({
-      id: 41,
-      text: "sun",
-      translations: ["slonce"],
+  it("keeps personalities on automatic changes and draws once for a manual selection", async () => {
+    const draw = jest.spyOn(boxFaceHelpers, "pickBoxSelectionFace").mockReturnValue("surprised");
+    const card = makeCard({ id: 41, text: "sun", translations: ["slonce"] });
+    const initial = createInteractionState(card);
+    const app = renderScreenWithState(initial, [card]);
+    await flushScreenState();
+    expect(latestBoxListProps?.faces).toEqual({
+      boxZero: "owo", boxOne: "nice", boxTwo: "ez", boxThree: "cheerful", boxFour: "sparkle", boxFive: "sleep",
     });
-
-    renderScreenWithState(createInteractionState(cardA), [cardA]);
-
-    await act(async () => {
-      await Promise.resolve();
-    });
-
-    expect(latestBoxListProps?.faces?.boxOne).toBeDefined();
+    expect(draw).not.toHaveBeenCalled();
+    await app.rerenderWithState({ ...initial, activeBox: "boxTwo" });
+    expect(latestBoxListProps?.faces?.boxTwo).toBe("ez");
+    expect(draw).not.toHaveBeenCalled();
+    act(() => latestBoxListProps?.handleSelectBox?.("boxTwo"));
+    expect(draw).toHaveBeenCalledTimes(1);
+    expect(latestBoxListProps?.faces?.boxTwo).toBe("surprised");
+    await app.rerenderWithState({ ...initial, activeBox: "boxTwo" });
+    expect(draw).toHaveBeenCalledTimes(1);
+    act(() => jest.advanceTimersByTime(800));
+    expect(latestBoxListProps?.faces?.boxTwo).toBe("ez");
   });
 
   it("keeps the classic boxes layout and hint visibility off the small-phone layout", async () => {
