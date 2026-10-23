@@ -1,5 +1,5 @@
 import React from "react";
-import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
+import { fireEvent, render, waitFor } from "@testing-library/react-native";
 
 import LanguageIntroScreen from "../LanguageIntroScreen";
 import { useSettings } from "@/src/contexts/SettingsContext";
@@ -11,6 +11,10 @@ import {
 const mockReplace = jest.fn();
 const setUiLanguage = jest.fn(() => Promise.resolve());
 const setNativeLanguage = jest.fn(() => Promise.resolve());
+
+jest.mock("react-native-safe-area-context", () =>
+  jest.requireActual("react-native-safe-area-context/jest/mock").default
+);
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({
@@ -82,10 +86,18 @@ const mockedUseSettings = useSettings as jest.Mock;
 const mockedGetOnboardingCheckpoint = getOnboardingCheckpoint as jest.Mock;
 const mockedSetOnboardingCheckpoint = setOnboardingCheckpoint as jest.Mock;
 
-function revealIntroContent() {
-  act(() => {
-    jest.advanceTimersByTime(50);
+async function revealIntroContent(screen: ReturnType<typeof render>) {
+  await waitFor(() => {
+    expect(screen.getByTestId("onboarding-intro-content")).toBeTruthy();
   });
+  const layout = (testID: string, width: number, height: number) => {
+    fireEvent(screen.getByTestId(testID, { includeHiddenElements: true }), "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width, height } },
+    });
+  };
+  layout("onboarding-intro-content", 390, 760);
+  layout("onboarding-intro-scroll", 354, 684);
+  layout("onboarding-intro-body", 354, 330);
 }
 
 describe("LanguageIntroScreen onboarding checkpoints", () => {
@@ -137,9 +149,9 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
     await waitFor(() => {
       expect(setNativeLanguage).toHaveBeenCalledWith("pl");
       expect(mockedSetOnboardingCheckpoint).toHaveBeenCalledWith("leitner_required");
-      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
     });
-    revealIntroContent();
+    await revealIntroContent(screen);
+    expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
     expect(mockReplace).not.toHaveBeenCalled();
   });
 
@@ -148,10 +160,8 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     const screen = render(<LanguageIntroScreen />);
 
-    await waitFor(() => {
-      expect(screen.getByTestId("leitner-diagram")).toBeTruthy();
-    });
-    revealIntroContent();
+    await revealIntroContent(screen);
+    expect(screen.getByTestId("leitner-diagram")).toBeTruthy();
   });
 
   it("moves from Leitner screen to course pinning", async () => {
@@ -159,10 +169,8 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     const screen = render(<LanguageIntroScreen />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
-    });
-    revealIntroContent();
+    await revealIntroContent(screen);
+    expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
     fireEvent.press(screen.getByText("Zaczynajmy"));
 
     await waitFor(() => {
@@ -176,10 +184,8 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     const screen = render(<LanguageIntroScreen />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
-    });
-    revealIntroContent();
+    await revealIntroContent(screen);
+    expect(screen.getByText("Zapamiętuj więcej")).toBeTruthy();
 
     expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
       /Memicard oparty jest na systemie Leitnera\./
@@ -204,13 +210,11 @@ describe("LanguageIntroScreen onboarding checkpoints", () => {
 
     const screen = render(<LanguageIntroScreen />);
 
-    await waitFor(() => {
-      expect(screen.getByText("Remember more")).toBeTruthy();
-      expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
-        /Memicard is based on the Leitner system\./
-      );
-      expect(screen.getByText("Let's start")).toBeTruthy();
-    });
-    revealIntroContent();
+    await revealIntroContent(screen);
+    expect(screen.getByText("Remember more")).toBeTruthy();
+    expect(screen.getByTestId("leitner-intro-description")).toHaveTextContent(
+      /Memicard is based on the Leitner system\./
+    );
+    expect(screen.getByText("Let's start")).toBeTruthy();
   });
 });

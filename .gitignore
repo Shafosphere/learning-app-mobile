@@ -50,17 +50,21 @@ images/
 assets/**/android/
 .idea/
 .legacy/
-assets/images/*
-!assets/images/.gitkeep
+# Image files stay local and must not be committed.
 *.png
-!assets/app/icons/notification-icon.png
 *.jpg
 *.jpeg
 *.svg
-!assets/icons/navbar/colored/*.svg
 *.svgx
-!assets/illustrations/leitner.svg
-!assets/illustrations/leitner.png
+*.webp
+*.ico
+*.gif
+*.avif
+*.bmp
+*.tif
+*.tiff
+*.heic
+*.heif
 S
 *.mp3
 

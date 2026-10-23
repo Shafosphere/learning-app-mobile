@@ -18,8 +18,8 @@ export const HINT_COOLDOWN_MS = 10 * 60 * 1000;
 export const HINT_TUTORIAL_FAIL_THRESHOLD = 5;
 export const UI_WARMUP_DELAY_MS = 250;
 export const ACTIONS_POSITION_NUDGE_TRIGGER_ANSWERS = 7;
-export const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
-export const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
+export const topButtonsPreview = require("@/assets/ui/settings/previews/controls-two-hand.png");
+export const bottomButtonsPreview = require("@/assets/ui/settings/previews/controls-one-hand.png");
 
 export const EMPTY_COURSE_COMPLETION_SUMMARY: CourseCompletionSummary = {
   totalAnswers: 0,

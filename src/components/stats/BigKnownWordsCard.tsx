@@ -11,7 +11,7 @@ import { useReducedMotion } from "react-native-reanimated";
 
 const TAP_FACES: readonly Face[] = ["sparkle", "blink", "blushed", "xd", "ez", "love"];
 
-const STAR_SOURCE = require("@/assets/illustrations/streak/gwiazdka.svg");
+const STAR_SOURCE = require("@/assets/ui/stats/streak/gwiazdka.svg");
 const STAR_SLOT_SIZE = 32;
 const STAR_COLUMNS = 5;
 const STAR_ROWS = 2;
@@ -271,7 +271,7 @@ const BigKnownWordsCard: React.FC = () => {
       }}
     >
       <ImageBackground
-        source={require("@/assets/illustrations/streak/streak.png")}
+        source={require("@/assets/ui/stats/streak/streak.png")}
         resizeMode="cover"
         style={[styles.container, { transform: [{ scale }] }]}
       >
@@ -294,13 +294,13 @@ const BigKnownWordsCard: React.FC = () => {
           ))}
         </View>
         <Image
-          source={require("@/assets/illustrations/streak/lewyrog.png")}
+          source={require("@/assets/ui/stats/streak/lewyrog.png")}
           resizeMode="stretch"
           style={styles.decoration}
           accessible={false}
         />
         <Image
-          source={require("@/assets/illustrations/streak/prawodol.png")}
+          source={require("@/assets/ui/stats/streak/prawodol.png")}
           resizeMode="stretch"
           style={styles.decoration}
           accessible={false}
@@ -316,19 +316,19 @@ const BigKnownWordsCard: React.FC = () => {
           />
         </View>
         <Image
-          source={require("@/assets/illustrations/streak/prawyrog.png")}
+          source={require("@/assets/ui/stats/streak/prawyrog.png")}
           resizeMode="stretch"
           style={styles.decoration}
           accessible={false}
         />
         <Image
-          source={require("@/assets/illustrations/streak/gora.png")}
+          source={require("@/assets/ui/stats/streak/gora.png")}
           resizeMode="stretch"
           style={styles.decoration}
           accessible={false}
         />
         <Image
-          source={require("@/assets/illustrations/puchar.png")}
+          source={require("@/assets/ui/achievements/trophy.png")}
           resizeMode="contain"
           style={styles.trophy}
           accessible={false}

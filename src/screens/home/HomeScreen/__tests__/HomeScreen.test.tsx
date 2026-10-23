@@ -4,40 +4,18 @@ import { FlatList, StyleSheet } from "react-native";
 import HomeScreen from "../HomeScreen";
 
 let mockWindowDimensions = { width: 412, height: 915, scale: 1, fontScale: 1 };
-let mockLanguage = "pl";
-let mockIsFocused = true;
 let mockFontScaleMultiplier = 1;
-let mockQuotes = [
-  { text: "Pierwszy cytat", author: "Autor pierwszy" },
-  { text: "Drugi cytat", author: "Autor drugi" },
-];
 const mockPush = jest.fn();
 const mockOpenCoursePanel = jest.fn();
 
 jest.mock("@/src/hooks/useOpenCoursePanel", () => ({
   useOpenCoursePanel: () => mockOpenCoursePanel,
 }));
-const mockTranslate = jest.fn((key: string, options?: { returnObjects?: boolean; lng?: string }) => {
-  if (options?.returnObjects) {
-    return mockQuotes.map((quote) => ({ ...quote, text: `${options.lng}: ${quote.text}` }));
-  }
-  return key;
-});
+const mockTranslate = jest.fn((key: string) => key);
 
 jest.mock("expo-router", () => ({
   useRouter: () => ({ push: mockPush }),
 }));
-
-jest.mock("@react-navigation/native", () => {
-  const mockReact = jest.requireActual<typeof import("react")>("react");
-  return {
-    useFocusEffect: (effect: () => void | (() => void)) => {
-      mockReact.useEffect(() => {
-        if (mockIsFocused) return effect();
-      }, [effect, mockIsFocused]);
-    },
-  };
-});
 
 jest.mock("react-native", () => {
   const RN = jest.requireActual("react-native");
@@ -52,7 +30,6 @@ jest.mock("react-native", () => {
 jest.mock("react-i18next", () => ({
   useTranslation: () => ({
     t: mockTranslate,
-    i18n: { language: mockLanguage, resolvedLanguage: mockLanguage },
   }),
 }));
 
@@ -75,24 +52,13 @@ function getListProps() {
   return screen.UNSAFE_getByType(FlatList).props;
 }
 
-function quoteSelectionCount() {
-  return mockTranslate.mock.calls.filter(([, options]) => options?.returnObjects).length;
-}
-
 describe("HomeScreen responsive grid", () => {
   beforeEach(() => {
     mockWindowDimensions = { width: 412, height: 915, scale: 1, fontScale: 1 };
-    mockLanguage = "pl";
-    mockIsFocused = true;
     mockFontScaleMultiplier = 1;
-    mockQuotes = [
-      { text: "Pierwszy cytat", author: "Autor pierwszy" },
-      { text: "Drugi cytat", author: "Autor drugi" },
-    ];
     mockPush.mockClear();
     mockOpenCoursePanel.mockClear();
     mockTranslate.mockClear();
-    jest.spyOn(Math, "random").mockReturnValue(0);
   });
 
   afterEach(() => jest.restoreAllMocks());
@@ -167,35 +133,6 @@ describe("HomeScreen responsive grid", () => {
     expect(iconStyle.height).toBeCloseTo(iconSize);
   });
 
-  it("keeps its quote through measurements and selects again on refocus and language change", () => {
-    const { rerender } = render(<HomeScreen />);
-    expect(screen.getByText("pl: Pierwszy cytat")).toBeTruthy();
-    measureGrid(372, 590);
-    measureGrid(372, 540);
-    expect(quoteSelectionCount()).toBe(1);
-    expect(screen.getByText("pl: Pierwszy cytat")).toBeTruthy();
-
-    mockIsFocused = false;
-    rerender(<HomeScreen />);
-    jest.mocked(Math.random).mockReturnValue(0.99);
-    mockIsFocused = true;
-    rerender(<HomeScreen />);
-    expect(screen.getByText("pl: Drugi cytat")).toBeTruthy();
-    expect(quoteSelectionCount()).toBe(2);
-
-    mockLanguage = "en";
-    rerender(<HomeScreen />);
-    expect(screen.getByText("en: Drugi cytat")).toBeTruthy();
-    expect(quoteSelectionCount()).toBe(3);
-  });
-
-  it("handles a missing quote translation", () => {
-    mockQuotes = [];
-    render(<HomeScreen />);
-    measureGrid(372, 590);
-    expect(screen.getAllByRole("button")).toHaveLength(5);
-  });
-
   it("keeps every destination and long translated label after resizing", () => {
     render(<HomeScreen />);
     measureGrid(372, 590);
@@ -218,7 +155,6 @@ describe("HomeScreen responsive grid", () => {
 describe("home mascot reactions", () => {
   beforeEach(() => {
     jest.useFakeTimers();
-    mockIsFocused = true;
     mockOpenCoursePanel.mockClear();
     mockPush.mockClear();
   });

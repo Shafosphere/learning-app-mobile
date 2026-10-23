@@ -6,6 +6,10 @@ import { setOnboardingCheckpoint } from "@/src/services/onboardingCheckpoint";
 
 const mockReplace = jest.fn();
 
+jest.mock("react-native-safe-area-context", () =>
+  jest.requireActual("react-native-safe-area-context/jest/mock").default
+);
+
 jest.mock("expo-router", () => ({
   useRouter: () => ({ replace: mockReplace }),
 }));
@@ -40,6 +44,14 @@ function renderIntro(screen: React.ReactElement) {
   act(() => {
     jest.advanceTimersByTime(50);
   });
+  const layout = (testID: string, width: number, height: number) => {
+    fireEvent(result.getByTestId(testID, { includeHiddenElements: true }), "layout", {
+      nativeEvent: { layout: { x: 0, y: 0, width, height } },
+    });
+  };
+  layout("onboarding-intro-content", 390, 760);
+  layout("onboarding-intro-scroll", 354, 684);
+  layout("onboarding-intro-body", 354, 330);
   return result;
 }
 

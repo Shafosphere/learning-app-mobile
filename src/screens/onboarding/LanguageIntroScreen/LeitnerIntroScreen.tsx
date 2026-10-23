@@ -6,7 +6,7 @@ import React, { useState } from "react";
 import { useTranslation } from "react-i18next";
 import { View } from "react-native";
 
-const LEITNER_SOURCE = require("@/assets/illustrations/leitner.png");
+const LEITNER_SOURCE = require("@/assets/ui/onboarding/leitner.png");
 
 export default function LeitnerIntroScreen() {
   const { uiLanguage } = useSettings();

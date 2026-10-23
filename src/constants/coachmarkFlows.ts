@@ -1,3 +1,4 @@
+import type { Face } from "@/src/components/Box/Skin/boxFaces";
 import type { BoxesState } from "@/src/types/boxes";
 
 export type CoachmarkAdvanceEvent =
@@ -17,6 +18,8 @@ export type CoachmarkFlowStep = {
   targetId: string;
   titleKey: string;
   descriptionKey: string;
+  mascotFace?: Face;
+  mascotMotion?: "hop" | "tilt";
   kind: "info" | "action" | "success";
   advanceOn: CoachmarkAdvanceEvent;
   spotlight?: boolean;
@@ -40,6 +43,7 @@ export type CoachmarkFlowStep = {
 export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   {
     id: "course-pin-step-1",
+    mascotFace: "happy",
     targetId: "course-pin-bubble-anchor",
     titleKey: "onboarding.coursePin.step1.title",
     descriptionKey: "onboarding.coursePin.step1.description",
@@ -107,6 +111,7 @@ export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "course-pin-step-7",
+    mascotFace: "sleep",
     targetId: "course-pin-bubble-anchor",
     titleKey: "onboarding.coursePin.step7.title",
     descriptionKey: "onboarding.coursePin.step7.description",
@@ -115,6 +120,8 @@ export const COURSE_PIN_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "course-pin-step-8",
+    mascotFace: "happy",
+    mascotMotion: "hop",
     targetId: "course-pin-bubble-anchor",
     titleKey: "onboarding.coursePin.step8.title",
     descriptionKey: "onboarding.coursePin.step8.description",
@@ -240,6 +247,7 @@ export const COURSE_ENTRY_SETTINGS_COACHMARK_STEPS: CoachmarkFlowStep[] = [
 export const REVIEW_COURSES_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   {
     id: "review-courses-step-1",
+    mascotFace: "happy",
     targetId: "review-courses-bubble-anchor",
     titleKey: "onboarding.reviewCourses.step1.title",
     descriptionKey: "onboarding.reviewCourses.step1.description",
@@ -297,6 +305,7 @@ export const REVIEW_COURSES_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "review-courses-step-6",
+    mascotFace: "encouraging",
     targetId: "review-courses-first-card",
     titleKey: "onboarding.reviewCourses.step6.title",
     descriptionKey: "onboarding.reviewCourses.step6.description",
@@ -316,6 +325,7 @@ const REVIEW_FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS = [
 const REVIEW_FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   {
     id: "review-flashcards-step-1",
+    mascotFace: "happy",
     targetId: "review-flashcards-bubble-anchor",
     titleKey: "onboarding.reviewFlashcards.step1.title",
     descriptionKey: "onboarding.reviewFlashcards.step1.description",
@@ -412,6 +422,7 @@ const REVIEW_FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "review-flashcards-step-10",
+    mascotFace: "encouraging",
     targetId: "review-flashcards-bubble-anchor",
     titleKey: "onboarding.reviewFlashcards.step10.title",
     descriptionKey: "onboarding.reviewFlashcards.step10.description",
@@ -436,6 +447,7 @@ const FLASHCARDS_ACTION_BUTTON_AVOID_TARGET_IDS = [
 const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   {
     id: "flashcards-step-1",
+    mascotFace: "happy",
     targetId: "flashcards-bubble-anchor",
     titleKey: "onboarding.flashcards.step1.title",
     descriptionKey: "onboarding.flashcards.step1.description",
@@ -519,6 +531,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-9",
+    mascotFace: "encouraging",
     targetId: "flashcards-card-section",
     titleKey: "onboarding.flashcards.step9.title",
     descriptionKey: "onboarding.flashcards.step9.description",
@@ -534,6 +547,8 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-10",
+    mascotFace: "sparkle",
+    mascotMotion: "hop",
     targetId: "flashcards-bubble-anchor",
     titleKey: "onboarding.flashcards.step10.title",
     descriptionKey: "onboarding.flashcards.step10.description",
@@ -545,6 +560,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-11",
+    mascotFace: "cheerful",
     targetId: "flashcards-box-two",
     titleKey: "onboarding.flashcards.step11.title",
     descriptionKey: "onboarding.flashcards.step11.description",
@@ -559,6 +575,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-12",
+    mascotFace: "cheerful",
     targetId: "flashcards-promotion-arrow-anchor",
     titleKey: "onboarding.flashcards.step12.title",
     descriptionKey: "onboarding.flashcards.step12.description",
@@ -584,6 +601,8 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-14",
+    mascotFace: "sparkle",
+    mascotMotion: "hop",
     targetId: "flashcards-boxes-section",
     titleKey: "onboarding.flashcards.step14.title",
     descriptionKey: "onboarding.flashcards.step14.description",
@@ -602,6 +621,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-15",
+    mascotFace: "surprised",
     targetId: "flashcards-boxes-section",
     titleKey: "onboarding.flashcards.step15.title",
     descriptionKey: "onboarding.flashcards.step15.description",
@@ -709,6 +729,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-24",
+    mascotFace: "cheerful",
     targetId: "flashcards-bubble-anchor",
     titleKey: "onboarding.flashcards.step24.title",
     descriptionKey: "onboarding.flashcards.step24.description",
@@ -718,6 +739,7 @@ const FLASHCARDS_COACHMARK_BASE_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-step-25",
+    mascotFace: "love",
     targetId: "flashcards-bubble-anchor",
     titleKey: "onboarding.flashcards.step25.title",
     descriptionKey: "onboarding.flashcards.step25.description",
@@ -736,6 +758,7 @@ export const FLASHCARDS_COACHMARK_STEPS: CoachmarkFlowStep[] =
 export const HINT_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   {
     id: "flashcards-hint-step-1",
+    mascotFace: "blink",
     targetId: "flashcards-hint-section",
     titleKey: "onboarding.hints.manualStep1.title",
     descriptionKey: "onboarding.hints.manualStep1.description",
@@ -780,6 +803,8 @@ export const HINT_COACHMARK_STEPS: CoachmarkFlowStep[] = [
   },
   {
     id: "flashcards-hint-step-5",
+    mascotFace: "blink",
+    mascotMotion: "tilt",
     targetId: "flashcards-hint-section",
     titleKey: "onboarding.hints.step5.title",
     descriptionKey: "onboarding.hints.step5.description",

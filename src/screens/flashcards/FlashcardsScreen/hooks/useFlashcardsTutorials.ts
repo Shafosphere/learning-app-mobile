@@ -383,6 +383,8 @@ export function useFlashcardsTutorials({
         ...currentFlashcardsStep,
         descriptionKey: "onboarding.flashcards.step10.descriptionAssisted",
         successVariant: "assisted",
+        mascotFace: "blink",
+        mascotMotion: "tilt",
       };
     }
     return currentFlashcardsStep;
@@ -397,6 +399,7 @@ export function useFlashcardsTutorials({
     }
     return {
       ...hintCoachmark.currentStep,
+      mascotFace: hintTutorialTriggerSource === "auto" ? "encouraging" : "blink",
       titleKey:
         hintTutorialTriggerSource === "auto"
           ? "onboarding.hints.autoStep1.title"

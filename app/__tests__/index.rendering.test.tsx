@@ -12,7 +12,6 @@ import { FlatList, StyleSheet, Text } from "react-native";
 
 import StartupIndexRoute from "../index";
 import { renderHomeTile } from "@/src/components/home/flatList";
-import { normalizeHomeQuotes, HOME_QUOTES_TRANSLATION_KEY } from "@/src/constants/homeQuotes";
 import { SettingsProvider, useSettings } from "@/src/contexts/SettingsContext";
 import i18n from "@/src/i18n";
 
@@ -32,11 +31,6 @@ jest.mock("@/src/components/home/flatList", () => {
       jest.fn(actual.renderHomeTile(...args)),
     ),
   };
-});
-
-jest.mock("@/src/constants/homeQuotes", () => {
-  const actual = jest.requireActual<typeof import("@/src/constants/homeQuotes")>("@/src/constants/homeQuotes");
-  return { ...actual, normalizeHomeQuotes: jest.fn(actual.normalizeHomeQuotes) };
 });
 
 let settings: ReturnType<typeof useSettings>;
@@ -66,7 +60,6 @@ async function startHome() {
     expect(settings.activeCustomCourseIdHydrated).toBe(true);
     expect(settings.uiLanguage).toBe("en");
     expect(screen.getByTestId("home-grid-viewport")).toBeTruthy();
-    expect(normalizeHomeQuotes).toHaveBeenCalled();
   });
   await act(async () => {});
   fireEvent(screen.getByTestId("home-grid-viewport"), "layout", {
@@ -86,7 +79,6 @@ function homeWork() {
       (count, result) => count + (result.value as jest.Mock).mock.calls.length,
       0,
     ),
-    quotes: jest.mocked(normalizeHomeQuotes).mock.calls.length,
   };
 }
 
@@ -115,7 +107,7 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-it("does no Home render, tile or quote work for course changes while blurred, and retains the grid on return", async () => {
+it("does no Home render or tile work for course changes while blurred, and retains the grid on return", async () => {
   const app = await startHome();
   const initialGrid = grid();
   const initialData = initialGrid.props.data;
@@ -147,21 +139,20 @@ it("does no Home render, tile or quote work for course changes while blurred, an
 
   act(() => router.back());
   expect(app.getPathname()).toBe("/");
-  expect(homeWork().quotes).toBe(baseline.quotes + 1);
+  expect(homeWork()).toEqual(baseline);
   expect(grid()).toBe(initialGrid);
   expect(grid().props.scrollEnabled).toBe(true);
   expect(StyleSheet.flatten(grid().props.style)).toEqual(StyleSheet.flatten(initialStyle));
   expect(settings.activeCustomCourseId).toBe(14);
 });
 
-it("keeps theme, accessibility and language live while blurred and refreshes the quote in the latest language on focus", async () => {
+it("keeps theme, accessibility and language live while blurred and on return", async () => {
   const app = await startHome();
   const initialGrid = grid();
   const titleKey = "repeats.labels.courses";
   const initialTitle = i18n.t(titleKey);
   const initialTitleStyle = StyleSheet.flatten(screen.getByText(initialTitle).props.style);
   act(() => router.push("/coursepanel"));
-  const quotesBefore = homeWork().quotes;
 
   for (const change of [
     () => settings.toggleTheme(),
@@ -182,15 +173,9 @@ it("keeps theme, accessibility and language live while blurred and refreshes the
   const latestTitle = i18n.t(titleKey);
   expect(latestTitle).not.toBe(initialTitle);
   expect(screen.getByText(latestTitle, { includeHiddenElements: true })).toBeTruthy();
-  expect(homeWork().quotes).toBe(quotesBefore);
   expect(app.getPathname()).toBe("/coursepanel");
 
   act(() => router.back());
-  expect(homeWork().quotes).toBe(quotesBefore + 1);
-  const latestQuotes = i18n.t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true, lng: "pl" });
-  expect(normalizeHomeQuotes).toHaveBeenLastCalledWith(latestQuotes);
-  const quotes = jest.mocked(normalizeHomeQuotes).mock.results.at(-1)!.value as ReturnType<typeof normalizeHomeQuotes>;
-  expect(quotes.some(quote => screen.queryByText(quote.text) != null)).toBe(true);
   expect(grid()).toBe(initialGrid);
   expect(screen.getByText(latestTitle)).toBeTruthy();
 });

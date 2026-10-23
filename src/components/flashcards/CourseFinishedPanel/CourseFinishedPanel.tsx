@@ -22,7 +22,7 @@ import Animated, {
 import { useTranslation } from "react-i18next";
 import { useStyles } from "./CourseFinishedPanel-styles";
 
-const BOX_SHADOW_SOURCE = require("@/assets/illustrations/mascot-box/body/shadow.svg");
+const BOX_SHADOW_SOURCE = require("@/assets/mascot/box/body/shadow.svg");
 
 const HORIZONTAL_INSET = 20;
 const VERTICAL_INSET_PERCENTAGE = 5;

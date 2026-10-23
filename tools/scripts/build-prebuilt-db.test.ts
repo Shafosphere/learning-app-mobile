@@ -350,7 +350,7 @@ describe("English from scratch series", () => {
       const images = cards.flatMap((card: { imageFront: string | null; imageBack: string | null }) => [card.imageFront, card.imageBack]).filter(Boolean);
       expect(images).toHaveLength(slug === slugs[0] ? 50 : 0);
       for (const name of images) {
-        expect(fs.existsSync(path.resolve(__dirname, "../../assets/images/A1", name))).toBe(true);
+        expect(fs.existsSync(path.resolve(__dirname, "../../assets/learning/flashcards/common-vocabulary", name))).toBe(true);
       }
     }
   });

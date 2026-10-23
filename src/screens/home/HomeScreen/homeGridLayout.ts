@@ -13,7 +13,7 @@ export type HomeGridMetrics = {
   scrollEnabled: boolean;
 };
 
-/** Dimensions are the measured viewport below the quote, in layout dp. */
+/** Dimensions are the measured grid viewport, in layout dp. */
 export function getHomeGridMetrics({
   width,
   height,

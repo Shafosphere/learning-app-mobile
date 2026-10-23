@@ -1,10 +1,8 @@
 import { useRouter } from "expo-router";
-import { useFocusEffect } from "@react-navigation/native";
 import { useCallback, useState } from "react";
 import {
   FlatList,
   View,
-  Text,
   useWindowDimensions,
   type LayoutChangeEvent,
 } from "react-native";
@@ -15,40 +13,19 @@ import { useOpenCoursePanel } from "@/src/hooks/useOpenCoursePanel";
 import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./HomeScreen-styles";
 import { getHomeGridMetrics } from "./homeGridLayout";
-import {
-  HOME_QUOTES_TRANSLATION_KEY,
-  normalizeHomeQuotes,
-} from "@/src/constants/homeQuotes";
 
 export default function HomeScreen() {
   const router = useRouter();
   const goToCoursePanel = useOpenCoursePanel();
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const styles = useStyles();
-  const { height: screenHeight, isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout } = useDeviceLayout();
   const { fontScale } = useWindowDimensions();
   const { fontScaleMultiplier } = useThemeSettings();
   const [viewport, setViewport] = useState<{
     width: number;
     height: number;
   } | null>(null);
-  const [randomQuote, setRandomQuote] = useState({ text: "", author: "" });
-  const language = i18n.resolvedLanguage ?? i18n.language;
-
-  useFocusEffect(
-    useCallback(() => {
-      const quotes = normalizeHomeQuotes(
-        t(HOME_QUOTES_TRANSLATION_KEY, { returnObjects: true, lng: language }),
-      );
-      setRandomQuote(
-        quotes[Math.floor(Math.random() * quotes.length)] ?? {
-          text: "",
-          author: "",
-        },
-      );
-    }, [t, language]),
-  );
-
   const onGridLayout = useCallback((event: LayoutChangeEvent) => {
     const { width, height } = event.nativeEvent.layout;
     setViewport((previous) =>
@@ -63,8 +40,6 @@ export default function HomeScreen() {
         fontScale: fontScale * fontScaleMultiplier,
       })
     : null;
-
-  const isCompactHeight = screenHeight < 760;
 
   const goToStats = () => {
     router.push("/stats");
@@ -89,6 +64,9 @@ export default function HomeScreen() {
       subtitle: t("screens.home.home.home.subtitle.przypieteKursy"),
       face: "nice",
       pressedFace: "happy",
+      decorations: [
+        { source: require("@/assets/ui/stats/streak/lewyrog.png") },
+      ],
       action: goToCoursePanel,
     },
     {
@@ -97,7 +75,7 @@ export default function HomeScreen() {
       subtitle: t("screens.home.home.home.subtitle.kreatorKursow"),
       face: "sparkle",
       pressedFace: "xd",
-      contentSource: require("@/assets/illustrations/mascot-box/content/nozyczki.png"),
+      contentSource: require("@/assets/mascot/box/props/scissors.png"),
       action: goToCustomCourse,
     },
     {
@@ -106,7 +84,7 @@ export default function HomeScreen() {
       subtitle: t("screens.home.home.home.subtitle.zobaczWyniki"),
       face: "ez",
       pressedFace: "sparkle",
-      contentSource: require("@/assets/illustrations/mascot-box/content/staTS.png"),
+      contentSource: require("@/assets/mascot/box/props/stats.png"),
       contentStyle: {
         top: -10,
         right: -2,
@@ -121,14 +99,14 @@ export default function HomeScreen() {
       face: "owo",
       faceParts: { eyes: "sparkle" },
       pressedFaceParts: { eyes: "happy", mouth: "owo" },
-      contentSource: require("@/assets/illustrations/mascot-box/content/rolka2.png"),
+      contentSource: require("@/assets/mascot/box/props/scroll.png"),
       contentStyle: { top: -16 },
       contentCopyStyles: [
         { right: 4, transform: [{ rotate: "0deg" }, { scale: 1.15 }] },
         { right: -12, transform: [{ rotate: "15deg" }, { scale: 1.15 }] },
         { right: -28, transform: [{ rotate: "30deg" }, { scale: 1.15 }] },
       ],
-      foregroundSource: require("@/assets/illustrations/mascot-box/content/lupa.png"),
+      foregroundSource: require("@/assets/mascot/box/props/magnifying-glass.png"),
       foregroundStyle: {
         right: -19,
         transform: [{ rotate: "5deg" }],
@@ -168,26 +146,6 @@ export default function HomeScreen() {
 
   return (
     <View style={[styles.container, isTabletLayout && styles.containerTablet]}>
-      <View style={[styles.header, isCompactHeight && styles.headerCompact]}>
-        <Text
-          style={[styles.quote, isCompactHeight && styles.quoteCompact]}
-          numberOfLines={isCompactHeight ? 2 : 3}
-          adjustsFontSizeToFit
-          minimumFontScale={isCompactHeight ? 0.72 : 0.82}
-          ellipsizeMode="tail"
-        >
-          {randomQuote.text}
-        </Text>
-        <Text
-          style={[styles.quoteAuthor, isCompactHeight && styles.quoteAuthorCompact]}
-          numberOfLines={1}
-          adjustsFontSizeToFit
-          minimumFontScale={0.85}
-        >
-          {randomQuote.author}
-        </Text>
-      </View>
-
       <View
         style={styles.gridWrapper}
         onLayout={onGridLayout}

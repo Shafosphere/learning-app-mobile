@@ -391,16 +391,16 @@ describe("Navbar review routing", () => {
   });
 
   it.each([
-    ["/", "home", 1, "home", require("@/assets/icons/navbar/colored/house_border_3x_outside.svg")],
-    ["/review", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
-    ["/review/levels", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
-    ["/review/reviewflashcards", "review", 0, "hourglass-end", require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg")],
-    ["/flashcards", "play", 2, "gamepad", require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg")],
-    ["/course-entry-settings", "play", 2, "gamepad", require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg")],
-    ["/completed-courses", "completed", 3, "trophy", require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg")],
-    ["/completed-courses/details", "completed", 3, "trophy", require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg")],
-    ["/settings", "settings", 4, "settings-sharp", require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg")],
-    ["/settings/details", "settings", 4, "settings-sharp", require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg")],
+    ["/", "home", 1, "home", require("@/assets/ui/navigation/home.svg")],
+    ["/review", "review", 0, "hourglass-end", require("@/assets/ui/navigation/review.svg")],
+    ["/review/levels", "review", 0, "hourglass-end", require("@/assets/ui/navigation/review.svg")],
+    ["/review/reviewflashcards", "review", 0, "hourglass-end", require("@/assets/ui/navigation/review.svg")],
+    ["/flashcards", "play", 2, "gamepad", require("@/assets/ui/navigation/play.svg")],
+    ["/course-entry-settings", "play", 2, "gamepad", require("@/assets/ui/navigation/play.svg")],
+    ["/completed-courses", "completed", 3, "trophy", require("@/assets/ui/navigation/completed.svg")],
+    ["/completed-courses/details", "completed", 3, "trophy", require("@/assets/ui/navigation/completed.svg")],
+    ["/settings", "settings", 4, "settings-sharp", require("@/assets/ui/navigation/settings.svg")],
+    ["/settings/details", "settings", 4, "settings-sharp", require("@/assets/ui/navigation/settings.svg")],
   ])("selects only the matching section on direct entry to %s", (path, section, index, inactiveIcon, source) => {
     const { screen } = setupNavbar({}, path);
     const bottomButtons = screen.getAllByRole("button").slice(-5);

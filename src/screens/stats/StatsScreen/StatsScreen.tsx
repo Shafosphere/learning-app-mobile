@@ -26,8 +26,8 @@ import { getRecentLearningHistory, type LearningHistoryEvent } from "@/src/db/sq
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import LearningHistoryList from "@/src/components/stats/LearningHistoryList";
 
-const SHIELD_SOURCE = require("@/assets/icons/tarcza.svg");
-const SHIELD_BORDER_SOURCE = require("@/assets/icons/tarcza_border.svg");
+const SHIELD_SOURCE = require("@/assets/ui/stats/shield.svg");
+const SHIELD_BORDER_SOURCE = require("@/assets/ui/stats/shield-border.svg");
 
 export default function StatsScreen() {
   const styles = useStyles();

@@ -889,6 +889,9 @@ export function GuidedCoachmarkLayer({
               pointerEvents="box-none"
             >
               <LogoMessage
+                mascotFace={currentStep.mascotFace ?? "nice"}
+                mascotMotion={currentStep.mascotMotion}
+                mascotReactionKey={currentStep.id}
                 title={t(currentStep.titleKey)}
                 description={t(currentStep.descriptionKey)}
                 layoutVariant={isCenteredIntro ? "centered_intro" : "default"}

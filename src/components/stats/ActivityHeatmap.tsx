@@ -467,7 +467,7 @@ const CalendarDay = memo(function CalendarDay({
       {shielded ? (
         <Image
           testID={`activity-heatmap-shield-${day.date}`}
-          source={require("@/assets/icons/tarcza.svg")}
+          source={require("@/assets/ui/stats/shield.svg")}
           contentFit="contain"
           style={{
             position: "absolute",

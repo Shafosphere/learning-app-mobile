@@ -8,7 +8,7 @@ import { useReducedMotion } from "react-native-reanimated";
 import { useNavbarMascotReaction, type MascotTapReaction } from "./useNavbarMascotReaction";
 
 type NavbarMascotProps = { tapReaction: MascotTapReaction };
-const SHADOW_SOURCE = require("@/assets/illustrations/mascot-box/body/shadow.svg");
+const SHADOW_SOURCE = require("@/assets/mascot/box/body/shadow.svg");
 const MOTION_DURATION_SCALE = 1.33;
 
 export default function NavbarMascot({ tapReaction }: NavbarMascotProps) {

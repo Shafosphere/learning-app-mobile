@@ -10,12 +10,14 @@ fi
 source_dir="$(cd "$1" && pwd)"
 cd "$(dirname "$0")/../.."
 
-output_dir="assets/images/A1"
+output_dir="assets/learning/flashcards/common-vocabulary"
 
 if ! command -v magick >/dev/null 2>&1; then
   echo "Brak ImageMagick (polecenia magick). Zainstaluj ImageMagick z obsługą WebP." >&2
   exit 1
 fi
+
+mkdir -p "$output_dir"
 
 # Źródłowe PNG przechowujemy poza projektem. Usuwamy tylko biel połączoną z brzegiem,
 # aby zachować białe elementy zamknięte wewnątrz konturu przedmiotu.

@@ -8,10 +8,9 @@ import {
   type ImageSourcePropType,
   View,
 } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
+import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { getIntroIllustrationWidth, getIntroSpacing } from "./introLayoutSizing";
 
-const WELCOME_LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 const SCROLL_BOTTOM_PADDING = 12;
 
 type OnboardingIntroLayoutProps = {
@@ -44,20 +43,35 @@ export function OnboardingIntroLayout({
   illustration,
 }: OnboardingIntroLayoutProps) {
   const styles = useStyles();
+  const insets = useSafeAreaInsets();
   const [contentHeight, setContentHeight] = useState(0);
   const [viewport, setViewport] = useState({ width: 0, height: 0 });
-  const [bodyHeight, setBodyHeight] = useState<number | null>(null);
+  const [measuredBody, setMeasuredBody] = useState<{
+    height: number;
+    logoWidth: number;
+  } | null>(null);
   const spacing = getIntroSpacing(contentHeight);
-  const illustrationWidth = illustration && viewport.width > 0 && bodyHeight !== null
+  // A body measured with the initial compact spacing cannot size the final illustration.
+  const isLayoutReady = contentHeight > 0 && viewport.height > 0 && viewport.width > 0
+    && measuredBody?.logoWidth === spacing.logoWidth;
+  const illustrationWidth = illustration && isLayoutReady
     ? getIntroIllustrationWidth({
         contentWidth: viewport.width,
-        availableHeight: viewport.height - bodyHeight - spacing.illustrationGap - SCROLL_BOTTOM_PADDING,
+        availableHeight: viewport.height - measuredBody.height - spacing.illustrationGap - SCROLL_BOTTOM_PADDING,
         aspectRatio: illustration.aspectRatio,
       })
     : undefined;
 
   return (
-    <SafeAreaView style={styles.container} edges={["top", "bottom", "left", "right"]}>
+    <View
+      testID="onboarding-intro-safe-area"
+      style={[
+        styles.container,
+        // The root provider already has initialWindowMetrics. Apply them in the
+        // first render instead of waiting for native SafeAreaView to update padding.
+        { paddingTop: insets.top, paddingBottom: insets.bottom, paddingLeft: insets.left, paddingRight: insets.right },
+      ]}
+    >
       <View
         style={styles.content}
         testID="onboarding-intro-content"
@@ -65,7 +79,10 @@ export function OnboardingIntroLayout({
       >
         <ScrollView
           testID="onboarding-intro-scroll"
-          style={styles.scroll}
+          style={[styles.scroll, { opacity: isLayoutReady ? 1 : 0 }]}
+          pointerEvents={isLayoutReady ? "auto" : "none"}
+          accessibilityElementsHidden={!isLayoutReady}
+          importantForAccessibility={isLayoutReady ? "auto" : "no-hide-descendants"}
           contentContainerStyle={styles.scrollContent}
           showsVerticalScrollIndicator
           onLayout={({ nativeEvent }) => {
@@ -79,24 +96,16 @@ export function OnboardingIntroLayout({
           <View
             testID="onboarding-intro-body"
             style={styles.body}
-            onLayout={({ nativeEvent }) => setBodyHeight(nativeEvent.layout.height)}
+            onLayout={({ nativeEvent }) => {
+              setMeasuredBody({ height: nativeEvent.layout.height, logoWidth: spacing.logoWidth });
+            }}
           >
             <View style={[styles.header, { paddingBottom: spacing.headerGap }]}>
-              {headerGraphic ? (
+              {headerGraphic && (
                 <View style={{ marginBottom: spacing.logoGap }}>
                   {headerGraphic(spacing.logoWidth)}
                 </View>
-              ) : <Image
-                source={WELCOME_LOGO_SOURCE}
-                testID="onboarding-intro-logo"
-                style={{
-                  width: spacing.logoWidth,
-                  height: spacing.logoWidth * 555 / 523,
-                  marginBottom: spacing.logoGap,
-                }}
-                resizeMode="contain"
-                accessible={false}
-              />}
+              )}
               <Text style={styles.title} allowFontScaling accessibilityRole="header">
                 {title}
               </Text>
@@ -144,7 +153,7 @@ export function OnboardingIntroLayout({
           />
         </View>
       </View>
-    </SafeAreaView>
+    </View>
   );
 }
 

@@ -1,11 +1,11 @@
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
-import { HOME_GRID_BOTTOM_PADDING, HOME_GRID_MAX_WIDTH } from "./homeGridLayout";
+import { HOME_GRID_BOTTOM_PADDING } from "./homeGridLayout";
 
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 30,
+    paddingTop: 85,
     backgroundColor: colors.background,
   },
   containerTablet: {
@@ -20,42 +20,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
     flex: 1,
     alignSelf: "center",
   },
-  header: {
-    gap: 8,
-    width: "100%",
-    maxWidth: HOME_GRID_MAX_WIDTH,
-    alignSelf: "center",
-    minHeight: 110,
-    justifyContent: "center",
-  },
-  headerCompact: {
-    minHeight: 86,
-    gap: 4,
-    marginBottom: 6,
-  },
-  quote: {
-    fontSize: 18,
-    fontWeight: "700",
-    color: colors.headline,
-    lineHeight: 26,
-    textAlign: "center",
-  },
-  quoteCompact: {
-    fontSize: 16,
-    lineHeight: 22,
-  },
-  quoteAuthor: {
-    fontSize: 14,
-    color: colors.paragraph,
-    textAlign: "right",
-    width: "100%",
-    paddingRight: 30,
-    fontStyle: "italic",
-  },
-  quoteAuthorCompact: {
-    fontSize: 12,
-    paddingRight: 18,
-  },
   gridContent: {
     paddingBottom: HOME_GRID_BOTTOM_PADDING,
   },
@@ -69,6 +33,20 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   tilePressed: {
     transform: [{ scale: 0.98 }],
+  },
+  tileDecorations: {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    borderRadius: 16,
+    overflow: "hidden",
+  },
+  tileCornerDecoration: {
+    position: "absolute",
+    bottom: 0,
+    left: 0,
   },
   tileVisualArea: {
     position: "absolute",

@@ -260,7 +260,7 @@ export default function CompletedCoursesScreen() {
         <View style={styles.minicontainer}>
           <View style={completedStyles.hero}>
             <Image
-              source={require("@/assets/illustrations/puchar.png")}
+              source={require("@/assets/ui/achievements/trophy.png")}
               style={completedStyles.trophy}
               accessible={false}
               testID="completed-courses-trophy"

@@ -147,8 +147,8 @@ describe("StatsScreen streak shields", () => {
       const shield = screen.getByTestId(owned ? ownedId : emptyId);
       expect(shield.props.source).toContainEqual(
         owned
-          ? require("@/assets/icons/tarcza.svg")
-          : require("@/assets/icons/tarcza_border.svg")
+          ? require("@/assets/ui/stats/shield.svg")
+          : require("@/assets/ui/stats/shield-border.svg")
       );
       expect(screen.queryByTestId(owned ? emptyId : ownedId)).toBeNull();
     }

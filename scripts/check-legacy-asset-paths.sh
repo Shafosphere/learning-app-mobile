@@ -18,13 +18,27 @@ patterns=(
   "./assets/icons/newIcons/"
   "./assets/icons/splash-icon.png"
   "./assets/icons/favicon.png"
+  "assets/znaki/"
+  "assets/images/"
+  "assets/illustrations/"
+  "assets/icons/"
+  "assets/nieuzywane/"
+)
+
+search_options=(
+  --fixed-strings
+  --glob '!node_modules/**'
+  --glob '!assets/**'
+  --glob '!scripts/check-legacy-asset-paths.sh'
+  --glob '!PLAN_PORZADKOWANIA_GRAFIK.md'
+  --glob '!audyt-grafik.csv'
 )
 
 failed=0
 for pattern in "${patterns[@]}"; do
-  if rg -n --fixed-strings --glob '!node_modules/**' --glob '!assets/**' --glob '!scripts/check-legacy-asset-paths.sh' "$pattern" . > /dev/null; then
-    echo "Legacy asset path found: $pattern"
-    rg -n --fixed-strings --glob '!node_modules/**' --glob '!assets/**' --glob '!scripts/check-legacy-asset-paths.sh' "$pattern" .
+  if rg -n "${search_options[@]}" "$pattern" . > /dev/null; then
+    echo "Legacy or archived asset path found: $pattern"
+    rg -n "${search_options[@]}" "$pattern" .
     failed=1
   fi
 done
@@ -33,4 +47,4 @@ if [[ "$failed" -eq 1 ]]; then
   exit 1
 fi
 
-echo "No legacy asset paths detected."
+echo "No legacy or archived asset paths detected."

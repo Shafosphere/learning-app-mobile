@@ -1,4 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
+import BoxSkin from "@/src/components/Box/Skin/BoxSkin";
+import type { Face } from "@/src/components/Box/Skin/boxFaces";
 import React from "react";
 import {
   type LayoutChangeEvent,
@@ -9,9 +11,12 @@ import {
   ViewStyle,
 } from "react-native";
 import Animated, {
+  cancelAnimation,
   interpolate,
   useAnimatedStyle,
+  useReducedMotion,
   useSharedValue,
+  withSequence,
   withTiming,
 } from "react-native-reanimated";
 import { useTranslation } from "react-i18next";
@@ -26,8 +31,6 @@ type LogoMessageVariant =
   | "done";
 
 type LogoMessageLayoutVariant = "default" | "centered_intro";
-
-const LOGO_SOURCE = require("@/assets/illustrations/mascot-box/branding/logo.png");
 
 const COPY_KEYS: Record<
   LogoMessageVariant,
@@ -86,6 +89,9 @@ type LogoMessageProps = {
   previousLabel?: string;
   nextLabel?: string;
   layoutVariant?: LogoMessageLayoutVariant;
+  mascotFace?: Face;
+  mascotMotion?: "hop" | "tilt";
+  mascotReactionKey?: string;
 };
 
 export default function LogoMessage({
@@ -104,6 +110,9 @@ export default function LogoMessage({
   previousLabel = "Previous message",
   nextLabel = "Next message",
   layoutVariant = "default",
+  mascotFace = "happy",
+  mascotMotion,
+  mascotReactionKey,
 }: LogoMessageProps) {
   const { t } = useTranslation();
   const styles = useStyles();
@@ -113,6 +122,33 @@ export default function LogoMessage({
   const isCenteredIntro = layoutVariant === "centered_intro";
   const hasNavigation = Boolean(onPrevious || onNext);
   const layoutProgress = useSharedValue(isCenteredIntro ? 1 : 0);
+  const reduceMotion = useReducedMotion();
+  const mascotTranslateY = useSharedValue(0);
+  const mascotRotation = useSharedValue(0);
+
+  React.useEffect(() => {
+    const reset = () => {
+      cancelAnimation(mascotTranslateY);
+      cancelAnimation(mascotRotation);
+      mascotTranslateY.value = 0;
+      mascotRotation.value = 0;
+    };
+
+    reset();
+    if (!reduceMotion && mascotMotion === "hop") {
+      mascotTranslateY.value = withSequence(
+        withTiming(-3, { duration: 140 }),
+        withTiming(0, { duration: 220 }),
+      );
+    } else if (!reduceMotion && mascotMotion === "tilt") {
+      mascotRotation.value = withSequence(
+        withTiming(-4, { duration: 140 }),
+        withTiming(0, { duration: 220 }),
+      );
+    }
+
+    return reset;
+  }, [mascotMotion, mascotReactionKey, reduceMotion, mascotTranslateY, mascotRotation]);
 
   React.useEffect(() => {
     layoutProgress.value = withTiming(isCenteredIntro ? 1 : 0, {
@@ -129,10 +165,20 @@ export default function LogoMessage({
   }));
 
   const logoAnimatedStyle = useAnimatedStyle(() => ({
-    left: interpolate(layoutProgress.value, [0, 1], [-12, -24]),
-    bottom: interpolate(layoutProgress.value, [0, 1], [-10, -30]),
+    left: interpolate(layoutProgress.value, [0, 1], [-4, -24]),
+    // Keep the anchor on the same timeline as the size, including reversals.
+    bottom: `${interpolate(layoutProgress.value, [0, 1], [50, 0])}%` as `${number}%`,
+    marginBottom: interpolate(layoutProgress.value, [0, 1], [-34, -20]),
     width: interpolate(layoutProgress.value, [0, 1], [68, 141]),
     height: interpolate(layoutProgress.value, [0, 1], [68, 141]),
+    transform: [
+      { translateY: mascotTranslateY.value },
+      { rotate: `${mascotRotation.value}deg` },
+    ],
+  }));
+
+  const mascotAnimatedStyle = useAnimatedStyle(() => ({
+    transform: [{ scale: interpolate(layoutProgress.value, [0, 1], [(68 * 1.15 * 1.1) / 122, 141 / 122]) }],
   }));
 
   const textWrapperAnimatedStyle = useAnimatedStyle(() => ({
@@ -170,10 +216,11 @@ export default function LogoMessage({
         accessible
         accessibilityRole="text"
       >
-        <Animated.Image
-          source={LOGO_SOURCE}
-          style={[styles.logo, logoAnimatedStyle]}
-        />
+        <Animated.View style={[styles.logo, logoAnimatedStyle]} pointerEvents="none">
+          <Animated.View style={[styles.mascot, mascotAnimatedStyle]}>
+            <BoxSkin wordCount={0} face={mascotFace} cardVariant="logo" showFace accessible={false} />
+          </Animated.View>
+        </Animated.View>
         {typeof maxBodyHeight === "number" ? (
           <ScrollView
             style={[

@@ -1,6 +1,6 @@
-import BoxBottom from "@/assets/illustrations/mascot-box/body/bottom-box.png";
-import Hat from "@/assets/illustrations/mascot-box/body/hat.png";
-import BoxTop from "@/assets/illustrations/mascot-box/body/top-box.png";
+import BoxBottom from "@/assets/mascot/box/body/bottom-box.png";
+import Hat from "@/assets/mascot/box/body/hat.png";
+import BoxTop from "@/assets/mascot/box/body/top-box.png";
 import { useSettings } from "@/src/contexts/SettingsContext";
 import React from "react";
 import { Image, View, type ImageSourcePropType, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";

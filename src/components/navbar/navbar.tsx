@@ -62,11 +62,11 @@ const FLASHCARDS_PATHS = new Set([
 ]);
 
 const BOTTOM_NAV_ICONS = {
-  review: require("@/assets/icons/navbar/colored/hourglass_border_3x_outside.svg"),
-  home: require("@/assets/icons/navbar/colored/house_border_3x_outside.svg"),
-  play: require("@/assets/icons/navbar/colored/gamepad_border_3x_outside.svg"),
-  completed: require("@/assets/icons/navbar/colored/puchar_border_3x_outside.svg"),
-  settings: require("@/assets/icons/navbar/colored/settings_border_3x_outside.svg"),
+  review: require("@/assets/ui/navigation/review.svg"),
+  home: require("@/assets/ui/navigation/home.svg"),
+  play: require("@/assets/ui/navigation/play.svg"),
+  completed: require("@/assets/ui/navigation/completed.svg"),
+  settings: require("@/assets/ui/navigation/settings.svg"),
 };
 
 type BottomNavSection = keyof typeof BOTTOM_NAV_ICONS;

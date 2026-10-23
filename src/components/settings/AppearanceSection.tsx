@@ -24,10 +24,10 @@ import ToggleRow from "@/src/components/toggle/ToggleRow";
 import { preventWidowsPl } from "@/src/utils/preventWidowsPl";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 
-const classicPreview = require("@/assets/images/settings/layout-classic.png");
-const carouselPreview = require("@/assets/images/settings/layout-carousel.png");
-const topButtonsPreview = require("@/assets/images/settings/controls-two-hand.png");
-const bottomButtonsPreview = require("@/assets/images/settings/controls-one-hand.png");
+const classicPreview = require("@/assets/ui/settings/previews/layout-classic.png");
+const carouselPreview = require("@/assets/ui/settings/previews/layout-carousel.png");
+const topButtonsPreview = require("@/assets/ui/settings/previews/controls-two-hand.png");
+const bottomButtonsPreview = require("@/assets/ui/settings/previews/controls-one-hand.png");
 const SETTINGS_TABLET_PREVIEW_MAX_WIDTH = 360;
 const SETTINGS_TABLET_LAYOUT_PREVIEW_SCALE = 1.14;
 

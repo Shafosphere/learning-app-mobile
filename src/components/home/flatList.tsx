@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
   Pressable,
+  Image,
   Text,
   View,
   type ListRenderItem,
@@ -24,6 +25,7 @@ export type HomeTile = {
   contentCopyStyles?: ImageStyle[];
   foregroundSource?: ImageSourcePropType;
   foregroundStyle?: ImageStyle;
+  decorations?: { source: ImageSourcePropType; style?: ImageStyle }[];
   action?: () => void;
   isPlaceholder?: boolean;
 };
@@ -110,6 +112,29 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
         pressed && styles.tilePressed,
       ]}
     >
+      {item.decorations && (
+        <View
+          style={styles.tileDecorations}
+          pointerEvents="none"
+          accessible={false}
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          {item.decorations.map((decoration, index) => (
+            <Image
+              key={index}
+              source={decoration.source}
+              style={[
+                styles.tileCornerDecoration,
+                { width: tileSize, height: tileSize * (824 / 1909) },
+                decoration.style,
+              ]}
+              resizeMode="contain"
+              accessible={false}
+            />
+          ))}
+        </View>
+      )}
       <View
         style={[
           styles.tileVisualArea,

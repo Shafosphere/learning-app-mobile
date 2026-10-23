@@ -1,8 +1,13 @@
 import React from "react";
 import { fireEvent, render } from "@testing-library/react-native";
 import { Image, ScrollView } from "react-native";
+import { SafeAreaInsetsContext } from "react-native-safe-area-context";
 import { OnboardingIntroLayout } from "../OnboardingIntroLayout";
 import { useSettings } from "@/src/contexts/SettingsContext";
+
+jest.mock("react-native-safe-area-context", () =>
+  jest.requireActual("react-native-safe-area-context/jest/mock").default
+);
 
 jest.mock("@/src/contexts/SettingsContext", () => {
   const useSettings = jest.fn();
@@ -27,6 +32,12 @@ function layout(element: Parameters<typeof fireEvent>[0], width: number, height:
   fireEvent(element, "layout", { nativeEvent: { layout: { x: 0, y: 0, width, height } } });
 }
 
+function measure(screen: ReturnType<typeof render>) {
+  layout(screen.getByTestId("onboarding-intro-content"), 390, 760);
+  layout(screen.getByTestId("onboarding-intro-scroll", { includeHiddenElements: true }), 354, 684);
+  layout(screen.getByTestId("onboarding-intro-body", { includeHiddenElements: true }), 354, 330);
+}
+
 beforeEach(() => {
   jest.clearAllMocks();
   mockedUseSettings.mockReturnValue(settings);
@@ -35,18 +46,18 @@ beforeEach(() => {
 it("fits the illustration to measured space and updates after rotation and text growth", () => {
   const screen = render(<OnboardingIntroLayout {...props} />);
   layout(screen.getByTestId("onboarding-intro-content"), 360, 580);
-  layout(screen.getByTestId("onboarding-intro-scroll"), 324, 504);
-  layout(screen.getByTestId("onboarding-intro-body"), 324, 327);
+  layout(screen.getByTestId("onboarding-intro-scroll", { includeHiddenElements: true }), 324, 504);
+  layout(screen.getByTestId("onboarding-intro-body", { includeHiddenElements: true }), 324, 327);
   expect(screen.getByTestId("leitner-diagram")).toHaveStyle({ width: 150 * aspectRatio, aspectRatio });
 
   layout(screen.getByTestId("onboarding-intro-content"), 460, 300);
-  layout(screen.getByTestId("onboarding-intro-scroll"), 424, 224);
-  layout(screen.getByTestId("onboarding-intro-body"), 424, 300);
+  layout(screen.getByTestId("onboarding-intro-scroll", { includeHiddenElements: true }), 424, 224);
+  layout(screen.getByTestId("onboarding-intro-body", { includeHiddenElements: true }), 424, 300);
   expect(screen.getByTestId("leitner-diagram")).toHaveStyle({ width: 180 });
 
   layout(screen.getByTestId("onboarding-intro-content"), 390, 760);
-  layout(screen.getByTestId("onboarding-intro-scroll"), 354, 684);
-  layout(screen.getByTestId("onboarding-intro-body"), 354, 330);
+  layout(screen.getByTestId("onboarding-intro-scroll", { includeHiddenElements: true }), 354, 684);
+  layout(screen.getByTestId("onboarding-intro-body", { includeHiddenElements: true }), 354, 330);
   expect(screen.getByTestId("leitner-diagram")).toHaveStyle({ width: 283.2 });
   layout(screen.getByTestId("onboarding-intro-body"), 354, 620);
   expect(screen.getByTestId("leitner-diagram")).toHaveStyle({ width: 180 });
@@ -56,6 +67,7 @@ it("fits the illustration to measured space and updates after rotation and text 
 
 it("keeps the entire body scrollable and the footer outside the scroll viewport", () => {
   const screen = render(<OnboardingIntroLayout {...props} />);
+  measure(screen);
   const scroll = screen.UNSAFE_getByType(ScrollView);
   expect(scroll.findByProps({ testID: "onboarding-intro-body" })).toBeTruthy();
   expect(() => scroll.findByProps({ testID: "onboarding-intro-footer" })).toThrow();
@@ -74,9 +86,37 @@ it("keeps the entire body scrollable and the footer outside the scroll viewport"
 it("respects app font scaling and disables continuation while saving", () => {
   mockedUseSettings.mockReturnValue({ ...settings, fontScaleMultiplier: 1.5 });
   const screen = render(<OnboardingIntroLayout {...props} isSaving />);
+  measure(screen);
   expect(screen.getByText(props.title)).toHaveStyle({ fontSize: 42, lineHeight: 51 });
   expect(screen.getByText(props.buttonText)).toHaveStyle({ fontSize: 30 });
   expect(screen.getByRole("button")).toBeDisabled();
   fireEvent.press(screen.getByRole("button"));
   expect(props.onContinue).not.toHaveBeenCalled();
+});
+
+it("applies safe-area padding immediately and reveals content only after final spacing is measured", () => {
+  const screen = render(
+    <SafeAreaInsetsContext.Provider value={{ top: 48, bottom: 24, left: 6, right: 8 }}>
+      <OnboardingIntroLayout {...props} />
+    </SafeAreaInsetsContext.Provider>
+  );
+  expect(screen.getByTestId("onboarding-intro-safe-area")).toHaveStyle({
+    paddingTop: 48, paddingBottom: 24, paddingLeft: 6, paddingRight: 8,
+  });
+  const scroll = () => screen.getByTestId("onboarding-intro-scroll", { includeHiddenElements: true });
+  const body = () => screen.getByTestId("onboarding-intro-body", { includeHiddenElements: true });
+  expect(scroll()).toHaveStyle({ opacity: 0 });
+  expect(screen.queryByText(props.title)).toBeNull();
+  expect(screen.getByRole("button")).toBeTruthy();
+
+  // The first body event can arrive before the content height selects final spacing.
+  layout(body(), 354, 260);
+  layout(scroll(), 354, 684);
+  layout(screen.getByTestId("onboarding-intro-content"), 390, 760);
+  expect(scroll()).toHaveStyle({ opacity: 0 });
+
+  layout(body(), 354, 330);
+  expect(scroll()).toHaveStyle({ opacity: 1 });
+  expect(screen.getByText(props.title)).toBeTruthy();
+  expect(screen.getByTestId("leitner-diagram")).toHaveStyle({ width: 283.2 });
 });

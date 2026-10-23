@@ -2,8 +2,10 @@
 
 set -euo pipefail
 
-source_dir="assets/images/birds"
-output_dir="assets/images/birds-webp"
+cd "$(dirname "$0")/../.."
+
+source_dir="assets/learning/flashcards/birds/source"
+output_dir="assets/learning/flashcards/birds"
 
 if ! command -v magick >/dev/null 2>&1; then
   echo "Brak ImageMagick (polecenia magick). Zainstaluj ImageMagick z obsługą WebP." >&2
