@@ -1364,6 +1364,7 @@
       "infoLabel": "Informacja o kursie progresywnym",
       "title": "Jak działa kurs progresywny?",
       "description": "Każdy kolejny zestaw zawiera słowa z poprzedniego i dodaje nowe. Możesz zacząć od 50 słów albo od razu wybrać największy zestaw.",
+      "roadSignsDescription": "Każdy kolejny zestaw zawiera znaki z poprzedniego i dodaje nowe: podstawowe (80), rozszerzone (132), wszystkie (165). Możesz zacząć od podstawowych znaków albo od razu wybrać największy zestaw.",
       "confirm": "Rozumiem",
       "close": "Zamknij informację o kursie progresywnym"
     },
@@ -1698,7 +1699,7 @@
       "description": {
         "capitals": "Stolice państw świata",
         "flags": "Flagi państw świata",
-        "roadSigns": "Polskie znaki drogowe"
+        "roadSigns": "Od 80 do 165 znaków"
       }
     }
   },

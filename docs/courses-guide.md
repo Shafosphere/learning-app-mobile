@@ -8,6 +8,8 @@
 - `src/components/course/` - komponenty list, sekcji i akordeonów kursów używane przez ekrany kursów.
 - `src/features/customCourse/` - drafty, typy pomocnicze i import CSV dla kursów własnych.
 
+Znaki drogowe w zakładce Wiedza tworzą serię progresywną: podstawowe (80), rozszerzone (132), wszystkie (165). Każdy większy zestaw zawiera znaki z poprzedniego z tymi samymi identyfikatorami, obrazami i odpowiedziami. Informację o progresji w akordeonie określa `progressiveDescriptionKey`, niezależnie od grupowania kursów językowych. Postęp nauki pozostaje osobny dla każdego kursu.
+
 Wartości domyślne kursów określa `src/contexts/settings/courseSettingsDefaults.ts`.
 Kreator kursów własnych, inicjalizacja kursów oficjalnych i reset ustawień korzystają z tego samego resolvera.
 Przy uruchomieniu kursy oficjalne uzupełniają brakujące ustawienia, również opcje dodane po instalacji kursu.
@@ -27,3 +29,5 @@ Istniejące wpisy pozostają zachowane; ręczny wybór równy wartości domyśln
 | Powtórki | Oficjalne: według manifestu (domyślnie włączone); własne: według wyboru w kreatorze (domyślnie wyłączone) |
 
 Starsze zapisy audio bez `autoplayMode` używają `non_native`. Zapisane tryby `all` i `off` oraz jawne wyłączenie audio pozostają zachowane.
+
+Kurs `math` (Matematyka Podstawa) jest wycofany przez `retired: true`. Nie trafia do nowych instalacji ani katalogu do przypinania. Dotychczas przypięty kurs pozostaje dostępny z zachowanym postępem; po odpięciu znika z katalogu. Zamrożone 258 fiszek w `assets/data/sqlite/retired-math.json` umożliwia odtworzenie kursu i postępu z backupu właściciela.

@@ -25,9 +25,11 @@ jest.mock("react-i18next", () => {
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 jest.mock("@expo/vector-icons/FontAwesome6", () => () => null);
 
-const makeGroup = (languageGroupId?: AccordionGroupItem["languageGroupId"]): AccordionGroupItem => ({
-  key: languageGroupId ?? "flags", title: languageGroupId ?? "Flagi", subtitle: "Opis", count: 1,
-  languageGroupId,
+const makeGroup = (series?: string): AccordionGroupItem => ({
+  key: series ?? "flags", title: series ?? "Flagi", subtitle: "Opis", count: 1,
+  progressiveDescriptionKey: series
+    ? `courses.progressive.${series === "roadSigns" ? "roadSignsDescription" : "description"}`
+    : undefined,
   regularItems: [{
     id: 1, name: "Zestaw", iconId: "flag:es", iconColor: "#F97316", slug: "es_to_pl_first_50",
     sourceLang: "es", targetLang: "pl", cardsCount: 50, smallFlag: "pl", isMini: false,
@@ -35,14 +37,15 @@ const makeGroup = (languageGroupId?: AccordionGroupItem["languageGroupId"]): Acc
   miniItems: [],
 });
 
-it.each(["englishFromZero", "frenchFromZero", "spanishFromZero"] as const)("shows info on collapsed and expanded %s without changing pin or expansion state", (id) => {
+it.each(["englishFromZero", "frenchFromZero", "spanishFromZero", "roadSigns"] as const)("shows info on collapsed and expanded %s without changing pin or expansion state", (id) => {
   const onPin = jest.fn();
   const screen = render(<CoursePinAccordion groups={[makeGroup(id)]} renderCourseCard={(course) => <Text key={course.id} onPress={onPin}>Zestaw</Text>} />);
   const header = () => screen.getByLabelText(`Kategoria ${id}, 1 kursów`);
   const info = () => screen.getByLabelText(pl.courses.progressive.infoLabel);
   expect(header().props.accessibilityState.expanded).toBe(false);
   fireEvent.press(info());
-  expect(screen.getByText(pl.courses.progressive.description)).toBeTruthy();
+  const description = id === "roadSigns" ? pl.courses.progressive.roadSignsDescription : pl.courses.progressive.description;
+  expect(screen.getByText(description)).toBeTruthy();
   fireEvent.press(screen.getByText(pl.courses.progressive.confirm));
   expect(screen.queryByText(pl.courses.progressive.title)).toBeNull();
   expect(header().props.accessibilityState.expanded).toBe(false);
@@ -62,11 +65,27 @@ it.each(["englishFromZero", "frenchFromZero", "spanishFromZero"] as const)("show
   expect(header().props.accessibilityState.expanded).toBe(true);
 });
 
-it("does not show an info button for knowledge groups", () => {
+it("does not show an info button for non-progressive knowledge groups", () => {
   const screen = render(<CoursePinAccordion groups={[makeGroup()]} renderCourseCard={(course) => <Text key={course.id}>Zestaw</Text>} />);
   expect(screen.queryByLabelText(pl.courses.progressive.infoLabel)).toBeNull();
   fireEvent.press(screen.getByLabelText("Kategoria Flagi, 1 kursów"));
   expect(screen.queryByLabelText(pl.courses.progressive.infoLabel)).toBeNull();
+});
+
+it("shows the description belonging to the selected progressive group", () => {
+  const screen = render(<CoursePinAccordion
+    groups={[makeGroup("englishFromZero"), makeGroup("roadSigns"), makeGroup()]}
+    renderCourseCard={(course) => <Text key={course.id}>Zestaw</Text>}
+  />);
+  const infoButtons = screen.getAllByLabelText(pl.courses.progressive.infoLabel);
+  expect(infoButtons).toHaveLength(2);
+  fireEvent.press(infoButtons[1]);
+  expect(screen.getByText(pl.courses.progressive.roadSignsDescription)).toBeTruthy();
+  expect(screen.queryByText(pl.courses.progressive.description)).toBeNull();
+  fireEvent.press(screen.getByText(pl.courses.progressive.confirm));
+  fireEvent.press(infoButtons[0]);
+  expect(screen.getByText(pl.courses.progressive.description)).toBeTruthy();
+  expect(screen.queryByText(pl.courses.progressive.roadSignsDescription)).toBeNull();
 });
 
 it("keeps existing modals unscrollable and enables scrolling only when requested", () => {

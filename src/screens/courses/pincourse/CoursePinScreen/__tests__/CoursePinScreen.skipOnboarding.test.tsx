@@ -70,6 +70,8 @@ jest.mock("react-i18next", () => ({
         "screens.courses.pincourse.coursePin.coursePin.textChild.wiedza": "Wiedza",
         "constants.knowledgeCourseGroups.label.capitals": "Stolice",
         "constants.knowledgeCourseGroups.label.flags": "Flagi",
+        "constants.knowledgeCourseGroups.label.roadSigns": "Znaki drogowe",
+        "constants.knowledgeCourseGroups.description.roadSigns": "Od 80 do 165 znaków",
         "constants.knowledgeCourseGroups.description.capitals": "Stolice państw świata",
         "constants.knowledgeCourseGroups.description.flags": "Flagi państw świata",
         "repeats.format.flashcardsValue": `${options?.value ?? 0} fiszek`,
@@ -522,7 +524,7 @@ describe("CoursePinScreen skip onboarding", () => {
     await waitFor(() => expect(screen.getByText("Pierwsze 50 słów")).toBeTruthy());
   });
 
-  it("shows info only for progressive language series and leaves pins unchanged", async () => {
+  it("shows info for progressive language series and leaves pins unchanged", async () => {
     mockedGetOnboardingCheckpoint.mockResolvedValue("done");
     mockOfficialCourseRows = [
       { id: 51, name: "Angielski 50", slug: "eng_to_pl_first_50", cardsCount: 50, iconId: "flag:en", iconColor: "#10B981" },
@@ -540,6 +542,34 @@ describe("CoursePinScreen skip onboarding", () => {
     fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
     expect(screen.getByLabelText("Kategoria Flagi, 1 kursów")).toBeTruthy();
     expect(screen.queryByLabelText("Informacja o kursie progresywnym")).toBeNull();
+  });
+
+  it("shows road signs as ordered progressive stages in Knowledge and keeps pins unchanged", async () => {
+    mockedGetOnboardingCheckpoint.mockResolvedValue("done");
+    const stages = [
+      { id: 91, name: "Podstawowe znaki", slug: "znaki_drogowe_najwazniejsze", cardsCount: 80 },
+      { id: 92, name: "Rozszerzone znaki", slug: "znaki_drogowe_rozszerzone", cardsCount: 132 },
+      { id: 93, name: "Wszystkie znaki", slug: "znaki_drogowe", cardsCount: 165 },
+    ];
+    mockOfficialCourseRows = stages.slice().reverse().map((row) => ({
+      ...row, iconId: "car", iconColor: "#DC2626",
+    }));
+    render(<CoursePinScreen />);
+    expect(screen.queryByLabelText("Kategoria Znaki drogowe, 3 kursów")).toBeNull();
+    fireEvent.press(screen.getByRole("tab", { name: "Wiedza" }));
+    const header = await screen.findByLabelText("Kategoria Znaki drogowe, 3 kursów");
+    expect(screen.getByText("Od 80 do 165 znaków")).toBeTruthy();
+    expect(header.props.accessibilityState.expanded).toBe(false);
+    fireEvent.press(screen.getByLabelText("Informacja o kursie progresywnym"));
+    expect(screen.getByText("courses.progressive.roadSignsDescription")).toBeTruthy();
+    expect(screen.queryByText("courses.progressive.description")).toBeNull();
+    fireEvent.press(screen.getByText("Rozumiem"));
+    expect(header.props.accessibilityState.expanded).toBe(false);
+    fireEvent.press(header);
+    expect(screen.getAllByText(/^(Podstawowe|Rozszerzone|Wszystkie) znaki$/).map((node) => node.props.children))
+      .toEqual(stages.map((row) => row.name));
+    expect(mockPinOfficialCourse).not.toHaveBeenCalled();
+    expect(mockUnpinOfficialCourse).not.toHaveBeenCalled();
   });
 
   it.each([true, false])("returns to activation during onboarding (coachmark active: %s)", async (isActive) => {

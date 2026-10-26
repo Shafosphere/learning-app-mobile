@@ -11,7 +11,6 @@ import {
 } from "react-native";
 import { useTranslation } from "react-i18next";
 import { useStyles } from "@/src/screens/courses/pincourse/CoursePinScreen/CoursePinScreen-styles";
-import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 
 type OfficialCourseListItem = {
@@ -45,7 +44,7 @@ export type AccordionGroupItem = {
   key: string;
   title: string;
   subtitle: string;
-  languageGroupId?: LanguageCourseGroupId;
+  progressiveDescriptionKey?: string;
   icon?: AccordionIcon;
   count: number;
   regularItems: OfficialCourseListItem[];
@@ -101,8 +100,8 @@ export function CoursePinAccordion({
   const { t } = useTranslation();
   const styles = useStyles();
   const [expandedGroupKey, setExpandedGroupKey] = useState<string | null>(null);
-  const [infoVisible, setInfoVisible] = useState(false);
-  const closeInfo = () => setInfoVisible(false);
+  const [infoDescriptionKey, setInfoDescriptionKey] = useState<string | null>(null);
+  const closeInfo = () => setInfoDescriptionKey(null);
 
   const visibleGroups = useMemo(
     () => groups.filter((group) => group.count > 0),
@@ -119,7 +118,7 @@ export function CoursePinAccordion({
         const hasMini = group.miniItems.length > 0;
 
         return (
-          <View key={group.key} style={group.languageGroupId ? styles.progressiveGroupWrapper : undefined}>
+          <View key={group.key} style={group.progressiveDescriptionKey ? styles.progressiveGroupWrapper : undefined}>
             <View style={styles.accordionItem}>
               <Pressable
                 accessibilityRole="button"
@@ -184,11 +183,11 @@ export function CoursePinAccordion({
                 </View>
               ) : null}
             </View>
-            {group.languageGroupId ? (
+            {group.progressiveDescriptionKey ? (
               <Pressable
                 accessibilityRole="button"
                 accessibilityLabel={t("courses.progressive.infoLabel")}
-                onPress={() => setInfoVisible(true)}
+                onPress={() => setInfoDescriptionKey(group.progressiveDescriptionKey ?? null)}
                 style={styles.progressiveInfoButton}
               >
                 <View style={styles.progressiveInfoBadge}>
@@ -204,9 +203,9 @@ export function CoursePinAccordion({
         );
       })}
       <NudgeModal
-        visible={infoVisible}
+        visible={infoDescriptionKey != null}
         title={t("courses.progressive.title")}
-        description={t("courses.progressive.description")}
+        description={infoDescriptionKey ? t(infoDescriptionKey) : ""}
         confirmLabel={t("courses.progressive.confirm")}
         closeLabel={t("courses.progressive.close")}
         onConfirm={closeInfo}

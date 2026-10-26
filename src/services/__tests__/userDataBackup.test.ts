@@ -1520,6 +1520,8 @@ describe("userDataBackup", () => {
     ["official-slug", false],
     ["fiszki_podstawy_en_pl_slowa", false],
     ["fiszki_podstawy_en_pl_slowa", true],
+    ["math", false],
+    ["math", true],
   ])("restores official state for %s (missing locally: %s)", async (slug, missingLocally) => {
     const db = createMockDb();
     if (missingLocally) {

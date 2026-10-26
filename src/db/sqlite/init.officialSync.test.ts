@@ -7,7 +7,8 @@ jest.mock("@/src/constants/officialPacks", () => ({
   get OFFICIAL_PACKS() { return [{ slug: mockSyncSlug, name: "A1", packVersion: mockSyncSlug === "french_a1" ? 2 : 3,
     iconId: "flag:en", iconColor: "#10B981", reviewsEnabled: true },
     { slug: "fiszki_podstawy_en_pl_slowa", retired: true, packVersion: 3 },
-    { slug: "basic_english_to_spanish_50", retired: true, packVersion: 2 }]; },
+    { slug: "basic_english_to_spanish_50", retired: true, packVersion: 2 },
+    { slug: "math", retired: true, packVersion: 1 }]; },
 }));
 jest.mock("@/assets/data/sqlite/prebuilt.db", () => 1);
 jest.mock("expo-sqlite", () => ({ importDatabaseFromAssetAsync: jest.fn(), openDatabaseAsync: jest.fn() }));
@@ -53,6 +54,9 @@ it.each(["eng_to_pl_a1", "french_a1"])("updates %s by stable IDs without clearin
   );
   expect(ensureOfficialCourse).not.toHaveBeenCalledWith(
     local, "basic_english_to_spanish_50", expect.anything(), expect.anything(), expect.anything(), expect.anything()
+  );
+  expect(ensureOfficialCourse).not.toHaveBeenCalledWith(
+    local, "math", expect.anything(), expect.anything(), expect.anything(), expect.anything()
   );
   const calls = local.runAsync.mock.calls;
   expect(calls.filter(([sql]) => sql.includes("INSERT INTO custom_flashcards"))).toHaveLength(1);

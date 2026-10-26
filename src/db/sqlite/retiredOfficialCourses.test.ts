@@ -1,3 +1,4 @@
+import mathCards from "@/assets/data/sqlite/retired-math.json";
 import cards from "@/assets/data/sqlite/retired-basic-english.json";
 import spanishCards from "@/assets/data/sqlite/retired-basic-spanish.json";
 import spanishEnglishCards from "@/assets/data/sqlite/retired-basic-spanish-en.json";
@@ -13,6 +14,7 @@ const makeDb = () => ({
 
 it.each([
   [slug, cards, 474],
+  ["math", mathCards, 258],
   ["fiszki_francuski_podstawowe_poprawione", frenchCards, 309],
   ["fiszki_hiszpanski_podstawowe_poprawione", spanishCards, 310],
   ["basic_english_to_spanish_50", spanishEnglishCards, 310],
@@ -34,7 +36,7 @@ it.each([
   expect(db.execAsync).toHaveBeenLastCalledWith("COMMIT;");
 });
 
-it.each([slug, "basic_english_to_spanish_50"])("keeps an existing owner's %s course untouched", async (courseSlug) => {
+it.each([slug, "basic_english_to_spanish_50", "math"])("keeps an existing owner's %s course untouched", async (courseSlug) => {
   const db = makeDb();
   db.getFirstAsync.mockResolvedValue({ id: 12 });
   expect(await restoreRetiredOfficialCourseWithDb(db as never, courseSlug)).toBe(12);

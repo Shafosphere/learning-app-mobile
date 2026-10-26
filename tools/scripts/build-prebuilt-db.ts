@@ -12,7 +12,7 @@ const SOURCE_DIR = path.join(ROOT_DIR, "tools", "prebuild-data");
 const OUTPUT_DB_PATH = path.join(ROOT_DIR, "assets", "data", "sqlite", "prebuilt.db");
 const SOURCE_LANGUAGE_DIRS = ["pl", "en"];
 // Increment this whenever the bundled database content changes.
-const PREBUILT_DATABASE_VERSION = 10;
+const PREBUILT_DATABASE_VERSION = 11;
 
 const OFFICIAL_PACKS = [
   {
@@ -215,16 +215,6 @@ const OFFICIAL_PACKS = [
     defaultType: "traditional",
     defaultFlip: false,
     csvFile: "historia/polska_historia.csv",
-  },
-  {
-    slug: "math",
-    name: "Matematyka Podstawa",
-    iconId: "calculator",
-    iconColor: "#38BDF8",
-    reviewsEnabled: true,
-    defaultType: "self_assess",
-    defaultFlip: false,
-    csvFile: "matematyka/math.csv",
   },
   {
     slug: "grecka_mitologia_prawda_falsz_50",

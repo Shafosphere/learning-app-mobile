@@ -80,6 +80,7 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
   id: KnowledgeCourseGroupId;
   titleKey: string;
   descriptionKey: string;
+  progressiveDescriptionKey?: string;
   icon: "city" | "flag" | "road";
 }[] = [
   {
@@ -98,6 +99,7 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
     id: "roadSigns",
     titleKey: "constants.knowledgeCourseGroups.label.roadSigns",
     descriptionKey: "constants.knowledgeCourseGroups.description.roadSigns",
+    progressiveDescriptionKey: "courses.progressive.roadSignsDescription",
     icon: "road",
   },
 ];
@@ -333,6 +335,7 @@ export default function CoursePinScreen() {
         key: `knowledge:${knowledgeGroup.id}`,
         title: t(knowledgeGroup.titleKey),
         subtitle: t(knowledgeGroup.descriptionKey),
+        progressiveDescriptionKey: knowledgeGroup.progressiveDescriptionKey,
         count: items.length,
         regularItems,
         miniItems,
@@ -741,7 +744,7 @@ export default function CoursePinScreen() {
                               revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
                               groups={[{
                                 key: group.key,
-                                languageGroupId: group.languageGroupId,
+                                progressiveDescriptionKey: "courses.progressive.description",
                                 title: t(definition.labelKey),
                                 subtitle: t(definition.descriptionKey),
                                 count: group.officialPacks.length,

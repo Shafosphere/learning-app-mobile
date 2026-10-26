@@ -425,6 +425,7 @@ const OFFICIAL_PACKS_MANIFEST = ([
   },
   {
     slug: "math",
+    retired: true,
     name: "Matematyka Podstawa",
     iconId: "calculator",
     iconColor: "#38BDF8",

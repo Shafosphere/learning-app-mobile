@@ -37,7 +37,6 @@ const ENGLISH_LANGUAGE_COURSE_SLUGS = [
 const POLISH_GENERAL_COURSE_SLUGS = [
   "astronomia",
   "polska_historia",
-  "math",
   "grecka_mitologia_prawda_falsz_50",
   "znaki_drogowe_najwazniejsze",
   "znaki_drogowe_rozszerzone",

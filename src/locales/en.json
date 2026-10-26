@@ -1360,6 +1360,7 @@
       "infoLabel": "About progressive courses",
       "title": "How does a progressive course work?",
       "description": "Each larger set includes the words from the previous set and adds new ones. You can start with 50 words or choose the largest set right away.",
+      "roadSignsDescription": "Each larger set includes signs from the previous set and adds new ones: basic (80), extended (132), all (165). You can start with basic signs or choose the largest set right away.",
       "confirm": "Got it",
       "close": "Close progressive course information"
     },
@@ -1694,7 +1695,7 @@
       "description": {
         "capitals": "Capitals of the world",
         "flags": "Flags of the world",
-        "roadSigns": "Polish road signs"
+        "roadSigns": "From 80 to 165 signs"
       }
     }
   },
