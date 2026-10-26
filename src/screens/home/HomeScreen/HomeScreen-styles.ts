@@ -5,7 +5,6 @@ export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
     paddingHorizontal: 20,
-    paddingTop: 85,
     backgroundColor: colors.background,
   },
   containerTablet: {
@@ -61,6 +60,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     top: 6,
     bottom: 48,
   },
+  tileVisualAreaCompact: {
+    top: 10,
+    bottom: 56,
+    left: 8,
+    right: 8,
+  },
   iconBox: {
     borderRadius: 16,
     alignItems: "center",
@@ -88,6 +93,12 @@ export const useStyles = createThemeStylesHook((colors) => ({
     bottom: 6,
     minHeight: 40,
   },
+  tileTextCompact: {
+    left: 8,
+    right: 8,
+    bottom: 10,
+    minHeight: 44,
+  },
   tileTitle: {
     fontSize: 24,
     fontWeight: "800",
@@ -96,6 +107,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   tileTitleTablet: {
     fontSize: 22,
+  },
+  tileTitleCompact: {
+    fontSize: 20,
   },
   tileSubtitle: {
     fontSize: 12,
@@ -106,6 +120,11 @@ export const useStyles = createThemeStylesHook((colors) => ({
   },
   tileSubtitleTablet: {
     lineHeight: 15,
+  },
+  tileSubtitleCompact: {
+    fontSize: 11,
+    lineHeight: 14,
+    minHeight: 14,
   },
   tileSubtitleHidden: {
     opacity: 0,

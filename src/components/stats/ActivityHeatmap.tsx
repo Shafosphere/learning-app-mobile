@@ -429,7 +429,8 @@ type CalendarDayProps = {
   backgroundColor: string;
   headline: string;
   paragraph: string;
-  accent: string;
+  selectionColor: string;
+  selectionInnerColor: string;
   dark: boolean;
   highContrast: boolean;
   size: number;
@@ -442,12 +443,14 @@ type CalendarDayProps = {
 
 const CalendarDay = memo(function CalendarDay({
   day, selected, future, active, shielded, backgroundColor,
-  headline, paragraph, accent, dark, highContrast, size, radius,
+  headline, paragraph, selectionColor, selectionInnerColor, dark, highContrast, size, radius,
   marginRight, marginBottom, styles, onSelect,
 }: CalendarDayProps) {
   return (
     <Pressable
       testID={`activity-heatmap-day-${day.date}`}
+      accessibilityRole="button"
+      accessibilityState={{ selected, disabled: future }}
       disabled={future}
       onPress={() => onSelect(day)}
       style={[
@@ -460,7 +463,7 @@ const CalendarDay = memo(function CalendarDay({
           marginBottom,
           backgroundColor,
           borderWidth: selected ? 2 : 0,
-          borderColor: selected ? accent : "transparent",
+          borderColor: selected ? selectionColor : "transparent",
         },
       ]}
     >
@@ -475,6 +478,23 @@ const CalendarDay = memo(function CalendarDay({
             height: Math.round(size * 0.82),
             opacity: dark ? 0.34 : 0.28,
           }}
+        />
+      ) : null}
+      {selected ? (
+        <View
+          testID={`activity-heatmap-selection-${day.date}`}
+          pointerEvents="none"
+          accessible={false}
+          style={[
+            StyleSheet.absoluteFillObject,
+            {
+              // A second, contrasting ring stays visible when the activity
+              // fill matches the outer ring, including high contrast themes.
+              borderWidth: 2,
+              borderColor: selectionInnerColor,
+              borderRadius: Math.max(0, radius - 2),
+            },
+          ]}
         />
       ) : null}
       <Text
@@ -549,7 +569,8 @@ const CalendarMonth = memo(function CalendarMonth({
               backgroundColor={background}
               headline={contrastText ?? colors.headline}
               paragraph={contrastText ?? colors.paragraph}
-              accent={colors.my_green}
+              selectionColor={colors.headline}
+              selectionInnerColor={colors.secondBackground}
               dark={dark}
               highContrast={highContrast}
               size={cellSize}

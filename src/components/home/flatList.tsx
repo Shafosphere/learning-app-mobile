@@ -68,6 +68,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
     }, remaining);
   };
   const { isTabletLayout = false, tileSize } = options;
+  const isCompactTile = tileSize < 160;
   const tileSizeStyle = { width: tileSize, height: tileSize };
   const iconSize = Math.min(isTabletLayout ? 132 : 90, tileSize * 0.54);
   const iconSizeStyle = { width: iconSize, height: iconSize };
@@ -139,6 +140,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
         style={[
           styles.tileVisualArea,
           isTabletLayout && styles.tileVisualAreaTablet,
+          isCompactTile && styles.tileVisualAreaCompact,
         ]}
       >
         <View
@@ -171,10 +173,18 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
         </View>
       </View>
       <View
-        style={[styles.tileText, isTabletLayout && styles.tileTextTablet]}
+        style={[
+          styles.tileText,
+          isTabletLayout && styles.tileTextTablet,
+          isCompactTile && styles.tileTextCompact,
+        ]}
       >
         <Text
-          style={[styles.tileTitle, isTabletLayout && styles.tileTitleTablet]}
+          style={[
+            styles.tileTitle,
+            isTabletLayout && styles.tileTitleTablet,
+            isCompactTile && styles.tileTitleCompact,
+          ]}
           numberOfLines={1}
           adjustsFontSizeToFit
           minimumFontScale={0.85}
@@ -185,6 +195,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
           style={[
             styles.tileSubtitle,
             isTabletLayout && styles.tileSubtitleTablet,
+            isCompactTile && styles.tileSubtitleCompact,
             !item.subtitle && styles.tileSubtitleHidden,
           ]}
           numberOfLines={2}

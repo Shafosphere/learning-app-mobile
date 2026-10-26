@@ -66,7 +66,7 @@ describe("HomeScreen responsive grid", () => {
   it("waits for a measured viewport, then renders five square buttons and a hidden sixth slot", () => {
     render(<HomeScreen />);
     expect(screen.queryByTestId("home-grid")).toBeNull();
-    measureGrid(372, 590);
+    measureGrid(372, 675);
 
     const buttons = screen.getAllByRole("button");
     expect(buttons).toHaveLength(5);
@@ -84,45 +84,92 @@ describe("HomeScreen responsive grid", () => {
   it("uses measured height instead of full screen height and updates after rotation", () => {
     mockWindowDimensions = { width: 900, height: 1200, scale: 1, fontScale: 1 };
     const { rerender } = render(<HomeScreen />);
-    measureGrid(756, 710);
+    measureGrid(756, 734);
     expect(StyleSheet.flatten(getListProps().style)).toMatchObject({ width: 456, alignSelf: "center" });
     expect(getListProps().scrollEnabled).toBe(false);
     expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(218);
 
     mockWindowDimensions = { width: 1200, height: 900, scale: 1, fontScale: 1 };
     rerender(<HomeScreen />);
-    measureGrid(1056, 440);
+    measureGrid(1056, 464);
     expect(getListProps().scrollEnabled).toBe(true);
     expect(StyleSheet.flatten(getListProps().style).width).toBe(340);
     expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(160);
 
-    measureGrid(756, 710);
+    measureGrid(756, 734);
     expect(getListProps().scrollEnabled).toBe(false);
   });
 
   it("allows the small phone's final row to be reached by scrolling", () => {
     mockWindowDimensions = { width: 360, height: 640, scale: 1, fontScale: 1 };
     render(<HomeScreen />);
-    measureGrid(320, 430);
+    measureGrid(320, 454);
     expect(getListProps().scrollEnabled).toBe(true);
     expect(screen.getAllByRole("button")).toHaveLength(5);
-    expect(StyleSheet.flatten(getListProps().style).width).toBe(319);
+    expect(StyleSheet.flatten(getListProps().style).width).toBe(293);
     expect(StyleSheet.flatten(getListProps().contentContainerStyle).paddingBottom).toBe(16);
+  });
+
+  it("balances tablet space above and below the tiles after resizing", () => {
+    mockWindowDimensions = { width: 600, height: 960, scale: 1, fontScale: 1 };
+    render(<HomeScreen />);
+    for (const height of [788, 1000]) {
+      measureGrid(456, height);
+      const tileHeight = StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height;
+      const gap = getListProps().columnWrapperStyle.gap;
+      const topSpace = StyleSheet.flatten(getListProps().style).marginTop;
+      const bottomSpace = height - topSpace - (3 * tileHeight + 2 * gap);
+      expect(topSpace).toBeCloseTo(bottomSpace);
+      expect(getListProps().scrollEnabled).toBe(false);
+    }
+
+    measureGrid(456, 440);
+    expect(getListProps().scrollEnabled).toBe(true);
+    expect(StyleSheet.flatten(getListProps().style).marginTop).toBe(24);
+  });
+
+  it("fits every destination above the bottom bar on a small phone", () => {
+    mockWindowDimensions = { width: 360, height: 640, scale: 1, fontScale: 1 };
+    render(<HomeScreen />);
+    measureGrid(320, 488);
+    expect(getListProps().scrollEnabled).toBe(false);
+    expect(screen.getAllByRole("button")).toHaveLength(5);
+    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(140);
+  });
+
+  it("restores the original spacing on tall phones and recalculates it after resizing", () => {
+    render(<HomeScreen />);
+    measureGrid(372, 760);
+    expect(StyleSheet.flatten(getListProps().style).marginTop).toBe(85);
+    expect(getListProps().scrollEnabled).toBe(false);
+    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(178);
+
+    measureGrid(372, 640);
+    expect(StyleSheet.flatten(getListProps().style).marginTop).toBe(60);
+    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(178);
+
+    measureGrid(320, 488);
+    expect(StyleSheet.flatten(getListProps().style).marginTop).toBe(24);
+    expect(getListProps().scrollEnabled).toBe(false);
+    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(140);
+
+    measureGrid(372, 760);
+    expect(StyleSheet.flatten(getListProps().style).marginTop).toBe(85);
   });
 
   it("accounts for system and app text enlargement without shrinking touch targets", () => {
     mockWindowDimensions = { width: 900, height: 1200, scale: 1, fontScale: 1.2 };
     mockFontScaleMultiplier = 1.15;
     render(<HomeScreen />);
-    measureGrid(756, 590);
+    measureGrid(756, 614);
     expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(221);
     expect(getListProps().scrollEnabled).toBe(true);
   });
 
   it.each([
-    [false, 372, 590, 90],
-    [true, 756, 440, 86.4],
-    [true, 756, 1000, 129.6],
+    [false, 372, 675, 90],
+    [true, 756, 464, 86.4],
+    [true, 756, 1085, 129.6],
   ])("sizes icons from the actual square (tablet: %p)", (tablet, width, height, iconSize) => {
     if (tablet) mockWindowDimensions = { width: 900, height: 1200, scale: 1, fontScale: 1 };
     render(<HomeScreen />);
@@ -135,8 +182,8 @@ describe("HomeScreen responsive grid", () => {
 
   it("keeps every destination and long translated label after resizing", () => {
     render(<HomeScreen />);
-    measureGrid(372, 590);
-    measureGrid(372, 540);
+    measureGrid(372, 675);
+    measureGrid(372, 564);
     const routes = ["/custom_course", "/stats", "/wiki", "/support"];
     const buttons = screen.getAllByRole("button");
     buttons.forEach((button, index) => {
@@ -171,7 +218,7 @@ describe("home mascot reactions", () => {
     [4, "support", "happy", "smile", "heart", "happy"],
   ] as const)("holds the %s mascot reaction for at least 400ms after a quick touch", (index, key, eyes, mouth, pressedEyes, pressedMouth) => {
     render(<HomeScreen />);
-    measureGrid(372, 590);
+    measureGrid(372, 675);
     const button = screen.getAllByRole("button")[index];
     const mascot = () => within(screen.getByTestId(`home-tile-mascot-${key}`));
     expect(mascot().getByTestId("box-skin-face-eyes")).toHaveProp("source", BOX_EYE_ASSETS[eyes]);
@@ -191,7 +238,7 @@ describe("home mascot reactions", () => {
 
   it("preserves local pressed state across parent updates and navigates immediately", () => {
     const app = render(<HomeScreen />);
-    measureGrid(372, 590);
+    measureGrid(372, 675);
     fireEvent(screen.getAllByRole("button")[0], "pressIn");
     app.rerender(<HomeScreen />);
     const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
@@ -205,7 +252,7 @@ describe("home mascot reactions", () => {
 
   it("keeps a long-held reaction until release without adding another 400ms", () => {
     render(<HomeScreen />);
-    measureGrid(372, 590);
+    measureGrid(372, 675);
     const button = screen.getAllByRole("button")[0];
     const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
     fireEvent(button, "pressIn");
@@ -220,7 +267,7 @@ describe("home mascot reactions", () => {
 
   it("restarts the minimum duration on another touch and cancels the timer on unmount", () => {
     const app = render(<HomeScreen />);
-    measureGrid(372, 590);
+    measureGrid(372, 675);
     const button = screen.getAllByRole("button")[0];
     const mascot = within(screen.getByTestId("home-tile-mascot-courses"));
     fireEvent(button, "pressIn");

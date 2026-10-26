@@ -12,7 +12,7 @@ import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { useOpenCoursePanel } from "@/src/hooks/useOpenCoursePanel";
 import { useThemeSettings } from "@/src/contexts/SettingsContext";
 import { useStyles } from "./HomeScreen-styles";
-import { getHomeGridMetrics } from "./homeGridLayout";
+import { getHomeGridLayout } from "./homeGridLayout";
 
 export default function HomeScreen() {
   const router = useRouter();
@@ -35,9 +35,10 @@ export default function HomeScreen() {
     );
   }, []);
   const gridMetrics = viewport
-    ? getHomeGridMetrics({
+    ? getHomeGridLayout({
         ...viewport,
         fontScale: fontScale * fontScaleMultiplier,
+        isTabletLayout,
       })
     : null;
 
@@ -154,7 +155,10 @@ export default function HomeScreen() {
         {gridMetrics && gridMetrics.tileSize > 0 && (
           <FlatList
             testID="home-grid"
-            style={[styles.grid, { width: gridMetrics.gridWidth }]}
+            style={[
+              styles.grid,
+              { width: gridMetrics.gridWidth, marginTop: gridMetrics.topPadding },
+            ]}
             data={listData}
             keyExtractor={(item) => item.key}
             renderItem={renderTile}

@@ -436,6 +436,42 @@ describe("ActivityHeatmap rendering boundaries", () => {
     expect(scrollToEnd).not.toHaveBeenCalled();
   });
 
+  it.each([
+    ["light", false],
+    ["dark", false],
+    ["light", true],
+    ["dark", true],
+  ] as const)("keeps two contrasting selection rings across activity levels in %s (high contrast: %s)", (theme, highContrast) => {
+    const original = jest.mocked(useSettings)();
+    const colors = resolveThemeColors(theme, { highContrast });
+    jest.mocked(useSettings).mockReturnValue({
+      ...original, theme, colors,
+      accessibilityPreferences: { ...original.accessibilityPreferences, highContrastEnabled: highContrast },
+    });
+    try {
+      const data = [1, 2, 3, 4].map((level) =>
+        activityDay(`2026-10-${String(level).padStart(2, "0")}`, { timeMs: level * 60000 }),
+      );
+      const screen = renderHeatmap(<ActivityHeatmap data={data} months={1} />);
+      // Include every intensity and an empty day. Selection must preserve the fill.
+      for (const day of [1, 2, 3, 4, 5]) {
+        const cell = dayCell(screen, day);
+        const backgroundColor = cell.props.style[1].backgroundColor;
+        fireEvent.press(cell);
+        expect(dayCell(screen, day)).toHaveStyle({ backgroundColor, borderWidth: 2, borderColor: colors.headline });
+        expect(dayCell(screen, day)).toHaveAccessibilityState({ selected: true });
+        const date = `2026-10-${String(day).padStart(2, "0")}`;
+        expect(screen.getByTestId(`activity-heatmap-selection-${date}`)).toHaveStyle({ borderWidth: 2, borderColor: colors.secondBackground });
+        expect(screen.getByTestId(`activity-heatmap-selection-${date}`).props.pointerEvents).toBe("none");
+        expect(screen.queryByTestId("activity-heatmap-selection-2026-10-21")).toBeNull();
+      }
+      expect(dayCell(screen, 4)).toHaveAccessibilityState({ selected: false });
+      expect(screen.queryByTestId("activity-heatmap-selection-2026-10-04")).toBeNull();
+    } finally {
+      jest.mocked(useSettings).mockReturnValue(original);
+    }
+  });
+
   it("updates only previous/new cells and leaves grids stable during details animation", () => {
     const screen = renderHeatmap(<ActivityHeatmap data={[]} months={1} />);
     const before = new Map(Array.from({ length: 31 }, (_, index) => {
@@ -638,7 +674,7 @@ describe("ActivityHeatmap rendering boundaries", () => {
         fontScaleMultiplier: 1.5,
       });
       screen.rerender(<ActivityHeatmap data={data} months={1} shieldedDates={["2026-10-21"]} />);
-      expect(dayCell(screen, 21)).toHaveStyle({ backgroundColor: settings.colors.background, borderColor: "#abcdef" });
+      expect(dayCell(screen, 21)).toHaveStyle({ backgroundColor: settings.colors.background, borderColor: "#ffffff" });
       expect(within(dayCell(screen, 21)).getByText("21")).toHaveStyle({ color: settings.colors.darkbg, fontSize: 33.75 });
       expect(screen.getByTestId("activity-heatmap-shield-2026-10-21")).toHaveStyle({ opacity: 0.34 });
       expect(screen.getByTestId("activity-details-card")).toHaveStyle({ borderWidth: 1 });
