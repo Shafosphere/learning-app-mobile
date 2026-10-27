@@ -25,6 +25,7 @@ export type HomeTile = {
   contentCopyStyles?: ImageStyle[];
   foregroundSource?: ImageSourcePropType;
   foregroundStyle?: ImageStyle;
+  foregroundLabel?: string;
   decorations?: { source: ImageSourcePropType; style?: ImageStyle }[];
   action?: () => void;
   isPlaceholder?: boolean;
@@ -165,6 +166,7 @@ export const HomeTileItem = React.memo(function HomeTileItem({ item, styles, opt
                 contentCopyStyles={item.contentCopyStyles}
                 foregroundSource={item.foregroundSource}
                 foregroundStyle={item.foregroundStyle}
+                foregroundLabel={item.foregroundLabel}
                 showFace
                 accessible={false}
               />

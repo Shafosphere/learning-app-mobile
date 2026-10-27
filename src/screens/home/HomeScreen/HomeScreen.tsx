@@ -65,9 +65,8 @@ export default function HomeScreen() {
       subtitle: t("screens.home.home.home.subtitle.przypieteKursy"),
       face: "nice",
       pressedFace: "happy",
-      decorations: [
-        { source: require("@/assets/ui/stats/streak/lewyrog.png") },
-      ],
+      contentSource: require("@/assets/mascot/box/props/pin.png"),
+      contentStyle: { top: -17,transform: [{ scale: 1.3 }] },
       action: goToCoursePanel,
     },
     {
@@ -121,6 +120,14 @@ export default function HomeScreen() {
       face: "blushed",
       faceParts: { eyes: "happy", mouth: "smile" },
       pressedFace: "love",
+      foregroundSource: require("@/assets/mascot/box/props/dymek.svg"),
+      foregroundLabel: t("screens.home.home.home.supportGreeting"),
+      foregroundStyle: {
+        width: 90,
+        height: 90,
+        top: -5,
+        right: -45,
+      },
       action: goToSupport,
     },
   ];

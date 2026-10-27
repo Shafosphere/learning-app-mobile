@@ -2212,6 +2212,7 @@
             "przewodnik": "Guide",
             "wsparcie": "Support"
           },
+          "supportGreeting": "HI",
           "subtitle": {
             "przypieteKursy": "Pinned courses",
             "kreatorKursow": "Course creator",

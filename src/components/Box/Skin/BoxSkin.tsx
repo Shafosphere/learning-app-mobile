@@ -2,8 +2,9 @@ import BoxBottom from "@/assets/mascot/box/body/bottom-box.png";
 import Hat from "@/assets/mascot/box/body/hat.png";
 import BoxTop from "@/assets/mascot/box/body/top-box.png";
 import { useSettings } from "@/src/contexts/SettingsContext";
+import { Image as ExpoImage } from "expo-image";
 import React from "react";
-import { Image, View, type ImageSourcePropType, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
+import { Image, Text, View, type ImageSourcePropType, type ImageStyle, type StyleProp, type ViewStyle } from "react-native";
 import { BoxCardsRow } from "./BoxCardsRow";
 import { BoxFace } from "./BoxFace";
 import { useBoxSkinStyles } from "./BoxSkin.styles";
@@ -20,11 +21,14 @@ interface BoxSkinProps {
   isCaro?: boolean;
   showHat?: boolean;
   cardVariant?: "default" | "logo";
+  /** Custom contents between the back and front of the box; overrides contentSource. */
+  content?: React.ReactNode;
   contentSource?: ImageSourcePropType;
   contentStyle?: ImageStyle;
   contentCopyStyles?: ImageStyle[];
   foregroundSource?: ImageSourcePropType;
   foregroundStyle?: ImageStyle;
+  foregroundLabel?: string;
   /** Overrides learning-box preference; navbar mascot must always show face. */
   showFace?: boolean;
   accessible?: boolean;
@@ -40,11 +44,13 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
   isCaro,
   showHat = false,
   cardVariant = "default",
+  content,
   contentSource,
   contentStyle,
   contentCopyStyles,
   foregroundSource,
   foregroundStyle,
+  foregroundLabel,
   showFace,
   accessible = true,
   accessibilityLabel: accessibilityLabelOverride,
@@ -78,7 +84,7 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
         />
       ) : null}
       <Image source={BoxTop} style={styles.skin} />
-      {contentSource ? (
+      {content ?? (contentSource ? (
         (contentCopyStyles ?? [{}]).map((copyStyle, index) => (
           <Image
             key={index}
@@ -89,17 +95,31 @@ const BoxSkin: React.FC<BoxSkinProps> = ({
         ))
       ) : (
         <BoxCardsRow wordCount={wordCount} styles={styles} variant={cardVariant} />
-      )}
+      ))}
       {shouldShowFace && (
         <BoxFace parts={getBoxFaceParts(face, faceParts)} style={[styles.face, faceStyle]} />
       )}
       <Image source={BoxBottom} style={styles.skin} />
       {foregroundSource ? (
-        <Image
-          source={foregroundSource}
+        <View
           style={[styles.foreground, foregroundStyle]}
-          resizeMode="contain"
-        />
+          pointerEvents="none"
+          accessibilityElementsHidden
+          importantForAccessibility="no-hide-descendants"
+        >
+          <ExpoImage
+            source={foregroundSource}
+            style={styles.foregroundImage}
+            contentFit="contain"
+          />
+          {foregroundLabel ? (
+            <View style={styles.foregroundLabelContainer}>
+              <Text style={styles.foregroundLabel} allowFontScaling={false} numberOfLines={1}>
+                {foregroundLabel}
+              </Text>
+            </View>
+          ) : null}
+        </View>
       ) : null}
     </View>
   );

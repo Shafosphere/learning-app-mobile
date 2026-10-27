@@ -55,6 +55,27 @@ export const useBoxSkinStyles = createThemeStylesHook((colors) => ({
     right: -14,
     zIndex: 1001,
   },
+  foregroundImage: {
+    width: "100%",
+    height: "100%",
+  },
+  foregroundLabelContainer: {
+    position: "absolute",
+    left: "15%",
+    right: "15%",
+    // Center inside the bubble body, excluding its tail and transparent margins.
+    top: "18%",
+    height: "57%",
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  foregroundLabel: {
+    color: "#000000",
+    fontSize: 18,
+    fontWeight: "700",
+    textAlign: "center",
+    includeFontPadding: false,
+  },
   card1: {
     position: "absolute",
     height: 120,

@@ -1,5 +1,6 @@
 import { render } from "@testing-library/react-native";
 import React from "react";
+import { Image } from "react-native";
 import BoxSkin from "../BoxSkin";
 import {
   BOX_EYE_ASSETS,
@@ -39,6 +40,34 @@ describe("BoxSkin", () => {
   beforeEach(() => {
     mockUseSettings.mockClear();
     mockUseSettings.mockReturnValue({ showBoxFaces: true });
+  });
+
+  it("layers custom content inside the box instead of source artwork or cards", () => {
+    const contentSource = { uri: "custom-clock.svg" };
+    const fallbackSource = { uri: "unused-content.png" };
+    const screen = render(
+      <BoxSkin
+        wordCount={40}
+        face="sleep"
+        showFace={false}
+        content={<Image source={contentSource} />}
+        contentSource={fallbackSource}
+      />
+    );
+    const sources = screen.UNSAFE_getAllByType(Image).map((node) => node.props.source);
+    expect(sources).toEqual([
+      require("@/assets/mascot/box/body/top-box.png"),
+      contentSource,
+      require("@/assets/mascot/box/body/bottom-box.png"),
+    ]);
+
+    screen.rerender(
+      <BoxSkin wordCount={40} face="sleep" showFace={false} contentSource={fallbackSource} />
+    );
+    expect(screen.UNSAFE_getAllByType(Image).map((node) => node.props.source)).toContainEqual(fallbackSource);
+
+    screen.rerender(<BoxSkin wordCount={40} face="sleep" showFace={false} />);
+    expect(screen.UNSAFE_getAllByType(Image)).toHaveLength(5);
   });
 
   it("skips unchanged artwork during parent updates and refreshes face and count changes", () => {

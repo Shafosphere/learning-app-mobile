@@ -2216,6 +2216,7 @@
             "przewodnik": "Przewodnik",
             "wsparcie": "Wsparcie"
           },
+          "supportGreeting": "HEJ",
           "subtitle": {
             "przypieteKursy": "Przypięte kursy",
             "kreatorKursow": "Kreator kursów",
