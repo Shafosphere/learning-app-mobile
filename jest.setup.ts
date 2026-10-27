@@ -6,6 +6,11 @@ jest.mock(
     require("@react-native-async-storage/async-storage/jest/async-storage-mock")
 );
 
+// Complete the upstream mock itself: Expo Router also imports it directly.
+jest.mock("react-native-reanimated/mock", () => ({
+  ...jest.requireActual("react-native-reanimated/mock"),
+  useReducedMotion: () => false,
+}));
 jest.mock("react-native-reanimated", () => require("react-native-reanimated/mock"));
 
 jest.mock("react-native-pager-view", () => {

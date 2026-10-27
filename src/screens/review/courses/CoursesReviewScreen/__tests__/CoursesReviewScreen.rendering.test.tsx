@@ -1,8 +1,10 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useNavigation, type NavigationProp, type ParamListBase } from "@react-navigation/native";
 import { Stack, router } from "expo-router";
+import { Image as ExpoImage } from "expo-image";
 import { act, cleanup, fireEvent, renderRouter, screen, waitFor } from "expo-router/testing-library";
 import { ScrollView, StyleSheet, Text, View } from "react-native";
+import * as Reanimated from "react-native-reanimated";
 import TextTicker from "react-native-text-ticker";
 
 import CoursesReviewScreen from "../CoursesReviewScreen";
@@ -18,6 +20,8 @@ import {
   type CustomCourseSummary,
 } from "@/src/db/sqlite/db";
 import i18n from "@/src/i18n";
+import { REVIEW_EMPTY_MESSAGES } from "../reviewEmptyMessages";
+import * as emptyMessages from "../reviewEmptyMessages";
 
 // Keep real settings, persistence, locale, styles, review components, coachmark
 // flow/portal hooks and router. Mock native effects and database responses only.
@@ -279,7 +283,7 @@ it("updates pinned cards, language, theme and accessibility while blurred", asyn
   expect(reviewNavigation.isFocused()).toBe(false);
 });
 
-it("refreshes review data on refocus and keeps zero-due courses disabled", async () => {
+it("refreshes review data on refocus and hides zero-due courses", async () => {
   const app = await startReview();
   const initialScroll = scrollView();
   blurReview(app);
@@ -292,15 +296,195 @@ it("refreshes review data on refocus and keeps zero-due courses disabled", async
   act(() => router.back());
   await waitFor(() => {
     expect(screen.getAllByText("New review").length).toBeGreaterThan(0);
-    expect(screen.getByText("0")).toBeTruthy();
+    expect(screen.queryAllByText(customCourse.name)).toHaveLength(0);
   });
   expect(mockedCustomCourses).toHaveBeenCalledTimes(loads + 1);
   expect(scrollView()).toBe(initialScroll);
-  expect(StyleSheet.flatten(screen.getByText("0").props.style).color).toBe(settings.colors.my_green);
-  fireEvent.press(title(customCourse.name));
+  expect(screen.queryByText("0")).toBeNull();
   expect(app.getPathname()).toBe("/review");
   expect(settings.activeCustomCourseId).toBe(99);
   expect(screen.getAllByText("7").length).toBeGreaterThan(0);
+});
+
+it("shows empty states for zero-due courses and restores cards when reviews become due", async () => {
+  const app = await startReview();
+  mockedDueCount.mockResolvedValue(0);
+  blurReview(app);
+  act(() => router.back());
+
+  await waitFor(() => {
+    expect(screen.getByTestId("review-empty-title")).toBeTruthy();
+  });
+  expect(screen.UNSAFE_getByType(ExpoImage).props.source).toEqual(require("@/assets/mascot/box/props/zegar4.svg"));
+  const entrance = jest.spyOn(Reanimated, "withSequence");
+  expect(entrance).not.toHaveBeenCalled();
+  fireEvent(screen.getByTestId("review-empty-clock", hidden), "load", {
+    nativeEvent: { source: { width: 500, height: 500 }, cacheType: "memory" },
+  });
+  expect(entrance).not.toHaveBeenCalled();
+  fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 390, height: 650 } } });
+  expect(entrance).toHaveBeenCalled();
+  expect(screen.getByTestId("box-skin-face-zzz", hidden)).toBeTruthy();
+  expect(screen.queryByText("Reviews")).toBeNull();
+  expect(screen.queryByText("Yours")).toBeNull();
+  expect(screen.queryByText("No reviews due right now.")).toBeNull();
+  expect(screen.queryAllByText(customCourse.name)).toHaveLength(0);
+  expect(screen.queryAllByText(officialCourse.name)).toHaveLength(0);
+  expect(screen.queryByText("EN")).toBeNull();
+  expect(screen.queryByText("You do not have any courses pinned for reviews yet.")).toBeNull();
+
+  mockedDueCount.mockResolvedValue(2);
+  blurReview(app);
+  act(() => router.back());
+  await waitFor(() => {
+    expect(title(customCourse.name)).toBeTruthy();
+    expect(title(officialCourse.name)).toBeTruthy();
+    expect(screen.queryByTestId("review-empty-state")).toBeNull();
+    expect(screen.queryByText("No reviews due right now.")).toBeNull();
+  });
+});
+
+it("keeps section headings hidden while refreshing an empty screen on refocus", async () => {
+  const app = await startReview();
+  mockedDueCount.mockResolvedValue(0);
+  blurReview(app);
+  act(() => router.back());
+  await waitFor(() => expect(screen.getByTestId("review-empty-state")).toBeTruthy());
+
+  let finishCounts!: (count: number) => void;
+  mockedDueCount.mockReturnValue(new Promise<number>((resolve) => {
+    finishCounts = resolve;
+  }));
+  blurReview(app);
+  const callsBeforeRefocus = mockedDueCount.mock.calls.length;
+  act(() => router.back());
+  await waitFor(() => expect(mockedDueCount.mock.calls.length).toBeGreaterThan(callsBeforeRefocus));
+  expect(screen.queryByText(i18n.t("repeats.labels.reviews"))).toBeNull();
+  expect(screen.queryByText(i18n.t("screens.review.courses.coursesReview.coursesReview.textChild.twoje"))).toBeNull();
+
+  await act(async () => finishCounts(0));
+  expect(screen.getByTestId("review-empty-state")).toBeTruthy();
+});
+
+it.each([
+  ["disabled", "reviewsDisabled"],
+  ["no courses", "noCourses"],
+  ["unpinned official", "noPinnedCourses"],
+  ["disabled custom and unpinned official", "reviewsDisabled"],
+] as const)("shows actionable guidance for %s in both languages", async (scenario, message) => {
+  const app = await startReview();
+  if (scenario === "disabled") {
+    mockedCustomCourses.mockResolvedValue([{ ...customCourse, reviewsEnabled: false }]);
+    mockedOfficialCourses.mockResolvedValue([{ ...officialCourse, reviewsEnabled: false }]);
+  } else if (scenario === "disabled custom and unpinned official") {
+    mockedCustomCourses.mockResolvedValue([{ ...customCourse, reviewsEnabled: false }]);
+    mockedOfficialCourses.mockResolvedValue([otherOfficialCourse]);
+  } else {
+    mockedCustomCourses.mockResolvedValue([]);
+    mockedOfficialCourses.mockResolvedValue(scenario === "unpinned official" ? [otherOfficialCourse] : []);
+  }
+  blurReview(app);
+  act(() => router.back());
+  await waitFor(() => expect(screen.getByTestId("review-empty-state")).toBeTruthy());
+  for (const language of ["en", "pl"] as const) {
+    await act(async () => { await settings.setUiLanguage(language); });
+    for (const line of ["title", "description"]) {
+      expect(screen.getByTestId(`review-empty-${line}`).props.children).toBe(
+        i18n.t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${message}.${line}`),
+      );
+    }
+  }
+  expect(screen.getByTestId("review-empty-illustration", hidden)).toBeTruthy();
+  expect(screen.getAllByTestId("review-empty-title")).toHaveLength(1);
+  expect(screen.getAllByTestId("review-empty-description")).toHaveLength(1);
+  expect(screen.queryByText("All courses have reviews disabled.")).toBeNull();
+  expect(screen.queryByText("You do not have any custom flashcards yet.")).toBeNull();
+});
+
+it.each([customCourse.id, officialCourse.id])("keeps the course list when course %s has due reviews", async (dueId) => {
+  const app = await startReview();
+  mockedDueCount.mockImplementation(async (id) => id === dueId ? 1 : 0);
+  blurReview(app);
+  act(() => router.back());
+  await waitFor(() => expect(screen.getByText("1")).toBeTruthy());
+  expect(title(dueId === customCourse.id ? customCourse.name : officialCourse.name)).toBeTruthy();
+  expect(screen.queryByTestId("review-empty-state")).toBeNull();
+});
+
+it("selects a new message on focus and keeps it through layout and settings updates", async () => {
+  const select = jest.spyOn(emptyMessages, "selectReviewEmptyMessage");
+  const app = await startReview();
+  mockedDueCount.mockResolvedValue(0);
+  blurReview(app);
+  act(() => router.back());
+  await waitFor(() => expect(screen.getByTestId("review-empty-title")).toBeTruthy());
+  for (let visit = 0; visit < 3; visit++) {
+    const previous = screen.getByTestId("review-empty-title").props.children;
+    const selections = select.mock.calls.length;
+    fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 390, height: 650 } } });
+    fireEvent(screen.getByTestId("review-empty-message"), "layout", { nativeEvent: { layout: { height: 100 } } });
+    await act(async () => { await settings.toggleLargeFont(); });
+    expect(screen.getByTestId("review-empty-title").props.children).toBe(previous);
+    expect(select).toHaveBeenCalledTimes(selections);
+    blurReview(app);
+    act(() => router.back());
+    await waitFor(() => expect(screen.getByTestId("review-empty-title").props.children).not.toBe(previous));
+    expect(select).toHaveBeenCalledTimes(selections + 1);
+  }
+});
+
+it.each([
+  ["break", "Czas na małą przerwę!", "Nowe powtórki pojawią się później."],
+  ["allReviewed", "Wszystko powtórzone!", "Twoje fiszki mogą teraz odpocząć."],
+  ["comeBackLater", "Jeszcze nie czas na powtórki", "Wróć później po kolejną porcję wiedzy."],
+] as const)("renders both Polish lines for %s", async (variant, heading, description) => {
+  jest.spyOn(emptyMessages, "selectReviewEmptyMessage").mockReturnValue(variant);
+  mockedDueCount.mockResolvedValue(0);
+  renderRouter({ _layout: Layout, "review/index": ReviewRoute }, { initialUrl: "/review" });
+  await waitFor(() => expect(screen.getByTestId("review-empty-title")).toBeTruthy());
+  await act(async () => { await settings.setUiLanguage("pl"); });
+  expect(screen.getByText(heading)).toBeTruthy();
+  expect(screen.getByText(description)).toBeTruthy();
+});
+
+it("waits for loading and keeps the empty message themed, translated and accessible", async () => {
+  let resolveCourses!: (rows: CustomCourseSummary[]) => void;
+  mockedCustomCourses.mockReturnValue(new Promise((resolve) => { resolveCourses = resolve; }));
+  mockedOfficialCourses.mockResolvedValue([]);
+  renderRouter({ _layout: Layout, "review/index": ReviewRoute }, { initialUrl: "/review" });
+  await waitFor(() => expect(mockedCustomCourses).toHaveBeenCalled());
+  expect(screen.queryByTestId("review-empty-state")).toBeNull();
+  mockedDueCount.mockResolvedValue(0);
+  await act(async () => resolveCourses([customCourse]));
+  await waitFor(() => expect(screen.getByTestId("review-empty-state")).toBeTruthy());
+  await act(async () => { await settings.toggleShowBoxFaces(); });
+  expect(settings.showBoxFaces).toBe(false);
+  expect(screen.getByTestId("box-skin-face-zzz", hidden)).toBeTruthy();
+  expect(screen.getByTestId("review-empty-illustration", hidden)).toHaveProp("accessibilityElementsHidden", true);
+  fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 390, height: 900 } } });
+  fireEvent(screen.getByTestId("review-empty-message"), "layout", { nativeEvent: { layout: { height: 60 } } });
+  const illustrationHeight = StyleSheet.flatten(screen.getByTestId("review-empty-illustration", hidden).props.style).height as number;
+  const initialTop = StyleSheet.flatten(screen.getByTestId("review-empty-state").props.style).paddingTop as number;
+  const overflow = 150 * illustrationHeight / 122;
+  expect(initialTop + (illustrationHeight + 28 + 60 - overflow) / 2).toBeCloseTo(900 * 0.42);
+  fireEvent(screen.getByTestId("review-empty-message"), "layout", { nativeEvent: { layout: { height: 300 } } });
+  expect(StyleSheet.flatten(screen.getByTestId("review-empty-state").props.style).paddingTop).toBeLessThan(initialTop);
+  fireEvent(scrollView(), "layout", { nativeEvent: { layout: { width: 844, height: 260 } } });
+  expect(StyleSheet.flatten(screen.getByTestId("review-empty-state").props.style).minHeight).toBe(260);
+  expect(StyleSheet.flatten(screen.getByTestId("review-empty-illustration", hidden).props.style).height).toBeLessThan(illustrationHeight);
+  const initialSize = StyleSheet.flatten(screen.getByTestId("review-empty-title").props.style).fontSize!;
+  expect(initialSize).toBe(18);
+  expect(screen.getByTestId("review-empty-description")).toHaveStyle({ fontSize: 16, fontWeight: "400", lineHeight: 23 });
+  expect(screen.getByTestId("review-empty-message")).toHaveStyle({ maxWidth: 320, marginTop: 28, gap: 8 });
+  await act(async () => { await settings.toggleLargeFont(); });
+  expect(StyleSheet.flatten(screen.getByTestId("review-empty-title").props.style).fontSize).toBe(initialSize * 1.15);
+  await act(async () => { await settings.toggleTheme(); });
+  expect(StyleSheet.flatten(screen.getByTestId("review-empty-title").props.style).color).toBe(settings.colors.paragraph);
+  const variant = REVIEW_EMPTY_MESSAGES.find((message) => screen.getByTestId("review-empty-title").props.children ===
+    i18n.t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${message}.title`))!;
+  await act(async () => { await settings.setUiLanguage("pl"); });
+  expect(screen.getByText(i18n.t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${variant}.title`))).toBeTruthy();
+  expect(screen.getByText(i18n.t(`screens.review.courses.coursesReview.coursesReview.emptyMessages.${variant}.description`))).toBeTruthy();
 });
 
 it.each([

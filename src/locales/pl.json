@@ -2235,7 +2235,35 @@
               "nieMaszJeszczePrzypietychKursow": "Nie masz jeszcze przypiętych kursów do powtórek.",
               "twoje": "Twoje",
               "nieMaszJeszczeWlasnychFiszek": "Nie masz jeszcze własnych fiszek.",
-              "wszystkieKursyMajaWylaczonePowtorki": "Wszystkie kursy mają wyłączone powtórki."
+              "wszystkieKursyMajaWylaczonePowtorki": "Wszystkie kursy mają wyłączone powtórki.",
+              "noDueReviews": "Brak powtórek na teraz.",
+              "notTimeForReviews": "To jeszcze nie czas na powtórki"
+            },
+            "emptyMessages": {
+              "noCourses": {
+                "title": "Dodaj kurs, aby zacząć",
+                "description": "Wybierz i przypnij kurs lub stwórz własne fiszki, aby rozpocząć naukę i powtórki."
+              },
+              "noPinnedCourses": {
+                "title": "Przypnij kurs do powtórek",
+                "description": "Przypnij kurs lub stwórz własne fiszki, aby były dostępne do powtórek."
+              },
+              "reviewsDisabled": {
+                "title": "Powtórki są wyłączone",
+                "description": "Włącz powtórki w ustawieniach przynajmniej jednego ze swoich kursów."
+              },
+              "break": {
+                "title": "Czas na małą przerwę!",
+                "description": "Nowe powtórki pojawią się później."
+              },
+              "allReviewed": {
+                "title": "Wszystko powtórzone!",
+                "description": "Twoje fiszki mogą teraz odpocząć."
+              },
+              "comeBackLater": {
+                "title": "Jeszcze nie czas na powtórki",
+                "description": "Wróć później po kolejną porcję wiedzy."
+              }
             },
             "title": {
               "miniKursy": "Mini kursy"

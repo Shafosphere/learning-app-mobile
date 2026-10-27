@@ -2,7 +2,7 @@ import Ionicons from "@expo/vector-icons/Ionicons";
 import { useFocusEffect } from "@react-navigation/native";
 import { useRouter } from "expo-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Image, NativeSyntheticEvent, NativeScrollEvent, Pressable, ScrollView, Text, View } from "react-native";
+import { Image, NativeSyntheticEvent, NativeScrollEvent, type LayoutChangeEvent, Pressable, ScrollView, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
@@ -26,6 +26,8 @@ import { ReviewCourseSection } from "@/src/components/review/ReviewCourseSection
 import { useStyles } from "./CoursesScreen-styles";
 import { OfficialCourseReviewItem, OfficialGroup } from "@/src/features/review/courseReviewTypes";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
+import { ReviewEmptyState } from "./ReviewEmptyState";
+import { selectReviewEmptyMessage, type ReviewEmptyMessage } from "./reviewEmptyMessages";
 
 export default function CoursesReviewScreen() {
   const styles = useStyles();
@@ -49,8 +51,16 @@ export default function CoursesReviewScreen() {
     {}
   );
   const [isLoading, setIsLoading] = useState(true);
+  const [emptyMessage, setEmptyMessage] = useState<ReviewEmptyMessage>("break");
   const [pendingScrollTargetId, setPendingScrollTargetId] = useState<number | null>(null);
   const [isAutoScrollingToTarget, setIsAutoScrollingToTarget] = useState(false);
+  const [viewport, setViewport] = useState({ width: 0, height: 0 });
+  const handleViewportLayout = useCallback((event: LayoutChangeEvent) => {
+    const { width, height } = event.nativeEvent.layout;
+    setViewport((previous) => previous.width === width && previous.height === height
+      ? previous
+      : { width, height });
+  }, []);
 
   const refreshData = useCallback(async () => {
     const now = Date.now();
@@ -138,6 +148,7 @@ export default function CoursesReviewScreen() {
 
   useFocusEffect(
     useCallback(() => {
+      setEmptyMessage(selectReviewEmptyMessage());
       let isMounted = true;
 
       const load = async () => {
@@ -157,13 +168,18 @@ export default function CoursesReviewScreen() {
   );
 
   const visibleCustomCourses = customCourses.filter(
-    (course) => course.reviewsEnabled
+    (course) => course.reviewsEnabled && (customCounts[course.id] ?? 0) > 0
   );
   const hasCustomCourses = customCourses.length > 0;
+  const hasEnabledCustomCourses = customCourses.some((course) => course.reviewsEnabled);
   const hasVisibleCustomCourses = visibleCustomCourses.length > 0;
-  const visibleOfficialCourses = officialCourses.filter(
+  const pinnedOfficialCourses = officialCourses.filter(
+    (course) => pinnedOfficialCourseIds.includes(course.id)
+  );
+  const hasEnabledOfficialCourses = pinnedOfficialCourses.some((course) => course.reviewsEnabled);
+  const visibleOfficialCourses = pinnedOfficialCourses.filter(
     (course) =>
-      pinnedOfficialCourseIds.includes(course.id) && course.reviewsEnabled
+      course.reviewsEnabled && (officialCounts[course.id] ?? 0) > 0
   );
   const officialGroups = useMemo<OfficialGroup[]>(() => {
     const groups = new Map<string, OfficialGroup>();
@@ -222,6 +238,15 @@ export default function CoursesReviewScreen() {
     });
   }, [visibleOfficialCourses]);
   const hasOfficialGroups = officialGroups.length > 0;
+  const showEmptyState = !isLoading && !hasOfficialGroups && !hasVisibleCustomCourses;
+  const displayedEmptyMessage: ReviewEmptyMessage =
+    hasEnabledCustomCourses || hasEnabledOfficialCourses
+      ? emptyMessage
+      : hasCustomCourses || pinnedOfficialCourses.length > 0
+        ? "reviewsDisabled"
+        : officialCourses.length > 0
+          ? "noPinnedCourses"
+          : "noCourses";
   const orderedVisibleOfficialCourses = useMemo(
     () =>
       officialGroups.flatMap((group) => {
@@ -437,7 +462,8 @@ export default function CoursesReviewScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={showEmptyState ? styles.emptyScrollContent : styles.scrollContent}
+        onLayout={handleViewportLayout}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!coachmark.currentStep?.scrollLocked && !isAutoScrollingToTarget}
         onScroll={handleScroll}
@@ -445,6 +471,9 @@ export default function CoursesReviewScreen() {
         onScrollEndDrag={handleScrollSettled}
         scrollEventThrottle={16}
       >
+        {showEmptyState ? (
+          <ReviewEmptyState width={viewport.width} height={viewport.height} message={displayedEmptyMessage} />
+        ) : isLoading && !hasOfficialGroups && !hasVisibleCustomCourses ? null : (
         <View ref={contentRef} collapsable={false} style={styles.minicontainer}>
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>
@@ -530,10 +559,14 @@ export default function CoursesReviewScreen() {
                 </View>
               );
             })}
-            {!hasOfficialGroups ? (
+            {!isLoading && !hasOfficialGroups ? (
               <Text style={styles.emptyText}>
                 {t(
-                  "screens.review.courses.coursesReview.coursesReview.textChild.nieMaszJeszczePrzypietychKursow"
+                  pinnedOfficialCourses.length === 0
+                    ? "screens.review.courses.coursesReview.coursesReview.textChild.nieMaszJeszczePrzypietychKursow"
+                    : !hasEnabledOfficialCourses
+                      ? "screens.review.courses.coursesReview.coursesReview.textChild.wszystkieKursyMajaWylaczonePowtorki"
+                      : "screens.review.courses.coursesReview.coursesReview.textChild.noDueReviews"
                 )}
               </Text>
             ) : null}
@@ -545,17 +578,21 @@ export default function CoursesReviewScreen() {
                 "screens.review.courses.coursesReview.coursesReview.textChild.twoje"
               )}
             </Text>
-            {!hasCustomCourses ? (
+            {isLoading && !hasVisibleCustomCourses ? null : !hasCustomCourses ? (
               <Text style={styles.emptyText}>
                 {t(
                   "screens.review.courses.coursesReview.coursesReview.textChild.nieMaszJeszczeWlasnychFiszek"
                 )}
               </Text>
-            ) : !hasVisibleCustomCourses ? (
+            ) : !hasEnabledCustomCourses ? (
               <Text style={styles.emptyText}>
                 {t(
                   "screens.review.courses.coursesReview.coursesReview.textChild.wszystkieKursyMajaWylaczonePowtorki"
                 )}
+              </Text>
+            ) : !hasVisibleCustomCourses ? (
+              <Text style={styles.emptyText}>
+                {t("screens.review.courses.coursesReview.coursesReview.textChild.noDueReviews")}
               </Text>
             ) : (
               <View style={styles.courseGrid}>
@@ -622,6 +659,7 @@ export default function CoursesReviewScreen() {
             )}
           </View>
         </View>
+        )}
       </ScrollView>
     </View>
   );

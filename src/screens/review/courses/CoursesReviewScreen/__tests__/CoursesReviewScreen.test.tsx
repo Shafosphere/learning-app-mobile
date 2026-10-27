@@ -1,5 +1,6 @@
 import React from "react";
 import { act, fireEvent, render, waitFor } from "@testing-library/react-native";
+import { Text } from "react-native";
 
 import CoursesReviewScreen from "@/src/screens/review/courses/CoursesReviewScreen/CoursesReviewScreen";
 import { useCourseSelectionActions, usePinnedOfficialCourseIds } from "@/src/contexts/SettingsContext";
@@ -28,6 +29,12 @@ jest.mock("@react-navigation/native", () => ({
 jest.mock("@/src/contexts/SettingsContext", () => ({
   useCourseSelectionActions: jest.fn(),
   usePinnedOfficialCourseIds: jest.fn(() => []),
+  useSettings: () => ({ showBoxFaces: true }),
+  useThemeSettings: () => ({
+    colors: jest.requireActual("@/src/theme/theme").themeMap.light,
+    accessibilityPreferences: {},
+    fontScaleMultiplier: 1,
+  }),
 }));
 
 jest.mock("@/src/db/sqlite/db", () => ({
@@ -119,6 +126,31 @@ describe("CoursesReviewScreen onboarding", () => {
     ]);
     mockedGetOfficialCustomCoursesWithCardCounts.mockResolvedValue([]);
     mockedCountDueCustomReviews.mockResolvedValue(3);
+  });
+
+  it.each([0, 3])("hides section headings while due counts are loading (due: %i)", async (dueCount) => {
+    let finishCount!: (count: number) => void;
+    mockedCountDueCustomReviews.mockReturnValue(new Promise<number>((resolve) => {
+      finishCount = resolve;
+    }));
+
+    const screen = render(<CoursesReviewScreen />);
+    expect(screen.UNSAFE_queryAllByType(Text)).toHaveLength(0);
+    expect(screen.queryByTestId("review-empty-state")).toBeNull();
+
+    await waitFor(() => expect(mockedCountDueCustomReviews).toHaveBeenCalled());
+    expect(screen.UNSAFE_queryAllByType(Text)).toHaveLength(0);
+    expect(screen.queryByTestId("review-empty-state")).toBeNull();
+
+    await act(async () => finishCount(dueCount));
+
+    if (dueCount === 0) {
+      expect(screen.getByTestId("review-empty-state")).toBeTruthy();
+      expect(screen.queryByText("Custom review")).toBeNull();
+    } else {
+      expect(screen.getByText("Custom review")).toBeTruthy();
+      expect(screen.queryByTestId("review-empty-state")).toBeNull();
+    }
   });
 
   it("starts onboarding only when at least one due review exists", async () => {

@@ -2231,7 +2231,35 @@
               "nieMaszJeszczePrzypietychKursow": "You do not have any courses pinned for reviews yet.",
               "twoje": "Yours",
               "nieMaszJeszczeWlasnychFiszek": "You do not have any custom flashcards yet.",
-              "wszystkieKursyMajaWylaczonePowtorki": "All courses have reviews disabled."
+              "wszystkieKursyMajaWylaczonePowtorki": "All courses have reviews disabled.",
+              "noDueReviews": "No reviews due right now.",
+              "notTimeForReviews": "It’s not time for reviews yet"
+            },
+            "emptyMessages": {
+              "noCourses": {
+                "title": "Add a course to get started",
+                "description": "Choose and pin a course or create your own flashcards to start learning and reviewing."
+              },
+              "noPinnedCourses": {
+                "title": "Pin a course to review",
+                "description": "Pin a course or create your own flashcards to make them available for reviews."
+              },
+              "reviewsDisabled": {
+                "title": "Reviews are turned off",
+                "description": "Enable reviews in the settings of at least one of your courses."
+              },
+              "break": {
+                "title": "Time for a little break!",
+                "description": "New reviews will be available later."
+              },
+              "allReviewed": {
+                "title": "All reviewed!",
+                "description": "Your flashcards can rest now."
+              },
+              "comeBackLater": {
+                "title": "It’s not time for reviews yet",
+                "description": "Come back later for another helping of knowledge."
+              }
             },
             "title": {
               "miniKursy": "Mini-courses"

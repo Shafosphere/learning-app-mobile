@@ -13,6 +13,9 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 32,
     alignItems: "center",
   },
+  emptyScrollContent: {
+    flexGrow: 1,
+  },
   minicontainer: {
     width: "75%",
     gap: 16,

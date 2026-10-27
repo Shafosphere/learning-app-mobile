@@ -21,7 +21,6 @@ import { useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import {
   ActivityIndicator,
-  Image,
   Pressable,
   ScrollView,
   StyleSheet,
@@ -29,6 +28,7 @@ import {
   View,
 } from "react-native";
 import { useStyles } from "../../activatecourse/CourseActivateScreen/CourseActivateScreen-styles";
+import { TrophyEntrance } from "./TrophyEntrance";
 
 const completedStyles = StyleSheet.create({
   emptyScrollContent: {
@@ -39,11 +39,6 @@ const completedStyles = StyleSheet.create({
     alignItems: "center",
     marginTop: 24,
     marginBottom: 12,
-  },
-  trophy: {
-    width: 160,
-    height: 160,
-    resizeMode: "contain",
   },
   emptyContainer: {
     minHeight: 0,
@@ -259,12 +254,7 @@ export default function CompletedCoursesScreen() {
       >
         <View style={styles.minicontainer}>
           <View style={completedStyles.hero}>
-            <Image
-              source={require("@/assets/ui/achievements/trophy.png")}
-              style={completedStyles.trophy}
-              accessible={false}
-              testID="completed-courses-trophy"
-            />
+            <TrophyEntrance ready={!isLoadingCourses} />
             <Text style={styles.title}>
               {t("screens.courses.completedCourses.title")}
             </Text>
