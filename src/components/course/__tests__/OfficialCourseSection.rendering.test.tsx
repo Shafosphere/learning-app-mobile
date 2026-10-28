@@ -132,3 +132,22 @@ it("updates real cards and marquee styles for theme, font size and translation c
   expect(app.screen.getAllByText("50 fiszek")).toHaveLength(2);
   expect(app.screen.getByRole("button", { name: "Edytuj Course 1" })).toBeTruthy();
 });
+
+it("keeps selection, editing and audio attached to the right course when switching between grid and list", async () => {
+  const app = await setup();
+  app.update({ cardWidth: 400 });
+  const selectedRow = () => within(app.screen.getByTestId("official-course-row-1"));
+  expect(selectedRow().getByRole("button", { selected: true })).toBeTruthy();
+  const secondRow = within(app.screen.getByTestId("official-course-row-2"));
+  fireEvent.press(secondRow.getAllByText("Course 2")[0]);
+  expect(app.props.onPress).toHaveBeenCalledWith(2, false);
+  app.update({ activeCourseId: 2 });
+  expect(within(app.screen.getByTestId("official-course-row-2")).getByRole("button", { selected: true })).toBeTruthy();
+  expect(app.props.renderCourseFooter).toHaveBeenLastCalledWith(app.props.list[1], true);
+
+  app.update({ cardWidth: undefined });
+  fireEvent.press(app.screen.getByRole("button", { name: "Edit Course 2" }), { stopPropagation: jest.fn() });
+  expect(app.props.onEdit).toHaveBeenCalledWith(app.props.list[1]);
+  app.update({ cardWidth: 350 });
+  expect(within(app.screen.getByTestId("official-course-row-2")).getByRole("button", { selected: true })).toBeTruthy();
+});

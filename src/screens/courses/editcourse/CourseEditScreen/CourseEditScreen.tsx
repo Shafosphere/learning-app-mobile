@@ -139,7 +139,8 @@ function BuiltinCourseEditor({
   const styles = useCourseEditStyles();
   const router = useRouter();
   const { t } = useTranslation();
-  const { isTabletLayout } = useDeviceLayout();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
@@ -450,10 +451,10 @@ function BuiltinCourseEditor({
   const imageSizeEnabled = cardSize === "large" && courseHasImages;
 
   const settingsScrollProps = useMemo(() => ({
-    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
-    contentContainerStyle: styles.scrollContent,
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet, isLandscapeLayout && styles.scrollViewLandscape],
+    contentContainerStyle: [styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape],
     keyboardShouldPersistTaps: "handled" as const,
-  }), [styles.scrollContent, styles.scrollView, styles.scrollViewTablet, useCenteredTabletLayout]);
+  }), [styles.scrollContent, styles.scrollContentLandscape, styles.scrollView, styles.scrollViewTablet, styles.scrollViewLandscape, useCenteredTabletLayout, isLandscapeLayout]);
   const courseSettingsProps = useMemo<CourseSettingsSectionProps>(() => ({
     styles,
     switchColors: {
@@ -588,6 +589,8 @@ function BuiltinCourseEditor({
 
   return (
     <View style={styles.container}>
+      <View style={[styles.settingsWorkspace, isLandscapeLayout && styles.settingsWorkspaceLandscape]}>
+      <View style={[styles.settingsBody, isLandscapeLayout && styles.settingsBodyLandscape]}>
       <SettingsTabPager
         ref={categoryTabs.pagerRef}
         options={categoryTabs.options}
@@ -598,11 +601,12 @@ function BuiltinCourseEditor({
         renderPage={renderSettingsPage}
       />
 
-      <View style={styles.buttonscontainer}>
+      <View style={[styles.buttonscontainer, isLandscapeLayout && styles.buttonsContainerLandscape]}>
         <View
           style={[
             styles.buttonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
+            isLandscapeLayout && styles.buttonsRowLandscape,
           ]}
         >
           <MyButton
@@ -617,11 +621,14 @@ function BuiltinCourseEditor({
           </MyButton>
         </View>
       </View>
+      </View>
       <SettingsTabBar
+        vertical={isLandscapeLayout}
         options={categoryTabs.options}
         value={categoryTabs.activeTab}
         onChange={categoryTabs.onChange}
       />
+      </View>
       {resetControls.modal}
     </View>
   );

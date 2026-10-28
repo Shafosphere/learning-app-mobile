@@ -19,7 +19,7 @@ export default function HomeScreen() {
   const goToCoursePanel = useOpenCoursePanel();
   const { t } = useTranslation();
   const styles = useStyles();
-  const { isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout, orientation } = useDeviceLayout();
   const { fontScale } = useWindowDimensions();
   const { fontScaleMultiplier } = useThemeSettings();
   const [viewport, setViewport] = useState<{
@@ -39,6 +39,7 @@ export default function HomeScreen() {
         ...viewport,
         fontScale: fontScale * fontScaleMultiplier,
         isTabletLayout,
+        isLandscape: orientation === "landscape",
       })
     : null;
 
@@ -134,8 +135,9 @@ export default function HomeScreen() {
 
   const tiles = buildHomeTiles();
 
+  const columns = gridMetrics?.columns ?? 2;
   const listData =
-    tiles.length % 2 === 0
+    tiles.length % columns === 0
       ? tiles
       : [
           ...tiles,
@@ -161,6 +163,7 @@ export default function HomeScreen() {
       >
         {gridMetrics && gridMetrics.tileSize > 0 && (
           <FlatList
+            key={columns}
             testID="home-grid"
             style={[
               styles.grid,
@@ -169,7 +172,7 @@ export default function HomeScreen() {
             data={listData}
             keyExtractor={(item) => item.key}
             renderItem={renderTile}
-            numColumns={2}
+            numColumns={columns}
             scrollEnabled={gridMetrics.scrollEnabled}
             bounces={false}
             alwaysBounceVertical={false}

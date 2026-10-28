@@ -65,7 +65,8 @@ export default function CourseSettingsScreen() {
   const pathname = usePathname();
   const setPopup = usePopup();
   const params = useLocalSearchParams<LocalSearchParams>();
-  const { isTabletLayout } = useDeviceLayout();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
   const useCenteredTabletLayout = isTabletLayout;
   const {
     colors,
@@ -603,10 +604,10 @@ export default function CourseSettingsScreen() {
   };
 
   const settingsScrollProps = useMemo(() => ({
-    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
-    contentContainerStyle: styles.scrollContent,
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet, isLandscapeLayout && styles.scrollViewLandscape],
+    contentContainerStyle: [styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape],
     keyboardShouldPersistTaps: "handled" as const,
-  }), [styles.scrollContent, styles.scrollView, styles.scrollViewTablet, useCenteredTabletLayout]);
+  }), [styles.scrollContent, styles.scrollContentLandscape, styles.scrollView, styles.scrollViewTablet, styles.scrollViewLandscape, useCenteredTabletLayout, isLandscapeLayout]);
   const courseSettingsProps = useMemo<CourseSettingsSectionProps>(() => ({
     styles,
     switchColors: {
@@ -695,6 +696,8 @@ export default function CourseSettingsScreen() {
 
   return (
     <View style={styles.container}>
+      <View style={[styles.settingsWorkspace, isLandscapeLayout && styles.settingsWorkspaceLandscape]}>
+      <View style={[styles.settingsBody, isLandscapeLayout && styles.settingsBodyLandscape]}>
       <SettingsTabPager
         ref={categoryTabs.pagerRef}
         options={categoryTabs.options}
@@ -705,11 +708,12 @@ export default function CourseSettingsScreen() {
         renderPage={renderSettingsPage}
       />
 
-      <View style={styles.buttonscontainer}>
+      <View style={[styles.buttonscontainer, isLandscapeLayout && styles.buttonsContainerLandscape]}>
         <View
           style={[
             styles.buttonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
+            isLandscapeLayout && styles.buttonsRowLandscape,
           ]}
         >
           <MyButton
@@ -736,11 +740,14 @@ export default function CourseSettingsScreen() {
           />
         </View>
       </View>
+      </View>
       <SettingsTabBar
+        vertical={isLandscapeLayout}
         options={categoryTabs.options}
         value={categoryTabs.activeTab}
         onChange={categoryTabs.onChange}
       />
+      </View>
     </View>
   );
 }

@@ -92,11 +92,18 @@ describe("HomeScreen responsive grid", () => {
     mockWindowDimensions = { width: 1200, height: 900, scale: 1, fontScale: 1 };
     rerender(<HomeScreen />);
     measureGrid(1056, 464);
-    expect(getListProps().scrollEnabled).toBe(true);
-    expect(StyleSheet.flatten(getListProps().style).width).toBe(340);
-    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(160);
+    expect(getListProps().numColumns).toBe(3);
+    expect(getListProps().scrollEnabled).toBe(false);
+    expect(StyleSheet.flatten(getListProps().style).width).toBe(646);
+    expect(StyleSheet.flatten(screen.getAllByRole("button")[0].props.style).height).toBe(202);
+    expect(screen.getAllByRole("button")).toHaveLength(5);
+    fireEvent.press(screen.getAllByRole("button")[4]);
+    expect(mockPush).toHaveBeenCalledWith("/support");
 
+    mockWindowDimensions = { width: 900, height: 1200, scale: 1, fontScale: 1 };
+    rerender(<HomeScreen />);
     measureGrid(756, 734);
+    expect(getListProps().numColumns).toBe(2);
     expect(getListProps().scrollEnabled).toBe(false);
   });
 

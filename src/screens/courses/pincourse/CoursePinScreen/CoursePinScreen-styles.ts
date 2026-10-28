@@ -14,6 +14,10 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 120,
     alignItems: "center",
   },
+  scrollContentLandscape: { paddingBottom: 24 },
+  titleLandscape: { marginTop: 16, marginBottom: 12 },
+  buttonsRowLandscape: { paddingTop: 12, borderTopWidth: 1 },
+  landscapeAction: { flex: 1, minHeight: 52 },
   minicontainer: {
     width: "75%",
   },

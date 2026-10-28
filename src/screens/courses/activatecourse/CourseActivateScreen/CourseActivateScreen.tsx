@@ -1,3 +1,4 @@
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { CourseAudioDownloadRow } from "@/Audio/runtime/CourseAudioDownloadRow";
 import { CourseAudioRevealProvider } from "@/Audio/runtime/CourseAudioRevealCoordinator";
 import type { LanguageCourseGroupId } from "@/src/constants/languageCourseGroups";
@@ -46,6 +47,7 @@ import { getCoursePlayRoute } from "@/src/features/customCourse/coursePlayRoute"
 
 type CustomCourseRowProps = {
   course: CustomCourseSummary;
+  spacious?: boolean;
   isHighlighted: boolean;
   headlineColor: string;
   onPress: (id: number, isAlreadyActive: boolean) => void;
@@ -54,6 +56,7 @@ type CustomCourseRowProps = {
 
 const CustomCourseRow = memo(function CustomCourseRow({
   course,
+  spacious,
   isHighlighted,
   headlineColor,
   onPress,
@@ -64,6 +67,7 @@ const CustomCourseRow = memo(function CustomCourseRow({
 
   return (
     <CourseListCard
+      spacious={spacious}
       title={course.name}
       subtitle={t("repeats.format.flashcardsValue", { value: course.cardsCount })}
       iconId={course.iconId}
@@ -104,6 +108,10 @@ function renderCourseAudioFooter(course: OfficialCourseListItem, isHighlighted: 
 
 export default function CourseActivateScreen() {
   const { t } = useTranslation();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeGrid = isTabletLayout && orientation === "landscape" && width >= 840;
+  const contentWidth = Math.min(1100, Math.max(0, width - 96));
+  const cardWidth = isLandscapeGrid ? (contentWidth - 16) / 2 : undefined;
   const {
     activeCustomCourseId,
     activeCustomCourseIdHydrated,
@@ -470,10 +478,10 @@ export default function CourseActivateScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isLandscapeGrid && styles.scrollContentLandscape]}
         keyboardShouldPersistTaps="handled"
       >
-        <View style={styles.minicontainer}>
+        <View style={[styles.minicontainer, isLandscapeGrid && { width: contentWidth }]}>
           {!isLoadingCourses && isEmptyState ? (
             <View style={styles.emptyContainer}>
               <Text style={styles.emptyState}>
@@ -486,13 +494,14 @@ export default function CourseActivateScreen() {
             <>
               {hasPinnedOfficialCourses ? (
                 <>
-                  <Text style={styles.title}>
+                  <Text style={[styles.title, isLandscapeGrid && styles.titleLandscape]}>
                     {t(
                       "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezNas"
                     )}
                   </Text>
                       <CourseGroupList
                         groups={courseGroups}
+                        cardWidth={cardWidth}
                         activeCourseId={activeCustomCourseId}
                         colors={colors}
                         onPress={handleCustomCoursePress}
@@ -511,16 +520,18 @@ export default function CourseActivateScreen() {
                       "screens.courses.activatecourse.courseActivate.courseActivate.textChild.stworzonePrzezCiebie"
                     )}
                   </Text>
-                  <View style={styles.customList}>
+                  <View style={isLandscapeGrid ? styles.courseGrid : styles.customList}>
                     {userCustomCourses.map((course) => (
-                      <CustomCourseRow
-                        key={course.id}
-                        course={course}
-                        isHighlighted={activeCustomCourseId === course.id}
-                        headlineColor={colors.headline}
-                        onPress={handleCustomCoursePress}
-                        onEdit={handleEditCustomCourse}
-                      />
+                      <View key={course.id} style={cardWidth != null ? { width: cardWidth } : undefined}>
+                        <CustomCourseRow
+                          spacious={isLandscapeGrid}
+                          course={course}
+                          isHighlighted={activeCustomCourseId === course.id}
+                          headlineColor={colors.headline}
+                          onPress={handleCustomCoursePress}
+                          onEdit={handleEditCustomCourse}
+                        />
+                      </View>
                     ))}
                   </View>
                 </View>
@@ -532,7 +543,7 @@ export default function CourseActivateScreen() {
 
       {showOnboardingNext ? (
         <View style={styles.buttonscontainer}>
-          <View style={styles.buttonsRow}>
+          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
             <CoachmarkAnchor
               id="course-activate-next-button"
               shape="rect"
@@ -573,11 +584,11 @@ export default function CourseActivateScreen() {
         </View>
       ) : (
         <View style={styles.buttonscontainer}>
-          <View style={styles.buttonsRow}>
+          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
             <MyButton
-              text={t(
-                "screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs"
-              )}
+              text={isLandscapeGrid
+                ? t("screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs").replace(/\s+/g, " ")
+                : t("screens.courses.activatecourse.courseActivate.courseActivate.text.dodajKurs")}
               accessibilityLabel={t(
                 "screens.courses.activatecourse.courseActivate.courseActivate.accessibilityLabel.dodajKurs"
               )}
@@ -585,6 +596,7 @@ export default function CourseActivateScreen() {
               onPress={() => router.push("/createcourse")}
               disabled={false}
               autoWidth
+              style={isLandscapeGrid ? styles.landscapeAction : undefined}
             />
             {hasActiveCourse ? (
               <MyButton
@@ -604,7 +616,7 @@ export default function CourseActivateScreen() {
                   if (route) router.push(route);
                 }}
                 disabled={!activeCustomCourseIdHydrated || !customCourseEntrySettingsSeenHydrated}
-                style={{ flex: 1 }}
+                style={isLandscapeGrid ? styles.landscapeAction : { flex: 1 }}
               />
             ) : null}
           </View>

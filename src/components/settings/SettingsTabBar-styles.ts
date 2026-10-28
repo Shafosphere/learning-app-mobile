@@ -20,6 +20,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     overflow: "visible",
   },
   innerTablet: { maxWidth: 500 },
+  sidebar: { width: 220, flexGrow: 0, flexShrink: 0, backgroundColor: colors.background },
+  sidebarContent: { paddingHorizontal: 18, paddingTop: 24, paddingBottom: 24 },
+  innerVertical: { flexDirection: "column", gap: 12, maxWidth: undefined },
+  buttonVertical: { flex: 0, minHeight: 56 },
+  buttonInnerVertical: { flexDirection: "row", justifyContent: "flex-start", paddingHorizontal: 12, paddingVertical: 12, gap: 12 },
+  label: { flex: 1, minWidth: 0, fontSize: 15, fontWeight: "700", color: colors.paragraph },
+  labelActive: { color: colors.headline },
   button: { flex: 1, borderRadius: 16, zIndex: 2, minHeight: 48 },
   buttonInner: {
     flex: 1,

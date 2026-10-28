@@ -1,6 +1,6 @@
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ComponentProps } from "react";
-import { TouchableOpacity, View } from "react-native";
+import { ScrollView, Text, TouchableOpacity, View } from "react-native";
 import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { TabSelectionIndicator, useTabIndicatorLayout } from "../navigation/TabSelectionIndicator";
 import { useStyles } from "./SettingsTabBar-styles";
@@ -14,6 +14,7 @@ export type SettingsTabOption<T extends string> = {
 
 type Props<T extends string> = {
   options: readonly SettingsTabOption<T>[];
+  vertical?: boolean;
   value: T;
   onChange: (value: T) => void;
 };
@@ -22,6 +23,7 @@ export function SettingsTabBar<T extends string>({
   options,
   value,
   onChange,
+  vertical = false,
 }: Props<T>) {
   const styles = useStyles();
   const { reduceMotion } = useSettingsPagerAccessibility();
@@ -31,50 +33,58 @@ export function SettingsTabBar<T extends string>({
 
   if (options.length === 0) return null;
 
-  return (
-    <View style={styles.bar}>
-      <View
-        style={[styles.inner, isTabletLayout && styles.innerTablet]}
-        onLayout={indicator.onLayout}
-        testID="settings-tab-bar"
-      >
-        {frame && frame.width > 0 && frame.height > 0 ? (
-          <TabSelectionIndicator
-            frame={frame}
-            layoutKey={indicator.layoutKey}
-            selectionKey={value}
-            reduceMotion={reduceMotion}
-            testID="settings-tab-indicator"
-            backgroundTestID="settings-tab-active-background"
-            lineTestID="settings-tab-active-line"
-          />
-        ) : null}
-        {options.map((option) => {
-          const selected = option.key === value;
-          return (
-            <TouchableOpacity
-              key={option.key}
-              activeOpacity={0.8}
-              onPress={() => {
-                if (!selected) onChange(option.key);
-              }}
-              style={styles.button}
-              onLayout={(event) => indicator.onTabLayout(option.key, event)}
-              accessibilityRole="tab"
-              accessibilityLabel={option.label}
-              accessibilityState={{ selected }}
-            >
-              <View style={styles.buttonInner}>
-                <Ionicons
-                  name={option.icon}
-                  size={22}
-                  style={[styles.icon, selected && styles.iconActive]}
-                />
-              </View>
-            </TouchableOpacity>
-          );
-        })}
-      </View>
+  const content = (
+    <View
+      style={[styles.inner, isTabletLayout && styles.innerTablet, vertical && styles.innerVertical]}
+      onLayout={indicator.onLayout}
+      testID="settings-tab-bar"
+    >
+      {frame && frame.width > 0 && frame.height > 0 ? (
+        <TabSelectionIndicator
+          frame={frame}
+          layoutKey={indicator.layoutKey}
+          selectionKey={value}
+          reduceMotion={reduceMotion}
+          testID="settings-tab-indicator"
+          backgroundTestID="settings-tab-active-background"
+          lineTestID="settings-tab-active-line"
+        />
+      ) : null}
+      {options.map((option) => {
+        const selected = option.key === value;
+        return (
+          <TouchableOpacity
+            key={option.key}
+            activeOpacity={0.8}
+            onPress={() => {
+              if (!selected) onChange(option.key);
+            }}
+            style={[styles.button, vertical && styles.buttonVertical]}
+            onLayout={(event) => indicator.onTabLayout(option.key, event)}
+            accessibilityRole="tab"
+            accessibilityLabel={option.label}
+            accessibilityState={{ selected }}
+          >
+            <View style={[styles.buttonInner, vertical && styles.buttonInnerVertical]}>
+              <Ionicons
+                name={option.icon}
+                size={22}
+                style={[styles.icon, selected && styles.iconActive]}
+              />
+              {vertical ? (
+                <Text style={[styles.label, selected && styles.labelActive]}>{option.label}</Text>
+              ) : null}
+            </View>
+          </TouchableOpacity>
+        );
+      })}
     </View>
   );
+
+  return vertical ? (
+    <ScrollView style={styles.sidebar} contentContainerStyle={styles.sidebarContent}
+      showsVerticalScrollIndicator={false} keyboardShouldPersistTaps="handled">
+      {content}
+    </ScrollView>
+  ) : <View style={styles.bar}>{content}</View>;
 }

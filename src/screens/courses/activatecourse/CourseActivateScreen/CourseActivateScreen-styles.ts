@@ -27,6 +27,18 @@ export const useStyles = createThemeStylesHook((colors) => ({
     paddingBottom: 120,
     alignItems: "center",
   },
+  scrollContentLandscape: { paddingBottom: 24 },
+  titleLandscape: { marginTop: 16, marginBottom: 4 },
+  courseGrid: {
+    flexDirection: "row",
+    flexWrap: "wrap",
+    alignItems: "flex-start",
+    gap: 16,
+  },
+  courseList: { gap: 12 },
+  groupHeaderLandscape: { marginTop: 8, marginBottom: 4 },
+  buttonsRowLandscape: { justifyContent: "center", paddingTop: 12, borderTopWidth: 1 },
+  landscapeAction: { flex: 1, minHeight: 52 },
   title: {
     fontSize: 25,
     fontWeight: 900,

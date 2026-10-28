@@ -1,5 +1,5 @@
 import React from "react";
-import { render } from "@testing-library/react-native";
+import { render, within } from "@testing-library/react-native";
 
 import LearningHistoryList from "@/src/components/stats/LearningHistoryList";
 import type { LearningHistoryEvent } from "@/src/db/sqlite/db";
@@ -139,4 +139,28 @@ describe("LearningHistoryList", () => {
     expect(screen.getByText("Bardzo długa nazwa kursu językowego dla początkujących")).toBeTruthy();
     expect(screen.getByText("Pudełko 1 → Pudełko 2")).toBeTruthy();
   });
+});
+
+
+it("keeps days separate and all entries when changing between two columns and one", () => {
+  const yesterday = Date.now() - 24 * 60 * 60 * 1000;
+  const events = [
+    event({ id: 1, promptText: "Today only" }),
+    event({ id: 2, promptText: "Yesterday first", createdAt: yesterday }),
+    event({ id: 3, promptText: "Yesterday second", createdAt: yesterday }),
+  ];
+  const screen = render(<LearningHistoryList events={events} columns={2} />);
+  const today = within(screen.getByTestId("history-row-1"));
+  expect(today.getByText("Today only")).toBeTruthy();
+  expect(today.queryByText("Yesterday first")).toBeNull();
+  const previous = within(screen.getByTestId("history-row-2"));
+  expect(previous.getByText("Yesterday first")).toBeTruthy();
+  expect(previous.getByText("Yesterday second")).toBeTruthy();
+  expect(screen.getAllByText("calendar-outline")).toHaveLength(2);
+
+  screen.rerender(<LearningHistoryList events={events} columns={1} />);
+  expect(screen.getByText("Today only")).toBeTruthy();
+  expect(within(screen.getByTestId("history-row-2")).queryByText("Yesterday second")).toBeNull();
+  expect(within(screen.getByTestId("history-row-3")).getByText("Yesterday second")).toBeTruthy();
+  expect(screen.getAllByText("calendar-outline")).toHaveLength(2);
 });

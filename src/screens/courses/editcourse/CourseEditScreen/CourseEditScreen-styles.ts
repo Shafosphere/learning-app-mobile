@@ -1,8 +1,10 @@
+import { settingsWorkspaceStyles } from "@/src/components/settings/settingsWorkspaceStyles";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const COURSE_SETTINGS_TABLET_MAX_WIDTH = 500;
 
 export const useCourseEditStyles = createThemeStylesHook((colors) => ({
+  ...settingsWorkspaceStyles,
   container: {
     flex: 1,
     backgroundColor: colors.background,

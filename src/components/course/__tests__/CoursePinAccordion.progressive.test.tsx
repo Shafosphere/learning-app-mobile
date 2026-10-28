@@ -37,6 +37,24 @@ const makeGroup = (series?: string): AccordionGroupItem => ({
   miniItems: [],
 });
 
+it("preserves an expanded group and pin actions when switching between one and two columns", () => {
+  const group = makeGroup("englishFromZero");
+  group.regularItems = [1, 2, 3].map((id) => ({ ...group.regularItems[0], id, name: `Kurs ${id}` }));
+  group.count = 3;
+  const onPin = jest.fn();
+  const renderCourseCard = (course: AccordionGroupItem["regularItems"][number]) => (
+    <Text key={course.id} onPress={() => onPin(course.id)}>{course.name}</Text>
+  );
+  const screen = render(<CoursePinAccordion groups={[group]} renderCourseCard={renderCourseCard} />);
+  fireEvent.press(screen.getByLabelText("Kategoria englishFromZero, 3 kursów"));
+  screen.rerender(<CoursePinAccordion groups={[group]} columns={2} renderCourseCard={renderCourseCard} />);
+  expect(screen.getByLabelText("Kategoria englishFromZero, 3 kursów").props.accessibilityState.expanded).toBe(true);
+  fireEvent.press(screen.getByText("Kurs 3"));
+  expect(onPin).toHaveBeenCalledWith(3);
+  screen.rerender(<CoursePinAccordion groups={[group]} columns={1} renderCourseCard={renderCourseCard} />);
+  expect(screen.getByText("Kurs 3")).toBeTruthy();
+});
+
 it.each(["englishFromZero", "frenchFromZero", "spanishFromZero", "roadSigns"] as const)("shows info on collapsed and expanded %s without changing pin or expansion state", (id) => {
   const onPin = jest.fn();
   const screen = render(<CoursePinAccordion groups={[makeGroup(id)]} renderCourseCard={(course) => <Text key={course.id} onPress={onPin}>Zestaw</Text>} />);

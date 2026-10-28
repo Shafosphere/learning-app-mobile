@@ -1,6 +1,6 @@
 import { statsTileStyle } from "./statsTileStyle";
 import Ionicons from "@expo/vector-icons/Ionicons";
-import React from "react";
+import React, { useMemo } from "react";
 import { FlatList, Image, Text, View } from "react-native";
 import { useTranslation } from "react-i18next";
 
@@ -13,6 +13,9 @@ import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const useStyles = createThemeStylesHook((colors) => ({
   list: { padding: 16, paddingTop: 4, gap: 10 },
+  listLandscape: { paddingHorizontal: 32 },
+  eventsRow: { flexDirection: "row", alignItems: "stretch", gap: 16 },
+  eventColumn: { flex: 1, minWidth: 0 },
   item: {
     ...statsTileStyle,
     padding: 16,
@@ -161,99 +164,128 @@ function isToday(timestamp: number) {
   return getLocalDayKey(timestamp) === getLocalDayKey(Date.now());
 }
 
+type HistoryRow =
+  | { kind: "day"; key: string; timestamp: number }
+  | { kind: "events"; key: string; events: LearningHistoryEvent[] };
+
 export default function LearningHistoryList({
   events,
+  columns = 1,
 }: {
   events: LearningHistoryEvent[];
+  columns?: 1 | 2;
 }) {
   const styles = useStyles();
   const { colors } = useSettings();
   const { t, i18n } = useTranslation();
   const locale = i18n.language || "en";
 
-  return (
-    <FlatList
-      data={events}
-      keyExtractor={(item) => String(item.id)}
-      contentContainerStyle={events.length ? styles.list : undefined}
-      renderItem={({ item, index }) => {
-        const previousItem = events[index - 1];
-        const isNewDay = index === 0 ||
-          getLocalDayKey(item.createdAt) !== getLocalDayKey(previousItem.createdAt);
-        return (
-          <View>
-            {isNewDay ? (
-              <View style={styles.dayHeader}>
-                <Ionicons name="calendar-outline" size={16} color={colors.headline} />
-                <Text>
-                  <Text style={styles.dayDate}>{formatDay(item.createdAt, locale)}</Text>
-                  {isToday(item.createdAt) ? <Text style={styles.dayToday}> {t("screens.stats.stats.stats.history.today")}</Text> : null}
+  const rows = useMemo(() => {
+    const next: HistoryRow[] = [];
+    let previousDay: string | null = null;
+    let currentRow: Extract<HistoryRow, { kind: "events" }> | null = null;
+    for (const event of events) {
+      const day = getLocalDayKey(event.createdAt);
+      if (day !== previousDay) {
+        next.push({ kind: "day", key: `day-${event.id}`, timestamp: event.createdAt });
+        currentRow = null;
+        previousDay = day;
+      }
+      if (!currentRow || currentRow.events.length === columns) {
+        currentRow = { kind: "events", key: `events-${event.id}`, events: [] };
+        next.push(currentRow);
+      }
+      currentRow.events.push(event);
+    }
+    return next;
+  }, [events, columns]);
+
+  const renderEvent = (item: LearningHistoryEvent) => (
+    <View style={styles.item}>
+      <View style={styles.statusRow}>
+        <View style={styles.statusGroup}>
+          <Ionicons
+            name={item.result === "ok" ? "checkmark-circle" : "close-circle"}
+            size={20}
+            color={item.result === "ok" ? colors.my_green : colors.my_red}
+          />
+          <Text style={[styles.result, { color: item.result === "ok" ? colors.my_green : colors.my_red }]}>
+            {t(item.result === "ok" ? "screens.stats.stats.stats.history.correct" : "screens.stats.stats.stats.history.wrong")}
+          </Text>
+        </View>
+        <View style={styles.detailsGroup}>
+          <View style={styles.timeGroup}>
+            <Ionicons name="time-outline" size={14} color={colors.paragraph} />
+            <Text style={styles.time}>{formatTime(item.createdAt, locale)}</Text>
+          </View>
+        </View>
+      </View>
+      <View style={styles.content}>
+        {item.promptText ? <CardMathText text={item.promptText} textStyle={styles.prompt} /> : null}
+        {item.promptImageUri ? <PromptImage uri={item.promptImageUri} imageStyle={styles.image} /> : null}
+        {item.expectedAnswerImageUri ? <PromptImage uri={item.expectedAnswerImageUri} imageStyle={styles.image} /> : null}
+      </View>
+      <View style={styles.metadataRow}>
+        {(() => {
+          const courseIcon = resolveCourseIconProps(
+            item.iconId ?? "book",
+            item.iconColor ?? colors.paragraph,
+          );
+          if (courseIcon.mainImageSource) {
+            return <Image source={courseIcon.mainImageSource} style={styles.courseIcon} />;
+          }
+          const CourseIcon = courseIcon.icon.Component;
+          return (
+            <CourseIcon
+              name={courseIcon.icon.name as never}
+              size={16}
+              color={courseIcon.icon.color}
+            />
+          );
+        })()}
+        <View style={styles.metadataStack}>
+          <View style={styles.metadataTopRow}>
+            {item.courseName ? <Text style={styles.metaCourse}>{item.courseName}</Text> : null}
+            <View>
+              {item.fromBox || item.toBox ? (
+                <Text style={styles.metaBox}>
+                  {`${formatBox(item.fromBox, t)} → ${formatBox(item.toBox, t)}`}
                 </Text>
-                <View style={styles.dayHeaderLine} />
-              </View>
-            ) : null}
-            <View style={styles.item}>
-              <View style={styles.statusRow}>
-                <View style={styles.statusGroup}>
-                  <Ionicons
-                    name={item.result === "ok" ? "checkmark-circle" : "close-circle"}
-                    size={20}
-                    color={item.result === "ok" ? colors.my_green : colors.my_red}
-                  />
-                  <Text style={[styles.result, { color: item.result === "ok" ? colors.my_green : colors.my_red }]}>
-                    {t(item.result === "ok" ? "screens.stats.stats.stats.history.correct" : "screens.stats.stats.stats.history.wrong")}
-                  </Text>
-                </View>
-                <View style={styles.detailsGroup}>
-                  <View style={styles.timeGroup}>
-                    <Ionicons name="time-outline" size={14} color={colors.paragraph} />
-                    <Text style={styles.time}>{formatTime(item.createdAt, locale)}</Text>
-                  </View>
-                </View>
-              </View>
-              <View style={styles.content}>
-                {item.promptText ? <CardMathText text={item.promptText} textStyle={styles.prompt} /> : null}
-                {item.promptImageUri ? <PromptImage uri={item.promptImageUri} imageStyle={styles.image} /> : null}
-                {item.expectedAnswerImageUri ? <PromptImage uri={item.expectedAnswerImageUri} imageStyle={styles.image} /> : null}
-              </View>
-              <View style={styles.metadataRow}>
-                {(() => {
-                  const courseIcon = resolveCourseIconProps(
-                    item.iconId ?? "book",
-                    item.iconColor ?? colors.paragraph,
-                  );
-                  if (courseIcon.mainImageSource) {
-                    return <Image source={courseIcon.mainImageSource} style={styles.courseIcon} />;
-                  }
-                  const CourseIcon = courseIcon.icon.Component;
-                  return (
-                    <CourseIcon
-                      name={courseIcon.icon.name as never}
-                      size={16}
-                      color={courseIcon.icon.color}
-                    />
-                  );
-                })()}
-                <View style={styles.metadataStack}>
-                  <View style={styles.metadataTopRow}>
-                    {item.courseName ? <Text style={styles.metaCourse}>{item.courseName}</Text> : null}
-                    <View>
-                      {item.fromBox || item.toBox ? (
-                        <Text style={styles.metaBox}>
-                          {`${formatBox(item.fromBox, t)} → ${formatBox(item.toBox, t)}`}
-                        </Text>
-                      ) : null}
-                      {formatDuration(item.durationMs, t) ? (
-                        <Text style={styles.metaDuration}>{formatDuration(item.durationMs, t)}</Text>
-                      ) : null}
-                    </View>
-                  </View>
-                </View>
-              </View>
+              ) : null}
+              {formatDuration(item.durationMs, t) ? (
+                <Text style={styles.metaDuration}>{formatDuration(item.durationMs, t)}</Text>
+              ) : null}
             </View>
           </View>
-        );
-      }}
+        </View>
+      </View>
+    </View>
+  );
+
+  return (
+    <FlatList
+      data={rows}
+      keyExtractor={(row) => row.key}
+      contentContainerStyle={events.length ? [styles.list, columns === 2 && styles.listLandscape] : undefined}
+      renderItem={({ item: row }) => row.kind === "day" ? (
+        <View style={[styles.dayHeader, { marginBottom: 2 }]}>
+          <Ionicons name="calendar-outline" size={16} color={colors.headline} />
+          <Text>
+            <Text style={styles.dayDate}>{formatDay(row.timestamp, locale)}</Text>
+            {isToday(row.timestamp) ? <Text style={styles.dayToday}> {t("screens.stats.stats.stats.history.today")}</Text> : null}
+          </Text>
+          <View style={styles.dayHeaderLine} />
+        </View>
+      ) : (
+        <View style={styles.eventsRow} testID={`history-row-${row.events[0].id}`}>
+          {row.events.map((event) => (
+            <View key={event.id} style={styles.eventColumn}>{renderEvent(event)}</View>
+          ))}
+          {columns === 2 && row.events.length === 1 ? (
+            <View style={styles.eventColumn} accessible={false} />
+          ) : null}
+        </View>
+      )}
       ListEmptyComponent={
         <View style={styles.empty}>
           <Ionicons name="time-outline" size={42} color="#94a3b8" />

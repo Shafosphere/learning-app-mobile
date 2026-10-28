@@ -8,6 +8,7 @@ import { CourseCard } from "./CourseCard";
 
 type CourseListCardProps = {
     title: string;
+    spacious?: boolean;
     subtitle?: string;
     iconId: string;
     iconColor: string;
@@ -73,6 +74,12 @@ const useStyles = createThemeStylesHook((colors) => ({
         fontWeight: "900",
         color: colors.headline,
     },
+    spacious: {
+        minHeight: 104,
+        height: "auto",
+        paddingHorizontal: 20,
+        paddingVertical: 18,
+    },
     highlighted: {
         backgroundColor: colors.my_green,
     },
@@ -80,6 +87,7 @@ const useStyles = createThemeStylesHook((colors) => ({
 
 export function CourseListCard({
     title,
+    spacious = false,
     subtitle,
     iconId,
     iconColor,
@@ -97,7 +105,7 @@ export function CourseListCard({
     return (
         <CourseCard
             onPress={onPress}
-            containerStyle={[styles.card, containerStyle]}
+            containerStyle={[styles.card, spacious && styles.spacious, containerStyle]}
             contentStyle={styles.cardContent}
             {...iconProps}
             iconWrapperStyle={[styles.iconBadge, { borderColor: iconColor }]}
@@ -106,9 +114,11 @@ export function CourseListCard({
             infoStyle={styles.info}
             title={title}
             titleContainerStyle={styles.titleContainer}
-            titleTextStyle={styles.title}
+            titleTextStyle={[styles.title, spacious && { fontSize: 22 }]}
             meta={subtitle}
             metaTextStyle={styles.meta}
+            accessibilityRole={spacious ? "button" : undefined}
+            accessibilityState={spacious ? { selected: Boolean(isHighlighted) } : undefined}
             rightAccessory={rightAccessory}
             isHighlighted={isHighlighted}
             highlightedStyle={styles.highlighted}

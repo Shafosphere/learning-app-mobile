@@ -11,6 +11,7 @@ import { useTranslation } from "react-i18next";
 
 interface CourseGroupListProps {
     groups: CourseGroup[];
+    cardWidth?: number;
     activeCourseId: number | null;
     colors: { headline: string };
     onPress: (id: number, isAlreadyActive: boolean) => void;
@@ -43,6 +44,7 @@ const CourseGroupView = memo(function CourseGroupView({
     firstCoachmarkCourseId,
     scrollRef,
     renderCourseFooter,
+    cardWidth,
 }: GroupProps) {
     const { t } = useTranslation();
     const styles = useStyles();
@@ -55,8 +57,8 @@ const CourseGroupView = memo(function CourseGroupView({
 
     return profileCourseActivation(`group:${group.key}`, (
         <View style={styles.groupSection}>
-            {!continuesLanguageSeries ? <View style={styles.groupHeader}>
-                <View style={styles.groupHeaderLine} />
+            {!continuesLanguageSeries ? <View style={[styles.groupHeader, cardWidth != null && styles.groupHeaderLandscape]}>
+                <View style={[styles.groupHeaderLine, cardWidth != null && { borderBottomWidth: 2 }]} />
                 <View style={styles.groupHeaderBadge}>
                     {group.languageGroupId ? (
                         <Text style={styles.groupHeaderCode}>
@@ -124,6 +126,7 @@ const CourseGroupView = memo(function CourseGroupView({
                 firstCoachmarkCourseId={firstCoachmarkCourseId != null && regularIds.has(firstCoachmarkCourseId) ? firstCoachmarkCourseId : null}
                 scrollRef={scrollRef}
                 renderCourseFooter={renderCourseFooter}
+                cardWidth={cardWidth}
             />
             <OfficialCourseSection
                 title={t("courses.groups.mini")}
@@ -137,6 +140,7 @@ const CourseGroupView = memo(function CourseGroupView({
                 firstCoachmarkCourseId={firstCoachmarkCourseId != null && miniIds.has(firstCoachmarkCourseId) ? firstCoachmarkCourseId : null}
                 scrollRef={scrollRef}
                 renderCourseFooter={renderCourseFooter}
+                cardWidth={cardWidth}
             />
         </View>
     ));

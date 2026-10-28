@@ -2,6 +2,8 @@ import { LANGUAGE_COURSE_GROUPS, type LanguageCourseGroupId } from "@/src/consta
 import MyButton from "@/src/components/button/button";
 import { SegmentedTabs } from "@/src/components/segmentedTabs/SegmentedTabs";
 import { CourseListCard } from "@/src/components/course/CourseListCard";
+import { CourseCardGrid } from "@/src/components/course/CourseCardGrid";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import { useCoachmarkLayerPortal } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { COURSE_PIN_COACHMARK_STEPS } from "@/src/constants/coachmarkFlows";
@@ -106,6 +108,10 @@ const KNOWLEDGE_ACCORDION_GROUPS: {
 
 export default function CoursePinScreen() {
   const styles = useStyles();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeGrid = isTabletLayout && orientation === "landscape" && width >= 840;
+  const contentWidth = Math.min(1100, Math.max(0, width - 96));
+  const columns = isLandscapeGrid ? 2 : 1;
   const { t } = useTranslation();
   const router = useRouter();
   const params = useLocalSearchParams<{ replayIntro?: string }>();
@@ -505,6 +511,7 @@ export default function CoursePinScreen() {
 
       const card = (
         <CourseListCard
+          spacious={isLandscapeGrid}
           key={`official-${pack.id}`}
           title={pack.name}
           subtitle={t(
@@ -600,6 +607,7 @@ export default function CoursePinScreen() {
       colors.headline,
       firstVisiblePackId,
       handleOfficialPinToggle,
+      isLandscapeGrid,
       pinnedOfficialCourseIds,
       styles,
       t,
@@ -624,12 +632,12 @@ export default function CoursePinScreen() {
       <ScrollView
         ref={scrollRef}
         style={styles.scrollArea}
-        contentContainerStyle={styles.scrollContent}
+        contentContainerStyle={[styles.scrollContent, isLandscapeGrid && styles.scrollContentLandscape]}
         keyboardShouldPersistTaps="handled"
         scrollEnabled={!coachmark.currentStep?.scrollLocked}
       >
-        <View style={styles.minicontainer}>
-          <Text style={styles.title}>
+        <View style={[styles.minicontainer, isLandscapeGrid && { width: contentWidth }]}>
+          <Text style={[styles.title, isLandscapeGrid && styles.titleLandscape]}>
             {t("screens.courses.pincourse.coursePin.coursePin.textChild.czegoSieUczymy")}
           </Text>
           <View style={styles.viewModeTabsSection}>
@@ -740,6 +748,7 @@ export default function CoursePinScreen() {
                           const definition = LANGUAGE_COURSE_GROUPS[group.languageGroupId];
                           return (
                             <CoursePinAccordion
+                              columns={columns}
                               key={group.key}
                               revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
                               groups={[{
@@ -769,7 +778,7 @@ export default function CoursePinScreen() {
                         if (continuesLanguageSeries) {
                           return (
                             <View key={group.key} style={styles.looseKnowledgeCoursesList}>
-                              {group.officialPacks.map(renderOfficialPackCard)}
+                              <CourseCardGrid columns={columns}>{group.officialPacks.map(renderOfficialPackCard)}</CourseCardGrid>
                             </View>
                           );
                         }
@@ -784,7 +793,7 @@ export default function CoursePinScreen() {
                                   )}
                                 </Text>
                                 <View style={styles.cardsList}>
-                                  {regularOfficialPacks.map(renderOfficialPackCard)}
+                                  <CourseCardGrid columns={columns}>{regularOfficialPacks.map(renderOfficialPackCard)}</CourseCardGrid>
                                 </View>
                               </>
                             ) : null}
@@ -799,7 +808,7 @@ export default function CoursePinScreen() {
                                   </Text>
                                 ) : null}
                                 <View style={styles.cardsList}>
-                                  {miniOfficialPacks.map(renderOfficialPackCard)}
+                                  <CourseCardGrid columns={columns}>{miniOfficialPacks.map(renderOfficialPackCard)}</CourseCardGrid>
                                 </View>
                               </>
                             ) : null}
@@ -822,13 +831,14 @@ export default function CoursePinScreen() {
                 </Text>
               ) : null}
               <CoursePinAccordion
+                columns={columns}
                 groups={accordionGroups}
                 revealCourseId={introActive && !coachmark.hasSeen ? firstVisiblePackId : null}
                 renderCourseCard={renderOfficialPackCard}
               />
               {looseKnowledgeCourses.length > 0 ? (
                 <View style={styles.looseKnowledgeCoursesList}>
-                  {looseKnowledgeCourses.map(renderOfficialPackCard)}
+                  <CourseCardGrid columns={columns}>{looseKnowledgeCourses.map(renderOfficialPackCard)}</CourseCardGrid>
                 </View>
               ) : null}
             </>
@@ -844,7 +854,7 @@ export default function CoursePinScreen() {
 
       {introActive ? (
         <View style={styles.buttonscontainer}>
-          <View style={styles.buttonsRow}>
+          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
             <CoachmarkAnchor
               id="course-pin-next-button"
               shape="rect"
@@ -892,22 +902,23 @@ export default function CoursePinScreen() {
         </View>
       ) : (
         <View style={styles.buttonscontainer}>
-          <View style={styles.buttonsRow}>
+          <View style={[styles.buttonsRow, isLandscapeGrid && { width: contentWidth }, isLandscapeGrid && styles.buttonsRowLandscape]}>
             <MyButton
               text={t(
                 "screens.courses.pincourse.coursePin.coursePin.text.zrobWlasny"
-              ).replace(/\s+/, "\n")}
+              ).replace(/\s+/, isLandscapeGrid ? " " : "\n")}
               color="my_yellow"
               onPress={() => router.push("/custom_course")}
               disabled={false}
-              autoWidth
+              autoWidth={!isLandscapeGrid}
+              style={isLandscapeGrid ? styles.landscapeAction : undefined}
             />
             <MyButton
               text={t("components.logoMessage.logoMessage.title.aktywujKurs")}
               color="my_green"
               onPress={() => router.dismissTo("/coursepanel")}
               disabled={false}
-              style={{ flex: 1 }}
+              style={isLandscapeGrid ? styles.landscapeAction : { flex: 1 }}
             />
           </View>
         </View>

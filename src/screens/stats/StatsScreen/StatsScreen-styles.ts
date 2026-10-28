@@ -16,6 +16,16 @@ export const useStyles = createThemeStylesHook((colors) => ({
   contentTablet: {
     maxWidth: STATS_TABLET_MAX_WIDTH,
   },
+  contentLandscape: { maxWidth: 1100 },
+  historyLandscape: { maxWidth: 1100 },
+  scrollContentLandscape: { paddingHorizontal: 32 },
+  summary: { gap: 12 },
+  summaryLandscape: { flexDirection: "row", alignItems: "stretch", gap: 24 },
+  miniStatsLandscape: { flex: 1, minWidth: 0, justifyContent: "space-between" },
+  miniStatItemLandscape: { flex: 1, justifyContent: "center" },
+  dashboardGroup: { gap: 24 },
+  dashboardRow: { flexDirection: "row", alignItems: "flex-start" },
+  dashboardColumn: { flex: 1, minWidth: 0 },
   tabs: {
     width: "auto",
     maxWidth: STATS_TABLET_MAX_WIDTH,

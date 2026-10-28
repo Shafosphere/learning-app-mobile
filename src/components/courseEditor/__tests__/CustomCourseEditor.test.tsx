@@ -12,6 +12,10 @@ import { getCustomCourseById, getCustomFlashcards, setCustomCourseReviewsEnabled
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useHydratedPersistedState } from "@/src/hooks/usePersistedState";
 
+let mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+beforeEach(() => {
+  mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+});
 const mockPopup = jest.fn();
 const mockT = (key: string) => key;
 jest.mock("react-i18next", () => ({ useTranslation: () => ({ t: mockT }) }));
@@ -27,7 +31,7 @@ jest.mock("@expo/vector-icons/Entypo", () => () => null);
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
 jest.mock("@/src/contexts/SettingsContext", () => { const useSettings = jest.fn(); return { useSettings, useThemeSettings: useSettings }; });
 jest.mock("@/src/contexts/PopupContext", () => ({ usePopup: () => mockPopup }));
-jest.mock("@/src/hooks/useDeviceLayout", () => ({ useDeviceLayout: () => ({ isTabletLayout: false }) }));
+jest.mock("@/src/hooks/useDeviceLayout", () => ({ useDeviceLayout: () => mockDeviceLayout }));
 jest.mock("../CustomCourseEditor-styles", () => ({ useStyles: () => ({}) }));
 jest.mock("@/src/db/sqlite/db", () => ({
   getCustomCourseById: jest.fn(),
@@ -124,6 +128,14 @@ it("preserves unsaved cards, course name and undo history when the answer-side g
   fireEvent.press(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title" }));
   completePagerSelection("appearance");
   expect(screen.getByText("category:appearance")).toBeTruthy();
+  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+  screen.rerender(<CustomCourseEditor {...props} />);
+  expect(screen.getByText("courseSettingsGroups.appearance.title")).toBeTruthy();
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
+  mockDeviceLayout = { isTabletLayout: true, width: 600, orientation: "portrait" };
+  screen.rerender(<CustomCourseEditor {...props} />);
+  expect(screen.queryByText("courseSettingsGroups.appearance.title")).toBeNull();
+  expect(screen.getByRole("tab", { name: "courseSettingsGroups.appearance.title", selected: true })).toBeTruthy();
   expect(screen.getByLabelText("courseCreator.customEditor.saveA11y")).toBeTruthy();
   expect(screen.getByLabelText("repeats.a11y.backToCoursesPanel")).toBeTruthy();
   fireEvent.press(screen.getByText("content"));

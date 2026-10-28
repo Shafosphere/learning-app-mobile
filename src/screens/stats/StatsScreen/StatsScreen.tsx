@@ -35,7 +35,8 @@ export default function StatsScreen() {
   const { statsBookshelfEnabled, colors } = useSettings();
   const accents = statsAccent(colors);
   const stats = useNavbarStatsSnapshot();
-  const { isTabletLayout } = useDeviceLayout();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
   const useCenteredTabletLayout = isTabletLayout;
   const [isActivityLoading, setIsActivityLoading] = useState(true);
   const [heatmapData, setHeatmapData] = useState<ActivityDay[]>([]);
@@ -179,76 +180,79 @@ export default function StatsScreen() {
         containerStyle={styles.tabs}
       />
       {activeTab === "stats" ? <ScrollView
-        style={[styles.content, useCenteredTabletLayout && styles.contentTablet]}
-        contentContainerStyle={styles.scrollContent}
+        style={[styles.content, useCenteredTabletLayout && styles.contentTablet, isLandscapeLayout && styles.contentLandscape]}
+        contentContainerStyle={[styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape]}
         scrollEnabled={!isBookshelfEditing}
       >
         <View style={styles.section}>
           <StatsSectionHeader icon="trophy" title={t("screens.stats.stats.stats.sections.achievements")} />
-          <BigKnownWordsCard />
-
-          <View style={styles.miniStatsRow}>
-            <View testID="streak-card" style={styles.miniStatItem}>
-              <View style={styles.miniStatCard}>
-                <View
-                  style={[
-                    styles.miniStatIconTile,
-                    { backgroundColor: statsIconBackground(accents.streak) },
-                  ]}
-                  accessibilityElementsHidden
-                  importantForAccessibility="no-hide-descendants"
-                >
-                  <MaterialIcons name="local-fire-department" size={statsIconSizes.metric} color={accents.streak} />
-                </View>
-                <View style={styles.miniStatCopy}>
-                  <Text
-                    testID="streak-value"
-                    style={styles.miniStatValue}
+          <View style={[styles.summary, isLandscapeLayout && styles.summaryLandscape]}>
+            <View style={isLandscapeLayout && styles.dashboardColumn}>
+              <BigKnownWordsCard />
+            </View>
+            <View style={[styles.miniStatsRow, isLandscapeLayout && styles.miniStatsLandscape]}>
+              <View testID="streak-card" style={[styles.miniStatItem, isLandscapeLayout && styles.miniStatItemLandscape]}>
+                <View style={styles.miniStatCard}>
+                  <View
+                    style={[
+                      styles.miniStatIconTile,
+                      { backgroundColor: statsIconBackground(accents.streak) },
+                    ]}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
                   >
-                    {stats.streakDays}
-                  </Text>
-                  <Text style={styles.miniStatLabel}>
-                    {t("screens.stats.stats.stats.textChild.codziennaPassa")}
-                  </Text>
-                </View>
-                <View style={styles.miniStatShieldStack}>
-                  {Array.from({ length: MAX_STREAK_SHIELDS }, (_, index) => {
-                    const owned = index < stats.shieldCount;
-                    return (
-                      <Image
-                        key={index}
-                        testID={owned ? `streak-shield-${index}` : `streak-shield-empty-${index}`}
-                        source={owned ? SHIELD_SOURCE : SHIELD_BORDER_SOURCE}
-                        contentFit="contain"
-                        style={{ width: statsIconSizes.indicator, height: statsIconSizes.indicator }}
-                      />
-                    );
-                  })}
+                    <MaterialIcons name="local-fire-department" size={statsIconSizes.metric} color={accents.streak} />
+                  </View>
+                  <View style={styles.miniStatCopy}>
+                    <Text
+                      testID="streak-value"
+                      style={styles.miniStatValue}
+                    >
+                      {stats.streakDays}
+                    </Text>
+                    <Text style={styles.miniStatLabel}>
+                      {t("screens.stats.stats.stats.textChild.codziennaPassa")}
+                    </Text>
+                  </View>
+                  <View style={styles.miniStatShieldStack}>
+                    {Array.from({ length: MAX_STREAK_SHIELDS }, (_, index) => {
+                      const owned = index < stats.shieldCount;
+                      return (
+                        <Image
+                          key={index}
+                          testID={owned ? `streak-shield-${index}` : `streak-shield-empty-${index}`}
+                          source={owned ? SHIELD_SOURCE : SHIELD_BORDER_SOURCE}
+                          contentFit="contain"
+                          style={{ width: statsIconSizes.indicator, height: statsIconSizes.indicator }}
+                        />
+                      );
+                    })}
+                  </View>
                 </View>
               </View>
-            </View>
-            <View testID="jumps-card" style={styles.miniStatItem}>
-              <View style={styles.miniStatCard}>
-                <View
-                  style={[
-                    styles.miniStatIconTile,
-                    { backgroundColor: statsIconBackground(accents.progress) },
-                  ]}
-                  accessibilityElementsHidden
-                  importantForAccessibility="no-hide-descendants"
-                >
-                  <Ionicons name="trending-up-outline" size={statsIconSizes.metric} color={accents.progress} />
-                </View>
-                <View style={styles.miniStatCopy}>
-                  <Text
-                    testID="jumps-value"
-                    style={styles.miniStatValue}
+              <View testID="jumps-card" style={[styles.miniStatItem, isLandscapeLayout && styles.miniStatItemLandscape]}>
+                <View style={styles.miniStatCard}>
+                  <View
+                    style={[
+                      styles.miniStatIconTile,
+                      { backgroundColor: statsIconBackground(accents.progress) },
+                    ]}
+                    accessibilityElementsHidden
+                    importantForAccessibility="no-hide-descendants"
                   >
-                    {stats.promotionsCount}
-                  </Text>
-                  <Text style={styles.miniStatLabel}>
-                    {t("repeats.labels.jumps")}
-                  </Text>
+                    <Ionicons name="trending-up-outline" size={statsIconSizes.metric} color={accents.progress} />
+                  </View>
+                  <View style={styles.miniStatCopy}>
+                    <Text
+                      testID="jumps-value"
+                      style={styles.miniStatValue}
+                    >
+                      {stats.promotionsCount}
+                    </Text>
+                    <Text style={styles.miniStatLabel}>
+                      {t("repeats.labels.jumps")}
+                    </Text>
+                  </View>
                 </View>
               </View>
             </View>
@@ -262,6 +266,8 @@ export default function StatsScreen() {
         <PinnedCoursesProgress />
 
         <ActivityHeatmap
+          compact={isLandscapeLayout}
+          sideBySide={isLandscapeLayout}
           data={heatmapData}
           isLoading={isActivityLoading}
           months={12}
@@ -274,11 +280,17 @@ export default function StatsScreen() {
             title={t("screens.stats.stats.stats.sections.analysis")}
             subtitle={t("screens.stats.stats.stats.sections.analysisSubtitle")}
           />
-          <HardWordsList />
-          <LearningTimeCard timeMs={learningTime} />
+          <View style={[styles.dashboardGroup, isLandscapeLayout && styles.dashboardRow]}>
+            <View style={isLandscapeLayout && styles.dashboardColumn}>
+              <HardWordsList />
+            </View>
+            <View style={isLandscapeLayout && styles.dashboardColumn}>
+              <LearningTimeCard timeMs={learningTime} />
+            </View>
+          </View>
         </View>
-      </ScrollView> : <View style={[styles.historyContent, useCenteredTabletLayout && styles.contentTablet]}>
-        <LearningHistoryList events={history} />
+      </ScrollView> : <View style={[styles.historyContent, useCenteredTabletLayout && styles.contentTablet, isLandscapeLayout && styles.historyLandscape]}>
+        <LearningHistoryList events={history} columns={isLandscapeLayout ? 2 : 1} />
       </View>}
     </View>
   );

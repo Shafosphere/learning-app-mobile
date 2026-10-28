@@ -65,6 +65,8 @@ type ActivityMonth = {
 type Props = {
   data: ActivityDay[];
   months?: number;
+  compact?: boolean;
+  sideBySide?: boolean;
   shieldedDates?: string[];
   onSelect?: (day: ActivityDay | null) => void;
   isLoading?: boolean;
@@ -133,6 +135,9 @@ const useStyles = createThemeStylesHook((colors, accessibility) => ({
   section: {
     ...statsSectionStyles.section,
   },
+  activityBody: { ...statsSectionStyles.section },
+  activityBodyLandscape: { flexDirection: "row", alignItems: "flex-start", gap: 24 },
+  activityColumn: { flex: 1, minWidth: 0 },
   calendarCard: {
     ...statsTileStyle,
     ...statsSectionStyles.section,
@@ -590,6 +595,8 @@ const CalendarMonth = memo(function CalendarMonth({
 function ActivityHeatmap({
   data,
   months = 12,
+  compact = false,
+  sideBySide = false,
   shieldedDates,
   onSelect,
   isLoading = false,
@@ -779,7 +786,7 @@ function ActivityHeatmap({
   const rawCellSize = (gridWidth - CELL_GAP * 6) / 7;
   const baseCellSize = Math.max(32, Math.min(46, Math.floor(rawCellSize)));
   const targetCellSize = baseCellSize * CALENDAR_SCALE;
-  const columns = Math.max(
+  const columns = compact ? 7 : Math.max(
     1,
     Math.round((gridWidth + CELL_GAP) / (targetCellSize + CELL_GAP))
   );
@@ -851,192 +858,196 @@ function ActivityHeatmap({
       testID="activity-heatmap"
       style={styles.container}
     >
-      <View style={styles.section}>
-        <StatsSectionHeader
-          icon="calendar-days"
-          title={t("screens.stats.stats.stats.sections.activity")}
-          metadata={visibleMonth?.label}
-        />
+      <StatsSectionHeader
+        icon="calendar-days"
+        title={t("screens.stats.stats.stats.sections.activity")}
+        metadata={visibleMonth?.label}
+      />
 
-        <View style={styles.calendarCard}>
-          <View
-            testID="activity-heatmap-calendar"
-            onLayout={(event) => {
-              const width = event.nativeEvent.layout.width;
-              if (width > 0) setContainerWidth(width);
-            }}
-          >
-            {containerWidth > 0 && <FlatList
-              testID="activity-heatmap-pager"
-              ref={listRef}
-              data={monthsData}
-              horizontal
-              pagingEnabled
-              showsHorizontalScrollIndicator={false}
-              bounces={false}
-              keyExtractor={monthKeyExtractor}
-              getItemLayout={getItemLayout}
-              initialScrollIndex={Math.max(0, monthsData.length - 1)}
-              // Keep month batches small while buffering adjacent pages for swipes.
-              initialNumToRender={1}
-              maxToRenderPerBatch={1}
-              windowSize={3}
-              renderItem={renderMonth}
-              onMomentumScrollEnd={handlePagerEnd}
-              style={styles.pager}
-            />}
-          </View>
-          <View style={styles.monthNavigation}>
-            <MyButton
-              accessibilityLabel={t("components.stats.activityHeatmap.navigation.previousMonth")}
-              color="my_yellow"
-              onPress={() => changeMonth(-1)}
-              disabled={containerWidth <= 0 || visibleMonthIndex <= 0}
-              autoWidth
-              style={styles.monthNavigationButton}
+      <View style={[styles.activityBody, sideBySide && styles.activityBodyLandscape]}>
+        <View style={sideBySide && styles.activityColumn}>
+          <View style={styles.calendarCard}>
+            <View
+              testID="activity-heatmap-calendar"
+              onLayout={(event) => {
+                const width = event.nativeEvent.layout.width;
+                if (width > 0) setContainerWidth(width);
+              }}
             >
-              <Ionicons
-                name="chevron-back"
-                size={24}
-                color={colors.headline}
-                style={{ opacity: containerWidth <= 0 || visibleMonthIndex <= 0 ? 0.35 : 1 }}
-                accessibilityElementsHidden
-                importantForAccessibility="no-hide-descendants"
-              />
-            </MyButton>
-            <MyButton
-              accessibilityLabel={t("components.stats.activityHeatmap.navigation.nextMonth")}
-              color="my_yellow"
-              onPress={() => changeMonth(1)}
-              disabled={containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1}
-              autoWidth
-              style={styles.monthNavigationButton}
-            >
-              <Ionicons
-                name="chevron-forward"
-                size={24}
-                color={colors.headline}
-                style={{ opacity: containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1 ? 0.35 : 1 }}
-                accessibilityElementsHidden
-                importantForAccessibility="no-hide-descendants"
-              />
-            </MyButton>
+              {containerWidth > 0 && <FlatList
+                testID="activity-heatmap-pager"
+                ref={listRef}
+                data={monthsData}
+                horizontal
+                pagingEnabled
+                showsHorizontalScrollIndicator={false}
+                bounces={false}
+                keyExtractor={monthKeyExtractor}
+                getItemLayout={getItemLayout}
+                initialScrollIndex={Math.max(0, monthsData.length - 1)}
+                // Keep month batches small while buffering adjacent pages for swipes.
+                initialNumToRender={1}
+                maxToRenderPerBatch={1}
+                windowSize={3}
+                renderItem={renderMonth}
+                onMomentumScrollEnd={handlePagerEnd}
+                style={styles.pager}
+              />}
+            </View>
+            <View style={styles.monthNavigation}>
+              <MyButton
+                accessibilityLabel={t("components.stats.activityHeatmap.navigation.previousMonth")}
+                color="my_yellow"
+                onPress={() => changeMonth(-1)}
+                disabled={containerWidth <= 0 || visibleMonthIndex <= 0}
+                autoWidth
+                style={styles.monthNavigationButton}
+              >
+                <Ionicons
+                  name="chevron-back"
+                  size={24}
+                  color={colors.headline}
+                  style={{ opacity: containerWidth <= 0 || visibleMonthIndex <= 0 ? 0.35 : 1 }}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                />
+              </MyButton>
+              <MyButton
+                accessibilityLabel={t("components.stats.activityHeatmap.navigation.nextMonth")}
+                color="my_yellow"
+                onPress={() => changeMonth(1)}
+                disabled={containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1}
+                autoWidth
+                style={styles.monthNavigationButton}
+              >
+                <Ionicons
+                  name="chevron-forward"
+                  size={24}
+                  color={colors.headline}
+                  style={{ opacity: containerWidth <= 0 || visibleMonthIndex >= monthsData.length - 1 ? 0.35 : 1 }}
+                  accessibilityElementsHidden
+                  importantForAccessibility="no-hide-descendants"
+                />
+              </MyButton>
+            </View>
           </View>
         </View>
-      </View>
 
-      <DetailsReveal>
-        <Animated.View
-          testID="activity-details-card"
-          entering={DETAILS_ENTER_TRANSITION}
-          pointerEvents={displayedDay ? "auto" : "none"}
-          style={styles.detailsWrap}
-        >
-          {displayedDay ? (
-            <StatsProgressCard
-              title={(
-                <ScrambleText
-                  text={formatDayLabel(displayedDay.date, t)}
-                  animateKey={`${animateKeyBase}-title`}
-                  style={styles.detailsTitle}
-                  accessibilityRole="header"
-                  preserveLayout
-                />
-              )}
-              leading={<Ionicons name="calendar-outline" size={20} color={colors.headline} />}
-              subtitle={hasDayActivity ? t("components.stats.activityHeatmap.details.selectedDayActivity") : undefined}
-              headerDivider
+        <View style={sideBySide && styles.activityColumn}>
+          <DetailsReveal>
+            <Animated.View
+              testID="activity-details-card"
+              entering={DETAILS_ENTER_TRANSITION}
+              pointerEvents={displayedDay ? "auto" : "none"}
+              style={styles.detailsWrap}
             >
-              {isLoading ? (
-                <View style={styles.dayState} testID="activity-details-loading">
-                  <ActivityIndicator color={colors.my_green} />
-                  <Text style={styles.dayStateDescription}>{t("components.stats.activityHeatmap.details.loading")}</Text>
-                </View>
-              ) : !hasDayActivity ? (
-                <View style={styles.dayState} testID="activity-details-empty">
-                  <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
-                    <Ionicons name="calendar-clear-outline" size={28} color={colors.paragraph} />
-                  </View>
-                  <View style={styles.dayStateCopy}>
-                    <Text style={styles.dayStateTitle}>{t("components.stats.activityHeatmap.details.emptyTitle")}</Text>
-                    <Text style={styles.dayStateDescription}>{t("components.stats.activityHeatmap.details.emptyDescription")}</Text>
-                  </View>
-                </View>
-              ) : <View testID="activity-details-grid" style={styles.detailsStatsGrid}>
-                {[
-                  {
-                    key: "promotions",
-                    label: t("repeats.labels.jumps"),
-                    value: String(displayedDay.promotionsCount),
-                    icon: "trending-up-outline" as const,
-                    color: accents.progress,
-                  },
-                  {
-                    key: "learned",
-                    label: t("repeats.labels.knownFlashcards"),
-                    value: String(displayedDay.learnedCount),
-                    icon: "school-outline" as const,
-                    color: accents.progress,
-                  },
-                  {
-                    key: "correct",
-                    label: t("components.stats.activityHeatmap.stats.correct"),
-                    value: String(displayedDay.correctCount),
-                    icon: "checkmark-circle-outline" as const,
-                    color: accents.progress,
-                  },
-                  {
-                    key: "wrong",
-                    label: t("components.stats.activityHeatmap.stats.wrong"),
-                    value: String(displayedDay.wrongCount),
-                    icon: "close" as const,
-                    color: accents.difficulty,
-                  },
-                  {
-                    key: "time",
-                    label: t("components.stats.activityHeatmap.stats.minutes"),
-                    value: String(Math.max(0, Math.round(displayedDay.timeMs / 60000))),
-                    icon: "stopwatch-outline" as const,
-                    color: accents.time,
-                  },
-                ].map((stat, index, stats) => (
-                  <Animated.View
-                    key={`${animateKeyBase}-${stat.key}`}
-                    entering={FadeInDown.duration(300).delay(index * 45).reduceMotion(ReduceMotion.System)}
-                    testID={`activity-details-stat-${stat.key}`}
-                    style={[styles.detailsStat, index === stats.length - 1 && styles.detailsLastStat]}
-                  >
-                    <View
-                      style={[
-                        styles.detailsStatIcon,
-                        { backgroundColor: statsIconBackground(stat.color) },
-                      ]}
-                      accessibilityElementsHidden
-                      importantForAccessibility="no-hide-descendants"
-                    >
-                      <Ionicons name={stat.icon} size={statsIconSizes.metric} color={stat.color} />
+              {displayedDay ? (
+                <StatsProgressCard
+                  title={(
+                    <ScrambleText
+                      text={formatDayLabel(displayedDay.date, t)}
+                      animateKey={`${animateKeyBase}-title`}
+                      style={styles.detailsTitle}
+                      accessibilityRole="header"
+                      preserveLayout
+                    />
+                  )}
+                  leading={<Ionicons name="calendar-outline" size={20} color={colors.headline} />}
+                  subtitle={hasDayActivity ? t("components.stats.activityHeatmap.details.selectedDayActivity") : undefined}
+                  headerDivider
+                >
+                  {isLoading ? (
+                    <View style={styles.dayState} testID="activity-details-loading">
+                      <ActivityIndicator color={colors.my_green} />
+                      <Text style={styles.dayStateDescription}>{t("components.stats.activityHeatmap.details.loading")}</Text>
                     </View>
-                    <View style={styles.detailsStatCopy}>
-                      <ScrambleText
-                        text={stat.value}
-                        animateKey={`${animateKeyBase}-${stat.key}`}
-                        style={styles.detailsStatValue}
-                        durationMs={560}
-                        numberOfLines={1}
-                        adjustsFontSizeToFit
-                        minimumFontScale={0.7}
-                      />
-                      <Text style={styles.detailsStatLabel}>
-                        {stat.label}
-                      </Text>
+                  ) : !hasDayActivity ? (
+                    <View style={styles.dayState} testID="activity-details-empty">
+                      <View accessibilityElementsHidden importantForAccessibility="no-hide-descendants">
+                        <Ionicons name="calendar-clear-outline" size={28} color={colors.paragraph} />
+                      </View>
+                      <View style={styles.dayStateCopy}>
+                        <Text style={styles.dayStateTitle}>{t("components.stats.activityHeatmap.details.emptyTitle")}</Text>
+                        <Text style={styles.dayStateDescription}>{t("components.stats.activityHeatmap.details.emptyDescription")}</Text>
+                      </View>
                     </View>
-                  </Animated.View>
-                ))}
-              </View>}
-            </StatsProgressCard>
-          ) : null}
-        </Animated.View>
-      </DetailsReveal>
+                  ) : <View testID="activity-details-grid" style={styles.detailsStatsGrid}>
+                    {[
+                      {
+                        key: "promotions",
+                        label: t("repeats.labels.jumps"),
+                        value: String(displayedDay.promotionsCount),
+                        icon: "trending-up-outline" as const,
+                        color: accents.progress,
+                      },
+                      {
+                        key: "learned",
+                        label: t("repeats.labels.knownFlashcards"),
+                        value: String(displayedDay.learnedCount),
+                        icon: "school-outline" as const,
+                        color: accents.progress,
+                      },
+                      {
+                        key: "correct",
+                        label: t("components.stats.activityHeatmap.stats.correct"),
+                        value: String(displayedDay.correctCount),
+                        icon: "checkmark-circle-outline" as const,
+                        color: accents.progress,
+                      },
+                      {
+                        key: "wrong",
+                        label: t("components.stats.activityHeatmap.stats.wrong"),
+                        value: String(displayedDay.wrongCount),
+                        icon: "close" as const,
+                        color: accents.difficulty,
+                      },
+                      {
+                        key: "time",
+                        label: t("components.stats.activityHeatmap.stats.minutes"),
+                        value: String(Math.max(0, Math.round(displayedDay.timeMs / 60000))),
+                        icon: "stopwatch-outline" as const,
+                        color: accents.time,
+                      },
+                    ].map((stat, index, stats) => (
+                      <Animated.View
+                        key={`${animateKeyBase}-${stat.key}`}
+                        entering={FadeInDown.duration(300).delay(index * 45).reduceMotion(ReduceMotion.System)}
+                        testID={`activity-details-stat-${stat.key}`}
+                        style={[styles.detailsStat, index === stats.length - 1 && styles.detailsLastStat]}
+                      >
+                        <View
+                          style={[
+                            styles.detailsStatIcon,
+                            { backgroundColor: statsIconBackground(stat.color) },
+                          ]}
+                          accessibilityElementsHidden
+                          importantForAccessibility="no-hide-descendants"
+                        >
+                          <Ionicons name={stat.icon} size={statsIconSizes.metric} color={stat.color} />
+                        </View>
+                        <View style={styles.detailsStatCopy}>
+                          <ScrambleText
+                            text={stat.value}
+                            animateKey={`${animateKeyBase}-${stat.key}`}
+                            style={styles.detailsStatValue}
+                            durationMs={560}
+                            numberOfLines={1}
+                            adjustsFontSizeToFit
+                            minimumFontScale={0.7}
+                          />
+                          <Text style={styles.detailsStatLabel}>
+                            {stat.label}
+                          </Text>
+                        </View>
+                      </Animated.View>
+                    ))}
+                  </View>}
+                </StatsProgressCard>
+              ) : null}
+            </Animated.View>
+          </DetailsReveal>
+        </View>
+      </View>
     </View>
   );
 }

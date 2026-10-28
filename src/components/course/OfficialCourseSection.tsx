@@ -11,6 +11,7 @@ import { OfficialCourseListItem } from "@/src/features/customCourse/courseActiva
 
 interface OfficialCourseSectionProps {
     title: string;
+    cardWidth?: number;
     list: OfficialCourseListItem[];
     showTitle?: boolean;
     isContinuation?: boolean;
@@ -28,6 +29,7 @@ type OfficialCourseRowProps = Pick<
     "onPress" | "onEdit" | "scrollRef" | "renderCourseFooter"
 > & {
     course: OfficialCourseListItem;
+    cardWidth?: number;
     isHighlighted: boolean;
     headlineColor: string;
     isCoachmarkTarget: boolean;
@@ -43,6 +45,7 @@ const OfficialCourseRow = memo(function OfficialCourseRow({
     onEdit,
     scrollRef,
     renderCourseFooter,
+    cardWidth,
 }: OfficialCourseRowProps) {
     const { t } = useTranslation();
     const styles = useStyles();
@@ -54,6 +57,7 @@ const OfficialCourseRow = memo(function OfficialCourseRow({
             iconColor={course.iconColor}
             flagCode={course.smallFlag ?? course.sourceLang}
             isHighlighted={isHighlighted}
+            spacious={cardWidth != null}
             onPress={() => onPress(course.id, isHighlighted)}
             rightAccessory={
                 <Pressable
@@ -73,7 +77,7 @@ const OfficialCourseRow = memo(function OfficialCourseRow({
     );
 
     return profileCourseActivation(`row:${course.id}`, (
-        <View testID={`official-course-row-${course.id}`}>
+        <View testID={`official-course-row-${course.id}`} style={cardWidth != null ? { width: cardWidth } : undefined}>
             <View style={{ zIndex: 1 }}>
                 {isCoachmarkTarget ? (
                     <CoachmarkAnchor
@@ -105,6 +109,7 @@ export const OfficialCourseSection = memo(function OfficialCourseSection({
     firstCoachmarkCourseId,
     scrollRef,
     renderCourseFooter,
+    cardWidth,
 }: OfficialCourseSectionProps) {
     const styles = useStyles();
 
@@ -112,21 +117,24 @@ export const OfficialCourseSection = memo(function OfficialCourseSection({
     if (!list.length) return null;
 
     return (
-        <View style={[styles.groupCourses, isContinuation && styles.groupCoursesContinuation]}>
+        <View style={[styles.groupCourses, cardWidth != null && { marginTop: 8 }, isContinuation && styles.groupCoursesContinuation]}>
             {showTitle ? <Text style={styles.groupSubtitle}>{title}</Text> : null}
-            {list.map((course) => (
-                <OfficialCourseRow
-                    key={`official-row-${course.id}`}
-                    course={course}
-                    isHighlighted={activeCourseId === course.id}
-                    headlineColor={headlineColor}
-                    isCoachmarkTarget={course.id === firstCoachmarkCourseId}
-                    onPress={onPress}
-                    onEdit={onEdit}
-                    scrollRef={scrollRef}
-                    renderCourseFooter={renderCourseFooter}
-                />
-            ))}
+            <View style={cardWidth != null ? styles.courseGrid : styles.courseList}>
+                {list.map((course) => (
+                    <OfficialCourseRow
+                        key={`official-row-${course.id}`}
+                        course={course}
+                        isHighlighted={activeCourseId === course.id}
+                        headlineColor={headlineColor}
+                        isCoachmarkTarget={course.id === firstCoachmarkCourseId}
+                        onPress={onPress}
+                        onEdit={onEdit}
+                        scrollRef={scrollRef}
+                        renderCourseFooter={renderCourseFooter}
+                        cardWidth={cardWidth}
+                    />
+                ))}
+            </View>
         </View>
     );
 });

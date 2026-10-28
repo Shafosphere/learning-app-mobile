@@ -176,3 +176,37 @@ describe("getHomeGridMetrics", () => {
     expect(metrics.scrollEnabled).toBe(true);
   });
 });
+
+
+describe("landscape tablet home", () => {
+  it.each([[880, 460], [1056, 734], [1222, 900]])(
+    "fits two centered rows at %s × %s",
+    (width, height) => {
+      const layout = getHomeGridLayout({ width, height, isTabletLayout: true, isLandscape: true });
+      expect(layout.columns).toBe(3);
+      expect(layout.gridWidth).toBeLessThanOrEqual(Math.min(width, 760));
+      expect(layout.scrollEnabled).toBe(false);
+      const visibleHeight = 2 * layout.tileSize + layout.gap;
+      expect(layout.topPadding).toBeCloseTo((height - visibleHeight) / 2);
+    },
+  );
+
+  it("keeps enlarged text tiles readable and scrollable in short windows", () => {
+    const layout = getHomeGridLayout({
+      width: 1056, height: 350, fontScale: 1.4, isTabletLayout: true, isLandscape: true,
+    });
+    expect(layout.columns).toBe(3);
+    expect(layout.tileSize).toBe(224);
+    expect(layout.scrollEnabled).toBe(true);
+  });
+
+  it("keeps phones in two columns in landscape", () => {
+    expect(getHomeGridLayout({ width: 760, height: 240, isLandscape: true }).columns).toBe(2);
+  });
+
+  it.each([0, 8, -10])("avoids negative dimensions in a collapsed window of width %s", (width) => {
+    const layout = getHomeGridLayout({ width, height: 0, isTabletLayout: true, isLandscape: true });
+    expect(layout.tileSize).toBeGreaterThanOrEqual(0);
+    expect(layout.gridWidth).toBeLessThanOrEqual(Math.max(0, width));
+  });
+});

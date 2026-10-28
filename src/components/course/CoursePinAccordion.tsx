@@ -1,4 +1,5 @@
 import FontAwesome6 from "@expo/vector-icons/FontAwesome6";
+import { CourseCardGrid } from "./CourseCardGrid";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import type { ReactNode } from "react";
 import { useMemo, useState } from "react";
@@ -52,6 +53,7 @@ export type AccordionGroupItem = {
 };
 
 type CoursePinAccordionProps = {
+  columns?: 1 | 2;
   groups: AccordionGroupItem[];
   revealCourseId?: number | null;
   renderCourseCard: (pack: OfficialCourseListItem) => ReactNode;
@@ -93,6 +95,7 @@ function GroupHeaderIcon({ icon }: { icon?: AccordionIcon }) {
 }
 
 export function CoursePinAccordion({
+  columns = 1,
   groups,
   renderCourseCard,
   revealCourseId,
@@ -168,7 +171,9 @@ export function CoursePinAccordion({
                   {hasRegular ? (
                     <>
                       <View style={styles.accordionCardsList}>
-                        {group.regularItems.map(renderCourseCard)}
+                        <CourseCardGrid columns={columns}>
+                          {group.regularItems.map(renderCourseCard)}
+                        </CourseCardGrid>
                       </View>
                     </>
                   ) : null}
@@ -176,7 +181,9 @@ export function CoursePinAccordion({
                   {hasMini ? (
                     <>
                       <View style={styles.accordionCardsList}>
-                        {group.miniItems.map(renderCourseCard)}
+                        <CourseCardGrid columns={columns}>
+                          {group.miniItems.map(renderCourseCard)}
+                        </CourseCardGrid>
                       </View>
                     </>
                   ) : null}

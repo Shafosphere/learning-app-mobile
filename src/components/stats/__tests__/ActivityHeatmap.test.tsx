@@ -550,13 +550,14 @@ describe("ActivityHeatmap rendering boundaries", () => {
     expect(dayCell(screen, 21).props.style).toBe(style);
   });
 
-  it("realigns the visible month after resize without resetting selection", () => {
+  it.each([false, true])("realigns the visible month when changing compact mode to %s without resetting selection", (compact) => {
     const scroll = jest.spyOn(FlatList.prototype, "scrollToOffset").mockImplementation(() => {});
     const screen = renderHeatmap(<ActivityHeatmap data={[]} months={3} />);
     fireEvent.press(dayCell(screen, 20));
     fireEvent(screen.getByTestId("activity-heatmap-pager"), "momentumScrollEnd", {
       nativeEvent: { contentOffset: { x: 350, y: 0 } },
     });
+    screen.rerender(<ActivityHeatmap data={[]} months={3} compact={compact} sideBySide={compact} />);
     measure(screen, 500);
     expect(scroll).toHaveBeenLastCalledWith({ offset: 500, animated: false });
     expect(screen.getByLabelText("30 components.stats.activityHeatmap.months.8 2026")).toBeTruthy();

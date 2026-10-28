@@ -91,7 +91,7 @@ export default function CustomCourseEditor({
   const styles = useStyles();
   const router = useRouter();
   const setPopup = usePopup();
-  const { isTabletLayout } = useDeviceLayout();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
   const useCenteredTabletLayout = isTabletLayout;
   const {
     activeCustomCourseId,
@@ -292,6 +292,8 @@ export default function CustomCourseEditor({
     hasResetActions: true,
   });
   const shouldShowTabSwitcher = !isOfficialCourse;
+  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840
+    && (isOfficialCourse || activeTab === "options");
   const shouldShowManualToolbar =
     !isOfficialCourse && !loading && !loadError && activeTab === "content";
   const nameConflict = useMemo(
@@ -706,11 +708,14 @@ export default function CustomCourseEditor({
     t,
   ]);
   const settingsScrollProps = useMemo(() => ({
-    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet],
-    contentContainerStyle: [styles.scrollContent, shouldShowManualToolbar && styles.scrollContentWithManualToolbar],
+    style: [styles.scrollView, useCenteredTabletLayout && styles.scrollViewTablet, isLandscapeLayout && styles.scrollViewLandscape],
+    contentContainerStyle: [styles.scrollContent, isLandscapeLayout && styles.scrollContentLandscape, shouldShowManualToolbar && styles.scrollContentWithManualToolbar],
     keyboardShouldPersistTaps: "handled" as const,
   }), [
     shouldShowManualToolbar,
+    isLandscapeLayout,
+    styles.scrollContentLandscape,
+    styles.scrollViewLandscape,
     styles.scrollContent,
     styles.scrollContentWithManualToolbar,
     styles.scrollView,
@@ -832,6 +837,8 @@ export default function CustomCourseEditor({
 
   return (
     <View style={styles.container}>
+      <View style={[styles.settingsWorkspace, isLandscapeLayout && styles.settingsWorkspaceLandscape]}>
+      <View style={[styles.settingsBody, isLandscapeLayout && styles.settingsBodyLandscape]}>
       {isOfficialCourse || activeTab === "options" ? (
       <SettingsTabPager
         ref={categoryTabs.pagerRef}
@@ -989,6 +996,7 @@ export default function CustomCourseEditor({
         style={[
           styles.buttonscontainer,
           (isOfficialCourse || activeTab === "options") && styles.settingsButtonsContainer,
+          isLandscapeLayout && styles.buttonsContainerLandscape,
         ]}
       >
         <View
@@ -996,6 +1004,7 @@ export default function CustomCourseEditor({
             styles.buttonsRow,
             (isOfficialCourse || activeTab === "options") && styles.settingsButtonsRow,
             useCenteredTabletLayout && styles.buttonsRowTablet,
+            isLandscapeLayout && styles.buttonsRowLandscape,
           ]}
         >
           {!isOfficialCourse ? (
@@ -1046,13 +1055,16 @@ export default function CustomCourseEditor({
           </View>
         </View>
       </View>
+      </View>
       {isOfficialCourse || activeTab === "options" ? (
         <SettingsTabBar
+          vertical={isLandscapeLayout}
           options={categoryTabs.options}
           value={categoryTabs.activeTab}
           onChange={categoryTabs.onChange}
         />
       ) : null}
+      </View>
       {resetControls.modal}
     </View>
   );
