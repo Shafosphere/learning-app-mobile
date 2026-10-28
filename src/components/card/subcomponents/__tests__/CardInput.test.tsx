@@ -1,3 +1,4 @@
+import { LandscapeStudyContext, getLandscapeStudyLayout } from "../../landscapeStudyLayout";
 import React from "react";
 import { act, fireEvent, render } from "@testing-library/react-native";
 import { StyleSheet, Text, TextInput } from "react-native";
@@ -63,6 +64,28 @@ describe("CardInput empty submit warning", () => {
     mockedUseSettings.mockReturnValue({ colors: { my_yellow: "#fde24f" } });
     mockTranslate = (key) => key;
     mockT = (key) => mockTranslate(key);
+  });
+
+  it("keeps the answer and confirmation usable as the landscape keyboard changes height", () => {
+    const confirm = jest.fn();
+    const change = jest.fn();
+    const content = (height: number, answer: string) => (
+      <LandscapeStudyContext.Provider value={getLandscapeStudyLayout(960, height)}>
+        <CardInput {...stableInputProps} allowMultilinePrompt promptText="A long question that remains available while typing"
+          answer={answer} setAnswer={change} handleConfirm={confirm}
+          inlineAction={{ disabled: false, label: "Confirm", onCorrectionConfirm: confirm }} />
+      </LandscapeStudyContext.Provider>
+    );
+    const screen = render(content(240, "draft"));
+    const input = screen.getByLabelText("flashcards.card.input.answerLabel");
+    fireEvent.changeText(input, "answer");
+    expect(change).toHaveBeenCalledWith("answer");
+    screen.rerender(content(190, "answer"));
+    expect(screen.getByLabelText("flashcards.card.input.answerLabel").props.value).toBe("answer");
+    expect(screen.getByText("A long question that remains available while typing")).toBeTruthy();
+    fireEvent.press(screen.getByRole("button", { name: "Confirm" }));
+    fireEvent(screen.getByLabelText("flashcards.card.input.answerLabel"), "submitEditing");
+    expect(confirm).toHaveBeenCalledTimes(2);
   });
 
   it("renders an image question without hidden prompt text, answer labels or speech controls", () => {

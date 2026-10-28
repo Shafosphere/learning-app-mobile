@@ -15,6 +15,7 @@ type CardActionsProps = {
   confirmDisabled?: boolean;
   confirmLabel?: string;
   hidden?: boolean;
+  edgeAligned?: boolean;
 };
 
 export function CardActions({
@@ -27,14 +28,15 @@ export function CardActions({
   confirmDisabled = false,
   confirmLabel = "OK",
   hidden = false,
+  edgeAligned = false,
 }: CardActionsProps) {
   const styles = useStyles();
   const { t } = useTranslation();
   const { fontScale, width } = useWindowDimensions();
   const { accessibilityPreferences } = useSettings();
   const stacked =
-    width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled;
-  const buttonWidth = stacked ? "100%" : 140;
+    !edgeAligned && (width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled);
+  const buttonWidth = stacked || edgeAligned ? "100%" : 140;
 
   if (hidden) {
     return null;
@@ -53,18 +55,25 @@ export function CardActions({
 
   return (
     <View
-      style={[styles.containerButton, stacked && styles.containerButtonStacked]}
+      style={[
+        styles.containerButton,
+        stacked && styles.containerButtonStacked,
+        edgeAligned && { width: "100%", justifyContent: "space-between" },
+      ]}
       collapsable={false}
     >
+      <View style={edgeAligned ? { flex: 1 } : undefined}>
       {downloadCoachmarkId ? (
-        <CoachmarkAnchor id={downloadCoachmarkId} shape="rect" radius={18}>
+        <CoachmarkAnchor id={downloadCoachmarkId} shape="rect" radius={18} style={edgeAligned ? { width: "100%" } : undefined}>
           <View collapsable={false}>{downloadButton}</View>
         </CoachmarkAnchor>
       ) : (
         downloadButton
       )}
+      </View>
+      <View style={edgeAligned ? { flex: 1 } : undefined}>
       {confirmCoachmarkId ? (
-        <CoachmarkAnchor id={confirmCoachmarkId} shape="rect" radius={18}>
+        <CoachmarkAnchor id={confirmCoachmarkId} shape="rect" radius={18} style={edgeAligned ? { width: "100%" } : undefined}>
           <View collapsable={false}>
             <MyButton
               width={buttonWidth}
@@ -86,6 +95,7 @@ export function CardActions({
           onPress={handleConfirm}
         />
       )}
+      </View>
     </View>
   );
 }

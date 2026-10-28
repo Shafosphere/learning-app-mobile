@@ -5,3 +5,7 @@ import { createContext } from "react";
 // Preserve this scaling budget during keyboard entry. The scroll container
 // separately tracks the visible height to reveal inputs without resizing boxes.
 export const StudyViewportContext = createContext<number | null>(null);
+
+// Cards in landscape fit the space above the keyboard, independently of the
+// stable budget used to size the boxes.
+export const VisibleStudyViewportContext = createContext<number | null>(null);

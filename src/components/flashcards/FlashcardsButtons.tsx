@@ -1,9 +1,10 @@
 import React from "react";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { View } from "react-native";
 import { CoachmarkAnchor } from "@edwardloopez/react-native-coachmark";
 
 import { CardActions } from "@/src/components/card/subcomponents/CardActions";
-import type { TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
+import { useSettings, type TrueFalseButtonsVariant } from "@/src/contexts/SettingsContext";
 import { useStyles } from "@/src/features/flashcards/study/study.styles";
 import { TrueFalseActions, TrueFalseActionsAnimated } from "@/src/components/flashcards/TrueFalseActions";
 
@@ -63,11 +64,15 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
   addFlashcardsDisabled = false,
 }) => {
   const styles = useStyles();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const { flashcardsLandscapeEnabled } = useSettings();
+  const edgeAligned = flashcardsLandscapeEnabled === true
+    && isTabletLayout && orientation === "landscape";
   const noopAsync = React.useCallback(async () => undefined, []);
   const noop = React.useCallback(() => undefined, []);
   const hiddenStyle = { opacity: 0, height: 0, overflow: "hidden" as const };
   const contentWidthStyle =
-    contentWidth != null
+    edgeAligned ? { width: "100%" as const } : contentWidth != null
       ? { width: contentWidth, maxWidth: "100%" as const }
       : null;
   const alignItems: "flex-start" | "center" | "flex-end" =
@@ -78,8 +83,9 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
     ...(position === "bottom" && align !== "center"
       ? { paddingHorizontal: 16 }
       : null),
+    ...(edgeAligned ? { paddingHorizontal: 24, alignItems: "stretch" as const } : null),
   };
-  const innerAlignStyle = { alignItems };
+  const innerAlignStyle = { alignItems: edgeAligned ? "stretch" as const : alignItems };
   const hiddenAccessibilityProps = {
     accessibilityElementsHidden: true,
     importantForAccessibility: "no-hide-descendants" as const,
@@ -89,12 +95,13 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
     <>
       {position === "bottom" ? (
         <View
-          style={!showTrueFalseActions ? hiddenStyle : undefined}
+          style={[edgeAligned && { width: "100%" }, !showTrueFalseActions && hiddenStyle]}
           pointerEvents={showTrueFalseActions ? "auto" : "none"}
           collapsable={false}
           {...(!showTrueFalseActions ? hiddenAccessibilityProps : undefined)}
         >
           <TrueFalseActionsAnimated
+            edgeAligned={edgeAligned}
             visible={showTrueFalseActions}
             disabled={trueFalseActionsDisabled}
             onAnswer={onTrueFalseAnswer}
@@ -112,6 +119,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
         <View
           style={[
             styles.topActionsWrapper,
+            edgeAligned && { width: "100%" },
             !showTrueFalseActions && hiddenStyle,
           ]}
           pointerEvents={showTrueFalseActions ? "auto" : "none"}
@@ -119,6 +127,7 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
           {...(!showTrueFalseActions ? hiddenAccessibilityProps : undefined)}
         >
           <TrueFalseActions
+            edgeAligned={edgeAligned}
             disabled={trueFalseActionsDisabled}
             onAnswer={onTrueFalseAnswer}
             onOk={onTrueFalseOk}
@@ -134,12 +143,13 @@ export const FlashcardsButtons: React.FC<FlashcardsButtonsProps> = ({
       )}
 
       <View
-        style={!showCardActions ? hiddenStyle : undefined}
+        style={[edgeAligned && { width: "100%" }, !showCardActions && hiddenStyle]}
         pointerEvents={showCardActions ? "auto" : "none"}
         collapsable={false}
         {...(!showCardActions ? hiddenAccessibilityProps : undefined)}
       >
         <CardActions
+          edgeAligned={edgeAligned}
           handleConfirm={onCardActionsConfirm ?? noop}
           onConfirmPressIn={onCardActionsConfirmPressIn}
           onDownload={onDownload ?? noopAsync}

@@ -332,7 +332,7 @@ describe("Navbar review routing", () => {
     expect(mockPush).not.toHaveBeenCalled();
   });
 
-  it("collapses only compact flashcards during keyboard entry and restores on hide or navigation", () => {
+  it.each(["/flashcards", "/review/reviewflashcards"])("collapses compact study at %s during keyboard entry and restores on hide or navigation", (path) => {
     const listeners = new Map<string, (event: KeyboardEvent) => void>();
     const originalSubscribe = Keyboard.addListener.bind(Keyboard);
     const subscribe = jest.spyOn(Keyboard, "addListener").mockImplementation((name, listener) => {
@@ -347,7 +347,7 @@ describe("Navbar review routing", () => {
       }, [compact, setCompact]);
       return null;
     }
-    (usePathname as jest.Mock).mockReturnValue("/flashcards");
+    (usePathname as jest.Mock).mockReturnValue(path);
     const screen = render(<Navbar><CompactScreen compact={false} /></Navbar>);
     const emit = (suffix: "Show" | "Hide") => act(() => {
       for (const [name, listener] of listeners) {

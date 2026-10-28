@@ -17,6 +17,7 @@ type PromptImageProps = {
   uri: string;
   imageStyle: StyleProp<ImageStyle>;
   initialSlotWidth?: number;
+  maxHeight?: number;
   onHeightChange?: (height: number) => void;
   renderMode?: "default" | "correction";
 };
@@ -304,6 +305,7 @@ export function PromptImage({
   uri,
   imageStyle,
   initialSlotWidth,
+  maxHeight,
   onHeightChange,
   renderMode = "default",
 }: PromptImageProps) {
@@ -567,7 +569,7 @@ export function PromptImage({
         ? Math.min(Math.max(baseTargetHeight * boostMultiplier, 200), 280)
         : baseTargetHeight;
     const rect = computeImageRect({
-      targetHeight: boostedTargetHeight,
+      targetHeight: maxHeight == null ? boostedTargetHeight : Math.min(boostedTargetHeight, maxHeight),
       ratio: contentRatio,
       slotWidth,
       maxWidthPercent: SLOT_MAX_WIDTH_FRACTION,
@@ -591,6 +593,7 @@ export function PromptImage({
     contentRatio,
     flashcardsImageFrameEnabled,
     imageStyle,
+    maxHeight,
     isConstellationMerged,
     isConstellationOutline,
     isSvg,

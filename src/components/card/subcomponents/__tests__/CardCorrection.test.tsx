@@ -1,3 +1,4 @@
+import { LandscapeStudyContext, getLandscapeStudyLayout } from "../../landscapeStudyLayout";
 import React from "react";
 import { fireEvent, render } from "@testing-library/react-native";
 import { ScrollView, TextInput } from "react-native";
@@ -27,6 +28,7 @@ function renderCorrection(
   inlineAction?: import("../../card-types").InlineCardAction,
   showRewersInput = true,
   audioActions: import("../../card-types").CardAudioActions = {},
+  landscape = false,
 ) {
   const next = jest.fn();
   const setInput2LayoutWidth = jest.fn();
@@ -80,6 +82,11 @@ function renderCorrection(
       imageSizeMode="dynamic"
       cardMetrics={getResponsiveFlashcardMetrics(390)}
     />,
+    { wrapper: ({ children }) => (
+      <LandscapeStudyContext.Provider value={landscape ? getLandscapeStudyLayout(960, 230) : null}>
+        {children}
+      </LandscapeStudyContext.Provider>
+    ) },
   );
   return { screen, next, setInput2LayoutWidth };
 }
@@ -173,4 +180,17 @@ describe("Box0 audio input gestures", () => {
     expect(readFront).toHaveBeenCalledTimes(2); expect(readBack).toHaveBeenCalledTimes(1);
     expect(front.props.onFocus).toBeDefined(); expect(front.props.onChangeText).toBeDefined();
   });
+});
+
+
+it("keeps both correction fields and confirmation accessible beside the landscape prompt", () => {
+  const confirm = jest.fn();
+  const { screen } = renderCorrection(false, "b", "J", {
+    disabled: false, label: "Confirm correction", onCorrectionConfirm: confirm,
+  }, true, {}, true);
+  expect(screen.getByTestId("landscape-study-card")).toBeTruthy();
+  expect(screen.getByLabelText("flashcards.card.input.frontCorrectionLabel").props.value).toBe("b");
+  expect(screen.getByLabelText("flashcards.card.input.backCorrectionLabel").props.value).toBe("J");
+  fireEvent.press(screen.getByRole("button", { name: "Confirm correction" }));
+  expect(confirm).toHaveBeenCalledTimes(1);
 });

@@ -1,3 +1,4 @@
+import { settingsWorkspaceStyles } from "@/src/components/settings/settingsWorkspaceStyles";
 import { createThemeStylesHook } from "@/src/theme/createThemeStylesHook";
 
 const SETTINGS_TABLET_MAX_WIDTH = 500;
@@ -5,8 +6,12 @@ const SETTINGS_TABLET_MAX_WIDTH = 500;
 export const useStyles = createThemeStylesHook((colors) => ({
   container: {
     flex: 1,
+    flexDirection: "column-reverse",
     backgroundColor: colors.background,
   },
+  containerLandscape: { flexDirection: "row" },
+  contentWrapperLandscape: settingsWorkspaceStyles.settingsBodyLandscape,
+  contentLandscape: settingsWorkspaceStyles.scrollViewLandscape,
   contentWrapper: {
     flex: 1,
     paddingHorizontal: 18,
@@ -158,6 +163,19 @@ export const useStyles = createThemeStylesHook((colors) => ({
   appearancePlainBlock: {
     marginBottom: 16,
     gap: 10,
+  },
+  previewSelectorsLandscape: {
+    width: "100%",
+    maxWidth: 600,
+    alignSelf: "center",
+    flexDirection: "row",
+    gap: 16,
+    marginBottom: 16,
+  },
+  previewSelectorColumn: {
+    width: "48%",
+    flexShrink: 1,
+    minWidth: 0,
   },
   appearanceBlockHeader: {
     gap: 4,

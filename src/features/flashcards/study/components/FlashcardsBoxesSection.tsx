@@ -40,6 +40,7 @@ const BOXES_FADE_OUT = FadeOut.duration(BOXES_FADE_OUT_DURATION_MS);
 const BOXES_FADE_IN = FadeIn.delay(BOXES_FADE_OUT_DURATION_MS).duration(180);
 
 type FlashcardsBoxesSectionProps = {
+  hidden?: boolean;
   debugSizes?: boolean;
   debugCourseId?: number | null;
   coachmarkId?: string;
@@ -76,6 +77,7 @@ type FlashcardsBoxesSectionProps = {
 };
 
 export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
+  hidden = false,
   debugSizes = false,
   debugCourseId,
   coachmarkId,
@@ -246,6 +248,7 @@ export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
       />
     ) : (
       <BoxesCarousel
+        rowHeight={horizontalRowHeight}
         compactLayout={isCompactStudyLayout}
         boxes={boxes}
         activeBox={activeBox}
@@ -255,7 +258,7 @@ export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
         disabled={boxSelectionLocked}
         countOverrides={tutorialBoxCountOverrides ?? undefined}
         faces={boxFaces}
-        layoutWidth={flashcardsContentWidth}
+        layoutWidth={measuredViewportWidth ?? flashcardsContentWidth}
         bottomClearance={carouselBottomClearance}
       />
     );
@@ -296,6 +299,9 @@ export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
       // after it disappears. Size/count changes within one layout stay smooth.
       key={boxesPresentation}
       testID={testID ?? "flashcards-boxes-wrapper"}
+      pointerEvents={hidden ? "none" : "auto"}
+      accessibilityElementsHidden={hidden}
+      importantForAccessibility={hidden ? "no-hide-descendants" : "auto"}
       entering={hasMountedRef.current ? BOXES_FADE_IN : undefined}
       exiting={BOXES_FADE_OUT}
       onLayout={(event) => {
@@ -306,6 +312,7 @@ export const FlashcardsBoxesSection = memo(function FlashcardsBoxesSection({
       layout={screenSectionLayout}
       style={[
         styles.boxesWrapper,
+        hidden && { opacity: 0 },
         boundedBoxesHeight != null ? { flex: 0, height: boundedBoxesHeight } : null,
         horizontalRowHeight != null ? { flex: 0, height: horizontalRowHeight } : null,
         !areButtonsOnTop && !hideActions && styles.boxesWrapperWithBottomButtons,

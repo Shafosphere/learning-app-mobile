@@ -3,7 +3,11 @@ import { act, fireEvent, render } from "@testing-library/react-native";
 import SettingsScreen from "../SettingsScreen";
 
 const mockSectionRender = jest.fn();
-beforeEach(() => mockSectionRender.mockClear());
+let mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+beforeEach(() => {
+  mockSectionRender.mockClear();
+  mockDeviceLayout = { isTabletLayout: false, width: 390, orientation: "portrait" };
+});
 afterEach(() => jest.restoreAllMocks());
 
 jest.mock("@expo/vector-icons/Ionicons", () => () => null);
@@ -11,7 +15,7 @@ jest.mock("react-i18next", () => ({
   useTranslation: () => ({ t: (key: string) => key }),
 }));
 jest.mock("@/src/hooks/useDeviceLayout", () => ({
-  useDeviceLayout: () => ({ isTabletLayout: false }),
+  useDeviceLayout: () => mockDeviceLayout,
 }));
 jest.mock("@/src/contexts/SettingsContext", () => {
   const { resolveThemeColors } = jest.requireActual("@/src/theme/theme");
@@ -100,4 +104,27 @@ it("keeps the bottom selection in sync after native selection", async () => {
   expect(screen.getByRole("tab", { name: "settings.tabs.accessibility", selected: true })).toBeTruthy();
   expect(screen.getByText("Accessibility content")).toBeTruthy();
   expect(screen.queryByText("Appearance content")).toBeNull();
+});
+
+
+it("keeps the selected settings page when rotating between the bottom tabs and sidebar", async () => {
+  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+  const screen = render(<SettingsScreen />);
+  await act(async () => {});
+  expect(screen.getByText("settings.tabs.learning")).toBeTruthy();
+  fireEvent.press(screen.getByRole("tab", { name: "settings.tabs.learning" }));
+  completePagerSelection("learning");
+  expect(screen.getByText("Learning content")).toBeTruthy();
+  mockSectionRender.mockClear();
+
+  mockDeviceLayout = { isTabletLayout: true, width: 600, orientation: "portrait" };
+  screen.rerender(<SettingsScreen />);
+  expect(screen.queryByText("settings.tabs.learning")).toBeNull();
+  expect(screen.getByRole("tab", { name: "settings.tabs.learning", selected: true })).toBeTruthy();
+  expect(screen.getByText("Learning content")).toBeTruthy();
+  mockDeviceLayout = { isTabletLayout: true, width: 960, orientation: "landscape" };
+  screen.rerender(<SettingsScreen />);
+  expect(screen.getByText("settings.tabs.learning")).toBeTruthy();
+  expect(screen.getByRole("tab", { name: "settings.tabs.learning", selected: true })).toBeTruthy();
+  expect(mockSectionRender).not.toHaveBeenCalled();
 });

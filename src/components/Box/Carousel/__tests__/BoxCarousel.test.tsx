@@ -56,6 +56,29 @@ describe("BoxCarousel personalities and manual selection", () => {
     expect(props.handleSelectBox.mock.calls).toEqual([["boxTwo"]]);
   });
 
+  it("fits every box in the landscape row and selects the last one without scrolling", () => {
+    const app = render(<BoxCarousel {...props} hideBoxZero rowHeight={100} layoutWidth={780} />);
+    let list = app.UNSAFE_getByType(Animated.FlatList);
+    expect(list.props.scrollEnabled).toBe(false);
+    expect(list.props.initialScrollIndex).toBe(0);
+    expect(list.props.contentContainerStyle.paddingHorizontal * 2 + list.props.snapToInterval * 5).toBe(780);
+    app.rerender(<BoxCarousel {...props} hideBoxZero rowHeight={80} layoutWidth={480} />);
+    list = app.UNSAFE_getByType(Animated.FlatList);
+    expect(list.props.contentContainerStyle.paddingHorizontal * 2 + list.props.snapToInterval * 5).toBe(480);
+    expect(props.handleSelectBox).not.toHaveBeenCalled();
+    fireEvent.press(app.UNSAFE_getAllByType(TouchableOpacity)[4]);
+    expect(props.handleSelectBox.mock.calls).toEqual([["boxFive"]]);
+  });
+
+  it("keeps the selected box and its counter when box zero is hidden", () => {
+    const counters = { boxOne: 11, boxTwo: 22, boxThree: 33 };
+    const app = render(<BoxCarousel {...props} activeBox="boxTwo" rowHeight={100} countOverrides={counters} />);
+    expect(app.getByText("22")).toBeTruthy();
+    app.rerender(<BoxCarousel {...props} activeBox="boxTwo" rowHeight={100} countOverrides={counters} hideBoxZero />);
+    expect(app.getByText("22")).toBeTruthy();
+    expect(props.handleSelectBox).not.toHaveBeenCalled();
+  });
+
   it("does not double-notify when momentum follows a box tap, or on programmatic selection", () => {
     const app = render(<BoxCarousel {...props} hideBoxZero />);
     fireEvent.press(app.UNSAFE_getAllByType(TouchableOpacity)[1]);

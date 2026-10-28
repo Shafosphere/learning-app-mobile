@@ -30,6 +30,7 @@ export function FlashcardsStudyLayout({
   isCourseFinishedVisible, interactionBlocked,
 }: Props) {
   const { studyLayout, dock, screenSectionLayout } = layout;
+  const isLandscapeTyping = layout.isLandscapeStudy && studyLayout.keyboardVisible;
   return (
     <View
       testID={`${testIDPrefix}-content`}
@@ -59,6 +60,7 @@ export function FlashcardsStudyLayout({
             <FlashcardsBoxesSection
               {...boxes}
               {...layout.boxesLayoutProps}
+              hidden={isLandscapeTyping}
               styles={styles}
               screenSectionLayout={screenSectionLayout}
             />

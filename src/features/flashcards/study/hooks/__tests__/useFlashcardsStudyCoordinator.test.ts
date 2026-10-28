@@ -1,3 +1,4 @@
+import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { act, renderHook } from "@testing-library/react-native";
 import { Animated, Keyboard, type KeyboardEvent, type LayoutChangeEvent } from "react-native";
 import { useFlashcardsStudyLayout } from "../useFlashcardsStudyLayout";
@@ -9,22 +10,32 @@ import { QuoteSuppressionContext } from "@/src/contexts/QuoteSuppressionContext"
 jest.mock("@/src/hooks/useKeyboardBottomOffset", () => ({ useKeyboardBottomOffset: jest.fn() }));
 jest.mock("@/src/services/debugEvents", () => ({ appendDebugEvent: jest.fn() }));
 
+let mockLandscapeEnabled = false;
+jest.mock("@/src/contexts/SettingsContext", () => ({
+  useSettings: () => ({ flashcardsLandscapeEnabled: mockLandscapeEnabled }),
+}));
+
+let mockOrientation = "portrait";
+jest.mock("@/src/hooks/useDeviceLayout", () => ({
+  useDeviceLayout: () => ({ orientation: mockOrientation }),
+}));
+
 function layout(height: number): LayoutChangeEvent {
   return { nativeEvent: { layout: { height, width: 375, x: 0, y: 0 } } } as LayoutChangeEvent;
 }
 
-function renderStudy(suppressQuotes = () => () => {}) {
+function renderStudy(suppressQuotes = () => () => {}, tablet = false, boxesLayout = "classic") {
   const wrapper = ({ children }: React.PropsWithChildren) => React.createElement(
     QuoteSuppressionContext.Provider, { value: suppressQuotes }, children,
   );
   return renderHook(({ eligible, focused = true }: { eligible: boolean; focused?: boolean }) => {
     const studyLayout = useFlashcardsStudyLayout({
-      isTabletLayout: false, boxesLayout: "classic", areButtonsOnTop: false,
+      isTabletLayout: tablet, boxesLayout, areButtonsOnTop: false,
     });
     return useFlashcardsStudyCoordinator({
       studyLayout,
-      isTabletLayout: false,
-      boxesLayout: "classic",
+      isTabletLayout: tablet,
+      boxesLayout,
       areButtonsOnTop: false,
       shouldShowBoxes: true,
       selectedItemId: 1,
@@ -55,6 +66,8 @@ function measure(result: ReturnType<typeof renderStudy>["result"], height: numbe
 
 describe("shared study coordination", () => {
   beforeEach(() => {
+    mockOrientation = "portrait";
+    mockLandscapeEnabled = false;
     jest.useFakeTimers();
     (useKeyboardBottomOffset as jest.Mock).mockReturnValue({
       keyboardVisible: false, bottomOffset: new Animated.Value(0),
@@ -64,6 +77,96 @@ describe("shared study coordination", () => {
     jest.restoreAllMocks();
     jest.clearAllTimers();
     jest.useRealTimers();
+  });
+
+  it("fits a landscape carousel to a row without scaling its scroll viewport, and restores portrait", () => {
+    mockLandscapeEnabled = true;
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(false);
+    mockOrientation = "landscape";
+    const { result, rerender } = renderStudy(undefined, true, "carousel");
+    measure(result, 463);
+    const expectCarouselGeometry = (viewportHeight: number, compact: boolean) => {
+      act(() => result.current.boxesLayoutProps.onBoxesViewportLayout(layout(viewportHeight)));
+      const props = result.current.boxesLayoutProps;
+      expect(props.isCompactStudyLayout).toBe(compact);
+      if (compact) {
+        expect(props.horizontalRowHeight).toBeGreaterThanOrEqual(80);
+        expect(props.boxesScaledHeight).toBe(props.horizontalRowHeight);
+        expect(props.boxesScale).toBe(1);
+        expect(props.boxesScaleOffsetY).toBe(0);
+        expect(props.carouselBottomClearance).toBe(0);
+        expect(props.boxesNeedScrollFallback).toBe(false);
+        return;
+      }
+      expect(props.horizontalRowHeight).toBeUndefined();
+      const naturalHeight = getBoxCarouselNaturalHeight({
+        isSmallPhoneLayout: compact, bottomClearance: props.carouselBottomClearance,
+      });
+      const expectedScale = Math.min(1, Math.max(0.3, viewportHeight / naturalHeight));
+      expect(props.boxesScale).toBeCloseTo(expectedScale);
+      expect(props.boxesScaleOffsetY).toBeCloseTo(naturalHeight * (1 - expectedScale) / 2);
+    };
+    expectCarouselGeometry(160, true);
+    expectCarouselGeometry(120, true);
+    expectCarouselGeometry(160, true);
+    mockOrientation = "portrait";
+    rerender({ eligible: true, focused: true });
+    expectCarouselGeometry(260, false);
+    mockOrientation = "landscape";
+    rerender({ eligible: true, focused: true });
+    expectCarouselGeometry(160, true);
+  });
+
+  it("keeps tablet section transitions disabled through repeated rotation", () => {
+    mockLandscapeEnabled = true;
+    const { result, rerender } = renderStudy(undefined, true);
+    measure(result, 800);
+    for (const orientation of ["portrait", "landscape", "portrait", "landscape"]) {
+      mockOrientation = orientation;
+      rerender({ eligible: true, focused: true });
+      expect(result.current.screenSectionLayout).toBeUndefined();
+      expect(result.current.isLandscapeStudy).toBe(orientation === "landscape");
+    }
+  });
+
+  it("keeps the vertical layout by default on a rotated tablet and responds to opting in and out", () => {
+    mockOrientation = "landscape";
+    const { result, rerender } = renderStudy(undefined, true);
+    measure(result, 800);
+    expect(result.current.isLandscapeStudy).toBe(false);
+    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
+    expect(result.current.boxesLayoutProps.isCompactStudyLayout).toBe(false);
+    mockLandscapeEnabled = true;
+    rerender({ eligible: true, focused: true });
+    expect(result.current.isLandscapeStudy).toBe(true);
+    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeGreaterThan(0);
+    mockLandscapeEnabled = false;
+    rerender({ eligible: true, focused: true });
+    expect(result.current.isLandscapeStudy).toBe(false);
+    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
+  });
+
+  it("preserves section transitions on phones", () => {
+    const { result } = renderStudy();
+    expect(result.current.screenSectionLayout).toBeDefined();
+  });
+
+  it("moves tablet confirmation into the card only in landscape and restores portrait", () => {
+    mockLandscapeEnabled = true;
+    jest.spyOn(Keyboard, "isVisible").mockReturnValue(true);
+    const { result, rerender } = renderStudy(undefined, true);
+    measure(result, 800);
+    expect(result.current.useInlineCardAction).toBe(false);
+    mockOrientation = "landscape";
+    rerender({ eligible: true, focused: true });
+    expect(result.current.isLandscapeStudy).toBe(true);
+    expect(result.current.useInlineCardAction).toBe(true);
+    expect(result.current.dock.bottomButtonsReservedSpace).toBe(0);
+    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeGreaterThan(0);
+    mockOrientation = "portrait";
+    rerender({ eligible: true, focused: true });
+    expect(result.current.useInlineCardAction).toBe(false);
+    expect(result.current.boxesLayoutProps.horizontalRowHeight).toBeUndefined();
   });
 
   it("suppresses reactions only for a focused compact screen and releases on recovery, blur and unmount", () => {

@@ -3,7 +3,7 @@ import { Keyboard, ScrollView, View, type StyleProp, type ViewStyle } from "reac
 import { useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import { logFlashcardsScrollDebug } from "@/src/services/flashcardsScrollDebug";
 import { StudyInputRevealContext } from "./StudyInputRevealContext";
-import { StudyViewportContext } from "./StudyViewportContext";
+import { StudyViewportContext, VisibleStudyViewportContext } from "./StudyViewportContext";
 
 /** Reveal the card's input rows, without scrolling past them into the boxes. */
 export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWindow, cardHeight, testID, enabled = true, contentContainerStyle }: {
@@ -245,7 +245,9 @@ export function KeyboardStudyScroll({ children, keyboardVisible, keyboardTopInWi
       >
         <StudyInputRevealContext.Provider value={inputReveal}>
           <StudyViewportContext.Provider value={studyViewport?.height ?? null}>
-            {children}
+            <VisibleStudyViewportContext.Provider value={viewport.visibleHeight || null}>
+              {children}
+            </VisibleStudyViewportContext.Provider>
           </StudyViewportContext.Provider>
         </StudyInputRevealContext.Provider>
       </ScrollView>

@@ -191,7 +191,8 @@ const NavbarFrame = memo(function NavbarFrame({
   const topBarVisibility = useRef(new Animated.Value(1)).current;
   const layoutTransition = useMemo(createNavbarLayoutTransition, []);
   const settledTopBarVisibilityRef = useRef(1);
-  const collapseTopBar = pathname === "/flashcards" && compactStudyLayout && keyboardVisible;
+  const isStudyRoute = pathname === "/flashcards" || pathname === "/review/reviewflashcards";
+  const collapseTopBar = isStudyRoute && compactStudyLayout && keyboardVisible;
 
   useEffect(() => {
     const subscriptions = [

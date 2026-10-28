@@ -102,6 +102,8 @@ export interface SettingsContextValue {
   toggleTheme: () => Promise<void>;
   boxesLayout: "classic" | "carousel";
   setBoxesLayout: (layout: "classic" | "carousel") => Promise<void>;
+  flashcardsLandscapeEnabled: boolean;
+  setFlashcardsLandscapeEnabled: (enabled: boolean) => Promise<void>;
   actionButtonsPosition: "top" | "bottom";
   setActionButtonsPosition: (position: "top" | "bottom") => Promise<void>;
   courses: LanguageCourse[];

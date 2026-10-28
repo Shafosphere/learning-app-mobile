@@ -67,23 +67,35 @@ function renderSettingsPage(tab: TabKey) {
 export default function SettingsScreen() {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { isTabletLayout } = useDeviceLayout();
+  const { width, isTabletLayout, orientation } = useDeviceLayout();
+  const isLandscapeLayout = isTabletLayout && orientation === "landscape" && width >= 840;
   const useCenteredTabletLayout = isTabletLayout;
   const [activeTab, setActiveTab] = useState<TabKey>(TAB_CONFIG[0].key);
   const pagerRef = useRef<SettingsTabPagerHandle<TabKey>>(null);
 
   const settingsScrollProps = useMemo(() => ({
-    style: [styles.content, useCenteredTabletLayout && styles.contentTablet],
+    style: [styles.content, useCenteredTabletLayout && styles.contentTablet, isLandscapeLayout && styles.contentLandscape],
     contentContainerStyle: styles.scrollContent,
     showsVerticalScrollIndicator: false,
-  }), [styles.content, styles.contentTablet, styles.scrollContent, useCenteredTabletLayout]);
+  }), [styles.content, styles.contentTablet, styles.contentLandscape, styles.scrollContent, useCenteredTabletLayout, isLandscapeLayout]);
 
   return (
-    <View style={styles.container}>
+    <View style={[styles.container, isLandscapeLayout && styles.containerLandscape]}>
+      <SettingsTabBar
+        vertical={isLandscapeLayout}
+        options={TAB_CONFIG.map((tab) => ({
+          key: tab.key,
+          label: t(tab.labelKey),
+          icon: tab.icon,
+        }))}
+        value={activeTab}
+        onChange={(tab) => pagerRef.current?.navigate(tab)}
+      />
       <View
         style={[
           styles.contentWrapper,
           useCenteredTabletLayout && styles.contentWrapperTablet,
+          isLandscapeLayout && styles.contentWrapperLandscape,
         ]}
       >
         <SettingsTabPager
@@ -96,16 +108,6 @@ export default function SettingsScreen() {
           renderPage={renderSettingsPage}
         />
       </View>
-
-      <SettingsTabBar
-        options={TAB_CONFIG.map((tab) => ({
-          key: tab.key,
-          label: t(tab.labelKey),
-          icon: tab.icon,
-        }))}
-        value={activeTab}
-        onChange={(tab) => pagerRef.current?.navigate(tab)}
-      />
     </View>
   );
 }

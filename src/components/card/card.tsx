@@ -20,6 +20,7 @@ import { NudgeModal } from "@/src/components/nudge/NudgeModal";
 import Ionicons from "@expo/vector-icons/Ionicons";
 import {
   useCallback,
+  useContext,
   useEffect,
   useLayoutEffect,
   useMemo,
@@ -48,6 +49,8 @@ import { CardMeasure } from "./subcomponents/CardMeasure";
 import { getResponsiveFlashcardMetrics } from "./responsiveCardWidth";
 import { useCardFocusController } from "./useCardFocusController";
 import { useFocusExecutor } from "./useFocusExecutor";
+import { VisibleStudyViewportContext } from "@/src/components/flashcards/StudyViewportContext";
+import { getLandscapeStudyLayout, LandscapeStudyContext } from "./landscapeStudyLayout";
 
 const INPUT_HORIZONTAL_PADDING = 8;
 const MIN_INPUT_SCROLL_AHEAD = 48; // keep at least ~2-3 letters visible ahead of the caret
@@ -169,12 +172,22 @@ export default function Card({
 }: CardProps) {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { width: windowWidth } = useWindowDimensions();
-  const { isTabletLayout } = useDeviceLayout();
-  const cardMetrics = getResponsiveFlashcardMetrics(windowWidth, {
-    isTabletLayout,
-    widthOverride,
-  });
+  const { width: windowWidth, height: windowHeight } = useWindowDimensions();
+  const { isTabletLayout, orientation } = useDeviceLayout();
+  const visibleStudyHeight = useContext(VisibleStudyViewportContext);
+  const { flashcardsLandscapeEnabled } = useSettings();
+  const isLandscapeStudy = flashcardsLandscapeEnabled === true && isTabletLayout && orientation === "landscape"
+    && (contentDebugSource === "flashcards" || contentDebugSource === "review");
+  const landscapeLayout = isLandscapeStudy
+    ? getLandscapeStudyLayout(windowWidth, visibleStudyHeight ?? windowHeight - 120, Boolean(inlineAction))
+    : null;
+  const cardMetrics = landscapeLayout
+    ? {
+        ...getResponsiveFlashcardMetrics(landscapeLayout.promptWidth + 48),
+        width: landscapeLayout.cardWidth,
+        contentScale: 1,
+      }
+    : getResponsiveFlashcardMetrics(windowWidth, { isTabletLayout, widthOverride });
 
   const editTabScale = cardMetrics.contentScale;
   const checkSpelling = useSpellchecking();
@@ -643,6 +656,7 @@ export default function Card({
   // True/false karty często mają dłuższy prompt; wymuś dynamiczną wysokość,
   // żeby tekst nie był ucinany nawet bez obrazka.
   const useLargeLayout =
+    isLandscapeStudy ||
     flashcardsCardSize === "large" ||
     hasImagePrompt ||
     selectedItem?.answerOnly ||
@@ -1451,8 +1465,8 @@ export default function Card({
           onBlur={() => logKeyboardDebug("card.keyboard_bridge.blur")}
         />
       ) : null}
-      {hideHints && !isEditingHint ? (
-        reserveHintSpaceWhenHidden ? (
+      {(hideHints || (isLandscapeStudy && (!currentHint || inlineAction))) && !isEditingHint ? (
+        reserveHintSpaceWhenHidden && !isLandscapeStudy ? (
           <View
             testID="card-hint-placeholder"
             style={[styles.hintContainer, { width: cardMetrics.width }]}
@@ -1481,47 +1495,49 @@ export default function Card({
           cardWidth={cardMetrics.width}
         />
       )}
-      <CardFrame
-        coachmarkId={coachmarkId}
-        compact={!useLargeLayout}
-        animateLayout={!disableLayoutAnimation && isLayoutAnimationArmed}
-        cardStateStyle={cardStateStyle}
-        cardWidth={cardMetrics.width}
-        minHeight={cardMetrics.minHeight}
-        contentScale={cardMetrics.contentScale}
-        backgroundColorOverride={backgroundColorOverride}
-        underlay={
-          onEdit ? (
-            <Pressable
-              accessibilityRole="button"
-              accessibilityLabel={t("flashcards.card.edit")}
-              hitSlop={8}
-              onPress={onEdit}
-              style={({ pressed }) => [
-                styles.editTab,
-                {
-                  right: 14 * editTabScale,
-                  bottom: -24 * editTabScale,
-                  width: 28 * editTabScale,
-                  height: 64 * editTabScale,
-                  paddingBottom: 4 * editTabScale,
-                  borderBottomLeftRadius: 12 * editTabScale,
-                  borderBottomRightRadius: 12 * editTabScale,
-                },
-                pressed && styles.editTabPressed,
-              ]}
-            >
-              <Ionicons
-                name="pencil"
-                size={14 * editTabScale}
-                color={styles.editTabIcon.color}
-              />
-            </Pressable>
-          ) : undefined
-        }
-      >
-        <CardContentResolver {...resolverProps} />
-      </CardFrame>
+      <LandscapeStudyContext.Provider value={landscapeLayout}>
+        <CardFrame
+          coachmarkId={coachmarkId}
+          compact={!useLargeLayout}
+          animateLayout={!disableLayoutAnimation && isLayoutAnimationArmed}
+          cardStateStyle={cardStateStyle}
+          cardWidth={cardMetrics.width}
+          minHeight={cardMetrics.minHeight}
+          contentScale={cardMetrics.contentScale}
+          backgroundColorOverride={backgroundColorOverride}
+          underlay={
+            onEdit ? (
+              <Pressable
+                accessibilityRole="button"
+                accessibilityLabel={t("flashcards.card.edit")}
+                hitSlop={8}
+                onPress={onEdit}
+                style={({ pressed }) => [
+                  styles.editTab,
+                  {
+                    right: 14 * editTabScale,
+                    bottom: -24 * editTabScale,
+                    width: 28 * editTabScale,
+                    height: 64 * editTabScale,
+                    paddingBottom: 4 * editTabScale,
+                    borderBottomLeftRadius: 12 * editTabScale,
+                    borderBottomRightRadius: 12 * editTabScale,
+                  },
+                  pressed && styles.editTabPressed,
+                ]}
+              >
+                <Ionicons
+                  name="pencil"
+                  size={14 * editTabScale}
+                  color={styles.editTabIcon.color}
+                />
+              </Pressable>
+            ) : undefined
+          }
+        >
+          <CardContentResolver {...resolverProps} />
+        </CardFrame>
+      </LandscapeStudyContext.Provider>
       {showCorrectionInputs && correction && process.env.NODE_ENV !== "test" ? (
         <CardMeasure
           correctionAwers={correctionAwers}

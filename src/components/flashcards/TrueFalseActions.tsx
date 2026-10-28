@@ -15,6 +15,7 @@ type TrueFalseActionsProps = {
   okLabel?: string;
   disabled?: boolean;
   dense?: boolean;
+  edgeAligned?: boolean;
   variant?: TrueFalseButtonsVariant;
   selectedAnswer?: boolean | null;
   showAddFlashcards?: boolean;
@@ -29,6 +30,7 @@ export function TrueFalseActions({
   okLabel = "OK",
   disabled = false,
   dense = false,
+  edgeAligned = false,
   variant = "true_false",
   selectedAnswer = null,
   showAddFlashcards = false,
@@ -39,12 +41,14 @@ export function TrueFalseActions({
   const { colors, accessibilityPreferences } = useSettings();
   const { fontScale, width } = useWindowDimensions();
   const stacked =
-    width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled;
+    !edgeAligned && (width < 360 || fontScale > 1.2 || accessibilityPreferences.largeFontEnabled);
+  const edgeStyle = edgeAligned ? { width: "100%" as const, justifyContent: "space-between" as const } : null;
   const styles = useMemo(
     () => makeStyles(colors, dense, stacked),
     [colors, dense, stacked]
   );
   const buttonWidth = stacked ? "100%" : 140;
+  const stretchButton = edgeAligned ? { flex: 1, width: "auto" as const } : undefined;
   const labels =
     variant === "know_dont_know"
       ? {
@@ -66,11 +70,12 @@ export function TrueFalseActions({
   if (mode === "ok") {
     return (
       <View
-        style={[styles.container, disabled && styles.disabled]}
+        style={[styles.container, edgeStyle, disabled && styles.disabled]}
         collapsable={false}
       >
         <MyButton
           text={labels.falseLabel}
+          style={stretchButton}
           color="my_red"
           onPress={() => undefined}
           width={buttonWidth}
@@ -80,6 +85,7 @@ export function TrueFalseActions({
         <View style={styles.spacer} />
         <MyButton
           text={okLabel}
+          style={stretchButton}
           color="my_yellow"
           onPress={onOk}
           width={buttonWidth}
@@ -94,11 +100,12 @@ export function TrueFalseActions({
 
   return (
     <View
-      style={[styles.container, disabled && styles.disabled]}
+      style={[styles.container, edgeStyle, disabled && styles.disabled]}
       collapsable={false}
     >
       <MyButton
         text={labels.falseLabel}
+        style={stretchButton}
         color="my_red"
         onPress={() => onAnswer(false)}
         width={buttonWidth}
@@ -106,7 +113,7 @@ export function TrueFalseActions({
         accessibilityLabel={getMarkLabel(labels.falseLabel)}
       />
       <View style={styles.spacer} />
-      <View style={styles.knowAction}>
+      <View style={[styles.knowAction, edgeAligned && { flex: 1, width: "auto" }]}>
         {showAddFlashcards ? (
           <Pressable
             style={[styles.addFlashcardsButton, addFlashcardsDisabled && styles.addFlashcardsButtonDisabled]}
@@ -121,6 +128,7 @@ export function TrueFalseActions({
         ) : null}
         <MyButton
           text={labels.trueLabel}
+          style={edgeAligned ? { width: "100%" } : undefined}
           color="my_green"
           onPress={() => onAnswer(true)}
           width={buttonWidth}
@@ -133,6 +141,7 @@ export function TrueFalseActions({
 }
 
 type TrueFalseActionsAnimatedProps = {
+  edgeAligned?: boolean;
   visible: boolean;
   onAnswer: (value: boolean) => void;
   onOk?: () => void;
@@ -148,6 +157,7 @@ type TrueFalseActionsAnimatedProps = {
 };
 
 export function TrueFalseActionsAnimated({
+  edgeAligned = false,
   visible,
   onAnswer,
   onOk,
@@ -197,10 +207,11 @@ export function TrueFalseActionsAnimated({
 
   return (
     <Animated.View
-      style={{ opacity, transform: [{ translateY }], alignSelf: "center" }}
+      style={{ opacity, transform: [{ translateY }], alignSelf: "center", ...(edgeAligned ? { width: "100%" } : null) }}
       pointerEvents={visible && !disabled ? "auto" : "none"}
     >
       <TrueFalseActions
+        edgeAligned={edgeAligned}
         onAnswer={onAnswer}
         onOk={onOk}
         mode={mode}

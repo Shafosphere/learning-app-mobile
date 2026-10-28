@@ -1,3 +1,6 @@
+import { SINGLE_ROW_BOX_MIN_HEIGHT } from "@/src/components/Box/List/BoxList.metrics";
+import { useSettings } from "@/src/contexts/SettingsContext";
+import { useDeviceLayout } from "@/src/hooks/useDeviceLayout";
 import { getBoxCarouselNaturalHeight } from "@/src/components/Box/Carousel/BoxCarousel.metrics";
 import { useNavbarCompactLayoutSetter, useNavbarLayoutTransition } from "@/src/contexts/NavbarLayoutContext";
 import { useQuoteSuppression } from "@/src/contexts/QuoteSuppressionContext";
@@ -27,17 +30,28 @@ export function useFlashcardsStudyCoordinator({
   studyLayout, isTabletLayout, boxesLayout, inlineCardActionEligible,
   shouldAnimateScreenLayout, ...dockParams
 }: Params) {
-  const { isCompactStudyLayout, horizontalRowHeight, setActionsHidden } = studyLayout;
+  const { orientation } = useDeviceLayout();
+  const { flashcardsLandscapeEnabled } = useSettings();
+  const isLandscapeStudy = flashcardsLandscapeEnabled === true
+    && isTabletLayout && orientation === "landscape";
+  const { isCompactStudyLayout, setActionsHidden } = studyLayout;
+  const isCompactBoxesLayout = isCompactStudyLayout || isLandscapeStudy;
+  // The 80dp phone fallback makes the boxes disproportionately small on a
+  // wide tablet. Grow the illustrations while retaining a single compact row.
+  const landscapeBoxRowHeight = Math.max(SINGLE_ROW_BOX_MIN_HEIGHT, Math.min(124,
+    studyLayout.availableStudyHeight - studyLayout.visibleCardHeight - 120));
+  const horizontalRowHeight = isLandscapeStudy
+    ? landscapeBoxRowHeight : studyLayout.horizontalRowHeight;
   const { areButtonsOnTop, shouldShowBoxes, isFocused } = dockParams;
-  useQuoteSuppression(isFocused && isCompactStudyLayout);
+  useQuoteSuppression(isFocused && (isCompactStudyLayout || isLandscapeStudy));
   const layoutTransition = useNavbarLayoutTransition();
   const setNavbarCompactLayout = useNavbarCompactLayoutSetter();
   useEffect(() => {
-    setNavbarCompactLayout(isFocused && isCompactStudyLayout);
+    setNavbarCompactLayout(isFocused && (isCompactStudyLayout || isLandscapeStudy));
     return () => setNavbarCompactLayout(false);
-  }, [isFocused, isCompactStudyLayout, setNavbarCompactLayout]);
+  }, [isFocused, isCompactStudyLayout, isLandscapeStudy, setNavbarCompactLayout]);
 
-  const canUseInlineCardAction = (isCompactStudyLayout || horizontalRowHeight != null)
+  const canUseInlineCardAction = (isLandscapeStudy || isCompactStudyLayout || horizontalRowHeight != null)
     && inlineCardActionEligible;
   const useInlineCardAction = canUseInlineCardAction && studyLayout.keyboardVisible;
   useEffect(() => setActionsHidden(useInlineCardAction), [useInlineCardAction, setActionsHidden]);
@@ -47,10 +61,10 @@ export function useFlashcardsStudyCoordinator({
     hideActions: useInlineCardAction,
     keepActionsAtBottom: canUseInlineCardAction,
     isSmallPhoneLayout: isCompactStudyLayout,
-    bottomDockOffsetOverride: studyLayout.bottomDockOffset,
+    bottomDockOffsetOverride: isLandscapeStudy ? 24 : studyLayout.bottomDockOffset,
   });
   const isCarouselLayout = boxesLayout !== "classic";
-  const carouselBottomClearance = isCarouselLayout && !areButtonsOnTop && !useInlineCardAction
+  const carouselBottomClearance = isCarouselLayout && !isLandscapeStudy && !areButtonsOnTop && !useInlineCardAction
     ? Math.max(56, Math.min(96, dock.bottomButtonsReservedSpace)) : 0;
   const classicBoxesMinScale = isTabletLayout
     ? areButtonsOnTop ? 0.72 : 0.54
@@ -63,7 +77,7 @@ export function useFlashcardsStudyCoordinator({
       ? { stableContentHeight: horizontalRowHeight ?? studyLayout.classicBoxesNaturalHeight }
       : isCarouselLayout
         ? { stableContentHeight: getBoxCarouselNaturalHeight({
-            isSmallPhoneLayout: isCompactStudyLayout,
+            isSmallPhoneLayout: isCompactBoxesLayout,
             bottomClearance: carouselBottomClearance,
           }) }
         : {}),
@@ -82,13 +96,17 @@ export function useFlashcardsStudyCoordinator({
     useInlineCardAction,
     areButtonsOnTop,
     isTabletCenteredStudyLayout,
-    screenSectionLayout: shouldAnimateScreenLayout ? SCREEN_LAYOUT_TRANSITION : undefined,
+    isLandscapeStudy,
+    // Tablet rotation changes both the centered stack and box presentation.
+    // Keep section positions native in both orientations so an interrupted
+    // portrait transition cannot leave a stale offset on the landscape card.
+    screenSectionLayout: shouldAnimateScreenLayout && !isTabletLayout ? SCREEN_LAYOUT_TRANSITION : undefined,
     studyScrollEnabled: isCompactStudyLayout || studyLayout.needsStudyScroll || studyLayout.keyboardVisible,
     showTopButtons: areButtonsOnTop && shouldShowBoxes && !useInlineCardAction,
     boxesLayoutProps: {
       effectiveBoxesLayout: boxesLayout,
       isTabletLayout,
-      isCompactStudyLayout,
+      isCompactStudyLayout: isCompactBoxesLayout,
       isTabletCompactBoxesLayout: isTabletCenteredStudyLayout && areButtonsOnTop,
       areButtonsOnTop,
       hideActions: useInlineCardAction,

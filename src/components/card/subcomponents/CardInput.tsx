@@ -16,6 +16,8 @@ import { PromptImage } from "./PromptImage";
 import type { FlashcardsImageSize } from "@/src/contexts/SettingsContext";
 import { useTranslation } from "react-i18next";
 import { buildPromptImageStyle, getInitialPromptImageSlotWidth } from "../promptImageSizing";
+import { useLandscapeStudyLayout } from "../landscapeStudyLayout";
+import { LandscapeCardContent } from "./LandscapeCardContent";
 
 const MARQUEE_DELAY_MS = 800;
 const MARQUEE_SPEED_PER_PIXEL_MS = 20;
@@ -85,6 +87,7 @@ export function CardInput({
   cardMetrics,
 }: CardInputProps) {
   const styles = useStyles();
+  const landscape = useLandscapeStudyLayout();
   const { ref: inputRowRef, onFocus: revealOnFocus, onBlur: revealOnBlur, onLayout: revealOnLayout } = useStudyInputReveal();
   const { colors, ignoreDiacriticsInSpellcheck, ignoreBoundaryPunctuation } = useSettings();
   const { t } = useTranslation();
@@ -343,8 +346,9 @@ export function CardInput({
     <PromptImage
       key={promptImageUri}
       uri={promptImageUri}
-      imageStyle={[styles.promptImage, promptImageStyle]}
-      initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
+      imageStyle={[styles.promptImage, landscape ? { height: landscape.imageHeight, maxHeight: landscape.imageHeight } : promptImageStyle]}
+      maxHeight={landscape?.imageHeight}
+      initialSlotWidth={landscape?.promptWidth ?? getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
     />
   ) : null;
   const hasPromptText = promptText.trim().length > 0;
@@ -411,44 +415,47 @@ export function CardInput({
     </View>
   );
 
+  const promptBlock = (
+    <View
+      style={[
+        styles.topContainer,
+        allowMultilinePrompt && styles.topContainerLarge,
+        promptImageUri && allowMultilinePrompt && { justifyContent: "center" },
+      ]}
+    >
+      <View style={{ width: "100%", gap: 8 * contentScale }}>
+        {promptImageUri ? imageBlock : null}
+        {hasPromptText ? (
+          <View style={styles.promptRow}>
+            <ReadablePrompt text={promptText} onRead={onReadPrompt}>{promptTextBlock}</ReadablePrompt>
+            {canToggleTranslations ? (
+              <Pressable
+                style={[styles.cardIconWrapper, { width: 32 * contentScale }]}
+                onPress={next}
+                hitSlop={8}
+                accessibilityRole="button"
+                accessibilityLabel={t(
+                  "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
+                )}
+              >
+                <Octicons
+                  name="discussion-duplicate"
+                  size={24 * contentScale}
+                  color={
+                    textColorOverride ?? (styles.cardFont as any).color
+                  }
+                />
+              </Pressable>
+            ) : null}
+          </View>
+        ) : null}
+      </View>
+    </View>
+  );
+
   const content = (
     <>
-      <View
-        style={[
-          styles.topContainer,
-          allowMultilinePrompt && styles.topContainerLarge,
-          promptImageUri && allowMultilinePrompt && { justifyContent: "center" },
-        ]}
-      >
-        <View style={{ width: "100%", gap: 8 * contentScale }}>
-          {promptImageUri ? imageBlock : null}
-          {hasPromptText ? (
-            <View style={styles.promptRow}>
-              <ReadablePrompt text={promptText} onRead={onReadPrompt}>{promptTextBlock}</ReadablePrompt>
-              {canToggleTranslations ? (
-                <Pressable
-                  style={[styles.cardIconWrapper, { width: 32 * contentScale }]}
-                  onPress={next}
-                  hitSlop={8}
-                  accessibilityRole="button"
-                  accessibilityLabel={t(
-                    "flashcards.card.accessibilityLabel.przelaczStroneFiszki"
-                  )}
-                >
-                  <Octicons
-                    name="discussion-duplicate"
-                    size={24 * contentScale}
-                    color={
-                      textColorOverride ?? (styles.cardFont as any).color
-                    }
-                  />
-                </Pressable>
-              ) : null}
-            </View>
-          ) : null}
-        </View>
-      </View>
-
+      {promptBlock}
       {allowMultilinePrompt ? (
         <View
           style={styles.inputContainerLarge}
@@ -460,6 +467,14 @@ export function CardInput({
       )}
     </>
   );
+
+  if (landscape) {
+    return (
+      <LandscapeCardContent prompt={promptBlock}>
+        {inputWithAction}
+      </LandscapeCardContent>
+    );
+  }
 
   if (allowMultilinePrompt) {
     return (

@@ -1,3 +1,5 @@
+import { useLandscapeStudyLayout } from "../landscapeStudyLayout";
+import { LandscapeCardContent } from "./LandscapeCardContent";
 import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import { InlineConfirmButton } from "./InlineConfirmButton";
 import { useStudyInputReveal } from "@/src/components/flashcards/StudyInputRevealContext";
@@ -98,6 +100,7 @@ export function CardCorrection({
   handleCorrectionInput1Change,
   wrongInputChange,
   suggestionProps,
+  isIntroMode,
   renderCorrectionGhostText,
   renderCorrectionErrorText,
   hasCorrectionMismatch,
@@ -126,6 +129,7 @@ export function CardCorrection({
   cardMetrics,
 }: CardCorrectionProps) {
   const styles = useStyles();
+  const landscape = useLandscapeStudyLayout();
   const input1Reveal = useStudyInputReveal();
   const input2Reveal = useStudyInputReveal();
   const { t } = useTranslation();
@@ -262,8 +266,9 @@ export function CardCorrection({
     <PromptImage
       key={promptImageUri}
       uri={promptImageUri}
-      imageStyle={[styles.promptImage, promptImageStyle]}
-      initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
+      imageStyle={[styles.promptImage, landscape ? { height: landscape.imageHeight, maxHeight: landscape.imageHeight } : promptImageStyle]}
+      maxHeight={landscape?.imageHeight}
+      initialSlotWidth={landscape?.promptWidth ?? getInitialPromptImageSlotWidth(cardMetrics.width, 8)}
       renderMode="correction"
     />
   ) : null;
@@ -528,6 +533,38 @@ export function CardCorrection({
       </View>
     </View>
   );
+
+  if (landscape) {
+    return (
+      <LandscapeCardContent prompt={promptBlock}>
+        {!isIntroMode ? (
+          <Text style={{ color: textColorOverride ?? styles.cardFont.color, fontSize: 14, marginBottom: 8 }}>
+            {t("flashcards.card.input.correctionLabel")}
+          </Text>
+        ) : null}
+        {showAwersInput ? (
+          <View>
+            {correctionInputCount > 1 && !isIntroMode ? (
+              <Text style={{ color: textColorOverride ?? styles.cardFont.color, fontSize: 12 }}>
+                {t("flashcards.card.input.frontCorrectionLabel")}
+              </Text>
+            ) : null}
+            {input1Block}
+          </View>
+        ) : null}
+        {showRewersInput ? (
+          <View>
+            {correctionInputCount > 1 && !isIntroMode ? (
+              <Text style={{ color: textColorOverride ?? styles.cardFont.color, fontSize: 12, marginTop: 8 }}>
+                {t("flashcards.card.input.backCorrectionLabel")}
+              </Text>
+            ) : null}
+            {input2Block}
+          </View>
+        ) : null}
+      </LandscapeCardContent>
+    );
+  }
 
   if (allowMultilinePrompt) {
     return (

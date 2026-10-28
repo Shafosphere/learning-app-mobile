@@ -24,6 +24,8 @@ type PreviewOptionSelectorProps<TKey extends string = string> = {
   previewAspectRatio?: number;
   previewImageScale?: number;
   previewMaxWidth?: number;
+  compact?: boolean;
+  title?: string;
   testIDPrefix?: string;
 };
 
@@ -37,6 +39,8 @@ export function PreviewOptionSelector<TKey extends string = string>({
   previewAspectRatio = 1.02,
   previewImageScale = 1,
   previewMaxWidth,
+  compact = false,
+  title,
   testIDPrefix,
 }: PreviewOptionSelectorProps<TKey>) {
   const styles = useStyles();
@@ -48,55 +52,68 @@ export function PreviewOptionSelector<TKey extends string = string>({
       style={[
         styles.root,
         variant === "card" ? styles.rootCard : styles.rootModal,
+        compact && styles.rootCompact,
       ]}
     >
-      <View
-        style={[
-          styles.tabsRow,
-          variant === "card" ? styles.tabsRowCard : styles.tabsRowModal,
-        ]}
-      >
-        {options.map((option) => {
-          const isActive = option.key === value;
+      {title ? <Text style={styles.title}>{title}</Text> : null}
+      <View>
+        <View
+          style={[
+            styles.tabsRow,
+            variant === "card" ? styles.tabsRowCard : styles.tabsRowModal,
+            compact && styles.tabsRowCompact,
+          ]}
+        >
+          {options.map((option) => {
+            const isActive = option.key === value;
 
-          return (
-            <TouchableOpacity
-              key={option.key}
-              activeOpacity={0.7}
-              onPress={() => onChange(option.key)}
-              style={[styles.tab, variant === "card" && styles.tabCard]}
-              testID={testIDPrefix ? `${testIDPrefix}-tab-${option.key}` : undefined}
-            >
-              <Text
-                style={[
-                  styles.tabLabel,
-                  variant === "card" ? styles.tabLabelCard : styles.tabLabelModal,
-                  isActive && styles.tabLabelActive,
-                ]}
+            return (
+              <TouchableOpacity
+                key={option.key}
+                activeOpacity={0.7}
+                onPress={() => onChange(option.key)}
+                accessibilityRole="tab"
+                accessibilityState={{ selected: isActive }}
+                style={[styles.tab, variant === "card" && styles.tabCard, compact && styles.tabCompact, compact && isActive && styles.tabCompactActive]}
+                testID={testIDPrefix ? `${testIDPrefix}-tab-${option.key}` : undefined}
               >
-                {option.label}
-              </Text>
-              <View
-                style={[
-                  styles.tabIndicator,
-                  variant === "card"
-                    ? styles.tabIndicatorCard
-                    : styles.tabIndicatorModal,
-                  isActive && styles.tabIndicatorActive,
-                ]}
-              />
-            </TouchableOpacity>
-          );
-        })}
+                <Text
+                  numberOfLines={compact ? 1 : undefined}
+                  style={[
+                    styles.tabLabel,
+                    variant === "card" ? styles.tabLabelCard : styles.tabLabelModal,
+                    isActive && styles.tabLabelActive,
+                    compact && styles.tabLabelCompact,
+                  ]}
+                >
+                  {option.label}
+                </Text>
+                <View
+                  style={[
+                    styles.tabIndicator,
+                    variant === "card"
+                      ? styles.tabIndicatorCard
+                      : styles.tabIndicatorModal,
+                    isActive && styles.tabIndicatorActive,
+                    compact && styles.tabIndicatorCompact,
+                  ]}
+                />
+              </TouchableOpacity>
+            );
+          })}
+        </View>
+
       </View>
 
       {selectedOption ? (
         <View
+          testID={testIDPrefix ? `${testIDPrefix}-preview` : undefined}
           style={[
             styles.previewHero,
             variant === "card" ? styles.previewHeroCard : styles.previewHeroModal,
             { aspectRatio: previewAspectRatio },
-            previewMaxWidth ? { maxWidth: previewMaxWidth } : null,
+            previewMaxWidth ? { width: previewMaxWidth, maxWidth: "100%" } : null,
+            compact && styles.previewHeroCompact,
           ]}
         >
           <View
@@ -126,6 +143,7 @@ export function PreviewOptionSelector<TKey extends string = string>({
           style={[
             styles.description,
             variant === "card" ? styles.descriptionCard : styles.descriptionModal,
+            compact && styles.descriptionCompact,
           ]}
         >
           {description}

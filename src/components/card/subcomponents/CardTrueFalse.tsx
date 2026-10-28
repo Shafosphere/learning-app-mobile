@@ -1,3 +1,4 @@
+import { useLandscapeStudyLayout } from "../landscapeStudyLayout";
 import { ReadablePrompt } from "@/Audio/runtime/components/ReadablePrompt";
 import MyButton from "@/src/components/button/button";
 import { useSettings, type FlashcardsImageSize } from "@/src/contexts/SettingsContext";
@@ -30,6 +31,7 @@ export function CardTrueFalse({
     cardMetrics,
 }: CardTrueFalseProps) {
     const { colors } = useSettings();
+    const landscape = useLandscapeStudyLayout();
     const { t } = useTranslation();
     const styles = useMemo(() => makeStyles(colors), [colors]);
 
@@ -69,7 +71,8 @@ export function CardTrueFalse({
                         <PromptImage
                             key={promptImageUri}
                             uri={promptImageUri}
-                            imageStyle={[styles.promptImage, promptImageStyle]}
+                            imageStyle={[styles.promptImage, landscape ? { height: landscape.imageHeight, maxHeight: landscape.imageHeight } : promptImageStyle]}
+                            maxHeight={landscape?.imageHeight}
                             initialSlotWidth={getInitialPromptImageSlotWidth(cardMetrics.width, 16)}
                         />
                     ) : null}

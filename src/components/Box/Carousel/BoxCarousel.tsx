@@ -28,6 +28,8 @@ interface BoxesProps {
     layoutWidth?: number;
     bottomClearance?: number;
     compactLayout?: boolean;
+    /** Fit the carousel itself to the available row, keeping its viewport unscaled. */
+    rowHeight?: number;
 }
 
 export default function BoxCarousel({
@@ -42,6 +44,7 @@ export default function BoxCarousel({
     layoutWidth,
     bottomClearance = 0,
     compactLayout,
+    rowHeight,
 }: BoxesProps) {
   const styles = useBoxCarouselStyles();
   const { width } = useWindowDimensions();
@@ -49,19 +52,21 @@ export default function BoxCarousel({
   const isSmallPhoneLayout = compactLayout ?? deviceLayout.isSmallPhoneLayout;
   const effectiveLayoutWidth = layoutWidth ?? width;
   const BOX_SKIN_HEIGHT = 122;
-  const ACTIVE_BOX_SCALE = isSmallPhoneLayout ? 1.3 : 2.05;
-  const INACTIVE_BOX_SCALE = isSmallPhoneLayout ? 0.72 : 0.9;
-  const ACTIVE_BOX_LIFT = isSmallPhoneLayout ? 2 : 12;
-  const INACTIVE_BOX_LIFT = isSmallPhoneLayout ? 4 : 14;
+  const isRow = rowHeight != null;
+  const rowStageHeight = Math.max(48, (rowHeight ?? 0) - 28);
+  const ACTIVE_BOX_SCALE = isRow ? (rowStageHeight - 6) / BOX_SKIN_HEIGHT : isSmallPhoneLayout ? 1.3 : 2.05;
+  const INACTIVE_BOX_SCALE = isRow ? ACTIVE_BOX_SCALE * 0.75 : isSmallPhoneLayout ? 0.72 : 0.9;
+  const ACTIVE_BOX_LIFT = isRow ? 0 : isSmallPhoneLayout ? 2 : 12;
+  const INACTIVE_BOX_LIFT = isRow ? 0 : isSmallPhoneLayout ? 4 : 14;
   const BOX_STAGE_VERTICAL_PADDING = isSmallPhoneLayout ? 6 : 40;
-  const LIST_VERTICAL_PADDING = isSmallPhoneLayout ? 4 : 14;
-  const ACTIVE_COUNTER_WRAP_STYLE = isSmallPhoneLayout
+  const LIST_VERTICAL_PADDING = isRow ? 0 : isSmallPhoneLayout ? 4 : 14;
+  const ACTIVE_COUNTER_WRAP_STYLE = isRow ? { height: 28, minHeight: 28, marginTop: 0 } : isSmallPhoneLayout
     ? { minHeight: 36, marginTop: -4 }
     : null;
-  const ACTIVE_COUNTER_NUMBER_STYLE = isSmallPhoneLayout
+  const ACTIVE_COUNTER_NUMBER_STYLE = isRow ? { fontSize: 20, lineHeight: 26 } : isSmallPhoneLayout
     ? { fontSize: 30, lineHeight: 34 }
     : null;
-  const BOX_STAGE_HEIGHT = Math.ceil(
+  const BOX_STAGE_HEIGHT = isRow ? rowStageHeight : Math.ceil(
     BOX_SKIN_HEIGHT * ACTIVE_BOX_SCALE +
       ACTIVE_BOX_LIFT * 2 +
       BOX_STAGE_VERTICAL_PADDING
@@ -80,8 +85,11 @@ export default function BoxCarousel({
         ? Math.min(118, Math.max(92, effectiveLayoutWidth * 0.3))
         : Math.min(150, Math.max(120, effectiveLayoutWidth * 0.34));
     const itemGap = baseSize * 0.5;
-    const itemWidth = baseSize + itemGap;
-    const spacerWidth = Math.max((effectiveLayoutWidth - itemWidth) / 2, 0);
+    const fitsRow = isRow && effectiveLayoutWidth >= items.length * 72;
+    const itemWidth = fitsRow
+        ? Math.min(112, effectiveLayoutWidth / Math.max(1, items.length))
+        : isRow ? 88 : baseSize + itemGap;
+    const spacerWidth = Math.max((effectiveLayoutWidth - itemWidth * (fitsRow ? items.length : 1)) / 2, 0);
     const defaultIndex = useMemo(() => {
         if (!items.length) return 0;
         const boxOneIdx = items.findIndex((item) => item.key === "boxOne");
@@ -102,13 +110,16 @@ export default function BoxCarousel({
     const flatListRef =
         useRef<Animated.FlatList<{ key: keyof BoxesState; count: number }>>(null);
     const lastSelectedRef = useRef<keyof BoxesState | null>(activeBox);
-    const prevItemWidthRef = useRef(itemWidth);
+    const itemKeys = items.map((item) => item.key).join(",");
+    const prevLayoutRef = useRef({ itemWidth, width: effectiveLayoutWidth, itemKeys });
     const [activeIndex, setActiveIndex] = useState(initialIndex);
     const [scrollOffset, setScrollOffset] = useState(initialIndex * itemWidth);
     const longPressTriggeredRef = useRef(false);
     useEffect(() => {
-        const widthChanged = prevItemWidthRef.current !== itemWidth;
-        prevItemWidthRef.current = itemWidth;
+        const widthChanged = prevLayoutRef.current.itemWidth !== itemWidth
+            || prevLayoutRef.current.width !== effectiveLayoutWidth
+            || prevLayoutRef.current.itemKeys !== itemKeys;
+        prevLayoutRef.current = { itemWidth, width: effectiveLayoutWidth, itemKeys };
 
         if (!items.length) return;
         if (!widthChanged && activeBox && activeBox === lastSelectedRef.current)
@@ -120,19 +131,19 @@ export default function BoxCarousel({
         const resolvedIdx = targetIdx >= 0 ? targetIdx : defaultIndex;
 
         flatListRef.current?.scrollToOffset({
-            offset: resolvedIdx * itemWidth,
+            offset: fitsRow ? 0 : resolvedIdx * itemWidth,
             animated: false,
         });
         scrollX.setValue(resolvedIdx * itemWidth);
         setActiveIndex(resolvedIdx);
-        setScrollOffset(resolvedIdx * itemWidth);
+        setScrollOffset(fitsRow ? 0 : resolvedIdx * itemWidth);
         lastSelectedRef.current = activeBox ?? null;
-    }, [activeBox, defaultIndex, itemWidth, items, scrollX]);
+    }, [activeBox, defaultIndex, itemWidth, effectiveLayoutWidth, itemKeys, items, scrollX, fitsRow]);
 
     const handleMomentumEnd = (
         event: NativeSyntheticEvent<NativeScrollEvent>
     ) => {
-        if (disabled) {
+        if (disabled || fitsRow) {
             return;
         }
         const offsetX = event.nativeEvent.contentOffset.x;
@@ -152,7 +163,7 @@ export default function BoxCarousel({
         }
         const clamped = Math.max(0, Math.min(index, items.length - 1));
         flatListRef.current?.scrollToOffset({
-            offset: clamped * itemWidth,
+            offset: fitsRow ? 0 : clamped * itemWidth,
             animated: true,
         });
         if (shouldNotify) {
@@ -184,6 +195,7 @@ export default function BoxCarousel({
         <View
             style={[
                 styles.container,
+                isRow ? { height: rowHeight } : null,
                 bottomClearance > 0 ? { paddingBottom: bottomClearance } : null,
             ]}
         >
@@ -194,7 +206,7 @@ export default function BoxCarousel({
                     keyExtractor={(item) => String(item.key)}
                     horizontal
                     removeClippedSubviews={false}
-                    scrollEnabled={!disabled}
+                    scrollEnabled={!disabled && !fitsRow}
                     showsHorizontalScrollIndicator={false}
                     bounces={false}
                     snapToInterval={itemWidth}
@@ -216,7 +228,7 @@ export default function BoxCarousel({
                         offset: itemWidth * index,
                         index,
                     })}
-                    initialScrollIndex={initialIndex}
+                    initialScrollIndex={fitsRow ? 0 : initialIndex}
                     contentContainerStyle={{
                         paddingHorizontal: spacerWidth,
                         paddingVertical: LIST_VERTICAL_PADDING,
@@ -228,7 +240,8 @@ export default function BoxCarousel({
                             index * itemWidth,
                             (index + 1) * itemWidth,
                         ];
-                        const scale = scrollX.interpolate({
+                        const isActive = index === activeIndex;
+                        const scale = fitsRow ? (isActive ? ACTIVE_BOX_SCALE : INACTIVE_BOX_SCALE) : scrollX.interpolate({
                             inputRange,
                             outputRange: [
                                 INACTIVE_BOX_SCALE,
@@ -246,7 +259,6 @@ export default function BoxCarousel({
                             ],
                             extrapolate: "clamp",
                         });
-                        const isActive = index === activeIndex;
                         const face =
                             faces?.[item.key] ??
                             resolveBoxFace({
@@ -362,7 +374,15 @@ export default function BoxCarousel({
                     </CoachmarkAnchor>
                 ) : null}
             </View>
-            <View style={[styles.activeCounterWrap, ACTIVE_COUNTER_WRAP_STYLE]}>
+            <View style={[
+                styles.activeCounterWrap,
+                ACTIVE_COUNTER_WRAP_STYLE,
+                fitsRow ? {
+                    alignSelf: "flex-start",
+                    width: itemWidth,
+                    marginLeft: spacerWidth + activeIndex * itemWidth,
+                } : null,
+            ]}>
                 {items[activeIndex]?.key === "boxOne" ? (
                     <CoachmarkAnchor
                         id="flashcards-box-one-count"

@@ -1,5 +1,6 @@
 // _layout.tsx
 import i18n from "@/src/i18n";
+import { StudyOrientationController } from "@/src/components/flashcards/StudyOrientationController";
 import Navbar from "@/src/components/navbar/navbar";
 import { CoachmarkLayerPortalProvider } from "@/src/components/onboarding/CoachmarkLayerPortal";
 import { OnboardingGate } from "@/src/components/onboarding/OnboardingGate";
@@ -733,6 +734,7 @@ export default function RootLayout() {
           <SettingsProvider initialTheme={effectiveStartupTheme}>
             <CoachmarkProvider>
               <AppThemeSystemUiSync />
+              <StudyOrientationController />
               <DueReviewsProvider>
                 <QuoteProvider>
                   <QuoteSystemInitializer />

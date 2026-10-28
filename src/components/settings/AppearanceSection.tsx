@@ -29,7 +29,6 @@ const carouselPreview = require("@/assets/ui/settings/previews/layout-carousel.p
 const topButtonsPreview = require("@/assets/ui/settings/previews/controls-two-hand.png");
 const bottomButtonsPreview = require("@/assets/ui/settings/previews/controls-one-hand.png");
 const SETTINGS_TABLET_PREVIEW_MAX_WIDTH = 360;
-const SETTINGS_TABLET_LAYOUT_PREVIEW_SCALE = 1.14;
 
 const uiLanguageOptions: {
   key: UiLanguage;
@@ -49,9 +48,12 @@ const nativeLanguageOptions: {
 const AppearanceSection: React.FC = () => {
   const styles = useStyles();
   const { t } = useTranslation();
-  const { isTabletLayout } = useDeviceLayout();
+  const { isTabletLayout, orientation, width } = useDeviceLayout();
+  const horizontalPreviews = orientation === "landscape" && width >= 600;
   const useCenteredTabletLayout = isTabletLayout;
-  const tabletPreviewMaxWidth = useCenteredTabletLayout
+  const tabletPreviewMaxWidth = horizontalPreviews
+    ? 152
+    : useCenteredTabletLayout
     ? SETTINGS_TABLET_PREVIEW_MAX_WIDTH
     : undefined;
   const {
@@ -74,6 +76,8 @@ const AppearanceSection: React.FC = () => {
     toggleShowBoxFaces,
     boxesLayout,
     setBoxesLayout,
+    flashcardsLandscapeEnabled,
+    setFlashcardsLandscapeEnabled,
     actionButtonsPosition,
     setActionButtonsPosition,
   } = useSettings();
@@ -349,31 +353,55 @@ const AppearanceSection: React.FC = () => {
         testID="flashcard-audio-volume-slider"
       />
 
-      <PreviewOptionSelector
-        options={layoutOptions}
-        value={boxesLayout}
-        onChange={(key) => void handleLayoutSelect(key)}
-        description={preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
-        previewAspectRatio={1.18}
-        previewImageScale={
-          useCenteredTabletLayout ? SETTINGS_TABLET_LAYOUT_PREVIEW_SCALE : 1
-        }
-        previewMaxWidth={tabletPreviewMaxWidth}
-        imageFit="contain"
-        testIDPrefix="settings-layout-selector"
-      />
+      <View style={styles.appearanceGroupCard}>
+        <ToggleRow
+          style={styles.appearanceGroupRow}
+          value={flashcardsLandscapeEnabled}
+          controlStyle={styles.switch}
+          onPress={() => void setFlashcardsLandscapeEnabled(!flashcardsLandscapeEnabled)}
+          accessibilityLabel={t("settings.appearance.landscapeFlashcards.title")}
+        >
+          <View style={styles.appearanceRowText}>
+            <Text style={styles.appearanceBlockTitle}>
+              {t("settings.appearance.landscapeFlashcards.title")}
+            </Text>
+            <Text style={styles.appearanceBlockDescription}>
+              {preventWidowsPl(t("settings.appearance.landscapeFlashcards.subtitle"))}
+            </Text>
+          </View>
+        </ToggleRow>
+      </View>
 
-      <PreviewOptionSelector
-        options={actionButtonsOptions}
-        value={actionButtonsPosition}
-        onChange={(key) => void handleActionButtonsPosition(key)}
-        description={preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
-        previewAspectRatio={1.02}
-        previewMaxWidth={tabletPreviewMaxWidth}
-        imageFit="cover"
-        testIDPrefix="settings-actions-selector"
-      />
-
+      <View style={horizontalPreviews ? styles.previewSelectorsLandscape : undefined}>
+        <View style={horizontalPreviews ? styles.previewSelectorColumn : undefined}>
+          <PreviewOptionSelector
+            title={horizontalPreviews ? t("settings.appearance.layoutSelector.title") : undefined}
+            options={layoutOptions}
+            value={boxesLayout}
+            onChange={(key) => void handleLayoutSelect(key)}
+            description={preventWidowsPl(t("settings.appearance.layoutSelector.subtitle"))}
+            previewAspectRatio={horizontalPreviews ? 1 : 1.18}
+            compact={horizontalPreviews}
+            previewMaxWidth={tabletPreviewMaxWidth}
+            imageFit="contain"
+            testIDPrefix="settings-layout-selector"
+          />
+        </View>
+        <View style={horizontalPreviews ? styles.previewSelectorColumn : undefined}>
+          <PreviewOptionSelector
+            title={horizontalPreviews ? t("settings.appearance.actionsSelector.title") : undefined}
+            options={actionButtonsOptions}
+            value={actionButtonsPosition}
+            onChange={(key) => void handleActionButtonsPosition(key)}
+            description={preventWidowsPl(t("settings.appearance.actionsSelector.subtitle"))}
+            previewAspectRatio={horizontalPreviews ? 1 : 1.02}
+            compact={horizontalPreviews}
+            previewMaxWidth={tabletPreviewMaxWidth}
+            imageFit="cover"
+            testIDPrefix="settings-actions-selector"
+          />
+        </View>
+      </View>
       <Modal
         animationType="fade"
         transparent

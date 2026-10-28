@@ -218,6 +218,10 @@
         "title": "Miny pudełek",
         "subtitle": "Uśmiechnięte albo smutne pudełka, zależnie od statusu."
       },
+      "landscapeFlashcards": {
+        "title": "Poziomy układ fiszek (eksperymentalny)",
+        "subtitle": "Pozwala obracać cały ekran fiszek i powtórek do poziomu. Może wyświetlać się nieprawidłowo — włączasz na własną odpowiedzialność. Domyślnie cały ekran nauki jest zablokowany w pionie."
+      },
       "layoutSelector": {
         "title": "Wybierz schemat pudełek",
         "subtitle": "Preferowany widok listy fiszek podczas nauki.",
@@ -1339,6 +1343,7 @@
         "answerHint": "Wpisz odpowiedź. Możesz wysłać pustą odpowiedź, zatwierdzając ją dwa razy.",
         "emptyAnswerError": "Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",
         "emptyAnswerHint": "Nieprawidłowe. Wpisz odpowiedź albo zatwierdź ponownie, aby wysłać pustą odpowiedź.",
+        "correctionLabel": "Popraw odpowiedź",
         "frontCorrectionLabel": "Popraw awers",
         "backCorrectionLabel": "Popraw rewers",
         "correctionHint": "Wpisz poprawkę. Nieprawidłowe znaki są wyróżnione.",

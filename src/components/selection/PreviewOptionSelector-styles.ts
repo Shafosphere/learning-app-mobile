@@ -11,6 +11,61 @@ export const useStyles = createThemeStylesHook((colors) => ({
   rootModal: {
     marginTop: 16,
   },
+  rootCompact: {
+    width: "100%",
+    padding: 16,
+    gap: 12,
+    marginBottom: 0,
+    flexGrow: 1,
+    borderRadius: 16,
+    borderWidth: 1,
+    borderColor: colors.border,
+    backgroundColor: colors.secondBackground,
+  },
+  title: {
+    fontSize: 16,
+    fontWeight: "800",
+    color: colors.headline,
+  },
+  tabsRowCompact: {
+    columnGap: 4,
+    rowGap: 4,
+    padding: 4,
+    borderRadius: 12,
+    backgroundColor: colors.background,
+  },
+  tabCompact: {
+    flex: 1,
+    minWidth: 0,
+    minHeight: 40,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderRadius: 9,
+    alignItems: "center",
+    justifyContent: "center",
+  },
+  tabCompactActive: {
+    backgroundColor: `${colors.my_green}1F`,
+  },
+  tabLabelCompact: {
+    fontSize: 14,
+    lineHeight: 20,
+    textAlign: "center",
+  },
+  tabIndicatorCompact: {
+    display: "none",
+  },
+  previewHeroCompact: {
+    borderWidth: 0,
+    borderRadius: 12,
+    padding: 0,
+    marginTop: 0,
+  },
+  descriptionCompact: {
+    fontSize: 13,
+    lineHeight: 18,
+    textAlign: "left",
+  },
   tabsRow: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -84,8 +139,13 @@ export const useStyles = createThemeStylesHook((colors) => ({
     marginTop: 14,
   },
   previewInner: {
-    width: "100%",
-    height: "100%",
+    // Pin the image to the aspect-ratio frame; percentage heights inside
+    // scroll content can resolve against the viewport and overflow the frame.
+    position: "absolute",
+    top: 2,
+    right: 2,
+    bottom: 2,
+    left: 2,
     alignItems: "center",
     justifyContent: "center",
     overflow: "hidden",

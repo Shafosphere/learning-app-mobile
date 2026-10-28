@@ -31,3 +31,21 @@ describe("punctuation settings persistence", () => {
     expect(await AsyncStorage.getItem(toleranceKey)).toBe("true");
   });
 });
+
+describe("experimental landscape flashcards preference", () => {
+  beforeEach(async () => { await AsyncStorage.clear(); });
+
+  it("defaults to vertical, persists opt-in across remounts, and resets to vertical", async () => {
+    const first = renderHook(useLearningPreferencesSettings);
+    await act(async () => {});
+    expect(first.result.current.flashcardsLandscapeEnabled).toBe(false);
+    await act(async () => { await first.result.current.setFlashcardsLandscapeEnabled(true); });
+    expect(await AsyncStorage.getItem("flashcards.landscapeEnabled")).toBe("true");
+    first.unmount();
+    const second = renderHook(useLearningPreferencesSettings);
+    await waitFor(() => expect(second.result.current.flashcardsLandscapeEnabled).toBe(true));
+    await act(async () => { await second.result.current.resetLearningPreferencesSettings(); });
+    expect(second.result.current.flashcardsLandscapeEnabled).toBe(false);
+    expect(await AsyncStorage.getItem("flashcards.landscapeEnabled")).toBe("false");
+  });
+});

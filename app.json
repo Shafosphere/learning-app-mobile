@@ -3,13 +3,14 @@
     "name": "Memicard",
     "slug": "memicard",
     "version": "1.0.27",
-    "orientation": "portrait",
+    "orientation": "default",
     "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png",
     "scheme": "memicard",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
+      "requireFullScreen": true,
       "icon": "./assets/app/icons/generated/ios/AppIcon~ios-marketing.png"
     },
     "android": {
@@ -42,6 +43,7 @@
     },
     "plugins": [
       "expo-router",
+      "expo-screen-orientation",
       [
         "expo-splash-screen",
         {
