@@ -1377,6 +1377,12 @@ export default function Card({
       cardKey: `${displayedAudioWord?.id}`,
       phase: readAnswer ? "answer" : "question",
       delayMs: readAnswer ? 0 : undefined,
+      ...(readAnswer ? { opposite: {
+        side: effectiveReversed ? "back" as const : "front" as const,
+        text: effectiveReversed
+          ? displayedAudioWord?.translations[0] ?? ""
+          : splitFrontTextIntoAnswers(displayedAudioWord?.text ?? "")[0] ?? "",
+      } } : {}),
     });
   const canReadInput = audio.available && activeBox === "boxZero" && isIntroMode;
   const resolverProps = {

@@ -16,6 +16,7 @@ type AutoplayPrompt = {
   cardKey: string;
   phase?: "question" | "answer";
   delayMs?: number;
+  opposite?: { side: AudioSide; text: string };
 };
 
 export function useFlashcardAudio(
@@ -23,7 +24,7 @@ export function useFlashcardAudio(
   externalId: string | null | undefined,
   contextKey: string,
   enabled: boolean,
-  prompt?: AutoplayPrompt,
+  requestedPrompt?: AutoplayPrompt,
 ) {
   const { t } = useTranslation();
   const popup = usePopup();
@@ -69,9 +70,21 @@ export function useFlashcardAudio(
       : { front: settings?.frontLanguage, back: settings?.backLanguage };
   }, [record?.isOfficial, slug, settings?.frontLanguage, settings?.backLanguage]);
   const available = enabled && appActive && courseAudioSettingsHydrated && flashcardAudioVolumeHydrated && flashcardAudioVolume > 0 && Boolean(record && settings?.enabled && languages.front && languages.back);
+  const autoplayMode = normalizeFlashcardAutoplayMode(settings?.autoplayMode);
+  // Official language courses teach the physical front, regardless of the
+  // current box or the app's native language. Custom courses use that preference.
+  const opposite = requestedPrompt?.opposite;
+  const officialLanguageCourse = Boolean(record?.isOfficial && OFFICIAL_PACKS.some(
+    (pack) => pack.slug === slug && audioLocale(pack.sourceLang) && audioLocale(pack.targetLang),
+  ));
+  const preferOpposite = autoplayMode === "non_native" && requestedPrompt?.phase === "answer" && opposite?.text.trim() && (
+    officialLanguageCourse
+      ? opposite.side === "front"
+      : !allowsAutomaticAudio(autoplayMode, languages[requestedPrompt.side], nativeLanguage)
+  );
+  const prompt = preferOpposite ? { ...requestedPrompt, ...opposite } : requestedPrompt;
   const promptKey = prompt ? JSON.stringify([courseId, prompt.cardKey, prompt.phase ?? "question", prompt.side, normalizeAudioText(prompt.text)]) : null;
   const autoplayDelayMs = prompt?.delayMs ?? FLASHCARD_AUTOPLAY_DELAY_MS;
-  const autoplayMode = normalizeFlashcardAutoplayMode(settings?.autoplayMode);
   const autoplayReady = nativeLanguageHydrated;
   const autoplayAllowed = Boolean(
     autoplayReady && prompt &&

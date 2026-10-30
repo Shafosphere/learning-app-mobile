@@ -126,6 +126,51 @@ describe("autoplay lifecycle", () => {
     hook.rerender({ ...defaults, phase: "answer", delayMs: 0 });
     expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(2);
   });
+  it.each([
+    ["es_to_en_first_50", "pl", "agua", "water", "es-ES"],
+    ["es_to_en_first_50", "en", "agua", "water", "es-ES"],
+    ["fr_to_en_first_50", "en", "eau", "water", "fr-FR"],
+    ["es_to_pl_first_50", "pl", "agua", "woda", "es-ES"],
+    ["eng_to_pl_first_50", "pl", "water", "woda", "en-US"],
+  ])("reads the learned side after a checked translation in %s (native %s)", async (slug, native, front, back, language) => {
+    getCourse.mockResolvedValue({ slug, isOfficial: true } as never);
+    mockNativeLanguage = native;
+    mockAudioSettings.autoplayMode = "non_native";
+    const props = { ...defaults, cardKey: "1", context: "answer", side: "back" as const, text: back,
+      phase: "answer" as const, delayMs: 0, opposite: { side: "front" as const, text: front } };
+    const hook = renderHook(() => useFlashcardAudio(42, "0001", props.context, true, props));
+    await act(async () => {});
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+    expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ text: front, language }));
+    hook.rerender({});
+    await advance(1000);
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(1);
+  });
+  it.each(["all", "off"] as const)("preserves explicit %s mode for checked translations", async (mode) => {
+    getCourse.mockResolvedValue({ slug: "es_to_en_first_50", isOfficial: true } as never);
+    mockNativeLanguage = "en";
+    mockAudioSettings.autoplayMode = mode;
+    renderHook(() => useFlashcardAudio(42, "0001", "answer", true, {
+      side: "back", text: "water", cardKey: "1", phase: "answer", delayMs: 0,
+      opposite: { side: "front", text: "agua" },
+    }));
+    await act(async () => {});
+    expect(flashcardAudioPlayer.play).toHaveBeenCalledTimes(mode === "off" ? 0 : 1);
+    if (mode === "all") expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(
+      expect.objectContaining({ text: "water", language: "en-US" }),
+    );
+  });
+  it("chooses the non-native side of a custom course even when it is the back", async () => {
+    getCourse.mockResolvedValue({ slug: null, isOfficial: false } as never);
+    mockNativeLanguage = "en";
+    mockAudioSettings = { enabled: true, frontLanguage: "en-US", backLanguage: "es-ES", autoplayMode: "non_native" };
+    renderHook(() => useFlashcardAudio(42, "0001", "answer", true, {
+      side: "front", text: "water", cardKey: "1", phase: "answer", delayMs: 0,
+      opposite: { side: "back", text: "agua" },
+    }));
+    await act(async () => {});
+    expect(flashcardAudioPlayer.play).toHaveBeenLastCalledWith(expect.objectContaining({ text: "agua", language: "es-ES" }));
+  });
   it.each(["disabled", "muted", "unfocused"])("suppresses immediate answers when %s", async (reason) => {
     if (reason === "disabled") mockAudioSettings.enabled = false;
     if (reason === "muted") mockVolume = 0;

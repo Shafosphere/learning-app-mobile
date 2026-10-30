@@ -200,7 +200,9 @@ describe("Card language integration", () => {
       expect(onCorrect).toHaveBeenCalledTimes(1);
       expect(onWrong).not.toHaveBeenCalled();
       expect(mockedAudio).toHaveBeenLastCalledWith(course.courseId, course.externalId, expect.any(String), true,
-        expect.objectContaining({ side: answerSide, text: expected.answers[0], phase: "answer" }));
+        expect.objectContaining({ side: answerSide, text: expected.answers[0], phase: "answer",
+          opposite: { side: answerSide === "front" ? "back" : "front",
+            text: answerSide === "front" ? course.back[0] : course.front } }));
     },
   );
 
@@ -224,7 +226,9 @@ describe("Card language integration", () => {
     expect(onWrong).toHaveBeenCalledTimes(1);
     expect(onCorrect).not.toHaveBeenCalled();
     expect(mockedAudio).toHaveBeenLastCalledWith(course.courseId, course.externalId, expect.any(String), true,
-      expect.objectContaining({ side: answerSide, text: expected.answers[0], phase: "answer" }));
+      expect.objectContaining({ side: answerSide, text: expected.answers[0], phase: "answer",
+        opposite: { side: answerSide === "front" ? "back" : "front",
+          text: answerSide === "front" ? course.back[0] : course.front } }));
     await act(async () => fireEvent.changeText(correctionInput, expected.rejected[0]));
     await act(async () => jest.advanceTimersByTime(5000));
     expect(screen.getByLabelText(label)).toBeTruthy();
